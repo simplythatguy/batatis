@@ -15,26 +15,35 @@
   ],
   "missing_info": [
     {
-      "field": "whether there is a vented air space outboard of the board",
-      "why": "one of the acceptable positions",
-      "priority": "administrative"
+      "field": "complete layer order, measured material thermal resistances and innermost impermeable surface",
+      "why": "Thickness and batt label alone do not establish the outboard-to-inboard ratio.",
+      "priority": "critical"
     },
     {
-      "field": "interior moisture loads (any high-humidity use)",
-      "why": "high-moisture uses need design under Part 5",
-      "priority": "administrative"
+      "field": "air leakage, dry-cup vapour permeance and design heating degree-days",
+      "why": "Establish applicability, exceptions and the tabulated ratio without assuming product properties.",
+      "priority": "critical"
+    },
+    {
+      "field": "whether a vented air space is inboard of the low-permeance board",
+      "why": "The material must be outboard of that air space for the vented-space option.",
+      "priority": "critical"
+    },
+    {
+      "field": "intended interior moisture generation",
+      "why": "High moisture changes the route to Part 5.",
+      "priority": "critical"
     }
   ],
   "gold": {
-    "departure": "Low-permeance exterior insulation placed where the outboard-to-inboard thermal resistance ratio is below the tabulated minimum.",
-    "must_cite": [
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [
       {
         "division": "B",
         "provision": "9.25.5.2.(1)",
-        "role": "benchmark"
-      }
-    ],
-    "should_cite": [
+        "why": "Candidate benchmark only; deciding facts must be obtained first."
+      },
       {
         "division": "B",
         "provision": "9.25.5.1.(1)",
@@ -47,20 +56,9 @@
       }
     ],
     "must_not_cite": [],
-    "section_c": [
-      {
-        "provision": "9.25.5.2.(1)",
-        "status": "direct",
-        "root_provision": null,
-        "pairs": [
-          "[F62,F63-OH1.1,OH1.2]",
-          "[F62,F63-OS2.3]"
-        ],
-        "conditional": []
-      }
-    ],
+    "section_c": [],
     "engineering_required": "depends",
-    "engineering_reason": "Depends on the building type and whether a hygrothermal design under Part 5 is used to justify the assembly.",
+    "engineering_reason": "Depends on the building exemption, actual design scope and any AHJ special-safety requirement. Part 5 envelope analysis alone is not the specific Part 4 professional trigger.",
     "engineering_citations": [
       {
         "division": "C",
@@ -71,7 +69,7 @@
         "provision": "2.4.1.1.(4)"
       }
     ],
-    "intake_action": "proceed_conditionally",
+    "intake_action": "ask",
     "out_of_scope": false,
     "redirect_to": null
   },
@@ -79,6 +77,6 @@
     "source": "codedb",
     "author": "Batatis evaluation builder (Claude Opus 5.5)",
     "date": "2026-10-20",
-    "notes": "Written from the code database only; held-out judge set not consulted."
+    "notes": "Written from the code database only; held-out judge set not consulted. Model-checked and revised by GPT-6.1-Sol max on 2026-10-20: Changed proceed to ask; removed an unsupported below-ratio conclusion and corrected the side of the vented air space."
   }
 }

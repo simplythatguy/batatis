@@ -22,8 +22,8 @@
       "priority": "critical"
     },
     {
-      "field": "whether a specific project exists",
-      "why": "a variance is project-specific; product-wide acceptance is a different route",
+      "field": "intended project or jurisdiction-wide application scope",
+      "why": "Identify the target assemblies, buildings and authorities; the variance template also provides for jurisdiction-wide scope.",
       "priority": "critical"
     },
     {
@@ -75,6 +75,6 @@
     "source": "codedb",
     "author": "Batatis evaluation builder (Claude Opus 5.5)",
     "date": "2026-10-20",
-    "notes": "Written from the code database only; held-out judge set not consulted."
+    "notes": "Written from the code database only; held-out judge set not consulted. Model-checked and revised by GPT-6.1-Sol max on 2026-10-20: Removed the unsupported assertion that every variance must be project-specific; kept ask."
   }
 }

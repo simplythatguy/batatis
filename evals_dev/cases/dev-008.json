@@ -4,14 +4,16 @@
   "topic": "envelope-insulation-sheathing",
   "code_part": 9,
   "jurisdiction": "Airdrie",
-  "seed_provision": "9.23.17.1.(1)",
-  "description": "For our next phase of single-family homes we want to drop the OSB on exterior walls and put 50 mm rigid foam directly on the studs, then large-format fibre cement panels screwed through the foam into the studs. The panels need fastening between studs according to the maker. Racking would be handled by let-in steel strap bracing.",
+  "seed_provision": "9.23.17.3.(1)",
+  "description": "For our next phase of two-storey single-family homes, each with a building area of 160 m2, we want to drop the OSB on exterior walls and put 50 mm rigid foam directly on the studs, then large-format fibre cement panels screwed through the foam into the studs. The panels need fastening between studs according to the maker, and we propose to put those intermediate fasteners into the foam alone, with no wood or metal backing between the studs. Racking would be handled by let-in steel strap bracing.",
   "known_facts": [
     "single-family homes",
     "no wood sheathing",
     "50 mm rigid foam on studs",
     "fibre cement panels needing intermediate fastening",
-    "steel strap bracing"
+    "steel strap bracing",
+    "each home two storeys; building area 160 m2",
+    "required intermediate cladding fasteners anchored into rigid foam alone, with no wood or metal backing"
   ],
   "missing_info": [
     {
@@ -31,48 +33,34 @@
     }
   ],
   "gold": {
-    "departure": "Exterior walls left unsheathed although the cladding requires intermediate fastening between supports.",
+    "departure": "Rigid insulation alone is used to attach the required intermediate cladding fasteners between studs.",
     "must_cite": [
       {
         "division": "B",
-        "provision": "9.23.17.1.(1)",
+        "provision": "9.23.17.3.(1)",
         "role": "benchmark"
       }
     ],
     "should_cite": [
       {
         "division": "B",
+        "provision": "9.23.17.1.(1)",
+        "why": "Sheathing is required where cladding needs intermediate fastening or solid backing."
+      },
+      {
+        "division": "B",
         "provision": "9.23.13.1.(2)",
-        "why": "bracing for lateral loads normally relies on sheathing or panel-type finishes"
+        "why": "Lateral bracing is a separate design question from cladding attachment."
       }
     ],
     "must_not_cite": [],
     "section_c": [
       {
-        "provision": "9.23.17.1.(1)",
-        "status": "direct",
+        "provision": "9.23.17.3.(1)",
+        "status": "none",
         "root_provision": null,
-        "pairs": [
-          "[F20,F22-OH1.1,OH1.2,OH1.3]",
-          "[F20-OP2.1,OP2.3,OP2.5]",
-          "[F20-OS2.1,OS2.3,OS2.5]",
-          "[F22-OP2.3,OP2.4,OP2.5]",
-          "[F22-OS2.3,OS2.5]"
-        ],
-        "conditional": [
-          {
-            "pair": "[F20,F22-OH4]",
-            "when": "Applies to floors and elements that support floors."
-          },
-          {
-            "pair": "[F22-OS3.1]",
-            "when": "Applies to floors and elements that support floors."
-          },
-          {
-            "pair": "[F22-OS3.7]",
-            "when": "Applies to walls, and elements that support walls, that contain doors or windows required for emergency egress."
-          }
-        ]
+        "pairs": [],
+        "conditional": []
       }
     ],
     "engineering_required": "depends",
@@ -95,6 +83,6 @@
     "source": "codedb",
     "author": "Batatis evaluation builder (Claude Opus 5.5)",
     "date": "2026-10-20",
-    "notes": "Written from the code database only; held-out judge set not consulted."
+    "notes": "Written from the code database only; held-out judge set not consulted. Model-checked synthetic clarification on 2026-10-20: Stated the building/parcel/design-basis scope in the applicant description rather than relying on evaluator-only metadata. Model-checked correction on 2026-10-20: foam is itself sheathing, so replaced the unsheathed-wall conclusion with the rigid-insulation attachment restriction and explicitly described the proposed intermediate fasteners."
   }
 }

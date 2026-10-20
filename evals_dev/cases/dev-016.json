@@ -5,14 +5,17 @@
   "code_part": 3,
   "jurisdiction": "Calgary",
   "seed_provision": "3.1.5.5.(1)",
-  "description": "Five-storey sprinklered office building of noncombustible construction. The owner wants a charred-timber rainscreen cladding on the street elevation. The supplier has a reaction-to-fire test from Europe but not the Canadian full-scale wall test. Can the European test support an alternative solution?",
+  "description": "Five-storey office building sprinklered throughout of noncombustible construction. The owner wants a charred solid-timber board rainscreen cladding on the street elevation. This is not a plywood-clad or other prescriptive Appendix D exterior-wall assembly. The supplier has a reaction-to-fire test from Europe but not the Canadian full-scale wall test. Can the European test support an alternative solution?",
   "known_facts": [
     "five storeys",
     "sprinklered",
     "office",
     "noncombustible construction required",
     "charred timber cladding",
-    "European test only"
+    "European test only",
+    "sprinklered throughout",
+    "solid timber boards rather than plywood",
+    "not a prescriptive Appendix D exterior-wall assembly"
   ],
   "missing_info": [
     {
@@ -68,6 +71,6 @@
     "source": "codedb",
     "author": "Batatis evaluation builder (Claude Opus 5.5)",
     "date": "2026-10-20",
-    "notes": "Written from the code database only; held-out judge set not consulted."
+    "notes": "Written from the code database only; held-out judge set not consulted. Model-checked synthetic clarification on 2026-10-20: stated full sprinkler coverage and excluded the prescriptive Appendix D wall option before retaining the tested-wall benchmark."
   }
 }

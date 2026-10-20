@@ -13,9 +13,14 @@
   ],
   "missing_info": [
     {
-      "field": "climate data for the target locations (degree-days, moisture index)",
-      "why": "whether a capillary break is required depends on location",
-      "priority": "administrative"
+      "field": "target-location heating degree-days and moisture index",
+      "why": "Climate determines whether the capillary-break benchmark applies.",
+      "priority": "critical"
+    },
+    {
+      "field": "building and backing materials, accessory-building status, and assembly performance basis",
+      "why": "The sentence contains acceptable-solution exceptions; no drained cavity alone does not settle the route.",
+      "priority": "critical"
     },
     {
       "field": "test or field evidence that omitting the capillary break does not harm the assembly",
@@ -24,15 +29,14 @@
     }
   ],
   "gold": {
-    "departure": "Face-sealed cladding without a capillary break where the climate requires one.",
-    "must_cite": [
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [
       {
         "division": "B",
         "provision": "9.27.2.2.(5)",
-        "role": "benchmark"
-      }
-    ],
-    "should_cite": [
+        "why": "Candidate benchmark only; deciding facts must be obtained first."
+      },
       {
         "division": "B",
         "provision": "9.27.2.2.(6)",
@@ -45,18 +49,7 @@
       }
     ],
     "must_not_cite": [],
-    "section_c": [
-      {
-        "provision": "9.27.2.2.(5)",
-        "status": "direct",
-        "root_provision": null,
-        "pairs": [
-          "[F61,F62-OH1.1,OH1.2,OH1.3]",
-          "[F61,F62-OS2.3]"
-        ],
-        "conditional": []
-      }
-    ],
+    "section_c": [],
     "engineering_required": "depends",
     "engineering_reason": "Product request without a building; professional involvement depends on the buildings it is used on.",
     "engineering_citations": [
@@ -69,7 +62,7 @@
         "provision": "2.4.1.1.(3)"
       }
     ],
-    "intake_action": "proceed_conditionally",
+    "intake_action": "ask",
     "out_of_scope": false,
     "redirect_to": null
   },
@@ -77,6 +70,6 @@
     "source": "codedb",
     "author": "Batatis evaluation builder (Claude Opus 5.5)",
     "date": "2026-10-20",
-    "notes": "Written from the code database only; held-out judge set not consulted."
+    "notes": "Written from the code database only; held-out judge set not consulted. Model-checked and revised by GPT-6.1-Sol max on 2026-10-20: Changed proceed to ask; climate and assembly exceptions were previously treated as established."
   }
 }

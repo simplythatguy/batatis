@@ -5,15 +5,21 @@
   "code_part": 9,
   "jurisdiction": "Lethbridge",
   "seed_provision": "9.27.3.4.(2)",
-  "description": "Renovation contractor. On a bungalow re-side we're adding 50 mm semi-rigid mineral wool boards over the existing OSB, strapping and fibre cement siding. We want to leave out the housewrap and let the mineral wool act as the drainage layer, with the board joints just butted together, not taped or lapped.",
+  "description": "Renovation contractor. On a single-storey bungalow re-side with a building area of 140 m2 we're adding 50 mm semi-rigid mineral wool boards over the existing OSB, strapping and fibre cement siding. We want to leave out the housewrap and let the mineral wool act as the drainage layer, with the board joints just butted together, not taped or lapped.",
   "known_facts": [
     "single detached bungalow",
     "50 mm mineral wool exterior boards over OSB",
     "no sheathing membrane",
     "butted unsealed joints",
-    "fibre cement on strapping"
+    "fibre cement on strapping",
+    "single storey; building area 140 m2"
   ],
   "missing_info": [
+    {
+      "field": "board rigidity, material specification and proposed drainage-plane and joint system",
+      "why": "The description says semi-rigid mineral wool; do not assume it meets the rigid insulating-sheathing permission or that its joint rule alone is the governing benchmark.",
+      "priority": "critical"
+    },
     {
       "field": "owner name and contact",
       "why": "Section A of the variance form",
@@ -26,15 +32,14 @@
     }
   ],
   "gold": {
-    "departure": "Insulating sheathing used in lieu of a sheathing membrane with joints neither sealed nor lapped, over moisture-sensitive OSB.",
-    "must_cite": [
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [
       {
         "division": "B",
         "provision": "9.27.3.4.(2)",
-        "role": "benchmark"
-      }
-    ],
-    "should_cite": [
+        "why": "Candidate joint-detail conditions only if the insulating-sheathing permission applies to the specified board."
+      },
       {
         "division": "B",
         "provision": "9.27.3.4.(1)",
@@ -47,18 +52,7 @@
       }
     ],
     "must_not_cite": [],
-    "section_c": [
-      {
-        "provision": "9.27.3.4.(2)",
-        "status": "direct",
-        "root_provision": null,
-        "pairs": [
-          "[F61,F55-OH1.1,OH1.2,OH1.3]",
-          "[F61,F55-OS2.3]"
-        ],
-        "conditional": []
-      }
-    ],
+    "section_c": [],
     "engineering_required": "no",
     "engineering_reason": "Single-family dwelling renovation within the exemption.",
     "engineering_citations": [
@@ -67,7 +61,7 @@
         "provision": "2.4.1.1.(1)"
       }
     ],
-    "intake_action": "proceed_conditionally",
+    "intake_action": "ask",
     "out_of_scope": false,
     "redirect_to": null
   },
@@ -75,6 +69,6 @@
     "source": "codedb",
     "author": "Batatis evaluation builder (Claude Opus 5.5)",
     "date": "2026-10-20",
-    "notes": "Written from the code database only; held-out judge set not consulted."
+    "notes": "Written from the code database only; held-out judge set not consulted. Model-checked synthetic clarification on 2026-10-20: Stated the building/parcel/design-basis scope in the applicant description rather than relying on evaluator-only metadata. Model-checked correction on 2026-10-20: changed proceed to ask because the semi-rigid board has not been shown to qualify for the rigid-sheathing membrane replacement permission."
   }
 }

@@ -1,0 +1,77 @@
+{
+  "id": "dev-050",
+  "applicant_type": "manufacturer",
+  "topic": "engineered-walls",
+  "code_part": 9,
+  "jurisdiction": "Okotoks",
+  "seed_provision": "9.23.1.1.(2)",
+  "description": "Our proposed two-storey wood-framed detached home with a building area of 200 m2 has an 18 m clear-span structural roof member. We want to keep the design entirely within the ordinary Part 9 framing tables, without designing the framing and fastening to the Part 4 wood-design provisions. The rest of the house uses closely spaced lumber framing. What should our application address?",
+  "known_facts": [
+    "detached wood-framed home",
+    "18 m structural-member span",
+    "ordinary Part 9 tables proposed",
+    "no design of framing and fastening to Part 4 wood provisions",
+    "two storeys; building area 200 m2"
+  ],
+  "missing_info": [
+    {
+      "field": "owner or representative contact and property identification",
+      "why": "Sections A–B administrative identification.",
+      "priority": "administrative"
+    },
+    {
+      "field": "risk assessment, mitigating measures, assumptions and supporting documents",
+      "why": "Alternative-path completeness items; request evidence rather than fabricate a professional conclusion.",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Wood framing beyond the structural-span scope is not designed under the required Part 4 wood-design route.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "9.23.1.1.(2)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.23.1.1.(1)",
+        "why": "The 12.20 m span limit is part of the scope."
+      },
+      {
+        "division": "B",
+        "provision": "4.3.1.1.(1)",
+        "why": "Required wood structural design standard on the Part 4 route."
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "9.23.1.1.(2)",
+        "status": "none",
+        "root_provision": null,
+        "pairs": [],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "yes",
+    "engineering_reason": "The stated span exceeds the Part 9 framing scope, whose next sentence directs this wood design to Part 4; that design requires a registered professional.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.2.(1)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 9.23.1.1.(2), NBC(AE) 2023, 2nd printing, PDF p.962. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

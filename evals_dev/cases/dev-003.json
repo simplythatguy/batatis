@@ -5,13 +5,14 @@
   "code_part": 9,
   "jurisdiction": "Red Deer",
   "seed_provision": "9.10.13.13.(1)",
-  "description": "Mechanical contractor here. On a three-storey, twelve-unit wood-frame apartment we have supply ducts that pass through the rated corridor walls. There's no room above the ceiling for damper access panels, so we'd like to skip the fire dampers and instead use 26 gauge steel duct sealed with a listed firestop at each wall. The ducts are about 150 by 250 mm and serve the suites' heat recovery ventilators.",
+  "description": "Mechanical contractor here. On a three-storey, twelve-unit wood-frame apartment with a building area of 480 m2 we have supply ducts that pass through the rated corridor walls. There's no room above the ceiling for damper access panels, so we'd like to skip the fire dampers and instead use 26 gauge steel duct sealed with a listed firestop at each wall. The ducts are about 150 by 250 mm and serve the suites' heat recovery ventilators.",
   "known_facts": [
     "three storeys, twelve dwelling units, wood frame",
     "ducts penetrate rated corridor walls",
     "no fire dampers proposed",
     "steel duct with listed firestop instead",
-    "ducts about 150 x 250 mm serving HRVs"
+    "ducts about 150 x 250 mm serving HRVs",
+    "building area 480 m2"
   ],
   "missing_info": [
     {
@@ -91,6 +92,6 @@
     "source": "codedb",
     "author": "Batatis evaluation builder (Claude Opus 5.5)",
     "date": "2026-10-20",
-    "notes": "Written from the code database only; held-out judge set not consulted."
+    "notes": "Written from the code database only; held-out judge set not consulted. Model-checked and revised by GPT-6.1-Sol max on 2026-10-20: Made the synthetic Part 9 building-area assumption explicit; damper benchmark unchanged."
   }
 }

@@ -5,12 +5,13 @@
   "code_part": 4,
   "jurisdiction": "Calgary",
   "seed_provision": "4.1.7.1.(6)",
-  "description": "We supply curtain wall and rainscreen cladding for a 20-storey tower. Our engineering team ran computational fluid dynamics to get the cladding wind pressures, which come out lower than the code's static method. We'd like to design the anchors to the CFD values.",
+  "description": "We supply curtain wall and rainscreen cladding for a 20-storey tower, with structural cladding-anchor design under Part 4. Our engineering team ran computational fluid dynamics to get the cladding wind pressures, which come out lower than the code's static method. We'd like to design the anchors to the CFD values.",
   "known_facts": [
     "cladding for a 20-storey tower",
     "CFD-derived wind pressures",
     "lower than the static procedure",
-    "anchor design to CFD values"
+    "anchor design to CFD values",
+    "structural cladding-anchor design under Part 4"
   ],
   "missing_info": [
     {
@@ -80,6 +81,6 @@
     "source": "codedb",
     "author": "Batatis evaluation builder (Claude Opus 5.5)",
     "date": "2026-10-20",
-    "notes": "Written from the code database only; held-out judge set not consulted."
+    "notes": "Written from the code database only; held-out judge set not consulted. Model-checked synthetic clarification on 2026-10-20: Stated the building/parcel/design-basis scope in the applicant description rather than relying on evaluator-only metadata."
   }
 }

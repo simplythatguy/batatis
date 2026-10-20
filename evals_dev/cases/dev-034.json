@@ -1,0 +1,84 @@
+{
+  "id": "dev-034",
+  "applicant_type": "architect-engineer",
+  "topic": "part3-fire-protection",
+  "code_part": 3,
+  "jurisdiction": "Edmonton",
+  "seed_provision": "3.2.6.5.(3)",
+  "description": "Our twelve-storey residential tower has eighty apartments, with the highest occupied floor 33 m above grade. The elevators are ordinary passenger elevators; none would be provided for firefighter use. The developer proposes relying on the stairs for firefighters instead. We need the application checklist for that change.",
+  "known_facts": [
+    "twelve-storey residential tower",
+    "eighty apartments",
+    "highest occupied floor 33 m above grade",
+    "no elevator provided for firefighter use",
+    "stairs proposed instead"
+  ],
+  "missing_info": [
+    {
+      "field": "owner or representative contact and property identification",
+      "why": "Sections A–B administrative identification.",
+      "priority": "administrative"
+    },
+    {
+      "field": "risk assessment, mitigating measures, assumptions and supporting documents",
+      "why": "Alternative-path completeness items; request evidence rather than fabricate a professional conclusion.",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "No elevator is provided for firefighter use in a building subject to the tall-building requirements.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "3.2.6.5.(3)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "3.2.6.1.(1)",
+        "why": "Group C floor height brings the building within this subsection."
+      },
+      {
+        "division": "B",
+        "provision": "3.2.6.5.(4)",
+        "why": "Lists performance requirements for the firefighter elevator."
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "3.2.6.5.(3)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F12,F06-OP1.2]",
+          "[F12,F06-OS1.2,OS1.5]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "yes",
+    "engineering_reason": "The stated occupancy, building size or dwelling count is outside the Division C exemption; applicable drawings require qualified registered professionals.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(3)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 3.2.6.5.(3), NBC(AE) 2023, 2nd printing, PDF p.237. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

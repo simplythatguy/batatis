@@ -1,0 +1,46 @@
+{
+  "id": "dev-060",
+  "applicant_type": "owner",
+  "topic": "out-of-scope",
+  "code_part": null,
+  "jurisdiction": "Foothills County",
+  "seed_provision": "7.1.2.1.(1)",
+  "description": "For my rural property I want a different private septic tank and disposal-field layout. The question is the sewage system design and its setbacks, not the building foundation or the sewer connection inside the house. I need to know who handles that alternative request.",
+  "known_facts": [
+    "rural private sewage system",
+    "alternative septic tank and disposal-field layout",
+    "sewage-system design and setbacks only",
+    "no foundation or internal building-sewer change"
+  ],
+  "missing_info": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "7.1.2.1.(1)",
+        "why": "Building-code pointer to the Private Sewage Disposal Systems Regulation."
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "depends",
+    "engineering_reason": "The applicable professional requirements belong to the private-sewage regime; Division C is not used to decide that separate-regime question.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      }
+    ],
+    "intake_action": "redirect",
+    "out_of_scope": true,
+    "redirect_to": "Private Sewage Disposal Systems Regulation / private sewage permit authority and private sewage safety codes officer"
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 7.1.2.1.(1), NBC(AE) 2023, 2nd printing, PDF p.621. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

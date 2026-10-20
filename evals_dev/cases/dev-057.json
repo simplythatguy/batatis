@@ -1,0 +1,70 @@
+{
+  "id": "dev-057",
+  "applicant_type": "contractor",
+  "topic": "part9-fire-separations",
+  "code_part": null,
+  "jurisdiction": "Sherwood Park",
+  "seed_provision": "9.10.9.16.(4)",
+  "description": "The customer calls the lower rental space a secondary suite and wants to keep the existing ceiling. I have not confirmed how many dwellings are in the building, how it is used, what the ceiling is made of or whether this is an alteration to an existing approved suite. Can you identify what we need before choosing a wall and ceiling route?",
+  "known_facts": [
+    "lower rental space described by customer as a secondary suite",
+    "existing ceiling to be retained",
+    "dwelling count, use, construction and approval status unconfirmed"
+  ],
+  "missing_info": [
+    {
+      "field": "actual dwelling arrangement, building occupancy, storeys and building area",
+      "why": "Resolve whether it is a house with a secondary suite and which Part applies.",
+      "priority": "critical"
+    },
+    {
+      "field": "existing wall and floor-ceiling layers, thicknesses, rating and continuity",
+      "why": "Determine whether an acceptable separation route already exists.",
+      "priority": "critical"
+    },
+    {
+      "field": "new construction versus alteration and existing approval scope",
+      "why": "Existing-building work can change the applicable route.",
+      "priority": "critical"
+    }
+  ],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.9.16.(1)",
+        "why": "Candidate baseline residential suite separation."
+      },
+      {
+        "division": "B",
+        "provision": "9.10.9.16.(4)",
+        "why": "Candidate house-with-secondary-suite permission, conditional on the actual arrangement."
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "depends",
+    "engineering_reason": "The actual building use, dwelling count and scope of structural work are unknown; the secondary-suite label cannot establish the Division C exemption.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(3)"
+      }
+    ],
+    "intake_action": "ask",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 9.10.9.16.(4), NBC(AE) 2023, 2nd printing, PDF p.886. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

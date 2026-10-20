@@ -1,0 +1,91 @@
+{
+  "id": "dev-027",
+  "applicant_type": "architect-engineer",
+  "topic": "single-exit",
+  "code_part": 3,
+  "jurisdiction": "Calgary",
+  "seed_provision": "3.4.2.3.(1)",
+  "description": "On an eight-storey office, the two required exits from each 1,200 m2 floor would be only 4 m apart along an open public corridor. The maximum floor diagonal is 30 m. There is no intervening fire separation that lengthens the smoke path or divides the floor into separate zones. We want to keep both stairs in this compact core.",
+  "known_facts": [
+    "eight-storey office",
+    "two required exits",
+    "floor area 1200 m2",
+    "maximum diagonal 30 m",
+    "shortest smoke path between exits 4 m",
+    "public corridor with no intervening fire separation"
+  ],
+  "missing_info": [
+    {
+      "field": "owner or representative contact and property identification",
+      "why": "Sections A–B administrative identification.",
+      "priority": "administrative"
+    },
+    {
+      "field": "risk assessment, mitigating measures, assumptions and supporting documents",
+      "why": "Alternative-path completeness items; request evidence rather than fabricate a professional conclusion.",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "The two exits are closer together than the required separation for a floor area with a public corridor.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "3.4.2.3.(1)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "3.4.2.3.(3)",
+        "why": "Distance is the shortest smoke-travel path."
+      },
+      {
+        "division": "B",
+        "provision": "3.4.2.3.(2)",
+        "why": "Check the fire-separated-floor exception, whose conditions the description rules out."
+      }
+    ],
+    "must_not_cite": [
+      {
+        "division": "B",
+        "provision": "3.4.2.3.(2)",
+        "prohibited_use": "as permitting the described proposal",
+        "why": "The floor is not divided by the required intervening fire separation."
+      }
+    ],
+    "section_c": [
+      {
+        "provision": "3.4.2.3.(1)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F10,F05-OS1.5]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "yes",
+    "engineering_reason": "The stated occupancy, building size or dwelling count is outside the Division C exemption; applicable drawings require qualified registered professionals.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(3)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 3.4.2.3.(1), NBC(AE) 2023, 2nd printing, PDF p.271. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

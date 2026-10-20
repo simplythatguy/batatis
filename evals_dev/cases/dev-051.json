@@ -1,0 +1,82 @@
+{
+  "id": "dev-051",
+  "applicant_type": "owner",
+  "topic": "part9-fire-separations",
+  "code_part": 9,
+  "jurisdiction": "Edmonton",
+  "seed_provision": "9.10.19.5.(2)",
+  "description": "I am adding a basement secondary suite inside my two-storey detached house with a building area of 160 m2. The only dwellings will be the main home and that suite. Each dwelling will have interconnected smoke alarms internally, but I want no connection between the two sets, wireless or wired. I do not want an alarm in one dwelling to sound in the other.",
+  "known_facts": [
+    "detached house with one internal secondary suite",
+    "two dwellings total",
+    "smoke alarms interconnected within each dwelling only",
+    "no wireless or hard-wired cross-house interconnection",
+    "two storeys; building area 160 m2"
+  ],
+  "missing_info": [
+    {
+      "field": "owner or representative contact and property identification",
+      "why": "Sections A–B administrative identification.",
+      "priority": "administrative"
+    },
+    {
+      "field": "risk assessment, mitigating measures, assumptions and supporting documents",
+      "why": "Alternative-path completeness items; request evidence rather than fabricate a professional conclusion.",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Smoke alarms are not interconnected throughout the house with a secondary suite.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.19.5.(2)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.19.5.(1)",
+        "why": "Within-unit interconnection does not replace the secondary-suite house-wide requirement."
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "9.10.19.5.(2)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F11-OS1.5]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "no",
+    "engineering_reason": "The house is within the residential exemption, with secondary suites excluded from the dwelling count; an AHJ special-safety requirement remains possible.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(2)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(4)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 9.10.19.5.(2), NBC(AE) 2023, 2nd printing, PDF p.910. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "id": "dev-059",
+  "applicant_type": "contractor",
+  "topic": "out-of-scope",
+  "code_part": null,
+  "jurisdiction": "Calgary",
+  "seed_provision": "9.10.22.1.(1)",
+  "description": "The gas fitter wants an alternative pipe-sizing and regulator arrangement for the natural gas supply to a house cooktop. This request is only about the gas supply installation; no building wall, appliance clearance or exit is being changed. Can this building-variance tool prepare that gas application?",
+  "known_facts": [
+    "natural gas supply piping and regulator arrangement for house cooktop",
+    "gas installation only",
+    "no building wall, clearance or exit change"
+  ],
+  "missing_info": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.22.1.(1)",
+        "why": "Building-code pointer to gas installation under the Gas Code Regulation."
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "depends",
+    "engineering_reason": "Professional or trade requirements for the gas installation must be determined under the gas regime; no building-design professional decision is made here.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      }
+    ],
+    "intake_action": "redirect",
+    "out_of_scope": true,
+    "redirect_to": "Gas Code Regulation / gas permit authority and gas safety codes officer"
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 9.10.22.1.(1), NBC(AE) 2023, 2nd printing, PDF p.911. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

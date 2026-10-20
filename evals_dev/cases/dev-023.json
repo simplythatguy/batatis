@@ -60,7 +60,7 @@
     "must_not_cite": [],
     "section_c": [],
     "engineering_required": "no",
-    "engineering_reason": "Single-family property with a suite stays within the exemption; secondary suites are not counted as dwelling units.",
+    "engineering_reason": "The described detached residential conversion is within the single-family or up-to-four-dwelling exemption, subject to an AHJ special-safety requirement. A detached garden dwelling is not assumed to be a secondary suite in the principal house.",
     "engineering_citations": [
       {
         "division": "C",
@@ -68,7 +68,7 @@
       },
       {
         "division": "C",
-        "provision": "2.4.1.1.(2)"
+        "provision": "2.4.1.1.(4)"
       }
     ],
     "intake_action": "ask",
@@ -79,6 +79,6 @@
     "source": "codedb",
     "author": "Batatis evaluation builder (Claude Opus 5.5)",
     "date": "2026-10-20",
-    "notes": "Written from the code database only; held-out judge set not consulted."
+    "notes": "Written from the code database only; held-out judge set not consulted. Model-checked and revised by GPT-6.1-Sol max on 2026-10-20: Corrected the professional-involvement rationale: evaluate the detached building, not a property-wide secondary-suite exclusion."
   }
 }

@@ -1,0 +1,92 @@
+{
+  "id": "dev-037",
+  "applicant_type": "manufacturer",
+  "topic": "cladding",
+  "code_part": 3,
+  "jurisdiction": "Airdrie",
+  "seed_provision": "3.1.6.9.(1)",
+  "description": "We propose decorative timber strips on all eight storeys of a forty-unit encapsulated mass timber apartment. The strips cover 20% of each exterior wall on every storey and run continuously from bottom to top. The flame-spread rating is stated as 75. The assembly has no full-scale exterior-wall test and is not one of the prescriptive Appendix D wall assemblies. We want to justify it with our own detail.",
+  "known_facts": [
+    "eight-storey encapsulated mass timber apartment",
+    "forty units",
+    "combustible timber strips cover 20% of each wall per storey",
+    "strips continuous over eight storeys",
+    "stated flame-spread rating 75",
+    "no full-scale wall test or Appendix D assembly route"
+  ],
+  "missing_info": [
+    {
+      "field": "owner or representative contact and property identification",
+      "why": "Sections A–B administrative identification.",
+      "priority": "administrative"
+    },
+    {
+      "field": "risk assessment, mitigating measures, assumptions and supporting documents",
+      "why": "Alternative-path completeness items; request evidence rather than fabricate a professional conclusion.",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Extensive vertically continuous combustible cladding replaces the noncombustible-cladding benchmark without meeting a listed permission.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "3.1.6.9.(1)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "3.1.6.9.(2)",
+        "why": "Contains limited-area, first-storey and tested-wall permissions."
+      },
+      {
+        "division": "B",
+        "provision": "3.1.6.9.(4)",
+        "why": "The prescriptive Appendix D alternative is explicitly excluded by the synthetic facts."
+      }
+    ],
+    "must_not_cite": [
+      {
+        "division": "B",
+        "provision": "3.1.6.9.(2)",
+        "prohibited_use": "as permitting the described proposal",
+        "why": "Twenty percent per storey and eight-storey continuity exceed the limited-strip options; no tested-wall route is offered."
+      }
+    ],
+    "section_c": [
+      {
+        "provision": "3.1.6.9.(1)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F02-OP1.2]",
+          "[F02-OS1.2]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "yes",
+    "engineering_reason": "The stated occupancy, building size or dwelling count is outside the Division C exemption; applicable drawings require qualified registered professionals.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(3)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 3.1.6.9.(1), NBC(AE) 2023, 2nd printing, PDF p.148. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

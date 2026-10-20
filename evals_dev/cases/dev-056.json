@@ -1,0 +1,61 @@
+{
+  "id": "dev-056",
+  "applicant_type": "architect-engineer",
+  "topic": "part4-structural",
+  "code_part": 4,
+  "jurisdiction": "unspecified",
+  "seed_provision": "4.1.6.2.(4)",
+  "description": "I am preparing a Part 4 roof snow-load design. The owner wants the wind exposure factor reduced to 0.75 because the site feels windy. I have no site-exposure survey yet, and I have not classified the building importance or reviewed roof obstructions and drifting. What deciding information comes first?",
+  "known_facts": [
+    "Part 4 roof snow design",
+    "wind exposure factor 0.75 requested",
+    "site exposure, importance and roof drifting not assessed"
+  ],
+  "missing_info": [
+    {
+      "field": "importance category and whether the site is rural with enduring open exposure on all sides",
+      "why": "The reduction is conditional on category and exposure, not subjective windiness.",
+      "priority": "critical"
+    },
+    {
+      "field": "roof obstructions and drift accumulation from adjacent surfaces",
+      "why": "These independently affect availability of the reduction.",
+      "priority": "critical"
+    }
+  ],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "4.1.6.2.(3)",
+        "why": "Default factor if the reduction is unavailable."
+      },
+      {
+        "division": "B",
+        "provision": "4.1.6.2.(4)",
+        "why": "Candidate reduction conditions."
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "yes",
+    "engineering_reason": "The described design is explicitly carried out under Part 4, requiring a registered professional skilled in the work.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.2.(1)"
+      }
+    ],
+    "intake_action": "ask",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 4.1.6.2.(4), NBC(AE) 2023, 2nd printing, PDF p.438. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

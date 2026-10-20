@@ -5,12 +5,14 @@
   "code_part": 9,
   "jurisdiction": "Edmonton",
   "seed_provision": "9.10.11.2.(2)",
-  "description": "We're planning a row of six two-storey townhouses on one lot, and every unit will have a legal basement suite. We'd like to build every party wall the same way, as a 1-hour rated double-stud wall running from the footing to the underside of the roof deck, instead of making some of them full firewalls. Is there a way to get that approved?",
+  "description": "We're planning a row of six two-storey townhouses across six adjacent fee-simple parcels, with party walls on the parcel boundaries and a total building area of 500 m2, proposed as a single building without internal firewalls, and every unit will have a legal basement suite. We'd like to build every party wall the same way, as a 1-hour rated double-stud wall running from the footing to the underside of the roof deck, instead of making some of them full firewalls. Is there a way to get that approved?",
   "known_facts": [
     "six houses in one row",
     "each house has a secondary suite",
     "two storeys",
-    "1 h party walls from footing to roof deck proposed for all"
+    "1 h party walls from footing to roof deck proposed for all",
+    "six adjacent fee-simple parcels; party walls on parcel boundaries; total building area 500 m2",
+    "proposed as one building without internal firewalls"
   ],
   "missing_info": [
     {
@@ -48,6 +50,11 @@
         "division": "B",
         "provision": "9.10.11.2.(3)",
         "why": "continuity of the party wall"
+      },
+      {
+        "division": "A",
+        "provision": "1.4.1.2.(1)",
+        "why": "Defined party-wall status depends on parcel boundaries; the revised synthetic description states that arrangement."
       }
     ],
     "must_not_cite": [],
@@ -87,6 +94,6 @@
     "source": "codedb",
     "author": "Batatis evaluation builder (Claude Opus 5.5)",
     "date": "2026-10-20",
-    "notes": "Written from the code database only; held-out judge set not consulted."
+    "notes": "Written from the code database only; held-out judge set not consulted. Model-checked synthetic clarification on 2026-10-20: Stated the building/parcel/design-basis scope in the applicant description rather than relying on evaluator-only metadata."
   }
 }
