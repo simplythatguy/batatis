@@ -3,8 +3,9 @@
  *
  * Ids, titles, and primary routes match docs/demo/script.md (7 shots).
  * The burned-in caption names only text that is on screen. It is not the
- * shot title. The lower third is the script's EXAMPLE DATA line for the case
- * actually on screen, and it sits in the sidebar so it does not cover the footer.
+ * shot title. The EXAMPLE DATA label and the caption sit in a band at the top
+ * of the frame. The app is inset below that band so the header subtitle and
+ * the footer stay visible.
  *
  * Recording order follows the script: Case C stays open through shots 2, 4, 5,
  * and 7's Case C frame. Reset runs before shot 3 and wipes Case C. Shot 6 is
@@ -42,6 +43,7 @@ const CASES = {
 };
 
 const OPEN_QUESTION_HOLD_MS = 3500;
+const LIMIT_LINE = "This tool does not write the evidence or the professional opinion.";
 const REAL_ADDRESS = "11821 73 Avenue NW";
 const FICTIONAL_ADDRESS = "100 Example Street NW";
 
@@ -105,72 +107,137 @@ function roleButton(page, label) {
 async function overlay(page, { caption, lower }) {
   await page.evaluate(
     ({ caption, lower }) => {
-      const ensure = (id, style) => {
-        let el = document.getElementById(id);
-        if (!el) {
-          el = document.createElement("div");
-          el.id = id;
-          el.setAttribute("data-demo-recorder", "true");
-          Object.assign(el.style, style);
-          document.body.appendChild(el);
+      let band = document.getElementById("demo-recorder-band");
+      if (!band) {
+        band = document.createElement("div");
+        band.id = "demo-recorder-band";
+        band.setAttribute("data-demo-recorder", "true");
+        const low = document.createElement("div");
+        low.id = "demo-recorder-lower";
+        const cap = document.createElement("div");
+        cap.id = "demo-recorder-caption";
+        band.append(low, cap);
+        document.body.appendChild(band);
+      }
+      const root = document.getElementById("root");
+      const shell = document.querySelector(".app-shell");
+      const panel = document.querySelector(".main-panel");
+      const restore = () => {
+        for (const el of [root, shell, panel]) {
+          if (!el) continue;
+          el.style.marginTop = "";
+          el.style.height = "";
+          el.style.maxHeight = "";
+          el.style.minHeight = "";
+          el.style.overflow = "";
         }
-        return el;
       };
-      const sidebar = document.querySelector(".sidebar");
-      const foot = document.querySelector(".sidebar-foot");
-      const nav = document.querySelector("nav.nav");
-      const workspace = document.querySelector(".workspace");
-      const sb = sidebar?.getBoundingClientRect();
-      const width = Math.min(200, Math.max(140, (sb?.width || 228) - 28));
-      const left = (sb?.left || 0) + 12;
-      const footTop = foot ? foot.getBoundingClientRect().top : (sb?.bottom || window.innerHeight) - 8;
-      const belowWordmark = (workspace?.getBoundingClientRect().bottom || 40) + 8;
-      const navBottom = nav ? nav.getBoundingClientRect().bottom : belowWordmark;
-      let top = Math.max(belowWordmark, navBottom + 8);
-      if (footTop - top < 72) top = Math.max(belowWordmark, footTop - 110);
-      const common = {
+      if (!caption && !lower) {
+        band.style.display = "none";
+        restore();
+        return;
+      }
+      Object.assign(band.style, {
         position: "fixed",
-        left: `${left}px`,
-        width: `${width}px`,
-        maxWidth: `${width}px`,
-        zIndex: "5",
-        pointerEvents: "none",
+        top: "0",
+        left: "0",
+        right: "0",
+        zIndex: "10000",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: "16px",
+        padding: "8px 16px",
+        background: "#18181b",
+        borderBottom: "1px solid #3f3f46",
         boxSizing: "border-box",
-        whiteSpace: "pre-wrap",
-      };
-      const cap = ensure("demo-recorder-caption", {
-        ...common,
-        background: "rgba(12,12,13,0.94)",
-        color: "#f4f4f5",
-        font: "600 11px/1.35 ui-sans-serif, system-ui, sans-serif",
-        padding: "4px 6px",
-        borderRadius: "4px",
+        pointerEvents: "none",
       });
-      cap.textContent = caption || "";
-      cap.style.display = caption ? "block" : "none";
-      if (caption) cap.style.top = `${top}px`;
-      const low = ensure("demo-recorder-lower", {
-        ...common,
+      const low = document.getElementById("demo-recorder-lower");
+      const cap = document.getElementById("demo-recorder-caption");
+      Object.assign(low.style, {
+        position: "static",
         background: "#fff7ed",
         color: "#7c2d12",
         border: "2px solid #c2410c",
-        font: "700 11px/1.35 ui-sans-serif, system-ui, sans-serif",
-        padding: "4px 6px",
-        borderRadius: "4px",
+        font: "700 14px/1.3 ui-sans-serif, system-ui, sans-serif",
+        padding: "4px 8px",
+        borderRadius: "6px",
+        whiteSpace: "pre",
+        maxWidth: "70%",
+        width: "auto",
+      });
+      Object.assign(cap.style, {
+        position: "static",
+        marginLeft: "auto",
+        background: "rgba(39,39,42,0.96)",
+        color: "#f4f4f5",
+        border: "1px solid #52525b",
+        font: "600 13px/1.3 ui-sans-serif, system-ui, sans-serif",
+        padding: "4px 8px",
+        borderRadius: "6px",
+        whiteSpace: "nowrap",
+        width: "auto",
       });
       low.textContent = lower || "";
       low.style.display = lower ? "block" : "none";
-      if (lower) {
-        const capHeight = caption ? cap.getBoundingClientRect().height : 0;
-        let lowTop = top + (caption ? capHeight + 4 : 0);
-        const lowHeight = low.getBoundingClientRect().height || 36;
-        if (lowTop + lowHeight > footTop - 4) lowTop = Math.max(top, footTop - lowHeight - 4);
-        low.style.top = `${lowTop}px`;
-      }
       low.setAttribute("data-example-data", lower && lower.includes("EXAMPLE DATA") ? "true" : "false");
+      cap.textContent = caption || "";
+      cap.style.display = caption ? "block" : "none";
+      const height = Math.ceil(band.getBoundingClientRect().height);
+      const inset = `${height}px`;
+      if (root) {
+        root.style.marginTop = inset;
+        root.style.height = `calc(100dvh - ${inset})`;
+        root.style.maxHeight = `calc(100dvh - ${inset})`;
+        root.style.overflow = "hidden";
+      }
+      if (shell) {
+        shell.style.height = "100%";
+        shell.style.maxHeight = "100%";
+        shell.style.minHeight = "0";
+        shell.style.marginTop = "0";
+      }
+      if (panel) {
+        panel.style.height = "calc(100% - 16px)";
+        panel.style.maxHeight = "calc(100% - 16px)";
+        panel.style.minHeight = "0";
+      }
     },
     { caption, lower: lower || "" },
   );
+}
+
+async function overlayClearsChrome(page) {
+  return page.evaluate(() => {
+    const overlaps = (a, b) => {
+      if (!a || !b) return false;
+      if (a.width < 1 || a.height < 1 || b.width < 1 || b.height < 1) return false;
+      return !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
+    };
+    const inView = (rect) =>
+      rect.top >= -1 && rect.left >= -1 && rect.bottom <= window.innerHeight + 1 && rect.right <= window.innerWidth + 1;
+    const band = document.getElementById("demo-recorder-band");
+    const bandRect = band && band.style.display !== "none" ? band.getBoundingClientRect() : null;
+    const subtitle = document.querySelector(".header-meta");
+    const footer = [...document.querySelectorAll(".footer-bar")].find((el) => {
+      const rect = el.getBoundingClientRect();
+      return rect.width > 1 && rect.height > 1;
+    });
+    const subtitleRect = subtitle?.getBoundingClientRect();
+    const footerRect = footer?.getBoundingClientRect();
+    const problems = [];
+    if (subtitle && subtitleRect && subtitleRect.width > 1 && overlaps(bandRect, subtitleRect)) problems.push("the header subtitle");
+    if (footer && footerRect && overlaps(bandRect, footerRect)) problems.push("the footer");
+    if (subtitle && subtitleRect && subtitleRect.width > 1 && !inView(subtitleRect)) problems.push("the header subtitle is outside the frame");
+    if (footer && footerRect && !inView(footerRect)) problems.push("the footer is outside the frame");
+    return {
+      ok: problems.length === 0,
+      reason: problems.length ? `The recorder band leaves app text hidden: ${problems.join("; ")}.` : "",
+      subtitle: subtitle ? subtitle.textContent.replace(/\s+/g, " ").trim() : "",
+      footer: footer ? footer.innerText.replace(/\s+/g, " ").trim() : "",
+    };
+  });
 }
 
 async function clearOverlay(page) {
@@ -221,6 +288,10 @@ async function settle(page, api, lower, { holdMs, suffix, caption } = {}) {
     };
   }
   await overlay(page, { caption: caption || "", lower: label });
+  const chrome = await overlayClearsChrome(page);
+  if (!chrome.ok) return { ok: false, reason: chrome.reason };
+  if (chrome.subtitle) api.notes.push(`Header subtitle visible: ${chrome.subtitle}`);
+  if (chrome.footer) api.notes.push(`Footer visible: ${chrome.footer}`);
   await sleep(holdMs ?? api.holdMs);
   const file = join(
     api.framesDir,
@@ -557,47 +628,35 @@ async function shot4(page, api) {
   await answerNotSure(page, api);
   const search = await searchDivisionB(page, "bedroom window unobstructed", "9.9.10.1.(2)");
   api.notes.push(search.note);
-  if (search.added) {
-    const reference = page
-      .locator("article")
-      .filter({ hasText: search.added })
-      .locator("summary")
-      .filter({ hasText: "Code reference" })
-      .first();
-    if (await visible(reference, 800)) {
-      await reference.click();
-      api.notes.push("Opened Code reference on the row that was added.");
-    } else api.notes.push("Code reference disclosure was not on the added row.");
+  if (!search.added) {
+    return skipped(
+      "Search did not show a returned row for 9.9.10.1.(2). No article id was typed in, and Section C was not recorded over the offline sample.",
+    );
   }
+  const reference = page
+    .locator("article")
+    .filter({ hasText: search.added })
+    .locator("summary")
+    .filter({ hasText: "Code reference" })
+    .first();
+  if (await visible(reference, 800)) {
+    await reference.click();
+    api.notes.push("Opened Code reference on the row that was added.");
+  } else api.notes.push("Code reference disclosure was not on the added row.");
   const searchBox = page.getByLabel("Search Division B").first();
   if (await visible(searchBox, 500)) await searchBox.scrollIntoViewIfNeeded().catch(() => {});
-  const searchText = (await page.locator("main").innerText()).replace(/\s+/g, " ");
-  let searchCaption = "Search did not return";
-  if (search.added) searchCaption = search.added;
-  else if (/could not be reached|Bad Gateway/i.test(searchText)) searchCaption = "Engine could not be reached";
-  else if (/No provisions returned/i.test(searchText)) searchCaption = "No provisions returned";
-  else if (/\d+ provisions returned/.test(searchText)) searchCaption = "Search rows";
-  const searchFrame = await settle(page, api, CASES.C.lower, { suffix: "search", caption: searchCaption });
+  const searchFrame = await settle(page, api, CASES.C.lower, { suffix: "search", caption: search.added });
   if (!searchFrame.ok) return skipped(searchFrame.reason);
   if (!(await goSectionC(page, api))) return skipped("Section C is not on this build.");
-  const offline = page.getByText(/Offline sample|not a lookup for this case|bundled offline sample|Lookup failed|did not return|could not be reached/);
-  if (await visible(offline, 1200)) {
-    api.notes.push("Section C did not show a live lookup. No objective, function, or intent was invented.");
+  const row = page.getByRole("row").filter({ hasText: search.added }).first();
+  if (!(await visible(row, 1500))) {
+    return skipped(`Section C has no row for ${search.added}. The offline sample was not recorded as the lookup.`);
   }
-  if (search.added) {
-    const row = page.getByRole("row").filter({ hasText: search.added }).first();
-    if (await visible(row, 1000)) await row.click();
-    else api.notes.push(`Section C has no row for ${search.added}. No attribution was typed in.`);
-  } else {
-    api.notes.push("No article was added, so no Section C row was selected.");
-  }
+  await row.scrollIntoViewIfNeeded().catch(() => {});
   api.notes.push("Ranked list still is not in this build. Omitted. No ranked caption was added.");
   api.notes.push("Benchmark card is not in this build. Omitted.");
   api.notes.push("Eval still is not in this build. Omitted. #/accuracy was not opened.");
-  const offlineVisible = await visible(offline, 400);
-  const frame = await settle(page, api, CASES.C.lower, {
-    caption: offlineVisible ? "Section C offline sample" : search.added ? search.added : "Section C",
-  });
+  const frame = await settle(page, api, CASES.C.lower, { caption: search.added });
   if (!frame.ok) return skipped(frame.reason);
   return recorded();
 }
@@ -623,21 +682,15 @@ async function shot5(page, api) {
   if (!(await visible(heading, 5000))) {
     return skipped("The Section D tab opened without the professional screening heading.");
   }
-  const limit = page.getByText(/does not write the evidence|does not write that opinion|not a licence decision|This is not a licence decision/i).first();
-  if (await visible(limit, 1000)) {
-    api.notes.push("The on-screen limit line is visible. It was not typed by the recorder.");
-    await limit.scrollIntoViewIfNeeded().catch(() => {});
-  } else {
-    api.notes.push(
-      "The limit line is not on screen. Section D routes did not return a card, and no evidence or judgement was invented.",
+  const limit = page.getByText(LIMIT_LINE).first();
+  if (!(await visible(limit, 1000))) {
+    return skipped(
+      `The limit line "${LIMIT_LINE}" is not on screen. The shot was not recorded, and the line was not invented.`,
     );
   }
-  const limitVisible = await visible(limit, 400);
-  const draftFirst = page.getByText("Save the draft first").first();
-  let sectionCaption = "Section D";
-  if (limitVisible) sectionCaption = "Does not write the opinion";
-  else if (await visible(draftFirst, 400)) sectionCaption = "Save the draft first";
-  const frame = await settle(page, api, CASES.C.lower, { suffix: "section-d", caption: sectionCaption });
+  api.notes.push("The on-screen limit line is visible. It was not typed by the recorder.");
+  await limit.scrollIntoViewIfNeeded().catch(() => {});
+  const frame = await settle(page, api, CASES.C.lower, { suffix: "section-d", caption: "Does not write the evidence" });
   if (!frame.ok) return skipped(frame.reason);
   return recorded();
 }
@@ -858,6 +911,10 @@ async function saveStill(page, api, lower, filePath) {
     return { ok: false, reason: `${REAL_ADDRESS} is still on screen. The still was not saved.` };
   }
   await overlay(page, { caption: "", lower: label });
+  const chrome = await overlayClearsChrome(page);
+  if (!chrome.ok) return { ok: false, reason: chrome.reason };
+  if (chrome.subtitle) api.notes.push(`Header subtitle visible: ${chrome.subtitle}`);
+  if (chrome.footer) api.notes.push(`Footer visible: ${chrome.footer}`);
   await sleep(300);
   const buffer = await page.screenshot({ type: "png" });
   const size = pngSize(buffer);

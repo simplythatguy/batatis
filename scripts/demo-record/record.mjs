@@ -4,9 +4,10 @@
  *   ./scripts/record-demo.sh
  *   ./scripts/record-demo.sh --branch cursor/e2e-product-flow-4362
  *
- * No model API key is read or sent. The app's fixture, example, and offline
- * paths are what the camera sees. If an engine is already on 127.0.0.1:8000,
- * Vite proxies /api to it; this script does not start one.
+ * By default this starts the checkout's engine on 127.0.0.1:8000, or reuses
+ * one that is already listening, and lets the browser call /api. Pass
+ * --offline to skip the engine and abort /api. The recorder does not call a
+ * model API itself.
  */
 import { spawn } from "node:child_process";
 import { createServer } from "node:net";
@@ -26,6 +27,7 @@ function parseArgs(argv) {
     checkScript: false,
     strict: false,
     engine: false,
+    offline: false,
     stills: false,
     holdMs: 1600,
     web: null,
@@ -45,6 +47,7 @@ function parseArgs(argv) {
     if (arg === "--check-script") out.checkScript = true;
     else if (arg === "--strict") out.strict = true;
     else if (arg === "--engine") out.engine = true;
+    else if (arg === "--offline") out.offline = true;
     else if (arg === "--stills") out.stills = true;
     else if (arg === "--web") out.web = next();
     else if (arg === "--branch") out.branch = next();
@@ -57,6 +60,7 @@ function parseArgs(argv) {
   }
   if (Number.isNaN(out.holdMs) || out.holdMs < 0) throw new Error("--hold must be a number of milliseconds");
   if (out.web && out.branch) throw new Error("Pass either --web or --branch, not both.");
+  if (out.offline && out.engine) throw new Error("Pass either --offline or --engine, not both.");
   return out;
 }
 
@@ -76,7 +80,8 @@ Options
   --script <file>   Shot list to diff (default docs/demo/script.md)
   --stills          Write the deck PNGs at 1440×900 and skip the mp4
   --strict          Exit non-zero unless every shot or still is captured
-  --engine          Acknowledge an engine already listening on port 8000
+  --offline         Do not start the engine, and abort /api and port 8000
+  --engine          Use the engine (this is already the default)
 `;
 
 function run(cmd, args, opts = {}) {
@@ -231,16 +236,101 @@ function stopChild(child) {
   }
 }
 
-async function engineNote(acknowledged) {
+async function engineUp() {
   try {
-    const res = await fetch("http://127.0.0.1:8000/openapi.json", { signal: AbortSignal.timeout(600) });
-    if (!res.ok) return `Port 8000 responded ${res.status}. The recorder did not start an engine.`;
-    return acknowledged
-      ? "An engine is listening on 127.0.0.1:8000. --engine was passed. Browser requests to /api are still aborted, so this recording does not create cases."
-      : "WARNING: An engine is listening on 127.0.0.1:8000. Browser requests to /api and port 8000 are aborted, so this recording does not create cases. Pass --engine to acknowledge the engine. The recorder did not start it.";
+    const res = await fetch("http://127.0.0.1:8000/openapi.json", { signal: AbortSignal.timeout(800) });
+    return res.ok;
   } catch {
-    return "No engine is listening on 127.0.0.1:8000. The recording uses the app's fixture and offline paths.";
+    return false;
   }
+}
+
+async function ensureEnginePython(engineRoot) {
+  try {
+    await run("python3", ["-c", "import uvicorn, fastapi"], { cwd: engineRoot });
+    return;
+  } catch {
+    const requirements = join(engineRoot, "engine/requirements.txt");
+    if (!existsSync(requirements)) {
+      throw new Error(`The engine at ${engineRoot} has no engine/requirements.txt, and uvicorn is not installed.`);
+    }
+    console.log(`Installing engine dependencies from ${requirements}`);
+    await run("python3", ["-m", "pip", "install", "-r", requirements], { cwd: engineRoot });
+  }
+}
+
+async function startEngine(engineRoot) {
+  const api = join(engineRoot, "engine/api.py");
+  if (!existsSync(api)) throw new Error(`${engineRoot} has no engine/api.py, so the recorder cannot start the engine.`);
+  await ensureEnginePython(engineRoot);
+  const child = spawn("python3", ["-m", "uvicorn", "engine.api:app", "--host", "127.0.0.1", "--port", "8000"], {
+    cwd: engineRoot,
+    detached: true,
+    stdio: ["ignore", "pipe", "pipe"],
+    env: { ...process.env },
+  });
+  let log = "";
+  const take = (chunk) => {
+    log += chunk.toString();
+    if (log.length > 20000) log = log.slice(-20000);
+  };
+  child.stdout.on("data", take);
+  child.stderr.on("data", take);
+  const started = Date.now();
+  while (Date.now() - started < 45000) {
+    if (child.exitCode !== null) {
+      throw new Error(`The engine exited before it was ready.\n${log.slice(-2000)}`);
+    }
+    if (await engineUp()) return child;
+    await new Promise((resolveWait) => setTimeout(resolveWait, 300));
+  }
+  stopChild(child);
+  throw new Error(`The engine did not answer on 127.0.0.1:8000.\n${log.slice(-2000)}`);
+}
+
+async function prepareEngine(args, engineRoot) {
+  if (args.offline) {
+    return {
+      networkMode: "offline",
+      engineState: "offline",
+      child: null,
+      note: "Offline mode (--offline). The recorder did not start an engine. Browser requests to /api and port 8000 are aborted. No PDF is uploaded.",
+    };
+  }
+  if (await engineUp()) {
+    return {
+      networkMode: "engine",
+      engineState: "reused",
+      child: null,
+      note: await engineNote("reused"),
+    };
+  }
+  console.log(`Starting the engine from ${engineRoot}`);
+  const child = await startEngine(engineRoot);
+  return {
+    networkMode: "engine",
+    engineState: "started",
+    child,
+    note: await engineNote("started"),
+  };
+}
+
+async function engineNote(state) {
+  let search = "Code search was not probed.";
+  try {
+    const res = await fetch("http://127.0.0.1:8000/code/search?q=window&limit=1", { signal: AbortSignal.timeout(2000) });
+    search =
+      res.status === 200
+        ? "Code search answered."
+        : `Code search returned ${res.status}.`;
+  } catch {
+    search = "Code search did not answer.";
+  }
+  const how =
+    state === "reused"
+      ? "Reused the engine already listening on 127.0.0.1:8000."
+      : "Started uvicorn engine.api:app on 127.0.0.1:8000 from the recorded checkout.";
+  return `${how} Browser requests to /api are proxied to it. ${search} The recorder did not call a model API. No PDF is uploaded.`;
 }
 
 async function gitIdentity(cwd) {
@@ -253,18 +343,17 @@ async function gitIdentity(cwd) {
   }
 }
 
-async function blockEngineAndModels(page) {
+async function blockTraffic(page, { offline }) {
   await page.route("**/*", (route) => {
     let blocked = false;
     try {
       const url = new URL(route.request().url());
-      blocked =
-        url.port === "8000" ||
-        url.pathname === "/api" ||
-        url.pathname.startsWith("/api/") ||
+      const model =
         url.hostname === "api.openai.com" ||
         url.hostname.endsWith(".openai.com") ||
         url.hostname === "api.anthropic.com";
+      const engine = url.port === "8000" || url.pathname === "/api" || url.pathname.startsWith("/api/");
+      blocked = model || (offline && engine);
     } catch {
       blocked = false;
     }
@@ -362,7 +451,7 @@ async function convertMp4(webm, mp4, trimSeconds) {
   return { duration, codec, width: Number(width), height: Number(height) };
 }
 
-async function captureDeckStills({ args, outDir, base, webDir, gitInfo, engine, sync }) {
+async function captureDeckStills({ args, outDir, base, webDir, gitInfo, engineSession, sync }) {
   const browser = await chromium.launch({
     executablePath: chromePath(),
     args: ["--no-sandbox", "--disable-dev-shm-usage"],
@@ -381,7 +470,7 @@ async function captureDeckStills({ args, outDir, base, webDir, gitInfo, engine, 
       const downloads = [];
       page.on("pageerror", (error) => pageErrors.push(error.message));
       page.on("download", (download) => downloads.push(download.suggestedFilename()));
-      await blockEngineAndModels(page);
+      await blockTraffic(page, { offline: args.offline });
       await page.goto(`${base.replace(/\/$/, "")}/?reset`, { waitUntil: "domcontentloaded", timeout: 30000 });
       await h1Ready(page);
       await page.evaluate(() => document.fonts?.ready);
@@ -389,11 +478,13 @@ async function captureDeckStills({ args, outDir, base, webDir, gitInfo, engine, 
       const log = {
         recordedAt: new Date().toISOString(),
         mode: "stills",
+        networkMode: engineSession.networkMode,
+        engineState: engineSession.engineState,
         viewport: { width: 1440, height: 900 },
         webDir,
         git: { ...gitInfo, requestedBranch: args.branch },
         baseUrl: base,
-        engine,
+        engine: engineSession.note,
         scriptSync: sync,
         pageErrors,
         downloads,
@@ -461,6 +552,7 @@ async function main() {
   }
   const mp4 = join(outDir, "batatis-demo.mp4");
   let vite;
+  let engineSession;
 
   try {
     let base = args.base;
@@ -472,10 +564,10 @@ async function main() {
       console.log(`App at ${base}`);
     }
     const gitInfo = await gitIdentity(dirname(webDir));
-    const engine = `${await engineNote(args.engine)} Browser requests to /api and port 8000 are aborted, so this recording does not call the engine or a model. No PDF is uploaded.`;
-    console.log(engine);
+    engineSession = await prepareEngine(args, dirname(webDir));
+    console.log(engineSession.note);
     if (args.stills) {
-      await captureDeckStills({ args, outDir, base, webDir, gitInfo, engine, sync });
+      await captureDeckStills({ args, outDir, base, webDir, gitInfo, engineSession, sync });
       return;
     }
     await ensurePlaywrightFfmpeg();
@@ -499,7 +591,7 @@ async function main() {
         const downloads = [];
         page.on("pageerror", (error) => pageErrors.push(error.message));
         page.on("download", (download) => downloads.push(download.suggestedFilename()));
-        await blockEngineAndModels(page);
+        await blockTraffic(page, { offline: args.offline });
         await page.goto(`${base.replace(/\/$/, "")}/?reset`, { waitUntil: "domcontentloaded", timeout: 30000 });
         await h1Ready(page);
         await page.evaluate(() => document.fonts?.ready);
@@ -521,7 +613,9 @@ async function main() {
           webDir,
           git: { ...gitInfo, requestedBranch: args.branch },
           baseUrl: base,
-          engine,
+          networkMode: engineSession.networkMode,
+          engineState: engineSession.engineState,
+          engine: engineSession.note,
           scriptSync: sync,
           media,
           mp4,
@@ -553,6 +647,7 @@ async function main() {
     }
   } finally {
     stopChild(vite?.child);
+    stopChild(engineSession?.child);
     await cleanup();
   }
 }

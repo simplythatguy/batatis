@@ -1,18 +1,20 @@
 {
-  "recordedAt": "2026-10-20T20:29:42.235Z",
+  "recordedAt": "2026-10-20T20:59:59.943Z",
   "mode": "stills",
+  "networkMode": "engine",
+  "engineState": "started",
   "viewport": {
     "width": 1440,
     "height": 900
   },
-  "webDir": "/tmp/batatis-record-cursor-e2e-product-flow-4362/web",
+  "webDir": "/tmp/batatis-record-cursor-e2e-product-flow-4362-jlUtYl/checkout/web",
   "git": {
-    "sha": "58ceb237c5ea846fb5093bac86af184613141847",
+    "sha": "4a4c1222e6fc4dacfd1c71039f1d30fec712f0ae",
     "branch": "HEAD",
     "requestedBranch": "cursor/e2e-product-flow-4362"
   },
-  "baseUrl": "http://127.0.0.1:46311/",
-  "engine": "No engine is listening on 127.0.0.1:8000. The recording uses the app's fixture, example, and offline paths. Browser requests to /api and port 8000 are aborted, so this recording does not call the engine or a model. No PDF is uploaded.",
+  "baseUrl": "http://127.0.0.1:41689/",
+  "engine": "Started uvicorn engine.api:app on 127.0.0.1:8000 from the recorded checkout. Browser requests to /api are proxied to it. Code search returned 503. The recorder did not call a model API. No PDF is uploaded.",
   "scriptSync": {
     "status": "ok",
     "path": "/workspace/docs/demo/script.md",
@@ -37,7 +39,9 @@
       "file": "shot-s02-describe.png",
       "notes": [
         "Did not upload a PDF.",
-        "Missing-item text on screen: Owner, Mailing address, Legal description."
+        "Missing-item text on screen: Owner, Mailing address, Legal description.",
+        "Header subtitle visible: Homebuilder · Two-storey infill at 0000 Example Crescent NW, Edmonton, about 210 m²…",
+        "Footer visible: Online review unavailable. Showing a limited check of fields in this browser. Save draft Continue to code check"
       ],
       "status": "captured",
       "width": 1440,
@@ -49,7 +53,9 @@
       "notes": [
         "Reset case showed: Cleared. Nothing from the previous case is kept.",
         "Did not upload a PDF.",
-        "Answered Not sure on 2 Your words card(s): Sheathing membrane; Storey count. Did not answer Yes or No."
+        "Answered Not sure on 2 Your words card(s): Sheathing membrane; Storey count. Did not answer Yes or No.",
+        "Header subtitle visible: NBC(AE) 2023, 2nd printing",
+        "Footer visible: Online review unavailable. Showing a limited check of fields in this browser. Draft saved in this browser. Not sure does not block Continue. Save draft Back Continue to Section C"
       ],
       "status": "captured",
       "width": 1440,
@@ -60,7 +66,7 @@
       "file": "shot-s04-search.png",
       "notes": [
         "Answered Not sure on 1 Your words card(s): What you described. Did not answer Yes or No.",
-        "Search for \"bedroom window unobstructed\" did not return (no engine or code database). 9.9.10.1.(2) was not typed in."
+        "Search for \"bedroom window unobstructed\" did not report a result. No article id was typed in."
       ],
       "status": "skipped",
       "reason": "Search did not show a returned row for 9.9.10.1.(2). No article id was typed in, and the Section C lookup was not drawn."
@@ -83,7 +89,9 @@
       "id": "shot-s06-section-d",
       "file": "shot-s06-section-d.png",
       "notes": [
-        "The sentence \"This tool does not write the evidence or the professional opinion.\" is not on this screen. It was not added."
+        "The sentence \"This tool does not write the evidence or the professional opinion.\" is not on this screen. It was not added.",
+        "Header subtitle visible: Variance template · Sections A, B and process fields",
+        "Footer visible: Online review unavailable. Showing a limited check of fields in this browser. Draft saved in this browser. 13 required items need attention. Check completeness stays available so you can review them. The official PDF stays closed until they are cleared. Back Save draft Check completeness"
       ],
       "status": "captured",
       "width": 1440,

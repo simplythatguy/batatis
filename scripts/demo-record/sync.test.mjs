@@ -82,6 +82,28 @@ test("retired 11-shot titles are not in the catalog", () => {
   }
 });
 
+test("shot 4 and shot 5 skip when their subject is not on screen", () => {
+  const source = readFileSync(new URL("./steps.mjs", import.meta.url), "utf8");
+  const shot4 = source.slice(source.indexOf("async function shot4"), source.indexOf("async function shot5"));
+  const shot5 = source.slice(source.indexOf("async function shot5"), source.indexOf("async function waitOfficerLoaded"));
+  assert.match(shot4, /if \(!search\.added\)/);
+  assert.match(shot4, /offline sample/);
+  assert.match(shot5, /LIMIT_LINE/);
+  assert.match(shot5, /is not on screen/);
+  assert.match(source, /demo-recorder-band/);
+  assert.equal(source.includes('top: "12px"'), false);
+  assert.equal(source.includes('bottom: "16px"'), false);
+});
+
+test("the recorder uses the engine unless --offline is set", () => {
+  const source = readFileSync(new URL("./record.mjs", import.meta.url), "utf8");
+  assert.match(source, /offline: false/);
+  assert.match(source, /--offline/);
+  assert.match(source, /networkMode: engineSession\.networkMode/);
+  assert.match(source, /engineState: engineSession\.engineState/);
+  assert.equal(source.includes("blockEngineAndModels"), false);
+});
+
 test("the walk does not upload a PDF", () => {
   const source = readFileSync(new URL("./steps.mjs", import.meta.url), "utf8");
   assert.equal(source.includes("setInputFiles"), false);
