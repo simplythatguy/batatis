@@ -7,6 +7,8 @@ import { Accuracy, Officer } from "./screens/Placeholders";
 import { SectionC } from "./screens/SectionC";
 import { resetCase, useCase } from "./store";
 
+const EXPLICIT_ROUTES = ["/code-check", "/section-c", "/application", "/officer", "/accuracy"];
+
 const NAV = [
   {
     area: "Applicant",
@@ -17,14 +19,15 @@ const NAV = [
       { path: "/application", label: "Application", icon: "application" },
     ],
   },
-  { area: "Officer", items: [{ path: "/officer", label: "Review", icon: "officer" }] },
-  { area: "Accuracy", items: [{ path: "/accuracy", label: "Report", icon: "accuracy" }] },
+  { area: "Officer", items: [{ path: "/officer", label: "Officer review", icon: "officer" }] },
+  { area: "Accuracy", items: [{ path: "/accuracy", label: "Accuracy report", icon: "accuracy" }] },
 ];
 
 export function App() {
   const route = useRoute();
   const { c, dispatch } = useCase();
   useFocusParam(route);
+  const isDescribeRoute = !EXPLICIT_ROUTES.includes(route.path);
 
   let screen;
   switch (route.path) {
@@ -61,18 +64,21 @@ export function App() {
             <div key={g.area} className="nav-section">
               <div className="sidebar-section-label">{g.area}</div>
               <div className="nav-group">
-                {g.items.map((i) => (
-                  <a
-                    key={i.path}
-                    className="nav-item"
-                    href={`#${i.path}`}
-                    data-active={route.path === i.path || (route.path === "/" && i.path === "/describe")}
-                    aria-current={route.path === i.path ? "page" : undefined}
-                  >
-                    <Icon name={i.icon} />
-                    {i.label}
-                  </a>
-                ))}
+                {g.items.map((i) => {
+                  const active = route.path === i.path || (i.path === "/describe" && isDescribeRoute);
+                  return (
+                    <a
+                      key={i.path}
+                      className="nav-item"
+                      href={`#${i.path}`}
+                      data-active={active}
+                      aria-current={active ? "page" : undefined}
+                    >
+                      <Icon name={i.icon} />
+                      {i.label}
+                    </a>
+                  );
+                })}
               </div>
             </div>
           ))}

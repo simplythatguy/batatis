@@ -507,11 +507,11 @@ Illustrative variable model cost for one 20-sheet case with 60 claims, ESTIMATE 
 
 Methods and instruction files actually read in this run (absolute paths):
 
-- `/Users/aamia/.codex/skills/t3-workflow/SKILL.md` (router) and `/Users/aamia/.codex/skills/t3-workflow/references/routes.md` (route map; applied the "Research" route).
-- `/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md` (Matt Pocock research: primary sources, cite every claim, one Markdown file; its "spin up a background agent" step was not applied because the brief forbids delegation).
-- `/Users/aamia/.codex/skills/typesafe-ai/SKILL.md` (TypeSafe/Jev design guidance), plus the live TypeSafe docs it points to (https://docs.typesafe.ai/llms.txt and the pages and cookbooks listed in Section 1).
+- `~/.codex/skills/t3-workflow/SKILL.md` (router) and `~/.codex/skills/t3-workflow/references/routes.md` (route map; applied the "Research" route).
+- `~/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md` (Matt Pocock research: primary sources, cite every claim, one Markdown file; its "spin up a background agent" step was not applied because the brief forbids delegation).
+- `~/.codex/skills/typesafe-ai/SKILL.md` (TypeSafe/Jev design guidance), plus the live TypeSafe docs it points to (https://docs.typesafe.ai/llms.txt and the pages and cookbooks listed in Section 1).
 - The `claude-api` skill, loaded through the Skill tool (base directory `/private/tmp/claude-501/bundled-skills/2.1.304/2e0f1a07113fc2115ab61f8112ac84bf/claude-api`; the skill body was supplied by the tool and its directory listing shows no SKILL.md file on disk). Its cached model table (2026-10-06) was used only as a pointer and checked against live Anthropic pages. I listed its `shared/` directory and grepped `shared/live-sources.md` for the pricing, vision and Bedrock URLs; I did not read the other shared files.
 - Prior research read as inputs (not methods): `/tmp/batatis-archive/research/product-vision-2026-10-18/02-models-and-costs.md`, `/tmp/batatis-archive/research/system-decision-2026-10-18/01-model-services.md`, `03-system-choice.md`, `06-hierarchical-retrieval.md`, `07-verification.md`, and (by grep only) `/tmp/batatis-archive/research/product-vision-2026-10-18/08-privacy-and-cloud-data.md`.
-- Not used: `/Users/aamia/.agents/pstack-models.md`, the pstack library, `/Users/aamia/.codex/skills/jev-search/SKILL.md` and `jev search` (not needed). `/tmp/batatis-research/discarded-haiku/` was not read.
+- Not used: `~/.agents/pstack-models.md`, the pstack library, `~/.codex/skills/jev-search/SKILL.md` and `jev search` (not needed). `/tmp/batatis-research/discarded-haiku/` was not read.
 
 Data handling note: the S1MB `viewer-summary.json` (17 MB) and other web pages were streamed to analysis in memory and not saved; one transient helper script (`/tmp/s1mb_analyze.py`, created and deleted early in the run) and the tool harness's own saved fetch outputs (under the project's tool-results directory) are the only other artifacts. No models were downloaded or run, no paid inference, no keys, no installs.

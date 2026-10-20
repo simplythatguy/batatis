@@ -28,7 +28,6 @@ REGISTRY_URL = ('https://nrc.canada.ca/en/certifications-evaluations-standards/'
 API_URL = REGISTRY_URL.rsplit('/', 1)[0] + '/published_evaluations.html'
 REPORT_URL = REGISTRY_URL.rsplit('/', 1)[0] + '/document.html'
 _ROOT = Path(__file__).resolve().parents[1]
-_MAIN = Path('/Users/aamia/.t3/projects/batatis')
 
 
 class RegistryUnavailable(RuntimeError):
@@ -113,7 +112,7 @@ class CCMCRegistry:
                  fetch_text: Callable[[str], str] = _fetch_text, ttl_seconds: float = 3600,
                  clock: Callable[[], float] = time.monotonic, today: Callable[[], date] = date.today,
                  offline: bool = False):
-        candidates = [_ROOT / 'reference/data/ccmc-registry.json', _MAIN / 'reference/data/ccmc-registry.json']
+        candidates = [_ROOT / 'reference/data/ccmc-registry.json']
         configured = snapshot_path or os.environ.get('BATATIS_CCMC_SNAPSHOT')
         self.snapshot_path = Path(configured) if configured else next((p for p in candidates if p.exists()), candidates[0])
         if snapshot_date is None:

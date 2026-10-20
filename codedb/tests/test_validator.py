@@ -89,6 +89,8 @@ def test_locations_and_files(tmp_path):
 
 
 def test_cli_exit_and_json(tmp_path):
+    from engine.tests._db_skip import require_repo_db
+    require_repo_db()
     p=tmp_path/'check.json';p.write_text(json.dumps({'citation':GOOD}))
     run=lambda:subprocess.run([sys.executable,'-m','codedb','validate',str(p),'--json'],text=True,capture_output=True)
     r=run();assert r.returncode==0 and json.loads(r.stdout)['ok']
