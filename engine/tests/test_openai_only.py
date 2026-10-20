@@ -105,6 +105,7 @@ def test_anthropic_verifier_cannot_run_on_the_deployed_path(monkeypatch):
 
 
 def _paid_needles():
+    # Split so this file does not contain the contiguous literals the scan rejects.
     return (
         'import ' + 'anthropic',
         'from ' + 'anthropic',
@@ -112,6 +113,11 @@ def _paid_needles():
         'api.' + 'typesafe.ai',
         'openrouter.' + 'ai/api',
         'HTTPS' + 'Connection',
+        'HTTP' + 'Connection(',
+        'client' + '.ask(',
+        'import ' + 'jevkit',
+        'from ' + '.jevkit',
+        '.identify.' + 'jevkit',
     )
 
 
@@ -128,15 +134,23 @@ def _paid_allowed(path: Path) -> bool:
     parts = relative.parts
     if parts[:3] == ('engine', 'identify', 'jevkit'):
         return True
+    if 'tests' in parts:
+        return True
     if parts and parts[0] in {'evals', 'evals_dev'}:
+        return True
+    if parts[:2] == ('docs', 'research'):
         return True
     return False
 
 
 def test_paid_clients_stay_in_cli_and_eval_modules():
-    """Anthropic and Jev network clients outside the CLI and eval modules fail CI."""
+    """Anthropic and Jev/TypeSafe call sites outside the CLI and eval modules fail CI.
+
+    The scan includes ``api.typesafe.ai`` and jevkit call sites (``client.ask``,
+    a jevkit import). The vendored client, the CLI runner, evals, and tests are allowed.
+    """
     needles = _paid_needles()
-    roots = [ROOT / 'engine', ROOT / 'evals', ROOT / 'evals_dev']
+    roots = [ROOT / 'engine', ROOT / 'evals', ROOT / 'evals_dev', ROOT / 'docs' / 'research']
     problems = []
     for root in roots:
         if not root.is_dir():
@@ -179,6 +193,16 @@ def test_live_refuses_jev_and_typesafe(monkeypatch):
     with pytest.raises(JevError, match='malformed'):
         ask('a house', {'governs': noul('it governs')}, api_key='test-jev-key', transport=transport)
     assert len(calls) == 1
+
+    from engine.identify.screen import Judge, jev_ask
+    monkeypatch.setenv('BATATIS_LIVE', '1')
+    with pytest.raises(RuntimeError, match='OpenAI only'):
+        jev_ask()
+    with pytest.raises(RuntimeError, match='OpenAI only'):
+        Judge()
+    screen = (ENGINE / 'identify' / 'screen.py').read_text()
+    for needle in ('client' + '.ask(', 'import ' + 'jevkit', 'from ' + '.jevkit', 'api.' + 'typesafe.ai'):
+        assert needle not in screen
 
 
 def test_live_refuses_anthropic_provider(tmp_path, monkeypatch):

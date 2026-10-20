@@ -199,7 +199,8 @@ def _origin(url: str) -> Any:
 
 def _refuse_when_deployed() -> None:
     """Live mode and the hosted engine are OpenAI only. No TypeSafe or OpenRouter call."""
-    if os.environ.get('BATATIS_LIVE') == '1' or os.environ.get('VERCEL'):
+    from engine.openai_only import non_openai_allowed
+    if not non_openai_allowed():
         raise JevError('offline', 'Live mode is OpenAI only.')
 
 

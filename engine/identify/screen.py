@@ -24,12 +24,14 @@ Ask = Callable[[Any, Mapping[str, Mapping[str, Any]], float], Mapping[str, Any]]
 
 
 def jev_ask(model: str = JEV_MODEL) -> Ask:
-    """The live adapter: vendored jevkit client, pinned model. Needs SSL_CERT_FILE=/etc/ssl/cert.pem on this Mac."""
-    from .jevkit import client
+    """TypeSafe ask for the CLI. Live mode refuses before the client is imported.
 
-    def ask(state, questions, timeout):
-        return client.ask(state, questions, timeout=timeout, model=model, provider=JEV_PROVIDER)
-    return ask
+    The network call itself lives in the CLI runner. This module does not import it.
+    """
+    from ..openai_only import refuse_non_openai
+    refuse_non_openai('Jev client')
+    from ..cli_sut import typesafe_ask
+    return typesafe_ask(model)
 
 
 def noul(text: str) -> dict:

@@ -74,12 +74,13 @@ def check_quotes(picks: list[Pick], candidates: list[str], arts: dict[str, dict]
 
 def anthropic_verifier_allowed() -> bool:
     """Live mode and the hosted engine are OpenAI only."""
-    return os.environ.get('BATATIS_LIVE') != '1' and not os.environ.get('VERCEL')
+    from ..openai_only import non_openai_allowed
+    return non_openai_allowed()
 
 
 def _refuse_anthropic() -> None:
-    if not anthropic_verifier_allowed():
-        raise RuntimeError('The Anthropic verifier does not run on the deployed path. Live mode is OpenAI only.')
+    from ..openai_only import refuse_non_openai
+    refuse_non_openai('Anthropic verifier')
 
 
 class ClaudeVerifier:
