@@ -12,4 +12,5 @@ if [[ ! -x .venv/bin/python ]]; then
   fi
 fi
 .venv/bin/python -m pip install -q -r engine/requirements.txt -r codedb/requirements.txt
+export BATATIS_LLM_PROVIDER=openai
 exec .venv/bin/python -m engine.identify.benchmark "$@"

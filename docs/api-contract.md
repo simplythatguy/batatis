@@ -37,7 +37,7 @@ That sentence is not a compliance finding. `intake_action` is `redirect` for a r
 
 With no provider key, the runner uses BM25, commits nothing, and sets `mode` to `bm25_fallback`. An exact description match (whitespace collapsed) for one of the three cached demos is served instead when there is no key or no code database. The payload has `cached: true`, `generated_at`, pinned model ids with `invoked: false`, and a short codedb quote. `Section C` on a committed or benchmark row carries `explainer.source` of `deterministic`, or `ai_written` when a quote-checked verifier reason does not claim compliance. A compliance claim leaves the deterministic explainer in place. `explainer` is null when there is no codedb quote.
 
-From a checkout that has no virtualenv, the same benchmark flags work through `scripts/bench_identify.sh`. The script creates `.venv` and installs `engine/requirements.txt` and `codedb/requirements.txt`. `OPENAI_API_KEY` is still required and is not printed.
+From a checkout that has no virtualenv, the same flags work through `scripts/bench_identify.sh`. The script creates `.venv`, installs `engine/requirements.txt` and `codedb/requirements.txt`, and sets `BATATIS_LLM_PROVIDER=openai`. The only value the caller supplies is `OPENAI_API_KEY`, and the script does not print it.
 
 ## Export
 

@@ -16,4 +16,5 @@ def test_bootstrap_installs_engine_and_codedb_requirements_and_pins_openai():
     assert '-r requirements.txt' not in script.replace('-r engine/requirements.txt', '').replace(
         '-r codedb/requirements.txt', '')
     assert 'engine.identify.benchmark' in script
+    assert 'export BATATIS_LLM_PROVIDER=openai' in script
     assert 'OPENAI_API_KEY' not in script
