@@ -73,10 +73,14 @@ export const factLabel = (field: string) => FACT_LABELS[field] ?? field;
 
 export const factFor = (c: Case, field: string): Fact | undefined => c.facts.find((f) => f.field === field);
 
+/** A fact's value as text. Engine values may be numbers or booleans; null reads as empty. */
+export const valueText = (f: Fact | undefined): string => (f?.value == null ? "" : String(f.value));
+
 /** The displayed value of a fact (select-backed fields show their option label). */
 export function displayValue(f: Fact): string {
   const def = DETAIL_FIELDS.find((d) => d.id === f.field);
-  return def?.options?.[f.value] ?? f.value;
+  const text = valueText(f);
+  return def?.options?.[text] ?? text;
 }
 
 /** Source ref prefix for values the applicant typed into a field. */
@@ -98,7 +102,7 @@ export function getGaps(c: Case): Gap[] {
   const gaps: Gap[] = [];
   for (const d of DETAIL_FIELDS) {
     const fact = factFor(c, d.id);
-    if (d.required && !fact?.value.trim()) {
+    if (d.required && !valueText(fact).trim()) {
       gaps.push({ id: `detail-${d.id}`, severity: "blocking", label: `${d.label} missing`, href: routeForDetail(d.id) });
     }
   }

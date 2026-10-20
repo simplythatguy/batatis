@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "node scripts/gen-types.mjs --check && tsc --noEmit && vite build",
+    "gen:types": "node scripts/gen-types.mjs",
+    "smoke:api": "node scripts/smoke-api.ts",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview"
   },

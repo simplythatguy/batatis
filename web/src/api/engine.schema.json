@@ -1,0 +1,945 @@
+{
+  "$defs": {
+    "AttributionPair": {
+      "properties": {
+        "application_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Application Note"
+        },
+        "bracket": {
+          "title": "Bracket",
+          "type": "string"
+        },
+        "clauses": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Clauses",
+          "type": "array"
+        },
+        "function": {
+          "title": "Function",
+          "type": "string"
+        },
+        "function_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Function Text"
+        },
+        "objective": {
+          "title": "Objective",
+          "type": "string"
+        },
+        "objective_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Objective Text"
+        },
+        "pdf_page": {
+          "title": "Pdf Page",
+          "type": "integer"
+        },
+        "table": {
+          "title": "Table",
+          "type": "string"
+        }
+      },
+      "required": [
+        "function",
+        "function_text",
+        "objective",
+        "objective_text",
+        "bracket",
+        "clauses",
+        "application_note",
+        "table",
+        "pdf_page"
+      ],
+      "title": "AttributionPair",
+      "type": "object"
+    },
+    "Case": {
+      "properties": {
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "evidence": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/EvidenceItem"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "facts": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Fact"
+          },
+          "title": "Facts",
+          "type": "array"
+        },
+        "gaps": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Gap"
+          },
+          "title": "Gaps",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "jurisdiction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Jurisdiction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "provisions": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Provisions",
+          "type": "array"
+        },
+        "section_c": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SectionCRow"
+          },
+          "title": "Section C",
+          "type": "array"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "updated_at": {
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "created_at",
+        "updated_at",
+        "jurisdiction",
+        "facts",
+        "provisions",
+        "section_c",
+        "evidence",
+        "gaps"
+      ],
+      "title": "Case",
+      "type": "object"
+    },
+    "EvidenceItem": {
+      "properties": {
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "evidence_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Type"
+        },
+        "function": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Function"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "objective": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Objective"
+        },
+        "professional_required": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Professional Required"
+        },
+        "status": {
+          "default": "needed",
+          "enum": [
+            "needed",
+            "provided",
+            "not_applicable"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "objective",
+        "function",
+        "description",
+        "evidence_type",
+        "professional_required",
+        "status"
+      ],
+      "title": "EvidenceItem",
+      "type": "object"
+    },
+    "Fact": {
+      "properties": {
+        "confidence": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "formula": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Formula"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "inputs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Inputs",
+          "type": "array"
+        },
+        "kind": {
+          "enum": [
+            "exact",
+            "pointed",
+            "computed",
+            "proposed"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/Source"
+        },
+        "status": {
+          "default": "unconfirmed",
+          "enum": [
+            "confirmed",
+            "unconfirmed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "id",
+        "field",
+        "value",
+        "kind",
+        "source",
+        "confidence",
+        "status",
+        "formula",
+        "inputs"
+      ],
+      "title": "Fact",
+      "type": "object"
+    },
+    "FactInput": {
+      "properties": {
+        "confidence": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "formula": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Formula"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "inputs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Inputs",
+          "type": "array"
+        },
+        "kind": {
+          "enum": [
+            "exact",
+            "pointed",
+            "computed",
+            "proposed"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/SourceInput"
+        },
+        "status": {
+          "default": "unconfirmed",
+          "enum": [
+            "confirmed",
+            "unconfirmed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "field",
+        "value",
+        "kind",
+        "source"
+      ],
+      "title": "Fact",
+      "type": "object"
+    },
+    "Gap": {
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "section": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "process"
+          ],
+          "title": "Section",
+          "type": "string"
+        },
+        "severity": {
+          "default": "blocking",
+          "enum": [
+            "blocking",
+            "warning"
+          ],
+          "title": "Severity",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "section",
+        "field",
+        "message",
+        "severity"
+      ],
+      "title": "Gap",
+      "type": "object"
+    },
+    "IntentBlock": {
+      "properties": {
+        "brackets": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Brackets",
+          "type": "array"
+        },
+        "intents": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Intents",
+          "type": "array"
+        },
+        "label": {
+          "default": "NBC 2020 Intent Statements, explanatory only",
+          "title": "Label",
+          "type": "string"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        },
+        "objective": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Objective"
+        },
+        "pdf_page": {
+          "title": "Pdf Page",
+          "type": "integer"
+        },
+        "provision_id": {
+          "title": "Provision Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "provision_id",
+        "objective",
+        "brackets",
+        "notes",
+        "intents",
+        "pdf_page"
+      ],
+      "title": "IntentBlock",
+      "type": "object"
+    },
+    "Jurisdiction": {
+      "properties": {
+        "authority": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Authority"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "authority"
+      ],
+      "title": "Jurisdiction",
+      "type": "object"
+    },
+    "JurisdictionInput": {
+      "properties": {
+        "authority": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Authority"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "Jurisdiction",
+      "type": "object"
+    },
+    "NewCase": {
+      "properties": {
+        "jurisdiction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JurisdictionInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        }
+      },
+      "title": "NewCase",
+      "type": "object"
+    },
+    "SectionCRequest": {
+      "properties": {
+        "provisions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Provisions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "provisions"
+      ],
+      "title": "SectionCRequest",
+      "type": "object"
+    },
+    "SectionCRow": {
+      "properties": {
+        "attributed_via": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attributed Via"
+        },
+        "attribution_status": {
+          "enum": [
+            "direct",
+            "inherited from parent",
+            "no row in the attribution table"
+          ],
+          "title": "Attribution Status",
+          "type": "string"
+        },
+        "citation": {
+          "title": "Citation",
+          "type": "string"
+        },
+        "differs": {
+          "default": false,
+          "title": "Differs",
+          "type": "boolean"
+        },
+        "intent_comparison": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intent Comparison"
+        },
+        "intents": {
+          "items": {
+            "$ref": "#/$defs/IntentBlock"
+          },
+          "title": "Intents",
+          "type": "array"
+        },
+        "only_in_ae": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Only In Ae",
+          "type": "array"
+        },
+        "only_in_intent": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Only In Intent",
+          "type": "array"
+        },
+        "pairs": {
+          "items": {
+            "$ref": "#/$defs/AttributionPair"
+          },
+          "title": "Pairs",
+          "type": "array"
+        },
+        "provision_id": {
+          "title": "Provision Id",
+          "type": "string"
+        },
+        "related_root": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Related Root"
+        },
+        "related_root_method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Related Root Method"
+        }
+      },
+      "required": [
+        "provision_id",
+        "citation",
+        "attribution_status",
+        "attributed_via",
+        "pairs",
+        "intents",
+        "intent_comparison",
+        "differs",
+        "only_in_intent",
+        "only_in_ae",
+        "related_root",
+        "related_root_method"
+      ],
+      "title": "SectionCRow",
+      "type": "object"
+    },
+    "Source": {
+      "properties": {
+        "bbox": {
+          "anyOf": [
+            {
+              "maxItems": 4,
+              "minItems": 4,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bbox"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote"
+        },
+        "ref": {
+          "title": "Ref",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "code",
+            "file",
+            "user_text",
+            "drawing",
+            "user_click"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "ref",
+        "page",
+        "bbox",
+        "quote"
+      ],
+      "title": "Source",
+      "type": "object"
+    },
+    "SourceInput": {
+      "properties": {
+        "bbox": {
+          "anyOf": [
+            {
+              "maxItems": 4,
+              "minItems": 4,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bbox"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote"
+        },
+        "ref": {
+          "title": "Ref",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "code",
+            "file",
+            "user_text",
+            "drawing",
+            "user_click"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "ref"
+      ],
+      "title": "Source",
+      "type": "object"
+    }
+  },
+  "title": "Batatis engine wire types"
+}
