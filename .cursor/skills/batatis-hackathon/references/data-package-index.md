@@ -1,6 +1,6 @@
 # Data package index (agents)
 
-Authoritative list from *Building Codes Challenge — Data Package* (Oct 2026). Prefer linking/fetching over redistributing NRC copyrighted code text.
+Authoritative list from *Building Codes Challenge — Data Package* (Oct 2026). Attribute and link NRC text; no word cap for the hackathon (aamia's ruling, Oct 20). Full clause text is allowed with NRC attribution and a link.
 
 ## Legislation
 

@@ -36,6 +36,6 @@ Official process fork: `docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png`
 - Completeness ≠ technical correctness / safety certification.
 - No fabricated article numbers or fabricated STANDATA / CCMC / test citations.
 - On alternative path: do **not** skip risk assessment, mitigating measures, or assumptions/limits; do **not** invent professional judgment or evidence.
-- NRC code text is copyrighted (link; don’t wholesale redistribute). STANDATA is OGL-Alberta.
+- Attribute and link NRC text; no word cap for the hackathon (aamia's ruling, Oct 20). Full clause text is allowed with NRC attribution and a link. STANDATA is OGL-Alberta.
 - Full skill: `.cursor/skills/batatis-hackathon/SKILL.md`. Workflow: `.cursor/skills/batatis-variance-workflow/SKILL.md`.
 - UI: `.cursor/skills/batatis-ui-opus/SKILL.md` → **Claude Opus 5.5**.
