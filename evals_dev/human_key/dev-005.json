@@ -1,0 +1,16 @@
+{
+  "case_id": "dev-005",
+  "status": "unverified",
+  "persona": "manufacturer",
+  "variance_kind": "cladding",
+  "scenario": "We make a wood-plastic composite siding board. Builders want to use it on walls close to the property line on small apartment buildings, where the code calls for noncombustible cladding. We have cone calorimeter results and a flame-spread rating of 75 but we have not done the full-scale exterior wall fire test. What do we need to get it accepted in Alberta?",
+  "section_ab_required_fields": null,
+  "expected_top_articles": null,
+  "benchmark_acceptable_solution": null,
+  "engineer_needed": null,
+  "intake_action": null,
+  "verifier_name": null,
+  "date_verified": null,
+  "source_page_refs": null,
+  "notes": null
+}

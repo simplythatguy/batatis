@@ -1,0 +1,115 @@
+{
+  "id": "scc-co-2023-03",
+  "title": "Building \u2013 Storage Racks \u2013 April 2023",
+  "decision_date": "2023-05-25",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2023/2023-03%20Council%20Order%20Decision_Redacted.pdf",
+  "applicant_type": null,
+  "topic": "part4-structural",
+  "code_part": null,
+  "jurisdiction": "Calgary",
+  "seed_provision": null,
+  "description": "The City of Calgary ordered a tire business to obtain a permit and compliance for free-standing tire storage racks in its building. The racks are stacked and moved by forklift and not anchored.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "storage racks",
+    "seismic",
+    "applicability",
+    "definitions",
+    "alteration"
+  ],
+  "missing_info": [],
+  "edition_original": "NBC(AE) 2019",
+  "other_codes": [],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": null,
+    "basis_type": "not applicable",
+    "basis": "not applicable: appeal of an s.49 order"
+  },
+  "outcome": "varied",
+  "outcome_summary": "Order varied: the portable racks are not subject to the Act or Code. The appellant must still have a valid permit for the building's configuration (scope excluding the racks) and arrange inspection by 24 June 2023.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "4.1.8.18.",
+      "source_code": "NBC(AE) 2019",
+      "source_division": "B",
+      "source_part": "Part 4",
+      "parsed_id": "4.1.8.18.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "4.1.8.18.(13)",
+      "source_code": "NBC(AE) 2019",
+      "source_division": "B",
+      "source_part": "Part 4",
+      "parsed_id": null,
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "The decision text may mis-number this article. It was left unmapped rather than corrected by guess."
+    },
+    {
+      "source_article": "2.2.10.1.(1)",
+      "source_code": "NBC(AE) 2019",
+      "source_division": "C",
+      "source_part": "Part 2",
+      "parsed_id": "2.2.10.1.(1)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "1.4.1.1.",
+      "source_code": "NBC(AE) 2019",
+      "source_division": "A",
+      "source_part": "Part 1",
+      "parsed_id": "1.4.1.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "The appellant relied on a professional engineer's code review concluding the racks were portable. The respondent wanted conditions so that 'engineering experts are overseeing the project'.",
+      "sentences": 2,
+      "quote_confidence": "standard",
+      "kind": "summary",
+      "field": "professional_involvement",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2023/2023-03%20Council%20Order%20Decision_Redacted.pdf"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": true,
+    "weak_flag": "depends",
+    "label_strength": "weak",
+    "facts": {}
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "depends",
+    "engineering_reason": "Weak appeal label only. Not an NBC(AE) 2023 professional-involvement determination.",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}

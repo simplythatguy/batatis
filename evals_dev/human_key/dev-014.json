@@ -1,0 +1,16 @@
+{
+  "case_id": "dev-014",
+  "status": "unverified",
+  "persona": "homebuilder",
+  "variance_kind": "single-exit",
+  "scenario": "We're putting up a three-storey walk-up with two apartments on each floor, six in total, about 280 m2 per floor. We'd like just one interior stair from the top floor down, plus each upper unit gets a balcony. Is one stair acceptable if we add something else?",
+  "section_ab_required_fields": null,
+  "expected_top_articles": null,
+  "benchmark_acceptable_solution": null,
+  "engineer_needed": null,
+  "intake_action": null,
+  "verifier_name": null,
+  "date_verified": null,
+  "source_page_refs": null,
+  "notes": null
+}
