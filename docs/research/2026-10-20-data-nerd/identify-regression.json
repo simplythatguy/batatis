@@ -1,0 +1,2064 @@
+{
+  "meta": {
+    "title": "Identify regression set: plain-language applicant descriptions (manufacturer / general contractor / homebuilder)",
+    "generated": "2026-10-20 (America/Edmonton)",
+    "label": "model-checked, not human-verified",
+    "trigger": "Unc session 5 (cold manufacturer run, PR #16 @579cd2c): identify missed case A provisions 9.27.5.1/9.27.5.3 and returned 9.29.9.3.(2).",
+    "codedb_snapshot": {
+      "path": "/workspace/batatis/codedb-snapshot/codedb.sqlite",
+      "sha256": "65e6504075167c3d12731593d57f9c58571bdf4fd5575af262011d1b18902192",
+      "edition": "NBC(AE) 2023 2nd printing"
+    },
+    "scoring_note": "Score at Article level (as engine/identify/benchmark.py _article()). gold_articles uses the identify_gold shape {division, provision->article, role}; sentences[] give the pinpoints. must_not_return: any of these in the top-k is a regression.",
+    "quote_check": "every quote is an exact substring of the codedb sentence text (whitespace-normalised)",
+    "counts": {
+      "manufacturer": 8,
+      "general_contractor": 12,
+      "homebuilder": 6
+    },
+    "total": 26
+  },
+  "cases": [
+    {
+      "id": "idr-001",
+      "role": "manufacturer",
+      "applicant_type": "manufacturer",
+      "description": "We make a new insulated sheathing panel and want it approved in Alberta so builders can nail siding straight onto it. What do I need?",
+      "known_facts": [
+        "manufacturer",
+        "insulated sheathing panel",
+        "siding nailed straight onto the panel",
+        "wants Alberta-wide approval"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.27.5.1.",
+          "title": "Attachment",
+          "sentences": [
+            {
+              "provision": "9.27.5.1.(1)",
+              "pdf_page": 1017
+            },
+            {
+              "provision": "9.27.5.1.(2)",
+              "pdf_page": 1018
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 1017,
+          "quote": "cladding shall be fastened to the framing members or furring members, or to blocking between the framing members",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1017"
+        },
+        {
+          "division": "B",
+          "article": "9.27.5.3.",
+          "title": "Furring",
+          "sentences": [
+            {
+              "provision": "9.27.5.3.(1)",
+              "pdf_page": 1018
+            },
+            {
+              "provision": "9.27.5.3.(3)",
+              "pdf_page": 1018
+            }
+          ],
+          "role": "benchmark (acceptable alternative the applicant skipped)",
+          "pdf_page": 1018,
+          "quote": "furring for the attachment of cladding shall be not less than 19 mm by 38 mm lumber when applied over sheathing",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1018"
+        },
+        {
+          "division": "B",
+          "article": "9.23.17.3.",
+          "title": "Attachment of Cladding to Sheathing",
+          "sentences": [
+            {
+              "provision": "9.23.17.3.(1)",
+              "pdf_page": 990
+            }
+          ],
+          "role": "gold (confirmed by Unc; pinned to Sentence 9.23.17.3.(1))",
+          "pdf_page": 990,
+          "quote": "Gypsum sheathing, rigid insulation and fibreboard shall not be used for the attachment of cladding materials",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.990",
+          "pinned_sentence": "9.23.17.3.(1)",
+          "confirmed_by": "Unc",
+          "confirmation": "Unc confirmed 9.23.17.3 as gold for idr-001 and idr-002 (Oct 20, 2026, relayed by the parent agent)",
+          "attribution_status": {
+            "status": "none",
+            "root_method": "not_determined",
+            "note": "codedb attribution_status is none for 9.23.17.3.(1): no objective or function is attributed, so a Section C row cannot be looked up for it"
+          }
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.29.9.2.",
+          "title": "Minimum Thickness",
+          "pdf_page": 1034,
+          "reason": "Thickness of OSB used as an interior finish; wrong face of the wall."
+        },
+        {
+          "division": "B",
+          "article": "9.27.10.1.",
+          "title": "Material Standard",
+          "pdf_page": 1023,
+          "reason": "Material standard for OSB used AS cladding; here OSB is the substrate being replaced."
+        },
+        {
+          "division": "B",
+          "article": "9.23.15.2.",
+          "title": "Material Standards",
+          "pdf_page": 986,
+          "reason": "Subfloor panel standards; floors, not walls."
+        }
+      ],
+      "authoring": {
+        "source": "verbatim: /workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/README.md line 24 (demo script step 1, typed text)",
+        "label": "model-checked, not human-verified",
+        "notes": "Unc's scripted typed phrasing for case A (demo script step 1). 9.23.17.3 is confirmed gold (confirmed by Unc), pinned to Sentence 9.23.17.3.(1), p.990; codedb attribution_status is 'none' (no objective or function)."
+      },
+      "verification": "model-checked, not human-verified",
+      "verbatim_from": {
+        "file": "/workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/README.md",
+        "line": 24,
+        "kind": "scripted demo input; the text Mira actually typed in session 5 is not recorded"
+      }
+    },
+    {
+      "id": "idr-002",
+      "role": "manufacturer",
+      "applicant_type": "manufacturer",
+      "description": "Our panel is selling in two other provinces *(claim not verified)*. We want **approval to sell it across Alberta** and a first **pilot house** in Edmonton this spring. Builders love it because vinyl siding nails **straight into the facer**, so there's no OSB and no strapping.",
+      "known_facts": [
+        "panel replaces OSB",
+        "vinyl siding nailed into the panel facer",
+        "no strapping (furring)",
+        "pilot house in Edmonton",
+        "wants Alberta-wide approval"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.27.5.1.",
+          "title": "Attachment",
+          "sentences": [
+            {
+              "provision": "9.27.5.1.(1)",
+              "pdf_page": 1017
+            },
+            {
+              "provision": "9.27.5.1.(2)",
+              "pdf_page": 1018
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 1017,
+          "quote": "cladding shall be fastened to the framing members or furring members, or to blocking between the framing members",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1017"
+        },
+        {
+          "division": "B",
+          "article": "9.27.5.3.",
+          "title": "Furring",
+          "sentences": [
+            {
+              "provision": "9.27.5.3.(1)",
+              "pdf_page": 1018
+            },
+            {
+              "provision": "9.27.5.3.(3)",
+              "pdf_page": 1018
+            }
+          ],
+          "role": "benchmark (acceptable alternative the applicant skipped)",
+          "pdf_page": 1018,
+          "quote": "furring for the attachment of cladding shall be not less than 19 mm by 38 mm lumber when applied over sheathing",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1018"
+        },
+        {
+          "division": "B",
+          "article": "9.23.17.3.",
+          "title": "Attachment of Cladding to Sheathing",
+          "sentences": [
+            {
+              "provision": "9.23.17.3.(1)",
+              "pdf_page": 990
+            }
+          ],
+          "role": "gold (confirmed by Unc; pinned to Sentence 9.23.17.3.(1))",
+          "pdf_page": 990,
+          "quote": "Gypsum sheathing, rigid insulation and fibreboard shall not be used for the attachment of cladding materials",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.990",
+          "pinned_sentence": "9.23.17.3.(1)",
+          "confirmed_by": "Unc",
+          "confirmation": "Unc confirmed 9.23.17.3 as gold for idr-001 and idr-002 (Oct 20, 2026, relayed by the parent agent)",
+          "attribution_status": {
+            "status": "none",
+            "root_method": "not_determined",
+            "note": "codedb attribution_status is none for 9.23.17.3.(1): no objective or function is attributed, so a Section C row cannot be looked up for it"
+          }
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.29.9.2.",
+          "title": "Minimum Thickness",
+          "pdf_page": 1034,
+          "reason": "Interior OSB finish thickness; \"no OSB\" refers to wall sheathing, not interior finish."
+        },
+        {
+          "division": "B",
+          "article": "9.27.12.1.",
+          "title": "Material Standards",
+          "pdf_page": 1024,
+          "reason": "Vinyl siding material standard; the question is how it is attached, not the siding product."
+        }
+      ],
+      "authoring": {
+        "source": "verbatim: /workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/input/project-brief.md line 7",
+        "label": "model-checked, not human-verified",
+        "notes": "Verbatim line from the case A persona brief, markdown kept as written. 9.23.17.3 is confirmed gold (confirmed by Unc), pinned to Sentence 9.23.17.3.(1), p.990; codedb attribution_status is 'none' (no objective or function)."
+      },
+      "verification": "model-checked, not human-verified",
+      "verbatim_from": {
+        "file": "/workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/input/project-brief.md",
+        "line": 7,
+        "kind": "persona brief text"
+      }
+    },
+    {
+      "id": "idr-003",
+      "role": "manufacturer",
+      "applicant_type": "manufacturer",
+      "description": "We make a recycled-plastic rainscreen strapping strip. Builders screw it through the foam board into the studs at 24 inches on centre and hang fibre-cement siding on it. Some framers want to space it at 32 inches to save material. Is our strip OK in place of wood strapping, and does the spacing matter?",
+      "known_facts": [
+        "manufacturer of plastic rainscreen strapping",
+        "installed over foam board, screwed into studs",
+        "24 in. (610 mm) and proposed 32 in. (813 mm) spacing",
+        "fibre-cement siding"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.27.5.3.",
+          "title": "Furring",
+          "sentences": [
+            {
+              "provision": "9.27.5.3.(1)",
+              "pdf_page": 1018
+            },
+            {
+              "provision": "9.27.5.3.(3)",
+              "pdf_page": 1018
+            }
+          ],
+          "role": "benchmark (pinned: 9.27.5.3.(3)(b) spacing; (1) lumber size)",
+          "pdf_page": 1018,
+          "quote": "spaced not more than 600 mm o.c.",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1018"
+        },
+        {
+          "division": "B",
+          "article": "9.27.5.1.",
+          "title": "Attachment",
+          "sentences": [
+            {
+              "provision": "9.27.5.1.(1)",
+              "pdf_page": 1017
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 1017,
+          "quote": "cladding shall be fastened to the framing members or furring members",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1017"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.27.5.2.",
+          "title": "Blocking",
+          "pdf_page": 1018,
+          "reason": "Blocking between framing members; the product is furring over sheathing, not blocking."
+        },
+        {
+          "division": "B",
+          "article": "9.23.3.5.",
+          "title": "Fasteners for Sheathing or Subflooring",
+          "pdf_page": 965,
+          "reason": "Fastening of sheathing to framing; the strip is furring for cladding."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": "Furring case matching the parent's description of case A (pinned to 9.27.5.3.(3)(b)). Note that 24 in. is 610 mm, which is already over 600 mm."
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-004",
+      "role": "manufacturer",
+      "applicant_type": "manufacturer",
+      "description": "We sell stainless ring-shank nails for vinyl siding. On houses with 1-1/2 inch foam outside the OSB, our 2-inch nail only gets about 3/4 inch into the studs. Contractors ask whether that's enough or if they need a longer nail.",
+      "known_facts": [
+        "nail manufacturer",
+        "vinyl siding",
+        "38 mm exterior foam over OSB",
+        "about 19 mm penetration into studs"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.27.5.7.",
+          "title": "Penetration of Fasteners",
+          "sentences": [
+            {
+              "provision": "9.27.5.7.(2)",
+              "pdf_page": 1020
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 1020,
+          "quote": "Fasteners for vinyl cladding, insulated vinyl cladding and polypropylene cladding shall penetrate through the nail-holding base or not less than 32 mm into the framing",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1020"
+        },
+        {
+          "division": "B",
+          "article": "9.27.5.4.",
+          "title": "Size and Spacing of Fasteners",
+          "sentences": [
+            {
+              "provision": "9.27.5.4.(1)",
+              "pdf_page": 1018
+            }
+          ],
+          "role": "related",
+          "pdf_page": 1018,
+          "quote": "Nail or staple size and spacing for the attachment of cladding and trim",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1018"
+        },
+        {
+          "division": "B",
+          "article": "9.27.5.5.",
+          "title": "Fastener Materials",
+          "sentences": [
+            {
+              "provision": "9.27.5.5.(1)",
+              "pdf_page": 1020
+            }
+          ],
+          "role": "related",
+          "pdf_page": 1020,
+          "quote": "shall be corrosion-resistant and shall be compatible with the cladding material",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1020"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.23.3.4.",
+          "title": "Nailing of Framing",
+          "pdf_page": 964,
+          "reason": "Nailing of framing members to each other, not cladding fasteners."
+        },
+        {
+          "division": "B",
+          "article": "9.23.3.5.",
+          "title": "Fasteners for Sheathing or Subflooring",
+          "pdf_page": 965,
+          "reason": "Fasteners for sheathing or subflooring, not cladding."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": ""
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-005",
+      "role": "manufacturer",
+      "applicant_type": "manufacturer",
+      "description": "Our synthetic housewrap is sold all over the US and tested to ASTM standards, but we've never had it tested to a Canadian standard. Can Alberta builders use it behind siding?",
+      "known_facts": [
+        "housewrap manufacturer",
+        "tested to US ASTM standards only",
+        "used behind siding"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.27.3.2.",
+          "title": "Sheathing Membrane Material Standard",
+          "sentences": [
+            {
+              "provision": "9.27.3.2.(1)",
+              "pdf_page": 1015
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 1015,
+          "quote": "Sheathing membranes shall conform to the performance requirements of CAN/CGSB-51.32-M",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1015"
+        },
+        {
+          "division": "B",
+          "article": "9.27.3.3.",
+          "title": "Required Sheathing Membrane and Installation",
+          "sentences": [
+            {
+              "provision": "9.27.3.3.(1)",
+              "pdf_page": 1015
+            }
+          ],
+          "role": "scope",
+          "pdf_page": 1015,
+          "quote": "at least one layer of sheathing membrane shall be applied beneath cladding",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1015"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.25.4.1.",
+          "title": "Required Barrier to Vapour Diffusion",
+          "pdf_page": 998,
+          "reason": "Vapour barrier on the warm side; a housewrap is not the vapour barrier."
+        },
+        {
+          "division": "B",
+          "article": "9.20.13.1.",
+          "title": "Materials for Flashing",
+          "pdf_page": 950,
+          "reason": "Flashing materials for masonry; housewrap is not flashing."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": ""
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-006",
+      "role": "manufacturer",
+      "applicant_type": "manufacturer",
+      "description": "We make a hemp-fibre batt insulation for walls and attics. There's no Canadian product standard written for hemp. What do inspectors in Alberta need from us before builders can use it?",
+      "known_facts": [
+        "insulation manufacturer",
+        "hemp-fibre batts",
+        "no Canadian product standard"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.25.2.2.",
+          "title": "Insulation Materials",
+          "sentences": [
+            {
+              "provision": "9.25.2.2.(1)",
+              "pdf_page": 995
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 995,
+          "quote": "thermal insulation shall conform to the requirements of",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.995"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.25.2.3.",
+          "title": "Installation of Thermal Insulation",
+          "pdf_page": 995,
+          "reason": "How insulation is installed, not which material standard it meets."
+        },
+        {
+          "division": "B",
+          "article": "9.36.2.6.",
+          "title": "Thermal Characteristics of Above-ground Opaque Building Assemblies",
+          "pdf_page": 1073,
+          "reason": "Required thermal values for assemblies; does not qualify an insulation material."
+        },
+        {
+          "division": "B",
+          "article": "9.10.17.10.",
+          "title": "Protection of Foamed Plastics",
+          "pdf_page": 907,
+          "reason": "Protection of foamed plastics; hemp batts are not foamed plastic."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": ""
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-007",
+      "role": "manufacturer",
+      "applicant_type": "manufacturer",
+      "description": "We make a frameless glass railing for decks and balconies. Homeowners like the clean look at 36 inches high. Can we sell it at that height for house decks that are about 8 feet above the yard?",
+      "known_facts": [
+        "glass railing manufacturer",
+        "36 in. (914 mm) guard height",
+        "house decks about 8 ft (2.4 m) above ground"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.8.8.3.",
+          "title": "Height of Guards",
+          "sentences": [
+            {
+              "provision": "9.8.8.3.(1)",
+              "pdf_page": 860
+            },
+            {
+              "provision": "9.8.8.3.(3)",
+              "pdf_page": 860
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 860,
+          "quote": "all guards shall be not less than 1 070 mm high",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.860"
+        },
+        {
+          "division": "B",
+          "article": "9.8.8.2.",
+          "title": "Loads on Guards",
+          "sentences": [
+            {
+              "provision": "9.8.8.2.(1)",
+              "pdf_page": 859
+            }
+          ],
+          "role": "related",
+          "pdf_page": 859,
+          "quote": "guards shall be designed to resist the specified loads prescribed in Table 9.8.8.2.",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.859"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.8.7.4.",
+          "title": "Height of Handrails",
+          "pdf_page": 858,
+          "reason": "Handrail height, not guard height."
+        },
+        {
+          "division": "B",
+          "article": "9.8.8.6.",
+          "title": "Design of Guards to Not Facilitate Climbing",
+          "pdf_page": 861,
+          "reason": "Anti-climbing rule applies only above 4.2 m; the deck is about 2.4 m."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": ""
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-008",
+      "role": "manufacturer",
+      "applicant_type": "manufacturer",
+      "description": "We make insulating concrete form blocks for basements. Our new thin-core block pours a 140 mm concrete core to save concrete. Can builders use it for basement walls on houses?",
+      "known_facts": [
+        "ICF manufacturer",
+        "140 mm concrete core",
+        "house basement walls"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.15.4.2.",
+          "title": "Foundation Wall Thickness and Required Lateral Support",
+          "sentences": [
+            {
+              "provision": "9.15.4.2.(1)",
+              "pdf_page": 927
+            },
+            {
+              "provision": "9.15.4.2.(2)",
+              "pdf_page": 927
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 927,
+          "quote": "shall be not less than the greater of",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.927"
+        },
+        {
+          "division": "B",
+          "article": "9.15.4.1.",
+          "title": "Flat Wall Insulating Concrete Form Units",
+          "sentences": [
+            {
+              "provision": "9.15.4.1.(1)",
+              "pdf_page": 927
+            }
+          ],
+          "role": "related",
+          "pdf_page": 927,
+          "quote": "Flat wall insulating concrete form units shall conform to CAN/ULC-S717.1",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.927"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.15.3.4.",
+          "title": "Basic Footing Widths and Areas",
+          "pdf_page": 926,
+          "reason": "Footing widths, not foundation wall thickness."
+        },
+        {
+          "division": "B",
+          "article": "9.27.5.1.",
+          "title": "Attachment",
+          "pdf_page": 1017,
+          "reason": "Its Sentence (5) covers screwing cladding to ICF web strips; the question is the wall core."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": ""
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-009",
+      "role": "general_contractor",
+      "applicant_type": "contractor",
+      "description": "On a duplex we're finishing, the siding sub nailed the vinyl siding straight into the rigid foam boards on two walls instead of into strapping or studs. The inspector flagged it. Can we leave it with some kind of approval?",
+      "known_facts": [
+        "general contractor",
+        "vinyl siding nailed into rigid foam boards",
+        "no strapping, not into studs",
+        "flagged by inspector"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.27.5.1.",
+          "title": "Attachment",
+          "sentences": [
+            {
+              "provision": "9.27.5.1.(1)",
+              "pdf_page": 1017
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 1017,
+          "quote": "cladding shall be fastened to the framing members or furring members, or to blocking between the framing members",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1017"
+        },
+        {
+          "division": "B",
+          "article": "9.23.17.3.",
+          "title": "Attachment of Cladding to Sheathing",
+          "sentences": [
+            {
+              "provision": "9.23.17.3.(1)",
+              "pdf_page": 990
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 990,
+          "quote": "rigid insulation and fibreboard shall not be used for the attachment of cladding materials",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.990"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.27.12.1.",
+          "title": "Material Standards",
+          "pdf_page": 1024,
+          "reason": "Vinyl siding material standard; the defect is attachment."
+        },
+        {
+          "division": "B",
+          "article": "9.25.2.3.",
+          "title": "Installation of Thermal Insulation",
+          "pdf_page": 995,
+          "reason": "Installation of the insulation itself."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": ""
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-010",
+      "role": "general_contractor",
+      "applicant_type": "contractor",
+      "description": "Our framer put up 1x3 strapping over the sheathing at about 32 inches apart so the cedar siding has a rain gap. Is that spacing a problem?",
+      "known_facts": [
+        "general contractor",
+        "1x3 (19 x 64 mm) strapping over sheathing",
+        "about 32 in. (813 mm) spacing",
+        "cedar siding"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.27.5.3.",
+          "title": "Furring",
+          "sentences": [
+            {
+              "provision": "9.27.5.3.(3)",
+              "pdf_page": 1018
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 1018,
+          "quote": "spaced not more than 600 mm o.c.",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1018"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.27.5.2.",
+          "title": "Blocking",
+          "pdf_page": 1018,
+          "reason": "Blocking between framing members, not furring strips."
+        },
+        {
+          "division": "B",
+          "article": "9.27.6.1.",
+          "title": "Materials",
+          "pdf_page": 1020,
+          "reason": "Lumber siding material; spacing of the strapping is the question."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": ""
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-011",
+      "role": "general_contractor",
+      "applicant_type": "contractor",
+      "description": "Crew nailed the OSB wall sheathing at 12 inches on the panel edges and 24 in the field because the nail gun was set wrong. What's the actual requirement and do we have to renail?",
+      "known_facts": [
+        "general contractor",
+        "OSB wall sheathing",
+        "nails at 12 in. (305 mm) on edges, 24 in. (610 mm) in the field"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.23.3.5.",
+          "title": "Fasteners for Sheathing or Subflooring",
+          "sentences": [
+            {
+              "provision": "9.23.3.5.(1)",
+              "pdf_page": 965
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 965,
+          "quote": "fastening of sheathing and subflooring shall conform to Table 9.23.3.5.-A",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.965"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.27.5.4.",
+          "title": "Size and Spacing of Fasteners",
+          "pdf_page": 1018,
+          "reason": "Nails for cladding and trim, not sheathing."
+        },
+        {
+          "division": "B",
+          "article": "9.23.3.4.",
+          "title": "Nailing of Framing",
+          "pdf_page": 964,
+          "reason": "Nailing framing members together."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": "Closest neighbour of the observed failure: 9.29.9.3.(2) cross-references 9.23.3.5.(2) only when OSB is an interior finish providing bracing."
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-012",
+      "role": "general_contractor",
+      "applicant_type": "contractor",
+      "description": "Building a small two-storey office. The stair between floors came out with 210 mm risers because the floor got thicker. Do we have to rebuild it?",
+      "known_facts": [
+        "general contractor",
+        "two-storey office",
+        "stair risers 210 mm"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.8.4.1.",
+          "title": "Dimensions for Risers",
+          "sentences": [
+            {
+              "provision": "9.8.4.1.(1)",
+              "pdf_page": 852
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 852,
+          "quote": "the rise, which is measured as the vertical nosing-to-nosing distance, shall comply with Table 9.8.4.1.",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.852"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.8.4.3.",
+          "title": "Dimensions of Tapered Treads",
+          "pdf_page": 853,
+          "reason": "Tapered treads; this stair is straight."
+        },
+        {
+          "division": "B",
+          "article": "9.8.7.4.",
+          "title": "Height of Handrails",
+          "pdf_page": 858,
+          "reason": "Handrail height, not riser height."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": ""
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-013",
+      "role": "general_contractor",
+      "applicant_type": "contractor",
+      "description": "We want to use 190 mm plain concrete block for a basement wall with about 2.4 m of backfill against it, no rebar. Is that thick enough?",
+      "known_facts": [
+        "general contractor",
+        "unreinforced 190 mm concrete block basement wall",
+        "about 2.4 m backfill"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.15.4.2.",
+          "title": "Foundation Wall Thickness and Required Lateral Support",
+          "sentences": [
+            {
+              "provision": "9.15.4.2.(1)",
+              "pdf_page": 927
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 927,
+          "quote": "the thickness of foundation walls made of unreinforced concrete block",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.927"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.15.3.4.",
+          "title": "Basic Footing Widths and Areas",
+          "pdf_page": 926,
+          "reason": "Footing widths, not wall thickness."
+        },
+        {
+          "division": "B",
+          "article": "9.15.4.1.",
+          "title": "Flat Wall Insulating Concrete Form Units",
+          "pdf_page": 927,
+          "reason": "ICF material standard; the wall is concrete block."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": ""
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-014",
+      "role": "general_contractor",
+      "applicant_type": "contractor",
+      "description": "On a three-storey walk-up, the architect drew horizontal cable railings on the top-floor balconies, about 5 m above the ground. The owner likes the look. Any issue?",
+      "known_facts": [
+        "general contractor",
+        "three-storey walk-up",
+        "horizontal cable guards",
+        "balconies about 5 m above grade"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.8.8.6.",
+          "title": "Design of Guards to Not Facilitate Climbing",
+          "sentences": [
+            {
+              "provision": "9.8.8.6.(1)",
+              "pdf_page": 861
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 861,
+          "quote": "… no member, attachment or opening located between 140 mm and 900 mm above the level protected by the guard facilitates climbing",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.861",
+          "quote_clipped": true
+        },
+        {
+          "division": "B",
+          "article": "9.8.8.5.",
+          "title": "Openings in Guards",
+          "sentences": [
+            {
+              "provision": "9.8.8.5.(1)",
+              "pdf_page": 861
+            }
+          ],
+          "role": "related",
+          "pdf_page": 861,
+          "quote": "prevents the passage of a spherical object having a diameter of 100 mm",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.861"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.8.8.3.",
+          "title": "Height of Guards",
+          "pdf_page": 860,
+          "reason": "Guard height is not in question."
+        },
+        {
+          "division": "B",
+          "article": "9.8.7.4.",
+          "title": "Height of Handrails",
+          "pdf_page": 858,
+          "reason": "Handrail height, not guard design."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": ""
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-015",
+      "role": "homebuilder",
+      "applicant_type": "homebuilder",
+      "description": "We're putting 2 inches of foil-faced foam board on the outside of our houses with taped seams. Can we skip the housewrap behind the vinyl siding?",
+      "known_facts": [
+        "homebuilder",
+        "50 mm foil-faced rigid foam outside",
+        "taped seams",
+        "vinyl siding"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.27.3.4.",
+          "title": "Insulating Sheathing in lieu of Sheathing Membrane",
+          "sentences": [
+            {
+              "provision": "9.27.3.4.(1)",
+              "pdf_page": 1015
+            },
+            {
+              "provision": "9.27.3.4.(2)",
+              "pdf_page": 1015
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 1015,
+          "quote": "a separate sheathing membrane is not required",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1015"
+        },
+        {
+          "division": "B",
+          "article": "9.27.3.3.",
+          "title": "Required Sheathing Membrane and Installation",
+          "sentences": [
+            {
+              "provision": "9.27.3.3.(1)",
+              "pdf_page": 1015
+            }
+          ],
+          "role": "scope",
+          "pdf_page": 1015,
+          "quote": "at least one layer of sheathing membrane shall be applied beneath cladding",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1015"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.25.5.1.",
+          "title": "General",
+          "pdf_page": 999,
+          "reason": "Low-permeance placement of the foam; a different question from the sheathing membrane."
+        },
+        {
+          "division": "B",
+          "article": "9.25.4.1.",
+          "title": "Required Barrier to Vapour Diffusion",
+          "pdf_page": 998,
+          "reason": "Interior vapour barrier."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": ""
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-016",
+      "role": "homebuilder",
+      "applicant_type": "homebuilder",
+      "description": "Our back-deck stairs have 8-inch risers and 9-inch treads to fit the yard. Will that pass?",
+      "known_facts": [
+        "homebuilder",
+        "exterior deck stair",
+        "risers 8 in. (203 mm)",
+        "treads 9 in. (229 mm)"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.8.4.1.",
+          "title": "Dimensions for Risers",
+          "sentences": [
+            {
+              "provision": "9.8.4.1.(1)",
+              "pdf_page": 852
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 852,
+          "quote": "shall comply with Table 9.8.4.1.",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.852"
+        },
+        {
+          "division": "B",
+          "article": "9.8.4.2.",
+          "title": "Dimensions for Rectangular Treads",
+          "sentences": [
+            {
+              "provision": "9.8.4.2.(1)",
+              "pdf_page": 853
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 853,
+          "quote": "the run shall comply with Table 9.8.4.2.",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.853"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.8.4.3.",
+          "title": "Dimensions of Tapered Treads",
+          "pdf_page": 853,
+          "reason": "Tapered treads; the stair is straight."
+        },
+        {
+          "division": "B",
+          "article": "9.8.8.3.",
+          "title": "Height of Guards",
+          "pdf_page": 860,
+          "reason": "Guard height, not stair geometry."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": ""
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-017",
+      "role": "homebuilder",
+      "applicant_type": "homebuilder",
+      "description": "For a modern look we want horizontal wood slats on the open side of the basement stairs, with about 4-1/2 inch gaps between slats. Is that allowed in a house?",
+      "known_facts": [
+        "homebuilder",
+        "interior stair guard of horizontal slats",
+        "gaps about 4.5 in. (114 mm)",
+        "house"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.8.8.5.",
+          "title": "Openings in Guards",
+          "sentences": [
+            {
+              "provision": "9.8.8.5.(1)",
+              "pdf_page": 861
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 861,
+          "quote": "prevents the passage of a spherical object having a diameter of 100 mm",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.861"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.8.8.6.",
+          "title": "Design of Guards to Not Facilitate Climbing",
+          "pdf_page": 861,
+          "reason": "Anti-climbing applies only where the guard protects a level more than 4.2 m above the adjacent level."
+        },
+        {
+          "division": "B",
+          "article": "9.8.8.3.",
+          "title": "Height of Guards",
+          "pdf_page": 860,
+          "reason": "Guard height is not in question."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": ""
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-018",
+      "role": "homebuilder",
+      "applicant_type": "homebuilder",
+      "description": "To save money we only insulate the basement walls down to about 2 feet below grade. Is full-height basement insulation actually required?",
+      "known_facts": [
+        "homebuilder",
+        "basement wall insulation to about 600 mm below grade"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.25.2.3.",
+          "title": "Installation of Thermal Insulation",
+          "sentences": [
+            {
+              "provision": "9.25.2.3.(4)",
+              "pdf_page": 995
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 995,
+          "quote": "Insulation shall be installed over the full height of foundation walls enclosing a basement or heated crawl space",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.995"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.36.2.6.",
+          "title": "Thermal Characteristics of Above-ground Opaque Building Assemblies",
+          "pdf_page": 1073,
+          "reason": "Thermal values for above-ground assemblies, not basement coverage."
+        },
+        {
+          "division": "B",
+          "article": "9.25.2.2.",
+          "title": "Insulation Materials",
+          "pdf_page": 995,
+          "reason": "Insulation material standards."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": ""
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-019",
+      "role": "homebuilder",
+      "applicant_type": "homebuilder",
+      "description": "The lot is silty and the geotech says the water table is about 300 mm below where the footings will sit. We sized the strip footings from the normal house table at 400 mm wide. OK?",
+      "known_facts": [
+        "homebuilder",
+        "silt soil",
+        "water table about 300 mm below footing base",
+        "400 mm strip footings from table"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.15.3.4.",
+          "title": "Basic Footing Widths and Areas",
+          "sentences": [
+            {
+              "provision": "9.15.3.4.(3)",
+              "pdf_page": 926
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 926,
+          "quote": "the footing width for walls shall be not less than twice the width required",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.926"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.15.4.2.",
+          "title": "Foundation Wall Thickness and Required Lateral Support",
+          "pdf_page": 927,
+          "reason": "Foundation wall thickness, not footing width."
+        },
+        {
+          "division": "B",
+          "article": "9.13.2.1.",
+          "title": "Required Dampproofing",
+          "pdf_page": 917,
+          "reason": "Dampproofing; the question is bearing width."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": ""
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-020",
+      "role": "homebuilder",
+      "applicant_type": "homebuilder",
+      "description": "We're switching to 3/8-inch OSB wall sheathing to cut costs and nailing vertical vinyl siding straight to it, no strapping. Any problem?",
+      "known_facts": [
+        "homebuilder",
+        "9.5 mm (3/8 in.) OSB wall sheathing",
+        "vertical vinyl siding nailed to sheathing",
+        "no strapping"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.27.5.1.",
+          "title": "Attachment",
+          "sentences": [
+            {
+              "provision": "9.27.5.1.(2)",
+              "pdf_page": 1018
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 1017,
+          "quote": "vertically applied vinyl siding",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1017"
+        },
+        {
+          "division": "B",
+          "article": "9.23.17.2.",
+          "title": "Thickness, Rating and Material Standards",
+          "sentences": [
+            {
+              "provision": "9.23.17.2.(1)",
+              "pdf_page": 989
+            }
+          ],
+          "role": "related",
+          "pdf_page": 989,
+          "quote": "it shall conform to either Table 9.23.17.2.-A or 9.23.17.2.-B",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.989"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.29.9.2.",
+          "title": "Minimum Thickness",
+          "pdf_page": 1034,
+          "reason": "Thickness of OSB as an INTERIOR finish; the classic near-miss for OSB thickness."
+        },
+        {
+          "division": "B",
+          "article": "9.27.10.1.",
+          "title": "Material Standard",
+          "pdf_page": 1023,
+          "reason": "OSB used as cladding; here OSB is sheathing behind vinyl."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": ""
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-021",
+      "role": "general_contractor",
+      "applicant_type": "contractor",
+      "description": "Fibre-cement lap siding went up with regular bright (uncoated) nails because the coated ones were back-ordered. Do we need to pull it?",
+      "known_facts": [
+        "general contractor",
+        "fibre-cement lap siding",
+        "uncoated steel nails"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "9.27.5.5.",
+          "title": "Fastener Materials",
+          "sentences": [
+            {
+              "provision": "9.27.5.5.(1)",
+              "pdf_page": 1020
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 1020,
+          "quote": "Nails or staples for the attachment of cladding and wood trim shall be corrosion-resistant",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1020"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.20.16.1.",
+          "title": "Corrosion Resistance of Connectors",
+          "pdf_page": 952,
+          "reason": "Corrosion resistance of masonry connectors, not cladding nails."
+        },
+        {
+          "division": "B",
+          "article": "9.23.3.4.",
+          "title": "Nailing of Framing",
+          "pdf_page": 964,
+          "reason": "Framing nails."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": ""
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-022",
+      "role": "general_contractor",
+      "applicant_type": "contractor",
+      "description": "We're the GC on a six-storey wood-frame apartment, all rental units, sprinklered throughout. The developer now wants to add a seventh floor of units on top, still wood. Is that a problem, or can we just keep framing?",
+      "known_facts": [
+        "general contractor",
+        "residential apartment, sprinklered",
+        "wood frame (combustible)",
+        "six storeys, proposed seventh"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "3.2.2.51.",
+          "title": "Group C, up to 6 Storeys, Sprinklered",
+          "sentences": [
+            {
+              "provision": "3.2.2.51.(1)",
+              "pdf_page": 189
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 189,
+          "quote": "b) it is not more than 6 storeys in building height",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.189"
+        },
+        {
+          "division": "B",
+          "article": "3.2.2.48.",
+          "title": "Group C, up to 12 Storeys, Sprinklered",
+          "sentences": [
+            {
+              "provision": "3.2.2.48.(1)",
+              "pdf_page": 188
+            }
+          ],
+          "role": "related (taller Group C Article; its construction requirements are in Sentence (2))",
+          "pdf_page": 188,
+          "quote": "b) it is not more than 12 storeys in building height",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.188"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.10.8.1.",
+          "title": "Fire-Resistance Ratings for Floors and Roofs",
+          "pdf_page": 880,
+          "reason": "Part 9 floor and roof fire-resistance ratings; a 6-7 storey apartment is outside Part 9."
+        },
+        {
+          "division": "B",
+          "article": "9.10.4.1.",
+          "title": "Mezzanines not Considered as Storeys",
+          "pdf_page": 879,
+          "reason": "Part 9 rule on mezzanines not counted as storeys; tempting on \"storeys\" but Part 9 only."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": "Part 3 case: the building is outside Part 9 scope (Div A 1.3.3.2./1.3.3.3.); Part 9 analogues are listed as must_not_return. Gold names the provision at issue only; it is not a compliance verdict."
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-023",
+      "role": "general_contractor",
+      "applicant_type": "contractor",
+      "description": "Four storeys: shops on the street level, apartments on the three floors above, sprinklered. The drawings show the floor over the shops as the same 1-hour floor as every other level. The owner asks if that's enough between the stores and the apartments.",
+      "known_facts": [
+        "general contractor",
+        "mixed use: retail at grade, residential above",
+        "four storeys, sprinklered",
+        "floor over retail drawn at 1 h"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "3.1.3.1.",
+          "title": "Separation of Major Occupancies",
+          "sentences": [
+            {
+              "provision": "3.1.3.1.(1)",
+              "pdf_page": 130
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 130,
+          "quote": "major occupancies shall be separated from adjoining major occupancies by fire separations having fire-resistance ratings conforming to Table 3.1.3.1.",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.130"
+        },
+        {
+          "division": "B",
+          "article": "3.2.2.7.",
+          "title": "Superimposed Major Occupancies",
+          "sentences": [
+            {
+              "provision": "3.2.2.7.(1)",
+              "pdf_page": 176
+            }
+          ],
+          "role": "related (superimposed occupancies)",
+          "pdf_page": 176,
+          "quote": "in a building in which one major occupancy is located entirely above another major occupancy",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.176"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.10.9.13.",
+          "title": "Separation of Residential Occupancies",
+          "pdf_page": 886,
+          "reason": "Part 9 separation of residential occupancies from other occupancies (1 h); the classic Part 9 near-miss for a 4-storey Part 3 building."
+        },
+        {
+          "division": "B",
+          "article": "9.10.8.1.",
+          "title": "Fire-Resistance Ratings for Floors and Roofs",
+          "pdf_page": 880,
+          "reason": "Part 9 floor ratings; not the occupancy-separation rule."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": "Part 3 case: the building is outside Part 9 scope (Div A 1.3.3.2./1.3.3.3.); Part 9 analogues are listed as must_not_return. Gold names the provision at issue only; it is not a compliance verdict."
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-024",
+      "role": "general_contractor",
+      "applicant_type": "contractor",
+      "description": "Fit-out of a banquet hall on the second floor of an existing two-storey building, about 400 seats. The owner wants only one exit stair from the hall so the kitchen can go where the second stair is drawn. Can we do that?",
+      "known_facts": [
+        "general contractor",
+        "assembly use: banquet hall about 400 seats",
+        "second floor of a two-storey building",
+        "one exit stair proposed"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "3.4.2.1.",
+          "title": "Minimum Number of Exits",
+          "sentences": [
+            {
+              "provision": "3.4.2.1.(1)",
+              "pdf_page": 269
+            },
+            {
+              "provision": "3.4.2.1.(2)",
+              "pdf_page": 269
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 269,
+          "quote": "every floor area intended for occupancy shall be served by at least 2 exits",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.269"
+        },
+        {
+          "division": "B",
+          "article": "3.3.1.5.",
+          "title": "Egress Doorways",
+          "sentences": [
+            {
+              "provision": "3.3.1.5.(1)",
+              "pdf_page": 246
+            }
+          ],
+          "role": "related (two egress doorways from the room)",
+          "pdf_page": 246,
+          "quote": "b) intended for an occupant load more than 60",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.246"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.9.8.2.",
+          "title": "Number of Required Exits",
+          "pdf_page": 871,
+          "reason": "Part 9 number of required exits; assembly occupancies are outside Part 9 (Div A 1.3.3.2.(1)(b))."
+        },
+        {
+          "division": "B",
+          "article": "9.9.9.1.",
+          "title": "Travel Limit to Exits or Egress Doors",
+          "pdf_page": 872,
+          "reason": "Part 9 travel limit within dwelling units; wrong occupancy and Part."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": "Part 3 case: the building is outside Part 9 scope (Div A 1.3.3.2./1.3.3.3.); Part 9 analogues are listed as must_not_return. Gold names the provision at issue only; it is not a compliance verdict."
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-025",
+      "role": "general_contractor",
+      "applicant_type": "contractor",
+      "description": "Two-storey office building, about 1,400 m2 on each floor, wood frame, no sprinklers. The floor between the levels is drawn as plain joists and drywall with no rating. The owner says it's just an office so it doesn't need anything special.",
+      "known_facts": [
+        "general contractor",
+        "business and personal services (office)",
+        "two storeys, about 1,400 m2 per floor",
+        "combustible, not sprinklered",
+        "floor assembly drawn unrated"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "3.2.2.64.",
+          "title": "Group D, up to 2 Storeys",
+          "sentences": [
+            {
+              "provision": "3.2.2.64.(2)",
+              "pdf_page": 194
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 194,
+          "quote": "floor assemblies shall be fire separations and, if of combustible construction, shall have a fire-resistance rating not less than 45 min",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.194"
+        },
+        {
+          "division": "B",
+          "article": "3.2.2.62.",
+          "title": "Group D, up to 3 Storeys",
+          "sentences": [
+            {
+              "provision": "3.2.2.62.(2)",
+              "pdf_page": 193
+            }
+          ],
+          "role": "benchmark (alternative Group D Article; which one applies depends on building area against Tables 3.2.2.62. and 3.2.2.64.)",
+          "pdf_page": 193,
+          "quote": "floor assemblies shall be fire separations and, if of combustible construction, shall have a fire-resistance rating not less than 45 min",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.193"
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.10.8.1.",
+          "title": "Fire-Resistance Ratings for Floors and Roofs",
+          "pdf_page": 880,
+          "reason": "Part 9 floor ratings; 1,400 m2 exceeds the 600 m2 Part 9 limit (Div A 1.3.3.3.(1))."
+        },
+        {
+          "division": "B",
+          "article": "9.10.18.2.",
+          "title": "Fire Alarm System Required",
+          "pdf_page": 907,
+          "reason": "Part 9 fire alarm requirement; not the floor-rating question and the wrong Part."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": "Part 3 case: the building is outside Part 9 scope (Div A 1.3.3.2./1.3.3.3.); Part 9 analogues are listed as must_not_return. Gold names the provision at issue only; it is not a compliance verdict."
+      },
+      "verification": "model-checked, not human-verified"
+    },
+    {
+      "id": "idr-026",
+      "role": "general_contractor",
+      "applicant_type": "contractor",
+      "description": "Six-storey hotel. The electrician ran bundles of cable through the rated corridor walls and the drywallers packed the holes with mineral wool and regular caulk. There are also plastic electrical boxes back-to-back in the suite walls. The inspector wants a listed system for each one. Can we leave them?",
+      "known_facts": [
+        "general contractor",
+        "hotel (residential), six storeys",
+        "cable bundles through rated corridor walls",
+        "mineral wool and non-listed caulk",
+        "combustible outlet boxes in rated walls"
+      ],
+      "gold_articles": [
+        {
+          "division": "B",
+          "article": "3.1.9.1.",
+          "title": "Firestops",
+          "sentences": [
+            {
+              "provision": "3.1.9.1.(1)",
+              "pdf_page": 159
+            }
+          ],
+          "role": "benchmark",
+          "pdf_page": 159,
+          "quote": "has an F rating not less than the required fire-resistance rating of the fire separation",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.159"
+        },
+        {
+          "division": "B",
+          "article": "3.1.9.2.",
+          "title": "Service Equipment Penetrations",
+          "sentences": [
+            {
+              "provision": "3.1.9.2.(1)",
+              "pdf_page": 159
+            }
+          ],
+          "role": "benchmark (service penetrations)",
+          "pdf_page": 159,
+          "quote": "electrical wires and cables, and other similar service equipment are permitted to penetrate a fire separation",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.159"
+        },
+        {
+          "division": "B",
+          "article": "3.1.9.3.",
+          "title": "Penetration by Outlet Boxes",
+          "sentences": [
+            {
+              "provision": "3.1.9.3.(2)",
+              "pdf_page": 160
+            }
+          ],
+          "role": "benchmark (outlet boxes)",
+          "pdf_page": 160,
+          "quote": "Combustible outlet boxes are permitted to penetrate the membrane of an assembly … provided they are sealed at the penetration by a firestop",
+          "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.160",
+          "quote_clipped": true
+        }
+      ],
+      "must_not_return": [
+        {
+          "division": "B",
+          "article": "9.29.9.3.",
+          "title": "Nails",
+          "pdf_page": 1035,
+          "reason": "Observed PR #16 @579cd2c failure: nails for OSB/particleboard used as an INTERIOR finish; nothing to do with attaching exterior cladding."
+        },
+        {
+          "division": "B",
+          "article": "9.10.9.6.",
+          "title": "General Requirements for Penetrations of Fire Separations",
+          "pdf_page": 883,
+          "reason": "Part 9 general penetration rule (allows \"sealed to maintain the integrity\"); a 6-storey hotel is Part 3."
+        },
+        {
+          "division": "B",
+          "article": "9.10.9.7.",
+          "title": "Piping Penetrations",
+          "pdf_page": 883,
+          "reason": "Part 9 piping penetrations; these are cables and boxes, and the wrong Part."
+        }
+      ],
+      "authoring": {
+        "source": "model-written plain-language applicant phrasing",
+        "label": "model-checked, not human-verified",
+        "notes": "Part 3 case: the building is outside Part 9 scope (Div A 1.3.3.2./1.3.3.3.); Part 9 analogues are listed as must_not_return. Gold names the provision at issue only; it is not a compliance verdict."
+      },
+      "verification": "model-checked, not human-verified"
+    }
+  ],
+  "product_approval_vs_variance": {
+    "summary": "A product approval and a variance answer different questions. Product approval is market-wide: a CCMC evaluation report, or one from an evaluator the Provincial Building Administrator has approved, can be used anywhere in Alberta to show the product meets the code. A variance (alternative solution) is a decision about one building or site: a safety codes officer accepts it when it gives about the same or better safety, documents it under Division C 2.3.1, and registers it with the Safety Codes Council. A province-wide STANDATA variance from the Provincial Building Administrator is the exception, but it needs a province-wide issue, not one company's product. So a manufacturer wanting \"approval across Alberta\" needs an evaluation report; a pilot house can go ahead on a site variance in the meantime.",
+    "claims": [
+      {
+        "claim": "CCMC (NRC) evaluates construction products for code compliance to help manufacturers get market acceptance.",
+        "sources": [
+          {
+            "source": "NRC, Canadian Construction Materials Centre (web page)",
+            "page": null,
+            "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre",
+            "quote": "The Canadian Construction Materials Centre (CCMC) assesses compliance with Canadian building, energy and safety codes.",
+            "verification": "web-fetched 2026-10-20 (WebFetch); not archived locally"
+          }
+        ]
+      },
+      {
+        "claim": "Alberta recognises CCMC evaluation reports, and those of organizations approved by the Provincial Building Administrator, as a way to show code compliance.",
+        "sources": [
+          {
+            "source": "NBC(AE) 2023 2nd printing, Div A 1.2.2.1.(2)",
+            "page": 38,
+            "url": "codedb snapshot (NBC(AE) 2023 2nd printing PDF)",
+            "quote": "Evaluation reports issued by the Canadian Construction Materials Centre … or an organization approved by the Provincial Building Administrator may be used in determining compliance",
+            "verification": "codedb-checked, PDF p.38",
+            "quote_clipped": true
+          }
+        ]
+      },
+      {
+        "claim": "The PBA approves other evaluators by STANDATA (e.g. QAI Laboratories, 23-BCI-005; also 23-BCI-006, -007, -013, -040 per the local STANDATA set).",
+        "sources": [
+          {
+            "source": "STANDATA 23-BCI-005, Approved organization - QAI Laboratories (May 2024)",
+            "page": 1,
+            "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/57cebce9-5fe6-4583-a0bd-f2e4c7eedec9/download/ma-23-bci-005-approved-organization-qai-laboratories.pdf",
+            "quote": "This interpretation recognizes QAI Laboratories as an approved organization that issues evaluation reports that may be used to determine compliance … NBC(AE).",
+            "verification": "source-PDF-checked (local copy /workspace/batatis/sources/standata/23-BCI-005.pdf), p.1",
+            "licence": "Open Government Licence - Alberta",
+            "quote_clipped": true
+          }
+        ]
+      },
+      {
+        "claim": "A province-wide variance is requested from the Provincial Building Administrator, applies everywhere in Alberta, and must address a province-wide issue; these are published as STANDATA variances (23-BCV series).",
+        "sources": [
+          {
+            "source": "NBC(AE) 2023 2nd printing, Div C 2.2.1.2.(1)",
+            "page": 729,
+            "url": "codedb snapshot (NBC(AE) 2023 2nd printing PDF)",
+            "quote": "A written request for a variance may be submitted to the Provincial Building Administrator.",
+            "verification": "codedb-checked, PDF p.729"
+          },
+          {
+            "source": "NBC(AE) 2023 2nd printing, Div C Note A-2.2.1.2.",
+            "page": 743,
+            "url": "codedb snapshot (NBC(AE) 2023 2nd printing PDF)",
+            "quote": "The application to the Provincial Building Administrator must show that the issue is province-wide.",
+            "verification": "codedb-checked, PDF p.743"
+          },
+          {
+            "source": "STANDATA 23-BCV-001, Window opening control devices (2024-04)",
+            "page": 3,
+            "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/01b622f0-f4a1-426d-b15f-ffc25e725949/download/ma-standata-variance-building-23-bcv-001-2024-04.pdf",
+            "quote": "This VARIANCE is applicable throughout the Province of Alberta.",
+            "verification": "source-PDF-checked (local copy /workspace/batatis/sources/standata/23-BCV-001.pdf), p.3",
+            "licence": "Open Government Licence - Alberta"
+          }
+        ]
+      },
+      {
+        "claim": "A site-specific variance is issued by a safety codes officer (or an Administrator) when the alternative gives approximately equivalent or greater safety; the officer must notify an Administrator.",
+        "sources": [
+          {
+            "source": "Safety Codes Act, RSA 2000 c S-1, s.38(1)",
+            "page": 31,
+            "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
+            "quote": "An Administrator or a safety codes officer may issue a written variance … of the opinion that the variance provides approximately equivalent or greater safety performance",
+            "verification": "source-PDF-checked (local copy /workspace/batatis/research/src/leg/S01.pdf), p.31",
+            "quote_clipped": true
+          },
+          {
+            "source": "Safety Codes Act s.38(3)",
+            "page": 31,
+            "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
+            "quote": "A safety codes officer on issuing a variance shall notify an Administrator.",
+            "verification": "source-PDF-checked (local copy /workspace/batatis/research/src/leg/S01.pdf), p.31"
+          }
+        ]
+      },
+      {
+        "claim": "For building, the officer must document the alternative solution per Division C 2.3.1 and send each variance to the Safety Codes Council within 10 days.",
+        "sources": [
+          {
+            "source": "SCC Information Bulletin IB-2025-11-18, Mandatory Documentation of Variances",
+            "page": 2,
+            "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf",
+            "quote": "Submit a copy of each variance to the Safety Codes Council within 10 days of issuance.",
+            "verification": "source-PDF-checked (local copy /workspace/batatis/sources/IB-2025-11-18.pdf), p.2"
+          },
+          {
+            "source": "IB-2025-11-18",
+            "page": 2,
+            "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf",
+            "quote": "Document alternative solutions as required by Division C of the applicable code.",
+            "verification": "source-PDF-checked (local copy /workspace/batatis/sources/IB-2025-11-18.pdf), p.2"
+          }
+        ]
+      },
+      {
+        "claim": "From December 1, 2026 variances are registered through the SCC Orders and Variances Portal; registration is not Council approval.",
+        "sources": [
+          {
+            "source": "SCC Information Bulletin IB-2026-10-01, Orders and Variances Registration Changes",
+            "page": 2,
+            "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf",
+            "quote": "Variances must be registered in OVP at the time of issuance or as soon as reasonably practicable thereafter.",
+            "verification": "source-PDF-checked (local copy /workspace/batatis/forms/IB-2026-10-01.pdf), p.2"
+          },
+          {
+            "source": "IB-2026-10-01",
+            "page": 1,
+            "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf",
+            "quote": "Registration of an order or variance through OVP does not constitute Council approval of that order or variance",
+            "verification": "source-PDF-checked (local copy /workspace/batatis/forms/IB-2026-10-01.pdf), p.1"
+          }
+        ]
+      },
+      {
+        "claim": "The Act lets an Administrator record a variance and the location it applies to (variance register).",
+        "sources": [
+          {
+            "source": "Safety Codes Act s.62",
+            "page": 51,
+            "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
+            "quote": "An Administrator may place an entry on the relevant information system that briefly indicates the subject-matter of a variance and the location …",
+            "verification": "source-PDF-checked (local copy /workspace/batatis/research/src/leg/S01.pdf), p.51",
+            "quote_clipped": true
+          }
+        ]
+      }
+    ],
+    "unverified": [
+      "No Safety Codes Act section creating a building-PRODUCT approval was found. s.40 (design registration) and s.43(2) (things \"approved by the regulations\") exist but were not confirmed to apply to building products. In the building discipline, product acceptance enters through NBC(AE) Div A 1.2.2.1.(2), not the Act. UNVERIFIED.",
+      "Whether a Part 9 product evaluation must be a CCMC \"evaluation\" versus a \"listing\" for Alberta acceptance: Div A 1.2.2.1.(2) names \"evaluation reports\"; the status of other listings was not checked. UNVERIFIED."
+    ],
+    "label": "model-checked, not human-verified"
+  }
+}

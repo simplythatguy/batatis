@@ -1,0 +1,2086 @@
+{
+  "generated": "2026-10-20",
+  "label": "model-checked, not human-verified",
+  "codedb_sha256": "65e6504075167c3d12731593d57f9c58571bdf4fd5575af262011d1b18902192",
+  "type_values": {
+    "mandatory": "a source sentence requires a human/professional when the condition is met",
+    "strongly-indicated": "requirement follows from a chain of sources or an interpretation applied by analogy",
+    "discretionary": "an officer/administrator may require or decide; the app must surface, not decide"
+  },
+  "verification_class_values": {
+    "codedb-only": "every quote is a code provision string-checked in codedb",
+    "mixed": "code provisions (codedb-checked) plus legislation/STANDATA/IB/appeal quotes (source-PDF-checked)",
+    "source-pdf-only": "no code provision; all quotes source-PDF-checked"
+  },
+  "mandatory_values": {
+    "true": "quoted code text requires professional design or authenticated documents once the condition is met",
+    "false": "see mandatory_class: discretionary (AHJ/administrator may require or decide) or not-professional-design (testing, routing, AHJ acceptance)",
+    "null": "not assessed (trigger is not codedb-only)"
+  },
+  "section_d_routing_priority": [
+    "HR-03",
+    "HR-01",
+    "HR-06",
+    "HR-07",
+    "HR-05",
+    "HR-04",
+    "HR-11",
+    "HR-14",
+    "HR-13",
+    "HR-12"
+  ],
+  "triggers": [
+    {
+      "id": "HR-01",
+      "group": "A. Professional involvement (code)",
+      "trigger": "Building is outside every general exception in Div C 2.4.1.1.(1), so registered professionals must authenticate the drawings and specifications.",
+      "type": "mandatory",
+      "human": "Registered architectural and/or engineering professional(s) for the applicable disciplines",
+      "detect_fields": [
+        "occupancy",
+        "storeys",
+        "building_area_m2",
+        "principal_dwelling_units",
+        "secondary_suites_count (NEW)",
+        "farm_public_use",
+        "relocatable_industrial_camp (NEW; engine uses occupancy value)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.4.1.1.(3)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 740,
+          "quote": "For buildings other than those described in Sentence (1), the drawings and specifications shall be authenticated by one or more registered professionals …",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.740",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.4.1.1.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 739,
+          "quote": "involvement of a registered professional is not required for a building a) 3 storeys or less in building height, classified as an assembly, care, treatment …",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.739",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.4.1.1.(2)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 740,
+          "quote": "For the purposes of Sentence (1), secondary suites need not be considered as dwelling units.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.740"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.4.1.1.(5)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 740,
+          "quote": "Drawings and specifications required to be authenticated by a registered professional shall be authenticated … Architects Act or the Engineering and Geoscience Professions Act.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.740",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "Exception thresholds (Div C 2.4.1.1.(1), p739): assembly/care/treatment/detention ≤3 storeys: 300/150/100 m² building area for 1/2/3 storeys; residential: single-family, or multi-family with ≤4 dwelling units (secondary suites not counted, 2.4.1.1.(2)); hotel/motel ≤3 storeys: 400/200/130 m²; business & personal services/mercantile/industrial ≤3 storeys: 500/250/165 m²; farm building not for public use; relocatable industrial camp building. \"Except as required by Sentence (4)\" — see HR-20.",
+      "engine_coverage": "Covered: professional.py general_building / general_exception / general_unresolved; same thresholds in _AREA_LIMITS.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.740",
+        "codedb-checked, 2nd printing, PDF p.739",
+        "codedb-checked, 2nd printing, PDF p.740",
+        "codedb-checked, 2nd printing, PDF p.740"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div C Sentence 2.4.1.1.(3)",
+        "Div C Sentence 2.4.1.1.(1)",
+        "Div C Sentence 2.4.1.1.(2)",
+        "Div C Sentence 2.4.1.1.(5)"
+      ],
+      "mandatory": true,
+      "mandatory_class": "mandatory",
+      "mandatory_basis": "Div C 2.4.1.1.(3): drawings and specifications \"shall be authenticated by one or more registered professionals\" outside the (1) exceptions.",
+      "routing_priority": 2
+    },
+    {
+      "id": "HR-02",
+      "group": "A. Professional involvement (code)",
+      "trigger": "A 2.4.1.1.(3) project needs a coordinating registered professional (CRP), registered professionals of record (RPRs) and Schedules A and B before the permit application; Schedule C-1 before occupancy; work stops if the CRP or an RPR leaves.",
+      "type": "mandatory",
+      "human": "Coordinating registered professional + registered professionals of record (architectural, structural, mechanical, electrical, geotechnical as applicable)",
+      "detect_fields": [
+        "general_required == yes (from HR-01)",
+        "schedule_a_provided (NEW)",
+        "schedule_b_provided (NEW)",
+        "crp_name (NEW)",
+        "rpr_disciplines (NEW)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.4.2.1.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 741,
+          "quote": "This Subsection applies to a project that falls within the scope of Sentence 2.4.1.1.(3).",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.741"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.4.2.2.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 741,
+          "quote": "Before applying for a permit, the owner shall a) retain a coordinating registered professional to coordinate the design and field reviews of the registered professionals …",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.741",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.4.2.2.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 741,
+          "quote": "c) provide the authority having jurisdiction with Schedules A and B",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.741"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.4.2.4.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 742,
+          "quote": "Before issuing an occupancy permit or giving permission to occupy, the authority having jurisdiction shall receive Schedule C-1 from the coordinating registered professional.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.742"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.4.2.5.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 742,
+          "quote": "work on the portion … shall stop until a replacement is retained and a new Schedule A is submitted to the authority having jurisdiction.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.742",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "The brief/plan reference to \"Tables 2.4.2.1.A/B\" has no match in NBC(AE) 2023 2nd printing (codedb: 0 provisions mention \"Table 2.4.2\"). The equivalents are Schedules A, B, C-1, C-2, C-3 named in Div C 2.4.2.2-2.4.2.4 (Note A-2.4.2.2.(1)(c), p744). The challenge-brief quote attributed to 2.4.2.1.(1) (\"Where required, the design and field review shall be carried out by a registered professional skilled in the appropriate discipline.\") does NOT appear in the code; 2.4.2.1.(1) is the application sentence quoted here.",
+      "engine_coverage": "NOT covered: professional.py never mentions Schedules, CRP or 2.4.2.x.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.741",
+        "codedb-checked, 2nd printing, PDF p.741",
+        "codedb-checked, 2nd printing, PDF p.741",
+        "codedb-checked, 2nd printing, PDF p.742",
+        "codedb-checked, 2nd printing, PDF p.742"
+      ],
+      "verification_class": "mixed",
+      "codedb_checked_provisions": [
+        "Div C Sentence 2.4.2.1.(1)",
+        "Div C Sentence 2.4.2.2.(1)",
+        "Div C Sentence 2.4.2.2.(1)",
+        "Div C Sentence 2.4.2.4.(1)",
+        "Div C Sentence 2.4.2.5.(1)"
+      ],
+      "mandatory": null,
+      "mandatory_class": "not assessed (not codedb-only)",
+      "mandatory_basis": "",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-03",
+      "group": "A. Professional involvement (code)",
+      "trigger": "Any structural design carried out under Part 4 of Div B (including a single engineered beam, connection or foundation in a Part 9 house).",
+      "type": "mandatory",
+      "human": "Registered professional skilled in the work concerned (structural engineer in practice)",
+      "detect_fields": [
+        "part4_design",
+        "part4_elements (NEW: list)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.4.1.2.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 740,
+          "quote": "For design carried out in accordance with Part 4 of Division B, the designer shall be a registered professional skilled in the work concerned.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.740"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.2.4.2.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 732,
+          "quote": "Structural drawings and related documents submitted with the application to build shall be authenticated by a registered professional as required by Sentence 2.4.1.2.(1).",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.732"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.2.4.4.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 732,
+          "quote": "Structural drawings of parts or components including guards shall be authenticated by a registered professional.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.732"
+        }
+      ],
+      "notes": "Div C Note A-2.4.1.2.(1) (p744): \"Part 4 … is written on the assumption that structural design will be carried out by a registered professional who is qualified to perform such design.\" Div C Subsection 2.2.4. (incl. Div C Article 2.2.4.4., guards) applies only where Div C Subsection 2.4.1. requires a registered professional (Div C 2.2.4.1.(1)).",
+      "engine_coverage": "Covered as a boolean (part4_design). Not derived from facts — see HR-05..HR-08 for the Part 9→Part 4 triggers the engine could detect.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.740",
+        "codedb-checked, 2nd printing, PDF p.732",
+        "codedb-checked, 2nd printing, PDF p.732"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div C Sentence 2.4.1.2.(1)",
+        "Div C Sentence 2.2.4.2.(1)",
+        "Div C Sentence 2.2.4.4.(1)"
+      ],
+      "mandatory": true,
+      "mandatory_class": "mandatory",
+      "mandatory_basis": "Div C 2.4.1.2.(1): for Part 4 design \"the designer shall be a registered professional\"; Div C 2.2.4.2.(1) structural drawings \"shall be authenticated\".",
+      "routing_priority": 1
+    },
+    {
+      "id": "HR-04",
+      "group": "A. Professional involvement (code)",
+      "trigger": "Building is not within Part 9 scope (Div A 1.3.3.2.), so Part 4 structural design applies to it → Div C 2.4.1.2.(1) professional, even if the building fits a Div C 2.4.1.1.(1) size exception.",
+      "type": "strongly-indicated",
+      "human": "Registered professional (structural) for the Part 4 design",
+      "detect_fields": [
+        "occupancy (incl. Group A, B1-B3, F1, post_disaster NEW)",
+        "storeys",
+        "building_area_m2"
+      ],
+      "confidence": "medium",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div A Sentence 1.3.3.2.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 39,
+          "quote": "Parts 3, 4, 5, and 6 of Division B apply … c) exceeding 600 m² in building area or exceeding 3 storeys in building height",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.39",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div A Sentence 1.3.3.3.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 40,
+          "quote": "Part 9 of Division B applies to all buildings … of 3 storeys or less in building height, having a building area not exceeding 600 m²",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.40",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "Model-derived chain (Div A 1.3.3.2.(1) → Part 4 applies → Div C 2.4.1.2.(1)); not stated in one sentence. The repo research sheet treats \"Part 3 merely because of occupancy\" as \"Depends\". Keep as strongly-indicated pending human confirmation.",
+      "engine_coverage": "NOT covered: engine does not link Part 3/4 applicability to 2.4.1.2.(1).",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.39",
+        "codedb-checked, 2nd printing, PDF p.40"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div A Sentence 1.3.3.2.(1)",
+        "Div A Sentence 1.3.3.3.(1)"
+      ],
+      "mandatory": true,
+      "mandatory_class": "mandatory",
+      "mandatory_basis": "Div A 1.3.3.2.(1): Parts 3 to 6 of Div B \"apply to all buildings\" listed there (e.g. post-disaster, Group A, Group B), i.e. outside Part 9 scope; that Part 4 design needs a registered professional under Div C 2.4.1.2.(1) (quoted under HR-03). Chain of two codedb-checked sentences.",
+      "routing_priority": 6
+    },
+    {
+      "id": "HR-05",
+      "group": "A. Professional involvement (code)",
+      "trigger": "Part 9 sentence sends the element to Part 4 because of wind or seismic hazard (sheathing fastening, anchorage, lumber roof sheathing).",
+      "type": "mandatory",
+      "human": "Registered professional (structural) via Div C 2.4.1.2.(1)",
+      "detect_fields": [
+        "hourly_wind_pressure_1in50_kPa (NEW)",
+        "Sa_0_2 (NEW)",
+        "braced_wall_panels_required (NEW)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 9.23.3.5.(4)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 967,
+          "quote": "Fastening of sheathing shall conform to Part 4 … wind pressure is equal to or greater than 1.2 kPa … Sa(0.2), is greater than 1.8.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.967",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 9.23.6.1.(6)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 970,
+          "quote": "Where … Sa(0.2), is greater than 1.8 or … wind pressure is equal to or greater than 1.2 kPa, anchorage shall be designed according to Part 4.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.970",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 9.23.16.5.(3)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 988,
+          "quote": "… roof sheathing shall be designed according to Part 4 … Sa(0.2), is greater than 1.2, or … wind pressure is equal to or greater than 1.20 kPa.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.988",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "Climatic values come from Div B Appendix C per location; not looked up here.",
+      "engine_coverage": "NOT covered (no climate facts in ProfessionalFacts).",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.967",
+        "codedb-checked, 2nd printing, PDF p.970",
+        "codedb-checked, 2nd printing, PDF p.988"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div B Sentence 9.23.3.5.(4)",
+        "Div B Sentence 9.23.6.1.(6)",
+        "Div B Sentence 9.23.16.5.(3)"
+      ],
+      "mandatory": true,
+      "mandatory_class": "mandatory",
+      "mandatory_basis": "Div B 9.23.3.5.(4), Div B 9.23.6.1.(6), Div B 9.23.16.5.(3) \"shall conform to Part 4\" / \"shall be designed according to Part 4\" above the wind/Sa(0.2) thresholds; then Div C 2.4.1.2.(1).",
+      "routing_priority": 5
+    },
+    {
+      "id": "HR-06",
+      "group": "A. Professional involvement (code)",
+      "trigger": "Part 9 sentence sends foundations/footings/spans to Part 4 because of span, load or ground conditions (joist span > 4.9 m, live load > 2.4 kPa, non-residential floor loads, floors-on-ground carrying superstructure loads, permafrost).",
+      "type": "mandatory",
+      "human": "Registered professional (structural/geotechnical) via Div C 2.4.1.2.(1)",
+      "detect_fields": [
+        "supported_joist_span_m (NEW)",
+        "specified_live_load_kPa (NEW)",
+        "floor_use_non_residential (NEW)",
+        "slab_supports_superstructure (NEW)",
+        "permafrost (NEW)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 9.15.3.3.(2)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 925,
+          "quote": "Except as provided in Sentence 9.15.3.4.(2), where the span of the supported joists exceeds 4.9 m, footings shall be designed in accordance with Section 4.2.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.925"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 9.15.3.3.(3)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 925,
+          "quote": "Where the specified live load exceeds 2.4 kPa, footings shall be designed in accordance with Section 4.2.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.925"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 9.23.4.1.(2)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 967,
+          "quote": "Spans for joists, beams and lintels supporting floors shall be determined according to Subsection 4.1.3. where the supported floors a) serve other than residential areas …",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.967",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 9.16.1.2.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 933,
+          "quote": "Floors-on-ground that support loads from the superstructure shall be designed in conformance with Part 4.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.933"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 9.15.1.2.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 924,
+          "quote": "Buildings erected on permafrost shall have foundations designed by a designer competent in this field in accordance with the appropriate requirements of Part 4.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.924"
+        }
+      ],
+      "notes": "",
+      "engine_coverage": "NOT covered as facts; only via part4_design boolean.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.925",
+        "codedb-checked, 2nd printing, PDF p.925",
+        "codedb-checked, 2nd printing, PDF p.967",
+        "codedb-checked, 2nd printing, PDF p.933",
+        "codedb-checked, 2nd printing, PDF p.924"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div B Sentence 9.15.3.3.(2)",
+        "Div B Sentence 9.15.3.3.(3)",
+        "Div B Sentence 9.23.4.1.(2)",
+        "Div B Sentence 9.16.1.2.(1)",
+        "Div B Sentence 9.15.1.2.(1)"
+      ],
+      "mandatory": true,
+      "mandatory_class": "mandatory",
+      "mandatory_basis": "Div B 9.15.3.3.(2)/(3), Div B 9.23.4.1.(2), Div B 9.16.1.2.(1) \"shall be designed in accordance with\" Part 4 / Section 4.2 / 4.1.3; Div B 9.15.1.2.(1) permafrost \"designed by a designer competent\"; Part 4 design then needs a registered professional under Div C 2.4.1.2.(1).",
+      "routing_priority": 3
+    },
+    {
+      "id": "HR-07",
+      "group": "A. Professional involvement (code)",
+      "trigger": "Part 9 sentence sends a material/element to Part 4 (reinforced concrete, loadbearing steel studs, non-standard columns, masonry/steel lintels, framing beyond 9.23.1.1.(1) limits, bowstring/arch trusses > 6 m).",
+      "type": "mandatory",
+      "human": "Registered professional (structural) via Div C 2.4.1.2.(1)",
+      "detect_fields": [
+        "structural_elements (NEW: list of element types)",
+        "framing_exceeds_9_23_1_1 (NEW)",
+        "truss_type/unsupported_span_m (NEW)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 9.3.1.1.(3)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 831,
+          "quote": "Except as provided in Sentence (4), reinforced concrete shall be designed to conform to the requirements of Part 4.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.831"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 9.24.1.1.(2)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 991,
+          "quote": "Where loadbearing steel studs are used, they shall be designed in conformance with Part 4.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.991"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 9.17.1.1.(2)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 935,
+          "quote": "Columns for applications other than as described in Sentence (1) shall be designed in accordance with Part 4.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.935"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 9.20.5.2.(3)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 944,
+          "quote": "Steel angle lintels supporting masonry other than veneer, masonry and reinforced concrete lintels, and masonry arches shall be designed in accordance with Part 4 …",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.944",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 9.23.1.1.(2)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 962,
+          "quote": "Where the conditions in Sentence (1) are exceeded for wood constructions, the design of the framing and fastening shall conform to Subsection 4.3.1.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.962"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 9.4.2.2.(3)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 838,
+          "quote": "Bow string, arch or semi-circular roof trusses having an unsupported span greater than 6 m shall be designed in conformance with the snow load requirements …",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.838",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "Full list of Part 9 sentences pointing to Part 4/Section 4.x found by SQL LIKE (33 hits) is in research/src/hrt_part9_part4.txt.",
+      "engine_coverage": "NOT covered as facts.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.831",
+        "codedb-checked, 2nd printing, PDF p.991",
+        "codedb-checked, 2nd printing, PDF p.935",
+        "codedb-checked, 2nd printing, PDF p.944",
+        "codedb-checked, 2nd printing, PDF p.962",
+        "codedb-checked, 2nd printing, PDF p.838"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div B Sentence 9.3.1.1.(3)",
+        "Div B Sentence 9.24.1.1.(2)",
+        "Div B Sentence 9.17.1.1.(2)",
+        "Div B Sentence 9.20.5.2.(3)",
+        "Div B Sentence 9.23.1.1.(2)",
+        "Div B Sentence 9.4.2.2.(3)"
+      ],
+      "mandatory": true,
+      "mandatory_class": "mandatory",
+      "mandatory_basis": "Div B 9.3.1.1.(3), Div B 9.24.1.1.(2), Div B 9.17.1.1.(2), Div B 9.20.5.2.(3), Div B 9.23.1.1.(2), Div B 9.4.2.2.(3) \"shall be designed in conformance with\" Part 4; Part 4 design needs a registered professional under Div C 2.4.1.2.(1).",
+      "routing_priority": 4
+    },
+    {
+      "id": "HR-08",
+      "group": "A. Professional involvement (code)",
+      "trigger": "Wood roof trusses (Part 9): truss design and interconnections need a registered engineering professional.",
+      "type": "mandatory",
+      "human": "Registered engineering professional (truss designer)",
+      "detect_fields": [
+        "roof_trusses",
+        "truss_interconnections (NEW)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 9.23.14.11.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 986,
+          "quote": "Wood roof trusses shall be designed in accordance with good engineering practice such as that described in TPIC 2019",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.986"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 9.23.14.11.(2)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 986,
+          "quote": "The joint connections used in trusses described in Sentence (1) shall be designed in conformance with the requirements in Subsection 4.3.1.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.986"
+        },
+        {
+          "kind": "doc",
+          "source": "STANDATA 23-BCI-015R1 (May 2025), wood roof trusses",
+          "cite": "STANDATA 23-BCI-015R1, Interpretation",
+          "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/750b7bd6-7a6a-47b8-8acf-bd58298f672b/download/ma-standata-interpretation-building-23-bci-015r1-2025-05.pdf",
+          "page": 1,
+          "quote": "Based on the requirements of Article 9.23.14.11., a truss assembly constructed using wood trusses must be designed by a registered engineering professional …",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, STANDATA 23-BCI-015R1, p.1; not codedb",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "Interpretation also allows the authenticated truss design to be a permit condition before framing inspection.",
+      "engine_coverage": "Covered: roof_trusses → truss_design / truss_part4 (yes).",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.986",
+        "codedb-checked, 2nd printing, PDF p.986",
+        "source-PDF-checked, STANDATA 23-BCI-015R1, p.1; not codedb"
+      ],
+      "verification_class": "mixed",
+      "codedb_checked_provisions": [
+        "Div B Sentence 9.23.14.11.(1)",
+        "Div B Sentence 9.23.14.11.(2)"
+      ],
+      "mandatory": null,
+      "mandatory_class": "not assessed (not codedb-only)",
+      "mandatory_basis": "",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-09",
+      "group": "A. Professional involvement (code)",
+      "trigger": "Design route uses \"good engineering practice\" (9.4.1.1.(1)(b), 9.23.13.2/3 bracing, 6.2.1.1 HVAC, 7.2.3.16.(2) drainage, 7.2.7.3.(1) water slide flume).",
+      "type": "strongly-indicated",
+      "human": "Person authorized to practise engineering (registered engineering professional)",
+      "detect_fields": [
+        "design_route (NEW: prescriptive | good_engineering_practice | part4)",
+        "prescriptive_route_confirmed"
+      ],
+      "confidence": "medium",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 9.4.1.1.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 836,
+          "quote": "b) be designed according to good engineering practice such as that provided in CWC 2014 … or c) be designed according to Part 4",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.836",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 9.23.13.3.(2)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 979,
+          "quote": "Bracing to resist lateral loads shall be designed and constructed in accordance with a) Part 4, or b) good engineering practice",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.979"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 6.2.1.1.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 593,
+          "quote": "Heating, ventilating and air-conditioning systems, including mechanical refrigeration equipment, shall be designed, constructed and installed in conformance with good engineering practice",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.593"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 7.2.3.16.(2)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 626,
+          "quote": "A drainage system shall be designed in accordance with good engineering practice.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.626"
+        },
+        {
+          "kind": "doc",
+          "source": "STANDATA 23-BCI-015R1 (May 2025), wood roof trusses",
+          "cite": "STANDATA 23-BCI-015R1, Discussion",
+          "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/750b7bd6-7a6a-47b8-8acf-bd58298f672b/download/ma-standata-interpretation-building-23-bci-015r1-2025-05.pdf",
+          "page": 1,
+          "quote": "The term “good engineering practice” requires the involvement of an individual who is authorized to engage in the practice of engineering …",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, STANDATA 23-BCI-015R1, p.1; not codedb",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "The STANDATA sentence is written about Article 9.23.14.11.; applying it to other \"good engineering practice\" sentences is an extrapolation (hence strongly-indicated, medium).",
+      "engine_coverage": "Partly: design_scope \"depends\" fires whenever prescriptive_route_confirmed is not True; no route-specific trigger.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.836",
+        "codedb-checked, 2nd printing, PDF p.979",
+        "codedb-checked, 2nd printing, PDF p.593",
+        "codedb-checked, 2nd printing, PDF p.626",
+        "source-PDF-checked, STANDATA 23-BCI-015R1, p.1; not codedb"
+      ],
+      "verification_class": "mixed",
+      "codedb_checked_provisions": [
+        "Div B Sentence 9.4.1.1.(1)",
+        "Div B Sentence 9.23.13.3.(2)",
+        "Div B Sentence 6.2.1.1.(1)",
+        "Div B Sentence 7.2.3.16.(2)"
+      ],
+      "mandatory": null,
+      "mandatory_class": "not assessed (not codedb-only)",
+      "mandatory_basis": "",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-10",
+      "group": "A. Professional involvement (code)",
+      "trigger": "Preserved wood foundation designed under Part 4: owner must show a registered professional is retained for installation field reviews.",
+      "type": "mandatory",
+      "human": "Registered professional (structural) for field reviews",
+      "detect_fields": [
+        "preserved_wood_foundation_part4"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.4.1.2.(2)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 740,
+          "quote": "If a preserved wood foundation designed in accordance with Part 4 … retained a registered professional to perform field reviews of the foundation system during installation.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.740",
+          "quote_clipped": true
+        },
+        {
+          "kind": "doc",
+          "source": "STANDATA 23-BCV-012R1 (May 2025), PWF with MLTP",
+          "cite": "STANDATA 23-BCV-012R1, Discussion",
+          "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/f0256837-d2a2-4038-bb0c-cb19aacfeb43/download/ma-standata-variance-building-23-bcv-012r1-2025-05.pdf",
+          "page": 1,
+          "quote": "Sentence 2.4.1.2.(2) of Division C requires a registered professional to perform field reviews of preserved wood foundations designed in accordance to Part 4.",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, STANDATA 23-BCV-012R1, p.1; not codedb"
+        }
+      ],
+      "notes": "",
+      "engine_coverage": "Covered: preserved_wood_foundation (yes).",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.740",
+        "source-PDF-checked, STANDATA 23-BCV-012R1, p.1; not codedb"
+      ],
+      "verification_class": "mixed",
+      "codedb_checked_provisions": [
+        "Div C Sentence 2.4.1.2.(2)"
+      ],
+      "mandatory": null,
+      "mandatory_class": "not assessed (not codedb-only)",
+      "mandatory_basis": "",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-11",
+      "group": "A. Professional involvement (code)",
+      "trigger": "Automatic fire suppression system or fire alarm system in a 2.4.1.1.(3) building: professional design, field review, witnessed testing/verification; plans authenticated unless the AHJ deems it a minor alteration.",
+      "type": "mandatory",
+      "human": "Registered professional (fire protection / mechanical / electrical)",
+      "detect_fields": [
+        "fire_suppression",
+        "fire_alarm",
+        "general_required",
+        "minor_alteration_existing_system (NEW, AHJ decision)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.4.1.3.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 740,
+          "quote": "If an automatic fire suppression system is to be installed … the owner shall submit evidence … retained a registered professional to a) design the system …",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.740",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.4.1.4.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 740,
+          "quote": "If a fire alarm system is to be installed … the owner shall submit evidence … retained a registered professional to a) design the system …",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.740",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.2.3.2.(2)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 731,
+          "quote": "Unless deemed by the authority having jurisdiction … minor alteration … all plans … for an automatic fire suppression system … shall be authenticated by a registered professional.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.731",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.2.3.3.(2)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 731,
+          "quote": "Unless deemed by the authority having jurisdiction … minor alteration … all plans for a fire alarm system … shall be authenticated by a registered professional.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.731",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "",
+      "engine_coverage": "Covered: suppression / fire_alarm. NOT covered: the 2.2.3.2.(2)/2.2.3.3.(2) \"minor alteration\" AHJ carve-out.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.740",
+        "codedb-checked, 2nd printing, PDF p.740",
+        "codedb-checked, 2nd printing, PDF p.731",
+        "codedb-checked, 2nd printing, PDF p.731"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div C Sentence 2.4.1.3.(1)",
+        "Div C Sentence 2.4.1.4.(1)",
+        "Div C Sentence 2.2.3.2.(2)",
+        "Div C Sentence 2.2.3.3.(2)"
+      ],
+      "mandatory": true,
+      "mandatory_class": "mandatory",
+      "mandatory_basis": "Div C 2.4.1.3.(1)/Div C 2.4.1.4.(1) owner shows it has \"retained a registered professional to\" design the sprinkler/fire alarm system in a Div C 2.4.1.1.(3) building; plans \"shall be authenticated\" unless the AHJ deems it a minor alteration (Div C 2.2.3.2.(2), Div C 2.2.3.3.(2)).",
+      "routing_priority": 7
+    },
+    {
+      "id": "HR-12",
+      "group": "A. Professional involvement (code)",
+      "trigger": "Part 10 building (industrial workforce accommodation) with a sprinkler system: designed by a registered professional (applies regardless of 2.4.1.1. exceptions).",
+      "type": "mandatory",
+      "human": "Registered professional (fire protection)",
+      "detect_fields": [
+        "part10_building (NEW)",
+        "fire_suppression"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 10.4.7.2.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 1504,
+          "quote": "If a sprinkler system is installed, it shall be designed by a registered professional in conformance with NFPA 13",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.1504"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 10.1.1.2.(2)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 1499,
+          "quote": "this Part applies to a building providing accommodation for an industrial workforce living and working in a temporary location",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.1499"
+        }
+      ],
+      "notes": "",
+      "engine_coverage": "NOT covered (engine treats relocatable_industrial_camp as a general \"no\").",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.1504",
+        "codedb-checked, 2nd printing, PDF p.1499"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div B Sentence 10.4.7.2.(1)",
+        "Div B Sentence 10.1.1.2.(2)"
+      ],
+      "mandatory": true,
+      "mandatory_class": "mandatory",
+      "mandatory_basis": "Div B 10.4.7.2.(1) Part 10 sprinkler system \"shall be designed by a registered professional\".",
+      "routing_priority": 10
+    },
+    {
+      "id": "HR-13",
+      "group": "A. Professional involvement (code)",
+      "trigger": "Swimming pool or water spray park: drawings and specifications authenticated by a registered professional.",
+      "type": "mandatory",
+      "human": "Registered professional",
+      "detect_fields": [
+        "aquatic_facility (NEW)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.2.9.2.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 734,
+          "quote": "… the drawings and specifications for a swimming pool or water spray park shall be authenticated by a registered professional.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.734",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "",
+      "engine_coverage": "NOT covered.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.734"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div C Sentence 2.2.9.2.(1)"
+      ],
+      "mandatory": true,
+      "mandatory_class": "mandatory",
+      "mandatory_basis": "Div C 2.2.9.2.(1) pool / spray park drawings \"shall be authenticated by a registered professional\".",
+      "routing_priority": 9
+    },
+    {
+      "id": "HR-14",
+      "group": "A. Professional involvement (code)",
+      "trigger": "Geotechnical work under Part 4: subsurface investigation, geotechnical loads/resistances, deep-foundation load-test interpretation.",
+      "type": "mandatory",
+      "human": "Registered professional (geotechnical)",
+      "detect_fields": [
+        "part4_foundation (NEW)",
+        "deep_foundations (NEW)",
+        "load_tests (NEW)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 4.2.2.1.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 505,
+          "quote": "A subsurface investigation, including groundwater conditions, shall be carried out by or under the direction of a registered professional having knowledge and experience …",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.505",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 4.2.4.1.(3)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 507,
+          "quote": "the geotechnical components of loads and the factored geotechnical resistances at ULS shall be determined by a suitably qualified and experienced registered professional.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.507"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 4.2.7.2.(2)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 510,
+          "quote": "the determination of the number and type of load test and the interpretation of the results shall be carried out by a registered professional …",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.510",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "",
+      "engine_coverage": "NOT covered.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.505",
+        "codedb-checked, 2nd printing, PDF p.507",
+        "codedb-checked, 2nd printing, PDF p.510"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div B Sentence 4.2.2.1.(1)",
+        "Div B Sentence 4.2.4.1.(3)",
+        "Div B Sentence 4.2.7.2.(2)"
+      ],
+      "mandatory": true,
+      "mandatory_class": "mandatory",
+      "mandatory_basis": "Div B 4.2.2.1.(1) subsurface investigation \"carried out by or under the direction of a registered professional\"; Div B 4.2.4.1.(3), Div B 4.2.7.2.(2) same.",
+      "routing_priority": 8
+    },
+    {
+      "id": "HR-15",
+      "group": "A. Professional involvement (code)",
+      "trigger": "Temporary structural members during construction (formwork, falsework, hoarding, scaffolding) \"when required\".",
+      "type": "strongly-indicated",
+      "human": "Registered professional retained by the constructor",
+      "detect_fields": [
+        "temporary_works (NEW)"
+      ],
+      "confidence": "medium",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.2.14.1.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 737,
+          "quote": "The constructor … when required, shall retain a registered professional to design temporary structural members such as formwork, falsework, hoarding and scaffolding.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.737",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "\"when required\" is not defined in the sentence (UNSOURCED which conditions trigger it).",
+      "engine_coverage": "NOT covered.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.737"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div C Sentence 2.2.14.1.(1)"
+      ],
+      "mandatory": false,
+      "mandatory_class": "discretionary",
+      "mandatory_basis": "Div C 2.2.14.1.(1) constructor retains a registered professional \"when required\"; the text does not say when, so it is a conditional/AHJ-or-contract call, not automatic.",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-16",
+      "group": "A. Professional involvement (code)",
+      "trigger": "Structure that is not one of the building types in Div B Articles 3.2.2.20. to 3.2.2.92. (special/unusual structures, e.g. multi-level storage racking): fire protection must follow good fire protection engineering practice.",
+      "type": "strongly-indicated",
+      "human": "Fire protection engineer (registered engineering professional)",
+      "detect_fields": [
+        "special_structure (NEW)",
+        "storage_racking_multilevel (NEW)"
+      ],
+      "confidence": "medium",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 3.2.2.2.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 175,
+          "quote": "A structure that cannot be identified with the characteristics of a building in Articles 3.2.2.20. to 3.2.2.92. … good fire protection engineering practice.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.175",
+          "quote_clipped": true
+        },
+        {
+          "kind": "doc",
+          "source": "STANDATA 23-BCV-014 (Mar 2025), multi-level storage racking",
+          "cite": "STANDATA 23-BCV-014",
+          "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/8246dd4b-20e7-4e37-b5f7-5e554accd3c5/download/ma-standata-variance-building-23-bcv-014-2025-03.pdf",
+          "page": 1,
+          "quote": "they be considered as special and unusual structures according to Article 3.2.2.2. and be designed according to good fire protection engineering practice.",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, STANDATA 23-BCV-014, p.1; not codedb"
+        }
+      ],
+      "notes": "",
+      "engine_coverage": "NOT covered.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.175",
+        "source-PDF-checked, STANDATA 23-BCV-014, p.1; not codedb"
+      ],
+      "verification_class": "mixed",
+      "codedb_checked_provisions": [
+        "Div B Sentence 3.2.2.2.(1)"
+      ],
+      "mandatory": null,
+      "mandatory_class": "not assessed (not codedb-only)",
+      "mandatory_basis": "",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-17",
+      "group": "A. Professional involvement (code)",
+      "trigger": "Alternative solution documentation: the person(s) taking responsibility must be identified with qualifications; if several, a single coordinator; analysis may need testing procedures or engineering studies.",
+      "type": "mandatory",
+      "human": "Named responsible designer(s); single coordinator (not necessarily registered)",
+      "detect_fields": [
+        "professional_name",
+        "professional_qualifications",
+        "multiple_responsible_persons (NEW)",
+        "coordinator_name (NEW)",
+        "supporting_tests_or_studies (NEW)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.3.1.1.(4)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 739,
+          "quote": "The Code analysis … shall include information about the qualifications, experience and background of the person or persons taking responsibility for the design.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.739",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.3.1.1.(6)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 739,
+          "quote": "the applicant for the permit shall identify a single person to co-ordinate the preparation of the design, Code analysis and documentation …",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.739",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.3.1.1.(3)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 739,
+          "quote": "any assumptions, limiting or restricting factors, testing procedures, engineering studies or building performance parameters that will support a Code compliance assessment.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.739"
+        }
+      ],
+      "notes": "2.3.1.1 does not by itself require a registered professional; it requires a named, qualified responsible person.",
+      "engine_coverage": "Partly: completeness.py D12 gaps (professional_name/qualifications/seal) fire only when professional.required == yes; 2.3.1.1.(4) used for evidence-author gaps. Single-coordinator rule (2.3.1.1.(6)) NOT covered.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.739",
+        "codedb-checked, 2nd printing, PDF p.739",
+        "codedb-checked, 2nd printing, PDF p.739"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div C Sentence 2.3.1.1.(4)",
+        "Div C Sentence 2.3.1.1.(6)",
+        "Div C Sentence 2.3.1.1.(3)"
+      ],
+      "mandatory": false,
+      "mandatory_class": "not-professional-design",
+      "mandatory_basis": "Div C 2.3.1.1.(4)/(6) must state the \"qualifications, experience and background\" of the responsible person and name \"a single person\" to co-ordinate; does not require a registered professional.",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-20",
+      "group": "B. Professional law (Acts/Regulations)",
+      "trigger": "SCO opinion that size or complexity may give rise to safety concerns → SCO may require sealed plans and professional review during construction (and AHJ may require registered professionals under the code).",
+      "type": "discretionary",
+      "human": "Safety codes officer decides; then registered engineer/architect",
+      "detect_fields": [
+        "special_safety_concerns",
+        "ahj_requires_professional",
+        "complexity_flags (NEW)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "doc",
+          "source": "Administrative Items Regulation, AR 16/2004 (consolidation current as of Mar 15, 2021)",
+          "cite": "Administrative Items Regulation s.18(1)",
+          "url": "https://kings-printer.alberta.ca/documents/Regs/2004_016.pdf",
+          "page": 10,
+          "quote": "… the size or complexity of a project may give rise to safety concerns, the safety codes officer may require that all plans and specifications …",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, Administrative Items Regulation AR 16/2004, p.10; not codedb (legislation)",
+          "quote_clipped": true
+        },
+        {
+          "kind": "doc",
+          "source": "Administrative Items Regulation, AR 16/2004 (consolidation current as of Mar 15, 2021)",
+          "cite": "Administrative Items Regulation s.18(1)-(2)",
+          "url": "https://kings-printer.alberta.ca/documents/Regs/2004_016.pdf",
+          "page": 11,
+          "quote": "be imprinted with a seal or stamp … be reviewed during construction in accordance with the Engineering and Geoscience Professions Act or the Architects Act.",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, Administrative Items Regulation AR 16/2004, p.11; not codedb (legislation)",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.4.1.1.(4)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 740,
+          "quote": "If the size or complexity of a project may give rise to special safety concerns … may require the involvement of one or more registered professionals …",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.740",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "AR 16/2004 consolidation is \"current as of March 15, 2021\"; amendments after that date were not checked.",
+      "engine_coverage": "Covered: ahj_direction (yes) / special_safety (depends) cite 2.4.1.1.(4). Admin Items Reg s.18 not cited.",
+      "verification": [
+        "source-PDF-checked, Administrative Items Regulation AR 16/2004, p.10; not codedb (legislation)",
+        "source-PDF-checked, Administrative Items Regulation AR 16/2004, p.11; not codedb (legislation)",
+        "codedb-checked, 2nd printing, PDF p.740"
+      ],
+      "verification_class": "mixed",
+      "codedb_checked_provisions": [
+        "Div C Sentence 2.4.1.1.(4)"
+      ],
+      "mandatory": null,
+      "mandatory_class": "not assessed (not codedb-only)",
+      "mandatory_basis": "",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-21",
+      "group": "B. Professional law (Acts/Regulations)",
+      "trigger": "Work is the \"practice of engineering\" and no EGPA exception applies (exceptions include supervised work, own-property work not involving public safety, and the small-building list in s.2(7), which uses GROSS AREA per floor).",
+      "type": "mandatory",
+      "human": "Professional engineer / licensee / permit holder",
+      "detect_fields": [
+        "activity_type (NEW)",
+        "own_property_sole_use (NEW)",
+        "occupancy",
+        "storeys",
+        "gross_area_per_floor_m2 (NEW)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "doc",
+          "source": "Engineering and Geoscience Professions Act, RSA 2000 c E-11 (current as of Dec 7, 2023)",
+          "cite": "EGPA s.2(1)",
+          "url": "https://kings-printer.alberta.ca/documents/Acts/E11.pdf",
+          "page": 12,
+          "quote": "Except as otherwise provided in this Act, no individual, corporation, partnership or other entity … except a professional engineer … shall engage in the practice of engineering.",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, Engineering and Geoscience Professions Act, p.12; not codedb (legislation)",
+          "quote_clipped": true
+        },
+        {
+          "kind": "doc",
+          "source": "Engineering and Geoscience Professions Act, RSA 2000 c E-11 (current as of Dec 7, 2023)",
+          "cite": "EGPA s.1(q)",
+          "url": "https://kings-printer.alberta.ca/documents/Acts/E11.pdf",
+          "page": 10,
+          "quote": "“practice of engineering” means (i) reporting on, advising on, evaluating, designing, preparing plans and specifications for or directing … of any structure, work or process",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, Engineering and Geoscience Professions Act, p.10; not codedb (legislation)",
+          "quote_clipped": true
+        },
+        {
+          "kind": "doc",
+          "source": "Engineering and Geoscience Professions Act, RSA 2000 c E-11 (current as of Dec 7, 2023)",
+          "cite": "EGPA s.2(4)(e)",
+          "url": "https://kings-printer.alberta.ca/documents/Acts/E11.pdf",
+          "page": 13,
+          "quote": "(e) a person who, on the person’s own property … carries out any work that does not involve the safety of the public;",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, Engineering and Geoscience Professions Act, p.13; not codedb (legislation)",
+          "quote_clipped": true
+        },
+        {
+          "kind": "doc",
+          "source": "Engineering and Geoscience Professions Act, RSA 2000 c E-11 (current as of Dec 7, 2023)",
+          "cite": "EGPA s.2(7)(a)",
+          "url": "https://kings-printer.alberta.ca/documents/Acts/E11.pdf",
+          "page": 14,
+          "quote": "The buildings referred to in subsection (6) are the following: (a) a building, 3 storeys or less in height, for assembly occupancy or institutional occupancy …",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, Engineering and Geoscience Professions Act, p.14; not codedb (legislation)",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "EGPA s.2(7) list mirrors Div C 2.4.1.1.(1) but measures \"gross area\" (per floor for 2-3 storeys), not \"building area\", and has no secondary-suite carve-out. A case can pass the code exception yet need legal review. s.38: Council may authorize a registered architect to apply for a permit without an engineer's stamp (see HR-24).",
+      "engine_coverage": "Partly: professional_law \"depends\" whenever professional_scope_resolved is not True; no EGPA thresholds or gross-area check.",
+      "verification": [
+        "source-PDF-checked, Engineering and Geoscience Professions Act, p.12; not codedb (legislation)",
+        "source-PDF-checked, Engineering and Geoscience Professions Act, p.10; not codedb (legislation)",
+        "source-PDF-checked, Engineering and Geoscience Professions Act, p.13; not codedb (legislation)",
+        "source-PDF-checked, Engineering and Geoscience Professions Act, p.14; not codedb (legislation)"
+      ],
+      "verification_class": "source-pdf-only",
+      "codedb_checked_provisions": [],
+      "mandatory": null,
+      "mandatory_class": "not assessed (not codedb-only)",
+      "mandatory_basis": "",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-22",
+      "group": "B. Professional law (Acts/Regulations)",
+      "trigger": "Work is the \"practice of architecture\" for a building not on the Architects Act s.2(6) list (same small-building list, gross area per floor).",
+      "type": "mandatory",
+      "human": "Registered architect (or other authorized entity)",
+      "detect_fields": [
+        "occupancy",
+        "storeys",
+        "gross_area_per_floor_m2 (NEW)",
+        "dwelling_units_total (NEW, incl. suites)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "doc",
+          "source": "Architects Act, RSA 2000 c A-44 (current as of Nov 16, 2022)",
+          "cite": "Architects Act s.2(1)",
+          "url": "https://kings-printer.alberta.ca/documents/Acts/A44.pdf",
+          "page": 8,
+          "quote": "2(1) Except as otherwise provided in this Act, no person except an authorized entity shall engage in the practice of architecture.",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, Architects Act, p.8; not codedb (legislation)"
+        },
+        {
+          "kind": "doc",
+          "source": "Architects Act, RSA 2000 c A-44 (current as of Nov 16, 2022)",
+          "cite": "Architects Act s.1(l)",
+          "url": "https://kings-printer.alberta.ca/documents/Acts/A44.pdf",
+          "page": 7,
+          "quote": "“practice of architecture” means (i) planning, designing or giving advice on the design of … erection, construction or alteration of or addition to a building,",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, Architects Act, p.7; not codedb (legislation)",
+          "quote_clipped": true
+        },
+        {
+          "kind": "doc",
+          "source": "Architects Act, RSA 2000 c A-44 (current as of Nov 16, 2022)",
+          "cite": "Architects Act s.2(6)(b)",
+          "url": "https://kings-printer.alberta.ca/documents/Acts/A44.pdf",
+          "page": 10,
+          "quote": "… a building for residential occupancy that (i) is a single family dwelling, or (ii) is a multiple family dwelling containing 4 dwelling units or less;",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, Architects Act, p.10; not codedb (legislation)",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "Same gross-area vs building-area and secondary-suite caveats as HR-21. Whether the Architects regulations count secondary suites: UNSOURCED (regulations not read).",
+      "engine_coverage": "Partly: secondary_suites reason flags \"independent professional-law treatment must be confirmed\"; no Act thresholds.",
+      "verification": [
+        "source-PDF-checked, Architects Act, p.8; not codedb (legislation)",
+        "source-PDF-checked, Architects Act, p.7; not codedb (legislation)",
+        "source-PDF-checked, Architects Act, p.10; not codedb (legislation)"
+      ],
+      "verification_class": "source-pdf-only",
+      "codedb_checked_provisions": [],
+      "mandatory": null,
+      "mandatory_class": "not assessed (not codedb-only)",
+      "mandatory_basis": "",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-23",
+      "group": "B. Professional law (Acts/Regulations)",
+      "trigger": "Where the regulations require a stamped/sealed design, no permit may issue unless the design is signed, stamped and sealed.",
+      "type": "mandatory",
+      "human": "Engineer/architect (seal) and permit issuer (gate)",
+      "detect_fields": [
+        "seal_required (derived from HR-01/03/20)",
+        "professional_seal"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "doc",
+          "source": "Safety Codes Act, RSA 2000 c S-1 (consolidation current as of Dec 1, 2025)",
+          "cite": "Safety Codes Act s.45(1)",
+          "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
+          "page": 35,
+          "quote": "no permit may be issued … unless the design is submitted for review or registered and is signed, stamped and sealed in accordance with the regulations.",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, Safety Codes Act, p.35; not codedb (legislation)",
+          "quote_clipped": true
+        },
+        {
+          "kind": "doc",
+          "source": "Safety Codes Act, RSA 2000 c S-1 (consolidation current as of Dec 1, 2025)",
+          "cite": "Safety Codes Act s.11",
+          "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
+          "page": 14,
+          "quote": "A person permitted to affix stamps or seals … shall ensure that any professional service the person renders … complies with this Act.",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, Safety Codes Act, p.14; not codedb (legislation)",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "",
+      "engine_coverage": "Partly: completeness.py D12 professional_authentication gap when required == yes.",
+      "verification": [
+        "source-PDF-checked, Safety Codes Act, p.35; not codedb (legislation)",
+        "source-PDF-checked, Safety Codes Act, p.14; not codedb (legislation)"
+      ],
+      "verification_class": "source-pdf-only",
+      "codedb_checked_provisions": [],
+      "mandatory": null,
+      "mandatory_class": "not assessed (not codedb-only)",
+      "mandatory_basis": "",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-24",
+      "group": "B. Professional law (Acts/Regulations)",
+      "trigger": "Architect applying without an engineer's stamp on final drawings — only if APEGA Council has authorized it.",
+      "type": "discretionary",
+      "human": "APEGA Council (on Joint Board recommendation)",
+      "detect_fields": [
+        "applicant_role (NEW)",
+        "engineer_stamp_present (NEW)"
+      ],
+      "confidence": "medium",
+      "sources": [
+        {
+          "kind": "doc",
+          "source": "Engineering and Geoscience Professions Act, RSA 2000 c E-11 (current as of Dec 7, 2023)",
+          "cite": "EGPA s.38",
+          "url": "https://kings-printer.alberta.ca/documents/Acts/E11.pdf",
+          "page": 42,
+          "quote": "… Council may authorize … a registered architect … to apply for a permit … without the final design drawings … having the stamp or seal of a professional engineer.",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, Engineering and Geoscience Professions Act, p.42; not codedb (legislation)",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "",
+      "engine_coverage": "NOT covered.",
+      "verification": [
+        "source-PDF-checked, Engineering and Geoscience Professions Act, p.42; not codedb (legislation)"
+      ],
+      "verification_class": "source-pdf-only",
+      "codedb_checked_provisions": [],
+      "mandatory": null,
+      "mandatory_class": "not assessed (not codedb-only)",
+      "mandatory_basis": "",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-30",
+      "group": "C. Officer / Administrator discretion",
+      "trigger": "Any variance (alternative solution) request: only an SCO or Administrator can decide it; the app must route to them and never state the variance is granted.",
+      "type": "mandatory",
+      "human": "Safety codes officer (or Administrator); SCO must notify an Administrator and register the variance",
+      "detect_fields": [
+        "intake_action",
+        "variance_requested"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "doc",
+          "source": "Safety Codes Act, RSA 2000 c S-1 (consolidation current as of Dec 1, 2025)",
+          "cite": "Safety Codes Act s.38(1)",
+          "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
+          "page": 31,
+          "quote": "if the Administrator or officer is of the opinion that the variance provides approximately equivalent or greater safety performance with respect to persons and property …",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, Safety Codes Act, p.31; not codedb (legislation)",
+          "quote_clipped": true
+        },
+        {
+          "kind": "doc",
+          "source": "Safety Codes Act, RSA 2000 c S-1 (consolidation current as of Dec 1, 2025)",
+          "cite": "Safety Codes Act s.38(3)",
+          "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
+          "page": 31,
+          "quote": "A safety codes officer on issuing a variance shall notify an Administrator.",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, Safety Codes Act, p.31; not codedb (legislation)"
+        },
+        {
+          "kind": "doc",
+          "source": "SCC Information Bulletin IB-2025-11-18",
+          "cite": "IB-2025-11-18",
+          "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf",
+          "page": 2,
+          "quote": "Submit a copy of each variance to the Safety Codes Council within 10 days of issuance.",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, SCC Information Bulletin IB-2025-11-18, p.2; not codedb"
+        },
+        {
+          "kind": "doc",
+          "source": "SCC Information Bulletin IB-2026-10-01",
+          "cite": "IB-2026-10-01",
+          "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf",
+          "page": 3,
+          "quote": "Applicable professional involvement; and",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, SCC Information Bulletin IB-2026-10-01, p.3; not codedb"
+        },
+        {
+          "kind": "doc",
+          "source": "SCC Information Bulletin IB-2026-10-16",
+          "cite": "IB-2026-10-16",
+          "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-16_AHJ_Clarification.pdf",
+          "page": 2,
+          "quote": "Undue influence … would be a person directing an SCO to issue a variance based on anything other than an administratively compliant alternative solution.",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, SCC Information Bulletin IB-2026-10-16, p.2; not codedb",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "IB-2026-10-01 lists \"Applicable professional involvement\" as a component of the revised variance form (OVP sole method from Dec 1, 2026).",
+      "engine_coverage": "UNSOURCED in engine: no explicit SCO hand-off object; intake_action exists in evals gold schema only.",
+      "verification": [
+        "source-PDF-checked, Safety Codes Act, p.31; not codedb (legislation)",
+        "source-PDF-checked, Safety Codes Act, p.31; not codedb (legislation)",
+        "source-PDF-checked, SCC Information Bulletin IB-2025-11-18, p.2; not codedb",
+        "source-PDF-checked, SCC Information Bulletin IB-2026-10-01, p.3; not codedb",
+        "source-PDF-checked, SCC Information Bulletin IB-2026-10-16, p.2; not codedb"
+      ],
+      "verification_class": "source-pdf-only",
+      "codedb_checked_provisions": [],
+      "mandatory": null,
+      "mandatory_class": "not assessed (not codedb-only)",
+      "mandatory_basis": "",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-31",
+      "group": "C. Officer / Administrator discretion",
+      "trigger": "Province-wide variance or code interpretation (ambiguity/lack of clarity in the code) → Provincial Building Administrator.",
+      "type": "discretionary",
+      "human": "Provincial Building Administrator",
+      "detect_fields": [
+        "code_ambiguity (NEW)",
+        "scope (site vs jurisdiction-wide)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.2.1.2.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 729,
+          "quote": "A written request for a variance may be submitted to the Provincial Building Administrator.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.729"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.2.1.3.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 729,
+          "quote": "A written request for an interpretation may be submitted to the Provincial Building Administrator … a) specific Code references, and b) a statement identifying the ambiguity …",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.729",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "",
+      "engine_coverage": "NOT covered (completeness.py collects \"scope\" only).",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.729",
+        "codedb-checked, 2nd printing, PDF p.729"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div C Sentence 2.2.1.2.(1)",
+        "Div C Sentence 2.2.1.3.(1)"
+      ],
+      "mandatory": false,
+      "mandatory_class": "discretionary",
+      "mandatory_basis": "Div C 2.2.1.2.(1)/Div C 2.2.1.3.(1) a request \"may be submitted\" to the PBA; routing, not professional design.",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-32",
+      "group": "C. Officer / Administrator discretion",
+      "trigger": "Barrier-free (Div B Section 3.8.) relaxation → Provincial Barrier-Free Administrator or PBA, not the local SCO.",
+      "type": "mandatory",
+      "human": "Provincial Barrier-Free Administrator / PBA",
+      "detect_fields": [
+        "provisions_varied (any 3.8.x)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.2.1.4.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 730,
+          "quote": "The Provincial Barrier-Free Administrator or Provincial Building Administrator may grant relaxation of one or more of the requirements of Section 3.8. of Division B",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.730"
+        }
+      ],
+      "notes": "Typed mandatory as a routing rule (the relaxation power sits with these Administrators); whether a local SCO may also vary Div B Section 3.8. under SCA s.38 is not settled here (UNSOURCED).",
+      "engine_coverage": "NOT covered.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.730"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div C Sentence 2.2.1.4.(1)"
+      ],
+      "mandatory": false,
+      "mandatory_class": "not-professional-design",
+      "mandatory_basis": "Div C 2.2.1.4.(1) only the PBFA/PBA \"may grant relaxation\" of Div B Section 3.8.; routing to an administrator, not professional design.",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-33",
+      "group": "C. Officer / Administrator discretion",
+      "trigger": "Minor dimensional shortfall (≤ 2 %) with no reduction in life safety → AHJ may accept without a variance.",
+      "type": "discretionary",
+      "human": "Authority having jurisdiction (SCO)",
+      "detect_fields": [
+        "dimension_required",
+        "dimension_proposed",
+        "percent_deviation (derived)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.2.2.3.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 730,
+          "quote": "If life safety will not be reduced, the authority having jurisdiction may accept a minor variation, not more than 2%, of a dimension …",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.730",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "",
+      "engine_coverage": "NOT covered.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.730"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div C Sentence 2.2.2.3.(1)"
+      ],
+      "mandatory": false,
+      "mandatory_class": "discretionary",
+      "mandatory_basis": "Div C 2.2.2.3.(1) the AHJ \"may accept a minor variation\"; no professional required.",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-34",
+      "group": "C. Officer / Administrator discretion",
+      "trigger": "Change of occupancy, alteration, or existing non-compliant construction → AHJ acceptance of the level of safety.",
+      "type": "discretionary",
+      "human": "Authority having jurisdiction (SCO)",
+      "detect_fields": [
+        "change_of_occupancy (NEW)",
+        "alteration_existing (NEW)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div A Sentence 1.1.1.2.(4)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 38,
+          "quote": "A change in occupancy or alteration … shall be permitted if the level of safety and building performance proposed are acceptable to the authority having jurisdiction.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.38",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div A Sentence 1.1.1.2.(6)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 38,
+          "quote": "The authority having jurisdiction may accept existing construction not in complete compliance with this Code and may place conditions on the existing construction.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.38"
+        }
+      ],
+      "notes": "",
+      "engine_coverage": "NOT covered.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.38",
+        "codedb-checked, 2nd printing, PDF p.38"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div A Sentence 1.1.1.2.(4)",
+        "Div A Sentence 1.1.1.2.(6)"
+      ],
+      "mandatory": false,
+      "mandatory_class": "discretionary",
+      "mandatory_basis": "Div A 1.1.1.2.(4)/(6) acceptance by the AHJ (\"acceptable to\", \"may accept\"); no professional required by the text.",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-35",
+      "group": "C. Officer / Administrator discretion",
+      "trigger": "Items the code sends to the AHJ for review and acceptance: pool slides/play equipment, supplemental disinfection, water-slide special discharge, Part 10 canopy/hood airflow designs, tents/air-supported structures, temporary buildings.",
+      "type": "mandatory",
+      "human": "Authority having jurisdiction (SCO)",
+      "detect_fields": [
+        "aquatic_equipment (NEW)",
+        "tent_or_air_supported (NEW)",
+        "temporary_building (NEW)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.2.2.5.(2)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 731,
+          "quote": "The design of a water treatment system using ozone, ultraviolet light … shall be submitted for review and acceptance by the authority having jurisdiction.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.731",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.2.11.2.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 735,
+          "quote": "A tent or air-supported structure shall not be erected unless written permission has been obtained from the authority having jurisdiction.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.735"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.2.11.3.(2)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 735,
+          "quote": "The authority having jurisdiction may permit selective compliance with this Code for a temporary building referred to in Sentence (1).",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.735"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 10.6.4.2.(3)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 1508,
+          "quote": "each design shall be submitted to the authority having jurisdiction for review.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.1508"
+        }
+      ],
+      "notes": "",
+      "engine_coverage": "NOT covered.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.731",
+        "codedb-checked, 2nd printing, PDF p.735",
+        "codedb-checked, 2nd printing, PDF p.735",
+        "codedb-checked, 2nd printing, PDF p.1508"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div C Sentence 2.2.2.5.(2)",
+        "Div C Sentence 2.2.11.2.(1)",
+        "Div C Sentence 2.2.11.3.(2)",
+        "Div B Sentence 10.6.4.2.(3)"
+      ],
+      "mandatory": false,
+      "mandatory_class": "not-professional-design",
+      "mandatory_basis": "Div C 2.2.2.5.(2), Div C 2.2.11.2.(1), Div C 2.2.11.3.(2), Div B 10.6.4.2.(3): submitted to / permitted by the AHJ; AHJ acceptance, no professional named.",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-36",
+      "group": "C. Officer / Administrator discretion",
+      "trigger": "Incorrect or insufficient information → permit issuer may refuse; may demand further information or records.",
+      "type": "discretionary",
+      "human": "Permit issuer / SCO",
+      "detect_fields": [
+        "completeness gaps (engine D-codes)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "doc",
+          "source": "Permit Regulation, AR 204/2007 (consolidation current as of Nov 20, 2024)",
+          "cite": "Permit Regulation s.26(b)",
+          "url": "https://kings-printer.alberta.ca/documents/Regs/2007_204.pdf",
+          "page": 21,
+          "quote": "(b) incorrect or insufficient information is submitted with respect to the permit or the undertaking to be governed by the permit,",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, Permit Regulation AR 204/2007, p.21; not codedb (legislation)"
+        },
+        {
+          "kind": "doc",
+          "source": "Permit Regulation, AR 204/2007 (consolidation current as of Nov 20, 2024)",
+          "cite": "Permit Regulation s.20(i)",
+          "url": "https://kings-printer.alberta.ca/documents/Regs/2007_204.pdf",
+          "page": 18,
+          "quote": "(i) include any further information that the permit issuer considers necessary",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, Permit Regulation AR 204/2007, p.18; not codedb (legislation)"
+        },
+        {
+          "kind": "doc",
+          "source": "Safety Codes Act, RSA 2000 c S-1 (consolidation current as of Dec 1, 2025)",
+          "cite": "Safety Codes Act s.35(1)",
+          "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
+          "page": 30,
+          "quote": "any record or document pertaining in any manner to compliance with this Act",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, Safety Codes Act, p.30; not codedb (legislation)"
+        }
+      ],
+      "notes": "Supports routing incomplete cases to the SCO as \"more information required\" rather than auto-refusal.",
+      "engine_coverage": "Covered in spirit: completeness.py emits gaps; no explicit refusal-risk flag.",
+      "verification": [
+        "source-PDF-checked, Permit Regulation AR 204/2007, p.21; not codedb (legislation)",
+        "source-PDF-checked, Permit Regulation AR 204/2007, p.18; not codedb (legislation)",
+        "source-PDF-checked, Safety Codes Act, p.30; not codedb (legislation)"
+      ],
+      "verification_class": "source-pdf-only",
+      "codedb_checked_provisions": [],
+      "mandatory": null,
+      "mandatory_class": "not assessed (not codedb-only)",
+      "mandatory_basis": "",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-40",
+      "group": "D. Specialist testing / certification",
+      "trigger": "Fire-resistance rating not from a listed/tabulated source → must come from CAN/ULC-S101 testing (accredited lab).",
+      "type": "strongly-indicated",
+      "human": "Accredited testing laboratory / certification body",
+      "detect_fields": [
+        "fire_resistance_rating_source (NEW)"
+      ],
+      "confidence": "medium",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 3.1.7.1.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 151,
+          "quote": "shall be determined on the basis of the results of tests conducted in conformance with CAN/ULC-S101",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.151"
+        }
+      ],
+      "notes": "Exceptions in 3.1.7.1.(2), 3.1.7.2. and 3.6.3.5. (and Part 9 Appendix-based ratings) not expanded here.",
+      "engine_coverage": "NOT covered.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.151"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div B Sentence 3.1.7.1.(1)"
+      ],
+      "mandatory": false,
+      "mandatory_class": "not-professional-design",
+      "mandatory_basis": "Div B 3.1.7.1.(1) rating \"determined on the basis of the results of tests\" (CAN/ULC-S101); a test lab, not a professional.",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-41",
+      "group": "D. Specialist testing / certification",
+      "trigger": "Combustible cladding on a building required to be noncombustible → CAN/ULC-S134 full-scale test results needed.",
+      "type": "mandatory",
+      "human": "Testing laboratory (CAN/ULC-S134)",
+      "detect_fields": [
+        "construction_type_required (NEW)",
+        "cladding_combustible (NEW)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div B Sentence 3.1.5.5.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 137,
+          "quote": "when tested in accordance with CAN/ULC-S134, “Standard Method of Fire Test of Exterior Wall Assemblies,”",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.137"
+        }
+      ],
+      "notes": "",
+      "engine_coverage": "NOT covered.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.137"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div B Sentence 3.1.5.5.(1)"
+      ],
+      "mandatory": false,
+      "mandatory_class": "not-professional-design",
+      "mandatory_basis": "Div B 3.1.5.5.(1) cladding performance \"when tested in accordance with CAN/ULC-S134\"; a test, not a professional.",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-42",
+      "group": "D. Specialist testing / certification",
+      "trigger": "Non-flammable medical gas piping → testing agency report accepted by AHJ before use.",
+      "type": "mandatory",
+      "human": "Testing agency + AHJ",
+      "detect_fields": [
+        "medical_gas_piping (NEW)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.2.11.4.(2)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 736,
+          "quote": "The testing agency that does the inspection and testing required by Sentence (1) shall provide a report",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.736"
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.2.11.4.(3)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 736,
+          "quote": "A non-flammable medical gas piping system shall not be used until the report required by Sentence (1) has been accepted by the authority having jurisdiction.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.736"
+        }
+      ],
+      "notes": "",
+      "engine_coverage": "NOT covered.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.736",
+        "codedb-checked, 2nd printing, PDF p.736"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div C Sentence 2.2.11.4.(2)",
+        "Div C Sentence 2.2.11.4.(3)"
+      ],
+      "mandatory": false,
+      "mandatory_class": "not-professional-design",
+      "mandatory_basis": "Div C 2.2.11.4.(2)/(3) a \"testing agency\" report accepted by the AHJ; not a professional.",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-43",
+      "group": "D. Specialist testing / certification",
+      "trigger": "Off-site constructed components/buildings: off-site review, CSA A277 certification, or PBA-approved certification for relocatable industrial camps; STANDATA variance route uses registered-professional verification.",
+      "type": "mandatory",
+      "human": "Certification organization / registered professionals",
+      "detect_fields": [
+        "off_site_constructed (NEW)",
+        "csa_a277_certified (NEW)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.5.1.1.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 742,
+          "quote": "Where a component of a building is assembled off the building site … cannot be reviewed on site, off-site reviews shall be carried out …",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.742",
+          "quote_clipped": true
+        },
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.5.1.1.(3)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 742,
+          "quote": "Every relocatable industrial camp building that is constructed after 01 May 2024 shall be certified by an organization approved … by the Provincial Building Administrator",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.742",
+          "quote_clipped": true
+        },
+        {
+          "kind": "doc",
+          "source": "STANDATA 23-BCV-002 (May 2024), off-site constructed buildings",
+          "cite": "STANDATA 23-BCV-002",
+          "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/c10bed94-08f0-41f0-93eb-90a039f89529/download/ma-standata-variance-building-23-bcv-002-2024-05.pdf",
+          "page": 2,
+          "quote": "Verified by registered architectural/engineering professionals in accordance with Division C, Subsections 2.4.2. and Section 2.5. of the NBC(AE).",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, STANDATA 23-BCV-002, p.2; not codedb"
+        }
+      ],
+      "notes": "",
+      "engine_coverage": "NOT covered.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.742",
+        "codedb-checked, 2nd printing, PDF p.742",
+        "source-PDF-checked, STANDATA 23-BCV-002, p.2; not codedb"
+      ],
+      "verification_class": "mixed",
+      "codedb_checked_provisions": [
+        "Div C Sentence 2.5.1.1.(1)",
+        "Div C Sentence 2.5.1.1.(3)"
+      ],
+      "mandatory": null,
+      "mandatory_class": "not assessed (not codedb-only)",
+      "mandatory_basis": "",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-44",
+      "group": "D. Specialist testing / certification",
+      "trigger": "Welded construction for Part 4 buildings → evidence of CWB certification if the AHJ requests it.",
+      "type": "discretionary",
+      "human": "AHJ (request) / Canadian Welding Bureau",
+      "detect_fields": [
+        "part4_design",
+        "welded_steel (NEW)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "code",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "cite": "Div C Sentence 2.2.2.4.(1)",
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "page": 730,
+          "quote": "If requested by the authority having jurisdiction, the owner shall submit evidence … fabricators and erectors of welded construction … are certified by the Canadian Welding Bureau.",
+          "checked": "codedb",
+          "verification": "codedb-checked, 2nd printing, PDF p.730",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "",
+      "engine_coverage": "NOT covered.",
+      "verification": [
+        "codedb-checked, 2nd printing, PDF p.730"
+      ],
+      "verification_class": "codedb-only",
+      "codedb_checked_provisions": [
+        "Div C Sentence 2.2.2.4.(1)"
+      ],
+      "mandatory": false,
+      "mandatory_class": "discretionary",
+      "mandatory_basis": "Div C 2.2.2.4.(1) \"If requested by the authority having jurisdiction\": CWB evidence, not professional design.",
+      "routing_priority": null
+    },
+    {
+      "id": "HR-50",
+      "group": "E. STANDATA variances that carry a professional condition",
+      "trigger": "Case relies on a province-wide STANDATA variance whose conditions name a professional (examples: 23-BCV-005 risk assessment; 23-BCV-010R1 APEGA authentication).",
+      "type": "mandatory",
+      "human": "Registered engineering professional per the variance conditions",
+      "detect_fields": [
+        "standata_variance_relied_on (NEW)"
+      ],
+      "confidence": "high",
+      "sources": [
+        {
+          "kind": "doc",
+          "source": "STANDATA 23-BCV-005 (May 2024), oil and gas processing buildings",
+          "cite": "STANDATA 23-BCV-005, Variance condition 2",
+          "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/bda7efc6-de1f-480f-b81b-1ecc8f66eea0/download/ma-standata-variance-building-23-bcv-005-2024-05.pdf",
+          "page": 2,
+          "quote": "A risk assessment has been prepared by a Registered Engineering Professional, licensed to practice in the province of Alberta",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, STANDATA 23-BCV-005, p.2; not codedb"
+        },
+        {
+          "kind": "doc",
+          "source": "STANDATA 23-BCV-010R1 (Apr 2025), engineer's authentication for welding procedures",
+          "cite": "STANDATA 23-BCV-010R1, condition 1",
+          "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/e18fadda-66e8-40e2-950b-79f990724912/download/ma-23-bcv-010r1-engineers-authentication-welding-procedures.pdf",
+          "page": 2,
+          "quote": "All documentation … must be authenticated in accordance with APEGA’s authentication standards and must be submitted to the authority having jurisdiction.",
+          "checked": "pdftotext",
+          "verification": "source-PDF-checked, STANDATA 23-BCV-010R1, p.2; not codedb",
+          "quote_clipped": true
+        }
+      ],
+      "notes": "Precedent conditions; each applies only to its own subject. Also see 23-BCV-002 (HR-43), 23-BCV-012R1 (HR-10), 23-BCV-014 (HR-16).",
+      "engine_coverage": "NOT covered.",
+      "verification": [
+        "source-PDF-checked, STANDATA 23-BCV-005, p.2; not codedb",
+        "source-PDF-checked, STANDATA 23-BCV-010R1, p.2; not codedb"
+      ],
+      "verification_class": "source-pdf-only",
+      "codedb_checked_provisions": [],
+      "mandatory": null,
+      "mandatory_class": "not assessed (not codedb-only)",
+      "mandatory_basis": "",
+      "routing_priority": null
+    }
+  ],
+  "public_variant_note": "Public variant for the repo: internal-only SCC appeal decisions removed (sources of kind \"appeal\" and sentences citing them). Model-checked, not human-verified. HR-37 is omitted because its only source is an internal-only appeal decision."
+}

@@ -1,0 +1,765 @@
+{
+  "generated": "2026-10-20 (America/Edmonton)",
+  "label": "model-checked, not human-verified",
+  "purpose": "Karen rubric gap #5 (Recommendations): mandatory-trigger sourcing and drop-in tests for Backy's #26/#30",
+  "codedb": "NBC(AE) 2023 2nd printing snapshot",
+  "guardrails": "no compliance verdicts; no answer-key sources (README, expected/, keys/); route to a named professional or officer",
+  "common_must_not": [
+    "state that the design complies, is compliant, or is approved",
+    "state as a final ruling that a professional is or is not required (route instead)",
+    "close needs_professional without the applicant confirming an engineer/architect role plus a seal or registration number (#26)",
+    "close the gap because a document names a person or a seal (#26)",
+    "state that a variance or relaxation is granted, will be granted, or is not needed",
+    "answer yes or no on the officer's behalf"
+  ],
+  "triggers": [
+    {
+      "id": "HR-02",
+      "name": "Coordinating registered professional, registered professionals of record, Schedules A and B",
+      "mandatory_call": "mandatory (once the project is outside every Div C 2.4.1.1.(1) exception); plus a separate discretionary AHJ power in Div C 2.4.1.1.(4)",
+      "call_basis": "Div C 2.4.1.1.(3) and 2.4.2.2.(1) use \"shall\"; Subsection 2.4.2. applies to every 2.4.1.1.(3) project (Div C 2.4.2.1.(1)). Div C 2.4.1.1.(4) is \"may require\" (discretionary).",
+      "basis": [
+        {
+          "kind": "code",
+          "cite": "Div C Sentence 2.4.1.1.(3)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 740,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "For buildings other than those described in Sentence (1), the drawings and specifications shall be authenticated by one or more registered professionals",
+          "verification": "codedb-checked, 2nd printing, PDF p.740"
+        },
+        {
+          "kind": "code",
+          "cite": "Div C Sentence 2.4.2.1.(1)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 741,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "This Subsection applies to a project that falls within the scope of Sentence 2.4.1.1.(3).",
+          "verification": "codedb-checked, 2nd printing, PDF p.741"
+        },
+        {
+          "kind": "code",
+          "cite": "Div C Sentence 2.4.2.2.(1)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 741,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "Before applying for a permit, the owner shall a) retain a coordinating registered professional",
+          "verification": "codedb-checked, 2nd printing, PDF p.741"
+        },
+        {
+          "kind": "code",
+          "cite": "Div C Sentence 2.4.2.2.(1)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 741,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "c) provide the authority having jurisdiction with Schedules A and B",
+          "verification": "codedb-checked, 2nd printing, PDF p.741"
+        },
+        {
+          "kind": "code",
+          "cite": "Div C Sentence 2.4.1.1.(1)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 739,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "b) classified as a residential occupancy that is i) a single-family dwelling, or ii) a multiple-family dwelling that contains 4 dwelling units or less",
+          "verification": "codedb-checked, 2nd printing, PDF p.739"
+        },
+        {
+          "kind": "code",
+          "cite": "Div C Sentence 2.4.1.1.(4)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 740,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "the authority having jurisdiction may require the involvement of one or more registered professionals",
+          "verification": "codedb-checked, 2nd printing, PDF p.740"
+        }
+      ],
+      "fires_when": [
+        "building outside every exception in Div C 2.4.1.1.(1), e.g. residential multiple-family dwelling with more than 4 dwelling units (secondary suites not counted, Div C 2.4.1.1.(2))"
+      ],
+      "near_misses": [
+        "single-family dwelling, or multiple-family dwelling with 4 dwelling units or less (exception (1)(b))",
+        "a house with a secondary suite: the suite is not counted as a dwelling unit (Div C 2.4.1.1.(2))",
+        "inside an exception but the AHJ invokes Div C 2.4.1.1.(4): discretionary, the officer decides"
+      ],
+      "tests": [
+        {
+          "id": "mtt-02a",
+          "kind": "fires",
+          "input_facts": {
+            "occupancy": "residential, multiple-family dwelling",
+            "dwelling_units": 64,
+            "storeys": 5,
+            "uses": "retail at grade",
+            "crp_name": null,
+            "schedule_a_provided": false,
+            "schedule_b_provided": false
+          },
+          "expected": {
+            "route": "human_review",
+            "human": "coordinating registered professional and registered professionals of record (owner retains them)",
+            "gap": {
+              "type": "needs_professional",
+              "status": "open"
+            },
+            "cite": [
+              "Div C 2.4.1.1.(3)",
+              "Div C 2.4.2.2.(1)"
+            ],
+            "ask": "Who is the coordinating registered professional, and have Schedules A and B been provided to the authority having jurisdiction?"
+          },
+          "must_not": [
+            "state that the design complies, is compliant, or is approved",
+            "state as a final ruling that a professional is or is not required (route instead)",
+            "close needs_professional without the applicant confirming an engineer/architect role plus a seal or registration number (#26)",
+            "close the gap because a document names a person or a seal (#26)",
+            "state that a variance or relaxation is granted, will be granted, or is not needed",
+            "answer yes or no on the officer's behalf"
+          ],
+          "label": "model-checked, not human-verified"
+        },
+        {
+          "id": "mtt-02b",
+          "kind": "near_miss",
+          "input_facts": {
+            "occupancy": "residential, single-family dwelling",
+            "dwelling_units": 1,
+            "secondary_suites_count": 1,
+            "storeys": 2
+          },
+          "expected": {
+            "trigger_fires": false,
+            "route": "none from HR-02; other triggers (HR-03 to HR-07) are still checked",
+            "note": "Div C 2.4.1.1.(4): the officer may still require a professional; show this as possible, not as a ruling."
+          },
+          "must_not": [
+            "state that the design complies, is compliant, or is approved",
+            "state as a final ruling that a professional is or is not required (route instead)",
+            "close needs_professional without the applicant confirming an engineer/architect role plus a seal or registration number (#26)",
+            "close the gap because a document names a person or a seal (#26)",
+            "state that a variance or relaxation is granted, will be granted, or is not needed",
+            "answer yes or no on the officer's behalf",
+            "say \"no professional is needed\""
+          ],
+          "label": "model-checked, not human-verified"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": "HR-05",
+      "name": "Part 9 sends sheathing fastening, anchorage or lumber roof sheathing to Part 4 because of wind or seismic hazard",
+      "mandatory_call": "mandatory (when a threshold is met)",
+      "call_basis": "The Part 9 Sentences say \"shall conform to Part 4\" / \"shall be designed according to Part 4\"; Div C 2.4.1.2.(1) then says the Part 4 designer \"shall be a registered professional\".",
+      "basis": [
+        {
+          "kind": "code",
+          "cite": "Div B Sentence 9.23.3.5.(4)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 967,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "Fastening of sheathing shall conform to Part 4, a) where the 1-in-50 hourly wind pressure is equal to or greater than 1.2 kPa",
+          "verification": "codedb-checked, 2nd printing, PDF p.967"
+        },
+        {
+          "kind": "code",
+          "cite": "Div B Sentence 9.23.6.1.(6)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 970,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "Where … Sa(0.2), is greater than 1.8 or … wind pressure is equal to or greater than 1.2 kPa, anchorage shall be designed according to Part 4.",
+          "verification": "codedb-checked, 2nd printing, PDF p.970"
+        },
+        {
+          "kind": "code",
+          "cite": "Div B Sentence 9.23.16.5.(3)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 988,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "Lumber roof sheathing shall be designed according to Part 4, where a) the seismic spectral acceleration, Sa(0.2), is greater than 1.2",
+          "verification": "codedb-checked, 2nd printing, PDF p.988"
+        },
+        {
+          "kind": "code",
+          "cite": "Div C Sentence 2.4.1.2.(1)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 740,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "For design carried out in accordance with Part 4 … the designer shall be a registered professional skilled in the work concerned.",
+          "verification": "codedb-checked, 2nd printing, PDF p.740"
+        }
+      ],
+      "fires_when": [
+        "1-in-50 hourly wind pressure >= 1.2 kPa (sheathing fastening, anchorage; lumber roof sheathing at >= 1.20 kPa)",
+        "Sa(0.2) > 1.8 (anchorage; fastening of required braced wall panels)",
+        "Sa(0.2) > 1.2 (lumber roof sheathing)"
+      ],
+      "near_misses": [
+        "wind exactly below 1.2 kPa, e.g. 1.01 kPa (highest 1-in-50 value among the 147 Alberta rows of Div B Appendix C Table C-2, Cowley, page 667 of the PDF)",
+        "Sa(0.2) exactly 1.8 (the test is \"greater than\")",
+        "Edmonton: 1-in-50 0.45 kPa (Table C-2, page 667 of the PDF), Sa(0.2) 0.103 (Table C-3, page 672 of the PDF)"
+      ],
+      "tests": [
+        {
+          "id": "mtt-05a",
+          "kind": "fires",
+          "input_facts": {
+            "element": "sheathing fastening",
+            "hourly_wind_pressure_1in50_kPa": 1.2,
+            "Sa_0_2": 0.1,
+            "climate_source": "synthetic boundary value (no Table C-2 Alberta row reaches it)"
+          },
+          "expected": {
+            "route": "human_review",
+            "human": "registered professional (structural) for the Part 4 design",
+            "gap": {
+              "type": "needs_professional",
+              "status": "open"
+            },
+            "cite": [
+              "Div B 9.23.3.5.(4)",
+              "Div C 2.4.1.2.(1)"
+            ]
+          },
+          "must_not": [
+            "state that the design complies, is compliant, or is approved",
+            "state as a final ruling that a professional is or is not required (route instead)",
+            "close needs_professional without the applicant confirming an engineer/architect role plus a seal or registration number (#26)",
+            "close the gap because a document names a person or a seal (#26)",
+            "state that a variance or relaxation is granted, will be granted, or is not needed",
+            "answer yes or no on the officer's behalf"
+          ],
+          "label": "model-checked, not human-verified"
+        },
+        {
+          "id": "mtt-05b",
+          "kind": "near_miss",
+          "input_facts": {
+            "element": "sheathing fastening and anchorage",
+            "location": "Edmonton",
+            "hourly_wind_pressure_1in50_kPa": 0.45,
+            "Sa_0_2": 0.103
+          },
+          "expected": {
+            "trigger_fires": false,
+            "route": "none from HR-05; show the threshold and the table value as facts",
+            "cite": [
+              "Div B 9.23.3.5.(4)"
+            ]
+          },
+          "must_not": [
+            "state that the design complies, is compliant, or is approved",
+            "state as a final ruling that a professional is or is not required (route instead)",
+            "close needs_professional without the applicant confirming an engineer/architect role plus a seal or registration number (#26)",
+            "close the gap because a document names a person or a seal (#26)",
+            "state that a variance or relaxation is granted, will be granted, or is not needed",
+            "answer yes or no on the officer's behalf",
+            "say \"no engineer needed\""
+          ],
+          "label": "model-checked, not human-verified"
+        }
+      ],
+      "notes": "Finding: across the 147 Alberta locations in Table C-2/C-3, the highest 1-in-50 hourly wind pressure is 1.01 kPa (Cowley) and the highest Sa(0.2) is 0.287 (Jasper, page 673 of the PDF). So no listed Alberta location meets an HR-05 threshold; the firing test is a synthetic boundary case. Parsed from the official PDF text by script; model-checked, not human-verified."
+    },
+    {
+      "id": "HR-06",
+      "name": "Part 9 sends footings, floor spans, floors-on-ground or permafrost foundations to Part 4",
+      "mandatory_call": "mandatory (when a condition is met)",
+      "call_basis": "\"shall be designed in accordance with Section 4.2.\" / \"Subsection 4.1.3.\" / \"Part 4\"; Div C 2.4.1.2.(1) then requires a registered professional for design under Part 4 (model-derived chain: Div B Section 4.2. and Div B Subsection 4.1.3. are in Part 4).",
+      "basis": [
+        {
+          "kind": "code",
+          "cite": "Div B Sentence 9.15.3.3.(2)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 925,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "where the span of the supported joists exceeds 4.9 m, footings shall be designed in accordance with Section 4.2.",
+          "verification": "codedb-checked, 2nd printing, PDF p.925"
+        },
+        {
+          "kind": "code",
+          "cite": "Div B Sentence 9.15.3.3.(3)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 925,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "Where the specified live load exceeds 2.4 kPa, footings shall be designed in accordance with Section 4.2.",
+          "verification": "codedb-checked, 2nd printing, PDF p.925"
+        },
+        {
+          "kind": "code",
+          "cite": "Div B Sentence 9.16.1.2.(1)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 933,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "Floors-on-ground that support loads from the superstructure shall be designed in conformance with Part 4.",
+          "verification": "codedb-checked, 2nd printing, PDF p.933"
+        },
+        {
+          "kind": "code",
+          "cite": "Div B Sentence 9.23.4.1.(2)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 967,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "Spans for joists, beams and lintels supporting floors shall be determined according to Subsection 4.1.3. where the supported floors a) serve other than residential areas",
+          "verification": "codedb-checked, 2nd printing, PDF p.967"
+        },
+        {
+          "kind": "code",
+          "cite": "Div B Sentence 9.15.1.2.(1)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 924,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "Buildings erected on permafrost shall have foundations designed by a designer competent in this field in accordance with the appropriate requirements of Part 4.",
+          "verification": "codedb-checked, 2nd printing, PDF p.924"
+        },
+        {
+          "kind": "code",
+          "cite": "Div C Sentence 2.4.1.2.(1)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 740,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "For design carried out in accordance with Part 4 … the designer shall be a registered professional skilled in the work concerned.",
+          "verification": "codedb-checked, 2nd printing, PDF p.740"
+        }
+      ],
+      "fires_when": [
+        "supported joist span > 4.9 m (footings)",
+        "specified live load > 2.4 kPa (footings)",
+        "floor-on-ground carries superstructure loads",
+        "floors serving other than residential areas (spans)",
+        "permafrost"
+      ],
+      "near_misses": [
+        "joist span exactly 4.9 m (\"exceeds\")",
+        "live load exactly 2.4 kPa (\"exceeds\")",
+        "the exception in Div B 9.15.3.4.(2) referred to by 9.15.3.3.(2) (not assessed here)",
+        "slab-on-ground that carries no superstructure load"
+      ],
+      "tests": [
+        {
+          "id": "mtt-06a",
+          "kind": "fires",
+          "input_facts": {
+            "supported_joist_span_m": 5.2,
+            "specified_live_load_kPa": 1.9,
+            "occupancy": "residential, single-family dwelling"
+          },
+          "expected": {
+            "route": "human_review",
+            "human": "registered professional (structural/geotechnical) for the Section 4.2 footing design",
+            "gap": {
+              "type": "needs_professional",
+              "status": "open"
+            },
+            "cite": [
+              "Div B 9.15.3.3.(2)",
+              "Div C 2.4.1.2.(1)"
+            ]
+          },
+          "must_not": [
+            "state that the design complies, is compliant, or is approved",
+            "state as a final ruling that a professional is or is not required (route instead)",
+            "close needs_professional without the applicant confirming an engineer/architect role plus a seal or registration number (#26)",
+            "close the gap because a document names a person or a seal (#26)",
+            "state that a variance or relaxation is granted, will be granted, or is not needed",
+            "answer yes or no on the officer's behalf"
+          ],
+          "label": "model-checked, not human-verified"
+        },
+        {
+          "id": "mtt-06b",
+          "kind": "near_miss",
+          "input_facts": {
+            "supported_joist_span_m": 4.9,
+            "specified_live_load_kPa": 2.4,
+            "occupancy": "residential, single-family dwelling"
+          },
+          "expected": {
+            "trigger_fires": false,
+            "route": "none from HR-06 on these facts"
+          },
+          "must_not": [
+            "state that the design complies, is compliant, or is approved",
+            "state as a final ruling that a professional is or is not required (route instead)",
+            "close needs_professional without the applicant confirming an engineer/architect role plus a seal or registration number (#26)",
+            "close the gap because a document names a person or a seal (#26)",
+            "state that a variance or relaxation is granted, will be granted, or is not needed",
+            "answer yes or no on the officer's behalf",
+            "say \"no engineer needed\""
+          ],
+          "label": "model-checked, not human-verified"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": "HR-07",
+      "name": "Part 9 sends a material or element to Part 4",
+      "mandatory_call": "mandatory (when the element is present); bowstring/arch trusses medium confidence",
+      "call_basis": "\"shall be designed to conform to the requirements of Part 4\" / \"in conformance with Part 4\" / \"Subsection 4.3.1.\"; Div C 2.4.1.2.(1). For Div B 9.4.2.2.(3) the text sends only the snow-load requirements of Subsection 4.1.6.; whether that is \"design carried out in accordance with Part 4\" is a model judgement.",
+      "basis": [
+        {
+          "kind": "code",
+          "cite": "Div B Sentence 9.3.1.1.(3)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 831,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "Except as provided in Sentence (4), reinforced concrete shall be designed to conform to the requirements of Part 4.",
+          "verification": "codedb-checked, 2nd printing, PDF p.831"
+        },
+        {
+          "kind": "code",
+          "cite": "Div B Sentence 9.3.1.1.(4)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 831,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "For flat insulating concrete form walls not exceeding 2 storeys in building height and having a maximum floor to floor height of 3 m",
+          "verification": "codedb-checked, 2nd printing, PDF p.831"
+        },
+        {
+          "kind": "code",
+          "cite": "Div B Sentence 9.24.1.1.(2)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 991,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "Where loadbearing steel studs are used, they shall be designed in conformance with Part 4.",
+          "verification": "codedb-checked, 2nd printing, PDF p.991"
+        },
+        {
+          "kind": "code",
+          "cite": "Div B Sentence 9.17.1.1.(2)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 935,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "Columns for applications other than as described in Sentence (1) shall be designed in accordance with Part 4.",
+          "verification": "codedb-checked, 2nd printing, PDF p.935"
+        },
+        {
+          "kind": "code",
+          "cite": "Div B Sentence 9.23.1.1.(2)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 962,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "Where the conditions in Sentence (1) are exceeded for wood constructions, the design of the framing and fastening shall conform to Subsection 4.3.1.",
+          "verification": "codedb-checked, 2nd printing, PDF p.962"
+        },
+        {
+          "kind": "code",
+          "cite": "Div B Sentence 9.4.2.2.(3)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 838,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "Bow string, arch or semi-circular roof trusses having an unsupported span greater than 6 m shall be designed in conformance with the snow load requirements",
+          "verification": "codedb-checked, 2nd printing, PDF p.838"
+        },
+        {
+          "kind": "code",
+          "cite": "Div C Sentence 2.4.1.2.(1)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 740,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "For design carried out in accordance with Part 4 … the designer shall be a registered professional skilled in the work concerned.",
+          "verification": "codedb-checked, 2nd printing, PDF p.740"
+        }
+      ],
+      "fires_when": [
+        "reinforced concrete outside the flat-ICF permission",
+        "loadbearing steel studs",
+        "columns outside Div B 9.17.1.1.(1)",
+        "wood framing beyond Div B 9.23.1.1.(1) (e.g. a member span over 12.20 m)",
+        "bowstring/arch/semi-circular truss with unsupported span > 6 m"
+      ],
+      "near_misses": [
+        "flat ICF walls of 2 storeys or less with floor-to-floor 3 m or less (Div B 9.3.1.1.(4) gives a prescriptive route)",
+        "truss unsupported span exactly 6 m (\"greater than\")",
+        "non-loadbearing steel studs"
+      ],
+      "tests": [
+        {
+          "id": "mtt-07a",
+          "kind": "fires",
+          "input_facts": {
+            "structural_elements": [
+              "loadbearing steel studs"
+            ],
+            "occupancy": "residential, single-family dwelling",
+            "storeys": 2
+          },
+          "expected": {
+            "route": "human_review",
+            "human": "registered professional (structural) for the Part 4 design",
+            "gap": {
+              "type": "needs_professional",
+              "status": "open"
+            },
+            "cite": [
+              "Div B 9.24.1.1.(2)",
+              "Div C 2.4.1.2.(1)"
+            ]
+          },
+          "must_not": [
+            "state that the design complies, is compliant, or is approved",
+            "state as a final ruling that a professional is or is not required (route instead)",
+            "close needs_professional without the applicant confirming an engineer/architect role plus a seal or registration number (#26)",
+            "close the gap because a document names a person or a seal (#26)",
+            "state that a variance or relaxation is granted, will be granted, or is not needed",
+            "answer yes or no on the officer's behalf"
+          ],
+          "label": "model-checked, not human-verified"
+        },
+        {
+          "id": "mtt-07b",
+          "kind": "near_miss",
+          "input_facts": {
+            "structural_elements": [
+              "flat ICF foundation walls"
+            ],
+            "storeys": 2,
+            "floor_to_floor_m": 3.0,
+            "truss_type": "bowstring",
+            "truss_unsupported_span_m": 6.0
+          },
+          "expected": {
+            "trigger_fires": false,
+            "route": "none from HR-07 on these facts; the Div B 9.3.1.1.(4) prescriptive route is shown with its conditions"
+          },
+          "must_not": [
+            "state that the design complies, is compliant, or is approved",
+            "state as a final ruling that a professional is or is not required (route instead)",
+            "close needs_professional without the applicant confirming an engineer/architect role plus a seal or registration number (#26)",
+            "close the gap because a document names a person or a seal (#26)",
+            "state that a variance or relaxation is granted, will be granted, or is not needed",
+            "answer yes or no on the officer's behalf",
+            "say \"no engineer needed\""
+          ],
+          "label": "model-checked, not human-verified"
+        }
+      ],
+      "notes": ""
+    },
+    {
+      "id": "HR-30",
+      "name": "Any variance (alternative solution) request goes to a safety codes officer or Administrator",
+      "mandatory_call": "discretionary decision; routing is required (only an Administrator or safety codes officer holds the power)",
+      "call_basis": "SCA s.38(1) \"may issue\" and \"is of the opinion\": the grant is discretionary. The power is given only to \"An Administrator or a safety codes officer\", so the app can only route. s.38(3) \"shall notify\" binds the officer after issuing, not the applicant. This is officer routing, not professional design.",
+      "basis": [
+        {
+          "kind": "statute",
+          "cite": "Safety Codes Act s.38(1)",
+          "source": "Safety Codes Act, RSA 2000 c S-1 (King's Printer, current as of December 1, 2025)",
+          "pdf_page": 31,
+          "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
+          "quote": "An Administrator or a safety codes officer may issue a written variance",
+          "verification": "source-PDF-checked (pdftotext), page 31 of the Act PDF; not codedb (legislation)"
+        },
+        {
+          "kind": "statute",
+          "cite": "Safety Codes Act s.38(1)",
+          "source": "Safety Codes Act, RSA 2000 c S-1 (King's Printer, current as of December 1, 2025)",
+          "pdf_page": 31,
+          "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
+          "quote": "if the Administrator or officer is of the opinion that the variance provides approximately equivalent or greater safety performance",
+          "verification": "source-PDF-checked (pdftotext), page 31 of the Act PDF; not codedb (legislation)"
+        },
+        {
+          "kind": "statute",
+          "cite": "Safety Codes Act s.38(3)",
+          "source": "Safety Codes Act, RSA 2000 c S-1 (King's Printer, current as of December 1, 2025)",
+          "pdf_page": 31,
+          "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
+          "quote": "A safety codes officer on issuing a variance shall notify an Administrator.",
+          "verification": "source-PDF-checked (pdftotext), page 31 of the Act PDF; not codedb (legislation)"
+        },
+        {
+          "kind": "code",
+          "cite": "Div A Sentence 1.2.1.1.(1)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 38,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "b) using alternative solutions that will achieve at least the minimum level of performance required by Division B",
+          "verification": "codedb-checked, 2nd printing, PDF p.38"
+        },
+        {
+          "kind": "code",
+          "cite": "Div C Sentence 2.2.1.2.(1)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 729,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "A written request for a variance may be submitted to the Provincial Building Administrator.",
+          "verification": "codedb-checked, 2nd printing, PDF p.729"
+        }
+      ],
+      "fires_when": [
+        "the applicant asks to depart from an acceptable solution (alternative solution / variance request), site-specific"
+      ],
+      "near_misses": [
+        "the design follows the acceptable solution as written (no variance requested)",
+        "a province-wide request: written request to the Provincial Building Administrator (Div C 2.2.1.2.(1)), a different route",
+        "a Div B Section 3.8. barrier-free relaxation: HR-32 route"
+      ],
+      "tests": [
+        {
+          "id": "mtt-30a",
+          "kind": "fires",
+          "input_facts": {
+            "intake_action": "variance_request",
+            "variance_requested": true,
+            "scope": "one site",
+            "jurisdiction": "Calgary (confirmed)"
+          },
+          "expected": {
+            "route": "human_review",
+            "human": "safety codes officer of the reviewing authority (or an Administrator)",
+            "gap": {
+              "type": "officer_decision",
+              "status": "open"
+            },
+            "cite": [
+              "Safety Codes Act s.38(1)"
+            ],
+            "say": "The officer decides; Batatis prepares the request and cannot say it will be accepted."
+          },
+          "must_not": [
+            "state that the design complies, is compliant, or is approved",
+            "state as a final ruling that a professional is or is not required (route instead)",
+            "close needs_professional without the applicant confirming an engineer/architect role plus a seal or registration number (#26)",
+            "close the gap because a document names a person or a seal (#26)",
+            "state that a variance or relaxation is granted, will be granted, or is not needed",
+            "answer yes or no on the officer's behalf"
+          ],
+          "label": "model-checked, not human-verified"
+        },
+        {
+          "id": "mtt-30b",
+          "kind": "near_miss",
+          "input_facts": {
+            "intake_action": "variance_request",
+            "variance_requested": true,
+            "scope": "province-wide"
+          },
+          "expected": {
+            "trigger_fires": "different route",
+            "route": "human_review",
+            "human": "Provincial Building Administrator (written request)",
+            "cite": [
+              "Div C 2.2.1.2.(1)"
+            ]
+          },
+          "must_not": [
+            "state that the design complies, is compliant, or is approved",
+            "state as a final ruling that a professional is or is not required (route instead)",
+            "close needs_professional without the applicant confirming an engineer/architect role plus a seal or registration number (#26)",
+            "close the gap because a document names a person or a seal (#26)",
+            "state that a variance or relaxation is granted, will be granted, or is not needed",
+            "answer yes or no on the officer's behalf"
+          ],
+          "label": "model-checked, not human-verified"
+        }
+      ],
+      "notes": "The HRT json had mandatory=null for HR-30 (not codedb-only). This file classifies it as discretionary (decision) with required routing."
+    },
+    {
+      "id": "HR-32",
+      "name": "Barrier-free (Div B Section 3.8.) relaxation",
+      "mandatory_call": "discretionary (the Administrator \"may grant\"); routing to the Provincial Barrier-Free Administrator or Provincial Building Administrator",
+      "call_basis": "Div C 2.2.1.4.(1) \"may grant relaxation\" and only \"if an owner can demonstrate\" one of two grounds. Whether a local safety codes officer may also vary Div B Section 3.8. under SCA s.38 is not settled by this text (UNSOURCED).",
+      "basis": [
+        {
+          "kind": "code",
+          "cite": "Div C Sentence 2.2.1.4.(1)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 730,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "The Provincial Barrier-Free Administrator or Provincial Building Administrator may grant relaxation of one or more of the requirements of Section 3.8. of Division B",
+          "verification": "codedb-checked, 2nd printing, PDF p.730"
+        },
+        {
+          "kind": "code",
+          "cite": "Div C Sentence 2.2.1.4.(1)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 730,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "a) the specific requirements are unnecessary, or b) extraordinary circumstances prevent conformance.",
+          "verification": "codedb-checked, 2nd printing, PDF p.730"
+        },
+        {
+          "kind": "code",
+          "cite": "Div B Sentence 3.8.1.1.(1)",
+          "source": "NBC(AE) 2023, 2nd printing",
+          "pdf_page": 301,
+          "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+          "quote": "This Section is concerned with the barrier-free design of buildings.",
+          "verification": "codedb-checked, 2nd printing, PDF p.301"
+        }
+      ],
+      "fires_when": [
+        "the applicant asks to relax a requirement in Div B Section 3.8. (barrier-free design)"
+      ],
+      "near_misses": [
+        "the departure is from a requirement outside Section 3.8.: HR-30 route (safety codes officer)",
+        "barrier-free requirement met as written: no relaxation requested"
+      ],
+      "tests": [
+        {
+          "id": "mtt-32a",
+          "kind": "fires",
+          "input_facts": {
+            "provisions_varied": [
+              "Div B Section 3.8. requirement (barrier-free path of travel)"
+            ],
+            "request": "relaxation",
+            "owner_grounds": "extraordinary circumstances (applicant-stated)"
+          },
+          "expected": {
+            "route": "human_review",
+            "human": "Provincial Barrier-Free Administrator or Provincial Building Administrator",
+            "gap": {
+              "type": "administrator_decision",
+              "status": "open"
+            },
+            "cite": [
+              "Div C 2.2.1.4.(1)"
+            ],
+            "ask": "Which ground does the owner rely on (unnecessary, or extraordinary circumstances), and what shows it?"
+          },
+          "must_not": [
+            "state that the design complies, is compliant, or is approved",
+            "state as a final ruling that a professional is or is not required (route instead)",
+            "close needs_professional without the applicant confirming an engineer/architect role plus a seal or registration number (#26)",
+            "close the gap because a document names a person or a seal (#26)",
+            "state that a variance or relaxation is granted, will be granted, or is not needed",
+            "answer yes or no on the officer's behalf"
+          ],
+          "label": "model-checked, not human-verified"
+        },
+        {
+          "id": "mtt-32b",
+          "kind": "near_miss",
+          "input_facts": {
+            "provisions_varied": [
+              "Div B 3.1.9.1.(1)"
+            ],
+            "request": "variance"
+          },
+          "expected": {
+            "trigger_fires": false,
+            "route": "HR-30 (safety codes officer)",
+            "cite": [
+              "Safety Codes Act s.38(1)"
+            ]
+          },
+          "must_not": [
+            "state that the design complies, is compliant, or is approved",
+            "state as a final ruling that a professional is or is not required (route instead)",
+            "close needs_professional without the applicant confirming an engineer/architect role plus a seal or registration number (#26)",
+            "close the gap because a document names a person or a seal (#26)",
+            "state that a variance or relaxation is granted, will be granted, or is not needed",
+            "answer yes or no on the officer's behalf"
+          ],
+          "label": "model-checked, not human-verified"
+        }
+      ],
+      "notes": "The HRT json typed HR-32 as \"mandatory\" (routing rule) with mandatory=false; the text supports discretionary."
+    }
+  ]
+}

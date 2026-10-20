@@ -1,0 +1,639 @@
+{
+  "meta": {
+    "title": "Identify gold v2: high-confidence group for BAT-26",
+    "generated": "2026-10-20 (America/Edmonton, MDT UTC-6)",
+    "label": "model-checked, not human-verified",
+    "supersedes": "research/identify-gold-proposals.{md,json} (v1, kept unchanged)",
+    "codedb_snapshot": {
+      "path": "/workspace/batatis/codedb-snapshot/codedb.sqlite",
+      "sha256": "65e6504075167c3d12731593d57f9c58571bdf4fd5575af262011d1b18902192"
+    },
+    "edition": "NBC(AE) 2023 2nd printing",
+    "scoring": "Article level (engine/identify/benchmark.py _article()); must_cite stays empty on ask cases (SCHEMA rule 3); gold goes in gold.identify_gold",
+    "high_group": [
+      "dev-006",
+      "dev-009",
+      "dev-010",
+      "dev-011",
+      "dev-015"
+    ],
+    "high_n": 5,
+    "scored_n_if_adopted": 16,
+    "guardrails": "Golds name the provision at issue; they never say the design complies or fails. Evidence = case description + known_facts + codedb + public sources; case gold/should_cite/seed fields were not used as evidence.",
+    "builder": "research/src/gold_v2_build.py"
+  },
+  "climate_data": {
+    "source": "NBC(AE) 2023 2nd printing, Division B Appendix C, Table C-2 \"Climatic Design Data for Selected Locations in Alberta\" and Table C-3 \"Seismic Design Data for Selected Locations in Alberta for Part 9 Design\"",
+    "pdf": "/workspace/batatis-pr16/reference/codes/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.pdf",
+    "pdf_sha256_prefix": "3d45376d6c71d54b",
+    "table_C2_pages": [
+      667,
+      668,
+      669,
+      670
+    ],
+    "table_C3_pages": [
+      671,
+      672,
+      673,
+      674
+    ],
+    "C2_locations_parsed": 147,
+    "C2_moisture_index_max": 0.6,
+    "C2_HDD_min": 4460,
+    "cochrane": {
+      "page": 667,
+      "HDD": 5200,
+      "moisture_index": 0.4,
+      "hwp_1_50": 0.48,
+      "Sa02": 0.236,
+      "Sa02_page": 672
+    },
+    "method": "pdftotext -layout row parse (16 numeric columns; HDD = col 6, moisture index = col 10, 1/50 hourly wind pressure = last); model-checked, not human-verified"
+  },
+  "high": {
+    "dev-006": {
+      "status": "high (adopted in v1)",
+      "gold": [
+        {
+          "division": "B",
+          "provision": "9.25.5.2.(1)",
+          "article": "9.25.5.2.",
+          "article_title": "Position of Low Permeance Materials",
+          "role": "benchmark",
+          "tier": "primary",
+          "confidence": "high",
+          "quote": "… the ratio between the total thermal resistance of all materials outboard … inboard of that surface is not less than that required by Table 9.25.5.2.",
+          "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+          "pdf_page": 1000,
+          "reasoning": "'Outboard insulation is too thin for that wall' is exactly the outboard-to-inboard thermal-resistance ratio in Clause (1)(b); the foil-faced (essentially impermeable) board is a low-permeance sheet material. Whether the design actually fails the ratio is an intake question, but the provision at issue is this one.",
+          "label": "model-checked, not human-verified",
+          "quote_clipped": true
+        }
+      ],
+      "candidates": [
+        {
+          "division": "B",
+          "provision": "9.25.5.1.(1)",
+          "article": "9.25.5.1.",
+          "article_title": "General",
+          "role": "scope",
+          "tier": "secondary",
+          "confidence": "high",
+          "quote": "sheet and panel-type materials incorporated into assemblies described in Article 9.25.1.1. shall conform to Article 9.25.5.2.",
+          "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+          "pdf_page": 999,
+          "reasoning": "Scope gate (air leakage < 0.1 L/(s×m²), dry-cup permeance < 60 ng/(Pa×s×m²), no high moisture). Not the varied provision.",
+          "label": "model-checked, not human-verified"
+        }
+      ]
+    },
+    "dev-010": {
+      "status": "high (adopted in v1)",
+      "gold": [
+        {
+          "division": "B",
+          "provision": "9.10.15.5.(2)",
+          "article": "9.10.15.5.",
+          "article_title": "Construction of Exposing Building Face of Houses",
+          "role": "benchmark",
+          "tier": "primary",
+          "confidence": "high",
+          "quote": "where the limiting distance is less than 0.6 m, the exposing building face … shall have a fire-resistance rating of not less than 45 min",
+          "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+          "pdf_page": 902,
+          "reasoning": "A house (9.10.15. applies per 9.10.15.1.(1)) with the east wall 0.5 m from the property line: limiting distance < 0.6 m. The city's 'metal or noncombustible siding' matches Clause (2)(a). Clause (2)(b) is a conditional vinyl route (9.27.12., gypsum backing, FSR ≤ 25, ≤ 2 mm), so whether a variance is needed is an intake question, but the provision is this one.",
+          "label": "model-checked, not human-verified",
+          "quote_clipped": true
+        }
+      ],
+      "candidates": []
+    },
+    "dev-011": {
+      "status": "high (adopted in v1)",
+      "gold": [
+        {
+          "division": "B",
+          "provision": "9.23.10.1.(1)",
+          "article": "9.23.10.1.",
+          "article_title": "Stud Size and Spacing",
+          "role": "benchmark",
+          "tier": "primary",
+          "confidence": "high",
+          "quote": "The size and spacing of studs shall conform to Table 9.23.10.1.",
+          "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+          "pdf_page": 974,
+          "reasoning": "Table 9.23.10.1. (PDF p.975, checked visually): exterior walls carrying 'roof with or without attic storage plus one floor' allow 38 × 89 at max 400 mm (or 38 × 140 at 600 mm). 2x4 at 600 mm supporting the second floor and roof departs from the table.",
+          "label": "model-checked, not human-verified"
+        }
+      ],
+      "candidates": [
+        {
+          "division": "B",
+          "provision": "9.4.1.1.(1)",
+          "article": "9.4.1.1.",
+          "article_title": "General",
+          "role": "scope",
+          "tier": "secondary",
+          "confidence": "high",
+          "quote": "be designed according to Part 4 using the loads and deflection and vibration limits specified in",
+          "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+          "pdf_page": 836,
+          "reasoning": "Alternative acceptable-solution route (engineered design) for the proprietary header and stud system. If the manufacturer designs to Part 4 or good engineering practice, there may be no variance at all.",
+          "label": "model-checked, not human-verified"
+        }
+      ]
+    },
+    "dev-015": {
+      "status": "high (adopted in v1)",
+      "gold": [
+        {
+          "division": "B",
+          "provision": "9.9.9.1.(1)",
+          "article": "9.9.9.1.",
+          "article_title": "Travel Limit to Exits or Egress Doors",
+          "role": "benchmark",
+          "tier": "primary",
+          "confidence": "high",
+          "quote": "… dwelling unit containing more than 1 storey shall have exits or egress doors … not be necessary to travel up or down more than 1 storey",
+          "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+          "pdf_page": 872,
+          "reasoning": "Attic bedroom in a two-storey house: from the attic the occupant travels down two storeys to the front door. The window exception (2) needs a ≥1 m × 0.55 m opening with a sill ≤1 m above the floor; 'small skylights' is not a measurement, so the case stays 'ask', but this is the provision.",
+          "label": "model-checked, not human-verified",
+          "quote_clipped": true
+        }
+      ],
+      "candidates": [
+        {
+          "division": "B",
+          "provision": "9.9.10.1.(1)",
+          "article": "9.9.10.1.",
+          "article_title": "Egress Windows or Doors for Bedrooms",
+          "role": "candidate",
+          "tier": "secondary",
+          "confidence": "medium",
+          "quote": "Except where the suite is sprinklered, each bedroom or combination bedroom shall have at least one outside window or exterior door openable from the inside",
+          "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+          "pdf_page": 873,
+          "reasoning": "The new attic bedroom also triggers the bedroom egress-window requirement (opening size in 9.9.10.1.(2)); small skylights may fail it too. Secondary because the applicant's question is about the way out, and this applies unless the suite is sprinklered.",
+          "label": "model-checked, not human-verified"
+        }
+      ]
+    },
+    "dev-009": {
+      "status": "upgraded: medium -> high (Article level)",
+      "gold": [
+        {
+          "division": "B",
+          "provision": "9.27.2.2.(5)",
+          "article": "9.27.2.2.",
+          "article_title": "Minimum Protection from Precipitation Ingress",
+          "role": "benchmark",
+          "tier": "primary",
+          "confidence": "high (Article 9.27.2.2.); pinpoint (5) medium",
+          "quote": "… second plane of protection incorporating a capillary break … b) the number of degree-days is 3400 or more, and the moisture index is greater than 1.00.",
+          "pdf_page": 1014,
+          "reasoning": "The inspectors' \"gap behind the cladding\" is the capillary break, and the Sentence that says when one is required is 9.27.2.2.(5). Scoring is at Article level, and every reading of the case (capillary break required or not, the (6) exceptions, what counts as a break under (1)) sits in Article 9.27.2.2., so the Article is high-confidence. Whether (5) is triggered depends on the site climate. The Table C-2 values are recorded below for the officer; the gold does not decide whether the panel complies.",
+          "label": "model-checked, not human-verified",
+          "quote_clipped": true
+        }
+      ],
+      "candidates": [
+        {
+          "division": "B",
+          "provision": "9.27.2.2.(4)",
+          "article": "9.27.2.2.",
+          "article_title": "Minimum Protection from Precipitation Ingress",
+          "role": "scope",
+          "tier": "secondary",
+          "confidence": "high",
+          "quote": "Exterior walls exposed to precipitation shall be protected against precipitation ingress by an exterior cladding assembly … where such walls enclose spaces of residential occupancy",
+          "pdf_page": 1014,
+          "reasoning": "Houses: the two-plane requirement applies regardless of climate; same Article.",
+          "label": "model-checked, not human-verified",
+          "quote_clipped": true
+        },
+        {
+          "division": "B",
+          "provision": "9.27.2.2.(1)",
+          "article": "9.27.2.2.",
+          "article_title": "Minimum Protection from Precipitation Ingress",
+          "role": "definition",
+          "tier": "secondary",
+          "confidence": "high",
+          "quote": "a cladding assembly is deemed to have a capillary break … a) there is a drained and vented air space not less than 9.5 mm deep",
+          "pdf_page": 1013,
+          "reasoning": "What counts as a capillary break; same Article.",
+          "label": "model-checked, not human-verified",
+          "quote_clipped": true
+        },
+        {
+          "division": "B",
+          "provision": "9.27.2.2.(6)",
+          "article": "9.27.2.2.",
+          "article_title": "Minimum Protection from Precipitation Ingress",
+          "role": "exception",
+          "tier": "secondary",
+          "confidence": "medium",
+          "quote": "the first and second planes of protection need not incorporate a capillary break … will not adversely affect the performance of the building assemblies",
+          "pdf_page": 1014,
+          "reasoning": "The route the manufacturer's evidence would target if (5) applies; same Article.",
+          "label": "model-checked, not human-verified",
+          "quote_clipped": true
+        }
+      ],
+      "supporting": {
+        "note": {
+          "note": "A-9.27.2.",
+          "pdf_page": 1429,
+          "quote": "Part 5 and Part 9 of the NBC(AE) recognize that mass walls and face-sealed, concealed barrier and rainscreen assemblies have their place …",
+          "label": "model-checked, not human-verified",
+          "quote_clipped": true
+        },
+        "climate_facts": "Table C-2 (PDF pages 667-670): 147 Alberta locations parsed. Lowest degree-days 4460 (so every listed location is in branch (5)(b), \"3400 or more\"); highest moisture index 0.6 (the (5)(b) threshold is \"greater than 1.00\"). These are recorded facts for the officer and are not a compliance finding. A site not listed in Table C-2 needs its own values."
+      },
+      "missing_to_confirm": [
+        "site location (if not in Table C-2)",
+        "backing materials (for 9.27.2.2.(6)(c))"
+      ],
+      "evidence_basis": "case description + known_facts + codedb + Appendix C of the official PDF; the case gold/should_cite fields were not used as evidence"
+    }
+  },
+  "not_high": {
+    "dev-005": {
+      "status": "not upgraded",
+      "confidence": "low",
+      "gold_proposed": [
+        {
+          "division": "B",
+          "provision": "9.10.14.5.(1)",
+          "article": "9.10.14.5.",
+          "article_title": "Construction of Exposing Building Face and Walls above Exposing Building Face",
+          "role": "benchmark",
+          "tier": "primary",
+          "confidence": "low",
+          "quote": "each exposing building face and any exterior wall located above an exposing building face … shall be constructed in conformance with Table 9.10.14.5.-A",
+          "pdf_page": 897,
+          "reasoning": "Part 9 branch.",
+          "label": "model-checked, not human-verified",
+          "quote_clipped": true
+        }
+      ],
+      "competing": [
+        {
+          "division": "B",
+          "provision": "3.2.3.7.(1)",
+          "article": "3.2.3.7.",
+          "article_title": "Construction of Exposing Building Face",
+          "role": "candidate",
+          "tier": "secondary",
+          "confidence": "low",
+          "quote": "the fire-resistance rating, construction and cladding for exposing building faces … of Group A, B, C, D … shall comply with Table 3.2.3.7.",
+          "pdf_page": 212,
+          "reasoning": "Part 3 branch.",
+          "label": "model-checked, not human-verified",
+          "quote_clipped": true
+        },
+        {
+          "division": "B",
+          "provision": "9.10.15.1.(1)",
+          "article": "9.10.15.1.",
+          "article_title": "Application",
+          "role": "scope",
+          "tier": "secondary",
+          "confidence": "low",
+          "quote": "buildings that contain only dwelling units and have no dwelling unit above another dwelling unit",
+          "pdf_page": 900,
+          "reasoning": "If no dwelling unit is above another, 9.10.15. (not 9.10.14.) governs.",
+          "label": "model-checked, not human-verified"
+        }
+      ],
+      "scope_quotes": [
+        {
+          "division": "A",
+          "provision": "1.3.3.3.(1)",
+          "article": "1.3.3.3.",
+          "article_title": "Application of Parts 9, 10 and 11",
+          "role": "scope",
+          "tier": "scope",
+          "confidence": "n/a",
+          "quote": "of 3 storeys or less in building height, having a building area not exceeding 600 m²",
+          "pdf_page": 40,
+          "reasoning": "Part 9 limits",
+          "label": "model-checked, not human-verified"
+        }
+      ],
+      "why_not_high": "Three different Articles are possible, depending on facts the description does not give: Part 3 Div B 3.2.3.7. if the building is over 3 storeys or over 600 m² (Div A 1.3.3.3.(1)); Div B 9.10.15.5. if no dwelling unit is above another (Div B 9.10.15.1.(1)); otherwise Div B 9.10.14.5. \"Small apartment buildings\" fixes none of these.",
+      "missing_facts": [
+        "building height in storeys",
+        "building area",
+        "whether any dwelling unit is above another",
+        "limiting distance / unprotected-opening %"
+      ]
+    },
+    "dev-007": {
+      "status": "not upgraded",
+      "confidence": "medium",
+      "gold_proposed": [
+        {
+          "division": "B",
+          "provision": "9.27.3.3.(1)",
+          "article": "9.27.3.3.",
+          "article_title": "Required Sheathing Membrane and Installation",
+          "role": "benchmark",
+          "tier": "primary",
+          "confidence": "medium",
+          "quote": "Except as provided in Articles 9.27.3.4. to 9.27.3.6., at least one layer of sheathing membrane shall be applied beneath cladding.",
+          "pdf_page": 1015,
+          "reasoning": "Omitting the housewrap departs from this Sentence unless an exception Article applies.",
+          "label": "model-checked, not human-verified"
+        }
+      ],
+      "competing": [
+        {
+          "division": "B",
+          "provision": "9.27.3.4.(1)",
+          "article": "9.27.3.4.",
+          "article_title": "Insulating Sheathing in lieu of Sheathing Membrane",
+          "role": "candidate",
+          "tier": "secondary",
+          "confidence": "medium",
+          "quote": "Where non-wood-based rigid exterior insulating sheathing, or exterior insulating sheathing with an integral sheathing membrane is installed, a separate sheathing membrane is not required.",
+          "pdf_page": 1015,
+          "reasoning": "If the board qualifies, no membrane is required and the departure moves to the joints in 9.27.3.4.(2) (butted, unsealed).",
+          "label": "model-checked, not human-verified"
+        },
+        {
+          "division": "B",
+          "provision": "9.27.3.4.(2)",
+          "article": "9.27.3.4.",
+          "article_title": "Insulating Sheathing in lieu of Sheathing Membrane",
+          "role": "candidate",
+          "tier": "secondary",
+          "confidence": "medium",
+          "quote": "the joints of sheathing panels not subject to moisture deterioration shall be i) sealed at all joints, or ii) lapped or tongue and groove …",
+          "pdf_page": 1015,
+          "reasoning": "Joint rule if 9.27.3.4.(1) applies.",
+          "label": "model-checked, not human-verified",
+          "quote_clipped": true
+        }
+      ],
+      "supporting": [
+        {
+          "note": "A-9.27.3.4.(2)",
+          "pdf_page": 1432,
+          "quote": "Butt joints can drain to either side and so should not be used unless they are sealed.",
+          "label": "model-checked, not human-verified"
+        }
+      ],
+      "why_not_high": "The scored Article flips between 9.27.3.3. and 9.27.3.4. depending on whether the specified board is \"non-wood-based rigid exterior insulating sheathing\" (9.27.3.4.(1)). The applicant calls it \"semi-rigid\". The code does not define \"rigid\", and codedb has no Note on 9.27.3.4.(1) (only A-9.27.3.4.(2) on joints). No public Alberta guidance was found in this pass that classifies semi-rigid mineral wool board.",
+      "missing_facts": [
+        "product data sheet / material standard and rigidity classification of the mineral wool board"
+      ]
+    },
+    "dev-012": {
+      "status": "not upgraded (raised low -> medium)",
+      "confidence": "medium",
+      "gold_proposed": [
+        {
+          "division": "B",
+          "provision": "9.23.13.1.(2)",
+          "article": "9.23.13.1.",
+          "article_title": "Requirements for Low to Moderate Wind and Seismic Forces",
+          "role": "benchmark",
+          "tier": "primary",
+          "confidence": "medium",
+          "quote": "Bracing to resist lateral loads shall be designed and constructed as follows",
+          "pdf_page": 978,
+          "reasoning": "Low-to-moderate-force bracing rule; the site values now fall in this Article's scope.",
+          "label": "model-checked, not human-verified"
+        },
+        {
+          "division": "B",
+          "provision": "9.23.13.1.(1)",
+          "article": "9.23.13.1.",
+          "article_title": "Requirements for Low to Moderate Wind and Seismic Forces",
+          "role": "scope",
+          "tier": "primary",
+          "confidence": "high (for the climate branch)",
+          "quote": "This Article applies in locations where … Sa(0.2), is not more than 0.70 and the 1-in-50 hourly wind pressure is less than 0.80 kPa.",
+          "pdf_page": 978,
+          "reasoning": "Cochrane values below.",
+          "label": "model-checked, not human-verified",
+          "quote_clipped": true
+        }
+      ],
+      "competing": [
+        {
+          "division": "B",
+          "provision": "9.23.1.1.(1)",
+          "article": "9.23.1.1.",
+          "article_title": "Limitations",
+          "role": "scope",
+          "tier": "secondary",
+          "confidence": "medium",
+          "quote": "This Section applies to constructions where wall, floor and roof planes are generally comprised of lumber frames of small repetitive structural members, or engineered components",
+          "pdf_page": 962,
+          "reasoning": "Whether a SIP house is inside Section 9.23. at all.",
+          "label": "model-checked, not human-verified"
+        },
+        {
+          "division": "B",
+          "provision": "9.4.1.1.(1)",
+          "article": "9.4.1.1.",
+          "article_title": "General",
+          "role": "candidate",
+          "tier": "secondary",
+          "confidence": "medium",
+          "quote": "be designed according to Part 4 using the loads and deflection and vibration limits specified in i) Part 9, or ii) Part 4.",
+          "pdf_page": 836,
+          "reasoning": "Engineering-design route if Section 9.23. does not apply to the SIP system.",
+          "label": "model-checked, not human-verified"
+        }
+      ],
+      "supporting": [
+        {
+          "note": "A-9.23.1.1.",
+          "pdf_page": 1405,
+          "quote": "The prescriptive requirements in Section 9.23. apply only to standard light wood-frame construction.",
+          "label": "model-checked, not human-verified"
+        }
+      ],
+      "climate_resolved": "Cochrane: Table C-3 Sa(0.2) = 0.236 (PDF page 672); Table C-2 1-in-50 hourly wind pressure = 0.48 kPa (PDF page 667). Both are within the 9.23.13.1.(1) limits, so the high-force branch 9.23.13.2. is not the scoped Article for this town.",
+      "why_not_high": "The climate fact is resolved, but the scope fact is not. If the SIP system counts as standard light wood-frame construction, 9.23.13.1. is the benchmark; if not, Note A-9.23.1.1. sends design to Part 4 (9.4.1.1.(1)(c)). The description gives no product evaluation. Public SIP documents found (an Ontario Minister's ruling cited by a manufacturer; CCMC listings) are not Alberta and not for this product, so they were not used.",
+      "missing_facts": [
+        "SIP product and any CCMC evaluation number",
+        "whether the panel system is framed (studs/splines) or stressed-skin only",
+        "site address within Cochrane (Table C-2/C-3 give town values)"
+      ]
+    },
+    "dev-020": {
+      "status": "unchanged: no defensible gold",
+      "confidence": null,
+      "why_not_high": "Part 3 vs Part 9 cannot be decided (v1 finding, not re-opened)."
+    }
+  },
+  "patches": [
+    {
+      "file": "evals_dev/cases/dev-006.json",
+      "op": "add",
+      "path": "/gold/identify_gold",
+      "value": [
+        {
+          "division": "B",
+          "provision": "9.25.5.2.(1)",
+          "role": "benchmark",
+          "confidence": "high",
+          "label": "model-checked, not human-verified"
+        }
+      ]
+    },
+    {
+      "file": "evals_dev/cases/dev-009.json",
+      "op": "add",
+      "path": "/gold/identify_gold",
+      "value": [
+        {
+          "division": "B",
+          "provision": "9.27.2.2.(5)",
+          "role": "benchmark",
+          "confidence": "high",
+          "label": "model-checked, not human-verified"
+        }
+      ]
+    },
+    {
+      "file": "evals_dev/cases/dev-010.json",
+      "op": "add",
+      "path": "/gold/identify_gold",
+      "value": [
+        {
+          "division": "B",
+          "provision": "9.10.15.5.(2)",
+          "role": "benchmark",
+          "confidence": "high",
+          "label": "model-checked, not human-verified"
+        }
+      ]
+    },
+    {
+      "file": "evals_dev/cases/dev-011.json",
+      "op": "add",
+      "path": "/gold/identify_gold",
+      "value": [
+        {
+          "division": "B",
+          "provision": "9.23.10.1.(1)",
+          "role": "benchmark",
+          "confidence": "high",
+          "label": "model-checked, not human-verified"
+        }
+      ]
+    },
+    {
+      "file": "evals_dev/cases/dev-015.json",
+      "op": "add",
+      "path": "/gold/identify_gold",
+      "value": [
+        {
+          "division": "B",
+          "provision": "9.9.9.1.(1)",
+          "role": "benchmark",
+          "confidence": "high",
+          "label": "model-checked, not human-verified"
+        }
+      ]
+    },
+    {
+      "file": "evals_dev/cases/dev-005.json",
+      "op": "add",
+      "path": "/gold/identify_gold_candidates",
+      "value": [
+        {
+          "division": "B",
+          "provision": "9.10.14.5.(1)",
+          "role": "benchmark",
+          "confidence": "low",
+          "label": "model-checked, not human-verified"
+        },
+        {
+          "division": "B",
+          "provision": "3.2.3.7.(1)",
+          "role": "candidate",
+          "confidence": "low",
+          "label": "model-checked, not human-verified"
+        },
+        {
+          "division": "B",
+          "provision": "9.10.15.1.(1)",
+          "role": "scope",
+          "confidence": "low",
+          "label": "model-checked, not human-verified"
+        }
+      ]
+    },
+    {
+      "file": "evals_dev/cases/dev-007.json",
+      "op": "add",
+      "path": "/gold/identify_gold_candidates",
+      "value": [
+        {
+          "division": "B",
+          "provision": "9.27.3.3.(1)",
+          "role": "benchmark",
+          "confidence": "medium",
+          "label": "model-checked, not human-verified"
+        },
+        {
+          "division": "B",
+          "provision": "9.27.3.4.(1)",
+          "role": "candidate",
+          "confidence": "medium",
+          "label": "model-checked, not human-verified"
+        },
+        {
+          "division": "B",
+          "provision": "9.27.3.4.(2)",
+          "role": "candidate",
+          "confidence": "medium",
+          "label": "model-checked, not human-verified"
+        }
+      ]
+    },
+    {
+      "file": "evals_dev/cases/dev-012.json",
+      "op": "add",
+      "path": "/gold/identify_gold_candidates",
+      "value": [
+        {
+          "division": "B",
+          "provision": "9.23.13.1.(2)",
+          "role": "benchmark",
+          "confidence": "medium",
+          "label": "model-checked, not human-verified"
+        },
+        {
+          "division": "B",
+          "provision": "9.23.13.1.(1)",
+          "role": "scope",
+          "confidence": "medium",
+          "label": "model-checked, not human-verified"
+        },
+        {
+          "division": "B",
+          "provision": "9.23.1.1.(1)",
+          "role": "scope",
+          "confidence": "medium",
+          "label": "model-checked, not human-verified"
+        },
+        {
+          "division": "B",
+          "provision": "9.4.1.1.(1)",
+          "role": "candidate",
+          "confidence": "medium",
+          "label": "model-checked, not human-verified"
+        }
+      ]
+    }
+  ]
+}
