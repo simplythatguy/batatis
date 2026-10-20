@@ -346,3 +346,36 @@ def test_missing_corpus_never_spends_on_an_ungrounded_query(tmp_path, monkeypatc
     response = TestClient(create_app()).post('/identify', json={'query': 'soffit'})
     assert response.status_code == 200 and response.json()['label'] == 'keyword search, no AI'
     assert not seen and _rows(path) == []
+
+
+def test_read_connection_reset_cannot_refund_a_potentially_billed_attempt(tmp_path, monkeypatch):
+    """URLError/OSError may occur while reading after the POST has been billed."""
+    estimate = spend.token_cost(MODEL, spend.estimate_input_tokens(_messages()), 8)
+    path = _prepare(tmp_path, monkeypatch, cap=str(estimate))
+    attempts = []
+    def reset_after_send(*args, **kwargs):
+        attempts.append('POST accepted, response connection reset')
+        raise urllib.error.URLError(ConnectionResetError('synthetic lost response'))
+    # Exercise both transport shapes used by the pre-fix cloud head and the fix.
+    monkeypatch.setattr(urllib.request, 'urlopen', reset_after_send)
+    monkeypatch.setattr(urllib.request, 'build_opener', lambda *a: SimpleNamespace(open=reset_after_send))
+    with pytest.raises(spend.SpendError):
+        call()
+    assert call().notice == spend.CAP_NOTICE
+    assert len(attempts) == 1 and _rows(path)[0]['status'] != 'released'
+
+
+def test_lifetime_budget_survives_new_dates_and_live_mode_toggles(tmp_path, monkeypatch):
+    path = _prepare(tmp_path, monkeypatch)
+    ledger = spend.open_ledger()
+    row = ledger.reserve('past', MODEL, Decimal('20'), Decimal('20'))
+    ledger.settle(row, Decimal('20'))
+    with sqlite3.connect(path) as con:
+        con.execute("UPDATE spend_ledger SET ts='2000-01-01T00:00:00.000000Z'")
+    attempts = []
+    monkeypatch.setattr(spend, '_post_chat', lambda *a: attempts.append('provider'))
+    monkeypatch.setenv('BATATIS_LIVE', '0')
+    assert call().offline
+    monkeypatch.setenv('BATATIS_LIVE', '1')
+    assert call().notice == spend.CAP_NOTICE
+    assert not attempts and len(_rows(path)) == 1
