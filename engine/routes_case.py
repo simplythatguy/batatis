@@ -38,7 +38,11 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
 
     @router.post('/cases/{case_id}/section-d', response_model=SectionDPlan)
     def section_d(case_id: str, body: SectionDRequest | None = None):
-        case = get_case(case_id)
+        store = cases()
+        snapshot = store.get_snapshot(case_id)
+        if snapshot is None:
+            raise HTTPException(404, 'case not found')
+        case, version = snapshot
         if body and body.provisions is not None:
             case.provisions = body.provisions
         try:
@@ -48,7 +52,12 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
             raise HTTPException(404, error.args[0]) from error
         except ValueError as error:
             raise HTTPException(400, f'invalid provision id: {error}') from error
-        cases().put(case)
+        try:
+            store.put(case, expected_version=version)
+        except VersionConflict as error:
+            if error.actual is None:
+                raise HTTPException(404, 'case not found') from error
+            raise HTTPException(409, 'case was updated concurrently') from error
         return plan
 
     @router.get('/cases/{case_id}/section-d/issues', response_model=list[SectionDIssue])
