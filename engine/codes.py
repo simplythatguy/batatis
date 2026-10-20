@@ -8,7 +8,8 @@ from pathlib import Path
 
 from codedb import lookup, search, store
 
-DEFAULT_DB = Path('/Users/aamia/.t3/projects/batatis/codedb/build/codedb.sqlite')
+_REPO = Path(__file__).resolve().parents[1]
+DEFAULT_DB = _REPO / 'codedb' / 'build' / 'codedb.sqlite'
 OBJECTIVES_PROVISION = ('2.2.1.1.(1)', 'A')        # Div A listing of objectives
 FUNCTIONS_PROVISION = ('3.2.1.1.(1)', 'A')         # Div A listing of functional statements
 
@@ -17,11 +18,18 @@ def default_db() -> Path:
     return Path(os.environ.get('BATATIS_CODEDB') or DEFAULT_DB)
 
 
+class CodeDbMissing(Exception):
+    """Raised only when the code database file is absent. The message has no path."""
+
+    def __init__(self) -> None:
+        super().__init__('code database not found')
+
+
 class Codes:
     def __init__(self, db_path: Path | str | None = None):
         self.db_path = Path(db_path) if db_path else default_db()
         if not self.db_path.exists():
-            raise FileNotFoundError(f'code database not found: {self.db_path} (set BATATIS_CODEDB)')
+            raise CodeDbMissing()
         self._definition = lru_cache(maxsize=None)(self._definition_uncached)
 
     def provision(self, provision_id: str, division: str | None = 'B') -> dict | None:

@@ -1,17 +1,65 @@
 """HTTP interface for the engine. Run: uvicorn engine.api:app --reload"""
 from __future__ import annotations
 
-from fastapi import FastAPI, HTTPException, Query, Response
+import logging
+from typing import Literal
+
+from fastapi import FastAPI, File, HTTPException, Query, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from starlette.datastructures import MutableHeaders
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from codedb import AmbiguousProvisionError
 
-from .codes import Codes
+from .codes import CodeDbMissing, Codes
+from .codes import default_db
 from .export import ExportBlocked, ExportError, FormNotFound, export_case
-from .models import Case, Fact, Jurisdiction, SectionCRow
+from .files import FileTooLarge, NotAPdf, discard_pdf, max_upload_bytes, save_pdf
+from .models import Case, Fact, Jurisdiction, SectionCRow, Source
 from .section_c import section_c_rows
 from .store import CaseStore
+
+logger = logging.getLogger(__name__)
+
+# Names the browser may read. Any other X-Batatis-* response header is added on the way out.
+EXPOSE_HEADERS = (
+    'Content-Disposition',
+    'X-Batatis-Form-Version',
+    'X-Batatis-Form-Date',
+    'X-Batatis-Form-Id',
+    'X-Batatis-Jurisdiction',
+)
+
+
+class ExposeBatatisHeaders:
+    """Keep Content-Disposition and every X-Batatis-* response header visible to the browser."""
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope['type'] != 'http':
+            await self.app(scope, receive, send)
+            return
+
+        async def send_with_expose(message: Message) -> None:
+            if message['type'] == 'http.response.start':
+                headers = MutableHeaders(scope=message)
+                names = [part.strip() for part in headers.get('access-control-expose-headers', '').split(',')
+                         if part.strip()]
+                seen = {name.lower() for name in names}
+                if 'content-disposition' not in seen:
+                    names.append('Content-Disposition')
+                    seen.add('content-disposition')
+                for key in headers:
+                    if key.lower().startswith('x-batatis-') and key.lower() not in seen:
+                        names.append(key)
+                        seen.add(key.lower())
+                headers['access-control-expose-headers'] = ', '.join(names)
+            await send(message)
+
+        await self.app(scope, receive, send_with_expose)
 
 
 class NewCase(BaseModel):
@@ -27,10 +75,19 @@ class ExportRequest(BaseModel):
     draft: bool = False
 
 
+class StoredFile(BaseModel):
+    id: str
+    name: str
+    pages: int
+    sha256: str
+    read: Literal[True] = True
+
+
 def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> FastAPI:
     app = FastAPI(title='Batatis engine')
     app.add_middleware(CORSMiddleware, allow_origin_regex=r'http://(localhost|127\.0\.0\.1)(:\d+)?',
-                       allow_methods=['*'], allow_headers=['*'])
+                       allow_methods=['*'], allow_headers=['*'], expose_headers=list(EXPOSE_HEADERS))
+    app.add_middleware(ExposeBatatisHeaders)
     state = {'store': store, 'codes': codes}
 
     def cases() -> CaseStore:
@@ -40,7 +97,12 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
 
     def code() -> Codes:
         if state['codes'] is None:
-            state['codes'] = Codes()
+            try:
+                state['codes'] = Codes()
+            except CodeDbMissing:
+                # The exception message is fixed and has no path. The path stays in this log line.
+                logger.error('code database not found: %s', default_db())
+                raise
         return state['codes']
 
     @app.post('/cases', response_model=Case, status_code=201)
@@ -54,12 +116,52 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
             raise HTTPException(404, 'case not found')
         return case
 
+    @app.put('/cases/{case_id}/jurisdiction', response_model=Case)
+    def set_jurisdiction(case_id: str, body: Jurisdiction):
+        def apply(case: Case) -> None:
+            case.jurisdiction = body
+
+        case = cases().mutate(case_id, apply)
+        if case is None:
+            raise HTTPException(404, 'case not found')
+        return case
+
     @app.post('/cases/{case_id}/facts', response_model=Case)
     def add_fact(case_id: str, fact: Fact):
         case = cases().add_fact(case_id, fact)
         if case is None:
             raise HTTPException(404, 'case not found')
         return case
+
+    @app.post('/cases/{case_id}/files', response_model=StoredFile, status_code=201)
+    async def upload_file(case_id: str, file: UploadFile = File(...)):
+        if cases().get(case_id) is None:
+            raise HTTPException(404, 'case not found')
+        limit = max_upload_bytes()
+        try:
+            data = await file.read(limit + 1)
+        finally:
+            await file.close()
+        if len(data) > limit:
+            raise HTTPException(413, 'file too large')
+        try:
+            stored = save_pdf(case_id, file.filename, data)
+        except FileTooLarge:
+            raise HTTPException(413, 'file too large') from None
+        except NotAPdf:
+            raise HTTPException(415, 'not a PDF') from None
+        except ValueError:
+            raise HTTPException(400, 'invalid case id') from None
+        fact = Fact(field=f'file.{stored.id}.name', value=stored.name, kind='exact', status='confirmed',
+                    source=Source(type='file', ref=stored.id))
+
+        def apply(case: Case) -> None:
+            case.facts.append(fact)
+
+        if cases().mutate(case_id, apply) is None:
+            discard_pdf(case_id, stored.id)
+            raise HTTPException(404, 'case not found')
+        return StoredFile(id=stored.id, name=stored.name, pages=stored.pages, sha256=stored.sha256)
 
     @app.post('/cases/{case_id}/export', response_class=Response,
               responses={200: {'content': {'application/pdf': {}}}, 409: {'description': 'export blocked'}})
@@ -71,7 +173,8 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         except ExportBlocked as e:
             raise HTTPException(409, {'message': 'export blocked; resolve these or export a draft', 'reasons': e.reasons})
         except FormNotFound as e:
-            raise HTTPException(503, str(e))
+            logger.error('SCC variance form not found: %s', e)
+            raise HTTPException(503, 'SCC variance form not found') from None
         except ExportError as e:
             raise HTTPException(500, str(e))
         name = f'{case_id}-scc-variance{"-DRAFT" if draft else ""}.pdf'
@@ -102,6 +205,13 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
             raise HTTPException(404, e.args[0])
         except ValueError as e:
             raise HTTPException(400, f'invalid provision id: {e}')
+
+    from fastapi.responses import JSONResponse
+
+    @app.exception_handler(CodeDbMissing)
+    def missing_codedb(_request, _exc: CodeDbMissing):
+        # Not FileNotFoundError. The body is fixed and carries no filesystem path.
+        return JSONResponse(status_code=503, content={'detail': 'code database not found'})
 
     app.include_router(__import__('engine.routes_case', fromlist=['create_router']).create_router(cases, code))
     return app

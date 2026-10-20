@@ -35,18 +35,23 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
 
     @router.post('/cases/{case_id}/section-d', response_model=SectionDPlan)
     def section_d(case_id: str, body: SectionDRequest | None = None):
-        case = get_case(case_id)
-        if body and body.provisions is not None:
-            case.provisions = body.provisions
-        try:
-            case.section_c = section_c_rows(case.provisions, code())
-            plan = section_d_plan(case, code())
-        except KeyError as error:
-            raise HTTPException(404, error.args[0]) from error
-        except ValueError as error:
-            raise HTTPException(400, f'invalid provision id: {error}') from error
-        cases().put(case)
-        return plan
+        # The lookup runs inside the case lock so a concurrent add_fact cannot be overwritten.
+        plan: list[SectionDPlan] = []
+
+        def apply(case):
+            if body and body.provisions is not None:
+                case.provisions = body.provisions
+            try:
+                case.section_c = section_c_rows(case.provisions, code())
+                plan.append(section_d_plan(case, code()))
+            except KeyError as error:
+                raise HTTPException(404, error.args[0]) from error
+            except ValueError as error:
+                raise HTTPException(400, f'invalid provision id: {error}') from error
+
+        if cases().mutate(case_id, apply) is None:
+            raise HTTPException(404, 'case not found')
+        return plan[0]
 
     @router.get('/cases/{case_id}/professional', response_model=ProfessionalResult)
     def professional(case_id: str):
