@@ -1,6 +1,6 @@
 # Case A: Manufacturer seeking acceptance of a novel insulating sheathing panel
 
-> **EXAMPLE DATA.** The company, product, people, addresses, test data and letters are all fictional. Code citations checked against the NBC(AE) 2023 1st printing. See `../sources.md`.
+> **EXAMPLE DATA.** The company, product, people, addresses, test data and letters are all fictional. In the 2nd printing, 9.27.5.1.(2) and 9.27.5.3.(3)(b) were checked by codedb lookup; other wording and all page cites are 1st printing. See `../sources.md`.
 
 This is a demo case. No loader reads it yet. Only files in `input/` are ever uploaded to the tool. This README contains the demo script, so it is not uploaded. Answer keys are in [`../keys/a-manufacturer-nailbase-sheathing/`](../keys/a-manufacturer-nailbase-sheathing/) and are never uploaded.
 

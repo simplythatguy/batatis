@@ -1,3 +1,5 @@
+> agent-authored, model-checked, not human-verified or official
+
 > **EXAMPLE DATA. Answer key.** Do not upload. Do not show to the tool or the participant.
 
 # Tester key for 03-sco-submission-bundle.pdf (do NOT upload)

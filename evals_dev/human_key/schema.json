@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://batatis.local/evals/human-key.schema.json",
+  "title": "Unfilled human key for one development case",
+  "description": "A person fills the null answer fields later, from the NBC(AE) 2023 2nd printing PDF and official SCC/STANDATA documents. The committed files are unfilled. This schema does not contain model gold labels. status unverified with a null verifier is the blank state. A verified key must name the verifier and the date; that rule is enforced by validate.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "status",
+    "persona",
+    "variance_kind",
+    "scenario",
+    "section_ab_required_fields",
+    "expected_top_articles",
+    "benchmark_acceptable_solution",
+    "engineer_needed",
+    "intake_action",
+    "verifier_name",
+    "date_verified",
+    "source_page_refs",
+    "notes"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "pattern": "^dev-[0-9]{3}$"},
+    "status": {"enum": ["unverified", "verified"]},
+    "persona": {"enum": ["manufacturer", "general contractor", "homebuilder"]},
+    "variance_kind": {"type": "string", "minLength": 1},
+    "scenario": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Read-only case description. The only text a later reviewer judges. Not a gold label."
+    },
+    "section_ab_required_fields": {
+      "type": ["array", "null"],
+      "description": "Part 1 Section A and B fields this application must contain. Null until a person fills the key.",
+      "items": {
+        "enum": [
+          "owner",
+          "representative",
+          "mailing_address",
+          "date_of_request",
+          "jurisdiction_wide",
+          "permit_number",
+          "legal_description",
+          "municipal_address",
+          "alternative_description"
+        ]
+      }
+    },
+    "expected_top_articles": {
+      "type": ["array", "null"],
+      "description": "Articles a person judges relevant. Each needs an NBC(AE) 2023 2nd printing citation and a PDF page. Null until filled. Do not copy model gold.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["provision", "division", "citation", "page"],
+        "properties": {
+          "provision": {"type": "string", "minLength": 1},
+          "division": {"enum": ["A", "B", "C"]},
+          "citation": {
+            "type": "string",
+            "minLength": 1,
+            "description": "NBC(AE) 2023, 2nd printing citation, including division and provision."
+          },
+          "page": {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    "benchmark_acceptable_solution": {"type": ["string", "null"]},
+    "engineer_needed": {"enum": ["yes", "no", null]},
+    "intake_action": {"enum": ["ask", "proceed_conditionally", "redirect", null]},
+    "verifier_name": {"type": ["string", "null"]},
+    "date_verified": {"type": ["string", "null"], "description": "ISO date YYYY-MM-DD when status is verified."},
+    "source_page_refs": {
+      "type": ["array", "null"],
+      "items": {"type": "string", "minLength": 1}
+    },
+    "notes": {"type": ["string", "null"]}
+  }
+}

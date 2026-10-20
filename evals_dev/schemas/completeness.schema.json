@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Completeness findings",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "section", "field", "message", "severity"],
+    "properties": {
+      "id": {"type": "string", "minLength": 1},
+      "section": {"type": "string", "minLength": 1},
+      "field": {"type": "string", "minLength": 1},
+      "message": {"type": "string", "minLength": 1},
+      "severity": {"enum": ["blocking", "warning"]},
+      "fix_hint": {"type": "string"},
+      "citation": {"type": ["string", "null"]}
+    }
+  }
+}
