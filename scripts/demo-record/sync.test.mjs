@@ -98,10 +98,14 @@ test("shot 4 and shot 5 skip when their subject is not on screen", () => {
   const stills = source.slice(source.indexOf("export async function runDeckStills"));
   assert.match(stills, /status: "pending"/);
   assert.match(stills, /provenance:/);
-  assert.match(stills, /engineSearchStatus !== 503/);
-  assert.match(stills, /captureOfficer\("shot-s06-section-d"\)/);
+  assert.match(stills, /An \/api call returned 503/);
+  assert.match(stills, /LIMIT_LINE/);
+  assert.match(stills, /Section D tab is current/);
+  assert.equal(stills.includes('captureOfficer("shot-s06-section-d")'), false);
+  assert.match(stills, /captureOfficer\("shot-s07-officer"\)/);
   assert.match(stills, /Officer review of the open Case A application/);
   assert.match(source, /The footer reads "Online review unavailable"/);
+  assert.match(source, /the compliance disclaimer is outside the frame/);
   assert.equal(source.includes("SECTION_D_STILL_LINE"), false);
   assert.equal(stills.includes('status: "skipped"'), false);
 });

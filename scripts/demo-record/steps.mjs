@@ -47,7 +47,6 @@ const OFFICER_INTRO =
 const OFFICER_HEADINGS = ["Documents", "Open Not sure", "Professional", "Grouped completeness report", "Information request"];
 const LIMIT_LINE =
   "Recommendations only. You write the evidence and the answers. This does not decide that the design complies or is safe.";
-const ENGINE_DOWN_STILLS = new Set(["shot-s02-describe", "shot-s03-not-sure", "shot-s06-section-d"]);
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -205,9 +204,29 @@ async function overlay(page, { caption, lower }) {
         shell.style.marginTop = "0";
       }
       if (panel) {
-        panel.style.height = "calc(100% - 16px)";
-        panel.style.maxHeight = "calc(100% - 16px)";
+        panel.style.display = "flex";
+        panel.style.flexDirection = "column";
         panel.style.minHeight = "0";
+        panel.style.overflow = "hidden";
+      }
+      const pane = document.querySelector(".main-panel .scroll-body, .main-panel .pane");
+      if (pane) {
+        pane.style.flex = "1 1 auto";
+        pane.style.minHeight = "0";
+        pane.style.overflow = "auto";
+      }
+      const footer = [...document.querySelectorAll(".footer-bar")].find((el) => {
+        if (el.closest("dialog")) return false;
+        const rect = el.getBoundingClientRect();
+        return rect.width > 1 && rect.height > 1;
+      });
+      if (footer && panel) {
+        const overflow = footer.getBoundingClientRect().bottom - (window.innerHeight - 2);
+        if (overflow > 0) {
+          const next = Math.max(240, panel.getBoundingClientRect().height - overflow);
+          panel.style.height = `${next}px`;
+          panel.style.maxHeight = `${next}px`;
+        }
       }
     },
     { caption, lower: lower || "" },
@@ -227,6 +246,7 @@ async function overlayClearsChrome(page) {
     const bandRect = band && band.style.display !== "none" ? band.getBoundingClientRect() : null;
     const subtitle = document.querySelector(".header-meta");
     const footer = [...document.querySelectorAll(".footer-bar")].find((el) => {
+      if (el.closest("dialog")) return false;
       const rect = el.getBoundingClientRect();
       return rect.width > 1 && rect.height > 1;
     });
@@ -254,7 +274,12 @@ async function overlayClearsChrome(page) {
     if (footer && footerRect && overlaps(bandRect, footerRect)) problems.push("the footer");
     if (disclaimer && disclaimerRect && overlaps(bandRect, disclaimerRect)) problems.push("the compliance disclaimer");
     if (subtitle && subtitleRect && subtitleRect.width > 1 && !inView(subtitleRect)) problems.push("the header subtitle is outside the frame");
-    if (footer && footerRect && !inView(footerRect)) problems.push("the footer is outside the frame");
+    if (footer && footerRect && !inView(footerRect)) {
+      problems.push(
+        `the footer is outside the frame (${Math.round(footerRect.top)} to ${Math.round(footerRect.bottom)} px, viewport ${window.innerHeight} px)`,
+      );
+    }
+    if (disclaimer && disclaimerRect && !inView(disclaimerRect)) problems.push("the compliance disclaimer is outside the frame");
     return {
       ok: problems.length === 0,
       reason: problems.length ? `The recorder band leaves app text hidden: ${problems.join("; ")}.` : "",
@@ -978,7 +1003,8 @@ async function saveStill(page, api, lower, filePath) {
   if (chrome.subtitle) api.notes.push(`Header subtitle visible: ${chrome.subtitle}`);
   if (chrome.footer) api.notes.push(`Footer visible: ${chrome.footer}`);
   if (chrome.disclaimer) api.notes.push(`Compliance disclaimer visible: ${chrome.disclaimer}`);
-  if ((chrome.footer || "").includes("Online review unavailable")) {
+  const screenText = await page.locator("body").innerText().catch(() => "");
+  if ((chrome.footer || "").includes("Online review unavailable") || screenText.includes("Online review unavailable")) {
     return {
       ok: false,
       reason: 'The footer reads "Online review unavailable". The still was not captured.',
@@ -1009,6 +1035,16 @@ export async function runDeckStills(page, opts) {
     state: { sawWho: false, caseOpen: false, caseC: false, caseA: false },
   };
   const byId = new Map();
+  const apiStatuses = new Set();
+  page.on("response", (response) => {
+    try {
+      const url = new URL(response.url());
+      const apiCall = url.port === "8000" || url.pathname === "/api" || url.pathname.startsWith("/api/");
+      if (apiCall) apiStatuses.add(response.status());
+    } catch {
+      // A malformed response URL is not an engine status.
+    }
+  });
 
   function drop(id) {
     const slot = DECK_STILLS.find((item) => item.id === id);
@@ -1028,6 +1064,9 @@ export async function runDeckStills(page, opts) {
   }
 
   async function capture(id, lower, caseName, onScreen) {
+    if (opts.engineSearchStatus === 503 || apiStatuses.has(503)) {
+      return skip(id, "An /api call returned 503. The still was not captured.");
+    }
     const slot = DECK_STILLS.find((item) => item.id === id);
     const saved = await saveStill(page, api, lower, join(outDir, slot.file));
     const notes = [...api.notes];
@@ -1053,11 +1092,6 @@ export async function runDeckStills(page, opts) {
     const notes = [...api.notes];
     api.notes.length = 0;
     return finish(id, { status: "pending", reason, notes });
-  }
-
-  function engineDown(id) {
-    if (opts.engineSearchStatus !== 503 || !ENGINE_DOWN_STILLS.has(id)) return "";
-    return "Code search returned 503. The still was not captured.";
   }
 
   try {
@@ -1096,9 +1130,12 @@ export async function runDeckStills(page, opts) {
         } else {
           const summary = page.locator("summary").filter({ hasText: "Review gaps" }).first();
           if (await visible(summary, 500)) await summary.scrollIntoViewIfNeeded().catch(() => {});
-          const down = engineDown("shot-s02-describe");
-          if (down) skip("shot-s02-describe", down);
-          else await capture("shot-s02-describe", CASES.C.lower, "Case C");
+          await page
+            .getByText(/Online administrative review finished|Online review unavailable/)
+            .first()
+            .waitFor({ timeout: 10000 })
+            .catch(() => {});
+          await capture("shot-s02-describe", CASES.C.lower, "Case C");
         }
       }
     }
@@ -1163,6 +1200,8 @@ export async function runDeckStills(page, opts) {
       }
     }
 
+    await captureSectionD();
+
     if (!api.state.sawWho) {
       skip("shot-s03-not-sure", "Who are you? is not on this build, so the manufacturer case cannot be started.");
     } else if (!(await resetCase(page, api))) {
@@ -1191,9 +1230,7 @@ export async function runDeckStills(page, opts) {
             );
           } else {
             await cards.first().scrollIntoViewIfNeeded().catch(() => {});
-            const down = engineDown("shot-s03-not-sure");
-            if (down) skip("shot-s03-not-sure", down);
-            else await capture("shot-s03-not-sure", CASES.A.lower, "Case A");
+            await capture("shot-s03-not-sure", CASES.A.lower, "Case A");
           }
         }
       }
@@ -1215,16 +1252,57 @@ export async function runDeckStills(page, opts) {
         return;
       }
       await intro.scrollIntoViewIfNeeded().catch(() => {});
-      const down = engineDown(id);
-      if (down) {
-        skip(id, down);
-        return;
-      }
       api.notes.push("Officer review of the open Case A application.");
       await capture(id, CASES.A.lower, "Case A");
     }
 
-    await captureOfficer("shot-s06-section-d");
+    async function captureSectionD() {
+      const id = "shot-s06-section-d";
+      if (!api.state.caseC) {
+        skip(id, "Case C is not the open case, so Section D was not captured.");
+        return;
+      }
+      if (!(await goApplication(page, "Section D"))) {
+        skip(id, "Section D is not an application tab on this build.");
+        return;
+      }
+      const heading = page.getByRole("heading", { name: "Section D and professional screening" }).first();
+      if (!(await visible(heading, 2500))) {
+        skip(id, "The Section D tab opened without the professional screening heading. The still was not captured.");
+        return;
+      }
+      const tab = page
+        .getByRole("navigation", { name: "Application sections" })
+        .getByRole("link", { name: /^Section D\b/ })
+        .first();
+      if ((await tab.getAttribute("aria-current").catch(() => "")) !== "page") {
+        skip(id, "The current application tab is not Section D. The still was not captured.");
+        return;
+      }
+      const limit = page.getByText(LIMIT_LINE).first();
+      if (!(await visible(limit, 8000))) {
+        skip(
+          id,
+          `The limit line "${LIMIT_LINE}" is not on screen. The shot was not recorded, and the line was not invented.`,
+        );
+        return;
+      }
+      await Promise.all([heading, limit].map((locator) => locator.evaluate((el) => {
+        const pane = el.closest(".scroll-body");
+        if (!pane) return;
+        const paneRect = pane.getBoundingClientRect();
+        const rect = el.getBoundingClientRect();
+        if (rect.top < paneRect.top) pane.scrollTop -= paneRect.top - rect.top + 8;
+        else if (rect.bottom > paneRect.bottom) pane.scrollTop += rect.bottom - paneRect.bottom + 8;
+      }).catch(() => {})));
+      if (!(await visible(heading, 500)) || !(await visible(limit, 500))) {
+        skip(id, "The Section D heading or the limit line is outside the frame. The still was not captured.");
+        return;
+      }
+      api.notes.push("Section D tab is current. The recommendations limit line is on screen.");
+      await capture(id, CASES.C.lower, "Case C");
+    }
+
     await captureOfficer("shot-s07-officer");
 
     skip(

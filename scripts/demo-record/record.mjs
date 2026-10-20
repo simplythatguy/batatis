@@ -365,6 +365,25 @@ async function prepareEngine(args, engineRoot) {
   }
   const codedbNote = await ensureCodeDb(engineRoot);
   if (await engineUp()) {
+    const listening = await probeCodeSearch();
+    if (listening !== 200) {
+      console.log(
+        `The engine on port 8000 returned ${listening || "no response"} for code search. Stopping it so the database on disk is loaded.`,
+      );
+      await run("bash", [
+        "-lc",
+        "if command -v fuser >/dev/null; then fuser -k 8000/tcp || true; else pkill -f 'uvicorn engine.api:app' || true; fi",
+      ]).catch(() => {});
+      const started = Date.now();
+      while (await engineUp()) {
+        if (Date.now() - started > 8000) {
+          throw new Error("An engine is still listening on 127.0.0.1:8000 and code search is not 200. Capture aborted.");
+        }
+        await new Promise((resolveWait) => setTimeout(resolveWait, 200));
+      }
+    }
+  }
+  if (await engineUp()) {
     const searchStatus = await probeCodeSearch();
     return {
       networkMode: "engine",
