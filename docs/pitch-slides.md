@@ -69,7 +69,7 @@
 *Sources:* [STANDATA 23-BCV-017](https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/2aa7678c-c476-4523-b0c3-36e71256e11b/download/ma-standata-variance-building-23-bcv-017-2025-09.pdf); [STANDATA 23-BCV-001](https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/01b622f0-f4a1-426d-b15f-ffc25e725949/download/ma-standata-variance-building-23-bcv-001-2024-04.pdf); [STANDATA 23-BCV-003](https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/3915ba54-96dd-4c54-a9c1-63df5c917836/download/ma-standata-variance-building-23-bcv-003-2024-05.pdf); [Calgary B23-014](https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-014-new-products-materials-and-systems-in-building-construction.pdf)
 
 ### Slide 9: The current SCC form out, designed for any jurisdiction [Usability and Portability, 10]
-- Fills the SCC form dated Oct 6, 2026 (5 pages, 87 fields), which supersedes the challenge's Appendix 1 (export from the engine; screen in review)
+- Fills Part 1, Sections A–D of the Council's current SCC form (PDF last modified Oct 6, 2026), not the brief's older Appendix 1 template; same field names, differences listed in the Implementation Plan (export from the engine; screen in review)
 - Export blocked with reasons until gaps clear, or exported as a labelled draft (engine on dev)
 - Designed so local add-ons are configuration; per-jurisdiction form registry in PR #12
 

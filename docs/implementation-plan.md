@@ -52,7 +52,9 @@ Quotes are word for word from the Council's PDFs (read Oct 20, 2026). "Built" me
 
 **Export target: the current SCC form, not the brief's Appendix 1 (built), and why.** Brief §2.5(a) asks for an export that matches "the format of the Safety Codes Variance Template Part 1, Sections A-D in Appendix 1" ([challenge scope](https://edmontonunlimited.com/wp-content/uploads/2026/09/Building-Codes-Challenge-with-Appendix-.pdf)). Since the brief was published, the Council has posted a revised form: the **SCC Variance Form for Proposed Alternative Solution, PDF dated Oct 6, 2026** (5 pages, 87 fields; [SCC form](https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf)). IB-2026-10-01 says "The revised variance form must be completed and included when the variance is registered through OVP", and from Dec 1, 2026 OVP is "the sole acceptable method for registration". An application on the Appendix 1 template would have to be re-keyed onto the revised form before an officer could register it, so we export the revised form. Its field map, `engine/export/field_maps/scc_2026-10.json` on `dev`, carries the SHA-256 of that exact form file. (The bulletin names the "revised Variance Form" without a date; we take it to be the version at the Council's form URL, last modified Oct 6, 2026.)
 
-Part 1 Sections A–D keep the same structure and field names on both forms, so the mapping is close. The differences, and how each is handled:
+**Disclosure:** Batatis fills Part 1, Sections A–D of the Safety Codes Council's current Variance Form for Proposed Alternative Solution (PDF last modified Oct 6, 2026), not the older Appendix 1 template in the challenge brief; the Part 1 fields carry the same names, the differences (Section B checkbox meaning, separate Section C and D rows, the removed owner acknowledgement, privacy wording) are listed in the table below, and Batatis never signs, declares or fills any officer field.
+
+The differences, and how each is handled:
 
 | Appendix 1 (brief) | Oct 6, 2026 SCC form (our export) | Handling |
 |---|---|---|
@@ -63,9 +65,9 @@ Part 1 Sections A–D keep the same structure and field names on both forms, so 
 | Section C explainer paragraph per article (brief §1.c.iii) | No field on either form | Not on either form. An optional explainer per Section C row is in draft PR #12; how it appears in an export (for example, an attached page) is not decided yet |
 | Section D: one combined text field (document and responsible person) | 5 rows, each with document and responsible-person fields | Mapped to the 5 rows (built); an Appendix 1 export would join them into one field (planned) |
 | Signatures: owner's acknowledgement checkbox ("Yes") covering publication and an equal-or-better-performance declaration | No checkbox; privacy notice cites POPA s.13(1)(b); printed-name fields added | Printed names mapped (built). The owner's acknowledgement and every signature are left for the owner: Batatis never makes a declaration on the owner's behalf |
-| Part 2 officer wording: "equal or better performance" | "approximately equivalent or greater safety performance" (matches Div C 2.2.1.2.(1)) | Part 2 is left blank for the officer on every form (built) |
+| Part 2 officer wording: "equal or better performance" | "approximately equivalent or greater safety performance" (form text; the revised form is required at OVP registration under IB-2026-10-01) | Part 2 is left blank for the officer on every form (built) |
 
-**Decision:** we do not build an Appendix 1-format export for Submission 1. If the judges require it, it is a second field map plus a rendered overlay for Section C (planned). The full field-by-field mapping is in `appendix1-mapping.md`.
+**Decision:** we do not build an Appendix 1-format export for Submission 1. If the judges require it, it is a second field map plus a rendered overlay for Section C (planned).
 
 **Integration, in three phases:**
 1. **Pilot, with nothing to install (in development).** The deliverable is designed to be:
