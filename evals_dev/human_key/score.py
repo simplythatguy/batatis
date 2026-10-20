@@ -43,11 +43,13 @@ NOTE = (
 
 
 def _norm(text: str) -> str:
+    """Normalize spacing, case and a terminal period for prose equality comparisons."""
     return re.sub(r'\s+', ' ', text).strip().casefold().rstrip('.')
 
 
 def _canon_field(text: str) -> str | None:
-    t = text.casefold()
+    """Map engine names and form labels to the human-key administrative vocabulary."""
+    t = re.sub(r'[_\-]+', ' ', text.casefold())
     if 'mailing' in t:
         return 'mailing_address'
     if 'civic' in t or 'municipal' in t:
@@ -56,7 +58,7 @@ def _canon_field(text: str) -> str | None:
         return 'legal_description'
     if 'permit' in t:
         return 'permit_number'
-    if 'jurisdiction' in t:
+    if 'jurisdiction' in t or t.strip() == 'scope':
         return 'jurisdiction_wide'
     if 'representative' in t or 'owner rep' in t:
         return 'representative'
@@ -70,6 +72,7 @@ def _canon_field(text: str) -> str | None:
 
 
 def _articles(value) -> set[tuple[str, str]] | None:
+    """Normalize article strings or records to a set of division/id pairs."""
     if value is None:
         return None
     out = set()
@@ -85,6 +88,7 @@ def _articles(value) -> set[tuple[str, str]] | None:
 
 
 def _system_articles(system: dict) -> set[tuple[str, str]] | None:
+    """Prefer explicitly committed article picks when the system supplies them."""
     arts = system.get('articles', system.get('expected_top_articles'))
     if arts is None:
         return None
@@ -119,6 +123,7 @@ def field_match(field: str, key: dict, system: dict) -> bool | None:
 
 
 def agreement_match(field: str, key: dict, gold: dict, case: dict) -> bool | None:
+    """Compare one verified-key field with development gold, independently of system accuracy."""
     expected = key.get(field)
     if expected is None:
         return None
@@ -139,11 +144,13 @@ def agreement_match(field: str, key: dict, gold: dict, case: dict) -> bool | Non
 
 
 def _tally(pairs: list[bool | None]) -> dict:
+    """Count true matches while excluding key fields with no answer."""
     judged = [p for p in pairs if p is not None]
     return proportion(sum(bool(p) for p in judged), len(judged))
 
 
 def score_keys(keys: list[dict], systems: dict[str, dict], cases: dict[str, dict]) -> dict:
+    """Score verified keys only, separating system accuracy from model-gold agreement."""
     verified = [k for k in keys if k.get('status') == 'verified']
     accuracy = {}
     agreement = {}
@@ -204,6 +211,7 @@ def calibrate(keys: list[dict], systems: dict[str, dict], thresholds: list[float
 
 
 def _engine_systems(cases: dict[str, dict], ids: list[str]) -> dict[str, dict]:
+    """Run identification for selected scenarios and retain only supported scored fields."""
     from engine.cli_sut import run
     systems = {}
     for cid in ids:
@@ -218,6 +226,7 @@ def _engine_systems(cases: dict[str, dict], ids: list[str]) -> dict[str, dict]:
 
 
 def load_system(path: Path) -> dict[str, dict]:
+    """Read list, cases-wrapper or case-id-map system outputs into a case-id index."""
     data = json.loads(path.read_text())
     rows = data['cases'] if isinstance(data, dict) and 'cases' in data else data
     if isinstance(rows, dict):
@@ -226,6 +235,7 @@ def load_system(path: Path) -> dict[str, dict]:
 
 
 def render(report: dict, calibration: dict | None) -> str:
+    """Render separate accuracy and agreement metrics plus optional threshold calibration."""
     lines = [
         'human key',
         f"evals: {report['evals']}",
@@ -257,10 +267,12 @@ def render(report: dict, calibration: dict | None) -> str:
 
 
 def _line(field: str, row: dict) -> str:
+    """Format a field score with its Wilson interval when available."""
     return f"  {field}: {row['label']}{_wilson(row)}"
 
 
 def _wilson(row: dict) -> str:
+    """Format an available Wilson interval, or an empty suffix for no observations."""
     span = row['wilson_95']
     if not span:
         return ''
@@ -268,6 +280,7 @@ def _wilson(row: dict) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Load keys and optional system outputs, then print scores and requested calibration."""
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--keys', type=Path, default=KEY_DIR)
     ap.add_argument('--cases', type=Path, default=ROOT / 'evals_dev' / 'cases')

@@ -91,7 +91,7 @@
       "text": "The SCO requested a building code review by an architect and a professional engineer. The panel held that 'a safety codes officer is not bound by the judgment of the registered professionals engaged by the Appellants' (in the context of s.49 orders and reclassification).",
       "sentences": 2,
       "quote_confidence": "standard",
-      "kind": "excerpt",
+      "kind": "summary",
       "field": "professional_involvement",
       "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2013/Redacted_Building%20and%20Fire_Mercantile_Occupancy_December_2013.pdf"
     }

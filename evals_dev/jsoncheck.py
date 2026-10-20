@@ -61,11 +61,13 @@ def validate(instance, schema, path='$') -> list[str]:
 
 
 def _type_ok(instance, expected) -> bool:
+    """Accept an instance matching any of the declared JSON Schema types."""
     names = expected if isinstance(expected, list) else [expected]
     return any(_one(instance, name) for name in names)
 
 
 def _one(instance, name: str) -> bool:
+    """Check one supported JSON type without treating Python booleans as numbers."""
     if name == 'object':
         return isinstance(instance, dict)
     if name == 'array':
@@ -84,6 +86,7 @@ def _one(instance, name: str) -> bool:
 
 
 def _type_name(instance) -> str:
+    """Describe a Python value using the supported JSON type vocabulary."""
     if instance is None:
         return 'null'
     if isinstance(instance, bool):

@@ -26,6 +26,7 @@ DEFERENCE_LABELS = {
 
 
 def load_appeals(path: Path) -> list[dict]:
+    """Load appeal case files in stable order, or return no cases for a missing directory."""
     if not path.is_dir():
         return []
     return [json.loads(p.read_text()) for p in sorted(path.glob('scc-*.json'))]
@@ -54,6 +55,7 @@ def mapped_citations(cases: list[dict], db_path: Path | None) -> tuple[list[dict
 
 
 def citation_resolution(cases: list[dict], db_path: Path | None, score) -> dict:
+    """Score only promoted current-edition citations and retain mapping skip reasons."""
     cites, meta = mapped_citations(cases, db_path)
     meta['codedb_used'] = db_path is not None
     if not cites and db_path is None:
@@ -69,10 +71,12 @@ def citation_resolution(cases: list[dict], db_path: Path | None, score) -> dict:
 
 
 def _by_id(cases: list[dict]) -> dict[str, dict]:
+    """Index appeal cases by their decision id."""
     return {case['id']: case for case in cases}
 
 
 def _quote_text(case: dict, field: str) -> str:
+    """Return the retained text for a requested source field, or an empty string."""
     for quote in case.get('quotes') or []:
         if quote.get('field') == field:
             return quote.get('text') or ''
@@ -111,11 +115,11 @@ def _section_c_engine(db_path: Path | None) -> dict:
         from engine.codes import Codes
         from engine.completeness import check_completeness
         from engine.tests.case_builder_fixtures import complete_case
-    except ImportError as exc:
+        case = complete_case()
+        case.section_c = []
+        gaps = check_completeness(case, Codes(db_path))
+    except (ImportError, LookupError) as exc:
         return proportion(0, 0, skipped=f'skipped: engine unavailable ({type(exc).__name__})')
-    case = complete_case()
-    case.section_c = []
-    gaps = check_completeness(case, Codes(db_path))
     hit = any(gap.id.startswith('D16:') for gap in gaps)
     return proportion(1 if hit else 0, 1)
 
@@ -146,12 +150,18 @@ def professional_agreement(cases: list[dict], flagger, *, skipped: str | None = 
 
 
 def engine_professional_flagger(db_path: Path):
+    """Build a facts-only screen after verifying all declared professional rules exist."""
     from engine.codes import Codes
     from engine.professional import ProfessionalFacts, professional_involvement
+    from engine.section_d_issues import PROFESSIONAL_RULES
 
     codes = Codes(db_path)
+    for division, provision_id, _source in PROFESSIONAL_RULES:
+        if codes.provision(provision_id, division) is None:
+            raise LookupError(f'missing professional-involvement provision: {division} {provision_id}')
 
     def flagger(case: dict) -> str:
+        """Run professional involvement using only the stored structured facts."""
         facts = ProfessionalFacts.model_validate((case.get('professional_involvement') or {}).get('facts') or {})
         return professional_involvement(facts, codes).required
 
@@ -159,6 +169,7 @@ def engine_professional_flagger(db_path: Path):
 
 
 def other_anchors(cases: list[dict]) -> dict:
+    """Check the insufficient-information, conditional-acceptance and deference metadata."""
     found = _by_id(cases)
     info = found.get(INSUFFICIENT_ID)
     info_ok = False
@@ -222,10 +233,12 @@ def other_anchors(cases: list[dict]) -> dict:
 
 
 def json_articles(case: dict) -> list[dict]:
+    """Return recorded source-article mappings, defaulting to an empty list."""
     return list(case.get('article_mapping') or [])
 
 
 def build_appeals_block(cases: list[dict], db_path: Path | None, score, *, professional_flagger=None) -> dict:
+    """Assemble weak-label checks, recording unavailable engine rules as skipped."""
     if not cases:
         empty = proportion(0, 0, skipped='no appeal cases')
         return {
@@ -240,7 +253,7 @@ def build_appeals_block(cases: list[dict], db_path: Path | None, score, *, profe
     if flagger is None and db_path is not None:
         try:
             flagger = engine_professional_flagger(db_path)
-        except ImportError as exc:
+        except (ImportError, LookupError) as exc:
             flagger_skip = f'skipped: engine unavailable ({type(exc).__name__})'
     return {
         'label_source': LABEL_SOURCE,

@@ -2,7 +2,7 @@
 
 ## Section D — evidence issues
 
-Engineer-needed flag: 55/60 agreement on the model-checked dev set (in-sample), 1 under-flag, 13 unknowns sent to the applicant.
+Engineer-needed `rules_only` baseline: 55/60 agreement on the model-checked dev set (in-sample), 1 under-flag, 13 abstentions. This baseline fills unstated facts and omits the span handoff; these figures do not measure the Section D issues endpoint.
 
 `GET /cases/{case_id}/section-d/issues`
 

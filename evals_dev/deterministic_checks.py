@@ -71,7 +71,6 @@ def find_codedb() -> Path | None:
     env = os.environ.get('BATATIS_CODEDB')
     candidates = [Path(env)] if env else []
     candidates.append(DEV.parent / 'codedb' / 'build' / 'codedb.sqlite')
-    candidates.append(Path('/Users/aamia/.t3/projects/batatis/codedb/build/codedb.sqlite'))
     for path in candidates:
         if path.is_file():
             return path
@@ -79,14 +78,17 @@ def find_codedb() -> Path | None:
 
 
 def load_cases(path: Path) -> list[dict]:
+    """Read development cases in stable filename order."""
     return [json.loads(p.read_text()) for p in sorted(path.glob('dev-*.json'))]
 
 
 def load_manifests(path: Path) -> list[dict]:
+    """Read planted missing-field manifests in stable filename order."""
     return [json.loads(p.read_text()) for p in sorted(path.glob('*.json'))]
 
 
 def load_schemas(path: Path) -> dict[str, dict]:
+    """Load the schema file assigned to each validated output kind."""
     names = {
         'case': 'case.schema.json',
         'identify': 'identify.schema.json',
@@ -98,12 +100,14 @@ def load_schemas(path: Path) -> dict[str, dict]:
 
 
 def _connect(db_path: Path) -> sqlite3.Connection:
+    """Open an existing code database read-only with named-column rows."""
     con = sqlite3.connect(f'file:{db_path}?mode=ro', uri=True)
     con.row_factory = sqlite3.Row
     return con
 
 
 def resolves(con: sqlite3.Connection, cite: dict) -> bool:
+    """Check a canonical citation id in its stated division, requiring uniqueness if unstated."""
     provision = cite.get('provision')
     if not provision:
         return False
@@ -124,6 +128,7 @@ def resolves(con: sqlite3.Connection, cite: dict) -> bool:
 
 
 def score_citations(cites: list[dict], db_path: Path | None, *, empty_reason: str) -> dict:
+    """Count resolvable citations, preserving missing-database and empty-input skip reasons."""
     if not cites:
         return proportion(0, 0, skipped=empty_reason)
     if db_path is None:
@@ -137,6 +142,7 @@ def score_citations(cites: list[dict], db_path: Path | None, *, empty_reason: st
 
 
 def gold_must_cite(cases: list[dict]) -> list[dict]:
+    """Collect fixture-gold citations separately from system-emitted citations."""
     out = []
     for case in cases:
         for ref in (case.get('gold') or {}).get('must_cite') or []:
@@ -147,10 +153,12 @@ def gold_must_cite(cases: list[dict]) -> list[dict]:
 
 
 def _pkey(pair: dict) -> tuple:
+    """Build an order-independent comparison key for an objective/function attribution pair."""
     return (pair['function'], pair['objective'], pair['bracket'], pair.get('application_note') or '')
 
 
 def _ikey(intent: dict) -> tuple:
+    """Build a comparison key preserving an intent block and its attribution brackets."""
     return (intent.get('provision_id'), intent.get('objective'),
             tuple(intent.get('brackets') or []), tuple(intent.get('intents') or []))
 
@@ -169,10 +177,12 @@ def gold_row_matches(gold_row: dict | None, db_pairs: list[dict], db_status: dic
 
 
 def _cmp_key(comparison: dict | None):
+    """Normalize intent comparison metadata, returning None for an absent comparison."""
     if not comparison:
         return None
 
     def seq(value):
+        """Sort string sequences for comparison while retaining representations of structured entries."""
         items = list(value or [])
         if all(isinstance(item, str) for item in items):
             return tuple(sorted(items))
@@ -191,12 +201,14 @@ def engine_matches(engine: dict, db: dict) -> bool:
 
 
 def provision_exact(engine: dict | None, db: dict, gold_row: dict | None) -> bool:
+    """Require both engine/database equality and consistency with any supplied gold row."""
     if engine is None:
         return False
     return engine_matches(engine, db) and gold_row_matches(gold_row, db['pairs'], db['status'])
 
 
 def confirmed_provisions(case: dict) -> list[str]:
+    """Select gold Section C provisions, falling back to required Division B citations."""
     rows = (case.get('gold') or {}).get('section_c') or []
     if rows:
         return [row['provision'] for row in rows if row.get('provision')]
@@ -238,6 +250,7 @@ def _view_from_record(rec: dict) -> dict:
 
 
 def _engine_view(row) -> dict:
+    """Normalize an engine Section C row to the deterministic comparison shape."""
     return {
         'pairs': [{'function': p.function, 'objective': p.objective, 'bracket': p.bracket,
                    'application_note': p.application_note or ''} for p in row.pairs],
@@ -252,6 +265,7 @@ def _engine_view(row) -> dict:
 
 
 def section_c_exactness(cases: list[dict], db_path: Path | None) -> dict:
+    """Compare engine rows and optional gold metadata against their code-database records."""
     if db_path is None:
         return proportion(0, 0, skipped=CODEDB_MISSING)
     try:
@@ -300,12 +314,14 @@ def score_planted(manifests: list[dict], checker) -> tuple[dict, dict]:
 
 
 def engine_planted_checker(db_path: Path):
+    """Build a completeness probe that receives applicant facts without removal labels."""
     from engine.codes import Codes
     from engine.completeness import check_completeness
     from engine.tests.case_builder_fixtures import complete_case
     codes = Codes(db_path)
 
     def checker(facts: dict) -> set[str]:
+        """Remove absent administrative fields from the control fixture and return detected gap fields."""
         case = complete_case()
         absent = [field for field in AB_FIELDS if field not in facts]
         case.facts = [fact for fact in case.facts if fact.field not in absent]
@@ -315,6 +331,7 @@ def engine_planted_checker(db_path: Path):
 
 
 def score_schemas(documents: dict[str, list], schemas: dict[str, dict], skip: dict[str, str | None]) -> dict:
+    """Count valid documents by schema kind and pool only checks that actually ran."""
     by_kind = {}
     for kind in SCHEMA_KINDS:
         docs = documents.get(kind) or []
@@ -333,21 +350,22 @@ def score_schemas(documents: dict[str, list], schemas: dict[str, dict], skip: di
 
 
 def _live_documents(db_path: Path) -> tuple[dict[str, list], str | None]:
+    """Generate synthetic engine outputs, skipping when required imports or rules are unavailable."""
     try:
         from engine.codes import Codes
         from engine.completeness import check_completeness
         from engine.section_d import section_d_plan
         from engine.tests.case_builder_fixtures import complete_case
-    except ImportError as exc:
+        codes = Codes(db_path)
+        case = complete_case()
+        docs = {
+            'case': [json.loads(case.model_dump_json())],
+            'completeness': [[json.loads(gap.model_dump_json()) for gap in check_completeness(case, codes)]],
+            'section_d': [json.loads(section_d_plan(case, codes).model_dump_json())],
+            'export': [],
+        }
+    except (ImportError, LookupError) as exc:
         return {}, f'skipped: engine unavailable ({type(exc).__name__})'
-    codes = Codes(db_path)
-    case = complete_case()
-    docs = {
-        'case': [json.loads(case.model_dump_json())],
-        'completeness': [[json.loads(gap.model_dump_json()) for gap in check_completeness(case, codes)]],
-        'section_d': [json.loads(section_d_plan(case, codes).model_dump_json())],
-        'export': [],
-    }
     try:
         from engine.export import ExportError, export_case
         result = export_case(case, draft=True, codes=codes)
@@ -367,6 +385,7 @@ def _live_documents(db_path: Path) -> tuple[dict[str, list], str | None]:
 def build_report(*, root: Path, db_path: Path | None, cases: list[dict], manifests: list[dict],
                  schemas: dict[str, dict], planted_checker=None, documents: dict | None = None,
                  appeals: list[dict] | None = None, professional_flagger=None) -> dict:
+    """Assemble separate deterministic citation, completeness, schema and appeal checks."""
     found = documents if documents is not None else discover(root)
     system = {
         'identify': citations('identify', found.get('identify') or []),
@@ -392,7 +411,7 @@ def build_report(*, root: Path, db_path: Path | None, cases: list[dict], manifes
     else:
         try:
             detection, false_positives = score_planted(manifests, engine_planted_checker(db_path))
-        except ImportError as exc:
+        except (ImportError, LookupError) as exc:
             reason = f'skipped: engine unavailable ({type(exc).__name__})'
             detection = proportion(0, 0, skipped=reason)
             false_positives = proportion(0, 0, skipped=reason)
@@ -441,6 +460,7 @@ def build_report(*, root: Path, db_path: Path | None, cases: list[dict], manifes
 
 
 def _line(label: str, row: dict) -> str:
+    """Format a measured proportion or its explicit skip reason for the text report."""
     if row.get('skipped'):
         return f"  {label}: {row['label']} ({row['skipped']})"
     span = row['wilson_95']
@@ -449,6 +469,7 @@ def _line(label: str, row: dict) -> str:
 
 
 def render(report: dict) -> str:
+    """Render deterministic metrics and caveats followed by the machine-readable JSON report."""
     checks = report['checks']
     cite = checks['citation_resolution']
     planted = checks['planted_missing_fields']
@@ -500,6 +521,7 @@ def render(report: dict) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Discover current inputs and print a deterministic report in text or JSON form."""
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--root', type=Path, default=DEV)
     ap.add_argument('--db', type=Path, default=None)

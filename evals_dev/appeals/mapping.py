@@ -36,11 +36,13 @@ def edition_bucket(code_edition: str) -> str:
 
 
 def _division(text: str) -> str | None:
+    """Extract an explicit Division A, B or C label, leaving unstated divisions unresolved."""
     match = re.search(r'Division\s+([ABC])\b', text or '')
     return match.group(1) if match else None
 
 
 def _parse_id(raw: str) -> str | None:
+    """Parse and canonicalize a source provision token without inventing an identifier."""
     match = _TOKEN.search(raw or '')
     if not match:
         return None
@@ -53,6 +55,7 @@ def _parse_id(raw: str) -> str | None:
 
 
 def _row(raw: str, code: str, division: str | None, part: str, **fields) -> dict:
+    """Construct an unmapped source-citation record with its reason and provenance."""
     return {
         'source_article': raw,
         'source_code': code,

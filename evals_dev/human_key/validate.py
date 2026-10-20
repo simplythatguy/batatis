@@ -29,6 +29,7 @@ FILLED = [name for name in ANSWER_FIELDS if name not in ('verifier_name', 'date_
 
 
 def codedb_path() -> Path | None:
+    """Locate an existing explicitly configured or repository-built code database."""
     env = os.environ.get('BATATIS_CODEDB')
     candidates = [Path(env)] if env else []
     candidates.append(ROOT / 'codedb' / 'build' / 'codedb.sqlite')
@@ -39,6 +40,7 @@ def codedb_path() -> Path | None:
 
 
 def _date_ok(value: str) -> bool:
+    """Check whether a verification date parses as an ISO calendar date."""
     try:
         dt.date.fromisoformat(value)
     except ValueError:
@@ -47,6 +49,7 @@ def _date_ok(value: str) -> bool:
 
 
 def key_errors(data: dict, case: dict | None) -> list[str]:
+    """Validate key shape, verifier requirements and consistency with the source scenario."""
     cid = data.get('case_id', '?')
     errors = [f'{cid}: {msg}' for msg in schema_errors(data, SCHEMA)]
     status = data.get('status')
@@ -74,6 +77,7 @@ def key_errors(data: dict, case: dict | None) -> list[str]:
 
 
 def page_warnings(data: dict, con: sqlite3.Connection) -> list[str]:
+    """Warn when a cited provision or claimed source page does not match codedb."""
     cid = data.get('case_id', '?')
     warnings = []
     articles = data.get('expected_top_articles') or []
@@ -99,6 +103,7 @@ def page_warnings(data: dict, con: sqlite3.Connection) -> list[str]:
 
 
 def validate_keys(keys: list[tuple[Path, dict]], cases: dict[str, dict], db: Path | None) -> tuple[list[str], list[str]]:
+    """Collect key errors and optional citation warnings using a read-only database."""
     errors, warnings = [], []
     con = sqlite3.connect(f'file:{db}?mode=ro', uri=True) if db else None
     try:
@@ -114,6 +119,7 @@ def validate_keys(keys: list[tuple[Path, dict]], cases: dict[str, dict], db: Pat
 
 
 def main() -> int:
+    """Validate the selected key files and print errors, warnings and verification status."""
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--keys', type=Path, default=KEY_DIR)
     ap.add_argument('--cases', type=Path, default=ROOT / 'evals_dev' / 'cases')

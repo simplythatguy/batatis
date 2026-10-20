@@ -28,6 +28,7 @@ LINE = 'label_strength: weak; editions pre-2023'
 
 
 def load_addressed(path: Path = CASES) -> list[dict]:
+    """Load only decisions whose professional-involvement issue was marked addressed."""
     cases = []
     for file in sorted(path.glob('scc-*.json')):
         case = json.loads(file.read_text())
@@ -44,6 +45,7 @@ def stored_facts(case: dict) -> ProfessionalFacts:
 
 
 def predict(case: dict, codes, variant: str) -> str:
+    """Apply one evaluation variant to stored facts without reading the weak target label."""
     if variant == 'always_unknown':
         return 'unknown'
     result = professional_involvement(prepare(stored_facts(case), Signals(), variant), codes)
@@ -60,11 +62,13 @@ def _column(label: str) -> str:
 
 
 def _matches(system: str, gold: str) -> bool:
+    """Treat unknown and depends as equivalent when comparing screen and weak labels."""
     normalized = {'unknown': 'depends'}
     return normalized.get(system, system) == normalized.get(gold, gold)
 
 
 def score_cases(cases: list[dict], codes) -> dict[str, dict]:
+    """Tally agreement, abstentions and confident errors separately for every screen variant."""
     totals = {}
     for name in VARIANTS:
         matrix = {gold: {column: 0 for column in SYSTEM_COLS} for gold in GOLD_ROWS}
@@ -92,11 +96,13 @@ def score_cases(cases: list[dict], codes) -> dict[str, dict]:
 
 
 def _ratio(count: int, total: int) -> str:
+    """Format an agreement ratio with its Wilson 95% interval."""
     low, high = wilson_interval(count, total)
     return f'{count}/{total} [{low:.4f}, {high:.4f}]'
 
 
 def render(totals: dict[str, dict]) -> str:
+    """Render weak-label caveats, confusion matrices and variant outcomes."""
     lines = [LINE, 'screen reads professional_involvement.facts only; the weak label is the target, not an input']
     lines.append('note: rules_only abstains with depends; that label is counted in the unknown column')
     for name in VARIANTS:
@@ -113,6 +119,7 @@ def render(totals: dict[str, dict]) -> str:
 
 
 def main() -> int:
+    """Require twelve addressed decisions and print their separate professional-screen report."""
     cases = load_addressed()
     if len(cases) != 12:
         print(f'expected 12 professional-involvement appeals, found {len(cases)}', file=sys.stderr)

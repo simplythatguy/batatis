@@ -25,6 +25,7 @@ class SectionDRequest(BaseModel):
 
 def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
                   registry: CCMCRegistry | None = None) -> APIRouter:
+    """Build case routes using injected storage, code lookup and registry access."""
     router = APIRouter(tags=['case building'])
     registry = registry or CCMCRegistry()
 
@@ -51,6 +52,7 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
 
     @router.get('/cases/{case_id}/section-d/issues', response_model=list[SectionDIssue])
     def section_d_issues_route(case_id: str):
+        """Return administrative evidence issues; missing cases or rules produce HTTP 404."""
         try:
             return section_d_issues(get_case(case_id), code())
         except KeyError as error:
