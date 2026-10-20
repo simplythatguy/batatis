@@ -42,6 +42,9 @@ FIELD | engineering_required |  | yes
 FIELD | professional_name |  | 
 FIELD | professional_qualifications |  | Synthetic stated qualifications
 
+[section B]
+FIELD | division_c_2_3_1 |  | The Division C Section 2.3.1 documentation for this alternative solution is included with this application.
+
 [attachment drawings]
 limiting distance: 1.2 m
 storeys: 2

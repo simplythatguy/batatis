@@ -5,6 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .bulletin_gates import applicant_reminder
 from .completeness_elements import NOTICE, SECTION_TITLES
 from .completeness_variants import VariantResult, format_export_reason
 
@@ -71,6 +72,16 @@ class LLMUsageModel(BaseModel):
     skipped: str | None = None
 
 
+class ReminderModel(BaseModel):
+    """IB-2025-11-18 copy deadline. Not a present/missing/unclear verdict and not an export blocker."""
+
+    model_config = ConfigDict(extra='forbid')
+    verdict: Literal['reminder'] = 'reminder'
+    bulletin_ids: list[str]
+    text: str
+    links: list[str]
+
+
 class CompletenessResponse(BaseModel):
     model_config = ConfigDict(extra='forbid')
     schema_version: Literal['batatis.completeness.v1'] = 'batatis.completeness.v1'
@@ -79,6 +90,7 @@ class CompletenessResponse(BaseModel):
     not_a_compliance_determination: Literal[True] = True
     notice: str = NOTICE
     reviews: list[ReviewModel]
+    reminder: ReminderModel
     llm: LLMUsageModel | None = None
 
 
@@ -115,7 +127,11 @@ def build_response(variant: str, results: list[VariantResult], *, export_reasons
     reviews = []
     for index, result in enumerate(results):
         reviews.append(_review(result, export_reasons if index == 0 else None))
-    return CompletenessResponse(variant=variant, reviews=reviews, llm=llm)
+    reminder = applicant_reminder()
+    return CompletenessResponse(
+        variant=variant, reviews=reviews, llm=llm,
+        reminder=ReminderModel(verdict='reminder', bulletin_ids=list(reminder['bulletin_ids']),
+                               text=reminder['text'], links=list(reminder['links'])))
 
 
 def gaps_to_export_reasons(gaps) -> list[str]:

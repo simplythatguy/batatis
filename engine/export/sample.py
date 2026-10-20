@@ -58,6 +58,8 @@ FACTS = {
     'supporting_doc.5.responsible': 'SYNTHETIC laboratory role',
     'supporting_doc.6.name': 'SYNTHETIC air-barrier-detail attachment',
     'supporting_doc.6.responsible': 'SYNTHETIC design-author role',
+    # IB-2025-11-18: the Division C Section 2.3.1 documentation is included. Not drafted analysis.
+    'division_c_2_3_1': 'The Division C Section 2.3.1 documentation for this alternative solution is included with this application.',
 }
 
 
@@ -67,7 +69,8 @@ def sample_case(codes: Codes, provisions: list[str] = PROVISIONS, facts: dict = 
                     source=Source(type='user_text', ref='synthetic-test-fixture:applicant', quote=str(value)))
 
     case = Case(title='SYNTHETIC BTRboard-like continuous sheathing insulation (test fixture)',
-                jurisdiction=Jurisdiction(id='calgary', name='City of Calgary'),
+                # IB-2026-10-16: City of Calgary is the accredited organisation, not an officer.
+                jurisdiction=Jurisdiction(id='calgary', name='City of Calgary', authority='City of Calgary'),
                 facts=[synthetic_fact(k, v) for k, v in facts.items()],
                 provisions=provisions, section_c=section_c_rows(provisions, codes))
     source_file = Path(__file__).parent / 'fixtures' / 'synthetic-evidence.txt'

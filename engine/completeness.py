@@ -13,6 +13,7 @@ from pathlib import Path
 
 from codedb import validate_text
 
+from .bulletin_gates import bulletin_gaps
 from .codes import Codes
 from .models import INTENT_LABEL, Case, Gap as CaseGap
 from .process_fields import confirmed_value, latest_fact, process_fields
@@ -103,7 +104,10 @@ def check_completeness(case: Case, codes: Codes, *,
         if (latest_fact(case, *signatures, *dates) is not None) and _missing(confirmed_value(case, *dates)):
             add('D02', 'A', name, f'the {name.replace("_", " ")}.', 'Ask the signatory to supply the signature date.')
     if case.jurisdiction is None:
-        add('admin', 'B', 'jurisdiction', 'the reviewing jurisdiction.', 'Ask which authority will receive the application.')
+        # IB-2026-10-16: the authority having jurisdiction is the organisation, not the officer.
+        add('admin', 'B', 'jurisdiction',
+            'the authority having jurisdiction. Under IB-2026-10-16 that authority is the accredited organisation or the Alberta Safety Codes Authority, not the individual officer.',
+            'Ask which accredited organisation, or the Alberta Safety Codes Authority, will receive the application. IB-2026-10-16.')
 
     process = process_fields(case, codes)
     for field in process:
@@ -246,4 +250,5 @@ def check_completeness(case: Case, codes: Codes, *,
                 add('evidence', 'D', f'evidence.{item.id}', f'supporting evidence for {item.provision_id}, {item.function}–{item.objective}.',
                     item.performance_issue + ' Select appropriate evidence types with the responsible designer; not every ladder rung is required.',
                     item.citation)
+    gaps.extend(bulletin_gaps(case))
     return gaps

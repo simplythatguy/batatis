@@ -52,6 +52,9 @@ BASE = {
     'engineering_required': ('', 'no'),
     'professional_name': ('', ''),
     'professional_qualifications': ('', ''),
+    # IB-2025-11-18: included documentation, not a drafted analysis.
+    'division_c_2_3_1': ('',
+        'The Division C Section 2.3.1 documentation for this alternative solution is included with this application.'),
 }
 MEASURES = {
     'limiting distance': '1.2 m',
@@ -67,6 +70,7 @@ SECTION = {
     'risk_assessment': 'process', 'mitigating_measures': 'process', 'assumptions_and_limits': 'process',
     'supporting_doc': 'D', 'responsible_party': 'D', 'document_date': 'D', 'engineering_required': 'D',
     'professional_name': 'D', 'professional_qualifications': 'D',
+    'division_c_2_3_1': 'B', 'additional_location': 'B',
 }
 
 
@@ -164,6 +168,15 @@ PLANTS = [
         _defect('section_c.article', 'D16', 'blank', 'missing', '', '9.10.15.5.(8)', 'C')]},
     {'id': 'd16-omitted-row', 'omit': ['section_c.article'], 'defects': [
         _defect('section_c.article', 'D16', 'not_found', 'missing', None, '9.10.15.5.(8)', 'C')]},
+    # IB-2025-11-18: the Division C Section 2.3.1 documentation is absent.
+    {'id': 'ib-doc-omitted', 'omit': ['division_c_2_3_1'], 'defects': [
+        _defect('division_c_2_3_1', 'IB-DOC', 'not_found', 'missing', None,
+                'Division C Section 2.3.1 documentation', 'B')]},
+    # IB-2026-10-01: one registration per specific location.
+    {'id': 'ib-two-locations', 'set': {
+        'additional_location': ('', '200 Example Road, Edmonton, Alberta')}, 'defects': [
+        _defect('single_location', 'IB-LOC', 'multiple_locations', 'missing',
+                '200 Example Road, Edmonton, Alberta', '100 Example Avenue, Edmonton, Alberta', 'B')]},
 ]
 
 

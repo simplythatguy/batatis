@@ -79,16 +79,18 @@ export interface IntentBlock {
   provision_id: string;
 }
 
+/** The authority having jurisdiction is the accredited organisation or the Alberta Safety Codes Authority, not the individual safety codes officer (IB-2026-10-16). */
 export interface Jurisdiction {
-  authority: string | null;
-  id: string;
-  name: string;
+  /** The organisation that holds jurisdiction under the Safety Codes Act. A safety codes officer exercises delegated powers and is not the authority having jurisdiction. IB-2026-10-16. */ authority: string | null;
+  /** Portable identifier for the accredited organisation or the Alberta Safety Codes Authority. Not an officer identifier. IB-2026-10-16. */ id: string;
+  /** Name of the accredited organisation or the Alberta Safety Codes Authority that has jurisdiction. Not the individual officer. IB-2026-10-16. */ name: string;
 }
 
+/** The authority having jurisdiction is the accredited organisation or the Alberta Safety Codes Authority, not the individual safety codes officer (IB-2026-10-16). */
 export interface JurisdictionInput {
-  authority?: string | null;
-  id: string;
-  name: string;
+  /** The organisation that holds jurisdiction under the Safety Codes Act. A safety codes officer exercises delegated powers and is not the authority having jurisdiction. IB-2026-10-16. */ authority?: string | null;
+  /** Portable identifier for the accredited organisation or the Alberta Safety Codes Authority. Not an officer identifier. IB-2026-10-16. */ id: string;
+  /** Name of the accredited organisation or the Alberta Safety Codes Authority that has jurisdiction. Not the individual officer. IB-2026-10-16. */ name: string;
 }
 
 export interface NewCase {

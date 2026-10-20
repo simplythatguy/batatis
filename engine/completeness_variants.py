@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 
+from .bulletin_gates import DOC_FIX, LOC_FIX, _missing, location_parts
 from .completeness_elements import BY_FIELD, ELEMENTS, INTENT_LABEL, ElementSpec
 from .ingest import Ingested, StoredValue, normalize_ws, quote_matches_bytes
 from .llm_judgement import JUDGEMENT_FIELDS, LLMUsage, judge_document
@@ -310,6 +311,10 @@ def _one(doc: Ingested, spec: ElementSpec, codes, engineering: bool, heuristics:
         return _supporting(doc, spec, heuristics)
     if spec.field in ('risk_assessment', 'mitigating_measures', 'assumptions_and_limits'):
         return _process(doc, spec, heuristics)
+    if spec.field == 'division_c_2_3_1':
+        return _division_c_documentation(doc, spec)
+    if spec.field == 'single_location':
+        return _single_location(doc, spec)
 
     state, problem, stored = _stored_state(doc, spec)
     if spec.field == 'section_c.intent' and state in ('filled', 'status'):
@@ -328,6 +333,78 @@ def _one(doc: Ingested, spec: ElementSpec, codes, engineering: bool, heuristics:
     message, _fix = _presence_copy(spec.label, reason_problem)
     return _finish(spec, doc, 'missing', message, problem=reason_problem,
                    defect_class=_presence_class(spec.field), quotes=_quote_for(doc, stored), preflight=True)
+
+
+def _on_variance(doc: Ingested) -> bool:
+    stored = doc.values.get('pathway') or doc.values.get('path')
+    if stored is None or not stored.value.strip():
+        return True
+    return stored.value.strip().casefold() not in {'acceptable', 'acceptable_solution'}
+
+
+def _gate(spec: ElementSpec, doc: Ingested, verdict: str, reason: str, *, problem: str | None = None,
+          defect_class: str | None = None, quotes: list[QuoteSpan] | None = None, fix_hint: str = '') -> ElementVerdict:
+    export_reason = None
+    if verdict == 'missing' and doc.kind == 'form':
+        export_reason = format_export_reason(spec.export_section, spec.export_field, reason, fix_hint)
+    return ElementVerdict(
+        field=spec.field, template_section=spec.template_section, export_section=spec.export_section,
+        export_field=spec.export_field, form_fields=list(spec.form_fields), label=spec.label, group=spec.group,
+        verdict=verdict, reason=reason, defect_class=defect_class, problem=problem, quotes=quotes or [],
+        prompt=_prompt(spec) if verdict in ('missing', 'unclear') else None,
+        in_export_preflight=bool(export_reason), export_reason=export_reason, source=spec.source)
+
+
+def _division_c_documentation(doc: Ingested, spec: ElementSpec) -> ElementVerdict:
+    # IB-2025-11-18. The 10-day copy is a reminder, not this gate.
+    if not _on_variance(doc):
+        return _gate(spec, doc, 'present',
+                     'IB-2025-11-18 applies to a variance. This record is on the acceptable-solution path.')
+    state, problem, stored = _stored_state(doc, spec)
+    if state in ('filled', 'status') or (state == 'present' and stored is None):
+        return _gate(spec, doc, 'present',
+                     'The Division C Section 2.3.1 documentation is included (IB-2025-11-18).',
+                     quotes=_quote_for(doc, stored))
+    if state == 'unclear':
+        return _gate(spec, doc, 'unclear',
+                     'The Division C Section 2.3.1 documentation is not a confirmed fact. Ask the applicant to confirm it (IB-2025-11-18).',
+                     problem='unconfirmed', quotes=_quote_for(doc, stored))
+    reason = ('Your application appears to be missing the Division C Section 2.3.1 documentation '
+              'for this alternative solution (IB-2025-11-18).')
+    return _gate(spec, doc, 'missing', reason, problem=problem or 'not_found', defect_class='IB-DOC',
+                 quotes=_quote_for(doc, stored), fix_hint=DOC_FIX)
+
+
+def _single_location(doc: Ingested, spec: ElementSpec) -> ElementVerdict:
+    # IB-2026-10-01: one registration for one specific location. A comma is part of one civic address.
+    if not _on_variance(doc):
+        return _gate(spec, doc, 'present',
+                     'IB-2026-10-01 applies to variance registration. This record is on the acceptable-solution path.')
+    civic = _value(doc, 'civic_address')
+    extras = []
+    quotes: list[QuoteSpan] = []
+    civic_stored = doc.values.get('civic_address')
+    quotes.extend(_quote_for(doc, civic_stored))
+    municipal = doc.values.get('municipal_address')
+    if (civic_stored and municipal and not _missing(civic_stored.value) and not _missing(municipal.value)
+            and civic_stored.value.strip() != municipal.value.strip()):
+        civic = civic_stored.value
+        extras.append(municipal.value)
+        quotes.extend(_quote_for(doc, municipal))
+    for key in ('additional_location', 'second_location', 'extra_location'):
+        stored = doc.values.get(key)
+        if stored is None:
+            continue
+        quotes.extend(_quote_for(doc, stored))
+        if not _missing(stored.value):
+            extras.append(stored.value)
+    if len(location_parts(civic, extras)) <= 1:
+        return _gate(spec, doc, 'present', 'One location is listed for this application (IB-2026-10-01).',
+                     quotes=quotes if extras or civic else [])
+    return _gate(
+        spec, doc, 'missing',
+        'Your application appears to be missing one registration for a single location; more than one location is listed (IB-2026-10-01).',
+        problem='multiple_locations', defect_class='IB-LOC', quotes=quotes, fix_hint=LOC_FIX)
 
 
 def _presence_class(field_name: str) -> str | None:

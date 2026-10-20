@@ -67,9 +67,13 @@ class Fact(BaseModel):
 
 
 class Jurisdiction(BaseModel):
-    id: str                                    # e.g. "calgary", "edmonton", "alberta-other"
-    name: str
-    authority: str | None = None
+    """The authority having jurisdiction is the accredited organisation or the Alberta Safety Codes Authority, not the individual safety codes officer (IB-2026-10-16)."""
+
+    id: str = Field(description='Portable identifier for the accredited organisation or the Alberta Safety Codes Authority. Not an officer identifier. IB-2026-10-16.')
+    name: str = Field(description='Name of the accredited organisation or the Alberta Safety Codes Authority that has jurisdiction. Not the individual officer. IB-2026-10-16.')
+    authority: str | None = Field(
+        default=None,
+        description='The organisation that holds jurisdiction under the Safety Codes Act. A safety codes officer exercises delegated powers and is not the authority having jurisdiction. IB-2026-10-16.')
 
 
 class AttributionPair(BaseModel):

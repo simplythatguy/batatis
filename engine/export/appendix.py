@@ -134,7 +134,8 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
     for label, key in (('Proposed alternative', 'alternative_description'), ('Scope', 'scope')):
         story.append(_kv(label, str(values.get(key, '(not provided or not confirmed)'))))
     if case.jurisdiction:
-        story.append(_kv('Reviewing jurisdiction', case.jurisdiction.name))
+        # IB-2026-10-16: name the accredited organisation, not the individual officer.
+        story.append(_kv('Authority having jurisdiction (organisation)', case.jurisdiction.name))
     if codes is not None:
         story.append(Paragraph('P. Applicant-written process fields', H2))
         story.append(_p('The following passages were supplied and confirmed by the applicant. Batatis supplies '

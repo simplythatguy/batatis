@@ -26,8 +26,12 @@ def complete_case(provisions=None):
         occupancy='single_family', part4_design=False, preserved_wood_foundation_part4=False,
         roof_trusses=False, prescriptive_route_confirmed=True, ahj_requires_professional=False,
         special_safety_concerns=False, professional_judgement_required=False, professional_scope_resolved=True,
-        fire_suppression=False, fire_alarm=False)
-    case = Case(title='Synthetic administrative fixture', jurisdiction=Jurisdiction(id='alberta-other', name='Synthetic AHJ'),
+        fire_suppression=False, fire_alarm=False,
+        division_c_2_3_1='The Division C Section 2.3.1 documentation for this alternative solution is included with this application.')
+    # IB-2026-10-16: the authority having jurisdiction is the organisation, not an officer.
+    case = Case(title='Synthetic administrative fixture',
+                jurisdiction=Jurisdiction(id='alberta-other', name='Synthetic accredited organisation',
+                                          authority='Synthetic accredited organisation'),
         facts=[fact(k, v) for k, v in values.items()], provisions=provisions, section_c=section_c_rows(provisions, codes))
     file = Source(type='file', ref='synthetic-evidence-fixture.txt', quote='Synthetic evidence metadata; no test was performed.')
     case.facts += [fact('evidence.synthetic.file_ref', file.ref, source=file),

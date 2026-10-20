@@ -63,6 +63,15 @@ Classes D01 to D04 cover the administrative core; D05 to D08 citation integrity;
 alternative-solution process fields that must never be skipped; D12 and D13 responsibility; D14
 and D15 consistency, which only judgement can catch and which the plan reports separately.
 
+Information Bulletin gates (cite and link the bulletin; do not copy it). Checked against the
+Council PDFs. The 10-day copy to the Safety Codes Council in IB-2025-11-18 is an applicant
+reminder, not a planted verdict and not an export blocker.
+
+| Class | How to plant | Expected detection | Check | Bulletin |
+|---|---|---|---|---|
+| IB-DOC | Omit the Division C Section 2.3.1 documentation field. | Missing `division_c_2_3_1`, problem `not_found`. Ask the applicant to include it. Do not draft it. | rule | IB-2025-11-18 |
+| IB-LOC | Add a second location (`additional_location`, or a second civic address split on `;` or a new line). A comma stays inside one address. | Missing `single_location`, problem `multiple_locations`. Ask which one location this registration covers. Do not pick one. | rule | IB-2026-10-01 |
+
 ## Report
 
 Per class: planted, caught, missed (with application and location), false positives on controls, and

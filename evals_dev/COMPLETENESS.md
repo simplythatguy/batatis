@@ -12,6 +12,8 @@ Run that from the repository root. The case set is the planted fixtures, the 60 
 
 Each variant reports the pinned model id, input and output tokens per case, p50 and p95 latency, USD and CAD cost per case, and the planted success metrics. CAD uses the Bank of Canada FXUSDCAD rate printed with its date. A line compares that cost with the C$125 price floor. An invented value fails the run.
 
+Planted classes include IB-DOC (Division C Section 2.3.1 documentation, IB-2025-11-18) and IB-LOC (one location per registration, IB-2026-10-01). The 10-day copy to the Safety Codes Council is an applicant reminder, not a scored verdict.
+
 Offline A and B, with C left uncalled:
 
 ```sh
