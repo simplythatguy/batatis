@@ -1,0 +1,265 @@
+{
+  "id": "d08-unlabelled",
+  "author": "pipeline-implementer",
+  "checker_aware": true,
+  "control": false,
+  "base_case": "synthetic-clean-form",
+  "defects": [
+    {
+      "field": "section_c.intent",
+      "class": "D08",
+      "problem": "intent_label",
+      "planted_value": "unlabelled paraphrase",
+      "original_value": "NBC 2020 Intent Statements, explanatory only",
+      "location": "Section C / section_c.intent",
+      "expected_verdict": "unclear"
+    }
+  ],
+  "elements": [
+    {
+      "field": "owner_name",
+      "section": "A",
+      "form_fields": [
+        "Owner",
+        "Owner Print"
+      ],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "application_date",
+      "section": "A",
+      "form_fields": [
+        "Date of Reqeuest"
+      ],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "representative",
+      "section": "A",
+      "form_fields": [
+        "Owner Rep",
+        "Owner Rep Print"
+      ],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "mailing_address",
+      "section": "A",
+      "form_fields": [
+        "Mailing Address"
+      ],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "signature",
+      "section": "A",
+      "form_fields": [],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "owner_rep_signature_date",
+      "section": "A",
+      "form_fields": [
+        "Date2"
+      ],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "civic_address",
+      "section": "B",
+      "form_fields": [
+        "Municipal Address"
+      ],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "legal_description",
+      "section": "B",
+      "form_fields": [
+        "Lot",
+        "Block",
+        "Plan",
+        "QTR",
+        "SEC",
+        "TWP",
+        "RGE",
+        "MER"
+      ],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "alternative_description",
+      "section": "B",
+      "form_fields": [],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "risk_assessment",
+      "section": "B",
+      "form_fields": [],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "mitigating_measures",
+      "section": "B",
+      "form_fields": [],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "assumptions_and_limits",
+      "section": "B",
+      "form_fields": [],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "section_b.consistency",
+      "section": "B",
+      "form_fields": [],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "code_or_standard",
+      "section": "C",
+      "form_fields": [
+        "Code or Standard"
+      ],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "section_c.article",
+      "section": "C",
+      "form_fields": [
+        "Article(s)"
+      ],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "section_c.intent",
+      "section": "C",
+      "form_fields": [
+        "Intent statement"
+      ],
+      "expected_verdict": "unclear",
+      "problem": "intent_label",
+      "defect_class": "D08",
+      "requires_codedb": false
+    },
+    {
+      "field": "section_c.edition",
+      "section": "C",
+      "form_fields": [],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "section_c.relevance",
+      "section": "C",
+      "form_fields": [],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "section_c.pair_match",
+      "section": "C",
+      "form_fields": [
+        "Objective",
+        "Function"
+      ],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": true
+    },
+    {
+      "field": "section_c.provision_found",
+      "section": "C",
+      "form_fields": [
+        "Article(s)"
+      ],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": true
+    },
+    {
+      "field": "supporting_doc",
+      "section": "D",
+      "form_fields": [
+        "Supporting Doc"
+      ],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "responsible_professional",
+      "section": "D",
+      "form_fields": [
+        "Name Responsible"
+      ],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    },
+    {
+      "field": "professional_qualifications",
+      "section": "D",
+      "form_fields": [],
+      "expected_verdict": "present",
+      "problem": null,
+      "defect_class": null,
+      "requires_codedb": false
+    }
+  ]
+}

@@ -24,7 +24,7 @@ class IngestError(ValueError):
 
 
 _WS = re.compile(r'\s+')
-_FIELD_LINE = re.compile(r'^FIELD\s*\|')
+_FIELD_LINE = re.compile(r'^FIELD\s*\|', re.M)
 _PROVISION = re.compile(r'\d+(?:\.\d+){3}(?:\.\(\d+\)(?:\([a-z]\))?)?')
 _STANDATA = re.compile(r'\b\d{2}-BC[A-Z]-\d+\b')
 _BLANK = re.compile(r'^(?:\(blank\)|blank|✘)$', re.I)

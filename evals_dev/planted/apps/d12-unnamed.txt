@@ -1,0 +1,49 @@
+# synthetic variance application d12-unnamed
+
+
+[section A]
+FIELD | owner_name | Owner | Avery Synthetic
+FIELD | representative | Owner Rep | Riley Synthetic
+FIELD | mailing_address | Mailing Address | 100 Example Avenue, Edmonton, Alberta
+FIELD | application_date | Date of Reqeuest | 2026-10-20
+FIELD | signature |  | signed
+FIELD | owner_rep_signature_date | Date2 | 2026-10-20
+
+[section B]
+FIELD | civic_address | Municipal Address | 100 Example Avenue, Edmonton, Alberta
+FIELD | legal_description |  | Lot 4 Block 8 Plan 1234567
+FIELD | lot | Lot | 4
+FIELD | block | Block | 8
+FIELD | plan | Plan | 1234567
+FIELD | alternative_description |  | The proposed soffit stays vented aluminum where the north exposing wall has a limiting distance of 1.2 m and a 450 mm overhang. This is a site-specific departure for a single detached house.
+limiting distance: 1.2 m
+storeys: 2
+sprinklered: no
+product thickness: 10 mm
+
+[section C]
+FIELD | code_or_standard | Code or Standard | National Building Code - 2023 Alberta Edition (2nd printing), Division B
+FIELD | section_c.article | Article(s) | 9.10.15.5.(8)
+FIELD | objective | Objective | OP3.1
+FIELD | function | Function | F03
+FIELD | section_c.intent | Intent statement | NBC 2020 Intent Statements, explanatory only. National explanatory material is not copied here and is not Alberta law.
+FIELD | heading |  | spatial separation soffit overhang
+
+[section process]
+FIELD | risk_assessment |  | If the soffit remains vented over the north wall at the stated 1.2 m limiting distance, flame could reach the neighbouring property. The applicant describes that departure-specific risk here.
+FIELD | mitigating_measures |  | Non-vented soffit material and protection on the north overhang address the limiting-distance departure described above.
+FIELD | assumptions_and_limits |  | Assumes the north wall limiting distance stays 1.2 m, the house remains a single detached house, and the overhang stays 450 mm. A change in distance or soffit type requires the applicant to reassess. These are assumptions.
+
+[section D]
+FIELD | supporting_doc | Supporting Doc | Synthetic product sheet for the soffit assembly
+FIELD | responsible_party | Name Responsible | Casey Synthetic, product specialist
+FIELD | document_date |  | 2026-10-01
+FIELD | engineering_required |  | yes
+FIELD | professional_name |  | 
+FIELD | professional_qualifications |  | Synthetic stated qualifications
+
+[attachment drawings]
+limiting distance: 1.2 m
+storeys: 2
+sprinklered: no
+product thickness: 10 mm
