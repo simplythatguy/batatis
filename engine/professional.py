@@ -93,7 +93,8 @@ def apply_span_handoff(case: Case, facts: ProfessionalFacts) -> ProfessionalFact
 
 def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes) -> ProfessionalResult:
     if isinstance(facts, Case):
-        facts = apply_span_handoff(facts, ProfessionalFacts.from_case(facts))
+        case = facts
+        facts = apply_span_handoff(case, ProfessionalFacts.from_case(facts))
     reasons: list[ProfessionalReason] = []
     questions: list[str] = []
 

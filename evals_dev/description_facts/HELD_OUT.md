@@ -10,7 +10,7 @@ Agent-labelled, not human-verified. These five texts were not in the 38-descript
 | brief-b-contractor | PR #14 `evals/demo-cases/b-contractor-firestop-nonconformance/input/project-brief.md` |
 | brief-c-homebuilder | PR #14 `evals/demo-cases/c-homebuilder-infill-house/input/project-brief.md` |
 
-## held-out, first run, agent-labelled
+## held-out, blind (pre-fix), agent-labelled
 
 This block is the first blind run, before these texts were used to change the extractor. Do not replace it with a later score. `alternative_description` gold on that run was the non-question remainder under the old rule (a whole sentence with `?`, or one that starts with what/how/why/when/where/which/who, was left out).
 

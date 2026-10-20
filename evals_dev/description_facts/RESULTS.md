@@ -2,7 +2,7 @@
 
 ## Synthetic, in-sample
 
-Synthetic, in-sample labels in `labelled.json` (38 descriptions). Gold is the fact a person would confirm from the wording. Null against null is ignored. Area and span match within 0.02. This set was written for these two extractors; it is not a held-out filing.
+Synthetic, in-sample, agent-labelled, model-checked, not human-verified labels in `labelled.json` (38 descriptions). Gold is the literal fact in the wording. An agent labelled it and a model checked it. Null against null is ignored. Area and span match within 0.02. This set was written for these two extractors; it is not a held-out filing.
 
 Production extractor: `normalised` (`engine.description_facts.WINNER`). It folds number words, hyphens, thousands separators, and square feet or feet into metres. The regex variant keeps metric digits only.
 

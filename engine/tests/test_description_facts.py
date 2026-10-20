@@ -83,7 +83,7 @@ def _misses(rows, name):
 
 def test_labelled_set_is_synthetic_and_the_winner_is_recorded():
     readme = (ROOT / 'README.md').read_text()
-    assert 'synthetic, in-sample' in readme
+    assert 'Synthetic, in-sample, agent-labelled, model-checked, not human-verified' in readme
     rows = _load()
     reports = {name: _round_report(score_variant(rows, name)) for name in ('regex', 'normalised')}
     best = max(reports, key=lambda name: (reports[name]['micro']['f1'], name == 'normalised'))
@@ -97,7 +97,7 @@ def test_labelled_set_is_synthetic_and_the_winner_is_recorded():
 
 def test_held_out_first_run_stays_frozen_and_post_fix_is_not_blind():
     report = HELD_OUT_REPORT.read_text()
-    assert 'held-out, first run, agent-labelled' in report
+    assert 'held-out, blind (pre-fix), agent-labelled' in report
     assert 'post-fix, no longer blind' in report
     rows = json.loads(HELD_OUT.read_text())
     assert {row['id'] for row in rows} == {
