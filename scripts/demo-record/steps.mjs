@@ -2,8 +2,9 @@
  * Walkthrough for the Batatis demo recording.
  *
  * Ids, titles, and primary routes match docs/demo/script.md (7 shots).
- * Overlay caption is `Shot N · <title>`. The lower third is the script's
- * EXAMPLE DATA line for the case actually on screen.
+ * The burned-in caption names only text that is on screen. It is not the
+ * shot title. The lower third is the script's EXAMPLE DATA line for the case
+ * actually on screen, and it sits in the sidebar so it does not cover the footer.
  *
  * Recording order follows the script: Case C stays open through shots 2, 4, 5,
  * and 7's Case C frame. Reset runs before shot 3 and wipes Case C. Shot 6 is
@@ -51,6 +52,10 @@ function skipped(reason) {
 
 function recorded() {
   return { status: "recorded" };
+}
+
+function failed(reason) {
+  return { status: "failed", reason };
 }
 
 function escapeReg(value) {
@@ -110,62 +115,65 @@ async function overlay(page, { caption, lower }) {
         }
         return el;
       };
-      const cap = ensure("demo-recorder-caption", {
+      const sidebar = document.querySelector(".sidebar");
+      const foot = document.querySelector(".sidebar-foot");
+      const nav = document.querySelector("nav.nav");
+      const workspace = document.querySelector(".workspace");
+      const sb = sidebar?.getBoundingClientRect();
+      const width = Math.min(200, Math.max(140, (sb?.width || 228) - 28));
+      const left = (sb?.left || 0) + 12;
+      const footTop = foot ? foot.getBoundingClientRect().top : (sb?.bottom || window.innerHeight) - 8;
+      const belowWordmark = (workspace?.getBoundingClientRect().bottom || 40) + 8;
+      const navBottom = nav ? nav.getBoundingClientRect().bottom : belowWordmark;
+      let top = Math.max(belowWordmark, navBottom + 8);
+      if (footTop - top < 72) top = Math.max(belowWordmark, footTop - 110);
+      const common = {
         position: "fixed",
-        top: "12px",
-        right: "16px",
-        zIndex: "10000",
-        background: "rgba(20,20,20,0.92)",
-        color: "#f4f4f5",
-        font: "600 13px/1.3 ui-sans-serif, system-ui, sans-serif",
-        padding: "6px 10px",
-        borderRadius: "6px",
+        left: `${left}px`,
+        width: `${width}px`,
+        maxWidth: `${width}px`,
+        zIndex: "5",
         pointerEvents: "none",
+        boxSizing: "border-box",
+        whiteSpace: "pre-wrap",
+      };
+      const cap = ensure("demo-recorder-caption", {
+        ...common,
+        background: "rgba(12,12,13,0.94)",
+        color: "#f4f4f5",
+        font: "600 11px/1.35 ui-sans-serif, system-ui, sans-serif",
+        padding: "4px 6px",
+        borderRadius: "4px",
       });
       cap.textContent = caption || "";
       cap.style.display = caption ? "block" : "none";
+      if (caption) cap.style.top = `${top}px`;
       const low = ensure("demo-recorder-lower", {
-        position: "fixed",
-        left: "16px",
-        bottom: "16px",
-        zIndex: "10000",
+        ...common,
         background: "#fff7ed",
         color: "#7c2d12",
         border: "2px solid #c2410c",
-        font: "700 16px/1.35 ui-sans-serif, system-ui, sans-serif",
-        padding: "8px 12px",
-        borderRadius: "6px",
-        pointerEvents: "none",
-        whiteSpace: "pre",
-        maxWidth: "460px",
+        font: "700 11px/1.35 ui-sans-serif, system-ui, sans-serif",
+        padding: "4px 6px",
+        borderRadius: "4px",
       });
       low.textContent = lower || "";
       low.style.display = lower ? "block" : "none";
+      if (lower) {
+        const capHeight = caption ? cap.getBoundingClientRect().height : 0;
+        let lowTop = top + (caption ? capHeight + 4 : 0);
+        const lowHeight = low.getBoundingClientRect().height || 36;
+        if (lowTop + lowHeight > footTop - 4) lowTop = Math.max(top, footTop - lowHeight - 4);
+        low.style.top = `${lowTop}px`;
+      }
       low.setAttribute("data-example-data", lower && lower.includes("EXAMPLE DATA") ? "true" : "false");
     },
     { caption, lower: lower || "" },
   );
 }
 
-async function cover(page, on) {
-  await page.evaluate((on) => {
-    const id = "demo-recorder-cover";
-    const existing = document.getElementById(id);
-    if (!on) {
-      existing?.remove();
-      return;
-    }
-    if (existing) return;
-    const el = document.createElement("div");
-    el.id = id;
-    Object.assign(el.style, {
-      position: "fixed",
-      inset: "0",
-      zIndex: "20000",
-      background: "#18181b",
-    });
-    document.body.appendChild(el);
-  }, on);
+async function clearOverlay(page) {
+  await overlay(page, { caption: "", lower: "" });
 }
 
 async function maskRealAddress(page, api) {
@@ -202,7 +210,7 @@ async function maskRealAddress(page, api) {
   return replaced;
 }
 
-async function settle(page, api, lower, { holdMs, suffix } = {}) {
+async function settle(page, api, lower, { holdMs, suffix, caption } = {}) {
   const label = exampleLabel(lower);
   const masked = await maskRealAddress(page, api);
   if (masked.still) {
@@ -211,7 +219,7 @@ async function settle(page, api, lower, { holdMs, suffix } = {}) {
       reason: `${REAL_ADDRESS} is still on screen. The shot was not captured with that address.`,
     };
   }
-  await overlay(page, { caption: `Shot ${api.step.id} · ${api.step.title}`, lower: label });
+  await overlay(page, { caption: caption || "", lower: label });
   await sleep(holdMs ?? api.holdMs);
   const file = join(
     api.framesDir,
@@ -223,6 +231,7 @@ async function settle(page, api, lower, { holdMs, suffix } = {}) {
 }
 
 async function goHash(page, hash) {
+  await clearOverlay(page);
   const target = hash.startsWith("#") ? hash : `#${hash}`;
   await page.evaluate((next) => {
     if (location.hash !== next) location.hash = next;
@@ -443,7 +452,10 @@ async function searchDivisionB(page, query, acceptId) {
   }
   await matched.getByRole("button", { name: "Add to this check" }).click();
   await sleep(400);
-  const card = page.locator("article").filter({ hasText: acceptId }).last();
+  const card = page
+    .locator("article")
+    .filter({ has: page.locator(".article-id", { hasText: new RegExp(`^${escapeReg(acceptId)}$`) }) })
+    .last();
   const yes = card.getByRole("button", { name: "Yes", exact: true });
   if (await visible(yes, 1500)) await yes.click();
   else return { added: acceptId, note: `Added ${acceptId} from the returned rows. The Yes button was not on that card.` };
@@ -493,7 +505,7 @@ async function shot1(page, api) {
   }
   api.state.sawWho = true;
   api.notes.push("Try an example was left unclicked.");
-  const frame = await settle(page, api, ALL_LOWER);
+  const frame = await settle(page, api, ALL_LOWER, { caption: "Who are you?" });
   if (!frame.ok) return skipped(frame.reason);
   return recorded();
 }
@@ -503,7 +515,9 @@ async function shot2(page, api) {
   if (!filled.ok) return skipped(filled.reason);
   if (!(await visible(describeHeading(page), 2000))) return skipped("The describe screen is not showing.");
   api.state.caseC = true;
-  const frame = await settle(page, api, filled.lower);
+  const pasted = page.getByText("0000 Example Crescent NW").first();
+  if (await visible(pasted, 800)) await pasted.scrollIntoViewIfNeeded().catch(() => {});
+  const frame = await settle(page, api, filled.lower, { caption: "Homebuilder paste" });
   if (!frame.ok) return skipped(frame.reason);
   return recorded();
 }
@@ -518,13 +532,17 @@ async function shot3(page, api) {
     return skipped(filled.reason || "Manufacturer did not open an empty describe screen.");
   }
   api.state.caseA = true;
-  const paste = await settle(page, api, CASES.A.lower, { suffix: "paste" });
+  const pastedA = page.getByText("0000 Example Way NW").first();
+  if (await visible(pastedA, 800)) await pastedA.scrollIntoViewIfNeeded().catch(() => {});
+  const paste = await settle(page, api, CASES.A.lower, { suffix: "paste", caption: "Manufacturer paste" });
   if (!paste.ok) return skipped(paste.reason);
   if (!(await goCodeCheck(page))) return skipped("Code check did not open for the manufacturer case.");
   const sawOpen = await answerNotSure(page, api);
+  if (!sawOpen) return failed("Not sure was not saved as an open question, so that beat was not recorded.");
   const frame = await settle(page, api, CASES.A.lower, {
-    holdMs: sawOpen ? Math.max(api.holdMs, OPEN_QUESTION_HOLD_MS) : api.holdMs,
+    holdMs: Math.max(api.holdMs, OPEN_QUESTION_HOLD_MS),
     suffix: "open-question",
+    caption: "Open question",
   });
   if (!frame.ok) return skipped(frame.reason);
   return recorded();
@@ -552,7 +570,13 @@ async function shot4(page, api) {
   }
   const searchBox = page.getByLabel("Search Division B").first();
   if (await visible(searchBox, 500)) await searchBox.scrollIntoViewIfNeeded().catch(() => {});
-  const searchFrame = await settle(page, api, CASES.C.lower, { suffix: "search" });
+  const searchText = (await page.locator("main").innerText()).replace(/\s+/g, " ");
+  let searchCaption = "Search did not return";
+  if (search.added) searchCaption = search.added;
+  else if (/could not be reached|Bad Gateway/i.test(searchText)) searchCaption = "Engine could not be reached";
+  else if (/No provisions returned/i.test(searchText)) searchCaption = "No provisions returned";
+  else if (/\d+ provisions returned/.test(searchText)) searchCaption = "Search rows";
+  const searchFrame = await settle(page, api, CASES.C.lower, { suffix: "search", caption: searchCaption });
   if (!searchFrame.ok) return skipped(searchFrame.reason);
   if (!(await goSectionC(page, api))) return skipped("Section C is not on this build.");
   const offline = page.getByText(/Offline sample|not a lookup for this case|bundled offline sample|Lookup failed|did not return|could not be reached/);
@@ -569,7 +593,10 @@ async function shot4(page, api) {
   api.notes.push("Ranked list still is not in this build. Omitted. No ranked caption was added.");
   api.notes.push("Benchmark card is not in this build. Omitted.");
   api.notes.push("Eval still is not in this build. Omitted. #/accuracy was not opened.");
-  const frame = await settle(page, api, CASES.C.lower);
+  const offlineVisible = await visible(offline, 400);
+  const frame = await settle(page, api, CASES.C.lower, {
+    caption: offlineVisible ? "Section C offline sample" : search.added ? search.added : "Section C",
+  });
   if (!frame.ok) return skipped(frame.reason);
   return recorded();
 }
@@ -584,14 +611,18 @@ async function shot5(page, api) {
   else api.notes.push("Risk assessment is not on the alternative path.");
   api.notes.push("Process fields were left empty. Nothing was typed into them.");
   await openReviewGaps(page, api);
-  const altFrame = await settle(page, api, CASES.C.lower, { suffix: "alternative-path" });
+  const riskEmpty = (await visible(risk, 400)) && (await risk.inputValue().catch(() => "x")) === "";
+  const altFrame = await settle(page, api, CASES.C.lower, {
+    suffix: "alternative-path",
+    caption: riskEmpty ? "Risk assessment empty" : "Alternative path",
+  });
   if (!altFrame.ok) return skipped(altFrame.reason);
   if (!(await goApplication(page, "Section D"))) return skipped("Section D is not an application tab on this build.");
   const heading = page.getByRole("heading", { name: "Section D and professional screening" }).first();
   if (!(await visible(heading, 5000))) {
     return skipped("The Section D tab opened without the professional screening heading.");
   }
-  const limit = page.getByText(/does not write the evidence|not a licence decision|This is not a licence decision/i).first();
+  const limit = page.getByText(/does not write the evidence|does not write that opinion|not a licence decision|This is not a licence decision/i).first();
   if (await visible(limit, 1000)) {
     api.notes.push("The on-screen limit line is visible. It was not typed by the recorder.");
     await limit.scrollIntoViewIfNeeded().catch(() => {});
@@ -600,7 +631,12 @@ async function shot5(page, api) {
       "The limit line is not on screen. Section D routes did not return a card, and no evidence or judgement was invented.",
     );
   }
-  const frame = await settle(page, api, CASES.C.lower, { suffix: "section-d" });
+  const limitVisible = await visible(limit, 400);
+  const draftFirst = page.getByText("Save the draft first").first();
+  let sectionCaption = "Section D";
+  if (limitVisible) sectionCaption = "Does not write the opinion";
+  else if (await visible(draftFirst, 400)) sectionCaption = "Save the draft first";
+  const frame = await settle(page, api, CASES.C.lower, { suffix: "section-d", caption: sectionCaption });
   if (!frame.ok) return skipped(frame.reason);
   return recorded();
 }
@@ -628,40 +664,40 @@ async function shot6(page, api) {
   const nav = navLink(page, "Officer review");
   if (!(await visible(nav, 1500))) return skipped("Officer review is not in the navigation.");
   const href = (await nav.getAttribute("href")) || "#/officer";
-  await cover(page, true);
-  try {
-    await page.evaluate((next) => {
-      location.hash = next.startsWith("#") ? next : `#${next}`;
-    }, href);
-    await sleep(400);
-    const title = h1(page, "Officer review");
-    if (!(await visible(title, 8000))) return skipped("Officer review did not open.");
-    if (await visible(page.getByRole("heading", { name: "Not built yet" }), 1000)) {
-      await goHash(page, "/describe");
-      return skipped("Officer review is the Not built yet placeholder. The planted package was not recorded.");
-    }
-    if (await visible(h1(page, "Who are you?"), 400)) {
-      return skipped("Officer review sent the browser back to Who are you?. The planted package was not recorded.");
-    }
-    if (await visible(page.getByText("does not open the sample package").first(), 800)) {
-      return skipped("Officer review says this application does not open the sample package. The planted package was not recorded.");
-    }
-    const before = namedButton(page, ["Before fixes", "Original example"]);
-    if (!(await visible(before, 8000))) {
-      const toolbar = page.getByRole("group", { name: "Package version" }).first();
-      const onScreen = (await visible(toolbar, 500)) ? (await toolbar.innerText()).replace(/\s+/g, " ").trim() : "";
-      return skipped(
-        onScreen
-          ? `Officer review package controls read "${onScreen}". Neither Before fixes nor Original example is on screen, so the planted package was not recorded.`
-          : "Officer review opened without a package version control, so the planted package was not recorded.",
-      );
-    }
-    await cover(page, false);
+  await clearOverlay(page);
+  await page.evaluate((next) => {
+    location.hash = next.startsWith("#") ? next : `#${next}`;
+  }, href);
+  await sleep(200);
+  const title = h1(page, "Officer review");
+  if (!(await visible(title, 8000))) return skipped("Officer review did not open.");
+  if (await visible(page.getByRole("heading", { name: "Not built yet" }), 500)) {
+    await goHash(page, "/describe");
+    return skipped("Officer review is the Not built yet placeholder. It was not held on screen.");
+  }
+  if (await visible(h1(page, "Who are you?"), 400)) {
+    return skipped("Officer review sent the browser back to Who are you?. The planted package was not recorded.");
+  }
+  if (await visible(page.getByText("does not open the sample package").first(), 800)) {
+    await goHash(page, "/describe");
+    return skipped("Officer review says this application does not open the sample package. The planted package was not recorded.");
+  }
+  const before = namedButton(page, ["Before fixes", "Original example"]);
+  if (!(await visible(before, 1200))) {
+    const toolbar = page.getByRole("group", { name: "Package version" }).first();
+    const onScreen = (await visible(toolbar, 500)) ? (await toolbar.innerText()).replace(/\s+/g, " ").trim() : "";
+    await goHash(page, "/describe");
+    return failed(
+      onScreen
+        ? `Officer review is open, and the version control reads "${onScreen}". Neither Before fixes nor Original example is visible.`
+        : "Officer review opened without a visible package version control.",
+    );
+  }
     const beforeName = (await before.innerText()).replace(/\s+/g, " ").trim();
     api.notes.push(`The officer screen is one planted package. Version control on screen: ${beforeName}. Case A, B, and C labels were not overlaid.`);
     await before.click();
     await waitOfficerLoaded(page);
-    const beforeFrame = await settle(page, api, LOWER.officer, { suffix: "before" });
+    const beforeFrame = await settle(page, api, LOWER.officer, { suffix: "before", caption: beforeName });
     if (!beforeFrame.ok) return skipped(beforeFrame.reason);
     const after = namedButton(page, ["After fixes", "Updated example"]);
     if (await visible(after, 800)) {
@@ -676,36 +712,35 @@ async function shot6(page, api) {
     const copy = namedButton(page, ["Copy request", "Copy example request"]);
     if (await visible(copy, 800)) await copy.scrollIntoViewIfNeeded().catch(() => {});
     else api.notes.push("Copy request is not on this screen.");
-    const afterFrame = await settle(page, api, LOWER.officer, { suffix: "after" });
+    const afterCaption = (await visible(request, 300)) ? "Information request" : "Officer review";
+    const afterFrame = await settle(page, api, LOWER.officer, { suffix: "after", caption: afterCaption });
     if (!afterFrame.ok) return skipped(afterFrame.reason);
     const shown = await page.evaluate((from) => document.body.innerText.includes(from), REAL_ADDRESS);
     if (shown) return skipped(`${REAL_ADDRESS} is on the officer screen. The shot was not kept.`);
     return recorded();
-  } finally {
-    await cover(page, false);
-  }
 }
 
 async function authorityFrame(page, api, spec, suffix) {
   if (!(await goDescribe(page))) return skipped("The describe screen is not available for the authority select.");
   const authority = page.getByLabel(/Which authority will review this/).first();
-  if (await visible(authority, 800)) {
-    await authority.scrollIntoViewIfNeeded().catch(() => {});
-    const value = await authority.inputValue().catch(() => "");
-    api.notes.push(
-      value
-        ? `Authority select value is "${value}". It was not changed on this frame.`
-        : "The authority select is empty. It was not given a new value on this frame.",
-    );
-  } else api.notes.push("Which authority will review this? is not on this screen.");
-  const describeFrame = await settle(page, api, spec.lower, { suffix: `${suffix}-authority` });
+  if (!(await visible(authority, 800))) {
+    return failed("Which authority will review this? is not visible.");
+  }
+  await authority.scrollIntoViewIfNeeded().catch(() => {});
+  const label = await authority.evaluate((el) => el.selectedOptions?.[0]?.label?.trim() || "").catch(() => "");
+  if (!label || label === "Select…") return failed("The authority select is visible and nothing is selected.");
+  api.notes.push(`Authority select shows "${label}".`);
+  const describeFrame = await settle(page, api, spec.lower, { suffix: `${suffix}-authority`, caption: `Authority · ${label}` });
   if (!describeFrame.ok) return skipped(describeFrame.reason);
   if (!(await goApplication(page, "Alternative path"))) {
     return skipped("The application screen is not on this build for the gaps frame.");
   }
   await openReviewGaps(page, api);
   await noteCheckCompleteness(page, api);
-  const appFrame = await settle(page, api, spec.lower, { suffix: `${suffix}-application` });
+  const owner = page.getByText("Owner missing", { exact: true }).first();
+  const gapsCaption = (await visible(owner, 500)) ? "Owner missing" : "Gaps open";
+  if (await visible(owner, 400)) await owner.scrollIntoViewIfNeeded().catch(() => {});
+  const appFrame = await settle(page, api, spec.lower, { suffix: `${suffix}-application`, caption: gapsCaption });
   if (!appFrame.ok) return skipped(appFrame.reason);
   return recorded();
 }
@@ -736,11 +771,12 @@ function mergeParts(step, parts) {
   const notes = parts.flatMap((part) => part.notes || []);
   const frames = parts.flatMap((part) => part.frames || []);
   if (failed.length) {
+    const hard = failed.some((part) => part.status === "failed");
     return {
       id: step.id,
       title: step.title,
       route: step.route,
-      status: "skipped",
+      status: hard ? "failed" : "skipped",
       reason: failed.map((part) => part.reason).filter(Boolean).join(" "),
       notes,
       frames,
@@ -758,6 +794,7 @@ export async function runWalkthrough(page, opts) {
   const stepById = new Map(STEPS.map((step) => [step.id, step]));
 
   async function exec(id, extra) {
+    await clearOverlay(page);
     const step = stepById.get(id);
     const notes = [];
     const frames = [];

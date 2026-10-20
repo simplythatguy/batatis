@@ -10,9 +10,10 @@
  */
 import { spawn } from "node:child_process";
 import { createServer } from "node:net";
-import { mkdirSync, writeFileSync, existsSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { mkdirSync, writeFileSync, existsSync, readFileSync, readdirSync, rmSync, mkdtempSync } from "node:fs";
 import { createRequire } from "node:module";
-import { dirname, join, resolve } from "node:path";
+import { tmpdir } from "node:os";
+import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright-core";
 import { STEPS, runWalkthrough } from "./steps.mjs";
@@ -24,6 +25,7 @@ function parseArgs(argv) {
   const out = {
     checkScript: false,
     strict: false,
+    engine: false,
     holdMs: 1600,
     web: null,
     branch: null,
@@ -41,6 +43,7 @@ function parseArgs(argv) {
     };
     if (arg === "--check-script") out.checkScript = true;
     else if (arg === "--strict") out.strict = true;
+    else if (arg === "--engine") out.engine = true;
     else if (arg === "--web") out.web = next();
     else if (arg === "--branch") out.branch = next();
     else if (arg === "--out") out.out = next();
@@ -68,7 +71,8 @@ Options
   --hold <ms>       Pause on each recorded shot (default 1600)
   --base <url>      Record an app that is already running
   --script <file>   Shot list to diff (default docs/demo/script.md)
-  --strict          Exit non-zero when any shot is skipped
+  --strict          Exit non-zero unless all seven shots are recorded
+  --engine          Acknowledge an engine already listening on port 8000
 `;
 
 function run(cmd, args, opts = {}) {
@@ -94,7 +98,11 @@ async function ensurePlaywrightFfmpeg() {
   const home = process.env.HOME || "";
   const cache = join(home, ".cache/ms-playwright");
   if (existsSync(cache)) {
-    const found = readdirSync(cache).some((name) => name.startsWith("ffmpeg-") && existsSync(join(cache, name, "ffmpeg-linux")));
+    const found = readdirSync(cache).some((name) => {
+      if (!name.startsWith("ffmpeg-")) return false;
+      const dir = join(cache, name);
+      return existsSync(dir) && readdirSync(dir).some((file) => file.startsWith("ffmpeg"));
+    });
     if (found) return;
   }
   const require = createRequire(import.meta.url);
@@ -105,7 +113,15 @@ async function ensurePlaywrightFfmpeg() {
 
 function chromePath() {
   if (process.env.CHROME_PATH && existsSync(process.env.CHROME_PATH)) return process.env.CHROME_PATH;
-  for (const path of ["/usr/bin/google-chrome-stable", "/usr/bin/google-chrome", "/usr/local/bin/google-chrome"]) {
+  for (const path of [
+    "/usr/bin/google-chrome-stable",
+    "/usr/bin/google-chrome",
+    "/usr/local/bin/google-chrome",
+    "/usr/bin/chromium",
+    "/usr/bin/chromium-browser",
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "/Applications/Chromium.app/Contents/MacOS/Chromium",
+  ]) {
     if (existsSync(path)) return path;
   }
   throw new Error("Chrome was not found. Set CHROME_PATH to a Chrome or Chromium binary.");
@@ -129,19 +145,29 @@ async function git(args, cwd) {
 
 async function materializeBranch(ref) {
   const safe = ref.replace(/[^a-zA-Z0-9._-]+/g, "-").slice(0, 80);
-  const localRef = `refs/batatis-record/${safe}`;
-  const dir = join("/tmp", `batatis-record-${safe}`);
-  await run("git", ["update-ref", "-d", localRef], { cwd: repoRoot }).catch(() => {});
-  await run("git", ["fetch", "origin", `${ref}:${localRef}`], { cwd: repoRoot }).catch(async (error) => {
+  const parent = mkdtempSync(join(tmpdir(), `batatis-record-${safe}-`));
+  const dir = join(parent, "checkout");
+  const suffix = basename(parent).split("-").pop();
+  const localRef = `refs/batatis-record/${safe}-${suffix}`;
+  try {
+    await run("git", ["fetch", "origin", `${ref}:${localRef}`], { cwd: repoRoot });
+  } catch (error) {
+    rmSync(parent, { recursive: true, force: true });
     throw new Error(`Could not fetch ${ref}. ${error.message}`);
-  });
-  await run("git", ["worktree", "remove", "--force", dir], { cwd: repoRoot }).catch(() => {});
-  await run("git", ["worktree", "add", "--detach", dir, localRef], { cwd: repoRoot });
+  }
+  try {
+    await run("git", ["worktree", "add", "--detach", dir, localRef], { cwd: repoRoot });
+  } catch (error) {
+    await run("git", ["update-ref", "-d", localRef], { cwd: repoRoot }).catch(() => {});
+    rmSync(parent, { recursive: true, force: true });
+    throw error;
+  }
   return {
     dir,
     async cleanup() {
       await run("git", ["worktree", "remove", "--force", dir], { cwd: repoRoot }).catch(() => {});
       await run("git", ["update-ref", "-d", localRef], { cwd: repoRoot }).catch(() => {});
+      rmSync(parent, { recursive: true, force: true });
     },
   };
 }
@@ -201,14 +227,25 @@ function stopChild(child) {
   }
 }
 
-async function engineNote() {
+async function engineNote(acknowledged) {
   try {
     const res = await fetch("http://127.0.0.1:8000/openapi.json", { signal: AbortSignal.timeout(600) });
-    return res.ok
-      ? "An engine is already listening on 127.0.0.1:8000. The recorder did not start it and did not send an API key."
-      : `Port 8000 responded ${res.status}. The recorder did not start an engine.`;
+    if (!res.ok) return `Port 8000 responded ${res.status}. The recorder did not start an engine.`;
+    return acknowledged
+      ? "An engine is listening on 127.0.0.1:8000. --engine was passed. Browser requests to /api are still aborted, so this recording does not create cases."
+      : "WARNING: An engine is listening on 127.0.0.1:8000. Browser requests to /api and port 8000 are aborted, so this recording does not create cases. Pass --engine to acknowledge the engine. The recorder did not start it.";
   } catch {
-    return "No engine is listening on 127.0.0.1:8000. The recording uses the app's fixture, example, and offline paths.";
+    return "No engine is listening on 127.0.0.1:8000. The recording uses the app's fixture and offline paths.";
+  }
+}
+
+async function gitIdentity(cwd) {
+  try {
+    const sha = await git(["rev-parse", "HEAD"], cwd);
+    const branch = await git(["rev-parse", "--abbrev-ref", "HEAD"], cwd);
+    return { sha: sha || null, branch: branch || null };
+  } catch {
+    return { sha: null, branch: null, error: "not a git checkout" };
   }
 }
 
@@ -259,14 +296,16 @@ function printReport(results) {
     console.log(`  recorded  ${step.id}  ${step.title}${extra}`);
   }
   for (const step of skipped) {
-    console.log(`  skipped   ${step.id}  ${step.title}`);
+    const label = step.status === "failed" ? "failed   " : "skipped  ";
+    console.log(`  ${label} ${step.id}  ${step.title}`);
     console.log(`            ${step.reason}`);
   }
 }
 
-async function convertMp4(webm, mp4) {
-  await run("ffmpeg", [
-    "-y",
+async function convertMp4(webm, mp4, trimSeconds) {
+  const args = ["-y"];
+  if (trimSeconds > 0.05) args.push("-ss", trimSeconds.toFixed(3));
+  args.push(
     "-i",
     webm,
     "-an",
@@ -279,7 +318,8 @@ async function convertMp4(webm, mp4) {
     "-crf",
     "20",
     mp4,
-  ]);
+  );
+  await run("ffmpeg", args);
   const { stdout: durationOut } = await run("ffprobe", [
     "-v",
     "error",
@@ -317,7 +357,7 @@ async function main() {
   const sync = scriptReport(scriptPath);
   console.log(sync.note);
   for (const problem of sync.problems) console.log(`  ${problem}`);
-  if (args.checkScript && !args.branch && !args.web && !args.base) {
+  if (args.checkScript) {
     if (sync.status === "drift") process.exitCode = 1;
     return;
   }
@@ -353,9 +393,8 @@ async function main() {
       base = await vite.ready;
       console.log(`App at ${base}`);
     }
-    const sha = await git(["rev-parse", "HEAD"], webDir).catch(() => "");
-    const branchName = await git(["rev-parse", "--abbrev-ref", "HEAD"], webDir).catch(() => "");
-    const engine = `${await engineNote()} Browser requests to /api and port 8000 are aborted, so this recording does not call the engine or a model. No PDF is uploaded.`;
+    const gitInfo = await gitIdentity(dirname(webDir));
+    const engine = `${await engineNote(args.engine)} Browser requests to /api and port 8000 are aborted, so this recording does not call the engine or a model. No PDF is uploaded.`;
     console.log(engine);
     await ensurePlaywrightFfmpeg();
 
@@ -371,6 +410,7 @@ async function main() {
       });
       try {
         await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+        const videoT0 = Date.now();
         const page = await context.newPage();
         page.setDefaultTimeout(8000);
         const pageErrors = [];
@@ -381,6 +421,8 @@ async function main() {
         await page.goto(`${base.replace(/\/$/, "")}/?reset`, { waitUntil: "domcontentloaded", timeout: 30000 });
         await h1Ready(page);
         await page.evaluate(() => document.fonts?.ready);
+        const paintMs = Date.now() - videoT0;
+        await page.waitForTimeout(1200);
         const results = await runWalkthrough(page, {
           holdMs: args.holdMs,
           framesDir,
@@ -390,12 +432,12 @@ async function main() {
         const video = page.video();
         await context.close();
         const webm = await video.path();
-        const media = await convertMp4(webm, mp4);
+        const media = await convertMp4(webm, mp4, Math.max(0, (paintMs - 120) / 1000));
         rmSync(videoDir, { recursive: true, force: true });
         const log = {
           recordedAt: new Date().toISOString(),
           webDir,
-          git: { sha, branch: branchName, requestedBranch: args.branch },
+          git: { ...gitInfo, requestedBranch: args.branch },
           baseUrl: base,
           engine,
           scriptSync: sync,
@@ -413,10 +455,10 @@ async function main() {
         if (downloads.length) {
           throw new Error(`A file was downloaded (${downloads.join(", ")}). The recorder does not save a PDF.`);
         }
-        if (!results.some((step) => step.status === "recorded")) {
-          throw new Error("No shot was recorded.");
-        }
         const missing = results.filter((step) => step.status !== "recorded");
+        if (!results.some((step) => step.status === "recorded")) {
+          console.log("No script shot was recorded. The mp4 is the opening screen.");
+        }
         if (args.strict && missing.length) {
           const detail = missing.map((step) => `${step.id} ${step.title}`).join("; ");
           throw new Error(`--strict: ${missing.length} shot(s) missing: ${detail}`);
