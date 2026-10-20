@@ -46,6 +46,7 @@ FACTS = {
     'fire_suppression': False, 'fire_alarm': False,
     'professional_name': 'SYNTHETIC TEST professional identity (no real appointment)',
     'professional_seal': 'SYNTHETIC TEST authentication metadata (no real seal or review)',
+    'professional.role': 'SYNTHETIC TEST engineer (no real appointment)',
     'supporting_doc.1.name': 'SYNTHETIC product-literature attachment',
     'supporting_doc.1.responsible': 'SYNTHETIC manufacturer role',
     'supporting_doc.2.name': 'SYNTHETIC envelope-analysis attachment',

@@ -95,6 +95,13 @@ def professional_involvement_gaps(case: Case, codes: Codes, process, *,
     required = professional.required == 'yes' or confirmed_value(case, 'engineering_required') in ('yes', True)
     if required:
         citation = next((r.citation for r in professional.reasons if r.required == 'yes'), codes.citation('2.4.1.1.(3)', 'C'))
+        if not professional_confirmed(case):
+            gaps.append(Gap(
+                id='D12:professional_confirmation', severity='blocking', section='D',
+                field='professional_confirmation',
+                message='Your application appears to be missing an applicant-confirmed registered professional for this scope.',
+                fix_hint='Confirm their engineer or architect role and registration number or seal. File metadata alone does not confirm this.',
+                citation=citation, routed_to='professional'))
         if _missing(confirmed_value(case, 'professional_name', 'responsible_professional', 'professional.name')):
             add('D12', 'D', 'responsible_professional', 'a named registered professional required for this work.',
                 'Ask who takes responsibility, their discipline and scope, and obtain their own authenticated work.', citation)
