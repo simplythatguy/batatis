@@ -114,8 +114,24 @@ _DEPENDS_FIELDS = {
     'trusses_unknown': ('roof_trusses',),
     'suppression_unknown': ('fire_suppression',),
     'fire_alarm_unknown': ('fire_alarm',),
+    'systems_unknown': ('fire_suppression', 'fire_alarm'),
+    'firestop_scope': ('fire_suppression',),
     'professional_law': ('professional_scope_resolved',),
 }
+
+_DECIDER = {
+    'officer': 'The officer decides.',
+    'applicant': 'The applicant decides.',
+    'professional': 'A registered professional decides.',
+}
+_FIRE_QUESTION = (
+    'Does the fire separation stay intact at each penetration, including sprinkler piping?')
+_FIRE_MESSAGE = (
+    'Whether the fire separation, each penetration and the sprinkler piping are covered is unresolved.')
+_SYSTEM_MESSAGE = (
+    'System presence or applicability of the general building requirement is unresolved.')
+_SYSTEM_QUESTION = (
+    'Is a fire suppression or fire alarm system being installed, and does the general professional requirement apply?')
 
 
 def _applicant_text(case: Case, *fields: str) -> str | None:
@@ -129,10 +145,16 @@ def _applicant_text(case: Case, *fields: str) -> str | None:
     return fact.value.strip()
 
 
+def commercial_party(*parts: str) -> bool:
+    """Sales, vendor, and manufacturer wording. An unsigned note from one of these is not a professional."""
+    tokens = re.sub(r'[^a-z0-9]+', ' ', ' '.join(parts).casefold()).split()
+    return any(token in _REJECT_ROLE for token in tokens)
+
+
 def role_confirmed(value: str) -> bool:
     """Case-insensitive. Punctuation is removed. Engineer and architect variants pass; commercial roles do not."""
     tokens = re.sub(r'[^a-z0-9]+', ' ', value.casefold()).split()
-    if any(token in _REJECT_ROLE for token in tokens):
+    if commercial_party(value):
         return False
     if 'peng' in tokens or {'p', 'eng'} <= set(tokens):
         return True
@@ -223,6 +245,10 @@ def _apply_case_sources(case: Case, facts: ProfessionalFacts):
 class ProfessionalResult(BaseModel):
     required: Requirement
     general_required: Requirement
+    # Sentences for an unresolved screen. Empty when that token is not unresolved.
+    # Show these. The tokens above stay for the machine.
+    decision: str = ''
+    general_decision: str = ''
     reasons: list[ProfessionalReason]
     questions: list[str]
     prompts: list[PracticePrompt] = []
@@ -247,6 +273,35 @@ _AREA_LIMITS = {
 
 def _listed(provisions: tuple[str, ...], prefix: str) -> bool:
     return any(provision.startswith(prefix) for provision in provisions)
+
+
+def unresolved_item(what: str, routed_to: str | None) -> str:
+    """User-facing line for an open screen. Names the deciding fact and who decides it."""
+    body = ' '.join(what.split()).strip().rstrip('.')
+    if not body or body.casefold() in {'depends', 'depend'}:
+        body = 'Whether a registered professional is required'
+    who = _DECIDER.get(routed_to or '', _DECIDER['officer'])
+    if who.casefold() in body.casefold():
+        return body if body.endswith('.') else f'{body}.'
+    return f'{body}. {who}'
+
+
+def _screen_scope(case: Case | None, provisions: tuple[str, ...]) -> str:
+    """Fire-separation work asks about the penetration. Structural provisions keep their own questions."""
+    if case is None:
+        return 'any'
+    parts = [case.title or '']
+    for field in ('topic', 'description', 'alternative_description', 'alternative'):
+        value = confirmed_value(case, field)
+        if isinstance(value, str):
+            parts.append(value)
+    text = ' '.join(parts).casefold()
+    fire = any(provision.startswith(('3.1.8', '3.1.9')) for provision in provisions) or any(
+        phrase in text for phrase in ('firestop', 'fire separation', 'fire-separation', 'penetration'))
+    structural = any(provision.startswith(('9.15', '9.23', '9.4', '4.')) for provision in provisions)
+    if fire and not structural:
+        return 'fire'
+    return 'any'
 
 
 def _missing_facts(facts: ProfessionalFacts, reasons: list[ProfessionalReason], *, confirmed: bool) -> tuple[str, ...]:
@@ -296,8 +351,10 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
         facts = loaded
     if span_handoff and facts.part4_design is not True:
         facts = facts.model_copy(update={'part4_design': True})
+    scope = _screen_scope(case, provisions)
     reasons: list[ProfessionalReason] = []
     questions: list[str] = []
+    asked: dict[str, str] = {}
 
     def add(code: str, required: Requirement, message: str, pid: str,
             question: str | None = None, division: str = 'C'):
@@ -307,16 +364,19 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
         reasons.append(ProfessionalReason(code=code, required=required, message=message, citation=rec['citation']))
         if question:
             questions.append(question)
+            asked[code] = question
 
     occupancy = facts.occupancy
     general: Requirement = 'depends'
+    general_question = None
     if occupancy == 'single_family':
         general = 'no'
     elif occupancy == 'multi_family':
         if facts.principal_dwelling_units is not None:
             general = 'yes' if facts.principal_dwelling_units > 4 else 'no'
         else:
-            questions.append('How many principal dwelling units are there, excluding confirmed qualifying secondary suites?')
+            general_question = 'How many principal dwelling units are there, excluding confirmed qualifying secondary suites?'
+            questions.append(general_question)
     elif occupancy in _AREA_LIMITS:
         if facts.storeys is not None:
             if facts.storeys > 3:
@@ -324,16 +384,19 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
             elif facts.building_area_m2 is not None:
                 general = 'no' if facts.building_area_m2 <= _AREA_LIMITS[occupancy][facts.storeys - 1] else 'yes'
         if general == 'depends':
-            questions.append('What are the building height in storeys and building area in square metres (not total floor area)?')
+            general_question = 'What are the building height in storeys and building area in square metres (not total floor area)?'
+            questions.append(general_question)
     elif occupancy == 'farm':
         if facts.farm_public_use is False:
             general = 'no'
-        else:
-            questions.append('Is the farm building for public use, and what occupancy classification applies?')
+        elif scope != 'fire':
+            general_question = 'Is the farm building for public use, and what occupancy classification applies?'
+            questions.append(general_question)
     elif occupancy == 'relocatable_industrial_camp':
         general = 'no'
     else:
-        questions.append('What is the confirmed occupancy/building type, including each use in a mixed-use building?')
+        general_question = 'What is the confirmed occupancy/building type, including each use in a mixed-use building?'
+        questions.append(general_question)
 
     if general == 'yes':
         add('general_building', 'yes',
@@ -345,7 +408,8 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
             '2.4.1.1.(1)')
     else:
         add('general_unresolved', 'depends',
-            'The facts do not establish whether a general professional-involvement exception applies.', '2.4.1.1.(1)')
+            'The facts do not establish whether a general professional-involvement exception applies.', '2.4.1.1.(1)',
+            general_question)
     if occupancy == 'multi_family':
         add('secondary_suites', 'no', 'Qualifying secondary suites need not count for this code exception; '
             'their status and independent professional-law treatment must be confirmed.', '2.4.1.1.(2)')
@@ -359,17 +423,18 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
 
     if facts.part4_design is True:
         add('part4', 'yes', 'Part 4 design requires a registered professional skilled in the work concerned.', '2.4.1.2.(1)')
-    elif facts.part4_design is None:
+    elif facts.part4_design is None and scope != 'fire':
         add('part4_unknown', 'depends', 'The structural design route is not confirmed.', '2.4.1.2.(1)',
             'Is any design carried out under Part 4, including beams, connections or foundations?')
     # Unanswered component questions are in scope only. A preserved-wood foundation
     # question is Part 4 work or a 9.15.2 provision. A truss question is Part 4 work
-    # or a 9.23.14 provision. Absence alone does not make the screen depend.
+    # or a 9.23.14 provision. A fire-separation case does not ask those. Absence
+    # alone does not make the screen depend.
     if facts.preserved_wood_foundation_part4 is True:
         add('preserved_wood_foundation', 'yes',
             'A Part 4 preserved wood foundation needs professional retention for installation field reviews before construction.',
             '2.4.1.2.(2)')
-    elif facts.preserved_wood_foundation_part4 is None and (
+    elif scope != 'fire' and facts.preserved_wood_foundation_part4 is None and (
             facts.part4_design is True or _listed(provisions, '9.15.2')):
         add('foundation_unknown', 'depends', 'The foundation design and field-review trigger are unresolved.', '2.4.1.2.(2)',
             'Does the project include a preserved wood foundation designed under Part 4?')
@@ -377,10 +442,11 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
         add('truss_design', 'yes', 'Wood roof truss design and assembly connections need appropriate engineering responsibility.',
             '9.23.14.11.(2)', division='B')
         add('truss_part4', 'yes', 'The Part 4 connection-design route requires a skilled registered professional.', '2.4.1.2.(1)')
-    elif facts.roof_trusses is None and (facts.part4_design is True or _listed(provisions, '9.23.14')):
+    elif scope != 'fire' and facts.roof_trusses is None and (facts.part4_design is True or _listed(provisions, '9.23.14')):
         add('trusses_unknown', 'depends', 'Roof-truss assembly design responsibility is not confirmed.', '2.4.1.2.(1)',
             'Are wood roof trusses or truss assembly connections included?')
 
+    pending_systems: list[tuple[str, str, str]] = []
     for field, code, pid, task in (
         ('fire_suppression', 'suppression', '2.4.1.3.(1)', 'testing'),
         ('fire_alarm', 'fire_alarm', '2.4.1.4.(1)', 'verification'),
@@ -389,11 +455,21 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
         if general == 'yes' and present is True:
             add(code, 'yes', f'The owner must document professional retention for system design, installation field reviews '
                 f'and witnessing {task}, before construction.', pid)
-        elif general != 'no' and (present is None or (present is True and general == 'depends')):
+        elif scope != 'fire' and general != 'no' and (present is None or (present is True and general == 'depends')):
             # Div C 2.4.1.3 and 2.4.1.4 apply to a 2.4.1.1.(3) building. A resolved
             # general exception is out of scope, so an unanswered system does not ask.
-            add(code + '_unknown', 'depends', 'System presence or applicability of the general building requirement is unresolved.',
-                pid, f'Is a {field.replace("_", " ")} system being installed, and does the general professional requirement apply?')
+            pending_systems.append((field, code, pid))
+    if len(pending_systems) >= 2:
+        for _field, _code, pid in pending_systems:
+            if codes.provision(pid, 'C') is None:
+                raise KeyError(f'missing professional-involvement provision: {pid}')
+        add('systems_unknown', 'depends', _SYSTEM_MESSAGE, pending_systems[0][2], _SYSTEM_QUESTION)
+    elif len(pending_systems) == 1:
+        field, code, pid = pending_systems[0]
+        add(code + '_unknown', 'depends', _SYSTEM_MESSAGE, pid,
+            f'Is a {field.replace("_", " ")} system being installed, and does the general professional requirement apply?')
+    if scope == 'fire':
+        add('firestop_scope', 'depends', _FIRE_MESSAGE, '2.4.1.3.(1)', _FIRE_QUESTION)
 
     # The Acts count suites. Div C 2.4.1.1.(2) does not. Above 4 is a yes even when the code exception is no.
     # The cite is the codedb authentication sentence. The Act pinpoint is source-pdf and is not a routing cite.
@@ -446,9 +522,34 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
         routed = 'applicant'
     else:
         routed = None
+    if scope == 'fire':
+        dropped = ('preserved wood', 'roof truss', 'farm building', 'beams, connections or foundations')
+        questions = [text for text in questions if not any(phrase in text.casefold() for phrase in dropped)]
     unique_questions = list(dict.fromkeys(questions))
-    return ProfessionalResult(required=required, general_required=general, reasons=reasons,
-                              questions=unique_questions, prompts=[_prompt_for(text) for text in unique_questions],
+    for reason in reasons:
+        if reason.required != 'depends':
+            continue
+        detail = reason.message
+        question = asked.get(reason.code)
+        if question and question not in detail:
+            detail = f'{detail.rstrip(".")}. {question}'
+        reason.message = unresolved_item(detail, routed)
+    decision = unresolved_item(
+        unique_questions[0] if unique_questions else 'Whether a registered professional is required', routed,
+    ) if required == 'depends' else ''
+    general_decision = unresolved_item(
+        'Whether a general professional-involvement exception applies', routed,
+    ) if general == 'depends' else ''
+    prompts = []
+    decider = _DECIDER.get(routed or '', '')
+    for text in unique_questions:
+        prompt = _prompt_for(text)
+        if decider and decider.casefold() not in prompt.help.casefold():
+            prompt = prompt.model_copy(update={'help': f'{prompt.help} {decider}'})
+        prompts.append(prompt)
+    return ProfessionalResult(required=required, general_required=general, decision=decision,
+                              general_decision=general_decision, reasons=reasons,
+                              questions=unique_questions, prompts=prompts,
                               involvement=involvement, missing_facts=missing, routed_to=routed,
                               applicant_sourced=bool(applicant), not_sure_fields=not_sure,
                               prescriptive_contradiction=contradiction)

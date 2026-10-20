@@ -17,7 +17,8 @@ from .codes import Codes
 from .models import INTENT_LABEL, Case, Gap as CaseGap
 from .process_fields import confirmed_value, latest_fact, process_fields
 from .professional import (
-    OFFICER_PROFESSIONAL_GAP, PRESCRIPTIVE_CONTRADICTION, ProfessionalResult, professional_involvement,
+    OFFICER_PROFESSIONAL_GAP, PRESCRIPTIVE_CONTRADICTION, ProfessionalResult, commercial_party,
+    professional_involvement, unresolved_item,
 )
 from .section_c import section_c_rows
 from .section_d import SupportingDocument, section_d_plan, supporting_documents
@@ -94,7 +95,7 @@ def professional_involvement_gaps(case: Case, codes: Codes, process, *,
                 'Request their qualifications, experience and background; do not draft them.', codes.citation('2.3.1.1.(4)', 'C'))
         docs = supporting_documents(case) if documents is None else documents
         if (_missing(confirmed_value(case, 'professional_seal', 'professional.seal'))
-                and not any(doc.professional_seal and doc.professional_seal.strip() for doc in docs)):
+                and not any(seal_is_professional_evidence(doc, quote=_file_quote(case, doc)) for doc in docs)):
             add('D12', 'D', 'professional_authentication', 'authentication information for the required professional work.',
                 'Request the responsible professional’s authenticated document; authenticity and scope need human review.',
                 codes.citation('2.4.1.1.(5)', 'C'))
@@ -108,15 +109,35 @@ def professional_involvement_gaps(case: Case, codes: Codes, process, *,
             citation=next((r.citation for r in professional.reasons if r.required == 'depends'), None),
             routed_to='officer'))
     elif professional.required == 'depends' or professional.involvement == 'unresolved':
-        named = ', '.join(professional.missing_facts) or 'the unresolved professional-involvement facts'
+        line = next((reason.message for reason in professional.reasons if reason.required == 'depends'), '')
+        if not line:
+            what = professional.questions[0] if professional.questions else 'Whether a registered professional is required'
+            line = unresolved_item(what, professional.routed_to)
         gaps.append(Gap(
             id='professional:professional_requirement', severity='blocking', section='D',
             field='professional_requirement',
-            message=f'Your application appears to be missing {named} to resolve professional involvement.',
-            fix_hint=' '.join(professional.questions),
+            message=line,
+            fix_hint=line,
             citation=next((r.citation for r in professional.reasons if r.required == 'depends'), None),
             routed_to=professional.routed_to))
     return gaps
+
+
+def _file_quote(case: Case, doc: SupportingDocument) -> str:
+    fact = latest_fact(case, f'evidence.{doc.id}.file_ref')
+    if fact is None or not isinstance(fact.source.quote, str):
+        return ''
+    return fact.source.quote
+
+
+def seal_is_professional_evidence(doc: SupportingDocument, *, quote: str = '') -> bool:
+    """A seal string on an unsigned vendor or sales email does not authenticate the work."""
+    seal = doc.professional_seal.strip() if isinstance(doc.professional_seal, str) else ''
+    if not seal:
+        return False
+    if commercial_party(doc.responsible_party, doc.issuer, doc.title, quote, seal):
+        return False
+    return True
 
 
 def check_completeness(case: Case, codes: Codes, *,

@@ -18,8 +18,8 @@ from .human_review import HumanReview, discretionary_review, human_reviews, mand
 from .models import Case
 from .process_fields import ProcessField, alternative_path, confirmed_value, latest_fact, process_fields
 from .professional import (
-    PracticePrompt, ProfessionalReason, ProfessionalResult, professional_confirmed,
-    professional_involvement,
+    PracticePrompt, ProfessionalReason, ProfessionalResult, commercial_party,
+    professional_confirmed, professional_involvement, unresolved_item,
 )
 from .section_d import (
     ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, EvidencePlanItem, EvidenceType, section_d_plan,
@@ -98,6 +98,8 @@ _RULE_IDS = {
     'trusses_unknown': ('2.4.1.2.(1)', 'C'),
     'suppression': ('2.4.1.3.(1)', 'C'),
     'suppression_unknown': ('2.4.1.3.(1)', 'C'),
+    'systems_unknown': ('2.4.1.3.(1)', 'C'),
+    'firestop_scope': ('2.4.1.3.(1)', 'C'),
     'fire_alarm': ('2.4.1.4.(1)', 'C'),
     'fire_alarm_unknown': ('2.4.1.4.(1)', 'C'),
     'design_scope': ('2.4.1.1.(3)', 'C'),
@@ -275,11 +277,12 @@ def render_practice(result: ProfessionalResult, codes: Codes, *, span_handoff: b
                      None), result)
     reason = _pick(result, 'depends')
     rule, division = _rule(reason) if reason else ('', '')
+    question = _question(result)
     return _with_prompts(PracticeOfEngineering(
         value='unknown', rule=rule or None, division=division or None,
         citation=reason.citation if reason else None,
-        reason='These facts do not establish whether practice of engineering applies. Ask before setting the flag to yes or no.',
-        question=_question(result)), result)
+        reason=unresolved_item(question, result.routed_to),
+        question=question), result)
 
 
 def _at_stake(item: EvidencePlanItem) -> str:
@@ -291,13 +294,21 @@ def _at_stake(item: EvidencePlanItem) -> str:
             'designer which performance benchmark applies before selecting evidence.')
 
 
+def _commercial_attachment(case: Case, doc) -> bool:
+    """An unsigned vendor or sales email is not professional evidence."""
+    fact = latest_fact(case, f'evidence.{doc.id}.file_ref')
+    quote = fact.source.quote if fact is not None and isinstance(fact.source.quote, str) else ''
+    seal = doc.professional_seal if isinstance(doc.professional_seal, str) else ''
+    return commercial_party(doc.responsible_party, doc.issuer, doc.title, quote, seal)
+
+
 def _status(case: Case, flag: PracticeOfEngineering, attachments) -> IssueStatus:
     """None of these values is a sign-off or a compliance determination."""
     if flag.value == 'unknown':
         return 'open'
     if flag.value is True and not professional_confirmed(case):
         return 'needs_professional'
-    if attachments:
+    if any(not _commercial_attachment(case, doc) for doc in attachments):
         return 'evidence_listed'
     return 'open'
 

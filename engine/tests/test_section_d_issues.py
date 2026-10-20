@@ -281,6 +281,133 @@ def test_part3_sales_rep_email_stays_needs_professional():
     assert 'FireSeal' not in payload and 'Example Sealants' not in payload and 'sales rep' not in payload
 
 
+def _visible(payload) -> list[str]:
+    found: list[str] = []
+
+    def walk(node, skip: bool = False):
+        if isinstance(node, dict):
+            for key, value in node.items():
+                walk(value, skip or key in ('required', 'general_required'))
+        elif isinstance(node, list):
+            for value in node:
+                walk(value, skip)
+        elif isinstance(node, str) and not skip:
+            found.append(node)
+
+    walk(payload)
+    return found
+
+
+def test_unresolved_item_names_what_decides_it_and_who():
+    """An open Section D item names the deciding question and routed_to. It does not say depends."""
+    codes = codes_with_rules()
+    case = Case(provisions=[BENCHMARK])
+    issue = section_d_issues(case, codes)[0]
+    flag = issue.practice_of_engineering
+    assert flag.value == 'unknown' and flag.routed_to in ('officer', 'professional', 'applicant')
+    who = {'officer': 'officer', 'applicant': 'applicant', 'professional': 'professional'}[flag.routed_to]
+    assert flag.question and flag.question in flag.reason
+    assert who in flag.reason.casefold() and 'decides' in flag.reason.casefold()
+    from engine.completeness import check_completeness
+    from engine.professional import professional_involvement
+    gap = next(item for item in check_completeness(case, codes) if item.field == 'professional_requirement')
+    assert gap.routed_to == flag.routed_to
+    assert who in gap.message.casefold() and 'decides' in gap.message.casefold()
+    result = professional_involvement(case, codes)
+    assert result.decision and who in result.decision.casefold() and 'decides' in result.decision.casefold()
+    blobs = [flag.reason, flag.question or '', gap.message, gap.fix_hint, result.decision, result.general_decision]
+    blobs += [prompt.text + ' ' + prompt.help for prompt in flag.prompts]
+    blobs += [reason.message for reason in result.reasons if reason.required == 'depends']
+    joined = '\n'.join(blobs)
+    assert 'depends. depends' not in joined.casefold()
+    assert re.search(r'\bdepends\b', joined, re.I) is None
+    for piece in _visible(issue.model_dump()) + _visible(gap.model_dump()):
+        assert piece.strip().casefold() not in {'depends', 'depends.'}
+        assert 'depends. depends' not in piece.casefold()
+
+
+def test_firestop_case_asks_about_the_penetration_not_wood_or_farm():
+    from engine.human_review import MANDATORY_ORDER, mandatory_hits
+    from engine.professional import ProfessionalFacts, professional_involvement
+    codes = codes_with_rules()
+    codes.add('B', '3.1.9.1.(1)')
+    codes.add('B', '3.1.9.4.(4)')
+    carlos = Case(
+        title='Firestop at sprinkler-pipe penetrations',
+        provisions=['3.1.9.1.(1)', '3.1.9.4.(4)'],
+        facts=[
+            fact('occupancy', 'mixed'), fact('storeys', 5), fact('building_area_m2', 1200.0),
+            fact('part4_design', True),
+        ],
+    )
+    farm = Case(
+        title='Firestop at a fire separation',
+        provisions=['3.1.9.1.(1)'],
+        facts=[fact('occupancy', 'farm'), fact('part4_design', True), fact('storeys', 2)],
+    )
+    for case in (carlos, farm):
+        result = professional_involvement(case, codes)
+        asked = ' '.join(result.questions).casefold()
+        assert 'preserved wood' not in asked
+        assert 'roof truss' not in asked
+        assert 'farm building' not in asked
+        assert 'beams, connections or foundations' not in asked
+        assert ('fire separation' in asked or 'penetration' in asked) and 'sprinkler' in asked
+        assert sum('System presence or applicability' in reason.message for reason in result.reasons) <= 1
+        issue = section_d_issues(case, codes)[0]
+        prompts = ' '.join(prompt.text for prompt in issue.practice_of_engineering.prompts).casefold()
+        assert 'preserved wood' not in prompts and 'roof truss' not in prompts and 'farm building' not in prompts
+        assert ('fire separation' in prompts or 'penetration' in prompts) and 'sprinkler' in prompts
+    screen = professional_involvement(ProfessionalFacts(
+        occupancy='mercantile', storeys=5, building_area_m2=800.0), codes)
+    assert sum('System presence or applicability' in reason.message for reason in screen.reasons) == 1
+    assert any('fire suppression' in question for question in screen.questions)
+    hits = mandatory_hits(carlos, codes)
+    ids = [hit.trigger_id for hit in hits]
+    assert MANDATORY_ORDER == (
+        'HR-03', 'HR-01', 'HR-06', 'HR-07', 'HR-05', 'HR-04', 'HR-11', 'HR-14', 'HR-13', 'HR-12')
+    assert ids == sorted(set(ids), key=MANDATORY_ORDER.index)
+    assert ids[0] == 'HR-03' and 'HR-04' in ids
+    assert hits[0].cite == codes.provision('2.4.1.2.(1)', 'C')['citation']
+    hr04 = next(hit for hit in hits if hit.trigger_id == 'HR-04')
+    assert hr04.cite == codes.provision('1.3.3.2.(1)', 'A')['citation']
+
+
+def test_unsigned_vendor_email_is_not_professional_evidence():
+    from engine.completeness import check_completeness, seal_is_professional_evidence
+    from engine.section_d import supporting_documents
+    codes = codes_with_rules()
+    quote = ("Hi Carlos, FireSeal 200 performs great on plastic pipe too, we've seen it in lots of jobs. "
+             "Treat this as our engineering judgment that it'll hold the rating. Thanks!")
+    email = Path('evals/demo-cases/b-contractor-firestop-nonconformance/input/manufacturer-ej-draft-EXAMPLE.md')
+    if email.exists():
+        assert quote in email.read_text()
+    bare = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact('part4_design', True)]), codes)[0]
+    file = Source(type='file', ref='vendor-email.eml', quote=quote)
+    case = Case(provisions=[BENCHMARK], facts=[
+        fact('part4_design', True),
+        fact(f'evidence.{bare.id}.file_ref', file.ref, source=file),
+        fact(f'evidence.{bare.id}.responsible_party', 'sales rep', source=file),
+        fact(f'evidence.{bare.id}.issuer', 'vendor', source=file),
+        fact(f'evidence.{bare.id}.professional_seal', 'stamp mentioned in the sales email', source=file),
+    ])
+    issue = section_d_issues(case, codes)[0]
+    assert not professional_confirmed(case)
+    assert issue.status == 'needs_professional'
+    docs = supporting_documents(case)
+    assert docs and all(not seal_is_professional_evidence(doc, quote=quote) for doc in docs)
+    assert any(gap.field == 'professional_authentication' and gap.id.startswith('D12:')
+               for gap in check_completeness(case, codes))
+    report = Source(type='file', ref='report.pdf', quote='Laboratory report.')
+    honest = Case(provisions=[BENCHMARK], facts=[
+        fact('part4_design', True),
+        fact(f'evidence.{bare.id}.file_ref', report.ref, source=report),
+        fact(f'evidence.{bare.id}.responsible_party', 'A. Engineer', source=report),
+        fact(f'evidence.{bare.id}.professional_seal', 'stamp image on the pdf', source=report),
+    ])
+    assert not any(gap.field == 'professional_authentication' for gap in check_completeness(honest, codes))
+
+
 def test_missing_division_c_citation_is_unknown_and_the_route_does_not_500(tmp_path):
     codes = codes_with_rules()
     codes.rows[('C', '2.4.1.2.(1)')]['citation'] = ''

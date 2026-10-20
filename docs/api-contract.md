@@ -17,7 +17,7 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `POST /section-c` | Body `{ "provisions": ["…"] }`. `SectionCRow` list. `404` when a provision is missing from codedb. `400` on an invalid id. |
 | `POST /cases/{case_id}/section-d` | Body optional `{ "provisions": ["…"] }`. `{ "items", "notices" }`. Writes the case. |
 | `GET /cases/{case_id}/section-d/issues` | Issue list below. Read-only. Does not write the case. |
-| `GET /cases/{case_id}/professional` | `required` and `general_required`: `yes`, `no`, or `depends`. `involvement`: `professional_involved`, `not_required`, or `unresolved`. Also `reasons`, `questions`, `missing_facts`, `scope_note`. |
+| `GET /cases/{case_id}/professional` | `required` and `general_required`: `yes`, `no`, or `depends`. When a token is unresolved, `decision` and `general_decision` are the sentences to show. `involvement`: `professional_involved`, `not_required`, or `unresolved`. Also `reasons`, `questions`, `missing_facts`, `scope_note`. |
 | `POST /cases/{case_id}/evidence` | `201` `EvidenceItem`. Body: `description` (required), optional `responsible_party`, `date`, `evidence_type`. Appends a new item with a server id. A second save does not replace the first. |
 | `DELETE /cases/{case_id}/evidence/{evidence_id}` | `204`. Removes that item and its `evidence.<id>.*` facts. `404` detail `evidence not found`. |
 | `GET /ccmc/search` | Query `q` (1–200 characters) and `limit` (1–50, default 20). `422` on a rejected query. `503` when the registry is unavailable; that detail is the registry error text. |
@@ -56,11 +56,15 @@ The fixed 404 detail strings are `case not found`, `provision not found`, and `e
 
 ### Practice-of-engineering on `GET /professional`
 
-`required` and `general_required` are `yes`, `no`, or `depends`. `depends` means a deciding fact is missing. That route does not return `true`, `false`, or `"unknown"`.
+`required` and `general_required` are `yes`, `no`, or `depends`. The unresolved token means a deciding fact is missing. That route does not return `true`, `false`, or `"unknown"`. Show `decision` and `general_decision` for an unresolved screen. Each is a sentence naming the deciding question and who decides (`routed_to`): the officer, the applicant, or a registered professional. An unresolved reason `message` is the same kind of sentence. Those sentences do not render the unresolved token on its own, and they do not repeat it.
 
 `involvement` is `professional_involved`, `not_required`, or `unresolved`. An alternative-solution case never counts `prescriptive_route_confirmed` as yes. A Yes on that route is a contradiction and clears nothing. Reserved professional judgement, professional scope, authority-requires-professional, and special-safety answers whose only source is the applicant stay unresolved. `professional_involved` is reached only when those answers come from an `officer`, `professional`, or `code` source and the applicant has confirmed an engineer or architect (normalised role match, for example `R. Singh, P.Eng.`, and a registration or seal number). That resolution is not `not_required`. If any Yes/No input to the screen is applicant-sourced, including a user-confirmed fact, the screen does not return `no`; it returns `depends`. The completeness gap is then exactly `Routed to the officer: whether a registered professional is required`, `routed_to` `officer`, severity `blocking`. That gap blocks the official PDF. A draft export stays allowed. `questions` remains a list of strings. `prompts` repeats each question with `help` (what Yes means and what No means) and `not_sure` (`Not sure (the officer decides)`). A Not sure answer is an open item routed to the officer.
 
-The issues route maps the same screen: `yes` → `true`, `no` → `false`, `depends` → `"unknown"`. `"unknown"` requires a question. `depends` and `"unknown"` are not the same token.
+The issues route maps the same screen: `yes` → `true`, `no` → `false`, `depends` → `"unknown"`. `"unknown"` requires a question. Those two tokens are not the same. An `"unknown"` issue `reason` and the professional-requirement gap name the deciding question and who decides. They do not render the unresolved token.
+
+Screening questions follow the case topic and the cited provisions. A fire-separation or firestop case (a Division B `3.1.8` or `3.1.9` provision, or a firestop, fire-separation, or penetration topic, without a structural provision) asks whether the fire separation stays intact at each penetration, including sprinkler piping. It does not ask about a preserved wood foundation, roof trusses, or a farm building. The mandatory codedb-only triggers stay in their routing order. When both a fire-suppression system and a fire-alarm system are unresolved, one system-presence line is returned.
+
+An unsigned email from a vendor or sales rep does not satisfy professional authentication and does not count as professional evidence. A seal string copied from that email does not close the authentication gap.
 
 ### Process field ids
 
@@ -124,7 +128,7 @@ Process fields are required on the alternative path. They are not rungs of the e
 | `rule` | string or null | Provision id of the Division C rule that triggered the flag, or of the rule that could not be applied. |
 | `division` | `"A"` \| `"B"` \| `"C"` or null | Division of `rule`. |
 | `citation` | string or null | That rule's citation from the code database. Omitted when the rule does not resolve. The rule id is one `engine/professional.py` already passes to its screen. |
-| `reason` | string | Recommendation tied to the rule. |
+| `reason` | string | Recommendation tied to the rule. When `value` is `"unknown"`, the sentence names the deciding question and who decides (`routed_to`). |
 | `question` | string or null | Required when `value` is `"unknown"`: the deciding question, not a generic stand-in unless every specific question was unusable. When `value` is `true`, the question asks the applicant for the registered professional's name, discipline (engineer or architect), and APEGA or AAA registration number. A seal the applicant confirms can stand in for the number. The service does not fill those fields. |
 | `prompts` | object[] | Each asked question: `text`, `help`, `not_sure`. `help` says what Yes and No mean. `not_sure` is `Not sure (the officer decides)`. |
 | `routed_to` | string or null | `officer`, `professional`, or `applicant`, same as the issue. |
@@ -181,7 +185,7 @@ Alternative path only, after the ladder: CCMC evaluation, ICC-ES evaluation, reg
       "rule": "2.4.1.1.(1)",
       "division": "C",
       "citation": "<citation string returned by codedb for Div C 2.4.1.1.(1)>",
-      "reason": "These facts do not establish whether practice of engineering applies. Ask before setting the flag to yes or no.",
+      "reason": "What is the confirmed occupancy/building type, including each use in a mixed-use building? The officer decides.",
       "question": "What is the confirmed occupancy/building type, including each use in a mixed-use building?"
     },
     "empty_process_fields": [
