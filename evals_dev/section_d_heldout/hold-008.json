@@ -1,0 +1,19 @@
+{
+  "id": "hold-008",
+  "description": "We are planning a single-storey office. The building area of 400 m2 is the building area, not a sum of the floors.",
+  "known_facts": [
+    "single-storey office",
+    "building area of 400 m2"
+  ],
+  "gold": {
+    "engineering_required": "no",
+    "engineering_reason": "A business occupancy at one storey has a building-area limit of 500 m2. 400 m2 is within that limit, and the building is not over three storeys.",
+    "limit_source": "engine/professional.py _AREA_LIMITS business (500, 250, 165); the one-storey entry is 500. Area at or under that entry and storeys of three or fewer sets general to no through Div C 2.4.1.1.(1)"
+  },
+  "authoring": {
+    "source": "engine/professional.py",
+    "gold_written": "before any system run",
+    "label": "model-checked",
+    "notes": "Held-out area under the one-storey business limit in engine/professional.py. Gold written from the rule text before the flag script was run on this file. Not human-reviewed."
+  }
+}
