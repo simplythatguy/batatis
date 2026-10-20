@@ -87,6 +87,28 @@ def test_d08_intent_is_national_explanatory_material():
     assert 'not Alberta law' in gap.message and 'explanatory only' in gap.fix_hint
 
 
+def test_valid_citation_for_another_article_is_still_wrong():
+    case = complete_case(['9.25.2.2.(1)'])
+    case.section_c[0].citation = Codes().citation('9.9.10.1.(1)', 'B')
+    assert any(g.id.startswith('citation_binding:') for g in check_completeness(case, Codes()))
+
+
+@pytest.mark.parametrize('field,value', [('intents', ['Fabricated intent content']), ('pdf_page', 1),
+    ('brackets', ['[F03-OS1.2]']), ('provision_id', '9.9.10.1.(1)')])
+def test_canonical_intent_checks_all_payload_fields(field, value):
+    case = complete_case(['9.25.2.2.(1)'])
+    setattr(case.section_c[0].intents[0], field, value)
+    assert any(g.id.startswith('intent_payload:') for g in check_completeness(case, Codes()))
+
+
+@pytest.mark.parametrize('field,value', [('differs', True), ('intent_comparison', 'invented'),
+    ('only_in_ae', ['invented']), ('only_in_intent', ['invented']), ('related_root', '9.99.99.99.(1)')])
+def test_canonical_intent_checks_comparison_metadata(field, value):
+    case = complete_case(['9.25.2.2.(1)'])
+    setattr(case.section_c[0], field, value)
+    assert any(g.id.startswith('intent_payload:') for g in check_completeness(case, Codes()))
+
+
 def test_d12_professional_required_but_none_named_or_authenticated():
     case = complete_case()
     case.facts.append(fact('part4_design', True))

@@ -143,12 +143,24 @@ def check_completeness(case: Case, codes: Codes, *,
                 'Expand this article into its sentence rows using deterministic lookup.', rec['citation'])
         else:
             current = canonical[0]
+            if row.citation != current.citation:
+                add('citation_binding', 'C', field + '.citation', 'the database citation bound to this row’s actual provision.',
+                    'Use the exact lookup citation for this provision; a valid citation to another article is not a match.',
+                    current.citation)
             if (_pairs(row) != _pairs(current) or row.attribution_status != current.attribution_status
                     or row.attributed_via != current.attributed_via):
                 pairs = ', '.join(dict.fromkeys(p.bracket for p in current.pairs)) or 'no row in the attribution table'
                 add('D07', 'C', field + '.pairs', 'the exact objective/function attribution for this provision; '
                     'a supplied pair or attribution scope is not in its Division B table row.',
                     f'Restore the lookup result: {pairs}. Keep clause conditions and inherited scope.', current.citation)
+            payload_fields = ('intents', 'intent_comparison', 'differs', 'only_in_intent', 'only_in_ae',
+                              'related_root', 'related_root_method')
+            supplied = row.model_dump(include=set(payload_fields))
+            verified_payload = current.model_dump(include=set(payload_fields))
+            if supplied != verified_payload:
+                add('intent_payload', 'C', field + '.intent_payload', 'the complete canonical intent payload and comparison metadata.',
+                    'Reload the intent text, labels, provision scope, pages, attribution brackets and comparison status from the database. '
+                    'Do not present changed or generated intent text as sourced.', current.citation)
         if row.provision_id not in expected:
             add('confirmation', 'C', field + '.confirmation', 'confirmation of this benchmark provision.',
                 'Ask the applicant to confirm the benchmark; do not silently add an article.')
