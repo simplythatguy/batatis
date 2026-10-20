@@ -1,0 +1,12 @@
+---
+description: All quality reviews of Batatis agent outputs must use Claude Opus 5.5
+alwaysApply: true
+---
+
+# Review model pin
+
+When reviewing battle-test answers, skill quality, PRs, or agent understanding of the Building Codes Challenge:
+
+- Use **Claude Opus 5.5** at the **highest available** tier (`claude-opus-5-5-max`, else `xhigh`, else `high`).
+- Record the reviewer model slug in the review artifact.
+- Do not accept a pass verdict from a non-Opus reviewer for env battle tests.

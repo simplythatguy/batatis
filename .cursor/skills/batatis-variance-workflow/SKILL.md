@@ -25,6 +25,8 @@ Product state machine implements the **No / alternative solution** branch while 
 
 **Evidence ladder** (recommend, don’t invent): manufacturer lit → STANDATA → ISO 17025 test → evaluation → eval+testing → qualification → ISO 17065 certification; plus on alt path: CCMC, ICC-ES, registered professional opinion, engineering review.
 
+Note: **risk assessment, mitigating measures, and assumptions/limits** are required **process steps** on the alternative path — not rungs of the evidence ladder.
+
 ## State loop (product flow)
 
 1. Create project → describe proposed design / alternative.

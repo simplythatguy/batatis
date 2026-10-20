@@ -69,6 +69,8 @@ Intake 20% · Code identification 20% · Recommendations 10% · Review 10% · Ap
 9. On the alternative fork: skipping risk assessment, mitigating measures, or assumptions/limits.
 10. Inventing evidence ladder outputs (tests, CCMC, STANDATA, certifications).
 11. Building product UX that ignores the official NBC(AE) yes/no fork.
+12. Redistributing NRC copyrighted code text wholesale (link instead; STANDATA is OGL-Alberta).
+13. Treating completeness review as a safety/compliance certification for SCOs.
 
 ## Related
 

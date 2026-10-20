@@ -2,6 +2,26 @@
 
 Alberta **Building Codes Challenge** (Built World Tech — Venture Pilots 2026).
 
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues for `simplythatguy/batatis` via `gh`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: root `GLOSSARY.md` + `docs/adr/` + challenge brief. See `docs/agents/domain.md`.
+
+### Stack skills
+
+- **Batatis challenge:** `.cursor/skills/batatis-*` (hackathon, variance-workflow, ui-opus).
+- **Matt Pocock engineering:** `.agents/skills/` (also symlinked under `.cursor/skills/`). Reinstall with `npx skills@latest add mattpocock/skills -a cursor`.
+- **pstack / poteto-mode:** Cursor plugin (not vendored). See `docs/pstack.md`. Review/judgment roles pinned to Opus 5.5 in `.cursor/rules/pstack-models.mdc`.
+
 ## What we are building
 
 An AI tool that helps innovators prepare a **complete, code-referenced alternative solution (variance) application** (Safety Codes Variance Template Part 1, Sections **A–D**) and helps Safety Codes Officers (**SCOs**) review for **administrative completeness** — **not** technical correctness.
