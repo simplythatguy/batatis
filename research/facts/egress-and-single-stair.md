@@ -662,7 +662,7 @@ Fresh downloads are under `reference/web/egress-and-single-stair/`. Existing ref
 
 ### Methods used
 
-- T3 workflow router and routes: `/Users/aamia/.codex/skills/t3-workflow/SKILL.md` and `/Users/aamia/.codex/skills/t3-workflow/references/routes.md`. Applied scoped research, preservation of concurrent changes and checkpointing. The parent's maintenance receipt was reused as instructed.
-- Matt Pocock research: `/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md`. Followed technical claims to primary sources and saved findings in this file. No further delegation, per this task's explicit limit.
-- pstack unslop: `/Users/aamia/.agents/skill-libraries/pstack/skills/unslop/SKILL.md`. Applied plain prose and explicit source attribution.
-- PDF reading: `/Users/aamia/.codex/plugins/cache/openai-primary-runtime/pdf/26.1017.11052/skills/pdf/SKILL.md`. Used page-specific extraction, layout-preserving attribution-table reads and PDFKit for the encrypted Seattle source. This is a sourced text deliverable; no product UI was implemented and no product screenshot or demo was required.
+- T3 workflow router and routes: `~/.codex/skills/t3-workflow/SKILL.md` and `~/.codex/skills/t3-workflow/references/routes.md`. Applied scoped research, preservation of concurrent changes and checkpointing. The parent's maintenance receipt was reused as instructed.
+- Matt Pocock research: `~/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md`. Followed technical claims to primary sources and saved findings in this file. No further delegation, per this task's explicit limit.
+- pstack unslop: `~/.agents/skill-libraries/pstack/skills/unslop/SKILL.md`. Applied plain prose and explicit source attribution.
+- PDF reading: `~/.codex/plugins/cache/openai-primary-runtime/pdf/26.1017.11052/skills/pdf/SKILL.md`. Used page-specific extraction, layout-preserving attribution-table reads and PDFKit for the encrypted Seattle source. This is a sourced text deliverable; no product UI was implemented and no product screenshot or demo was required.

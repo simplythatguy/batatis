@@ -32,7 +32,7 @@ Exit 0 = no detected errors; exit 1 = citation/file errors; exit 2 = command/set
 
 ## Raw verification receipts
 
-Executed from `/Users/aamia/.t3/projects/batatis`:
+Executed from `~/.t3/projects/batatis`:
 
 ```text
 .venv/bin/python -m pytest codedb/tests -q
@@ -95,18 +95,18 @@ Detailed ignored evidence: `build/spot-check.json`, `build/audit/pages/*.txt`, `
 - NFC stretch work was not attempted; the registered NFC source is explicitly unsupported by this build.
 - No UI was built, so there is no meaningful screenshot/video surface. Actual CLI/API outputs, tests and saved source comparisons are the evidence.
 - No independent child review was run because the preamble forbids further delegation. A local spec/correctness review found and fixed the issues listed above.
-- Workflow maintenance check reported intentional/unresolved drift in `/Users/aamia/.agents/pstack-models.md`; it was preserved. No workflow configuration was changed.
+- Workflow maintenance check reported intentional/unresolved drift in `~/.agents/pstack-models.md`; it was preserved. No workflow configuration was changed.
 
 ## Methods used
 
 Files actually read and applied:
 
-- T3 workflow router: `/Users/aamia/.codex/skills/t3-workflow/SKILL.md` and `/Users/aamia/.codex/skills/t3-workflow/references/routes.md`.
-- pstack feature slices: `/Users/aamia/.agents/skill-libraries/pstack/skills/poteto-mode/playbooks/feature.md` (adapted to no-delegation/no-commit contract).
-- pstack domain structures: `/Users/aamia/.agents/skill-libraries/pstack/skills/principle-model-the-domain/SKILL.md`.
-- pstack proof against actual artifacts: `/Users/aamia/.agents/skill-libraries/pstack/skills/principle-prove-it-works/SKILL.md`.
-- Matt Pocock module interfaces: `/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/codebase-design/SKILL.md`.
-- Matt Pocock targeted regression diagnosis: `/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/diagnosing-bugs/SKILL.md`.
-- Matt Pocock spec/correctness review: `/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/code-review/SKILL.md` (local review; no nested agents).
-- Nonvisual evidence rules: `/Users/aamia/.codex/skills/t3-workflow/references/visual-evidence.md`.
-- Drift handling: `/Users/aamia/.agents/t3-workflow/UPDATE-SAFETY.md`.
+- T3 workflow router: `~/.codex/skills/t3-workflow/SKILL.md` and `~/.codex/skills/t3-workflow/references/routes.md`.
+- pstack feature slices: `~/.agents/skill-libraries/pstack/skills/poteto-mode/playbooks/feature.md` (adapted to no-delegation/no-commit contract).
+- pstack domain structures: `~/.agents/skill-libraries/pstack/skills/principle-model-the-domain/SKILL.md`.
+- pstack proof against actual artifacts: `~/.agents/skill-libraries/pstack/skills/principle-prove-it-works/SKILL.md`.
+- Matt Pocock module interfaces: `~/.agents/skill-libraries/mattpocock/skills/engineering/codebase-design/SKILL.md`.
+- Matt Pocock targeted regression diagnosis: `~/.agents/skill-libraries/mattpocock/skills/engineering/diagnosing-bugs/SKILL.md`.
+- Matt Pocock spec/correctness review: `~/.agents/skill-libraries/mattpocock/skills/engineering/code-review/SKILL.md` (local review; no nested agents).
+- Nonvisual evidence rules: `~/.codex/skills/t3-workflow/references/visual-evidence.md`.
+- Drift handling: `~/.agents/t3-workflow/UPDATE-SAFETY.md`.

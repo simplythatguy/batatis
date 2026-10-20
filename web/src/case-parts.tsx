@@ -58,10 +58,10 @@ function FactRow({ fact }: { fact: Fact }) {
       </div>
       {pending && (
         <div className="btn-row fact-actions">
-          <button type="button" className="btn" onClick={() => dispatch({ type: "confirmFact", id: fact.id })}>
+          <button type="button" className="btn" aria-label={`Confirm ${factLabel(fact.field)}`} onClick={() => dispatch({ type: "confirmFact", id: fact.id })}>
             Confirm
           </button>
-          <button type="button" className="btn btn-ghost" onClick={() => dispatch({ type: "dismissFact", id: fact.id })}>
+          <button type="button" className="btn btn-ghost" aria-label={`Not right: ${factLabel(fact.field)}`} onClick={() => dispatch({ type: "dismissFact", id: fact.id })}>
             Not right
           </button>
         </div>
@@ -113,12 +113,13 @@ function QuestionChip({ q }: { q: Question }) {
   }
   return (
     <li className="chip" data-open={open}>
-      <button type="button" className="chip-button" id={`q-${q.id}`} aria-expanded={open} onClick={() => setOpen(!open)}>
+      <button type="button" className="chip-button" id={`q-${q.id}`} aria-expanded={open} aria-controls={open ? `answer-${q.id}` : undefined} onClick={() => setOpen(!open)}>
         <span className="chip-q">{q.text}</span>
         <span className="chip-why">Why we ask: {q.why}</span>
       </button>
       {open && (
         <form
+          id={`answer-${q.id}`}
           className="chip-answer"
           onSubmit={(e) => {
             e.preventDefault();
@@ -126,7 +127,7 @@ function QuestionChip({ q }: { q: Question }) {
           }}
         >
           <label className="sr-only" htmlFor={`qa-${q.id}`}>
-            Your answer
+            Your answer: {q.text}
           </label>
           <input id={`qa-${q.id}`} className="input" value={text} onChange={(e) => setText(e.target.value)} placeholder="Your answer" autoFocus />
           <button type="submit" className="btn" disabled={!text.trim()}>
@@ -194,7 +195,7 @@ function DetailInput({ def }: { def: DetailField }) {
             {fact.kind === "proposed" ? "Proposed from" : "From"} {sourceLine(fact.source)}
             {fact.source.quote && <q className="field-quote">{fact.source.quote}</q>}
             {fact.status === "unconfirmed" && (
-              <button type="button" className="btn btn-ghost btn-xs" onClick={() => dispatch({ type: "confirmFact", id: fact.id })}>
+              <button type="button" className="btn btn-ghost btn-xs" aria-label={`Confirm ${def.label}`} onClick={() => dispatch({ type: "confirmFact", id: fact.id })}>
                 Confirm
               </button>
             )}

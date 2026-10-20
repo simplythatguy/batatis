@@ -168,11 +168,11 @@ All accessed 2026-10-18; exact per-file PDF URLs and local hashes are in `index.
 
 ## Methods used
 
-- T3 workflow router: `/Users/aamia/.codex/skills/t3-workflow/SKILL.md`; route selection: `/Users/aamia/.codex/skills/t3-workflow/references/routes.md`.
-- Matt Pocock, primary-source research: `/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md` (no further delegation, per task contract).
-- Data index and scoped data quality: `/Users/aamia/.codex/plugins/cache/openai-curated-remote/data-analytics/1.0.11/skills/index/SKILL.md` and `/Users/aamia/.codex/plugins/cache/openai-curated-remote/data-analytics/1.0.11/skills/analyze-data-quality/SKILL.md`.
-- PDF source rendering/inspection: `/Users/aamia/.codex/plugins/cache/openai-primary-runtime/pdf/26.1017.11052/skills/pdf/SKILL.md`.
-- Search triage: `/Users/aamia/.codex/skills/jev-search/SKILL.md`; Jev network was unavailable, so only its local screen ran. No ranking/sufficiency judgment is claimed.
-- Workflow drift safety: `/Users/aamia/.agents/t3-workflow/UPDATE-SAFETY.md`; read-only maintenance check reported model-role file drift, preserved unchanged.
+- T3 workflow router: `~/.codex/skills/t3-workflow/SKILL.md`; route selection: `~/.codex/skills/t3-workflow/references/routes.md`.
+- Matt Pocock, primary-source research: `~/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md` (no further delegation, per task contract).
+- Data index and scoped data quality: `~/.codex/plugins/cache/openai-curated-remote/data-analytics/1.0.11/skills/index/SKILL.md` and `~/.codex/plugins/cache/openai-curated-remote/data-analytics/1.0.11/skills/analyze-data-quality/SKILL.md`.
+- PDF source rendering/inspection: `~/.codex/plugins/cache/openai-primary-runtime/pdf/26.1017.11052/skills/pdf/SKILL.md`.
+- Search triage: `~/.codex/skills/jev-search/SKILL.md`; Jev network was unavailable, so only its local screen ran. No ranking/sufficiency judgment is claimed.
+- Workflow drift safety: `~/.agents/t3-workflow/UPDATE-SAFETY.md`; read-only maintenance check reported model-role file drift, preserved unchanged.
 
 No user interface feature was implemented; screenshots/demos are not a feature acceptance surface for this research task.
