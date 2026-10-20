@@ -8,12 +8,114 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from engine.api import create_app
-from engine.models import Case, EvidenceItem
+from engine.models import Case, EvidenceItem, Fact, Source
 from engine.retention import maybe_purge, purge_now, reset_purge_clock
-from engine.store import CaseStore, open_store
+from engine.store import RETENTION_DAYS, CaseStore, open_store
+
+
+@pytest.fixture(params=['sqlite', 'postgres'])
+def retention_store(request, tmp_path):
+    if request.param == 'sqlite':
+        store = CaseStore(tmp_path / 'cases.sqlite')
+    else:
+        url = os.environ.get('TEST_DATABASE_URL')
+        if not url:
+            pytest.skip('TEST_DATABASE_URL is not set')
+        from engine.store_postgres import PostgresCaseStore
+        store = PostgresCaseStore(url)
+    created = []
+    reset_purge_clock()
+    try:
+        yield store, created
+    finally:
+        for case_id in created:
+            store.delete(case_id)
+        reset_purge_clock()
+
+
+def test_expired_case_and_file_cannot_be_accessed_between_sweeps(retention_store):
+    store, created = retention_store
+    case = store.put(Case(title='expires between sweeps'))
+    created.append(case.id)
+    file_id = store.put_file(case.id, 'old.pdf', b'%PDF-1.4 expired')['id']
+    client = TestClient(create_app(store=store))
+    assert client.get(f'/cases/{case.id}').status_code == 200
+    _age(store, case.id, RETENTION_DAYS + 1)
+    # The previous request just consumed the sweep window. Access must still expire it.
+    response = client.get(f'/cases/{case.id}')
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'case not found'
+    assert store.get_file(case.id, file_id) is None
+    assert store.get_version(case.id) is None
+    assert store.purge_expired() == 0  # Access already physically removed the case and file.
+
+
+@pytest.mark.parametrize('access', ['get_file', 'get_version', 'add_fact', 'put_file'])
+def test_direct_store_access_cannot_read_or_extend_an_expired_case(retention_store, access):
+    store, created = retention_store
+    case = store.put(Case(title='expired'))
+    created.append(case.id)
+    file_id = store.put_file(case.id, 'old.pdf', b'%PDF-1.4 expired')['id']
+    _age(store, case.id, RETENTION_DAYS + 1)
+    if access == 'get_file':
+        result = store.get_file(case.id, file_id)
+    elif access == 'get_version':
+        result = store.get_version(case.id)
+    elif access == 'add_fact':
+        result = store.add_fact(case.id, Fact(field='storeys', value=2, kind='pointed',
+                                            source=Source(type='user_text', ref='message')))
+    else:
+        result = store.put_file(case.id, 'new.pdf', b'%PDF-1.4 new')
+    assert result is None
+    assert store.purge_expired() == 0
+
+
+def test_delete_is_empty_204_then_404_and_removes_files(retention_store):
+    store, created = retention_store
+    client = TestClient(create_app(store=store))
+    case_id = client.post('/cases', json={'title': 'delete'}).json()['id']
+    created.append(case_id)
+    uploaded = client.post(f'/cases/{case_id}/files', content=b'%PDF-1.4 delete',
+                           headers={'content-type': 'application/pdf'})
+    assert uploaded.status_code == 201
+    file_id = uploaded.json()['id']
+    response = client.delete(f'/cases/{case_id}')
+    assert response.status_code == 204
+    assert response.content == b''
+    assert store.get_file(case_id, file_id) is None
+    assert store.get(case_id) is None
+    assert client.delete(f'/cases/{case_id}').status_code == 404
+
+
+def test_retention_boundary_uses_elapsed_days_including_timezone_offsets(retention_store, monkeypatch):
+    store, created = retention_store
+    current = datetime.now(timezone.utc).replace(microsecond=0)
+
+    class FrozenDatetime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return current.astimezone(tz) if tz else current.replace(tzinfo=None)
+
+    monkeypatch.setattr('engine.store.datetime', FrozenDatetime)
+    cutoff = current - timedelta(days=RETENTION_DAYS)
+    cases = []
+    for stamp in [cutoff - timedelta(seconds=1),
+                  (cutoff - timedelta(seconds=1)).astimezone(timezone(timedelta(hours=3))),
+                  cutoff, cutoff + timedelta(seconds=1)]:
+        case = store.put(Case())
+        created.append(case.id)
+        file_id = store.put_file(case.id, 'boundary.pdf', b'%PDF-1.4 boundary')['id']
+        _set_created_at(store, case.id, stamp.isoformat(timespec='seconds'))
+        cases.append((case.id, file_id))
+    assert store.purge_expired() == 2
+    for index, (case_id, file_id) in enumerate(cases):
+        assert (store.get(case_id) is None) == (index < 2)
+        assert (store.get_file(case_id, file_id) is None) == (index < 2)
+    assert store.purge_expired() == 0
 
 
 def _stamp(days: int) -> str:
@@ -21,7 +123,10 @@ def _stamp(days: int) -> str:
 
 
 def _age(store, case_id: str, days: int) -> None:
-    stamp = _stamp(days)
+    _set_created_at(store, case_id, _stamp(days))
+
+
+def _set_created_at(store, case_id: str, stamp: str) -> None:
     if isinstance(store, CaseStore):
         with sqlite3.connect(store.path) as con:
             con.execute("UPDATE cases SET json = json_set(json, '$.created_at', ?) WHERE id=?", (stamp, case_id))
@@ -67,7 +172,9 @@ def test_maybe_purge_runs_once_per_interval(tmp_path):
     second = store.put(Case(title='second'))
     _age(store, second.id, 8)
     assert maybe_purge(store, interval=600) == 0
-    assert store.get(second.id).title == 'second'
+    # Inspect storage directly: accessing an expired case must itself remove it.
+    with sqlite3.connect(store.path) as con:
+        assert con.execute('SELECT id FROM cases WHERE id=?', (second.id,)).fetchone()
     reset_purge_clock()
     assert maybe_purge(store, interval=600) == 1
     assert store.get(second.id) is None

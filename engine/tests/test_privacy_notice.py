@@ -6,6 +6,7 @@ from pathlib import Path
 
 from engine.copyright import PII_NOTICE
 from engine.privacy import PRIVACY_NOTICE
+from engine.store import RETENTION_DAYS
 
 ROOT = Path(__file__).resolve().parents[2]
 SKIP = {'.git', 'node_modules', 'dist', '__pycache__', '.venv', 'reference'}
@@ -34,7 +35,7 @@ def test_web_and_engine_notices_match_and_no_other_notice_remains():
     web = _web_notice()
     assert web == PRIVACY_NOTICE == PII_NOTICE
     assert 'https://openai.com/policies/api-data-usage-policies' in web
-    assert web.endswith('after 7 days or on request.')
+    assert web.endswith(f'after {RETENTION_DAYS} days or on request.')
     needle = 'Do not upload personal information'
     here = Path(__file__).resolve()
     for path in _text_files():
