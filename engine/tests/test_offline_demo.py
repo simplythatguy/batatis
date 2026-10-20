@@ -130,7 +130,7 @@ def test_cached_citations_resolve_in_codedb():
     assert [row['id'] for row in rows] == list(DEMO_CASE_IDS)
     seen = []
     for row in rows:
-        assert row['key'] == cache_key(row['description'])
+        assert row['description_sha256'] == cache_key(row['description'])
         payload = row['payload']
         ids = [article['provision'] for article in payload['articles']]
         benchmark = payload.get('benchmark') or {}

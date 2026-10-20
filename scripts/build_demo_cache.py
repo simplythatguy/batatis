@@ -47,7 +47,7 @@ def main() -> int:
         rows.append({
             'id': case_id,
             'description': prose,
-            'key': cache_key(prose),
+            'description_sha256': cache_key(prose),
             'candidates': candidates,
             'payload': result,
         })

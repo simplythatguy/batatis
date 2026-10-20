@@ -1,0 +1,13 @@
+title = "Batatis"
+
+[extend]
+useDefault = true
+
+# The offline demo cache stores the SHA-256 of each seeded description beside that
+# prose. Gitleaks reads those 64-hex values as generic-api-key because an older
+# revision named the field "key". They are content hashes, not credentials.
+[[allowlists]]
+description = "SHA-256 of a demo-case description in engine/identify/demo_cache.json"
+paths = ['''(?:^|/)engine/identify/demo_cache\.json$''']
+regexTarget = "secret"
+regexes = ['''(?i)^[a-f0-9]{64}$''']

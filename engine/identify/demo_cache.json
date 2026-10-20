@@ -125,7 +125,7 @@
         "calibration_set": "evals_dev/human_key/"
       }
     },
-    "key": "ce292647ba8cd863652c1a2b9566863877ef6145c930541ccf0009e6358946a7"
+    "description_sha256": "ce292647ba8cd863652c1a2b9566863877ef6145c930541ccf0009e6358946a7"
   },
   {
     "id": "dev-003",
@@ -269,7 +269,7 @@
         "calibration_set": "evals_dev/human_key/"
       }
     },
-    "key": "ac129ebf812901d1e6f536b09884cdd890c1f1cf552be74c539979396b100c54"
+    "description_sha256": "ac129ebf812901d1e6f536b09884cdd890c1f1cf552be74c539979396b100c54"
   },
   {
     "id": "dev-013",
@@ -443,6 +443,6 @@
         "calibration_set": "evals_dev/human_key/"
       }
     },
-    "key": "a73e97a0aaabd4cdd91ea3f0023229cd37418f9cb0957fa152d9aef49e1879fd"
+    "description_sha256": "a73e97a0aaabd4cdd91ea3f0023229cd37418f9cb0957fa152d9aef49e1879fd"
   }
 ]
