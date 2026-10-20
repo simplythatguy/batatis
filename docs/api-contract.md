@@ -24,9 +24,33 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 
 A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
 
-### Section D plan status and evidence field
+A fact's `source.type` is `code`, `file`, `user_text`, `drawing`, or `user_click`.
 
-`POST /cases/{case_id}/section-d` items use `status` `not provided` or `provided`. The evidence field on that item is `recommended_types`. Values are the `EvidenceType` list in `engine/section_d.py`: the seven-step ladder, then on the alternative path CCMC evaluation, ICC-ES evaluation, registered professional opinion, and engineering review. `provision_id` and `citation` sit on the item. Every plan item is a provision codedb already resolved.
+Gap `severity` is `blocking` or `warning`.
+
+The fixed 404 detail strings are `case not found` and `provision not found`.
+
+### Section D plan item
+
+`POST /cases/{case_id}/section-d` returns `{ "items", "notices" }`. Each item is `engine/section_d.py` `EvidencePlanItem`. Every plan item is a provision codedb already resolved. `provision_id` and `citation` sit on the item.
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `id` | string | Stable id for this provision and attribution pair. |
+| `provision_id` | string | Division B provision id codedb resolved. |
+| `citation` | string | Citation string copied from the code database. |
+| `status` | string | `not provided` or `provided`. |
+| `attribution_status` | string | `direct`, `inherited from parent`, or `no row in the attribution table`. |
+| `attributed_via` | string or null | Parent provision when the row is inherited. |
+| `objective` | string or null | Objective code from the attribution pair. Null when the table has no row. |
+| `function` | string or null | Functional-statement code from the same pair. |
+| `bracket` | string or null | Bracket on that pair. |
+| `clauses` | string[] | Clause ids. Empty means the whole sentence. |
+| `application_note` | string or null | Attribution condition from the pair. |
+| `performance_issue` | string | What the comparison should address. Wording recommends; it does not conclude. |
+| `recommended_types` | string[] | `EvidenceType` values from `engine/section_d.py`: the seven-step ladder, then on the alternative path CCMC evaluation, ICC-ES evaluation, registered professional opinion, and engineering review. |
+| `responsible_party` | string | Names copied from linked applicant documents. Empty when none are named. |
+| `attachments` | object[] | Linked supporting documents: `id`, `title`, `file`, `item_ids`, `responsible_party`, `issuer`, `date`, `professional_seal`. |
 
 ### Practice-of-engineering on `GET /professional`
 
@@ -164,7 +188,7 @@ A live response copies the citation string the code database returns. The placeh
 
 | Status | When |
 | --- | --- |
-| 404 | Detail `case not found`, or `provision not found`, or the text of a missing codedb provision on Section C, the plan, or this issues route. |
+| 404 | Fixed detail strings are `case not found` and `provision not found`. Section C, the plan, and this issues route can also 404 with the text of a missing codedb provision. |
 | 400 | Invalid provision id, or an ambiguous division on `GET /code/{provision_id}`. |
 | 409 | Export is blocked. Detail is the object under Routes. |
 | 422 | A `proposed` fact was sent as `confirmed`, or `GET /ccmc/search` rejected the query. |

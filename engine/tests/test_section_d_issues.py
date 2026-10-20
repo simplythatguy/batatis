@@ -8,7 +8,10 @@ from fastapi.testclient import TestClient
 from engine.api import create_app
 from engine.models import Case, Source
 from engine.section_d import ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER
-from engine.section_d_flag_eval import RULE_IDS, flag_label, flag_question, load_codes, main, score
+from engine.professional import ProfessionalFacts
+from engine.section_d_flag_eval import (
+    RULE_IDS, Signals, VariantScore, counterfactual, flag_label, flag_question, load_codes, main, score, winner,
+)
 from engine.section_d_issues import PROCESS_RULES, PROFESSIONAL_RULES, section_d_issues
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import fact
@@ -234,14 +237,21 @@ def test_eval_script_prints_in_sample_wilson_table(capsys):
     assert 'held-out: evals_dev/section_d_heldout' in out
     assert 'held-out gold: model-checked' in out
     assert 'held-out rules_plus_unknown: 7/8 [0.5291, 0.9776]' in out
-    assert 'held-out (post-fix, no longer blind for missing-fact cases) rules_plus_unknown: 4/8 [0.2152, 0.7848]' in out
-    assert 'hold-004' not in out.split('held-out (post-fix, no longer blind for missing-fact cases) misses')[-1]
+    assert 'post-fix, no longer blind' in out
+    assert 'rules_plus_unknown          8   4/8 [0.2152, 0.7848]' in out
+    assert 'rules_plus_unknown_cf       8   4/8 [0.2152, 0.7848]' in out
+    plus_misses = out.split('misses rules_plus_unknown:', 1)[1].split('rules_plus_unknown_cf', 1)[0]
+    assert 'hold-004' not in plus_misses
     assert 'dev-050' in Path('engine/section_d_flag_eval.py').read_text()
     assert 'winner: rules_plus_unknown' in out
     assert 'under_flag_target: 0' in out
     assert 'note: rules_only abstains with depends; that label is counted in the unknown column' in out
-    plus = next(line for line in out.splitlines() if line.startswith('rules_plus_unknown'))
+    plus = next(line for line in out.splitlines() if line.startswith('rules_plus_unknown '))
+    assert plus.split()[0] == 'rules_plus_unknown'
     assert '50/60 [' in plus
+    cf = next(line for line in out.splitlines() if line.startswith('rules_plus_unknown_cf'))
+    assert '50/60 [' in cf
+    assert re.search(r'\]\s+0\s+27\s+0\s*$', cf)
     assert re.search(r'\]\s+0\s+27\s+0\s*$', plus)
     only = next(line for line in out.splitlines() if line.startswith('rules_only '))
     assert '55/60 [' in only
@@ -269,7 +279,11 @@ def test_eval_script_prints_in_sample_wilson_table(capsys):
     assert 'under_flag rules_only: dev-050:' in out
     assert 'span_m=18' in out
     assert 'under_flag rules_plus_unknown: none' in out
+    assert 'under_flag rules_plus_unknown_cf: none' in out
     assert 'under_flag always_unknown: none' in out
+    assert 'confusion rules_plus_unknown_cf  rows=gold  columns=system yes unknown no' in out
+    assert 'unknown_rate rules_plus_unknown_cf: 27/60 [' in out
+    assert 'confident_wrong rules_plus_unknown_cf: 0/60 [' in out
 
 
 def test_heldout_gold_was_written_from_repo_limits():
@@ -304,6 +318,43 @@ def test_missing_deciding_fact_is_unknown_with_a_question():
     dev = score(codes)
     assert dev['rules_plus_unknown'].scored == 60
     assert dev['rules_plus_unknown'].under_flag == 0
+
+
+def test_counterfactual_stays_unknown_when_the_missing_span_flips():
+    codes, _codedb = load_codes()
+    missing_span = json.loads(Path('evals_dev/section_d_heldout/hold-004.json').read_text())
+    assert flag_label(missing_span, codes, 'rules_plus_unknown_cf') == 'unknown'
+    question = flag_question(missing_span, codes, 'rules_plus_unknown_cf')
+    assert question and 'span' in question.casefold()
+
+
+def test_counterfactual_returns_no_when_the_missing_area_cannot_flip():
+    """Area is not a deciding input for single_family once Part 4 design is already false."""
+    codes, _codedb = load_codes()
+    facts = ProfessionalFacts(occupancy='single_family', storeys=1, part4_design=False)
+    label, question = counterfactual(facts, Signals(span_m=10.0), codes)
+    assert label == 'no'
+    assert question is None
+
+
+def test_shipped_winner_stays_rules_plus_unknown_when_the_counterfactual_agrees_more():
+    totals = {
+        'rules_only': VariantScore('rules_only', scored=60, matched=55, under_flag=1),
+        'rules_plus_unknown': VariantScore('rules_plus_unknown', scored=60, matched=50, under_flag=0),
+        'rules_plus_unknown_cf': VariantScore('rules_plus_unknown_cf', scored=60, matched=60, under_flag=0),
+        'always_unknown': VariantScore('always_unknown', scored=60, matched=17, under_flag=0),
+    }
+    assert winner(totals) == 'rules_plus_unknown'
+    assert totals['rules_plus_unknown'].under_flag == 0
+
+
+def test_default_db_is_the_repo_codedb_build():
+    source = Path('engine/codes.py').read_text()
+    assert "_REPO = Path(__file__).resolve().parents[1]" in source
+    assert "DEFAULT_DB = _REPO / 'codedb' / 'build' / 'codedb.sqlite'" in source
+    assert '/Users/aamia' not in source
+    assert 'class CodeDbMissing(Exception):' in source
+    assert "super().__init__('code database not found')" in source
 
 
 def test_claim_blocklist_matches_compliance_and_safety_claims():

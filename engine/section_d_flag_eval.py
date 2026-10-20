@@ -8,6 +8,13 @@ Part 4 design (cited only as Div C 2.4.1.2.(1) from professional.py), and return
 question when span, area, storeys, occupancy, or Part 4 design is missing. It does not default
 those facts to a boolean. A rule that already resolves to yes still returns yes.
 
+`rules_plus_unknown_cf` is the same frozen screen, run once for every combination of the missing
+deciding facts at fixed extremes (the value that most pushes toward yes, and the value that most
+pushes toward no). Those extremes come from the rule thresholds and do not change per case. If
+every combination returns the same answer, that answer is used. If they disagree, the flag is
+unknown and the question names the first missing fact that flips the answer. This variant is
+reported beside the shipped screen. The shipped screen stays `rules_plus_unknown`.
+
 The gold labels are model-checked, not human-reviewed. `rules_plus_unknown` was written while
 looking at this same development set, so agreement on those 60 cases is in-sample. The eight-case
 limit check is reported separately and is no longer blind for missing-fact cases.
@@ -21,6 +28,7 @@ import json
 import math
 import re
 from dataclasses import dataclass, field
+from itertools import product
 from pathlib import Path
 
 from .codes import CodeDbMissing, Codes
@@ -42,7 +50,9 @@ _HEADLINE = (
     'Engineer-needed flag: {matched}/{scored} agreement on the model-checked dev set (in-sample), '
     '{under_flag} under-flag, {unknown} unknowns sent to the applicant.'
 )
-VARIANTS = ('rules_only', 'rules_plus_unknown', 'always_unknown')
+VARIANTS = ('rules_only', 'rules_plus_unknown', 'rules_plus_unknown_cf', 'always_unknown')
+# Not selected. The shipped screen stays rules_plus_unknown even when this variant agrees more.
+_NOT_SHIPPED = frozenset({'always_unknown', 'rules_plus_unknown_cf'})
 GOLD_ROWS = ('yes', 'depends', 'no')
 SYSTEM_COLS = ('yes', 'unknown', 'no')
 
@@ -64,6 +74,13 @@ _AREA_LIMITS = {
     'detention': (300, 150, 100), 'hotel': (400, 200, 130),
     'business': (500, 250, 165), 'mercantile': (500, 250, 165), 'industrial': (500, 250, 165),
 }
+# Fixed extremes from engine/professional.py and PART9_MAX_SPAN_M. Not fitted to a gold label.
+# Yes: span above 12.20 m, area above every _AREA_LIMITS entry, storeys > 3,
+# multi_family with principal_dwelling_units > 4, part4_design true.
+# No: span at 12.20 m (the handoff is strict greater-than), area 1 m2, one storey,
+# single_family, part4_design false.
+_CF_AREA_YES = max(limit for limits in _AREA_LIMITS.values() for limit in limits) + 1
+_CF_UNITS_YES = 5  # professional.py sets multi_family general to yes only when units > 4
 # Lookup stub ids. Sources are the third field of PROFESSIONAL_RULES and PROCESS_RULES.
 RULE_IDS = tuple((division, provision_id) for division, provision_id, _source in (*PROFESSIONAL_RULES, *PROCESS_RULES))
 _WILSON_Z = 1.959963984540054  # 95%
@@ -303,10 +320,74 @@ def prepare(facts: ProfessionalFacts, signals: Signals, variant: str) -> Profess
     return ProfessionalFacts(**data)
 
 
+def _with_span_handoff(facts: ProfessionalFacts, signals: Signals) -> ProfessionalFacts:
+    if signals.span_m is not None and signals.span_m > PART9_MAX_SPAN_M and facts.part4_design is not True:
+        return facts.model_copy(update={'part4_design': True})
+    return facts
+
+
+def _assign_extremes(facts: ProfessionalFacts, signals: Signals, assignment: dict[str, bool]) -> ProfessionalFacts:
+    """Set each missing deciding fact to its frozen yes-push or no-push value, then apply the span handoff."""
+    data = facts.model_dump()
+    span = signals.span_m
+    for name, toward_yes in assignment.items():
+        if name == 'span':
+            span = PART9_MAX_SPAN_M + 0.01 if toward_yes else PART9_MAX_SPAN_M
+        elif name == 'area':
+            data['building_area_m2'] = _CF_AREA_YES if toward_yes else 1.0
+        elif name == 'storeys':
+            data['storeys'] = 4 if toward_yes else 1
+        elif name == 'occupancy':
+            if toward_yes:
+                data['occupancy'] = 'multi_family'
+                data['principal_dwelling_units'] = _CF_UNITS_YES
+            else:
+                data['occupancy'] = 'single_family'
+                data['principal_dwelling_units'] = None
+        elif name == 'part4_design':
+            data['part4_design'] = bool(toward_yes)
+    if span is not None and span > PART9_MAX_SPAN_M:
+        data['part4_design'] = True
+    if _plain_exemption(data) and not signals.flags and data.get('part4_design') is not True:
+        for key, value in _NO_DEFAULTS.items():
+            if data.get(key) is None:
+                data[key] = value
+    return ProfessionalFacts(**data)
+
+
+def counterfactual(facts: ProfessionalFacts, signals: Signals, codes) -> tuple[str, str | None]:
+    """Return the shared answer when every extreme agrees, otherwise unknown and the first flipping fact."""
+    base = _with_span_handoff(facts, signals)
+    missing = missing_deciding_facts(base, signals)
+    labels: dict[tuple[bool, ...], tuple[str, list[str]]] = {}
+    bits_list = list(product((False, True), repeat=len(missing))) or [()]
+    for bits in bits_list:
+        assignment = {name: bit for name, bit in zip(missing, bits)}
+        result = professional_involvement(_assign_extremes(base, signals, assignment), codes)
+        labels[bits] = (result.required, result.questions)
+    answers = {bits: required for bits, (required, _questions) in labels.items()}
+    if len(set(answers.values())) == 1:
+        only = next(iter(answers.values()))
+        if only == 'depends':
+            questions = next(iter(labels.values()))[1]
+            question = _MISSING_QUESTION[missing[0]] if missing else (questions[0] if questions else None)
+            return 'unknown', question or 'Which deciding building fact is still unconfirmed?'
+        return only, None
+    baseline = tuple(False for _ in missing)
+    for index, name in enumerate(missing):
+        trial = list(baseline)
+        trial[index] = True
+        if answers[tuple(trial)] != answers[baseline]:
+            return 'unknown', _MISSING_QUESTION[name]
+    return 'unknown', _MISSING_QUESTION[missing[0]]
+
+
 def evaluate(case: dict, codes, variant: str) -> tuple[str, str | None]:
     if variant == 'always_unknown':
         return 'unknown', None
     facts, signals = observe(case)
+    if variant == 'rules_plus_unknown_cf':
+        return counterfactual(facts, signals, codes)
     prepared = prepare(facts, signals, variant)
     result = professional_involvement(prepared, codes)
     if variant == 'rules_plus_unknown' and result.required != 'yes':
@@ -396,7 +477,8 @@ def load_heldout() -> list[dict]:
 
 
 def winner(totals: dict[str, VariantScore]) -> str:
-    ranked = sorted((row for row in totals.values() if row.name != 'always_unknown'),
+    # rules_plus_unknown_cf is measured here and is not eligible. The shipped screen stays rules_plus_unknown.
+    ranked = sorted((row for row in totals.values() if row.name not in _NOT_SHIPPED),
                     key=lambda row: (row.under_flag > 0, -row.agreement, row.name != 'rules_plus_unknown'))
     if not ranked or ranked[0].scored == 0:
         return 'none'
@@ -419,26 +501,35 @@ def _count_cell(count: int, scored: int) -> str:
     return f'{count}/{scored} [{lower:.4f}, {upper_text}]'
 
 
+def _variant_lines(row: VariantScore) -> list[str]:
+    lines = [
+        f'{row.name:<22} {row.scored:>6} {_agreement_cell(row):>22} {row.under_flag:>10} {row.unknown:>7} {row.skipped:>7}',
+        f'unknown_rate {row.name}: {_count_cell(row.unknown, row.scored)}',
+        f'confident_wrong {row.name}: {_count_cell(row.confident_wrong, row.scored)}',
+        f'confusion {row.name}  rows=gold  columns=system yes unknown no',
+    ]
+    for gold in GOLD_ROWS:
+        cells = '  '.join(f'{row.matrix[gold][column]:>3}' for column in SYSTEM_COLS)
+        lines.append(f'  {gold:<7} {cells}')
+    lines.append(f'gold_yes_as_unknown {row.name}: {_yes_unknown(row)}')
+    facts = '; '.join(row.under_flag_facts) if row.under_flag_facts else 'none'
+    lines.append(f'under_flag {row.name}: {facts}')
+    return lines
+
+
+def _table_header() -> str:
+    return f'{"variant":<22} {"scored":>6} {"agreement":>22} {"under_flag":>10} {"unknown":>7} {"skipped":>7}'
+
+
 def report(totals: dict[str, VariantScore], codedb: str) -> str:
     scored = max((row.scored for row in totals.values()), default=0)
     skipped = max((row.skipped for row in totals.values()), default=0)
     lines = [
-        f'{"variant":<22} {"scored":>6} {"agreement":>22} {"under_flag":>10} {"unknown":>7} {"skipped":>7}',
+        _table_header(),
         'note: rules_only abstains with depends; that label is counted in the unknown column',
     ]
     for name in VARIANTS:
-        row = totals[name]
-        lines.append(
-            f'{name:<22} {row.scored:>6} {_agreement_cell(row):>22} {row.under_flag:>10} {row.unknown:>7} {row.skipped:>7}')
-        lines.append(f'unknown_rate {name}: {_count_cell(row.unknown, row.scored)}')
-        lines.append(f'confident_wrong {name}: {_count_cell(row.confident_wrong, row.scored)}')
-        lines.append(f'confusion {name}  rows=gold  columns=system yes unknown no')
-        for gold in GOLD_ROWS:
-            cells = '  '.join(f'{row.matrix[gold][column]:>3}' for column in SYSTEM_COLS)
-            lines.append(f'  {gold:<7} {cells}')
-        lines.append(f'gold_yes_as_unknown {name}: {_yes_unknown(row)}')
-        facts = '; '.join(row.under_flag_facts) if row.under_flag_facts else 'none'
-        lines.append(f'under_flag {name}: {facts}')
+        lines.extend(_variant_lines(totals[name]))
     lines.append('rules_plus_unknown on this dev table is in-sample and pending out-of-sample confirmation')
     lines.append(f'winner: {winner(totals)}')
     lines.append('under_flag_target: 0')
@@ -455,17 +546,17 @@ def report(totals: dict[str, VariantScore], codedb: str) -> str:
 
 
 def heldout_report(totals: dict[str, VariantScore]) -> str:
-    row = totals['rules_plus_unknown']
-    misses = ', '.join(row.misses) if row.misses else 'none'
     lines = [
         'held-out: evals_dev/section_d_heldout',
         'held-out gold: model-checked',
         f'held-out rules_plus_unknown: {_BLIND_HELDOUT_RULES_PLUS}',
-        'held-out (post-fix, no longer blind for missing-fact cases) '
-        f'rules_plus_unknown: {_agreement_cell(row)}',
-        'held-out (post-fix, no longer blind for missing-fact cases) '
-        f'misses rules_plus_unknown: {misses}',
+        'post-fix, no longer blind',
+        _table_header(),
     ]
+    for name in VARIANTS:
+        lines.extend(_variant_lines(totals[name]))
+        misses = ', '.join(totals[name].misses) if totals[name].misses else 'none'
+        lines.append(f'misses {name}: {misses}')
     return '\n'.join(lines)
 
 
