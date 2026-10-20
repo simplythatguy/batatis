@@ -1,5 +1,6 @@
 """Exercise the Section C refresher through its command-line interface."""
 import json
+import os
 import pathlib
 import shutil
 import subprocess
@@ -7,21 +8,29 @@ import sys
 
 import pytest
 
-from evals_dev.validate_cases import DEFAULT_DB
+from evals_dev.validate_cases import database_path
 
 ROOT = pathlib.Path(__file__).resolve().parent
 
 
+def require_db():
+    path = database_path()
+    if os.environ.get('BATATIS_CODEDB') and not path.is_file():
+        pytest.fail(f'BATATIS_CODEDB is set but the file is missing: {path}')
+    if not path.is_file():
+        pytest.skip('code database not built at codedb/build/codedb.sqlite')
+    return path
+
+
 @pytest.fixture
 def case_dir(tmp_path):
-    if not pathlib.Path(DEFAULT_DB).is_file():
-        pytest.skip('code database not built')
+    require_db()
     return pathlib.Path(shutil.copytree(ROOT / 'cases', tmp_path / 'cases'))
 
 
 def run_refresh(case_dir, *flags):
     return subprocess.run(
-        [sys.executable, str(ROOT / 'author_cases.py'), '--db', DEFAULT_DB,
+        [sys.executable, str(ROOT / 'author_cases.py'), '--db', str(require_db()),
          '--cases', str(case_dir), *flags],
         capture_output=True, text=True, check=False, timeout=15,
     )

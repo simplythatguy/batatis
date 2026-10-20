@@ -21,7 +21,8 @@ from engine.section_d import supporting_documents
 from engine.models import INTENT_LABEL, Fact, Gap, Source
 
 FORM = form_path()
-pytestmark = pytest.mark.skipif(not FORM.exists(), reason=f'SCC form not present at {FORM} (git-excluded)')
+pytestmark = pytest.mark.skipif(
+    not FORM.exists(), reason='SCC form not present at reference/guides/SCC-Variance-Form.pdf (git-excluded)')
 
 
 @pytest.fixture(scope='module')

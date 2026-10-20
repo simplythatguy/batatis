@@ -8,13 +8,20 @@ Exit 0 when every case passes; 1 otherwise.
 import argparse
 import collections
 import json
+import os
 import pathlib
 import re
 import sqlite3
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent
-DEFAULT_DB = str(ROOT.parent / 'codedb' / 'build' / 'codedb.sqlite')
+REPO = ROOT.parent
+DEFAULT_DB = str(REPO / 'codedb' / 'build' / 'codedb.sqlite')
+
+
+def database_path() -> pathlib.Path:
+    """Repo build, or BATATIS_CODEDB when that variable is set."""
+    return pathlib.Path(os.environ['BATATIS_CODEDB']) if os.environ.get('BATATIS_CODEDB') else pathlib.Path(DEFAULT_DB)
 APPLICANTS = {'manufacturer', 'homebuilder', 'contractor', 'architect-engineer', 'owner'}
 TOPICS = {'part9-spatial-separation', 'part9-fire-separations', 'envelope-insulation-sheathing', 'cladding',
           'engineered-walls', 'single-exit', 'part3-fire-protection', 'part4-structural', 'out-of-scope'}
@@ -126,7 +133,7 @@ def validate(cases, con):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--db', default=DEFAULT_DB)
+    ap.add_argument('--db', default=str(database_path()))
     ap.add_argument('--cases', default=str(ROOT / 'cases'))
     a = ap.parse_args()
     con = sqlite3.connect(f'file:{a.db}?mode=ro', uri=True)

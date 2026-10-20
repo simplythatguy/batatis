@@ -1,7 +1,7 @@
 {
   "article": "3.1.10.2.",
   "command": [
-    "/Users/aamia/.t3/projects/batatis/.venv/bin/python",
+    ".venv/bin/python",
     "-I",
     "tools/codesearch.py",
     "find",

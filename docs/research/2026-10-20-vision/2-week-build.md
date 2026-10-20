@@ -197,6 +197,8 @@ Never cut the guaranteed claims, abstention, the required process fields, the of
 
 Every demo case is our own; none comes from the held-out set. The scripted path can replay cached runs; live judge inputs stream their progress.
 
+**Presenter note.** Identification in `engine/cli_sut.py` auto-commits Part 9 articles whose rerank probability is at least 0.75, and at most three of them. When the verifier runs, an article is committed only if the verifier also picked it; a failed ranker commits nothing. That 0.75 cutoff is a placeholder. It has not been fitted on the calibration fold. Fitting it there, and reporting the result on the validation fold, is planned for day 7 of this plan. The commit is what the judge's identification run returns. Official-form export is a later step: a final export still refuses while a fact is unconfirmed or a blocking gap is open, and a Section C row stays out until the applicant confirms that departure. If a judge asks, say the threshold is uncalibrated and that the calibration-fold fit is still ahead.
+
 ## Decisions settled on 2026-10-20
 
 1. **Deadline:** 29 October 2026.
