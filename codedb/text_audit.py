@@ -2,7 +2,7 @@
 
 Run ``python -m codedb.text_audit --json --output codedb/build/text-audit.json``.
 Use ``--dictionary-db codedb/build/before.sqlite`` for a fixed before/after
-vocabulary. Counts are occurrences, including overlapping sentence/clause text;
+vocabulary. Counts are distinct flagged fragments per field, including repeated sentence/clause text;
 warnings can be legitimate typography and require a source check.
 """
 from __future__ import annotations
@@ -59,7 +59,10 @@ class Detector:
             for m in re.finditer(r"(?m)^([A-Z][A-Za-z -]+?)(?: \([^\n)]*\))? means\b", t):
                 terms.add(m[1].lower())
         self.terms = sorted(terms, key=lambda s: (-len(s), s))
-        self.glued = [re.compile(r"\b" + re.escape(t) + r"([a-z]{2,})\b", re.I) for t in self.terms]
+        corpus = ' '.join(' '.join(t.split()) for t in texts)
+        self.followers = {t: {m[1].lower() for m in re.finditer(
+            r'\b' + re.escape(t) + r'\s+([a-z]+)\b', corpus, re.I)} for t in self.terms}
+        self.glued = [(t, re.compile(r"\b" + re.escape(t) + r"([a-z]{2,})\b", re.I)) for t in self.terms]
 
     def scan(self, text):
         found = set()
@@ -78,9 +81,12 @@ class Detector:
                     if len(joined) >= 3 and joined in self.dictionary and any(
                             p not in self.dictionary for p in parts):
                         found.add(("split_words", line[start.start():group[-1].end()]))
-            for rx in self.glued:
+            for term, rx in self.glued:
                 for m in rx.finditer(line):
-                    if m[1].lower() not in ('es', 'ing') and m[0].lower() not in self.dictionary:
+                    tail = m[0].split()[-1].lower()
+                    usual = term.split()[-1]
+                    known_word = tail in self.dictionary and self.words[tail] >= max(2, self.words[usual] / 10)
+                    if not known_word and m[1].lower() in self.followers[term] and m[1].lower() in self.dictionary:
                         found.add(("glued_defined_terms", m[0]))
         for m in re.finditer(r"\b(?:m|mm|cm|km)\s*[23]\b|\bP\s+a\b|\b\d(?:\s+\d)+\s*P\s*a\b", text):
             found.add(("broken_units", m[0]))
@@ -110,6 +116,42 @@ def audit(path=None, dictionary_path=None, examples=5):
             'scope': 'Distinct flagged fragments per field, not confirmed errors; hierarchy text repeats.'}
 
 
+def unaligned_sources(path=None):
+    """List every body/intent line deliberately left unreconstructed.
+
+    Full source text belongs only in ignored local outputs. This is separate from
+    the heuristic warnings: a formula can be unalignable without looking like a
+    broken word, and an unusual but correct word can trigger a heuristic warning.
+    """
+    from . import intents, textnorm
+    con = store.connect(path)
+    records = []
+    source_keys = []
+    try:
+        for table, identifier in (("provisions", "id"), ("notes", "note_id")):
+            for r in con.execute(f"SELECT * FROM {table} ORDER BY pdf_page,{identifier}"):
+                value = textnorm.source_text(r['text_raw'], r['doc'], r['pdf_page'], r['pdf_page_end'])
+                records.append((table, f"{r['doc']}/{r['division']}/{r[identifier]}",
+                                r['pdf_page'], r['pdf_page_end'], value))
+        source_keys = [r[0] for r in con.execute('SELECT DISTINCT source FROM intents ORDER BY source')]
+    finally:
+        con.close()
+    for key in source_keys:
+        for entry in intents.parse_intents(key):
+            for i, block in enumerate(entry.blocks):
+                value = textnorm.source_text('\n'.join(block.intent_lines), key, block.page, block.page_end)
+                records.append(('intents', f'{key}/{entry.provision}/{i}', block.page, block.page_end, value))
+                for note in block.attribution_notes:
+                    records.append(('intent_notes', f'{key}/{entry.provision}/{i}', block.page, block.page_end, note))
+    issues = []
+    counts = Counter()
+    for table, identifier, first, last, value in records:
+        for line in value.unmatched:
+            counts[table] += 1
+            issues.append({'table': table, 'id': identifier, 'pdf_pages': [first, last], 'raw_line': line})
+    return {'unreconstructed_lines': len(issues), 'by_table': dict(counts), 'lines': issues}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--db', type=Path)
@@ -117,8 +159,13 @@ def main():
     parser.add_argument('--examples', type=int, default=5, help='-1 includes every warning')
     parser.add_argument('--json', action='store_true')
     parser.add_argument('--output', type=Path)
+    parser.add_argument('--unaligned-output', type=Path, help='Also list all unchanged, unalignable source lines')
     args = parser.parse_args()
     result = audit(args.db, args.dictionary_db, args.examples)
+    if args.unaligned_output:
+        unaligned = unaligned_sources(args.db)
+        args.unaligned_output.write_text(json.dumps(unaligned, indent=2, ensure_ascii=False)+'\n', encoding='utf8')
+        result['unreconstructed_source_lines'] = unaligned['unreconstructed_lines']
     payload = json.dumps(result, indent=2, ensure_ascii=False) + '\n'
     if args.output:
         args.output.write_text(payload, encoding='utf8')

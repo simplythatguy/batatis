@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-from . import ids
+from . import ids, textnorm
 from .ids import Pid
 from .sources import load_pages
 
@@ -74,6 +74,7 @@ class Node:
     page: int = 0
     page_end: int = 0
     lines: list[tuple[int, str]] = field(default_factory=list)   # own text lines (incl. children for sentences)
+    source: str | None = None
 
     def add(self, page: int, text: str):
         self.lines.append((page, text))
@@ -81,7 +82,8 @@ class Node:
 
     @property
     def text(self) -> str:
-        return "\n".join(t for _, t in self.lines)
+        raw = "\n".join(t for _, t in self.lines)
+        return textnorm.source_text(raw, self.source, self.page, self.page_end)
 
 
 _SECTION = re.compile(r"^Section (\d+)\.(\d+)\.\s+([A-Z].*)$")
@@ -294,10 +296,11 @@ class Note:
     page: int
     page_end: int
     lines: list[str] = field(default_factory=list)
+    source: str | None = None
 
     @property
     def text(self):
-        return "\n".join(self.lines)
+        return textnorm.source_text("\n".join(self.lines), self.source, self.page, self.page_end)
 
 
 def note_targets(note_id: str) -> list[str]:
@@ -367,10 +370,13 @@ def parse_code(key: str, skip_tables: set[str]) -> ParsedCode:
             tp = TreeParser(s.division, s.part, skip_tables)
             tp.feed(stream)
             for pid, n in tp.nodes.items():
+                n.source = key
                 nodes[(s.division, pid)] = n
             for t, pg in tp.tables.items():
                 tables.setdefault((s.division, t), pg)
             anomalies += [f"Div {s.division} {a}" for a in tp.anomalies]
         elif s.kind == "notes":
             notes += parse_notes(s.division, s.part, stream)
+    for note in notes:
+        note.source = key
     return ParsedCode(nodes, notes, tables, segs, anomalies)
