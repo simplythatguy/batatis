@@ -54,8 +54,8 @@ _SQFT = 0.09290304
 _CONF = {'high': 0.86, 'medium': 0.6, 'low': 0.35}
 
 SCALAR_FIELDS = (
-    'applicant_role', 'owner_name', 'municipal_address', 'legal_description', 'permit_number',
-    'municipality', 'jurisdiction_scope', 'occupancy', 'storeys', 'building_area_m2',
+    'applicant_role', 'owner_name', 'municipal_address', 'mailing_address', 'legal_description',
+    'permit_number', 'municipality', 'jurisdiction_scope', 'occupancy', 'storeys', 'building_area_m2',
     'dwelling_units', 'sprinklered', 'product_or_assembly', 'installation_status',
     'proposed_alternative', 'required_acceptable_solution', 'project_name',
 )
@@ -121,6 +121,7 @@ class IntakeFacts(BaseModel):
     applicant_role: FactCell = Field(default_factory=FactCell)
     owner_name: FactCell = Field(default_factory=FactCell)
     municipal_address: FactCell = Field(default_factory=FactCell)
+    mailing_address: FactCell = Field(default_factory=FactCell)
     legal_description: FactCell = Field(default_factory=FactCell)
     permit_number: FactCell = Field(default_factory=FactCell)
     municipality: FactCell = Field(default_factory=FactCell)
@@ -173,6 +174,7 @@ def _extract(text: str, *, normalise: bool, departure: str, codes) -> IntakeFact
         applicant_role=_role(text),
         owner_name=_owner(text),
         municipal_address=_address(text),
+        mailing_address=_mailing(text),
         legal_description=_legal(text),
         permit_number=_permit(text),
         municipality=_municipality(text),
@@ -341,6 +343,22 @@ def _address(text: str) -> FactCell:
     if match:
         return _hit(text, match.group(1), match.group(1), 'high')
     return FactCell()
+
+
+def _mailing(text: str) -> FactCell:
+    """Section A mailing address. A civic Address row is not copied into this field."""
+    table = _table(text)
+    for key in ('mailing address', 'mail address'):
+        value = table.get(key)
+        if value and not _negated(value) and value in text:
+            return _hit(text, value, value, 'high')
+    match = re.search(r'(?i)\bmailing address\s*(?:is|:)\s*([^\n|]+)', text)
+    if not match:
+        return FactCell()
+    value = _polish(match.group(1))
+    if _negated(value) or not value or value not in text:
+        return FactCell()
+    return _hit(text, value, value, 'high')
 
 
 def _legal(text: str) -> FactCell:
@@ -824,6 +842,8 @@ def _supports(field: str, value, quote: str, text: str) -> bool:
         return str(value) in quote
     if field == 'building_area_m2':
         return re.search(r'\d', quote) is not None and str(value).split('.')[0] in quote.replace(',', '')
+    if field == 'mailing_address':
+        return str(value) in quote and bool(re.search(r'(?i)\bmail', quote))
     return str(value) in quote
 
 
@@ -1230,7 +1250,9 @@ def render_results(scored: dict) -> str:
         'The held-out pair was written down before either extractor was tuned, and the rules were not changed after this score. '
         'cfx-001 through cfx-005 are regression slices of '
         '`evals/demo-cases/b-contractor-firestop-nonconformance/input/` at 914b8ec. '
-        'They are not the held-out set used to pick the winner.',
+        'They are not the held-out set used to pick the winner. '
+        '`mailing_address` is read only from an explicit mailing-address cue. '
+        'None of these pastes state one, so the field is empty on both sides and is omitted from the tables.',
         '',
         format_table('Without cfx (persona and negation)', scored['without_cfx']),
         '',

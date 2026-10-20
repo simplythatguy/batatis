@@ -26,6 +26,7 @@ class FactsPatch(BaseModel):
     applicant_role: ApplicantRole | None = None
     owner_name: str | None = None
     municipal_address: str | None = None
+    mailing_address: str | None = None
     legal_description: str | None = None
     permit_number: str | None = None
     municipality: str | None = None

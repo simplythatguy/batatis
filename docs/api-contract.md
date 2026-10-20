@@ -212,7 +212,7 @@ Each scalar cell is `{ "value", "status", "confidence", "source_quote", "source_
 | Field | Values |
 | --- | --- |
 | `applicant_role` | `owner`, `designer`, `contractor`, `manufacturer`, `other` |
-| `owner_name`, `municipal_address`, `legal_description`, `permit_number`, `municipality`, `project_name` | string read from the paste. `project_name` is the project name row when the paste has one. |
+| `owner_name`, `municipal_address`, `mailing_address`, `legal_description`, `permit_number`, `municipality`, `project_name` | string read from the paste. `municipal_address` is the civic address. `mailing_address` is filled only when the paste names a mailing address. `project_name` is the project name row when the paste has one. |
 | `jurisdiction_scope` | `site` or `jurisdiction_wide`. Both cues abstain and ask. |
 | `occupancy` | `Occupancy` in `engine/professional.py`. Retail plus dwelling units abstains. `factory-bonded` is not `industrial`. |
 | `storeys`, `dwelling_units` | integer. `building_area_m2` is a number; “about”, gross, total, or main floor is `medium` and asks which area. |

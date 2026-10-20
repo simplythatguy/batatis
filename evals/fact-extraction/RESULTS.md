@@ -2,7 +2,7 @@
 
 Agent-authored, model-checked, not human-verified. Gold values are spans or direct readings of the pasted text. A field that is empty in both the gold and the prediction is not counted as a true positive.
 
-The shipped extractor is the sentence classifier. The regex baseline keeps every non-question sentence. Word-number storeys and square-foot conversion run only in the classifier. Persona, negation, and cfx scores are in-sample checks of those rules. The held-out pair was written down before either extractor was tuned, and the rules were not changed after this score. cfx-001 through cfx-005 are regression slices of `evals/demo-cases/b-contractor-firestop-nonconformance/input/` at 914b8ec. They are not the held-out set used to pick the winner.
+The shipped extractor is the sentence classifier. The regex baseline keeps every non-question sentence. Word-number storeys and square-foot conversion run only in the classifier. Persona, negation, and cfx scores are in-sample checks of those rules. The held-out pair was written down before either extractor was tuned, and the rules were not changed after this score. cfx-001 through cfx-005 are regression slices of `evals/demo-cases/b-contractor-firestop-nonconformance/input/` at 914b8ec. They are not the held-out set used to pick the winner. `mailing_address` is read only from an explicit mailing-address cue. None of these pastes state one, so the field is empty on both sides and is omitted from the tables.
 
 ### Without cfx (persona and negation)
 

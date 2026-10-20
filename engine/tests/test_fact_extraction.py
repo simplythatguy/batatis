@@ -159,6 +159,67 @@ def test_building_sprinklered_survives_the_exempt_claim():
     assert 'sprinkler branch lines' in facts.claimed_exemptions[0].text
 
 
+def test_case_b_admin_fields_are_unconfirmed_and_the_departure_is_not_the_paste():
+    """Issue #14 Case B. Admin cells stay unconfirmed, with a quote. The paste is not the departure."""
+    text = BRIEF.read_text()
+    case = Case()
+    facts = record_description(case, text)
+    present = {
+        'owner_name': 'Example Commons Holdings Inc.',
+        'municipal_address': '0000 Example Avenue SW, Calgary, AB',
+        'legal_description': 'Lot 0, Block 0, Plan 0000000',
+        'permit_number': 'BP-0000-00000',
+        'sprinklered': 'yes',
+    }
+    for field, value in present.items():
+        cell = getattr(facts, field)
+        assert cell.status == 'extracted'
+        assert cell.value == value
+        assert cell.source_quote and cell.source_quote in text and cell.source_quote != text
+        ledger = [fact for fact in case.facts if fact.field == field]
+        assert ledger
+        fact = ledger[-1]
+        assert fact.status == 'unconfirmed'
+        assert fact.value == value
+        assert fact.source.quote == cell.source_quote
+        assert fact.source.quote in text and fact.source.quote != text
+    assert facts.mailing_address.status == 'missing'
+    assert facts.mailing_address.value is None
+    assert facts.mailing_address.source_quote is None
+    assert not any(fact.field == 'mailing_address' for fact in case.facts)
+    assert facts.proposed_alternative.value is None
+    assert facts.proposed_alternative.value != text
+    assert all(fact.value != text for fact in case.facts)
+    assert not any(fact.field == 'alternative_description' and fact.value == text for fact in case.facts)
+
+
+def test_mailing_address_is_its_own_unconfirmed_fact():
+    text = (
+        'Owner: Example Commons Holdings Inc.\n'
+        'Address: 0000 Example Avenue SW, Calgary, AB\n'
+        'Mailing address: PO Box 12, Edmonton, AB\n'
+        'Building permit BP-1111, issued. The building is sprinklered.\n'
+        'We propose to omit the firestop collar.\n'
+    )
+    case = Case()
+    facts = record_description(case, text)
+    cell = facts.mailing_address
+    assert cell.status == 'extracted'
+    assert cell.value == 'PO Box 12, Edmonton, AB'
+    assert cell.source_quote == 'PO Box 12, Edmonton, AB'
+    assert cell.source_quote in text and cell.source_quote != text
+    fact = next(item for item in case.facts if item.field == 'mailing_address')
+    assert fact.status == 'unconfirmed'
+    assert fact.source.quote == cell.source_quote
+    assert facts.municipal_address.value == '0000 Example Avenue SW, Calgary, AB'
+    assert facts.municipal_address.value != facts.mailing_address.value
+    assert facts.proposed_alternative.value == 'We propose to omit the firestop collar.'
+    assert facts.proposed_alternative.value != text
+    assert not _supports(
+        'mailing_address', '0000 Example Avenue SW, Calgary, AB',
+        '0000 Example Avenue SW, Calgary, AB', text)
+
+
 def test_cfx_001_reads_identity_and_does_not_confirm_a_rating_or_group():
     item = by_id()['cfx-001']
     case = Case()
