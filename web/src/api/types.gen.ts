@@ -86,7 +86,7 @@ export interface Case {
   id: string;
   jurisdiction: Jurisdiction | null;
   provisions: string[];
-  /** Shown as soon as the role is a manufacturer, or the scope is province-wide. None otherwise. */ route_notice: string | null;
+  /** Product approval versus a site variance. None unless the role is a manufacturer or the scope is province-wide. */ route_notice: RouteNotice | null;
   section_c: SectionCRow[];
   title: string | null;
   updated_at: string;
@@ -230,6 +230,25 @@ export interface OpenQuestion {
   status: string | null;
   text: string;
   why: string;
+}
+
+export interface RouteBullet {
+  citations: RouteCitation[];
+  claim: string;
+}
+
+/** One source for a bullet. `excerpt` is omitted for NBC code text. */
+export interface RouteCitation {
+  excerpt: string | null;
+  page: number | null;
+  source: string;
+  url: string | null;
+}
+
+/** Summary plus the sourced bullets. The UI renders these fields. */
+export interface RouteNotice {
+  bullets: RouteBullet[];
+  summary: string;
 }
 
 export interface SectionCRequest {

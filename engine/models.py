@@ -14,6 +14,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, computed_field, model_validator
 
+from .route_notice import RouteNotice
+
 FactKind = Literal['exact', 'pointed', 'computed', 'proposed']
 FactStatus = Literal['confirmed', 'unconfirmed', 'open', 'unknown']
 SourceType = Literal['code', 'file', 'user_text', 'drawing', 'user_click']
@@ -163,8 +165,8 @@ class Case(BaseModel):
 
     @computed_field
     @property
-    def route_notice(self) -> str | None:
-        """Shown as soon as the role is a manufacturer, or the scope is province-wide. None otherwise."""
+    def route_notice(self) -> RouteNotice | None:
+        """Product approval versus a site variance. None unless the role is a manufacturer or the scope is province-wide."""
         from .route_notice import route_notice
         return route_notice(self)
 

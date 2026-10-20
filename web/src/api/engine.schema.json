@@ -780,15 +780,14 @@
         "route_notice": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/RouteNotice"
             },
             {
               "type": "null"
             }
           ],
-          "description": "Shown as soon as the role is a manufacturer, or the scope is province-wide. None otherwise.",
-          "readOnly": true,
-          "title": "Route Notice"
+          "description": "Product approval versus a site variance. None unless the role is a manufacturer or the scope is province-wide.",
+          "readOnly": true
         },
         "section_c": {
           "default": [],
@@ -1897,6 +1896,105 @@
         "answer"
       ],
       "title": "OpenQuestion",
+      "type": "object"
+    },
+    "RouteBullet": {
+      "additionalProperties": false,
+      "properties": {
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/RouteCitation"
+          },
+          "title": "Citations",
+          "type": "array"
+        },
+        "claim": {
+          "title": "Claim",
+          "type": "string"
+        }
+      },
+      "required": [
+        "claim",
+        "citations"
+      ],
+      "title": "RouteBullet",
+      "type": "object"
+    },
+    "RouteCitation": {
+      "additionalProperties": false,
+      "description": "One source for a bullet. `excerpt` is omitted for NBC code text.",
+      "properties": {
+        "excerpt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Excerpt"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "required": [
+        "source",
+        "page",
+        "url",
+        "excerpt"
+      ],
+      "title": "RouteCitation",
+      "type": "object"
+    },
+    "RouteNotice": {
+      "additionalProperties": false,
+      "description": "Summary plus the sourced bullets. The UI renders these fields.",
+      "properties": {
+        "bullets": {
+          "items": {
+            "$ref": "#/$defs/RouteBullet"
+          },
+          "title": "Bullets",
+          "type": "array"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "summary",
+        "bullets"
+      ],
+      "title": "RouteNotice",
       "type": "object"
     },
     "SectionCRequest": {

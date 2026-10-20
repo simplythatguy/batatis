@@ -12,7 +12,7 @@ from engine.models import Case, Fact, Source
 from engine.professional import (
     DEFAULT_HELP, NOT_SURE_OPTION, PART4_HELP, ProfessionalFacts, professional_involvement,
 )
-from engine.route_notice import CCMC_SENTENCE, IB_2026_10_01_URL, SCC_FORM_URL
+from engine.route_notice import SUMMARY
 from engine.section_d_issues import render_practice
 from engine.store import CaseStore
 from engine.tests.test_professional import ordinary_house
@@ -31,6 +31,15 @@ def _case(tmp_path):
     return TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes()))
 
 
+def _quoted_code_words(notice: dict) -> int:
+    total = 0
+    for bullet in notice['bullets']:
+        for citation in bullet['citations']:
+            if str(citation['source']).startswith('NBC') and citation.get('excerpt'):
+                total += len(citation['excerpt'].split())
+    return total
+
+
 def test_route_notice_for_a_manufacturer_or_a_province_wide_scope(tmp_path):
     client = _case(tmp_path)
     maker = client.post('/cases', json={'title': 'NailBase panel'}).json()
@@ -38,14 +47,21 @@ def test_route_notice_for_a_manufacturer_or_a_province_wide_scope(tmp_path):
         'field': 'applicant.role', 'value': 'manufacturer', 'kind': 'pointed',
         'source': {'type': 'user_text', 'ref': 'role', 'quote': 'manufacturer'}})
     notice = posted.json()['route_notice']
-    assert notice.startswith('A variance covers one site.')
-    assert 'This tool prepares a site variance application.' in notice
-    assert IB_2026_10_01_URL in notice and 'specific location' in notice
-    assert 'jurisdictional alternative solutions' in notice
-    assert 'Section B checkbox' in notice and SCC_FORM_URL in notice
-    assert CCMC_SENTENCE in notice and 'Canadian Construction Materials Centre' in notice
-    assert 'PAS-001' not in notice and 'calgary.ca' not in notice and '2.2.1.2' not in notice
-    assert 'ask the Safety Codes Officer' not in notice
+    assert notice['summary'] == SUMMARY
+    assert 'market-wide' in notice['summary'] and 'one building or site' in notice['summary']
+    assert 'Safety Codes Council' in notice['summary']
+    claims = [bullet['claim'] for bullet in notice['bullets']]
+    assert len(claims) == 8
+    assert any('1.2.2.1.(2)' in cite['source'] and cite['page'] == 38 and cite['excerpt'] is None
+               for bullet in notice['bullets'] for cite in bullet['citations'])
+    assert any(cite['url'] and 'canadian-construction-materials-centre' in cite['url']
+               for bullet in notice['bullets'] for cite in bullet['citations'])
+    assert any(cite['url'] and 'IB-2026-10-01' in cite['url']
+               for bullet in notice['bullets'] for cite in bullet['citations'])
+    blob = posted.text
+    assert _quoted_code_words(notice) <= 25
+    assert 'may be used in determining compliance with the requirements of this Code' not in blob
+    assert 's.40' not in blob and 's.43' not in blob and 'listing' not in blob.casefold()
     form = resolve_form()
     assert form.jurisdiction == 'alberta' and form.form_id == 'scc-variance'
 
@@ -54,7 +70,7 @@ def test_route_notice_for_a_manufacturer_or_a_province_wide_scope(tmp_path):
     wide = client.post(f"/cases/{other['id']}/facts", json={
         'field': 'scope', 'value': 'province-wide', 'kind': 'pointed',
         'source': {'type': 'user_text', 'ref': 'scope', 'quote': 'province-wide'}})
-    assert 'site variance application' in wide.json()['route_notice']
+    assert wide.json()['route_notice']['summary'] == SUMMARY
 
 
 def test_engineer_question_names_the_deciding_facts_and_not_eight_cites():
@@ -157,7 +173,7 @@ def test_sheathing_membrane_card_is_not_shown_for_a_structural_nail_base_panel()
 def test_a_stated_role_fact_round_trips_with_its_notice(tmp_path):
     """The notice is computed. Storing the case does not turn it into a different form."""
     case = Case(facts=[Fact(field='role', value='manufacturer', kind='pointed', source=_SRC)])
-    assert case.route_notice and 'site variance application' in case.route_notice
+    assert case.route_notice and case.route_notice.summary == SUMMARY
     store = CaseStore(tmp_path / 'cases.sqlite')
     loaded = store.get(store.put(case).id)
     assert loaded.route_notice == case.route_notice
