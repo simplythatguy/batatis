@@ -214,15 +214,40 @@ def test_eval_script_prints_in_sample_wilson_table(capsys):
     out = capsys.readouterr().out
     assert 'gold: model-checked' in out
     assert 'split: dev (in-sample; no held-out)' in out
+    assert 'out_of_sample: evals_dev/appeals (built on another branch; not scored here)' in out
     assert 'winner: rules_plus_unknown' in out
     assert 'under_flag_target: 0' in out
+    assert 'note: rules_only abstains with depends; that label is counted in the unknown column' in out
     plus = next(line for line in out.splitlines() if line.startswith('rules_plus_unknown'))
     assert '60/60 [' in plus and ', 1.0]' in plus
     assert re.search(r'\]\s+0\s+17\s+0\s*$', plus)
     only = next(line for line in out.splitlines() if line.startswith('rules_only '))
-    assert re.search(r'\]\s+1\s+0\s+0\s*$', only)
+    assert '55/60 [' in only
+    assert re.search(r'\]\s+1\s+13\s+0\s*$', only)
+    baseline = next(line for line in out.splitlines() if line.startswith('always_unknown'))
+    assert '17/60 [' in baseline
+    assert re.search(r'\]\s+0\s+60\s+0\s*$', baseline)
+    assert 'unknown_rate rules_only: 13/60 [' in out
+    assert 'unknown_rate rules_plus_unknown: 17/60 [' in out
+    assert 'unknown_rate always_unknown: 60/60 [' in out and ', 1.0]' in out
+    assert 'confident_wrong rules_only: 5/60 [' in out
+    assert 'confident_wrong rules_plus_unknown: 0/60 [' in out
+    assert 'confident_wrong always_unknown: 0/60 [' in out
+    assert 'confusion rules_only  rows=gold  columns=system yes unknown no' in out
+    assert 'confusion rules_plus_unknown  rows=gold  columns=system yes unknown no' in out
+    assert 'confusion always_unknown  rows=gold  columns=system yes unknown no' in out
+    assert re.search(r'confusion rules_only.*\n  yes\s+32\s+0\s+1\n  depends\s+0\s+13\s+4\n  no\s+0\s+0\s+10\n', out)
+    assert re.search(
+        r'confusion rules_plus_unknown.*\n  yes\s+33\s+0\s+0\n  depends\s+0\s+17\s+0\n  no\s+0\s+0\s+10\n', out)
+    assert re.search(
+        r'confusion always_unknown.*\n  yes\s+0\s+33\s+0\n  depends\s+0\s+17\s+0\n  no\s+0\s+10\s+0\n', out)
     assert 'gold_yes_as_unknown rules_plus_unknown: none' in out
     assert 'gold_yes_as_unknown rules_only: none' in out
+    assert 'gold_yes_as_unknown always_unknown: dev-002' in out
+    assert 'under_flag rules_only: dev-050:' in out
+    assert 'span_m=18' in out
+    assert 'under_flag rules_plus_unknown: none' in out
+    assert 'under_flag always_unknown: none' in out
 
 
 def test_claim_blocklist_matches_compliance_and_safety_claims():
