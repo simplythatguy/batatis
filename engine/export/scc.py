@@ -13,7 +13,6 @@ from __future__ import annotations
 import hashlib
 import io
 import json
-import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -26,9 +25,9 @@ from ..completeness import check_completeness
 from ..process_fields import PROCESS_ALIASES
 from ..section_c import section_c_rows
 from ..section_d import supporting_documents
+from .forms import FormRegistryError, resolve_form
 from .text import fit, pdf_safe
 
-DEFAULT_FORM = Path('/Users/aamia/.t3/projects/batatis/reference/guides/SCC-Variance-Form.pdf')
 MAP_DIR = Path(__file__).parent / 'field_maps'
 CURRENT_MAP = 'scc_2026-10'
 MULTILINE = 1 << 12
@@ -76,25 +75,39 @@ class ExportResult:
     placements: list[Placement] = field(default_factory=list)
     blank_fields: list[str] = field(default_factory=list)
     open_items: list[str] = field(default_factory=list)
+    form_version: str = ''
+    form_date: str = ''
+    form_id: str = ''
+    jurisdiction: str = ''
 
 
 def form_path() -> Path:
-    return Path(os.environ.get('BATATIS_SCC_FORM') or DEFAULT_FORM)
+    """Blank form for the default registry entry. `BATATIS_SCC_FORM` overrides that path only."""
+    try:
+        return resolve_form().local_path
+    except FormRegistryError as exc:
+        raise FormNotFound(str(exc)) from exc
 
 
 def load_field_map(version: str = CURRENT_MAP) -> dict:
     return json.loads((MAP_DIR / f'{version}.json').read_text())
 
 
-def load_form(path: Path | str | None, fmap: dict) -> bytes:
+def load_form(path: Path | str | None, fmap: dict, *, expected_sha: str | None = None,
+              label: str | None = None) -> bytes:
     path = Path(path) if path else form_path()
     if not path.exists():
-        raise FormNotFound(f'SCC variance form not found at {path} (set BATATIS_SCC_FORM)')
+        raise FormNotFound(
+            f'Variance form not found at {path}. Set BATATIS_SCC_FORM or run scripts/fetch_sources.py.')
     data = path.read_bytes()
     digest = hashlib.sha256(data).hexdigest()
-    if digest != fmap['sha256']:
-        raise FormMismatch(f'{path} has SHA-256 {digest}, but field map {fmap["version"]} was made for '
-                           f'{fmap["sha256"]}. The form has changed: map its fields again before exporting.')
+    expect = expected_sha or fmap['sha256']
+    who = label or fmap.get('version') or str(path)
+    if digest != expect or expect != fmap['sha256']:
+        raise FormMismatch(
+            f'{who} has SHA-256 {digest}, but the registry requires SHA-256 {expect} '
+            f'(field map {fmap.get("version")} was made for {fmap["sha256"]}). '
+            f'Refusing to export until the form file matches this jurisdiction and form version.')
     return data
 
 
@@ -314,17 +327,25 @@ def _rects(form: bytes, fmap: dict) -> dict[str, tuple[float, float, float, floa
 
 
 def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str | None = None,
-                version: str = CURRENT_MAP) -> ExportResult:
+                version: str | None = None, jurisdiction: str | None = None, form_id: str | None = None,
+                registry: Path | str | None = None) -> ExportResult:
     """Authoritatively check, canonicalize, fill, flatten and append; no prior gap request is needed."""
     from .appendix import build_appendix, stamp_draft
 
-    fmap = load_field_map(version)
+    try:
+        spec = resolve_form(jurisdiction, form_id, registry=registry)
+    except FormRegistryError as exc:
+        raise FormNotFound(str(exc)) from exc
+    if version and version != spec.version:
+        fmap = load_field_map(version)
+    else:
+        fmap = json.loads(spec.field_map_path.read_text())
     codes = codes or Codes()
     reasons = blockers(case, fmap, codes)
     if reasons and not draft:
         raise ExportBlocked(reasons)
     case = _canonical_case(case, codes)
-    blank_form = load_form(form, fmap)
+    blank_form = load_form(form or spec.local_path, fmap, expected_sha=spec.sha256, label=spec.label)
     values = confirmed_values(case)
     plan = _plan(case, values, fmap, _rects(blank_form, fmap))
     filled, placements = _fill_and_flatten(blank_form, plan)
@@ -338,7 +359,9 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
     if draft:
         stamp_draft(out)
     out.add_metadata({'/Title': 'Variance Form for Proposed Alternative Solution' + (' (DRAFT)' if draft else ''),
-                      '/Producer': f'Batatis export, field map {fmap["version"]}'})
+                      '/Producer': f'Batatis export, field map {fmap["version"]}',
+                      '/FormVersion': spec.version, '/FormDate': spec.pdf_last_modified,
+                      '/FormId': spec.form_id, '/Jurisdiction': spec.jurisdiction})
     buf = io.BytesIO()
     out.write(buf)
     filled_names = set(plan.text) | {k for k, v in plan.checks.items() if v != '/Off'}
@@ -346,4 +369,6 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
                          *[f for r in fmap['section_d_rows'] for f in r.values()]] if n not in filled_names]
     return ExportResult(pdf=buf.getvalue(), field_map=fmap['version'], form_pages=form_pages,
                         appendix_pages=len(app_reader.pages), draft=draft, placements=placements,
-                        blank_fields=blank, open_items=reasons if draft else [])
+                        blank_fields=blank, open_items=reasons if draft else [],
+                        form_version=spec.version, form_date=spec.pdf_last_modified,
+                        form_id=spec.form_id, jurisdiction=spec.jurisdiction)

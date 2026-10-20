@@ -14,7 +14,7 @@ import sqlite3
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent
-DEFAULT_DB = '/Users/aamia/.t3/projects/batatis/codedb/build/codedb.sqlite'
+DEFAULT_DB = str(ROOT.parent / 'codedb' / 'build' / 'codedb.sqlite')
 APPLICANTS = {'manufacturer', 'homebuilder', 'contractor', 'architect-engineer', 'owner'}
 TOPICS = {'part9-spatial-separation', 'part9-fire-separations', 'envelope-insulation-sheathing', 'cladding',
           'engineered-walls', 'single-exit', 'part3-fire-protection', 'part4-structural', 'out-of-scope'}

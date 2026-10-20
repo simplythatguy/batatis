@@ -1,0 +1,30 @@
+{
+  "nbc_ae": {
+    "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+    "record_url": "https://nrc-publications.canada.ca/eng/view/object/?id=0316d953-0d55-4311-af69-cad55efec499",
+    "sha256": "3d45376d6c71d54b7f1797084d0828c250b20ab9b380f424f1aab8cfc9a39827",
+    "bytes": 15010934,
+    "path": "reference/codes/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.pdf",
+    "jsonl": "reference/text/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.jsonl",
+    "jsonl_sha256": "923483af04ebba73d9dd8c31742c7eb05f0eca018a3dd67c29bab532e350af29",
+    "pages": 1578
+  },
+  "intent": {
+    "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=de0e0ec9-a452-4337-bc84-002a230c9d66",
+    "record_url": "https://nrc-publications.canada.ca/eng/view/object/?id=de0e0ec9-a452-4337-bc84-002a230c9d66",
+    "sha256": "a75ef52eff6f060a4735010c0435ee966b48b1a1d11cf22e1610f557096ba4cf",
+    "bytes": 17156090,
+    "path": "reference/codes/NBC-2020-Intent-Statements.pdf",
+    "jsonl": "reference/text/NBC-2020-Intent-Statements.jsonl",
+    "jsonl_sha256": "787c20b46a7c0ee975873cf7662fb0dc9af70df2d16ddb71d00584edc2aa50b1",
+    "pages": 3210
+  },
+  "form": {
+    "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf",
+    "sha256": "f44640ca005c957c11a2387d2768fffc35ef93c97125dcca37436fcc0b9afc1d",
+    "bytes": 334580,
+    "path": "reference/guides/SCC-Variance-Form.pdf",
+    "pages": 5,
+    "pdf_last_modified": "2026-10-06"
+  }
+}

@@ -1,14 +1,22 @@
 """Case-builder HTTP routes; storage/code access is supplied by the application's closures."""
 from __future__ import annotations
 
+import json
+import queue
+import threading
 from typing import Callable
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from .ccmc import CCMCRegistry, RegistrySearch, RegistryUnavailable
-from .codes import Codes
+from .codes import Codes, default_db
 from .completeness import Gap, check_completeness
+from .identify.answers import apply_answers
+from .identify.config import has_live_model
+from .identify.demo_cache import match_demo
+from .identify.pipeline import run as identify_run
 from .process_fields import ProcessField, process_fields
 from .professional import ProfessionalResult, professional_involvement
 from .section_c import section_c_rows
@@ -20,6 +28,24 @@ class SectionDRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
     # Explicitly confirmed selections. No request field accepts generated process/evidence content.
     provisions: list[str] | None = Field(default=None, min_length=1)
+
+
+class AnswerIn(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    field: str | None = None
+    question_id: str | None = None
+    answer: str = ''
+
+
+class IdentifyRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    prose: str = Field(min_length=1)
+    answers: list[AnswerIn] = []
+
+
+class ConfirmRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    provisions: list[str] = Field(min_length=1)
 
 
 def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],

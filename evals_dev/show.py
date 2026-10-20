@@ -9,7 +9,7 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 from codedb import children, lookup  # noqa: E402
 
-DB = '/Users/aamia/.t3/projects/batatis/codedb/build/codedb.sqlite'
+DB = str(pathlib.Path(__file__).resolve().parents[1] / 'codedb' / 'build' / 'codedb.sqlite')
 
 ap = argparse.ArgumentParser()
 ap.add_argument('ids', nargs='+')

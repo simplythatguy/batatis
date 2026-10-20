@@ -10,8 +10,10 @@ attribution differs from NBC(AE) 2023.
 """
 from __future__ import annotations
 
+import re
+
 from .codes import Codes
-from .models import AttributionPair, IntentBlock, SectionCRow
+from .models import INTENT_LABEL, AttributionPair, Explainer, IntentBlock, SectionCRow
 
 _STATUS = {'direct': 'direct', 'clause_level': 'direct', 'inherits': 'inherited from parent',
            'none': 'no row in the attribution table'}
@@ -64,4 +66,31 @@ def _row(rec: dict, codes: Codes) -> SectionCRow:
         differs=bool(cmp and cmp['status'] == 'differs'),
         only_in_intent=(cmp or {}).get('only_in_intent') or [],
         only_in_ae=(cmp or {}).get('only_in_ae') or [],
-        related_root=related, related_root_method=st.get('root_method') if related else None)
+        related_root=related, related_root_method=st.get('root_method') if related else None,
+        explainer=_explainer(rec, status, pairs, intents))
+
+
+def _quote(text: str, limit: int = 240) -> str | None:
+    flat = re.sub(r'\s+', ' ', text or '').strip()
+    if not flat:
+        return None
+    if len(flat) <= limit:
+        return flat
+    cut = flat[:limit]
+    return cut.rsplit(' ', 1)[0] if ' ' in cut else cut
+
+
+def _explainer(rec: dict, status: str, pairs: list[AttributionPair], intents: list[IntentBlock]) -> Explainer | None:
+    """Template over codedb text. Null when the sentence has no text to quote."""
+    quote = _quote(rec.get('text') or '')
+    if not quote:
+        return None
+    objs = list(dict.fromkeys(p.objective for p in pairs))
+    fns = list(dict.fromkeys(p.function for p in pairs))
+    bits = [f'Division B {rec["id"]} is quoted from the code database. Attribution status: {status}.']
+    if objs or fns:
+        bits.append(f'Objectives: {", ".join(objs) or "none"}. Functions: {", ".join(fns) or "none"}.')
+    else:
+        bits.append('The NBC(AE) attribution table has no objective or function for this sentence.')
+    bits.append(f'{INTENT_LABEL}.' if intents else 'No national intent statement is attached to this sentence.')
+    return Explainer(text=' '.join(bits), quote=quote, source='deterministic')

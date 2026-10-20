@@ -1,0 +1,18 @@
+{
+  "default": {"jurisdiction": "alberta", "form_id": "scc-variance"},
+  "forms": {
+    "alberta": {
+      "scc-variance": {
+        "version": "scc_2026-10",
+        "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf",
+        "pdf_last_modified": "2026-10-06",
+        "page_count": 5,
+        "field_count": 87,
+        "sha256": "f44640ca005c957c11a2387d2768fffc35ef93c97125dcca37436fcc0b9afc1d",
+        "field_map": "engine/export/field_maps/scc_2026-10.json",
+        "local_path": "reference/guides/SCC-Variance-Form.pdf",
+        "note": "Official Safety Codes Council variance form, PDF last-modified 2026-10-06 (5 pages, 87 fields). Its SHA-256 matches engine/export/field_maps/scc_2026-10.json. Wording differs from the challenge brief's Appendix 1, so Appendix 1 is not the export target. Known differences: the Section B checkbox label, the privacy text, and the officer line, which on this form reads \"approximately equivalent or greater safety performance\"."
+      }
+    }
+  }
+}
