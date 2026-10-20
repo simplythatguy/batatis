@@ -1,7 +1,7 @@
 > agent-authored, model-checked, not human-verified or official
 
 # Expected: relevant-article shortlist (Case B)
-> EXAMPLE DATA. NBC(AE) 2023, Div B. Checked against the **1st printing** (pages below are 1st-printing). All 102 cited provisions present in the 2nd-printing code database (pages p.322, p.323, p.1126, p.1201 confirmed).
+> EXAMPLE DATA. NBC(AE) 2023, Div B. Checked against the **1st printing** (pages below are 1st-printing). Spot-checked in the 2nd-printing code database: 9.27.5.1.(2), 3.1.9.1.(1), 9.9.10.1.(2), CAN/ULC-S115:2018 edition [Div B Table 1.3.1.2, p.116]. The full list is in [cited-provisions.txt](../../../cited-provisions.txt); a full presence check is not yet run.
 
 | Rank | Provision | Why it applies | Status |
 |---|---|---|---|

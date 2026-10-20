@@ -1,14 +1,14 @@
 # Data Nerd review of the Batatis demo cases (A, B, C)
 
-Reviewed 2026-10-20 (MDT, UTC-6). Unc's files were **not edited**. This is a separate review file.
+Reviewed 2026-10-20 (MDT, UTC-6). This is a separate review file. The demo-case files were edited afterward to apply the corrections below. Nothing here claims 2nd-printing presence beyond the spot checks in the note under this line.
 
 > **Note (2026-10-20):** the corrections in this review were applied to the demo-case files after the review.
 >
-> **Note (2026-10-20, 2nd-printing code database):** all 102 cited provisions present in the 2nd-printing code database (pages p.322, p.323, p.1126, p.1201 confirmed). The adopted firestop standard is CAN/ULC-S115:2018 (PDF p.116). The 14.3 / 12.5 / 11 mm sheathing minimums are in Sentence 9.27.5.1.(2), not (1). The 600 mm furring spacing is in 9.27.5.3.(3)(b).
+> **Note (2026-10-20, 2nd-printing code database):** Spot-checked in the 2nd-printing code database: 9.27.5.1.(2), 3.1.9.1.(1), 9.9.10.1.(2), CAN/ULC-S115:2018 edition [Div B Table 1.3.1.2, p.116]. The full list is in [cited-provisions.txt](cited-provisions.txt); a full presence check is not yet run. The 14.3 / 12.5 / 11 mm sheathing minimums are in Sentence 9.27.5.1.(2), not (1). The 600 mm furring spacing is in 9.27.5.3.(3)(b).
 
 **Code text used:** NBC(AE) 2023, **1st printing** (free NRC PDF via publications.gc.ca; local copy kept outside this folder).
 - The **2nd printing** is the one in force (Alberta.ca says it was published Aug 17, 2026; the NRC record says "April 2026"). It's a free NRC download, but the NRC server fails TLS from the authoring environment, so I couldn't open it.
-- Every check below was made against the 1st printing, and those page numbers are the ones cited unless a row says otherwise. A later 2nd-printing code database check found all 102 cited provisions present in the 2nd-printing code database (pages p.322, p.323, p.1126, p.1201 confirmed), and CAN/ULC-S115:2018 at PDF p.116.
+- Every check below was made against the 1st printing, and those page numbers are the ones cited unless a row says otherwise. A later 2nd-printing code database check spot-checked 9.27.5.1.(2), 3.1.9.1.(1), 9.9.10.1.(2), and the CAN/ULC-S115:2018 edition [Div B Table 1.3.1.2, p.116]. The full list is in [cited-provisions.txt](cited-provisions.txt); a full presence check is not yet run.
 - Where a 2nd-printing change could matter, I've flagged it.
 
 STANDATA was checked live against the CKAN API (`open.alberta.ca/api/3`), with package metadata as of 2026-10-15.
@@ -59,6 +59,6 @@ STANDATA was checked live against the CKAN API (`open.alberta.ca/api/3`), with p
 | T12 | **Resolved** | Free from NRC (1st and 2nd printings). The 2nd printing is in force per Alberta.ca (published Aug 17, 2026). The 1st printing is mirrored at publications.gc.ca. | NRC record 0316d953-…; https://publications.gc.ca/collections/collection_2024/cnrc-nrc/NR24-28-7-2023-eng.pdf |
 
 ## 3. Not checked
-- Wording changes in the 2nd printing beyond the provisions confirmed present in the code database (pages p.322, p.323, p.1126, p.1201 confirmed; CAN/ULC-S115:2018 at PDF p.116).
+- Wording changes in the 2nd printing beyond the spot checks (9.27.5.1.(2), 3.1.9.1.(1), 9.9.10.1.(2), and the CAN/ULC-S115:2018 edition in Div B Table 1.3.1.2, PDF p.116).
 - **NBC 2020 Intent Statements** (I1/I2, IS page numbers).
 - Edmonton's Sa(0.2) value, and Edmonton/Calgary accreditation records in the SCC search tool.

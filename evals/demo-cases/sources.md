@@ -1,12 +1,12 @@
 # Sources (Batatis demo cases, backlog #7)
 
-> **Edition caveat.** The cases were checked against the **NBC(AE) 2023 1st printing** (free NRC PDF, mirrored at publications.gc.ca). The **2nd printing** (revisions and errata released Aug 17, 2026) is the edition now in force: all 102 cited provisions present in the 2nd-printing code database (pages p.322, p.323, p.1126, p.1201 confirmed). The adopted firestop standard in that printing is **CAN/ULC-S115:2018** (PDF p.116). Page numbers below are 1st-printing unless marked otherwise.
+> **Edition caveat.** The cases were checked against the **NBC(AE) 2023 1st printing** (free NRC PDF, mirrored at publications.gc.ca). The **2nd printing** (revisions and errata released Aug 17, 2026) is the edition now in force. Spot-checked in the 2nd-printing code database: 9.27.5.1.(2), 3.1.9.1.(1), 9.9.10.1.(2), CAN/ULC-S115:2018 edition [Div B Table 1.3.1.2, p.116]. The full list is in [cited-provisions.txt](cited-provisions.txt); a full presence check is not yet run. Page numbers below are 1st-printing unless marked otherwise.
 
 Every code article, standard and STANDATA cited in the demo cases is listed here with how it was checked. The Data Nerd review (`DATA_NERD_REVIEW.md`, in this folder) is the cross-check behind this revision.
 **Verification levels**
 - **WEB**: the primary source was fetched on 2026-10-20 (MT) and the cited text read. Snapshots were kept locally by the author and not committed.
 - **CODE-1P**: checked directly in the NBC(AE) 2023 1st printing by the Data Nerd review.
-- **RESEARCH**: from the Batatis research notes (branch `feat/build-foundations`). All 102 cited provisions present in the 2nd-printing code database (pages p.322, p.323, p.1126, p.1201 confirmed).
+- **RESEARCH**: from the Batatis research notes (branch `feat/build-foundations`). Spot-checked in the 2nd-printing code database: 9.27.5.1.(2), 3.1.9.1.(1), 9.9.10.1.(2), CAN/ULC-S115:2018 edition [Div B Table 1.3.1.2, p.116]. The full list is in [cited-provisions.txt](cited-provisions.txt); a full presence check is not yet run.
 - **TO VERIFY**: not confirmed. The cases phrase these generically and flag them.
 
 **Code text:** NBC(AE) 2023 is a **free download** from NRC (1st and 2nd printings): https://nrc-publications.canada.ca/eng/view/object/?id=0316d953-0d55-4311-af69-cad55efec499 (1st-printing mirror: https://publications.gc.ca/collections/collection_2024/cnrc-nrc/NR24-28-7-2023-eng.pdf ; Alberta page: https://www.alberta.ca/building-codes-and-standards). Intent statements come from the *NBC 2020 Intent Statements*, which are national, explanatory, not Alberta law, and were **not checked again** in the review.
@@ -53,7 +53,7 @@ Every code article, standard and STANDATA cited in the demo cases is listed here
 | W22 | RDH Building Science, *32139.000 Alberta Unvented Roofs, Evaluation Report* (Sept 10, 2025), published by the Spray Foam Coalition | The report named in 23-BCV-017: low-slope type "greater than 2%"; three assemblies (all exterior insulation / all required R as SPF at the deck / exterior board + MDSPF); hybrids with fibrous insulation only with a ratio check (≥60% air-impermeable R in Zone 7A per its IBC excerpt); interior RH ≤35%; CAN/ULC-S705.1/.2 or S712.1/.2; certified installer | WEB | https://sprayfoamcoalition.org/wp-content/uploads/32139_000-2025-09-10-RDH-Alberta-Unvented-Roofs-Report.pdf |
 
 ## NBC(AE) 2023 provisions cited
-Pages are **1st printing** (CODE-1P) unless marked. All 102 cited provisions present in the 2nd-printing code database (pages p.322, p.323, p.1126, p.1201 confirmed).
+Pages are **1st printing** (CODE-1P) unless marked. Spot-checked in the 2nd-printing code database: 9.27.5.1.(2), 3.1.9.1.(1), 9.9.10.1.(2), CAN/ULC-S115:2018 edition [Div B Table 1.3.1.2, p.116]. The full list is in [cited-provisions.txt](cited-provisions.txt); a full presence check is not yet run.
 
 | Provision | What it's used for | Verification |
 |---|---|---|
@@ -84,7 +84,7 @@ Pages are **1st printing** (CODE-1P) unless marked. All 102 cited provisions pre
 | Div B 9.25.2.2.(1) | Insulation to listed standards (S701.1, S704.1, …) | CODE-1P |
 | Div B 9.25.5.1.(1), (3), (4); Note A-9.25.5.1.(1); 9.25.5.2.(1) + Table | Low-permeance materials; permeance test ASTM E96/E96M desiccant method ((1)(a)(ii)); permeance inversely proportional to thickness (Note); (4) exemption; ratio 0.30 at 5000–5999 HDD | CODE-1P (B 9-169, 9-594) |
 | Div B 9.27.3.3.(1); 9.27.3.4.(1), (2) | Sheathing membrane; insulating sheathing in lieu; joints | CODE-1P |
-| Div B 9.27.5.1.(1), (2); 9.27.5.3.(1), (3)(b) | (1) cladding fastened to framing, furring or blocking. Sheathing minimums for vertical vinyl (14.3 mm lumber / 12.5 mm plywood or waferboard / 11 mm OSB) are in **9.27.5.1.(2)**, not (1). Furring 19×38 mm is 9.27.5.3.(1). The **600 mm** furring spacing is **9.27.5.3.(3)(b)**. 9.27.5.1.(1): [F20-OS2.1,OS2.3], [F20-OH1.1,OH1.2,OH1.3]; other pairs apply only to panel-type bracing cladding | CODE-1P (Table 9.38.1.1 PDF p.1193, B 9-371); 2nd-printing code database |
+| Div B 9.27.5.1.(1), (2); 9.27.5.3.(1), (3)(b) | (1) cladding fastened to framing, furring or blocking. Sheathing minimums for vertical vinyl (14.3 mm lumber / 12.5 mm plywood or waferboard / 11 mm OSB) are in **9.27.5.1.(2)**, not (1). Furring 19×38 mm is 9.27.5.3.(1). The **600 mm** furring spacing is **9.27.5.3.(3)(b)**. 9.27.5.1.(1): [F20-OS2.1,OS2.3], [F20-OH1.1,OH1.2,OH1.3]; other pairs apply only to panel-type bracing cladding | CODE-1P (Table 9.38.1.1 PDF p.1193, B 9-371). 9.27.5.1.(2) spot-checked in the 2nd-printing code database |
 | Div B 9.36.2.6 | Zone 7A wall RSI 3.08 (no HRV) / 2.97 (HRV) | CODE-1P |
 | Div B 9.36.2.8.(1), (5), (7), (9) | Heated floor RSI 2.84 (Zone 7A); (5) full bottom surface including edges; (7) in addition, perimeter/foundation wall to the bottom of the floor; (9) integral-footing slab (RSI 3.72 / 2.84 + skirt; Part 4 per 9.16.1.2) | CODE-1P (B 9-245 to 9-247); (1) also quoted in W6 |
 | Div B 9.19.1.1.(1) | Roof venting "except where it can be shown to be unnecessary" | WEB (quoted in W7) |
@@ -110,5 +110,5 @@ Pages are **1st printing** (CODE-1P) unless marked. All 102 cited provisions pre
 | T10 | 9.9.10.1.(1) sprinkler exception wording | C | **Resolved** | "Except where the suite is sprinklered…" |
 | T11 | Edmonton AHJ and route | C | **Partial** | Route checked (W20); accreditation still to look up (W5) |
 | T12 | NBC(AE) source URL | all | **Resolved** | Free NRC download (W18) |
-| T13 | 2nd-printing presence of cited provisions, pages p.322, p.323, p.1126, p.1201, and CAN/ULC-S115:2018 | all | **Resolved for presence, those pages, and the firestop edition** | All 102 cited provisions present in the 2nd-printing code database (pages p.322, p.323, p.1126, p.1201 confirmed). Adopted firestop standard: CAN/ULC-S115:2018 (PDF p.116). |
+| T13 | 2nd-printing presence of cited provisions, and the CAN/ULC-S115:2018 edition | all | **Spot-checked only; full presence check not yet run** | Spot-checked in the 2nd-printing code database: 9.27.5.1.(2), 3.1.9.1.(1), 9.9.10.1.(2), CAN/ULC-S115:2018 edition [Div B Table 1.3.1.2, p.116]. The full list is in [cited-provisions.txt](cited-provisions.txt); a full presence check is not yet run. |
 | T14 | NBC 2020 Intent Statements (I1/I2 and IS pages) | A, C | **Open** | Intent cells are flagged GAP in cases A and C. Labelled national and not checked again |
