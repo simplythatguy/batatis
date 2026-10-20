@@ -149,9 +149,26 @@ export interface ExtractedAdmin {
   /** Only a line the applicant labeled as the proposed alternative. */
   alternative?: string;
   narrative: string;
+  addressInferred?: boolean;
 }
 
 const ALTERNATIVE_LINE = /^(?:proposed alternative|alternative solution|alternative)\s*[:\-]\s*(.+)$/i;
+
+/** A period in St. Albert or Ave. NW is not a sentence boundary. */
+function addressEnd(text: string): number {
+  const boundary = /[;!?]|\.(?=\s|$)/g;
+  for (const match of text.matchAll(boundary)) {
+    const end = match.index!;
+    if (match[0] === ".") {
+      const word = text.slice(0, end).match(/[A-Za-z]+$/)?.[0] ?? "";
+      const rest = text.slice(end + 1).trim();
+      const nextSentence = /^(?:The|This|That|We|Our|It|There|A|An)\s|^(?:Owner|Permit|Alternative)\s*:/i.test(rest);
+      if (/^(st|rd|ave|blvd|dr|cres|hwy|ab)$/i.test(word) && !nextSentence) continue;
+    }
+    return end;
+  }
+  return text.length;
+}
 
 /** Pull labeled owner, address, legal description, and permit lines out of pasted text. */
 export function extractAdmin(text: string): ExtractedAdmin {
@@ -165,7 +182,10 @@ export function extractAdmin(text: string): ExtractedAdmin {
     }
     const hit = ADMIN_LINES.find((label) => label.re.test(trimmed) && !found[label.field]);
     if (hit) {
-      found[hit.field] = trimmed.match(hit.re)?.[1]?.trim() ?? "";
+      const value = trimmed.match(hit.re)?.[1]?.trim() ?? "";
+      const end = /Address$/.test(hit.field) ? addressEnd(value) : value.length;
+      found[hit.field] = value.slice(0, end).trim();
+      if (end < value.length) kept.push(value.slice(end + 1).trim());
       continue;
     }
     kept.push(line);
@@ -180,10 +200,17 @@ export function extractAdmin(text: string): ExtractedAdmin {
     if (legal) found.legalDescription = legal[1].replace(/\s+/g, " ").trim();
   }
   if (!found.municipalAddress) {
-    const address = rest.match(
-      /\b(\d{1,6}\s+[A-Za-z0-9.'-]+(?:\s+[A-Za-z0-9.'-]+){0,4}\s(?:Avenue|Street|Crescent|Way|Road|Drive|Boulevard)\s+(?:NW|NE|SW|SE)(?:,\s*[A-Za-z. ]+)?)/,
-    );
-    if (address) found.municipalAddress = address[1].replace(/\s+/g, " ").trim();
+    // Stay on one line; an unlabelled extraction is a suggestion, never confirmed.
+    for (const line of rest.split(/\n/)) {
+      const start = line.search(/\b\d{1,6}\s+[A-Za-z]/);
+      if (start < 0) continue;
+      const tail = line.slice(start);
+      const value = tail.slice(0, addressEnd(tail)).trim();
+      if (!/\b(?:Avenue|Ave\.?|Street|St\.?|Crescent|Cres\.?|Way|Road|Rd\.?|Drive|Dr\.?|Boulevard|Blvd\.?)\s+(?:NW|NE|SW|SE)\b/i.test(value)) continue;
+      found.municipalAddress = value;
+      found.addressInferred = true;
+      break;
+    }
   }
   return { ...found, narrative: rest.trim() };
 }
@@ -257,7 +284,8 @@ export function applyDescription(c: Case, text: string): Case {
     const existing = facts.find((f) => f.field === field);
     if (existing && isUserKept(existing)) continue;
     const rest = facts.filter((f) => f.field !== field);
-    rest.push(pointed(`desc-${field}`, field, value));
+    const fact = pointed(`desc-${field}`, field, value);
+    rest.push(field === "municipalAddress" && extracted.addressInferred ? { ...fact, kind: "proposed", status: "unconfirmed" } : fact);
     facts.length = 0;
     facts.push(...rest);
   }

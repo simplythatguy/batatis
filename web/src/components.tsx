@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useRoute } from "./router";
 import { NRC_CREDIT, NRC_SOURCES } from "./config";
 import { splitNoticeUrl } from "./rules";
@@ -220,22 +220,36 @@ export function CheckAction() {
 }
 
 /** Small field groups; deep links open the group containing the requested field. */
-export function FieldSteps({ steps, nextHref }: { steps: { title: string; fields: string[]; content: ReactNode }[]; nextHref?: string }) {
+export function FieldSteps({ steps, nextHref, previousHref, onComplete }: { steps: { title: string; fields: string[]; content: ReactNode }[]; nextHref?: string; previousHref?: string; onComplete?: () => void }) {
   const route = useRoute();
   const focus = route.params.get("focus");
   const focusIndex = steps.findIndex(step => focus && step.fields.includes(focus));
-  const [index, setIndex] = useState(Math.max(0, focusIndex));
+  const [index, setIndex] = useState(focusIndex >= 0 ? focusIndex : route.params.get("step") === "last" ? steps.length - 1 : 0);
   useEffect(() => { if (focusIndex >= 0) setIndex(focusIndex); }, [focusIndex, focus]);
   const current = Math.min(index, steps.length - 1);
   const step = steps[current];
+  const heading = useRef<HTMLHeadingElement>(null);
+  const moved = useRef(false);
+  const move = (next: number) => {
+    if (next === current) {
+      heading.current?.focus({ preventScroll: true });
+      heading.current?.scrollIntoView({ block: "start", behavior: "instant" });
+    } else { moved.current = true; setIndex(next); }
+  };
+  useLayoutEffect(() => {
+    if (!moved.current) return;
+    moved.current = false;
+    heading.current?.focus({ preventScroll: true });
+    heading.current?.scrollIntoView({ block: "start", behavior: "instant" });
+  }, [current]);
   if (!step) return null;
   return <section className="field-step">
-    <div className="step-heading"><h2>{step.title}</h2><span className="meta">{current + 1} of {steps.length}</span></div>
+    <div className="step-heading"><h2 ref={heading} tabIndex={-1}>{step.title}</h2><span className="meta">{current + 1} of {steps.length}</span></div>
     {step.content}
     <div className="step-controls">
-      <button type="button" className="btn btn-ghost" disabled={current === 0} onClick={() => setIndex(current - 1)}>Previous</button>
-      <details className="jump-menu"><summary>All fields</summary><div>{steps.map((item, n) => <button key={item.title} type="button" className="btn btn-ghost" aria-current={current === n ? "step" : undefined} onClick={e => { setIndex(n); e.currentTarget.closest("details")?.removeAttribute("open"); }}>{item.title}</button>)}</div></details>
-      {current < steps.length - 1 ? <button type="button" className="btn btn-primary" onClick={() => setIndex(current + 1)}>Continue</button> : nextHref ? <a className="btn btn-primary" href={nextHref}>Continue</a> : <span className="meta">You can return to any answer.</span>}
+      {current === 0 && previousHref ? <a className="btn btn-ghost" href={previousHref}>Previous</a> : <button type="button" className="btn btn-ghost" disabled={current === 0} onClick={() => move(current - 1)}>Previous</button>}
+      <details className="jump-menu"><summary>All fields</summary><div>{steps.map((item, n) => <button key={item.title} type="button" className="btn btn-ghost" aria-current={current === n ? "step" : undefined} onClick={e => { move(n); e.currentTarget.closest("details")?.removeAttribute("open"); }}>{item.title}</button>)}</div></details>
+      {current < steps.length - 1 ? <button type="button" className="btn btn-primary" onClick={() => move(current + 1)}>Continue</button> : nextHref ? <a className="btn btn-primary" href={nextHref}>Continue</a> : onComplete ? <button className="btn btn-primary" onClick={onComplete}>Continue to evidence</button> : <span className="meta">You can return to any answer.</span>}
     </div>
   </section>;
 }

@@ -1,6 +1,7 @@
 import { applyDescription } from "./intake";
 import { AUTHORITY_ONLY_FIELDS, professionalConfirmed } from "./professional";
 import type { Candidate, CandidateAnswer, Case, Fact, Gap, ProcessFieldId, SectionCRow } from "./types";
+import { canonicalProvision, isProvision, reconcileSectionC } from "./provisions";
 
 /** Section A and B fields. Values live only in `case.facts`; nothing here holds a default. */
 export interface DetailField {
@@ -209,6 +210,8 @@ export function displayValue(f: Fact): string {
   const def = DETAIL_FIELDS.find((d) => d.id === f.field);
   const text = valueText(f);
   if (f.field === "professional.occupancy" || f.field.endsWith(".occupancy")) return OCCUPANCY_LABELS[text] ?? text;
+  if (text === "not_sure") return "Not sure";
+  if (text === "not_engaged_yet") return "Not engaged yet";
   if (text === "true") return "Yes";
   if (text === "false") return "No";
   return def?.options?.[text] ?? text;
@@ -257,7 +260,7 @@ export function getGaps(c: Case): Gap[] {
       id: "detail-jurisdiction",
       severity: "blocking",
       label: "Reviewing authority missing",
-      href: "#/describe",
+      href: "#/describe?focus=authority",
     });
   }
   for (const d of DETAIL_FIELDS) {
@@ -277,6 +280,9 @@ export function getGaps(c: Case): Gap[] {
     });
   }
   for (const a of c.candidates) {
+    if (isProvision(a.provision) && !c.sectionC.some(r => canonicalProvision(r.provision) === canonicalProvision(a.provision))) {
+      gaps.push({ id: `lookup-${a.id}`, severity: "blocking", label: `Review the sentences in ${a.provision}`, href: "#/section-c", field: `candidate.${a.id}` });
+    }
     if (a.answer === null) {
       gaps.push({
         id: `answer-${a.id}`,
@@ -369,6 +375,7 @@ export type Action =
   | { type: "dismissFact"; id: string }
   | { type: "setDetail"; field: string; value: string; section: string }
   | { type: "answerQuestion"; id: string; answer: string }
+  | { type: "setStoreyCount"; value: string }
   | { type: "answerCandidate"; id: string; answer: CandidateAnswer }
   | { type: "setProcess"; field: ProcessFieldId; value: string }
   | { type: "setAuthority"; authority: Case["authority"] }
@@ -380,6 +387,9 @@ export type Action =
   | { type: "noteIdentifyQuestions"; questions: { id?: string; field: string; text: string; why?: string | null }[] }
   | { type: "bindOpenQuestion"; candidateId: string; questionId: string }
   | { type: "noteSectionC"; rows: SectionCRow[] }
+  | { type: "reconcileSectionC"; rows: SectionCRow[] }
+  | { type: "removeCandidate"; id: string }
+  | { type: "editEvidenceDraft"; itemId: string; patch: Partial<NonNullable<Case["evidenceDrafts"]>[string]> }
   | { type: "saveEvidence"; itemId: string; document: string; responsible: string; date: string; evidenceType: string; provisionId: string }
   | { type: "removeEvidence"; id: string }
   | { type: "ackEvidenceDeletion"; ids: string[] }
@@ -453,6 +463,14 @@ export function reducer(c: Case, a: Action): Case {
         facts: upsertUserFact(c, q.field, a.answer, { type: "user_text", ref: "Your answer", quote: a.answer }),
       };
     }
+    case "setStoreyCount": {
+      const value = a.value.trim();
+      const known = value !== "" && Number.isInteger(Number(value)) && Number(value) > 0;
+      const facts = c.facts.filter(f => f.field !== "building.storeys");
+      if (known) facts.push({ id: newId("f"), field: "building.storeys", value: Number(value), kind: "pointed", status: "confirmed", source: { type: "user_text", ref: "Your storey count", quote: value } });
+      const next = { ...c, facts, questions: c.questions.map(q => q.id === "q-desc-storeys" ? { ...q, answer: known ? value : undefined } : q) };
+      return reducer(next, { type: "answerCandidate", id: "desc-storeys", answer: known ? "no" : "not-sure" });
+    }
     case "answerCandidate": {
       const cand = c.candidates.find((x) => x.id === a.id);
       const candidates = c.candidates.map((x) =>
@@ -497,7 +515,7 @@ export function reducer(c: Case, a: Action): Case {
     case "setAuthority":
       return { ...c, authority: a.authority };
     case "addCandidate":
-      return c.candidates.some((x) => x.provision === a.candidate.provision)
+      return c.candidates.some((x) => canonicalProvision(x.provision) === canonicalProvision(a.candidate.provision))
         ? c
         : { ...c, candidates: [...c.candidates, a.candidate] };
     case "addIdentified": {
@@ -548,12 +566,21 @@ export function reducer(c: Case, a: Action): Case {
         ),
       };
     }
+    case "removeCandidate":
+      return { ...c, candidates: c.candidates.filter(x => x.id !== a.id), sectionC: c.sectionC.filter(r => r.candidateId !== a.id), questions: c.questions.filter(q => q.cardId !== a.id && q.id !== `q-from-${a.id}`) };
+    case "reconcileSectionC":
+      return reconcileSectionC(c, a.rows);
     case "noteSectionC": {
       const rest = c.sectionC.filter(
         (row) => !a.rows.some((next) => next.candidateId === row.candidateId && next.provision === row.provision),
       );
       return { ...c, sectionC: [...rest, ...a.rows] };
     }
+    case "editEvidenceDraft":
+      return { ...c, evidenceDrafts: { ...c.evidenceDrafts, [a.itemId]: {
+        document: "", responsible: "", date: "", evidenceType: "", note: "",
+        ...c.evidenceDrafts?.[a.itemId], ...a.patch,
+      } } };
     case "saveEvidence": {
       const description = a.document.trim();
       const who = a.responsible.trim();
@@ -601,7 +628,9 @@ export function reducer(c: Case, a: Action): Case {
           date,
         },
       ];
-      return { ...c, facts, listedEvidence: listed };
+      const drafts = { ...c.evidenceDrafts };
+      delete drafts[a.itemId];
+      return { ...c, facts, listedEvidence: listed, evidenceDrafts: drafts };
     }
     case "removeEvidence": {
       const id = a.id.trim();

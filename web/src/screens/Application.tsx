@@ -237,7 +237,8 @@ export function Application({ route }: { route: Route }) {
     <>
       <PanelHeader title="Application" meta="Your details" />
       <GapStrip gaps={gaps} />
-      <nav className="toolbar" aria-label="Application sections">
+      <div className="phone-section field"><label className="sr-only" htmlFor="application-section">Application section</label><select id="application-section" value={tab} onChange={e => { location.hash = `#/application?tab=${e.target.value}`; }}>{TABS.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}</select></div>
+      <nav className="toolbar application-sections" aria-label="Application sections">
         {TABS.map((t) => {
           const n = checkStatus === "not_requested" ? 0 : countFor(t.id);
           return (
@@ -267,16 +268,13 @@ export function Application({ route }: { route: Route }) {
         </div>
       </div>
       <div className="footer-bar">
-        <DraftNote />
-        <span className="status-note" role="status">
-          {footerLine}
-        </span>
-        <a className="btn btn-ghost" href="#/section-c">
-          Back
-        </a>
-        <button type="button" className="btn" onClick={() => void saveDraft()}>
-          Save draft
-        </button>
+        <details className="draft-options"><summary className="btn">Save & options</summary><div className="draft-options-body">
+          <DraftNote />
+          <button type="button" className="btn" onClick={() => void saveDraft()}>Save draft</button>
+          <a className="btn btn-ghost" href={tab === "A" ? "#/describe?step=last" : tab === "B" ? "#/application?tab=A&step=last" : tab === "alt" ? "#/section-c" : "#/application?tab=alt&step=last"}>Back</a>
+          <button type="button" className="btn" onClick={() => dialog.current?.showModal()}>Review missing details</button>
+          {footerLine && <p className="meta">{footerLine}</p>}
+        </div></details>
         <button type="button" className="btn" disabled={busy || checkStatus === "running"} onClick={openCheck}>
           {checkStatus === "unavailable" ? "Try check again" : "Ready to submit"}
         </button>
@@ -314,7 +312,7 @@ export function Application({ route }: { route: Route }) {
               </p>
             )}
             {stage === "ready" && file?.notice && <Notices notices={[file.notice]} />}
-            {stage !== "ready" && checkStatus !== "not_requested" && checkStatus !== "running" && <details className="disclosure"><summary>{blocking.length} required items</summary><MissingItems gaps={gaps} sectionById={sectionById} onFollow={follow} /></details>}
+            {stage !== "ready" && checkStatus !== "not_requested" && checkStatus !== "running" && <details className="disclosure"><summary>Show {blocking.length} missing or unconfirmed items</summary><MissingItems gaps={gaps} sectionById={sectionById} onFollow={follow} /></details>}
             {(tech || checkDetail || reasons.length > 0) && (
               <details>
                 <summary>Technical detail</summary>
@@ -330,13 +328,13 @@ export function Application({ route }: { route: Route }) {
             )}
           </div>
           <div className="footer-bar">
-            {blocking.length > 0 && !busy && checkStatus !== "not_requested" && checkStatus !== "unavailable" && stage !== "ready" && stage !== "error" && (
+            {blocking.length > 0 && !busy && stage !== "ready" && (
               <button type="button" className="btn btn-primary" onClick={reviewFirst}>
-                Review first item
+                Continue filling missing details
               </button>
             )}
             {(stage === "error" || (!exportAttempted && checkStatus === "unavailable")) && (
-              <button type="button" className="btn btn-primary" disabled={busy} onClick={() => exportAttempted ? void prepare(draftIntent) : openCheck()}>
+              <button type="button" className="btn" disabled={busy} onClick={() => exportAttempted ? void prepare(draftIntent) : openCheck()}>
                 {exportAttempted ? "Try download again" : "Try check again"}
               </button>
             )}

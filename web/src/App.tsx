@@ -31,6 +31,7 @@ const NAV = [
 export function App() {
   const route = useRoute();
   const { c, phase, resetToWho } = useCase();
+  const navDialog = useRef<HTMLDialogElement>(null);
   const resetDialog = useRef<HTMLDialogElement>(null);
   const [resetOpen, setResetOpen] = useState(false);
   useFocusParam(route);
@@ -74,6 +75,7 @@ export function App() {
           </span>
           Batatis
         </div>
+        {phase === "case" && <button className="btn phone-navigation" onClick={() => navDialog.current?.showModal()}>Navigation</button>}
         {phase === "case" && (
           <nav className="nav" aria-label="Main">
             {NAV.map((g) => (
@@ -115,6 +117,14 @@ export function App() {
       <main className="main-panel">
         {screen}
       </main>
+      <dialog className="dialog navigation-dialog" ref={navDialog} aria-labelledby="navigation-title">
+        <div className="dialog-body">
+          <div className="dialog-head"><h2 id="navigation-title" className="dialog-title">Navigation</h2><button className="btn" onClick={() => navDialog.current?.close()}>Close</button></div>
+          <nav aria-label="Main navigation">{NAV.flatMap(g => g.items).map(item => <a key={item.path} className="nav-item" href={`#${item.path}`} aria-current={route.path === item.path ? "page" : undefined} onClick={() => navDialog.current?.close()}><Icon name={item.icon} />{item.label}</a>)}</nav>
+          <p className="meta">{applicantLabel(c.applicantType)}</p>
+          <button className="btn btn-ghost" onClick={() => { navDialog.current?.close(); setResetOpen(true); }}>Reset case</button>
+        </div>
+      </dialog>
       <dialog className="dialog" ref={resetDialog} aria-labelledby="reset-confirm-title" onClose={() => setResetOpen(false)}>
         <form method="dialog">
           <div className="dialog-body">

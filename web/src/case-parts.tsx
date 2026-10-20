@@ -239,7 +239,7 @@ function DetailInput({ def }: { def: DetailField }) {
 export function DetailFields({ section }: { section: "A" | "B" }) {
   const fields = DETAIL_FIELDS.filter(d => d.section === section);
   const groups = Array.from({ length: Math.ceil(fields.length / 2) }, (_, i) => fields.slice(i * 2, i * 2 + 2));
-  return <FieldSteps key={section} nextHref={section === "A" ? "#/application?tab=B" : "#/code-check"} steps={groups.map(group => ({
+  return <FieldSteps key={section} previousHref={section === "A" ? "#/describe?step=last" : "#/application?tab=A&step=last"} nextHref={section === "A" ? "#/application?tab=B" : "#/code-check"} steps={groups.map(group => ({
     title: group[0].label,
     fields: group.map(d => `field-${d.id}`),
     content: <div className="form-grid">{group.map(d => <DetailInput key={d.id} def={d} />)}</div>,
@@ -248,7 +248,7 @@ export function DetailFields({ section }: { section: "A" | "B" }) {
 
 export function ProcessFields() {
   const { c, dispatch } = useCase();
-  return <FieldSteps nextHref="#/application?tab=D" steps={PROCESS_FIELDS.map(p => ({
+  return <FieldSteps previousHref="#/section-c" nextHref="#/application?tab=D" steps={PROCESS_FIELDS.map(p => ({
     title: p.label,
     fields: [`field-${p.id}`],
     content: <div className="field">

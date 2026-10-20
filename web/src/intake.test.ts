@@ -3,6 +3,32 @@ import test from "node:test";
 import { emptyCase } from "./intake.ts";
 import { reducer } from "./model.ts";
 
+test("narrative addresses stop before the next sentence and need confirmation", () => {
+  for (const address of ["0000 Example Way NW, Calgary", "123 St. Albert Rd. NW, St. Albert", "123 Example Ave. NW, Edmonton"]) {
+    const text = `The site is ${address}. The firestop at the level 2 riser was installed by the plumbing sub.`;
+    const c = reducer(emptyCase("contractor"), { type: "setDescription", text });
+    const fact = c.facts.find(f => f.field === "municipalAddress");
+    assert.equal(fact?.value, address);
+    assert.equal(fact?.status, "unconfirmed");
+    assert.equal(c.description, text);
+    assert.equal(c.facts.find(f => f.field === "project.description")?.value, text);
+  }
+});
+
+test("labelled address preserves abbreviations and stops at a field or sentence separator", () => {
+  for (const suffix of ["\nThe firestop is incomplete.", "; Permit: BP-123", ". The firestop is incomplete."]) {
+    const c = reducer(emptyCase("contractor"), { type: "setDescription", text: `Address: 123 St. Albert Rd. NW, St. Albert${suffix}` });
+    const fact = c.facts.find(f => f.field === "municipalAddress");
+    assert.equal(fact?.value, "123 St. Albert Rd. NW, St. Albert");
+    assert.equal(fact?.status, "confirmed");
+  }
+  for (const text of ["Address: 123 Main St.", "Address: 123 Main St. The firestop is incomplete."]) {
+    const c = reducer(emptyCase("contractor"), { type: "setDescription", text });
+    assert.match(String(c.facts.find(f => f.field === "municipalAddress")?.value), /^123 Main St\.?$/);
+    assert.equal(c.description, text);
+  }
+});
+
 test("pasted text fills owner, address, legal description, and permit", () => {
   const text = [
     "Owner: Example Owner",

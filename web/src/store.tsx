@@ -9,6 +9,9 @@ import { emptyCase } from "./intake";
 import { gapLabel, getGaps, reducer, type Action } from "./model";
 import { caseForRole, initialVisit } from "./visit";
 import type { ApplicantType, Case, Gap } from "./types";
+import { useSectionC } from "./api/sectionC";
+import { readSectionD, SectionDRecoveryError, type SectionDRead } from "./api/sectionD";
+import { isProvision, reconcileSectionC } from "./provisions";
 
 /** Older builds kept the whole case here. It is removed on load and never written again. */
 const LEGACY_KEYS = ["batatis-web-case-v4", "batatis-web-case-v3"];
@@ -25,6 +28,10 @@ function load() {
 }
 
 interface Store {
+  sectionCLookup: ReturnType<typeof useSectionC>;
+  retrySectionC: () => void;
+  snapshotKey: string;
+  loadSectionD: (retry?: boolean) => Promise<SectionDRead | null>;
   c: Case;
   /** Workflow gaps (unconfirmed facts, unanswered cards) plus engine gaps when the route returns. */
   gaps: Gap[];
@@ -157,6 +164,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const [c, reduce] = useReducer(reducer, loaded.case);
   const revision = useRef(0);
   const syncQueue = useRef<Promise<unknown>>(Promise.resolve());
+  const sectionDHold = useRef<{ generation: number; id: string; error: SectionDRecoveryError } | null>(null);
   const [engineId, setEngineId] = useState<string | null>(null);
   const [factsEpoch, setFactsEpoch] = useState(0);
   const [engineGaps, setEngineGaps] = useState<EngineGap[]>([]);
@@ -177,6 +185,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   latestCase.current = c;
   const renderGeneration = engineGeneration();
   const renderRevision = revision.current;
+  const [lookupAttempt, setLookupAttempt] = useState(0);
+  const sectionCLookup = useSectionC(c.candidates.filter(a => isProvision(a.provision)).map(a => ({ candidateId: a.id, provision: a.provision })), [], lookupAttempt);
 
   const publishCheck = useCallback((next: CheckState) => {
     checkRef.current = next;
@@ -185,7 +195,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   // Stable dispatch prevents deterministic lookup effects from refiring on status updates.
   const dispatch = useCallback((action: Action) => {
-    const derived = ["ackEvidenceDeletion", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions"].includes(action.type);
+    const derived = (action.type === "reconcileSectionC" && JSON.stringify(reconcileSectionC(latestCase.current, action.rows).candidates) === JSON.stringify(latestCase.current.candidates)) || [ "editEvidenceDraft", "ackEvidenceDeletion", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions"].includes(action.type);
     if (!derived) {
       revision.current += 1;
       activeCheck.current?.ctl.abort();
@@ -206,6 +216,57 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     latestCase.current = reducer(latestCase.current, action);
     reduce(action);
   }, [publishCheck]);
+
+  useEffect(() => {
+    if (sectionCLookup.source !== "live") return;
+    if (reconcileSectionC(c, sectionCLookup.rows) !== c) dispatch({ type: "reconcileSectionC", rows: sectionCLookup.rows });
+  }, [sectionCLookup, c.candidates, dispatch]);
+
+  function loadSectionD(retry = false): Promise<SectionDRead | null> {
+    const token = renderGeneration, version = renderRevision, snapshot = c;
+    const candidateKey = JSON.stringify(c.candidates);
+    const rowKey = JSON.stringify(c.sectionC);
+    if (sectionCLookup.source === "loading") return Promise.resolve(null);
+    if (sectionCLookup.source !== "live") return Promise.reject(new Error("Code references could not be loaded. Try the lookup again in Section C."));
+    const current = () => isEngineGeneration(token) && revision.current === version && JSON.stringify(latestCase.current.candidates) === candidateKey && JSON.stringify(latestCase.current.sectionC) === rowKey;
+    const pending = syncQueue.current.catch(() => {}).then(async () => {
+      if (!current()) return null;
+      const hold = sectionDHold.current;
+      if (hold?.generation === token) {
+        if (hold.error.kind === "missing" || !retry) throw hold.error;
+        // Only the labelled retry may recover a conflict. Read the live case
+        // before writing again; never replace a missing case with a new one.
+        try { await engine.getCase(hold.id); }
+        catch (error) {
+          if (error instanceof EngineError && error.status === 404) {
+            const missing = new SectionDRecoveryError("missing", error.detail);
+            sectionDHold.current = { ...hold, error: missing };
+            throw missing;
+          }
+          throw error;
+        }
+        if (!current()) return null;
+        sectionDHold.current = null;
+      }
+      const id = await performSync(snapshot, current);
+      if (!id || !current()) {
+        if (current()) throw new Error(syncState.current.detail || "Save was not acknowledged.");
+        return null;
+      }
+      try { return await readSectionD(id, snapshot, current); }
+      catch (error) {
+        if (!current()) return null;
+        if (error instanceof EngineError && (error.status === 409 || (error.status === 404 && /case not found/i.test(error.detail)))) {
+          const recovery = new SectionDRecoveryError(error.status === 409 ? "conflict" : "missing", error.detail);
+          sectionDHold.current = { generation: token, id, error: recovery };
+          throw recovery;
+        }
+        throw error;
+      }
+    });
+    syncQueue.current = pending;
+    return pending;
+  }
 
   function sync(_announce: boolean): Promise<string | null> {
     const token = renderGeneration;
@@ -368,6 +429,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   useEffect(() => { latestGaps.current = gaps; }, [gaps]);
 
   const value: Store = {
+    sectionCLookup, retrySectionC: () => setLookupAttempt(n => n + 1),
+    snapshotKey: `${renderGeneration}:${renderRevision}:${JSON.stringify(c.candidates)}:${JSON.stringify(c.sectionC)}:${sectionCLookup.source}`,
+    loadSectionD,
     c, gaps, notices, engineGaps, gapsSource, gapsNote, reviewDetail, syncOk,
     saveStatus, saveDetail, savedNote,
     checkStatus: check.status, checkNote: check.note, checkDetail: check.detail,

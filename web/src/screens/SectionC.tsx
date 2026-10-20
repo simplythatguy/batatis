@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { engine, EngineError, type CodeHit } from "../api/client";
-import { toViewRow, useProvisionText, useSectionC, type SectionCSource } from "../api/sectionC";
-import { CONFIRM_UNAVAILABLE, DECISION_UNAVAILABLE, readDecisionBody } from "../identify";
-import { failureKind, sectionCQuoteLabel } from "../rules";
+import { useProvisionText, type SectionCSource } from "../api/sectionC";
+import { sectionCQuoteLabel } from "../rules";
 import { CodeQuote, ServiceUnavailable, GapStrip, PanelHeader, StatusPill } from "../components";
 import { candidateById, unresolvedCandidates } from "../model";
 import { useCase } from "../store";
@@ -19,7 +18,7 @@ function AttributionCell({ row }: { row: SectionCRow }) {
   return <span className="label-pill">No row in table</span>;
 }
 
-const rowKey = (r: SectionCRow) => `${r.candidateId}:${r.provision}`;
+const rowKey = (r: SectionCRow) => r.provision;
 const term = (r: SectionCRow, code: string) => r.terms?.[code];
 
 /** Current deterministic lookup status. Product cases have no sample fallback. */
@@ -167,18 +166,10 @@ function ProvisionSearch() {
 }
 
 export function SectionC() {
-  const { c, gaps, dispatch, engineId, saveDraft } = useCase();
-  // Confirmed departures and the ones still awaiting an answer; a "no" drops the provision.
+  const { c, gaps, dispatch, sectionCLookup, retrySectionC } = useCase();
+  const { source, error } = sectionCLookup;
+  const rows = source === "live" ? c.sectionC : [];
   const [attempt, setAttempt] = useState(0);
-  const [confirmNote, setConfirmNote] = useState("");
-  const wanted = useMemo(
-    () =>
-      c.candidates
-        .filter((a) => /^\d/.test(a.provision) && (a.answer === "yes" || (a.suggestion === "search" && a.answer === null)))
-        .map((a) => ({ candidateId: a.id, provision: a.provision })),
-    [c.candidates],
-  );
-  const { rows, source, error } = useSectionC(wanted, [], attempt);
   const [selected, setSelected] = useState<string>();
   const sel = rows.find((r) => rowKey(r) === selected) ?? rows[0];
   const selCand = sel && candidateById(c, sel.candidateId);
@@ -191,23 +182,6 @@ export function SectionC() {
       ? selCand.quote
       : null;
   const open = unresolvedCandidates(c);
-  const yesKey = c.candidates
-    .filter((a) => a.answer === "yes" && /^\d/.test(a.provision))
-    .map((a) => a.provision)
-    .join("|");
-
-  useEffect(() => {
-    if (!engineId || !yesKey) return;
-    const provisions = yesKey.split("|");
-    const ctl = new AbortController();
-    void engine.confirmIdentify(engineId, provisions, ctl.signal).catch((err: unknown) => {
-      if (ctl.signal.aborted) return;
-      if (err instanceof EngineError && failureKind(err.status, err.detail) === "missing-route") {
-        setConfirmNote(CONFIRM_UNAVAILABLE);
-      }
-    });
-    return () => ctl.abort();
-  }, [engineId, yesKey]);
 
   return (
     <>
@@ -222,13 +196,8 @@ export function SectionC() {
           )}
           {source === "live" && rows.length > 0 && <span className="meta">Rows from the engine's code database for this case</span>}
         </div>
-        {confirmNote && (
-          <p className="empty" role="status">
-            {confirmNote}
-          </p>
-        )}
         <details className="compact-help"><summary>About Section C</summary><p>Objectives explain why a code requirement exists. Functions describe what it must achieve. These come from the code tables, not AI.</p></details>
-        {source === "error" && <ServiceUnavailable reason={error ?? "The lookup did not return."} onRetry={() => setAttempt(n => n + 1)} />}
+        {source === "error" && <ServiceUnavailable reason={error ?? "The lookup did not return."} onRetry={() => { retrySectionC(); setAttempt(n => n + 1); }} />}
         <details className="disclosure" open={!rows.length || undefined}><summary>Add a code reference</summary><ProvisionSearch /></details>
         {rows.length > 0 && <details className="disclosure"><summary>All references ({rows.length})</summary><div className="table-wrap">
           <table className="table sc-table">
@@ -264,7 +233,7 @@ export function SectionC() {
                         <StatusPill dot="done">Departure</StatusPill>
                       ) : (
                         <StatusPill dot={cand?.answer === "not-sure" ? "warning" : "blocking"}>
-                          {cand?.answer === "not-sure" ? "Not sure" : "Unanswered"}
+                          {cand?.answer === "no" ? "No departure" : cand?.answer === "not-sure" ? "Not sure" : "Unanswered"}
                         </StatusPill>
                       )}
                     </td>
@@ -350,40 +319,16 @@ export function SectionC() {
               ))}
             </details>
             <div className="card"><h2 className="section-title">{sel.provision}</h2><Pairs row={sel} /></div>
-            {selCand?.suggestion && selCand.answer !== "yes" && (
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => {
-                  dispatch({ type: "answerCandidate", id: selCand.id, answer: "yes" });
-                  const provisions = [
-                    ...new Set(
-                      c.candidates
-                        .filter((a) => /^\d/.test(a.provision) && (a.answer === "yes" || a.id === selCand.id))
-                        .map((a) => a.provision),
-                    ),
-                  ];
-                  void (async () => {
-                    const id = engineId ?? (await saveDraft());
-                    if (!id) return;
-                    if (selCand.suggestion === "identify") {
-                      try {
-                        const body = await engine.decide(id, selCand.provision, "yes");
-                        const read = readDecisionBody(body, selCand.provision);
-                        if (read.row) dispatch({ type: "noteSectionC", rows: [toViewRow(read.row, selCand.id)] });
-                      } catch (err: unknown) {
-                        if (err instanceof EngineError && failureKind(err.status, err.detail) === "missing-route") {
-                          setConfirmNote(DECISION_UNAVAILABLE);
-                        }
-                      }
-                    }
-                    await engine.sectionD(id, provisions).catch(() => undefined);
-                  })();
-                }}
-              >
-                Confirm this provision
-              </button>
-            )}
+            {selCand && <div className="field">
+              <label htmlFor="sentence-decision">Does your design depart from this sentence?</label>
+              <select id="sentence-decision" value={selCand.answer ?? ""} onChange={e => {
+                const answer = e.target.value;
+                if (answer === "yes" || answer === "no" || answer === "not-sure") dispatch({ type: "answerCandidate", id: selCand.id, answer });
+              }}>
+                <option value="">Not answered</option><option value="yes">Yes — a departure</option><option value="no">No departure</option><option value="not-sure">Not sure</option>
+              </select>
+              <button type="button" className="btn btn-ghost" onClick={() => dispatch({ type: "removeCandidate", id: selCand.id })}>Remove reference</button>
+            </div>}
             {sel.explanation && (
               <section className="ai-block">
                 <div className="block-label">
@@ -404,7 +349,7 @@ export function SectionC() {
         <a className="btn btn-ghost" href="#/code-check">
           Back
         </a>
-        <button type="button" className="btn btn-primary" onClick={() => (location.hash = "#/application?tab=D")}>
+        <button type="button" className="btn btn-primary" onClick={() => (location.hash = "#/application?tab=alt")}>
           Continue
         </button>
       </div>

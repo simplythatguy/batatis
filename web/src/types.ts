@@ -179,4 +179,6 @@ export interface Case {
   listedEvidence?: ListedEvidence[];
   /** Evidence slot ids waiting for DELETE /cases/{id}/evidence/{id}. */
   deletedEvidence?: string[];
+  /** Unfinished editors for this visit only; never sent as facts. Reset clears them. */
+  evidenceDrafts?: Record<string, { document: string; responsible: string; date: string; evidenceType: string; note: string }>;
 }

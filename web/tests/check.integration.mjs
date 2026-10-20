@@ -47,6 +47,8 @@ async function scenario(name, run) {
       if (/\/cases\/[^/]+$/.test(path)) return reply(s.cases[id]);
       if (path === '/code/search') return reply([{id:'9.25.2.2.(1)', division:'B', text:'Synthetic code wording', citation:'Synthetic citation', article_title:'Insulation', title:'Insulation'}]);
       if (path.endsWith('/gaps')) return reply([{id:'owner',field:'owner_name',section:'A',severity:'blocking',message:'Owner is missing.'}]);
+      if (path.endsWith('/section-d')) return reply({items:[],notices:[]});
+      if (path.endsWith('/professional')) return reply({required:'depends',reasons:[],questions:[]});
       if (path.includes('/code/')) return reply({id:'9.25.2.2.(1)',text:'Synthetic code wording',citation:'Synthetic citation', children:[]});
       return reply([]);
     };
@@ -54,7 +56,7 @@ async function scenario(name, run) {
   await page.goto(web + '/tests/check.html');
   await page.waitForFunction(() => !!window.caseStore);
   try { await run(page); assert.deepEqual(errors, []); passed++; console.log('PASS', name); }
-  catch (e) { failed++; console.error('FAIL', name, e.message); }
+  catch (e) { failed++; console.error('FAIL', name, e.stack); }
   finally { await page.close(); }
 }
 const dispatch = async (page, action) => { await page.evaluate(a => window.caseStore.dispatch(a), action); await page.evaluate(() => new Promise(requestAnimationFrame)); };
@@ -239,10 +241,11 @@ try {
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await nav(page, '/application?tab=B&focus=field-municipalAddress');
     await page.locator('#field-municipalAddress').waitFor({state:'visible'});
-    assert.ok(await page.locator('input:visible,textarea:visible,select:visible').count() <= 2);
+    assert.ok(await page.locator('.field-step input:visible,.field-step textarea:visible,.field-step select:visible').count() <= 2);
     await nav(page, '/application?tab=D');
     await page.locator('#prof-role').waitFor({state:'visible'});
-    assert.equal(await page.locator('select:visible').count(), 1);
+    assert.equal(await page.locator('.field-step select:visible').count(), 1);
+    assert.equal(await page.getByRole('combobox', {name:'Application section',exact:true}).count(), 1);
     assert.equal(await page.getByRole('combobox', {name:'Who is the registered professional for this scope?',exact:true}).count(), 1);
     assert.equal(await count(page), 0);
   });

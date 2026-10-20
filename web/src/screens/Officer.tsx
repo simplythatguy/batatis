@@ -189,11 +189,34 @@ export function Officer() {
       <PanelHeader title="Officer review" meta="Administrative completeness" />
       <div className="pane scroll-body">
         <div className="content-col stack">
-          <RoleNote />
           <p className="meta intro">This review is of the application in front of you. It checks whether information is present. It does not decide whether the design complies or is safe.</p>
           <p className="meta" role="status">
             {statusLine}
           </p>
+          <section aria-labelledby="request-title">
+            <h2 id="request-title" className="section-title">
+              Information request
+            </h2>
+            <details className="disclosure"><summary>Request text</summary>{!pending && (
+              <div className="field request-field">
+                <label htmlFor="request-text">Request</label>
+                <textarea id="request-text" className="mono" readOnly rows={12} value={request} />
+              </div>
+            )}
+            </details><div className="btn-row">
+              <button type="button" className="btn btn-primary" disabled={pending} onClick={() => void copy()}>
+                Copy request
+              </button>
+              <a className="btn btn-ghost" href="#/describe">
+                Return to application
+              </a>
+            </div>
+            {copyNote && (
+              <p className="field-note" role="status">
+                {copyNote}
+              </p>
+            )}
+          </section>
           {pending && (
             <div aria-busy="true">
               <p>
@@ -293,30 +316,7 @@ export function Officer() {
               <Judgement skipped={report.phase === "ready" ? report.skipped : []} />
             </>
           )}
-          <section aria-labelledby="request-title">
-            <h2 id="request-title" className="section-title">
-              Information request
-            </h2>
-            {!pending && (
-              <div className="field request-field">
-                <label htmlFor="request-text">Request</label>
-                <textarea id="request-text" className="mono" readOnly rows={12} value={request} />
-              </div>
-            )}
-            <div className="btn-row">
-              <button type="button" className="btn btn-primary" disabled={pending} onClick={() => void copy()}>
-                Copy request
-              </button>
-              <a className="btn btn-ghost" href="#/describe">
-                Return to application
-              </a>
-            </div>
-            {copyNote && (
-              <p className="field-note" role="status">
-                {copyNote}
-              </p>
-            )}
-          </section>
+
         </div>
       </div>
     </>

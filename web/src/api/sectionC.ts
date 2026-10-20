@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { AttributionStatus, SectionCRow } from "../types";
 import { engine, EngineError } from "./client";
 import type { SectionCRow as EngineRow } from "./types.gen";
+import { canonicalProvision, withinProvision } from "../provisions";
 
 const STATUS: Record<EngineRow["attribution_status"], AttributionStatus> = {
   direct: "direct",
@@ -45,7 +46,14 @@ export function toViewRow(r: EngineRow, candidateId: string): SectionCRow {
 }
 
 /** True when `row` (a sentence or clause id) belongs to the candidate provision `p` (itself or below it). */
-const within = (row: string, p: string) => row === p || (row.startsWith(p) && (p.endsWith(".") || row[p.length] === "("));
+export function canonicalRows(rows: EngineRow[], wanted: Wanted[]): SectionCRow[] {
+  return [...new Map(rows.map(r => [canonicalProvision(r.provision_id), r])).values()].flatMap(r => {
+    // Prefer the exact candidate, independently of input order.
+    const owner = wanted.find(w => canonicalProvision(w.provision) === canonicalProvision(r.provision_id))
+      ?? wanted.find(w => withinProvision(r.provision_id, w.provision));
+    return owner ? [toViewRow(r, owner.candidateId)] : [];
+  });
+}
 
 export type SectionCSource = "loading" | "live" | "cached" | "error";
 
@@ -82,7 +90,8 @@ export function useSectionC(wanted: Wanted[], offline: SectionCRow[], attempt = 
         ctl.signal,
       )
       .then((rows) => {
-        const view = real.flatMap((w) => rows.filter((r) => within(r.provision_id, w.provision)).map((r) => toViewRow(r, w.candidateId)));
+        if (ctl.signal.aborted) return;
+        const view = canonicalRows(rows, real);
         setState({ key, source: "live", rows: view });
       })
       .catch((e: unknown) => {
@@ -99,7 +108,7 @@ export function useSectionC(wanted: Wanted[], offline: SectionCRow[], attempt = 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
-  return state.key === key ? state : { ...state, key, source: "loading" as const };
+  return state.key === key ? state : { key, rows: [], source: "loading" as const };
 }
 
 export type ProvisionText =

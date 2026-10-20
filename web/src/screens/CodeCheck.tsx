@@ -33,7 +33,11 @@ function CandidateCard({
   total: number;
   onAnswer: (candidate: Candidate, answer: CandidateAnswer) => void;
 }) {
-  const s = STATUS[a.answer ?? "none"];
+  const { c, dispatch } = useCase();
+  const [storeys, setStoreys] = useState("");
+  const isStoreys = a.id === "desc-storeys";
+  const savedCount = c.questions.find(q => q.id === "q-desc-storeys")?.answer;
+  const s = isStoreys && savedCount ? { dot: "done" as const, label: "Count recorded" } : STATUS[a.answer ?? "none"];
   const kind = quoteKind(a);
   return (
     <article className="card" id={`cand-${a.id}`} tabIndex={-1} aria-labelledby={`cand-${a.id}-topic`}>
@@ -61,7 +65,14 @@ function CandidateCard({
           <blockquote className="cite-block quote">{a.quote.text}</blockquote>
         )}
       </details>
-      <p className="ask">
+      {isStoreys ? <form className="field" onSubmit={e => {
+        e.preventDefault();
+        if (!Number.isInteger(Number(storeys)) || Number(storeys) < 1) return;
+        dispatch({ type: "setStoreyCount", value: storeys });
+      }}><label htmlFor="storey-count">How many storeys does the building have?</label>
+        <input id="storey-count" type="number" min="1" step="1" value={storeys || savedCount || ""} onChange={e => setStoreys(e.target.value)} />
+        <div className="btn-row"><button className="btn" type="submit">Save count</button><button className="btn" type="button" onClick={() => { setStoreys(""); dispatch({ type: "setStoreyCount", value: "" }); }}>Not sure</button></div>
+      </form> : <><p className="ask">
         Does your design <strong>{a.departure}</strong> instead?
       </p>
       <div className="segmented" role="group" aria-label={`Answer for ${a.topic}`}>
@@ -77,6 +88,7 @@ function CandidateCard({
           </button>
         ))}
       </div>
+      </>}
       {a.answer === "not-sure" && (
         <div className="followup">
           <div className="meta">Open question</div>
@@ -328,7 +340,7 @@ export function CodeCheck() {
         <button type="button" className="btn" onClick={() => void saveDraft()}>
           Save draft
         </button>
-        <a className="btn btn-ghost" href="#/describe">
+        <a className="btn btn-ghost" href="#/application?tab=B&step=last">
           Back
         </a>
         <button

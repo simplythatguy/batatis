@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { SectionDRecoveryError } from "../api/sectionD";
 import {
-  engine,
-  EngineError,
   failureText,
   type EngineProcessField,
   type ProfessionalResult,
@@ -10,13 +9,14 @@ import {
 } from "../api/client";
 import { ServiceUnavailable, FieldSteps } from "../components";
 import { practiceFlagLine, practicePrompt } from "../humanReview";
-import { answeredYes, evidenceDocuments, sectionDWhileRefreshing, shownProcessAnswer } from "../model";
+import { evidenceDocuments, shownProcessAnswer } from "../model";
 import { AUTHORITY_DECISION_FIELDS, evidenceLinked, evidenceRecorded, isScopeField, practiceFromReview, SCOPE_HELP, sectionDIssueStatus } from "../professional";
-import { failureKind } from "../rules";
 import { useCase } from "../store";
+import { evidenceTask } from "../evidence";
 import type { Case } from "../types";
 
 type Load = {
+  recovery?: SectionDRecoveryError;
   phase: "idle" | "loading" | "live" | "error" | "unreachable";
   note: string;
   plan: SectionDPlan | null;
@@ -107,11 +107,9 @@ function EvidenceAnswer({
   types: string[];
 }) {
   const { c, dispatch } = useCase();
-  const [document, setDocument] = useState("");
-  const [responsible, setResponsible] = useState("");
-  const [date, setDate] = useState("");
-  const [evidenceType, setEvidenceType] = useState("");
-  const [note, setNote] = useState("");
+  const draft = c.evidenceDrafts?.[itemId] ?? { document: "", responsible: "", date: "", evidenceType: "", note: "" };
+  const { document, responsible, date, evidenceType, note } = draft;
+  const edit = (patch: Partial<typeof draft>) => dispatch({ type: "editEvidenceDraft", itemId, patch });
   const typeOptions = types.length ? types : [...EVIDENCE_TYPES];
   const docId = `evidence-doc-${itemId}`;
   const whoId = `evidence-who-${itemId}`;
@@ -121,25 +119,21 @@ function EvidenceAnswer({
     const ref = document.trim();
     const who = responsible.trim();
     if (!ref || !who || !evidenceType) {
-      setNote("Name the document, the person responsible, and the evidence type. Typed evidence is text, not a file.");
+      edit({ note: "Add the document, person responsible and evidence type." });
       return;
     }
     dispatch({ type: "saveEvidence", itemId, document: ref, responsible: who, date, evidenceType, provisionId });
-    setDocument("");
-    setResponsible("");
-    setDate("");
-    setEvidenceType("");
-    setNote(`Saved: ${ref}. Evidence listed (not reviewed). It stays on this case. Add another document if you have one.`);
+    edit({ note: `Added: ${ref}. Listed, not reviewed.` });
   }
 
   const earlier = evidenceDocuments(c, itemId);
 
   return (
     <div className="form-grid">
-      <p className="meta full">{title}</p>
+      <p className="sr-only">{title}</p>
       <div className="field">
         <label htmlFor={`evidence-type-${itemId}`}>Evidence type</label>
-        <select id={`evidence-type-${itemId}`} value={evidenceType} onChange={(e) => setEvidenceType(e.target.value)}>
+        <select id={`evidence-type-${itemId}`} value={evidenceType} onChange={(e) => edit({ evidenceType: e.target.value })}>
           <option value="">Not chosen</option>
           {typeOptions.map((type) => (
             <option key={type} value={type}>
@@ -150,15 +144,15 @@ function EvidenceAnswer({
       </div>
       <div className="field">
         <label htmlFor={docId}>Document name</label>
-        <input id={docId} value={document} onChange={(e) => setDocument(e.target.value)} />
+        <input id={docId} value={document} onChange={(e) => edit({ document: e.target.value })} />
       </div>
       <div className="field">
         <label htmlFor={whoId}>Person or organisation responsible</label>
-        <input id={whoId} value={responsible} onChange={(e) => setResponsible(e.target.value)} />
+        <input id={whoId} value={responsible} onChange={(e) => edit({ responsible: e.target.value })} />
       </div>
       <div className="field">
         <label htmlFor={dateId}>Date or revision</label>
-        <input id={dateId} value={date} onChange={(e) => setDate(e.target.value)} placeholder="Left blank until you enter it" />
+        <input id={dateId} value={date} onChange={(e) => edit({ date: e.target.value })} placeholder="Left blank until you enter it" />
       </div>
       <div className="field">
         <button type="button" className="btn" onClick={save}>
@@ -189,7 +183,7 @@ function EvidenceAnswer({
   );
 }
 
-function ProfessionalAnswers() {
+function ProfessionalAnswers({ onEvidence }: { onEvidence: () => void }) {
   const { c, dispatch } = useCase();
   const inputs = PROFESSIONAL_FIELDS.map((q) => {
         const id = `prof-${q.field}`;
@@ -336,102 +330,52 @@ function ProfessionalAnswers() {
           </div>
         );
       });
-  return <FieldSteps steps={PROFESSIONAL_FIELDS.map((q, i) => ({
+  const deferred = deferredChoice(c, "role");
+  const steps = PROFESSIONAL_FIELDS.map((q, i) => ({
     title: q.label,
     fields: [`prof-${q.field}`],
-    content: <div className="form-grid">{inputs[i]}</div>,
-  }))} />;
+    content: <div className="form-grid">{inputs[i]}{q.field === "role" && deferred && <div className="full"><p className="meta">You can leave professional details for later. The officer will need them before the official PDF.</p><button className="btn" onClick={onEvidence}>Continue to evidence</button></div>}</div>,
+  })).filter((_, i) => !deferred || ![1, 2].includes(i));
+  return <FieldSteps previousHref="#/application?tab=alt&step=last" steps={steps} onComplete={onEvidence} />;
 }
 
-/**
- * Section D. Today's engine returns the evidence plan from POST /cases/{id}/section-d.
- * GET /cases/{id}/section-d/issues is requested first and shown when that route exists.
- */
+/** One coherent deterministic plan, after the current case has been saved. */
 export function Recommendations() {
-  const { c, engineId, dispatch, factsEpoch } = useCase();
+  const { c, dispatch, snapshotKey, loadSectionD } = useCase();
   const [view, setView] = useState("professional");
-  const [evidenceIndex, setEvidenceIndex] = useState(0);
-  const provisions = answeredYes(c).map((a) => a.provision).filter((id) => /^\d/.test(id)).join("|");
+  const [selectedEvidence, setSelectedEvidence] = useState("");
   const [attempt, setAttempt] = useState(0);
+  const attempted = useRef(0);
   const [load, setLoad] = useState<Load>(IDLE);
-  const practiceNow = useRef(c.practiceOfEngineering);
-  practiceNow.current = c.practiceOfEngineering;
 
   useEffect(() => {
-    if (!engineId) {
-      setLoad({
-        phase: "error",
-        note: "Save the draft first. Then this page lists the evidence still missing.",
-        plan: null,
-        issues: null,
-        professional: null,
-        fields: [],
-        issuesNote: null,
-      });
-      return;
-    }
-    const ctl = new AbortController();
-    setLoad((previous) => sectionDWhileRefreshing(previous));
-    const ids = provisions ? provisions.split("|") : undefined;
-    void (async () => {
-      let issues: SectionDIssue[] | null = null;
-      let issuesNote: string | null = null;
-      try {
-        issues = await engine.sectionDIssues(engineId, ctl.signal);
-      } catch (e) {
-        if (ctl.signal.aborted) return;
-        if (e instanceof EngineError && failureKind(e.status, e.detail) === "unreachable") {
-          setLoad((previous) => ({ ...previous, phase: "unreachable", note: e.detail }));
-          return;
-        }
-        if (e instanceof EngineError && failureKind(e.status, e.detail) === "missing-route") {
-          issuesNote = null;
-        } else if (e instanceof EngineError && failureKind(e.status, e.detail) === "codedb") {
-          issuesNote = "The code database is not available.";
-        } else if (e instanceof EngineError) {
-          issuesNote = e.detail;
-        } else {
-          issuesNote = failureText(e);
-        }
-      }
-      try {
-        const [plan, professional, fields] = await Promise.all([
-          engine.sectionD(engineId, ids, ctl.signal),
-          engine.professional(engineId, ctl.signal),
-          engine.processFields(engineId, ctl.signal),
-        ]);
-        if (ctl.signal.aborted) return;
-        const practice = practiceFromReview(
-          practiceNow.current,
-          professional.required,
-          Boolean(issues?.some((issue) => issue.practice_of_engineering.value === true)),
-        );
-        if (practiceNow.current !== practice) dispatch({ type: "notePractice", value: practice });
-        setLoad({
-          phase: "live",
-          note: "Recommendations only. You write the evidence and the answers. This does not decide that the design complies or is safe.",
-          plan,
-          issues,
-          professional,
-          fields,
-          issuesNote,
-        });
-      } catch (e) {
-        if (ctl.signal.aborted) return;
-        const message = failureText(e);
-        const unreachable = e instanceof EngineError && failureKind(e.status, e.detail) === "unreachable";
-        setLoad((previous) => ({
-          ...previous,
-          phase: unreachable ? "unreachable" : "error",
-          note: message,
-          issues: issues ?? previous.issues,
-          issuesNote,
-        }));
-      }
-    })();
-    return () => ctl.abort();
-  }, [engineId, provisions, attempt, factsEpoch, dispatch]);
+    let active = true;
+    setLoad({ ...IDLE, phase: "loading" });
+    const retry = attempted.current !== attempt;
+    attempted.current = attempt;
+    void loadSectionD(retry).then(result => {
+      if (!active || !result) return;
+      const practice = practiceFromReview(c.practiceOfEngineering, result.professional.required,
+        Boolean(result.issues?.some(issue => issue.practice_of_engineering.value === true)));
+      if (c.practiceOfEngineering !== practice) dispatch({ type: "notePractice", value: practice });
+      setLoad({ ...result, phase: "live", note: "" });
+    }).catch(error => {
+      if (active) setLoad({ ...IDLE, phase: "error", note: failureText(error), recovery: error instanceof SectionDRecoveryError ? error : undefined });
+    });
+    return () => { active = false; };
+    // Snapshot captures generation, revision and deterministic reference expansion.
+    // Status changes and unfinished editor text must not start another read.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snapshotKey, attempt, dispatch]);
 
+  // Issues and plans describe the same items. Prefer the issue's richer context;
+  // retain plan-only entries when an older engine has no issues route.
+  const items = [...new Map<string, { id: string; issue?: SectionDIssue; plan?: SectionDPlan["items"][number] }>([
+    ...(load.issues ?? []).map(issue => [issue.id, { id: issue.id, issue, plan: undefined as SectionDPlan["items"][number] | undefined }] as const),
+    ...(load.plan?.items ?? []).filter(item => !load.issues?.some(issue => issue.id === item.id))
+      .map(plan => [plan.id, { id: plan.id, issue: undefined as SectionDIssue | undefined, plan }] as const),
+  ]).values()];
+  const selectedId = items.some(item => item.id === selectedEvidence) ? selectedEvidence : items[0]?.id;
   const flag = load.professional?.required;
 
   return (
@@ -442,7 +386,7 @@ export function Recommendations() {
         <button className="pill" aria-pressed={view === "evidence"} data-active={view === "evidence"} onClick={() => setView("evidence")}>Evidence</button>
       </div>
       {view === "professional" && <>
-      <ProfessionalAnswers />
+      <ProfessionalAnswers onEvidence={() => setView("evidence")} />
       <details className="compact-help"><summary>Professional review notes</summary>
         {flag && <p>{practiceFlagLine(flag)}</p>}
         <p>Batatis recommends evidence. Your professional supplies the analysis. This is not a safety or compliance decision.</p>
@@ -451,19 +395,22 @@ export function Recommendations() {
       </details>
       </>}
       {view === "evidence" && <>
-      {(load.phase === "error" || load.phase === "unreachable") && <ServiceUnavailable reason={load.note} onRetry={() => setAttempt(n => n + 1)} />}
+      {load.recovery ? <div className="recovery" role="status"><p>{load.recovery.message}</p>
+        {load.recovery.kind === "conflict" && <button className="btn" onClick={() => setAttempt(n => n + 1)}>Refresh case and retry</button>}
+        <a className="text-link" href="#/application?download=1">Keep a draft</a>
+        <details><summary>Technical detail</summary><p>{load.recovery.detail}</p></details>
+      </div> : (load.phase === "error" || load.phase === "unreachable") && <ServiceUnavailable reason={load.note} onRetry={() => setAttempt(n => n + 1)} />}
       {load.phase === "loading" && <p className="meta" role="status">Loading evidence…</p>}
-      {((load.issues?.length ?? 0) + (load.plan?.items.length ?? 0)) > 0 && <div className="field"><label htmlFor="evidence-choice">Document to add</label><select id="evidence-choice" value={evidenceIndex} onChange={e => setEvidenceIndex(Number(e.target.value))}>
-        {load.issues?.map((issue, i) => <option key={`issue-${issue.id}`} value={i}>{issue.provision?.provision_id ?? "Open question"} · issue {i + 1}</option>)}
-        {load.plan?.items.map((item, i) => <option key={`plan-${item.id}`} value={(load.issues?.length ?? 0) + i}>{item.provision_id} · evidence {i + 1}</option>)}
+      {items.length > 0 && <div className="field"><label htmlFor="evidence-choice">Document to add</label><select id="evidence-choice" value={selectedId ?? ""} onChange={e => setSelectedEvidence(e.target.value)}>
+        {items.map(({ id, issue, plan }) => <option key={id} value={id}>{evidenceTask(c, issue ?? plan ?? {})}</option>)}
       </select></div>}
 
       {load.issues === null && load.issuesNote && <p className="empty">{load.issuesNote}</p>}
       {load.issues && (
         <div className="stack">
-          <h3 className="sub-title">Section D issues</h3>
+
           {load.issues.length === 0 && <p className="empty">No Section D issues returned.</p>}
-          {load.issues.filter((_, i) => i === evidenceIndex).map((issue) => {
+          {load.issues.filter(issue => issue.id === selectedId).map((issue) => {
             const practice = issue.practice_of_engineering;
             const practiceValue = practice.value === true ? true : practice.value === false ? false : "unknown";
             const prompt = practicePrompt(practiceValue, practice.question);
@@ -475,13 +422,13 @@ export function Recommendations() {
             return (
               <article key={issue.id} className="card">
                 <div className="card-head">
-                  <span className="article-id">{issue.provision?.provision_id ?? issue.entered_reference ?? "No provision yet"}</span>
+                  <h3 className="section-title">{evidenceTask(c, issue)}</h3>
                   <span className="label-pill">
                     <span className={`status-dot ${status === "needs_professional" ? "blocking" : "warning"}`} />
                     {status === "needs_professional" ? "Routed to the officer" : status === "evidence_listed" ? "evidence listed" : "open"}
                   </span>
                 </div>
-                <details className="compact-help"><summary>What this document should address</summary><p>{issue.at_stake}</p>
+                <details className="compact-help"><summary>What this document should address</summary><p className="mono">{issue.provision?.provision_id ?? issue.entered_reference ?? "No confirmed reference"}</p><p>{issue.at_stake}</p>
                 {issue.question && <p className="field-note">{issue.question}</p>}
                 <p>
                   <span className={`status-dot ${practiceValue === true ? "blocking" : practiceValue === "unknown" ? "warning" : "pending"}`} />{" "}
@@ -506,20 +453,20 @@ export function Recommendations() {
       )}
       {load.plan && (
         <div className="stack">
-          <h3 className="sub-title">Evidence plan</h3>
+          {!load.issues && <h3 className="sub-title">Evidence plan</h3>}
           {load.plan.items.length === 0 && (
             <p className="empty">No evidence items yet. Confirm a provision on Section C, then each item appears here for you to answer.</p>
           )}
-          {load.plan.items.filter((_, i) => i + (load.issues?.length ?? 0) === evidenceIndex).map((item) => (
+          {load.plan.items.filter(item => item.id === selectedId && !load.issues?.some(issue => issue.id === item.id)).map((item) => (
             <article key={item.id} className="card">
               <div className="card-head">
-                <span className="article-id">{item.provision_id}</span>
+                <h3 className="section-title">{evidenceTask(c, item)}</h3>
                 <span className="label-pill">
                   <span className={`status-dot ${evidenceRecorded(item.status) ? "done" : "warning"}`} />
                   {item.status}
                 </span>
               </div>
-              <details className="compact-help"><summary>What this document should address</summary><p>{item.performance_issue}</p>
+              <details className="compact-help"><summary>What this document should address</summary><p className="mono">{item.provision_id}</p><p>{item.performance_issue}</p>
               <p className="meta">
                 Evidence types to consider: {item.recommended_types.join(", ") || "none listed"}. Not results, and not filled in for you.
               </p>

@@ -35,3 +35,25 @@ returning to a previous value, overlapping saves, creation/jurisdiction reset
 races, stale provider completions, and evidence replacement/deletion generations.
 They do not certify PostgreSQL, provider execution, deployment, official export
 eligibility, or the separately queued explicit-check and guided-flow UX changes.
+
+R4 regression coverage uses the same disposable engine and production Vite app:
+
+```sh
+BATATIS_CODEDB=/absolute/path/to/codedb.sqlite \
+SYNC_WEB_BASE=http://127.0.0.1:15166 \
+python3 scripts/test-sync.py --browser --repair
+```
+
+`repair.integration.mts` checks real CodeDB canonicalization, sentence decisions,
+write-before-read Section D, address provenance, draft ownership and text labels.
+`repair.integration.mjs` mounts the actual app and exercises keyboard progression,
+320/390/desktop and short viewports, evidence switching, held writes, errors,
+alternative-path progression and officer actions. All cases are synthetic test
+data; no fixture import or entry point is included in the production build.
+Last-reference withdrawal explicitly reports the current backend's unsupported
+empty-provisions update; that server contract still requires integration.
+The conflict/deletion browser regression injects the #24 response contract into
+the real-engine flow: 409 requires an explicit fresh-case read before retry, and
+404 case-not-found is terminal without recreation. It preserves client drafts
+and asserts no identification or completeness dispatch as a recovery side effect.
+This is client contract evidence, not a test of the unmerged #24 backend.
