@@ -112,13 +112,12 @@ Scoring question, from pull request #15: "Does it identify the specific technica
 
 ### Open pull requests
 
-- [#8](https://github.com/simplythatguy/batatis/pull/8) (Section D issues and practice-of-engineering screen, not merged). Numbers below are copied from the pull-request body. The body calls them model-checked. They are not human-verified.
-  - Engineer-needed flag: 55/60 agreement on the model-checked dev set (in-sample), 1 under-flag, 13 unknowns sent to the applicant.
-  - The body says the `rules_plus_unknown` row is in-sample, pending out-of-sample confirmation, and that the span rule came from development case `dev-050`.
-  - Held-out, model-checked, as written: `held-out rules_plus_unknown: 7/8 [0.5291, 0.9776]`.
-  - Also written: `held-out (post-fix, no longer blind for missing-fact cases) rules_plus_unknown: 4/8 [0.2152, 0.7848]`.
-  - Dev `rules_plus_unknown` under-flag is 0.
-  - Pytest written in the body: `python3 -m pytest engine/tests/test_section_d_issues.py -q` — 14 passed.
+- [#8](https://github.com/simplythatguy/batatis/pull/8) (Section D issues and practice-of-engineering screen, not merged). Numbers below are copied from the pull-request body. The body calls them model-checked. They are not human-verified. The 55/60 row and the 50/60 row are different rows.
+  - Current headline, `rules_only`: 55/60 agreement on the model-checked dev set (in-sample), 1 under-flag (dev-050), 13 unknowns sent to the applicant. Model-checked. Not human-verified.
+  - Shipped screen, post-fix `rules_plus_unknown`: 50/60 agreement on that same dev set, 0 under-flags. Model-checked. Not human-verified. The body says the dev table is in-sample, and that the span rule came from development case `dev-050`.
+  - Blind held-out, pre-fix. Model-checked. Not human-verified. As written: `held-out rules_plus_unknown: 7/8 [0.5291, 0.9776]`. The body calls this line frozen and not recomputed.
+  - A different held-out row, post-fix and no longer blind for missing-fact cases: `rules_plus_unknown: 4/8 [0.2152, 0.7848]`. Model-checked. Not human-verified.
+  - Pytest written in the body: `python3 -m pytest engine/tests/test_section_d_issues.py -q` — 18 passed.
   - The body says citation text was not checked against a local code database in that run.
 - [#9](https://github.com/simplythatguy/batatis/pull/9) (human-key harness, not merged). The body says the branch is rebased onto #8 because `dev` does not yet contain the Section D practice screen. Numbers below are copied from the pull-request body. The body marks `label_strength: weak; editions pre-2023`. They are not human-verified.
   - `rules_only`, `rules_plus_unknown`, and `always_unknown`: each `7/12 [0.3195, 0.8067]`.
@@ -148,7 +147,7 @@ Scoring question, from pull request #15: "Can it review a completed application,
 
 - [#11](https://github.com/simplythatguy/batatis/pull/11) (administrative completeness pipeline, draft, not merged). The body adds bulletin gates for IB-2025-11-18 and IB-2026-10-01, and says the 10-day copy to the Safety Codes Council is a reminder, not an export blocker. Numbers below are copied from the pull-request body (offline `python3 -m evals_dev.completeness_eval --repeats 1`, no `--live`, no code database). They are not human-verified.
   - Before, as written: variant A 0.992 (729/735), variant B 1.000 (735/735), clean-control false positives 0, invented values 0. Variant C not scored.
-  - After, as written: variant A `overall_success=0.993 (845/851)`; variant B `overall_success=1.000 (851/851)`; both `invented_values=0` and `invented_value_gate=pass`; clean-control false positives 0. Variant C `status=skipped`.
+  - After, as written: variant A `overall_success=0.993 (845/851)`; variant B `overall_success=1.000 (851/851)`. 845/851 and 851/851 are an internal, in-sample, synthetic planted set, not a judge-facing score. They are model-checked. They are not human-verified. Both have `invented_values=0` and `invented_value_gate=pass`; clean-control false positives 0. Variant C `status=skipped`.
   - The body says variant A still misses generic risk (D09 1/2), unrelated mitigations (D10 1/2), contradictions (D14 0/2), and relevance (D15 0/2), and that D05 and D07 are absent from that table because they need the code database.
   - Pytest written in the body, without a code database: 12 passed across `test_bulletin_gates.py`, `test_portal_package.py`, `test_jurisdiction_wording.py`, and `test_schema_export.py`.
   - The body says the draft is not ready to merge.
