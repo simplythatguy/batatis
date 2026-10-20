@@ -194,11 +194,11 @@ try {
   await page.goto(`${preview}/#/application?tab=A`, { waitUntil: "networkidle0" });
   await page.type("#field-owner", "Example Applicant");
   await page.type("#field-representative", "Example Applicant");
-  await page.type("#field-mailingAddress", "100 Example Street NW, Edmonton");
+  await page.type("#field-mailingAddress", "0000 Example Avenue NW, Edmonton");
   await page.type("#field-date", "2026-10-20");
   await page.goto(`${preview}/#/application?tab=B`, { waitUntil: "networkidle0" });
   await page.select("#field-scope", "site");
-  await page.type("#field-municipalAddress", "100 Example Street NW, Edmonton");
+  await page.type("#field-municipalAddress", "0000 Example Avenue NW, Edmonton");
   await page.type("#field-legalDescription", "Lot 1, Block 1, Plan EXAMPLE");
   const alt = await page.$eval("#field-alternative", (el) => el.value);
   if (!alt.trim()) await page.type("#field-alternative", DESCRIPTION);
@@ -289,7 +289,11 @@ try {
 
   await page.goto(`${preview}/#/accuracy`, { waitUntil: "networkidle0" });
   text = await jargon(page, "accuracy");
-  assert(/55 of 60/.test(text), "model-checked screen is missing the 55/60 evaluation");
+  assert(/50 of 60/.test(text), "model-checked screen is missing the shipped 50/60 in-sample figure");
+  assert(/in-sample/.test(text), "model-checked screen does not label the figure in-sample");
+  assert(/0 under-flags/.test(text), "model-checked screen is missing 0 under-flags");
+  assert(/27 unknowns/.test(text), "model-checked screen is missing 27 unknowns");
+  assert(!/55 of 60/.test(text), "model-checked screen still shows the rules_only 55/60 figure");
   await shot(page, "08-accuracy");
 
   console.log("ok: cold path finished at the draft record");

@@ -11,7 +11,7 @@ import {
 import { DemoFallback, RoleNote } from "../components";
 import { practiceFlagLine, practicePrompt } from "../humanReview";
 import { answeredYes } from "../model";
-import { evidenceLinked, isScopeField, professionalConfirmed, SCOPE_HELP, sectionDIssueStatus } from "../professional";
+import { evidenceLinked, evidenceRecorded, isScopeField, practiceFromReview, professionalConfirmed, SCOPE_HELP, sectionDIssueStatus } from "../professional";
 import { failureKind } from "../rules";
 import { useCase } from "../store";
 import type { Case } from "../types";
@@ -230,7 +230,9 @@ function ProfessionalAnswers() {
         }
         const scopeField = isScopeField(q.field) ? q.field : null;
         const notSure = c.questions.some((question) => question.id === `q-scope-${q.field}` && !question.answer);
-        const value = notSure ? "not-sure" : current === true ? "yes" : current === false ? "no" : "";
+        const recorded = [...c.facts].reverse().find((fact) => fact.field === `professional.${q.field}` && fact.kind !== "proposed");
+        const chosen = recorded?.value;
+        const value = notSure ? "not-sure" : chosen === true ? "yes" : chosen === false ? "no" : "";
         return (
           <div key={q.field} className={`field full ${value ? "" : "is-empty"}`}>
             <label htmlFor={id}>{q.label}</label>
@@ -267,7 +269,7 @@ function ProfessionalAnswers() {
  * GET /cases/{id}/section-d/issues is requested first and shown when that route exists.
  */
 export function Recommendations() {
-  const { c, engineId, dispatch } = useCase();
+  const { c, engineId, dispatch, factsEpoch } = useCase();
   const provisions = answeredYes(c).map((a) => a.provision).filter((id) => /^\d/.test(id)).join("|");
   const [attempt, setAttempt] = useState(0);
   const [load, setLoad] = useState<Load>(IDLE);
@@ -314,8 +316,11 @@ export function Recommendations() {
           engine.processFields(engineId, ctl.signal),
         ]);
         if (ctl.signal.aborted) return;
-        const practiceTrue = professional.required === "yes" || Boolean(issues?.some((issue) => issue.practice_of_engineering.value === true));
-        const practice = practiceTrue ? true : professional.required === "no" ? false : "unknown";
+        const practice = practiceFromReview(
+          c.practiceOfEngineering,
+          professional.required,
+          Boolean(issues?.some((issue) => issue.practice_of_engineering.value === true)),
+        );
         if (c.practiceOfEngineering !== practice) dispatch({ type: "notePractice", value: practice });
         setLoad({
           phase: "live",
@@ -342,7 +347,7 @@ export function Recommendations() {
       }
     })();
     return () => ctl.abort();
-  }, [engineId, provisions, attempt, c.practiceOfEngineering, dispatch]);
+  }, [engineId, provisions, attempt, factsEpoch, c.practiceOfEngineering, dispatch]);
 
   const flag = load.professional?.required;
 
@@ -438,7 +443,7 @@ export function Recommendations() {
               <div className="card-head">
                 <span className="article-id">{item.provision_id}</span>
                 <span className="label-pill">
-                  <span className={`status-dot ${item.status === "provided" ? "done" : "warning"}`} />
+                  <span className={`status-dot ${evidenceRecorded(item.status) ? "done" : "warning"}`} />
                   {item.status}
                 </span>
               </div>

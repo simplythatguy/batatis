@@ -139,7 +139,7 @@ Scoring question, from `docs/judging-rubric.md`: "Can it review a completed appl
 - Route: `GET /cases/{id}/gaps` in [`engine/routes_case.py`](../../engine/routes_case.py).
 - Tests for those classes: [`engine/tests/test_completeness.py`](../../engine/tests/test_completeness.py). This checklist does not restate a pass count; none is written beside the file.
 - Planted-defect protocol only: [`evals_dev/planted/SPEC.md`](../../evals_dev/planted/SPEC.md). The spec says generating the seeded PDFs waits for form export. The directory contains that spec and no planted applications.
-- Applicant completeness chrome: [`web/src/screens/Application.tsx`](../../web/src/screens/Application.tsx). "Check completeness" stays disabled while blocking gaps from the client model remain. The dialog says filling the official SCC form arrives with the engine, and that the check is administrative. There is no export button on this screen.
+- Applicant completeness chrome: [`web/src/screens/Application.tsx`](../../web/src/screens/Application.tsx). "Check completeness" stays available while blocking gaps remain, so the missing items can be reviewed. The official PDF stays closed until those gaps are cleared. The dialog says filling the official SCC form arrives with the engine, and that the check is administrative. There is no export button on this screen.
 - Officer screen: [`web/src/screens/Placeholders.tsx`](../../web/src/screens/Placeholders.tsx) renders "Not built yet" for officer review. The accuracy page in the same file says "No evaluation runs yet".
 
 ### Open pull requests

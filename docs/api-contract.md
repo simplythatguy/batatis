@@ -11,12 +11,12 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `POST /cases` | `201` Case. Body is optional: `title`, `jurisdiction` (`id`, `name`, `authority`). |
 | `GET /cases/{case_id}` | Case, or `404` with detail `case not found`. |
 | `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. |
-| `POST /cases/{case_id}/identify` | Ranked article cards. Does not write `provisions`. See Identify. |
-| `GET /cases/{case_id}/identify` | The stored card payload from the last identify call, or `404` detail `identify result not found`. |
-| `GET /cases/{case_id}/identify/stream` | Query `prose`. Server-sent stage events. See Identify. |
-| `POST /cases/{case_id}/identify/{provision_id}/decision` | Body `{ "decision": "yes" \| "no" \| "not_sure" }`. Returns a `SectionCRow`. See Identify. |
-| `GET /cases/{case_id}/information-request` | Officer draft: `{ "case_id", "items" }`. Each `not_sure` decision is an item with `id`, `provision_id`, and `text`. |
-| `POST /cases/{case_id}/identify/confirm` | Body `{ "provisions": ["…"] }`. Writes `provisions` and Section C after a codedb check. |
+| `POST /cases/{case_id}/identify` | Served once PR #12 merges. Ranked article cards. Does not write `provisions`. See Identify. |
+| `GET /cases/{case_id}/identify` | Served once PR #12 merges. The stored card payload from the last identify call, or `404` detail `identify result not found`. |
+| `GET /cases/{case_id}/identify/stream` | Served once PR #12 merges. Query `prose`. Server-sent stage events. See Identify. |
+| `POST /cases/{case_id}/identify/{provision_id}/decision` | Served once PR #12 merges. Body `{ "decision": "yes" \| "no" \| "not_sure" }`. Returns a `SectionCRow`. See Identify. |
+| `GET /cases/{case_id}/information-request` | Served once PR #12 merges. Officer draft: `{ "case_id", "items" }`. Each `not_sure` decision is an item with `id`, `provision_id`, and `text`. |
+| `POST /cases/{case_id}/identify/confirm` | Served once PR #12 merges. Body `{ "provisions": ["…"] }`. Writes `provisions` and Section C after a codedb check. |
 | `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`. |
 | `GET /code/search` | Query `q`, `division` (`A` `B` or `C`, default `B`), `limit` (1–100, default 20). Hits as returned: `id`, `division`, `level`, `article_title`, `title`, `text`, `citation`. |
 | `GET /code/{provision_id}` | Query `division` optional. The codedb provision record, or `404` detail `provision not found`. `400` when the id is invalid or the division is ambiguous. |
@@ -26,7 +26,7 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `GET /cases/{case_id}/professional` | `required` and `general_required`: `yes`, `no`, or `depends`. Also `reasons`, `questions`, `scope_note`. |
 | `GET /ccmc/search` | Query `q` (1–200 characters) and `limit` (1–50, default 20). `422` on a rejected query. `503` when the registry is unavailable; that detail is the registry error text. |
 | `GET /cases/{case_id}/process-fields` | Process-field list. Empty when the pathway is an acceptable solution. |
-| `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` when the blank form file is missing; that detail is the form error text. `500` on other export failures. |
+| `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` when the blank form file is missing; detail is exactly `SCC variance form not found`. `500` on other export failures; detail is exactly `The SCC variance form could not be exported.` |
 
 A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed`, `unconfirmed`, `open`, or `unknown`. A `proposed` fact cannot be `confirmed`.
 
@@ -37,6 +37,8 @@ Gap `severity` is `blocking` or `warning`.
 The fixed 404 detail strings are `case not found` and `provision not found`. A case that has not been identified is `identify result not found`.
 
 ## Identify
+
+Served once PR #12 merges. These routes are not on this branch or on dev yet.
 
 `POST /cases/{id}/identify` is the primary call. Body:
 
@@ -246,6 +248,6 @@ A live response copies the citation string the code database returns. The placeh
 | 400 | Invalid provision id, or an ambiguous division on `GET /code/{provision_id}`. |
 | 409 | Export is blocked. Detail is the object under Routes. |
 | 422 | A `proposed` fact was sent as `confirmed`, or `GET /ccmc/search` rejected the query. |
-| 500 | Export failed for a reason other than a missing form. |
-| 503 | The code database file is absent. Body is exactly `{"detail": "code database not found"}`. Raised only by `CodeDbMissing` in `engine/codes.py`. Not a `FileNotFoundError`. The body has no server path. A missing blank form and an unavailable CCMC registry are also HTTP 503, and their detail is that error's own text. |
+| 500 | Export failed for a reason other than a missing form. Detail is exactly `The SCC variance form could not be exported.` |
+| 503 | The code database file is absent. Body is exactly `{"detail": "code database not found"}`. Raised only by `CodeDbMissing` in `engine/codes.py`. Not a `FileNotFoundError`. The body has no server path. A missing blank form is HTTP 503 with detail exactly `SCC variance form not found`. An unavailable CCMC registry is also HTTP 503, and its detail is the registry error text. |
 | 200 | An unknown Division B token on this issues route does not 404. It returns `provision: null` and a question. |

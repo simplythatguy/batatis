@@ -16,7 +16,7 @@ export function Accuracy() {
             Model-checked means a proposal is on the ledger with a confidence and a source. It is not confirmed until you accept it, and it is not a finding that the design complies or is safe.
           </p>
           <p>
-            Engineer-needed flag: 55 of 60 agreed on the model-checked development set (in-sample). 1 case was under-flagged. 13 unknowns were sent to the applicant. That is the Section D issues evaluation, not a score for this case.
+            Engineer-needed flag, shipped rules_plus_unknown: 50 of 60 in-sample, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), 27 unknowns sent to the applicant; held-out 7 of 8 blind (pre-fix), post-fix 4 of 8 (no longer blind); model-checked, not human-verified. That is the Section D issues evaluation, not a score for this case.
           </p>
           <p>
             <StatusPill dot="warning">{proposed.length} still proposed</StatusPill>{" "}

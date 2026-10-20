@@ -73,6 +73,24 @@ function roleConfirmed(value: string): boolean {
   return ROLE_VALUES.has(tokens.join(" "));
 }
 
+/**
+ * An applicant's Yes or No cannot turn a raised practice flag off.
+ * The engine's "no" does not either. A seal or registration number is what clears the gap.
+ */
+export function practiceFromReview(
+  current: true | false | "unknown" | undefined,
+  required: "yes" | "no" | "depends",
+  issueSaysYes: boolean,
+): true | false | "unknown" {
+  if (issueSaysYes || required === "yes" || current === true) return true;
+  return current === false ? false : "unknown";
+}
+
+/** #23 will rename gap status `provided` to `evidence_listed`. Both mean the applicant listed evidence. */
+export function evidenceRecorded(status: string | null | undefined): boolean {
+  return status === "provided" || status === "evidence_listed";
+}
+
 /** Engineer or architect, plus a seal or registration number, confirmed by the applicant. */
 export function professionalConfirmed(facts: ProfessionalFact[]): boolean {
   const role = applicantText(facts, ROLE_FIELDS);

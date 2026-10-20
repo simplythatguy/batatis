@@ -29,7 +29,7 @@ export function Application({ route }: { route: Route }) {
   const [reasons, setReasons] = useState<string[]>([]);
   const [tech, setTech] = useState("");
   const [statusText, setStatusText] = useState("Review missing or unconfirmed information before downloading the application PDF.");
-  const [file, setFile] = useState<{ url: string; name: string; draft: boolean } | null>(null);
+  const [file, setFile] = useState<{ url: string; name: string; draft: boolean; downloadedAt: Date } | null>(null);
   const blocking = gaps.filter((g) => g.severity === "blocking");
   const warnings = gaps.filter((g) => g.severity === "warning").length;
   const example = EXAMPLES.find((ex) => ex.id === c.exampleId);
@@ -89,6 +89,10 @@ export function Application({ route }: { route: Route }) {
   }
 
   async function prepare(draft: boolean) {
+    setDraftIntent(draft);
+    setReasons([]);
+    setTech("");
+    forgetFile();
     if (c.exampleId) {
       const note = "Example PDFs are not yet labelled. Download the example text record instead.";
       setStage("blocked");
@@ -105,10 +109,6 @@ export function Application({ route }: { route: Route }) {
     }
     const ctl = new AbortController();
     abortRef.current = ctl;
-    setDraftIntent(draft);
-    setReasons([]);
-    setTech("");
-    forgetFile();
     setStage("checking");
     setStatusText(`Saving and reviewing ${subject}…`);
     const caseId = await saveDraft();
@@ -125,7 +125,6 @@ export function Application({ route }: { route: Route }) {
       const got = await engine.exportPdf(caseId, draft, ctl.signal);
       if (ctl.signal.aborted) return;
       const url = URL.createObjectURL(got.blob);
-      setFile({ url, name: got.filename, draft });
       if (draft) {
         const note = "Your draft PDF is ready. This draft may have missing or unconfirmed information.";
         setCompletenessRecord({ label: "Draft", reasons: [], note });
@@ -134,6 +133,7 @@ export function Application({ route }: { route: Route }) {
       document.body.append(a);
       a.click();
       a.remove();
+      setFile({ url, name: got.filename, draft, downloadedAt: new Date() });
       setStage("ready");
       setStatusText(draft ? "Your draft PDF is ready." : "Your application PDF is ready.");
     } catch (e) {
@@ -160,12 +160,22 @@ export function Application({ route }: { route: Route }) {
   }
 
   function downloadRecord() {
+    const pdfLines = file
+      ? [`Application PDF: downloaded ${file.draft ? "draft PDF " : ""}${file.name} at ${file.downloadedAt.toLocaleString()}.`]
+      : stage === "blocked"
+        ? ["Application PDF: blocked. Reasons:", ...(reasons.length ? reasons : [statusText]).map((reason) => `- ${reason}`)]
+        : stage === "error"
+          ? ["Application PDF: could not be prepared.", ...(statusText !== "The PDF could not be prepared." ? [statusText] : [])]
+          : ["Application PDF: not prepared in this session."];
     const text = [
       ...(c.exampleId ? [`EXAMPLE — ${exampleLabel}`, "For practice. Not for submission.", ""] : []),
       c.title,
       c.description,
       "",
       ...c.facts.map((f) => `${factLabel(f.field)}: ${f.value ?? ""} (${f.kind}, ${f.status})`),
+      "",
+      "Application PDF",
+      ...pdfLines,
       "",
       "A text record is not the Safety Codes Council form.",
     ].join("\n");
@@ -177,7 +187,8 @@ export function Application({ route }: { route: Route }) {
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 0);
-    setStatusText(`Download started: ${name}. A text record is not the Safety Codes Council form.`);
+    const line = `Download started: ${name}. A text record is not the Safety Codes Council form.`;
+    setStatusText((current) => (stage === "blocked" || stage === "error" ? `${current} ${line}` : line));
   }
 
   function downloadAgain() {
@@ -200,11 +211,12 @@ export function Application({ route }: { route: Route }) {
   }
 
   const busy = stage === "checking" || stage === "preparing";
+  const gapCount = `${blocking.length} required item${blocking.length === 1 ? "" : "s"} need attention. Check completeness stays available so you can review them. The official PDF stays closed until they are cleared.`;
   const footerLine =
     gapsSource === "idle"
-      ? `Your application has not been reviewed online yet. ${blocking.length} required item${blocking.length === 1 ? "" : "s"} need attention.`
+      ? `Your application has not been reviewed online yet. ${gapCount}`
       : blocking.length
-        ? `${blocking.length} required item${blocking.length === 1 ? "" : "s"} need attention.`
+        ? gapCount
         : gapsSource === "engine"
           ? `No blocking administrative items found. Review any open questions before downloading.${warnings ? ` ${warnings} open question${warnings === 1 ? "" : "s"}.` : ""}`
           : "";

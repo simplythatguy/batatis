@@ -130,6 +130,56 @@ const SUBJECTS: { re: RegExp; topic: string; departure: string; ask: string }[] 
   },
 ];
 
+const ADMIN_LINES: { field: "owner" | "representative" | "mailingAddress" | "municipalAddress" | "legalDescription" | "permit"; re: RegExp }[] = [
+  { field: "owner", re: /^(?:owner(?: name)?)\s*[:\-]\s*(.+)$/i },
+  { field: "representative", re: /^(?:representative|rep)\s*[:\-]\s*(.+)$/i },
+  { field: "mailingAddress", re: /^(?:mailing address)\s*[:\-]\s*(.+)$/i },
+  { field: "municipalAddress", re: /^(?:municipal address|civic address|site address|site|address)\s*[:\-]\s*(.+)$/i },
+  { field: "legalDescription", re: /^(?:legal description|legal)\s*[:\-]\s*(.+)$/i },
+  { field: "permit", re: /^(?:permit(?:\s+number|\s*#)?)\s*[:\-]\s*(.+)$/i },
+];
+
+export interface ExtractedAdmin {
+  owner?: string;
+  representative?: string;
+  mailingAddress?: string;
+  municipalAddress?: string;
+  legalDescription?: string;
+  permit?: string;
+  narrative: string;
+}
+
+/** Pull labeled owner, address, legal description, and permit lines out of pasted text. */
+export function extractAdmin(text: string): ExtractedAdmin {
+  const found: Omit<ExtractedAdmin, "narrative"> = {};
+  const kept: string[] = [];
+  for (const line of text.split(/\n/)) {
+    const trimmed = line.trim();
+    const hit = ADMIN_LINES.find((label) => label.re.test(trimmed) && !found[label.field]);
+    if (hit) {
+      found[hit.field] = trimmed.match(hit.re)?.[1]?.trim() ?? "";
+      continue;
+    }
+    kept.push(line);
+  }
+  const rest = kept.join("\n");
+  if (!found.permit) {
+    const permit = rest.match(/\b(BP-[A-Za-z0-9-]+)\b/);
+    if (permit) found.permit = permit[1];
+  }
+  if (!found.legalDescription) {
+    const legal = rest.match(/\b(Lot\s+\S+,?\s*Block\s+\S+,?\s*Plan\s+\S+)/i);
+    if (legal) found.legalDescription = legal[1].replace(/\s+/g, " ").trim();
+  }
+  if (!found.municipalAddress) {
+    const address = rest.match(
+      /\b(\d{1,6}\s+[A-Za-z0-9.'-]+(?:\s+[A-Za-z0-9.'-]+){0,4}\s(?:Avenue|Street|Crescent|Way|Road|Drive|Boulevard)\s+(?:NW|NE|SW|SE)(?:,\s*[A-Za-z. ]+)?)/,
+    );
+    if (address) found.municipalAddress = address[1].replace(/\s+/g, " ").trim();
+  }
+  return { ...found, narrative: rest.trim() };
+}
+
 function pointed(id: string, field: string, value: string): Fact {
   return {
     id,
@@ -191,10 +241,29 @@ export function applyDescription(c: Case, text: string): Case {
   const sentence = trimmed.split(/(?<=[.!?])\s+/)[0] ?? trimmed;
   const title = sentence.length > 72 ? `${sentence.slice(0, 69)}…` : sentence;
   facts.push(pointed("desc-description", "project.description", trimmed));
+  const extracted = extractAdmin(trimmed);
+  const adminFields = ["owner", "representative", "mailingAddress", "municipalAddress", "legalDescription", "permit"] as const;
+  let pulled = false;
+  for (const field of adminFields) {
+    const value = extracted[field];
+    if (!value) continue;
+    pulled = true;
+    const existing = facts.find((f) => f.field === field);
+    if (existing && isUserKept(existing)) continue;
+    const rest = facts.filter((f) => f.field !== field);
+    rest.push(pointed(`desc-${field}`, field, value));
+    facts.length = 0;
+    facts.push(...rest);
+  }
   const alt = facts.find((f) => f.field === "alternative");
-  if (!alt || alt.source.ref === FROM_YOU) {
+  const altText = pulled ? extracted.narrative : trimmed;
+  if ((!alt || alt.source.ref === FROM_YOU) && altText) {
     const rest = facts.filter((f) => f.field !== "alternative");
-    rest.push(pointed("desc-alternative", "alternative", trimmed));
+    rest.push(pointed("desc-alternative", "alternative", altText));
+    facts.length = 0;
+    facts.push(...rest);
+  } else if (pulled && alt?.source.ref === FROM_YOU && !altText) {
+    const rest = facts.filter((f) => f.field !== "alternative");
     facts.length = 0;
     facts.push(...rest);
   }

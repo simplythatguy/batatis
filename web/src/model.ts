@@ -470,10 +470,22 @@ export function reducer(c: Case, a: Action): Case {
           ],
         };
       }
-      return reducer(
-        { ...c, facts, questions },
-        { type: "setProfessionalFact", field: a.field, value: a.answer === "yes" },
-      );
+      const quote = a.answer;
+      return {
+        ...c,
+        facts: [
+          ...facts,
+          {
+            id: newId("f"),
+            field: `professional.${a.field}`,
+            value: a.answer === "yes",
+            kind: "pointed",
+            status: "unconfirmed",
+            source: { type: "user_click", ref: "Your answer", quote },
+          },
+        ],
+        questions,
+      };
     }
     case "notePractice":
       return { ...c, practiceOfEngineering: a.value };

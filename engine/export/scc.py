@@ -107,6 +107,7 @@ _ALIASES = {
     'mailing_address': ('mailing_address', 'mailingAddress'),
     'municipal_address': ('municipal_address', 'municipalAddress', 'civic_address', 'address'),
     'legal_description': ('legal_description', 'legalDescription', 'section_b.legal_description'),
+    'permit_number': ('permit_number', 'permit', 'section_b.permit_number'),
     'alternative_description': ('alternative_description', 'alternative'),
 }
 _FIELD_KEYS = {alias: key for key, aliases in _ALIASES.items() for alias in aliases}

@@ -291,9 +291,9 @@ export function Officer() {
               </p>
             )}
             {!pending && (
-              <div className="field">
+              <div className="field request-field">
                 <label htmlFor="request-text">Request</label>
-                <textarea id="request-text" readOnly rows={12} value={request} />
+                <textarea id="request-text" className="mono" readOnly rows={12} value={request} />
               </div>
             )}
             <div className="btn-row">

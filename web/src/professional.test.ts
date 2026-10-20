@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { emptyCase } from "./intake.ts";
 import { getGaps, reducer } from "./model.ts";
-import { sectionDIssueStatus } from "./professional.ts";
+import { evidenceRecorded, practiceFromReview, sectionDIssueStatus } from "./professional.ts";
 
 test("prescriptive yes and reserved judgement no leave needs_professional open", () => {
   let c = reducer(emptyCase("homebuilder"), { type: "notePractice", value: true });
@@ -21,6 +21,30 @@ test("prescriptive yes and reserved judgement no leave needs_professional open",
     sectionDIssueStatus({ practice: true, facts: c.facts, evidenceLinked: true }),
     "evidence_listed",
   );
+});
+
+test("applicant No/Yes/Yes/No does not clear needs-professional", () => {
+  let c = reducer(emptyCase("contractor"), { type: "notePractice", value: true });
+  const answers = [
+    ["part4_design", "no"],
+    ["ahj_requires_professional", "yes"],
+    ["special_safety_concerns", "yes"],
+    ["roof_trusses", "no"],
+  ] as const;
+  for (const [field, answer] of answers) {
+    c = reducer(c, { type: "answerScope", field, answer });
+  }
+  assert.ok(getGaps(c).some((gap) => gap.id === "needs-professional"));
+  assert.equal(c.practiceOfEngineering, true);
+  for (const [field] of answers) {
+    const fact = c.facts.find((item) => item.field === `professional.${field}`);
+    assert.equal(fact?.status, "unconfirmed");
+  }
+  assert.equal(practiceFromReview(true, "no", false), true);
+  assert.equal(practiceFromReview(undefined, "no", false), "unknown");
+  assert.equal(evidenceRecorded("provided"), true);
+  assert.equal(evidenceRecorded("evidence_listed"), true);
+  assert.equal(evidenceRecorded("not provided"), false);
 });
 
 test("a later evidence save keeps the earlier document", () => {

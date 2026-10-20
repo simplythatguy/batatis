@@ -269,7 +269,7 @@ export interface SectionDPlan {
     id: string;
     provision_id: string;
     citation: string;
-    status: "not provided" | "provided";
+    status: "not provided" | "provided" | "evidence_listed";
     objective: string | null;
     function: string | null;
     performance_issue: string;

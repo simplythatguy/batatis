@@ -65,6 +65,8 @@ interface Store {
   /** Latest save/review outcome. Safe to read after `await saveDraft()` from an older render. */
   readSync: () => { reviewed: boolean; detail: string };
   engineId: string | null;
+  /** Increments after facts are pushed, so Section D can reload on the new facts. */
+  factsEpoch: number;
   savedNote: string;
   phase: "who" | "case";
   /** Shown after Reset so the clear is visible. */
@@ -135,6 +137,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const [resetNote, setResetNote] = useState(loaded.note);
   const [c, dispatch] = useReducer(reducer, loaded.case);
   const [engineId, setEngineId] = useState<string | null>(null);
+  const [factsEpoch, setFactsEpoch] = useState(0);
   const [engineGaps, setEngineGaps] = useState<EngineGap[]>([]);
   const startsBlank = loaded.phase !== "case" || (!loaded.case.facts.length && !loaded.case.authority);
   const [gapsSource, setGapsSource] = useState<Store["gapsSource"]>(startsBlank ? "idle" : "loading");
@@ -163,6 +166,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       if (c.authority) id = await syncJurisdiction(id, c.authority, c.title);
       setEngineId(id);
       const factError = await pushFacts(id, c.facts);
+      setFactsEpoch((n) => n + 1);
       const got = await refreshGaps(id);
       if (got.error && /case not found/i.test(got.error)) {
         clearEngineSession();
@@ -246,6 +250,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       syncOk,
       readSync: () => syncState.current,
       engineId,
+      factsEpoch,
       savedNote,
       phase,
       resetNote,
@@ -293,7 +298,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     }),
     // sync closes over the latest case via the render that built it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [c, gaps, engineGaps, gapsSource, gapsNote, reviewDetail, syncOk, engineId, savedNote, phase, resetNote, pendingExampleId, completenessRecord],
+    [c, gaps, engineGaps, gapsSource, gapsNote, reviewDetail, syncOk, engineId, factsEpoch, savedNote, phase, resetNote, pendingExampleId, completenessRecord],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

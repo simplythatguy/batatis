@@ -1021,6 +1021,17 @@ blockquote.cite-block {
   box-sizing: border-box;
 }
 
+.request-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+#request-text {
+  min-height: 16rem;
+  resize: vertical;
+}
+
 /* —— Narrow screens —— */
 
 @media (max-width: 1080px) {
