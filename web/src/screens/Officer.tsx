@@ -44,7 +44,15 @@ function reportFrom(body: CompletenessReport): ReportState {
 
 export function Officer() {
   const { c, gaps, gapsSource, gapsNote, reviewDetail, saveDraft, engineGaps, completenessRecord, dispatch } = useCase();
-  const blank = !c.exampleId && !c.description.trim() && c.facts.length === 0 && !c.authority;
+  const openNotSure = notSureQuestions(c.questions);
+  const ranked = rankingQuestions(c.questions);
+  const blank =
+    !c.exampleId &&
+    !c.description.trim() &&
+    c.facts.length === 0 &&
+    !c.authority &&
+    openNotSure.length === 0 &&
+    ranked.length === 0;
   const [attempt, setAttempt] = useState(0);
   const [settled, setSettled] = useState(blank);
   const [report, setReport] = useState<ReportState>({ phase: "loading" });
@@ -125,8 +133,6 @@ export function Officer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [blank, attempt]);
 
-  const openNotSure = notSureQuestions(c.questions);
-  const ranked = rankingQuestions(c.questions);
   const flags = officerProfessionalLines(professionalChecked, c.practiceOfEngineering, c.facts);
   const exampleLabel = c.exampleId ? (EXAMPLES.find((ex) => ex.id === c.exampleId)?.label ?? "Loaded example") : undefined;
   const reportNote = report.phase === "ready" ? report.note : null;

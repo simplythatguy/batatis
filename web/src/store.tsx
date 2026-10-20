@@ -188,7 +188,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       const evidenceError = await pushListedEvidence(id, c.listedEvidence ?? []);
       const deleted = await pushDeletedEvidence(id, c.deletedEvidence ?? []);
       if (deleted.acked.length) dispatch({ type: "ackEvidenceDeletion", ids: deleted.acked });
-      setFactsEpoch((n) => n + 1);
+      if (!factError) setFactsEpoch((n) => n + 1);
       const got = await refreshGaps(id);
       if (got.error && /case not found/i.test(got.error)) {
         clearEngineSession();

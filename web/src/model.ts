@@ -660,7 +660,7 @@ export function reducer(c: Case, a: Action): Case {
         field: `professional.${a.field}`,
         value: a.answer === "yes",
         kind: "pointed" as const,
-        status: "unconfirmed" as const,
+        status: "confirmed" as const,
         source: { type: "user_click" as const, ref: "Your answer", quote },
       };
       const authorityOnly = a.answer === "yes" && (AUTHORITY_ONLY_FIELDS as readonly string[]).includes(a.field);
@@ -685,6 +685,8 @@ export function reducer(c: Case, a: Action): Case {
       return { ...c, deletedEvidence: (c.deletedEvidence ?? []).filter((id) => !gone.has(id)) };
     }
     case "notePractice":
+      // An applicant answer, including one the engine reads as "no", must not store false.
+      if (a.value === false) return c.practiceOfEngineering === true ? c : { ...c, practiceOfEngineering: "unknown" };
       return { ...c, practiceOfEngineering: a.value };
     case "setProfessionalFact": {
       const field = `professional.${a.field}`;
@@ -703,6 +705,26 @@ export function reducer(c: Case, a: Action): Case {
 }
 
 export const candidateById = (c: Case, id: string): Candidate | undefined => c.candidates.find((x) => x.id === id);
+
+export type SectionDView = {
+  phase: "idle" | "loading" | "live" | "error" | "unreachable";
+  note: string;
+  plan: unknown;
+  issues: unknown;
+  professional: unknown;
+  fields: unknown[];
+  issuesNote: string | null;
+};
+
+/** A refresh after facts are pushed keeps the screen the applicant is filling in. */
+export function sectionDWhileRefreshing<T extends SectionDView>(previous: T): T {
+  const hasData = previous.plan != null || previous.issues != null || previous.professional != null;
+  return {
+    ...previous,
+    phase: "loading",
+    note: hasData ? "Updating Section D…" : "Loading Section D…",
+  };
+}
 
 /** Changes when a Section D answer, evidence item, or withdrawal is saved. */
 export function sectionDRefreshKey(c: Case): string {
