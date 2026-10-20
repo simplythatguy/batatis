@@ -150,7 +150,7 @@ Scoring question, from `docs/judging-rubric.md`: "Can it review a completed appl
   - The body says variant A still misses generic risk (D09 1/2), unrelated mitigations (D10 1/2), contradictions (D14 0/2), and relevance (D15 0/2), and that D05 and D07 are absent from that table because they need the code database.
   - Pytest written in the body, without a code database: 12 passed across `test_bulletin_gates.py`, `test_portal_package.py`, `test_jurisdiction_wording.py`, and `test_schema_export.py`.
   - The body says the draft is not ready to merge.
-- [#16](https://github.com/simplythatguy/batatis/pull/16). #16 is not merged and is CHANGES @ `27bec3e`, not re-tested. "Download draft record" saves a .txt draft record, and only once every gap is closed. "Check completeness" downloads the engine-filled Safety Codes Council variance form PDF (a 7-page PDF: the 5-page SCC form plus appendix) behind a "not a finding that the design complies" dialog. The body also says `GET /gaps` returned 503 when `BATATIS_CODEDB` was missing.
+- [#16](https://github.com/simplythatguy/batatis/pull/16). #16 is not merged and is CHANGES @ `27bec3e`, not re-tested. At #16 @ `579cd2c`, "Download draft record" saves a .txt draft record, and only once every gap is closed. "Check completeness" downloads the engine-filled Safety Codes Council variance form PDF (the 5-page Oct 6, 2026 form plus engine-generated attachment pages (7 for Unc's 3b case; not the brief's Appendix 1)) behind a "not a finding that the design complies" dialog. The body also says `GET /gaps` returned 503 when `BATATIS_CODEDB` was missing.
 
 ### GAP
 
@@ -182,7 +182,7 @@ Scoring question, from `docs/judging-rubric.md`: "Is there a realistic path to b
 
 ### On `dev`
 
-- Research schedule only: [`docs/research/2026-10-20-vision/2-week-build.md`](../research/2026-10-20-vision/2-week-build.md), dated 2026-10-20. It names a build window of 21–29 October 2026, gates G1–G5, a cut order, and a day-3 skeleton deploy. It is a research note. It is not a submission implementation plan, and the gates in it are not results.
+- The plans are on dev, merged via [#18](https://github.com/simplythatguy/batatis/pull/18) as `64d5027`. Research schedule: [`docs/research/2026-10-20-vision/2-week-build.md`](../research/2026-10-20-vision/2-week-build.md), dated 2026-10-20. It names a build window of 21–29 October 2026, gates G1–G5, a cut order, and a day-3 skeleton deploy. It is a research note. It is not a submission implementation plan, and the gates in it are not results.
 - [`docs/user-testing/`](../user-testing/), merged in pull request [#6](https://github.com/simplythatguy/batatis/pull/6) at `f7fcf4c`. Round plan, think-aloud script, SUS, a consent form marked DRAFT, and an officer timing protocol. The folder says no real-user or officer sessions have been run, simulated sessions are labelled SIMULATED, and every number in a results table is blank until a session takes place. Round 1 is planned as 3 applicants. Round 1b is planned as 1–2 officers.
 
 ### Open pull requests
@@ -199,7 +199,7 @@ Scoring question, from `docs/judging-rubric.md`: "Is there a credible company he
 
 ### On `dev`
 
-- Research notes only: [`docs/research/2026-10-20-vision/C-market-provinces-business.md`](../research/2026-10-20-vision/C-market-provinces-business.md). Header: "Research only." Claim labels in that file are VERIFIED, VENDOR CLAIM, ESTIMATE, and UNVERIFIED.
+- The plans are on dev, merged via [#18](https://github.com/simplythatguy/batatis/pull/18) as `64d5027`. Research notes: [`docs/research/2026-10-20-vision/C-market-provinces-business.md`](../research/2026-10-20-vision/C-market-provinces-business.md). Header: "Research only." Claim labels in that file are VERIFIED, VENDOR CLAIM, ESTIMATE, and UNVERIFIED.
 - Section "(a) One-page business case" is labelled "ESTIMATES unless marked". It discusses who pays, a cost-per-application anchor, and a moat. Those sentences stay inside that file's labels. This checklist does not promote them to a business plan.
 - Section 5 records the file's own reading of willingness to pay. The same file says Alberta or Canadian consultant fees for alternative solutions were still not found after that pass.
 
@@ -221,7 +221,7 @@ Scoring question, from `docs/judging-rubric.md`: "Overall user experience for bo
 
 ### Open pull requests
 
-- [#16](https://github.com/simplythatguy/batatis/pull/16). #16 is not merged and is CHANGES @ `27bec3e`, not re-tested. "Download draft record" saves a .txt draft record, and only once every gap is closed. "Check completeness" downloads the engine-filled Safety Codes Council variance form PDF (a 7-page PDF: the 5-page SCC form plus appendix) behind a "not a finding that the design complies" dialog. The body says the product surface moves to `web/`. Screenshots in that body are of a local preview.
+- [#16](https://github.com/simplythatguy/batatis/pull/16). #16 is not merged and is CHANGES @ `27bec3e`, not re-tested. At #16 @ `579cd2c`, "Download draft record" saves a .txt draft record, and only once every gap is closed. "Check completeness" downloads the engine-filled Safety Codes Council variance form PDF (the 5-page Oct 6, 2026 form plus engine-generated attachment pages (7 for Unc's 3b case; not the brief's Appendix 1)) behind a "not a finding that the design complies" dialog. The body says the product surface moves to `web/`. Screenshots in that body are of a local preview.
 - [#11](https://github.com/simplythatguy/batatis/pull/11). The body says wire fields on `Jurisdiction` stay `id`, `name`, and `authority`, and that "authority having jurisdiction" wording follows IB-2026-10-16. That wording change is not on `dev`.
 
 ### GAP
