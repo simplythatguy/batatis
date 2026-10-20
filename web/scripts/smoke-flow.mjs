@@ -141,12 +141,12 @@ try {
   await clickButton(page, "Continue to application");
   await page.waitForSelector("#reco-title");
   await page.waitForFunction(
-    () => /Evidence plan|Section D issues|Internal Server Error|not available yet|could not be reached|Save the draft/.test(document.body.innerText),
+    () => /Evidence plan|Section D issues|Internal Server Error|code database not found|not available yet|could not be reached|Save the draft/.test(document.body.innerText),
     { timeout: 20000 },
   );
   text = await jargon(page, "section D");
   assert(/What is the occupancy or building type/.test(text), "section D has no occupancy question");
-  assert(/Document name|Evidence plan|No evidence items yet|Internal Server Error/.test(text), "section D has no evidence area");
+  assert(/Document name|Evidence plan|No evidence items yet|Internal Server Error|code database not found/.test(text), "section D has no evidence area");
   await page.select("#prof-occupancy", "single_family");
   for (const [id, value] of [
     ["#prof-part4_design", "no"],

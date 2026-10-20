@@ -1,8 +1,79 @@
 # API contract
 
-## Section D — evidence issues
+Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind).
 
-Engineer-needed flag: 55/60 agreement on the model-checked dev set (in-sample), 1 under-flag, 13 unknowns sent to the applicant.
+These are the routes the engine serves. There is no `POST /cases/{id}/files`.
+
+## Routes
+
+| Method and path | Response |
+| --- | --- |
+| `POST /cases` | `201` Case. Body is optional: `title`, `jurisdiction` (`id`, `name`, `authority`). |
+| `GET /cases/{case_id}` | Case, or `404` with detail `case not found`. |
+| `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. |
+| `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`. |
+| `GET /code/search` | Query `q`, `division` (`A` `B` or `C`, default `B`), `limit` (1–100, default 20). Hits as returned: `id`, `division`, `level`, `article_title`, `title`, `text`, `citation`. |
+| `GET /code/{provision_id}` | Query `division` optional. The codedb provision record, or `404` detail `provision not found`. `400` when the id is invalid or the division is ambiguous. |
+| `POST /section-c` | Body `{ "provisions": ["…"] }`. `SectionCRow` list. `404` when a provision is missing from codedb. `400` on an invalid id. |
+| `POST /cases/{case_id}/section-d` | Body optional `{ "provisions": ["…"] }`. `{ "items", "notices" }`. Writes the case. |
+| `GET /cases/{case_id}/section-d/issues` | Issue list below. Read-only. Does not write the case. |
+| `GET /cases/{case_id}/professional` | `required` and `general_required`: `yes`, `no`, or `depends`. Also `reasons`, `questions`, `scope_note`. |
+| `GET /ccmc/search` | Query `q` (1–200 characters) and `limit` (1–50, default 20). `422` on a rejected query. `503` when the registry is unavailable; that detail is the registry error text. |
+| `GET /cases/{case_id}/process-fields` | Process-field list. Empty when the pathway is an acceptable solution. |
+| `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` when the blank form file is missing; that detail is the form error text. `500` on other export failures. |
+
+A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
+
+A fact's `source.type` is `code`, `file`, `user_text`, `drawing`, or `user_click`.
+
+Gap `severity` is `blocking` or `warning`.
+
+The fixed 404 detail strings are `case not found` and `provision not found`.
+
+### Section D plan item
+
+`POST /cases/{case_id}/section-d` returns `{ "items", "notices" }`. Each item is `engine/section_d.py` `EvidencePlanItem`. Every plan item is a provision codedb already resolved. `provision_id` and `citation` sit on the item.
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `id` | string | Stable id for this provision and attribution pair. |
+| `provision_id` | string | Division B provision id codedb resolved. |
+| `citation` | string | Citation string copied from the code database. |
+| `status` | string | `not provided` or `provided`. |
+| `attribution_status` | string | `direct`, `inherited from parent`, or `no row in the attribution table`. |
+| `attributed_via` | string or null | Parent provision when the row is inherited. |
+| `objective` | string or null | Objective code from the attribution pair. Null when the table has no row. |
+| `function` | string or null | Functional-statement code from the same pair. |
+| `bracket` | string or null | Bracket on that pair. |
+| `clauses` | string[] | Clause ids. Empty means the whole sentence. |
+| `application_note` | string or null | Attribution condition from the pair. |
+| `performance_issue` | string | What the comparison should address. Wording recommends; it does not conclude. |
+| `recommended_types` | string[] | `EvidenceType` values from `engine/section_d.py`: the seven-step ladder, then on the alternative path CCMC evaluation, ICC-ES evaluation, registered professional opinion, and engineering review. |
+| `responsible_party` | string | Names copied from linked applicant documents. Empty when none are named. |
+| `attachments` | object[] | Linked supporting documents: `id`, `title`, `file`, `item_ids`, `responsible_party`, `issuer`, `date`, `professional_seal`. |
+
+### Practice-of-engineering on `GET /professional`
+
+`required` and `general_required` are `yes`, `no`, or `depends`. `depends` means a deciding fact is missing. That route does not return `true`, `false`, or `"unknown"`.
+
+The issues route maps the same screen: `yes` → `true`, `no` → `false`, `depends` → `"unknown"`. `"unknown"` requires a question. `depends` and `"unknown"` are not the same token.
+
+### Process field ids
+
+Canonical ids on `GET /process-fields` and on an issue's `empty_process_fields` are `rationale`, `risk_assessment`, `mitigating_measures`, `assumptions_and_limits`, `maintenance_operation`, and `qualifications`.
+
+The ledger accepts `process.<id>` and the bare id. Aliases, from `engine/process_fields.py`:
+
+| Canonical id | Also accepted |
+| --- | --- |
+| `rationale` | `rationale` |
+| `risk_assessment` | `risk` |
+| `mitigating_measures` | `mitigation` |
+| `assumptions_and_limits` | `assumptions_limits`, `assumptions` |
+| `maintenance_operation` | `operation_maintenance` |
+| `qualifications` | `qualifications` |
+
+## Section D — evidence issues
 
 `GET /cases/{case_id}/section-d/issues`
 
@@ -24,10 +95,10 @@ An empty list is not returned for a case with no confirmed benchmark. That case 
 | `objective` | string or null | Objective code from the attribution row, such as `OP3.1`. Null when the table has no row. |
 | `function` | string or null | Functional-statement code from the same row, such as `F03`. |
 | `at_stake` | string | What the evidence should address. Wording recommends; it does not conclude. |
-| `recommended_evidence_types` | string[] | Evidence types in confidence-ladder order. On the alternative path the four extra types follow the ladder: CCMC evaluation, ICC-ES evaluation, registered professional opinion, engineering review. |
+| `recommended_types` | string[] | Same `EvidenceType` values as a Section D plan item, in ladder order. The field name matches `engine/section_d.py`. |
 | `practice_of_engineering` | object | Whether the stated facts indicate practice of engineering. |
 | `empty_process_fields` | object[] | Required alternative-path process fields that still have no confirmed applicant answer. Not evidence types. |
-| `status` | string | `open`, `addressed`, or `needs_professional`. |
+| `status` | string | `open`, `addressed`, or `needs_professional`. This is the issues enum. The plan route uses `not provided` or `provided`. |
 
 `empty_process_fields[]`:
 
@@ -90,7 +161,7 @@ Alternative path only, after the ladder: CCMC evaluation, ICC-ES evaluation, reg
     "objective": "OP3.1",
     "function": "F03",
     "at_stake": "Recommend evidence that addresses F03 and OP3.1 for benchmark <citation string returned by codedb for this provision>. Identify the proposed configuration, the comparison the responsible designer selects, the report passages they rely on, the differences and the limits.",
-    "recommended_evidence_types": ["manufacturer's literature", "existing STANDATA variance"],
+    "recommended_types": ["manufacturer's literature", "existing STANDATA variance"],
     "practice_of_engineering": {
       "value": "unknown",
       "rule": "2.4.1.1.(1)",
@@ -117,5 +188,10 @@ A live response copies the citation string the code database returns. The placeh
 
 | Status | When |
 | --- | --- |
-| 404 | The case does not exist, or a Division C rule the screen names is missing from the code database. |
-| 200 | An unknown Division B token does not 404. It returns `provision: null` and a question. |
+| 404 | Fixed detail strings are `case not found` and `provision not found`. Section C, the plan, and this issues route can also 404 with the text of a missing codedb provision. |
+| 400 | Invalid provision id, or an ambiguous division on `GET /code/{provision_id}`. |
+| 409 | Export is blocked. Detail is the object under Routes. |
+| 422 | A `proposed` fact was sent as `confirmed`, or `GET /ccmc/search` rejected the query. |
+| 500 | Export failed for a reason other than a missing form. |
+| 503 | The code database file is absent. Body is exactly `{"detail": "code database not found"}`. Raised only by `CodeDbMissing` in `engine/codes.py`. Not a `FileNotFoundError`. The body has no server path. A missing blank form and an unavailable CCMC registry are also HTTP 503, and their detail is that error's own text. |
+| 200 | An unknown Division B token on this issues route does not 404. It returns `provision: null` and a question. |

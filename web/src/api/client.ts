@@ -108,7 +108,7 @@ export function createEngine(base: string) {
     /** Persists confirmed provisions, re-looks up Section C, and returns the Section D plan on today's dev. */
     sectionD: (caseId: string, provisions?: string[], signal?: AbortSignal) =>
       call<SectionDPlan>("POST", `/cases/${enc(caseId)}/section-d`, provisions ? { provisions } : {}, signal),
-    /** GET /cases/{id}/section-d/issues from PR #8. 404 on today's dev. */
+    /** GET /cases/{id}/section-d/issues. A missing code database is a fixed 503, not a missing route. */
     sectionDIssues: (caseId: string, signal?: AbortSignal) =>
       call<SectionDIssue[]>("GET", `/cases/${enc(caseId)}/section-d/issues`, undefined, signal),
     /**
@@ -167,7 +167,7 @@ export interface SectionDIssue {
   objective: string | null;
   function: string | null;
   at_stake: string;
-  recommended_evidence_types: string[];
+  recommended_types: string[];
   practice_of_engineering: {
     value: boolean | "unknown";
     rule: string | null;

@@ -47,4 +47,6 @@ cd web && npm install && npm run dev
 
 ## Status
 
+Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind).
+
 Clone-ready **agent environment** (rules, skills, evals, docs) plus the Vite product in `web/`.

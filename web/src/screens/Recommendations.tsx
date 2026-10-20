@@ -410,7 +410,7 @@ export function Recommendations() {
                 </p>
                 {unknown && practice.question && <p className="field-note">{practice.question}</p>}
                 <p className="meta">
-                  Evidence types to consider: {issue.recommended_evidence_types.join(", ") || "none listed"}. Not results, and not filled in for you.
+                  Evidence types to consider: {issue.recommended_types.join(", ") || "none listed"}. Not results, and not filled in for you.
                 </p>
                 {issue.provision?.citation && <p className="mono meta">{issue.provision.citation}</p>}
                 <EvidenceAnswer itemId={issue.id} title="Name the document you are supplying for this issue. The words are yours." />

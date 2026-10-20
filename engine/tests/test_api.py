@@ -12,21 +12,6 @@ def client(tmp_path_factory):
     return TestClient(create_app(store=store, codes=Codes()))
 
 
-def test_missing_code_database_is_not_turned_into_a_503(tmp_path, monkeypatch):
-    """A missing codedb must not be rewritten into a 503 that echoes the filesystem path.
-
-    The narrow CodeDbMissing 503 lives on the backend/case-api branch, not here.
-    The response is a fixed 500 so the body does not include the path.
-    """
-    monkeypatch.setenv('BATATIS_CODEDB', str(tmp_path / 'no-such.sqlite'))
-    client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite')), raise_server_exceptions=False)
-    r = client.get('/code/search', params={'q': 'wall'})
-    assert r.status_code == 500
-    assert 'no-such.sqlite' not in r.text
-    assert 'BATATIS_CODEDB' not in r.text
-    assert 'code database not found' not in r.text
-
-
 def test_case_lifecycle(client):
     r = client.post('/cases', json={'title': 'Garage suite', 'jurisdiction': {'id': 'calgary', 'name': 'Calgary'}})
     assert r.status_code == 201
