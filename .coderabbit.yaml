@@ -1,0 +1,86 @@
+# CodeRabbit review configuration.
+# Schema: https://coderabbit.ai/integrations/schema.v2.json
+# base_branches entries are unanchored regular expressions. Anchors match the
+# branch name exactly. `dev` is not the GitHub default branch, so pull requests
+# into `dev` are skipped unless it is listed here.
+language: en-US
+
+reviews:
+  profile: assertive
+  request_changes_workflow: true
+  high_level_summary: true
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - "^dev$"
+      - "^main$"
+  path_instructions:
+    - path: "engine/**"
+      instructions: |
+        Flag a building-code citation that is not traceable to a codedb record or a checked-in source document. That includes NBC and NBC(AE) article, sentence, or clause numbers, Division A/B/C references, and STANDATA, CCMC, or ICC-ES identifiers. Do not accept a number that only appears in generated prose.
+        Flag any statement that Batatis certifies safety, technical correctness, or code compliance. Batatis reviews administrative completeness of a variance application. It must not say a design complies, is safe, or performs equivalently.
+        Flag invented Section D evidence: a professional opinion, test report, CCMC or ICC-ES listing, or engineering judgment written as if it were the applicant's evidence. Section D may say what evidence must address and when a licensed professional is required. It must not author that evidence.
+        Flag an alternative-solution path that skips risk assessment, mitigating measures, or assumptions and limits. Section C objective, functional statement, and intent must be a deterministic lookup after the article is identified, not generated text presented as code.
+        When docs/api-contract.md exists, flag a request or response shape that drifts from it. Field names, types, required fields, and status codes in the changed code must match that contract.
+    - path: "codedb/**"
+      instructions: |
+        Flag a building-code citation that is not traceable to a codedb record or a checked-in source document. That includes NBC and NBC(AE) article, sentence, or clause numbers, Division A/B/C references, and STANDATA, CCMC, or ICC-ES identifiers. Do not accept a number that only appears in generated prose.
+        Flag any statement that Batatis certifies safety, technical correctness, or code compliance. Batatis reviews administrative completeness of a variance application. It must not say a design complies, is safe, or performs equivalently.
+        Flag invented Section D evidence: a professional opinion, test report, CCMC or ICC-ES listing, or engineering judgment written as if it were the applicant's evidence. Section D may say what evidence must address and when a licensed professional is required. It must not author that evidence.
+        Flag an alternative-solution path that skips risk assessment, mitigating measures, or assumptions and limits. Section C objective, functional statement, and intent must be a deterministic lookup after the article is identified, not generated text presented as code.
+    - path: "web/**"
+      instructions: |
+        Flag a control that does nothing or has no accessible name: a button, link, or menu item with an empty handler, a missing label, or a click target that is not keyboard reachable.
+        Flag a loading or error state that is not handled. A screen must not stay on copy such as "Waiting for the engine" with no timeout, error, or retry. Empty, loading, and failed requests need a visible next step.
+        Flag user-facing copy that says the design complies with the building code, is safe, or that Batatis certified compliance. The product reviews administrative completeness only.
+        When docs/api-contract.md exists, flag a request or response shape that drifts from it. Field names, types, required fields, and status codes in the changed code must match that contract.
+    - path: "evals/**"
+      instructions: |
+        Flag a test answer, expected citation, gold label, or rubric result that is copied into a prompt, fixture instruction, or other text the model under test sees.
+        Flag unseeded randomness: random sampling, uuid4, time-based choice, or a shuffle that can change order between runs. Eval runs must use a fixed seed.
+    - path: "evals_dev/**"
+      instructions: |
+        Flag a test answer, expected citation, gold label, or rubric result that is copied into a prompt, fixture instruction, or other text the model under test sees.
+        Flag unseeded randomness: random sampling, uuid4, time-based choice, or a shuffle that can change order between runs. Eval runs must use a fixed seed.
+    - path: "**/*eval*.py"
+      instructions: |
+        Flag a test answer, expected citation, gold label, or rubric result that is copied into a prompt, fixture instruction, or other text the model under test sees.
+        Flag unseeded randomness: random sampling, uuid4, time-based choice, or a shuffle that can change order between runs. Eval runs must use a fixed seed.
+    - path: "docs/**"
+      instructions: |
+        Flag safety, code-compliance, or certification claims. Batatis reviews administrative completeness of a variance application. It must not say a design complies, is safe, or that Batatis certified compliance.
+        Flag a rubric criterion that is not in the challenge brief (docs/hackathon-problem-brief.md or the challenge PDF). Do not treat a criterion as official unless that brief states it.
+        Flag a building-code citation that is not traceable to a codedb record or a checked-in source document. That includes NBC and NBC(AE) article, sentence, or clause numbers, Division A/B/C references, and STANDATA, CCMC, or ICC-ES identifiers.
+    - path: "**"
+      instructions: |
+        Flag a committed secret: an API key, token, password, private key, or credential, including a live-looking value in an example. Flag a committed dotenv file (.env, .env.local, .env.production, and the same names with other suffixes). A template that contains only obvious placeholders and is named as an example is fine.
+  tools:
+    ruff:
+      enabled: true
+    eslint:
+      enabled: true
+    oxc:
+      enabled: true
+    reactDoctor:
+      enabled: true
+    markdownlint:
+      enabled: true
+    yamllint:
+      enabled: true
+    shellcheck:
+      enabled: true
+    actionlint:
+      enabled: true
+    zizmor:
+      enabled: true
+    gitleaks:
+      enabled: true
+    trufflehog:
+      enabled: true
+    dotenvLint:
+      enabled: true
+    osvScanner:
+      enabled: true
+    semgrep:
+      enabled: true
