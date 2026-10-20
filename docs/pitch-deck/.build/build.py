@@ -56,7 +56,7 @@ SHOTS = {  # (placeholder id, on-slide caption of 6 words or fewer, alt text, EX
      ("shot-s04-benchmark", "Identify output · draft, not in app", "Identify output and benchmark card from the draft build", True)],
  5: [("shot-s05-eval", "Evaluation results per variant · model-checked", "Evaluation results, one labelled line per variant", False)],
  6: [("shot-s06-section-d", "Section D leaves evidence blank · in review", "Alternative path with its fields left empty and the Section D card", True)],
- 7: [("shot-s07-officer", "Officer review, sample package · in review", "Officer review screen with one planted sample package", True)],
+ 7: [("shot-s07-officer", "Officer review, open application · in review", "Officer review screen reviews the applicant's open application for administrative completeness", True)],
  8: [("shot-s08-roles", "\u201cWho are you?\u201d role picker · in review", "Role picker: Manufacturer, General contractor, Homebuilder", True)],
  9: [("shot-s09-locked", "Download locked while gaps open · in review", "Application screen: Check completeness opens a review; the official PDF stays locked while blocking gaps remain", True),
      ("shot-s09-scc-form", "Engine-filled SCC form · simulated session", "Downloaded engine-filled SCC variance form PDF, unsigned, officer Part 2 blank", True)],

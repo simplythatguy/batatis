@@ -37,7 +37,7 @@
 ### Slide 7: Completeness review: built in the engine, officer screen in review
 **Time (150 wpm):** 1:23–1:35  |  **Spoken words:** 31  |  **At 150 wpm:** 12.4 s  |  **At 140 wpm:** 13.3 s
 
-> For officers, the check lists gaps by form section, never compliance. The screen, in review, shows one planted sample package; Copy request lists administrative items, not a decision. No timing data.
+> For officers, the check lists gaps by form section, never compliance. The screen, in review, reviews the applicant's open application for administrative completeness; Copy request lists administrative items, not a decision. No timing data.
 
 ### Slide 8: One tool, three kinds of first-time applicants
 **Time (150 wpm):** 1:36–1:43  |  **Spoken words:** 18  |  **At 150 wpm:** 7.2 s  |  **At 140 wpm:** 7.7 s
@@ -89,7 +89,7 @@ BP = business-plan.md, IP = implementation-plan.md, QA = judge-qa.md, PO = pitch
 | 5 | 9/11 on dev cases with gold, 9 excluded; model-checked, not human-verified | IP §4; IP §10 |
 | 6 | Where no tested system fits, designed to say an engineer's judgment is needed, and stop; never writes the evidence | Slides s6; QA Q19; PO slide 6 row |
 | 7 | Gaps by form section; never judges compliance | IP §3; IP §2 |
-| 7 | Officer screen in review, one planted sample package; Copy request lists administrative items, not a decision (PR #16; not on `dev`) | PR #20 shot 6; PO slide 7 row |
+| 7 | Officer screen in review reviews the applicant's open application for administrative completeness; Copy request lists administrative items, not a decision (PR #16; not on `dev`) | PR #20 shot 6; PO slide 7 row |
 | 7 | No timing data | IP §7; IP §11 |
 | 8 | Three fictional applicants, one form, "Not sure" on every question (PR #16, in review) | IP §9; PR #20 shots 1 and 3 |
 | 9 | In the app (PR #16, in review), once every gap is closed, Check completeness downloads the Council's Oct 6, 2026 form (not Appendix 1), filled in by the engine, unsigned, officer Part 2 blank; the "not a finding that the design complies" notice is the app's dialog | Hands-on downloads at #16 @579cd2c (the 5-page Oct 6, 2026 form plus engine-generated attachment pages, 7 in total for the simulated walkthrough case; not the brief's Appendix 1; field map scc_2026-10); IP §3; BP §1; QA Q6 |
