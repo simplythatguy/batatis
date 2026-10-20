@@ -9,9 +9,9 @@ from evals_dev.appeals.score_professional import LINE, load_addressed, predict, 
 
 from engine.section_d_flag_eval import load_codes
 from evals_dev.appeals.checks import (
-    LABEL_SOURCE, build_appeals_block, citation_resolution, professional_agreement,
+    LABEL_SOURCE, build_appeals_block, citation_resolution, engine_professional_flagger, professional_agreement,
 )
-from evals_dev.appeals.convert import WEAK_FLAG, split_sentences
+from evals_dev.appeals.convert import WEAK_FLAG, convert_record, split_sentences
 from evals_dev.appeals.mapping import attempt_mapping
 from evals_dev.deterministic_checks import CODEDB_MISSING, build_report, load_schemas, score_citations
 from evals_dev.stats import wilson_interval
@@ -22,10 +22,12 @@ PROVISION = __import__('re').compile(r'\b\d{1,2}(?:\.\d{1,3}){2,}')
 
 
 def _cases():
+    """Load the committed appeal cases in stable order."""
     return [json.loads(path.read_text()) for path in sorted(CASES.glob('scc-*.json'))]
 
 
 def test_converted_set_keeps_short_fields_and_no_2023_gold():
+    """Verify converted set keeps short fields and no 2023 gold."""
     cases = _cases()
     assert len(cases) == 25
     editions = {}
@@ -62,6 +64,7 @@ def test_converted_set_keeps_short_fields_and_no_2023_gold():
 
 
 def test_anchors_are_recorded_as_weak_labels():
+    """Verify anchors are recorded as weak labels."""
     by_id = {case['id']: case for case in _cases()}
     section_c = by_id['scc-co-0015414-2012']
     assert 'objectives and functional statements' in section_c['quotes'][0]['text']
@@ -80,6 +83,7 @@ def test_anchors_are_recorded_as_weak_labels():
 
 
 def test_same_identifier_is_not_promoted_to_a_2023_citation(tmp_path):
+    """Verify same identifier is not promoted to a 2023 citation."""
     db = tmp_path / 'codedb.sqlite'
     con = sqlite3.connect(db)
     con.execute('CREATE TABLE provisions (doc TEXT, division TEXT, id TEXT, title TEXT)')
@@ -106,6 +110,7 @@ def test_same_identifier_is_not_promoted_to_a_2023_citation(tmp_path):
 
 
 def test_professional_agreement_is_separate_and_not_forced(tmp_path):
+    """Verify professional agreement is separate and not forced."""
     cases = _cases()
     skipped = professional_agreement(cases, None)
     assert skipped['label_source'] == LABEL_SOURCE
@@ -142,8 +147,11 @@ def test_panel_conclusion_is_not_a_screen_fact_and_paraphrases_stay_summaries():
     panel = by_id['scc-co-0015416-2012']['professional_involvement']
     assert panel['facts'] == {}
     assert 'weak yes label' in panel['facts_provenance']
-    summaries = ('scc-co-0015439-2014', 'scc-co-2022-06', 'scc-co-0015427-2012')
-    excerpts = ('scc-co-2023-03', 'scc-co-0015467-2016')
+    summaries = (
+        'scc-co-0015439-2014', 'scc-co-2022-06', 'scc-co-0015427-2012',
+        'scc-co-2023-03', 'scc-co-0015467-2016',
+    )
+    excerpts = ('scc-co-2024-06', 'scc-co-0015428-2012')
     for case_id in summaries:
         quotes = [quote for quote in by_id[case_id]['quotes'] if quote['field'] == 'professional_involvement']
         assert quotes and quotes[0]['kind'] == 'summary', case_id
@@ -180,6 +188,7 @@ def test_missing_division_c_skips_the_professional_screen(monkeypatch):
 
 
 def test_practice_screen_uses_stored_facts_and_not_the_label():
+    """Verify practice screen uses stored facts and not the label."""
     cases = load_addressed()
     assert len(cases) == 12
     codes, _codedb = load_codes()
@@ -208,6 +217,7 @@ def test_practice_screen_uses_stored_facts_and_not_the_label():
 
 
 def test_repo_holds_no_appeal_pdf_or_unattributed_excerpt():
+    """Verify repo holds no appeal pdf or unattributed excerpt."""
     appeals = CASES.parent
     assert list(appeals.rglob('*.pdf')) == []
     for path in CASES.glob('*.json'):
@@ -222,6 +232,7 @@ def test_repo_holds_no_appeal_pdf_or_unattributed_excerpt():
 
 
 def test_mapped_citation_resolves_only_after_a_2023_id_is_set(tmp_path):
+    """Verify mapped citation resolves only after a 2023 id is set."""
     db = tmp_path / 'codedb.sqlite'
     con = sqlite3.connect(db)
     con.execute('CREATE TABLE provisions (doc TEXT, division TEXT, id TEXT)')
@@ -247,3 +258,71 @@ def test_mapped_citation_resolves_only_after_a_2023_id_is_set(tmp_path):
     assert unmapped['n'] == 0
     assert unmapped['skipped'] == 'no mapped NBC(AE) 2023 citations'
     assert unmapped['mapping']['same_identifier_not_promoted'] > 0
+
+
+@pytest.mark.parametrize('text,kind', [
+    ("The engineer's slope stability study was requested.", 'summary'),
+    ("The appellant's Code Review Report was inadequate.", 'summary'),
+    ("A professional engineer's code review was supplied.", 'summary'),
+    ("Professional Engineer's 6 April 2016 letter was supplied.", 'summary'),
+    ("Appellant relied on a 'safety specialist'.", 'summary'),
+    ("The panel relied on 'the professional opinion of the engineer'.", 'summary'),
+    ("'The panel required professional involvement.'", 'excerpt'),
+    ('  “The panel required professional involvement.”', 'excerpt'),
+    ('“The engineer’s review was requested.”', 'excerpt'),
+])
+def test_converter_distinguishes_paraphrases_from_opening_quotes(text, kind):
+    """Possessives and embedded fragments do not make researcher prose an excerpt."""
+    rec = {'id': 'synthetic-appeal', 'professional_involvement': text,
+           'refusal_reason_evidence': "The appellant's paraphrase."}
+    case = convert_record(rec, {'professional_involvement_addressed': False})
+    quotes = {q['field']: q for q in case['quotes']}
+    assert quotes['professional_involvement']['kind'] == kind
+    assert quotes['refusal_reason_evidence']['kind'] == 'excerpt'
+
+
+def test_panel_conclusion_is_excluded_from_professional_inputs():
+    """Both conversion and the stored case exclude facts that overlap the weak label."""
+    original = next(c for c in _cases() if c['id'] == 'scc-co-0015416-2012')
+    regenerated = convert_record({'id': original['id']}, {'professional_involvement_addressed': True})
+    for case in (original, regenerated):
+        assert case['professional_involvement']['facts'] == {}
+        assert case['professional_involvement']['weak_flag'] == 'yes'
+        assert 'panel conclusion' in case['authoring']['notes']
+        assert 'not an independent authority statement' in case['authoring']['notes']
+
+
+def test_committed_quote_kinds_match_converter():
+    """Reclassifying retained professional text agrees with every committed case."""
+    for case in _cases():
+        for quote in case['quotes']:
+            rec = {'id': case['id'], quote['field']: quote['text']}
+            converted = convert_record(rec, {
+                'professional_involvement_addressed': case['professional_involvement']['addressed'],
+            })
+            match = next(q for q in converted['quotes'] if q['field'] == quote['field'])
+            assert match['kind'] == quote['kind'], case['id']
+
+
+@pytest.mark.parametrize('sentinel_present', [False, True])
+def test_incomplete_division_c_rules_skip_instead_of_crashing_report(tmp_path, monkeypatch, sentinel_present):
+    """Missing all or part of Division C skips affected checks while keeping the report usable."""
+    from codedb.store import SCHEMA
+
+    db = tmp_path / 'codedb.sqlite'
+    with sqlite3.connect(db) as con:
+        con.executescript(SCHEMA)
+        con.execute("INSERT INTO docs (doc, label) VALUES ('NBC-AE', 'Synthetic code fixture')")
+        if sentinel_present:
+            con.execute("INSERT INTO provisions (doc, division, id, level, pdf_page) "
+                        "VALUES ('NBC-AE', 'C', '2.4.1.1.(1)', 'sentence', 1)")
+    monkeypatch.setenv('BATATIS_CODEDB', str(db))
+    with pytest.raises(LookupError, match='missing professional-involvement provision'):
+        engine_professional_flagger(db)
+    block = build_appeals_block(_cases(), db, score_citations)
+    assert block['professional_involvement']['agreement']['n'] == 0
+    assert 'LookupError' in block['professional_involvement']['agreement']['skipped']
+    assert block['section_c_anchor']['engine_flags_missing_section_c']['skipped']
+    report = build_report(root=DEV, db_path=db, cases=[], manifests=[],
+                          schemas=load_schemas(DEV / 'schemas'), appeals=_cases())
+    assert report['checks']['appeals']['professional_involvement']['agreement']['skipped']

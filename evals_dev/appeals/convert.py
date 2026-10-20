@@ -29,9 +29,6 @@ _SENT = re.compile(
     r'|(?<=[.?!]["])\s+(?=[A-Z])'
 )
 _PROVISION = re.compile(r'\b\d{1,2}(?:\.\d{1,3}){2,}')
-# A quoted span of several words. A possessive apostrophe is not a quotation mark.
-# Apostrophes inside a word, as in "engineer's", are not quotation marks.
-_QUOTED_SPAN = re.compile(r"""(?<!\w)['"\u201c](.+?)['"\u201d](?!\w)""", re.S)
 # Holdings that are not the first two sentences of the researcher's note.
 QUOTE_OVERRIDE = {
     ('scc-co-2024-06', 'professional_involvement'): (
@@ -83,11 +80,18 @@ WEAK_FLAG = {
 }
 # Only fields the decision states in the engine's own vocabulary.
 # A panel conclusion is not stored as a fact. It is the weak label.
+# An order to file schedules is not rewritten as ahj_requires_professional.
 PROFESSIONAL_FACTS: dict[str, dict] = {}
 FACTS_PROVENANCE = {
     'scc-co-0015416-2012': (
         'The panel sentence about special safety concerns is the weak yes label. '
         'It is not stored as a screen fact.'
+    ),
+}
+PROFESSIONAL_FACT_NOTES = {
+    'scc-co-0015416-2012': (
+        'special_safety_concerns was omitted: it comes from the panel conclusion '
+        'that also supplies the weak yes label, not an independent authority statement.'
     ),
 }
 DEFERENCE = {
@@ -101,6 +105,7 @@ CONDITION_0015427 = (
 
 
 def split_sentences(text: str) -> list[str]:
+    """Normalize whitespace and split retained research text at supported sentence boundaries."""
     text = ' '.join((text or '').split())
     if not text:
         return []
@@ -108,6 +113,7 @@ def split_sentences(text: str) -> list[str]:
 
 
 def _sentences(text: str, n: int = 2) -> str:
+    """Keep at most n sentences and restore terminal punctuation where splitting removed it."""
     parts = split_sentences(text)
     if not parts:
         return ''
@@ -135,14 +141,8 @@ def _description(facts: str) -> str:
     return ' '.join(kept)
 
 
-def _has_quoted_span(text: str | None) -> bool:
-    for match in _QUOTED_SPAN.finditer(text or ''):
-        if len(match.group(1).split()) >= 4:
-            return True
-    return False
-
-
 def _other_codes(code_edition: str) -> list[str]:
+    """Identify supported fire-code and standard labels mentioned in the source edition."""
     found = []
     for label, pattern in (
         ('NFC(AE) 2019', r'NFC'),
@@ -155,6 +155,7 @@ def _other_codes(code_edition: str) -> list[str]:
 
 
 def _quote(text: str | None, confidence: str, *, kind: str) -> dict | None:
+    """Trim source text to two sentences and attach its provenance classification."""
     short = _sentences(text or '', 2)
     if not short:
         return None
@@ -167,6 +168,7 @@ def _quote(text: str | None, confidence: str, *, kind: str) -> dict | None:
 
 
 def convert_record(rec: dict, index_row: dict) -> dict:
+    """Convert one research record to a trimmed weak-label case without promoting citations."""
     edition = edition_bucket(rec.get('code_edition') or '')
     confidence = 'low' if str(rec.get('text_source') or '').startswith('OCR') else 'standard'
     case_id = rec['id']
@@ -174,7 +176,10 @@ def convert_record(rec: dict, index_row: dict) -> dict:
     for field in ('refusal_reason_evidence', 'professional_involvement'):
         override = QUOTE_OVERRIDE.get((case_id, field))
         source = override if override is not None else (rec.get(field) if isinstance(rec.get(field), str) else None)
-        kind = 'excerpt' if field == 'refusal_reason_evidence' or override is not None or _has_quoted_span(source) else 'summary'
+        # A possessive or an embedded fragment does not make a paraphrase an excerpt.
+        # An opening quotation, or a holding kept in QUOTE_OVERRIDE, does.
+        quoted = (source or '').lstrip().startswith(("'", '"', '\u2018', '\u201c'))
+        kind = 'excerpt' if field == 'refusal_reason_evidence' or override is not None or quoted else 'summary'
         item = _quote(source, confidence, kind=kind)
         if item:
             item['field'] = field
@@ -255,6 +260,8 @@ def convert_record(rec: dict, index_row: dict) -> dict:
             ),
         },
     }
+    if case_id in PROFESSIONAL_FACT_NOTES:
+        case['authoring']['notes'] += ' ' + PROFESSIONAL_FACT_NOTES[case_id]
     if case_id == 'scc-co-2022-06':
         case['insufficient_information'] = {
             'source_provision': '2.2.10.8.(2)(b)',
@@ -277,6 +284,7 @@ def convert_record(rec: dict, index_row: dict) -> dict:
 
 
 def convert_dir(source: Path, dest: Path) -> list[dict]:
+    """Validate the indexed 25-record research set and replace the generated case files."""
     index = json.loads((source / 'index.json').read_text())
     by_id = {row['id']: row for row in index['decisions']}
     cases = []
@@ -296,6 +304,7 @@ def convert_dir(source: Path, dest: Path) -> list[dict]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Convert a supplied research directory and report the number of written cases."""
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('source', type=Path)
     ap.add_argument('--out', type=Path, default=OUT)

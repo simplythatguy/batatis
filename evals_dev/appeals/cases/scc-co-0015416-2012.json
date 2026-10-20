@@ -121,6 +121,6 @@
     "source": "scc-appeal-decision",
     "author": "Batatis appeals converter",
     "date": "2026-10-20",
-    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold. special_safety_concerns was omitted: it comes from the panel conclusion that also supplies the weak yes label, not an independent authority statement."
   }
 }

@@ -79,6 +79,7 @@ class RuleLookup:
     """Resolves rule ids without emitting an NBC citation string."""
 
     def provision(self, provision_id: str, division: str | None = 'B'):
+        """Resolve only declared rule ids, returning fixture metadata without an NBC citation."""
         if division is None:
             raise ValueError(f'division required for {provision_id}')
         key = (division.upper(), provision_id)
@@ -89,10 +90,12 @@ class RuleLookup:
                 'intents': [], 'intent_comparison': []}
 
     def citation(self, provision_id: str, division: str | None = 'B'):
+        """Return the rule fixture marker, or None when its id is not declared."""
         record = self.provision(provision_id, division)
         return record['citation'] if record else None
 
     def definition(self, code: str):
+        """Return no definition text because this fixture supplies rule ids only."""
         return None
 
 
@@ -119,6 +122,7 @@ class VariantScore:
 
     @property
     def agreement(self) -> float:
+        """Return the exact-match fraction among scored cases, or zero for an empty set."""
         return self.matched / self.scored if self.scored else 0.0
 
 
@@ -135,21 +139,25 @@ def wilson_interval(matched: int, scored: int) -> tuple[float, float]:
 
 
 def _number(token: str) -> int:
+    """Parse a numeric token or a supported English number word."""
     token = token.lower().replace(',', '')
     return _NUM[token] if token in _NUM else int(float(token))
 
 
 def _case_text(case: dict) -> str:
+    """Combine the applicant description and known facts without reading gold labels."""
     return '\n'.join([case.get('description') or '', *(case.get('known_facts') or [])])
 
 
 def _storeys(text: str) -> int | None:
+    """Return the largest stated building height in storeys, or None if absent."""
     found = [1] if re.search(r'\bsingle-storey\b', text, re.I) else []
     found += [_number(match.group(1)) for match in re.finditer(rf'\b({_TOKEN})[-\s]storeys?\b', text, re.I)]
     return max(found) if found else None
 
 
 def _area(text: str) -> float | None:
+    """Prefer an explicitly labelled building area; reject ambiguous unlabelled areas."""
     for pattern in (r'building area of\s+(\d[\d,]*(?:\.\d+)?)\s*m', r'(\d[\d,]*(?:\.\d+)?)\s*m\s*(?:2|²)\s+building area'):
         labelled = re.findall(pattern, text, re.I)
         if labelled:
@@ -165,6 +173,7 @@ def _area(text: str) -> float | None:
 
 
 def _units(text: str, storeys: int | None) -> int | None:
+    """Extract dwelling counts, using a stated total or units per floor when available."""
     total = re.search(rf'\b({_TOKEN})\s+in total\b', text, re.I)
     if total:
         return _number(total.group(1))
@@ -184,12 +193,14 @@ def _units(text: str, storeys: int | None) -> int | None:
 
 
 def _span(text: str) -> float | None:
+    """Return the largest stated span in metres, excluding square-metre quantities."""
     found = [float(match.group(1)) for match in re.finditer(
         rf'\b(\d+(?:\.\d+)?)\s*m(?!\s*(?:2|²))(?:\s+\S+){{0,4}}\s+\S*span\b', text, re.I)]
     return max(found) if found else None
 
 
 def _occupancy(text: str, units: int | None) -> str | None:
+    """Map recognized applicant wording and dwelling counts to an occupancy category."""
     if re.search(r'\b(?:community hall|arena|library)\b', text, re.I):
         return 'assembly'
     if re.search(r'\b(?:warehouse|industrial building|industrial park)\b', text, re.I):
@@ -239,6 +250,7 @@ def observe(case: dict) -> tuple[ProfessionalFacts, Signals]:
 
 
 def _plain_exemption(data: dict) -> bool:
+    """Check whether the observed building fits a general exception without explicit triggers."""
     if data.get('part4_design') is True or data.get('roof_trusses') is True or data.get('ahj_requires_professional') is True:
         return False
     occupancy, units, storeys, area = data.get('occupancy'), data.get('principal_dwelling_units'), data.get('storeys'), data.get('building_area_m2')
@@ -254,6 +266,7 @@ def _plain_exemption(data: dict) -> bool:
 
 
 def prepare(facts: ProfessionalFacts, signals: Signals, variant: str) -> ProfessionalFacts:
+    """Apply variant-specific defaults and the development span handoff to observed facts."""
     data = facts.model_dump()
     # This span handoff came from development case dev-050 (stated 18 m span, gold yes).
     # A stated span above PART9_MAX_SPAN_M is recorded as Part 4 design. The cited
@@ -270,6 +283,7 @@ def prepare(facts: ProfessionalFacts, signals: Signals, variant: str) -> Profess
 
 
 def flag_label(case: dict, codes, variant: str) -> str:
+    """Run one screen variant on applicant facts without reading the target label."""
     if variant == 'always_unknown':
         return 'unknown'
     facts, signals = observe(case)
@@ -287,6 +301,7 @@ def _column(label: str) -> str:
 
 
 def under_flag_fact(case: dict, variant: str) -> str:
+    """Describe observed facts and omitted span handling for an under-flagged case."""
     facts, signals = observe(case)
     parts = [f'occupancy={facts.occupancy}', f'part4_design={"true" if facts.part4_design is True else "unset"}']
     if signals.span_m is not None:
@@ -298,11 +313,13 @@ def under_flag_fact(case: dict, variant: str) -> str:
 
 
 def _matches(system: str, gold: str) -> bool:
+    """Compare labels with unknown and depends treated as the same abstention."""
     normalized = {'unknown': 'depends'}
     return normalized.get(system, system) == normalized.get(gold, gold)
 
 
 def load_codes():
+    """Use codedb when its professional sentinel exists; otherwise use declared rule fixtures."""
     try:
         codes = Codes()
         if codes.provision('2.4.1.1.(1)', 'C') is None:
@@ -313,6 +330,7 @@ def load_codes():
 
 
 def score(codes, cases: list[dict] | None = None) -> dict[str, VariantScore]:
+    """Tally exact matches, abstentions, errors and confusion counts for each variant."""
     rows = cases if cases is not None else load_cases()
     totals = {name: VariantScore(name) for name in VARIANTS}
     for case in rows:
@@ -342,14 +360,17 @@ def score(codes, cases: list[dict] | None = None) -> dict[str, VariantScore]:
 
 
 def load_cases() -> list[dict]:
+    """Load development cases in stable filename order."""
     return [json.loads(path.read_text()) for path in sorted(CASES.glob('dev-*.json'))]
 
 
 def load_heldout() -> list[dict]:
+    """Load the separately authored held-out cases in stable filename order."""
     return [json.loads(path.read_text()) for path in sorted(HELDOUT.glob('hold-*.json'))]
 
 
 def winner(totals: dict[str, VariantScore]) -> str:
+    """Rank measured rule variants by under-flag avoidance, agreement and tie preference."""
     ranked = sorted((row for row in totals.values() if row.name != 'always_unknown'),
                     key=lambda row: (row.under_flag > 0, -row.agreement, row.name != 'rules_plus_unknown'))
     if not ranked or ranked[0].scored == 0:
@@ -358,22 +379,26 @@ def winner(totals: dict[str, VariantScore]) -> str:
 
 
 def _agreement_cell(row: VariantScore) -> str:
+    """Format agreement counts and their Wilson 95% interval for the report."""
     lower, upper = wilson_interval(row.matched, row.scored)
     upper_text = '1.0' if round(upper, 4) == 1 else f'{upper:.4f}'
     return f'{row.matched}/{row.scored} [{lower:.4f}, {upper_text}]'
 
 
 def _yes_unknown(row: VariantScore) -> str:
+    """List gold-yes cases receiving an abstention, or return none."""
     return 'none' if not row.gold_yes_unknown else ', '.join(row.gold_yes_unknown)
 
 
 def _count_cell(count: int, scored: int) -> str:
+    """Format a count and denominator with their Wilson 95% interval."""
     lower, upper = wilson_interval(count, scored)
     upper_text = '1.0' if round(upper, 4) == 1 else f'{upper:.4f}'
     return f'{count}/{scored} [{lower:.4f}, {upper_text}]'
 
 
 def report(totals: dict[str, VariantScore], codedb: str) -> str:
+    """Render development metrics, error cases and measurement caveats for all variants."""
     scored = max((row.scored for row in totals.values()), default=0)
     skipped = max((row.skipped for row in totals.values()), default=0)
     lines = [
@@ -409,6 +434,7 @@ def report(totals: dict[str, VariantScore], codedb: str) -> str:
 
 
 def heldout_report(totals: dict[str, VariantScore]) -> str:
+    """Render separate held-out agreement and missed-case summaries."""
     lines = [
         'held-out: evals_dev/section_d_heldout',
         'held-out gold: model-checked',
@@ -422,11 +448,13 @@ def heldout_report(totals: dict[str, VariantScore]) -> str:
 
 
 def headline(totals: dict[str, VariantScore]) -> str:
+    """Format the rules_only baseline counts as the report headline."""
     row = totals['rules_only']
     return _HEADLINE.format(matched=row.matched, scored=row.scored, under_flag=row.under_flag, unknown=row.unknown)
 
 
 def main() -> int:
+    """Print development and held-out reports using codedb or declared rule fixtures."""
     codes, codedb = load_codes()
     dev = score(codes)
     print(headline(dev))

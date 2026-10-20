@@ -43,10 +43,12 @@ ANSWER_FIELDS = (
 
 
 def persona_of(case: dict) -> str | None:
+    """Map the declared applicant type to a supported human-key persona."""
     return PERSONA_OF.get(case.get('applicant_type'))
 
 
 def _shuffled(items: list, rng: random.Random) -> list:
+    """Return a seeded Fisher-Yates permutation without mutating the input list."""
     out = list(items)
     for i in range(len(out) - 1, 0, -1):
         j = rng.randrange(i + 1)
@@ -98,6 +100,7 @@ def select_cases(cases: list[dict], seed: int = SEED, per_persona: int = PER_PER
 
 
 def _check_coverage(selected: list[dict], per_persona: int) -> None:
+    """Require persona quotas, at least three topics and every supported intake action."""
     counts = {p: 0 for p in PERSONAS}
     for case in selected:
         counts[persona_of(case)] += 1
@@ -132,10 +135,12 @@ def blank_key(case: dict) -> dict:
 
 
 def load_cases(path: Path = CASES) -> list[dict]:
+    """Load development cases in stable filename order for reproducible selection."""
     return [json.loads(p.read_text()) for p in sorted(path.glob('dev-*.json'))]
 
 
 def _untouched(path: Path) -> bool:
+    """Allow writing only a missing key or an unverified key with every answer still null."""
     if not path.exists():
         return True
     data = json.loads(path.read_text())
@@ -158,6 +163,7 @@ def write_selection(selected: list[dict], dest: Path = ROOT) -> list[str]:
 
 
 def _markdown(selected: list[dict]) -> str:
+    """Describe selection provenance, balancing counts and the chosen case ids."""
     actions: dict[str, int] = {a: 0 for a in ACTIONS}
     for case in selected:
         actions[case['gold']['intake_action']] += 1
@@ -205,6 +211,7 @@ def _markdown(selected: list[dict]) -> str:
 
 
 def main() -> int:
+    """Draw the reproducible subset and optionally write keys that remain untouched."""
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--cases', type=Path, default=CASES)
     ap.add_argument('--seed', type=int, default=SEED)

@@ -106,6 +106,7 @@ class PracticeOfEngineering(BaseModel):
 
     @model_validator(mode='after')
     def _shape(self):
+        """Require a question for unknown flags and a sourced rule for boolean flags."""
         if self.value == 'unknown':
             if not (self.question and self.question.strip()):
                 raise ValueError('unknown practice of engineering requires a question')
@@ -142,6 +143,7 @@ class SectionDIssue(BaseModel):
 
 
 def _question(result: ProfessionalResult) -> str:
+    """Select a neutral clarification question from the professional screen result."""
     for question in result.questions:
         folded = question.casefold()
         if question.strip() and 'safe' not in folded and 'compli' not in folded:
@@ -150,6 +152,7 @@ def _question(result: ProfessionalResult) -> str:
 
 
 def _pick(result: ProfessionalResult, required: str) -> ProfessionalReason | None:
+    """Choose a reason for the requested outcome, prioritizing explicit professional triggers."""
     chosen = [reason for reason in result.reasons if reason.required == required]
     if required == 'yes':
         order = {code: index for index, code in enumerate(_YES_PRIORITY)}
@@ -158,6 +161,7 @@ def _pick(result: ProfessionalResult, required: str) -> ProfessionalReason | Non
 
 
 def _rule(reason: ProfessionalReason) -> tuple[str, str]:
+    """Map a professional reason code to its declared provision id and division."""
     return _RULE_IDS.get(reason.code, ('', ''))
 
 
@@ -173,6 +177,7 @@ def practice_of_engineering(case: Case, codes: Codes) -> PracticeOfEngineering:
 
 
 def render_practice(result: ProfessionalResult, codes: Codes, *, span_handoff: bool = False) -> PracticeOfEngineering:
+    """Convert a professional result to a sourced recommendation or an unknown with a question."""
     if result.required == 'yes':
         reason = _pick(result, 'yes')
         rule, division = _rule(reason) if reason else ('', '')
@@ -201,6 +206,7 @@ def render_practice(result: ProfessionalResult, codes: Codes, *, span_handoff: b
 
 
 def _at_stake(item: EvidencePlanItem) -> str:
+    """Describe evidence questions for an objective/function pair or unresolved attribution."""
     if item.objective and item.function:
         return (f'Recommend evidence that addresses {item.function} and {item.objective} for benchmark {item.citation}. '
                 'Identify the proposed configuration, the comparison the responsible designer selects, '
@@ -210,6 +216,7 @@ def _at_stake(item: EvidencePlanItem) -> str:
 
 
 def _status(flag: PracticeOfEngineering, attachments) -> IssueStatus:
+    """Keep unknown practice flags open and classify supplied items for resolved flags."""
     named = any((doc.responsible_party or '').strip() or doc.professional_seal for doc in attachments)
     if flag.value is True and not named:
         return 'needs_professional'
@@ -221,11 +228,13 @@ def _status(flag: PracticeOfEngineering, attachments) -> IssueStatus:
 
 
 def _empty_fields(fields: list[ProcessField]) -> tuple[EmptyProcessField, ...]:
+    """List required process fields with no confirmed applicant answer."""
     return tuple(EmptyProcessField(id=field.id, label=field.label, citation=field.citation)
                  for field in fields if field.answer is None)
 
 
 def _lookup(codes: Codes, provision_id: str, division: str):
+    """Resolve a provision, treating malformed or missing keys as unresolved input."""
     try:
         return codes.provision(provision_id, division)
     except (ValueError, KeyError):

@@ -3,6 +3,7 @@ import json
 import re
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from engine.api import create_app
@@ -31,10 +32,12 @@ class FakeCodes:
     """In-memory stand-in. Every citation string is recorded when it is handed out."""
 
     def __init__(self):
+        """Initialize empty in-memory rule rows and issued-citation tracking."""
         self.rows = {}
         self.issued: set[str] = set()
 
     def add(self, division, provision_id, **extra):
+        """Register a synthetic provision row and return this fixture for chaining."""
         citation = extra.pop('citation', f'fixture:{division}:{provision_id}')
         row = {'id': provision_id, 'division': division, 'citation': citation, 'level': 'sentence',
                'children': [], 'attributions': [], 'attribution_status': {'status': 'none', 'root_provision': None,
@@ -44,20 +47,24 @@ class FakeCodes:
         return self
 
     def provision(self, provision_id, division='B'):
+        """Resolve a fixture row and record any citation returned to the caller."""
         row = self.rows.get((division, provision_id))
         if row:
             self.issued.add(row['citation'])
         return row
 
     def citation(self, provision_id, division='B'):
+        """Return a resolved fixture citation, or None for an unknown provision."""
         row = self.provision(provision_id, division)
         return row['citation'] if row else None
 
     def definition(self, code):
+        """Supply no definition text for these recommendation-only fixture checks."""
         return None
 
 
 def codes_with_rules():
+    """Build declared rule fixtures plus benchmarks with and without attribution rows."""
     codes = FakeCodes()
     for division, provision_id in RULE_IDS:
         codes.add(division, provision_id)
@@ -69,6 +76,7 @@ def codes_with_rules():
 
 
 def _strings(payload):
+    """Walk nested response values and yield each string for claim scanning."""
     if isinstance(payload, str):
         yield payload
     elif isinstance(payload, dict):
@@ -80,6 +88,7 @@ def _strings(payload):
 
 
 def _citations(payload):
+    """Walk nested response objects and yield only citation field values."""
     if isinstance(payload, dict):
         for key, value in payload.items():
             if key == 'citation' and isinstance(value, str):
@@ -92,6 +101,7 @@ def _citations(payload):
 
 
 def _house_facts():
+    """Provide confirmed single-family facts that resolve all professional component questions."""
     values = dict(occupancy='single_family', part4_design=False, preserved_wood_foundation_part4=False,
                   roof_trusses=False, prescriptive_route_confirmed=True, ahj_requires_professional=False,
                   special_safety_concerns=False, professional_judgement_required=False,
@@ -100,6 +110,7 @@ def _house_facts():
 
 
 def test_confirmed_provision_recommends_ladder_and_lists_empty_process_fields():
+    """Verify confirmed provision recommends ladder and lists empty process fields."""
     codes = codes_with_rules()
     issue = section_d_issues(Case(provisions=[BENCHMARK]), codes)[0]
     assert issue.provision.provision_id == BENCHMARK and issue.provision.citation == codes.rows[('B', BENCHMARK)]['citation']
@@ -113,6 +124,7 @@ def test_confirmed_provision_recommends_ladder_and_lists_empty_process_fields():
 
 
 def test_unknown_reference_has_no_citation_and_missing_attribution_asks():
+    """Verify unknown reference has no citation and missing attribution asks."""
     codes = codes_with_rules()
     issues = section_d_issues(Case(provisions=[UNKNOWN, NO_ROW]), codes)
     missing = next(issue for issue in issues if issue.entered_reference == UNKNOWN)
@@ -125,6 +137,7 @@ def test_unknown_reference_has_no_citation_and_missing_attribution_asks():
 
 
 def test_no_issue_text_claims_compliance_or_safety_and_citations_stay_inside_codedb():
+    """Verify no issue text claims compliance or safety and citations stay inside codedb."""
     codes = codes_with_rules()
     cases = [
         Case(provisions=[BENCHMARK, UNKNOWN, NO_ROW]),
@@ -144,6 +157,7 @@ def test_no_issue_text_claims_compliance_or_safety_and_citations_stay_inside_cod
 
 
 def test_span_is_part4_and_cites_only_the_existing_division_c_rule():
+    """Verify span is part4 and cites only the existing division c rule."""
     codes = codes_with_rules()
     issue = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact('span_m', 18)]), codes)[0]
     assert issue.practice_of_engineering.value is True
@@ -154,6 +168,7 @@ def test_span_is_part4_and_cites_only_the_existing_division_c_rule():
 
 
 def test_status_addressed_by_applicant_item_and_needs_professional_without_one():
+    """Verify status addressed by applicant item and needs professional without one."""
     codes = codes_with_rules()
     bare = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact('part4_design', True)]), codes)[0]
     assert bare.status == 'needs_professional' and bare.practice_of_engineering.value is True
@@ -175,18 +190,52 @@ def test_status_addressed_by_applicant_item_and_needs_professional_without_one()
 
 
 def test_acceptable_path_drops_variance_process_fields_and_extra_evidence_types():
+    """Verify acceptable path drops variance process fields and extra evidence types."""
     case = Case(provisions=[BENCHMARK], facts=[fact('pathway', 'acceptable')])
     issue = section_d_issues(case, codes_with_rules())[0]
     assert issue.empty_process_fields == ()
     assert issue.recommended_evidence_types == CONFIDENCE_LADDER
 
 
+@pytest.mark.parametrize('named', [False, True])
+def test_unknown_practice_stays_open_with_applicant_attachment(tmp_path, named):
+    """Supplying a document cannot resolve an unknown practice flag in the API."""
+    codes = codes_with_rules()
+    case = Case(provisions=[BENCHMARK])
+    issue = section_d_issues(case, codes)[0]
+    file = Source(type='file', ref='applicant-report.pdf', quote='Applicant report metadata.')
+    case.facts.append(fact(f'evidence.{issue.id}.file_ref', file.ref, source=file))
+    if named:
+        case.facts.append(fact(f'evidence.{issue.id}.responsible_party', 'Named professional'))
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    store.put(case)
+    response = TestClient(create_app(store, codes)).get(f'/cases/{case.id}/section-d/issues')
+    assert response.status_code == 200
+    supplied = response.json()[0]
+    assert supplied['practice_of_engineering']['value'] == 'unknown'
+    assert supplied['status'] == 'open'
+
+
+def test_known_nonprofessional_flag_is_addressed_by_an_attachment():
+    """A resolved negative flag still allows an applicant attachment to address the issue."""
+    codes = codes_with_rules()
+    case = Case(provisions=[BENCHMARK], facts=_house_facts())
+    issue = section_d_issues(case, codes)[0]
+    file = Source(type='file', ref='applicant-report.pdf', quote='Applicant report metadata.')
+    case.facts.append(fact(f'evidence.{issue.id}.file_ref', file.ref, source=file))
+    supplied = section_d_issues(case, codes)[0]
+    assert supplied.practice_of_engineering.value is False
+    assert supplied.status == 'addressed'
+
+
 def test_no_benchmark_asks_and_does_not_invent_a_provision():
+    """Verify no benchmark asks and does not invent a provision."""
     issue = section_d_issues(Case(), codes_with_rules())[0]
     assert issue.provision is None and issue.question and issue.status == 'open'
 
 
 def test_route_is_read_only_and_missing_case_is_404(tmp_path):
+    """Verify route is read only and missing case is 404."""
     store = CaseStore(tmp_path / 'cases.sqlite')
     client = TestClient(create_app(store, codes_with_rules()))
     assert client.get('/cases/missing/section-d/issues').status_code == 404
@@ -201,6 +250,7 @@ def test_route_is_read_only_and_missing_case_is_404(tmp_path):
 
 
 def test_rule_table_uses_only_provisions_already_in_the_repo():
+    """Verify rule table uses only provisions already in the repo."""
     professional = Path('engine/professional.py').read_text()
     process = Path('engine/process_fields.py').read_text()
     for _division, provision_id, source in (*PROFESSIONAL_RULES, *PROCESS_RULES):
@@ -215,6 +265,7 @@ def test_rule_table_uses_only_provisions_already_in_the_repo():
 
 
 def test_eval_script_prints_in_sample_wilson_table(capsys):
+    """Verify eval script prints in sample wilson table."""
     assert main() == 0
     out = capsys.readouterr().out
     assert out.startswith(
@@ -267,6 +318,7 @@ def test_eval_script_prints_in_sample_wilson_table(capsys):
 
 
 def test_heldout_gold_was_written_from_repo_limits():
+    """Verify heldout gold was written from repo limits."""
     folder = Path('evals_dev/section_d_heldout')
     cases = [json.loads(path.read_text()) for path in sorted(folder.glob('hold-*.json'))]
     assert len(cases) == 8
@@ -284,6 +336,7 @@ def test_heldout_gold_was_written_from_repo_limits():
 
 
 def test_claim_blocklist_matches_compliance_and_safety_claims():
+    """Verify claim blocklist matches compliance and safety claims."""
     sample = 'The design complies, is safe, meets the code, and performance is achieved.'
     assert any(re.search(pattern, sample, re.I) for pattern in CLAIM_PHRASES)
     assert re.search(r'\bsafe\b', 'is safe', re.I) and re.search(r'\bcompliance\b', 'compliance', re.I)

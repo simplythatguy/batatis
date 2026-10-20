@@ -51,6 +51,10 @@ Their quotes have `quote_confidence: low`.
 Each excerpt in `quotes` carries the decision `source_url`. An excerpt is at most
 two sentences. OCR decisions keep `quote_confidence: low`.
 
+Professional-involvement text is marked `excerpt` only when it opens with a
+quotation mark. Possessives and embedded quoted fragments remain `summary`
+because the surrounding text is the researcher's paraphrase.
+
 `python evals_dev/deterministic_checks.py` adds an `appeals` block with
 `label_source: appeals_weak`. It is not mixed with model-graded scores.
 
