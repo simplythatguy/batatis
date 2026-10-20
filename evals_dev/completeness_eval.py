@@ -1,8 +1,11 @@
 """Keyed completeness benchmark for variants A, B, and C.
 
-From the repository root, with OPENAI_API_KEY already in the environment:
+From a plain checkout, with OPENAI_API_KEY already in the environment:
 
-    BATATIS_LLM_PROVIDER=openai python3 -m evals_dev.completeness_eval --live --repeats 3
+    bash scripts/bench_completeness.sh
+
+That script creates a virtualenv, installs engine/requirements.txt, and runs
+this module with BATATIS_LLM_PROVIDER=openai --live --repeats 3.
 
 The process never prints the key. If the key is missing, it exits with an error
 before any provider call. Variant C is the LLM pass. A and B do not call a model.

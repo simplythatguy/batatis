@@ -8,6 +8,23 @@ from contextlib import redirect_stderr, redirect_stdout
 from evals_dev.completeness_eval import MIN_CASES, load_cases, main, redact
 
 
+def test_bench_script_exits_when_openai_key_is_missing():
+    env = os.environ.copy()
+    env.pop('OPENAI_API_KEY', None)
+    env.pop('ANTHROPIC_API_KEY', None)
+    script = os.path.join(os.path.dirname(__file__), '..', 'scripts', 'bench_completeness.sh')
+    proc = subprocess.run(['bash', script], cwd=os.path.join(os.path.dirname(__file__), '..'),
+                          env=env, capture_output=True, text=True, check=False)
+    combined = proc.stdout + proc.stderr
+    assert proc.returncode == 2
+    assert 'OPENAI_API_KEY is not set' in proc.stderr
+    assert 'sk-' not in combined
+    text = open(script, encoding='utf-8').read()
+    assert '--live' in text and '--repeats 3' in text
+    assert 'BATATIS_LLM_PROVIDER=openai' in text
+    assert 'engine/requirements.txt' in text
+
+
 def test_live_command_exits_when_openai_key_is_missing():
     env = os.environ.copy()
     env.pop('OPENAI_API_KEY', None)
