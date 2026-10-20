@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 import { diffScript, parseDemoScript } from "./sync.mjs";
-import { DECK_STILLS, STEPS } from "./steps.mjs";
+import { DECK_STILLS, STEPS, judgeChrome } from "./steps.mjs";
 
 const EXPECTED = [
   ["1", "Three applicants (0:18)", "#/"],
@@ -98,7 +98,8 @@ test("shot 4 and shot 5 skip when their subject is not on screen", () => {
   const stills = source.slice(source.indexOf("export async function runDeckStills"));
   assert.match(stills, /status: "pending"/);
   assert.match(stills, /provenance:/);
-  assert.match(stills, /An \/api call returned 503/);
+  assert.match(stills, /status >= 500/);
+  assert.match(stills, /An \/api call returned \$\{failedStatus\}/);
   assert.match(stills, /LIMIT_LINE/);
   assert.match(stills, /Section D tab is current/);
   assert.equal(stills.includes('captureOfficer("shot-s06-section-d")'), false);
@@ -191,18 +192,81 @@ test("diff accepts the recorder against the 7-shot list", () => {
   assert.deepEqual(diff.problems, []);
 });
 
-test("diff accepts the recorder against #20's script when that ref is present", (t) => {
+function readScriptCandidate(spec) {
+  if (!spec.includes(":")) {
+    if (!existsSync(spec)) return "";
+    return readFileSync(spec, "utf8");
+  }
+  return execFileSync("git", ["show", spec], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+}
+
+test("diff accepts the script from the working tree, origin/dev, or #20", (t) => {
+  const specs = ["docs/demo/script.md", "origin/dev:docs/demo/script.md", "origin/cursor/demo-video-script-1e38:docs/demo/script.md"];
   let markdown = "";
-  try {
-    markdown = execFileSync("git", ["show", "origin/cursor/demo-video-script-1e38:docs/demo/script.md"], {
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-  } catch {
-    t.skip("origin/cursor/demo-video-script-1e38 is not available");
+  let used = "";
+  for (const spec of specs) {
+    try {
+      const text = readScriptCandidate(spec);
+      if (text) {
+        markdown = text;
+        used = spec;
+        break;
+      }
+    } catch {
+      // The next source in the same order the recorder uses.
+    }
+  }
+  if (!markdown) {
+    t.skip("docs/demo/script.md is not in the working tree, origin/dev, or #20");
     return;
   }
   const diff = diffScript(STEPS, markdown);
-  assert.equal(diff.shots.length, 7);
+  assert.equal(diff.shots.length, 7, used);
   assert.deepEqual(diff.problems, []);
+});
+
+test("a frame with the compliance disclaimer pushed off screen is rejected", () => {
+  const viewport = { width: 1440, height: 900 };
+  const onScreen = { top: 800, left: 16, right: 1400, bottom: 860, width: 1384, height: 60 };
+  const offScreen = { top: 940, left: 16, right: 1400, bottom: 1000, width: 1384, height: 60 };
+  const clear = judgeChrome({
+    bandRect: { top: 0, left: 0, right: 1440, bottom: 48, width: 1440, height: 48 },
+    subtitleRect: { top: 60, left: 16, right: 400, bottom: 80, width: 384, height: 20 },
+    footerRect: onScreen,
+    disclaimerRect: onScreen,
+    viewport,
+  });
+  assert.deepEqual(clear, []);
+  const rejected = judgeChrome({
+    bandRect: null,
+    subtitleRect: { top: 60, left: 16, right: 400, bottom: 80, width: 384, height: 20 },
+    footerRect: onScreen,
+    disclaimerRect: offScreen,
+    viewport,
+  });
+  assert.ok(rejected.includes("the compliance disclaimer is outside the frame"));
+});
+
+test("captured stills are not engine-down, and s06 is Section D", () => {
+  const log = JSON.parse(readFileSync(new URL("../../artifacts/deck-stills/stills-log.json", import.meta.url), "utf8"));
+  assert.equal(log.webDir.includes("/tmp/"), false);
+  assert.match(log.engine, /Code search answered/);
+  assert.equal(log.engine.includes("returned 503"), false);
+  for (const slot of log.slots) {
+    const text = JSON.stringify(slot);
+    if (slot.status === "captured") {
+      assert.match(slot.provenance, /^scripted demo capture, /);
+      assert.equal(text.includes("Online review unavailable"), false, slot.id);
+    } else {
+      assert.equal(slot.status, "pending", slot.id);
+      assert.equal(typeof slot.reason, "string");
+      assert.ok(slot.reason.length > 0, slot.id);
+    }
+  }
+  const sectionD = log.slots.find((slot) => slot.id === "shot-s06-section-d");
+  assert.equal(sectionD.status, "captured");
+  const notes = sectionD.notes.join(" ");
+  assert.match(notes, /Section D tab is current/);
+  assert.match(notes, /recommendations limit line is on screen/);
+  assert.equal(notes.includes("is not on this screen"), false);
 });

@@ -79,7 +79,7 @@ Options
   --out <dir>       Output directory (default artifacts/demo, or artifacts/deck-stills with --stills)
   --hold <ms>       Pause on each recorded shot (default 1600)
   --base <url>      Record an app that is already running
-  --script <file>   Shot list to diff (default: docs/demo/script.md on #20, cursor/demo-video-script-1e38)
+  --script <file>   Shot list to diff (default: docs/demo/script.md, then origin/dev, then #20)
   --stills          Write the deck PNGs at 1440×900 and skip the mp4
   --strict          Exit non-zero unless every shot or still is captured
   --allow-drift     Record even when the script and the step catalog disagree

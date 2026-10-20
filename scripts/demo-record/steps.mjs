@@ -233,15 +233,34 @@ async function overlay(page, { caption, lower }) {
   );
 }
 
+export function judgeChrome({ bandRect, subtitleRect, footerRect, disclaimerRect, viewport }) {
+  const overlaps = (a, b) => {
+    if (!a || !b) return false;
+    if (a.width < 1 || a.height < 1 || b.width < 1 || b.height < 1) return false;
+    return !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
+  };
+  const inView = (rect) =>
+    Boolean(rect) &&
+    rect.top >= -1 &&
+    rect.left >= -1 &&
+    rect.bottom <= viewport.height + 1 &&
+    rect.right <= viewport.width + 1;
+  const problems = [];
+  if (subtitleRect && subtitleRect.width > 1 && overlaps(bandRect, subtitleRect)) problems.push("the header subtitle");
+  if (footerRect && overlaps(bandRect, footerRect)) problems.push("the footer");
+  if (disclaimerRect && overlaps(bandRect, disclaimerRect)) problems.push("the compliance disclaimer");
+  if (subtitleRect && subtitleRect.width > 1 && !inView(subtitleRect)) problems.push("the header subtitle is outside the frame");
+  if (footerRect && !inView(footerRect)) {
+    problems.push(
+      `the footer is outside the frame (${Math.round(footerRect.top)} to ${Math.round(footerRect.bottom)} px, viewport ${viewport.height} px)`,
+    );
+  }
+  if (disclaimerRect && !inView(disclaimerRect)) problems.push("the compliance disclaimer is outside the frame");
+  return problems;
+}
+
 async function overlayClearsChrome(page) {
-  return page.evaluate(() => {
-    const overlaps = (a, b) => {
-      if (!a || !b) return false;
-      if (a.width < 1 || a.height < 1 || b.width < 1 || b.height < 1) return false;
-      return !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
-    };
-    const inView = (rect) =>
-      rect.top >= -1 && rect.left >= -1 && rect.bottom <= window.innerHeight + 1 && rect.right <= window.innerWidth + 1;
+  const measured = await page.evaluate(() => {
     const band = document.getElementById("demo-recorder-band");
     const bandRect = band && band.style.display !== "none" ? band.getBoundingClientRect() : null;
     const subtitle = document.querySelector(".header-meta");
@@ -269,25 +288,29 @@ async function overlayClearsChrome(page) {
     const subtitleRect = subtitle?.getBoundingClientRect();
     const footerRect = footer?.getBoundingClientRect();
     const disclaimerRect = disclaimer?.getBoundingClientRect();
-    const problems = [];
-    if (subtitle && subtitleRect && subtitleRect.width > 1 && overlaps(bandRect, subtitleRect)) problems.push("the header subtitle");
-    if (footer && footerRect && overlaps(bandRect, footerRect)) problems.push("the footer");
-    if (disclaimer && disclaimerRect && overlaps(bandRect, disclaimerRect)) problems.push("the compliance disclaimer");
-    if (subtitle && subtitleRect && subtitleRect.width > 1 && !inView(subtitleRect)) problems.push("the header subtitle is outside the frame");
-    if (footer && footerRect && !inView(footerRect)) {
-      problems.push(
-        `the footer is outside the frame (${Math.round(footerRect.top)} to ${Math.round(footerRect.bottom)} px, viewport ${window.innerHeight} px)`,
-      );
-    }
-    if (disclaimer && disclaimerRect && !inView(disclaimerRect)) problems.push("the compliance disclaimer is outside the frame");
+    const box = (rect) =>
+      rect && rect.width > 0 && rect.height > 0
+        ? { top: rect.top, left: rect.left, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height }
+        : null;
     return {
-      ok: problems.length === 0,
-      reason: problems.length ? `The recorder band leaves app text hidden: ${problems.join("; ")}.` : "",
+      bandRect: box(bandRect),
+      subtitleRect: subtitle && subtitleRect && subtitleRect.width > 1 ? box(subtitleRect) : null,
+      footerRect: box(footerRect),
+      disclaimerRect: box(disclaimerRect),
+      viewport: { width: window.innerWidth, height: window.innerHeight },
       subtitle: subtitle ? subtitle.textContent.replace(/\s+/g, " ").trim() : "",
       footer: footer ? footer.innerText.replace(/\s+/g, " ").trim() : "",
       disclaimer: disclaimer ? disclaimer.innerText.replace(/\s+/g, " ").trim() : "",
     };
   });
+  const problems = judgeChrome(measured);
+  return {
+    ok: problems.length === 0,
+    reason: problems.length ? `The recorder band leaves app text hidden: ${problems.join("; ")}.` : "",
+    subtitle: measured.subtitle,
+    footer: measured.footer,
+    disclaimer: measured.disclaimer,
+  };
 }
 
 async function clearOverlay(page) {
@@ -1064,8 +1087,9 @@ export async function runDeckStills(page, opts) {
   }
 
   async function capture(id, lower, caseName, onScreen) {
-    if (opts.engineSearchStatus === 503 || apiStatuses.has(503)) {
-      return skip(id, "An /api call returned 503. The still was not captured.");
+    const failedStatus = [opts.engineSearchStatus, ...apiStatuses].find((status) => status >= 500);
+    if (failedStatus) {
+      return skip(id, `An /api call returned ${failedStatus}. The still was not captured.`);
     }
     const slot = DECK_STILLS.find((item) => item.id === id);
     const saved = await saveStill(page, api, lower, join(outDir, slot.file));
@@ -1143,8 +1167,8 @@ export async function runDeckStills(page, opts) {
     if (!api.state.caseC) {
       skip("shot-s04-search", "Case C is not open, so the bedroom-window search was not run.");
     } else {
-      if (opts.engineSearchStatus === 503) {
-        skip("shot-s04-search", "Code search returned 503. No article id was typed in, and the Section C lookup was not drawn.");
+      if (opts.engineSearchStatus >= 500) {
+        skip("shot-s04-search", `Code search returned ${opts.engineSearchStatus}. No article id was typed in, and the Section C lookup was not drawn.`);
       } else if (!(await visible(h1(page, "Code check"), 400)) && !(await goCodeCheck(page))) {
         skip("shot-s04-search", "Code check is not on this build.");
       } else {
