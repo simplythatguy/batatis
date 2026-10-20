@@ -1,7 +1,8 @@
 /**
- * Typed client for the engine HTTP API (engine/api.py). The app calls `/api/...`; in development
- * Vite proxies `/api` to the engine at http://127.0.0.1:8000 (vite.config.ts).
- * Set VITE_API_BASE to call another origin (default `/api`). VITE_ENGINE_URL is the previous name.
+ * Typed client for the engine HTTP API (engine/api.py). The app calls `/api/...` unless
+ * `VITE_API_BASE` or `VITE_ENGINE_URL` is set, in which case it calls that origin.
+ * `VITE_API_BASE` wins; the default is `/api`. In development, Vite proxies `/api` to
+ * `VITE_ENGINE_URL`, or http://127.0.0.1:8000 when that is unset (vite.config.ts).
  * `createEngine(base)` serves scripts and tests outside Vite.
  */
 import type { Case, FactInput, Gap, NewCase, SectionCRow } from "./types.gen";

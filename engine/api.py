@@ -17,6 +17,7 @@ from .export import (EXPORT_FAILED_DETAIL, ExportBlocked, ExportError, FORM_NOT_
 from .http_guard import HttpGuard
 from .llm_gate import client_ip_from, search_retry_after
 from .models import Case, Fact, Jurisdiction, SectionCRow
+from .retention import maybe_purge
 from .section_c import section_c_rows
 from .store import CaseStore, FileTooLarge, VersionConflict, assert_durable_when_hosted, open_store
 from .uploads import PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL
@@ -86,9 +87,8 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
 
     def sweep():
         current = state['store']
-        purge = getattr(current, 'purge_expired', None) if current is not None else None
-        if purge:
-            purge()
+        if current is not None and getattr(current, 'purge_expired', None):
+            maybe_purge(current)
 
     app.add_middleware(CORSMiddleware, allow_origin_regex=r'http://(localhost|127\.0\.0\.1)(:\d+)?',
                        allow_methods=['*'], allow_headers=['*'])
@@ -106,7 +106,13 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
 
     @app.post('/cases', response_model=Case, status_code=201)
     def create_case(body: NewCase | None = None):
+        maybe_purge(cases())
         return cases().put(Case(**(body.model_dump() if body else {})))
+
+    @app.get('/retention/purge')
+    def retention_purge():
+        """Unthrottled purge. The daily Vercel cron calls this route."""
+        return {'deleted': cases().purge_expired()}
 
     @app.get('/cases/{case_id}', response_model=Case)
     def get_case(case_id: str):

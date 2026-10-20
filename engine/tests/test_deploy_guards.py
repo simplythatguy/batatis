@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 
 from engine.api import create_app
 from engine.copyright import NRC_PUBLICATION_URL, PII_NOTICE, attribute_code
+from engine.retention import reset_purge_clock
 from engine.models import Case
 from engine.store import CaseStore
 
@@ -95,8 +96,11 @@ def test_responses_carry_noindex_and_the_privacy_notice(client):
 
 
 def test_privacy_notice_matches_the_web_app():
-    web = (ROOT / 'web/src/components.tsx').read_text()
+    web = (ROOT / 'web/src/privacy.ts').read_text()
     assert PII_NOTICE in web
+    component = (ROOT / 'web/src/components.tsx').read_text()
+    assert 'from "./privacy"' in component
+    assert PII_NOTICE not in component
     robots = (ROOT / 'web/public/robots.txt').read_text()
     assert 'User-agent: *' in robots and 'Disallow: /' in robots
     vercel = json.loads((ROOT / 'vercel.json').read_text())
@@ -120,6 +124,7 @@ def test_a_failed_purge_is_logged_and_the_request_continues(tmp_path, caplog):
             return super().purge_expired()
 
     caplog.set_level(logging.WARNING, logger='engine.access')
+    reset_purge_clock()
     client = TestClient(create_app(Broken(tmp_path / 'cases.sqlite')))
     response = client.post('/cases', json={'title': 'still served'})
     assert response.status_code == 503
@@ -136,6 +141,7 @@ def test_cases_older_than_seven_days_are_deleted(tmp_path):
     old.created_at = (datetime.now(timezone.utc) - timedelta(days=7, seconds=1)).isoformat(timespec='seconds')
     store.put(old)
     fresh = store.put(Case())
+    assert store.purge_expired() == 1
     assert store.get(old.id) is None
     assert store.get(fresh.id) is not None
 
