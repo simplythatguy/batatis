@@ -29,7 +29,7 @@
 | Compliance claims or invented citations in output | 0 | Automated checks plus officer override log |
 | First-time applicants completing Part 1 A–D unaided | At least 2 of 3 per round | Think-aloud sessions, only if a partner engages |
 | Continuation | At least 1 organization asks to continue after Mar 2, 2027 | Written request |
-| Cost per case vs. price floor | Identification measured (C$0.0277 per case on dev cases, about 0.02% of the C$125 floor; Implementation Plan §4); full pipeline to be measured | Keyed benchmark, reported in US$ and C$ with a dated rate |
+| Cost per case vs. price floor | Identification measured (model aliases, not pinned): C$0.0277 per case on dev cases, about 0.02% of the C$125 floor (Implementation Plan §4); full pipeline to be measured | Keyed benchmark, reported in US$ and C$ with a dated rate |
 
 ## 4. Gating conditions
 | Gate | What it requires | Our response | Source |

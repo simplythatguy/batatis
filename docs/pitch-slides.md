@@ -17,12 +17,12 @@
 - Applicant and site details come only from you; upload isn't in this demo
 - On PR #16, Not sure is the answer on the cards that are on screen
 
-**Speaker notes:** Intake is a fifth of the score, so we start with it. Batatis is designed to build Sections A and B from the applicant's description; today the engine lists what's missing and the end-to-end screen flow is not built. Anything it can't confirm, it is designed to ask about instead of filling in.
+**Speaker notes:** Intake is a fifth of the score, so we start with it. Batatis is designed to build Sections A and B from the applicant's description; today the engine lists what's missing, and the end-to-end screen flow is in review in PR #16, not yet on dev. Anything it can't confirm, it is designed to ask about instead of filling in.
 *Sources:* dev `engine/models.py`, `engine/completeness.py`; [PR #16](https://github.com/simplythatguy/batatis/pull/16)
 
 ### Slide 3: It asks before it guesses, and we test that [Intake, 20]
 - Missing fields become plain questions, each tied to a form section (engine on dev; screen in review)
-- Engineer-needed flag (PR #8, on dev): rules_only 55/60 in-sample, 1 under-flag; shipped rules_plus_unknown 50/60 in-sample, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind); model-checked, not human-verified.
+- Engineer-needed flag (PR #8, on dev): rules_only (the rules-only checker) 55/60 in-sample, 1 under-flag; shipped rules_plus_unknown 50/60 in-sample, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind); model-checked, not human-verified.
 - Accuracy across all applicant types: still to be measured
 
 **Speaker notes:** The completeness check on dev names each missing field and the question to ask. The shipped variant is rules_plus_unknown: 50/60 in-sample, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), with 27 unknowns sent to the applicant. Held-out for that variant: 7/8 blind pre-fix; post-fix 4/8 is no longer blind. 55/60 is rules_only and isn't shipped (1 under-flag). All answer keys are model-checked, not human-verified, so treat this as an early signal.
@@ -30,18 +30,18 @@
 
 ### Slide 4: A ranked shortlist, measured against a named acceptable solution [Code Identification, 20]
 - Ranked articles with a named benchmark acceptable solution [if merged: PR #12]
-- You confirm departures; the exception is a narrow Part 9 auto-commit (p ≥ 0.75, at most 3 articles, uncalibrated)
+- You confirm departures; a narrow Part 9 auto-commit is designed (p ≥ 0.75, at most 3 articles), but its thresholds are uncalibrated placeholders, so auto-commit stays off in the UI
 - Section C objectives and functions are looked up from the code's tables (on dev); the table stays empty until an article is added from Search, because identification is command-line only
 
 **Speaker notes:** For the homebuilder's window, the benchmark acceptable solution is Sentence 9.9.10.1.(2): at least 0.35 m² unobstructed, no dimension under 380 mm, and the case's 0.312 m² opening is the departure. In the filmed demo that card is a still, not a screen in PR #16, and it is not a cached demo run. PR #16 does not parse the description into facts; a frame that showed that parsing would be a mockup. Ranking is command-line only on dev and moves to HTTP in PR #12, which also runs BM25 first, then an OpenAI rerank and verifier.
 *Sources:* dev `engine/section_c.py`, `engine/identify/`; [PR #12](https://github.com/simplythatguy/batatis/pull/12); case C (PR #14, on dev)
 
 ### Slide 5: Every citation resolves, or it's dropped [Code Identification, 20]
-- Built by script from the official NBC(AE) 2023; the 2nd-printing pin is in PR #12
+- Built by script from the official NBC(AE) 2023; the 2nd printing is pinned in the codedb README on dev (SHA-256 source manifest in PR #12)
 - A citation that doesn't quote the code word for word is removed (on dev)
-- Identification: C$0.0277 per case, 5.7 s median, 11.3 s p95 (measured, 20 dev cases, cost and latency over 3 repeats, identification step only (excludes the completeness judge and Section D))
+- Identification (model aliases, not pinned): C$0.0277 per case, 5.7 s median, 11.3 s p95 (measured, 20 dev cases, cost and latency over 3 repeats, identification step only (excludes the completeness judge and Section D))
 
-**Speaker notes:** Hallucinated citations are the failure that would sink an application, so the verifier drops any citation whose quote doesn't match the code text. Each Section C row carries its article, objective and function from the attribution tables, so the rationale follows the code's own structure; the three demo articles were checked against our code database. Code identification: top-1 9/11 and recall@5 9/11 on the model-checked dev cases that have a gold article (in-sample, single run, 9 cases without gold excluded); the BM25 baseline gets 5/11; it asks the applicant on 40% of cases. These are dev cases, not real applications, and the models are aliases until they are pinned to dated snapshots in PR #12 (in progress).
+**Speaker notes:** Hallucinated citations are the failure that would sink an application, so the verifier drops any citation whose quote doesn't match the code text. Each Section C row carries its article, objective and function from the attribution tables, so the rationale follows the code's own structure; the three demo articles were checked against our code database. Code identification: top-1 9/11 and recall@5 (correct article in the top 5) 9/11 on the model-checked dev cases that have a gold article (in-sample, single run, 9 cases without gold excluded); the BM25 baseline gets 5/11; it asks the applicant on 40% of cases. These are dev cases, not real applications, and the models are aliases until they are pinned to dated snapshots in PR #12 (in progress).
 *Sources:* [Alberta building codes](https://www.alberta.ca/building-codes-and-standards); Implementation Plan §9
 
 ### Slide 6: It knows where to stop [Recommendations, 10]
@@ -87,7 +87,7 @@
 ### Slide 11: Applicants pay to arrive complete [Business Plan, 10]
 - First buyer: production homebuilders, who write the Div C 2.3.1 documentation
 - Price to test: C$125–750 per bespoke package (untested hypothesis)
-- Identification model cost: C$0.0277 per case, about 0.02% of the C$125 floor (measured on dev cases; identification step only)
+- Identification model cost (model aliases, not pinned): C$0.0277 per case, about 0.02% of the C$125 floor (measured on dev cases; identification step only)
 
 **Speaker notes:** The low end of the range is one hour at the Council's own C$125/hour alternative-solution rate. No buyer has seen a price. Authority pilots would sit under the C$75,000 trade-agreement threshold that Edmonton and Calgary apply.
 *Sources:* [draft PR #12](https://github.com/simplythatguy/batatis/pull/12) (keyed run, Oct 20, 2026); [SCC fee schedule](https://ebs.safetycodes.ab.ca/documents/webdocs/sr/council%20fee%20schedule%20asca%20v2.pdf); [Edmonton Procurement Standard](https://www.edmonton.ca/sites/default/files/public-files/Procurement%20Standard.pdf); [Calgary procurement policy](https://www.calgary.ca/buy-sell/supply-to-city/procurement-policy.html)

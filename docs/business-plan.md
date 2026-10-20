@@ -117,7 +117,7 @@ A better model makes anyone's code search and drafting better, including ours. I
 - **No buyer has seen a price.** Every price in §5 is a hypothesis built from public anchors, and the authority's willingness to pay has no figure at all.
 - **Whether builders pay per package** when some variances are jurisdiction-wide repeats (§4 tension).
 - **Cost and latency are measured for code identification only** (§6), on model aliases and dev cases, not real applications; the completeness judge's cost is still to be measured.
-- **The officer review and portal package are not built yet,** and no officer has used Batatis. Time saved for an SCO is a target, not a result (see the Implementation Plan's testing protocol).
+- **The officer screen is in review (PR #16, one planted sample package); the registration bundle is not built,** and no officer has used Batatis. Time saved for an SCO is a target, not a result (see the Implementation Plan's testing protocol).
 - **No pilot partner has agreed.** We have not contacted anyone; this is a hackathon prototype.
 - **The Data Hub's bases:** the report covers Q1–Q2 2026, counts varied articles, not applications, and does not show variance type (§3).
 - **Consultant preparation fees in Alberta** are not public; we use proxies.
