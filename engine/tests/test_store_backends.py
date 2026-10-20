@@ -1,9 +1,7 @@
 """File backend always. Postgres only when TEST_DATABASE_URL is set."""
 import os
-import sqlite3
 import threading
 import uuid
-from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -71,18 +69,8 @@ def test_open_store_defaults_to_file(monkeypatch, tmp_path):
 
 
 def test_cases_older_than_seven_days_are_purged_with_files(tmp_path):
-    store = CaseStore(tmp_path / 'cases.sqlite')
-    old = store.put(Case(title='old'))
-    saved = store.put_file(old.id, 'note.pdf', b'%PDF-1.4 old')
-    fresh = store.put(Case(title='fresh'))
-    stamp = (datetime.now(timezone.utc) - timedelta(days=8)).isoformat(timespec='seconds')
-    with sqlite3.connect(store.path) as con:
-        con.execute("UPDATE cases SET json = json_set(json, '$.created_at', ?) WHERE id=?", (stamp, old.id))
-    assert store.get(fresh.id).title == 'fresh'
-    assert store.get(old.id) is None
-    assert store.get_file(old.id, saved['id']) is None
-    assert store.delete(fresh.id) is True
-    assert store.get(fresh.id) is None
+    from engine.tests.test_retention import assert_retention
+    assert_retention(CaseStore(tmp_path / 'cases.sqlite'))
 
 
 def test_vercel_without_postgres_is_a_single_instance_demo(monkeypatch, tmp_path):
@@ -127,13 +115,8 @@ def test_postgres_backend(monkeypatch):
             thread.join()
         assert errors == []
         assert store.get_version(shared) == 2
-        expired = store.put(Case(title='expired'))
-        created.append(expired.id)
-        stamp = (datetime.now(timezone.utc) - timedelta(days=8)).isoformat(timespec='seconds')
-        with store._conn() as con:
-            con.execute("UPDATE cases SET data = jsonb_set(data, '{created_at}', to_jsonb(%s::text)) WHERE id=%s",
-                        (stamp, expired.id))
-        assert store.get(expired.id) is None
+        from engine.tests.test_retention import assert_retention
+        assert_retention(store, created)
     finally:
         with store._conn() as con:
             for case_id in created:

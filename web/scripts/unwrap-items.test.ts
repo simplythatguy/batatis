@@ -1,8 +1,9 @@
 // Every list route must come back as an array. The engine wraps those bodies as { items, meta }.
 import assert from "node:assert/strict";
 import { ARRAY_ROUTES, createEngine, unwrapItems, type Engine } from "../src/api/client.ts";
+import { PRIVACY_NOTICE } from "../src/privacy.ts";
 
-const notice = "Do not upload personal information. In live mode, text you enter is sent to OpenAI (US) for processing and is retained by OpenAI under its API data policy (https://openai.com/policies/api-data-usage-policies); Batatis deletes its own stored case data and files after 7 days or on request.";
+const notice = PRIVACY_NOTICE;
 
 assert.deepEqual(unwrapItems([{ id: "raw" }]), [{ id: "raw" }]);
 const wrapped = unwrapItems({ items: [{ id: "wrapped" }], meta: { notice } });

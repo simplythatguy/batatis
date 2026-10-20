@@ -35,7 +35,7 @@ python3 -m venv .venv
 
 Leave that terminal open. Uvicorn prints `Uvicorn running on http://127.0.0.1:8000`. The route list is at http://127.0.0.1:8000/docs. Stop it with Ctrl+C. Stop the web app the same way, in its own terminal.
 
-Cases are saved in `~/.batatis/cases.sqlite`, which every clone on this machine shares. To keep this clone's cases in the repo directory, start the engine this way instead:
+Cases are saved in `~/.batatis/cases.sqlite`, which every clone on this machine shares. A case and its files are deleted 7 days after `created_at` (see Retention). To keep this clone's cases in the repo directory, start the engine this way instead:
 
 ```bash
 BATATIS_CASES=./.data/cases.sqlite .venv/bin/uvicorn engine.api:app --port 8000
@@ -196,6 +196,12 @@ User-testing protocol: [`docs/user-testing/README.md`](./docs/user-testing/READM
 - Do not invent Section D professional evidence.
 - Prefer NBC(AE) 2023 **2nd printing**.
 - UI → Opus 5.5 implement **and** review; default look = Linear-caliber tokens (no prompt required).
+
+## Retention
+
+Do not upload personal information. In live mode, text you enter is sent to OpenAI (US) for processing and is retained by OpenAI under its API data policy (https://openai.com/policies/api-data-usage-policies); Batatis deletes its own stored case data and files after 7 days or on request.
+
+A case and its stored files are deleted 7 days after `created_at`, or sooner when the applicant calls `DELETE /cases/{case_id}`. The sqlite store and Neon Postgres use the same purge. Case create and the request sweep run it at most once every 10 minutes per engine instance. `python -m engine.retention` runs it immediately. On Vercel Hobby, a daily cron calls `GET /api/retention/purge`.
 
 ## Status
 

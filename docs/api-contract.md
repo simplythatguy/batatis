@@ -13,6 +13,7 @@ Every response sets `X-Robots-Tag: noindex, nofollow` and `X-Batatis-Notice` to 
 | Method and path | Response |
 | --- | --- |
 | `POST /cases` | `201` Case. Body is optional: `title`, `jurisdiction` (`id`, `name`, `authority`). |
+| `GET /retention/purge` | `{ "deleted": N, "meta" }`. Deletes cases with `created_at` older than 7 days, and their files. A second call returns `deleted: 0`. The daily Vercel cron calls `/api/retention/purge`. |
 | `GET /cases/{case_id}` | Case, or `404` with detail `case not found`. |
 | `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. `409` detail `case was updated concurrently` when the stored version changed during the write. |
 | `POST /cases/{case_id}/files` | `201` `{ "id", "name", "size", "content_type" }`. Body is raw `application/pdf` (optional header `x-filename`) or multipart with one file part. Bytes go in `case_files`. `404` detail `case not found`. `413` detail `PDF too large: the limit is 4 MB. Try compressing the file or splitting it.` `415` detail `only PDF files are accepted`. |
@@ -54,11 +55,11 @@ Returning code text is not a finding that a design complies. The code database f
 
 The appendix carries the NRC text for each Section C row: the citation, objective and functional-statement titles, any application note, the full provision text, and the NBC 2020 intent statements and their notes, each with the NRC publication link. Applicant-written process answers and other confirmed form values stay the applicant's words. JSON responses and the appendix do not clip provision text.
 
-### Demo data and retention
+### Privacy notice and retention
 
 Do not upload personal information. In live mode, text you enter is sent to OpenAI (US) for processing and is retained by OpenAI under its API data policy (https://openai.com/policies/api-data-usage-policies); Batatis deletes its own stored case data and files after 7 days or on request. Every JSON response includes that sentence as `meta.notice`. Every response also sends it in the `X-Batatis-Notice` header. A JSON array is returned as `{ "items": [...], "meta": { "notice": "..." } }`.
 
-A case older than 7 days, measured from `created_at`, is deleted with its facts, evidence, and files. The purge runs when a case is accessed and on a sweep at the start of each request.
+A case older than 7 days, measured from `created_at`, is deleted with its facts, evidence, and files. Deleting sooner is allowed. `DELETE /cases/{case_id}` removes that case and its files immediately (`204`, or `404` detail `case not found`). The same purge runs in the sqlite store and in Neon Postgres. Case create, and the sweep at the start of each request, run it at most once every 10 minutes per engine instance. `GET /retention/purge` (Vercel cron path `/api/retention/purge`, once a day on the Hobby plan) and `python -m engine.retention` run it immediately. A second purge deletes nothing.
 
 The engine log line is the method, the path, and the status. It does not include case JSON or uploaded bytes.
 
@@ -179,7 +180,7 @@ Alternative path only, after the ladder: CCMC evaluation, ICC-ES evaluation, reg
 
 ### Example
 
-The live body is `{ "items": <the array below>, "meta": { "notice": "<the privacy notice>" } }`.
+The live body is `{ "items": <the array below>, "meta": { "notice": "Do not upload personal information. In live mode, text you enter is sent to OpenAI (US) for processing and is retained by OpenAI under its API data policy (https://openai.com/policies/api-data-usage-policies); Batatis deletes its own stored case data and files after 7 days or on request." } }`.
 
 ```json
 [
