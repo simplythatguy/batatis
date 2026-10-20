@@ -2,40 +2,33 @@ import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useS
 import { EngineError, type EngineGap } from "./api/client";
 import { type CompletenessRecord, isProfessionalHold, officerRoutedLabel } from "./humanReview";
 import { clearEngineSession, engineCaseId, ensureEngineCase, pushDeletedEvidence, pushFacts, pushListedEvidence, refreshGaps, syncJurisdiction } from "./api/sync";
-import { shouldConfirmReplace } from "./rules";
+import { engineNotices, groupEvidenceGaps, missingFromEngine, shouldConfirmReplace } from "./rules";
 import { exampleCase } from "./examples";
 import { emptyCase } from "./intake";
 import { gapLabel, getGaps, reducer, type Action } from "./model";
 import { caseForRole, initialVisit } from "./visit";
 import type { ApplicantType, Case, Gap } from "./types";
 
-const KEY = "batatis-web-case-v4";
+/** Older builds kept the whole case here. It is removed on load and never written again. */
+const LEGACY_KEYS = ["batatis-web-case-v4", "batatis-web-case-v3"];
 
-interface Persisted {
-  phase: "who" | "case";
-  case: Case;
-  note: string;
-}
-
-function load(): Persisted {
-  let stored: string | null = null;
+/** A cold visit starts empty. Nothing about a previous visitor's case is read or kept in this browser. */
+function load() {
   try {
-    if (new URLSearchParams(location.search).has("reset")) {
-      sessionStorage.removeItem(KEY);
-    }
-    stored = sessionStorage.getItem(KEY);
-    sessionStorage.removeItem(KEY);
+    for (const key of LEGACY_KEYS) sessionStorage.removeItem(key);
     clearEngineSession();
   } catch {
-    stored = null;
+    /* storage unavailable: nothing to clear */
   }
-  return initialVisit(stored);
+  return initialVisit();
 }
 
 interface Store {
   c: Case;
   /** Workflow gaps (unconfirmed facts, unanswered cards) plus engine gaps when the route returns. */
   gaps: Gap[];
+  /** Engine `info` items. Shown as notices, never counted as missing. */
+  notices: string[];
   engineGaps: EngineGap[];
   /** idle = no review requested. engine = online result. browser = limited local check. */
   gapsSource: "idle" | "loading" | "engine" | "browser";
@@ -123,7 +116,7 @@ function composeGaps(localCase: Case, source: Store["gapsSource"], engine: Engin
   if (source !== "engine") return local;
   const seen = new Set<string>();
   const admin: Gap[] = [];
-  for (const g of engine) {
+  for (const g of missingFromEngine(groupEvidenceGaps(engine))) {
     const keys = aliasKeys(g.field);
     if (keys.some((key) => seen.has(key))) continue;
     for (const key of keys) seen.add(key);
@@ -153,15 +146,14 @@ function hrefFor(field: string): string {
 
 export function CaseProvider({ children }: { children: ReactNode }) {
   const loaded = useMemo(load, []);
-  const [phase, setPhase] = useState(loaded.phase);
+  const [phase, setPhase] = useState<"who" | "case">(loaded.phase);
   const [resetNote, setResetNote] = useState(loaded.note);
   const [c, dispatch] = useReducer(reducer, loaded.case);
   const [engineId, setEngineId] = useState<string | null>(null);
   const [factsEpoch, setFactsEpoch] = useState(0);
   const [engineGaps, setEngineGaps] = useState<EngineGap[]>([]);
-  const startsBlank = loaded.phase !== "case" || (!loaded.case.facts.length && !loaded.case.authority);
-  const [gapsSource, setGapsSource] = useState<Store["gapsSource"]>(startsBlank ? "idle" : "loading");
-  const [gapsNote, setGapsNote] = useState(startsBlank ? "Your application has not been reviewed online yet." : "Reviewing your application…");
+  const [gapsSource, setGapsSource] = useState<Store["gapsSource"]>("idle");
+  const [gapsNote, setGapsNote] = useState("Your application has not been reviewed online yet.");
   const [reviewDetail, setReviewDetail] = useState("");
   const [syncOk, setSyncOk] = useState(false);
   const syncState = useRef({ reviewed: false, detail: "" });
@@ -169,8 +161,6 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const [pendingExampleId, setPendingExampleId] = useState<string | null>(null);
   const [completenessRecord, setCompletenessRecord] = useState<CompletenessRecord | null>(null);
   const latestGaps = useRef<Gap[]>([]);
-
-  useEffect(() => sessionStorage.setItem(KEY, JSON.stringify({ phase, case: c, note: resetNote })), [phase, c, resetNote]);
 
   function reviewingCopy() {
     return c.exampleId ? "Reviewing this example…" : "Reviewing your application…";
@@ -258,6 +248,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   }
 
   const gaps = useMemo(() => composeGaps(c, gapsSource, engineGaps), [c, engineGaps, gapsSource]);
+  const notices = useMemo(() => (gapsSource === "engine" ? engineNotices(engineGaps) : []), [engineGaps, gapsSource]);
   useEffect(() => {
     latestGaps.current = gaps;
   }, [gaps]);
@@ -266,6 +257,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     () => ({
       c,
       gaps,
+      notices,
       engineGaps,
       gapsSource,
       gapsNote,
@@ -321,7 +313,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     }),
     // sync closes over the latest case via the render that built it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [c, gaps, engineGaps, gapsSource, gapsNote, reviewDetail, syncOk, engineId, factsEpoch, savedNote, phase, resetNote, pendingExampleId, completenessRecord],
+    [c, gaps, notices, engineGaps, gapsSource, gapsNote, reviewDetail, syncOk, engineId, factsEpoch, savedNote, phase, resetNote, pendingExampleId, completenessRecord],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

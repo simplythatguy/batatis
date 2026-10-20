@@ -64,17 +64,17 @@ test("Not sure is an open question and does not block Continue", () => {
     gaps: getGaps(c),
     notSure: c.questions.filter((item) => item.id.startsWith("q-from-")),
     ranking: [],
-    professional: ["Practice of engineering is unknown."],
+    professional: ["Not yet known whether a registered professional is required. Routed to the officer."],
     record: { label: "Export blocked", reasons: ["Section B, alternative description is empty."], note: "Export blocked." },
     role: { engineer: "Name an engineer when the design needs one.", officer: "The officer decides contradictions." },
-    reportNote: "The grouped completeness report isn't available on this engine yet.",
+    reportNote: "The grouped completeness report isn't available yet.",
   });
   assert.match(letter, /Which part of this sentence/);
   assert.match(letter, /Export blocked/);
   assert.match(letter, /Section B, alternative description is empty/);
   assert.match(letter, /SCO judgement/);
   for (const item of SCO_JUDGEMENT) assert.match(letter, new RegExp(item.label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
-  assert.match(letter, /Practice of engineering is unknown/);
+  assert.match(letter, /Not yet known whether a registered professional is required/);
   assert.match(letter, /No documents uploaded/);
   assert.doesNotMatch(letter, /complies or is safe\.\nAdministrative/);
   assert.match(letter, /does not decide whether the design complies or is safe/);

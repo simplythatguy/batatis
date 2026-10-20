@@ -58,6 +58,7 @@ const homebuilder: Case = {
       quote: {
         text: "Roof soffit projects over an exposing building face whose limiting distance is 0.45 m or less.",
         citation: "Summary from a development case, not the code sentence. Provision named there: 9.10.15.5.(8).",
+        source: "summary",
       },
     },
   ],
@@ -103,7 +104,8 @@ const contractor: Case = {
       clarifyingQuestion: "What is the fire-resistance rating of the corridor wall the duct passes through?",
       quote: {
         text: "Ducts penetrate rated fire separations without fire dampers; firestopped steel duct proposed instead.",
-        citation: "Summary from development case dev-003, not the code sentence. Provision named there: 9.10.13.13.(1).",
+        citation: "Summary from a development case, not the code sentence. Provision named there: 9.10.13.13.(1).",
+        source: "summary",
       },
     },
   ],
@@ -111,7 +113,7 @@ const contractor: Case = {
     {
       candidateId: "ex-damper",
       provision: "9.10.13.13.(1)",
-      citation: "Cached from development case dev-003. Not a live lookup.",
+      citation: "Cached from a development case. Not a live lookup.",
       attributionStatus: "direct",
       pairs: [
         { bracket: "[F03-OP1.2]", functions: ["F03"], objectives: ["OP1.2"] },
@@ -140,7 +142,7 @@ export const EXAMPLES: Example[] = [
   {
     id: "contractor-dampers",
     label: "General contractor · corridor ducts",
-    blurb: "Steel ducts through rated corridor walls, without fire dampers. Cached summary from development case dev-003.",
+    blurb: "Steel ducts through rated corridor walls, without fire dampers. Cached summary from a development case.",
     case: contractor,
   },
   {

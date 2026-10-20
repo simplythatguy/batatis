@@ -42,6 +42,14 @@ async function jargon(page, where) {
   return text;
 }
 
+/** Change the in-app route. A reload is a cold visit and starts an empty case, so the walk never reloads. */
+async function go(page, hash, { idle = true } = {}) {
+  await page.evaluate((h) => {
+    location.hash = h;
+  }, hash);
+  if (idle) await page.waitForNetworkIdle({ idleTime: 300, timeout: 15000 }).catch(() => undefined);
+}
+
 async function clickButton(page, label) {
   const handle = await page.evaluateHandle((wanted) => {
     const nodes = [...document.querySelectorAll("button")];
@@ -77,7 +85,7 @@ try {
   await clickButton(page, "Homebuilder");
   await page.waitForSelector("#description");
 
-  await page.goto(`${preview}/#/officer`, { waitUntil: "networkidle0" });
+  await go(page, "#/officer");
   let text = await jargon(page, "blank officer");
   assert(/SCO judgement/.test(text), "blank officer does not name SCO judgement");
   assert(/does not open the sample package/.test(text), "blank officer opened the hempcrete package");
@@ -89,7 +97,7 @@ try {
   await page.setViewport({ width: 390, height: 844 });
   await shot(page, "00-officer-blank-mobile");
   await page.setViewport({ width: 1280, height: 900 });
-  await page.goto(`${preview}/#/describe`, { waitUntil: "networkidle0" });
+  await go(page, "#/describe");
   await page.waitForSelector("#description");
 
   await page.type("#description", DESCRIPTION);
@@ -113,7 +121,7 @@ try {
   }
   await shot(page, "02-code-check");
 
-  await page.goto(`${preview}/#/section-c`, { waitUntil: "networkidle0" });
+  await go(page, "#/section-c");
   await page.waitForSelector("#section-c-search");
   const query = await page.$eval("#section-c-search", (el) => el.value);
   assert(query.includes("hempcrete"), `search box was not prefilled from the description: ${query}`);
@@ -142,7 +150,11 @@ try {
   await clickButton(page, "Continue to application");
   await page.waitForSelector("#reco-title");
   await page.waitForFunction(
-    () => /Evidence plan|Section D issues|Internal Server Error|code database not found|not available yet|could not be reached|Save the draft/.test(document.body.innerText),
+    () => {
+      const t = document.body.innerText;
+      // Wait for the evidence area itself, not only the page heading, so the next assertion does not race the load.
+      return /What is the occupancy or building type/.test(t) && /Document name|Evidence plan|No evidence items yet|Internal Server Error|code database not found/.test(t);
+    },
     { timeout: 20000 },
   );
   text = await jargon(page, "section D");
@@ -191,12 +203,12 @@ try {
   }
   await shot(page, "04-section-d");
 
-  await page.goto(`${preview}/#/application?tab=A`, { waitUntil: "networkidle0" });
+  await go(page, "#/application?tab=A");
   await page.type("#field-owner", "Example Applicant");
   await page.type("#field-representative", "Example Applicant");
   await page.type("#field-mailingAddress", "0000 Example Avenue NW, Edmonton");
   await page.type("#field-date", "2026-10-20");
-  await page.goto(`${preview}/#/application?tab=B`, { waitUntil: "networkidle0" });
+  await go(page, "#/application?tab=B");
   await page.select("#field-scope", "site");
   await page.type("#field-municipalAddress", "0000 Example Avenue NW, Edmonton");
   await page.type("#field-legalDescription", "Lot 1, Block 1, Plan EXAMPLE");
@@ -227,7 +239,7 @@ try {
   await page.waitForFunction(() => {
     const t = document.body.innerText;
     if (/Saving and reviewing|Preparing your/.test(t)) return false;
-    return /Online review unavailable|Some required information is missing|Your application PDF is ready|Your draft PDF is ready|The PDF was blocked|The PDF could not be prepared/.test(t);
+    return /Online review unavailable|Not exported yet|No blocking administrative items found|Some required information is missing|Your application PDF is ready|Your draft PDF is ready|The PDF was blocked|The PDF could not be prepared/.test(t);
   }, { timeout: 20000 });
   text = await jargon(page, "completeness dialog");
   assert(!/Engine \d+/.test(text), "completeness dialog shows a raw engine status");
@@ -260,7 +272,7 @@ try {
     else pass();
   };
   page.on("request", delayGaps);
-  await page.goto(`${preview}/#/officer`, { waitUntil: "domcontentloaded" });
+  await go(page, "#/officer", { idle: false });
   await page.waitForFunction(() => document.body.innerText.includes("Reviewing your application"), { timeout: 10000 });
   text = await jargon(page, "officer pending");
   assert(!/Nothing open in this section/.test(text), "officer says nothing is open while the review is pending");
@@ -281,13 +293,14 @@ try {
   assert(/Copy request/.test(text), "officer has no copy request");
   assert(!/Copy example request/.test(text), "officer still copies an example request");
   assert(!/Hempcrete garden suite/.test(text), "officer still names the sample package");
-  assert(/Retry review/.test(text), "officer engine-down has no Retry");
+  if (/Online review unavailable/.test(text)) assert(/Retry review/.test(text), "officer engine-down has no Retry");
+  else assert(/Online administrative review finished/.test(text), "officer neither finished the review nor offered Retry");
   assert(!/case_[0-9a-f]{6,}/.test(text), "officer shows a raw case id");
   assert(!/Engine \d+/.test(text), "officer shows a raw engine status");
   assert(!/\/cases\//.test(text), "officer shows an endpoint path");
   await shot(page, "07-officer");
 
-  await page.goto(`${preview}/#/accuracy`, { waitUntil: "networkidle0" });
+  await go(page, "#/accuracy");
   text = await jargon(page, "accuracy");
   assert(/rules_plus_unknown/.test(text), "model-checked screen is missing the shipped rules_plus_unknown label");
   assert(/50\/60/.test(text), "model-checked screen is missing the shipped 50/60 figure");

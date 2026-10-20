@@ -329,6 +329,15 @@ export function getGaps(c: Case): Gap[] {
       field: "professional.role",
     });
   }
+  if (c.practiceOfEngineering === "unknown" && !professionalConfirmed(c.facts)) {
+    gaps.push({
+      id: "practice-unknown",
+      severity: "blocking",
+      label: "Routed to the officer: whether a registered professional is required. The draft PDF stays available; the official PDF waits for this.",
+      href: "#/application?tab=D&focus=prof-role",
+      field: "professional_requirement",
+    });
+  }
   if (c.questions.some((q) => q.id.startsWith("q-prof-") && !q.answer)) {
     gaps.push({
       id: "professional-not-engaged",
@@ -506,8 +515,8 @@ export function reducer(c: Case, a: Action): Case {
             identified: true,
             suggestion: "identify" as const,
             quote: quote
-              ? { text: quote, citation: "Quoted from the code database." }
-              : { text: article.reason || "No sentence was returned for this article.", citation: "No code sentence was returned." },
+              ? { text: quote, citation: "Quoted from the code database.", source: "code" as const }
+              : { text: article.reason || "No sentence was returned for this article.", citation: "No code sentence was returned.", source: "ranking" as const },
             departure: "do something other than what this sentence requires",
             clarifyingQuestion: "Which part of this sentence does the design not follow?",
             answer: prev?.answer ?? null,

@@ -111,7 +111,7 @@ export function professionalFlagLines(c: Pick<Case, "practiceOfEngineering" | "f
     ];
   }
   if (c.practiceOfEngineering === false) return ["Practice of engineering was not indicated."];
-  if (c.practiceOfEngineering === "unknown") return ["Practice of engineering is unknown."];
+  if (c.practiceOfEngineering === "unknown") return ["Not yet known whether a registered professional is required. Routed to the officer."];
   return ["Practice of engineering has not been screened on this application."];
 }
 

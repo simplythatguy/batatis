@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { NRC_CREDIT, NRC_SOURCES } from "./config";
+import { splitNoticeUrl } from "./rules";
 import { EXAMPLES } from "./examples";
 import { roleNote } from "./humanReview";
 import { useCase } from "./store";
@@ -40,6 +42,13 @@ const ICONS: Record<string, ReactNode> = {
   upload: <path d="M8 11V3.5M5 6.5l3-3 3 3M3 12.5h10" />,
   close: <path d="m4.5 4.5 7 7m0-7-7 7" />,
   chevron: <path d="m6 4 4 4-4 4" />,
+  info: (
+    <>
+      <circle cx="8" cy="8" r="5.5" />
+      <path d="M8 7.25v3.5M8 5.25v.01" />
+    </>
+  ),
+  external: <path d="M6.5 3.5h-3v9h9v-3M9 3.5h3.5V7M12.5 3.5 7.5 8.5" />,
 };
 
 export function Icon({ name, size = 14 }: { name: keyof typeof ICONS | string; size?: number }) {
@@ -242,6 +251,76 @@ export function RoleNote() {
     <p className="field-note">
       {note.engineer} {note.officer}
     </p>
+  );
+}
+
+/**
+ * Verbatim code text with its NRC credit and a link to the official publication.
+ * Use only for text the code database returned; summaries and the applicant's words are not code text.
+ */
+export function CodeQuote({ text, source = "code", className = "" }: { text: ReactNode; source?: keyof typeof NRC_SOURCES; className?: string }) {
+  return (
+    <figure className="code-quote">
+      {/* Long text scrolls inside the quote (styles.css), so it needs a keyboard stop. */}
+      <blockquote className={`cite-block quote ${className}`.trim()} tabIndex={typeof text === "string" && text.length > 700 ? 0 : undefined}>
+        {text}
+      </blockquote>
+      <NrcCredit source={source} as="figcaption" />
+    </figure>
+  );
+}
+
+/** "© National Research Council of Canada · <publication> · Official publication ↗". */
+export function NrcCredit({ source = "code", as: Tag = "span" }: { source?: keyof typeof NRC_SOURCES; as?: "span" | "figcaption" }) {
+  const pub = NRC_SOURCES[source];
+  return (
+    <Tag className="nrc-credit">
+      {NRC_CREDIT} · {pub.title} ·{" "}
+      <a href={pub.url} target="_blank" rel="noopener noreferrer">
+        Official publication
+        <Icon name="external" size={11} />
+        <span className="sr-only"> (opens in a new tab)</span>
+      </a>
+    </Tag>
+  );
+}
+
+/**
+ * Information from the engine (severity `info`). Not a missing item, so it carries no count and no status dot.
+ * A URL inside the message becomes the link; nothing points back into the app.
+ */
+export function NoticeRow({ text }: { text: string }) {
+  const { text: shown, url } = splitNoticeUrl(text);
+  return (
+    <p className="notice-row" role="note">
+      <span className="notice-icon" role="img" aria-label="Information">
+        <Icon name="info" size={14} />
+      </span>
+      <span>
+        {shown}
+        {url && (
+          <>
+            {" "}
+            <a href={url} target="_blank" rel="noopener noreferrer">
+              Open the source
+              <Icon name="external" size={11} />
+              <span className="sr-only"> (opens in a new tab)</span>
+            </a>
+          </>
+        )}
+      </span>
+    </p>
+  );
+}
+
+export function Notices({ notices }: { notices: string[] }) {
+  if (!notices.length) return null;
+  return (
+    <div className="notice-list">
+      {[...new Set(notices)].map((n) => (
+        <NoticeRow key={n} text={n} />
+      ))}
+    </div>
   );
 }
 

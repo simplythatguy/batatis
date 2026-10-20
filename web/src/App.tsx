@@ -9,6 +9,7 @@ import { Officer } from "./screens/Officer";
 import { SectionC } from "./screens/SectionC";
 import { Who } from "./screens/Who";
 import { applicantLabel } from "./intake";
+import { AUTHORITIES } from "./config";
 import { EXAMPLES } from "./examples";
 import { useCase } from "./store";
 
@@ -111,7 +112,7 @@ export function App() {
           <div className="case-card">
             <span className="case-title">{phase === "case" ? c.title || "New application" : "No case yet"}</span>
             <span className="meta">
-              {phase === "case" ? `${applicantLabel(c.applicantType)} · ${c.authority || "Authority not selected"}` : "No case yet"}
+              {phase === "case" ? `${applicantLabel(c.applicantType)} · ${AUTHORITIES.find((a) => a.id === c.authority)?.name ?? "Authority not selected"}` : "No case yet"}
             </span>
           </div>
           {phase === "case" && (

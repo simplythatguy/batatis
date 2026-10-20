@@ -9,11 +9,11 @@ import type { Action } from "./model";
 import type { CandidateAnswer } from "./types";
 
 export const DECISION_UNAVAILABLE =
-  "Article decisions aren't available on this engine yet. Your Yes, No, or Not sure is kept on this check.";
+  "Article decisions aren't available yet. Your Yes, No, or Not sure is kept on this check.";
 
-export const CONFIRM_UNAVAILABLE = "Saving accepted articles isn't available on this engine yet.";
+export const CONFIRM_UNAVAILABLE = "Saving accepted articles isn't available yet.";
 
-export const INFORMATION_UNAVAILABLE = "The officer information request isn't available on this engine yet.";
+export const INFORMATION_UNAVAILABLE = "The officer information request isn't available yet.";
 
 export function isCachedDemo(payload: { mode?: string | null; cached?: boolean | null }): boolean {
   return payload.mode === "cached_demo" && payload.cached === true;
