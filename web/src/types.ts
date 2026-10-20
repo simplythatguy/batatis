@@ -90,8 +90,10 @@ export interface SectionCRow {
   /** The national 2020 intent statement is attributed differently from NBC(AE) 2023. */
   differs: boolean;
   differsDetail?: string;
-  /** AI-written, never code text. */
-  explanation: string;
+  /** Objective and function titles by code (live rows carry them from the engine). */
+  terms?: Record<string, string>;
+  /** AI-written, never code text. Absent on live lookup rows until the engine writes explanations. */
+  explanation?: string;
 }
 
 export type ProcessFieldId = "rationale" | "risk" | "mitigation" | "assumptions";
