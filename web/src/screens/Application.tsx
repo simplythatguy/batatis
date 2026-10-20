@@ -12,7 +12,7 @@ const TABS = [
 
 export function Application({ route }: { route: Route }) {
   const { gaps } = useCase();
-  const tab = route.params.get("tab") ?? "A";
+  const tab = TABS.find((t) => t.id === route.params.get("tab"))?.id ?? "A";
   const dialog = useRef<HTMLDialogElement>(null);
   const blocking = gaps.filter((g) => g.severity === "blocking");
   const countFor = (t: string) =>

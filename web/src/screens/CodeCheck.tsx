@@ -59,7 +59,7 @@ function CandidateCard({ a, index, total }: { a: Candidate; index: number; total
         <div className="followup">
           <div className="meta">Check before answering</div>
           <p>{a.clarifyingQuestion}</p>
-          <p className="meta">Answer Yes or No once you know; Section C waits for it.</p>
+          <p className="meta">Answer Yes or No once you know, before you continue from this check.</p>
         </div>
       )}
       <details className="disclosure ref">
