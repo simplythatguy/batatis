@@ -7,7 +7,7 @@
 ## 1. Phases after Demo Day (all targets)
 | Phase | When (target) | What happens | Exit condition (target) |
 |---|---|---|---|
-| 0. Ready to pilot | By Dec 1, 2026 | Hosting in a Canadian cloud region; applicant and officer sign-in; officer completeness view; portal registration package (form, attachment manifest, redaction flags); monitoring of ask, override and dropped-quote rates | Build passes the agent-run walkthroughs and the planted-gap package with no compliance claims and no invented citations |
+| 0. Ready to pilot | Nov 26 build, pilot-ready by Dec 1, 2026 | Hosting in a Canadian cloud region; applicant and officer sign-in; officer completeness view; portal registration package (form, attachment manifest, redaction flags); monitoring of ask, override and dropped-quote rates | Build passes the agent-run walkthroughs and the planted-gap package with no compliance claims and no invented citations |
 | 1. Parallel pilot with one accredited organization | Dec 2, 2026 – Mar 2, 2027 (the program's implementation window, which it calls "not guaranteed", [onboarding guide](https://edmontonunlimited.com/wp-content/uploads/2026/09/Built-World-Challenge-Onboarding-Guide.docx.pdf)) | Applicants prepare packages with Batatis; officers run the completeness review alongside today's process. Officers make every decision and register in the Council's portal themselves | Success metrics in §3 met, and the organization asks to continue |
 | 2. Applicant self-serve | After a successful pilot | Repeat filers (production homebuilders, manufacturers) use Batatis to arrive complete in any participating jurisdiction | Paying applicant accounts at a price tested in the pilot |
 | 3. More organizations, then an OVP integration | After phase 2 | Configure per-organization checklists; build an approved interface into the portal only on the Council's terms | The Council publishes integration requirements and approves the path |
@@ -29,7 +29,7 @@
 | Compliance claims or invented citations in output | 0 | Automated checks plus officer override log |
 | First-time applicants completing Part 1 A–D unaided | At least 2 of 3 per round | Think-aloud sessions, only if a partner engages |
 | Continuation | At least 1 organization asks to continue after Mar 2, 2027 | Written request |
-| Cost per case vs. price floor | **To be measured: keyed benchmark pending** | Keyed benchmark, reported in US$ and C$ with a dated rate |
+| Cost per case vs. price floor | Identification measured (C$0.0277 per case on dev cases, about 0.02% of the C$125 floor; Implementation Plan §4); full pipeline to be measured | Keyed benchmark, reported in US$ and C$ with a dated rate |
 
 ## 4. Gating conditions
 | Gate | What it requires | Our response | Source |

@@ -1,11 +1,11 @@
 # Batatis: Pitch Slides
 
-*Slide copy for Submission 1 (Oct 29, 2026), built from pitch-outline.md. Rubric weights are in brackets. Status labels: **on dev** (engine or screen merged), **[if merged: PR #N]** (in an open pull request), **not built** or **planned**. The end-to-end applicant flow (description → Section C → export in one screen flow) is **not built** yet; where a slide shows it, it is a **cached demo run**. Evaluation figures are model-checked, not human-verified.*
+*Slide copy for Submission 1 (Oct 29, 2026), built from pitch-outline.md. Rubric weights are in brackets. Status labels: **on dev** (engine or screen merged), **[if merged: PR #N]** (in an open pull request), **not built** or **planned**. The end-to-end applicant flow (description → Section C → export in one screen flow) is **not built** yet; where a slide shows it, the demo uses PR #16's screens in review or a labelled still. A **cached demo run** is a recorded real model run for a seeded example case, replayed and labelled as such on screen instead of a live model call. Evaluation figures are model-checked, not human-verified.*
 
 ---
 
 ### Slide 1: Alberta's variance paperwork keeps bouncing back
-- 1,553 / 1,698 / 1,713 building variances in 2019, 2021 and 2022
+- 1,553 / 637 / 1,698 / 1,713 building variances in 2019–2022
 - Edmonton: about 67% of 2023 variances (all disciplines)
 - No published service standard for variance review
 
@@ -22,24 +22,24 @@
 
 ### Slide 3: It asks before it guesses, and we test that [Intake, 20]
 - Missing fields become plain questions, each tied to a form section (engine on dev; screen in review)
-- Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind) (PR #8, not merged).
+- Engineer-needed flag (PR #8, not merged): rules_only 55/60 in-sample, 1 under-flag; shipped rules_plus_unknown 50/60 in-sample, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind); model-checked, not human-verified.
 - Accuracy across all applicant types: still to be measured
 
-**Speaker notes:** The completeness check on dev names each missing field and the question to ask. The engineer-needed flag has two variants in PR #8: rules_only scored 55 of 60 on the in-sample dev set, and rules_plus_unknown scored 7 of 8 on a held-out set that was blind before a later fix; re-runs after that fix are not blind. All answer keys are model-checked, not human-verified, so treat this as an early signal.
+**Speaker notes:** The completeness check on dev names each missing field and the question to ask. The engineer-needed flag has two variants in PR #8 (not merged). The shipped variant, rules_plus_unknown, scored 50 of 60 on the in-sample dev set with 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), and 7 of 8 on a held-out set that was blind before a later fix; re-runs after that fix are not blind. The unshipped rules_only variant scored 55 of 60 in-sample. All answer keys are model-checked, not human-verified, so treat this as an early signal.
 *Sources:* dev `engine/completeness.py`; [PR #8](https://github.com/simplythatguy/batatis/pull/8)
 
 ### Slide 4: A ranked shortlist, measured against a named acceptable solution [Code Identification, 20]
 - Ranked articles with a named benchmark acceptable solution [if merged: PR #12]
 - You confirm departures; the exception is a narrow Part 9 auto-commit (p ≥ 0.75, at most 3 articles, uncalibrated)
-- Section C objectives and functions are looked up from the code's tables (on dev)
+- Section C objectives and functions are looked up from the code's tables (on dev); the table stays empty until an article is added from Search, because identification is command-line only
 
-**Speaker notes:** For the homebuilder's window, the benchmark acceptable solution is Sentence 9.9.10.1.(2): at least 0.35 m² unobstructed, no dimension under 380 mm, and the case's 0.312 m² opening is the departure. Showing each requirement beside the code text is the design; on today's screens that view is still being fixed, so in the demo it is a cached run. Ranking is command-line only on dev and moves to HTTP in PR #12, which also runs BM25 first, then an OpenAI rerank and verifier.
+**Speaker notes:** For the homebuilder's window, the benchmark acceptable solution is Sentence 9.9.10.1.(2): at least 0.35 m² unobstructed, no dimension under 380 mm, and the case's 0.312 m² opening is the departure. Showing each requirement beside the code text is the design; on today's screens that view is still being fixed, so in the demo it is a labelled still from PR #12 (not in this app build). Ranking is command-line only on dev and moves to HTTP in PR #12, which also runs BM25 first, then an OpenAI rerank and verifier.
 *Sources:* dev `engine/section_c.py`, `engine/identify/`; [PR #12](https://github.com/simplythatguy/batatis/pull/12); case C [if merged: PR #14]
 
 ### Slide 5: Every citation resolves, or it's dropped [Code Identification, 20]
 - Built by script from the official NBC(AE) 2023; the 2nd-printing pin is in PR #12
 - A citation that doesn't quote the code word for word is removed (on dev)
-- Identification: C$0.0277 per case, 5.7 s median, 11.3 s p95 (measured, 20 dev cases × 3 repeats, identification step only (excludes the completeness judge and Section D))
+- Identification: C$0.0277 per case, 5.7 s median, 11.3 s p95 (measured, 20 dev cases, cost and latency over 3 repeats, identification step only (excludes the completeness judge and Section D))
 
 **Speaker notes:** Hallucinated citations are the failure that would sink an application, so the verifier drops any citation whose quote doesn't match the code text. Each Section C row carries its article, objective and function from the attribution tables, so the rationale follows the code's own structure; the three demo articles were checked against our code database. Code identification: top-1 9/11 and recall@5 9/11 on the model-checked dev cases that have a gold article (in-sample, single run, 9 cases without gold excluded); the BM25 baseline gets 5/11; it asks the applicant on 40% of cases. These are dev cases, not real applications, and the models are aliases until they are pinned to dated snapshots in PR #12 (in progress).
 *Sources:* [Alberta building codes](https://www.alberta.ca/building-codes-and-standards); Implementation Plan §9
@@ -68,12 +68,12 @@
 **Speaker notes:** Our three demo cases cover a homebuilder, a manufacturer and a general contractor, with fictional people and real code citations. The STANDATA reasoning (23-BCV-003 covers the under-slab insulation but not the edges; the roof is probably not covered by 23-BCV-017 as drawn) is case content; the tool's STANDATA "you may not need a variance" check is not built. Whether a real first-time applicant could use it unaided is untested.
 *Sources:* [STANDATA 23-BCV-017](https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/2aa7678c-c476-4523-b0c3-36e71256e11b/download/ma-standata-variance-building-23-bcv-017-2025-09.pdf); [STANDATA 23-BCV-001](https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/01b622f0-f4a1-426d-b15f-ffc25e725949/download/ma-standata-variance-building-23-bcv-001-2024-04.pdf); [STANDATA 23-BCV-003](https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/3915ba54-96dd-4c54-a9c1-63df5c917836/download/ma-standata-variance-building-23-bcv-003-2024-05.pdf); [Calgary B23-014](https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-014-new-products-materials-and-systems-in-building-construction.pdf)
 
-### Slide 9: The current SCC form out, designed for any jurisdiction [Usability and Portability, 10]
-- Fills Part 1, Sections A–D of the Council's current SCC form (PDF last modified Oct 6, 2026), not the brief's older Appendix 1 template; same field names, differences listed in the Implementation Plan (export from the engine; screen in review)
-- Export blocked with reasons until gaps clear, or exported as a labelled draft (engine on dev)
+### Slide 9: Fills the current SCC form; built to travel [Usability and Portability, 10]
+- Fills Part 1, Sections A–D of the Council's current SCC form (PDF last modified Oct 6, 2026), not the brief's older Appendix 1 template; same field names, differences listed in the Implementation Plan (the engine fills the SCC form; the app's draft record is a .txt, PR #16, pending merge)
+- The engine blocks export with reasons until gaps clear, or returns a labelled draft (engine on dev; in the app (PR #16, pending merge), Download draft record saves a .txt draft record once every gap is closed, not the SCC form)
 - Designed so local add-ons are configuration; per-jurisdiction form registry in PR #12
 
-**Speaker notes:** We caught the Council's October form revision and fingerprinted the export to that exact file, leaving the officer's Part 2 blank. Target: an AI-agent walkthrough that reaches a finished export on the current screens, reported as before → after; that re-run is pending, so we report no result yet. No real user has tested it.
+**Speaker notes:** We caught the Council's October form revision and fingerprinted the export to that exact file, leaving the officer's Part 2 blank. A third AI-agent simulated walkthrough on the screens in review still did not reach export (before → after: reached export: no → no); reaching export is the target for the next re-run. The engine fills the SCC form; in the app (PR #16, pending merge), Download draft record saves a .txt draft record once every gap is closed, not the SCC form. No real user has tested it.
 *Sources:* dev `engine/export/field_maps/scc_2026-10.json`, `engine/export/scc.py`; [SCC form](https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf); [PR #12](https://github.com/simplythatguy/batatis/pull/12)
 
 ### Slide 10: Ready for December 1 [Implementation Plan, 10]
