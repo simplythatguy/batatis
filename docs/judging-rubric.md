@@ -17,3 +17,8 @@ Rubric for evaluating innovator team submissions at Semi-Finals and Demo Day. Th
 | 7 | Business Plan | Is there a credible company here — buyer, willingness to pay, cost per application, and a defensible position as the underlying models improve. | 10% |
 | 8 | Usability and Portability | Overall user experience for both sides. Would a design lead choose this over their current process; would an SCO open it twice. Is it designed for adaptability to individual jurisdictions. | 10% |
 | 9 | The X Factor | Hard-to-quantify edge — team, insight, unfair advantage. | 5% |
+
+## Editor's notes (not in the PDF)
+
+- The nine weights sum to 100. That sum is computed; the PDF prints no total row.
+- Semi-Finals and Demo Day usage is stated in the PDF's opening rubric sentence: "Rubric for evaluating innovator team submissions at Semi-Finals and Demo Day. These judging criteria follow the criteria provided in Section 2 to the applicants."
