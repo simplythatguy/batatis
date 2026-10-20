@@ -1,6 +1,7 @@
 """Section D issues recommend evidence. They do not certify a design or invent a citation."""
 import json
 import re
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
@@ -8,7 +9,7 @@ from engine.api import create_app
 from engine.models import Case, Source
 from engine.section_d import ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER
 from engine.section_d_flag_eval import RULE_IDS, main
-from engine.section_d_issues import section_d_issues
+from engine.section_d_issues import PROCESS_RULES, PROFESSIONAL_RULES, section_d_issues
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import fact
 
@@ -142,16 +143,14 @@ def test_no_issue_text_claims_compliance_or_safety_and_citations_stay_inside_cod
         assert 'NBC(AE)' not in blob
 
 
-def test_span_handoff_cites_only_a_resolved_sentence():
+def test_span_is_part4_and_cites_only_the_existing_division_c_rule():
     codes = codes_with_rules()
-    del codes.rows[('B', '9.23.1.1.(2)')]
-    quiet = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact('span_m', 18)]), codes)[0]
-    assert quiet.practice_of_engineering.value is True
-    assert '9.23.1.1' not in quiet.model_dump_json()
-    codes.add('B', '9.23.1.1.(2)')
-    cited = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact('span_m', 18)]), codes)[0]
-    assert codes.rows[('B', '9.23.1.1.(2)')]['citation'] in cited.practice_of_engineering.reason
-    assert codes.rows[('B', '9.23.1.1.(2)')]['citation'] in codes.issued
+    issue = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact('span_m', 18)]), codes)[0]
+    assert issue.practice_of_engineering.value is True
+    assert issue.practice_of_engineering.rule == '2.4.1.2.(1)'
+    assert issue.practice_of_engineering.citation == 'fixture:C:2.4.1.2.(1)'
+    assert issue.practice_of_engineering.citation in codes.issued
+    assert '9.23.1.1' not in issue.model_dump_json()
 
 
 def test_status_addressed_by_applicant_item_and_needs_professional_without_one():
@@ -196,19 +195,34 @@ def test_route_is_read_only_and_missing_case_is_404(tmp_path):
     assert store.get(case.id).model_dump_json() == before
 
 
-def test_eval_script_prints_variant_table_with_zero_under_flag(capsys):
+def test_rule_table_uses_only_provisions_already_in_the_repo():
+    professional = Path('engine/professional.py').read_text()
+    process = Path('engine/process_fields.py').read_text()
+    for _division, provision_id, source in (*PROFESSIONAL_RULES, *PROCESS_RULES):
+        if source.startswith('engine/professional.py'):
+            assert provision_id in professional, provision_id
+        elif source.startswith('engine/process_fields.py'):
+            assert provision_id in process, provision_id
+        else:
+            raise AssertionError(source)
+    for path in ('engine/section_d_issues.py', 'engine/section_d_flag_eval.py', 'docs/api-contract.md'):
+        assert '9.23.1.1' not in Path(path).read_text()
+
+
+def test_eval_script_prints_in_sample_wilson_table(capsys):
     assert main() == 0
     out = capsys.readouterr().out
-    assert out.splitlines()[0].split() == ['variant', 'scored', 'agreement', 'under_flag', 'skipped']
+    assert 'gold: model-checked' in out
+    assert 'split: dev (in-sample; no held-out)' in out
     assert 'winner: rules_plus_unknown' in out
     assert 'under_flag_target: 0' in out
     plus = next(line for line in out.splitlines() if line.startswith('rules_plus_unknown'))
-    only = next(line for line in out.splitlines() if line.startswith('rules_only'))
-    plus_parts, only_parts = plus.split(), only.split()
-    assert int(plus_parts[3]) == 0
-    assert int(plus_parts[1]) + int(plus_parts[4]) == 60
-    assert int(plus_parts[1]) > 0
-    assert float(plus_parts[2]) >= float(only_parts[2])
+    assert '60/60 [' in plus and ', 1.0]' in plus
+    assert re.search(r'\]\s+0\s+17\s+0\s*$', plus)
+    only = next(line for line in out.splitlines() if line.startswith('rules_only '))
+    assert re.search(r'\]\s+1\s+0\s+0\s*$', only)
+    assert 'gold_yes_as_unknown rules_plus_unknown: none' in out
+    assert 'gold_yes_as_unknown rules_only: none' in out
 
 
 def test_claim_blocklist_matches_compliance_and_safety_claims():
