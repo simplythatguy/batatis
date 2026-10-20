@@ -98,6 +98,7 @@ An empty list is not returned for a case with no confirmed benchmark. That case 
 | `recommended_types` | string[] | Same `EvidenceType` values as a Section D plan item, in ladder order. The field name matches `engine/section_d.py`. |
 | `practice_of_engineering` | object | Whether the stated facts indicate practice of engineering. |
 | `empty_process_fields` | object[] | Required alternative-path process fields that still have no confirmed applicant answer. Not evidence types. |
+| `human_review` | object[] | `{trigger_id, who, why, cite}`. Each practice flag names the professional or authority and a pinpoint citation. A variance row is `HR-30`: an SCO or Administrator decides it. Not a sign-off or compliance determination. |
 | `status` | string | `open`, `evidence_listed`, or `needs_professional`. This is the issues enum. The plan route uses `not provided` or `provided`. Not a sign-off or compliance determination. |
 
 `empty_process_fields[]`:
@@ -132,6 +133,8 @@ Confirmed `professional.span_m` (or `span_m`) above 12.20 m is recorded as Part 
 | `open` | No applicant-supplied item is linked, or the practice flag is `"unknown"`. Not a sign-off or compliance determination. |
 
 The UI does not read the old issue status `addressed`, so that token is not accepted as an alias. Plan-item `not provided` and `provided` are also not a sign-off or compliance determination. The issues route does not write the case and does not fill the professional's name, discipline, or registration number.
+
+`human_review` is routing, not a determination. Code `cite` values are copied from the code database; a provision that does not resolve is left off the list. Statute pinpoints are limited to `Architects Act s.2(6)(b)`, `EGPA s.2(7)(a)`, and `Safety Codes Act s.38(1)`. When the general professional requirement is yes, the list names Schedules A and B, the coordinating registered professional (Div C 2.4.2.2.(1)), and Schedule C-1 before occupancy (Div C 2.4.2.4.(1)). There is no Table 2.4.2.1. A code exception can still carry `HR-21` or `HR-22` when gross area per floor is larger than building area, or when the total unit count including suites is above 4. A Division B `3.8` provision routes to the Provincial Barrier-Free Administrator or the Provincial Building Administrator (Div C 2.2.1.4.(1)). `requests_interpretation` routes to the Provincial Building Administrator (Div C 2.2.1.3.(1)). A dimensional difference of not more than 2% stays with the authority having jurisdiction (Div C 2.2.2.3.(1)). `gross_area_per_floor_m2` and `total_unit_count` are confirmed facts. The code screen still uses building area and principal dwelling units.
 
 ### Evidence-type order
 

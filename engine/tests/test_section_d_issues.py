@@ -65,8 +65,9 @@ class FakeCodes:
 
 
 def codes_with_rules():
+    from engine.human_review import REVIEW_PROVISIONS
     codes = FakeCodes()
-    for division, provision_id in RULE_IDS:
+    for division, provision_id in (*RULE_IDS, *REVIEW_PROVISIONS):
         codes.add(division, provision_id)
     codes.add('B', BENCHMARK, attribution_status={'status': 'direct', 'root_provision': None, 'root_method': None},
               attributions=[{'bracket': '[F03-OP3.1]', 'clauses': [], 'application_note': None,
@@ -142,7 +143,15 @@ def test_no_issue_text_claims_compliance_or_safety_and_citations_stay_inside_cod
     ]
     for case in cases:
         payload = [issue.model_dump() for issue in section_d_issues(case, codes)]
-        blob = json.dumps(payload)
+        # Statute titles such as the Safety Codes Act are pinpoints, not a safety claim.
+        scanned = json.loads(json.dumps(payload))
+        def drop_cites(node):
+            if isinstance(node, dict):
+                return {key: drop_cites(value) for key, value in node.items() if key != 'cite'}
+            if isinstance(node, list):
+                return [drop_cites(value) for value in node]
+            return node
+        blob = json.dumps(drop_cites(scanned))
         for pattern in CLAIM_PHRASES:
             assert re.search(pattern, blob, re.I) is None, pattern
         for citation in _citations(payload):

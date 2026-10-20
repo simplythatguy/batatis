@@ -21,11 +21,14 @@ def test_missing_facts_never_return_no():
 def test_under_flagging_guard_every_missing_house_scope_fact():
     facts = ordinary_house()
     assert professional_involvement(facts, Codes()).required == 'no'
-    for field in ('part4_design', 'preserved_wood_foundation_part4', 'roof_trusses', 'prescriptive_route_confirmed',
-                  'ahj_requires_professional', 'special_safety_concerns', 'professional_judgement_required',
-                  'professional_scope_resolved', 'fire_suppression', 'fire_alarm'):
+    for field in ('part4_design', 'prescriptive_route_confirmed', 'ahj_requires_professional',
+                  'special_safety_concerns', 'professional_judgement_required', 'professional_scope_resolved'):
         result = professional_involvement(facts.model_copy(update={field: None}), Codes())
         assert result.required == 'depends', field
+    # Truss, preserved wood, and suppression questions are out of scope on this house.
+    for field in ('preserved_wood_foundation_part4', 'roof_trusses', 'fire_suppression', 'fire_alarm'):
+        result = professional_involvement(facts.model_copy(update={field: None}), Codes())
+        assert result.required == 'no', field
 
 
 @pytest.mark.parametrize('occupancy,storeys,area,expected', [

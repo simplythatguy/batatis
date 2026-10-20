@@ -26,6 +26,10 @@ class ProfessionalFacts(BaseModel):
     storeys: Count | None = None
     building_area_m2: Annotated[float, Field(gt=0, allow_inf_nan=False)] | None = None
     principal_dwelling_units: Count | None = None  # Confirmed count, excluding qualifying secondary suites.
+    # Acts measure gross area per floor and a total unit count that does not drop suites.
+    # The code screen still uses building area and principal_dwelling_units.
+    gross_area_per_floor_m2: Annotated[float, Field(gt=0, allow_inf_nan=False)] | None = None
+    total_unit_count: Count | None = None
     farm_public_use: bool | None = None
     part4_design: bool | None = None
     preserved_wood_foundation_part4: bool | None = None
@@ -77,8 +81,14 @@ _AREA_LIMITS = {
 }
 
 
-def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes) -> ProfessionalResult:
+def _listed(provisions: tuple[str, ...], prefix: str) -> bool:
+    return any(provision.startswith(prefix) for provision in provisions)
+
+
+def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
+                             provisions: tuple[str, ...] = ()) -> ProfessionalResult:
     if isinstance(facts, Case):
+        provisions = tuple(facts.provisions)
         facts = ProfessionalFacts.from_case(facts)
     reasons: list[ProfessionalReason] = []
     questions: list[str] = []
@@ -146,18 +156,22 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes) -> P
     elif facts.part4_design is None:
         add('part4_unknown', 'depends', 'The structural design route is not confirmed.', '2.4.1.2.(1)',
             'Is any design carried out under Part 4, including beams, connections or foundations?')
+    # Unanswered component questions are in scope only. A preserved-wood foundation
+    # question is Part 4 work or a 9.15.2 provision. A truss question is Part 4 work
+    # or a 9.23.14 provision. Absence alone does not make the screen depend.
     if facts.preserved_wood_foundation_part4 is True:
         add('preserved_wood_foundation', 'yes',
             'A Part 4 preserved wood foundation needs professional retention for installation field reviews before construction.',
             '2.4.1.2.(2)')
-    elif facts.preserved_wood_foundation_part4 is None:
+    elif facts.preserved_wood_foundation_part4 is None and (
+            facts.part4_design is True or _listed(provisions, '9.15.2')):
         add('foundation_unknown', 'depends', 'The foundation design and field-review trigger are unresolved.', '2.4.1.2.(2)',
             'Does the project include a preserved wood foundation designed under Part 4?')
     if facts.roof_trusses is True:
         add('truss_design', 'yes', 'Wood roof truss design and assembly connections need appropriate engineering responsibility.',
             '9.23.14.11.(2)', division='B')
         add('truss_part4', 'yes', 'The Part 4 connection-design route requires a skilled registered professional.', '2.4.1.2.(1)')
-    elif facts.roof_trusses is None:
+    elif facts.roof_trusses is None and (facts.part4_design is True or _listed(provisions, '9.23.14')):
         add('trusses_unknown', 'depends', 'Roof-truss assembly design responsibility is not confirmed.', '2.4.1.2.(1)',
             'Are wood roof trusses or truss assembly connections included?')
 
@@ -169,7 +183,9 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes) -> P
         if general == 'yes' and present is True:
             add(code, 'yes', f'The owner must document professional retention for system design, installation field reviews '
                 f'and witnessing {task}, before construction.', pid)
-        elif present is None or (present is True and general == 'depends'):
+        elif general != 'no' and (present is None or (present is True and general == 'depends')):
+            # Div C 2.4.1.3 and 2.4.1.4 apply to a 2.4.1.1.(3) building. A resolved
+            # general exception is out of scope, so an unanswered system does not ask.
             add(code + '_unknown', 'depends', 'System presence or applicability of the general building requirement is unresolved.',
                 pid, f'Is a {field.replace("_", " ")} system being installed, and does the general professional requirement apply?')
 

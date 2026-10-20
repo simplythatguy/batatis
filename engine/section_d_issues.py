@@ -15,6 +15,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, model_validator
 
 from .codes import Codes
+from .human_review import HumanReview, human_reviews
 from .models import Case
 from .process_fields import ProcessField, alternative_path, confirmed_value, latest_fact, process_fields
 from .professional import ProfessionalFacts, ProfessionalReason, ProfessionalResult, professional_involvement
@@ -178,6 +179,7 @@ class SectionDIssue(BaseModel):
     recommended_types: tuple[EvidenceType, ...]
     practice_of_engineering: PracticeOfEngineering
     empty_process_fields: tuple[EmptyProcessField, ...]
+    human_review: tuple[HumanReview, ...] = ()
     status: IssueStatus
 
 
@@ -238,7 +240,7 @@ def practice_of_engineering(case: Case, codes: Codes) -> PracticeOfEngineering:
     facts = ProfessionalFacts.from_case(case)
     if span_handoff and facts.part4_design is not True:
         facts = facts.model_copy(update={'part4_design': True})
-    result = professional_involvement(facts, codes)
+    result = professional_involvement(facts, codes, provisions=tuple(case.provisions))
     return render_practice(result, codes, span_handoff=span_handoff)
 
 
@@ -315,6 +317,11 @@ def _lookup(codes: Codes, provision_id: str, division: str):
         return None
 
 
+def _with_review(case: Case, codes: Codes, issues: list[SectionDIssue]) -> list[SectionDIssue]:
+    reviews = human_reviews(case, codes)
+    return [issue.model_copy(update={'human_review': reviews}) for issue in issues]
+
+
 def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
     """Read-only list. Does not write the case and does not invent a citation or a professional opinion."""
     flag = practice_of_engineering(case, codes)
@@ -322,12 +329,12 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
     recommended_fallback = CONFIDENCE_LADDER + (ALTERNATIVE_EVIDENCE_TYPES if alternative_path(case) else ())
 
     if not case.provisions:
-        return [SectionDIssue(
+        return _with_review(case, codes, [SectionDIssue(
             id='benchmark-unconfirmed', provision=None, question=(
                 'Confirm the Division B benchmark provisions before recommending performance evidence.'),
             at_stake='No confirmed benchmark is on the case. Recommend evidence only after a provision resolves in the code database.',
             recommended_types=recommended_fallback, practice_of_engineering=flag,
-            empty_process_fields=empty, status=_status(case, flag, ()))]
+            empty_process_fields=empty, status=_status(case, flag, ()))])
 
     known: list[str] = []
     unresolved: list[SectionDIssue] = []
@@ -345,7 +352,7 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
 
     issues = list(unresolved)
     if not known:
-        return issues
+        return _with_review(case, codes, issues)
     scoped = case.model_copy(update={'provisions': known})
     plan = section_d_plan(scoped, codes)
     for item in plan.items:
@@ -370,7 +377,7 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
             at_stake=_at_stake(item),
             recommended_types=item.recommended_types, practice_of_engineering=flag,
             empty_process_fields=empty, status=_status(case, flag, item.attachments)))
-    return issues
+    return _with_review(case, codes, issues)
 
 
 def generic_fallback_on_dev(cases: list[dict], codes: Codes) -> int:
@@ -400,6 +407,11 @@ def _cited(issue: SectionDIssue) -> list[tuple[str, str, str]]:
         rule = _PROCESS_RULE_IDS.get(field.id)
         if rule and field.citation:
             rows.append((rule[0], rule[1], field.citation))
+    from .human_review import REVIEW_PROVISIONS
+    for review in issue.human_review:
+        for division, provision_id in REVIEW_PROVISIONS:
+            if provision_id in review.cite:
+                rows.append((division, provision_id, review.cite))
     return rows
 
 
