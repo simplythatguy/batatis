@@ -117,6 +117,40 @@ def test_purge_failure_in_a_route_is_a_safe_503(tmp_path, monkeypatch, caplog, t
     reset_purge_clock()
 
 
+@pytest.mark.parametrize('url', ['/retention/purge', '/api/retention/purge'])
+@pytest.mark.parametrize('configured,authorization,status', [
+    (False, None, 503),
+    (True, None, 401),
+    (True, 'Bearer wrong', 401),
+    (True, 'Bearer retention-test-token', 200),
+])
+def test_hosted_cron_requires_auth_before_any_bulk_purge(
+        tmp_path, monkeypatch, caplog, url, configured, authorization, status):
+    class CountingStore(CaseStore):
+        purges = 0
+
+        def purge_expired(self):
+            self.purges += 1
+            return super().purge_expired()
+
+    reset_purge_clock()
+    monkeypatch.setenv('VERCEL', '1')
+    if configured:
+        monkeypatch.setenv('CRON_SECRET', 'retention-test-token')
+    else:
+        monkeypatch.delenv('CRON_SECRET', raising=False)
+    store = CountingStore(tmp_path / 'cases.sqlite')
+    client = TestClient(create_app(store=store))
+    headers = {'authorization': authorization} if authorization else {}
+    with caplog.at_level(logging.INFO):
+        response = client.get(url, headers=headers)
+    assert response.status_code == status
+    assert store.purges == (1 if status == 200 else 0)
+    assert response.headers['cache-control'] == 'no-store'
+    assert 'retention-test-token' not in response.text + caplog.text
+    reset_purge_clock()
+
+
 def test_retention_boundary_uses_elapsed_days_including_timezone_offsets(retention_store, monkeypatch):
     store, created = retention_store
     current = datetime.now(timezone.utc).replace(microsecond=0)
