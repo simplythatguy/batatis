@@ -373,6 +373,60 @@ def test_firestop_case_asks_about_the_penetration_not_wood_or_farm():
     assert hr04.cite == codes.provision('1.3.3.2.(1)', 'A')['citation']
 
 
+def test_five_storey_firestop_does_not_ask_part9_questions():
+    """Part 3 screening, including a 5-storey firestop, skips wood, truss, and farm questions."""
+    from engine.human_review import MANDATORY_ORDER, mandatory_hits
+    from engine.professional import _PART_QUESTION, professional_involvement
+    codes = codes_with_rules()
+    codes.add('B', '3.1.9.1.(1)')
+    codes.add('B', '3.1.9.4.(4)')
+    codes.add('B', '3.2.2.2.(1)')
+    firestop = Case(
+        title='Firestop at sprinkler-pipe penetrations',
+        provisions=['3.1.9.1.(1)', '3.1.9.4.(4)'],
+        facts=[
+            fact('occupancy', 'mixed'), fact('storeys', 5), fact('building_area_m2', 1200.0),
+            fact('part4_design', True),
+        ],
+    )
+    by_storeys = Case(provisions=[BENCHMARK], facts=[
+        fact('occupancy', 'mercantile'), fact('storeys', 5), fact('part4_design', True),
+    ])
+    by_area = Case(provisions=[BENCHMARK], facts=[
+        fact('occupancy', 'mercantile'), fact('storeys', 2), fact('building_area_m2', 601.0),
+        fact('part4_design', True),
+    ])
+    by_occupancy = Case(provisions=[BENCHMARK], facts=[
+        fact('occupancy', 'assembly'), fact('storeys', 1), fact('part4_design', True),
+    ])
+    by_prefix = Case(provisions=['3.2.2.2.(1)'], facts=[
+        fact('occupancy', 'mercantile'), fact('storeys', 2), fact('part4_design', True),
+    ])
+    for case in (firestop, by_storeys, by_area, by_occupancy, by_prefix):
+        asked = ' '.join(professional_involvement(case, codes).questions).casefold()
+        assert 'preserved wood' not in asked
+        assert 'roof truss' not in asked
+        assert 'farm building' not in asked
+        assert _PART_QUESTION.casefold() not in asked
+    issue = section_d_issues(firestop, codes)[0]
+    prompts = ' '.join(prompt.text for prompt in issue.practice_of_engineering.prompts).casefold()
+    assert 'preserved wood' not in prompts and 'roof truss' not in prompts and 'farm building' not in prompts
+    assert 'fire separation' in prompts and 'sprinkler' in prompts
+    ids = [hit.trigger_id for hit in mandatory_hits(firestop, codes)]
+    assert ids == sorted(ids, key=MANDATORY_ORDER.index)
+    assert 'HR-04' in ids and ids[0] == 'HR-03'
+    unknown = Case(facts=[fact('occupancy', 'mixed'), fact('part4_design', True)])
+    unknown_questions = professional_involvement(unknown, codes).questions
+    folded = ' '.join(unknown_questions).casefold()
+    assert 'preserved wood' not in folded and 'roof truss' not in folded and 'farm building' not in folded
+    assert sum(question == _PART_QUESTION for question in unknown_questions) == 1
+    part9 = Case(provisions=[BENCHMARK], facts=[
+        fact('occupancy', 'single_family'), fact('storeys', 2), fact('part4_design', True),
+    ])
+    part9_asked = ' '.join(professional_involvement(part9, codes).questions).casefold()
+    assert 'preserved wood' in part9_asked and 'roof truss' in part9_asked
+
+
 def test_unsigned_vendor_email_is_not_professional_evidence():
     from engine.completeness import check_completeness, seal_is_professional_evidence
     from engine.section_d import supporting_documents

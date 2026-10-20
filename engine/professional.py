@@ -132,6 +132,14 @@ _SYSTEM_MESSAGE = (
     'System presence or applicability of the general building requirement is unresolved.')
 _SYSTEM_QUESTION = (
     'Is a fire suppression or fire alarm system being installed, and does the general professional requirement apply?')
+_PART_QUESTION = 'Which part applies to this building, Part 3 or Part 9?'
+_PART_MESSAGE = 'Whether Part 3 or Part 9 applies is unresolved.'
+# Div A 1.3.3.3 keeps Part 9 to three storeys and 600 m2. Assembly and institutional occupancies are outside it.
+_PART3_OCCUPANCY = frozenset({'assembly', 'care', 'treatment', 'detention'})
+_PART9_OCCUPANCY = frozenset({
+    'single_family', 'multi_family', 'farm', 'hotel', 'business', 'mercantile',
+    'industrial', 'relocatable_industrial_camp',
+})
 
 
 def _applicant_text(case: Case, *fields: str) -> str | None:
@@ -202,6 +210,8 @@ _HELP = {
         'Yes means those requirements are resolved. No means they are not. Not sure: the officer decides.',
     'What gross area applies, and does a basement count in that area?':
         'State the gross area if you know it. Yes and No do not settle this. Not sure: the officer decides.',
+    'Which part applies to this building, Part 3 or Part 9?':
+        'Name Part 3 or Part 9. Not sure: the officer decides.',
 }
 
 
@@ -286,6 +296,30 @@ def unresolved_item(what: str, routed_to: str | None) -> str:
     return f'{body}. {who}'
 
 
+def _provision_part(provision: str) -> str | None:
+    head = provision.split('.', 1)[0]
+    if head in {'3', '9'}:
+        return head
+    return None
+
+
+def _building_part(facts: ProfessionalFacts, provisions: tuple[str, ...]) -> str:
+    """Part 3, Part 9, or unknown, from storeys, area, occupancy, and cited prefixes."""
+    cited = {part for part in (_provision_part(provision) for provision in provisions) if part}
+    if ((facts.storeys is not None and facts.storeys > 3)
+            or (facts.building_area_m2 is not None and facts.building_area_m2 > 600)
+            or facts.occupancy in _PART3_OCCUPANCY
+            or '3' in cited):
+        return '3'
+    if (facts.occupancy in _PART9_OCCUPANCY
+            and (facts.storeys is None or facts.storeys <= 3)
+            and (facts.building_area_m2 is None or facts.building_area_m2 <= 600)):
+        return '9'
+    if cited == {'9'}:
+        return '9'
+    return 'unknown'
+
+
 def _screen_scope(case: Case | None, provisions: tuple[str, ...]) -> str:
     """Fire-separation work asks about the penetration. Structural provisions keep their own questions."""
     if case is None:
@@ -352,6 +386,9 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
     if span_handoff and facts.part4_design is not True:
         facts = facts.model_copy(update={'part4_design': True})
     scope = _screen_scope(case, provisions)
+    # Facts-only calls keep the existing questions so the flag eval does not move.
+    part = _building_part(facts, provisions) if case is not None else '9'
+    ask_part9 = part == '9'
     reasons: list[ProfessionalReason] = []
     questions: list[str] = []
     asked: dict[str, str] = {}
@@ -389,7 +426,7 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
     elif occupancy == 'farm':
         if facts.farm_public_use is False:
             general = 'no'
-        elif scope != 'fire':
+        elif ask_part9 and scope != 'fire':
             general_question = 'Is the farm building for public use, and what occupancy classification applies?'
             questions.append(general_question)
     elif occupancy == 'relocatable_industrial_camp':
@@ -427,14 +464,15 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
         add('part4_unknown', 'depends', 'The structural design route is not confirmed.', '2.4.1.2.(1)',
             'Is any design carried out under Part 4, including beams, connections or foundations?')
     # Unanswered component questions are in scope only. A preserved-wood foundation
-    # question is Part 4 work or a 9.15.2 provision. A truss question is Part 4 work
-    # or a 9.23.14 provision. A fire-separation case does not ask those. Absence
-    # alone does not make the screen depend.
+    # question is Part 9 work or a 9.15.2 provision. A truss question is Part 9 work
+    # or a 9.23.14 provision. Part 3, including a 5-storey building or a Part 3
+    # citation, does not ask those. An unknown part asks which part applies instead.
+    # Absence alone does not make the screen depend.
     if facts.preserved_wood_foundation_part4 is True:
         add('preserved_wood_foundation', 'yes',
             'A Part 4 preserved wood foundation needs professional retention for installation field reviews before construction.',
             '2.4.1.2.(2)')
-    elif scope != 'fire' and facts.preserved_wood_foundation_part4 is None and (
+    elif ask_part9 and scope != 'fire' and facts.preserved_wood_foundation_part4 is None and (
             facts.part4_design is True or _listed(provisions, '9.15.2')):
         add('foundation_unknown', 'depends', 'The foundation design and field-review trigger are unresolved.', '2.4.1.2.(2)',
             'Does the project include a preserved wood foundation designed under Part 4?')
@@ -442,7 +480,8 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
         add('truss_design', 'yes', 'Wood roof truss design and assembly connections need appropriate engineering responsibility.',
             '9.23.14.11.(2)', division='B')
         add('truss_part4', 'yes', 'The Part 4 connection-design route requires a skilled registered professional.', '2.4.1.2.(1)')
-    elif scope != 'fire' and facts.roof_trusses is None and (facts.part4_design is True or _listed(provisions, '9.23.14')):
+    elif ask_part9 and scope != 'fire' and facts.roof_trusses is None and (
+            facts.part4_design is True or _listed(provisions, '9.23.14')):
         add('trusses_unknown', 'depends', 'Roof-truss assembly design responsibility is not confirmed.', '2.4.1.2.(1)',
             'Are wood roof trusses or truss assembly connections included?')
 
@@ -470,6 +509,12 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
             f'Is a {field.replace("_", " ")} system being installed, and does the general professional requirement apply?')
     if scope == 'fire':
         add('firestop_scope', 'depends', _FIRE_MESSAGE, '2.4.1.3.(1)', _FIRE_QUESTION)
+    if case is not None and part == 'unknown' and _PART_QUESTION not in questions:
+        record = codes.provision('1.3.3.3.(1)', 'A')
+        if record is None:
+            questions.append(_PART_QUESTION)
+        else:
+            add('part_scope', 'depends', _PART_MESSAGE, '1.3.3.3.(1)', _PART_QUESTION, division='A')
 
     # The Acts count suites. Div C 2.4.1.1.(2) does not. Above 4 is a yes even when the code exception is no.
     # The cite is the codedb authentication sentence. The Act pinpoint is source-pdf and is not a routing cite.
@@ -522,9 +567,11 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
         routed = 'applicant'
     else:
         routed = None
+    if not ask_part9:
+        part9_items = ('preserved wood', 'roof truss', 'farm building')
+        questions = [text for text in questions if not any(phrase in text.casefold() for phrase in part9_items)]
     if scope == 'fire':
-        dropped = ('preserved wood', 'roof truss', 'farm building', 'beams, connections or foundations')
-        questions = [text for text in questions if not any(phrase in text.casefold() for phrase in dropped)]
+        questions = [text for text in questions if 'beams, connections or foundations' not in text.casefold()]
     unique_questions = list(dict.fromkeys(questions))
     for reason in reasons:
         if reason.required != 'depends':

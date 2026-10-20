@@ -100,6 +100,7 @@ _RULE_IDS = {
     'suppression_unknown': ('2.4.1.3.(1)', 'C'),
     'systems_unknown': ('2.4.1.3.(1)', 'C'),
     'firestop_scope': ('2.4.1.3.(1)', 'C'),
+    'part_scope': ('1.3.3.3.(1)', 'A'),
     'fire_alarm': ('2.4.1.4.(1)', 'C'),
     'fire_alarm_unknown': ('2.4.1.4.(1)', 'C'),
     'design_scope': ('2.4.1.1.(3)', 'C'),
