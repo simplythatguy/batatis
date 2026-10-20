@@ -49,7 +49,7 @@ PROCESS_RULES = (
 )
 
 PracticeValue = bool | Literal['unknown']
-IssueStatus = Literal['open', 'addressed', 'needs_professional']
+IssueStatus = Literal['open', 'evidence_listed', 'needs_professional']
 QuestionKind = Literal['benchmark', 'objective_performance']
 AskedOf = Literal['applicant', 'professional', 'officer']
 
@@ -230,7 +230,7 @@ def _status(flag: PracticeOfEngineering, attachments) -> IssueStatus:
     if flag.value is True and not named:
         return 'needs_professional'
     if attachments and flag.value != 'unknown':
-        return 'addressed'
+        return 'evidence_listed'
     return 'open'
 
 

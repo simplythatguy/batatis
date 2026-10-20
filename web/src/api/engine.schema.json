@@ -220,6 +220,15 @@
           "title": "Id",
           "type": "string"
         },
+        "kind": {
+          "default": "text",
+          "enum": [
+            "text",
+            "file"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
         "objective": {
           "anyOf": [
             {
@@ -276,6 +285,7 @@
         "evidence_type",
         "file_id",
         "professional_required",
+        "kind",
         "status"
       ],
       "title": "EvidenceItem",

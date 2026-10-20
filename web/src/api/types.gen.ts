@@ -33,6 +33,7 @@ export interface EvidenceItem {
   file_id: string | null;
   function: string | null;
   id: string;
+  kind: "text" | "file";
   objective: string | null;
   professional_required: boolean | null;
   provision_id: string | null;

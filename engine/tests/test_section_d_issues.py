@@ -157,7 +157,7 @@ def test_span_is_part4_and_cites_only_the_existing_division_c_rule():
     assert '9.23.1.1' not in issue.model_dump_json()
 
 
-def test_status_addressed_by_applicant_item_and_needs_professional_without_one():
+def test_status_evidence_listed_by_applicant_item_and_needs_professional_without_one():
     codes = codes_with_rules()
     bare = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact('part4_design', True)]), codes)[0]
     assert bare.status == 'needs_professional' and bare.practice_of_engineering.value is True
@@ -167,7 +167,7 @@ def test_status_addressed_by_applicant_item_and_needs_professional_without_one()
     case.facts += [fact(f'evidence.{bare.id}.file_ref', file.ref, source=file),
                    fact(f'evidence.{bare.id}.responsible_party', 'Named applicant professional')]
     supplied = section_d_issues(case, codes)[0]
-    assert supplied.status == 'addressed' and supplied.practice_of_engineering.value is True
+    assert supplied.status == 'evidence_listed' and supplied.practice_of_engineering.value is True
     house = section_d_issues(Case(provisions=[BENCHMARK], facts=_house_facts()), codes)[0]
     assert house.practice_of_engineering.value is False and house.status == 'open'
     assert house.practice_of_engineering.citation in codes.issued
@@ -180,7 +180,7 @@ def test_status_addressed_by_applicant_item_and_needs_professional_without_one()
     house_case = Case(provisions=[BENCHMARK], facts=_house_facts() + [
         fact(f'evidence.{house.id}.file_ref', unsigned.ref, source=unsigned)])
     supplied_house = section_d_issues(house_case, codes)[0]
-    assert supplied_house.practice_of_engineering.value is False and supplied_house.status == 'addressed'
+    assert supplied_house.practice_of_engineering.value is False and supplied_house.status == 'evidence_listed'
 
 
 def test_acceptable_path_drops_variance_process_fields_and_extra_evidence_types():

@@ -136,7 +136,10 @@ def test_pair_evidence_closes_only_that_pair_and_rejects_unknown_pairs(client):
         'file_id': 'file_applicant_1'})
     assert created.status_code == 201
     assert created.json()['evidence']['file_id'] == 'file_applicant_1'
+    assert created.json()['evidence']['kind'] == 'file'
     assert created.json()['evidence']['status'] == 'evidence_listed'
+    stored = store.get(case.id)
+    assert not any(entry.field.endswith('.file_ref') for entry in stored.facts)
     assert created.json()['closed'][0]['reason'] == 'evidence listed (not reviewed)'
     assert [(pair['function'], pair['objective']) for pair in created.json()['closed'][0]['pairs']] == [('P1', 'Q1')]
     _assert_not_a_sign_off(created.json()['gaps'], created.json()['closed'])
@@ -203,3 +206,95 @@ def test_description_extracts_storeys_and_drops_the_question(client):
     stored = store.get(case.id)
     assert all(item.source.type == 'description' and item.status == 'unconfirmed' for item in stored.facts)
     assert http.post('/cases/missing/description', json={'text': '2-storey'}).status_code == 404
+
+
+def test_stored_provided_row_loads_as_evidence_listed(client):
+    """A case saved with status provided loads as evidence_listed and is written back that way."""
+    _, store = client
+    case = _case(store)
+    raw = json.loads(case.model_dump_json())
+    raw['evidence'] = [
+        {'id': 'ev_legacy', 'description': 'Legacy listing', 'status': 'provided',
+         'provision_id': '9.99.1.1.(1)'},
+        {'id': 'ev_file', 'description': 'Legacy file', 'status': 'provided'},
+    ]
+    file_fact = fact(
+        'evidence.ev_file.file_ref', 'legacy.pdf',
+        source=Source(type='file', ref='legacy.pdf', quote='Legacy file metadata.'))
+    raw['facts'].append(json.loads(file_fact.model_dump_json()))
+    with store._connect() as con:
+        con.execute('UPDATE cases SET json=? WHERE id=?', (json.dumps(raw), case.id))
+    loaded = store.get(case.id)
+    by_id = {item.id: item for item in loaded.evidence}
+    assert by_id['ev_legacy'].status == 'evidence_listed'
+    assert by_id['ev_legacy'].kind == 'text'
+    assert by_id['ev_file'].status == 'evidence_listed'
+    assert by_id['ev_file'].kind == 'file'
+    store.put(loaded)
+    with store._connect() as con:
+        saved = json.loads(con.execute('SELECT json FROM cases WHERE id=?', (case.id,)).fetchone()[0])
+    assert {item['status'] for item in saved['evidence']} == {'evidence_listed'}
+
+
+def test_typed_text_creates_no_file_ref_and_has_kind_text(client):
+    http, store = client
+    case = _case(store)
+    created = http.post(f'/cases/{case.id}/evidence', json={
+        'provision_id': '9.99.1.1.(1)', 'evidence_type': "manufacturer's literature",
+        'description': 'Applicant typed the product name',
+        'responsible_party': 'Synthetic applicant', 'date': '2026-10-20'})
+    assert created.status_code == 201
+    body = created.json()['evidence']
+    assert body['kind'] == 'text'
+    assert body['file_id'] is None
+    assert body['status'] == 'evidence_listed'
+    stored = store.get(case.id)
+    prefix = f"evidence.{body['id']}."
+    facts = {item.field: item for item in stored.facts if item.field.startswith(prefix)}
+    assert set(facts) == {prefix + 'title', prefix + 'responsible_party', prefix + 'date'}
+    assert all(item.source.type == 'user_text' for item in facts.values())
+    assert not any(item.field.endswith('.file_ref') for item in stored.facts)
+
+
+def test_listing_with_no_provision_closes_nothing(client):
+    http, store = client
+    case = _case(store)
+    before = _evidence_gaps(http.get(f'/cases/{case.id}/gaps').json())
+    created = http.post(f'/cases/{case.id}/evidence', json={
+        'evidence_type': 'evaluation', 'description': 'Case-level listing, no benchmark'})
+    assert created.status_code == 201
+    body = created.json()
+    assert body['evidence']['provision_id'] is None
+    assert body['evidence']['kind'] == 'text'
+    assert body['closed'] == []
+    assert body['gaps'] and body['gaps'][0]['provision_id'] == '9.99.1.1.(1)'
+    after = _evidence_gaps(http.get(f'/cases/{case.id}/gaps').json())
+    assert any(gap.get('provision_id') == '9.99.1.1.(1)' for gap in after)
+    assert len(after) >= len(before)
+
+
+def test_delete_removes_the_evidence_facts(client):
+    http, store = client
+    case = _case(store)
+    created = http.post(f'/cases/{case.id}/evidence', json={
+        'provision_id': '9.99.1.1.(1)', 'evidence_type': 'evaluation',
+        'description': 'Applicant note to withdraw',
+        'responsible_party': 'Synthetic applicant', 'date': '2026-10-20'})
+    evidence_id = created.json()['evidence']['id']
+    prefix = f'evidence.{evidence_id}.'
+    assert any(item.field.startswith(prefix) for item in store.get(case.id).facts)
+    assert http.delete(f'/cases/{case.id}/evidence/{evidence_id}').status_code == 204
+    stored = store.get(case.id)
+    assert stored.evidence == []
+    assert not any(item.field.startswith(prefix) for item in stored.facts)
+
+
+def test_unknown_file_id_is_400(client):
+    http, store = client
+    case = _case(store)
+    rejected = http.post(f'/cases/{case.id}/evidence', json={
+        'provision_id': '9.99.1.1.(1)', 'evidence_type': 'evaluation',
+        'description': 'Names a file the case does not have', 'file_id': 'missing-file'})
+    assert rejected.status_code == 400
+    assert rejected.json()['detail'] == 'file_id does not match a stored file'
+    assert store.get(case.id).evidence == []

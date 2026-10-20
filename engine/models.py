@@ -121,9 +121,20 @@ class EvidenceItem(BaseModel):
     evidence_type: str | None = None
     file_id: str | None = None
     professional_required: bool | None = None
+    # text: the applicant typed a listing. file: file_id names a stored file, or an older
+    # row has a confirmed file-source evidence.<id>.file_ref fact.
+    kind: Literal['text', 'file'] = 'text'
     # evidence_listed: the applicant listed evidence; not a check that it is sufficient,
-    # and not a compliance determination.
+    # and not a compliance determination. A stored ``provided`` is that same value.
     status: Literal['needed', 'evidence_listed', 'not_applicable'] = 'needed'
+
+    @model_validator(mode='before')
+    @classmethod
+    def _provided_alias(cls, data):
+        """Old cases stored ``provided``. Load them as ``evidence_listed`` and write that back."""
+        if isinstance(data, dict) and data.get('status') == 'provided':
+            return {**data, 'status': 'evidence_listed'}
+        return data
 
 
 class Gap(BaseModel):
@@ -132,6 +143,18 @@ class Gap(BaseModel):
     field: str
     message: str
     severity: Literal['blocking', 'warning'] = 'blocking'
+
+
+def _confirmed_file_ref(facts: list[Fact], evidence_id: str) -> bool:
+    """True when this evidence id has a confirmed file-source ``file_ref`` fact."""
+    field = f'evidence.{evidence_id}.file_ref'
+    for fact in facts:
+        ref = fact.source.ref
+        if (fact.field == field and fact.status == 'confirmed' and fact.kind != 'proposed'
+                and fact.source.type == 'file' and isinstance(fact.value, str)
+                and fact.value == ref and ref.strip()):
+            return True
+    return False
 
 
 class Case(BaseModel):
@@ -145,6 +168,14 @@ class Case(BaseModel):
     section_c: list[SectionCRow] = []
     evidence: list[EvidenceItem] = []
     gaps: list[Gap] = []
+
+    @model_validator(mode='after')
+    def _kind_from_stored_file(self):
+        """An older row with a confirmed file-source file_ref is kind file. Otherwise leave kind."""
+        for item in self.evidence:
+            if _confirmed_file_ref(self.facts, item.id):
+                item.kind = 'file'
+        return self
 
     def export_facts(self) -> list[dict]:
         return [f.export() for f in self.facts]

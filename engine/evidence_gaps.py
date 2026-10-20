@@ -32,6 +32,9 @@ class OpenPair(BaseModel):
 
 # Why an open evidence gap leaves the list. Listing is not a review.
 CLOSURE_REASON = 'evidence listed (not reviewed)'
+# Plan items still say ``provided`` until #26. Evidence rows say ``evidence_listed``.
+# Either value means the applicant listed it. Merge order can land either name first.
+LISTED_STATUSES = frozenset({'provided', 'evidence_listed'})
 
 
 class EvidenceClosure(BaseModel):
@@ -75,7 +78,7 @@ def evidence_covers_item(item: EvidencePlanItem, evidence: Sequence[EvidenceItem
     check that the evidence is sufficient.
     """
     for entry in evidence:
-        if entry.status != 'evidence_listed' or entry.provision_id != item.provision_id:
+        if entry.status not in LISTED_STATUSES or entry.provision_id != item.provision_id:
             continue
         if entry.objective is None and entry.function is None:
             return True
@@ -86,7 +89,7 @@ def evidence_covers_item(item: EvidencePlanItem, evidence: Sequence[EvidenceItem
 
 def uncovered_items(items: Sequence[EvidencePlanItem],
                     evidence: Sequence[EvidenceItem]) -> list[EvidencePlanItem]:
-    return [item for item in items if item.status != 'provided' and not evidence_covers_item(item, evidence)]
+    return [item for item in items if item.status not in LISTED_STATUSES and not evidence_covers_item(item, evidence)]
 
 
 def provision_roles(case: Case) -> dict[str, str]:

@@ -40,8 +40,14 @@ def test_provision_evidence_closes_every_pair_and_a_pair_closes_one():
 
 
 def test_file_backed_plan_status_stays_covered_without_an_evidence_item():
+    """``provided`` and ``evidence_listed`` both mean the plan item is already listed."""
     done = item('9.99.1.1.(1)', 'P1', 'Q1', status='provided')
+    listed = EvidencePlanItem.model_construct(**{**done.model_dump(), 'status': 'evidence_listed'})
+    legacy = EvidenceItem.model_construct(
+        provision_id='9.99.1.1.(1)', description='Legacy listing', status='provided')
     assert uncovered_items([done], []) == []
+    assert uncovered_items([listed], []) == []
+    assert uncovered_items([item('9.99.1.1.(1)', 'P1', 'Q1')], [legacy]) == []
 
 
 def test_missing_objective_is_one_warning_and_does_not_invent_a_pair():
