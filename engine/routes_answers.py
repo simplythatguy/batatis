@@ -14,7 +14,8 @@ from .building_facts import BuildingFactsUpdate, write_building_facts
 from .codes import Codes
 from .description_facts import DescriptionExtract, extract_description
 from .evidence_gaps import (
-    EvidenceClosure, ProvisionEvidenceGap, evidence_closures, group_evidence_gaps, uncovered_items)
+    EvidenceClosure, ProvisionEvidenceGap, evidence_closures, group_evidence_gaps, rank_gaps,
+    scoped_plan_items, uncovered_items)
 from .models import Case, EvidenceItem, Fact, Source
 from .professional import ProfessionalResult, professional_involvement
 from .section_d import EvidenceType, section_d_plan
@@ -102,7 +103,7 @@ def create_answers_router(cases: Callable[[], CaseStore], code: Callable[[], Cod
             raise HTTPException(404, error.args[0]) from error
         except ValueError as error:
             raise HTTPException(400, f'invalid provision id: {error}') from error
-        items = plan.items if plan else []
+        items = scoped_plan_items(case, plan.items) if plan else []
         matched = [item for item in items if item.provision_id == body.provision_id]
         if not matched:
             raise HTTPException(400, 'confirm this Division B benchmark before attaching evidence')
@@ -120,7 +121,7 @@ def create_answers_router(cases: Callable[[], CaseStore], code: Callable[[], Cod
         cases().put(case)
         still_open = uncovered_items(items, case.evidence)
         return EvidenceCreated(
-            evidence=item, gaps=group_evidence_gaps(still_open),
+            evidence=item, gaps=rank_gaps(group_evidence_gaps(still_open)),
             closed=evidence_closures(before, still_open))
 
     @router.delete('/cases/{case_id}/evidence/{evidence_id}', status_code=204)

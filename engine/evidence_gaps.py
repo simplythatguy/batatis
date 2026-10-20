@@ -10,12 +10,15 @@ Nothing here writes evidence, reviews it, or calls it verified.
 """
 from __future__ import annotations
 
+import re
 from typing import Literal, Sequence
 
 from pydantic import BaseModel, ConfigDict
 
-from .models import EvidenceItem
-from .section_d import EvidencePlanItem
+from .models import Case, EvidenceItem
+from .section_d import (
+    ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, EvidencePlanItem,
+)
 
 
 class OpenPair(BaseModel):
@@ -37,6 +40,14 @@ class EvidenceClosure(BaseModel):
     reason: Literal['evidence listed (not reviewed)'] = CLOSURE_REASON
 
 
+# Confirmed fact ``provision_role`` = ``<role>:<provision id>``.
+# departure / affected take an evidence gap. supporting / citing do not.
+DEPARTURE_ROLES = frozenset({'departure', 'affected'})
+OUT_OF_SCOPE_ROLES = frozenset({'supporting', 'citing'})
+_ROLE_VALUE = re.compile(r'^(departure|affected|supporting|citing):(\S+)$')
+_PRIORITY_LIMIT = 5
+
+
 class ProvisionEvidenceGap(BaseModel):
     """A gap list entry PR #11 can append without one row per pair."""
 
@@ -44,7 +55,9 @@ class ProvisionEvidenceGap(BaseModel):
     provision_id: str
     citation: str | None = None
     pairs: list[OpenPair] = []
+    evidence_types: list[str] = []
     severity: Literal['blocking', 'warning'] = 'blocking'
+    priority: bool = False
     rule: str
     field: str
     missing: str
@@ -73,14 +86,60 @@ def uncovered_items(items: Sequence[EvidencePlanItem],
     return [item for item in items if item.status != 'provided' and not evidence_covers_item(item, evidence)]
 
 
+def provision_roles(case: Case) -> dict[str, str]:
+    """Latest confirmed role for each provision. Proposed or unconfirmed labels are ignored."""
+    roles: dict[str, str] = {}
+    for fact in case.facts:
+        if fact.field != 'provision_role' or fact.status != 'confirmed' or fact.kind == 'proposed':
+            continue
+        if not isinstance(fact.value, str):
+            continue
+        match = _ROLE_VALUE.match(fact.value.strip())
+        if match:
+            roles[match.group(2)] = match.group(1)
+    return roles
+
+
+def evidence_provision_ids(case: Case) -> list[str]:
+    """Provisions that take an evidence gap.
+
+    With no role labels, every confirmed provision is in scope. Once a label
+    exists, only ``departure`` and ``affected`` stay. ``supporting`` and
+    ``citing`` are the citing chain and do not get an evidence gap.
+    """
+    confirmed = list(dict.fromkeys(case.provisions))
+    roles = provision_roles(case)
+    if not roles:
+        return confirmed
+    return [pid for pid in confirmed
+            if roles.get(pid) in DEPARTURE_ROLES and roles.get(pid) not in OUT_OF_SCOPE_ROLES]
+
+
+def scoped_plan_items(case: Case, items: Sequence[EvidencePlanItem]) -> list[EvidencePlanItem]:
+    allowed = set(evidence_provision_ids(case))
+    return [item for item in items if item.provision_id in allowed]
+
+
+def _evidence_types(items: Sequence[EvidencePlanItem]) -> list[str]:
+    """Ladder order, one mention each. Types are copied from the plan, not invented."""
+    order = list(CONFIDENCE_LADDER) + list(ALTERNATIVE_EVIDENCE_TYPES)
+    found: list[str] = []
+    for item in items:
+        for kind in item.recommended_types:
+            if kind not in found:
+                found.append(kind)
+    return sorted(found, key=lambda kind: (order.index(kind) if kind in order else len(order), found.index(kind)))
+
+
 def group_evidence_gaps(items: Sequence[EvidencePlanItem]) -> list[ProvisionEvidenceGap]:
-    """Group open plan items by provision id, preserving first-seen order."""
+    """One gap per provision. Pairs and evidence types sit on that gap, not in new rows."""
     grouped: dict[str, list[EvidencePlanItem]] = {}
     for item in items:
         grouped.setdefault(item.provision_id, []).append(item)
     gaps: list[ProvisionEvidenceGap] = []
     for provision_id, group in grouped.items():
         citation = next((item.citation for item in group if item.citation), None)
+        types = _evidence_types(group)
         paired = [item for item in group if item.objective and item.function]
         if paired:
             pairs: list[OpenPair] = []
@@ -91,24 +150,34 @@ def group_evidence_gaps(items: Sequence[EvidencePlanItem]) -> list[ProvisionEvid
                     continue
                 seen.add(key)
                 pairs.append(OpenPair(function=item.function, objective=item.objective))
-            listed = ', '.join(f'{pair.function}–{pair.objective}' for pair in pairs)
+            type_list = ', '.join(types) if types else 'the evidence types the responsible designer selects'
             gaps.append(ProvisionEvidenceGap(
-                provision_id=provision_id, citation=citation, pairs=pairs, severity='blocking',
-                rule='evidence', field=f'evidence.{provision_id}',
+                provision_id=provision_id, citation=citation, pairs=pairs, evidence_types=types,
+                severity='blocking', rule='evidence', field=f'evidence.{provision_id}',
                 missing=f'supporting evidence for {provision_id}.',
-                fix_hint=('List evidence the applicant supplies for these objective/function pairs: '
-                          f'{listed}. Select appropriate evidence types with the responsible designer; '
+                fix_hint=(f'List evidence the applicant supplies for this provision. '
+                          f'{len(pairs)} objective/function pairs are on this gap. '
+                          f'Evidence types to discuss: {type_list}. '
+                          'Select appropriate evidence types with the responsible designer; '
                           'not every ladder rung is required. Listing evidence records what was named. '
                           'It does not assess or verify it.')))
         else:
             gaps.append(ProvisionEvidenceGap(
-                provision_id=provision_id, citation=citation, pairs=[], severity='warning',
-                rule='evidence_scope', field=f'evidence.{provision_id}.scope',
+                provision_id=provision_id, citation=citation, pairs=[], evidence_types=types,
+                severity='warning', rule='evidence_scope', field=f'evidence.{provision_id}.scope',
                 missing=f'an identified performance benchmark for {provision_id}.',
                 fix_hint=('The attribution table has no objective or function for this provision. '
                           'Ask the responsible designer which benchmark applies before selecting evidence. '
                           'No objective or function is inferred.')))
     return gaps
+
+
+def rank_gaps(gaps: list) -> list:
+    """Blocking gaps first. The first five are ``priority``. Every gap stays in the list."""
+    ordered = sorted(gaps, key=lambda gap: gap.severity != 'blocking')
+    for index, gap in enumerate(ordered):
+        gap.priority = index < _PRIORITY_LIMIT
+    return ordered
 
 
 def evidence_closures(before: Sequence[EvidencePlanItem],

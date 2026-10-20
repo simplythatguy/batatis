@@ -14,7 +14,7 @@ from pathlib import Path
 from codedb import validate_text
 
 from .codes import Codes
-from .evidence_gaps import OpenPair, group_evidence_gaps, uncovered_items
+from .evidence_gaps import OpenPair, group_evidence_gaps, rank_gaps, scoped_plan_items, uncovered_items
 from .models import INTENT_LABEL, Case, Gap as CaseGap
 from .process_fields import confirmed_value, latest_fact, process_fields
 from .professional import ProfessionalResult, professional_involvement
@@ -27,6 +27,8 @@ class Gap(CaseGap):
     citation: str | None = None
     provision_id: str | None = None
     pairs: list[OpenPair] = []
+    evidence_types: list[str] = []
+    priority: bool = False
 
 
 _CORE = (
@@ -247,10 +249,11 @@ def check_completeness(case: Case, codes: Codes, *,
         # One gap per provision. PR #11 should call group_evidence_gaps on its open plan
         # items instead of adding one gap per objective/function pair.
         verified = case.model_copy(update={'provisions': list(expected)})
-        open_items = uncovered_items(section_d_plan(verified, codes, docs).items, case.evidence)
+        open_items = scoped_plan_items(case, uncovered_items(section_d_plan(verified, codes, docs).items, case.evidence))
         for spec in group_evidence_gaps(open_items):
             gaps.append(Gap(
                 id=f'{spec.rule}:{spec.provision_id}', severity=spec.severity, section='D', field=spec.field,
                 message=f'Your application appears to be missing {spec.missing}', fix_hint=spec.fix_hint,
-                citation=spec.citation, provision_id=spec.provision_id, pairs=list(spec.pairs)))
-    return gaps
+                citation=spec.citation, provision_id=spec.provision_id, pairs=list(spec.pairs),
+                evidence_types=list(spec.evidence_types)))
+    return rank_gaps(gaps)

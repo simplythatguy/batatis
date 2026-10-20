@@ -66,8 +66,14 @@ def _case(store):
             'representative', 'mailing_address', 'alternative_description', 'scope')]))
 
 
+def _gap_rows(payload):
+    if isinstance(payload, dict) and 'gaps' in payload:
+        return payload['gaps']
+    return payload
+
+
 def _evidence_gaps(payload):
-    return [gap for gap in payload if str(gap.get('id', '')).startswith('evidence')
+    return [gap for gap in _gap_rows(payload) if str(gap.get('id', '')).startswith('evidence')
             or str(gap.get('field', '')).startswith('evidence')]
 
 

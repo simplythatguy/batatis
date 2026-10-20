@@ -23,6 +23,14 @@ class SectionDRequest(BaseModel):
     provisions: list[str] | None = Field(default=None, min_length=1)
 
 
+class GapList(BaseModel):
+    """Every gap, blocking first. ``priority`` marks the first five. ``total`` is the full count."""
+
+    model_config = ConfigDict(extra='forbid')
+    total: int
+    gaps: list[Gap]
+
+
 def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
                   registry: CCMCRegistry | None = None) -> APIRouter:
     router = APIRouter(tags=['case building'])
@@ -73,8 +81,9 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
     def fields(case_id: str):
         return process_fields(get_case(case_id), code())
 
-    @router.get('/cases/{case_id}/gaps', response_model=list[Gap])
+    @router.get('/cases/{case_id}/gaps', response_model=GapList)
     def gaps(case_id: str):
-        return check_completeness(get_case(case_id), code())
+        found = check_completeness(get_case(case_id), code())
+        return GapList(total=len(found), gaps=found)
 
     return router

@@ -38,11 +38,11 @@ def test_professional_process_and_gaps_use_latest_persisted_facts(context):
     client, store, codes = context
     case = store.put(complete_case())
     assert client.get(f'/cases/{case.id}/professional').json()['required'] == 'no'
-    assert client.get(f'/cases/{case.id}/gaps').json() == []
+    assert client.get(f'/cases/{case.id}/gaps').json() == {'total': 0, 'gaps': []}
     fields = client.get(f'/cases/{case.id}/process-fields').json()
     assert len(fields) == 6 and all(f['answer']['author'] == 'applicant' for f in fields)
     store.add_fact(case.id, fact('process.risk_assessment', 'Proposed generated text', kind='proposed', status='unconfirmed'))
-    gaps = client.get(f'/cases/{case.id}/gaps').json()
+    gaps = client.get(f'/cases/{case.id}/gaps').json()['gaps']
     assert any(g['id'].startswith('D09:') and g['fix_hint'] and g['citation'] for g in gaps)
     assert next(f for f in client.get(f'/cases/{case.id}/process-fields').json() if f['id'] == 'risk_assessment')['answer'] is None
 
