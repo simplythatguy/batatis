@@ -24,6 +24,19 @@ python3 -m venv .venv
 
 Leave that terminal open. Uvicorn prints `Uvicorn running on http://127.0.0.1:8000`. The route list is at http://127.0.0.1:8000/docs.
 
+If port 8000 is already taken, Uvicorn exits with `Errno 98` (`address already in use`). Start the engine on another port and point the web app at that same URL:
+
+```bash
+.venv/bin/uvicorn engine.api:app --port 8010
+```
+
+```bash
+cd web
+VITE_ENGINE_URL=http://127.0.0.1:8010 npm run dev
+```
+
+`VITE_ENGINE_URL` is the engine the app calls, and the dev server proxies `/api` to that URL. Check this engine at http://127.0.0.1:8010/docs.
+
 Creating a case works before any code database exists:
 
 ```bash
@@ -92,7 +105,7 @@ Open the URL Vite prints:
 Local:   http://localhost:5173/
 ```
 
-On this machine `http://127.0.0.1:5173/` did not connect under the default `npm run dev`; `http://localhost:5173/` returned HTTP 200. The page title is Batatis and the Describe screen loads. Vite proxies `/api` to http://127.0.0.1:8000, so `http://localhost:5173/api/code/search?q=egress` returns the same 503 body.
+On this machine `http://127.0.0.1:5173/` did not connect under the default `npm run dev`; `http://localhost:5173/` returned HTTP 200. The page title is Batatis and the Describe screen loads. By default Vite proxies `/api` to http://127.0.0.1:8000, so `http://localhost:5173/api/code/search?q=egress` returns the same 503 body. If the engine is on another port, set `VITE_ENGINE_URL` as in the Backend step; `/api` follows that URL.
 
 On http://localhost:5173/#/section-c, with the database missing, the page shows **Offline sample** and this sentence: "The engine is not reachable, so these rows are a bundled offline sample, not a lookup for this case." The label tooltip reads `Engine not reachable: Engine 503: code database not found`.
 
