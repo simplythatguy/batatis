@@ -10,10 +10,13 @@ from engine.models import Case, Source
 from engine.section_d import ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER
 from engine.professional import ProfessionalFacts
 from engine.section_d_flag_eval import (
-    RULE_IDS, Signals, VariantScore, counterfactual, flag_label, flag_question, headline, load_codes,
-    load_heldout, main, score, winner,
+    RULE_IDS, Signals, VariantScore, counterfactual, flag_label, flag_question, headline, load_cases,
+    load_codes, load_heldout, main, score, winner,
 )
-from engine.section_d_issues import PROCESS_RULES, PROFESSIONAL_RULES, section_d_issues
+from engine.section_d_issues import (
+    GENERIC_FALLBACK_QUESTION, PROCESS_RULES, PROFESSIONAL_REQUEST, PROFESSIONAL_RULES,
+    generic_fallback_on_dev, professional_confirmed, section_d_issues,
+)
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import fact
 
@@ -157,17 +160,35 @@ def test_span_is_part4_and_cites_only_the_existing_division_c_rule():
     assert '9.23.1.1' not in issue.model_dump_json()
 
 
-def test_status_addressed_by_applicant_item_and_needs_professional_without_one():
+def test_status_lists_evidence_only_after_a_confirmed_professional():
     codes = codes_with_rules()
     bare = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact('part4_design', True)]), codes)[0]
     assert bare.status == 'needs_professional' and bare.practice_of_engineering.value is True
+    assert bare.practice_of_engineering.question == PROFESSIONAL_REQUEST
     assert bare.practice_of_engineering.division == 'C' and bare.practice_of_engineering.citation in codes.issued
     file = Source(type='file', ref='applicant-report.pdf', quote='Applicant report metadata.')
-    case = Case(provisions=[BENCHMARK], facts=[fact('part4_design', True)])
-    case.facts += [fact(f'evidence.{bare.id}.file_ref', file.ref, source=file),
-                   fact(f'evidence.{bare.id}.responsible_party', 'Named applicant professional')]
-    supplied = section_d_issues(case, codes)[0]
-    assert supplied.status == 'addressed' and supplied.practice_of_engineering.value is True
+    named = Case(provisions=[BENCHMARK], facts=[fact('part4_design', True)])
+    named.facts += [fact(f'evidence.{bare.id}.file_ref', file.ref, source=file),
+                    fact(f'evidence.{bare.id}.responsible_party', 'Named applicant professional', source=file),
+                    fact(f'evidence.{bare.id}.professional_seal', 'stamp image on the pdf', source=file)]
+    supplied = section_d_issues(named, codes)[0]
+    assert supplied.status == 'needs_professional' and supplied.practice_of_engineering.value is True
+    role_and_document_seal = Case(provisions=[BENCHMARK], facts=[
+        fact('part4_design', True),
+        fact('professional.role', 'engineer'),
+        fact(f'evidence.{bare.id}.file_ref', file.ref, source=file),
+        fact(f'evidence.{bare.id}.professional_seal', 'stamp image on the pdf', source=file),
+        fact('professional.registration_number', 'from the pdf', source=file),
+    ])
+    assert section_d_issues(role_and_document_seal, codes)[0].status == 'needs_professional'
+    confirmed = Case(provisions=[BENCHMARK], facts=[
+        fact('part4_design', True),
+        fact('professional.role', 'architect'),
+        fact('professional.registration_number', 'AAA-000'),
+        fact(f'evidence.{bare.id}.file_ref', file.ref, source=file),
+    ])
+    listed = section_d_issues(confirmed, codes)[0]
+    assert professional_confirmed(confirmed) and listed.status == 'evidence_listed'
     house = section_d_issues(Case(provisions=[BENCHMARK], facts=_house_facts()), codes)[0]
     assert house.practice_of_engineering.value is False and house.status == 'open'
     assert house.practice_of_engineering.citation in codes.issued
@@ -177,10 +198,42 @@ def test_status_addressed_by_applicant_item_and_needs_professional_without_one()
         fact(f'evidence.{unknown.id}.file_ref', unsigned.ref, source=unsigned)])
     still_open = section_d_issues(unknown_case, codes)[0]
     assert still_open.practice_of_engineering.value == 'unknown' and still_open.status == 'open'
+    assert still_open.practice_of_engineering.question != PROFESSIONAL_REQUEST
     house_case = Case(provisions=[BENCHMARK], facts=_house_facts() + [
         fact(f'evidence.{house.id}.file_ref', unsigned.ref, source=unsigned)])
     supplied_house = section_d_issues(house_case, codes)[0]
-    assert supplied_house.practice_of_engineering.value is False and supplied_house.status == 'addressed'
+    assert supplied_house.practice_of_engineering.value is False and supplied_house.status == 'evidence_listed'
+
+
+def test_part3_sales_rep_email_stays_needs_professional():
+    """Case B input: a Part 3 building plus the sales-rep email. The email is not a professional.
+
+    The quote is the body of evals/demo-cases/b-contractor-firestop-nonconformance/input/
+    manufacturer-ej-draft-EXAMPLE.md. Answer keys are not read. When that file is on the
+    branch, the quote has to still be in it.
+    """
+    email = Path('evals/demo-cases/b-contractor-firestop-nonconformance/input/manufacturer-ej-draft-EXAMPLE.md')
+    quote = ("Hi Carlos, FireSeal 200 performs great on plastic pipe too, we've seen it in lots of jobs. "
+             "Treat this as our engineering judgment that it'll hold the rating. Thanks!")
+    if email.exists():
+        assert quote in email.read_text()
+    codes = codes_with_rules()
+    part3 = [fact('occupancy', 'mercantile'), fact('storeys', 5), fact('building_area_m2', 800.0)]
+    bare = section_d_issues(Case(provisions=[BENCHMARK], facts=part3), codes)[0]
+    assert bare.practice_of_engineering.value is True and bare.status == 'needs_professional'
+    file = Source(type='file', ref='manufacturer-ej-draft-EXAMPLE.md', quote=quote)
+    case = Case(provisions=[BENCHMARK], facts=list(part3) + [
+        fact(f'evidence.{bare.id}.file_ref', file.ref, source=file),
+        fact(f'evidence.{bare.id}.responsible_party', 'sales rep, Example Sealants Co.', source=file),
+        fact(f'evidence.{bare.id}.professional_seal', 'stamp mentioned in the sales email', source=file),
+    ])
+    snapshot = [item.model_dump() for item in case.facts]
+    issue = section_d_issues(case, codes)[0]
+    assert [item.model_dump() for item in case.facts] == snapshot
+    assert issue.status == 'needs_professional'
+    assert issue.practice_of_engineering.question == PROFESSIONAL_REQUEST
+    payload = issue.model_dump_json()
+    assert 'FireSeal' not in payload and 'Example Sealants' not in payload and 'sales rep' not in payload
 
 
 def test_acceptable_path_drops_variance_process_fields_and_extra_evidence_types():
@@ -373,6 +426,45 @@ def test_default_db_is_the_repo_codedb_build():
     assert '/Users/aamia' not in source
     assert 'class CodeDbMissing(Exception):' in source
     assert "super().__init__('code database not found')" in source
+
+
+def test_generic_fallback_question_on_the_dev_set(caplog):
+    import logging
+
+    codes, _codedb = load_codes()
+    cases = load_cases()
+    assert len(cases) == 60
+    with caplog.at_level(logging.INFO, logger='engine.section_d_issues'):
+        fired = generic_fallback_on_dev(cases, codes)
+    assert fired == 0
+    assert 'generic fallback practice question fired 0 times on 60 dev cases' in caplog.text
+
+
+def test_generic_fallback_counter_records_an_unusable_question():
+    import engine.section_d_issues as issues
+    from engine.professional import ProfessionalReason, ProfessionalResult
+
+    issues.generic_fallback_fires = 0
+    result = ProfessionalResult(
+        required='depends', general_required='depends',
+        reasons=[ProfessionalReason(code='general_unresolved', required='depends', message='Ask.',
+                                    citation='rule:C:2.4.1.1.(1)')],
+        questions=['This design complies and is safe.'])
+    assert issues._question(result) == GENERIC_FALLBACK_QUESTION
+    assert issues.generic_fallback_fires == 1
+
+
+def test_second_printing_citations_resolve_when_codedb_is_present():
+    import pytest
+    from engine.codes import CodeDbMissing, Codes
+    from engine.section_d_issues import citation_resolution
+
+    try:
+        codes = Codes()
+    except CodeDbMissing:
+        pytest.skip('code database not built at codedb/build/codedb.sqlite')
+    resolved, total = citation_resolution(load_cases(), codes)
+    assert total > 0 and resolved == total
 
 
 def test_claim_blocklist_matches_compliance_and_safety_claims():

@@ -1,4 +1,6 @@
-"""The v1.1 scorer reads an external file and does not open the precedent index."""
+"""The v1.1 scorer reads an external file and does not open the precedent index.
+
+Those labels are internal and not judge-facing."""
 import json
 from pathlib import Path
 
@@ -26,6 +28,7 @@ def test_heldout_v11_scorer_skips_null_labels_and_splits_source(tmp_path):
     text = report(loaded, codes)
     assert text.startswith(SECTION)
     assert INTERPRETATION in text
+    assert 'internal' in text and 'not judge-facing' in text
     assert 'confident_wrong' in text
     assert 'unknown_rate' in text
     assert 'first run with frozen rules' in text

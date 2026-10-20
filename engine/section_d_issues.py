@@ -3,17 +3,20 @@
 Each issue recommends evidence and, where Division C says so, professional involvement.
 It does not conclude that a design complies, is safe, or that a supplied opinion is adequate.
 Citations are copied from codedb lookups. A reference that does not resolve becomes no citation
-and a question.
+and a question. This module does not write the case and does not fill a professional's name,
+discipline, seal, or registration number.
 """
 from __future__ import annotations
 
+import logging
+import re
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
 from .codes import Codes
 from .models import Case
-from .process_fields import ProcessField, alternative_path, confirmed_value, process_fields
+from .process_fields import ProcessField, alternative_path, confirmed_value, latest_fact, process_fields
 from .professional import ProfessionalFacts, ProfessionalReason, ProfessionalResult, professional_involvement
 from .section_d import (
     ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, EvidencePlanItem, EvidenceType, section_d_plan,
@@ -48,7 +51,42 @@ PROCESS_RULES = (
 )
 
 PracticeValue = bool | Literal['unknown']
-IssueStatus = Literal['open', 'addressed', 'needs_professional']
+IssueStatus = Literal['open', 'evidence_listed', 'needs_professional']
+
+log = logging.getLogger(__name__)
+
+# Used only when the Division C screen is unresolved and every specific question was unusable.
+GENERIC_FALLBACK_QUESTION = (
+    'Which building facts are still unconfirmed before this practice-of-engineering flag can be set?')
+generic_fallback_fires = 0
+
+# The applicant has to confirm these. A name or seal copied off a document does not count.
+PROFESSIONAL_REQUEST = (
+    'Name the registered professional for this scope: name, discipline (engineer or architect), '
+    'and APEGA or AAA registration number. A seal the applicant confirms can stand in for the number. '
+    'This screen does not fill the name, the discipline, or the number.')
+_APPLICANT_SOURCES = frozenset({'user_text', 'user_click'})
+_ROLE_FIELDS = (
+    'professional.role', 'professional.discipline', 'registered_professional.role',
+    'registered_professional.discipline',
+)
+_SEAL_FIELDS = ('professional.seal', 'professional_seal', 'registered_professional.seal')
+_REGISTRATION_FIELDS = (
+    'professional.registration_number', 'professional.registration',
+    'registered_professional.registration_number', 'apega_number', 'aaa_number',
+)
+_ROLE_VALUES = frozenset({
+    'engineer', 'architect', 'professional engineer', 'registered engineer',
+    'professional architect', 'registered architect',
+})
+_PROCESS_RULE_IDS = {
+    'rationale': ('C', '2.3.1.1.(2)(a)'),
+    'maintenance_operation': ('C', '2.3.1.1.(2)(b)'),
+    'risk_assessment': ('C', '2.3.1.1.(3)'),
+    'mitigating_measures': ('C', '2.3.1.1.(3)'),
+    'assumptions_and_limits': ('C', '2.3.1.1.(3)'),
+    'qualifications': ('C', '2.3.1.1.(4)'),
+}
 
 # Reason codes professional.py emits, in the order a Division C rule should be shown.
 _YES_PRIORITY = (
@@ -144,11 +182,41 @@ class SectionDIssue(BaseModel):
 
 
 def _question(result: ProfessionalResult) -> str:
+    global generic_fallback_fires
     for question in result.questions:
         folded = question.casefold()
         if question.strip() and 'safe' not in folded and 'compli' not in folded:
             return question
-    return 'Which building facts are still unconfirmed before this practice-of-engineering flag can be set?'
+    generic_fallback_fires += 1
+    log.info('generic fallback practice question')
+    return GENERIC_FALLBACK_QUESTION
+
+
+def _applicant_confirmed(case: Case, *fields: str) -> str | None:
+    """Confirmed applicant text or an explicit confirmation. Document sources do not qualify."""
+    fact = latest_fact(case, *fields)
+    if fact is None or fact.status != 'confirmed' or fact.kind == 'proposed':
+        return None
+    if fact.source.type not in _APPLICANT_SOURCES:
+        return None
+    if not isinstance(fact.value, str) or not fact.value.strip():
+        return None
+    return fact.value.strip()
+
+
+def _role_confirmed(value: str) -> bool:
+    tokens = re.findall(r'[a-z]+', value.casefold())
+    if 'sales' in tokens:
+        return False
+    return ' '.join(tokens) in _ROLE_VALUES
+
+
+def professional_confirmed(case: Case) -> bool:
+    """Engineer or architect, plus a seal or registration number, confirmed by the applicant."""
+    role = _applicant_confirmed(case, *_ROLE_FIELDS)
+    if role is None or not _role_confirmed(role):
+        return False
+    return _applicant_confirmed(case, *_SEAL_FIELDS) is not None or _applicant_confirmed(case, *_REGISTRATION_FIELDS) is not None
 
 
 def _pick(result: ProfessionalResult, required: str) -> ProfessionalReason | None:
@@ -183,7 +251,8 @@ def render_practice(result: ProfessionalResult, codes: Codes, *, span_handoff: b
         if span_handoff:
             text += ' The stated span is recorded as Part 4 design, so the same Division C rule applies.'
         return PracticeOfEngineering(value=True, rule=rule or None, division=division or None,
-                                     citation=reason.citation if reason else None, reason=text, question=None)
+                                     citation=reason.citation if reason else None, reason=text,
+                                     question=PROFESSIONAL_REQUEST)
     if result.required == 'no':
         reason = _pick(result, 'no') or _pick(result, 'depends')
         rule, division = _rule(reason) if reason else ('', '')
@@ -211,12 +280,14 @@ def _at_stake(item: EvidencePlanItem) -> str:
             'designer which performance benchmark applies before selecting evidence.')
 
 
-def _status(flag: PracticeOfEngineering, attachments) -> IssueStatus:
-    named = any((doc.responsible_party or '').strip() or doc.professional_seal for doc in attachments)
-    if flag.value is True and not named:
+def _status(case: Case, flag: PracticeOfEngineering, attachments) -> IssueStatus:
+    """None of these values is a sign-off or a compliance determination."""
+    if flag.value == 'unknown':
+        return 'open'
+    if flag.value is True and not professional_confirmed(case):
         return 'needs_professional'
-    if attachments and flag.value != 'unknown':
-        return 'addressed'
+    if attachments:
+        return 'evidence_listed'
     return 'open'
 
 
@@ -244,7 +315,7 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
                 'Confirm the Division B benchmark provisions before recommending performance evidence.'),
             at_stake='No confirmed benchmark is on the case. Recommend evidence only after a provision resolves in the code database.',
             recommended_types=recommended_fallback, practice_of_engineering=flag,
-            empty_process_fields=empty, status=_status(flag, ()))]
+            empty_process_fields=empty, status=_status(case, flag, ()))]
 
     known: list[str] = []
     unresolved: list[SectionDIssue] = []
@@ -256,7 +327,7 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
                 question='This entered reference was not found in the code database. Ask which Division B provision is the benchmark. No replacement article is suggested.',
                 at_stake='Recommend evidence only after the benchmark resolves in the code database.',
                 recommended_types=recommended_fallback, practice_of_engineering=flag,
-                empty_process_fields=empty, status=_status(flag, ())))
+                empty_process_fields=empty, status=_status(case, flag, ())))
         else:
             known.append(provision_id)
 
@@ -275,7 +346,7 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
                 objective=None, function=None,
                 at_stake='Recommend evidence only after the benchmark resolves in the code database.',
                 recommended_types=item.recommended_types, practice_of_engineering=flag,
-                empty_process_fields=empty, status=_status(flag, item.attachments)))
+                empty_process_fields=empty, status=_status(case, flag, item.attachments)))
             continue
         question = None
         if not (item.objective and item.function):
@@ -286,5 +357,52 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
             question=question, objective=item.objective, function=item.function,
             at_stake=_at_stake(item),
             recommended_types=item.recommended_types, practice_of_engineering=flag,
-            empty_process_fields=empty, status=_status(flag, item.attachments)))
+            empty_process_fields=empty, status=_status(case, flag, item.attachments)))
     return issues
+
+
+def generic_fallback_on_dev(cases: list[dict], codes: Codes) -> int:
+    """Count fallback questions for dev cases as the issues route sees them.
+
+    Each case contributes its seed provision only. The route does not read the prose
+    and does not infer facts from it.
+    """
+    global generic_fallback_fires
+    generic_fallback_fires = 0
+    for case in cases:
+        seed = case.get('seed_provision')
+        provisions = [seed] if isinstance(seed, str) and seed else []
+        section_d_issues(Case(provisions=provisions), codes)
+    log.info('generic fallback practice question fired %s times on %s dev cases', generic_fallback_fires, len(cases))
+    return generic_fallback_fires
+
+
+def _cited(issue: SectionDIssue) -> list[tuple[str, str, str]]:
+    rows: list[tuple[str, str, str]] = []
+    if issue.provision and issue.provision.citation:
+        rows.append((issue.provision.division, issue.provision.provision_id, issue.provision.citation))
+    flag = issue.practice_of_engineering
+    if flag.rule and flag.division and flag.citation:
+        rows.append((flag.division, flag.rule, flag.citation))
+    for field in issue.empty_process_fields:
+        rule = _PROCESS_RULE_IDS.get(field.id)
+        if rule and field.citation:
+            rows.append((rule[0], rule[1], field.citation))
+    return rows
+
+
+def citation_resolution(cases: list[dict], codes: Codes) -> tuple[int, int]:
+    """Unique cited provisions from one issues-endpoint pass, and how many still resolve."""
+    seen: dict[tuple[str, str], str] = {}
+    for case in cases:
+        seed = case.get('seed_provision')
+        provisions = [seed] if isinstance(seed, str) and seed else []
+        for issue in section_d_issues(Case(provisions=provisions), codes):
+            for division, provision_id, citation in _cited(issue):
+                seen.setdefault((division, provision_id), citation)
+    resolved = 0
+    for (division, provision_id), citation in seen.items():
+        record = _lookup(codes, provision_id, division)
+        if record and record.get('citation') == citation:
+            resolved += 1
+    return resolved, len(seen)

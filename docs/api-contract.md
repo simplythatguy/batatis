@@ -39,7 +39,7 @@ The fixed 404 detail strings are `case not found` and `provision not found`.
 | `id` | string | Stable id for this provision and attribution pair. |
 | `provision_id` | string | Division B provision id codedb resolved. |
 | `citation` | string | Citation string copied from the code database. |
-| `status` | string | `not provided` or `provided`. |
+| `status` | string | `not provided` or `provided`. Not a sign-off or compliance determination. |
 | `attribution_status` | string | `direct`, `inherited from parent`, or `no row in the attribution table`. |
 | `attributed_via` | string or null | Parent provision when the row is inherited. |
 | `objective` | string or null | Objective code from the attribution pair. Null when the table has no row. |
@@ -91,14 +91,14 @@ An empty list is not returned for a case with no confirmed benchmark. That case 
 | `provision.division` | `"A"` \| `"B"` \| `"C"` | Division of that row. Benchmark issues use `"B"`. |
 | `provision.citation` | string | Citation string copied from the code database. The service does not format its own citation. |
 | `entered_reference` | string or null | The applicant's unresolved token. Not a citation. |
-| `question` | string or null | Present when the benchmark, the attribution, or the practice screen is incomplete. |
+| `question` | string or null | Present when the benchmark or the attribution is incomplete. The practice object carries its own question. |
 | `objective` | string or null | Objective code from the attribution row, such as `OP3.1`. Null when the table has no row. |
 | `function` | string or null | Functional-statement code from the same row, such as `F03`. |
 | `at_stake` | string | What the evidence should address. Wording recommends; it does not conclude. |
 | `recommended_types` | string[] | Same `EvidenceType` values as a Section D plan item, in ladder order. The field name matches `engine/section_d.py`. |
 | `practice_of_engineering` | object | Whether the stated facts indicate practice of engineering. |
 | `empty_process_fields` | object[] | Required alternative-path process fields that still have no confirmed applicant answer. Not evidence types. |
-| `status` | string | `open`, `addressed`, or `needs_professional`. This is the issues enum. The plan route uses `not provided` or `provided`. |
+| `status` | string | `open`, `evidence_listed`, or `needs_professional`. This is the issues enum. The plan route uses `not provided` or `provided`. Not a sign-off or compliance determination. |
 
 `empty_process_fields[]`:
 
@@ -119,7 +119,7 @@ Process fields are required on the alternative path. They are not rungs of the e
 | `division` | `"A"` \| `"B"` \| `"C"` or null | Division of `rule`. |
 | `citation` | string or null | That rule's citation from the code database. Omitted when the rule does not resolve. The rule id is one `engine/professional.py` already passes to its screen. |
 | `reason` | string | Recommendation tied to the rule. |
-| `question` | string or null | Required when `value` is `"unknown"`. |
+| `question` | string or null | Required when `value` is `"unknown"`: the deciding question, not a generic stand-in unless every specific question was unusable. When `value` is `true`, the question asks the applicant for the registered professional's name, discipline (engineer or architect), and APEGA or AAA registration number. A seal the applicant confirms can stand in for the number. The service does not fill those fields. |
 
 Confirmed `professional.span_m` (or `span_m`) above 12.20 m is recorded as Part 4 design. This span handoff came from development case dev-050. The cited rule is Div C 2.4.1.2.(1), the same provision `engine/professional.py` already uses for Part 4 design. No other provision id is added for the span.
 
@@ -127,9 +127,11 @@ Confirmed `professional.span_m` (or `span_m`) above 12.20 m is recorded as Part 
 
 | Value | When |
 | --- | --- |
-| `needs_professional` | `practice_of_engineering.value` is `true` and no applicant-supplied item linked to the issue names a responsible party or a seal. |
-| `addressed` | An applicant-supplied item is linked to the issue (and, if a professional is indicated, a responsible party or seal is named). This records that the item was supplied. It does not assess the item. |
-| `open` | No applicant-supplied item is linked. Also used when the practice flag is `"unknown"`. |
+| `needs_professional` | `practice_of_engineering.value` is `true` and the applicant has not confirmed a registered-professional role of engineer or architect together with a seal or a registration number. The confirmation is `user_text` or an explicit confirmation (`user_click`). A name or seal on an uploaded document does not count, and the service does not infer one. Not a sign-off or compliance determination. |
+| `evidence_listed` | An applicant-supplied item is linked to the issue, the practice flag is not `"unknown"`, and a `true` flag also has that confirmed role and seal or registration number. Listing the item is not a sign-off or compliance determination. |
+| `open` | No applicant-supplied item is linked, or the practice flag is `"unknown"`. Not a sign-off or compliance determination. |
+
+The UI does not read the old issue status `addressed`, so that token is not accepted as an alias. Plan-item `not provided` and `provided` are also not a sign-off or compliance determination. The issues route does not write the case and does not fill the professional's name, discipline, or registration number.
 
 ### Evidence-type order
 
