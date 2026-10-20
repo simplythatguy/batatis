@@ -65,6 +65,48 @@ def test_case_a_identify_queries_omit_interior_nail_article():
         _no_interior_nail(_ids(terms))
 
 
+def test_provision_id_query_returns_that_provision_first():
+    from codedb.ids import canon
+
+    for query in ('3.1.9.1', '3.1.9.1.', '3.1.9.1.(1)', '9.10.19.3'):
+        rows = search(query, division='B', limit=8)
+        assert rows[0]['id'] == canon(query), (query, [row['id'] for row in rows])
+        assert (rows[0].get('text') or '').split()
+    article = search('3.1.9.1', division='B', limit=8)
+    assert [row['id'] for row in article] == [
+        '3.1.9.1.',
+        '3.1.9.1.(1)', '3.1.9.1.(2)', '3.1.9.1.(3)', '3.1.9.1.(4)',
+        '3.1.9.1.(5)', '3.1.9.1.(6)', '3.1.9.1.(7)',
+    ]
+    assert all((row.get('text') or '').split() for row in article)
+    other = search('3.1.9.1', division='C', limit=8)
+    assert all(row['id'] != '3.1.9.1.' for row in other)
+    assert '9.99.99.99.' not in _ids('9.99.99.99')
+
+
+def test_firestop_spellings_reach_the_firestops_article():
+    for query in (
+        'fire stopping', 'fire-stopping', 'firestopping',
+        'fire stop', 'fire-stop', 'fire stops', 'firestop',
+    ):
+        assert '3.1.9.1.' in _ids(query), query
+    split = search('firestop', division='B', limit=40)
+    assert any(row['id'].startswith('9.10.13.14') for row in split)
+
+
+def test_empty_article_hit_carries_its_sentences():
+    rows = search('firestop', division='B', limit=8)
+    article = next(row for row in rows if row['id'] == '3.1.9.1.')
+    words = (article.get('text') or '').split()
+    assert words and len(words) <= 25
+    children = article.get('children') or []
+    assert [child['id'] for child in children] == [
+        '3.1.9.1.(1)', '3.1.9.1.(2)', '3.1.9.1.(3)', '3.1.9.1.(4)',
+        '3.1.9.1.(5)', '3.1.9.1.(6)', '3.1.9.1.(7)',
+    ]
+    assert all((child.get('text') or '').split() and len(child['text'].split()) <= 25 for child in children)
+
+
 def test_firestop_plastic_pipe_returns_general_rule_and_dwv_clause():
     ids = _ids('firestop plastic pipe penetration')
     assert '3.1.9.1.(1)' in ids

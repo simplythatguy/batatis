@@ -9,8 +9,10 @@ heading boost (not a blanket title weight), one same-section neighbour
 when the leader matches every concept, and the furring article kept
 next to an attachment article. Part 9 is a small tie-break when the
 query names a Part 9 building. V3 tries an AND of the content words
-first. Zero or very few AND hits relax by dropping the blocking word,
-then fall back to the OR query, still ranked by BM25.
+first. Zero or very few AND hits keep the near-miss union, then fall
+back to the OR query, still ranked by BM25. A query that is only a
+provision id is looked up and placed first. Firestop spellings are
+folded to one term before that ranking.
 
 Synonym groups are generic building terms. They are not provision ids
 and they are not keyed to a fixture. The public `search` signature is
@@ -22,13 +24,19 @@ import json
 import re
 from contextlib import closing
 
-from . import store
+from . import ids, store
 
 SHIPPED = 'v3'
 
 _JSON = {'clauses', 'fs', 'objectives', 'brackets', 'attribution_notes', 'intents',
          'only_in_intent', 'only_in_ae'}
 _WORD = re.compile(r'[^\W_]+', re.UNICODE)
+# One token for every spelling of firestop. Hyphens and spaces are the same word.
+# Longer forms are listed first so "fire stopping" is not cut down to "fire stop".
+_FIRESTOP_FORM = re.compile(
+    r'\b(?:fire[- ]stopping|firestopping|fire[- ]stops|firestops|fire[- ]stop|firestop)\b',
+    re.IGNORECASE)
+_PROVISION_LEVELS = frozenset({'article', 'sentence', 'clause', 'subclause'})
 _ARTICLE = re.compile(r'(\d+\.\d+\.\d+\.\d+\.)')
 _NOTE_ONLY = re.compile(r'^\(See Notes?\b.*\)$', re.IGNORECASE)
 SNIPPET_WORDS = 25
@@ -170,15 +178,71 @@ def _expand(words: list[str]) -> list[str]:
     return out
 
 
+def _fold_firestop(terms: str) -> str:
+    """Collapse firestop spellings to one word before BM25 sees the query."""
+    return _FIRESTOP_FORM.sub('firestop', terms)
+
+
+def _fts_atom(word: str) -> str:
+    """One FTS term. `firestop` also matches the split index forms, and the reverse."""
+    cleaned = word.replace('"', '')
+    if cleaned == 'firestop':
+        return '(firestop OR "fire stop")'
+    return '"' + cleaned + '"'
+
+
 def _fts_query(words: list[str], *, phrase: bool) -> str:
-    parts = ['"' + w.replace('"', '') + '"' for w in words]
+    parts = [_fts_atom(word) for word in words]
     if phrase:
         parts.append('"insulating sheathing"')
     return ' OR '.join(parts)
 
 
 def _and_query(words: list[str]) -> str:
-    return ' AND '.join('"' + word.replace('"', '') + '"' for word in words)
+    return ' AND '.join(_fts_atom(word) for word in words)
+
+
+def _id_query(terms: str) -> str | None:
+    """The whole query when it is one article, sentence, or clause id.
+
+    A trailing dot is optional. Extra words are not an id. A subsection such
+    as 3.1.9 is not an id.
+    """
+    text = terms.strip()
+    if not text or any(ch.isspace() for ch in text):
+        return None
+    attempts = [text]
+    if text.endswith('.') and '(' in text:
+        attempts.append(text[:-1])
+    for attempt in attempts:
+        try:
+            parsed = ids.parse(attempt)
+        except ValueError:
+            continue
+        if parsed.level in _PROVISION_LEVELS:
+            return str(parsed)
+    return None
+
+
+def _direct_rows(con, provision_id: str, *, doc: str, division: str | None) -> list[dict]:
+    """The provision, then an article's children in code order. Missing ids add nothing."""
+    sql = 'SELECT * FROM provisions WHERE doc=? AND id=?'
+    args: list = [doc, provision_id]
+    if division:
+        sql += ' AND division=?'
+        args.append(division.upper())
+    sql += ' ORDER BY division, sort_key'
+    found = [_record(row) for row in con.execute(sql, args)]
+    out: list[dict] = []
+    for row in found:
+        out.append(row)
+        if row.get('level') != 'article':
+            continue
+        children = con.execute(
+            'SELECT * FROM provisions WHERE doc=? AND division=? AND parent_id=? ORDER BY sort_key',
+            (doc, row['division'], row['id'])).fetchall()
+        out.extend(_record(child) for child in children)
+    return out
 
 
 def _norm_token(word: str) -> str:
@@ -691,9 +755,31 @@ def _cap_response(rows: list[dict]) -> None:
         remaining -= len(keep)
 
 
-def _present_rows(con, rows: list[dict], *, doc: str, division: str | None, limit: int, terms: str) -> list[dict]:
+def _sentence_snippets(con, row: dict, *, doc: str, division: str | None, terms: list[str]) -> list[dict]:
+    """Sentences under an article that stores no text of its own.
+
+    Each snippet is at most 25 words. The list is how a card shows the
+    article when the article row itself is empty in the database.
+    """
+    if row.get('level') != 'article' or not _placeholder(row.get('text_raw')):
+        return []
+    division_sql = row.get('division') or division
+    if not division_sql:
+        return []
+    snippets = []
+    for sentence in _child_level(con, doc, division_sql, row['id'], 'sentence'):
+        text = _best_window(sentence.get('text') or '', terms)
+        if not text:
+            continue
+        snippets.append({'id': sentence['id'], 'level': sentence['level'], 'text': text})
+    return snippets
+
+
+def _present_rows(con, rows: list[dict], *, doc: str, division: str | None, limit: int, terms: str,
+                  keep: set[tuple[str, str]] | None = None) -> list[dict]:
     if not rows:
         return []
+    keep = keep or set()
     division_sql = division or rows[0].get('division')
     window_terms = _expand(_tokens(terms))
     selected = []
@@ -720,7 +806,20 @@ def _present_rows(con, rows: list[dict], *, doc: str, division: str | None, limi
                 break
         if len(selected) >= limit:
             break
+    opened = {
+        (row.get('division'), row['id']): row.get('text') or ''
+        for row in selected if (row.get('division'), row['id']) in keep
+    }
     _cap_response(selected)
+    for row in selected:
+        key = (row.get('division'), row['id'])
+        if key in opened and not (row.get('text') or '').strip():
+            row['text'] = opened[key]
+        snippets = _sentence_snippets(con, row, doc=doc, division=division_sql, terms=window_terms)
+        if snippets:
+            row['children'] = snippets
+            if not (row.get('text') or '').strip():
+                row['text'] = snippets[0]['text']
     for index, row in enumerate(selected):
         row['rank'] = float(index)
     return selected
@@ -801,10 +900,17 @@ def search_variant(terms: str, variant: str, *, doc='NBC-AE', division=None, lim
         raise ValueError(f'unknown search variant {variant}')
     if not 1 <= limit <= 1000:
         raise ValueError('limit must be between 1 and 1000')
+    canon = _id_query(terms)
+    terms = _fold_firestop(terms)
     raw = _WORD.findall(terms)
-    if not raw:
+    if not raw and not canon:
         return []
     with closing(store.connect(db_path)) as con:
+        pinned = _direct_rows(con, canon, doc=doc, division=division) if canon else []
+        pinned_keys = {(row['division'], row['id']) for row in pinned}
+        if not raw:
+            return _present_rows(
+                con, pinned, doc=doc, division=division, limit=limit, terms=terms, keep=pinned_keys)
         if variant == 'v0':
             query = _fts_query([w for w in raw], phrase=False)
             rows = _fts(con, query, doc=doc, division=division, limit=limit, title_weight=5.0)
@@ -839,4 +945,7 @@ def search_variant(terms: str, variant: str, *, doc='NBC-AE', division=None, lim
                 rows = _lift_leader_clauses(con, rows, _content(terms), doc=doc, division=division)
                 if len(rows) < limit:
                     rows = _promote_rare_headings(con, rows, terms, doc=doc, division=division)
-        return _present_rows(con, rows, doc=doc, division=division, limit=limit, terms=terms)
+        if pinned:
+            rows = pinned + [row for row in rows if (row['division'], row['id']) not in pinned_keys]
+        return _present_rows(
+            con, rows, doc=doc, division=division, limit=limit, terms=terms, keep=pinned_keys)

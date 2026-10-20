@@ -47,6 +47,8 @@ class Codes:
                  'article_title': h['article_title'], 'title': h['title'], 'text': h['text'],
                  'pdf_page': h.get('pdf_page'),
                  'attribution': h.get('attribution') or 'lookup not available',
+                 'children': [{'id': child['id'], 'level': child['level'], 'text': child.get('text') or ''}
+                              for child in (h.get('children') or [])],
                  'citation': self.citation(h['id'], h['division'])} for h in hits]
 
     def definition(self, code: str) -> dict | None:

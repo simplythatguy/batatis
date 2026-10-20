@@ -16,6 +16,8 @@ export interface CodeHit {
   text: string;
   pdf_page: number | null;
   attribution: string;
+  /** Sentences under an article that stores no text of its own. Each text is at most 25 words. */
+  children: { id: string; level: string; text: string }[];
   citation: string | null;
 }
 
