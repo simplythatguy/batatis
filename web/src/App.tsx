@@ -30,7 +30,7 @@ const NAV = [
 
 export function App() {
   const route = useRoute();
-  const { c, phase, askExample, resetToWho, continueCase, pendingExampleId, confirmExample, dismissExample } = useCase();
+  const { c, phase, askExample, resetToWho, pendingExampleId, confirmExample, dismissExample } = useCase();
   const confirmDialog = useRef<HTMLDialogElement>(null);
   const resetDialog = useRef<HTMLDialogElement>(null);
   const [resetOpen, setResetOpen] = useState(false);
@@ -50,24 +50,7 @@ export function App() {
   }, [resetOpen]);
 
   let screen;
-  if (phase === "resume") {
-    screen = (
-      <div className="pane scroll-body">
-        <div className="content-col stack">
-          <h1 className="section-title">Continue your case or start new?</h1>
-          <p>A case is already in this browser. Nothing from it is shown on this card.</p>
-          <div className="btn-row">
-            <button type="button" className="btn btn-primary" onClick={continueCase}>
-              Continue
-            </button>
-            <button type="button" className="btn" onClick={resetToWho}>
-              Start new
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  } else if (phase !== "case") {
+  if (phase !== "case") {
     screen = <Who />;
   } else switch (route.path) {
     case "/code-check":

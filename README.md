@@ -199,7 +199,7 @@ User-testing protocol: [`docs/user-testing/README.md`](./docs/user-testing/READM
 
 ## Product
 
-The product is the Vite app in [`web/`](./web). It is the canonical frontend ([ADR 0001](./docs/adr/0001-vite-web-canonical.md)): Describe, Code check, Section C, and Application are wired to the engine. Linear tokens live in [`docs/design/tokens.css`](./docs/design/tokens.css) and [`docs/design/variables.css`](./docs/design/variables.css). `apps/web` is not the product and is not on this branch.
+The canonical frontend is [`web/`](./web) (Vite) ([ADR 0001](./docs/adr/0001-vite-web-canonical.md)): Describe, Code check, Section C, and Application are wired to the engine. Linear tokens live in [`docs/design/tokens.css`](./docs/design/tokens.css) and [`docs/design/variables.css`](./docs/design/variables.css). `apps/web` is not used for product work.
 
 ```bash
 cd web && npm install && npm run dev

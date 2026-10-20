@@ -6,48 +6,30 @@ import { shouldConfirmReplace } from "./rules";
 import { exampleCase } from "./examples";
 import { emptyCase } from "./intake";
 import { gapLabel, getGaps, reducer, type Action } from "./model";
+import { caseForRole, initialVisit } from "./visit";
 import type { ApplicantType, Case, Gap } from "./types";
 
 const KEY = "batatis-web-case-v4";
 
 interface Persisted {
-  phase: "who" | "case" | "resume";
+  phase: "who" | "case";
   case: Case;
   note: string;
 }
 
 function load(): Persisted {
-  if (new URLSearchParams(location.search).has("reset")) {
+  let stored: string | null = null;
+  try {
+    if (new URLSearchParams(location.search).has("reset")) {
+      sessionStorage.removeItem(KEY);
+    }
+    stored = sessionStorage.getItem(KEY);
     sessionStorage.removeItem(KEY);
     clearEngineSession();
-  }
-  try {
-    const raw = sessionStorage.getItem(KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as Persisted;
-      const blank = emptyCase(parsed.case?.applicantType || "homebuilder");
-      if (parsed.phase === "case" && parsed.case) {
-        return {
-          phase: "resume",
-          note: parsed.note ?? "",
-          case: {
-            ...blank,
-            ...parsed.case,
-            process: { ...blank.process, ...parsed.case.process },
-            authority: parsed.case.authority ?? "",
-            files: parsed.case.files ?? [],
-            facts: parsed.case.facts ?? [],
-            questions: parsed.case.questions ?? [],
-            candidates: parsed.case.candidates ?? [],
-            sectionC: parsed.case.sectionC ?? [],
-          },
-        };
-      }
-    }
   } catch {
-    /* a new visitor starts at Who are you */
+    stored = null;
   }
-  return { phase: "who", case: emptyCase("homebuilder"), note: "" };
+  return initialVisit(stored);
 }
 
 interface Store {
@@ -68,13 +50,12 @@ interface Store {
   /** Increments after facts are pushed, so Section D can reload on the new facts. */
   factsEpoch: number;
   savedNote: string;
-  phase: "who" | "case" | "resume";
+  phase: "who" | "case";
   /** Shown after Reset so the clear is visible. */
   resetNote: string;
   dispatch: Dispatch<Action>;
   saveDraft: () => Promise<string | null>;
   beginEmpty: (type: ApplicantType) => void;
-  continueCase: () => void;
   loadExample: (id: string) => void;
   /** Opens an example, or asks first when that would wipe a case the user started. */
   askExample: (id: string) => void;
@@ -297,8 +278,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       resetNote,
       dispatch,
       saveDraft: () => sync(true),
-      beginEmpty: (type) => openCase(emptyCase(type)),
-      continueCase: () => setPhase("case"),
+      beginEmpty: (type) => openCase(caseForRole(type, c)),
       loadExample: (id) => {
         const next = exampleCase(id);
         if (next) openCase(next);
