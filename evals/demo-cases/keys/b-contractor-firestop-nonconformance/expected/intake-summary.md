@@ -1,7 +1,7 @@
 > agent-authored, model-checked, not human-verified or official
 
 # Expected: intake summary (Case B)
-> EXAMPLE DATA. Citations checked against the NBC(AE) 2023 1st printing; 2nd printing not verified (`../../../sources.md`).
+> EXAMPLE DATA. Citations checked against the NBC(AE) 2023 1st printing. All 102 cited provisions present in the 2nd-printing code database (pages p.322, p.323, p.1126, p.1201 confirmed). (`../../../sources.md`).
 
 **Who's asking:** Northgate Example Builders (GC), Carlos Mendes. The **owner** is Example Commons Holdings Inc. (fictional). Confirm the GC's authority to act for the owner.
 **Stage:** under construction, permit issued, before close-in.
@@ -17,7 +17,7 @@
 | Legal / address | Lot 0 Block 0 Plan 0000000; 0000 Example Avenue SW *(fictional)* | ✓ |
 | Non-conformance | 46 plastic penetrations through rated floors, L3–L4 | ✓ |
 | Required floor rating | "1 h" per the architect's analysis | Project data, **not derived by the tool** (consistent with 3.2.2.51.(2)(a) if that Article governs) |
-| Building height | 5 storeys (> 3) | Triggers the **50 Pa** S115 test for plastic pipe (3.1.9.4.(4)(b)) |
+| Building height | 5 storeys (> 3) | Triggers the **50 Pa** CAN/ULC-S115:2018 test for plastic pipe (3.1.9.4.(4)(b)) |
 | Sprinkler penetrations | 22 steel branch lines, same sealant | ⚠ Not covered by 3.1.9.1.(4) unless heads with NFPA 13 metal escutcheons. Ask. |
 | Deadline | Close-in 2026-10-24 | Schedule pressure. **Not** a reason to lower evidence. |
 

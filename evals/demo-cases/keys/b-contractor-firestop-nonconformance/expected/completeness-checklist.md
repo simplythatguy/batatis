@@ -5,7 +5,7 @@
 
 | # | Item | Basis | Status |
 |---|---|---|---|
-| R0 | **Listed S115 route considered first** (50 Pa-tested for plastic pipe) | 3.1.9.1.(1); 3.1.9.4.(4)(b); W14 rule 1 | ❌ |
+| R0 | **Listed CAN/ULC-S115:2018 route considered first** (50 Pa-tested for plastic pipe) | 3.1.9.1.(1); 3.1.9.4.(4)(b); W14 rule 1 | ❌ |
 | R1 | No combustible piping in a vertical service space | 3.1.9.4.(4)(c) | ⚠ Ask |
 | P0 | City inspector or plans examiner contacted | W9 | ❌ |
 | A1–A3 | Owner, representative authorization, mailing address | SCC §A | ⚠ |

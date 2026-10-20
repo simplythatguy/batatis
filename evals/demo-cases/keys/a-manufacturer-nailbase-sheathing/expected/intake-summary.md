@@ -1,7 +1,7 @@
 > agent-authored, model-checked, not human-verified or official
 
 # Expected: intake summary (Case A)
-> EXAMPLE DATA. This is what a good tool should produce after intake. Citations checked against the NBC(AE) 2023 1st printing; 2nd printing not verified (see `../../../sources.md`).
+> EXAMPLE DATA. This is what a good tool should produce after intake. Citations checked against the NBC(AE) 2023 1st printing. All 102 cited provisions present in the 2nd-printing code database (pages p.322, p.323, p.1126, p.1201 confirmed). (see `../../../sources.md`).
 
 **Who's asking:** Example Panel Works Ltd. (manufacturer), represented by Mira Okafor. *Role: manufacturer and evidence supplier, not the owner.*
 **What they want, in two separate goals:**

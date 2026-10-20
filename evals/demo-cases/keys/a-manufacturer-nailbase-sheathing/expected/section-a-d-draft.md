@@ -28,7 +28,7 @@
 | 9.27.5.1.(1), fastening of cladding | OS2.1, OS2.3; OH1.1, OH1.2, OH1.3 *([F20-OS2.1,OS2.3], [F20-OH1.1,OH1.2,OH1.3]). The other printed pairs (F22, OS2.4/2.5, OP2.x, OH4, OS3.1, OS3.7) are N/A: they apply only where panel-type cladding provides the required bracing, and vertical vinyl siding isn't that.* | F20 | GAP: intent lookup not available | Table 9.38.1.1., 1st printing PDF p.1193 (B 9-371) |
 | 9.27.5.1.(2), cladding fastened to sheathing | OH1.1–OH1.3; OS2.1, OS2.3 | F20 | GAP: intent lookup not available | Table 9.38.1.1., 1st printing PDF p.1193 (B 9-371) |
 
-*Benchmark acceptable solution:* vertical vinyl siding fastened to ≥11 mm OSB per 9.27.5.1.(2), or to 19×38 furring at ≤600 mm o.c. secured to framing per 9.27.5.3.(1), (3).
+*Benchmark acceptable solution:* vertical vinyl siding fastened to ≥11 mm OSB per 9.27.5.1.(2), or to 19×38 mm furring per 9.27.5.3.(1), spaced at ≤600 mm o.c. per 9.27.5.3.(3)(b).
 *Retrieved code text and AI explanation must render differently in the UI.*
 
 **Required by Div C 2.3.1.1.(2)–(6):** a code analysis giving the method and rationale for comparing withdrawal and wind-load resistance with the benchmark; **O&M/inspection** (re-siding instructions, damage repair); the objectives, functions and acceptable solutions addressed, with **assumptions, limiting or restricting factors** (siding type, nail type and spacing, wind exposure, facer thickness, moisture cycling), testing procedures, engineering studies and performance parameters; the qualifications of the responsible designer; and a single coordinator if there are several authors.
@@ -44,4 +44,4 @@
 | Product data sheet and installation guide | Example Panel Works Ltd. *(fictional)* | ⚠ Manufacturer claims only |
 | O&M / inspection statement for the fastening | `[designer + owner acceptance]` | ❌ |
 
-**Truthful status line:** *Citations checked against the NBC(AE) 2023 1st printing; 2nd printing not verified. Applicant/site data, the analysis and the performance evidence are incomplete. Not ready to submit. This draft makes no safety or compliance finding.*
+**Truthful status line:** *Citations checked against the NBC(AE) 2023 1st printing. All 102 cited provisions present in the 2nd-printing code database (pages p.322, p.323, p.1126, p.1201 confirmed). Applicant/site data, the analysis and the performance evidence are incomplete. Not ready to submit. This draft makes no safety or compliance finding.*
