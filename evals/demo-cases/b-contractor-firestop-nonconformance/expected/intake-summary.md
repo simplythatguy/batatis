@@ -1,7 +1,7 @@
 > agent-authored, model-checked, not human-verified or official
 
 # Expected: intake summary (Case B)
-> EXAMPLE DATA. Citations verified (`../../sources.md`).
+> EXAMPLE DATA. Citations checked against the NBC(AE) 2023 1st printing; 2nd printing not verified (`../../sources.md`).
 
 **Who's asking:** Northgate Example Builders (GC), Carlos Mendes. The **owner** is Example Commons Holdings Inc. (fictional). Confirm the GC's authority to act for the owner.
 **Stage:** under construction, permit issued, before close-in.

@@ -35,6 +35,6 @@ A **2-storey single-family infill house** (about 210 m², no secondary suite, **
 7. **SCO role:** upload the draft → completeness review.
 
 ## Files
-- `input/`: the only files uploaded to the tool — project brief (md, html, pdf), drawing notes, window schedule, roof assembly note
+- `input/`: the only files uploaded to the tool — project brief (md, html, pdf), drawing notes, window supplier note (EXAMPLE)
 - `presenter/known-gaps.md`: presenter answer key (never upload)
 - `expected/`: intake summary, article shortlist, Section A–D draft, evidence plan, completeness checklist, SCO review, must-not

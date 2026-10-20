@@ -44,4 +44,4 @@
 | Product data sheet and installation guide | Example Panel Works Ltd. *(fictional)* | ⚠ Manufacturer claims only |
 | O&M / inspection statement for the fastening | `[designer + owner acceptance]` | ❌ |
 
-**Truthful status line:** *Citations verified. Applicant/site data, the analysis and the performance evidence are incomplete. Not ready to submit. This draft makes no safety or compliance finding.*
+**Truthful status line:** *Citations checked against the NBC(AE) 2023 1st printing; 2nd printing not verified. Applicant/site data, the analysis and the performance evidence are incomplete. Not ready to submit. This draft makes no safety or compliance finding.*
