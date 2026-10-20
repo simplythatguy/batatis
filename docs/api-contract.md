@@ -33,7 +33,7 @@ The fixed 404 detail strings are `case not found` and `provision not found`.
 
 ### Uploads
 
-`POST /cases/{case_id}/files` is the upload this service serves. The PDF is stored in `case_files` on the case database, with a 4 MB cap. The body may be a raw `application/pdf` or multipart. A function disk is ephemeral, and Vercel stops request bodies at 4.5 MB, so this database copy is the route. #21 adopts it.
+`POST /cases/{case_id}/files` is the single implementation of this upload. It is database-backed: the PDF is stored in `case_files`, and a file over 4 MB is HTTP 413 with `PDF too large: the limit is 4 MB. Try compressing the file or splitting it.` The body may be a raw `application/pdf` or multipart. A function disk is ephemeral, and Vercel stops request bodies at 4.5 MB. #21's PDF parser plugs in as a helper this route calls. There is no separate disk-backed route.
 
 ### Code text
 
