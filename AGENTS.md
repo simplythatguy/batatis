@@ -34,7 +34,7 @@ Official NBC(AE) process fork (acceptable vs alternative): [`docs/diagrams/nbc-a
 
 1. Read `.cursor/skills/batatis-hackathon/SKILL.md` (domain + pitfalls + NBC(AE) fork).
 2. For product flow work, read `.cursor/skills/batatis-variance-workflow/SKILL.md`.
-3. For any UI / frontend / visual work: read `.cursor/skills/batatis-ui-linear/SKILL.md` + `.cursor/skills/batatis-ui-opus/SKILL.md`. **Default product look** = Linear-caliber system (`docs/design-system-linear.md`, `docs/design/tokens.css`). Use **Claude Opus 5.5** (highest available tier) for **UI implementation and UI review**. Simplify ruthlessly without dropping capabilities; meet the bug-free bar.
+3. For any UI / frontend / visual work: read `.cursor/skills/batatis-ui-linear/SKILL.md` + `.cursor/skills/batatis-ui-opus/SKILL.md`. **Default product look** = Linear-caliber system (`docs/design-system-linear.md`, `docs/design/tokens.css`). Primary CTAs are **neutral grey** (not indigo fill). Use **Claude Opus 5.5** for UI implement **and** formal UI review (Composer is provisional). Simplify ruthlessly without dropping capabilities; meet the bug-free bar + `evals/ui-artifacts/smoke.mjs`.
 4. Run understanding checks in `evals/fixtures/understanding-checklist.md` when changing skills/rules. Blind UI prompts: `evals/battle-prompts/ui-blind/`.
 
 Always-on domain rule: `.cursor/rules/batatis-hackathon.mdc`. UI globs: `.cursor/rules/batatis-ui-opus.mdc`, `.cursor/rules/batatis-ui-linear.mdc`.
