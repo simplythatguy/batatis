@@ -18,11 +18,11 @@ def build(path) -> None:
             'pdf_page, pdf_page_end, sort_key) VALUES (?,?,?,?,?,?,?,?,?,?)',
             ('NBC-AE', division, pid, level, parent, 'synthetic fixture', 'synthetic fixture', 1, 1, pid))
 
-    def attr(pid, function, objective, seq=1):
+    def attr(pid, function, objective, seq=1, page=1, table='Table synthetic'):
         con.execute(
             'INSERT INTO attributions VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
-            ('NBC-AE', 'Table synthetic', pid, pid.split('(')[0], None, '[]', seq,
-             f'[{function}-{objective}]', json.dumps([function]), json.dumps([objective]), None, 1))
+            ('NBC-AE', table, pid, pid.split('(')[0], None, '[]', seq,
+             f'[{function}-{objective}]', json.dumps([function]), json.dumps([objective]), None, page))
 
     def status(pid, name, root=None, how=None):
         con.execute('INSERT INTO attribution_status VALUES (?,?,?,?,?)',
@@ -43,9 +43,12 @@ def build(path) -> None:
     status('9.8.8.1.(5)', 'none', '9.8.8.1.(4)', 'exception_root')
 
     prov('B', '3.1.9.4.', 'article')
-    for sentence in ('1', '2', '4'):
+    for sentence in ('1', '2'):
         prov('B', f'3.1.9.4.({sentence})', 'sentence', '3.1.9.4.')
         status(f'3.1.9.4.({sentence})', 'none')
+    # Codedb attribution_status for (4) is none. No root is stored here.
+    prov('B', '3.1.9.4.(4)', 'sentence', '3.1.9.4.')
+    status('3.1.9.4.(4)', 'none')
     prov('B', '3.1.9.4.(3)', 'sentence', '3.1.9.4.')
     attr('3.1.9.4.(3)', 'F03', 'OS1.2')
     status('3.1.9.4.(3)', 'direct')
@@ -57,9 +60,13 @@ def build(path) -> None:
     prov('B', '3.1.9.1.', 'article')
     prov('B', '3.1.9.1.(1)', 'sentence', '3.1.9.1.')
     prov('B', '3.1.9.1.(4)', 'sentence', '3.1.9.1.')
-    attr('3.1.9.1.(1)', 'F03', 'OS1.2')
+    # Table 3.10.1.1., PDF p.323. Positive control beside the unattributed (4).
+    for seq, (function, objective) in enumerate(
+            (('F03', 'OS1.2'), ('F04', 'OS1.3'), ('F03', 'OP1.2'), ('F04', 'OP1.3')), start=1):
+        attr('3.1.9.1.(1)', function, objective, seq, page=323, table='Table 3.10.1.1.')
     status('3.1.9.1.(1)', 'direct')
-    status('3.1.9.1.(4)', 'none', '3.1.9.1.(1)', 'exception_root')
+    # Codedb attribution_status for (4) is none. The (1) pairs are not copied onto it.
+    status('3.1.9.1.(4)', 'none')
 
     prov('B', '9.25.5.1.', 'article')
     prov('B', '9.25.5.1.(1)', 'sentence', '9.25.5.1.')

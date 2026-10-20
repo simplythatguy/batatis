@@ -24,7 +24,7 @@ def codes(tmp_path):
     ('3.1.9.4.(1)', None),
     ('3.1.9.4.(2)', None),
     ('3.1.9.4.(4)', None),
-    ('3.1.9.1.(4)', '3.1.9.1.(1)'),
+    ('3.1.9.1.(4)', None),
     ('9.25.5.1.(1)', '9.25.5.1.(2)'),
 ])
 def test_sentence_without_an_article_row_stays_a_gap(codes, pid, root):
@@ -85,6 +85,45 @@ def test_not_determined_sentence_states_that_and_does_not_copy_the_article(codes
     assert NOT_ATTRIBUTED_LABEL in text
     assert 'F99' not in text and 'OS9.9' not in text
     assert "manufacturer's literature" in text
+
+
+CONTROL_PAIRS = (
+    ('F03', 'OS1.2', 323, 'Table 3.10.1.1.'),
+    ('F04', 'OS1.3', 323, 'Table 3.10.1.1.'),
+    ('F03', 'OP1.2', 323, 'Table 3.10.1.1.'),
+    ('F04', 'OP1.3', 323, 'Table 3.10.1.1.'),
+)
+
+
+@pytest.mark.parametrize('pid', ['3.1.9.1.(4)', '3.1.9.4.(4)', '9.23.17.3.(1)'])
+def test_codedb_status_none_is_not_attributed(codes, pid):
+    """These three sentences are attribution_status none in the codedb fixture."""
+    rec = codes.provision(pid, 'B')
+    assert rec['attribution_status']['status'] == 'none'
+    assert rec['attributions'] == []
+    [row] = section_c_rows([pid], codes)
+    assert row.provision_id == pid
+    assert row.pairs == []
+    assert row.attribution == NOT_ATTRIBUTED
+    assert row.attribution_label == NOT_ATTRIBUTED_LABEL
+    assert row.attribution_status == 'no row in the attribution table'
+    assert row.attributed_via is None
+
+
+def test_3_1_9_1_1_is_the_attributed_control(codes):
+    """Sentence (1) keeps Table 3.10.1.1. p.323. Those pairs are not copied onto (4)."""
+    rec = codes.provision('3.1.9.1.(1)', 'B')
+    assert rec['attribution_status']['status'] == 'direct'
+    assert [(a['bracket'], a['pdf_page'], a['table_id']) for a in rec['attributions']] == [
+        (f'[{function}-{objective}]', page, table) for function, objective, page, table in CONTROL_PAIRS]
+    [row] = section_c_rows(['3.1.9.1.(1)'], codes)
+    assert row.attribution is None
+    assert row.attribution_status == 'direct'
+    assert [(pair.function, pair.objective, pair.pdf_page, pair.table) for pair in row.pairs] == list(CONTROL_PAIRS)
+    [blank] = section_c_rows(['3.1.9.1.(4)'], codes)
+    assert blank.pairs == []
+    assert blank.attribution == NOT_ATTRIBUTED
+    assert 'F03' not in blank.attribution_label and 'OS1.2' not in blank.attribution_label
 
 
 def test_cited_3_1_9_4_4_is_an_explicit_section_c_row(codes):
