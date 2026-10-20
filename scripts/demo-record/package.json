@@ -1,0 +1,13 @@
+{
+  "name": "batatis-demo-record",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "record": "node record.mjs",
+    "check-script": "node record.mjs --check-script",
+    "test": "node --test sync.test.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "1.58.2"
+  }
+}
