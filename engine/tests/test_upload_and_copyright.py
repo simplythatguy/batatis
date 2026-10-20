@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 import json
 import logging
 import re
@@ -10,6 +11,7 @@ from fastapi.testclient import TestClient
 
 from codedb import store as codedb_store
 from engine.api import create_app, read_capped
+from engine.export import EXPORT_FAILED_DETAIL, FORM_NOT_FOUND_DETAIL
 from engine.codes import Codes
 from engine.copyright import (NRC_PUBLICATION_URL, PII_NOTICE, RESPONSE_NRC_MAX_WORDS, SNIPPET_MAX_WORDS,
                               clip_marker, clip_response, has_consecutive_words, is_nrc_string, words)
@@ -297,19 +299,42 @@ def test_unreachable_database_is_503():
     assert 'secret-host' not in response.text
 
 
-def test_export_without_the_scc_form_is_503(tmp_path, monkeypatch):
+def _export_client(tmp_path, monkeypatch):
     monkeypatch.delenv('BATATIS_SCC_FORM', raising=False)
-    monkeypatch.setattr('engine.export.scc.DEFAULT_FORM', tmp_path / 'missing-guide.pdf')
-    monkeypatch.setattr('engine.export.scc.BUNDLE_FORM', tmp_path / 'missing-bundle.pdf')
     monkeypatch.setattr('engine.export.scc.blockers', lambda *args, **kwargs: [])
     monkeypatch.setattr('engine.export.scc._canonical_case', lambda case, codes: case)
     path = tmp_path / 'codedb.sqlite'
     _synthetic_db(path)
     client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes(path)))
     case_id = client.post('/cases', json={'title': 'export'}).json()['id']
-    response = client.post(f'/cases/{case_id}/export', json={'draft': True})
+    return client, case_id
+
+
+def test_export_without_the_scc_form_is_503(tmp_path, monkeypatch, caplog):
+    monkeypatch.setattr('engine.export.scc.DEFAULT_FORM', tmp_path / 'missing-guide.pdf')
+    monkeypatch.setattr('engine.export.scc.BUNDLE_FORM', tmp_path / 'missing-bundle.pdf')
+    client, case_id = _export_client(tmp_path, monkeypatch)
+    with caplog.at_level(logging.ERROR, logger='engine.api'):
+        response = client.post(f'/cases/{case_id}/export', json={'draft': True})
     assert response.status_code == 503
-    assert response.json()['detail'] == 'PDF export is unavailable on this deployment: SCC form not configured'
+    assert response.json()['detail'] == FORM_NOT_FOUND_DETAIL
+    assert 'unavailable on this deployment' in caplog.text
+    assert str(tmp_path) not in response.text
+
+
+def test_mismatched_form_is_500_without_a_path(tmp_path, monkeypatch, caplog):
+    bad = tmp_path / 'wrong-form.pdf'
+    bad.write_bytes(b'%PDF-1.4 not the council form')
+    monkeypatch.setattr('engine.export.scc.DEFAULT_FORM', bad)
+    monkeypatch.setattr('engine.export.scc.BUNDLE_FORM', tmp_path / 'missing-bundle.pdf')
+    client, case_id = _export_client(tmp_path, monkeypatch)
+    with caplog.at_level(logging.ERROR, logger='engine.api'):
+        response = client.post(f'/cases/{case_id}/export', json={'draft': True})
+    assert response.status_code == 500
+    assert response.json()['detail'] == EXPORT_FAILED_DETAIL
+    assert str(bad) not in response.text
+    assert hashlib.sha256(bad.read_bytes()).hexdigest() not in response.text
+    assert str(bad) in caplog.text
 
 
 def _assert_search_limited(response):

@@ -30,7 +30,8 @@ from .text import fit, pdf_safe
 
 DEFAULT_FORM = Path(__file__).resolve().parents[2] / 'reference' / 'guides' / 'SCC-Variance-Form.pdf'
 BUNDLE_FORM = Path(__file__).resolve().parents[2] / 'codedb' / 'build' / 'SCC-Variance-Form.pdf'
-FORM_UNCONFIGURED = 'PDF export is unavailable on this deployment: SCC form not configured'
+FORM_NOT_FOUND_DETAIL = 'SCC variance form not found'
+EXPORT_FAILED_DETAIL = 'The SCC variance form could not be exported.'
 MAP_DIR = Path(__file__).parent / 'field_maps'
 CURRENT_MAP = 'scc_2026-10'
 MULTILINE = 1 << 12
@@ -97,7 +98,7 @@ def load_field_map(version: str = CURRENT_MAP) -> dict:
 def load_form(path: Path | str | None, fmap: dict) -> bytes:
     path = Path(path) if path else form_path()
     if not path.is_file():
-        raise FormNotFound(FORM_UNCONFIGURED)
+        raise FormNotFound(FORM_NOT_FOUND_DETAIL)
     data = path.read_bytes()
     digest = hashlib.sha256(data).hexdigest()
     if digest != fmap['sha256']:
