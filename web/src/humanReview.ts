@@ -98,9 +98,9 @@ export function professionalFlagLines(c: Pick<Case, "practiceOfEngineering" | "f
  */
 /** One line for the professional screen. The flag word is not repeated. */
 export function practiceFlagLine(flag: "yes" | "no" | "depends"): string {
-  if (flag === "yes") return "Practice of engineering: yes. A registered professional is indicated. This is not a licence decision.";
-  if (flag === "no") return "Practice of engineering: no. The screen did not indicate one.";
-  return "Practice of engineering: depends. The screen needs more facts. This is not a licence decision.";
+  if (flag === "yes") return "Practice of engineering is indicated. A registered professional is needed. This is not a licence decision.";
+  if (flag === "no") return "The screen did not indicate practice of engineering.";
+  return "More facts are needed before this screen can say whether practice of engineering applies. This is not a licence decision.";
 }
 
 export function practicePrompt(

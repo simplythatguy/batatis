@@ -80,10 +80,18 @@ test("Not sure is an open question and does not block Continue", () => {
   assert.match(letter, /does not decide whether the design complies or is safe/);
 });
 
+test("the Section D practice line does not repeat depends", () => {
+  const depends = practiceFlagLine("depends");
+  const yes = practiceFlagLine("yes");
+  const no = practiceFlagLine("no");
+  assert.equal(depends, "More facts are needed before this screen can say whether practice of engineering applies. This is not a licence decision.");
+  assert.doesNotMatch(depends, /depends/i);
+  assert.doesNotMatch(`${depends} ${yes} ${no}`, /depends\.\s*depends|yes\.\s*yes|no\.\s*no/i);
+  assert.doesNotMatch(yes, /Practice of engineering:\s*yes/i);
+  assert.doesNotMatch(no, /Practice of engineering:\s*no/i);
+});
+
 test("a yes asks for the professional and an unknown shows its question", () => {
-  assert.equal(practiceFlagLine("depends"), "Practice of engineering: depends. The screen needs more facts. This is not a licence decision.");
-  assert.doesNotMatch(practiceFlagLine("depends"), /depends\. depends/);
-  assert.doesNotMatch(practiceFlagLine("yes"), /yes\. yes/);
   let routed = reducer(emptyCase("contractor"), { type: "notePractice", value: true });
   routed = reducer(routed, {
     type: "answerScope",
