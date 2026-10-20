@@ -88,12 +88,19 @@ class MemorySpend:
 _memory = MemorySpend()
 _llm_window = SlidingWindow()
 _search_window = SlidingWindow()
+_spend = None
+_spend_lock = threading.Lock()
 
 
 def reset_for_tests() -> None:
+    global _spend
     _memory.reset()
     _llm_window.reset()
     _search_window.reset()
+    with _spend_lock:
+        if _spend is not None:
+            _spend.close()
+        _spend = None
 
 
 def live_enabled() -> bool:
@@ -112,10 +119,15 @@ def estimate_usd(model: str, input_tokens: int, output_tokens: int) -> Decimal:
 
 
 def _ledger():
-    if (os.environ.get('BATATIS_STORE') or '').strip().lower() == 'postgres':
-        from .store_postgres import PostgresCaseStore
-        return PostgresCaseStore()
-    return _memory
+    """Memory cap for the file store. One Postgres connection, created once, when the store is postgres."""
+    global _spend
+    if (os.environ.get('BATATIS_STORE') or '').strip().lower() != 'postgres':
+        return _memory
+    with _spend_lock:
+        if _spend is None:
+            from .store_postgres import PostgresSpend
+            _spend = PostgresSpend()
+        return _spend
 
 
 def _reserve(ledger, usd: Decimal, cap: Decimal) -> bool:

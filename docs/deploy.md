@@ -36,11 +36,11 @@ Set these on the Vercel project for Preview and Production. Leave the project Ro
 
 | Variable | Where | Purpose |
 | --- | --- | --- |
-| `BATATIS_STORE` | engine runtime | `file` locally (default). `postgres` on Vercel. |
+| `BATATIS_STORE` | engine runtime | `file` locally (default). `postgres` on Vercel. If `VERCEL` is set and this is unset or `file`, the process refuses to start. |
 | `DATABASE_URL` | engine runtime | Neon (or any Postgres) URL. `sslmode=require` is added when the URL omits it. |
 | `BATATIS_LIVE` | engine runtime | Unset or anything other than `1` keeps the offline path. Live calls also need `OPENAI_API_KEY`. |
 | `OPENAI_API_KEY` | engine runtime, sensitive | Server only. Do not use a `VITE_` name. The process never logs the value. |
-| `BATATIS_DAILY_SPEND_CAP_USD` | engine runtime | Default `5`. Over the cap, model calls return the offline path with `source: "offline-cap"`. |
+| `BATATIS_DAILY_SPEND_CAP_USD` | engine runtime | Default `5`. Over the cap, model calls return the offline path with `source: "offline-cap"`. The cap is shared across instances only when `BATATIS_STORE=postgres`. The file store keeps it in memory for that process. |
 | `BATATIS_LLM_RATE_LIMIT` | engine runtime | Default `20` live model calls per IP per window. |
 | `BATATIS_LLM_RATE_WINDOW_SECONDS` | engine runtime | Default `600`. |
 | `BATATIS_SEARCH_RATE_LIMIT` | engine runtime | Default `30` code searches per IP per window. |
@@ -53,7 +53,7 @@ Set these on the Vercel project for Preview and Production. Leave the project Ro
 
 Local file runs ignore `DATABASE_URL`. Uploaded PDF bytes go in `case_files` (Postgres `bytea`, or sqlite blob locally), capped at 4 MB. A larger PDF is HTTP 413 with `{"detail": "PDF too large: the limit is 4 MB. Try compressing the file or splitting it."}`.
 
-Code JSON responses keep at most 25 words of provision text. Search returns at most 20 hits. That is not a compliance determination.
+`GET /code/*` and `POST /section-c` keep at most 25 words of every string except ids, citations, enums, and URLs. Search returns at most 20 hits. That is not a compliance determination.
 
 ## Preview
 

@@ -4,8 +4,17 @@ from __future__ import annotations
 import re
 
 WORD_LIMIT = 25
-CODE_TEXT_KEYS = frozenset({'text', 'text_raw', 'function_text', 'objective_text', 'application_note'})
-CODE_LIST_KEYS = frozenset({'intents'})
+# Identifiers, citations, enums, and URLs stay whole. Every other string is clipped.
+SAFE_KEYS = frozenset({
+    'id', 'provision_id', 'parent_id', 'case_id', 'doc', 'note_id', 'article_id',
+    'table_id', 'root_provision', 'related_root', 'sort_key', 'code',
+    'citation',
+    'division', 'level', 'kind', 'status', 'type', 'source',
+    'attribution_status', 'intent_comparison', 'related_root_method', 'root_method',
+    'url', 'href',
+    'title', 'article_title', 'objective', 'function', 'bracket', 'label',
+    'clause', 'subclause',
+})
 _WORD = re.compile(r'\S+')
 
 
@@ -24,14 +33,12 @@ def snippet(text: str | None, limit: int = WORD_LIMIT) -> str | None:
 
 
 def clip_tree(node, key: str | None = None):
-    """Truncate provision text fields. Other strings (facts, gap messages) stay whole."""
+    """Clip every string to 25 words. Allowlisted keys (ids, cites, enums, urls) stay whole."""
     if isinstance(node, str):
-        if key in CODE_TEXT_KEYS:
-            return snippet(node) or ''
-        return node
+        if key in SAFE_KEYS:
+            return node
+        return snippet(node) or ''
     if isinstance(node, list):
-        if key in CODE_LIST_KEYS and all(isinstance(item, str) for item in node):
-            return [snippet(item) or '' for item in node]
         return [clip_tree(item, key) for item in node]
     if isinstance(node, dict):
         return {name: clip_tree(value, name) for name, value in node.items()}

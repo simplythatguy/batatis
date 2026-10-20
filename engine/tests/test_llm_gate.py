@@ -50,3 +50,31 @@ def test_per_ip_rate_limit(monkeypatch):
     assert authorize(max_input_tokens=1, max_output_tokens=1, client_ip='203.0.113.1').allowed
     assert authorize(max_input_tokens=1, max_output_tokens=1, client_ip='203.0.113.1').source == 'rate-limited'
     assert authorize(max_input_tokens=1, max_output_tokens=1, client_ip='203.0.113.2').allowed
+
+
+def test_postgres_spend_connection_is_created_once(monkeypatch):
+    monkeypatch.setenv('BATATIS_STORE', 'postgres')
+    monkeypatch.setenv('BATATIS_LIVE', '1')
+    monkeypatch.setenv('OPENAI_API_KEY', 'sk-test-secret')
+    monkeypatch.setenv('BATATIS_DAILY_SPEND_CAP_USD', '5')
+    created = []
+
+    class Ledger:
+        def __init__(self):
+            created.append(self)
+
+        def try_reserve_spend(self, usd, cap):
+            return True
+
+        def adjust_spend(self, delta):
+            return None
+
+        def close(self):
+            return None
+
+    monkeypatch.setattr('engine.store_postgres.PostgresSpend', Ledger)
+    reset_for_tests()
+    assert authorize(max_input_tokens=10, max_output_tokens=10).allowed
+    record(model='gpt-4.1-mini', input_tokens=1, output_tokens=1, reserved_usd=0)
+    assert authorize(max_input_tokens=10, max_output_tokens=10).allowed
+    assert len(created) == 1

@@ -2,7 +2,7 @@
 
 Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind).
 
-These are the routes the engine serves. There is no `POST /cases/{id}/files`.
+These are the routes the engine serves. `POST /cases/{case_id}/files` stores the PDF in the case database.
 
 ## Routes
 
@@ -10,9 +10,10 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | --- | --- |
 | `POST /cases` | `201` Case. Body is optional: `title`, `jurisdiction` (`id`, `name`, `authority`). |
 | `GET /cases/{case_id}` | Case, or `404` with detail `case not found`. |
-| `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. |
+| `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. `409` detail `case was updated concurrently` when the stored version changed during the write. |
+| `POST /cases/{case_id}/files` | `201` `{ "id", "name", "size", "content_type" }`. Body is raw `application/pdf` (optional header `x-filename`) or multipart with one file part. Bytes go in `case_files`. `404` detail `case not found`. `413` detail `PDF too large: the limit is 4 MB. Try compressing the file or splitting it.` `415` detail `only PDF files are accepted`. |
 | `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`. |
-| `GET /code/search` | Query `q`, `division` (`A` `B` or `C`, default `B`), `limit` (1–100, default 20). Hits as returned: `id`, `division`, `level`, `article_title`, `title`, `text`, `citation`. |
+| `GET /code/search` | Query `q`, `division` (`A` `B` or `C`, default `B`), `limit` (1–20, default 20). `422` when `limit` is 21 or otherwise outside 1–20. `429` detail `code search is rate-limited`. Hits as returned: `id`, `division`, `level`, `article_title`, `title`, `text`, `citation`. |
 | `GET /code/{provision_id}` | Query `division` optional. The codedb provision record, or `404` detail `provision not found`. `400` when the id is invalid or the division is ambiguous. |
 | `POST /section-c` | Body `{ "provisions": ["…"] }`. `SectionCRow` list. `404` when a provision is missing from codedb. `400` on an invalid id. |
 | `POST /cases/{case_id}/section-d` | Body optional `{ "provisions": ["…"] }`. `{ "items", "notices" }`. Writes the case. |
@@ -29,6 +30,14 @@ A fact's `source.type` is `code`, `file`, `user_text`, `drawing`, or `user_click
 Gap `severity` is `blocking` or `warning`.
 
 The fixed 404 detail strings are `case not found` and `provision not found`.
+
+### Uploads
+
+`POST /cases/{case_id}/files` is the upload this service serves. The PDF is stored in `case_files` on the case database, with a 4 MB cap. The body may be a raw `application/pdf` or multipart. A function disk is ephemeral, and Vercel stops request bodies at 4.5 MB, so this database copy is the route. #21 adopts it.
+
+### Code text
+
+JSON from `GET /code/search`, `GET /code/{provision_id}`, and `POST /section-c` keeps at most 25 words of every string. Ids, citations, enums, and URLs stay whole. That includes provision `text`, intent `notes`, and `clauses`, including strings nested in lists. Case, gap, and Section D JSON are not clipped. A clipped field is not a finding that a design complies.
 
 ### Section D plan item
 
@@ -190,8 +199,11 @@ A live response copies the citation string the code database returns. The placeh
 | --- | --- |
 | 404 | Fixed detail strings are `case not found` and `provision not found`. Section C, the plan, and this issues route can also 404 with the text of a missing codedb provision. |
 | 400 | Invalid provision id, or an ambiguous division on `GET /code/{provision_id}`. |
-| 409 | Export is blocked. Detail is the object under Routes. |
-| 422 | A `proposed` fact was sent as `confirmed`, or `GET /ccmc/search` rejected the query. |
+| 409 | Export is blocked. Detail is the object under Routes. `POST /cases/{case_id}/facts` also returns 409 with detail `case was updated concurrently`. |
+| 413 | `POST /cases/{case_id}/files` when the PDF is over 4 MB. Detail is `PDF too large: the limit is 4 MB. Try compressing the file or splitting it.` |
+| 415 | `POST /cases/{case_id}/files` when the body is not a PDF. Detail is `only PDF files are accepted`. |
+| 422 | A `proposed` fact was sent as `confirmed`, `GET /code/search` `limit` is outside 1–20 (21 is 422), or `GET /ccmc/search` rejected the query. |
+| 429 | `GET /code/search` when the caller is over the search rate limit. Detail is `code search is rate-limited`. |
 | 500 | Export failed for a reason other than a missing form. |
-| 503 | The code database file is absent. Body is exactly `{"detail": "code database not found"}`. Raised only by `CodeDbMissing` in `engine/codes.py`. Not a `FileNotFoundError`. The body has no server path. A missing blank form and an unavailable CCMC registry are also HTTP 503, and their detail is that error's own text. |
+| 503 | The code database file is absent. Body is exactly `{"detail": "code database not found"}`. Raised only by `CodeDbMissing` in `engine/codes.py`. Not a `FileNotFoundError`. The body has no server path. A missing blank form and an unavailable CCMC registry are also HTTP 503, and their detail is that error's own text. An unreachable case database is HTTP 503 with detail `case store unavailable`, and that body does not include the server address. |
 | 200 | An unknown Division B token on this issues route does not 404. It returns `provision: null` and a question. |

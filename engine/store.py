@@ -45,8 +45,20 @@ def default_path() -> Path:
     return Path(os.environ.get('BATATIS_CASES') or DEFAULT_PATH)
 
 
+def assert_durable_when_hosted() -> None:
+    """A Vercel function disk is ephemeral. Refuse the file store instead of dropping cases."""
+    if not os.environ.get('VERCEL'):
+        return
+    kind = (os.environ.get('BATATIS_STORE') or '').strip().lower()
+    if kind in ('', 'file', 'sqlite'):
+        raise RuntimeError(
+            'Refusing to start: VERCEL is set and BATATIS_STORE is not postgres. '
+            'Set BATATIS_STORE=postgres and DATABASE_URL. A file store on this host is an ephemeral disk.')
+
+
 def open_store(path: Path | str | None = None) -> CaseBackend:
     """File backend unless BATATIS_STORE=postgres, which also needs DATABASE_URL."""
+    assert_durable_when_hosted()
     kind = (os.environ.get('BATATIS_STORE') or 'file').strip().lower()
     if kind in ('', 'file', 'sqlite'):
         return CaseStore(path)

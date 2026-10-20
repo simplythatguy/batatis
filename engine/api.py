@@ -1,8 +1,10 @@
 """HTTP interface for the engine. Run: uvicorn engine.api:app --reload"""
 from __future__ import annotations
 
+import psycopg
 from fastapi import FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from codedb import AmbiguousProvisionError
@@ -13,7 +15,7 @@ from .http_guard import HttpGuard
 from .llm_gate import client_ip_from, search_allowed
 from .models import Case, Fact, Jurisdiction, SectionCRow
 from .section_c import section_c_rows
-from .store import CaseStore, FileTooLarge, VersionConflict, open_store
+from .store import CaseStore, FileTooLarge, VersionConflict, assert_durable_when_hosted, open_store
 from .uploads import PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL
 
 
@@ -72,6 +74,8 @@ def _pdf_from_body(body: bytes, content_type: str, filename: str | None) -> tupl
 
 
 def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> FastAPI:
+    if store is None:
+        assert_durable_when_hosted()
     app = FastAPI(title='Batatis engine')
     app.add_middleware(CORSMiddleware, allow_origin_regex=r'http://(localhost|127\.0\.0\.1)(:\d+)?',
                        allow_methods=['*'], allow_headers=['*'])
@@ -173,12 +177,15 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         except ValueError as e:
             raise HTTPException(400, f'invalid provision id: {e}')
 
-    from fastapi.responses import JSONResponse
-
     @app.exception_handler(CodeDbMissing)
     def missing_codedb(_request, _exc: CodeDbMissing):
         # Not FileNotFoundError. The body is fixed and carries no filesystem path.
         return JSONResponse(status_code=503, content={'detail': 'code database not found'})
+
+    @app.exception_handler(psycopg.OperationalError)
+    def store_unreachable(_request, _exc: psycopg.OperationalError):
+        # The exception text can name the host. The response does not.
+        return JSONResponse(status_code=503, content={'detail': 'case store unavailable'})
 
     app.include_router(__import__('engine.routes_case', fromlist=['create_router']).create_router(cases, code))
     return app

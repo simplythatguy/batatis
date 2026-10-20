@@ -1,4 +1,4 @@
-"""ASGI guard: strip /api, tag robots, and clip provision text in JSON bodies."""
+"""ASGI guard: strip /api, tag robots, and clip code-response text."""
 from __future__ import annotations
 
 import json
@@ -11,6 +11,12 @@ def _header(headers, name: bytes) -> bytes:
         if key.lower() == name:
             return value
     return b''
+
+
+def _code_response(path: str) -> bool:
+    """Provision JSON only. Case, gap, and Section D bodies stay whole."""
+    path = path.split('?', 1)[0]
+    return path.startswith('/code/') or path == '/section-c' or path.startswith('/section-c/')
 
 
 class HttpGuard:
@@ -28,6 +34,8 @@ class HttpGuard:
             raw = scope.get('raw_path') or b''
             if raw.startswith(b'/api'):
                 scope['raw_path'] = raw[4:] or b'/'
+            path = scope['path']
+        clip_body = _code_response(path)
         started: dict = {}
         chunks: list[bytes] = []
 
@@ -44,7 +52,7 @@ class HttpGuard:
                 return
             raw = b''.join(chunks)
             headers = list(started.get('headers') or [])
-            if b'application/json' in _header(headers, b'content-type'):
+            if clip_body and b'application/json' in _header(headers, b'content-type'):
                 try:
                     raw = json.dumps(clip_tree(json.loads(raw))).encode()
                 except (ValueError, UnicodeError):

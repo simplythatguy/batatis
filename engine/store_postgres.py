@@ -6,6 +6,7 @@ when the URL does not already set it, which is what Neon expects.
 from __future__ import annotations
 
 import os
+import threading
 import uuid
 from contextlib import contextmanager
 from decimal import Decimal
@@ -83,13 +84,10 @@ class PostgresCaseStore:
         payload = Jsonb(case.model_dump(mode='json'))
         with self._conn() as con:
             if expected_version is None:
-                row = con.execute('SELECT version FROM cases WHERE id=%s', (case.id,)).fetchone()
-                if row is None:
-                    con.execute('INSERT INTO cases (id, data, version, updated_at) VALUES (%s, %s, 1, %s)',
-                                (case.id, payload, case.updated_at))
-                else:
-                    con.execute('UPDATE cases SET data=%s, version=version+1, updated_at=%s WHERE id=%s',
-                                (payload, case.updated_at, case.id))
+                con.execute('INSERT INTO cases (id, data, version, updated_at) VALUES (%s, %s, 1, %s) '
+                            'ON CONFLICT (id) DO UPDATE SET data=EXCLUDED.data, '
+                            'version=cases.version+1, updated_at=EXCLUDED.updated_at',
+                            (case.id, payload, case.updated_at))
                 return case
             if expected_version == 0:
                 try:
@@ -155,3 +153,45 @@ class PostgresCaseStore:
         with self._conn() as con:
             con.execute('INSERT INTO spend (day, usd) VALUES (CURRENT_DATE, 0) ON CONFLICT (day) DO NOTHING')
             con.execute('UPDATE spend SET usd = usd + %s WHERE day = CURRENT_DATE', (delta,))
+
+
+class PostgresSpend:
+    """One connection and one CREATE TABLE for the daily spend cap.
+
+    The case store still opens a connection per operation. The LLM gate must not.
+    """
+
+    def __init__(self, url: str | None = None):
+        import psycopg
+        self._psycopg = psycopg
+        self.url = url or database_url()
+        self._lock = threading.Lock()
+        self._con = self._psycopg.connect(self.url, autocommit=False, connect_timeout=10)
+        self._con.execute('CREATE TABLE IF NOT EXISTS spend (day date PRIMARY KEY, usd numeric NOT NULL)')
+        self._con.commit()
+
+    def close(self) -> None:
+        with self._lock:
+            self._con.close()
+
+    def try_reserve_spend(self, usd: Decimal, cap: Decimal) -> bool:
+        with self._lock:
+            try:
+                self._con.execute('INSERT INTO spend (day, usd) VALUES (CURRENT_DATE, 0) ON CONFLICT (day) DO NOTHING')
+                row = self._con.execute('UPDATE spend SET usd = usd + %s WHERE day = CURRENT_DATE AND usd + %s <= %s '
+                                        'RETURNING usd', (usd, usd, cap)).fetchone()
+                self._con.commit()
+            except Exception:
+                self._con.rollback()
+                raise
+        return row is not None
+
+    def adjust_spend(self, delta: Decimal) -> None:
+        with self._lock:
+            try:
+                self._con.execute('INSERT INTO spend (day, usd) VALUES (CURRENT_DATE, 0) ON CONFLICT (day) DO NOTHING')
+                self._con.execute('UPDATE spend SET usd = usd + %s WHERE day = CURRENT_DATE', (delta,))
+                self._con.commit()
+            except Exception:
+                self._con.rollback()
+                raise
