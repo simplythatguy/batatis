@@ -14,6 +14,7 @@
  * invent article numbers, listings, test results, professional opinions, or
  * stills. It does not upload a PDF, click Try an example, or open Accuracy.
  */
+import { existsSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const LOWER = {
@@ -829,4 +830,294 @@ export async function runWalkthrough(page, opts) {
   return [shot1Result, shot2Result, shot3Result, shot4Result, shot5Result, shot6Result, shot7Result].sort(
     (a, b) => Number(a.id) - Number(b.id),
   );
+}
+
+/** Deck slots from the screenshot list. Filenames are the PNG basenames. */
+export const DECK_STILLS = [
+  { id: "shot-s08-roles", file: "shot-s08-roles.png" },
+  { id: "shot-s02-describe", file: "shot-s02-describe.png" },
+  { id: "shot-s03-not-sure", file: "shot-s03-not-sure.png" },
+  { id: "shot-s04-search", file: "shot-s04-search.png" },
+  { id: "shot-s04-benchmark", file: "shot-s04-benchmark.png" },
+  { id: "shot-s05-eval", file: "shot-s05-eval.png" },
+  { id: "shot-s06-section-d", file: "shot-s06-section-d.png" },
+  { id: "shot-s07-officer", file: "shot-s07-officer.png" },
+  { id: "shot-s09-locked", file: "shot-s09-locked.png" },
+  { id: "shot-s09-scc-form", file: "shot-s09-scc-form.png" },
+];
+
+function pngSize(buffer) {
+  if (buffer.length < 24 || buffer.readUInt32BE(12) !== 0x49484452) return { width: 0, height: 0 };
+  return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) };
+}
+
+async function saveStill(page, api, lower, filePath) {
+  const label = exampleLabel(lower);
+  const masked = await maskRealAddress(page, api);
+  if (masked.still) {
+    return { ok: false, reason: `${REAL_ADDRESS} is still on screen. The still was not saved.` };
+  }
+  await overlay(page, { caption: "", lower: label });
+  await sleep(300);
+  const buffer = await page.screenshot({ type: "png" });
+  const size = pngSize(buffer);
+  if (size.width !== 1440 || size.height !== 900) {
+    return { ok: false, reason: `Screenshot was ${size.width}×${size.height}, not 1440×900.` };
+  }
+  writeFileSync(filePath, buffer);
+  return { ok: true, width: size.width, height: size.height };
+}
+
+export async function runDeckStills(page, opts) {
+  const outDir = opts.outDir;
+  const api = {
+    holdMs: 400,
+    framesDir: outDir,
+    step: { id: "0", title: "still" },
+    notes: [],
+    frames: [],
+    state: { sawWho: false, caseOpen: false, caseC: false, caseA: false },
+  };
+  const byId = new Map();
+
+  function drop(id) {
+    const slot = DECK_STILLS.find((item) => item.id === id);
+    const filePath = join(outDir, slot.file);
+    if (existsSync(filePath)) rmSync(filePath);
+  }
+
+  function finish(id, outcome) {
+    const slot = DECK_STILLS.find((item) => item.id === id);
+    if (outcome.status !== "captured") drop(id);
+    byId.set(id, {
+      id,
+      file: slot.file,
+      notes: outcome.notes || [],
+      ...outcome,
+    });
+  }
+
+  async function capture(id, lower) {
+    const slot = DECK_STILLS.find((item) => item.id === id);
+    const saved = await saveStill(page, api, lower, join(outDir, slot.file));
+    const notes = [...api.notes];
+    api.notes.length = 0;
+    if (!saved.ok) return finish(id, { status: "skipped", reason: saved.reason, notes });
+    return finish(id, { status: "captured", width: saved.width, height: saved.height, notes });
+  }
+
+  function skip(id, reason) {
+    const notes = [...api.notes];
+    api.notes.length = 0;
+    return finish(id, { status: "skipped", reason, notes });
+  }
+
+  try {
+    await goHash(page, "/");
+    const who = h1(page, "Who are you?");
+    const roles = ["Manufacturer", "General contractor", "Homebuilder"];
+    const missingRole = [];
+    if (await visible(who, 2000)) {
+      api.state.sawWho = true;
+      for (const label of roles) {
+        if (!(await visible(roleButton(page, label), 1000))) missingRole.push(label);
+      }
+    }
+    if (!api.state.sawWho) {
+      skip("shot-s08-roles", "Who are you? is not on this build.");
+    } else if (missingRole.length) {
+      skip("shot-s08-roles", `Role buttons not on screen: ${missingRole.join(", ")}.`);
+    } else {
+      api.notes.push("Try an example was left unclicked.");
+      await capture("shot-s08-roles", ALL_LOWER);
+    }
+
+    const filledC = api.state.sawWho ? await fillIntake(page, api, CASES.C) : { ok: false, reason: "Who are you? is not on this build, so Case C was not pasted." };
+    if (!filledC.ok) {
+      skip("shot-s02-describe", filledC.reason);
+    } else {
+      api.state.caseC = true;
+      const body = await page.locator("main").innerText();
+      if (!body.includes("0000 Example Crescent")) {
+        skip("shot-s02-describe", "The Case C paragraph is not in the description. The still was not saved.");
+      } else {
+        const gaps = ["Owner", "Mailing address", "Legal description"].filter((label) => body.includes(label));
+        api.notes.push(gaps.length ? `Missing-item text on screen: ${gaps.join(", ")}.` : "Owner, mailing address, and legal description were not named on this screen.");
+        if (!body.includes("Review gaps")) {
+          skip("shot-s02-describe", "Review gaps is not on this screen. The describe still was not saved.");
+        } else {
+          const summary = page.locator("summary").filter({ hasText: "Review gaps" }).first();
+          if (await visible(summary, 500)) await summary.scrollIntoViewIfNeeded().catch(() => {});
+          await capture("shot-s02-describe", CASES.C.lower);
+        }
+      }
+    }
+
+    if (!api.state.caseC) {
+      skip("shot-s04-search", "Case C is not open, so the bedroom-window search was not run.");
+    } else {
+      if (!(await visible(h1(page, "Code check"), 400)) && !(await goCodeCheck(page))) {
+        skip("shot-s04-search", "Code check is not on this build.");
+      } else {
+        await answerNotSure(page, api);
+        const search = await searchDivisionB(page, "bedroom window unobstructed", "9.9.10.1.(2)");
+        api.notes.push(search.note);
+        if (!search.added) {
+          skip(
+            "shot-s04-search",
+            "Search did not show a returned row for 9.9.10.1.(2). No article id was typed in, and the Section C lookup was not drawn.",
+          );
+        } else if (!(await goSectionC(page, api))) {
+          skip("shot-s04-search", "Section C is not on this build, so the lookup still was not saved.");
+        } else {
+          const row = page.getByRole("row").filter({ hasText: search.added }).first();
+          if (!(await visible(row, 1500))) {
+            skip("shot-s04-search", `Section C has no row for ${search.added}. The lookup still was not drawn.`);
+          } else {
+            await row.scrollIntoViewIfNeeded().catch(() => {});
+            await capture("shot-s04-search", CASES.C.lower);
+          }
+        }
+      }
+    }
+
+    skip(
+      "shot-s04-benchmark",
+      "The ranked list and benchmark card are not in this app build. The still was not drawn.",
+    );
+    skip(
+      "shot-s05-eval",
+      "The eval still is not a screen in this build. #/accuracy was not opened, and the figures were not drawn.",
+    );
+
+    if (!api.state.caseC) {
+      skip("shot-s06-section-d", "Case C is not open, so Section D was not captured.");
+    } else if (!(await goApplication(page, "Section D"))) {
+      skip("shot-s06-section-d", "Section D is not an application tab on this build.");
+    } else {
+      const heading = page.getByRole("heading", { name: "Section D and professional screening" }).first();
+      if (!(await visible(heading, 5000))) {
+        skip("shot-s06-section-d", "Section D and professional screening is not on this build.");
+      } else {
+        const limit = page.getByText("This tool does not write the evidence or the professional opinion.").first();
+        if (await visible(limit, 800)) {
+          api.notes.push("The on-screen limit line is visible.");
+          await limit.scrollIntoViewIfNeeded().catch(() => {});
+        } else {
+          api.notes.push(
+            "The sentence \"This tool does not write the evidence or the professional opinion.\" is not on this screen. It was not added.",
+          );
+          await heading.scrollIntoViewIfNeeded().catch(() => {});
+        }
+        await capture("shot-s06-section-d", CASES.C.lower);
+      }
+    }
+
+    if (!api.state.caseC) {
+      skip("shot-s09-locked", "Case C is not open, so the application still was not captured.");
+    } else if (!(await goApplication(page))) {
+      skip("shot-s09-locked", "The application screen is not on this build.");
+    } else {
+      await openReviewGaps(page, api);
+      const check = page.getByRole("button", { name: /Check completeness|Run pre-flight/ }).first();
+      if (!(await visible(check, 800))) {
+        skip("shot-s09-locked", "Check completeness is not on this build. The locked still was not drawn.");
+      } else if (!(await check.isDisabled())) {
+        skip(
+          "shot-s09-locked",
+          "Check completeness is enabled while gaps are open. The disabled control is not on this build, and the still was not faked.",
+        );
+      } else {
+        api.notes.push("Check completeness is disabled. It was not clicked. No PDF was downloaded.");
+        await check.scrollIntoViewIfNeeded().catch(() => {});
+        await capture("shot-s09-locked", CASES.C.lower);
+      }
+    }
+
+    if (!api.state.sawWho) {
+      skip("shot-s03-not-sure", "Who are you? is not on this build, so the manufacturer case cannot be started.");
+    } else if (!(await resetCase(page, api))) {
+      skip("shot-s03-not-sure", "Reset case is not available, so the Not sure still was not captured.");
+    } else {
+      const filledA = await fillIntake(page, api, CASES.A);
+      if (!filledA.ok) {
+        skip("shot-s03-not-sure", filledA.reason);
+      } else {
+        api.state.caseA = true;
+        if (!(await goCodeCheck(page))) {
+          skip("shot-s03-not-sure", "Code check did not open for the manufacturer case.");
+        } else {
+          await answerNotSure(page, api);
+          const cards = page.locator("article").filter({ hasText: "Your words" });
+          const count = await cards.count();
+          let pressed = 0;
+          for (let i = 0; i < count; i += 1) {
+            const button = cards.nth(i).getByRole("button", { name: "Not sure", exact: true });
+            if ((await button.getAttribute("aria-pressed").catch(() => "")) === "true") pressed += 1;
+          }
+          if (pressed < 2) {
+            skip(
+              "shot-s03-not-sure",
+              `Not sure is pressed on ${pressed} Your words card(s), not two. The still was not saved.`,
+            );
+          } else {
+            await cards.first().scrollIntoViewIfNeeded().catch(() => {});
+            await capture("shot-s03-not-sure", CASES.A.lower);
+          }
+        }
+      }
+    }
+
+    if (!api.state.caseOpen) {
+      skip("shot-s07-officer", "No case is open, so Officer review does not show the planted package.");
+    } else {
+      const nav = navLink(page, "Officer review");
+      if (!(await visible(nav, 1500))) {
+        skip("shot-s07-officer", "Officer review is not in the navigation.");
+      } else {
+        const href = (await nav.getAttribute("href")) || "#/officer";
+        await page.evaluate((next) => {
+          location.hash = next.startsWith("#") ? next : `#${next}`;
+        }, href);
+        await sleep(400);
+        if (!(await visible(h1(page, "Officer review"), 8000))) {
+          skip("shot-s07-officer", "Officer review did not open.");
+        } else if (await visible(page.getByRole("heading", { name: "Not built yet" }), 800)) {
+          skip("shot-s07-officer", "Officer review is the Not built yet placeholder.");
+        } else if (await visible(page.getByText("does not open the sample package").first(), 800)) {
+          skip("shot-s07-officer", "Officer review says this application does not open the sample package.");
+        } else {
+          const before = namedButton(page, ["Before fixes", "Original example"]);
+          if (!(await visible(before, 8000))) {
+            skip("shot-s07-officer", "Officer review opened without a package version control.");
+          } else {
+            await before.click();
+            await waitOfficerLoaded(page);
+            const after = namedButton(page, ["After fixes", "Updated example"]);
+            if (await visible(after, 800)) {
+              api.notes.push(`Version controls on screen: ${(await before.innerText()).trim()}, ${(await after.innerText()).trim()}.`);
+              await after.click();
+              await waitOfficerLoaded(page);
+            }
+            const copy = namedButton(page, ["Copy request", "Copy example request"]);
+            if (await visible(copy, 800)) await copy.scrollIntoViewIfNeeded().catch(() => {});
+            else api.notes.push("Copy request is not on this screen.");
+            await capture("shot-s07-officer", LOWER.officer);
+          }
+        }
+      }
+    }
+
+    skip(
+      "shot-s09-scc-form",
+      "The filled SCC form is an engine PDF. Check completeness was not clicked, and this run does not call the engine, so the form was not captured.",
+    );
+  } catch (error) {
+    const reason = `Stills stopped: ${error instanceof Error ? error.message : String(error)}`;
+    for (const slot of DECK_STILLS) {
+      if (!byId.has(slot.id)) finish(slot.id, { status: "skipped", reason, notes: [] });
+    }
+  }
+
+  return DECK_STILLS.map((slot) => byId.get(slot.id) || { id: slot.id, file: slot.file, status: "skipped", reason: "Not reached.", notes: [] });
 }

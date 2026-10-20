@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 import { diffScript, parseDemoScript } from "./sync.mjs";
-import { STEPS } from "./steps.mjs";
+import { DECK_STILLS, STEPS } from "./steps.mjs";
 
 const REAL_ADDRESS_GUARD = "11821 73 Avenue NW";
 
@@ -38,6 +38,27 @@ const SCRIPT_EXCERPT = `
 ### Shot 7 — Authority, gaps still open (0:16)
 - **Route:** \`#/describe\` for the authority select, then \`#/application\`
 `;
+
+const DECK_FILES = [
+  "shot-s08-roles.png",
+  "shot-s02-describe.png",
+  "shot-s03-not-sure.png",
+  "shot-s04-search.png",
+  "shot-s04-benchmark.png",
+  "shot-s05-eval.png",
+  "shot-s06-section-d.png",
+  "shot-s07-officer.png",
+  "shot-s09-locked.png",
+  "shot-s09-scc-form.png",
+];
+
+test("deck still filenames match the screenshot slot list", () => {
+  assert.deepEqual(
+    DECK_STILLS.map((slot) => slot.file),
+    DECK_FILES,
+  );
+  assert.equal(new Set(DECK_STILLS.map((slot) => slot.id)).size, DECK_STILLS.length);
+});
 
 test("recorder steps match the 7-shot demo script", () => {
   assert.deepEqual(

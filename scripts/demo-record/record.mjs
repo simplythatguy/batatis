@@ -16,7 +16,7 @@ import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright-core";
-import { STEPS, runWalkthrough } from "./steps.mjs";
+import { STEPS, runDeckStills, runWalkthrough } from "./steps.mjs";
 import { diffScript } from "./sync.mjs";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -26,6 +26,7 @@ function parseArgs(argv) {
     checkScript: false,
     strict: false,
     engine: false,
+    stills: false,
     holdMs: 1600,
     web: null,
     branch: null,
@@ -44,6 +45,7 @@ function parseArgs(argv) {
     if (arg === "--check-script") out.checkScript = true;
     else if (arg === "--strict") out.strict = true;
     else if (arg === "--engine") out.engine = true;
+    else if (arg === "--stills") out.stills = true;
     else if (arg === "--web") out.web = next();
     else if (arg === "--branch") out.branch = next();
     else if (arg === "--out") out.out = next();
@@ -65,13 +67,15 @@ const HELP = `Record a Batatis walkthrough mp4.
   ./scripts/record-demo.sh --web <path-to-web>
   ./scripts/record-demo.sh --check-script
   ./scripts/record-demo.sh --strict
+  ./scripts/record-demo.sh --stills --branch <git-ref>
 
 Options
-  --out <dir>       Output directory (default artifacts/demo)
+  --out <dir>       Output directory (default artifacts/demo, or artifacts/deck-stills with --stills)
   --hold <ms>       Pause on each recorded shot (default 1600)
   --base <url>      Record an app that is already running
   --script <file>   Shot list to diff (default docs/demo/script.md)
-  --strict          Exit non-zero unless all seven shots are recorded
+  --stills          Write the deck PNGs at 1440×900 and skip the mp4
+  --strict          Exit non-zero unless every shot or still is captured
   --engine          Acknowledge an engine already listening on port 8000
 `;
 
@@ -287,6 +291,17 @@ function scriptReport(scriptPath) {
   };
 }
 
+function printStills(results) {
+  const captured = results.filter((slot) => slot.status === "captured");
+  const skipped = results.filter((slot) => slot.status !== "captured");
+  console.log(`\nCaptured ${captured.length} of ${results.length} deck stills.`);
+  for (const slot of captured) console.log(`  captured  ${slot.file}`);
+  for (const slot of skipped) {
+    console.log(`  skipped   ${slot.file}`);
+    console.log(`            ${slot.reason}`);
+  }
+}
+
 function printReport(results) {
   const recorded = results.filter((step) => step.status === "recorded");
   const skipped = results.filter((step) => step.status !== "recorded");
@@ -347,6 +362,66 @@ async function convertMp4(webm, mp4, trimSeconds) {
   return { duration, codec, width: Number(width), height: Number(height) };
 }
 
+async function captureDeckStills({ args, outDir, base, webDir, gitInfo, engine, sync }) {
+  const browser = await chromium.launch({
+    executablePath: chromePath(),
+    args: ["--no-sandbox", "--disable-dev-shm-usage"],
+  });
+  try {
+    const context = await browser.newContext({
+      viewport: { width: 1440, height: 900 },
+      deviceScaleFactor: 1,
+      colorScheme: "dark",
+    });
+    try {
+      await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+      const page = await context.newPage();
+      page.setDefaultTimeout(8000);
+      const pageErrors = [];
+      const downloads = [];
+      page.on("pageerror", (error) => pageErrors.push(error.message));
+      page.on("download", (download) => downloads.push(download.suggestedFilename()));
+      await blockEngineAndModels(page);
+      await page.goto(`${base.replace(/\/$/, "")}/?reset`, { waitUntil: "domcontentloaded", timeout: 30000 });
+      await h1Ready(page);
+      await page.evaluate(() => document.fonts?.ready);
+      const results = await runDeckStills(page, { outDir });
+      const log = {
+        recordedAt: new Date().toISOString(),
+        mode: "stills",
+        viewport: { width: 1440, height: 900 },
+        webDir,
+        git: { ...gitInfo, requestedBranch: args.branch },
+        baseUrl: base,
+        engine,
+        scriptSync: sync,
+        pageErrors,
+        downloads,
+        slots: results,
+      };
+      const logPath = join(outDir, "stills-log.json");
+      writeFileSync(logPath, `${JSON.stringify(log, null, 2)}\n`);
+      printStills(results);
+      console.log(`\nstills ${outDir}`);
+      console.log(`log ${logPath}`);
+      if (downloads.length) {
+        throw new Error(`A file was downloaded (${downloads.join(", ")}). The recorder does not save a PDF.`);
+      }
+      const captured = results.filter((slot) => slot.status === "captured");
+      if (!captured.length) throw new Error("No deck still was captured.");
+      const missing = results.filter((slot) => slot.status !== "captured");
+      if (args.strict && missing.length) {
+        const detail = missing.map((slot) => slot.file).join(", ");
+        throw new Error(`--strict: ${missing.length} still(s) missing: ${detail}`);
+      }
+    } finally {
+      await context.close().catch(() => {});
+    }
+  } finally {
+    await browser.close().catch(() => {});
+  }
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
@@ -376,11 +451,14 @@ async function main() {
     }
   }
 
-  const outDir = resolve(args.out || join(repoRoot, "artifacts/demo"));
+  const outDir = resolve(args.out || join(repoRoot, args.stills ? "artifacts/deck-stills" : "artifacts/demo"));
+  mkdirSync(outDir, { recursive: true });
   const framesDir = join(outDir, "frames");
   const videoDir = join(outDir, ".video");
-  mkdirSync(framesDir, { recursive: true });
-  mkdirSync(videoDir, { recursive: true });
+  if (!args.stills) {
+    mkdirSync(framesDir, { recursive: true });
+    mkdirSync(videoDir, { recursive: true });
+  }
   const mp4 = join(outDir, "batatis-demo.mp4");
   let vite;
 
@@ -396,6 +474,10 @@ async function main() {
     const gitInfo = await gitIdentity(dirname(webDir));
     const engine = `${await engineNote(args.engine)} Browser requests to /api and port 8000 are aborted, so this recording does not call the engine or a model. No PDF is uploaded.`;
     console.log(engine);
+    if (args.stills) {
+      await captureDeckStills({ args, outDir, base, webDir, gitInfo, engine, sync });
+      return;
+    }
     await ensurePlaywrightFfmpeg();
 
     const browser = await chromium.launch({

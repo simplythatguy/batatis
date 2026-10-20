@@ -6,4 +6,6 @@ node_modules/
 *.pyc
 __pycache__/
 .venv/
-artifacts/
+artifacts/*
+!artifacts/deck-stills/
+!artifacts/deck-stills/**
