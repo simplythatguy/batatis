@@ -28,12 +28,13 @@ Smoke: `../../../evals/ui-artifacts/smoke.mjs` · Captures: `../../../evals/ui-a
 | 3 | **One shared gap source** — `shared-gaps.js` (or equivalent). Same blocking list on intake banner, SCO gaps, export gate. |
 | 4 | **Gating** — disable (or confirm-with-gap-list) complete / download / admin-complete while blocking gaps remain (`data-requires-no-blocking-gaps`). |
 | 5 | **No demo/template leakage** — no “demo” rows; no bracket placeholders (`[linked excerpt]`); no status words standing in for values (`present`, `from registry`). Render the real value or `—` + gap. |
-| 6 | **Styled controls** — custom select, 14px thin-border checkbox (neutral checked), `resize: none` on textareas. No browser-default chrome. |
+| 6 | **Styled controls** — custom select; checkbox is a true 14px square (exclude it from text-input padding rules), 1px hairline, 4px radius, checked = `#E6E6E6` fill + dark check glyph; `resize: none` on textareas. No browser-default chrome. |
 | 7 | **Labels never wrap, rows never clip** — `.btn` is `white-space: nowrap`; `.btn-row` uses `flex-wrap: wrap` (never `overflow-x` scroll that hides a button). Shorten labels for narrow detail panes. |
 | 8 | **One data model, derived everywhere** — fields, article status, Section C and Section D live in one state object; gaps, counts, summaries and previews are computed from it and recompute on input. Preview text must equal the table values. Gates name the unconfirmed articles. |
 | 9 | **Every control works** — nav items are links; Back/Continue navigate; each action changes visible state (saved note, dialog, status, download). No inert buttons, no `href="#"`, no native `alert()` — use a styled `<dialog>`. Disabled controls show their reason inline. |
 | 10 | **No silent defaults** — unanswered selects start at "Select…" with empty styling; prefilled values carry a marker (inferred, defaulted) and a way to confirm. |
 | 11 | **Panes scroll, the page does not** — fixed-height shell; list, detail and preview panes own their overflow. |
+| 12 | **No status word without a gap** — anything labelled Required/Missing must also be in the shared gap list (warning at minimum) and clear when satisfied; otherwise label it Planned. Status cells are pills with dots; provenance notes ("Not authored by this tool") are muted meta, not status. |
 
 `--focus-ring` / `--accent` (`#5e6ad2`) = **focus rings only** (and optional sparse status). Not CTA identity, not active nav.
 

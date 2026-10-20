@@ -429,7 +429,7 @@ a {
   font-weight: var(--weight-medium);
 }
 
-.field input,
+.field input:not([type="checkbox"]),
 .field textarea,
 .field select {
   background: var(--bg-input);
@@ -456,13 +456,13 @@ a {
   padding-right: 28px;
 }
 
-.field input:focus,
+.field input:not([type="checkbox"]):focus,
 .field textarea:focus,
 .field select:focus {
   border-color: var(--focus-ring);
 }
 
-.field.is-empty input,
+.field.is-empty input:not([type="checkbox"]),
 .field.is-empty textarea,
 .field.is-empty select {
   border-color: var(--border-danger);
@@ -474,34 +474,44 @@ a {
   gap: 6px;
 }
 
-/* Custom checkbox — neutral checked, not system blue / not indigo fill identity */
+/* Custom checkbox — 14px square hairline; checked = neutral light fill + dark check */
 input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
+  box-sizing: border-box;
   width: 14px;
   height: 14px;
+  min-width: 14px;
+  aspect-ratio: 1;
   margin: 0;
   border: 1px solid var(--border-strong);
-  border-radius: 3px;
+  border-radius: 4px;
   background: var(--bg-input);
   cursor: pointer;
-  flex-shrink: 0;
+  flex: 0 0 14px;
   display: inline-grid;
   place-content: center;
+  transition: background var(--duration-fast) var(--ease-out);
 }
 
 input[type="checkbox"]::before {
   content: "";
-  width: 8px;
-  height: 8px;
-  transform: scale(0);
-  background: var(--text-primary);
-  border-radius: 1px;
+  width: 4px;
+  height: 7px;
+  margin-top: -2px;
+  border: solid var(--btn-primary-text);
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg) scale(0);
   transition: transform 80ms var(--ease-out);
 }
 
+input[type="checkbox"]:checked {
+  background: var(--btn-primary-bg);
+  border-color: var(--btn-primary-bg);
+}
+
 input[type="checkbox"]:checked::before {
-  transform: scale(1);
+  transform: rotate(45deg) scale(1);
 }
 
 input[type="checkbox"]:focus-visible {

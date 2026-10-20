@@ -20,12 +20,13 @@ Default product look for all Batatis UI. Agents apply this **without** being ask
 3. **One gap source** across intake / SCO / export.
 4. **Gate** complete/download/admin-complete while blocking gaps remain.
 5. **No demo/template leakage** — no `[bracket]` placeholders, no `present` / `from registry` in place of real values.
-6. **Styled** select / checkbox / textarea (no browser defaults; no resize handle).
+6. **Styled** select / checkbox / textarea (no browser defaults; no resize handle). Checkbox = 14px square, hairline, checked `#E6E6E6` + dark check.
 7. **Buttons** `white-space: nowrap`; `.btn-row` wraps (never clips via `overflow-x`).
 8. **Previews equal sources** — PDF / SCO values come from the same objects as the Section C table; gates name unconfirmed articles.
 9. **Every control works** — nav = links, actions change visible state, styled `<dialog>` not `alert()`, disabled reasons inline.
 10. **No silent defaults** — unanswered selects start empty; prefilled values are marked.
 11. **Panes scroll, not the page.**
+12. **No "Required" without a gap** — required-but-missing items are shared gaps (warning minimum); status cells are pills with dots.
 
 `--focus-ring: #5e6ad2` is for **focus only**, not button identity.
 
