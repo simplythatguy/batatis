@@ -29,8 +29,9 @@ VERIFY_N = 15
 QUESTION_K = 5
 
 DEFAULT_PIPELINE = 'c'
-# Dated snapshots, not the floating aliases. OpenAI lists these as the default
-# snapshots for gpt-4.1 and gpt-4.1-mini (developers.openai.com, 2025-04-14).
+# Dated snapshots, not the floating aliases. OpenAI's model pages list these
+# default snapshots: gpt-4.1-mini-2025-04-14 and gpt-4.1-2025-04-14
+# (platform.openai.com/docs/models/gpt-4.1-mini and .../gpt-4.1).
 # BATATIS_SCREEN_MODEL, BATATIS_RERANK_MODEL, and BATATIS_VERIFY_MODEL override them.
 SCREEN_MODEL = os.environ.get('BATATIS_SCREEN_MODEL', 'gpt-4.1-mini-2025-04-14')
 RERANK_MODEL = os.environ.get('BATATIS_RERANK_MODEL', 'gpt-4.1-mini-2025-04-14')
