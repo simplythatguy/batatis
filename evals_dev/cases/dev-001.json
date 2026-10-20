@@ -1,0 +1,95 @@
+{
+  "id": "dev-001",
+  "applicant_type": "homebuilder",
+  "topic": "part9-spatial-separation",
+  "code_part": 9,
+  "jurisdiction": "Calgary",
+  "seed_provision": "9.10.15.5.(8)",
+  "description": "We're building a new single detached house on a narrow infill lot. The north side wall sits 0.3 m from the property line, which is the side yard against the neighbour's lot, not a street or lane. The client wants the same 450 mm roof overhang all the way around, including over that north wall. The soffit would be vented aluminum. Can we do this as a variance and what would we need to show?",
+  "known_facts": [
+    "single detached house",
+    "limiting distance 0.3 m on the north side",
+    "faces a side property line, not a public way",
+    "450 mm overhang wanted over that wall",
+    "vented aluminum soffit"
+  ],
+  "missing_info": [
+    {
+      "field": "owner name and contact",
+      "why": "Section A of the variance form",
+      "priority": "administrative"
+    },
+    {
+      "field": "civic address and legal description",
+      "why": "Section A identifies the property",
+      "priority": "administrative"
+    },
+    {
+      "field": "soffit construction and protection proposed",
+      "why": "mitigation must address fire spread to the neighbour",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Roof soffit projects over an exposing building face whose limiting distance is 0.45 m or less.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.15.5.(8)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.15.5.(11)",
+        "why": "protection required for soffits within 1.2 m of the property line"
+      },
+      {
+        "division": "B",
+        "provision": "9.10.15.5.(9)",
+        "why": "projection limit when the limiting distance exceeds 0.45 m"
+      }
+    ],
+    "must_not_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.15.5.(10)",
+        "prohibited_use": "as the exception permitting the soffit",
+        "why": "the wall faces a side property line, not a public way"
+      }
+    ],
+    "section_c": [
+      {
+        "provision": "9.10.15.5.(8)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F03-OP3.1]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "no",
+    "engineering_reason": "Single-family dwelling: registered professional involvement not required unless the authority invokes special safety concerns.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(4)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis evaluation builder (Claude Opus 5.5)",
+    "date": "2026-10-20",
+    "notes": "Written from the code database only; held-out judge set not consulted."
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "id": "dev-021",
+  "applicant_type": "homebuilder",
+  "topic": "part9-spatial-separation",
+  "code_part": 9,
+  "jurisdiction": "Calgary",
+  "seed_provision": "9.10.15.5.(9)",
+  "description": "The city flagged the eaves on one of our new houses as too close to the property line. We need a variance. Can you start the form?",
+  "known_facts": [
+    "new house",
+    "eaves flagged as too close to a property line"
+  ],
+  "missing_info": [
+    {
+      "field": "limiting distance of the wall below the eave",
+      "why": "at 0.45 m or less no soffit is allowed; above that the projection limit applies",
+      "priority": "critical"
+    },
+    {
+      "field": "distance from the soffit face to the property line",
+      "why": "measures the departure",
+      "priority": "critical"
+    },
+    {
+      "field": "whether that side faces a street or lane",
+      "why": "a public-way exception may apply",
+      "priority": "critical"
+    },
+    {
+      "field": "owner name and contact",
+      "why": "Section A of the variance form",
+      "priority": "administrative"
+    },
+    {
+      "field": "civic address and legal description",
+      "why": "Section A identifies the property",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.15.5.(8)",
+        "why": "branch: limiting distance 0.45 m or less"
+      },
+      {
+        "division": "B",
+        "provision": "9.10.15.5.(9)",
+        "why": "branch: limiting distance more than 0.45 m"
+      },
+      {
+        "division": "B",
+        "provision": "9.10.15.5.(10)",
+        "why": "branch: faces a public way"
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "no",
+    "engineering_reason": "House within the exemption, unless the authority invokes special safety concerns.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(4)"
+      }
+    ],
+    "intake_action": "ask",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis evaluation builder (Claude Opus 5.5)",
+    "date": "2026-10-20",
+    "notes": "Written from the code database only; held-out judge set not consulted."
+  }
+}

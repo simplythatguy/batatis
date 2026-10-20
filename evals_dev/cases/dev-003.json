@@ -1,0 +1,96 @@
+{
+  "id": "dev-003",
+  "applicant_type": "contractor",
+  "topic": "part9-fire-separations",
+  "code_part": 9,
+  "jurisdiction": "Red Deer",
+  "seed_provision": "9.10.13.13.(1)",
+  "description": "Mechanical contractor here. On a three-storey, twelve-unit wood-frame apartment we have supply ducts that pass through the rated corridor walls. There's no room above the ceiling for damper access panels, so we'd like to skip the fire dampers and instead use 26 gauge steel duct sealed with a listed firestop at each wall. The ducts are about 150 by 250 mm and serve the suites' heat recovery ventilators.",
+  "known_facts": [
+    "three storeys, twelve dwelling units, wood frame",
+    "ducts penetrate rated corridor walls",
+    "no fire dampers proposed",
+    "steel duct with listed firestop instead",
+    "ducts about 150 x 250 mm serving HRVs"
+  ],
+  "missing_info": [
+    {
+      "field": "owner name and contact",
+      "why": "Section A of the variance form",
+      "priority": "administrative"
+    },
+    {
+      "field": "civic address and legal description",
+      "why": "Section A identifies the property",
+      "priority": "administrative"
+    },
+    {
+      "field": "fire-resistance rating of the corridor walls",
+      "why": "sets the rating the penetration must maintain",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Ducts penetrate rated fire separations without fire dampers; firestopped steel duct proposed instead.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.13.13.(1)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.9.6.(1)",
+        "why": "firestopping of penetrations in fire separations"
+      },
+      {
+        "division": "B",
+        "provision": "9.10.13.13.(2)",
+        "why": "the small branch-duct exemption; the stated duct size exceeds it"
+      }
+    ],
+    "must_not_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.13.13.(2)",
+        "prohibited_use": "as making dampers unnecessary",
+        "why": "the stated duct is larger than the exemption allows and does not serve only air-conditioning units"
+      }
+    ],
+    "section_c": [
+      {
+        "provision": "9.10.13.13.(1)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F03-OP1.2]",
+          "[F03-OS1.2]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "yes",
+    "engineering_reason": "Twelve-unit residential building is outside the exemption; registered professionals authenticate the design, including the mechanical changes.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(3)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis evaluation builder (Claude Opus 5.5)",
+    "date": "2026-10-20",
+    "notes": "Written from the code database only; held-out judge set not consulted."
+  }
+}

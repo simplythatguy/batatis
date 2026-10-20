@@ -1,0 +1,82 @@
+{
+  "id": "dev-009",
+  "applicant_type": "manufacturer",
+  "topic": "cladding",
+  "code_part": 9,
+  "jurisdiction": "unspecified",
+  "seed_provision": "9.27.2.2.(5)",
+  "description": "We manufacture an insulated metal panel with factory-sealed joints. It's a face-sealed system: no drainage cavity behind it. We'd like to sell it for houses across Alberta, including places that get a lot of rain and snowmelt. Some inspectors say they need a gap behind the cladding. Can we get a general acceptance?",
+  "known_facts": [
+    "insulated metal panel",
+    "face-sealed, no drained cavity",
+    "intended for houses across Alberta"
+  ],
+  "missing_info": [
+    {
+      "field": "climate data for the target locations (degree-days, moisture index)",
+      "why": "whether a capillary break is required depends on location",
+      "priority": "administrative"
+    },
+    {
+      "field": "test or field evidence that omitting the capillary break does not harm the assembly",
+      "why": "Section D evidence",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Face-sealed cladding without a capillary break where the climate requires one.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "9.27.2.2.(5)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.27.2.2.(6)",
+        "why": "conditions under which the capillary break may be omitted"
+      },
+      {
+        "division": "B",
+        "provision": "9.27.2.2.(1)",
+        "why": "what counts as a capillary break"
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "9.27.2.2.(5)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F61,F62-OH1.1,OH1.2,OH1.3]",
+          "[F61,F62-OS2.3]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "depends",
+    "engineering_reason": "Product request without a building; professional involvement depends on the buildings it is used on.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(3)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis evaluation builder (Claude Opus 5.5)",
+    "date": "2026-10-20",
+    "notes": "Written from the code database only; held-out judge set not consulted."
+  }
+}

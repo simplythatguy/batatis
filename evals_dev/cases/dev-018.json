@@ -1,0 +1,88 @@
+{
+  "id": "dev-018",
+  "applicant_type": "architect-engineer",
+  "topic": "part4-structural",
+  "code_part": 4,
+  "jurisdiction": "Leduc",
+  "seed_provision": "4.1.6.2.(3)",
+  "description": "Structural engineer on a large single-storey warehouse in a suburban industrial park, with other buildings across the street. We want to use a reduced wind exposure factor of 0.75 for the roof snow load because the site is flat and windy. Normal importance category.",
+  "known_facts": [
+    "single-storey warehouse",
+    "suburban industrial park",
+    "neighbouring buildings",
+    "wind exposure factor 0.75 proposed",
+    "normal importance"
+  ],
+  "missing_info": [
+    {
+      "field": "owner name and contact",
+      "why": "Section A of the variance form",
+      "priority": "administrative"
+    },
+    {
+      "field": "civic address and legal description",
+      "why": "Section A identifies the property",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Reduced wind exposure factor applied outside a rural, fully exposed site.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "4.1.6.2.(3)",
+        "role": "benchmark"
+      },
+      {
+        "division": "B",
+        "provision": "4.1.6.2.(4)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "4.1.6.2.(1)",
+        "why": "snow load formula"
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "4.1.6.2.(3)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F20-OP2.1]",
+          "[F20-OS2.1]",
+          "[F22-OP2.4]"
+        ],
+        "conditional": []
+      },
+      {
+        "provision": "4.1.6.2.(4)",
+        "status": "none",
+        "root_provision": "4.1.6.2.(3)",
+        "pairs": [],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "yes",
+    "engineering_reason": "Part 4 structural design must be done by a registered professional.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.2.(1)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis evaluation builder (Claude Opus 5.5)",
+    "date": "2026-10-20",
+    "notes": "Written from the code database only; held-out judge set not consulted."
+  }
+}

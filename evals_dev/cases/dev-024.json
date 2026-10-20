@@ -1,0 +1,44 @@
+{
+  "id": "dev-024",
+  "applicant_type": "contractor",
+  "topic": "out-of-scope",
+  "code_part": null,
+  "jurisdiction": "Calgary",
+  "seed_provision": "7.1.2.1.(1)",
+  "description": "Plumbing contractor. In a basement bathroom we can't tie the new vent into the existing stack, so we want to use an air admittance valve under the vanity instead of running a vent through the roof. Can you write up the variance for the vent?",
+  "known_facts": [
+    "basement bathroom",
+    "air admittance valve instead of a vent through the roof"
+  ],
+  "missing_info": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "7.1.2.1.(1)",
+        "why": "the building code defers plumbing systems to the Plumbing Code Regulation"
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "depends",
+    "engineering_reason": "Decided under the plumbing regime, not by this building-code tool.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      }
+    ],
+    "intake_action": "redirect",
+    "out_of_scope": true,
+    "redirect_to": "Plumbing Code Regulation / National Plumbing Code (plumbing permit and plumbing safety codes officer)"
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis evaluation builder (Claude Opus 5.5)",
+    "date": "2026-10-20",
+    "notes": "Written from the code database only; held-out judge set not consulted."
+  }
+}

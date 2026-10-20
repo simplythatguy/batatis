@@ -1,0 +1,88 @@
+{
+  "id": "dev-014",
+  "applicant_type": "homebuilder",
+  "topic": "single-exit",
+  "code_part": 9,
+  "jurisdiction": "Grande Prairie",
+  "seed_provision": "9.9.8.2.(1)",
+  "description": "We're putting up a three-storey walk-up with two apartments on each floor, six in total, about 280 m2 per floor. We'd like just one interior stair from the top floor down, plus each upper unit gets a balcony. Is one stair acceptable if we add something else?",
+  "known_facts": [
+    "three storeys",
+    "six apartments",
+    "about 280 m2 per floor",
+    "one interior stair",
+    "balconies on upper units"
+  ],
+  "missing_info": [
+    {
+      "field": "owner name and contact",
+      "why": "Section A of the variance form",
+      "priority": "administrative"
+    },
+    {
+      "field": "civic address and legal description",
+      "why": "Section A identifies the property",
+      "priority": "administrative"
+    },
+    {
+      "field": "sprinklered or not",
+      "why": "major mitigation and comparison input",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Third storey served by a single exit; the single-exit allowance covers only 1- and 2-storey buildings.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "9.9.8.2.(1)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.9.8.2.(2)",
+        "why": "single-exit allowance and its storey limit"
+      },
+      {
+        "division": "B",
+        "provision": "9.9.9.1.(3)",
+        "why": "balcony provision for travel limits within dwelling units"
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "9.9.8.2.(1)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F10-OS3.7]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "yes",
+    "engineering_reason": "Six dwelling units exceeds the four-unit exemption.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(3)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis evaluation builder (Claude Opus 5.5)",
+    "date": "2026-10-20",
+    "notes": "Written from the code database only; held-out judge set not consulted."
+  }
+}

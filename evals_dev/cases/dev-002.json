@@ -1,0 +1,92 @@
+{
+  "id": "dev-002",
+  "applicant_type": "homebuilder",
+  "topic": "part9-fire-separations",
+  "code_part": 9,
+  "jurisdiction": "Edmonton",
+  "seed_provision": "9.10.11.2.(2)",
+  "description": "We're planning a row of six two-storey townhouses on one lot, and every unit will have a legal basement suite. We'd like to build every party wall the same way, as a 1-hour rated double-stud wall running from the footing to the underside of the roof deck, instead of making some of them full firewalls. Is there a way to get that approved?",
+  "known_facts": [
+    "six houses in one row",
+    "each house has a secondary suite",
+    "two storeys",
+    "1 h party walls from footing to roof deck proposed for all"
+  ],
+  "missing_info": [
+    {
+      "field": "owner name and contact",
+      "why": "Section A of the variance form",
+      "priority": "administrative"
+    },
+    {
+      "field": "civic address and legal description",
+      "why": "Section A identifies the property",
+      "priority": "administrative"
+    },
+    {
+      "field": "tested wall assembly listing for the 1 h party wall",
+      "why": "Section D evidence",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Party walls between every pair of houses with secondary suites built as 1 h fire separations; no firewalls dividing the row into buildings of not more than 2 houses.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.11.2.(2)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.11.2.(1)",
+        "why": "the 1 h party-wall option the applicant is extending"
+      },
+      {
+        "division": "B",
+        "provision": "9.10.11.2.(3)",
+        "why": "continuity of the party wall"
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "9.10.11.2.(2)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F03-OP3.1]",
+          "[F03-OS1.2]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "yes",
+    "engineering_reason": "Six dwelling units in one building (secondary suites aside) exceeds the four-unit exemption, so authenticated drawings are required.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(2)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(3)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis evaluation builder (Claude Opus 5.5)",
+    "date": "2026-10-20",
+    "notes": "Written from the code database only; held-out judge set not consulted."
+  }
+}

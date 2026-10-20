@@ -1,0 +1,100 @@
+{
+  "id": "dev-011",
+  "applicant_type": "manufacturer",
+  "topic": "engineered-walls",
+  "code_part": 9,
+  "jurisdiction": "unspecified",
+  "seed_provision": "9.23.10.1.(1)",
+  "description": "We build factory panelized wall systems for houses. To save material we want to frame load-bearing exterior walls of two-storey homes with 2x4 studs at 600 mm centres supporting the second floor and roof, with a structural header system of our own design. Our in-house tables say it works. What does Alberta need from us?",
+  "known_facts": [
+    "panelized wall system",
+    "2x4 studs at 600 mm on centre, load-bearing",
+    "two-storey houses",
+    "proprietary tables"
+  ],
+  "missing_info": [
+    {
+      "field": "who designed the system and whether it is engineered under Part 4",
+      "why": "route choice",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Stud size and spacing outside the prescriptive table for the loads carried.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "9.23.10.1.(1)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.4.1.1.(1)",
+        "why": "Part 9 structural members may instead be designed by engineering (acceptable-solution fork)"
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "9.23.10.1.(1)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F20-OP2.1,OP2.5]",
+          "[F20-OS2.1,OS2.5]",
+          "[F22-OP2.4,OP2.5]",
+          "[F22-OS2.5]"
+        ],
+        "conditional": [
+          {
+            "pair": "[F20,F22-OH1.1,OH1.2,OH1.3]",
+            "when": "Applies to elements that support or are part of an environmental separator."
+          },
+          {
+            "pair": "[F20,F22-OP2.3]",
+            "when": "Applies to elements that support or are part of an environmental separator."
+          },
+          {
+            "pair": "[F20,F22-OS1.2]",
+            "when": "Applies to assemblies required to provide fire resistance."
+          },
+          {
+            "pair": "[F20,F22-OS2.3]",
+            "when": "Applies to elements that support or are part of an environmental separator."
+          },
+          {
+            "pair": "[F22-OH4]",
+            "when": "Applies to floors and elements that support floors."
+          },
+          {
+            "pair": "[F22-OS3.1]",
+            "when": "Applies to floors and elements that support floors."
+          },
+          {
+            "pair": "[F22-OS3.7]",
+            "when": "Applies to walls, and elements that support walls, that contain doors or windows required for emergency egress."
+          }
+        ]
+      }
+    ],
+    "engineering_required": "yes",
+    "engineering_reason": "Departing from the span/stud tables needs structural design to Part 4, which must be done by a registered professional.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.2.(1)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis evaluation builder (Claude Opus 5.5)",
+    "date": "2026-10-20",
+    "notes": "Written from the code database only; held-out judge set not consulted."
+  }
+}
