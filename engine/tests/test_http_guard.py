@@ -47,7 +47,7 @@ def test_failed_purge_refuses_the_request_without_leaking_exception_text(caplog)
     called = []
 
     def broken_sweep():
-        raise RuntimeError('postgresql://private-user:private-password@private-host/cases')
+        raise RuntimeError('connection failed: private-host, private-credential')
 
     app.add_middleware(HttpGuard, sweep=broken_sweep)
 

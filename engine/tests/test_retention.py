@@ -1,8 +1,8 @@
 """7-day purge: an 8-day case goes, a 6-day case stays, files go with the case, a second purge is a no-op."""
 from __future__ import annotations
 
-import os
 import logging
+import os
 import sqlite3
 import subprocess
 import sys
@@ -99,7 +99,7 @@ def test_purge_failure_in_a_route_is_a_safe_503(tmp_path, monkeypatch, caplog, t
 
         def purge_expired(self):
             if self.fail:
-                raise RuntimeError('postgresql://private-user:private-password@private-host/cases')
+                raise RuntimeError('connection failed: private-host, private-credential')
             return super().purge_expired()
 
     reset_purge_clock()
