@@ -44,7 +44,12 @@ _LABELS = {
     'project.description': 'Description',
     'alternative': 'Proposed alternative',
     'ccmc_evaluation': 'CCMC evaluation',
+    'air_leakage_test': 'Air-leakage test',
+    'bracing_design': 'Bracing design',
     'evidence.letter': 'Letter',
+    'evidence.product_data_sheet': 'Product data sheet',
+    'evidence.permeance': 'Permeance summary',
+    'site.city': 'City',
     'scope': 'Jurisdiction-wide',
     'applicant.role': 'Role',
     'applicant_type': 'Role',
@@ -65,6 +70,8 @@ _BOOL_FIELDS = {
     'professional.fire_alarm', 'fire_alarm',
     'building.sprinklered',
     'ccmc_evaluation',
+    'air_leakage_test',
+    'bracing_design',
 }
 
 _VALUES = {

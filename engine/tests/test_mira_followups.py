@@ -19,11 +19,20 @@ from engine.tests.test_professional import ordinary_house
 
 _SRC = Source(type='user_text', ref='applicant', quote='role')
 _CITE = re.compile(r'2\.4\.1\.\d|Div C')
-_NAILBASE = 'A structural nail-base panel. Vinyl siding nails into the facer.'
+_MIRA = (
+    'We manufacture NailBase CI-50, a 50 mm rigid foam panel with a 6 mm fibre-cement facer that '
+    'replaces 11 mm OSB sheathing on 2x6 walls at 400 mm o.c. Vinyl siding is nailed directly into '
+    'the facer with no furring. We want approval to sell it across Alberta and to build a pilot house '
+    'in Edmonton: 2-storey single-family, about 190 m2, unsprinklered, builder Birchfield Example Homes, '
+    'address 0000 Example Way NW. We have our product data sheet, a US lab permeance test summary, and '
+    'an unsigned draft engineer letter about nail pull-out. We have no CCMC evaluation yet, no '
+    'air-leakage test, and no bracing design. Do we need an engineer to stamp anything?'
+)
+_MEMBRANE_CARD = 'sheathing membrane an acceptable solution names'
 _MEMBRANE = {
     'provision': '9.27.3.2.',
     'title': 'Sheathing Membrane',
-    'text': 'Sheathing membrane an acceptable solution names shall conform to the standard.',
+    'text': _MEMBRANE_CARD,
 }
 
 
@@ -150,24 +159,56 @@ def test_sheathing_membrane_card_is_not_shown_for_a_structural_nail_base_panel()
         {'provision': '9.27.5.1.', 'title': 'Attachment of Cladding',
          'text': 'Cladding shall be fastened to framing, furring or blocking.'},
     ]
-    questions = generate_questions(_NAILBASE, candidates, provisions=['9.27.5.1.'])
+    questions = generate_questions(_MIRA, candidates, provisions=['9.27.5.1.'])
     blob = ' '.join(q['text'] + ' ' + q['why'] + ' ' + ' '.join(q['disambiguates']) for q in questions).lower()
-    assert 'sheathing membrane' not in blob
+    assert _MEMBRANE_CARD not in blob
     assert '9.27.3.2.' not in blob
     card = {
         'field': 'assembly.sheathing_membrane',
-        'text': 'Sheathing membrane an acceptable solution names',
+        'text': _MEMBRANE_CARD,
         'why': 'The card asks about the sheathing membrane.',
         'disambiguates': ['9.27.3.2.'],
     }
     assert question_matches(
-        card, description=_NAILBASE, provisions=['9.27.5.1.'], candidates=candidates) is False
+        card, description=_MIRA, provisions=['9.27.5.1.'], candidates=candidates) is False
     assert question_matches(
         card, description='The wall has no sheathing membrane.', provisions=['9.27.3.2.'],
         candidates=candidates) is True
     shown = generate_questions(
         'The wall has no sheathing membrane.', candidates, provisions=['9.27.3.2.'])
     assert any(q['field'] == 'assembly.sheathing_membrane' for q in shown)
+
+
+def test_mira_description_parse_records_the_house_the_evidence_and_the_route(tmp_path):
+    client = _case(tmp_path)
+    created = client.post('/cases', json={'title': _MIRA}).json()
+    fields = {fact['field']: fact['value'] for fact in created['facts']}
+    assert fields['building.storeys'] == 2
+    assert fields['building.area'] == 'about 190 m²'
+    assert fields['occupancy'] == 'single_family'
+    assert fields['building.sprinklered'] is False
+    assert fields['site.city'] == 'Edmonton'
+    assert fields['scope'] == 'province-wide; one site'
+    assert fields['role'] == 'manufacturer'
+    assert fields['ccmc_evaluation'] is False
+    assert fields['air_leakage_test'] is False
+    assert fields['bracing_design'] is False
+    assert 'professional_confirmed' not in fields
+    descriptions = {item['description'] for item in created['evidence']}
+    assert descriptions == {
+        'product data sheet',
+        'US lab permeance summary',
+        'unsigned draft engineer letter',
+    }
+    assert all(item['professional_required'] is None for item in created['evidence'])
+    assert created['route_notice']['summary']
+    again = client.post(f"/cases/{created['id']}/facts", json={
+        'field': 'project.description', 'value': _MIRA, 'kind': 'pointed',
+        'source': {'type': 'user_text', 'ref': 'paste', 'quote': 'NailBase'}})
+    body = again.json()
+    assert [fact['field'] for fact in body['facts']].count('ccmc_evaluation') == 1
+    assert sum(item['description'] == 'unsigned draft engineer letter' for item in body['evidence']) == 1
+    assert not any(fact['field'] == 'professional_confirmed' for fact in body['facts'])
 
 
 def test_a_stated_role_fact_round_trips_with_its_notice(tmp_path):
