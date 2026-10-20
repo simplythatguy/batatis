@@ -185,10 +185,7 @@ def _norm_token(word: str) -> str:
     return word.lower().strip('.,;:()[]"“”\'')
 
 
-def _term_match(token: str, term: str) -> bool:
-    """True when a text word and a query word share a stem, not a short prefix."""
-    if not token or not term:
-        return False
+def _close_term(token: str, term: str) -> bool:
     if token == term:
         return True
     if token.startswith(term) or term.startswith(token):
@@ -202,6 +199,28 @@ def _term_match(token: str, term: str) -> bool:
             break
         shared += 1
     return shared >= 5
+
+
+def _term_forms(token: str) -> set[str]:
+    """Surface forms plus the -ing/-ed stem the FTS Porter tokenizer already uses."""
+    forms = {token}
+    if len(token) > 5 and token.endswith('ing'):
+        stem = token[:-3]
+        forms.update({stem, stem + 'e'})
+    if len(token) > 4 and token.endswith('ed'):
+        stem = token[:-2]
+        forms.update({stem, stem + 'e'})
+    if len(token) > 3 and token.endswith('s') and not token.endswith('ss'):
+        forms.add(token[:-1])
+    return forms
+
+
+def _term_match(token: str, term: str) -> bool:
+    """True when a text word and a query word share a stem, not a short prefix."""
+    if not token or not term:
+        return False
+    term = term.lower()
+    return any(_close_term(form, term) for form in _term_forms(token))
 
 
 def _window_score(words: list[str], start: int, limit: int, terms: list[str]) -> tuple[int, int]:
@@ -256,45 +275,56 @@ def _fts(con, query: str, *, doc: str, division: str | None, limit: int, title_w
     return [_record(row) for row in con.execute(sql, args)]
 
 
-def _drop_blocking_term(con, words: list[str], *, doc: str, division: str | None, title_weight: float) -> list[str]:
-    """Drop the word whose removal lets the most provisions match.
-
-    Ties drop the rarer word. The remaining words stay in their original order.
-    """
-    ranked = []
-    for word in words:
-        rest = [other for other in words if other != word]
-        query = _and_query(rest) if len(rest) > 1 else '"' + rest[0].replace('"', '') + '"'
-        hits = len(_fts(con, query, doc=doc, division=division, limit=AND_FEW, title_weight=title_weight))
-        alone = '"' + word.replace('"', '') + '"'
-        frequency = len(_fts(con, alone, doc=doc, division=division, limit=50, title_weight=title_weight))
-        ranked.append((hits, frequency, word))
-    ranked.sort(key=lambda item: (-item[0], item[1], words.index(item[2])))
-    dropped = ranked[0][2]
-    return [word for word in words if word != dropped]
-
-
 def _and_then_or(con, words: list[str], or_query: str, *, doc: str, division: str | None,
                  title_weight: float, pool: int) -> tuple[list[dict], str]:
-    """AND the content words. On zero or very few hits, drop blocking words, then OR.
+    """AND the content words. On zero or very few hits, keep every near-miss.
 
-    The returned rows are BM25 order. `mode` is `and`, `relaxed`, or `or`.
+    A near-miss matches every word but one. Those rows are ranked by how many
+    words they match, then by whether they sit in the leading section, then by
+    BM25 of the OR query. One row per article comes first. `mode` is `and`,
+    `relaxed`, or `or`.
     """
     if len(words) < 2 or len(words) > AND_MAX_TERMS:
         rows = _fts(con, or_query, doc=doc, division=division, limit=pool, title_weight=title_weight)
         return rows, 'or'
-    current = list(words)
-    mode = 'and'
-    while True:
-        rows = _fts(con, _and_query(current), doc=doc, division=division, limit=pool, title_weight=title_weight)
-        if len(rows) >= AND_FEW:
-            return rows, mode
-        if len(current) <= 2:
-            break
-        current = _drop_blocking_term(con, current, doc=doc, division=division, title_weight=title_weight)
-        mode = 'relaxed'
-    rows = _fts(con, or_query, doc=doc, division=division, limit=pool, title_weight=title_weight)
-    return rows, 'or'
+    full = _fts(con, _and_query(words), doc=doc, division=division, limit=pool, title_weight=title_weight)
+    if len(full) >= AND_FEW:
+        return full, 'and'
+    matched: dict[str, set[str]] = {}
+    rows_by: dict[str, dict] = {}
+    for row in full:
+        matched[row['id']] = set(words)
+        rows_by[row['id']] = row
+    for word in words:
+        rest = [other for other in words if other != word]
+        if len(rest) < 2:
+            continue
+        for row in _fts(con, _and_query(rest), doc=doc, division=division, limit=pool, title_weight=title_weight):
+            rows_by.setdefault(row['id'], row)
+            matched.setdefault(row['id'], set()).update(rest)
+    if len(rows_by) < AND_FEW:
+        rows = _fts(con, or_query, doc=doc, division=division, limit=pool, title_weight=title_weight)
+        return rows, 'or'
+    or_rows = _fts(con, or_query, doc=doc, division=division, limit=pool, title_weight=title_weight)
+    bm = {row['id']: float(row['rank']) for row in or_rows}
+
+    def sort_key(row: dict) -> tuple:
+        same = 0 if row.get('section') == leader_section else 1
+        return (-len(matched[row['id']]), same, bm.get(row['id'], 0.0), row.get('sort_key') or '')
+
+    unordered = list(rows_by.values())
+    leader_section = min(unordered, key=lambda row: (
+        -len(matched[row['id']]), bm.get(row['id'], 0.0), row.get('sort_key') or '')).get('section')
+    best: dict[str, dict] = {}
+    for row in unordered:
+        art = row.get('article') or article_of(row['id'])
+        current = best.get(art)
+        if current is None or sort_key(row) < sort_key(current):
+            best[art] = row
+    primary = sorted(best.values(), key=sort_key)
+    seen = {row['id'] for row in primary}
+    backfill = sorted((row for row in unordered if row['id'] not in seen), key=sort_key)
+    return primary + backfill, 'relaxed'
 
 
 def _groups_of(tokens) -> set[int]:
@@ -506,10 +536,152 @@ def _child_level(con, doc: str, division: str, article: str, level: str) -> list
     return [_record(row) for row in fetched]
 
 
-def _cap_response(rows: list[dict]) -> None:
-    """Keep each snippet at 25 words and the whole response at 75."""
-    remaining = RESPONSE_WORDS
+_DEFER_CLAUSE = re.compile(r'except as provided in Clause \(([a-z])\)', re.I)
+
+
+def _collapse(text: str) -> str:
+    return ' '.join((text or '').split())
+
+
+def _terms_in(text: str, terms: list[str]) -> set[str]:
+    tokens = [_norm_token(word) for word in (text or '').split()]
+    return {term for term in terms if any(_term_match(token, term) for token in tokens if token)}
+
+
+def _preamble(sentence: str, clauses: list[dict]) -> str:
+    body = _collapse(sentence)
+    for clause in clauses:
+        body = body.replace(_collapse(clause.get('text') or ''), ' ')
+    return _collapse(body)
+
+
+def _focused_clause(sentence: str, clauses: list[dict], terms: list[str]) -> dict | None:
+    """The clause that carries a query word the sentence stem does not.
+
+    A clause that only says "except as provided in Clause (b)" yields to that
+    sibling when the sibling also matches. The sentence stays when no clause
+    covers every query word already in the stem.
+    """
+    if not clauses:
+        return None
+    base = _terms_in(_preamble(sentence, clauses), terms)
+    candidates = []
+    for clause in clauses:
+        got = _terms_in(clause.get('text') or '', terms)
+        if base <= got and got - base:
+            candidates.append((clause, got))
+    if not candidates:
+        return None
+    by_letter = {}
+    for clause, _got in candidates:
+        letter = clause['id'].rstrip(')').split('(')[-1]
+        by_letter[letter] = clause
+    deferred = set()
+    for clause, _got in candidates:
+        match = _DEFER_CLAUSE.search(clause.get('text') or '')
+        if match and match.group(1) in by_letter:
+            deferred.add(clause['id'])
+    kept = [(clause, got) for clause, got in candidates if clause['id'] not in deferred] or candidates
+    clause, _got = max(kept, key=lambda item: (len(item[1] - base), len(item[1])))
+    return clause
+
+
+def _sentence_clauses(con, doc: str, division: str, sentence_id: str) -> list[dict]:
+    fetched = con.execute(
+        "SELECT * FROM provisions WHERE doc=? AND division=? AND parent_id=? AND level='clause' "
+        'ORDER BY sort_key',
+        (doc, division, sentence_id)).fetchall()
+    return [_record(row) for row in fetched]
+
+
+def _lift_leader_clauses(con, rows: list[dict], terms: list[str], *, doc: str, division: str | None) -> list[dict]:
+    """Place the focused clause just after its sentence, without dropping either.
+
+    Only sentences in the leading subsection are opened. Clauses are not in
+    the FTS index, so this is how a matching clause can enter the window.
+    """
+    if not rows:
+        return rows
+    leader = rows[0].get('subsection')
+    division_sql = division or rows[0].get('division')
+    limit = len(rows)
+    lifted: set[str] = set()
+    parents: set[str] = set()
+    out: list[dict] = []
+    seen = {row['id'] for row in rows}
     for row in rows:
+        out.append(row)
+        if row.get('level') != 'sentence' or row.get('subsection') != leader:
+            continue
+        clauses = _sentence_clauses(con, doc, division_sql, row['id'])
+        focus = _focused_clause(row.get('text') or '', clauses, terms)
+        if focus is None or focus['id'] in seen:
+            continue
+        out.append(focus)
+        seen.add(focus['id'])
+        lifted.add(focus['id'])
+        parents.add(row['id'])
+    protected = lifted | parents
+    while len(out) > limit:
+        drop_at = next((
+            index for index in range(len(out) - 1, -1, -1) if out[index]['id'] not in protected
+        ), None)
+        if drop_at is None:
+            break
+        del out[drop_at]
+    return out
+
+
+def attribution_label(con, doc: str, provision_id: str) -> str:
+    """Objective/function brackets for this provision, or an explicit miss.
+
+    An empty string is not a result. A provision with no listed objective and
+    no listed function says `lookup not available`.
+    """
+    fetched = con.execute(
+        'SELECT bracket, fs, objectives FROM attributions WHERE doc=? AND provision_id=? ORDER BY seq',
+        (doc, provision_id)).fetchall()
+    labels = []
+    for row in fetched:
+        functions = json.loads(row['fs']) if isinstance(row['fs'], str) else (row['fs'] or [])
+        objectives = json.loads(row['objectives']) if isinstance(row['objectives'], str) else (row['objectives'] or [])
+        if not functions and not objectives:
+            continue
+        labels.append(row['bracket'] or ' '.join([*functions, *objectives]))
+    if not labels:
+        return 'lookup not available'
+    return '; '.join(labels)
+
+
+def _cap_response(rows: list[dict]) -> None:
+    """Keep each snippet at 25 words and the whole response at 75.
+
+    An article row keeps a child snippet. Later sentence rows give up their
+    words first.
+    """
+    article_at = [index for index, row in enumerate(rows) if row.get('level') == 'article']
+    pieces = []
+    for index in article_at:
+        words = (rows[index].get('text') or '').split()[:SNIPPET_WORDS]
+        if words:
+            pieces.append([index, words])
+    need = sum(len(words) for _index, words in pieces)
+    while pieces and need > RESPONSE_WORDS:
+        longest = max(pieces, key=lambda item: len(item[1]))
+        if len(longest[1]) <= 1:
+            break
+        longest[1].pop()
+        need -= 1
+    reserved = set()
+    used = 0
+    for index, words in pieces:
+        rows[index]['text'] = ' '.join(words)
+        reserved.add(index)
+        used += len(words)
+    remaining = RESPONSE_WORDS - used
+    for index, row in enumerate(rows):
+        if index in reserved:
+            continue
         words = (row.get('text') or '').split()
         if remaining <= 0 or not words:
             row['text'] = ''
@@ -542,6 +714,7 @@ def _present_rows(con, rows: list[dict], *, doc: str, division: str | None, limi
             if item['id'] in seen:
                 continue
             seen.add(item['id'])
+            item['attribution'] = attribution_label(con, doc, item['id'])
             selected.append(item)
             if len(selected) >= limit:
                 break
@@ -653,12 +826,17 @@ def search_variant(terms: str, variant: str, *, doc='NBC-AE', division=None, lim
             # strict AND that misses falls back to a relaxed AND, then to OR.
             if len(_query_groups(terms)) >= 2:
                 rows = _fts(con, or_query, doc=doc, division=division, limit=pool, title_weight=V3_TITLE_WEIGHT)
+                rows = _rerank_v3(con, rows, terms, doc=doc, division=division, limit=limit)
             else:
+                # AND, then the near-miss union. Open the leading subsection's
+                # clauses before the window is closed. Do not insert an article
+                # heading once the window is full: that pushes a sentence out.
                 rows, _mode = _and_then_or(
                     con, _content(terms), or_query,
                     doc=doc, division=division, title_weight=V3_TITLE_WEIGHT, pool=pool,
                 )
-            rows = _rerank_v3(con, rows, terms, doc=doc, division=division, limit=limit)
-            if len(_query_groups(terms)) < 2:
-                rows = _promote_rare_headings(con, rows, terms, doc=doc, division=division)
+                rows = rows[:limit]
+                rows = _lift_leader_clauses(con, rows, _content(terms), doc=doc, division=division)
+                if len(rows) < limit:
+                    rows = _promote_rare_headings(con, rows, terms, doc=doc, division=division)
         return _present_rows(con, rows, doc=doc, division=division, limit=limit, terms=terms)

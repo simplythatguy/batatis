@@ -14,6 +14,7 @@ export interface CodeHit {
   title: string | null;
   text: string;
   pdf_page: number | null;
+  attribution: string;
   citation: string | null;
 }
 
