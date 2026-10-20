@@ -64,7 +64,33 @@
     ],
     "intake_action": "ask",
     "out_of_scope": false,
-    "redirect_to": null
+    "redirect_to": null,
+    "identify_gold_candidates": [
+      {
+        "division": "B",
+        "provision": "9.27.2.2.(5)",
+        "role": "benchmark",
+        "tier": "primary",
+        "confidence": "medium",
+        "label": "model-checked, not human-verified",
+        "quote": "exterior walls exposed to precipitation shall be protected against precipitation ingress by an exterior cladding assembly consisting of a first plane of protection and a second plane of protection incorporating a capillary break",
+        "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+        "pdf_page": 1014,
+        "reasoning": "Face-sealed panel with no drained cavity = no capillary break; the requirement applies only in locations meeting the degree-day / moisture-index conditions, which 'places that get a lot of rain and snowmelt' implies but does not establish."
+      },
+      {
+        "division": "B",
+        "provision": "9.27.2.2.(6)",
+        "role": "candidate",
+        "tier": "secondary",
+        "confidence": "medium",
+        "label": "model-checked, not human-verified",
+        "quote": "the first and second planes of protection need not incorporate a capillary break, where a) it can be shown that omitting the capillary break will not adversely affect the performance of the building assemblies",
+        "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+        "pdf_page": 1014,
+        "reasoning": "The exception the manufacturer's evidence would target. Not the varied provision."
+      }
+    ]
   },
   "authoring": {
     "source": "codedb",

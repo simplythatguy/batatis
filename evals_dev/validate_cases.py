@@ -28,6 +28,29 @@ TOPICS = {'part9-spatial-separation', 'part9-fire-separations', 'envelope-insula
 ENG = {'yes', 'no', 'depends'}
 ACTIONS = {'ask', 'proceed_conditionally', 'redirect'}
 ARTICLE_NO = re.compile(r'\b\d{1,2}\.\d{1,2}\.\d{1,2}\.\d{1,2}\.?')
+GOLD_LABEL = 'model-checked, not human-verified'
+IDENTIFY_ROLES = {'benchmark', 'secondary'}
+CANDIDATE_ROLES = {'benchmark', 'candidate', 'scope', 'secondary'}
+
+
+def _check_identify_list(err, exists, counts, cid, refs, field, roles):
+    if refs is None:
+        return
+    if not isinstance(refs, list):
+        err(cid, f'{field} must be a list')
+        return
+    for ref in refs:
+        if ref.get('role') not in roles:
+            err(cid, f'{field} role')
+        if ref.get('label') != GOLD_LABEL:
+            err(cid, f'{field} must be labelled {GOLD_LABEL}')
+        if not (ref.get('quote') or '').strip():
+            err(cid, f'{field} needs the codedb quote used as provenance')
+        if exists(cid, ref.get('division'), ref.get('provision'), field):
+            counts['citations_checked'] += 1
+        quoted = ref.get('quoted_provision')
+        if quoted:
+            exists(cid, ref.get('division'), quoted, field)
 
 
 def validate(cases, con):
@@ -75,6 +98,13 @@ def validate(cases, con):
             for ref in g.get(field, []):
                 if exists(cid, ref.get('division'), ref.get('provision'), field):
                     counts['citations_checked'] += 1
+        _check_identify_list(err, exists, counts, cid, g.get('identify_gold'), 'identify_gold', IDENTIFY_ROLES)
+        _check_identify_list(err, exists, counts, cid, g.get('identify_gold_candidates'),
+                             'identify_gold_candidates', CANDIDATE_ROLES)
+        if g.get('identify_gold') and g.get('intake_action') != 'ask':
+            err(cid, 'identify_gold is only for ask cases')
+        if g.get('identify_gold') and g.get('must_cite'):
+            err(cid, 'identify_gold requires an empty must_cite')
         if g.get('engineering_required') not in ENG:
             err(cid, 'engineering_required')
         if not g.get('engineering_citations'):

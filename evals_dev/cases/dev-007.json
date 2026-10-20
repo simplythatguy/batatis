@@ -63,7 +63,33 @@
     ],
     "intake_action": "ask",
     "out_of_scope": false,
-    "redirect_to": null
+    "redirect_to": null,
+    "identify_gold_candidates": [
+      {
+        "division": "B",
+        "provision": "9.27.3.3.(1)",
+        "role": "benchmark",
+        "tier": "primary",
+        "confidence": "medium",
+        "label": "model-checked, not human-verified",
+        "quote": "at least one layer of sheathing membrane shall be applied beneath cladding",
+        "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+        "pdf_page": 1015,
+        "reasoning": "The contractor wants to 'leave out the housewrap'. The membrane requirement is 9.27.3.3.(1); 9.27.3.4. is only an exception for rigid insulating sheathing, and the board is described as semi-rigid. Not in the case's current should_cite."
+      },
+      {
+        "division": "B",
+        "provision": "9.27.3.4.(2)",
+        "role": "candidate",
+        "tier": "secondary",
+        "confidence": "medium",
+        "label": "model-checked, not human-verified",
+        "quote": "the joints of sheathing panels not subject to moisture deterioration shall be i) sealed at all joints, or ii) lapped or tongue and groove, and detailed to ensure drainage of water to the exterior",
+        "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+        "pdf_page": 1015,
+        "reasoning": "If the board does qualify as rigid insulating sheathing under 9.27.3.4.(1), the departure becomes the butted, unsealed, unlapped joints, which is this clause. Seed provision; keep as the alternative branch."
+      }
+    ]
   },
   "authoring": {
     "source": "codedb",

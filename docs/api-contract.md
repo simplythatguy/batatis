@@ -120,7 +120,17 @@ BATATIS_LLM_PROVIDER=openai .venv/bin/python -m engine.identify.benchmark \
 
 The process exits 2 when `OPENAI_API_KEY` is missing. It does not print the key. `--fx-usd-cad` (CAD per 1 USD) and `--fx-date` are required and are printed on every variant line. The rate above is Bank of Canada series FXUSDCAD for 2026-10-19; pass a different pair when you have a newer one. Defaults are dated snapshots, not the floating aliases: screen and rerank `gpt-4.1-mini-2025-04-14`, verifier `gpt-4.1-2025-04-14`. Those are the default snapshots on OpenAI's model pages for `gpt-4.1-mini` and `gpt-4.1`. `BATATIS_SCREEN_MODEL`, `BATATIS_RERANK_MODEL`, and `BATATIS_VERIFY_MODEL` replace them. Each variant line prints the requested id (`rerank_model`, `verifier_model`) and the id the API returned (`rerank_returned`, `verifier_returned`, or `none` when that stage made no call). It also includes input and output tokens per case, p50 and p95 latency, USD and CAD per case, then a line comparing CAD per case with the C$125 price floor.
 
-Accuracy is the mean of every repeat, with min, max, and the per-repeat values. Gold is only `must_cite`. Cases with an empty `must_cite` stay out of top-1, recall@5, and MRR (`n_gold` and `n_no_gold` are both printed). A commit on a no-gold case is `commits_no_gold`, not a committed error. `stability` is the share of cases whose top-1 article is the same on every repeat. Each case also has a majority-vote top-1. The command writes `results.json` and `summary.csv` under `out/identify-benchmark/` (gitignored) unless `--out` is set. Those files carry model ids, the FX rate and date, and token counts. They do not carry keys. The command fetches official sources and builds the code database first.
+Accuracy is the mean of every repeat, with min, max, and the per-repeat values. The command reports two groups and does not pool them.
+
+`scored_must_cite` is the headline. Gold is `must_cite` only. On the first 20 development cases that is n=11. A case with neither `must_cite` nor `identify_gold` stays out of both rates. A commit on that case is `commits_no_gold`, not an error.
+
+`scored_ask_identify_gold` is separate. It scores ask cases whose `gold.identify_gold` has `role: benchmark`. The note on that group is: retrieval of the candidate article on ask cases; measures finding the article, not deciding it applies. Those rows are labelled model-checked, not human-verified. On the first 20 development cases that is n=4 (`dev-006`, `dev-010`, `dev-011`, `dev-015`). `identify_gold_candidates` is unscored. Committed errors on the ask group are `committed_errors_ask`, not `committed_errors_gold` and not `commits_no_gold`.
+
+Article match uses the leading `N.N.N.N.` id. A sentence such as `9.25.5.2.(1)` matches the ranked article `9.25.5.2.`. The stored gold keeps the sentence id. Only `role: benchmark` is the ask retrieval target. `role: secondary` is not a recall target, and committing that article is not an ask committed error.
+
+The CSV `group` column keeps the two blocks apart. On ask rows, `n` is the group size and `n_gold` is blank, so the headline gold count is not repeated there.
+
+`stability` is the share of cases whose top-1 article is the same on every repeat. Each headline case also has a majority-vote top-1. The command writes `results.json` and `summary.csv` under `out/identify-benchmark/` (gitignored) unless `--out` is set. Those files carry model ids, the FX rate and date, and token counts. They do not carry keys. The command fetches official sources and builds the code database first.
 
 
 ### Section D plan item

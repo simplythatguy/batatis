@@ -58,7 +58,21 @@
     ],
     "intake_action": "ask",
     "out_of_scope": false,
-    "redirect_to": null
+    "redirect_to": null,
+    "identify_gold": [
+      {
+        "division": "B",
+        "provision": "9.10.15.5.(2)",
+        "role": "benchmark",
+        "tier": "primary",
+        "confidence": "high",
+        "label": "model-checked, not human-verified",
+        "quote": "where the limiting distance is less than 0.6 m, the exposing building face and exterior walls located above the exposing building face that enclose an attic or roof space shall have a fire-resistance rating of not less than 45 min",
+        "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+        "pdf_page": 902,
+        "reasoning": "A house (9.10.15. applies per 9.10.15.1.(1)) with the east wall 0.5 m from the property line: limiting distance < 0.6 m. The city's 'metal or noncombustible siding' matches Clause (2)(a). Clause (2)(b) is a conditional vinyl route (9.27.12., gypsum backing, FSR \u2264 25, \u2264 2 mm), so whether a variance is needed is an intake question, but the provision is this one."
+      }
+    ]
   },
   "authoring": {
     "source": "codedb",

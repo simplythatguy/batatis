@@ -31,6 +31,8 @@ filenames and IDs. The validator is `evals_dev/validate_cases.py`.
 |---|---|---|
 | `departure` | string | One line: what the design does instead of the acceptable solution. Empty for `ask`/`redirect` cases. |
 | `must_cite` | object[] | `{division, provision, role}`. Minimum provisions a correct answer identifies. `role` is `benchmark` (the acceptable solution departed from) or `scope` (applicability/handoff pointer). Empty for `ask` cases where the route is undecided. |
+| `identify_gold` | object[] | Optional. Ask cases only, and only while `must_cite` stays empty. `{division, provision, role, quote, label}`. `role` is `benchmark` (the primary retrieval target) or `secondary` (recorded, not a recall target). `label` is `model-checked, not human-verified`. `quote` is the codedb sentence kept as provenance. The benchmark scores this list as `scored_ask_identify_gold` and does not pool it into the `must_cite` headline. |
+| `identify_gold_candidates` | object[] | Optional. Unscored proposals, including medium and low confidence rows. Same provenance fields. The benchmark does not score them. |
 | `should_cite` | object[] | `{division, provision, why}`. Helpful or conditional references. Not recall targets; never penalised. In `ask` cases these are the candidate branches. |
 | `must_not_cite` | object[] | `{division, provision, prohibited_use, why}`. A provision that is wrong **as used** here (for example an exception whose condition the facts rule out). Mentioning it to reject it is fine. |
 | `section_c` | object[] | One row per benchmark sentence: `{provision, status, root_provision, pairs, conditional}`. Copied from `codedb.lookup(provision)`: `status` is the attribution status (`direct`, `none`, `clause_level`); `pairs` are unconditional table brackets such as `[F02,F03-OP3.1]`; `conditional` is `[{pair, when}]` for rows with an application note. `status: none` with empty `pairs` means the table has no row: Section C must say so and must not invent one. `root_provision` is the database's heuristic root and is never an attribution. |
@@ -50,9 +52,21 @@ Article 2.3.1.1.; they are not repeated in each `must_cite`.
 2. `section_c` equals the database rows for that provision: same unconditional bracket set, same
    conditional `(pair, when)` set, same status.
 3. `ask` cases have at least one `critical` missing field and an empty `must_cite`.
+   `identify_gold` does not fill `must_cite`.
 4. `redirect` cases have `out_of_scope: true` and a `redirect_to`.
 5. `description` contains no code article numbers.
 6. Edition: NBC(AE) 2023, 2nd printing only.
+
+## Article matching
+
+A ranked id and a gold provision match when they share the article id: the leading
+`N.N.N.N.` form. `9.25.5.2.(1)` and `9.25.5.2.` are the same article. A clause suffix
+is ignored. Stored gold keeps the sentence id. `engine.identify.benchmark` compares
+the article ids, so a sentence-level gold matches an article-level ranked id and the
+reverse. For `identify_gold`, only `role: benchmark` is the retrieval target.
+`role: secondary` is not a recall target, and committing that article is not a
+committed error. Committed errors on `scored_ask_identify_gold` are counted apart
+from `committed_errors_gold` and from `commits_no_gold`.
 
 ## Refreshing deterministic Section C values
 

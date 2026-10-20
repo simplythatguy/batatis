@@ -21,9 +21,18 @@ Leave-one-family-out does not change these ranks: identification does not read t
 precedent index.
 
 Every repeat is scored. The printed top-1, recall@5, MRR, ask rate and commit
-counts are the mean, with min, max and the per-repeat values. Gold is copied
-from must_cite only. A case with an empty must_cite is no-gold: it stays out of
-the accuracy rates, and a commit on it is counted separately, not as an error.
+counts are the mean, with min, max and the per-repeat values.
+
+Two groups are reported and never pooled:
+
+- scored_must_cite is the headline. Gold is must_cite only.
+- scored_ask_identify_gold scores ask cases that carry gold.identify_gold.
+  It measures retrieval of the primary article. It does not decide that the
+  article applies. Its committed errors are a separate count.
+
+A case with neither list is unscored. A commit on it is commits_no_gold, not
+an error. Article match uses the leading N.N.N.N. id, so a sentence such as
+9.25.5.2.(1) matches the ranked article 9.25.5.2.
 """
 from __future__ import annotations
 
@@ -47,12 +56,32 @@ PRICE_FLOOR_CAD = 125.0
 ARTICLE = re.compile(r'(\d+\.\d+\.\d+\.\d+\.)')
 SECRET_ENV = re.compile(r'(KEY|TOKEN|SECRET|PASSWORD)', re.I)
 METRIC_KEYS = ('top1', 'recall5', 'mrr', 'ask_rate', 'committed_errors_gold', 'commits_no_gold')
+ASK_METRIC_KEYS = ('top1', 'recall5', 'mrr', 'committed_errors_ask')
+ASK_GROUP = 'scored_ask_identify_gold'
+MUST_GROUP = 'scored_must_cite'
+ASK_NOTE = ('retrieval of the candidate article on ask cases; '
+            'measures finding the article, not deciding it applies')
+GOLD_LABEL = 'model-checked, not human-verified'
 DEFAULT_OUT = ROOT / 'out' / 'identify-benchmark'
 
 
 def _article(provision: str) -> str:
+    """Article id, the leading ``N.N.N.N.`` form.
+
+    ``9.25.5.2.(1)`` and ``9.25.5.2.`` are the same article. A clause suffix is
+    ignored. The stored gold keeps the sentence id; scores compare articles.
+    """
     match = ARTICLE.match(provision or '')
     return match.group(1) if match else provision
+
+
+def _articles(provisions) -> list[str]:
+    out: list[str] = []
+    for provision in provisions or []:
+        art = _article(provision)
+        if art and art not in out:
+            out.append(art)
+    return out
 
 
 def _die(message: str, code: int = 2) -> None:
@@ -104,20 +133,40 @@ def gold_from_entries(entries) -> tuple[list[str], list[dict]]:
     return gold, roles
 
 
+def split_identify_gold(entries) -> tuple[list[str], list[dict], list[str]]:
+    """Primary benchmark articles, their role rows, and secondary articles.
+
+    Only ``role: benchmark`` is the retrieval target. ``role: secondary`` is
+    recorded and is not a recall target. A commit of a secondary article is
+    not a committed error.
+    """
+    primary = [row for row in entries or [] if row.get('role') == 'benchmark']
+    secondary = [row for row in entries or [] if row.get('role') == 'secondary']
+    gold, roles = gold_from_entries(primary)
+    related, _roles = gold_from_entries(secondary)
+    return gold, roles, related
+
+
 def load_cases(source: str, count: int) -> list[dict]:
     rows: list[dict] = []
     if source in ('evals_dev', 'both'):
         for path in sorted((ROOT / 'evals_dev' / 'cases').glob('dev-*.json')):
             data = json.loads(path.read_text())
-            gold, roles = gold_from_entries((data.get('gold') or {}).get('must_cite') or [])
+            gold_block = data.get('gold') or {}
+            gold, roles = gold_from_entries(gold_block.get('must_cite') or [])
+            ask_gold, ask_roles, ask_secondary = split_identify_gold(gold_block.get('identify_gold') or [])
+            if gold and ask_gold:
+                _die(f'{data["id"]}: must_cite and identify_gold would pool two gold lists')
             rows.append({'id': data['id'], 'query': data['description'], 'gold': gold,
-                         'gold_roles': roles, 'pool': 'evals_dev'})
+                         'gold_roles': roles, 'ask_gold': ask_gold, 'ask_gold_roles': ask_roles,
+                         'ask_secondary': ask_secondary, 'pool': 'evals_dev'})
     if source in ('public', 'both'):
         public = json.loads((ROOT / 'evals_dev' / 'public_benchmark' / 'cases.json').read_text())
         for case in public:
             gold, roles = gold_from_entries(case.get('gold') or [])
             rows.append({'id': case['id'], 'query': case['query'], 'gold': gold,
-                         'gold_roles': roles, 'pool': 'public'})
+                         'gold_roles': roles, 'ask_gold': [], 'ask_gold_roles': [],
+                         'ask_secondary': [], 'pool': 'public'})
     if len(rows) < count:
         _die(f'{source} has {len(rows)} cases; this command requires at least {count}.')
     return rows[:count]
@@ -156,10 +205,13 @@ def repeat_metrics(rows: list[dict]) -> dict:
         top1 = recall5 = mrr = None
     errors_gold = 0
     commits_no_gold = 0
+    n_ask = 0
     for row in rows:
         if row['gold']:
             gold = set(row['gold'])
             errors_gold += sum(1 for art in row['committed'] if art not in gold)
+        elif row.get('ask_gold'):
+            n_ask += 1
         else:
             commits_no_gold += len(row['committed'])
     return {
@@ -170,7 +222,37 @@ def repeat_metrics(rows: list[dict]) -> dict:
         'committed_errors_gold': errors_gold,
         'commits_no_gold': commits_no_gold,
         'n_gold': n_gold,
-        'n_no_gold': n - n_gold,
+        'n_no_gold': n - n_gold - n_ask,
+        'n_ask_gold': n_ask,
+        'n': n,
+    }
+
+
+def ask_repeat_metrics(rows: list[dict]) -> dict:
+    """Retrieval metrics for ask cases with identify_gold. Not mixed into the headline.
+
+    ``gold`` here is the primary article list. ``secondary`` articles are not
+    recall targets, and committing one is not an error.
+    """
+    n = len(rows)
+    if not rows:
+        return {'top1': None, 'recall5': None, 'mrr': None, 'committed_errors_ask': 0, 'n': 0}
+    top1 = recall5 = mrr = 0.0
+    errors = 0
+    for row in rows:
+        gold = set(row['gold'])
+        allowed = gold | set(row.get('secondary') or [])
+        order = row['order']
+        hits = [index for index, art in enumerate(order) if art in gold]
+        top1 += 1 if set(order[:1]) & gold else 0
+        recall5 += len(set(order[:5]) & gold) / len(gold)
+        mrr += (1 / (hits[0] + 1)) if hits else 0
+        errors += sum(1 for art in row['committed'] if art not in allowed)
+    return {
+        'top1': top1 / n,
+        'recall5': recall5 / n,
+        'mrr': mrr / n,
+        'committed_errors_ask': errors,
         'n': n,
     }
 
@@ -202,7 +284,8 @@ def aggregate(per_case: list[dict]) -> dict:
     n_repeats = len(per_case[0]['repeats']) if per_case else 0
     per_repeat = []
     for index in range(n_repeats):
-        rows = [{'gold': case['gold'], 'order': case['repeats'][index]['order'],
+        rows = [{'gold': case['gold'], 'ask_gold': case.get('ask_gold') or [],
+                 'order': case['repeats'][index]['order'],
                  'intake': case['repeats'][index]['intake'],
                  'committed': case['repeats'][index]['committed']} for case in per_case]
         metrics = repeat_metrics(rows)
@@ -220,7 +303,38 @@ def aggregate(per_case: list[dict]) -> dict:
         'majority_top1_accuracy': (hits / len(gold_cases)) if gold_cases else None,
         'n_gold': per_repeat[0]['n_gold'] if per_repeat else 0,
         'n_no_gold': per_repeat[0]['n_no_gold'] if per_repeat else 0,
+        'n_ask_gold': per_repeat[0]['n_ask_gold'] if per_repeat else 0,
         'n': n,
+    }
+
+
+def ask_group_summary(per_case: list[dict]) -> dict:
+    """scored_ask_identify_gold. Separate from the must_cite headline."""
+    cases = [case for case in per_case if case.get('ask_gold')]
+    n_repeats = len(per_case[0]['repeats']) if per_case else 0
+    per_repeat = []
+    for index in range(n_repeats):
+        rows = [{
+            'gold': case['ask_gold'],
+            'secondary': case.get('ask_secondary') or [],
+            'order': case['repeats'][index]['order'],
+            'committed': case['repeats'][index]['committed'],
+        } for case in cases]
+        metrics = ask_repeat_metrics(rows)
+        metrics['repeat'] = index
+        per_repeat.append(metrics)
+    hits = sum(1 for case in cases if case.get('ask_majority_top1') in set(case['ask_gold']))
+    stable_n = sum(1 for case in cases if case.get('ask_stable'))
+    n = len(cases)
+    return {
+        'name': ASK_GROUP,
+        'note': ASK_NOTE,
+        'label': GOLD_LABEL,
+        'n': n,
+        'per_repeat': per_repeat,
+        'series': {key: _series(per_repeat, key) for key in ASK_METRIC_KEYS},
+        'stability': (stable_n / n) if n else None,
+        'majority_top1_accuracy': (hits / n) if n else None,
     }
 
 
@@ -265,9 +379,9 @@ def price_floor_line(variant: str, cad_per_case: float | None, fx: float, fx_dat
 
 def _read_repeat(result: dict, gold: list[str]) -> dict:
     usage = (result.get('trace') or {}).get('usage') or {}
-    order = list((result.get('trace') or {}).get('ranked_ids') or
-                 [row['provision'] for row in result.get('articles') or []])
-    committed = [row['provision'] for row in result.get('articles') or [] if row.get('committed')]
+    order = _articles((result.get('trace') or {}).get('ranked_ids') or
+                      [row['provision'] for row in result.get('articles') or []])
+    committed = _articles(row['provision'] for row in result.get('articles') or [] if row.get('committed'))
     gold_set = set(gold)
     first = next((index for index, art in enumerate(order) if art in gold_set), None) if gold else None
     return {
@@ -288,6 +402,9 @@ def _public_case(case: dict) -> dict:
         'id': case['id'],
         'gold': case['gold'],
         'gold_roles': case['gold_roles'],
+        'ask_gold': case.get('ask_gold') or [],
+        'ask_secondary': case.get('ask_secondary') or [],
+        'group': ASK_GROUP if case.get('ask_gold') else (MUST_GROUP if case['gold'] else 'unscored'),
         'majority_top1': case['majority_top1'],
         'stable': case['stable'],
         'repeats': [{
@@ -309,7 +426,8 @@ def _variant_lines(name: str, pins: dict, per_case: list[dict], summary: dict, *
     lines = [
         f"variant={name} screen={pins['screen'] or 'bm25'} {model_id_fields(pins, per_case)} "
         f"verify_chars={chars if chars is not None else 'n/a'} "
-        f"n={summary['n']} n_gold={summary['n_gold']} n_no_gold={summary['n_no_gold']} "
+        f"n={summary['n']} n_gold={summary['n_gold']} n_ask_gold={summary['n_ask_gold']} "
+        f"n_no_gold={summary['n_no_gold']} "
         f"repeats={repeats} fallbacks={fallbacks} "
         f"input_tokens_per_case={input_per_case:.1f} output_tokens_per_case={output_per_case:.1f} "
         f"p50_ms={_fmt(_percentile(latencies, 50), 1)} p95_ms={_fmt(_percentile(latencies, 95), 1)} "
@@ -323,7 +441,7 @@ def _variant_lines(name: str, pins: dict, per_case: list[dict], summary: dict, *
             f"ask_rate={_fmt(rep['ask_rate'])} "
             f"committed_errors_gold={rep['committed_errors_gold']} "
             f"commits_no_gold={rep['commits_no_gold']} "
-            f"n_gold={rep['n_gold']} n_no_gold={rep['n_no_gold']}"
+            f"n_gold={rep['n_gold']} n_ask_gold={rep['n_ask_gold']} n_no_gold={rep['n_no_gold']}"
         )
     lines.append(
         f"variant={name} summary "
@@ -373,20 +491,24 @@ def write_results(payload: dict, out_dir: Path) -> None:
         _die('refusing to write benchmark output that contains a key')
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / 'results.json').write_text(text)
-    fields = ['variant', 'row', 'repeat', 'top1', 'recall5', 'mrr', 'ask_rate',
-              'committed_errors_gold', 'commits_no_gold', 'n_gold', 'n_no_gold', 'n',
+    fields = ['group', 'variant', 'row', 'repeat', 'top1', 'recall5', 'mrr', 'ask_rate',
+              'committed_errors_gold', 'committed_errors_ask', 'commits_no_gold',
+              'n_gold', 'n_no_gold', 'n',
               'stability', 'majority_top1', 'input_tokens_per_case', 'output_tokens_per_case',
               'p50_ms', 'p95_ms', 'usd_per_case', 'cad_per_case', 'fx_usd_cad', 'fx_date',
-              'rerank_model', 'rerank_returned', 'verifier_model', 'verifier_returned']
+              'rerank_model', 'rerank_returned', 'verifier_model', 'verifier_returned', 'note']
     with (out_dir / 'summary.csv').open('w', newline='') as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
         for variant in payload['variants']:
             common = {
+                'group': MUST_GROUP,
                 'variant': variant['name'],
                 'n_gold': variant['n_gold'],
                 'n_no_gold': variant['n_no_gold'],
                 'n': variant['n'],
+                'note': 'headline',
+                'committed_errors_ask': '',
                 'fx_usd_cad': payload['fx_usd_cad'],
                 'fx_date': payload['fx_date'],
                 'rerank_model': (variant['requested_models'] or {}).get('rerank') or '',
@@ -418,6 +540,46 @@ def write_results(payload: dict, out_dir: Path) -> None:
                     'stability': variant['stability'] if label == 'mean' else '',
                     'majority_top1': variant['majority_top1_accuracy'] if label == 'mean' else '',
                 })
+            ask = variant.get('groups', {}).get(ASK_GROUP) or {}
+            ask_series = ask.get('series') or {}
+            ask_common = {
+                'group': ASK_GROUP,
+                'variant': variant['name'],
+                'n_gold': '',
+                'n_no_gold': '',
+                'n': ask.get('n') or 0,
+                'note': ask.get('note') or ASK_NOTE,
+                'committed_errors_gold': '',
+                'commits_no_gold': '',
+                'ask_rate': '',
+                'fx_usd_cad': payload['fx_usd_cad'],
+                'fx_date': payload['fx_date'],
+                'rerank_model': common['rerank_model'],
+                'rerank_returned': common['rerank_returned'],
+                'verifier_model': common['verifier_model'],
+                'verifier_returned': common['verifier_returned'],
+                'input_tokens_per_case': '',
+                'output_tokens_per_case': '',
+                'p50_ms': '',
+                'p95_ms': '',
+                'usd_per_case': '',
+                'cad_per_case': '',
+            }
+            for rep in ask.get('per_repeat') or []:
+                writer.writerow({**ask_common, 'row': 'repeat', 'repeat': rep['repeat'],
+                                 'top1': rep['top1'], 'recall5': rep['recall5'], 'mrr': rep['mrr'],
+                                 'committed_errors_ask': rep['committed_errors_ask'],
+                                 'stability': '', 'majority_top1': ''})
+            for label, pick in (('mean', 'mean'), ('min', 'min'), ('max', 'max')):
+                writer.writerow({
+                    **ask_common, 'row': label, 'repeat': '',
+                    'top1': (ask_series.get('top1') or {}).get(pick),
+                    'recall5': (ask_series.get('recall5') or {}).get(pick),
+                    'mrr': (ask_series.get('mrr') or {}).get(pick),
+                    'committed_errors_ask': (ask_series.get('committed_errors_ask') or {}).get(pick),
+                    'stability': ask.get('stability') if label == 'mean' else '',
+                    'majority_top1': ask.get('majority_top1_accuracy') if label == 'mean' else '',
+                })
 
 
 def run_variants(cases: list[dict], repeats: int, fx: float, fx_date: str, *,
@@ -438,7 +600,9 @@ def run_variants(cases: list[dict], repeats: int, fx: float, fx_date: str, *,
     print(f'identify-benchmark provider=openai cases={len(cases)} repeats={repeats} '
           f'fx_usd_cad={fx} fx_date={fx_date} price_floor_cad={PRICE_FLOOR_CAD:.2f}')
     print('lofo=unchanged identification does not read the precedent index')
-    print('accuracy=mean_of_every_repeat gold=must_cite_only no_gold_commits_are_not_errors')
+    print('accuracy=mean_of_every_repeat headline=scored_must_cite '
+          'ask_group=scored_ask_identify_gold_not_pooled '
+          'article_match=sentence_id_equals_article_id')
     exit_code = 0
     written_variants = []
     for name, kwargs, pins in variants:
@@ -457,20 +621,41 @@ def run_variants(cases: list[dict], repeats: int, fx: float, fx_date: str, *,
                     fallbacks += 1
                 reps.append(rep)
             tops = [rep['order'][0] if rep['order'] else None for rep in reps]
+            ask_gold = list(case.get('ask_gold') or [])
             per_case.append({
                 'id': case['id'], 'gold': list(case['gold']),
                 'gold_roles': list(case.get('gold_roles') or []),
+                'ask_gold': ask_gold,
+                'ask_secondary': list(case.get('ask_secondary') or []),
+                'ask_majority_top1': majority_top1(tops) if ask_gold else None,
+                'ask_stable': len(set(tops)) <= 1 if ask_gold else None,
                 'majority_top1': majority_top1(tops),
                 'stable': len(set(tops)) <= 1,
                 'repeats': reps,
             })
         summary = aggregate(per_case)
+        ask_summary = ask_group_summary(per_case)
         usd, cad, input_per_case, output_per_case = _cost(per_case, fx)
         for line in _variant_lines(name, pins, per_case, summary, repeats=repeats, fallbacks=fallbacks,
                                    input_per_case=input_per_case, output_per_case=output_per_case,
                                    latencies=latencies, usd=usd, cad=cad, fx=fx, fx_date=fx_date):
             print(line)
         print(price_floor_line(name, cad, fx, fx_date))
+        for rep in ask_summary['per_repeat']:
+            print(f"group={ASK_GROUP} variant={name} repeat={rep['repeat']} "
+                  f"top-1={_fmt(rep['top1'])} recall@5={_fmt(rep['recall5'])} MRR={_fmt(rep['mrr'])} "
+                  f"committed_errors_ask={rep['committed_errors_ask']} n={rep['n']} "
+                  f"label={GOLD_LABEL!r}")
+        ask_series = ask_summary['series']
+        print(f"group={ASK_GROUP} variant={name} summary n={ask_summary['n']} "
+              + ' '.join(
+                  f"{key}_mean={_fmt(ask_series[key]['mean'])} {key}_min={_fmt(ask_series[key]['min'])} "
+                  f"{key}_max={_fmt(ask_series[key]['max'])}"
+                  for key in ASK_METRIC_KEYS
+              )
+              + f" stability={_fmt(ask_summary['stability'])} "
+              f"majority_top1={_fmt(ask_summary['majority_top1_accuracy'])} "
+              f"note={ASK_NOTE!r}")
         if name != 'a_bm25' and fallbacks == len(per_case) * repeats:
             exit_code = 1
             print(f'variant={name} provider calls all fell back to BM25; check the OpenAI account, not this log, for the key.',
@@ -493,6 +678,18 @@ def run_variants(cases: list[dict], repeats: int, fx: float, fx_date: str, *,
             'n_gold': summary['n_gold'],
             'n_no_gold': summary['n_no_gold'],
             'n': summary['n'],
+            'groups': {
+                MUST_GROUP: {
+                    'name': MUST_GROUP,
+                    'n': summary['n_gold'],
+                    'note': 'headline accuracy on must_cite; not pooled with scored_ask_identify_gold',
+                    'per_repeat': summary['per_repeat'],
+                    'series': summary['series'],
+                    'stability': summary['stability'],
+                    'majority_top1_accuracy': summary['majority_top1_accuracy'],
+                },
+                ASK_GROUP: ask_summary,
+            },
             'fallbacks': fallbacks,
             'input_tokens_per_case': input_per_case,
             'output_tokens_per_case': output_per_case,
@@ -512,7 +709,13 @@ def run_variants(cases: list[dict], repeats: int, fx: float, fx_date: str, *,
         'fx_date': fx_date,
         'repeats': repeats,
         'n_cases': len(cases),
-        'gold_provenance': 'must_cite on evals_dev; public cases use their gold string list. Empty gold is left empty.',
+        'gold_provenance': (
+            'Headline scored_must_cite copies must_cite only. '
+            'scored_ask_identify_gold copies gold.identify_gold role benchmark and is not pooled. '
+            'identify_gold_candidates are unscored. '
+            'Article match: the leading N.N.N.N. id, so 9.25.5.2.(1) matches ranked 9.25.5.2. '
+            'Ask identify_gold is model-checked, not human-verified.'
+        ),
         'variants': written_variants,
     }
     write_results(payload, out_dir or DEFAULT_OUT)

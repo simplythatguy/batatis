@@ -59,7 +59,35 @@
     ],
     "intake_action": "ask",
     "out_of_scope": false,
-    "redirect_to": null
+    "redirect_to": null,
+    "identify_gold": [
+      {
+        "division": "B",
+        "provision": "9.23.10.1.(1)",
+        "role": "benchmark",
+        "tier": "primary",
+        "confidence": "high",
+        "label": "model-checked, not human-verified",
+        "quote": "The size and spacing of studs shall conform to Table 9.23.10.1.",
+        "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+        "pdf_page": 974,
+        "reasoning": "Table 9.23.10.1. (PDF p.975, checked visually): exterior walls carrying 'roof with or without attic storage plus one floor' allow 38 \u00d7 89 at max 400 mm (or 38 \u00d7 140 at 600 mm). 2x4 at 600 mm supporting the second floor and roof departs from the table."
+      }
+    ],
+    "identify_gold_candidates": [
+      {
+        "division": "B",
+        "provision": "9.4.1.1.(1)",
+        "role": "scope",
+        "tier": "secondary",
+        "confidence": "high",
+        "label": "model-checked, not human-verified",
+        "quote": "be designed according to Part 4 using the loads and deflection and vibration limits specified in",
+        "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+        "pdf_page": 836,
+        "reasoning": "Alternative acceptable-solution route (engineered design) for the proprietary header and stud system. If the manufacturer designs to Part 4 or good engineering practice, there may be no variance at all."
+      }
+    ]
   },
   "authoring": {
     "source": "codedb",

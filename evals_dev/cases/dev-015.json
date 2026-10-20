@@ -66,7 +66,34 @@
     ],
     "intake_action": "ask",
     "out_of_scope": false,
-    "redirect_to": null
+    "redirect_to": null,
+    "identify_gold": [
+      {
+        "division": "B",
+        "provision": "9.9.9.1.(1)",
+        "role": "benchmark",
+        "tier": "primary",
+        "confidence": "high",
+        "label": "model-checked, not human-verified",
+        "quote": "every dwelling unit containing more than 1 storey shall have exits or egress doors located so that it shall not be necessary to travel up or down more than 1 storey to reach a level served by",
+        "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+        "pdf_page": 872,
+        "reasoning": "Attic bedroom in a two-storey house: from the attic the occupant travels down two storeys to the front door. The window exception (2) needs a \u22651 m \u00d7 0.55 m opening with a sill \u22641 m above the floor; 'small skylights' is not a measurement, so the case stays 'ask', but this is the provision."
+      },
+      {
+        "division": "B",
+        "provision": "9.9.10.1.",
+        "role": "secondary",
+        "tier": "secondary",
+        "confidence": "medium",
+        "label": "model-checked, not human-verified",
+        "quote": "Except where the suite is sprinklered, each bedroom or combination bedroom shall have at least one outside window or exterior door openable from the inside",
+        "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+        "pdf_page": 873,
+        "reasoning": "The new attic bedroom also triggers the bedroom egress-window requirement (opening size in 9.9.10.1.(2)); small skylights may fail it too. Secondary because the applicant's question is about the way out, and this applies unless the suite is sprinklered.",
+        "quoted_provision": "9.9.10.1.(1)"
+      }
+    ]
   },
   "authoring": {
     "source": "codedb",

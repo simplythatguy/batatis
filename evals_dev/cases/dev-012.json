@@ -74,7 +74,33 @@
     ],
     "intake_action": "ask",
     "out_of_scope": false,
-    "redirect_to": null
+    "redirect_to": null,
+    "identify_gold_candidates": [
+      {
+        "division": "B",
+        "provision": "9.23.13.1.(2)",
+        "role": "benchmark",
+        "tier": "primary",
+        "confidence": "low",
+        "label": "model-checked, not human-verified",
+        "quote": "Bracing to resist lateral loads shall be designed and constructed as follows",
+        "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+        "pdf_page": 978,
+        "reasoning": "Low-to-moderate forces branch. The departure ('no separate braced wall panels', relying on SIP supplier shear values) is a lateral-bracing departure, but which article governs depends on Sa(0.2) and the 1-in-50 hourly wind pressure, not given; and (2)(b)(ii)/(iii) allow Part 4 or good engineering practice."
+      },
+      {
+        "division": "B",
+        "provision": "9.23.13.2.(2)",
+        "role": "candidate",
+        "tier": "secondary",
+        "confidence": "low",
+        "label": "model-checked, not human-verified",
+        "quote": "Bracing to resist lateral loads shall be designed and constructed in accordance with a) Articles 9.23.13.4. to 9.23.13.7., b) Part 4, or c) good engineering practice",
+        "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+        "pdf_page": 979,
+        "reasoning": "High-force branch, if the Cochrane site exceeds 9.23.13.1.(1) limits (not verified here)."
+      }
+    ]
   },
   "authoring": {
     "source": "codedb",

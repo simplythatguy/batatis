@@ -71,7 +71,35 @@
     ],
     "intake_action": "ask",
     "out_of_scope": false,
-    "redirect_to": null
+    "redirect_to": null,
+    "identify_gold": [
+      {
+        "division": "B",
+        "provision": "9.25.5.2.(1)",
+        "role": "benchmark",
+        "tier": "primary",
+        "confidence": "high",
+        "label": "model-checked, not human-verified",
+        "quote": "at a location where the ratio between the total thermal resistance of all materials outboard of its innermost impermeable surface and the total thermal resistance of all materials inboard of that surface is not less than that required by Table 9.25.5.2.",
+        "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+        "pdf_page": 1000,
+        "reasoning": "'Outboard insulation is too thin for that wall' is exactly the outboard-to-inboard thermal-resistance ratio in Clause (1)(b); the foil-faced (essentially impermeable) board is a low-permeance sheet material. Whether the design actually fails the ratio is an intake question, but the provision at issue is this one."
+      }
+    ],
+    "identify_gold_candidates": [
+      {
+        "division": "B",
+        "provision": "9.25.5.1.(1)",
+        "role": "scope",
+        "tier": "secondary",
+        "confidence": "high",
+        "label": "model-checked, not human-verified",
+        "quote": "sheet and panel-type materials incorporated into assemblies described in Article 9.25.1.1. shall conform to Article 9.25.5.2.",
+        "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+        "pdf_page": 999,
+        "reasoning": "Scope gate (air leakage < 0.1 L/(s\u00d7m\u00b2), dry-cup permeance < 60 ng/(Pa\u00d7s\u00d7m\u00b2), no high moisture). Not the varied provision."
+      }
+    ]
   },
   "authoring": {
     "source": "codedb",

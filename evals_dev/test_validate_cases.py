@@ -46,6 +46,40 @@ def test_rejects_wrong_pair(con, cases):
     assert any('pairs' in e for e in errors)
 
 
+ADOPTED = {'dev-006', 'dev-010', 'dev-011', 'dev-015'}
+CANDIDATES = {'dev-005', 'dev-007', 'dev-009', 'dev-012'}
+LABEL = 'model-checked, not human-verified'
+
+
+def test_ask_identify_gold_is_labelled_and_must_cite_stays_empty(cases):
+    by = {case['id']: case for case in cases}
+    for cid in ADOPTED:
+        gold = by[cid]['gold']
+        assert gold['intake_action'] == 'ask' and gold['must_cite'] == []
+        assert gold['identify_gold']
+        for row in gold['identify_gold']:
+            assert row['label'] == LABEL and row['quote'].strip()
+    assert [row['provision'] for row in by['dev-015']['gold']['identify_gold']] == [
+        '9.9.9.1.(1)', '9.9.10.1.']
+    assert by['dev-015']['gold']['identify_gold'][1]['role'] == 'secondary'
+    assert by['dev-015']['gold']['identify_gold'][1]['quoted_provision'] == '9.9.10.1.(1)'
+    for cid in CANDIDATES:
+        gold = by[cid]['gold']
+        assert gold['must_cite'] == [] and 'identify_gold' not in gold
+        assert gold['identify_gold_candidates']
+        for row in gold['identify_gold_candidates']:
+            assert row['label'] == LABEL and row['quote'].strip()
+    assert 'identify_gold' not in by['dev-020']['gold']
+    assert 'identify_gold_candidates' not in by['dev-020']['gold']
+
+
+def test_rejects_invented_identify_gold(con, cases):
+    case = by_id(cases, 'dev-006')
+    case['gold']['identify_gold'][0]['provision'] = '9.25.5.2.(99)'
+    errors, _counts = vc.validate([case], con)
+    assert any('not in database' in error for error in errors)
+
+
 def test_rejects_invented_provision(con, cases):
     c = by_id(cases, 'dev-001')
     c['gold']['must_cite'].append({'division': 'B', 'provision': '9.10.15.5.(99)', 'role': 'benchmark'})

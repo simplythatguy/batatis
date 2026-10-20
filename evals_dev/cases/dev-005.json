@@ -75,7 +75,45 @@
     ],
     "intake_action": "ask",
     "out_of_scope": false,
-    "redirect_to": null
+    "redirect_to": null,
+    "identify_gold_candidates": [
+      {
+        "division": "B",
+        "provision": "9.10.14.5.(1)",
+        "role": "benchmark",
+        "tier": "primary",
+        "confidence": "low",
+        "label": "model-checked, not human-verified",
+        "quote": "each exposing building face and any exterior wall located above an exposing building face that encloses an attic or roof space shall be constructed in conformance with Table 9.10.14.5.-A",
+        "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+        "pdf_page": 897,
+        "reasoning": "The applicant says the code 'calls for noncombustible cladding' on walls close to the property line of small apartment buildings; in Part 9 that cladding requirement comes from Table 9.10.14.5.-A via Sentence (1). 9.10.14. (not 9.10.15.) is the Part 9 subsection for apartment buildings unless no dwelling unit is above another (9.10.15.1.(1)), which the description doesn't say."
+      },
+      {
+        "division": "B",
+        "provision": "9.10.14.5.(2)",
+        "role": "candidate",
+        "tier": "secondary",
+        "confidence": "low",
+        "label": "model-checked, not human-verified",
+        "quote": "need not be noncombustible where the wall assembly complies with the requirements of Clause 3.1.5.5.(1)(b) when tested in conformance with CAN/ULC-S134",
+        "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+        "pdf_page": 897,
+        "reasoning": "The full-scale test the manufacturer hasn't done is the tested-wall permission; useful to rank, but it is the route not taken, not the provision varied."
+      },
+      {
+        "division": "B",
+        "provision": "3.2.3.7.(1)",
+        "role": "candidate",
+        "tier": "secondary",
+        "confidence": "low",
+        "label": "model-checked, not human-verified",
+        "quote": "the fire-resistance rating, construction and cladding for exposing building faces of buildings or fire compartments of Group A, B, C, D or Group F, Division 3 occupancy classification shall comply with Table 3.2.3.7.",
+        "quote_check": "exact substring of codedb provisions.text (whitespace-normalized)",
+        "pdf_page": 212,
+        "reasoning": "Part 3 branch: if the 'small apartment buildings' exceed Part 9 limits (height/area not given), the same cladding requirement comes from 3.2.3.7.(1)."
+      }
+    ]
   },
   "authoring": {
     "source": "codedb",
