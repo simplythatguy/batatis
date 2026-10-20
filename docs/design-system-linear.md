@@ -11,6 +11,7 @@ Default product look for all Batatis UI. Agents apply this **without** being ask
 | Skill | [`.cursor/skills/batatis-ui-linear/SKILL.md`](../.cursor/skills/batatis-ui-linear/SKILL.md) |
 | Shared gaps | [`evals/ui-artifacts/shared-gaps.js`](../evals/ui-artifacts/shared-gaps.js) |
 | Smoke | [`evals/ui-artifacts/smoke.mjs`](../evals/ui-artifacts/smoke.mjs) |
+| Captures | [`evals/ui-artifacts/screenshots.mjs`](../evals/ui-artifacts/screenshots.mjs) |
 
 ## Opus P0 (blocking)
 
@@ -22,6 +23,9 @@ Default product look for all Batatis UI. Agents apply this **without** being ask
 6. **Styled** select / checkbox / textarea (no browser defaults; no resize handle).
 7. **Buttons** `white-space: nowrap`; `.btn-row` wraps (never clips via `overflow-x`).
 8. **Previews equal sources** — PDF / SCO values come from the same objects as the Section C table; gates name unconfirmed articles.
+9. **Every control works** — nav = links, actions change visible state, styled `<dialog>` not `alert()`, disabled reasons inline.
+10. **No silent defaults** — unanswered selects start empty; prefilled values are marked.
+11. **Panes scroll, not the page.**
 
 `--focus-ring: #5e6ad2` is for **focus only**, not button identity.
 

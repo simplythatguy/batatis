@@ -14,7 +14,7 @@ alwaysApply: false
 For **all** Batatis product UI / frontend / visual / UX work matching these globs:
 
 1. **Look:** Follow `.cursor/skills/batatis-ui-linear/SKILL.md` + `docs/design/tokens.css`. Charcoal layers, thin borders, Inter-like sans, 8px grid, sidebar+main. User need not say “Linear.”
-2. **Opus P0:** Neutral grey primary CTAs (not indigo fill); active nav faint fill only; shared gap source; gate complete/download while gaps open; no demo leakage; styled controls; nowrap labels in wrapping rows (no clipping); previews show real values (no `[placeholder]` / `present`). Formal seal = Opus 5.5 (Composer is provisional).
+2. **Opus P0:** Neutral grey primary CTAs (not indigo fill); active nav faint fill only; shared gap source; gate complete/download while gaps open; no demo leakage; styled controls; nowrap labels in wrapping rows (no clipping); previews show real values (no `[placeholder]` / `present`); every control wired (nav = links, no `alert()`); no silent defaults; one derived data model. Formal seal = Opus 5.5 (Composer is provisional).
 3. **Simplify ruthlessly without dropping capabilities.**
 4. **Model:** Claude Opus 5.5 for UI implement **and** UI review.
 5. **Bug-free bar:** smoke `evals/ui-artifacts/smoke.mjs`; cite ≠ AI; confidence/no silent fills.

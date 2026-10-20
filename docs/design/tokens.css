@@ -1,11 +1,11 @@
 /**
- * Batatis product UI tokens — Linear-inspired system (default look).
+ * Batatis product UI tokens — Batatis default product system.
  * Opus seal (round 1): primary CTAs are NEUTRAL, not indigo-filled.
  * --accent / focus indigo is focus-ring only — never filled button identity.
  * Reference: docs/design/linear-reference/
  */
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
 
 :root {
   /* —— Surfaces —— */
@@ -59,7 +59,7 @@
   --pdf-sheet-text: #1a1a1c;
   --pdf-sheet-muted: #5c5c62;
 
-  --font-sans: "Inter", "Linear Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
   --text-xs: 11px;
   --text-sm: 12px;
@@ -175,7 +175,14 @@ a {
 .btn[disabled] {
   opacity: 0.4;
   cursor: not-allowed;
-  pointer-events: none;
+}
+
+.btn:disabled:hover {
+  background: var(--bg-elevated);
+}
+
+.btn-primary:disabled:hover {
+  background: var(--btn-primary-bg);
 }
 
 .btn-ghost {
@@ -327,7 +334,8 @@ a {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 16px);
+  height: calc(100vh - 16px);
+  min-height: 0;
 }
 
 .panel-header {
@@ -442,7 +450,7 @@ a {
 }
 
 .field select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none' stroke='%898a8e' stroke-width='1.5'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none' stroke='%23898a8e' stroke-width='1.5'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
   padding-right: 28px;
@@ -612,4 +620,100 @@ input[type="checkbox"]:focus-visible {
   font-variant-numeric: tabular-nums;
   font-weight: var(--weight-medium);
   white-space: nowrap;
+}
+
+a.nav-item,
+a.gap-chip,
+a.gap-item {
+  color: inherit;
+  text-decoration: none;
+}
+
+a.gap-chip:hover,
+a.gap-item:hover {
+  color: var(--text-primary);
+}
+
+a.gap-chip:focus-visible,
+a.gap-item:focus-visible,
+a.btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+a.btn {
+  text-decoration: none;
+}
+
+.sidebar-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 28px;
+  padding: 0 var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--text-md);
+}
+
+.sidebar-meta svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0.85;
+}
+
+.content-col {
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.status-note {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-right: auto;
+}
+
+.status-note:empty {
+  display: none;
+}
+
+.dialog {
+  width: min(480px, calc(100vw - 32px));
+  padding: 0;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+.dialog::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.dialog-body {
+  padding: var(--space-4);
+}
+
+.dialog-title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+}
+
+.dialog .footer-bar {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.field-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+[hidden] {
+  display: none !important;
 }

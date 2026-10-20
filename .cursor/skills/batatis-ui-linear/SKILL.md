@@ -17,7 +17,7 @@ References: `../../../docs/design/linear-reference/`
 Tokens: `../../../docs/design/tokens.css`  
 Doc: `../../../docs/design-system-linear.md`  
 Shared gaps: `../../../evals/ui-artifacts/shared-gaps.js`  
-Smoke: `../../../evals/ui-artifacts/smoke.mjs`
+Smoke: `../../../evals/ui-artifacts/smoke.mjs` · Captures: `../../../evals/ui-artifacts/screenshots.mjs`
 
 ## Opus P0 (must not fail)
 
@@ -30,7 +30,10 @@ Smoke: `../../../evals/ui-artifacts/smoke.mjs`
 | 5 | **No demo/template leakage** — no “demo” rows; no bracket placeholders (`[linked excerpt]`); no status words standing in for values (`present`, `from registry`). Render the real value or `—` + gap. |
 | 6 | **Styled controls** — custom select, 14px thin-border checkbox (neutral checked), `resize: none` on textareas. No browser-default chrome. |
 | 7 | **Labels never wrap, rows never clip** — `.btn` is `white-space: nowrap`; `.btn-row` uses `flex-wrap: wrap` (never `overflow-x` scroll that hides a button). Shorten labels for narrow detail panes. |
-| 8 | **One data source per value** — Section C table, SCO and PDF preview read the same article/process objects; preview text must equal the table values. Gates name the unconfirmed articles. |
+| 8 | **One data model, derived everywhere** — fields, article status, Section C and Section D live in one state object; gaps, counts, summaries and previews are computed from it and recompute on input. Preview text must equal the table values. Gates name the unconfirmed articles. |
+| 9 | **Every control works** — nav items are links; Back/Continue navigate; each action changes visible state (saved note, dialog, status, download). No inert buttons, no `href="#"`, no native `alert()` — use a styled `<dialog>`. Disabled controls show their reason inline. |
+| 10 | **No silent defaults** — unanswered selects start at "Select…" with empty styling; prefilled values carry a marker (inferred, defaulted) and a way to confirm. |
+| 11 | **Panes scroll, the page does not** — fixed-height shell; list, detail and preview panes own their overflow. |
 
 `--focus-ring` / `--accent` (`#5e6ad2`) = **focus rings only** (and optional sparse status). Not CTA identity, not active nav.
 
@@ -61,6 +64,7 @@ Smoke: `../../../evals/ui-artifacts/smoke.mjs`
 - Live demo rows; browser-default checkbox/select; wrapping button labels; clipped buttons in narrow panes
 - `[placeholder]` strings or `present` / `from registry` instead of real values in previews
 - Mark admin-complete / Download enabled while blocking gaps open
+- Inert nav/footer controls, `alert()`, selects defaulting silently, gap lists typed by hand instead of derived
 - Green “lookup” text spam; disc bullets; missing status dots on queue rows
 
 ## Implementation checklist
@@ -73,5 +77,5 @@ Smoke: `../../../evals/ui-artifacts/smoke.mjs`
 6. Styled checkbox/select/textarea; nowrap labels in wrapping rows (nothing clipped); thin-stroke icons.
 7. Status dots from the single map; lookup = neutral pills.
 8. Required empties: `.field.is-empty` + status dot (not placeholder-only).
-9. Run `node evals/ui-artifacts/smoke.mjs`.
+9. Run `node evals/ui-artifacts/smoke.mjs` (chrome, clipping, leakage, every control, cross-screen happy path), then `screenshots.mjs`.
 10. Opus 5.5 re-seal against `evals/battle-prompts/ui-blind/README.md`.
