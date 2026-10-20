@@ -79,41 +79,26 @@ class ClaudeVerifier:
                  max_tokens: int = 16000):
         self.arts = articles(Path(db_path))
         self.model, self.effort, self.max_tokens = model, effort, max_tokens
-        self._injected = client is not None
+        if client is None:
+            import anthropic
+            if not os.environ.get('ANTHROPIC_API_KEY'):
+                raise RuntimeError('ANTHROPIC_API_KEY is not set')
+            client = anthropic.Anthropic()
         self.client = client
 
     def prompt(self, query: str, candidates: list[str]) -> str:
         listed = '\n\n'.join(f'<article id="{a}">\n{card(self.arts[a], None)}\n</article>' for a in candidates)
         return f'<proposal>\n{query}\n</proposal>\n\n<candidates>\n{listed}\n</candidates>'
 
-    def _client(self):
-        if self.client is None:
-            import anthropic
-            if not os.environ.get('ANTHROPIC_API_KEY'):
-                raise RuntimeError('ANTHROPIC_API_KEY is not set')
-            self.client = anthropic.Anthropic()
-        return self.client
-
     def verify(self, query: str, candidates: list[str]) -> Verification:
-        from ..llm_gate import authorize, record
-        decision = None
-        if not self._injected:
-            decision = authorize(model=self.model, max_input_tokens=8000, max_output_tokens=self.max_tokens)
-            if not decision.allowed:
-                return Verification([], [], decision.source,
-                                    {'source': decision.source, 'input_tokens': 0, 'output_tokens': 0}, 0.0)
         candidates = [a for a in candidates if a in self.arts]
         t0 = time.monotonic()
-        resp = self._client().messages.parse(
+        resp = self.client.messages.parse(
             model=self.model, max_tokens=self.max_tokens, system=SYSTEM,
             output_config={'effort': self.effort}, output_format=Picks,
             messages=[{'role': 'user', 'content': self.prompt(query, candidates)}])
         seconds = time.monotonic() - t0
         usage = {'input_tokens': resp.usage.input_tokens, 'output_tokens': resp.usage.output_tokens}
-        if decision is not None:
-            record(model=self.model, input_tokens=usage['input_tokens'], output_tokens=usage['output_tokens'],
-                   reserved_usd=decision.reserved_usd)
-            usage = usage | {'source': decision.source}
         if resp.stop_reason == 'refusal' or resp.parsed_output is None:
             return Verification([], [], resp.stop_reason, usage, seconds)
         keep, dropped = check_quotes(resp.parsed_output.picks, candidates, self.arts)

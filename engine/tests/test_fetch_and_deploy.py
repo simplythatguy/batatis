@@ -98,7 +98,6 @@ def test_vercel_config_keeps_sqlite_on_the_engine_only():
     assert 'fetch_sources.py' in build
     assert 'Refusing to deploy without a verified code database' in build
     client = (ROOT / 'web' / 'src' / 'api' / 'client.ts').read_text()
-    screen = (ROOT / 'web' / 'src' / 'screens' / 'Describe.tsx').read_text()
     assert 'VITE_API_BASE' in client
-    assert 'PDF too large: the limit is 4 MB' in client
-    assert 'PDF_TOO_LARGE' in screen and 'e.status === 413' in screen
+    assert 'PDF too large' not in client
+    assert 'PDF too large: the limit is 4 MB' in (ROOT / 'engine' / 'uploads.py').read_text()

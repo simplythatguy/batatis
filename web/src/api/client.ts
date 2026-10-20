@@ -4,9 +4,6 @@
  * Set VITE_API_BASE to call another origin (default `/api`). VITE_ENGINE_URL is the previous name.
  * `createEngine(base)` serves scripts and tests outside Vite.
  */
-export const PDF_MAX_BYTES = 4 * 1024 * 1024;
-export const PDF_TOO_LARGE =
-  "PDF too large: the limit is 4 MB. Try compressing the file or splitting it.";
 import type { Case, FactInput, NewCase, SectionCRow } from "./types.gen";
 
 /** A provision returned by GET /code/search (engine/codes.py `Codes.search`). */
@@ -91,29 +88,6 @@ export function createEngine(base: string) {
     /** Section C rows by deterministic lookup, in input order (an article expands to its sentences). */
     sectionC: (provisions: string[], signal?: AbortSignal) =>
       call<SectionCRow[]>("POST", "/section-c", { provisions }, signal),
-    /** Multipart PDF upload. A 413 carries PDF_TOO_LARGE as `detail`. */
-    uploadPdf: async (caseId: string, file: File, signal?: AbortSignal) => {
-      const body = new FormData();
-      body.append("file", file, file.name);
-      let res: Response;
-      try {
-        res = await fetch(`${base}/cases/${enc(caseId)}/files`, { method: "POST", body, signal });
-      } catch (e) {
-        if (signal?.aborted) throw e;
-        throw new EngineError(0, e instanceof Error ? e.message : String(e));
-      }
-      if (!res.ok) {
-        let detail = res.statusText;
-        try {
-          const j = await res.json();
-          detail = typeof j.detail === "string" ? j.detail : JSON.stringify(j.detail ?? j);
-        } catch {
-          /* keep statusText */
-        }
-        throw new EngineError(res.status, detail);
-      }
-      return (await res.json()) as { id: string; name: string; size: number; content_type: string };
-    },
   };
 }
 

@@ -247,19 +247,3 @@ def check_completeness(case: Case, codes: Codes, *,
                     item.performance_issue + ' Select appropriate evidence types with the responsible designer; not every ladder rung is required.',
                     item.citation)
     return gaps
-
-
-def model_findings(document_text: str, *, client_ip: str | None = None) -> dict:
-    """Completeness model review enters through the live gate. Offline is the default.
-
-    An allowed call still returns no findings here: this branch does not send applicant
-    text to a provider and does not draft risk, mitigations, or assumptions. The
-    completeness pipeline records actual tokens around its own provider call.
-    """
-    from .llm_gate import DEFAULT_MODEL, authorize, record
-    decision = authorize(model=DEFAULT_MODEL, max_input_tokens=min(8000, max(1, len(document_text) // 4 + 1)),
-                         max_output_tokens=1024, client_ip=client_ip)
-    if not decision.allowed:
-        return {'source': decision.source, 'findings': []}
-    record(model=DEFAULT_MODEL, input_tokens=0, output_tokens=0, reserved_usd=decision.reserved_usd)
-    return {'source': decision.source, 'findings': []}

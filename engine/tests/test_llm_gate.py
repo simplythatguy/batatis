@@ -1,6 +1,5 @@
 import pytest
 
-from engine.completeness import model_findings
 from engine.llm_gate import authorize, estimate_usd, record, reset_for_tests
 from engine import llm_gate
 
@@ -31,7 +30,6 @@ def test_spend_cap_returns_offline_cap_and_record_uses_actual(monkeypatch):
     monkeypatch.setenv('BATATIS_DAILY_SPEND_CAP_USD', '0.0000001')
     blocked = authorize(model='gpt-4.1-mini', max_input_tokens=1000, max_output_tokens=1000, client_ip='203.0.113.8')
     assert blocked.source == 'offline-cap' and blocked.allowed is False
-    assert model_findings('applicant text', client_ip='203.0.113.8')['source'] == 'offline-cap'
 
     monkeypatch.setenv('BATATIS_DAILY_SPEND_CAP_USD', '5')
     monkeypatch.setenv('BATATIS_LLM_RATE_LIMIT', '10')
@@ -52,7 +50,3 @@ def test_per_ip_rate_limit(monkeypatch):
     assert authorize(max_input_tokens=1, max_output_tokens=1, client_ip='203.0.113.1').allowed
     assert authorize(max_input_tokens=1, max_output_tokens=1, client_ip='203.0.113.1').source == 'rate-limited'
     assert authorize(max_input_tokens=1, max_output_tokens=1, client_ip='203.0.113.2').allowed
-
-
-def test_completeness_model_review_is_offline():
-    assert model_findings('a long applicant document') == {'source': 'offline', 'findings': []}

@@ -49,7 +49,7 @@ Set these on the Vercel project for Preview and Production. Leave the project Ro
 | `CODEDB_INTENT_PDF_URL` | engine build | Optional private URL for the intent PDF. |
 | `CODEDB_SKIP_OFFICIAL` | engine build | `1` skips the NRC host when the private URL for that file is set. |
 | `VITE_API_BASE` | web build | Optional. Defaults to `/api`. |
-| `TEST_DATABASE_URL` | CI / local only | Runs the Postgres store tests. Omit to skip them. |
+| `TEST_DATABASE_URL` | engine CI | Set on the engine job to the `postgres:16` service. Omit locally to skip the Postgres store test. |
 
 Local file runs ignore `DATABASE_URL`. Uploaded PDF bytes go in `case_files` (Postgres `bytea`, or sqlite blob locally), capped at 4 MB. A larger PDF is HTTP 413 with `{"detail": "PDF too large: the limit is 4 MB. Try compressing the file or splitting it."}`.
 
@@ -78,7 +78,13 @@ warm POST /cases 201 0.040s
 
 Production tracks `dev`, and only after #12 and `backend/case-api` have merged there. This branch is the deploy shape. It is not the production promotion by itself.
 
-`backend/case-api` is also making `CaseStore` writes atomic. The overlap is `put(..., expected_version=)` and `VersionConflict` (retry inside `add_fact`, HTTP 409 if the retry is exhausted). Keep one optimistic-update implementation when the branches merge. `backend/identify-api` should keep calling `engine.llm_gate` (`authorize` / `record`); offline stays the default unless `BATATIS_LIVE=1` and `OPENAI_API_KEY` are both set.
+`backend/case-api` is also making `CaseStore` writes atomic. The overlap is `put(..., expected_version=)` and `VersionConflict` (retry inside `add_fact`, HTTP 409 if the retry is exhausted). Keep one optimistic-update implementation when the branches merge.
+
+```text
+#12 owns engine/identify; this branch does not change it.
+Call engine.llm_gate.authorize before a provider request and record after with the actual token counts.
+Live only when BATATIS_LIVE=1 and OPENAI_API_KEY are both set; otherwise stay offline and do not contact a provider.
+```
 
 ## Accounts and plan limits
 

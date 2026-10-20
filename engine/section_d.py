@@ -12,7 +12,6 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from .codes import Codes
-from .copyright import snippet
 from .models import AttributionStatus, Case, Source
 from .process_fields import alternative_path, confirmed_value, latest_fact
 from .section_c import section_c_rows
@@ -135,13 +134,13 @@ def section_d_plan(case: Case, codes: Codes, documents: list[SupportingDocument]
             eid = 'ev_' + hashlib.sha256(repr(key).encode()).hexdigest()[:16]
             attached = tuple(d for d in documents if eid in d.item_ids)
             issue = (f'Provide a comparison with the acceptable-solution performance for {row.provision_id}. '
-                     f'Address {pair.function}: {snippet(pair.function_text) or pair.function}; '
-                     f'{pair.objective}: {snippet(pair.objective_text) or pair.objective}. '
+                     f'Address {pair.function}: {pair.function_text or pair.function}; '
+                     f'{pair.objective}: {pair.objective_text or pair.objective}. '
                      'Identify the proposed configuration, comparison method, supporting report passages, differences and limits.'
                      if pair else 'The attribution table has no row for this provision. Ask the responsible designer '
                      'to identify the applicable benchmark before selecting performance evidence.')
             if pair and pair.application_note:
-                issue += f' Attribution condition: {snippet(pair.application_note)}'
+                issue += f' Attribution condition: {pair.application_note}'
             items.append(EvidencePlanItem(id=eid, provision_id=row.provision_id, citation=row.citation,
                 attribution_status=row.attribution_status, attributed_via=row.attributed_via,
                 objective=pair.objective if pair else None, function=pair.function if pair else None,
