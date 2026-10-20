@@ -1,0 +1,19 @@
+{
+  "id": "hold-002",
+  "description": "We are building a single-storey detached house. The roof has a 12.21 m clear span. The rest of the framing is ordinary closely spaced lumber.",
+  "known_facts": [
+    "single-storey detached house",
+    "12.21 m clear span"
+  ],
+  "gold": {
+    "engineering_required": "yes",
+    "engineering_reason": "12.21 m is above 12.20 m, so the span is recorded as Part 4 design. Part 4 design requires a registered professional.",
+    "limit_source": "engine/section_d_issues.py PART9_MAX_SPAN_M = 12.20; engine/professional.py part4_design true adds Div C 2.4.1.2.(1)"
+  },
+  "authoring": {
+    "source": "engine/professional.py",
+    "gold_written": "before any system run",
+    "label": "model-checked",
+    "notes": "Held-out span just over 12.20 m. Gold written from the rule text before the flag script was run on this file. Not human-reviewed."
+  }
+}
