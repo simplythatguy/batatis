@@ -28,7 +28,8 @@ class HttpGuard:
         if scope.get('type') != 'http':
             await self.app(scope, receive, send)
             return
-        if self.sweep is not None:
+        # The explicit purge authenticates in its route before touching the store.
+        if self.sweep is not None and scope.get('path') not in ('/retention/purge', '/api/retention/purge'):
             try:
                 self.sweep()
             except Exception as exc:

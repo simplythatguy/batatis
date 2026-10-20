@@ -97,9 +97,26 @@ Live only when BATATIS_LIVE=1 and OPENAI_API_KEY are both set; otherwise stay of
 
 ## Accounts and plan limits
 
-Not created by this change:
+The existing Vercel project uses the dedicated free Neon resource `batatis-db`
+(`free_v3`). Keep `BATATIS_STORE=postgres` and its private `DATABASE_URL`
+configured. Hosted startup refuses a missing Postgres configuration; there is
+no temporary-disk fallback. Keep `BATATIS_LIVE=0` and the OpenAI key unset until
+the US$20 total cap in #41 is integrated and passes its gate. The daily ledger
+in this branch does not satisfy that gate.
 
-- A Neon free-tier database (or another Postgres) and its `DATABASE_URL`, if the project does not already have one. The stateless engine needs it. The file store is for a single machine.
+Configure an independent, random server-only `CRON_SECRET` for the scheduled
+retention purge (at least 16 characters). Vercel sends it as
+`Authorization: Bearer <CRON_SECRET>`; see
+[Securing cron jobs](https://vercel.com/docs/cron-jobs/manage-cron-jobs#securing-cron-jobs).
+Without that secret a hosted purge returns `503` detail
+`retention purge not configured`; a missing or incorrect bearer token returns
+`401` detail `unauthorized`. Neither response triggers a bulk purge. Responses
+are not cached, and tokens are never logged. The operator CLI remains available
+as `python -m engine.retention`. Local HTTP runs require bearer auth when
+`CRON_SECRET` is set, and allow unauthenticated purges when it is unset.
+
+Other prerequisites:
+
 - An OpenAI key, only if live model calls are turned on. Offline works without one.
 - A private Blob or Neon object for the two PDFs, only if the Vercel builder cannot reach `nrc-publications.canada.ca`.
 

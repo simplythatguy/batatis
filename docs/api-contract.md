@@ -9,7 +9,7 @@ These are the routes the engine serves. `POST /cases/{case_id}/files` stores the
 | Method and path | Response |
 | --- | --- |
 | `POST /cases` | `201` Case. Body is optional: `title`, `jurisdiction` (`id`, `name`, `authority`). |
-| `GET /retention/purge` | `{ "deleted": N, "meta" }`. Deletes cases with `created_at` older than 7 days, and their files. A second call returns `deleted: 0`. The daily Vercel cron calls `/api/retention/purge`. |
+| `GET /retention/purge` | `{ "deleted": N, "meta" }`. Deletes cases with `created_at` older than 7 days, and their files. A second call returns `deleted: 0`. The daily Vercel cron calls `/api/retention/purge` with `Authorization: Bearer <CRON_SECRET>`. Hosted runs require that secret (`503` detail `retention purge not configured` if missing); a missing or incorrect header is `401` detail `unauthorized`. Auth is checked before any bulk purge. Responses use `Cache-Control: no-store`. |
 | `GET /cases/{case_id}` | Case, or `404` with detail `case not found`. |
 | `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. `409` detail `case was updated concurrently` when the stored version changed during the write. |
 | `POST /cases/{case_id}/files` | `201` `{ "id", "name", "size", "content_type" }`. Body is raw `application/pdf` (optional header `x-filename`) or multipart with one file part. Bytes go in `case_files`. `404` detail `case not found`. `413` detail `PDF too large: the limit is 4 MB. Try compressing the file or splitting it.` `415` detail `only PDF files are accepted`. |
