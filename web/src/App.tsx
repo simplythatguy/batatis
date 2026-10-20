@@ -17,8 +17,8 @@ const NAV = [
       { path: "/application", label: "Application", icon: "application" },
     ],
   },
-  { area: "Officer", items: [{ path: "/officer", label: "Review", icon: "officer" }] },
-  { area: "Accuracy", items: [{ path: "/accuracy", label: "Report", icon: "accuracy" }] },
+  { area: "Officer", items: [{ path: "/officer", label: "Officer review", icon: "officer" }] },
+  { area: "Accuracy", items: [{ path: "/accuracy", label: "Accuracy report", icon: "accuracy" }] },
 ];
 
 export function App() {
@@ -67,7 +67,7 @@ export function App() {
                     className="nav-item"
                     href={`#${i.path}`}
                     data-active={route.path === i.path || (route.path === "/" && i.path === "/describe")}
-                    aria-current={route.path === i.path ? "page" : undefined}
+                    aria-current={route.path === i.path || (route.path === "/" && i.path === "/describe") ? "page" : undefined}
                   >
                     <Icon name={i.icon} />
                     {i.label}
