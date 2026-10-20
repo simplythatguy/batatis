@@ -70,9 +70,12 @@ def _add(usage: dict, extra: dict, model: str | None = None) -> None:
     usage['output_tokens'] += out
     usage['requests'] += 1
     if model:
-        slot = usage.setdefault('by_model', {}).setdefault(model, {'input_tokens': 0, 'output_tokens': 0})
+        slot = usage.setdefault('by_model', {}).setdefault(model, {'input_tokens': 0, 'output_tokens': 0, 'returned': []})
         slot['input_tokens'] += inn
         slot['output_tokens'] += out
+        returned = extra.get('returned_model')
+        if returned and returned not in slot['returned']:
+            slot['returned'].append(returned)
 
 
 def complete_json(name: str, schema: dict, system: str, user: str, *, model: str, which: str | None = None,
@@ -101,7 +104,11 @@ def _openai_json(name, schema, system, user, *, model, timeout) -> tuple[dict, d
     data = response.json()
     content = data['choices'][0]['message']['content']
     raw = data.get('usage') or {}
-    return json.loads(content), {'input_tokens': raw.get('prompt_tokens', 0), 'output_tokens': raw.get('completion_tokens', 0)}
+    return json.loads(content), {
+        'input_tokens': raw.get('prompt_tokens', 0),
+        'output_tokens': raw.get('completion_tokens', 0),
+        'returned_model': data.get('model'),
+    }
 
 
 def _anthropic_json(system, user, *, model, timeout) -> tuple[dict, dict]:

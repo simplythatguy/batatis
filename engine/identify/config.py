@@ -29,15 +29,21 @@ VERIFY_N = 15
 QUESTION_K = 5
 
 DEFAULT_PIPELINE = 'c'
-SCREEN_MODEL = os.environ.get('BATATIS_SCREEN_MODEL', 'gpt-4.1-mini')
-RERANK_MODEL = os.environ.get('BATATIS_RERANK_MODEL', 'gpt-4.1-mini')
-VERIFY_MODEL_OPENAI = os.environ.get('BATATIS_VERIFY_MODEL', 'gpt-4.1')
+# Dated snapshots, not the floating aliases. OpenAI lists these as the default
+# snapshots for gpt-4.1 and gpt-4.1-mini (developers.openai.com, 2025-04-14).
+# BATATIS_SCREEN_MODEL, BATATIS_RERANK_MODEL, and BATATIS_VERIFY_MODEL override them.
+SCREEN_MODEL = os.environ.get('BATATIS_SCREEN_MODEL', 'gpt-4.1-mini-2025-04-14')
+RERANK_MODEL = os.environ.get('BATATIS_RERANK_MODEL', 'gpt-4.1-mini-2025-04-14')
+VERIFY_MODEL_OPENAI = os.environ.get('BATATIS_VERIFY_MODEL', 'gpt-4.1-2025-04-14')
 VERIFY_MODEL_ANTHROPIC = 'claude-sonnet-5-5'
 
 # USD per 1M tokens, input then output. Estimates for the benchmark printer only.
+# Alias keys stay so an env override of gpt-4.1 or gpt-4.1-mini still prices.
 PRICES = {
     'gpt-4.1': (2.0, 8.0),
+    'gpt-4.1-2025-04-14': (2.0, 8.0),
     'gpt-4.1-mini': (0.40, 1.60),
+    'gpt-4.1-mini-2025-04-14': (0.40, 1.60),
 }
 
 

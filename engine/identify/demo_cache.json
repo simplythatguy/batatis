@@ -110,9 +110,9 @@
       "cached": true,
       "generated_at": "2026-10-20T18:45:00Z",
       "model_ids": {
-        "screen": "gpt-4.1-mini",
-        "rerank": "gpt-4.1-mini",
-        "verifier": "gpt-4.1",
+        "screen": "gpt-4.1-mini-2025-04-14",
+        "rerank": "gpt-4.1-mini-2025-04-14",
+        "verifier": "gpt-4.1-2025-04-14",
         "invoked": false
       },
       "commit_policy": {
@@ -254,9 +254,9 @@
       "cached": true,
       "generated_at": "2026-10-20T18:45:00Z",
       "model_ids": {
-        "screen": "gpt-4.1-mini",
-        "rerank": "gpt-4.1-mini",
-        "verifier": "gpt-4.1",
+        "screen": "gpt-4.1-mini-2025-04-14",
+        "rerank": "gpt-4.1-mini-2025-04-14",
+        "verifier": "gpt-4.1-2025-04-14",
         "invoked": false
       },
       "commit_policy": {
@@ -428,9 +428,9 @@
       "cached": true,
       "generated_at": "2026-10-20T18:45:00Z",
       "model_ids": {
-        "screen": "gpt-4.1-mini",
-        "rerank": "gpt-4.1-mini",
-        "verifier": "gpt-4.1",
+        "screen": "gpt-4.1-mini-2025-04-14",
+        "rerank": "gpt-4.1-mini-2025-04-14",
+        "verifier": "gpt-4.1-2025-04-14",
         "invoked": false
       },
       "commit_policy": {

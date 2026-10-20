@@ -133,6 +133,27 @@ def _fmt(value, digits=4) -> str:
     return str(value)
 
 
+def _returned_ids(per_case: list[dict], requested: str | None) -> str:
+    if not requested:
+        return 'none'
+    found: list[str] = []
+    for case in per_case:
+        for rep in case['reps']:
+            slot = (rep.get('by_model') or {}).get(requested) or {}
+            for model_id in slot.get('returned') or []:
+                if model_id not in found:
+                    found.append(model_id)
+    return ','.join(found) if found else 'none'
+
+
+def model_id_fields(pins: dict, per_case: list[dict]) -> str:
+    """Requested pin and the id the API actually returned, for rerank and verifier."""
+    rerank = pins.get('rerank')
+    verifier = pins.get('verifier')
+    return (f"rerank_model={rerank or 'none'} rerank_returned={_returned_ids(per_case, rerank)} "
+            f"verifier_model={verifier or 'none'} verifier_returned={_returned_ids(per_case, verifier)}")
+
+
 def price_floor_line(variant: str, cad_per_case: float | None, fx: float, fx_date: str) -> str:
     if cad_per_case is None:
         return (f'price_floor variant={variant} cad_per_case=null floor_cad={PRICE_FLOOR_CAD:.2f} '
@@ -218,8 +239,8 @@ def run_variants(cases: list[dict], repeats: int, fx: float, fx_date: str) -> in
             errors += sum(1 for art in case['committed'] if art not in gold)
         chars = pins['verify_chars']
         print(
-            f"variant={name} screen={pins['screen'] or 'bm25'} rerank_model={pins['rerank'] or 'none'} "
-            f"verifier_model={pins['verifier'] or 'none'} verify_chars={chars if chars is not None else 'n/a'} "
+            f"variant={name} screen={pins['screen'] or 'bm25'} {model_id_fields(pins, per_case)} "
+            f"verify_chars={chars if chars is not None else 'n/a'} "
             f"n={n} n_scored={metrics['n_scored']} repeats={repeats} fallbacks={fallbacks} "
             f"top-1={_fmt(metrics['top1'])} recall@5={_fmt(metrics['recall5'])} MRR={_fmt(metrics['mrr'])} "
             f"ask_rate={ask_rate:.4f} committed_errors={errors} "
