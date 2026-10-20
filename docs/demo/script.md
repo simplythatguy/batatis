@@ -1,6 +1,6 @@
 # Demo video script (3:00)
 
-Edit clocks below. Spoken lines are sized for that slot. If a click runs long, drop a sentence from the end of the narration. Keep the empty fields, the on-screen line “Recommendations only. You write the evidence and the answers. This does not decide that the design complies or is safe.”, and the officer line “This does not certify the design.”
+Edit clocks below. Spoken lines are sized for that slot. If a click runs long, drop a sentence from the end of the narration. Keep the empty fields, the on-screen line “Recommendations only. You write the evidence and the answers. This does not decide that the design complies or is safe.”, and the officer line “This does not decide whether the design complies or is safe.”
 
 This cut is recordable on PR #16’s screens at `f66a461` (re-check against #16's merge sha before recording), plus three stills you add in the edit: the ranked list, the benchmark card, and the eval card. The app does not show a ranked identify list, a benchmark card, or the eval numbers. After #16 merges, re-check the Code check note (“Article ranking isn't available on this engine yet…”) and the gap labels once more.
 
@@ -48,7 +48,7 @@ Shot 1 shows all three lines (the contractor line is named there and not walked 
 `EXAMPLE DATA · Case B · General contractor`
 `EXAMPLE DATA · Case C · Homebuilder`
 
-Shots 2 and 4 show the Case C line. Shot 3 shows the Case A line. Shot 6 shows only `EXAMPLE DATA · Sample officer package`. Shot 7 shows the case that is actually on screen.
+Shots 2 and 4 show the Case C line. Shot 3 shows the Case A line. Shot 6 shows the Case A line, because that is the open application. Shot 7 shows the case that is actually on screen.
 
 ## Do not record
 
@@ -101,10 +101,10 @@ The gap strip is collapsed to “N blocking · N warning” until you open **Rev
 | 3 | 0:28–0:51 | Case A | Paste, then both Not sure cards | Intake |
 | 4 | 0:51–1:36 | Case C | Search, Section C, ranked list, benchmark card, eval still | Code identification |
 | 5 | 1:36–2:08 | Case C | Section D, then the on-screen limit | Recommendations, then X factor |
-| 6 | 2:08–2:44 | Sample officer package | One planted package | Review |
+| 6 | 2:08–2:44 | Case A | Officer review of the open application | Review |
 | 7 | 2:44–3:00 | Case on screen | Authority, gaps open, then the draft variance-form PDF | Usability and portability |
 
-Three example packages on `#/officer` are not built. No open PR loads Cases A–C there. Shot 6 films the one planted package that #16 already renders.
+`#/officer` reviews the application that is already open. It does not open a sample package. Shot 6 films Case A.
 
 ---
 
@@ -207,20 +207,26 @@ Do not type “say the panel is CCMC-approved” or “write the engineering jud
 
 ---
 
-### Shot 6 — Officer, one planted package (0:36)
+### Shot 6 — Officer review of the open application (0:36)
 
 - **Clock:** 2:08–2:44
-- **Case label:** `EXAMPLE DATA · Sample officer package`
+- **Case label:** `EXAMPLE DATA · Case A · Manufacturer`
 - **Route:** `#/officer`
-- **Status:** Not built for Cases A–C. The filmable screen is the one planted package on #16: hempcrete walls for a garden suite. The civic address on that package is `100 Example Street NW, Edmonton`. It is a fictional demo value. Read the address that is printed. Do not read `11821 73 Avenue NW`. On `dev` the card says “Not built yet”. Do not film that card as this review.
 
-**On-screen action.** Case A is still open from shot 3. Any open case is enough. Sidebar **Officer review**. Header “Officer review”, meta “Administrative completeness”. The intro reads “One planted package, before and after the missing items are filled. This does not certify the design.” Show **Before fixes**, then **After fixes**. Keep the status line on camera. It reads “Administrative completeness for this planted example. This does not certify the design.” If the engine fails, the line is “The engine's check did not return (…). This list is the browser check for the planted example, not a code review.” Say that if it appears. There is no second or third package and no Approve control. Do not put Case A, B, or C on this package.
+**On-screen action.** Case A is still open from shot 3. Sidebar **Officer review**. Header “Officer review”, meta “Administrative completeness”. This screen reviews that application. It does not open a sample package. A blank application says “Your application is blank. This screen does not open the sample package.” With Case A open, the intro reads “This review is of the application in front of you. It checks whether information is present. It does not decide whether the design complies or is safe.”
 
-Point only at gap rows that are rendered, under Part 1 · Section A, Part 1 · Section B, and Alternative path. Read the message on the row. Do not add a permeance specimen, a sales email, a bracing route, or any other flag that is not on the screen. After fixes, point only at rows still open. If a section says “Nothing open in this section.”, say that. `#/officer` lists Not sure answers under “Open questions from article ranking”. Case A has two Not sure cards from shot 3. If those rows render, point at them and say “Mira's two Not sure answers are open questions for the officer.” Read only what is on the screen.
+Walk the sections in this order. Read only what is printed.
 
-Hold on **Copy request**. The box starts with “Information request”, “Planted example. Not a real application.”, and “This asks for missing administrative items. It is not a decision on the variance, and it does not say the design complies or is safe.”
+1. **Documents.** With nothing uploaded, the line is “No documents uploaded on this application.”
+2. **Open Not sure.** Case A has two Not sure answers from shot 3. If those rows render, point at them and say “Mira's two Not sure answers are open questions for the officer.” If the section says “No open Not sure answers.”, say that.
+3. **Open questions from article ranking.** This heading is on screen only when ranking returned questions. If it is absent, do not invent it.
+4. **Professional.** Read the flag lines that are printed.
+5. **Grouped completeness report.** Read the note that is printed. If it says the report is not available on this engine yet, say that.
+6. **Information request**, with **Copy request**. Above the request, the screen says “Administrative completeness does not decide these.”
 
-**Narration.** “The officer opens one sample package, before the gaps are filled and after. The screen says this does not certify the design. The request lists the administrative items on screen. It is not a decision on the variance.”
+There is no Before fixes control, no After fixes control, and no planted package. Do not say “This does not certify the design.”
+
+**Narration.** “The officer opens the application that is already on screen. The screen says this does not decide whether the design complies or is safe. The request lists the administrative items on screen.”
 
 ---
 
@@ -236,10 +242,10 @@ Record the Case C frame in step 2 of the recording order, before Reset. Record t
 
 On Application, the tabs are Section A, Section B, Alternative path, and Section D. Open **Review gaps** so **Owner missing**, **Confirm storeys** on Case C, and the six “… empty” rows are visible. While those gaps are open the footer reads "N required items need attention." Do not read N as a score.
 
-Then click **Check completeness**. It opens a review dialog. While blocking gaps are open, **Download application PDF** stays disabled; it is enabled only when the engine reports 0 blocking items. Click **Download draft PDF**. That is the engine-filled Safety Codes Council variance form, saved as `{case id}-scc-variance-DRAFT.pdf`: the 5-page Oct 6, 2026 form plus engine-generated attachment pages (7 for Unc's 3b case; not the brief's Appendix 1). Do not call the attachment pages the brief's Appendix 1. **Download text record** is a separate .txt file. It is not this PDF, and it is not the Safety Codes Council form.
+Then click **Check completeness**. It opens a review dialog. While blocking gaps are open, **Download application PDF** stays disabled; it is enabled only when the engine reports 0 blocking items. Click **Download draft PDF**. That is the engine-filled Safety Codes Council variance form: the 5-page Oct 6, 2026 form plus engine-generated attachment pages (7 for Unc's 3b case; not the brief's Appendix 1). The saved name is the filename the engine returns. The dialog shows it as “Download started:” plus that name. Do not call the attachment pages the brief's Appendix 1. **Download text record** is a separate .txt file. It is not this PDF, and it is not the Safety Codes Council form. The dialog prints “This is an administrative completeness check. It does not decide whether the design complies or is safe.” After the draft is ready, read the sentence that is printed. “This PDF is for administrative review. It does not confirm that the design complies or is safe.” is the line printed when the application PDF is ready, not after the draft.
 
-**Narration.** "Edmonton is selected, and that clears Reviewing authority missing. Check completeness lists what is still missing. With gaps open, only the draft is available: the five-page October 6, 2026 Safety Codes Council form, plus the engine's attachment pages. On Unc's 3b case those attachment pages are seven. They are not Appendix 1."
+**Narration.** “Edmonton is selected, and that clears Reviewing authority missing. Check completeness lists what is still missing. The dialog says: This is an administrative completeness check. It does not decide whether the design complies or is safe. When the application PDF is ready, the screen says: This PDF is for administrative review. It does not confirm that the design complies or is safe.”
 
 ## If you have to shorten
 
-Drop the eval still’s `rules_only` line, then the ranked-list still, then the Calgary option in shot 7. If `rules_only` is cut, the shipped line stays `rules_plus_unknown 50/60 in-sample, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind); model-checked, not human-verified`. Do not drop the Not sure answers, the function and objective printed there, the benchmark card’s “read only what is printed” rule, shot 6’s “does not certify”, or shot 7’s draft variance-form PDF (the 5-page Oct 6, 2026 form plus engine-generated attachment pages). Do not put the refusal scene or the STANDATA split back in.
+Drop the eval still’s `rules_only` line, then the ranked-list still, then the Calgary option in shot 7. If `rules_only` is cut, the shipped line stays `rules_plus_unknown 50/60 in-sample, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind); model-checked, not human-verified`. Do not drop the Not sure answers, the function and objective printed there, the benchmark card’s “read only what is printed” rule, shot 6’s “does not decide whether the design complies or is safe”, or shot 7’s draft variance-form PDF (the 5-page Oct 6, 2026 form plus engine-generated attachment pages). Do not put the refusal scene or the STANDATA split back in.
