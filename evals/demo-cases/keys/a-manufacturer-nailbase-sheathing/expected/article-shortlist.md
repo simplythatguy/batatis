@@ -1,7 +1,7 @@
 > agent-authored, model-checked, not human-verified or official
 
 # Expected: relevant-article shortlist (Case A)
-> EXAMPLE DATA. NBC(AE) 2023, Div B unless noted. Checked against the 1st printing. All 102 cited provisions present in the 2nd-printing code database (pages p.322, p.323, p.1126, p.1201 confirmed). See `../../../sources.md`.
+> EXAMPLE DATA. National Building Code (Alberta Edition) (NBC(AE)) 2023, Div B unless noted. In the 2nd printing, 9.27.5.1.(2) and 9.27.5.3.(3)(b) were checked by codedb lookup; other wording and all page cites are 1st printing. The full list is in [cited-provisions.txt](../../../cited-provisions.txt); a check that every cited provision exists in the 2nd printing: all 95 listed ids present (presence only). See [sources.md](../../../sources.md).
 
 | Rank | Provision | Why it applies | Status for this design |
 |---|---|---|---|

@@ -1,0 +1,18 @@
+{
+  "id": "ab-missing-scope",
+  "role": "planted",
+  "constructed": true,
+  "removed_fields": [
+    "scope"
+  ],
+  "facts": {
+    "owner_name": "Synthetic owner_name",
+    "application_date": "Synthetic application_date",
+    "civic_address": "Synthetic civic_address",
+    "legal_description": "Synthetic legal_description",
+    "representative": "Synthetic representative",
+    "mailing_address": "Synthetic mailing_address",
+    "alternative_description": "Synthetic alternative_description"
+  },
+  "note": "Constructed fixture. Ground truth is removed_fields. Not a model gold label and not a human key. Removed scope from the clean Part 1 A/B application."
+}
