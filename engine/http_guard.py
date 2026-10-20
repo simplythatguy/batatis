@@ -4,7 +4,8 @@ from __future__ import annotations
 import json
 import logging
 
-from .copyright import PII_NOTICE, attach_meta, attribute_code
+from .copyright import attach_meta, attribute_code
+from .privacy import PII_NOTICE
 
 access_log = logging.getLogger('engine.access')
 

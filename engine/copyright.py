@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import re
 
-from .privacy import PRIVACY_NOTICE as PII_NOTICE
+from .privacy import PII_NOTICE
 
 NRC_PUBLICATION_URL = (
     'https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499'
