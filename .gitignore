@@ -6,3 +6,6 @@ node_modules/
 *.pyc
 __pycache__/
 .venv/
+
+# Local builder output: full NRC quotes over 25 words. Never commit.
+docs/research/2026-10-20-data-nerd/src/clip_originals.json

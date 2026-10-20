@@ -1,0 +1,174 @@
+import json, re, sqlite3, subprocess, hashlib, sys
+from pathlib import Path
+DB='/workspace/batatis/codedb-snapshot/codedb.sqlite'; R=Path('/workspace/batatis/research'); c=sqlite3.connect(DB); ERR=[]
+LABEL='model-checked, not human-verified'
+n=lambda s: re.sub(r'\s+',' ',(s or '').replace('\u00ad','')).strip()
+def cite(div,pid,quote,why=''):
+    r=c.execute('select pdf_page,text,title from provisions where division=? and id=?',(div,pid)).fetchone()
+    if not r: ERR.append(f'missing Div {div} {pid}'); return None
+    if n(quote) not in n(r[1]): ERR.append(f'quote mismatch Div {div} {pid}: {quote[:60]}')
+    return dict(source='NBC(AE) 2023 2nd printing (codedb)', division=div, provision=pid, pdf_page=r[0], quote=quote, why=why, verification='codedb string-match, '+LABEL)
+def pages(pdf):
+    k=int(re.search(r'Pages:\s+(\d+)',subprocess.run(['pdfinfo',pdf],capture_output=True,text=True).stdout).group(1))
+    return [n(subprocess.run(['pdftotext','-f',str(p),'-l',str(p),pdf,'-'],capture_output=True,text=True).stdout) for p in range(1,k+1)]
+def pdfcite(label,pdf,url,quote,why=''):
+    P=pages(pdf); hit=[i+1 for i,t in enumerate(P) if n(quote) in t]
+    if not hit: ERR.append(f'quote not found in {pdf}: {quote[:60]}')
+    return dict(source=label, url=url, local=pdf, pdf_page=hit[0] if hit else None, quote=quote, why=why, verification='pdftotext string-match, '+LABEL)
+def attr(pid):
+    rows=c.execute('select table_id,bracket,pdf_page from attributions where provision_id=? order by seq',(pid,)).fetchall()
+    st=c.execute("select status from attribution_status where doc='NBC-AE' and provision_id=?",(pid,)).fetchone()
+    return dict(provision=pid, attribution_status=st[0] if st else None, rows=[dict(table=t,bracket=b,pdf_page=p) for t,b,p in rows])
+def defn(term):
+    t=n(c.execute("select text from provisions where division='A' and id='1.4.1.2.(1)'").fetchone()[0])
+    i=t.find(term+' means'); j=t.find('. ',i)
+    if i<0: ERR.append('no definition '+term); return None
+    q=t[i:j+1]; pg,pe=c.execute("select pdf_page,pdf_page_end from provisions where division='A' and id='1.4.1.2.(1)'").fetchone()
+    tp=[d['page'] for d in TXT if pg<=d['page']<=pe and q[:60] in n(d['text'])]
+    if len(tp)!=1: ERR.append('definition page not unique '+term)
+    return dict(source='NBC(AE) 2023 2nd printing (codedb)', division='A', provision='1.4.1.2.(1)', pdf_page=tp[0] if tp else pg, page_note=f'term located on PDF p.{tp[0] if tp else None} by string-match against the code text (definitions list, Sentence 1.4.1.2.(1), PDF p.{pg}-{pe})', quote=q, verification='codedb string-match, '+LABEL)
+TXT=[json.loads(l) for l in open('/workspace/batatis-pr16/reference/text/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.jsonl')]
+SCA=('Safety Codes Act, RSA 2000, c S-1 (King\'s Printer, current as of December 1, 2025)','/workspace/batatis/research/src/leg/S01.pdf','https://kings-printer.alberta.ca/documents/Acts/S01.pdf')
+IFC=('International Firestop Council, IFC EJ Guidelines (Rev. Feb 2024) - industry guidance, not code','/workspace/batatis/sources/ifc/ifc-ej-guidelines-2024-02.pdf','https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf')
+SCCU=('Safety Codes Council, "National Building Code - 2023 Alberta Edition, Part 3 - Code update information"','/workspace/batatis/sources/nbcae-updates/nbcae2023-part3-update.pdf','https://ebs.safetycodes.ab.ca/documents/webdocs/PI/National%20Building%20Code%20-%202023%20Alberta%20Edition_Part%203.pdf')
+REPO='simplythatguy/batatis@914b8ec'; RP='evals/demo-cases/b-contractor-firestop-nonconformance/input/'
+LOCAL='/workspace/batatis/research/src/repo-914b8ec/'+RP
+if 'Current as of December 1, 2025' not in pages(SCA[1])[0]: ERR.append('SCA currency date not found')
+def line(f,ln,sub=None):
+    if f.startswith('/workspace/unc-reports/'): src=f; out=f
+    else: src=LOCAL+f; out=f'{RP}{f} @ {REPO}'
+    L=open(src).read().split('\n')[ln-1]
+    if sub and sub not in L: ERR.append(f'{f}:{ln} missing {sub[:50]}')
+    return dict(file=out,line=ln,text=(sub or L))
+
+# ---------- Part 1
+part1=dict(
+ question='When does an Alberta applicant need an alternative solution / variance, and when should they just change the design to meet the acceptable solutions?',
+ app_answer='Two routes; the officer decides. (1) Replace or repair with a tested, listed firestop system for the actual pipe and gap — the code\'s acceptable-solution route (Div A 1.2.1.1.(1)(a)); the inspector or safety codes officer confirms it. (2) If no tested system fits, propose an alternative solution with the documents in Div C 2.3.1.1 and request a variance; the safety codes officer decides (SCA s.38(1)), and installed work stays at risk until then. Batatis can\'t tell you either route will be accepted.',
+ app_answer_source='Karen review, /workspace/karen/pr-reviews.md "Carlos S1 backing" (Oct 20, 2026 ~2:31 PM MDT), verbatim',
+ rule=[
+  'Step 1 (route 1): Show the Division B acceptable solution that governs the item. For Carlos that is a tested, listed CAN/ULC-S115 firestop system for the actual pipe and gap. Replacing or repairing to it is the acceptable-solution route (Div A 1.2.1.1.(1)(a)). The inspector or safety codes officer confirms it; the app never states that the work complies.',
+  'Step 2: Only where the acceptable solution cannot be met (no tested system fits the field condition) is an alternative solution the route, under Div A 1.2.1.1.(1)(b). It must reach at least the performance required "in the areas defined by the objectives and functional statements attributed to the applicable acceptable solutions".',
+  'Step 3: The attributed objectives and functions are the ones the code lists for that sentence (Div A 1.2.1.1.(2), Div B 1.1.2.1.(1), and for Part 3 Table 3.10.1.1 via Div B 3.10.1.1.(1)). The app looks them up and never invents them. Where codedb attribution_status is "none" (for example 3.1.9.4.(4)), the app shows "lookup not available".',
+  'Step 4: The applicant provides the documentation in Div C 2.3.1.1: a code analysis showing at least the required performance, plus any maintenance or operational requirements.',
+  'Step 5: A safety codes officer may issue a variance only if, in the officer\'s opinion, it gives "approximately equivalent or greater safety performance" (Safety Codes Act s.38(1)). A refusal is served in writing and can be appealed to the Council within 30 days (s.38(6)-(7)). The app never says a variance will be granted, and never says installed work can be kept.',
+  'Step 6 (Carlos S1 issue 1): for an "EJ", the app lists evidence and does not judge it. The IFC EJ guidelines (industry guidance, not code) say EJs are not used in lieu of available tested systems, are issued only by the manufacturer\'s qualified technical personnel or a knowledgeable registered PE/FPE or listing agency, and carry the authorization signature, the tested system relied on, and the job name and location. The app marks the email evidence_listed (not reviewed), lists which of these items it cannot find, and routes: ask for an EJ from a qualified issuer; the officer decides acceptance.'],
+ citations=[
+  cite('A','1.2.1.1.(1)','Compliance with this Code shall be achieved by a) complying with the applicable acceptable solutions in Division B','compliance option (a): acceptable solutions'),
+  cite('A','1.2.1.1.(1)','b) using alternative solutions that will achieve at least the minimum level of performance required by Division B in the areas defined by the objectives and functional statements attributed to the applicable acceptable solutions','compliance option (b): alternative solutions'),
+  cite('A','1.2.1.1.(2)','the objectives and functional statements attributed to the acceptable solutions in Division B shall be the objectives and functional statements referred to in Subsection 1.1.2. of Division B','which objectives/functions count'),
+  cite('A','2.1.1.2.(1)','only to the extent that they relate to compliance with this Code as required in Article 1.2.1.1.','objectives (Div A Part 2) apply only via Div A 1.2.1.1'),
+  cite('A','2.2.1.1.(1)','OS1 Fire Safety An objective of this Code is to limit the probability that','objective OS1 (fire safety)'),
+  cite('A','3.2.1.1.(1)','F03 To retard the effects of fire on areas beyond its point of origin.','functional statement F03 (Div A Part 3)'),
+  cite('A','3.2.1.1.(1)','F04 To retard failure or collapse due to the effects of fire.','functional statement F04'),
+  cite('B','1.1.2.1.(1)','the objectives and functional statements attributed to the acceptable solutions in Division B shall be the objectives and functional statements identified in Sections 3.10., 4.5., 5.10., 6.10., 7.3., 8.3., 9.38., 10.8. and 11.3.','attribution (Div B 1.1.2)'),
+  cite('B','3.10.1.1.(1)','shall be the objectives and functional statements listed in Table 3.10.1.1.','Part 3 attribution table'),
+  cite('C','2.3.1.1.(1)','Documentation conforming to this Subsection shall be provided by the person requesting the use of an alternative solution to demonstrate that the proposed alternative solution complies with this Code.','documentation duty'),
+  cite('C','2.3.1.1.(2)','a Code analysis outlining the analytical methods and rationales used to determine that a proposed alternative solution will achieve at least the level of performance required by Clause 1.2.1.1.(1)(b) of Division A','required code analysis'),
+  pdfcite(*SCA,'An Administrator or a safety codes officer may issue a written variance with respect to any thing, process or activity to which this Act applies if the Administrator or officer is of the opinion that the variance provides approximately equivalent or greater safety performance with respect to persons and property as that provided for by this Act.','SCA s.38(1) variance basis'),
+  pdfcite(*SCA,'An applicant who receives a notice referred to in subsection (6) may, within 30 days after the date on which the notice is received, appeal the refusal to the Council in accordance with the Council’s bylaws.','SCA s.38(7) appeal of refusal'),
+  pdfcite(*IFC,'Not be used in lieu of tested systems when available','IFC EJ guideline 1'),
+  pdfcite(*IFC,'Be issued only by a firestop manufacturer’s qualified technical personnel or in concert with the manufacturer by a knowledgeable registered Professional Engineer, Fire Protection Engineer, or an independent testing agency that provides listing services for firestop systems','IFC EJ guideline 2 (who may issue)'),
+  pdfcite(*IFC,'Include dates of issue and authorization signature as well as the issuer’s name, address and telephone number','IFC EJ content item'),
+  pdfcite(*IFC,'Reference tested system(s) upon which design (EJ or TE) is based on','IFC EJ content item'),
+  pdfcite(*IFC,'Identify the job name, project location and firm EJ (TE) is issued to','IFC EJ content item')],
+ carlos_attribution=dict(note='Attribution lookups for the Carlos case (codedb attributions and attribution_status tables)', items=[attr('3.1.9.1.(1)'),attr('3.1.9.1.(4)'),attr('3.1.9.4.(4)')]),
+ carlos_evidence=[line('manufacturer-ej-draft-EXAMPLE.md',6), line('architect-email-EXAMPLE.md',4,'we can\'t accept the rep\'s email as an EJ'), line('ncr-firestop-EXAMPLE.md',15)])
+
+# ---------- Part 2
+P2c=dict(
+ scope=[cite('A','1.3.3.2.(1)','c) exceeding 600 m² in building area or exceeding 3 storeys in building height used for major occupancies classified as i) Group C, residential occupancies','Part 3 scope'),
+        cite('A','1.3.3.3.(1)','applies to all buildings described in Article 1.1.1.1. of 3 storeys or less in building height, having a building area not exceeding 600 m²','Part 9 scope (the Sentence opens "Part 9 of Division B")'),
+        cite('B','3.1.2.1.(1)','every building or part thereof shall be classified according to its major occupancy as belonging to one of the Groups or Divisions described in Table 3.1.2.1.','occupancy classification')],
+ definitions=[defn('Building area'),defn('Building height (in storeys)'),defn('Firewall'),defn('First storey'),defn('Sprinklered (as applying to a building or part thereof)')],
+ part3_size=[cite('B','3.2.2.5.(1)','the building height and building area of the entire building shall be used','whole-building height/area'),
+   cite('B','3.2.2.6.(1)','the requirements of this Subsection for the most restricted major occupancy contained shall apply to the whole building','multiple occupancies'),
+   cite('B','3.2.2.7.(1)','in a building in which one major occupancy is located entirely above another major occupancy, the requirements in this Subsection for each portion of the building containing a major occupancy shall apply to that portion as if the entire building were of that major occupancy','superimposed occupancies (retail below residential)'),
+   cite('B','3.2.2.8.(1)','these major occupancies need not be considered as major occupancies for the purposes of this Subsection','10% exception'),
+   cite('B','3.2.2.18.(1)','an automatic sprinkler system conforming to the requirements of Articles 3.2.4.7., 3.2.4.8., 3.2.4.9. and 3.2.5.12. shall be installed throughout a building regulated by one or more of Articles','sprinklers required for listed Articles (includes 3.2.2.47.-3.2.2.49., 3.2.2.51., 3.2.2.52., 3.2.2.55., 3.2.2.66., 3.2.2.67., 3.2.2.69.)'),
+   cite('B','3.2.2.18.(2)','the automatic sprinkler system shall also be installed throughout all lower storeys in the building','lower storeys'),
+   cite('B','3.2.2.47.(1)','Except as permitted by Articles 3.2.2.48. to 3.2.2.55., a building classified as Group C shall conform to Sentence (2).','Group C any height/area, sprinklered'),
+   cite('B','3.2.2.48.(1)','it is not more than 12 storeys in building height, c) it has a height not more than 42 m','Group C up to 12 storeys, sprinklered'),
+   cite('B','3.2.2.48.(4)','b) the Group E major occupancy is located below the third storey','Group E inside a 3.2.2.48 building'),
+   cite('B','3.2.2.49.(1)','iv) not more than 7 200 m² if 5 storeys in building height','Group C up to 6 storeys, noncombustible, sprinklered'),
+   cite('B','3.2.2.51.(1)','b) it is not more than 6 storeys in building height, c) it has a height not more than 18 m','Group C up to 6 storeys, sprinklered'),
+   cite('B','3.2.2.51.(1)','v) 1 800 m² if 5 storeys in building height','3.2.2.51 area at 5 storeys'),
+   cite('B','3.2.2.51.(5)','a) the Group A, Division 2 major occupancy and Group E major occupancy are located below the third storey','Group E inside a 3.2.2.51 building'),
+   cite('B','3.2.2.52.(1)','b) it is not more than 4 storeys in building height','Group C up to 4 storeys: excludes 5 storeys'),
+   cite('B','3.2.2.55.(1)','b) it is not more than 3 storeys in building height','Group C up to 3 storeys: excludes 5 storeys'),
+   cite('B','3.2.2.67.(1)','b) it is not more than 4 storeys in building height, and c) it has a building area not more than 1 800 m²','Group E up to 4 storeys'),
+   cite('B','3.2.5.12.(1)','an automatic sprinkler system shall be designed, constructed, installed and tested in conformance with NFPA 13','sprinkler standard'),
+   cite('B','3.2.5.12.(2)','i) is not more than 4 storeys in building height and conforms to Article 3.2.2.47., 3.2.2.49., 3.2.2.51., 3.2.2.52. or 3.2.2.55.','NFPA 13R limits')],
+ part9=[cite('B','9.10.1.3.(8)','Sprinkler systems shall be designed, constructed and installed in conformance with Articles 3.2.5.12. to 3.2.5.15. and 3.2.5.17.','Part 9 sprinkler design'),
+   cite('B','9.10.2.2.(2)','be i) sprinklered in conformance with NFPA 13D','Part 9 sprinkler mandate found: home-type care'),
+   cite('B','9.10.9.9.(3)','Sprinkler piping is permitted to penetrate a fire separation, provided the fire compartments on each side of the fire separation are sprinklered.','Part 9 sprinkler piping penetration'),
+   cite('B','9.10.9.9.(4)','provided the annular space created by the penetration of a fire sprinkler is covered by a metal escutcheon plate in accordance with NFPA 13','Part 9 sprinkler escutcheon exception')],
+ penetrations=[cite('B','3.1.9.1.(1)','sealed by a firestop that, when subjected to the fire test method in CAN/ULC-S115, “Standard Method of Fire Tests of Firestop Systems,” has an F rating not less than the required fire-resistance rating of the fire separation, or b) cast in place, where the item penetrating the fire separation is steel, ferrous, copper, concrete or masonry','general firestop rule'),
+   cite('B','3.1.9.1.(4)','Sprinklers are permitted to penetrate a fire separation or a membrane forming part of an assembly required to have a fire-resistance rating without having to meet the firestop requirements of Sentences (1) to (3), provided the annular space created by the penetration of a fire sprinkler is covered by a metal escutcheon plate in accordance with NFPA 13','the only sprinkler "exemption" (sprinklers, with escutcheon)'),
+   cite('B','3.1.9.2.(1)','pipes, totally enclosed raceways','service penetrations'),
+   cite('B','3.1.9.2.(1)','provided they are protected at the penetration with a firestop conforming to Sentence 3.1.9.1.(1)','service penetrations need a 3.1.9.1.(1) firestop'),
+   cite('B','3.1.9.4.(1)','Combustible sprinkler piping is permitted to penetrate a fire separation provided the fire compartments on each side of the fire separation are sprinklered.','combustible sprinkler piping'),
+   cite('B','3.1.9.4.(4)(b)','in buildings more than 3 storeys in building height, the piping is sealed at the penetration by a firestop','DWV in >3 storeys'),
+   cite('B','3.1.9.4.(4)(b)','with a pressure differential of 50 Pa between the exposed and unexposed sides','50 Pa')],
+ alberta_specific=[pdfcite(*SCCU,'AB specific Sentences (3) and (4) deleted; harmonized with NBC.','historical context: entry for the "Automatic Sprinkler System Required" Article, previous Alberta Edition to 2023; the Alberta-specific sprinkler sentences were removed')])
+part2=dict(
+ claim_in_report=line('/workspace/unc-reports/session3-carlos-gc.md',9),
+ claim_in_case=[line('project-brief.md',20), line('ncr-firestop-EXAMPLE.md',13)],
+ scope_note='In case B, the "exempt" claim is about firestopping the sprinkler PIPE penetrations (3.1.9.1.(4)), not about whether the building needs sprinklers. The brief says the building is sprinklered. Both questions are covered: (A) does the building need sprinklers, and (B) is the sprinkler penetration exempt from firestopping.',
+ citations=P2c,
+ alberta_note='Alberta-specific (historical context, previous Alberta Edition): the SCC NBC(AE) 2023 Part 3 update document says that the two Alberta-specific Sentences, (3) and (4), of the "Automatic Sprinkler System Required" Article were deleted and the Article was harmonized with the NBC. A text search of that document found no other Alberta-specific sprinkler-requirement change. Its numbering notes (for example 3.2.2.50 "Reserved") were not interpreted. Not checked: a search snippet (SCC Summit 2023 slides) about NFPA 13D being extended to row houses; it is not used here.',
+ decision_table_building=[
+  dict(condition='Group A, B or F1, or a post-disaster building, or Group C/D/E/F2/F3 over 3 storeys or over 600 m²', result='Part 3 applies (Div A 1.3.3.2.(1))', next='Part 3 size Articles 3.2.2.20-3.2.2.92'),
+  dict(condition='Group B4/C/D/E/F2/F3, 3 storeys or less, and 600 m² or less', result='Part 9 applies (Div A 1.3.3.3.(1))', next='No general Part 9 sprinkler mandate was found in a codedb sentence search except home-type care (9.10.2.2.(2)). If sprinklers are installed: 9.10.1.3.(8). (model reading)'),
+  dict(condition='Part 3, Group C, 5 storeys (Carlos)', result='The Group C Articles that allow 5 storeys are 3.2.2.47, 3.2.2.48 (≤12 storeys, ≤42 m, ≤6 000 m²), 3.2.2.49 (noncombustible, ≤7 200 m² at 5 storeys) and 3.2.2.51 (≤6 storeys, ≤18 m, ≤1 800 m² at 5 storeys). All are listed in 3.2.2.18.(1), so the building is required to be sprinklered if it falls under one of these Articles (officer confirms); the brief states it is sprinklered (applicant-stated). 3.2.2.52 (≤4 storeys) and 3.2.2.55 (≤3) do not cover 5 storeys.', next='Need building area and height (m) to pick the Article.'),
+  dict(condition='Retail (Group E) at grade under Group C', result='Allowed within 3.2.2.48 or 3.2.2.51 if the Group E occupancy is below the third storey (3.2.2.48.(4)(b), 3.2.2.51.(5)(a)). Otherwise use 3.2.2.6 or 3.2.2.7. 3.2.2.8 applies if the retail is ≤10% of the storey floor area.', next='Need the retail floor area and storey.'),
+  dict(condition='Any storey required to be sprinklered', result='All lower storeys are sprinklered too (3.2.2.18.(2))', next='—'),
+  dict(condition='Sprinkler standard', result='NFPA 13 by default (3.2.5.12.(1)); NFPA 13R is limited to a residential-occupancy-throughout building of ≤4 storeys under the listed Articles (3.2.5.12.(2)(a)(i)). The app shows these limits; the officer confirms which standard applies.', next='Ask for the sprinkler design standard.')],
+ decision_table_penetration=[
+  dict(item='Sprinkler (head) through a fire separation or membrane, with a metal escutcheon plate per NFPA 13', result='Firestop requirements of 3.1.9.1.(1)-(3) do not apply (3.1.9.1.(4); Part 9: 9.10.9.9.(4))', app_action='ask for escutcheon evidence → officer gap "exemption claimed under 3.1.9.1.(4), evidence needed"'),
+  dict(item='Steel sprinkler branch line through a rated floor (case B: 22 lines, NCR L13)', result='Service penetration: firestop conforming to 3.1.9.1.(1) (CAN/ULC-S115 F rating ≥ the required rating) or cast-in-place for steel (3.1.9.2.(1), 3.1.9.1.(1)(b))', app_action='needs-evidence question: which listed system or provision covers this penetration? → officer gap "applicant claim not supported by a citation"'),
+  dict(item='Combustible (e.g. CPVC) sprinkler piping', result='Permitted to penetrate a fire separation if the fire compartments on both sides are sprinklered (3.1.9.4.(1); Part 9: 9.10.9.9.(3)). The sentence does not itself say the firestop is waived, so the app should not infer that (model reading).', app_action='needs-evidence question: which listed system or provision covers this penetration? → officer gap "applicant claim not supported by a citation"'),
+  dict(item='Same sealant as the failed DWV/PEX penetrations, listing covers metallic pipe only', result='The NCR marks the sprinkler lines "Not assessed"; the listing must cover the actual penetrant and annular space', app_action='needs-evidence question: which listed system or provision covers this penetration? → officer gap "applicant claim not supported by a citation"')],
+ evidence_to_ask=[
+  dict(field='major_occupancies', ask='Major occupancy of each part, with its storey (Table 3.1.2.1 Group/Division)', basis='Div B 3.1.2.1.(1); 3.2.2.6-3.2.2.8'),
+  dict(field='building_area_m2', ask='Building area (greatest horizontal area above grade, to the outside of exterior walls / centre line of firewalls)', basis='Div A 1.4.1.2.(1) "Building area"; 1.3.3.2/1.3.3.3; 3.2.2.x'),
+  dict(field='building_height_storeys', ask='Building height in storeys (per the Div A definition, counted from the floor of the first storey to the roof)', basis='Div A 1.4.1.2.(1) "Building height", "First storey"; 3.2.2.x; 3.2.1.1.(1) rooftop enclosures not counted'),
+  dict(field='height_m', ask='Height from the floor of the first storey to the uppermost floor level (excluding rooftop enclosures)', basis='3.2.2.48.(1)(c), 3.2.2.51.(1)(c)'),
+  dict(field='construction_type', ask='Combustible / noncombustible / encapsulated mass timber', basis='3.2.2.49 vs 3.2.2.51 (titles and (2))'),
+  dict(field='dwelling_units_and_suites', ask='Number of dwelling units / suites and where they are', basis='3.2.5.12.(2)-(3) (13R/13D eligibility); case brief "64 dwelling units"'),
+  dict(field='retail_area_m2', ask='Group E floor area per storey, and its storey', basis='3.2.2.8.(1); 3.2.2.48.(4); 3.2.2.51.(5)'),
+  dict(field='firewalls', ask='Are any firewalls subdividing the building? (They change the building area.)', basis='Div A 1.4.1.2.(1) "Building area", "Firewall"'),
+  dict(field='sprinkler_standard_and_extent', ask='NFPA 13 / 13R / 13D, and is it installed throughout (all storeys)?', basis='3.2.2.18.(1)-(2); 3.2.5.12.(1)-(3)'),
+  dict(field='penetrant_type', ask='At each sprinkler penetration: sprinkler head with a metal escutcheon per NFPA 13, or branch-line pipe? Pipe material (steel, CPVC)?', basis='3.1.9.1.(4); 3.1.9.2.(1); 3.1.9.4.(1)'),
+  dict(field='compartments_both_sides_sprinklered', ask='Are the fire compartments on both sides sprinklered? (Needed for combustible sprinkler piping.)', basis='3.1.9.4.(1)'),
+  dict(field='fire_separation_rating', ask='Required fire-resistance rating of the separation (from the architect\'s code analysis, as project data)', basis='3.1.9.1.(1); case brief L15 ("1 h")'),
+  dict(field='firestop_listing', ask='Listed CAN/ULC-S115 system number for that penetrant and annular space', basis='3.1.9.1.(1)(a)')])
+
+# ---------- Part 3
+PB='project-brief.md'
+def snip(f,a,b): return '\n'.join(open(LOCAL+f).read().split('\n')[a-1:b])
+def S(f,lines,**k): return dict(file=f'{RP}{f} @ {REPO}', lines=lines, **k)
+fx=[
+ dict(id='cfx-001', title='Project table paste (owner, address, legal, permit)', snippet=snip(PB,8,15), source=S(PB,'8-15', why='session3 L3: "Pasted owner, address, legal description and permit were not read"'),
+  expected=dict(project_name='Example Commons', address='0000 Example Avenue SW, Calgary, AB', legal_description='Lot 0, Block 0, Plan 0000000', owner='Example Commons Holdings Inc.', building_permit=dict(number='BP-0000-00000', status='issued'), storeys=5, sprinklered=dict(value=True, status='applicant-stated'), uses='retail at grade, 64 dwelling units above', dwelling_units=64, design_team=['Example Architecture Inc. (coordinating registered professional)','Example MEP Engineering'], floor_fire_separation_rating=dict(value='1 h', status='project data, per the architect\'s code analysis; not derived'), jurisdiction=dict(value='Calgary', status='proposed (from address)')),
+  must_not=['put the paste into "Proposed alternative"','re-ask owner, address, legal description or permit','derive the 1 h rating or an occupancy Group as a confirmed fact'],
+  still_missing=['building_area_m2','height_m','major_occupancies (Group C + Group E to be confirmed)','construction_type','firewalls']),
+ dict(id='cfx-002', title='What happened (sealant, listing, penetrants)', snippet=snip(PB,18,18)+'\n\n'+snip(PB,20,20), source=S(PB,'18, 20'),
+  expected=dict(levels=['L3','L4'], sealant='Example FireSeal 200', listing='EX-FS-1234', listing_scope='metal pipes only (per third-party inspector)', penetrants=['PVC drain pipe','PEX bundles'], annular_space_issue='some holes bigger than the listing allows', passed=dict(level='L2', penetrant='copper'), sprinkler_branch_lines=dict(sealed_with='same sealant'), claims=[dict(text='sprinklers are "exempt"', by='firestop sub', status='unverified claim; check against 3.1.9.1.(4)')]),
+  must_not=['record "sprinklers exempt" as a fact','treat the listing as covering plastic pipe']),
+ dict(id='cfx-003', title='What we need (schedule, desired outcome, evidence)', snippet=snip(PB,22,25), source=S(PB,'22-25'),
+  expected=dict(close_in_date='2026-10-24', desired_outcome='"a variance so we don\'t have to rip it out" (applicant wish, not a route decision)', evidence_offered=[dict(type='email', from_='sealant rep', described_as='draft EJ', status='not yet assessed')]),
+  must_not=['promise a variance','classify the rep email as an engineering judgment']),
+ dict(id='cfx-004', title='Sales-rep "EJ" email', snippet=snip('manufacturer-ej-draft-EXAMPLE.md',4,6), source=S('manufacturer-ej-draft-EXAMPLE.md','4-6', note='repo file ends at line 6; missing items are derived from what the email does not contain'),
+  expected=dict(issuer_role='sales rep', issuer_company='Example Sealants Co.', sent='2026-10-15 4:52 pm', product='FireSeal 200', claim=dict(text='performs on plastic pipe; "Treat this as our engineering judgment"', status='claim'), ej_status='evidence_listed (not reviewed)', missing_items=['signature/authorization','tested system referenced','job name/location','issuer qualifications'], route='ask for an EJ from a qualified issuer (IFC guidance); the officer decides acceptance'),
+  must_not=['accept as an EJ','write or complete the EJ','rule on whether it is an EJ']),
+ dict(id='cfx-005', title='Sprinkler "exempt" question plus NCR row', snippet=snip(PB,20,20)+'\n'+snip('ncr-firestop-EXAMPLE.md',13,13), source=dict(file=[f'{RP}{PB} @ {REPO} line 20', f'{RP}ncr-firestop-EXAMPLE.md @ {REPO} line 13'], note='input files only; no README, expected/ or keys/ content'),
+  expected=dict(claim=dict(text='sprinklers are "exempt"', by='firestop sub', status='claim (unverified)'), sealant_on_sprinkler_lines='same sealant (brief L20)', penetrant='sprinkler branch lines', material='steel', quantity=22, levels='L3-L4', assembly='rated floor', installed_system='same sealant', ncr_finding='Not assessed: inspector asks the design team to confirm treatment', needs_evidence_question='Which listed system or provision covers each sprinkler penetration (heads with a metal escutcheon per NFPA 13, or branch pipe through the floor)?', officer_gap='applicant claim not supported by a citation'),
+  must_not=['answer yes or no'], must=['create a needs-evidence question plus an officer gap'])]
+for f in fx: f['label']=LABEL
+
+if ERR: print('\n'.join(ERR)); sys.exit(1)
+out=dict(meta=dict(title='Carlos S1 backing: variance vs redesign, sprinkler "exempt", fact-extraction regression cases', generated='2026-10-20 (America/Edmonton, MDT UTC-6)', label=LABEL, persona='Carlos Mendes (GC, Calgary), case B', report='/workspace/unc-reports/session3-carlos-gc.md (S1 issues 1-3 at lines 8-10)', codedb_snapshot=dict(path=DB, sha256=hashlib.sha256(open(DB,'rb').read()).hexdigest(), edition='NBC(AE) 2023 2nd printing'), public_sources_only=True, builder='research/src/carlos_s1_build.py'),
+ part1_variance_vs_redesign=part1, part2_sprinkler_exempt=part2, part3_fact_extraction_cases=fx)
+json.dump(out,open(R/'carlos-s1-backing.json','w'),ensure_ascii=False,indent=2)
+print('OK json', sum(len(v) for v in P2c.values()), len(part1['citations']), len(fx))
