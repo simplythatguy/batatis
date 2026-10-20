@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 
-from engine.description_facts import WINNER, score_variant
+from engine.description_facts import WINNER, extract_description, extract_regex, score_variant
 
 ROOT = Path(__file__).resolve().parents[2] / 'evals_dev' / 'description_facts'
 LABELS = ROOT / 'labelled.json'
@@ -30,8 +30,33 @@ def _round_report(report):
     return out
 
 
-def _recorded(path: Path) -> dict:
-    return json.loads(path.read_text().split('```json')[1].split('```')[0])
+def _recorded_blocks(path: Path) -> list[dict]:
+    parts = path.read_text().split('```json')[1:]
+    return [json.loads(part.split('```')[0]) for part in parts]
+
+
+# Frozen output of the first blind run, before these five texts were used to change the extractor.
+_HELD_OUT_FIRST_RUN = {
+    'reports': {
+        name: {
+            'storeys': {'precision': 1.0, 'recall': 0.75, 'tp': 3, 'fp': 0, 'fn': 1},
+            'building_area_m2': {'precision': 1.0, 'recall': 0.6667, 'tp': 2, 'fp': 0, 'fn': 1},
+            'span_m': {'precision': 1.0, 'recall': 1.0, 'tp': 0, 'fp': 0, 'fn': 0},
+            'occupancy': {'precision': 0.5, 'recall': 0.5, 'tp': 1, 'fp': 1, 'fn': 1},
+            'alternative_description': {'precision': 1.0, 'recall': 1.0, 'tp': 5, 'fp': 0, 'fn': 0},
+            'micro': {'precision': 0.9167, 'recall': 0.7857, 'tp': 11, 'fp': 1, 'fn': 3, 'f1': 0.8462},
+        }
+        for name in ('regex', 'normalised')
+    },
+    'misses': {
+        name: [
+            {'id': 'brief-a-manufacturer', 'field': 'storeys', 'gold': 2, 'predicted': None},
+            {'id': 'brief-a-manufacturer', 'field': 'building_area_m2', 'gold': 190, 'predicted': None},
+            {'id': 'brief-a-manufacturer', 'field': 'occupancy', 'gold': 'single_family', 'predicted': 'industrial'},
+        ]
+        for name in ('regex', 'normalised')
+    },
+}
 
 
 def _misses(rows, name):
@@ -67,22 +92,62 @@ def test_labelled_set_is_synthetic_and_the_winner_is_recorded():
     assert reports[WINNER]['micro']['f1'] >= reports['normalised']['micro']['f1']
     text = RESULTS.read_text()
     assert 'Synthetic, in-sample' in text
-    assert _recorded(RESULTS) == reports
+    assert _recorded_blocks(RESULTS)[0] == reports
 
 
-def test_held_out_demo_text_is_scored_and_misses_are_listed():
+def test_held_out_first_run_stays_frozen_and_post_fix_is_not_blind():
     report = HELD_OUT_REPORT.read_text()
-    assert 'Agent-labelled, not human-verified' in report
+    assert 'held-out, first run, agent-labelled' in report
+    assert 'post-fix, no longer blind' in report
     rows = json.loads(HELD_OUT.read_text())
     assert {row['id'] for row in rows} == {
         'script-c-homebuilder', 'script-a-manufacturer', 'brief-a-manufacturer',
         'brief-b-contractor', 'brief-c-homebuilder'}
     assert all(row['labelling'] == 'agent-labelled, not human-verified' for row in rows)
+    first, post = _recorded_blocks(HELD_OUT_REPORT)
+    assert first == _HELD_OUT_FIRST_RUN
     fresh = {
         'reports': {name: _round_report(score_variant(rows, name)) for name in ('regex', 'normalised')},
         'misses': {name: _misses(rows, name) for name in ('regex', 'normalised')},
     }
-    assert _recorded(HELD_OUT_REPORT) == fresh
+    assert post == fresh
+    assert post != first
     for name, found in fresh['misses'].items():
         for miss in found:
             assert miss['id'] in report and miss['field'] in report
+
+
+def _facts(text: str) -> dict:
+    return {fact.field: fact.value for fact in extract_description(text).facts}
+
+
+def test_question_mark_drops_only_the_interrogative_clause():
+    text = '2-storey single-family, about 190 m², housewrap?'
+    facts = _facts(text)
+    assert facts['storeys'] == 2
+    assert facts['building_area_m2'] == 190
+    assert facts['occupancy'] == 'single_family'
+    alternative = extract_description(text).alternative_description
+    assert alternative is not None and 'housewrap' not in alternative and '?' not in alternative
+    for separated in (
+        '2-storey single-family; about 190 m²; housewrap?',
+        '2-storey single-family — about 190 m² — housewrap?',
+        '| Building | 2-storey single-family, about 190 m² |\n| Wall | housewrap?',
+    ):
+        assert _facts(separated) == facts
+    for question in ('Is 2-storey enough?', 'What do I need for a 2-storey garden suite?'):
+        extracted = extract_description(question)
+        assert extracted.facts == () and extracted.alternative_description is None
+        assert extract_regex(question).facts == ()
+
+
+def test_factory_bonded_is_not_industrial_and_residential_wins_a_conflict():
+    assert 'occupancy' not in _facts('The facer is factory-bonded.')
+    assert _facts('A factory of 2 storeys.')['occupancy'] == 'industrial'
+    assert _facts('A warehouse of 2 storeys.')['occupancy'] == 'industrial'
+    assert _facts(
+        'A 2-storey single-family house with factory-bonded panels.')['occupancy'] == 'single_family'
+    assert _facts('A single-family house beside a warehouse.')['occupancy'] == 'single_family'
+    assert 'occupancy' not in _facts('A hotel beside a warehouse.')
+    assert 'occupancy' not in _facts('A single-family house and a duplex.')
+    assert extract_regex('The facer is factory-bonded.').facts == ()

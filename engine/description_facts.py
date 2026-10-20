@@ -3,8 +3,8 @@
 Two extractors are kept so the labelled comparison in
 ``evals_dev/description_facts/`` can be re-run. ``extract_description`` is the
 winner (rules plus a normaliser). Extracted facts are unconfirmed and marked
-with source type ``description``. Questions to the tool are left out of the
-proposed-alternative text. Nothing here is a professional opinion.
+with source type ``description``. Only the interrogative clause or sentence is
+left out of the proposed-alternative text. Nothing here is a professional opinion.
 """
 from __future__ import annotations
 
@@ -42,7 +42,9 @@ _OCCUPANCY = (
     ('detention', re.compile(r'\b(?:detention occupancy|detention|jail|prison)\b', re.I)),
     ('mercantile', re.compile(r'\b(?:mercantile|retail store|retail occupancy)\b', re.I)),
     ('business', re.compile(r'\b(?:business occupancy|office building)\b', re.I)),
-    ('industrial', re.compile(r'\b(?:industrial occupancy|warehouse|factory)\b', re.I)),
+    # Hyphenated modifiers (factory-bonded, warehouse-style) are product words, not a building.
+    ('industrial', re.compile(
+        r'(?<!-)\b(?:industrial occupancy|warehouse|factory)\b(?!-)', re.I)),
     ('farm', re.compile(r'\b(?:farm building|barn)\b', re.I)),
     ('mixed', re.compile(r'\b(?:mixed[-\s]?use)\b', re.I)),
 )
@@ -62,36 +64,115 @@ class DescriptionExtract:
     facts: tuple[ExtractedFact, ...]
 
 
-def sentences(text: str) -> list[str]:
-    """Split on sentence punctuation, keeping abbreviations such as ``sq. ft.`` together."""
-    stripped = text.strip()
-    protected = re.sub(
+_RESIDENTIAL = frozenset({'single_family', 'multi_family'})
+
+
+def _protect(text: str) -> str:
+    """Keep abbreviations such as ``sq. ft.`` from looking like sentence ends."""
+    return re.sub(
         r'\b(?:sq|ft|m|no|fig)\.\s+(?=[a-z])',
         lambda match: match.group(0).replace('.', '\0'),
-        stripped, flags=re.I)
-    parts = re.split(r'(?<=[.!?])\s+', protected)
-    return [part.replace('\0', '.').strip() for part in parts if part.strip()]
+        text, flags=re.I)
+
+
+def _restore(text: str) -> str:
+    return text.replace('\0', '.')
 
 
 def is_question(sentence: str) -> bool:
-    """A question to the tool, not a statement that happens to contain a question mark mid-word."""
+    """A question to the tool, not a statement that merely sits beside one."""
     stripped = sentence.strip()
     return '?' in stripped or bool(_WH.match(stripped))
 
 
+def _without_question_clause(piece: str) -> str | None:
+    """Drop a question sentence, or only the comma-clause that contains ``?``."""
+    raw = _restore(piece)
+    if not raw.strip():
+        return None
+    if '?' in raw:
+        clauses = [clause for clause in raw.split(',') if clause.strip() and not is_question(clause)]
+        if not clauses:
+            return None
+        return ','.join(clauses)
+    if is_question(raw):
+        return None
+    return raw
+
+
+def _filter_line(line: str) -> str:
+    """Apply sentence and ``;`` / ``—`` splits inside one line, then drop questions."""
+    tokens = re.split(r'((?<=[.!?])\s+|\s*;\s*|\s*—\s*)', _protect(line))
+    kept: list[str] = []
+    for index in range(0, len(tokens), 2):
+        piece = _without_question_clause(tokens[index])
+        if piece is None:
+            continue
+        if kept:
+            kept.append(tokens[index - 1])
+        kept.append(piece)
+    return ''.join(kept).strip()
+
+
+def _without_questions(text: str) -> str:
+    """Drop interrogative lines and clauses. Leave every other line in place."""
+    lines: list[str] = []
+    for line in text.splitlines():
+        if not line.strip():
+            lines.append('')
+            continue
+        filtered = _filter_line(line)
+        if filtered:
+            lines.append(filtered)
+    return '\n'.join(lines).strip()
+
+
+def sentences(text: str) -> list[str]:
+    """Split on sentence and line boundaries and on ``;`` or ``—`` list separators.
+
+    A comma is not a boundary. Abbreviations such as ``sq. ft.`` stay together.
+    """
+    pieces: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        parts = re.split(r'(?<=[.!?])\s+|\s*;\s*|\s*—\s*', _protect(stripped))
+        for part in parts:
+            cleaned = _restore(part).strip()
+            if cleaned:
+                pieces.append(cleaned)
+    return pieces
+
+
 def narrative_sentences(text: str) -> list[str]:
-    return [sentence for sentence in sentences(text) if not is_question(sentence)]
+    """Statements only. A ``?`` drops that clause, not the rest of the row."""
+    return [sentence for sentence in sentences(_without_questions(text)) if sentence.strip()]
 
 
 def alternative_text(text: str) -> str | None:
-    kept = narrative_sentences(text)
+    """Non-question remainder. Line breaks stay unless they follow sentence punctuation."""
+    filtered = _without_questions(text)
+    if not filtered:
+        return None
+    parts = re.split(r'(?<=[.!?])\s+', _protect(filtered))
+    kept = [_restore(part).strip() for part in parts if part.strip()]
     if not kept:
         return None
     return ' '.join(kept)
 
 
 def _occupancy(text: str) -> str | None:
+    """Building-use words only. One residential category wins; a conflict stays empty.
+
+    A wrong occupancy is worse than none. Product or process adjectives never match.
+    """
     found = [name for name, pattern in _OCCUPANCY if pattern.search(text)]
+    residential = [name for name in found if name in _RESIDENTIAL]
+    if len(residential) == 1:
+        return residential[0]
+    if residential:
+        return None
     return found[0] if len(found) == 1 else None
 
 
