@@ -49,7 +49,7 @@ export function Application({ route }: { route: Route }) {
   const [reasons, setReasons] = useState<string[]>([]);
   const [tech, setTech] = useState("");
   const [statusText, setStatusText] = useState("Review missing or unconfirmed information before downloading the application PDF.");
-  const [file, setFile] = useState<{ url: string; name: string; draft: boolean } | null>(null);
+  const [file, setFile] = useState<{ url: string; name: string; draft: boolean; downloadedAt: Date } | null>(null);
   const blocking = gaps.filter((g) => g.severity === "blocking");
   const warnings = gaps.filter((g) => g.severity === "warning").length;
   const example = EXAMPLES.find((ex) => ex.id === c.exampleId);
@@ -96,6 +96,10 @@ export function Application({ route }: { route: Route }) {
   }
 
   async function prepare(draft: boolean) {
+    setDraftIntent(draft);
+    setReasons([]);
+    setTech("");
+    forgetFile();
     if (c.exampleId) {
       setStage("blocked");
       setStatusText("Example PDFs are not yet labelled. Download the example text record instead.");
@@ -108,10 +112,6 @@ export function Application({ route }: { route: Route }) {
     }
     const ctl = new AbortController();
     abortRef.current = ctl;
-    setDraftIntent(draft);
-    setReasons([]);
-    setTech("");
-    forgetFile();
     setStage("checking");
     setStatusText(`Saving and reviewing ${subject}…`);
     const caseId = await saveDraft();
@@ -128,11 +128,11 @@ export function Application({ route }: { route: Route }) {
       const got = await engine.exportPdf(caseId, draft, ctl.signal);
       if (ctl.signal.aborted) return;
       const url = URL.createObjectURL(got.blob);
-      setFile({ url, name: got.filename, draft });
       const a = Object.assign(document.createElement("a"), { href: url, download: got.filename });
       document.body.append(a);
       a.click();
       a.remove();
+      setFile({ url, name: got.filename, draft, downloadedAt: new Date() });
       setStage("ready");
       setStatusText(draft ? "Your draft PDF is ready." : "Your application PDF is ready.");
     } catch (e) {
@@ -157,12 +157,22 @@ export function Application({ route }: { route: Route }) {
   }
 
   function downloadRecord() {
+    const pdfLines = file
+      ? [`Application PDF: downloaded ${file.draft ? "draft PDF " : ""}${file.name} at ${file.downloadedAt.toLocaleString()}.`]
+      : stage === "blocked"
+        ? ["Application PDF: blocked. Reasons:", ...(reasons.length ? reasons : [statusText]).map((reason) => `- ${reason}`)]
+        : stage === "error"
+          ? ["Application PDF: could not be prepared.", ...(statusText !== "The PDF could not be prepared." ? [statusText] : [])]
+          : ["Application PDF: not prepared in this session."];
     const text = [
       ...(c.exampleId ? [`EXAMPLE — ${exampleLabel}`, "For practice. Not for submission.", ""] : []),
       c.title,
       c.description,
       "",
       ...c.facts.map((f) => `${factLabel(f.field)}: ${f.value ?? ""} (${f.kind}, ${f.status})`),
+      "",
+      "Application PDF",
+      ...pdfLines,
       "",
       "A text record is not the Safety Codes Council form.",
     ].join("\n");
@@ -174,7 +184,9 @@ export function Application({ route }: { route: Route }) {
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 0);
-    setStatusText(`Download started: ${name}. A text record is not the Safety Codes Council form.`);
+    if (stage !== "blocked" && stage !== "error") {
+      setStatusText(`Download started: ${name}. A text record is not the Safety Codes Council form.`);
+    }
   }
 
   function downloadAgain() {

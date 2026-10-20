@@ -252,9 +252,9 @@ export function Officer() {
               Information request
             </h2>
             {current && (
-              <div className="field">
+              <div className="field request-field">
                 <label htmlFor="request-text">{version}</label>
-                <textarea id="request-text" readOnly rows={10} value={letter} />
+                <textarea id="request-text" className="mono" readOnly rows={10} value={letter} />
               </div>
             )}
             <div className="btn-row">
