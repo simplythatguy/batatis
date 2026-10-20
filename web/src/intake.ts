@@ -146,8 +146,12 @@ export interface ExtractedAdmin {
   municipalAddress?: string;
   legalDescription?: string;
   permit?: string;
+  /** Only a line the applicant labeled as the proposed alternative. */
+  alternative?: string;
   narrative: string;
 }
+
+const ALTERNATIVE_LINE = /^(?:proposed alternative|alternative solution|alternative)\s*[:\-]\s*(.+)$/i;
 
 /** Pull labeled owner, address, legal description, and permit lines out of pasted text. */
 export function extractAdmin(text: string): ExtractedAdmin {
@@ -155,6 +159,10 @@ export function extractAdmin(text: string): ExtractedAdmin {
   const kept: string[] = [];
   for (const line of text.split(/\n/)) {
     const trimmed = line.trim();
+    if (!found.alternative && ALTERNATIVE_LINE.test(trimmed)) {
+      found.alternative = trimmed.match(ALTERNATIVE_LINE)?.[1]?.trim() ?? "";
+      continue;
+    }
     const hit = ADMIN_LINES.find((label) => label.re.test(trimmed) && !found[label.field]);
     if (hit) {
       found[hit.field] = trimmed.match(hit.re)?.[1]?.trim() ?? "";
@@ -243,11 +251,9 @@ export function applyDescription(c: Case, text: string): Case {
   facts.push(pointed("desc-description", "project.description", trimmed));
   const extracted = extractAdmin(trimmed);
   const adminFields = ["owner", "representative", "mailingAddress", "municipalAddress", "legalDescription", "permit"] as const;
-  let pulled = false;
   for (const field of adminFields) {
     const value = extracted[field];
     if (!value) continue;
-    pulled = true;
     const existing = facts.find((f) => f.field === field);
     if (existing && isUserKept(existing)) continue;
     const rest = facts.filter((f) => f.field !== field);
@@ -255,17 +261,16 @@ export function applyDescription(c: Case, text: string): Case {
     facts.length = 0;
     facts.push(...rest);
   }
-  const alt = facts.find((f) => f.field === "alternative");
-  const altText = pulled ? extracted.narrative : trimmed;
-  if ((!alt || alt.source.ref === FROM_YOU) && altText) {
-    const rest = facts.filter((f) => f.field !== "alternative");
-    rest.push(pointed("desc-alternative", "alternative", altText));
-    facts.length = 0;
-    facts.push(...rest);
-  } else if (pulled && alt?.source.ref === FROM_YOU && !altText) {
-    const rest = facts.filter((f) => f.field !== "alternative");
-    facts.length = 0;
-    facts.push(...rest);
+  // The paste stays in the description. Proposed alternative is filled only from a labeled line,
+  // so the rest of the brief is not copied into that field.
+  if (extracted.alternative) {
+    const existing = facts.find((f) => f.field === "alternative");
+    if (!existing || !isUserKept(existing)) {
+      const rest = facts.filter((f) => f.field !== "alternative");
+      rest.push(pointed("desc-alternative", "alternative", extracted.alternative));
+      facts.length = 0;
+      facts.push(...rest);
+    }
   }
 
   const storey = trimmed.match(STOREY);

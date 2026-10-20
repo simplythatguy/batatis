@@ -95,7 +95,7 @@ export function officerProfessionalLines(
     return [
       professionalConfirmed(facts)
         ? "Practice of engineering is indicated. A registered professional is named on this application."
-        : "Practice of engineering is indicated. The registered professional is not confirmed.",
+        : "Practice of engineering is indicated. The registered professional is not confirmed. This item is routed to the officer until an engineer or architect confirms a seal or registration number.",
     ];
   }
   if (practice === false) return ["Practice of engineering was not indicated."];
@@ -107,7 +107,7 @@ export function professionalFlagLines(c: Pick<Case, "practiceOfEngineering" | "f
     return [
       professionalConfirmed(c.facts)
         ? "Practice of engineering is indicated. A registered professional is named on this application."
-        : "Practice of engineering is indicated. The registered professional is not confirmed.",
+        : "Practice of engineering is indicated. The registered professional is not confirmed. This item is routed to the officer until an engineer or architect confirms a seal or registration number.",
     ];
   }
   if (c.practiceOfEngineering === false) return ["Practice of engineering was not indicated."];
@@ -115,11 +115,27 @@ export function professionalFlagLines(c: Pick<Case, "practiceOfEngineering" | "f
   return ["Practice of engineering has not been screened on this application."];
 }
 
-/**
- * What the applicant sees for one issue's practice flag.
- * A yes asks for the professional's name. It does not repeat an engineering judgment.
- * Unknown shows the question the issues route returned.
- */
+const PROFESSIONAL_HOLD = /responsible_professional|professional_authentication|professional_qualifications|professional_requirement|professional\.role|needs-professional|professional-not-engaged/;
+
+/** A professional blocker the applicant cannot clear by inventing a seal. */
+export function isProfessionalHold(gap: { id: string; field?: string }): boolean {
+  return PROFESSIONAL_HOLD.test(gap.id) || PROFESSIONAL_HOLD.test(gap.field ?? "");
+}
+
+/** What to do while the official PDF stays closed for a missing engineer or architect. */
+export function professionalRouteNote(gaps: { id: string; field?: string }[]): string | null {
+  if (!gaps.some(isProfessionalHold)) return null;
+  return "This professional item is routed to the officer. Name an engineer or architect and their seal or registration number, or choose Not sure or Not engaged yet. That does not open the official PDF. Download a draft PDF, or open Officer review and copy the request. Do not invent a number.";
+}
+
+/** Keep the missing item, and say it goes to the officer with a next step. */
+export function officerRoutedLabel(message: string): string {
+  const base = message.trim();
+  if (/routed to the officer/i.test(base)) return base;
+  const sentence = base.endsWith(".") ? base : `${base}.`;
+  return `${sentence} This item is routed to the officer. Choose Not sure or Not engaged yet to send it there, or name an engineer or architect and their seal or registration number. A draft PDF is available. Do not invent a number. The official PDF stays closed until that confirmation is real.`;
+}
+
 /** One line for the professional screen. The flag word is not repeated. */
 export function practiceFlagLine(flag: "yes" | "no" | "depends"): string {
   if (flag === "yes") return "Practice of engineering is indicated. A registered professional is needed. This is not a licence decision.";
@@ -139,7 +155,7 @@ export function practicePrompt(
   }
   if (value === true) {
     return {
-      lead: "Name the registered professional and their seal or registration number. This screen does not state their engineering judgment.",
+      lead: "This item is routed to the officer. Name the registered professional and their seal or registration number, or choose Not sure or Not engaged yet. That does not clear it. This screen does not state their engineering judgment.",
       question: null,
     };
   }

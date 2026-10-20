@@ -177,7 +177,12 @@ test("labels name the question and hide raw fact keys", () => {
 
 test("a process answer just typed shows before the engine copy arrives", () => {
   const blank = emptyCase("contractor");
-  const typed = reducer(blank, { type: "setProcess", field: "risk", value: "Water at the joint." });
+  const partial = reducer(blank, { type: "setProcess", field: "risk", value: "Wat" });
+  const typed = reducer(partial, { type: "setProcess", field: "risk", value: "Water at the joint." });
+  assert.equal(typed.process.risk, "Water at the joint.");
+  const stored = typed.facts.filter((fact) => fact.field === "process.risk_assessment");
+  assert.equal(stored.length, 1);
+  assert.equal(stored[0]?.value, "Water at the joint.");
   assert.equal(shownProcessAnswer("risk_assessment", null, typed.process), "Water at the joint.");
   assert.equal(shownProcessAnswer("risk_assessment", "stale engine text", typed.process), "Water at the joint.");
   assert.equal(shownProcessAnswer("risk_assessment", null, blank.process), "");

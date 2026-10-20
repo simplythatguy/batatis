@@ -230,7 +230,7 @@ function ProfessionalAnswers() {
           return (
             <div key={q.field} className={`field full ${value ? "" : "is-empty"}`}>
               <label htmlFor="prof-role">{q.label}</label>
-              <p className="field-note">Engineer or architect, with a seal or registration number. Not sure and Not engaged yet go to the officer and keep the official PDF closed.</p>
+              <p className="field-note">This item is routed to the officer until an engineer or architect confirms a seal or registration number. Not sure and Not engaged yet send the question to the officer. That does not open the official PDF. Download a draft PDF or copy the officer request. Do not invent a number.</p>
               <select
                 id="prof-role"
                 value={value}
@@ -464,7 +464,7 @@ export function Recommendations() {
       )}
       {c.practiceOfEngineering === true && !professionalConfirmed(c.facts) && (
         <p className="field-note" role="status">
-          This is routed to the officer. Name an engineer or architect and their seal or registration number. You can keep preparing the application. Official export stays blocked until that person is confirmed. This screen does not write their judgment.
+          This item is routed to the officer. Name an engineer or architect and their seal or registration number, or choose Not sure or Not engaged yet. That does not open the official PDF. Download a draft PDF, or open Officer review and copy the request. Do not invent a number. This screen does not write their judgment.
         </p>
       )}
       {load.professional?.reasons.map((r) => (
@@ -499,7 +499,7 @@ export function Recommendations() {
                   <span className="article-id">{issue.provision?.provision_id ?? issue.entered_reference ?? "No provision yet"}</span>
                   <span className="label-pill">
                     <span className={`status-dot ${status === "needs_professional" ? "blocking" : "warning"}`} />
-                    {status === "needs_professional" ? "needs_professional" : status === "evidence_listed" ? "evidence listed" : "open"}
+                    {status === "needs_professional" ? "Routed to the officer" : status === "evidence_listed" ? "evidence listed" : "open"}
                   </span>
                 </div>
                 <p>{issue.at_stake}</p>

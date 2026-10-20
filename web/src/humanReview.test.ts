@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { notSureQuestions, officerProfessionalLines, officerRequest, pdfOutcomeLine, practiceFlagLine, practicePrompt, SCO_JUDGEMENT, textRecord } from "./humanReview.ts";
+import { notSureQuestions, officerProfessionalLines, officerRequest, officerRoutedLabel, pdfOutcomeLine, practiceFlagLine, practicePrompt, professionalRouteNote, SCO_JUDGEMENT, textRecord } from "./humanReview.ts";
 import { emptyCase } from "./intake.ts";
 import { getGaps, reducer, unresolvedCandidates } from "./model.ts";
 
@@ -183,9 +183,21 @@ test("a yes asks for the professional and an unknown shows its question", () => 
   routed = reducer(routed, { type: "answerScope", field: "fire_alarm", answer: "clear" });
   assert.equal(routed.facts.some((fact) => fact.field === "professional.fire_alarm"), false);
   const yes = practicePrompt(true, "Is the span over 12.20 m?");
+  assert.match(yes.lead, /routed to the officer/);
   assert.match(yes.lead, /Name the registered professional/);
+  assert.match(yes.lead, /seal or registration number/);
   assert.match(yes.lead, /does not state their engineering judgment/);
+  assert.doesNotMatch(yes.lead, /needs_professional/);
   assert.equal(yes.question, null);
+  const route = professionalRouteNote([{ id: "D12:responsible_professional", field: "responsible_professional" }]);
+  assert.match(route ?? "", /routed to the officer/);
+  assert.match(route ?? "", /draft PDF/);
+  assert.match(route ?? "", /Do not invent a number/);
+  assert.equal(professionalRouteNote([{ id: "detail-owner", field: "owner" }]), null);
+  const labeled = officerRoutedLabel("a named registered professional required for this work");
+  assert.match(labeled, /routed to the officer/);
+  assert.match(labeled, /Not sure or Not engaged yet/);
+  assert.equal(officerRoutedLabel(labeled), labeled);
   const unknown = practicePrompt("unknown", "What is the confirmed occupancy?");
   assert.equal(unknown.question, "What is the confirmed occupancy?");
   assert.match(unknown.lead, /not a yes or a no/);

@@ -5,7 +5,7 @@ import { MissingItems } from "../completenessView";
 import { DraftNote, GapStrip, PanelHeader } from "../components";
 import { EXAMPLES } from "../examples";
 import { displayValue, factLabel, plainFactStatus } from "../model";
-import { UNSIGNED_LINE, pdfOutcomeLine, textRecord } from "../humanReview";
+import { UNSIGNED_LINE, pdfOutcomeLine, professionalRouteNote, textRecord } from "../humanReview";
 import type { Route } from "../router";
 import { useCase } from "../store";
 import type { Gap } from "../types";
@@ -79,9 +79,10 @@ export function Application({ route }: { route: Route }) {
         return;
       }
       if (blockers.length) {
-        const note = `Not exported yet. Official PDF closed while ${blockers.length} required item${blockers.length === 1 ? "" : "s"} remain.`;
+        const route = professionalRouteNote(blockers);
+        const note = route ?? `Not exported yet. Official PDF closed while ${blockers.length} required item${blockers.length === 1 ? "" : "s"} remain.`;
         setStage("blocked");
-        setStatusText("Not exported yet.");
+        setStatusText(note);
         setCompletenessRecord({ label: "Not exported yet", reasons: [], note });
         return;
       }
@@ -105,7 +106,8 @@ export function Application({ route }: { route: Route }) {
       return;
     }
     if (!draft && !officialReady) {
-      const note = "Some required information is missing or unconfirmed. The reasons are the missing items in this record.";
+      const route = professionalRouteNote(gaps);
+      const note = route ?? "Some required information is missing or unconfirmed. The reasons are the missing items in this record.";
       setStage("blocked");
       setStatusText(note);
       setCompletenessRecord({ label: "Export blocked", reasons: [], note });

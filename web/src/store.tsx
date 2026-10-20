@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type Dispatch, type ReactNode } from "react";
 import { EngineError, type EngineGap } from "./api/client";
-import { type CompletenessRecord } from "./humanReview";
+import { type CompletenessRecord, isProfessionalHold, officerRoutedLabel } from "./humanReview";
 import { clearEngineSession, engineCaseId, ensureEngineCase, pushDeletedEvidence, pushFacts, pushListedEvidence, refreshGaps, syncJurisdiction } from "./api/sync";
 import { shouldConfirmReplace } from "./rules";
 import { exampleCase } from "./examples";
@@ -127,10 +127,11 @@ function composeGaps(localCase: Case, source: Store["gapsSource"], engine: Engin
     const keys = aliasKeys(g.field);
     if (keys.some((key) => seen.has(key))) continue;
     for (const key of keys) seen.add(key);
+    const label = gapLabel(g.message, g.fix_hint);
     admin.push({
       id: g.id,
       severity: g.severity,
-      label: gapLabel(g.message, g.fix_hint),
+      label: isProfessionalHold(g) ? officerRoutedLabel(label) : label,
       href: hrefFor(g.field),
       field: g.field,
     });
