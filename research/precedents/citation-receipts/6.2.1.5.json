@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/Users/aamia/.t3/projects/batatis/.venv/bin/python",
+    "-I",
+    "tools/codesearch.py",
+    "find",
+    "(?<!\\d)6\\.2\\.1\\.5\\.(?!\\d)",
+    "--doc",
+    "NBC-AE",
+    "--max",
+    "1000",
+    "--context",
+    "0"
+  ],
+  "stdout": "[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.103] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.104] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.110] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.296] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.594] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.602] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.603] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.609] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.618] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.762] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.763] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.765] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.769] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.783] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.785] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.794] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.796] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.798] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.889] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1452] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1526] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1527] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1529] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1533] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1547] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1549] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1558] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1560] ...6.2.1.5....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1562] ...6.2.1.5....\n\n",
+  "stderr": "",
+  "exit_code": 0
+}

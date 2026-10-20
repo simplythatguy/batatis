@@ -1,0 +1,214 @@
+[
+ {
+  "case": "V01",
+  "id": "standata-abc2014-variance-14-bcv-009",
+  "gold": [
+   "3.1.18.5."
+  ],
+  "gold_in_candidates": [
+   "3.1.18.5."
+  ]
+ },
+ {
+  "case": "V02",
+  "id": "standata-nbc2023-variance-23-bcv-001",
+  "gold": [
+   "9.8.8.1.",
+   "9.9.10.1."
+  ],
+  "gold_in_candidates": [
+   "9.9.10.1."
+  ]
+ },
+ {
+  "case": "V03",
+  "id": "standata-nbc2023-variance-23-bcv-003",
+  "gold": [
+   "9.36.2.8."
+  ],
+  "gold_in_candidates": [
+   "9.36.2.8."
+  ]
+ },
+ {
+  "case": "V04",
+  "id": "standata-nbc2023-variance-23-bcv-004",
+  "gold": [
+   "3.1.7.1.",
+   "9.10.3.1."
+  ],
+  "gold_in_candidates": [
+   "3.1.7.1.",
+   "9.10.3.1."
+  ]
+ },
+ {
+  "case": "V05",
+  "id": "standata-nbc2023-variance-23-bcv-005",
+  "gold": [
+   "3.3.1.5."
+  ],
+  "gold_in_candidates": [
+   "3.3.1.5."
+  ]
+ },
+ {
+  "case": "V06",
+  "id": "standata-nbc2023-variance-23-bcv-007",
+  "gold": [
+   "9.23.4.2."
+  ],
+  "gold_in_candidates": [
+   "9.23.4.2."
+  ]
+ },
+ {
+  "case": "V07",
+  "id": "standata-nbc2023-variance-23-bcv-008-rev1",
+  "gold": [
+   "9.32.3.13."
+  ],
+  "gold_in_candidates": [
+   "9.32.3.13."
+  ]
+ },
+ {
+  "case": "V08",
+  "id": "standata-nbc2023-variance-23-bcv-008",
+  "gold": [
+   "9.32.3.13."
+  ],
+  "gold_in_candidates": [
+   "9.32.3.13."
+  ]
+ },
+ {
+  "case": "V09",
+  "id": "standata-nbc2023-variance-23-bcv-009",
+  "gold": [
+   "6.2.1.5.",
+   "9.33.5.2."
+  ],
+  "gold_in_candidates": [
+   "6.2.1.5.",
+   "9.33.5.2."
+  ]
+ },
+ {
+  "case": "V10",
+  "id": "standata-nbc2023-variance-23-bcv-010",
+  "gold": [
+   "4.3.4.1."
+  ],
+  "gold_in_candidates": [
+   "4.3.4.1."
+  ]
+ },
+ {
+  "case": "V11",
+  "id": "standata-nbc2023-variance-23-bcv-010r1",
+  "gold": [
+   "4.3.4.1."
+  ],
+  "gold_in_candidates": [
+   "4.3.4.1."
+  ]
+ },
+ {
+  "case": "V12",
+  "id": "standata-nbc2023-variance-23-bcv-011r1",
+  "gold": [
+   "3.1.18.5."
+  ],
+  "gold_in_candidates": []
+ },
+ {
+  "case": "V13",
+  "id": "standata-nbc2023-variance-23-bcv-012r1",
+  "gold": [
+   "9.15.2.4."
+  ],
+  "gold_in_candidates": [
+   "9.15.2.4."
+  ]
+ },
+ {
+  "case": "V14",
+  "id": "standata-nbc2023-variance-23-bcv-013",
+  "gold": [
+   "3.5.4.1."
+  ],
+  "gold_in_candidates": [
+   "3.5.4.1."
+  ]
+ },
+ {
+  "case": "V15",
+  "id": "standata-nbc2023-variance-23-bcv-014",
+  "gold": [
+   "3.2.2.2."
+  ],
+  "gold_in_candidates": [
+   "3.2.2.2."
+  ]
+ },
+ {
+  "case": "V16",
+  "id": "standata-nbc2023-variance-23-bcv-017",
+  "gold": [
+   "9.19.1.1.",
+   "9.19.1.4."
+  ],
+  "gold_in_candidates": [
+   "9.19.1.1."
+  ]
+ },
+ {
+  "case": "V17",
+  "id": "standata-nbc2023-variance-23-bcv-018",
+  "gold": [
+   "9.10.12.4.",
+   "9.10.14.5.",
+   "9.10.15.5."
+  ],
+  "gold_in_candidates": [
+   "9.10.12.4.",
+   "9.10.14.5.",
+   "9.10.15.5."
+  ]
+ },
+ {
+  "case": "V18",
+  "id": "calgary-spv-001-zero-lot-line-2026-03",
+  "gold": [
+   "9.10.15.5."
+  ],
+  "gold_in_candidates": [
+   "9.10.15.5."
+  ]
+ },
+ {
+  "case": "V19",
+  "id": "calgary-spv-003-construction-of-exposed-building-face",
+  "gold": [
+   "9.10.14.2.",
+   "9.10.14.5."
+  ],
+  "gold_in_candidates": [
+   "9.10.14.2.",
+   "9.10.14.5."
+  ]
+ },
+ {
+  "case": "V20",
+  "id": "calgary-spv-006-firewall-rowhouse-secondary-suites",
+  "gold": [
+   "9.10.11.2.",
+   "9.10.13.13."
+  ],
+  "gold_in_candidates": [
+   "9.10.11.2.",
+   "9.10.13.13."
+  ]
+ }
+]

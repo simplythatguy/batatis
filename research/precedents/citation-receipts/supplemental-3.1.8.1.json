@@ -1,0 +1,36 @@
+{
+  "article": "3.1.8.1.",
+  "command": [
+    "/Users/aamia/.t3/projects/batatis/.venv/bin/python",
+    "-I",
+    "tools/codesearch.py",
+    "find",
+    "(?<!\\d)3\\.1\\.8\\.1\\.(?!\\d)",
+    "--doc",
+    "NBC-AE",
+    "--max",
+    "1000",
+    "--context",
+    "0"
+  ],
+  "pdf_pages": [
+    113,
+    152,
+    153,
+    244,
+    246,
+    260,
+    271,
+    322,
+    361,
+    362,
+    779,
+    780,
+    794,
+    1543,
+    1544,
+    1558
+  ],
+  "status": "text-present",
+  "stdout": "[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.113] ...3.1.8.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.152] ...3.1.8.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.153] ...3.1.8.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.244] ...3.1.8.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.246] ...3.1.8.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.260] ...3.1.8.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.271] ...3.1.8.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.322] ...3.1.8.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.361] ...3.1.8.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.362] ...3.1.8.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.779] ...3.1.8.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.780] ...3.1.8.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.794] ...3.1.8.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1543] ...3.1.8.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1544] ...3.1.8.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1558] ...3.1.8.1....\n\n"
+}

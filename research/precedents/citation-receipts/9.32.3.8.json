@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/Users/aamia/.t3/projects/batatis/.venv/bin/python",
+    "-I",
+    "tools/codesearch.py",
+    "find",
+    "(?<!\\d)9\\.32\\.3\\.8\\.(?!\\d)",
+    "--doc",
+    "NBC-AE",
+    "--max",
+    "1000",
+    "--context",
+    "0"
+  ],
+  "stdout": "[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.101] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.105] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.762] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.767] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.770] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.772] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.779] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.790] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.797] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.800] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.807] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.808] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.809] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.813] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1041] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1043] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1048] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1050] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1220] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1438] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1449] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1450] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1451] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1452] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1526] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1531] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1534] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1536] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1543] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1554] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1561] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1564] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1571] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1572] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1573] ...9.32.3.8....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1577] ...9.32.3.8....\n\n",
+  "stderr": "",
+  "exit_code": 0
+}

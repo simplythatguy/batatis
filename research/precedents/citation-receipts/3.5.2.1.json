@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/Users/aamia/.t3/projects/batatis/.venv/bin/python",
+    "-I",
+    "tools/codesearch.py",
+    "find",
+    "(?<!\\d)3\\.5\\.2\\.1\\.(?!\\d)",
+    "--doc",
+    "NBC-AE",
+    "--max",
+    "1000",
+    "--context",
+    "0"
+  ],
+  "stdout": "[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.13] ...3.5.2.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.92] ...3.5.2.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.109] ...3.5.2.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.287] ...3.5.2.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.304] ...3.5.2.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.349] ...3.5.2.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.396] ...3.5.2.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.398] ...3.5.2.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.764] ...3.5.2.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.774] ...3.5.2.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.775] ...3.5.2.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1528] ...3.5.2.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1538] ...3.5.2.1....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1539] ...3.5.2.1....\n\n",
+  "stderr": "",
+  "exit_code": 0
+}

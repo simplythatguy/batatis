@@ -1,0 +1,4224 @@
+{
+  "source_local_path": "reference/data/ccmc-registry.json",
+  "source_url": "https://const-bers-app-prod.corp.nrc.gc.ca/ords/ccmc/dac/published_evaluations",
+  "accessed": "2026-10-18",
+  "source_sha256": "2bc06567ed90bc7d87517fb9a1c2ea134e55e18bd8ddceaa58d2d64684c822f8",
+  "population": "The provided registry snapshot, not a new download of all individual assessment reports.",
+  "assessments": 462,
+  "has_more": false,
+  "status_counts": {
+    "Active": 462
+  },
+  "unique_ids": 462,
+  "unique_ccmc_numbers": 462,
+  "missing_masterformat": 27,
+  "missing_reference_documents": 0,
+  "malformed_json_fields": [],
+  "masterformat_divisions": [
+    {
+      "code": "07",
+      "assessments": 281
+    },
+    {
+      "code": "06",
+      "assessments": 112
+    },
+    {
+      "code": "09",
+      "assessments": 31
+    },
+    {
+      "code": "33",
+      "assessments": 16
+    },
+    {
+      "code": "31",
+      "assessments": 12
+    },
+    {
+      "code": "03",
+      "assessments": 6
+    },
+    {
+      "code": "05",
+      "assessments": 5
+    },
+    {
+      "code": "22",
+      "assessments": 2
+    },
+    {
+      "code": "08",
+      "assessments": 1
+    },
+    {
+      "code": "23",
+      "assessments": 1
+    }
+  ],
+  "masterformat_categories": [
+    {
+      "code": "07 20 00",
+      "assessments": 82,
+      "examples": [
+        {
+          "ccmcno": "03240-L",
+          "products": [
+            "Esgard"
+          ]
+        },
+        {
+          "ccmcno": "05650-L",
+          "products": [
+            "PINK NEXT GEN® FIBERGLAS®Insulation"
+          ]
+        },
+        {
+          "ccmcno": "08251-L",
+          "products": [
+            "ProCell Green",
+            "Sanctuary"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 21 13",
+      "assessments": 81,
+      "examples": [
+        {
+          "ccmcno": "03240-L",
+          "products": [
+            "Esgard"
+          ]
+        },
+        {
+          "ccmcno": "04888-L",
+          "products": [
+            "Styrofoam™ Brand Highload™ 40",
+            "Styrofoam™ Brand Highload™ 60",
+            "Styrofoam™ Brand Highload™100",
+            "Styrofoam™ Brand Panel Core 30",
+            "Styrofoam™ Brand Panel Core 40",
+            "Styrofoam™ Brand Panel Core 60",
+            "Styrofoam™ Brand Perimate™",
+            "Styrofoam™ Brand Roofmate™",
+            "Styrofoam™ Brand SM30",
+            "Styrofoam™ Brand Tech-Crete Blanks"
+          ]
+        },
+        {
+          "ccmcno": "05650-L",
+          "products": [
+            "PINK NEXT GEN® FIBERGLAS®Insulation"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 21 00",
+      "assessments": 73,
+      "examples": [
+        {
+          "ccmcno": "04888-L",
+          "products": [
+            "Styrofoam™ Brand Highload™ 40",
+            "Styrofoam™ Brand Highload™ 60",
+            "Styrofoam™ Brand Highload™100",
+            "Styrofoam™ Brand Panel Core 30",
+            "Styrofoam™ Brand Panel Core 40",
+            "Styrofoam™ Brand Panel Core 60",
+            "Styrofoam™ Brand Perimate™",
+            "Styrofoam™ Brand Roofmate™",
+            "Styrofoam™ Brand SM30",
+            "Styrofoam™ Brand Tech-Crete Blanks"
+          ]
+        },
+        {
+          "ccmcno": "11420-L",
+          "products": [
+            "Styrofoam™ Brand Cavitymate™",
+            "Styrofoam™ Brand Cavitymate™ Ultra",
+            "Styrofoam™ Brand Deckmate™ Plus",
+            "Styrofoam™ Brand Deckmate™ Plus FA",
+            "Styrofoam™ Brand Panel Core 20",
+            "Styrofoam™ Brand Panelmate™ Ultra",
+            "Styrofoam™ Brand Ultra SL",
+            "Styrofoam™ CM20",
+            "Styrospan™"
+          ]
+        },
+        {
+          "ccmcno": "12085-L",
+          "products": [
+            "Styrofoam™ Brand Cladmate™",
+            "Styrofoam™ Brand Cladmate™ XL",
+            "Styrofoam™ Brand Deckmate™",
+            "Styrofoam™ Brand Panelmate™",
+            "Styrofoam™ Brand Wallmate™"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 21 13.13",
+      "assessments": 39,
+      "examples": [
+        {
+          "ccmcno": "04888-L",
+          "products": [
+            "Styrofoam™ Brand Highload™ 40",
+            "Styrofoam™ Brand Highload™ 60",
+            "Styrofoam™ Brand Highload™100",
+            "Styrofoam™ Brand Panel Core 30",
+            "Styrofoam™ Brand Panel Core 40",
+            "Styrofoam™ Brand Panel Core 60",
+            "Styrofoam™ Brand Perimate™",
+            "Styrofoam™ Brand Roofmate™",
+            "Styrofoam™ Brand SM30",
+            "Styrofoam™ Brand Tech-Crete Blanks"
+          ]
+        },
+        {
+          "ccmcno": "11420-L",
+          "products": [
+            "Styrofoam™ Brand Cavitymate™",
+            "Styrofoam™ Brand Cavitymate™ Ultra",
+            "Styrofoam™ Brand Deckmate™ Plus",
+            "Styrofoam™ Brand Deckmate™ Plus FA",
+            "Styrofoam™ Brand Panel Core 20",
+            "Styrofoam™ Brand Panelmate™ Ultra",
+            "Styrofoam™ Brand Ultra SL",
+            "Styrofoam™ CM20",
+            "Styrospan™"
+          ]
+        },
+        {
+          "ccmcno": "12085-L",
+          "products": [
+            "Styrofoam™ Brand Cladmate™",
+            "Styrofoam™ Brand Cladmate™ XL",
+            "Styrofoam™ Brand Deckmate™",
+            "Styrofoam™ Brand Panelmate™",
+            "Styrofoam™ Brand Wallmate™"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 25 00",
+      "assessments": 37,
+      "examples": [
+        {
+          "ccmcno": "10706-L",
+          "products": [
+            "Scutan Reflective Foil Vapour Barrier"
+          ]
+        },
+        {
+          "ccmcno": "13447-L",
+          "products": [
+            "Froth-Pak™ Foam System",
+            "Froth-Pak™ Sealant"
+          ]
+        },
+        {
+          "ccmcno": "13455-L",
+          "products": [
+            "HandiFoam® E84 HFO",
+            "HandiFoam® HFO FR"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 50 00",
+      "assessments": 32,
+      "examples": [
+        {
+          "ccmcno": "10473-L",
+          "products": [
+            "Sure-Seal",
+            "Sure-Seal AFX",
+            "Sure-Seal FR",
+            "Sure-Seal FleeceBACK",
+            "Sure-Tough",
+            "Sure-White",
+            "Sure-White FleeceBACK",
+            "Sure-White Reinforced"
+          ]
+        },
+        {
+          "ccmcno": "13184-L",
+          "products": [
+            "LASTOBOND 195",
+            "LASTOBOND SANDED FINISH"
+          ]
+        },
+        {
+          "ccmcno": "13206-L",
+          "products": [
+            "Sure-Weld™ TPO - Roofing Membrane"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 05 23.02",
+      "assessments": 31,
+      "examples": [
+        {
+          "ccmcno": "13019-L",
+          "products": [
+            "Cascophen® 9000 (D to L) series resins"
+          ]
+        },
+        {
+          "ccmcno": "13050-L",
+          "products": [
+            "Cascophen® G-1260-A Resin with Cascoset® H80"
+          ]
+        },
+        {
+          "ccmcno": "13051-L",
+          "products": [
+            "Cascophen® LT-5210 (D to Q)  series resins"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 10 00",
+      "assessments": 30,
+      "examples": [
+        {
+          "ccmcno": "13237-L",
+          "products": [
+            "Fiber Strong® Rim Board"
+          ]
+        },
+        {
+          "ccmcno": "13238-L",
+          "products": [
+            "Tolko OSB Rim Board Plus"
+          ]
+        },
+        {
+          "ccmcno": "13248-L",
+          "products": [
+            "West Fraser Rimboard Grade A",
+            "West Fraser Rimboard Grade B1",
+            "West Fraser Rimboard Grade B2",
+            "West Fraser Rimboard Grade C1",
+            "West Fraser Rimboard Grade C2"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 27 00",
+      "assessments": 24,
+      "examples": [
+        {
+          "ccmcno": "13447-L",
+          "products": [
+            "Froth-Pak™ Foam System",
+            "Froth-Pak™ Sealant"
+          ]
+        },
+        {
+          "ccmcno": "13455-L",
+          "products": [
+            "HandiFoam® E84 HFO",
+            "HandiFoam® HFO FR"
+          ]
+        },
+        {
+          "ccmcno": "13484-L",
+          "products": [
+            "Tiger Foam®"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "09 81 13",
+      "assessments": 22,
+      "examples": [
+        {
+          "ccmcno": "09521-L",
+          "products": [
+            "CertainTeed Lanaé NoiseReducer™ – Fibreglass Batt Insulation",
+            "CertainTeed Lanaé Sustainable Insulation™ – Fibreglass Batt Insulation"
+          ]
+        },
+        {
+          "ccmcno": "09799-L",
+          "products": [
+            "CertainTeed Ultratherm™ – Fibreglass Blown Insulation"
+          ]
+        },
+        {
+          "ccmcno": "12018-L",
+          "products": [
+            "ROCKWOOL Comfortbatt®"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 21 13.16",
+      "assessments": 20,
+      "examples": [
+        {
+          "ccmcno": "05650-L",
+          "products": [
+            "PINK NEXT GEN® FIBERGLAS®Insulation"
+          ]
+        },
+        {
+          "ccmcno": "09521-L",
+          "products": [
+            "CertainTeed Lanaé NoiseReducer™ – Fibreglass Batt Insulation",
+            "CertainTeed Lanaé Sustainable Insulation™ – Fibreglass Batt Insulation"
+          ]
+        },
+        {
+          "ccmcno": "09799-L",
+          "products": [
+            "CertainTeed Ultratherm™ – Fibreglass Blown Insulation"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 21 16",
+      "assessments": 20,
+      "examples": [
+        {
+          "ccmcno": "05650-L",
+          "products": [
+            "PINK NEXT GEN® FIBERGLAS®Insulation"
+          ]
+        },
+        {
+          "ccmcno": "09521-L",
+          "products": [
+            "CertainTeed Lanaé NoiseReducer™ – Fibreglass Batt Insulation",
+            "CertainTeed Lanaé Sustainable Insulation™ – Fibreglass Batt Insulation"
+          ]
+        },
+        {
+          "ccmcno": "09799-L",
+          "products": [
+            "CertainTeed Ultratherm™ – Fibreglass Blown Insulation"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 21 13.19",
+      "assessments": 20,
+      "examples": [
+        {
+          "ccmcno": "05650-L",
+          "products": [
+            "PINK NEXT GEN® FIBERGLAS®Insulation"
+          ]
+        },
+        {
+          "ccmcno": "09521-L",
+          "products": [
+            "CertainTeed Lanaé NoiseReducer™ – Fibreglass Batt Insulation",
+            "CertainTeed Lanaé Sustainable Insulation™ – Fibreglass Batt Insulation"
+          ]
+        },
+        {
+          "ccmcno": "09799-L",
+          "products": [
+            "CertainTeed Ultratherm™ – Fibreglass Blown Insulation"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "09 81 00",
+      "assessments": 20,
+      "examples": [
+        {
+          "ccmcno": "09521-L",
+          "products": [
+            "CertainTeed Lanaé NoiseReducer™ – Fibreglass Batt Insulation",
+            "CertainTeed Lanaé Sustainable Insulation™ – Fibreglass Batt Insulation"
+          ]
+        },
+        {
+          "ccmcno": "09799-L",
+          "products": [
+            "CertainTeed Ultratherm™ – Fibreglass Blown Insulation"
+          ]
+        },
+        {
+          "ccmcno": "12018-L",
+          "products": [
+            "ROCKWOOL Comfortbatt®"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 21 19",
+      "assessments": 18,
+      "examples": [
+        {
+          "ccmcno": "13697-L",
+          "products": [
+            "Insulthane®Extreme ccSPF"
+          ]
+        },
+        {
+          "ccmcno": "14087-L",
+          "products": [
+            "Enverge® 1860 CDN™",
+            "Enverge® Nexseal® 2.0 CDN"
+          ]
+        },
+        {
+          "ccmcno": "14128-R",
+          "products": [
+            "Floraseal 50"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 00 00",
+      "assessments": 16,
+      "examples": [
+        {
+          "ccmcno": "08384-L",
+          "products": [
+            "ES-20"
+          ]
+        },
+        {
+          "ccmcno": "12888-L",
+          "products": [
+            "ES-16"
+          ]
+        },
+        {
+          "ccmcno": "10319-L",
+          "products": [
+            "MII 16"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 46 33",
+      "assessments": 15,
+      "examples": [
+        {
+          "ccmcno": "06419-L",
+          "products": [
+            "Premium Exterior Building Products"
+          ]
+        },
+        {
+          "ccmcno": "06541-L",
+          "products": [
+            "Gentek Vinyl Siding"
+          ]
+        },
+        {
+          "ccmcno": "11814-L",
+          "products": [
+            "Kaycan Solid Vinyl Siding"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 46 00",
+      "assessments": 15,
+      "examples": [
+        {
+          "ccmcno": "11826-L",
+          "products": [
+            "LP®SmartSide®ExpertFinish®Lap",
+            "LP®SmartSide®ExpertFinish®Nickel Gap",
+            "LP®SmartSide®ExpertFinish®Panel",
+            "LP®SmartSide®ExpertFinish®Vertical Siding",
+            "LP®SmartSide®Lap",
+            "LP®SmartSide®Nickel Gap",
+            "LP®SmartSide®Panel",
+            "LP®SmartSide®Vertical Siding"
+          ]
+        },
+        {
+          "ccmcno": "13605-L",
+          "products": [
+            "TruWood"
+          ]
+        },
+        {
+          "ccmcno": "14015-L",
+          "products": [
+            "MiraTec® Treated Exterior Composite Trim"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 54 19",
+      "assessments": 15,
+      "examples": [
+        {
+          "ccmcno": "13293-L",
+          "products": [
+            "Tufdek™"
+          ]
+        },
+        {
+          "ccmcno": "13299-L",
+          "products": [
+            "Duro-Last® 50-Mil Membrane",
+            "Duro-Last® 60-Mil Membrane"
+          ]
+        },
+        {
+          "ccmcno": "13312-L",
+          "products": [
+            "Sure-Flex KEE HP Fleeceback",
+            "Sure-Flex PVC Fleeceback",
+            "Sure-Flex™ KEE HP",
+            "Sure-Flex™ PVC"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 40 00",
+      "assessments": 14,
+      "examples": [
+        {
+          "ccmcno": "06419-L",
+          "products": [
+            "Premium Exterior Building Products"
+          ]
+        },
+        {
+          "ccmcno": "06541-L",
+          "products": [
+            "Gentek Vinyl Siding"
+          ]
+        },
+        {
+          "ccmcno": "07893-L",
+          "products": [
+            "Maibec CanExel Engineered Siding"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 21 23",
+      "assessments": 14,
+      "examples": [
+        {
+          "ccmcno": "08251-L",
+          "products": [
+            "ProCell Green",
+            "Sanctuary"
+          ]
+        },
+        {
+          "ccmcno": "08532-L",
+          "products": [
+            "Igloo Cellulose Insulation"
+          ]
+        },
+        {
+          "ccmcno": "08774-L",
+          "products": [
+            "Therm-O-Light (Type 1)"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 17 00",
+      "assessments": 14,
+      "examples": [
+        {
+          "ccmcno": "13237-L",
+          "products": [
+            "Fiber Strong® Rim Board"
+          ]
+        },
+        {
+          "ccmcno": "13238-L",
+          "products": [
+            "Tolko OSB Rim Board Plus"
+          ]
+        },
+        {
+          "ccmcno": "13248-L",
+          "products": [
+            "West Fraser Rimboard Grade A",
+            "West Fraser Rimboard Grade B1",
+            "West Fraser Rimboard Grade B2",
+            "West Fraser Rimboard Grade C1",
+            "West Fraser Rimboard Grade C2"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "09 81 16",
+      "assessments": 12,
+      "examples": [
+        {
+          "ccmcno": "09799-L",
+          "products": [
+            "CertainTeed Ultratherm™ – Fibreglass Blown Insulation"
+          ]
+        },
+        {
+          "ccmcno": "12276-L",
+          "products": [
+            "Canada Basement Blanket",
+            "Formaldehyde-Free™ Fibreglass Insulation, UNFACED",
+            "PEBS Blanket™",
+            "Thermal and Sound Control"
+          ]
+        },
+        {
+          "ccmcno": "12427-L",
+          "products": [
+            "Manville Blowing Wool Rich-R"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 26 00",
+      "assessments": 12,
+      "examples": [
+        {
+          "ccmcno": "10706-L",
+          "products": [
+            "Scutan Reflective Foil Vapour Barrier"
+          ]
+        },
+        {
+          "ccmcno": "13459-R",
+          "products": [
+            "ISOFOIL"
+          ]
+        },
+        {
+          "ccmcno": "13494-R",
+          "products": [
+            "Enermax™ (thermal insulation)"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 11 00",
+      "assessments": 12,
+      "examples": [
+        {
+          "ccmcno": "08675-R",
+          "products": [
+            "Microllam® LVL"
+          ]
+        },
+        {
+          "ccmcno": "11518-R",
+          "products": [
+            "PWT™ LVL 1.3E 1550Fb X-Ply",
+            "PWT™ LVL 1.5E 2250Fb",
+            "PWT™ LVL 1.6E 2250Fb",
+            "PWT™ LVL 2.0E 2900Fb"
+          ]
+        },
+        {
+          "ccmcno": "12472-R",
+          "products": [
+            "VERSA-LAM® LVL"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 27 23",
+      "assessments": 12,
+      "examples": [
+        {
+          "ccmcno": "12857-R",
+          "products": [
+            "Tyvek®HomeWrap®– Air Barrier Material"
+          ]
+        },
+        {
+          "ccmcno": "13231-R",
+          "products": [
+            "Surround™ HouseWrap ─ Air Barrier Material",
+            "Typar.CA HouseWrap ─ Air Barrier Material"
+          ]
+        },
+        {
+          "ccmcno": "13253-R",
+          "products": [
+            "Tyvek®CommercialWrap®– Air Barrier Material™"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 73 00",
+      "assessments": 12,
+      "examples": [
+        {
+          "ccmcno": "13125-R",
+          "products": [
+            "Trex® Enhance® decking",
+            "Trex® Select® decking",
+            "Trex® Signature® decking",
+            "Trex® Transcend® decking"
+          ]
+        },
+        {
+          "ccmcno": "13191-R",
+          "products": [
+            "MoistureShield®Vantage Decking",
+            "MoistureShield®Vision Decking"
+          ]
+        },
+        {
+          "ccmcno": "13378-R",
+          "products": [
+            "DecKorators&reg;Composite Deck Board",
+            "Marine Composite Deck Board"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 21 13.07",
+      "assessments": 11,
+      "examples": [
+        {
+          "ccmcno": "12422-L",
+          "products": [
+            "ACFoam® Supreme",
+            "EnergyShield®"
+          ]
+        },
+        {
+          "ccmcno": "12423-L",
+          "products": [
+            "ACFoam®-III",
+            "EnergyShield CGF®",
+            "Stucco-Shield® II"
+          ]
+        },
+        {
+          "ccmcno": "12464-L",
+          "products": [
+            "ACFoam® CrossVent®",
+            "ACFoam® Nail Base",
+            "ACFoam®-II"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 71 13",
+      "assessments": 11,
+      "examples": [
+        {
+          "ccmcno": "08675-R",
+          "products": [
+            "Microllam® LVL"
+          ]
+        },
+        {
+          "ccmcno": "11518-R",
+          "products": [
+            "PWT™ LVL 1.3E 1550Fb X-Ply",
+            "PWT™ LVL 1.5E 2250Fb",
+            "PWT™ LVL 1.6E 2250Fb",
+            "PWT™ LVL 2.0E 2900Fb"
+          ]
+        },
+        {
+          "ccmcno": "12472-R",
+          "products": [
+            "VERSA-LAM® LVL"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 71 00",
+      "assessments": 11,
+      "examples": [
+        {
+          "ccmcno": "08675-R",
+          "products": [
+            "Microllam® LVL"
+          ]
+        },
+        {
+          "ccmcno": "11518-R",
+          "products": [
+            "PWT™ LVL 1.3E 1550Fb X-Ply",
+            "PWT™ LVL 1.5E 2250Fb",
+            "PWT™ LVL 1.6E 2250Fb",
+            "PWT™ LVL 2.0E 2900Fb"
+          ]
+        },
+        {
+          "ccmcno": "12472-R",
+          "products": [
+            "VERSA-LAM® LVL"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 70 00",
+      "assessments": 11,
+      "examples": [
+        {
+          "ccmcno": "08675-R",
+          "products": [
+            "Microllam® LVL"
+          ]
+        },
+        {
+          "ccmcno": "11518-R",
+          "products": [
+            "PWT™ LVL 1.3E 1550Fb X-Ply",
+            "PWT™ LVL 1.5E 2250Fb",
+            "PWT™ LVL 1.6E 2250Fb",
+            "PWT™ LVL 2.0E 2900Fb"
+          ]
+        },
+        {
+          "ccmcno": "12472-R",
+          "products": [
+            "VERSA-LAM® LVL"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 17 33",
+      "assessments": 11,
+      "examples": [
+        {
+          "ccmcno": "12412-R",
+          "products": [
+            "LPI® 18",
+            "LPI® 20Plus",
+            "LPI® 32Plus",
+            "LPI® 36",
+            "LPI® 42Plus",
+            "LPI® 530",
+            "LPI® 56",
+            "PWI 18S",
+            "PWI 20S",
+            "PWI 32S",
+            "PWI 36L",
+            "PWI 42S",
+            "PWI 53L",
+            "PWI 56L"
+          ]
+        },
+        {
+          "ccmcno": "12787-R",
+          "products": [
+            "AJS® Joists"
+          ]
+        },
+        {
+          "ccmcno": "13032-R",
+          "products": [
+            "Nordic I-Joist Series"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "31 66 15",
+      "assessments": 11,
+      "examples": [
+        {
+          "ccmcno": "13059-R",
+          "products": [
+            "Techno Metal Post™"
+          ]
+        },
+        {
+          "ccmcno": "13102-R",
+          "products": [
+            "Pile P178",
+            "Pile P238",
+            "Pile P312"
+          ]
+        },
+        {
+          "ccmcno": "13268-R",
+          "products": [
+            "Geopile"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 21 23.01",
+      "assessments": 10,
+      "examples": [
+        {
+          "ccmcno": "08251-L",
+          "products": [
+            "ProCell Green",
+            "Sanctuary"
+          ]
+        },
+        {
+          "ccmcno": "08532-L",
+          "products": [
+            "Igloo Cellulose Insulation"
+          ]
+        },
+        {
+          "ccmcno": "08774-L",
+          "products": [
+            "Therm-O-Light (Type 1)"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 16 00",
+      "assessments": 10,
+      "examples": [
+        {
+          "ccmcno": "12739-L",
+          "products": [
+            "BMR"
+          ]
+        },
+        {
+          "ccmcno": "12851-L",
+          "products": [
+            "ATTICAT®EXPANDING BLOWN-IN-INSULATION",
+            "PROPINK®FIBERGLAS®BLOWN LOOSEFILL® INSULATION"
+          ]
+        },
+        {
+          "ccmcno": "13186-L",
+          "products": [
+            "HP Recovery Board",
+            "Structodek® High Density Roof Board"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 52 00",
+      "assessments": 10,
+      "examples": [
+        {
+          "ccmcno": "13184-L",
+          "products": [
+            "LASTOBOND 195",
+            "LASTOBOND SANDED FINISH"
+          ]
+        },
+        {
+          "ccmcno": "13273-L",
+          "products": [
+            "Gripgard"
+          ]
+        },
+        {
+          "ccmcno": "13288-L",
+          "products": [
+            "RESISTO HR CAP SHEET",
+            "RESISTO SELF-ADHERED WATERPROOFING MEMBRANE"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 54 00",
+      "assessments": 10,
+      "examples": [
+        {
+          "ccmcno": "13206-L",
+          "products": [
+            "Sure-Weld™ TPO - Roofing Membrane"
+          ]
+        },
+        {
+          "ccmcno": "13348-L",
+          "products": [
+            "Elevate UltraPly™ TPO",
+            "Elevate UltraPly™ TPO Flex Adhered",
+            "Elevate UltraPly™ TPO Flex SA",
+            "Elevate UltraPly™ TPO Platinum™",
+            "Elevate UltraPly™ TPO SA"
+          ]
+        },
+        {
+          "ccmcno": "13580-L",
+          "products": [
+            "Mule-Hide TPO-c Membrane"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 21 19.02",
+      "assessments": 10,
+      "examples": [
+        {
+          "ccmcno": "13697-L",
+          "products": [
+            "Insulthane®Extreme ccSPF"
+          ]
+        },
+        {
+          "ccmcno": "14087-L",
+          "products": [
+            "Enverge® 1860 CDN™",
+            "Enverge® Nexseal® 2.0 CDN"
+          ]
+        },
+        {
+          "ccmcno": "14133-L",
+          "products": [
+            "Grizzly Gold"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 73 13",
+      "assessments": 10,
+      "examples": [
+        {
+          "ccmcno": "13125-R",
+          "products": [
+            "Trex® Enhance® decking",
+            "Trex® Select® decking",
+            "Trex® Signature® decking",
+            "Trex® Transcend® decking"
+          ]
+        },
+        {
+          "ccmcno": "13191-R",
+          "products": [
+            "MoistureShield®Vantage Decking",
+            "MoistureShield®Vision Decking"
+          ]
+        },
+        {
+          "ccmcno": "13378-R",
+          "products": [
+            "DecKorators&reg;Composite Deck Board",
+            "Marine Composite Deck Board"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 10 00",
+      "assessments": 9,
+      "examples": [
+        {
+          "ccmcno": "13099-R",
+          "products": [
+            "SUPERSEAL Dimpled Membrane"
+          ]
+        },
+        {
+          "ccmcno": "13169-R",
+          "products": [
+            "DMX AG"
+          ]
+        },
+        {
+          "ccmcno": "13452-R",
+          "products": [
+            "SUPERPRO"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 21 29",
+      "assessments": 8,
+      "examples": [
+        {
+          "ccmcno": "14128-R",
+          "products": [
+            "Floraseal 50"
+          ]
+        },
+        {
+          "ccmcno": "12070-R",
+          "products": [
+            "Classic™"
+          ]
+        },
+        {
+          "ccmcno": "12344-R",
+          "products": [
+            "WallBAR"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 27 19",
+      "assessments": 8,
+      "examples": [
+        {
+          "ccmcno": "14889-L",
+          "products": [
+            "ULTRA+"
+          ]
+        },
+        {
+          "ccmcno": "14890-L",
+          "products": [
+            "Layfield Canada Vapour Barrier"
+          ]
+        },
+        {
+          "ccmcno": "14892-L",
+          "products": [
+            "polytarp super-six®"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 27 36",
+      "assessments": 7,
+      "examples": [
+        {
+          "ccmcno": "13447-L",
+          "products": [
+            "Froth-Pak™ Foam System",
+            "Froth-Pak™ Sealant"
+          ]
+        },
+        {
+          "ccmcno": "13455-L",
+          "products": [
+            "HandiFoam® E84 HFO",
+            "HandiFoam® HFO FR"
+          ]
+        },
+        {
+          "ccmcno": "13484-L",
+          "products": [
+            "Tiger Foam®"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 41 00",
+      "assessments": 7,
+      "examples": [
+        {
+          "ccmcno": "10241-R",
+          "products": [
+            "DECRA® Shake",
+            "DECRA® Shingle Plus",
+            "DECRA® Tile"
+          ]
+        },
+        {
+          "ccmcno": "10475-R",
+          "products": [
+            "Interlock®Cedar",
+            "Interlock®Slate"
+          ]
+        },
+        {
+          "ccmcno": "13380-R",
+          "products": [
+            "ArrowLine Shingle Shake",
+            "ArrowLine Slate"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 41 13",
+      "assessments": 7,
+      "examples": [
+        {
+          "ccmcno": "10241-R",
+          "products": [
+            "DECRA® Shake",
+            "DECRA® Shingle Plus",
+            "DECRA® Tile"
+          ]
+        },
+        {
+          "ccmcno": "10475-R",
+          "products": [
+            "Interlock®Cedar",
+            "Interlock®Slate"
+          ]
+        },
+        {
+          "ccmcno": "13380-R",
+          "products": [
+            "ArrowLine Shingle Shake",
+            "ArrowLine Slate"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 24 13",
+      "assessments": 6,
+      "examples": [
+        {
+          "ccmcno": "12416-R",
+          "products": [
+            "Sto BTS® Plus",
+            "Sto Element Finish Coat",
+            "Sto Flexyl",
+            "Sto Gold Coat®",
+            "Sto Gold Fill",
+            "Sto Primer/Adhesive-B",
+            "Sto-Glass Fibre Mesh",
+            "Stolit® Finish Coat",
+            "Stolit® Lotusan Finish Coat"
+          ]
+        },
+        {
+          "ccmcno": "12913-R",
+          "products": [
+            "Adex-MFS",
+            "Adex-RS",
+            "Adex-VCA",
+            "Adex-XNC"
+          ]
+        },
+        {
+          "ccmcno": "12969-R",
+          "products": [
+            "DuROCK PUCC-ROCK Insulation Board",
+            "Hudson Brick",
+            "Hudson Grout Coat",
+            "InsulROCK",
+            "PUCCS",
+            "PUCCS NC"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 24 00",
+      "assessments": 6,
+      "examples": [
+        {
+          "ccmcno": "12416-R",
+          "products": [
+            "Sto BTS® Plus",
+            "Sto Element Finish Coat",
+            "Sto Flexyl",
+            "Sto Gold Coat®",
+            "Sto Gold Fill",
+            "Sto Primer/Adhesive-B",
+            "Sto-Glass Fibre Mesh",
+            "Stolit® Finish Coat",
+            "Stolit® Lotusan Finish Coat"
+          ]
+        },
+        {
+          "ccmcno": "12913-R",
+          "products": [
+            "Adex-MFS",
+            "Adex-RS",
+            "Adex-VCA",
+            "Adex-XNC"
+          ]
+        },
+        {
+          "ccmcno": "12969-R",
+          "products": [
+            "DuROCK PUCC-ROCK Insulation Board",
+            "Hudson Brick",
+            "Hudson Grout Coat",
+            "InsulROCK",
+            "PUCCS",
+            "PUCCS NC"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "33 46 00",
+      "assessments": 6,
+      "examples": [
+        {
+          "ccmcno": "12718-R",
+          "products": [
+            "Comfortboard® 80"
+          ]
+        },
+        {
+          "ccmcno": "13387-R",
+          "products": [
+            "Foamular® NGX™"
+          ]
+        },
+        {
+          "ccmcno": "13492-R",
+          "products": [
+            "Form-A-Drain"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 18 00",
+      "assessments": 6,
+      "examples": [
+        {
+          "ccmcno": "13134-R",
+          "products": [
+            "Duradek Ultra"
+          ]
+        },
+        {
+          "ccmcno": "13534-R",
+          "products": [
+            "DekSmart™ Ultra"
+          ]
+        },
+        {
+          "ccmcno": "13606-R",
+          "products": [
+            "Weatherdek Plus"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 18 13",
+      "assessments": 6,
+      "examples": [
+        {
+          "ccmcno": "13134-R",
+          "products": [
+            "Duradek Ultra"
+          ]
+        },
+        {
+          "ccmcno": "13534-R",
+          "products": [
+            "DekSmart™ Ultra"
+          ]
+        },
+        {
+          "ccmcno": "13606-R",
+          "products": [
+            "Weatherdek Plus"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 16 13",
+      "assessments": 5,
+      "examples": [
+        {
+          "ccmcno": "03240-L",
+          "products": [
+            "Esgard"
+          ]
+        },
+        {
+          "ccmcno": "10617-L",
+          "products": [
+            "ISOLtop"
+          ]
+        },
+        {
+          "ccmcno": "12044-L",
+          "products": [
+            "BP Sheathing"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 22 16",
+      "assessments": 5,
+      "examples": [
+        {
+          "ccmcno": "03240-L",
+          "products": [
+            "Esgard"
+          ]
+        },
+        {
+          "ccmcno": "10617-L",
+          "products": [
+            "ISOLtop"
+          ]
+        },
+        {
+          "ccmcno": "12044-L",
+          "products": [
+            "BP Sheathing"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 22 00",
+      "assessments": 5,
+      "examples": [
+        {
+          "ccmcno": "03240-L",
+          "products": [
+            "Esgard"
+          ]
+        },
+        {
+          "ccmcno": "10617-L",
+          "products": [
+            "ISOLtop"
+          ]
+        },
+        {
+          "ccmcno": "12044-L",
+          "products": [
+            "BP Sheathing"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 27 10.02",
+      "assessments": 5,
+      "examples": [
+        {
+          "ccmcno": "13074-L",
+          "products": [
+            "Enerfoam™",
+            "GREAT STUFF PRO™ Gaps & Cracks",
+            "GREAT STUFF PRO™ Multipurpose Black Insulating Foam Sealant",
+            "GREAT STUFF PRO™ Pestblock",
+            "GREAT STUFF PRO™ Window & Door",
+            "GREAT STUFF™ Big Gap Filler",
+            "GREAT STUFF™ Fireblock",
+            "GREAT STUFF™ Gaps & Cracks",
+            "GREAT STUFF™ Multipurpose Black",
+            "GREAT STUFF™ Multipurpose White",
+            "GREAT STUFF™ Pestblock",
+            "GREAT STUFF™ Pond & Stone",
+            "GREAT STUFF™ Window & Door"
+          ]
+        },
+        {
+          "ccmcno": "13531-L",
+          "products": [
+            "IPF Green"
+          ]
+        },
+        {
+          "ccmcno": "13626-L",
+          "products": [
+            "Fast Foam Extreme Sealant",
+            "Fast Foam Fireblock",
+            "Fast Foam Window and Door Sealant",
+            "Handi-Foam Black Sealant",
+            "Handi-Foam Extreme",
+            "Handi-Foam Extreme Window and Door",
+            "Handi-Foam Fireblock",
+            "Handi-Foam HC Foam Sealant (Gun Foam and Straw Foam versions)"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 24 19",
+      "assessments": 5,
+      "examples": [
+        {
+          "ccmcno": "12416-R",
+          "products": [
+            "Sto BTS® Plus",
+            "Sto Element Finish Coat",
+            "Sto Flexyl",
+            "Sto Gold Coat®",
+            "Sto Gold Fill",
+            "Sto Primer/Adhesive-B",
+            "Sto-Glass Fibre Mesh",
+            "Stolit® Finish Coat",
+            "Stolit® Lotusan Finish Coat"
+          ]
+        },
+        {
+          "ccmcno": "12913-R",
+          "products": [
+            "Adex-MFS",
+            "Adex-RS",
+            "Adex-VCA",
+            "Adex-XNC"
+          ]
+        },
+        {
+          "ccmcno": "12969-R",
+          "products": [
+            "DuROCK PUCC-ROCK Insulation Board",
+            "Hudson Brick",
+            "Hudson Grout Coat",
+            "InsulROCK",
+            "PUCCS",
+            "PUCCS NC"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 24 23",
+      "assessments": 5,
+      "examples": [
+        {
+          "ccmcno": "12416-R",
+          "products": [
+            "Sto BTS® Plus",
+            "Sto Element Finish Coat",
+            "Sto Flexyl",
+            "Sto Gold Coat®",
+            "Sto Gold Fill",
+            "Sto Primer/Adhesive-B",
+            "Sto-Glass Fibre Mesh",
+            "Stolit® Finish Coat",
+            "Stolit® Lotusan Finish Coat"
+          ]
+        },
+        {
+          "ccmcno": "12913-R",
+          "products": [
+            "Adex-MFS",
+            "Adex-RS",
+            "Adex-VCA",
+            "Adex-XNC"
+          ]
+        },
+        {
+          "ccmcno": "12969-R",
+          "products": [
+            "DuROCK PUCC-ROCK Insulation Board",
+            "Hudson Brick",
+            "Hudson Grout Coat",
+            "InsulROCK",
+            "PUCCS",
+            "PUCCS NC"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 24 16",
+      "assessments": 5,
+      "examples": [
+        {
+          "ccmcno": "12416-R",
+          "products": [
+            "Sto BTS® Plus",
+            "Sto Element Finish Coat",
+            "Sto Flexyl",
+            "Sto Gold Coat®",
+            "Sto Gold Fill",
+            "Sto Primer/Adhesive-B",
+            "Sto-Glass Fibre Mesh",
+            "Stolit® Finish Coat",
+            "Stolit® Lotusan Finish Coat"
+          ]
+        },
+        {
+          "ccmcno": "12913-R",
+          "products": [
+            "Adex-MFS",
+            "Adex-RS",
+            "Adex-VCA",
+            "Adex-XNC"
+          ]
+        },
+        {
+          "ccmcno": "12969-R",
+          "products": [
+            "DuROCK PUCC-ROCK Insulation Board",
+            "Hudson Brick",
+            "Hudson Grout Coat",
+            "InsulROCK",
+            "PUCCS",
+            "PUCCS NC"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "33 46 23",
+      "assessments": 5,
+      "examples": [
+        {
+          "ccmcno": "12788-R",
+          "products": [
+            "DELTA®-MS"
+          ]
+        },
+        {
+          "ccmcno": "12878-R",
+          "products": [
+            "Platon&reg; Foundation Wrap"
+          ]
+        },
+        {
+          "ccmcno": "13209-R",
+          "products": [
+            "DELTA®-DRAIN"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "03 10 00",
+      "assessments": 5,
+      "examples": [
+        {
+          "ccmcno": "12839-R",
+          "products": [
+            "Bigfoot Systems&reg;"
+          ]
+        },
+        {
+          "ccmcno": "13043-L",
+          "products": [
+            "Amvic Plus 3.30 Insulated Concrete Forms (ICF)",
+            "Amvic Standard Insulated Concrete Forms (ICF)"
+          ]
+        },
+        {
+          "ccmcno": "13101-L",
+          "products": [
+            "Advantage Insulating Concrete Forming (ICF) System"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "03 11 00",
+      "assessments": 5,
+      "examples": [
+        {
+          "ccmcno": "12839-R",
+          "products": [
+            "Bigfoot Systems&reg;"
+          ]
+        },
+        {
+          "ccmcno": "13043-L",
+          "products": [
+            "Amvic Plus 3.30 Insulated Concrete Forms (ICF)",
+            "Amvic Standard Insulated Concrete Forms (ICF)"
+          ]
+        },
+        {
+          "ccmcno": "13101-L",
+          "products": [
+            "Advantage Insulating Concrete Forming (ICF) System"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "33 41 13",
+      "assessments": 5,
+      "examples": [
+        {
+          "ccmcno": "13098-R",
+          "products": [
+            "SUPERSEAL Dimpled Membrane (Drainage)"
+          ]
+        },
+        {
+          "ccmcno": "13182-R",
+          "products": [
+            "DMX AG"
+          ]
+        },
+        {
+          "ccmcno": "13579-R",
+          "products": [
+            "Geo-Wrap"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "33 41 13.16",
+      "assessments": 5,
+      "examples": [
+        {
+          "ccmcno": "13098-R",
+          "products": [
+            "SUPERSEAL Dimpled Membrane (Drainage)"
+          ]
+        },
+        {
+          "ccmcno": "13182-R",
+          "products": [
+            "DMX AG"
+          ]
+        },
+        {
+          "ccmcno": "13579-R",
+          "products": [
+            "Geo-Wrap"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 11 19",
+      "assessments": 5,
+      "examples": [
+        {
+          "ccmcno": "13099-R",
+          "products": [
+            "SUPERSEAL Dimpled Membrane"
+          ]
+        },
+        {
+          "ccmcno": "13169-R",
+          "products": [
+            "DMX AG"
+          ]
+        },
+        {
+          "ccmcno": "13635-R",
+          "products": [
+            "Isostud",
+            "Isostud (Dampproofing)",
+            "Marflex",
+            "Power Drain"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 46 26",
+      "assessments": 4,
+      "examples": [
+        {
+          "ccmcno": "07893-L",
+          "products": [
+            "Maibec CanExel Engineered Siding"
+          ]
+        },
+        {
+          "ccmcno": "13605-L",
+          "products": [
+            "TruWood"
+          ]
+        },
+        {
+          "ccmcno": "14015-L",
+          "products": [
+            "MiraTec® Treated Exterior Composite Trim"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 21 23.07",
+      "assessments": 4,
+      "examples": [
+        {
+          "ccmcno": "09799-L",
+          "products": [
+            "CertainTeed Ultratherm™ – Fibreglass Blown Insulation"
+          ]
+        },
+        {
+          "ccmcno": "12427-L",
+          "products": [
+            "Manville Blowing Wool Rich-R"
+          ]
+        },
+        {
+          "ccmcno": "13255-L",
+          "products": [
+            "Northern White Blowing Wool"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "05 10 00",
+      "assessments": 4,
+      "examples": [
+        {
+          "ccmcno": "11170-L",
+          "products": [
+            "Quali-T-Fab – Model 2436",
+            "Quali-T-Fab – Model 3050",
+            "Quali-T-Fab – Model 5080",
+            "Quali-T-Fab – Model 6090"
+          ]
+        },
+        {
+          "ccmcno": "13131-L",
+          "products": [
+            "Quali-T-Fab – Model 1824",
+            "Quali-T-Fab – Model 30108",
+            "Quali-T-Fab – Model 30120",
+            "Quali-T-Fab – Model 3096",
+            "Quali-T-Fab – Model 35108HD",
+            "Quali-T-Fab – Model 35120HD",
+            "Quali-T-Fab – Model 35120SHD",
+            "Quali-T-Fab – Model 35144SHD",
+            "Quali-T-Fab – Model 3596HD"
+          ]
+        },
+        {
+          "ccmcno": "13610-L",
+          "products": [
+            "Marshall Extend-O-Column"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "05 12 23",
+      "assessments": 4,
+      "examples": [
+        {
+          "ccmcno": "11170-L",
+          "products": [
+            "Quali-T-Fab – Model 2436",
+            "Quali-T-Fab – Model 3050",
+            "Quali-T-Fab – Model 5080",
+            "Quali-T-Fab – Model 6090"
+          ]
+        },
+        {
+          "ccmcno": "13131-L",
+          "products": [
+            "Quali-T-Fab – Model 1824",
+            "Quali-T-Fab – Model 30108",
+            "Quali-T-Fab – Model 30120",
+            "Quali-T-Fab – Model 3096",
+            "Quali-T-Fab – Model 35108HD",
+            "Quali-T-Fab – Model 35120HD",
+            "Quali-T-Fab – Model 35120SHD",
+            "Quali-T-Fab – Model 35144SHD",
+            "Quali-T-Fab – Model 3596HD"
+          ]
+        },
+        {
+          "ccmcno": "13610-L",
+          "products": [
+            "Marshall Extend-O-Column"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "05 12 00",
+      "assessments": 4,
+      "examples": [
+        {
+          "ccmcno": "11170-L",
+          "products": [
+            "Quali-T-Fab – Model 2436",
+            "Quali-T-Fab – Model 3050",
+            "Quali-T-Fab – Model 5080",
+            "Quali-T-Fab – Model 6090"
+          ]
+        },
+        {
+          "ccmcno": "13131-L",
+          "products": [
+            "Quali-T-Fab – Model 1824",
+            "Quali-T-Fab – Model 30108",
+            "Quali-T-Fab – Model 30120",
+            "Quali-T-Fab – Model 3096",
+            "Quali-T-Fab – Model 35108HD",
+            "Quali-T-Fab – Model 35120HD",
+            "Quali-T-Fab – Model 35120SHD",
+            "Quali-T-Fab – Model 35144SHD",
+            "Quali-T-Fab – Model 3596HD"
+          ]
+        },
+        {
+          "ccmcno": "13610-L",
+          "products": [
+            "Marshall Extend-O-Column"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 54 23",
+      "assessments": 4,
+      "examples": [
+        {
+          "ccmcno": "13206-L",
+          "products": [
+            "Sure-Weld™ TPO - Roofing Membrane"
+          ]
+        },
+        {
+          "ccmcno": "13348-L",
+          "products": [
+            "Elevate UltraPly™ TPO",
+            "Elevate UltraPly™ TPO Flex Adhered",
+            "Elevate UltraPly™ TPO Flex SA",
+            "Elevate UltraPly™ TPO Platinum™",
+            "Elevate UltraPly™ TPO SA"
+          ]
+        },
+        {
+          "ccmcno": "13580-L",
+          "products": [
+            "Mule-Hide TPO-c Membrane"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 13 26",
+      "assessments": 4,
+      "examples": [
+        {
+          "ccmcno": "13297-R",
+          "products": [
+            "Blueskin®WP 200"
+          ]
+        },
+        {
+          "ccmcno": "13560-R",
+          "products": [
+            "COLPHENE 3000"
+          ]
+        },
+        {
+          "ccmcno": "13562-R",
+          "products": [
+            "ELASTOPHENE 1500",
+            "MEMBRANE D'ÉTANCHÉITÉ AUTOCOLLANTE DE RESISTO",
+            "RESISTO SELF-ADHERED WATERPROOFING MEMBRANE"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 53 00",
+      "assessments": 3,
+      "examples": [
+        {
+          "ccmcno": "10473-L",
+          "products": [
+            "Sure-Seal",
+            "Sure-Seal AFX",
+            "Sure-Seal FR",
+            "Sure-Seal FleeceBACK",
+            "Sure-Tough",
+            "Sure-White",
+            "Sure-White FleeceBACK",
+            "Sure-White Reinforced"
+          ]
+        },
+        {
+          "ccmcno": "13266-L",
+          "products": [
+            "Elevate RubberGard™ EPDM SA",
+            "Elevate RubberGard™ EcoWhite™ EPDM",
+            "Elevate RubberGard™ EcoWhite™ EPDM PT",
+            "Elevate RubberGard™ EcoWhite™ Platinum™ EPDM",
+            "Elevate RubberGard™ EcoWhite™ Platinum™ EPDM PT",
+            "Elevate RubberGard™ LSFR PT",
+            "Elevate RubberGard™ Low Slope Fire Retardant (Black)",
+            "Elevate RubberGard™ Max EPDM",
+            "Elevate RubberGard™ Max PT",
+            "Elevate RubberGard™ Platinum",
+            "Elevate RubberGard™ Platinum PT"
+          ]
+        },
+        {
+          "ccmcno": "13575-L",
+          "products": [
+            "Mule-Hide EPDM Membrane"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 53 23",
+      "assessments": 3,
+      "examples": [
+        {
+          "ccmcno": "10473-L",
+          "products": [
+            "Sure-Seal",
+            "Sure-Seal AFX",
+            "Sure-Seal FR",
+            "Sure-Seal FleeceBACK",
+            "Sure-Tough",
+            "Sure-White",
+            "Sure-White FleeceBACK",
+            "Sure-White Reinforced"
+          ]
+        },
+        {
+          "ccmcno": "13266-L",
+          "products": [
+            "Elevate RubberGard™ EPDM SA",
+            "Elevate RubberGard™ EcoWhite™ EPDM",
+            "Elevate RubberGard™ EcoWhite™ EPDM PT",
+            "Elevate RubberGard™ EcoWhite™ Platinum™ EPDM",
+            "Elevate RubberGard™ EcoWhite™ Platinum™ EPDM PT",
+            "Elevate RubberGard™ LSFR PT",
+            "Elevate RubberGard™ Low Slope Fire Retardant (Black)",
+            "Elevate RubberGard™ Max EPDM",
+            "Elevate RubberGard™ Max PT",
+            "Elevate RubberGard™ Platinum",
+            "Elevate RubberGard™ Platinum PT"
+          ]
+        },
+        {
+          "ccmcno": "13575-L",
+          "products": [
+            "Mule-Hide EPDM Membrane"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 17 43",
+      "assessments": 3,
+      "examples": [
+        {
+          "ccmcno": "13237-L",
+          "products": [
+            "Fiber Strong® Rim Board"
+          ]
+        },
+        {
+          "ccmcno": "13238-L",
+          "products": [
+            "Tolko OSB Rim Board Plus"
+          ]
+        },
+        {
+          "ccmcno": "13248-L",
+          "products": [
+            "West Fraser Rimboard Grade A",
+            "West Fraser Rimboard Grade B1",
+            "West Fraser Rimboard Grade B2",
+            "West Fraser Rimboard Grade C1",
+            "West Fraser Rimboard Grade C2"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 19 00.02",
+      "assessments": 3,
+      "examples": [
+        {
+          "ccmcno": "13654-L",
+          "products": [
+            "Nordic X-Lam"
+          ]
+        },
+        {
+          "ccmcno": "14041-L",
+          "products": [
+            "OK Laminators CLT"
+          ]
+        },
+        {
+          "ccmcno": "14808-L",
+          "products": [
+            "Boise Cascade VersaWorks® Veneer Laminated Timber"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 17 19",
+      "assessments": 3,
+      "examples": [
+        {
+          "ccmcno": "13654-L",
+          "products": [
+            "Nordic X-Lam"
+          ]
+        },
+        {
+          "ccmcno": "14041-L",
+          "products": [
+            "OK Laminators CLT"
+          ]
+        },
+        {
+          "ccmcno": "14808-L",
+          "products": [
+            "Boise Cascade VersaWorks® Veneer Laminated Timber"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "03 11 19",
+      "assessments": 3,
+      "examples": [
+        {
+          "ccmcno": "13043-L",
+          "products": [
+            "Amvic Plus 3.30 Insulated Concrete Forms (ICF)",
+            "Amvic Standard Insulated Concrete Forms (ICF)"
+          ]
+        },
+        {
+          "ccmcno": "13101-L",
+          "products": [
+            "Advantage Insulating Concrete Forming (ICF) System"
+          ]
+        },
+        {
+          "ccmcno": "13354-R",
+          "products": [
+            "Polycrete®Big Block 1600"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 21 26",
+      "assessments": 3,
+      "examples": [
+        {
+          "ccmcno": "13240-R",
+          "products": [
+            "ProPINK® Wall Insulation System"
+          ]
+        },
+        {
+          "ccmcno": "13272-R",
+          "products": [
+            "InsulSafe® XC Wall Insulation System"
+          ]
+        },
+        {
+          "ccmcno": "13422-R",
+          "products": [
+            "Knauf JetStream® MAX Blowing Insulation Wall System",
+            "Sidewall Blowing Insulation"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 14 14",
+      "assessments": 3,
+      "examples": [
+        {
+          "ccmcno": "13452-R",
+          "products": [
+            "SUPERPRO"
+          ]
+        },
+        {
+          "ccmcno": "14144-R",
+          "products": [
+            "Hygrothane"
+          ]
+        },
+        {
+          "ccmcno": "14841-R",
+          "products": [
+            "DURAFLEX F46"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 14 00",
+      "assessments": 3,
+      "examples": [
+        {
+          "ccmcno": "13452-R",
+          "products": [
+            "SUPERPRO"
+          ]
+        },
+        {
+          "ccmcno": "14144-R",
+          "products": [
+            "Hygrothane"
+          ]
+        },
+        {
+          "ccmcno": "14841-R",
+          "products": [
+            "DURAFLEX F46"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 14 16",
+      "assessments": 3,
+      "examples": [
+        {
+          "ccmcno": "13452-R",
+          "products": [
+            "SUPERPRO"
+          ]
+        },
+        {
+          "ccmcno": "14144-R",
+          "products": [
+            "Hygrothane"
+          ]
+        },
+        {
+          "ccmcno": "14841-R",
+          "products": [
+            "DURAFLEX F46"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "09 20 00",
+      "assessments": 3,
+      "examples": [
+        {
+          "ccmcno": "13637-R",
+          "products": [
+            "Okaroc"
+          ]
+        },
+        {
+          "ccmcno": "14119-R",
+          "products": [
+            "PSL Vinylroc"
+          ]
+        },
+        {
+          "ccmcno": "14184-R",
+          "products": [
+            "VipRoc vinyl laminated gypsum"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "09 21 00",
+      "assessments": 3,
+      "examples": [
+        {
+          "ccmcno": "13637-R",
+          "products": [
+            "Okaroc"
+          ]
+        },
+        {
+          "ccmcno": "14119-R",
+          "products": [
+            "PSL Vinylroc"
+          ]
+        },
+        {
+          "ccmcno": "14184-R",
+          "products": [
+            "VipRoc vinyl laminated gypsum"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "09 29 00",
+      "assessments": 3,
+      "examples": [
+        {
+          "ccmcno": "13637-R",
+          "products": [
+            "Okaroc"
+          ]
+        },
+        {
+          "ccmcno": "14119-R",
+          "products": [
+            "PSL Vinylroc"
+          ]
+        },
+        {
+          "ccmcno": "14184-R",
+          "products": [
+            "VipRoc vinyl laminated gypsum"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 53 13",
+      "assessments": 3,
+      "examples": [
+        {
+          "ccmcno": "13690-R",
+          "products": [
+            "AZEK Harvest",
+            "AZEK Vintage"
+          ]
+        },
+        {
+          "ccmcno": "14101-R",
+          "products": [
+            "Zuri Decking"
+          ]
+        },
+        {
+          "ccmcno": "14744-R",
+          "products": [
+            "Gorilla® Wood"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 27 09.01",
+      "assessments": 3,
+      "examples": [
+        {
+          "ccmcno": "14030-R",
+          "products": [
+            "Insulthane® Extreme Air Barrier System"
+          ]
+        },
+        {
+          "ccmcno": "14096-R",
+          "products": [
+            "Wrapsulate® Foam Jacket Air Barrier System"
+          ]
+        },
+        {
+          "ccmcno": "14241-R",
+          "products": [
+            "Boreal Nature Elite – Air Barrier System"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 16 26",
+      "assessments": 3,
+      "examples": [
+        {
+          "ccmcno": "14075-R",
+          "products": [
+            "ZIP System® R-Sheathing"
+          ]
+        },
+        {
+          "ccmcno": "14091-R",
+          "products": [
+            "1/2\" HardieBacker® 500 backerboard",
+            "1/4\" HardieBacker® EZ Grid® underlayment",
+            "1/4\" HardieBacker® underlayment"
+          ]
+        },
+        {
+          "ccmcno": "14136-R",
+          "products": [
+            "fermacell®flooring elements",
+            "fermacell®gypsum fibre boards"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "09 28 00",
+      "assessments": 3,
+      "examples": [
+        {
+          "ccmcno": "14075-R",
+          "products": [
+            "ZIP System® R-Sheathing"
+          ]
+        },
+        {
+          "ccmcno": "14091-R",
+          "products": [
+            "1/2\" HardieBacker® 500 backerboard",
+            "1/4\" HardieBacker® EZ Grid® underlayment",
+            "1/4\" HardieBacker® underlayment"
+          ]
+        },
+        {
+          "ccmcno": "14136-R",
+          "products": [
+            "fermacell®flooring elements",
+            "fermacell®gypsum fibre boards"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 46 23",
+      "assessments": 2,
+      "examples": [
+        {
+          "ccmcno": "11826-L",
+          "products": [
+            "LP®SmartSide®ExpertFinish®Lap",
+            "LP®SmartSide®ExpertFinish®Nickel Gap",
+            "LP®SmartSide®ExpertFinish®Panel",
+            "LP®SmartSide®ExpertFinish®Vertical Siding",
+            "LP®SmartSide®Lap",
+            "LP®SmartSide®Nickel Gap",
+            "LP®SmartSide®Panel",
+            "LP®SmartSide®Vertical Siding"
+          ]
+        },
+        {
+          "ccmcno": "14770-L",
+          "products": [
+            "LP BuilderSeries® SmartLock™ lap siding"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "09 28 19",
+      "assessments": 2,
+      "examples": [
+        {
+          "ccmcno": "12525-R",
+          "products": [
+            "FIBEROCK®Brand Underlayment – Aqua-Tough"
+          ]
+        },
+        {
+          "ccmcno": "14136-R",
+          "products": [
+            "fermacell®flooring elements",
+            "fermacell®gypsum fibre boards"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "22 10 00",
+      "assessments": 2,
+      "examples": [
+        {
+          "ccmcno": "13529-R",
+          "products": [
+            "AquaPEX",
+            "hePEX"
+          ]
+        },
+        {
+          "ccmcno": "14006-R",
+          "products": [
+            "Aquatherm Blue Pipe&reg;MF RP (RCT)",
+            "Aquatherm Grn&reg;",
+            "Aquatherm&nbsp;Green&nbsp;Pipe&reg;&nbsp;MF"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "22 11 00",
+      "assessments": 2,
+      "examples": [
+        {
+          "ccmcno": "13529-R",
+          "products": [
+            "AquaPEX",
+            "hePEX"
+          ]
+        },
+        {
+          "ccmcno": "14006-R",
+          "products": [
+            "Aquatherm Blue Pipe&reg;MF RP (RCT)",
+            "Aquatherm Grn&reg;",
+            "Aquatherm&nbsp;Green&nbsp;Pipe&reg;&nbsp;MF"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "22 11 16",
+      "assessments": 2,
+      "examples": [
+        {
+          "ccmcno": "13529-R",
+          "products": [
+            "AquaPEX",
+            "hePEX"
+          ]
+        },
+        {
+          "ccmcno": "14006-R",
+          "products": [
+            "Aquatherm Blue Pipe&reg;MF RP (RCT)",
+            "Aquatherm Grn&reg;",
+            "Aquatherm&nbsp;Green&nbsp;Pipe&reg;&nbsp;MF"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 72 26",
+      "assessments": 2,
+      "examples": [
+        {
+          "ccmcno": "14083-R",
+          "products": [
+            "Cobra®Exhaust Vent",
+            "Cobra®Ridge Runner®Exhaust Vent",
+            "Cobra®Snow Country Advanced™ Exhaust Vent",
+            "Cobra®Snow Country™ Exhaust Vent"
+          ]
+        },
+        {
+          "ccmcno": "14740-L",
+          "products": [
+            "Python&trade; 150 Round Vent",
+            "Python&trade; 50 Square Vent",
+            "Python&trade; 60 Square Vent",
+            "Python&trade; 65 Slant Back Vent",
+            "Python&trade; FlexFit&trade; 3-IN-1 Ridge Vent",
+            "Python™ Weather-Tite Rolled Ridge Vent-1” x 11.75” x 20’",
+            "Python™ Weather-Tite Rolled Ridge Vent-¾” x 10.5” x 20’",
+            "Python™ Weather-Tite Rolled Ridge Vent-¾” x 10.5” x 50’",
+            "Python™ Weather-Tite Rolled Ridge Vent-¾” x 11.75” x 20’",
+            "Python™ Weather-Tite Rolled Ridge Vent-¾” x 11.75” x 50’",
+            "Python™ Weather-Tite Rolled Ridge Vent-¾” x 8” x 20’"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 32 26",
+      "assessments": 2,
+      "examples": [
+        {
+          "ccmcno": "14094-R",
+          "products": [
+            "Bellaforté Shake",
+            "Bellaforté Slate",
+            "Multi-width Shake",
+            "Multi-width Slate",
+            "Province Shake",
+            "Province Slate",
+            "Select Shake",
+            "Single-width Shake",
+            "Single-width Slate"
+          ]
+        },
+        {
+          "ccmcno": "14174-R",
+          "products": [
+            "Empire Niagara Shake",
+            "Empire Niagara Slate",
+            "Empire Shake",
+            "Empire Slate",
+            "Majestic Niagara Shake",
+            "Majestic Niagara Slate",
+            "Majestic Slate",
+            "Seneca Shake"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 46 19",
+      "assessments": 2,
+      "examples": [
+        {
+          "ccmcno": "14137-L",
+          "products": [
+            "Lux Architectural Panel"
+          ]
+        },
+        {
+          "ccmcno": "14153-L",
+          "products": [
+            "Armour Side"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 26 13",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "10706-L",
+          "products": [
+            "Scutan Reflective Foil Vapour Barrier"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "05 31 13",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "06292-R",
+          "products": [
+            "Hambro Floor-Ceiling Assembly"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 16 53",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "06666-R",
+          "products": [
+            "Fome-Cor&reg;Board"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 31 16",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "10475-R",
+          "products": [
+            "Interlock®Cedar",
+            "Interlock®Slate"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 32 19",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "10475-R",
+          "products": [
+            "Interlock®Cedar",
+            "Interlock®Slate"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 46 46",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "12678-R",
+          "products": [
+            "Artisan®Lap Siding",
+            "Artisan®Siding with Lock Joint System",
+            "HardiePanel®HZ5®Vertical Siding",
+            "HardiePlank®HZ5®Lap Siding",
+            "HardieShingle®HZ5® Individual Shingle",
+            "HardieShingle®HZ5®Notched Panels"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 17 36",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "12691-R",
+          "products": [
+            "Posi-Strut® Metal Web Joist PS-10V2",
+            "Posi-Strut® Metal Web Joist PS-12",
+            "Posi-Strut® Metal Web Joist PS-12i",
+            "Posi-Strut® Metal Web Joist PS-13",
+            "Posi-Strut® Metal Web Joist PS-14V3",
+            "Posi-Strut® Metal Web Joist PS-16V3"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 12 16",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "13016-R",
+          "products": [
+            "Insulspan Structural Insulated Panel (SIP) System"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 12 00",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "13016-R",
+          "products": [
+            "Insulspan Structural Insulated Panel (SIP) System"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 18 13",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "13216-R",
+          "products": [
+            "Nordic Lam™"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 44 00",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "13302-R",
+          "products": [
+            "Suretouch"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "03 11 13",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "13309-R",
+          "products": [
+            "The Footing Tube"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "03 15 00",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "13309-R",
+          "products": [
+            "The Footing Tube"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 14 13",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "13452-R",
+          "products": [
+            "SUPERPRO"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 56 00",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "13473-R",
+          "products": [
+            "FlexStone"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 17 53",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "13474-R",
+          "products": [
+            "Open Joist TRIFORCE™ Series"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "03 00 00",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "13628-R",
+          "products": [
+            "Superior Walls Xi Precast Concrete Insulated Wall Panels"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "08 81 00",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "13640-R",
+          "products": [
+            "Lumon Glazing System"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 05 23",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "13677-R",
+          "products": [
+            "SWG ASSY® 3.0 Self-Tapping Wood Screws",
+            "SWG ASSY® VG Plus"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 65 26",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "14003-R",
+          "products": [
+            "FlashSealR®",
+            "JointSealR®"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 65 19",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "14005-R",
+          "products": [
+            "Greenskin™"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "09 96 00",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "14036-R",
+          "products": [
+            "DC315"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 11 00",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "14093-R",
+          "products": [
+            "TREMdri™ 540"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 53 00",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "14121-R",
+          "products": [
+            "Inteplast Deck",
+            "Inteplast Porch",
+            "Wolf Serenity Deck",
+            "Wolf Serenity Porch Exterior Decking"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 13 13",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "14095-R",
+          "products": [
+            "TREMdri™ 540"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 13 00",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "14095-R",
+          "products": [
+            "TREMdri™ 540"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 13 52",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "14095-R",
+          "products": [
+            "TREMdri™ 540"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06 11 13",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "14229-R",
+          "products": [
+            "TEK-BASE 04-48",
+            "TEK-BASE 04-48 2%UV"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "23 07 19",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "14382-R",
+          "products": [
+            "CL4FIRE Code-96™ Grease Duct Insulation System (CL4)",
+            "CL4Fire RED"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 26 23",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "14445-R",
+          "products": [
+            "Boreal Nature Elite - Radon Mitigation System"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07 72 23",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "14740-L",
+          "products": [
+            "Python&trade; 150 Round Vent",
+            "Python&trade; 50 Square Vent",
+            "Python&trade; 60 Square Vent",
+            "Python&trade; 65 Slant Back Vent",
+            "Python&trade; FlexFit&trade; 3-IN-1 Ridge Vent",
+            "Python™ Weather-Tite Rolled Ridge Vent-1” x 11.75” x 20’",
+            "Python™ Weather-Tite Rolled Ridge Vent-¾” x 10.5” x 20’",
+            "Python™ Weather-Tite Rolled Ridge Vent-¾” x 10.5” x 50’",
+            "Python™ Weather-Tite Rolled Ridge Vent-¾” x 11.75” x 20’",
+            "Python™ Weather-Tite Rolled Ridge Vent-¾” x 11.75” x 50’",
+            "Python™ Weather-Tite Rolled Ridge Vent-¾” x 8” x 20’"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "31 21 13",
+      "assessments": 1,
+      "examples": [
+        {
+          "ccmcno": "14928-R",
+          "products": [
+            "VaporBlock® Plus™"
+          ]
+        }
+      ]
+    }
+  ],
+  "reference_documents": [
+    {
+      "reference": "CCMC-TG-072510.03-15",
+      "assessments": 19
+    },
+    {
+      "reference": "CSA O112.9:10",
+      "assessments": 17
+    },
+    {
+      "reference": "CSA-S347-14",
+      "assessments": 10
+    },
+    {
+      "reference": "CAN/ULC-S701-11, Type 2",
+      "assessments": 10
+    },
+    {
+      "reference": "CCMC-TG-072510.03-20",
+      "assessments": 10
+    },
+    {
+      "reference": "CAN/ULC-S703-09, Type 1",
+      "assessments": 9
+    },
+    {
+      "reference": "CAN/CGSB-37.54-95, Type 4, Class B",
+      "assessments": 9
+    },
+    {
+      "reference": "CCMC-TG-061733.01-20",
+      "assessments": 9
+    },
+    {
+      "reference": "CCMC-TG-061733.01-15",
+      "assessments": 9
+    },
+    {
+      "reference": "CAN/ULC-S701-11, Type 1",
+      "assessments": 8
+    },
+    {
+      "reference": "CAN/ULC-S701-11, Type 3",
+      "assessments": 8
+    },
+    {
+      "reference": "CSA O112.9:21",
+      "assessments": 8
+    },
+    {
+      "reference": "CAN/ULC-S705.1-15",
+      "assessments": 8
+    },
+    {
+      "reference": "CCMC-TG-316615.13-15A",
+      "assessments": 8
+    },
+    {
+      "reference": "CAN/CGSB-51.34-M86",
+      "assessments": 8
+    },
+    {
+      "reference": "CAN/CGSB-41.24-95",
+      "assessments": 7
+    },
+    {
+      "reference": "CSA-O86-14",
+      "assessments": 7
+    },
+    {
+      "reference": "CAN/ULC-S702.1-21, Type 1",
+      "assessments": 7
+    },
+    {
+      "reference": "CSA O112.7-M1977 (R2006), Type 1",
+      "assessments": 7
+    },
+    {
+      "reference": "CSA O112.10-08",
+      "assessments": 7
+    },
+    {
+      "reference": "CCMC-TG-061710-15A",
+      "assessments": 7
+    },
+    {
+      "reference": "CCMC-TG-072709.02-20",
+      "assessments": 7
+    },
+    {
+      "reference": "CSA A123.22-08, Type I",
+      "assessments": 6
+    },
+    {
+      "reference": "CCMC-TG-074113-15A",
+      "assessments": 6
+    },
+    {
+      "reference": "CAN/ULC-S701.1:2017, Type 3",
+      "assessments": 5
+    },
+    {
+      "reference": "CAN/ULC-S704-11, Type 2, Class 2",
+      "assessments": 5
+    },
+    {
+      "reference": "CAN/ULC-S712.1:2017",
+      "assessments": 5
+    },
+    {
+      "reference": "CCMC-TG-060523.08-20",
+      "assessments": 5
+    },
+    {
+      "reference": "CCMC-TG-071119.01-20",
+      "assessments": 5
+    },
+    {
+      "reference": "CAN/ULC-S716.1-12",
+      "assessments": 5
+    },
+    {
+      "reference": "CCMC-TG-334623.01-24",
+      "assessments": 5
+    },
+    {
+      "reference": "CCMC-TG-075419.01-20",
+      "assessments": 5
+    },
+    {
+      "reference": "CCMC-TG-075419.01-15",
+      "assessments": 5
+    },
+    {
+      "reference": "CAN/ULC-S701.1:2017, Type 4",
+      "assessments": 4
+    },
+    {
+      "reference": "CAN/ULC S702.1:21, Type 5",
+      "assessments": 4
+    },
+    {
+      "reference": "CAN/ULC-S701.1:2017, Type 2",
+      "assessments": 4
+    },
+    {
+      "reference": "CAN/ULC-S702-14, Type 1",
+      "assessments": 4
+    },
+    {
+      "reference": "ASTM D6878/D6878M-11a",
+      "assessments": 4
+    },
+    {
+      "reference": "CAN/ULC-S710.1-11, Class 1",
+      "assessments": 4
+    },
+    {
+      "reference": "CCMC-TG-334623.01-17",
+      "assessments": 4
+    },
+    {
+      "reference": "CCMC-TG-071119.01-15",
+      "assessments": 4
+    },
+    {
+      "reference": "CCMC-TG-067314.01-15",
+      "assessments": 4
+    },
+    {
+      "reference": "CCMC-TG-072709.02-15F",
+      "assessments": 4
+    },
+    {
+      "reference": "ASTM D4637/D4637M-15, Type I",
+      "assessments": 3
+    },
+    {
+      "reference": "CAN/ULC-S702.1:2014, Amendment: 1, Type 5",
+      "assessments": 3
+    },
+    {
+      "reference": "CAN/ULC-S701-05, Type 1",
+      "assessments": 3
+    },
+    {
+      "reference": "CAN/ULC-S701.1:2017, Type 1",
+      "assessments": 3
+    },
+    {
+      "reference": "CSA O112.6-M1977 (R2006)",
+      "assessments": 3
+    },
+    {
+      "reference": "CGSB 37-GP-56M-1985, Type 2a, Class C, Grade 1",
+      "assessments": 3
+    },
+    {
+      "reference": "CAN/ULC-S711.1:2019",
+      "assessments": 3
+    },
+    {
+      "reference": "CAN/ULC-S711.1-11, Class 1",
+      "assessments": 3
+    },
+    {
+      "reference": "ANSI/APA PRG 320-2018",
+      "assessments": 3
+    },
+    {
+      "reference": "ANSI/APA PRG 320-2019",
+      "assessments": 3
+    },
+    {
+      "reference": "CCMC-TG-072520-15B",
+      "assessments": 3
+    },
+    {
+      "reference": "CCMC-TG-061710A-15A",
+      "assessments": 3
+    },
+    {
+      "reference": "CCMC-TG-072123.06-20",
+      "assessments": 3
+    },
+    {
+      "reference": "CCMC-TG-072123.06-15",
+      "assessments": 3
+    },
+    {
+      "reference": "CCMC-TG-067314.01-20",
+      "assessments": 3
+    },
+    {
+      "reference": "CCMC-TG-072709.02-15E",
+      "assessments": 3
+    },
+    {
+      "reference": "CCMC-TG-092915-15",
+      "assessments": 3
+    },
+    {
+      "reference": "CAN/ULC-S706-09, Type 1, Class 2",
+      "assessments": 2
+    },
+    {
+      "reference": "CAN/ULC-S706-09, Type 2, Class 2",
+      "assessments": 2
+    },
+    {
+      "reference": "CAN/ULC-S703-09, Type 2",
+      "assessments": 2
+    },
+    {
+      "reference": "CAN/ULC 704.1:2023, Type 3, Class 1",
+      "assessments": 2
+    },
+    {
+      "reference": "CAN/ULC S704.1:2017, Type 3, Class 1",
+      "assessments": 2
+    },
+    {
+      "reference": "ASTM D3679-17",
+      "assessments": 2
+    },
+    {
+      "reference": "CSA O437.0-93, Grade O1",
+      "assessments": 2
+    },
+    {
+      "reference": "CAN/ULC-S706-09, Type 2, Class 3, Grade 1",
+      "assessments": 2
+    },
+    {
+      "reference": "CAN/ULC-S702.1:2021, Type 1",
+      "assessments": 2
+    },
+    {
+      "reference": "CAN/ULC-S704-11, Type 3, Class 1",
+      "assessments": 2
+    },
+    {
+      "reference": "CAN/ULC-S704-11, Type 2, Class 3",
+      "assessments": 2
+    },
+    {
+      "reference": "CAN/ULC-S704.1:2017, Type 1, Class 1",
+      "assessments": 2
+    },
+    {
+      "reference": "CAN/CGSB-7.2-94, Type 2",
+      "assessments": 2
+    },
+    {
+      "reference": "CAN/ULC-S704-11, Type 1, Class 1",
+      "assessments": 2
+    },
+    {
+      "reference": "ANSI/APA PRR 410-2016, Grade B2",
+      "assessments": 2
+    },
+    {
+      "reference": "ANSI/APA PRR 410-2016, Grade B1",
+      "assessments": 2
+    },
+    {
+      "reference": "ANSI/APA PRR 410-2016, Grade C2",
+      "assessments": 2
+    },
+    {
+      "reference": "CAN/ULC-S701-05, Type 2",
+      "assessments": 2
+    },
+    {
+      "reference": "CAN/ULC-S701-05, Type 3",
+      "assessments": 2
+    },
+    {
+      "reference": "CGSB 37-GP-56M-1985, Type 1a, Class A, Grade 1",
+      "assessments": 2
+    },
+    {
+      "reference": "CAN/CGSB-11.3-M87, Type 5",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-061710-20",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-334613.02-12",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-072113.10-15A",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-072113.10-20A",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-031113.04-15",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-072709.02-15D",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-072413.05-20A",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-072709.01 -20F",
+      "assessments": 2
+    },
+    {
+      "reference": "CAN/ULC-S717.1:2017",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-072126.02-15",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-072126.02-20",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-074633.04-15",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-072131.03-20",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-072131.03-15",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-067314.01-10",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-071326.01-10",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-316615.13-20",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-067315.02-20",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-067315.02-15",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-074633.07-15",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-072119.03-15",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-072119.03-20",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-073226.01-15",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-073226.01-20",
+      "assessments": 2
+    },
+    {
+      "reference": "CAN/CGSB-93.4-92",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-071416.02-20",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-074644.01-15",
+      "assessments": 2
+    },
+    {
+      "reference": "CCMC-TG-074633.07-20",
+      "assessments": 2
+    },
+    {
+      "reference": "CAN/ULC-S705.1:2018",
+      "assessments": 2
+    },
+    {
+      "reference": "CAN/ULC-S702.1:2014, Amendment: 1, Type 1",
+      "assessments": 1
+    },
+    {
+      "reference": "ANSI A135.6-2012",
+      "assessments": 1
+    },
+    {
+      "reference": "ASTM D4637/D4637M-15, Type III",
+      "assessments": 1
+    },
+    {
+      "reference": "ASTM D4637/D4637M-15, Type II",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S706-09, Type 1, Class 1",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S706-09, Type 2, Class 1",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/CGSB-51.33-M89, Type 1",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/CGSB-7.2-94, Type 1",
+      "assessments": 1
+    },
+    {
+      "reference": "CSA O437.0-93, Grade O2",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S706-09, Type 2, Class 4, Grade 1",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S704-11, Type 3, Class 3",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S710.1-11, Class 2",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC S710.1-11, Class 1",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S710.1:2019",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S702.1:2021, Type 5",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S706-02, Type 2, Class 1",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S706-02, Type 2, Class 2",
+      "assessments": 1
+    },
+    {
+      "reference": "CSA O112.10-08(R2013)",
+      "assessments": 1
+    },
+    {
+      "reference": "ANSI/APA PRR 410-2016, Grade C1",
+      "assessments": 1
+    },
+    {
+      "reference": "ANSI/APA PRR 410-2021, Grade B2",
+      "assessments": 1
+    },
+    {
+      "reference": "ANSI/APA PRR 410-2021, Grade B1",
+      "assessments": 1
+    },
+    {
+      "reference": "ANSI/APA PRR 410-2021, Grade C1",
+      "assessments": 1
+    },
+    {
+      "reference": "ANSI/APA PRR 410-2021, Grade A",
+      "assessments": 1
+    },
+    {
+      "reference": "ANSI/APA PRR 410-2021, Grade C2",
+      "assessments": 1
+    },
+    {
+      "reference": "ASTM D4637/D4637M -13, Type II",
+      "assessments": 1
+    },
+    {
+      "reference": "ASTM D4637/D4637M -13, Type I",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S704-11, Type 1, Class 3",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC S711.1-11, Class 2",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S704-11, Type 3, Class 2",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S704-11, Type 2, Class 1",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S701.1:2022, Type 1",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S701.1:2022, Type 2",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S701.1:2022, Type 3",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/CGSB-7.2-94, Amendment: 1, Type 1",
+      "assessments": 1
+    },
+    {
+      "reference": "CSA A123.22-08, Type II",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/CGSB-11.5-M87",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S702-14, Type 3",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S702-14, Type 2",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-053113.01-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-061653.01-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-074113-15B",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072520-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072520-20A",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S712.1:2020",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072129.03-15A",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072129.03-20A",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072413.01-20B",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-098113.01-15B",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-092819-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-061710-15B",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-071119.01-25",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-074645.01-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-074645.01-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-061736-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-061733.01-15A",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-031113.04-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-061216.01-15C",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-061216.01A-10",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-061629.01-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-316615.13-15B",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072413.01C-10",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072413.01-15A",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072129.04-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072129.04-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-061813.03-10",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072413.01-20C",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-316615.13-10",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072126.02-A-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-060523.06-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-071326.01-05",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-074450-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072129.03-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072129.03-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-031119.01-15C",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-067314.01-10A",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-071416.01-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-075610.02-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-061753.01-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-098113.01-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072510.06-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072510.06-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-334613.04-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072131.04-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072131.04-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-074633.04A-15B",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072510.06-15A",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072510.06-20A",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-334619.10-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-221116-15A",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-074633.05-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072709.02-15A",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072113.05-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072113.05-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072709.02-15B",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-034110.03-10",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-071326.02-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-071326.02-25",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-334623.01-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-085700-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-085700-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-060523.14-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-334613.03-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-076526.02-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-076519.03-10",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-221116-15C",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-074661-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072520-10A",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072510.09-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-316615.13-15D",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072709.01-10",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072709.02-10A",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-099648-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-099648-25",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-099648-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-074634-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-074633.04-15A",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072510.13-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-098113.01-15A",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-061613.01-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-071326.03-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-071326.03-25",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-077226-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072413.02-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-067314.01-15A",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-092813.04-15A",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-067315.04-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-071326.03-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-067315.03-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-061710.02-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-071326.02-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072709.01-15B",
+      "assessments": 1
+    },
+    {
+      "reference": "CGSB 37-GP-56M-1985, Type 1a, Class A, Grade 2",
+      "assessments": 1
+    },
+    {
+      "reference": "CGSB 37-GP-56M-1985, Type 2a, Class C, Grade 2",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072413.04-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-061733.01-15B",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-061626.03-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-074633.04-15C",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-067315.06-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-067315.06-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-067314.01-15C",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-067314.01-20A",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-074643.04-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-074650A-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-071123-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-071123-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072119.06-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072119.06-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072709.01-15F",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072116.06-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072116.06-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC-S704.1:2017, Type 2, Class 2",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-067315.01-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-042236-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072623.02-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-230719-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-230719-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-072623.01-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-074640-15",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-334613.05-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-074643.03-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CSA A93:2019, Type C",
+      "assessments": 1
+    },
+    {
+      "reference": "CSA A93:2019, Type B",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-074633.05-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC 704.1:2023, Type 2, Class 1",
+      "assessments": 1
+    },
+    {
+      "reference": "CAN/ULC S704.1:2017, Type 2, Class 1",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-316615.23-20",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-316615.23-15",
+      "assessments": 1
+    },
+    {
+      "reference": "ASTM C920-18",
+      "assessments": 1
+    },
+    {
+      "reference": "CCMC-TG-312113.16-15",
+      "assessments": 1
+    }
+  ],
+  "counting_rule": "Each assessment counted once per distinct category/division/reference string. Categories overlap; totals across categories are not additive. Reference strings preserve edition/type/amendment text.",
+  "product_path": [
+    "Match product/manufacturer and exact CCMC number; retrieve the actual published assessment.",
+    "Check current status, assessment type, evaluated code editions, product specification and intended installation.",
+    "Compare project use with report limitations, permitted substrates/assemblies, load/climate/fire conditions, installation and quality-control requirements.",
+    "Extract the specific test standards/evidence and use them to request supporting documents; the registry row alone does not establish performance or acceptance.",
+    "Verify Alberta adoption/current article mappings separately; identify whether an acceptable-solution route exists or a project alternative solution is still required.",
+    "Carry the report and responsible professional into Section D evidence; leave performance judgment to the AHJ/professional."
+  ]
+}

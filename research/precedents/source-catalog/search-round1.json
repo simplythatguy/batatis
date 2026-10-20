@@ -1,0 +1,27 @@
+{
+  "question": "Find official Calgary standing posted variances for residential ventilation and backwater valves, missing from the current index page.",
+  "queries_tried": [
+    "site:calgary.ca \"standing posted variance\" \"ventilation\"",
+    "site:calgary.ca \"SPV\" \"backwater\""
+  ],
+  "candidate_queries": [
+    "site:calgary.ca \"SPV-005\" ventilation",
+    "site:calgary.ca \"variance\" \"ventilation\" \"SPV\""
+  ],
+  "round_index": 1,
+  "max_rounds": 2,
+  "results": [
+    {
+      "id": "backwater",
+      "title": "SPV-007 alarmed normally open backwater valves",
+      "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/alarmed-normally-open-spv-007.pdf",
+      "snippet": "Official Calgary June 20 2025 variance allows an alarmed normally open backwater valve serving at most two dwelling units."
+    },
+    {
+      "id": "current",
+      "title": "Building advisories, bulletins and variances",
+      "url": "https://www.calgary.ca/development/permits/building-regulation-advisories.html",
+      "snippet": "Current index lists SPV-001, 003,006. No ventilation SPV appears."
+    }
+  ]
+}

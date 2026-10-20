@@ -1,0 +1,83 @@
+{
+  "grouped_rows": 95,
+  "article_count_sum": 3118,
+  "distinct_id_article_combinations": 2386,
+  "distinct_variance_ids_excluding_null": 1876,
+  "building_unique_variance_ids_excluding_null": 1845,
+  "nulls_by_grain_field": {
+    "variance_id": 4,
+    "discipline": 0,
+    "code_edition_raw": 4,
+    "article_raw": 4
+  },
+  "groups_disagreeing_with_distinct_id_article_count": 6,
+  "differences": [
+    {
+      "group": {
+        "discipline": "Building",
+        "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+        "article_raw": "9.10.11.2.",
+        "article_count": 366,
+        "normalized_article": "9.10.11.2."
+      },
+      "distinct_id_article_count": 264
+    },
+    {
+      "group": {
+        "discipline": "Building",
+        "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+        "article_raw": "9.10.13.13.",
+        "article_count": 251,
+        "normalized_article": "9.10.13.13."
+      },
+      "distinct_id_article_count": 250
+    },
+    {
+      "group": {
+        "discipline": "Building",
+        "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+        "article_raw": "9.10.14.5.(9)",
+        "article_count": 153,
+        "normalized_article": "9.10.14.5."
+      },
+      "distinct_id_article_count": 1
+    },
+    {
+      "group": {
+        "discipline": "Building",
+        "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+        "article_raw": "9.10.15.3.",
+        "article_count": 134,
+        "normalized_article": "9.10.15.3."
+      },
+      "distinct_id_article_count": 79
+    },
+    {
+      "group": {
+        "discipline": "Building",
+        "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+        "article_raw": "9.10.15.5.(8)",
+        "article_count": 1501,
+        "normalized_article": "9.10.15.5."
+      },
+      "distinct_id_article_count": 1076
+    },
+    {
+      "group": {
+        "discipline": "Building",
+        "code_edition_raw": "NBC(AE)-2023",
+        "article_raw": "3.2.5.15.(2)",
+        "article_count": 2,
+        "normalized_article": "3.2.5.15."
+      },
+      "distinct_id_article_count": 1
+    }
+  ],
+  "powerbi_model_last_refresh": "2026-08-14T19:51:02.753",
+  "limitations": [
+    "The visible entity/report identifies 2026 Q1. Landing text says publication begins with Q1/Q2 2026, but Q2 coverage is not established by this model.",
+    "Article Count is the published measure; it does not necessarily count unique applications.",
+    "Some aggregate groups have multiple source rows per variance/article combination. Published totals and unique-ID counts must not be interchanged.",
+    "Supporting applications/technical alternative-solution evidence are not included in the SCC publication."
+  ]
+}

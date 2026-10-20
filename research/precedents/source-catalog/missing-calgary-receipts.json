@@ -1,0 +1,23 @@
+[
+  {
+    "key": "ventilation",
+    "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/ventilation-for-acceptable-indoor-air-quality.pdf",
+    "result": "200|application/pdf|https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/ventilation-for-acceptable-indoor-air-quality.pdf",
+    "is_pdf": true,
+    "stderr": ""
+  },
+  {
+    "key": "backwater-prd",
+    "url": "https://www-prd.calgary.ca/content/dam/www/pda/pd/documents/building/variances/alarmed-normally-open-spv-007.pdf",
+    "result": "404|text/html;charset=utf-8|https://www-prd.calgary.ca/content/dam/www/pda/pd/documents/building/variances/alarmed-normally-open-spv-007.pdf",
+    "is_pdf": false,
+    "stderr": ""
+  },
+  {
+    "key": "ventilation-prd",
+    "url": "https://www-prd.calgary.ca/content/dam/www/pda/pd/documents/building/variances/ventilation-for-acceptable-indoor-air-quality.pdf",
+    "result": "200|application/pdf|https://www-prd.calgary.ca/content/dam/www/pda/pd/documents/building/variances/ventilation-for-acceptable-indoor-air-quality.pdf",
+    "is_pdf": true,
+    "stderr": ""
+  }
+]

@@ -1,0 +1,98 @@
+{
+  "version": "1.0.0",
+  "queries": [
+    {
+      "Query": {
+        "Commands": [
+          {
+            "SemanticQueryDataShapeCommand": {
+              "Query": {
+                "Version": 2,
+                "From": [
+                  {
+                    "Name": "v",
+                    "Entity": "Variances2026q1",
+                    "Type": 0
+                  }
+                ],
+                "Select": [
+                  {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Source": "v"
+                        }
+                      },
+                      "Property": "Variance ID"
+                    },
+                    "Name": "Variance ID"
+                  },
+                  {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Source": "v"
+                        }
+                      },
+                      "Property": "Discipline"
+                    },
+                    "Name": "Discipline"
+                  },
+                  {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Source": "v"
+                        }
+                      },
+                      "Property": "Code and Standard 2"
+                    },
+                    "Name": "Code and Standard 2"
+                  },
+                  {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Source": "v"
+                        }
+                      },
+                      "Property": "Article2"
+                    },
+                    "Name": "Article2"
+                  }
+                ]
+              },
+              "Binding": {
+                "DataReduction": {
+                  "DataVolume": 4,
+                  "Primary": {
+                    "Window": {
+                      "Count": 30000
+                    }
+                  }
+                },
+                "Primary": {
+                  "Groupings": [
+                    {
+                      "Projections": [
+                        0,
+                        1,
+                        2,
+                        3
+                      ]
+                    }
+                  ]
+                },
+                "Version": 1
+              },
+              "ExecutionMetricsKind": 1
+            }
+          }
+        ]
+      },
+      "QueryId": "precedent-research-grain"
+    }
+  ],
+  "cancelQueries": [],
+  "modelId": 4112675
+}

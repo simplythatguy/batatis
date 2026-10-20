@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/Users/aamia/.t3/projects/batatis/.venv/bin/python",
+    "-I",
+    "tools/codesearch.py",
+    "find",
+    "(?<!\\d)9\\.7\\.4\\.3\\.(?!\\d)",
+    "--doc",
+    "NBC-AE",
+    "--max",
+    "1000",
+    "--context",
+    "0"
+  ],
+  "stdout": "[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.106] ...9.7.4.3....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.772] ...9.7.4.3....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.849] ...9.7.4.3....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1122] ...9.7.4.3....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1536] ...9.7.4.3....\n\n",
+  "stderr": "",
+  "exit_code": 0
+}

@@ -1,0 +1,32 @@
+{
+  "status": "fail_open",
+  "decision": "answer_from_what_we_have",
+  "evidence_thin": true,
+  "screening": "none",
+  "selected_ids": [],
+  "dropped_injection_ids": [],
+  "local_screen_ids": [],
+  "unjudged_ids": [],
+  "clipped_ids": [],
+  "scores": {},
+  "answerable": null,
+  "sufficient": null,
+  "sufficiency": null,
+  "next_query": null,
+  "queries_tried": [
+    "site:open.alberta.ca \"23-BCV-015\"",
+    "site:open.alberta.ca \"23-BCV-016\""
+  ],
+  "candidate_queries": [],
+  "round_index": 1,
+  "max_rounds": 1,
+  "top_k": 6,
+  "results_seen": 0,
+  "truncated": false,
+  "latency_ms": null,
+  "notes": [
+    "nothing to rank",
+    "no readable passage could be sent for a sufficiency check",
+    "Jev decided nothing here; selected_ids is the screened head of the original order and nothing is claimed about sufficiency"
+  ]
+}
