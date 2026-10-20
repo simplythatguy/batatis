@@ -23,6 +23,7 @@ class SlidingWindow:
     def allow(self, key: str, limit: int, window_s: float) -> bool:
         now = time.monotonic()
         with self._lock:
+            self._evict(now, window_s)
             kept = [stamp for stamp in self.events.get(key, []) if now - stamp < window_s]
             if len(kept) >= limit:
                 self.events[key] = kept
@@ -30,6 +31,15 @@ class SlidingWindow:
             kept.append(now)
             self.events[key] = kept
             return True
+
+    def _evict(self, now: float, window_s: float) -> None:
+        """Drop IPs whose stamps are all outside the window. Caller holds the lock."""
+        stale = [
+            ip for ip, stamps in self.events.items()
+            if not any(now - stamp < window_s for stamp in stamps)
+        ]
+        for ip in stale:
+            del self.events[ip]
 
     def retry_after(self, key: str, window_s: float) -> int:
         now = time.monotonic()

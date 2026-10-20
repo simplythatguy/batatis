@@ -1,32 +1,49 @@
-"""Total spend cap for every keyed OpenAI call.
+"""Total spend cap, and the only OpenAI HTTP call in this repository.
 
-Live calls require ``BATATIS_LIVE=1`` and ``OPENAI_API_KEY``. The running total
-lives in Postgres (``DATABASE_URL``, or ``POSTGRES_URL`` when that is unset),
-in one table, ``spend_ledger``. There is no daily cap.
+Live calls require ``BATATIS_LIVE=1`` and ``OPENAI_API_KEY``. Live mode is
+OpenAI only: ``BATATIS_LLM_PROVIDER=anthropic`` is refused when live is on.
+The running total lives in Postgres (``DATABASE_URL``, or ``POSTGRES_URL``
+when that is unset), in one table, ``spend_ledger``. There is no daily cap.
 ``BATATIS_DAILY_SPEND_CAP_USD`` is ignored.
 
-A reservation inserts a row only when settled spend plus open reservations
-plus this call's worst-case estimate is within ``BATATIS_TOTAL_BUDGET_USD``
+``openai_chat_json`` is the only function that posts to the provider. It
+estimates input tokens from the messages it was given, always sends
+``max_completion_tokens``, and reserves the priced worst case: the model's
+input rate times that estimate, plus its output rate times
+``max_completion_tokens``. A model missing from the price table is refused
+before any request. The ``model`` on the response must be the model that was
+sent. The reservation inserts a row only when settled spend plus open
+reservations plus this estimate is within ``BATATIS_TOTAL_BUDGET_USD``
 (default 20). Postgres takes a transaction advisory lock in the statement
 before that insert, and holds it until commit, so concurrent instances cannot
 pass the check together. After the provider returns, the row is settled to the
-cost of the reported tokens. An error releases the reservation.
+cost of the reported tokens, and never above the reservation. An error
+releases the reservation in ``finally``.
+
+The input estimate uses tiktoken's ``o200k_base`` when that package imports.
+Otherwise it is ``ceil(character_count / 3)`` of the message JSON. Three
+characters per token is above a typical English rate of about four, so the
+fallback reserves more than the call is likely to bill.
 
 No database, a database error, an unknown model, or a full cap refuses the
 call and leaves the offline path to answer. Those refusals are not HTTP 5xx.
+The API key is read from the environment inside the request and is not logged.
 The code database is never opened here; a URL that points at ``codedb.sqlite``
 is refused.
 """
 from __future__ import annotations
 
+import json
 import logging
 import os
 import sqlite3
+import urllib.error
+import urllib.request
 from contextlib import closing
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
-from typing import Any, Callable, Mapping
+from typing import Any, Mapping
 from urllib.parse import urlsplit, urlunsplit
 
 from pydantic import BaseModel
@@ -46,8 +63,8 @@ MODEL_PRICES: dict[str, tuple[Decimal, Decimal]] = {
     'gpt-4.1-mini-2025-04-14': (Decimal('0.40'), Decimal('1.60')),
 }
 
-# Route names keyed callers pass. Identify rerank/verify, the completeness
-# judge, and Section D all go through keyed_openai_call.
+# Route names stored on ledger rows. Every live OpenAI call goes through
+# openai_chat_json in this file.
 ROUTE_IDENTIFY_RERANK = 'identify.rerank'
 ROUTE_IDENTIFY_VERIFY = 'identify.verify'
 ROUTE_IDENTIFY_SCREEN = 'identify.screen'
@@ -492,32 +509,102 @@ def _usage_tokens(value: Any) -> tuple[int, int] | None:
     return inn_i, out_i
 
 
-def _invoke(client: Any) -> Any:
-    if callable(client):
-        return client()
-    complete = getattr(client, 'complete', None)
-    if complete is None:
-        raise TypeError('OpenAI client must be callable or provide complete()')
-    return complete()
+class SpendError(Exception):
+    """The provider call failed, or live mode refused a non-OpenAI provider.
 
-
-def keyed_openai_call(*, route: str, model: str, max_input_tokens: int, max_output_tokens: int,
-                      client: Callable[[], Any] | Any) -> KeyedResult:
-    """Reserve, call, and settle. Refusals return an offline result and do not call ``client``.
-
-    ``client`` is invoked only after a reservation commits. Tests pass a mock.
-    The key is never read from the client and never logged.
+    The message has no API key and no request body.
     """
+
+
+def live_provider_is_anthropic() -> bool:
+    """True when live mode is on and the configured provider is Anthropic."""
+    if os.environ.get('BATATIS_LIVE') != '1':
+        return False
+    return (os.environ.get('BATATIS_LLM_PROVIDER') or '').strip().lower() == 'anthropic'
+
+
+def estimate_input_tokens(messages: Any) -> int:
+    """Input tokens to reserve for these messages. At least 1.
+
+    tiktoken ``o200k_base`` when that package imports. Otherwise
+    ``ceil(len(json) / 3)``. The character fallback is conservative: it counts
+    more tokens than a typical English rate of about four characters per token,
+    so the reservation is high rather than low.
+    """
+    try:
+        blob = json.dumps(messages, ensure_ascii=False, separators=(',', ':'), default=str)
+    except (TypeError, ValueError):
+        blob = str(messages)
+    counted = 0
+    try:
+        import tiktoken
+        counted = len(tiktoken.get_encoding('o200k_base').encode(blob))
+    except Exception:
+        counted = (len(blob) + 2) // 3
+    return max(1, counted)
+
+
+def _post_chat(payload: dict, api_key: str) -> dict:
+    """POST one chat completion. ``api_key`` is a header only and is not logged."""
+    data = json.dumps(payload).encode('utf-8')
+    request = urllib.request.Request(
+        'https://api.openai.com/v1/chat/completions',
+        data=data,
+        method='POST',
+        headers={
+            'Authorization': 'Bearer ' + api_key,
+            'Content-Type': 'application/json',
+        },
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            raw = response.read()
+    except urllib.error.HTTPError as exc:
+        raise SpendError('openai http ' + str(exc.code)) from None
+    except Exception:
+        raise SpendError('openai request failed') from None
+    try:
+        parsed = json.loads(raw.decode('utf-8'))
+    except Exception:
+        raise SpendError('openai response was not json') from None
+    if not isinstance(parsed, dict):
+        raise SpendError('openai response was not an object')
+    if parsed.get('error'):
+        raise SpendError('openai refused')
+    return parsed
+
+
+# #12 engine/identify/llm.py `_openai_json` posts on its own today. That call
+# has to come through this function. The guard test fails CI otherwise.
+def openai_chat_json(messages, *, model: str, max_completion_tokens: int,
+                     response_format: dict | None = None,
+                     route: str = ROUTE_IDENTIFY_RERANK) -> KeyedResult:
+    """Reserve a worst-case estimate, post the chat request, then settle or release.
+
+    This is the only OpenAI request function. Callers do not pass a client.
+    ``max_completion_tokens`` is required and is always sent. The reservation is
+    the input rate times the estimated input tokens plus the output rate times
+    ``max_completion_tokens``. Refusals return an offline result and do not post.
+    A provider error releases the reservation and raises ``SpendError`` (or the
+    error from the post). The API key is not logged.
+    """
+    if live_provider_is_anthropic():
+        raise SpendError('Live mode is OpenAI only.')
     if not live_enabled():
         return KeyedResult(offline=True, notice=None)
     if model not in MODEL_PRICES:
         return KeyedResult(offline=True, notice=UNPRICED_NOTICE)
-    if max_input_tokens < 0 or max_output_tokens < 0:
+    if isinstance(max_completion_tokens, bool) or not isinstance(max_completion_tokens, int):
+        return KeyedResult(offline=True, notice=LEDGER_NOTICE)
+    if max_completion_tokens < 0:
+        return KeyedResult(offline=True, notice=LEDGER_NOTICE)
+    if not isinstance(messages, list) or not messages:
         return KeyedResult(offline=True, notice=LEDGER_NOTICE)
     cap = total_cap_usd()
     if cap is None:
         return KeyedResult(offline=True, notice=LEDGER_NOTICE)
-    estimate = token_cost(model, max_input_tokens, max_output_tokens)
+    input_est = estimate_input_tokens(messages)
+    estimate = token_cost(model, input_est, max_completion_tokens)
     try:
         ledger = open_ledger()
         row_id = ledger.reserve(route, model, estimate, cap)
@@ -526,22 +613,44 @@ def keyed_openai_call(*, route: str, model: str, max_input_tokens: int, max_outp
         return KeyedResult(offline=True, notice=LEDGER_NOTICE)
     if row_id is None:
         return KeyedResult(offline=True, notice=CAP_NOTICE)
+
+    value: dict | None = None
+    actual = estimate
+    call_error: BaseException | None = None
     try:
-        value = _invoke(client)
-    except Exception:
+        api_key = (os.environ.get('OPENAI_API_KEY') or '').strip()
+        payload: dict[str, Any] = {
+            'model': model,
+            'messages': messages,
+            'max_completion_tokens': max_completion_tokens,
+        }
+        if response_format is not None:
+            payload['response_format'] = response_format
+        value = _post_chat(payload, api_key)
+        returned = value.get('model')
+        if returned != model or returned not in MODEL_PRICES:
+            raise SpendError('openai model mismatch')
+        choices = value.get('choices') or []
+        if choices and isinstance(choices[0], dict) and choices[0].get('finish_reason') == 'refusal':
+            raise SpendError('openai refused')
+        spent = _usage_tokens(value)
+        if spent is not None:
+            actual = token_cost(model, spent[0], spent[1])
+            if actual > estimate:
+                actual = estimate
+    except Exception as exc:
+        call_error = exc
+    finally:
         try:
-            ledger.release(row_id)
+            if call_error is not None:
+                ledger.release(row_id)
+            else:
+                ledger.settle(row_id, actual)
         except LedgerUnavailable:
+            # A failed settle leaves the reservation, which still counts the worst case.
             log.warning('spend ledger unavailable')
-        raise
-    spent = _usage_tokens(value)
-    actual = estimate if spent is None else token_cost(model, spent[0], spent[1])
-    try:
-        ledger.settle(row_id, actual)
-    except LedgerUnavailable:
-        # The reservation still counts the worst case, which is at least the actual cost
-        # when the caller passed a real maximum. Leave it in place.
-        log.warning('spend ledger unavailable')
+    if call_error is not None:
+        raise call_error
     return KeyedResult(offline=False, notice=None, value=value)
 
 

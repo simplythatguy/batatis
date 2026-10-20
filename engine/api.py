@@ -30,8 +30,7 @@ class ExportRequest(BaseModel):
     draft: bool = False
 
 
-def create_app(store: CaseStore | None = None, codes: Codes | None = None, identify_client=None,
-               registry=None) -> FastAPI:
+def create_app(store: CaseStore | None = None, codes: Codes | None = None, registry=None) -> FastAPI:
     app = FastAPI(title='Batatis engine')
     app.add_middleware(CORSMiddleware, allow_origin_regex=r'http://(localhost|127\.0\.0\.1)(:\d+)?',
                        allow_methods=['*'], allow_headers=['*'])
@@ -44,7 +43,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, ident
             return JSONResponse(status_code=404, content={'detail': 'not found'})
         return await call_next(request)
 
-    state = {'store': store, 'codes': codes, 'identify_client': identify_client}
+    state = {'store': store, 'codes': codes}
 
     def cases() -> CaseStore:
         if state['store'] is None:
@@ -63,7 +62,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, ident
 
     @app.post('/identify', response_model=IdentifyResponse, responses={429: {'description': 'per-IP limit'}})
     def identify_route(body: IdentifyRequest, request: Request):
-        outcome = identify(request, body, codes=state['codes'], client=state['identify_client'] or _refuse_live_client)
+        outcome = identify(request, body, codes=state['codes'])
         if isinstance(outcome, tuple):
             status, payload, retry_after = outcome
             return JSONResponse(status_code=status, content=payload, headers={'Retry-After': str(retry_after)})
@@ -142,11 +141,6 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, ident
 
     app.include_router(__import__('engine.routes_case', fromlist=['create_router']).create_router(cases, code, registry))
     return app
-
-
-def _refuse_live_client():
-    """No injected client. A live call that reached here did not reserve a provider request."""
-    raise RuntimeError('OpenAI client is not configured')
 
 
 app = create_app()

@@ -32,7 +32,7 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 
 ### Labels
 
-A live model result uses the label `model output, not verified`. It does not include an accuracy field, a score field, or an eval fraction such as `9/11` or `50/60`. Over the spend cap, or when the ledger is unavailable, `POST /identify` stays HTTP 200 and returns `label` `keyword search, no AI` together with `notice`. The `hits` on that fallback are BM25 article ids from the code database, or an empty list when that database cannot be read.
+A live model result uses the label `model output, not verified`. It does not include an accuracy field, a score field, or an eval fraction such as `9/11` or `50/60`. Over the spend cap, or when the ledger is unavailable, `POST /identify` stays HTTP 200 and returns `label` `keyword search, no AI` together with `notice`. A provider error, including a model refusal, also stays HTTP 200: `label` is `API fallback`, `notice` is omitted, and the reservation is released. The `hits` on either fallback are BM25 article ids from the code database, or an empty list when that database cannot be read.
 
 ### Rate limits
 
@@ -40,7 +40,7 @@ A live model result uses the label `model output, not verified`. It does not inc
 
 ### Spend cap and `notice`
 
-Keyed OpenAI calls — identify rerank and verify, the completeness judge, Section D, and any other model call — reserve against one total cap before the provider is contacted (`BATATIS_TOTAL_BUDGET_USD`, default 20). There is no daily cap.
+Every live OpenAI call goes through `openai_chat_json` in `engine/spend.py`, which reserves against one total cap before the provider is contacted (`BATATIS_TOTAL_BUDGET_USD`, default 20). There is no daily cap. The reservation is the model's input rate times an estimate of the input tokens, plus its output rate times `max_completion_tokens` (always sent). The input estimate is tiktoken `o200k_base` when that package imports, otherwise `ceil(character_count / 3)` of the message JSON, which is above a typical English rate and so reserves high. `BATATIS_LLM_PROVIDER=anthropic` is refused when `BATATIS_LIVE=1`.
 
 `GET /status/budget` returns only:
 

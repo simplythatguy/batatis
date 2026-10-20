@@ -16,12 +16,12 @@ from fastapi.testclient import TestClient
 from engine.api import create_app
 from engine.ccmc import CCMCRegistry
 from engine.identify_http import (
-    CODEDB_DOWNLOADS, IDENTIFY_MAX_INPUT, IDENTIFY_MAX_OUTPUT, IDENTIFY_MODEL, KEYWORD_LABEL, MODEL_LABEL,
+    API_FALLBACK_LABEL, CODEDB_DOWNLOADS, IDENTIFY_MAX_OUTPUT, IDENTIFY_MODEL, KEYWORD_LABEL, MODEL_LABEL,
+    identify_messages,
 )
-from engine.llm_gate import reset_for_tests
-from engine.spend import LEDGER_NOTICE
-from engine.spend import token_cost
-from engine.tests.test_spend import _prepare
+from engine.llm_gate import SlidingWindow, reset_for_tests
+from engine.spend import LEDGER_NOTICE, estimate_input_tokens, openai_chat_json, token_cost
+from engine.tests.test_spend import _install, _prepare
 
 ROOT = Path(__file__).resolve().parents[2]
 MARKER = b'SQLite format 3'
@@ -83,16 +83,13 @@ def test_vercel_json_sets_robots_noindex_on_every_route():
 
 def test_daily_budget_variable_does_not_limit_spend(tmp_path, monkeypatch):
     """#24's $5/day variable is not a cap. The total is BATATIS_TOTAL_BUDGET_USD."""
-    path = _prepare(tmp_path, monkeypatch, cap='20')
+    _prepare(tmp_path, monkeypatch, cap='20')
     monkeypatch.setenv('BATATIS_DAILY_SPEND_CAP_USD', '0')
     seen = []
-    from engine.spend import keyed_openai_call
-    from engine.spend import ROUTE_IDENTIFY_RERANK
-    result = keyed_openai_call(
-        route=ROUTE_IDENTIFY_RERANK, model='gpt-4.1-mini',
-        max_input_tokens=35000, max_output_tokens=0,
-        client=lambda: seen.append(1) or {'usage': {'prompt_tokens': 35000, 'completion_tokens': 0}})
-    assert result.offline is False and seen == [1]
+    _install(monkeypatch, seen, completion=0)
+    result = openai_chat_json(
+        [{'role': 'user', 'content': 'soffit'}], model='gpt-4.1-mini', max_completion_tokens=0)
+    assert result.offline is False and len(seen) == 1
     gate = (ROOT / 'engine/llm_gate.py').read_text()
     spend = (ROOT / 'engine/spend.py').read_text()
     assert "os.environ.get('BATATIS_DAILY_SPEND_CAP_USD')" not in gate
@@ -164,30 +161,47 @@ def test_vercel_routes_404_a_planted_codedb_sqlite(tmp_path):
         server.shutdown()
 
 
+def _identify_estimate(query: str):
+    return token_cost(
+        IDENTIFY_MODEL, estimate_input_tokens(identify_messages(query)), IDENTIFY_MAX_OUTPUT)
+
+
+def _install_identify(monkeypatch, seen, query: str):
+    reserved = estimate_input_tokens(identify_messages(query))
+
+    def post(payload, key):
+        seen.append(payload)
+        return {
+            'model': payload['model'],
+            'usage': {'prompt_tokens': reserved, 'completion_tokens': IDENTIFY_MAX_OUTPUT},
+            'choices': [{'message': {'content': '{}'}}],
+        }
+
+    monkeypatch.setattr('engine.spend._post_chat', post)
+
+
 def test_identify_falls_back_to_keyword_search_when_the_cap_is_exhausted(tmp_path, monkeypatch):
     reset_for_tests()
-    estimate = token_cost(IDENTIFY_MODEL, IDENTIFY_MAX_INPUT, IDENTIFY_MAX_OUTPUT)
+    query = 'soffit limiting distance'
+    estimate = _identify_estimate(query)
     path = _prepare(tmp_path, monkeypatch, cap=format(estimate, 'f'))
     monkeypatch.setenv('BATATIS_LLM_RATE_LIMIT', '20')
     seen = []
-
-    def client():
-        seen.append('called')
-        return {'usage': {'prompt_tokens': IDENTIFY_MAX_INPUT, 'completion_tokens': IDENTIFY_MAX_OUTPUT}}
-
-    http = TestClient(create_app(identify_client=client))
-    first = http.post('/identify', json={'query': 'soffit limiting distance'})
+    _install_identify(monkeypatch, seen, query)
+    http = TestClient(create_app())
+    first = http.post('/identify', json={'query': query})
     assert first.status_code == 200
-    assert seen == ['called']
+    assert len(seen) == 1
+    assert seen[0]['max_completion_tokens'] == IDENTIFY_MAX_OUTPUT
     assert first.json()['label'] == MODEL_LABEL
     assert first.json()['label'] == 'model output, not verified'
-    second = http.post('/identify', json={'query': 'soffit limiting distance'})
+    second = http.post('/identify', json={'query': query})
     assert second.status_code == 200
     body = second.json()
     assert body['label'] == KEYWORD_LABEL
     assert body['label'] == 'keyword search, no AI'
     assert "demo's spending limit has been reached" in body['notice']
-    assert seen == ['called']
+    assert len(seen) == 1
     with sqlite3.connect(path) as con:
         statuses = [row[0] for row in con.execute('SELECT status FROM spend_ledger ORDER BY id')]
     assert statuses == ['settled']
@@ -199,7 +213,8 @@ def test_identify_returns_429_at_the_per_ip_limit(monkeypatch):
     monkeypatch.setenv('BATATIS_LLM_RATE_LIMIT', '1')
     monkeypatch.setenv('BATATIS_LLM_RATE_WINDOW_SECONDS', '600')
     seen = []
-    http = TestClient(create_app(identify_client=lambda: seen.append('called')))
+    _install(monkeypatch, seen)
+    http = TestClient(create_app())
     first = http.post('/identify', json={'query': 'egress window'})
     assert first.status_code == 200
     assert first.json()['label'] == KEYWORD_LABEL
@@ -229,7 +244,8 @@ def test_identify_falls_back_to_bm25_when_the_ledger_is_unavailable(monkeypatch)
     monkeypatch.delenv('POSTGRES_URL', raising=False)
     _bm25(monkeypatch)
     seen = []
-    http = TestClient(create_app(identify_client=lambda: seen.append('called')))
+    _install(monkeypatch, seen)
+    http = TestClient(create_app())
     response = http.post('/identify', json={'query': 'soffit limiting distance'})
     assert response.status_code == 200
     body = response.json()
@@ -242,25 +258,61 @@ def test_identify_falls_back_to_bm25_when_the_ledger_is_unavailable(monkeypatch)
 
 def test_identify_cap_fallback_keeps_the_bm25_label_and_the_notice(tmp_path, monkeypatch):
     reset_for_tests()
-    estimate = token_cost(IDENTIFY_MODEL, IDENTIFY_MAX_INPUT, IDENTIFY_MAX_OUTPUT)
+    query = 'soffit limiting distance'
+    estimate = _identify_estimate(query)
     _prepare(tmp_path, monkeypatch, cap=format(estimate, 'f'))
     _bm25(monkeypatch)
     seen = []
-
-    def client():
-        seen.append('called')
-        return {'usage': {'prompt_tokens': IDENTIFY_MAX_INPUT, 'completion_tokens': IDENTIFY_MAX_OUTPUT}}
-
-    http = TestClient(create_app(identify_client=client))
-    http.post('/identify', json={'query': 'soffit limiting distance'})
-    response = http.post('/identify', json={'query': 'soffit limiting distance'})
+    _install_identify(monkeypatch, seen, query)
+    http = TestClient(create_app())
+    http.post('/identify', json={'query': query})
+    response = http.post('/identify', json={'query': query})
     body = response.json()
     assert response.status_code == 200
     assert body['label'] == KEYWORD_LABEL
     assert body['notice']
     assert 'keyword search, no AI' in response.text
     assert body['hits'] == ['9.10.15.4.']
-    assert seen == ['called']
+    assert len(seen) == 1
+
+
+def test_identify_llm_error_falls_back_with_hits(tmp_path, monkeypatch):
+    """A provider failure is HTTP 200, label API fallback, and the BM25 hits."""
+    reset_for_tests()
+    path = _prepare(tmp_path, monkeypatch, cap='20')
+    _bm25(monkeypatch)
+
+    def boom(payload, key):
+        raise RuntimeError('provider down')
+
+    monkeypatch.setattr('engine.spend._post_chat', boom)
+    http = TestClient(create_app())
+    response = http.post('/identify', json={'query': 'soffit limiting distance'})
+    assert response.status_code == 200
+    body = response.json()
+    assert body['label'] == API_FALLBACK_LABEL
+    assert body['label'] == 'API fallback'
+    assert body['hits'] == ['9.10.15.4.']
+    assert body['hits'] != []
+    with sqlite3.connect(path) as con:
+        statuses = [row[0] for row in con.execute('SELECT status FROM spend_ledger ORDER BY id')]
+    assert statuses == ['released']
+
+    def refuse(payload, key):
+        return {
+            'model': payload['model'],
+            'usage': {'prompt_tokens': 1, 'completion_tokens': 1},
+            'choices': [{'message': {'refusal': 'no'}, 'finish_reason': 'refusal'}],
+        }
+
+    monkeypatch.setattr('engine.spend._post_chat', refuse)
+    again = http.post('/identify', json={'query': 'soffit limiting distance'})
+    assert again.status_code == 200
+    assert again.json()['label'] == 'API fallback'
+    assert again.json()['hits'] == ['9.10.15.4.']
+    with sqlite3.connect(path) as con:
+        statuses = [row[0] for row in con.execute('SELECT status FROM spend_ledger ORDER BY id')]
+    assert statuses == ['released', 'released']
 
 
 def _offline_registry(tmp_path):
@@ -324,19 +376,33 @@ def _reject_accuracy(payload: object) -> None:
     walk(payload)
 
 
+def test_sliding_window_evicts_expired_ips():
+    import time
+    window = SlidingWindow()
+    window.events['old'] = [time.monotonic() - 10_000]
+    window.events['fresh'] = [time.monotonic()]
+    assert window.allow('new', limit=5, window_s=60) is True
+    assert 'old' not in window.events
+    assert 'fresh' in window.events
+    assert 'new' in window.events
+
+
 def test_live_model_result_is_labelled_and_has_no_accuracy_field(tmp_path, monkeypatch):
     reset_for_tests()
     _prepare(tmp_path, monkeypatch, cap='20')
 
-    def client():
+    def post(payload, key):
         return {
+            'model': payload['model'],
             'usage': {'prompt_tokens': 10, 'completion_tokens': 2},
             'accuracy': '9/11',
             'score': '50/60',
             'text': 'held-out accuracy 9/11 and 50/60',
+            'choices': [{'message': {'content': 'held-out accuracy 9/11 and 50/60'}}],
         }
 
-    http = TestClient(create_app(identify_client=client))
+    monkeypatch.setattr('engine.spend._post_chat', post)
+    http = TestClient(create_app())
     identified = http.post('/identify', json={'query': 'soffit limiting distance'})
     assert identified.status_code == 200
     body = identified.json()

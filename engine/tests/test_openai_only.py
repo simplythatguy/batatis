@@ -12,8 +12,26 @@ HOST = 'api.' + 'openai.com'
 CLIENTS = {'OpenAI', 'AsyncOpenAI', 'AzureOpenAI'}
 
 
-def _py_files():
-    return [path for path in ENGINE.rglob('*.py') if path.name != 'spend.py']
+def _needles():
+    # Split so this file does not contain the contiguous literals the scan rejects.
+    return (
+        'api.' + 'openai.com',
+        'import ' + 'openai',
+        'from ' + 'openai',
+        'Open' + 'AI(',
+    )
+
+
+def _engine_files():
+    """Files under engine/, except spend.py. apps/ is not scanned."""
+    for path in ENGINE.rglob('*'):
+        if not path.is_file() or '__pycache__' in path.parts or 'apps' in path.parts:
+            continue
+        if path.resolve() == (ENGINE / 'spend.py').resolve():
+            continue
+        if path.suffix == '.pyc':
+            continue
+        yield path
 
 
 def _offenders(path: Path) -> list[str]:
@@ -39,19 +57,34 @@ def _offenders(path: Path) -> list[str]:
 
 
 def test_only_spend_py_may_construct_or_call_openai():
+    """AST plus a text scan. apps/ is outside engine/ and is not scanned."""
+    needles = _needles()
     problems = []
-    for path in _py_files():
-        hits = _offenders(path)
-        if hits:
-            problems.append(f'{path.relative_to(ROOT)}: {", ".join(hits)}')
+    for path in _engine_files():
+        text = path.read_text(errors='ignore')
+        for needle in needles:
+            if needle in text:
+                problems.append(f'{path.relative_to(ROOT)}: text')
+                break
+        if path.suffix == '.py':
+            hits = _offenders(path)
+            if hits:
+                problems.append(f'{path.relative_to(ROOT)}: {", ".join(hits)}')
     assert problems == []
+    spend = (ENGINE / 'spend.py').read_text()
+    assert needles[0] in spend
+    assert 'def openai_chat_json' in spend
+    assert 'def keyed_openai_call' not in spend
 
 
 def test_deployed_routes_do_not_call_the_anthropic_verifier():
-    for relative in ('engine/api.py', 'engine/identify_http.py', 'engine/routes_case.py', 'engine/spend.py'):
+    for relative in ('engine/api.py', 'engine/identify_http.py', 'engine/routes_case.py'):
         text = (ROOT / relative).read_text()
         assert 'anthropic' not in text.lower()
         assert 'ClaudeVerifier' not in text
+    spend = (ROOT / 'engine/spend.py').read_text()
+    assert 'ClaudeVerifier' not in spend
+    assert 'import anthropic' not in spend.lower()
 
 
 def test_anthropic_verifier_cannot_run_on_the_deployed_path(monkeypatch):
@@ -69,6 +102,39 @@ def test_anthropic_verifier_cannot_run_on_the_deployed_path(monkeypatch):
     assert anthropic_verifier_allowed() is False
     with pytest.raises(RuntimeError, match='OpenAI only'):
         ClaudeVerifier('codedb/build/codedb.sqlite')
+
+
+def test_live_refuses_anthropic_provider(tmp_path, monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from engine.api import create_app
+    from engine.llm_gate import reset_for_tests
+    from engine.spend import SpendError, openai_chat_json
+    from engine.tests.test_spend import _prepare
+
+    path = _prepare(tmp_path, monkeypatch)
+    monkeypatch.setenv('BATATIS_LLM_PROVIDER', 'Anthropic')
+    seen = []
+    monkeypatch.setattr('engine.spend._post_chat', lambda payload, key: seen.append(payload))
+    with pytest.raises(SpendError, match='OpenAI only'):
+        openai_chat_json(
+            [{'role': 'user', 'content': 'hi'}], model='gpt-4.1-mini', max_completion_tokens=8)
+    assert seen == []
+    import sqlite3
+    with sqlite3.connect(path) as con:
+        assert con.execute('SELECT COUNT(*) FROM spend_ledger').fetchone()[0] == 0
+
+    reset_for_tests()
+    monkeypatch.setattr(
+        'engine.identify.corpus.bm25_rank',
+        lambda query, db_path, limit=20: ['9.10.15.4.'],
+    )
+    response = TestClient(create_app()).post('/identify', json={'query': 'soffit'})
+    assert response.status_code == 200
+    body = response.json()
+    assert body['label'] == 'API fallback'
+    assert body['hits'] == ['9.10.15.4.']
+    assert seen == []
 
 
 def test_cli_verifier_does_not_call_anthropic_when_live(monkeypatch):

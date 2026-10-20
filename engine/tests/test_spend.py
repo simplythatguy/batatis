@@ -1,6 +1,7 @@
-"""Spend cap. No network. The OpenAI client is a mock. The ledger is sqlite."""
+"""Spend cap. No network. The OpenAI post is a mock. The ledger is sqlite."""
 from __future__ import annotations
 
+import logging
 import sqlite3
 import threading
 from decimal import Decimal
@@ -16,19 +17,19 @@ from engine.spend import (
     POSTGRES_LOCK_SQL,
     POSTGRES_RESERVE_SQL,
     ROUTE_IDENTIFY_RERANK,
+    SpendError,
     UNPRICED_NOTICE,
     _SQLITE_DDL,
     budget_status,
     database_url,
-    keyed_openai_call,
+    estimate_input_tokens,
+    openai_chat_json,
     sqlite_database_url,
+    token_cost,
     total_cap_usd,
 )
 
-# 35,000 input tokens on gpt-4.1-mini is exactly $0.014.
 _MODEL = 'gpt-4.1-mini'
-_IN = 35000
-_OUT = 0
 
 
 def _url(path: Path) -> str:
@@ -39,6 +40,7 @@ def _prepare(tmp_path, monkeypatch, *, cap='20', live='1', key='test-openai-key'
     path = tmp_path / 'spend.sqlite'
     monkeypatch.setenv('DATABASE_URL', _url(path))
     monkeypatch.delenv('POSTGRES_URL', raising=False)
+    monkeypatch.delenv('BATATIS_LLM_PROVIDER', raising=False)
     if live is None:
         monkeypatch.delenv('BATATIS_LIVE', raising=False)
     else:
@@ -65,76 +67,108 @@ def _rows(path: Path):
             'SELECT id, route, model, est_usd, actual_usd, status FROM spend_ledger ORDER BY id')]
 
 
-def _usage(prompt=_IN, completion=_OUT):
-    return {'usage': {'prompt_tokens': prompt, 'completion_tokens': completion}, 'choices': [{'message': {}}]}
+def _messages(text='soffit'):
+    return [{'role': 'user', 'content': text}]
 
 
-def _call(path, client, route=ROUTE_IDENTIFY_RERANK):
-    return keyed_openai_call(
-        route=route, model=_MODEL, max_input_tokens=_IN, max_output_tokens=_OUT, client=client)
+def _reply(payload, prompt, completion):
+    return {
+        'model': payload['model'],
+        'usage': {'prompt_tokens': prompt, 'completion_tokens': completion},
+        'choices': [{'message': {'content': '{}'}}],
+    }
+
+
+def _install(monkeypatch, seen, *, prompt=None, completion=0, reply=None):
+    def post(payload, key):
+        assert key == 'test-openai-key'
+        assert 'max_completion_tokens' in payload
+        assert isinstance(payload['max_completion_tokens'], int)
+        seen.append(payload)
+        if reply is not None:
+            return reply(payload)
+        used = estimate_input_tokens(payload['messages']) if prompt is None else prompt
+        return _reply(payload, used, completion)
+
+    monkeypatch.setattr('engine.spend._post_chat', post)
+
+
+def _call(messages=None, *, model=_MODEL, max_completion_tokens=0, route=ROUTE_IDENTIFY_RERANK):
+    return openai_chat_json(
+        messages if messages is not None else _messages(),
+        model=model,
+        max_completion_tokens=max_completion_tokens,
+        route=route,
+    )
 
 
 def test_under_cap_call_proceeds_and_is_settled(tmp_path, monkeypatch):
     path = _prepare(tmp_path, monkeypatch)
     seen = []
-
-    def client():
-        seen.append('called')
-        return _usage()
-
-    # Worst case is 70,000 input tokens ($0.028). The mock reports 35,000 ($0.014).
-    result = keyed_openai_call(
-        route=ROUTE_IDENTIFY_RERANK, model=_MODEL,
-        max_input_tokens=70_000, max_output_tokens=0, client=client)
+    messages = _messages('x' * 30)
+    reserved_in = estimate_input_tokens(messages)
+    reported_in = max(1, reserved_in // 2)
+    _install(monkeypatch, seen, prompt=reported_in, completion=0)
+    result = openai_chat_json(
+        messages, model=_MODEL, max_completion_tokens=0, route=ROUTE_IDENTIFY_RERANK)
     assert result.offline is False and result.notice is None and result.value['choices']
-    assert seen == ['called']
+    assert len(seen) == 1
+    assert seen[0]['max_completion_tokens'] == 0
+    assert seen[0]['model'] == _MODEL
     rows = _rows(path)
     assert len(rows) == 1
     assert rows[0]['route'] == ROUTE_IDENTIFY_RERANK
     assert rows[0]['model'] == _MODEL
     assert rows[0]['status'] == 'settled'
-    assert rows[0]['est_usd'] == '0.028000'
-    assert rows[0]['actual_usd'] == '0.014000'
-    status = budget_status()
-    assert status.spent_usd == 0.01
-    assert status.remaining_usd == 19.99
+    assert rows[0]['est_usd'] == format(token_cost(_MODEL, reserved_in, 0), 'f')
+    assert rows[0]['actual_usd'] == format(token_cost(_MODEL, reported_in, 0), 'f')
+    assert Decimal(rows[0]['actual_usd']) <= Decimal(rows[0]['est_usd'])
 
 
 def test_reaching_the_cap_refuses_the_next_call_offline(tmp_path, monkeypatch):
-    path = _prepare(tmp_path, monkeypatch, cap='0.014')
+    messages = _messages()
+    estimate = token_cost(_MODEL, estimate_input_tokens(messages), 0)
+    path = _prepare(tmp_path, monkeypatch, cap=format(estimate, 'f'))
     seen = []
-
-    def client():
-        seen.append('called')
-        return _usage()
-
-    first = _call(path, client)
-    second = _call(path, client)
+    _install(monkeypatch, seen, completion=0)
+    first = _call(messages)
+    second = _call(messages)
     assert first.offline is False
     assert second.offline is True
     assert second.notice == CAP_NOTICE
-    assert seen == ['called']
+    assert len(seen) == 1
     assert [row['status'] for row in _rows(path)] == ['settled']
 
 
 def test_concurrent_reservations_cannot_exceed_the_cap(tmp_path, monkeypatch):
-    # $0.40 each (1,000,000 input tokens on gpt-4.1-mini). Cap $1.00 fits two, not three.
-    path = _prepare(tmp_path, monkeypatch, cap='1')
+    messages = _messages('x')
+    max_out = 250_000
+    reserved_in = estimate_input_tokens(messages)
+    estimate = token_cost(_MODEL, reserved_in, max_out)
+    path = _prepare(tmp_path, monkeypatch, cap=format(estimate * 2, 'f'))
     hold = threading.Event()
     entered = []
     refused = []
     lock = threading.Lock()
 
-    def client():
+    def post(payload, key):
+        assert key == 'test-openai-key'
+        assert payload['max_completion_tokens'] == max_out
         with lock:
             entered.append(threading.get_ident())
         assert hold.wait(timeout=10)
-        return {'usage': {'prompt_tokens': 0, 'completion_tokens': 0}}
+        return _reply(payload, reserved_in, max_out)
+
+    monkeypatch.setattr('engine.spend._post_chat', post)
 
     def worker():
-        result = keyed_openai_call(
-            route=ROUTE_IDENTIFY_RERANK, model=_MODEL,
-            max_input_tokens=1_000_000, max_output_tokens=0, client=client)
+        try:
+            result = openai_chat_json(
+                messages, model=_MODEL, max_completion_tokens=max_out, route=ROUTE_IDENTIFY_RERANK)
+        except Exception as exc:
+            with lock:
+                refused.append(type(exc).__name__)
+            return
         if result.offline:
             with lock:
                 refused.append(result.notice)
@@ -155,35 +189,64 @@ def test_concurrent_reservations_cannot_exceed_the_cap(tmp_path, monkeypatch):
         assert [row['status'] for row in _rows(path)] == ['reserved', 'reserved']
     status = budget_status()
     assert status.spent_usd == 0
-    assert status.remaining_usd == 0.2
+    assert status.remaining_usd == 0
     hold.set()
     for thread in threads:
         thread.join(timeout=10)
         assert not thread.is_alive()
-    assert all(row['status'] == 'settled' for row in _rows(path))
+    rows = _rows(path)
+    assert all(row['status'] == 'settled' for row in rows)
+    settled = sum(Decimal(row['actual_usd']) for row in rows)
+    assert settled <= Decimal(format(estimate * 2, 'f'))
+
+
+def test_oversized_prompt_is_refused_before_any_http_call(tmp_path, monkeypatch):
+    path = _prepare(tmp_path, monkeypatch, cap='0.000001')
+    seen = []
+    _install(monkeypatch, seen)
+    result = openai_chat_json(
+        _messages('x' * 50_000), model=_MODEL, max_completion_tokens=8_000)
+    assert result.offline is True
+    assert result.notice == CAP_NOTICE
+    assert seen == []
+    assert _rows(path) == []
 
 
 def test_error_releases_the_reservation(tmp_path, monkeypatch):
-    path = _prepare(tmp_path, monkeypatch, cap='0.014')
+    messages = _messages()
+    estimate = token_cost(_MODEL, estimate_input_tokens(messages), 0)
+    path = _prepare(tmp_path, monkeypatch, cap=format(estimate, 'f'))
 
-    def boom():
+    def boom(payload, key):
         raise RuntimeError('provider failed')
 
+    monkeypatch.setattr('engine.spend._post_chat', boom)
     with pytest.raises(RuntimeError, match='provider failed'):
-        _call(path, boom)
+        _call(messages)
     rows = _rows(path)
     assert len(rows) == 1 and rows[0]['status'] == 'released'
-    assert budget_status().remaining_usd == 0.01
+    assert budget_status().remaining_usd == float(estimate.quantize(Decimal('0.01')))
 
     seen = []
-
-    def client():
-        seen.append('called')
-        return _usage()
-
-    result = _call(path, client)
-    assert result.offline is False and seen == ['called']
+    _install(monkeypatch, seen, completion=0)
+    result = _call(messages)
+    assert result.offline is False and len(seen) == 1
     assert [row['status'] for row in _rows(path)] == ['released', 'settled']
+
+
+def test_returned_model_must_match_and_be_priced(tmp_path, monkeypatch):
+    path = _prepare(tmp_path, monkeypatch)
+
+    def post(payload, key):
+        body = _reply(payload, 1, 1)
+        body['model'] = 'gpt-4.1'
+        return body
+
+    monkeypatch.setattr('engine.spend._post_chat', post)
+    with pytest.raises(SpendError, match='model mismatch'):
+        _call()
+    rows = _rows(path)
+    assert len(rows) == 1 and rows[0]['status'] == 'released'
 
 
 def test_no_database_in_live_mode_fails_closed(tmp_path, monkeypatch):
@@ -191,15 +254,17 @@ def test_no_database_in_live_mode_fails_closed(tmp_path, monkeypatch):
     monkeypatch.delenv('POSTGRES_URL', raising=False)
     monkeypatch.setenv('BATATIS_LIVE', '1')
     monkeypatch.setenv('OPENAI_API_KEY', 'test-openai-key')
+    monkeypatch.delenv('BATATIS_LLM_PROVIDER', raising=False)
     seen = []
-    result = _call(tmp_path, lambda: seen.append('called'))
+    _install(monkeypatch, seen)
+    result = _call()
     assert result.offline is True
     assert result.notice == LEDGER_NOTICE
     assert seen == []
 
     missing = tmp_path / 'missing-parent' / 'spend.sqlite'
     monkeypatch.setenv('DATABASE_URL', _url(missing))
-    result = _call(tmp_path, lambda: seen.append('called'))
+    result = _call()
     assert result.offline is True and result.notice == LEDGER_NOTICE
     assert seen == []
     assert not missing.exists()
@@ -207,7 +272,7 @@ def test_no_database_in_live_mode_fails_closed(tmp_path, monkeypatch):
     codedb = tmp_path / 'codedb.sqlite'
     codedb.write_text('readonly-bundle')
     monkeypatch.setenv('DATABASE_URL', _url(codedb))
-    result = _call(tmp_path, lambda: seen.append('called'))
+    result = _call()
     assert result.notice == LEDGER_NOTICE
     assert codedb.read_text() == 'readonly-bundle'
     assert seen == []
@@ -219,24 +284,31 @@ def test_default_cap_is_20(tmp_path, monkeypatch):
     assert total_cap_usd() == Decimal('20')
     path = _prepare(tmp_path, monkeypatch, cap=None)
     seen = []
-    result = _call(path, lambda: seen.append('called') or _usage())
-    assert result.offline is False and seen == ['called']
+    _install(monkeypatch, seen, prompt=35_000, completion=0)
+    wide = _messages('x' * 200_000)
+    assert estimate_input_tokens(wide) >= 35_000
+    result = openai_chat_json(wide, model=_MODEL, max_completion_tokens=0)
+    assert result.offline is False and len(seen) == 1
     status = budget_status()
     assert status.cap_usd == 20
     assert status.live is True
+    assert status.spent_usd == 0.01
+    assert status.remaining_usd == 19.99
+    assert path.exists()
 
 
 def test_live_unset_does_not_write_ledger_or_call_model(tmp_path, monkeypatch):
     path = _prepare(tmp_path, monkeypatch, live=None, create=False)
     seen = []
-    result = _call(path, lambda: seen.append('called'))
+    _install(monkeypatch, seen)
+    result = _call()
     assert result.offline is True and result.notice is None and result.value is None
     assert seen == []
     assert not path.exists()
 
     monkeypatch.setenv('BATATIS_LIVE', '1')
     monkeypatch.setenv('OPENAI_API_KEY', '')
-    result = _call(path, lambda: seen.append('called'))
+    result = _call()
     assert result.offline is True and result.notice is None
     assert seen == []
     assert not path.exists()
@@ -245,14 +317,43 @@ def test_live_unset_does_not_write_ledger_or_call_model(tmp_path, monkeypatch):
 def test_unknown_model_is_refused(tmp_path, monkeypatch):
     path = _prepare(tmp_path, monkeypatch)
     seen = []
-    result = keyed_openai_call(
-        route=ROUTE_IDENTIFY_RERANK, model='gpt-unpriced',
-        max_input_tokens=10, max_output_tokens=10,
-        client=lambda: seen.append('called'))
+    _install(monkeypatch, seen)
+    result = openai_chat_json(_messages(), model='gpt-unpriced', max_completion_tokens=10)
     assert result.offline is True
     assert result.notice == UNPRICED_NOTICE
     assert seen == []
     assert _rows(path) == []
+
+
+def test_api_key_is_not_logged(tmp_path, monkeypatch, caplog):
+    _prepare(tmp_path, monkeypatch, key='sk-test-secret-value')
+
+    def boom(payload, key):
+        raise SpendError('openai http 500')
+
+    monkeypatch.setattr('engine.spend._post_chat', boom)
+    with caplog.at_level(logging.DEBUG):
+        with pytest.raises(SpendError):
+            _call()
+    assert 'sk-test-secret-value' not in caplog.text
+    source = Path(__file__).resolve().parents[1].joinpath('spend.py').read_text()
+    assert 'log.' in source
+    for line in source.splitlines():
+        if 'log.' in line:
+            assert 'api_key' not in line
+            assert 'OPENAI_API_KEY' not in line
+
+
+def test_response_format_is_sent(tmp_path, monkeypatch):
+    _prepare(tmp_path, monkeypatch)
+    seen = []
+    _install(monkeypatch, seen, completion=1)
+    fmt = {'type': 'json_object'}
+    result = openai_chat_json(
+        _messages(), model=_MODEL, max_completion_tokens=16, response_format=fmt)
+    assert result.offline is False
+    assert seen[0]['response_format'] == fmt
+    assert seen[0]['max_completion_tokens'] == 16
 
 
 def test_status_budget_route_hides_the_key_and_stays_200(tmp_path, monkeypatch):
@@ -261,6 +362,7 @@ def test_status_budget_route_hides_the_key_and_stays_200(tmp_path, monkeypatch):
     monkeypatch.setenv('BATATIS_LIVE', '1')
     monkeypatch.setenv('OPENAI_API_KEY', 'test-openai-key')
     monkeypatch.delenv('BATATIS_TOTAL_BUDGET_USD', raising=False)
+    monkeypatch.delenv('BATATIS_LLM_PROVIDER', raising=False)
     client = TestClient(create_app())
     response = client.get('/status/budget')
     assert response.status_code == 200
@@ -272,7 +374,11 @@ def test_status_budget_route_hides_the_key_and_stays_200(tmp_path, monkeypatch):
     assert 'test-openai-key' not in response.text
 
     path = _prepare(tmp_path, monkeypatch)
-    _call(path, lambda: _usage())
+    seen = []
+    _install(monkeypatch, seen, prompt=35_000, completion=0)
+    wide = _messages('x' * 200_000)
+    assert estimate_input_tokens(wide) >= 35_000
+    openai_chat_json(wide, model=_MODEL, max_completion_tokens=0)
     response = client.get('/status/budget')
     assert response.status_code == 200
     body = response.json()
@@ -321,7 +427,21 @@ def test_postgres_reservation_locks_before_the_cap_check():
 def test_sqlite_url_helper_round_trip(tmp_path):
     path = tmp_path / 'ledger.sqlite'
     assert sqlite_database_url(path).startswith('sqlite:///')
-    # The helper is what tests and local doubles should build. Importing it keeps the
-    # three-slash form that _sqlite_path accepts.
     from engine.spend import _sqlite_path
     assert _sqlite_path(sqlite_database_url(path)) == path.resolve()
+
+
+def test_character_estimate_is_ceil_of_chars_over_three(monkeypatch):
+    """The fallback is documented as conservative: ceil(chars / 3), at least 1."""
+    import builtins
+    real_import = builtins.__import__
+
+    def blocked(name, *args, **kwargs):
+        if name == 'tiktoken':
+            raise ImportError('tiktoken blocked')
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, '__import__', blocked)
+    messages = _messages('abcdef')  # json is longer than the six letters
+    blob_len = len(__import__('json').dumps(messages, ensure_ascii=False, separators=(',', ':')))
+    assert estimate_input_tokens(messages) == max(1, (blob_len + 2) // 3)

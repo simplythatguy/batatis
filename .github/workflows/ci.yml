@@ -75,6 +75,44 @@ jobs:
       - name: Engine tests and key-free evals
         run: python -m pytest -q engine/tests codedb/tests evals_dev -rs
 
+  engine-postgres:
+    name: engine postgres
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: batatis
+          POSTGRES_DB: spend
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U batatis -d spend"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      # Loopback service with trust auth. No password. sslmode=disable so the
+      # spend URL helper does not add sslmode=require.
+      DATABASE_URL: postgresql://batatis@127.0.0.1:5432/spend?sslmode=disable
+      OPENAI_API_KEY: ""
+      BATATIS_LIVE: ""
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: engine/requirements.txt
+      - name: Install engine requirements
+        run: python -m pip install -r engine/requirements.txt
+      - name: Spend tests against Postgres
+        run: python -m pytest -q engine/tests/test_spend_postgres.py engine/tests/test_spend.py -rs
+
   gitleaks:
     name: gitleaks
     runs-on: ubuntu-latest

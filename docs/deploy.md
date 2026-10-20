@@ -20,7 +20,37 @@ Set these on the Vercel project for the engine runtime. Do not commit values. `O
 
 `POST /identify` counts toward `BATATIS_LLM_RATE_LIMIT` (default 20) per IP per `BATATIS_LLM_RATE_WINDOW_SECONDS` (default 600). `GET /ccmc/search` counts toward `BATATIS_SEARCH_RATE_LIMIT` (default 60) per IP per `BATATIS_SEARCH_RATE_WINDOW_SECONDS` (default 600). The client IP is the first hop of `x-vercel-forwarded-for`, then `X-Forwarded-For`, then the peer address. A request over the limit is HTTP 429 with `Retry-After` and a detail that says which limit was reached. Both windows are in memory on one process. They are per instance unless a later change stores them in Postgres. They are not the spend cap.
 
-Over the spend cap, or when the ledger cannot be checked, `POST /identify` stays HTTP 200. `label` is `keyword search, no AI`, `notice` is set, and `hits` are the BM25 list. A live model result uses `label` `model output, not verified` and does not carry an accuracy or score field.
+`BATATIS_LLM_PROVIDER=anthropic` is refused when `BATATIS_LIVE=1`. Live calls are OpenAI only. The only request function is `openai_chat_json` in `engine/spend.py`. It estimates input tokens from the messages (tiktoken `o200k_base` when that package is installed, otherwise `ceil(character_count / 3)`, which reserves high), always sends `max_completion_tokens`, and reserves the input rate times that estimate plus the output rate times `max_completion_tokens`.
+
+Over the spend cap, or when the ledger cannot be checked, `POST /identify` stays HTTP 200. `label` is `keyword search, no AI`, `notice` is set, and `hits` are the BM25 list. A provider error also stays HTTP 200: the reservation is released, `label` is `API fallback`, and `hits` are that same BM25 list. A live model result uses `label` `model output, not verified` and does not carry an accuracy or score field.
+
+## Releasing a stuck reservation
+
+A row left at `reserved` still counts against the cap. `GET /status/budget` includes it in `remaining_usd`. That happens when a process stops after the insert and before settle or release. Release it in the Neon SQL editor, or with `psql`, after listing the open rows:
+
+```sql
+SELECT id, ts, route, model, est_usd, status
+FROM spend_ledger
+WHERE status = 'reserved';
+```
+
+Release one row by id:
+
+```sql
+UPDATE spend_ledger
+SET status = 'released', actual_usd = NULL
+WHERE status = 'reserved' AND id = 123;
+```
+
+Or every open reservation older than a UTC cutoff (`ts` is `YYYY-MM-DDTHH:MM:SS.ffffffZ`):
+
+```sql
+UPDATE spend_ledger
+SET status = 'released', actual_usd = NULL
+WHERE status = 'reserved' AND ts < '2026-10-20T00:00:00.000000Z';
+```
+
+Leave `settled` rows in place. They are the spent total.
 
 `X-Batatis-Notice` and the engine `X-Robots-Tag` header belong to #24 (`http_guard`, `PII_NOTICE`). This branch does not set those headers. `web/index.html` carries the robots meta tag, and every `vercel.json` route sends `X-Robots-Tag: noindex, nofollow`.
 
