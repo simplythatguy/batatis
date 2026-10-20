@@ -8,8 +8,8 @@ Evidence base:
 - Pull request [#7](https://github.com/simplythatguy/batatis/pull/7) is inside that pin. It merged at `bbdd051` (`web: small a11y and copy polish (polish-1)`) and renames the user-facing button to "Check completeness".
 - Open pull requests into `dev`. An open pull request is not on `dev`.
 - **BLOCKED** means a reviewer has requested changes on that pull request's current head, so this checklist does not treat it as clear to merge.
-- Pull request [#18](https://github.com/simplythatguy/batatis/pull/18), branch `docs/plans-draft` at `1d8f67b`, adds `docs/business-plan.md`, `docs/implementation-plan.md`, `docs/pitch-outline.md`, `docs/pilot-adoption-plan.md`, `docs/judge-qa.md`, and `docs/pitch-slides.md`. Karen and Backy approved that head. Unc still has changes, so the pull request is not clear to merge. Those files are not on `dev`.
-- Pull request [#16](https://github.com/simplythatguy/batatis/pull/16) is **BLOCKED**. It is not on `dev`.
+- Pull request [#18](https://github.com/simplythatguy/batatis/pull/18), branch `docs/plans-draft`, adds `docs/business-plan.md`, `docs/implementation-plan.md`, `docs/pitch-outline.md`, `docs/pilot-adoption-plan.md`, `docs/judge-qa.md`, and `docs/pitch-slides.md`. Karen and Backy approved. Unc still has changes, so the pull request is not clear to merge. Those files are not on `dev`.
+- Pull request [#16](https://github.com/simplythatguy/batatis/pull/16) is in review. It is not on `dev`.
 - Pull request [#20](https://github.com/simplythatguy/batatis/pull/20) is a demo script (`docs/demo/script.md`) and is **BLOCKED**. It is not on `dev`.
 - Numbers are copied from files on the pinned `dev` or from pull-request bodies. **model-checked** means that source labels the number as model-checked. It is not a human verification.
 
@@ -43,22 +43,22 @@ These are the deliverables we expect the package to need. Discord has not been c
 
 | Deliverable | Status |
 | --- | --- |
-| Demo video | `GAP:` no submission demo video is in the repo. [`2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) has a six-minute demo script ("The six-minute demo"). That is a script. Pull request [#20](https://github.com/simplythatguy/batatis/pull/20) is a demo script (`docs/demo/script.md`) and is **BLOCKED**. Pull request [#16](https://github.com/simplythatguy/batatis/pull/16) is **BLOCKED**. It links an agent screen recording of a local preview (`vite-who-to-completeness.mp4`). That recording is a development walkthrough of the branch, not a submission video. |
-| Business plan | Pull request [#18](https://github.com/simplythatguy/batatis/pull/18), not clear to merge (Karen and Backy approved `1d8f67b`; Unc still has changes): [`docs/business-plan.md`](https://github.com/simplythatguy/batatis/blob/docs/plans-draft/docs/business-plan.md) on branch `docs/plans-draft`. It is not on `dev`. Research on `dev` remains [`docs/research/2026-10-20-vision/C-market-provinces-business.md`](../research/2026-10-20-vision/C-market-provinces-business.md). This checklist does not restate the plan. |
-| Implementation plan | Pull request [#18](https://github.com/simplythatguy/batatis/pull/18), not clear to merge (Karen and Backy approved `1d8f67b`; Unc still has changes): [`docs/implementation-plan.md`](https://github.com/simplythatguy/batatis/blob/docs/plans-draft/docs/implementation-plan.md) on branch `docs/plans-draft`. It is not on `dev`. Closest material on `dev` is the research schedule [`2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) (dated 2026-10-20). The user-testing appendix is on `dev` at [`docs/user-testing/`](../user-testing/), merged in pull request [#6](https://github.com/simplythatguy/batatis/pull/6) at `f7fcf4c`. That folder says no real-user or officer sessions have been run, simulated sessions are labelled SIMULATED, and every number in a results table is blank until a session takes place. |
-| Pitch outline | Pull request [#18](https://github.com/simplythatguy/batatis/pull/18), not clear to merge (Karen and Backy approved `1d8f67b`; Unc still has changes): [`docs/pitch-outline.md`](https://github.com/simplythatguy/batatis/blob/docs/plans-draft/docs/pitch-outline.md) on branch `docs/plans-draft`. It is not on `dev`. |
-| Pilot plan | Pull request [#18](https://github.com/simplythatguy/batatis/pull/18), not clear to merge (Karen and Backy approved `1d8f67b`; Unc still has changes): [`docs/pilot-adoption-plan.md`](https://github.com/simplythatguy/batatis/blob/docs/plans-draft/docs/pilot-adoption-plan.md) on branch `docs/plans-draft`. It is not on `dev`. |
+| Demo video | `GAP:` no submission demo video is in the repo. [`2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) has a six-minute demo script ("The six-minute demo"). That is a script. Pull request [#20](https://github.com/simplythatguy/batatis/pull/20) is a demo script (`docs/demo/script.md`) and is **BLOCKED**. Pull request [#16](https://github.com/simplythatguy/batatis/pull/16) is in review. It links an agent screen recording of a local preview (`vite-who-to-completeness.mp4`). That recording is a development walkthrough of the branch, not a submission video. |
+| Business plan | Pull request [#18](https://github.com/simplythatguy/batatis/pull/18), not clear to merge (Karen and Backy approved; Unc still has changes): [`docs/business-plan.md`](https://github.com/simplythatguy/batatis/blob/docs/plans-draft/docs/business-plan.md) on branch `docs/plans-draft`. It is not on `dev`. Research on `dev` remains [`docs/research/2026-10-20-vision/C-market-provinces-business.md`](../research/2026-10-20-vision/C-market-provinces-business.md). This checklist does not restate the plan. |
+| Implementation plan | Pull request [#18](https://github.com/simplythatguy/batatis/pull/18), not clear to merge (Karen and Backy approved; Unc still has changes): [`docs/implementation-plan.md`](https://github.com/simplythatguy/batatis/blob/docs/plans-draft/docs/implementation-plan.md) on branch `docs/plans-draft`. It is not on `dev`. Closest material on `dev` is the research schedule [`2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) (dated 2026-10-20). The user-testing appendix is on `dev` at [`docs/user-testing/`](../user-testing/), merged in pull request [#6](https://github.com/simplythatguy/batatis/pull/6) at `f7fcf4c`. That folder says no real-user or officer sessions have been run, simulated sessions are labelled SIMULATED, and every number in a results table is blank until a session takes place. |
+| Pitch outline | Pull request [#18](https://github.com/simplythatguy/batatis/pull/18), not clear to merge (Karen and Backy approved; Unc still has changes): [`docs/pitch-outline.md`](https://github.com/simplythatguy/batatis/blob/docs/plans-draft/docs/pitch-outline.md) on branch `docs/plans-draft`. It is not on `dev`. |
+| Pilot plan | Pull request [#18](https://github.com/simplythatguy/batatis/pull/18), not clear to merge (Karen and Backy approved; Unc still has changes): [`docs/pilot-adoption-plan.md`](https://github.com/simplythatguy/batatis/blob/docs/plans-draft/docs/pilot-adoption-plan.md) on branch `docs/plans-draft`. It is not on `dev`. |
 | Brief §2.1.b.ii | Covered only in draft pull request [#12](https://github.com/simplythatguy/batatis/pull/12). The brief asks the solution to recommend the most likely benchmark or accepted solution, with an explanation. On that branch, `engine/identify/pipeline.py` `_benchmark` returns role `benchmark_acceptable_solution`. It is not on `dev`. |
 | Brief §2.1.c.iii | Covered only in draft pull request [#12](https://github.com/simplythatguy/batatis/pull/12). The brief asks for an explainer paragraph for each article included, and why. On that branch, `engine/section_c.py` `_explainer` builds that paragraph. It is not on `dev`. |
-| Working link | `GAP:` no deployed URL is in the repo. deploy PR #24 in review ([#24](https://github.com/simplythatguy/batatis/pull/24)). On `dev`, `web/src/api/client.ts` proxies `/api` to `http://127.0.0.1:8000`. [`2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) says "Demo runs locally" and "A skeleton deploys on day 3". |
+| Working link | `GAP:` no deployed URL is in the repo. Deploy PR [#24](https://github.com/simplythatguy/batatis/pull/24) is **BLOCKED**, not deployed. On `dev`, `web/src/api/client.ts` proxies `/api` to `http://127.0.0.1:8000`. [`2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) says "Demo runs locally" and "A skeleton deploys on day 3". |
 | Repo | Present: [https://github.com/simplythatguy/batatis](https://github.com/simplythatguy/batatis). This checklist's tree is `dev` at `914b8ec`, plus the open pull requests named below. Pull request [#7](https://github.com/simplythatguy/batatis/pull/7) is inside that pin (`bbdd051`). Pull request [#8](https://github.com/simplythatguy/batatis/pull/8) is inside that pin (`69fb4ff`). Pull request [#14](https://github.com/simplythatguy/batatis/pull/14) is that pin. The root [`README.md`](../../README.md) status line still says application product code is not the focus of that document. `engine/` and `web/` are already on `dev`. |
 
 ## Risks
 
 | Risk | Status |
 | --- | --- |
-| Appendix 1 vs the Oct 6 SCC form | Brief §2.5(a) asks for an export in the Appendix 1 format. The crosswalk is pull request [#18](https://github.com/simplythatguy/batatis/pull/18) (not clear to merge: Karen and Backy approved `1d8f67b`; Unc still has changes), implementation plan §3, "Export target": the export fills the Oct 6, 2026 SCC form. On `dev`, export is engine-only (`POST /cases/{id}/export` in [`engine/api.py`](../../engine/api.py)). The Application screen has no export button. The SCC form PDF is not in git. |
-| NBC(AE) 2023 2nd printing | The edition has to be the same on the screen, in the docs, and in the demo script. On this pin, [`codedb/README.md`](../../codedb/README.md) says the code database is NBC(AE) 2023, second printing. Pull request [#20](https://github.com/simplythatguy/batatis/pull/20) (demo script, **BLOCKED**) and pull request [#16](https://github.com/simplythatguy/batatis/pull/16) (**BLOCKED**) are the script and screen sides of that check. |
+| Appendix 1 vs the Oct 6 SCC form | Brief §2.5(a) asks for an export in the Appendix 1 format. The crosswalk is pull request [#18](https://github.com/simplythatguy/batatis/pull/18) (not clear to merge: Karen and Backy approved; Unc still has changes), implementation plan §3, "Export target": the export fills the Oct 6, 2026 SCC form. On `dev`, export is engine-only (`POST /cases/{id}/export` in [`engine/api.py`](../../engine/api.py)). The Application screen has no export button. The SCC form PDF is not in git. |
+| NBC(AE) 2023 2nd printing | The edition has to be the same on the screen, in the docs, and in the demo script. On this pin, [`codedb/README.md`](../../codedb/README.md) says the code database is NBC(AE) 2023, second printing. Pull request [#20](https://github.com/simplythatguy/batatis/pull/20) (demo script, **BLOCKED**) and pull request [#16](https://github.com/simplythatguy/batatis/pull/16) (in review) are the script and screen sides of that check. |
 
 ## 1. Intake — 20%
 
@@ -75,7 +75,7 @@ Scoring question, from `docs/judging-rubric.md`: "Does the tool capture the info
 
 ### Open pull requests
 
-- [#16](https://github.com/simplythatguy/batatis/pull/16) (**BLOCKED**, web-to-engine MVP, not merged). The body describes an empty case, three roles (manufacturer, general contractor, homebuilder), a typed description posted with `POST /cases` and `POST /facts`, and "Not sure" stored as an open question. It also says file upload `POST /files` returned 404, and that article ranking stays command-line only.
+- [#16](https://github.com/simplythatguy/batatis/pull/16) (in review, web-to-engine MVP, not merged). The body describes an empty case, three roles (manufacturer, general contractor, homebuilder), a typed description posted with `POST /cases` and `POST /facts`, and "Not sure" stored as an open question. It also says file upload `POST /files` returned 404, and that article ranking stays command-line only.
 
 ### GAP
 
@@ -97,11 +97,11 @@ Scoring question, from `docs/judging-rubric.md`: "Does it map the project to the
 ### Open pull requests
 
 - [#12](https://github.com/simplythatguy/batatis/pull/12) (identify pipeline and keyed OpenAI benchmark, draft, not merged). The body says `POST /cases/{id}/identify` and `engine/cli_sut.py` call `engine.identify.pipeline.run`, and that an answer of "not sure" is stored with status `unknown`. It gives the benchmark command (`python -m engine.identify.benchmark`, 20 `evals_dev` cases, `--repeats 3`, FX 1.4097 on 2026-10-19). It says pytest of the listed modules was 17 passed, and that a missing `OPENAI_API_KEY` exits 2. The summary says demo-cache quotes and a live OpenAI score are not in that push. The keyed benchmark results section of the same body records a single run, not those 3 repeats. For variant `c_openai_rerank_verify`: top-1 9/11 and recall@5 9/11 on model-checked dev cases with gold, in-sample, single run (the body's 0.8182 on n=11). BM25 baseline 5/11 (the body's `a_bm25` top-1 0.4545 on the same 11 cases). Asks on 40%. C$0.0277 and 5.7 s median per case for identification only, on model aliases (`gpt-4.1-mini` and `gpt-4.1`, not dated snapshots). Model-checked. Not human-verified. Not on `dev`. Brief §2.1.b.ii is `_benchmark` in `engine/identify/pipeline.py` on that branch (role `benchmark_acceptable_solution`). Brief §2.1.c.iii is `_explainer` in `engine/section_c.py` on that branch. Neither function is on `dev`.
-- [#16](https://github.com/simplythatguy/batatis/pull/16) (**BLOCKED**). The body says Section C on that branch is a live lookup or a labelled cached demo, and that article ranking is command-line only.
+- [#16](https://github.com/simplythatguy/batatis/pull/16) (in review). The body says Section C on that branch is a live lookup or a labelled cached demo, and that article ranking is command-line only.
 
 ### GAP
 
-- `GAP:` no applicant-facing run, on `dev` or in a pull-request body, that scores the benchmark acceptable solution as its own result. The identification figures on pull request #12 are top-1 and recall@5 on `must_cite` gold. They are model-checked. They are not human-verified.
+- `GAP:` no applicant-facing run, on `dev` or in a pull-request body, that scores the benchmark acceptable solution as its own result. The identification figures on pull request #12 are top-1 and recall@5 on `must_cite` gold. They are in-sample, model-checked, not human-verified.
 
 ## 3. Recommendations — 10%
 
@@ -150,7 +150,7 @@ Scoring question, from `docs/judging-rubric.md`: "Can it review a completed appl
   - The body says variant A still misses generic risk (D09 1/2), unrelated mitigations (D10 1/2), contradictions (D14 0/2), and relevance (D15 0/2), and that D05 and D07 are absent from that table because they need the code database.
   - Pytest written in the body, without a code database: 12 passed across `test_bulletin_gates.py`, `test_portal_package.py`, `test_jurisdiction_wording.py`, and `test_schema_export.py`.
   - The body says the draft is not ready to merge.
-- [#16](https://github.com/simplythatguy/batatis/pull/16). PR #16, in review (not on `dev` yet). "Download draft record" saves a .txt draft record, and only once every gap is closed. "Check completeness" downloads the engine-filled Safety Codes Council variance form PDF (7 pages, the Oct 6, 2026 form) behind a "not a finding that the design complies" dialog. The body also says `GET /gaps` returned 503 when `BATATIS_CODEDB` was missing.
+- [#16](https://github.com/simplythatguy/batatis/pull/16). PR #16, in review (not on `dev` yet). "Download draft record" saves a .txt draft record, and only once every gap is closed. "Check completeness" downloads the engine-filled Safety Codes Council variance form PDF (7 pages (the 5-page form plus appendix), the Oct 6, 2026 form) behind a "not a finding that the design complies" dialog. The body also says `GET /gaps` returned 503 when `BATATIS_CODEDB` was missing.
 
 ### GAP
 
@@ -169,7 +169,7 @@ Scoring question, from `docs/judging-rubric.md`: "Could an inexperienced applica
 
 ### Open pull requests
 
-- [#16](https://github.com/simplythatguy/batatis/pull/16) (**BLOCKED**). The body describes a "Who are you?" step with manufacturer, general contractor, and homebuilder, each starting from an empty case, plus "Try an example" for three cached runs.
+- [#16](https://github.com/simplythatguy/batatis/pull/16) (in review). The body describes a "Who are you?" step with manufacturer, general contractor, and homebuilder, each starting from an empty case, plus "Try an example" for three cached runs.
 
 ### GAP
 
@@ -187,11 +187,11 @@ Scoring question, from `docs/judging-rubric.md`: "Is there a realistic path to b
 
 ### Open pull requests
 
-- [#18](https://github.com/simplythatguy/batatis/pull/18) is not clear to merge. Karen and Backy approved `1d8f67b`. Unc still has changes. On branch `docs/plans-draft` that head adds `docs/implementation-plan.md` and `docs/pilot-adoption-plan.md`. They are not on `dev`. This checklist does not restate those files.
+- [#18](https://github.com/simplythatguy/batatis/pull/18) is not clear to merge. Karen and Backy approved. Unc still has changes. On branch `docs/plans-draft` the pull request adds `docs/implementation-plan.md` and `docs/pilot-adoption-plan.md`. They are not on `dev`. This checklist does not restate those files.
 
 ### GAP
 
-- `GAP:` no user-test results that could inform a final design. The testing kit is on `dev` and its results tables are blank. The submission implementation plan and the pilot plan are in PR #18, which is not clear to merge (Karen and Backy approved `1d8f67b`; Unc still has changes).
+- `GAP:` no user-test results that could inform a final design. The testing kit is on `dev` and its results tables are blank. The submission implementation plan and the pilot plan are in PR #18, which is not clear to merge (Karen and Backy approved; Unc still has changes).
 
 ## 7. Business Plan — 10%
 
@@ -205,7 +205,7 @@ Scoring question, from `docs/judging-rubric.md`: "Is there a credible company he
 
 ### Open pull requests
 
-- [#18](https://github.com/simplythatguy/batatis/pull/18) is not clear to merge. Karen and Backy approved `1d8f67b`. Unc still has changes. On branch `docs/plans-draft` that head adds `docs/business-plan.md`, `docs/pitch-outline.md`, `docs/judge-qa.md`, and `docs/pitch-slides.md`. They are not on `dev`. This checklist does not restate those files.
+- [#18](https://github.com/simplythatguy/batatis/pull/18) is not clear to merge. Karen and Backy approved. Unc still has changes. On branch `docs/plans-draft` the pull request adds `docs/business-plan.md`, `docs/pitch-outline.md`, `docs/judge-qa.md`, and `docs/pitch-slides.md`. They are not on `dev`. This checklist does not restate those files.
 
 ## 8. Usability and Portability — 10%
 
@@ -221,7 +221,7 @@ Scoring question, from `docs/judging-rubric.md`: "Overall user experience for bo
 
 ### Open pull requests
 
-- [#16](https://github.com/simplythatguy/batatis/pull/16). PR #16, in review (not on `dev` yet). "Download draft record" saves a .txt draft record, and only once every gap is closed. "Check completeness" downloads the engine-filled Safety Codes Council variance form PDF (7 pages, the Oct 6, 2026 form) behind a "not a finding that the design complies" dialog. The body says the product surface moves to `web/`. Screenshots in that body are of a local preview.
+- [#16](https://github.com/simplythatguy/batatis/pull/16). PR #16, in review (not on `dev` yet). "Download draft record" saves a .txt draft record, and only once every gap is closed. "Check completeness" downloads the engine-filled Safety Codes Council variance form PDF (7 pages (the 5-page form plus appendix), the Oct 6, 2026 form) behind a "not a finding that the design complies" dialog. The body says the product surface moves to `web/`. Screenshots in that body are of a local preview.
 - [#11](https://github.com/simplythatguy/batatis/pull/11). The body says wire fields on `Jurisdiction` stay `id`, `name`, and `authority`, and that "authority having jurisdiction" wording follows IB-2026-10-16. That wording change is not on `dev`.
 
 ### GAP
@@ -248,12 +248,12 @@ Scoring question, from `docs/judging-rubric.md`: "Hard-to-quantify edge — team
 Nothing below is a result. It is the list of `GAP:` lines that still have no file.
 
 1. Submission demo video. The demo script is pull request #20, which is **BLOCKED**.
-2. A working link. Deploy PR #24 is in review. No deployed URL is in the repo.
-3. Identification figures on `dev`. Draft pull request #12 records top-1 9/11 and recall@5 9/11, model-checked, in-sample, single run, not human-verified. Those figures are not on `dev`.
+2. A working link. Deploy PR #24 is **BLOCKED**, not deployed. No deployed URL is in the repo.
+3. Identification figures on `dev`. Draft pull request #12 records top-1 9/11 and recall@5 9/11 on `must_cite` gold, in-sample, model-checked, single run, not human-verified. Those figures are not on `dev`.
 4. Human-verified intake, code-identification, and professional-flag scores. What exists is model-checked, or marked weak, or a research measurement with the limits written in its own file.
 5. An officer view with a time measurement. The screen on `dev` is a placeholder.
 6. Jurisdiction packs. The three applicant demo cases are on `dev` (`evals/demo-cases/`, #14 at `914b8ec`) and the README says no loader reads them. The role chooser is pull request #16.
 7. User-test results that could inform a final design. The protocol is on `dev` at `docs/user-testing/`. Its results tables are blank.
 8. Brief §2.1.b.ii and §2.1.c.iii on `dev`. Both are only on draft pull request #12.
 
-The business plan, the implementation plan, the pitch outline, the pilot plan, `docs/judge-qa.md`, and `docs/pitch-slides.md` are in PR #18, which is not clear to merge (Karen and Backy approved `1d8f67b`; Unc still has changes). Pull request #16 is **BLOCKED**.
+The business plan, the implementation plan, the pitch outline, the pilot plan, `docs/judge-qa.md`, and `docs/pitch-slides.md` are in PR #18, which is not clear to merge (Karen and Backy approved; Unc still has changes). Pull request #16 is in review.
