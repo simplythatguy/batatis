@@ -1,7 +1,7 @@
 > agent-authored, model-checked, not human-verified or official
 
 # Expected: relevant-article shortlist (Case C)
-> EXAMPLE DATA. NBC(AE) 2023, checked against the **1st printing**; 2nd-printing wording and pages are unverified. Sources in `../../sources.md`.
+> EXAMPLE DATA. NBC(AE) 2023, checked against the **1st printing**; 2nd printing not verified. Sources in `../../../sources.md`.
 
 | Rank | Provision / document | Why it applies | Status |
 |---|---|---|---|

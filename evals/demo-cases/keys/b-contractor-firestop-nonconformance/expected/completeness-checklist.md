@@ -13,7 +13,7 @@
 | B2 | Exact penetration IDs covered by the request | SCC §B | ❌ |
 | B3 | One issue per request (sprinklers separate) | W9 | ⚠ |
 | C1 | 3.1.9.1.(1) and 3.1.9.4.(3) rows with attributions from lookup | Div B 1.1.2.1.(1) | ✓ |
-| C2 | Intent cells | — | ❌ **Flagged blank (no verified lookup)** |
+| C2 | Intent cells | — | ❌ **Flagged blank (lookup not available)** |
 | 2.3 | Code analysis, O&M, assumptions, tests, qualifications, coordinator | Div C 2.3.1.1.(2)–(6) | ❌ |
 | ALT-1/2 | Risk assessment, mitigations | Batatis alt-path rule; good practice / SCO expectation (not 2.3.1.1 terms) | ❌ **Export blocked** |
 | ALT-3 | Assumptions/limits | Div C 2.3.1.1.(3) | ❌ **Export blocked** |

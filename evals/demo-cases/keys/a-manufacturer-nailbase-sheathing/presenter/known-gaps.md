@@ -9,3 +9,10 @@
 8. There's no evaluation report. "CCMC pending" is only an enquiry.
 9. No limiting distance or exposing-face data, so it can't be ruled out that 9.10.14.5/9.10.15.5 apply.
 10. No operation, maintenance or inspection plan for the fastening (Div C 2.3.1.1.(2)(b)).
+
+## Planted in inputs
+Notes taken out of the client bundle. The gaps stay in the files by omission.
+
+- `input/engineer-letter-draft-EXAMPLE.md`: no seal, no permit-to-practice number, no date of authentication.
+- `input/test-summary-EXAMPLE.md`: accreditation body and scope not stated; ASTM E96 edition not stated; specimen is 25 mm (the installed product is 50 mm); not tested: air leakage, thermal resistance, 50 mm thickness, taped joints.
+- `input/project-brief.md` (same text in the html and pdf): "selling in two other provinces" — claim not checked.

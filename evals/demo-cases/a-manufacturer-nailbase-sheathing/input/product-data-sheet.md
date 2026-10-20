@@ -1,5 +1,5 @@
 # EPW NailBase CI-50: Product data sheet (manufacturer literature)
-> **EXAMPLE DATA.** This is a fictional product. All values are manufacturer *claims* and haven't been independently verified.
+> **EXAMPLE DATA.** This is a fictional product. All values are manufacturer *claims* and haven't been independently checked.
 
 | Property | Claimed value | Basis stated on sheet |
 |---|---|---|

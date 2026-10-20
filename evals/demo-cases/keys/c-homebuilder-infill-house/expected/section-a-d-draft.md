@@ -21,7 +21,7 @@
 ## Section C
 **Applicable code:** NBC(AE) 2023, Division B (2nd printing in force; rows checked against the 1st printing).
 
-| Article | Objective | Function | Intent statement *(NBC 2020 national explanatory supplement, not Alberta law; not independently re-verified)* | Source |
+| Article | Objective | Function | Intent statement *(NBC 2020 national explanatory supplement, not Alberta law; not independently checked again)* | Source |
 |---|---|---|---|---|
 | 9.9.10.1.(1) | OS3.7 (an emergency delays or prevents movement to safety) | F10 (timely movement to a safe place in an emergency) | GAP: intent lookup not available | Table 9.38.1.1., 1st pr. PDF p.1117 (B 9-295) |
 | 9.9.10.1.(2) | OS3.7 | F10 | GAP: intent lookup not available | same |

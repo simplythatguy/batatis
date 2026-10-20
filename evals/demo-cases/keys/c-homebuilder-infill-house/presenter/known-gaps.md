@@ -7,3 +7,8 @@
 6. Mailing address for Section A is missing. The owner (client) must be the requester or authorize the builder (W3).
 7. The builder wants owner "risk acceptance" in the variance. It doesn't replace the risk assessment.
 8. W-07 has a 450 mm sill on the 2nd floor and a "standard rotary operator". It needs an F2090 WOCD (23-BCV-001, B23-02) or a guard (9.8.8.1.(4)/(5)). The rotary operator can't be the limiter.
+
+## Planted in inputs
+Notes taken out of the client bundle. The gaps stay in the files by omission.
+
+- `input/window-supplier-note-EXAMPLE.md`: not stated: whether "clear opening" is measured to the code's unobstructed-opening definition, or with the sash projecting.

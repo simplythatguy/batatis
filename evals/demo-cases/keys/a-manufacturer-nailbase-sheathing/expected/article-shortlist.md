@@ -1,7 +1,7 @@
 > agent-authored, model-checked, not human-verified or official
 
 # Expected: relevant-article shortlist (Case A)
-> EXAMPLE DATA. NBC(AE) 2023, Div B unless noted. Checked against the 1st printing; the 2nd printing (in force) is unverified. See `../../sources.md`.
+> EXAMPLE DATA. NBC(AE) 2023, Div B unless noted. Checked against the 1st printing; 2nd printing not verified. See `../../../sources.md`.
 
 | Rank | Provision | Why it applies | Status for this design |
 |---|---|---|---|
@@ -16,4 +16,4 @@
 | — | Div A 1.2.2.1.(2) | CCMC or PBA-approved evaluation reports may be used in determining compliance | **Route for market-wide acceptance**, not a Section C row. PBA-approved evaluators: STANDATAs 23-BCI-005 (QAI), -006 (UL Solutions), -007 (Intertek), -013 (ICC-ES), -040 (APA). |
 | — | Div C 2.2.1.2 + Note A-2.2.1.2 | Province-wide variance by written request to the PBA. Must show a province-wide issue. | Possible but unlikely for one proprietary product. Flag it, don't recommend it. |
 
-**Not cited:** any article the tool can't resolve. If the user mentions "9.10.9.9." or an unverified STANDATA, the tool should ask for the source rather than adopt it.
+**Not cited:** any article the tool can't resolve. If the user mentions "9.10.9.9." or a STANDATA that was not checked, the tool should ask for the source rather than adopt it.

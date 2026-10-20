@@ -23,7 +23,7 @@
 
 | Article(s) | Objective | Function | Intent statement | Source |
 |---|---|---|---|---|
-| 3.1.9.1.(1), firestops at penetrations of rated fire separations | OS1.2, OP1.2 (fire impacting areas beyond its point of origin); OS1.3, OP1.3 (collapse due to fire) | F03 (retard effects of fire beyond its point of origin); F04 (retard failure or collapse due to fire) | **⚠ GAP: intent lookup not available in the verified source set. Leave blank and flag it. Don't paraphrase from memory.** | Table 3.10.1.1., 1st pr. PDF p.317: [F03-OS1.2], [F03-OP1.2], [F04-OS1.3], [F04-OP1.3] |
+| 3.1.9.1.(1), firestops at penetrations of rated fire separations | OS1.2, OP1.2 (fire impacting areas beyond its point of origin); OS1.3, OP1.3 (collapse due to fire) | F03 (retard effects of fire beyond its point of origin); F04 (retard failure or collapse due to fire) | **⚠ GAP: intent lookup not available in the source set. Leave blank and flag it. Don't paraphrase from memory.** | Table 3.10.1.1., 1st pr. PDF p.317: [F03-OS1.2], [F03-OP1.2], [F04-OS1.3], [F04-OP1.3] |
 | **3.1.9.4.(3)**, combustible DWV piping penetrating a rated fire separation (via (4)(b): 50 Pa S115 test in buildings > 3 storeys) | OS1.2, OP1.2; OS1.3, OP1.3 | F03; F02, F04 | **⚠ GAP: intent lookup not available.** Flagged blank. | Table 3.10.1.1., 1st pr. PDF p.318 (B 3-196): [F03-OS1.2], [F02,F04-OS1.3], [F03-OP1.2], [F02,F04-OP1.3] |
 | 3.1.8.1.(2), openings in fire separations protected | OS1.2, OP1.2 | F03 | ⚠ GAP: intent lookup not available | Table 3.10.1.1., 1st pr. PDF p.316 (B 3-194): [F03-OS1.2], [F03-OP1.2], "applies to the requirement that openings in fire separations be protected with closures, shafts or other means". (3.1.8.1.(1) is attributed to clause (a) only.) |
 

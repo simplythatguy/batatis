@@ -1,7 +1,7 @@
 > agent-authored, model-checked, not human-verified or official
 
 # Expected: gap and completeness checklist (Case A)
-> EXAMPLE DATA. Administrative completeness only. Passing this checklist does **not** mean the design is safe, compliant or approved.
+> EXAMPLE DATA. Administrative completeness only. Passing this checklist does **not** mean the design is safe or approved.
 
 | # | Item | Required by | Status |
 |---|---|---|---|

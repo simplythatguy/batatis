@@ -11,4 +11,4 @@
 | W-07 egress | Opening measured on the code basis | Supplier quote | Manufacturer literature | Supplier confirmation of the unobstructed opening. If going alt-path: designer's code analysis + any mitigation documentation. |
 | W-07 fall protection | F2090 WOCD or guard | "Standard rotary operator" (doesn't count) | — | WOCD product data showing **ASTM F2090** (23-BCV-001) and Edmonton B23-02 criteria |
 
-**Must not:** call R-5 acceptable, call the roof compliant as drawn, treat the rotary operator as a limiter, or treat owner consent as evidence.
+**Must not:** call R-5 acceptable, call the roof acceptable as drawn, treat the rotary operator as a limiter, or treat owner consent as evidence.

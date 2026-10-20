@@ -8,3 +8,8 @@
 7. One request per issue in Calgary. Sprinkler treatment and plastic penetrations may need **separate** requests (W9).
 8. Change notices and field review by the professionals of record (Div C 2.4.2.3, RESEARCH) aren't addressed.
 9. Plastic DWV and PEX in a building >3 storeys need **50 Pa-tested** S115 systems (3.1.9.4.(4)(b)). The submitted listing doesn't say it was. Are any stacks in a vertical service space (3.1.9.4.(4)(c))?
+
+## Planted in inputs
+Notes taken out of the client bundle. The gaps stay in the files by omission.
+
+- `input/manufacturer-ej-draft-EXAMPLE.md`: not included: job name and location; the tested system(s) relied on; penetrant sizes or annular space; rating supported; installation instructions; issuer's technical qualifications; signature or date of authorization.

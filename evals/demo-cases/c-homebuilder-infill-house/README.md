@@ -2,7 +2,7 @@
 
 > **EXAMPLE DATA.** The people, companies, address and drawings are fictional. Code and STANDATA citations checked against the NBC(AE) 2023 1st printing. See `../sources.md`.
 
-This is a demo case. No loader reads it yet. Only files in `input/` are ever uploaded to the tool. This README contains the demo script and expected answers, so it is not uploaded. `expected/` is not uploaded. `presenter/known-gaps.md` is the presenter answer key.
+This is a demo case. No loader reads it yet. Only files in `input/` are ever uploaded to the tool. This README contains the demo script, so it is not uploaded. Answer keys are in [`../keys/c-homebuilder-infill-house/`](../keys/c-homebuilder-infill-house/) and are never uploaded.
 
 ## Persona
 **Priya Natarajan**, owner of **Larkspur Example Homes (fictional)**, Edmonton. She's a small custom builder doing 6–8 houses a year. She's confident with Part 9, but new to variances. Her client wants an architectural "modern box". Her question: *"Which parts of this house need a variance?"*
@@ -36,5 +36,5 @@ A **2-storey single-family infill house** (about 210 m², no secondary suite, **
 
 ## Files
 - `input/`: the only files uploaded to the tool — `project-brief.md`, `project-brief.html`, `project-brief.pdf`, `drawing-notes.md`, `window-supplier-note-EXAMPLE.md`
-- `presenter/known-gaps.md`: presenter answer key (never upload)
-- `expected/`: intake summary, article shortlist, Section A–D draft, evidence plan, completeness checklist, SCO review, must-not
+- [`../keys/c-homebuilder-infill-house/presenter/known-gaps.md`](../keys/c-homebuilder-infill-house/presenter/known-gaps.md): presenter answer key (never upload)
+- [`../keys/c-homebuilder-infill-house/expected/`](../keys/c-homebuilder-infill-house/expected/): intake summary, article shortlist, Section A–D draft, evidence plan, completeness checklist, SCO review, must-not
