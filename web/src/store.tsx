@@ -24,9 +24,21 @@ interface Store {
 
 const Ctx = createContext<Store | null>(null);
 
+/** Every edit dispatches on input; the browser copy is written ~500 ms after the last one,
+ *  and at once when the page is hidden, so a first fill is never lost to a missed blur. */
+const SAVE_DELAY = 500;
+
 export function CaseProvider({ children }: { children: ReactNode }) {
   const [c, dispatch] = useReducer(reducer, undefined, load);
-  useEffect(() => sessionStorage.setItem(KEY, JSON.stringify(c)), [c]);
+  useEffect(() => {
+    const save = () => sessionStorage.setItem(KEY, JSON.stringify(c));
+    const t = window.setTimeout(save, SAVE_DELAY);
+    window.addEventListener("pagehide", save);
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener("pagehide", save);
+    };
+  }, [c]);
   const value = useMemo(() => ({ c, gaps: getGaps(c), dispatch }), [c]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

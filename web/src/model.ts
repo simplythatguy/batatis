@@ -1,3 +1,4 @@
+import { properPlaces } from "./places";
 import type { Candidate, CandidateAnswer, Case, Fact, Gap, ProcessFieldId } from "./types";
 
 /** Section A and B fields. Values live only in `case.facts`; nothing here holds a default. */
@@ -76,11 +77,15 @@ export const factFor = (c: Case, field: string): Fact | undefined => c.facts.fin
 /** A fact's value as text. Engine values may be numbers or booleans; null reads as empty. */
 export const valueText = (f: Fact | undefined): string => (f?.value == null ? "" : String(f.value));
 
+/** Fields whose values name places; shown with proper-cased place names. */
+const PLACE_FIELDS = new Set(["site.climate", "municipalAddress", "mailingAddress"]);
+
 /** The displayed value of a fact (select-backed fields show their option label). */
 export function displayValue(f: Fact): string {
   const def = DETAIL_FIELDS.find((d) => d.id === f.field);
   const text = valueText(f);
-  return def?.options?.[text] ?? text;
+  const shown = def?.options?.[text] ?? text;
+  return PLACE_FIELDS.has(f.field) ? properPlaces(shown) : shown;
 }
 
 /** Source ref prefix for values the applicant typed into a field. */
@@ -103,7 +108,7 @@ export function getGaps(c: Case): Gap[] {
   for (const d of DETAIL_FIELDS) {
     const fact = factFor(c, d.id);
     if (d.required && !valueText(fact).trim()) {
-      gaps.push({ id: `detail-${d.id}`, severity: "blocking", label: `${d.label} missing`, href: routeForDetail(d.id) });
+      gaps.push({ id: `detail-${d.id}`, severity: "blocking", label: `${d.label} is missing`, href: routeForDetail(d.id) });
     }
   }
   for (const f of c.facts) {
@@ -111,18 +116,23 @@ export function getGaps(c: Case): Gap[] {
     gaps.push({
       id: `confirm-${f.id}`,
       severity: "blocking",
-      label: `Confirm ${factLabel(f.field).toLowerCase()}`,
+      label: `Check and confirm the ${factLabel(f.field).toLowerCase()} we read`,
       href: DETAIL_IDS.has(f.field) ? routeForDetail(f.field) : `#/describe?focus=fact-${f.id}`,
     });
   }
   for (const a of c.candidates) {
     if (a.answer === null) {
-      gaps.push({ id: `answer-${a.id}`, severity: "blocking", label: `Answer: ${a.topic.toLowerCase()}`, href: `#/code-check?focus=cand-${a.id}` });
+      gaps.push({
+        id: `answer-${a.id}`,
+        severity: "blocking",
+        label: `Say whether your design is different: ${a.topic.toLowerCase()}`,
+        href: `#/code-check?focus=cand-${a.id}`,
+      });
     } else if (a.answer === "not-sure") {
       gaps.push({
         id: `answer-${a.id}`,
         severity: "blocking",
-        label: `Not sure yet: ${a.topic.toLowerCase()}`,
+        label: `You are not sure yet: ${a.topic.toLowerCase()}`,
         href: `#/code-check?focus=cand-${a.id}`,
       });
     }
@@ -131,7 +141,7 @@ export function getGaps(c: Case): Gap[] {
     gaps.push({
       id: "no-departure",
       severity: "warning",
-      label: "No departure confirmed: you may not need a variance",
+      label: "You said nothing is different from the code, so you may not need a variance",
       href: "#/code-check",
     });
   }
@@ -140,14 +150,14 @@ export function getGaps(c: Case): Gap[] {
       gaps.push({
         id: `process-${p.id}`,
         severity: "blocking",
-        label: `${p.label} empty`,
+        label: `${p.label} is empty`,
         href: `#/application?tab=alt&focus=field-${p.id}`,
       });
     }
   }
   for (const q of c.questions) {
     if (!q.answer) {
-      gaps.push({ id: `question-${q.id}`, severity: "warning", label: `Open question: ${factLabel(q.field).toLowerCase()}`, href: `#/describe?focus=q-${q.id}` });
+      gaps.push({ id: `question-${q.id}`, severity: "warning", label: `Open question about the ${factLabel(q.field).toLowerCase()}`, href: `#/describe?focus=q-${q.id}` });
     }
   }
   return gaps;

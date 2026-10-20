@@ -1,6 +1,5 @@
-import { useState } from "react";
-import { GapStrip, Icon, PanelHeader, StatusPill, type Dot } from "../components";
-import { answeredYes, unresolvedCandidates } from "../model";
+import { Citation, PanelHeader, StatusPill, type Dot } from "../components";
+import { unresolvedCandidates } from "../model";
 import { useCase } from "../store";
 import type { Candidate, CandidateAnswer } from "../types";
 
@@ -11,37 +10,34 @@ const ANSWERS: { value: CandidateAnswer; label: string }[] = [
 ];
 
 const STATUS: Record<string, { dot: Dot; label: string }> = {
-  yes: { dot: "done", label: "Departure confirmed" },
-  no: { dot: "pending", label: "Not a departure" },
-  "not-sure": { dot: "warning", label: "Not sure yet" },
+  yes: { dot: "done", label: "You said: different" },
+  no: { dot: "pending", label: "Same as the code" },
+  "not-sure": { dot: "warning", label: "Not sure · open question for the officer" },
   none: { dot: "blocking", label: "Needs your answer" },
 };
 
-function CandidateCard({ a, index, total }: { a: Candidate; index: number; total: number }) {
+function CandidateCard({ a }: { a: Candidate }) {
   const { dispatch } = useCase();
   const s = STATUS[a.answer ?? "none"];
   return (
     <article className="card" id={`cand-${a.id}`} tabIndex={-1} aria-labelledby={`cand-${a.id}-topic`}>
       <div className="card-head">
-        <span className="meta">
-          {index + 1} of {total}
-        </span>
+        {a.benchmark && <span className="label-pill">Main code rule</span>}
         <h2 className="card-topic" id={`cand-${a.id}-topic`}>
           {a.topic}
         </h2>
-        {a.benchmark && <span className="label-pill">Main requirement</span>}
         <StatusPill dot={s.dot}>{s.label}</StatusPill>
       </div>
-      <div className="code-said">
-        <div className="block-label">
-          <span className="label-pill">Code text</span>
-          <span className="meta">The code says</span>
-        </div>
+      <div>
         <blockquote className="cite-block quote">{a.quote.text}</blockquote>
+        <Citation text={a.quote.citation} />
       </div>
-      <p className="ask">
-        <span className="label-pill ai-pill">AI-written</span> Does your design <strong>{a.departure}</strong> instead?
-      </p>
+      <div>
+        <p className="ask">
+          Does your design <strong>{a.departure}</strong> instead?
+        </p>
+        <span className="meta">AI-written question</span>
+      </div>
       <div className="segmented" role="group" aria-label={`Answer for ${a.topic}`}>
         {ANSWERS.map((o) => (
           <button
@@ -55,79 +51,51 @@ function CandidateCard({ a, index, total }: { a: Candidate; index: number; total
           </button>
         ))}
       </div>
-      {a.answer === "not-sure" && (
+      {a.answer === "not-sure" ? (
         <div className="followup">
-          <div className="meta">Check before answering</div>
+          <div className="meta">Open question for the officer</div>
           <p>{a.clarifyingQuestion}</p>
-          <p className="meta">Answer Yes or No once you know, before you continue from this check.</p>
+          <p className="meta">Until officer routing is connected, answer Yes or No here once you know to continue.</p>
         </div>
+      ) : (
+        <p className="meta">Not sure? It goes to the officer as an open question.</p>
       )}
-      <details className="disclosure ref">
-        <summary>
-          <Icon name="chevron" size={12} />
-          <span className="disclosure-title">Code reference</span>
-        </summary>
-        <dl className="ref-grid">
-          <dt>Provision</dt>
-          <dd className="article-id">{a.provision}</dd>
-          <dt>Citation</dt>
-          <dd className="mono">{a.quote.citation}</dd>
-          <dt>Part</dt>
-          <dd>Part {a.part}</dd>
-        </dl>
-      </details>
     </article>
   );
 }
 
-type Filter = "all" | "open" | "yes";
-
 export function CodeCheck() {
-  const { c, gaps } = useCase();
-  const [filter, setFilter] = useState<Filter>("all");
+  const { c } = useCase();
   const open = unresolvedCandidates(c);
-  const yes = answeredYes(c);
-  const counts: Record<Filter, number> = { all: c.candidates.length, open: open.length, yes: yes.length };
-  const shown = c.candidates.filter((a) => filter === "all" || (filter === "open" ? open.includes(a) : a.answer === "yes"));
-  const labels: Record<Filter, string> = { all: "All", open: "Needs an answer", yes: "Departures" };
+  const answered = c.candidates.length - open.length;
   return (
     <>
       <PanelHeader title="Code check" meta="NBC(AE) 2023 · 2nd printing" />
-      <GapStrip gaps={gaps} />
-      <div className="toolbar" role="toolbar" aria-label="Filter">
-        {(Object.keys(labels) as Filter[]).map((f) => (
-          <button key={f} type="button" className="pill" data-active={filter === f} aria-pressed={filter === f} onClick={() => setFilter(f)}>
-            {labels[f]} <span className="tab-count">{counts[f]}</span>
-          </button>
-        ))}
-      </div>
       <div className="pane scroll-body">
-        <div className="content-col stack">
-          <p className="meta intro">
-            A departure means your design does something differently from the quoted requirement. Answer each card; you do
-            not need the article numbers.
-          </p>
-          {shown.length ? (
-            shown.map((a) => <CandidateCard key={a.id} a={a} index={c.candidates.indexOf(a)} total={c.candidates.length} />)
+        <div className="column stack">
+          <p className="meta">Answer each card in plain words. You do not need the article numbers.</p>
+          {c.candidates.length ? (
+            c.candidates.map((a) => <CandidateCard key={a.id} a={a} />)
           ) : (
-            <p className="empty">{filter === "yes" ? "No confirmed departures yet." : filter === "open" ? "No requirements need an answer." : "No requirements to review."}</p>
+            <p className="empty">No code rules to review yet. Describe your idea first.</p>
           )}
         </div>
       </div>
       <div className="footer-bar">
         <span className="status-note" role="status">
-          {open.length ? `Answer ${open.map((a) => a.topic.toLowerCase()).join("; ")} to continue` : ""}
+          {c.candidates.length ? `${answered} of ${c.candidates.length} answered` : ""}
+          {open.length ? ` · answer Yes or No on the rest to continue` : ""}
         </span>
         <a className="btn btn-ghost" href="#/describe">
           Back
         </a>
         {open.length ? (
           <button type="button" className="btn btn-primary" disabled>
-            Continue to Section C
+            Continue to application
           </button>
         ) : (
           <a className="btn btn-primary" href="#/section-c">
-            Continue to Section C
+            Continue to application
           </a>
         )}
       </div>

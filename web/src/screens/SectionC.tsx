@@ -1,20 +1,20 @@
 import { useMemo, useState } from "react";
 import { useProvisionText, useSectionC, type SectionCSource } from "../api/sectionC";
-import { GapStrip, PanelHeader, StatusPill } from "../components";
+import { Citation, Icon, StatusPill } from "../components";
 import { CODE_TERMS } from "../fixture";
-import { candidateById, unresolvedCandidates } from "../model";
+import { candidateById } from "../model";
 import { useCase } from "../store";
 import type { SectionCRow } from "../types";
 
-function AttributionCell({ row }: { row: SectionCRow }) {
-  if (row.attributionStatus === "direct") return <span className="label-pill">Direct row</span>;
+function ListCell({ row }: { row: SectionCRow }) {
+  if (row.attributionStatus === "direct") return <span className="label-pill">Own row</span>;
   if (row.attributionStatus === "inherited")
     return (
-      <span className="label-pill" title={`Uses the table row for ${row.inheritedFrom}`}>
-        Inherited · {row.inheritedFrom}
+      <span className="label-pill" title={`Uses the list row for ${row.inheritedFrom}`}>
+        Uses the row for {row.inheritedFrom}
       </span>
     );
-  return <span className="label-pill">No row in table</span>;
+  return <span className="label-pill">Not in the list</span>;
 }
 
 const rowKey = (r: SectionCRow) => `${r.candidateId}:${r.provision}`;
@@ -33,7 +33,7 @@ function SourceLabel({ source, error }: { source: SectionCSource; error?: string
 }
 
 function Pairs({ row }: { row: SectionCRow }) {
-  if (!row.pairs.length) return <span className="muted-text">No objective or function in the attribution table for this provision</span>;
+  if (!row.pairs.length) return <span className="muted-text">No objective or function in the objectives and functions list for this provision</span>;
   return (
     <ul className="plain-list pairs">
       {row.pairs.map((p) => (
@@ -59,9 +59,10 @@ function Pairs({ row }: { row: SectionCRow }) {
   );
 }
 
-export function SectionC() {
-  const { c, gaps } = useCase();
-  // Confirmed departures and the ones still awaiting an answer; a "no" drops the provision.
+/** Section C · Objectives and functions: the Application tab body, also reached at `#/section-c`. */
+export function SectionCBody() {
+  const { c } = useCase();
+  // Provisions you said are different and the ones still awaiting an answer; a "no" drops the provision.
   const wanted = useMemo(
     () => c.candidates.filter((a) => a.answer !== "no").map((a) => ({ candidateId: a.id, provision: a.provision })),
     [c.candidates],
@@ -72,38 +73,41 @@ export function SectionC() {
   const selCand = sel && candidateById(c, sel.candidateId);
   const liveText = useProvisionText(source === "live" ? sel?.provision : undefined);
   const quote = liveText ?? (selCand && selCand.provision === sel?.provision ? selCand.quote : null);
-  const open = unresolvedCandidates(c);
 
   return (
-    <>
-      <PanelHeader title="Section C · Objectives, functions and intent" meta="Lookup from the attribution tables" />
-      <GapStrip gaps={gaps} />
-      <div className="pane scroll-body">
-        <div className="sc-source">
-          <SourceLabel source={source} error={error} />
-          {source === "live" && <span className="meta">Rows from the engine's code database for this case</span>}
-        </div>
-        <p className="meta intro">
-          Objectives and functions come from NBC(AE) 2023, 2nd printing, Table 9.38.1.1., by lookup after you confirm a
-          departure. Rows still waiting for your answer are shown greyed and are not exported.
+    <div className="stack">
+      <div className="sc-source">
+        <SourceLabel source={source} error={error} />
+        <span className="meta">
+          Looked up from NBC(AE) 2023, 2nd printing, Table 9.38.1.1. Greyed rows wait for your answer in{" "}
+          <a className="text-link" href="#/code-check">
+            Code check
+          </a>{" "}
+          and are not exported.
+        </span>
+      </div>
+      {source === "offline" && (
+        <p className="field-note" role="status">
+          <span className="status-dot warning" />
+          The engine is not reachable, so these rows are a bundled offline sample, not a lookup for this case.
         </p>
-        {source === "offline" && (
-          <p className="field-note" role="status">
-            <span className="status-dot warning" />
-            The engine is not reachable, so these rows are a bundled offline sample, not a lookup for this case.
-          </p>
-        )}
+      )}
+      {source !== "loading" && !rows.length && (
+        <p className="empty">
+          {c.candidates.length
+            ? "No rows: you said none of the code rules differ from your design."
+            : "No rows yet. Answer the cards in Code check first."}
+        </p>
+      )}
+      {rows.length > 0 && (
         <div className="table-wrap">
           <table className="table sc-table">
             <thead>
               <tr>
                 <th>Your answer</th>
                 <th>Provision</th>
-                <th>Attribution</th>
+                <th>In the list</th>
                 <th>Objective · Function</th>
-                <th>
-                  Intent <span className="th-note">NBC 2020 Intent Statements, explanatory only</span>
-                </th>
               </tr>
             </thead>
             <tbody>
@@ -121,7 +125,7 @@ export function SectionC() {
                   >
                     <td data-label="Your answer">
                       {confirmed ? (
-                        <StatusPill dot="done">Departure</StatusPill>
+                        <StatusPill dot="done">You said: different</StatusPill>
                       ) : (
                         <StatusPill dot={cand?.answer === "not-sure" ? "warning" : "blocking"}>
                           {cand?.answer === "not-sure" ? "Not sure" : "Unanswered"}
@@ -132,25 +136,17 @@ export function SectionC() {
                       <span className="article-id">{r.provision}</span>
                       <span className="meta cell-sub">{cand?.topic}</span>
                     </td>
-                    <td data-label="Attribution">
-                      <AttributionCell row={r} />
+                    <td data-label="In the list">
+                      <ListCell row={r} />
                       {r.differs && (
                         <span className="label-pill differs" title={r.differsDetail}>
                           <span className="status-dot warning" />
-                          Attribution differs
+                          Differs from NBC 2020 intent
                         </span>
                       )}
                     </td>
                     <td data-label="Objective · Function">
                       <Pairs row={r} />
-                    </td>
-                    <td data-label="Intent">
-                      {!r.intent.length && <span className="muted-text">None for this provision</span>}
-                      {r.intent.map((i) => (
-                        <span key={i.text} className="intent-text">
-                          {i.text}
-                        </span>
-                      ))}
                     </td>
                   </tr>
                 );
@@ -158,62 +154,49 @@ export function SectionC() {
             </tbody>
           </table>
         </div>
+      )}
 
-        {sel && (
-          <div className="sc-detail">
-            <section className="source-block">
-              <div className="block-label">
-                <span className="label-pill">Code text</span>
-                <span className="meta">Retrieved verbatim · {quote?.citation ?? sel.citation}</span>
-              </div>
-              <blockquote className="cite-block quote">{quote?.text ?? "Loading the provision text…"}</blockquote>
+      {sel && (
+        <div className="sc-detail">
+          <section className="source-block">
+            <blockquote className="cite-block quote">{quote?.text ?? "Loading the provision text…"}</blockquote>
+            <Citation text={quote?.citation ?? sel.citation} />
+            {(sel.attributionStatus !== "direct" || sel.differs) && (
               <p className="meta">
-                Section C row: {sel.citation}
-                {sel.attributionStatus === "inherited" && ` · uses the table row of ${sel.inheritedFrom}`}
-                {sel.attributionStatus === "no-row" && " · the attribution table has no row for it"}
+                {sel.attributionStatus === "inherited" && `Uses the list row of ${sel.inheritedFrom}. `}
+                {sel.attributionStatus === "no-row" && "The objectives and functions list has no row for it. "}
+                {sel.differs && sel.differsDetail}
               </p>
-              {sel.differs && (
-                <p className="field-note">
-                  <span className="status-dot warning" />
-                  {sel.differsDetail}
-                </p>
-              )}
-            </section>
-            <section className="source-block">
-              <div className="block-label">
-                <span className="label-pill">NBC 2020 Intent Statements</span>
-                <span className="meta">Explanatory only, not part of NBC(AE) 2023</span>
-              </div>
+            )}
+          </section>
+          <details className="disclosure">
+            <summary>
+              <Icon name="chevron" size={12} />
+              <span className="disclosure-title">Intent and explanation</span>
+              <span className="meta">NBC 2020 intent, explanatory only{sel.explanation ? " · AI-written note" : ""}</span>
+            </summary>
+            <div className="stack">
               {!sel.intent.length && <p className="meta">No NBC 2020 intent statement for this provision.</p>}
               {sel.intent.map((i) => (
                 <blockquote key={i.text} className="cite-block quote intent-block">
-                  {i.objective && <span className="meta">{i.objective} · </span>}{i.text}
+                  {i.objective && <span className="meta">{i.objective} · </span>}
+                  {i.text}
                 </blockquote>
               ))}
-            </section>
-            {sel.explanation && (
-              <section className="ai-block">
-                <div className="block-label">
-                  <span className="label-pill ai-pill">AI-written</span>
-                  <span className="meta">Explanation, not code text</span>
-                </div>
-                <p className="ai-explain">{sel.explanation}</p>
-              </section>
-            )}
-          </div>
-        )}
-      </div>
-      <div className="footer-bar">
-        <span className="status-note" role="status">
-          {open.length ? `${open.length} row${open.length > 1 ? "s" : ""} wait for your answer in Code check` : ""}
-        </span>
-        <a className="btn btn-ghost" href="#/code-check">
-          Back
-        </a>
-        <a className="btn btn-primary" href="#/application?tab=alt">
-          Continue to application
-        </a>
-      </div>
-    </>
+              <p className="meta">NBC 2020 Intent Statements are explanatory only, not part of NBC(AE) 2023.</p>
+              {sel.explanation && (
+                <section className="ai-block">
+                  <div className="block-label">
+                    <span className="label-pill ai-pill">AI-written</span>
+                    <span className="meta">Explanation, not code text</span>
+                  </div>
+                  <p className="ai-explain">{sel.explanation}</p>
+                </section>
+              )}
+            </div>
+          </details>
+        </div>
+      )}
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { DetailFields, FactLedger, QuestionChips } from "../case-parts";
-import { GapStrip, Icon, PanelHeader } from "../components";
+import { Icon, PanelHeader } from "../components";
 import { DETAIL_FIELDS, factFor, valueText } from "../model";
 import { useCase } from "../store";
 
@@ -63,7 +63,7 @@ function DropZone() {
             <li key={f.id} className="file-row">
               <Icon name="file" />
               <span className="file-name" title={f.name}>{f.name}</span>
-              <span className="meta file-state">{f.read ? `Read · ${f.pages} pages` : "Waiting for the engine"}</span>
+              <span className="meta file-state">{f.read ? `Read · ${f.pages} pages` : "Listed, not read yet"}</span>
               <button
                 type="button"
                 className="btn btn-ghost btn-icon"
@@ -81,14 +81,14 @@ function DropZone() {
 }
 
 export function Describe() {
-  const { c, gaps, dispatch } = useCase();
+  const { c, dispatch } = useCase();
   const missingDetails = DETAIL_FIELDS.filter((d) => d.required && !valueText(factFor(c, d.id)).trim()).length;
+  const toCheck = c.facts.filter((f) => f.status === "unconfirmed").length;
   return (
     <>
-      <PanelHeader title="Describe your idea" meta={c.title} />
-      <GapStrip gaps={gaps} />
-      <div className="describe">
-        <div className="describe-main pane">
+      <PanelHeader title="Describe" />
+      <div className="pane scroll-body">
+        <div className="column stack-8">
           <div className="field">
             <label htmlFor="description" className="lead-label">
               Describe your idea in a sentence or two
@@ -96,13 +96,15 @@ export function Describe() {
             <textarea
               id="description"
               className="describe-text"
-              rows={5}
+              rows={4}
+              autoComplete="off"
               value={c.description}
               onChange={(e) => dispatch({ type: "setDescription", text: e.target.value })}
               placeholder="What are you building or selling, and what does it do differently?"
             />
           </div>
           <DropZone />
+          <FactLedger />
           <QuestionChips />
           <details className="disclosure">
             <summary>
@@ -117,12 +119,11 @@ export function Describe() {
             <DetailFields section="B" />
           </details>
         </div>
-        <aside className="describe-side pane">
-          <FactLedger />
-        </aside>
       </div>
       <div className="footer-bar">
-        <span className="status-note">Fixture data · the engine connects next</span>
+        <span className="status-note" role="status">
+          Saved in this browser{toCheck ? ` · ${toCheck} fact${toCheck > 1 ? "s" : ""} still need you. You can come back.` : ""}
+        </span>
         <a className="btn btn-primary" href="#/code-check">
           Continue to code check
         </a>

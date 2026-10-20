@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { KindBadge, StatusPill } from "./components";
+import { Icon, KindBadge, StatusPill } from "./components";
 import { DETAIL_FIELDS, PROCESS_FIELDS, displayValue, factFor, factLabel, isTyped, valueText, type DetailField } from "./model";
 import { useCase } from "./store";
 import type { Fact, Question, Source } from "./types";
@@ -21,9 +21,9 @@ function FactRow({ fact }: { fact: Fact }) {
   return (
     <li className="fact" id={`fact-${fact.id}`} tabIndex={-1}>
       <div className="fact-head">
-        <KindBadge kind={fact.kind} />
+        <KindBadge fact={fact} />
         <span className="fact-field">{factLabel(fact.field)}</span>
-        {pending && <StatusPill dot="warning">Needs your check</StatusPill>}
+        {pending && <StatusPill dot="warning">Check</StatusPill>}
       </div>
       <div className={`fact-value ${staleInputs ? "is-stale" : ""}`}>{displayValue(fact)}</div>
       {fact.formula && <div className="mono fact-formula">{fact.formula}</div>}
@@ -42,7 +42,7 @@ function FactRow({ fact }: { fact: Fact }) {
       <div className="fact-source">
         <span className="meta">
           {fact.kind === "computed"
-            ? `Computed from ${(fact.inputs ?? []).map((id) => c.facts.find((f) => f.id === id)).filter(Boolean).map((f) => factLabel(f!.field).toLowerCase()).join(" and ") || "values that changed"}`
+            ? `Worked out from ${(fact.inputs ?? []).map((id) => c.facts.find((f) => f.id === id)).filter(Boolean).map((f) => factLabel(f!.field).toLowerCase()).join(" and ") || "values that changed"}`
             : `From ${sourceLine(fact.source)}`}
         </span>
         {fact.source.quote && <q className="fact-quote">{fact.source.quote}</q>}
@@ -70,19 +70,21 @@ function FactRow({ fact }: { fact: Fact }) {
   );
 }
 
+/** All facts as one collapsed row; the model-checked line stays visible under it. */
 export function FactLedger() {
   const { c } = useCase();
   const pending = c.facts.filter((f) => f.status === "unconfirmed").length;
   return (
-    <section className="ledger" aria-labelledby="ledger-title">
-      <div className="ledger-head">
-        <h2 id="ledger-title" className="section-title">
-          Fact ledger
-        </h2>
+    <details className="disclosure ledger">
+      <summary>
+        <Icon name="chevron" size={12} />
+        <span className="disclosure-title">Facts</span>
         <span className="meta">
-          {c.facts.length} facts{pending ? ` · ${pending} to check` : ""}
+          {c.facts.length}
+          {pending ? ` · ${pending} to check` : c.facts.length ? " · all confirmed" : ""}
         </span>
-      </div>
+        <span className="meta summary-sub">Model-checked from your words. Nothing counts until you confirm.</span>
+      </summary>
       {c.facts.length ? (
         <ul className="plain-list ledger-list">
           {c.facts.map((f) => (
@@ -92,7 +94,7 @@ export function FactLedger() {
       ) : (
         <p className="empty">No facts yet. Describe your idea or drop a file.</p>
       )}
-    </section>
+    </details>
   );
 }
 
@@ -129,7 +131,7 @@ function QuestionChip({ q }: { q: Question }) {
           <label className="sr-only" htmlFor={`qa-${q.id}`}>
             Your answer: {q.text}
           </label>
-          <input id={`qa-${q.id}`} className="input" value={text} onChange={(e) => setText(e.target.value)} placeholder="Your answer" autoFocus />
+          <input id={`qa-${q.id}`} className="input" autoComplete="off" value={text} onChange={(e) => setText(e.target.value)} placeholder="Your answer" autoFocus />
           <button type="submit" className="btn" disabled={!text.trim()}>
             Save answer
           </button>
@@ -147,10 +149,11 @@ export function QuestionChips() {
     <section aria-labelledby="questions-title">
       <div className="ledger-head">
         <h2 id="questions-title" className="section-title">
-          Questions
+          A few questions
         </h2>
         <span className="meta">{open ? `${open} open` : "All answered"}</span>
       </div>
+      <p className="meta questions-note">Not sure? It goes to the officer as an open question.</p>
       <ul className="plain-list chips">
         {qs.map((q) => (
           <QuestionChip key={q.id} q={q} />
@@ -170,12 +173,12 @@ function DetailInput({ def }: { def: DetailField }) {
   return (
     <div className={`field ${def.multiline ? "full" : ""} ${empty ? "is-empty" : ""}`}>
       <div className="field-label-row">
-        {empty && <span className="status-dot blocking" />}
+        {empty && <span className="status-dot pending" />}
         <label htmlFor={id}>{def.label}</label>
         {!def.required && <span className="meta optional">Optional</span>}
       </div>
       {def.options ? (
-        <select id={id} value={value} onChange={(e) => set(e.target.value)} data-empty={!value}>
+        <select id={id} autoComplete="off" value={value} onChange={(e) => set(e.target.value)} data-empty={!value}>
           <option value="">Select…</option>
           {Object.entries(def.options).map(([k, v]) => (
             <option key={k} value={k}>
@@ -184,15 +187,15 @@ function DetailInput({ def }: { def: DetailField }) {
           ))}
         </select>
       ) : def.multiline ? (
-        <textarea id={id} rows={3} value={value} onChange={(e) => set(e.target.value)} />
+        <textarea id={id} rows={3} autoComplete="off" value={value} onChange={(e) => set(e.target.value)} />
       ) : (
-        <input id={id} value={value} onChange={(e) => set(e.target.value)} />
+        <input id={id} autoComplete="off" value={value} onChange={(e) => set(e.target.value)} />
       )}
       <div className="field-foot">
         {fact && !isTyped(fact) ? (
           <span className="field-note">
             <span className={`status-dot ${fact.status === "confirmed" ? "done" : "warning"}`} />
-            {fact.kind === "proposed" ? "Proposed from" : "From"} {sourceLine(fact.source)}
+            {fact.kind === "proposed" ? "Our guess, from" : "From"} {sourceLine(fact.source)}
             {fact.source.quote && <q className="field-quote">{fact.source.quote}</q>}
             {fact.status === "unconfirmed" && (
               <button type="button" className="btn btn-ghost btn-xs" aria-label={`Confirm ${def.label}`} onClick={() => dispatch({ type: "confirmFact", id: fact.id })}>
@@ -202,10 +205,6 @@ function DetailInput({ def }: { def: DetailField }) {
           </span>
         ) : fact ? (
           <span className="field-note">Typed by you</span>
-        ) : def.id === "alternative" && c.description.trim() ? (
-          <button type="button" className="btn btn-ghost btn-xs" onClick={() => set(c.description.trim())}>
-            Start from my description
-          </button>
         ) : (
           def.hint && <span className="field-note">{def.hint}</span>
         )}
@@ -237,9 +236,8 @@ export function ProcessFields() {
         return (
           <div key={p.id} className={`field full ${empty ? "is-empty" : ""}`}>
             <div className="field-label-row">
-              {empty && <span className="status-dot blocking" />}
+              {empty && <span className="status-dot pending" />}
               <label htmlFor={id}>{p.label}</label>
-              <span className="meta optional">Required</span>
             </div>
             <ul className="plain-list prompts" id={`${id}-prompts`}>
               {p.prompts.map((t) => (
@@ -249,6 +247,7 @@ export function ProcessFields() {
             <textarea
               id={id}
               rows={4}
+              autoComplete="off"
               aria-describedby={`${id}-prompts`}
               value={c.process[p.id]}
               onChange={(e) => dispatch({ type: "setProcess", field: p.id, value: e.target.value })}

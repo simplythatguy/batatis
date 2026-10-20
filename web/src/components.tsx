@@ -1,33 +1,8 @@
-import type { ReactNode } from "react";
-import type { FactKind, Gap } from "./types";
+import { useRef, type ReactNode } from "react";
+import { useCase } from "./store";
+import type { Fact, Gap } from "./types";
 
 const ICONS: Record<string, ReactNode> = {
-  describe: <path d="M3 4h10M3 8h10M3 12h6" />,
-  application: (
-    <>
-      <rect x="3" y="2.5" width="10" height="11" rx="1.5" />
-      <path d="M5.5 6h5M5.5 9h5M5.5 12h3" />
-    </>
-  ),
-  check: (
-    <>
-      <circle cx="8" cy="8" r="5.5" />
-      <path d="m5.75 8 1.6 1.6 2.9-3.2" />
-    </>
-  ),
-  table: (
-    <>
-      <rect x="2.5" y="3" width="11" height="10" rx="1.5" />
-      <path d="M2.5 6.5h11M6.5 6.5V13" />
-    </>
-  ),
-  officer: (
-    <>
-      <circle cx="8" cy="5.5" r="2.5" />
-      <path d="M3.5 13.5c.6-2.4 2.4-3.5 4.5-3.5s3.9 1.1 4.5 3.5" />
-    </>
-  ),
-  accuracy: <path d="M3 13V8M6.5 13V5M10 13V9.5M13.5 13V3" />,
   file: (
     <>
       <path d="M4 2.5h5l3 3v8H4z" />
@@ -68,68 +43,109 @@ export function StatusPill({ dot, children }: { dot: Dot; children: ReactNode })
   );
 }
 
-const KIND_LABEL: Record<FactKind, string> = { exact: "Exact", pointed: "Pointed", computed: "Computed", proposed: "Proposed" };
-const KIND_HELP: Record<FactKind, string> = {
-  exact: "Exact: taken from the code database or the form",
-  pointed: "Pointed: a span selected from your words or files, never generated",
-  computed: "Computed: a formula over exact and pointed values",
-  proposed: "Proposed: AI judgement; needs your confirmation",
+/** Plain-word fact kinds. A pointed span says where it came from: a file or the applicant's words. */
+function kindLabel(f: Fact): string {
+  if (f.kind === "pointed") return f.source.type === "file" ? "From your file" : "From your words";
+  return { exact: "Exact", computed: "Worked out", proposed: "Our guess · check it" }[f.kind];
+}
+
+const KIND_HELP: Record<Fact["kind"], string> = {
+  exact: "Taken from the code database or the form",
+  pointed: "Copied from your words or files, never generated",
+  computed: "Worked out by a formula from other facts",
+  proposed: "An AI guess. It counts only after you confirm it",
 };
 
-export function KindBadge({ kind }: { kind: FactKind }) {
+export function KindBadge({ fact }: { fact: Fact }) {
   return (
-    <span className={`kind-badge kind-${kind}`} title={KIND_HELP[kind]}>
-      {KIND_LABEL[kind]}
+    <span className={`kind-badge kind-${fact.kind}`} title={KIND_HELP[fact.kind]}>
+      {kindLabel(fact)}
     </span>
   );
 }
 
-export function GapStrip({ gaps }: { gaps: Gap[] }) {
-  if (!gaps.length) {
-    return (
-      <div className="gap-summary gap-panel" aria-label="Administrative gaps">
-        <span className="gap-chip">
-          <span className="status-dot done" />
-          No open gaps
-        </span>
-      </div>
-    );
-  }
-  const blocking = gaps.filter((g) => g.severity === "blocking").length;
+/**
+ * Citation line in the spec's order: edition · printing · division and provision · PDF page.
+ * Built from the code database's citation string; anything that does not parse is shown verbatim.
+ */
+export function Citation({ text }: { text: string }) {
+  const m = /^NBC\(AE\) 2023 p2, Div ([ABC]), (?:\w+ )?(\S+) \[PDF p\.(\d+)\]$/.exec(text.trim());
+  if (!m) return <p className="cite-line">{text}</p>;
   return (
-    <details className="gap-panel">
-      <summary className="gap-summary">
-        <span className="gap-chip">
-          <span className="status-dot blocking" />
-          {blocking} blocking
-        </span>
-        <span className="gap-chip">
-          <span className="status-dot warning" />
-          {gaps.length - blocking} warning
-        </span>
-        <span className="meta gap-toggle">
-          Review gaps <Icon name="chevron" size={12} />
-        </span>
-      </summary>
-      <ul className="plain-list gap-grid" aria-label="Administrative gaps">
-        {gaps.map((g) => (
-          <li key={g.id}>
-            <a className="gap-chip" href={g.href}>
-              <span className={`status-dot ${g.severity}`} />
-              {g.label}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </details>
+    <p className="cite-line" title={text}>
+      NBC(AE) 2023 · 2nd printing · Div {m[1]} <span className="article-id">{m[2]}</span> · PDF p.{m[3]}
+    </p>
+  );
+}
+
+/** Header control: "● N to fix" opens the one gap list. Warnings live only in the drawer. */
+function GapControl({ gaps }: { gaps: Gap[] }) {
+  const drawer = useRef<HTMLDialogElement>(null);
+  const blocking = gaps.filter((g) => g.severity === "blocking");
+  const notes = gaps.filter((g) => g.severity === "warning");
+  const label = blocking.length ? `${blocking.length} to fix` : "Nothing to fix";
+  const group = (title: string, list: Gap[]) =>
+    list.length > 0 && (
+      <section className="drawer-group" aria-label={title}>
+        <h3 className="drawer-group-title">
+          {title} · {list.length}
+        </h3>
+        <ul className="plain-list">
+          {list.map((g) => (
+            <li key={g.id}>
+              <a className="drawer-row" href={g.href} onClick={() => drawer.current?.close()}>
+                <span className={`status-dot ${g.severity}`} />
+                {g.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    );
+  return (
+    <>
+      <button
+        type="button"
+        className="btn btn-ghost gap-control"
+        aria-haspopup="dialog"
+        onClick={() => drawer.current?.showModal()}
+      >
+        <span className={`status-dot ${blocking.length ? "blocking" : "done"}`} />
+        {label}
+        {notes.length > 0 && <span className="tab-count">· {notes.length} note{notes.length > 1 ? "s" : ""}</span>}
+      </button>
+      <dialog
+        className="drawer"
+        ref={drawer}
+        aria-labelledby="drawer-title"
+        onClick={(e) => e.target === e.currentTarget && drawer.current?.close()}
+      >
+        <div className="drawer-head">
+          <h2 className="dialog-title" id="drawer-title">
+            {label}
+          </h2>
+          <button type="button" className="btn btn-ghost btn-icon" aria-label="Close" onClick={() => drawer.current?.close()}>
+            <Icon name="close" size={12} />
+          </button>
+        </div>
+        <div className="drawer-body">
+          <p className="meta">Checks that information is present. Not a finding that the design complies.</p>
+          {group("To fix", blocking)}
+          {group("Notes", notes)}
+          {!gaps.length && <p className="empty">Nothing is missing right now.</p>}
+        </div>
+      </dialog>
+    </>
   );
 }
 
 export function PanelHeader({ title, meta }: { title: string; meta?: ReactNode }) {
+  const { gaps } = useCase();
   return (
     <header className="panel-header">
       <h1 className="panel-title">{title}</h1>
       {meta && <span className="meta header-meta">{meta}</span>}
+      <GapControl gaps={gaps} />
     </header>
   );
 }

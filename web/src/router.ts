@@ -21,7 +21,8 @@ export function useRoute(): Route {
   return route;
 }
 
-/** After navigation, move focus to `?focus=<element id>` so gap links land on the fix. */
+/** After navigation, move focus to `?focus=<element id>` so gap links land on the fix.
+ *  Collapsed rows (`<details>`) around the target open first. */
 export function useFocusParam(route: Route) {
   const target = route.params.get("focus");
   useEffect(() => {
@@ -29,6 +30,7 @@ export function useFocusParam(route: Route) {
     const t = window.setTimeout(() => {
       const el = document.getElementById(target);
       if (!el) return;
+      for (let d = el.parentElement?.closest("details"); d; d = d.parentElement?.closest("details")) d.open = true;
       el.scrollIntoView({ block: "center" });
       el.focus({ preventScroll: true });
     }, 0);
