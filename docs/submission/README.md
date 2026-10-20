@@ -50,7 +50,7 @@ These are the deliverables we expect the package to need. Discord has not been c
 | Pilot plan | Pull request [#18](https://github.com/simplythatguy/batatis/pull/18), not clear to merge (Karen and Backy approved `1d8f67b`; Unc still has changes): [`docs/pilot-adoption-plan.md`](https://github.com/simplythatguy/batatis/blob/docs/plans-draft/docs/pilot-adoption-plan.md) on branch `docs/plans-draft`. It is not on `dev`. |
 | Brief §2.1.b.ii | Covered only in draft pull request [#12](https://github.com/simplythatguy/batatis/pull/12). The brief asks the solution to recommend the most likely benchmark or accepted solution, with an explanation. On that branch, `engine/identify/pipeline.py` `_benchmark` returns role `benchmark_acceptable_solution`. It is not on `dev`. |
 | Brief §2.1.c.iii | Covered only in draft pull request [#12](https://github.com/simplythatguy/batatis/pull/12). The brief asks for an explainer paragraph for each article included, and why. On that branch, `engine/section_c.py` `_explainer` builds that paragraph. It is not on `dev`. |
-| Working link | `GAP:` hosting plan in progress. No deployed URL is in the repo. On `dev`, `web/src/api/client.ts` proxies `/api` to `http://127.0.0.1:8000`. [`2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) says "Demo runs locally" and "A skeleton deploys on day 3". Pull request [#16](https://github.com/simplythatguy/batatis/pull/16) is **BLOCKED**. It records a production preview against `http://127.0.0.1:8000`. |
+| Working link | `GAP:` no deployed URL is in the repo. deploy PR #24 in review ([#24](https://github.com/simplythatguy/batatis/pull/24)). On `dev`, `web/src/api/client.ts` proxies `/api` to `http://127.0.0.1:8000`. [`2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) says "Demo runs locally" and "A skeleton deploys on day 3". |
 | Repo | Present: [https://github.com/simplythatguy/batatis](https://github.com/simplythatguy/batatis). This checklist's tree is `dev` at `914b8ec`, plus the open pull requests named below. Pull request [#7](https://github.com/simplythatguy/batatis/pull/7) is inside that pin (`bbdd051`). Pull request [#8](https://github.com/simplythatguy/batatis/pull/8) is inside that pin (`69fb4ff`). Pull request [#14](https://github.com/simplythatguy/batatis/pull/14) is that pin. The root [`README.md`](../../README.md) status line still says application product code is not the focus of that document. `engine/` and `web/` are already on `dev`. |
 
 ## Risks
@@ -71,7 +71,7 @@ Scoring question, from `docs/judging-rubric.md`: "Does the tool capture the info
 - Fixture review: [`evals_dev/REVIEW.md`](../../evals_dev/REVIEW.md). The file's own status line is **model-checked** development fixtures; not human reviewed. Counts written there: 60 cases; intake actions `ask` 18, `proceed_conditionally` 38, `redirect` 4; applicant types architect-engineer 14, contractor 13, homebuilder 8, manufacturer 14, owner 11. The same file says human/professional review completed for zero cases in that task, and that no held-out accuracy is claimed. Those counts are model-checked. They are not human-verified.
 - Web intake chrome on `dev`: [`web/src/screens/Describe.tsx`](../../web/src/screens/Describe.tsx), confidence text for proposed facts in [`web/src/case-parts.tsx`](../../web/src/case-parts.tsx), and a "Not sure" answer in [`web/src/screens/CodeCheck.tsx`](../../web/src/screens/CodeCheck.tsx).
 - A new visit loads a filled example. [`web/src/store.tsx`](../../web/src/store.tsx) session key `batatis-web-case-v2` falls through to [`web/src/fixture.ts`](../../web/src/fixture.ts). The screens do not call the engine's case or fact routes. The typed client does define `createCase` and `addFact` ([`web/src/api/client.ts`](../../web/src/api/client.ts)), and [`web/scripts/smoke-api.ts`](../../web/scripts/smoke-api.ts) calls them against a running engine. No result of that script is recorded in the repo. The routes themselves are in [`engine/api.py`](../../engine/api.py).
-- Demo cases, merged in pull request [#14](https://github.com/simplythatguy/batatis/pull/14) at `914b8ec`: [`evals/demo-cases/`](../../evals/demo-cases/). [`evals/demo-cases/README.md`](../../evals/demo-cases/README.md) says no loader reads that folder. It says the cases were checked against the NBC(AE) 2023 1st printing, and that all 102 cited provisions are present in the 2nd-printing code database (pages p.322, p.323, p.1126, and p.1201 confirmed). People and products are fictional. Files that would be uploaded are each case's `input/` and the `tester-samples/` bundles `01`–`03`. Answer keys are under `keys/<case>/` (`presenter/known-gaps.md` and `expected/`) and `keys/tester-samples/03-sco-bundle-TESTER-KEY.md`.
+- Demo cases, merged in pull request [#14](https://github.com/simplythatguy/batatis/pull/14) at `914b8ec`: [`evals/demo-cases/`](../../evals/demo-cases/). [`evals/demo-cases/README.md`](../../evals/demo-cases/README.md) says no loader reads that folder. It says the cases were checked against the NBC(AE) 2023 1st printing. Only 4 provisions were spot-checked against the 2nd printing (pages p.322, p.323, p.1126, and p.1201). People and products are fictional. Files that would be uploaded are each case's `input/` and the `tester-samples/` bundles `01`–`03`. Answer keys are under `keys/<case>/` (`presenter/known-gaps.md` and `expected/`) and `keys/tester-samples/03-sco-bundle-TESTER-KEY.md`.
 
 ### Open pull requests
 
@@ -119,7 +119,7 @@ Scoring question, from `docs/judging-rubric.md`: "Does it identify the specific 
 
 ### Open pull requests
 
-- [#9](https://github.com/simplythatguy/batatis/pull/9) (human-key harness, not merged). The body says the branch is rebased onto #8 because, when that body was written, `dev` did not contain the Section D practice screen. #8 has since merged at `69fb4ff`, so that screen is on `dev`. #9 itself is not merged. Numbers below are copied from the pull-request body. The body marks `label_strength: weak; editions pre-2023`. They are not human-verified.
+- [#9](https://github.com/simplythatguy/batatis/pull/9) (human-key harness, not merged). The branch is up to date by merge with `dev`, which includes the Section D screen from #8 at `69fb4ff`. #9 itself is not merged. Numbers below are copied from the pull-request body. The body marks `label_strength: weak; editions pre-2023`. They are not human-verified.
   - `rules_only`, `rules_plus_unknown`, and `always_unknown`: each `7/12 [0.3195, 0.8067]`.
   - `unknown: 12` on each variant. `confident_wrong: none`.
   - The body says stored facts do not establish a yes or a no, so every variant abstains; the 7 matches are the weak `depends` labels; the 5 weak `yes` labels land in the unknown column.
@@ -150,7 +150,7 @@ Scoring question, from `docs/judging-rubric.md`: "Can it review a completed appl
   - The body says variant A still misses generic risk (D09 1/2), unrelated mitigations (D10 1/2), contradictions (D14 0/2), and relevance (D15 0/2), and that D05 and D07 are absent from that table because they need the code database.
   - Pytest written in the body, without a code database: 12 passed across `test_bulletin_gates.py`, `test_portal_package.py`, `test_jurisdiction_wording.py`, and `test_schema_export.py`.
   - The body says the draft is not ready to merge.
-- [#16](https://github.com/simplythatguy/batatis/pull/16) (**BLOCKED**). The body says "Check completeness" stays disabled until blocking gaps close, then calls `POST /cases/{id}/export` (per PR description; not confirmed hands-on). It also says `GET /gaps` returned 503 when `BATATIS_CODEDB` was missing.
+- [#16](https://github.com/simplythatguy/batatis/pull/16) (**BLOCKED**). In #16 the "Download draft record" button saves a .txt draft record only after every gap is closed, and it does not fill in the SCC form. The body also says `GET /gaps` returned 503 when `BATATIS_CODEDB` was missing.
 
 ### GAP
 
@@ -221,7 +221,7 @@ Scoring question, from `docs/judging-rubric.md`: "Overall user experience for bo
 
 ### Open pull requests
 
-- [#16](https://github.com/simplythatguy/batatis/pull/16) (**BLOCKED**). The body says the product surface moves to `web/`, that export is called after blocking gaps close (per PR description; not confirmed hands-on), and that the official PDF still needs the code database and `BATATIS_SCC_FORM` on the machine that runs the engine. Screenshots in that body are of a local preview.
+- [#16](https://github.com/simplythatguy/batatis/pull/16) (**BLOCKED**). The body says the product surface moves to `web/`. In #16 the "Download draft record" button saves a .txt draft record only after every gap is closed, and it does not fill in the SCC form. Screenshots in that body are of a local preview.
 - [#11](https://github.com/simplythatguy/batatis/pull/11). The body says wire fields on `Jurisdiction` stay `id`, `name`, and `authority`, and that "authority having jurisdiction" wording follows IB-2026-10-16. That wording change is not on `dev`.
 
 ### GAP
@@ -248,7 +248,7 @@ Scoring question, from `docs/judging-rubric.md`: "Hard-to-quantify edge — team
 Nothing below is a result. It is the list of `GAP:` lines that still have no file.
 
 1. Submission demo video. The demo script is pull request #20, which is **BLOCKED**.
-2. A working link. Hosting plan in progress. Local preview only.
+2. A working link. Deploy PR #24 is in review. No deployed URL is in the repo.
 3. Identification figures on `dev`. Draft pull request #12 records top-1 9/11 and recall@5 9/11, model-checked, in-sample, single run, not human-verified. Those figures are not on `dev`.
 4. Human-verified intake, code-identification, and professional-flag scores. What exists is model-checked, or marked weak, or a research measurement with the limits written in its own file.
 5. An officer view with a time measurement. The screen on `dev` is a placeholder.
