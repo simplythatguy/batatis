@@ -11,10 +11,10 @@
  */
 import { spawn } from "node:child_process";
 import { createServer } from "node:net";
-import { mkdirSync, writeFileSync, existsSync, readFileSync, readdirSync, rmSync, mkdtempSync } from "node:fs";
+import { copyFileSync, mkdirSync, writeFileSync, existsSync, readFileSync, readdirSync, rmSync, mkdtempSync } from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
-import { basename, dirname, join, resolve } from "node:path";
+import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright-core";
 import { STEPS, runDeckStills, runWalkthrough } from "./steps.mjs";
@@ -252,6 +252,38 @@ async function engineUp() {
   }
 }
 
+function loggedWebDir(absPath) {
+  const rel = relative(repoRoot, absPath || "");
+  if (rel && !rel.startsWith("..") && !isAbsolute(rel)) return rel.split("\\").join("/");
+  return "web";
+}
+
+async function ensureCodeDb(engineRoot) {
+  const db = join(engineRoot, "codedb/build/codedb.sqlite");
+  if (existsSync(db)) return "The code database is already built.";
+  const local = join(repoRoot, "codedb/build/codedb.sqlite");
+  if (existsSync(local) && resolve(local) !== resolve(db)) {
+    mkdirSync(dirname(db), { recursive: true });
+    copyFileSync(local, db);
+    return "Copied the code database into the recorded checkout.";
+  }
+  const pdf = join(engineRoot, "reference/codes/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.pdf");
+  const text = join(engineRoot, "reference/text/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.jsonl");
+  if (!existsSync(pdf) || !existsSync(text)) {
+    return "The NBC source PDF and page text are not in this checkout, so the code database was not built.";
+  }
+  console.log("Building the code database from the checkout's NBC sources.");
+  try {
+    await run("python3", ["-m", "codedb", "build"], { cwd: engineRoot });
+  } catch (error) {
+    const line = (error instanceof Error ? error.message : String(error)).split("\n")[0];
+    return `The code database build failed: ${line}`;
+  }
+  return existsSync(db)
+    ? "Built the code database from the checkout's NBC sources."
+    : "The code database build did not write codedb/build/codedb.sqlite.";
+}
+
 async function ensureEnginePython(engineRoot) {
   try {
     await run("python3", ["-c", "import uvicorn, fastapi"], { cwd: engineRoot });
@@ -295,49 +327,60 @@ async function startEngine(engineRoot) {
   throw new Error(`The engine did not answer on 127.0.0.1:8000.\n${log.slice(-2000)}`);
 }
 
+async function probeCodeSearch() {
+  try {
+    const res = await fetch("http://127.0.0.1:8000/code/search?q=window&limit=1", { signal: AbortSignal.timeout(2000) });
+    return res.status;
+  } catch {
+    return 0;
+  }
+}
+
+function engineNote(state, codedbNote, searchStatus) {
+  const search =
+    searchStatus === 200
+      ? "Code search answered."
+      : searchStatus
+        ? `Code search returned ${searchStatus}.`
+        : "Code search did not answer.";
+  const how =
+    state === "reused"
+      ? "Reused the engine already listening on 127.0.0.1:8000."
+      : "Started uvicorn engine.api:app on 127.0.0.1:8000 from the recorded checkout.";
+  return `${how} Browser requests to /api are proxied to it. ${codedbNote} ${search} The recorder did not call a model API. No PDF is uploaded.`;
+}
+
 async function prepareEngine(args, engineRoot) {
   if (args.offline) {
     return {
       networkMode: "offline",
       engineState: "offline",
       child: null,
+      searchStatus: 0,
       note: "Offline mode (--offline). The recorder did not start an engine. Browser requests to /api and port 8000 are aborted. No PDF is uploaded.",
     };
   }
+  const codedbNote = await ensureCodeDb(engineRoot);
   if (await engineUp()) {
+    const searchStatus = await probeCodeSearch();
     return {
       networkMode: "engine",
       engineState: "reused",
       child: null,
-      note: await engineNote("reused"),
+      searchStatus,
+      note: engineNote("reused", codedbNote, searchStatus),
     };
   }
   console.log(`Starting the engine from ${engineRoot}`);
   const child = await startEngine(engineRoot);
+  const searchStatus = await probeCodeSearch();
   return {
     networkMode: "engine",
     engineState: "started",
     child,
-    note: await engineNote("started"),
+    searchStatus,
+    note: engineNote("started", codedbNote, searchStatus),
   };
-}
-
-async function engineNote(state) {
-  let search = "Code search was not probed.";
-  try {
-    const res = await fetch("http://127.0.0.1:8000/code/search?q=window&limit=1", { signal: AbortSignal.timeout(2000) });
-    search =
-      res.status === 200
-        ? "Code search answered."
-        : `Code search returned ${res.status}.`;
-  } catch {
-    search = "Code search did not answer.";
-  }
-  const how =
-    state === "reused"
-      ? "Reused the engine already listening on 127.0.0.1:8000."
-      : "Started uvicorn engine.api:app on 127.0.0.1:8000 from the recorded checkout.";
-  return `${how} Browser requests to /api are proxied to it. ${search} The recorder did not call a model API. No PDF is uploaded.`;
 }
 
 async function gitIdentity(cwd) {
@@ -369,7 +412,11 @@ async function blockTraffic(page, { offline }) {
   });
 }
 
-const SCRIPT_SPEC = "origin/cursor/demo-video-script-1e38:docs/demo/script.md";
+const SCRIPT_SOURCES = [
+  "docs/demo/script.md",
+  "origin/dev:docs/demo/script.md",
+  "origin/cursor/demo-video-script-1e38:docs/demo/script.md",
+];
 
 function reportScript(markdown, source) {
   const diff = diffScript(STEPS, markdown);
@@ -384,6 +431,19 @@ function reportScript(markdown, source) {
   };
 }
 
+async function showGitScript(spec) {
+  const ref = spec.slice(0, spec.indexOf(":"));
+  const remoteRef = ref.startsWith("origin/") ? ref.slice("origin/".length) : ref;
+  try {
+    await run("git", ["fetch", "--quiet", "origin", remoteRef], { cwd: repoRoot });
+  } catch (error) {
+    const line = (error instanceof Error ? error.message : String(error)).split("\n")[0];
+    console.log(`Could not refresh ${remoteRef} (${line}). Reading ${spec}.`);
+  }
+  const { stdout } = await run("git", ["show", spec], { cwd: repoRoot });
+  return stdout;
+}
+
 async function loadScript(args) {
   if (args.script) {
     const path = resolve(args.script);
@@ -392,29 +452,28 @@ async function loadScript(args) {
         status: "missing",
         source: args.script,
         problems: [`Script file not found: ${path}`],
-        note: `Script file not found: ${args.script}. Leave --script unset to read #20, or pass a shot list.`,
+        note: `Script file not found: ${args.script}. Leave --script unset to read the working tree, origin/dev, then #20.`,
       };
     }
     return reportScript(readFileSync(path, "utf8"), args.script);
   }
-  try {
-    await run("git", ["fetch", "--quiet", "origin", "cursor/demo-video-script-1e38"], { cwd: repoRoot });
-  } catch (error) {
-    const line = (error instanceof Error ? error.message : String(error)).split("\n")[0];
-    console.log(`Could not refresh cursor/demo-video-script-1e38 (${line}). Reading ${SCRIPT_SPEC}.`);
+  const local = join(repoRoot, SCRIPT_SOURCES[0]);
+  if (existsSync(local)) return reportScript(readFileSync(local, "utf8"), SCRIPT_SOURCES[0]);
+  const problems = [];
+  for (const spec of SCRIPT_SOURCES.slice(1)) {
+    try {
+      return reportScript(await showGitScript(spec), spec);
+    } catch (error) {
+      const line = (error instanceof Error ? error.message : String(error)).split("\n")[0];
+      problems.push(`Could not read ${spec}. ${line}`);
+    }
   }
-  try {
-    const { stdout } = await run("git", ["show", SCRIPT_SPEC], { cwd: repoRoot });
-    return reportScript(stdout, SCRIPT_SPEC);
-  } catch (error) {
-    const line = (error instanceof Error ? error.message : String(error)).split("\n")[0];
-    return {
-      status: "missing",
-      source: SCRIPT_SPEC,
-      problems: [`Could not read ${SCRIPT_SPEC}. ${line}`],
-      note: `Could not read the demo script from #20 (${SCRIPT_SPEC}).`,
-    };
-  }
+  return {
+    status: "missing",
+    source: SCRIPT_SOURCES.join(", "),
+    problems,
+    note: "Could not read docs/demo/script.md from the working tree, origin/dev, or #20.",
+  };
 }
 
 function printStills(results) {
@@ -545,6 +604,7 @@ async function captureDeckStills({ args, outDir, base, webDir, gitInfo, engineSe
         sourceBranch,
         sourceSha: gitInfo.sha,
         recordedAt,
+        engineSearchStatus: engineSession.searchStatus,
       });
       const log = {
         recordedAt,
@@ -552,7 +612,7 @@ async function captureDeckStills({ args, outDir, base, webDir, gitInfo, engineSe
         networkMode: engineSession.networkMode,
         engineState: engineSession.engineState,
         viewport: { width: 1440, height: 900 },
-        webDir,
+        webDir: loggedWebDir(webDir),
         git: { ...gitInfo, requestedBranch: args.branch },
         baseUrl: base,
         engine: engineSession.note,
@@ -683,7 +743,7 @@ async function main() {
         rmSync(videoDir, { recursive: true, force: true });
         const log = {
           recordedAt: new Date().toISOString(),
-          webDir,
+          webDir: loggedWebDir(webDir),
           git: { ...gitInfo, requestedBranch: args.branch },
           baseUrl: base,
           networkMode: engineSession.networkMode,

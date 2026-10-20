@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { diffScript, parseDemoScript } from "./sync.mjs";
 import { DECK_STILLS, STEPS } from "./steps.mjs";
@@ -98,6 +98,10 @@ test("shot 4 and shot 5 skip when their subject is not on screen", () => {
   const stills = source.slice(source.indexOf("export async function runDeckStills"));
   assert.match(stills, /status: "pending"/);
   assert.match(stills, /provenance:/);
+  assert.match(stills, /engineSearchStatus !== 503/);
+  assert.match(stills, /LIMIT_LINE/);
+  assert.match(source, /The footer reads "Online review unavailable"/);
+  assert.equal(source.includes("SECTION_D_STILL_LINE"), false);
   assert.equal(stills.includes('status: "skipped"'), false);
 });
 
@@ -109,7 +113,13 @@ test("the recorder uses the engine unless --offline is set", () => {
   assert.match(source, /engineState: engineSession\.engineState/);
   assert.equal(source.includes("blockEngineAndModels"), false);
   assert.equal(source.includes("Recording anyway"), false);
-  assert.match(source, /origin\/cursor\/demo-video-script-1e38:docs\/demo\/script\.md/);
+  const sources = source.slice(source.indexOf("const SCRIPT_SOURCES"), source.indexOf("];", source.indexOf("const SCRIPT_SOURCES")));
+  const worktree = sources.indexOf('"docs/demo/script.md"');
+  const dev = sources.indexOf('"origin/dev:docs/demo/script.md"');
+  const branch = sources.indexOf('"origin/cursor/demo-video-script-1e38:docs/demo/script.md"');
+  assert.ok(worktree >= 0 && worktree < dev && dev < branch);
+  assert.match(source, /loggedWebDir/);
+  assert.match(source, /ensureCodeDb/);
   assert.match(source, /sync\.status !== "ok"/);
   assert.match(source, /--allow-drift/);
   assert.match(source, /allowDrift/);
@@ -174,14 +184,17 @@ test("diff accepts the recorder against the 7-shot list", () => {
   assert.deepEqual(diff.problems, []);
 });
 
-test("this branch does not carry docs/demo/script.md", () => {
-  assert.equal(existsSync(new URL("../../docs/demo/script.md", import.meta.url)), false);
-});
-
-test("diff accepts the recorder against #20's script", () => {
-  const markdown = execFileSync("git", ["show", "origin/cursor/demo-video-script-1e38:docs/demo/script.md"], {
-    encoding: "utf8",
-  });
+test("diff accepts the recorder against #20's script when that ref is present", (t) => {
+  let markdown = "";
+  try {
+    markdown = execFileSync("git", ["show", "origin/cursor/demo-video-script-1e38:docs/demo/script.md"], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+  } catch {
+    t.skip("origin/cursor/demo-video-script-1e38 is not available");
+    return;
+  }
   const diff = diffScript(STEPS, markdown);
   assert.equal(diff.shots.length, 7);
   assert.deepEqual(diff.problems, []);

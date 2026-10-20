@@ -47,7 +47,7 @@ const OFFICER_INTRO =
 const OFFICER_HEADINGS = ["Documents", "Open Not sure", "Professional", "Grouped completeness report", "Information request"];
 const LIMIT_LINE =
   "Recommendations only. You write the evidence and the answers. This does not decide that the design complies or is safe.";
-const SECTION_D_STILL_LINE = "This tool does not write the evidence or the professional opinion.";
+const ENGINE_DOWN_STILLS = new Set(["shot-s02-describe", "shot-s03-not-sure", "shot-s06-section-d"]);
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -978,6 +978,12 @@ async function saveStill(page, api, lower, filePath) {
   if (chrome.subtitle) api.notes.push(`Header subtitle visible: ${chrome.subtitle}`);
   if (chrome.footer) api.notes.push(`Footer visible: ${chrome.footer}`);
   if (chrome.disclaimer) api.notes.push(`Compliance disclaimer visible: ${chrome.disclaimer}`);
+  if ((chrome.footer || "").includes("Online review unavailable")) {
+    return {
+      ok: false,
+      reason: 'The footer reads "Online review unavailable". The still was not captured.',
+    };
+  }
   await sleep(300);
   const buffer = await page.screenshot({ type: "png" });
   const size = pngSize(buffer);
@@ -1049,6 +1055,11 @@ export async function runDeckStills(page, opts) {
     return finish(id, { status: "pending", reason, notes });
   }
 
+  function engineDown(id) {
+    if (opts.engineSearchStatus !== 503 || !ENGINE_DOWN_STILLS.has(id)) return "";
+    return "Code search returned 503. The still was not captured.";
+  }
+
   try {
     await goHash(page, "/");
     const who = h1(page, "Who are you?");
@@ -1085,7 +1096,9 @@ export async function runDeckStills(page, opts) {
         } else {
           const summary = page.locator("summary").filter({ hasText: "Review gaps" }).first();
           if (await visible(summary, 500)) await summary.scrollIntoViewIfNeeded().catch(() => {});
-          await capture("shot-s02-describe", CASES.C.lower, "Case C");
+          const down = engineDown("shot-s02-describe");
+          if (down) skip("shot-s02-describe", down);
+          else await capture("shot-s02-describe", CASES.C.lower, "Case C");
         }
       }
     }
@@ -1093,7 +1106,9 @@ export async function runDeckStills(page, opts) {
     if (!api.state.caseC) {
       skip("shot-s04-search", "Case C is not open, so the bedroom-window search was not run.");
     } else {
-      if (!(await visible(h1(page, "Code check"), 400)) && !(await goCodeCheck(page))) {
+      if (opts.engineSearchStatus === 503) {
+        skip("shot-s04-search", "Code search returned 503. No article id was typed in, and the Section C lookup was not drawn.");
+      } else if (!(await visible(h1(page, "Code check"), 400)) && !(await goCodeCheck(page))) {
         skip("shot-s04-search", "Code check is not on this build.");
       } else {
         await answerNotSure(page, api);
@@ -1136,23 +1151,22 @@ export async function runDeckStills(page, opts) {
       if (!(await visible(heading, 5000))) {
         skip("shot-s06-section-d", "Section D and professional screening is not on this build.");
       } else {
-        const wanted = page.getByText(SECTION_D_STILL_LINE, { exact: true }).first();
-        let onScreen = "";
-        if (await visible(wanted, 800)) {
-          await wanted.scrollIntoViewIfNeeded().catch(() => {});
-          onScreen = SECTION_D_STILL_LINE;
-          api.notes.push("The on-screen limit line is visible.");
-        } else {
-          const headingText = (await heading.innerText()).replace(/\s+/g, " ").trim();
-          const meta = page.locator("#reco-title").locator("xpath=following::p[contains(@class,'meta')][1]");
-          const metaText = (await visible(meta, 500)) ? (await meta.innerText()).replace(/\s+/g, " ").trim() : "";
-          onScreen = [headingText, metaText].filter(Boolean).join(" ");
-          api.notes.push(
-            `The sentence "${SECTION_D_STILL_LINE}" is not on this screen. It was not added. Visible text: ${onScreen}`,
+        const limit = page.getByText(LIMIT_LINE).first();
+        const down = engineDown("shot-s06-section-d");
+        if (!(await visible(limit, 1500))) {
+          skip(
+            "shot-s06-section-d",
+            down
+              ? `${down} The limit line "${LIMIT_LINE}" is not on screen. It was not invented.`
+              : `The limit line "${LIMIT_LINE}" is not on screen. The still was not captured, and the line was not invented.`,
           );
-          await heading.scrollIntoViewIfNeeded().catch(() => {});
+        } else if (down) {
+          skip("shot-s06-section-d", down);
+        } else {
+          await limit.scrollIntoViewIfNeeded().catch(() => {});
+          api.notes.push("The on-screen limit line is visible.");
+          await capture("shot-s06-section-d", CASES.C.lower, "Case C", LIMIT_LINE);
         }
-        await capture("shot-s06-section-d", CASES.C.lower, "Case C", onScreen);
       }
     }
 
@@ -1205,7 +1219,9 @@ export async function runDeckStills(page, opts) {
             );
           } else {
             await cards.first().scrollIntoViewIfNeeded().catch(() => {});
-            await capture("shot-s03-not-sure", CASES.A.lower, "Case A");
+            const down = engineDown("shot-s03-not-sure");
+            if (down) skip("shot-s03-not-sure", down);
+            else await capture("shot-s03-not-sure", CASES.A.lower, "Case A");
           }
         }
       }

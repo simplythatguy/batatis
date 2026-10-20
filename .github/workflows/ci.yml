@@ -27,6 +27,8 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: web/package-lock.json
+      - name: Demo recorder checks
+        run: node --test scripts/demo-record/sync.test.mjs
       - name: Install, typecheck, and production build
         working-directory: web
         run: |
