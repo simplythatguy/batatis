@@ -1,0 +1,478 @@
+{
+  "schema": 1,
+  "generated_at": "2026-10-20T23:24:39.098663+00:00",
+  "source_commit": "99a376c68ffb2d58847076796a27ad95f2712a2a",
+  "source_sha256": {
+    "engine/section_d_flag_eval.py": "4b2e97aac7dcf279921d4c120653c94c242bdc1cfeca44a660f2e60ed9e00405",
+    "engine/professional.py": "592bab2d17ca6c55baac999d583be9f7714685726ca15b454c9a2150fb047f1b",
+    "engine/section_d_issues.py": "a3fa09eece75a8eb5d8f7dd020ccf0f3a3c76d71558af023992da9b95183aaf7",
+    "engine/process_fields.py": "cdfd3b92138870698cfca07d2a6a898319dff0b5f8d2e903943526b91124c061",
+    "engine/models.py": "e52ad5a7f92992b6e03defdcfac740218118ecc34daef1fb8576df628fbfeea5",
+    "engine/codes.py": "a97ade68ba40e08dcc5cdfef65223c6199ee057686e7c6e16cc4954dc0e62f82"
+  },
+  "codedb_sha256": "672f2c44d4ca3568630bb6046c7bfece5837bbab33b01a57a35da9a5b46fc03f",
+  "input_sha256": {
+    "evals_dev/cases/dev-001.json": "23945edc31c28c6c98717763eab1b411ef48ae6c25ecbce685b33e44ffa31ba9",
+    "evals_dev/cases/dev-002.json": "2b257edd6654ea354bdaf9fc6f936103eeb07c750cb04fd35eb8298618284caf",
+    "evals_dev/cases/dev-003.json": "101acc7ad1f3510401f96a26cb3cc079eaabf2ab88e8ace8ab66d82361b04213",
+    "evals_dev/cases/dev-004.json": "86cffd3cc4d8746d17ee10135c4928651bab9bbd5d6ebcb127d7b18baa62ae29",
+    "evals_dev/cases/dev-005.json": "b6be77f96cbea71be92722793b6693546d93eb4fc632f3f097e2d8694baf5992",
+    "evals_dev/cases/dev-006.json": "104392504ce3930fd4e14d9c2eb9c2ec70d2b404012eaa82b97db1066d6c9ea2",
+    "evals_dev/cases/dev-007.json": "94975d8f505d7e706e440089d18669dd1e166303d935e4e12153c0032d10ef57",
+    "evals_dev/cases/dev-008.json": "aba9b6701a9b3ac6580071e1bbbe0f01a1cf4694d23886d67187a2be3ac19977",
+    "evals_dev/cases/dev-009.json": "94ae0b9991e51deb4d632970866e7b2c4f348b435a1a32588ff81da291edcbcb",
+    "evals_dev/cases/dev-010.json": "9b47c41f12946598dabda09e73265e98bed080281fcb905444995522967eb6f6",
+    "evals_dev/cases/dev-011.json": "f79ecd7629c0aa90737bc33e445bdc5c38f1cf7df8e7a21871193dce4335843f",
+    "evals_dev/cases/dev-012.json": "100bbdabf514e8556859c5975332e2a9ea46de06ca78e7d970d318a620950984",
+    "evals_dev/cases/dev-013.json": "4a57590bb490fb639a55cbbe3d1449a8a54c56f9b3d33509e217254d7bc3db1f",
+    "evals_dev/cases/dev-014.json": "c7945e0f03e0262270559d33ec5224e2471ac2cb426366ec063e9de59da1afd3",
+    "evals_dev/cases/dev-015.json": "568fd4d58e45adc006d2cd89eaf6ab484591cff9573e406954c230606e3dc424",
+    "evals_dev/cases/dev-016.json": "bb76915b28f8ea216ffe04b92f247d576c5beacbef268bbfc0ce45bd44008d4a",
+    "evals_dev/cases/dev-017.json": "ba154e3f81870a079e5e6a7627dfb32ee49612583096565a2ac78f0aa15a6576",
+    "evals_dev/cases/dev-018.json": "844aa473deb6e4065e06ec6840e3c0f3e81fb294807e3f09832f8e9074cbe661",
+    "evals_dev/cases/dev-019.json": "fd6de0bb20f292e28ddc34ce74b7dcf80c240f549a03e3df01d68cc5a7954311",
+    "evals_dev/cases/dev-020.json": "4dd49291a5949b4a2a65c385cec66e21bf5cabead7d87362d739512814a30ef9",
+    "evals_dev/cases/dev-021.json": "7aca5352a6cef77b7a4c8bb8b760437493b06916a0c1c948d6734cbcc7689ba3",
+    "evals_dev/cases/dev-022.json": "1db700c8642e5c1b5879ea2dc527e129d6c521133062728c7e814e4d7887ed50",
+    "evals_dev/cases/dev-023.json": "6312bbe8db3384a7e6898e682a84042ee84a338ada7e3cca58af864b4bb5b87a",
+    "evals_dev/cases/dev-024.json": "1c1b14af0db85ff2052697bc79ba864a39cd0ec496836c057b81024ad47281e8",
+    "evals_dev/cases/dev-025.json": "ca26c232d85419d01b44758f568a64f6f0adab786709c30944879e24921169b0",
+    "evals_dev/cases/dev-026.json": "0b1a1d7b6e444b3cc2bca1890d9ace67444a6ac8bdece85113074fd287b97895",
+    "evals_dev/cases/dev-027.json": "6cc454f9f6462ba7b23576d93a4d74488fe99f6912758f0669b5191b910a3c8e",
+    "evals_dev/cases/dev-028.json": "47f91bb1ea363eb7b79b0b5c82289cef17ed17c960eb6770e007590bec109fbc",
+    "evals_dev/cases/dev-029.json": "a3b18e05841e519042cbee97e84023f4027f53ed121f88de3f43145811971992",
+    "evals_dev/cases/dev-030.json": "f7ae90a87cd3b65910765d542379fc727c269ea8a2dd4a625a740ffc91a8c6c0",
+    "evals_dev/cases/dev-031.json": "74a765379753c12c30992c91bbb1f4ef8346e91b9332f83154f6ea4b99906d8c",
+    "evals_dev/cases/dev-032.json": "a8ccd0c3f14abc67c3bfd530c40a278243d2acb2e82c5892a196b00f8b5ee4b4",
+    "evals_dev/cases/dev-033.json": "d0d06f48ad347e0610c0f03f05ee98d587edaa81be1b16eb2e504d17db468514",
+    "evals_dev/cases/dev-034.json": "21de7eba0c465373147164dcbf40d2002d97f90067a0bf3b39a39e785811f8af",
+    "evals_dev/cases/dev-035.json": "b6f8e0d8e567367679fe5cd4cab5a5648e85c4c0d7556771ed90f44bbc04b0db",
+    "evals_dev/cases/dev-036.json": "f79b94e0e62963c7a783ebaacede0657a9ffca57f48318773370b17b2e189388",
+    "evals_dev/cases/dev-037.json": "f507140093698cc8f336bd7e533a56b0b2f9ff29e4a68d194cae9ff53484e9e6",
+    "evals_dev/cases/dev-038.json": "417dddc02220aa337a82db4821622c6a6b0db5321f7309c07109ad1f89f2e8c4",
+    "evals_dev/cases/dev-039.json": "abf298515b2107a2489f00e75c0718035921b6fe08469c410b15a083d96fb8fe",
+    "evals_dev/cases/dev-040.json": "e64b2d2f10714f7c6847ccd93565ae2ea70861c4fd0e5f4104f34921100e0c2b",
+    "evals_dev/cases/dev-041.json": "2307e304083a12ec791fa9b96e7427e8f95c8b669c3018f5a238aa79c11c9d4b",
+    "evals_dev/cases/dev-042.json": "3a8e19bc8eab8cb20e62664a8acfd37e0ad095d7f7fb1b6fd7fcb8a6f187ad31",
+    "evals_dev/cases/dev-043.json": "ab1871ce1427b32f63d2b1de232a3e470f17edf84c3a8bf0e4863e3127fc3b3d",
+    "evals_dev/cases/dev-044.json": "a637d585dc647e8ac9259ac048cdab9e177ea6d69d61e3466b42bcbcbcbd54e6",
+    "evals_dev/cases/dev-045.json": "f0d207aa2ce0dbc062e1460fe8b5fef3ef97e1a3c780f9d10f0feb0b6d51324e",
+    "evals_dev/cases/dev-046.json": "29f9584cafadda321e00187086a33bee832dda0290f1bcd44e72b5cd18e5d0f5",
+    "evals_dev/cases/dev-047.json": "cd3214cdcb7b7cccdd5d49f87cb8752e549061228e38fc54e1c4dc60ee1e5aa2",
+    "evals_dev/cases/dev-048.json": "c0257f2684dc0a81ceef1665388494693beb51c556355d197e2e8650f339fe03",
+    "evals_dev/cases/dev-049.json": "7d8e7a21c7e9716f78d86d80fc0de97243aa3af09661b5b0dca36d8bb9f0df44",
+    "evals_dev/cases/dev-050.json": "a432aaca6d76da0a31dc48965ec9c5a2d0392d16f85f5b3773e530c272d488c1",
+    "evals_dev/cases/dev-051.json": "b7d48018c0c1de8a72ddb7d4721e1aee7f57b6b5540a2d64d811f54f1351f1d6",
+    "evals_dev/cases/dev-052.json": "0343db2e7e9365803c17bd598ac45c1bc3566bd0c259f7feda71801dd6168831",
+    "evals_dev/cases/dev-053.json": "c94b4607dafc191d22f532760be016de4f0a2ca1f407f3180b7091283b71e442",
+    "evals_dev/cases/dev-054.json": "78d32947aaaf17e2bbd6503f47ec1038ad376e128a3990e134c681bc39a64190",
+    "evals_dev/cases/dev-055.json": "552571b600b68603826e07aa3864fc72520515dc4126375b56edb804c2ad64ab",
+    "evals_dev/cases/dev-056.json": "33008ed95e71e6d9fa8a523bea86397ee821d33152d8fae0a8171a47540f4885",
+    "evals_dev/cases/dev-057.json": "1afc232f5db7477466c1601accb75b5f29256fd6de9da4d98cb3b6172d8063d5",
+    "evals_dev/cases/dev-058.json": "538d6c10342f1d388f2da3204bd491ae24db3b9c1fdd05de2c3d7fb739ee5a65",
+    "evals_dev/cases/dev-059.json": "0cfd3ad10d5d6e110e514cbcba4b0ec4d0b3438f33a725ff2396ff79c9dc2fa6",
+    "evals_dev/cases/dev-060.json": "b53ef1adb2bdaae02456bc2ab0d640fb9a739e48f2b75b39d80340cc77bf5fa0",
+    "evals/fixtures/section_d_no_gt/ngt-001.json": "57e73d50391110a65faad8245412a3314ebde2adf660d318a782fed09f103039",
+    "evals/fixtures/section_d_no_gt/ngt-002.json": "e368451461a2f30f80ea664148d9fb899aee28e069ec6dbcc8486728bace2054",
+    "evals/fixtures/section_d_no_gt/ngt-003.json": "3ad71536bf250ffb43f2df81820501c4e099da11411bbd731c96a49438a5fa94",
+    "evals/fixtures/section_d_no_gt/ngt-004.json": "1924c01b109cf69af5f2fd7724c033833867a2b587d903c8c0ea43da34c16679",
+    "evals/fixtures/section_d_no_gt/ngt-005.json": "e6932c4f473a56b49258477444f50bad4d9282e21397a07a637d7cfc28deb185",
+    "evals/fixtures/section_d_no_gt/ngt-006.json": "9b6ff3044c4405227c177c49ec98c066a9273af7171ca5b43fc4ea28b0ef0542",
+    "evals/fixtures/section_d_no_gt/ngt-007.json": "21785bbe604166a8f0d3e270b77844d9cfe527b5594e9aedd7fa2c45e603466b",
+    "evals/fixtures/section_d_no_gt/ngt-008.json": "4555f311a38482068f6cad16ad09accfaafef180c3db198886bb65205ec00df8",
+    "evals/fixtures/section_d_no_gt/ngt-101.json": "54c757970e71a17d5ff0f82e3f210cbdc998e75c003623fdcb2a882e62ec79db",
+    "evals/fixtures/section_d_no_gt/ngt-102.json": "e0fb4385dfa06a4ae9c00baace2ec91a2b5de93ed96b67a6a46e4f5a07a82332",
+    "evals/fixtures/section_d_no_gt/ngt-103.json": "972354c7b2021385285cc92e2a95832e4ef3a18aebf7412d1c5dc4a2952b9b4f"
+  },
+  "dev": {
+    "rules_only": {
+      "name": "rules_only",
+      "scored": 60,
+      "skipped": 0,
+      "matched": 55,
+      "under_flag": 1,
+      "over_flag": 0,
+      "unknown": 13,
+      "confident_wrong": 5,
+      "gold_yes_unknown": [],
+      "under_flag_facts": [
+        "dev-050: occupancy=single_family; part4_design=false; span_m=18; rules_only does not apply the 12.20 m span, so part4_design stays false"
+      ],
+      "misses": [
+        "dev-008 gold=depends system=no",
+        "dev-011 gold=depends system=no",
+        "dev-012 gold=depends system=no",
+        "dev-049 gold=depends system=no",
+        "dev-050 gold=yes system=no"
+      ],
+      "matrix": {
+        "yes": {
+          "yes": 32,
+          "unknown": 0,
+          "no": 1
+        },
+        "depends": {
+          "yes": 0,
+          "unknown": 13,
+          "no": 4
+        },
+        "no": {
+          "yes": 0,
+          "unknown": 0,
+          "no": 10
+        }
+      }
+    },
+    "rules_plus_unknown": {
+      "name": "rules_plus_unknown",
+      "scored": 60,
+      "skipped": 0,
+      "matched": 50,
+      "under_flag": 0,
+      "over_flag": 0,
+      "unknown": 27,
+      "confident_wrong": 0,
+      "gold_yes_unknown": [],
+      "under_flag_facts": [],
+      "misses": [
+        "dev-001 gold=no system=unknown",
+        "dev-004 gold=no system=unknown",
+        "dev-007 gold=no system=unknown",
+        "dev-010 gold=no system=unknown",
+        "dev-015 gold=no system=unknown",
+        "dev-021 gold=no system=unknown",
+        "dev-023 gold=no system=unknown",
+        "dev-048 gold=no system=unknown",
+        "dev-051 gold=no system=unknown",
+        "dev-052 gold=no system=unknown"
+      ],
+      "matrix": {
+        "yes": {
+          "yes": 33,
+          "unknown": 0,
+          "no": 0
+        },
+        "depends": {
+          "yes": 0,
+          "unknown": 17,
+          "no": 0
+        },
+        "no": {
+          "yes": 0,
+          "unknown": 10,
+          "no": 0
+        }
+      }
+    },
+    "rules_plus_unknown_cf": {
+      "name": "rules_plus_unknown_cf",
+      "scored": 60,
+      "skipped": 0,
+      "matched": 50,
+      "under_flag": 0,
+      "over_flag": 0,
+      "unknown": 27,
+      "confident_wrong": 0,
+      "gold_yes_unknown": [],
+      "under_flag_facts": [],
+      "misses": [
+        "dev-001 gold=no system=unknown",
+        "dev-004 gold=no system=unknown",
+        "dev-007 gold=no system=unknown",
+        "dev-010 gold=no system=unknown",
+        "dev-015 gold=no system=unknown",
+        "dev-021 gold=no system=unknown",
+        "dev-023 gold=no system=unknown",
+        "dev-048 gold=no system=unknown",
+        "dev-051 gold=no system=unknown",
+        "dev-052 gold=no system=unknown"
+      ],
+      "matrix": {
+        "yes": {
+          "yes": 33,
+          "unknown": 0,
+          "no": 0
+        },
+        "depends": {
+          "yes": 0,
+          "unknown": 17,
+          "no": 0
+        },
+        "no": {
+          "yes": 0,
+          "unknown": 10,
+          "no": 0
+        }
+      }
+    },
+    "always_unknown": {
+      "name": "always_unknown",
+      "scored": 60,
+      "skipped": 0,
+      "matched": 17,
+      "under_flag": 0,
+      "over_flag": 0,
+      "unknown": 60,
+      "confident_wrong": 0,
+      "gold_yes_unknown": [
+        "dev-002",
+        "dev-003",
+        "dev-013",
+        "dev-014",
+        "dev-016",
+        "dev-017",
+        "dev-018",
+        "dev-019",
+        "dev-026",
+        "dev-027",
+        "dev-028",
+        "dev-029",
+        "dev-030",
+        "dev-031",
+        "dev-032",
+        "dev-033",
+        "dev-034",
+        "dev-035",
+        "dev-036",
+        "dev-037",
+        "dev-038",
+        "dev-039",
+        "dev-040",
+        "dev-041",
+        "dev-042",
+        "dev-043",
+        "dev-044",
+        "dev-045",
+        "dev-046",
+        "dev-047",
+        "dev-050",
+        "dev-056",
+        "dev-058"
+      ],
+      "under_flag_facts": [],
+      "misses": [
+        "dev-001 gold=no system=unknown",
+        "dev-002 gold=yes system=unknown",
+        "dev-003 gold=yes system=unknown",
+        "dev-004 gold=no system=unknown",
+        "dev-007 gold=no system=unknown",
+        "dev-010 gold=no system=unknown",
+        "dev-013 gold=yes system=unknown",
+        "dev-014 gold=yes system=unknown",
+        "dev-015 gold=no system=unknown",
+        "dev-016 gold=yes system=unknown",
+        "dev-017 gold=yes system=unknown",
+        "dev-018 gold=yes system=unknown",
+        "dev-019 gold=yes system=unknown",
+        "dev-021 gold=no system=unknown",
+        "dev-023 gold=no system=unknown",
+        "dev-026 gold=yes system=unknown",
+        "dev-027 gold=yes system=unknown",
+        "dev-028 gold=yes system=unknown",
+        "dev-029 gold=yes system=unknown",
+        "dev-030 gold=yes system=unknown",
+        "dev-031 gold=yes system=unknown",
+        "dev-032 gold=yes system=unknown",
+        "dev-033 gold=yes system=unknown",
+        "dev-034 gold=yes system=unknown",
+        "dev-035 gold=yes system=unknown",
+        "dev-036 gold=yes system=unknown",
+        "dev-037 gold=yes system=unknown",
+        "dev-038 gold=yes system=unknown",
+        "dev-039 gold=yes system=unknown",
+        "dev-040 gold=yes system=unknown",
+        "dev-041 gold=yes system=unknown",
+        "dev-042 gold=yes system=unknown",
+        "dev-043 gold=yes system=unknown",
+        "dev-044 gold=yes system=unknown",
+        "dev-045 gold=yes system=unknown",
+        "dev-046 gold=yes system=unknown",
+        "dev-047 gold=yes system=unknown",
+        "dev-048 gold=no system=unknown",
+        "dev-050 gold=yes system=unknown",
+        "dev-051 gold=no system=unknown",
+        "dev-052 gold=no system=unknown",
+        "dev-056 gold=yes system=unknown",
+        "dev-058 gold=yes system=unknown"
+      ],
+      "matrix": {
+        "yes": {
+          "yes": 0,
+          "unknown": 33,
+          "no": 0
+        },
+        "depends": {
+          "yes": 0,
+          "unknown": 17,
+          "no": 0
+        },
+        "no": {
+          "yes": 0,
+          "unknown": 10,
+          "no": 0
+        }
+      }
+    }
+  },
+  "model_constructed_no_gt": {
+    "rules_only": {
+      "name": "rules_only",
+      "scored": 11,
+      "skipped": 0,
+      "matched": 10,
+      "under_flag": 0,
+      "over_flag": 0,
+      "unknown": 1,
+      "confident_wrong": 0,
+      "gold_yes_unknown": [
+        "ngt-103"
+      ],
+      "under_flag_facts": [],
+      "misses": [
+        "ngt-103 gold=yes system=depends"
+      ],
+      "matrix": {
+        "yes": {
+          "yes": 2,
+          "unknown": 1,
+          "no": 0
+        },
+        "depends": {
+          "yes": 0,
+          "unknown": 0,
+          "no": 0
+        },
+        "no": {
+          "yes": 0,
+          "unknown": 0,
+          "no": 8
+        }
+      }
+    },
+    "rules_plus_unknown": {
+      "name": "rules_plus_unknown",
+      "scored": 11,
+      "skipped": 0,
+      "matched": 10,
+      "under_flag": 0,
+      "over_flag": 0,
+      "unknown": 1,
+      "confident_wrong": 0,
+      "gold_yes_unknown": [
+        "ngt-103"
+      ],
+      "under_flag_facts": [],
+      "misses": [
+        "ngt-103 gold=yes system=unknown"
+      ],
+      "matrix": {
+        "yes": {
+          "yes": 2,
+          "unknown": 1,
+          "no": 0
+        },
+        "depends": {
+          "yes": 0,
+          "unknown": 0,
+          "no": 0
+        },
+        "no": {
+          "yes": 0,
+          "unknown": 0,
+          "no": 8
+        }
+      }
+    },
+    "rules_plus_unknown_cf": {
+      "name": "rules_plus_unknown_cf",
+      "scored": 11,
+      "skipped": 0,
+      "matched": 10,
+      "under_flag": 0,
+      "over_flag": 0,
+      "unknown": 1,
+      "confident_wrong": 0,
+      "gold_yes_unknown": [
+        "ngt-103"
+      ],
+      "under_flag_facts": [],
+      "misses": [
+        "ngt-103 gold=yes system=unknown"
+      ],
+      "matrix": {
+        "yes": {
+          "yes": 2,
+          "unknown": 1,
+          "no": 0
+        },
+        "depends": {
+          "yes": 0,
+          "unknown": 0,
+          "no": 0
+        },
+        "no": {
+          "yes": 0,
+          "unknown": 0,
+          "no": 8
+        }
+      }
+    },
+    "always_unknown": {
+      "name": "always_unknown",
+      "scored": 11,
+      "skipped": 0,
+      "matched": 0,
+      "under_flag": 0,
+      "over_flag": 0,
+      "unknown": 11,
+      "confident_wrong": 0,
+      "gold_yes_unknown": [
+        "ngt-101",
+        "ngt-102",
+        "ngt-103"
+      ],
+      "under_flag_facts": [],
+      "misses": [
+        "ngt-001 gold=no system=unknown",
+        "ngt-002 gold=no system=unknown",
+        "ngt-003 gold=no system=unknown",
+        "ngt-004 gold=no system=unknown",
+        "ngt-005 gold=no system=unknown",
+        "ngt-006 gold=no system=unknown",
+        "ngt-007 gold=no system=unknown",
+        "ngt-008 gold=no system=unknown",
+        "ngt-101 gold=yes system=unknown",
+        "ngt-102 gold=yes system=unknown",
+        "ngt-103 gold=yes system=unknown"
+      ],
+      "matrix": {
+        "yes": {
+          "yes": 0,
+          "unknown": 3,
+          "no": 0
+        },
+        "depends": {
+          "yes": 0,
+          "unknown": 0,
+          "no": 0
+        },
+        "no": {
+          "yes": 0,
+          "unknown": 8,
+          "no": 0
+        }
+      }
+    }
+  },
+  "citation_resolution": {
+    "resolved": 56,
+    "total": 56
+  },
+  "heldout_read": false,
+  "provider_calls": 0,
+  "limits": [
+    "Dev60 and model-constructed no-ground-truth11 are in-sample, model-checked, not human-verified.",
+    "No sealed or external heldout corpus was loaded or scored.",
+    "Citation resolution establishes lookup binding, not legal or technical correctness."
+  ]
+}
