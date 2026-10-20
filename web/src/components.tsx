@@ -87,7 +87,7 @@ export function KindBadge({ kind }: { kind: FactKind }) {
 export function GapStrip({ gaps }: { gaps: Gap[] }) {
   if (!gaps.length) {
     return (
-      <div className="gap-strip" aria-label="Administrative gaps">
+      <div className="gap-summary gap-panel" aria-label="Administrative gaps">
         <span className="gap-chip">
           <span className="status-dot done" />
           No open gaps

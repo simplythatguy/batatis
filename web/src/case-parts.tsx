@@ -40,10 +40,20 @@ function FactRow({ fact }: { fact: Fact }) {
         </div>
       )}
       <div className="fact-source">
-        <span className="meta">From {sourceLine(fact.source)}</span>
+        <span className="meta">
+          {fact.kind === "computed"
+            ? `Computed from ${(fact.inputs ?? []).map((id) => c.facts.find((f) => f.id === id)).filter(Boolean).map((f) => factLabel(f!.field).toLowerCase()).join(" and ") || "values that changed"}`
+            : `From ${sourceLine(fact.source)}`}
+        </span>
         {fact.source.quote && <q className="fact-quote">{fact.source.quote}</q>}
         {fact.kind === "proposed" && fact.confidence !== undefined && (
           <span className="meta">Confidence {Math.round(fact.confidence * 100)}%</span>
+        )}
+        {fact.kind === "proposed" && !pending && (
+          <span className="field-note">
+            <span className="status-dot done" />
+            Confirmed by you
+          </span>
         )}
       </div>
       {pending && (

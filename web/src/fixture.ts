@@ -94,7 +94,7 @@ export const FIXTURE: Case = {
       field: "assembly.ratio",
       value: "0.26",
       kind: "computed",
-      source: { type: "code", ref: "Outboard ÷ inboard thermal resistance" },
+      source: { type: "code", ref: "Formula over f-rsi-board and f-rsi-cavity" },
       formula: "RSI 0.88 outboard ÷ RSI 3.34 inboard = 0.26",
       inputs: ["f-rsi-board", "f-rsi-cavity"],
       status: "confirmed",
