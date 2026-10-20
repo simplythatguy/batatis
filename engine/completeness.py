@@ -14,6 +14,7 @@ from pathlib import Path
 from codedb import validate_text
 
 from .codes import Codes
+from .evidence_gaps import OpenPair, group_evidence_gaps, uncovered_items
 from .models import INTENT_LABEL, Case, Gap as CaseGap
 from .process_fields import confirmed_value, latest_fact, process_fields
 from .professional import ProfessionalResult, professional_involvement
@@ -24,6 +25,8 @@ from .section_d import SupportingDocument, section_d_plan, supporting_documents
 class Gap(CaseGap):
     fix_hint: str
     citation: str | None = None
+    provision_id: str | None = None
+    pairs: list[OpenPair] = []
 
 
 _CORE = (
@@ -229,6 +232,10 @@ def check_completeness(case: Case, codes: Codes, *,
                 'Request the issue/revision date so the reviewer can identify the version supplied.', severity='warning')
     attached_ids = {d.id for d in docs}
     for evidence in case.evidence:
+        # Provision-scoped evidence is the applicant's answer to a performance gap.
+        # A file id is optional and is stored on the item; it is not a second ledger fact.
+        if evidence.provision_id:
+            continue
         if evidence.status == 'provided' and evidence.id not in attached_ids:
             add('attachment', 'D', f'evidence.{evidence.id}.file_ref', f'a file reference for the supporting document “{evidence.description}”.',
                 'Attach the file and retain its source; a provided flag is not an attachment.')
@@ -237,13 +244,13 @@ def check_completeness(case: Case, codes: Codes, *,
                     'Ask for the author, issuer or responsible organisation and their scope.')
     if expected:
         # Use only verified provisions so a bad reference becomes a gap, not an exception/500.
+        # One gap per provision. PR #11 should call group_evidence_gaps on its open plan
+        # items instead of adding one gap per objective/function pair.
         verified = case.model_copy(update={'provisions': list(expected)})
-        for item in section_d_plan(verified, codes, docs).items:
-            if item.objective is None:
-                add('evidence_scope', 'D', f'evidence.{item.id}.scope', f'an identified performance benchmark for {item.provision_id}.',
-                    'The table has no row; ask the responsible designer which substantive benchmark applies.', item.citation, 'warning')
-            elif item.status == 'not provided':
-                add('evidence', 'D', f'evidence.{item.id}', f'supporting evidence for {item.provision_id}, {item.function}–{item.objective}.',
-                    item.performance_issue + ' Select appropriate evidence types with the responsible designer; not every ladder rung is required.',
-                    item.citation)
+        open_items = uncovered_items(section_d_plan(verified, codes, docs).items, case.evidence)
+        for spec in group_evidence_gaps(open_items):
+            gaps.append(Gap(
+                id=f'{spec.rule}:{spec.provision_id}', severity=spec.severity, section='D', field=spec.field,
+                message=f'Your application appears to be missing {spec.missing}', fix_hint=spec.fix_hint,
+                citation=spec.citation, provision_id=spec.provision_id, pairs=list(spec.pairs)))
     return gaps

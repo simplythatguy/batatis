@@ -56,6 +56,30 @@ def attribution_rows(con, provision, *, inherited=True):
     return [record(r) for r in rows]
 
 
+def explanatory_intents(con, doc: str, provision_id: str, division: str):
+    """Intent-supplement rows for a Division B provision. Explanatory only.
+
+    The intents table has no division column. Farm-building entries use the same
+    bare ids as Division C (for example 2.3.1.1.(3) and 2.4.1.1.(1)), and their
+    comparison status is provision_missing_in_ae. A bare-id match must not attach
+    those rows to a Division A or C citation, and must not attach a row the
+    comparison says is not an Alberta Edition provision.
+    """
+    if division != 'B':
+        return [], []
+    intents = [record(r) for r in con.execute(
+        'SELECT * FROM intents WHERE code_doc=? AND (provision_id=? OR provision_id LIKE ?) '
+        'ORDER BY pdf_page,block_seq', (doc, provision_id, provision_id + '(%'))]
+    comparisons = [record(r) for r in con.execute(
+        'SELECT * FROM intent_comparison WHERE code_doc=? AND (provision_id=? OR provision_id LIKE ?)',
+        (doc, provision_id, provision_id + '(%'))]
+    blocked = {row['provision_id'] for row in comparisons if row.get('status') == 'provision_missing_in_ae'}
+    if blocked:
+        intents = [row for row in intents if row['provision_id'] not in blocked]
+        comparisons = [row for row in comparisons if row.get('status') != 'provision_missing_in_ae']
+    return intents, comparisons
+
+
 def lookup(provision_id: str, *, doc='NBC-AE', division=None, db_path: Path | str | None = None):
     """Return a provision with source rows, notes and explanatory intents; None if absent.
 
@@ -80,11 +104,7 @@ def lookup(provision_id: str, *, doc='NBC-AE', division=None, db_path: Path | st
                       'ON n.doc=l.doc AND n.division=l.division AND n.note_id=l.note_id '
                       'WHERE l.doc=? AND l.division=? AND (l.provision_id=? OR l.provision_id LIKE ?) '
                       'ORDER BY n.pdf_page', (doc, div, pid, pid + '(%'))]
-        out['intents'] = [record(r) for r in con.execute('SELECT * FROM intents WHERE code_doc=? '
-                          'AND (provision_id=? OR provision_id LIKE ?) ORDER BY pdf_page,block_seq',
-                          (doc, pid, pid + '(%'))] if div == 'B' else []
-        out['intent_comparison'] = [record(r) for r in con.execute('SELECT * FROM intent_comparison WHERE code_doc=? '
-                      'AND (provision_id=? OR provision_id LIKE ?)', (doc, pid, pid + '(%'))] if div == 'B' else []
+        out['intents'], out['intent_comparison'] = explanatory_intents(con, doc, pid, div)
         label = con.execute('SELECT label FROM docs WHERE doc=?', (doc,)).fetchone()[0]
         out['citation'] = f'{label}, Div {div}, {out["level"].title()} {pid} [PDF p.{out["pdf_page"]}]'
         return out

@@ -2,20 +2,20 @@
 
 No model calls. One row per Division B sentence (an article expands to its sentences; a clause stays a
 clause). Attribution status is reported literally:
-  direct                           - the table has a row for the sentence (or for its clauses)
-  inherited from parent            - a clause with no row of its own takes its sentence's row
-  no row in the attribution table  - nothing in the table; Section C must say so, never guess
-National 2020 intent statements are attached as explanatory text only, with a flag when their
-attribution differs from NBC(AE) 2023.
+  direct                           - the table has a row for this provision id
+  inherited from parent            - no row here; pairs are copied from a parent sentence or article,
+                                     or from a clause when the sentence itself has none. attributed_via
+                                     is that source id
+  no row in the attribution table  - nothing on this id, its parent sentence, or its article; never guess
+National 2020 intent statements are explanatory only. They attach to Division B rows, and a comparison
+status of provision_missing_in_ae is not attached.
 """
 from __future__ import annotations
 
+from codedb import ids
+
 from .codes import Codes
 from .models import AttributionPair, IntentBlock, SectionCRow
-
-_STATUS = {'direct': 'direct', 'clause_level': 'direct', 'inherits': 'inherited from parent',
-           'none': 'no row in the attribution table'}
-
 
 def section_c_rows(provision_ids: list[str], codes: Codes) -> list[SectionCRow]:
     """Rows for Division B provisions, in input order. Raises KeyError for an id not in Division B."""
@@ -39,27 +39,81 @@ def _text(codes: Codes, code: str) -> str | None:
     return d['title'] if d else None
 
 
+def _pairs(rows, codes: Codes) -> list[AttributionPair]:
+    return [AttributionPair(function=f, function_text=_text(codes, f), objective=o,
+                            objective_text=_text(codes, o), bracket=a['bracket'], clauses=a['clauses'] or [],
+                            application_note=a['application_note'], table=a['table_id'], pdf_page=a['pdf_page'])
+            for a in rows for f in a['fs'] for o in a['objectives']]
+
+
+def _source_id(rows) -> str | None:
+    found = list(dict.fromkeys(a['provision_id'] for a in rows))
+    if not found:
+        return None
+    return found[0] if len(found) == 1 else ', '.join(found)
+
+
+def _exact_rows(attributions, provision_id: str):
+    return [a for a in attributions or [] if a.get('provision_id') == provision_id]
+
+
+def _parent_rows(pid: str, codes: Codes):
+    """Clause to sentence to article, using only rows stored on that ancestor.
+
+    Descendant sentences of an article are not copied onto a sibling. An empty
+    result means Section C must leave the objective and function blank.
+    """
+    try:
+        parsed = ids.parse(pid)
+    except ValueError:
+        return [], None
+    for ancestor in parsed.ancestors():
+        if ancestor.level not in ('clause', 'sentence', 'article'):
+            continue
+        parent = codes.provision(str(ancestor), 'B')
+        taken = _exact_rows(parent['attributions'], str(ancestor)) if parent else []
+        if taken:
+            return taken, str(ancestor)
+        if ancestor.level == 'article':
+            break
+    return [], None
+
+
+def _attribution(rec: dict, codes: Codes):
+    """Own row, else rows lookup already inherited, else the parent chain."""
+    pid = rec['id']
+    rows = list(rec.get('attributions') or [])
+    own = _exact_rows(rows, pid)
+    if own:
+        return own, 'direct', None
+    other = [a for a in rows if a.get('provision_id') != pid]
+    if other:
+        return other, 'inherited from parent', _source_id(other)
+    inherited, via = _parent_rows(pid, codes)
+    if inherited:
+        return inherited, 'inherited from parent', via
+    return [], 'no row in the attribution table', None
+
+
 def _row(rec: dict, codes: Codes) -> SectionCRow:
     pid = rec['id']
     st = rec.get('attribution_status') or {}
-    raw_status = st.get('status') or ('direct' if rec['attributions'] else 'none')
-    pairs = [AttributionPair(function=f, function_text=_text(codes, f), objective=o,
-                             objective_text=_text(codes, o), bracket=a['bracket'], clauses=a['clauses'] or [],
-                             application_note=a['application_note'], table=a['table_id'], pdf_page=a['pdf_page'])
-             for a in rec['attributions'] for f in a['fs'] for o in a['objectives']]
-    status = _STATUS[raw_status]
-    if status != 'no row in the attribution table' and not pairs:
-        status = 'no row in the attribution table'
-    own = lambda p: p == pid or p.startswith(pid + '(')            # noqa: E731  sentence and its clauses
+    raw_status = st.get('status') or ('direct' if rec.get('attributions') else 'none')
+    source_rows, status, via = _attribution(rec, codes)
+    pairs = _pairs(source_rows, codes)
+    if not pairs:
+        status, via = 'no row in the attribution table', None
+    comparisons = rec.get('intent_comparison') or []
+    missing = {c['provision_id'] for c in comparisons if c.get('status') == 'provision_missing_in_ae'}
+    own_intent = lambda p: p == pid or p.startswith(pid + '(')  # noqa: E731
     intents = [IntentBlock(provision_id=i['provision_id'], objective=i['objective'], brackets=i['brackets'] or [],
                            notes=i['attribution_notes'] or [], intents=i['intents'] or [], pdf_page=i['pdf_page'])
-               for i in rec['intents'] if own(i['provision_id'])]
-    cmp = next((c for c in rec['intent_comparison'] if c['provision_id'] == pid), None)
-    related = st.get('root_provision') if raw_status == 'none' else None
+               for i in rec.get('intents') or [] if own_intent(i['provision_id']) and i['provision_id'] not in missing]
+    cmp = next((c for c in comparisons if c['provision_id'] == pid and c['provision_id'] not in missing), None)
+    related = st.get('root_provision') if status == 'no row in the attribution table' and raw_status == 'none' else None
     return SectionCRow(
         provision_id=pid, citation=rec['citation'], attribution_status=status,
-        attributed_via=st.get('root_provision') if raw_status == 'inherits' else None,
-        pairs=pairs, intents=intents,
+        attributed_via=via, pairs=pairs, intents=intents,
         intent_comparison=cmp['status'] if cmp else None,
         differs=bool(cmp and cmp['status'] == 'differs'),
         only_in_intent=(cmp or {}).get('only_in_intent') or [],

@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field, model_validator
 
 FactKind = Literal['exact', 'pointed', 'computed', 'proposed']
 FactStatus = Literal['confirmed', 'unconfirmed']
-SourceType = Literal['code', 'file', 'user_text', 'drawing', 'user_click']
+SourceType = Literal['code', 'file', 'user_text', 'drawing', 'user_click', 'description']
 AttributionStatus = Literal['direct', 'inherited from parent', 'no row in the attribution table']
 
 INTENT_LABEL = 'NBC 2020 Intent Statements, explanatory only'
@@ -111,10 +111,12 @@ class SectionCRow(BaseModel):
 
 class EvidenceItem(BaseModel):
     id: str = Field(default_factory=lambda: new_id('ev'))
+    provision_id: str | None = None
     objective: str | None = None
     function: str | None = None
     description: str
     evidence_type: str | None = None
+    file_id: str | None = None
     professional_required: bool | None = None
     status: Literal['needed', 'provided', 'not_applicable'] = 'needed'
 
