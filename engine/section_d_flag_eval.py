@@ -46,10 +46,11 @@ _MISSING_QUESTION = {
     'occupancy': 'What is the confirmed occupancy or building type?',
     'part4_design': 'Is any design carried out under Part 4, including beams, connections or foundations?',
 }
-_HEADLINE = (
-    'Engineer-needed flag: {matched}/{scored} agreement on the model-checked dev set (in-sample), '
-    '{under_flag} under-flag, {unknown} unknowns sent to the applicant.'
-)
+
+def _count_phrase(count: int, singular: str) -> str:
+    return f'{count} {singular if count == 1 else singular + "s"}'
+
+
 VARIANTS = ('rules_only', 'rules_plus_unknown', 'rules_plus_unknown_cf', 'always_unknown')
 # Not selected. The shipped screen stays rules_plus_unknown even when this variant agrees more.
 _NOT_SHIPPED = frozenset({'always_unknown', 'rules_plus_unknown_cf'})
@@ -560,17 +561,32 @@ def heldout_report(totals: dict[str, VariantScore]) -> str:
     return '\n'.join(lines)
 
 
-def headline(totals: dict[str, VariantScore]) -> str:
-    row = totals['rules_only']
-    return _HEADLINE.format(matched=row.matched, scored=row.scored, under_flag=row.under_flag, unknown=row.unknown)
+def headline(dev: dict[str, VariantScore], heldout: dict[str, VariantScore]) -> str:
+    """Name rules_only and whichever variant winner() ships. Counts come from those rows."""
+    baseline = dev['rules_only']
+    shipped_name = winner(dev)
+    shipped = dev[shipped_name]
+    post = heldout[shipped_name]
+    blind = _BLIND_HELDOUT_RULES_PLUS.split(' ', 1)[0]
+    return (
+        'Engineer-needed flag (model-checked): '
+        f'rules_only {baseline.matched}/{baseline.scored} on the dev set (in-sample), '
+        f'{_count_phrase(baseline.under_flag, "under-flag")}; '
+        f'shipped {shipped_name}: {shipped.matched}/{shipped.scored} in-sample, '
+        f'{_count_phrase(shipped.under_flag, "under-flag")}, '
+        f'{_count_phrase(shipped.unknown, "unknown")} sent to the applicant; '
+        f'held-out {blind} blind (pre-fix), '
+        f'post-fix {post.matched}/{post.scored} (no longer blind).'
+    )
 
 
 def main() -> int:
     codes, codedb = load_codes()
     dev = score(codes)
-    print(headline(dev))
+    heldout = score(codes, load_heldout())
+    print(headline(dev, heldout))
     print(report(dev, codedb))
-    print(heldout_report(score(codes, load_heldout())))
+    print(heldout_report(heldout))
     return 0
 
 

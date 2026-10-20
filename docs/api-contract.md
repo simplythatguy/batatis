@@ -1,6 +1,6 @@
 # API contract
 
-Engineer-needed flag: 55/60 agreement on the model-checked dev set (in-sample), 1 under-flag, 13 unknowns sent to the applicant.
+Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind).
 
 These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 

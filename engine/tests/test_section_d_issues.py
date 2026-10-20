@@ -10,7 +10,8 @@ from engine.models import Case, Source
 from engine.section_d import ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER
 from engine.professional import ProfessionalFacts
 from engine.section_d_flag_eval import (
-    RULE_IDS, Signals, VariantScore, counterfactual, flag_label, flag_question, load_codes, main, score, winner,
+    RULE_IDS, Signals, VariantScore, counterfactual, flag_label, flag_question, headline, load_codes,
+    load_heldout, main, score, winner,
 )
 from engine.section_d_issues import PROCESS_RULES, PROFESSIONAL_RULES, section_d_issues
 from engine.store import CaseStore
@@ -227,9 +228,16 @@ def test_rule_table_uses_only_provisions_already_in_the_repo():
 def test_eval_script_prints_in_sample_wilson_table(capsys):
     assert main() == 0
     out = capsys.readouterr().out
-    assert out.startswith(
-        'Engineer-needed flag: 55/60 agreement on the model-checked dev set (in-sample), '
-        '1 under-flag, 13 unknowns sent to the applicant.\n')
+    codes, _codedb = load_codes()
+    dev = score(codes)
+    held = score(codes, load_heldout())
+    expected = headline(dev, held)
+    shipped = winner(dev)
+    assert shipped in expected
+    assert f'shipped {shipped}:' in expected
+    assert out.startswith(expected + '\n')
+    for path in ('docs/api-contract.md', 'README.md'):
+        assert expected in Path(path).read_text()
     assert 'gold: model-checked' in out
     assert 'split: dev (in-sample; pending out-of-sample confirmation)' in out
     assert 'rules_plus_unknown on this dev table is in-sample and pending out-of-sample confirmation' in out
