@@ -16,7 +16,11 @@ from pathlib import Path
 
 from .section_d_flag_eval import VARIANTS, _agreement_cell, _count_cell, load_codes, score
 
-SECTION = "held-out v1.1 (not blind to the authors' rule design? no: first run, frozen rules)"
+SECTION = 'Held-out v1.1: first run, frozen rules, retrieval off'
+INTERPRETATION = (
+    'the shipped screen asks rather than says no on most BCV cases, whose no labels come from silence; '
+    '0 under-flags; low agreement here reflects asking, not wrong answers. Weak labels, not judge-facing.'
+)
 LABEL = (
     'model-extracted labels; BCV no labels are by silence, not explicit negatives; '
     'province-wide variances, not applications'
@@ -67,7 +71,10 @@ def _block(title: str, cases: list[dict], codes) -> list[str]:
         row = totals[name]
         facts = ', '.join(row.under_flag_facts) if row.under_flag_facts else 'none'
         lines.append(
-            f'{name} agreement {_agreement_cell(row)} under_flag {_count_cell(row.under_flag, row.scored)}')
+            f'{name} agreement {_agreement_cell(row)} '
+            f'under_flag {_count_cell(row.under_flag, row.scored)} '
+            f'confident_wrong {_count_cell(row.confident_wrong, row.scored)} '
+            f'unknown_rate {_count_cell(row.unknown, row.scored)}')
         lines.append(f'under_flag {name}: {facts}')
     return lines
 
@@ -76,6 +83,7 @@ def report(rows: list[dict], codes) -> str:
     cases, skipped = labelled_cases(rows)
     lines = [
         SECTION,
+        INTERPRETATION,
         'first run with frozen rules',
         'precedent retrieval: off',
         f'label: {LABEL}',

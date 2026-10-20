@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 from engine.section_d_flag_eval import load_codes
-from engine.section_d_heldout_v11 import LABEL, SECTION, labelled_cases, report
+from engine.section_d_heldout_v11 import INTERPRETATION, LABEL, SECTION, labelled_cases, report
 
 
 def test_heldout_v11_scorer_skips_null_labels_and_splits_source(tmp_path):
@@ -25,6 +25,9 @@ def test_heldout_v11_scorer_skips_null_labels_and_splits_source(tmp_path):
     codes, _codedb = load_codes()
     text = report(loaded, codes)
     assert text.startswith(SECTION)
+    assert INTERPRETATION in text
+    assert 'confident_wrong' in text
+    assert 'unknown_rate' in text
     assert 'first run with frozen rules' in text
     assert 'precedent retrieval: off' in text
     assert LABEL in text
