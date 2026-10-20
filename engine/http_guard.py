@@ -1,4 +1,4 @@
-"""ASGI guard: strip /api, refuse the code database file, tag robots, and clip NRC text."""
+"""ASGI guard: strip /api, tag robots, budget NRC text, and log ids, routes, and status."""
 from __future__ import annotations
 
 import json
@@ -16,29 +16,6 @@ def _header(headers, name: bytes) -> bytes:
     return b''
 
 
-def database_path_blocked(path: str) -> bool:
-    """True for the built sqlite and any path that would name that file.
-
-    The database is an engine input. It is not a download.
-    """
-    route = (path or '').split('?', 1)[0]
-    if route == '/codedb' or route.startswith('/codedb/'):
-        return True
-    name = route.rsplit('/', 1)[-1]
-    return name.endswith('.sqlite') or name.endswith('.sqlite-journal')
-
-
-def _not_found():
-    raw = json.dumps(attach_meta({'detail': 'not found'})).encode()
-    headers = [
-        (b'content-type', b'application/json'),
-        (b'content-length', str(len(raw)).encode()),
-        (b'x-robots-tag', b'noindex, nofollow'),
-        (b'x-batatis-notice', PII_NOTICE.encode()),
-    ]
-    return raw, headers
-
-
 class HttpGuard:
     def __init__(self, app, sweep=None):
         self.app = app
@@ -52,7 +29,7 @@ class HttpGuard:
             try:
                 self.sweep()
             except Exception:
-                # A sweep failure must not replace the route's own error.
+                # A sweep failure must not log a connection string or replace the route's own error.
                 pass
         path = scope.get('path') or ''
         if path == '/api' or path.startswith('/api/'):
@@ -63,13 +40,6 @@ class HttpGuard:
                 scope['raw_path'] = raw_path[4:] or b'/'
             path = scope['path']
         route = path.split('?', 1)[0]
-        if database_path_blocked(route):
-            raw, headers = _not_found()
-            access_log.info('%s %s 404', scope.get('method', '-'), route)
-            await send({'type': 'http.response.start', 'status': 404, 'headers': headers})
-            body = b'' if scope.get('method') == 'HEAD' else raw
-            await send({'type': 'http.response.body', 'body': body})
-            return
         started: dict = {}
         chunks: list[bytes] = []
 
@@ -99,7 +69,7 @@ class HttpGuard:
             headers.append((b'x-batatis-notice', PII_NOTICE.encode()))
             start = dict(started['message'])
             start['headers'] = headers
-            # Method, route, and status only. Never the body, a quote, or uploaded bytes.
+            # Ids, route, and status only. Never the body, a quote, or uploaded bytes.
             access_log.info('%s %s %s', scope.get('method', '-'), route, start.get('status', '-'))
             await send(start)
             await send({'type': 'http.response.body', 'body': raw})

@@ -3,6 +3,7 @@
 Sections: X (form values too long for their cell), C (one entry per Section C row: citation, attribution
 pairs with their Division A text and table source, provision text, NBC 2020 intent statements labelled as
 explanatory only), D (every supporting document) and, for drafts, the open items that block a final export.
+Section C keeps the full provision text, the NBC(AE) attribution, and a link to the NRC publication.
 """
 from __future__ import annotations
 
@@ -19,6 +20,7 @@ from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
 from reportlab.platypus import KeepTogether, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
+from ..copyright import NRC_PUBLICATION_URL
 from ..models import INTENT_LABEL, Case, SectionCRow
 from ..process_fields import process_fields
 from ..section_d import section_d_plan, supporting_documents
@@ -81,7 +83,8 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
     out.append(_kv('Attribution status', status))
     if row.pairs:
         out.append(_table(['Function', 'Objective', 'Source'],
-                          [[f'{p.function} {p.function_text or ""}'.strip(), f'{p.objective} {p.objective_text or ""}'.strip(),
+                          [[f'{p.function} {p.function_text or ""}'.strip(),
+                            f'{p.objective} {p.objective_text or ""}'.strip(),
                             f'{p.table}, NBC(AE) 2023 PDF p. {p.pdf_page}'
                             + (f'; clauses {", ".join(p.clauses)}' if p.clauses else '')
                             + (f'; {p.application_note}' if p.application_note else '')]
@@ -151,6 +154,7 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
             story.append(KeepTogether(block))
 
     story.append(Paragraph('C. Attributions to acceptable solutions', H2))
+    story.append(_p(f'National Building Code - 2023 Alberta Edition: {NRC_PUBLICATION_URL}', SMALL))
     if not case.section_c:
         story.append(_p('No provisions identified.'))
     for k, row in enumerate(case.section_c, start=1):

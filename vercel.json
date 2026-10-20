@@ -28,8 +28,8 @@
       "rewrites": [{ "source": "/api/:path(.*)?", "destination": "/:path" }],
       "functions": {
         "engine/api.py": {
-          "includeFiles": "{codedb/build/codedb.sqlite,reference/guides/SCC-Variance-Form.pdf}",
-          "excludeFiles": "{engine/tests/**,codedb/tests/**,evals/**,evals_dev/**,**/*fixture*/**,web/**,docs/**,research/**,reference/codes/**,reference/text/**,codedb/build/export/**,.cursor/**,.agents/**}"
+          "includeFiles": "{codedb/build/codedb.sqlite,codedb/build/SCC-Variance-Form.pdf}",
+          "excludeFiles": "{engine/tests/**,codedb/tests/**,evals/**,evals_dev/**,**/*fixture*/**,web/**,docs/**,research/**,reference/**,.cursor/**,.agents/**}"
         }
       }
     }

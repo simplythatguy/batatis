@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Callable
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
 
 from .ccmc import CCMCRegistry, RegistrySearch, RegistryUnavailable
@@ -14,6 +14,7 @@ from .professional import ProfessionalResult, professional_involvement
 from .section_c import section_c_rows
 from .section_d import SectionDPlan, section_d_plan
 from .section_d_issues import SectionDIssue, section_d_issues
+from .llm_gate import client_ip_from, search_retry_after
 from .store import CaseStore
 
 
@@ -61,7 +62,12 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
         return professional_involvement(get_case(case_id), code())
 
     @router.get('/ccmc/search', response_model=RegistrySearch)
-    def ccmc_search(q: str = Query(min_length=1, max_length=200), limit: int = Query(20, ge=1, le=50)):
+    def ccmc_search(request: Request, q: str = Query(min_length=1, max_length=200),
+                    limit: int = Query(20, ge=1, le=50)):
+        wait = search_retry_after(client_ip_from(request))
+        if wait is not None:
+            raise HTTPException(429, f'Search limit reached; try again in {wait} seconds',
+                                headers={'Retry-After': str(wait)})
         try:
             return registry.search(q, limit=limit)
         except ValueError as error:

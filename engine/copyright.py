@@ -9,10 +9,10 @@ RESPONSE_NRC_MAX_WORDS = 75
 NRC_PUBLICATION_URL = (
     'https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499'
 )
-# Shown on API responses and, in the same words, in the web app before paste or upload.
 PII_NOTICE = (
-    "Don't paste personal information you don't need. Applicant text is sent to OpenAI (US) "
-    "for processing in live mode, and data is deleted after 7 days or on request."
+    'Do not upload personal information. In live mode, text you enter is sent to OpenAI (US) for processing '
+    'and is retained by OpenAI under its API data policy (https://openai.com/policies/api-data-usage-policies); '
+    'Batatis deletes its own stored case data and files after 7 days or on request.'
 )
 # Prose copied from the code. Identifiers, citations, and URLs are not in this set.
 # `quote` is not in this set: it counts only when its source type is `code`.
@@ -102,17 +102,12 @@ class _Budget:
         self.left = RESPONSE_NRC_MAX_WORDS
 
 
-def _link(owners: list[dict]) -> None:
-    """The object that holds NRC prose keeps a link to the publication."""
-    if owners and 'url' not in owners[0] and 'href' not in owners[0]:
-        owners[0]['url'] = NRC_PUBLICATION_URL
-
-
 def _mark(owners: list[dict]) -> None:
-    """Flag every ancestor when a string was cut. The holder also keeps the NRC link."""
+    """Flag every ancestor. The object that holds the string gains the NRC link."""
     for owner in owners:
         owner['clipped'] = True
-    _link(owners)
+    if owners and 'url' not in owners[0] and 'href' not in owners[0]:
+        owners[0]['url'] = NRC_PUBLICATION_URL
 
 
 def _clip_string(text: str, page, budget: _Budget, owners: list[dict]) -> str:
@@ -122,7 +117,6 @@ def _clip_string(text: str, page, budget: _Budget, owners: list[dict]) -> str:
     room = min(SNIPPET_MAX_WORDS, budget.left)
     if len(found) <= room:
         budget.left -= len(found)
-        _link(owners)
         return text
     _mark(owners)
     if room <= 0:
@@ -152,8 +146,8 @@ def clip_response(node):
     """Apply the response budget to one JSON body.
 
     Each NRC snippet is at most 25 words. The body keeps at most 75 words of NRC text.
-    Past that, the string is the page marker only. An object that holds NRC prose gains
-    the NRC link. `clipped` is set only when a string was actually cut.
+    Past that, the string is the page marker only, and the object keeps its citation,
+    gains the NRC link, and sets clipped to true.
     """
     return _walk(node, None, None, _Budget(), [], None)
 
@@ -187,7 +181,7 @@ def clip_snippet(text: str, *, page=None, budget=None, citation: str | None = No
 
 
 def attach_meta(payload):
-    """Put the privacy notice on every JSON body. Arrays stay addressable under `items`."""
+    """Put the demo notice on every JSON body. Arrays stay addressable under `items`."""
     notice = {'notice': PII_NOTICE}
     if isinstance(payload, dict):
         out = dict(payload)

@@ -1,9 +1,10 @@
 /**
  * Typed client for the engine HTTP API (engine/api.py). The app calls `/api/...`; in development
- * Vite proxies `/api` to the engine at http://127.0.0.1:8000 (vite.config.ts). Set VITE_ENGINE_URL
- * to call another engine directly. `createEngine(base)` serves scripts and tests outside Vite.
+ * Vite proxies `/api` to the engine at http://127.0.0.1:8000 (vite.config.ts).
+ * Set VITE_API_BASE to call another origin (default `/api`). VITE_ENGINE_URL is the previous name.
+ * `createEngine(base)` serves scripts and tests outside Vite.
  */
-import type { Case, FactInput, NewCase, SectionCRow } from "./types.gen";
+import type { Case, FactInput, Gap, NewCase, SectionCRow } from "./types.gen";
 
 /** A provision returned by GET /code/search (engine/codes.py `Codes.search`). */
 export interface CodeHit {
@@ -33,6 +34,43 @@ export interface CodeRecord {
 
 type Division = "A" | "B" | "C";
 
+/** GET /cases/{id}/process-fields. The engine list is wrapped as `{ items, meta }`. */
+export interface ProcessField {
+  id: string;
+  label: string;
+  prompt: string;
+  citation: string;
+  required: true;
+  answer: { value: string } | null;
+}
+
+/** GET /cases/{id}/section-d/issues. The engine list is wrapped as `{ items, meta }`. */
+export interface SectionDIssue {
+  id: string;
+  question: string | null;
+  at_stake: string;
+  status: string;
+}
+
+/** JSON array routes are `{ items, meta }`. Objects that also carry other fields are not envelopes. */
+export interface ItemEnvelope<T> {
+  items: T[];
+  meta?: { notice: string };
+}
+
+export function unwrapItems<T>(body: T[] | ItemEnvelope<T>): T[] {
+  return Array.isArray(body) ? body : body.items;
+}
+
+/** Every engine route whose JSON body is a list. Middleware wraps each one as `{ items, meta }`. */
+export const ARRAY_ROUTES = [
+  { name: "search", method: "GET", path: "/code/search" },
+  { name: "sectionC", method: "POST", path: "/section-c" },
+  { name: "gaps", method: "GET", path: "/cases/{caseId}/gaps" },
+  { name: "processFields", method: "GET", path: "/cases/{caseId}/process-fields" },
+  { name: "sectionDIssues", method: "GET", path: "/cases/{caseId}/section-d/issues" },
+] as const;
+
 /** status 0 = the engine could not be reached. */
 export class EngineError extends Error {
   readonly status: number;
@@ -45,22 +83,6 @@ export class EngineError extends Error {
 }
 
 const enc = encodeURIComponent;
-
-/** Array routes are `{items, meta}`. A body that already has other keys stays intact. */
-export function unwrapList<T>(payload: unknown): T[] {
-  if (Array.isArray(payload)) return payload as T[];
-  if (
-    payload !== null &&
-    typeof payload === "object" &&
-    "items" in payload &&
-    "meta" in payload &&
-    Array.isArray((payload as { items: unknown }).items) &&
-    Object.keys(payload).length === 2
-  ) {
-    return (payload as { items: T[] }).items;
-  }
-  return payload as T[];
-}
 
 export function createEngine(base: string) {
   async function call<T>(method: "GET" | "POST", path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
@@ -98,14 +120,32 @@ export function createEngine(base: string) {
       call<CodeRecord>("GET", `/code/${enc(id)}${division ? `?division=${division}` : ""}`, undefined, signal),
     search: (q: string, opts: { division?: Division; limit?: number } = {}, signal?: AbortSignal) => {
       const p = new URLSearchParams({ q, division: opts.division ?? "B", limit: String(opts.limit ?? 20) });
-      return call<unknown>("GET", `/code/search?${p}`, undefined, signal).then((payload) => unwrapList<CodeHit>(payload));
+      return call<CodeHit[] | ItemEnvelope<CodeHit>>("GET", `/code/search?${p}`, undefined, signal).then(unwrapItems);
     },
     /** Section C rows by deterministic lookup, in input order (an article expands to its sentences). */
     sectionC: (provisions: string[], signal?: AbortSignal) =>
-      call<unknown>("POST", "/section-c", { provisions }, signal).then((payload) => unwrapList<SectionCRow>(payload)),
+      call<SectionCRow[] | ItemEnvelope<SectionCRow>>("POST", "/section-c", { provisions }, signal).then(unwrapItems),
+    gaps: (caseId: string, signal?: AbortSignal) =>
+      call<Gap[] | ItemEnvelope<Gap>>("GET", `/cases/${enc(caseId)}/gaps`, undefined, signal).then(unwrapItems),
+    processFields: (caseId: string, signal?: AbortSignal) =>
+      call<ProcessField[] | ItemEnvelope<ProcessField>>(
+        "GET",
+        `/cases/${enc(caseId)}/process-fields`,
+        undefined,
+        signal,
+      ).then(unwrapItems),
+    sectionDIssues: (caseId: string, signal?: AbortSignal) =>
+      call<SectionDIssue[] | ItemEnvelope<SectionDIssue>>(
+        "GET",
+        `/cases/${enc(caseId)}/section-d/issues`,
+        undefined,
+        signal,
+      ).then(unwrapItems),
   };
 }
 
 export type Engine = ReturnType<typeof createEngine>;
 
-export const engine: Engine = createEngine(import.meta.env?.VITE_ENGINE_URL ?? "/api");
+const env = import.meta.env ?? {};
+const apiBase = env.VITE_API_BASE || env.VITE_ENGINE_URL || "/api";
+export const engine: Engine = createEngine(apiBase);

@@ -16,7 +16,6 @@ from engine.section_d_flag_eval import (
 from engine.section_d_issues import PROCESS_RULES, PROFESSIONAL_RULES, section_d_issues
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import fact
-from engine.tests.json_body import listed
 
 # Recommendation text must not claim compliance or safety. Objective titles from the
 # code ("Safety") are not copied into these strings; the test scans the whole payload.
@@ -204,7 +203,7 @@ def test_route_is_read_only_and_missing_case_is_404(tmp_path):
     before = store.get(case.id).model_dump_json()
     response = client.get(f'/cases/{case.id}/section-d/issues')
     assert response.status_code == 200
-    body = listed(response.json())
+    body = response.json()['items']
     assert body[0]['entered_reference'] == UNKNOWN and body[0]['provision'] is None
     assert body[1]['provision']['citation']
     assert store.get(case.id).model_dump_json() == before

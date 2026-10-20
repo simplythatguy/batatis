@@ -32,8 +32,17 @@ jobs:
         run: |
           npm ci
           npm run typecheck
-          node --experimental-strip-types scripts/unwrap-list.check.ts
+          npm run test:unwrap
           npm run build
+      - name: Fail if a sqlite file is in the web output
+        run: |
+          set -eu
+          found=$(find web/dist web/public -name '*.sqlite' -print)
+          if [ -n "$found" ]; then
+            printf '%s\n' "$found" >&2
+            echo "A code database must not ship in web/dist or web/public." >&2
+            exit 1
+          fi
       - name: UI smoke
         run: |
           npm init -y --prefix "${RUNNER_TEMP}/ui-smoke"
@@ -47,7 +56,21 @@ jobs:
   engine:
     name: engine
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: batatis
+          POSTGRES_PASSWORD: batatis
+          POSTGRES_DB: batatis
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U batatis -d batatis"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     env:
       # Blank on purpose. Live provider tests skip; they must not fail for a missing key.
       ANTHROPIC_API_KEY: ""
@@ -57,6 +80,7 @@ jobs:
       OPENROUTER_API_KEY: ""
       RUNWARE_API_KEY: ""
       BATATIS_LIVE_JEV: ""
+      TEST_DATABASE_URL: postgresql://batatis:batatis@127.0.0.1:5432/batatis
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

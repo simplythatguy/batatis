@@ -1,4 +1,4 @@
-import { Icon } from "./components";
+import { Icon, SINGLE_INSTANCE_DEMO } from "./components";
 import { useFocusParam, useRoute } from "./router";
 import { Application } from "./screens/Application";
 import { CodeCheck } from "./screens/CodeCheck";
@@ -92,6 +92,7 @@ export function App() {
             Reset case
           </button>
         </div>
+        <p className="meta demo-notice">{SINGLE_INSTANCE_DEMO}</p>
       </aside>
       <main className="main-panel">{screen}</main>
     </div>
