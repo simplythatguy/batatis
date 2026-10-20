@@ -65,7 +65,7 @@ The differences, and how each is handled:
 | Section C explainer paragraph per article (brief §1.c.iii) | No field on either form | Not on either form. An optional explainer per Section C row is in draft PR #12; how it appears in an export (for example, an attached page) is not decided yet |
 | Section D: one combined text field (document and responsible person) | 5 rows, each with document and responsible-person fields | Mapped to the 5 rows (built); an Appendix 1 export would join them into one field (planned) |
 | Signatures: owner's acknowledgement checkbox ("Yes") covering publication and an equal-or-better-performance declaration | No checkbox; privacy notice cites POPA s.13(1)(b); printed-name fields added | Printed names mapped (built). The owner's acknowledgement and every signature are left for the owner: Batatis never makes a declaration on the owner's behalf |
-| Part 2 officer wording: "equal or better performance" | "approximately equivalent or greater safety performance" (form text; the revised form is required at OVP registration under IB-2026-10-01) | Part 2 is left blank for the officer on every form (built) |
+| Part 2 officer wording: "equal or better performance" | "approximately equivalent or greater safety performance" (the form's Part 2(a) text; IB-2026-10-01 states the same test: a variance "provides approximately equivalent or greater safety performance") | Part 2 is left blank for the officer on every form (built) |
 
 **Decision:** we do not build an Appendix 1-format export for Submission 1. If the judges require it, it is a second field map plus a rendered overlay for Section C (planned).
 
