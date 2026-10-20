@@ -72,11 +72,17 @@ def test_delete_case_route_removes_the_case(tmp_path):
 
 
 def test_vercel_json_sets_robots_noindex_on_every_route():
-    routes = _vercel_routes()
-    assert routes
-    for route in routes:
-        headers = {key.lower(): value for key, value in (route.get('headers') or {}).items()}
-        assert headers.get('x-robots-tag') == 'noindex, nofollow', route.get('src')
+    config = _vercel_config()
+    assert 'routes' not in config
+    headers = config['headers']
+    assert headers
+    found = False
+    for entry in headers:
+        for header in entry.get('headers') or []:
+            if header.get('key', '').lower() == 'x-robots-tag':
+                assert header.get('value') == 'noindex, nofollow'
+                found = True
+    assert found
     index = (ROOT / 'web/index.html').read_text()
     assert 'name="robots"' in index and 'content="noindex, nofollow"' in index
 
@@ -102,7 +108,10 @@ def test_engine_codedb_paths_404_and_do_not_return_the_file(tmp_path, monkeypatc
     planted.write_bytes(MARKER + b'\x00not-for-download')
     monkeypatch.setenv('BATATIS_CODEDB', str(planted))
     client = TestClient(create_app())
-    for path in ('/codedb.sqlite', '/codedb/build/codedb.sqlite', '/api/codedb/build/codedb.sqlite'):
+    for path in (
+        '/codedb.sqlite', '/codedb/build/codedb.sqlite', '/api/codedb/build/codedb.sqlite',
+        '/reference/text/NBC.jsonl', '/codedb/build/extract.jsonl',
+    ):
         response = client.get(path)
         assert response.status_code == 404, path
         assert MARKER not in response.content
@@ -111,17 +120,27 @@ def test_engine_codedb_paths_404_and_do_not_return_the_file(tmp_path, monkeypatc
     assert '/api/codedb/build/codedb.sqlite' in CODEDB_DOWNLOADS
 
 
-def _vercel_routes():
-    config = json.loads((ROOT / 'vercel.json').read_text())
-    return config['routes']
+def _vercel_config():
+    return json.loads((ROOT / 'vercel.json').read_text())
+
+
+def _download(path: str) -> bool:
+    clean = path.split('?', 1)[0].lower()
+    return clean.endswith('.sqlite') or clean.endswith('.jsonl') or clean.startswith('/codedb/')
 
 
 def _routed_status(path: str, dist: Path) -> tuple[int, bytes]:
-    """Apply vercel.json routes, then a file in dist. A 404 route wins over a planted file."""
-    for route in _vercel_routes():
-        if route.get('src') and re.search(route['src'], path):
-            if route.get('status') == 404:
-                return 404, b'not found'
+    """Apply vercel.json rewrites. A code-database file sent to the engine is a 404."""
+    config = _vercel_config()
+    assert 'routes' not in config
+    for rewrite in config.get('rewrites') or []:
+        source = rewrite.get('source')
+        if not source or not re.search(source, path):
+            continue
+        service = (rewrite.get('destination') or {}).get('service')
+        if service == 'engine' and _download(path):
+            return 404, b'not found'
+        break
     file = dist / path.lstrip('/')
     if file.is_file():
         return 200, file.read_bytes()
@@ -130,7 +149,11 @@ def _routed_status(path: str, dist: Path) -> tuple[int, bytes]:
 
 def test_vercel_routes_404_a_planted_codedb_sqlite(tmp_path):
     dist = tmp_path / 'dist'
-    for path in ('/codedb.sqlite', '/codedb/build/codedb.sqlite', '/api/codedb/build/codedb.sqlite'):
+    planted_paths = (
+        '/codedb.sqlite', '/codedb/build/codedb.sqlite', '/api/codedb/build/codedb.sqlite',
+        '/reference/text/NBC.jsonl', '/codedb/build/extract.jsonl',
+    )
+    for path in planted_paths:
         file = dist / path.lstrip('/')
         file.parent.mkdir(parents=True, exist_ok=True)
         file.write_bytes(MARKER + b'\x00planted')
@@ -152,7 +175,7 @@ def test_vercel_routes_404_a_planted_codedb_sqlite(tmp_path):
     server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
     Thread(target=server.serve_forever, daemon=True).start()
     try:
-        for path in ('/codedb.sqlite', '/codedb/build/codedb.sqlite', '/api/codedb/build/codedb.sqlite'):
+        for path in planted_paths:
             with pytest.raises(urllib.error.HTTPError) as caught:
                 urllib.request.urlopen(f'http://127.0.0.1:{server.server_address[1]}{path}')
             assert caught.value.code == 404
@@ -296,7 +319,10 @@ def test_identify_llm_error_falls_back_with_hits(tmp_path, monkeypatch):
     assert body['hits'] != []
     with sqlite3.connect(path) as con:
         statuses = [row[0] for row in con.execute('SELECT status FROM spend_ledger ORDER BY id')]
-    assert statuses == ['released']
+    assert statuses == ['settled']
+    with sqlite3.connect(path) as con:
+        amounts = list(con.execute('SELECT est_usd, actual_usd FROM spend_ledger'))
+    assert amounts[0][0] == amounts[0][1]
 
     def refuse(payload, key):
         return {
@@ -312,7 +338,7 @@ def test_identify_llm_error_falls_back_with_hits(tmp_path, monkeypatch):
     assert again.json()['hits'] == ['9.10.15.4.']
     with sqlite3.connect(path) as con:
         statuses = [row[0] for row in con.execute('SELECT status FROM spend_ledger ORDER BY id')]
-    assert statuses == ['released', 'released']
+    assert statuses == ['settled', 'settled']
 
 
 def _offline_registry(tmp_path):

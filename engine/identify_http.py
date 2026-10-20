@@ -17,13 +17,23 @@ API_FALLBACK_LABEL = 'API fallback'
 IDENTIFY_MODEL = 'gpt-4.1-mini'
 IDENTIFY_MAX_OUTPUT = 2_000
 
-# Exact paths that must not return the code database file.
+# Exact paths that must not return the code database file. Any .sqlite or .jsonl
+# path is the same refusal: those files are not downloads.
 CODEDB_DOWNLOADS = frozenset({
     '/codedb.sqlite',
     '/codedb/build/codedb.sqlite',
     '/api/codedb.sqlite',
     '/api/codedb/build/codedb.sqlite',
 })
+
+
+def codedb_download(path: str) -> bool:
+    """True when this path must 404 instead of returning a code-database file."""
+    clean = path.split('?', 1)[0]
+    if clean in CODEDB_DOWNLOADS:
+        return True
+    lower = clean.lower()
+    return lower.endswith('.sqlite') or lower.endswith('.jsonl')
 
 
 class IdentifyRequest(BaseModel):

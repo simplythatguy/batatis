@@ -10,7 +10,13 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const dist = join(root, "web", "dist");
-const paths = ["/codedb.sqlite", "/codedb/build/codedb.sqlite", "/api/codedb/build/codedb.sqlite"];
+const paths = [
+  "/codedb.sqlite",
+  "/codedb/build/codedb.sqlite",
+  "/api/codedb/build/codedb.sqlite",
+  "/reference/text/NBC.jsonl",
+  "/codedb/build/extract.jsonl",
+];
 const marker = "SQLite format 3";
 
 if (!existsSync(join(dist, "index.html"))) {
@@ -34,14 +40,31 @@ if (leaked.length) {
 }
 
 const config = JSON.parse(readFileSync(join(root, "vercel.json"), "utf8"));
-const routes = config.routes || [];
+if (config.routes) {
+  console.error("vercel.json must not use routes; use rewrites and headers");
+  process.exit(1);
+}
+const robots = (config.headers || []).some((entry) =>
+  (entry.headers || []).some(
+    (header) => header.key.toLowerCase() === "x-robots-tag" && header.value === "noindex, nofollow",
+  ),
+);
+if (!robots) {
+  console.error("vercel.json headers are missing X-Robots-Tag: noindex, nofollow");
+  process.exit(1);
+}
+
+function download(urlPath) {
+  const clean = urlPath.split("?")[0].toLowerCase();
+  return clean.endsWith(".sqlite") || clean.endsWith(".jsonl") || clean.startsWith("/codedb/");
+}
 
 function statusFor(urlPath) {
-  for (const route of routes) {
-    if (route.src && new RegExp(route.src).test(urlPath)) {
-      if (route.continue) continue;
-      return route.status ?? 200;
-    }
+  for (const rewrite of config.rewrites || []) {
+    if (!rewrite.source || !new RegExp(rewrite.source).test(urlPath)) continue;
+    const service = rewrite.destination && rewrite.destination.service;
+    if (service === "engine" && download(urlPath)) return 404;
+    return null;
   }
   return null;
 }

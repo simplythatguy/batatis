@@ -15,6 +15,20 @@ def default_path() -> Path:
     return Path(os.environ.get('BATATIS_CASES') or DEFAULT_PATH)
 
 
+def open_store():
+    """Sqlite by default. A Postgres URL selects the Postgres case store.
+
+    #24 is not on this branch. Its purge and daily spend table are not copied
+    here. When that branch is on dev, use its delete and purge.
+    """
+    from .spend import database_url
+    url = database_url()
+    if url and url.startswith('postgresql://'):
+        from .store_postgres import PostgresCaseStore
+        return PostgresCaseStore(url)
+    return CaseStore()
+
+
 class CaseStore:
     def __init__(self, path: Path | str | None = None):
         self.path = Path(path) if path else default_path()

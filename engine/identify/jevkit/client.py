@@ -197,6 +197,12 @@ def _origin(url: str) -> Any:
         f"?{parsed.query}" if parsed.query else "")
 
 
+def _refuse_when_deployed() -> None:
+    """Live mode and the hosted engine are OpenAI only. No TypeSafe or OpenRouter call."""
+    if os.environ.get('BATATIS_LIVE') == '1' or os.environ.get('VERCEL'):
+        raise JevError('offline', 'Live mode is OpenAI only.')
+
+
 def _connect(key: Any, timeout: float) -> Any:
     scheme, host, port = key
     if scheme == "http":
@@ -242,6 +248,7 @@ def _http_transport(body: bytes, headers: Dict[str, str], timeout: float, url: s
     ``max_bytes`` is the caller's own ceiling on the reply: a feature that plans one small
     object should not be able to pull a megabyte because the client's default is higher.
     """
+    _refuse_when_deployed()
     key, path = _origin(url)
     for attempt in (0, 1):
         connection = _POOL.borrow(key, timeout)
@@ -436,6 +443,7 @@ def ask(
     Raises ``JevError`` for anything the caller should not act on. ``timeout`` is a
     total wall-clock budget across retries, not a per-attempt one.
     """
+    _refuse_when_deployed()
     if not questions:
         raise ValueError("no questions")
     # Where the shape is enforced. A caller that hand-builds a question dict used to reach the

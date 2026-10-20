@@ -10,7 +10,7 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | --- | --- |
 | `GET /status/budget` | `200` `{ "live", "cap_usd", "spent_usd", "remaining_usd" }`. See below. |
 | `POST /identify` | Body `{ "query" }`. `200` `{ "label", "notice", "hits" }`. A live model result has `label` `model output, not verified` and no accuracy or score field. Over the cap, or when the ledger cannot be checked, `label` is `keyword search, no AI`, `notice` is set, and `hits` are the BM25 article ids. Over the per-IP limit, `429` with `Retry-After` and detail `Live model limit reached; try again in N seconds`. The limit is in memory on each engine instance. |
-| `GET /codedb.sqlite`, `GET /codedb/build/codedb.sqlite`, `GET /api/codedb/build/codedb.sqlite` | `404` `{ "detail": "not found" }`. The code database file is not the body. |
+| `GET` paths ending in `.sqlite` or `.jsonl`, including `/codedb.sqlite`, `/codedb/build/codedb.sqlite`, `/api/codedb/build/codedb.sqlite` | `404` `{ "detail": "not found" }`. The code database file is not the body. |
 | `POST /cases` | `201` Case. Body is optional: `title`, `jurisdiction` (`id`, `name`, `authority`). |
 | `GET /cases/{case_id}` | Case, or `404` with detail `case not found`. |
 | `DELETE /cases/{case_id}` | `204` with an empty body when the case is removed. `404` detail `case not found` when it is not stored. |
@@ -28,11 +28,11 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 
 ### Privacy notice
 
-`X-Batatis-Notice` and the engine `X-Robots-Tag` header are owned by #24 (`http_guard`, `PII_NOTICE`). This branch does not set either header and does not keep a second notice string. `web/index.html` has `<meta name="robots" content="noindex, nofollow">`. Every route in `vercel.json` sends `X-Robots-Tag: noindex, nofollow`.
+`X-Batatis-Notice` and the engine `X-Robots-Tag` header are owned by #24 (`http_guard`, `PII_NOTICE`). This branch does not set either header and does not keep a second notice string. `web/index.html` has `<meta name="robots" content="noindex, nofollow">`. `vercel.json` `headers` send `X-Robots-Tag: noindex, nofollow` on `/(.*)`. There is no `routes` key.
 
 ### Labels
 
-A live model result uses the label `model output, not verified`. It does not include an accuracy field, a score field, or an eval fraction such as `9/11` or `50/60`. Over the spend cap, or when the ledger is unavailable, `POST /identify` stays HTTP 200 and returns `label` `keyword search, no AI` together with `notice`. A provider error, including a model refusal, also stays HTTP 200: `label` is `API fallback`, `notice` is omitted, and the reservation is released. The `hits` on either fallback are BM25 article ids from the code database, or an empty list when that database cannot be read.
+A live model result uses the label `model output, not verified`. It does not include an accuracy field, a score field, or an eval fraction such as `9/11` or `50/60`. Over the spend cap, or when the ledger is unavailable, `POST /identify` stays HTTP 200 and returns `label` `keyword search, no AI` together with `notice`. A provider error, including a model refusal, also stays HTTP 200: `label` is `API fallback` and `notice` is omitted. The `hits` on either fallback are BM25 article ids from the code database, or an empty list when that database cannot be read. If that request never left (a connect error, or a local refusal before the post), the reservation is released. If the provider was contacted and then failed (timeout, HTTP error, or a response that could not be used), the full reservation stays settled. Settled cost is never above the reservation.
 
 ### Rate limits
 
@@ -40,7 +40,9 @@ A live model result uses the label `model output, not verified`. It does not inc
 
 ### Spend cap and `notice`
 
-Every live OpenAI call goes through `openai_chat_json` in `engine/spend.py`, which reserves against one total cap before the provider is contacted (`BATATIS_TOTAL_BUDGET_USD`, default 20). There is no daily cap. The reservation is the model's input rate times an estimate of the input tokens, plus its output rate times `max_completion_tokens` (always sent). The input estimate is tiktoken `o200k_base` when that package imports, otherwise `ceil(character_count / 3)` of the message JSON, which is above a typical English rate and so reserves high. `BATATIS_LLM_PROVIDER=anthropic` is refused when `BATATIS_LIVE=1`.
+The cap covers OpenAI chat completions posted by `openai_chat_json` in `engine/spend.py` (`BATATIS_TOTAL_BUDGET_USD`, default 20). There is no daily cap. The reservation is the model's input rate times an estimate of the input tokens, plus its output rate times `max_completion_tokens` (always sent). The settled amount is never higher than that reservation. The input estimate is tiktoken `o200k_base` when that package imports, otherwise `ceil(character_count / 3)` of the message JSON, which is above a typical English rate and so reserves high. `BATATIS_LLM_PROVIDER=anthropic` is refused when `BATATIS_LIVE=1`.
+
+The Anthropic verifier and the Jev/TypeSafe client are not metered by this cap. Live mode (`BATATIS_LIVE=1`) and the hosted engine (`VERCEL` set) refuse both before a request is sent. A CLI or eval run can still call them only when `BATATIS_LIVE` is unset and `VERCEL` is unset.
 
 `GET /status/budget` returns only:
 

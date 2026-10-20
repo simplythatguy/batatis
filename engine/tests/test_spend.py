@@ -17,6 +17,8 @@ from engine.spend import (
     POSTGRES_LOCK_SQL,
     POSTGRES_RESERVE_SQL,
     ROUTE_IDENTIFY_RERANK,
+    RequestNotSent,
+    RequestSent,
     SpendError,
     UNPRICED_NOTICE,
     _SQLITE_DDL,
@@ -218,10 +220,10 @@ def test_error_releases_the_reservation(tmp_path, monkeypatch):
     path = _prepare(tmp_path, monkeypatch, cap=format(estimate, 'f'))
 
     def boom(payload, key):
-        raise RuntimeError('provider failed')
+        raise RequestNotSent('openai connect failed')
 
     monkeypatch.setattr('engine.spend._post_chat', boom)
-    with pytest.raises(RuntimeError, match='provider failed'):
+    with pytest.raises(RequestNotSent, match='connect failed'):
         _call(messages)
     rows = _rows(path)
     assert len(rows) == 1 and rows[0]['status'] == 'released'
@@ -243,10 +245,11 @@ def test_returned_model_must_match_and_be_priced(tmp_path, monkeypatch):
         return body
 
     monkeypatch.setattr('engine.spend._post_chat', post)
-    with pytest.raises(SpendError, match='model mismatch'):
+    with pytest.raises(RequestSent, match='model mismatch'):
         _call()
     rows = _rows(path)
-    assert len(rows) == 1 and rows[0]['status'] == 'released'
+    assert len(rows) == 1 and rows[0]['status'] == 'settled'
+    assert rows[0]['actual_usd'] == rows[0]['est_usd']
 
 
 def test_no_database_in_live_mode_fails_closed(tmp_path, monkeypatch):
@@ -429,6 +432,59 @@ def test_sqlite_url_helper_round_trip(tmp_path):
     assert sqlite_database_url(path).startswith('sqlite:///')
     from engine.spend import _sqlite_path
     assert _sqlite_path(sqlite_database_url(path)) == path.resolve()
+
+
+def test_sent_request_error_keeps_the_full_reservation(tmp_path, monkeypatch):
+    messages = _messages()
+    estimate = token_cost(_MODEL, estimate_input_tokens(messages), 8)
+    path = _prepare(tmp_path, monkeypatch, cap=format(estimate, 'f'))
+
+    def boom(payload, key):
+        raise RequestSent('openai http 500')
+
+    monkeypatch.setattr('engine.spend._post_chat', boom)
+    with pytest.raises(RequestSent, match='http 500'):
+        openai_chat_json(messages, model=_MODEL, max_completion_tokens=8)
+    rows = _rows(path)
+    assert rows[0]['status'] == 'settled'
+    assert rows[0]['actual_usd'] == rows[0]['est_usd']
+    assert Decimal(rows[0]['actual_usd']) == estimate
+    seen = []
+    _install(monkeypatch, seen, completion=0)
+    second = openai_chat_json(messages, model=_MODEL, max_completion_tokens=8)
+    assert second.offline is True and second.notice == CAP_NOTICE
+    assert seen == []
+
+
+def test_reported_usage_cannot_settle_above_the_reservation(tmp_path, monkeypatch):
+    path = _prepare(tmp_path, monkeypatch, cap='20')
+    messages = _messages('short')
+
+    def post(payload, key):
+        return _reply(payload, 50_000_000, 50_000_000)
+
+    monkeypatch.setattr('engine.spend._post_chat', post)
+    result = openai_chat_json(messages, model=_MODEL, max_completion_tokens=4)
+    assert result.offline is False
+    row = _rows(path)[0]
+    assert row['status'] == 'settled'
+    assert Decimal(row['actual_usd']) == Decimal(row['est_usd'])
+    reserved = token_cost(_MODEL, estimate_input_tokens(messages), 4)
+    assert Decimal(row['actual_usd']) == reserved
+
+
+def test_postgres_unreachable_fails_closed(monkeypatch):
+    monkeypatch.setenv('DATABASE_URL', 'postgresql://batatis@127.0.0.1:1/spend?sslmode=disable')
+    monkeypatch.delenv('POSTGRES_URL', raising=False)
+    monkeypatch.setenv('BATATIS_LIVE', '1')
+    monkeypatch.setenv('OPENAI_API_KEY', 'test-openai-key')
+    monkeypatch.delenv('BATATIS_LLM_PROVIDER', raising=False)
+    seen = []
+    _install(monkeypatch, seen)
+    result = openai_chat_json(_messages(), model=_MODEL, max_completion_tokens=8)
+    assert result.offline is True
+    assert result.notice == LEDGER_NOTICE
+    assert seen == []
 
 
 def test_character_estimate_is_ceil_of_chars_over_three(monkeypatch):

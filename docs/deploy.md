@@ -1,6 +1,6 @@
 # Deploy notes for the live OpenAI spend cap
 
-Service layout and `vercel.json` are a separate change. This page is the spend cap those functions have to have before a key is turned on.
+`vercel.json` uses `headers` and `rewrites` in the same shape as #38 (`deploy/vercel-dev`), including that branch's `services` block. It does not use `routes`. `.sqlite` and `.jsonl` requests are rewritten to the engine, which answers 404. `headers` send `X-Robots-Tag: noindex, nofollow` on `/(.*)`. The engine build script named in that services block is #38's.
 
 The engine on Vercel Hobby is a set of stateless functions. They do not share memory, so the running total cannot live in the process. It is one Postgres table, `spend_ledger`, on Neon. Neon's free tier is enough for that table: one row per keyed call. The code database is a separate read-only sqlite file. The ledger never opens `codedb.sqlite`. Pointing `DATABASE_URL` at that file is refused, and a read-only bundle stays read-only.
 
@@ -20,9 +20,11 @@ Set these on the Vercel project for the engine runtime. Do not commit values. `O
 
 `POST /identify` counts toward `BATATIS_LLM_RATE_LIMIT` (default 20) per IP per `BATATIS_LLM_RATE_WINDOW_SECONDS` (default 600). `GET /ccmc/search` counts toward `BATATIS_SEARCH_RATE_LIMIT` (default 60) per IP per `BATATIS_SEARCH_RATE_WINDOW_SECONDS` (default 600). The client IP is the first hop of `x-vercel-forwarded-for`, then `X-Forwarded-For`, then the peer address. A request over the limit is HTTP 429 with `Retry-After` and a detail that says which limit was reached. Both windows are in memory on one process. They are per instance unless a later change stores them in Postgres. They are not the spend cap.
 
-`BATATIS_LLM_PROVIDER=anthropic` is refused when `BATATIS_LIVE=1`. Live calls are OpenAI only. The only request function is `openai_chat_json` in `engine/spend.py`. It estimates input tokens from the messages (tiktoken `o200k_base` when that package is installed, otherwise `ceil(character_count / 3)`, which reserves high), always sends `max_completion_tokens`, and reserves the input rate times that estimate plus the output rate times `max_completion_tokens`.
+The cap covers OpenAI chat completions from `openai_chat_json` in `engine/spend.py` only. It estimates input tokens from the messages (tiktoken `o200k_base` when that package is installed, otherwise `ceil(character_count / 3)`, which reserves high), always sends `max_completion_tokens`, and reserves the input rate times that estimate plus the output rate times `max_completion_tokens`. The settled cost is never higher than that reservation. A connect error before the request leaves releases the reservation. A timeout, an HTTP error, or an unusable response settles the full reservation.
 
-Over the spend cap, or when the ledger cannot be checked, `POST /identify` stays HTTP 200. `label` is `keyword search, no AI`, `notice` is set, and `hits` are the BM25 list. A provider error also stays HTTP 200: the reservation is released, `label` is `API fallback`, and `hits` are that same BM25 list. A live model result uses `label` `model output, not verified` and does not carry an accuracy or score field.
+`BATATIS_LLM_PROVIDER=anthropic` is refused when `BATATIS_LIVE=1`. The Anthropic verifier and the Jev/TypeSafe client are not metered. Live mode and a hosted engine (`VERCEL` set) refuse both before a request. A CLI or eval run can still call them only when `BATATIS_LIVE` is unset and `VERCEL` is unset.
+
+Over the spend cap, or when the ledger cannot be checked, `POST /identify` stays HTTP 200. `label` is `keyword search, no AI`, `notice` is set, and `hits` are the BM25 list. A provider error also stays HTTP 200 with `label` `API fallback` and those BM25 hits. A live model result uses `label` `model output, not verified` and does not carry an accuracy or score field.
 
 ## Releasing a stuck reservation
 
@@ -52,9 +54,9 @@ WHERE status = 'reserved' AND ts < '2026-10-20T00:00:00.000000Z';
 
 Leave `settled` rows in place. They are the spent total.
 
-`X-Batatis-Notice` and the engine `X-Robots-Tag` header belong to #24 (`http_guard`, `PII_NOTICE`). This branch does not set those headers. `web/index.html` carries the robots meta tag, and every `vercel.json` route sends `X-Robots-Tag: noindex, nofollow`.
+`X-Batatis-Notice` and the engine `X-Robots-Tag` header belong to #24 (`http_guard`, `PII_NOTICE`). This branch does not set those headers. `web/index.html` carries the robots meta tag. `vercel.json` `headers` send `X-Robots-Tag: noindex, nofollow`.
 
-The code database is not a public file. `vercel.json` answers `/codedb.sqlite`, `/codedb/build/codedb.sqlite`, and `/api/codedb/build/codedb.sqlite` with 404, ahead of any later rewrite. Those routes have to stay. The service layout itself is a separate change. The web build's `dist/` does not contain `codedb.sqlite`.
+The code database is not a public file. Rewrites send `.sqlite` and `.jsonl` paths, including `/codedb/…`, to the engine, and the engine returns 404. The web build's `dist/` does not contain `codedb.sqlite`. Postgres `DELETE /cases/{id}` removes one case row. #24 is not on `dev`, so this branch does not copy #24's 7-day purge.
 
 No database, a database error, an unknown model, or a full cap refuses the provider call and serves the offline path with the `notice` strings in `docs/api-contract.md`. Those refusals are HTTP 200, not 5xx.
 

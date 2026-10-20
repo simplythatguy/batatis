@@ -516,6 +516,14 @@ class SpendError(Exception):
     """
 
 
+class RequestNotSent(SpendError):
+    """The request never left this process. The reservation is released."""
+
+
+class RequestSent(SpendError):
+    """The provider was contacted. The full reservation stays settled."""
+
+
 def live_provider_is_anthropic() -> bool:
     """True when live mode is on and the configured provider is Anthropic."""
     if os.environ.get('BATATIS_LIVE') != '1':
@@ -560,17 +568,25 @@ def _post_chat(payload: dict, api_key: str) -> dict:
         with urllib.request.urlopen(request, timeout=60) as response:
             raw = response.read()
     except urllib.error.HTTPError as exc:
-        raise SpendError('openai http ' + str(exc.code)) from None
-    except Exception:
-        raise SpendError('openai request failed') from None
+        # An HTTP status means the request was sent.
+        raise RequestSent('openai http ' + str(exc.code)) from None
+    except urllib.error.URLError as exc:
+        # A timeout can fire after the bytes left. A refused connection cannot.
+        if isinstance(exc.reason, TimeoutError):
+            raise RequestSent('openai timeout') from None
+        raise RequestNotSent('openai connect failed') from None
+    except TimeoutError:
+        raise RequestSent('openai timeout') from None
+    except OSError:
+        raise RequestNotSent('openai connect failed') from None
     try:
         parsed = json.loads(raw.decode('utf-8'))
     except Exception:
-        raise SpendError('openai response was not json') from None
+        raise RequestSent('openai response was not json') from None
     if not isinstance(parsed, dict):
-        raise SpendError('openai response was not an object')
+        raise RequestSent('openai response was not an object')
     if parsed.get('error'):
-        raise SpendError('openai refused')
+        raise RequestSent('openai refused')
     return parsed
 
 
@@ -585,8 +601,10 @@ def openai_chat_json(messages, *, model: str, max_completion_tokens: int,
     ``max_completion_tokens`` is required and is always sent. The reservation is
     the input rate times the estimated input tokens plus the output rate times
     ``max_completion_tokens``. Refusals return an offline result and do not post.
-    A provider error releases the reservation and raises ``SpendError`` (or the
-    error from the post). The API key is not logged.
+    The settled cost never exceeds that reservation. A connect error before the
+    request leaves releases it. A timeout, an HTTP error, or a bad response
+    settles the full reservation, because the request may already have been
+    billed. The API key is not logged.
     """
     if live_provider_is_anthropic():
         raise SpendError('Live mode is OpenAI only.')
@@ -617,6 +635,7 @@ def openai_chat_json(messages, *, model: str, max_completion_tokens: int,
     value: dict | None = None
     actual = estimate
     call_error: BaseException | None = None
+    sent = False
     try:
         api_key = (os.environ.get('OPENAI_API_KEY') or '').strip()
         payload: dict[str, Any] = {
@@ -627,25 +646,30 @@ def openai_chat_json(messages, *, model: str, max_completion_tokens: int,
         if response_format is not None:
             payload['response_format'] = response_format
         value = _post_chat(payload, api_key)
+        sent = True
         returned = value.get('model')
         if returned != model or returned not in MODEL_PRICES:
-            raise SpendError('openai model mismatch')
+            raise RequestSent('openai model mismatch')
         choices = value.get('choices') or []
         if choices and isinstance(choices[0], dict) and choices[0].get('finish_reason') == 'refusal':
-            raise SpendError('openai refused')
+            raise RequestSent('openai refused')
         spent = _usage_tokens(value)
         if spent is not None:
             actual = token_cost(model, spent[0], spent[1])
             if actual > estimate:
                 actual = estimate
+    except RequestNotSent as exc:
+        call_error = exc
     except Exception as exc:
+        # Unknown failures count as sent. Only RequestNotSent proves the bytes stayed here.
+        sent = True
         call_error = exc
     finally:
         try:
-            if call_error is not None:
+            if call_error is not None and not sent:
                 ledger.release(row_id)
             else:
-                ledger.settle(row_id, actual)
+                ledger.settle(row_id, estimate if call_error is not None else actual)
         except LedgerUnavailable:
             # A failed settle leaves the reservation, which still counts the worst case.
             log.warning('spend ledger unavailable')

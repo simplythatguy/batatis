@@ -10,11 +10,11 @@ from codedb import AmbiguousProvisionError
 
 from .codes import CodeDbMissing, Codes
 from .export import ExportBlocked, ExportError, FormNotFound, export_case
-from .identify_http import CODEDB_DOWNLOADS, IdentifyRequest, IdentifyResponse, identify
+from .identify_http import IdentifyRequest, IdentifyResponse, codedb_download, identify
 from .models import Case, Fact, Jurisdiction, SectionCRow
 from .spend import BudgetStatus, budget_status
 from .section_c import section_c_rows
-from .store import CaseStore
+from .store import CaseStore, open_store
 
 
 class NewCase(BaseModel):
@@ -39,7 +39,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, regis
     async def codedb_is_not_a_download(request: Request, call_next):
         # Robots and the privacy notice headers belong to #24 (http_guard, PII_NOTICE).
         # The code database is not a download. The body is fixed and has no file bytes.
-        if request.url.path in CODEDB_DOWNLOADS:
+        if codedb_download(request.url.path):
             return JSONResponse(status_code=404, content={'detail': 'not found'})
         return await call_next(request)
 
@@ -47,7 +47,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, regis
 
     def cases() -> CaseStore:
         if state['store'] is None:
-            state['store'] = CaseStore()
+            state['store'] = open_store()
         return state['store']
 
     def code() -> Codes:
