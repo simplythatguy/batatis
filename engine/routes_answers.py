@@ -13,7 +13,8 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from .building_facts import BuildingFactsUpdate, write_building_facts
 from .codes import Codes
 from .description_facts import DescriptionExtract, extract_description
-from .evidence_gaps import ProvisionEvidenceGap, group_evidence_gaps, uncovered_items
+from .evidence_gaps import (
+    EvidenceClosure, ProvisionEvidenceGap, evidence_closures, group_evidence_gaps, uncovered_items)
 from .models import Case, EvidenceItem, Fact, Source
 from .professional import ProfessionalResult, professional_involvement
 from .section_d import EvidenceType, section_d_plan
@@ -46,6 +47,7 @@ class EvidenceCreate(BaseModel):
 class EvidenceCreated(BaseModel):
     evidence: EvidenceItem
     gaps: list[ProvisionEvidenceGap]
+    closed: list[EvidenceClosure]
 
 
 class BuildingFactsResponse(BaseModel):
@@ -109,13 +111,17 @@ def create_answers_router(cases: Callable[[], CaseStore], code: Callable[[], Cod
                          if item.objective == body.objective and item.function == body.function), None)
             if pair is None:
                 raise HTTPException(400, 'that objective/function pair is not on the attribution for this provision')
+        before = uncovered_items(items, case.evidence)
         item = EvidenceItem(
             provision_id=body.provision_id, objective=body.objective, function=body.function,
             description=body.description, evidence_type=body.evidence_type, file_id=body.file_id,
-            professional_required=None, status='provided')
+            professional_required=None, status='evidence_listed')
         case.evidence.append(item)
         cases().put(case)
-        return EvidenceCreated(evidence=item, gaps=group_evidence_gaps(uncovered_items(items, case.evidence)))
+        still_open = uncovered_items(items, case.evidence)
+        return EvidenceCreated(
+            evidence=item, gaps=group_evidence_gaps(still_open),
+            closed=evidence_closures(before, still_open))
 
     @router.delete('/cases/{case_id}/evidence/{evidence_id}', status_code=204)
     def delete_evidence(case_id: str, evidence_id: str):

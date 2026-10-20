@@ -118,7 +118,9 @@ class EvidenceItem(BaseModel):
     evidence_type: str | None = None
     file_id: str | None = None
     professional_required: bool | None = None
-    status: Literal['needed', 'provided', 'not_applicable'] = 'needed'
+    # evidence_listed: the applicant listed evidence; not a check that it is sufficient,
+    # and not a compliance determination.
+    status: Literal['needed', 'evidence_listed', 'not_applicable'] = 'needed'
 
 
 class Gap(BaseModel):

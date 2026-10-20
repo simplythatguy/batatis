@@ -77,7 +77,7 @@ def sample_case(codes: Codes, provisions: list[str] = PROVISIONS, facts: dict = 
         name, who = facts.get(f'supporting_doc.{n}.name'), facts.get(f'supporting_doc.{n}.responsible')
         if not name:
             continue
-        case.evidence.append(EvidenceItem(id=eid, description=name, status='provided'))
+        case.evidence.append(EvidenceItem(id=eid, description=name, status='evidence_listed'))
         case.facts.append(synthetic_fact(f'evidence.{eid}.file_ref', str(source_file)))
         case.facts[-1].source = Source(type='file', ref=str(source_file), quote=text)
         case.facts += [synthetic_fact(f'evidence.{eid}.{key}', value) for key, value in

@@ -192,6 +192,18 @@
           "default": null,
           "title": "Evidence Type"
         },
+        "file_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "File Id"
+        },
         "function": {
           "anyOf": [
             {
@@ -232,11 +244,23 @@
           "default": null,
           "title": "Professional Required"
         },
+        "provision_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision Id"
+        },
         "status": {
           "default": "needed",
           "enum": [
             "needed",
-            "provided",
+            "evidence_listed",
             "not_applicable"
           ],
           "title": "Status",
@@ -245,10 +269,12 @@
       },
       "required": [
         "id",
+        "provision_id",
         "objective",
         "function",
         "description",
         "evidence_type",
+        "file_id",
         "professional_required",
         "status"
       ],
@@ -847,7 +873,8 @@
             "file",
             "user_text",
             "drawing",
-            "user_click"
+            "user_click",
+            "description"
           ],
           "title": "Type",
           "type": "string"
@@ -927,7 +954,8 @@
             "file",
             "user_text",
             "drawing",
-            "user_click"
+            "user_click",
+            "description"
           ],
           "title": "Type",
           "type": "string"

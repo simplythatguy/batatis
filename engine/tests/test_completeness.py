@@ -149,7 +149,7 @@ def test_latest_unconfirmed_alias_never_uses_earlier_confirmed_value():
 
 def test_provided_flag_without_attachment_or_responsibility_still_has_gaps():
     case = complete_case()
-    case.evidence.append(EvidenceItem(id='unattached', description='Claimed report', status='provided'))
+    case.evidence.append(EvidenceItem(id='unattached', description='Claimed report', status='evidence_listed'))
     fields = {g.field for g in check_completeness(case, Codes())}
     assert {'evidence.unattached.file_ref', 'evidence.unattached.responsible_party'} <= fields
 

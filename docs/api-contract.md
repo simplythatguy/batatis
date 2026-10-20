@@ -1,6 +1,6 @@
 # Engine HTTP contract
 
-Shapes below are the routes on this branch. Completeness is administrative. A `provided` evidence item records what the applicant supplied. It does not verify the document, and it does not say the design complies or is safe.
+Shapes below are the routes on this branch. Completeness is administrative. An `evidence_listed` item means the applicant listed evidence; not a check that it is sufficient, and not a compliance determination.
 
 There is no upload route here. `file_id` is an opaque applicant reference. The engine does not read file bytes.
 
@@ -77,15 +77,17 @@ Stored facts are `pointed`, `unconfirmed`, `source.type` `description`, `source.
 
 Evidence types: `manufacturer's literature`, `existing STANDATA variance`, `ISO 17025 test report`, `evaluation`, `evaluation + testing`, `qualification`, `ISO 17065 certification`, `CCMC evaluation`, `ICC-ES evaluation`, `registered professional opinion`, `engineering review`.
 
-The provision must already be on the Section D plan (`400` `confirm this Division B benchmark before attaching evidence`). A pair must match a plan item (`400` `that objective/function pair is not on the attribution for this provision`). The stored `EvidenceItem` has `status` `provided` and `professional_required` null.
+The provision must already be on the Section D plan (`400` `confirm this Division B benchmark before attaching evidence`). A pair must match a plan item (`400` `that objective/function pair is not on the attribution for this provision`). The stored `EvidenceItem` has `status` `evidence_listed` and `professional_required` null.
 
-Response: `{evidence, gaps}`. `gaps` is the remaining grouped list for the current plan (same objects as below). Evidence with no objective and no function closes every open pair on that provision. A pair closes only that pair.
+`evidence_listed` means the applicant listed evidence; not a check that it is sufficient, and not a compliance determination. The other stored statuses are `needed` and `not_applicable`.
+
+Response: `{evidence, gaps, closed}`. `gaps` is the remaining grouped list for the current plan (same objects as below). `closed` is the pairs that left that list. Each entry is `{provision_id, pairs, reason}` and `reason` is `evidence listed (not reviewed)`. Evidence with no objective and no function closes every open pair on that provision. A pair closes only that pair.
 
 `DELETE /cases/{case_id}/evidence/{evidence_id}` → `204` empty body, or `404` `evidence not found` / `case not found`.
 
 ## Grouped evidence gaps
 
-`GET /cases/{case_id}/gaps` → `200` list, or `404`. Each gap has `id`, `section`, `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`, and, for evidence gaps, `provision_id` and `pairs` (`{function, objective}`).
+`GET /cases/{case_id}/gaps` → `200` list, or `404`. Each gap has `id`, `section`, `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`, and, for evidence gaps, `provision_id` and `pairs` (`{function, objective}`). Evidence gap text does not say the evidence was addressed, satisfied, or compliant.
 
 Open objective/function pairs on one provision are one blocking gap:
 

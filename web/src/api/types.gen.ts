@@ -30,11 +30,13 @@ export interface Case {
 export interface EvidenceItem {
   description: string;
   evidence_type: string | null;
+  file_id: string | null;
   function: string | null;
   id: string;
   objective: string | null;
   professional_required: boolean | null;
-  status: "needed" | "provided" | "not_applicable";
+  provision_id: string | null;
+  status: "needed" | "evidence_listed" | "not_applicable";
 }
 
 export interface Fact {
@@ -120,7 +122,7 @@ export interface Source {
   page: number | null;
   quote: string | null;
   ref: string;
-  type: "code" | "file" | "user_text" | "drawing" | "user_click";
+  type: "code" | "file" | "user_text" | "drawing" | "user_click" | "description";
 }
 
 export interface SourceInput {
@@ -128,5 +130,5 @@ export interface SourceInput {
   page?: number | null;
   quote?: string | null;
   ref: string;
-  type: "code" | "file" | "user_text" | "drawing" | "user_click";
+  type: "code" | "file" | "user_text" | "drawing" | "user_click" | "description";
 }

@@ -1,4 +1,7 @@
 """Applicant routes for evidence, building facts and description facts."""
+import json
+import re
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -64,7 +67,16 @@ def _case(store):
 
 
 def _evidence_gaps(payload):
-    return [gap for gap in payload if str(gap.get('id', '')).startswith('evidence:')]
+    return [gap for gap in payload if str(gap.get('id', '')).startswith('evidence')
+            or str(gap.get('field', '')).startswith('evidence')]
+
+
+_SIGN_OFF = re.compile(r'\b(?:addressed|satisfied|compliant)\b', re.I)
+
+
+def _assert_not_a_sign_off(*payloads):
+    text = json.dumps(payloads)
+    assert _SIGN_OFF.search(text) is None, text
 
 
 def test_evidence_post_groups_and_closes_then_delete_reopens(client):
@@ -83,11 +95,14 @@ def test_evidence_post_groups_and_closes_then_delete_reopens(client):
     assert created.status_code == 201
     body = created.json()
     assert body['gaps'] == []
-    assert body['evidence']['status'] == 'provided'
+    assert body['evidence']['status'] == 'evidence_listed'
+    assert body['closed'][0]['reason'] == 'evidence listed (not reviewed)'
+    assert len(body['closed'][0]['pairs']) == 19
     assert body['evidence']['professional_required'] is None
     assert body['evidence']['file_id'] is None
-    assert http.get(f'/cases/{case.id}/gaps').json()
-    assert _evidence_gaps(http.get(f'/cases/{case.id}/gaps').json()) == []
+    after = http.get(f'/cases/{case.id}/gaps').json()
+    assert _evidence_gaps(after) == []
+    _assert_not_a_sign_off(evidence, body['gaps'], body['closed'], after)
 
     evidence_id = body['evidence']['id']
     assert http.delete(f'/cases/{case.id}/evidence/{evidence_id}').status_code == 204
@@ -105,6 +120,10 @@ def test_pair_evidence_closes_only_that_pair_and_rejects_unknown_pairs(client):
         'file_id': 'file_applicant_1'})
     assert created.status_code == 201
     assert created.json()['evidence']['file_id'] == 'file_applicant_1'
+    assert created.json()['evidence']['status'] == 'evidence_listed'
+    assert created.json()['closed'][0]['reason'] == 'evidence listed (not reviewed)'
+    assert [(pair['function'], pair['objective']) for pair in created.json()['closed'][0]['pairs']] == [('P1', 'Q1')]
+    _assert_not_a_sign_off(created.json()['gaps'], created.json()['closed'])
     left = created.json()['gaps']
     assert len(left) == 1 and len(left[0]['pairs']) == 18
     assert all(pair['function'] != 'P1' for pair in left[0]['pairs'])

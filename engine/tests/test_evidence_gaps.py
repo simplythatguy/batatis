@@ -29,14 +29,14 @@ def test_provision_evidence_closes_every_pair_and_a_pair_closes_one():
     provision = '9.99.1.1.(1)'
     items = [item(provision, 'P1', 'Q1'), item(provision, 'P2', 'Q2')]
     whole = EvidenceItem(provision_id=provision, description='Applicant report', evidence_type="manufacturer's literature",
-                         status='provided')
+                         status='evidence_listed')
     assert uncovered_items(items, [whole]) == []
     one = EvidenceItem(provision_id=provision, objective='Q1', function='P1', description='Applicant note',
-                       evidence_type='evaluation', status='provided')
+                       evidence_type='evaluation', status='evidence_listed')
     left = uncovered_items(items, [one])
     assert [item.function for item in left] == ['P2']
     assert len(group_evidence_gaps(left)) == 1
-    assert evidence_covers_item(items[0], [EvidenceItem(description='no provision', status='provided')]) is False
+    assert evidence_covers_item(items[0], [EvidenceItem(description='no provision', status='evidence_listed')]) is False
 
 
 def test_file_backed_plan_status_stays_covered_without_an_evidence_item():

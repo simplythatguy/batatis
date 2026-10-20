@@ -236,9 +236,9 @@ def check_completeness(case: Case, codes: Codes, *,
         # A file id is optional and is stored on the item; it is not a second ledger fact.
         if evidence.provision_id:
             continue
-        if evidence.status == 'provided' and evidence.id not in attached_ids:
+        if evidence.status == 'evidence_listed' and evidence.id not in attached_ids:
             add('attachment', 'D', f'evidence.{evidence.id}.file_ref', f'a file reference for the supporting document “{evidence.description}”.',
-                'Attach the file and retain its source; a provided flag is not an attachment.')
+                'Attach the file and retain its source; listing evidence is not an attachment.')
             if _missing(confirmed_value(case, f'evidence.{evidence.id}.responsible_party')):
                 add('D13', 'D', f'evidence.{evidence.id}.responsible_party', f'a responsible person for supporting document “{evidence.description}”.',
                     'Ask for the author, issuer or responsible organisation and their scope.')
