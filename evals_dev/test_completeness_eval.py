@@ -23,6 +23,7 @@ def test_bench_script_exits_when_openai_key_is_missing():
     assert '--live' in text and '--repeats 3' in text
     assert 'BATATIS_LLM_PROVIDER=openai' in text
     assert 'engine/requirements.txt' in text
+    assert 'codedb/requirements.txt' in text
 
 
 def test_live_command_exits_when_openai_key_is_missing():

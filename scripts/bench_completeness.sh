@@ -36,7 +36,8 @@ PY
   rm -f "$bootstrap"
 fi
 
-.venv/bin/python -m pip install --disable-pip-version-check -q -r engine/requirements.txt
+.venv/bin/python -m pip install --disable-pip-version-check -q \
+  -r engine/requirements.txt -r codedb/requirements.txt
 
 export BATATIS_LLM_PROVIDER=openai
 exec .venv/bin/python -m evals_dev.completeness_eval --live --repeats 3

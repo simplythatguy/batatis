@@ -4,7 +4,8 @@ From a plain checkout, with OPENAI_API_KEY already in the environment:
 
     bash scripts/bench_completeness.sh
 
-That script creates a virtualenv, installs engine/requirements.txt, and runs
+That script creates a virtualenv, installs engine/requirements.txt and
+codedb/requirements.txt, and runs
 this module with BATATIS_LLM_PROVIDER=openai --live --repeats 3.
 
 The process never prints the key. If the key is missing, it exits with an error

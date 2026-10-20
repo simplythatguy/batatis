@@ -2,7 +2,7 @@
 
 Administrative completeness only. The checker does not see gold labels.
 
-Keyed run (variants A, B, and C; C calls the pinned OpenAI model). From a plain checkout, with `OPENAI_API_KEY` already in the environment and no virtualenv prepared. The script creates `.venv`, installs `engine/requirements.txt`, and runs the benchmark. It does not print the key and exits if the key is missing.
+Keyed run (variants A, B, and C; C calls the pinned OpenAI model). From a plain checkout, with `OPENAI_API_KEY` already in the environment and no virtualenv prepared. The script creates `.venv`, installs `engine/requirements.txt` and `codedb/requirements.txt`, and runs the benchmark. It does not print the key and exits if the key is missing.
 
 ```sh
 bash scripts/bench_completeness.sh
