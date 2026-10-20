@@ -24,7 +24,7 @@ def test_routes_are_mounted_and_rebuild_only_confirmed_rows(context):
     case = store.put(Case())
     r = client.post(f'/cases/{case.id}/section-d', json={'provisions': ['9.25.5.2.(1)(b)', '9.27.3.2.(1)']})
     assert r.status_code == 200 and r.json()['items']
-    assert all(item['status'] == 'not provided' for item in r.json()['items'])
+    assert all(item['status'] == 'needed' for item in r.json()['items'])
     stored = store.get(case.id)
     assert stored.provisions == ['9.25.5.2.(1)(b)', '9.27.3.2.(1)'] and stored.section_c
     assert stored.evidence == []

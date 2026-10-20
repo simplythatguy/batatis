@@ -117,7 +117,17 @@ class EvidenceItem(BaseModel):
     description: str
     evidence_type: str | None = None
     professional_required: bool | None = None
-    status: Literal['needed', 'provided', 'not_applicable'] = 'needed'
+    status: Literal['needed', 'evidence_listed', 'not_applicable'] = 'needed'
+    # text: the applicant listed it and no file is attached. file: a confirmed file-source file_ref exists.
+    kind: Literal['text', 'file'] = 'text'
+
+    @model_validator(mode='before')
+    @classmethod
+    def _provided_loads_as_listed(cls, data):
+        """A stored provided row is evidence_listed. Old cases load, and the next write stores the new token."""
+        if isinstance(data, dict) and data.get('status') == 'provided':
+            return {**data, 'status': 'evidence_listed'}
+        return data
 
 
 class Gap(BaseModel):
@@ -140,6 +150,19 @@ class Case(BaseModel):
     section_c: list[SectionCRow] = []
     evidence: list[EvidenceItem] = []
     gaps: list[Gap] = []
+
+    @model_validator(mode='after')
+    def _kind_follows_the_file(self):
+        """kind is file only when a confirmed file-source file_ref exists. Otherwise it is text."""
+        for item in self.evidence:
+            prefix = f'evidence.{item.id}.file_ref'
+            fact = next((entry for entry in reversed(self.facts) if entry.field == prefix), None)
+            has_file = (
+                fact is not None and fact.status == 'confirmed' and fact.kind != 'proposed'
+                and fact.source.type == 'file' and fact.value == fact.source.ref
+                and isinstance(fact.source.ref, str) and fact.source.ref.strip())
+            item.kind = 'file' if has_file else 'text'
+        return self
 
     def export_facts(self) -> list[dict]:
         return [f.export() for f in self.facts]

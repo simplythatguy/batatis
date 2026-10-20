@@ -208,6 +208,15 @@
           "title": "Id",
           "type": "string"
         },
+        "kind": {
+          "default": "text",
+          "enum": [
+            "text",
+            "file"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
         "objective": {
           "anyOf": [
             {
@@ -236,7 +245,7 @@
           "default": "needed",
           "enum": [
             "needed",
-            "provided",
+            "evidence_listed",
             "not_applicable"
           ],
           "title": "Status",
@@ -250,7 +259,8 @@
         "description",
         "evidence_type",
         "professional_required",
-        "status"
+        "status",
+        "kind"
       ],
       "title": "EvidenceItem",
       "type": "object"

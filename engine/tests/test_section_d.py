@@ -14,7 +14,7 @@ def test_every_confirmed_pair_gets_an_issue_and_ordered_types():
     expected = {(r.provision_id, p.function, p.objective) for r in section_c_rows(case.provisions, Codes()) for p in r.pairs}
     assert {(e.provision_id, e.function, e.objective) for e in plan.items} == expected
     assert all(e.recommended_types == CONFIDENCE_LADDER + ALTERNATIVE_EVIDENCE_TYPES for e in plan.items)
-    assert all(e.status == 'not provided' and e.responsible_party == '' and not e.attachments for e in plan.items)
+    assert all(e.status == 'needed' and e.responsible_party == '' and not e.attachments for e in plan.items)
     assert plan == section_d_plan(case, Codes())
 
 
@@ -43,8 +43,8 @@ def test_file_required_before_status_provided_and_responsibility_stays_blank():
     doc = SupportingDocument(id='d1', title='Applicant report', file={'ref': 'report.pdf'}, item_ids=(item.id,))
     plan = section_d_plan(case, Codes(), [doc])
     supplied = next(e for e in plan.items if e.id == item.id)
-    assert supplied.status == 'provided' and supplied.responsible_party == ''
-    assert sum(e.status == 'provided' for e in plan.items) == 1
+    assert supplied.status == 'evidence_listed' and supplied.responsible_party == ''
+    assert sum(e.status == 'evidence_listed' for e in plan.items) == 1
 
 
 def test_file_and_metadata_from_ledger():
@@ -59,7 +59,7 @@ def test_file_and_metadata_from_ledger():
     docs = supporting_documents(case)
     assert len(docs) == 1 and docs[0].file.ref == 'report.pdf'
     result = next(e for e in section_d_plan(case, Codes()).items if e.id == item.id)
-    assert result.status == 'provided' and result.responsible_party == 'Named applicant engineer'
+    assert result.status == 'evidence_listed' and result.responsible_party == 'Named applicant engineer'
     case.facts.append(fact('file_ref', 'mismatch.pdf', file))
     assert supporting_documents(case) == []
 

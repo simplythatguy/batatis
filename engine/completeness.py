@@ -296,9 +296,9 @@ def check_completeness(case: Case, codes: Codes, *,
                 'Request the issue/revision date so the reviewer can identify the version supplied.', severity='warning')
     attached_ids = {d.id for d in docs}
     for evidence in case.evidence:
-        if evidence.status == 'provided' and evidence.id not in attached_ids:
+        if evidence.status == 'evidence_listed' and evidence.id not in attached_ids:
             add('attachment', 'D', f'evidence.{evidence.id}.file_ref', f'a file reference for the supporting document “{evidence.description}”.',
-                'Attach the file and retain its source; a provided flag is not an attachment.')
+                'Attach the file and retain its source; an evidence_listed status is not an attachment.')
             if _missing(confirmed_value(case, f'evidence.{evidence.id}.responsible_party')):
                 add('D13', 'D', f'evidence.{evidence.id}.responsible_party', f'a responsible person for supporting document “{evidence.description}”.',
                     'Ask for the author, issuer or responsible organisation and their scope.')
@@ -309,7 +309,7 @@ def check_completeness(case: Case, codes: Codes, *,
             if item.objective is None:
                 add('evidence_scope', 'D', f'evidence.{item.id}.scope', f'an identified performance benchmark for {item.provision_id}.',
                     'The table has no row; ask the responsible designer which substantive benchmark applies.', item.citation, 'warning')
-            elif item.status == 'not provided':
+            elif item.status == 'needed':
                 add('evidence', 'D', f'evidence.{item.id}', f'supporting evidence for {item.provision_id}, {item.function}–{item.objective}.',
                     item.performance_issue + ' Select appropriate evidence types with the responsible designer; not every ladder rung is required.',
                     item.citation)

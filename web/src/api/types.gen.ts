@@ -32,9 +32,10 @@ export interface EvidenceItem {
   evidence_type: string | null;
   function: string | null;
   id: string;
+  kind: "text" | "file";
   objective: string | null;
   professional_required: boolean | null;
-  status: "needed" | "provided" | "not_applicable";
+  status: "needed" | "evidence_listed" | "not_applicable";
 }
 
 export interface Fact {

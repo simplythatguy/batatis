@@ -8,7 +8,7 @@ from pypdf import PdfReader
 from engine.api import create_app
 from engine.completeness import professional_involvement_gaps
 from engine.export.appendix import build_appendix
-from engine.models import Case
+from engine.models import Case, EvidenceItem, Source
 from engine.professional import OFFICER_PROFESSIONAL_GAP, ProfessionalFacts, professional_involvement
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import fact
@@ -114,35 +114,56 @@ def test_fact_screen_can_still_answer_not_required():
     assert result.required == 'no' and result.involvement == 'not_required'
 
 
-def test_two_evidence_saves_stay_in_the_api_and_the_pdf(tmp_path):
-    client, store = _client(tmp_path)
-    case_id = client.post('/cases', json={'title': 'Dana'}).json()['id']
-    first = client.post(f'/cases/{case_id}/evidence', json={
-        'description': ENGINEER_EMAIL, 'responsible_party': 'R. Singh, P.Eng.'})
-    second = client.post(f'/cases/{case_id}/evidence', json={
-        'description': SUPPLIER_NOTE, 'responsible_party': 'Example Fenestration Co.'})
-    assert first.status_code == second.status_code == 201
-    saved = client.get(f'/cases/{case_id}').json()['evidence']
-    assert [item['description'] for item in saved] == [ENGINEER_EMAIL, SUPPLIER_NOTE]
-    assert saved[0]['id'] == first.json()['id']
-    assert saved[1]['id'] == second.json()['id']
-    assert saved[0]['id'] != saved[1]['id']
-    text = _pdf_text(store.get(case_id))
+TEXT_LABEL = 'listed by applicant, no file attached, not reviewed'
+
+
+def _text_listing(description: str, *, status: str = 'evidence_listed') -> tuple[EvidenceItem, list]:
+    """A typed listing. Facts are applicant text. There is no file_ref."""
+    item = EvidenceItem.model_validate({'id': f'ev_{description[:8]}', 'description': description, 'status': status})
+    prefix = f'evidence.{item.id}.'
+    facts = [
+        fact(prefix + 'title', description),
+        fact(prefix + 'responsible_party', 'R. Singh, P.Eng.'),
+        fact(prefix + 'date', '2026-10-20'),
+    ]
+    return item, facts
+
+
+def test_text_evidence_has_no_file_ref_and_the_pdf_lists_it():
+    first, first_facts = _text_listing(ENGINEER_EMAIL, status='provided')
+    second, second_facts = _text_listing(SUPPLIER_NOTE)
+    assert first.status == second.status == 'evidence_listed'
+    assert first.kind == second.kind == 'text'
+    case = Case(evidence=[first, second], facts=first_facts + second_facts)
+    assert all(item.kind == 'text' for item in case.evidence)
+    assert all('file_ref' not in entry.field for entry in case.facts)
+    text = _pdf_text(case)
     assert ENGINEER_EMAIL in text and SUPPLIER_NOTE in text
+    assert TEXT_LABEL in text
 
 
-def test_delete_evidence_removes_only_that_item(tmp_path):
+def test_evidence_route_is_not_on_this_branch_and_writes_no_file_ref(tmp_path):
     client, store = _client(tmp_path)
     case_id = client.post('/cases', json={'title': 'Dana'}).json()['id']
-    first = client.post(f'/cases/{case_id}/evidence', json={'description': ENGINEER_EMAIL}).json()
-    second = client.post(f'/cases/{case_id}/evidence', json={'description': SUPPLIER_NOTE}).json()
-    assert client.delete(f'/cases/{case_id}/evidence/{first["id"]}').status_code == 204
-    assert client.delete(f'/cases/{case_id}/evidence/{first["id"]}').status_code == 404
-    saved = client.get(f'/cases/{case_id}').json()['evidence']
-    assert [item['id'] for item in saved] == [second['id']]
-    assert saved[0]['description'] == SUPPLIER_NOTE
-    text = _pdf_text(store.get(case_id))
-    assert SUPPLIER_NOTE in text and ENGINEER_EMAIL not in text
+    posted = client.post(f'/cases/{case_id}/evidence', json={'description': ENGINEER_EMAIL})
+    assert posted.status_code == 404
+    assert client.delete(f'/cases/{case_id}/evidence/ev_missing').status_code == 404
+    saved = store.get(case_id)
+    assert saved.evidence == []
+    assert all('file_ref' not in entry.field for entry in saved.facts)
+
+
+def test_a_file_document_is_not_labelled_as_an_unattached_listing():
+    item = EvidenceItem(id='ev_file', description='Sealed report', kind='text')
+    file = Source(type='file', ref='report.pdf', quote='report.pdf')
+    case = Case(evidence=[item], facts=[
+        fact('evidence.ev_file.file_ref', 'report.pdf', source=file),
+        fact('evidence.ev_file.title', 'Sealed report'),
+    ])
+    assert case.evidence[0].kind == 'file'
+    text = _pdf_text(case)
+    assert 'Sealed report' in text
+    assert TEXT_LABEL not in text
 
 
 def _client(tmp_path):

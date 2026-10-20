@@ -60,7 +60,7 @@ class EvidencePlanItem(BaseModel):
     performance_issue: str
     recommended_types: tuple[EvidenceType, ...]
     responsible_party: str = ''
-    status: Literal['not provided', 'provided'] = 'not provided'
+    status: Literal['needed', 'evidence_listed'] = 'needed'
     attachments: tuple[SupportingDocument, ...] = ()
 
 
@@ -148,5 +148,5 @@ def section_d_plan(case: Case, codes: Codes, documents: list[SupportingDocument]
                 application_note=pair.application_note if pair else None, performance_issue=issue,
                 recommended_types=recommended, responsible_party='; '.join(dict.fromkeys(
                     d.responsible_party for d in attached if d.responsible_party.strip())),
-                status='provided' if attached else 'not provided', attachments=attached))
+                status='evidence_listed' if attached else 'needed', attachments=attached))
     return SectionDPlan(items=items, notices=notices)

@@ -123,6 +123,47 @@ def test_not_engaged_yet_on_professional_engagement_stays_unknown():
     _engagement_stays_unknown('not_engaged_yet')
 
 
+def test_acceptable_path_applicant_answers_do_not_clear_special_safety_or_professional_law(tmp_path):
+    """Applicant answers stay unknown on an acceptable solution, not only on an alternative."""
+    codes = codes_with_rules()
+    officer = Source(type='officer', ref='ahj', quote='authority answer')
+    applicant = Source(type='user_text', ref='applicant', quote='applicant answer')
+    reserved = {'special_safety_concerns', 'professional_scope_resolved'}
+    for pathway in ('acceptable', 'acceptable_solution'):
+        facts = [fact(name, value, source=applicant if name in reserved else officer)
+                 for name, value in CLEARING_ANSWERS.items()]
+        facts.append(fact('pathway', pathway, source=officer))
+        case = Case(provisions=[BENCHMARK], facts=facts)
+        result = professional_involvement(case, codes)
+        assert result.required == 'depends', pathway
+        assert result.required != 'no', pathway
+        by_code = {reason.code: reason.required for reason in result.reasons}
+        assert by_code['special_safety'] == 'depends', pathway
+        assert by_code['professional_law'] == 'depends', pathway
+        issue = section_d_issues(case, codes)[0]
+        assert issue.practice_of_engineering.value == 'unknown', pathway
+        assert issue.practice_of_engineering.value is not False, pathway
+        assert issue.routed_to == 'officer', pathway
+        gap = _officer_gap(case)
+        assert gap.message == OFFICER_PROFESSIONAL_GAP
+        assert gap.severity == 'blocking' and gap.routed_to == 'officer'
+        reasons = official_export_reasons(case, codes)
+        assert any(OFFICER_PROFESSIONAL_GAP in reason for reason in reasons)
+        draft_is_allowed(case, codes)
+
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    saved = store.put(case)
+    client = TestClient(create_app(store, codes))
+    professional = client.get(f'/cases/{saved.id}/professional').json()
+    assert professional['required'] == 'depends'
+    assert professional['required'] != 'no'
+    issued = client.get(f'/cases/{saved.id}/section-d/issues').json()[0]
+    assert issued['practice_of_engineering']['value'] == 'unknown'
+    assert issued['routed_to'] == 'officer'
+    gaps = client.get(f'/cases/{saved.id}/gaps').json()
+    assert any(row['message'] == OFFICER_PROFESSIONAL_GAP and row['routed_to'] == 'officer' for row in gaps)
+
+
 def test_not_sure_is_an_officer_routed_open_item():
     codes = codes_with_rules()
     officer = Source(type='officer', ref='ahj', quote='authority answer')

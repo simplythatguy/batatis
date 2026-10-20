@@ -163,6 +163,9 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
         story += _row_story(k, row, codes, k <= plan.rows_in_form)
 
     docs = supporting_documents(case)
+    attached = {doc.id for doc in docs}
+    # A text listing is not a file. It is not reviewed, and it is not a file_ref document.
+    text_items = [item for item in case.evidence if item.kind == 'text' and item.id not in attached]
     story.append(Paragraph('D. Supporting documentation', H2))
     if docs:
         story.append(_table(['Ref', 'Name of supporting documentation', 'Responsible', 'On the form'],
@@ -183,7 +186,12 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
             story.append(KeepTogether(block))
         story.append(_p('An attachment and its links record what the applicant supplied. The responsible designer '
                         'and authority must review its authenticity, scope, limitations and technical adequacy.', SMALL))
-    else:
+    for item in text_items:
+        story.append(KeepTogether([
+            Paragraph(escape(item.description), H3),
+            _p('listed by applicant, no file attached, not reviewed'),
+        ]))
+    if not docs and not text_items:
         story.append(_p('No supporting documents listed.'))
 
     buf = io.BytesIO()

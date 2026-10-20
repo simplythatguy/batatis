@@ -264,7 +264,12 @@ def _not_sure_value(value: object) -> bool:
 
 
 def _apply_case_sources(case: Case, facts: ProfessionalFacts):
-    """Applicant Yes/No answers, including a confirmed user fact, cannot clear the screen."""
+    """Applicant Yes/No answers, including a confirmed user fact, cannot clear the screen.
+
+    This runs on every pathway. An acceptable solution does not let an applicant answer
+    clear special_safety_concerns or professional_scope_resolved. Those reserved fields
+    stay unresolved, and applicant input never produces required ``no``.
+    """
     contradiction = None
     if alternative_path(case) and facts.prescriptive_route_confirmed is True:
         facts = facts.model_copy(update={'prescriptive_route_confirmed': False})
