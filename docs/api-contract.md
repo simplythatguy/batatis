@@ -28,7 +28,7 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 
 ### Privacy notice
 
-The notice text is owned by #24 (`backend/deploy`): `web/src/privacy.ts` and the engine mirror. `engine/privacy.py` is the only import site on this branch. It does not contain notice copy. `X-Batatis-Notice` is set only after that import returns the shared string. Every response sets `X-Robots-Tag: noindex, nofollow`.
+`X-Batatis-Notice` and the engine `X-Robots-Tag` header are owned by #24 (`http_guard`, `PII_NOTICE`). This branch does not set either header and does not keep a second notice string. `web/index.html` has `<meta name="robots" content="noindex, nofollow">`. Every route in `vercel.json` sends `X-Robots-Tag: noindex, nofollow`.
 
 ### Labels
 

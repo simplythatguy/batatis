@@ -19,7 +19,6 @@ from engine.identify_http import (
     CODEDB_DOWNLOADS, IDENTIFY_MAX_INPUT, IDENTIFY_MAX_OUTPUT, IDENTIFY_MODEL, KEYWORD_LABEL, MODEL_LABEL,
 )
 from engine.llm_gate import reset_for_tests
-from engine.privacy import privacy_notice
 from engine.spend import LEDGER_NOTICE
 from engine.spend import token_cost
 from engine.tests.test_spend import _prepare
@@ -28,14 +27,13 @@ ROOT = Path(__file__).resolve().parents[2]
 MARKER = b'SQLite format 3'
 
 
-def test_privacy_notice_waits_for_the_shared_import():
-    """#24 owns the notice text. This branch has one TODO import site and no second copy."""
-    source = (ROOT / 'engine/privacy.py').read_text()
-    assert source.count('TODO(#24)') == 1
-    assert privacy_notice(live=False) is None
-    assert privacy_notice(live=True) is None
+def test_engine_does_not_set_a_second_robots_or_notice_header():
+    """#24's http_guard owns X-Robots-Tag and X-Batatis-Notice (PII_NOTICE)."""
+    api = (ROOT / 'engine/api.py').read_text()
+    assert 'X-Robots-Tag' not in api
+    assert 'X-Batatis-Notice' not in api
+    assert not (ROOT / 'engine/privacy.py').exists()
     for banned in ('up to 30 days', 'cases stay until deleted', 'Cases do not expire'):
-        assert banned not in source
         assert banned not in (ROOT / 'docs/api-contract.md').read_text()
         assert banned not in (ROOT / 'docs/deploy.md').read_text()
     sidebar = (ROOT / 'web/src/App.tsx').read_text()
@@ -46,7 +44,7 @@ def test_privacy_notice_waits_for_the_shared_import():
     response = TestClient(create_app()).get('/status/budget')
     assert response.status_code == 200
     assert 'x-batatis-notice' not in response.headers
-    assert response.headers['x-robots-tag'] == 'noindex, nofollow'
+    assert 'x-robots-tag' not in response.headers
 
 
 def test_delete_case_route_removes_the_case(tmp_path):
@@ -65,18 +63,12 @@ def test_delete_case_route_removes_the_case(tmp_path):
     deleted = http.delete(f'/cases/{case_id}')
     assert deleted.status_code == 204
     assert deleted.content == b''
-    assert deleted.headers['x-robots-tag'] == 'noindex, nofollow'
+    assert 'x-robots-tag' not in deleted.headers
+    assert 'x-batatis-notice' not in deleted.headers
     missing = http.get(f'/cases/{case_id}')
     assert missing.status_code == 404
     assert missing.json()['detail'] == 'case not found'
     assert http.delete(f'/cases/{case_id}').status_code == 404
-
-
-def test_engine_sends_robots_noindex_on_every_response():
-    client = TestClient(create_app())
-    for path in ('/status/budget', '/codedb.sqlite', '/codedb/build/codedb.sqlite', '/api/codedb/build/codedb.sqlite'):
-        response = client.get(path)
-        assert response.headers['x-robots-tag'] == 'noindex, nofollow', path
 
 
 def test_vercel_json_sets_robots_noindex_on_every_route():

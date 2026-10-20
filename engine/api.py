@@ -12,8 +12,7 @@ from .codes import CodeDbMissing, Codes
 from .export import ExportBlocked, ExportError, FormNotFound, export_case
 from .identify_http import CODEDB_DOWNLOADS, IdentifyRequest, IdentifyResponse, identify
 from .models import Case, Fact, Jurisdiction, SectionCRow
-from .privacy import privacy_notice
-from .spend import BudgetStatus, budget_status, live_enabled
+from .spend import BudgetStatus, budget_status
 from .section_c import section_c_rows
 from .store import CaseStore
 
@@ -38,21 +37,12 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, ident
                        allow_methods=['*'], allow_headers=['*'])
 
     @app.middleware('http')
-    async def privacy_and_codedb(request: Request, call_next):
+    async def codedb_is_not_a_download(request: Request, call_next):
+        # Robots and the privacy notice headers belong to #24 (http_guard, PII_NOTICE).
         # The code database is not a download. The body is fixed and has no file bytes.
         if request.url.path in CODEDB_DOWNLOADS:
-            denied = JSONResponse(status_code=404, content={'detail': 'not found'})
-            _public_headers(denied)
-            return denied
-        response = await call_next(request)
-        _public_headers(response)
-        return response
-
-    def _public_headers(response: Response) -> None:
-        response.headers['X-Robots-Tag'] = 'noindex, nofollow'
-        notice = privacy_notice(live=live_enabled())
-        if notice:
-            response.headers['X-Batatis-Notice'] = notice
+            return JSONResponse(status_code=404, content={'detail': 'not found'})
+        return await call_next(request)
 
     state = {'store': store, 'codes': codes, 'identify_client': identify_client}
 
