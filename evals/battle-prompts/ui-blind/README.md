@@ -17,14 +17,14 @@ Do **not** mention: Linear, dark mode, Inter, spacing tokens, charcoal, pills, s
 
 | # | Criterion | Fail if |
 | --- | --- | --- |
-| 1 | Looks like the in-repo design system (charcoal layers, thin borders, Inter-like sans, 8px rhythm, sparse functional color, sidebar+main / list+detail) | Generic light dashboard, purple-glow AI skin, marketing card grid |
+| 1 | Linear-caliber structure (charcoal layers, thin borders, Inter-like sans, 8px, sidebar+main) **without** indigo filled CTAs | Purple/indigo filled primaries, marketing card grid, purple-glow AI skin |
 | 2 | All prompt capabilities present | Feature dropped “for simplicity” |
-| 3 | Bug-free bar | Dead buttons, silent required fills, code text blended into AI prose, missing empty/error for missing data |
-| 4 | Domain safety | Completeness language only; no “complies/safe”; alt-path process fields not removed |
-| 5 | Chrome discipline | Active nav = quiet gray (not accent ring); ≤1 solid accent CTA/viewport; checkbox uses `--accent` |
-| 6 | Interaction smoke | `node evals/ui-artifacts/smoke.mjs` passes (required before claiming interaction seal) |
+| 3 | Bug-free bar | Dead buttons, silent fills, code blended into AI prose, missing empty/error |
+| 4 | Domain safety | Completeness only; no “complies/safe”; alt-path process fields present |
+| 5 | Opus P0 chrome | Neutral grey primary CTA; active nav faint fill only; shared gaps; gating; no demo leakage; styled controls; nowrap |
+| 6 | Interaction smoke | `node evals/ui-artifacts/smoke.mjs` PASS |
 
-Overall: each surface **PASS/FAIL**. Round fails if any surface FAIL. Fix skills → re-run.
+**Formal seal = Opus 5.5.** Composer reviews are provisional. Overall: each surface **PASS/FAIL**. Round fails if any FAIL.
 
 ## Suite
 
