@@ -46,12 +46,16 @@ class Fact(BaseModel):
     source: Source
     confidence: float | None = Field(default=None, ge=0, le=1)
     status: FactStatus = 'unconfirmed'
+    formula: str | None = None                 # computed facts only: the formula as shown to the user
+    inputs: list[str] = []                     # computed facts only: ids of the facts the formula reads
 
     @model_validator(mode='after')
     def _proposed_is_never_confirmed(self):
         if self.kind == 'proposed' and self.status == 'confirmed':
             raise ValueError('a proposed fact cannot be confirmed; record the confirmation as a new fact '
                              'with a user_click source')
+        if self.kind != 'computed' and (self.formula is not None or self.inputs):
+            raise ValueError('formula and inputs belong to computed facts only')
         return self
 
     def export(self) -> dict:
