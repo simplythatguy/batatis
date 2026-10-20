@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useProvisionText, useSectionC, type SectionCSource } from "../api/sectionC";
 import { GapStrip, PanelHeader, StatusPill } from "../components";
 import { CODE_TERMS } from "../fixture";
-import { candidateById, unresolvedCandidates } from "../model";
+import { candidateById, codeCheckWaiting, unresolvedCandidates } from "../model";
 import { useCase } from "../store";
 import type { SectionCRow } from "../types";
 
@@ -205,7 +205,7 @@ export function SectionC() {
       </div>
       <div className="footer-bar">
         <span className="status-note" role="status">
-          {open.length ? `${open.length} row${open.length > 1 ? "s" : ""} wait for your answer in Code check` : ""}
+          {codeCheckWaiting(open)}
         </span>
         <a className="btn btn-ghost" href="#/code-check">
           Back

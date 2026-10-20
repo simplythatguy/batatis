@@ -52,6 +52,7 @@ def test_missing_objective_is_one_warning_and_does_not_invent_a_pair():
     [gap] = group_evidence_gaps([blank])
     assert gap.severity == 'warning' and gap.pairs == [] and gap.rule == 'evidence_scope'
     assert gap.evidence_types == ["manufacturer's literature"]
+    assert gap.missing == "supporting evidence for 9.99.1.3.(1): manufacturer's literature."
     assert "manufacturer's literature" in gap.fix_hint
     assert 'inferred' in gap.fix_hint
 

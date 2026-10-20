@@ -97,6 +97,17 @@ export function routeForDetail(id: string) {
 export const answeredYes = (c: Case) => c.candidates.filter((a) => a.answer === "yes");
 export const unresolvedCandidates = (c: Case) => c.candidates.filter((a) => a.answer !== "yes" && a.answer !== "no");
 
+/** The question still open on a Code check card. */
+export function codeCheckQuestion(a: Candidate): string {
+  if (a.answer === "not-sure") return a.clarifyingQuestion;
+  return `Does your design ${a.departure} instead?`;
+}
+
+/** Each waiting row names its provision and that question. */
+export function codeCheckWaiting(open: Candidate[]): string {
+  return open.map((a) => `${a.provision}: ${codeCheckQuestion(a)}`).join("; ");
+}
+
 /** Derived gap list: the only list any surface renders. */
 export function getGaps(c: Case): Gap[] {
   const gaps: Gap[] = [];
@@ -115,17 +126,13 @@ export function getGaps(c: Case): Gap[] {
       href: DETAIL_IDS.has(f.field) ? routeForDetail(f.field) : `#/describe?focus=fact-${f.id}`,
     });
   }
-  for (const a of c.candidates) {
-    if (a.answer === null) {
-      gaps.push({ id: `answer-${a.id}`, severity: "blocking", label: `Answer: ${a.topic.toLowerCase()}`, href: `#/code-check?focus=cand-${a.id}` });
-    } else if (a.answer === "not-sure") {
-      gaps.push({
-        id: `answer-${a.id}`,
-        severity: "blocking",
-        label: `Not sure yet: ${a.topic.toLowerCase()}`,
-        href: `#/code-check?focus=cand-${a.id}`,
-      });
-    }
+  for (const a of unresolvedCandidates(c)) {
+    gaps.push({
+      id: `answer-${a.id}`,
+      severity: "blocking",
+      label: `${a.provision}: ${codeCheckQuestion(a)}`,
+      href: `#/code-check?focus=cand-${a.id}`,
+    });
   }
   if (c.candidates.length && !unresolvedCandidates(c).length && !answeredYes(c).length) {
     gaps.push({

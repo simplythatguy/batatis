@@ -159,6 +159,19 @@ def _evidence_types(items: Sequence[EvidencePlanItem]) -> list[str]:
     return sorted(found, key=lambda kind: (order.index(kind) if kind in order else len(order), found.index(kind)))
 
 
+def _type_list(types: Sequence[str]) -> str:
+    return ', '.join(types) if types else 'the evidence types the responsible designer selects'
+
+
+def _missing_evidence(provision_id: str, types: Sequence[str], pairs: Sequence[OpenPair]) -> str:
+    """The completeness message names the provision and each missing evidence item."""
+    listed = _type_list(types)
+    if pairs:
+        named = ', '.join(f'{pair.function}/{pair.objective}' for pair in pairs)
+        return f'supporting evidence for {provision_id} ({named}): {listed}.'
+    return f'supporting evidence for {provision_id}: {listed}.'
+
+
 def group_evidence_gaps(items: Sequence[EvidencePlanItem]) -> list[ProvisionEvidenceGap]:
     """One gap per provision. Pairs and evidence types sit on that gap, not in new rows."""
     grouped: dict[str, list[EvidencePlanItem]] = {}
@@ -178,11 +191,11 @@ def group_evidence_gaps(items: Sequence[EvidencePlanItem]) -> list[ProvisionEvid
                     continue
                 seen.add(key)
                 pairs.append(OpenPair(function=item.function, objective=item.objective))
-            type_list = ', '.join(types) if types else 'the evidence types the responsible designer selects'
+            type_list = _type_list(types)
             gaps.append(ProvisionEvidenceGap(
                 provision_id=provision_id, citation=citation, pairs=pairs, evidence_types=types,
                 severity='blocking', rule='evidence', field=f'evidence.{provision_id}',
-                missing=f'supporting evidence for {provision_id}.',
+                missing=_missing_evidence(provision_id, types, pairs),
                 fix_hint=(f'List evidence the applicant supplies for this provision. '
                           f'{len(pairs)} objective/function pairs are on this gap. '
                           f'Evidence types to discuss: {type_list}. '
@@ -190,11 +203,11 @@ def group_evidence_gaps(items: Sequence[EvidencePlanItem]) -> list[ProvisionEvid
                           'not every ladder rung is required. Listing evidence records what was named. '
                           'It does not assess or verify it.')))
         else:
-            type_list = ', '.join(types) if types else 'the evidence types the responsible designer selects'
+            type_list = _type_list(types)
             gaps.append(ProvisionEvidenceGap(
                 provision_id=provision_id, citation=citation, pairs=[], evidence_types=types,
                 severity='warning', rule='evidence_scope', field=f'evidence.{provision_id}.scope',
-                missing=f'supporting evidence for {provision_id}.',
+                missing=_missing_evidence(provision_id, types, ()),
                 fix_hint=(f'{NOT_ATTRIBUTED_LABEL}. '
                           f'Evidence types to discuss: {type_list}. '
                           'No objective or function is on this gap. '

@@ -49,6 +49,10 @@ def build(path) -> None:
     prov('B', '3.1.9.4.(3)', 'sentence', '3.1.9.4.')
     attr('3.1.9.4.(3)', 'F03', 'OS1.2')
     status('3.1.9.4.(3)', 'direct')
+    # (7) is a later-added sentence with its own table row. It is not copied onto (4).
+    prov('B', '3.1.9.4.(7)', 'sentence', '3.1.9.4.')
+    attr('3.1.9.4.(7)', 'F03', 'OS1.2')
+    status('3.1.9.4.(7)', 'direct')
 
     prov('B', '3.1.9.1.', 'article')
     prov('B', '3.1.9.1.(1)', 'sentence', '3.1.9.1.')

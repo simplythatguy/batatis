@@ -7,8 +7,9 @@ clause). Attribution status is reported literally:
                                      or from a clause when the sentence itself has none. attributed_via
                                      is that source id
   no row in the attribution table  - nothing on this id, its parent sentence, or its article; never guess
-A codedb status of none with root method not_determined is not a parent to copy. The row stays
-without an objective or function and says so: attribution ``not_attributed``.
+A cited provision is always one of those rows. When the row has no objective or function, it says so:
+attribution ``not_attributed``. A codedb status of none with root method not_determined is not a parent
+to copy, and a sibling sentence is not copied either.
 National 2020 intent statements are explanatory only. They attach to Division B rows, and a comparison
 status of provision_missing_in_ae is not attached.
 """
@@ -128,7 +129,8 @@ def _row(rec: dict, codes: Codes) -> SectionCRow:
                for i in rec.get('intents') or [] if own_intent(i['provision_id']) and i['provision_id'] not in missing]
     cmp = next((c for c in comparisons if c['provision_id'] == pid and c['provision_id'] not in missing), None)
     related = st.get('root_provision') if status == 'no row in the attribution table' and raw_status == 'none' else None
-    unattributed = not pairs and _unattributed(rec)
+    # Parent fallback already ran. An empty row is stated; it is not left blank.
+    unattributed = not pairs
     return SectionCRow(
         provision_id=pid, citation=rec['citation'], attribution_status=status,
         attributed_via=via, pairs=pairs, intents=intents,
