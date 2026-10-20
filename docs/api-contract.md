@@ -4,7 +4,7 @@
 
 Administrative completeness only. A response never certifies that a design complies or is safe. Citations are returned only when they come from the code database.
 
-Dates are ISO-8601 strings. JSON bodies use `Content-Type: application/json`. Error bodies are FastAPI `detail`, a string unless a route below says otherwise.
+Dates are ISO-8601 strings. JSON bodies use `Content-Type: application/json`. Error bodies have a FastAPI `detail` field: an array for request-validation errors (422), otherwise a string unless a route below says otherwise.
 
 ### Reviewing jurisdiction
 
@@ -81,7 +81,7 @@ Body is one Fact. `200` the Case. `404` unknown case. `422` when the fact is inv
 
 | Env | Default | Meaning |
 | --- | --- | --- |
-| `BATATIS_FILE_MAX_BYTES` | `20971520` (20 MB) | Reject larger uploads. |
+| `BATATIS_FILE_MAX_BYTES` | `20971520` (20 MB) | Reject larger uploads. Blank, non-integer, and non-positive values use the default. |
 | `BATATIS_FILES` | `<repo>/.batatis-files` | Directory for the bytes. Git-ignored. Not returned to the client. |
 
 `201`:
@@ -90,7 +90,7 @@ Body is one Fact. `200` the Case. `404` unknown case. `422` when the fact is inv
 { "id": "file_…", "name": "plans.pdf", "pages": 1, "sha256": "<hex>", "read": true }
 ```
 
-`name` is the base name of the upload. `pages` is the PDF page count. `sha256` is the hex digest of the stored bytes. `read` is always true.
+`name` is the base name of the upload. `pages` is the PDF page count. `sha256` is the hex digest of the stored bytes. `read` is always true: it means the bytes were stored and the page count was read, not that the document's text was read.
 
 The case gains one confirmed fact. Nothing else is extracted.
 

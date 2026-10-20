@@ -134,14 +134,16 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         return case
 
     @app.post('/cases/{case_id}/files', response_model=StoredFile, status_code=201)
-    async def upload_file(case_id: str, file: UploadFile = File(...)):
-        if cases().get(case_id) is None:
-            raise HTTPException(404, 'case not found')
-        limit = max_upload_bytes()
+    def upload_file(case_id: str, file: UploadFile = File(...)):
+        # FastAPI runs sync endpoints in its threadpool, including SQLite, locks,
+        # PDF parsing, and file I/O. Keep the save and case update in one worker.
         try:
-            data = await file.read(limit + 1)
+            if cases().get(case_id) is None:
+                raise HTTPException(404, 'case not found')
+            limit = max_upload_bytes()
+            data = file.file.read(limit + 1)
         finally:
-            await file.close()
+            file.file.close()
         if len(data) > limit:
             raise HTTPException(413, 'file too large')
         try:
@@ -150,17 +152,21 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
             raise HTTPException(413, 'file too large') from None
         except NotAPdf:
             raise HTTPException(415, 'not a PDF') from None
-        except ValueError:
-            raise HTTPException(400, 'invalid case id') from None
-        fact = Fact(field=f'file.{stored.id}.name', value=stored.name, kind='exact', status='confirmed',
-                    source=Source(type='file', ref=stored.id))
+        try:
+            fact = Fact(field=f'file.{stored.id}.name', value=stored.name, kind='exact', status='confirmed',
+                        source=Source(type='file', ref=stored.id))
 
-        def apply(case: Case) -> None:
-            case.facts.append(fact)
+            def apply(case: Case) -> None:
+                case.facts.append(fact)
 
-        if cases().mutate(case_id, apply) is None:
-            discard_pdf(case_id, stored.id)
-            raise HTTPException(404, 'case not found')
+            if cases().mutate(case_id, apply) is None:
+                raise HTTPException(404, 'case not found')
+        except BaseException:
+            try:
+                discard_pdf(case_id, stored.id)
+            except Exception:
+                logger.exception('failed to discard PDF after case update failure')
+            raise
         return StoredFile(id=stored.id, name=stored.name, pages=stored.pages, sha256=stored.sha256)
 
     @app.post('/cases/{case_id}/export', response_class=Response,

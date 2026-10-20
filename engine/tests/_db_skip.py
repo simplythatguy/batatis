@@ -56,8 +56,10 @@ def _opened_path(exc: FileNotFoundError) -> Path | None:
 def require_repo_db() -> None:
     """Fail when BATATIS_CODEDB is set but missing. Skip when the repo build is absent."""
     configured = os.environ.get('BATATIS_CODEDB')
-    if configured and not Path(configured).is_file():
-        pytest.fail(f'BATATIS_CODEDB is set but the file is missing: {configured}')
+    if configured:
+        if not Path(configured).is_file():
+            pytest.fail(f'BATATIS_CODEDB is set but the file is missing: {configured}')
+        return
     if not REPO_DB.is_file():
         pytest.skip(SKIP_REASON)
 
