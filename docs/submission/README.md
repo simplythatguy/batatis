@@ -114,7 +114,7 @@ Scoring question, from pull request #15: "Does it identify the specific technica
 
 - [#8](https://github.com/simplythatguy/batatis/pull/8) (Section D issues and practice-of-engineering screen, not merged). Numbers below are copied from the pull-request body. The body calls them model-checked. They are not human-verified. The 55/60 row and the 50/60 row are different rows.
   - Current headline, `rules_only`: 55/60 agreement on the model-checked dev set (in-sample), 1 under-flag (dev-050), 13 unknowns sent to the applicant. Model-checked. Not human-verified.
-  - Shipped screen, post-fix `rules_plus_unknown`: 50/60 agreement on that same dev set, 0 under-flags. Model-checked. Not human-verified. The body says the dev table is in-sample, and that the span rule came from development case `dev-050`.
+  - Shipped screen, post-fix `rules_plus_unknown`: 50/60 agreement on that same dev set, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction). Model-checked. Not human-verified. The body says the dev table is in-sample, and that the span rule came from development case `dev-050`.
   - Blind held-out, pre-fix. Model-checked. Not human-verified. As written: `held-out rules_plus_unknown: 7/8 [0.5291, 0.9776]`. The body calls this line frozen and not recomputed.
   - A different held-out row, post-fix and no longer blind for missing-fact cases: `rules_plus_unknown: 4/8 [0.2152, 0.7848]`. Model-checked. Not human-verified.
   - Pytest written in the body: `python3 -m pytest engine/tests/test_section_d_issues.py -q` — 18 passed.
