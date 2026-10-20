@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { notSureQuestions } from "./humanReview.ts";
 import { emptyCase } from "./intake.ts";
-import { codeCheckLabel, displayValue, factLabel, gapLabel, getGaps, plainFactStatus, reducer, shownProcessAnswer } from "./model.ts";
+import { codeCheckLabel, displayValue, evidenceDocuments, factLabel, gapLabel, getGaps, plainFactStatus, reducer, sectionDRefreshKey, shownProcessAnswer } from "./model.ts";
 import { evidenceRecorded, practiceFromReview, professionalConfirmed, roleConfirmed, sectionDIssueStatus } from "./professional.ts";
 import type { Fact } from "./types.ts";
 
@@ -175,6 +176,70 @@ test("a process answer just typed shows before the engine copy arrives", () => {
   assert.equal(shownProcessAnswer("risk_assessment", null, typed.process), "Water at the joint.");
   assert.equal(shownProcessAnswer("risk_assessment", "stale engine text", typed.process), "Water at the joint.");
   assert.equal(shownProcessAnswer("risk_assessment", null, blank.process), "");
+});
+
+test("authority-only yes is routed to the officer and can be withdrawn", () => {
+  let c = reducer(emptyCase("homebuilder"), { type: "notePractice", value: true });
+  c = reducer(c, { type: "answerScope", field: "ahj_requires_professional", answer: "yes", text: "Has the authority required a registered professional?" });
+  assert.ok(getGaps(c).some((gap) => gap.id === "needs-professional"));
+  assert.equal(professionalConfirmed(c.facts), false);
+  const routed = notSureQuestions(c.questions);
+  assert.ok(routed.some((question) => question.id === "q-prof-ahj_requires_professional"));
+  assert.match(routed.find((question) => question.id === "q-prof-ahj_requires_professional")?.why ?? "", /officer/);
+  c = reducer(c, { type: "answerScope", field: "ahj_requires_professional", answer: "clear" });
+  assert.equal(c.facts.some((fact) => fact.field === "professional.ahj_requires_professional"), false);
+  assert.equal(c.questions.some((question) => question.id === "q-prof-ahj_requires_professional"), false);
+  assert.ok(getGaps(c).some((gap) => gap.id === "needs-professional"));
+});
+
+test("a registered professional answer can be withdrawn", () => {
+  let c = reducer(emptyCase("contractor"), { type: "notePractice", value: true });
+  c = reducer(c, { type: "setProfessionalFact", field: "role", value: "architect" });
+  c = reducer(c, { type: "setProfessionalFact", field: "seal", value: "seal 19" });
+  assert.equal(professionalConfirmed(c.facts), true);
+  c = reducer(c, { type: "answerScope", field: "role", answer: "clear" });
+  c = reducer(c, { type: "answerScope", field: "seal", answer: "clear" });
+  assert.equal(professionalConfirmed(c.facts), false);
+  assert.ok(getGaps(c).some((gap) => gap.id === "needs-professional"));
+});
+
+test("removing one evidence document keeps the other and queues a deletion", () => {
+  let c = reducer(emptyCase("homebuilder"), {
+    type: "saveEvidence",
+    itemId: "wall",
+    document: "First report",
+    responsible: "Ada Applicant",
+    date: "2026-10-01",
+    evidenceType: "engineering review",
+    provisionId: "9.10.15.5.",
+  });
+  c = reducer(c, {
+    type: "saveEvidence",
+    itemId: "wall",
+    document: "Second report",
+    responsible: "Ben Engineer",
+    date: "",
+    evidenceType: "CCMC",
+    provisionId: "9.10.15.5.",
+  });
+  assert.equal(evidenceDocuments(c, "wall").length, 2);
+  const second = evidenceDocuments(c, "wall")[1];
+  const before = sectionDRefreshKey(c);
+  c = reducer(c, { type: "removeEvidence", id: "wall" });
+  assert.deepEqual(evidenceDocuments(c, "wall").map((item) => item.title), ["Second report"]);
+  assert.deepEqual(c.deletedEvidence, ["wall"]);
+  assert.equal(c.listedEvidence?.some((item) => item.id === "wall"), false);
+  assert.equal(c.listedEvidence?.some((item) => item.id === second.id), true);
+  assert.notEqual(sectionDRefreshKey(c), before);
+  c = reducer(c, { type: "ackEvidenceDeletion", ids: ["wall"] });
+  assert.deepEqual(c.deletedEvidence, []);
+});
+
+test("a Section D answer changes the refresh key", () => {
+  const start = emptyCase("contractor");
+  const answered = reducer(start, { type: "answerScope", field: "part4_design", answer: "no" });
+  assert.notEqual(sectionDRefreshKey(answered), sectionDRefreshKey(start));
+  assert.equal(professionalConfirmed(answered.facts), false);
 });
 
 test("not sure on the prescriptive route stays an open question", () => {

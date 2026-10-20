@@ -120,6 +120,14 @@ function evidencePosted(caseId: string): Set<string> {
   }
 }
 
+function forgetEvidence(caseId: string, id: string) {
+  const done = evidencePosted(caseId);
+  for (const signature of [...done]) {
+    if (signature.startsWith(`${id}:`)) done.delete(signature);
+  }
+  rememberEvidence(caseId, done);
+}
+
 function rememberEvidence(caseId: string, ids: Set<string>) {
   let map: Record<string, string[]> = {};
   try {
@@ -164,6 +172,34 @@ export async function pushListedEvidence(caseId: string, items: ListedEvidence[]
     }
   }
   return error;
+}
+
+/**
+ * DELETE one evidence slot on the engine. A missing route is acknowledged so the
+ * browser copy stays removed. Any other failure stays queued for the next save.
+ */
+export async function pushDeletedEvidence(
+  caseId: string,
+  ids: string[],
+): Promise<{ acked: string[]; error: string | null }> {
+  const acked: string[] = [];
+  let error: string | null = null;
+  for (const id of ids) {
+    if (!id.trim()) continue;
+    try {
+      await engine.deleteEvidence(caseId, id);
+      forgetEvidence(caseId, id);
+      acked.push(id);
+    } catch (e) {
+      if (e instanceof EngineError && e.status === 404 && !/case not found/i.test(e.detail)) {
+        forgetEvidence(caseId, id);
+        acked.push(id);
+        continue;
+      }
+      error = e instanceof EngineError ? e.detail : String(e);
+    }
+  }
+  return { acked, error };
 }
 
 export async function refreshGaps(caseId: string): Promise<{ gaps: EngineGap[]; error: string | null }> {

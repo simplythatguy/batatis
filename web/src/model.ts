@@ -1,5 +1,5 @@
 import { applyDescription } from "./intake";
-import { professionalConfirmed } from "./professional";
+import { AUTHORITY_ONLY_FIELDS, professionalConfirmed } from "./professional";
 import type { Candidate, CandidateAnswer, Case, Fact, Gap, ProcessFieldId, SectionCRow } from "./types";
 
 /** Section A and B fields. Values live only in `case.facts`; nothing here holds a default. */
@@ -372,6 +372,8 @@ export type Action =
   | { type: "bindOpenQuestion"; candidateId: string; questionId: string }
   | { type: "noteSectionC"; rows: SectionCRow[] }
   | { type: "saveEvidence"; itemId: string; document: string; responsible: string; date: string; evidenceType: string; provisionId: string }
+  | { type: "removeEvidence"; id: string }
+  | { type: "ackEvidenceDeletion"; ids: string[] }
   | { type: "deferProfessional"; field: string; choice: "not_sure" | "not_engaged_yet"; label: string }
   | { type: "setProfessionalFact"; field: string; value: string | number | boolean }
   | { type: "answerScope"; field: string; answer: "yes" | "no" | "not-sure" | "clear"; text?: string }
@@ -589,6 +591,17 @@ export function reducer(c: Case, a: Action): Case {
       ];
       return { ...c, facts, listedEvidence: listed };
     }
+    case "removeEvidence": {
+      const id = a.id.trim();
+      if (!id) return c;
+      const prefix = `evidence.${id}.`;
+      return {
+        ...c,
+        facts: c.facts.filter((fact) => !fact.field.startsWith(prefix)),
+        listedEvidence: (c.listedEvidence ?? []).filter((item) => item.id !== id),
+        deletedEvidence: [...new Set([...(c.deletedEvidence ?? []), id])],
+      };
+    }
     case "deferProfessional": {
       const field = `professional.${a.field}`;
       const facts = c.facts.filter((f) => f.field !== field);
@@ -623,7 +636,7 @@ export function reducer(c: Case, a: Action): Case {
           : a.field === "professional_judgement_required"
             ? "Does any proposed analysis require reserved professional judgement?"
             : "This question is still open.");
-      const questions = c.questions.filter((q) => q.id !== qid);
+      const questions = c.questions.filter((q) => q.id !== qid && q.id !== `q-prof-${a.field}`);
       const facts = c.facts.filter((f) => f.field !== `professional.${a.field}`);
       if (a.answer === "clear") return { ...c, facts, questions };
       if (a.answer === "not-sure") {
@@ -642,21 +655,34 @@ export function reducer(c: Case, a: Action): Case {
         };
       }
       const quote = a.answer;
+      const answered = {
+        id: newId("f"),
+        field: `professional.${a.field}`,
+        value: a.answer === "yes",
+        kind: "pointed" as const,
+        status: "unconfirmed" as const,
+        source: { type: "user_click" as const, ref: "Your answer", quote },
+      };
+      const authorityOnly = a.answer === "yes" && (AUTHORITY_ONLY_FIELDS as readonly string[]).includes(a.field);
       return {
         ...c,
-        facts: [
-          ...facts,
-          {
-            id: newId("f"),
-            field: `professional.${a.field}`,
-            value: a.answer === "yes",
-            kind: "pointed",
-            status: "unconfirmed",
-            source: { type: "user_click", ref: "Your answer", quote },
-          },
-        ],
-        questions,
+        facts: [...facts, answered],
+        questions: authorityOnly
+          ? [
+              ...questions,
+              {
+                id: `q-prof-${a.field}`,
+                text,
+                why: "An authority requirement does not name a registered professional. This is routed to the officer.",
+                field: `professional.${a.field}`,
+              },
+            ]
+          : questions,
       };
+    }
+    case "ackEvidenceDeletion": {
+      const gone = new Set(a.ids);
+      return { ...c, deletedEvidence: (c.deletedEvidence ?? []).filter((id) => !gone.has(id)) };
     }
     case "notePractice":
       return { ...c, practiceOfEngineering: a.value };
@@ -677,3 +703,30 @@ export function reducer(c: Case, a: Action): Case {
 }
 
 export const candidateById = (c: Case, id: string): Candidate | undefined => c.candidates.find((x) => x.id === id);
+
+/** Changes when a Section D answer, evidence item, or withdrawal is saved. */
+export function sectionDRefreshKey(c: Case): string {
+  const facts = c.facts
+    .filter((fact) => fact.field.startsWith("professional.") || fact.field.startsWith("evidence."))
+    .map((fact) => `${fact.field}:${String(fact.value)}:${fact.status ?? ""}`)
+    .join("|");
+  const listed = (c.listedEvidence ?? []).map((item) => `${item.id}:${item.description}`).join("|");
+  const removed = (c.deletedEvidence ?? []).join("|");
+  const questions = c.questions
+    .filter((question) => question.id.startsWith("q-prof-") || question.id.startsWith("q-scope-"))
+    .map((question) => `${question.id}:${question.answer ?? ""}`)
+    .join("|");
+  return `${facts}#${listed}#${removed}#${questions}`;
+}
+
+export function evidenceDocuments(c: Case, itemId: string): { id: string; title: string }[] {
+  const titles = new Map<string, string>();
+  for (const fact of c.facts) {
+    const match = /^evidence\.([^.]+)\.title$/.exec(fact.field);
+    if (!match) continue;
+    const slot = match[1];
+    if (slot !== itemId && !slot.startsWith(`${itemId}~`)) continue;
+    if (typeof fact.value === "string" && fact.value.trim()) titles.set(slot, fact.value.trim());
+  }
+  return [...titles].map(([id, title]) => ({ id, title }));
+}

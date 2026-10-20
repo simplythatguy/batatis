@@ -118,6 +118,24 @@ test("a check that did not export does not say the PDF was blocked", () => {
   assert.match(record, /Completeness: 3 required items, 1 open question, checked at 2026-10-20/);
   assert.match(record, /does not decide whether the design complies or is safe/);
   assert.doesNotMatch(record, /\(pointed, confirmed\)/);
+  const downloaded = pdfOutcomeLine({
+    example: false,
+    downloaded: { name: "case-homebuilder-scc-variance-DRAFT.pdf", draft: true, at: "2026-10-20" },
+    exportAttempted: true,
+    blockingCount: 0,
+  });
+  const afterPdf = textRecord({
+    title: "House",
+    description: "Hempcrete",
+    factLines: [],
+    blockingCount: 0,
+    warningCount: 0,
+    checkedAt: "2026-10-20",
+    pdfLines: downloaded,
+  });
+  assert.match(afterPdf, /case-homebuilder-scc-variance-DRAFT\.pdf/);
+  assert.doesNotMatch(afterPdf, /did not return that PDF/);
+  assert.doesNotMatch(afterPdf, /The engine did not return/);
 });
 
 test("the Section D practice line does not repeat depends", () => {

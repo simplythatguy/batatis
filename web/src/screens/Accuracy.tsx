@@ -2,8 +2,14 @@ import { PanelHeader, StatusPill } from "../components";
 import { displayValue, factLabel } from "../model";
 import { useCase } from "../store";
 
-const SHIPPED_LABEL =
+const README_LINE =
   "Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind).";
+
+/** The README line, with the text-only construction note after the shipped 0 under-flags. */
+const SHIPPED_LABEL = README_LINE.replace(
+  "0 under-flags,",
+  "0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction),",
+);
 
 /** Proposed facts the model suggested. Confirmation is the applicant's, not a score. */
 export function Accuracy() {
@@ -18,9 +24,8 @@ export function Accuracy() {
           <p className="meta intro">
             A proposal stays here until you accept it. Accepting it does not mean the design complies or is safe.
           </p>
-          <p>
-            The engineer-needed flag agreed on 50 of 60 practice cases and missed none; it asked a question on 27. On 8 new cases: 7 of 8 before a fix, 4 of 8 after. Checked by a model, not by a person.
-          </p>
+          <p>{SHIPPED_LABEL}</p>
+          <p className="meta">Checked by a model, not by a person.</p>
           <p>
             <StatusPill dot="warning">{proposed.length} still proposed</StatusPill>{" "}
             <StatusPill dot="done">

@@ -10,7 +10,7 @@ import {
 } from "../api/client";
 import { DemoFallback, RoleNote } from "../components";
 import { practiceFlagLine, practicePrompt } from "../humanReview";
-import { answeredYes, shownProcessAnswer } from "../model";
+import { answeredYes, evidenceDocuments, sectionDRefreshKey, shownProcessAnswer } from "../model";
 import { evidenceLinked, evidenceRecorded, isScopeField, practiceFromReview, professionalConfirmed, SCOPE_HELP, sectionDIssueStatus } from "../professional";
 import { failureKind } from "../rules";
 import { useCase } from "../store";
@@ -136,10 +136,7 @@ function EvidenceAnswer({
     setNote(`Saved: ${ref}. Evidence listed (not reviewed). It stays on this case. Add another document if you have one.`);
   }
 
-  const earlier = c.facts
-    .filter((f) => (f.field.startsWith(`evidence.${itemId}.`) || f.field.startsWith(`evidence.${itemId}~`)) && f.field.endsWith(".title"))
-    .map((f) => (typeof f.value === "string" ? f.value : ""))
-    .filter(Boolean);
+  const earlier = evidenceDocuments(c, itemId);
 
   return (
     <div className="form-grid">
@@ -181,8 +178,13 @@ function EvidenceAnswer({
         <div className="field full">
           <p className="meta">Documents already on this case</p>
           <ul className="plain-list">
-            {earlier.map((title, index) => (
-              <li key={`${title}-${index}`}>{title}</li>
+            {earlier.map((item) => (
+              <li key={item.id}>
+                {item.title}{" "}
+                <button type="button" className="btn" onClick={() => dispatch({ type: "removeEvidence", id: item.id })}>
+                  Remove {item.title}
+                </button>
+              </li>
             ))}
           </ul>
         </div>
@@ -234,7 +236,9 @@ function ProfessionalAnswers() {
                 value={value}
                 onChange={(e) => {
                   const next = e.target.value;
-                  if (next === "not_sure" || next === "not_engaged_yet") {
+                  if (next === "") {
+                    dispatch({ type: "answerScope", field: q.field, answer: "clear" });
+                  } else if (next === "not_sure" || next === "not_engaged_yet") {
                     dispatch({ type: "deferProfessional", field: q.field, choice: next, label: q.label });
                   } else if (next === "engineer" || next === "architect") {
                     dispatch({ type: "setProfessionalFact", field: q.field, value: next });
@@ -263,6 +267,8 @@ function ProfessionalAnswers() {
                   const next = e.target.value;
                   if (next === "not_sure" || next === "not_engaged_yet") {
                     dispatch({ type: "deferProfessional", field: q.field, choice: next, label: q.label });
+                  } else {
+                    dispatch({ type: "answerScope", field: q.field, answer: "clear" });
                   }
                 }}
               >
@@ -287,8 +293,12 @@ function ProfessionalAnswers() {
                 min={1}
                 value={value}
                 onChange={(e) => {
+                  if (e.target.value === "") {
+                    dispatch({ type: "answerScope", field: q.field, answer: "clear" });
+                    return;
+                  }
                   const n = Number(e.target.value);
-                  if (e.target.value !== "" && Number.isFinite(n) && n > 0) {
+                  if (Number.isFinite(n) && n > 0) {
                     dispatch({ type: "setProfessionalFact", field: q.field, value: q.field === "building_area_m2" ? n : Math.trunc(n) });
                   }
                 }}
@@ -339,6 +349,7 @@ function ProfessionalAnswers() {
 export function Recommendations() {
   const { c, engineId, dispatch, factsEpoch } = useCase();
   const provisions = answeredYes(c).map((a) => a.provision).filter((id) => /^\d/.test(id)).join("|");
+  const refreshKey = sectionDRefreshKey(c);
   const [attempt, setAttempt] = useState(0);
   const [load, setLoad] = useState<Load>(IDLE);
 
@@ -417,7 +428,7 @@ export function Recommendations() {
       }
     })();
     return () => ctl.abort();
-  }, [engineId, provisions, attempt, factsEpoch, c.practiceOfEngineering, dispatch]);
+  }, [engineId, provisions, attempt, factsEpoch, refreshKey, c.practiceOfEngineering, dispatch]);
 
   const flag = load.professional?.required;
 

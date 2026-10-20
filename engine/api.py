@@ -42,11 +42,9 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         if state['codes'] is None:
             try:
                 state['codes'] = Codes()
-            except FileNotFoundError:
-                # CodeDbMissing is a separate type and the handler below returns
-                # a fixed 503. Any other missing file stays a path-free 500 so
-                # CORS still applies.
-                raise HTTPException(500, 'Internal Server Error')
+            except (CodeDbMissing, FileNotFoundError):
+                # Fixed detail. The body has no filesystem path.
+                raise HTTPException(503, 'code database not found') from None
         return state['codes']
 
     @app.post('/cases', response_model=Case, status_code=201)
@@ -76,8 +74,9 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
             res = export_case(case, draft=draft, codes=code())
         except ExportBlocked as e:
             raise HTTPException(409, {'message': 'export blocked; resolve these or export a draft', 'reasons': e.reasons})
-        except FormNotFound:
-            raise HTTPException(503, 'SCC variance form not found')
+        except FormNotFound as e:
+            # The contract's 503 detail is the form error's own text.
+            raise HTTPException(503, str(e)) from None
         except ExportError:
             raise HTTPException(500, 'The SCC variance form could not be exported.')
         name = f'{case_id}-scc-variance{"-DRAFT" if draft else ""}.pdf'

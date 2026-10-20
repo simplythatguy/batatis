@@ -50,7 +50,7 @@ export class EngineError extends Error {
 const enc = encodeURIComponent;
 
 export function createEngine(base: string) {
-  async function call<T>(method: "GET" | "POST" | "PUT", path: string, body?: unknown, signal?: AbortSignal, ms = ENGINE_WAIT_MS): Promise<T> {
+  async function call<T>(method: "GET" | "POST" | "PUT" | "DELETE", path: string, body?: unknown, signal?: AbortSignal, ms = ENGINE_WAIT_MS): Promise<T> {
     const timed = withTimeout(signal, ms);
     let res: Response;
     try {
@@ -163,6 +163,9 @@ export function createEngine(base: string) {
       body: { provision_id: string; evidence_type: string; description: string; objective?: string; function?: string },
       signal?: AbortSignal,
     ) => call<{ evidence: { id: string; status: string } }>("POST", `/cases/${enc(caseId)}/evidence`, body, signal),
+    /** DELETE /cases/{id}/evidence/{evidence_id}. Removes one slot and leaves the others. */
+    deleteEvidence: (caseId: string, evidenceId: string, signal?: AbortSignal) =>
+      call<Case>("DELETE", `/cases/${enc(caseId)}/evidence/${enc(evidenceId)}`, undefined, signal),
     /** POST /cases/{id}/identify/confirm. Writes provisions after a code-database check. */
     confirmIdentify: (caseId: string, provisions: string[], signal?: AbortSignal) =>
       call<Case>("POST", `/cases/${enc(caseId)}/identify/confirm`, { provisions }, signal),

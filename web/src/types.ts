@@ -171,4 +171,6 @@ export interface Case {
   practiceOfEngineering?: true | false | "unknown";
   /** Typed evidence waiting for POST /cases/{id}/evidence. Not file references. */
   listedEvidence?: ListedEvidence[];
+  /** Evidence slot ids waiting for DELETE /cases/{id}/evidence/{id}. */
+  deletedEvidence?: string[];
 }

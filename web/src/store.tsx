@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type Dispatch, type ReactNode } from "react";
 import { EngineError, type EngineGap } from "./api/client";
 import { type CompletenessRecord } from "./humanReview";
-import { clearEngineSession, engineCaseId, ensureEngineCase, pushFacts, pushListedEvidence, refreshGaps, syncJurisdiction } from "./api/sync";
+import { clearEngineSession, engineCaseId, ensureEngineCase, pushDeletedEvidence, pushFacts, pushListedEvidence, refreshGaps, syncJurisdiction } from "./api/sync";
 import { shouldConfirmReplace } from "./rules";
 import { exampleCase } from "./examples";
 import { emptyCase } from "./intake";
@@ -205,6 +205,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       setEngineId(id);
       const factError = await pushFacts(id, c.facts);
       const evidenceError = await pushListedEvidence(id, c.listedEvidence ?? []);
+      const deleted = await pushDeletedEvidence(id, c.deletedEvidence ?? []);
+      if (deleted.acked.length) dispatch({ type: "ackEvidenceDeletion", ids: deleted.acked });
       setFactsEpoch((n) => n + 1);
       const got = await refreshGaps(id);
       if (got.error && /case not found/i.test(got.error)) {
@@ -221,9 +223,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       } else {
         setEngineGaps(got.gaps);
         setGapsSource("engine");
-        setReviewDetail(factError ?? evidenceError ?? "");
+        setReviewDetail(factError ?? evidenceError ?? deleted.error ?? "");
         setGapsNote("Online administrative review finished. This does not decide whether the design complies or is safe.");
-        setSyncOk(!factError && !evidenceError);
+        setSyncOk(!factError && !evidenceError && !deleted.error);
         latestGaps.current = composeGaps(c, "engine", got.gaps);
       }
       if (announce) {
@@ -254,7 +256,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(handle);
     // Re-check when the applicant edits facts or picks an authority before the case exists.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, c.facts, c.authority, c.title]);
+  }, [phase, c.facts, c.authority, c.title, c.listedEvidence, c.deletedEvidence]);
 
   function openCase(next: Case) {
     clearEngineSession();

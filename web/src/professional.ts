@@ -34,6 +34,8 @@ const REGISTRATION_FIELDS = [
 const REJECT_ROLE = new Set(["sales", "rep", "supplier", "manufacturer", "salesperson", "vendor"]);
 
 export const SCOPE_FIELDS = ["prescriptive_route_confirmed", "professional_judgement_required"] as const;
+/** An authority's own requirement. It does not name an engineer or architect. */
+export const AUTHORITY_ONLY_FIELDS = ["ahj_requires_professional", "special_safety_concerns"] as const;
 export type ScopeField = (typeof SCOPE_FIELDS)[number];
 
 export const SCOPE_HELP: Record<ScopeField, string> = {

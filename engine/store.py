@@ -44,3 +44,13 @@ class CaseStore:
             return None
         case.facts = [f for f in case.facts if f.id != fact.id] + [fact]
         return self.put(case)
+
+    def remove_evidence(self, case_id: str, evidence_id: str) -> Case | None:
+        """Drop one evidence slot. ``wall`` does not remove ``wall~2``."""
+        case = self.get(case_id)
+        if case is None:
+            return None
+        prefix = f'evidence.{evidence_id}.'
+        case.facts = [fact for fact in case.facts if not fact.field.startswith(prefix)]
+        case.evidence = [item for item in case.evidence if item.id != evidence_id]
+        return self.put(case)

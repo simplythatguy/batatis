@@ -77,4 +77,11 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
     def gaps(case_id: str):
         return check_completeness(get_case(case_id), code())
 
+    @router.delete('/cases/{case_id}/evidence/{evidence_id}')
+    def delete_evidence(case_id: str, evidence_id: str):
+        case = cases().remove_evidence(case_id, evidence_id)
+        if case is None:
+            raise HTTPException(404, 'case not found')
+        return case
+
     return router

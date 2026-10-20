@@ -89,7 +89,7 @@ def load_field_map(version: str = CURRENT_MAP) -> dict:
 def load_form(path: Path | str | None, fmap: dict) -> bytes:
     path = Path(path) if path else form_path()
     if not path.exists():
-        raise FormNotFound(f'SCC variance form not found at {path} (set BATATIS_SCC_FORM)')
+        raise FormNotFound('SCC variance form not found')
     data = path.read_bytes()
     digest = hashlib.sha256(data).hexdigest()
     if digest != fmap['sha256']:
