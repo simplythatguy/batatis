@@ -1,0 +1,18 @@
+{
+  "source_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/alarmed-normally-open-spv-007.pdf",
+  "accessed": "2026-10-18",
+  "source_kind": "Search-service cached PDF first-page excerpt; original live URL returned 404",
+  "cached_document_title": "VARIANCE \u2013 normally open backwater valve serving no more than two dwelling units (SPV-007)",
+  "cached_issue_date": "2025-06-20",
+  "claims_supported_by_cached_page_1": [
+    "The source describes the NPC 2020 backflow clause as the varied requirement.",
+    "The stated scope is an alarmed normally open backwater valve serving a house with a secondary suite, at most two dwelling units.",
+    "The cached text requires occupant notification, unrestricted valve access and discontinuing plumbing use during backup until restored."
+  ],
+  "not_verified": [
+    "Complete second page and all conditions",
+    "Continued posting/current validity",
+    "Current project/AHJ acceptance"
+  ],
+  "live_download_receipts": "research/precedents/source-catalog/missing-calgary-receipts.json"
+}

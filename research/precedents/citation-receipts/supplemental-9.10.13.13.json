@@ -1,0 +1,36 @@
+{
+  "article": "9.10.13.13.",
+  "command": [
+    "/Users/aamia/.t3/projects/batatis/.venv/bin/python",
+    "-I",
+    "tools/codesearch.py",
+    "find",
+    "(?<!\\d)9\\.10\\.13\\.13\\.(?!\\d)",
+    "--doc",
+    "NBC-AE",
+    "--max",
+    "1000",
+    "--context",
+    "0"
+  ],
+  "pdf_pages": [
+    769,
+    770,
+    773,
+    775,
+    778,
+    788,
+    810,
+    893,
+    1129,
+    1533,
+    1534,
+    1537,
+    1539,
+    1542,
+    1552,
+    1574
+  ],
+  "status": "text-present",
+  "stdout": "[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.769] ...9.10.13.13....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.770] ...9.10.13.13....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.773] ...9.10.13.13....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.775] ...9.10.13.13....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.778] ...9.10.13.13....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.788] ...9.10.13.13....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.810] ...9.10.13.13....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.893] ...9.10.13.13....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1129] ...9.10.13.13....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1533] ...9.10.13.13....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1534] ...9.10.13.13....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1537] ...9.10.13.13....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1539] ...9.10.13.13....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1542] ...9.10.13.13....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1552] ...9.10.13.13....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1574] ...9.10.13.13....\n\n"
+}

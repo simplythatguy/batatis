@@ -1,0 +1,15 @@
+{
+  "url": "https://wabi-canada-central-b-primary-api.analysis.windows.net/public/reports/querydata?synchronous=true",
+  "accessed": "2026-10-18",
+  "http_result": "200 5814",
+  "stderr": "",
+  "public_resource_key": "3ab0630c-39fe-4212-b3b1-d7820e79d004",
+  "model_id": 4112675,
+  "entity": "Variances2026q1",
+  "fields": [
+    "Discipline",
+    "Code and Standard 2",
+    "Article2",
+    "Article Count"
+  ]
+}

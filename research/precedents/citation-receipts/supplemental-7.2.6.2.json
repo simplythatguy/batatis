@@ -1,0 +1,26 @@
+{
+  "article": "7.2.6.2.",
+  "command": [
+    "/Users/aamia/.t3/projects/batatis/.venv/bin/python",
+    "-I",
+    "tools/codesearch.py",
+    "find",
+    "(?<!\\d)7\\.2\\.6\\.2\\.(?!\\d)",
+    "--doc",
+    "NBC-AE",
+    "--max",
+    "1000",
+    "--context",
+    "0"
+  ],
+  "pdf_pages": [
+    625,
+    636,
+    643,
+    645,
+    807,
+    1571
+  ],
+  "status": "text-present",
+  "stdout": "[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.625] ...7.2.6.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.636] ...7.2.6.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.643] ...7.2.6.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.645] ...7.2.6.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.807] ...7.2.6.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.1571] ...7.2.6.2....\n\n"
+}

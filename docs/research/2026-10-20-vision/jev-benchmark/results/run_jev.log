@@ -1,0 +1,57 @@
+1/53 standata-abc2014-variance-14-bcv-009 done; requests 21 tokens 394127 errors 0 elapsed 2s
+2/53 standata-nbc2023-bulletin-23-bcb-001 done; requests 42 tokens 789692 errors 0 elapsed 3s
+3/53 standata-nbc2023-bulletin-23-bcb-002 done; requests 63 tokens 1184978 errors 0 elapsed 4s
+4/53 standata-nbc2023-bulletin-23-bcb-002r1 done; requests 84 tokens 1580332 errors 0 elapsed 5s
+5/53 standata-nbc2023-bulletin-23-bcb-003 done; requests 105 tokens 1973619 errors 0 elapsed 7s
+6/53 standata-nbc2023-bulletin-23-bcb-004 done; requests 126 tokens 2367345 errors 0 elapsed 8s
+7/53 standata-nbc2023-bulletin-23-bcb-006 done; requests 147 tokens 2761875 errors 0 elapsed 10s
+8/53 standata-nbc2023-bulletin-23-bcb-007 done; requests 168 tokens 3155955 errors 0 elapsed 13s
+9/53 standata-nbc2023-bulletin-23-bcb-008 done; requests 189 tokens 3549966 errors 0 elapsed 15s
+10/53 standata-nbc2023-bulletin-23-bcb-013 done; requests 210 tokens 3943939 errors 0 elapsed 17s
+11/53 standata-nbc2023-interpretation-23-bci-001 done; requests 231 tokens 4338979 errors 0 elapsed 18s
+12/53 standata-nbc2023-interpretation-23-bci-002 done; requests 252 tokens 4733170 errors 0 elapsed 20s
+13/53 standata-nbc2023-interpretation-23-bci-003 done; requests 273 tokens 5127773 errors 0 elapsed 21s
+14/53 standata-nbc2023-interpretation-23-bci-004 done; requests 294 tokens 5522278 errors 0 elapsed 23s
+15/53 standata-nbc2023-interpretation-23-bci-008 done; requests 315 tokens 5917443 errors 0 elapsed 25s
+16/53 standata-nbc2023-interpretation-23-bci-009 done; requests 336 tokens 6312391 errors 0 elapsed 26s
+17/53 standata-nbc2023-interpretation-23-bci-010 done; requests 357 tokens 6706587 errors 0 elapsed 28s
+18/53 standata-nbc2023-interpretation-23-bci-011 done; requests 378 tokens 7100907 errors 0 elapsed 29s
+19/53 standata-nbc2023-interpretation-23-bci-014 done; requests 399 tokens 7494930 errors 0 elapsed 30s
+20/53 standata-nbc2023-interpretation-23-bci-015 done; requests 420 tokens 7890643 errors 0 elapsed 32s
+21/53 standata-nbc2023-interpretation-23-bci-015r1 done; requests 441 tokens 8286436 errors 0 elapsed 33s
+22/53 standata-nbc2023-interpretation-23-bci-016 done; requests 462 tokens 8681265 errors 0 elapsed 35s
+23/53 standata-nbc2023-interpretation-23-bci-017 done; requests 483 tokens 9075173 errors 0 elapsed 36s
+24/53 standata-nbc2023-interpretation-23-bci-018 done; requests 504 tokens 9470657 errors 0 elapsed 38s
+25/53 standata-nbc2023-interpretation-23-bci-020 done; requests 525 tokens 9865405 errors 0 elapsed 39s
+26/53 standata-nbc2023-interpretation-23-bci-022 done; requests 546 tokens 10260641 errors 0 elapsed 41s
+27/53 standata-nbc2023-interpretation-23-bci-025 done; requests 567 tokens 10654208 errors 0 elapsed 43s
+28/53 standata-nbc2023-interpretation-23-bci-030 done; requests 588 tokens 11049188 errors 0 elapsed 45s
+29/53 standata-nbc2023-interpretation-23-bci-034 done; requests 609 tokens 11444726 errors 0 elapsed 46s
+30/53 standata-nbc2023-interpretation-23-bci-035 done; requests 630 tokens 11839095 errors 0 elapsed 49s
+31/53 standata-nbc2023-interpretation-23-bci-037 done; requests 651 tokens 12231449 errors 0 elapsed 51s
+32/53 standata-nbc2023-interpretation-23-bci-038 done; requests 672 tokens 12626239 errors 0 elapsed 53s
+33/53 standata-nbc2023-interpretation-23-bci-042 done; requests 693 tokens 13020248 errors 0 elapsed 56s
+34/53 standata-nbc2023-interpretation-23-bci-043 done; requests 714 tokens 13415659 errors 0 elapsed 58s
+35/53 standata-nbc2023-variance-23-bcv-001 done; requests 735 tokens 13810537 errors 0 elapsed 59s
+36/53 standata-nbc2023-variance-23-bcv-003 done; requests 756 tokens 14205613 errors 0 elapsed 60s
+37/53 standata-nbc2023-variance-23-bcv-004 done; requests 777 tokens 14603108 errors 0 elapsed 62s
+38/53 standata-nbc2023-variance-23-bcv-005 done; requests 798 tokens 14997359 errors 0 elapsed 64s
+39/53 standata-nbc2023-variance-23-bcv-007 done; requests 819 tokens 15391363 errors 0 elapsed 65s
+40/53 standata-nbc2023-variance-23-bcv-008-rev1 done; requests 840 tokens 15785650 errors 0 elapsed 67s
+41/53 standata-nbc2023-variance-23-bcv-008 done; requests 861 tokens 16180363 errors 0 elapsed 69s
+42/53 standata-nbc2023-variance-23-bcv-009 done; requests 882 tokens 16573731 errors 0 elapsed 70s
+43/53 standata-nbc2023-variance-23-bcv-010 done; requests 903 tokens 16966823 errors 0 elapsed 71s
+44/53 standata-nbc2023-variance-23-bcv-010r1 done; requests 924 tokens 17359788 errors 0 elapsed 73s
+45/53 standata-nbc2023-variance-23-bcv-011r1 done; requests 945 tokens 17753076 errors 0 elapsed 74s
+46/53 standata-nbc2023-variance-23-bcv-012r1 done; requests 966 tokens 18147349 errors 0 elapsed 76s
+47/53 standata-nbc2023-variance-23-bcv-013 done; requests 987 tokens 18542555 errors 0 elapsed 77s
+48/53 standata-nbc2023-variance-23-bcv-014 done; requests 1008 tokens 18936571 errors 0 elapsed 78s
+49/53 standata-nbc2023-variance-23-bcv-017 done; requests 1029 tokens 19331572 errors 0 elapsed 80s
+50/53 standata-nbc2023-variance-23-bcv-018 done; requests 1050 tokens 19725944 errors 0 elapsed 81s
+51/53 calgary-spv-001-zero-lot-line-2026-03 done; requests 1071 tokens 20120408 errors 0 elapsed 82s
+52/53 calgary-spv-003-construction-of-exposed-building-face done; requests 1092 tokens 20516372 errors 0 elapsed 83s
+53/53 calgary-spv-006-firewall-rowhouse-secondary-suites done; requests 1113 tokens 20911331 errors 0 elapsed 85s
+USAGE {'requests': 1113, 'input_tokens': 20911331, 'output_tokens': 2044413, 'errors': 0} latency p50/p95 ms 420.1390743255615 780.5037498474121
+BM25                         MRR 0.485 | h@1 0.32 h@3 0.60 h@5 0.66 h@10 0.77 h@20 0.83 h@50 0.87 h@100 0.91 h@200 0.91 | r@1 0.23 r@3 0.47 r@5 0.53 r@10 0.65 r@20 0.72 r@50 0.77 r@100 0.82 r@200 0.83
+BM25 top60 -> Jev rerank     MRR 0.728 | h@1 0.66 h@3 0.79 h@5 0.81 h@10 0.85 h@20 0.85 h@50 0.87 h@100 0.91 h@200 0.91 | r@1 0.49 r@3 0.63 r@5 0.67 r@10 0.73 r@20 0.76 r@50 0.77 r@100 0.82 r@200 0.83
+Jev exhaustive (2080 arts)   MRR 0.643 | h@1 0.53 h@3 0.70 h@5 0.77 h@10 0.83 h@20 0.89 h@50 0.92 h@100 0.92 h@200 0.92 | r@1 0.40 r@3 0.54 r@5 0.62 r@10 0.70 r@20 0.78 r@50 0.88 r@100 0.89 r@200 0.91

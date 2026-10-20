@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/Users/aamia/.t3/projects/batatis/.venv/bin/python",
+    "-I",
+    "tools/codesearch.py",
+    "find",
+    "(?<!\\d)1\\.3\\.1\\.2\\.(?!\\d)",
+    "--doc",
+    "NBC-AE",
+    "--max",
+    "1000",
+    "--context",
+    "0"
+  ],
+  "stdout": "[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.17] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.29] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.39] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.90] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.91] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.92] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.93] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.94] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.95] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.96] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.97] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.98] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.99] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.100] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.101] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.102] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.103] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.104] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.105] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.106] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.107] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.108] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.109] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.110] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.111] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.112] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.113] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.114] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.115] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.116] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.117] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.118] ...1.3.1.2....\n\n[NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2 PDF p.119] ...1.3.1.2....\n\n",
+  "stderr": "",
+  "exit_code": 0
+}

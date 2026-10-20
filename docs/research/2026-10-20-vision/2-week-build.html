@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Batatis: two-week build</title>
+<style>
+  .viz-root {
+    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s0: #a3a29b;
+    --fg: var(--foreground, #0b0b0b);
+    --fg2: var(--muted-foreground, #52514e);
+    --surf: var(--card, #fcfcfb);
+    --surf2: var(--secondary, #f0efec);
+    --line: var(--border, #e2e1dc);
+    --r: var(--radius, 10px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .viz-root { --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s0: #5f5e58;
+      --fg: var(--foreground, #f0efec); --fg2: var(--muted-foreground, #c3c2b7);
+      --surf: var(--card, #131315); --surf2: var(--secondary, #1c1c1f); --line: var(--border, #2a2a2e); }
+  }
+  :root[data-theme="dark"] .viz-root { --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s0: #5f5e58;
+    --fg: var(--foreground, #f0efec); --fg2: var(--muted-foreground, #c3c2b7);
+    --surf: var(--card, #131315); --surf2: var(--secondary, #1c1c1f); --line: var(--border, #2a2a2e); }
+  * { box-sizing: border-box; }
+  body.viz-root { margin: 0; color: var(--fg); font: 13.5px/1.45 var(--font-sans, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif); }
+  .wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .card { background: var(--surf); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; min-width: 0; }
+  .card h2 { font-size: 13px; font-weight: 600; margin: 0 0 12px; }
+  .row-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .row-head h2 { margin: 0; }
+
+  .scope { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .scope section { background: var(--surf2); border-radius: calc(var(--r) - 4px); padding: 14px 12px 10px; position: relative; overflow: hidden; }
+  .scope section::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--k); }
+  .scope h3 { font-size: 12.5px; font-weight: 600; margin: 0 0 2px; }
+  .scope .sub { font-size: 12px; color: var(--fg2); margin: 0 0 8px; }
+  .scope ol, .scope ul { margin: 0; padding-left: 18px; color: var(--fg); font-size: 12.5px; }
+  .scope li { margin: 3px 0; }
+  .k1 { --k: var(--s1); } .k2 { --k: var(--s2); } .k3 { --k: var(--s3); } .k0 { --k: var(--s0); }
+
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--fg2); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 14px; height: 4px; border-radius: 2px; background: var(--k); display: inline-block; }
+  .legend .gate-key { width: 8px; height: 8px; transform: rotate(45deg); background: var(--fg); border-radius: 1px; }
+
+  .scroller { overflow-x: auto; }
+  .tl { min-width: 640px; display: grid; grid-template-columns: 72px 1fr; row-gap: 6px; }
+  .axis, .lane, .gaterow { display: contents; }
+  .lane-label { font-size: 11.5px; font-weight: 600; color: var(--fg2); padding-top: 8px; line-height: 1.2; }
+  .days { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); position: relative; }
+  .axis .days div { font-size: 10.5px; color: var(--fg2); padding: 0 3px 4px; border-left: 1px solid var(--line); line-height: 1.25; }
+  .axis .days div b { display: block; color: var(--fg); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .lane .days { min-height: 46px; background: repeating-linear-gradient(to right, var(--line) 0 1px, transparent 1px calc(100% / 14)); }
+  .task { grid-row: 1; margin: 0 1px; background: var(--surf2); border-radius: 6px; padding: 9px 6px 6px;
+    position: relative; overflow: hidden; outline: none; border: 1px solid transparent; z-index: 2; }
+  .task::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--k); }
+  .task:hover, .task:focus-visible { border-color: var(--fg2); }
+  .task .t { font-size: 11.5px; font-weight: 600; line-height: 1.25; display: block; }
+  .gaterow .days { height: 30px; }
+  .gate { position: absolute; top: 2px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 3px;
+    outline: none; padding: 0 6px; z-index: 3; }
+  .gate .dia { width: 10px; height: 10px; transform: rotate(45deg); background: var(--fg); border-radius: 1px; box-shadow: 0 0 0 2px var(--surf); }
+  .gate .lbl { font-size: 11px; font-weight: 600; line-height: 1; }
+  .gate:hover .dia, .gate:focus-visible .dia { background: var(--s1); }
+  .gline { position: absolute; top: -6px; bottom: -6px; width: 1px; background: var(--fg2); opacity: .45; pointer-events: none; z-index: 1; }
+  .gaterow .gline { top: 22px; }
+
+  .tip { position: fixed; z-index: 10; max-width: 300px; background: var(--popover, var(--surf)); color: var(--popover-foreground, var(--fg));
+    border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; font-size: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    pointer-events: none; opacity: 0; transition: opacity .08s; }
+  .tip.on { opacity: 1; }
+  .tip .v { font-weight: 600; font-size: 12.5px; display: block; margin-bottom: 3px; }
+  .tip .m { color: var(--fg2); display: block; }
+  .tip .key { display: inline-block; width: 12px; height: 2px; border-radius: 1px; background: var(--k); vertical-align: middle; margin-right: 6px; }
+
+  button.toggle { font: inherit; font-size: 12px; color: var(--fg); background: var(--surf2); border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+  button.toggle:focus-visible, .task:focus-visible, .gate:focus-visible, .scroller:focus-visible { outline: 2px solid var(--ring, var(--s1)); outline-offset: 2px; }
+  table { border-collapse: collapse; width: 100%; font-size: 12px; }
+  th, td { text-align: left; padding: 6px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--fg2); font-weight: 600; font-size: 11.5px; }
+  td.n { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--fg2); }
+  [hidden] { display: none !important; }
+  .note { font-size: 12px; color: var(--fg2); margin: 10px 0 0; }
+  @media (max-width: 620px) { .scope { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body class="viz-root">
+<div class="wrap">
+
+  <div class="card">
+    <h2>What ships, and what waits</h2>
+    <div class="scope">
+      <section class="k1" aria-labelledby="s1">
+        <h3 id="s1">Build: never cut</h3>
+        <p class="sub">Carries Intake, Code ID, Recommendations, Review and portability</p>
+        <ol>
+          <li>Intake for any applicant type; at most five questions</li>
+          <li>Scope check with clear redirects</li>
+          <li>Code ID over all 2,080 Div B articles: Part 9 commits, other Parts get quoted choices</li>
+          <li>Section C by lookup, with "no row" and "differs" labels</li>
+          <li>Coded rules for the three most-varied articles, with standing-package checklists</li>
+          <li>Jurisdiction packs: Calgary, Edmonton, rest of Alberta</li>
+          <li>Section D evidence plan tied to the codes; professional flags</li>
+          <li>Process fields: Batatis asks, the applicant writes</li>
+          <li>Pre-flight and the official form, version-keyed and flattened</li>
+          <li>Officer review with attachments and a re-upload diff</li>
+          <li>Accuracy report: guaranteed claims apart from measured ones</li>
+        </ol>
+      </section>
+      <section class="k2" aria-labelledby="s2">
+        <h3 id="s2">Build if the gate passes: the wow</h3>
+        <p class="sub">Shows the Plan Twin vision on Alberta's most-varied article</p>
+        <ol start="12">
+          <li>Site twin: on vector sheets Batatis picks the dimension strings and you confirm; trace mode on the rest</li>
+          <li>Calgary's own variance form as a second export</li>
+          <li>Part 2 prefill, limited to insufficient-information reasons</li>
+        </ol>
+      </section>
+      <section class="k0" aria-labelledby="s3">
+        <h3 id="s3">Roadmap: in the pitch, not built</h3>
+        <p class="sub">Labelled as coverage in the app</p>
+        <ul>
+          <li>Other provinces and territories</li>
+          <li>Floor-plan twin; DWG, IFC, RVT; scans and photos</li>
+          <li>All Part 9 checks, then Part 3</li>
+          <li>NFC, NECB, NPC</li>
+          <li>Permit systems and SCC registration</li>
+          <li>Canadian data residency</li>
+          <li>Professional sign-off marketplace</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row-head">
+      <h2 id="tl-title">Schedule, by workstream</h2>
+      <div class="legend" aria-label="Legend">
+        <span class="k1"><i></i>Core: never cut</span>
+        <span class="k2"><i></i>Wow: behind a gate</span>
+        <span class="k3"><i></i>Proof and pitch</span>
+        <span><i class="gate-key"></i>Gate</span>
+      </div>
+      <button class="toggle" id="toggle" aria-pressed="false">Table view</button>
+    </div>
+    <div id="chart" class="scroller" role="region" aria-labelledby="tl-title" tabindex="0">
+      <div class="tl" id="tl"></div>
+    </div>
+    <div id="table" hidden>
+      <table aria-labelledby="tl-title">
+        <thead><tr><th scope="col">Workstream</th><th scope="col">Days</th><th scope="col">Kind</th><th scope="col">Work</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <p class="note">Hover or focus any block or gate for details. Codex returns on the evening of day 4. Held-out test runs happen only on days 10 and 11; feature freeze is at the end of day 10.</p>
+  </div>
+</div>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script>
+// Follow the host theme: read the injected background and pick the light or dark color steps
+(function () {
+  const bg = getComputedStyle(document.documentElement).getPropertyValue("--background").trim();
+  if (!bg) return;
+  const c = document.createElement("canvas"); c.width = c.height = 1;
+  const x = c.getContext("2d"); x.fillStyle = "#808080"; x.fillStyle = bg; x.fillRect(0, 0, 1, 1);
+  const [r, g, b] = x.getImageData(0, 0, 1, 1).data;
+  const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  document.documentElement.setAttribute("data-theme", lum < 0.5 ? "dark" : "light");
+})();
+const DAYS = ["Wed 21 Oct","Thu 22","Fri 23","Sat 24","Sun 25","Mon 26","Tue 27","Wed 28","Thu 29","Fri 30","Sat 31","Sun 1 Nov","Mon 2","Tue 3"];
+const KIND = {
+  core:  { label: "Core: never cut", k: "k1" },
+  wow:   { label: "Wow: behind a gate", k: "k2" },
+  proof: { label: "Proof and pitch", k: "k3" },
+};
+const LANES = ["Engine", "Web app", "Evals, data", "Codex", "You"];
+const TASKS = [
+  { lane: "Engine", from: 1, to: 2, kind: "core", title: "Foundations",
+    detail: "Case schema and API; codedb, precedents and facts into main; intent-parser fix and Section C audit; identify service as API calls with full text" },
+  { lane: "Engine", from: 3, to: 5, kind: "core", title: "Case builder and export",
+    detail: "Section C rows; Section D tied to codes; professional rules; process prompts; completeness checker; export with field maps, flattening, appendix and a render test" },
+  { lane: "Engine", from: 6, to: 8, kind: "core", title: "Officer review",
+    detail: "Uploaded forms, attachments panel, information request, re-upload diff" },
+  { lane: "Engine", from: 9, to: 10, kind: "proof", title: "Accuracy fixes",
+    detail: "Fixes from error analysis; thresholds fitted on the calibration fold, reported on the validation fold; feature freeze at the end of day 10" },
+  { lane: "Engine", from: 12, to: 13, kind: "core", title: "Deploy",
+    detail: "Local demo build and a private deployment with the database mounted privately" },
+  { lane: "Web app", from: 1, to: 2, kind: "core", title: "Describe mock, shell",
+    detail: "Describe screen mock on day 1; app shell; port the intake, ranking and Section C screens with plain-language confirmation" },
+  { lane: "Web app", from: 3, to: 5, kind: "core", title: "Describe flow end to end",
+    detail: "Pre-flight and export; skeleton deployed on day 3" },
+  { lane: "Web app", from: 6, to: 8, kind: "core", title: "Officer screens",
+    detail: "Officer screens; jurisdiction switch; accuracy report" },
+  { lane: "Web app", from: 9, to: 11, kind: "proof", title: "Usability and UI review",
+    detail: "Fixes from user sessions; Opus 5.5 UI review and fixes" },
+  { lane: "Web app", from: 12, to: 13, kind: "proof", title: "E2E tests",
+    detail: "The three demo flows: 9 of 10 uncached live runs must pass" },
+  { lane: "Evals, data", from: 1, to: 2, kind: "proof", title: "Harness, new cases",
+    detail: "Judge script; about 80 new development cases with a checker; leave-one-out precedent index; planted defects, half from an independent author; local drawing test sets from public Calgary appeal packages, 2 held out; a synthetic drawing set for the demo" },
+  { lane: "Evals, data", from: 3, to: 5, kind: "proof", title: "Dev run 1",
+    detail: "Calibration fold; planted-defect run 1" },
+  { lane: "Evals, data", from: 6, to: 8, kind: "proof", title: "Dev run 2",
+    detail: "Validation fold and error analysis" },
+  { lane: "Evals, data", from: 10, to: 11, kind: "proof", title: "Held-out runs",
+    detail: "Test run 1 on day 10 and run 2 on day 11, both reported as they come out" },
+  { lane: "Codex", from: 5, to: 6, kind: "core", title: "Rules and packs",
+    detail: "Coded rules for the three most-varied articles; SPV-001, SPV-006 and B23-01 checklists; jurisdiction packs" },
+  { lane: "Codex", from: 7, to: 9, kind: "wow", title: "Site twin",
+    detail: "Sheet triage; candidate picking with confirmation on vector sheets; trace mode on outlined and raster sheets; live limiting-distance and soffit checks" },
+  { lane: "You", from: 1, to: 2, kind: "proof", title: "Inputs",
+    detail: "Decisions and outreach on day 0; ask a builder for one real set you may show; spot-check 20 development cases" },
+  { lane: "You", from: 3, to: 5, kind: "proof", title: "Session 1, labels, deck draft",
+    detail: "User session 1 on day 3 (builder or first-time applicant, static screens and the Describe mock); label the drawing sets; draft the deck and beta plan by day 5" },
+  { lane: "You", from: 6, to: 7, kind: "proof", title: "Officer session",
+    detail: "Timed officer review by day 7; ask willingness to pay; log what changed and why" },
+  { lane: "You", from: 8, to: 9, kind: "proof", title: "Session 3",
+    detail: "Manufacturer or first-time applicant, on day 9" },
+  { lane: "You", from: 10, to: 14, kind: "proof", title: "Deck, video, rehearsals",
+    detail: "Deck iteration, backup video, three rehearsals; submit on day 14" },
+];
+const GATES = [
+  { id: "G1", day: 2, title: "Identify service matches the benchmark",
+    detail: "On 53 public cases, leave-one-out: rerank MRR at least 0.70; verifier top-1 by Part with intervals over 5 repeats; latency and cost recorded" },
+  { id: "G3", day: 5, title: "Describe flow exports",
+    detail: "Three demo cases: every applicant field filled or marked not applicable, 0 validator errors, render test passes" },
+  { id: "G2", day: 8, title: "Candidate picking: go or no-go",
+    detail: "Right string or a question for each side setback, stated limiting distance and eave projection on 2 held-out real vector sets, with no wrong auto-accepted value; otherwise trace mode only" },
+  { id: "G4", day: 9, title: "Accuracy on the validation fold",
+    detail: "At least 50 committed picks with at most 1 error; every guaranteed claim passes; otherwise Batatis asks more and commits less" },
+  { id: "G5", day: 12, title: "Demo freeze",
+    detail: "9 of 10 uncached live runs of the three demo flows pass" },
+];
+
+const tl = document.getElementById("tl");
+const tip = document.getElementById("tip");
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+function dayRange(a, b) { return a === b ? `Day ${a}` : `Days ${a}–${b}`; }
+
+// Axis
+const axisLabel = el("div", "lane-label", "");
+const axisDays = el("div", "days");
+DAYS.forEach((d, i) => { const c = el("div"); c.appendChild(el("b", null, String(i + 1))); c.appendChild(document.createTextNode(d)); axisDays.appendChild(c); });
+const axis = el("div", "axis"); axis.append(axisLabel, axisDays); tl.appendChild(axis);
+
+// Gate row
+const gr = el("div", "gaterow");
+gr.appendChild(el("div", "lane-label", "Gates"));
+const gd = el("div", "days");
+GATES.forEach(g => {
+  const b = el("div", "gate");
+  b.tabIndex = 0;
+  b.style.left = `${(g.day / 14) * 100}%`;
+  b.setAttribute("aria-label", `${g.id}, end of day ${g.day}: ${g.title}. ${g.detail}`);
+  b.append(el("span", "lbl", g.id), el("span", "dia"));
+  bindTip(b, () => [`${g.id} · end of day ${g.day}`, g.title, g.detail, null]);
+  gd.appendChild(b);
+});
+gr.append(gd); tl.appendChild(gr);
+
+// Lanes
+LANES.forEach(name => {
+  const lane = el("div", "lane");
+  lane.appendChild(el("div", "lane-label", name));
+  const days = el("div", "days");
+  TASKS.filter(t => t.lane === name).forEach(t => {
+    const b = el("div", `task ${KIND[t.kind].k}`);
+    b.tabIndex = 0;
+    b.style.gridColumn = `${t.from} / ${t.to + 1}`;
+    b.setAttribute("aria-label", `${name}, ${dayRange(t.from, t.to)}, ${KIND[t.kind].label}: ${t.title}. ${t.detail}`);
+    b.append(el("span", "t", t.title));
+    bindTip(b, () => [`${dayRange(t.from, t.to)} · ${name}`, t.title, t.detail, t.kind]);
+    days.appendChild(b);
+  });
+  lane.appendChild(days);
+  tl.appendChild(lane);
+});
+
+// Gate lines: each row draws its own hairline at every gate position
+document.querySelectorAll(".gaterow .days, .lane .days").forEach(row => {
+  GATES.forEach(g => { const l = el("div", "gline"); l.style.left = `${(g.day / 14) * 100}%`; row.appendChild(l); });
+});
+
+function bindTip(node, get) {
+  const show = (x, y) => {
+    const [meta, title, detail, kind] = get();
+    tip.replaceChildren();
+    const v = el("span", "v");
+    if (kind) { const key = el("span", `key ${KIND[kind].k}`); v.appendChild(key); }
+    v.appendChild(document.createTextNode(title));
+    tip.append(v, el("span", "m", meta), el("span", "m", detail));
+    if (kind) tip.appendChild(el("span", "m", KIND[kind].label));
+    tip.classList.add("on");
+    const r = tip.getBoundingClientRect();
+    let left = x + 14, top = y + 14;
+    if (left + r.width > window.innerWidth - 8) left = x - r.width - 14;
+    if (top + r.height > window.innerHeight - 8) top = y - r.height - 14;
+    tip.style.left = `${Math.max(8, left)}px`;
+    tip.style.top = `${Math.max(8, top)}px`;
+  };
+  node.addEventListener("pointermove", e => show(e.clientX, e.clientY));
+  node.addEventListener("pointerleave", () => tip.classList.remove("on"));
+  node.addEventListener("focus", () => { const r = node.getBoundingClientRect(); show(r.left + r.width / 2, r.bottom); });
+  node.addEventListener("blur", () => tip.classList.remove("on"));
+}
+
+// Table view
+const tbody = document.getElementById("tbody");
+TASKS.forEach(t => {
+  const tr = el("tr");
+  tr.append(el("td", null, t.lane), el("td", "n", dayRange(t.from, t.to)), el("td", null, KIND[t.kind].label), el("td", null, `${t.title}: ${t.detail}`));
+  tbody.appendChild(tr);
+});
+GATES.forEach(g => {
+  const tr = el("tr");
+  tr.append(el("td", null, "Gate " + g.id), el("td", "n", `End of day ${g.day}`), el("td", null, "Gate"), el("td", null, `${g.title}: ${g.detail}`));
+  tbody.appendChild(tr);
+});
+const toggle = document.getElementById("toggle");
+toggle.addEventListener("click", () => {
+  const on = toggle.getAttribute("aria-pressed") !== "true";
+  toggle.setAttribute("aria-pressed", String(on));
+  toggle.textContent = on ? "Timeline view" : "Table view";
+  document.getElementById("chart").hidden = on;
+  document.getElementById("table").hidden = !on;
+});
+</script>
+</body>
+</html>

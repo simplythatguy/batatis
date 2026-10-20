@@ -1,0 +1,2739 @@
+{
+  "standata-abc2014-variance-14-bcv-001": {
+    "summary": "Permits designated building SCOs to accept construction and demolition fire safety plans where the fire-code acceptance route is unavailable.",
+    "applies_to": "Alberta construction/demolition sites; designated officers in the listed accredited organizations.",
+    "conditions": [
+      "Officer must act within designation and employment authority.",
+      "Plan and inspection obligations continue to apply; this changes who can accept a plan."
+    ],
+    "selected_citations": [
+      "B:8.1.1.1.",
+      "FIRE:5.6.1.3."
+    ],
+    "topics": [
+      "process-and-admin",
+      "firefighting-alarms-sprinklers"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-015": {
+    "summary": "Permits designated building SCOs to accept construction and demolition fire safety plans where the fire-code acceptance route is unavailable.",
+    "applies_to": "Alberta construction/demolition sites; designated officers in the listed accredited organizations.",
+    "conditions": [
+      "Officer must act within designation and employment authority.",
+      "Plan and inspection obligations continue to apply; this changes who can accept a plan."
+    ],
+    "selected_citations": [
+      "B:8.1.1.1.",
+      "FIRE:5.6.1.3."
+    ],
+    "topics": [
+      "process-and-admin",
+      "firefighting-alarms-sprinklers"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-002": {
+    "summary": "Accepts the cited engineered tall-wall guide instead of individual wall engineering for projects within its limits.",
+    "applies_to": "Residential tall walls covered by the January 2016 guide and June 2016 amendment.",
+    "conditions": [
+      "Show project-specific wall details on permit drawings.",
+      "Walls outside the guide still require site-specific engineering."
+    ],
+    "selected_citations": [
+      "B:9.23.10.1."
+    ],
+    "topics": [
+      "structural-and-framing",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-002r1": {
+    "summary": "Accepts the cited engineered tall-wall guide instead of individual wall engineering for projects within its limits.",
+    "applies_to": "Residential tall walls covered by the January 2016 guide and June 2016 amendment.",
+    "conditions": [
+      "Show project-specific wall details on permit drawings.",
+      "Walls outside the guide still require site-specific engineering."
+    ],
+    "selected_citations": [
+      "B:9.23.10.1."
+    ],
+    "topics": [
+      "structural-and-framing",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-003": {
+    "summary": "Accepts an engineered low-rise fenestration wind/rain-pressure guide as an alternative way to select NAFS ratings.",
+    "applies_to": "Part 9 low-rise projects within the Berkeley Vadocz guide scope.",
+    "conditions": [
+      "Use the May 11, 2016 guide and satisfy its scope and limitations.",
+      "Acceptance substitutes the documented design values; it does not waive product-performance requirements."
+    ],
+    "selected_citations": [
+      "B:9.7.4.3."
+    ],
+    "topics": [
+      "building-envelope-insulation-cladding",
+      "structural-and-framing"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-003r1": {
+    "summary": "Accepts an engineered low-rise fenestration wind/rain-pressure guide as an alternative way to select NAFS ratings.",
+    "applies_to": "Part 9 low-rise projects within the Berkeley Vadocz guide scope.",
+    "conditions": [
+      "Use the May 11, 2016 guide and satisfy its scope and limitations.",
+      "Acceptance substitutes the documented design values; it does not waive product-performance requirements."
+    ],
+    "selected_citations": [
+      "B:9.7.4.3."
+    ],
+    "topics": [
+      "building-envelope-insulation-cladding",
+      "structural-and-framing"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-004": {
+    "summary": "Accepts maximum joist, rafter and beam spans from the 2009 Canadian Wood Council Span Book.",
+    "applies_to": "Part 9 members and loading conditions within the referenced Span Book.",
+    "conditions": [
+      "Use the specifically identified 2009 edition and its applicable design conditions."
+    ],
+    "selected_citations": [
+      "B:9.23.4.2."
+    ],
+    "topics": [
+      "structural-and-framing"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-012": {
+    "summary": "Accepts maximum joist, rafter and beam spans from the 2009 Canadian Wood Council Span Book.",
+    "applies_to": "Part 9 members and loading conditions within the referenced Span Book.",
+    "conditions": [
+      "Use the specifically identified 2009 edition and its applicable design conditions."
+    ],
+    "selected_citations": [
+      "B:9.23.4.2."
+    ],
+    "topics": [
+      "structural-and-framing"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-005": {
+    "summary": "Recognizes CSA A277-16 factory certification in place of the earlier referenced certification standard.",
+    "applies_to": "Prefabricated buildings, modules and panels reviewed off site.",
+    "conditions": [
+      "Certification must conform to CSA A277-16.",
+      "This record is withdrawn/historical; do not use as current authorization."
+    ],
+    "selected_citations": [
+      "C:2.4.5.1."
+    ],
+    "topics": [
+      "evidence-and-conformity",
+      "process-and-admin"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-006": {
+    "summary": "Allows a passenger elevator to replace an accessibility lift without the usual stretcher-sized car when the stated limits are met.",
+    "applies_to": "Elevators substituted for CSA B355 accessibility lifts; historical 7,000 mm travel limit.",
+    "conditions": [
+      "Travel must not exceed 7,000 mm.",
+      "Car size must meet the identified CSA B355 minimums.",
+      "Check the joint elevating-device conditions, FEO provisions and permit documentation in this version."
+    ],
+    "selected_citations": [
+      "B:3.5.4.1.(1)"
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "firefighting-alarms-sprinklers"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-003-rev1": {
+    "summary": "Allows a passenger elevator to replace an accessibility lift without the usual stretcher-sized car when the stated limits are met.",
+    "applies_to": "Elevators substituted for CSA B355 accessibility lifts; historical 7,000 mm travel limit.",
+    "conditions": [
+      "Travel must not exceed 7,000 mm.",
+      "Car size must meet the identified CSA B355 minimums.",
+      "Check the joint elevating-device conditions, FEO provisions and permit documentation in this version."
+    ],
+    "selected_citations": [
+      "B:3.5.4.1.(1)"
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "firefighting-alarms-sprinklers"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-003": {
+    "summary": "Allows a passenger elevator to replace an accessibility lift without the usual stretcher-sized car when the stated limits are met.",
+    "applies_to": "Elevators substituted for CSA B355 accessibility lifts; historical 7,000 mm travel limit.",
+    "conditions": [
+      "Travel must not exceed 7,000 mm.",
+      "Car size must meet the identified CSA B355 minimums.",
+      "Check the joint elevating-device conditions, FEO provisions and permit documentation in this version."
+    ],
+    "selected_citations": [
+      "B:3.5.4.1.(1)"
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "firefighting-alarms-sprinklers"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-007": {
+    "summary": "Allows specified fixed industrial stairs, folding stairs or ladders for interior roof access instead of conventional stairs.",
+    "applies_to": "Interior access to roofs and rooftop equipment within this historical variance.",
+    "conditions": [
+      "Industrial/folding stair vertical rise limited to 3.7 m; folding stairs need handrails and adequate certified load capacity.",
+      "Fixed ladders must satisfy the cited OHS requirements.",
+      "Provide conforming landings when access methods are combined and observe all illustrated conditions."
+    ],
+    "selected_citations": [
+      "B:3.2.5.3.(1)",
+      "B:3.6.4.7.(1)"
+    ],
+    "topics": [
+      "egress-and-single-stair",
+      "hvac-ventilation-plumbing",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-008": {
+    "summary": "Extends a suite-separation exception to qualifying single-storey strip malls.",
+    "applies_to": "Business/personal-service and mercantile suites in a qualifying strip mall.",
+    "conditions": [
+      "Provide the prescribed sprinkler and fire alarm systems.",
+      "Each suite needs at least two direct exterior exits.",
+      "Exclude residential and institutional uses; separate assembly suites to the required rating.",
+      "Withdrawn historical document."
+    ],
+    "selected_citations": [
+      "B:3.3.1.1.(1)",
+      "B:9.10.9.13.(1)"
+    ],
+    "topics": [
+      "fire-separations-and-spatial-separation",
+      "occupancy-and-accessibility"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-009": {
+    "summary": "Allows greenhouse polyethylene film that does not meet the tent-film standard for staff-only plant-growing facilities.",
+    "applies_to": "Commercial plant-growing greenhouses closed to the public.",
+    "conditions": [
+      "Use only for growing plants and exclude public access.",
+      "Film flame-spread rating must not exceed 25.",
+      "Public-access/other-use greenhouses remain subject to the referenced fabric standard; see 23-BCV-011R1 for the later two-option route."
+    ],
+    "selected_citations": [
+      "B:3.1.6.5."
+    ],
+    "topics": [
+      "combustible-construction-and-mass-timber",
+      "occupancy-and-accessibility"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-011": {
+    "summary": "Allows greenhouse polyethylene film that does not meet the tent-film standard for staff-only plant-growing facilities.",
+    "applies_to": "Commercial plant-growing greenhouses closed to the public.",
+    "conditions": [
+      "Use only for growing plants and exclude public access.",
+      "Film flame-spread rating must not exceed 25.",
+      "Public-access/other-use greenhouses remain subject to the referenced fabric standard; see 23-BCV-011R1 for the later two-option route."
+    ],
+    "selected_citations": [
+      "B:3.1.6.5."
+    ],
+    "topics": [
+      "combustible-construction-and-mass-timber",
+      "occupancy-and-accessibility"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2023-variance-23-bcv-011": {
+    "summary": "Allows greenhouse polyethylene film that does not meet the tent-film standard for staff-only plant-growing facilities.",
+    "applies_to": "Commercial plant-growing greenhouses closed to the public.",
+    "conditions": [
+      "Use only for growing plants and exclude public access.",
+      "Film flame-spread rating must not exceed 25.",
+      "Superseded by 23-BCV-011R1; the public-access option belongs to R1."
+    ],
+    "selected_citations": [
+      "B:3.1.18.5."
+    ],
+    "topics": [
+      "combustible-construction-and-mass-timber",
+      "occupancy-and-accessibility"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-010": {
+    "summary": "Accepts certified wireless interconnection of smoke alarms in place of wired interconnection.",
+    "applies_to": "New and existing buildings within the ABC 2014 variance.",
+    "conditions": [
+      "Smoke alarms and wireless system must be certified to CAN/ULC-S531.",
+      "This does not remove alarm-location, power-supply or other applicable requirements."
+    ],
+    "selected_citations": [
+      "B:3.2.4.21.(9)",
+      "B:9.10.19.5.(1)"
+    ],
+    "topics": [
+      "firefighting-alarms-sprinklers",
+      "housing-secondary-suites-part9"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-006": {
+    "summary": "Accepts CAN/ULC-S531 certified wireless smoke-alarm interconnection under the historical building-code edition.",
+    "applies_to": "New and existing buildings addressed by the 2019 variance.",
+    "conditions": [
+      "Use smoke alarms with certified wireless interconnection.",
+      "Read the operative variance carefully: its explicit alternative identifies the Part 3 interconnection sentence; Part 9 appears in discussion."
+    ],
+    "selected_citations": [
+      "B:3.2.4.20.(10)"
+    ],
+    "topics": [
+      "firefighting-alarms-sprinklers",
+      "housing-secondary-suites-part9"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-011": {
+    "summary": "Permits controlled electromagnetic door locking for qualifying treatment/care occupancies with safeguards for emergency release.",
+    "applies_to": "Group B, Divisions 2 and 3 occupancies; withdrawn historical joint building/fire variance.",
+    "conditions": [
+      "Provide sprinklers and a fire alarm system.",
+      "Locks must release on the specified alarm, power-loss and manual controls and require the prescribed reset.",
+      "Provide the required signage, emergency lighting and operational safeguards; consult all source conditions."
+    ],
+    "selected_citations": [
+      "B:3.4.6.16.(5)"
+    ],
+    "topics": [
+      "egress-and-single-stair",
+      "occupancy-and-accessibility",
+      "firefighting-alarms-sprinklers"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-012": {
+    "summary": "Allows small oil/gas processing buildings to use an F2 occupancy classification when an engineered risk assessment and compensating safeguards address the hazards.",
+    "applies_to": "Oil/gas processing buildings no larger than 150 m².",
+    "conditions": [
+      "Obtain an Alberta registered engineer risk assessment covering ventilation, gas/fire detection, shutdown/depressurization and remote firefighting-water needs.",
+      "Implement the required operating/training measures and list engineering recommendations in the permit submission.",
+      "Meet the exit, panic-hardware, travel-distance and ignition-control conditions in the complete variance."
+    ],
+    "selected_citations": [
+      "B:3.3.1.5."
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "professional-involvement",
+      "hvac-ventilation-plumbing",
+      "firefighting-alarms-sprinklers"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use.",
+    "citation_scope_note": "The source uses broad classification provisions as well as the listed article; this is not an exhaustive article list."
+  },
+  "standata-nbc2019-variance-19-bcv-010": {
+    "summary": "Allows small oil/gas processing buildings to use an F2 occupancy classification when an engineered risk assessment and compensating safeguards address the hazards.",
+    "applies_to": "Oil/gas processing buildings no larger than 150 m².",
+    "conditions": [
+      "Obtain an Alberta registered engineer risk assessment covering ventilation, gas/fire detection, shutdown/depressurization and remote firefighting-water needs.",
+      "Implement the required operating/training measures and list engineering recommendations in the permit submission.",
+      "Meet the exit, panic-hardware, travel-distance and ignition-control conditions in the complete variance."
+    ],
+    "selected_citations": [
+      "B:3.3.1.5."
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "professional-involvement",
+      "hvac-ventilation-plumbing",
+      "firefighting-alarms-sprinklers"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use.",
+    "citation_scope_note": "The source uses broad classification provisions as well as the listed article; this is not an exhaustive article list."
+  },
+  "standata-nbc2023-variance-23-bcv-005": {
+    "summary": "Allows small oil/gas processing buildings to use an F2 occupancy classification when an engineered risk assessment and compensating safeguards address the hazards.",
+    "applies_to": "Oil/gas processing buildings no larger than 150 m².",
+    "conditions": [
+      "Obtain an Alberta registered engineer risk assessment covering ventilation, gas/fire detection, shutdown/depressurization and remote firefighting-water needs.",
+      "Implement the required operating/training measures and list engineering recommendations in the permit submission.",
+      "Meet the exit, panic-hardware, travel-distance and ignition-control conditions in the complete variance."
+    ],
+    "selected_citations": [
+      "B:3.3.1.5."
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "professional-involvement",
+      "hvac-ventilation-plumbing",
+      "firefighting-alarms-sprinklers"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use.",
+    "citation_scope_note": "The source uses broad classification provisions as well as the listed article; this is not an exhaustive article list."
+  },
+  "standata-abc2014-variance-14-bcv-013": {
+    "summary": "Allows qualifying small natural-gas metering/regulating buildings to be classified as F2 rather than high-hazard industrial occupancy.",
+    "applies_to": "Low-human-occupancy natural-gas regulating/metering buildings.",
+    "conditions": [
+      "Building limited to 55 m² and one storey.",
+      "Provide continuous adequate ventilation so small leaks cannot accumulate.",
+      "The specific ventilation article differs between code editions."
+    ],
+    "selected_citations": [],
+    "topics": [
+      "occupancy-and-accessibility",
+      "hvac-ventilation-plumbing"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use.",
+    "citation_scope_note": "The departure is an occupancy classification/definition; ventilation references are conditions, not themselves varied articles."
+  },
+  "standata-nbc2019-variance-19-bcv-009": {
+    "summary": "Allows qualifying small natural-gas metering/regulating buildings to be classified as F2 rather than high-hazard industrial occupancy.",
+    "applies_to": "Low-human-occupancy natural-gas regulating/metering buildings.",
+    "conditions": [
+      "Building limited to 55 m² and one storey.",
+      "Provide continuous adequate ventilation so small leaks cannot accumulate.",
+      "The specific ventilation article differs between code editions."
+    ],
+    "selected_citations": [],
+    "topics": [
+      "occupancy-and-accessibility",
+      "hvac-ventilation-plumbing"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use.",
+    "citation_scope_note": "The departure is an occupancy classification/definition; ventilation references are conditions, not themselves varied articles."
+  },
+  "standata-nbc2023-variance-23-bcv-006": {
+    "summary": "Allows qualifying small natural-gas metering/regulating buildings to be classified as F2 rather than high-hazard industrial occupancy.",
+    "applies_to": "Low-human-occupancy natural-gas regulating/metering buildings.",
+    "conditions": [
+      "Building limited to 55 m² and one storey.",
+      "Provide continuous adequate ventilation so small leaks cannot accumulate.",
+      "The specific ventilation article differs between code editions."
+    ],
+    "selected_citations": [],
+    "topics": [
+      "occupancy-and-accessibility",
+      "hvac-ventilation-plumbing"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use.",
+    "citation_scope_note": "The departure is an occupancy classification/definition; ventilation references are conditions, not themselves varied articles."
+  },
+  "standata-abc2014-variance-14-bcv-014": {
+    "summary": "Allows employee-only lowered oil-change/lubrication workspaces without separation from the main service-garage floor.",
+    "applies_to": "Service garages limited to oil-change/lubrication work.",
+    "conditions": [
+      "Noncombustible floor, ventilation and at least 2 m headroom are required.",
+      "Provide two remote stair accesses; a guarded ladder substitution is limited to the stated 150 m²/15 m case.",
+      "Exclude fuel-burning appliances and ignition-producing work; comply with extinguisher, electrical and liquid-storage requirements."
+    ],
+    "selected_citations": [],
+    "topics": [
+      "occupancy-and-accessibility",
+      "egress-and-single-stair",
+      "hvac-ventilation-plumbing"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use.",
+    "citation_scope_note": "Departure is described by workspace configuration/Section 3.4; no exact four-part varied article is designated in the operative text. Do not turn extinguisher/fire-code conditions into varied NBC articles."
+  },
+  "standata-nbc2019-variance-19-bcv-007": {
+    "summary": "Allows employee-only lowered oil-change/lubrication workspaces without separation from the main service-garage floor.",
+    "applies_to": "Service garages limited to oil-change/lubrication work.",
+    "conditions": [
+      "Noncombustible floor, ventilation and at least 2 m headroom are required.",
+      "Provide two remote stair accesses; a guarded ladder substitution is limited to the stated 150 m²/15 m case.",
+      "Exclude fuel-burning appliances and ignition-producing work; comply with extinguisher, electrical and liquid-storage requirements."
+    ],
+    "selected_citations": [],
+    "topics": [
+      "occupancy-and-accessibility",
+      "egress-and-single-stair",
+      "hvac-ventilation-plumbing"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use.",
+    "citation_scope_note": "Departure is described by workspace configuration/Section 3.4; no exact four-part varied article is designated in the operative text. Do not turn extinguisher/fire-code conditions into varied NBC articles."
+  },
+  "standata-nbc2019-variance-19-bcv-007r1": {
+    "summary": "Allows employee-only lowered oil-change/lubrication workspaces without separation from the main service-garage floor.",
+    "applies_to": "Service garages limited to oil-change/lubrication work.",
+    "conditions": [
+      "Noncombustible floor, ventilation and at least 2 m headroom are required.",
+      "Provide two remote stair accesses; a guarded ladder substitution is limited to the stated 150 m²/15 m case.",
+      "Exclude fuel-burning appliances and ignition-producing work; comply with extinguisher, electrical and liquid-storage requirements."
+    ],
+    "selected_citations": [],
+    "topics": [
+      "occupancy-and-accessibility",
+      "egress-and-single-stair",
+      "hvac-ventilation-plumbing"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use.",
+    "citation_scope_note": "Departure is described by workspace configuration/Section 3.4; no exact four-part varied article is designated in the operative text. Do not turn extinguisher/fire-code conditions into varied NBC articles."
+  },
+  "standata-abc2014-variance-14-bcv-015": {
+    "summary": "Treats qualifying multilevel storage racks as special/unusual structures under a detailed alternative design package.",
+    "applies_to": "Authorized-personnel storage/retrieval racks in permitted industrial or mercantile buildings.",
+    "conditions": [
+      "Submit the required fire safety plan and Part 4 structural design.",
+      "Apply all construction, open-deck, fire/smoke performance, sprinkler, alarm and egress criteria in the source.",
+      "The numbered design items in the variance are its own clauses, not NBC article numbers."
+    ],
+    "selected_citations": [
+      "B:3.2.2.2.(1)"
+    ],
+    "topics": [
+      "structural-and-framing",
+      "firefighting-alarms-sprinklers",
+      "egress-and-single-stair",
+      "occupancy-and-accessibility"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-008": {
+    "summary": "Treats qualifying multilevel storage racks as special/unusual structures under a detailed alternative design package.",
+    "applies_to": "Authorized-personnel storage/retrieval racks in permitted industrial or mercantile buildings.",
+    "conditions": [
+      "Submit the required fire safety plan and Part 4 structural design.",
+      "Apply all construction, open-deck, fire/smoke performance, sprinkler, alarm and egress criteria in the source.",
+      "The numbered design items in the variance are its own clauses, not NBC article numbers."
+    ],
+    "selected_citations": [
+      "B:3.2.2.2.(1)"
+    ],
+    "topics": [
+      "structural-and-framing",
+      "firefighting-alarms-sprinklers",
+      "egress-and-single-stair",
+      "occupancy-and-accessibility"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2023-variance-23-bcv-014": {
+    "summary": "Treats qualifying multilevel storage racks as special/unusual structures under a detailed alternative design package.",
+    "applies_to": "Authorized-personnel storage/retrieval racks in permitted industrial or mercantile buildings.",
+    "conditions": [
+      "Submit the required fire safety plan and Part 4 structural design.",
+      "Apply all construction, open-deck, fire/smoke performance, sprinkler, alarm and egress criteria in the source.",
+      "The numbered design items in the variance are its own clauses, not NBC article numbers."
+    ],
+    "selected_citations": [
+      "B:3.2.2.2.(1)"
+    ],
+    "topics": [
+      "structural-and-framing",
+      "firefighting-alarms-sprinklers",
+      "egress-and-single-stair",
+      "occupancy-and-accessibility"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-016": {
+    "summary": "Provides a documentation route for manufactured structural components in one- and two-family dwellings.",
+    "applies_to": "Dwellings using CCMC-listed manufactured structural systems/components.",
+    "conditions": [
+      "Use components within CCMC evaluation and manufacturer instructions and address system interfaces.",
+      "Submit manufacturer/supplier letters, applicable engineered design program information and layout/calculation documents.",
+      "Authenticate designs and interfaces where the source requires professional responsibility."
+    ],
+    "selected_citations": [
+      "C:2.2.2.1.(1)",
+      "C:2.2.2.1.(2)",
+      "C:2.2.10.4."
+    ],
+    "topics": [
+      "structural-and-framing",
+      "evidence-and-conformity",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-017": {
+    "summary": "Accepts an EnerGuide Rating System v15 energy-compliance route with additional modelling and submission controls.",
+    "applies_to": "Detached, semi-detached and row houses, including houses with secondary suites; excludes stacked/common-space arrangements.",
+    "conditions": [
+      "Demonstrate at least 5% annual energy savings over the ERS v15 reference case.",
+      "Exclude on-site renewable contribution and do not model reductions in process/plug loads.",
+      "Submit the listed drawings, modelling/label evidence and applicable supporting details before occupancy."
+    ],
+    "selected_citations": [
+      "B:9.36.1.3.(1)"
+    ],
+    "topics": [
+      "energy-efficiency",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-004": {
+    "summary": "Accepts an EnerGuide Rating System v15 energy-compliance route with additional modelling and submission controls.",
+    "applies_to": "Detached, semi-detached and row houses, including houses with secondary suites; excludes stacked/common-space arrangements.",
+    "conditions": [
+      "Demonstrate at least 5% annual energy savings over the ERS v15 reference case.",
+      "Exclude on-site renewable contribution and do not model reductions in process/plug loads.",
+      "Submit the listed drawings, modelling/label evidence and applicable supporting details before occupancy."
+    ],
+    "selected_citations": [
+      "B:9.36.1.3.(1)"
+    ],
+    "topics": [
+      "energy-efficiency",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-018": {
+    "summary": "Accepts listed sprinkler-protected glazing in qualifying rated wall assemblies as an alternative to the normal fire-endurance test route.",
+    "applies_to": "Interior/exterior fire-resistance-rated wall glazing within the listing and variance limits.",
+    "conditions": [
+      "Use listed specific-application window sprinklers, fixed suitable glazing and NFPA 13 design.",
+      "Protect both sides where required; preserve loadbearing ratings and unobstructed wetting.",
+      "Meet the required wall rating and every listing/installation/use restriction.",
+      "Evaluation standards and wet-system conditions are version-specific; read this source version."
+    ],
+    "selected_citations": [
+      "B:3.1.7.1.(1)",
+      "B:9.10.3.1.(1)"
+    ],
+    "topics": [
+      "fire-separations-and-spatial-separation",
+      "firefighting-alarms-sprinklers",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-018r1": {
+    "summary": "Accepts listed sprinkler-protected glazing in qualifying rated wall assemblies as an alternative to the normal fire-endurance test route.",
+    "applies_to": "Interior/exterior fire-resistance-rated wall glazing within the listing and variance limits.",
+    "conditions": [
+      "Use listed specific-application window sprinklers, fixed suitable glazing and NFPA 13 design.",
+      "Protect both sides where required; preserve loadbearing ratings and unobstructed wetting.",
+      "Meet the required wall rating and every listing/installation/use restriction.",
+      "Evaluation standards and wet-system conditions are version-specific; read this source version."
+    ],
+    "selected_citations": [
+      "B:3.1.7.1.(1)",
+      "B:9.10.3.1.(1)"
+    ],
+    "topics": [
+      "fire-separations-and-spatial-separation",
+      "firefighting-alarms-sprinklers",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-013": {
+    "summary": "Accepts listed sprinkler-protected glazing in qualifying rated wall assemblies as an alternative to the normal fire-endurance test route.",
+    "applies_to": "Interior/exterior fire-resistance-rated wall glazing within the listing and variance limits.",
+    "conditions": [
+      "Use listed specific-application window sprinklers, fixed suitable glazing and NFPA 13 design.",
+      "Protect both sides where required; preserve loadbearing ratings and unobstructed wetting.",
+      "Meet the required wall rating and every listing/installation/use restriction.",
+      "Evaluation standards and wet-system conditions are version-specific; read this source version."
+    ],
+    "selected_citations": [
+      "B:3.1.7.1.(1)",
+      "B:9.10.3.1.(1)"
+    ],
+    "topics": [
+      "fire-separations-and-spatial-separation",
+      "firefighting-alarms-sprinklers",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2023-variance-23-bcv-004": {
+    "summary": "Accepts listed sprinkler-protected glazing in qualifying rated wall assemblies as an alternative to the normal fire-endurance test route.",
+    "applies_to": "Interior/exterior fire-resistance-rated wall glazing within the listing and variance limits.",
+    "conditions": [
+      "Use listed specific-application window sprinklers, fixed suitable glazing and NFPA 13 design.",
+      "Protect both sides where required; preserve loadbearing ratings and unobstructed wetting.",
+      "Meet the required wall rating and every listing/installation/use restriction.",
+      "Evaluation standards and wet-system conditions are version-specific; read this source version."
+    ],
+    "selected_citations": [
+      "B:3.1.7.1.(1)",
+      "B:9.10.3.1.(1)"
+    ],
+    "topics": [
+      "fire-separations-and-spatial-separation",
+      "firefighting-alarms-sprinklers",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-019": {
+    "summary": "Allows reduced under-slab insulation for heated floors in contact with ground, with different values above and below frost depth.",
+    "applies_to": "Historical heated floors in ground contact.",
+    "conditions": [
+      "Minimum RSI 0.88 (R-5) where fully below the frost line.",
+      "Minimum RSI 1.32 (R-7.5) where above the frost line.",
+      "Do not import this two-value rule into 23-BCV-003, which uses a different condition."
+    ],
+    "selected_citations": [
+      "B:9.36.2.8."
+    ],
+    "topics": [
+      "energy-efficiency",
+      "building-envelope-insulation-cladding"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-005": {
+    "summary": "Allows reduced under-slab insulation for heated floors in contact with ground, with different values above and below frost depth.",
+    "applies_to": "Historical heated floors in ground contact.",
+    "conditions": [
+      "Minimum RSI 0.88 (R-5) where fully below the frost line.",
+      "Minimum RSI 1.32 (R-7.5) where above the frost line.",
+      "Do not import this two-value rule into 23-BCV-003, which uses a different condition."
+    ],
+    "selected_citations": [
+      "B:9.36.2.8."
+    ],
+    "topics": [
+      "energy-efficiency",
+      "building-envelope-insulation-cladding"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-abc2014-variance-14-bcv-020": {
+    "summary": "Addresses sprinkler antifreeze protection in Alberta freezing conditions through retained design protection or alternative freeze-control measures.",
+    "applies_to": "Existing and new sprinkler systems subject to freezing.",
+    "conditions": [
+      "Do not lower existing antifreeze concentration without replacement freeze protection.",
+      "New designs must address Alberta climate conditions.",
+      "Examples include insulation, monitored listed heat tracing, or dry/pre-action systems; assess the complete design rather than selecting a generic example."
+    ],
+    "selected_citations": [
+      "B:3.2.5.12.",
+      "B:9.10.1.3.",
+      "FIRE:6.4.1.1."
+    ],
+    "topics": [
+      "firefighting-alarms-sprinklers",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-016": {
+    "summary": "Addresses sprinkler antifreeze protection in Alberta freezing conditions through retained design protection or alternative freeze-control measures.",
+    "applies_to": "Existing and new sprinkler systems subject to freezing.",
+    "conditions": [
+      "Do not lower existing antifreeze concentration without replacement freeze protection.",
+      "New designs must address Alberta climate conditions.",
+      "Examples include insulation, monitored listed heat tracing, or dry/pre-action systems; assess the complete design rather than selecting a generic example."
+    ],
+    "selected_citations": [
+      "B:3.2.5.12.",
+      "B:9.10.1.3.",
+      "FIRE:6.4.1.1."
+    ],
+    "topics": [
+      "firefighting-alarms-sprinklers",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-001": {
+    "summary": "Recognizes CSA A277 labelling for new relocatable industrial accommodation and specifies separate controls for renovations.",
+    "applies_to": "Part 10 industrial camp buildings/modules and the historical transition/renovation label program.",
+    "conditions": [
+      "Provide the appropriate CSA A277 certification label and specification sheet for new units.",
+      "Renovations need AHJ permits and applicable green-label procedures.",
+      "Read the revision-specific factory/in-situ renovation and transition provisions."
+    ],
+    "selected_citations": [
+      "B:10.1.1.4.(3)"
+    ],
+    "topics": [
+      "process-and-admin",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use.",
+    "citation_scope_note": "The operative text also identifies 10.1.1.4.(3); verified separately as a Part 10 provision."
+  },
+  "standata-nbc2019-variance-19-bcv-001r1": {
+    "summary": "Recognizes CSA A277 labelling for new relocatable industrial accommodation and specifies separate controls for renovations.",
+    "applies_to": "Part 10 industrial camp buildings/modules and the historical transition/renovation label program.",
+    "conditions": [
+      "Provide the appropriate CSA A277 certification label and specification sheet for new units.",
+      "Renovations need AHJ permits and applicable green-label procedures.",
+      "Read the revision-specific factory/in-situ renovation and transition provisions."
+    ],
+    "selected_citations": [
+      "B:10.1.1.4.(3)"
+    ],
+    "topics": [
+      "process-and-admin",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use.",
+    "citation_scope_note": "The operative text also identifies 10.1.1.4.(3); verified separately as a Part 10 provision."
+  },
+  "standata-nbc2019-variance-19-bcv-002": {
+    "summary": "Accepts CSA A277 certification/specification sheets as verification for factory-built Part 9 homes without an additional Alberta label.",
+    "applies_to": "Factory-constructed Part 9 homes.",
+    "conditions": [
+      "Provide the CSA A277 certification label and applicable specification sheet.",
+      "Certification must establish design/construction compliance with the applicable code edition."
+    ],
+    "selected_citations": [
+      "C:2.4.5.1."
+    ],
+    "topics": [
+      "evidence-and-conformity",
+      "housing-secondary-suites-part9"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-014": {
+    "summary": "Permits up to 12 storeys of encapsulated mass timber using a detailed attached alternative construction/fire-protection package.",
+    "applies_to": "Historical encapsulated mass-timber buildings up to 12 storeys.",
+    "conditions": [
+      "Apply the complete Appendix A package, including fire protection, construction and operational limits.",
+      "The document explicitly changes the historical construction route; not every cross-referenced article in the appendix is varied.",
+      "Use the revision/current-code route rather than treating this archived package as current blanket permission."
+    ],
+    "selected_citations": [],
+    "topics": [
+      "combustible-construction-and-mass-timber",
+      "firefighting-alarms-sprinklers",
+      "structural-and-framing"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use.",
+    "citation_scope_note": "No single exhaustive varied-article list is stated; Appendix A is an integrated alternative design package. References are separately preserved."
+  },
+  "standata-nbc2019-variance-19-bcv-014-rev1": {
+    "summary": "Permits encapsulated mass-timber buildings up to 12 storeys by requiring the identified national 2020 building/fire-code package.",
+    "applies_to": "Projects governed by the historical 2019 Alberta variance.",
+    "conditions": [
+      "Design and construction must comply with NBCC 2020 and NFCC 2020 as required by this variance.",
+      "These national codes are referenced by an older variance; they are not being cited as current Alberta law."
+    ],
+    "selected_citations": [],
+    "topics": [
+      "combustible-construction-and-mass-timber",
+      "structural-and-framing"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-017": {
+    "summary": "Accepts tested intumescent-coated vented soffit materials as an alternative to specified non-vented/protective soffit construction.",
+    "applies_to": "Soffits within the listed Part 9 exposure-protection situations.",
+    "conditions": [
+      "Testing laboratory must be accredited by the Standards Council of Canada.",
+      "Supply evidence of performance at least equivalent to 11 mm plywood against the source Appendix A benchmark.",
+      "Install to manufacturer instructions or the testing documentation."
+    ],
+    "selected_citations": [
+      "B:9.10.14.5.(12)",
+      "B:9.10.15.5.(11)",
+      "B:9.10.12.4.(2)",
+      "B:9.10.12.4.(3)"
+    ],
+    "topics": [
+      "fire-separations-and-spatial-separation",
+      "building-envelope-insulation-cladding",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2023-variance-23-bcv-018": {
+    "summary": "Accepts tested intumescent-coated vented soffit materials as an alternative to specified non-vented/protective soffit construction.",
+    "applies_to": "Soffits within the listed Part 9 exposure-protection situations.",
+    "conditions": [
+      "Testing laboratory must be accredited by the Standards Council of Canada.",
+      "Supply evidence of performance at least equivalent to 11 mm plywood against the source Appendix A benchmark.",
+      "Install to manufacturer instructions or the testing documentation."
+    ],
+    "selected_citations": [
+      "B:9.10.14.5.(12)",
+      "B:9.10.15.5.(11)",
+      "B:9.10.12.4.(2)",
+      "B:9.10.12.4.(3)"
+    ],
+    "topics": [
+      "fire-separations-and-spatial-separation",
+      "building-envelope-insulation-cladding",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-018-rev2": {
+    "summary": "Recognizes an engineered generic adhered-masonry-veneer guide for eligible Part 9 residential walls.",
+    "applies_to": "Adhered masonry veneer installed no higher than 3.05 m above local grade on eligible Part 9 residential units.",
+    "conditions": [
+      "Use the specific guide issue attached/referenced by this revision.",
+      "Show project-specific veneer details on permit drawings.",
+      "Outside-guide walls may require site-specific engineering."
+    ],
+    "selected_citations": [],
+    "topics": [
+      "building-envelope-insulation-cladding",
+      "structural-and-framing",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use.",
+    "citation_scope_note": "No exact varied article is stated in the source; do not infer one from the product category."
+  },
+  "standata-nbc2019-variance-19-bcv-018": {
+    "summary": "Recognizes an engineered generic adhered-masonry-veneer guide for eligible Part 9 residential walls.",
+    "applies_to": "Adhered masonry veneer installed no higher than 3.05 m above local grade on eligible Part 9 residential units.",
+    "conditions": [
+      "Use the specific guide issue attached/referenced by this revision.",
+      "Show project-specific veneer details on permit drawings.",
+      "Outside-guide walls may require site-specific engineering."
+    ],
+    "selected_citations": [],
+    "topics": [
+      "building-envelope-insulation-cladding",
+      "structural-and-framing",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use.",
+    "citation_scope_note": "No exact varied article is stated in the source; do not infer one from the product category."
+  },
+  "standata-nbc2019-variance-19-bcv-018r1": {
+    "summary": "Recognizes an engineered generic adhered-masonry-veneer guide for eligible Part 9 residential walls.",
+    "applies_to": "Adhered masonry veneer installed no higher than 3.05 m above local grade on eligible Part 9 residential units.",
+    "conditions": [
+      "Use the specific guide issue attached/referenced by this revision.",
+      "Show project-specific veneer details on permit drawings.",
+      "Outside-guide walls may require site-specific engineering."
+    ],
+    "selected_citations": [],
+    "topics": [
+      "building-envelope-insulation-cladding",
+      "structural-and-framing",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use.",
+    "citation_scope_note": "No exact varied article is stated in the source; do not infer one from the product category."
+  },
+  "standata-nbc2019-variance-19-bcv-019": {
+    "summary": "Allows engineered fixed industrial stairs or fixed ladders for interior access to rooftop HVAC equipment.",
+    "applies_to": "Interior access for servicing rooftop HVAC equipment.",
+    "conditions": [
+      "Fixed stair rise between landings limited to 3.7 m; specified rung-ladder rise limited to 3 m.",
+      "Provide top/bottom landings and comply with the stated OHS and geometry conditions.",
+      "These permanent load-carrying structures require engineering."
+    ],
+    "selected_citations": [
+      "B:3.6.4.7.(1)",
+      "B:3.2.5.3."
+    ],
+    "topics": [
+      "hvac-ventilation-plumbing",
+      "egress-and-single-stair",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-020-rev1": {
+    "summary": "Sets separate compliance routes for Part 9 structural insulated panels: a suitable CCMC evaluation or a professionally prepared alternative solution.",
+    "applies_to": "Structural insulated panels in historical Part 9 projects.",
+    "conditions": [
+      "CCMC route requires the report, listed scope/limitations, manufacturer instructions and AHJ field inspection.",
+      "Other routes need a registered-professional alternative-solution submission with coordinated structural/envelope design.",
+      "Follow revision-specific professional documentation requirements."
+    ],
+    "selected_citations": [
+      "A:1.2.1.1.(1)",
+      "A:1.2.2.1.(2)",
+      "C:2.4.2.1.(9)"
+    ],
+    "topics": [
+      "structural-and-framing",
+      "building-envelope-insulation-cladding",
+      "evidence-and-conformity",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-020": {
+    "summary": "Sets separate compliance routes for Part 9 structural insulated panels: a suitable CCMC evaluation or a professionally prepared alternative solution.",
+    "applies_to": "Structural insulated panels in historical Part 9 projects.",
+    "conditions": [
+      "CCMC route requires the report, listed scope/limitations, manufacturer instructions and AHJ field inspection.",
+      "Other routes need a registered-professional alternative-solution submission with coordinated structural/envelope design.",
+      "Follow revision-specific professional documentation requirements."
+    ],
+    "selected_citations": [
+      "A:1.2.1.1.(1)",
+      "A:1.2.2.1.(2)",
+      "C:2.4.2.1.(9)"
+    ],
+    "topics": [
+      "structural-and-framing",
+      "building-envelope-insulation-cladding",
+      "evidence-and-conformity",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-021": {
+    "summary": "Allows documented alternative off-site review methods for factory/off-site buildings when normal completed-site review cannot verify concealed work.",
+    "applies_to": "Off-site constructed buildings and completed steel modules.",
+    "conditions": [
+      "Use the relevant CSA A660 certificate, registered-professional review, or AHJ inspection route.",
+      "Professional route requires authenticated drawings/specifications and conformance documentation.",
+      "Where off-site inspection is infeasible, agree critical on-site inspection items with the AHJ during plan review."
+    ],
+    "selected_citations": [
+      "C:2.4.5.1.(2)"
+    ],
+    "topics": [
+      "process-and-admin",
+      "evidence-and-conformity",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2023-variance-23-bcv-002": {
+    "summary": "Allows documented alternative off-site review methods for factory/off-site buildings when normal completed-site review cannot verify concealed work.",
+    "applies_to": "Off-site constructed buildings and completed steel modules.",
+    "conditions": [
+      "Use the relevant CSA A660 certificate, registered-professional review, or AHJ inspection route.",
+      "Professional route requires authenticated drawings/specifications and conformance documentation.",
+      "Where off-site inspection is infeasible, agree critical on-site inspection items with the AHJ during plan review."
+    ],
+    "selected_citations": [
+      "C:2.5.1.1.(2)"
+    ],
+    "topics": [
+      "process-and-admin",
+      "evidence-and-conformity",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-022": {
+    "summary": "Allows unvented Part 9 residential roof assemblies designed under the specifically referenced building-science evaluation report.",
+    "applies_to": "Part 9 residential roof assemblies within the report scope.",
+    "conditions": [
+      "Meet every design requirement and limitation in the identified evaluation report.",
+      "Use the report issue cited by this document; the 2023 variance requires it with the permit application."
+    ],
+    "selected_citations": [
+      "B:9.19.1.1.(1)",
+      "B:9.19.1.4.(1)"
+    ],
+    "topics": [
+      "building-envelope-insulation-cladding",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2023-variance-23-bcv-017": {
+    "summary": "Allows unvented Part 9 residential roof assemblies designed under the specifically referenced building-science evaluation report.",
+    "applies_to": "Part 9 residential roof assemblies within the report scope.",
+    "conditions": [
+      "Meet every design requirement and limitation in the identified evaluation report.",
+      "Use the report issue cited by this document; the 2023 variance requires it with the permit application."
+    ],
+    "selected_citations": [
+      "B:9.19.1.1.(1)",
+      "B:9.19.1.4.(1)"
+    ],
+    "topics": [
+      "building-envelope-insulation-cladding",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-023": {
+    "summary": "Allows the specified energy-table insulation values for flat/cathedral roofs above qualifying residential garages.",
+    "applies_to": "Attached garages and heated detached garages serving residential occupancies.",
+    "conditions": [
+      "Use the relevant flat/cathedral-roof values from the two identified Section 9.36 tables.",
+      "Historical variance only; verify the second-printing garage insulation table for current work."
+    ],
+    "selected_citations": [
+      "B:9.25.2.1.(1)",
+      "B:9.36.2.6.(1)"
+    ],
+    "topics": [
+      "energy-efficiency",
+      "housing-secondary-suites-part9"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-024-rev1": {
+    "summary": "Recognizes updated professional-involvement schedules for projects governed by the 2019 code.",
+    "applies_to": "Historical coordinating/design/field-review professional documentation.",
+    "conditions": [
+      "Use the attached schedules or the 2023 Appendix B schedules as authorized by this exact revision.",
+      "R1 allows projects begun with the earlier attached schedules to finish with them.",
+      "R1 explains that the project-reference header refers to the coordinating registered professional."
+    ],
+    "selected_citations": [
+      "C:2.4.3.1.",
+      "C:2.4.3.2.",
+      "C:2.4.4.1."
+    ],
+    "topics": [
+      "professional-involvement",
+      "process-and-admin"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-024": {
+    "summary": "Recognizes updated professional-involvement schedules for projects governed by the 2019 code.",
+    "applies_to": "Historical coordinating/design/field-review professional documentation.",
+    "conditions": [
+      "Use the attached schedules or the 2023 Appendix B schedules as authorized by this exact revision.",
+      "R1 allows projects begun with the earlier attached schedules to finish with them.",
+      "R1 explains that the project-reference header refers to the coordinating registered professional."
+    ],
+    "selected_citations": [
+      "C:2.4.3.1.",
+      "C:2.4.3.2.",
+      "C:2.4.4.1."
+    ],
+    "topics": [
+      "professional-involvement",
+      "process-and-admin"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2019-variance-19-bcv-025": {
+    "summary": "Allows professionally authenticated welding controls instead of the normal fabricator certification route for qualifying structural-steel fabrication.",
+    "applies_to": "Structural steel fabricated by non-CSA W47.1-certified fabricators.",
+    "conditions": [
+      "Owner must arrange registered-engineer review of the welding program and procedures.",
+      "Verify quality management, qualified procedures/welders, supervision and consumable controls.",
+      "Submit authenticated documents to the AHJ; see 23-BCV-010R1 for the revised equivalency table."
+    ],
+    "selected_citations": [
+      "B:4.3.4.1.(1)"
+    ],
+    "topics": [
+      "structural-and-framing",
+      "professional-involvement",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2023-variance-23-bcv-010": {
+    "summary": "Allows professionally authenticated welding controls instead of the normal fabricator certification route for qualifying structural-steel fabrication.",
+    "applies_to": "Structural steel fabricated by non-CSA W47.1-certified fabricators.",
+    "conditions": [
+      "Owner must arrange registered-engineer review of the welding program and procedures.",
+      "Verify quality management, qualified procedures/welders, supervision and consumable controls.",
+      "Submit authenticated documents to the AHJ; see 23-BCV-010R1 for the revised equivalency table."
+    ],
+    "selected_citations": [
+      "B:4.3.4.1.(1)"
+    ],
+    "topics": [
+      "structural-and-framing",
+      "professional-involvement",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2023-variance-23-bcv-001": {
+    "summary": "Accepts ASTM F2090 window-opening control devices for both fall protection and bedroom escape requirements in eligible Part 9 residential occupancies.",
+    "applies_to": "Part 9 residential windows subject to the cited guard/bedroom escape requirements.",
+    "conditions": [
+      "Mechanism must comply with ASTM F2090.",
+      "Do not use this route for adaptable or barrier-free dwelling units."
+    ],
+    "selected_citations": [
+      "B:9.8.8.1.(4)",
+      "B:9.9.10.1.(1)"
+    ],
+    "topics": [
+      "egress-and-single-stair",
+      "housing-secondary-suites-part9",
+      "occupancy-and-accessibility"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2023-variance-23-bcv-003": {
+    "summary": "Accepts a specified minimum under-slab insulation value for heated floors in ground contact.",
+    "applies_to": "Heated floors in contact with ground.",
+    "conditions": [
+      "Provide at least RSI 1.32 (R-7.5) under the slab.",
+      "Do not reuse the lower historical frost-depth value from older variances."
+    ],
+    "selected_citations": [
+      "B:9.36.2.8.(9)"
+    ],
+    "topics": [
+      "energy-efficiency",
+      "building-envelope-insulation-cladding"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2023-variance-23-bcv-007": {
+    "summary": "Accepts maximum joist, rafter and beam spans from the 2020 Canadian Wood Council Span Book.",
+    "applies_to": "Part 9 wood framing within the referenced 2020 Span Book scope.",
+    "conditions": [
+      "Use the specified 2020 edition and its applicable load/span limitations."
+    ],
+    "selected_citations": [
+      "B:9.23.4.2."
+    ],
+    "topics": [
+      "structural-and-framing"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2023-variance-23-bcv-008": {
+    "summary": "Historical version allows reduced horizontal clearance between certain residential exhaust outlets and their own air intake.",
+    "applies_to": "Kitchen, bathroom and clothes-dryer exhaust serving an individual dwelling or house with secondary suite.",
+    "conditions": [
+      "Original version addresses the stated 900 mm horizontal relationship.",
+      "Superseded: use Figure A and the exact scope of REV1 rather than carrying this wording forward."
+    ],
+    "selected_citations": [
+      "B:9.32.3.13."
+    ],
+    "topics": [
+      "hvac-ventilation-plumbing",
+      "housing-secondary-suites-part9"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2023-variance-23-bcv-008-rev1": {
+    "summary": "Allows moisture-bearing residential exhaust outlets to use the clearance geometry in the variance diagram.",
+    "applies_to": "Residential exhaust outlets and air intakes within this variance.",
+    "conditions": [
+      "Apply the actual Figure A geometry and clearance dimensions.",
+      "The diagram is essential; this text summary is not a replacement for it."
+    ],
+    "selected_citations": [
+      "B:9.32.3.13."
+    ],
+    "topics": [
+      "hvac-ventilation-plumbing",
+      "housing-secondary-suites-part9"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2023-variance-23-bcv-009": {
+    "summary": "Recognizes CSA B52:23 as an alternative refrigeration installation standard under the Alberta building code.",
+    "applies_to": "Mechanical refrigeration installations addressed by the NBC(AE).",
+    "conditions": [
+      "Installation must conform to CSA B52:23.",
+      "This accepts a newer standard edition; it does not waive unrelated installation requirements."
+    ],
+    "selected_citations": [
+      "B:6.2.1.5.",
+      "B:6.3.1.4.",
+      "B:9.33.5.2."
+    ],
+    "topics": [
+      "hvac-ventilation-plumbing",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2023-variance-23-bcv-010r1": {
+    "summary": "Accepts a registered-engineer welding equivalency route for fabricators not certified to CSA W47.1.",
+    "applies_to": "Structural-steel welding/fabrication within the variance scope.",
+    "conditions": [
+      "Submit all engineer-determined documentation authenticated to APEGA standards.",
+      "Comply with relevant AWS D1.1 welding-procedure requirements.",
+      "Registered engineer must verify every equivalency measure in column 4 of Table A."
+    ],
+    "selected_citations": [
+      "B:4.3.4.1.(1)",
+      "C:2.2.2.4.(1)"
+    ],
+    "topics": [
+      "structural-and-framing",
+      "professional-involvement",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2023-variance-23-bcv-011r1": {
+    "summary": "Adds a tightly scoped public-retail greenhouse option while retaining the staff-only plant-growing option for polyethylene film.",
+    "applies_to": "Staff-only plant growing, or a qualifying one-storey F3 greenhouse selling plants/horticultural products.",
+    "conditions": [
+      "Both options require film flame-spread rating no greater than 25.",
+      "Public option: limit retail use, provide at least 1.1 m aisles, two directions of travel and no dead ends.",
+      "Public exits require at least 40% extra width and at least 1,190 mm; occupant load uses 4.6 m²/person.",
+      "Provide exit signage, compliant spatial/exposure protection and an implemented/maintained fire safety plan, submitted to AHJ when required.",
+      "Facilities outside both options must meet CAN/ULC-S109."
+    ],
+    "selected_citations": [
+      "B:3.1.18.5."
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "combustible-construction-and-mass-timber",
+      "egress-and-single-stair",
+      "firefighting-alarms-sprinklers"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2023-variance-23-bcv-012r1": {
+    "summary": "Recognizes a specific engineered guide for mechanically laminated timber panel permanent wood foundations in eligible Part 9 housing.",
+    "applies_to": "Residential MLTP foundations within the guide and prescriptive-foundation scope.",
+    "conditions": [
+      "Follow the December 2024 guide identified by this variance.",
+      "Include project-specific foundation details on permit drawings.",
+      "Outside-scope foundations must follow the alternative professional/design route identified in the source."
+    ],
+    "selected_citations": [
+      "B:9.15.2.4.(1)"
+    ],
+    "topics": [
+      "structural-and-framing",
+      "combustible-construction-and-mass-timber",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2023-variance-23-bcv-013": {
+    "summary": "Allows a passenger elevator in place of an accessibility platform lift or LULA with revised travel/car-size and FEO conditions.",
+    "applies_to": "Elevators substituted for accessibility lifts or LULA in the joint building/elevating-device variance.",
+    "conditions": [
+      "Maximum vertical travel is 7,620 mm; meet the cited minimum accessible car dimensions.",
+      "Apply the specific FEO exception for the substituted accessibility device.",
+      "Give the variance documentation to both building and elevating-device permit authorities."
+    ],
+    "selected_citations": [
+      "B:3.5.4.1.(1)",
+      "B:3.8.3.7.(2)"
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "firefighting-alarms-sprinklers"
+    ],
+    "conditions_completeness": "Navigation summary of operative conditions; read every condition, table, diagram and limitation in the source before use."
+  },
+  "standata-nbc2023-interpretation-23-bci-001": {
+    "summary": "Explains building/fire-code treatment of storage sea-cans and why normal prefabricated steel-building certifications do not automatically cover them.",
+    "applies_to": "Shipping containers for material storage with authorized-personnel access.",
+    "conditions": [
+      "Determine the applicable building and fire requirements and identify dangerous-goods storage in the fire safety plan.",
+      "Do not assume CSA A660 or A277 certification applies to shipping containers."
+    ],
+    "selected_citations": [
+      "A:1.4.1.2.",
+      "B:4.1.1.1."
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "structural-and-framing",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-002": {
+    "summary": "Distinguishes residential dayhomes from daycare occupancies offering overnight care and consolidates their safety requirements.",
+    "applies_to": "Licensed overnight child-care dayhomes/daycares.",
+    "conditions": [
+      "Establish the occupancy classification before selecting protections.",
+      "Address the specified smoke/CO detection, sleeping-room escape, fire alarm/sprinkler and emergency-planning measures for that category."
+    ],
+    "selected_citations": [
+      "A:1.4.1.2.",
+      "B:3.2.4.20.",
+      "B:9.10.19.2."
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "housing-secondary-suites-part9",
+      "firefighting-alarms-sprinklers"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-003": {
+    "summary": "Coordinates design and operational occupant-load calculations for assembly uses.",
+    "applies_to": "Assembly occupancies/licensed beverage establishments under building and fire authorities.",
+    "conditions": [
+      "Use the lowest applicable limit from the listed alarm, sprinkler, egress and occupant-density criteria.",
+      "Coordinate both AHJs; this document is an interpretation rather than a variance increasing capacity."
+    ],
+    "selected_citations": [
+      "B:3.1.17.1.",
+      "B:3.4.2.6.",
+      "B:3.2.5.12."
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "egress-and-single-stair",
+      "firefighting-alarms-sprinklers"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-003r1": {
+    "summary": "Coordinates design and operational occupant-load calculations for assembly uses.",
+    "applies_to": "Assembly occupancies/licensed beverage establishments under building and fire authorities.",
+    "conditions": [
+      "Use the lowest applicable limit from the listed alarm, sprinkler, egress and occupant-density criteria.",
+      "Coordinate both AHJs; this document is an interpretation rather than a variance increasing capacity."
+    ],
+    "selected_citations": [
+      "B:3.1.17.1.",
+      "B:3.4.2.6.",
+      "B:3.2.5.12."
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "egress-and-single-stair",
+      "firefighting-alarms-sprinklers"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-004": {
+    "summary": "Clarifies permits and the use of NFPA 33 for spray-finishing systems where the building code relies on good engineering practice.",
+    "applies_to": "Spray booths, areas and rooms involving flammable/combustible materials.",
+    "conditions": [
+      "Apply NFPA 33 for the relevant systems.",
+      "Obtain building, electrical and gas permits as applicable."
+    ],
+    "selected_citations": [
+      "B:6.9.1.2.",
+      "B:6.2.1.1."
+    ],
+    "topics": [
+      "hvac-ventilation-plumbing",
+      "professional-involvement",
+      "process-and-admin"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-005": {
+    "summary": "Recognizes QAI Laboratories as an approved organization issuing product evaluation reports for use in Alberta.",
+    "applies_to": "Evaluation reports within the organization’s recognized/accredited scope.",
+    "conditions": [
+      "Maintain Standards Council of Canada accreditation.",
+      "Notify the Provincial Building Administrator of accreditation changes/lapse.",
+      "A report still has product-specific scope, limitations and edition requirements."
+    ],
+    "selected_citations": [
+      "A:1.2.2.1."
+    ],
+    "topics": [
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-006": {
+    "summary": "Recognizes ULC/UL Solutions as an approved organization issuing product evaluation reports for use in Alberta.",
+    "applies_to": "Evaluation reports within the organization’s recognized/accredited scope.",
+    "conditions": [
+      "Maintain Standards Council of Canada accreditation.",
+      "Notify the Provincial Building Administrator of accreditation changes/lapse.",
+      "A report still has product-specific scope, limitations and edition requirements."
+    ],
+    "selected_citations": [
+      "A:1.2.2.1."
+    ],
+    "topics": [
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-007": {
+    "summary": "Recognizes Intertek as an approved organization issuing product evaluation reports for use in Alberta.",
+    "applies_to": "Evaluation reports within the organization’s recognized/accredited scope.",
+    "conditions": [
+      "Maintain Standards Council of Canada accreditation.",
+      "Notify the Provincial Building Administrator of accreditation changes/lapse.",
+      "A report still has product-specific scope, limitations and edition requirements."
+    ],
+    "selected_citations": [
+      "A:1.2.2.1."
+    ],
+    "topics": [
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-013": {
+    "summary": "Recognizes ICC Evaluation Service as an approved organization issuing product evaluation reports for use in Alberta.",
+    "applies_to": "Evaluation reports within the organization’s recognized/accredited scope.",
+    "conditions": [
+      "Maintain Standards Council of Canada accreditation.",
+      "Notify the Provincial Building Administrator of accreditation changes/lapse.",
+      "A report still has product-specific scope, limitations and edition requirements."
+    ],
+    "selected_citations": [
+      "A:1.2.2.1."
+    ],
+    "topics": [
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-040": {
+    "summary": "Recognizes APA – The Engineered Wood Association as an approved organization issuing product evaluation reports for use in Alberta.",
+    "applies_to": "Evaluation reports within the organization’s recognized/accredited scope.",
+    "conditions": [
+      "Maintain Standards Council of Canada accreditation.",
+      "Notify the Provincial Building Administrator of accreditation changes/lapse.",
+      "A report still has product-specific scope, limitations and edition requirements."
+    ],
+    "selected_citations": [
+      "A:1.2.2.1."
+    ],
+    "topics": [
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-008": {
+    "summary": "Clarifies whether damper-operating smoke detectors must connect to a building fire alarm system.",
+    "applies_to": "Smoke/fire-smoke dampers in HVAC systems.",
+    "conditions": [
+      "Detector operation does not by itself create a requirement for a building fire alarm system.",
+      "Where a fire alarm system is required, apply the identified detector/system installation, verification and signal requirements."
+    ],
+    "selected_citations": [
+      "B:3.1.8.11.(3)",
+      "B:3.2.4.1."
+    ],
+    "topics": [
+      "firefighting-alarms-sprinklers",
+      "hvac-ventilation-plumbing",
+      "fire-separations-and-spatial-separation"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-009": {
+    "summary": "Separates installation/design authority from ongoing fire-code maintenance duties for commercial cooking suppression/exhaust systems.",
+    "applies_to": "Commercial kitchen fixed suppression and exhaust systems.",
+    "conditions": [
+      "Consult the building AHJ on installation permits/professional involvement and the fire AHJ on ongoing testing/cleaning/maintenance.",
+      "Use the specified qualified people and referenced installation/maintenance standards."
+    ],
+    "selected_citations": [
+      "B:6.3.1.6.",
+      "B:9.10.1.4."
+    ],
+    "topics": [
+      "hvac-ventilation-plumbing",
+      "firefighting-alarms-sprinklers",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-010": {
+    "summary": "Explains multi-discipline safety-code permitting and emergency planning for special events.",
+    "applies_to": "Indoor/outdoor events requiring permits, occupant-load assessment or emergency planning.",
+    "conditions": [
+      "Coordinate local AHJ and other relevant authorities.",
+      "Apply the relevant assembly, temporary-structure, occupancy, fire-protection and operational requirements."
+    ],
+    "selected_citations": [
+      "B:3.1.17.1.",
+      "B:3.1.18.1.",
+      "C:2.2.11.1."
+    ],
+    "topics": [
+      "process-and-admin",
+      "occupancy-and-accessibility",
+      "egress-and-single-stair"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-011": {
+    "summary": "Explains maintenance, replacement, modernization and alternative-solution options for existing fire alarm systems.",
+    "applies_to": "Existing fire alarm systems of any age undergoing work or testing.",
+    "conditions": [
+      "Use people qualified for the activity; wiring repairs/replacement require qualified electricians.",
+      "Distinguish like-for-like replacement from a change of use or modernization.",
+      "Where current-code upgrading is not the chosen route, obtain the required documented alternative solution and supporting professional work."
+    ],
+    "selected_citations": [
+      "A:1.1.1.2.",
+      "B:3.2.4.5.",
+      "B:3.2.4.19."
+    ],
+    "topics": [
+      "firefighting-alarms-sprinklers",
+      "professional-involvement",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-012-rev1": {
+    "summary": "Clarifies professional authentication boundaries for individual services in five-or-more-unit rowhousing.",
+    "applies_to": "Residential rowhouses with no dwelling above/below another and at least five dwelling units.",
+    "conditions": [
+      "Individual-unit electrical/water/drainage/gas/HVAC systems receive the stated limited treatment at the listed service boundaries.",
+      "Shared/common systems and other professional design obligations remain subject to the source and code.",
+      "Use the latest R2 multi-discipline interpretation rather than superseded versions."
+    ],
+    "selected_citations": [
+      "C:2.4.1.1."
+    ],
+    "topics": [
+      "professional-involvement",
+      "housing-secondary-suites-part9",
+      "hvac-ventilation-plumbing"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-012": {
+    "summary": "Clarifies professional authentication boundaries for individual services in five-or-more-unit rowhousing.",
+    "applies_to": "Residential rowhouses with no dwelling above/below another and at least five dwelling units.",
+    "conditions": [
+      "Individual-unit electrical/water/drainage/gas/HVAC systems receive the stated limited treatment at the listed service boundaries.",
+      "Shared/common systems and other professional design obligations remain subject to the source and code.",
+      "Use the latest R2 multi-discipline interpretation rather than superseded versions."
+    ],
+    "selected_citations": [
+      "C:2.4.1.1."
+    ],
+    "topics": [
+      "professional-involvement",
+      "housing-secondary-suites-part9",
+      "hvac-ventilation-plumbing"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-012r2": {
+    "summary": "Clarifies professional authentication boundaries for individual services in five-or-more-unit rowhousing.",
+    "applies_to": "Residential rowhouses with no dwelling above/below another and at least five dwelling units.",
+    "conditions": [
+      "Individual-unit electrical/water/drainage/gas/HVAC systems receive the stated limited treatment at the listed service boundaries.",
+      "Shared/common systems and other professional design obligations remain subject to the source and code.",
+      "Use the latest R2 multi-discipline interpretation rather than superseded versions."
+    ],
+    "selected_citations": [
+      "C:2.4.1.1."
+    ],
+    "topics": [
+      "professional-involvement",
+      "housing-secondary-suites-part9",
+      "hvac-ventilation-plumbing"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-014": {
+    "summary": "Defines the professional qualifications of an integrated testing coordinator for fire/life-safety systems.",
+    "applies_to": "Integrated testing of fire-protection/life-safety systems and interacting building systems.",
+    "conditions": [
+      "Coordinator must be a registered engineering professional knowledgeable and experienced in system design, installation and operation."
+    ],
+    "selected_citations": [
+      "C:2.4.1.4.",
+      "B:3.2.9.1.",
+      "B:9.10.1.2."
+    ],
+    "topics": [
+      "professional-involvement",
+      "firefighting-alarms-sprinklers"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-015": {
+    "summary": "Requires engineered/authenticated wood trusses and their connections as an assembly, including necessary interface information.",
+    "applies_to": "Wood trusses and roof assemblies in Part 9 buildings.",
+    "conditions": [
+      "Have the registered engineer design and authenticate the required truss/connection information.",
+      "Information need not be duplicated on separately authenticated drawings where already covered.",
+      "Give authenticated documents to the AHJ before the specified inspection/covering approval; check the implementation date in the source."
+    ],
+    "selected_citations": [
+      "B:9.23.14.11.",
+      "C:2.4.1.2."
+    ],
+    "topics": [
+      "professional-involvement",
+      "structural-and-framing"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-015r1": {
+    "summary": "Requires engineered/authenticated wood trusses and their connections as an assembly, including necessary interface information.",
+    "applies_to": "Wood trusses and roof assemblies in Part 9 buildings.",
+    "conditions": [
+      "Have the registered engineer design and authenticate the required truss/connection information.",
+      "Information need not be duplicated on separately authenticated drawings where already covered.",
+      "Give authenticated documents to the AHJ before the specified inspection/covering approval; check the implementation date in the source."
+    ],
+    "selected_citations": [
+      "B:9.23.14.11.",
+      "C:2.4.1.2."
+    ],
+    "topics": [
+      "professional-involvement",
+      "structural-and-framing"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-016": {
+    "summary": "Distinguishes AHJ assessment of code-exempt accessibility situations from a provincial barrier-free relaxation request.",
+    "applies_to": "Projects assessed for the listed barrier-free exceptions/uses.",
+    "conditions": [
+      "AHJ/SCO must establish that an exemption or partial exemption applies.",
+      "Otherwise use the proper provincial relaxation process; this is not an applicant-selected universal exemption."
+    ],
+    "selected_citations": [
+      "B:3.8.2.1.(1)",
+      "C:2.2.1.4."
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "process-and-admin"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-016r1": {
+    "summary": "Distinguishes AHJ assessment of code-exempt accessibility situations from a provincial barrier-free relaxation request.",
+    "applies_to": "Projects assessed for the listed barrier-free exceptions/uses.",
+    "conditions": [
+      "AHJ/SCO must establish that an exemption or partial exemption applies.",
+      "Otherwise use the proper provincial relaxation process; this is not an applicant-selected universal exemption."
+    ],
+    "selected_citations": [
+      "B:3.8.2.1.(1)",
+      "C:2.2.1.4."
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "process-and-admin"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-017": {
+    "summary": "Explains when charging lights for listed photoluminescent exit signs need not connect to emergency power.",
+    "applies_to": "Photoluminescent exit signs and their dedicated charging lights.",
+    "conditions": [
+      "Keep normal-power charging illumination continuous and on a dedicated circuit.",
+      "Restrict controls to authorized personnel and meet listing light-type/lux conditions.",
+      "Follow manufacturer installation instructions and listed/tested duration labelling."
+    ],
+    "selected_citations": [
+      "B:3.4.5.1.(5)",
+      "B:9.9.11.3.(5)"
+    ],
+    "topics": [
+      "egress-and-single-stair",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-018": {
+    "summary": "Discusses fall/collision protection for low glazing and openable windows; the official publication is on hold under review.",
+    "applies_to": "Window glazing positioned where guard/fall-protection concerns arise.",
+    "conditions": [
+      "ON HOLD – UNDER REVIEW: do not treat the interpretation as currently available permission.",
+      "Refer directly to current code and the AHJ for fixed/openable glazing and fall/collision protection."
+    ],
+    "selected_citations": [
+      "B:9.8.8.1.",
+      "B:3.3.1.18."
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "housing-secondary-suites-part9",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-019": {
+    "summary": "Distinguishes care occupancy from ordinary residential occupancy based on the services actually intended/provided.",
+    "applies_to": "Supportive-living accommodations without treatment services.",
+    "conditions": [
+      "Owner must identify the intended use/services.",
+      "Use B3 where care services fall within that classification and C where those care services are absent."
+    ],
+    "selected_citations": [
+      "A:1.4.1.2."
+    ],
+    "topics": [
+      "occupancy-and-accessibility"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-020": {
+    "summary": "Clarifies appliance categories and when combustion systems need protection against dwelling depressurization.",
+    "applies_to": "Fuel-fired space/water-heating appliances and dwelling ventilation.",
+    "conditions": [
+      "Categories I/II are not treated as mechanically vented or direct-vented for this purpose.",
+      "Categories III/IV and qualifying fully enclosed direct-vent arrangements receive the stated treatment.",
+      "Identify the actual appliance category/venting configuration before applying the protection rule."
+    ],
+    "selected_citations": [
+      "B:9.32.3.8."
+    ],
+    "topics": [
+      "hvac-ventilation-plumbing",
+      "housing-secondary-suites-part9"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-021": {
+    "summary": "Explains current Part 10 relocatable industrial accommodation certification and renovation labelling.",
+    "applies_to": "New units built on/after May 1, 2024 and renovations to existing certified units.",
+    "conditions": [
+      "New units require the appropriate CSA A277 label/specification sheet.",
+      "In-situ renovations require permits and applicable Municipal Affairs green labels applied through AHJ inspection.",
+      "Follow the source’s separate factory-renovation process."
+    ],
+    "selected_citations": [
+      "C:2.5.1.1."
+    ],
+    "topics": [
+      "process-and-admin",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-022": {
+    "summary": "Identifies certain building uses that may be exempt from the building energy-efficiency provisions.",
+    "applies_to": "Listed low-occupancy industrial/equipment shelters and specific impractical-to-comply uses.",
+    "conditions": [
+      "Establish the actual occupancy and use; exclusion is not inferred from an industrial label alone.",
+      "Refer irregular/unique cases to the AHJ.",
+      "Moisture/comfort insulation obligations are a separate consideration."
+    ],
+    "selected_citations": [
+      "B:9.36.1.3.",
+      "B:9.25.2.1."
+    ],
+    "topics": [
+      "energy-efficiency",
+      "occupancy-and-accessibility"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-023": {
+    "summary": "Clarifies the building-envelope definition as it applies to attic/roof-space separation and ventilation.",
+    "applies_to": "Residential buildings with one or more dwelling units.",
+    "conditions": [
+      "Include assemblies separating the attic/roof space from outside/ground, its ventilation, and separation from conditioned space.",
+      "Use this interpretation to identify the relevant envelope rather than to waive assembly performance."
+    ],
+    "selected_citations": [
+      "A:1.4.1.2."
+    ],
+    "topics": [
+      "building-envelope-insulation-cladding"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-024": {
+    "summary": "Explains the application/review route for demonstrating that an F1 industrial hazard has been reduced to an F2-equivalent risk.",
+    "applies_to": "Buildings/parts classified as F1 industrial occupancy.",
+    "conditions": [
+      "Use a qualified Alberta registered engineer’s hazard/performance analysis.",
+      "Submit the required alternative-solution documentation, including operating/maintenance limitations.",
+      "AHJ acceptance and enforcement remain necessary; this interpretation is not a generic reclassification approval."
+    ],
+    "selected_citations": [
+      "C:2.3.1.1.",
+      "C:2.3.1.2.",
+      "A:1.2.1.1."
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "professional-involvement",
+      "process-and-admin",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-025": {
+    "summary": "Assigns building-SCO review of energy-storage-system room construction and clarifies dual permit needs.",
+    "applies_to": "Service/utility rooms required by the identified electrical-code ESS rules.",
+    "conditions": [
+      "Obtain an electrical permit for the installation and a building permit for required room construction.",
+      "Building SCO reviews/inspects the room construction against the stated requirements."
+    ],
+    "selected_citations": [
+      "B:9.10.3.1."
+    ],
+    "topics": [
+      "fire-separations-and-spatial-separation",
+      "process-and-admin"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-026": {
+    "summary": "Confirms that single-egress-stair residential designs can follow the alternative-solution route when acceptable solutions call for multiple stairs.",
+    "applies_to": "Residential buildings proposing fewer stairs than the prescriptive acceptable solution.",
+    "conditions": [
+      "Submit a Division C alternative-solution case demonstrating the required performance against attributed objectives/functions.",
+      "Keep issued variance documentation available on the premises and maintain ongoing compliance.",
+      "This is an application pathway, not a blanket approval of a single-stair design."
+    ],
+    "selected_citations": [
+      "A:1.2.1.1.(1)",
+      "C:2.3.1.1.",
+      "C:2.3.1.2."
+    ],
+    "topics": [
+      "egress-and-single-stair",
+      "professional-involvement",
+      "evidence-and-conformity",
+      "process-and-admin"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-030": {
+    "summary": "Consolidates building/fire-code considerations for reducing fire spread during construction/demolition.",
+    "applies_to": "Construction/demolition sites from houses to multistorey buildings.",
+    "conditions": [
+      "Coordinate a risk assessment and protection measures with the AHJ/SCO.",
+      "Account for adjacent exposure, available firefighting capacity, water/access and fire safety planning.",
+      "The suggestions are not an exhaustive prescriptive design."
+    ],
+    "selected_citations": [
+      "B:8.1.1.1.",
+      "B:3.2.5.6."
+    ],
+    "topics": [
+      "fire-separations-and-spatial-separation",
+      "firefighting-alarms-sprinklers",
+      "process-and-admin"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-032": {
+    "summary": "Clarifies industrial classification and safeguards for buildings used to park/repair/service tank vehicles.",
+    "applies_to": "Tank-vehicle buildings where flammable/combustible contents or vapours may be present.",
+    "conditions": [
+      "Identify actual parking/repair/service activities and hazardous contents.",
+      "Apply the stated F1 design, ventilation, electrical-area and ignition-source controls where required."
+    ],
+    "selected_citations": [
+      "A:1.4.1.2."
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "hvac-ventilation-plumbing",
+      "firefighting-alarms-sprinklers"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-034": {
+    "summary": "Clarifies the duty to maintain operational elevating devices serving a required accessible path in residential buildings.",
+    "applies_to": "Residential buildings whose required barrier-free path is served by an elevator/platform device.",
+    "conditions": [
+      "Maintain the device in service or provide accepted equivalent accessibility measures.",
+      "Necessary repairs/emergency shutdowns require reasonable and diligent handling under the source.",
+      "SCO enforcement does not make every temporary repair outage a permanent exemption."
+    ],
+    "selected_citations": [
+      "B:3.8.2.3.",
+      "B:3.8.3.7."
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "process-and-admin"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-035": {
+    "summary": "Explains the garage-separation exception where an attached garage serves a house with a secondary suite.",
+    "applies_to": "Attached storage garages for five vehicles or fewer serving that house/suite arrangement.",
+    "conditions": [
+      "Apply the exception only to the garage serving the dwelling/house to which it is attached or in which it is built.",
+      "Check the remaining garage and secondary-suite separation requirements."
+    ],
+    "selected_citations": [
+      "B:9.10.9.18.(3)"
+    ],
+    "topics": [
+      "housing-secondary-suites-part9",
+      "fire-separations-and-spatial-separation"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-037": {
+    "summary": "Clarifies the applicable lightning-protection standard and electrical permitting.",
+    "applies_to": "New/altered/added lightning-protection systems.",
+    "conditions": [
+      "Comply with CAN/CSA-B72:20.",
+      "An electrical permit is required; this work alone does not require a building permit under this interpretation."
+    ],
+    "selected_citations": [
+      "B:3.6.1.3."
+    ],
+    "topics": [
+      "process-and-admin",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-038": {
+    "summary": "Clarifies whether alterations to existing elevators require firefighters’ emergency-operation upgrades.",
+    "applies_to": "Existing elevating devices where FEO was not originally installed/required.",
+    "conditions": [
+      "Registered professional must verify the code/requirements at initial installation during the permit process.",
+      "Apply the actual alteration provisions; a controller capable of FEO is not alone an installed FEO system.",
+      "Separate requirements apply when an existing FEO system is altered."
+    ],
+    "selected_citations": [
+      "B:3.5.2.1.",
+      "B:3.2.4.14."
+    ],
+    "topics": [
+      "occupancy-and-accessibility",
+      "firefighting-alarms-sprinklers",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-042": {
+    "summary": "Explains design/submission and verification for hydronic systems heating building interiors.",
+    "applies_to": "Primary/secondary interior hydronic heat; excludes systems such as exterior snowmelt that do not heat the building interior.",
+    "conditions": [
+      "Submit the specified professionally prepared generic package plus project-specific design data/plans.",
+      "Use a qualified designer under the stated alternatives and obtain the required system verification/documentation."
+    ],
+    "selected_citations": [
+      "B:9.33.4.1.(1)",
+      "C:2.4.1.1.(3)"
+    ],
+    "topics": [
+      "hvac-ventilation-plumbing",
+      "professional-involvement",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-interpretation-23-bci-043": {
+    "summary": "Coordinates permits, professional involvement and qualified installation/testing of electromagnetic locks connected to fire alarms.",
+    "applies_to": "New/existing maglock installations and their maintenance/testing/verification.",
+    "conditions": [
+      "Obtain applicable permits for new work/modifications.",
+      "Retain registered engineering involvement when size, occupancy or complexity requires it.",
+      "Use qualified persons and complete the required fire-alarm/interface verification and ongoing testing."
+    ],
+    "selected_citations": [
+      "C:2.4.1.1.",
+      "B:3.2.9.1.",
+      "B:3.2.4.5."
+    ],
+    "topics": [
+      "egress-and-single-stair",
+      "firefighting-alarms-sprinklers",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-bulletin-23-bcb-001": {
+    "summary": "Explains Alberta’s Tier 1 housing energy requirements and distinguishes voluntary higher tiers.",
+    "applies_to": "Housing/small-building energy compliance under Section 9.36.",
+    "conditions": [
+      "Use the adopted Tier 1 provisions; do not automatically import every higher-tier requirement.",
+      "Check the stated airtightness/modelling treatment and voluntary-tier conditions."
+    ],
+    "selected_citations": [
+      "B:9.36.1.3.",
+      "B:9.36.7.3.",
+      "B:9.36.5.10."
+    ],
+    "topics": [
+      "energy-efficiency"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-bulletin-23-bcb-002": {
+    "summary": "Historical roof-truss documentation bulletin for one- and two-family dwellings; now archived.",
+    "applies_to": "Former truss submission/authentication arrangements.",
+    "conditions": [
+      "Do not use the archived bulletin to override 23-BCI-015R1.",
+      "For present submissions check the current interpretation and municipal implementation requirements."
+    ],
+    "selected_citations": [
+      "B:9.23.14.11.",
+      "C:2.4.1.1.",
+      "C:2.4.1.2."
+    ],
+    "topics": [
+      "structural-and-framing",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-bulletin-23-bcb-002r1": {
+    "summary": "Historical roof-truss documentation bulletin for one- and two-family dwellings; now archived.",
+    "applies_to": "Former truss submission/authentication arrangements.",
+    "conditions": [
+      "Do not use the archived bulletin to override 23-BCI-015R1.",
+      "For present submissions check the current interpretation and municipal implementation requirements."
+    ],
+    "selected_citations": [
+      "B:9.23.14.11.",
+      "C:2.4.1.1.",
+      "C:2.4.1.2."
+    ],
+    "topics": [
+      "structural-and-framing",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-bulletin-23-bcb-003": {
+    "summary": "Archived joint electrical variance/building bulletin addressing residential energy-storage installations before adoption of the newer electrical code.",
+    "applies_to": "Historical residential ESS installations under the 2021 electrical code.",
+    "conditions": [
+      "The source limits single ESS capacity and specifies location, enclosure, listing and permit controls.",
+      "The source says its temporary variance ceases when the 2024 electrical code is adopted.",
+      "This is not a current NBC building variance."
+    ],
+    "selected_citations": [
+      "B:9.10.3.1."
+    ],
+    "topics": [
+      "fire-separations-and-spatial-separation",
+      "process-and-admin",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-bulletin-23-bcb-004": {
+    "summary": "Provides guidance for AHJ permission to occupy completed parts of buildings while construction continues.",
+    "applies_to": "Phased occupancy, occupied additions and alterations.",
+    "conditions": [
+      "Obtain AHJ permission/occupancy permit.",
+      "Coordinate a construction fire safety plan, required systems and safe separation of occupied/work areas."
+    ],
+    "selected_citations": [
+      "C:2.2.11.1.(1)",
+      "B:8.1.1.1.(3)"
+    ],
+    "topics": [
+      "process-and-admin",
+      "firefighting-alarms-sprinklers",
+      "fire-separations-and-spatial-separation"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-bulletin-23-bcb-005": {
+    "summary": "Explains acceptance and limitations of listed/certified sprinkler antifreeze solutions.",
+    "applies_to": "Existing/new sprinkler systems designed with antifreeze.",
+    "conditions": [
+      "Use a listed/certified solution and check listing compatibility, temperature, volume/pressure and maintenance limitations.",
+      "Do not assume a solution accepted for one system is compatible with another."
+    ],
+    "selected_citations": [],
+    "topics": [
+      "firefighting-alarms-sprinklers",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-bulletin-23-bcb-006": {
+    "summary": "Explains SEER2/HSPF2 equipment-efficiency metrics and their relationship to code requirements.",
+    "applies_to": "Electrically operated air-cooled air conditioners and heat pumps under NBC(AE)/NECB.",
+    "conditions": [
+      "Check applicable equipment-efficiency rules and the stated test/metric conversion context.",
+      "Do not treat a changed rating label as a standalone performance equivalence finding."
+    ],
+    "selected_citations": [
+      "B:9.36.3.10."
+    ],
+    "topics": [
+      "energy-efficiency",
+      "hvac-ventilation-plumbing",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-bulletin-23-bcb-007": {
+    "summary": "Consolidates dispersed Part 9 secondary-suite provisions for navigation alongside the actual code.",
+    "applies_to": "Houses with a secondary suite.",
+    "conditions": [
+      "Use the latest R1 version.",
+      "Check every applicable code provision directly; this compilation is not a complete design guide or issued alternative solution."
+    ],
+    "selected_citations": [
+      "A:1.4.1.2.",
+      "B:9.10.11.2.",
+      "B:9.10.9.3.",
+      "B:9.32.1.2."
+    ],
+    "topics": [
+      "housing-secondary-suites-part9",
+      "fire-separations-and-spatial-separation",
+      "hvac-ventilation-plumbing"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-bulletin-23-bcb-007r1": {
+    "summary": "Consolidates dispersed Part 9 secondary-suite provisions for navigation alongside the actual code.",
+    "applies_to": "Houses with a secondary suite.",
+    "conditions": [
+      "Use the latest R1 version.",
+      "Check every applicable code provision directly; this compilation is not a complete design guide or issued alternative solution."
+    ],
+    "selected_citations": [
+      "A:1.4.1.2.",
+      "B:9.10.11.2.",
+      "B:9.10.9.3.",
+      "B:9.32.1.2."
+    ],
+    "topics": [
+      "housing-secondary-suites-part9",
+      "fire-separations-and-spatial-separation",
+      "hvac-ventilation-plumbing"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-bulletin-23-bcb-008": {
+    "summary": "Consolidates requirements for safe access to rooftop HVAC equipment with the newer gas-installation standard context.",
+    "applies_to": "Roof-mounted HVAC equipment under the building/gas codes.",
+    "conditions": [
+      "Apply the relevant CSA B149.1 edition and current code references.",
+      "Read the access geometry and equipment servicing provisions in the source rather than assuming the historical roof-access variance still applies."
+    ],
+    "selected_citations": [
+      "B:3.6.4.7.",
+      "B:6.2.1.6.",
+      "B:9.33.1.2."
+    ],
+    "topics": [
+      "hvac-ventilation-plumbing",
+      "egress-and-single-stair"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "standata-nbc2023-bulletin-23-bcb-013": {
+    "summary": "Identifies labelling requirements for radon/soil-gas piping and distinguishes Part 3 and Part 9 routes.",
+    "applies_to": "Radon rough-in/active soil-depressurization piping.",
+    "conditions": [
+      "Use the relevant Part 3 designed-system or Part 9 prescriptive route.",
+      "Provide the specified radon-only labels at the required locations."
+    ],
+    "selected_citations": [
+      "B:6.2.1.1.",
+      "B:9.13.4.3."
+    ],
+    "topics": [
+      "building-envelope-insulation-cladding",
+      "hvac-ventilation-plumbing"
+    ],
+    "conditions_completeness": "Source navigation summary; read the full interpretation/bulletin and any referenced standards before applying it."
+  },
+  "calgary-spv-001-zero-lot-line-2026-03": {
+    "title": "SPV-001 – Zero Lot Line (Revision 5)",
+    "type": "spv",
+    "code_edition": "NBC(AE), edition not explicitly numbered in PDF; current Calgary posting",
+    "date": "2026-03-05",
+    "summary": "Provides a permit-referenced, paired-house construction package for qualifying Calgary zero-lot-line homes.",
+    "applies_to": "Calgary single-family houses up to three storeys, including houses with secondary suites, within the SPV configuration.",
+    "conditions": [
+      "Reference SPV-001 in application documents and permit conditions; no deviations are permitted.",
+      "Coordinate both adjacent buildings and register the required maintenance/access easement on both titles.",
+      "Apply the complete gypsum, cladding, soffit, opening, balcony, separation and construction details.",
+      "SOURCE CONFLICT: page 4 lists maximum footing projection as 0.3 m while page 5 authority/conditions text says 0.6 m. Obtain Calgary clarification; this index does not resolve that inconsistency."
+    ],
+    "selected_citations": [
+      "B:9.10.15.5.(8)",
+      "B:9.10.15.5.(9)"
+    ],
+    "topics": [
+      "fire-separations-and-spatial-separation",
+      "housing-secondary-suites-part9",
+      "process-and-admin"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document.",
+    "source_conflicts": [
+      {
+        "source_pdf_pages": [
+          4,
+          5
+        ],
+        "issue": "Footing projection into easement: 0.3 m versus 0.6 m.",
+        "resolution": "UNVERIFIED: requires issuer clarification; do not silently choose either value."
+      }
+    ]
+  },
+  "calgary-spv-003-construction-of-exposed-building-face": {
+    "title": "SPV-003 – Construction of Exposed Building Face (Revision 3)",
+    "type": "spv",
+    "code_edition": "NBC(AE), edition not explicitly numbered in PDF; current Calgary posting",
+    "date": "2025-02-12",
+    "summary": "Accepts a specified encapsulated wood-frame exposed-wall assembly for qualifying single-storey F3 Part 9 buildings facing dwellings they do not serve.",
+    "applies_to": "Calgary F3 accessory/garage-type buildings and facing multidwelling buildings in the stated spatial-separation situation.",
+    "conditions": [
+      "Reference SPV-003 in permit documents and conditions; no deviations.",
+      "Use the entire specified encapsulation, exterior cladding, framing, sheathing/joint and roof/soffit package.",
+      "Use the document’s exposing-face and limiting-distance treatment only within its scope."
+    ],
+    "selected_citations": [
+      "B:9.10.14.2.",
+      "B:9.10.14.5.(1)"
+    ],
+    "topics": [
+      "fire-separations-and-spatial-separation",
+      "combustible-construction-and-mass-timber",
+      "building-envelope-insulation-cladding"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document."
+  },
+  "calgary-spv-006-firewall-rowhouse-secondary-suites": {
+    "title": "SPV-006 – Firewall in a Rowhouse with Secondary Suites",
+    "type": "spv",
+    "code_edition": "NBC(AE), edition not explicitly numbered in PDF; current Calgary posting",
+    "date": "2025-06-19",
+    "summary": "Accepts a package of compartmentation, egress and service protections instead of the prescribed firewall in qualifying rowhouses with secondary suites.",
+    "applies_to": "Calgary rowhouses containing more than two houses with secondary suites.",
+    "conditions": [
+      "Reference SPV-006 in the application and permit conditions; no deviations.",
+      "Provide the required suite/exit fire separations and support ratings, using only the stated sprinkler alternatives.",
+      "Apply the separate-egress alternatives, protected doors/penetrations and qualifying noncombustible duct provisions.",
+      "Submit HVAC drawings; an individualized variance outside this SPV needs professional involvement."
+    ],
+    "selected_citations": [
+      "B:9.10.11.2.(2)",
+      "B:9.10.13.13.(1)"
+    ],
+    "topics": [
+      "fire-separations-and-spatial-separation",
+      "housing-secondary-suites-part9",
+      "egress-and-single-stair",
+      "hvac-ventilation-plumbing",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document."
+  },
+  "calgary-new-standing-posted-variance-procedure": {
+    "title": "New Standing Posted Variance Procedure",
+    "type": "bulletin",
+    "code_edition": "ABC 2014",
+    "date": "2017-09-06",
+    "summary": "Explains the move from repeated individual zero-lot-line variance requests to a referenced standing posted variance.",
+    "applies_to": "Calgary applicants using an unmodified applicable SPV.",
+    "conditions": [
+      "State compliance with the applicable SPV in permit documents or a supporting letter.",
+      "Permit must reference the SPV and all of its conditions.",
+      "The historical zero-lot-line procedure excludes inner-city/infill use; read current SPV scope directly."
+    ],
+    "selected_citations": [
+      "B:9.10.15.5.(8)"
+    ],
+    "topics": [
+      "process-and-admin",
+      "fire-separations-and-spatial-separation"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document.",
+    "historical_counts": {
+      "builders": 26,
+      "requests": 382,
+      "period": "2017-01-01 to 2017-09-01 as stated by the advisory; not a current provincewide statistic"
+    }
+  },
+  "calgary-plumbing-advisory-p15-002-secondary-suites-backwater-valves": {
+    "title": "P15-002 – Secondary Suites, Backwater Valves and Protection from Backflow",
+    "type": "bulletin",
+    "code_edition": "National Plumbing Code 2020",
+    "date": "2022-10-04",
+    "summary": "Explains backflow protection for secondary suites and the restriction on a normally open valve serving multiple dwelling units.",
+    "applies_to": "Calgary secondary-suite plumbing installations exposed to sewage backflow.",
+    "conditions": [
+      "Assess whether below-street-level fixtures need protection.",
+      "A normally open backwater valve on the identified drain/branch cannot serve more than one dwelling unit under this advisory.",
+      "Existing multi-unit arrangements may need removal/reconfiguration/additional protection.",
+      "This is a plumbing advisory, not an SPV or a verified NBC provision."
+    ],
+    "selected_citations": [
+      "PLUMBING:2.4.6.4."
+    ],
+    "topics": [
+      "hvac-ventilation-plumbing",
+      "housing-secondary-suites-part9"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document."
+  },
+  "calgary-request-for-specific-variance": {
+    "title": "Request for Specific Variance form",
+    "type": "bulletin",
+    "code_edition": "Safety Codes Act / permit form; no single code edition",
+    "date": "2014-06",
+    "summary": "Captures project/applicant identity, requested departure, rationale, evidence and owner acknowledgement for an individual variance.",
+    "applies_to": "Calgary specific-variance applications.",
+    "conditions": [
+      "Identify the code/standard, departure, reasons and supporting documentation.",
+      "Complete the property/permit/applicant information and declaration.",
+      "A blank request form is not an accepted variance."
+    ],
+    "selected_citations": [],
+    "topics": [
+      "process-and-admin"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document."
+  },
+  "calgary-building-advisory-b23-001-code-transition": {
+    "title": "B23-001 – Building Code Transition for Multi-Building Projects",
+    "type": "bulletin",
+    "code_edition": "NBC(AE) 2019/2023 and NECB 2017/2020 transition",
+    "date": "2024-01-29",
+    "summary": "Explains Calgary’s dated transition arrangements for multi-building developments when the newer codes came into force.",
+    "applies_to": "Multi-building projects with the specified development/building-permit application timing.",
+    "conditions": [
+      "Check the complete January 24/May 1, 2024 application timing criteria.",
+      "Do not use this historical transition discussion as unrestricted permission to choose an older edition.",
+      "Advisory has the issuer’s stated nonbinding status."
+    ],
+    "selected_citations": [],
+    "topics": [
+      "process-and-admin"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document."
+  },
+  "edmonton-policy-b14-01-reduced-or-zero-lot-line": {
+    "title": "B14-01 – Reduced or Zero Lot Line Side Yard Wall and Gable Construction",
+    "type": "policy",
+    "code_edition": "ABC 2014",
+    "date": "2019-01-10",
+    "summary": "Uses a legally maintained deemed limiting-distance line and paired construction details for qualifying reduced/zero-lot-line houses.",
+    "applies_to": "Edmonton single-detached/semi-detached houses permitted by zoning in the specified adjacent-lot configuration.",
+    "conditions": [
+      "Register the permanent easement/maintenance agreement against both titles.",
+      "Apply the paired-wall/gable, cladding, gypsum, soffit/opening and construction-intention requirements.",
+      "If the adjacent property cannot satisfy the policy, a separate site-specific variance may be needed.",
+      "Older-edition PDF remains linked; obtain AHJ confirmation before present-edition reliance."
+    ],
+    "selected_citations": [
+      "B:9.10.15.5."
+    ],
+    "topics": [
+      "fire-separations-and-spatial-separation",
+      "housing-secondary-suites-part9",
+      "process-and-admin"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document."
+  },
+  "edmonton-policy-b14-01g-reduced-zero-lot-line-detached-garages": {
+    "title": "B14-01G – Reduced or Zero Lot Line Detached Garages",
+    "type": "policy",
+    "code_edition": "ABC 2014",
+    "date": "2019-01-10",
+    "summary": "Provides a paired-lot deemed limiting-distance construction route for eligible detached garages/accessory buildings.",
+    "applies_to": "Edmonton detached garages/accessory buildings serving single/semi-detached houses in reduced/zero-lot-line development.",
+    "conditions": [
+      "Register and maintain the required adjacent-title easement.",
+      "Apply the specified paired-wall/gable, gypsum/cladding, soffit and shared-garage separation conditions.",
+      "Use a site-specific route if both adjacent buildings cannot follow the policy.",
+      "Older-edition PDF remains linked; confirm present applicability with Edmonton."
+    ],
+    "selected_citations": [
+      "B:9.10.14.5.(4)"
+    ],
+    "topics": [
+      "fire-separations-and-spatial-separation",
+      "housing-secondary-suites-part9",
+      "process-and-admin"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document."
+  },
+  "edmonton-policy-b19-03-area-separation-walls": {
+    "title": "B19-03 – Area Separation Walls for Rowhouses with Secondary Suites",
+    "type": "policy",
+    "code_edition": "NBC(AE) 2019",
+    "date": "2021-01-11",
+    "summary": "Historical policy accepts listed gypsum-shaftliner area-separation systems with sacrificial protective walls as a firewall alternative.",
+    "applies_to": "Historical Part 9 rowhouses with more than two houses containing secondary suites.",
+    "conditions": [
+      "PDF is marked archived; use B23-01 for current-edition policy review.",
+      "Follow tested/listed assemblies, continuous wall extent, permitted penetrations and protective-wall requirements.",
+      "Loadbearing variations require the stated engineering review."
+    ],
+    "selected_citations": [
+      "B:9.10.11.2.(2)"
+    ],
+    "topics": [
+      "fire-separations-and-spatial-separation",
+      "housing-secondary-suites-part9",
+      "professional-involvement"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document.",
+    "source_status": "archived"
+  },
+  "edmonton-policy-b19-04-small-building-access": {
+    "title": "B19-04 – Small Building Access",
+    "type": "policy",
+    "code_edition": "NBC(AE) 2019",
+    "date": null,
+    "summary": "Explains Edmonton emergency-response access expectations for Part 9 and small one-storey Part 3 buildings.",
+    "applies_to": "Edmonton Part 9 buildings and one-storey Part 3 buildings up to 600 m².",
+    "conditions": [
+      "Provide the specified emergency access path, including the stated 45 m responder-travel limit and access geometry.",
+      "Address separately accessed building portions; use the detailed path/route provisions and exceptions.",
+      "The source says it does not relax code provisions or settle hydrant distance."
+    ],
+    "selected_citations": [
+      "B:3.2.5.5.",
+      "B:3.2.5.6.",
+      "B:9.10.20.3."
+    ],
+    "topics": [
+      "firefighting-alarms-sprinklers",
+      "process-and-admin",
+      "housing-secondary-suites-part9"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document."
+  },
+  "edmonton-policy-b23-01-row-house-fire-separation-more-than-two-secondary-suites": {
+    "title": "B23-01 – Fire Separation Between Rowhouses with More Than Two Secondary Suites",
+    "type": "policy",
+    "code_edition": "NBC(AE) 2023",
+    "date": "2024-07-30",
+    "summary": "Accepts a one-hour party-wall fire separation instead of the identified firewall requirement for qualifying Part 9 rowhouses.",
+    "applies_to": "Edmonton freehold/condominium Part 9 rowhouses with more than two adjacent houses containing secondary suites.",
+    "conditions": [
+      "Provide at least a one-hour party-wall fire separation and satisfy all other house-with-secondary-suite requirements.",
+      "Show sufficient construction details and submit the policy’s Letter of Construction Intention.",
+      "Notify Edmonton if approved construction intention changes."
+    ],
+    "selected_citations": [
+      "B:9.10.11.2.(2)"
+    ],
+    "topics": [
+      "fire-separations-and-spatial-separation",
+      "housing-secondary-suites-part9",
+      "process-and-admin"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document."
+  },
+  "edmonton-alternative-solution-secondary-suites-in-row-houses": {
+    "title": "Alternative Solution for Secondary Suites in Row Houses – Supporting Report",
+    "type": "policy",
+    "code_edition": "NBC(AE) 2023",
+    "date": "2024-07-26",
+    "summary": "Provides the supporting life-safety/property-protection reasoning referenced by Edmonton B23-01.",
+    "applies_to": "The rowhouse/secondary-suite arrangement evaluated in the supporting report.",
+    "conditions": [
+      "Read alongside B23-01 and the actual design conditions.",
+      "Do not treat another project or a report summary as a separate issued variance."
+    ],
+    "selected_citations": [
+      "B:9.10.11.2."
+    ],
+    "topics": [
+      "fire-separations-and-spatial-separation",
+      "housing-secondary-suites-part9",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document."
+  },
+  "edmonton-policy-b23-02-window-opening-control-devices": {
+    "title": "B23-02 – Window Opening Control Devices",
+    "type": "policy",
+    "code_edition": "NBC(AE) 2023",
+    "date": "2024-12-23",
+    "summary": "Clarifies Edmonton acceptance/inspection of ASTM F2090 window-opening controls for fall protection and egress through 23-BCV-001.",
+    "applies_to": "Edmonton eligible residential windows; excludes adaptable/barrier-free dwelling units under the provincial variance.",
+    "conditions": [
+      "Meet the stated ASTM-based release, opening-control and automatic-reset requirements.",
+      "Have owner safety/operation information available at inspection.",
+      "Use provincial variance scope for bedroom/egress applications rather than assuming all guards are escape devices."
+    ],
+    "selected_citations": [
+      "B:9.8.8.1.",
+      "B:9.9.10.1.",
+      "B:9.9.9.1."
+    ],
+    "topics": [
+      "egress-and-single-stair",
+      "housing-secondary-suites-part9",
+      "occupancy-and-accessibility"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document."
+  },
+  "edmonton-policy-bulletin-b23-03-roof-truss-engineering": {
+    "title": "B23-03 – Roof Truss Engineering Requirements",
+    "type": "policy",
+    "code_edition": "NBC(AE) 2023",
+    "date": "2026-02-04",
+    "summary": "Implements authenticated roof-truss assembly submissions with Edmonton building-permit applications from March 1, 2026.",
+    "applies_to": "Single-family/semi-detached houses and three/four-unit rowhouses; detached-garage exceptions are stated.",
+    "conditions": [
+      "Provide authenticated assembly information, including interconnections, in the required application documents.",
+      "Layout authentication is unnecessary only where all relevant assembly/interface information is already in authenticated documents.",
+      "Standard detached garages receive the stated exception unless living/attic-storage/loft space is present.",
+      "SOURCE TYPO: opening text calls the STANDATA 23-BCI-05R1; the body identifies 23-BCI-015R1. Verify against the latter official source."
+    ],
+    "selected_citations": [],
+    "topics": [
+      "structural-and-framing",
+      "professional-involvement",
+      "process-and-admin"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document."
+  },
+  "edmonton-policy-interpretation-b23-05-application-of-9944": {
+    "title": "B23-05 / COE-SCPI-POL-INT-0001 – Application of 9.9.4.4.",
+    "type": "policy",
+    "code_edition": "NBC(AE) 2023",
+    "date": "2026-06-10",
+    "summary": "Limits Edmonton application of exterior-stair/ramp opening protection for low ground-adjacent egress configurations and explains alternative-solution boundaries.",
+    "applies_to": "Edmonton unenclosed exterior exit stairs/ramps and relevant ground-adjacent passageways.",
+    "conditions": [
+      "Policy threshold: stairs/ramps no more than 1.5 m above or 600 mm below adjacent ground.",
+      "Read Appendix A for the distinction between prescriptive protection, genuine alternatives and redundant egress configurations.",
+      "Do not convert explanatory discussion into provincewide code text."
+    ],
+    "selected_citations": [
+      "B:9.9.4.4.",
+      "B:9.9.4.2."
+    ],
+    "topics": [
+      "egress-and-single-stair",
+      "fire-separations-and-spatial-separation",
+      "housing-secondary-suites-part9"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document."
+  },
+  "scc-notice-variances-under-safety-codes-act-2019": {
+    "title": "Notice – Variances under the Safety Codes Act",
+    "type": "bulletin",
+    "code_edition": "Safety Codes Act; multi-discipline",
+    "date": "2019-08-01",
+    "summary": "Explains applicant evidence responsibilities and the reviewing SCO’s role in the variance process.",
+    "applies_to": "Alberta applicants, SCOs and registered professionals across disciplines.",
+    "conditions": [
+      "Applicant develops and supports the proposed alternative; SCO reviews/evaluates it.",
+      "A variance does not rewrite or relax the code benchmark.",
+      "SCO review must not substitute the officer’s own engineering/architectural design for the professional’s submission."
+    ],
+    "selected_citations": [],
+    "topics": [
+      "process-and-admin",
+      "professional-involvement",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document.",
+    "issuer": "Government of Alberta (linked by Safety Codes Council)"
+  },
+  "scc-variance-faqs": {
+    "title": "Safety Codes Council – Variance FAQs",
+    "type": "bulletin",
+    "code_edition": "Safety Codes Act; multi-discipline",
+    "date": null,
+    "summary": "Explains discretionary variance authority, applicant evidence and review/appeal roles.",
+    "applies_to": "Alberta variance applicants and reviewing authorities.",
+    "conditions": [
+      "Applicant supplies rationale and evidence; appropriate professional support may be needed.",
+      "SCO must act within certification/designation and assess the submitted case.",
+      "Court/appeal language may be historical; use current governing process sources before relying on deadlines or court names."
+    ],
+    "selected_citations": [],
+    "topics": [
+      "process-and-admin",
+      "professional-involvement",
+      "evidence-and-conformity"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document."
+  },
+  "standata-nbc2023-errata-23-bce-001": {
+    "title": "23-BCE-001 – Errata (with replacement pages)",
+    "type": "erratum",
+    "code_edition": "NBC(AE) 2023; corrections issued before second printing",
+    "date": "2024-05",
+    "summary": "Corrects technical references, table presentation, accessibility administration and professional-involvement forms in the 2023 code.",
+    "applies_to": "2023 code users; consult second printing and errata.md for incorporation checks.",
+    "conditions": [
+      "Corrections are enumerated on source PDF pages 1–3.",
+      "Source pages 4–25 are replacement code/forms, not 22 additional errata.",
+      "Current second-printing text controls all current citations."
+    ],
+    "selected_citations": [
+      "B:3.2.5.7.",
+      "B:3.6.4.7.",
+      "B:3.8.4.3.",
+      "B:4.1.8.4.",
+      "B:9.25.2.1.",
+      "C:2.2.1.4."
+    ],
+    "topics": [
+      "code-structure-and-attribution",
+      "professional-involvement",
+      "energy-efficiency",
+      "occupancy-and-accessibility",
+      "firefighting-alarms-sprinklers"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document."
+  },
+  "standata-nbc2019-errata-19-bce-001": {
+    "title": "19-BCE-001 – Historical Errata",
+    "type": "erratum",
+    "code_edition": "NBC(AE) 2019",
+    "date": "2020-05",
+    "summary": "Marks the historical residential-bathroom doorway sentence as reserved and removes its explanatory note because they were included in error.",
+    "applies_to": "Existing/historical 2019-edition source review.",
+    "conditions": [
+      "Keep historical code corrections associated with their original edition.",
+      "Use NBC(AE) 2023 p2 for current citations and do not apply 2019 replacement text to it."
+    ],
+    "selected_citations": [
+      "B:3.8.3.6.(3)"
+    ],
+    "topics": [
+      "code-structure-and-attribution"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document."
+  },
+  "standata-nbc2019-errata-19-bce-002": {
+    "title": "19-BCE-002 – Historical Errata",
+    "type": "erratum",
+    "code_edition": "NBC(AE) 2019",
+    "date": "2021-07",
+    "summary": "Clarifies that accessible examination/treatment rooms require a compliant lavatory only where a lavatory is provided.",
+    "applies_to": "Existing/historical 2019-edition source review.",
+    "conditions": [
+      "Keep historical code corrections associated with their original edition.",
+      "Use NBC(AE) 2023 p2 for current citations and do not apply 2019 replacement text to it."
+    ],
+    "selected_citations": [
+      "B:3.8.5.3.(1)",
+      "B:3.8.5.3.(2)"
+    ],
+    "topics": [
+      "code-structure-and-attribution"
+    ],
+    "conditions_completeness": "Source navigation summary; read every operative condition and applicable diagram in the original document."
+  },
+  "calgary-spv-004-ventilation-indoor-air-quality": {
+    "title": "SPV-004 – Ventilation for Acceptable Indoor Air Quality",
+    "type": "spv",
+    "code_edition": "NBC(AE) 2019",
+    "date": "2020-02-25",
+    "summary": "Accepts a newer ASHRAE 62 ventilation standard as a complete project basis under documented engineering responsibility.",
+    "applies_to": "Calgary HVAC designs seeking to use a newer ventilation-standard edition than the historical referenced edition.",
+    "conditions": [
+      "Engineer of record must review, sign and seal mechanical drawings.",
+      "Engineer must identify the selected edition in writing and confirm ventilation is sufficient for the intended occupancy.",
+      "Apply the selected standard in its entirety to the full project scope and reference SPV-004 in application/permit conditions.",
+      "PDF is publicly retrievable but absent from the current SPV table; verify present availability/applicability with Calgary before relying on it."
+    ],
+    "selected_citations": [
+      "B:1.3.1.2.(1)",
+      "B:6.2.1.1.(1)"
+    ],
+    "topics": [
+      "hvac-ventilation-plumbing",
+      "professional-involvement",
+      "evidence-and-conformity"
+    ],
+    "source_status": "unlisted-public-document",
+    "conditions_completeness": "Source navigation summary; apply every condition in the source.",
+    "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/ventilation-for-acceptable-indoor-air-quality.pdf",
+    "publication_url": "https://www.calgary.ca/development/permits/building-regulation-advisories.html"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "status": "fail_open",
+  "decision": "answer_from_what_we_have",
+  "evidence_thin": true,
+  "screening": "local-only",
+  "selected_ids": [
+    "ventilation",
+    "backwater"
+  ],
+  "dropped_injection_ids": [],
+  "local_screen_ids": [],
+  "unjudged_ids": [
+    "ventilation",
+    "backwater"
+  ],
+  "clipped_ids": [],
+  "scores": {},
+  "answerable": null,
+  "sufficient": null,
+  "sufficiency": null,
+  "next_query": null,
+  "queries_tried": [
+    "site:calgary.ca \"SPV-005\" ventilation",
+    "site:calgary.ca \"variance\" \"ventilation\" \"SPV\""
+  ],
+  "candidate_queries": [],
+  "round_index": 2,
+  "max_rounds": 2,
+  "top_k": 6,
+  "results_seen": 2,
+  "truncated": false,
+  "latency_ms": null,
+  "notes": [
+    "Jev unavailable (network)",
+    "Jev unavailable (network): sufficiency was not decided",
+    "Jev decided nothing here; selected_ids is the screened head of the original order and nothing is claimed about sufficiency"
+  ]
+}

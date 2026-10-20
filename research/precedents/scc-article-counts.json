@@ -1,0 +1,979 @@
+{
+  "source_url": "https://www.safetycodes.ab.ca/data-hub/variance-data/",
+  "accessed": "2026-10-18",
+  "model_entity": "Variances2026q1",
+  "period": "2026 Q1 label in visible model/report; not inferred to include Q2",
+  "grain": "Published Article Count grouped by discipline, raw code label, and raw article string.",
+  "rows": [
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2019 Alberta Edition",
+      "article_raw": "3.1.8.1.",
+      "article_count": 1,
+      "normalized_article": "3.1.8.1."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2019 Alberta Edition",
+      "article_raw": "3.1.8.5.",
+      "article_count": 1,
+      "normalized_article": "3.1.8.5."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2019 Alberta Edition",
+      "article_raw": "3.2.2.72.",
+      "article_count": 1,
+      "normalized_article": "3.2.2.72."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2019 Alberta Edition",
+      "article_raw": "3.2.2.77.1.",
+      "article_count": 1,
+      "normalized_article": "3.2.2.77."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2019 Alberta Edition",
+      "article_raw": "3.2.4.16.",
+      "article_count": 1,
+      "normalized_article": "3.2.4.16."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2019 Alberta Edition",
+      "article_raw": "3.2.4.18.",
+      "article_count": 1,
+      "normalized_article": "3.2.4.18."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2019 Alberta Edition",
+      "article_raw": "3.2.5.8.",
+      "article_count": 1,
+      "normalized_article": "3.2.5.8."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2019 Alberta Edition",
+      "article_raw": "3.4.1.4.",
+      "article_count": 1,
+      "normalized_article": "3.4.1.4."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2019 Alberta Edition",
+      "article_raw": "3.4.6.5.",
+      "article_count": 3,
+      "normalized_article": "3.4.6.5."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2019 Alberta Edition",
+      "article_raw": "3.4.6.8.",
+      "article_count": 4,
+      "normalized_article": "3.4.6.8."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": " 9.10.13.13.",
+      "article_count": 1,
+      "normalized_article": "9.10.13.13."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.1.10.2.",
+      "article_count": 2,
+      "normalized_article": "3.1.10.2."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.1.10.3.",
+      "article_count": 1,
+      "normalized_article": "3.1.10.3."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.1.10.4.",
+      "article_count": 1,
+      "normalized_article": "3.1.10.4."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.1.7.",
+      "article_count": 1,
+      "normalized_article": null
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.1.7.1.",
+      "article_count": 3,
+      "normalized_article": "3.1.7.1."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.1.7.3.",
+      "article_count": 1,
+      "normalized_article": "3.1.7.3."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.1.8.",
+      "article_count": 1,
+      "normalized_article": null
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.1.8.13.",
+      "article_count": 1,
+      "normalized_article": "3.1.8.13."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.1.9.",
+      "article_count": 1,
+      "normalized_article": null
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.1.9.5.",
+      "article_count": 1,
+      "normalized_article": "3.1.9.5."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.2.2.25.",
+      "article_count": 1,
+      "normalized_article": "3.2.2.25."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.2.2.26.",
+      "article_count": 1,
+      "normalized_article": "3.2.2.26."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.2.2.29.(2).(a)",
+      "article_count": 1,
+      "normalized_article": "3.2.2.29."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.2.2.66.(2).(a)",
+      "article_count": 1,
+      "normalized_article": "3.2.2.66."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.2.2.9.",
+      "article_count": 1,
+      "normalized_article": "3.2.2.9."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.2.3.",
+      "article_count": 1,
+      "normalized_article": null
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.2.3.13.",
+      "article_count": 2,
+      "normalized_article": "3.2.3.13."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.2.3.7.",
+      "article_count": 7,
+      "normalized_article": "3.2.3.7."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.2.5.12.",
+      "article_count": 3,
+      "normalized_article": "3.2.5.12."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.2.7.7.",
+      "article_count": 1,
+      "normalized_article": "3.2.7.7."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.2.8.1.",
+      "article_count": 6,
+      "normalized_article": "3.2.8.1."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.3.1.18.",
+      "article_count": 1,
+      "normalized_article": "3.3.1.18."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.3.1.5.",
+      "article_count": 1,
+      "normalized_article": "3.3.1.5."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.3.1.9.(5)",
+      "article_count": 3,
+      "normalized_article": "3.3.1.9."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.3.2.5.",
+      "article_count": 1,
+      "normalized_article": "3.3.2.5."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.3.3.3.(1)",
+      "article_count": 3,
+      "normalized_article": "3.3.3.3."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.3.3.5.",
+      "article_count": 1,
+      "normalized_article": "3.3.3.5."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.3.4.4.(6)",
+      "article_count": 3,
+      "normalized_article": "3.3.4.4."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.4.2.1.",
+      "article_count": 2,
+      "normalized_article": "3.4.2.1."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.4.2.5.",
+      "article_count": 5,
+      "normalized_article": "3.4.2.5."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.4.6.16.",
+      "article_count": 1,
+      "normalized_article": "3.4.6.16."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.4.6.2.",
+      "article_count": 1,
+      "normalized_article": "3.4.6.2."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.4.6.5.",
+      "article_count": 7,
+      "normalized_article": "3.4.6.5."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "3.4.6.8.",
+      "article_count": 7,
+      "normalized_article": "3.4.6.8."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "7.2.3.42.",
+      "article_count": 1,
+      "normalized_article": "7.2.3.42."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "7.2.6.2.",
+      "article_count": 1,
+      "normalized_article": "7.2.6.2."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.10.11.2.",
+      "article_count": 366,
+      "normalized_article": "9.10.11.2."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.10.13.13.",
+      "article_count": 251,
+      "normalized_article": "9.10.13.13."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.10.14.1.",
+      "article_count": 1,
+      "normalized_article": "9.10.14.1."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.10.14.2.",
+      "article_count": 218,
+      "normalized_article": "9.10.14.2."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.10.14.4.(1)",
+      "article_count": 5,
+      "normalized_article": "9.10.14.4."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.10.14.4.(8)",
+      "article_count": 1,
+      "normalized_article": "9.10.14.4."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.10.14.5.",
+      "article_count": 167,
+      "normalized_article": "9.10.14.5."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.10.14.5.(1)",
+      "article_count": 37,
+      "normalized_article": "9.10.14.5."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.10.14.5.(9)",
+      "article_count": 153,
+      "normalized_article": "9.10.14.5."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.10.15.3.",
+      "article_count": 134,
+      "normalized_article": "9.10.15.3."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.10.15.3.(1)",
+      "article_count": 16,
+      "normalized_article": "9.10.15.3."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.10.15.4.",
+      "article_count": 5,
+      "normalized_article": "9.10.15.4."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.10.15.5.",
+      "article_count": 1,
+      "normalized_article": "9.10.15.5."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.10.15.5.(8)",
+      "article_count": 1501,
+      "normalized_article": "9.10.15.5."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.10.17.10.",
+      "article_count": 1,
+      "normalized_article": "9.10.17.10."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.10.2.2.",
+      "article_count": 2,
+      "normalized_article": "9.10.2.2."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.10.9.15.",
+      "article_count": 18,
+      "normalized_article": "9.10.9.15."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.25.4.1.",
+      "article_count": 1,
+      "normalized_article": "9.25.4.1."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.25.4.2.",
+      "article_count": 1,
+      "normalized_article": "9.25.4.2."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.25.4.3.",
+      "article_count": 1,
+      "normalized_article": "9.25.4.3."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.27.5.4.",
+      "article_count": 1,
+      "normalized_article": "9.27.5.4."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.29.5.3.",
+      "article_count": 1,
+      "normalized_article": "9.29.5.3."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.4.1.1.",
+      "article_count": 1,
+      "normalized_article": "9.4.1.1."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.4.3.1.",
+      "article_count": 1,
+      "normalized_article": "9.4.3.1."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.9.4.4.",
+      "article_count": 73,
+      "normalized_article": "9.9.4.4."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.9.4.6.",
+      "article_count": 26,
+      "normalized_article": "9.9.4.6."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.9.6.5 (1)",
+      "article_count": 8,
+      "normalized_article": "9.9.6.5."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "9.9.6.5.(1)",
+      "article_count": 1,
+      "normalized_article": "9.9.6.5."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "National Building Code 2019",
+      "article_raw": "3.4.2.5.",
+      "article_count": 1,
+      "normalized_article": "3.4.2.5."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "NBC(AE)-2023",
+      "article_raw": "3.2.5.15.(2)",
+      "article_count": 2,
+      "normalized_article": "3.2.5.15."
+    },
+    {
+      "discipline": "Building",
+      "code_edition_raw": "NBC(AE)-2023",
+      "article_raw": "9.10.2.2.(2.a.)",
+      "article_count": 1,
+      "normalized_article": "9.10.2.2."
+    },
+    {
+      "discipline": "Electrical",
+      "code_edition_raw": "CEC Part 1",
+      "article_raw": "4-004",
+      "article_count": 1,
+      "normalized_article": null
+    },
+    {
+      "discipline": "Electrical",
+      "code_edition_raw": "CSA 22.1",
+      "article_raw": "2-024",
+      "article_count": 1,
+      "normalized_article": null
+    },
+    {
+      "discipline": "Electrical",
+      "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+      "article_raw": "8-102",
+      "article_count": 1,
+      "normalized_article": null
+    },
+    {
+      "discipline": "Fire",
+      "code_edition_raw": "National Fire Code - 2019 Alberta Edition",
+      "article_raw": "4.6.8.2.",
+      "article_count": 1,
+      "normalized_article": "4.6.8.2."
+    },
+    {
+      "discipline": "Gas",
+      "code_edition_raw": "GA_B149.1",
+      "article_raw": "6.3.1.",
+      "article_count": 1,
+      "normalized_article": null
+    },
+    {
+      "discipline": "Plumbing",
+      "code_edition_raw": "Alberta Plumbing Code of Canada 2020",
+      "article_raw": "2.5.1.1.",
+      "article_count": 2,
+      "normalized_article": "2.5.1.1."
+    },
+    {
+      "discipline": "Plumbing",
+      "code_edition_raw": "Alberta Plumbing Code of Canada 2020",
+      "article_raw": "2.7.1.1.",
+      "article_count": 1,
+      "normalized_article": "2.7.1.1."
+    },
+    {
+      "discipline": "Plumbing",
+      "code_edition_raw": "Alberta Private Sewage Standards of Practice 2021",
+      "article_raw": "5.2.3.1.",
+      "article_count": 6,
+      "normalized_article": "5.2.3.1."
+    },
+    {
+      "discipline": "Plumbing",
+      "code_edition_raw": "Alberta Private Sewage Systems SoP 2021",
+      "article_raw": "1.1.3.1.",
+      "article_count": 1,
+      "normalized_article": "1.1.3.1."
+    },
+    {
+      "discipline": "Plumbing",
+      "code_edition_raw": "Alberta Private Sewage Systems SoP 2021",
+      "article_raw": "10.1.2.4.",
+      "article_count": 2,
+      "normalized_article": "10.1.2.4."
+    },
+    {
+      "discipline": "Plumbing",
+      "code_edition_raw": "Alberta Private Sewage Systems SoP 2021",
+      "article_raw": "8.7.2.1.",
+      "article_count": 5,
+      "normalized_article": "8.7.2.1."
+    },
+    {
+      "discipline": "Plumbing",
+      "code_edition_raw": "Alberta Private Sewage Systems SoP 2021",
+      "article_raw": "8.7.2.2.",
+      "article_count": 3,
+      "normalized_article": "8.7.2.2."
+    },
+    {
+      "discipline": "Plumbing",
+      "code_edition_raw": "National Plumbing Code  2015",
+      "article_raw": "2.4.7.1.",
+      "article_count": 1,
+      "normalized_article": "2.4.7.1."
+    },
+    {
+      "discipline": "Plumbing",
+      "code_edition_raw": "National Plumbing Code - 2023 Alberta Edition",
+      "article_raw": "2.2.5.4.",
+      "article_count": 1,
+      "normalized_article": "2.2.5.4."
+    },
+    {
+      "discipline": "Pressure Equipment",
+      "code_edition_raw": "AR 49/2006, BO_ASMEB31",
+      "article_raw": "Section 33",
+      "article_count": 1,
+      "normalized_article": null
+    },
+    {
+      "discipline": "Pressure Equipment",
+      "code_edition_raw": "BO_CSAB51, Pressure Equipment Safety Regulation",
+      "article_raw": "6.3.4.1.",
+      "article_count": 1,
+      "normalized_article": "6.3.4.1."
+    },
+    {
+      "discipline": "Pressure Equipment",
+      "code_edition_raw": "BO_CSAB51, Pressure Equipment Safety Regulation",
+      "article_raw": "UG-84.",
+      "article_count": 1,
+      "normalized_article": null
+    }
+  ],
+  "current_ae2023_root_frequencies": [
+    {
+      "article": "9.10.15.5.",
+      "published_article_occurrences": 1502
+    },
+    {
+      "article": "9.10.11.2.",
+      "published_article_occurrences": 366
+    },
+    {
+      "article": "9.10.14.5.",
+      "published_article_occurrences": 357
+    },
+    {
+      "article": "9.10.13.13.",
+      "published_article_occurrences": 252
+    },
+    {
+      "article": "9.10.14.2.",
+      "published_article_occurrences": 218
+    },
+    {
+      "article": "9.10.15.3.",
+      "published_article_occurrences": 150
+    },
+    {
+      "article": "9.9.4.4.",
+      "published_article_occurrences": 73
+    },
+    {
+      "article": "9.9.4.6.",
+      "published_article_occurrences": 26
+    },
+    {
+      "article": "9.10.9.15.",
+      "published_article_occurrences": 18
+    },
+    {
+      "article": "9.9.6.5.",
+      "published_article_occurrences": 9
+    },
+    {
+      "article": "3.2.3.7.",
+      "published_article_occurrences": 7
+    },
+    {
+      "article": "3.4.6.5.",
+      "published_article_occurrences": 7
+    },
+    {
+      "article": "3.4.6.8.",
+      "published_article_occurrences": 7
+    },
+    {
+      "article": "3.2.8.1.",
+      "published_article_occurrences": 6
+    },
+    {
+      "article": "9.10.14.4.",
+      "published_article_occurrences": 6
+    },
+    {
+      "article": "3.4.2.5.",
+      "published_article_occurrences": 5
+    },
+    {
+      "article": "9.10.15.4.",
+      "published_article_occurrences": 5
+    },
+    {
+      "article": "3.1.7.1.",
+      "published_article_occurrences": 3
+    },
+    {
+      "article": "3.2.5.12.",
+      "published_article_occurrences": 3
+    },
+    {
+      "article": "3.3.1.9.",
+      "published_article_occurrences": 3
+    },
+    {
+      "article": "3.3.3.3.",
+      "published_article_occurrences": 3
+    },
+    {
+      "article": "3.3.4.4.",
+      "published_article_occurrences": 3
+    },
+    {
+      "article": "9.10.2.2.",
+      "published_article_occurrences": 3
+    },
+    {
+      "article": "3.1.10.2.",
+      "published_article_occurrences": 2
+    },
+    {
+      "article": "3.2.3.13.",
+      "published_article_occurrences": 2
+    },
+    {
+      "article": "3.4.2.1.",
+      "published_article_occurrences": 2
+    },
+    {
+      "article": "3.2.5.15.",
+      "published_article_occurrences": 2
+    },
+    {
+      "article": "3.1.10.3.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "3.1.10.4.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "3.1.7.3.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "3.1.8.13.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "3.1.9.5.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "3.2.2.25.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "3.2.2.26.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "3.2.2.29.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "3.2.2.66.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "3.2.2.9.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "3.2.7.7.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "3.3.1.18.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "3.3.1.5.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "3.3.2.5.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "3.3.3.5.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "3.4.6.16.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "3.4.6.2.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "7.2.3.42.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "7.2.6.2.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "9.10.14.1.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "9.10.17.10.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "9.25.4.1.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "9.25.4.2.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "9.25.4.3.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "9.27.5.4.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "9.29.5.3.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "9.4.1.1.",
+      "published_article_occurrences": 1
+    },
+    {
+      "article": "9.4.3.1.",
+      "published_article_occurrences": 1
+    }
+  ],
+  "quality_checks": {
+    "grouped_rows": 95,
+    "article_count_sum": 3118,
+    "distinct_id_article_combinations": 2386,
+    "distinct_variance_ids_excluding_null": 1876,
+    "building_unique_variance_ids_excluding_null": 1845,
+    "nulls_by_grain_field": {
+      "variance_id": 4,
+      "discipline": 0,
+      "code_edition_raw": 4,
+      "article_raw": 4
+    },
+    "groups_disagreeing_with_distinct_id_article_count": 6,
+    "differences": [
+      {
+        "group": {
+          "discipline": "Building",
+          "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+          "article_raw": "9.10.11.2.",
+          "article_count": 366,
+          "normalized_article": "9.10.11.2."
+        },
+        "distinct_id_article_count": 264
+      },
+      {
+        "group": {
+          "discipline": "Building",
+          "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+          "article_raw": "9.10.13.13.",
+          "article_count": 251,
+          "normalized_article": "9.10.13.13."
+        },
+        "distinct_id_article_count": 250
+      },
+      {
+        "group": {
+          "discipline": "Building",
+          "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+          "article_raw": "9.10.14.5.(9)",
+          "article_count": 153,
+          "normalized_article": "9.10.14.5."
+        },
+        "distinct_id_article_count": 1
+      },
+      {
+        "group": {
+          "discipline": "Building",
+          "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+          "article_raw": "9.10.15.3.",
+          "article_count": 134,
+          "normalized_article": "9.10.15.3."
+        },
+        "distinct_id_article_count": 79
+      },
+      {
+        "group": {
+          "discipline": "Building",
+          "code_edition_raw": "National Building Code - 2023 Alberta Edition",
+          "article_raw": "9.10.15.5.(8)",
+          "article_count": 1501,
+          "normalized_article": "9.10.15.5."
+        },
+        "distinct_id_article_count": 1076
+      },
+      {
+        "group": {
+          "discipline": "Building",
+          "code_edition_raw": "NBC(AE)-2023",
+          "article_raw": "3.2.5.15.(2)",
+          "article_count": 2,
+          "normalized_article": "3.2.5.15."
+        },
+        "distinct_id_article_count": 1
+      }
+    ],
+    "powerbi_model_last_refresh": "2026-08-14T19:51:02.753",
+    "limitations": [
+      "The visible entity/report identifies 2026 Q1. Landing text says publication begins with Q1/Q2 2026, but Q2 coverage is not established by this model.",
+      "Article Count is the published measure; it does not necessarily count unique applications.",
+      "Some aggregate groups have multiple source rows per variance/article combination. Published totals and unique-ID counts must not be interchanged.",
+      "Supporting applications/technical alternative-solution evidence are not included in the SCC publication."
+    ]
+  }
+}

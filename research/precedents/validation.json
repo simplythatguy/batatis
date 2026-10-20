@@ -1,0 +1,53 @@
+{
+  "code_reference": {
+    "pdf_path": "reference/codes/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.pdf",
+    "pdf_sha256": "3d45376d6c71d54b7f1797084d0828c250b20ab9b380f424f1aab8cfc9a39827",
+    "text_sha256": "923483af04ebba73d9dd8c31742c7eb05f0eca018a3dd67c29bab532e350af29",
+    "text_pages": 1578,
+    "text_up_to_date_by_mtime": true
+  },
+  "local_pdf_url_statuses": {
+    "200": 148
+  },
+  "source_conflict_records": [
+    "standata-nbc2023-errata-23-bce-001",
+    "standata-nbc2023-interpretation-23-bci-024",
+    "standata-nbc2023-interpretation-23-bci-026",
+    "calgary-spv-001-zero-lot-line-2026-03"
+  ],
+  "accessed": "2026-10-18",
+  "records": 151,
+  "local_pdf_records": 148,
+  "local_source_records": 150,
+  "partial_source_records": 1,
+  "types": {
+    "variance": 75,
+    "erratum": 3,
+    "bulletin": 18,
+    "interpretation": 40,
+    "spv": 5,
+    "policy": 9,
+    "ccmc-summary": 1
+  },
+  "article_reference_statuses": {
+    "outside-nbc-scope": 6,
+    "same-number-present-equivalence-unverified": 70,
+    "topic-successor-found-equivalence-unverified": 5,
+    "not-found": 9,
+    "same-number-present": 143
+  },
+  "selected_article_searches": 113,
+  "supplemental_searches": 96,
+  "errors": [],
+  "warnings": [
+    [
+      "ccmc-registry-summary",
+      "UNVERIFIED live refresh: curl exit 6, could not resolve host const-bers-app-prod.corp.nrc.gc.ca on 2026-10-18; the supplied JSON is the data source."
+    ],
+    [
+      "calgary-spv-007-alarmed-backwater-valve",
+      "GET returned HTTP 404 on www.calgary.ca and www-prd.calgary.ca on 2026-10-18; search service retained cached first-page text. One direct web retry also returned 404."
+    ]
+  ],
+  "scope": "Structural/provenance/current-article-presence validation. No technical acceptance, full sentence validation, or full semantic edition equivalence certification."
+}

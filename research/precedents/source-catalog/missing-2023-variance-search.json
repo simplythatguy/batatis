@@ -1,0 +1,11 @@
+{
+  "question": "Locate missing 2023 Alberta building-variance families 015 and 016.",
+  "queries_tried": [
+    "site:open.alberta.ca \"23-BCV-015\"",
+    "site:open.alberta.ca \"23-BCV-016\""
+  ],
+  "candidate_queries": [],
+  "round_index": 1,
+  "max_rounds": 1,
+  "results": []
+}

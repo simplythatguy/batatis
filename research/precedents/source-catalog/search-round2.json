@@ -1,0 +1,24 @@
+{
+  "question": "Find official Calgary ventilation and backwater-valve standing posted variance sources.",
+  "queries_tried": [
+    "site:calgary.ca \"SPV-005\" ventilation",
+    "site:calgary.ca \"variance\" \"ventilation\" \"SPV\""
+  ],
+  "candidate_queries": [],
+  "round_index": 2,
+  "max_rounds": 2,
+  "results": [
+    {
+      "id": "ventilation",
+      "title": "SPV-004 Ventilation for acceptable indoor air quality",
+      "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/ventilation-for-acceptable-indoor-air-quality.pdf",
+      "snippet": "Official February 25 2020 PDF permits a newer ASHRAE62 standard subject to engineer review, sealed drawings, written selected edition/sufficient ventilation, and use of that edition for the full project."
+    },
+    {
+      "id": "backwater",
+      "title": "SPV-007 backwater valves",
+      "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/alarmed-normally-open-spv-007.pdf",
+      "snippet": "Search cache has page1, but live download on www and www-prd returned HTTP404. Not currently in posted SPV table."
+    }
+  ]
+}

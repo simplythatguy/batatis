@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Batatis concept</title>
+<style>
+  .page { font-family: var(--font-sans, system-ui, -apple-system, "Segoe UI", sans-serif); color: var(--foreground); display: flex; flex-direction: column; gap: 30px; }
+  .page h2 { font-size: 15px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .lede { margin: 0 0 12px; color: var(--muted-foreground); font-size: 13px; line-height: 1.5; max-width: 70ch; }
+  .note { color: var(--muted-foreground); font-size: 11.5px; margin: 8px 0 0; line-height: 1.45; }
+
+  /* ---------- product mock (fixed dark product surface) ---------- */
+  .mock { --bg:#0c0c0d; --panel:#131315; --elev:#19191b; --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.16);
+          --t1:#eeeeef; --t2:#a7a7ad; --t3:#85858b; --red:#eb5757; --amber:#f2c94c; --grey:#8a8a8e; --green:#4cb782; --cta:#e6e6e6;
+          background:var(--bg); color:var(--t1); border-radius:var(--radius, 10px); padding:16px; font-size:12px; line-height:1.45;
+          border:1px solid rgba(255,255,255,.06); color-scheme: dark; }
+  .mock button { font:inherit; }
+  .bar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:12px; }
+  .proj { font-weight:600; font-size:13px; margin-right:6px; }
+  .chip { display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px; border-radius:6px; background:var(--elev); border:1px solid var(--line); color:var(--t2); white-space:nowrap; font-size:11px; }
+  .chip b { color:var(--t1); font-weight:500; }
+  .files { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+  .file { display:inline-flex; gap:6px; align-items:center; padding:4px 8px; border-radius:6px; border:1px dashed var(--line2); color:var(--t2); font-size:11px; white-space:nowrap; }
+  .file .k { color:var(--t1); }
+  .grid { display:grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap:12px; }
+  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+  .pane { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px; min-width:0; }
+  .pane h3 { margin:0 0 8px; font-size:11px; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:.06em; }
+  .planwrap svg { width:100%; height:auto; display:block; }
+  .legend { display:flex; flex-wrap:wrap; gap:10px; margin-top:8px; color:var(--t3); font-size:10.5px; }
+  .legend span { display:inline-flex; align-items:center; gap:5px; }
+  .sw { width:14px; height:4px; border-radius:2px; display:inline-block; }
+  .summary { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .pill { display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px; border-radius:11px; background:var(--elev); border:1px solid var(--line); font-size:11px; color:var(--t1); white-space:nowrap; }
+  .dot { width:7px; height:7px; border-radius:50%; display:inline-block; flex:none; }
+  .issues { display:flex; flex-direction:column; gap:4px; margin-bottom:10px; }
+  .issue { display:flex; gap:8px; align-items:flex-start; text-align:left; width:100%; background:transparent; border:1px solid transparent; border-radius:6px; padding:6px 7px; color:var(--t1); cursor:pointer; }
+  .issue:hover { background:rgba(255,255,255,.04); }
+  .issue[aria-pressed="true"] { background:rgba(255,255,255,.06); border-color:var(--line); }
+  .issue:focus-visible, .btn:focus-visible, .seg button:focus-visible, input[type=range]:focus-visible, .tv:focus-visible { outline:2px solid #8a8a8e; outline-offset:1px; }
+  .num { flex:none; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:600; color:#111; }
+  .issue .t { display:block; font-weight:500; }
+  .issue .s { display:block; color:var(--t3); font-size:11px; }
+  .detail { border-top:1px solid var(--line); padding-top:10px; display:flex; flex-direction:column; gap:8px; }
+  .detail h4 { margin:0; font-size:12.5px; font-weight:600; }
+  .row { display:flex; gap:6px; align-items:baseline; flex-wrap:wrap; }
+  .lbl { color:var(--t3); font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; }
+  .src { display:inline-flex; align-items:center; gap:5px; color:var(--t2); font-size:11px; }
+  .tag { font-size:10px; padding:1px 6px; border-radius:4px; border:1px solid var(--line2); color:var(--t2); white-space:nowrap; }
+  .quote { margin:0; padding:7px 9px; border-left:2px solid var(--line2); background:rgba(255,255,255,.03); border-radius:0 6px 6px 0; color:var(--t1); font-size:11.5px; }
+  .cite { display:block; color:var(--t3); font-size:10.5px; margin-top:4px; font-family: var(--font-mono, ui-monospace, monospace); }
+  .btns { display:flex; flex-wrap:wrap; gap:6px; }
+  .btn { height:26px; padding:0 10px; border-radius:6px; border:1px solid var(--line2); background:var(--elev); color:var(--t1); cursor:pointer; white-space:nowrap; font-size:11.5px; }
+  .btn:hover { background:#202023; }
+  .btn.primary { background:var(--cta); color:#141415; border-color:var(--cta); font-weight:500; }
+  .btn.primary:hover { background:#f2f2f2; }
+  .btn[disabled] { opacity:.45; cursor:not-allowed; }
+  .slider { display:flex; align-items:center; gap:8px; }
+  .slider input { flex:1; accent-color:#e6e6e6; }
+  .mono { font-family: var(--font-mono, ui-monospace, monospace); font-size:11px; }
+  table.sc { width:100%; border-collapse:collapse; font-size:11px; }
+  table.sc th, table.sc td { text-align:left; padding:5px 6px; border-bottom:1px solid var(--line); vertical-align:top; }
+  table.sc th { color:var(--t3); font-weight:500; font-size:10.5px; }
+  .seg { display:inline-flex; border:1px solid var(--line2); border-radius:6px; overflow:hidden; }
+  .seg button { height:24px; padding:0 9px; background:transparent; color:var(--t2); border:0; border-right:1px solid var(--line2); cursor:pointer; font-size:11px; white-space:nowrap; }
+  .seg button:last-child { border-right:0; }
+  .seg button[aria-pressed="true"] { background:rgba(255,255,255,.08); color:var(--t1); }
+  ul.ck { margin:0; padding-left:16px; color:var(--t2); }
+  ul.ck li { margin:2px 0; }
+  .facts { display:flex; flex-direction:column; gap:4px; }
+  .fact { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 0; border-bottom:1px solid var(--line); color:var(--t1); font-size:11.5px; flex-wrap:wrap; }
+  .fact .tag.unk { border-style:dashed; color:var(--t3); }
+  .fnote { color:var(--t3); font-size:10.5px; margin-top:6px; }
+  .gate { margin-top:10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .gate .why { color:var(--t3); font-size:11px; }
+  .disclaim { margin-top:10px; color:var(--t3); font-size:10.5px; }
+
+  /* ---------- pipeline ---------- */
+  .pipe { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:8px; }
+  @media (max-width: 640px) { .pipe { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+  .stage { border:1px solid var(--border); border-radius:calc(var(--radius, 10px) - 2px); padding:10px; background:var(--card); color:var(--card-foreground); display:flex; flex-direction:column; gap:4px; min-width:0; }
+  .stage .n { font-size:10.5px; color:var(--muted-foreground); font-variant-numeric: tabular-nums; }
+  .stage .h { font-weight:600; font-size:12.5px; }
+  .stage .d { font-size:11.5px; color:var(--muted-foreground); line-height:1.4; }
+  .who { margin-top:auto; padding-top:4px; display:flex; gap:4px; flex-wrap:wrap; }
+  .who span { font-size:10px; padding:1px 6px; border-radius:4px; border:1px solid var(--border); color:var(--muted-foreground); white-space:nowrap; }
+
+  /* ---------- evidence chart (fixed dark chart surface, palette validated on #131315) ---------- */
+  .viz { --surface:#131315; --ink1:#f0efec; --ink2:#c3c2b7; --muted:#898781; --grid:#2c2c2a; --axis:#383835;
+         --s1:#3987e5; --s2:#d95926; --s3:#199e70; background:var(--surface); color:var(--ink1); border-radius:var(--radius, 10px);
+         padding:16px; color-scheme: dark; }
+  .kpis { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:10px; margin-bottom:16px; }
+  @media (max-width: 640px) { .kpis { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+  .kpi .l { font-size:11px; color:var(--ink2); }
+  .kpi .v { font-size:22px; font-weight:600; letter-spacing:-0.01em; margin-top:2px; }
+  .kpi .v small { font-size:12px; font-weight:500; color:var(--ink2); margin-left:4px; }
+  .kpi .d { font-size:10.5px; color:var(--muted); margin-top:2px; line-height:1.35; }
+  .chart-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
+  .chart-title { font-size:12.5px; font-weight:600; }
+  .chart-sub { font-size:11px; color:var(--ink2); }
+  .clegend { display:flex; gap:12px; flex-wrap:wrap; font-size:11px; color:var(--ink2); margin:6px 0 2px; }
+  .clegend span { display:inline-flex; align-items:center; gap:6px; }
+  .clegend i { width:16px; height:2px; border-radius:1px; display:inline-block; }
+  .tv { height:24px; padding:0 9px; border-radius:6px; border:1px solid rgba(255,255,255,.16); background:transparent; color:var(--ink2); cursor:pointer; font:inherit; font-size:11px; white-space:nowrap; }
+  .chartbox { position:relative; height:250px; }
+  .chartbox svg { width:100%; height:250px; display:block; }
+  .tip { position:absolute; pointer-events:none; background:#1f1f22; border:1px solid rgba(255,255,255,.12); border-radius:6px; padding:7px 9px; font-size:11px; color:var(--ink1); min-width:150px; opacity:0; transition:opacity .08s; }
+  .tip .tk { color:var(--ink2); margin-bottom:4px; }
+  .tip .tr { display:flex; align-items:center; gap:6px; justify-content:space-between; }
+  .tip .tr b { font-weight:600; font-variant-numeric: tabular-nums; }
+  .tip .tr span { display:inline-flex; align-items:center; gap:6px; color:var(--ink2); }
+  .tip i { width:12px; height:2px; display:inline-block; border-radius:1px; }
+  table.tview { width:100%; border-collapse:collapse; font-size:11.5px; margin-top:8px; }
+  table.tview th, table.tview td { padding:5px 6px; border-bottom:1px solid #2c2c2a; text-align:right; font-variant-numeric: tabular-nums; }
+  table.tview th:first-child, table.tview td:first-child { text-align:left; }
+  table.tview th { color:var(--ink2); font-weight:500; }
+  .bars { display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+  .brow { display:grid; grid-template-columns: minmax(0, 44%) minmax(0, 1fr); gap:10px; align-items:center; outline:none; border-radius:4px; }
+  .brow:focus-visible { outline:2px solid #8a8a8e; outline-offset:2px; }
+  .blab { font-size:11.5px; color:var(--ink1); line-height:1.3; }
+  .blab small { display:block; color:var(--ink2); font-size:10.5px; }
+  .btrack { position:relative; height:18px; display:flex; align-items:center; gap:8px; }
+  .bfill { height:16px; background:var(--s1); border-radius:0 4px 4px 0; min-width:2px; }
+  .brow.other .bfill { background:#5a5a58; }
+  .brow:hover .bfill, .brow:focus .bfill { filter:brightness(1.15); }
+  .bval { font-size:11px; color:var(--ink2); white-space:nowrap; font-variant-numeric: tabular-nums; }
+  @media (max-width: 640px) { .brow { grid-template-columns: 1fr; gap:3px; } }
+  .vnote { font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.45; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <section>
+    <h2>The experience: drop the plans, fix what the reviewer would catch</h2>
+    <p class="lede">Illustrative concept on a synthetic Calgary project. Every code quote, citation and Section C attribution below is a real lookup from NBC(AE) 2023, 2nd printing; the drawing values are invented for the demo. Click an issue, try the controls.</p>
+
+    <div class="mock" id="mock">
+      <div class="bar">
+        <span class="proj">Rowhouse, 4 houses with secondary suites</span>
+        <span class="chip">Calgary, AB <b>NBC(AE) 2023, 2nd printing</b></span>
+        <span class="chip">Part 9 <b>residential</b></span>
+        <span class="chip">Basement suite, unit 2</span>
+      </div>
+      <div class="files" aria-label="Dropped files, sorted automatically">
+        <span class="file">A-001 cover <span class="k">title block read</span></span>
+        <span class="file">A-101 plans <span class="k">3 floor plans</span></span>
+        <span class="file">A-201 <span class="k">2 elevations</span></span>
+        <span class="file">A-301 <span class="k">wall types, section</span></span>
+        <span class="file">window spec.pdf <span class="k">product data</span></span>
+        <span class="file">IMG_2231.jpg <span class="k">site photo</span></span>
+      </div>
+
+      <div class="grid">
+        <div class="pane planwrap">
+          <h3>Plan twin, basement suite (from A-101 p.2)</h3>
+          <svg id="plan" viewBox="-30 -34 470 318" role="img" aria-label="Interactive basement suite plan with numbered code issues"></svg>
+          <div class="legend">
+            <span><i class="sw" style="background:#eb5757"></i>party wall: issue</span>
+            <span><i class="sw" style="background:#f2c94c"></i>variance path</span>
+            <span><i class="sw" style="background:#cfcfd4"></i>exterior wall</span>
+            <span><i class="sw" style="background:#4cb782"></i>path to exterior door</span>
+            <span>SA = smoke alarm</span>
+          </div>
+          <h3 style="margin-top:14px">Facts, each with its source</h3>
+          <div class="facts">
+            <div class="fact"><span>Address, legal description</span><span class="tag">read: A-001 title block</span></div>
+            <div class="fact"><span>4 houses, each with a secondary suite</span><span class="tag">you confirmed</span></div>
+            <div class="fact"><span>Suite floor area 60 m²</span><span class="tag">computed from plan</span></div>
+            <div class="fact"><span>Sprinklers: none shown</span><span class="tag">read: A-101, A-301</span></div>
+            <div class="fact"><span>Ceiling between the two dwelling units</span><span class="tag unk">unknown: next question</span></div>
+          </div>
+          <div class="fnote">Nothing is filled silently. Unknowns stay visible and are asked only when they change a requirement (here, which route in 9.10.9.16. applies).</div>
+        </div>
+        <div class="pane">
+          <h3>Pre-flight check</h3>
+          <div class="summary" id="summary"></div>
+          <div class="issues" id="issues"></div>
+          <div class="detail" id="detail"></div>
+        </div>
+      </div>
+      <div class="gate" id="gate"></div>
+      <div class="disclaim">Batatis prepares and checks the application. It never says a design is safe or compliant; professionals and the Safety Codes Officer decide.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>How it works</h2>
+    <p class="lede">Models propose; deterministic code and people decide. Each stage says who is trusted for it. Results use the NRC’s four states: Meets, Does not meet, Information not available, Uncertain.</p>
+    <div class="pipe" id="pipe"></div>
+  </section>
+
+  <section>
+    <h2>Where Alberta’s variances actually are</h2>
+    <p class="lede">Five Part 9 fire-protection articles make up 81% of building-article variances registered in Alberta in the first half of 2026. All five turn on things the drawings show: limiting distance, exposing building faces, soffits, party walls, and ducts crossing rated assemblies.</p>
+    <div class="viz">
+      <div class="chart-head">
+        <div>
+          <div class="chart-title">Building-article variances registered, Q1–Q2 2026</div>
+          <div class="chart-sub">3,088 article entries; one variance can vary several articles</div>
+        </div>
+        <button class="tv" id="tvbtn2" aria-pressed="false">Show table</button>
+      </div>
+      <div class="bars" id="bars"></div>
+      <div id="tview2" hidden></div>
+      <div class="vnote">Source: Safety Codes Council data hub, public report “Variances Registered Q1–Q2 2026” (read 2026-10-20). Article titles from NBC(AE) 2023, 2nd printing. The Council records which articles were varied, not the supporting documents.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Evidence: screen every article instead of searching for a few</h2>
+    <p class="lede">Measured today on 53 public Alberta precedents (17 STANDATA variances, 3 Calgary SPVs, 24 interpretations, 9 bulletins) against all 2,080 Division B articles of NBC(AE) 2023, 2nd printing. Gold labels are the articles each precedent cites; the protected team eval set was not used.</p>
+    <div class="viz" id="viz">
+      <div class="kpis">
+        <div class="kpi"><div class="l">Right article ranked first</div><div class="v">66%<small>vs 32%</small></div><div class="d">Keyword search, then Jev rerank, vs keyword search alone</div></div>
+        <div class="kpi"><div class="l">Governing articles in top 50</div><div class="v">88%<small>vs 77%</small></div><div class="d">Jev screens all 2,080 articles, vs keyword search</div></div>
+        <div class="kpi"><div class="l">Kept at p ≥ 0.10</div><div class="v">96.5%</div><div class="d">of governing articles, while passing on 15% of the code (311 articles on average)</div></div>
+        <div class="kpi"><div class="l">Screening cost per project</div><div class="v">$0.016</div><div class="d">0.38M input tokens at $0.042 per million; 20 requests, about 1.6 s with 8 in parallel</div></div>
+      </div>
+      <div class="chart-head">
+        <div>
+          <div class="chart-title">Share of governing articles found within the top k</div>
+          <div class="chart-sub">Recall at depth k, 53 cases, 84 gold articles</div>
+        </div>
+        <button class="tv" id="tvbtn" aria-pressed="false">Show table</button>
+      </div>
+      <div class="clegend" id="clegend"></div>
+      <div class="chartbox" id="chartbox">
+        <svg id="chart" role="img" aria-label="Line chart of recall at depth k for three pipelines"></svg>
+        <div class="tip" id="tip" role="status" aria-live="polite"></div>
+      </div>
+      <div id="tview" hidden></div>
+      <div class="vnote">Keyword search is SQLite FTS5 BM25 over the code database. Jev = TypeSafe jev-latest decision model, one yes/no judgment per article (“this article states a requirement that directly governs the situation”). Recall is a lower bound: several misses are context references in interpretations rather than governing provisions.</div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  function h(tag, attrs, kids) {
+    var el = document.createElement(tag);
+    if (attrs) for (var k in attrs) {
+      if (attrs[k] == null || attrs[k] === false) continue;
+      if (k === "class") el.className = attrs[k];
+      else if (k === "text") el.textContent = attrs[k];
+      else if (k.slice(0, 2) === "on") el.addEventListener(k.slice(2), attrs[k]);
+      else el.setAttribute(k, attrs[k]);
+    }
+    (kids || []).forEach(function (c) { if (c != null) el.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return el;
+  }
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function s(tag, attrs, text) {
+    var el = document.createElementNS(SVGNS, tag);
+    for (var k in attrs) el.setAttribute(k, attrs[k]);
+    if (text != null) el.textContent = text;
+    return el;
+  }
+
+  /* ------------------------------ state ------------------------------ */
+  var COLORS = { blocking: "#eb5757", warning: "#f2c94c", pending: "#8a8a8e", done: "#4cb782" };
+  var st = { sel: 1, winW: 640, winH: 460, smoke: false, inter: null, wallPath: null };
+
+  function windowArea() { return st.winW * st.winH / 1e6; }
+  function windowOk() { return windowArea() >= 0.35 && Math.min(st.winW, st.winH) >= 380; }
+
+  function issues() {
+    return [
+      { id: 1, title: "Bedroom window W1 too small to escape through",
+        status: windowOk() ? "done" : "blocking",
+        stLabel: windowOk() ? "Fixed in design" : "Blocking", result: windowOk() ? "Meets (after your change)" : "Does not meet",
+        sub: windowOk() ? "Opening " + windowArea().toFixed(2) + " m², meets 0.35 m²" : "Opening " + windowArea().toFixed(2) + " m², needs 0.35 m²" },
+      { id: 2, title: "Party wall must be a firewall in a 4-house row",
+        status: st.wallPath ? "done" : "warning",
+        stLabel: st.wallPath === "variance" ? "Variance drafted" : st.wallPath === "redesign" ? "Redesign chosen" : "Choose a path", result: st.wallPath === "variance" ? "Does not meet: alternative solution drafted" : st.wallPath === "redesign" ? "Meets once the firewall is detailed" : "Does not meet",
+        sub: st.wallPath === "variance" ? "Using Calgary SPV-006, 3 items to confirm" : st.wallPath === "redesign" ? "Wall type P1 changed to firewall" : "Drawings show a 1 h fire separation" },
+      { id: 3, title: "Smoke alarms: bedroom and interconnection",
+        status: (st.smoke && st.inter === "yes") ? "done" : (st.inter === "no" ? "blocking" : "warning"),
+        stLabel: (st.smoke && st.inter === "yes") ? "Resolved" : (st.inter === "no" ? "Blocking" : "Missing item"), result: (st.smoke && st.inter === "yes") ? "Meets (your answer, to confirm on electrical drawings)" : (st.inter === "no" ? "Does not meet" : "Information not available"),
+        sub: (!st.smoke ? "No alarm shown in the bedroom" : "Alarm added to plan") + (st.inter === null ? "; 1 question" : st.inter === "unsure" ? "; electrician to confirm" : st.inter === "no" ? "; not interconnected" : "") },
+      { id: 4, title: "Sound rating of separating assemblies not stated",
+        status: "pending", stLabel: "Needs evidence", result: "Information not available",
+        sub: "Name a tested assembly or attach test data" }
+    ];
+  }
+
+  /* ------------------------------ plan ------------------------------ */
+  var M = 40; // px per metre
+  function X(m) { return m * M; } function Y(m) { return m * M; }
+  function drawPlan() {
+    var svg = document.getElementById("plan");
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var I = issues();
+    var stat = {}; I.forEach(function (i) { stat[i.id] = i.status; });
+    // floor
+    svg.appendChild(s("rect", { x: 0, y: 0, width: X(10), height: Y(6), fill: "#151517" }));
+    // rooms
+    var rooms = [
+      { x: 0, y: 0, w: 2.4, h: 2.2, n: "Mech." },
+      { x: 2.4, y: 0, w: 2.2, h: 2.2, n: "Bath" },
+      { x: 0, y: 2.2, w: 6.4, h: 2.6, n: "Living / kitchen" },
+      { x: 0.3, y: 4.8, w: 3.0, h: 1.2, n: "Stair up" },
+      { x: 6.4, y: 0, w: 3.6, h: 3.6, n: "Bedroom" },
+      { x: 6.4, y: 3.6, w: 3.6, h: 2.4, n: "Entry / hall" }
+    ];
+    rooms.forEach(function (r) {
+      svg.appendChild(s("rect", { x: X(r.x), y: Y(r.y), width: X(r.w), height: Y(r.h), fill: "none", stroke: "#3a3a3f", "stroke-width": 1.5 }));
+      svg.appendChild(s("text", { x: X(r.x + r.w / 2), y: Y(r.y + r.h / 2) + 4, "text-anchor": "middle", fill: "#a7a7ad", "font-size": 11 }, r.n));
+    });
+    // stair treads
+    for (var t = 0; t < 10; t++) svg.appendChild(s("line", { x1: X(0.3 + t * 0.3), y1: Y(4.8), x2: X(0.3 + t * 0.3), y2: Y(6.0), stroke: "#2c2c30", "stroke-width": 1 }));
+    // exterior walls (front x=0, rear x=10)
+    svg.appendChild(s("line", { x1: 0, y1: 0, x2: 0, y2: Y(6), stroke: "#cfcfd4", "stroke-width": 6 }));
+    svg.appendChild(s("line", { x1: X(10), y1: 0, x2: X(10), y2: Y(6), stroke: "#cfcfd4", "stroke-width": 6 }));
+    // party walls (top y=0, bottom y=6)
+    var pw = stat[2] === "done" ? (st.wallPath === "redesign" ? "#4cb782" : "#f2c94c") : "#eb5757";
+    svg.appendChild(s("line", { x1: -3, y1: 0, x2: X(10) + 3, y2: 0, stroke: pw, "stroke-width": 8 }));
+    svg.appendChild(s("line", { x1: -3, y1: Y(6), x2: X(10) + 3, y2: Y(6), stroke: pw, "stroke-width": 8 }));
+    svg.appendChild(s("text", { x: X(5), y: -12, "text-anchor": "middle", fill: "#85858b", "font-size": 10 }, "party wall P1 to unit 1"));
+    svg.appendChild(s("text", { x: X(5), y: Y(6) + 22, "text-anchor": "middle", fill: "#85858b", "font-size": 10 }, "party wall P1 to unit 3"));
+    // window W1 on rear wall, width scales with slider
+    var wm = st.winW / 1000, wy = 1.8 - wm / 2;
+    svg.appendChild(s("rect", { x: X(10) - 4, y: Y(wy), width: 8, height: Y(wm), fill: "#0c0c0d", stroke: stat[1] === "done" ? "#4cb782" : "#eb5757", "stroke-width": 2 }));
+    svg.appendChild(s("text", { x: X(10) + 10, y: Y(1.8) + 4, fill: "#a7a7ad", "font-size": 10 }, "W1"));
+    // doors
+    svg.appendChild(s("path", { d: "M" + X(6.4) + " " + Y(2.6) + " a " + X(0.8) + " " + X(0.8) + " 0 0 0 " + (-X(0.8)) + " " + X(0.8), fill: "none", stroke: "#6a6a70", "stroke-width": 1 }));
+    svg.appendChild(s("rect", { x: X(10) - 4, y: Y(4.9), width: 8, height: Y(0.9), fill: "#0c0c0d", stroke: "#cfcfd4", "stroke-width": 1.5 }));
+    svg.appendChild(s("text", { x: X(10) + 10, y: Y(5.35) + 4, fill: "#a7a7ad", "font-size": 10 }, "D1"));
+    // egress path bedroom -> D1
+    svg.appendChild(s("polyline", { points: [X(8.2), Y(2.45), X(8.2), Y(3.0), X(6.9), Y(3.0), X(6.9), Y(5.35), X(9.7), Y(5.35)].join(" "), fill: "none", stroke: "#4cb782", "stroke-width": 2, "stroke-dasharray": "4 4", "stroke-linecap": "round" }));
+    // smoke alarms
+    var alarms = [[4.9, 2.75], [8.95, 4.0]];
+    if (st.smoke) alarms.push([9.2, 0.75]);
+    alarms.forEach(function (a) {
+      svg.appendChild(s("circle", { cx: X(a[0]), cy: Y(a[1]), r: 9, fill: "#0c0c0d", stroke: "#cfcfd4", "stroke-width": 1.2 }));
+      svg.appendChild(s("text", { x: X(a[0]), y: Y(a[1]) + 3.5, "text-anchor": "middle", fill: "#cfcfd4", "font-size": 8.5, "font-weight": 600 }, "SA"));
+    });
+    // pins
+    var pins = { 1: [10.0, 0.75], 2: [1.2, 0.0], 3: [7.2, 0.8], 4: [5.0, 6.0] };
+    I.forEach(function (i) {
+      var p = pins[i.id], g = s("g", { tabindex: 0, role: "button", "aria-label": "Issue " + i.id + ": " + i.title, style: "cursor:pointer" });
+      if (st.sel === i.id) g.appendChild(s("circle", { cx: X(p[0]), cy: Y(p[1]), r: 15, fill: "none", stroke: "#e6e6e6", "stroke-width": 1.5 }));
+      g.appendChild(s("circle", { cx: X(p[0]), cy: Y(p[1]), r: 11, fill: COLORS[i.status], stroke: "#0c0c0d", "stroke-width": 2 }));
+      g.appendChild(s("text", { x: X(p[0]), y: Y(p[1]) + 4, "text-anchor": "middle", fill: "#111", "font-size": 11, "font-weight": 700 }, String(i.id)));
+      g.addEventListener("click", function () { select(i.id); });
+      g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(i.id); } });
+      svg.appendChild(g);
+    });
+  }
+
+  /* ---------------------------- inspector ---------------------------- */
+  function quote(text, cite) { return h("blockquote", { class: "quote" }, [text, h("span", { class: "cite", text: cite })]); }
+  function source(label, kind) { return h("div", { class: "src" }, [h("span", { class: "tag", text: kind }), label]); }
+
+  function detail() {
+    var d = document.getElementById("detail"); d.textContent = "";
+    var i = issues().filter(function (x) { return x.id === st.sel; })[0];
+    d.appendChild(h("h4", { text: i.id + ". " + i.title }));
+    d.appendChild(h("div", { class: "src", id: "chkres" }, [h("span", { class: "tag", text: "Check result" }), h("span", { text: i.result })]));
+    if (i.id === 1) {
+      var ws = source("Clear opening " + st.winW + " × " + st.winH + " mm = " + windowArea().toFixed(2) + " m², window schedule A-101 p.2", "read from drawing");
+      ws.id = "winsrc"; d.appendChild(ws);
+      d.appendChild(quote("“The window referred to in Sentence (1) shall a) provide an unobstructed opening of not less than 0.35 m² in area with no dimension less than 380 mm …”",
+        "NBC(AE) 2023 p2, Div B, Sentence 9.9.10.1.(2) [PDF p.873]"));
+      var out = h("span", { class: "mono", text: windowArea().toFixed(2) + " m²" });
+      var range = h("input", { type: "range", min: 500, max: 1000, step: 10, value: st.winW, "aria-label": "Clear width of window W1 in millimetres" });
+      range.addEventListener("input", function () { st.winW = +range.value; render(false); out.textContent = windowArea().toFixed(2) + " m²"; });
+      d.appendChild(h("div", { class: "lbl", text: "Try it: clear width of W1 (height " + st.winH + " mm)" }));
+      d.appendChild(h("div", { class: "slider" }, [range, out]));
+      d.appendChild(h("div", { class: "lbl", text: "Other paths in the same article" }));
+      d.appendChild(h("ul", { class: "ck" }, [
+        h("li", { text: "Use an exterior door from the bedroom (Sentence 9.9.10.1.(1): “outside window or exterior door”)" }),
+        h("li", { text: "Sprinkler the suite (Sentence 9.9.10.1.(1) applies “Except where the suite is sprinklered”)" })
+      ]));
+    }
+    if (i.id === 2) {
+      d.appendChild(source("4 houses, each with a secondary suite, A-001 cover sheet", "confirmed fact"));
+      d.appendChild(source("Wall type P1 = 1 h fire separation, A-301", "read from drawing"));
+      d.appendChild(quote("“Where a building of residential occupancy contains more than 2 houses, a party wall that separates any 2 adjacent houses with a secondary suite from the rest of the building shall be constructed as a firewall …”",
+        "NBC(AE) 2023 p2, Div B, Sentence 9.10.11.2.(2) [PDF p.889]"));
+      d.appendChild(h("div", { class: "src" }, [h("span", { class: "tag", text: "Alberta data" }), "Article 9.10.11.2. is the 2nd most-varied article in Alberta: 366 of 3,088 building-article variances registered Q1–Q2 2026"]));
+      d.appendChild(h("div", { class: "lbl", text: "Precedent found" }));
+      d.appendChild(h("div", { class: "src" }, [h("span", { class: "tag", text: "Calgary SPV-006" }), "Firewall in a Rowhouse with Secondary Suites, posted 2025-06-19: a compartmentation, egress and service-protection package instead of the firewall"]));
+      d.appendChild(h("div", { class: "btns" }, [
+        h("button", { class: "btn" + (st.wallPath === "redesign" ? " primary" : ""), "aria-pressed": String(st.wallPath === "redesign"), onclick: function () { st.wallPath = "redesign"; render(true); }, text: "Redesign as firewall" }),
+        h("button", { class: "btn" + (st.wallPath === "variance" ? " primary" : ""), "aria-pressed": String(st.wallPath === "variance"), onclick: function () { st.wallPath = "variance"; render(true); }, text: "Draft variance with SPV-006" })
+      ]));
+      if (st.wallPath === "variance") {
+        d.appendChild(h("div", { class: "lbl", text: "Section C, filled by lookup (not by the AI)" }));
+        var tb = h("table", { class: "sc" }, [
+          h("thead", {}, [h("tr", {}, [h("th", { text: "Provision" }), h("th", { text: "Function" }), h("th", { text: "Objective" })])]),
+          h("tbody", {}, [
+            h("tr", {}, [h("td", { class: "mono", text: "9.10.11.2.(2)" }), h("td", { text: "F03 To retard the effects of fire on areas beyond its point of origin" }), h("td", { text: "OS1.2 fire or explosion impacting areas beyond its point of origin" })]),
+            h("tr", {}, [h("td", { class: "mono", text: "9.10.11.2.(2)" }), h("td", { text: "F03" }), h("td", { text: "OP3.1 fire or explosion impacting areas beyond the building of origin" })])
+          ])
+        ]);
+        d.appendChild(tb);
+        d.appendChild(h("span", { class: "cite", text: "Attribution: NBC(AE) 2023 p2, Div B, Table 9.38.1.1. [PDF p.1128]. Intent text is shown separately and labelled “NBC 2020 Intent Statements, explanatory only”." }));
+        d.appendChild(h("div", { class: "lbl", text: "Section D and process items to confirm" }));
+        d.appendChild(h("ul", { class: "ck" }, [
+          h("li", { text: "Reference SPV-006 in the application; no deviations from it" }),
+          h("li", { text: "Suite and exit fire separations and support ratings as SPV-006 states" }),
+          h("li", { text: "HVAC drawings; protected doors and penetrations" }),
+          h("li", { text: "Risk assessment, mitigating measures, assumptions and limits: drafted from SPV-006 conditions, you confirm" })
+        ]));
+      }
+    }
+    if (i.id === 3) {
+      d.appendChild(source(st.smoke ? "Alarm added in the bedroom on the plan" : "No SA symbol inside the bedroom, A-101 p.2", st.smoke ? "your change" : "read from drawing"));
+      d.appendChild(quote("“… on any storey of a dwelling unit containing sleeping rooms, a smoke alarm is installed i) in each sleeping room …”",
+        "NBC(AE) 2023 p2, Div B, Sentence 9.10.19.3.(1) [PDF p.909]"));
+      d.appendChild(h("div", { class: "btns" }, [
+        h("button", { class: "btn" + (st.smoke ? "" : " primary"), disabled: st.smoke ? "disabled" : null, onclick: function () { st.smoke = true; render(true); }, text: st.smoke ? "Alarm added" : "Add alarm to plan" })
+      ]));
+      d.appendChild(quote("“Smoke alarms in a house with a secondary suite shall be wirelessly interconnected or interconnected by hard-wiring …”",
+        "NBC(AE) 2023 p2, Div B, Sentence 9.10.19.5.(2) [PDF p.910]"));
+      d.appendChild(h("div", { class: "lbl", text: "One question: are alarms in both dwelling units interconnected?" }));
+      var seg = h("div", { class: "seg", role: "group", "aria-label": "Interconnection answer" });
+      [["yes", "Yes"], ["no", "No"], ["unsure", "Not sure"]].forEach(function (o) {
+        seg.appendChild(h("button", { "aria-pressed": String(st.inter === o[0]), onclick: function () { st.inter = o[0]; render(true); }, text: o[1] }));
+      });
+      d.appendChild(seg);
+      if (st.inter === "unsure") d.appendChild(h("div", { class: "src", text: "Assigned to: electrician. The application stays open until answered." }));
+      if (st.inter === "no") d.appendChild(h("div", { class: "src", text: "Required for this building type: add interconnection to the electrical drawings." }));
+    }
+    if (i.id === 4) {
+      d.appendChild(source("No STC or ASTC value on wall type P1 or the suite ceiling, A-301", "read from drawing"));
+      d.appendChild(quote("“… a separating assembly and adjoining constructions, which together provide an apparent sound transmission class (ASTC) rating of not less than 47, or b) a separating assembly providing a sound transmission class (STC) rating of not less than 50 …”",
+        "NBC(AE) 2023 p2, Div B, Sentence 9.11.1.1.(1) [PDF p.912]"));
+      d.appendChild(h("div", { class: "lbl", text: "Evidence that would close this" }));
+      d.appendChild(h("ul", { class: "ck" }, [
+        h("li", { text: "Name the tested or listed assembly on A-301, or" }),
+        h("li", { text: "Attach a test report for the assembly (we check that its scope matches your wall)" })
+      ]));
+    }
+  }
+
+  function summaryAndList() {
+    var I = issues();
+    var sum = document.getElementById("summary"); sum.textContent = "";
+    var counts = { blocking: 0, warning: 0, pending: 0, done: 0 };
+    I.forEach(function (i) { counts[i.status]++; });
+    [["blocking", "blocking"], ["warning", "to decide"], ["pending", "needs evidence"], ["done", "resolved"]].forEach(function (c) {
+      sum.appendChild(h("span", { class: "pill" }, [h("i", { class: "dot", style: "background:" + COLORS[c[0]] }), counts[c[0]] + " " + c[1]]));
+    });
+    var list = document.getElementById("issues"); list.textContent = "";
+    I.forEach(function (i) {
+      list.appendChild(h("button", { class: "issue", "aria-pressed": String(st.sel === i.id), onclick: function () { select(i.id); } }, [
+        h("span", { class: "num", style: "background:" + COLORS[i.status], text: String(i.id) }),
+        h("span", {}, [h("span", { class: "t", text: i.title }), h("span", { class: "s", text: i.stLabel + " · " + i.sub })])
+      ]));
+    });
+    var gate = document.getElementById("gate"); gate.textContent = "";
+    var open = I.filter(function (i) { return i.status !== "done"; });
+    var btn = h("button", { class: "btn primary", text: "Export application (PDF)" });
+    if (open.length) { btn.setAttribute("disabled", ""); }
+    gate.appendChild(btn);
+    gate.appendChild(h("span", { class: "why", text: open.length ? "Disabled: " + open.length + " open item" + (open.length > 1 ? "s" : "") + " (" + open.map(function (i) { return "#" + i.id; }).join(", ") + "). The demo keeps #4 open on purpose: only real evidence closes it." : "Ready to export." }));
+  }
+
+  function select(id) { st.sel = id; render(true); }
+  function render(full) { drawPlan(); summaryAndList(); if (full !== false) detail(); else refreshWindowSource(); }
+  function refreshWindowSource() {
+    var srcEl = document.getElementById("winsrc"), resEl = document.getElementById("chkres");
+    if (srcEl && st.sel === 1) { srcEl.lastChild.textContent = "Clear opening " + st.winW + " × " + st.winH + " mm = " + windowArea().toFixed(2) + " m², window schedule A-101 p.2"; }
+    if (resEl && st.sel === 1) { resEl.lastChild.textContent = issues()[0].result; }
+  }
+
+  /* ----------------------------- pipeline ----------------------------- */
+  var stages = [
+    ["Drop", "Any file: PDF sets, DWG/IFC, scans, phone photos, emails. Every page is sorted by type.", ["Model + check"]],
+    ["Read", "CAD/IFC parsed exactly; vector PDFs rebuilt from linework; scans read by a vision model. Every value keeps its source box.", ["Exact where possible", "You confirm"]],
+    ["Resolve", "Address and dates → authority, code edition, local process and forms. Unsupported places say so.", ["Exact"]],
+    ["Screen", "Every provision judged against the building facts by a decision model (Jev today): ~2,000 yes/no calls per project in seconds.", ["Model, recall-first"]],
+    ["Verify", "A frontier model reads the shortlist in full; quotes must match the code database word for word.", ["Model + exact check"]],
+    ["Check", "Measurable rules (areas, widths, distances, counts) computed from plan geometry by tested code.", ["Exact"]],
+    ["Compose", "Variance Sections A–D: Section C by lookup, precedents, evidence ladder, professional triggers.", ["Exact + drafted", "You confirm"]],
+    ["Pre-flight & review", "Completeness gate, the reviewer’s view with source links, revision diffs, the reply letter.", ["SCO decides"]]
+  ];
+  var pipe = document.getElementById("pipe");
+  stages.forEach(function (sg, i) {
+    pipe.appendChild(h("div", { class: "stage" }, [
+      h("div", { class: "n", text: String(i + 1).padStart(2, "0") }),
+      h("div", { class: "h", text: sg[0] }),
+      h("div", { class: "d", text: sg[1] }),
+      h("div", { class: "who" }, sg[2].map(function (w) { return h("span", { text: w }); }))
+    ]));
+  });
+
+  /* ------------------------------ chart ------------------------------ */
+  var KS = [1, 3, 5, 10, 20, 50, 100, 200];
+  var SERIES = [
+    { key: "bm25", name: "Keyword search (BM25)", color: "var(--s1)", hex: "#3987e5", v: [0.23, 0.465, 0.531, 0.648, 0.72, 0.77, 0.818, 0.827] },
+    { key: "rerank", name: "Keyword top 60, Jev rerank", color: "var(--s2)", hex: "#d95926", v: [0.487, 0.629, 0.673, 0.73, 0.758, 0.77, 0.818, 0.827] },
+    { key: "screen", name: "Jev screens all 2,080, top 60 reranked", color: "var(--s3)", hex: "#199e70", v: [0.459, 0.638, 0.654, 0.717, 0.799, 0.881, 0.89, 0.909] }
+  ];
+  var lg = document.getElementById("clegend");
+  SERIES.forEach(function (sr) { lg.appendChild(h("span", {}, [h("i", { style: "background:" + sr.hex }), sr.name])); });
+
+  var box = document.getElementById("chartbox"), svgc = document.getElementById("chart"), tip = document.getElementById("tip");
+  var geo = {};
+  function drawChart() {
+    while (svgc.firstChild) svgc.removeChild(svgc.firstChild);
+    var W = box.clientWidth || 680, H = 250, pl = 40, pr = 150, pt = 12, pb = 30;
+    if (W < 520) pr = 16;
+    var iw = W - pl - pr, ih = H - pt - pb;
+    svgc.setAttribute("viewBox", "0 0 " + W + " " + H);
+    function xp(i) { return pl + iw * i / (KS.length - 1); }
+    function yp(v) { return pt + ih * (1 - v); }
+    geo = { xp: xp, yp: yp, pl: pl, iw: iw, W: W };
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (t) {
+      svgc.appendChild(s("line", { x1: pl, x2: pl + iw, y1: yp(t), y2: yp(t), stroke: t === 0 ? "#383835" : "#2c2c2a", "stroke-width": 1 }));
+      svgc.appendChild(s("text", { x: pl - 8, y: yp(t) + 4, "text-anchor": "end", fill: "#898781", "font-size": 10.5, style: "font-variant-numeric: tabular-nums" }, Math.round(t * 100) + "%"));
+    });
+    KS.forEach(function (k, i) {
+      svgc.appendChild(s("text", { x: xp(i), y: H - 10, "text-anchor": "middle", fill: "#898781", "font-size": 10.5, style: "font-variant-numeric: tabular-nums" }, "top " + k));
+    });
+    SERIES.forEach(function (sr) {
+      var pts = sr.v.map(function (v, i) { return xp(i) + "," + yp(v); }).join(" ");
+      svgc.appendChild(s("polyline", { points: pts, fill: "none", stroke: sr.hex, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    });
+    // end labels with leader lines when space allows
+    if (pr > 100) {
+      var ends = SERIES.map(function (sr) { return { sr: sr, y: yp(sr.v[sr.v.length - 1]) }; }).sort(function (a, b) { return a.y - b.y; });
+      var ly = ends.map(function (e) { return e.y; });
+      for (var j = 1; j < ly.length; j++) if (ly[j] - ly[j - 1] < 14) ly[j] = ly[j - 1] + 14;
+      ends.forEach(function (e, j) {
+        var x0 = pl + iw;
+        svgc.appendChild(s("circle", { cx: x0, cy: e.y, r: 4, fill: e.sr.hex, stroke: "#131315", "stroke-width": 2 }));
+        svgc.appendChild(s("line", { x1: x0 + 6, y1: e.y, x2: x0 + 16, y2: ly[j], stroke: "#555552", "stroke-width": 1 }));
+        svgc.appendChild(s("text", { x: x0 + 20, y: ly[j] + 4, fill: "#c3c2b7", "font-size": 10.5 }, Math.round(e.sr.v[e.sr.v.length - 1] * 100) + "% " + (e.sr.key === "screen" ? "screen all" : e.sr.key === "rerank" ? "rerank" : "keyword")));
+      });
+    }
+    var cross = s("line", { id: "cross", x1: 0, x2: 0, y1: pt, y2: pt + ih, stroke: "#6b6b68", "stroke-width": 1, opacity: 0 });
+    svgc.appendChild(cross);
+    var hit = s("rect", { x: pl - 12, y: pt, width: iw + 24, height: ih, fill: "transparent", tabindex: 0, "aria-label": "Chart hover area; use arrow keys to step through depths" });
+    svgc.appendChild(hit);
+    var cur = -1;
+    function show(i) {
+      cur = i; cross.setAttribute("x1", xp(i)); cross.setAttribute("x2", xp(i)); cross.setAttribute("opacity", 1);
+      tip.textContent = "";
+      tip.appendChild(h("div", { class: "tk", text: "Within top " + KS[i] }));
+      SERIES.slice().sort(function (a, b) { return b.v[i] - a.v[i]; }).forEach(function (sr) {
+        tip.appendChild(h("div", { class: "tr" }, [h("span", {}, [h("i", { style: "background:" + sr.hex }), sr.name]), h("b", { text: Math.round(sr.v[i] * 1000) / 10 + "%" })]));
+      });
+      var left = xp(i) + 12; if (left + 230 > W) left = xp(i) - 242;
+      tip.style.left = Math.max(0, left) + "px"; tip.style.top = "8px"; tip.style.opacity = 1;
+    }
+    function hide() { cross.setAttribute("opacity", 0); tip.style.opacity = 0; }
+    hit.addEventListener("pointermove", function (e) {
+      var r = svgc.getBoundingClientRect(), x = (e.clientX - r.left) * (W / r.width);
+      var i = Math.round((x - pl) / iw * (KS.length - 1)); i = Math.max(0, Math.min(KS.length - 1, i)); show(i);
+    });
+    hit.addEventListener("pointerleave", hide);
+    hit.addEventListener("focus", function () { show(cur < 0 ? 0 : cur); });
+    hit.addEventListener("blur", hide);
+    hit.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight") { e.preventDefault(); show(Math.min(KS.length - 1, cur + 1)); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); show(Math.max(0, cur - 1)); }
+    });
+  }
+  // table view
+  var tv = document.getElementById("tview"), tvb = document.getElementById("tvbtn");
+  var SHORT = { bm25: "Keyword", rerank: "Keyword + Jev rerank", screen: "Jev screen all" };
+  var table = h("table", { class: "tview" }, [
+    h("thead", {}, [h("tr", {}, [h("th", { text: "Within" })].concat(SERIES.map(function (sr) { return h("th", { text: SHORT[sr.key] }); })))]),
+    h("tbody", {}, KS.map(function (k, i) { return h("tr", {}, [h("td", { text: "top " + k })].concat(SERIES.map(function (sr) { return h("td", { text: Math.round(sr.v[i] * 1000) / 10 + "%" }); }))); }))
+  ]);
+  tv.appendChild(table);
+  tvb.addEventListener("click", function () {
+    var on = tv.hasAttribute("hidden"); if (on) tv.removeAttribute("hidden"); else tv.setAttribute("hidden", "");
+    tvb.setAttribute("aria-pressed", String(on)); tvb.textContent = on ? "Hide table" : "Show table";
+  });
+
+  var VAR = [
+    { id: "9.10.15.5.(8)", t: "Projecting roof soffits where limiting distance ≤ 0.45 m", n: 1501 },
+    { id: "9.10.11.2.", t: "Firewalls not required (party walls)", n: 366 },
+    { id: "9.10.13.13.", t: "Fire dampers", n: 251 },
+    { id: "9.10.14.2.", t: "Area and location of exposing building face", n: 218 },
+    { id: "9.10.14.5.", t: "Construction of exposing building face", n: 167 },
+    { id: "All other building articles", t: "", n: 3088 - 2503, other: true }
+  ];
+  var TOTAL = 3088, bars = document.getElementById("bars");
+  VAR.forEach(function (v) {
+    var pct = Math.round(v.n / TOTAL * 1000) / 10;
+    var row = h("div", { class: "brow" + (v.other ? " other" : ""), tabindex: 0, title: v.id + ": " + v.n + " (" + pct + "%)" }, [
+      h("div", { class: "blab" }, [v.other ? v.id : "Div B " + v.id, v.t ? h("small", { text: v.t }) : null]),
+      h("div", { class: "btrack" }, [h("div", { class: "bfill", style: "width:" + Math.max(0.6, v.n / 1501 * 78) + "%" }), h("span", { class: "bval", text: v.n.toLocaleString("en-CA") + " · " + pct + "%" })])
+    ]);
+    bars.appendChild(row);
+  });
+  var tv2 = document.getElementById("tview2"), tvb2 = document.getElementById("tvbtn2");
+  tv2.appendChild(h("table", { class: "tview" }, [
+    h("thead", {}, [h("tr", {}, [h("th", { text: "Article" }), h("th", { text: "Entries" }), h("th", { text: "Share" })])]),
+    h("tbody", {}, VAR.map(function (v) { return h("tr", {}, [h("td", { text: v.id }), h("td", { text: v.n.toLocaleString("en-CA") }), h("td", { text: (Math.round(v.n / TOTAL * 1000) / 10) + "%" })]); }))
+  ]));
+  tvb2.addEventListener("click", function () {
+    var on = tv2.hasAttribute("hidden"); if (on) tv2.removeAttribute("hidden"); else tv2.setAttribute("hidden", "");
+    tvb2.setAttribute("aria-pressed", String(on)); tvb2.textContent = on ? "Hide table" : "Show table";
+  });
+
+  render(true);
+  drawChart();
+  if (window.ResizeObserver) new ResizeObserver(function () { drawChart(); }).observe(box);
+  console.log("self-check", JSON.stringify({ windowArea: windowArea().toFixed(3), windowOk: windowOk(), issues: issues().map(function (i) { return i.status; }) }));
+})();
+</script>
+</body>
+</html>
