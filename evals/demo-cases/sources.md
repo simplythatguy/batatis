@@ -4,7 +4,7 @@
 
 Every code article, standard and STANDATA cited in the demo cases is listed here with how it was verified. The Data Nerd review (`DATA_NERD_REVIEW.md`, in this folder) is the cross-check behind this revision.
 **Verification levels**
-- **WEB**: the primary source was fetched on 2026-10-20 (MT) and the cited text read. Snapshots kept locally, not committed.
+- **WEB**: the primary source was fetched on 2026-10-20 (MT) and the cited text read. Snapshots were kept locally by the author and not committed.
 - **CODE-1P**: checked directly in the NBC(AE) 2023 1st printing by the Data Nerd review.
 - **RESEARCH**: from the Batatis research notes (branch `feat/build-foundations`). Their 2nd-printing page cites are unverified.
 - **TO VERIFY**: not confirmed. The cases phrase these generically and flag them.

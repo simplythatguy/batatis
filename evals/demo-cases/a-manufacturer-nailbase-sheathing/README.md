@@ -1,6 +1,6 @@
 # Case A: Manufacturer seeking acceptance of a novel insulating sheathing panel
 
-> **EXAMPLE DATA.** The company, product, people, addresses, test data and letters are all fictional. Code citations were checked against the NBC(AE) 2023 1st printing; 2nd-printing wording is unverified. See `../sources.md`.
+> **EXAMPLE DATA.** The company, product, people, addresses, test data and letters are all fictional. Code citations checked against the NBC(AE) 2023 1st printing. See `../sources.md`.
 
 This is a demo case. No loader reads it yet. Only files in `input/` are ever uploaded to the tool. This README contains the demo script and expected answers, so it is not uploaded. `expected/` is not uploaded. `presenter/known-gaps.md` is the presenter answer key.
 

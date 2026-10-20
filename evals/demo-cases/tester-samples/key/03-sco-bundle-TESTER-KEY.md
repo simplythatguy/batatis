@@ -1,3 +1,5 @@
+> **EXAMPLE DATA. Answer key.** Do not upload. Do not show to the tool or the participant.
+
 # Tester key for 03-sco-submission-bundle.pdf (do NOT upload)
 
 - A (VR-2026-031): appears admin-complete.

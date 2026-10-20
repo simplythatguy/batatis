@@ -31,7 +31,7 @@ For [`tester-samples/`](tester-samples/README.md), only the `01`–`03` bundle f
 [`tester-samples/`](tester-samples/README.md): fictional demo materials for user testing. Only the `01`–`03` bundle files are ever uploaded. `01` and `02` are applicant inputs. `03` is the planted-gap SCO submission bundle for the officer timing protocol in `docs/user-testing/` (Round 1b). [`key/03-sco-bundle-TESTER-KEY.md`](tester-samples/key/03-sco-bundle-TESTER-KEY.md) is the tester answer key.
 
 ## Verification legend (used in `sources.md`)
-- **WEB:** fetched from the official source on 2026-10-20; snapshots kept locally, not committed
+- **WEB:** fetched from the official source on 2026-10-20. Snapshots were kept locally by the author and not committed.
 - **CODE-1P:** checked in the NBC(AE) 2023 1st printing (free NRC PDF) by the Data Nerd review
 - **RESEARCH:** from the Batatis research notes (`feat/build-foundations`); their 2nd-printing page cites are unverified
 - **TO VERIFY:** not confirmed. Phrased generically in the cases.

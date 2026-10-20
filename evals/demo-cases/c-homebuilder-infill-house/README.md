@@ -1,6 +1,6 @@
 # Case C: Homebuilder with a non-standard infill house
 
-> **EXAMPLE DATA.** The people, companies, address and drawings are fictional. Code and STANDATA citations were checked against the NBC(AE) 2023 1st printing; 2nd-printing wording is unverified. See `../sources.md`.
+> **EXAMPLE DATA.** The people, companies, address and drawings are fictional. Code and STANDATA citations checked against the NBC(AE) 2023 1st printing. See `../sources.md`.
 
 This is a demo case. No loader reads it yet. Only files in `input/` are ever uploaded to the tool. This README contains the demo script and expected answers, so it is not uploaded. `expected/` is not uploaded. `presenter/known-gaps.md` is the presenter answer key.
 
@@ -35,6 +35,6 @@ A **2-storey single-family infill house** (about 210 m², no secondary suite, **
 7. **SCO role:** upload the draft → completeness review.
 
 ## Files
-- `input/`: the only files uploaded to the tool — project brief (md, html, pdf), drawing notes, window supplier note (EXAMPLE)
+- `input/`: the only files uploaded to the tool — `project-brief.md`, `project-brief.html`, `project-brief.pdf`, `drawing-notes.md`, `window-supplier-note-EXAMPLE.md`
 - `presenter/known-gaps.md`: presenter answer key (never upload)
 - `expected/`: intake summary, article shortlist, Section A–D draft, evidence plan, completeness checklist, SCO review, must-not

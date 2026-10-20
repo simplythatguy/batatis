@@ -1,6 +1,6 @@
 # Case B: General contractor with a firestop non-conformance found mid-construction
 
-> **EXAMPLE DATA.** The companies, people, address, products, listings and letters are all fictional. Code citations were checked against the NBC(AE) 2023 1st printing; 2nd-printing wording is unverified. See `../sources.md`.
+> **EXAMPLE DATA.** The companies, people, address, products, listings and letters are all fictional. Code citations checked against the NBC(AE) 2023 1st printing. See `../sources.md`.
 
 This is a demo case. No loader reads it yet. Only files in `input/` are ever uploaded to the tool. This README contains the demo script and expected answers, so it is not uploaded. `expected/` is not uploaded. `presenter/known-gaps.md` is the presenter answer key.
 

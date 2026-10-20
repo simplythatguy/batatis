@@ -4,7 +4,7 @@
 **Date:** 2026-10-12  **To:** "whoever approves building products in Alberta"
 
 ## What we want
-Our panel is selling in two other provinces *(claim not verified)*. We want **approval to sell it across Alberta** and a first **pilot house** in Edmonton this spring. Builders love it because vinyl siding nails **straight into the facer**, so there's no OSB and no strapping.
+Our panel is selling in two other provinces. We want **approval to sell it across Alberta** and a first **pilot house** in Edmonton this spring. Builders love it because vinyl siding nails **straight into the facer**, so there's no OSB and no strapping.
 
 ## The product (see the data sheet)
 - 50 mm rigid foam core with a 6 mm fibre-cement nail-base facer, factory-bonded. No wood content.
