@@ -26,8 +26,10 @@ Ask = Callable[[Any, Mapping[str, Mapping[str, Any]], float], Mapping[str, Any]]
 def jev_ask(model: str = JEV_MODEL) -> Ask:
     """The live adapter: vendored jevkit client, pinned model. Needs SSL_CERT_FILE=/etc/ssl/cert.pem on this Mac."""
     from .jevkit import client
+    client.refuse_deployed()
 
     def ask(state, questions, timeout):
+        client.refuse_deployed()
         return client.ask(state, questions, timeout=timeout, model=model, provider=JEV_PROVIDER)
     return ask
 

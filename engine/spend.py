@@ -17,13 +17,13 @@ reservations plus this estimate is within ``BATATIS_TOTAL_BUDGET_USD``
 (default 20). Postgres takes a transaction advisory lock in the statement
 before that insert, and holds it until commit, so concurrent instances cannot
 pass the check together. After the provider returns, the row is settled to the
-cost of the reported tokens, and never above the reservation. An error
-releases the reservation in ``finally``.
+cost of validated reported tokens. Ambiguous errors retain the full reservation;
+no automatic refund, retry, or age-based release is permitted.
 
-The input estimate uses tiktoken's ``o200k_base`` when that package imports.
-Otherwise it is ``ceil(character_count / 3)`` of the message JSON. Three
-characters per token is above a typical English rate of about four, so the
-fallback reserves more than the call is likely to bill.
+Only text messages and bounded JSON response formats are supported. Input is
+bounded by the UTF-8 bytes of the complete serialized request, plus framing
+allowance. Dated models and the standard service tier are pinned. Output is
+bounded in the actual request, not merely declared by the caller.
 
 No database, a database error, an unknown model, or a full cap refuses the
 call and leaves the offline path to answer. Those refusals are not HTTP 5xx.
@@ -36,12 +36,13 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import sqlite3
 import urllib.error
 import urllib.request
 from contextlib import closing
 from datetime import datetime, timezone
-from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+from decimal import Decimal, InvalidOperation, ROUND_CEILING, ROUND_FLOOR, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any, Mapping
 from urllib.parse import urlsplit, urlunsplit
@@ -62,6 +63,13 @@ MODEL_PRICES: dict[str, tuple[Decimal, Decimal]] = {
     'gpt-4.1-mini': (Decimal('0.40'), Decimal('1.60')),
     'gpt-4.1-mini-2025-04-14': (Decimal('0.40'), Decimal('1.60')),
 }
+_MODEL_SNAPSHOTS = {
+    'gpt-4.1': 'gpt-4.1-2025-04-14',
+    'gpt-4.1-mini': 'gpt-4.1-mini-2025-04-14',
+}
+_MAX_OUTPUT_TOKENS = 32_768
+_CONTEXT_TOKENS = 1_047_576
+_MAX_RESPONSE_BYTES = 2 * 1024 * 1024
 
 # Route names stored on ledger rows. Every live OpenAI call goes through
 # openai_chat_json in this file.
@@ -202,22 +210,38 @@ def total_cap_usd() -> Decimal | None:
     An unparseable or negative value is ``None``: callers refuse the model call.
     """
     raw = os.environ.get('BATATIS_TOTAL_BUDGET_USD')
-    if raw is None or not raw.strip():
+    if raw is None:
         return _DEFAULT_CAP
     try:
         cap = Decimal(raw.strip())
     except InvalidOperation:
         return None
-    if not cap.is_finite() or cap < 0:
+    if not cap.is_finite() or cap < 0 or cap > _DEFAULT_CAP:
         return None
     return cap
 
 
 def token_cost(model: str, input_tokens: int, output_tokens: int) -> Decimal:
     """USD for these token counts. Raises KeyError when ``model`` is not priced."""
-    inn, out = MODEL_PRICES[model]
+    inn, out = _prices(model)
+    if any(type(n) is not int or n < 0 for n in (input_tokens, output_tokens)):
+        raise ValueError('invalid token count')
     usd = (Decimal(input_tokens) * inn + Decimal(output_tokens) * out) / _SCALE
-    return usd.quantize(_PLACES, rounding=ROUND_HALF_UP)
+    return usd.quantize(_PLACES, rounding=ROUND_CEILING)
+
+
+def _prices(model: str) -> tuple[Decimal, Decimal]:
+    """Refuse unknown or corrupt prices, including alias/snapshot disagreement."""
+    if model not in {*_MODEL_SNAPSHOTS, *_MODEL_SNAPSHOTS.values()}:
+        raise KeyError(model)
+    rates = MODEL_PRICES[model]
+    if (not isinstance(rates, tuple) or len(rates) != 2 or
+            any(not isinstance(n, Decimal) or not n.is_finite() or n <= 0 for n in rates)):
+        raise ValueError('invalid pricing')
+    snapshot = _MODEL_SNAPSHOTS.get(model, model)
+    if rates != MODEL_PRICES.get(snapshot):
+        raise ValueError('inconsistent pricing')
+    return rates
 
 
 def sqlite_database_url(path: Path | str) -> str:
@@ -247,11 +271,49 @@ def database_url() -> str | None:
 
 
 def _usd_text(amount: Decimal) -> str:
-    return format(amount.quantize(_PLACES, rounding=ROUND_HALF_UP), '.6f')
+    if not amount.is_finite() or amount < 0:
+        raise LedgerUnavailable
+    return format(amount.quantize(_PLACES, rounding=ROUND_CEILING), '.6f')
 
 
 def _micro(amount: Decimal) -> int:
-    return int(amount.quantize(_PLACES, rounding=ROUND_HALF_UP) * _SCALE)
+    return int(Decimal(_usd_text(amount)) * _SCALE)
+
+
+def _cap_micro(cap: Decimal) -> int:
+    if not cap.is_finite() or not 0 <= cap <= _DEFAULT_CAP:
+        raise LedgerUnavailable
+    # Costs round up; the available cap must round down.
+    return int((cap * _SCALE).to_integral_value(rounding=ROUND_FLOOR))
+
+
+def _checked_totals(rows) -> tuple[Decimal, Decimal]:
+    """Validate legacy TEXT amounts before SQL can coerce bad data to zero.
+
+    Run under the reservation lock. A recorded overrun freezes further calls
+    instead of concealing an amount above its reservation.
+    """
+    settled = reserved = Decimal('0')
+    for estimate, actual, status in rows:
+        for amount in (estimate, actual):
+            if amount is not None and (not isinstance(amount, str) or
+                    re.fullmatch(r'(0|[1-9][0-9]{0,8})\.[0-9]{6}', amount) is None):
+                raise LedgerUnavailable
+        if estimate is None or status not in {'reserved', 'settled', 'released'}:
+            raise LedgerUnavailable
+        if status == 'settled':
+            if actual is None or Decimal(actual) > Decimal(estimate):
+                raise LedgerUnavailable
+            settled += Decimal(actual)
+        elif actual is not None:
+            raise LedgerUnavailable
+        elif status == 'reserved':
+            reserved += Decimal(estimate)
+    return settled, reserved
+
+
+def _validate_ledger(con) -> tuple[Decimal, Decimal]:
+    return _checked_totals(con.execute('SELECT est_usd, actual_usd, status FROM spend_ledger').fetchall())
 
 
 def _from_micro(micro: int) -> Decimal:
@@ -306,9 +368,10 @@ class _SqliteLedger:
                 self._ensure(con)
                 con.execute('BEGIN IMMEDIATE')
                 try:
+                    _validate_ledger(con)
                     row = con.execute(
                         SQLITE_RESERVE_SQL,
-                        (_stamp(), route, model, est, _micro(estimate), _micro(cap)),
+                        (_stamp(), route, model, est, _micro(estimate), _cap_micro(cap)),
                     ).fetchone()
                     con.execute('COMMIT')
                 except Exception:
@@ -349,16 +412,13 @@ class _SqliteLedger:
     def totals(self) -> tuple[Decimal, Decimal] | None:
         try:
             with closing(self._connect()) as con:
-                row = con.execute(f'SELECT {_USED_SETTLED}, {_USED_RESERVED} FROM spend_ledger').fetchone()
+                return _validate_ledger(con)
         except sqlite3.OperationalError as exc:
             if 'no such table' in str(exc).lower():
                 return Decimal('0'), Decimal('0')
             raise LedgerUnavailable from exc
         except sqlite3.Error as exc:
             raise LedgerUnavailable from exc
-        if row is None:
-            return Decimal('0'), Decimal('0')
-        return _from_micro(row[0] or 0), _from_micro(row[1] or 0)
 
 
 _USED_SETTLED = """
@@ -428,10 +488,14 @@ class _PostgresLedger:
         self._ensure_table()
 
         def fn(con):
+            # A pool/server default of REPEATABLE READ would make the cap's
+            # snapshot stale while waiting for the advisory lock.
+            con.execute('SET TRANSACTION ISOLATION LEVEL READ COMMITTED')
             con.execute(POSTGRES_LOCK_SQL, (_ADVISORY_LOCK,))
+            _validate_ledger(con)
             row = con.execute(
                 POSTGRES_RESERVE_SQL,
-                (_stamp(), route, model, est, _micro(estimate), _micro(cap)),
+                (_stamp(), route, model, est, _micro(estimate), _cap_micro(cap)),
             ).fetchone()
             con.commit()
             return None if row is None else int(row[0])
@@ -446,6 +510,7 @@ class _PostgresLedger:
 
     def _update(self, row_id: int, status: str, actual: str | None) -> None:
         def fn(con):
+            con.execute(POSTGRES_LOCK_SQL, (_ADVISORY_LOCK,))
             con.execute(
                 "UPDATE spend_ledger SET status=%s, actual_usd=%s WHERE id=%s AND status='reserved'",
                 (status, actual, row_id),
@@ -457,18 +522,14 @@ class _PostgresLedger:
     def totals(self) -> tuple[Decimal, Decimal] | None:
         def fn(con):
             try:
-                row = con.execute(
-                    f'SELECT {_USED_SETTLED}, {_USED_RESERVED} FROM spend_ledger'
-                ).fetchone()
+                totals = _validate_ledger(con)
             except Exception as exc:
                 con.rollback()
                 if _missing_ledger(exc):
                     return Decimal('0'), Decimal('0')
                 raise
             con.rollback()
-            if row is None:
-                return Decimal('0'), Decimal('0')
-            return _from_micro(row[0] or 0), _from_micro(row[1] or 0)
+            return totals
 
         return self._run(fn)
 
@@ -479,6 +540,8 @@ def open_ledger():
     if not url:
         raise LedgerUnavailable
     if url.startswith('sqlite:'):
+        if os.environ.get('VERCEL'):
+            raise LedgerUnavailable
         return _SqliteLedger(_sqlite_path(url))
     if url.startswith('postgresql://'):
         return _PostgresLedger(url)
@@ -496,17 +559,19 @@ def _usage_tokens(value: Any) -> tuple[int, int] | None:
             'input_tokens': getattr(usage, 'input_tokens', None),
             'output_tokens': getattr(usage, 'output_tokens', None),
         }
-    inn = usage.get('prompt_tokens', usage.get('input_tokens'))
-    out = usage.get('completion_tokens', usage.get('output_tokens'))
+    inn = usage.get('prompt_tokens')
+    if inn is None:
+        inn = usage.get('input_tokens')
+    out = usage.get('completion_tokens')
+    if out is None:
+        out = usage.get('output_tokens')
     if inn is None or out is None:
         return None
-    try:
-        inn_i, out_i = int(inn), int(out)
-    except (TypeError, ValueError):
+    if type(inn) is not int or type(out) is not int:
         return None
-    if inn_i < 0 or out_i < 0:
+    if inn < 0 or out < 0:
         return None
-    return inn_i, out_i
+    return inn, out
 
 
 class SpendError(Exception):
@@ -517,36 +582,89 @@ class SpendError(Exception):
 
 
 def live_provider_is_anthropic() -> bool:
-    """True when live mode is on and the configured provider is Anthropic."""
-    if os.environ.get('BATATIS_LIVE') != '1':
+    """Compatibility predicate: any non-OpenAI provider is refused in live/hosted mode."""
+    if os.environ.get('BATATIS_LIVE') != '1' and not os.environ.get('VERCEL'):
         return False
-    return (os.environ.get('BATATIS_LLM_PROVIDER') or '').strip().lower() == 'anthropic'
+    return (os.environ.get('BATATIS_LLM_PROVIDER') or 'openai').strip().lower() != 'openai'
 
 
-def estimate_input_tokens(messages: Any) -> int:
-    """Input tokens to reserve for these messages. At least 1.
+def _json_bytes(value: Any) -> bytes:
+    return json.dumps(value, ensure_ascii=False, separators=(',', ':'), allow_nan=False).encode('utf-8')
 
-    tiktoken ``o200k_base`` when that package imports. Otherwise
-    ``ceil(len(json) / 3)``. The character fallback is conservative: it counts
-    more tokens than a typical English rate of about four characters per token,
-    so the reservation is high rather than low.
+
+def estimate_input_tokens(messages: Any, response_format: dict | None = None, *,
+                          model: str = 'gpt-4.1-mini', max_completion_tokens: int = 8) -> int:
+    """Conservative text-only bound from the complete request, including schema.
+
+    A byte-level tokenizer cannot emit more tokens than source UTF-8 bytes.
+    Count all JSON fields, including schema, and add 4096 framing tokens plus
+    64 per message. No network tokenizer, character heuristic, or tools. The
+    request validator limits the accepted schema/message shape.
     """
-    try:
-        blob = json.dumps(messages, ensure_ascii=False, separators=(',', ':'), default=str)
-    except (TypeError, ValueError):
-        blob = str(messages)
-    counted = 0
-    try:
-        import tiktoken
-        counted = len(tiktoken.get_encoding('o200k_base').encode(blob))
-    except Exception:
-        counted = (len(blob) + 2) // 3
-    return max(1, counted)
+    payload = _payload(messages, model, max_completion_tokens, response_format)
+    return len(_json_bytes(payload)) + 4096 + 64 * len(messages)
+
+
+def _payload(messages, model: str, max_completion_tokens: int, response_format) -> dict:
+    if (type(max_completion_tokens) is not int or
+            not 1 <= max_completion_tokens <= _MAX_OUTPUT_TOKENS):
+        raise ValueError('invalid output bound')
+    if not isinstance(messages, list) or not 1 <= len(messages) <= 64:
+        raise ValueError('invalid messages')
+    for message in messages:
+        if (not isinstance(message, dict) or set(message) != {'role', 'content'} or
+                message['role'] not in {'system', 'developer', 'user', 'assistant'} or
+                not isinstance(message['content'], str)):
+            raise ValueError('text messages only')
+    payload = {
+        'model': _MODEL_SNAPSHOTS.get(model, model),
+        'messages': messages,
+        'max_completion_tokens': max_completion_tokens,
+        'service_tier': 'default',
+        'n': 1,
+        'store': False,
+    }
+    if response_format is not None:
+        if not isinstance(response_format, dict):
+            raise ValueError('invalid response format')
+        if response_format != {'type': 'json_object'}:
+            if (set(response_format) != {'type', 'json_schema'} or
+                    response_format['type'] != 'json_schema'):
+                raise ValueError('unsupported response format')
+            fmt = response_format['json_schema']
+            if (not isinstance(fmt, dict) or set(fmt) != {'name', 'strict', 'schema'} or
+                    not isinstance(fmt['name'], str) or not re.fullmatch(r'[A-Za-z0-9_-]{1,64}', fmt['name']) or
+                    fmt['strict'] is not True or not isinstance(fmt['schema'], dict)):
+                raise ValueError('invalid response schema')
+            # No remote/recursive refs or expansions outside the serialized bound.
+            def check_schema(node, depth=0):
+                if depth > 16:
+                    raise ValueError('schema too deep')
+                if isinstance(node, dict):
+                    if any(str(key).startswith('$') for key in node):
+                        raise ValueError('schema refs are unsupported')
+                    for value in node.values():
+                        check_schema(value, depth + 1)
+                elif isinstance(node, list):
+                    for value in node:
+                        check_schema(value, depth + 1)
+            check_schema(fmt['schema'])
+            if len(_json_bytes(response_format)) > 32_768:
+                raise ValueError('schema too large')
+        payload['response_format'] = response_format
+    # Serialize before reserving. This also isolates caller mutations from the
+    # request that was counted (including nested schema dictionaries).
+    return json.loads(_json_bytes(payload))
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
 
 
 def _post_chat(payload: dict, api_key: str) -> dict:
     """POST one chat completion. ``api_key`` is a header only and is not logged."""
-    data = json.dumps(payload).encode('utf-8')
+    data = _json_bytes(payload)
     request = urllib.request.Request(
         'https://api.openai.com/v1/chat/completions',
         data=data,
@@ -557,8 +675,13 @@ def _post_chat(payload: dict, api_key: str) -> dict:
         },
     )
     try:
-        with urllib.request.urlopen(request, timeout=60) as response:
-            raw = response.read()
+        # urllib performs no HTTP retries. Refuse redirects so this single
+        # reservation cannot turn into another request or leak authorization.
+        opener = urllib.request.build_opener(_NoRedirect())
+        with opener.open(request, timeout=60) as response:
+            raw = response.read(_MAX_RESPONSE_BYTES + 1)
+            if len(raw) > _MAX_RESPONSE_BYTES:
+                raise SpendError('openai response too large')
     except urllib.error.HTTPError as exc:
         raise SpendError('openai http ' + str(exc.code)) from None
     except Exception:
@@ -579,32 +702,32 @@ def _post_chat(payload: dict, api_key: str) -> dict:
 def openai_chat_json(messages, *, model: str, max_completion_tokens: int,
                      response_format: dict | None = None,
                      route: str = ROUTE_IDENTIFY_RERANK) -> KeyedResult:
-    """Reserve a worst-case estimate, post the chat request, then settle or release.
+    """One bounded, priced attempt. Unknown outcomes retain their full reservation.
 
-    This is the only OpenAI request function. Callers do not pass a client.
-    ``max_completion_tokens`` is required and is always sent. The reservation is
-    the input rate times the estimated input tokens plus the output rate times
-    ``max_completion_tokens``. Refusals return an offline result and do not post.
-    A provider error releases the reservation and raises ``SpendError`` (or the
-    error from the post). The API key is not logged.
+    Preflight refusals do not contact the provider. After sending begins every
+    exception, cancellation, timeout, refusal, malformed response, and failed
+    settlement stays charged at the reservation until billing reconciliation.
+    There are no hidden transport or SDK retries.
     """
     if live_provider_is_anthropic():
         raise SpendError('Live mode is OpenAI only.')
     if not live_enabled():
         return KeyedResult(offline=True, notice=None)
-    if model not in MODEL_PRICES:
+    try:
+        _prices(model)
+    except (KeyError, ValueError, TypeError):
         return KeyedResult(offline=True, notice=UNPRICED_NOTICE)
-    if isinstance(max_completion_tokens, bool) or not isinstance(max_completion_tokens, int):
-        return KeyedResult(offline=True, notice=LEDGER_NOTICE)
-    if max_completion_tokens < 0:
-        return KeyedResult(offline=True, notice=LEDGER_NOTICE)
-    if not isinstance(messages, list) or not messages:
-        return KeyedResult(offline=True, notice=LEDGER_NOTICE)
     cap = total_cap_usd()
     if cap is None:
         return KeyedResult(offline=True, notice=LEDGER_NOTICE)
-    input_est = estimate_input_tokens(messages)
-    estimate = token_cost(model, input_est, max_completion_tokens)
+    try:
+        payload = _payload(messages, model, max_completion_tokens, response_format)
+        input_est = len(_json_bytes(payload)) + 4096 + 64 * len(payload['messages'])
+        if input_est + max_completion_tokens > _CONTEXT_TOKENS:
+            raise ValueError('request exceeds context bound')
+        estimate = token_cost(model, input_est, max_completion_tokens)
+    except (ValueError, TypeError, OverflowError, RecursionError, InvalidOperation):
+        return KeyedResult(offline=True, notice=LEDGER_NOTICE)
     try:
         ledger = open_ledger()
         row_id = ledger.reserve(route, model, estimate, cap)
@@ -614,43 +737,41 @@ def openai_chat_json(messages, *, model: str, max_completion_tokens: int,
     if row_id is None:
         return KeyedResult(offline=True, notice=CAP_NOTICE)
 
-    value: dict | None = None
+    # The reservation is durable before this point. Do not refund on exceptions:
+    # even a connection/read/parse error can follow billable provider processing.
+    api_key = (os.environ.get('OPENAI_API_KEY') or '').strip()
+    value = _post_chat(payload, api_key)
+    if not isinstance(value, dict):
+        raise SpendError('invalid openai response')
+    if value.get('model') != payload['model']:
+        raise SpendError('openai model mismatch')
+    if value.get('service_tier') != 'default':
+        raise SpendError('openai service tier mismatch')
+    choices = value.get('choices') or []
+    if (not isinstance(choices, list) or len(choices) != 1 or
+            not isinstance(choices[0], dict) or
+            not isinstance(choices[0].get('message'), dict)):
+        raise SpendError('invalid openai choices')
+    spent = _usage_tokens(value)
     actual = estimate
-    call_error: BaseException | None = None
+    if spent is not None:
+        actual = token_cost(model, *spent)
+        if spent[0] > input_est or spent[1] > max_completion_tokens:
+            # Never clamp reported spend to hide an overrun. An over-reservation
+            # amount in the ledger freezes future calls for manual investigation.
+            try:
+                ledger.settle(row_id, max(actual, estimate))
+            except LedgerUnavailable:
+                log.warning('spend ledger unavailable')
+            raise SpendError('openai usage exceeded request bounds')
+    if choices[0].get('finish_reason') == 'refusal' or choices[0]['message'].get('refusal'):
+        raise SpendError('openai refused')
     try:
-        api_key = (os.environ.get('OPENAI_API_KEY') or '').strip()
-        payload: dict[str, Any] = {
-            'model': model,
-            'messages': messages,
-            'max_completion_tokens': max_completion_tokens,
-        }
-        if response_format is not None:
-            payload['response_format'] = response_format
-        value = _post_chat(payload, api_key)
-        returned = value.get('model')
-        if returned != model or returned not in MODEL_PRICES:
-            raise SpendError('openai model mismatch')
-        choices = value.get('choices') or []
-        if choices and isinstance(choices[0], dict) and choices[0].get('finish_reason') == 'refusal':
-            raise SpendError('openai refused')
-        spent = _usage_tokens(value)
-        if spent is not None:
-            actual = token_cost(model, spent[0], spent[1])
-            if actual > estimate:
-                actual = estimate
-    except Exception as exc:
-        call_error = exc
-    finally:
-        try:
-            if call_error is not None:
-                ledger.release(row_id)
-            else:
-                ledger.settle(row_id, actual)
-        except LedgerUnavailable:
-            # A failed settle leaves the reservation, which still counts the worst case.
-            log.warning('spend ledger unavailable')
-    if call_error is not None:
-        raise call_error
+        ledger.settle(row_id, actual)
+    except LedgerUnavailable:
+        # A failed/ambiguously committed settlement leaves at most the full
+        # reservation consumed. Returning the response cannot free that budget.
+        log.warning('spend ledger unavailable')
     return KeyedResult(offline=False, notice=None, value=value)
 
 
@@ -675,7 +796,7 @@ def _budget_status() -> BudgetStatus:
             if not path.exists():
                 totals = (Decimal('0'), Decimal('0'))
             else:
-                totals = _SqliteLedger(path).totals()
+                totals = open_ledger().totals()
         else:
             totals = open_ledger().totals()
     except LedgerUnavailable:
@@ -684,7 +805,9 @@ def _budget_status() -> BudgetStatus:
     if totals is None or cap is None:
         return BudgetStatus(live=live_enabled(), cap_usd=cap_json, spent_usd=None, remaining_usd=None)
     settled, reserved = totals
-    remaining = _cents(cap) - _cents(settled) - _cents(reserved)
+    if os.environ.get('VERCEL') and url and url.startswith('sqlite:'):
+        return BudgetStatus(live=live_enabled(), cap_usd=cap_json, spent_usd=None, remaining_usd=None)
+    remaining = (cap - settled - reserved).quantize(_CENTS, rounding=ROUND_FLOOR)
     if remaining < 0:
         remaining = Decimal('0.00')
     return BudgetStatus(

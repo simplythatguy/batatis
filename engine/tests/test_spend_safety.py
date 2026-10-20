@@ -2,6 +2,9 @@
 from decimal import Decimal
 import json
 import sqlite3
+import urllib.error
+import urllib.request
+from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
@@ -165,3 +168,181 @@ def test_default_identify_uses_query_and_validated_corpus_ids(tmp_path, monkeypa
     assert response.json()['hits'] == ['9.9.10.1.', '9.10.15.4.']
     assert 'soffit fixture' in json.dumps(seen[0]['messages'])
     assert seen[0]['response_format']['type'] == 'json_schema'
+
+
+@pytest.mark.parametrize('out', [0, -1, True, 1.5, 32_769])
+def test_invalid_output_limit_never_reaches_transport(tmp_path, monkeypatch, out):
+    _prepare(tmp_path, monkeypatch)
+    seen = []
+    monkeypatch.setattr(spend, '_post_chat', lambda payload, key: seen.append(payload))
+    result = spend.openai_chat_json(_messages(), model=MODEL, max_completion_tokens=out)
+    assert result.offline and not seen
+
+
+@pytest.mark.parametrize('usage', [
+    {'prompt_tokens': -1, 'completion_tokens': 1},
+    {'prompt_tokens': 1.9, 'completion_tokens': 1},
+    {'prompt_tokens': True, 'completion_tokens': 1},
+    {'prompt_tokens': '1', 'completion_tokens': '1'},
+    {},
+])
+def test_missing_or_untrusted_usage_consumes_the_whole_reservation(tmp_path, monkeypatch, usage):
+    path = _prepare(tmp_path, monkeypatch)
+    def post(payload, key):
+        reply = _reply(payload, 1, 1)
+        reply['usage'] = usage
+        return reply
+    monkeypatch.setattr(spend, '_post_chat', post)
+    assert not call().offline
+    row = _rows(path)[0]
+    assert row['actual_usd'] == row['est_usd']
+
+
+def test_responses_style_usage_objects_use_the_reported_tokens():
+    assert spend._usage_tokens(SimpleNamespace(usage=SimpleNamespace(input_tokens=2, output_tokens=3))) == (2, 3)
+
+
+def test_failed_settlement_keeps_the_reservation_and_refuses_a_retry(tmp_path, monkeypatch):
+    estimate = spend.token_cost(MODEL, spend.estimate_input_tokens(_messages()), 8)
+    path = _prepare(tmp_path, monkeypatch, cap=str(estimate))
+    seen = []
+    def post(payload, key):
+        seen.append(payload)
+        return _reply(payload, 1, 1)
+    def unavailable(*args):
+        raise spend.LedgerUnavailable
+    monkeypatch.setattr(spend, '_post_chat', post)
+    monkeypatch.setattr(spend._SqliteLedger, 'settle', unavailable)
+    assert not call().offline
+    assert call().notice == spend.CAP_NOTICE
+    assert len(seen) == 1 and _rows(path)[0]['status'] == 'reserved'
+
+
+def test_reported_overrun_is_recorded_in_full_and_freezes_future_calls(tmp_path, monkeypatch):
+    path = _prepare(tmp_path, monkeypatch)
+    seen = []
+    def post(payload, key):
+        seen.append(payload)
+        return _reply(payload, 40_000, 10_000)
+    monkeypatch.setattr(spend, '_post_chat', post)
+    with pytest.raises(spend.SpendError, match='bounds'):
+        call()
+    row = _rows(path)[0]
+    assert Decimal(row['actual_usd']) == spend.token_cost(MODEL, 40_000, 10_000)
+    assert Decimal(row['actual_usd']) > Decimal(row['est_usd'])
+    assert call().notice == spend.LEDGER_NOTICE
+    assert len(seen) == 1
+
+
+@pytest.mark.parametrize('fault', ['model', 'tier', 'missing_tier', 'refusal', 'choices', 'parse'])
+def test_post_send_errors_never_refund_the_attempt(tmp_path, monkeypatch, fault):
+    path = _prepare(tmp_path, monkeypatch)
+    def post(payload, key):
+        reply = _reply(payload, 1, 1)
+        if fault == 'model':
+            reply['model'] = 'gpt-4.1'
+        elif fault == 'tier':
+            reply['service_tier'] = 'priority'
+        elif fault == 'missing_tier':
+            reply.pop('service_tier')
+        elif fault == 'refusal':
+            reply['choices'][0]['message']['refusal'] = 'refused'
+        elif fault == 'choices':
+            reply['choices'] = []
+        else:
+            raise spend.SpendError('response was not JSON')
+        return reply
+    monkeypatch.setattr(spend, '_post_chat', post)
+    with pytest.raises(spend.SpendError):
+        call()
+    assert _rows(path)[0]['status'] == 'reserved'
+
+
+@pytest.mark.parametrize('status', [None, 302, 429, 500, 'timeout', 'bad_json'])
+def test_production_http_request_has_one_attempt_and_a_bounded_payload(tmp_path, monkeypatch, status):
+    path = _prepare(tmp_path, monkeypatch)
+    requests = []
+    handlers = []
+
+    class Response:
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            return False
+        def read(self, size):
+            assert size == spend._MAX_RESPONSE_BYTES + 1
+            if status == 'bad_json':
+                return b'invalid JSON'
+            return json.dumps(_reply(json.loads(requests[0].data), 1, 1)).encode()
+
+    class Opener:
+        def open(self, request, timeout):
+            requests.append(request)
+            assert timeout == 60 and request.method == 'POST'
+            assert request.full_url == 'https://' + 'api.' + 'openai.com/v1/chat/completions'
+            assert request.get_header('Authorization') == 'Bearer test-openai-key'
+            payload = json.loads(request.data)
+            assert payload['model'] == 'gpt-4.1-mini-2025-04-14'
+            assert payload['max_completion_tokens'] == 8 and payload['service_tier'] == 'default'
+            assert payload['n'] == 1 and payload['store'] is False
+            if isinstance(status, int):
+                raise urllib.error.HTTPError(request.full_url, status, 'synthetic', None, None)
+            if status == 'timeout':
+                raise TimeoutError('synthetic timeout')
+            return Response()
+
+    def build(*args):
+        handlers.extend(args)
+        return Opener()
+
+    monkeypatch.setattr(urllib.request, 'build_opener', build)
+    if status is None:
+        assert not call().offline
+        assert _rows(path)[0]['status'] == 'settled'
+    else:
+        with pytest.raises(spend.SpendError):
+            call()
+        assert _rows(path)[0]['status'] == 'reserved'
+    assert len(requests) == 1
+    assert len(handlers) == 1 and isinstance(handlers[0], spend._NoRedirect)
+    assert handlers[0].redirect_request(requests[0], None, 307, '', {}, 'https://example.test') is None
+
+
+@pytest.mark.parametrize('bad_output', [
+    {'hits': ['9.10.15.4.', '99.99.99.99.']},
+    {'hits': ['9.10.15.4.', '9.10.15.4.']},
+    {'hits': '9.10.15.4.'},
+    {'hits': [12]},
+    {'hits': ['9.10.15.4.'], 'accuracy': '9/11'},
+    'not JSON',
+])
+def test_invalid_rankings_return_keyword_fallback_without_leaking_output(tmp_path, monkeypatch, bad_output):
+    _prepare(tmp_path, monkeypatch)
+    reset_for_tests()
+    monkeypatch.setattr('engine.identify.corpus.bm25_rank', lambda *a, **k: ['9.10.15.4.'])
+    monkeypatch.setattr('engine.identify.corpus.articles', lambda *a: {
+        '9.10.15.4.': {'title': 'Fixture', 'text': 'Fixture text'},
+    })
+    def post(payload, key):
+        reply = _reply(payload, 1, 1)
+        reply['choices'][0]['message']['content'] = bad_output if isinstance(bad_output, str) else json.dumps(bad_output)
+        return reply
+    monkeypatch.setattr(spend, '_post_chat', post)
+    response = TestClient(create_app()).post('/identify', json={'query': 'soffit'})
+    assert response.status_code == 200
+    assert response.json()['label'] == 'keyword search, no AI'
+    assert response.json()['notice']
+    assert response.json()['hits'] == ['9.10.15.4.']
+    assert '99.99' not in response.text and 'accuracy' not in response.text
+
+
+def test_missing_corpus_never_spends_on_an_ungrounded_query(tmp_path, monkeypatch):
+    path = _prepare(tmp_path, monkeypatch)
+    reset_for_tests()
+    monkeypatch.setattr('engine.identify.corpus.bm25_rank', lambda *a, **k: ['9.10.15.4.'])
+    monkeypatch.setattr('engine.identify.corpus.articles', lambda *a: {})
+    seen = []
+    monkeypatch.setattr(spend, '_post_chat', lambda payload, key: seen.append(payload))
+    response = TestClient(create_app()).post('/identify', json={'query': 'soffit'})
+    assert response.status_code == 200 and response.json()['label'] == 'keyword search, no AI'
+    assert not seen and _rows(path) == []

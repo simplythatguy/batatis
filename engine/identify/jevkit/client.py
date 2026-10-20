@@ -233,6 +233,12 @@ def _close(connection: Any) -> None:
         pass
 
 
+def refuse_deployed() -> None:
+    """This unmetered research provider must never run in hosted/live Batatis."""
+    if os.environ.get('VERCEL') or os.environ.get('BATATIS_LIVE') == '1':
+        raise JevError('disabled_deployed', 'Live mode is OpenAI only.')
+
+
 def _http_transport(body: bytes, headers: Dict[str, str], timeout: float, url: str = ENDPOINT,
                     max_bytes: int = MAX_RESPONSE_BYTES) -> bytes:
     """POST one request over a pooled connection. Redirects are never followed.
@@ -242,6 +248,7 @@ def _http_transport(body: bytes, headers: Dict[str, str], timeout: float, url: s
     ``max_bytes`` is the caller's own ceiling on the reply: a feature that plans one small
     object should not be able to pull a megabyte because the client's default is higher.
     """
+    refuse_deployed()
     key, path = _origin(url)
     for attempt in (0, 1):
         connection = _POOL.borrow(key, timeout)
@@ -436,6 +443,7 @@ def ask(
     Raises ``JevError`` for anything the caller should not act on. ``timeout`` is a
     total wall-clock budget across retries, not a per-attempt one.
     """
+    refuse_deployed()
     if not questions:
         raise ValueError("no questions")
     # Where the shape is enforced. A caller that hand-builds a question dict used to reach the

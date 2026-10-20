@@ -129,10 +129,14 @@ def test_live_refuses_anthropic_provider(tmp_path, monkeypatch):
         'engine.identify.corpus.bm25_rank',
         lambda query, db_path, limit=20: ['9.10.15.4.'],
     )
+    monkeypatch.setattr('engine.identify.corpus.articles', lambda *args: {
+        '9.10.15.4.': {'title': 'Fixture', 'text': 'Fixture text'},
+    })
     response = TestClient(create_app()).post('/identify', json={'query': 'soffit'})
     assert response.status_code == 200
     body = response.json()
-    assert body['label'] == 'API fallback'
+    assert body['label'] == 'keyword search, no AI'
+    assert body['notice']
     assert body['hits'] == ['9.10.15.4.']
     assert seen == []
 
@@ -144,4 +148,4 @@ def test_cli_verifier_does_not_call_anthropic_when_live(monkeypatch):
     monkeypatch.setenv('ANTHROPIC_API_KEY', 'test-anthropic-key')
     trace: dict = {}
     assert _verify('a house', ENGINE / 'missing.sqlite', ['9.10.15.4.'], trace) is None
-    assert trace['verifier'].startswith('failed:')
+    assert trace['verifier'] == 'failed: RuntimeError'

@@ -16,8 +16,8 @@ from fastapi.testclient import TestClient
 from engine.api import create_app
 from engine.ccmc import CCMCRegistry
 from engine.identify_http import (
-    API_FALLBACK_LABEL, CODEDB_DOWNLOADS, IDENTIFY_MAX_OUTPUT, IDENTIFY_MODEL, KEYWORD_LABEL, MODEL_LABEL,
-    identify_messages,
+    CODEDB_DOWNLOADS, IDENTIFY_MAX_OUTPUT, IDENTIFY_MODEL, KEYWORD_LABEL, MODEL_LABEL,
+    identify_messages, identify_response_format,
 )
 from engine.llm_gate import SlidingWindow, reset_for_tests
 from engine.spend import LEDGER_NOTICE, estimate_input_tokens, openai_chat_json, token_cost
@@ -27,24 +27,19 @@ ROOT = Path(__file__).resolve().parents[2]
 MARKER = b'SQLite format 3'
 
 
-def test_engine_does_not_set_a_second_robots_or_notice_header():
-    """#24's http_guard owns X-Robots-Tag and X-Batatis-Notice (PII_NOTICE)."""
-    api = (ROOT / 'engine/api.py').read_text()
-    assert 'X-Robots-Tag' not in api
-    assert 'X-Batatis-Notice' not in api
-    assert not (ROOT / 'engine/privacy.py').exists()
+def test_spend_change_does_not_duplicate_the_shared_privacy_notice():
+    """#24 owns the shared notice. Its later integration must be allowed."""
     for banned in ('up to 30 days', 'cases stay until deleted', 'Cases do not expire'):
         assert banned not in (ROOT / 'docs/api-contract.md').read_text()
         assert banned not in (ROOT / 'docs/deploy.md').read_text()
     sidebar = (ROOT / 'web/src/App.tsx').read_text()
     assert 'DELETE /cases' not in sidebar
-    assert 'privacy-notice' not in sidebar
-    assert not (ROOT / 'web/src/privacy.ts').exists()
+    assert sidebar.count('privacy-notice') <= 1
     reset_for_tests()
     response = TestClient(create_app()).get('/status/budget')
     assert response.status_code == 200
-    assert 'x-batatis-notice' not in response.headers
-    assert 'x-robots-tag' not in response.headers
+    # Header text, purge, deletion, and canonical web/engine equality are tested
+    # by #24. Never require those headers/files to be absent on this branch.
 
 
 def test_delete_case_route_removes_the_case(tmp_path):
@@ -63,8 +58,6 @@ def test_delete_case_route_removes_the_case(tmp_path):
     deleted = http.delete(f'/cases/{case_id}')
     assert deleted.status_code == 204
     assert deleted.content == b''
-    assert 'x-robots-tag' not in deleted.headers
-    assert 'x-batatis-notice' not in deleted.headers
     missing = http.get(f'/cases/{case_id}')
     assert missing.status_code == 404
     assert missing.json()['detail'] == 'case not found'
@@ -88,7 +81,7 @@ def test_daily_budget_variable_does_not_limit_spend(tmp_path, monkeypatch):
     seen = []
     _install(monkeypatch, seen, completion=0)
     result = openai_chat_json(
-        [{'role': 'user', 'content': 'soffit'}], model='gpt-4.1-mini', max_completion_tokens=0)
+        [{'role': 'user', 'content': 'soffit'}], model='gpt-4.1-mini', max_completion_tokens=8)
     assert result.offline is False and len(seen) == 1
     gate = (ROOT / 'engine/llm_gate.py').read_text()
     spend = (ROOT / 'engine/spend.py').read_text()
@@ -102,7 +95,7 @@ def test_engine_codedb_paths_404_and_do_not_return_the_file(tmp_path, monkeypatc
     planted.write_bytes(MARKER + b'\x00not-for-download')
     monkeypatch.setenv('BATATIS_CODEDB', str(planted))
     client = TestClient(create_app())
-    for path in ('/codedb.sqlite', '/codedb/build/codedb.sqlite', '/api/codedb/build/codedb.sqlite'):
+    for path in CODEDB_DOWNLOADS:
         response = client.get(path)
         assert response.status_code == 404, path
         assert MARKER not in response.content
@@ -130,7 +123,7 @@ def _routed_status(path: str, dist: Path) -> tuple[int, bytes]:
 
 def test_vercel_routes_404_a_planted_codedb_sqlite(tmp_path):
     dist = tmp_path / 'dist'
-    for path in ('/codedb.sqlite', '/codedb/build/codedb.sqlite', '/api/codedb/build/codedb.sqlite'):
+    for path in CODEDB_DOWNLOADS:
         file = dist / path.lstrip('/')
         file.parent.mkdir(parents=True, exist_ok=True)
         file.write_bytes(MARKER + b'\x00planted')
@@ -152,7 +145,7 @@ def test_vercel_routes_404_a_planted_codedb_sqlite(tmp_path):
     server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
     Thread(target=server.serve_forever, daemon=True).start()
     try:
-        for path in ('/codedb.sqlite', '/codedb/build/codedb.sqlite', '/api/codedb/build/codedb.sqlite'):
+        for path in CODEDB_DOWNLOADS:
             with pytest.raises(urllib.error.HTTPError) as caught:
                 urllib.request.urlopen(f'http://127.0.0.1:{server.server_address[1]}{path}')
             assert caught.value.code == 404
@@ -161,20 +154,29 @@ def test_vercel_routes_404_a_planted_codedb_sqlite(tmp_path):
         server.shutdown()
 
 
+_ARTICLE_ID = '9.10.15.4.'
+_CANDIDATES = {_ARTICLE_ID: {'title': 'Fixture', 'text': 'Fixture text'}}
+
+
 def _identify_estimate(query: str):
     return token_cost(
-        IDENTIFY_MODEL, estimate_input_tokens(identify_messages(query)), IDENTIFY_MAX_OUTPUT)
+        IDENTIFY_MODEL, estimate_input_tokens(identify_messages(query, _CANDIDATES),
+            identify_response_format(list(_CANDIDATES)), max_completion_tokens=IDENTIFY_MAX_OUTPUT),
+        IDENTIFY_MAX_OUTPUT)
 
 
 def _install_identify(monkeypatch, seen, query: str):
-    reserved = estimate_input_tokens(identify_messages(query))
+    _bm25(monkeypatch)
+    reserved = estimate_input_tokens(identify_messages(query, _CANDIDATES),
+        identify_response_format(list(_CANDIDATES)), max_completion_tokens=IDENTIFY_MAX_OUTPUT)
 
     def post(payload, key):
         seen.append(payload)
         return {
             'model': payload['model'],
+            'service_tier': 'default',
             'usage': {'prompt_tokens': reserved, 'completion_tokens': IDENTIFY_MAX_OUTPUT},
-            'choices': [{'message': {'content': '{}'}}],
+            'choices': [{'finish_reason': 'stop', 'message': {'content': json.dumps({'hits': [_ARTICLE_ID]})}}],
         }
 
     monkeypatch.setattr('engine.spend._post_chat', post)
@@ -233,6 +235,7 @@ def _bm25(monkeypatch):
         'engine.identify.corpus.bm25_rank',
         lambda query, path, limit=20: ['9.10.15.4.'],
     )
+    monkeypatch.setattr('engine.identify.corpus.articles', lambda *args: _CANDIDATES)
 
 
 def test_identify_falls_back_to_bm25_when_the_ledger_is_unavailable(monkeypatch):
@@ -277,7 +280,7 @@ def test_identify_cap_fallback_keeps_the_bm25_label_and_the_notice(tmp_path, mon
 
 
 def test_identify_llm_error_falls_back_with_hits(tmp_path, monkeypatch):
-    """A provider failure is HTTP 200, label API fallback, and the BM25 hits."""
+    """A provider failure keeps its reservation and returns labelled BM25 hits."""
     reset_for_tests()
     path = _prepare(tmp_path, monkeypatch, cap='20')
     _bm25(monkeypatch)
@@ -290,17 +293,18 @@ def test_identify_llm_error_falls_back_with_hits(tmp_path, monkeypatch):
     response = http.post('/identify', json={'query': 'soffit limiting distance'})
     assert response.status_code == 200
     body = response.json()
-    assert body['label'] == API_FALLBACK_LABEL
-    assert body['label'] == 'API fallback'
+    assert body['label'] == KEYWORD_LABEL
+    assert body['notice']
     assert body['hits'] == ['9.10.15.4.']
     assert body['hits'] != []
     with sqlite3.connect(path) as con:
         statuses = [row[0] for row in con.execute('SELECT status FROM spend_ledger ORDER BY id')]
-    assert statuses == ['released']
+    assert statuses == ['reserved']
 
     def refuse(payload, key):
         return {
             'model': payload['model'],
+            'service_tier': 'default',
             'usage': {'prompt_tokens': 1, 'completion_tokens': 1},
             'choices': [{'message': {'refusal': 'no'}, 'finish_reason': 'refusal'}],
         }
@@ -308,11 +312,12 @@ def test_identify_llm_error_falls_back_with_hits(tmp_path, monkeypatch):
     monkeypatch.setattr('engine.spend._post_chat', refuse)
     again = http.post('/identify', json={'query': 'soffit limiting distance'})
     assert again.status_code == 200
-    assert again.json()['label'] == 'API fallback'
+    assert again.json()['label'] == KEYWORD_LABEL
+    assert again.json()['notice']
     assert again.json()['hits'] == ['9.10.15.4.']
     with sqlite3.connect(path) as con:
         statuses = [row[0] for row in con.execute('SELECT status FROM spend_ledger ORDER BY id')]
-    assert statuses == ['released', 'released']
+    assert statuses == ['reserved', 'reserved']
 
 
 def _offline_registry(tmp_path):
@@ -390,15 +395,17 @@ def test_sliding_window_evicts_expired_ips():
 def test_live_model_result_is_labelled_and_has_no_accuracy_field(tmp_path, monkeypatch):
     reset_for_tests()
     _prepare(tmp_path, monkeypatch, cap='20')
+    _bm25(monkeypatch)
 
     def post(payload, key):
         return {
             'model': payload['model'],
+            'service_tier': 'default',
             'usage': {'prompt_tokens': 10, 'completion_tokens': 2},
             'accuracy': '9/11',
             'score': '50/60',
             'text': 'held-out accuracy 9/11 and 50/60',
-            'choices': [{'message': {'content': 'held-out accuracy 9/11 and 50/60'}}],
+            'choices': [{'finish_reason': 'stop', 'message': {'content': json.dumps({'hits': [_ARTICLE_ID]})}}],
         }
 
     monkeypatch.setattr('engine.spend._post_chat', post)

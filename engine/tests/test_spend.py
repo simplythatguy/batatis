@@ -75,7 +75,8 @@ def _reply(payload, prompt, completion):
     return {
         'model': payload['model'],
         'usage': {'prompt_tokens': prompt, 'completion_tokens': completion},
-        'choices': [{'message': {'content': '{}'}}],
+        'service_tier': 'default',
+        'choices': [{'finish_reason': 'stop', 'message': {'content': '{}'}}],
     }
 
 
@@ -87,13 +88,14 @@ def _install(monkeypatch, seen, *, prompt=None, completion=0, reply=None):
         seen.append(payload)
         if reply is not None:
             return reply(payload)
-        used = estimate_input_tokens(payload['messages']) if prompt is None else prompt
+        used = estimate_input_tokens(payload['messages'], payload.get('response_format'),
+                                     model=payload['model'], max_completion_tokens=payload['max_completion_tokens']) if prompt is None else prompt
         return _reply(payload, used, completion)
 
     monkeypatch.setattr('engine.spend._post_chat', post)
 
 
-def _call(messages=None, *, model=_MODEL, max_completion_tokens=0, route=ROUTE_IDENTIFY_RERANK):
+def _call(messages=None, *, model=_MODEL, max_completion_tokens=8, route=ROUTE_IDENTIFY_RERANK):
     return openai_chat_json(
         messages if messages is not None else _messages(),
         model=model,
@@ -110,24 +112,24 @@ def test_under_cap_call_proceeds_and_is_settled(tmp_path, monkeypatch):
     reported_in = max(1, reserved_in // 2)
     _install(monkeypatch, seen, prompt=reported_in, completion=0)
     result = openai_chat_json(
-        messages, model=_MODEL, max_completion_tokens=0, route=ROUTE_IDENTIFY_RERANK)
+        messages, model=_MODEL, max_completion_tokens=8, route=ROUTE_IDENTIFY_RERANK)
     assert result.offline is False and result.notice is None and result.value['choices']
     assert len(seen) == 1
-    assert seen[0]['max_completion_tokens'] == 0
-    assert seen[0]['model'] == _MODEL
+    assert seen[0]['max_completion_tokens'] == 8
+    assert seen[0]['model'] == _MODEL + '-2025-04-14'
     rows = _rows(path)
     assert len(rows) == 1
     assert rows[0]['route'] == ROUTE_IDENTIFY_RERANK
     assert rows[0]['model'] == _MODEL
     assert rows[0]['status'] == 'settled'
-    assert rows[0]['est_usd'] == format(token_cost(_MODEL, reserved_in, 0), 'f')
+    assert rows[0]['est_usd'] == format(token_cost(_MODEL, reserved_in, 8), 'f')
     assert rows[0]['actual_usd'] == format(token_cost(_MODEL, reported_in, 0), 'f')
     assert Decimal(rows[0]['actual_usd']) <= Decimal(rows[0]['est_usd'])
 
 
 def test_reaching_the_cap_refuses_the_next_call_offline(tmp_path, monkeypatch):
     messages = _messages()
-    estimate = token_cost(_MODEL, estimate_input_tokens(messages), 0)
+    estimate = token_cost(_MODEL, estimate_input_tokens(messages), 8)
     path = _prepare(tmp_path, monkeypatch, cap=format(estimate, 'f'))
     seen = []
     _install(monkeypatch, seen, completion=0)
@@ -142,8 +144,8 @@ def test_reaching_the_cap_refuses_the_next_call_offline(tmp_path, monkeypatch):
 
 def test_concurrent_reservations_cannot_exceed_the_cap(tmp_path, monkeypatch):
     messages = _messages('x')
-    max_out = 250_000
-    reserved_in = estimate_input_tokens(messages)
+    max_out = 2_500
+    reserved_in = estimate_input_tokens(messages, max_completion_tokens=max_out)
     estimate = token_cost(_MODEL, reserved_in, max_out)
     path = _prepare(tmp_path, monkeypatch, cap=format(estimate * 2, 'f'))
     hold = threading.Event()
@@ -212,9 +214,9 @@ def test_oversized_prompt_is_refused_before_any_http_call(tmp_path, monkeypatch)
     assert _rows(path) == []
 
 
-def test_error_releases_the_reservation(tmp_path, monkeypatch):
+def test_error_retains_the_reservation(tmp_path, monkeypatch):
     messages = _messages()
-    estimate = token_cost(_MODEL, estimate_input_tokens(messages), 0)
+    estimate = token_cost(_MODEL, estimate_input_tokens(messages), 8)
     path = _prepare(tmp_path, monkeypatch, cap=format(estimate, 'f'))
 
     def boom(payload, key):
@@ -224,14 +226,12 @@ def test_error_releases_the_reservation(tmp_path, monkeypatch):
     with pytest.raises(RuntimeError, match='provider failed'):
         _call(messages)
     rows = _rows(path)
-    assert len(rows) == 1 and rows[0]['status'] == 'released'
-    assert budget_status().remaining_usd == float(estimate.quantize(Decimal('0.01')))
-
+    assert len(rows) == 1 and rows[0]['status'] == 'reserved'
     seen = []
     _install(monkeypatch, seen, completion=0)
-    result = _call(messages)
-    assert result.offline is False and len(seen) == 1
-    assert [row['status'] for row in _rows(path)] == ['released', 'settled']
+    assert _call(messages).notice == CAP_NOTICE
+    assert seen == []
+    assert [row['status'] for row in _rows(path)] == ['reserved']
 
 
 def test_returned_model_must_match_and_be_priced(tmp_path, monkeypatch):
@@ -246,7 +246,7 @@ def test_returned_model_must_match_and_be_priced(tmp_path, monkeypatch):
     with pytest.raises(SpendError, match='model mismatch'):
         _call()
     rows = _rows(path)
-    assert len(rows) == 1 and rows[0]['status'] == 'released'
+    assert len(rows) == 1 and rows[0]['status'] == 'reserved'
 
 
 def test_no_database_in_live_mode_fails_closed(tmp_path, monkeypatch):
@@ -287,13 +287,13 @@ def test_default_cap_is_20(tmp_path, monkeypatch):
     _install(monkeypatch, seen, prompt=35_000, completion=0)
     wide = _messages('x' * 200_000)
     assert estimate_input_tokens(wide) >= 35_000
-    result = openai_chat_json(wide, model=_MODEL, max_completion_tokens=0)
+    result = openai_chat_json(wide, model=_MODEL, max_completion_tokens=8)
     assert result.offline is False and len(seen) == 1
     status = budget_status()
     assert status.cap_usd == 20
     assert status.live is True
     assert status.spent_usd == 0.01
-    assert status.remaining_usd == 19.99
+    assert status.remaining_usd == 19.98
     assert path.exists()
 
 
@@ -378,12 +378,12 @@ def test_status_budget_route_hides_the_key_and_stays_200(tmp_path, monkeypatch):
     _install(monkeypatch, seen, prompt=35_000, completion=0)
     wide = _messages('x' * 200_000)
     assert estimate_input_tokens(wide) >= 35_000
-    openai_chat_json(wide, model=_MODEL, max_completion_tokens=0)
+    openai_chat_json(wide, model=_MODEL, max_completion_tokens=8)
     response = client.get('/status/budget')
     assert response.status_code == 200
     body = response.json()
     assert body['spent_usd'] == 0.01
-    assert body['remaining_usd'] == 19.99
+    assert body['remaining_usd'] == 19.98
     assert 'test-openai-key' not in response.text
 
     blocked = tmp_path / 'not-a-file'
@@ -431,17 +431,8 @@ def test_sqlite_url_helper_round_trip(tmp_path):
     assert _sqlite_path(sqlite_database_url(path)) == path.resolve()
 
 
-def test_character_estimate_is_ceil_of_chars_over_three(monkeypatch):
-    """The fallback is documented as conservative: ceil(chars / 3), at least 1."""
-    import builtins
-    real_import = builtins.__import__
-
-    def blocked(name, *args, **kwargs):
-        if name == 'tiktoken':
-            raise ImportError('tiktoken blocked')
-        return real_import(name, *args, **kwargs)
-
-    monkeypatch.setattr(builtins, '__import__', blocked)
-    messages = _messages('abcdef')  # json is longer than the six letters
-    blob_len = len(__import__('json').dumps(messages, ensure_ascii=False, separators=(',', ':')))
-    assert estimate_input_tokens(messages) == max(1, (blob_len + 2) // 3)
+def test_input_bound_counts_utf8_bytes_without_a_tokenizer():
+    import json
+    messages = _messages('é💥' * 20)
+    byte_count = len(json.dumps(messages, ensure_ascii=False).encode('utf-8'))
+    assert estimate_input_tokens(messages) > byte_count
