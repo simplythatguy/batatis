@@ -6,6 +6,9 @@
       "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
     }
   ],
+  "crons": [
+    { "path": "/api/retention/purge", "schedule": "0 6 * * *" }
+  ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": { "service": "engine" } },
     { "source": "/(.*)", "destination": { "service": "web" } }

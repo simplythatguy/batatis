@@ -59,7 +59,9 @@ Set these on the Vercel project for Preview and Production. Leave the project Ro
 
 Local file runs ignore `DATABASE_URL`. Uploaded PDF bytes go in `case_files` (Postgres `bytea`, or sqlite blob locally), capped at 4 MB. A larger PDF is HTTP 413 with `{"detail": "PDF too large: the limit is 4 MB. Try compressing the file or splitting it."}`.
 
-Every JSON response returns code text in full, with its citation and the NRC publication link. Search still returns at most 20 hits. No route serves `codedb.sqlite`. The exported PDF uses the same rule: form cells carry provision ids and objective/function codes, and the appendix carries citations, objective and functional-statement titles, application notes, the full provision text, and NBC 2020 intent statements and notes, each with the NRC link. Cases older than 7 days are deleted with their files. Do not upload personal information; demo data may be deleted.
+Every JSON response returns code text in full, with its citation and the NRC publication link. Search still returns at most 20 hits. No route serves `codedb.sqlite`. The exported PDF uses the same rule: form cells carry provision ids and objective/function codes, and the appendix carries citations, objective and functional-statement titles, application notes, the full provision text, and NBC 2020 intent statements and notes, each with the NRC link.
+
+Do not upload personal information. In live mode, text you enter is sent to OpenAI (US) for processing and is retained by OpenAI under its API data policy (https://openai.com/policies/api-data-usage-policies); Batatis deletes its own stored case data and files after 7 days or on request. That sentence is `meta.notice` and the `X-Batatis-Notice` header. Cases and their files are deleted 7 days after `created_at`, or sooner on `DELETE /cases/{case_id}`. The sqlite store and Neon Postgres both purge. Case create and the per-request sweep do it at most once every 10 minutes per instance. `python -m engine.retention` runs it immediately, and so does the Hobby cron `GET /api/retention/purge` (`0 6 * * *`, once a day). A second purge deletes nothing.
 
 ## Preview
 

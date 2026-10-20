@@ -37,6 +37,12 @@ User-testing protocol: [`docs/user-testing/README.md`](./docs/user-testing/READM
 - Prefer NBC(AE) 2023 **2nd printing**.
 - UI → Opus 5.5 implement **and** review; default look = Linear-caliber tokens (no prompt required).
 
+## Retention
+
+Do not upload personal information. In live mode, text you enter is sent to OpenAI (US) for processing and is retained by OpenAI under its API data policy (https://openai.com/policies/api-data-usage-policies); Batatis deletes its own stored case data and files after 7 days or on request.
+
+A case and its stored files are deleted 7 days after `created_at`, or sooner when the applicant calls `DELETE /cases/{case_id}`. The sqlite store and Neon Postgres use the same purge. Case create and the request sweep run it at most once every 10 minutes per engine instance. `python -m engine.retention` runs it immediately. On Vercel Hobby, a daily cron calls `GET /api/retention/purge`.
+
 ## Status
 
 Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind).

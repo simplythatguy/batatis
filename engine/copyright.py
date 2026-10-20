@@ -3,10 +3,11 @@ from __future__ import annotations
 
 import re
 
+from .privacy import PRIVACY_NOTICE as PII_NOTICE
+
 NRC_PUBLICATION_URL = (
     'https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499'
 )
-PII_NOTICE = 'Do not upload personal information. Demo data may be deleted.'
 # Prose copied from the code. Identifiers, citations, and URLs are not in this set.
 # `quote` is not in this set: it counts only when its source type is `code`.
 PROSE_KEYS = frozenset({
@@ -88,7 +89,7 @@ def attribute_code(node, key=None, parent=None):
 
 
 def attach_meta(payload):
-    """Put the demo notice on every JSON body. Arrays stay addressable under `items`."""
+    """Put the privacy notice on every JSON body. Arrays stay addressable under `items`."""
     notice = {'notice': PII_NOTICE}
     if isinstance(payload, dict):
         out = dict(payload)

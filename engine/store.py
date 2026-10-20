@@ -46,7 +46,7 @@ class CaseBackend(Protocol):
 
 
 def retention_cutoff() -> str:
-    """Cases created before this instant are past the demo retention window."""
+    """Cases created before this instant are older than the 7-day retention window."""
     return (datetime.now(timezone.utc) - timedelta(days=RETENTION_DAYS)).isoformat(timespec='seconds')
 
 
@@ -100,7 +100,6 @@ class CaseStore:
         return int(row[0]) if row else None
 
     def put(self, case: Case, *, expected_version: int | None = None) -> Case:
-        self.purge_expired()
         case.updated_at = now()
         payload = case.model_dump_json()
         with closing(self._connect()) as con, con:
@@ -124,14 +123,12 @@ class CaseStore:
         return case
 
     def get(self, case_id: str) -> Case | None:
-        self.purge_expired()
         with closing(self._connect()) as con:
             row = con.execute('SELECT json FROM cases WHERE id=?', (case_id,)).fetchone()
         return Case.model_validate_json(row[0]) if row else None
 
     def delete(self, case_id: str) -> bool:
         """Remove the case, its facts, its evidence, and its files."""
-        self.purge_expired()
         with closing(self._connect()) as con, con:
             con.execute('DELETE FROM case_files WHERE case_id=?', (case_id,))
             cur = con.execute('DELETE FROM cases WHERE id=?', (case_id,))
@@ -152,7 +149,6 @@ class CaseStore:
 
     def add_fact(self, case_id: str, fact: Fact) -> Case | None:
         """Read-modify-write under a reserved lock so two writers cannot drop a fact."""
-        self.purge_expired()
         for _ in range(5):
             con = sqlite3.connect(self.path, timeout=5, isolation_level=None)
             try:

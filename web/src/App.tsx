@@ -1,4 +1,5 @@
 import { Icon } from "./components";
+import { PRIVACY_NOTICE } from "./privacy";
 import { useFocusParam, useRoute } from "./router";
 import { Application } from "./screens/Application";
 import { CodeCheck } from "./screens/CodeCheck";
@@ -92,7 +93,7 @@ export function App() {
             Reset case
           </button>
         </div>
-        <p className="meta privacy-notice">Do not upload personal information. Demo data may be deleted.</p>
+        <p className="meta privacy-notice">{PRIVACY_NOTICE}</p>
       </aside>
       <main className="main-panel">{screen}</main>
     </div>

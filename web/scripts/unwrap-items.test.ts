@@ -1,8 +1,9 @@
 // Every list route must come back as an array. The engine wraps those bodies as { items, meta }.
 import assert from "node:assert/strict";
 import { ARRAY_ROUTES, createEngine, unwrapItems, type Engine } from "../src/api/client.ts";
+import { PRIVACY_NOTICE } from "../src/privacy.ts";
 
-const notice = "Do not upload personal information. Demo data may be deleted.";
+const notice = PRIVACY_NOTICE;
 
 assert.deepEqual(unwrapItems([{ id: "raw" }]), [{ id: "raw" }]);
 const wrapped = unwrapItems({ items: [{ id: "wrapped" }], meta: { notice } });
