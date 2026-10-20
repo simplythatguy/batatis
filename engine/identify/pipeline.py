@@ -18,6 +18,7 @@ from engine.identify.config import (COMMIT_PARTS, RERANK_MODEL, RERANK_N, SCREEN
 from engine.identify.corpus import card
 from engine.identify.departure import assess_variance, detect_redirect
 from engine.identify.questions import generate_questions
+from engine.identify.offline import ProviderOutage, is_provider_outage
 from engine.identify.verify import Pick, check_quotes
 from engine.section_c import section_c_rows
 
@@ -229,6 +230,8 @@ def run(prose: str, db_path: Path | str | None = None, judge: Judge | None = Non
                 mode = which
                 models['rerank'] = RERANK_MODEL
         except Exception as exc:
+            if is_provider_outage(exc):
+                raise ProviderOutage(type(exc).__name__) from exc
             use_bm25(f'{type(exc).__name__}: {exc}', emit_screen=False)
 
     picks = None
@@ -253,6 +256,8 @@ def run(prose: str, db_path: Path | str | None = None, judge: Judge | None = Non
                 trace['verifier'] = {'picks': [p.article for p in checked.picks], 'dropped': len(checked.dropped)}
                 models['verifier'] = VERIFY_MODEL_ANTHROPIC
             except Exception as exc:
+                if is_provider_outage(exc):
+                    raise ProviderOutage(type(exc).__name__) from exc
                 trace['verifier'] = f'failed: {type(exc).__name__}'
                 picks = None
     else:
@@ -267,6 +272,8 @@ def run(prose: str, db_path: Path | str | None = None, judge: Judge | None = Non
             trace['usage'] = usage
             models['verifier'] = vmodel
         except Exception as exc:
+            if is_provider_outage(exc):
+                raise ProviderOutage(type(exc).__name__) from exc
             trace['verifier'] = f'failed: {type(exc).__name__}'
             picks = None
 
@@ -336,6 +343,7 @@ def run(prose: str, db_path: Path | str | None = None, judge: Judge | None = Non
         'mode': mode,
         'persisted': False,
         'cached': False,
+        'source': 'live',
         'model_ids': models,
         'commit_policy': policy,
         'trace': {**trace, 'commit_threshold': threshold, 'max_commits': max_commits,

@@ -91,6 +91,8 @@ def test_new_case_keeps_only_the_applicants_facts_and_unknown_answers(tmp_path, 
             on_stage('done', result)
         return result
 
+    monkeypatch.setenv('OPENAI_API_KEY', 'test-not-a-real-key')
+    monkeypatch.delenv('BATATIS_OFFLINE', raising=False)
     monkeypatch.setattr('engine.routes_case.identify_run', fake_run)
     client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes()))
     created = client.post('/cases', json={'title': 'Hempcrete house'})
@@ -150,12 +152,18 @@ def test_demo_cache_matches_the_three_descriptions_and_keeps_short_quotes():
 def test_missing_database_response_does_not_include_a_path(tmp_path, monkeypatch):
     missing = tmp_path / 'hidden' / 'codedb.sqlite'
     monkeypatch.setattr('engine.routes_case.default_db', lambda: missing)
+    monkeypatch.delenv('OPENAI_API_KEY', raising=False)
+    monkeypatch.delenv('BATATIS_OFFLINE', raising=False)
     client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes()))
     case_id = client.post('/cases').json()['id']
-    identified = client.post(f'/cases/{case_id}/identify', json={'prose': 'a proposal that is not a cached demo'})
-    assert identified.status_code == 503
-    assert identified.json()['detail'] == 'code database not found'
-    assert 'hidden' not in identified.text and 'codedb.sqlite' not in identified.text
+    offline = client.post(f'/cases/{case_id}/identify', json={'prose': 'a proposal that is not a cached demo'})
+    assert offline.status_code == 200 and offline.json()['source'] == 'offline-miss'
+    assert 'hidden' not in offline.text and 'codedb.sqlite' not in offline.text
+    monkeypatch.setenv('OPENAI_API_KEY', 'test-not-a-real-key')
+    live = client.post(f'/cases/{case_id}/identify', json={'prose': 'a proposal that is not a cached demo'})
+    assert live.status_code == 503
+    assert live.json()['detail'] == 'code database not found'
+    assert 'hidden' not in live.text and 'codedb.sqlite' not in live.text
     try:
         run('a proposal that is not a cached demo', db_path=missing)
     except CodeDbMissing as exc:
@@ -165,7 +173,8 @@ def test_missing_database_response_does_not_include_a_path(tmp_path, monkeypatch
 
 
 def test_exact_demo_description_is_cached_without_a_model_or_a_database(tmp_path, monkeypatch):
-    monkeypatch.setattr('engine.routes_case.has_live_model', lambda: False)
+    monkeypatch.delenv('OPENAI_API_KEY', raising=False)
+    monkeypatch.delenv('BATATIS_OFFLINE', raising=False)
     monkeypatch.setattr('engine.routes_case.default_db', lambda: Path('/tmp/batatis-missing-codedb.sqlite'))
     client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes()))
     case_id = client.post('/cases').json()['id']
@@ -175,7 +184,8 @@ def test_exact_demo_description_is_cached_without_a_model_or_a_database(tmp_path
     })
     assert identified.status_code == 200
     body = identified.json()
-    assert body['cached'] is True and body['benchmark']['provision'] == '3.4.2.1.'
+    assert body['source'] == 'cache' and body['cached'] is True
+    assert body['benchmark']['provision'] == '3.4.2.1.'
     assert any(q['status'] == 'unknown' and q['field'] == 'building.storeys' for q in body['open_questions'])
     saved = client.get(f'/cases/{case_id}').json()
     assert saved['provisions'] == [] and 'NorthCore' not in json.dumps(saved)

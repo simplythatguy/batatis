@@ -14,8 +14,8 @@ from .ccmc import CCMCRegistry, RegistrySearch, RegistryUnavailable
 from .codes import CodeDbMissing, Codes, default_db
 from .completeness import Gap, check_completeness
 from .identify.answers import apply_answers
-from .identify.config import has_live_model
-from .identify.demo_cache import match_demo
+from .identify.demo_cache import match_demo, offline_miss
+from .identify.offline import ProviderOutage, is_provider_outage, offline_mode
 from .identify.pipeline import run as identify_run
 from .models import Case
 from .process_fields import ProcessField, process_fields
@@ -96,18 +96,25 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
     def gaps(case_id: str):
         return check_completeness(get_case(case_id), code())
 
+    def _serve_offline(prose: str, facts, on_stage=None) -> dict:
+        result = match_demo(prose, facts) or offline_miss()
+        if on_stage:
+            on_stage('done', result)
+        return result
+
     def _identify_result(prose: str, facts, on_stage=None) -> dict:
+        if offline_mode():
+            return _serve_offline(prose, facts, on_stage)
         if not default_db().exists():
-            cached = match_demo(prose, facts)
-            if cached:
-                return cached
             raise CodeDbMissing()
-        if not has_live_model():
-            cached = match_demo(prose, facts)
-            if cached:
-                return cached
-        result = identify_run(prose, facts=facts, on_stage=on_stage)
+        try:
+            result = identify_run(prose, facts=facts, on_stage=on_stage)
+        except Exception as exc:
+            if isinstance(exc, ProviderOutage) or is_provider_outage(exc):
+                return _serve_offline(prose, facts, on_stage)
+            raise
         result['persisted'] = False
+        result['source'] = 'live'
         return result
 
     def _stream(prose: str, facts):

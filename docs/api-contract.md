@@ -37,9 +37,13 @@ Each item in `section_c`, including the rows under `benchmark.section_c`, uses `
 
 `POST /cases/{id}/identify/confirm` with `{"provisions": ["9.10.15.5.(8)"]}` checks each id in the code database, then writes `provisions` and Section C. An unknown id returns 404 and leaves the case unchanged.
 
-When the code database is missing and the description is not a cached demo, identify returns HTTP 503 with the fixed detail `code database not found`. The body does not include a filesystem path.
+Every identify response has `source`: `live` when a provider call succeeded, `cache` when the body was served from `engine/identify/demo_cache.json`, or `offline-miss` when offline mode has nothing stored for that description. Offline mode is `BATATIS_OFFLINE=1`, or it is selected on its own when `OPENAI_API_KEY` is absent, or when the live call fails with an authentication, network, or timeout error. The cache key is the SHA-256 of the description after Unicode NFC, with surrounding whitespace removed and internal whitespace collapsed to one space. Answers are not part of the key.
 
-With no provider key, the runner uses BM25, commits nothing, and sets `mode` to `bm25_fallback`. An exact description match (whitespace collapsed) for one of the three cached demos is served instead when there is no key or no code database. The payload has `cached: true`, `generated_at`, pinned model ids with `invoked: false`, and a short codedb quote. `Section C` on a committed or benchmark row carries `explainer.source` of `deterministic`, or `ai_written` when a quote-checked verifier reason does not claim compliance. A compliance claim leaves the deterministic explainer in place. `explainer` is null when there is no codedb quote.
+A cache hit has `cached: true` and the stored quotes. A miss is HTTP 200 with `message` set to `offline: no cached result for this case`, empty `articles` and `section_c`, and no citation. The demo does not invent an article to fill that miss. The cached descriptions are `dev-001`, `dev-003`, and `dev-013`. `scripts/build_demo_cache.py` records a fresh live result for those three when `OPENAI_API_KEY` is set, and it exits without writing a file when the key is absent.
+
+When a live identify needs the code database and the file is missing, the response is HTTP 503 with the fixed detail `code database not found`. The body does not include a filesystem path. Offline mode does not need the database to return a cache hit or an offline miss.
+
+`Section C` on a committed or benchmark row carries `explainer.source` of `deterministic`, or `ai_written` when a quote-checked verifier reason does not claim compliance. A compliance claim leaves the deterministic explainer in place. `explainer` is null when there is no codedb quote. The benchmark command's BM25 variant is unchanged and is not this offline path.
 
 From a checkout that has no virtualenv, the same flags work through `scripts/bench_identify.sh`. The script creates `.venv`, installs `engine/requirements.txt` and `codedb/requirements.txt`, and sets `BATATIS_LLM_PROVIDER=openai`. The only value the caller supplies is `OPENAI_API_KEY`, and the script does not print it.
 
