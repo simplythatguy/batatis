@@ -1143,34 +1143,6 @@ export async function runDeckStills(page, opts) {
     );
 
     if (!api.state.caseC) {
-      skip("shot-s06-section-d", "Case C is not open, so Section D was not captured.");
-    } else if (!(await goApplication(page, "Section D"))) {
-      skip("shot-s06-section-d", "Section D is not an application tab on this build.");
-    } else {
-      const heading = page.getByRole("heading", { name: "Section D and professional screening" }).first();
-      if (!(await visible(heading, 5000))) {
-        skip("shot-s06-section-d", "Section D and professional screening is not on this build.");
-      } else {
-        const limit = page.getByText(LIMIT_LINE).first();
-        const down = engineDown("shot-s06-section-d");
-        if (!(await visible(limit, 1500))) {
-          skip(
-            "shot-s06-section-d",
-            down
-              ? `${down} The limit line "${LIMIT_LINE}" is not on screen. It was not invented.`
-              : `The limit line "${LIMIT_LINE}" is not on screen. The still was not captured, and the line was not invented.`,
-          );
-        } else if (down) {
-          skip("shot-s06-section-d", down);
-        } else {
-          await limit.scrollIntoViewIfNeeded().catch(() => {});
-          api.notes.push("The on-screen limit line is visible.");
-          await capture("shot-s06-section-d", CASES.C.lower, "Case C", LIMIT_LINE);
-        }
-      }
-    }
-
-    if (!api.state.caseC) {
       skip("shot-s09-locked", "Case C is not open, so the application still was not captured.");
     } else if (!(await goApplication(page))) {
       skip("shot-s09-locked", "The application screen is not on this build.");
@@ -1227,18 +1199,33 @@ export async function runDeckStills(page, opts) {
       }
     }
 
-    if (!api.state.caseOpen) {
-      skip("shot-s07-officer", "No case is open, so Officer review does not show the open application.");
-    } else {
+    async function captureOfficer(id) {
+      if (!api.state.caseA) {
+        skip(id, "Case A is not open, so Officer review of the open application was not captured.");
+        return;
+      }
       const opened = await openOfficerReview(page, api);
       if (!opened.ok) {
-        skip("shot-s07-officer", opened.reason);
-      } else {
-        const intro = page.getByText(OFFICER_INTRO, { exact: true }).first();
-        await intro.scrollIntoViewIfNeeded().catch(() => {});
-        await capture("shot-s07-officer", CASES.A.lower, "Case A");
+        skip(id, opened.reason);
+        return;
       }
+      const intro = page.getByText(OFFICER_INTRO, { exact: true }).first();
+      if (!(await visible(intro, 1500))) {
+        skip(id, "The open-application review line is not on screen. The officer still was not captured.");
+        return;
+      }
+      await intro.scrollIntoViewIfNeeded().catch(() => {});
+      const down = engineDown(id);
+      if (down) {
+        skip(id, down);
+        return;
+      }
+      api.notes.push("Officer review of the open Case A application.");
+      await capture(id, CASES.A.lower, "Case A");
     }
+
+    await captureOfficer("shot-s06-section-d");
+    await captureOfficer("shot-s07-officer");
 
     skip(
       "shot-s09-scc-form",

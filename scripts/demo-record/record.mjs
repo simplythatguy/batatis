@@ -270,7 +270,10 @@ async function ensureCodeDb(engineRoot) {
   const pdf = join(engineRoot, "reference/codes/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.pdf");
   const text = join(engineRoot, "reference/text/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.jsonl");
   if (!existsSync(pdf) || !existsSync(text)) {
-    return "The NBC source PDF and page text are not in this checkout, so the code database was not built.";
+    const seed = join(repoRoot, "scripts/demo-record/seed-admin-db.py");
+    console.log("NBC sources are not in this checkout. Seeding the Division C provisions the completeness check looks up.");
+    await run("python3", [seed, db], { cwd: engineRoot });
+    return "Seeded the code database with the Division C provisions the completeness check looks up. Sentence text was not added.";
   }
   console.log("Building the code database from the checkout's NBC sources.");
   try {
@@ -574,7 +577,22 @@ async function stillSourceBranch(args, gitInfo) {
   return "detached";
 }
 
+async function requireEngine() {
+  let status = 0;
+  try {
+    const res = await fetch("http://127.0.0.1:8000/openapi.json", { signal: AbortSignal.timeout(3000) });
+    status = res.status;
+    if (res.status === 200) return;
+  } catch {
+    status = 0;
+  }
+  throw new Error(
+    `The engine is not reachable (GET /openapi.json returned ${status || "no response"}). Capture aborted.`,
+  );
+}
+
 async function captureDeckStills({ args, outDir, base, webDir, gitInfo, engineSession, sync }) {
+  await requireEngine();
   const browser = await chromium.launch({
     executablePath: chromePath(),
     args: ["--no-sandbox", "--disable-dev-shm-usage"],

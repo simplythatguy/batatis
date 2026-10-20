@@ -99,7 +99,8 @@ test("shot 4 and shot 5 skip when their subject is not on screen", () => {
   assert.match(stills, /status: "pending"/);
   assert.match(stills, /provenance:/);
   assert.match(stills, /engineSearchStatus !== 503/);
-  assert.match(stills, /LIMIT_LINE/);
+  assert.match(stills, /captureOfficer\("shot-s06-section-d"\)/);
+  assert.match(stills, /Officer review of the open Case A application/);
   assert.match(source, /The footer reads "Online review unavailable"/);
   assert.equal(source.includes("SECTION_D_STILL_LINE"), false);
   assert.equal(stills.includes('status: "skipped"'), false);
@@ -120,6 +121,8 @@ test("the recorder uses the engine unless --offline is set", () => {
   assert.ok(worktree >= 0 && worktree < dev && dev < branch);
   assert.match(source, /loggedWebDir/);
   assert.match(source, /ensureCodeDb/);
+  assert.match(source, /openapi\.json/);
+  assert.match(source, /Capture aborted/);
   assert.match(source, /sync\.status !== "ok"/);
   assert.match(source, /--allow-drift/);
   assert.match(source, /allowDrift/);

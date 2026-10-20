@@ -1,5 +1,5 @@
 {
-  "recordedAt": "2026-10-20T21:38:59.856Z",
+  "recordedAt": "2026-10-20T21:50:11.273Z",
   "mode": "stills",
   "networkMode": "engine",
   "engineState": "started",
@@ -9,12 +9,12 @@
   },
   "webDir": "web",
   "git": {
-    "sha": "944e04c3238660055db707338cffa538c958f361",
+    "sha": "88bd41aaf424933c37d5c255025b0fcab9d8c090",
     "branch": "HEAD",
     "requestedBranch": "cursor/e2e-product-flow-4362"
   },
-  "baseUrl": "http://127.0.0.1:37293/",
-  "engine": "Started uvicorn engine.api:app on 127.0.0.1:8000 from the recorded checkout. Browser requests to /api are proxied to it. The NBC source PDF and page text are not in this checkout, so the code database was not built. Code search returned 503. The recorder did not call a model API. No PDF is uploaded.",
+  "baseUrl": "http://127.0.0.1:33805/",
+  "engine": "Started uvicorn engine.api:app on 127.0.0.1:8000 from the recorded checkout. Browser requests to /api are proxied to it. Seeded the code database with the Division C provisions the completeness check looks up. Sentence text was not added. Code search answered. The recorder did not call a model API. No PDF is uploaded.",
   "scriptSync": {
     "status": "ok",
     "source": "origin/cursor/demo-video-script-1e38:docs/demo/script.md",
@@ -33,9 +33,9 @@
       "status": "captured",
       "width": 1440,
       "height": 900,
-      "caption": "scripted demo capture, cursor/e2e-product-flow-4362 @ 944e04c",
-      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362 @ 944e04c",
-      "source": "cursor/e2e-product-flow-4362 @ 944e04c",
+      "caption": "scripted demo capture, cursor/e2e-product-flow-4362 @ 88bd41a",
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362 @ 88bd41a",
+      "source": "cursor/e2e-product-flow-4362 @ 88bd41a",
       "case": "All three",
       "date": "2026-10-20",
       "onScreen": ""
@@ -45,10 +45,20 @@
       "file": "shot-s02-describe.png",
       "notes": [
         "Did not upload a PDF.",
-        "Missing-item text on screen: Owner, Mailing address, Legal description."
+        "Owner, mailing address, and legal description were not named on this screen.",
+        "Header subtitle visible: Homebuilder · Two-storey infill at 0000 Example Crescent NW, Edmonton, about 210 m²…",
+        "Footer visible: Online administrative review finished. This does not decide whether the design complies or is safe. Save draft Continue to code check",
+        "Compliance disclaimer visible: Online administrative review finished. This does not decide whether the design complies or is safe."
       ],
-      "status": "pending",
-      "reason": "Code search returned 503. The still was not captured."
+      "status": "captured",
+      "width": 1440,
+      "height": 900,
+      "caption": "scripted demo capture, cursor/e2e-product-flow-4362 @ 88bd41a",
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362 @ 88bd41a",
+      "source": "cursor/e2e-product-flow-4362 @ 88bd41a",
+      "case": "Case C",
+      "date": "2026-10-20",
+      "onScreen": ""
     },
     {
       "id": "shot-s03-not-sure",
@@ -56,17 +66,30 @@
       "notes": [
         "Reset case showed: Cleared. Nothing from the previous case is kept.",
         "Did not upload a PDF.",
-        "Answered Not sure on 2 Your words card(s): Sheathing membrane; Storey count. Did not answer Yes or No."
+        "Answered Not sure on 2 Your words card(s): Sheathing membrane; Storey count. Did not answer Yes or No.",
+        "Header subtitle visible: NBC(AE) 2023, 2nd printing",
+        "Footer visible: Online administrative review finished. This does not decide whether the design complies or is safe. Draft saved. Not sure does not block Continue. Save draft Back Continue to Section C",
+        "Compliance disclaimer visible: Online administrative review finished. This does not decide whether the design complies or is safe. Draft saved."
       ],
-      "status": "pending",
-      "reason": "Code search returned 503. The still was not captured."
+      "status": "captured",
+      "width": 1440,
+      "height": 900,
+      "caption": "scripted demo capture, cursor/e2e-product-flow-4362 @ 88bd41a",
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362 @ 88bd41a",
+      "source": "cursor/e2e-product-flow-4362 @ 88bd41a",
+      "case": "Case A",
+      "date": "2026-10-20",
+      "onScreen": ""
     },
     {
       "id": "shot-s04-search",
       "file": "shot-s04-search.png",
-      "notes": [],
+      "notes": [
+        "Answered Not sure on 1 Your words card(s): What you described. Did not answer Yes or No.",
+        "Search for \"bedroom window unobstructed\" did not show a row whose id is 9.9.10.1.(2). Nothing was added."
+      ],
       "status": "pending",
-      "reason": "Code search returned 503. No article id was typed in, and the Section C lookup was not drawn."
+      "reason": "Search did not show a returned row for 9.9.10.1.(2). No article id was typed in, and the Section C lookup was not drawn."
     },
     {
       "id": "shot-s04-benchmark",
@@ -85,9 +108,22 @@
     {
       "id": "shot-s06-section-d",
       "file": "shot-s06-section-d.png",
-      "notes": [],
-      "status": "pending",
-      "reason": "Code search returned 503. The still was not captured. The limit line \"Recommendations only. You write the evidence and the answers. This does not decide that the design complies or is safe.\" is not on screen. It was not invented."
+      "notes": [
+        "Officer sections on screen: Documents, Professional, Information request.",
+        "Copy request is on screen. No package version control was clicked.",
+        "Officer review of the open Case A application.",
+        "Header subtitle visible: Administrative completeness",
+        "Compliance disclaimer visible: Online administrative review finished. This does not decide whether the design complies or is safe."
+      ],
+      "status": "captured",
+      "width": 1440,
+      "height": 900,
+      "caption": "scripted demo capture, cursor/e2e-product-flow-4362 @ 88bd41a",
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362 @ 88bd41a",
+      "source": "cursor/e2e-product-flow-4362 @ 88bd41a",
+      "case": "Case A",
+      "date": "2026-10-20",
+      "onScreen": ""
     },
     {
       "id": "shot-s07-officer",
@@ -95,15 +131,16 @@
       "notes": [
         "Officer sections on screen: Documents, Professional, Information request.",
         "Copy request is on screen. No package version control was clicked.",
+        "Officer review of the open Case A application.",
         "Header subtitle visible: Administrative completeness",
-        "Compliance disclaimer visible: This review is of the application in front of you. It checks whether information is present. It does not decide whether the design complies or is safe."
+        "Compliance disclaimer visible: Online administrative review finished. This does not decide whether the design complies or is safe."
       ],
       "status": "captured",
       "width": 1440,
       "height": 900,
-      "caption": "scripted demo capture, cursor/e2e-product-flow-4362 @ 944e04c",
-      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362 @ 944e04c",
-      "source": "cursor/e2e-product-flow-4362 @ 944e04c",
+      "caption": "scripted demo capture, cursor/e2e-product-flow-4362 @ 88bd41a",
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362 @ 88bd41a",
+      "source": "cursor/e2e-product-flow-4362 @ 88bd41a",
       "case": "Case A",
       "date": "2026-10-20",
       "onScreen": ""
