@@ -23,9 +23,15 @@ Product state machine implements the **No / alternative solution** branch while 
 | Demonstrate equivalent performance | Section D evidence planner using confidence ladder |
 | Finalise permit application | PDF export + SCO reviewer view |
 
-**Evidence ladder** (recommend, don’t invent): manufacturer lit → STANDATA → ISO 17025 test → evaluation → eval+testing → qualification → ISO 17065 certification; plus on alt path: CCMC, ICC-ES, registered professional opinion, engineering review.
+### Evidence types vs process requirements (do not conflate)
 
-Note: **risk assessment, mitigating measures, and assumptions/limits** are required **process steps** on the alternative path — not rungs of the evidence ladder.
+| Bucket | What it is | Contents |
+| --- | --- | --- |
+| **Shared evidence ladder** (confidence order) | Evidence *types* you recommend / collect | manufacturer lit → STANDATA → ISO 17025 test → evaluation → eval+testing → qualification → ISO 17065 certification |
+| **Alt-path extra evidence types** | Additional evidence *types* on the No / variance fork | CCMC assessments, ICC-ES evaluations, registered professional opinion, engineering review |
+| **Alt-path process requirements** | Required **workflow steps / fields** — **not** evidence-ladder rungs and **not** “extra evidence types” | **risk assessment**, **mitigating measures**, **assumptions / limiting factors** |
+
+Recommend evidence; never invent ladder outputs (tests, STANDATA citations, CCMC/ICC-ES listings, stamped opinions). Still require the three process fields on every alternative-path draft before export.
 
 ## State loop (product flow)
 

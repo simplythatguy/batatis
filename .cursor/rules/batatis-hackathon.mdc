@@ -24,12 +24,17 @@ Guide users through **Safety Codes Variance Template Part 1, Sections A–D**:
 
 Start with **NBC(AE) 2023, 2nd printing** before other codes. Division **C §2.3** = admin documentation bottleneck for alternative solutions.
 
-Official process fork: `docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png` — after code analysis, **complies with acceptable solution(s)?** Yes → evidence ladder → permit; No → SSRIA variance path with rationale, Div B attributions, **risk + mitigations + assumptions**, equivalent-performance evidence.
+Official process fork: `docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png` — after code analysis, **complies with acceptable solution(s)?** Yes → evidence ladder → permit; No → SSRIA variance path with rationale, Div B attributions, **risk + mitigations + assumptions** (process fields), equivalent-performance evidence (ladder + CCMC / ICC-ES / professional / engineering).
+
+## Attribution traps (soft nits that must not recur)
+
+- **Portability ≠ SCO UX rule.** Jurisdiction portability is Usability/portability judging + portable data model. Applicant UX: confidence / no silent fills / novice clarity. SCO UX: distinct code text vs AI explanation; admin gaps only.
+- **Process ≠ evidence ladder.** Risk assessment, mitigating measures, assumptions/limits are **process requirements** on the alt path. They are **not** rungs of the evidence confidence ladder and **not** “extra evidence types.” Extra evidence types on alt path = CCMC, ICC-ES, registered professional opinion, engineering review.
 
 ## Hard stops
 
 - Completeness ≠ technical correctness / safety certification.
-- No fabricated article numbers.
+- No fabricated article numbers or fabricated STANDATA / CCMC / test citations.
 - On alternative path: do **not** skip risk assessment, mitigating measures, or assumptions/limits; do **not** invent professional judgment or evidence.
 - NRC code text is copyrighted (link; don’t wholesale redistribute). STANDATA is OGL-Alberta.
 - Full skill: `.cursor/skills/batatis-hackathon/SKILL.md`. Workflow: `.cursor/skills/batatis-variance-workflow/SKILL.md`.

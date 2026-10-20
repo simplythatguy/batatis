@@ -8,10 +8,11 @@ globs:
 alwaysApply: false
 ---
 
-# UI model pin
+# UI model pin + default system
 
-For all Batatis UI / frontend / visual / UX implementation or review:
+For all Batatis UI / frontend / visual / UX **implementation or review**:
 
 - Use **Claude Opus 5.5** at the **highest available Opus 5.5 reasoning tier** (prefer `claude-opus-5-5-max`, else `xhigh`, else `high`).
-- Load skill `.cursor/skills/batatis-ui-opus/SKILL.md`.
-- Do not silently switch UI work to a cheaper/faster non-Opus model.
+- Load `.cursor/skills/batatis-ui-opus/SKILL.md` **and** `.cursor/skills/batatis-ui-linear/SKILL.md`.
+- Default product look = Linear-caliber tokens in `docs/design/tokens.css` (user need not ask).
+- Do not silently switch UI implement or UI review to a cheaper/faster non-Opus model.

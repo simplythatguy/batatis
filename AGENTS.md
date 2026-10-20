@@ -18,7 +18,7 @@ Single-context: root `GLOSSARY.md` + `docs/adr/` + challenge brief. See `docs/ag
 
 ### Stack skills
 
-- **Batatis challenge:** `.cursor/skills/batatis-*` (hackathon, variance-workflow, ui-opus).
+- **Batatis challenge:** `.cursor/skills/batatis-*` (hackathon, variance-workflow, ui-opus, **ui-linear**).
 - **Matt Pocock engineering:** `.agents/skills/` (also symlinked under `.cursor/skills/`). Reinstall with `npx skills@latest add mattpocock/skills -a cursor`.
 - **pstack / poteto-mode:** Cursor plugin (not vendored). See `docs/pstack.md`. Review/judgment roles pinned to Opus 5.5 in `.cursor/rules/pstack-models.mdc`.
 
@@ -34,10 +34,10 @@ Official NBC(AE) process fork (acceptable vs alternative): [`docs/diagrams/nbc-a
 
 1. Read `.cursor/skills/batatis-hackathon/SKILL.md` (domain + pitfalls + NBC(AE) fork).
 2. For product flow work, read `.cursor/skills/batatis-variance-workflow/SKILL.md`.
-3. For any UI / frontend / visual work, read `.cursor/skills/batatis-ui-opus/SKILL.md` and use **Claude Opus 5.5** (highest available Opus 5.5 tier).
-4. Run understanding checks in `evals/fixtures/understanding-checklist.md` when changing skills/rules.
+3. For any UI / frontend / visual work: read `.cursor/skills/batatis-ui-linear/SKILL.md` + `.cursor/skills/batatis-ui-opus/SKILL.md`. **Default product look** = Linear-caliber system (`docs/design-system-linear.md`, `docs/design/tokens.css`). Use **Claude Opus 5.5** (highest available tier) for **UI implementation and UI review**. Simplify ruthlessly without dropping capabilities; meet the bug-free bar.
+4. Run understanding checks in `evals/fixtures/understanding-checklist.md` when changing skills/rules. Blind UI prompts: `evals/battle-prompts/ui-blind/`.
 
-Always-on rules: `.cursor/rules/batatis-hackathon.mdc`, `.cursor/rules/batatis-ui-opus.mdc`.
+Always-on domain rule: `.cursor/rules/batatis-hackathon.mdc`. UI globs: `.cursor/rules/batatis-ui-opus.mdc`, `.cursor/rules/batatis-ui-linear.mdc`.
 
 Human brief: `docs/hackathon-problem-brief.md`.
 

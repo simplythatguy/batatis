@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Batatis — Intake</title>
+    <link rel="stylesheet" href="../../docs/design/tokens.css" />
+    <style>
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-4);
+        padding: var(--space-4);
+      }
+      .form-grid .full {
+        grid-column: 1 / -1;
+      }
+      .panel-body {
+        overflow: auto;
+        flex: 1;
+      }
+      .footer-bar {
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--space-2);
+        padding: var(--space-3) var(--space-4);
+        border-top: 1px solid var(--border-subtle);
+      }
+      .workspace {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-2);
+        font-weight: var(--weight-semibold);
+        font-size: var(--text-md);
+      }
+
+      .nav-item svg, .workspace svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
+      .nav-group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .assumption {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: var(--text-xs);
+        color: var(--text-secondary);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="workspace">Batatis <span class="meta">▾</span></div>
+        <div class="nav-group">
+          <div class="nav-item active" data-active="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 6.5h6M5 9.5h4"/></svg>Intake</div>
+          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4L3 8l3 4M10 4l3 4-3 4"/></svg>Code identification</div>
+          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M3 8h10M3 12h6"/></svg>Section C</div>
+          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 3h6l3 3v7H4V3z"/><path d="M10 3v3h3"/></svg>Evidence plan</div>
+          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v7M5.5 7.5 8 10l2.5-2.5M3 13h10"/></svg>Export</div>
+        </div>
+        <div>
+          <div class="sidebar-section-label">Project</div>
+          <div class="nav-item">VAR-1042 · Straw wall</div>
+        </div>
+      </aside>
+      <main class="main-panel">
+        <header class="panel-header">
+          <h1 class="panel-title">Applicant intake</h1>
+          <span class="meta">Variance Template · Sections A–B</span>
+        </header>
+        <div class="gap-banner">
+          <span class="status-dot danger"></span>
+          Missing required: mailing address · municipal address
+        </div>
+        <div class="toolbar">
+          <button type="button" class="pill active" data-active="true">Section A</button>
+          <button type="button" class="pill">Section B</button>
+          <button type="button" class="pill">Assumptions</button>
+        </div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="field">
+              <label>Owner</label>
+              <input value="Amina Okonkwo" />
+              <span class="confidence">Inferred · confirm</span>
+            </div>
+            <div class="field">
+              <label>Representative</label>
+              <input placeholder="Required" />
+            </div>
+            <div class="field full">
+              <label>Mailing address</label>
+              <input placeholder="Required — empty" />
+            </div>
+            <div class="field">
+              <label>Date</label>
+              <input value="2026-10-20" />
+            </div>
+            <div class="field">
+              <label>Permit #</label>
+              <input placeholder="If issued" />
+            </div>
+            <div class="field full">
+              <label>Municipal address</label>
+              <input placeholder="Required — empty" />
+            </div>
+            <div class="field full">
+              <label>Legal description / ATS</label>
+              <input value="NW-12-24-1-W5" />
+              <label class="assumption"
+                ><input type="checkbox" checked /> Treat as assumption until verified</label
+              >
+            </div>
+            <div class="field full">
+              <label>Proposed alternative (clear description)</label>
+              <textarea rows="4">
+Load-bearing straw-bale wall assembly as alternative to NBC(AE) Part 9 acceptable solution for exterior walls.</textarea
+              >
+            </div>
+            <div class="field">
+              <label>Jurisdiction-wide variance?</label>
+              <select>
+                <option>No — site specific</option>
+                <option>Yes</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="footer-bar">
+          <button type="button" class="btn btn-ghost">Save draft</button>
+          <button type="button" class="btn btn-primary">Continue to code identification</button>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

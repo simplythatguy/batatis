@@ -46,7 +46,11 @@ Shared: Design → identify applicable acceptable solutions → code analysis (o
 - **Yes:** complete analysis → evidence of compliance (ladder) → finalise permit application.
 - **No (our product focus):** SSRIA Request for Specific Variance → rationale → detailed Div B analysis (sentences + objectives / functional / intent) → **risk assessment** → **mitigating measures** → **assumptions/limits** → demonstrate equivalent performance → finalise permit application.
 
-**Evidence confidence ladder** (lower → higher): manufacturer lit → STANDATA variance → ISO 17025 test → evaluation → eval+testing → qualification → ISO 17065 certification. Alternative path also cites CCMC, ICC-ES, registered professional opinion, engineering review.
+**Evidence confidence ladder** (lower → higher; evidence *types*): manufacturer lit → STANDATA variance → ISO 17025 test → evaluation → eval+testing → qualification → ISO 17065 certification.
+
+**Alt-path extra evidence types** (still evidence, not process): CCMC, ICC-ES, registered professional opinion, engineering review.
+
+**Alt-path process requirements** (never call these “evidence types” or ladder rungs): risk assessment → mitigating measures → assumptions/limits.
 
 ## Data priorities
 
@@ -71,6 +75,8 @@ Intake 20% · Code identification 20% · Recommendations 10% · Review 10% · Ap
 11. Building product UX that ignores the official NBC(AE) yes/no fork.
 12. Redistributing NRC copyrighted code text wholesale (link instead; STANDATA is OGL-Alberta).
 13. Treating completeness review as a safety/compliance certification for SCOs.
+14. Mis-attributing **jurisdiction portability** as an SCO-surface UX rule (it is data-model / judging Usability & portability).
+15. Calling risk / mitigations / assumptions “evidence types” or ladder rungs (they are alt-path **process** requirements).
 
 ## Related
 

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Batatis — Section C</title>
+    <link rel="stylesheet" href="../../docs/design/tokens.css" />
+    <style>
+      .workspace {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-2);
+        font-weight: var(--weight-semibold);
+      }
+
+      .nav-item svg, .workspace svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
+      .nav-group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .panel-body {
+        overflow: auto;
+        flex: 1;
+        padding: var(--space-4);
+      }
+      .footer-bar {
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--space-2);
+        padding: var(--space-3) var(--space-4);
+        border-top: 1px solid var(--border-subtle);
+      }
+      .lookup {
+        font-size: var(--text-xs);
+        color: var(--status-success);
+      }
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="workspace">Batatis <span class="meta">▾</span></div>
+        <div class="nav-group">
+          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 6.5h6M5 9.5h4"/></svg>Intake</div>
+          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4L3 8l3 4M10 4l3 4-3 4"/></svg>Code identification</div>
+          <div class="nav-item active" data-active="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M3 8h10M3 12h6"/></svg>Section C</div>
+          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 3h6l3 3v7H4V3z"/><path d="M10 3v3h3"/></svg>Evidence plan</div>
+          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v7M5.5 7.5 8 10l2.5-2.5M3 13h10"/></svg>Export</div>
+        </div>
+      </aside>
+      <main class="main-panel">
+        <header class="panel-header">
+          <h1 class="panel-title">Section C · Attributions</h1>
+          <span class="lookup">Source: attribution registry (deterministic lookup)</span>
+        </header>
+        <div class="gap-banner">
+          <span class="status-dot danger"></span>
+          Administrative gap: intent empty for 9.25.3.1.
+        </div>
+        <div class="panel-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Article</th>
+                <th>Objective</th>
+                <th>Function</th>
+                <th>Intent</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>NBC(AE) 2023</td>
+                <td class="mono">9.25.2.1.</td>
+                <td>OH1 / OS2 <span class="lookup">lookup</span></td>
+                <td>F51 / F20 <span class="lookup">lookup</span></td>
+                <td>Registry row #A-192 <span class="lookup">lookup</span></td>
+              </tr>
+              <tr>
+                <td>NBC(AE) 2023</td>
+                <td class="mono">9.25.3.1.</td>
+                <td>OH1 <span class="lookup">lookup</span></td>
+                <td>F55 <span class="lookup">lookup</span></td>
+                <td style="color: var(--status-danger)">— empty</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="stack" style="margin-top: 24px">
+            <div>
+              <div class="meta" style="margin-bottom: 8px">Retrieved code text</div>
+              <div class="cite-block">
+                9.25.2.1. Required Insulation 1) All walls, ceilings and floors separating
+                conditioned space from unconditioned space or exterior air shall be provided with
+                thermal insulation conforming to… [linked excerpt — not redistributed in full]
+              </div>
+            </div>
+            <div>
+              <div class="meta" style="margin-bottom: 8px">AI explainer (not source text)</div>
+              <p class="ai-explain">
+                This article is the benchmark acceptable solution for insulating exterior walls in
+                Part 9 buildings. Your alternative must address the same objectives/functions via
+                equivalent performance evidence — this panel does not certify compliance.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="footer-bar">
+          <button type="button" class="btn">Re-run lookup</button>
+          <button type="button" class="btn btn-ghost">Back to ranking</button>
+          <button type="button" class="btn btn-primary">Continue to evidence plan</button>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

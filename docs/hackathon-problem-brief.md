@@ -31,9 +31,11 @@ Official process diagram (repo): [`docs/diagrams/nbc-ae-acceptable-vs-alternativ
 | Fork | Path |
 | --- | --- |
 | **Yes (acceptable)** | Complete code analysis → evidence of compliance (confidence ladder below) → finalise building permit application |
-| **No (alternative / variance)** | Use **SSRIA Request for Specific Variance** → rationale → detailed code analysis (**Division B** sentences + objectives / functional / intent) → **risk assessment** → **mitigating measures** → **assumptions / limiting factors** → demonstrate equivalent performance (evidence + CCMC, ICC-ES, registered professional opinion, engineering review) → finalise permit application |
+| **No (alternative / variance)** | Use **SSRIA Request for Specific Variance** → rationale → detailed code analysis (**Division B** sentences + objectives / functional / intent) → **risk assessment** → **mitigating measures** → **assumptions / limiting factors** *(process requirements — not ladder rungs)* → demonstrate equivalent performance (evidence ladder + **extra evidence types**: CCMC, ICC-ES, registered professional opinion, engineering review) → finalise permit application |
 
-**Evidence confidence ladder** (lower → higher): manufacturer’s published literature → existing STANDATA variance → ISO 17025 test report → evaluation → evaluation + testing → qualification → ISO 17065 certification.
+**Evidence confidence ladder** (lower → higher; evidence *types* only): manufacturer’s published literature → existing STANDATA variance → ISO 17025 test report → evaluation → evaluation + testing → qualification → ISO 17065 certification.
+
+Do **not** list risk / mitigations / assumptions as ladder rungs or “extra evidence types.”
 
 Batatis product flow maps onto the **No** branch (variance) while still helping users discover when they are actually on the **Yes** branch.
 
@@ -53,12 +55,13 @@ Batatis product flow maps onto the **No** branch (variance) while still helping 
 3. Section C is lookup, not LLM memory.
 4. Do not complete Section D as the engineer / invent professional judgment.
 5. Division C (esp. §2.3) is the admin documentation bottleneck.
-6. Jurisdiction portability — don’t hard-code one municipality.
+6. Jurisdiction portability — don’t hard-code one municipality (**data-model / judging**, not an SCO UX rule).
 7. Ambiguity → ask clarifying questions.
 8. Label assumptions vs facts.
-9. **Respect the NBC(AE) decision fork** — if the proposal is an alternative solution, do **not** skip rationale, risk assessment, mitigating measures, or assumptions/limits.
-10. **Evidence ladder** — recommend evidence types by confidence; never invent test results, CCMC listings, or professional opinions.
+9. **Respect the NBC(AE) decision fork** — if the proposal is an alternative solution, do **not** skip rationale, risk assessment, mitigating measures, or assumptions/limits (**process** fields).
+10. **Evidence ladder** — recommend evidence types by confidence; never invent test results, CCMC listings, STANDATA cites, or professional opinions. Keep process fields separate from ladder types.
 11. Map Omar/product UI flow to this official process (variance path = SSRIA + Div B attributions + risk/mitigation + equivalent-performance evidence).
+12. Attribute UX rules by surface: Applicant = confidence / no silent fills / novice clarity; SCO = distinct code text vs AI; portability stays with schema/judging.
 
 ## Judging weights
 

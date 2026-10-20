@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Batatis — Article ranking</title>
+    <link rel="stylesheet" href="../../docs/design/tokens.css" />
+    <style>
+      .split {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        flex: 1;
+        min-height: 0;
+      }
+      .list {
+        border-right: 1px solid var(--border-subtle);
+        overflow: auto;
+      }
+      .detail {
+        padding: var(--space-4);
+        overflow: auto;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 28px 88px 1fr 100px;
+        gap: var(--space-3);
+        align-items: center;
+        min-height: 40px;
+        padding: 0 var(--space-4);
+        border-bottom: 1px solid var(--border-subtle);
+        cursor: pointer;
+      }
+      .row:hover,
+      .row.selected {
+        background: var(--bg-hover);
+      }
+      .group-h {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-2) var(--space-4);
+        font-size: var(--text-sm);
+        color: var(--text-secondary);
+        border-bottom: 1px solid var(--border-subtle);
+        background: var(--bg-elevated);
+      }
+      .workspace {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-2);
+        font-weight: var(--weight-semibold);
+      }
+
+      .nav-item svg, .workspace svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
+      .nav-group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .footer-bar {
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--space-2);
+        padding: var(--space-3) var(--space-4);
+        border-top: 1px solid var(--border-subtle);
+      }
+      .demo {
+        color: var(--status-warning);
+        font-size: var(--text-xs);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="workspace">Batatis <span class="meta">▾</span></div>
+        <div class="nav-group">
+          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 6.5h6M5 9.5h4"/></svg>Intake</div>
+          <div class="nav-item active" data-active="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4L3 8l3 4M10 4l3 4-3 4"/></svg>Code identification</div>
+          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M3 8h10M3 12h6"/></svg>Section C</div>
+          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 3h6l3 3v7H4V3z"/><path d="M10 3v3h3"/></svg>Evidence plan</div>
+          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v7M5.5 7.5 8 10l2.5-2.5M3 13h10"/></svg>Export</div>
+        </div>
+      </aside>
+      <main class="main-panel">
+        <header class="panel-header">
+          <h1 class="panel-title">Article ranking</h1>
+          <span class="meta">NBC(AE) 2023 · 2nd printing</span>
+        </header>
+        <div class="toolbar">
+          <button type="button" class="pill active" data-active="true">Candidates</button>
+          <button type="button" class="pill">Confirmed</button>
+          <button type="button" class="pill">Needs clarification</button>
+        </div>
+        <div class="split">
+          <div class="list">
+            <div class="group-h">
+              <span class="status-dot success"></span> Benchmark recommended · 1
+            </div>
+            <div class="row selected">
+              <span class="meta">1</span>
+              <span class="mono">9.25.2.1.</span>
+              <span>Thermal insulation · exterior walls</span>
+              <span class="label-pill"><span class="status-dot info"></span> Pending</span>
+            </div>
+            <div class="group-h"><span class="status-dot progress"></span> Other candidates · 2</div>
+            <div class="row">
+              <span class="meta">2</span>
+              <span class="mono">9.25.3.1.</span>
+              <span>Air barrier system</span>
+              <span class="label-pill"><span class="status-dot"></span> Pending</span>
+            </div>
+            <div class="row">
+              <span class="meta">3</span>
+              <span class="mono">demo</span>
+              <span>Placeholder row <span class="demo">(demo — not a real cite)</span></span>
+              <span class="label-pill"><span class="status-dot danger"></span> Reject</span>
+            </div>
+          </div>
+          <div class="detail">
+            <h2 style="margin: 0 0 8px; font-size: var(--text-lg)">Benchmark acceptable solution</h2>
+            <p class="meta" style="margin-top: 0">Article 9.25.2.1. · ranked #1</p>
+            <p class="ai-explain">
+              Most likely benchmark for the described exterior wall thermal performance. Confirm
+              after verifying edition text. Ask whether the assembly is Part 9 housing before
+              locking the list.
+            </p>
+            <div style="display: flex; gap: 8px; margin-top: 16px">
+              <button type="button" class="btn btn-primary">Confirm article</button>
+              <button type="button" class="btn">Reject</button>
+              <button type="button" class="btn btn-ghost">Ask clarifying question</button>
+            </div>
+          </div>
+        </div>
+        <div class="footer-bar">
+          <button type="button" class="btn btn-ghost">Back to intake</button>
+          <button type="button" class="btn btn-primary">Continue to Section C</button>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

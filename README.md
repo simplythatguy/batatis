@@ -19,13 +19,14 @@ Open the repo in **Cursor**. New agent threads should:
 2. Follow always-on rules under [`.cursor/rules/`](./.cursor/rules/) (includes **pstack model map** + **review = Opus 5.5**).
 3. Install **pstack** plugin once: `/add-plugin pstack` — see [`docs/pstack.md`](./docs/pstack.md).
 4. Load skills as tasks demand:
-   - `.cursor/skills/batatis-*` — challenge domain / variance / UI Opus pin
+   - `.cursor/skills/batatis-*` — challenge domain / variance / **UI Linear system** / UI Opus pin
    - `.agents/skills/` — Matt Pocock engineering skills (triage, tdd, grill-*, etc.)
-5. Use [`evals/fixtures/`](./evals/fixtures/) and [`evals/battle-prompts/`](./evals/battle-prompts/) to verify understanding.
-6. **All quality reviews** of agent outputs use Claude Opus 5.5 (max/xhigh).
+5. Use [`evals/fixtures/`](./evals/fixtures/) and [`evals/battle-prompts/`](./evals/battle-prompts/) (incl. `ui-blind/`) to verify understanding.
+6. **All quality reviews** of agent outputs use Claude Opus 5.5 (max/xhigh). UI review also Opus 5.5.
 
 Human-oriented brief: [`docs/hackathon-problem-brief.md`](./docs/hackathon-problem-brief.md).  
-NBC(AE) acceptable vs alternative process: [`docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png`](./docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png).
+NBC(AE) acceptable vs alternative process: [`docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png`](./docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png).  
+Product UI system: [`docs/design-system-linear.md`](./docs/design-system-linear.md).
 
 ## Non-negotiables (short)
 
@@ -33,7 +34,7 @@ NBC(AE) acceptable vs alternative process: [`docs/diagrams/nbc-ae-acceptable-vs-
 - No fabricated code citations; Section C attributions are lookups.
 - Do not invent Section D professional evidence.
 - Prefer NBC(AE) 2023 **2nd printing**.
-- UI → Opus 5.5.
+- UI → Opus 5.5 implement **and** review; default look = Linear-caliber tokens (no prompt required).
 
 ## Status
 

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Batatis — SCO review</title>
+    <link rel="stylesheet" href="../../docs/design/tokens.css" />
+    <style>
+      .tri {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        flex: 1;
+        min-height: 0;
+      }
+      .mid {
+        border-right: 1px solid var(--border-subtle);
+        overflow: auto;
+      }
+      .detail {
+        overflow: auto;
+        padding: var(--space-4);
+      }
+      .workspace {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-2);
+        font-weight: var(--weight-semibold);
+      }
+
+      .nav-item svg, .workspace svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
+      .nav-group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .item {
+        padding: var(--space-3) var(--space-4);
+        border-bottom: 1px solid var(--border-subtle);
+        cursor: pointer;
+      }
+      .item.selected,
+      .item:hover {
+        background: var(--bg-hover);
+      }
+      .footer-bar {
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--space-2);
+        padding: var(--space-3) var(--space-4);
+        border-top: 1px solid var(--border-subtle);
+      }
+      .gap-list {
+        list-style: none;
+        padding: 0;
+        margin: 12px 0 0;
+      }
+      .gap-list li {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border-subtle);
+        font-size: var(--text-md);
+        color: var(--text-secondary);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="workspace">Batatis <span class="meta">▾</span></div>
+        <div class="nav-group">
+          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h10M3 8h10M3 11h7"/></svg>Queue</div>
+          <div class="nav-item active" data-active="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5"/><path d="M8 5.5v3l2 1"/></svg>SCO review</div>
+          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v7M5.5 7.5 8 10l2.5-2.5M3 13h10"/></svg>Export package</div>
+        </div>
+        <div>
+          <div class="sidebar-section-label">Role</div>
+          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="6" r="2.5"/><path d="M3.5 13c1-2.5 2.8-3.5 4.5-3.5S11.5 10.5 12.5 13"/></svg>Safety Codes Officer</div>
+        </div>
+      </aside>
+      <main class="main-panel">
+        <header class="panel-header">
+          <h1 class="panel-title">Administrative review</h1>
+          <span class="meta">Completeness only · not technical correctness</span>
+        </header>
+        <div class="toolbar">
+          <button type="button" class="pill active" data-active="true">Gaps</button>
+          <button type="button" class="pill">Citations</button>
+          <button type="button" class="pill">Explanations</button>
+        </div>
+        <div class="tri">
+          <div class="mid">
+            <div class="item selected">
+              <div style="font-weight: 500">VAR-1042 · Straw wall</div>
+              <div class="meta" style="margin-top: 4px">
+                <span class="status-dot danger"></span> 3 admin gaps · updated 1h
+              </div>
+            </div>
+            <div class="item">
+              <div style="font-weight: 500">VAR-1038 · Stair geometry</div>
+              <div class="meta" style="margin-top: 4px">
+                <span class="status-dot success"></span> Admin-complete · 3h
+              </div>
+            </div>
+          </div>
+          <div class="detail">
+            <h2 style="margin: 0; font-size: var(--text-lg)">Gaps</h2>
+            <ul class="gap-list">
+              <li>
+                <span class="status-dot danger"></span> Risk assessment empty (alternative path)
+              </li>
+              <li>
+                <span class="status-dot danger"></span> Assumptions not labeled for SCO
+              </li>
+              <li>
+                <span class="status-dot warning"></span> Section C intent missing for 9.25.3.1.
+              </li>
+            </ul>
+            <h3 style="margin: 24px 0 8px; font-size: var(--text-md)">Citation (retrieved)</h3>
+            <div class="cite-block">9.25.2.1. … thermal insulation conforming to…</div>
+            <h3 style="margin: 16px 0 8px; font-size: var(--text-md)">AI explanation</h3>
+            <p class="ai-explain">
+              Applicant linked this article as the benchmark acceptable solution. Explanation is
+              for navigation only — this view does not determine whether the alternative meets
+              code.
+            </p>
+          </div>
+        </div>
+        <div class="footer-bar">
+          <button type="button" class="btn">Request applicant fixes</button>
+          <button type="button" class="btn btn-primary">Mark administratively complete</button>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

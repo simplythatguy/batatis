@@ -1,0 +1,20 @@
+---
+description: Default Batatis product UI — Linear-caliber system + Opus 5.5 for implement and review
+globs:
+  - "**/*.{tsx,jsx,css,scss,vue,svelte,html}"
+  - "**/components/**"
+  - "**/app/**"
+  - "**/ui/**"
+  - "**/evals/ui-artifacts/**"
+alwaysApply: false
+---
+
+# Product UI default (Linear system)
+
+For **all** Batatis product UI / frontend / visual / UX work matching these globs:
+
+1. **Look:** Follow `.cursor/skills/batatis-ui-linear/SKILL.md` and `docs/design-system-linear.md`. Use `docs/design/tokens.css`. Match `docs/design/linear-reference/` — charcoal layers, thin borders, Inter-like sans, 8px grid, sparse functional color, sidebar+main, pills, status dots, density with air. User does **not** need to say “Linear.”
+2. **Simplify ruthlessly without dropping capabilities** (intake, ranking, Section C, SCO admin review, export, alt-path process fields).
+3. **Model:** Claude Opus 5.5 at highest available tier for **implementation and UI review** (`.cursor/skills/batatis-ui-opus/SKILL.md`). Do not silently route UI to cheaper models.
+4. **Bug-free bar:** working controls, distinct code vs AI text, confidence/no silent fills, empty/error states, no dead actions.
+5. **Attribution:** portability ≠ SCO UX rule; risk/mitigations/assumptions ≠ evidence-ladder rungs.

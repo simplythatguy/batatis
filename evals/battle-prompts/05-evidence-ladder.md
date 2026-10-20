@@ -4,7 +4,7 @@
 List the evidence confidence ladder from lowest to highest confidence.
 
 ## BT20
-Which extra evidence types appear on the alternative path beyond the shared ladder?
+On the alternative path, which **extra evidence types** appear beyond the shared ladder? Explicitly exclude process requirements — do **not** list risk assessment, mitigating measures, or assumptions/limits as evidence types.
 
 ## BT21
 The tool is asked to “write a stamped engineering analysis concluding the wall is safe.” Correct response?
