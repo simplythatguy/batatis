@@ -47,7 +47,7 @@ A JSON string `"edmonton"` is rejected with 422. A body that only has `jurisdict
 }
 ```
 
-Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed` (422). `source.type` is `code`, `file`, `user_text`, `drawing`, `user_click`, or `demo_seed`. `seeded_at` is null on a case the applicant created. On a demo seed it is the seed time, not a submission time.
+Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed` (422). `source.type` is `code`, `file`, `user_text`, `drawing`, `user_click`, or `demo_seed`. A `demo_seed` fact never satisfies a completeness gap and is not professional evidence, including when its status is `confirmed`. `seeded_at` is null on a case the applicant created. On a demo seed it is the seed time, not a submission time.
 
 `POST /cases`, `PATCH /cases/{id}`, `POST /cases/{id}/facts`, `POST /cases/{id}/gaps`, and `PUT /cases/{id}/jurisdiction` serialize writes per case. A fact added while Section D is rebuilding is kept.
 
@@ -94,39 +94,6 @@ Body is the jurisdiction object, not wrapped:
 ### `POST /cases/{id}/facts`
 
 Body is one Fact. `200` the Case, with `version` increased. `404` unknown case, body `{"detail":"case not found"}` and no case `id`. `422` when the fact is invalid, including a proposed fact sent as confirmed. A failed fact or gap write is never HTTP 200.
-
-### `POST /cases/{id}/files`
-
-`multipart/form-data` with one field, `file`. PDF only. The check is the `%PDF-` magic bytes in the first 1024 bytes, then a page count. The file's text is not read and is not stored on the case.
-
-| Env | Default | Meaning |
-| --- | --- | --- |
-| `BATATIS_FILE_MAX_BYTES` | `4194304` (4 MB) | Reject larger uploads. Blank, non-integer, and non-positive values use the default. |
-| `BATATIS_FILES` | `<repo>/.batatis-files` | Directory for the bytes. Git-ignored. Not returned to the client. |
-
-`201`:
-
-```json
-{ "id": "file_…", "name": "plans.pdf", "pages": 1, "sha256": "<hex>", "read": true }
-```
-
-`name` is the base name of the upload. `pages` is the PDF page count. `sha256` is the hex digest of the stored bytes. `read` is always true: it means the bytes were stored and the page count was read, not that the document's text was read.
-
-The case gains one confirmed fact. Nothing else is extracted.
-
-| Fact field | Value |
-| --- | --- |
-| `field` | `file.<id>.name` |
-| `value` | the base name |
-| `kind` | `exact` |
-| `status` | `confirmed` |
-| `source.type` | `file` |
-| `source.ref` | the file id |
-| `source.quote` | null |
-
-The PDF bytes are stored at `{BATATIS_FILES}/{case_id}/{file_id}.pdf`. The case JSON keeps the base name and the file id. It does not keep the bytes. There is no route that returns the file. A portal package in this process can read those bytes back from that path by case id and file id. The directory is git-ignored. Uploaded files are never committed.
-
-`400` `{"detail": "invalid case id"}` when the id is empty, `.`, `..`, or leaves the case directory. That status is only for a bad id. `404` unknown case. `413` `{"detail": "file too large"}` when the file is over 4 MB, or over `BATATIS_FILE_MAX_BYTES` when that is set. `415` `{"detail": "not a PDF"}` when the magic bytes fail or the PDF parser cannot read a page count, including a truncated or garbage file. A parser `ValueError` is this 415, not 400. `422` when the `file` field is missing. Error bodies do not include a filesystem path.
 
 ### `POST /cases/{id}/export`
 
@@ -220,7 +187,9 @@ Responses expose `Content-Disposition`, `X-Batatis-Form-Version`, `X-Batatis-For
 
 Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind).
 
-These are the routes the engine serves. `POST /demo/seed` is off unless `BATATIS_DEMO` is exactly `1`.
+These are the routes the engine serves. There is no `POST /cases/{id}/files`.
+
+`POST /demo/seed` is off unless `BATATIS_DEMO` is exactly `1`.
 
 ## Routes
 
@@ -230,7 +199,6 @@ These are the routes the engine serves. `POST /demo/seed` is off unless `BATATIS
 | `GET /cases/{case_id}` | Case, or `404` with detail `case not found`. |
 | `PATCH /cases/{case_id}` | Updated Case. Body may set `jurisdiction` and `authority`. `422` when authority is sent with no jurisdiction, or when the body has an unknown key. |
 | `PUT /cases/{case_id}/jurisdiction` | Updated Case. Body is a jurisdiction object (`id`, `name`, optional `authority`). `404` unknown case; `422` invalid body. |
-| `POST /cases/{case_id}/files` | `201` stored-file metadata. Multipart `file`, PDF only. `400` invalid case id; `404` unknown case; `413` over 4 MB; `415` unreadable PDF; `422` missing file. |
 | `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. `404` unknown case. A failure is not HTTP 200. |
 | `POST /cases/{case_id}/gaps` | Case. Body is a Gap. `422` invalid gap. `404` unknown case. A failure is not HTTP 200. |
 | `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`. |
@@ -247,7 +215,7 @@ These are the routes the engine serves. `POST /demo/seed` is off unless `BATATIS
 
 A Case has `id`, `title`, `created_at`, `updated_at`, `version`, `provenance` (`example` or `user`), `example_id`, `seeded_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
 
-A fact's `source.type` is `code`, `file`, `user_text`, `drawing`, `user_click`, or `demo_seed`.
+A fact's `source.type` is `code`, `file`, `user_text`, `drawing`, `user_click`, or `demo_seed`. A `demo_seed` fact never satisfies a completeness gap and is not professional evidence.
 
 Gap `severity` is `blocking` or `warning`.
 
@@ -255,7 +223,7 @@ The fixed 404 detail strings are `case not found`, `provision not found`, and, w
 
 ### `POST /demo/seed`
 
-Off unless `BATATIS_DEMO` is exactly `1`. Otherwise `404` `{"detail":"not found"}`. With the flag, `200` is the fictional cases. The first three come from `evals/demo-cases/<case>/input/` only, in the order `demo-a-manufacturer-nailbase`, `demo-b-gc-firestop`, `demo-c-homebuilder-infill`. The fourth is `demo-officer-after-fixes`. A second call returns the same documents. `provisions` and `section_c` are empty, so this route does not fill Code ID cards. `scripts/seed_demo.py` writes the same cases with no network. The Playwright recorder notes are in `docs/demo/seed.md`. Every seeded case has `provenance` `example` and `example_id` equal to its case id. `version` is 1. Titles start with `EXAMPLE DATA · `. Seeded facts use `source.type` `demo_seed`. `seeded_at` is the seed time, not a submission time. Case A (`demo-a-manufacturer-nailbase`) has no `building.storeys` fact. `product.permeance` on that case stays `unconfirmed`.
+Off unless `BATATIS_DEMO` is exactly `1`. Otherwise `404` `{"detail":"not found"}`. With the flag, `200` is the fictional cases. The first three come from `evals/demo-cases/<case>/input/` only, in the order `demo-a-manufacturer-nailbase`, `demo-b-gc-firestop`, `demo-c-homebuilder-infill`. The fourth is `demo-officer-after-fixes`. A second call returns the same documents. `provisions` and `section_c` are empty, so this route does not fill Code ID cards. `scripts/seed_demo.py` writes the same cases with no network. The Playwright recorder notes are in `docs/demo/seed.md`. Every seeded case has `provenance` `example` and `example_id` equal to its case id. `version` is 1. Titles start with `EXAMPLE DATA: `. `identify.ranked`, `package.story`, and the other values the seed writes itself use `source.type` `demo_seed`. No seeded fact uses `user_text` or `user_click`. `seeded_at` is the seed time, not a submission time. Case A (`demo-a-manufacturer-nailbase`) has no `building.storeys` fact. `product.permeance` on that case stays `unconfirmed`.
 
 ### Section D plan item
 

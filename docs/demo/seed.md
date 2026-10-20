@@ -13,7 +13,7 @@ curl -X POST http://127.0.0.1:8000/demo/seed
 
 `BATATIS_DEMO` must be the character `1`. Any other value, including an unset variable, leaves the seed off. The script exits 2 and writes nothing. `POST /demo/seed` returns 404 `{"detail":"not found"}`. Leave the variable unset in production.
 
-The script prints the cases as JSON. A second run prints the same JSON and puts the same documents back, including after a later edit. Case ids and fact ids are fixed. `seeded_at` is the seed time (`2026-10-20T00:00:00+00:00`), not a submission time. Each case has `provenance` `example`, `example_id` equal to its id, and `version` 1. Titles start with `EXAMPLE DATA · `. Every seeded fact has `source.type` `demo_seed`.
+The script prints the cases as JSON. A second run prints the same JSON and puts the same documents back, including after a later edit. Case ids and fact ids are fixed. `seeded_at` is the seed time (`2026-10-20T00:00:00+00:00`), not a submission time. Each case has `provenance` `example`, `example_id` equal to its id, and `version` 1. Titles start with `EXAMPLE DATA: `. `identify.ranked`, `package.story`, and the other values the seed writes itself use `source.type` `demo_seed`. Quote-checked facts from the input files use `source.type` `file`. No seeded fact uses `user_text` or `user_click`. A `demo_seed` fact does not satisfy a gap and is not professional evidence.
 
 | Id | Input directory | City on the brief |
 | --- | --- | --- |
@@ -26,7 +26,7 @@ The first three are the applicant cases. The fourth is the officer package after
 
 Facts for the first three cases come only from those `input/` files. `keys/`, `expected/`, and `presenter/` are not read. Each of those facts' `source.ref` is the repo path under `input/`, and its `source.quote` is a substring of that file. `confirmed` means the file states it. It does not mean the statement was verified, and it is not a professional opinion. Unsigned drafts stay labelled by the `DRAFT` or `EXAMPLE` line in the file. Manufacturer performance claims stay `unconfirmed`.
 
-The seed does not copy PDF bytes and does not write `file.{id}.name`. The PDF is stored with its page count only; facts come from the pasted text. A stored file is `stored: true` and `text_read: false`. Case A does not include a storey count, so the engine can still ask for it.
+The seed does not copy PDF bytes and does not write file.{id}.name. This branch has no upload route. The recorder does not upload a brief.
 
 ## Code ID cards
 

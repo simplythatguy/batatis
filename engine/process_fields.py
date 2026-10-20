@@ -96,8 +96,14 @@ def latest_fact(case: Case, *fields: str) -> Fact | None:
 
 
 def confirmed_value(case: Case, *fields: str):
+    """A confirmed applicant or file fact. ``demo_seed`` never supplies one.
+
+    A seed-written value does not close a completeness gap and is not
+    professional evidence, even when its status is ``confirmed``.
+    """
     fact = latest_fact(case, *fields)
-    if fact and fact.status == 'confirmed' and fact.kind != 'proposed':
+    if (fact and fact.status == 'confirmed' and fact.kind != 'proposed'
+            and fact.source.type != 'demo_seed'):
         return fact.value
     return None
 

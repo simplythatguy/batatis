@@ -9,10 +9,14 @@ import pytest
 from fastapi.testclient import TestClient
 
 from engine.api import create_app
+from engine.completeness import check_completeness
 from engine.demo_seed import (
-    CASE_IDS, OFFICER_AFTER_ID, OFFICER_STORY, STAMP, TITLE_PREFIX, build_cases, demo_enabled, seed_cases,
+    CASE_IDS, OFFICER_AFTER_ID, OFFICER_STORY, STAMP, build_cases, demo_enabled, seed_cases,
 )
-from engine.models import Fact, Source
+from engine.models import Case, Fact, Jurisdiction, Source
+from engine.process_fields import confirmed_value
+from engine.professional import ProfessionalResult
+from engine.section_d import supporting_documents
 from engine.store import CaseStore
 
 REPO = Path(__file__).resolve().parents[2]
@@ -54,17 +58,59 @@ def test_cases_use_fixed_ids_and_only_input_files():
                 assert fact['value'] == Path(ref).name or fact['value'] in quote
 
 
-def test_seeded_titles_and_facts_are_labelled_as_example_data():
+def test_seeded_titles_use_the_example_data_prefix():
+    for case in build_cases():
+        assert case.title is not None and case.title.startswith('EXAMPLE DATA: ')
+        assert case.seeded_at == STAMP
+
+
+def test_no_seeded_fact_uses_an_applicant_source():
     cases = build_cases()
     for case in cases:
-        assert case.title is not None and case.title.startswith(TITLE_PREFIX)
-        assert case.seeded_at == STAMP
-        assert all(fact.source.type == 'demo_seed' for fact in case.facts)
+        assert all(fact.source.type not in {'user_text', 'user_click'} for fact in case.facts)
+    officer = next(case for case in cases if case.id == OFFICER_AFTER_ID)
+    ranked = next(fact for fact in officer.facts if fact.field == 'identify.ranked')
+    story = next(fact for fact in officer.facts if fact.field == 'package.story')
+    assert ranked.source.type == 'demo_seed'
+    assert story.source.type == 'demo_seed'
+    professional = [fact for fact in officer.facts if fact.value == 'needs professional']
+    assert professional and all(fact.source.type == 'demo_seed' and fact.status == 'unconfirmed'
+                                for fact in professional)
     nailbase = next(case for case in cases if case.id == CASE_IDS[0])
     assert all(fact.field != 'building.storeys' for fact in nailbase.facts)
     permeance = next(fact for fact in nailbase.facts if fact.field == 'product.permeance')
     assert permeance.status == 'unconfirmed'
-    assert permeance.source.type == 'demo_seed'
+    assert permeance.source.type == 'file'
+
+
+class _GapCodes:
+    def provision(self, provision_id, division=None):
+        return {'id': provision_id, 'citation': 'fixture citation', 'article_title': 'Fixture'}
+
+    def citation(self, provision_id, division=None):
+        return 'fixture citation'
+
+
+def test_demo_seed_does_not_satisfy_a_gap_or_professional_evidence():
+    seeded = Fact(field='owner', value='Dana Hartley', kind='pointed', status='confirmed',
+                  source=Source(type='demo_seed', ref='demo-seed', quote='Dana Hartley'))
+    stated = Fact(field='owner', value='Dana Hartley', kind='pointed', status='confirmed',
+                  source=Source(type='user_text', ref='applicant', quote='Dana Hartley'))
+    assert confirmed_value(Case(facts=[seeded]), 'owner') is None
+    assert confirmed_value(Case(facts=[stated]), 'owner') == 'Dana Hartley'
+    professional = ProfessionalResult(required='no', general_required='no', reasons=[], questions=[])
+    jurisdiction = Jurisdiction(id='county-of-example', name='County of Example')
+    still_open = check_completeness(Case(facts=[seeded], jurisdiction=jurisdiction), _GapCodes(),
+                                    professional=professional)
+    assert any(gap.field == 'owner_name' for gap in still_open)
+    closed = check_completeness(Case(facts=[stated], jurisdiction=jurisdiction), _GapCodes(),
+                                professional=professional)
+    assert all(gap.field != 'owner_name' for gap in closed)
+    seal = Fact(field='evidence.e1.professional_seal', value='needs professional', kind='pointed',
+                status='confirmed', source=Source(type='demo_seed', ref='demo-seed', quote='needs professional'))
+    ref = Fact(field='evidence.e1.file_ref', value='demo-seed', kind='pointed', status='confirmed',
+               source=Source(type='demo_seed', ref='demo-seed', quote='demo-seed'))
+    assert supporting_documents(Case(facts=[ref, seal])) == []
 
 
 def test_example_drafts_are_not_professional_evidence():

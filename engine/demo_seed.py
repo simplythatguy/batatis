@@ -16,7 +16,7 @@ from .models import Case, Fact, Jurisdiction, Source
 from .store import CaseStore
 
 STAMP = '2026-10-20T00:00:00+00:00'
-TITLE_PREFIX = 'EXAMPLE DATA · '
+TITLE_PREFIX = 'EXAMPLE DATA: '
 OFFICER_AFTER_ID = 'demo-officer-after-fixes'
 OFFICER_STORY = 'blocking gaps drop to only what a professional must supply'
 REPO = Path(__file__).resolve().parents[1]
@@ -366,4 +366,4 @@ def _fact(case_id: str, field: str, value: str, status: str, ref: str, quote: st
     return Fact(
         id=f'fact_{case_id}_{token}',
         field=field, value=value, kind='pointed', status=status,
-        source=Source(type='demo_seed', ref=ref, quote=quote))
+        source=Source(type='file', ref=ref, quote=quote))
