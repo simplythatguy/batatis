@@ -1,3 +1,5 @@
+**DRAFT: not for live sessions until placeholders are filled and ethics requirements are checked**
+
 # Consent to take part in a Batatis usability session
 
 > Not a university Research Ethics Board (REB)-approved study. This is informal product testing for a student hackathon project. **Runner:** if the results will be published beyond the hackathon (paper, thesis, public report), check with the University of Alberta Research Ethics Office whether ethics approval is needed *before* running sessions.
