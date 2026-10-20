@@ -6,7 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from engine.api import create_app
-from engine.models import Case, Jurisdiction, SectionCRow
+from engine.models import Case, Jurisdiction, SectionCRow, Source
 from engine.professional import ProfessionalResult
 from engine.section_d import EvidencePlanItem, SectionDPlan
 from engine.store import CaseStore
@@ -120,6 +120,16 @@ def test_evidence_post_groups_and_closes_then_delete_reopens(client):
 def test_pair_evidence_closes_only_that_pair_and_rejects_unknown_pairs(client):
     http, store = client
     case = _case(store)
+    rejected = http.post(f'/cases/{case.id}/evidence', json={
+        'provision_id': '9.99.1.1.(1)', 'objective': 'Q1', 'function': 'P1',
+        'evidence_type': 'CCMC evaluation', 'description': 'Applicant named a CCMC report they will attach',
+        'file_id': 'file_applicant_1'})
+    assert rejected.status_code == 400
+    assert rejected.json()['detail'] == 'file_id does not match a stored file'
+    case.facts.append(fact(
+        'file', 'file_applicant_1',
+        source=Source(type='file', ref='file_applicant_1', quote='Applicant file metadata.')))
+    store.put(case)
     created = http.post(f'/cases/{case.id}/evidence', json={
         'provision_id': '9.99.1.1.(1)', 'objective': 'Q1', 'function': 'P1',
         'evidence_type': 'CCMC evaluation', 'description': 'Applicant named a CCMC report they will attach',

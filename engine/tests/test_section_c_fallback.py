@@ -1,6 +1,9 @@
-"""Section C inherits clause, then sentence, then article rows, and does not invent pairs."""
+"""Section C pairs come only from codedb attribution_status. None stays empty."""
+from contextlib import closing
+
 import pytest
 
+from codedb import store
 from codedb.tests.mini_db import build
 from engine.codes import Codes
 from engine.completeness import check_completeness
@@ -38,11 +41,18 @@ def test_sentence_without_an_article_row_stays_a_gap(codes, pid, root):
     assert 'compli' not in row.citation.casefold()
 
 
-def test_sentence_attributed_only_at_clause_a_inherits_that_clause(codes):
-    [row] = section_c_rows(['3.1.8.1.(1)'], codes)
-    assert row.attribution_status == 'inherited from parent'
-    assert row.attributed_via == '3.1.8.1.(1)(a)'
-    assert sorted((pair.function, pair.objective) for pair in row.pairs) == [('F03', 'OP1.2'), ('F03', 'OS1.2')]
+def test_3_1_8_1_1_has_no_sentence_level_pairs(codes):
+    """Status clause_level keeps pairs off the sentence and shows the clause that has them."""
+    rows = section_c_rows(['3.1.8.1.(1)'], codes)
+    sentence = next(row for row in rows if row.provision_id == '3.1.8.1.(1)')
+    assert sentence.pairs == []
+    assert sentence.attributed_via is None
+    assert sentence.attribution is None
+    assert sentence.attribution_label == 'attributed at clause level: (a)'
+    clause = next(row for row in rows if row.provision_id == '3.1.8.1.(1)(a)')
+    assert clause.attribution_status == 'direct'
+    assert clause.attributed_via is None
+    assert sorted((pair.function, pair.objective) for pair in clause.pairs) == [('F03', 'OP1.2'), ('F03', 'OS1.2')]
 
 
 def test_clause_without_rows_does_not_take_a_sibling_clause(codes):
@@ -61,10 +71,15 @@ def test_clause_inherits_its_sentence_not_a_made_up_pair(codes):
 
 
 def test_sentence_falls_back_to_an_article_row(codes):
+    """8.1.1.1.(1) is attribution_status none. The article row is not copied onto it."""
+    rec = codes.provision('8.1.1.1.(1)', 'B')
+    assert rec['attribution_status']['status'] == 'none'
     [row] = section_c_rows(['8.1.1.1.(1)'], codes)
-    assert row.attribution_status == 'inherited from parent'
-    assert row.attributed_via == '8.1.1.1.'
-    assert [(pair.function, pair.objective) for pair in row.pairs] == [('F10', 'OS3.7')]
+    assert row.pairs == []
+    assert row.attributed_via is None
+    assert row.attribution == NOT_ATTRIBUTED
+    assert row.attribution_label == 'lookup not available'
+    assert row.attribution_status == 'no row in the attribution table'
 
 
 def test_not_determined_sentence_states_that_and_does_not_copy_the_article(codes):
@@ -173,6 +188,22 @@ def test_adding_3_1_9_4_7_names_each_new_blocking_gap(codes, monkeypatch):
         assert gap.evidence_types
         for kind in gap.evidence_types:
             assert kind in gap.message
+
+
+def test_every_none_status_returns_empty_pairs(codes):
+    """Every attribution_status none id in the mini database has no pairs and no attributed_via."""
+    with closing(store.connect(codes.db_path)) as con:
+        none_ids = [row['provision_id'] for row in con.execute(
+            "SELECT provision_id FROM attribution_status WHERE status='none' ORDER BY provision_id")]
+    assert none_ids
+    for pid in none_ids:
+        match = [row for row in section_c_rows([pid], codes) if row.provision_id == pid]
+        assert len(match) == 1
+        row = match[0]
+        assert row.pairs == []
+        assert row.attributed_via is None
+        assert row.attribution == NOT_ATTRIBUTED
+        assert row.attribution_label == 'lookup not available'
 
 
 def test_division_c_sentence_is_not_a_section_c_row(codes):

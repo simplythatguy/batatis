@@ -75,6 +75,11 @@ class DescriptionResponse(BaseModel):
     facts: list[DescriptionFactView]
 
 
+def _stored_file(case: Case, file_id: str) -> bool:
+    """True when a fact already on the case points at this file. Bytes are not read."""
+    return any(fact.source.type == 'file' and fact.source.ref == file_id for fact in case.facts)
+
+
 def _fact_from_extract(extracted) -> Fact:
     return Fact(field=extracted.field, value=extracted.value, kind='pointed', status='unconfirmed',
                 source=Source(type='description', ref='description', quote=extracted.quote))
@@ -107,6 +112,8 @@ def create_answers_router(cases: Callable[[], CaseStore], code: Callable[[], Cod
         matched = [item for item in items if item.provision_id == body.provision_id]
         if not matched:
             raise HTTPException(400, 'confirm this Division B benchmark before attaching evidence')
+        if body.file_id is not None and not _stored_file(case, body.file_id):
+            raise HTTPException(400, 'file_id does not match a stored file')
         if body.objective is not None:
             pair = next((item for item in matched
                          if item.objective == body.objective and item.function == body.function), None)

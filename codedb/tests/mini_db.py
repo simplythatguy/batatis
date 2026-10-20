@@ -82,6 +82,8 @@ def build(path) -> None:
     status('3.1.8.1.(1)', 'clause_level')
     attr('3.1.8.1.(1)(a)', 'F03', 'OS1.2', 1)
     attr('3.1.8.1.(1)(a)', 'F03', 'OP1.2', 2)
+    status('3.1.8.1.(1)(a)', 'direct')
+    status('3.1.8.1.(1)(b)', 'none', how='not_determined')
 
     prov('B', '3.1.4.2.', 'article')
     prov('B', '3.1.4.2.(1)', 'sentence', '3.1.4.2.')

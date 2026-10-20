@@ -98,8 +98,8 @@ class SectionCRow(BaseModel):
     provision_id: str
     citation: str
     attribution_status: AttributionStatus
-    attributed_via: str | None = None          # parent provision when inherited
-    # Set when NBC(AE) 2023 attributes no objective or function. Not a guessed pair.
+    attributed_via: str | None = None          # codedb root_provision when status is inherits
+    # Set when codedb attribution_status is none. Not a guessed pair.
     attribution: Literal['not_attributed'] | None = None
     attribution_label: str | None = None
     pairs: list[AttributionPair]
