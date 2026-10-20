@@ -46,11 +46,16 @@ def _offenders(path: Path) -> list[str]:
             node.module == 'openai' or node.module.startswith('openai.')
         ):
             found.append(f'from {node.module}')
+        elif isinstance(node, ast.ImportFrom) and 'tests' not in path.parts:
+            if any(alias.name == '_post_chat' for alias in node.names):
+                found.append('private transport import')
         elif isinstance(node, ast.Call):
             func = node.func
             name = func.attr if isinstance(func, ast.Attribute) else getattr(func, 'id', '')
             if name in CLIENTS:
                 found.append(f'call {name}')
+            if name == '_post_chat' and 'tests' not in path.parts:
+                found.append('private transport bypass')
         elif isinstance(node, ast.Constant) and isinstance(node.value, str) and HOST in node.value:
             found.append('api host')
     return found
@@ -84,7 +89,7 @@ def test_deployed_routes_do_not_call_the_anthropic_verifier():
         assert 'ClaudeVerifier' not in text
     spend = (ROOT / 'engine/spend.py').read_text()
     assert 'ClaudeVerifier' not in spend
-    assert 'import anthropic' not in spend.lower()
+    assert ('import ' + 'anthropic') not in spend.lower()
 
 
 def test_anthropic_verifier_cannot_run_on_the_deployed_path(monkeypatch):
@@ -102,6 +107,107 @@ def test_anthropic_verifier_cannot_run_on_the_deployed_path(monkeypatch):
     assert anthropic_verifier_allowed() is False
     with pytest.raises(RuntimeError, match='OpenAI only'):
         ClaudeVerifier('codedb/build/codedb.sqlite')
+
+
+def _paid_needles():
+    # Split so this file does not contain the contiguous literals the scan rejects.
+    return (
+        'import ' + 'anthropic',
+        'from ' + 'anthropic',
+        'Anthropic' + '(',
+        'api.' + 'typesafe.ai',
+        'openrouter.' + 'ai/api',
+        'HTTPS' + 'Connection',
+        'HTTP' + 'Connection(',
+        'client' + '.ask(',
+        'import ' + 'jevkit',
+        'from ' + '.jevkit',
+        '.identify.' + 'jevkit',
+    )
+
+
+_PAID_ALLOWED = {
+    Path('engine/identify/verify.py'),
+    Path('engine/cli_sut.py'),
+}
+
+
+def _paid_allowed(path: Path) -> bool:
+    relative = path.relative_to(ROOT)
+    if relative in _PAID_ALLOWED:
+        return True
+    parts = relative.parts
+    if parts[:3] == ('engine', 'identify', 'jevkit'):
+        return True
+    if 'tests' in parts:
+        return True
+    if parts and parts[0] in {'evals', 'evals_dev'}:
+        return True
+    if parts[:2] == ('docs', 'research'):
+        return True
+    return False
+
+
+def test_paid_clients_stay_in_cli_and_eval_modules():
+    """Anthropic and Jev/TypeSafe call sites outside the CLI and eval modules fail CI.
+
+    The scan includes ``api.typesafe.ai`` and jevkit call sites (``client.ask``,
+    a jevkit import). The vendored client, the CLI runner, evals, and tests are allowed.
+    """
+    needles = _paid_needles()
+    roots = [ROOT / 'engine', ROOT / 'evals', ROOT / 'evals_dev', ROOT / 'docs' / 'research']
+    problems = []
+    for root in roots:
+        if not root.is_dir():
+            continue
+        for path in root.rglob('*'):
+            if not path.is_file() or '__pycache__' in path.parts or path.suffix == '.pyc':
+                continue
+            if _paid_allowed(path):
+                continue
+            text = path.read_text(errors='ignore')
+            for needle in needles:
+                if needle in text:
+                    problems.append(f'{path.relative_to(ROOT)}: paid client')
+                    break
+    assert problems == []
+
+
+def test_live_refuses_jev_and_typesafe(monkeypatch):
+    from engine.identify.jevkit.client import JevError, ask, noul
+
+    calls = []
+
+    def transport(body, headers, timeout):
+        calls.append(body)
+        return b'{}'
+
+    monkeypatch.setenv('BATATIS_LIVE', '1')
+    monkeypatch.delenv('VERCEL', raising=False)
+    with pytest.raises(JevError, match='OpenAI only'):
+        ask('a house', {'governs': noul('it governs')}, api_key='test-jev-key', transport=transport)
+    assert calls == []
+
+    monkeypatch.delenv('BATATIS_LIVE', raising=False)
+    monkeypatch.setenv('VERCEL', '1')
+    with pytest.raises(JevError, match='OpenAI only'):
+        ask('a house', {'governs': noul('it governs')}, api_key='test-jev-key', transport=transport)
+    assert calls == []
+
+    monkeypatch.delenv('VERCEL', raising=False)
+    with pytest.raises(JevError, match='malformed'):
+        ask('a house', {'governs': noul('it governs')}, api_key='test-jev-key', transport=transport)
+    assert len(calls) == 1
+
+    from engine.identify.screen import Judge, jev_ask
+    monkeypatch.setenv('BATATIS_LIVE', '1')
+    with pytest.raises(RuntimeError, match='OpenAI only'):
+        jev_ask()
+    with pytest.raises(RuntimeError, match='OpenAI only'):
+        Judge()
+    screen = (ENGINE / 'identify' / 'screen.py').read_text()
+    for needle in ('client' + '.ask(', 'import ' + 'jevkit', 'from ' + '.jevkit', 'api.' + 'typesafe.ai'):
+        assert needle not in screen
 
 
 def test_live_refuses_anthropic_provider(tmp_path, monkeypatch):

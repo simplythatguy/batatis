@@ -112,7 +112,7 @@ jobs:
       - name: Install engine requirements
         run: python -m pip install -r engine/requirements.txt
       - name: Spend tests against Postgres
-        run: python -m pytest -q engine/tests/test_spend_postgres.py engine/tests/test_spend.py -rs
+        run: python -m pytest -q engine/tests/test_spend_postgres.py engine/tests/test_store_postgres.py engine/tests/test_spend.py engine/tests/test_models_store.py -rs
 
   gitleaks:
     name: gitleaks

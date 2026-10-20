@@ -1,32 +1,36 @@
-# Deploy notes for the live OpenAI spend cap
+# Live OpenAI spending gate
 
-Service layout and `vercel.json` are a separate change. This page is the spend cap those functions have to have before a key is turned on.
+The key and live flag stay off until the parent approves the integrated #24/#38/#41 revision. This change does not deploy or activate a provider. #38 owns service layout, rewrites, headers, and Vercel configuration; #24 owns the canonical privacy notice, retention, and deletion lifecycle.
 
-The engine on Vercel Hobby is a set of stateless functions. They do not share memory, so the running total cannot live in the process. It is one Postgres table, `spend_ledger`, on Neon. Neon's free tier is enough for that table: one row per keyed call. The code database is a separate read-only sqlite file. The ledger never opens `codedb.sqlite`. Pointing `DATABASE_URL` at that file is refused, and a read-only bundle stays read-only.
+## Configuration
 
-## Environment
+The lifetime allowance is **US$20 total**, with no daily cap or reset. `BATATIS_TOTAL_BUDGET_USD` defaults to `20` only when unset. A finite value from `0` through `20` can lower the allowance. Blank, negative, nonfinite, malformed, or higher values refuse calls. `BATATIS_DAILY_SPEND_CAP_USD` is ignored.
 
-Set these on the Vercel project for the engine runtime. Do not commit values. `OPENAI_API_KEY` is set in Vercel only after this cap is on `dev`. Until then leave `BATATIS_LIVE` unset. Offline mode does not call a model and does not need a key.
+Live calls require both `BATATIS_LIVE=1` and a server-only `OPENAI_API_KEY`. Neither a key nor a database URL is logged or returned. Never use a `VITE_` key. `GET /status/budget` reports configuration/readability, not permission to activate the key.
 
-| Variable | Purpose |
-| --- | --- |
-| `BATATIS_LIVE` | `1` turns live mode on. Any other value, including unset, stays offline. Live mode also needs `OPENAI_API_KEY`. |
-| `OPENAI_API_KEY` | Server only. Do not use a `VITE_` name. The process does not log it, and `GET /status/budget` does not return it. |
-| `BATATIS_TOTAL_BUDGET_USD` | Total cap in USD for every keyed OpenAI call. Default `20` when unset. There is no daily cap. |
-| `DATABASE_URL` | Neon (or any Postgres) URL for the spend ledger. Preferred over `POSTGRES_URL`. A `postgres://` scheme is rewritten to `postgresql://`. `sslmode=require` is added when the URL does not already set `sslmode`. |
-| `POSTGRES_URL` | Used only when `DATABASE_URL` is empty. Same rewriting rules. |
+The shared ledger is `spend_ledger` in Postgres, selected by `DATABASE_URL`, then `POSTGRES_URL`. `postgres://` is normalized to `postgresql://`; `sslmode=require` is added when no sslmode is specified. Hosted/Vercel mode refuses SQLite URLs. Explicit SQLite files are local test doubles; the code database is a separate read-only file and is never a ledger.
 
-`BATATIS_DAILY_SPEND_CAP_USD` is ignored if it is set. The earlier $5-a-day cap is not used. The cap is one total, default 20, stored in Postgres.
+A missing/unavailable ledger, invalid stored amounts/status, invalid pricing/configuration, or insufficient allowance refuses the provider before dispatch. Malformed legacy TEXT money is rejected before SQL can coerce it to zero. Reservations and charges round **up** to microdollars; the available cap rounds **down**. Postgres explicitly uses READ COMMITTED and takes an advisory transaction lock before validating the ledger and conditionally inserting. Settlement uses the same lock. Concurrent instances share settled costs and open reservations.
 
-`POST /identify` counts toward `BATATIS_LLM_RATE_LIMIT` (default 20) per IP per `BATATIS_LLM_RATE_WINDOW_SECONDS` (default 600). `GET /ccmc/search` counts toward `BATATIS_SEARCH_RATE_LIMIT` (default 60) per IP per `BATATIS_SEARCH_RATE_WINDOW_SECONDS` (default 600). The client IP is the first hop of `x-vercel-forwarded-for`, then `X-Forwarded-For`, then the peer address. A request over the limit is HTTP 429 with `Retry-After` and a detail that says which limit was reached. Both windows are in memory on one process. They are per instance unless a later change stores them in Postgres. They are not the spend cap.
+## The one provider request
 
-`BATATIS_LLM_PROVIDER=anthropic` is refused when `BATATIS_LIVE=1`. Live calls are OpenAI only. The only request function is `openai_chat_json` in `engine/spend.py`. It estimates input tokens from the messages (tiktoken `o200k_base` when that package is installed, otherwise `ceil(character_count / 3)`, which reserves high), always sends `max_completion_tokens`, and reserves the input rate times that estimate plus the output rate times `max_completion_tokens`.
+`openai_chat_json` in `engine/spend.py` owns the production OpenAI transport. Callers supply text messages, a known model, a supported JSON response format, and an output limit. There is no arbitrary client callback. The approved GPT-4.1/mini names resolve to their dated `2025-04-14` snapshots; the request explicitly sets `service_tier=default`, `n=1`, `store=false`, and `max_completion_tokens` (1–32,768). Tools, images/audio, recursive/remote schema references, and unknown models/providers are refused.
 
-Over the spend cap, or when the ledger cannot be checked, `POST /identify` stays HTTP 200. `label` is `keyword search, no AI`, `notice` is set, and `hits` are the BM25 list. A provider error also stays HTTP 200: the reservation is released, `label` is `API fallback`, and `hits` are that same BM25 list. A live model result uses `label` `model output, not verified` and does not carry an accuracy or score field.
+The input reservation counts UTF-8 bytes of the **complete serialized request**, including the response schema, plus 4,096 framing tokens and 64 per message. Requests whose bound plus output exceeds the model context window are refused. This intentionally over-reserves rather than using English character averages or an incomplete tokenizer count. Standard text rates include cached input at the full input price. Sources checked 2026-10-20: [GPT-4.1 mini](https://developers.openai.com/api/docs/models/gpt-4.1-mini), [GPT-4.1](https://developers.openai.com/api/docs/models/gpt-4.1), [Chat Completions request limits and tier](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create).
 
-## Releasing a stuck reservation
+A durable reservation precedes one HTTP attempt. The urllib transport has no SDK/HTTP retries and refuses redirects. Every timeout, HTTP error, dropped connection, cancellation, malformed/refused response, model/tier mismatch, or failed settlement conservatively keeps the reservation. A network exception is never proof that a request was not billed. A later retry needs its own reservation. Missing or invalid usage consumes the full estimate. Valid usage settles to the upward-rounded actual text cost. A reported cost above the estimate is recorded in full and makes subsequent ledger validation refuse further calls; it is never silently clamped. Such a response violates the provider request bounds and requires investigation before activation can continue.
 
-A row left at `reserved` still counts against the cap. `GET /status/budget` includes it in `remaining_usd`. That happens when a process stops after the insert and before settle or release. Release it in the Neon SQL editor, or with `psql`, after listing the open rows:
+Anthropic and Jev/TypeSafe/OpenRouter are disabled in both live and hosted execution, including the Jev transport. They are not covered by this OpenAI ledger. Offline research adapters remain separate. CI scans engine source for ungated OpenAI construction/API calls.
+
+`POST /identify` reranks only BM25 candidate IDs that exist in the local Division B corpus. Its prompt contains the query and bounded corpus snippets; its JSON schema restricts returned IDs. The response is accepted only when complete, unique, and grounded in those candidates. A valid result has `label: model output, not verified`. Provider/validation failures return HTTP 200 with `label: keyword search, no AI`, a notice, and keyword hits. An unavailable corpus causes no paid call. This is candidate reranking, not the full #12 identification/verification pipeline. Completeness and Section D currently use rules, not model calls; future callers must use the same spending boundary.
+
+Per-IP windows remain best-effort, in memory per instance: `/identify` defaults to 20/600 seconds and `/ccmc/search` to 60/600 seconds. Their `BATATIS_LLM_RATE_*` and `BATATIS_SEARCH_RATE_*` settings do not authorize spend or replace the shared ledger. Over the window, routes return 429 with `Retry-After`.
+
+## Reconciling an uncertain reservation
+
+A stranded `reserved` row remains counted forever, including across deploys and dates. **Never release it based on age or a timeout alone. Never truncate the ledger or delete settled rows.** Billing evidence for that specific attempt must establish no charge, or a smaller verified actual charge, before a human reconciles it. Otherwise retain the full reservation.
+
+Inspect only the needed rows in a trusted database session:
 
 ```sql
 SELECT id, ts, route, model, est_usd, status
@@ -34,28 +38,19 @@ FROM spend_ledger
 WHERE status = 'reserved';
 ```
 
-Release one row by id:
+Only after provider billing evidence establishes **zero charge for one specific row**, replace the example ID and release that row:
 
 ```sql
 UPDATE spend_ledger
 SET status = 'released', actual_usd = NULL
-WHERE status = 'reserved' AND id = 123;
+WHERE status = 'reserved' AND id = 123
+RETURNING id;
 ```
 
-Or every open reservation older than a UTC cutoff (`ts` is `YYYY-MM-DDTHH:MM:SS.ffffffZ`):
+For a verified nonzero charge, retain the reservation until a reviewed reconciliation records the conservatively rounded amount. A failed/ambiguous database commit must be reread before trying again. Do not run a bulk or age-based sweep.
 
-```sql
-UPDATE spend_ledger
-SET status = 'released', actual_usd = NULL
-WHERE status = 'reserved' AND ts < '2026-10-20T00:00:00.000000Z';
-```
+## Verification and integration
 
-Leave `settled` rows in place. They are the spent total.
+Offline checks fake the provider at the transport boundary. Real Postgres tests require explicit `BATATIS_TEST_POSTGRES_URL`; every test creates a unique schema with its own search_path and drops only that schema. `DATABASE_URL` alone never authorizes destructive test setup. CI supplies an isolated postgres:16 service, exercises five simultaneous connections (including a REPEATABLE READ connection default), concurrent first-use DDL, lost commit acknowledgements, failed settlements, corrupted ledger values, and timeouts. A connection-outage probe also runs without Postgres. Do not point a test at shared case/spend tables.
 
-`X-Batatis-Notice` and the engine `X-Robots-Tag` header belong to #24 (`http_guard`, `PII_NOTICE`). This branch does not set those headers. `web/index.html` carries the robots meta tag, and every `vercel.json` route sends `X-Robots-Tag: noindex, nofollow`.
-
-The code database is not a public file. `vercel.json` answers `/codedb.sqlite`, `/codedb/build/codedb.sqlite`, and `/api/codedb/build/codedb.sqlite` with 404, ahead of any later rewrite. Those routes have to stay. The service layout itself is a separate change. The web build's `dist/` does not contain `codedb.sqlite`.
-
-No database, a database error, an unknown model, or a full cap refuses the provider call and serves the offline path with the `notice` strings in `docs/api-contract.md`. Those refusals are HTTP 200, not 5xx.
-
-`GET /status/budget` reports `live`, `cap_usd`, `spent_usd`, and `remaining_usd`.
+Key activation still requires the parent's same-head independent review, green affected CI, integrated #24 privacy/retention and #38 deployment verification, and provider acceptance evidence under the spending gate. Local fakes and Postgres accounting tests do not establish a live provider result.

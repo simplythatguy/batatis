@@ -65,11 +65,18 @@ def test_delete_case_route_removes_the_case(tmp_path):
 
 
 def test_vercel_json_sets_robots_noindex_on_every_route():
+    config = json.loads((ROOT / 'vercel.json').read_text())
     routes = _vercel_routes()
-    assert routes
-    for route in routes:
-        headers = {key.lower(): value for key, value in (route.get('headers') or {}).items()}
-        assert headers.get('x-robots-tag') == 'noindex, nofollow', route.get('src')
+    global_headers = {
+        h['key'].lower(): h['value']
+        for entry in config.get('headers', []) if entry.get('source') == '/(.*)'
+        for h in entry.get('headers', [])
+    }
+    if global_headers.get('x-robots-tag') != 'noindex, nofollow':
+        assert routes
+        for route in routes:
+            headers = {key.lower(): value for key, value in (route.get('headers') or {}).items()}
+            assert headers.get('x-robots-tag') == 'noindex, nofollow', route.get('src')
     index = (ROOT / 'web/index.html').read_text()
     assert 'name="robots"' in index and 'content="noindex, nofollow"' in index
 
@@ -95,7 +102,7 @@ def test_engine_codedb_paths_404_and_do_not_return_the_file(tmp_path, monkeypatc
     planted.write_bytes(MARKER + b'\x00not-for-download')
     monkeypatch.setenv('BATATIS_CODEDB', str(planted))
     client = TestClient(create_app())
-    for path in CODEDB_DOWNLOADS:
+    for path in (*CODEDB_DOWNLOADS, '/reference/text/NBC.jsonl', '/codedb/build/extract.jsonl'):
         response = client.get(path)
         assert response.status_code == 404, path
         assert MARKER not in response.content
@@ -106,7 +113,7 @@ def test_engine_codedb_paths_404_and_do_not_return_the_file(tmp_path, monkeypatc
 
 def _vercel_routes():
     config = json.loads((ROOT / 'vercel.json').read_text())
-    return config['routes']
+    return config.get('routes', [])
 
 
 def _routed_status(path: str, dist: Path) -> tuple[int, bytes]:
@@ -115,6 +122,15 @@ def _routed_status(path: str, dist: Path) -> tuple[int, bytes]:
         if route.get('src') and re.search(route['src'], path):
             if route.get('status') == 404:
                 return 404, b'not found'
+    config = json.loads((ROOT / 'vercel.json').read_text())
+    for rewrite in config.get('rewrites', []):
+        if re.search(rewrite['source'], path):
+            destination = rewrite.get('destination')
+            if isinstance(destination, dict) and destination.get('service') == 'engine':
+                from engine.identify_http import codedb_download
+                if codedb_download(path):
+                    return 404, b'not found'
+            break
     file = dist / path.lstrip('/')
     if file.is_file():
         return 200, file.read_bytes()
@@ -123,7 +139,7 @@ def _routed_status(path: str, dist: Path) -> tuple[int, bytes]:
 
 def test_vercel_routes_404_a_planted_codedb_sqlite(tmp_path):
     dist = tmp_path / 'dist'
-    for path in CODEDB_DOWNLOADS:
+    for path in (*CODEDB_DOWNLOADS, '/reference/text/NBC.jsonl', '/codedb/build/extract.jsonl'):
         file = dist / path.lstrip('/')
         file.parent.mkdir(parents=True, exist_ok=True)
         file.write_bytes(MARKER + b'\x00planted')
@@ -145,7 +161,7 @@ def test_vercel_routes_404_a_planted_codedb_sqlite(tmp_path):
     server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
     Thread(target=server.serve_forever, daemon=True).start()
     try:
-        for path in CODEDB_DOWNLOADS:
+        for path in (*CODEDB_DOWNLOADS, '/reference/text/NBC.jsonl', '/codedb/build/extract.jsonl'):
             with pytest.raises(urllib.error.HTTPError) as caught:
                 urllib.request.urlopen(f'http://127.0.0.1:{server.server_address[1]}{path}')
             assert caught.value.code == 404

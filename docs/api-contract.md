@@ -10,7 +10,7 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | --- | --- |
 | `GET /status/budget` | `200` `{ "live", "cap_usd", "spent_usd", "remaining_usd" }`. See below. |
 | `POST /identify` | Body `{ "query" }`. `200` `{ "label", "notice", "hits" }`. A live model result has `label` `model output, not verified` and no accuracy or score field. Over the cap, or when the ledger cannot be checked, `label` is `keyword search, no AI`, `notice` is set, and `hits` are the BM25 article ids. Over the per-IP limit, `429` with `Retry-After` and detail `Live model limit reached; try again in N seconds`. The limit is in memory on each engine instance. |
-| `GET /codedb.sqlite`, `GET /codedb/build/codedb.sqlite`, `GET /api/codedb/build/codedb.sqlite` | `404` `{ "detail": "not found" }`. The code database file is not the body. |
+| `GET` paths ending in `.sqlite` or `.jsonl`, including `/codedb.sqlite`, `/codedb/build/codedb.sqlite`, `/api/codedb/build/codedb.sqlite` | `404` `{ "detail": "not found" }`. The code database file is not the body. |
 | `POST /cases` | `201` Case. Body is optional: `title`, `jurisdiction` (`id`, `name`, `authority`). |
 | `GET /cases/{case_id}` | Case, or `404` with detail `case not found`. |
 | `DELETE /cases/{case_id}` | `204` with an empty body when the case is removed. `404` detail `case not found` when it is not stored. |
@@ -28,11 +28,13 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 
 ### Privacy notice
 
-`X-Batatis-Notice` and the engine `X-Robots-Tag` header are owned by #24 (`http_guard`, `PII_NOTICE`). This branch does not set either header and does not keep a second notice string. `web/index.html` has `<meta name="robots" content="noindex, nofollow">`. Every route in `vercel.json` sends `X-Robots-Tag: noindex, nofollow`.
+`X-Batatis-Notice` and the engine `X-Robots-Tag` header are owned by #24 (`http_guard`, `PII_NOTICE`). This branch does not set either header and does not keep a second notice string. `web/index.html` has `<meta name="robots" content="noindex, nofollow">`. `vercel.json` `headers` send `X-Robots-Tag: noindex, nofollow` on `/(.*)`. There is no `routes` key.
 
 ### Labels
 
-A live model result uses the label `model output, not verified`. It does not include an accuracy field, a score field, or an eval fraction such as `9/11` or `50/60`. Over the spend cap, or when the ledger is unavailable, `POST /identify` stays HTTP 200 and returns `label` `keyword search, no AI` together with `notice`. A provider error, including a model refusal, also stays HTTP 200: `label` is `API fallback`, `notice` is omitted, and the reservation is released. The `hits` on either fallback are BM25 article ids from the code database, or an empty list when that database cannot be read.
+A live model result uses `model output, not verified` and returns only validated, unique article IDs from the supplied Division B corpus candidates. It carries no model prose, accuracy/score fields, or eval fractions. This endpoint reranks BM25 candidates; it does not implement the full #12 pipeline. An unavailable corpus causes no model call.
+
+Cap/ledger refusals and provider or result-validation errors return HTTP 200, `label: keyword search, no AI`, a notice, and BM25 article IDs (an empty list when the code database cannot be read). Uncertain provider attempts retain their full reservation; errors never automatically refund budget.
 
 ### Rate limits
 
@@ -40,16 +42,20 @@ A live model result uses the label `model output, not verified`. It does not inc
 
 ### Spend cap and `notice`
 
-Every live OpenAI call goes through `openai_chat_json` in `engine/spend.py`, which reserves against one total cap before the provider is contacted (`BATATIS_TOTAL_BUDGET_USD`, default 20). There is no daily cap. The reservation is the model's input rate times an estimate of the input tokens, plus its output rate times `max_completion_tokens` (always sent). The input estimate is tiktoken `o200k_base` when that package imports, otherwise `ceil(character_count / 3)` of the message JSON, which is above a typical English rate and so reserves high. `BATATIS_LLM_PROVIDER=anthropic` is refused when `BATATIS_LIVE=1`.
+`openai_chat_json` in `engine/spend.py` owns one production OpenAI HTTP attempt. It reserves before dispatch against the permanent `BATATIS_TOTAL_BUDGET_USD` allowance (default and maximum US$20), including settled spend and outstanding reservations. There is no daily cap or automatic reset. Blank/invalid caps, unknown or invalid pricing, bad ledger values, and hosted SQLite ledgers fail closed.
+
+The request pins a dated GPT-4.1/mini snapshot, standard service tier, one text completion, and `max_completion_tokens` (1–32,768). Input is bounded by UTF-8 bytes of the complete serialized request, including schema, plus framing allowance. Unsupported tools/modalities/formats are refused. Charges/reservations round up to microdollars; available allowance rounds down. Transport retries and redirects are disabled. Anthropic and Jev/TypeSafe/OpenRouter are disabled on live/hosted paths. Completeness and Section D are rules-only at this revision; future model paths must use this same gate.
+
+After dispatch begins, timeouts, connection errors, refusals, malformed responses, cancellations, and failed settlements retain the full reservation. Valid token usage can settle lower. Missing/invalid usage consumes the worst case. A reported overrun is recorded without clamping and blocks further calls. Never release a row solely because it is old: reconciliation requires attempt-specific provider billing evidence. See [deploy notes](deploy.md).
 
 `GET /status/budget` returns only:
 
 | Field | Type | Meaning |
 | --- | --- | --- |
 | `live` | bool | True when `BATATIS_LIVE=1` and `OPENAI_API_KEY` is set. The key is not in the body. |
-| `cap_usd` | number or null | The total cap, in dollars, rounded to cents. Null when the variable is not a non-negative number. |
+| `cap_usd` | number or null | The total cap, in dollars, rounded to cents. Null for blank/invalid values or amounts outside 0–20. |
 | `spent_usd` | number or null | Settled spend, rounded to cents. Null when the ledger cannot be read. |
-| `remaining_usd` | number or null | Cap minus settled spend minus open reservations, rounded to cents, never below zero. Null when the ledger cannot be read. |
+| `remaining_usd` | number or null | Cap minus settled spend minus open reservations, rounded down to cents, never below zero. Null when the ledger cannot be read. |
 
 The body has no per-request rows and no credentials. A missing ledger or a ledger error is still HTTP 200.
 

@@ -65,6 +65,19 @@ def section_c(article_ids: list[str], codes: Codes) -> list[dict]:
     return rows
 
 
+def typesafe_ask(model: str | None = None):
+    """The one Jev/TypeSafe call site outside the vendored client. Refused in live mode."""
+    from engine.openai_only import refuse_non_openai
+    refuse_non_openai('Jev client')
+    from engine.identify.jevkit import client
+    from engine.identify.screen import JEV_MODEL, JEV_PROVIDER
+    pinned = model or JEV_MODEL
+
+    def ask(state, questions, timeout):
+        return client.ask(state, questions, timeout=timeout, model=pinned, provider=JEV_PROVIDER)
+    return ask
+
+
 def run(prose: str, db_path: Path | str | None = None, judge: Judge | None = None) -> dict:
     db = Path(db_path) if db_path else default_db()
     arts = articles(db)

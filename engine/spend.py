@@ -316,10 +316,6 @@ def _validate_ledger(con) -> tuple[Decimal, Decimal]:
     return _checked_totals(con.execute('SELECT est_usd, actual_usd, status FROM spend_ledger').fetchall())
 
 
-def _from_micro(micro: int) -> Decimal:
-    return (Decimal(int(micro)) / _SCALE).quantize(_PLACES)
-
-
 def _cents(amount: Decimal) -> Decimal:
     return amount.quantize(_CENTS, rounding=ROUND_HALF_UP)
 
@@ -419,13 +415,6 @@ class _SqliteLedger:
             raise LedgerUnavailable from exc
         except sqlite3.Error as exc:
             raise LedgerUnavailable from exc
-
-
-_USED_SETTLED = """
-COALESCE(SUM(CASE WHEN status = 'settled' THEN CAST(REPLACE(actual_usd, '.', '') AS BIGINT) ELSE 0 END), 0)"""
-
-_USED_RESERVED = """
-COALESCE(SUM(CASE WHEN status = 'reserved' THEN CAST(REPLACE(est_usd, '.', '') AS BIGINT) ELSE 0 END), 0)"""
 
 
 class _PostgresLedger:
