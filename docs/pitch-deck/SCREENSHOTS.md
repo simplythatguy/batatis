@@ -1,6 +1,6 @@
 # Batatis deck: screenshot slots
 
-Drop each image into `deck/img/` with the exact file name below (PNG). `index.html` shows the image automatically when the file exists and shows the dashed placeholder when it doesn't. Re-export the PDF after adding images.
+Drop each image into `docs/pitch-deck/img/` with the exact file name below (PNG). `index.html` shows the image automatically when the file exists and shows the dashed placeholder when it doesn't. Re-export the PDF after adding images.
 
 Shots 1 to 7 follow the PR #20 demo script (`docs/demo/script.md`, not merged), filmed on PR #16's screens (in review), not on `dev`. Case text comes from the PR #14 demo cases. People and projects are fictional: every frame showing case data must carry an **EXAMPLE DATA** label. The slot on slide 9 for the filled SCC form is extra and not in the PR #20 shot list.
 
