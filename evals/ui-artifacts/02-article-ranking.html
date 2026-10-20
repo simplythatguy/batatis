@@ -22,7 +22,7 @@
       }
       .row {
         display: grid;
-        grid-template-columns: 28px 88px 1fr 100px;
+        grid-template-columns: 28px 88px 1fr auto;
         gap: var(--space-3);
         align-items: center;
         min-height: 40px;
@@ -44,31 +44,6 @@
         border-bottom: 1px solid var(--border-subtle);
         background: var(--bg-elevated);
       }
-      .workspace {
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-        padding: var(--space-2);
-        font-weight: var(--weight-semibold);
-      }
-
-      .nav-item svg, .workspace svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
-      .nav-group {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-      }
-      .footer-bar {
-        display: flex;
-        justify-content: flex-end;
-        gap: var(--space-2);
-        padding: var(--space-3) var(--space-4);
-        border-top: 1px solid var(--border-subtle);
-      }
-      .demo {
-        color: var(--status-warning);
-        font-size: var(--text-xs);
-      }
     </style>
   </head>
   <body>
@@ -89,33 +64,25 @@
           <span class="meta">NBC(AE) 2023 · 2nd printing</span>
         </header>
         <div class="toolbar">
-          <button type="button" class="pill active" data-active="true">Candidates</button>
-          <button type="button" class="pill">Confirmed</button>
-          <button type="button" class="pill">Needs clarification</button>
+          <button type="button" class="pill active" data-active="true">Candidates · 2</button>
+          <button type="button" class="pill">Confirmed · 0</button>
+          <button type="button" class="pill">Needs clarification · 1</button>
         </div>
         <div class="split">
           <div class="list">
-            <div class="group-h">
-              <span class="status-dot success"></span> Benchmark recommended · 1
-            </div>
+            <div class="group-h"><span class="status-dot done"></span> Benchmark recommended · 1</div>
             <div class="row selected">
               <span class="meta">1</span>
               <span class="mono">9.25.2.1.</span>
               <span>Thermal insulation · exterior walls</span>
-              <span class="label-pill"><span class="status-dot info"></span> Pending</span>
+              <span class="label-pill"><span class="status-dot pending"></span> Pending</span>
             </div>
-            <div class="group-h"><span class="status-dot progress"></span> Other candidates · 2</div>
+            <div class="group-h"><span class="status-dot pending"></span> Other candidates · 1</div>
             <div class="row">
               <span class="meta">2</span>
               <span class="mono">9.25.3.1.</span>
               <span>Air barrier system</span>
-              <span class="label-pill"><span class="status-dot"></span> Pending</span>
-            </div>
-            <div class="row">
-              <span class="meta">3</span>
-              <span class="mono">demo</span>
-              <span>Placeholder row <span class="demo">(demo — not a real cite)</span></span>
-              <span class="label-pill"><span class="status-dot danger"></span> Reject</span>
+              <span class="label-pill"><span class="status-dot pending"></span> Pending</span>
             </div>
           </div>
           <div class="detail">
@@ -126,8 +93,8 @@
               after verifying edition text. Ask whether the assembly is Part 9 housing before
               locking the list.
             </p>
-            <div style="display: flex; gap: 8px; margin-top: 16px">
-              <button type="button" class="btn btn-primary">Confirm article</button>
+            <div class="btn-row" style="margin-top: 16px">
+              <button type="button" class="btn">Confirm article</button>
               <button type="button" class="btn">Reject</button>
               <button type="button" class="btn btn-ghost">Ask clarifying question</button>
             </div>

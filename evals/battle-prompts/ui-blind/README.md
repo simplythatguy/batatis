@@ -21,6 +21,8 @@ Do **not** mention: Linear, dark mode, Inter, spacing tokens, charcoal, pills, s
 | 2 | All prompt capabilities present | Feature dropped “for simplicity” |
 | 3 | Bug-free bar | Dead buttons, silent required fills, code text blended into AI prose, missing empty/error for missing data |
 | 4 | Domain safety | Completeness language only; no “complies/safe”; alt-path process fields not removed |
+| 5 | Chrome discipline | Active nav = quiet gray (not accent ring); ≤1 solid accent CTA/viewport; checkbox uses `--accent` |
+| 6 | Interaction smoke | `node evals/ui-artifacts/smoke.mjs` passes (required before claiming interaction seal) |
 
 Overall: each surface **PASS/FAIL**. Round fails if any surface FAIL. Fix skills → re-run.
 

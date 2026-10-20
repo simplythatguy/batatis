@@ -13,8 +13,9 @@ alwaysApply: false
 
 For **all** Batatis product UI / frontend / visual / UX work matching these globs:
 
-1. **Look:** Follow `.cursor/skills/batatis-ui-linear/SKILL.md` and `docs/design-system-linear.md`. Use `docs/design/tokens.css`. Match `docs/design/linear-reference/` — charcoal layers, thin borders, Inter-like sans, 8px grid, sparse functional color, sidebar+main, pills, status dots, density with air. User does **not** need to say “Linear.”
-2. **Simplify ruthlessly without dropping capabilities** (intake, ranking, Section C, SCO admin review, export, alt-path process fields).
-3. **Model:** Claude Opus 5.5 at highest available tier for **implementation and UI review** (`.cursor/skills/batatis-ui-opus/SKILL.md`). Do not silently route UI to cheaper models.
-4. **Bug-free bar:** working controls, distinct code vs AI text, confidence/no silent fills, empty/error states, no dead actions.
-5. **Attribution:** portability ≠ SCO UX rule; risk/mitigations/assumptions ≠ evidence-ladder rungs.
+1. **Look:** Follow `.cursor/skills/batatis-ui-linear/SKILL.md` + `docs/design/tokens.css`. Charcoal layers, thin borders, Inter-like sans, 8px grid, sidebar+main. User need not say “Linear.”
+2. **Opus P0:** Neutral grey primary CTAs (not indigo fill); active nav faint fill only; shared gap source; gate complete/download while gaps open; no demo leakage; styled controls; nowrap buttons. Formal seal = Opus 5.5 (Composer is provisional).
+3. **Simplify ruthlessly without dropping capabilities.**
+4. **Model:** Claude Opus 5.5 for UI implement **and** UI review.
+5. **Bug-free bar:** smoke `evals/ui-artifacts/smoke.mjs`; cite ≠ AI; confidence/no silent fills.
+6. **Attribution:** portability ≠ SCO UX; process fields ≠ evidence ladder.

@@ -14,25 +14,20 @@
       }
       .mid {
         border-right: 1px solid var(--border-subtle);
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+      .mid-list {
         overflow: auto;
+        flex: 1;
       }
       .detail {
         overflow: auto;
         padding: var(--space-4);
-      }
-      .workspace {
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-        padding: var(--space-2);
-        font-weight: var(--weight-semibold);
-      }
-
-      .nav-item svg, .workspace svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
-      .nav-group {
         display: flex;
         flex-direction: column;
-        gap: 2px;
+        gap: var(--space-4);
       }
       .item {
         padding: var(--space-3) var(--space-4);
@@ -43,26 +38,22 @@
       .item:hover {
         background: var(--bg-hover);
       }
-      .footer-bar {
+      .item-title {
         display: flex;
-        justify-content: flex-end;
-        gap: var(--space-2);
-        padding: var(--space-3) var(--space-4);
-        border-top: 1px solid var(--border-subtle);
-      }
-      .gap-list {
-        list-style: none;
-        padding: 0;
-        margin: 12px 0 0;
-      }
-      .gap-list li {
-        display: flex;
+        align-items: center;
         gap: 8px;
-        align-items: flex-start;
-        padding: 8px 0;
-        border-bottom: 1px solid var(--border-subtle);
-        font-size: var(--text-md);
-        color: var(--text-secondary);
+        font-weight: 500;
+      }
+      .pane {
+        display: none;
+      }
+      .pane[data-active="true"] {
+        display: block;
+      }
+      .detail-toolbar {
+        display: flex;
+        gap: var(--space-2);
+        margin: -4px 0 0;
       }
     </style>
   </head>
@@ -85,54 +76,65 @@
           <h1 class="panel-title">Administrative review</h1>
           <span class="meta">Completeness only · not technical correctness</span>
         </header>
-        <div class="toolbar">
-          <button type="button" class="pill active" data-active="true">Gaps</button>
-          <button type="button" class="pill">Citations</button>
-          <button type="button" class="pill">Explanations</button>
-        </div>
         <div class="tri">
           <div class="mid">
-            <div class="item selected">
-              <div style="font-weight: 500">VAR-1042 · Straw wall</div>
-              <div class="meta" style="margin-top: 4px">
-                <span class="status-dot danger"></span> 3 admin gaps · updated 1h
+            <div class="mid-list">
+              <div class="item selected">
+                <div class="item-title"><span class="status-dot blocking"></span> VAR-1042 · Straw wall</div>
+                <div class="meta" style="margin-top: 4px">6 blocking · 1 warning · updated 1h</div>
               </div>
-            </div>
-            <div class="item">
-              <div style="font-weight: 500">VAR-1038 · Stair geometry</div>
-              <div class="meta" style="margin-top: 4px">
-                <span class="status-dot success"></span> Admin-complete · 3h
+              <div class="item">
+                <div class="item-title"><span class="status-dot done"></span> VAR-1038 · Stair geometry</div>
+                <div class="meta" style="margin-top: 4px">Admin-complete · 3h</div>
               </div>
             </div>
           </div>
           <div class="detail">
-            <h2 style="margin: 0; font-size: var(--text-lg)">Gaps</h2>
-            <ul class="gap-list">
-              <li>
-                <span class="status-dot danger"></span> Risk assessment empty (alternative path)
-              </li>
-              <li>
-                <span class="status-dot danger"></span> Assumptions not labeled for SCO
-              </li>
-              <li>
-                <span class="status-dot warning"></span> Section C intent missing for 9.25.3.1.
-              </li>
-            </ul>
-            <h3 style="margin: 24px 0 8px; font-size: var(--text-md)">Citation (retrieved)</h3>
-            <div class="cite-block">9.25.2.1. … thermal insulation conforming to…</div>
-            <h3 style="margin: 16px 0 8px; font-size: var(--text-md)">AI explanation</h3>
-            <p class="ai-explain">
-              Applicant linked this article as the benchmark acceptable solution. Explanation is
-              for navigation only — this view does not determine whether the alternative meets
-              code.
-            </p>
+            <div class="detail-toolbar" role="tablist">
+              <button type="button" class="pill active" data-active="true" data-pane="gaps">Gaps</button>
+              <button type="button" class="pill" data-pane="citations">Citations</button>
+              <button type="button" class="pill" data-pane="explanations">Explanations</button>
+            </div>
+            <div class="pane" data-pane-panel="gaps" data-active="true">
+              <h2 style="margin: 0 0 4px; font-size: var(--text-md)">Gaps</h2>
+              <ul class="plain-list" id="gap-list"></ul>
+            </div>
+            <div class="pane" data-pane-panel="citations">
+              <h2 style="margin: 0 0 8px; font-size: var(--text-md)">Citation (retrieved)</h2>
+              <pre class="cite-block">9.25.2.1. Required Insulation — All walls, ceilings and floors separating conditioned space from unconditioned space or exterior air shall be provided with thermal insulation conforming to…</pre>
+            </div>
+            <div class="pane" data-pane-panel="explanations">
+              <h2 style="margin: 0 0 8px; font-size: var(--text-md)">AI explanation</h2>
+              <p class="ai-explain">
+                Applicant linked 9.25.2.1. as the benchmark acceptable solution. Explanation is for
+                navigation only — this view does not determine whether the alternative meets code.
+              </p>
+            </div>
           </div>
         </div>
         <div class="footer-bar">
           <button type="button" class="btn">Request applicant fixes</button>
-          <button type="button" class="btn btn-primary">Mark administratively complete</button>
+          <button type="button" class="btn btn-primary" data-requires-no-blocking-gaps>Mark administratively complete</button>
         </div>
       </main>
     </div>
+    <script type="module">
+      import { renderGapList, applyGating } from "./shared-gaps.js";
+      renderGapList(document.getElementById("gap-list"));
+      applyGating();
+      const tabs = document.querySelectorAll("[data-pane]");
+      const panes = document.querySelectorAll("[data-pane-panel]");
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          tabs.forEach((t) => {
+            t.classList.toggle("active", t === tab);
+            t.dataset.active = t === tab ? "true" : "false";
+          });
+          panes.forEach((p) => {
+            p.dataset.active = p.dataset.panePanel === tab.dataset.pane ? "true" : "false";
+          });
+        });
+      });
+    </script>
   </body>
 </html>

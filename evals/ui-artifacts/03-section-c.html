@@ -6,40 +6,19 @@
     <title>Batatis — Section C</title>
     <link rel="stylesheet" href="../../docs/design/tokens.css" />
     <style>
-      .workspace {
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-        padding: var(--space-2);
-        font-weight: var(--weight-semibold);
-      }
-
-      .nav-item svg, .workspace svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
-      .nav-group {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-      }
       .panel-body {
         overflow: auto;
         flex: 1;
         padding: var(--space-4);
       }
-      .footer-bar {
-        display: flex;
-        justify-content: flex-end;
-        gap: var(--space-2);
-        padding: var(--space-3) var(--space-4);
-        border-top: 1px solid var(--border-subtle);
-      }
-      .lookup {
-        font-size: var(--text-xs);
-        color: var(--status-success);
-      }
       .stack {
         display: flex;
         flex-direction: column;
         gap: var(--space-3);
+        margin-top: var(--space-4);
+      }
+      .table tr {
+        cursor: pointer;
       }
     </style>
   </head>
@@ -58,14 +37,11 @@
       <main class="main-panel">
         <header class="panel-header">
           <h1 class="panel-title">Section C · Attributions</h1>
-          <span class="lookup">Source: attribution registry (deterministic lookup)</span>
+          <span class="label-pill">Source · attribution registry</span>
         </header>
-        <div class="gap-banner">
-          <span class="status-dot danger"></span>
-          Administrative gap: intent empty for 9.25.3.1.
-        </div>
+        <div class="gap-strip" id="gap-strip"></div>
         <div class="panel-body">
-          <table class="table">
+          <table class="table" id="attr-table">
             <thead>
               <tr>
                 <th>Code</th>
@@ -76,34 +52,30 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr class="selected" data-article="9.25.2.1." data-cite="9.25.2.1. Required Insulation — All walls, ceilings and floors separating conditioned space from unconditioned space or exterior air shall be provided with thermal insulation conforming to… [linked excerpt]">
                 <td>NBC(AE) 2023</td>
                 <td class="mono">9.25.2.1.</td>
-                <td>OH1 / OS2 <span class="lookup">lookup</span></td>
-                <td>F51 / F20 <span class="lookup">lookup</span></td>
-                <td>Registry row #A-192 <span class="lookup">lookup</span></td>
+                <td>OH1 / OS2 <span class="label-pill">lookup</span></td>
+                <td>F51 / F20 <span class="label-pill">lookup</span></td>
+                <td>Registry row #A-192 <span class="label-pill">lookup</span></td>
               </tr>
-              <tr>
+              <tr data-article="9.25.3.1." data-cite="9.25.3.1. Air barrier continuity — The air barrier system shall be continuous… [linked excerpt]">
                 <td>NBC(AE) 2023</td>
                 <td class="mono">9.25.3.1.</td>
-                <td>OH1 <span class="lookup">lookup</span></td>
-                <td>F55 <span class="lookup">lookup</span></td>
-                <td style="color: var(--status-danger)">— empty</td>
+                <td>OH1 <span class="label-pill">lookup</span></td>
+                <td>F55 <span class="label-pill">lookup</span></td>
+                <td><span class="status-dot blocking"></span> —</td>
               </tr>
             </tbody>
           </table>
-          <div class="stack" style="margin-top: 24px">
+          <div class="stack">
             <div>
-              <div class="meta" style="margin-bottom: 8px">Retrieved code text</div>
-              <div class="cite-block">
-                9.25.2.1. Required Insulation 1) All walls, ceilings and floors separating
-                conditioned space from unconditioned space or exterior air shall be provided with
-                thermal insulation conforming to… [linked excerpt — not redistributed in full]
-              </div>
+              <div class="meta" style="margin-bottom: 8px">Retrieved code text · <span id="cite-article">9.25.2.1.</span></div>
+              <pre class="cite-block" id="cite-block">9.25.2.1. Required Insulation — All walls, ceilings and floors separating conditioned space from unconditioned space or exterior air shall be provided with thermal insulation conforming to… [linked excerpt]</pre>
             </div>
             <div>
               <div class="meta" style="margin-bottom: 8px">AI explainer (not source text)</div>
-              <p class="ai-explain">
+              <p class="ai-explain" id="ai-explain">
                 This article is the benchmark acceptable solution for insulating exterior walls in
                 Part 9 buildings. Your alternative must address the same objectives/functions via
                 equivalent performance evidence — this panel does not certify compliance.
@@ -118,5 +90,19 @@
         </div>
       </main>
     </div>
+    <script type="module">
+      import { renderGapStrip } from "./shared-gaps.js";
+      renderGapStrip(document.getElementById("gap-strip"));
+      const rows = document.querySelectorAll("#attr-table tbody tr");
+      const cite = document.getElementById("cite-block");
+      const citeArt = document.getElementById("cite-article");
+      rows.forEach((row) => {
+        row.addEventListener("click", () => {
+          rows.forEach((r) => r.classList.toggle("selected", r === row));
+          citeArt.textContent = row.dataset.article;
+          cite.textContent = row.dataset.cite;
+        });
+      });
+    </script>
   </body>
 </html>

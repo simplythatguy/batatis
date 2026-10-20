@@ -1,49 +1,64 @@
 /**
  * Batatis product UI tokens — Linear-inspired system (default look).
- * Copy into any app shell / sandbox. Agents: prefer these variables; do not invent
- * a competing palette. Reference screenshots: docs/design/linear-reference/
+ * Opus seal (round 1): primary CTAs are NEUTRAL, not indigo-filled.
+ * --accent / focus indigo is focus-ring only — never filled button identity.
+ * Reference: docs/design/linear-reference/
  */
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
-  /* —— Surfaces (charcoal layers, darkest → raised) —— */
+  /* —— Surfaces —— */
   --bg-app: #080808;
   --bg-sidebar: #0c0c0d;
   --bg-panel: #0f0f10;
   --bg-elevated: #141415;
-  --bg-hover: #1a1a1c;
-  --bg-active: #1e1e21;
+  --bg-hover: rgba(255, 255, 255, 0.04);
+  --bg-active: rgba(255, 255, 255, 0.06);
   --bg-input: #121214;
 
   /* —— Borders —— */
   --border-subtle: rgba(255, 255, 255, 0.06);
   --border-default: rgba(255, 255, 255, 0.1);
   --border-strong: rgba(255, 255, 255, 0.16);
-  --border-focus: #5e6ad2;
+  --border-danger: rgba(235, 87, 87, 0.55);
+
+  /* Focus ring only (not CTA fill, not active nav) */
+  --focus-ring: #5e6ad2;
+  --accent: var(--focus-ring);
 
   /* —— Text —— */
   --text-primary: #eeeeef;
-  --text-secondary: #8a8a8e;
-  --text-tertiary: #626266;
-  --text-inverse: #0c0c0d;
+  --text-secondary: #9b9ba1;
+  --text-tertiary: #7a7a80;
+  --text-inverse: #141415;
 
-  /* —— Functional (sparse — status / meaning only) —— */
-  --accent: #5e6ad2;
+  /* —— Primary CTA = neutral (Opus P0) —— */
+  --btn-primary-bg: #e6e6e6;
+  --btn-primary-text: #141415;
+  --btn-primary-hover: #f2f2f2;
+
+  /* —— Status map (one map, all screens) —— */
+  --status-blocking: #eb5757; /* red — blocking gaps */
+  --status-warning: #f2c94c; /* amber — warnings */
+  --status-pending: #8a8a8e; /* grey — pending */
+  --status-done: #4cb782; /* green — complete / done */
+  --status-danger: var(--status-blocking);
+  --status-success: var(--status-done);
+  --status-progress: var(--status-warning);
+  --status-todo: var(--status-pending);
+  --status-info: var(--status-pending);
+
+  /* legacy aliases unused for buttons */
   --accent-muted: rgba(94, 106, 210, 0.18);
-  --status-success: #4cb782;
-  --status-warning: #f2c94c;
-  --status-danger: #eb5757;
-  --status-info: #5e6ad2;
-  --status-progress: #f2c94c;
-  --status-todo: #8a8a8e;
 
-  /* —— Diff / code —— */
   --diff-add-bg: rgba(76, 183, 130, 0.12);
   --diff-del-bg: rgba(235, 87, 87, 0.12);
   --code-bg: #161618;
+  --pdf-sheet-bg: #f4f4f5;
+  --pdf-sheet-text: #1a1a1c;
+  --pdf-sheet-muted: #5c5c62;
 
-  /* —— Typography —— */
   --font-sans: "Inter", "Linear Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
   --text-xs: 11px;
@@ -52,14 +67,12 @@
   --text-base: 14px;
   --text-lg: 16px;
   --text-xl: 20px;
-  --text-2xl: 24px;
   --leading-tight: 1.25;
   --leading-normal: 1.45;
   --weight-regular: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
 
-  /* —— 8px grid —— */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -67,28 +80,19 @@
   --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
-  --space-10: 40px;
-  --space-12: 48px;
 
-  /* —— Radii (subtle, consistent) —— */
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
-  --radius-pill: 999px;
 
-  /* —— Layout —— */
   --sidebar-width: 244px;
   --list-pane-width: 320px;
   --header-height: 48px;
-  --row-height: 36px;
+  --row-height: 32px;
+  --input-height: 32px;
 
-  /* —— Motion —— */
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --duration-fast: 120ms;
-  --duration-normal: 180ms;
-
-  /* —— Shadows (almost none — prefer borders / layers) —— */
-  --shadow-float: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
 *,
@@ -108,7 +112,6 @@ body {
   line-height: var(--leading-normal);
   font-weight: var(--weight-regular);
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -120,15 +123,16 @@ select {
 }
 
 a {
-  color: var(--accent);
+  color: var(--text-secondary);
   text-decoration: none;
 }
 
-/* —— Primitives agents should reuse —— */
+/* —— Buttons —— */
 
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
   height: 28px;
   padding: 0 var(--space-3);
@@ -139,6 +143,8 @@ a {
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: background var(--duration-fast) var(--ease-out);
 }
 
@@ -146,19 +152,43 @@ a {
   background: var(--bg-hover);
 }
 
+.btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Neutral primary — NOT indigo fill */
 .btn-primary {
-  background: var(--accent);
+  background: var(--btn-primary-bg);
   border-color: transparent;
-  color: #fff;
+  color: var(--btn-primary-text);
 }
 
 .btn-primary:hover {
-  filter: brightness(1.08);
+  background: var(--btn-primary-hover);
+  filter: none;
+}
+
+.btn-primary:disabled,
+.btn-primary[disabled],
+.btn:disabled,
+.btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .btn-ghost {
   background: transparent;
   border-color: transparent;
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--space-2);
+  overflow-x: auto;
 }
 
 .pill {
@@ -168,42 +198,20 @@ a {
   height: 24px;
   padding: 0 10px;
   border-radius: var(--radius-md);
-  background: var(--bg-elevated);
+  background: transparent;
   border: 1px solid transparent;
   color: var(--text-secondary);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
 }
 
 .pill[data-active="true"],
 .pill.active {
   background: var(--bg-active);
   color: var(--text-primary);
-  border-color: var(--border-subtle);
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--status-todo);
-  flex-shrink: 0;
-}
-
-.status-dot.success {
-  background: var(--status-success);
-}
-.status-dot.warning {
-  background: var(--status-warning);
-}
-.status-dot.danger {
-  background: var(--status-danger);
-}
-.status-dot.info {
-  background: var(--status-info);
-}
-.status-dot.progress {
-  background: var(--status-progress);
+  border-color: transparent;
 }
 
 .label-pill {
@@ -217,6 +225,34 @@ a {
   border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
   font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-pending);
+  flex-shrink: 0;
+}
+.status-dot.blocking,
+.status-dot.danger {
+  background: var(--status-blocking);
+}
+.status-dot.warning {
+  background: var(--status-warning);
+}
+.status-dot.pending,
+.status-dot.info,
+.status-dot.todo {
+  background: var(--status-pending);
+}
+.status-dot.done,
+.status-dot.success {
+  background: var(--status-done);
+}
+.status-dot.progress {
+  background: var(--status-warning);
 }
 
 .app-shell {
@@ -255,6 +291,14 @@ a {
   font-weight: var(--weight-medium);
   cursor: pointer;
   border: 1px solid transparent;
+  box-shadow: none;
+}
+
+.nav-item svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  opacity: 0.85;
 }
 
 .nav-item:hover {
@@ -266,7 +310,13 @@ a {
 .nav-item.active {
   background: var(--bg-active);
   color: var(--text-primary);
-  border-color: var(--border-focus);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.nav-item:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
 }
 
 .main-panel {
@@ -300,22 +350,8 @@ a {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-2) var(--space-4);
   border-bottom: 1px solid var(--border-subtle);
-}
-
-.list-row {
-  display: grid;
-  align-items: center;
-  gap: var(--space-3);
-  min-height: var(--row-height);
-  padding: 0 var(--space-4);
-  border-bottom: 1px solid var(--border-subtle);
-  font-size: var(--text-md);
-}
-
-.list-row:hover {
-  background: var(--bg-hover);
 }
 
 .meta {
@@ -346,9 +382,13 @@ a {
 }
 
 .table td {
-  padding: var(--space-3) var(--space-4);
+  padding: 10px var(--space-4);
   border-bottom: 1px solid var(--border-subtle);
   vertical-align: top;
+}
+
+.table tr.selected td {
+  background: var(--bg-active);
 }
 
 .cite-block {
@@ -360,6 +400,7 @@ a {
   padding: var(--space-3);
   color: var(--text-primary);
   white-space: pre-wrap;
+  margin: 0;
 }
 
 .ai-explain {
@@ -371,12 +412,12 @@ a {
 .field {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 4px;
 }
 
 .field label {
   font-size: var(--text-xs);
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   font-weight: var(--weight-medium);
 }
 
@@ -386,14 +427,78 @@ a {
   background: var(--bg-input);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
-  padding: var(--space-2) var(--space-3);
+  padding: 0 var(--space-3);
+  height: var(--input-height);
   outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.field textarea {
+  height: auto;
+  min-height: 72px;
+  padding: var(--space-2) var(--space-3);
+  resize: none;
+}
+
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none' stroke='%898a8e' stroke-width='1.5'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
 }
 
 .field input:focus,
 .field textarea:focus,
 .field select:focus {
-  border-color: var(--border-focus);
+  border-color: var(--focus-ring);
+}
+
+.field.is-empty input,
+.field.is-empty textarea,
+.field.is-empty select {
+  border-color: var(--border-danger);
+}
+
+.field-label-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Custom checkbox — neutral checked, not system blue / not indigo fill identity */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  background: var(--bg-input);
+  cursor: pointer;
+  flex-shrink: 0;
+  display: inline-grid;
+  place-content: center;
+}
+
+input[type="checkbox"]::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  transform: scale(0);
+  background: var(--text-primary);
+  border-radius: 1px;
+  transition: transform 80ms var(--ease-out);
+}
+
+input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .confidence {
@@ -401,16 +506,77 @@ a {
   color: var(--status-warning);
 }
 
-.gap-banner {
+.gap-banner,
+.gap-list {
   display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.gap-banner {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.gap-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--text-md);
+  color: var(--text-secondary);
+  list-style: none;
+}
+
+.gap-item:last-child {
+  border-bottom: none;
+}
+
+.gap-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.gap-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.footer-bar {
+  display: flex;
+  justify-content: flex-end;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--border-subtle);
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
+  border-top: 1px solid var(--border-subtle);
 }
 
-.gap-banner .status-dot.danger {
-  background: var(--status-danger);
+.workspace {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-md);
+}
+
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.plain-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }

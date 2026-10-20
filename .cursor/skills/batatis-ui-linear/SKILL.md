@@ -7,73 +7,69 @@ description: Default Batatis product UI/UX system. Always produce Linear-caliber
 
 ## Mandate (always on for product UI)
 
-Agents **always** ship spectacular, simplified product UI matching this system’s spacing, colors, texture, type, components, and color discipline — **without** the prompt saying “make it Linear.”
+Agents **always** ship spectacular, simplified product UI matching this system — **without** the prompt saying “make it Linear.”
 
-- **Simplify ruthlessly; never drop capabilities.** Collapse chrome, not features.
-- **Bug-free bar:** interactive states work; labels match actions; no dead controls; keyboard focus visible; empty/error/loading states exist where data can be missing.
-- **Model:** Claude Opus 5.5 (highest available tier) for **all UI implementation and all UI review** — see `../batatis-ui-opus/SKILL.md`.
+- **Simplify ruthlessly; never drop capabilities.**
+- **Bug-free bar:** working controls; focus visible; empty/error states; gates while gaps open.
+- **Formal UI seal = Opus 5.5** (Composer reviews are provisional only). See `../batatis-ui-opus/SKILL.md`.
 
-Reference screenshots (study before inventing patterns): `../../../docs/design/linear-reference/`.  
-Tokens to copy: `../../../docs/design/tokens.css`.  
-Human doc: `../../../docs/design-system-linear.md`.
+References: `../../../docs/design/linear-reference/`  
+Tokens: `../../../docs/design/tokens.css`  
+Doc: `../../../docs/design-system-linear.md`  
+Shared gaps: `../../../evals/ui-artifacts/shared-gaps.js`  
+Smoke: `../../../evals/ui-artifacts/smoke.mjs`
 
-## Visual language (encode these; do not substitute)
+## Opus P0 (must not fail)
+
+| # | Rule |
+| --- | --- |
+| 1 | **Neutral primary CTAs** — `.btn-primary` = light grey fill `#E6E6E6` + dark text (`--btn-primary-*`). **Never** indigo/purple/violet filled buttons (incl. `#5e6ad2`). |
+| 2 | **Active nav** = `--bg-active` faint fill `rgba(255,255,255,0.05–0.07)` + full-strength text. **No** border, ring, glow, coloured outline. |
+| 3 | **One shared gap source** — `shared-gaps.js` (or equivalent). Same blocking list on intake banner, SCO gaps, export gate. |
+| 4 | **Gating** — disable (or confirm-with-gap-list) complete / download / admin-complete while blocking gaps remain (`data-requires-no-blocking-gaps`). |
+| 5 | **No demo leakage** — no “demo” rows; no template strings like `obj/func/intent via registry`; use `—` / empty-state. |
+| 6 | **Styled controls** — custom select, 14px thin-border checkbox (neutral checked), `resize: none` on textareas. No browser-default chrome. |
+| 7 | **Buttons never wrap** — `white-space: nowrap` + `.btn-row` horizontal scroll/overflow if needed. |
+
+`--focus-ring` / `--accent` (`#5e6ad2`) = **focus rings only** (and optional sparse status). Not CTA identity, not active nav.
+
+## Visual language
 
 | Pillar | Rule |
 | --- | --- |
-| Surfaces | Charcoal layers: `--bg-app` → sidebar → panel → elevated. Depth from **value shifts**, not heavy shadows. |
-| Borders | **1px** thin, low-contrast (`--border-subtle` / `--border-default`). Prefer border + layer over card shadow. |
-| Type | Inter / Linear-like sans (`--font-sans`). Hierarchy via **weight + color**, not huge size jumps. |
-| Grid | **8px** spacing scale (`--space-*`). Density with air: compact rows, generous padding. |
-| Color | **Sparse functional color** only (status, labels, selection accent). No decorative purple gradients / glow fest. |
-| Radii | Small consistent (`4–8px`). Pills are soft rectangles, not candy `rounded-full` blobs unless a true chip. |
-| Layout | Default **sidebar + main**; lists often **three-pane** (nav / list / detail). Main content in a rounded panel with thin border. |
-| Cards | Avoid clutter cards. Separate with whitespace + hairline dividers. Cards only when they are the interaction container. |
-| Icons | Thin-stroke (~1.5px), monochrome nav + utility icons in sidebar/header; color only when status/meaning. Text-only nav is a soft fail vs reference. |
-| Status | Small **status dots** + muted text (success / warning / danger / progress). |
-| Code vs AI | Retrieved code in mono `cite-block`; AI explainers in `.ai-explain` muted prose — **visually distinct**. |
+| Surfaces | Charcoal layers; depth from value shifts |
+| Borders | 1px low-contrast |
+| Type | Inter-like sans; labels ≥11px, secondary ≥ readable contrast |
+| Grid | 8px; form rows ~32px; inputs ≤36px; prefer 2-col property grids |
+| Color | Status dots only for meaning: blocking=red, warning=amber, pending=grey, done=green. Colour on the **dot**, not spam-coloured text |
+| Lookup / source | Neutral `.label-pill` (thin border, muted text) — not green text |
+| Layout | Sidebar + main; list+detail for review |
+| Icons | Thin-stroke nav icons |
+| Code vs AI | `.cite-block` (no leading indent dump) ≠ `.ai-explain` |
+| PDF preview | Light sheet (`--pdf-sheet-bg`) — do not imply the PDF is charcoal |
 
-## Layout patterns
+## Status map (single)
 
-1. **App shell** — `.app-shell` + `.sidebar` + `.main-panel`.
-2. **List + detail** — middle list pane + right detail (inbox / SCO review).
-3. **Grouped rows** — section headers with count; single-line issue-style rows (id · status · title · meta).
-4. **Tables** — hairline headers, uppercase micro labels, no zebra stripes.
-5. **Toolbars** — pill filters left; ghost icon actions right.
-6. **Forms** — quiet inputs on `--bg-input`; confidence hints under fields; never silently fill required fields.
+`blocking` → `--status-blocking` · `warning` → `--status-warning` · `pending` → `--status-pending` · `done` → `--status-done`
 
-## Product surfaces (capabilities stay; chrome simplifies)
+## Anti-patterns (material fail)
 
-| Surface | Must remain possible | UI pattern |
-| --- | --- | --- |
-| Intake | A–B fields, confidence, clarifying Qs, assumptions labeled | Form + gap banner; sidebar project nav |
-| Article ranking | Ranked candidates, benchmark acceptable, confirm/reject | Grouped list rows + detail pane |
-| Section C | Deterministic attributions table + per-article explainer | Table; code cite ≠ AI explain |
-| SCO review | Citations, gaps, explanations; admin only | Three-pane; gap list; never “complies/safe” |
-| Export | PDF preview + completeness gate | Preview panel + checklist of missing process fields |
-
-## Attribution (do not regress BT12)
-
-- Applicant UX rules ≠ SCO UX rules ≠ portability.
-- Portability = data-model / judging — **not** an SCO chrome rule.
-
-## Process ≠ evidence (do not regress BT20)
-
-UI may show risk / mitigations / assumptions as **required process fields** on the alt path. Do not label them as evidence-ladder rungs.
-
-## Anti-patterns (fail the blind UI bar)
-
-- Generic dashboard card grids, purple-glow AI chrome, cream/serif marketing skins.
-- Mentioning brand names in copy as a substitute for tokens.
-- Dropping Section D planner, risk fields, or SCO gap review to “look simpler.”
-- Mixing retrieved NBC text into AI narrative styling.
-- Silent required-field fills; missing empty/error states; non-working buttons.
+- Indigo/purple **filled** primary buttons or active-nav rings
+- Composer “PASS” treated as formal seal
+- Divergent gap lists across intake / SCO / export
+- Live demo rows; browser-default checkbox/select; wrapping button labels
+- Mark admin-complete / Download enabled while blocking gaps open
+- Green “lookup” text spam; disc bullets; missing status dots on queue rows
 
 ## Implementation checklist
 
-1. Load `docs/design/tokens.css` (or equivalent CSS variables).
-2. Match shell: sidebar + main panel, thin borders, charcoal layers.
-3. Use pills, status dots, hairline tables/rows.
-4. Keep every product capability reachable in ≤2 clicks from the surface’s primary job.
-5. Self-review against `docs/design/linear-reference/` + bug bar before handoff.
-6. UI review agent must use Opus 5.5 and score against `evals/battle-prompts/ui-blind/README.md` pass bar.
+1. Load `docs/design/tokens.css`.
+2. Neutral `.btn-primary`; ≤1 primary CTA per viewport footer.
+3. Active nav = faint fill only.
+4. Wire `shared-gaps.js` (or one source) on intake + SCO + export; cross-check before ship.
+5. Gate complete/download/admin-complete on blocking gaps.
+6. Styled checkbox/select/textarea; nowrap buttons; thin-stroke icons.
+7. Status dots from the single map; lookup = neutral pills.
+8. Required empties: `.field.is-empty` + status dot (not placeholder-only).
+9. Run `node evals/ui-artifacts/smoke.mjs`.
+10. Opus 5.5 re-seal against `evals/battle-prompts/ui-blind/README.md`.

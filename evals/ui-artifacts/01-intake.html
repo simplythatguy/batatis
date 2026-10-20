@@ -9,7 +9,7 @@
       .form-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: var(--space-4);
+        gap: var(--space-3) var(--space-4);
         padding: var(--space-4);
       }
       .form-grid .full {
@@ -19,27 +19,11 @@
         overflow: auto;
         flex: 1;
       }
-      .footer-bar {
-        display: flex;
-        justify-content: flex-end;
-        gap: var(--space-2);
-        padding: var(--space-3) var(--space-4);
-        border-top: 1px solid var(--border-subtle);
+      .section-block {
+        display: none;
       }
-      .workspace {
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-        padding: var(--space-2);
-        font-weight: var(--weight-semibold);
-        font-size: var(--text-md);
-      }
-
-      .nav-item svg, .workspace svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.85; }
-      .nav-group {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
+      .section-block[data-active="true"] {
+        display: grid;
       }
       .assumption {
         display: inline-flex;
@@ -55,7 +39,9 @@
       <aside class="sidebar">
         <div class="workspace">Batatis <span class="meta">▾</span></div>
         <div class="nav-group">
-          <div class="nav-item active" data-active="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 6.5h6M5 9.5h4"/></svg>Intake</div>
+          <div class="nav-item active" data-active="true">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 6.5h6M5 9.5h4"/></svg>Intake
+          </div>
           <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4L3 8l3 4M10 4l3 4-3 4"/></svg>Code identification</div>
           <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M3 8h10M3 12h6"/></svg>Section C</div>
           <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 3h6l3 3v7H4V3z"/><path d="M10 3v3h3"/></svg>Evidence plan</div>
@@ -71,54 +57,40 @@
           <h1 class="panel-title">Applicant intake</h1>
           <span class="meta">Variance Template · Sections A–B</span>
         </header>
-        <div class="gap-banner">
-          <span class="status-dot danger"></span>
-          Missing required: mailing address · municipal address
-        </div>
-        <div class="toolbar">
-          <button type="button" class="pill active" data-active="true">Section A</button>
-          <button type="button" class="pill">Section B</button>
-          <button type="button" class="pill">Assumptions</button>
+        <div class="gap-strip" id="gap-strip" aria-label="Administrative gaps"></div>
+        <div class="toolbar" role="tablist">
+          <button type="button" class="pill active" data-active="true" data-tab="A">Section A</button>
+          <button type="button" class="pill" data-tab="B">Section B</button>
+          <button type="button" class="pill" data-tab="assumptions">Assumptions</button>
         </div>
         <div class="panel-body">
-          <div class="form-grid">
+          <div class="form-grid section-block" data-section="A" data-active="true">
             <div class="field">
-              <label>Owner</label>
+              <div class="field-label-row"><label>Owner</label></div>
               <input value="Amina Okonkwo" />
               <span class="confidence">Inferred · confirm</span>
             </div>
-            <div class="field">
-              <label>Representative</label>
+            <div class="field is-empty">
+              <div class="field-label-row">
+                <span class="status-dot blocking"></span><label>Representative</label>
+              </div>
               <input placeholder="Required" />
             </div>
-            <div class="field full">
-              <label>Mailing address</label>
-              <input placeholder="Required — empty" />
+            <div class="field is-empty full">
+              <div class="field-label-row">
+                <span class="status-dot blocking"></span><label>Mailing address</label>
+              </div>
+              <input placeholder="Required" />
             </div>
             <div class="field">
               <label>Date</label>
               <input value="2026-10-20" />
             </div>
+          </div>
+          <div class="form-grid section-block" data-section="B">
             <div class="field">
               <label>Permit #</label>
               <input placeholder="If issued" />
-            </div>
-            <div class="field full">
-              <label>Municipal address</label>
-              <input placeholder="Required — empty" />
-            </div>
-            <div class="field full">
-              <label>Legal description / ATS</label>
-              <input value="NW-12-24-1-W5" />
-              <label class="assumption"
-                ><input type="checkbox" checked /> Treat as assumption until verified</label
-              >
-            </div>
-            <div class="field full">
-              <label>Proposed alternative (clear description)</label>
-              <textarea rows="4">
-Load-bearing straw-bale wall assembly as alternative to NBC(AE) Part 9 acceptable solution for exterior walls.</textarea
-              >
             </div>
             <div class="field">
               <label>Jurisdiction-wide variance?</label>
@@ -126,6 +98,29 @@ Load-bearing straw-bale wall assembly as alternative to NBC(AE) Part 9 acceptabl
                 <option>No — site specific</option>
                 <option>Yes</option>
               </select>
+            </div>
+            <div class="field is-empty full">
+              <div class="field-label-row">
+                <span class="status-dot blocking"></span><label>Municipal address</label>
+              </div>
+              <input placeholder="Required" />
+            </div>
+            <div class="field full">
+              <div class="field-label-row">
+                <span class="status-dot warning"></span><label>Legal description / ATS</label>
+              </div>
+              <input value="NW-12-24-1-W5" />
+              <label class="assumption"><input type="checkbox" checked /> Treat as assumption until verified</label>
+            </div>
+            <div class="field full">
+              <label>Proposed alternative (clear description)</label>
+              <textarea rows="3">Load-bearing straw-bale wall assembly as alternative to NBC(AE) Part 9 acceptable solution for exterior walls.</textarea>
+            </div>
+          </div>
+          <div class="form-grid section-block" data-section="assumptions">
+            <div class="field full">
+              <label>Labeled assumptions</label>
+              <textarea rows="4">ATS legal description (NW-12-24-1-W5) is unverified and marked as assumption.</textarea>
             </div>
           </div>
         </div>
@@ -135,5 +130,22 @@ Load-bearing straw-bale wall assembly as alternative to NBC(AE) Part 9 acceptabl
         </div>
       </main>
     </div>
+    <script type="module">
+      import { renderGapStrip } from "./shared-gaps.js";
+      renderGapStrip(document.getElementById("gap-strip"));
+      const tabs = document.querySelectorAll("[data-tab]");
+      const sections = document.querySelectorAll("[data-section]");
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          tabs.forEach((t) => {
+            t.classList.toggle("active", t === tab);
+            t.dataset.active = t === tab ? "true" : "false";
+          });
+          sections.forEach((s) => {
+            s.dataset.active = s.dataset.section === tab.dataset.tab ? "true" : "false";
+          });
+        });
+      });
+    </script>
   </body>
 </html>
