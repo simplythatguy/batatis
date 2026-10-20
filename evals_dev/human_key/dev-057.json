@@ -1,0 +1,16 @@
+{
+  "case_id": "dev-057",
+  "status": "unverified",
+  "persona": "general contractor",
+  "variance_kind": "part9-fire-separations",
+  "scenario": "The customer calls the lower rental space a secondary suite and wants to keep the existing ceiling. I have not confirmed how many dwellings are in the building, how it is used, what the ceiling is made of or whether this is an alteration to an existing approved suite. Can you identify what we need before choosing a wall and ceiling route?",
+  "section_ab_required_fields": null,
+  "expected_top_articles": null,
+  "benchmark_acceptable_solution": null,
+  "engineer_needed": null,
+  "intake_action": null,
+  "verifier_name": null,
+  "date_verified": null,
+  "source_page_refs": null,
+  "notes": null
+}

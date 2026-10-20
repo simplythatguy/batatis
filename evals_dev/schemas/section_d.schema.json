@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Section D evidence plan",
+  "type": "object",
+  "required": ["items", "notices"],
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["provision_id", "citation", "performance_issue"],
+        "properties": {
+          "id": {"type": "string"},
+          "provision_id": {"type": "string", "minLength": 1},
+          "citation": {"type": "string", "minLength": 1},
+          "performance_issue": {"type": "string"}
+        }
+      }
+    },
+    "notices": {"type": "array", "items": {"type": "string"}}
+  }
+}
