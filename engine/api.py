@@ -3,7 +3,11 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import secrets
+from email import policy
+from email.message import Message
+from email.parser import BytesParser
 
 import psycopg
 from fastapi import FastAPI, HTTPException, Query, Request, Response
@@ -22,7 +26,8 @@ from .models import Case, Fact, Jurisdiction, SectionCRow
 from .retention import maybe_purge
 from .section_c import section_c_rows
 from .store import CaseStore, FileTooLarge, VersionConflict, assert_durable_when_hosted, open_store
-from .uploads import PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL
+from .uploads import (MULTIPART_MAX_OVERHEAD_BYTES, MULTIPART_MAX_PARTS,
+                      PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL)
 
 logger = logging.getLogger(__name__)
 
@@ -59,26 +64,47 @@ async def read_capped(request: Request, limit: int = PDF_MAX_BYTES) -> bytes:
 
 
 def _pdf_from_body(body: bytes, content_type: str, filename: str | None) -> tuple[str, bytes]:
-    if 'multipart/form-data' not in content_type.lower():
+    if content_type.split(';', 1)[0].strip().lower() != 'multipart/form-data':
         return filename or 'upload.pdf', body
-    marker = content_type.lower().split('boundary=', 1)
-    if len(marker) != 2:
-        raise HTTPException(400, 'multipart body is missing a boundary')
-    boundary = marker[1].split(';', 1)[0].strip().strip('"').encode()
-    for part in body.split(b'--' + boundary):
-        if b'Content-Disposition' not in part:
-            continue
-        header, _, payload = part.partition(b'\r\n\r\n')
-        if payload.endswith(b'\r\n'):
-            payload = payload[:-2]
-        if not payload:
-            continue
-        name = filename or 'upload.pdf'
-        for line in header.decode('latin1').split('\r\n'):
-            if 'filename=' in line:
-                name = line.split('filename=', 1)[1].strip().strip('"') or name
-        return name, payload
-    raise HTTPException(400, 'multipart body has no file')
+    if len(body) > PDF_MAX_BYTES + MULTIPART_MAX_OVERHEAD_BYTES:
+        raise HTTPException(413, PDF_TOO_LARGE_DETAIL)
+    try:
+        header = Message(policy=policy.default)
+        header['Content-Type'] = content_type
+        boundary = header.get_boundary()
+        if not boundary:
+            raise HTTPException(400, 'multipart body is missing a boundary')
+        boundary_bytes = boundary.encode('ascii')
+        if not re.fullmatch(rb"[0-9A-Za-z'()+_,./:=? -]{0,69}[0-9A-Za-z'()+_,./:=?-]", boundary_bytes):
+            raise ValueError('invalid boundary')
+        # Bound the number of parts before the MIME parser allocates their objects.
+        delimiter = re.compile(rb'(?:\A|(?<=[\r\n]))--' + re.escape(boundary_bytes) +
+                               rb'(?:--)?[ \t]*(?:\r\n|\r|\n|\Z)')
+        if sum(1 for _ in delimiter.finditer(body)) > MULTIPART_MAX_PARTS + 1:
+            raise HTTPException(400, 'multipart body has too many parts')
+        message = BytesParser(policy=policy.default.clone(raise_on_defect=True)).parsebytes(
+            b'Content-Type: ' + content_type.encode('latin1') + b'\r\nMIME-Version: 1.0\r\n\r\n' + body)
+        if not message.is_multipart():
+            raise ValueError('missing multipart framing')
+        files = []
+        for part in message.iter_parts():
+            if part.is_multipart() or any(getattr(value, 'defects', ()) for value in part.values()):
+                raise ValueError('invalid multipart part')
+            if len(part.get_all('Content-Disposition', [])) != 1:
+                raise ValueError('missing or ambiguous disposition')
+            if part.get_content_disposition() == 'form-data' and part.get_filename() is not None:
+                files.append(part)
+        if len(files) != 1:
+            raise HTTPException(400, 'multipart body must contain exactly one file')
+        part = files[0]
+        data = part.get_payload(decode=True)
+        if data is None:
+            raise ValueError('missing file payload')
+        if len(data) > PDF_MAX_BYTES or len(body) - len(data) > MULTIPART_MAX_OVERHEAD_BYTES:
+            raise HTTPException(413, PDF_TOO_LARGE_DETAIL)
+        return part.get_filename() or filename or 'upload.pdf', data
+    except (ValueError, RecursionError) as error:
+        raise HTTPException(400, 'invalid multipart body') from error
 
 
 def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> FastAPI:
@@ -156,8 +182,11 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
     async def upload_file(case_id: str, request: Request):
         if cases().get(case_id) is None:
             raise HTTPException(404, 'case not found')
-        body = await read_capped(request)
-        name, data = _pdf_from_body(body, request.headers.get('content-type', ''),
+        content_type = request.headers.get('content-type', '')
+        multipart = content_type.split(';', 1)[0].strip().lower() == 'multipart/form-data'
+        limit = PDF_MAX_BYTES + (MULTIPART_MAX_OVERHEAD_BYTES if multipart else 0)
+        body = await read_capped(request, limit)
+        name, data = _pdf_from_body(body, content_type,
                                     request.headers.get('x-filename'))
         if len(data) > PDF_MAX_BYTES:
             raise HTTPException(413, PDF_TOO_LARGE_DETAIL)

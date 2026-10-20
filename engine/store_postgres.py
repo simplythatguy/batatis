@@ -70,16 +70,20 @@ class PostgresCaseStore:
             con.close()
 
     def get_version(self, case_id: str) -> int | None:
-        with self._conn() as con:
-            self._purge_expired(con, case_id)
-            row = con.execute('SELECT version FROM cases WHERE id=%s', (case_id,)).fetchone()
-        return int(row[0]) if row else None
+        snapshot = self.get_snapshot(case_id)
+        return snapshot[1] if snapshot else None
 
     def get(self, case_id: str) -> Case | None:
+        snapshot = self.get_snapshot(case_id)
+        return snapshot[0] if snapshot else None
+
+    def get_snapshot(self, case_id: str) -> tuple[Case, int] | None:
+        """Read the case and version together, checking retention after any lock wait."""
         with self._conn() as con:
-            self._purge_expired(con, case_id)
-            row = con.execute('SELECT data FROM cases WHERE id=%s', (case_id,)).fetchone()
-        return Case.model_validate(row[0]) if row else None
+            row = con.execute('SELECT data, version FROM cases WHERE id=%s FOR UPDATE', (case_id,)).fetchone()
+            if row is None or self._purge_expired(con, case_id):
+                return None
+            return Case.model_validate(row[0]), int(row[1])
 
     def delete(self, case_id: str) -> bool:
         """Remove the case, its facts, its evidence, and its files."""
@@ -110,6 +114,7 @@ class PostgresCaseStore:
     def put(self, case: Case, *, expected_version: int | None = None) -> Case:
         case.updated_at = now()
         payload = Jsonb(case.model_dump(mode='json'))
+        conflict = None
         with self._conn() as con:
             if expected_version is None:
                 con.execute('INSERT INTO cases (id, data, version, updated_at) VALUES (%s, %s, 1, %s) '
@@ -125,21 +130,28 @@ class PostgresCaseStore:
                     actual = con.execute('SELECT version FROM cases WHERE id=%s', (case.id,)).fetchone()
                     raise VersionConflict(case.id, 0, int(actual[0]) if actual else None)
                 return case
-            cur = con.execute('UPDATE cases SET data=%s, version=version+1, updated_at=%s '
-                              'WHERE id=%s AND version=%s',
-                              (payload, case.updated_at, case.id, expected_version))
-            if cur.rowcount != 1:
-                row = con.execute('SELECT version FROM cases WHERE id=%s', (case.id,)).fetchone()
-                raise VersionConflict(case.id, expected_version, int(row[0]) if row else None)
+            row = con.execute('SELECT data, version FROM cases WHERE id=%s FOR UPDATE', (case.id,)).fetchone()
+            if row is not None and self._purge_expired(con, case.id):
+                row = None
+            if row is None or row[1] != expected_version:
+                conflict = VersionConflict(case.id, expected_version, int(row[1]) if row else None)
+            else:
+                cur = con.execute('UPDATE cases SET data=%s, version=version+1, updated_at=%s '
+                                  'WHERE id=%s AND version=%s',
+                                  (payload, case.updated_at, case.id, expected_version))
+                if cur.rowcount != 1:
+                    raise VersionConflict(case.id, expected_version)
+        # Keep an expiry deletion committed even though the optimistic write is rejected.
+        if conflict is not None:
+            raise conflict
         return case
 
     def add_fact(self, case_id: str, fact: Fact) -> Case | None:
         """Lock the row, then update only if the version is unchanged."""
         for _ in range(5):
             with self._conn() as con:
-                self._purge_expired(con, case_id)
                 row = con.execute('SELECT data, version FROM cases WHERE id=%s FOR UPDATE', (case_id,)).fetchone()
-                if row is None:
+                if row is None or self._purge_expired(con, case_id):
                     return None
                 case = Case.model_validate(row[0])
                 case.facts = [item for item in case.facts if item.id != fact.id] + [fact]
@@ -177,9 +189,9 @@ class PostgresCaseStore:
             raise FileTooLarge()
         file_id = f'file_{uuid.uuid4().hex[:12]}'
         with self._conn() as con:
-            self._purge_expired(con, case_id)
-            # The parent lock prevents a delete/purge from racing this file insert.
-            if con.execute('SELECT id FROM cases WHERE id=%s FOR KEY SHARE', (case_id,)).fetchone() is None:
+            # Lock before computing expiry; an earlier cutoff could go stale while waiting.
+            row = con.execute('SELECT data, version FROM cases WHERE id=%s FOR UPDATE', (case_id,)).fetchone()
+            if row is None or self._purge_expired(con, case_id):
                 return None
             con.execute('INSERT INTO case_files (id, case_id, name, content_type, size, data, created_at) '
                         'VALUES (%s, %s, %s, %s, %s, %s, %s)',

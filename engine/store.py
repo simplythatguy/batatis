@@ -36,6 +36,7 @@ class FileTooLarge(Exception):
 
 class CaseBackend(Protocol):
     def get(self, case_id: str) -> Case | None: ...
+    def get_snapshot(self, case_id: str) -> tuple[Case, int] | None: ...
     def get_version(self, case_id: str) -> int | None: ...
     def put(self, case: Case, *, expected_version: int | None = None) -> Case: ...
     def add_fact(self, case_id: str, fact: Fact) -> Case | None: ...
@@ -107,6 +108,7 @@ class CaseStore:
     def put(self, case: Case, *, expected_version: int | None = None) -> Case:
         case.updated_at = now()
         payload = case.model_dump_json()
+        conflict = None
         with closing(self._connect()) as con, con:
             if expected_version is None:
                 con.execute('INSERT INTO cases (id, json, updated_at, version) VALUES (?,?,?,1) '
@@ -122,18 +124,29 @@ class CaseStore:
                     actual = int(row[0]) if row else None
                     raise VersionConflict(case.id, 0, actual) from exc
                 return case
+            # Lock before taking the cutoff, including time spent waiting for another writer.
+            con.execute('BEGIN IMMEDIATE')
+            self._purge_expired(con, case.id)
             cur = con.execute('UPDATE cases SET json=?, updated_at=?, version=version+1 '
                               'WHERE id=? AND version=?', (payload, case.updated_at, case.id, expected_version))
             if cur.rowcount != 1:
                 row = con.execute('SELECT version FROM cases WHERE id=?', (case.id,)).fetchone()
-                raise VersionConflict(case.id, expected_version, int(row[0]) if row else None)
+                conflict = VersionConflict(case.id, expected_version, int(row[0]) if row else None)
+        # Commit an expiry deletion before reporting the conflict; raising inside would roll it back.
+        if conflict is not None:
+            raise conflict
         return case
 
     def get(self, case_id: str) -> Case | None:
+        snapshot = self.get_snapshot(case_id)
+        return snapshot[0] if snapshot else None
+
+    def get_snapshot(self, case_id: str) -> tuple[Case, int] | None:
+        """The case and its optimistic version come from the same stored row."""
         with closing(self._connect()) as con, con:
             self._purge_expired(con, case_id)
-            row = con.execute('SELECT json FROM cases WHERE id=?', (case_id,)).fetchone()
-        return Case.model_validate_json(row[0]) if row else None
+            row = con.execute('SELECT json, version FROM cases WHERE id=?', (case_id,)).fetchone()
+        return (Case.model_validate_json(row[0]), int(row[1])) if row else None
 
     def delete(self, case_id: str) -> bool:
         """Remove the case, its facts, its evidence, and its files."""
@@ -148,6 +161,8 @@ class CaseStore:
             return self._purge_expired(con)
 
     def _purge_expired(self, con, case_id: str | None = None) -> int:
+        if not con.in_transaction:
+            con.execute('BEGIN IMMEDIATE')
         # Targeted access uses the case primary key; only periodic sweeps scan all cases.
         where = "julianday(json_extract(json, '$.created_at')) < julianday(?)"
         params = [retention_cutoff()]
