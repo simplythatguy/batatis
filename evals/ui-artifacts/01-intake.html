@@ -25,6 +25,14 @@
       .section-block[data-active="true"] {
         display: grid;
       }
+      .tab-count {
+        color: var(--text-tertiary);
+        font-variant-numeric: tabular-nums;
+        margin-left: 4px;
+      }
+      .tab-count:empty {
+        display: none;
+      }
       .assumption {
         display: inline-flex;
         align-items: center;
@@ -49,7 +57,7 @@
         </div>
         <div>
           <div class="sidebar-section-label">Project</div>
-          <div class="nav-item">VAR-1042 · Straw wall</div>
+          <div class="nav-item" data-project-label></div>
         </div>
       </aside>
       <main class="main-panel">
@@ -59,16 +67,16 @@
         </header>
         <div class="gap-strip" id="gap-strip" aria-label="Administrative gaps"></div>
         <div class="toolbar" role="tablist">
-          <button type="button" class="pill active" data-active="true" data-tab="A">Section A</button>
-          <button type="button" class="pill" data-tab="B">Section B</button>
-          <button type="button" class="pill" data-tab="assumptions">Assumptions</button>
+          <button type="button" class="pill active" data-active="true" data-tab="A">Section A <span class="tab-count" data-tab-count="A"></span></button>
+          <button type="button" class="pill" data-tab="B">Section B <span class="tab-count" data-tab-count="B"></span></button>
+          <button type="button" class="pill" data-tab="assumptions">Assumptions <span class="tab-count" data-tab-count="assumptions"></span></button>
         </div>
         <div class="panel-body">
           <div class="form-grid section-block" data-section="A" data-active="true">
             <div class="field">
               <div class="field-label-row"><label>Owner</label></div>
               <input value="Amina Okonkwo" />
-              <span class="confidence">Inferred · confirm</span>
+              <span class="confidence"><span class="status-dot warning"></span>Inferred · confirm</span>
             </div>
             <div class="field is-empty">
               <div class="field-label-row">
@@ -76,7 +84,7 @@
               </div>
               <input placeholder="Required" />
             </div>
-            <div class="field is-empty full">
+            <div class="field is-empty">
               <div class="field-label-row">
                 <span class="status-dot blocking"></span><label>Mailing address</label>
               </div>
@@ -131,7 +139,14 @@
       </main>
     </div>
     <script type="module">
-      import { renderGapStrip } from "./shared-gaps.js";
+      import { getGaps, renderGapStrip, renderProjectLabel } from "./shared-gaps.js";
+      renderProjectLabel();
+      const tabGapIds = { A: ["rep", "mail"], B: ["muni", "ats-assumption"], assumptions: [] };
+      const gapIds = new Set(getGaps().map((g) => g.id));
+      document.querySelectorAll("[data-tab-count]").forEach((el) => {
+        const n = tabGapIds[el.dataset.tabCount].filter((id) => gapIds.has(id)).length;
+        el.textContent = n ? String(n) : "";
+      });
       renderGapStrip(document.getElementById("gap-strip"));
       const tabs = document.querySelectorAll("[data-tab]");
       const sections = document.querySelectorAll("[data-section]");

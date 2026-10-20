@@ -8,7 +8,7 @@
     <style>
       .split {
         display: grid;
-        grid-template-columns: 1fr 360px;
+        grid-template-columns: 1fr 380px;
         flex: 1;
         min-height: 0;
       }
@@ -17,8 +17,9 @@
         overflow: auto;
       }
       .detail {
-        padding: var(--space-4);
+        padding: var(--space-4) var(--space-5) var(--space-4) var(--space-4);
         overflow: auto;
+        min-width: 0;
       }
       .row {
         display: grid;
@@ -34,6 +35,9 @@
       .row.selected {
         background: var(--bg-hover);
       }
+      .row[hidden] {
+        display: none;
+      }
       .group-h {
         display: flex;
         align-items: center;
@@ -43,6 +47,11 @@
         color: var(--text-secondary);
         border-bottom: 1px solid var(--border-subtle);
         background: var(--bg-elevated);
+      }
+      .gate-hint {
+        font-size: var(--text-sm);
+        color: var(--text-secondary);
+        margin-right: auto;
       }
     </style>
   </head>
@@ -57,54 +66,111 @@
           <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 3h6l3 3v7H4V3z"/><path d="M10 3v3h3"/></svg>Evidence plan</div>
           <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v7M5.5 7.5 8 10l2.5-2.5M3 13h10"/></svg>Export</div>
         </div>
+        <div>
+          <div class="sidebar-section-label">Project</div>
+          <div class="nav-item" data-project-label></div>
+        </div>
       </aside>
       <main class="main-panel">
         <header class="panel-header">
           <h1 class="panel-title">Article ranking</h1>
           <span class="meta">NBC(AE) 2023 · 2nd printing</span>
         </header>
-        <div class="toolbar">
-          <button type="button" class="pill active" data-active="true">Candidates · 2</button>
-          <button type="button" class="pill">Confirmed · 0</button>
-          <button type="button" class="pill">Needs clarification · 1</button>
+        <div class="gap-strip" id="gap-strip" aria-label="Administrative gaps"></div>
+        <div class="toolbar" role="tablist">
+          <button type="button" class="pill active" data-active="true" data-filter="all">Candidates · <span data-count="all"></span></button>
+          <button type="button" class="pill" data-filter="confirmed">Confirmed · <span data-count="confirmed"></span></button>
+          <button type="button" class="pill" data-filter="needs-clarification">Needs clarification · <span data-count="needs-clarification"></span></button>
         </div>
         <div class="split">
-          <div class="list">
-            <div class="group-h"><span class="status-dot done"></span> Benchmark recommended · 1</div>
-            <div class="row selected">
-              <span class="meta">1</span>
-              <span class="mono">9.25.2.1.</span>
-              <span>Thermal insulation · exterior walls</span>
-              <span class="label-pill"><span class="status-dot pending"></span> Pending</span>
-            </div>
-            <div class="group-h"><span class="status-dot pending"></span> Other candidates · 1</div>
-            <div class="row">
-              <span class="meta">2</span>
-              <span class="mono">9.25.3.1.</span>
-              <span>Air barrier system</span>
-              <span class="label-pill"><span class="status-dot pending"></span> Pending</span>
-            </div>
-          </div>
-          <div class="detail">
-            <h2 style="margin: 0 0 8px; font-size: var(--text-lg)">Benchmark acceptable solution</h2>
-            <p class="meta" style="margin-top: 0">Article 9.25.2.1. · ranked #1</p>
-            <p class="ai-explain">
-              Most likely benchmark for the described exterior wall thermal performance. Confirm
-              after verifying edition text. Ask whether the assembly is Part 9 housing before
-              locking the list.
-            </p>
-            <div class="btn-row" style="margin-top: 16px">
-              <button type="button" class="btn">Confirm article</button>
-              <button type="button" class="btn">Reject</button>
-              <button type="button" class="btn btn-ghost">Ask clarifying question</button>
-            </div>
-          </div>
+          <div class="list" id="list"></div>
+          <div class="detail" id="detail"></div>
         </div>
         <div class="footer-bar">
+          <span class="gate-hint" id="gate-hint">Confirm at least one article to continue</span>
           <button type="button" class="btn btn-ghost">Back to intake</button>
-          <button type="button" class="btn btn-primary">Continue to Section C</button>
+          <button type="button" class="btn btn-primary" id="continue-btn" disabled>Continue to Section C</button>
         </div>
       </main>
     </div>
+    <script type="module">
+      import { ARTICLES, articleCounts, renderGapStrip, statusPill, renderProjectLabel } from "./shared-gaps.js";
+
+      const articles = ARTICLES.map((a) => ({ ...a }));
+      let selectedId = articles[0].id;
+      let filter = "all";
+
+      const explain = {
+        "9.25.2.1.":
+          "Most likely benchmark for the described exterior wall thermal performance. Confirm after verifying edition text.",
+        "9.25.3.1.":
+          "Air barrier continuity may apply to the straw-bale assembly. Clarify whether a separate air barrier is proposed before confirming.",
+      };
+
+      function render() {
+        const counts = articleCounts(articles);
+        document.querySelectorAll("[data-count]").forEach((el) => (el.textContent = counts[el.dataset.count]));
+        renderGapStrip(document.getElementById("gap-strip"), articles);
+
+        const visible = articles.filter((a) => filter === "all" || a.status === filter);
+        const bench = visible.filter((a) => a.benchmark);
+        const other = visible.filter((a) => !a.benchmark);
+        const row = (a) =>
+          `<div class="row ${a.id === selectedId ? "selected" : ""}" data-id="${a.id}">
+            <span class="meta">${a.rank}</span>
+            <span class="article-id">${a.id}</span>
+            <span>${a.title}</span>
+            ${statusPill(a.status)}
+          </div>`;
+        let html = "";
+        if (bench.length) html += `<div class="group-h"><span class="status-dot done"></span> Benchmark recommended · ${bench.length}</div>${bench.map(row).join("")}`;
+        if (other.length) html += `<div class="group-h"><span class="status-dot pending"></span> Other candidates · ${other.length}</div>${other.map(row).join("")}`;
+        if (!visible.length) html = `<div class="group-h">No articles in this view</div>`;
+        document.getElementById("list").innerHTML = html;
+        document.querySelectorAll(".row").forEach((r) =>
+          r.addEventListener("click", () => {
+            selectedId = r.dataset.id;
+            render();
+          })
+        );
+
+        const a = articles.find((x) => x.id === selectedId) || articles[0];
+        document.getElementById("detail").innerHTML = `
+          <h2 style="margin: 0 0 8px; font-size: var(--text-lg)">${a.benchmark ? "Benchmark acceptable solution" : "Candidate article"}</h2>
+          <p class="meta" style="margin-top: 0">Article ${a.id} · ranked #${a.rank} · ${statusPill(a.status)}</p>
+          <p class="ai-explain">${explain[a.id]}</p>
+          <div class="btn-row" style="margin-top: 16px">
+            <button type="button" class="btn" data-act="confirm">Confirm article</button>
+            <button type="button" class="btn" data-act="reject">Reject</button>
+            <button type="button" class="btn btn-ghost" data-act="clarify">Ask clarifying question</button>
+          </div>`;
+        document.querySelectorAll("[data-act]").forEach((b) =>
+          b.addEventListener("click", () => {
+            const map = { confirm: "confirmed", reject: "rejected", clarify: "needs-clarification" };
+            a.status = map[b.dataset.act];
+            render();
+          })
+        );
+
+        const canContinue = counts.confirmed > 0;
+        const cont = document.getElementById("continue-btn");
+        cont.disabled = !canContinue;
+        document.getElementById("gate-hint").hidden = canContinue;
+      }
+
+      document.querySelectorAll("[data-filter]").forEach((tab) =>
+        tab.addEventListener("click", () => {
+          filter = tab.dataset.filter;
+          document.querySelectorAll("[data-filter]").forEach((t) => {
+            t.classList.toggle("active", t === tab);
+            t.dataset.active = t === tab ? "true" : "false";
+          });
+          render();
+        })
+      );
+
+      renderProjectLabel();
+      render();
+    </script>
   </body>
 </html>

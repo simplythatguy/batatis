@@ -49,6 +49,16 @@
         font-size: var(--text-md);
         color: var(--pdf-sheet-text);
       }
+      .nowrap {
+        white-space: nowrap;
+      }
+      .gate strong {
+        color: var(--text-primary);
+        font-weight: var(--weight-medium);
+      }
+      .sheet-article {
+        margin-bottom: 10px;
+      }
       .sheet .muted {
         color: var(--pdf-sheet-muted);
       }
@@ -77,6 +87,10 @@
           <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 3h6l3 3v7H4V3z"/><path d="M10 3v3h3"/></svg>Evidence plan</div>
           <div class="nav-item active" data-active="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v7M5.5 7.5 8 10l2.5-2.5M3 13h10"/></svg>Export</div>
         </div>
+        <div>
+          <div class="sidebar-section-label">Project</div>
+          <div class="nav-item" data-project-label></div>
+        </div>
       </aside>
       <main class="main-panel">
         <header class="panel-header">
@@ -98,21 +112,18 @@
               <p>Legal description / ATS: NW-12-24-1-W5 <span class="muted">(assumption)</span></p>
               <p>Proposed alternative: Load-bearing straw-bale wall assembly as alternative to NBC(AE) Part 9 acceptable solution for exterior walls.</p>
               <h3>Section C</h3>
-              <p>9.25.2.1. — objective / function / intent present</p>
-              <p>9.25.3.1. — intent: —</p>
+              <div id="sheet-section-c"></div>
               <h3>Section D · documentation plan</h3>
               <p>ISO 17025 wall assembly test — Lab TBD (applicant to upload)</p>
               <p>Registered professional opinion — required (not authored by tool)</p>
               <h3>Alternative-path process fields</h3>
-              <p>Risk assessment: —</p>
-              <p>Mitigating measures: present</p>
-              <p>Assumptions / limits: —</p>
+              <div id="sheet-process"></div>
             </div>
           </div>
           <div class="side">
-            <div class="gate">
+            <div class="gate" id="gate">
               <span class="status-dot blocking"></span>
-              Completeness gate blocked: blocking administrative gaps remain. Download disabled until resolved (or use Override, which still lists gaps).
+              <span id="gate-text"></span>
             </div>
             <h3 style="margin: 0 0 8px; font-size: var(--text-md)">Remaining gaps</h3>
             <ul class="plain-list" id="gap-list"></ul>
@@ -130,11 +141,31 @@
       </main>
     </div>
     <script type="module">
-      import { renderGapList, applyGating, GAPS } from "./shared-gaps.js";
+      import { ARTICLES, PROCESS_FIELDS, STATUS_META, renderGapList, applyGating, getGaps, blockingGaps, unconfirmedArticles, renderProjectLabel } from "./shared-gaps.js";
+      renderProjectLabel();
       renderGapList(document.getElementById("gap-list"));
       applyGating();
+      const val = (v) => (v ? v : "—");
+      document.getElementById("sheet-section-c").innerHTML = ARTICLES.filter((a) => a.status !== "rejected")
+        .map(
+          (a) => `<div class="sheet-article" data-article="${a.id}">
+            <p><strong>${a.id}</strong> ${a.title} <span class="muted">· ${STATUS_META[a.status].label}${a.status === "confirmed" ? "" : " — not exported until confirmed"}</span></p>
+            <p><span class="muted">Objective</span> <span data-value="objective">${a.objective}</span> · <span class="muted">Function</span> <span data-value="fn">${a.fn}</span></p>
+            <p><span class="muted">Intent</span> <span data-value="intent">${val(a.intent)}</span>${a.intentRef ? ` <span class="muted nowrap">(${a.intentRef})</span>` : ""}</p>
+          </div>`
+        )
+        .join("");
+      document.getElementById("sheet-process").innerHTML = PROCESS_FIELDS.map(
+        (f) => `<p><span class="muted">${f.label}:</span> <span data-value="${f.id}">${val(f.value)}</span></p>`
+      ).join("");
+      const unconfirmed = unconfirmedArticles().map((a) => a.id);
+      const blocking = blockingGaps().length;
+      document.getElementById("gate-text").innerHTML =
+        `<strong>Download blocked</strong> · ${blocking} blocking gaps` +
+        (unconfirmed.length ? `<br />Articles not confirmed: ${unconfirmed.join(", ")}` : "") +
+        `<br />Override downloads with the gap list attached.`;
       document.getElementById("override-btn").addEventListener("click", () => {
-        alert("Override download would include gap list:\n" + GAPS.map((g) => `• ${g.label}`).join("\n"));
+        alert("Override download would include gap list:\n" + getGaps().map((g) => `• ${g.label}`).join("\n"));
       });
     </script>
   </body>

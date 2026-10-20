@@ -55,6 +55,24 @@
         gap: var(--space-2);
         margin: -4px 0 0;
       }
+      .tab-count {
+        color: var(--text-tertiary);
+        font-variant-numeric: tabular-nums;
+        margin-left: 4px;
+      }
+      .cite-entry + .cite-entry {
+        margin-top: var(--space-4);
+      }
+      .cite-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        font-variant-numeric: tabular-nums;
+      }
+      .gate-reason {
+        margin-right: auto;
+      }
     </style>
   </head>
   <body>
@@ -81,7 +99,7 @@
             <div class="mid-list">
               <div class="item selected">
                 <div class="item-title"><span class="status-dot blocking"></span> VAR-1042 · Straw wall</div>
-                <div class="meta" style="margin-top: 4px">6 blocking · 1 warning · updated 1h</div>
+                <div class="meta" style="margin-top: 4px"><span id="gap-summary"></span> · updated 1h</div>
               </div>
               <div class="item">
                 <div class="item-title"><span class="status-dot done"></span> VAR-1038 · Stair geometry</div>
@@ -91,17 +109,15 @@
           </div>
           <div class="detail">
             <div class="detail-toolbar" role="tablist">
-              <button type="button" class="pill active" data-active="true" data-pane="gaps">Gaps</button>
-              <button type="button" class="pill" data-pane="citations">Citations</button>
+              <button type="button" class="pill active" data-active="true" data-pane="gaps">Gaps <span class="tab-count" id="gap-count"></span></button>
+              <button type="button" class="pill" data-pane="citations">Citations <span class="tab-count" id="cite-count"></span></button>
               <button type="button" class="pill" data-pane="explanations">Explanations</button>
             </div>
             <div class="pane" data-pane-panel="gaps" data-active="true">
-              <h2 style="margin: 0 0 4px; font-size: var(--text-md)">Gaps</h2>
               <ul class="plain-list" id="gap-list"></ul>
             </div>
             <div class="pane" data-pane-panel="citations">
-              <h2 style="margin: 0 0 8px; font-size: var(--text-md)">Citation (retrieved)</h2>
-              <pre class="cite-block">9.25.2.1. Required Insulation — All walls, ceilings and floors separating conditioned space from unconditioned space or exterior air shall be provided with thermal insulation conforming to…</pre>
+              <div id="cite-list"></div>
             </div>
             <div class="pane" data-pane-panel="explanations">
               <h2 style="margin: 0 0 8px; font-size: var(--text-md)">AI explanation</h2>
@@ -113,14 +129,29 @@
           </div>
         </div>
         <div class="footer-bar">
+          <span class="meta gate-reason" id="gate-reason"></span>
           <button type="button" class="btn">Request applicant fixes</button>
           <button type="button" class="btn btn-primary" data-requires-no-blocking-gaps>Mark administratively complete</button>
         </div>
       </main>
     </div>
     <script type="module">
-      import { renderGapList, applyGating } from "./shared-gaps.js";
+      import { ARTICLES, getGaps, blockingGaps, renderGapList, applyGating, gapSummary, statusPill } from "./shared-gaps.js";
       renderGapList(document.getElementById("gap-list"));
+      const cited = ARTICLES.filter((a) => a.status !== "rejected");
+      document.getElementById("gap-count").textContent = getGaps().length;
+      document.getElementById("cite-count").textContent = cited.length;
+      document.getElementById("cite-list").innerHTML = cited
+        .map(
+          (a) => `<div class="cite-entry">
+            <div class="cite-head"><span class="article-id">${a.id}</span> ${statusPill(a.status)}</div>
+            <pre class="cite-block">${a.excerpt}</pre>
+          </div>`
+        )
+        .join("");
+      const nBlocking = blockingGaps().length;
+      document.getElementById("gate-reason").textContent = nBlocking ? `Resolve ${nBlocking} blocking gaps to mark complete` : "";
+      document.getElementById("gap-summary").textContent = gapSummary();
       applyGating();
       const tabs = document.querySelectorAll("[data-pane]");
       const panes = document.querySelectorAll("[data-pane-panel]");
