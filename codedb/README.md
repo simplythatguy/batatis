@@ -11,6 +11,11 @@ Local, read-only queries over **NBC(AE) 2023, second printing**, Volumes 1 and 2
 .venv/bin/python -m codedb.audit
 ```
 
+The standalone requirements include `pypdfium2>=5.14.0,<6` for glyph positions,
+effective font sizes and baselines during text reconstruction (verified with 5.14.0).
+Install `codedb/requirements.txt` to rebuild; the engine requirements are not needed.
+Reading an existing database does not require PDFium.
+
 Rebuild requires both PDFs and their per-page JSONL extracts at the paths registered in `codedb/sources.py`. It parses attribution tables using PDF coordinates, preserves source page numbers, and writes:
 
 - `codedb/build/codedb.sqlite`: schema/build version 2, replaced atomically after a successful build.

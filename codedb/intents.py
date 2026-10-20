@@ -12,6 +12,7 @@ import re
 from dataclasses import dataclass, field
 
 from .attributions import parse_bracket
+from .textnorm import SourceText, source_text
 from .sources import load_pages
 
 _BRACKET = re.compile(r"\[[^\]]*\]")
@@ -35,6 +36,8 @@ class Block:
     attribution_lines: list[str] = field(default_factory=list)  # raw "[..] note" lines
     intent_lines: list[str] = field(default_factory=list)
     page: int = 0
+    source: str | None = None
+    page_end: int = 0
 
     @property
     def brackets(self):
@@ -48,16 +51,25 @@ class Block:
         Bracketed words that are not attributions (e.g. "[noncombustible]" quoted from Code text) stay in the note.
         """
         notes = []
+
+        def remove(text):
+            return _BRACKET.sub(lambda m: "" if parse_attribution_bracket(m.group(0)) else m.group(0), text).strip()
+
         for ln in self.attribution_lines:
-            rest = _BRACKET.sub(lambda m: "" if parse_attribution_bracket(m.group(0)) else m.group(0), ln).strip()
+            rest = remove(ln)
             if rest:
-                notes.append(rest)
+                # Removing a bracket first would make the remaining text a
+                # discontinuous span that cannot align with the PDF any more.
+                value = source_text(ln, self.source, self.page, self.page_end)
+                notes.append(SourceText(rest, remove(value.readable), value.unmatched, self.source, value.uncertain_lines)
+                             if isinstance(value, SourceText) else rest)
         return notes
 
     def intents(self, repair) -> list[str]:
-        text = "\n".join(self.intent_lines)
+        raw = "\n".join(self.intent_lines)
+        text = repair(source_text(raw, self.source, self.page, self.page_end))
         parts = re.split(r"(?m)^Intent \d+\.\s*", text)
-        out = [repair(" ".join(p.split())).strip() for p in parts if p.strip()]
+        out = [" ".join(p.split()).strip() for p in parts if p.strip()]
         return out
 
 
@@ -90,6 +102,7 @@ def parse_intents(key: str) -> list[Entry]:
                 continue
             if pending_objective:
                 block = Block(line.strip(), page=p.page)
+                block.source, block.page_end = key, p.page
                 cur.blocks.append(block)
                 pending_objective, mode = False, None
                 continue
@@ -100,14 +113,17 @@ def parse_intents(key: str) -> list[Entry]:
                 if block is None or block.intent_lines or mode == "intent":
                     if block is None or mode != "attr":
                         block = Block(None, page=p.page)
+                        block.source = key
                         cur.blocks.append(block)
                 mode = "intent"
                 continue
             if mode == "attr" and block is not None:
+                block.page_end = p.page
                 if line.startswith("[") or not block.attribution_lines:
                     block.attribution_lines.append(line)
                 else:
                     block.attribution_lines[-1] += " " + line
             elif mode == "intent" and block is not None:
+                block.page_end = p.page
                 block.intent_lines.append(line)
     return entries
