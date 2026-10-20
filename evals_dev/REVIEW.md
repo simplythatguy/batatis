@@ -29,11 +29,11 @@ one-based pages of the combined PDF, not printed volume page labels. Division B 
 ledger unless another division is named. National intent statements were not substituted for Alberta
 attributions or used to supply missing Section C pairs.
 
-- Python: `/Users/aamia/.t3/projects/batatis/.venv/bin/python`.
-- CodeDB, opened read-only: `/Users/aamia/.t3/projects/batatis/codedb/build/codedb.sqlite`.
+- Python: `.venv/bin/python`.
+- CodeDB, opened read-only: `codedb/build/codedb.sqlite`.
 - Lookup calls supplied `division` and the explicit `db_path`; no default worktree database was used.
-- Canonical PDF: `/Users/aamia/.t3/projects/batatis/reference/codes/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.pdf`.
-- Canonical extracted text: `/Users/aamia/.t3/projects/batatis/reference/text/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.jsonl`.
+- Canonical PDF: `reference/codes/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.pdf`.
+- Canonical extracted text: `reference/text/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.jsonl`.
 - CodeDB SHA-256: `0bc82c760700f8f638387a573a6bbf9a24cb93ea7cb45aef9698c5f63f721660`.
 - PDF SHA-256: `3d45376d6c71d54b7f1797084d0828c250b20ab9b380f424f1aab8cfc9a39827`.
 - Extracted-text SHA-256: `923483af04ebba73d9dd8c31742c7eb05f0eca018a3dd67c29bab532e350af29`.
@@ -225,8 +225,8 @@ brackets/conditions and three no-row sentences. The following final results appl
 60-file set; complete command output was checked, not inferred from an authoring success message.
 
 ```text
-/Users/aamia/.t3/projects/batatis/.venv/bin/python evals_dev/validate_cases.py \
-  --db /Users/aamia/.t3/projects/batatis/codedb/build/codedb.sqlite
+.venv/bin/python evals_dev/validate_cases.py \
+  --db codedb/build/codedb.sqlite
 exit 0; ok: true; errors: []
 ```
 
@@ -240,22 +240,22 @@ verification, not a new reviewed case. A final semantic pass also corrected the 
 sentence to the multi-storey-dwelling sentence before committing; its source page remains 886.
 
 ```text
-/Users/aamia/.t3/projects/batatis/.venv/bin/python -m pytest evals_dev -q
+.venv/bin/python -m pytest evals_dev -q
 exit 0; 17 passed in 2.98s
 
-/Users/aamia/.t3/projects/batatis/.venv/bin/python -m pytest evals_dev/test_author_cases.py -q
+.venv/bin/python -m pytest evals_dev/test_author_cases.py -q
 exit 0; 9 passed in 2.92s
 
-/Users/aamia/.t3/projects/batatis/.venv/bin/python evals_dev/author_cases.py \
-  --db /Users/aamia/.t3/projects/batatis/codedb/build/codedb.sqlite
+.venv/bin/python evals_dev/author_cases.py \
+  --db codedb/build/codedb.sqlite
 exit 0; ok: true; mode: check; cases: 60; section_c_rows: 39; changed_cases: []
 
-/Users/aamia/.t3/projects/batatis/.venv/bin/python evals_dev/author_cases.py \
-  --db /Users/aamia/.t3/projects/batatis/codedb/build/codedb.sqlite --check
+.venv/bin/python evals_dev/author_cases.py \
+  --db codedb/build/codedb.sqlite --check
 exit 0; ok: true; mode: check; cases: 60; section_c_rows: 39; changed_cases: []
 
-/Users/aamia/.t3/projects/batatis/.venv/bin/python evals_dev/author_cases.py \
-  --db /Users/aamia/.t3/projects/batatis/codedb/build/codedb.sqlite --write
+.venv/bin/python evals_dev/author_cases.py \
+  --db codedb/build/codedb.sqlite --write
 exit 0; ok: true; mode: write; cases: 60; section_c_rows: 39; changed_cases: []
 
 git diff --check
@@ -308,24 +308,24 @@ not apply to this nonvisual fixture task.
 
 ## Methods used
 
-- [T3 workflow](/Users/aamia/.codex/skills/t3-workflow/SKILL.md) and
-  [route selection](/Users/aamia/.codex/skills/t3-workflow/references/routes.md): ownership, source-first
+- [T3 workflow](~/.codex/skills/t3-workflow/SKILL.md) and
+  [route selection](~/.codex/skills/t3-workflow/references/routes.md): ownership, source-first
   work, bounded verification, review and honest evidence limits.
-- [pstack interrogate](/Users/aamia/.agents/skill-libraries/pstack/skills/interrogate/SKILL.md), with its
-  [rubric](/Users/aamia/.agents/skill-libraries/pstack/skills/interrogate/references/rubric.md),
-  [lead judgment](/Users/aamia/.agents/skill-libraries/pstack/skills/interrogate/references/lead-judgment.md),
-  [reviewer prompt](/Users/aamia/.agents/skill-libraries/pstack/skills/interrogate/references/reviewer-prompt.md)
-  and [quality lens](/Users/aamia/.agents/skill-libraries/pstack/skills/interrogate/references/code-quality-review.md):
+- [pstack interrogate](~/.agents/skill-libraries/pstack/skills/interrogate/SKILL.md), with its
+  [rubric](~/.agents/skill-libraries/pstack/skills/interrogate/references/rubric.md),
+  [lead judgment](~/.agents/skill-libraries/pstack/skills/interrogate/references/lead-judgment.md),
+  [reviewer prompt](~/.agents/skill-libraries/pstack/skills/interrogate/references/reviewer-prompt.md)
+  and [quality lens](~/.agents/skill-libraries/pstack/skills/interrogate/references/code-quality-review.md):
   challenge benchmark applicability, trace exceptions, reject unsupported labels, preserve disputes.
   Adapted to direct review because the user prohibited further delegation.
 - [Batatis hackathon](../.cursor/skills/batatis-hackathon/SKILL.md),
   [variance workflow](../.cursor/skills/batatis-variance-workflow/SKILL.md) and
   [always-on domain rule](../.cursor/rules/batatis-hackathon.mdc): administrative completeness,
   acceptable/alternative fork, deterministic Section C and professional-evidence boundaries.
-- [PDF skill](/Users/aamia/.codex/plugins/cache/openai-primary-runtime/pdf/26.1017.11052/skills/pdf/SKILL.md):
+- [PDF skill](~/.codex/plugins/cache/openai-primary-runtime/pdf/26.1017.11052/skills/pdf/SKILL.md):
   targeted source-table extraction, rendering and visual inspection. No PDF was edited.
-- Integration repair: [Matt Pocock TDD](/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/tdd/SKILL.md)
-  and its [test guidance](/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/tdd/tests.md).
+- Integration repair: [Matt Pocock TDD](~/.agents/skill-libraries/mattpocock/skills/engineering/tdd/SKILL.md)
+  and its [test guidance](~/.agents/skill-libraries/mattpocock/skills/engineering/tdd/tests.md).
   Tested the user-authorized CLI boundary: read-only default, explicit deterministic refresh,
   preservation and batch rejection. Observed failing CLI tests before implementing the new modes,
   then exercised the real CodeDB and temporary fixture copies without mocks. Reused the T3 router,

@@ -3,13 +3,14 @@
 Usage: python evals_dev/show.py 9.10.15.5. [--div B] [--chars 400]
 """
 import argparse
+import os
 import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 from codedb import children, lookup  # noqa: E402
 
-DB = '/Users/aamia/.t3/projects/batatis/codedb/build/codedb.sqlite'
+DB = os.environ.get('BATATIS_CODEDB') or str(pathlib.Path(__file__).resolve().parents[1] / 'codedb' / 'build' / 'codedb.sqlite')
 
 ap = argparse.ArgumentParser()
 ap.add_argument('ids', nargs='+')

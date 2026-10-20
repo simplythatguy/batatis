@@ -698,11 +698,11 @@ There are **61 distinct article-level provisions**, plus **two tables and one ex
 
 ### Methods used
 
-- T3 workflow router: `/Users/aamia/.codex/skills/t3-workflow/SKILL.md`.
-- T3 route selection: `/Users/aamia/.codex/skills/t3-workflow/references/routes.md`.
-- Matt Pocock, primary-source research: `/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md`.
-- pstack, unslop prose review: `/Users/aamia/.agents/skill-libraries/pstack/skills/unslop/SKILL.md`.
-- T3 maintenance drift guidance: `/Users/aamia/.agents/t3-workflow/UPDATE-SAFETY.md`; the read-only check reported model-preference-file drift. No configuration was restored or changed.
+- T3 workflow router: `~/.codex/skills/t3-workflow/SKILL.md`.
+- T3 route selection: `~/.codex/skills/t3-workflow/references/routes.md`.
+- Matt Pocock, primary-source research: `~/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md`.
+- pstack, unslop prose review: `~/.agents/skill-libraries/pstack/skills/unslop/SKILL.md`.
+- T3 maintenance drift guidance: `~/.agents/t3-workflow/UPDATE-SAFETY.md`; the read-only check reported model-preference-file drift. No configuration was restored or changed.
 
 This assignment produced nonvisual research, not a visible product feature. No browser demo or screenshot is claimed as verification.
 
