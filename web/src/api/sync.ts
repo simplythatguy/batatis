@@ -14,37 +14,53 @@ const POSTED_KEY = "batatis-engine-posted";
 const EVIDENCE_KEY = "batatis-engine-evidence";
 
 let inflight: Promise<string> | null = null;
+let generation = 0;
+const factQueues = new Map<string, Promise<unknown>>();
+
+/** Captured by callers before starting work; a reset invalidates every continuation. */
+export const engineGeneration = () => generation;
+export const isEngineGeneration = (value: number) => value === generation;
+
+export class StaleEngineSession extends Error {
+  constructor() {
+    super("The application changed while saving.");
+    this.name = "StaleEngineSession";
+  }
+}
+
+function assertGeneration(value: number) {
+  if (!isEngineGeneration(value)) throw new StaleEngineSession();
+}
 
 export function engineCaseId(): string | null {
   return sessionStorage.getItem(ID_KEY);
 }
 
 export function clearEngineSession() {
+  generation += 1;
+  factQueues.clear();
   sessionStorage.removeItem(ID_KEY);
   sessionStorage.removeItem(POSTED_KEY);
   sessionStorage.removeItem(EVIDENCE_KEY);
   inflight = null;
 }
 
-function postedMap(): Record<string, string[]> {
+type PostedFact = { id: string; signature: string };
+
+function postedFor(caseId: string): Record<string, PostedFact> {
   try {
-    const raw = JSON.parse(sessionStorage.getItem(POSTED_KEY) || "{}");
-    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
-    return raw as Record<string, string[]>;
+    const map = JSON.parse(sessionStorage.getItem(POSTED_KEY) || "{}");
+    const fields = map?.[caseId];
+    return fields && typeof fields === "object" && !Array.isArray(fields) ? fields : {};
   } catch {
     return {};
   }
 }
 
-function postedFor(caseId: string): Set<string> {
-  const list = postedMap()[caseId];
-  return new Set(Array.isArray(list) ? list.map(String) : []);
-}
-
-function remember(caseId: string, ids: Set<string>) {
-  const map = postedMap();
-  map[caseId] = [...ids];
-  sessionStorage.setItem(POSTED_KEY, JSON.stringify(map));
+function remember(caseId: string, fields: Record<string, PostedFact>) {
+  let map: Record<string, unknown> = {};
+  try { map = JSON.parse(sessionStorage.getItem(POSTED_KEY) || "{}"); } catch { /* empty */ }
+  sessionStorage.setItem(POSTED_KEY, JSON.stringify({ ...map, [caseId]: fields }));
 }
 
 /**
@@ -55,16 +71,19 @@ export function ensureEngineCase(title: string, authority: AuthorityId): Promise
   const existing = engineCaseId();
   if (existing) return Promise.resolve(existing);
   if (inflight) return inflight;
-  inflight = engine
+  const token = generation;
+  const request = engine
     .createCase({ title, jurisdiction: jurisdictionForCreate(authority) })
     .then((created) => {
+      assertGeneration(token);
       sessionStorage.setItem(ID_KEY, created.id);
       return created.id;
     })
     .finally(() => {
-      inflight = null;
+      if (inflight === request) inflight = null;
     });
-  return inflight;
+  inflight = request;
+  return request;
 }
 
 /**
@@ -74,36 +93,66 @@ export function ensureEngineCase(title: string, authority: AuthorityId): Promise
  * POST /cases is the only way this engine stores a jurisdiction.
  */
 export async function syncJurisdiction(caseId: string, authority: Exclude<AuthorityId, "">, title: string): Promise<string> {
+  const token = generation;
   const body = jurisdictionBody(authority);
   try {
     await engine.setJurisdiction(caseId, body);
+    assertGeneration(token);
     return caseId;
   } catch (e) {
     if (!(e instanceof EngineError) || e.status !== 404) throw e;
   }
   try {
+    assertGeneration(token);
     const current = await engine.getCase(caseId);
+    assertGeneration(token);
     if (current.jurisdiction?.id === body.id) return caseId;
   } catch (e) {
     if (!(e instanceof EngineError) || e.status === 0) throw e;
   }
+  assertGeneration(token);
   const created = await engine.createCase({ title, jurisdiction: body });
+  assertGeneration(token);
   sessionStorage.setItem(ID_KEY, created.id);
   return created.id;
 }
 
-/** Post facts the engine has not seen at this value. An edit of the same id is sent again. */
-export async function pushFacts(caseId: string, facts: Fact[]): Promise<string | null> {
+/** Reconcile a complete browser fact snapshot, including withdrawals. Serialize writes
+ * so a slower older save cannot become the engine's latest revision. */
+export function pushFacts(caseId: string, facts: Fact[]): Promise<string | null> {
+  const token = generation;
+  const previous = factQueues.get(caseId) ?? Promise.resolve();
+  const request = previous.catch(() => {}).then(() => reconcileFacts(caseId, facts, token));
+  factQueues.set(caseId, request);
+  return request;
+}
+
+async function reconcileFacts(caseId: string, facts: Fact[], token: number): Promise<string | null> {
+  assertGeneration(token);
   const done = postedFor(caseId);
+  const latest = new Map(facts.map((fact) => [fact.field, fact]));
+  const revisions = [...latest.values()];
+  for (const [field, posted] of Object.entries(done)) {
+    // Evidence removal is handled by its explicit DELETE and acknowledgement queue.
+    if (latest.has(field) || field.startsWith("evidence.")) continue;
+    revisions.push({
+      id: `${posted.id}-withdrawn`, field, value: "", kind: "pointed", status: "unconfirmed",
+      source: { type: "user_click", ref: "Answer withdrawn by applicant", quote: "" },
+    });
+  }
   let error: string | null = null;
-  for (const fact of facts) {
+  for (const fact of revisions) {
+    assertGeneration(token);
     const signature = factSignature(fact);
-    if (done.has(signature)) continue;
+    if (done[fact.field]?.signature === signature) continue;
     try {
       await engine.addFact(caseId, fact);
-      done.add(signature);
+      assertGeneration(token);
+      if (latest.has(fact.field)) done[fact.field] = { id: fact.id, signature };
+      else delete done[fact.field];
       remember(caseId, done);
     } catch (e) {
+      assertGeneration(token);
       error = e instanceof EngineError ? e.detail : String(e);
     }
   }
@@ -121,6 +170,9 @@ function evidencePosted(caseId: string): Set<string> {
 }
 
 function forgetEvidence(caseId: string, id: string) {
+  const facts = postedFor(caseId);
+  for (const field of Object.keys(facts)) if (field.startsWith(`evidence.${id}.`)) delete facts[field];
+  remember(caseId, facts);
   const done = evidencePosted(caseId);
   for (const signature of [...done]) {
     if (signature.startsWith(`${id}:`)) done.delete(signature);
@@ -145,9 +197,11 @@ function rememberEvidence(caseId: string, ids: Set<string>) {
  * The local record stays text either way. Nothing here is stored as a file reference.
  */
 export async function pushListedEvidence(caseId: string, items: ListedEvidence[]): Promise<string | null> {
+  const token = generation;
   const done = evidencePosted(caseId);
   let error: string | null = null;
   for (const item of items) {
+    assertGeneration(token);
     if (!item.provisionId || !item.evidenceType || !item.description.trim()) continue;
     const signature = `${item.id}:${item.description}`;
     if (done.has(signature)) continue;
@@ -160,9 +214,11 @@ export async function pushListedEvidence(caseId: string, items: ListedEvidence[]
         evidence_type: item.evidenceType,
         description,
       });
+      assertGeneration(token);
       done.add(signature);
       rememberEvidence(caseId, done);
     } catch (e) {
+      assertGeneration(token);
       if (e instanceof EngineError && e.status === 404) {
         done.add(signature);
         rememberEvidence(caseId, done);
@@ -182,15 +238,19 @@ export async function pushDeletedEvidence(
   caseId: string,
   ids: string[],
 ): Promise<{ acked: string[]; error: string | null }> {
+  const token = generation;
   const acked: string[] = [];
   let error: string | null = null;
   for (const id of ids) {
+    assertGeneration(token);
     if (!id.trim()) continue;
     try {
       await engine.deleteEvidence(caseId, id);
+      assertGeneration(token);
       forgetEvidence(caseId, id);
       acked.push(id);
     } catch (e) {
+      assertGeneration(token);
       if (e instanceof EngineError && e.status === 404 && !/case not found/i.test(e.detail)) {
         forgetEvidence(caseId, id);
         acked.push(id);

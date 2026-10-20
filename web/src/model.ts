@@ -183,8 +183,8 @@ const ENGINE_PROCESS: Record<string, ProcessFieldId> = {
 /** What Section D shows for a process answer. A value just typed wins over a stale engine copy. */
 export function shownProcessAnswer(engineId: string, remote: string | null | undefined, process: Case["process"]): string {
   const localId = ENGINE_PROCESS[engineId];
-  const local = localId ? process[localId].trim() : "";
-  return local || remote?.trim() || "";
+  // Known fields belong to the browser draft, including an explicitly cleared answer.
+  return localId ? process[localId].trim() : remote?.trim() || "";
 }
 
 /** The gap names the question the engine sent, when the message does not already include it. */
@@ -560,7 +560,10 @@ export function reducer(c: Case, a: Action): Case {
       const date = a.date.trim();
       const evidenceType = a.evidenceType.trim();
       if (!description || !who || !evidenceType) return c;
-      const taken = new Set(c.facts.filter((f) => f.field.startsWith("evidence.")).map((f) => f.field.split(".")[1]));
+      const taken = new Set([
+        ...c.facts.filter((f) => f.field.startsWith("evidence.")).map((f) => f.field.split(".")[1]),
+        ...(c.deletedEvidence ?? []),
+      ]);
       let slot = a.itemId;
       if (taken.has(a.itemId)) {
         let n = 2;

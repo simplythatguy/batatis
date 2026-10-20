@@ -8,6 +8,7 @@
     "build": "node scripts/gen-types.mjs --check && tsc --noEmit && vite build",
     "gen:types": "node scripts/gen-types.mjs",
     "smoke:api": "node scripts/smoke-api.ts",
+    "test:sync": "python3 scripts/test-sync.py",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --import ./scripts/register-ts.mjs --test src/rules.test.ts src/professional.test.ts src/humanReview.test.ts src/identify.test.ts src/intake.test.ts src/visit.test.ts src/ui-notices.test.ts",
     "preview": "vite preview"

@@ -60,7 +60,12 @@ test("only code-database text is labelled Code text", () => {
 test("the NRC credit names the publisher and links the official publication", () => {
   assert.equal(NRC_CREDIT, "© National Research Council of Canada");
   assert.match(NRC_SOURCES.code.title, /NBC\(AE\) 2023, 2nd printing/);
-  assert.match(NRC_SOURCES.code.url, /^https:\/\/nrc-publications\.canada\.ca\/.*0316d953-0d55-4311-af69-cad55efec499$/);
+  const codeUrl = new URL(NRC_SOURCES.code.url);
+  assert.equal(codeUrl.origin, "https://nrc-publications.canada.ca");
+  assert.equal(codeUrl.pathname, "/eng/view/ft/");
+  assert.equal(codeUrl.searchParams.get("id"), "0316d953-0d55-4311-af69-cad55efec499");
+  assert.equal(codeUrl.searchParams.get("dp"), "2");
+  assert.equal(codeUrl.searchParams.get("dsl"), "en");
   assert.match(NRC_SOURCES.intent.url, /^https:\/\/nrc-publications\.canada\.ca\/.*de0e0ec9-a452-4337-bc84-002a230c9d66$/);
 });
 

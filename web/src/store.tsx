@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type Dispatch, type ReactNode } from "react";
 import { EngineError, type EngineGap } from "./api/client";
 import { type CompletenessRecord, isProfessionalHold, officerRoutedLabel } from "./humanReview";
-import { clearEngineSession, engineCaseId, ensureEngineCase, pushDeletedEvidence, pushFacts, pushListedEvidence, refreshGaps, syncJurisdiction } from "./api/sync";
+import { clearEngineSession, engineCaseId, engineGeneration, isEngineGeneration, ensureEngineCase, pushDeletedEvidence, pushFacts, pushListedEvidence, refreshGaps, syncJurisdiction } from "./api/sync";
 import { engineNotices, groupEvidenceGaps, missingFromEngine, shouldConfirmReplace } from "./rules";
 import { exampleCase } from "./examples";
 import { emptyCase } from "./intake";
@@ -108,7 +108,9 @@ const FIELD_ALIASES: Record<string, string[]> = {
 };
 
 function aliasKeys(field: string): string[] {
-  return FIELD_ALIASES[field] ?? [field];
+  // Process gaps use the engine name; local facts use the process. prefix.
+  const processField = field.replace(/^process\./, "");
+  return FIELD_ALIASES[field] ?? [processField, `process.${processField}`];
 }
 
 function composeGaps(localCase: Case, source: Store["gapsSource"], engine: EngineGap[]): Gap[] {
@@ -130,7 +132,7 @@ function composeGaps(localCase: Case, source: Store["gapsSource"], engine: Engin
     });
   }
   const workflow = local.filter((g) => {
-    if (g.id.startsWith("detail-") || g.id.startsWith("process-")) return false;
+    // Local missing answers remain blocking while an older online review is displayed.
     if (!g.field) return true;
     return !aliasKeys(g.field).some((key) => seen.has(key));
   });
@@ -148,7 +150,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const loaded = useMemo(load, []);
   const [phase, setPhase] = useState<"who" | "case">(loaded.phase);
   const [resetNote, setResetNote] = useState(loaded.note);
-  const [c, dispatch] = useReducer(reducer, loaded.case);
+  const [c, reduce] = useReducer(reducer, loaded.case);
+  const revision = useRef(0);
+  const syncQueue = useRef<Promise<unknown>>(Promise.resolve());
   const [engineId, setEngineId] = useState<string | null>(null);
   const [factsEpoch, setFactsEpoch] = useState(0);
   const [engineGaps, setEngineGaps] = useState<EngineGap[]>([]);
@@ -161,26 +165,58 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const [pendingExampleId, setPendingExampleId] = useState<string | null>(null);
   const [completenessRecord, setCompletenessRecord] = useState<CompletenessRecord | null>(null);
   const latestGaps = useRef<Gap[]>([]);
+  const latestCase = useRef(c);
+  latestCase.current = c;
+  const renderGeneration = engineGeneration();
+  const renderRevision = revision.current;
+
+  function dispatch(action: Action) {
+    // Derived review results do not change the fact snapshot being saved.
+    const derived = ["ackEvidenceDeletion", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions"].includes(action.type);
+    if (!derived) {
+      revision.current += 1;
+      syncState.current = { reviewed: false, detail: "" };
+      setSyncOk(false);
+    }
+    reduce(action);
+  }
 
   function reviewingCopy() {
     return c.exampleId ? "Reviewing this example…" : "Reviewing your application…";
   }
 
-  async function sync(announce: boolean): Promise<string | null> {
+  function sync(announce: boolean): Promise<string | null> {
+    const token = renderGeneration;
+    const version = renderRevision;
+    const current = () => isEngineGeneration(token) && revision.current === version;
+    const pending = syncQueue.current.catch(() => {}).then(() => performSync(announce, current));
+    syncQueue.current = pending;
+    return pending;
+  }
+
+  async function performSync(announce: boolean, current: () => boolean): Promise<string | null> {
+    if (!current()) return null;
+    syncState.current = { reviewed: false, detail: "" };
     setGapsSource("loading");
     setGapsNote(reviewingCopy());
     setSyncOk(false);
     if (!announce) setSavedNote("");
     try {
       let id = await ensureEngineCase(c.title, c.authority);
+      if (!current()) return null;
       if (c.authority) id = await syncJurisdiction(id, c.authority, c.title);
+      if (!current()) return null;
       setEngineId(id);
       const factError = await pushFacts(id, c.facts);
+      if (!current()) return null;
       const evidenceError = await pushListedEvidence(id, c.listedEvidence ?? []);
+      if (!current()) return null;
       const deleted = await pushDeletedEvidence(id, c.deletedEvidence ?? []);
+      if (!current()) return null;
       if (deleted.acked.length) dispatch({ type: "ackEvidenceDeletion", ids: deleted.acked });
       if (!factError) setFactsEpoch((n) => n + 1);
       const got = await refreshGaps(id);
+      if (!current()) return null;
       if (got.error && /case not found/i.test(got.error)) {
         clearEngineSession();
         setEngineId(null);
@@ -191,21 +227,21 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         setReviewDetail(got.error);
         setGapsNote("Online review unavailable. Showing a limited check of fields in this browser.");
         setSyncOk(false);
-        latestGaps.current = composeGaps(c, "browser", []);
+        latestGaps.current = composeGaps(latestCase.current, "browser", []);
       } else {
         setEngineGaps(got.gaps);
         setGapsSource("engine");
         setReviewDetail(factError ?? evidenceError ?? deleted.error ?? "");
         setGapsNote("Online administrative review finished. This does not decide whether the design complies or is safe.");
         setSyncOk(!factError && !evidenceError && !deleted.error);
-        latestGaps.current = composeGaps(c, "engine", got.gaps);
+        latestGaps.current = composeGaps(latestCase.current, "engine", got.gaps);
       }
-      if (announce) {
-        setSavedNote(got.error || factError ? "Draft saved in this browser." : "Draft saved.");
-      }
-      syncState.current = { reviewed: !got.error && !factError, detail: got.error || factError || "" };
+      const failure = got.error || factError || evidenceError || deleted.error || "";
+      if (announce) setSavedNote(failure ? "Draft saved in this browser." : "Draft saved.");
+      syncState.current = { reviewed: !failure, detail: failure };
       return id;
     } catch (e) {
+      if (!current()) return null;
       setEngineId(engineCaseId());
       setEngineGaps([]);
       setGapsSource("browser");
@@ -214,7 +250,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       setReviewDetail(message);
       setGapsNote("Online review unavailable. Showing a limited check of fields in this browser.");
       setSyncOk(false);
-      latestGaps.current = composeGaps(c, "browser", []);
+      latestGaps.current = composeGaps(latestCase.current, "browser", []);
       syncState.current = { reviewed: false, detail: message };
       if (announce) setSavedNote("Draft saved in this browser.");
       return null;
@@ -223,7 +259,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (phase !== "case") return;
-    if (!c.facts.length && !c.authority) return;
+    if (!c.facts.length && !c.authority && !engineCaseId()) return;
     const handle = window.setTimeout(() => void sync(false), 500);
     return () => window.clearTimeout(handle);
     // Re-check when the applicant edits facts or picks an authority before the case exists.
@@ -232,6 +268,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   function openCase(next: Case) {
     clearEngineSession();
+    syncQueue.current = Promise.resolve();
+    syncState.current = { reviewed: false, detail: "" };
+    latestGaps.current = getGaps(next);
     setEngineId(null);
     setEngineGaps([]);
     setSyncOk(false);
@@ -297,6 +336,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       readGaps: () => latestGaps.current,
       resetToWho: () => {
         clearEngineSession();
+        syncQueue.current = Promise.resolve();
+        syncState.current = { reviewed: false, detail: "" };
+        latestGaps.current = [];
         setEngineId(null);
         setEngineGaps([]);
         setGapsSource("idle");

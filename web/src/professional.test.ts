@@ -186,6 +186,8 @@ test("a process answer just typed shows before the engine copy arrives", () => {
   assert.equal(shownProcessAnswer("risk_assessment", null, typed.process), "Water at the joint.");
   assert.equal(shownProcessAnswer("risk_assessment", "stale engine text", typed.process), "Water at the joint.");
   assert.equal(shownProcessAnswer("risk_assessment", null, blank.process), "");
+  const cleared = reducer(typed, { type: "setProcess", field: "risk", value: "" });
+  assert.equal(shownProcessAnswer("risk_assessment", "stale engine text", cleared.process), "");
 });
 
 test("authority-only yes is routed to the officer and can be withdrawn", () => {
