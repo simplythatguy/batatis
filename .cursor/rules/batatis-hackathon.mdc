@@ -1,0 +1,33 @@
+---
+description: Batatis Building Codes Challenge — always-on domain brief and pitfalls
+alwaysApply: true
+---
+
+# Batatis — Building Codes Challenge
+
+Alberta Built World Tech Venture Pilots 2026. Repo goal: AI assistant for **alternative solution / variance applications**.
+
+## Problem
+
+Prescriptive codes vs innovators. Applicants must prove ≈equivalent or better performance. Many first submissions are incomplete → weeks–months of SCO back-and-forth across **430+** jurisdictions.
+
+## Prototype target
+
+Guide users through **Safety Codes Variance Template Part 1, Sections A–D**:
+
+1. **Intake** — applicant + building/location facts (A–B); ask for missing/ambiguous info; separate facts vs assumptions; signal confidence.
+2. **Code identification** — select/rank relevant articles; propose benchmark acceptable solution + explanation; real citations only.
+3. **Section C** — once articles known, **deterministic lookup** of objective, functional statement, intent; explainer per article.
+4. **Section D recommendations** — what evidence must address; flag licensed professional / engineering practice; **do not invent professional judgment**.
+5. **Completeness review** — applicant or SCO; administrative gaps only.
+6. **Export** — PDF matching template; portable data for local jurisdiction variants + SCO reviewer view.
+
+Start with **NBC(AE) 2023, 2nd printing** before other codes. Division **C §2.3** = admin documentation bottleneck for alternative solutions.
+
+## Hard stops
+
+- Completeness ≠ technical correctness / safety certification.
+- No fabricated article numbers.
+- NRC code text is copyrighted (link; don’t wholesale redistribute). STANDATA is OGL-Alberta.
+- Full skill: `.cursor/skills/batatis-hackathon/SKILL.md`. Workflow: `.cursor/skills/batatis-variance-workflow/SKILL.md`.
+- UI: `.cursor/skills/batatis-ui-opus/SKILL.md` → **Claude Opus 5.5**.

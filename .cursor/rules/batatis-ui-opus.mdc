@@ -1,0 +1,17 @@
+---
+description: Batatis UI work must use Claude Opus 5.5
+globs:
+  - "**/*.{tsx,jsx,css,scss,vue,svelte,html}"
+  - "**/components/**"
+  - "**/app/**"
+  - "**/ui/**"
+alwaysApply: false
+---
+
+# UI model pin
+
+For all Batatis UI / frontend / visual / UX implementation or review:
+
+- Use **Claude Opus 5.5** at the **highest available Opus 5.5 reasoning tier** (prefer `claude-opus-5-5-max`, else `xhigh`, else `high`).
+- Load skill `.cursor/skills/batatis-ui-opus/SKILL.md`.
+- Do not silently switch UI work to a cheaper/faster non-Opus model.
