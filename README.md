@@ -199,7 +199,7 @@ User-testing protocol: [`docs/user-testing/README.md`](./docs/user-testing/READM
 
 ## Status
 
-The public Vercel deploy is a single-instance demo. The Neon case store is not configured (`DATABASE_URL` is unset), so cases stay on that instance until `BATATIS_STORE=postgres` and `DATABASE_URL` are set. See [`docs/deploy.md`](./docs/deploy.md).
+The public Vercel deploy is a single-instance demo. Without `DATABASE_URL`, cases are kept in each instance's temporary folder. They may vanish early or be missing on another instance. Set `BATATIS_STORE=postgres` and `DATABASE_URL` to use the Neon store. See [`docs/deploy.md`](./docs/deploy.md).
 
 Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind).
 

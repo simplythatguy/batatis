@@ -32,7 +32,7 @@ The builder needs the NBC(AE) 2023 2nd-printing PDF and the NBC 2020 intent-stat
 
 Do not work around a failed download by committing the PDF or the sqlite.
 
-The same build downloads the Safety Codes Council variance form from `https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf`. The pinned sha256 is `f44640ca005c957c11a2387d2768fffc35ef93c97125dcca37436fcc0b9afc1d` (334580 bytes), the same digest as `engine/export/field_maps/scc_2026-10.json`. The file lands at `codedb/build/SCC-Variance-Form.pdf` and is included in the engine bundle. It is not committed. If that host is unreachable, set `SCC_FORM_URL` to a private object. `CODEDB_SKIP_OFFICIAL=1` skips the official URL when the private one is set. A missing form at runtime makes `POST /cases/{id}/export` return 503 with `PDF export is unavailable on this deployment: SCC form not configured`.
+The same build downloads the Safety Codes Council variance form from `https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf`. The pinned sha256 is `f44640ca005c957c11a2387d2768fffc35ef93c97125dcca37436fcc0b9afc1d` (334580 bytes), the same digest as `engine/export/field_maps/scc_2026-10.json`. The file lands at `codedb/build/SCC-Variance-Form.pdf` and is included in the engine bundle. It is not committed. If that host is unreachable, set `SCC_FORM_URL` to a private object. `CODEDB_SKIP_OFFICIAL=1` skips the official URL when the private one is set. A missing form at runtime makes `POST /cases/{id}/export` return 503 with `SCC variance form not found`. The server log says the export is unavailable on this deployment. A form whose sha256 does not match the field map returns 500 with `The SCC variance form could not be exported.` The response does not include the form path.
 
 ## Environment variables
 
@@ -59,9 +59,9 @@ Set these on the Vercel project for Preview and Production. Leave the project Ro
 
 Local file runs ignore `DATABASE_URL`. Uploaded PDF bytes go in `case_files` (Postgres `bytea`, or sqlite blob locally), capped at 4 MB. A larger PDF is HTTP 413 with `{"detail": "PDF too large: the limit is 4 MB. Try compressing the file or splitting it."}`.
 
-Every JSON response keeps at most 25 words in one NRC snippet and at most 75 words of NRC text in total. Past that budget the body keeps the citation and the NRC link, with `clipped: true` and `… [clipped, see NBC p.N]`. Search hits share that one budget. Search still returns at most 20 hits. The exported PDF form cells carry provision ids and objective/function codes. The appendix keeps the full provision text, the NBC(AE) attribution, and the NRC publication link. Cases older than 7 days are deleted with their files.
+Every JSON response returns code text in full, with its citation and the NRC publication link. Search still returns at most 20 hits. No route serves `codedb.sqlite`. The exported PDF uses the same rule: form cells carry provision ids and objective/function codes, and the appendix carries citations, objective and functional-statement titles, application notes, the full provision text, and NBC 2020 intent statements and notes, each with the NRC link. Cases older than 7 days are deleted with their files.
 
-This project's Vercel environment has no `DATABASE_URL`, so the Neon case store is not usable here. The deploy is a single-instance demo: cases stay on that instance's disk (`BATATIS_CASES`) and are deleted after 7 days or on request. Set `BATATIS_STORE=postgres` and `DATABASE_URL` to use the shared store. The web app says "Single-instance demo. Cases stay on this instance until a Postgres store is configured."
+This project's Vercel environment has no `DATABASE_URL`, so the Neon case store is not usable here. The deploy is a single-instance demo: cases stay in that instance's temporary folder (`BATATIS_CASES`) and can vanish earlier than 7 days, or be missing on another instance. Set `BATATIS_STORE=postgres` and `DATABASE_URL` to use #24's shared Neon store. The web app says "Single-instance demo. Cases stay on this instance until a Postgres store is configured."
 
 ## Preview
 
@@ -91,7 +91,7 @@ Production tracks `dev`, and only after #12 and `backend/case-api` have merged t
 ```text
 #12 owns engine/identify; this branch does not change it.
 Call engine.llm_gate.authorize before a provider request and record after with the actual token counts.
-Clip code quotes in identify responses with the same NRC snippet rules.
+Keep the citation and the NRC publication link on code quotes. Do not shorten them.
 Live only when BATATIS_LIVE=1 and OPENAI_API_KEY are both set; otherwise stay offline and do not contact a provider.
 ```
 

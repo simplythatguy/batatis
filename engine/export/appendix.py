@@ -3,7 +3,7 @@
 Sections: X (form values too long for their cell), C (one entry per Section C row: citation, attribution
 pairs with their Division A text and table source, provision text, NBC 2020 intent statements labelled as
 explanatory only), D (every supporting document) and, for drafts, the open items that block a final export.
-Section C keeps the full provision text, the NBC(AE) attribution, and a link to the NRC publication.
+NRC prose in section C is the full provision text, with its citation and the NRC publication link.
 """
 from __future__ import annotations
 
@@ -73,6 +73,19 @@ def _table(header: list[str], rows: list[list[str]], widths: list[float]) -> Tab
     return t
 
 
+def _nrc(text, citation: str) -> str:
+    """Full code text, its citation, and the NRC publication link."""
+    if not text:
+        return ''
+    body = str(text)
+    parts = [body]
+    if citation and citation not in body:
+        parts.append(citation)
+    if NRC_PUBLICATION_URL not in body:
+        parts.append(NRC_PUBLICATION_URL)
+    return ' '.join(parts)
+
+
 def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
     out = [Paragraph(f'C-{k}&nbsp;&nbsp;{escape(row.provision_id)}', H3),
            _kv('Citation', row.citation),
@@ -83,11 +96,11 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
     out.append(_kv('Attribution status', status))
     if row.pairs:
         out.append(_table(['Function', 'Objective', 'Source'],
-                          [[f'{p.function} {p.function_text or ""}'.strip(),
-                            f'{p.objective} {p.objective_text or ""}'.strip(),
+                          [[f'{p.function} {_nrc(p.function_text, row.citation)}'.strip(),
+                            f'{p.objective} {_nrc(p.objective_text, row.citation)}'.strip(),
                             f'{p.table}, NBC(AE) 2023 PDF p. {p.pdf_page}'
                             + (f'; clauses {", ".join(p.clauses)}' if p.clauses else '')
-                            + (f'; {p.application_note}' if p.application_note else '')]
+                            + (f'; {_nrc(p.application_note, row.citation)}' if p.application_note else '')]
                            for p in row.pairs], [2.3 * inch, 2.3 * inch, 2.4 * inch]))
     else:
         out.append(_p('The NBC(AE) 2023 attribution table has no row for this provision, so no objective or '
@@ -96,7 +109,7 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
         rec = codes.provision(row.provision_id, 'B')
         if rec and rec.get('text'):
             out.append(_kv('Provision text', f'Article {rec["article"]} {rec["article_title"] or ""}'.strip()))
-            out.append(_p(_reflow(rec['text']), CODE))
+            out.append(_p(_nrc(_reflow(rec['text']), row.citation), CODE))
     out.append(Paragraph(f'<b>{escape(INTENT_LABEL)}</b>', BODY))
     if row.differs:
         out.append(_p('The national 2020 intent statement is attributed differently from NBC(AE) 2023.'
@@ -108,8 +121,8 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
         head = f'{blk.provision_id}' + (f', objective {blk.objective}' if blk.objective else '') \
             + (f', attribution {"; ".join(blk.brackets)}' if blk.brackets else '') + f' (intent PDF p. {blk.pdf_page})'
         out.append(_p(head, SMALL))
-        out += [_p(t, CODE) for t in blk.intents]
-        out += [_p(f'Note: {n}', SMALL) for n in blk.notes]
+        out += [_p(_nrc(t, row.citation), CODE) for t in blk.intents]
+        out += [_p(f'Note: {_nrc(n, row.citation)}', SMALL) for n in blk.notes]
     return out
 
 
@@ -154,7 +167,6 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
             story.append(KeepTogether(block))
 
     story.append(Paragraph('C. Attributions to acceptable solutions', H2))
-    story.append(_p(f'National Building Code - 2023 Alberta Edition: {NRC_PUBLICATION_URL}', SMALL))
     if not case.section_c:
         story.append(_p('No provisions identified.'))
     for k, row in enumerate(case.section_c, start=1):

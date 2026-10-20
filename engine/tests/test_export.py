@@ -13,7 +13,7 @@ import pypdfium2 as pdfium
 import pytest
 
 from engine.codes import Codes
-from engine.copyright import NRC_PUBLICATION_URL, SNIPPET_MAX_WORDS, has_consecutive_words, words
+from engine.copyright import NRC_PUBLICATION_URL, has_consecutive_words, words
 from engine.export import ExportBlocked, FormMismatch, export_case, form_path, load_field_map
 from engine.export.sample import FACTS, sample_case
 from engine.export.text import faithful_font_text, pdf_safe
@@ -162,12 +162,12 @@ def test_section_c_cells_and_appendix_match_section_c_rows(final, case, codes):
         assert row.citation in appendix
         for p in row.pairs:
             for piece in (p.function_text, p.objective_text, p.application_note):
-                if piece and len(words(piece)) > SNIPPET_MAX_WORDS:
-                    assert has_consecutive_words(appendix, words(piece)[:SNIPPET_MAX_WORDS + 1])
+                if piece:
+                    assert has_consecutive_words(appendix, words(piece))
         for blk in row.intents:
             for t in [*blk.intents, *blk.notes]:
-                if len(words(t)) > SNIPPET_MAX_WORDS:
-                    assert has_consecutive_words(appendix, words(t)[:SNIPPET_MAX_WORDS + 1])
+                if t:
+                    assert has_consecutive_words(appendix, words(t))
     assert NRC_PUBLICATION_URL in appendix
     for n in (5, 6):
         assert FACTS[f'supporting_doc.{n}.name'] in appendix
@@ -311,13 +311,11 @@ def test_scientific_notation_in_real_provision_text_survives_export(codes):
     text = appendix_text(result.pdf, result.form_pages)
     for pid in provisions:
         source = codes.provision(pid, 'B')['text']
-        kept = ' '.join(words(faithful_font_text(source))[:SNIPPET_MAX_WORDS])
-        assert norm(kept) in text or NRC_PUBLICATION_URL in text
-        if len(words(source)) > SNIPPET_MAX_WORDS:
-            assert has_consecutive_words(text, words(faithful_font_text(source))[:SNIPPET_MAX_WORDS + 1])
-        kept_source = ' '.join(words(source)[:SNIPPET_MAX_WORDS])
+        rendered = faithful_font_text(source)
+        assert has_consecutive_words(text, words(rendered))
+        assert NRC_PUBLICATION_URL in text
         for glyphs, notation in [('x₃₀', 'x_(30)'), ('h₁', 'h_(1)'), ('h₂', 'h_(2)')]:
-            if glyphs in kept_source:
+            if glyphs in source:
                 assert notation in text
-        if 'α' in kept_source:
+        if 'α' in source:
             assert '[U+03B1 GREEK SMALL LETTER ALPHA]' in text

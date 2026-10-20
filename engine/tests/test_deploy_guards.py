@@ -1,7 +1,6 @@
-"""Deploy guards: the code database is not a download, NRC text stays inside the word budget, and the privacy notice matches the web app."""
+"""Deploy guards: the code database is not a download, NRC text is returned whole, and the privacy notice matches the web app."""
 import json
 import logging
-import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -9,24 +8,12 @@ import pytest
 from fastapi.testclient import TestClient
 
 from engine.api import create_app
-from engine.copyright import (
-    NRC_PUBLICATION_URL,
-    PII_NOTICE,
-    RESPONSE_NRC_MAX_WORDS,
-    SNIPPET_MAX_WORDS,
-    clip_response,
-    words,
-)
+from engine.copyright import NRC_PUBLICATION_URL, PII_NOTICE, attribute_code
 from engine.models import Case
 from engine.store import CaseStore
 
 SQLITE_MAGIC = b'SQLite format 3'
-MARKER = re.compile(r'… \[clipped, see NBC(?: p\.\d+|\(AE\) 2023)\]')
 ROOT = Path(__file__).resolve().parents[2]
-
-
-def snippet_words(text: str) -> int:
-    return len(words(MARKER.sub('', text)))
 
 
 @pytest.fixture
@@ -51,41 +38,39 @@ def test_codedb_file_is_not_downloadable(client, path):
     assert not head.content.startswith(SQLITE_MAGIC)
 
 
-def test_response_keeps_25_words_per_snippet_and_75_overall():
+def test_code_text_is_returned_whole_with_the_nrc_link():
     sentence = ' '.join(f'word{i}' for i in range(40))
-    out = clip_response({
+    out = attribute_code({
         'pdf_page': 12,
         'text': sentence,
         'notes': [sentence, sentence, sentence],
         'question': sentence,
     })
-    snippets = [out['text'], *out['notes']]
-    assert all(snippet_words(item) <= SNIPPET_MAX_WORDS for item in snippets)
-    assert sum(snippet_words(item) for item in snippets) == RESPONSE_NRC_MAX_WORDS
-    assert snippet_words(out['notes'][-1]) == 0
-    assert out['url'] == NRC_PUBLICATION_URL
-    assert out['clipped'] is True
+    assert out['text'] == sentence
+    assert out['notes'] == [sentence, sentence, sentence]
     assert out['question'] == sentence
-    assert 'word25' not in out['text']
+    assert out['url'] == NRC_PUBLICATION_URL
+    assert 'clipped' not in out
 
 
-def test_short_prose_is_not_marked_clipped():
-    out = clip_response({'text': 'fire separation', 'pdf_page': 3})
+def test_short_prose_keeps_the_nrc_link():
+    out = attribute_code({'text': 'fire separation', 'pdf_page': 3})
     assert out['text'] == 'fire separation'
+    assert out['url'] == NRC_PUBLICATION_URL
     assert 'clipped' not in out
 
 
 def test_applicant_text_is_not_treated_as_code():
     value = ' '.join(f'name{i}' for i in range(40))
-    out = clip_response({'value': value, 'source': {'type': 'user_text', 'ref': 'm'}})
+    out = attribute_code({'value': value, 'source': {'type': 'user_text', 'ref': 'm'}})
     assert out['value'] == value
     assert 'url' not in out
     assert 'clipped' not in out
 
 
-def test_http_response_clips_code_quotes_to_the_word_budget(client):
+def test_http_response_keeps_the_full_code_quote(client):
     quote = ' '.join(f'word{i}' for i in range(40))
-    created = client.post('/cases', json={'title': 'Clip'})
+    created = client.post('/cases', json={'title': 'Whole'})
     case_id = created.json()['id']
     fact = {
         'field': 'excerpt',
@@ -96,11 +81,9 @@ def test_http_response_clips_code_quotes_to_the_word_budget(client):
     response = client.post(f'/cases/{case_id}/facts', json=fact)
     assert response.status_code == 200
     stored = response.json()['facts'][0]
-    snippets = [stored['source']['quote']]
-    assert all(snippet_words(item) <= SNIPPET_MAX_WORDS for item in snippets)
-    assert sum(snippet_words(item) for item in snippets) <= RESPONSE_NRC_MAX_WORDS
+    assert stored['source']['quote'] == quote
     assert stored['source']['url'] == NRC_PUBLICATION_URL or stored.get('url') == NRC_PUBLICATION_URL
-    assert 'word25' not in stored['source']['quote']
+    assert 'clipped' not in stored['source']
 
 
 def test_responses_carry_noindex_and_the_privacy_notice(client):
@@ -139,10 +122,12 @@ def test_a_failed_purge_is_logged_and_the_request_continues(tmp_path, caplog):
     caplog.set_level(logging.WARNING, logger='engine.access')
     client = TestClient(create_app(Broken(tmp_path / 'cases.sqlite')))
     response = client.post('/cases', json={'title': 'still served'})
-    assert response.status_code == 201
+    assert response.status_code == 503
+    assert response.json()['detail'] == 'case purge failed'
+    assert response.json()['meta']['notice'] == PII_NOTICE
     assert 'case purge failed: RuntimeError' in caplog.text
-    assert 'secret' not in caplog.text
-    assert 'db.example' not in caplog.text
+    assert 'secret' not in caplog.text and 'secret' not in response.text
+    assert 'db.example' not in caplog.text and 'db.example' not in response.text
 
 
 def test_cases_older_than_seven_days_are_deleted(tmp_path):

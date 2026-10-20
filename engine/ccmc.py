@@ -27,6 +27,9 @@ REGISTRY_URL = ('https://nrc.canada.ca/en/certifications-evaluations-standards/'
                 'canadian-construction-materials-centre/ccmc-publications/registry.html')
 API_URL = REGISTRY_URL.rsplit('/', 1)[0] + '/published_evaluations.html'
 REPORT_URL = REGISTRY_URL.rsplit('/', 1)[0] + '/document.html'
+# One search may match up to 50 listings. Report dates are cached on this instance.
+# A single search opens at most this many new report requests to nrc.canada.ca.
+REPORT_FETCH_CAP = 8
 _ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -228,6 +231,7 @@ class CCMCRegistry:
             matches = [a for a, text in self._items if all(token in text for token in tokens)]
             selected = matches[:limit]
             pending = [a for a in selected if a.number not in self._dates] if self._source == 'live' else []
+            pending = pending[:REPORT_FETCH_CAP]
             if pending:
                 with ThreadPoolExecutor(max_workers=4) as pool:
                     for a, result in zip(pending, pool.map(self._report_date, pending)):

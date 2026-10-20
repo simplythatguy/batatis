@@ -1,6 +1,8 @@
 """HTTP interface for the engine. Run: uvicorn engine.api:app --reload"""
 from __future__ import annotations
 
+import logging
+
 import psycopg
 from fastapi import FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,13 +12,16 @@ from pydantic import BaseModel
 from codedb import AmbiguousProvisionError
 
 from .codes import CodeDbMissing, Codes
-from .export import ExportBlocked, ExportError, FormNotFound, export_case
+from .export import (EXPORT_FAILED_DETAIL, ExportBlocked, ExportError, FORM_NOT_FOUND_DETAIL, FormNotFound,
+                     export_case)
 from .http_guard import HttpGuard
 from .llm_gate import client_ip_from, search_retry_after
 from .models import Case, Fact, Jurisdiction, SectionCRow
 from .section_c import section_c_rows
 from .store import CaseStore, FileTooLarge, VersionConflict, assert_durable_when_hosted, open_store
 from .uploads import PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL
+
+logger = logging.getLogger(__name__)
 
 
 class NewCase(BaseModel):
@@ -154,10 +159,12 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
             res = export_case(case, draft=draft, codes=code())
         except ExportBlocked as e:
             raise HTTPException(409, {'message': 'export blocked; resolve these or export a draft', 'reasons': e.reasons})
-        except FormNotFound as e:
-            raise HTTPException(503, str(e))
-        except ExportError as e:
-            raise HTTPException(500, str(e))
+        except FormNotFound as exc:
+            logger.error('PDF export is unavailable on this deployment: %s', exc)
+            raise HTTPException(503, FORM_NOT_FOUND_DETAIL) from None
+        except ExportError as exc:
+            logger.error('%s %s', EXPORT_FAILED_DETAIL, exc)
+            raise HTTPException(500, EXPORT_FAILED_DETAIL) from None
         name = f'{case_id}-scc-variance{"-DRAFT" if draft else ""}.pdf'
         return Response(res.pdf, media_type='application/pdf',
                         headers={'Content-Disposition': f'attachment; filename="{name}"'})

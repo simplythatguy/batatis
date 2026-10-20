@@ -1,10 +1,10 @@
-"""ASGI guard: strip /api, tag robots, budget NRC text, and log ids, routes, and status."""
+"""ASGI guard: strip /api, tag robots, attribute NRC text, and log ids, routes, and status."""
 from __future__ import annotations
 
 import json
 import logging
 
-from .copyright import PII_NOTICE, attach_meta, clip_response
+from .copyright import PII_NOTICE, attach_meta, attribute_code
 
 access_log = logging.getLogger('engine.access')
 
@@ -29,8 +29,22 @@ class HttpGuard:
             try:
                 self.sweep()
             except Exception as exc:
-                # The exception text can name a database host. Log the type only, and still serve the route.
+                # The exception text can name a database host. Log the type, and answer 503.
                 access_log.warning('case purge failed: %s', type(exc).__name__)
+                payload = {'detail': 'case purge failed', 'meta': {'notice': PII_NOTICE}}
+                raw = json.dumps(payload).encode()
+                await send({
+                    'type': 'http.response.start',
+                    'status': 503,
+                    'headers': [
+                        (b'content-type', b'application/json'),
+                        (b'content-length', str(len(raw)).encode()),
+                        (b'x-robots-tag', b'noindex, nofollow'),
+                        (b'x-batatis-notice', PII_NOTICE.encode()),
+                    ],
+                })
+                await send({'type': 'http.response.body', 'body': raw})
+                return
         path = scope.get('path') or ''
         if path == '/api' or path.startswith('/api/'):
             scope = dict(scope)
@@ -58,7 +72,7 @@ class HttpGuard:
             headers = list(started.get('headers') or [])
             if raw and b'application/json' in _header(headers, b'content-type'):
                 try:
-                    payload = attach_meta(clip_response(json.loads(raw)))
+                    payload = attach_meta(attribute_code(json.loads(raw)))
                     raw = json.dumps(payload).encode()
                 except (ValueError, UnicodeError):
                     pass
