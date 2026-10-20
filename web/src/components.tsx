@@ -108,7 +108,7 @@ export function GapStrip({ gaps }: { gaps: Gap[] }) {
           {gaps.length - blocking} warning
         </span>
         <span className="meta gap-toggle">
-          Show gaps <Icon name="chevron" size={12} />
+          Review gaps <Icon name="chevron" size={12} />
         </span>
       </summary>
       <ul className="plain-list gap-grid" aria-label="Administrative gaps">

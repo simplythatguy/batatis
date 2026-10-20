@@ -458,14 +458,14 @@ Repo background, not a source for code facts: reference/README-data-package.md.
 - Unverified items are listed under Open questions, items 1, 2, 5, 6, 7 and 10.
 
 ## Methods used
-- /Users/aamia/.t3/projects/batatis/docs/contracts/briefs/PREAMBLE.md (read)
-- /Users/aamia/.t3/projects/batatis/docs/contracts/WAVE2-BRIEF.md (read: method, template and report format)
-- /Users/aamia/.t3/projects/batatis/docs/contracts/briefs/WAVE2-TOPICS.md (read: section fire-separations-and-spatial-separation)
-- /Users/aamia/.t3/projects/batatis/docs/contracts/CONTRACTS.md (read: citation, copyright, template and checkpoint rules)
-- /Users/aamia/.codex/skills/t3-workflow/SKILL.md (read: routing)
-- /Users/aamia/.codex/skills/t3-workflow/references/routes.md (read: research route)
-- /Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md (read and applied: primary sources and cited findings)
-- /Users/aamia/.agents/skill-libraries/pstack/skills/unslop/SKILL.md (read and applied to the prose)
-- /Users/aamia/.codex/AGENTS.md (read: T3 block and child-brief rules)
+- docs/contracts/briefs/PREAMBLE.md (read)
+- docs/contracts/WAVE2-BRIEF.md (read: method, template and report format)
+- docs/contracts/briefs/WAVE2-TOPICS.md (read: section fire-separations-and-spatial-separation)
+- docs/contracts/CONTRACTS.md (read: citation, copyright, template and checkpoint rules)
+- ~/.codex/skills/t3-workflow/SKILL.md (read: routing)
+- ~/.codex/skills/t3-workflow/references/routes.md (read: research route)
+- ~/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md (read and applied: primary sources and cited findings)
+- ~/.agents/skill-libraries/pstack/skills/unslop/SKILL.md (read and applied to the prose)
+- ~/.codex/AGENTS.md (read: T3 block and child-brief rules)
 
 Not loaded: visual-evidence.md (no visible surface), orchestration.md (no delegation), and ui-quality.md (no interface work). The maintenance check was not run by this child, because source access succeeded and the workflow lets children reuse the parent's check.
