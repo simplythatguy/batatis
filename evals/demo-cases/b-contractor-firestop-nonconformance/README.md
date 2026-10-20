@@ -1,6 +1,6 @@
 # Case B: General contractor with a firestop non-conformance found mid-construction
 
-> **EXAMPLE DATA.** The companies, people, address, products, listings and letters are all fictional. Code citations checked against the NBC(AE) 2023 1st printing. See `../sources.md`.
+> **EXAMPLE DATA.** The companies, people, address, products, listings and letters are all fictional. Code citations checked against the National Building Code (Alberta Edition) (NBC(AE)) 2023 1st printing. The 2nd printing is in force. See `../sources.md`.
 
 This is a demo case. No loader reads it yet. Only files in `input/` are ever uploaded to the tool. This README contains the demo script, so it is not uploaded. Answer keys are in [`../keys/b-contractor-firestop-nonconformance/`](../keys/b-contractor-firestop-nonconformance/) and are never uploaded.
 
