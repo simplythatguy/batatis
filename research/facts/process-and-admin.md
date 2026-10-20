@@ -742,10 +742,10 @@ The two explanatory intent entries are NBC 2020 Intent Statements, 9.9.10.1.(1) 
 
 ## Methods used
 
-- T3 workflow router: `/Users/aamia/.codex/skills/t3-workflow/SKILL.md` and `/Users/aamia/.codex/skills/t3-workflow/references/routes.md`. Used the research route, preserved shared-checkout edits, and maintained section checkpoints. Reused the parent's maintenance result as instructed; no additional delegation, commit, push or UI implementation occurred.
+- T3 workflow router: `~/.codex/skills/t3-workflow/SKILL.md` and `~/.codex/skills/t3-workflow/references/routes.md`. Used the research route, preserved shared-checkout edits, and maintained section checkpoints. Reused the parent's maintenance result as instructed; no additional delegation, commit, push or UI implementation occurred.
 
-- Matt Pocock `engineering/research`: `/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md`. Followed claims to the adopted code, statutes, official forms, government guidance and municipal sources. The task's explicit ban on further delegation overrides that method's background-agent suggestion.
-- pstack `unslop`: `/Users/aamia/.agents/skill-libraries/pstack/skills/unslop/SKILL.md`. Used plain prose, specific attributions and explicit uncertainty.
+- Matt Pocock `engineering/research`: `~/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md`. Followed claims to the adopted code, statutes, official forms, government guidance and municipal sources. The task's explicit ban on further delegation overrides that method's background-agent suggestion.
+- pstack `unslop`: `~/.agents/skill-libraries/pstack/skills/unslop/SKILL.md`. Used plain prose, specific attributions and explicit uncertainty.
 
-- `jev-search`: `/Users/aamia/.codex/skills/jev-search/SKILL.md`. Applied one search-result gate; reported its network `fail_open` result and made no certification claim from it.
-- PDF inspection: `/Users/aamia/.codex/plugins/cache/openai-primary-runtime/pdf/26.1017.11052/skills/pdf/SKILL.md`. Read source PDF text and field/widget structures; Poppler was unavailable, so rendered the five form pages with macOS PDFKit and inspected each saved PNG. No PDF was edited or created as a deliverable.
+- `jev-search`: `~/.codex/skills/jev-search/SKILL.md`. Applied one search-result gate; reported its network `fail_open` result and made no certification claim from it.
+- PDF inspection: `~/.codex/plugins/cache/openai-primary-runtime/pdf/26.1017.11052/skills/pdf/SKILL.md`. Read source PDF text and field/widget structures; Poppler was unavailable, so rendered the five form pages with macOS PDFKit and inspected each saved PNG. No PDF was edited or created as a deliverable.

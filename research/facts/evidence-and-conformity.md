@@ -643,10 +643,10 @@ The workflow maintenance check reported model-preference drift; source methods w
 
 Methods used, with actual source files read:
 
-- T3 workflow router: `/Users/aamia/.codex/skills/t3-workflow/SKILL.md`.
-- T3 method routing: `/Users/aamia/.codex/skills/t3-workflow/references/routes.md`.
-- Matt Pocock primary-source research: `/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md`.
-- pstack unslop prose review: `/Users/aamia/.agents/skill-libraries/pstack/skills/unslop/SKILL.md`.
-- Workflow drift-handling instructions: `/Users/aamia/.agents/t3-workflow/UPDATE-SAFETY.md`.
+- T3 workflow router: `~/.codex/skills/t3-workflow/SKILL.md`.
+- T3 method routing: `~/.codex/skills/t3-workflow/references/routes.md`.
+- Matt Pocock primary-source research: `~/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md`.
+- pstack unslop prose review: `~/.agents/skill-libraries/pstack/skills/unslop/SKILL.md`.
+- Workflow drift-handling instructions: `~/.agents/t3-workflow/UPDATE-SAFETY.md`.
 
 The brief's no-further-delegation and no-commit rules governed this research. The source research method's background-agent instruction did not override those rules.
