@@ -1,0 +1,88 @@
+{
+  "id": "dev-048",
+  "applicant_type": "homebuilder",
+  "topic": "envelope-insulation-sheathing",
+  "code_part": 9,
+  "jurisdiction": "unspecified",
+  "seed_provision": "9.25.5.2.(1)",
+  "description": "For a new two-storey detached house with a building area of 180 m2, our wall has a foil-faced exterior insulation layer between the stud cavity and the cladding. The design location has 6,500 heating degree-days. At the innermost impermeable surface, the total RSI outboard is 0.5 and inboard is 4.0. Measured dry-cup vapour permeance is 5 ng/(Pa s m2), and air leakage is 0.02 L/(s m2) at 75 Pa. There is no air space inboard of that layer, it is not on the warm face, and indoor moisture generation is ordinary. We want to keep this arrangement.",
+  "known_facts": [
+    "two-storey detached house",
+    "6500 heating degree-days stated as design input",
+    "RSI outboard 0.5 and inboard 4.0 at innermost impermeable surface",
+    "vapour permeance 5 ng/(Pa s m2)",
+    "air leakage 0.02 L/(s m2) at 75 Pa",
+    "not on warm face",
+    "no inboard air space",
+    "ordinary indoor moisture",
+    "building area 180 m2"
+  ],
+  "missing_info": [
+    {
+      "field": "owner or representative contact and property identification",
+      "why": "Sections A–B administrative identification.",
+      "priority": "administrative"
+    },
+    {
+      "field": "risk assessment, mitigating measures, assumptions and supporting documents",
+      "why": "Alternative-path completeness items; request evidence rather than fabricate a professional conclusion.",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Low-permeance exterior material has a 0.125 thermal-resistance ratio below the 0.35 minimum for the stated heating degree-days, without the warm-face or vented-space options.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "9.25.5.2.(1)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.25.5.1.(1)",
+        "why": "Applicability thresholds are supplied as synthetic facts."
+      },
+      {
+        "division": "B",
+        "provision": "9.25.5.1.(4)",
+        "why": "The stated permeance and degree-days do not meet this exception."
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "9.25.5.2.(1)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F62,F63-OH1.1,OH1.2]",
+          "[F62,F63-OS2.3]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "no",
+    "engineering_reason": "Single-family dwelling is exempt from general registered-professional involvement unless the AHJ invokes special safety concerns; no Part 4 work is described.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(4)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 9.25.5.2.(1), NBC(AE) 2023, 2nd printing, PDF p.1000. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

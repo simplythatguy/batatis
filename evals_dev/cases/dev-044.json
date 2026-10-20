@@ -1,0 +1,69 @@
+{
+  "id": "dev-044",
+  "applicant_type": "architect-engineer",
+  "topic": "part4-structural",
+  "code_part": 4,
+  "jurisdiction": "Medicine Hat",
+  "seed_provision": "4.1.5.3.(1)",
+  "description": "For a continuous multi-span office floor designed under Part 4, our live-load analysis would load every span simultaneously and stop there. We would not check any partial-area loading patterns even where they could produce a larger effect in a member. We want to use this simplified loading method in the submission.",
+  "known_facts": [
+    "Part 4 continuous multi-span office floor",
+    "uniform full-area live loading only",
+    "partial-area patterns omitted even if they are more critical"
+  ],
+  "missing_info": [
+    {
+      "field": "owner or representative contact and property identification",
+      "why": "Sections A–B administrative identification.",
+      "priority": "administrative"
+    },
+    {
+      "field": "risk assessment, mitigating measures, assumptions and supporting documents",
+      "why": "Alternative-path completeness items; request evidence rather than fabricate a professional conclusion.",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Only full-area live loading is considered rather than the full or partial loading producing the most critical member effects.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "4.1.5.3.(1)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "4.1.5.3.(1)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F20-OP2.1]",
+          "[F20-OS2.1]",
+          "[F22-OH4]",
+          "[F22-OP2.4]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "yes",
+    "engineering_reason": "The described design is explicitly carried out under Part 4, requiring a registered professional skilled in the work.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.2.(1)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 4.1.5.3.(1), NBC(AE) 2023, 2nd printing, PDF p.430. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

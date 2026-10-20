@@ -5,7 +5,9 @@ from the code database (`codedb/`) only: each case starts from a Division B prov
 2nd printing, and describes a design that departs from it in an applicant's own words. They are **not**
 derived from the held-out judge set and must never be compared against it by hand.
 
-One JSON object per file. The validator is `evals_dev/validate_cases.py`.
+One JSON object per file. Committed JSON is the single authoring source for narratives, semantic
+labels and authoring receipts. The reviewed set is exactly `dev-001` through `dev-060`, with matching
+filenames and IDs. The validator is `evals_dev/validate_cases.py`.
 
 ## Top level
 
@@ -14,7 +16,7 @@ One JSON object per file. The validator is `evals_dev/validate_cases.py`.
 | `id` | string | `dev-NNN`. Never reuse a held-out id pattern. |
 | `applicant_type` | enum | `manufacturer` \| `homebuilder` \| `contractor` \| `architect-engineer` \| `owner` |
 | `topic` | enum | `part9-spatial-separation`, `part9-fire-separations`, `envelope-insulation-sheathing`, `cladding`, `engineered-walls`, `single-exit`, `part3-fire-protection`, `part4-structural`, `out-of-scope` |
-| `code_part` | int \| null | Part of Division B the seed provision belongs to; null for out-of-scope requests. |
+| `code_part` | int \| null | Part of Division B the seed provision belongs to when the route is identified. Null means an unresolved route (`ask`, `out_of_scope: false`) or a separate-regime request (`redirect`, `out_of_scope: true`); null alone is not an out-of-scope label. |
 | `jurisdiction` | string | Alberta municipality, or `unspecified`. Kept as data so cases stay portable across jurisdictions. |
 | `seed_provision` | string | The Division B provision the author started from (not shown to the system under test). |
 | `description` | string | The only text the system under test receives. Plain language, no article numbers. |
@@ -51,3 +53,34 @@ Article 2.3.1.1.; they are not repeated in each `must_cite`.
 4. `redirect` cases have `out_of_scope: true` and a `redirect_to`.
 5. `description` contains no code article numbers.
 6. Edition: NBC(AE) 2023, 2nd printing only.
+
+## Refreshing deterministic Section C values
+
+Edit the JSON files directly when authoring or reviewing case semantics. The historical
+`author_cases.py` filename now identifies a **Section C refresher**, not a narrative generator.
+It contains no second copy of the fixture narratives and does not update authoring receipts or
+claim human review.
+
+The default run, or explicit `--check`, reads the existing 60 files and CodeDB without writing.
+Only Division B references already listed with `role: benchmark` in `gold.must_cite` supply Section C
+rows. Seed provisions, scope references and candidate citations do not select additional rows.
+`--write` explicitly permits updates to **`gold.section_c` only**. Unchanged files are not rewritten;
+every other JSON value, including unknown metadata fields, is preserved.
+
+The entire projected set is validated before any source file is replaced. Missing/unexpected files,
+filename/ID mismatches, malformed JSON, invalid case labels or unknown benchmark provisions abort the
+batch. Replacements are prepared first and applied with per-file atomic renames. This is not a
+filesystem-wide crash transaction.
+
+```sh
+.venv/bin/python evals_dev/author_cases.py --check
+.venv/bin/python evals_dev/author_cases.py --write
+.venv/bin/python evals_dev/validate_cases.py
+.venv/bin/python -m pytest evals_dev -q
+```
+
+Both scripts accept `--db PATH` and `--cases DIR`; use the main checkout's Python environment when
+the isolated worktree has no `.venv` (the exact verified commands are in `REVIEW.md`). Refresher exit
+codes: `0` means current or successfully refreshed, `1` means check mode found Section C drift, and
+`2` means invalid input or an I/O failure. Fix semantic/input errors in JSON; the refresher does not
+choose a different benchmark, rewrite a narrative or repair an authoring decision.

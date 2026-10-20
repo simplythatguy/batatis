@@ -4,12 +4,15 @@
   "topic": "part9-spatial-separation",
   "code_part": 9,
   "jurisdiction": "Canmore",
-  "seed_provision": "9.10.14.2.(2)",
-  "description": "I'm the architect on a side-by-side duplex with a wall that is angled about 20 degrees to the side property line, so it runs from 1.2 m to 3.0 m away. For the window-area calculation we'd like to use the average distance of the wall, about 2.1 m, rather than drawing the plane at the closest point. Using the closest point cuts our glazing allowance by more than half.",
+  "seed_provision": "9.10.15.2.(3)",
+  "description": "I'm the architect on a two-storey side-by-side duplex with a building area of 240 m2 and no dwelling above another. One wall is angled about 20 degrees to the side property line, so it runs from 1.2 m to 3.0 m away. For the window-area calculation we'd like to use the average distance of the wall, about 2.1 m, rather than drawing the plane at the closest point. One of the windows is at the 1.2 m end, in front of our proposed average-distance plane. Using the closest window plane cuts our glazing allowance by more than half.",
   "known_facts": [
     "duplex",
     "skewed wall 1.2 m to 3.0 m from the side property line",
-    "average distance 2.1 m proposed for unprotected-opening area"
+    "average distance 2.1 m proposed for unprotected-opening area",
+    "no dwelling above another",
+    "a glazed opening lies at the 1.2 m end in front of the proposed plane",
+    "building area 240 m2"
   ],
   "missing_info": [
     {
@@ -29,30 +32,37 @@
     }
   ],
   "gold": {
-    "departure": "Exposing building face location for a skewed wall taken at the average distance instead of the plane with no unprotected openings in front of it.",
+    "departure": "Glazed-opening area for a skewed house wall calculated from a plane behind an actual glazed opening.",
     "must_cite": [
       {
         "division": "B",
-        "provision": "9.10.14.2.(2)",
+        "provision": "9.10.15.2.(3)",
         "role": "benchmark"
       }
     ],
     "should_cite": [
       {
         "division": "B",
-        "provision": "9.10.14.4.(1)",
-        "why": "maximum aggregate area of unprotected openings"
+        "provision": "9.10.15.1.(1)",
+        "why": "House subsection applies to the side-by-side dwellings."
       },
       {
         "division": "B",
         "provision": "9.10.15.4.(1)",
-        "why": "glazed openings in houses, if the duplex is treated under the house provisions"
+        "why": "Permitted glazed-opening area after the plane is correctly located."
       }
     ],
-    "must_not_cite": [],
+    "must_not_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.14.2.(2)",
+        "prohibited_use": "as the governing spatial-separation benchmark for these side-by-side dwellings",
+        "why": "Subsection 9.10.14 excludes buildings to which the house subsection applies."
+      }
+    ],
     "section_c": [
       {
-        "provision": "9.10.14.2.(2)",
+        "provision": "9.10.15.2.(3)",
         "status": "none",
         "root_provision": null,
         "pairs": [],
@@ -75,6 +85,6 @@
     "source": "codedb",
     "author": "Batatis evaluation builder (Claude Opus 5.5)",
     "date": "2026-10-20",
-    "notes": "Written from the code database only; held-out judge set not consulted."
+    "notes": "Written from the code database only; held-out judge set not consulted. Model-checked and revised by GPT-6.1-Sol max on 2026-10-20: Replaced the non-house spatial-separation sentence with the house sentence and stated the synthetic window placement that makes the departure real. Model-checked synthetic clarification on 2026-10-20: Stated the building/parcel/design-basis scope in the applicant description rather than relying on evaluator-only metadata."
   }
 }

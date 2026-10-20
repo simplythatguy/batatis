@@ -1,0 +1,83 @@
+{
+  "id": "dev-032",
+  "applicant_type": "manufacturer",
+  "topic": "cladding",
+  "code_part": 3,
+  "jurisdiction": "Edmonton",
+  "seed_provision": "3.1.5.5.(3)",
+  "description": "We manufacture fire-retardant-treated wood cladding for a six-storey sprinklered office required to be noncombustible. Our proposed wall assembly was fire-tested only with unweathered cladding. We want to omit accelerated weathering before the fire-exposure test. The assembly is not one of the prescriptive Appendix D exterior-wall assemblies; our proposal relies on the tested-wall route.",
+  "known_facts": [
+    "fire-retardant-treated wood exterior cladding",
+    "six-storey sprinklered office",
+    "noncombustible construction required",
+    "wall fire test uses unweathered cladding only",
+    "accelerated weathering before fire-exposure test omitted",
+    "not an Appendix D prescriptive assembly",
+    "tested-wall route proposed"
+  ],
+  "missing_info": [
+    {
+      "field": "owner or representative contact and property identification",
+      "why": "Sections A–B administrative identification.",
+      "priority": "administrative"
+    },
+    {
+      "field": "weathering and fire-test records, risk assessment, mitigating measures and assumptions",
+      "why": "Request actual records and an alternative performance case; do not infer durability or equivalence.",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Fire-retardant-treated wood cladding is proposed without accelerated weathering before the required fire-exposure test.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "3.1.5.5.(3)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "3.1.5.5.(1)",
+        "why": "Underlying combustible-cladding tested-wall permission."
+      },
+      {
+        "division": "B",
+        "provision": "3.1.5.5.(4)",
+        "why": "Separate prescriptive assembly route is explicitly excluded by the synthetic facts."
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "3.1.5.5.(3)",
+        "status": "none",
+        "root_provision": null,
+        "pairs": [],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "yes",
+    "engineering_reason": "The stated occupancy, building size or dwelling count is outside the Division C exemption; applicable drawings require qualified registered professionals.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(3)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 3.1.5.5.(3), NBC(AE) 2023, 2nd printing, PDF p.137. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

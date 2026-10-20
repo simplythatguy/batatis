@@ -1,0 +1,79 @@
+{
+  "id": "dev-028",
+  "applicant_type": "contractor",
+  "topic": "single-exit",
+  "code_part": 3,
+  "jurisdiction": "Edmonton",
+  "seed_provision": "3.4.4.4.(3)",
+  "description": "We are building a six-storey apartment with eighteen units and two contiguous scissors stairs. The wall between the stairs is rated. The team wants a self-closing rated crossover door through that wall at every second landing to simplify access. The doors would connect the two exit stairs directly.",
+  "known_facts": [
+    "six storeys and eighteen apartments",
+    "contiguous scissors exit stairs",
+    "rated separating wall",
+    "crossover doorways directly between stairs proposed"
+  ],
+  "missing_info": [
+    {
+      "field": "owner or representative contact and property identification",
+      "why": "Sections A–B administrative identification.",
+      "priority": "administrative"
+    },
+    {
+      "field": "risk assessment, mitigating measures, assumptions and supporting documents",
+      "why": "Alternative-path completeness items; request evidence rather than fabricate a professional conclusion.",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Doorways pierce the fire separation between contiguous exit stairs.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "3.4.4.4.(3)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "3.4.4.4.(2)",
+        "why": "Establishes the required separation between the stairs."
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "3.4.4.4.(3)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F05-OS1.5]",
+          "[F06-OP1.2]",
+          "[F06-OS1.5,OS1.2]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "yes",
+    "engineering_reason": "The stated occupancy, building size or dwelling count is outside the Division C exemption; applicable drawings require qualified registered professionals.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(3)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 3.4.4.4.(3), NBC(AE) 2023, 2nd printing, PDF p.275. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

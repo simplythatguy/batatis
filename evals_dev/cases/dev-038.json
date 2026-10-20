@@ -1,0 +1,79 @@
+{
+  "id": "dev-038",
+  "applicant_type": "contractor",
+  "topic": "part3-fire-protection",
+  "code_part": 3,
+  "jurisdiction": "Leduc",
+  "seed_provision": "3.1.6.17.(3)",
+  "description": "On a nine-storey apartment with sixty dwellings, rated CLT walls form part of the encapsulated mass timber structure. Electrical outlet boxes on opposite sides of one wall would be only 250 mm apart. We want to keep that spacing and submit a local protection detail instead of moving the boxes.",
+  "known_facts": [
+    "nine-storey apartment",
+    "sixty dwellings",
+    "rated structural mass timber wall",
+    "opposite-side outlet boxes 250 mm apart",
+    "local protection detail proposed"
+  ],
+  "missing_info": [
+    {
+      "field": "owner or representative contact and property identification",
+      "why": "Sections A–B administrative identification.",
+      "priority": "administrative"
+    },
+    {
+      "field": "risk assessment, mitigating measures, assumptions and supporting documents",
+      "why": "Alternative-path completeness items; request evidence rather than fabricate a professional conclusion.",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Opposite-side outlet boxes in a rated structural mass timber element are spaced less than 600 mm apart.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "3.1.6.17.(3)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "3.1.6.17.(1)",
+        "why": "Cutout permissions do not remove the separate opposite-box spacing requirement."
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "3.1.6.17.(3)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F03-OP1.2]",
+          "[F03-OS1.2]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "yes",
+    "engineering_reason": "The stated occupancy, building size or dwelling count is outside the Division C exemption; applicable drawings require qualified registered professionals.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(3)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 3.1.6.17.(3), NBC(AE) 2023, 2nd printing, PDF p.151. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

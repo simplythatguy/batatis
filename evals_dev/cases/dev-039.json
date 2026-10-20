@@ -1,0 +1,76 @@
+{
+  "id": "dev-039",
+  "applicant_type": "owner",
+  "topic": "part4-structural",
+  "code_part": 4,
+  "jurisdiction": "Wetaskiwin",
+  "seed_provision": "4.1.6.14.(1)",
+  "description": "Our new 2,500 m2 arena is being structurally designed under Part 4. We want roof members designed for 25% less snow load because our operations contractor promises to shovel the roof after every storm. Can the snow-removal contract be the basis for the reduced design load?",
+  "known_facts": [
+    "new arena",
+    "building area 2500 m2",
+    "structural design under Part 4",
+    "25% snow-load reduction requested",
+    "manual snow-removal contract offered"
+  ],
+  "missing_info": [
+    {
+      "field": "owner or representative contact and property identification",
+      "why": "Sections A–B administrative identification.",
+      "priority": "administrative"
+    },
+    {
+      "field": "risk assessment, mitigating measures, assumptions and supporting documents",
+      "why": "Alternative-path completeness items; request evidence rather than fabricate a professional conclusion.",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "A snow-removal commitment is used as a rationale to reduce the design snow load.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "4.1.6.14.(1)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "4.1.6.2.(1)",
+        "why": "Specified roof snow and associated-rain load calculation."
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "4.1.6.14.(1)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F20-OP2.1]",
+          "[F20-OS2.1]",
+          "[F22-OP2.4]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "yes",
+    "engineering_reason": "The described design is explicitly carried out under Part 4, requiring a registered professional skilled in the work.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.2.(1)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 4.1.6.14.(1), NBC(AE) 2023, 2nd printing, PDF p.450. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

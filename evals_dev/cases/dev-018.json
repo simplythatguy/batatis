@@ -5,13 +5,14 @@
   "code_part": 4,
   "jurisdiction": "Leduc",
   "seed_provision": "4.1.6.2.(3)",
-  "description": "Structural engineer on a large single-storey warehouse in a suburban industrial park, with other buildings across the street. We want to use a reduced wind exposure factor of 0.75 for the roof snow load because the site is flat and windy. Normal importance category.",
+  "description": "Structural engineer carrying out Part 4 design on a large single-storey warehouse in a suburban industrial park, with other buildings across the street. We want to use a reduced wind exposure factor of 0.75 for the roof snow load because the site is flat and windy. Normal importance category.",
   "known_facts": [
     "single-storey warehouse",
     "suburban industrial park",
     "neighbouring buildings",
     "wind exposure factor 0.75 proposed",
-    "normal importance"
+    "normal importance",
+    "structural design under Part 4"
   ],
   "missing_info": [
     {
@@ -83,6 +84,6 @@
     "source": "codedb",
     "author": "Batatis evaluation builder (Claude Opus 5.5)",
     "date": "2026-10-20",
-    "notes": "Written from the code database only; held-out judge set not consulted."
+    "notes": "Written from the code database only; held-out judge set not consulted. Model-checked synthetic clarification on 2026-10-20: Stated the building/parcel/design-basis scope in the applicant description rather than relying on evaluator-only metadata."
   }
 }

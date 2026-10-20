@@ -1,0 +1,76 @@
+{
+  "id": "dev-031",
+  "applicant_type": "manufacturer",
+  "topic": "cladding",
+  "code_part": 3,
+  "jurisdiction": "Calgary",
+  "seed_provision": "3.1.5.5.(1)",
+  "description": "Our combustible timber rainscreen has exterior-wall fire-test documentation. The proposed project is a seven-storey, 1,100 m2 office building required to use noncombustible construction, with no sprinklers anywhere. We want to use the cladding on upper storeys on the strength of the wall test alone. Please address this cladding proposal; the sprinkler design is a separate unresolved issue.",
+  "known_facts": [
+    "combustible timber rainscreen",
+    "seven-storey office",
+    "building area 1100 m2",
+    "noncombustible construction required",
+    "building not sprinklered",
+    "wall-test documentation offered"
+  ],
+  "missing_info": [
+    {
+      "field": "scope and applicability of the offered wall-test documentation",
+      "why": "Evidence must be supplied and checked; its adequacy is not assumed.",
+      "priority": "administrative"
+    },
+    {
+      "field": "owner or representative contact and property identification",
+      "why": "Sections A–B administrative identification.",
+      "priority": "administrative"
+    },
+    {
+      "field": "risk assessment, mitigating measures, assumptions and supporting documents",
+      "why": "Alternative-path completeness items; request evidence rather than fabricate a professional conclusion.",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Combustible cladding is proposed above three storeys in a building that is not sprinklered throughout.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "3.1.5.5.(1)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "3.1.5.5.(1)",
+        "status": "none",
+        "root_provision": "3.1.5.5.(2)",
+        "pairs": [],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "yes",
+    "engineering_reason": "The stated occupancy, building size or dwelling count is outside the Division C exemption; applicable drawings require qualified registered professionals.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(3)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 3.1.5.5.(1), NBC(AE) 2023, 2nd printing, PDF p.137. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

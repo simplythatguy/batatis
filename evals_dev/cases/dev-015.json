@@ -14,6 +14,16 @@
   ],
   "missing_info": [
     {
+      "field": "clear openable skylight height and width, sill height above floor and ground, and opening operation",
+      "why": "The window exception is dimensional; small skylights is not a measurement.",
+      "priority": "critical"
+    },
+    {
+      "field": "whether there is direct balcony access and whether another suite is above or below",
+      "why": "The window and balcony alternatives must be checked before alleging excess travel.",
+      "priority": "critical"
+    },
+    {
       "field": "owner name and contact",
       "why": "Section A of the variance form",
       "priority": "administrative"
@@ -22,41 +32,30 @@
       "field": "civic address and legal description",
       "why": "Section A identifies the property",
       "priority": "administrative"
-    },
-    {
-      "field": "skylight opening size and height above floor",
-      "why": "whether an egress-window route is available",
-      "priority": "administrative"
     }
   ],
   "gold": {
-    "departure": "Travel of more than one storey from the attic level to an exit or egress door without the window or balcony alternatives.",
-    "must_cite": [
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [
       {
         "division": "B",
         "provision": "9.9.9.1.(1)",
-        "role": "benchmark"
-      }
-    ],
-    "should_cite": [
+        "why": "Candidate benchmark only; deciding facts must be obtained first."
+      },
       {
         "division": "B",
         "provision": "9.9.9.1.(2)",
         "why": "window alternative for units not above or below another suite"
+      },
+      {
+        "division": "B",
+        "provision": "9.9.9.1.(3)",
+        "why": "Candidate balcony alternative; direct access has not been described."
       }
     ],
     "must_not_cite": [],
-    "section_c": [
-      {
-        "provision": "9.9.9.1.(1)",
-        "status": "direct",
-        "root_provision": null,
-        "pairs": [
-          "[F10-OS3.7]"
-        ],
-        "conditional": []
-      }
-    ],
+    "section_c": [],
     "engineering_required": "no",
     "engineering_reason": "Single-family dwelling within the exemption.",
     "engineering_citations": [
@@ -65,7 +64,7 @@
         "provision": "2.4.1.1.(1)"
       }
     ],
-    "intake_action": "proceed_conditionally",
+    "intake_action": "ask",
     "out_of_scope": false,
     "redirect_to": null
   },
@@ -73,6 +72,6 @@
     "source": "codedb",
     "author": "Batatis evaluation builder (Claude Opus 5.5)",
     "date": "2026-10-20",
-    "notes": "Written from the code database only; held-out judge set not consulted."
+    "notes": "Written from the code database only; held-out judge set not consulted. Model-checked and revised by GPT-6.1-Sol max on 2026-10-20: Changed proceed to ask; small skylights and an unstated balcony do not rule out the acceptable-solution alternatives."
   }
 }

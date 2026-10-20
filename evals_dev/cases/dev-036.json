@@ -1,0 +1,92 @@
+{
+  "id": "dev-036",
+  "applicant_type": "architect-engineer",
+  "topic": "engineered-walls",
+  "code_part": 3,
+  "jurisdiction": "Canmore",
+  "seed_provision": "3.1.6.4.(1)",
+  "description": "An eight-storey, forty-unit encapsulated mass timber apartment design leaves two opposite-facing CLT wall surfaces exposed inside each suite. Together they are 20% of the suite perimeter-wall area and have a stated flame-spread rating of 100. All ceilings, beams and columns remain encapsulated. We want the opposite walls exposed without adding protection.",
+  "known_facts": [
+    "eight-storey encapsulated mass timber apartment",
+    "forty units",
+    "two opposite-facing CLT wall surfaces exposed",
+    "exposed walls total 20% of perimeter-wall area",
+    "stated flame-spread rating 100",
+    "ceilings beams and columns encapsulated"
+  ],
+  "missing_info": [
+    {
+      "field": "owner or representative contact and property identification",
+      "why": "Sections A–B administrative identification.",
+      "priority": "administrative"
+    },
+    {
+      "field": "risk assessment, mitigating measures, assumptions and supporting documents",
+      "why": "Alternative-path completeness items; request evidence rather than fabricate a professional conclusion.",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Opposite-facing mass timber wall surfaces are left unencapsulated rather than meeting the exposed-wall exception.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "3.1.6.4.(1)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "3.1.6.4.(4)",
+        "why": "The exposed-wall exception requires surfaces to face the same direction."
+      },
+      {
+        "division": "B",
+        "provision": "3.1.6.4.(5)",
+        "why": "The area ceiling is a separate condition; meeting it does not remove the direction condition."
+      }
+    ],
+    "must_not_cite": [
+      {
+        "division": "B",
+        "provision": "3.1.6.4.(4)",
+        "prohibited_use": "as permitting the described proposal",
+        "why": "The exposed surfaces face opposite directions."
+      }
+    ],
+    "section_c": [
+      {
+        "provision": "3.1.6.4.(1)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F02-OP1.2]",
+          "[F02-OS1.2]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "yes",
+    "engineering_reason": "The stated occupancy, building size or dwelling count is outside the Division C exemption; applicable drawings require qualified registered professionals.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(3)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 3.1.6.4.(1), NBC(AE) 2023, 2nd printing, PDF p.146. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

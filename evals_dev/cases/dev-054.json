@@ -1,0 +1,70 @@
+{
+  "id": "dev-054",
+  "applicant_type": "architect-engineer",
+  "topic": "cladding",
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": "3.1.5.5.(1)",
+  "description": "A client wants timber-look exterior panels for a tall building. I have not received the material specification, construction classification or sprinkler information. The pictures look like wood, but that is all I can say. Which approval route should we investigate?",
+  "known_facts": [
+    "tall building described without measured height",
+    "timber-look exterior panels",
+    "material and construction details not received"
+  ],
+  "missing_info": [
+    {
+      "field": "material composition and combustibility",
+      "why": "Appearance does not establish combustible-cladding applicability.",
+      "priority": "critical"
+    },
+    {
+      "field": "height, occupancy, construction regime and sprinkler coverage",
+      "why": "Distinguish noncombustible, encapsulated mass timber and other applicable routes.",
+      "priority": "critical"
+    },
+    {
+      "field": "wall assembly, spatial separation and proposed evidence",
+      "why": "Establish the permission or actual departure rather than presume one.",
+      "priority": "critical"
+    }
+  ],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "3.1.5.5.(1)",
+        "why": "Candidate for combustible cladding on required noncombustible construction."
+      },
+      {
+        "division": "B",
+        "provision": "3.1.6.9.(1)",
+        "why": "Candidate if the building is encapsulated mass timber."
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "depends",
+    "engineering_reason": "Tall is not a code height or occupancy classification; actual size, use, work and design basis must establish the professional trigger.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(3)"
+      }
+    ],
+    "intake_action": "ask",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 3.1.5.5.(1), NBC(AE) 2023, 2nd printing, PDF p.137. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

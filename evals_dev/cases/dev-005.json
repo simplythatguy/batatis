@@ -14,6 +14,21 @@
   ],
   "missing_info": [
     {
+      "field": "intended building height, building area and dwelling arrangement",
+      "why": "Small apartment buildings alone does not establish Part 9 versus Part 3 applicability.",
+      "priority": "critical"
+    },
+    {
+      "field": "limiting distance and maximum permitted unprotected-opening percentage",
+      "why": "The construction table and the tested-wall permission have different conditions.",
+      "priority": "critical"
+    },
+    {
+      "field": "complete wall construction and applicable tested or prescriptive assembly route",
+      "why": "A missing full-scale test does not by itself prove that all acceptable-solution routes fail.",
+      "priority": "critical"
+    },
+    {
       "field": "specific building, limiting distance and opening percentage",
       "why": "the required construction depends on the exposing building face",
       "priority": "administrative"
@@ -25,20 +40,19 @@
     }
   ],
   "gold": {
-    "departure": "Combustible composite cladding on exposing building faces where the table requires noncombustible cladding, without the full-scale wall-assembly test.",
-    "must_cite": [
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [
       {
         "division": "B",
         "provision": "9.10.14.5.(1)",
-        "role": "benchmark"
+        "why": "Candidate benchmark only; deciding facts must be obtained first."
       },
       {
         "division": "B",
         "provision": "9.10.14.5.(2)",
-        "role": "benchmark"
-      }
-    ],
-    "should_cite": [
+        "why": "Candidate tested-wall cladding permission, conditional on maximum permitted opening percentage and other stated limits."
+      },
       {
         "division": "B",
         "provision": "3.1.5.5.(1)",
@@ -46,26 +60,7 @@
       }
     ],
     "must_not_cite": [],
-    "section_c": [
-      {
-        "provision": "9.10.14.5.(1)",
-        "status": "direct",
-        "root_provision": null,
-        "pairs": [
-          "[F02,F03-OP3.1]"
-        ],
-        "conditional": []
-      },
-      {
-        "provision": "9.10.14.5.(2)",
-        "status": "direct",
-        "root_provision": null,
-        "pairs": [
-          "[F03-OP3.1]"
-        ],
-        "conditional": []
-      }
-    ],
+    "section_c": [],
     "engineering_required": "depends",
     "engineering_reason": "Depends on the building it goes on: buildings outside the Division C exemption need registered professionals.",
     "engineering_citations": [
@@ -78,7 +73,7 @@
         "provision": "2.4.1.1.(3)"
       }
     ],
-    "intake_action": "proceed_conditionally",
+    "intake_action": "ask",
     "out_of_scope": false,
     "redirect_to": null
   },
@@ -86,6 +81,6 @@
     "source": "codedb",
     "author": "Batatis evaluation builder (Claude Opus 5.5)",
     "date": "2026-10-20",
-    "notes": "Written from the code database only; held-out judge set not consulted."
+    "notes": "Written from the code database only; held-out judge set not consulted. Model-checked and revised by GPT-6.1-Sol max on 2026-10-20: Changed proceed to ask; the product-wide request does not establish the construction-table conditions or the applicable Part."
   }
 }

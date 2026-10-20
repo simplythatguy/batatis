@@ -14,21 +14,25 @@
   ],
   "missing_info": [
     {
-      "field": "who designed the system and whether it is engineered under Part 4",
-      "why": "route choice",
-      "priority": "administrative"
+      "field": "unsupported stud height and complete load path including the proprietary header",
+      "why": "Establish the table comparison and the scope of the proposed structural design.",
+      "priority": "critical"
+    },
+    {
+      "field": "structural design basis and responsible designer",
+      "why": "Part 9 permits listed prescriptive, good-engineering-practice and Part 4 routes; departing from one table does not alone establish the chosen route.",
+      "priority": "critical"
     }
   ],
   "gold": {
-    "departure": "Stud size and spacing outside the prescriptive table for the loads carried.",
-    "must_cite": [
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [
       {
         "division": "B",
         "provision": "9.23.10.1.(1)",
-        "role": "benchmark"
-      }
-    ],
-    "should_cite": [
+        "why": "Candidate benchmark only; deciding facts must be obtained first."
+      },
       {
         "division": "B",
         "provision": "9.4.1.1.(1)",
@@ -36,58 +40,24 @@
       }
     ],
     "must_not_cite": [],
-    "section_c": [
-      {
-        "provision": "9.23.10.1.(1)",
-        "status": "direct",
-        "root_provision": null,
-        "pairs": [
-          "[F20-OP2.1,OP2.5]",
-          "[F20-OS2.1,OS2.5]",
-          "[F22-OP2.4,OP2.5]",
-          "[F22-OS2.5]"
-        ],
-        "conditional": [
-          {
-            "pair": "[F20,F22-OH1.1,OH1.2,OH1.3]",
-            "when": "Applies to elements that support or are part of an environmental separator."
-          },
-          {
-            "pair": "[F20,F22-OP2.3]",
-            "when": "Applies to elements that support or are part of an environmental separator."
-          },
-          {
-            "pair": "[F20,F22-OS1.2]",
-            "when": "Applies to assemblies required to provide fire resistance."
-          },
-          {
-            "pair": "[F20,F22-OS2.3]",
-            "when": "Applies to elements that support or are part of an environmental separator."
-          },
-          {
-            "pair": "[F22-OH4]",
-            "when": "Applies to floors and elements that support floors."
-          },
-          {
-            "pair": "[F22-OS3.1]",
-            "when": "Applies to floors and elements that support floors."
-          },
-          {
-            "pair": "[F22-OS3.7]",
-            "when": "Applies to walls, and elements that support walls, that contain doors or windows required for emergency egress."
-          }
-        ]
-      }
-    ],
-    "engineering_required": "yes",
-    "engineering_reason": "Departing from the span/stud tables needs structural design to Part 4, which must be done by a registered professional.",
+    "section_c": [],
+    "engineering_required": "depends",
+    "engineering_reason": "The Part 4 route requires a registered professional; the selected design basis and any AHJ special-safety requirement remain unresolved for the proposed houses.",
     "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(4)"
+      },
       {
         "division": "C",
         "provision": "2.4.1.2.(1)"
       }
     ],
-    "intake_action": "proceed_conditionally",
+    "intake_action": "ask",
     "out_of_scope": false,
     "redirect_to": null
   },
@@ -95,6 +65,6 @@
     "source": "codedb",
     "author": "Batatis evaluation builder (Claude Opus 5.5)",
     "date": "2026-10-20",
-    "notes": "Written from the code database only; held-out judge set not consulted."
+    "notes": "Written from the code database only; held-out judge set not consulted. Model-checked and revised by GPT-6.1-Sol max on 2026-10-20: Changed proceed to ask and professional yes to depends; table departure checked on PDF p.975, but Part 4 cannot be assumed from table departure alone."
   }
 }

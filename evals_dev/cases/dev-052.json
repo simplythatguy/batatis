@@ -1,0 +1,89 @@
+{
+  "id": "dev-052",
+  "applicant_type": "contractor",
+  "topic": "part9-fire-separations",
+  "code_part": 9,
+  "jurisdiction": "Calgary",
+  "seed_provision": "9.10.9.16.(3)",
+  "description": "For a new two-storey detached house with one basement secondary suite and a building area of 180 m2, we want 9.5 mm gypsum on both sides of the walls and below the floor framing that separate the dwellings. It is continuous and smoke-tight, but we are not offering a rated fire-separation assembly. We are proposing this thinner board in place of the thicker-board secondary-suite option.",
+  "known_facts": [
+    "new detached house with one secondary suite",
+    "separating walls and underside of floor framing have 9.5 mm gypsum",
+    "continuous smoke-tight barrier proposed",
+    "no rated fire-separation assembly offered",
+    "building area 180 m2"
+  ],
+  "missing_info": [
+    {
+      "field": "owner or representative contact and property identification",
+      "why": "Sections A–B administrative identification.",
+      "priority": "administrative"
+    },
+    {
+      "field": "risk assessment, mitigating measures, assumptions and supporting documents",
+      "why": "Alternative-path completeness items; request evidence rather than fabricate a professional conclusion.",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "The multi-storey main dwelling lacks the required fire-resistance-rated separation, and the proposed 9.5 mm gypsum does not meet the secondary-suite smoke-tight-barrier permission.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.9.16.(3)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.9.16.(4)",
+        "why": "The secondary-suite permission requires at least 12.7 mm gypsum in the specified locations."
+      }
+    ],
+    "must_not_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.9.16.(4)",
+        "prohibited_use": "as permitting the described proposal",
+        "why": "The proposed 9.5 mm gypsum is below the stated minimum thickness."
+      }
+    ],
+    "section_c": [
+      {
+        "provision": "9.10.9.16.(3)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F03-OS1.2]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "no",
+    "engineering_reason": "The house and its secondary suite are within the residential exemption, subject to AHJ special-safety concerns; no Part 4 structural work is described.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(2)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(4)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 9.10.9.16.(3), NBC(AE) 2023, 2nd printing, PDF p.886. The main dwelling contains multiple storeys; the secondary-suite permission remains conditional on its gypsum thickness. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

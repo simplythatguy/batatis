@@ -5,13 +5,14 @@
   "code_part": 3,
   "jurisdiction": "Edmonton",
   "seed_provision": "3.1.6.4.(1)",
-  "description": "Design-build contractor on an encapsulated mass timber residential building, eight storeys. In the top-floor suites the developer wants the CLT ceilings left fully exposed, about 60% of each suite's ceiling, with a clear intumescent coating. Walls would stay covered with gypsum.",
+  "description": "Design-build contractor on an encapsulated mass timber residential building with forty apartments, eight storeys. In the top-floor suites the developer wants the CLT ceilings left fully exposed, about 60% of each suite's ceiling, with a clear intumescent coating. Walls would stay covered with gypsum.",
   "known_facts": [
     "eight storeys",
     "encapsulated mass timber construction",
     "residential",
     "about 60% of suite ceilings exposed",
-    "intumescent coating proposed"
+    "intumescent coating proposed",
+    "forty dwelling units"
   ],
   "missing_info": [
     {
@@ -87,6 +88,6 @@
     "source": "codedb",
     "author": "Batatis evaluation builder (Claude Opus 5.5)",
     "date": "2026-10-20",
-    "notes": "Written from the code database only; held-out judge set not consulted."
+    "notes": "Written from the code database only; held-out judge set not consulted. Model-checked and revised by GPT-6.1-Sol max on 2026-10-20: Made the synthetic dwelling count explicit for the Division C professional-involvement trigger; timber benchmark unchanged."
   }
 }

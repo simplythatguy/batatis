@@ -1,0 +1,90 @@
+{
+  "id": "dev-055",
+  "applicant_type": "manufacturer",
+  "topic": "envelope-insulation-sheathing",
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": "9.27.3.4.(1)",
+  "description": "We call our proposed board BTRboard. Builders are asking if it can replace both OSB and housewrap while also providing continuous exterior insulation. We have not specified its composition, thickness, structural function or joint details here. What should we send before you decide whether a variance is needed?",
+  "known_facts": [
+    "proposed product name BTRboard",
+    "intended to replace OSB and housewrap and provide exterior insulation",
+    "material, thickness, structural function and joints unspecified"
+  ],
+  "missing_info": [
+    {
+      "field": "material composition, rigidity, moisture behaviour and joint system",
+      "why": "Determine whether the membrane-replacement permission can apply.",
+      "priority": "critical"
+    },
+    {
+      "field": "structural role, lateral system, cladding fastening and backing needs",
+      "why": "Membrane permission is separate from sheathing and structural requirements.",
+      "priority": "critical"
+    },
+    {
+      "field": "thermal resistance, air leakage, vapour permeance, layer order and design climate",
+      "why": "Determine material-positioning applicability without inventing branded-product properties.",
+      "priority": "critical"
+    },
+    {
+      "field": "intended building types, storeys, areas and application scope",
+      "why": "Resolve Part 9 versus Part 3 and project or jurisdiction-wide scope.",
+      "priority": "critical"
+    }
+  ],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.27.3.4.(1)",
+        "why": "Candidate membrane-replacement permission."
+      },
+      {
+        "division": "B",
+        "provision": "9.27.3.4.(2)",
+        "why": "Joint details are a separate condition."
+      },
+      {
+        "division": "B",
+        "provision": "9.23.17.1.(1)",
+        "why": "Cladding may require sheathing or solid backing."
+      },
+      {
+        "division": "B",
+        "provision": "9.23.13.1.(2)",
+        "why": "Structural lateral resistance is a distinct question."
+      },
+      {
+        "division": "B",
+        "provision": "9.25.5.1.(1)",
+        "why": "Candidate low-permeance applicability rule."
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "depends",
+    "engineering_reason": "A product name does not establish a building exemption or a structural design route; the intended work and design basis are unknown.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(3)"
+      }
+    ],
+    "intake_action": "ask",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 9.27.3.4.(1), NBC(AE) 2023, 2nd printing, PDF p.1015. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

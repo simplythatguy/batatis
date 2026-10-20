@@ -1,0 +1,65 @@
+{
+  "id": "dev-053",
+  "applicant_type": "owner",
+  "topic": "single-exit",
+  "code_part": null,
+  "jurisdiction": "Brooks",
+  "seed_provision": "3.4.2.1.(2)",
+  "description": "I am looking at a small new office with one exit. Someone said small offices can do that without a variance. I do not have measured plans or an occupancy calculation yet. Can we start with what you need to know?",
+  "known_facts": [
+    "new office proposed",
+    "one exit",
+    "no measured plans or occupant-load calculation"
+  ],
+  "missing_info": [
+    {
+      "field": "building height, building area and floor areas",
+      "why": "Determine applicable Part and the relevant single-exit size limits.",
+      "priority": "critical"
+    },
+    {
+      "field": "occupant load served by the exit, sprinkler coverage and travel distances",
+      "why": "These decide whether a single exit is already permitted.",
+      "priority": "critical"
+    }
+  ],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "3.4.2.1.(2)",
+        "why": "Candidate Part 3 single-exit permission."
+      },
+      {
+        "division": "B",
+        "provision": "9.9.8.2.(2)",
+        "why": "Candidate Part 9 single-exit permission."
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "depends",
+    "engineering_reason": "Storeys, building area and occupancy details are needed to evaluate the Division C business-occupancy exemption.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(3)"
+      }
+    ],
+    "intake_action": "ask",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 3.4.2.1.(2), NBC(AE) 2023, 2nd printing, PDF p.269. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

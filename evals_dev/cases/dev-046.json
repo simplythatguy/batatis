@@ -1,0 +1,68 @@
+{
+  "id": "dev-046",
+  "applicant_type": "contractor",
+  "topic": "part4-structural",
+  "code_part": 4,
+  "jurisdiction": "High River",
+  "seed_provision": "4.2.4.8.(1)",
+  "description": "A new commercial basement foundation is being designed under Part 4. The design information says groundwater can rise high enough to put upward water pressure on the foundation. We propose leaving hydrostatic uplift out of the structural design and relying on a maintenance promise for portable pumps instead.",
+  "known_facts": [
+    "commercial basement foundation",
+    "Part 4 design",
+    "groundwater can cause hydrostatic uplift",
+    "uplift effects omitted from design",
+    "portable-pump maintenance promise offered"
+  ],
+  "missing_info": [
+    {
+      "field": "owner or representative contact and property identification",
+      "why": "Sections A–B administrative identification.",
+      "priority": "administrative"
+    },
+    {
+      "field": "risk assessment, mitigating measures, assumptions and supporting documents",
+      "why": "Alternative-path completeness items; request evidence rather than fabricate a professional conclusion.",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Known hydrostatic uplift effects are omitted from the foundation design.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "4.2.4.8.(1)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "4.2.4.8.(1)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F22-OP2.1,OP2.4]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "yes",
+    "engineering_reason": "The described design is explicitly carried out under Part 4, requiring a registered professional skilled in the work.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.2.(1)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 4.2.4.8.(1), NBC(AE) 2023, 2nd printing, PDF p.508. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}

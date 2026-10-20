@@ -1,0 +1,84 @@
+{
+  "id": "dev-049",
+  "applicant_type": "homebuilder",
+  "topic": "envelope-insulation-sheathing",
+  "code_part": 9,
+  "jurisdiction": "Cochrane",
+  "seed_provision": "9.25.5.1.(2)",
+  "description": "A new single-storey detached home with a building area of 220 m2 includes an indoor swimming-pool room that will generate high indoor moisture. We want the wall enclosing that room designed only with the ordinary prescriptive house-wall moisture details. We propose no Part 5 envelope design for the pool room and would justify the omission with a larger exhaust fan.",
+  "known_facts": [
+    "new detached house",
+    "indoor swimming pool with high moisture generation",
+    "ordinary prescriptive moisture details only",
+    "no Part 5 envelope design proposed",
+    "larger exhaust fan offered",
+    "single storey; building area 220 m2"
+  ],
+  "missing_info": [
+    {
+      "field": "owner or representative contact and property identification",
+      "why": "Sections A–B administrative identification.",
+      "priority": "administrative"
+    },
+    {
+      "field": "risk assessment, mitigating measures, assumptions and supporting documents",
+      "why": "Alternative-path completeness items; request evidence rather than fabricate a professional conclusion.",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "An assembly enclosing a high-moisture-generating space is not designed according to Part 5.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "9.25.5.1.(2)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.25.5.1.(1)",
+        "why": "Ordinary-moisture material-positioning route does not replace the high-moisture requirement."
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "9.25.5.1.(2)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F62,F63-OH1.1,OH1.2,OH1.3]",
+          "[F62,F63-OS2.3]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "depends",
+    "engineering_reason": "A Part 5 envelope design is required, but Division C does not make every Part 5 design an automatic Part 4 professional trigger. The house exemption, actual work and AHJ special-safety determination must be checked.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(4)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.2.(1)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis development-case researcher (GPT-6.1-Sol max)",
+    "date": "2026-10-20",
+    "notes": "Independent synthetic case seeded from Div B 9.25.5.1.(2), NBC(AE) 2023, 2nd printing, PDF p.999. Section C copied from codedb.lookup with explicit db_path. Model-checked; no human professional review or held-out consultation."
+  }
+}
