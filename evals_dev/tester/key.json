@@ -1,0 +1,31 @@
+{
+  "source": "03-sco-bundle-TESTER-KEY.md",
+  "note": "Scorer input only. Do not pass this file to ingestion.",
+  "submissions": {
+    "VR-2026-031": {
+      "admin_complete": true,
+      "findings": []
+    },
+    "VR-2026-034": {
+      "admin_complete": false,
+      "findings": [
+        {"field": "risk_assessment", "problem": "blank"},
+        {"field": "assumptions_and_limits", "problem": "blank"},
+        {"field": "mitigating_measures", "problem": "thin"},
+        {"field": "supporting_doc", "problem": "no_evidence"}
+      ]
+    },
+    "VR-2026-037": {
+      "admin_complete": false,
+      "findings": [
+        {"field": "owner_name", "problem": "blank"},
+        {"field": "application_date", "problem": "blank"},
+        {"field": "signature", "problem": "blank"},
+        {"field": "legal_description", "problem": "blank"},
+        {"field": "section_c.intent", "problem": "blank"},
+        {"field": "assumptions_and_limits", "problem": "stated_as_fact"},
+        {"field": "supporting_doc", "problem": "brochure_only"}
+      ]
+    }
+  }
+}
