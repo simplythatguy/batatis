@@ -107,23 +107,25 @@ That check runs before the blocked-export check. `200` is `application/pdf` with
 
 ```json
 {
-  "detail": ["unconfirmed pointed fact \"owner_name\" (fact_…)"],
-  "reasons": [
-    {
-      "section": "A",
-      "gap_id": "unconfirmed:owner_name",
-      "fact_key": "owner_name",
-      "label": "unconfirmed pointed fact \"owner_name\" (fact_…)",
-      "fix_hint": "Confirm this fact, or remove it, before a final export.",
-      "severity": "blocking"
-    }
-  ]
+  "detail": {
+    "message": "export blocked; resolve these or export a draft",
+    "reasons": [
+      {
+        "section": "A",
+        "gap_id": "unconfirmed:owner_name",
+        "fact_key": "owner_name",
+        "label": "unconfirmed pointed fact \"owner_name\" (fact_…)",
+        "fix_hint": "Confirm this fact, or remove it, before a final export.",
+        "severity": "blocking"
+      }
+    ]
+  }
 }
 ```
 
-`detail` is the string list from before this shape. `reasons` is the structured list. `section` is `A`, `B`, `C`, or `D`. A process-section gap keeps its stable completeness id and is reported with `section` `D`. `gap_id` is stable for the same content. `fact_key` is null when the blocker is not a single field, including `section_c:empty`.
+`detail.message` is the fixed blocked-export text. `detail.reasons` is the structured list. `section` is `A`, `B`, `C`, or `D`. A process-section gap keeps its stable completeness id and is reported with `section` `D`. `gap_id` is stable for the same content. `fact_key` is null when the blocker is not a single field, including `section_c:empty`.
 
-`503` `{"detail": "SCC variance form not found"}` when the blank form file is missing. The path is logged on the server and is not in the body. `503` `{"detail": "code database not found"}` when the code database is missing. `500` for another export failure.
+`503` `{"detail": "SCC variance form not found"}` when the blank form file is missing. The path is logged on the server and is not in the body. `503` `{"detail": "code database not found"}` when the code database is missing. `500` `{"detail": "The SCC variance form could not be exported."}` for another export failure. The exception text is logged on the server and is not in the body.
 
 ### `GET /cases/{id}/gaps`
 
@@ -210,7 +212,7 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `GET /cases/{case_id}/professional` | `required` and `general_required`: `yes`, `no`, or `depends`. Also `reasons`, `questions`, `scope_note`. |
 | `GET /ccmc/search` | Query `q` (1–200 characters) and `limit` (1–50, default 20). `422` on a rejected query. `503` when the registry is unavailable; that detail is the registry error text. |
 | `GET /cases/{case_id}/process-fields` | Process-field list. Empty when the pathway is an acceptable solution. |
-| `POST /cases/{case_id}/export` | Body optional `{ "draft": false, "expected_version": 1 }`. `200` is `application/pdf`. `409` is either `{ "code": "version_conflict", "current_version": N }` or `{ "detail": ["…"], "reasons": […] }`. `503` when the blank form file is missing; detail is exactly `SCC variance form not found`. `500` on other export failures. |
+| `POST /cases/{case_id}/export` | Body optional `{ "draft": false, "expected_version": 1 }`. `200` is `application/pdf`. `409` is either `{ "code": "version_conflict", "current_version": N }` or `{ "detail": { "message": "export blocked; resolve these or export a draft", "reasons": […] } }`. `503` when the blank form file is missing; detail is exactly `SCC variance form not found`. `500` detail is exactly `The SCC variance form could not be exported.` |
 | `POST /demo/seed` | The fictional demo cases, including the officer after-fixes package, or `404` `{"detail":"not found"}` unless `BATATIS_DEMO` is `1`. |
 
 A Case has `id`, `title`, `created_at`, `updated_at`, `version`, `provenance` (`example` or `user`), `example_id`, `seeded_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
@@ -387,6 +389,6 @@ A live response copies the citation string the code database returns. The placeh
 | 400 | Invalid provision id, or an ambiguous division on `GET /code/{provision_id}`. |
 | 409 | Export is blocked. Detail is the object under Routes. |
 | 422 | A `proposed` fact was sent as `confirmed`, or `GET /ccmc/search` rejected the query. |
-| 500 | Export failed for a reason other than a missing form. |
+| 500 | Export failed for a reason other than a missing form. Body is exactly `{"detail": "The SCC variance form could not be exported."}`. The exception text is not in the body. |
 | 503 | The code database file is absent. Body is exactly `{"detail": "code database not found"}`. Raised only by `CodeDbMissing` in `engine/codes.py`. Not a `FileNotFoundError`. The body has no server path. A missing blank form is also HTTP 503 with detail `SCC variance form not found`. An unavailable CCMC registry is HTTP 503 with its error text. |
 | 200 | An unknown Division B token on this issues route does not 404. It returns `provision: null` and a question. |

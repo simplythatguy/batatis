@@ -1,6 +1,6 @@
 """Structured export blockers.
 
-The string list is the compatibility ``detail``. ``reasons`` is one object per blocker.
+The HTTP body puts these objects on ``detail.reasons``, next to ``detail.message``.
 ``gap_id`` is stable for the same case content: completeness ids, or an id derived from
 the section and field. Sections on the object are the form sections A–D. A process-section
 gap keeps its completeness id and is reported under D.

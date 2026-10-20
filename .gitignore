@@ -6,5 +6,3 @@ node_modules/
 *.pyc
 __pycache__/
 .venv/
-# Applicant uploads (BATATIS_FILES). Never commit these.
-.batatis-files/

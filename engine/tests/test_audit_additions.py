@@ -74,22 +74,43 @@ def test_export_409_returns_structured_reasons_and_the_string_list(tmp_path):
     blocked = client.post(f'/cases/{case_id}/export')
     assert blocked.status_code == 409
     body = blocked.json()
-    assert isinstance(body['detail'], list) and body['detail']
-    assert all(isinstance(item, str) for item in body['detail'])
-    assert 'Section C has no provisions' in body['detail']
+    assert set(body) == {'detail'}
+    detail = body['detail']
+    assert detail['message'] == 'export blocked; resolve these or export a draft'
+    reasons = detail['reasons']
+    assert reasons and all(isinstance(item, dict) for item in reasons)
+    assert any(item['label'] == 'Section C has no provisions' for item in reasons)
     ids = []
-    for item in body['reasons']:
+    for item in reasons:
         assert item['section'] in ('A', 'B', 'C', 'D')
         assert item['gap_id'] and item['label'] and item['fix_hint']
         assert item['severity'] == 'blocking'
         assert 'fact_key' in item
         ids.append(item['gap_id'])
-    assert ids == [row['gap_id'] for row in client.post(f'/cases/{case_id}/export').json()['reasons']]
+    again = client.post(f'/cases/{case_id}/export').json()['detail']['reasons']
+    assert ids == [row['gap_id'] for row in again]
     assert 'section_c:empty' in ids
-    empty = next(row for row in body['reasons'] if row['gap_id'] == 'section_c:empty')
+    empty = next(row for row in reasons if row['gap_id'] == 'section_c:empty')
     assert empty['fact_key'] is None and empty['section'] == 'C'
-    jurisdiction = next(row for row in body['reasons'] if row['fact_key'] == 'jurisdiction')
+    jurisdiction = next(row for row in reasons if row['fact_key'] == 'jurisdiction')
     assert jurisdiction['section'] == 'B' and jurisdiction['gap_id'] == 'admin:jurisdiction'
+
+
+def test_export_error_returns_fixed_text(tmp_path, monkeypatch):
+    from engine.export.scc import ExportError
+
+    client, _store = _client(tmp_path)
+    case_id = client.post('/cases', json={'title': 'Empty'}).json()['id']
+
+    def boom(*_args, **_kwargs):
+        raise ExportError('secret path /var/forms/SCC-Variance-Form.pdf')
+
+    monkeypatch.setattr('engine.api.export_case', boom)
+    response = client.post(f'/cases/{case_id}/export')
+    assert response.status_code == 500
+    assert response.json() == {'detail': 'The SCC variance form could not be exported.'}
+    assert 'secret path' not in response.text
+    assert 'SCC-Variance-Form' not in response.text
 
 
 def test_version_advances_on_writes_and_failures_are_not_200(tmp_path):
@@ -121,7 +142,8 @@ def test_version_advances_on_writes_and_failures_are_not_200(tmp_path):
     assert stale.status_code == 409
     assert stale.json() == {'code': 'version_conflict', 'current_version': 3}
     current = client.post(f"/cases/{body['id']}/export", json={'expected_version': 3})
-    assert current.status_code == 409 and 'reasons' in current.json() and 'code' not in current.json()
+    assert current.status_code == 409
+    assert current.json()['detail']['reasons'] and 'code' not in current.json()
 
 
 def test_patch_updates_jurisdiction_and_authority(tmp_path):

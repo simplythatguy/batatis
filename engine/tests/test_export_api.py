@@ -31,7 +31,8 @@ def test_export_route(ctx):
     store.add_fact(case.id, Fact(field='storeys', value=2, kind='proposed', source=Source(type='user_text', ref='m'),
                                  confidence=0.5))
     r = client.post(f'/cases/{case.id}/export')
-    assert r.status_code == 409 and any('storeys' in x for x in r.json()['detail'])
+    assert r.status_code == 409
+    assert any(item['fact_key'] == 'storeys' for item in r.json()['detail']['reasons'])
     r = client.post(f'/cases/{case.id}/export', json={'draft': True})
     assert r.status_code == 200 and 'DRAFT' in r.headers['content-disposition']
     assert client.post('/cases/case_nope/export').status_code == 404
