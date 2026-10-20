@@ -87,7 +87,7 @@
       </main>
     </div>
     <script type="module">
-      import { getArticles, setArticleStatus, articleCounts, renderGapStrip, statusPill, renderShell, wireTabs } from "./shared-gaps.js";
+      import { getArticles, setArticleStatus, articleCounts, unconfirmedArticles, renderGapStrip, statusPill, renderShell, wireTabs } from "./shared-gaps.js";
 
       renderShell("ranking");
       const QUESTIONS = {
@@ -145,9 +145,12 @@
           })
         );
 
+        const unresolved = unconfirmedArticles(articles);
         const cont = document.getElementById("continue-btn");
-        cont.disabled = counts.confirmed === 0;
-        document.getElementById("gate-hint").textContent = counts.confirmed ? "" : "Confirm at least one article to continue";
+        cont.disabled = unresolved.length > 0;
+        document.getElementById("gate-hint").textContent = unresolved.length
+          ? `Resolve ${unresolved.map((a) => a.id).join(", ")} (confirm or reject) to continue`
+          : "";
       }
 
       document.getElementById("continue-btn").addEventListener("click", () => (location.href = "03-section-c.html"));

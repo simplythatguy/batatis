@@ -117,7 +117,7 @@
     </dialog>
 
     <script type="module">
-      import { CODE_EDITION, getArticles, sectionCArticles, setIntent, renderGapStrip, statusPill, renderShell } from "./shared-gaps.js";
+      import { CODE_EDITION, getArticles, sectionCArticles, unconfirmedArticles, setIntent, renderGapStrip, statusPill, renderShell } from "./shared-gaps.js";
 
       renderShell("sectionC");
       let selectedId = sectionCArticles()[0]?.id;
@@ -168,10 +168,11 @@
         document.getElementById("explain-article").textContent = a.id;
         document.getElementById("ai-explain").textContent = a.explainSectionC;
 
-        const pending = rows.filter((x) => x.status !== "confirmed").map((x) => x.id);
-        const confirmed = rows.length - pending.length;
-        document.getElementById("continue-btn").disabled = confirmed === 0;
-        document.getElementById("gate-reason").textContent = confirmed ? "" : `Confirm ${pending.join(", ")} on ranking to continue`;
+        const unresolved = unconfirmedArticles();
+        document.getElementById("continue-btn").disabled = unresolved.length > 0;
+        document.getElementById("gate-reason").textContent = unresolved.length
+          ? `Resolve ${unresolved.map((a) => a.id).join(", ")} (confirm or reject) to continue`
+          : "";
         document.getElementById("provenance").textContent =
           `Objective, function and intent are deterministic registry lookups for ${CODE_EDITION}, 2nd printing` +
           (lookedUpAt ? ` · refreshed ${lookedUpAt}` : "") +

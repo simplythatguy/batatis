@@ -147,7 +147,7 @@
       import { state, setField, save, getGaps, renderGapStrip, renderShell, wireTabs } from "./shared-gaps.js";
 
       renderShell("intake");
-      const TAB_GAPS = { A: ["rep", "mail"], B: ["muni", "juris", "ats"], alt: ["risk", "assumptions"] };
+      const TAB_GAPS = { A: ["owner", "rep", "mail"], B: ["muni", "juris", "ats"], alt: ["risk", "assumptions"] };
       const fieldTab = Object.fromEntries(
         [...document.querySelectorAll("[data-section]")].flatMap((s) =>
           [...s.querySelectorAll("[data-field]")].map((f) => [f.id, s.dataset.section])
@@ -163,6 +163,7 @@
         document.getElementById("owner-confirm")?.addEventListener("click", () => {
           setField("ownerConfirmed", true);
           renderOwner();
+          refresh();
         });
       }
 

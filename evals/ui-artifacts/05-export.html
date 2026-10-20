@@ -192,7 +192,7 @@
 
       document.getElementById("sheet-sub").textContent = `${PROJECT_ID} · ${CODE_EDITION} · Preview, not an approval document`;
       document.getElementById("sheet-a").innerHTML = kv([
-        ["Owner", val(f.owner)],
+        ["Owner", `${val(f.owner)}${f.ownerConfirmed ? "" : ' <span class="muted">(inferred)</span>'}`],
         ["Representative", val(f.rep)],
         ["Mailing address", val(f.mail)],
         ["Date", val(f.date)],

@@ -28,7 +28,7 @@ Default product look for all Batatis UI. Agents apply this **without** being ask
 11. **Panes scroll, not the page.**
 12. **No "Required" without a gap** — required-but-missing items are shared gaps (warning minimum); status cells are pills with dots.
 
-`--focus-ring: #5e6ad2` is for **focus only**, not button identity.
+`--focus-ring: #8a8a8e` (neutral grey) is for **focus only**, not button identity. Never indigo/`#5E6AD2`.
 
 ## Token map
 
@@ -37,7 +37,7 @@ Default product look for all Batatis UI. Agents apply this **without** being ask
 | App bg | `--bg-app` | `#080808` |
 | Active nav | `--bg-active` | `rgba(255,255,255,0.06)` |
 | Primary CTA | `--btn-primary-bg` / `--btn-primary-text` | `#e6e6e6` / `#141415` |
-| Focus | `--focus-ring` | `#5e6ad2` (rings only) |
+| Focus | `--focus-ring` | `#8a8a8e` (neutral rings only) |
 | Blocking / warn / pending / done | `--status-*` | red / amber / grey / green |
 | PDF sheet | `--pdf-sheet-bg` | `#f4f4f5` (light) |
 

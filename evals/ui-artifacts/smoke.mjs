@@ -125,6 +125,11 @@ try {
   assert(/230,\s*230,\s*230/.test(primBg), `B01: primary must be neutral grey (got ${primBg})`);
   const nav = await page.locator(".nav-item.active").evaluate((el) => ({ border: getComputedStyle(el).borderColor, shadow: getComputedStyle(el).boxShadow }));
   assert(!/94,\s*106,\s*210/.test(nav.border) && nav.shadow === "none", "B01: active nav fill only");
+  const focusRing = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--focus-ring").trim());
+  assert(focusRing.toLowerCase() !== "#5e6ad2" && !/94,\s*106,\s*210/.test(focusRing), `B01: focus ring must be neutral (got ${focusRing})`);
+  await page.locator("#owner").focus();
+  const ownerFocus = await page.locator("#owner").evaluate((el) => getComputedStyle(el).borderColor);
+  assert(!/94,\s*106,\s*210/.test(ownerFocus), `B01: input focus border must not be indigo (got ${ownerFocus})`);
   const box = await page.locator("#atsAssumption").evaluate((el) => {
     el.closest("[data-section]").dataset.active = "true";
     const freeze = document.head.appendChild(Object.assign(document.createElement("style"), { textContent: "*,*::before{transition:none!important}" }));
@@ -166,14 +171,16 @@ try {
   assert((await page.locator("#juris").inputValue()) === "", "B01: jurisdiction select starts unanswered");
   assert(/Defaulted to today/.test(await text("body")), "B01: defaulted date is marked");
   assert(/Representative missing/.test(await text("#gap-strip")), "B01: rep gap seeded");
+  assert(/Owner inferred from upload — confirm/.test(await text("#gap-strip")), "B01: inferred owner is a shared warning gap");
   await page.fill("#rep", "Kai Lindqvist");
   assert(!/Representative missing/.test(await text("#gap-strip")), "B01: typing clears the gap");
   assert(!(await page.locator('[data-required="rep"]').evaluate((el) => el.classList.contains("is-empty"))), "B01: field leaves empty state");
-  assert((await text('[data-tab-count="A"]')) === "1", "B01: tab count updates");
+  assert((await text('[data-tab-count="A"]')) === "2", "B01: tab count updates (owner warning + mail)");
   await page.click("#save-btn");
   assert(/Draft saved/.test(await text("#save-note")), "B01: Save draft shows saved state");
   await page.click("#owner-confirm");
   assert(/Confirmed by applicant/.test(await text("#owner-foot")), "B01: inferred owner can be confirmed");
+  assert(!/Owner inferred from upload/.test(await text("#gap-strip")), "B01: Confirm clears owner gap");
   await go("01-intake", { hash: "#muni" });
   assert((await page.locator('[data-tab="B"]').getAttribute("aria-selected")) === "true", "B01: #muni opens Section B");
   assert(await page.locator("#muni").evaluate((el) => el === document.activeElement), "B01: #muni focuses the field");
@@ -186,7 +193,8 @@ try {
   assert((await page.locator(".btn-primary").count()) === 1, "B02: one primary");
   const clarifyCount = Number(await text('[data-count="needs-clarification"]'));
   assert(clarifyCount === (await page.locator('.row [data-status="needs-clarification"]').count()), "B02: clarification count = rows");
-  assert(await page.locator("#continue-btn").isDisabled(), "B02: Continue disabled with 0 confirmed");
+  assert(await page.locator("#continue-btn").isDisabled(), "B02: Continue disabled while articles unresolved");
+  assert(/Resolve 9\.25\.2\.1\., 9\.25\.3\.1\. \(confirm or reject\) to continue/.test(await text("#gate-hint")), "B02: footer matches shared resolve rule");
   await page.click('[data-filter="confirmed"]');
   assert(/No articles in this view/.test(await text("#list")), "B02: empty filter state");
   await page.click('[data-filter="all"]');
@@ -194,10 +202,16 @@ try {
   assert(/Question for applicant/.test(await text("#detail")), "B02: clarification question shown for ambiguous row");
   await page.locator(".row").nth(0).click();
   await page.click('[data-act="confirmed"]');
-  assert(await page.locator("#continue-btn").isEnabled(), "B02: Continue enabled after confirming");
+  assert(await page.locator("#continue-btn").isDisabled(), "B02: Continue still gated after confirming one");
+  assert(/Resolve 9\.25\.3\.1\. \(confirm or reject\) to continue/.test(await text("#gate-hint")), "B02: footer lists remaining unresolved");
   assert((await text('[data-count="confirmed"]')) === "1", "B02: confirmed count updates");
   await page.click('[data-filter="confirmed"]');
   assert((await page.locator(".row").count()) === 1, "B02: confirmed filter lists the article");
+  await page.click('[data-filter="all"]');
+  await page.locator(".row").nth(1).click();
+  await page.click('[data-act="confirmed"]');
+  assert(await page.locator("#continue-btn").isEnabled(), "B02: Continue enabled when both resolved");
+  assert((await text("#gate-hint")) === "", "B02: gate hint clears when resolved");
   await Promise.all([page.waitForURL(/03-section-c/), page.click("#continue-btn")]);
 
   // B03 — columns, row binding, intent, lookup
@@ -205,7 +219,8 @@ try {
   const headers = normalize(await text("thead"));
   for (const h of ["CODE", "ARTICLE", "OBJECTIVE", "FUNCTION", "INTENT"]) assert(headers.includes(h), `B03: missing ${h} column`);
   assert((await page.locator("#attr-body tr [data-status]").count()) === (await page.locator("#attr-body tr").count()), "B03: status per row");
-  assert(await page.locator("#continue-btn").isDisabled(), "B03: Continue gated on confirmation");
+  assert(await page.locator("#continue-btn").isDisabled(), "B03: Continue gated on unresolved articles");
+  assert(/Resolve 9\.25\.2\.1\., 9\.25\.3\.1\. \(confirm or reject\) to continue/.test(await text("#gate-reason")), "B03: footer uses Resolve matching shared gap");
   await page.locator("#attr-body tr").nth(1).click();
   assert((await text("#explain-article")) === "9.25.3.1." && (await text("#cite-article")) === "9.25.3.1.", "B03: cite + explainer follow row");
   assert(/air barrier/i.test(await text("#ai-explain")), "B03: explainer text matches row");
@@ -231,6 +246,14 @@ try {
   assert(new RegExp(`Resolve ${seededBlocking} blocking gaps`).test(await text("#gate-reason")), "B04: disabled reason");
   assert((await text("#gap-summary")) === `${seededBlocking} blocking · ${seededWarning} warning`, "B04: summary matches gap source");
   assert((await page.locator("#gap-list li").count()) === Number(await text("#gap-count")), "B04: Gaps tab count");
+  assert(/Owner inferred from upload — confirm/.test(await text("#gap-list")), "B04: owner warning in shared gaps");
+  await page.click("#request-btn");
+  assert(await page.locator("#request-dialog[open]").count(), "B04: request dialog opens for focus check");
+  await page.locator("#request-note").focus();
+  const noteFocus = await page.locator("#request-note").evaluate((el) => getComputedStyle(el).borderColor);
+  assert(!/94,\s*106,\s*210/.test(noteFocus), `B04: textarea focus must not be indigo (got ${noteFocus})`);
+  await page.click("#request-dialog button[value='cancel'], #request-dialog .btn-ghost");
+  await page.waitForFunction(() => !document.getElementById("request-dialog").open);
   await page.click('[data-pane="citations"]');
   assert((await page.locator("#cite-list .entry").count()) === 2, "B04: citations for every Section C article");
   assert(/Citations 2\/2 .* Section C incomplete/.test(await text("#cite-coverage")), "B04: citation coverage line");
@@ -262,6 +285,8 @@ try {
   // B05 — values equal B03, gate honesty, override dialog + download
   await go("05-export", { reset: true });
   assert(await page.locator("#download-btn").isDisabled(), "B05: Download disabled");
+  assert(/Owner inferred from upload — confirm/.test(await text("#gap-list")), "B05: inferred owner listed in gaps");
+  assert(/\(inferred\)/.test(await page.locator("#sheet-a").innerText()), "B05: owner shows (inferred) until confirmed");
   for (const v of b03Values) {
     for (const k of ["objective", "fn", "intent"]) {
       const got = (await page.locator(`[data-article="${v.id}"] [data-value="${k}"]`).innerText()).trim();
@@ -276,12 +301,14 @@ try {
   assert(/244,\s*244,\s*245/.test(await page.locator(".sheet").evaluate((el) => getComputedStyle(el).backgroundColor)), "B05: light sheet");
   await page.click("#override-btn");
   assert(/Representative missing/.test(await text("#override-list")), "B05: override dialog lists gaps");
+  assert(/Owner inferred from upload — confirm/.test(await text("#override-list")), "B05: override lists owner gap");
   const [download] = await Promise.all([page.waitForEvent("download"), page.click("#override-confirm")]);
   assert(/VAR-1042-draft-with-gaps/.test(download.suggestedFilename()), "B05: override downloads draft");
   assert(/Draft downloaded/.test(await text("#export-note")), "B05: download confirmed in UI");
 
   // Happy path across screens: shared state unlocks every gate
   await go("01-intake", { reset: true });
+  await page.click("#owner-confirm");
   await page.fill("#rep", "Kai Lindqvist");
   await page.fill("#mail", "Box 12, Cochrane AB");
   await page.click('[data-tab="B"]');
@@ -296,6 +323,8 @@ try {
   await page.locator(".row").nth(1).click();
   await page.click('[data-act="confirmed"]');
   await go("03-section-c");
+  assert(await page.locator("#continue-btn").isEnabled(), "Flow: B03 Continue enabled after both articles resolved");
+  assert((await text("#gate-reason")) === "", "Flow: B03 gate clears when articles resolved");
   await page.click('[data-add-intent="9.25.3.1."]');
   await page.fill("#intent-input", "Limit air leakage through insulated assemblies to control condensation.");
   await page.click("#intent-save");
@@ -305,6 +334,7 @@ try {
   await go("05-export");
   assert(await page.locator("#download-btn").isEnabled(), "Flow: Download enabled when gaps resolved");
   assert(/Ready to download/.test(await text("#gate-text")), "Flow: gate reports ready");
+  assert(!/\(inferred\)/.test(await page.locator("#sheet-a").innerText()), "Flow: confirmed owner has no (inferred) mark");
   assert(/Kai Lindqvist/.test(await text("#sheet")) && /No — site specific/.test(await text("#sheet")), "Flow: preview reflects intake edits");
   await page.click("#download-btn");
   assert(await page.evaluate(() => window.__printed === true), "Flow: Download opens print-to-PDF");

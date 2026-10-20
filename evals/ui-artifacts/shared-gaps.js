@@ -193,6 +193,14 @@ export function getGaps(articles = getArticles(), f = state.fields) {
   need("juris", "Jurisdiction-wide variance not answered", "01-intake.html#juris");
   need("risk", "Risk assessment empty (alternative path)", "01-intake.html#risk");
   need("assumptions", "Assumptions / limits empty (alternative path)", "01-intake.html#assumptions");
+  if (!f.ownerConfirmed) {
+    gaps.push({
+      id: "owner",
+      severity: "warning",
+      label: "Owner inferred from upload — confirm",
+      href: "01-intake.html#owner",
+    });
+  }
   const unconfirmed = unconfirmedArticles(articles);
   if (unconfirmed.length) {
     gaps.push({

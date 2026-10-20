@@ -1,8 +1,7 @@
 /**
  * Batatis product UI tokens — Batatis default product system.
- * Opus seal (round 1): primary CTAs are NEUTRAL, not indigo-filled.
- * --accent / focus indigo is focus-ring only — never filled button identity.
- * Reference: docs/design/linear-reference/
+ * Opus seal: primary CTAs NEUTRAL (not indigo-filled); focus rings NEUTRAL grey
+ * (never indigo/#5E6AD2). Reference: docs/design/linear-reference/
  */
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
@@ -23,8 +22,8 @@
   --border-strong: rgba(255, 255, 255, 0.16);
   --border-danger: rgba(235, 87, 87, 0.55);
 
-  /* Focus ring only (not CTA fill, not active nav) */
-  --focus-ring: #5e6ad2;
+  /* Focus ring only — neutral grey, never indigo (not CTA fill, not active nav) */
+  --focus-ring: #8a8a8e;
   --accent: var(--focus-ring);
 
   /* —— Text —— */
@@ -50,7 +49,7 @@
   --status-info: var(--status-pending);
 
   /* legacy aliases unused for buttons */
-  --accent-muted: rgba(94, 106, 210, 0.18);
+  --accent-muted: rgba(138, 138, 142, 0.22);
 
   --diff-add-bg: rgba(76, 183, 130, 0.12);
   --diff-del-bg: rgba(235, 87, 87, 0.12);

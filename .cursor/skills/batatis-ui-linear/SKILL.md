@@ -36,7 +36,7 @@ Smoke: `../../../evals/ui-artifacts/smoke.mjs` · Captures: `../../../evals/ui-a
 | 11 | **Panes scroll, the page does not** — fixed-height shell; list, detail and preview panes own their overflow. |
 | 12 | **No status word without a gap** — anything labelled Required/Missing must also be in the shared gap list (warning at minimum) and clear when satisfied; otherwise label it Planned. Status cells are pills with dots; provenance notes ("Not authored by this tool") are muted meta, not status. |
 
-`--focus-ring` / `--accent` (`#5e6ad2`) = **focus rings only** (and optional sparse status). Not CTA identity, not active nav.
+`--focus-ring` / `--accent` (`#8a8a8e` neutral grey) = **focus rings only**. Never indigo/`#5E6AD2`. Not CTA identity, not active nav.
 
 ## Visual language
 
