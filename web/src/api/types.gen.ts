@@ -20,6 +20,8 @@ export interface Case {
   facts: Fact[];
   gaps: Gap[];
   id: string;
+  intake_facts: Record<string, unknown> | null;
+  intake_text: string | null;
   jurisdiction: Jurisdiction | null;
   provisions: string[];
   section_c: SectionCRow[];

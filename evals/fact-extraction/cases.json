@@ -1,0 +1,629 @@
+{
+  "label": "agent-authored, model-checked, not human-verified",
+  "source_commit": "914b8ec",
+  "note": "Extraction expectations only. Derived from the case files and the persona pastes. Not a copy of the backing answer key.",
+  "cases": [
+    {
+      "id": "mira",
+      "split": "persona",
+      "label": "agent-authored, model-checked, not human-verified",
+      "text": "We manufacture NailBase CI-50, a 50 mm rigid foam panel with a 6 mm fibre-cement facer that replaces 11 mm OSB sheathing on 2x6 walls at 400 mm o.c. Vinyl siding is nailed directly into the facer with no furring. We want approval to sell it across Alberta and to build a pilot house in Edmonton: 2-storey single-family, about 190 m2, unsprinklered, builder Birchfield Example Homes, address 0000 Example Way NW. We have our product data sheet, a US lab permeance test summary, and an unsigned draft engineer letter about nail pull-out. We have no CCMC evaluation yet, no air-leakage test, and no bracing design. Do we need an engineer to stamp anything?",
+      "expect": {
+        "applicant_role": "manufacturer",
+        "owner_name": null,
+        "municipal_address": "0000 Example Way NW",
+        "legal_description": null,
+        "permit_number": null,
+        "municipality": "Edmonton",
+        "jurisdiction_scope": null,
+        "occupancy": "single_family",
+        "storeys": 2,
+        "building_area_m2": 190,
+        "dwelling_units": null,
+        "sprinklered": "no",
+        "product_or_assembly": "NailBase CI-50",
+        "installation_status": "planned",
+        "proposed_alternative": "We manufacture NailBase CI-50, a 50 mm rigid foam panel with a 6 mm fibre-cement facer that replaces 11 mm OSB sheathing on 2x6 walls at 400 mm o.c. Vinyl siding is nailed directly into the facer with no furring. We want approval to sell it across Alberta and to build a pilot house in Edmonton",
+        "required_acceptable_solution": null,
+        "project_name": null,
+        "claimed_provisions": [],
+        "claimed_exemptions": [],
+        "claims": [],
+        "evidence_items": [
+          {
+            "kind": "product_data_sheet",
+            "author_type": "applicant",
+            "signed": null,
+            "review_status": "listed_not_reviewed",
+            "missing_items": []
+          },
+          {
+            "kind": "lab_test",
+            "author_type": "lab",
+            "signed": null,
+            "review_status": "listed_not_reviewed",
+            "missing_items": []
+          },
+          {
+            "kind": "engineer_letter",
+            "author_type": "professional",
+            "signed": false,
+            "review_status": "listed_not_reviewed",
+            "missing_items": [
+              "signature"
+            ]
+          }
+        ]
+      },
+      "departure": {
+        "includes": [
+          "replaces 11 mm OSB",
+          "nailed directly",
+          "pilot house in Edmonton"
+        ],
+        "excludes": [
+          "Birchfield",
+          "about 190",
+          "unsprinklered",
+          "product data sheet",
+          "Do we need"
+        ]
+      }
+    },
+    {
+      "id": "dana",
+      "split": "persona",
+      "label": "agent-authored, model-checked, not human-verified",
+      "text": "EXAMPLE DATA — FICTIONAL TEST DOCUMENT FOR BATATIS USER TESTING — NOT A REAL PROJECT\n\n# Project Brief — Backyard Garden Suite (Hempcrete)\n\nPrepared by: Dana Hartley (owner / builder)   Date: 2026-10-14\n\nSite: 0000 Example Avenue NW, Edmonton, AB (fictional address)   Legal description: don't have it yet — will ask the city (fictional)\n\nPermit #: not applied for yet\n\n# What I want to build\n\nA small one-bedroom garden suite at the back of my lot for my mother. About 60 m² main floor, with a sleeping loft over the bathroom. I think that makes it under 3 storeys, but I'm not sure how lofts are counted.\n\n# The unusual part\n\nInstead of a normal 2x6 stud wall with batt insulation and poly, I want 300 mm cast-in-place hempcrete around a timber frame (2x4 at 600 mm o.c. buried in the hempcrete), finished with lime render outside and lime plaster inside. No poly vapour barrier — the supplier says hempcrete needs to \"breathe\".\n\n- Roof: conventional trusses, blown cellulose, standard shingles\n\n- Foundation: insulated slab on grade\n\n- Heating: one ductless heat pump + electric baseboard backup\n\n- Distance to house: about 4 m; to back lane fence: about 1.5 m\n\n# What I have\n\n- Supplier brochure \"HempWall Pro\" (fictional) claiming R-2.0 per inch and \"excellent fire resistance\"\n\n- Photos of a similar build in BC\n\n- No lab tests, no engineer yet\n\n# Questions\n\nDo I need a variance? What do I have to give the city? Can I do this without hiring an engineer?",
+      "expect": {
+        "applicant_role": "owner",
+        "owner_name": "Dana Hartley",
+        "municipal_address": "0000 Example Avenue NW, Edmonton, AB",
+        "legal_description": null,
+        "permit_number": null,
+        "municipality": "Edmonton",
+        "jurisdiction_scope": "site",
+        "occupancy": "single_family",
+        "storeys": null,
+        "building_area_m2": 60,
+        "dwelling_units": null,
+        "sprinklered": null,
+        "product_or_assembly": "cast-in-place hempcrete",
+        "installation_status": "planned",
+        "proposed_alternative": "Instead of a normal 2x6 stud wall with batt insulation and poly, I want 300 mm cast-in-place hempcrete around a timber frame (2x4 at 600 mm o.c. buried in the hempcrete), finished with lime render outside and lime plaster inside. No poly vapour barrier — the supplier says hempcrete needs to \"breathe\".",
+        "required_acceptable_solution": "a normal 2x6 stud wall with batt insulation and poly",
+        "project_name": null,
+        "claimed_provisions": [],
+        "claimed_exemptions": [],
+        "claims": [],
+        "evidence_items": [
+          {
+            "kind": "brochure",
+            "author_type": "vendor",
+            "signed": null,
+            "review_status": "listed_not_reviewed",
+            "missing_items": []
+          },
+          {
+            "kind": "photos",
+            "author_type": "applicant",
+            "signed": null,
+            "review_status": "listed_not_reviewed",
+            "missing_items": []
+          }
+        ]
+      },
+      "departure": {
+        "includes": [
+          "Instead of a normal 2x6",
+          "No poly"
+        ],
+        "excludes": [
+          "Do I need a variance",
+          "HempWall",
+          "don't have it yet"
+        ]
+      },
+      "source": {
+        "file": "evals/demo-cases/tester-samples/01-hartley-garden-suite-brief.html",
+        "format": "html"
+      }
+    },
+    {
+      "id": "carlos-brief",
+      "split": "persona",
+      "label": "agent-authored, model-checked, not human-verified",
+      "text": "# Project brief: Example Commons, firestop issue on L3–L4\n\n**From:** Carlos Mendes, PM, Northgate Example Builders Ltd. *(fictional)*  **Date:** 2026-10-15\n\n## Project\n| Item | Detail |\n|---|---|\n| Name | Example Commons *(fictional)* |\n| Address | 0000 Example Avenue SW, Calgary, AB *(fictional)* |\n| Legal | Lot 0, Block 0, Plan 0000000 *(fictional placeholder)* |\n| Owner | Example Commons Holdings Inc. *(fictional)* |\n| Building permit | BP-0000-00000 *(fictional)*, issued |\n| Building | 5 storeys, sprinklered, retail at grade, 64 dwelling units above |\n| Design team | Example Architecture Inc. *(fictional)*, coordinating registered professional; Example MEP Engineering *(fictional)* |\n| Floor assemblies | Rated fire separations. *Rating per the architect's code analysis: \"1 h\"* |\n\n## What happened\nOur firestop sub sealed the plumbing penetrations on L3 and L4 with **Example FireSeal 200** *(fictional)* and handed in listing **EX-FS-1234** *(fictional)*. The third-party firestop inspector says that listing only covers **metal pipes**. Ours are mostly **PVC drain pipe and bundles of PEX**, and some holes are bigger than the listing allows. L2 (copper) passed.\n\nThe sprinkler fitter used the same sealant around the sprinkler branch lines. The sub says sprinklers are \"exempt\".\n\n## What we need\n- Keep the **drywall close-in on 2026-10-24**\n- Ideally \"a variance so we don't have to rip it out\"\n- We have a **draft EJ email** from the sealant rep\n\n## Who we've talked to\n- Architect (email attached). Not yet the City inspector.\n",
+      "expect": {
+        "applicant_role": "contractor",
+        "owner_name": "Example Commons Holdings Inc.",
+        "municipal_address": "0000 Example Avenue SW, Calgary, AB",
+        "legal_description": "Lot 0, Block 0, Plan 0000000",
+        "permit_number": "BP-0000-00000",
+        "municipality": "Calgary",
+        "jurisdiction_scope": "site",
+        "occupancy": null,
+        "storeys": 5,
+        "building_area_m2": null,
+        "dwelling_units": 64,
+        "sprinklered": "yes",
+        "product_or_assembly": "Example FireSeal 200",
+        "installation_status": "installed",
+        "proposed_alternative": null,
+        "required_acceptable_solution": null,
+        "project_name": "Example Commons",
+        "claimed_provisions": [],
+        "claimed_exemptions": {
+          "status": "applicant_asserted",
+          "by": "firestop sub",
+          "contains": [
+            "sprinkler branch lines",
+            "sprinklers are \"exempt\""
+          ]
+        },
+        "claims": {
+          "contains": [
+            "a variance so we don't have to rip it out"
+          ]
+        },
+        "evidence_items": [
+          {
+            "kind": "email",
+            "author_type": "vendor",
+            "signed": false,
+            "review_status": "listed_not_reviewed",
+            "missing_items": [
+              "signature",
+              "tested system",
+              "job name and location",
+              "issuer qualifications"
+            ],
+            "stated_role": "sealant rep"
+          }
+        ]
+      },
+      "departure": {
+        "includes": [],
+        "excludes": [
+          "Example Commons Holdings",
+          "BP-0000-00000",
+          "0000 Example Avenue",
+          "draft EJ",
+          "sprinklers are \"exempt\"",
+          "a variance so we don't"
+        ]
+      },
+      "source": {
+        "file": "evals/demo-cases/b-contractor-firestop-nonconformance/input/project-brief.md",
+        "commit": "914b8ec"
+      }
+    },
+    {
+      "id": "negation",
+      "split": "negation",
+      "label": "agent-authored, model-checked, not human-verified",
+      "text": "The building is not sprinklered. There is no engineer. The design is not under Part 4. This is not a 2-storey building.",
+      "expect": {
+        "applicant_role": null,
+        "owner_name": null,
+        "municipal_address": null,
+        "legal_description": null,
+        "permit_number": null,
+        "municipality": null,
+        "jurisdiction_scope": null,
+        "occupancy": null,
+        "storeys": null,
+        "building_area_m2": null,
+        "dwelling_units": null,
+        "sprinklered": "no",
+        "product_or_assembly": null,
+        "installation_status": null,
+        "proposed_alternative": null,
+        "required_acceptable_solution": null,
+        "project_name": null,
+        "claimed_provisions": [],
+        "claimed_exemptions": [],
+        "claims": [],
+        "evidence_items": []
+      },
+      "departure": {
+        "includes": [],
+        "excludes": [
+          "not sprinklered",
+          "Part 4",
+          "2-storey"
+        ]
+      }
+    },
+    {
+      "id": "cfx-001",
+      "split": "cfx",
+      "label": "agent-authored, model-checked, not human-verified",
+      "text": "| Name | Example Commons *(fictional)* |\n| Address | 0000 Example Avenue SW, Calgary, AB *(fictional)* |\n| Legal | Lot 0, Block 0, Plan 0000000 *(fictional placeholder)* |\n| Owner | Example Commons Holdings Inc. *(fictional)* |\n| Building permit | BP-0000-00000 *(fictional)*, issued |\n| Building | 5 storeys, sprinklered, retail at grade, 64 dwelling units above |\n| Design team | Example Architecture Inc. *(fictional)*, coordinating registered professional; Example MEP Engineering *(fictional)* |\n| Floor assemblies | Rated fire separations. *Rating per the architect's code analysis: \"1 h\"* |",
+      "expect": {
+        "applicant_role": null,
+        "owner_name": "Example Commons Holdings Inc.",
+        "municipal_address": "0000 Example Avenue SW, Calgary, AB",
+        "legal_description": "Lot 0, Block 0, Plan 0000000",
+        "permit_number": "BP-0000-00000",
+        "municipality": "Calgary",
+        "jurisdiction_scope": "site",
+        "occupancy": null,
+        "storeys": 5,
+        "building_area_m2": null,
+        "dwelling_units": 64,
+        "sprinklered": "yes",
+        "product_or_assembly": null,
+        "installation_status": null,
+        "proposed_alternative": null,
+        "required_acceptable_solution": null,
+        "project_name": "Example Commons",
+        "claimed_provisions": [],
+        "claimed_exemptions": [],
+        "claims": [],
+        "evidence_items": []
+      },
+      "departure": {
+        "includes": [],
+        "excludes": [
+          "Example Commons Holdings",
+          "BP-0000-00000",
+          "0000 Example Avenue",
+          "1 h"
+        ]
+      },
+      "source": {
+        "file": "evals/demo-cases/b-contractor-firestop-nonconformance/input/project-brief.md",
+        "lines": "8-15",
+        "commit": "914b8ec"
+      }
+    },
+    {
+      "id": "cfx-002",
+      "split": "cfx",
+      "label": "agent-authored, model-checked, not human-verified",
+      "text": "Our firestop sub sealed the plumbing penetrations on L3 and L4 with **Example FireSeal 200** *(fictional)* and handed in listing **EX-FS-1234** *(fictional)*. The third-party firestop inspector says that listing only covers **metal pipes**. Ours are mostly **PVC drain pipe and bundles of PEX**, and some holes are bigger than the listing allows. L2 (copper) passed.\n\nThe sprinkler fitter used the same sealant around the sprinkler branch lines. The sub says sprinklers are \"exempt\".",
+      "expect": {
+        "applicant_role": null,
+        "owner_name": null,
+        "municipal_address": null,
+        "legal_description": null,
+        "permit_number": null,
+        "municipality": null,
+        "jurisdiction_scope": null,
+        "occupancy": null,
+        "storeys": null,
+        "building_area_m2": null,
+        "dwelling_units": null,
+        "sprinklered": null,
+        "product_or_assembly": "Example FireSeal 200",
+        "installation_status": "installed",
+        "proposed_alternative": null,
+        "required_acceptable_solution": null,
+        "project_name": null,
+        "claimed_provisions": [],
+        "claimed_exemptions": {
+          "status": "applicant_asserted",
+          "by": "firestop sub",
+          "contains": [
+            "sprinkler branch lines",
+            "sprinklers are \"exempt\""
+          ]
+        },
+        "claims": [],
+        "evidence_items": []
+      },
+      "departure": {
+        "includes": [],
+        "excludes": [
+          "sprinklers are \"exempt\"",
+          "Example FireSeal"
+        ]
+      },
+      "source": {
+        "file": "evals/demo-cases/b-contractor-firestop-nonconformance/input/project-brief.md",
+        "lines": "18, 20",
+        "commit": "914b8ec"
+      }
+    },
+    {
+      "id": "cfx-003",
+      "split": "cfx",
+      "label": "agent-authored, model-checked, not human-verified",
+      "text": "## What we need\n- Keep the **drywall close-in on 2026-10-24**\n- Ideally \"a variance so we don't have to rip it out\"\n- We have a **draft EJ email** from the sealant rep",
+      "expect": {
+        "applicant_role": null,
+        "owner_name": null,
+        "municipal_address": null,
+        "legal_description": null,
+        "permit_number": null,
+        "municipality": null,
+        "jurisdiction_scope": null,
+        "occupancy": null,
+        "storeys": null,
+        "building_area_m2": null,
+        "dwelling_units": null,
+        "sprinklered": null,
+        "product_or_assembly": null,
+        "installation_status": null,
+        "proposed_alternative": null,
+        "required_acceptable_solution": null,
+        "project_name": null,
+        "claimed_provisions": [],
+        "claimed_exemptions": [],
+        "claims": {
+          "contains": [
+            "a variance so we don't have to rip it out"
+          ]
+        },
+        "evidence_items": [
+          {
+            "kind": "email",
+            "author_type": "vendor",
+            "signed": false,
+            "review_status": "listed_not_reviewed",
+            "missing_items": [
+              "signature",
+              "tested system",
+              "job name and location",
+              "issuer qualifications"
+            ],
+            "stated_role": "sealant rep"
+          }
+        ]
+      },
+      "departure": {
+        "includes": [],
+        "excludes": [
+          "a variance so we don't",
+          "draft EJ"
+        ]
+      },
+      "source": {
+        "file": "evals/demo-cases/b-contractor-firestop-nonconformance/input/project-brief.md",
+        "lines": "22-25",
+        "commit": "914b8ec"
+      }
+    },
+    {
+      "id": "cfx-004",
+      "split": "cfx",
+      "label": "agent-authored, model-checked, not human-verified",
+      "text": "From: sales rep, Example Sealants Co. *(fictional)*. Sent 2026-10-15 4:52 pm.\n\n\"Hi Carlos, FireSeal 200 performs great on plastic pipe too, we've seen it in lots of jobs. Treat this as our engineering judgment that it'll hold the rating. Thanks!\"",
+      "expect": {
+        "applicant_role": null,
+        "owner_name": null,
+        "municipal_address": null,
+        "legal_description": null,
+        "permit_number": null,
+        "municipality": null,
+        "jurisdiction_scope": null,
+        "occupancy": null,
+        "storeys": null,
+        "building_area_m2": null,
+        "dwelling_units": null,
+        "sprinklered": null,
+        "product_or_assembly": "FireSeal 200",
+        "installation_status": null,
+        "proposed_alternative": null,
+        "required_acceptable_solution": null,
+        "project_name": null,
+        "claimed_provisions": [],
+        "claimed_exemptions": [],
+        "claims": {
+          "contains": [
+            "engineering judgment",
+            "plastic"
+          ]
+        },
+        "evidence_items": [
+          {
+            "kind": "email",
+            "author_type": "vendor",
+            "signed": false,
+            "review_status": "listed_not_reviewed",
+            "missing_items": [
+              "signature",
+              "tested system",
+              "job name and location",
+              "issuer qualifications"
+            ],
+            "stated_role": "sales rep"
+          }
+        ]
+      },
+      "departure": {
+        "includes": [],
+        "excludes": [
+          "engineering judgment",
+          "FireSeal"
+        ]
+      },
+      "source": {
+        "file": "evals/demo-cases/b-contractor-firestop-nonconformance/input/manufacturer-ej-draft-EXAMPLE.md",
+        "lines": "4-6",
+        "commit": "914b8ec"
+      }
+    },
+    {
+      "id": "cfx-005",
+      "split": "cfx",
+      "label": "agent-authored, model-checked, not human-verified",
+      "text": "The sprinkler fitter used the same sealant around the sprinkler branch lines. The sub says sprinklers are \"exempt\".\n| L3–L4 | Sprinkler branch lines (steel) | 22 | Rated floor | Same sealant | **Not assessed:** inspector asks the design team to confirm treatment |",
+      "expect": {
+        "applicant_role": null,
+        "owner_name": null,
+        "municipal_address": null,
+        "legal_description": null,
+        "permit_number": null,
+        "municipality": null,
+        "jurisdiction_scope": null,
+        "occupancy": null,
+        "storeys": null,
+        "building_area_m2": null,
+        "dwelling_units": null,
+        "sprinklered": null,
+        "product_or_assembly": null,
+        "installation_status": null,
+        "proposed_alternative": null,
+        "required_acceptable_solution": null,
+        "project_name": null,
+        "claimed_provisions": [],
+        "claimed_exemptions": {
+          "status": "applicant_asserted",
+          "by": "The sub",
+          "contains": [
+            "sprinkler branch lines",
+            "sprinklers are \"exempt\""
+          ]
+        },
+        "claims": [],
+        "evidence_items": []
+      },
+      "departure": {
+        "includes": [],
+        "excludes": [
+          "sprinklers are \"exempt\"",
+          "Not assessed"
+        ]
+      },
+      "source": {
+        "files": [
+          "evals/demo-cases/b-contractor-firestop-nonconformance/input/project-brief.md line 20",
+          "evals/demo-cases/b-contractor-firestop-nonconformance/input/ncr-firestop-EXAMPLE.md line 13"
+        ],
+        "commit": "914b8ec"
+      }
+    },
+    {
+      "id": "held-pat",
+      "split": "held_out",
+      "label": "agent-authored, model-checked, not human-verified",
+      "text": "The owner is Pat Example. The building is not sprinklered. Permit number BP-999 is issued. This warehouse is 4 storeys with a gross floor area of 1200 m2. We propose to omit the firestop collar. Our sales rep emailed an unsigned note that the foam is fine. The design is not under Part 4.",
+      "expect": {
+        "applicant_role": null,
+        "owner_name": "Pat Example",
+        "municipal_address": null,
+        "legal_description": null,
+        "permit_number": "BP-999",
+        "municipality": null,
+        "jurisdiction_scope": null,
+        "occupancy": "industrial",
+        "storeys": 4,
+        "building_area_m2": 1200,
+        "dwelling_units": null,
+        "sprinklered": "no",
+        "product_or_assembly": null,
+        "installation_status": "planned",
+        "proposed_alternative": "We propose to omit the firestop collar.",
+        "required_acceptable_solution": null,
+        "project_name": null,
+        "claimed_provisions": [],
+        "claimed_exemptions": [],
+        "claims": [],
+        "evidence_items": [
+          {
+            "kind": "email",
+            "author_type": "vendor",
+            "signed": false,
+            "review_status": "listed_not_reviewed",
+            "missing_items": [
+              "signature"
+            ],
+            "stated_role": "sales rep"
+          }
+        ]
+      },
+      "departure": {
+        "exact": "We propose to omit the firestop collar.",
+        "includes": [],
+        "excludes": [
+          "Pat Example",
+          "BP-999",
+          "unsigned note"
+        ]
+      }
+    },
+    {
+      "id": "held-ada",
+      "split": "held_out",
+      "label": "agent-authored, model-checked, not human-verified",
+      "text": "Prepared by: Ada Example (designer). Site: 10 Example Road SE, Red Deer, AB. Legal: Plan 1234, Block 5, Lot 6. The clinic is not sprinklered. We propose to use a folding partition instead of a corridor wall in this 3-storey care building of 400 m2. We have a vendor brochure only.",
+      "expect": {
+        "applicant_role": "designer",
+        "owner_name": null,
+        "municipal_address": "10 Example Road SE, Red Deer, AB",
+        "legal_description": "Plan 1234, Block 5, Lot 6",
+        "permit_number": null,
+        "municipality": "Red Deer",
+        "jurisdiction_scope": "site",
+        "occupancy": "care",
+        "storeys": 3,
+        "building_area_m2": 400,
+        "dwelling_units": null,
+        "sprinklered": "no",
+        "product_or_assembly": null,
+        "installation_status": "planned",
+        "proposed_alternative": "We propose to use a folding partition instead of a corridor wall in this 3-storey care building of 400 m2.",
+        "required_acceptable_solution": "a corridor wall",
+        "project_name": null,
+        "claimed_provisions": [],
+        "claimed_exemptions": [],
+        "claims": [],
+        "evidence_items": [
+          {
+            "kind": "brochure",
+            "author_type": "vendor",
+            "signed": null,
+            "review_status": "listed_not_reviewed",
+            "missing_items": []
+          }
+        ]
+      },
+      "departure": {
+        "includes": [
+          "instead of a corridor wall"
+        ],
+        "excludes": [
+          "Ada Example",
+          "Plan 1234",
+          "vendor brochure",
+          "not sprinklered"
+        ]
+      }
+    },
+    {
+      "id": "approach-shop",
+      "split": "approach_dev",
+      "label": "agent-authored, model-checked, not human-verified",
+      "text": "The shop is a two-storey warehouse of 2,000 sq ft.",
+      "expect": {
+        "applicant_role": null,
+        "owner_name": null,
+        "municipal_address": null,
+        "legal_description": null,
+        "permit_number": null,
+        "municipality": null,
+        "jurisdiction_scope": null,
+        "occupancy": "industrial",
+        "storeys": 2,
+        "building_area_m2": 185.81,
+        "dwelling_units": null,
+        "sprinklered": null,
+        "product_or_assembly": null,
+        "installation_status": null,
+        "proposed_alternative": null,
+        "required_acceptable_solution": null,
+        "project_name": null,
+        "claimed_provisions": [],
+        "claimed_exemptions": [],
+        "claims": [],
+        "evidence_items": []
+      },
+      "departure": {
+        "includes": [],
+        "excludes": []
+      }
+    }
+  ]
+}

@@ -111,6 +111,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         return JSONResponse(status_code=503, content={'detail': 'code database not found'})
 
     app.include_router(__import__('engine.routes_case', fromlist=['create_router']).create_router(cases, code))
+    app.include_router(__import__('engine.routes_description', fromlist=['create_router']).create_router(cases, code))
     return app
 
 

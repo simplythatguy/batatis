@@ -138,6 +138,8 @@ class Case(BaseModel):
     section_c: list[SectionCRow] = []
     evidence: list[EvidenceItem] = []
     gaps: list[Gap] = []
+    intake_text: str | None = None             # last pasted description; quotes are spans of this text
+    intake_facts: dict | None = None           # structured extraction (engine.fact_extraction); unconfirmed until the user says so
 
     def export_facts(self) -> list[dict]:
         return [f.export() for f in self.facts]

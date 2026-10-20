@@ -115,6 +115,31 @@
           "title": "Id",
           "type": "string"
         },
+        "intake_facts": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intake Facts"
+        },
+        "intake_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intake Text"
+        },
         "jurisdiction": {
           "anyOf": [
             {
@@ -169,7 +194,9 @@
         "provisions",
         "section_c",
         "evidence",
-        "gaps"
+        "gaps",
+        "intake_text",
+        "intake_facts"
       ],
       "title": "Case",
       "type": "object"

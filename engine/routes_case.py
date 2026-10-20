@@ -75,6 +75,8 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
 
     @router.get('/cases/{case_id}/gaps', response_model=list[Gap])
     def gaps(case_id: str):
-        return check_completeness(get_case(case_id), code())
+        case = get_case(case_id)
+        from .fact_extraction import officer_gaps
+        return check_completeness(case, code()) + officer_gaps(case)
 
     return router

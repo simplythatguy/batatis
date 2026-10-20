@@ -11,7 +11,10 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `POST /cases` | `201` Case. Body is optional: `title`, `jurisdiction` (`id`, `name`, `authority`). |
 | `GET /cases/{case_id}` | Case, or `404` with detail `case not found`. |
 | `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. |
-| `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`. |
+| `POST /cases/{case_id}/description` | `{ "facts", "alternative_description", "proposed_alternative" }`. Body `{ "text" }` (1–8000 characters). See Description and fact extraction. |
+| `GET /cases/{case_id}/facts` | The intake facts object, or a blank all-missing object when no description has been posted. `404` detail `case not found`. |
+| `PATCH /cases/{case_id}/facts` | `{ "facts", "gaps_summary" }`. Body is one or more scalar fields. `422` on an empty body, a null value, an unknown field, or a value outside the enum. |
+| `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`. Officer gaps from the intake are appended. `503` when the code database is absent. |
 | `GET /code/search` | Query `q`, `division` (`A` `B` or `C`, default `B`), `limit` (1–100, default 20). Hits as returned: `id`, `division`, `level`, `article_title`, `title`, `text`, `citation`. |
 | `GET /code/{provision_id}` | Query `division` optional. The codedb provision record, or `404` detail `provision not found`. `400` when the id is invalid or the division is ambiguous. |
 | `POST /section-c` | Body `{ "provisions": ["…"] }`. `SectionCRow` list. `404` when a provision is missing from codedb. `400` on an invalid id. |
@@ -22,7 +25,7 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `GET /cases/{case_id}/process-fields` | Process-field list. Empty when the pathway is an acceptable solution. |
 | `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` when the blank form file is missing; that detail is the form error text. `500` on other export failures. |
 
-A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
+A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`, `intake_text`, and `intake_facts`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
 
 A fact's `source.type` is `code`, `file`, `user_text`, `drawing`, or `user_click`.
 
@@ -195,3 +198,34 @@ A live response copies the citation string the code database returns. The placeh
 | 500 | Export failed for a reason other than a missing form. |
 | 503 | The code database file is absent. Body is exactly `{"detail": "code database not found"}`. Raised only by `CodeDbMissing` in `engine/codes.py`. Not a `FileNotFoundError`. The body has no server path. A missing blank form and an unavailable CCMC registry are also HTTP 503, and their detail is that error's own text. |
 | 200 | An unknown Division B token on this issues route does not 404. It returns `provision: null` and a question. |
+
+## Description and fact extraction
+
+`POST /cases/{case_id}/description` reads a pasted description offline. Rules do not call the network. A model pass runs only when `BATATIS_LIVE=1` and `OPENAI_API_KEY` is set, and only for a scalar the rules left blank (`status` `missing` and `method` null). A rules hit, including a deliberate abstention (`method` `rules`), is not overridden. The key is not logged. If the call fails, the rules result stands.
+
+`alternative_description` and `proposed_alternative` in the response are the same string: the departure sentences, or null. They are not the whole paste.
+
+`GET /cases/{case_id}/facts` returns that object. `PATCH /cases/{case_id}/facts` sets `method` to `user`. `status` is `confirmed` when the field was missing or the value is unchanged, and `corrected` when the value changes. The user's value is kept if the description is posted again. The patch re-runs the gap check. `gaps_summary` is `{ "unavailable", "detail", "blocking", "warning", "fields", "gaps" }`. When the code database is absent, `unavailable` is true, `detail` is `code database not found`, `blocking` is null, and officer gaps from the intake are still listed.
+
+Each scalar cell is `{ "value", "status", "confidence", "source_quote", "source_span", "method", "question" }`. `status` is `extracted`, `confirmed`, `corrected`, or `missing`. `confidence` is `high`, `medium`, or `low`. `source_quote` is a verbatim span of the paste (`source_span` is `[start, end]`), or null. `method` is `rules`, `model`, or `user`. Everything the extractor writes starts as `extracted` (unconfirmed). The ledger copies scalars as `pointed` facts with `source.ref` `description`. Claims, exemptions, and evidence items are not ledger facts. `jurisdiction_scope` is also stored as `scope`. `proposed_alternative` is also stored as `alternative_description`.
+
+| Field | Values |
+| --- | --- |
+| `applicant_role` | `owner`, `designer`, `contractor`, `manufacturer`, `other` |
+| `owner_name`, `municipal_address`, `legal_description`, `permit_number`, `municipality`, `project_name` | string read from the paste. `project_name` is the project name row when the paste has one. |
+| `jurisdiction_scope` | `site` or `jurisdiction_wide`. Both cues abstain and ask. |
+| `occupancy` | `Occupancy` in `engine/professional.py`. Retail plus dwelling units abstains. `factory-bonded` is not `industrial`. |
+| `storeys`, `dwelling_units` | integer. `building_area_m2` is a number; “about”, gross, total, or main floor is `medium` and asks which area. |
+| `sprinklered` | `yes`, `no`, `partial`, `unknown`. “Exempt” does not set this. |
+| `product_or_assembly` | string |
+| `installation_status` | `installed`, `planned`, `unknown` |
+| `proposed_alternative` | departure sentences only |
+| `required_acceptable_solution` | the acceptable solution the applicant named (“instead of …”, “the code requires …”) |
+| `claimed_provisions` | `{ "id", "entered", "resolved", "division" }`. No code text. `resolved` is false when the code database has no row. |
+| `claimed_exemptions` | `{ "text", "provision_ids", "status": "applicant_asserted", "by", "question", "officer_gap", "source_quote", "source_span" }`. The question asks for evidence. An uncited claim opens an officer gap whose message is `applicant claim not supported by a citation`. |
+| `claims` | Applicant wishes and assertions, `status` `applicant_asserted`. A variance wish is a claim. It is not a granted route. |
+| `evidence_items` | `{ "kind", "signed", "author_type", "stated_role", "review_status", "review_label", "missing_items", "question", "professional_confirmed", "source_quote", "source_span" }` |
+
+`author_type` is `professional`, `vendor`, `lab`, `applicant`, or `unknown`, as the paste states it. `review_status` is `listed_not_reviewed`. `review_label` is `evidence_listed (not reviewed)`. `professional_confirmed` is false. An item described as an EJ lists the missing items that the paste does not contain: `signature`, `tested system`, `job name and location`, `issuer qualifications`. The question asks for an EJ from a qualified issuer. The officer decides. The extractor records the applicant's words and does not judge the item.
+
+Eval cases and the metric live in `evals/fact-extraction/`. The cases are agent-authored, model-checked, and not human-verified.
