@@ -13,8 +13,8 @@
         min-height: 0;
       }
       .list {
-        border-right: 1px solid var(--border-subtle);
         overflow: auto;
+        border-right: 1px solid var(--border-subtle);
       }
       .detail {
         padding: var(--space-4) var(--space-5) var(--space-4) var(--space-4);
@@ -35,50 +35,43 @@
       .row.selected {
         background: var(--bg-hover);
       }
-      .row[hidden] {
-        display: none;
+      .row:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: -2px;
       }
       .group-h {
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
         padding: var(--space-2) var(--space-4);
         font-size: var(--text-sm);
         color: var(--text-secondary);
         border-bottom: 1px solid var(--border-subtle);
         background: var(--bg-elevated);
       }
-      .gate-hint {
-        font-size: var(--text-sm);
+      .empty {
+        padding: var(--space-6) var(--space-4);
         color: var(--text-secondary);
-        margin-right: auto;
+        font-size: var(--text-md);
+      }
+      .question {
+        margin-top: var(--space-4);
+        padding: var(--space-3);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        font-size: var(--text-md);
+        color: var(--text-secondary);
       }
     </style>
   </head>
   <body>
     <div class="app-shell">
-      <aside class="sidebar">
-        <div class="workspace">Batatis <span class="meta">▾</span></div>
-        <div class="nav-group">
-          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 6.5h6M5 9.5h4"/></svg>Intake</div>
-          <div class="nav-item active" data-active="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4L3 8l3 4M10 4l3 4-3 4"/></svg>Code identification</div>
-          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M3 8h10M3 12h6"/></svg>Section C</div>
-          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 3h6l3 3v7H4V3z"/><path d="M10 3v3h3"/></svg>Evidence plan</div>
-          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v7M5.5 7.5 8 10l2.5-2.5M3 13h10"/></svg>Export</div>
-        </div>
-        <div>
-          <div class="sidebar-section-label">Project</div>
-          <div class="nav-item" data-project-label></div>
-        </div>
-      </aside>
+      <aside class="sidebar" data-shell></aside>
       <main class="main-panel">
         <header class="panel-header">
           <h1 class="panel-title">Article ranking</h1>
           <span class="meta">NBC(AE) 2023 · 2nd printing</span>
         </header>
         <div class="gap-strip" id="gap-strip" aria-label="Administrative gaps"></div>
-        <div class="toolbar" role="tablist">
-          <button type="button" class="pill active" data-active="true" data-filter="all">Candidates · <span data-count="all"></span></button>
+        <div class="toolbar" role="tablist" aria-label="Filter articles">
+          <button type="button" class="pill" data-filter="all">Candidates · <span data-count="all"></span></button>
           <button type="button" class="pill" data-filter="confirmed">Confirmed · <span data-count="confirmed"></span></button>
           <button type="button" class="pill" data-filter="needs-clarification">Needs clarification · <span data-count="needs-clarification"></span></button>
         </div>
@@ -87,90 +80,81 @@
           <div class="detail" id="detail"></div>
         </div>
         <div class="footer-bar">
-          <span class="gate-hint" id="gate-hint">Confirm at least one article to continue</span>
-          <button type="button" class="btn btn-ghost">Back to intake</button>
-          <button type="button" class="btn btn-primary" id="continue-btn" disabled>Continue to Section C</button>
+          <span class="status-note" id="gate-hint"></span>
+          <a class="btn btn-ghost" href="01-intake.html">Back to intake</a>
+          <button type="button" class="btn btn-primary" id="continue-btn">Continue to Section C</button>
         </div>
       </main>
     </div>
     <script type="module">
-      import { ARTICLES, articleCounts, renderGapStrip, statusPill, renderProjectLabel } from "./shared-gaps.js";
+      import { getArticles, setArticleStatus, articleCounts, renderGapStrip, statusPill, renderShell, wireTabs } from "./shared-gaps.js";
 
-      const articles = ARTICLES.map((a) => ({ ...a }));
-      let selectedId = articles[0].id;
+      renderShell("ranking");
+      const QUESTIONS = {
+        "9.25.2.1.": "Which insulation value does the straw-bale assembly target, and how was it measured?",
+        "9.25.3.1.": "Does the assembly include a separate air barrier, or is the plaster finish relied on as the air barrier?",
+      };
+      let selectedId = getArticles()[0].id;
       let filter = "all";
 
-      const explain = {
-        "9.25.2.1.":
-          "Most likely benchmark for the described exterior wall thermal performance. Confirm after verifying edition text.",
-        "9.25.3.1.":
-          "Air barrier continuity may apply to the straw-bale assembly. Clarify whether a separate air barrier is proposed before confirming.",
-      };
-
       function render() {
+        const articles = getArticles();
         const counts = articleCounts(articles);
         document.querySelectorAll("[data-count]").forEach((el) => (el.textContent = counts[el.dataset.count]));
-        renderGapStrip(document.getElementById("gap-strip"), articles);
+        renderGapStrip(document.getElementById("gap-strip"));
 
         const visible = articles.filter((a) => filter === "all" || a.status === filter);
-        const bench = visible.filter((a) => a.benchmark);
-        const other = visible.filter((a) => !a.benchmark);
         const row = (a) =>
-          `<div class="row ${a.id === selectedId ? "selected" : ""}" data-id="${a.id}">
+          `<div class="row ${a.id === selectedId ? "selected" : ""}" data-id="${a.id}" tabindex="0" role="button" aria-pressed="${a.id === selectedId}">
             <span class="meta">${a.rank}</span>
             <span class="article-id">${a.id}</span>
             <span>${a.title}</span>
             ${statusPill(a.status)}
           </div>`;
+        const bench = visible.filter((a) => a.benchmark);
+        const other = visible.filter((a) => !a.benchmark);
         let html = "";
-        if (bench.length) html += `<div class="group-h"><span class="status-dot done"></span> Benchmark recommended · ${bench.length}</div>${bench.map(row).join("")}`;
-        if (other.length) html += `<div class="group-h"><span class="status-dot pending"></span> Other candidates · ${other.length}</div>${other.map(row).join("")}`;
-        if (!visible.length) html = `<div class="group-h">No articles in this view</div>`;
-        document.getElementById("list").innerHTML = html;
-        document.querySelectorAll(".row").forEach((r) =>
-          r.addEventListener("click", () => {
+        if (bench.length) html += `<div class="group-h">Benchmark recommended · ${bench.length}</div>${bench.map(row).join("")}`;
+        if (other.length) html += `<div class="group-h">Other candidates · ${other.length}</div>${other.map(row).join("")}`;
+        document.getElementById("list").innerHTML = html || `<div class="empty">No articles in this view.</div>`;
+        document.querySelectorAll(".row").forEach((r) => {
+          const pick = () => {
             selectedId = r.dataset.id;
             render();
-          })
-        );
+            document.querySelector(`.row[data-id="${selectedId}"]`)?.focus();
+          };
+          r.addEventListener("click", pick);
+          r.addEventListener("keydown", (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), pick()));
+        });
 
-        const a = articles.find((x) => x.id === selectedId) || articles[0];
+        const a = articles.find((x) => x.id === selectedId);
         document.getElementById("detail").innerHTML = `
           <h2 style="margin: 0 0 8px; font-size: var(--text-lg)">${a.benchmark ? "Benchmark acceptable solution" : "Candidate article"}</h2>
-          <p class="meta" style="margin-top: 0">Article ${a.id} · ranked #${a.rank} · ${statusPill(a.status)}</p>
-          <p class="ai-explain">${explain[a.id]}</p>
+          <p class="meta" style="margin-top: 0; display: flex; align-items: center; gap: 6px">Article ${a.id} · ranked #${a.rank} ${statusPill(a.status)}</p>
+          <p class="ai-explain">${a.explainRanking}</p>
           <div class="btn-row" style="margin-top: 16px">
-            <button type="button" class="btn" data-act="confirm">Confirm article</button>
-            <button type="button" class="btn" data-act="reject">Reject</button>
-            <button type="button" class="btn btn-ghost" data-act="clarify">Ask clarifying question</button>
-          </div>`;
+            <button type="button" class="btn" data-act="confirmed" ${a.status === "confirmed" ? "disabled" : ""}>Confirm article</button>
+            <button type="button" class="btn" data-act="rejected" ${a.status === "rejected" ? "disabled" : ""}>Reject</button>
+            <button type="button" class="btn" data-act="needs-clarification">Ask clarifying question</button>
+          </div>
+          ${a.status === "needs-clarification" ? `<div class="question"><div class="meta" style="margin-bottom: 4px">Question for applicant</div>${QUESTIONS[a.id]}</div>` : ""}`;
         document.querySelectorAll("[data-act]").forEach((b) =>
           b.addEventListener("click", () => {
-            const map = { confirm: "confirmed", reject: "rejected", clarify: "needs-clarification" };
-            a.status = map[b.dataset.act];
+            setArticleStatus(a.id, b.dataset.act);
             render();
           })
         );
 
-        const canContinue = counts.confirmed > 0;
         const cont = document.getElementById("continue-btn");
-        cont.disabled = !canContinue;
-        document.getElementById("gate-hint").hidden = canContinue;
+        cont.disabled = counts.confirmed === 0;
+        document.getElementById("gate-hint").textContent = counts.confirmed ? "" : "Confirm at least one article to continue";
       }
 
-      document.querySelectorAll("[data-filter]").forEach((tab) =>
-        tab.addEventListener("click", () => {
-          filter = tab.dataset.filter;
-          document.querySelectorAll("[data-filter]").forEach((t) => {
-            t.classList.toggle("active", t === tab);
-            t.dataset.active = t === tab ? "true" : "false";
-          });
-          render();
-        })
-      );
-
-      renderProjectLabel();
-      render();
+      document.getElementById("continue-btn").addEventListener("click", () => (location.href = "03-section-c.html"));
+      wireTabs("[data-filter]", "data-filter-panel", (value) => {
+        filter = value;
+        render();
+      })("all");
     </script>
   </body>
 </html>

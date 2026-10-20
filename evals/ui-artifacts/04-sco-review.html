@@ -14,13 +14,7 @@
       }
       .mid {
         border-right: 1px solid var(--border-subtle);
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-      }
-      .mid-list {
         overflow: auto;
-        flex: 1;
       }
       .detail {
         overflow: auto;
@@ -30,13 +24,22 @@
         gap: var(--space-4);
       }
       .item {
+        display: block;
+        width: 100%;
+        text-align: left;
         padding: var(--space-3) var(--space-4);
+        border: 0;
         border-bottom: 1px solid var(--border-subtle);
+        background: transparent;
         cursor: pointer;
       }
       .item.selected,
       .item:hover {
         background: var(--bg-hover);
+      }
+      .item:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: -2px;
       }
       .item-title {
         display: flex;
@@ -58,114 +61,150 @@
       .tab-count {
         color: var(--text-tertiary);
         font-variant-numeric: tabular-nums;
-        margin-left: 4px;
       }
-      .cite-entry + .cite-entry {
+      .entry + .entry {
         margin-top: var(--space-4);
       }
-      .cite-head {
+      .entry-head {
         display: flex;
         align-items: center;
         gap: 8px;
         margin-bottom: 8px;
-        font-variant-numeric: tabular-nums;
       }
-      .gate-reason {
-        margin-right: auto;
+      .coverage {
+        margin: 0 0 var(--space-3);
+      }
+      .empty-state {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-secondary);
+      }
+      .dialog textarea {
+        width: 100%;
       }
     </style>
   </head>
   <body>
     <div class="app-shell">
-      <aside class="sidebar">
-        <div class="workspace">Batatis <span class="meta">▾</span></div>
-        <div class="nav-group">
-          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h10M3 8h10M3 11h7"/></svg>Queue</div>
-          <div class="nav-item active" data-active="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5"/><path d="M8 5.5v3l2 1"/></svg>SCO review</div>
-          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v7M5.5 7.5 8 10l2.5-2.5M3 13h10"/></svg>Export package</div>
-        </div>
-        <div>
-          <div class="sidebar-section-label">Role</div>
-          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="6" r="2.5"/><path d="M3.5 13c1-2.5 2.8-3.5 4.5-3.5S11.5 10.5 12.5 13"/></svg>Safety Codes Officer</div>
-        </div>
-      </aside>
+      <aside class="sidebar" data-shell></aside>
       <main class="main-panel">
         <header class="panel-header">
           <h1 class="panel-title">Administrative review</h1>
           <span class="meta">Completeness only · not technical correctness</span>
         </header>
         <div class="tri">
-          <div class="mid">
-            <div class="mid-list">
-              <div class="item selected">
-                <div class="item-title"><span class="status-dot blocking"></span> VAR-1042 · Straw wall</div>
-                <div class="meta" style="margin-top: 4px"><span id="gap-summary"></span> · updated 1h</div>
-              </div>
-              <div class="item">
-                <div class="item-title"><span class="status-dot done"></span> VAR-1038 · Stair geometry</div>
-                <div class="meta" style="margin-top: 4px">Admin-complete · 3h</div>
-              </div>
-            </div>
+          <div class="mid" role="listbox" aria-label="Review queue">
+            <button type="button" class="item" data-project="VAR-1042" role="option">
+              <span class="item-title"><span class="status-dot blocking" id="q-dot"></span> VAR-1042 · Straw wall</span>
+              <span class="meta" style="display: block; margin-top: 4px"><span id="gap-summary"></span> · updated 1h</span>
+            </button>
+            <button type="button" class="item" data-project="VAR-1038" role="option">
+              <span class="item-title"><span class="status-dot done"></span> VAR-1038 · Stair geometry</span>
+              <span class="meta" style="display: block; margin-top: 4px">Admin-complete · 3h</span>
+            </button>
           </div>
-          <div class="detail">
-            <div class="detail-toolbar" role="tablist">
-              <button type="button" class="pill active" data-active="true" data-pane="gaps">Gaps <span class="tab-count" id="gap-count"></span></button>
+          <div class="detail" id="detail-1042">
+            <div class="detail-toolbar" role="tablist" aria-label="Review sections">
+              <button type="button" class="pill" data-pane="gaps">Gaps <span class="tab-count" id="gap-count"></span></button>
               <button type="button" class="pill" data-pane="citations">Citations <span class="tab-count" id="cite-count"></span></button>
-              <button type="button" class="pill" data-pane="explanations">Explanations</button>
+              <button type="button" class="pill" data-pane="explanations">Explanations <span class="tab-count" id="explain-count"></span></button>
             </div>
-            <div class="pane" data-pane-panel="gaps" data-active="true">
+            <div class="pane" data-pane-panel="gaps" role="tabpanel">
               <ul class="plain-list" id="gap-list"></ul>
             </div>
-            <div class="pane" data-pane-panel="citations">
+            <div class="pane" data-pane-panel="citations" role="tabpanel">
+              <p class="meta coverage" id="cite-coverage"></p>
               <div id="cite-list"></div>
             </div>
-            <div class="pane" data-pane-panel="explanations">
-              <h2 style="margin: 0 0 8px; font-size: var(--text-md)">AI explanation</h2>
-              <p class="ai-explain">
-                Applicant linked 9.25.2.1. as the benchmark acceptable solution. Explanation is for
-                navigation only — this view does not determine whether the alternative meets code.
-              </p>
+            <div class="pane" data-pane-panel="explanations" role="tabpanel">
+              <p class="meta coverage">AI explanations are for navigation only. This view does not determine whether the alternative meets code.</p>
+              <div id="explain-list"></div>
             </div>
+          </div>
+          <div class="detail" id="detail-1038" hidden>
+            <div class="empty-state"><span class="status-dot done"></span>VAR-1038 has no open administrative gaps. Marked administratively complete 3h ago.</div>
           </div>
         </div>
         <div class="footer-bar">
-          <span class="meta gate-reason" id="gate-reason"></span>
-          <button type="button" class="btn">Request applicant fixes</button>
+          <span class="status-note" id="gate-reason" role="status"></span>
+          <button type="button" class="btn" id="request-btn">Request applicant fixes</button>
           <button type="button" class="btn btn-primary" data-requires-no-blocking-gaps>Mark administratively complete</button>
         </div>
       </main>
     </div>
+
+    <dialog class="dialog" id="request-dialog">
+      <form method="dialog">
+        <div class="dialog-body">
+          <h2 class="dialog-title">Request fixes for VAR-1042</h2>
+          <p class="meta" style="margin: 0 0 8px">These items are sent to the applicant:</p>
+          <ul class="plain-list" id="request-list"></ul>
+          <div class="field" style="margin-top: 12px">
+            <label for="request-note">Note to applicant (optional)</label>
+            <textarea id="request-note" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="footer-bar">
+          <button type="submit" class="btn btn-ghost" value="cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" value="send" id="request-send">Send request</button>
+        </div>
+      </form>
+    </dialog>
+
     <script type="module">
-      import { ARTICLES, getGaps, blockingGaps, renderGapList, applyGating, gapSummary, statusPill } from "./shared-gaps.js";
-      renderGapList(document.getElementById("gap-list"));
-      const cited = ARTICLES.filter((a) => a.status !== "rejected");
+      import { getGaps, blockingGaps, sectionCArticles, renderGapList, applyGating, gapSummary, statusPill, renderShell, wireTabs } from "./shared-gaps.js";
+
+      renderShell("review", "sco");
+      const cited = sectionCArticles();
+      const confirmed = cited.filter((a) => a.status === "confirmed").length;
+      renderGapList(document.getElementById("gap-list"), { links: false });
+      renderGapList(document.getElementById("request-list"), { links: false });
+      document.getElementById("gap-summary").textContent = gapSummary();
       document.getElementById("gap-count").textContent = getGaps().length;
       document.getElementById("cite-count").textContent = cited.length;
+      document.getElementById("explain-count").textContent = cited.length;
+      document.getElementById("cite-coverage").textContent =
+        `Citations ${cited.length}/${cited.length} retrieved · ${confirmed}/${cited.length} articles confirmed · Section C ${confirmed === cited.length ? "complete" : "incomplete"}`;
+      const head = (a) => `<div class="entry-head"><span class="article-id">${a.id}</span> ${statusPill(a.status)}</div>`;
       document.getElementById("cite-list").innerHTML = cited
-        .map(
-          (a) => `<div class="cite-entry">
-            <div class="cite-head"><span class="article-id">${a.id}</span> ${statusPill(a.status)}</div>
-            <pre class="cite-block">${a.excerpt}</pre>
-          </div>`
-        )
+        .map((a) => `<div class="entry">${head(a)}<pre class="cite-block">${a.excerpt}</pre></div>`)
         .join("");
-      const nBlocking = blockingGaps().length;
-      document.getElementById("gate-reason").textContent = nBlocking ? `Resolve ${nBlocking} blocking gaps to mark complete` : "";
-      document.getElementById("gap-summary").textContent = gapSummary();
-      applyGating();
-      const tabs = document.querySelectorAll("[data-pane]");
-      const panes = document.querySelectorAll("[data-pane-panel]");
-      tabs.forEach((tab) => {
-        tab.addEventListener("click", () => {
-          tabs.forEach((t) => {
-            t.classList.toggle("active", t === tab);
-            t.dataset.active = t === tab ? "true" : "false";
+      document.getElementById("explain-list").innerHTML = cited
+        .map((a) => `<div class="entry">${head(a)}<p class="ai-explain" style="margin: 0">${a.explainSectionC}</p></div>`)
+        .join("");
+
+      const footerFor1042 = () => {
+        const n = applyGating();
+        document.getElementById("gate-reason").textContent = n ? `Resolve ${n} blocking gaps to mark complete` : "";
+        document.getElementById("q-dot").className = `status-dot ${n ? "blocking" : "done"}`;
+      };
+      const items = document.querySelectorAll("[data-project]");
+      items.forEach((item) =>
+        item.addEventListener("click", () => {
+          const is1042 = item.dataset.project === "VAR-1042";
+          items.forEach((i) => {
+            i.classList.toggle("selected", i === item);
+            i.setAttribute("aria-selected", String(i === item));
           });
-          panes.forEach((p) => {
-            p.dataset.active = p.dataset.panePanel === tab.dataset.pane ? "true" : "false";
-          });
-        });
+          document.getElementById("detail-1042").hidden = !is1042;
+          document.getElementById("detail-1038").hidden = is1042;
+          document.getElementById("request-btn").hidden = !is1042;
+          document.querySelector("[data-requires-no-blocking-gaps]").hidden = !is1042;
+          if (is1042) footerFor1042();
+          else document.getElementById("gate-reason").textContent = "Administratively complete";
+        })
+      );
+      items[0].click();
+
+      const dialog = document.getElementById("request-dialog");
+      document.getElementById("request-btn").addEventListener("click", () => dialog.showModal());
+      dialog.addEventListener("close", () => {
+        if (dialog.returnValue !== "send") return;
+        const n = getGaps().length;
+        document.getElementById("gate-reason").textContent = `Fix request sent · ${n} items · ${blockingGaps().length} blocking`;
       });
+      wireTabs("[data-pane]", "data-pane-panel")("gaps");
     </script>
   </body>
 </html>

@@ -13,10 +13,10 @@
         min-height: 0;
       }
       .preview {
-        padding: var(--space-4);
+        padding: var(--space-6) var(--space-4);
         overflow: auto;
         border-right: 1px solid var(--border-subtle);
-        background: var(--bg-panel);
+        background: var(--bg-app);
       }
       .side {
         padding: var(--space-4);
@@ -25,11 +25,12 @@
       .sheet {
         background: var(--pdf-sheet-bg);
         color: var(--pdf-sheet-text);
-        border: 1px solid var(--border-default);
-        border-radius: var(--radius-lg);
-        padding: var(--space-6);
-        max-width: 720px;
-        min-height: 520px;
+        border-radius: 2px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+        padding: 40px 48px;
+        max-width: 680px;
+        min-height: 880px;
+        margin: 0 auto;
       }
       .sheet h2 {
         margin: 0 0 4px;
@@ -37,30 +38,50 @@
         color: var(--pdf-sheet-text);
       }
       .sheet h3 {
-        margin: 20px 0 8px;
-        font-size: var(--text-sm);
+        margin: 24px 0 8px;
+        font-size: var(--text-xs);
         color: var(--pdf-sheet-muted);
         text-transform: uppercase;
         letter-spacing: 0.04em;
       }
-      .sheet p,
-      .sheet li {
-        margin: 0;
+      .sheet p {
+        margin: 0 0 2px;
         font-size: var(--text-md);
         color: var(--pdf-sheet-text);
       }
-      .nowrap {
-        white-space: nowrap;
-      }
-      .gate strong {
-        color: var(--text-primary);
-        font-weight: var(--weight-medium);
-      }
-      .sheet-article {
-        margin-bottom: 10px;
-      }
       .sheet .muted {
         color: var(--pdf-sheet-muted);
+      }
+      .kv {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        gap: 2px 12px;
+        font-size: var(--text-md);
+      }
+      .kv dt {
+        color: var(--pdf-sheet-muted);
+      }
+      .kv dd {
+        margin: 0;
+      }
+      .sheet-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: var(--text-sm);
+      }
+      .sheet-table th,
+      .sheet-table td {
+        text-align: left;
+        vertical-align: top;
+        padding: 6px 8px 6px 0;
+        border-bottom: 1px solid #dcdce0;
+      }
+      .sheet-table th {
+        color: var(--pdf-sheet-muted);
+        font-weight: var(--weight-medium);
+      }
+      .nowrap {
+        white-space: nowrap;
       }
       .gate {
         display: flex;
@@ -74,24 +95,23 @@
         color: var(--text-secondary);
         margin-bottom: 16px;
       }
+      .gate.clear {
+        border-color: var(--border-default);
+        background: transparent;
+      }
+      .gate strong {
+        color: var(--text-primary);
+        font-weight: var(--weight-medium);
+      }
+      .side h3 {
+        margin: 0 0 8px;
+        font-size: var(--text-md);
+      }
     </style>
   </head>
   <body>
     <div class="app-shell">
-      <aside class="sidebar">
-        <div class="workspace">Batatis <span class="meta">▾</span></div>
-        <div class="nav-group">
-          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 6.5h6M5 9.5h4"/></svg>Intake</div>
-          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4L3 8l3 4M10 4l3 4-3 4"/></svg>Code identification</div>
-          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M3 8h10M3 12h6"/></svg>Section C</div>
-          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 3h6l3 3v7H4V3z"/><path d="M10 3v3h3"/></svg>Evidence plan</div>
-          <div class="nav-item active" data-active="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v7M5.5 7.5 8 10l2.5-2.5M3 13h10"/></svg>Export</div>
-        </div>
-        <div>
-          <div class="sidebar-section-label">Project</div>
-          <div class="nav-item" data-project-label></div>
-        </div>
-      </aside>
+      <aside class="sidebar" data-shell></aside>
       <main class="main-panel">
         <header class="panel-header">
           <h1 class="panel-title">Export · PDF preview</h1>
@@ -99,74 +119,135 @@
         </header>
         <div class="split">
           <div class="preview">
-            <div class="sheet">
+            <article class="sheet" id="sheet">
               <h2>Safety Codes Variance Template</h2>
-              <p class="muted">Preview · not an approval document</p>
+              <p class="muted" id="sheet-sub"></p>
               <h3>Section A</h3>
-              <p>Owner: Amina Okonkwo</p>
-              <p>Representative: —</p>
-              <p>Mailing address: —</p>
-              <p>Date: 2026-10-20</p>
+              <dl class="kv" id="sheet-a"></dl>
               <h3>Section B</h3>
-              <p>Municipal address: —</p>
-              <p>Legal description / ATS: NW-12-24-1-W5 <span class="muted">(assumption)</span></p>
-              <p>Proposed alternative: Load-bearing straw-bale wall assembly as alternative to NBC(AE) Part 9 acceptable solution for exterior walls.</p>
+              <dl class="kv" id="sheet-b"></dl>
               <h3>Section C</h3>
-              <div id="sheet-section-c"></div>
+              <table class="sheet-table">
+                <thead>
+                  <tr><th>Article</th><th>Objective</th><th>Function</th><th>Intent</th><th>Status</th></tr>
+                </thead>
+                <tbody id="sheet-section-c"></tbody>
+              </table>
               <h3>Section D · documentation plan</h3>
-              <p>ISO 17025 wall assembly test — Lab TBD (applicant to upload)</p>
-              <p>Registered professional opinion — required (not authored by tool)</p>
+              <table class="sheet-table">
+                <thead>
+                  <tr><th>Item</th><th>Responsible</th><th>Status</th></tr>
+                </thead>
+                <tbody id="sheet-d"></tbody>
+              </table>
               <h3>Alternative-path process fields</h3>
-              <div id="sheet-process"></div>
-            </div>
+              <dl class="kv" id="sheet-process"></dl>
+            </article>
           </div>
           <div class="side">
             <div class="gate" id="gate">
-              <span class="status-dot blocking"></span>
+              <span class="status-dot blocking" id="gate-dot"></span>
               <span id="gate-text"></span>
             </div>
-            <h3 style="margin: 0 0 8px; font-size: var(--text-md)">Remaining gaps</h3>
+            <h3>Remaining gaps</h3>
             <ul class="plain-list" id="gap-list"></ul>
-            <p class="ai-explain" style="margin-top: 16px">
-              Section D lists a plan only. The tool will not invent test results or stamped
-              engineering conclusions.
+            <p class="meta" style="margin-top: 16px">
+              Section D lists a plan only. This tool does not invent test results or stamped engineering conclusions.
             </p>
           </div>
         </div>
         <div class="footer-bar">
-          <button type="button" class="btn btn-ghost">Back to fix gaps</button>
+          <span class="status-note" id="export-note" role="status"></span>
+          <a class="btn btn-ghost" id="back-btn" href="01-intake.html">Back to fix gaps</a>
           <button type="button" class="btn" id="override-btn">Override &amp; download (lists gaps)</button>
-          <button type="button" class="btn btn-primary" data-requires-no-blocking-gaps>Download PDF</button>
+          <button type="button" class="btn btn-primary" id="download-btn" data-requires-no-blocking-gaps>Download PDF</button>
         </div>
       </main>
     </div>
+
+    <dialog class="dialog" id="override-dialog">
+      <form method="dialog">
+        <div class="dialog-body">
+          <h2 class="dialog-title">Download with open gaps?</h2>
+          <p class="meta" style="margin: 0 0 8px">The draft is not administratively complete. This gap list is attached to the download:</p>
+          <ul class="plain-list" id="override-list"></ul>
+        </div>
+        <div class="footer-bar">
+          <button type="submit" class="btn btn-ghost" value="cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" value="download" id="override-confirm">Download with gap list</button>
+        </div>
+      </form>
+    </dialog>
+
     <script type="module">
-      import { ARTICLES, PROCESS_FIELDS, STATUS_META, renderGapList, applyGating, getGaps, blockingGaps, unconfirmedArticles, renderProjectLabel } from "./shared-gaps.js";
-      renderProjectLabel();
-      renderGapList(document.getElementById("gap-list"));
-      applyGating();
-      const val = (v) => (v ? v : "—");
-      document.getElementById("sheet-section-c").innerHTML = ARTICLES.filter((a) => a.status !== "rejected")
+      import {
+        PROJECT_ID, CODE_EDITION, JURIS_OPTIONS, sectionD, STATUS_META, state, sectionCArticles, processFields,
+        getGaps, blockingGaps, unconfirmedArticles, renderGapList, applyGating, renderShell, downloadText,
+      } from "./shared-gaps.js";
+
+      renderShell("export");
+      const f = state.fields;
+      const val = (v) => (String(v ?? "").trim() ? v : "—");
+      const kv = (rows) => rows.map(([k, v, id]) => `<dt>${k}</dt><dd${id ? ` data-value="${id}"` : ""}>${v}</dd>`).join("");
+
+      document.getElementById("sheet-sub").textContent = `${PROJECT_ID} · ${CODE_EDITION} · Preview, not an approval document`;
+      document.getElementById("sheet-a").innerHTML = kv([
+        ["Owner", val(f.owner)],
+        ["Representative", val(f.rep)],
+        ["Mailing address", val(f.mail)],
+        ["Date", val(f.date)],
+      ]);
+      document.getElementById("sheet-b").innerHTML = kv([
+        ["Permit #", val(f.permit)],
+        ["Jurisdiction-wide", val(JURIS_OPTIONS[f.juris])],
+        ["Municipal address", val(f.muni)],
+        ["Legal description / ATS", `${val(f.ats)}${f.atsAssumption ? ' <span class="muted">(assumption)</span>' : ""}`],
+        ["Proposed alternative", val(f.alternative)],
+      ]);
+      document.getElementById("sheet-section-c").innerHTML = sectionCArticles()
         .map(
-          (a) => `<div class="sheet-article" data-article="${a.id}">
-            <p><strong>${a.id}</strong> ${a.title} <span class="muted">· ${STATUS_META[a.status].label}${a.status === "confirmed" ? "" : " — not exported until confirmed"}</span></p>
-            <p><span class="muted">Objective</span> <span data-value="objective">${a.objective}</span> · <span class="muted">Function</span> <span data-value="fn">${a.fn}</span></p>
-            <p><span class="muted">Intent</span> <span data-value="intent">${val(a.intent)}</span>${a.intentRef ? ` <span class="muted nowrap">(${a.intentRef})</span>` : ""}</p>
-          </div>`
+          (a) => `<tr data-article="${a.id}">
+            <td class="nowrap"><strong>${a.id}</strong><br /><span class="muted">${a.title}</span></td>
+            <td data-value="objective">${a.objective}</td>
+            <td data-value="fn">${a.fn}</td>
+            <td><span data-value="intent">${val(a.intent)}</span>${a.intentRef ? `<br /><span class="muted">${a.intentRef}</span>` : ""}</td>
+            <td class="nowrap">${STATUS_META[a.status].label}${a.status === "confirmed" ? "" : '<br /><span class="muted">not exported</span>'}</td>
+          </tr>`
         )
         .join("");
-      document.getElementById("sheet-process").innerHTML = PROCESS_FIELDS.map(
-        (f) => `<p><span class="muted">${f.label}:</span> <span data-value="${f.id}">${val(f.value)}</span></p>`
+      document.getElementById("sheet-d").innerHTML = sectionD().map(
+        (d) => `<tr><td>${d.item}</td><td>${d.by}</td><td>${d.status}</td></tr>`
       ).join("");
+      document.getElementById("sheet-process").innerHTML = kv(processFields().map((p) => [p.label, val(p.value), p.id]));
+
+      renderGapList(document.getElementById("gap-list"));
+      renderGapList(document.getElementById("override-list"), { links: false });
+      const blocking = applyGating();
       const unconfirmed = unconfirmedArticles().map((a) => a.id);
-      const blocking = blockingGaps().length;
-      document.getElementById("gate-text").innerHTML =
-        `<strong>Download blocked</strong> · ${blocking} blocking gaps` +
-        (unconfirmed.length ? `<br />Articles not confirmed: ${unconfirmed.join(", ")}` : "") +
-        `<br />Override downloads with the gap list attached.`;
-      document.getElementById("override-btn").addEventListener("click", () => {
-        alert("Override download would include gap list:\n" + getGaps().map((g) => `• ${g.label}`).join("\n"));
+      const gate = document.getElementById("gate");
+      gate.classList.toggle("clear", blocking === 0);
+      document.getElementById("gate-dot").className = `status-dot ${blocking ? "blocking" : "done"}`;
+      document.getElementById("gate-text").innerHTML = blocking
+        ? `<strong>Download blocked</strong> · ${blocking} blocking gaps` +
+          (unconfirmed.length ? `<br />Articles not confirmed: ${unconfirmed.join(", ")}` : "") +
+          `<br />Override downloads with the gap list attached.`
+        : `<strong>Ready to download</strong> · no blocking gaps`;
+      document.getElementById("override-btn").hidden = blocking === 0;
+      const first = getGaps()[0];
+      const back = document.getElementById("back-btn");
+      if (first) back.href = first.href;
+      else back.hidden = true;
+
+      const sheetText = () => document.getElementById("sheet").innerText;
+      const dialog = document.getElementById("override-dialog");
+      document.getElementById("override-btn").addEventListener("click", () => dialog.showModal());
+      dialog.addEventListener("close", () => {
+        if (dialog.returnValue !== "download") return;
+        const gaps = getGaps().map((g) => `- ${g.label}`).join("\n");
+        downloadText(`${PROJECT_ID}-draft-with-gaps.txt`, `${sheetText()}\n\nOPEN GAPS (${blockingGaps().length} blocking)\n${gaps}\n`);
+        document.getElementById("export-note").textContent = `Draft downloaded with ${getGaps().length} gaps listed`;
       });
+      document.getElementById("download-btn").addEventListener("click", () => window.print());
     </script>
   </body>
 </html>

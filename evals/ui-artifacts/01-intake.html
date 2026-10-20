@@ -6,29 +6,31 @@
     <title>Batatis — Intake</title>
     <link rel="stylesheet" href="../../docs/design/tokens.css" />
     <style>
-      .form-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--space-3) var(--space-4);
-        padding: var(--space-4);
-      }
-      .form-grid .full {
-        grid-column: 1 / -1;
-      }
       .panel-body {
         overflow: auto;
         flex: 1;
       }
-      .section-block {
+      .form-grid {
         display: none;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-4);
+        padding: var(--space-5) var(--space-4);
       }
-      .section-block[data-active="true"] {
+      .form-grid[data-active="true"] {
         display: grid;
+      }
+      .form-grid .full {
+        grid-column: 1 / -1;
+      }
+      .field-foot {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        min-height: 22px;
       }
       .tab-count {
         color: var(--text-tertiary);
         font-variant-numeric: tabular-nums;
-        margin-left: 4px;
       }
       .tab-count:empty {
         display: none;
@@ -39,128 +41,170 @@
         gap: 6px;
         font-size: var(--text-xs);
         color: var(--text-secondary);
+        cursor: pointer;
+      }
+      .field[data-required]:not(.is-empty) .field-label-row .status-dot {
+        display: none;
+      }
+      .section-hint {
+        grid-column: 1 / -1;
+        margin: 0;
       }
     </style>
   </head>
   <body>
     <div class="app-shell">
-      <aside class="sidebar">
-        <div class="workspace">Batatis <span class="meta">▾</span></div>
-        <div class="nav-group">
-          <div class="nav-item active" data-active="true">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 6.5h6M5 9.5h4"/></svg>Intake
-          </div>
-          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4L3 8l3 4M10 4l3 4-3 4"/></svg>Code identification</div>
-          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10M3 8h10M3 12h6"/></svg>Section C</div>
-          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 3h6l3 3v7H4V3z"/><path d="M10 3v3h3"/></svg>Evidence plan</div>
-          <div class="nav-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v7M5.5 7.5 8 10l2.5-2.5M3 13h10"/></svg>Export</div>
-        </div>
-        <div>
-          <div class="sidebar-section-label">Project</div>
-          <div class="nav-item" data-project-label></div>
-        </div>
-      </aside>
+      <aside class="sidebar" data-shell></aside>
       <main class="main-panel">
         <header class="panel-header">
           <h1 class="panel-title">Applicant intake</h1>
           <span class="meta">Variance Template · Sections A–B</span>
         </header>
         <div class="gap-strip" id="gap-strip" aria-label="Administrative gaps"></div>
-        <div class="toolbar" role="tablist">
-          <button type="button" class="pill active" data-active="true" data-tab="A">Section A <span class="tab-count" data-tab-count="A"></span></button>
+        <div class="toolbar" role="tablist" aria-label="Intake sections">
+          <button type="button" class="pill" data-tab="A">Section A <span class="tab-count" data-tab-count="A"></span></button>
           <button type="button" class="pill" data-tab="B">Section B <span class="tab-count" data-tab-count="B"></span></button>
-          <button type="button" class="pill" data-tab="assumptions">Assumptions <span class="tab-count" data-tab-count="assumptions"></span></button>
+          <button type="button" class="pill" data-tab="alt">Alternative path <span class="tab-count" data-tab-count="alt"></span></button>
         </div>
         <div class="panel-body">
-          <div class="form-grid section-block" data-section="A" data-active="true">
-            <div class="field">
-              <div class="field-label-row"><label>Owner</label></div>
-              <input value="Amina Okonkwo" />
-              <span class="confidence"><span class="status-dot warning"></span>Inferred · confirm</span>
-            </div>
-            <div class="field is-empty">
-              <div class="field-label-row">
-                <span class="status-dot blocking"></span><label>Representative</label>
+          <div class="content-col">
+            <section class="form-grid" data-section="A" role="tabpanel">
+              <div class="field">
+                <label for="owner">Owner</label>
+                <input id="owner" data-field="owner" />
+                <div class="field-foot" id="owner-foot"></div>
               </div>
-              <input placeholder="Required" />
-            </div>
-            <div class="field is-empty">
-              <div class="field-label-row">
-                <span class="status-dot blocking"></span><label>Mailing address</label>
+              <div class="field" data-required="rep">
+                <div class="field-label-row"><span class="status-dot blocking"></span><label for="rep">Representative</label></div>
+                <input id="rep" data-field="rep" placeholder="Required" />
               </div>
-              <input placeholder="Required" />
-            </div>
-            <div class="field">
-              <label>Date</label>
-              <input value="2026-10-20" />
-            </div>
-          </div>
-          <div class="form-grid section-block" data-section="B">
-            <div class="field">
-              <label>Permit #</label>
-              <input placeholder="If issued" />
-            </div>
-            <div class="field">
-              <label>Jurisdiction-wide variance?</label>
-              <select>
-                <option>No — site specific</option>
-                <option>Yes</option>
-              </select>
-            </div>
-            <div class="field is-empty full">
-              <div class="field-label-row">
-                <span class="status-dot blocking"></span><label>Municipal address</label>
+              <div class="field" data-required="mail">
+                <div class="field-label-row"><span class="status-dot blocking"></span><label for="mail">Mailing address</label></div>
+                <input id="mail" data-field="mail" placeholder="Required" />
               </div>
-              <input placeholder="Required" />
-            </div>
-            <div class="field full">
-              <div class="field-label-row">
-                <span class="status-dot warning"></span><label>Legal description / ATS</label>
+              <div class="field">
+                <label for="date">Date</label>
+                <input id="date" data-field="date" type="text" inputmode="numeric" />
+                <div class="field-foot"><span class="field-note"><span class="status-dot pending"></span>Defaulted to today</span></div>
               </div>
-              <input value="NW-12-24-1-W5" />
-              <label class="assumption"><input type="checkbox" checked /> Treat as assumption until verified</label>
-            </div>
-            <div class="field full">
-              <label>Proposed alternative (clear description)</label>
-              <textarea rows="3">Load-bearing straw-bale wall assembly as alternative to NBC(AE) Part 9 acceptable solution for exterior walls.</textarea>
-            </div>
-          </div>
-          <div class="form-grid section-block" data-section="assumptions">
-            <div class="field full">
-              <label>Labeled assumptions</label>
-              <textarea rows="4">ATS legal description (NW-12-24-1-W5) is unverified and marked as assumption.</textarea>
-            </div>
+            </section>
+
+            <section class="form-grid" data-section="B" role="tabpanel">
+              <div class="field">
+                <label for="permit">Permit #</label>
+                <input id="permit" data-field="permit" placeholder="If issued" />
+              </div>
+              <div class="field" data-required="juris">
+                <div class="field-label-row"><span class="status-dot blocking"></span><label for="juris">Jurisdiction-wide variance?</label></div>
+                <select id="juris" data-field="juris">
+                  <option value="">Select…</option>
+                  <option value="site">No — site specific</option>
+                  <option value="jurisdiction">Yes — jurisdiction-wide</option>
+                </select>
+              </div>
+              <div class="field" data-required="muni">
+                <div class="field-label-row"><span class="status-dot blocking"></span><label for="muni">Municipal address</label></div>
+                <input id="muni" data-field="muni" placeholder="Required" />
+              </div>
+              <div class="field">
+                <div class="field-label-row"><span class="status-dot warning" id="ats-dot"></span><label for="ats">Legal description / ATS</label></div>
+                <input id="ats" data-field="ats" />
+                <div class="field-foot">
+                  <label class="assumption" for="atsAssumption"><input type="checkbox" id="atsAssumption" data-field="atsAssumption" /> Treat as assumption until verified</label>
+                </div>
+              </div>
+              <div class="field full">
+                <label for="alternative">Proposed alternative (clear description)</label>
+                <textarea id="alternative" data-field="alternative" rows="3"></textarea>
+              </div>
+            </section>
+
+            <section class="form-grid" data-section="alt" role="tabpanel">
+              <p class="meta section-hint">Required for the alternative path. Values carry into the export as written.</p>
+              <div class="field full" data-required="risk">
+                <div class="field-label-row"><span class="status-dot blocking"></span><label for="risk">Risk assessment</label></div>
+                <textarea id="risk" data-field="risk" rows="3" placeholder="Required"></textarea>
+              </div>
+              <div class="field full">
+                <label for="mitigation">Mitigating measures</label>
+                <textarea id="mitigation" data-field="mitigation" rows="3"></textarea>
+              </div>
+              <div class="field full" data-required="assumptions">
+                <div class="field-label-row"><span class="status-dot blocking"></span><label for="assumptions">Assumptions / limits</label></div>
+                <textarea id="assumptions" data-field="assumptions" rows="3" placeholder="Required"></textarea>
+              </div>
+            </section>
           </div>
         </div>
         <div class="footer-bar">
-          <button type="button" class="btn btn-ghost">Save draft</button>
-          <button type="button" class="btn btn-primary">Continue to code identification</button>
+          <span class="status-note" id="save-note" role="status"></span>
+          <button type="button" class="btn btn-ghost" id="save-btn">Save draft</button>
+          <a class="btn btn-primary" href="02-article-ranking.html">Continue to code identification</a>
         </div>
       </main>
     </div>
     <script type="module">
-      import { getGaps, renderGapStrip, renderProjectLabel } from "./shared-gaps.js";
-      renderProjectLabel();
-      const tabGapIds = { A: ["rep", "mail"], B: ["muni", "ats-assumption"], assumptions: [] };
-      const gapIds = new Set(getGaps().map((g) => g.id));
-      document.querySelectorAll("[data-tab-count]").forEach((el) => {
-        const n = tabGapIds[el.dataset.tabCount].filter((id) => gapIds.has(id)).length;
-        el.textContent = n ? String(n) : "";
-      });
-      renderGapStrip(document.getElementById("gap-strip"));
-      const tabs = document.querySelectorAll("[data-tab]");
-      const sections = document.querySelectorAll("[data-section]");
-      tabs.forEach((tab) => {
-        tab.addEventListener("click", () => {
-          tabs.forEach((t) => {
-            t.classList.toggle("active", t === tab);
-            t.dataset.active = t === tab ? "true" : "false";
-          });
-          sections.forEach((s) => {
-            s.dataset.active = s.dataset.section === tab.dataset.tab ? "true" : "false";
-          });
+      import { state, setField, save, getGaps, renderGapStrip, renderShell, wireTabs } from "./shared-gaps.js";
+
+      renderShell("intake");
+      const TAB_GAPS = { A: ["rep", "mail"], B: ["muni", "juris", "ats"], alt: ["risk", "assumptions"] };
+      const fieldTab = Object.fromEntries(
+        [...document.querySelectorAll("[data-section]")].flatMap((s) =>
+          [...s.querySelectorAll("[data-field]")].map((f) => [f.id, s.dataset.section])
+        )
+      );
+
+      function renderOwner() {
+        const foot = document.getElementById("owner-foot");
+        foot.innerHTML = state.fields.ownerConfirmed
+          ? `<span class="field-note"><span class="status-dot done"></span>Confirmed by applicant</span>`
+          : `<span class="field-note"><span class="status-dot warning"></span>Inferred from upload</span>
+             <button type="button" class="btn btn-ghost" id="owner-confirm" style="height: 22px; padding: 0 6px">Confirm</button>`;
+        document.getElementById("owner-confirm")?.addEventListener("click", () => {
+          setField("ownerConfirmed", true);
+          renderOwner();
+        });
+      }
+
+      function refresh() {
+        renderGapStrip(document.getElementById("gap-strip"));
+        const ids = new Set(getGaps().map((g) => g.id));
+        document.querySelectorAll("[data-required]").forEach((el) => el.classList.toggle("is-empty", ids.has(el.dataset.required)));
+        document.getElementById("ats-dot").hidden = !state.fields.atsAssumption;
+        document.querySelectorAll("[data-tab-count]").forEach((el) => {
+          const n = TAB_GAPS[el.dataset.tabCount].filter((id) => ids.has(id)).length;
+          el.textContent = n ? String(n) : "";
+        });
+      }
+
+      document.querySelectorAll("[data-field]").forEach((el) => {
+        const id = el.dataset.field;
+        if (el.type === "checkbox") el.checked = Boolean(state.fields[id]);
+        else el.value = state.fields[id] ?? "";
+        el.addEventListener(el.type === "checkbox" || el.tagName === "SELECT" ? "change" : "input", () => {
+          setField(id, el.type === "checkbox" ? el.checked : el.value);
+          if (id === "owner") setField("ownerConfirmed", true), renderOwner();
+          refresh();
         });
       });
+
+      document.getElementById("save-btn").addEventListener("click", () => {
+        state.savedAt = new Date().toISOString();
+        save();
+        const t = new Date(state.savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        document.getElementById("save-note").textContent = `Draft saved · ${t}`;
+      });
+
+      const selectTab = wireTabs("[data-tab]", "data-section");
+      function focusFromHash() {
+        const id = location.hash.slice(1);
+        selectTab(fieldTab[id] || "A");
+        if (fieldTab[id]) document.getElementById(id).focus();
+      }
+      window.addEventListener("hashchange", focusFromHash);
+      focusFromHash();
+      renderOwner();
+      refresh();
     </script>
   </body>
 </html>
