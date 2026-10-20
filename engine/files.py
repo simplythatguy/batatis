@@ -1,78 +1,42 @@
-"""Store applicant PDFs. Only the page count is read; no text is extracted."""
+"""PDF checks for the case file route.
+
+The route itself lives on the deploy branch: it stores the bytes in the case
+database, accepts a raw body or a multipart part, and caps the body at 4 MB.
+This module does not write a file. The route calls ``inspect_upload`` after it
+has the bytes.
+"""
 from __future__ import annotations
 
-import hashlib
 import io
-import logging
-import os
-from dataclasses import dataclass
-from pathlib import Path
 
 from pypdf import PdfReader
 
-from .models import new_id
-
-_REPO = Path(__file__).resolve().parents[1]
-DEFAULT_FILES = _REPO / '.batatis-files'
-DEFAULT_MAX_BYTES = 4 * 1024 * 1024
-logger = logging.getLogger(__name__)
+# Same cap and 413 text as the deploy route. Vercel rejects bodies over 4.5 MB.
+PDF_MAX_BYTES = 4 * 1024 * 1024
+PDF_TOO_LARGE_DETAIL = 'PDF too large: the limit is 4 MB. Try compressing the file or splitting it.'
 
 
 class NotAPdf(Exception):
-    """The bytes are not a readable PDF. Callers map this to HTTP 415."""
+    """The bytes are not a readable PDF. The route maps this to HTTP 415."""
 
 
 class FileTooLarge(Exception):
-    """The upload is over the configured cap. Callers map this to HTTP 413."""
+    """The upload is over 4 MB. The route maps this to HTTP 413."""
 
+    detail = PDF_TOO_LARGE_DETAIL
 
-@dataclass(frozen=True)
-class StoredPdf:
-    id: str
-    name: str
-    pages: int
-    sha256: str
-
-
-def files_root() -> Path:
-    raw = os.environ.get('BATATIS_FILES')
-    return Path(raw) if raw else DEFAULT_FILES
-
-
-def max_upload_bytes() -> int:
-    raw = os.environ.get('BATATIS_FILE_MAX_BYTES')
-    if raw is None or not raw.strip():
-        return DEFAULT_MAX_BYTES
-    try:
-        limit = int(raw)
-        if limit > 0:
-            return limit
-    except ValueError:
-        pass
-    logger.warning('invalid BATATIS_FILE_MAX_BYTES; using the default upload limit')
-    return DEFAULT_MAX_BYTES
-
-
-def _safe_name(filename: str | None) -> str:
-    name = Path(filename or '').name
-    if not name or name in {'.', '..'}:
-        return 'document.pdf'
-    return name
+    def __init__(self) -> None:
+        super().__init__(PDF_TOO_LARGE_DETAIL)
 
 
 def validate_case_id(case_id: str) -> None:
-    """Reject an id that is not a single directory name under the files root."""
+    """Reject an id the route answers with HTTP 400.
+
+    Empty, ``.``, ``..``, a slash, a backslash, or NUL. Checked before the
+    parser runs, so a parser error is never this message.
+    """
     if not case_id or case_id in {'.', '..'} or '/' in case_id or '\\' in case_id or '\x00' in case_id:
         raise ValueError('invalid case id')
-    root = files_root().resolve()
-    dest = (root / case_id).resolve()
-    if dest.parent != root:
-        raise ValueError('invalid case id')
-
-
-def _case_dir(case_id: str) -> Path:
-    validate_case_id(case_id)
-    return (files_root().resolve() / case_id).resolve()
 
 
 def _is_pdf(data: bytes) -> bool:
@@ -92,32 +56,26 @@ def _page_count(data: bytes) -> int:
         raise NotAPdf() from exc
 
 
-def save_pdf(case_id: str, filename: str | None, data: bytes) -> StoredPdf:
-    directory = _case_dir(case_id)
-    if len(data) > max_upload_bytes():
-        raise FileTooLarge()
+def read_pdf(data: bytes) -> int:
+    """Page count. Raises NotAPdf for a missing magic header or a parser error.
+
+    The deploy route passes the raw body, or the file part taken out of a
+    multipart body. Either way these are the PDF bytes, and nothing is stored.
+    """
     if not _is_pdf(data):
         raise NotAPdf()
-    pages = _page_count(data)
-    file_id = new_id('file')
-    name = _safe_name(filename)
-    digest = hashlib.sha256(data).hexdigest()
-    directory.mkdir(parents=True, exist_ok=True)
-    dest = directory / f'{file_id}.pdf'
-    partial = dest.with_suffix('.pdf.part')
-    try:
-        partial.write_bytes(data)
-        partial.replace(dest)
-    finally:
-        partial.unlink(missing_ok=True)
-    return StoredPdf(id=file_id, name=name, pages=pages, sha256=digest)
+    return _page_count(data)
 
 
-def discard_pdf(case_id: str, file_id: str) -> None:
-    if not file_id or file_id in {'.', '..'} or '/' in file_id or '\\' in file_id:
-        return
-    try:
-        directory = _case_dir(case_id)
-    except ValueError:
-        return
-    (directory / f'{file_id}.pdf').unlink(missing_ok=True)
+def inspect_upload(case_id: str, data: bytes) -> int:
+    """Checks the deploy route applies before it stores the PDF.
+
+    A bad id raises ``ValueError('invalid case id')`` (HTTP 400). More than
+    4 MB raises ``FileTooLarge`` (HTTP 413, ``PDF_TOO_LARGE_DETAIL``). Bytes
+    that are not a readable PDF raise ``NotAPdf`` (HTTP 415). Returns the
+    page count.
+    """
+    validate_case_id(case_id)
+    if len(data) > PDF_MAX_BYTES:
+        raise FileTooLarge()
+    return read_pdf(data)

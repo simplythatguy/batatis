@@ -1,17 +1,11 @@
-"""Case API: jurisdiction gap, uploads, missing code database, and concurrent writes."""
-import asyncio
-import hashlib
-import io
+"""Case API: jurisdiction gap, missing code database, and concurrent writes."""
 import logging
-import sqlite3
 import threading
 from pathlib import Path
 
-import httpx
 import pytest
 from fastapi import Response
 from fastapi.testclient import TestClient
-from reportlab.pdfgen import canvas
 
 from engine.api import create_app
 from engine.codes import CodeDbMissing, Codes, default_db
@@ -37,8 +31,7 @@ class _GapCodes:
 
 
 @pytest.fixture
-def api(tmp_path, monkeypatch):
-    monkeypatch.setenv('BATATIS_FILES', str(tmp_path / 'files'))
+def api(tmp_path):
     store = CaseStore(tmp_path / 'cases.sqlite')
     client = TestClient(create_app(store, _GapCodes()))
     return client, store
@@ -102,175 +95,10 @@ def test_put_authority_name_roundtrip(api):
     assert _gap(client.get(f'/cases/{cid}/gaps').json(), 'jurisdiction') is None
 
 
-def _pdf(text='SECRET CODE TEXT') -> bytes:
-    buf = io.BytesIO()
-    sheet = canvas.Canvas(buf)
-    sheet.drawString(36, 72, text)
-    sheet.showPage()
-    sheet.save()
-    return buf.getvalue()
-
-
-def test_pdf_upload_stores_bytes_and_one_exact_file_fact(api, tmp_path, monkeypatch):
+def test_case_api_does_not_serve_the_files_route(api):
     client, _store = api
-    monkeypatch.setenv('BATATIS_FILES', str(tmp_path / 'uploads'))
-    cid = client.post('/cases').json()['id']
-    data = _pdf()
-    opened = client.post(f'/cases/{cid}/files', files={'file': ('../../plans.pdf', data, 'application/octet-stream')})
-    assert opened.status_code == 201
-    body = opened.json()
-    assert body['name'] == 'plans.pdf'
-    assert body['pages'] == 1
-    assert body['read'] is True
-    assert body['sha256'] == hashlib.sha256(data).hexdigest()
-    assert '/' not in opened.text
-    assert 'SECRET CODE TEXT' not in opened.text
-    root = Path(tmp_path / 'uploads').resolve()
-    stored = root / cid / f"{body['id']}.pdf"
-    assert stored.is_file() and stored.read_bytes() == data
-    assert root in stored.parents
-    case = client.get(f'/cases/{cid}').json()
-    fact = case['facts'][-1]
-    assert fact['field'] == f"file.{body['id']}.name"
-    assert fact['value'] == 'plans.pdf'
-    assert fact['kind'] == 'exact'
-    assert fact['status'] == 'confirmed'
-    assert fact['source']['type'] == 'file'
-    assert fact['source']['ref'] == body['id']
-    assert fact['source']['quote'] is None
-    assert 'SECRET CODE TEXT' not in str(case)
-    assert str(root) not in str(case)
-
-
-def test_bad_case_id_is_400_and_a_file_over_4mb_is_413(api):
-    client, _store = api
-    bad = client.post('/cases/%2e%2e/files', files={'file': ('a.pdf', _pdf(), 'application/pdf')})
-    assert bad.status_code == 400
-    assert bad.json() == {'detail': 'invalid case id'}
-    over = b'%PDF-' + (b'0' * ((4 * 1024 * 1024) - 4))
-    assert len(over) == 4 * 1024 * 1024 + 1
-    cid = client.post('/cases').json()['id']
-    too_big = client.post(f'/cases/{cid}/files', files={'file': ('big.pdf', over, 'application/pdf')})
-    assert too_big.status_code == 413
-    assert too_big.json() == {'detail': 'file too large'}
-    assert client.get(f'/cases/{cid}').json()['facts'] == []
-
-
-def test_upload_rejects_missing_case_non_pdf_and_oversize(api, monkeypatch):
-    client, _store = api
-    data = _pdf()
-    assert client.post('/cases/missing/files', files={'file': ('a.pdf', data, 'application/pdf')}).status_code == 404
-    cid = client.post('/cases').json()['id']
-    not_pdf = client.post(f'/cases/{cid}/files', files={'file': ('notes.txt', b'hello', 'text/plain')})
-    assert not_pdf.status_code == 415 and not_pdf.json() == {'detail': 'not a PDF'}
-    assert '/' not in not_pdf.text
-    monkeypatch.setenv('BATATIS_FILE_MAX_BYTES', '32')
-    too_big = client.post(f'/cases/{cid}/files', files={'file': ('a.pdf', data, 'application/pdf')})
-    assert too_big.status_code == 413 and too_big.json() == {'detail': 'file too large'}
-    assert client.get(f'/cases/{cid}').json()['facts'] == []
-    missing = client.post(f'/cases/{cid}/files')
-    assert missing.status_code == 422
-    assert isinstance(missing.json()['detail'], list)
-    magic = b'%PDF-1.4\nnot a readable pdf'
-    unreadable = client.post(f'/cases/{cid}/files', files={'file': ('bad.pdf', magic, 'application/pdf')})
-    assert unreadable.status_code == 415
-    assert client.get(f'/cases/{cid}').json()['facts'] == []
-
-
-@pytest.mark.parametrize('error', [ValueError, KeyError, IndexError, TypeError,
-                                 AttributeError, RecursionError, RuntimeError])
-@pytest.mark.parametrize('stage', ['reader', 'pages'])
-def test_upload_maps_parser_failures_to_415(api, tmp_path, monkeypatch, error, stage):
-    client, _store = api
-    cid = client.post('/cases').json()['id']
-
-    class BrokenReader:
-        def __init__(self, *_args):
-            if stage == 'reader':
-                raise error('synthetic parser failure')
-
-        @property
-        def pages(self):
-            raise error('synthetic page-tree failure')
-
-    monkeypatch.setattr('engine.files.PdfReader', BrokenReader)
-    response = client.post(f'/cases/{cid}/files', files={'file': ('a.pdf', _pdf(), 'application/pdf')})
-    assert response.status_code == 415
-    assert response.json() == {'detail': 'not a PDF'}
-    assert client.get(f'/cases/{cid}').json()['facts'] == []
-    assert not list((tmp_path / 'files').rglob('*'))
-
-
-@pytest.mark.parametrize('outcome', ['missing', 'error', 'cleanup_error'])
-def test_upload_discards_pdf_when_case_update_fails(api, tmp_path, monkeypatch, outcome, caplog):
-    client, store = api
-    cid = client.post('/cases').json()['id']
-    failure = sqlite3.OperationalError('synthetic database lock')
-
-    def fail_update(*_args):
-        if outcome == 'missing':
-            return None
-        raise failure
-
-    monkeypatch.setattr(store, 'mutate', fail_update)
-    if outcome == 'cleanup_error':
-        def fail_cleanup(*_args):
-            raise OSError('synthetic cleanup failure')
-
-        monkeypatch.setattr('engine.api.discard_pdf', fail_cleanup)
-
-    if outcome == 'missing':
-        response = client.post(f'/cases/{cid}/files', files={'file': ('a.pdf', _pdf(), 'application/pdf')})
-        assert response.status_code == 404
-        assert response.json() == {'detail': 'case not found'}
-    else:
-        with pytest.raises(sqlite3.OperationalError) as raised:
-            client.post(f'/cases/{cid}/files', files={'file': ('a.pdf', _pdf(), 'application/pdf')})
-        assert raised.value is failure
-
-    assert store.get(cid).facts == []
-    if outcome == 'cleanup_error':
-        assert 'failed to discard PDF' in caplog.text
-    else:
-        assert not list((tmp_path / 'files').rglob('*.pdf'))
-
-
-@pytest.mark.parametrize('operation', ['get', 'save_pdf', 'mutate'])
-def test_upload_blocking_work_allows_other_requests(api, monkeypatch, operation):
-    client, store = api
-    cid = client.post('/cases').json()['id']
-    entered = threading.Event()
-    release = threading.Event()
-    if operation == 'save_pdf':
-        import engine.api as api_module
-        owner = api_module
-    else:
-        owner = store
-    original = getattr(owner, operation)
-
-    def blocked(*args, **kwargs):
-        entered.set()
-        if not release.wait(3):
-            raise RuntimeError('upload blocked the event loop')
-        return original(*args, **kwargs)
-
-    monkeypatch.setattr(owner, operation, blocked)
-
-    async def exercise():
-        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=client.app),
-                                     base_url='http://test') as concurrent:
-            uploading = asyncio.create_task(concurrent.post(
-                f'/cases/{cid}/files', files={'file': ('a.pdf', _pdf(), 'application/pdf')}))
-            try:
-                assert await asyncio.to_thread(entered.wait, 2)
-                probe = await asyncio.wait_for(concurrent.get('/openapi.json'), timeout=1)
-                assert probe.status_code == 200
-            finally:
-                release.set()
-                response = await uploading
-            assert response.status_code == 201
-
-    asyncio.run(exercise())
+    paths = client.get('/openapi.json').json()['paths']
+    assert '/cases/{case_id}/files' not in paths
 
 
 def test_missing_codedb_is_503_without_a_path(tmp_path, monkeypatch, caplog):

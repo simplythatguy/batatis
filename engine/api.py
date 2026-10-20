@@ -2,9 +2,8 @@
 from __future__ import annotations
 
 import logging
-from typing import Literal
 
-from fastapi import FastAPI, File, HTTPException, Query, Response, UploadFile
+from fastapi import FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict
@@ -16,8 +15,7 @@ from codedb import AmbiguousProvisionError
 from .codes import CodeDbMissing, Codes, default_db
 from .demo_seed import demo_enabled, seed_cases
 from .export import ExportBlocked, ExportError, FormNotFound, export_case
-from .files import FileTooLarge, NotAPdf, discard_pdf, max_upload_bytes, save_pdf, validate_case_id
-from .models import Case, Fact, Gap, Jurisdiction, SectionCRow, Source
+from .models import Case, Fact, Gap, Jurisdiction, SectionCRow
 from .section_c import section_c_rows
 from .store import CaseStore
 
@@ -84,14 +82,6 @@ class SectionCRequest(BaseModel):
 class ExportRequest(BaseModel):
     draft: bool = False
     expected_version: int | None = None
-
-
-class StoredFile(BaseModel):
-    id: str
-    name: str
-    pages: int
-    sha256: str
-    read: Literal[True] = True
 
 
 def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> FastAPI:
@@ -184,53 +174,6 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         if not any(stored.id == gap.id for stored in case.gaps):
             raise HTTPException(500, 'gap was not stored')
         return case
-
-    @app.post('/cases/{case_id}/files', response_model=StoredFile, status_code=201)
-    def upload_file(case_id: str, file: UploadFile = File(...)):
-        # FastAPI runs sync endpoints in its threadpool, including SQLite, locks,
-        # PDF parsing, and file I/O. Keep the save and case update in one worker.
-        try:
-            try:
-                validate_case_id(case_id)
-            except ValueError as exc:
-                if str(exc) == 'invalid case id':
-                    raise HTTPException(400, 'invalid case id') from None
-                raise
-            if cases().get(case_id) is None:
-                raise HTTPException(404, 'case not found')
-            limit = max_upload_bytes()
-            data = file.file.read(limit + 1)
-        finally:
-            file.file.close()
-        if len(data) > limit:
-            raise HTTPException(413, 'file too large')
-        try:
-            stored = save_pdf(case_id, file.filename, data)
-        except FileTooLarge:
-            raise HTTPException(413, 'file too large') from None
-        except NotAPdf:
-            raise HTTPException(415, 'not a PDF') from None
-        except ValueError as exc:
-            # Only a bad id is 400. A parser ValueError is not a PDF.
-            if str(exc) == 'invalid case id':
-                raise HTTPException(400, 'invalid case id') from None
-            raise HTTPException(415, 'not a PDF') from None
-        try:
-            fact = Fact(field=f'file.{stored.id}.name', value=stored.name, kind='exact', status='confirmed',
-                        source=Source(type='file', ref=stored.id))
-
-            def apply(case: Case) -> None:
-                case.facts.append(fact)
-
-            if cases().mutate(case_id, apply) is None:
-                raise HTTPException(404, 'case not found')
-        except BaseException:
-            try:
-                discard_pdf(case_id, stored.id)
-            except Exception:
-                logger.exception('failed to discard PDF after case update failure')
-            raise
-        return StoredFile(id=stored.id, name=stored.name, pages=stored.pages, sha256=stored.sha256)
 
     @app.post('/cases/{case_id}/export', response_class=Response,
               responses={200: {'content': {'application/pdf': {}}}, 409: {'description': 'export blocked'}})

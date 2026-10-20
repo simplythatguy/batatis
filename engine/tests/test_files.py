@@ -1,40 +1,10 @@
-"""Failure containment at the PDF storage boundary."""
+"""PDF checks the deploy file route calls. Nothing here writes a file."""
 import io
-from pathlib import Path
 
 import pytest
 from reportlab.pdfgen import canvas
 
-from engine.files import DEFAULT_MAX_BYTES, NotAPdf, max_upload_bytes, save_pdf
-
-
-@pytest.mark.parametrize('raw', ['', ' ', 'not-a-number', '0', '-1', '1.5', '1024'])
-def test_upload_limit_uses_a_positive_integer_or_the_default(monkeypatch, raw):
-    monkeypatch.setenv('BATATIS_FILE_MAX_BYTES', raw)
-    assert max_upload_bytes() == (1024 if raw == '1024' else DEFAULT_MAX_BYTES)
-
-
-@pytest.mark.parametrize('failure_point', ['write', 'replace'])
-def test_failed_storage_removes_partial_files(tmp_path, monkeypatch, failure_point):
-    monkeypatch.setenv('BATATIS_FILES', str(tmp_path))
-    monkeypatch.setattr('engine.files._page_count', lambda _data: 1)
-    failure = OSError('synthetic storage failure')
-    original_write = Path.write_bytes
-
-    def broken_write(path, data):
-        original_write(path, data[:5])
-        raise failure
-
-    def broken_replace(*_args):
-        raise failure
-
-    monkeypatch.setattr(Path, 'write_bytes' if failure_point == 'write' else 'replace',
-                        broken_write if failure_point == 'write' else broken_replace)
-    with pytest.raises(OSError) as raised:
-        save_pdf('case_fixture', 'plans.pdf', b'%PDF-synthetic')
-    assert raised.value is failure
-    assert not list(tmp_path.rglob('*.part'))
-    assert not list(tmp_path.rglob('*.pdf'))
+from engine.files import PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL, FileTooLarge, NotAPdf, inspect_upload, read_pdf
 
 
 def _tiny_pdf() -> bytes:
@@ -46,37 +16,86 @@ def _tiny_pdf() -> bytes:
     return buf.getvalue()
 
 
-def test_truncated_or_garbage_pdf_is_not_a_pdf(tmp_path, monkeypatch):
-    monkeypatch.setenv('BATATIS_FILES', str(tmp_path))
+def _contract(case_id: str, data: bytes) -> tuple[int, str]:
+    """Status the deploy route returns for these bytes.
+
+    The bytes are the raw body, or the file part taken out of multipart.
+    A readable PDF is not a rejection.
+    """
+    try:
+        inspect_upload(case_id, data)
+    except ValueError as exc:
+        assert str(exc) == 'invalid case id'
+        return 400, 'invalid case id'
+    except FileTooLarge as exc:
+        return 413, exc.detail
+    except NotAPdf:
+        return 415, 'only PDF files are accepted'
+    raise AssertionError('expected a rejection')
+
+
+def test_readable_pdf_returns_a_page_count():
+    assert read_pdf(_tiny_pdf()) == 1
+    assert inspect_upload('case_ok', _tiny_pdf()) == 1
+
+
+def test_truncated_or_garbage_pdf_is_not_a_pdf():
     truncated = _tiny_pdf()[:24]
     assert truncated.startswith(b'%PDF-')
     with pytest.raises(NotAPdf):
-        save_pdf('case_ok', 'truncated.pdf', truncated)
+        read_pdf(truncated)
     with pytest.raises(NotAPdf):
-        save_pdf('case_ok', 'garbage.pdf', b'this is not a pdf')
-    assert not list(tmp_path.rglob('*.pdf'))
+        read_pdf(b'this is not a pdf')
+    assert _contract('case_ok', truncated) == (415, 'only PDF files are accepted')
+    assert _contract('case_ok', b'this is not a pdf') == (415, 'only PDF files are accepted')
 
 
-def test_parser_valueerror_is_not_an_invalid_case_id(tmp_path, monkeypatch):
-    monkeypatch.setenv('BATATIS_FILES', str(tmp_path))
-
+def test_parser_valueerror_is_not_an_invalid_case_id(monkeypatch):
     class BrokenReader:
         def __init__(self, *_args, **_kwargs):
             raise ValueError('invalid case id')
 
     monkeypatch.setattr('engine.files.PdfReader', BrokenReader)
     with pytest.raises(NotAPdf):
-        save_pdf('case_ok', 'a.pdf', _tiny_pdf())
-    assert not list(tmp_path.rglob('*.pdf'))
+        read_pdf(_tiny_pdf())
 
 
-def test_invalid_case_id_is_rejected_before_parsing(tmp_path, monkeypatch):
-    monkeypatch.setenv('BATATIS_FILES', str(tmp_path))
-
+def test_invalid_case_id_is_rejected_before_parsing(monkeypatch):
     def unexpected_parse(_data):
         pytest.fail('invalid case id reached PDF parsing')
 
     monkeypatch.setattr('engine.files._page_count', unexpected_parse)
     with pytest.raises(ValueError, match='invalid case id'):
-        save_pdf('../escape', 'plans.pdf', b'%PDF-synthetic')
-    assert not list(tmp_path.iterdir())
+        inspect_upload('../escape', b'%PDF-synthetic')
+
+
+def test_bad_case_id_is_400_and_a_file_over_4mb_is_413():
+    assert _contract('..', _tiny_pdf()) == (400, 'invalid case id')
+    assert _contract('.', _tiny_pdf()) == (400, 'invalid case id')
+    over = b'%PDF-' + (b'0' * (PDF_MAX_BYTES - 4))
+    assert len(over) == PDF_MAX_BYTES + 1
+    status, detail = _contract('case_ok', over)
+    assert status == 413
+    assert detail == PDF_TOO_LARGE_DETAIL
+    within = b'%PDF-' + (b'0' * (PDF_MAX_BYTES - 5))
+    assert len(within) == PDF_MAX_BYTES
+    with pytest.raises(NotAPdf):
+        inspect_upload('case_ok', within)
+
+
+@pytest.mark.parametrize('error', [ValueError, KeyError, IndexError, TypeError,
+                                 AttributeError, RecursionError, RuntimeError])
+@pytest.mark.parametrize('stage', ['reader', 'pages'])
+def test_parser_failures_are_not_a_pdf(monkeypatch, error, stage):
+    class BrokenReader:
+        def __init__(self, *_args):
+            if stage == 'reader':
+                raise error('synthetic parser failure')
+
+        @property
+        def pages(self):
+            raise error('synthetic page-tree failure')
+
+    monkeypatch.setattr('engine.files.PdfReader', BrokenReader)
+    with pytest.raises(NotAPdf):
+        read_pdf(_tiny_pdf())
