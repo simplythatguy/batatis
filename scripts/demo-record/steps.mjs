@@ -47,8 +47,7 @@ const OFFICER_INTRO =
 const OFFICER_HEADINGS = ["Documents", "Open Not sure", "Professional", "Grouped completeness report", "Information request"];
 const LIMIT_LINE =
   "Recommendations only. You write the evidence and the answers. This does not decide that the design complies or is safe.";
-const REAL_ADDRESS = "11821 73 Avenue NW";
-const FICTIONAL_ADDRESS = "100 Example Street NW";
+const SECTION_D_STILL_LINE = "This tool does not write the evidence or the professional opinion.";
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -270,49 +269,8 @@ async function clearOverlay(page) {
   await overlay(page, { caption: "", lower: "" });
 }
 
-async function maskRealAddress(page, api) {
-  const replaced = await page.evaluate(
-    ({ from, to }) => {
-      let count = 0;
-      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-      let node = walker.nextNode();
-      while (node) {
-        if (node.nodeValue && node.nodeValue.includes(from)) {
-          node.nodeValue = node.nodeValue.split(from).join(to);
-          count += 1;
-        }
-        node = walker.nextNode();
-      }
-      for (const el of document.querySelectorAll("input, textarea")) {
-        if (typeof el.value === "string" && el.value.includes(from)) {
-          el.value = el.value.split(from).join(to);
-          count += 1;
-        }
-      }
-      const still =
-        document.body.innerText.includes(from) ||
-        [...document.querySelectorAll("input, textarea")].some((el) => (el.value || "").includes(from));
-      return { count, still };
-    },
-    { from: REAL_ADDRESS, to: FICTIONAL_ADDRESS },
-  );
-  if (replaced.count) {
-    api.notes.push(
-      `Replaced ${replaced.count} on-screen occurrence(s) of ${REAL_ADDRESS} with ${FICTIONAL_ADDRESS}. The frame is labelled EXAMPLE DATA.`,
-    );
-  }
-  return replaced;
-}
-
 async function settle(page, api, lower, { holdMs, suffix, caption } = {}) {
   const label = exampleLabel(lower);
-  const masked = await maskRealAddress(page, api);
-  if (masked.still) {
-    return {
-      ok: false,
-      reason: `${REAL_ADDRESS} is still on screen. The shot was not captured with that address.`,
-    };
-  }
   await overlay(page, { caption: caption || "", lower: label });
   const chrome = await overlayClearsChrome(page);
   if (!chrome.ok) return { ok: false, reason: chrome.reason };
@@ -565,6 +523,10 @@ async function resetCase(page, api) {
   const button = page.getByRole("button", { name: "Reset case" }).first();
   if (!(await visible(button, 1500))) return false;
   await button.click();
+  const confirm = page.getByRole("heading", { name: "Clear this case?" }).first();
+  if (await visible(confirm, 800)) {
+    await page.getByRole("button", { name: "Reset case", exact: true }).last().click();
+  }
   await sleep(400);
   const who = await visible(h1(page, "Who are you?"), 4000);
   if (!who) return false;
@@ -590,8 +552,8 @@ async function noteCheckCompleteness(page, api) {
   const disabled = await check.isDisabled();
   api.notes.push(
     disabled
-      ? "Check completeness stays disabled. It was not clicked, and no PDF was downloaded."
-      : "Check completeness is enabled. It was not clicked, so no PDF was downloaded.",
+      ? "Check completeness stays disabled."
+      : "Check completeness is enabled.",
   );
   await check.scrollIntoViewIfNeeded().catch(() => {});
 }
@@ -795,9 +757,85 @@ async function shot6(page, api) {
   }
   const requestFrame = await settle(page, api, CASES.A.lower, { suffix: "request", caption: "Copy request" });
   if (!requestFrame.ok) return pending(requestFrame.reason);
-  const shown = await page.evaluate((from) => document.body.innerText.includes(from), REAL_ADDRESS);
-  if (shown) return pending(`${REAL_ADDRESS} is on the officer screen. The shot was not kept.`);
   return recorded();
+}
+
+async function closeDialog(page) {
+  for (let i = 0; i < 3; i += 1) {
+    const open = page.locator("dialog[open]");
+    if ((await open.count()) < 1) return;
+    const close = open.getByRole("button", { name: "Close", exact: true }).first();
+    if (await visible(close, 300)) await close.click().catch(() => {});
+    if ((await page.locator("dialog[open]").count()) > 0) await page.keyboard.press("Escape").catch(() => {});
+    await sleep(150);
+  }
+}
+
+async function downloadDraftPdf(page, api, suffix, lower) {
+  const check = page.getByRole("button", { name: "Check completeness", exact: true }).first();
+  if (!(await visible(check, 1500))) {
+    return { ok: false, reason: "Check completeness is not on screen, so the draft PDF step was not recorded." };
+  }
+  await check.click();
+  try {
+    const dialog = page.locator("dialog[open]").last();
+    await dialog.waitFor({ state: "visible", timeout: 5000 }).catch(() => {});
+    await page
+      .waitForFunction(() => {
+        const open = document.querySelector("dialog[open]");
+        if (!open) return false;
+        return !/Saving and reviewing/.test(open.innerText || "");
+      }, { timeout: 15000 })
+      .catch(() => {});
+    const draft = page.getByRole("button", { name: "Download draft PDF", exact: true }).first();
+    const enabled = await draft.isEnabled({ timeout: 1000 }).catch(() => false);
+    if (!enabled) {
+      const text = (await dialog.innerText().catch(() => "")).replace(/\s+/g, " ").trim();
+      return {
+        ok: false,
+        reason: text
+          ? `Download draft PDF was not available. On screen: ${text.slice(0, 280)}`
+          : "Check completeness did not open a dialog with Download draft PDF.",
+      };
+    }
+    const downloadPromise = page.waitForEvent("download", { timeout: 25000 }).catch(() => null);
+    await draft.click();
+    const started = page.getByText(/Download started:/).first();
+    const draftNote = page.getByText("This draft may have missing or unconfirmed information.").first();
+    const dialogLine = page
+      .getByText("This is an administrative completeness check. It does not decide whether the design complies or is safe.")
+      .first();
+    const failedLine = page
+      .getByText(/could not be prepared|Online review unavailable|application PDF form is unavailable|The PDF was blocked/)
+      .first();
+    await Promise.race([
+      started.waitFor({ state: "visible", timeout: 20000 }).catch(() => {}),
+      draftNote.waitFor({ state: "visible", timeout: 20000 }).catch(() => {}),
+      failedLine.waitFor({ state: "visible", timeout: 20000 }).catch(() => {}),
+    ]);
+    const download = await downloadPromise;
+    if (download) {
+      api.notes.push(`Draft PDF download started: ${download.suggestedFilename()}.`);
+      await download.path().catch(() => {});
+    }
+    const sawDraft = (await visible(started, 500)) || (await visible(draftNote, 500));
+    if (!sawDraft) {
+      const status = await failedLine.innerText().catch(() => "");
+      return {
+        ok: false,
+        reason: status
+          ? `Download draft PDF did not start. On screen: ${status.replace(/\s+/g, " ").trim()}`
+          : "Download draft PDF did not show Download started.",
+      };
+    }
+    if (await visible(dialogLine, 800)) await dialogLine.scrollIntoViewIfNeeded().catch(() => {});
+    api.notes.push("The draft PDF dialog is on screen. Download application PDF was not clicked.");
+    const frame = await settle(page, api, lower, { suffix: `${suffix}-draft`, caption: "Download draft PDF" });
+    if (!frame.ok) return { ok: false, reason: frame.reason };
+    return { ok: true };
+  } finally {
+    await closeDialog(page);
+  }
 }
 
 async function authorityFrame(page, api, spec, suffix) {
@@ -822,6 +860,8 @@ async function authorityFrame(page, api, spec, suffix) {
   if (await visible(owner, 400)) await owner.scrollIntoViewIfNeeded().catch(() => {});
   const appFrame = await settle(page, api, spec.lower, { suffix: `${suffix}-application`, caption: gapsCaption });
   if (!appFrame.ok) return skipped(appFrame.reason);
+  const draft = await downloadDraftPdf(page, api, suffix, spec.lower);
+  if (!draft.ok) return skipped(draft.reason);
   return recorded();
 }
 
@@ -932,10 +972,6 @@ function pngSize(buffer) {
 
 async function saveStill(page, api, lower, filePath) {
   const label = exampleLabel(lower);
-  const masked = await maskRealAddress(page, api);
-  if (masked.still) {
-    return { ok: false, reason: `${REAL_ADDRESS} is still on screen. The still was not saved.` };
-  }
   await overlay(page, { caption: "", lower: label });
   const chrome = await overlayClearsChrome(page);
   if (!chrome.ok) return { ok: false, reason: chrome.reason };
@@ -957,7 +993,7 @@ export async function runDeckStills(page, opts) {
   const sourceBranch = opts.sourceBranch || "unknown";
   const shortSha = opts.sourceSha ? String(opts.sourceSha).slice(0, 7) : "unknown";
   const date = String(opts.recordedAt || new Date().toISOString()).slice(0, 10);
-  const source = `${sourceBranch}@${shortSha}`;
+  const source = `${sourceBranch} @ ${shortSha}`;
   const api = {
     holdMs: 400,
     framesDir: outDir,
@@ -985,22 +1021,25 @@ export async function runDeckStills(page, opts) {
     });
   }
 
-  async function capture(id, lower, caseName) {
+  async function capture(id, lower, caseName, onScreen) {
     const slot = DECK_STILLS.find((item) => item.id === id);
     const saved = await saveStill(page, api, lower, join(outDir, slot.file));
     const notes = [...api.notes];
     api.notes.length = 0;
     if (!saved.ok) return finish(id, { status: "pending", reason: saved.reason, notes });
     const caseLabel = caseName || "unspecified";
+    const caption = `scripted demo capture, ${source}`;
     return finish(id, {
       status: "captured",
       width: saved.width,
       height: saved.height,
       notes,
-      provenance: `scripted demo capture, ${source}, ${caseLabel}, ${date}`,
+      caption,
+      provenance: caption,
       source,
       case: caseLabel,
       date,
+      onScreen: onScreen || "",
     });
   }
 
@@ -1097,15 +1136,23 @@ export async function runDeckStills(page, opts) {
       if (!(await visible(heading, 5000))) {
         skip("shot-s06-section-d", "Section D and professional screening is not on this build.");
       } else {
-        const limit = page.getByText(LIMIT_LINE).first();
-        if (await visible(limit, 800)) {
+        const wanted = page.getByText(SECTION_D_STILL_LINE, { exact: true }).first();
+        let onScreen = "";
+        if (await visible(wanted, 800)) {
+          await wanted.scrollIntoViewIfNeeded().catch(() => {});
+          onScreen = SECTION_D_STILL_LINE;
           api.notes.push("The on-screen limit line is visible.");
-          await limit.scrollIntoViewIfNeeded().catch(() => {});
         } else {
-          api.notes.push(`The sentence "${LIMIT_LINE}" is not on this screen. It was not added.`);
+          const headingText = (await heading.innerText()).replace(/\s+/g, " ").trim();
+          const meta = page.locator("#reco-title").locator("xpath=following::p[contains(@class,'meta')][1]");
+          const metaText = (await visible(meta, 500)) ? (await meta.innerText()).replace(/\s+/g, " ").trim() : "";
+          onScreen = [headingText, metaText].filter(Boolean).join(" ");
+          api.notes.push(
+            `The sentence "${SECTION_D_STILL_LINE}" is not on this screen. It was not added. Visible text: ${onScreen}`,
+          );
           await heading.scrollIntoViewIfNeeded().catch(() => {});
         }
-        await capture("shot-s06-section-d", CASES.C.lower, "Case C");
+        await capture("shot-s06-section-d", CASES.C.lower, "Case C", onScreen);
       }
     }
 

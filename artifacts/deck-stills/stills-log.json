@@ -1,5 +1,5 @@
 {
-  "recordedAt": "2026-10-20T21:17:36.248Z",
+  "recordedAt": "2026-10-20T21:24:17.452Z",
   "mode": "stills",
   "networkMode": "engine",
   "engineState": "started",
@@ -7,13 +7,13 @@
     "width": 1440,
     "height": 900
   },
-  "webDir": "/tmp/batatis-record-2413ad9-IY1kKj/checkout/web",
+  "webDir": "/tmp/batatis-record-cursor-e2e-product-flow-4362-UVMZGN/checkout/web",
   "git": {
-    "sha": "2413ad9a6478b83f28425d673ab7ce084e7a318d",
+    "sha": "4a4c1222e6fc4dacfd1c71039f1d30fec712f0ae",
     "branch": "HEAD",
-    "requestedBranch": "2413ad9"
+    "requestedBranch": "cursor/e2e-product-flow-4362"
   },
-  "baseUrl": "http://127.0.0.1:41319/",
+  "baseUrl": "http://127.0.0.1:33737/",
   "engine": "Started uvicorn engine.api:app on 127.0.0.1:8000 from the recorded checkout. Browser requests to /api are proxied to it. Code search returned 503. The recorder did not call a model API. No PDF is uploaded.",
   "scriptSync": {
     "status": "ok",
@@ -33,10 +33,12 @@
       "status": "captured",
       "width": 1440,
       "height": 900,
-      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362@2413ad9, All three, 2026-10-20",
-      "source": "cursor/e2e-product-flow-4362@2413ad9",
+      "caption": "scripted demo capture, cursor/e2e-product-flow-4362 @ 4a4c122",
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362 @ 4a4c122",
+      "source": "cursor/e2e-product-flow-4362 @ 4a4c122",
       "case": "All three",
-      "date": "2026-10-20"
+      "date": "2026-10-20",
+      "onScreen": ""
     },
     {
       "id": "shot-s02-describe",
@@ -50,10 +52,12 @@
       "status": "captured",
       "width": 1440,
       "height": 900,
-      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362@2413ad9, Case C, 2026-10-20",
-      "source": "cursor/e2e-product-flow-4362@2413ad9",
+      "caption": "scripted demo capture, cursor/e2e-product-flow-4362 @ 4a4c122",
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362 @ 4a4c122",
+      "source": "cursor/e2e-product-flow-4362 @ 4a4c122",
       "case": "Case C",
-      "date": "2026-10-20"
+      "date": "2026-10-20",
+      "onScreen": ""
     },
     {
       "id": "shot-s03-not-sure",
@@ -68,10 +72,12 @@
       "status": "captured",
       "width": 1440,
       "height": 900,
-      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362@2413ad9, Case A, 2026-10-20",
-      "source": "cursor/e2e-product-flow-4362@2413ad9",
+      "caption": "scripted demo capture, cursor/e2e-product-flow-4362 @ 4a4c122",
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362 @ 4a4c122",
+      "source": "cursor/e2e-product-flow-4362 @ 4a4c122",
       "case": "Case A",
-      "date": "2026-10-20"
+      "date": "2026-10-20",
+      "onScreen": ""
     },
     {
       "id": "shot-s04-search",
@@ -101,17 +107,19 @@
       "id": "shot-s06-section-d",
       "file": "shot-s06-section-d.png",
       "notes": [
-        "The sentence \"Recommendations only. You write the evidence and the answers. This does not decide that the design complies or is safe.\" is not on this screen. It was not added.",
+        "The sentence \"This tool does not write the evidence or the professional opinion.\" is not on this screen. It was not added. Visible text: Section D and professional screening code database not found",
         "Header subtitle visible: Variance template · Sections A, B and process fields",
-        "Footer visible: Online review unavailable. Showing a limited check of fields in this browser. Draft saved in this browser. 14 required items need attention. Back Save draft Check completeness"
+        "Footer visible: Online review unavailable. Showing a limited check of fields in this browser. Draft saved in this browser. 13 required items need attention. Check completeness stays available so you can review them. The official PDF stays closed until they are cleared. Back Save draft Check completeness"
       ],
       "status": "captured",
       "width": 1440,
       "height": 900,
-      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362@2413ad9, Case C, 2026-10-20",
-      "source": "cursor/e2e-product-flow-4362@2413ad9",
+      "caption": "scripted demo capture, cursor/e2e-product-flow-4362 @ 4a4c122",
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362 @ 4a4c122",
+      "source": "cursor/e2e-product-flow-4362 @ 4a4c122",
       "case": "Case C",
-      "date": "2026-10-20"
+      "date": "2026-10-20",
+      "onScreen": "Section D and professional screening code database not found"
     },
     {
       "id": "shot-s07-officer",
@@ -125,10 +133,12 @@
       "status": "captured",
       "width": 1440,
       "height": 900,
-      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362@2413ad9, Case A, 2026-10-20",
-      "source": "cursor/e2e-product-flow-4362@2413ad9",
+      "caption": "scripted demo capture, cursor/e2e-product-flow-4362 @ 4a4c122",
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362 @ 4a4c122",
+      "source": "cursor/e2e-product-flow-4362 @ 4a4c122",
       "case": "Case A",
-      "date": "2026-10-20"
+      "date": "2026-10-20",
+      "onScreen": ""
     },
     {
       "id": "shot-s09-locked",

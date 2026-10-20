@@ -29,6 +29,7 @@ function parseArgs(argv) {
     engine: false,
     offline: false,
     stills: false,
+    allowDrift: false,
     holdMs: 1600,
     web: null,
     branch: null,
@@ -49,6 +50,7 @@ function parseArgs(argv) {
     else if (arg === "--engine") out.engine = true;
     else if (arg === "--offline") out.offline = true;
     else if (arg === "--stills") out.stills = true;
+    else if (arg === "--allow-drift") out.allowDrift = true;
     else if (arg === "--web") out.web = next();
     else if (arg === "--branch") out.branch = next();
     else if (arg === "--out") out.out = next();
@@ -80,6 +82,7 @@ Options
   --script <file>   Shot list to diff (default: docs/demo/script.md on #20, cursor/demo-video-script-1e38)
   --stills          Write the deck PNGs at 1440×900 and skip the mp4
   --strict          Exit non-zero unless every shot or still is captured
+  --allow-drift     Record even when the script and the step catalog disagree
   --offline         Do not start the engine, and abort /api and port 8000
   --engine          Use the engine (this is already the default)
 `;
@@ -590,9 +593,11 @@ async function main() {
   const sync = await loadScript(args);
   console.log(sync.note);
   for (const problem of sync.problems) console.log(`  ${problem}`);
-  if (sync.status !== "ok") {
+  if (sync.status === "drift" && args.allowDrift && !args.checkScript) {
+    console.log("Recording with --allow-drift. The script and the recorder steps do not match.");
+  } else if (sync.status !== "ok") {
     process.exitCode = 1;
-    if (!args.checkScript) console.log("Stopped before recording.");
+    if (!args.checkScript) console.log("Stopped before recording. Pass --allow-drift to record when the script and the steps disagree.");
     return;
   }
   if (args.checkScript) return;
@@ -696,8 +701,9 @@ async function main() {
         printReport(results);
         console.log(`\nmp4 ${mp4} (${media.duration.toFixed(1)}s, ${media.width}x${media.height} ${media.codec})`);
         console.log(`log ${logPath}`);
-        if (downloads.length) {
-          throw new Error(`A file was downloaded (${downloads.join(", ")}). The recorder does not save a PDF.`);
+        const draftNoted = results.some((step) => (step.notes || []).some((note) => note.startsWith("Draft PDF download started")));
+        if (downloads.length && !draftNoted) {
+          throw new Error(`A file was downloaded (${downloads.join(", ")}). The recorder does not save a PDF except the shot 7 draft.`);
         }
         const missing = results.filter((step) => step.status !== "recorded");
         if (!results.some((step) => step.status === "recorded")) {

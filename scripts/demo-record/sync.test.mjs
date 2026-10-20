@@ -5,8 +5,6 @@ import test from "node:test";
 import { diffScript, parseDemoScript } from "./sync.mjs";
 import { DECK_STILLS, STEPS } from "./steps.mjs";
 
-const REAL_ADDRESS_GUARD = "11821 73 Avenue NW";
-
 const EXPECTED = [
   ["1", "Three applicants (0:18)", "#/"],
   ["2", "Homebuilder paste (0:10)", "#/describe"],
@@ -113,6 +111,8 @@ test("the recorder uses the engine unless --offline is set", () => {
   assert.equal(source.includes("Recording anyway"), false);
   assert.match(source, /origin\/cursor\/demo-video-script-1e38:docs\/demo\/script\.md/);
   assert.match(source, /sync\.status !== "ok"/);
+  assert.match(source, /--allow-drift/);
+  assert.match(source, /allowDrift/);
 });
 
 test("the officer shot reviews the open application", () => {
@@ -128,11 +128,14 @@ test("the officer shot reviews the open application", () => {
   assert.match(source, /OFFICER_INTRO/);
 });
 
-test("the walk does not upload a PDF", () => {
+test("the walk does not upload a PDF and has no address redactor", () => {
   const source = readFileSync(new URL("./steps.mjs", import.meta.url), "utf8");
   assert.equal(source.includes("setInputFiles"), false);
   assert.equal(source.includes("project-brief.pdf"), false);
-  assert.equal(source.includes(REAL_ADDRESS_GUARD), true);
+  assert.equal(source.includes("maskRealAddress"), false);
+  assert.equal(source.includes("11821 73 Avenue NW"), false);
+  assert.match(source, /Download draft PDF/);
+  assert.equal(source.includes("AI-agent simulated session"), false);
 });
 
 test("parser reads legacy shot rows and headings", () => {
