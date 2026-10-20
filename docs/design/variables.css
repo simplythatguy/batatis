@@ -1,0 +1,43 @@
+/**
+ * HTML evals load these through docs/design/tokens.css.
+ * The Next app does not import this file.
+ */
+
+:root {
+  --bg-app: #080808;
+  --bg-sidebar: #0c0c0d;
+  --bg-panel: #131315;
+  --bg-elevated: #19191b;
+  --bg-hover: rgba(255, 255, 255, 0.04);
+  --bg-active: rgba(255, 255, 255, 0.06);
+  --bg-input: #121214;
+
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --border-danger: rgba(235, 87, 87, 0.55);
+
+  --focus-ring: #8a8a8e;
+
+  --text-primary: #eeeeef;
+  --text-secondary: #9b9ba1;
+  --text-tertiary: #808086;
+  --text-inverse: #141415;
+
+  --btn-primary-bg: #e6e6e6;
+  --btn-primary-text: #141415;
+  --btn-primary-hover: #f2f2f2;
+
+  --status-blocking: #eb5757;
+  --status-warning: #f2c94c;
+  --status-pending: #8a8a8e;
+  --status-done: #4cb782;
+
+  --accent-muted: rgba(138, 138, 142, 0.22);
+  --diff-add-bg: rgba(76, 183, 130, 0.12);
+  --diff-del-bg: rgba(235, 87, 87, 0.12);
+  --code-bg: #161618;
+  --pdf-sheet-bg: #f4f4f5;
+  --pdf-sheet-text: #1a1a1c;
+  --pdf-sheet-muted: #5c5c62;
+}
