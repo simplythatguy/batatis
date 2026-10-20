@@ -68,7 +68,36 @@ def present(result: dict, codes: Codes | None, mode: str, facts=None) -> dict:
         shaped.append(_card(article, index, stored, codes, result, mode, facts, source))
     result['articles'] = shaped
     _guard_quotes(result)
+    result['engineering_answer'] = _engineering_answer(result, codes, facts)
     return result
+
+
+def _engineering_answer(result: dict, codes: Codes | None, facts) -> str:
+    """One sentence for the practice-of-engineering line. The machine token stays on ``engineering_required``."""
+    from engine.models import Case, Fact
+    from engine.professional import professional_involvement
+
+    if codes is not None:
+        items = []
+        for fact in facts or []:
+            if isinstance(fact, Fact):
+                items.append(fact)
+                continue
+            if isinstance(fact, dict) and fact.get('field') and fact.get('kind') and fact.get('source'):
+                try:
+                    items.append(Fact.model_validate(fact))
+                except (TypeError, ValueError):
+                    continue
+        try:
+            return professional_involvement(Case(facts=items), codes).answer
+        except (KeyError, ValueError):
+            pass
+    token = result.get('engineering_required')
+    if token == 'yes':
+        return 'A registered professional is indicated for the stated scope.'
+    if token == 'no':
+        return 'The stated facts fit a general exception.'
+    return 'unknown: needs a deciding fact'
 
 
 def _stored_rows(result: dict) -> list[dict]:

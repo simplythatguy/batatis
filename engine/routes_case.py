@@ -20,7 +20,9 @@ from .identify.demo_cache import match_demo
 from .identify.http_models import DecisionRequest, DecisionResponse, IdentifyRequest, IdentifyResponse
 from .identify.offline import ProviderOutage, http_live, is_provider_outage
 from .identify.pipeline import run as identify_run
-from .models import Case
+from .identify.storeys import parse_storeys
+from .identify.title import short_title, title_should_replace
+from .models import Case, Fact, Source
 from .process_fields import ProcessField, process_fields
 from .professional import ProfessionalResult, professional_involvement
 from .section_c import section_c_rows
@@ -142,7 +144,31 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
             return cached, 'cached_demo'
         return _bm25(prose, facts, on_stage), 'bm25_fallback'
 
+    def _remember_storeys(case: Case, prose: str) -> None:
+        """A count written in the description is a pointed fact. Identify does not ask for it again."""
+        if any(fact.field == 'building.storeys' for fact in case.facts):
+            return
+        parsed = parse_storeys(prose)
+        if parsed is None:
+            return
+        count, quote = parsed
+        case.facts.append(Fact(
+            field='building.storeys', value=count, kind='pointed', status='confirmed',
+            source=Source(type='user_text', ref='description', quote=quote),
+        ))
+
+    def _remember_title(case: Case, prose: str, result: dict) -> None:
+        if not title_should_replace(case.title, prose):
+            return
+        case.title = short_title(prose, case.facts, result)
+
     def _identify_result(case_id: str, prose: str, facts, on_stage=None) -> dict:
+        case = cases().get(case_id)
+        storeys_before = len(case.facts) if case is not None else 0
+        title_before = case.title if case is not None else None
+        if case is not None:
+            _remember_storeys(case, prose)
+            facts = case.facts
         if http_live():
             if not default_db().exists():
                 raise CodeDbMissing()
@@ -157,7 +183,12 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
         else:
             raw, mode = _without_provider(prose, facts, on_stage)
         result = present(raw, _codes_or_none(), mode, facts)
-        overlay_decisions(result, cases().get(case_id))
+        if case is not None:
+            _remember_title(case, prose, result)
+            if case.title != title_before or len(case.facts) != storeys_before:
+                cases().put(case)
+            result['title'] = case.title
+        overlay_decisions(result, case if case is not None else cases().get(case_id))
         cases().put_identify(case_id, result)
         if on_stage:
             on_stage('done', result)

@@ -100,6 +100,7 @@ export interface DecisionResponse {
   articles: ArticleCard[];
   benchmark: AcceptableBenchmark | null;
   cached: boolean;
+  engineering_answer: string | null;
   engineering_required: string | null;
   intake_action: string | null;
   mode: "live" | "cached_demo" | "bm25_fallback";
@@ -111,6 +112,7 @@ export interface DecisionResponse {
   section_c: (Record<string, unknown>)[];
   section_c_row: SectionCRow[] | null;
   source: string | null;
+  title: string | null;
   variance_explanation: string | null;
   variance_needed: string | null;
 }
@@ -134,11 +136,13 @@ export interface Explainer {
 
 export interface Fact {
   confidence: number | null;
+  /** Human line for this fact, for example 'Designed under Part 4: No'. */ display: string;
   field: string;
   formula: string | null;
   id: string;
   inputs: string[];
   kind: "exact" | "pointed" | "computed" | "proposed";
+  /** Human name for `field`. The raw key stays on `field`. */ label: string;
   source: Source;
   status: "confirmed" | "unconfirmed" | "open" | "unknown";
   value: string | number | boolean | null;
@@ -174,6 +178,7 @@ export interface IdentifyResponse {
   articles: ArticleCard[];
   benchmark: AcceptableBenchmark | null;
   cached: boolean;
+  engineering_answer: string | null;
   engineering_required: string | null;
   intake_action: string | null;
   mode: "live" | "cached_demo" | "bm25_fallback";
@@ -184,6 +189,7 @@ export interface IdentifyResponse {
   redirect_to: string | null;
   section_c: (Record<string, unknown>)[];
   source: string | null;
+  title: string | null;
   variance_explanation: string | null;
   variance_needed: string | null;
 }

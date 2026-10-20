@@ -992,7 +992,6 @@
       "variance_explanation": "The description treats the design as doing something other than the cited acceptable solution. A variance is the application that asks the Safety Codes Officer to consider that alternative. This identification does not decide whether the alternative performs as well.",
       "questions": [
         "What is the wall assembly made of, and what are its fire-resistance and thermal properties?",
-        "How many storeys does the building have?",
         "What is the building area of each storey?",
         "Is the building sprinklered?",
         "What is the occupancy (and, if you have it, the occupant load)?"
@@ -1011,19 +1010,6 @@
             "9.27.3.6.",
             "9.23.13.5.",
             "3.1.5.8."
-          ],
-          "answer": null
-        },
-        {
-          "id": "building.storeys",
-          "field": "building.storeys",
-          "text": "How many storeys does the building have?",
-          "why": "Storey count changes which exit, fire-separation, and spatial-separation articles are in the set.",
-          "status": "open",
-          "disambiguates": [
-            "9.29.5.8.",
-            "9.29.9.3.",
-            "9.29.6.3."
           ],
           "answer": null
         },
@@ -1558,29 +1544,13 @@
       "variance_needed": "likely",
       "variance_explanation": "The description treats the design as doing something other than the cited acceptable solution. A variance is the application that asks the Safety Codes Officer to consider that alternative. This identification does not decide whether the alternative performs as well.",
       "questions": [
-        "How many storeys does the building have?",
         "What is the building height in storeys and metres?",
         "What is the building area of each storey?",
         "What is the wall assembly made of, and what are its fire-resistance and thermal properties?",
-        "What is the occupancy (and, if you have it, the occupant load)?"
+        "What is the occupancy (and, if you have it, the occupant load)?",
+        "Is the building sprinklered?"
       ],
       "open_questions": [
-        {
-          "id": "building.storeys",
-          "field": "building.storeys",
-          "text": "How many storeys does the building have?",
-          "why": "Storey count changes which exit, fire-separation, and spatial-separation articles are in the set.",
-          "status": "open",
-          "disambiguates": [
-            "3.2.2.52.",
-            "3.2.2.55.",
-            "3.1.9.4.",
-            "3.2.2.48.",
-            "3.2.2.49.",
-            "3.2.2.51."
-          ],
-          "answer": null
-        },
         {
           "id": "building.height",
           "field": "building.height",
@@ -1648,6 +1618,25 @@
             "3.2.2.48.",
             "3.2.2.49.",
             "3.2.2.51."
+          ],
+          "answer": null
+        },
+        {
+          "id": "building.sprinklered",
+          "field": "building.sprinklered",
+          "text": "Is the building sprinklered?",
+          "why": "Sprinkler status changes which exit and fire-separation relaxations are candidates.",
+          "status": "open",
+          "disambiguates": [
+            "3.2.2.52.",
+            "3.2.2.55.",
+            "3.1.9.4.",
+            "3.1.9.1.",
+            "9.10.9.9.",
+            "3.2.2.48.",
+            "3.2.2.49.",
+            "3.2.2.51.",
+            "3.1.5.19."
           ],
           "answer": null
         }
@@ -2061,8 +2050,8 @@
         "What is the wall assembly made of, and what are its fire-resistance and thermal properties?",
         "What is the occupancy (and, if you have it, the occupant load)?",
         "Is the building sprinklered?",
-        "How many storeys does the building have?",
-        "What is the building height in storeys and metres?"
+        "What is the building height in storeys and metres?",
+        "What is the limiting distance from the exposing building face to the property line?"
       ],
       "open_questions": [
         {
@@ -2110,22 +2099,21 @@
           "answer": null
         },
         {
-          "id": "building.storeys",
-          "field": "building.storeys",
-          "text": "How many storeys does the building have?",
-          "why": "Storey count changes which exit, fire-separation, and spatial-separation articles are in the set.",
+          "id": "building.height",
+          "field": "building.height",
+          "text": "What is the building height in storeys and metres?",
+          "why": "Height decides whether Part 9 or Part 3 exit and construction articles govern.",
           "status": "open",
           "disambiguates": [
-            "9.10.20.2.",
             "3.2.5.12."
           ],
           "answer": null
         },
         {
-          "id": "building.height",
-          "field": "building.height",
-          "text": "What is the building height in storeys and metres?",
-          "why": "Height decides whether Part 9 or Part 3 exit and construction articles govern.",
+          "id": "site.limiting_distance",
+          "field": "site.limiting_distance",
+          "text": "What is the limiting distance from the exposing building face to the property line?",
+          "why": "Limiting distance decides which spatial-separation articles, and which unprotected-opening limits, stay in the set.",
           "status": "open",
           "disambiguates": [
             "3.2.5.12."

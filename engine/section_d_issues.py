@@ -198,7 +198,7 @@ def render_practice(result: ProfessionalResult, codes: Codes, *, span_handoff: b
     return PracticeOfEngineering(
         value='unknown', rule=rule or None, division=division or None,
         citation=reason.citation if reason else None,
-        reason='These facts do not establish whether practice of engineering applies. Ask before setting the flag to yes or no.',
+        reason=result.answer,
         question=_question(result))
 
 

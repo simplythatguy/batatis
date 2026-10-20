@@ -12,7 +12,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, computed_field, model_validator
 
 FactKind = Literal['exact', 'pointed', 'computed', 'proposed']
 FactStatus = Literal['confirmed', 'unconfirmed', 'open', 'unknown']
@@ -57,6 +57,20 @@ class Fact(BaseModel):
         if self.kind != 'computed' and (self.formula is not None or self.inputs):
             raise ValueError('formula and inputs belong to computed facts only')
         return self
+
+    @computed_field
+    @property
+    def label(self) -> str:
+        """Human name for `field`. The raw key stays on `field`."""
+        from .fact_text import fact_label
+        return fact_label(self.field)
+
+    @computed_field
+    @property
+    def display(self) -> str:
+        """Human line for this fact, for example 'Designed under Part 4: No'."""
+        from .fact_text import fact_display
+        return fact_display(self.field, self.value)
 
     def export(self) -> dict:
         """Export form. Re-checks the invariant so a mutated instance still cannot leak as confirmed."""

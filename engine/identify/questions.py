@@ -6,6 +6,8 @@ not confirmed is asked back as a confirmation. An unknown answer stays open.
 """
 from __future__ import annotations
 
+from engine.identify.storeys import parse_storeys
+
 QUESTION_CAP = 5
 
 # Prefixes are families already in NBC(AE) Division B. A question is emitted only when a
@@ -131,9 +133,23 @@ def _text(probe: dict, fact: dict | None) -> tuple[str, str]:
             'unconfirmed')
 
 
+def _with_storeys(prose: str, facts: list[dict]) -> list[dict]:
+    """A storey count written in the description is already known. Do not ask for it again."""
+    if any(fact.get('field') == 'building.storeys' for fact in facts):
+        return facts
+    parsed = parse_storeys(prose)
+    if parsed is None:
+        return facts
+    count, quote = parsed
+    return facts + [{
+        'field': 'building.storeys', 'value': count, 'status': 'confirmed',
+        'source': {'type': 'user_text', 'ref': 'description', 'quote': quote},
+    }]
+
+
 def generate_questions(prose: str, candidates: list[dict], facts=None, *, cap: int = QUESTION_CAP) -> list[dict]:
     """Ranked questions, at most `cap`. Each names the candidates it disambiguates."""
-    facts = _view(facts)
+    facts = _with_storeys(prose, _view(facts))
     prose = prose or ''
     scored = []
     for probe in PROBES:

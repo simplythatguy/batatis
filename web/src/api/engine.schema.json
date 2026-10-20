@@ -864,6 +864,18 @@
           "title": "Cached",
           "type": "boolean"
         },
+        "engineering_answer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Engineering Answer"
+        },
         "engineering_required": {
           "anyOf": [
             {
@@ -980,6 +992,18 @@
           "default": null,
           "title": "Source"
         },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
         "variance_explanation": {
           "anyOf": [
             {
@@ -1020,6 +1044,8 @@
         "intake_action",
         "redirect_to",
         "engineering_required",
+        "engineering_answer",
+        "title",
         "model_ids",
         "section_c_row"
       ],
@@ -1151,6 +1177,12 @@
           "default": null,
           "title": "Confidence"
         },
+        "display": {
+          "description": "Human line for this fact, for example 'Designed under Part 4: No'.",
+          "readOnly": true,
+          "title": "Display",
+          "type": "string"
+        },
         "field": {
           "title": "Field",
           "type": "string"
@@ -1187,6 +1219,12 @@
             "proposed"
           ],
           "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "description": "Human name for `field`. The raw key stays on `field`.",
+          "readOnly": true,
+          "title": "Label",
           "type": "string"
         },
         "source": {
@@ -1233,7 +1271,9 @@
         "confidence",
         "status",
         "formula",
-        "inputs"
+        "inputs",
+        "label",
+        "display"
       ],
       "title": "Fact",
       "type": "object"
@@ -1432,6 +1472,18 @@
           "title": "Cached",
           "type": "boolean"
         },
+        "engineering_answer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Engineering Answer"
+        },
         "engineering_required": {
           "anyOf": [
             {
@@ -1533,6 +1585,18 @@
           "default": null,
           "title": "Source"
         },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
         "variance_explanation": {
           "anyOf": [
             {
@@ -1573,6 +1637,8 @@
         "intake_action",
         "redirect_to",
         "engineering_required",
+        "engineering_answer",
+        "title",
         "model_ids"
       ],
       "title": "IdentifyResponse",

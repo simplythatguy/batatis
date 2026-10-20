@@ -33,6 +33,8 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 
 A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed`, `unconfirmed`, `open`, or `unknown`. A `proposed` fact cannot be `confirmed`.
 
+Each fact also has `label` and `display`. `field` and `value` stay the machine values. `label` is the human name (`Designed under Part 4`, `Building type`). `display` is the line to show (`Designed under Part 4: No`, `Building type: Single-family dwelling`). A boolean displays as Yes or No. `single_family` displays as Single-family dwelling.
+
 A fact's `source.type` is `code`, `file`, `user_text`, `drawing`, or `user_click`.
 
 Gap `severity` is `blocking` or `warning`.
@@ -77,6 +79,12 @@ Without a live call, prose that matches a seeded demo case is the stored cache i
 `POST` and `GET` `/cases/{id}/identify` return `IdentifyResponse`. The decision route returns `DecisionResponse`, which adds `section_c_row`. The stream route's `done` event carries that same identify payload; its HTTP body stays `text/event-stream`. Those models are in `web/src/api/engine.schema.json`. The web client calls them as `identify`, `getIdentify`, and `decideArticle`.
 
 `GET /cases/{id}/identify` returns that same body after POST or the stream. It does not write `provisions`. A case that has not been identified is HTTP 404 with detail `identify result not found`.
+
+Identify reads a storey count out of the description and stores it as a confirmed `building.storeys` fact: `two-storey`, `2 storeys`, `2-storey`, `single-storey`, and `bungalow` (1). The storey question is not asked again. An answer already stored on `building.storeys`, including "not sure", is left as the applicant wrote it.
+
+When the case title is empty, or it is the description's first sentence, identify replaces it with a short title: building type, place, and one provision id copied from the identify result, plus a few words of that article's title. Example: `Single-family, Edmonton: 9.9.10.1.(2) egress window`. The title does not say the design complies or is safe. A title the applicant set, such as `Hempcrete house`, stays.
+
+`engineering_required` stays `yes`, `no`, or `depends`. `engineering_answer` is the one sentence to show. When the screen is `depends`, that sentence is `unknown: needs <fact>` (the missing fact fields) or the condition with the token removed. It is not `depends. depends.`
 
 When a live identify needs the code database and the file is missing, the response is HTTP 503 with the fixed detail `code database not found`. The body does not include a filesystem path. A live call that fails with an authentication, network, or timeout error uses the same non-live path as a missing key.
 
@@ -212,6 +220,8 @@ The CSV `group` column keeps the two blocks apart. On ask rows, `n` is the group
 ### Practice-of-engineering on `GET /professional`
 
 `required` and `general_required` are `yes`, `no`, or `depends`. `depends` means a deciding fact is missing. That route does not return `true`, `false`, or `"unknown"`.
+
+`answer` is the sentence to show for that screen. `required` stays the machine token. When the screen is `depends`, `answer` is `unknown: needs professional.part4_design` (and any other missing fact fields, each once) or the condition with the token removed. `needs` lists those fact fields. `answer` is not `depends. depends.` The issues route uses that same `answer` as the practice-of-engineering `reason` when the value is `"unknown"`.
 
 The issues route maps the same screen: `yes` → `true`, `no` → `false`, `depends` → `"unknown"`. `"unknown"` requires a question. `depends` and `"unknown"` are not the same token.
 

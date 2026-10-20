@@ -130,6 +130,8 @@ class IdentifyResponse(BaseModel):
     intake_action: str | None = None
     redirect_to: str | None = None
     engineering_required: str | None = None
+    engineering_answer: str | None = None
+    title: str | None = None
     model_ids: dict[str, Any] | None = None
 
 
