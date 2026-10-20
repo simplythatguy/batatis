@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { DetailFields, ProcessFields } from "../case-parts";
-import { GapStrip, PanelHeader, PrivacyNotice } from "../components";
+import { GapStrip, PanelHeader } from "../components";
 import type { Route } from "../router";
 import { useCase } from "../store";
 
@@ -41,7 +41,6 @@ export function Application({ route }: { route: Route }) {
       </nav>
       <div className="pane scroll-body" role="region" aria-label={TABS.find((t) => t.id === tab)?.label}>
         <div className="content-col">
-          <PrivacyNotice />
           {tab === "alt" ? <ProcessFields /> : <DetailFields section={tab === "B" ? "B" : "A"} />}
         </div>
       </div>

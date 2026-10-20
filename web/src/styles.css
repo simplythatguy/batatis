@@ -1084,11 +1084,17 @@ blockquote.cite-block {
 }
 
 .privacy-notice {
-  margin: 0 0 var(--space-3);
+  margin: var(--space-2) 0 0;
   max-width: 68ch;
   color: var(--text-secondary);
   font-size: var(--text-sm);
   line-height: 1.45;
+}
+
+.sidebar-foot .privacy-notice {
+  margin: 0;
+  max-width: 32ch;
+  color: var(--text-tertiary);
 }
 
 .demo-notice {
