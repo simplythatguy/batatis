@@ -1,4 +1,5 @@
 import { applyDescription } from "./intake";
+import { professionalConfirmed, type ScopeField } from "./professional";
 import type { Candidate, CandidateAnswer, Case, Fact, Gap, ProcessFieldId } from "./types";
 
 /** Section A and B fields. Values live only in `case.facts`; nothing here holds a default. */
@@ -95,6 +96,11 @@ export const FACT_LABELS: Record<string, string> = {
   "project.description": "What you described",
   "site.climate": "Where it is installed",
   "code.edition": "Code edition",
+  "professional.prescriptive_route_confirmed": "Prescriptive route",
+  "professional.professional_judgement_required": "Reserved professional judgement",
+  "professional.role": "Registered professional",
+  "professional.registration_number": "Registration number",
+  "professional.seal": "Professional seal",
   ...Object.fromEntries(DETAIL_FIELDS.map((f) => [f.id, f.label])),
 };
 
@@ -177,6 +183,14 @@ export function getGaps(c: Case): Gap[] {
       gaps.push({ id: `question-${q.id}`, severity: "warning", label: `Open question: ${factLabel(q.field).toLowerCase()}`, href: `#/describe?focus=q-${q.id}` });
     }
   }
+  if (c.practiceOfEngineering === true && !professionalConfirmed(c.facts)) {
+    gaps.push({
+      id: "needs-professional",
+      severity: "blocking",
+      label: "Registered professional not confirmed",
+      href: "#/application?tab=D&focus=prof-role",
+    });
+  }
   const blocking = gaps.some((g) => g.severity === "blocking");
   const allNo = c.candidates.length > 0 && c.candidates.every((a) => a.answer === "no");
   if (!blocking && allNo) {
@@ -209,6 +223,8 @@ export type Action =
     }
   | { type: "saveEvidence"; itemId: string; document: string; responsible: string; date: string }
   | { type: "setProfessionalFact"; field: string; value: string | number | boolean }
+  | { type: "answerScope"; field: ScopeField; answer: "yes" | "no" | "not-sure" }
+  | { type: "notePractice"; value: true | false | "unknown" }
   | { type: "reset"; to: Case };
 
 let seq = 0;
@@ -348,8 +364,14 @@ export function reducer(c: Case, a: Action): Case {
       const who = a.responsible.trim();
       const date = a.date.trim();
       if (!ref || !who) return c;
-      const prefix = `evidence.${a.itemId}.`;
-      const keep = c.facts.filter((f) => !f.field.startsWith(prefix));
+      const taken = new Set(c.facts.filter((f) => f.field.startsWith("evidence.")).map((f) => f.field.split(".")[1]));
+      let slot = a.itemId;
+      if (taken.has(a.itemId)) {
+        let n = 2;
+        while (taken.has(`${a.itemId}~${n}`)) n += 1;
+        slot = `${a.itemId}~${n}`;
+      }
+      const prefix = `evidence.${slot}.`;
       const pointed = (field: string, value: string, source: Fact["source"]): Fact => ({
         id: newId("f"),
         field,
@@ -362,7 +384,7 @@ export function reducer(c: Case, a: Action): Case {
         source,
       });
       const facts = [
-        ...keep,
+        ...c.facts,
         pointed(`${prefix}file_ref`, ref, { type: "file", ref, quote: ref }),
         pointed(`${prefix}title`, ref, { type: "user_text", ref: "Your evidence", quote: ref }),
         pointed(`${prefix}responsible_party`, who, { type: "user_text", ref: "Your evidence", quote: who }),
@@ -370,6 +392,36 @@ export function reducer(c: Case, a: Action): Case {
       if (date) facts.push(pointed(`${prefix}date`, date, { type: "user_text", ref: "Your evidence", quote: date }));
       return { ...c, facts };
     }
+    case "answerScope": {
+      const qid = `q-scope-${a.field}`;
+      const text =
+        a.field === "prescriptive_route_confirmed"
+          ? "Is the design following the prescriptive route?"
+          : "Does any proposed analysis require reserved professional judgement?";
+      const questions = c.questions.filter((q) => q.id !== qid);
+      const facts = c.facts.filter((f) => f.field !== `professional.${a.field}`);
+      if (a.answer === "not-sure") {
+        return {
+          ...c,
+          facts,
+          questions: [
+            ...questions,
+            {
+              id: qid,
+              text,
+              why: "You answered Not sure. This stays an open question for the officer.",
+              field: `professional.${a.field}`,
+            },
+          ],
+        };
+      }
+      return reducer(
+        { ...c, facts, questions },
+        { type: "setProfessionalFact", field: a.field, value: a.answer === "yes" },
+      );
+    }
+    case "notePractice":
+      return { ...c, practiceOfEngineering: a.value };
     case "setProfessionalFact": {
       const field = `professional.${a.field}`;
       const quote = typeof a.value === "boolean" ? (a.value ? "yes" : "no") : String(a.value);

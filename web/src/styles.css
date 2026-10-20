@@ -960,8 +960,65 @@ blockquote.cite-block {
   margin: 0;
 }
 
+.dialog {
+  max-height: calc(100dvh - var(--space-8));
+}
+
+.dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog > form {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: calc(100dvh - var(--space-8));
+  overflow: hidden;
+}
+
+.dialog-body {
+  flex: 1 1 auto;
+  overflow: auto;
+  min-height: 0;
+  overscroll-behavior: contain;
+}
+
+.dialog-body > * + * {
+  margin-top: var(--space-3);
+}
+
+.dialog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
 .dialog p {
   margin: 0;
+}
+
+.dialog .footer-bar {
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.dialog .footer-bar .btn {
+  white-space: nowrap;
+}
+
+.dialog progress,
+.pane progress {
+  width: 100%;
+  height: 4px;
+}
+
+.field textarea,
+#request-text {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* —— Narrow screens —— */
@@ -1108,12 +1165,57 @@ blockquote.cite-block {
 }
 
 .example-banner {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
   margin: 0;
-  padding: var(--space-2) var(--space-4);
-  border-bottom: 1px solid var(--border-subtle, var(--border));
-  background: var(--bg-raised, transparent);
-  color: var(--text);
-  font-size: var(--text-sm, 13px);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-default);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.example-banner-copy {
+  min-width: 0;
+}
+
+.example-banner-title,
+.example-banner-body {
+  margin: 0;
+}
+
+.example-banner-title {
+  color: var(--text-primary);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
+.example-banner-body {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.example-banner .btn {
+  flex-shrink: 0;
+  min-height: calc(var(--space-5) + var(--space-6));
+}
+
+@media (max-width: 390px) {
+  .example-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+    padding: var(--space-3);
+  }
+
+  .example-banner .btn {
+    width: 100%;
+  }
 }
 
 @media (max-width: 560px) {

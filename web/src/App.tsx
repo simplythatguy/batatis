@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Icon } from "./components";
-import { EXAMPLE_BANNER } from "./rules";
+import { ExampleBanner, Icon } from "./components";
 import { useFocusParam, useRoute } from "./router";
 import { Application } from "./screens/Application";
 import { CodeCheck } from "./screens/CodeCheck";
@@ -123,10 +122,8 @@ export function App() {
         </div>
       </aside>
       <main className="main-panel">
-        {phase === "case" && c.exampleId && (
-          <p className="example-banner" role="status">
-            <span className="status-dot warning" /> {EXAMPLE_BANNER}
-          </p>
+        {phase === "case" && (route.path === "/officer" || c.exampleId) && (
+          <ExampleBanner officer={route.path === "/officer"} />
         )}
         {screen}
       </main>

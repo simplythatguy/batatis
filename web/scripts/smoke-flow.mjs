@@ -77,9 +77,23 @@ try {
   await clickButton(page, "Homebuilder");
   await page.waitForSelector("#description");
 
+  await page.goto(`${preview}/#/officer`, { waitUntil: "networkidle0" });
+  let text = await jargon(page, "blank officer");
+  assert(/EXAMPLE · Officer review · Hempcrete garden suite/.test(text), "blank officer is missing the example banner");
+  assert(/does not open the sample package/.test(text), "blank officer opened the hempcrete package");
+  assert(!/Nothing open in this section/.test(text), "blank officer says nothing is open");
+  assert(!/Your application appears to be missing/.test(text), "blank officer lists planted gaps");
+  assert(!/Engine \d+/.test(text), "blank officer shows an engine status");
+  await shot(page, "00-officer-blank");
+  await page.setViewport({ width: 390, height: 844 });
+  await shot(page, "00-officer-blank-mobile");
+  await page.setViewport({ width: 1280, height: 900 });
+  await page.goto(`${preview}/#/describe`, { waitUntil: "networkidle0" });
+  await page.waitForSelector("#description");
+
   await page.type("#description", DESCRIPTION);
   await page.select("#authority", "calgary");
-  let text = await jargon(page, "describe");
+  text = await jargon(page, "describe");
   assert(/Upload isn't available yet\. Paste the text instead\./.test(text), "describe does not say to paste instead of uploading");
   await shot(page, "01-describe");
 
@@ -202,18 +216,71 @@ try {
     throw new Error(`Check completeness stayed disabled. Visible gaps: ${gaps.join(" | ")}`);
   });
   await jargon(page, "application");
+  const check = await page.evaluate(() => {
+    const button = [...document.querySelectorAll("button")].find((b) => b.textContent?.includes("Check completeness"));
+    return { found: Boolean(button), disabled: button?.disabled ?? true };
+  });
+  assert(check.found && !check.disabled, "Check completeness is missing or disabled while gaps remain");
   await clickButton(page, "Check completeness");
   await page.waitForSelector("#completeness-title");
-  await page.waitForFunction(() => /PDF|draft|did not|blocked|missing/i.test(document.body.innerText), { timeout: 20000 });
-  await jargon(page, "completeness dialog");
+  await page.waitForFunction(() => {
+    const t = document.body.innerText;
+    if (/Saving and reviewing|Preparing your/.test(t)) return false;
+    return /Online review unavailable|Some required information is missing|Your application PDF is ready|Your draft PDF is ready|The PDF was blocked|The PDF could not be prepared/.test(t);
+  }, { timeout: 20000 });
+  text = await jargon(page, "completeness dialog");
+  assert(!/Engine \d+/.test(text), "completeness dialog shows a raw engine status");
+  assert(!/Manufacturer example|Contractor example|Homebuilder example/.test(text), "completeness dialog can replace the case");
+  assert(/Current missing items|Online review unavailable/.test(text), "dialog has neither missing items nor the unavailable state");
+  assert(/Section A · Applicant|Online review unavailable/.test(text), "dialog does not group items or explain the failure");
+  const draftButton = await page.evaluate(() =>
+    [...document.querySelectorAll("button")].some((b) => b.textContent?.trim() === "Download draft PDF"),
+  );
+  if (draftButton) {
+    const seen = page.waitForRequest((req) => req.method() === "POST" && req.url().includes("/export"), { timeout: 20000 });
+    await clickButton(page, "Download draft PDF");
+    const body = (await seen).postData() ?? "";
+    assert(/"draft"\s*:\s*true/.test(body), `draft export body was ${body}`);
+  } else {
+    assert(/Retry review|Try again/.test(text), "engine-down dialog has no retry");
+    assert(/Download text record/.test(text), "engine-down dialog has no text record");
+  }
   await shot(page, "06-completeness");
-  await clickButton(page, "Download draft record");
-  await page.waitForFunction(() => /draft-record\.txt/.test(document.body.innerText), { timeout: 5000 });
+  await page.setViewport({ width: 390, height: 844 });
+  await shot(page, "06-completeness-mobile");
+  await page.setViewport({ width: 1280, height: 900 });
+  await clickButton(page, "Download text record");
+  await page.waitForFunction(() => /text-record\.txt/.test(document.body.innerText), { timeout: 5000 });
 
-  await page.goto(`${preview}/#/officer`, { waitUntil: "networkidle0" });
+  await page.setRequestInterception(true);
+  const delayGaps = (req) => {
+    const pass = () => req.continue().catch(() => undefined);
+    if (req.url().includes("/gaps")) setTimeout(pass, 700);
+    else pass();
+  };
+  page.on("request", delayGaps);
+  await page.goto(`${preview}/#/officer`, { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => document.body.innerText.includes("Reviewing the example package"), { timeout: 10000 });
+  text = await jargon(page, "officer pending");
+  assert(!/Nothing open in this section/.test(text), "officer says nothing is open while the review is pending");
+  assert(!/No missing administrative items found/.test(text), "officer claims a clean review before it returns");
+  const pendingCopy = await page.evaluate(() => {
+    const button = [...document.querySelectorAll("button")].find((b) => b.textContent?.includes("Copy example request"));
+    return { disabled: button?.disabled ?? false, hasRequest: Boolean(document.querySelector("#request-text")) };
+  });
+  assert(pendingCopy.disabled, "Copy example request is enabled before the review returns");
+  assert(!pendingCopy.hasRequest, "the example request is written before the review returns");
+  await page.waitForFunction(() => /Retry review|Review finished|No missing administrative items found in this review/.test(document.body.innerText), {
+    timeout: 20000,
+  });
+  page.off("request", delayGaps);
+  await page.setRequestInterception(false);
   text = await jargon(page, "officer");
-  assert(/Planted example\. Not a real application\./.test(text), "officer does not label the planted example");
+  assert(/EXAMPLE · Officer review/.test(text), "officer does not label the sample review");
+  assert(/Retry review/.test(text), "officer engine-down has no Retry");
   assert(!/case_[0-9a-f]{6,}/.test(text), "officer shows a raw case id");
+  assert(!/Engine \d+/.test(text), "officer shows a raw engine status");
+  assert(!/\/cases\//.test(text), "officer shows an endpoint path");
   await shot(page, "07-officer");
 
   await page.goto(`${preview}/#/accuracy`, { waitUntil: "networkidle0" });

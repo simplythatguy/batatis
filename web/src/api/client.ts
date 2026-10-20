@@ -177,7 +177,7 @@ export interface SectionDIssue {
     question: string | null;
   };
   empty_process_fields: { id: string; label: string; citation: string }[];
-  status: "open" | "addressed" | "needs_professional";
+  status: "open" | "addressed" | "evidence_listed" | "needs_professional";
 }
 
 export interface IdentifyArticle {

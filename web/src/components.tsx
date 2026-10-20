@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { EXAMPLES } from "./examples";
 import { useCase } from "./store";
 import type { FactKind, Gap } from "./types";
 
@@ -86,6 +87,38 @@ export function KindBadge({ kind }: { kind: FactKind }) {
 }
 
 export function GapStrip({ gaps }: { gaps: Gap[] }) {
+  const { gapsSource, c } = useCase();
+  if (gapsSource === "idle") {
+    return (
+      <div className="gap-summary gap-panel" aria-label="Administrative gaps">
+        <span className="gap-chip">
+          <span className="status-dot pending" />
+          Your application has not been reviewed online yet.
+        </span>
+      </div>
+    );
+  }
+  if (gapsSource === "loading" && !gaps.length) {
+    return (
+      <div className="gap-summary gap-panel" aria-label="Administrative gaps">
+        <span className="gap-chip">
+          <span className="status-dot pending" />
+          Reviewing {c.exampleId ? "this example" : "your application"}…
+        </span>
+        <span className="meta">The missing-item list may change when the review finishes.</span>
+      </div>
+    );
+  }
+  if (!gaps.length && gapsSource === "browser") {
+    return (
+      <div className="gap-summary gap-panel" aria-label="Administrative gaps">
+        <span className="gap-chip">
+          <span className="status-dot warning" />
+          No missing fields found by this browser check. The online review has not completed.
+        </span>
+      </div>
+    );
+  }
   if (!gaps.length) {
     return (
       <div className="gap-summary gap-panel" aria-label="Administrative gaps">
@@ -100,6 +133,12 @@ export function GapStrip({ gaps }: { gaps: Gap[] }) {
   return (
     <details className="gap-panel">
       <summary className="gap-summary">
+        {gapsSource === "loading" && (
+          <span className="gap-chip">
+            <span className="status-dot pending" />
+            Reviewing {c.exampleId ? "this example" : "your application"}…
+          </span>
+        )}
         <span className="gap-chip">
           <span className="status-dot blocking" />
           {blocking} blocking
@@ -157,10 +196,42 @@ export function DemoFallback({ reason, onRetry }: { reason: string; onRetry?: ()
 
 export function DraftNote() {
   const { savedNote, gapsNote } = useCase();
+  if (!gapsNote && !savedNote) return null;
   return (
     <span className="status-note" role="status">
-      {savedNote || gapsNote}
+      {gapsNote}
+      {gapsNote && savedNote ? " " : ""}
+      {savedNote}
     </span>
+  );
+}
+
+/** Persistent example provenance. Not dismissible. Officer always names the sample package. */
+export function ExampleBanner({ officer = false }: { officer?: boolean }) {
+  const { c, resetToWho } = useCase();
+  const label = officer
+    ? "Officer review · Hempcrete garden suite"
+    : (EXAMPLES.find((ex) => ex.id === c.exampleId)?.label ?? "Loaded example");
+  return (
+    <aside className="example-banner" role="note" aria-label="Example data">
+      <div className="example-banner-copy">
+        <p className="example-banner-title">EXAMPLE · {label}</p>
+        <p className="example-banner-body">
+          {officer
+            ? "This review uses a sample package. Your application is not being reviewed here."
+            : "You are viewing a sample application. Starting your own application clears this example."}
+        </p>
+      </div>
+      {officer ? (
+        <a className="btn" href="#/describe">
+          Return to application
+        </a>
+      ) : (
+        <button type="button" className="btn" onClick={resetToWho}>
+          Start my own application
+        </button>
+      )}
+    </aside>
   );
 }
 

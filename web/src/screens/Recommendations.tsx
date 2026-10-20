@@ -10,6 +10,7 @@ import {
 } from "../api/client";
 import { DemoFallback } from "../components";
 import { answeredYes } from "../model";
+import { evidenceLinked, isScopeField, SCOPE_HELP, sectionDIssueStatus } from "../professional";
 import { failureKind } from "../rules";
 import { useCase } from "../store";
 import type { Case } from "../types";
@@ -43,9 +44,12 @@ const OCCUPANCY = [
   ["other", "Other"],
 ] as const;
 
-type ProfKind = "bool" | "number" | "occupancy";
+type ProfKind = "bool" | "number" | "occupancy" | "role" | "text";
 
 const PROFESSIONAL_FIELDS: { field: string; label: string; kind: ProfKind }[] = [
+  { field: "role", label: "Who is the registered professional for this scope?", kind: "role" },
+  { field: "registration_number", label: "APEGA or AAA registration number", kind: "text" },
+  { field: "seal", label: "Seal that professional confirmed", kind: "text" },
   { field: "occupancy", label: "What is the occupancy or building type?", kind: "occupancy" },
   { field: "principal_dwelling_units", label: "How many principal dwelling units, excluding confirmed qualifying secondary suites?", kind: "number" },
   { field: "storeys", label: "How many storeys is the building?", kind: "number" },
@@ -99,8 +103,13 @@ function EvidenceAnswer({ itemId, title }: { itemId: string; title: string }) {
       return;
     }
     dispatch({ type: "saveEvidence", itemId, document, responsible, date });
-    setNote("Saved. This records what you wrote. It does not assess the document.");
+    setNote("Saved. Earlier documents stay on the case. This does not assess the document.");
   }
+
+  const earlier = c.facts
+    .filter((f) => (f.field.startsWith(`evidence.${itemId}.`) || f.field.startsWith(`evidence.${itemId}~`)) && f.field.endsWith(".title"))
+    .map((f) => (typeof f.value === "string" ? f.value : ""))
+    .filter(Boolean);
 
   return (
     <div className="form-grid">
@@ -127,6 +136,16 @@ function EvidenceAnswer({ itemId, title }: { itemId: string; title: string }) {
           </p>
         )}
       </div>
+      {earlier.length > 0 && (
+        <div className="field full">
+          <p className="meta">Documents already on this case</p>
+          <ul className="plain-list">
+            {earlier.map((title, index) => (
+              <li key={`${title}-${index}`}>{title}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
@@ -136,7 +155,7 @@ function ProfessionalAnswers() {
   return (
     <div className="form-grid">
       <p className="meta full section-hint">
-        These start empty. Your answer is posted as a fact. Nothing is filled in for you, and an unanswered question stays unanswered.
+        These start empty. A registered professional is an engineer or architect you confirm, with a seal or a registration number. The prescriptive-route and reserved-judgement answers do not clear that.
       </p>
       {PROFESSIONAL_FIELDS.map((q) => {
         const id = `prof-${q.field}`;
@@ -162,6 +181,37 @@ function ProfessionalAnswers() {
             </div>
           );
         }
+        if (q.kind === "role") {
+          const value = typeof current === "string" ? current : "";
+          return (
+            <div key={q.field} className={`field full ${value ? "" : "is-empty"}`}>
+              <label htmlFor="prof-role">{q.label}</label>
+              <p className="field-note">Engineer or architect. A name copied from a document does not count. A seal can stand in for the registration number.</p>
+              <select
+                id="prof-role"
+                value={value === "engineer" || value === "architect" ? value : ""}
+                onChange={(e) => {
+                  if (e.target.value === "engineer" || e.target.value === "architect") {
+                    dispatch({ type: "setProfessionalFact", field: q.field, value: e.target.value });
+                  }
+                }}
+              >
+                <option value="">Not answered</option>
+                <option value="engineer">Engineer</option>
+                <option value="architect">Architect</option>
+              </select>
+            </div>
+          );
+        }
+        if (q.kind === "text") {
+          const value = typeof current === "string" ? current : "";
+          return (
+            <div key={q.field} className={`field full ${value ? "" : "is-empty"}`}>
+              <label htmlFor={id}>{q.label}</label>
+              <input id={id} value={value} onChange={(e) => dispatch({ type: "setProfessionalFact", field: q.field, value: e.target.value })} />
+            </div>
+          );
+        }
         if (q.kind === "number") {
           const value = typeof current === "number" ? String(current) : "";
           return (
@@ -182,22 +232,31 @@ function ProfessionalAnswers() {
             </div>
           );
         }
-        const value = current === true ? "yes" : current === false ? "no" : "";
+        const scopeField = isScopeField(q.field) ? q.field : null;
+        const notSure = scopeField !== null && c.questions.some((question) => question.id === `q-scope-${scopeField}` && !question.answer);
+        const value = notSure ? "not-sure" : current === true ? "yes" : current === false ? "no" : "";
         return (
           <div key={q.field} className={`field full ${value ? "" : "is-empty"}`}>
             <label htmlFor={id}>{q.label}</label>
+            {scopeField && <p className="field-note">{SCOPE_HELP[scopeField]}</p>}
             <select
               id={id}
               value={value}
               onChange={(e) => {
-                if (e.target.value === "yes" || e.target.value === "no") {
-                  dispatch({ type: "setProfessionalFact", field: q.field, value: e.target.value === "yes" });
+                const next = e.target.value;
+                if (scopeField && (next === "yes" || next === "no" || next === "not-sure")) {
+                  dispatch({ type: "answerScope", field: scopeField, answer: next });
+                  return;
+                }
+                if (next === "yes" || next === "no") {
+                  dispatch({ type: "setProfessionalFact", field: q.field, value: next === "yes" });
                 }
               }}
             >
               <option value="">Not answered</option>
               <option value="yes">Yes</option>
               <option value="no">No</option>
+              {scopeField && <option value="not-sure">Not sure</option>}
             </select>
           </div>
         );
@@ -211,7 +270,7 @@ function ProfessionalAnswers() {
  * GET /cases/{id}/section-d/issues is requested first and shown when that route exists.
  */
 export function Recommendations() {
-  const { c, engineId } = useCase();
+  const { c, engineId, dispatch } = useCase();
   const provisions = answeredYes(c).map((a) => a.provision).filter((id) => /^\d/.test(id)).join("|");
   const [attempt, setAttempt] = useState(0);
   const [load, setLoad] = useState<Load>(IDLE);
@@ -251,6 +310,9 @@ export function Recommendations() {
           engine.processFields(engineId, ctl.signal),
         ]);
         if (ctl.signal.aborted) return;
+        const practiceTrue = professional.required === "yes" || Boolean(issues?.some((issue) => issue.practice_of_engineering.value === true));
+        const practice = practiceTrue ? true : professional.required === "no" ? false : "unknown";
+        if (c.practiceOfEngineering !== practice) dispatch({ type: "notePractice", value: practice });
         setLoad({
           phase: "live",
           note: "Recommendations only. You write the evidence and the answers. This does not decide that the design complies or is safe.",
@@ -274,7 +336,7 @@ export function Recommendations() {
       }
     })();
     return () => ctl.abort();
-  }, [engineId, provisions, attempt]);
+  }, [engineId, provisions, attempt, c.practiceOfEngineering, dispatch]);
 
   const flag = load.professional?.required;
 
@@ -321,13 +383,18 @@ export function Recommendations() {
           {load.issues.map((issue) => {
             const practice = issue.practice_of_engineering;
             const unknown = practice.value === "unknown";
+            const status = sectionDIssueStatus({
+              practice: practice.value === true ? true : practice.value === false ? false : "unknown",
+              facts: c.facts,
+              evidenceLinked: evidenceLinked(c.facts, issue.id),
+            });
             return (
               <article key={issue.id} className="card">
                 <div className="card-head">
                   <span className="article-id">{issue.provision?.provision_id ?? issue.entered_reference ?? "No provision yet"}</span>
                   <span className="label-pill">
-                    <span className={`status-dot ${issue.status === "addressed" ? "done" : issue.status === "needs_professional" ? "blocking" : "warning"}`} />
-                    {issue.status}
+                    <span className={`status-dot ${status === "needs_professional" ? "blocking" : "warning"}`} />
+                    {status === "needs_professional" ? "needs_professional" : status === "evidence_listed" ? "evidence listed" : "open"}
                   </span>
                 </div>
                 <p>{issue.at_stake}</p>

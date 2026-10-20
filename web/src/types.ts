@@ -148,4 +148,9 @@ export interface Case {
   sectionC: SectionCRow[];
   /** Written by the applicant only; the tool supplies prompts, never content. */
   process: Record<ProcessFieldId, string>;
+  /**
+   * True when the Division C screen or a Section D issue says practice of engineering applies.
+   * Applicant yes/no answers do not set this, and they do not clear it.
+   */
+  practiceOfEngineering?: true | false | "unknown";
 }

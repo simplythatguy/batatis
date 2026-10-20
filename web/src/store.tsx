@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useReducer, useState, type Dispatch, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type Dispatch, type ReactNode } from "react";
 import type { EngineGap } from "./api/client";
 import { EngineError } from "./api/client";
 import { clearEngineSession, engineCaseId, ensureEngineCase, pushFacts, refreshGaps, syncJurisdiction } from "./api/sync";
@@ -55,9 +55,15 @@ interface Store {
   /** Workflow gaps (unconfirmed facts, unanswered cards) plus engine gaps when the route returns. */
   gaps: Gap[];
   engineGaps: EngineGap[];
-  /** engine = GET /gaps. browser = that call failed and the list is the local check. */
-  gapsSource: "loading" | "engine" | "browser";
+  /** idle = no review requested. engine = online result. browser = limited local check. */
+  gapsSource: "idle" | "loading" | "engine" | "browser";
   gapsNote: string;
+  /** Raw failure text for a collapsed technical detail. Not shown as the status line. */
+  reviewDetail: string;
+  /** True only after the latest save and online review both succeeded. */
+  syncOk: boolean;
+  /** Latest save/review outcome. Safe to read after `await saveDraft()` from an older render. */
+  readSync: () => { reviewed: boolean; detail: string };
   engineId: string | null;
   savedNote: string;
   phase: "who" | "case";
@@ -113,14 +119,26 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const [c, dispatch] = useReducer(reducer, loaded.case);
   const [engineId, setEngineId] = useState<string | null>(null);
   const [engineGaps, setEngineGaps] = useState<EngineGap[]>([]);
-  const [gapsSource, setGapsSource] = useState<Store["gapsSource"]>("loading");
-  const [gapsNote, setGapsNote] = useState("Checking what is still missing…");
+  const startsBlank = loaded.phase !== "case" || (!loaded.case.facts.length && !loaded.case.authority);
+  const [gapsSource, setGapsSource] = useState<Store["gapsSource"]>(startsBlank ? "idle" : "loading");
+  const [gapsNote, setGapsNote] = useState(startsBlank ? "Your application has not been reviewed online yet." : "Reviewing your application…");
+  const [reviewDetail, setReviewDetail] = useState("");
+  const [syncOk, setSyncOk] = useState(false);
+  const syncState = useRef({ reviewed: false, detail: "" });
   const [savedNote, setSavedNote] = useState("");
   const [pendingExampleId, setPendingExampleId] = useState<string | null>(null);
 
   useEffect(() => sessionStorage.setItem(KEY, JSON.stringify({ phase, case: c, note: resetNote })), [phase, c, resetNote]);
 
+  function reviewingCopy() {
+    return c.exampleId ? "Reviewing this example…" : "Reviewing your application…";
+  }
+
   async function sync(announce: boolean): Promise<string | null> {
+    setGapsSource("loading");
+    setGapsNote(reviewingCopy());
+    setSyncOk(false);
+    if (!announce) setSavedNote("");
     try {
       let id = await ensureEngineCase(c.title, c.authority);
       if (c.authority) id = await syncJurisdiction(id, c.authority, c.title);
@@ -134,15 +152,20 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       if (got.error) {
         setEngineGaps([]);
         setGapsSource("browser");
-        setGapsNote(`The administrative check did not return (${got.error}). This list is what is still empty here. It is not a finding that the design complies.`);
+        setReviewDetail(got.error);
+        setGapsNote("Online review unavailable. Showing a limited check of fields in this browser.");
+        setSyncOk(false);
       } else {
         setEngineGaps(got.gaps);
         setGapsSource("engine");
-        setGapsNote("From the engine's administrative check. This is not a finding that the design complies.");
+        setReviewDetail(factError ?? "");
+        setGapsNote("Online administrative review finished. This does not decide whether the design complies or is safe.");
+        setSyncOk(!factError);
       }
       if (announce) {
-        setSavedNote(factError ? `Draft saved. One fact was not accepted: ${factError}` : `Draft saved on the engine (${id}).`);
+        setSavedNote(got.error || factError ? "Draft saved in this browser." : "Draft saved.");
       }
+      syncState.current = { reviewed: !got.error && !factError, detail: got.error || factError || "" };
       return id;
     } catch (e) {
       setEngineId(engineCaseId());
@@ -150,8 +173,11 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       setGapsSource("browser");
       const message = e instanceof EngineError ? e.detail : e instanceof Error ? e.message : String(e);
       if (e instanceof EngineError && e.status === 404 && /case not found/i.test(e.detail)) clearEngineSession();
-      setGapsNote(`The engine did not take this case (${message}). This list is what is still empty here.`);
-      if (announce) setSavedNote(`Draft saved in this browser. ${message}`);
+      setReviewDetail(message);
+      setGapsNote("Online review unavailable. Showing a limited check of fields in this browser.");
+      setSyncOk(false);
+      syncState.current = { reviewed: false, detail: message };
+      if (announce) setSavedNote("Draft saved in this browser.");
       return null;
     }
   }
@@ -169,8 +195,12 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     clearEngineSession();
     setEngineId(null);
     setEngineGaps([]);
-    setGapsSource("loading");
-    setGapsNote("Checking what is still missing…");
+    setSyncOk(false);
+    setSavedNote("");
+    setReviewDetail("");
+    const blank = !next.facts.length && !next.authority;
+    setGapsSource(blank ? "idle" : "loading");
+    setGapsNote(blank ? "Your application has not been reviewed online yet." : next.exampleId ? "Reviewing this example…" : "Reviewing your application…");
     setResetNote("");
     dispatch({ type: "reset", to: next });
     setPhase("case");
@@ -197,6 +227,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       engineGaps,
       gapsSource,
       gapsNote,
+      reviewDetail,
+      syncOk,
+      readSync: () => syncState.current,
       engineId,
       savedNote,
       phase,
@@ -228,8 +261,10 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         clearEngineSession();
         setEngineId(null);
         setEngineGaps([]);
-        setGapsSource("browser");
+        setGapsSource("idle");
         setGapsNote("");
+        setReviewDetail("");
+        setSyncOk(false);
         setSavedNote("");
         dispatch({ type: "reset", to: emptyCase("homebuilder") });
         setPhase("who");
@@ -239,7 +274,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     }),
     // sync closes over the latest case via the render that built it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [c, gaps, engineGaps, gapsSource, gapsNote, engineId, savedNote, phase, resetNote, pendingExampleId],
+    [c, gaps, engineGaps, gapsSource, gapsNote, reviewDetail, syncOk, engineId, savedNote, phase, resetNote, pendingExampleId],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
