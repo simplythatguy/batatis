@@ -15,7 +15,8 @@ from engine.api import create_app
 from engine.models import Case, EvidenceItem, Fact, Source
 from engine.privacy import PII_NOTICE
 from engine.retention import reset_purge_clock
-from engine.store import CaseBackend, CaseStore, VersionConflict
+from engine.routes_case import create_router
+from engine.store import RETENTION_DAYS, CaseBackend, CaseStore, VersionConflict
 
 
 def _fact(field, value):
@@ -110,6 +111,23 @@ def test_removal_advances_version_and_rejects_stale_put_without_changing_its_con
     assert store.get_version(stale.id) == version + 3
 
 
+def test_failed_removal_rolls_back_case_and_version_together(evidence_store, monkeypatch):
+    store, create = evidence_store
+    case = create(facts=[_fact('evidence.wall.title', 'withdrawn')],
+                  evidence=[EvidenceItem(id='wall', description='withdrawn')])
+    serializer = 'model_dump_json' if isinstance(store, CaseStore) else 'model_dump'
+
+    def fail(*_args, **_kwargs):
+        raise RuntimeError('synthetic serialization failure')
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Case, serializer, fail)
+        with pytest.raises(RuntimeError, match='synthetic serialization failure'):
+            store.remove_evidence(case.id, 'wall')
+    assert store.get(case.id) == case
+    assert store.get_version(case.id) == 1
+
+
 def _private_response(response, status):
     assert response.status_code == status, response.text
     assert response.json()['meta']['notice'] == PII_NOTICE
@@ -124,7 +142,9 @@ def test_actual_delete_route_works_without_codedb_and_is_mounted_once(evidence_s
                   evidence=[EvidenceItem(id='wall', description='withdrawn'),
                             EvidenceItem(id='wall~2', description='kept')])
     app = create_app(store=store)
-    routes = [route for route in app.routes
+    # Inspect the router before inclusion: FastAPI may include it lazily in app.routes.
+    router = create_router(lambda: store, lambda: pytest.fail('Deletion must not open CodeDB'))
+    routes = [route for route in router.routes
               if getattr(route, 'path', '') == '/cases/{case_id}/evidence/{evidence_id}'
               and 'DELETE' in getattr(route, 'methods', set())]
     assert len(routes) == 1
@@ -177,6 +197,32 @@ def test_expired_case_is_purged_on_removal_between_sweeps(evidence_store):
     assert store.get_version(case.id) is None
     assert store.get_file(case.id, file_id) is None
     assert store.remove_evidence(case.id, 'wall') is None
+
+
+def test_removal_uses_the_elapsed_seven_day_boundary_without_extending_it(evidence_store, monkeypatch):
+    store, create = evidence_store
+    current = datetime.now(timezone.utc).replace(microsecond=0)
+
+    class FrozenDatetime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return current.astimezone(tz) if tz else current.replace(tzinfo=None)
+
+    monkeypatch.setattr('engine.store.datetime', FrozenDatetime)
+    cutoff = current - timedelta(days=RETENTION_DAYS)
+    for index, stamp in enumerate([
+        cutoff - timedelta(seconds=1),
+        (cutoff - timedelta(seconds=1)).astimezone(timezone(timedelta(hours=3))),
+        cutoff, cutoff + timedelta(seconds=1),
+    ]):
+        case = create(created_at=stamp.isoformat(timespec='seconds'),
+                      facts=[_fact('evidence.wall.title', 'withdrawn')])
+        result = store.remove_evidence(case.id, 'wall')
+        if index < 2:
+            assert result is None and store.get_version(case.id) is None
+        else:
+            assert result.facts == [] and result.created_at == case.created_at
+            assert store.get_version(case.id) == 2
 
 
 @pytest.mark.parametrize('writer', ['fact', 'delete'])
@@ -271,15 +317,14 @@ def _terminal_write(store, case_id, terminal):
 
 
 @pytest.mark.parametrize('terminal', ['delete', 'expire'])
-def test_queued_removal_cannot_restore_a_case_after_terminal_write(evidence_store, terminal):
+def test_queued_removal_cannot_restore_a_case_after_terminal_write(evidence_store, monkeypatch, terminal):
     store, create = evidence_store
     case = create(facts=[_fact('evidence.wall.title', 'withdrawn')])
     file_id = store.put_file(case.id, 'terminal.pdf', b'%PDF-1.4 synthetic')['id']
-    started, done = threading.Event(), threading.Event()
+    attempted, done = threading.Event(), threading.Event()
     results, errors = [], []
 
     def remove():
-        started.set()
         try:
             results.append(store.remove_evidence(case.id, 'wall'))
         except BaseException as exc:
@@ -288,13 +333,47 @@ def test_queued_removal_cannot_restore_a_case_after_terminal_write(evidence_stor
             done.set()
 
     thread = threading.Thread(target=remove)
-    with _terminal_write(store, case.id, terminal):
-        thread.start()
-        assert started.wait(5)
-        assert not done.wait(0.25), 'Removal did not wait for the terminal transaction'
-    thread.join(20)
+    # Observe the actual lock attempt, rather than assuming a thread has connected.
+    # In Postgres this pins expiry between the first purge and a waiting row read.
+    class ObservedConnection:
+        def __init__(self, con):
+            self.con = con
+
+        def execute(self, statement, *args):
+            lock = 'BEGIN IMMEDIATE' if isinstance(store, CaseStore) else 'SELECT data, version'
+            if threading.current_thread() is thread and statement.startswith(lock):
+                attempted.set()
+            return self.con.execute(statement, *args)
+
+        def __getattr__(self, name):
+            return getattr(self.con, name)
+
+    if isinstance(store, CaseStore):
+        connect = store._connect
+        monkeypatch.setattr(store, '_connect', lambda: ObservedConnection(connect()))
+    else:
+        connect = store._conn
+
+        @contextmanager
+        def observed_connection():
+            with connect() as con:
+                yield ObservedConnection(con)
+
+        monkeypatch.setattr(store, '_conn', observed_connection)
+    try:
+        with _terminal_write(store, case.id, terminal):
+            thread.start()
+            assert attempted.wait(15), 'Removal did not reach the database lock'
+            assert not done.wait(0.25), 'Removal did not wait for the terminal transaction'
+    finally:
+        if thread.ident is not None:
+            thread.join(20)
+        monkeypatch.undo()
     assert not thread.is_alive()
     assert not errors and results == [None]
     assert store.get(case.id) is None and store.get_version(case.id) is None
     assert store.get_file(case.id, file_id) is None
     assert store.purge_expired() == 0
+    with pytest.raises(VersionConflict):
+        store.put(case, expected_version=1)
+    assert store.get(case.id) is None
