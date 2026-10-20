@@ -39,7 +39,7 @@
 | **Privacy: municipalities (POPA)** | Alberta's Protection of Privacy Act has been in force since June 11, 2025; its privacy-management-program duties apply from June 11, 2026 | The organization's POPA obligations flow to us by contract, and pilot records belong to the organization | [OIPC: POPA](https://oipc.ab.ca/legislation/popa/) |
 | **The SCC portal (OVP)** | From Dec 1, 2026, only SCOs register variances, only through OVP, one location per registration, with supporting documentation and the revised variance form; unnecessary personal information is removed or redacted. Integration options and technical requirements are still to come | Batatis never registers anything; it prepares a package the SCO uploads. Any automated interface is built only with the Council's approval | [SCC IB-2026-10-01](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf) |
 | **Program window** | The Dec 2 – Mar 2 implementation window is not guaranteed | Phase 1 slips to whenever an organization engages; nothing in phases 2–3 depends on program funding | Onboarding guide (above) |
-| **Code text terms** | NRC code text is shown with NRC attribution and a link to the source | Written NRC terms before any commercial use | Implementation Plan §10 |
+| **Code text terms** | Code text is shown as the wording a citation relies on, with the edition and the provision. The screen does not yet show an NRC credit or a link to the official publication. | Written NRC terms before any commercial use | Implementation Plan §10 |
 
 ## 5. What would stop the pilot
 - An officer finds a compliance claim or an invented citation in output: pause and fix before continuing.
