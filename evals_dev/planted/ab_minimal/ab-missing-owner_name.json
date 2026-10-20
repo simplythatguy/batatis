@@ -1,0 +1,18 @@
+{
+  "id": "ab-missing-owner_name",
+  "role": "planted",
+  "constructed": true,
+  "removed_fields": [
+    "owner_name"
+  ],
+  "facts": {
+    "application_date": "Synthetic application_date",
+    "civic_address": "Synthetic civic_address",
+    "legal_description": "Synthetic legal_description",
+    "representative": "Synthetic representative",
+    "mailing_address": "Synthetic mailing_address",
+    "alternative_description": "Synthetic alternative_description",
+    "scope": "Synthetic scope"
+  },
+  "note": "Constructed fixture. Ground truth is removed_fields. Not a model gold label and not a human key. Removed owner_name from the clean Part 1 A/B application."
+}

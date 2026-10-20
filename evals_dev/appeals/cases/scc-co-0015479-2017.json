@@ -1,0 +1,103 @@
+{
+  "id": "scc-co-0015479-2017",
+  "title": "Building \u2013 Barrier free exit door \u2013 October 2017",
+  "decision_date": "2017-11-06",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2017/Building%20-%20Barrier%20free%20exit%20door%20-%20October%202017.pdf",
+  "applicant_type": null,
+  "topic": null,
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "An accredited agency's order on a two-storey hotel listed 14 contraventions. Only item 11 remained in dispute: a requirement that the rear (south) exit door be barrier-free.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "barrier-free design",
+    "access vs egress",
+    "exit doors",
+    "code interpretation"
+  ],
+  "missing_info": [],
+  "edition_original": "ABC 2006",
+  "other_codes": [],
+  "text_source_kind": "ocr",
+  "label_strength": "weak",
+  "refusal": {
+    "code": null,
+    "basis_type": "not applicable",
+    "basis": "not applicable: appeal of an order"
+  },
+  "outcome": "overturned",
+  "outcome_summary": "Order item 11 revoked: the ABC distinguishes access from egress. 3.8 addresses entrances and paths of travel, not exits, and no second egress door from the room or suite was needed.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "3.8.1.2.(1)",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.8.1.2.(1)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "9.9.7.4. / Table 9.9.7.4.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 9",
+      "parsed_id": null,
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "Table citation. Not mapped without a verified NBC(AE) 2023 table id."
+    },
+    {
+      "source_article": "Subsection 9.5.2.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 9",
+      "parsed_id": null,
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "Not an article identifier."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "Not at issue (appellant was an architect).",
+      "sentences": 1,
+      "quote_confidence": "low",
+      "kind": "summary",
+      "field": "professional_involvement",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2017/Building%20-%20Barrier%20free%20exit%20door%20-%20October%202017.pdf"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": false,
+    "weak_flag": null,
+    "label_strength": null,
+    "facts": {}
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": null,
+    "engineering_reason": "",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}
