@@ -161,6 +161,13 @@ class Case(BaseModel):
     evidence: list[EvidenceItem] = []
     gaps: list[Gap] = []
 
+    @computed_field
+    @property
+    def route_notice(self) -> str | None:
+        """Manufacturer or province-wide scope: this tool prepares a site variance. None otherwise."""
+        from .route_notice import route_notice
+        return route_notice(self)
+
     def export_facts(self) -> list[dict]:
         return [f.export() for f in self.facts]
 

@@ -9,6 +9,7 @@ from codedb import AmbiguousProvisionError
 
 from .codes import CodeDbMissing, Codes
 from .export import ExportBlocked, ExportError, FormMismatch, FormNotFound, export_case
+from .description_facts import apply_pasted_text
 from .models import Case, Fact, Jurisdiction, SectionCRow
 from .quotes import clip_body
 from .section_c import section_c_rows
@@ -59,7 +60,9 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
 
     @app.post('/cases', response_model=Case, status_code=201)
     def create_case(body: NewCase | None = None):
-        return _public_case(cases().put(Case(**(body.model_dump() if body else {}))))
+        case = Case(**(body.model_dump() if body else {}))
+        apply_pasted_text(case, case.title)
+        return _public_case(cases().put(case))
 
     @app.get('/cases/{case_id}', response_model=Case)
     def get_case(case_id: str):
@@ -70,6 +73,9 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         case = cases().add_fact(case_id, fact)
         if case is None:
             raise HTTPException(404, 'case not found')
+        if isinstance(fact.value, str):
+            apply_pasted_text(case, fact.value)
+            case = cases().put(case)
         return _public_case(case)
 
     @app.post('/cases/{case_id}/export', response_class=Response,

@@ -20,8 +20,17 @@ PROBES = (
         'ask': 'What is the wall assembly made of, and what are its fire-resistance and thermal properties?',
         'why': 'The material and its fire or thermal properties decide which wall, insulation, and fire-resistance articles apply.',
         'prefixes': ('9.10.3.', '9.10.8.', '9.23.', '9.25.', '3.1.5.', '3.1.7.'),
-        'prose': ('hemp', 'hempcrete', 'straw bale', 'wall assembly', 'assembly', 'sheathing', 'insulation'),
+        'prose': ('hemp', 'hempcrete', 'straw bale', 'wall assembly', 'assembly', 'insulation'),
         'boost': ('hemp', 'hempcrete'),
+    },
+    {
+        'field': 'assembly.sheathing_membrane',
+        'label': 'sheathing membrane',
+        'ask': 'Is a sheathing membrane part of this wall?',
+        'why': 'A sheathing membrane is a different layer from a structural nail-base panel.',
+        'prefixes': ('9.27.3.',),
+        'prose': ('sheathing membrane',),
+        'topic': ('sheathing membrane',),
     },
     {
         'field': 'building.storeys',
@@ -92,18 +101,77 @@ def _view(facts) -> list[dict]:
     return out
 
 
-def _hits(probe: dict, prose: str, candidates: list[dict]) -> list[dict]:
+def _terms(probe: dict) -> tuple[str, ...]:
+    return tuple(probe.get('topic') or probe['prose'])
+
+
+def _topic_in(probe: dict, prose: str) -> bool:
+    low = (prose or '').lower()
+    return any(term in low for term in _terms(probe))
+
+
+def _provision_hits(probe: dict, candidates: list[dict], provisions) -> list[dict]:
+    """Candidates or confirmed provisions in this question's provision family."""
     hits = []
+    seen = set()
     for cand in candidates:
         pid = str(cand.get('provision') or '')
-        blob = f"{cand.get('title') or ''} {cand.get('text') or ''}".lower()
-        if any(pid.startswith(p) for p in probe['prefixes']) or any(k in blob for k in probe['prose']):
+        if any(pid.startswith(prefix) for prefix in probe['prefixes']) and pid not in seen:
             hits.append(cand)
+            seen.add(pid)
+    for pid in provisions or []:
+        pid = str(pid)
+        if any(pid.startswith(prefix) for prefix in probe['prefixes']) and pid not in seen:
+            hits.append({'provision': pid, 'title': '', 'text': ''})
+            seen.add(pid)
+    return hits
+
+
+def _hits(probe: dict, prose: str, candidates: list[dict], provisions=()) -> list[dict]:
+    """Provision family, or a topic the description actually names. Not the top ranked cards."""
+    hits = _provision_hits(probe, candidates, provisions)
+    described = _topic_in(probe, prose)
+    # A sheathing-membrane card follows that topic or that provision. A ranked
+    # article with the words in its title is not enough for a nail-base panel.
+    if 'sheathing membrane' in _terms(probe):
+        case_has = any(str(pid).startswith('9.27.3.') for pid in provisions or [])
+        if not described and not case_has:
+            return []
+        return [hit for hit in hits if str(hit.get('provision') or '').startswith('9.27.3.')]
     if hits:
         return hits
-    if any(k in prose.lower() for k in probe['prose']):
-        return list(candidates[:3])
+    if described:
+        return []
     return []
+
+
+def question_matches(question: dict, *, description: str, provisions=(), candidates=()) -> bool:
+    """A question card is shown only when its provision or its topic matches this case.
+
+    ``provisions`` are the case's provisions. Ranked candidates are not a match by themselves.
+    """
+    description = (description or '').lower()
+    provision_ids = [str(pid) for pid in provisions or []]
+    disambiguates = [str(pid) for pid in question.get('disambiguates') or []]
+    parts = [str(question.get('text') or ''), str(question.get('why') or '')]
+    linked = {pid for pid in disambiguates}
+    for cand in candidates or []:
+        if str(cand.get('provision') or '') in linked:
+            parts.append(str(cand.get('title') or ''))
+            parts.append(str(cand.get('text') or ''))
+    blob = ' '.join(parts).lower()
+    if 'sheathing membrane' in blob:
+        if 'sheathing membrane' in description:
+            return True
+        return any(pid.startswith('9.27.3.') for pid in provision_ids)
+    if provision_ids and disambiguates:
+        return any(
+            left.startswith(right) or right.startswith(left)
+            for left in disambiguates for right in provision_ids
+        )
+    if disambiguates and not provision_ids:
+        return True
+    return True
 
 
 def _known(facts: list[dict], field: str) -> dict | None:
@@ -147,14 +215,17 @@ def _with_storeys(prose: str, facts: list[dict]) -> list[dict]:
     }]
 
 
-def generate_questions(prose: str, candidates: list[dict], facts=None, *, cap: int = QUESTION_CAP) -> list[dict]:
+def generate_questions(prose: str, candidates: list[dict], facts=None, *, cap: int = QUESTION_CAP,
+                       provisions=None) -> list[dict]:
     """Ranked questions, at most `cap`. Each names the candidates it disambiguates."""
     facts = _with_storeys(prose, _view(facts))
     prose = prose or ''
+    provisions = list(provisions or [])
     scored = []
     for probe in PROBES:
-        hits = _hits(probe, prose, candidates)
-        if not hits:
+        hits = _hits(probe, prose, candidates, provisions)
+        described = _topic_in(probe, prose)
+        if not hits and not described:
             continue
         fact = _known(facts, probe['field'])
         if fact and fact.get('status') == 'confirmed' and fact.get('value') not in (None, ''):
@@ -198,4 +269,5 @@ def generate_questions(prose: str, candidates: list[dict], facts=None, *, cap: i
             'disambiguates': [],
             'answer': fact.get('value'),
         })
-    return chosen
+    return [question for question in chosen
+            if question_matches(question, description=prose, provisions=provisions, candidates=candidates)]

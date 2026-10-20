@@ -777,6 +777,19 @@
           "title": "Provisions",
           "type": "array"
         },
+        "route_notice": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Manufacturer or province-wide scope: this tool prepares a site variance. None otherwise.",
+          "readOnly": true,
+          "title": "Route Notice"
+        },
         "section_c": {
           "default": [],
           "items": {
@@ -812,7 +825,8 @@
         "provisions",
         "section_c",
         "evidence",
-        "gaps"
+        "gaps",
+        "route_notice"
       ],
       "title": "Case",
       "type": "object"

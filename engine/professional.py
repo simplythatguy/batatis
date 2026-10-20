@@ -15,6 +15,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, computed_field
 
 from .codes import Codes
+from .fact_text import fact_label
 from .models import Case
 from .process_fields import confirmed_value
 
@@ -49,6 +50,73 @@ def practice_answer(required: str, reasons, needs: list[str]) -> str:
             if text:
                 return text
     return 'unknown: needs a deciding fact'
+
+
+# The facts that decide the screen. The other Division C triggers stay on ``reasons``
+# for the machine token. The sentence a person reads names these, not those citations.
+_PRIMARY_FACTS = ('occupancy', 'part4_design')
+_FACT_PHRASE = {
+    'occupancy': 'the building type',
+    'part4_design': 'whether any design is carried out under Part 4',
+    'storeys': 'the number of storeys',
+    'building_area_m2': 'the building area',
+    'principal_dwelling_units': 'the number of principal dwelling units',
+    'farm_public_use': 'whether the farm building is for public use',
+    'span_m': 'the span',
+    'preserved_wood_foundation_part4': 'whether there is a preserved wood foundation designed under Part 4',
+    'roof_trusses': 'whether wood roof trusses are included',
+    'ahj_requires_professional': 'whether the authority requires a professional',
+    'special_safety_concerns': 'whether size or complexity requires a professional',
+    'fire_suppression': 'whether a fire suppression system is being installed',
+    'fire_alarm': 'whether a fire alarm system is being installed',
+    'prescriptive_route_confirmed': 'which design route applies',
+    'professional_judgement_required': 'whether the work needs reserved professional judgement',
+    'professional_scope_resolved': 'whether professional-law scope is resolved',
+}
+
+
+def _field_name(field: str) -> str:
+    return field.split('.')[-1]
+
+
+def deciding_needs(facts: ProfessionalFacts, needs: list[str]) -> list[str]:
+    """The missing facts that decide this screen. Not every Division C trigger."""
+    def full(name: str) -> str:
+        return name if '.' in name else f'professional.{name}'
+
+    def take(chosen: list[str], name: str) -> None:
+        item = full(name)
+        if item in needs and item not in chosen:
+            chosen.append(item)
+
+    chosen: list[str] = []
+    for name in _PRIMARY_FACTS:
+        take(chosen, name)
+    if facts.occupancy == 'multi_family':
+        take(chosen, 'principal_dwelling_units')
+    if facts.occupancy in _AREA_LIMITS:
+        take(chosen, 'storeys')
+        take(chosen, 'building_area_m2')
+    if facts.occupancy == 'farm':
+        take(chosen, 'farm_public_use')
+    take(chosen, 'span_m')
+    return chosen or list(needs)
+
+
+def engineer_question(needs: list[str]) -> str:
+    """One question. It names the deciding facts and does not cite Division C."""
+    phrases = []
+    for field in needs:
+        name = _field_name(field)
+        phrases.append(_FACT_PHRASE.get(name) or fact_label(field))
+    if not phrases:
+        return 'Do we need an engineer? A deciding fact is not on the case yet.'
+    if len(phrases) == 1:
+        return f'Do we need an engineer? The deciding fact is {phrases[0]}.'
+    listed = ', '.join(phrases[:-1]) + f', and {phrases[-1]}'
+    return f'Do we need an engineer? The deciding facts are {listed}.'
+
+
 Occupancy = Literal['single_family', 'multi_family', 'hotel', 'assembly', 'care', 'treatment',
                     'detention', 'business', 'mercantile', 'industrial', 'farm',
                     'relocatable_industrial_camp', 'mixed', 'other']
@@ -123,7 +191,6 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes) -> P
     if isinstance(facts, Case):
         facts = ProfessionalFacts.from_case(facts)
     reasons: list[ProfessionalReason] = []
-    questions: list[str] = []
     needs: list[str] = []
 
     def need(*names: str) -> None:
@@ -132,14 +199,11 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes) -> P
             if field not in needs:
                 needs.append(field)
 
-    def add(code: str, required: Requirement, message: str, pid: str,
-            question: str | None = None, division: str = 'C'):
+    def add(code: str, required: Requirement, message: str, pid: str, division: str = 'C'):
         rec = codes.provision(pid, division)
         if rec is None:
             raise KeyError(f'missing professional-involvement provision: {pid}')
         reasons.append(ProfessionalReason(code=code, required=required, message=message, citation=rec['citation']))
-        if question:
-            questions.append(question)
 
     occupancy = facts.occupancy
     general: Requirement = 'depends'
@@ -148,25 +212,17 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes) -> P
     elif occupancy == 'multi_family':
         if facts.principal_dwelling_units is not None:
             general = 'yes' if facts.principal_dwelling_units > 4 else 'no'
-        else:
-            questions.append('How many principal dwelling units are there, excluding confirmed qualifying secondary suites?')
     elif occupancy in _AREA_LIMITS:
         if facts.storeys is not None:
             if facts.storeys > 3:
                 general = 'yes'
             elif facts.building_area_m2 is not None:
                 general = 'no' if facts.building_area_m2 <= _AREA_LIMITS[occupancy][facts.storeys - 1] else 'yes'
-        if general == 'depends':
-            questions.append('What are the building height in storeys and building area in square metres (not total floor area)?')
     elif occupancy == 'farm':
         if facts.farm_public_use is False:
             general = 'no'
-        else:
-            questions.append('Is the farm building for public use, and what occupancy classification applies?')
     elif occupancy == 'relocatable_industrial_camp':
         general = 'no'
-    else:
-        questions.append('What is the confirmed occupancy/building type, including each use in a mixed-use building?')
 
     if general == 'yes':
         add('general_building', 'yes',
@@ -203,30 +259,27 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes) -> P
         if facts.special_safety_concerns is None:
             need('special_safety_concerns')
         add('special_safety', 'depends', 'Size, complexity or an unresolved authority direction may require professionals.',
-            '2.4.1.1.(4)', 'Has the authority determined whether size or complexity requires professional involvement, and for which scope?')
+            '2.4.1.1.(4)')
 
     if facts.part4_design is True:
         add('part4', 'yes', 'Part 4 design requires a registered professional skilled in the work concerned.', '2.4.1.2.(1)')
     elif facts.part4_design is None:
         need('part4_design')
-        add('part4_unknown', 'depends', 'The structural design route is not confirmed.', '2.4.1.2.(1)',
-            'Is any design carried out under Part 4, including beams, connections or foundations?')
+        add('part4_unknown', 'depends', 'The structural design route is not confirmed.', '2.4.1.2.(1)')
     if facts.preserved_wood_foundation_part4 is True:
         add('preserved_wood_foundation', 'yes',
             'A Part 4 preserved wood foundation needs professional retention for installation field reviews before construction.',
             '2.4.1.2.(2)')
     elif facts.preserved_wood_foundation_part4 is None:
         need('preserved_wood_foundation_part4')
-        add('foundation_unknown', 'depends', 'The foundation design and field-review trigger are unresolved.', '2.4.1.2.(2)',
-            'Does the project include a preserved wood foundation designed under Part 4?')
+        add('foundation_unknown', 'depends', 'The foundation design and field-review trigger are unresolved.', '2.4.1.2.(2)')
     if facts.roof_trusses is True:
         add('truss_design', 'yes', 'Wood roof truss design and assembly connections need appropriate engineering responsibility.',
             '9.23.14.11.(2)', division='B')
         add('truss_part4', 'yes', 'The Part 4 connection-design route requires a skilled registered professional.', '2.4.1.2.(1)')
     elif facts.roof_trusses is None:
         need('roof_trusses')
-        add('trusses_unknown', 'depends', 'Roof-truss assembly design responsibility is not confirmed.', '2.4.1.2.(1)',
-            'Are wood roof trusses or truss assembly connections included?')
+        add('trusses_unknown', 'depends', 'Roof-truss assembly design responsibility is not confirmed.', '2.4.1.2.(1)')
 
     for field, code, pid, task in (
         ('fire_suppression', 'suppression', '2.4.1.3.(1)', 'testing'),
@@ -240,7 +293,7 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes) -> P
             if present is None:
                 need(field)
             add(code + '_unknown', 'depends', 'System presence or applicability of the general building requirement is unresolved.',
-                pid, f'Is a {field.replace("_", " ")} system being installed, and does the general professional requirement apply?')
+                pid)
 
     if facts.prescriptive_route_confirmed is not True or facts.professional_judgement_required is not False:
         if facts.prescriptive_route_confirmed is None:
@@ -248,18 +301,15 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes) -> P
         if facts.professional_judgement_required is None:
             need('professional_judgement_required')
         add('design_scope', 'depends', 'Non-prescriptive work or performance judgements need a competent professional-scope assessment.',
-            '2.4.1.1.(3)', 'Which design route applies, and does any proposed analysis require reserved professional judgement?')
+            '2.4.1.1.(3)')
     if facts.professional_scope_resolved is not True:
         need('professional_scope_resolved')
         add('professional_law', 'depends', 'Independent professional-law and local scope requirements are not resolved.',
-            '2.4.1.1.(5)', 'Have the applicable professional-law, discipline and local submission requirements been resolved?')
+            '2.4.1.1.(5)')
 
     required: Requirement = 'yes' if any(r.required == 'yes' for r in reasons) else (
         'depends' if any(r.required == 'depends' for r in reasons) else 'no')
-    asked = []
-    for question in dict.fromkeys(questions):
-        if question.strip().casefold() in ('depends', 'depends.'):
-            continue
-        asked.append(question)
+    shown = deciding_needs(facts, needs) if required == 'depends' else []
+    asked = [engineer_question(shown)] if required == 'depends' else []
     return ProfessionalResult(required=required, general_required=general, reasons=reasons,
-                              questions=asked, needs=needs)
+                              questions=asked, needs=shown if required == 'depends' else needs)

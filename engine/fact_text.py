@@ -43,6 +43,12 @@ _LABELS = {
     'egress.window': 'Bedroom egress window',
     'project.description': 'Description',
     'alternative': 'Proposed alternative',
+    'ccmc_evaluation': 'CCMC evaluation',
+    'evidence.letter': 'Letter',
+    'scope': 'Jurisdiction-wide',
+    'applicant.role': 'Role',
+    'applicant_type': 'Role',
+    'role': 'Role',
 }
 
 _BOOL_FIELDS = {
@@ -58,6 +64,7 @@ _BOOL_FIELDS = {
     'professional.fire_suppression', 'fire_suppression',
     'professional.fire_alarm', 'fire_alarm',
     'building.sprinklered',
+    'ccmc_evaluation',
 }
 
 _VALUES = {

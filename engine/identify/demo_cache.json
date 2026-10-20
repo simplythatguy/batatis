@@ -993,8 +993,7 @@
       "questions": [
         "What is the wall assembly made of, and what are its fire-resistance and thermal properties?",
         "What is the building area of each storey?",
-        "Is the building sprinklered?",
-        "What is the occupancy (and, if you have it, the occupant load)?"
+        "Is the building sprinklered?"
       ],
       "open_questions": [
         {
@@ -1004,10 +1003,7 @@
           "why": "The material and its fire or thermal properties decide which wall, insulation, and fire-resistance articles apply.",
           "status": "open",
           "disambiguates": [
-            "9.29.9.3.",
-            "9.29.6.3.",
             "9.23.13.6.",
-            "9.27.3.6.",
             "9.23.13.5.",
             "3.1.5.8."
           ],
@@ -1019,11 +1015,7 @@
           "text": "What is the building area of each storey?",
           "why": "Building area changes the Part 9 / Part 3 boundary and several construction articles.",
           "status": "open",
-          "disambiguates": [
-            "9.29.5.8.",
-            "9.29.9.3.",
-            "9.29.6.3."
-          ],
+          "disambiguates": [],
           "answer": null
         },
         {
@@ -1032,22 +1024,7 @@
           "text": "Is the building sprinklered?",
           "why": "Sprinkler status changes which exit and fire-separation relaxations are candidates.",
           "status": "open",
-          "disambiguates": [
-            "9.29.5.8.",
-            "9.29.9.3.",
-            "9.29.6.3."
-          ],
-          "answer": null
-        },
-        {
-          "id": "building.occupancy",
-          "field": "building.occupancy",
-          "text": "What is the occupancy (and, if you have it, the occupant load)?",
-          "why": "Occupancy and occupant load move a design between Part 9 housing articles and Part 3 assembly or care articles.",
-          "status": "open",
-          "disambiguates": [
-            "9.23.13.5."
-          ],
+          "disambiguates": [],
           "answer": null
         }
       ],
@@ -1546,9 +1523,9 @@
       "questions": [
         "What is the building height in storeys and metres?",
         "What is the building area of each storey?",
+        "Is the building sprinklered?",
         "What is the wall assembly made of, and what are its fire-resistance and thermal properties?",
-        "What is the occupancy (and, if you have it, the occupant load)?",
-        "Is the building sprinklered?"
+        "What is the occupancy (and, if you have it, the occupant load)?"
       ],
       "open_questions": [
         {
@@ -1560,7 +1537,6 @@
           "disambiguates": [
             "3.2.2.52.",
             "3.2.2.55.",
-            "3.1.9.4.",
             "3.2.2.48.",
             "3.2.2.49.",
             "3.2.2.51."
@@ -1578,45 +1554,6 @@
             "3.2.2.55.",
             "3.2.2.48.",
             "3.2.2.49.",
-            "3.2.2.51.",
-            "3.1.5.19."
-          ],
-          "answer": null
-        },
-        {
-          "id": "assembly.material",
-          "field": "assembly.material",
-          "text": "What is the wall assembly made of, and what are its fire-resistance and thermal properties?",
-          "why": "The material and its fire or thermal properties decide which wall, insulation, and fire-resistance articles apply.",
-          "status": "open",
-          "disambiguates": [
-            "3.2.2.52.",
-            "3.2.2.55.",
-            "3.1.9.4.",
-            "3.1.9.1.",
-            "9.10.9.9.",
-            "3.2.2.48.",
-            "3.2.2.49.",
-            "3.2.2.51.",
-            "3.1.5.19."
-          ],
-          "answer": null
-        },
-        {
-          "id": "building.occupancy",
-          "field": "building.occupancy",
-          "text": "What is the occupancy (and, if you have it, the occupant load)?",
-          "why": "Occupancy and occupant load move a design between Part 9 housing articles and Part 3 assembly or care articles.",
-          "status": "open",
-          "disambiguates": [
-            "3.2.2.52.",
-            "3.2.2.55.",
-            "3.1.9.4.",
-            "3.1.9.1.",
-            "9.10.9.9.",
-            "9.10.9.7.",
-            "3.2.2.48.",
-            "3.2.2.49.",
             "3.2.2.51."
           ],
           "answer": null
@@ -1630,14 +1567,30 @@
           "disambiguates": [
             "3.2.2.52.",
             "3.2.2.55.",
-            "3.1.9.4.",
-            "3.1.9.1.",
-            "9.10.9.9.",
             "3.2.2.48.",
             "3.2.2.49.",
-            "3.2.2.51.",
+            "3.2.2.51."
+          ],
+          "answer": null
+        },
+        {
+          "id": "assembly.material",
+          "field": "assembly.material",
+          "text": "What is the wall assembly made of, and what are its fire-resistance and thermal properties?",
+          "why": "The material and its fire or thermal properties decide which wall, insulation, and fire-resistance articles apply.",
+          "status": "open",
+          "disambiguates": [
             "3.1.5.19."
           ],
+          "answer": null
+        },
+        {
+          "id": "building.occupancy",
+          "field": "building.occupancy",
+          "text": "What is the occupancy (and, if you have it, the occupant load)?",
+          "why": "Occupancy and occupant load move a design between Part 9 housing articles and Part 3 assembly or care articles.",
+          "status": "open",
+          "disambiguates": [],
           "answer": null
         }
       ],
@@ -2048,10 +2001,9 @@
       "variance_explanation": "The description treats the design as doing something other than the cited acceptable solution. A variance is the application that asks the Safety Codes Officer to consider that alternative. This identification does not decide whether the alternative performs as well.",
       "questions": [
         "What is the wall assembly made of, and what are its fire-resistance and thermal properties?",
-        "What is the occupancy (and, if you have it, the occupant load)?",
         "Is the building sprinklered?",
-        "What is the building height in storeys and metres?",
-        "What is the limiting distance from the exposing building face to the property line?"
+        "What is the occupancy (and, if you have it, the occupant load)?",
+        "What is the building area of each storey?"
       ],
       "open_questions": [
         {
@@ -2063,25 +2015,7 @@
           "disambiguates": [
             "9.25.2.5.",
             "3.1.5.15.",
-            "9.23.14.11.",
-            "3.2.5.12.",
-            "9.36.5.14."
-          ],
-          "answer": null
-        },
-        {
-          "id": "building.occupancy",
-          "field": "building.occupancy",
-          "text": "What is the occupancy (and, if you have it, the occupant load)?",
-          "why": "Occupancy and occupant load move a design between Part 9 housing articles and Part 3 assembly or care articles.",
-          "status": "open",
-          "disambiguates": [
-            "3.1.5.15.",
-            "9.10.20.2.",
-            "3.2.5.12.",
-            "9.9.6.3.",
-            "9.36.5.14.",
-            "9.9.6.2."
+            "9.23.14.11."
           ],
           "answer": null
         },
@@ -2092,32 +2026,26 @@
           "why": "Sprinkler status changes which exit and fire-separation relaxations are candidates.",
           "status": "open",
           "disambiguates": [
-            "3.1.5.15.",
-            "9.10.20.2.",
             "3.2.5.12."
           ],
           "answer": null
         },
         {
-          "id": "building.height",
-          "field": "building.height",
-          "text": "What is the building height in storeys and metres?",
-          "why": "Height decides whether Part 9 or Part 3 exit and construction articles govern.",
+          "id": "building.occupancy",
+          "field": "building.occupancy",
+          "text": "What is the occupancy (and, if you have it, the occupant load)?",
+          "why": "Occupancy and occupant load move a design between Part 9 housing articles and Part 3 assembly or care articles.",
           "status": "open",
-          "disambiguates": [
-            "3.2.5.12."
-          ],
+          "disambiguates": [],
           "answer": null
         },
         {
-          "id": "site.limiting_distance",
-          "field": "site.limiting_distance",
-          "text": "What is the limiting distance from the exposing building face to the property line?",
-          "why": "Limiting distance decides which spatial-separation articles, and which unprotected-opening limits, stay in the set.",
+          "id": "building.area",
+          "field": "building.area",
+          "text": "What is the building area of each storey?",
+          "why": "Building area changes the Part 9 / Part 3 boundary and several construction articles.",
           "status": "open",
-          "disambiguates": [
-            "3.2.5.12."
-          ],
+          "disambiguates": [],
           "answer": null
         }
       ],

@@ -161,7 +161,7 @@ def _checked_verifier(verifier, prose, ranked_ids, arts):
 
 def run(prose: str, db_path: Path | str | None = None, judge: Judge | None = None, *, arts: dict | None = None,
         codes: Codes | None = None,         verifier=None, facts=None, on_stage=None, ranker: str | None = None,
-        verify: bool = True, verify_chars: int | None = None) -> dict:
+        verify: bool = True, verify_chars: int | None = None, provisions=None) -> dict:
     policy = commit_policy()
     threshold = policy['threshold']
     max_commits = policy['max_commits']
@@ -318,7 +318,7 @@ def run(prose: str, db_path: Path | str | None = None, judge: Judge | None = Non
     questions = generate_questions(prose, [
         {'provision': a['provision'], 'title': a['title'], 'text': arts[a['provision']].get('text', ''), 'part': a['part']}
         for a in out_articles
-    ], facts)
+    ], facts, provisions=provisions)
     variance, explanation = assess_variance(prose, facts)
     if redirect:
         intake = 'redirect'

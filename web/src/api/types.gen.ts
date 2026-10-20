@@ -86,6 +86,7 @@ export interface Case {
   id: string;
   jurisdiction: Jurisdiction | null;
   provisions: string[];
+  /** Manufacturer or province-wide scope: this tool prepares a site variance. None otherwise. */ route_notice: string | null;
   section_c: SectionCRow[];
   title: string | null;
   updated_at: string;

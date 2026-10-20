@@ -20,6 +20,7 @@ from .identify.demo_cache import match_demo
 from .identify.http_models import DecisionRequest, DecisionResponse, IdentifyRequest, IdentifyResponse
 from .identify.offline import ProviderOutage, http_live, is_provider_outage
 from .identify.pipeline import run as identify_run
+from .description_facts import apply_pasted_text
 from .identify.storeys import parse_storeys
 from .identify.title import short_title, title_should_replace
 from .llm_gate import Decision, authorize, client_ip_from, record
@@ -166,11 +167,12 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
 
         return inner
 
-    def _bm25(prose: str, facts, on_stage) -> dict:
+    def _bm25(prose: str, facts, on_stage, provisions=None) -> dict:
         if not default_db().exists():
             return empty_bm25()
         try:
-            return identify_run(prose, facts=facts, on_stage=_stages(on_stage), ranker='bm25')
+            return identify_run(prose, facts=facts, on_stage=_stages(on_stage), ranker='bm25',
+                                provisions=provisions)
         except (CodeDbMissing, FileNotFoundError):
             return empty_bm25()
         except Exception as exc:
@@ -178,11 +180,11 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
                 return empty_bm25()
             raise
 
-    def _without_provider(prose: str, facts, on_stage) -> tuple[dict, str]:
+    def _without_provider(prose: str, facts, on_stage, provisions=None) -> tuple[dict, str]:
         cached = match_demo(prose, facts)
         if cached is not None:
             return cached, 'cached_demo'
-        return _bm25(prose, facts, on_stage), 'bm25_fallback'
+        return _bm25(prose, facts, on_stage, provisions), 'bm25_fallback'
 
     def _remember_storeys(case: Case, prose: str) -> None:
         """A count written in the description is a pointed fact. Identify does not ask for it again."""
@@ -204,11 +206,13 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
 
     def _identify_result(case_id: str, prose: str, facts, on_stage=None, client_ip: str | None = None) -> dict:
         case = cases().get(case_id)
-        storeys_before = len(case.facts) if case is not None else 0
+        before = (len(case.facts), len(case.evidence)) if case is not None else (0, 0)
         title_before = case.title if case is not None else None
         if case is not None:
+            apply_pasted_text(case, prose)
             _remember_storeys(case, prose)
             facts = case.facts
+        provisions = list(case.provisions) if case is not None else None
         gate_source = None
         if http_live():
             if not default_db().exists():
@@ -216,27 +220,27 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
             decision = authorize(model=_GATE_MODEL, max_input_tokens=_GATE_INPUT_TOKENS,
                                  max_output_tokens=_GATE_OUTPUT_TOKENS, client_ip=client_ip)
             if not decision.allowed:
-                raw, mode = _without_provider(prose, facts, on_stage)
+                raw, mode = _without_provider(prose, facts, on_stage, provisions)
                 gate_source = decision.source
             else:
                 try:
-                    raw = identify_run(prose, facts=facts, on_stage=_stages(on_stage))
+                    raw = identify_run(prose, facts=facts, on_stage=_stages(on_stage), provisions=provisions)
                     mode = 'live'
                     _record_usage(raw, decision)
                 except Exception as exc:
                     _release(decision)
                     if isinstance(exc, ProviderOutage) or is_provider_outage(exc):
-                        raw, mode = _without_provider(prose, facts, on_stage)
+                        raw, mode = _without_provider(prose, facts, on_stage, provisions)
                     else:
                         raise
         else:
-            raw, mode = _without_provider(prose, facts, on_stage)
+            raw, mode = _without_provider(prose, facts, on_stage, provisions)
         result = present(raw, _codes_or_none(), mode, facts)
         if gate_source:
             result['source'] = gate_source
         if case is not None:
             _remember_title(case, prose, result)
-            if case.title != title_before or len(case.facts) != storeys_before:
+            if case.title != title_before or (len(case.facts), len(case.evidence)) != before:
                 cases().put(case)
             result['title'] = case.title
         overlay_decisions(result, case if case is not None else cases().get(case_id))

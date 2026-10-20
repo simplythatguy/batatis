@@ -31,7 +31,9 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `GET /cases/{case_id}/process-fields` | Process-field list. Empty when the pathway is an acceptable solution. |
 | `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` when the blank form file is missing; that detail is the form error text. `500` on other export failures. |
 
-A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed`, `unconfirmed`, `open`, or `unknown`. A `proposed` fact cannot be `confirmed`.
+A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`, and `route_notice`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed`, `unconfirmed`, `open`, or `unknown`. A `proposed` fact cannot be `confirmed`.
+
+`route_notice` is a sentence, or null. It is set when the role is a manufacturer (`role`, `applicant.role`, or `applicant_type`) or the scope fact is province-wide. It says province-wide product acceptance is a different route from a single-site variance, and that this tool prepares a site variance application. The only routes it names are ones already documented in the repo: a CCMC evaluation (the Canadian Construction Materials Centre page and PAS-001) and the provincial variance under Division C Article 2.2.1.2 and Note A-2.2.1.2. Calgary B23-014 is the documented site-and-project-specific product path. A route the research does not name ends with `ask the Safety Codes Officer or the province which route applies`. The notice does not change the form template. Export still resolves `alberta` / `scc-variance` unless the request asks for another registered form.
 
 Each fact also has `label` and `display`. `field` and `value` stay the machine values. `label` is the human name (`Designed under Part 4`, `Building type`). `display` is the line to show (`Designed under Part 4: No`, `Building type: Single-family dwelling`). A boolean displays as Yes or No. `single_family` displays as Single-family dwelling.
 
@@ -82,9 +84,15 @@ Without a live call, prose that matches a seeded demo case is the stored cache i
 
 Identify reads a storey count out of the description and stores it as a confirmed `building.storeys` fact: `two-storey`, `2 storeys`, `2-storey`, `single-storey`, and `bungalow` (1). The storey question is not asked again. An answer already stored on `building.storeys`, including "not sure", is left as the applicant wrote it.
 
+Pasted description text is also read for two cues. `no CCMC` pre-fills `ccmc_evaluation` as false. `unsigned letter` pre-fills the fact `evidence.letter` with `letter, unsigned` and an evidence item with that description. That item is not a registered professional opinion. The parser never writes `professional_confirmed`.
+
+An answer of `province-wide`, `across Alberta`, or `multiple sites` to the site question sets `scope`. The first two store `province-wide`. `multiple sites` stores `jurisdiction`. `scope` is the jurisdiction-wide field. `one site` does not set it.
+
+A question card is returned only when its provision family matches a candidate or a case provision, or its topic is in the description. A card about a sheathing membrane is not returned for a structural nail-base panel unless the description says `sheathing membrane` or a case provision is in `9.27.3`.
+
 When the case title is empty, or it is the description's first sentence, identify replaces it with a short title: building type, place, and one provision id copied from the identify result, plus a few words of that article's title. Example: `Single-family, Edmonton: 9.9.10.1.(2) egress window`. The title does not say the design complies or is safe. A title the applicant set, such as `Hempcrete house`, stays.
 
-`engineering_required` stays `yes`, `no`, or `depends`. `engineering_answer` is the one sentence to show. When the screen is `depends`, that sentence is `unknown: needs <fact>` (the missing fact fields) or the condition with the token removed. It is not `depends. depends.`
+`engineering_required` stays `yes`, `no`, or `depends`. `engineering_answer` is the one sentence to show. When the screen is `depends`, that sentence is `unknown: needs` plus the deciding fact fields (the building type and whether any design is under Part 4, plus area, storeys, or dwelling count when those decide). It names those facts. It does not list Division C citations, and it is not `depends. depends.`
 
 When a live identify needs the code database and the file is missing, the response is HTTP 503 with the fixed detail `code database not found`. The body does not include a filesystem path. A live call that fails with an authentication, network, or timeout error uses the same non-live path as a missing key.
 
@@ -221,7 +229,7 @@ The CSV `group` column keeps the two blocks apart. On ask rows, `n` is the group
 
 `required` and `general_required` are `yes`, `no`, or `depends`. `depends` means a deciding fact is missing. That route does not return `true`, `false`, or `"unknown"`.
 
-`answer` is the sentence to show for that screen. `required` stays the machine token. When the screen is `depends`, `answer` is `unknown: needs professional.part4_design` (and any other missing fact fields, each once) or the condition with the token removed. `needs` lists those fact fields. `answer` is not `depends. depends.` The issues route uses that same `answer` as the practice-of-engineering `reason` when the value is `"unknown"`.
+`answer` is the sentence to show for that screen. `required` stays the machine token. When the screen is `depends`, `answer` is `unknown: needs` plus the deciding fact fields, each once. For a house whose only gap is Part 4 design, that is `unknown: needs professional.part4_design`. `needs` lists those deciding facts. `questions` is one question, `Do we need an engineer?`, that names the same facts in words. Neither `answer` nor `questions` lists Division C citations, and `answer` is not `depends. depends.` The issues route uses that same `answer` as the practice-of-engineering `reason` when the value is `"unknown"`. `reasons` still carries the looked-up Division C rules for the machine token.
 
 The issues route maps the same screen: `yes` → `true`, `no` → `false`, `depends` → `"unknown"`. `"unknown"` requires a question. `depends` and `"unknown"` are not the same token.
 
