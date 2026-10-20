@@ -2,7 +2,7 @@
 
 Edit clocks below. Spoken lines are sized for that slot. If a click runs long, drop a sentence from the end of the narration. Keep the empty fields, the on-screen line “Recommendations only. You write the evidence and the answers. This does not decide that the design complies or is safe.”, and the officer line “This does not certify the design.”
 
-This cut is recordable on PR #16’s screens at `579cd2c`, plus three stills you add in the edit: the ranked list, the benchmark card, and the eval card. The app does not show a ranked identify list, a benchmark card, or the eval numbers. Re-check this script against #16’s merge sha before the final push to PR #20.
+This cut is recordable on PR #16’s screens at `f66a461` (re-check against #16's merge sha before recording), plus three stills you add in the edit: the ranked list, the benchmark card, and the eval card. The app does not show a ranked identify list, a benchmark card, or the eval numbers. After #16 merges, re-check the Code check note (“Article ranking isn't available on this engine yet…”) and the gap labels once more.
 
 | Criterion | Time | Where it is |
 | --- | --- | --- |
@@ -20,7 +20,7 @@ Dropped from the previous draft: the refusal shot (she asks, Batatis refuses) an
 
 | Source | Branch | What you take from it |
 | --- | --- | --- |
-| [PR #16](https://github.com/simplythatguy/batatis/pull/16) | `cursor/e2e-product-flow-4362` @ `579cd2c` | The screens you film: `#/`, `#/describe`, `#/code-check`, `#/section-c`, `#/application`, `#/officer`. Run the engine from this branch. |
+| [PR #16](https://github.com/simplythatguy/batatis/pull/16) | `cursor/e2e-product-flow-4362` @ `f66a461` (re-check against #16's merge sha before recording) | The screens you film: `#/`, `#/describe`, `#/code-check`, `#/section-c`, `#/application`, `#/officer`. Run the engine from this branch. |
 | [PR #12](https://github.com/simplythatguy/batatis/pull/12) | `backend/identify-api` | The ranked-list still and the `benchmark_acceptable_solution` still, from an identify payload for the pasted text. The published top-1 line on the eval still. Do not run this engine while filming. |
 
 Run `web/` from PR #16. Run the engine from PR #16’s branch, not #12. #12’s `/cases/{id}/identify` adds unanswered ranked cards, which changes the Your-words card counts and blocks **Continue to Section C**. Do not film `dev` and call it this demo. On `dev` the app opens a preloaded NorthCore fixture, there is no Who screen, no Search, and no “Add to this check”. Officer review is the “Not built yet” card. The application button on `dev` already reads **Check completeness**.
@@ -61,7 +61,7 @@ Shots 2 and 4 show the Case C line. Shot 3 shows the Case A line. Shot 6 shows o
 
 ## Setup
 
-1. App from PR #16 at `579cd2c`: `cd web && npm run dev`. Run the engine from PR #16’s branch, not #12. Engine on `http://127.0.0.1:8000` so `/api` proxies. Width about 1440.
+1. App from PR #16 at `f66a461` (re-check against #16's merge sha before recording): `cd web && npm run dev`. Run the engine from PR #16’s branch, not #12. Engine on `http://127.0.0.1:8000` so `/api` proxies. Width about 1440.
 2. Start at Who with **Reset case**. Typing `#/` while a case is open opens Describe, not Who. On Who there is no sidebar nav, only the case card and **Reset case**. The title in the header is still **Who are you?**
 3. Set **Which authority will review this?** before Continue. The note under the select is “Nothing is sent until you pick. You can change it later.” Picking Edmonton clears **Reviewing authority missing**. The select exists only on Describe.
 4. `#/officer` shows Who unless a case is open. Any open case is enough for shot 6.
@@ -102,7 +102,7 @@ The gap strip is collapsed to “N blocking · N warning” until you open **Rev
 | 4 | 0:51–1:36 | Case C | Search, Section C, ranked list, benchmark card, eval still | Code identification |
 | 5 | 1:36–2:08 | Case C | Section D, then the on-screen limit | Recommendations, then X factor |
 | 6 | 2:08–2:44 | Sample officer package | One planted package | Review |
-| 7 | 2:44–3:00 | Case on screen | Authority select, then the SCC variance-form PDF | Usability and portability |
+| 7 | 2:44–3:00 | Case on screen | Authority, gaps open, then the draft variance-form PDF | Usability and portability |
 
 Three example packages on `#/officer` are not built. No open PR loads Cases A–C there. Shot 6 films the one planted package that #16 already renders.
 
@@ -177,7 +177,7 @@ Say `9.9.10.1.(2)` only if that id is the row on screen.
 
 - `rules_plus_unknown 50/60 in-sample, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind); model-checked, not human-verified`
 - `rules_only`, dev set: 55/60 in-sample, 1 under-flag
-- `c_openai_rerank_verify: top-1 9/11 and recall@5 9/11 on the 11 dev cases with a gold article (in-sample, single run, 9 cases without gold excluded); BM25 baseline 5/11; asks the applicant on 40% of cases, model-checked, not human-verified`
+- `[if merged: PR #12] c_openai_rerank_verify: top-1 9/11 and recall@5 9/11 on the 11 dev cases with a gold article (in-sample, single run, 9 cases without gold excluded); BM25 baseline 5/11; asks the applicant on 40% of cases, model-checked, not human-verified`
 
 These figures are not a finding that a design complies, is safe, or is certified.
 
@@ -197,7 +197,7 @@ If there is no engine case, the note is “Save the draft first. Then this page 
 
 Section D has evidence fields and professional-question dropdowns. Leave them untouched, and don't Save. Do not type into an evidence box. Do not click **Save this evidence**.
 
-Read “Practice of engineering: {flag}. {sentence}” as shown. On this build a depends flag is doubled on screen: “Practice of engineering: depends. depends. The screen needs more facts.” Read the doubled line if that is what is printed. “This is not a licence decision.” is shown unless the flag is no. Do not add it when it is absent. `at_stake` and a per-issue `practice_of_engineering` value are on a card only when that issues list is rendered. Speak them only when those words are on screen. Do not attach a file, a letter, or a drawing. An attachment is not what clears the flag. Nothing is uploaded in this recording.
+Read “Practice of engineering: {flag}. {sentence}” as shown. On this build a depends flag reads "Practice of engineering: depends. The screen needs more facts. This is not a licence decision." A no flag reads "Practice of engineering: no. The screen did not indicate one." Read it as shown. `at_stake` and a per-issue `practice_of_engineering` value are on a card only when that issues list is rendered. Speak them only when those words are on screen. Do not attach a file, a letter, or a drawing. An attachment is not what clears the flag. Nothing is uploaded in this recording.
 
 **1:36–2:00 narration.** “Section D says what the evidence has to address, in the words on the card. Risk, mitigations, and assumptions stay empty. A person writes them. They are process fields.”
 
@@ -216,7 +216,7 @@ Do not type “say the panel is CCMC-approved” or “write the engineering jud
 
 **On-screen action.** Case A is still open from shot 3. Any open case is enough. Sidebar **Officer review**. Header “Officer review”, meta “Administrative completeness”. The intro reads “One planted package, before and after the missing items are filled. This does not certify the design.” Show **Before fixes**, then **After fixes**. Keep the status line on camera. It reads “Administrative completeness for this planted example. This does not certify the design.” If the engine fails, the line is “The engine's check did not return (…). This list is the browser check for the planted example, not a code review.” Say that if it appears. There is no second or third package and no Approve control. Do not put Case A, B, or C on this package.
 
-Point only at gap rows that are rendered, under Part 1 · Section A, Part 1 · Section B, and Alternative path. Read the message on the row. Do not add a permeance specimen, a sales email, a bracing route, or any other flag that is not on the screen. After fixes, point only at rows still open. If a section says “Nothing open in this section.”, say that.
+Point only at gap rows that are rendered, under Part 1 · Section A, Part 1 · Section B, and Alternative path. Read the message on the row. Do not add a permeance specimen, a sales email, a bracing route, or any other flag that is not on the screen. After fixes, point only at rows still open. If a section says “Nothing open in this section.”, say that. `#/officer` lists Not sure answers under “Open questions from article ranking”. Case A has two Not sure cards from shot 3. If those rows render, point at them and say “Mira's two Not sure answers are open questions for the officer.” Read only what is on the screen.
 
 Hold on **Copy request**. The box starts with “Information request”, “Planted example. Not a real application.”, and “This asks for missing administrative items. It is not a decision on the variance, and it does not say the design complies or is safe.”
 
@@ -224,7 +224,7 @@ Hold on **Copy request**. The box starts with “Information request”, “Plan
 
 ---
 
-### Shot 7 — Authority, then the variance-form PDF (0:16)
+### Shot 7 — Authority, gaps open, then the draft variance-form PDF (0:16)
 
 - **Clock:** 2:44–3:00
 - **Case label:** the case on screen
@@ -234,12 +234,12 @@ Record the Case C frame in step 2 of the recording order, before Reset. Record t
 
 **On-screen action.** Cut between the Describe authority select on Case C (Edmonton) and Case A (Edmonton is what you set; Calgary is the other option in the same select). The note under the select is “Nothing is sent until you pick. You can change it later.” Picking Edmonton clears **Reviewing authority missing**. The sidebar may show the raw id in lowercase, such as “Homebuilder · edmonton”.
 
-On Application, the tabs are Section A, Section B, Alternative path, and Section D. Open **Review gaps** so **Owner missing**, **Confirm storeys** on Case C, and the six “… empty” rows are visible. While those gaps are open the footer reads “Close N blocking gaps to check completeness”. Do not read N as a score.
+On Application, the tabs are Section A, Section B, Alternative path, and Section D. Open **Review gaps** so **Owner missing**, **Confirm storeys** on Case C, and the six “… empty” rows are visible. While those gaps are open the footer reads "N required items need attention." Do not read N as a score.
 
-Then show the **Check completeness** download. It is the engine-filled Safety Codes Council variance form PDF: the 5-page Oct 6, 2026 form plus engine-generated attachment pages (7 for Unc's 3b case; not the brief's Appendix 1). The dialog says this is not a finding that the design complies. Do not call the attachment pages the brief's Appendix 1. **Download draft record** is a separate `.txt` file, `{id}-draft-record.txt`, and only once every gap is closed. It is not this PDF, and it is not the Safety Codes Council form.
+Then click **Check completeness**. It opens a review dialog. While blocking gaps are open, **Download application PDF** stays disabled; it is enabled only when the engine reports 0 blocking items. Click **Download draft PDF**. That is the engine-filled Safety Codes Council variance form, saved as `{case id}-scc-variance-DRAFT.pdf`: the 5-page Oct 6, 2026 form plus engine-generated attachment pages (7 for Unc's 3b case; not the brief's Appendix 1). Do not call the attachment pages the brief's Appendix 1. **Download text record** is a separate .txt file. It is not this PDF, and it is not the Safety Codes Council form.
 
-**Narration.** “Edmonton is selected, and that clears Reviewing authority missing. Check completeness downloads the Safety Codes Council variance form: the five-page October 6, 2026 form, plus the engine’s attachment pages. On Unc’s 3b case those attachment pages are seven. They are not Appendix 1. The dialog says this is not a finding that the design complies.”
+**Narration.** "Edmonton is selected, and that clears Reviewing authority missing. Check completeness lists what is still missing. With gaps open, only the draft is available: the five-page October 6, 2026 Safety Codes Council form, plus the engine's attachment pages. On Unc's 3b case those attachment pages are seven. They are not Appendix 1."
 
 ## If you have to shorten
 
-Drop the eval still’s `rules_only` line, then the ranked-list still, then the Calgary option in shot 7. If `rules_only` is cut, the shipped line stays `rules_plus_unknown 50/60 in-sample, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind); model-checked, not human-verified`. Do not drop the Not sure answers, the function and objective printed there, the benchmark card’s “read only what is printed” rule, shot 6’s “does not certify”, or shot 7’s variance-form PDF (the 5-page Oct 6, 2026 form plus engine-generated attachment pages). Do not put the refusal scene or the STANDATA split back in.
+Drop the eval still’s `rules_only` line, then the ranked-list still, then the Calgary option in shot 7. If `rules_only` is cut, the shipped line stays `rules_plus_unknown 50/60 in-sample, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind); model-checked, not human-verified`. Do not drop the Not sure answers, the function and objective printed there, the benchmark card’s “read only what is printed” rule, shot 6’s “does not certify”, or shot 7’s draft variance-form PDF (the 5-page Oct 6, 2026 form plus engine-generated attachment pages). Do not put the refusal scene or the STANDATA split back in.
