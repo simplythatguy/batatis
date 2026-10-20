@@ -5,7 +5,10 @@ from pathlib import Path
 
 import pytest
 
-from evals_dev.appeals.score_professional import LINE, load_addressed, predict, render, score_cases
+from evals_dev.appeals.score_professional import (
+    BASELINE, GOLD_ROWS, LINE, SYSTEM_COLS, VARIANTS, baseline_applies, confusion_rows,
+    load_addressed, predict, render, score_cases,
+)
 
 from engine.section_d_flag_eval import load_codes
 from evals_dev.appeals.checks import (
@@ -201,19 +204,57 @@ def test_practice_screen_uses_stored_facts_and_not_the_label():
     for variant in ('rules_only', 'rules_plus_unknown', 'always_unknown'):
         assert predict(original, codes, variant) == predict(flipped, codes, variant)
     totals = score_cases(cases, codes)
-    text = render(totals)
+    assert confusion_rows(cases) == 'weak_label'
+    assert baseline_applies(cases, totals)
+    text = render(totals, rows=confusion_rows(cases), baseline=baseline_applies(cases, totals))
     assert LINE in text
     assert text.splitlines()[0] == LINE
+    assert BASELINE in text
+    assert 'rows=gold' not in text
     for name, row in totals.items():
         assert row['n'] == 12
         assert f'{name}: {row["matched"]}/12 ' in text
+        assert f'decided: {row["n"] - row["unknown"]}/{row["n"]}' in text
+        assert f'confusion {name}  rows=weak_label  columns=system yes unknown no' in text
         assert sum(sum(cols.values()) for cols in row['matrix'].values()) == 12
         assert f'unknown {name}: {row["unknown"]}' in text
         assert 'confident_wrong' in text
+    assert 'decided: 0/12' in text
     assert totals['always_unknown']['unknown'] == 12
     assert totals['always_unknown']['confident_wrong'] == []
     depends = sum(case['professional_involvement']['weak_flag'] == 'depends' for case in cases)
     assert totals['always_unknown']['matched'] == depends
+
+
+def _blank_totals(n=1, unknown=0, matched=0):
+    """A zero matrix large enough for render()."""
+    return {
+        name: {
+            'matched': matched,
+            'n': n,
+            'unknown': unknown,
+            'confident_wrong': [],
+            'matrix': {gold: {column: 0 for column in SYSTEM_COLS} for gold in GOLD_ROWS},
+        }
+        for name in VARIANTS
+    }
+
+
+def test_confusion_rows_follow_label_strength():
+    """Weak labels print rows=weak_label. Any other strength stays rows=gold."""
+    weak = {'professional_involvement': {'label_strength': 'weak', 'weak_flag': 'yes', 'facts': {}}}
+    assert confusion_rows([weak]) == 'weak_label'
+    reviewed = {'professional_involvement': {'label_strength': 'reviewed', 'weak_flag': 'yes', 'facts': {}}}
+    assert confusion_rows([weak, reviewed]) == 'gold'
+    assert baseline_applies([weak], _blank_totals()) is False
+    weak_text = render(_blank_totals(), rows='weak_label')
+    assert 'rows=weak_label' in weak_text
+    assert 'rows=gold' not in weak_text
+    assert BASELINE not in weak_text
+    gold_text = render(_blank_totals(), rows='gold')
+    assert 'confusion rules_only  rows=gold  columns=system yes unknown no' in gold_text
+    assert 'rows=weak_label' not in gold_text
+    assert 'decided: 1/1' in gold_text
 
 
 def test_repo_holds_no_appeal_pdf_or_unattributed_excerpt():

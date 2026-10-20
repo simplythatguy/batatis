@@ -4,6 +4,8 @@ Current evals are **model-checked**. The human key in this directory is **unfill
 Nothing reported here is human verification, and nothing here certifies that a design
 complies with the building code.
 
+No human review is scheduled; evals stay model-checked, n=0.
+
 The blank keys are a harness for later. No one is filling them in this pass. Do not
 copy model gold labels from `evals_dev/cases/` into a key.
 

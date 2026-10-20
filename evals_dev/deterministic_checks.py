@@ -295,6 +295,13 @@ def section_c_exactness(cases: list[dict], db_path: Path | None) -> dict:
     return proportion(hit, n)
 
 
+def planted_fixture_label(manifests: list[dict]) -> str | None:
+    """The ab_minimal set is constructed. Say so only when every fixture carries that flag."""
+    if manifests and all(item.get('constructed') is True for item in manifests):
+        return 'constructed'
+    return None
+
+
 def score_planted(manifests: list[dict], checker) -> tuple[dict, dict]:
     """``checker(facts)`` returns the field names flagged missing. It must not be shown removed_fields."""
     detected = slots = fp = fp_n = 0
@@ -447,6 +454,7 @@ def build_report(*, root: Path, db_path: Path | None, cases: list[dict], manifes
             },
             'section_c_exactness': section_c_exactness(cases, db_path),
             'planted_missing_fields': {
+                'fixtures': planted_fixture_label(manifests),
                 'detection': detection,
                 'false_positives': false_positives,
             },
@@ -492,6 +500,8 @@ def render(report: dict) -> str:
     lines.append(_line('confirmed provisions', checks['section_c_exactness']))
     lines.append('')
     lines.append('Planted missing-field detection')
+    if planted.get('fixtures') == 'constructed':
+        lines.append('  fixtures: constructed')
     lines.append(_line('removed fields flagged', planted['detection']))
     lines.append(_line('false positives on clean controls', planted['false_positives']))
     lines.append('')

@@ -128,11 +128,13 @@ def test_report_without_codedb_does_not_mix_in_a_model_grade(tmp_path):
     assert checks['section_c_exactness']['skipped'] == CODEDB_MISSING
     assert checks['citation_resolution']['fixture_gold']['skipped'] == CODEDB_MISSING
     assert checks['planted_missing_fields']['detection']['skipped'] == CODEDB_MISSING
+    assert checks['planted_missing_fields']['fixtures'] == 'constructed'
     assert checks['schema_validity']['by_kind']['identify']['label'] == '1 of 1'
     assert checks['schema_validity']['by_kind']['case']['skipped'] == CODEDB_MISSING
     text = render(report)
     assert text.startswith('deterministic checks')
     assert 'model-checked' in text and 'unfilled' in text
+    assert 'fixtures: constructed' in text
     assert 'human-verified' not in text
 
 
@@ -147,6 +149,7 @@ def test_invalid_engine_output_fails_schema_validity():
     identify = report['checks']['schema_validity']['by_kind']['identify']
     assert identify['label'] == '0 of 1'
     assert identify['wilson_95'] == wilson_interval(0, 1)
+    assert report['checks']['planted_missing_fields']['fixtures'] is None
 
 
 @pytest.mark.parametrize('findings', [[], [{

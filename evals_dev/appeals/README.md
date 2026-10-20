@@ -68,9 +68,12 @@ python evals_dev/appeals/score_professional.py
 That screen reads `professional_involvement.facts` only. It does not read the
 weak label, and it does not need codedb. The report is `x/12` with a Wilson
 95% interval for `rules_only`, `rules_plus_unknown` and `always_unknown`, plus
-a confusion matrix, the unknown count and the confident-wrong ids. The rules
-are not adjusted from this set. The report line is
-`label_strength: weak; editions pre-2023`.
+`decided: 0/12`, a confusion matrix, the unknown count and the confident-wrong
+ids. The rules are not adjusted from this set. The report line is
+`label_strength: weak; editions pre-2023`. Because every label is weak, the
+confusion header is `rows=weak_label`.
+
+all 12 appeals have empty facts, so every variant answers unknown; 7/12 is the always-unknown baseline by construction, not a skill measure.
 
 - **Citation resolution after mapping.** Only rows with `nbc_ae_2023` set are
   resolved. With nothing mapped, a missing codedb reports `skipped: codedb missing`.

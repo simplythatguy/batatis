@@ -25,6 +25,10 @@ VARIANTS = ('rules_only', 'rules_plus_unknown', 'always_unknown')
 GOLD_ROWS = ('yes', 'depends', 'no')
 SYSTEM_COLS = ('yes', 'unknown', 'no')
 LINE = 'label_strength: weak; editions pre-2023'
+BASELINE = (
+    'all 12 appeals have empty facts, so every variant answers unknown; '
+    '7/12 is the always-unknown baseline by construction, not a skill measure'
+)
 
 
 def load_addressed(path: Path = CASES) -> list[dict]:
@@ -101,14 +105,48 @@ def _ratio(count: int, total: int) -> str:
     return f'{count}/{total} [{low:.4f}, {high:.4f}]'
 
 
-def render(totals: dict[str, dict]) -> str:
+def facts_empty(case: dict) -> bool:
+    """True when the case stores no professional-screen fact."""
+    raw = (case.get('professional_involvement') or {}).get('facts') or {}
+    return all(value in (None, '', [], {}) for value in raw.values())
+
+
+def confusion_rows(cases: list[dict]) -> str:
+    """Weak labels are not gold. Use rows=weak_label only when every label is weak."""
+    if cases and all(
+        (case.get('professional_involvement') or {}).get('label_strength') == 'weak'
+        for case in cases
+    ):
+        return 'weak_label'
+    return 'gold'
+
+
+def baseline_applies(cases: list[dict], totals: dict[str, dict]) -> bool:
+    """The fixed 7/12 sentence is true only for this empty-fact set."""
+    if len(cases) != 12 or not all(facts_empty(case) for case in cases):
+        return False
+    depends = sum(case['professional_involvement'].get('weak_flag') == 'depends' for case in cases)
+    if depends != 7:
+        return False
+    return all(
+        totals.get(name, {}).get('n') == 12
+        and totals[name]['unknown'] == 12
+        and totals[name]['matched'] == 7
+        for name in VARIANTS
+    )
+
+
+def render(totals: dict[str, dict], *, rows: str = 'gold', baseline: bool = False) -> str:
     """Render weak-label caveats, confusion matrices and variant outcomes."""
     lines = [LINE, 'screen reads professional_involvement.facts only; the weak label is the target, not an input']
     lines.append('note: rules_only abstains with depends; that label is counted in the unknown column')
+    if baseline:
+        lines.append(BASELINE)
     for name in VARIANTS:
         row = totals[name]
-        lines.append(f'{name}: {_ratio(row["matched"], row["n"])}')
-        lines.append(f'confusion {name}  rows=gold  columns=system yes unknown no')
+        decided = row['n'] - row['unknown']
+        lines.append(f'{name}: {_ratio(row["matched"], row["n"])}  decided: {decided}/{row["n"]}')
+        lines.append(f'confusion {name}  rows={rows}  columns=system yes unknown no')
         for gold in GOLD_ROWS:
             cells = '  '.join(f'{row["matrix"][gold][column]:>3}' for column in SYSTEM_COLS)
             lines.append(f'  {gold:<7} {cells}')
@@ -125,7 +163,8 @@ def main() -> int:
         print(f'expected 12 professional-involvement appeals, found {len(cases)}', file=sys.stderr)
         return 1
     codes, _codedb = load_codes()
-    print(render(score_cases(cases, codes)))
+    totals = score_cases(cases, codes)
+    print(render(totals, rows=confusion_rows(cases), baseline=baseline_applies(cases, totals)))
     return 0
 
 
