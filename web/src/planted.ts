@@ -1,6 +1,6 @@
 /**
  * One planted administrative package for the officer screen.
- * Names and the street address are demo values. The gaps are empty fields and a placeholder,
+ * Names and the street address are example data, marked as such. The gaps are empty fields and a placeholder,
  * the same classes the engine flags without needing a code citation.
  */
 import type { EngineGap } from "./api/client";
@@ -21,8 +21,8 @@ function fact(field: string, value: string): Fact {
 
 const shared: Fact[] = [
   fact("alternative", "Hempcrete walls for a garden suite behind an existing house in Edmonton."),
-  fact("municipalAddress", "0000 Example Avenue NW, Edmonton"),
-  fact("mailingAddress", "0000 Example Avenue NW, Edmonton"),
+  fact("municipalAddress", "000 Example Avenue NW, Edmonton (EXAMPLE DATA)"),
+  fact("mailingAddress", "000 Example Avenue NW, Edmonton (EXAMPLE DATA)"),
   fact("scope", "site"),
   fact("process.mitigating_measures", "The walls stay above grade, with a rainscreen and a capillary break at the sill."),
   fact("process.assumptions_and_limits", "One storey, one suite, no second dwelling unit inside the garden suite."),
