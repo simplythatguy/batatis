@@ -5,7 +5,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from engine.api import create_app
-from engine.codes import Codes
+from engine.codes import CodeDbMissing, Codes
 from engine.identify.answers import apply_answers
 from engine.identify.demo_cache import match_demo
 from engine.identify.departure import NOT_INDICATED, assess_variance, detect_redirect
@@ -144,6 +144,23 @@ def test_demo_cache_matches_the_three_descriptions_and_keeps_short_quotes():
         assert '9.9.4.4' not in json.dumps(payload)
     unknown = match_demo(_demo('dev-001'), facts=[{'field': 'building.storeys', 'status': 'unknown', 'value': None}])
     assert any(q['field'] == 'building.storeys' and q['status'] == 'unknown' for q in unknown['open_questions'])
+
+
+def test_missing_database_response_does_not_include_a_path(tmp_path, monkeypatch):
+    missing = tmp_path / 'hidden' / 'codedb.sqlite'
+    monkeypatch.setattr('engine.routes_case.default_db', lambda: missing)
+    client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes()))
+    case_id = client.post('/cases').json()['id']
+    identified = client.post(f'/cases/{case_id}/identify', json={'prose': 'a proposal that is not a cached demo'})
+    assert identified.status_code == 503
+    assert identified.json()['detail'] == 'code database not found'
+    assert 'hidden' not in identified.text and 'codedb.sqlite' not in identified.text
+    try:
+        run('a proposal that is not a cached demo', db_path=missing)
+    except CodeDbMissing as exc:
+        assert str(exc) == 'code database not found' and 'hidden' not in str(exc)
+    else:
+        raise AssertionError('missing database must raise CodeDbMissing')
 
 
 def test_exact_demo_description_is_cached_without_a_model_or_a_database(tmp_path, monkeypatch):

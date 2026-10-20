@@ -10,7 +10,7 @@ import os
 import re
 from pathlib import Path
 
-from engine.codes import Codes, default_db
+from engine.codes import CodeDbMissing, Codes, default_db
 from engine.identify import Judge, articles, bm25_rank, identify
 from engine.identify.config import (COMMIT_PARTS, RERANK_MODEL, RERANK_N, SCREEN_MODEL, TOP_K,
                                     VERIFY_MODEL_ANTHROPIC, VERIFY_MODEL_OPENAI, VERIFY_N,
@@ -166,7 +166,7 @@ def run(prose: str, db_path: Path | str | None = None, judge: Judge | None = Non
     db = Path(db_path) if db_path else (None if arts is not None else default_db())
     if arts is None:
         if db is None or not Path(db).exists():
-            raise FileNotFoundError(f'code database not found: {db} (set BATATIS_CODEDB)')
+            raise CodeDbMissing()
         arts = articles(Path(db))
     codes = _codes_for(db, codes)
     trace: dict = {}

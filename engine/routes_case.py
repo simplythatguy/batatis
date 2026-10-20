@@ -11,7 +11,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from .ccmc import CCMCRegistry, RegistrySearch, RegistryUnavailable
-from .codes import Codes, default_db
+from .codes import CodeDbMissing, Codes, default_db
 from .completeness import Gap, check_completeness
 from .identify.answers import apply_answers
 from .identify.config import has_live_model
@@ -101,7 +101,7 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
             cached = match_demo(prose, facts)
             if cached:
                 return cached
-            raise FileNotFoundError('code database not found and this description is not a cached demo')
+            raise CodeDbMissing()
         if not has_live_model():
             cached = match_demo(prose, facts)
             if cached:
@@ -148,8 +148,8 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
             return _stream(body.prose, case.facts)
         try:
             result = _identify_result(body.prose, case.facts)
-        except FileNotFoundError as exc:
-            raise HTTPException(503, str(exc)) from exc
+        except (CodeDbMissing, FileNotFoundError):
+            raise HTTPException(503, 'code database not found') from None
         saved = cases().get(case_id)
         if list(saved.provisions) != provisions:
             raise HTTPException(500, 'identify must not change provisions')
