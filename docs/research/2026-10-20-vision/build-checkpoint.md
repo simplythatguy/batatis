@@ -105,11 +105,11 @@ accuracy nor technical compliance or safety.
 
 ## Methods used
 
-- [T3 workflow and routing](/Users/aamia/.codex/skills/t3-workflow/SKILL.md)
-- [pstack feature workflow](/Users/aamia/.agents/skill-libraries/pstack/skills/poteto-mode/playbooks/feature.md)
-- [Matt Pocock code review](/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/code-review/SKILL.md)
-- [Matt Pocock diagnosis](/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/diagnosing-bugs/SKILL.md)
-- [PDF rendering and inspection](/Users/aamia/.codex/plugins/cache/openai-primary-runtime/pdf/26.1017.11052/skills/pdf/SKILL.md)
+- [T3 workflow and routing](~/.codex/skills/t3-workflow/SKILL.md)
+- [pstack feature workflow](~/.agents/skill-libraries/pstack/skills/poteto-mode/playbooks/feature.md)
+- [Matt Pocock code review](~/.agents/skill-libraries/mattpocock/skills/engineering/code-review/SKILL.md)
+- [Matt Pocock diagnosis](~/.agents/skill-libraries/mattpocock/skills/engineering/diagnosing-bugs/SKILL.md)
+- [PDF rendering and inspection](~/.codex/plugins/cache/openai-primary-runtime/pdf/26.1017.11052/skills/pdf/SKILL.md)
 
 Worker-specific research, TDD and adversarial-review receipts appear in the task results and
 development-case review ledger. No held-out judge cases were opened.

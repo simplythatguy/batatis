@@ -37,7 +37,7 @@ function DropZone() {
         <Icon name="upload" size={16} />
         <span>Drop PDFs: drawings, product literature, test reports, a filled SCC form</span>
         <button type="button" className="btn" onClick={() => input.current?.click()}>
-          Choose files
+          Choose PDFs
         </button>
         <input
           ref={input}
@@ -62,7 +62,7 @@ function DropZone() {
           {c.files.map((f) => (
             <li key={f.id} className="file-row">
               <Icon name="file" />
-              <span className="file-name">{f.name}</span>
+              <span className="file-name" title={f.name}>{f.name}</span>
               <span className="meta file-state">{f.read ? `Read · ${f.pages} pages` : "Waiting for the engine"}</span>
               <button
                 type="button"

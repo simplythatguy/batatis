@@ -57,9 +57,9 @@ function CandidateCard({ a, index, total }: { a: Candidate; index: number; total
       </div>
       {a.answer === "not-sure" && (
         <div className="followup">
-          <div className="meta">We will ask</div>
+          <div className="meta">Check before answering</div>
           <p>{a.clarifyingQuestion}</p>
-          <p className="meta">Answer Yes or No once you know; Section C waits for it.</p>
+          <p className="meta">Answer Yes or No once you know, before you continue from this check.</p>
         </div>
       )}
       <details className="disclosure ref">
@@ -104,13 +104,13 @@ export function CodeCheck() {
       <div className="pane scroll-body">
         <div className="content-col stack">
           <p className="meta intro">
-            Each card quotes one requirement your design may depart from. Answer in your own terms; you do not need the
-            article numbers.
+            A departure means your design does something differently from the quoted requirement. Answer each card; you do
+            not need the article numbers.
           </p>
           {shown.length ? (
             shown.map((a) => <CandidateCard key={a.id} a={a} index={c.candidates.indexOf(a)} total={c.candidates.length} />)
           ) : (
-            <p className="empty">Nothing in this view.</p>
+            <p className="empty">{filter === "yes" ? "No confirmed departures yet." : filter === "open" ? "No requirements need an answer." : "No requirements to review."}</p>
           )}
         </div>
       </div>

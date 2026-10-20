@@ -600,11 +600,11 @@ The existing `codedb` CLI was used because its help and lookups worked. `tools/c
 
 Methods actually read and applied:
 
-- T3 workflow router: `/Users/aamia/.codex/skills/t3-workflow/SKILL.md` and `/Users/aamia/.codex/skills/t3-workflow/references/routes.md`. Scope, checkpointing, proportionate verification, and method reassessment. Parent maintenance receipt reused as instructed.
-- Matt Pocock research: `/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md`. Follow claims to primary sources and save one sourced fact sheet. No further delegation, as the task expressly prohibits it.
-- pstack unslop: `/Users/aamia/.agents/skill-libraries/pstack/skills/unslop/SKILL.md`. Plain prose, specific attribution, explicit gaps, and no invented technical certainty.
-- PDF reading: `/Users/aamia/.codex/plugins/cache/openai-primary-runtime/pdf/26.1017.11052/skills/pdf/SKILL.md`. Read page text and visually inspect the two attribution tables. Poppler was unavailable; macOS PDFKit rendered the source pages to PNG without altering the PDFs.
-- Jev search: `/Users/aamia/.codex/skills/jev-search/SKILL.md`. One search-selection attempt returned local-only fail-open; no evidence-sufficiency claim was made.
+- T3 workflow router: `~/.codex/skills/t3-workflow/SKILL.md` and `~/.codex/skills/t3-workflow/references/routes.md`. Scope, checkpointing, proportionate verification, and method reassessment. Parent maintenance receipt reused as instructed.
+- Matt Pocock research: `~/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md`. Follow claims to primary sources and save one sourced fact sheet. No further delegation, as the task expressly prohibits it.
+- pstack unslop: `~/.agents/skill-libraries/pstack/skills/unslop/SKILL.md`. Plain prose, specific attribution, explicit gaps, and no invented technical certainty.
+- PDF reading: `~/.codex/plugins/cache/openai-primary-runtime/pdf/26.1017.11052/skills/pdf/SKILL.md`. Read page text and visually inspect the two attribution tables. Poppler was unavailable; macOS PDFKit rendered the source pages to PNG without altering the PDFs.
+- Jev search: `~/.codex/skills/jev-search/SKILL.md`. One search-selection attempt returned local-only fail-open; no evidence-sufficiency claim was made.
 
 This is a sourced text deliverable. No product UI was implemented, so no browser demo or product screenshot was required. The saved attribution-page renders are source-inspection evidence, not a product demo.
 
