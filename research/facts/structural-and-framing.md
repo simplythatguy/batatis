@@ -413,7 +413,7 @@ Intent citations for the rows above (the Why column paraphrases them; explanator
 ## Sources
 Repository documents read in this session. Page numbers are PDF pages.
 - docs/contracts/briefs/PREAMBLE.md, docs/contracts/WAVE2-BRIEF.md, docs/contracts/briefs/WAVE2-TOPICS.md (section structural-and-framing), docs/contracts/CONTRACTS.md, WAVES.md, reference/README-challenge.md. The challenge scope PDF text in the README was read for the judging context.
-- Method files: /Users/aamia/.codex/skills/t3-workflow/SKILL.md and references/routes.md; /Users/aamia/.codex/AGENTS.md; /Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md; /Users/aamia/.agents/skill-libraries/pstack/skills/unslop/SKILL.md.
+- Method files: ~/.codex/skills/t3-workflow/SKILL.md and references/routes.md; ~/.codex/AGENTS.md; ~/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md; ~/.agents/skill-libraries/pstack/skills/unslop/SKILL.md.
 - codedb/README.md and codedb/PROGRESS.md, for the CLI, the validator scope and the known false positives.
 - Code database (codedb, NBC-AE build 2): lookup, children, the attributions for Div B Table 4.5.1.1 (PDF pp.513 to 524) and Table 9.38.1.1 (PDF pp.1120 to 1192), the definitions table (pages 68 to 81), the intent comparison, and the printed page 1180 checked with tools/codesearch.py page.
 - NBC(AE) 2023 second printing (reference/codes/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.pdf; text in reference/text/). Division A Part 1 (PDF pages 38 to 40), Division B Part 1 climatic values (PDF page 89), Division B Part 4 (PDF pages 424 to 524), Division B Part 9 structural articles (PDF pages 831 to 1192 as cited), and Division C Sections 2.3, 2.4 and 2.5 (PDF pages 739 to 742).

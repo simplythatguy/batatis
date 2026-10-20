@@ -26,7 +26,8 @@ Open the repo in **Cursor**. New agent threads should:
 
 Human-oriented brief: [`docs/hackathon-problem-brief.md`](./docs/hackathon-problem-brief.md).  
 NBC(AE) acceptable vs alternative process: [`docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png`](./docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png).  
-Product UI system: [`docs/design-system-linear.md`](./docs/design-system-linear.md).
+Product UI system: [`docs/design-system-linear.md`](./docs/design-system-linear.md).  
+User-testing protocol: [`docs/user-testing/README.md`](./docs/user-testing/README.md).
 
 ## Non-negotiables (short)
 
