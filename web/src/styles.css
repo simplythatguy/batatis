@@ -46,6 +46,12 @@ body {
   align-items: flex-start;
 }
 
+.privacy-notice {
+  margin: 0;
+  line-height: 1.45;
+  color: var(--text-tertiary);
+}
+
 .case-card {
   display: flex;
   flex-direction: column;
@@ -944,6 +950,10 @@ blockquote.cite-block {
     grid-column: 2;
     grid-row: 1;
     margin: 0;
+  }
+
+  .privacy-notice {
+    grid-column: 1 / -1;
   }
 
   .nav {

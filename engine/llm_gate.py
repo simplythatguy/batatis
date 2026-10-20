@@ -41,6 +41,8 @@ class Decision:
 
 
 class SlidingWindow:
+    """In-memory hits for this process. A search or model limit is per instance, not global."""
+
     def __init__(self):
         self.events: dict[str, list[float]] = {}
         self._lock = threading.Lock()
@@ -201,7 +203,8 @@ def record(*, model: str, input_tokens: int, output_tokens: int, reserved_usd: D
 def search_retry_after(client_ip: str) -> int | None:
     """None when this IP may search. Otherwise the Retry-After delay in seconds.
 
-    Default budget is 60 searches per 10 minutes per IP.
+    Default budget is 60 searches per 10 minutes per IP, on this instance.
+    `GET /code/search` and `GET /ccmc/search` share the window.
     """
     limit, window = _rate_limit('BATATIS_SEARCH_RATE', '60', '600')
     key = client_ip or 'unknown'

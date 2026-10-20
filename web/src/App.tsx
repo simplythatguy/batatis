@@ -92,6 +92,7 @@ export function App() {
             Reset case
           </button>
         </div>
+        <p className="meta privacy-notice">Do not upload personal information. Demo data may be deleted.</p>
       </aside>
       <main className="main-panel">{screen}</main>
     </div>

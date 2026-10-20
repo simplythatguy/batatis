@@ -4,7 +4,7 @@ Official URLs are tried first, with retries. When a build machine cannot reach
 nrc-publications.canada.ca, set CODEDB_PDF_URL and CODEDB_INTENT_PDF_URL to private
 Vercel Blob or Neon object URLs. Those URLs are never printed. A mismatched digest
 is deleted. This script does not commit the PDF or the sqlite, and it fails the
-build rather than continue without a verified file.
+build rather than continue without a sha256-checked file.
 
 CODEDB_SKIP_OFFICIAL=1 skips the NRC host when the matching private URL is set.
 """
@@ -167,7 +167,7 @@ def extract_jsonl(pdf: Path, dest: Path, expect_sha: str | None) -> None:
         partial.unlink(missing_ok=True)
         raise DownloadError(FAIL.format(detail=(
             f'{dest.name} page extract is not sha256-checked. '
-            'The codedb was not built from an unverified extract.')))
+            'The codedb was not built from an extract that is not sha256-checked.')))
     partial.replace(dest)
     print(f'extracted {dest.name} pages={len(reader.pages)}', file=sys.stderr)
 

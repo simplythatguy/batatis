@@ -45,10 +45,10 @@ Set these on the Vercel project for Preview and Production. Leave the project Ro
 | `BATATIS_LIVE` | engine runtime | Unset or anything other than `1` keeps the offline path. Live calls also need `OPENAI_API_KEY`. |
 | `OPENAI_API_KEY` | engine runtime, sensitive | Server only. Do not use a `VITE_` name. The process never logs the value. |
 | `BATATIS_DAILY_SPEND_CAP_USD` | engine runtime | Default `5`. Over the cap, model calls return the offline path with `source: "offline-cap"`. On Vercel this cap requires `BATATIS_STORE=postgres`. The per-instance memory ledger is not used there: if `VERCEL` is set and the store is not postgres, live calls stay on `offline-cap` and do not spend from memory. Off Vercel, the file store keeps the cap in memory for that process. |
-| `BATATIS_LLM_RATE_LIMIT` | engine runtime | Default `20` live model calls per IP per window. |
+| `BATATIS_LLM_RATE_LIMIT` | engine runtime | Default `20` live model calls per IP per window. The window is in memory on that engine instance. |
 | `BATATIS_LLM_RATE_WINDOW_SECONDS` | engine runtime | Default `600`. |
-| `BATATIS_SEARCH_RATE_LIMIT` | engine runtime | Default `60` searches per IP per window. `GET /code/search` and `GET /ccmc/search` share this window. The client IP is the first hop of `x-vercel-forwarded-for`, then `X-Forwarded-For`, then the peer address. |
-| `BATATIS_SEARCH_RATE_WINDOW_SECONDS` | engine runtime | Default `600` (10 minutes). A 429 body is `Search limit reached; try again in N seconds` and sets `Retry-After`. |
+| `BATATIS_SEARCH_RATE_LIMIT` | engine runtime | Default `60` searches per IP per window, per engine instance. `GET /code/search` and `GET /ccmc/search` share this window. The client IP is the first hop of `x-vercel-forwarded-for`, then `X-Forwarded-For`, then the peer address. |
+| `BATATIS_SEARCH_RATE_WINDOW_SECONDS` | engine runtime | Default `600` (10 minutes). A 429 body is `Search limit reached; try again in N seconds` and sets `Retry-After`. The search window and the model window are each an in-memory `SlidingWindow` on one process. They are not a cap shared across instances. The shared cap is the Postgres daily spend ledger. |
 | `BATATIS_SCC_FORM` | engine runtime | Optional filesystem path to the SCC variance form. The build's copy is `codedb/build/SCC-Variance-Form.pdf`. |
 | `SCC_FORM_URL` | engine build | Optional private URL for the SCC variance form. Still sha256-checked. |
 | `CODEDB_PDF_URL` | engine build | Optional private URL for the NBC(AE) PDF. |
@@ -97,8 +97,8 @@ Live only when BATATIS_LIVE=1 and OPENAI_API_KEY are both set; otherwise stay of
 
 Not created by this change:
 
-- A Neon (or other Postgres) database and its `DATABASE_URL`, if the project does not already have one. The stateless engine needs it. The file store is for a single machine.
+- A Neon free-tier database (or another Postgres) and its `DATABASE_URL`, if the project does not already have one. The stateless engine needs it. The file store is for a single machine.
 - An OpenAI key, only if live model calls are turned on. Offline works without one.
 - A private Blob or Neon object for the two PDFs, only if the Vercel builder cannot reach `nrc-publications.canada.ca`.
 
-Vercel Services does not by itself require a new Vercel account. The engine function includes a sqlite on the order of 26 MB plus Python dependencies. If the project's function bundle limit rejects that, the limit is in the plan, and the fix is not to commit the database. Confirm the limit in the Vercel dashboard before the first production build.
+The Vercel project is on the Hobby plan. Vercel Services is in beta on all plans, including Hobby. The engine function includes a sqlite on the order of 26 MB plus Python dependencies. If the Hobby plan's function bundle limit rejects that, the limit is the Hobby plan's, and the fix is not to commit the database. Confirm the limit in the Vercel dashboard before the first production build.

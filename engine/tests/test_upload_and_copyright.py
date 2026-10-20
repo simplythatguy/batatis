@@ -134,6 +134,44 @@ def _assert_budget(payload):
     assert sum(len(words(snippet)) for snippet in snippets) <= RESPONSE_NRC_MAX_WORDS
 
 
+def seeded_code_word_count(text, seeds):
+    """Seeded provision tokens anywhere in a response, not only clipper fields.
+
+    `message`, `fix_hint`, `reasons`, `title`, and `article_title` count. A route
+    that copies provision sentences into those fields still has to stay at 75.
+    """
+    return sum(1 for token in re.findall(r'[A-Za-z0-9]+', text) if token in seeds)
+
+
+def _assert_seeded_budget(text, seeds):
+    count = seeded_code_word_count(text, seeds)
+    assert count <= RESPONSE_NRC_MAX_WORDS, count
+
+
+def test_whole_response_counts_seeded_words_in_message_fix_hint_reasons_and_titles():
+    """The route check is the whole JSON body. Clipper-exempt fields still spend the 75."""
+    seeds = {f'w{i:02d}' for i in range(40)}
+    chunk = ' '.join(f'w{i:02d}' for i in range(20))
+    body = {'message': chunk, 'fix_hint': chunk, 'reasons': [chunk], 'title': chunk, 'article_title': 'Synthetic'}
+    text = json.dumps(body)
+    assert seeded_code_word_count(text, seeds) == 80
+    with pytest.raises(AssertionError):
+        _assert_seeded_budget(text, seeds)
+    under = json.dumps({'title': ' '.join(f'w{i:02d}' for i in range(10)), 'message': 'administrative gap only'})
+    assert seeded_code_word_count(under, seeds) == 10
+    _assert_seeded_budget(under, seeds)
+
+
+def test_titles_are_headings_and_are_not_clipped():
+    """`title` and `article_title` are headings. The clipper leaves them whole."""
+    long = _long('t')
+    clipped = clip_response({'title': long, 'article_title': long, 'text': 'one short sentence'})
+    assert clipped['title'] == long
+    assert clipped['article_title'] == long
+    assert clipped['text'] == 'one short sentence'
+    assert 'clipped' not in clipped
+
+
 def test_snippet_cap_is_25_words_not_the_response_total():
     """One passage stops at SNIPPET_MAX_WORDS even when the response still has room."""
     long = _long('p')
@@ -413,6 +451,8 @@ def test_every_registered_route_stays_inside_the_nrc_budget(tmp_path, monkeypatc
             payload = response.json()
             assert isinstance(payload, dict) and payload['meta']['notice'] == PII_NOTICE
             _assert_budget(payload)
+            seeds = set(seeded) | set(_long('c').split()) | set(_long('n').split()) | set(_long('k').split()) | set(long.split())
+            _assert_seeded_budget(response.text, seeds)
     assert client.get(f'/cases/{case_id}').status_code == 404
 
 
