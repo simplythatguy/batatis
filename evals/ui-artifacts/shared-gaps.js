@@ -51,19 +51,31 @@ const SECTION_D_SEED = [
   {
     id: "hotbox",
     item: "Thermal performance test of the wall assembly (guarded hot box, ASTM C1363)",
+    short: "wall assembly thermal test",
     by: "ISO/IEC 17025-accredited lab · not yet named",
-    status: "Applicant to upload",
+    note: null,
   },
   {
     id: "opinion",
     item: "Equivalency opinion for the alternative solution",
+    short: "equivalency opinion",
     by: "Applicant's registered professional",
-    status: "Required · not authored by this tool",
+    note: "Not authored by this tool",
   },
 ];
 
+/** Section D rows; every row without an upload is a shared warning gap. */
 export const sectionD = () =>
-  SECTION_D_SEED.map((d) => (state.uploads[d.id] ? { ...d, status: `Uploaded · ${state.uploads[d.id]}` } : d));
+  SECTION_D_SEED.map((d) => {
+    const file = state.uploads[d.id];
+    return file
+      ? { ...d, uploaded: file, status: "uploaded", statusLabel: `Uploaded · ${file}` }
+      : { ...d, uploaded: null, status: "missing", statusLabel: "Required · not uploaded" };
+  });
+
+export function sectionDPill(d) {
+  return `<span class="label-pill" data-evidence-status="${d.status}"><span class="status-dot ${d.status === "uploaded" ? "done" : "warning"}"></span>${d.statusLabel}</span>`;
+}
 
 export function setUpload(id, filename) {
   state.uploads[id] = filename;
@@ -194,6 +206,11 @@ export function getGaps(articles = getArticles(), f = state.fields) {
     .filter((a) => !a.intent)
     .forEach((a) =>
       gaps.push({ id: `intent-${a.id}`, severity: "blocking", label: `Section C intent empty for ${a.id}`, href: "03-section-c.html" })
+    );
+  sectionD()
+    .filter((d) => !d.uploaded)
+    .forEach((d) =>
+      gaps.push({ id: `evidence-${d.id}`, severity: "warning", label: `Evidence not uploaded: ${d.short}`, href: "06-evidence-plan.html" })
     );
   if (f.atsAssumption) {
     gaps.push({ id: "ats", severity: "warning", label: "ATS legal description marked assumption — verify", href: "01-intake.html#ats" });

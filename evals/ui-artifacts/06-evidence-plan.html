@@ -11,6 +11,15 @@
         flex: 1;
         padding: var(--space-4);
       }
+      .item-title {
+        display: block;
+        font-weight: var(--weight-medium);
+        color: var(--text-primary);
+      }
+      .item-note {
+        display: block;
+        margin-top: 2px;
+      }
       .intro {
         margin: 0 0 var(--space-4);
       }
@@ -27,7 +36,7 @@
         <div class="gap-strip" id="gap-strip" aria-label="Administrative gaps"></div>
         <div class="panel-body">
           <div class="content-col">
-            <p class="meta intro">This plan lists what will demonstrate equivalent performance and who provides it. The tool does not author test results or engineering opinions.</p>
+            <p class="meta intro">This plan lists what will demonstrate equivalent performance and who provides it. Missing uploads are listed as gaps until attached. The tool does not author test results or engineering opinions.</p>
             <table class="table">
               <thead>
                 <tr><th>Item</th><th>Responsible</th><th>Status</th><th></th></tr>
@@ -43,7 +52,7 @@
       </main>
     </div>
     <script type="module">
-      import { sectionD, setUpload, renderGapStrip, renderShell } from "./shared-gaps.js";
+      import { sectionD, sectionDPill, setUpload, renderGapStrip, renderShell } from "./shared-gaps.js";
 
       renderShell("evidence");
       renderGapStrip(document.getElementById("gap-strip"));
@@ -52,10 +61,10 @@
         body.innerHTML = sectionD()
           .map(
             (d) => `<tr>
-              <td>${d.item}</td>
+              <td><span class="item-title">${d.item}</span>${d.note ? `<span class="meta item-note">${d.note}</span>` : ""}</td>
               <td class="meta">${d.by}</td>
-              <td data-status-of="${d.id}">${d.status}</td>
-              <td style="text-align: right"><button type="button" class="btn" data-pick="${d.id}">Upload file</button><input type="file" hidden data-upload="${d.id}" aria-label="Upload file for ${d.item}" /></td>
+              <td data-status-of="${d.id}">${sectionDPill(d)}</td>
+              <td style="text-align: right"><button type="button" class="btn" data-pick="${d.id}">${d.uploaded ? "Replace file" : "Upload file"}</button><input type="file" hidden data-upload="${d.id}" aria-label="Upload file for ${d.item}" /></td>
             </tr>`
           )
           .join("");
@@ -66,6 +75,7 @@
           input.addEventListener("change", () => {
             if (!input.files[0]) return;
             setUpload(input.dataset.upload, input.files[0].name);
+            renderGapStrip(document.getElementById("gap-strip"));
             render();
           })
         );

@@ -44,6 +44,11 @@ const SHOTS = [
   ["ui-b05-export.png", "05-export"],
   ["ui-b05-export-override.png", "05-export", () => page.click("#override-btn")],
   ["ui-b06-evidence-plan.png", "06-evidence-plan"],
+  [
+    "ui-b06-evidence-plan-uploaded.png",
+    "06-evidence-plan",
+    () => page.locator('[data-upload="hotbox"]').setInputFiles({ name: "hotbox-report.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4") }),
+  ],
 ];
 
 for (const [file, name, act] of SHOTS) {
@@ -55,5 +60,15 @@ for (const [file, name, act] of SHOTS) {
   await page.screenshot({ path: join(out, file) });
   console.log("shot", file);
 }
+const zoom = await (await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 3 })).newPage();
+await zoom.goto(`${base}/01-intake.html?reset#ats`, { waitUntil: "networkidle" });
+await zoom.locator("#ats").blur();
+const atsField = zoom.locator('[data-section="B"] .field', { has: zoom.locator("#ats") });
+await atsField.screenshot({ path: join(out, "ui-b01-checkbox-checked-3x.png") });
+await zoom.uncheck("#atsAssumption");
+await zoom.locator("#atsAssumption").blur();
+await zoom.waitForTimeout(150);
+await atsField.screenshot({ path: join(out, "ui-b01-checkbox-unchecked-3x.png") });
+console.log("shot checkbox zooms");
 await browser.close();
 server.close();

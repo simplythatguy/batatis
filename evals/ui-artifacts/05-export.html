@@ -216,7 +216,7 @@
         )
         .join("");
       document.getElementById("sheet-d").innerHTML = sectionD().map(
-        (d) => `<tr><td>${d.item}</td><td>${d.by}</td><td>${d.status}</td></tr>`
+        (d) => `<tr data-evidence="${d.id}"><td>${d.item}${d.note ? `<br /><span class="muted">${d.note}</span>` : ""}</td><td>${d.by}</td><td data-evidence-status="${d.status}">${d.statusLabel}</td></tr>`
       ).join("");
       document.getElementById("sheet-process").innerHTML = kv(processFields().map((p) => [p.label, val(p.value), p.id]));
 
@@ -224,14 +224,15 @@
       renderGapList(document.getElementById("override-list"), { links: false });
       const blocking = applyGating();
       const unconfirmed = unconfirmedArticles().map((a) => a.id);
+      const warnings = getGaps().length - blocking;
       const gate = document.getElementById("gate");
       gate.classList.toggle("clear", blocking === 0);
       document.getElementById("gate-dot").className = `status-dot ${blocking ? "blocking" : "done"}`;
       document.getElementById("gate-text").innerHTML = blocking
-        ? `<strong>Download blocked</strong> · ${blocking} blocking gaps` +
+        ? `<strong>Download blocked</strong> · ${blocking} blocking gaps · ${warnings} warnings` +
           (unconfirmed.length ? `<br />Articles not confirmed: ${unconfirmed.join(", ")}` : "") +
           `<br />Override downloads with the gap list attached.`
-        : `<strong>Ready to download</strong> · no blocking gaps`;
+        : `<strong>Ready to download</strong> · no blocking gaps${warnings ? ` · ${warnings} warnings remain` : ""}`;
       document.getElementById("override-btn").hidden = blocking === 0;
       const first = getGaps()[0];
       const back = document.getElementById("back-btn");

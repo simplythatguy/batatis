@@ -114,7 +114,10 @@ try {
     lists[name] = normalize(await text(sel));
   }
   assert(new Set(Object.values(lists)).size === 1, `Gap lists differ:\n${Object.entries(lists).map(([k, v]) => `${k}: ${v}`).join("\n")}`);
-  const seededBlocking = lists["01-intake"].split("|").length - 1;
+  await go("01-intake", { reset: true });
+  const seededBlocking = await page.locator("#gap-strip .status-dot.blocking").count();
+  const seededWarning = await page.locator("#gap-strip .status-dot.warning").count();
+  assert(/Evidence not uploaded/.test(lists["01-intake"]), "Shared gaps include missing Section D evidence");
 
   // B01 — chrome, styled controls, live gaps, save, deep links
   await go("01-intake", { reset: true });
@@ -122,7 +125,31 @@ try {
   assert(/230,\s*230,\s*230/.test(primBg), `B01: primary must be neutral grey (got ${primBg})`);
   const nav = await page.locator(".nav-item.active").evaluate((el) => ({ border: getComputedStyle(el).borderColor, shadow: getComputedStyle(el).boxShadow }));
   assert(!/94,\s*106,\s*210/.test(nav.border) && nav.shadow === "none", "B01: active nav fill only");
-  assert(/none/.test(await page.locator('input[type="checkbox"]').evaluate((el) => getComputedStyle(el).appearance)), "B01: checkbox styled");
+  const box = await page.locator("#atsAssumption").evaluate((el) => {
+    el.closest("[data-section]").dataset.active = "true";
+    const freeze = document.head.appendChild(Object.assign(document.createElement("style"), { textContent: "*,*::before{transition:none!important}" }));
+    const r = el.getBoundingClientRect();
+    const cs = getComputedStyle(el);
+    const glyph = (on) => {
+      el.checked = on;
+      const b = getComputedStyle(el, "::before");
+      const m = b.transform.match(/matrix\(([^)]+)\)/);
+      const [a, bb] = m ? m[1].split(",").map(Number) : [0, 0];
+      return { scale: Math.hypot(a, bb), border: parseFloat(b.borderRightWidth), color: b.borderRightColor, bg: getComputedStyle(el).backgroundColor };
+    };
+    const off = glyph(false);
+    const on = glyph(true);
+    el.closest("[data-section]").dataset.active = "false";
+    el.checked = true;
+    freeze.remove();
+    return { w: r.width, h: r.height, appearance: cs.appearance, radius: cs.borderTopLeftRadius, border: cs.borderTopWidth, off, on };
+  });
+  assert(/none/.test(box.appearance), "B01: checkbox styled");
+  assert(box.w === box.h && box.w >= 14 && box.w <= 16, `B01: checkbox must be a 14–16px square (got ${box.w}×${box.h})`);
+  assert(box.border === "1px" && parseFloat(box.radius) >= 3 && parseFloat(box.radius) <= 4, "B01: checkbox hairline border, ~4px radius");
+  assert(/230,\s*230,\s*230/.test(box.on.bg), `B01: checked fill must be #E6E6E6 (got ${box.on.bg})`);
+  assert(box.on.scale > 0.9 && box.on.border > 0 && /20,\s*20,\s*21/.test(box.on.color), "B01: checked state shows dark check glyph");
+  assert(box.off.scale < 0.01, "B01: unchecked state hides the check glyph");
   const chevronOk = await page.locator("#juris").evaluate(async (el) => {
     const m = getComputedStyle(el).backgroundImage.match(/^url\("(.*)"\)$/);
     if (!m) return false;
@@ -202,7 +229,7 @@ try {
   await go("04-sco-review", { reset: true });
   assert(await page.locator("[data-requires-no-blocking-gaps]").isDisabled(), "B04: admin-complete disabled");
   assert(new RegExp(`Resolve ${seededBlocking} blocking gaps`).test(await text("#gate-reason")), "B04: disabled reason");
-  assert((await text("#gap-summary")).startsWith(`${seededBlocking} blocking`), "B04: summary matches gap source");
+  assert((await text("#gap-summary")) === `${seededBlocking} blocking · ${seededWarning} warning`, "B04: summary matches gap source");
   assert((await page.locator("#gap-list li").count()) === Number(await text("#gap-count")), "B04: Gaps tab count");
   await page.click('[data-pane="citations"]');
   assert((await page.locator("#cite-list .entry").count()) === 2, "B04: citations for every Section C article");
@@ -216,6 +243,21 @@ try {
   assert(/Fix request sent/.test(await text("#gate-reason")), "B04: request sent state");
   await page.click('[data-project="VAR-1038"]');
   assert(await page.locator("#detail-1038").isVisible(), "B04: queue row selects detail");
+
+  // B06 — evidence status pills + gap honesty
+  await go("06-evidence-plan", { reset: true });
+  const rows = await page.locator("#plan-body tr").count();
+  assert((await page.locator("#plan-body [data-evidence-status] .status-dot").count()) === rows, "B06: status pill with dot per row");
+  assert(/Not authored by this tool/.test(await page.locator("#plan-body .meta").allInnerTexts().then((t) => t.join(" "))), "B06: authorship note is muted meta");
+  assert((await page.locator("#gap-strip a", { hasText: "Evidence not uploaded" }).count()) === rows, "B06: each missing upload is a shared gap");
+  await page.locator('[data-upload="hotbox"]').setInputFiles({ name: "hotbox-report.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4") });
+  assert(/Uploaded · hotbox-report\.pdf/.test(await text('[data-status-of="hotbox"]')), "B06: upload updates status pill");
+  assert(!/wall assembly thermal test/.test(await text("#gap-strip")), "B06: upload clears its gap");
+  await go("04-sco-review");
+  assert((await text("#gap-summary")) === `${seededBlocking} blocking · ${seededWarning - 1} warning`, "B06→B04: SCO summary reflects upload");
+  await go("05-export");
+  assert(/Uploaded · hotbox-report\.pdf/.test(await text('[data-evidence="hotbox"]')), "B06→B05: Section D status matches");
+  assert(/Required · not uploaded/.test(await text('[data-evidence="opinion"]')), "B05: missing evidence labelled, matches B06");
 
   // B05 — values equal B03, gate honesty, override dialog + download
   await go("05-export", { reset: true });
