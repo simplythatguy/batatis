@@ -98,8 +98,15 @@ def _evidence(gaps):
 def test_one_departed_article_is_a_handful_of_gaps_and_every_gap_stays(client):
     http, store = client
     case = _case(store)
-    body = http.get(f'/cases/{case.id}/gaps').json()
-    assert body['total'] == len(body['gaps'])
+    listed = http.get(f'/cases/{case.id}/gaps')
+    assert listed.status_code == 200 and isinstance(listed.json(), list)
+    assert listed.headers['x-gap-total'] == str(len(listed.json()))
+    envelope = http.get(f'/cases/{case.id}/gaps', params={'shape': 'v2'})
+    assert envelope.status_code == 200
+    body = envelope.json()
+    assert body['total'] == len(body['gaps']) == len(listed.json())
+    assert body['gaps'] == listed.json()
+    assert http.get(f'/cases/{case.id}/gaps', params={'shape': 'v1'}).status_code == 422
     assert len({gap['id'] for gap in body['gaps']}) == body['total']
     evidence = _evidence(body['gaps'])
     assert 1 <= len(evidence) <= 5
@@ -126,6 +133,121 @@ def test_unlabelled_provisions_stay_in_scope_and_labels_drop_the_citing_chain():
     proposed = Case(provisions=provisions, facts=[
         fact('provision_role', f'supporting:{DEPARTURE}', kind='proposed', status='unconfirmed')])
     assert evidence_provision_ids(proposed) == provisions
+
+
+def test_article_departure_covers_its_sentences_and_a_citing_article_does_not():
+    from engine.evidence_gaps import provision_in_scope, scoped_plan_items
+
+    article = '9.27.5.1.'
+    citing = '9.27.3.3.'
+    case = Case(provisions=[article, citing], facts=[
+        fact('provision_role', f'departure:{article}'),
+        fact('provision_role', f'citing:{citing}'),
+        fact('provision_role', f'citing:{article}(2)'),
+    ])
+    items = [
+        _item(f'{article}(1)', 'F20', 'OS2.1'),
+        _item(f'{article}(2)', 'F20', 'OS2.3'),
+        _item(f'{citing}(1)', 'F20', 'OS2.1'),
+    ]
+    assert provision_in_scope(case, f'{article}(1)')
+    assert not provision_in_scope(case, f'{article}(2)')
+    assert [item.provision_id for item in scoped_plan_items(case, items)] == [f'{article}(1)']
+
+
+# Synthetic reference wording. These ids are the manufacturer shortlist's no-departure
+# rows. The sentences are not quotations of the code.
+_CHAIN = {
+    DEPARTURE: 'Fasten cladding to framing. See Article 9.27.3.3. and Sentence 9.25.5.1.(1).',
+    '9.27.3.3.': 'Sheathing membrane. See Sentence 9.27.3.4.(1) and Sentence 9.25.5.2.(1).',
+    '9.27.3.3.(1)': 'Sheathing membrane sentence.',
+    '9.25.5.1.(1)': 'See Article 9.36.2.6. and Sentence 9.23.13.1.(2) and Sentence 9.10.17.10.(1).',
+    '9.27.3.4.(1)': 'Joint detail.',
+    '9.25.5.2.(1)': 'Position of the barrier.',
+    '9.36.2.6.': 'Energy efficiency article.',
+    '9.36.2.6.(1)': 'Energy efficiency sentence.',
+    '9.23.13.1.(2)': 'Bracing.',
+    '9.10.17.10.(1)': 'Foamed plastic.',
+}
+_ARTICLES = {'9.27.3.3.': '9.27.3.3.(1)', '9.36.2.6.': '9.36.2.6.(1)'}
+_DEPARTURE_PAIRS = (('F20', 'OS2.1'), ('F20', 'OS2.3'), ('F20', 'OH1.1'), ('F20', 'OH1.2'), ('F20', 'OH1.3'))
+
+
+class _ChainCodes:
+    """One departed sentence whose text names the rest of the shortlist."""
+
+    db_path = 'synthetic'
+
+    def provision(self, pid, division='B'):
+        if pid not in _CHAIN:
+            return None
+        child = _ARTICLES.get(pid)
+        pairs = _DEPARTURE_PAIRS if pid == DEPARTURE else (('F20', 'OS2.1'),)
+        return {
+            'id': pid, 'division': division, 'citation': f'synthetic Div {division} {pid}',
+            'level': 'article' if child else 'sentence',
+            'attributions': [_pair_row(pid, function, objective) for function, objective in pairs],
+            'intents': [], 'intent_comparison': [],
+            'attribution_status': {'status': 'direct', 'root_provision': None},
+            'children': [{'id': child, 'level': 'sentence'}] if child else [],
+            'text': _CHAIN[pid], 'pdf_page': 1, 'pdf_page_end': 1, 'article_title': 'synthetic',
+        }
+
+    def citation(self, pid, division='B'):
+        found = self.provision(pid, division)
+        return found['citation'] if found else None
+
+    def definition(self, code):
+        return None
+
+
+def _pair_row(pid, function, objective):
+    return {'provision_id': pid, 'fs': [function], 'objectives': [objective], 'bracket': f'[{function}-{objective}]',
+            'clauses': [], 'application_note': None, 'table_id': 'synthetic', 'pdf_page': 1}
+
+
+@pytest.fixture
+def chain_client(tmp_path, monkeypatch):
+    monkeypatch.setattr('engine.completeness.validate_text', lambda *args, **kwargs: {'errors': []})
+    monkeypatch.setattr('engine.completeness.process_fields', lambda case, codes: [])
+    monkeypatch.setattr(
+        'engine.completeness.professional_involvement',
+        lambda case, codes: ProfessionalResult(required='no', general_required='no', reasons=[], questions=[]))
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    return TestClient(create_app(store, _ChainCodes())), store
+
+
+def test_added_departure_pulls_the_citing_chain_and_gaps_stay_few(chain_client):
+    http, store = chain_client
+    case = store.put(Case(
+        jurisdiction=Jurisdiction(id='alberta-other', name='Synthetic AHJ'),
+        facts=[fact(name, 'synthetic') for name in (
+            'owner_name', 'application_date', 'civic_address', 'legal_description',
+            'representative', 'mailing_address', 'alternative_description', 'scope')]))
+    posted = http.post(f'/cases/{case.id}/section-d', json={'provisions': [DEPARTURE]})
+    assert posted.status_code == 200, posted.text
+    stored = store.get(case.id)
+    assert stored.provisions[0] == DEPARTURE
+    citing = stored.provisions[1:]
+    assert set(citing) >= {
+        '9.27.3.3.', '9.25.5.1.(1)', '9.27.3.4.(1)', '9.25.5.2.(1)',
+        '9.36.2.6.', '9.23.13.1.(2)', '9.10.17.10.(1)'}
+    roles = {fact.value for fact in stored.facts if fact.field == 'provision_role'}
+    assert f'departure:{DEPARTURE}' in roles
+    assert all(f'citing:{pid}' in roles for pid in citing)
+    listed = http.get(f'/cases/{stored.id}/gaps')
+    assert isinstance(listed.json(), list)
+    assert listed.headers['x-gap-total'] == str(len(listed.json()))
+    evidence = _evidence(listed.json())
+    assert listed.json() == evidence
+    assert len(evidence) == 1
+    assert {gap['provision_id'] for gap in evidence} == {DEPARTURE}
+    assert len(evidence[0]['pairs']) == len(_DEPARTURE_PAIRS)
+    assert len(stored.provisions) > len(evidence)
+    assert not any(gap['field'].endswith(('.date', '.responsible_party', '.title', '.document', '.person'))
+                   for gap in listed.json())
+    envelope = http.get(f'/cases/{stored.id}/gaps', params={'shape': 'v2'}).json()
+    assert envelope['total'] == len(listed.json()) and envelope['gaps'] == listed.json()
 
 
 def test_rank_returns_every_gap_and_marks_the_first_five():

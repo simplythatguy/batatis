@@ -15,6 +15,8 @@ from typing import Literal, Sequence
 
 from pydantic import BaseModel, ConfigDict
 
+from codedb import ids
+
 from .models import Case, EvidenceItem
 from .section_d import (
     ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, EvidencePlanItem,
@@ -100,12 +102,23 @@ def provision_roles(case: Case) -> dict[str, str]:
     return roles
 
 
+def _under(provision_id: str, root_id: str) -> bool:
+    if provision_id == root_id:
+        return True
+    try:
+        parsed = ids.parse(provision_id)
+    except ValueError:
+        return False
+    return any(str(ancestor) == root_id for ancestor in parsed.ancestors())
+
+
 def evidence_provision_ids(case: Case) -> list[str]:
-    """Provisions that take an evidence gap.
+    """Stored provisions that take an evidence gap.
 
     With no role labels, every confirmed provision is in scope. Once a label
     exists, only ``departure`` and ``affected`` stay. ``supporting`` and
-    ``citing`` are the citing chain and do not get an evidence gap.
+    ``citing`` are the citing chain and do not get an evidence gap. Sentences
+    of a departure article are in scope through :func:`provision_in_scope`.
     """
     confirmed = list(dict.fromkeys(case.provisions))
     roles = provision_roles(case)
@@ -115,9 +128,23 @@ def evidence_provision_ids(case: Case) -> list[str]:
             if roles.get(pid) in DEPARTURE_ROLES and roles.get(pid) not in OUT_OF_SCOPE_ROLES]
 
 
+def provision_in_scope(case: Case, provision_id: str) -> bool:
+    """True when this provision, or a departure article that contains it, takes a gap.
+
+    A sentence marked ``citing`` stays out of scope even when its article is a departure.
+    With no role labels, only an id stored on the case is in scope.
+    """
+    if provision_roles(case).get(provision_id) in OUT_OF_SCOPE_ROLES:
+        return False
+    roles = provision_roles(case)
+    confirmed = list(dict.fromkeys(case.provisions))
+    if not roles:
+        return provision_id in confirmed
+    return any(roles.get(root) in DEPARTURE_ROLES and _under(provision_id, root) for root in confirmed)
+
+
 def scoped_plan_items(case: Case, items: Sequence[EvidencePlanItem]) -> list[EvidencePlanItem]:
-    allowed = set(evidence_provision_ids(case))
-    return [item for item in items if item.provision_id in allowed]
+    return [item for item in items if provision_in_scope(case, item.provision_id)]
 
 
 def _evidence_types(items: Sequence[EvidencePlanItem]) -> list[str]:

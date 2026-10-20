@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Callable
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Response
 from pydantic import BaseModel, ConfigDict, Field
 
 from .ccmc import CCMCRegistry, RegistrySearch, RegistryUnavailable
@@ -11,6 +11,7 @@ from .codes import Codes
 from .completeness import Gap, check_completeness
 from .process_fields import ProcessField, process_fields
 from .professional import ProfessionalResult, professional_involvement
+from .provision_roles import record_provision_roles
 from .section_c import section_c_rows
 from .section_d import SectionDPlan, section_d_plan
 from .section_d_issues import SectionDIssue, section_d_issues
@@ -45,9 +46,11 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
     @router.post('/cases/{case_id}/section-d', response_model=SectionDPlan)
     def section_d(case_id: str, body: SectionDRequest | None = None):
         case = get_case(case_id)
-        if body and body.provisions is not None:
-            case.provisions = body.provisions
         try:
+            # User-added or identified provisions are the departure. References
+            # named in that text are appended as citing and do not take a gap.
+            if body and body.provisions is not None:
+                record_provision_roles(case, code(), body.provisions)
             case.section_c = section_c_rows(case.provisions, code())
             plan = section_d_plan(case, code())
         except KeyError as error:
@@ -81,9 +84,18 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
     def fields(case_id: str):
         return process_fields(get_case(case_id), code())
 
-    @router.get('/cases/{case_id}/gaps', response_model=GapList)
-    def gaps(case_id: str):
+    @router.get('/cases/{case_id}/gaps', response_model=None)
+    def gaps(case_id: str, response: Response, shape: str | None = Query(default=None)):
+        """JSON array, as before. ``?shape=v2`` returns ``{total, gaps}``.
+
+        ``X-Gap-Total`` is the count either way. ``priority`` is on each gap.
+        """
+        if shape not in (None, 'v2'):
+            raise HTTPException(422, 'shape must be v2')
         found = check_completeness(get_case(case_id), code())
-        return GapList(total=len(found), gaps=found)
+        response.headers['X-Gap-Total'] = str(len(found))
+        if shape == 'v2':
+            return GapList(total=len(found), gaps=found)
+        return found
 
     return router

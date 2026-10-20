@@ -26,7 +26,11 @@ def test_routes_are_mounted_and_rebuild_only_confirmed_rows(context):
     assert r.status_code == 200 and r.json()['items']
     assert all(item['status'] == 'not provided' for item in r.json()['items'])
     stored = store.get(case.id)
-    assert stored.provisions == ['9.25.5.2.(1)(b)', '9.27.3.2.(1)'] and stored.section_c
+    assert stored.provisions[:2] == ['9.25.5.2.(1)(b)', '9.27.3.2.(1)'] and stored.section_c
+    from engine.evidence_gaps import provision_roles
+    roles = provision_roles(stored)
+    assert roles['9.25.5.2.(1)(b)'] == 'departure' and roles['9.27.3.2.(1)'] == 'departure'
+    assert all(roles[pid] == 'citing' for pid in stored.provisions[2:])
     assert stored.evidence == []
     before = stored.model_dump_json()
     r = client.post(f'/cases/{case.id}/section-d', json={'provisions': ['9.99.99.99.(1)']})
@@ -38,11 +42,12 @@ def test_professional_process_and_gaps_use_latest_persisted_facts(context):
     client, store, codes = context
     case = store.put(complete_case())
     assert client.get(f'/cases/{case.id}/professional').json()['required'] == 'no'
-    assert client.get(f'/cases/{case.id}/gaps').json() == {'total': 0, 'gaps': []}
+    empty = client.get(f'/cases/{case.id}/gaps')
+    assert empty.json() == [] and empty.headers['x-gap-total'] == '0'
     fields = client.get(f'/cases/{case.id}/process-fields').json()
     assert len(fields) == 6 and all(f['answer']['author'] == 'applicant' for f in fields)
     store.add_fact(case.id, fact('process.risk_assessment', 'Proposed generated text', kind='proposed', status='unconfirmed'))
-    gaps = client.get(f'/cases/{case.id}/gaps').json()['gaps']
+    gaps = client.get(f'/cases/{case.id}/gaps').json()
     assert any(g['id'].startswith('D09:') and g['fix_hint'] and g['citation'] for g in gaps)
     assert next(f for f in client.get(f'/cases/{case.id}/process-fields').json() if f['id'] == 'risk_assessment')['answer'] is None
 
