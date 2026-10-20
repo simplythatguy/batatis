@@ -230,21 +230,18 @@ async function goHash(page, hash) {
   await sleep(350);
 }
 
-async function openDisclosure(page, name) {
-  const summary = page.locator("summary").filter({ hasText: name }).first();
-  if (!(await visible(summary, 800))) return false;
-  const details = page.locator("details").filter({ has: summary }).first();
-  const isOpen = await details.evaluate((el) => el.open).catch(() => false);
-  if (!isOpen) {
-    await summary.scrollIntoViewIfNeeded().catch(() => {});
-    await summary.click();
-    await sleep(250);
-  }
-  return true;
-}
-
 async function openReviewGaps(page, api) {
-  if (await openDisclosure(page, "Review gaps")) return;
+  const summary = page.locator("summary").filter({ hasText: "Review gaps" }).first();
+  if (await visible(summary, 2500)) {
+    const details = summary.locator("xpath=ancestor::details[1]");
+    const isOpen = await details.evaluate((el) => el.open).catch(() => false);
+    if (!isOpen) {
+      await summary.scrollIntoViewIfNeeded().catch(() => {});
+      await summary.click();
+      await sleep(250);
+    }
+    return;
+  }
   api.notes.push("Review gaps is not on this screen.");
 }
 
@@ -304,6 +301,7 @@ async function fillIntake(page, api, spec) {
     api.notes.push("Which authority will review this? is not on this build.");
   }
   api.notes.push("Did not upload a PDF.");
+  await sleep(500);
   await openReviewGaps(page, api);
   await showLedger(page, api);
   if (await visible(box, 500)) await box.scrollIntoViewIfNeeded().catch(() => {});
@@ -608,11 +606,19 @@ async function shot5(page, api) {
 }
 
 async function waitOfficerLoaded(page) {
-  const loading = page.getByText("Loading the package…").first();
-  if (await visible(loading, 600)) {
-    await loading.waitFor({ state: "hidden", timeout: 8000 }).catch(() => {});
+  const loading = page.getByText(/Loading the package…|Reviewing the example package…|Missing items will appear here/).first();
+  if (await visible(loading, 1000)) {
+    await page
+      .getByText(/Online review unavailable|Online administrative review|No missing|Your application appears to be missing/)
+      .first()
+      .waitFor({ timeout: 8000 })
+      .catch(() => {});
   }
   await sleep(300);
+}
+
+function namedButton(page, names) {
+  return page.getByRole("button", { name: new RegExp(`^(${names.map(escapeReg).join("|")})$`) }).first();
 }
 
 async function shot6(page, api) {
@@ -637,24 +643,37 @@ async function shot6(page, api) {
     if (await visible(h1(page, "Who are you?"), 400)) {
       return skipped("Officer review sent the browser back to Who are you?. The planted package was not recorded.");
     }
-    const before = page.getByRole("button", { name: "Before fixes" }).first();
+    if (await visible(page.getByText("does not open the sample package").first(), 800)) {
+      return skipped("Officer review says this application does not open the sample package. The planted package was not recorded.");
+    }
+    const before = namedButton(page, ["Before fixes", "Original example"]);
     if (!(await visible(before, 8000))) {
-      return skipped("Officer review opened without Before fixes, so the planted package was not recorded.");
+      const toolbar = page.getByRole("group", { name: "Package version" }).first();
+      const onScreen = (await visible(toolbar, 500)) ? (await toolbar.innerText()).replace(/\s+/g, " ").trim() : "";
+      return skipped(
+        onScreen
+          ? `Officer review package controls read "${onScreen}". Neither Before fixes nor Original example is on screen, so the planted package was not recorded.`
+          : "Officer review opened without a package version control, so the planted package was not recorded.",
+      );
     }
     await cover(page, false);
-    api.notes.push("The officer screen is one planted package. Case A, B, and C labels were not overlaid.");
+    const beforeName = (await before.innerText()).replace(/\s+/g, " ").trim();
+    api.notes.push(`The officer screen is one planted package. Version control on screen: ${beforeName}. Case A, B, and C labels were not overlaid.`);
     await before.click();
     await waitOfficerLoaded(page);
     const beforeFrame = await settle(page, api, LOWER.officer, { suffix: "before" });
     if (!beforeFrame.ok) return skipped(beforeFrame.reason);
-    const after = page.getByRole("button", { name: "After fixes" }).first();
-    if (await visible(after, 800)) await after.click();
-    else api.notes.push("After fixes is not on this screen.");
+    const after = namedButton(page, ["After fixes", "Updated example"]);
+    if (await visible(after, 800)) {
+      const afterName = (await after.innerText()).replace(/\s+/g, " ").trim();
+      api.notes.push(`Second version control on screen: ${afterName}.`);
+      await after.click();
+    } else api.notes.push("The second package version control is not on this screen.");
     await waitOfficerLoaded(page);
     const request = page.getByRole("heading", { name: "Information request" }).first();
     if (await visible(request, 2000)) await request.scrollIntoViewIfNeeded().catch(() => {});
     else api.notes.push("Information request is not on this screen.");
-    const copy = page.getByRole("button", { name: "Copy request" }).first();
+    const copy = namedButton(page, ["Copy request", "Copy example request"]);
     if (await visible(copy, 800)) await copy.scrollIntoViewIfNeeded().catch(() => {});
     else api.notes.push("Copy request is not on this screen.");
     const afterFrame = await settle(page, api, LOWER.officer, { suffix: "after" });
