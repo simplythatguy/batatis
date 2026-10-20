@@ -8,6 +8,14 @@ Part 4 design (cited only as Div C 2.4.1.2.(1) from professional.py), and return
 question when span, area, storeys, occupancy, or Part 4 design is missing. It does not default
 those facts to a boolean. A rule that already resolves to yes still returns yes.
 
+Part 4 itself is derived from stated facts. Positive triggers, from the codedb-checked Part 9
+sentences, are a 1-in-50 hourly wind pressure at or above 1.2 kPa, Sa(0.2) above 1.8 (or above
+1.2 where lumber roof sheathing is stated), a supported joist span above 4.9 m, a specified live
+load above 2.4 kPa, reinforced concrete, steel studs, permafrost, and a building outside Part 9
+under Div A 1.3.3.2.(1), including a Group A or Group B occupancy that still fits a Division C
+size exception. A wood-frame building inside that Part 9 limit with none of those triggers is
+part4_design false. That negative is extracted, not filled in.
+
 `rules_plus_unknown_cf` is the same frozen screen, run once for every combination of the missing
 deciding facts at fixed extremes (the value that most pushes toward yes, and the value that most
 pushes toward no). Those extremes come from the rule thresholds and do not change per case. If
@@ -19,10 +27,11 @@ The gold labels are model-checked, not human-reviewed. `rules_plus_unknown` was 
 looking at this same development set, so agreement on those 60 cases is in-sample. The eight-case
 limit check is reported separately and is no longer blind for missing-fact cases.
 
-Gold `depends` matches system `unknown`. Under-flag is gold yes and system no. A case is skipped
-when codedb (or the rule lookup standing in for it) cannot resolve a provision the screen asks for.
+Gold `depends` matches system `unknown`. Under-flag is gold yes and system no. Over-flag is gold
+no and system yes. A case is skipped when codedb (or the rule lookup standing in for it) cannot
+resolve a provision the screen asks for.
 
-(on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction)
+Part 4 on text-only cases is derived from stated facts. A wood-frame building inside Part 9 with no Part 4 trigger is part4_design false, so the screen can answer no. On this dev set (model-checked, in-sample) the shipped screen still emits 0 no labels.
 """
 from __future__ import annotations
 
@@ -139,6 +148,7 @@ class VariantScore:
     skipped: int = 0
     matched: int = 0
     under_flag: int = 0
+    over_flag: int = 0
     unknown: int = 0
     confident_wrong: int = 0
     gold_yes_unknown: list[str] = field(default_factory=list)
@@ -213,6 +223,104 @@ def _units(text: str, storeys: int | None) -> int | None:
     return max(found) if found else None
 
 
+_WOOD_FRAME = re.compile(r'\b(?:wood[-\s]?fram(?:e|ed|ing)|light[-\s]frame)\b', re.I)
+_REINFORCED_CONCRETE = re.compile(r'\breinforced concrete\b', re.I)
+_POST_DISASTER = re.compile(r'\bpost-disaster\b', re.I)
+_HIGH_HAZARD = re.compile(r'\b(?:high-hazard industrial|group f,?\s*division\s*1)\b', re.I)
+# Div A 1.3.3.2.(1)(b): Group A, and Group B care, treatment or detention. Not every industrial use.
+_OUTSIDE_PART9_OCCUPANCY = frozenset({'assembly', 'care', 'treatment', 'detention'})
+
+
+def _kpa_at(text: str, cue: str, limit: float, *, at_least: bool) -> bool:
+    """True when a kPa value beside `cue` meets the Part 9 threshold. Equality follows the sentence."""
+    for match in re.finditer(r'(\d+(?:\.\d+)?)\s*kPa', text, re.I):
+        window = text[max(0, match.start() - 80):match.end() + 40]
+        if not re.search(cue, window, re.I):
+            continue
+        value = float(match.group(1))
+        if at_least and value >= limit:
+            return True
+        if not at_least and value > limit:
+            return True
+    return False
+
+
+def _sa_triggers_part4(text: str) -> bool:
+    """Sa(0.2) above 1.8, or above 1.2 when lumber roof sheathing is stated.
+
+    Div B 9.23.3.5.(4) and 9.23.6.1.(6) use greater than 1.8. Div B 9.23.16.5.(3) uses
+    greater than 1.2 for lumber roof sheathing. Both limits are strict.
+    """
+    lumber_roof = re.search(r'\blumber roof sheathing\b', text, re.I) is not None
+    for match in re.finditer(r'Sa\s*\(\s*0\.2\s*\)(?:[^0-9]{0,40})(\d+(?:\.\d+)?)', text, re.I):
+        value = float(match.group(1))
+        if value > 1.8 or (lumber_roof and value > 1.2):
+            return True
+    return False
+
+
+def _joist_span_exceeds_4_9(text: str) -> bool:
+    """Div B 9.15.3.3.(2): supported joist span exceeds 4.9 m. Not the 12.20 m roof-member handoff."""
+    patterns = (
+        r'(\d+(?:\.\d+)?)\s*m(?!\s*(?:2|²))(?:\s+\w+){0,4}\s+joists?\b',
+        r'joists?(?:\s+\w+){0,5}\s+span(?:ning|s)?(?:\s+\w+){0,4}\s+(\d+(?:\.\d+)?)\s*m(?!\s*(?:2|²))',
+    )
+    for pattern in patterns:
+        for match in re.finditer(pattern, text, re.I):
+            if float(match.group(1)) > 4.9:
+                return True
+    return False
+
+
+def _steel_studs(text: str) -> bool:
+    """Div B 9.24.1.1.(2) is loadbearing steel studs. A stated non-loadbearing stud is not that trigger."""
+    for match in re.finditer(r'steel studs?', text, re.I):
+        prefix = text[max(0, match.start() - 20):match.start()]
+        if re.search(r'non[-\s]?loadbearing\s+$', prefix, re.I):
+            continue
+        return True
+    return False
+
+
+def _outside_part9(text: str, storeys: int | None, area: float | None, occupancy: str | None) -> bool:
+    """Div A 1.3.3.2.(1): Part 4 applies even when a Division C 2.4.1.1.(1) size exception is met."""
+    if storeys is not None and storeys > 3:
+        return True
+    if area is not None and area > 600:
+        return True
+    if occupancy in _OUTSIDE_PART9_OCCUPANCY:
+        return True
+    if _POST_DISASTER.search(text) or _HIGH_HAZARD.search(text):
+        return True
+    return False
+
+
+def _inside_part9(text: str, storeys: int | None, area: float | None, occupancy: str | None) -> bool:
+    """Stated size and occupancy put the building on the Part 9 side of Div A 1.3.3.2.(1)."""
+    if storeys is None or storeys > 3 or area is None or area > 600 or occupancy is None:
+        return False
+    if occupancy in _OUTSIDE_PART9_OCCUPANCY or occupancy in {'mixed', 'other'}:
+        return False
+    if _POST_DISASTER.search(text) or _HIGH_HAZARD.search(text):
+        return False
+    return True
+
+
+def _part4_from_text(text: str, storeys: int | None, area: float | None, occupancy: str | None) -> bool | None:
+    """True, false, or unknown Part 4 design. A span above 12.20 m is not applied here."""
+    if _PART4.search(text) or _outside_part9(text, storeys, area, occupancy):
+        return True
+    if _REINFORCED_CONCRETE.search(text) or _steel_studs(text) or re.search(r'\bpermafrost\b', text, re.I):
+        return True
+    if _kpa_at(text, r'\bwind\b', 1.2, at_least=True) or _sa_triggers_part4(text):
+        return True
+    if _joist_span_exceeds_4_9(text) or _kpa_at(text, r'\blive load\b', 2.4, at_least=False):
+        return True
+    if _WOOD_FRAME.search(text) and _inside_part9(text, storeys, area, occupancy):
+        return False
+    return None
+
+
 def _span(text: str) -> float | None:
     found = [float(match.group(1)) for match in re.finditer(
         rf'\b(\d+(?:\.\d+)?)\s*m(?!\s*(?:2|²))(?:\s+\S+){{0,4}}\s+\S*span\b', text, re.I)]
@@ -263,8 +371,9 @@ def observe(case: dict) -> tuple[ProfessionalFacts, Signals]:
         'building_area_m2': area,
         'principal_dwelling_units': units if _occupancy(text, units) == 'multi_family' else None,
     }
-    if _PART4.search(text):
-        data['part4_design'] = True
+    part4 = _part4_from_text(text, storeys, area, data['occupancy'])
+    if part4 is not None:
+        data['part4_design'] = part4
     return ProfessionalFacts(**{key: value for key, value in data.items() if value is not None}), signals
 
 
@@ -418,12 +527,13 @@ def _column(label: str) -> str:
 
 def under_flag_fact(case: dict, variant: str) -> str:
     facts, signals = observe(case)
-    parts = [f'occupancy={facts.occupancy}', f'part4_design={"true" if facts.part4_design is True else "unset"}']
+    part4 = {True: 'true', False: 'false'}.get(facts.part4_design, 'unset')
+    parts = [f'occupancy={facts.occupancy}', f'part4_design={part4}']
     if signals.span_m is not None:
         parts.append(f'span_m={signals.span_m:g}')
     if variant == 'rules_only' and signals.span_m is not None and signals.span_m > PART9_MAX_SPAN_M:
         parts.append(
-            f'rules_only does not apply the {PART9_MAX_SPAN_M:.2f} m span, so part4_design is filled false')
+            f'rules_only does not apply the {PART9_MAX_SPAN_M:.2f} m span, so part4_design stays false')
     return f"{case['id']}: " + '; '.join(parts)
 
 
@@ -466,6 +576,8 @@ def score(codes, cases: list[dict] | None = None) -> dict[str, VariantScore]:
             if gold == 'yes' and label == 'no':
                 totals[name].under_flag += 1
                 totals[name].under_flag_facts.append(under_flag_fact(case, name))
+            if gold == 'no' and label == 'yes':
+                totals[name].over_flag += 1
             if gold == 'yes' and column == 'unknown':
                 totals[name].gold_yes_unknown.append(case['id'])
     return totals
@@ -517,6 +629,7 @@ def _variant_lines(row: VariantScore) -> list[str]:
     lines.append(f'gold_yes_as_unknown {row.name}: {_yes_unknown(row)}')
     facts = '; '.join(row.under_flag_facts) if row.under_flag_facts else 'none'
     lines.append(f'under_flag {row.name}: {facts}')
+    lines.append(f'over_flag {row.name}: {row.over_flag} (gold no, system yes)')
     return lines
 
 

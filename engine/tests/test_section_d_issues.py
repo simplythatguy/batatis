@@ -328,8 +328,9 @@ def test_eval_script_prints_in_sample_wilson_table(capsys):
     assert f'shipped {shipped}:' in expected
     assert out.startswith(expected + '\n')
     disclosure = (
-        '(on text-only cases it answers only yes or ask, never no, '
-        'so 0 under-flags holds by construction)'
+        'Part 4 on text-only cases is derived from stated facts. A wood-frame building inside '
+        'Part 9 with no Part 4 trigger is part4_design false, so the screen can answer no. '
+        'On this dev set (model-checked, in-sample) the shipped screen still emits 0 no labels.'
     )
     for path in ('docs/api-contract.md', 'README.md', 'engine/section_d_flag_eval.py'):
         text = Path(path).read_text()
@@ -387,6 +388,10 @@ def test_eval_script_prints_in_sample_wilson_table(capsys):
     assert 'under_flag rules_plus_unknown: none' in out
     assert 'under_flag rules_plus_unknown_cf: none' in out
     assert 'under_flag always_unknown: none' in out
+    assert 'over_flag rules_only: 0 (gold no, system yes)' in out
+    assert 'over_flag rules_plus_unknown: 0 (gold no, system yes)' in out
+    assert 'over_flag rules_plus_unknown_cf: 0 (gold no, system yes)' in out
+    assert 'over_flag always_unknown: 0 (gold no, system yes)' in out
     assert 'confusion rules_plus_unknown_cf  rows=gold  columns=system yes unknown no' in out
     assert 'unknown_rate rules_plus_unknown_cf: 27/60 [' in out
     assert 'confident_wrong rules_plus_unknown_cf: 0/60 [' in out
