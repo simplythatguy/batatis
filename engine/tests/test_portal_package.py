@@ -21,8 +21,14 @@ def test_preflight_reuses_the_documentation_gate_and_does_not_include_the_form()
     assert any('division_c_2_3_1' in reason and 'IB-2025-11-18' in reason for reason in package.preflight_reasons)
     assert package.reminder_verdict == 'reminder'
     assert 'within 10 days' in package.reminder
+    assert 'copy of each variance' in package.reminder.casefold()
     assert all('within 10 days' not in reason for reason in package.preflight_reasons)
-    assert 'complies' not in package.text().casefold()
+    text = package.text().casefold()
+    assert 'complies' not in text
+    assert 'prepared for the safety codes officer to register' in text
+    assert 'not council approval' in text
+    assert 'applicant registers' not in text
+    assert 'applicant to register' not in text
     form = package.manifest[0]
     assert form.role == 'form' and form.needs_personal_information and not form.included
 

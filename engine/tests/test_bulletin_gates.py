@@ -41,6 +41,8 @@ def test_missing_division_c_documentation_cites_ib_2025_11_18():
     assert gap.citation == 'IB-2025-11-18'
     assert gap.field == 'division_c_2_3_1'
     assert gap.message.startswith('Your application appears to be missing ')
+    assert 'safety codes officer needs to issue and register' in gap.message
+    assert 'applicant duty' not in gap.message.casefold()
     assert 'within 10 days' not in gap.message
     assert 'within 10 days' not in gap.fix_hint
 
@@ -54,6 +56,7 @@ def test_second_location_and_semicolon_cite_ib_2026_10_01_but_a_comma_does_not()
     assert [gap.id for gap in second] == ['IB-LOC:single_location']
     assert second[0].citation == 'IB-2026-10-01'
     assert 'Do not choose a location' in second[0].fix_hint
+    assert 'safety codes officer registers' in second[0].fix_hint
     split = bulletin_gaps(_case(**{
         'division_c_2_3_1': DOC,
         'civic_address': '100 Example Avenue, Edmonton, Alberta; 200 Example Road, Edmonton, Alberta',
@@ -75,8 +78,14 @@ def test_copy_deadline_is_a_reminder_not_a_gap():
     reminder = applicant_reminder()
     assert reminder['verdict'] == 'reminder'
     assert reminder['bulletin_ids'] == ['IB-2025-11-18', 'IB-2026-10-01']
+    folded = reminder['text'].casefold()
+    assert 'applicant reminder' not in folded
+    assert 'copy of each variance' in folded
+    assert 'issued variance, not the supporting documentation' in folded
     assert 'within 10 days' in reminder['text']
     assert '2026-12-01' in reminder['text']
+    assert 'only a safety codes officer registers' in folded
+    assert 'not council approval' in folded
     assert 'https://ovp.safetycodes.ab.ca/' in reminder['links']
     assert all('within 10 days' not in gap.message for gap in bulletin_gaps(_case()))
 

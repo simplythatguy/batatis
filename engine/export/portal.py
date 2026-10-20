@@ -1,13 +1,14 @@
-"""Registration package for the Orders and Variances Portal.
+"""Package prepared for the safety codes officer to register on the Orders and Variances Portal.
 
-IB-2026-10-01: from 2026-12-01 the portal is the sole registration method; the
-filled form and supporting documentation are included together; one registration
-covers one location; unnecessary personal information in supporting documents is
-flagged so it can be removed or redacted. This module does not edit files and
-does not decide that a file is safe.
+IB-2026-10-01: from 2026-12-01 the portal is the sole method; only a safety codes
+officer registers; registration is not Council approval; the filled form and
+supporting documentation go together; one variance is for one location;
+unnecessary personal information in supporting documents is flagged so it can be
+removed or redacted. This module does not edit files and does not decide that a
+file is safe.
 
-The 10-day copy in IB-2025-11-18 is attached as a reminder, not as a pre-flight
-failure. Pre-flight reuses the completeness gates.
+The 10-day copy in IB-2025-11-18 is a copy of the issued variance, attached as a
+reminder, not as a pre-flight failure. Pre-flight reuses the completeness gates.
 """
 from __future__ import annotations
 
@@ -61,7 +62,8 @@ class PortalPackage:
 
     def text(self) -> str:
         lines = [
-            'Portal registration package',
+            'Portal registration package prepared for the safety codes officer to register',
+            'Registration is not Council approval.',
             'Bulletins: ' + ', '.join(self.bulletin_ids),
             self.form_note,
             'Pre-flight:',
@@ -100,7 +102,8 @@ def _flags(attachments: list[PortalAttachment]) -> list[RedactionFlag]:
                 found.append(RedactionFlag(
                     attachment=attachment.name, kind=kind, match=match, bulletin_id='IB-2026-10-01',
                     message=(f'IB-2026-10-01: supporting attachment "{attachment.name}" includes a {kind}. '
-                             'Unnecessary personal information should be removed or redacted before registration. '
+                             'Unnecessary personal information should be removed or redacted before the safety '
+                             'codes officer registers the variance. Registration is not Council approval. '
                              'This check does not edit the file and does not decide that the file is safe.')))
     return found
 
@@ -115,31 +118,46 @@ def portal_package(case: Case, *, codes=None, attachments: list[PortalAttachment
     reasons = _preflight_reasons(case, codes)
     form_pdf = None
     if reasons:
-        form_note = 'The filled form was not produced because the completeness pre-flight has open items. IB-2026-10-01.'
+        form_note = (
+            'The filled form was not produced because the completeness pre-flight has open items. '
+            'This package is prepared for the safety codes officer to register. Registration is not '
+            'Council approval. IB-2026-10-01.')
     else:
         try:
             # Import stays local so this module does not change scc.py path handling.
             result = export_case(case, codes=codes, form=form)
         except ExportBlocked as exc:
-            form_note = 'The filled form was not produced because export pre-flight refused the case. IB-2026-10-01.'
+            form_note = (
+                'The filled form was not produced because export pre-flight refused the case. '
+                'This package is prepared for the safety codes officer to register. Registration is not '
+                'Council approval. IB-2026-10-01.')
             if not reasons:
                 reasons = list(exc.reasons)
         except FormNotFound:
-            form_note = 'The SCC variance form file is not on this machine, so the filled form was not produced. IB-2026-10-01.'
+            form_note = (
+                'The SCC variance form file is not on this machine, so the filled form was not produced. '
+                'This package is prepared for the safety codes officer to register. Registration is not '
+                'Council approval. IB-2026-10-01.')
         except FileNotFoundError:
-            form_note = 'The code database is not on this machine, so the filled form was not produced. IB-2026-10-01.'
+            form_note = (
+                'The code database is not on this machine, so the filled form was not produced. '
+                'This package is prepared for the safety codes officer to register. Registration is not '
+                'Council approval. IB-2026-10-01.')
         else:
             form_pdf = result.pdf
             form_note = (
-                'Filled variance form included. IB-2026-10-01: include it at registration. '
+                'Filled variance form included in the package prepared for the safety codes officer to register. '
+                'IB-2026-10-01. Registration is not Council approval. '
                 'The form does not replace the supporting documentation.')
     manifest = [ManifestEntry(
         'Variance form', 'form', True, form_pdf is not None,
-        'Personal information belongs on the form. IB-2026-10-01.')]
+        'Personal information belongs on the form. Prepared for the safety codes officer to register. '
+        'Registration is not Council approval. IB-2026-10-01.')]
     for attachment in attachments:
         manifest.append(ManifestEntry(
             attachment.name, 'supporting', attachment.needs_personal_information, True,
-            'Supporting documentation included at registration. IB-2026-10-01.'))
+            'Supporting documentation for the safety codes officer to include when registering. '
+            'Registration is not Council approval. IB-2026-10-01.'))
     return PortalPackage(
         bulletin_ids=('IB-2026-10-01', 'IB-2025-11-18', 'IB-2026-10-16'),
         form_pdf=form_pdf, form_included=form_pdf is not None, form_note=form_note, manifest=manifest,

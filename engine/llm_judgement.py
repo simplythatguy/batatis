@@ -182,15 +182,60 @@ class ScriptedClient(LLMClient):
         return LLMResult(json.dumps(self.payload), LLMUsage('scripted', 'scripted', 12, 24, 0.001))
 
 
-def _parse_findings(text: str) -> list[dict]:
+@dataclass(frozen=True)
+class JudgementFinding:
+    """One validated judgement item. Both the parser and apply_llm use this shape."""
+
+    field: str
+    verdict: str
+    reason: str
+    quotes: tuple[str, ...]
+    defect_class: str | None = None
+    problem: str | None = None
+
+
+def _parse_findings(text: str) -> tuple[list, int]:
+    """Return raw finding items and how many top-level shapes were dropped.
+
+    Items are not filtered here. A response that is not ``{"findings": [...]}``
+    counts as one drop so the run continues.
+    """
     cleaned = text.strip()
     cleaned = re.sub(r'^```(?:json)?\s*|\s*```$', '', cleaned)
     try:
         body = json.loads(cleaned)
     except json.JSONDecodeError:
-        return []
-    findings = body.get('findings') if isinstance(body, dict) else None
-    return [item for item in findings or [] if isinstance(item, dict)]
+        return [], 1
+    if not isinstance(body, dict) or not isinstance(body.get('findings'), list):
+        return [], 1
+    return list(body['findings']), 0
+
+
+def _as_finding(item) -> JudgementFinding | None:
+    """Validate one item. None means the item is malformed and must be counted."""
+    if not isinstance(item, dict):
+        return None
+    field_name = item.get('field')
+    verdict = item.get('verdict')
+    if not isinstance(field_name, str) or field_name not in JUDGEMENT_FIELDS:
+        return None
+    if verdict not in ('missing', 'unclear'):
+        return None
+    raw_quotes = item.get('quotes') if item.get('quotes') is not None else []
+    if not isinstance(raw_quotes, list) or any(not isinstance(quote, str) for quote in raw_quotes):
+        return None
+    reason = item.get('reason')
+    defect_class = item.get('defect_class')
+    problem = item.get('problem')
+    if reason is not None and not isinstance(reason, str):
+        return None
+    if defect_class is not None and not isinstance(defect_class, str):
+        return None
+    if problem is not None and not isinstance(problem, str):
+        return None
+    return JudgementFinding(
+        field=field_name, verdict=verdict, reason=reason or '', quotes=tuple(raw_quotes),
+        defect_class=defect_class, problem=problem)
 
 
 def quotes_verify(quotes: list[str], doc: Ingested, *, need: int) -> bool:
@@ -199,31 +244,27 @@ def quotes_verify(quotes: list[str], doc: Ingested, *, need: int) -> bool:
     return all(quote_matches_bytes(quote, doc.data, doc.text, ledger=doc.ledger) for quote in quotes if quote.strip())
 
 
-def filter_findings(doc: Ingested, findings: list[dict]) -> tuple[list[dict], int]:
-    """Drop any finding whose quotes do not verify. Provider-independent."""
-    kept, dropped = [], 0
-    for finding in findings:
-        field_name = finding.get('field')
-        if field_name not in JUDGEMENT_FIELDS:
+def filter_findings(doc: Ingested, findings: list) -> tuple[list[JudgementFinding], int]:
+    """Drop a malformed item or one whose quotes do not verify. Provider-independent."""
+    kept: list[JudgementFinding] = []
+    dropped = 0
+    for item in findings:
+        finding = _as_finding(item)
+        if finding is None:
             dropped += 1
             continue
-        if finding.get('verdict') not in ('missing', 'unclear'):
+        need = 2 if finding.field == 'section_b.consistency' or finding.defect_class == 'D14' else 1
+        if not quotes_verify(list(finding.quotes), doc, need=need):
             dropped += 1
             continue
-        quotes = [quote for quote in finding.get('quotes') or [] if isinstance(quote, str)]
-        need = 2 if field_name == 'section_b.consistency' or finding.get('defect_class') == 'D14' else 1
-        if not quotes_verify(quotes, doc, need=need):
-            dropped += 1
-            continue
-        finding = dict(finding)
-        finding['quotes'] = quotes
         kept.append(finding)
     return kept, dropped
 
 
-def judge_document(doc: Ingested, client: LLMClient) -> tuple[list[dict], LLMUsage]:
+def judge_document(doc: Ingested, client: LLMClient) -> tuple[list[JudgementFinding], LLMUsage]:
     user = 'Applicant document:\n' + doc.text[:120000]
     result = client.complete(_SYSTEM, user)
-    kept, dropped = filter_findings(doc, _parse_findings(result.text))
-    result.usage.dropped = dropped
+    raw, shape_dropped = _parse_findings(result.text)
+    kept, dropped = filter_findings(doc, raw)
+    result.usage.dropped = dropped + shape_dropped
     return kept, result.usage

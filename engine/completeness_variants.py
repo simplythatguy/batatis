@@ -21,7 +21,7 @@ from pathlib import Path
 from .bulletin_gates import DOC_FIX, LOC_FIX, _missing, location_parts
 from .completeness_elements import BY_FIELD, ELEMENTS, INTENT_LABEL, ElementSpec
 from .ingest import Ingested, StoredValue, normalize_ws, quote_matches_bytes
-from .llm_judgement import JUDGEMENT_FIELDS, LLMUsage, judge_document
+from .llm_judgement import LLMUsage, JudgementFinding, judge_document
 from .models import INTENT_LABEL as MODEL_INTENT_LABEL
 from .process_fields import _FIELDS
 
@@ -363,14 +363,14 @@ def _division_c_documentation(doc: Ingested, spec: ElementSpec) -> ElementVerdic
     state, problem, stored = _stored_state(doc, spec)
     if state in ('filled', 'status') or (state == 'present' and stored is None):
         return _gate(spec, doc, 'present',
-                     'The Division C Section 2.3.1 documentation is included (IB-2025-11-18).',
+                     'The Division C Section 2.3.1 documentation the safety codes officer needs to issue and register is included (IB-2025-11-18).',
                      quotes=_quote_for(doc, stored))
     if state == 'unclear':
         return _gate(spec, doc, 'unclear',
-                     'The Division C Section 2.3.1 documentation is not a confirmed fact. Ask the applicant to confirm it (IB-2025-11-18).',
+                     'The Division C Section 2.3.1 documentation the safety codes officer needs to issue and register is not a confirmed fact. Ask the applicant to confirm it (IB-2025-11-18).',
                      problem='unconfirmed', quotes=_quote_for(doc, stored))
     reason = ('Your application appears to be missing the Division C Section 2.3.1 documentation '
-              'for this alternative solution (IB-2025-11-18).')
+              'the safety codes officer needs to issue and register (IB-2025-11-18).')
     return _gate(spec, doc, 'missing', reason, problem=problem or 'not_found', defect_class='IB-DOC',
                  quotes=_quote_for(doc, stored), fix_hint=DOC_FIX)
 
@@ -399,11 +399,11 @@ def _single_location(doc: Ingested, spec: ElementSpec) -> ElementVerdict:
         if not _missing(stored.value):
             extras.append(stored.value)
     if len(location_parts(civic, extras)) <= 1:
-        return _gate(spec, doc, 'present', 'One location is listed for this application (IB-2026-10-01).',
+        return _gate(spec, doc, 'present', 'One location is listed for this variance (IB-2026-10-01).',
                      quotes=quotes if extras or civic else [])
     return _gate(
         spec, doc, 'missing',
-        'Your application appears to be missing one registration for a single location; more than one location is listed (IB-2026-10-01).',
+        'Your application appears to be missing a single location for this variance; more than one location is listed (IB-2026-10-01).',
         problem='multiple_locations', defect_class='IB-LOC', quotes=quotes, fix_hint=LOC_FIX)
 
 
@@ -565,7 +565,8 @@ def apply_heuristics(doc: Ingested, codes) -> list[ElementVerdict]:
     return [_one(doc, spec, codes, engineering, heuristics=True) for spec in ELEMENTS]
 
 
-def apply_llm(doc: Ingested, elements: list[ElementVerdict], findings: list[dict]) -> list[ElementVerdict]:
+def apply_llm(doc: Ingested, elements: list[ElementVerdict],
+              findings: list[JudgementFinding]) -> list[ElementVerdict]:
     by_field = {item.field: item for item in findings}
     updated = []
     for element in elements:
@@ -574,11 +575,11 @@ def apply_llm(doc: Ingested, elements: list[ElementVerdict], findings: list[dict
             updated.append(element)
             continue
         spec = BY_FIELD[element.field]
-        quotes = [QuoteSpan(quote, 'pointed', doc.ref) for quote in finding.get('quotes') or []]
+        quotes = [QuoteSpan(quote, 'pointed', doc.ref) for quote in finding.quotes]
         updated.append(_finish(
-            spec, doc, finding.get('verdict') or 'unclear',
-            str(finding.get('reason') or 'The judgement step quoted a span that needs an applicant answer.'),
-            problem=finding.get('problem'), defect_class=finding.get('defect_class'), quotes=quotes))
+            spec, doc, finding.verdict,
+            finding.reason or 'The judgement step quoted a span that needs an applicant answer.',
+            problem=finding.problem, defect_class=finding.defect_class, quotes=quotes))
     return updated
 
 

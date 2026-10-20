@@ -64,13 +64,15 @@ alternative-solution process fields that must never be skipped; D12 and D13 resp
 and D15 consistency, which only judgement can catch and which the plan reports separately.
 
 Information Bulletin gates (cite and link the bulletin; do not copy it). Checked against the
-Council PDFs. The 10-day copy to the Safety Codes Council in IB-2025-11-18 is an applicant
-reminder, not a planted verdict and not an export blocker.
+Council PDFs. IB-2025-11-18's 10-day item is a copy of each issued variance to the Safety
+Codes Council, sent by the safety codes officer, not the supporting documentation and not an
+applicant duty. It is a reminder, not a planted verdict and not an export blocker. Registration
+on the Orders and Variances Portal is the officer's act and is not Council approval.
 
 | Class | How to plant | Expected detection | Check | Bulletin |
 |---|---|---|---|---|
-| IB-DOC | Omit the Division C Section 2.3.1 documentation field. | Missing `division_c_2_3_1`, problem `not_found`. Ask the applicant to include it. Do not draft it. | rule | IB-2025-11-18 |
-| IB-LOC | Add a second location (`additional_location`, or a second civic address split on `;` or a new line). A comma stays inside one address. | Missing `single_location`, problem `multiple_locations`. Ask which one location this registration covers. Do not pick one. | rule | IB-2026-10-01 |
+| IB-DOC | Omit the Division C Section 2.3.1 documentation field. | Missing `division_c_2_3_1`, problem `not_found`. The documentation the safety codes officer needs to issue and register. Do not draft it. | rule | IB-2025-11-18 |
+| IB-LOC | Add a second location (`additional_location`, or a second civic address split on `;` or a new line). A comma stays inside one address. | Missing `single_location`, problem `multiple_locations`. Ask which one location this variance is for. A safety codes officer registers each variance for one location. Do not pick one. | rule | IB-2026-10-01 |
 
 ## Report
 

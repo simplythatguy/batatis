@@ -116,15 +116,15 @@ ELEMENTS: tuple[ElementSpec, ...] = (
                 'qualifications of the responsible professional',
                 'Ask the registered professional for their qualifications, experience and the scope they will seal. Do not draft this.',
                 'registered_professional'),
-    # IB-2025-11-18: Division C Section 2.3.1 documentation is mandatory for a building variance.
+    # IB-2025-11-18: documentation the safety codes officer needs to issue and register.
     ElementSpec('division_c_2_3_1', 'B', 'B', 'division_c_2_3_1', (),
                 'Division C Section 2.3.1 documentation',
-                'Is the Division C Section 2.3.1 documentation for this alternative solution included? IB-2025-11-18 requires that documentation. The tool will not draft it.',
+                'Is the Division C Section 2.3.1 documentation the safety codes officer needs to issue and register included? IB-2025-11-18. The tool will not draft it.',
                 'applicant', 'IB-2025-11-18'),
-    # IB-2026-10-01: each variance is registered individually, for one specific location.
+    # IB-2026-10-01: a safety codes officer registers each variance for one specific location.
     ElementSpec('single_location', 'B', 'B', 'single_location', (),
                 'single location',
-                'This application lists more than one location. Which single location should this registration cover? IB-2026-10-01 requires one registration per location. The review will not pick one.',
+                'This application lists more than one location. Which single location is this variance for? A safety codes officer registers each variance for one specific location (IB-2026-10-01). The review will not pick one.',
                 'applicant', 'IB-2026-10-01'),
 )
 

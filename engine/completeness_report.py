@@ -73,7 +73,7 @@ class LLMUsageModel(BaseModel):
 
 
 class ReminderModel(BaseModel):
-    """IB-2025-11-18 copy deadline. Not a present/missing/unclear verdict and not an export blocker."""
+    """IB-2025-11-18 copy of the issued variance. Not a present/missing/unclear verdict and not an export blocker."""
 
     model_config = ConfigDict(extra='forbid')
     verdict: Literal['reminder'] = 'reminder'

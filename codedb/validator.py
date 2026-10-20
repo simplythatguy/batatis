@@ -86,6 +86,21 @@ def _nfc_article_pages(pid, doc):
     return _NFC_TEXT['found'][article]
 
 
+def _note_rows(con, doc, note_id, div):
+    """Resolve a note across divisions.
+
+    The Division letter nearest a citation is often about the sentence's subject
+    (Clause 1.2.1.1.(1)(b) mentions Division B) while the note itself is in
+    Division A. Prefer an explicit division when that division has the note;
+    otherwise use every division that has it.
+    """
+    rows = con.execute('SELECT * FROM notes WHERE doc=? AND note_id=?', (doc, note_id)).fetchall()
+    if not rows or not div:
+        return rows
+    preferred = [row for row in rows if row['division'] == div]
+    return preferred or rows
+
+
 def _scan(text, path, con, report, default_doc):
     # Paragraphs allow a citation followed by its attribution on the next line, but
     # reset at headings/list rows so an unrelated paragraph cannot supply a target.
@@ -177,9 +192,7 @@ def _scan(text, path, con, report, default_doc):
                 # Lettered tables keep their letter after the id: Table 9.23.3.5.-A.
                 letter = re.match(r'-([A-Z])(?!\w)', line[m.end():]) if table else None
                 if note:
-                    rows = con.execute('SELECT * FROM notes WHERE doc=? AND note_id=?'+
-                                       (' AND division=?' if div else ''),
-                                       (local_doc,'A-'+pid,div) if div else (local_doc,'A-'+pid)).fetchall()
+                    rows = _note_rows(con, local_doc, 'A-' + pid, div)
                 else:
                     table_id = 'Table '+pid+(f'-{letter.group(1)}' if letter else '')
                     rows = con.execute('SELECT *,pdf_page AS pdf_page_end FROM code_tables WHERE doc=? AND table_id=?'+

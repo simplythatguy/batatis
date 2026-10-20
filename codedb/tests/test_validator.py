@@ -96,6 +96,19 @@ def test_cli_exit_and_json(tmp_path):
     r=run();assert r.returncode==1 and not json.loads(r.stdout)['ok']
 
 
+def test_div_a_note_resolves_when_nearby_text_says_division_b():
+    """Note A-1.2.1.1.(1)(b) is Division A, PDF p.57. Skip when the database is absent."""
+    from codedb import store
+    try:
+        store.connect()
+    except FileNotFoundError:
+        pytest.skip('no codedb')
+    text = 'performance required by Division B (see Note A-1.2.1.1.(1)(b)) [PDF p.57]'
+    report = validate_text(text)
+    assert 'nonexistent_note' not in [item['code'] for item in report['errors']]
+    assert report['ok'], report['errors']
+
+
 def test_structured_division_and_mixed_source_kinds():
     assert validate_text('{\n "doc": "NBC-AE",\n "division": "A",\n "id": "1.2.1.1.(1)"\n}')['ok']
     assert validate_text('NBC 2020 Intent Statements, 9.9.10.1.(1); NBC(AE) 2023 p2, Div B, '

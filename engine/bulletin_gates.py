@@ -1,9 +1,13 @@
 """Administrative gates drawn from SCC Information Bulletins.
 
-IB-2025-11-18: Division C Section 2.3.1 documentation for a building variance.
-IB-2026-10-01: one registration for one specific location.
-The 10-day copy to the Safety Codes Council is an applicant reminder, not a verdict
-and not an export blocker. Bulletin text is not copied here.
+IB-2025-11-18: when issuing a variance, the safety codes officer documents the
+alternative solution under Division C Section 2.3.1, sends a copy of each variance
+(not the supporting file) to the Safety Codes Council within 10 days, and keeps
+supporting documents to supply on request.
+IB-2026-10-01: only a safety codes officer registers, for one specific location.
+Registration is not Council approval.
+The 10-day copy is a reminder, not a verdict and not an export blocker.
+Bulletin text is not copied here.
 """
 from __future__ import annotations
 
@@ -17,12 +21,13 @@ _PLACEHOLDERS = {'tbd', 'tobedetermined', 'tobeprovided', 'unknown', 'pending', 
 _EXTRA_LOCATION = ('additional_location', 'second_location', 'extra_location')
 DOC_FIELDS = ('division_c_2_3_1', 'division_c_documentation', 'div_c_2_3_1')
 DOC_FIX = (
-    'Ask the applicant to include the Division C Section 2.3.1 documentation for this alternative '
-    'solution. Do not draft it. IB-2025-11-18.'
+    'Include the Division C Section 2.3.1 documentation the safety codes officer needs to issue and '
+    'register this variance. Do not draft it. IB-2025-11-18 places that documentation with the officer; '
+    'it is not an applicant duty under the bulletin.'
 )
 LOC_FIX = (
-    'Ask the applicant which single location this registration covers. Submit a separate registration '
-    'for each other location. Do not choose a location. IB-2026-10-01.'
+    'Ask which single location this variance is for. A safety codes officer registers each variance for '
+    'one specific location. Do not choose a location. IB-2026-10-01.'
 )
 
 
@@ -62,16 +67,19 @@ def documentation_value(case):
 
 
 def applicant_reminder() -> dict:
-    """IB-2025-11-18 copy deadline. IB-2026-10-01 keeps that duty and names the portal."""
+    """IB-2025-11-18 copy of the issued variance. IB-2026-10-01: the officer registers."""
     return {
         'verdict': 'reminder',
         'bulletin_ids': ['IB-2025-11-18', 'IB-2026-10-01'],
         'text': (
-            'Applicant reminder, not a completeness verdict: IB-2025-11-18 says to submit a copy of each '
-            'variance to the Safety Codes Council within 10 days of issuance. IB-2026-10-01 says those '
-            'requirements remain in effect, and from 2026-12-01 the Orders and Variances Portal '
-            f'({PORTAL_URL}) is the sole registration method, with the supporting documentation included '
-            'at registration. This reminder does not decide that the application is complete.'
+            'Reminder, not a completeness verdict. IB-2025-11-18: the safety codes officer submits a copy '
+            'of each variance to the Safety Codes Council within 10 days of issuance. That copy is the '
+            'issued variance, not the supporting documentation. Supporting documents are retained and made '
+            'available on request by an Administrator. IB-2026-10-01 keeps those requirements in effect. '
+            'From 2026-12-01 the Orders and Variances Portal '
+            f'({PORTAL_URL}) is the sole method, and only a safety codes officer registers an order or a '
+            'variance there. Registration is not Council approval of the variance and does not transfer '
+            'responsibility for the decision. This reminder does not decide that the application is complete.'
         ),
         'links': [INDEX_URL, BULLETINS['IB-2025-11-18']['url'], BULLETINS['IB-2026-10-01']['url'], PORTAL_URL],
     }
@@ -88,12 +96,12 @@ def bulletin_gaps(case) -> list:
         gaps.append(Gap(
             id='IB-DOC:division_c_2_3_1', severity='blocking', section='B', field='division_c_2_3_1',
             message=('Your application appears to be missing the Division C Section 2.3.1 documentation '
-                     'for this alternative solution (IB-2025-11-18).'),
+                     'the safety codes officer needs to issue and register (IB-2025-11-18).'),
             fix_hint=DOC_FIX, citation='IB-2025-11-18'))
     if len(case_locations(case)) > 1:
         gaps.append(Gap(
             id='IB-LOC:single_location', severity='blocking', section='B', field='single_location',
-            message=('Your application appears to be missing one registration for a single location; '
+            message=('Your application appears to be missing a single location for this variance; '
                      'more than one location is listed (IB-2026-10-01).'),
             fix_hint=LOC_FIX, citation='IB-2026-10-01'))
     return gaps

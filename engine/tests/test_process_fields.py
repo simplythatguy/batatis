@@ -15,9 +15,19 @@ def answer_fact(field='risk_assessment', **changes):
 
 def test_prompts_are_blank_and_separate_from_evidence():
     fields = process_fields(Case(), Codes())
-    assert len(fields) == 6 and all(f.answer is None and f.required for f in fields)
-    assert all(f.prompt and f.reviewer_looks_for and f.citation.startswith('NBC(AE) 2023 p2, Div C') for f in fields)
-    assert next(f for f in fields if f.id == 'maintenance_operation').citation == Codes().citation('2.3.1.1.(2)(b)', 'C')
+    assert len(fields) == 8 and all(f.answer is None and f.required for f in fields)
+    by_id = {field.id: field for field in fields}
+    cited = [field for field in fields if field.citation]
+    assert all(field.citation.startswith('NBC(AE) 2023 p2, Div C') for field in cited)
+    assert {field.id for field in fields if field.citation is None} == {'risk_assessment', 'mitigating_measures'}
+    codes = Codes()
+    assert by_id['rationale'].citation == codes.citation('2.3.1.1.(2)(a)', 'C')
+    assert by_id['assumptions_and_limits'].citation == codes.citation('2.3.1.1.(3)', 'C')
+    assert by_id['maintenance_operation'].citation == codes.citation('2.3.1.1.(2)(b)', 'C')
+    assert by_id['analysis_detail'].citation == codes.citation('2.3.1.1.(5)', 'C')
+    assert by_id['qualifications'].citation == codes.citation('2.3.1.1.(4)', 'C')
+    assert by_id['design_coordinator'].citation == codes.citation('2.3.1.1.(6)', 'C')
+    assert '2.3.1.1.(3)' not in (by_id['risk_assessment'].prompt + by_id['mitigating_measures'].prompt)
 
 
 def test_applicant_passage_roundtrips_but_ai_cannot_fill_field():
