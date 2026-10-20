@@ -115,6 +115,7 @@ class SectionCRow(BaseModel):
 
 class EvidenceItem(BaseModel):
     id: str = Field(default_factory=lambda: new_id('ev'))
+    provision_id: str | None = None
     objective: str | None = None
     function: str | None = None
     description: str
