@@ -11,8 +11,8 @@
   /* —— Surfaces —— */
   --bg-app: #080808;
   --bg-sidebar: #0c0c0d;
-  --bg-panel: #0f0f10;
-  --bg-elevated: #141415;
+  --bg-panel: #131315;
+  --bg-elevated: #19191b;
   --bg-hover: rgba(255, 255, 255, 0.04);
   --bg-active: rgba(255, 255, 255, 0.06);
   --bg-input: #121214;
@@ -30,7 +30,7 @@
   /* —— Text —— */
   --text-primary: #eeeeef;
   --text-secondary: #9b9ba1;
-  --text-tertiary: #7a7a80;
+  --text-tertiary: #808086;
   --text-inverse: #141415;
 
   /* —— Primary CTA = neutral (Opus P0) —— */
@@ -185,10 +185,10 @@ a {
 
 .btn-row {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
-  overflow-x: auto;
+  min-width: 0;
 }
 
 .pill {
@@ -502,8 +502,11 @@ input[type="checkbox"]:focus-visible {
 }
 
 .confidence {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: var(--text-xs);
-  color: var(--status-warning);
+  color: var(--text-secondary);
 }
 
 .gap-banner,
@@ -531,6 +534,12 @@ input[type="checkbox"]:focus-visible {
 
 .gap-item:last-child {
   border-bottom: none;
+}
+
+/* Centre dot on the first text line (13px × 1.45 ≈ 19px line) */
+.gap-item > .status-dot,
+.gate > .status-dot {
+  margin-top: 5px;
 }
 
 .gap-strip {
@@ -579,4 +588,28 @@ input[type="checkbox"]:focus-visible {
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+.text-link {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 3px;
+}
+
+.text-link:hover {
+  color: var(--text-primary);
+}
+
+.text-link:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.article-id {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
 }

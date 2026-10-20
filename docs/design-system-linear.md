@@ -18,9 +18,10 @@ Default product look for all Batatis UI. Agents apply this **without** being ask
 2. **Active nav = faint fill** — `rgba(255,255,255,~0.06)`; no accent ring/glow.
 3. **One gap source** across intake / SCO / export.
 4. **Gate** complete/download/admin-complete while blocking gaps remain.
-5. **No demo/template leakage** in user surfaces.
+5. **No demo/template leakage** — no `[bracket]` placeholders, no `present` / `from registry` in place of real values.
 6. **Styled** select / checkbox / textarea (no browser defaults; no resize handle).
-7. **Buttons** `white-space: nowrap`.
+7. **Buttons** `white-space: nowrap`; `.btn-row` wraps (never clips via `overflow-x`).
+8. **Previews equal sources** — PDF / SCO values come from the same objects as the Section C table; gates name unconfirmed articles.
 
 `--focus-ring: #5e6ad2` is for **focus only**, not button identity.
 

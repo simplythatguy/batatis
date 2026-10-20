@@ -27,9 +27,10 @@ Smoke: `../../../evals/ui-artifacts/smoke.mjs`
 | 2 | **Active nav** = `--bg-active` faint fill `rgba(255,255,255,0.05–0.07)` + full-strength text. **No** border, ring, glow, coloured outline. |
 | 3 | **One shared gap source** — `shared-gaps.js` (or equivalent). Same blocking list on intake banner, SCO gaps, export gate. |
 | 4 | **Gating** — disable (or confirm-with-gap-list) complete / download / admin-complete while blocking gaps remain (`data-requires-no-blocking-gaps`). |
-| 5 | **No demo leakage** — no “demo” rows; no template strings like `obj/func/intent via registry`; use `—` / empty-state. |
+| 5 | **No demo/template leakage** — no “demo” rows; no bracket placeholders (`[linked excerpt]`); no status words standing in for values (`present`, `from registry`). Render the real value or `—` + gap. |
 | 6 | **Styled controls** — custom select, 14px thin-border checkbox (neutral checked), `resize: none` on textareas. No browser-default chrome. |
-| 7 | **Buttons never wrap** — `white-space: nowrap` + `.btn-row` horizontal scroll/overflow if needed. |
+| 7 | **Labels never wrap, rows never clip** — `.btn` is `white-space: nowrap`; `.btn-row` uses `flex-wrap: wrap` (never `overflow-x` scroll that hides a button). Shorten labels for narrow detail panes. |
+| 8 | **One data source per value** — Section C table, SCO and PDF preview read the same article/process objects; preview text must equal the table values. Gates name the unconfirmed articles. |
 
 `--focus-ring` / `--accent` (`#5e6ad2`) = **focus rings only** (and optional sparse status). Not CTA identity, not active nav.
 
@@ -57,7 +58,8 @@ Smoke: `../../../evals/ui-artifacts/smoke.mjs`
 - Indigo/purple **filled** primary buttons or active-nav rings
 - Composer “PASS” treated as formal seal
 - Divergent gap lists across intake / SCO / export
-- Live demo rows; browser-default checkbox/select; wrapping button labels
+- Live demo rows; browser-default checkbox/select; wrapping button labels; clipped buttons in narrow panes
+- `[placeholder]` strings or `present` / `from registry` instead of real values in previews
 - Mark admin-complete / Download enabled while blocking gaps open
 - Green “lookup” text spam; disc bullets; missing status dots on queue rows
 
@@ -68,7 +70,7 @@ Smoke: `../../../evals/ui-artifacts/smoke.mjs`
 3. Active nav = faint fill only.
 4. Wire `shared-gaps.js` (or one source) on intake + SCO + export; cross-check before ship.
 5. Gate complete/download/admin-complete on blocking gaps.
-6. Styled checkbox/select/textarea; nowrap buttons; thin-stroke icons.
+6. Styled checkbox/select/textarea; nowrap labels in wrapping rows (nothing clipped); thin-stroke icons.
 7. Status dots from the single map; lookup = neutral pills.
 8. Required empties: `.field.is-empty` + status dot (not placeholder-only).
 9. Run `node evals/ui-artifacts/smoke.mjs`.
