@@ -1,5 +1,7 @@
 # API contract
 
+Public `POST /cases/{id}/facts` accepts applicant provenance (`user_text`, `user_click`, `file`, or `drawing`). It rejects client-asserted `officer`, `professional`, or `code` authority with HTTP 422. Trusted internal records remain readable; accepting an applicant fact does not promote its authority.
+
 Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind). (on the 60 text-only dev cases it answered only yes or ask, 0 no, so 0 under-flags is partly by design; since 4425089 it can answer no when stated facts clear every trigger) Part 4 on text-only cases is derived from stated facts. A wood-frame building inside Part 9 with no Part 4 trigger is part4_design false, so the screen can answer no. On this dev set (model-checked, in-sample) the shipped screen still emits 0 no labels.
 
 These are the routes the engine serves. There is no `POST /cases/{id}/files`.

@@ -56,6 +56,8 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
 
     @app.post('/cases/{case_id}/facts', response_model=Case)
     def add_fact(case_id: str, fact: Fact):
+        if fact.source.type not in {'user_text', 'user_click', 'file', 'drawing'}:
+            raise HTTPException(422, 'public fact input cannot assert officer, professional, or code authority')
         case = cases().add_fact(case_id, fact)
         if case is None:
             raise HTTPException(404, 'case not found')
