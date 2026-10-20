@@ -1,9 +1,11 @@
 """Failure containment at the PDF storage boundary."""
+import io
 from pathlib import Path
 
 import pytest
+from reportlab.pdfgen import canvas
 
-from engine.files import DEFAULT_MAX_BYTES, max_upload_bytes, save_pdf
+from engine.files import DEFAULT_MAX_BYTES, NotAPdf, max_upload_bytes, save_pdf
 
 
 @pytest.mark.parametrize('raw', ['', ' ', 'not-a-number', '0', '-1', '1.5', '1024'])
@@ -32,6 +34,39 @@ def test_failed_storage_removes_partial_files(tmp_path, monkeypatch, failure_poi
         save_pdf('case_fixture', 'plans.pdf', b'%PDF-synthetic')
     assert raised.value is failure
     assert not list(tmp_path.rglob('*.part'))
+    assert not list(tmp_path.rglob('*.pdf'))
+
+
+def _tiny_pdf() -> bytes:
+    buf = io.BytesIO()
+    sheet = canvas.Canvas(buf)
+    sheet.drawString(36, 72, 'SYNTHETIC')
+    sheet.showPage()
+    sheet.save()
+    return buf.getvalue()
+
+
+def test_truncated_or_garbage_pdf_is_not_a_pdf(tmp_path, monkeypatch):
+    monkeypatch.setenv('BATATIS_FILES', str(tmp_path))
+    truncated = _tiny_pdf()[:24]
+    assert truncated.startswith(b'%PDF-')
+    with pytest.raises(NotAPdf):
+        save_pdf('case_ok', 'truncated.pdf', truncated)
+    with pytest.raises(NotAPdf):
+        save_pdf('case_ok', 'garbage.pdf', b'this is not a pdf')
+    assert not list(tmp_path.rglob('*.pdf'))
+
+
+def test_parser_valueerror_is_not_an_invalid_case_id(tmp_path, monkeypatch):
+    monkeypatch.setenv('BATATIS_FILES', str(tmp_path))
+
+    class BrokenReader:
+        def __init__(self, *_args, **_kwargs):
+            raise ValueError('invalid case id')
+
+    monkeypatch.setattr('engine.files.PdfReader', BrokenReader)
+    with pytest.raises(NotAPdf):
+        save_pdf('case_ok', 'a.pdf', _tiny_pdf())
     assert not list(tmp_path.rglob('*.pdf'))
 
 

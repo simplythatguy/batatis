@@ -16,7 +16,7 @@ from codedb import AmbiguousProvisionError
 from .codes import CodeDbMissing, Codes, default_db
 from .demo_seed import demo_enabled, seed_cases
 from .export import ExportBlocked, ExportError, FormNotFound, export_case
-from .files import FileTooLarge, NotAPdf, discard_pdf, max_upload_bytes, save_pdf
+from .files import FileTooLarge, NotAPdf, discard_pdf, max_upload_bytes, save_pdf, validate_case_id
 from .models import Case, Fact, Gap, Jurisdiction, SectionCRow, Source
 from .section_c import section_c_rows
 from .store import CaseStore
@@ -190,6 +190,12 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         # FastAPI runs sync endpoints in its threadpool, including SQLite, locks,
         # PDF parsing, and file I/O. Keep the save and case update in one worker.
         try:
+            try:
+                validate_case_id(case_id)
+            except ValueError as exc:
+                if str(exc) == 'invalid case id':
+                    raise HTTPException(400, 'invalid case id') from None
+                raise
             if cases().get(case_id) is None:
                 raise HTTPException(404, 'case not found')
             limit = max_upload_bytes()
@@ -203,6 +209,11 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         except FileTooLarge:
             raise HTTPException(413, 'file too large') from None
         except NotAPdf:
+            raise HTTPException(415, 'not a PDF') from None
+        except ValueError as exc:
+            # Only a bad id is 400. A parser ValueError is not a PDF.
+            if str(exc) == 'invalid case id':
+                raise HTTPException(400, 'invalid case id') from None
             raise HTTPException(415, 'not a PDF') from None
         try:
             fact = Fact(field=f'file.{stored.id}.name', value=stored.name, kind='exact', status='confirmed',

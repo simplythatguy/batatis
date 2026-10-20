@@ -142,6 +142,20 @@ def test_pdf_upload_stores_bytes_and_one_exact_file_fact(api, tmp_path, monkeypa
     assert str(root) not in str(case)
 
 
+def test_bad_case_id_is_400_and_a_file_over_4mb_is_413(api):
+    client, _store = api
+    bad = client.post('/cases/%2e%2e/files', files={'file': ('a.pdf', _pdf(), 'application/pdf')})
+    assert bad.status_code == 400
+    assert bad.json() == {'detail': 'invalid case id'}
+    over = b'%PDF-' + (b'0' * ((4 * 1024 * 1024) - 4))
+    assert len(over) == 4 * 1024 * 1024 + 1
+    cid = client.post('/cases').json()['id']
+    too_big = client.post(f'/cases/{cid}/files', files={'file': ('big.pdf', over, 'application/pdf')})
+    assert too_big.status_code == 413
+    assert too_big.json() == {'detail': 'file too large'}
+    assert client.get(f'/cases/{cid}').json()['facts'] == []
+
+
 def test_upload_rejects_missing_case_non_pdf_and_oversize(api, monkeypatch):
     client, _store = api
     data = _pdf()

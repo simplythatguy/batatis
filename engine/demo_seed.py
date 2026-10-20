@@ -187,10 +187,10 @@ def _officer_after_fixes() -> Case:
     brief = _tester_html('01-hartley-garden-suite-brief.html')
     bundle_ref = 'evals/demo-cases/tester-samples/03-sco-submission-bundle.html'
     brief_ref = 'evals/demo-cases/tester-samples/01-hartley-garden-suite-brief.html'
-    address = _slice(bundle, '10432', ' (fictional address)')
+    address = _slice(bundle, '0000 Example Avenue NW', ' (fictional address)')
     address_quote = address + ' (fictional address)'
     scope_quote = 'A small one-bedroom garden suite at the back of my lot for my mother.'
-    description = '60 m² garden suite, 300 mm hempcrete walls, no poly.'
+    description = '60 m² garden suite, 300 mm hempcrete walls, no polyethylene vapour barrier (no poly).'
     facts = [
         _file_fact(OFFICER_AFTER_ID, 'authority', 'County of Example', bundle_ref, 'County of Example'),
         _file_fact(OFFICER_AFTER_ID, 'jurisdiction', 'County of Example', bundle_ref, 'County of Example'),

@@ -14,7 +14,7 @@ from .models import new_id
 
 _REPO = Path(__file__).resolve().parents[1]
 DEFAULT_FILES = _REPO / '.batatis-files'
-DEFAULT_MAX_BYTES = 20 * 1024 * 1024
+DEFAULT_MAX_BYTES = 4 * 1024 * 1024
 logger = logging.getLogger(__name__)
 
 
@@ -60,14 +60,19 @@ def _safe_name(filename: str | None) -> str:
     return name
 
 
-def _case_dir(case_id: str) -> Path:
+def validate_case_id(case_id: str) -> None:
+    """Reject an id that is not a single directory name under the files root."""
     if not case_id or case_id in {'.', '..'} or '/' in case_id or '\\' in case_id or '\x00' in case_id:
         raise ValueError('invalid case id')
     root = files_root().resolve()
     dest = (root / case_id).resolve()
     if dest.parent != root:
         raise ValueError('invalid case id')
-    return dest
+
+
+def _case_dir(case_id: str) -> Path:
+    validate_case_id(case_id)
+    return (files_root().resolve() / case_id).resolve()
 
 
 def _is_pdf(data: bytes) -> bool:
@@ -78,8 +83,11 @@ def _is_pdf(data: bytes) -> bool:
 
 
 def _page_count(data: bytes) -> int:
+    """Page count, or NotAPdf. A parser ValueError is not an invalid case id."""
     try:
         return len(PdfReader(io.BytesIO(data)).pages)
+    except NotAPdf:
+        raise
     except Exception as exc:
         raise NotAPdf() from exc
 
