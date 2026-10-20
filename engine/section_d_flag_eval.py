@@ -26,7 +26,9 @@ from .professional import ProfessionalFacts, professional_involvement
 from .section_d_issues import PART9_MAX_SPAN_M, PROCESS_RULES, PROFESSIONAL_RULES
 
 CASES = Path(__file__).resolve().parents[1] / 'evals_dev' / 'cases'
-VARIANTS = ('rules_only', 'rules_plus_unknown')
+VARIANTS = ('rules_only', 'rules_plus_unknown', 'always_unknown')
+GOLD_ROWS = ('yes', 'depends', 'no')
+SYSTEM_COLS = ('yes', 'unknown', 'no')
 
 _NUM = {
     'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8,
@@ -102,7 +104,11 @@ class VariantScore:
     matched: int = 0
     under_flag: int = 0
     unknown: int = 0
+    confident_wrong: int = 0
     gold_yes_unknown: list[str] = field(default_factory=list)
+    under_flag_facts: list[str] = field(default_factory=list)
+    matrix: dict[str, dict[str, int]] = field(default_factory=lambda: {
+        gold: {column: 0 for column in SYSTEM_COLS} for gold in GOLD_ROWS})
 
     @property
     def agreement(self) -> float:
@@ -254,11 +260,31 @@ def prepare(facts: ProfessionalFacts, signals: Signals, variant: str) -> Profess
 
 
 def flag_label(case: dict, codes, variant: str) -> str:
+    if variant == 'always_unknown':
+        return 'unknown'
     facts, signals = observe(case)
     result = professional_involvement(prepare(facts, signals, variant), codes)
     if variant == 'rules_plus_unknown' and result.required == 'depends':
         return 'unknown'
     return result.required
+
+
+def _column(label: str) -> str:
+    """rules_only abstains with professional.py's ``depends``. That count shares the unknown column."""
+    if label == 'depends':
+        return 'unknown'
+    return label
+
+
+def under_flag_fact(case: dict, variant: str) -> str:
+    facts, signals = observe(case)
+    parts = [f'occupancy={facts.occupancy}', f'part4_design={"true" if facts.part4_design is True else "unset"}']
+    if signals.span_m is not None:
+        parts.append(f'span_m={signals.span_m:g}')
+    if variant == 'rules_only' and signals.span_m is not None and signals.span_m > PART9_MAX_SPAN_M:
+        parts.append(
+            f'rules_only does not apply the {PART9_MAX_SPAN_M:.2f} m span, so part4_design is filled false')
+    return f"{case['id']}: " + '; '.join(parts)
 
 
 def _matches(system: str, gold: str) -> bool:
@@ -287,13 +313,18 @@ def score(codes, cases: list[dict] | None = None) -> dict[str, VariantScore]:
             except (KeyError, ValueError):
                 totals[name].skipped += 1
                 continue
+            column = _column(label)
             totals[name].scored += 1
             totals[name].matched += int(_matches(label, gold))
-            if label == 'unknown':
+            totals[name].matrix[gold][column] += 1
+            if column == 'unknown':
                 totals[name].unknown += 1
+            if column in ('yes', 'no') and not _matches(label, gold):
+                totals[name].confident_wrong += 1
             if gold == 'yes' and label == 'no':
                 totals[name].under_flag += 1
-            if gold == 'yes' and label == 'unknown':
+                totals[name].under_flag_facts.append(under_flag_fact(case, name))
+            if gold == 'yes' and column == 'unknown':
                 totals[name].gold_yes_unknown.append(case['id'])
     return totals
 
@@ -303,7 +334,8 @@ def load_cases() -> list[dict]:
 
 
 def winner(totals: dict[str, VariantScore]) -> str:
-    ranked = sorted(totals.values(), key=lambda row: (row.under_flag > 0, -row.agreement, row.name != 'rules_plus_unknown'))
+    ranked = sorted((row for row in totals.values() if row.name != 'always_unknown'),
+                    key=lambda row: (row.under_flag > 0, -row.agreement, row.name != 'rules_plus_unknown'))
     if not ranked or ranked[0].scored == 0:
         return 'none'
     return ranked[0].name
@@ -319,21 +351,37 @@ def _yes_unknown(row: VariantScore) -> str:
     return 'none' if not row.gold_yes_unknown else ', '.join(row.gold_yes_unknown)
 
 
+def _count_cell(count: int, scored: int) -> str:
+    lower, upper = wilson_interval(count, scored)
+    upper_text = '1.0' if round(upper, 4) == 1 else f'{upper:.4f}'
+    return f'{count}/{scored} [{lower:.4f}, {upper_text}]'
+
+
 def report(totals: dict[str, VariantScore], codedb: str) -> str:
-    scored = max(row.scored for row in totals.values())
-    skipped = max(row.skipped for row in totals.values())
+    scored = max((row.scored for row in totals.values()), default=0)
+    skipped = max((row.skipped for row in totals.values()), default=0)
     lines = [
         f'{"variant":<22} {"scored":>6} {"agreement":>22} {"under_flag":>10} {"unknown":>7} {"skipped":>7}',
+        'note: rules_only abstains with depends; that label is counted in the unknown column',
     ]
     for name in VARIANTS:
         row = totals[name]
         lines.append(
             f'{name:<22} {row.scored:>6} {_agreement_cell(row):>22} {row.under_flag:>10} {row.unknown:>7} {row.skipped:>7}')
+        lines.append(f'unknown_rate {name}: {_count_cell(row.unknown, row.scored)}')
+        lines.append(f'confident_wrong {name}: {_count_cell(row.confident_wrong, row.scored)}')
+        lines.append(f'confusion {name}  rows=gold  columns=system yes unknown no')
+        for gold in GOLD_ROWS:
+            cells = '  '.join(f'{row.matrix[gold][column]:>3}' for column in SYSTEM_COLS)
+            lines.append(f'  {gold:<7} {cells}')
         lines.append(f'gold_yes_as_unknown {name}: {_yes_unknown(row)}')
+        facts = '; '.join(row.under_flag_facts) if row.under_flag_facts else 'none'
+        lines.append(f'under_flag {name}: {facts}')
     lines.append(f'winner: {winner(totals)}')
     lines.append('under_flag_target: 0')
     lines.append('gold: model-checked')
     lines.append('split: dev (in-sample; no held-out)')
+    lines.append('out_of_sample: evals_dev/appeals (built on another branch; not scored here)')
     lines.append(f'codedb: {codedb}')
     lines.append(f'scored: {scored}')
     lines.append(f'skipped: {skipped}')
