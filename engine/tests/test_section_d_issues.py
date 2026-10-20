@@ -111,6 +111,12 @@ def test_confirmed_provision_recommends_ladder_and_lists_empty_process_fields():
     assert issue.recommended_types == CONFIDENCE_LADDER + ALTERNATIVE_EVIDENCE_TYPES
     empty = [field.id for field in issue.empty_process_fields]
     assert {'risk_assessment', 'mitigating_measures', 'assumptions_and_limits'} <= set(empty)
+    fields = {field.id: field for field in issue.empty_process_fields}
+    # Workflow requirements do not acquire an invented Code citation.
+    assert fields['risk_assessment'].citation is None
+    assert fields['mitigating_measures'].citation is None
+    assert fields['analysis_detail'].citation == codes.rows[('C', '2.3.1.1.(5)')]['citation']
+    assert fields['design_coordinator'].citation == codes.rows[('C', '2.3.1.1.(6)')]['citation']
     assert not set(empty) & set(issue.recommended_types)
     assert issue.status == 'open' and issue.practice_of_engineering.value == 'unknown'
     assert issue.practice_of_engineering.question

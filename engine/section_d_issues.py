@@ -43,8 +43,10 @@ PROFESSIONAL_RULES = (
 PROCESS_RULES = (
     ('C', '2.3.1.1.(2)(a)', 'engine/process_fields.py: rationale'),
     ('C', '2.3.1.1.(2)(b)', 'engine/process_fields.py: maintenance_operation'),
-    ('C', '2.3.1.1.(3)', 'engine/process_fields.py: risk_assessment, mitigating_measures, assumptions_and_limits'),
+    ('C', '2.3.1.1.(3)', 'engine/process_fields.py: assumptions_and_limits'),
     ('C', '2.3.1.1.(4)', 'engine/process_fields.py: qualifications'),
+    ('C', '2.3.1.1.(5)', 'engine/process_fields.py: analysis_detail'),
+    ('C', '2.3.1.1.(6)', 'engine/process_fields.py: design_coordinator'),
 )
 
 PracticeValue = bool | Literal['unknown']
@@ -125,7 +127,7 @@ class EmptyProcessField(BaseModel):
     model_config = ConfigDict(extra='forbid')
     id: str
     label: str
-    citation: str
+    citation: str | None = None
 
 
 class SectionDIssue(BaseModel):

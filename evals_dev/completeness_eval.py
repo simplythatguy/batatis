@@ -168,9 +168,12 @@ def load_cases() -> list[BenchCase]:
 
 def open_codes():
     """Open the resolved code database. A missing file is a clear error, not a skip."""
-    from engine.codes import Codes
+    from engine.codes import CodeDbMissing, Codes
     try:
         return Codes()
+    except CodeDbMissing:
+        raise SystemExit(
+            'code database not found. Set BATATIS_CODEDB or build codedb/build/codedb.sqlite.') from None
     except FileNotFoundError as exc:
         raise SystemExit(redact(str(exc))) from None
 

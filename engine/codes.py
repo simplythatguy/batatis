@@ -74,14 +74,19 @@ class CodeDbMissing(Exception):
 
 class Codes:
     def __init__(self, db_path: Path | str | None = None):
-        if db_path is None:
-            self.db_path = resolve_codedb()
+        # An explicit API corpus selection must not fall through to another file.
+        # Keep the detailed filesystem diagnostic in the CLI resolver, while the
+        # API uses its existing typed, path-free missing-database contract.
+        configured = db_path if db_path is not None else (os.environ.get('BATATIS_CODEDB') or '').strip()
+        if configured:
+            self.db_path = Path(configured)
         else:
-            self.db_path = Path(db_path)
-            if not self.db_path.is_file():
-                raise FileNotFoundError(
-                    f'code database not found: {self.db_path}. '
-                    'Set BATATIS_CODEDB or build codedb/build/codedb.sqlite.')
+            try:
+                self.db_path = resolve_codedb()
+            except FileNotFoundError as error:
+                raise CodeDbMissing() from error
+        if not self.db_path.is_file():
+            raise CodeDbMissing()
         self._definition = lru_cache(maxsize=None)(self._definition_uncached)
 
     def provision(self, provision_id: str, division: str | None = 'B') -> dict | None:

@@ -22,6 +22,7 @@ import re
 from dataclasses import dataclass, field
 
 from ..bulletin_gates import applicant_reminder, bulletin_gaps
+from ..codes import CodeDbMissing
 from ..models import Case
 from ..process_fields import confirmed_value
 
@@ -346,7 +347,7 @@ def portal_package(case: Case, *, codes=None, attachments: list[PortalAttachment
                 'The SCC variance form file is not on this machine, so the filled form was not produced. '
                 'This package is prepared for the safety codes officer to register. Registration is not '
                 'Council approval. IB-2026-10-01.')
-        except FileNotFoundError:
+        except (CodeDbMissing, FileNotFoundError):
             form_note = (
                 'The code database is not on this machine, so the filled form was not produced. '
                 'This package is prepared for the safety codes officer to register. Registration is not '

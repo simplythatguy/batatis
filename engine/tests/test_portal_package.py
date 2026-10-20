@@ -1,4 +1,6 @@
 """Portal package without a code database and without the SCC form PDF."""
+import pytest
+
 from engine.export.portal import (
     SCO_FIELDS, PortalAttachment, check_attachment, code_items_for, portal_package, suggest_filename,
 )
@@ -6,6 +8,12 @@ from engine.models import Case, Fact, Jurisdiction, Source
 
 DOC = ('The Division C Section 2.3.1 documentation for this alternative solution is included '
        'with this application.')
+
+
+@pytest.fixture(autouse=True)
+def unavailable_code_database(tmp_path, monkeypatch):
+    """Keep this module's documented no-corpus condition on developer machines too."""
+    monkeypatch.setenv('BATATIS_CODEDB', str(tmp_path / 'absent-corpus.sqlite'))
 
 
 def _case(**facts):

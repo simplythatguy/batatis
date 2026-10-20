@@ -38,8 +38,12 @@ FACTS = {
     'assumptions_limits': 'SYNTHETIC applicant limits: the example is a Part 9 house and the selected wall configuration only.',
     'operation_maintenance': 'SYNTHETIC applicant operation/maintenance passage: identify owner duties, inspection '
                              'intervals and commissioning conditions with the responsible designer.',
+    'analysis_detail': 'SYNTHETIC applicant analysis detail: test-only text exercising administrative presence. '
+                       'No design analysis, technical validity or equivalent performance is asserted.',
     'qualifications': 'SYNTHETIC applicant qualifications passage: a fictional design author is used only to exercise '
                       'administrative presence checks. No licence or competence is claimed.',
+    'design_coordinator': 'SYNTHETIC applicant coordination passage: one fictional person is responsible for '
+                          'this test record. No real appointment is made.',
     'occupancy': 'single_family', 'part4_design': True, 'preserved_wood_foundation_part4': False,
     'roof_trusses': False, 'prescriptive_route_confirmed': False, 'ahj_requires_professional': False,
     'special_safety_concerns': False, 'professional_judgement_required': True, 'professional_scope_resolved': True,

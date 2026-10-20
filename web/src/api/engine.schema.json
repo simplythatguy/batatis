@@ -232,6 +232,18 @@
           "default": null,
           "title": "Professional Required"
         },
+        "provision_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision Id"
+        },
         "status": {
           "default": "needed",
           "enum": [
@@ -245,6 +257,7 @@
       },
       "required": [
         "id",
+        "provision_id",
         "objective",
         "function",
         "description",

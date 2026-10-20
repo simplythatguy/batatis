@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
 
 from .ccmc import CCMCRegistry, RegistrySearch, RegistryUnavailable
-from .codes import Codes
+from .codes import CodeDbMissing, Codes
 from .completeness import Gap, check_completeness
 from .completeness_report import CompletenessResponse, LLMUsageModel, build_response, gaps_to_export_reasons
 from .completeness_variants import SELECTED_VARIANT, run_variant
@@ -96,7 +96,7 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
     def open_codes():
         try:
             return code()
-        except FileNotFoundError:
+        except CodeDbMissing:
             return None
 
     @router.post('/cases/{case_id}/completeness', response_model=CompletenessResponse)

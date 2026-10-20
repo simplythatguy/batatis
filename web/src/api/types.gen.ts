@@ -34,6 +34,7 @@ export interface EvidenceItem {
   id: string;
   objective: string | null;
   professional_required: boolean | null;
+  provision_id: string | null;
   status: "needed" | "provided" | "not_applicable";
 }
 

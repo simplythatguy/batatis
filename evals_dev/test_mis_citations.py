@@ -81,7 +81,7 @@ def test_trap_ids_resolve_when_codedb_is_present():
                     table_id = provision if provision.startswith('Table') else 'Table ' + provision
                     row = con.execute(
                         "SELECT 1 FROM code_tables WHERE doc='NBC-AE' AND table_id=?",
-                        (table_id.rstrip('.'),)).fetchone()
+                        (table_id,)).fetchone()
                 else:
                     row = con.execute(
                         "SELECT title FROM provisions WHERE doc='NBC-AE' AND division='B' AND id=?",
