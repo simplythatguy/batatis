@@ -74,6 +74,10 @@ export function createEngine(base: string) {
     return (await res.json()) as T;
   }
 
+  function itemsOf<T>(body: T[] | { items: T[] }): T[] {
+    return Array.isArray(body) ? body : body.items;
+  }
+
   return {
     createCase: (body: NewCase = {}, signal?: AbortSignal) => call<Case>("POST", "/cases", body, signal),
     getCase: (id: string, signal?: AbortSignal) => call<Case>("GET", `/cases/${enc(id)}`, undefined, signal),
@@ -83,11 +87,11 @@ export function createEngine(base: string) {
       call<CodeRecord>("GET", `/code/${enc(id)}${division ? `?division=${division}` : ""}`, undefined, signal),
     search: (q: string, opts: { division?: Division; limit?: number } = {}, signal?: AbortSignal) => {
       const p = new URLSearchParams({ q, division: opts.division ?? "B", limit: String(opts.limit ?? 20) });
-      return call<CodeHit[]>("GET", `/code/search?${p}`, undefined, signal);
+      return call<CodeHit[] | { items: CodeHit[] }>("GET", `/code/search?${p}`, undefined, signal).then(itemsOf);
     },
     /** Section C rows by deterministic lookup, in input order (an article expands to its sentences). */
     sectionC: (provisions: string[], signal?: AbortSignal) =>
-      call<SectionCRow[]>("POST", "/section-c", { provisions }, signal),
+      call<SectionCRow[] | { items: SectionCRow[] }>("POST", "/section-c", { provisions }, signal).then(itemsOf),
   };
 }
 

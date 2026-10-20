@@ -77,10 +77,17 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
     if store is None:
         assert_durable_when_hosted()
     app = FastAPI(title='Batatis engine')
+    state = {'store': store, 'codes': codes}
+
+    def sweep():
+        current = state['store']
+        purge = getattr(current, 'purge_expired', None) if current is not None else None
+        if purge:
+            purge()
+
     app.add_middleware(CORSMiddleware, allow_origin_regex=r'http://(localhost|127\.0\.0\.1)(:\d+)?',
                        allow_methods=['*'], allow_headers=['*'])
-    app.add_middleware(HttpGuard)
-    state = {'store': store, 'codes': codes}
+    app.add_middleware(HttpGuard, sweep=sweep)
 
     def cases() -> CaseStore:
         if state['store'] is None:
@@ -132,6 +139,12 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
             raise HTTPException(404, 'case not found')
         return {key: saved[key] for key in ('id', 'name', 'size', 'content_type')}
 
+    @app.delete('/cases/{case_id}', status_code=204)
+    def delete_case(case_id: str):
+        if not cases().delete(case_id):
+            raise HTTPException(404, 'case not found')
+        return Response(status_code=204)
+
     @app.post('/cases/{case_id}/export', response_class=Response,
               responses={200: {'content': {'application/pdf': {}}}, 409: {'description': 'export blocked'}})
     def export(case_id: str, body: ExportRequest | None = None):
@@ -161,7 +174,10 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         return code().search(q, division=division, limit=limit)
 
     @app.get('/code/{provision_id}')
-    def code_lookup(provision_id: str, division: str | None = Query(None, pattern='^[ABC]$')):
+    def code_lookup(provision_id: str, request: Request, division: str | None = Query(None, pattern='^[ABC]$')):
+        extra = set(request.query_params) - {'division'}
+        if extra:
+            raise HTTPException(400, 'this route accepts only division')
         try:
             rec = code().provision(provision_id, division)
         except AmbiguousProvisionError as e:

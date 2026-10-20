@@ -9,6 +9,7 @@ import os
 import sqlite3
 import uuid
 from contextlib import closing
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Protocol
 
@@ -16,6 +17,7 @@ from .models import Case, Fact, now
 from .uploads import PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL
 
 DEFAULT_PATH = Path.home() / '.batatis' / 'cases.sqlite'
+RETENTION_DAYS = 7
 
 
 class VersionConflict(Exception):
@@ -39,6 +41,13 @@ class CaseBackend(Protocol):
     def add_fact(self, case_id: str, fact: Fact) -> Case | None: ...
     def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf') -> dict | None: ...
     def get_file(self, case_id: str, file_id: str) -> dict | None: ...
+    def delete(self, case_id: str) -> bool: ...
+    def purge_expired(self) -> int: ...
+
+
+def retention_cutoff() -> str:
+    """Cases created before this instant are past the demo retention window."""
+    return (datetime.now(timezone.utc) - timedelta(days=RETENTION_DAYS)).isoformat(timespec='seconds')
 
 
 def default_path() -> Path:
@@ -91,6 +100,7 @@ class CaseStore:
         return int(row[0]) if row else None
 
     def put(self, case: Case, *, expected_version: int | None = None) -> Case:
+        self.purge_expired()
         case.updated_at = now()
         payload = case.model_dump_json()
         with closing(self._connect()) as con, con:
@@ -114,12 +124,35 @@ class CaseStore:
         return case
 
     def get(self, case_id: str) -> Case | None:
+        self.purge_expired()
         with closing(self._connect()) as con:
             row = con.execute('SELECT json FROM cases WHERE id=?', (case_id,)).fetchone()
         return Case.model_validate_json(row[0]) if row else None
 
+    def delete(self, case_id: str) -> bool:
+        """Remove the case, its facts, its evidence, and its files."""
+        self.purge_expired()
+        with closing(self._connect()) as con, con:
+            con.execute('DELETE FROM case_files WHERE case_id=?', (case_id,))
+            cur = con.execute('DELETE FROM cases WHERE id=?', (case_id,))
+            return cur.rowcount == 1
+
+    def purge_expired(self) -> int:
+        """Delete every case created more than 7 days ago, and its files. One statement pair."""
+        cutoff = retention_cutoff()
+        with closing(self._connect()) as con, con:
+            ids = [row[0] for row in con.execute(
+                "SELECT id FROM cases WHERE json_extract(json, '$.created_at') < ?", (cutoff,))]
+            if not ids:
+                return 0
+            con.executemany('DELETE FROM case_files WHERE case_id=?', [(case_id,) for case_id in ids])
+            con.execute(
+                f"DELETE FROM cases WHERE id IN ({','.join('?' for _ in ids)})", ids)
+            return len(ids)
+
     def add_fact(self, case_id: str, fact: Fact) -> Case | None:
         """Read-modify-write under a reserved lock so two writers cannot drop a fact."""
+        self.purge_expired()
         for _ in range(5):
             con = sqlite3.connect(self.path, timeout=5, isolation_level=None)
             try:

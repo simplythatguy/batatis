@@ -1,9 +1,12 @@
-"""ASGI guard: strip /api, tag robots, and clip code-response text."""
+"""ASGI guard: strip /api, tag robots, budget NRC text, and log ids, routes, and status."""
 from __future__ import annotations
 
 import json
+import logging
 
-from .copyright import clip_tree
+from .copyright import PII_NOTICE, attach_meta, clip_response
+
+access_log = logging.getLogger('engine.access')
 
 
 def _header(headers, name: bytes) -> bytes:
@@ -13,29 +16,30 @@ def _header(headers, name: bytes) -> bytes:
     return b''
 
 
-def _code_response(path: str) -> bool:
-    """Provision JSON only. Case, gap, and Section D bodies stay whole."""
-    path = path.split('?', 1)[0]
-    return path.startswith('/code/') or path == '/section-c' or path.startswith('/section-c/')
-
-
 class HttpGuard:
-    def __init__(self, app):
+    def __init__(self, app, sweep=None):
         self.app = app
+        self.sweep = sweep
 
     async def __call__(self, scope, receive, send):
         if scope.get('type') != 'http':
             await self.app(scope, receive, send)
             return
+        if self.sweep is not None:
+            try:
+                self.sweep()
+            except Exception:
+                # A sweep failure must not log a connection string or replace the route's own error.
+                pass
         path = scope.get('path') or ''
         if path == '/api' or path.startswith('/api/'):
             scope = dict(scope)
             scope['path'] = path[4:] or '/'
-            raw = scope.get('raw_path') or b''
-            if raw.startswith(b'/api'):
-                scope['raw_path'] = raw[4:] or b'/'
+            raw_path = scope.get('raw_path') or b''
+            if raw_path.startswith(b'/api'):
+                scope['raw_path'] = raw_path[4:] or b'/'
             path = scope['path']
-        clip_body = _code_response(path)
+        route = path.split('?', 1)[0]
         started: dict = {}
         chunks: list[bytes] = []
 
@@ -52,17 +56,21 @@ class HttpGuard:
                 return
             raw = b''.join(chunks)
             headers = list(started.get('headers') or [])
-            if clip_body and b'application/json' in _header(headers, b'content-type'):
+            if raw and b'application/json' in _header(headers, b'content-type'):
                 try:
-                    raw = json.dumps(clip_tree(json.loads(raw))).encode()
+                    payload = attach_meta(clip_response(json.loads(raw)))
+                    raw = json.dumps(payload).encode()
                 except (ValueError, UnicodeError):
                     pass
                 headers = [(key, value) for key, value in headers if key.lower() != b'content-length']
                 headers.append((b'content-length', str(len(raw)).encode()))
-            headers = [(key, value) for key, value in headers if key.lower() != b'x-robots-tag']
+            headers = [(key, value) for key, value in headers if key.lower() not in (b'x-robots-tag', b'x-batatis-notice')]
             headers.append((b'x-robots-tag', b'noindex, nofollow'))
+            headers.append((b'x-batatis-notice', PII_NOTICE.encode()))
             start = dict(started['message'])
             start['headers'] = headers
+            # Ids, route, and status only. Never the body, a quote, or uploaded bytes.
+            access_log.info('%s %s %s', scope.get('method', '-'), route, start.get('status', '-'))
             await send(start)
             await send({'type': 'http.response.body', 'body': raw})
 

@@ -12,15 +12,16 @@ These are the routes the engine serves. `POST /cases/{case_id}/files` stores the
 | `GET /cases/{case_id}` | Case, or `404` with detail `case not found`. |
 | `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. `409` detail `case was updated concurrently` when the stored version changed during the write. |
 | `POST /cases/{case_id}/files` | `201` `{ "id", "name", "size", "content_type" }`. Body is raw `application/pdf` (optional header `x-filename`) or multipart with one file part. Bytes go in `case_files`. `404` detail `case not found`. `413` detail `PDF too large: the limit is 4 MB. Try compressing the file or splitting it.` `415` detail `only PDF files are accepted`. |
-| `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`. |
-| `GET /code/search` | Query `q`, `division` (`A` `B` or `C`, default `B`), `limit` (1–20, default 20). `422` detail `The maximum is 20.` when `limit` is above 20. `429` detail `Search limit reached; try again in N seconds`, with a `Retry-After` header of N seconds. Default budget is 60 searches per 10 minutes per IP. Hits as returned: `id`, `division`, `level`, `article_title`, `title`, `text`, `citation`. |
-| `GET /code/{provision_id}` | Query `division` optional. The codedb provision record, or `404` detail `provision not found`. `400` when the id is invalid or the division is ambiguous. |
-| `POST /section-c` | Body `{ "provisions": ["…"] }`. `SectionCRow` list. `404` when a provision is missing from codedb. `400` on an invalid id. |
-| `POST /cases/{case_id}/section-d` | Body optional `{ "provisions": ["…"] }`. `{ "items", "notices" }`. Writes the case. |
-| `GET /cases/{case_id}/section-d/issues` | Issue list below. Read-only. Does not write the case. |
+| `DELETE /cases/{case_id}` | `204` empty body. Removes the case, its facts, its evidence, and its files. `404` detail `case not found`. |
+| `GET /cases/{case_id}/gaps` | `{ "items", "meta" }`. `items` is the `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`. |
+| `GET /code/search` | Query `q`, `division` (`A` `B` or `C`, default `B`), `limit` (1–20, default 20). `422` detail `The maximum is 20.` when `limit` is above 20. `429` detail `Search limit reached; try again in N seconds`, with a `Retry-After` header of N seconds. Default budget is 60 searches per 10 minutes per IP. Body is `{ "items", "meta" }`. Each hit has `id`, `division`, `level`, `article_title`, `title`, `text`, `citation`. |
+| `GET /code/{provision_id}` | Query `division` only. Any other query parameter, including a sentence offset, page, or cursor, is `400` detail `this route accepts only division`. The codedb provision record, or `404` detail `provision not found`. `400` when the id is invalid or the division is ambiguous. |
+| `POST /section-c` | Body `{ "provisions": ["…"] }`. `{ "items", "meta" }` where `items` is the `SectionCRow` list. `404` when a provision is missing from codedb. `400` on an invalid id. |
+| `POST /cases/{case_id}/section-d` | Body optional `{ "provisions": ["…"] }`. `{ "items", "notices", "meta" }`. Writes the case. |
+| `GET /cases/{case_id}/section-d/issues` | `{ "items", "meta" }`. `items` is the issue list below. Read-only. Does not write the case. |
 | `GET /cases/{case_id}/professional` | `required` and `general_required`: `yes`, `no`, or `depends`. Also `reasons`, `questions`, `scope_note`. |
 | `GET /ccmc/search` | Query `q` (1–200 characters) and `limit` (1–50, default 20). `422` on a rejected query. `503` when the registry is unavailable; that detail is the registry error text. |
-| `GET /cases/{case_id}/process-fields` | Process-field list. Empty when the pathway is an acceptable solution. |
+| `GET /cases/{case_id}/process-fields` | `{ "items", "meta" }`. `items` is the process-field list. Empty when the pathway is an acceptable solution. |
 | `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` when the blank form file is missing; that detail is the form error text. `500` on other export failures. |
 
 A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
@@ -35,9 +36,23 @@ The fixed 404 detail strings are `case not found` and `provision not found`.
 
 `POST /cases/{case_id}/files` is the single implementation of this upload. It is database-backed: the PDF is stored in `case_files`, and a file over 4 MB is HTTP 413 with `PDF too large: the limit is 4 MB. Try compressing the file or splitting it.` The body may be a raw `application/pdf` or multipart. A function disk is ephemeral, and Vercel stops request bodies at 4.5 MB. #21's PDF parser plugs in as a helper this route calls. There is no separate disk-backed route.
 
-### Code text
+### NRC text budget
 
-JSON from `GET /code/search`, `GET /code/{provision_id}`, and `POST /section-c` keeps at most 25 words of every string. Ids, citations, enums, and URLs stay whole. That includes provision `text`, intent `notes`, and `clauses`, including strings nested in lists. A clipped string ends with `… [clipped, see NBC p.N]`, where N is the `pdf_page` on that object, or `… [clipped, see NBC(AE) 2023]` when no page is known. The same object gains `clipped_fields`, the list of keys whose text was clipped. An unclipped string has no marker, and an object with no clipped text has no `clipped_fields`. Case, gap, and Section D JSON are not clipped. A clipped field is not a finding that a design complies.
+Every JSON response is under one budget for NRC code text. The budget counts provision text, objective and functional-statement wording, intent statements and notes, clauses, fact quotes, and search snippets. Identifiers, citations, and URLs are not counted.
+
+A single snippet is at most 25 words. The response carries at most 75 words of that text in total. Words past either limit are not returned. The object keeps its citation, gains the NRC publication link (`https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499` when the object had no link), sets `clipped` to true, and the clipped string is `… [clipped, see NBC p.N]`, where N is the `pdf_page` on that object, or `… [clipped, see NBC(AE) 2023]` when no page is known. An unclipped string has no marker, and an object with no clipped text has no `clipped` flag.
+
+`GET /code/{provision_id}` accepts only `division`. It exposes no sentence offset, page, cursor, or other parameter a client can use to reassemble an article.
+
+A clipped field is not a finding that a design complies.
+
+### Demo data and retention
+
+Do not upload personal information. Demo data may be deleted. Every JSON response includes that sentence as `meta.notice`. Every response also sends it in the `X-Batatis-Notice` header. A JSON array is returned as `{ "items": [...], "meta": { "notice": "..." } }`.
+
+A case older than 7 days, measured from `created_at`, is deleted with its facts, evidence, and files. The purge runs when a case is accessed and on a sweep at the start of each request.
+
+The engine log line is the method, the path, and the status. It does not include case JSON or uploaded bytes.
 
 ### Section D plan item
 
@@ -156,6 +171,8 @@ Alternative path only, after the ladder: CCMC evaluation, ICC-ES evaluation, reg
 
 ### Example
 
+The live body is `{ "items": <the array below>, "meta": { "notice": "Do not upload personal information. Demo data may be deleted." } }`.
+
 ```json
 [
   {
@@ -198,7 +215,7 @@ A live response copies the citation string the code database returns. The placeh
 | Status | When |
 | --- | --- |
 | 404 | Fixed detail strings are `case not found` and `provision not found`. Section C, the plan, and this issues route can also 404 with the text of a missing codedb provision. |
-| 400 | Invalid provision id, or an ambiguous division on `GET /code/{provision_id}`. |
+| 400 | Invalid provision id, an ambiguous division on `GET /code/{provision_id}`, or any query parameter other than `division` on that route (`this route accepts only division`). |
 | 409 | Export is blocked. Detail is the object under Routes. `POST /cases/{case_id}/facts` also returns 409 with detail `case was updated concurrently`. |
 | 413 | `POST /cases/{case_id}/files` when the PDF is over 4 MB. Detail is `PDF too large: the limit is 4 MB. Try compressing the file or splitting it.` |
 | 415 | `POST /cases/{case_id}/files` when the body is not a PDF. Detail is `only PDF files are accepted`. |

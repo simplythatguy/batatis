@@ -14,7 +14,7 @@ from decimal import Decimal
 from psycopg.types.json import Jsonb
 
 from .models import Case, Fact, now
-from .store import FileTooLarge, VersionConflict
+from .store import FileTooLarge, VersionConflict, retention_cutoff
 from .uploads import PDF_MAX_BYTES
 
 MIGRATIONS = (
@@ -75,11 +75,33 @@ class PostgresCaseStore:
         return int(row[0]) if row else None
 
     def get(self, case_id: str) -> Case | None:
+        self.purge_expired()
         with self._conn() as con:
             row = con.execute('SELECT data FROM cases WHERE id=%s', (case_id,)).fetchone()
         return Case.model_validate(row[0]) if row else None
 
+    def delete(self, case_id: str) -> bool:
+        """Remove the case, its facts, its evidence, and its files."""
+        self.purge_expired()
+        with self._conn() as con:
+            con.execute('DELETE FROM case_files WHERE case_id=%s', (case_id,))
+            cur = con.execute('DELETE FROM cases WHERE id=%s', (case_id,))
+            return cur.rowcount == 1
+
+    def purge_expired(self) -> int:
+        """Delete every case created more than 7 days ago, and its files."""
+        cutoff = retention_cutoff()
+        with self._conn() as con:
+            rows = con.execute("SELECT id FROM cases WHERE data->>'created_at' < %s", (cutoff,)).fetchall()
+            ids = [row[0] for row in rows]
+            if not ids:
+                return 0
+            con.execute('DELETE FROM case_files WHERE case_id = ANY(%s)', (ids,))
+            con.execute('DELETE FROM cases WHERE id = ANY(%s)', (ids,))
+            return len(ids)
+
     def put(self, case: Case, *, expected_version: int | None = None) -> Case:
+        self.purge_expired()
         case.updated_at = now()
         payload = Jsonb(case.model_dump(mode='json'))
         with self._conn() as con:
@@ -105,6 +127,7 @@ class PostgresCaseStore:
 
     def add_fact(self, case_id: str, fact: Fact) -> Case | None:
         """Lock the row, then update only if the version is unchanged."""
+        self.purge_expired()
         for _ in range(5):
             with self._conn() as con:
                 row = con.execute('SELECT data, version FROM cases WHERE id=%s FOR UPDATE', (case_id,)).fetchone()

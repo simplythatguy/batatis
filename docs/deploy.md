@@ -59,7 +59,7 @@ Set these on the Vercel project for Preview and Production. Leave the project Ro
 
 Local file runs ignore `DATABASE_URL`. Uploaded PDF bytes go in `case_files` (Postgres `bytea`, or sqlite blob locally), capped at 4 MB. A larger PDF is HTTP 413 with `{"detail": "PDF too large: the limit is 4 MB. Try compressing the file or splitting it."}`.
 
-`GET /code/*` and `POST /section-c` keep at most 25 words of every string except ids, citations, enums, and URLs. A clipped string ends with `… [clipped, see NBC p.N]` or `… [clipped, see NBC(AE) 2023]`, and the object lists those keys in `clipped_fields`. Search returns at most 20 hits.
+Every JSON response keeps at most 25 words in one NRC snippet and at most 75 words of NRC text in total. Past that budget the body keeps the citation and the NRC link, with `clipped: true` and `… [clipped, see NBC p.N]`. Search still returns at most 20 hits. Cases older than 7 days are deleted with their files. Do not upload personal information; demo data may be deleted.
 
 ## Preview
 
