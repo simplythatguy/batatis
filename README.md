@@ -35,7 +35,7 @@ python3 -m venv .venv
 
 Leave that terminal open. Uvicorn prints `Uvicorn running on http://127.0.0.1:8000`. The route list is at http://127.0.0.1:8000/docs. Stop it with Ctrl+C. Stop the web app the same way, in its own terminal.
 
-Cases are saved in `~/.batatis/cases.sqlite`, which every clone on this machine shares. To keep this clone's cases in the repo directory:
+Cases are saved in `~/.batatis/cases.sqlite`, which every clone on this machine shares. To keep this clone's cases in the repo directory, start the engine this way instead:
 
 ```bash
 BATATIS_CASES=./.data/cases.sqlite .venv/bin/uvicorn engine.api:app --port 8000
