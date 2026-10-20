@@ -324,21 +324,22 @@ def test_every_registered_route_stays_inside_the_nrc_budget(tmp_path, monkeypatc
 def test_access_log_has_ids_route_and_status_only(tmp_path, caplog):
     store = CaseStore(tmp_path / 'cases.sqlite')
     client = TestClient(create_app(store=store, codes=None))
-    secret = 'SECRETQUOTE9f3a7c'
+    quote = 'applicant quote must stay out of the log'
+    upload = b'%PDF-applicant-upload-must-stay-out-of-the-log'
     with caplog.at_level(logging.INFO, logger='engine.access'):
-        created = client.post('/cases', json={'title': secret})
+        created = client.post('/cases', json={'title': quote})
         case_id = created.json()['id']
         client.post(f'/cases/{case_id}/facts', json={
-            'field': 'note', 'value': secret, 'kind': 'pointed', 'status': 'unconfirmed',
-            'source': {'type': 'user_text', 'ref': 'msg', 'quote': secret},
+            'field': 'note', 'value': quote, 'kind': 'pointed', 'status': 'unconfirmed',
+            'source': {'type': 'user_text', 'ref': 'msg', 'quote': quote},
         })
-        uploaded = client.post(f'/cases/{case_id}/files', content=b'%PDF-SECRETBYTES9f3a7c',
-                               headers={'content-type': 'application/pdf', 'x-filename': secret + '.pdf'})
+        uploaded = client.post(f'/cases/{case_id}/files', content=upload,
+                               headers={'content-type': 'application/pdf', 'x-filename': 'plan.pdf'})
         assert uploaded.status_code == 201
         fetched = client.get(f'/cases/{case_id}')
     assert fetched.status_code == 200
-    assert secret not in caplog.text
-    assert 'SECRETBYTES9f3a7c' not in caplog.text
+    assert quote not in caplog.text
+    assert b'applicant-upload-must-stay-out-of-the-log' not in caplog.text.encode()
     messages = [record.message for record in caplog.records if record.name == 'engine.access']
     assert f'POST /cases/{case_id}/facts 200' in messages
     assert f'GET /cases/{case_id} 200' in messages
