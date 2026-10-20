@@ -1,8 +1,29 @@
 {
   "routes": [
-    { "src": "^/codedb\\.sqlite$", "status": 404 },
-    { "src": "^/codedb/build/codedb\\.sqlite$", "status": 404 },
-    { "src": "^/api/codedb\\.sqlite$", "status": 404 },
-    { "src": "^/api/codedb/build/codedb\\.sqlite$", "status": 404 }
+    {
+      "src": "/(.*)",
+      "headers": { "X-Robots-Tag": "noindex, nofollow" },
+      "continue": true
+    },
+    {
+      "src": "^/codedb\\.sqlite$",
+      "status": 404,
+      "headers": { "X-Robots-Tag": "noindex, nofollow" }
+    },
+    {
+      "src": "^/codedb/build/codedb\\.sqlite$",
+      "status": 404,
+      "headers": { "X-Robots-Tag": "noindex, nofollow" }
+    },
+    {
+      "src": "^/api/codedb\\.sqlite$",
+      "status": 404,
+      "headers": { "X-Robots-Tag": "noindex, nofollow" }
+    },
+    {
+      "src": "^/api/codedb/build/codedb\\.sqlite$",
+      "status": 404,
+      "headers": { "X-Robots-Tag": "noindex, nofollow" }
+    }
   ]
 }

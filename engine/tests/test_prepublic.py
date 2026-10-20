@@ -19,11 +19,8 @@ from engine.identify_http import (
     CODEDB_DOWNLOADS, IDENTIFY_MAX_INPUT, IDENTIFY_MAX_OUTPUT, IDENTIFY_MODEL, KEYWORD_LABEL, MODEL_LABEL,
 )
 from engine.llm_gate import reset_for_tests
-from engine.privacy import (
-    DELETE_LINE, DONT_PASTE, LIVE_SEND_LINE, OPENAI_RETENTION_LINE, OPENAI_RETENTION_URL,
-    PRIVACY_HEADER, PRIVACY_SENTENCE, PROCESSOR_LINE, privacy_header,
-)
-from engine.spend import LEDGER_NOTICE, live_enabled
+from engine.privacy import privacy_notice
+from engine.spend import LEDGER_NOTICE
 from engine.spend import token_cost
 from engine.tests.test_spend import _prepare
 
@@ -31,56 +28,36 @@ ROOT = Path(__file__).resolve().parents[2]
 MARKER = b'SQLite format 3'
 
 
-def test_privacy_notice_names_openai_us_in_the_api_and_the_sidebar():
-    web = (ROOT / 'web/src/privacy.ts').read_text()
+def test_privacy_notice_waits_for_the_shared_import():
+    """#24 owns the notice text. This branch has one TODO import site and no second copy."""
+    source = (ROOT / 'engine/privacy.py').read_text()
+    assert source.count('TODO(#24)') == 1
+    assert privacy_notice(live=False) is None
+    assert privacy_notice(live=True) is None
+    for banned in ('up to 30 days', 'cases stay until deleted', 'Cases do not expire'):
+        assert banned not in source
+        assert banned not in (ROOT / 'docs/api-contract.md').read_text()
+        assert banned not in (ROOT / 'docs/deploy.md').read_text()
     sidebar = (ROOT / 'web/src/App.tsx').read_text()
-    assert PRIVACY_SENTENCE in web and PROCESSOR_LINE in web
-    assert DONT_PASTE in web and DELETE_LINE in web
-    assert 'PRIVACY_SENTENCE' in sidebar and 'PROCESSOR_LINE' in sidebar
-    assert 'DONT_PASTE' in sidebar and 'DELETE_LINE' in sidebar
-    assert 'OpenAI (US)' in PROCESSOR_LINE and 'processor' in PROCESSOR_LINE
-    assert PRIVACY_SENTENCE == 'Do not upload personal information. Demo data may be deleted.'
-    assert DONT_PASTE == "Don't paste personal information you don't need."
-    assert '7-day' not in (ROOT / 'engine/privacy.py').read_text()
+    assert 'DELETE /cases' not in sidebar
+    assert 'privacy-notice' not in sidebar
+    assert not (ROOT / 'web/src/privacy.ts').exists()
     reset_for_tests()
     response = TestClient(create_app()).get('/status/budget')
     assert response.status_code == 200
-    notice = response.headers['x-batatis-notice']
-    assert PRIVACY_SENTENCE in notice
-    assert PROCESSOR_LINE in notice
-    assert DONT_PASTE in notice and DELETE_LINE in notice
-    assert LIVE_SEND_LINE not in notice
-    assert notice == PRIVACY_HEADER
+    assert 'x-batatis-notice' not in response.headers
+    assert response.headers['x-robots-tag'] == 'noindex, nofollow'
 
 
-def test_live_notice_names_openai_processing_and_the_delete_route(tmp_path, monkeypatch):
-    """Live header says content is sent to OpenAI (US) and how to delete a case."""
-    monkeypatch.setenv('BATATIS_LIVE', '1')
-    monkeypatch.setenv('OPENAI_API_KEY', 'test-openai-key')
-    assert live_enabled()
-    contract = (ROOT / 'docs/api-contract.md').read_text()
-    source = (ROOT / 'engine/privacy.py').read_text()
-    verbatim = (
-        'OpenAI may securely retain API inputs and outputs for up to 30 days to provide '
-        'the services and to identify abuse.'
-    )
-    assert 'Checked 2026-10-20' in source
-    assert verbatim in source
-    assert OPENAI_RETENTION_URL in contract
-    assert verbatim in contract
-    assert '7-day' not in contract.split('### Privacy notice', 1)[1].split('### ', 1)[0]
-    header = privacy_header(live=True)
-    assert LIVE_SEND_LINE in header
-    assert 'Pasted text and uploaded content are sent to OpenAI (US) for processing.' in header
-    assert DONT_PASTE in header
-    assert DELETE_LINE in header
-    assert OPENAI_RETENTION_URL in header
-    assert 'up to 30 days' in OPENAI_RETENTION_LINE
-    reset_for_tests()
+def test_delete_case_route_removes_the_case(tmp_path):
+    """DELETE /cases/{id} removes a stored case.
+
+    Manual check (no web unit runner in web/package.json): open the app, choose
+    Delete this case, confirm in the dialog, and see an empty case on Describe.
+    Cancel leaves the current case. A failed request shows an error and does not clear.
+    """
     from engine.store import CaseStore
     http = TestClient(create_app(CaseStore(tmp_path / 'cases.sqlite')))
-    response = http.get('/status/budget')
-    assert response.headers['x-batatis-notice'] == header
     created = http.post('/cases', json={'title': 'soffit trial'})
     assert created.status_code == 201
     case_id = created.json()['id']
@@ -88,10 +65,28 @@ def test_live_notice_names_openai_processing_and_the_delete_route(tmp_path, monk
     deleted = http.delete(f'/cases/{case_id}')
     assert deleted.status_code == 204
     assert deleted.content == b''
+    assert deleted.headers['x-robots-tag'] == 'noindex, nofollow'
     missing = http.get(f'/cases/{case_id}')
     assert missing.status_code == 404
     assert missing.json()['detail'] == 'case not found'
     assert http.delete(f'/cases/{case_id}').status_code == 404
+
+
+def test_engine_sends_robots_noindex_on_every_response():
+    client = TestClient(create_app())
+    for path in ('/status/budget', '/codedb.sqlite', '/codedb/build/codedb.sqlite', '/api/codedb/build/codedb.sqlite'):
+        response = client.get(path)
+        assert response.headers['x-robots-tag'] == 'noindex, nofollow', path
+
+
+def test_vercel_json_sets_robots_noindex_on_every_route():
+    routes = _vercel_routes()
+    assert routes
+    for route in routes:
+        headers = {key.lower(): value for key, value in (route.get('headers') or {}).items()}
+        assert headers.get('x-robots-tag') == 'noindex, nofollow', route.get('src')
+    index = (ROOT / 'web/index.html').read_text()
+    assert 'name="robots"' in index and 'content="noindex, nofollow"' in index
 
 
 def test_daily_budget_variable_does_not_limit_spend(tmp_path, monkeypatch):

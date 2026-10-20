@@ -22,7 +22,7 @@ Set these on the Vercel project for the engine runtime. Do not commit values. `O
 
 Over the spend cap, or when the ledger cannot be checked, `POST /identify` stays HTTP 200. `label` is `keyword search, no AI`, `notice` is set, and `hits` are the BM25 list. A live model result uses `label` `model output, not verified` and does not carry an accuracy or score field.
 
-When live mode is on, `X-Batatis-Notice` says pasted text and uploaded content are sent to OpenAI (US) for processing, says not to paste personal information you don't need, and names `DELETE /cases/{case_id}` as the way to remove a stored case. Cases do not expire on a timer. OpenAI's API retention period is the one on https://openai.com/policies/api-data-usage-policies (checked 2026-10-20; up to 30 days, with the exceptions quoted in `docs/api-contract.md`).
+The privacy notice text is the shared #24 constant, imported from `engine/privacy.py` once `backend/deploy` is on `dev`. This branch does not keep a second copy. Every engine response and every `vercel.json` route sends `X-Robots-Tag: noindex, nofollow`. The web `index.html` has the same robots meta tag.
 
 The code database is not a public file. `vercel.json` answers `/codedb.sqlite`, `/codedb/build/codedb.sqlite`, and `/api/codedb/build/codedb.sqlite` with 404, ahead of any later rewrite. Those routes have to stay. The service layout itself is a separate change. The web build's `dist/` does not contain `codedb.sqlite`.
 

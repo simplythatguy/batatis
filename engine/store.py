@@ -39,7 +39,7 @@ class CaseStore:
         return Case.model_validate_json(row[0]) if row else None
 
     def delete(self, case_id: str) -> bool:
-        """Remove one case. False when that id is not stored. Cases do not expire on a timer."""
+        """Remove one case. False when that id is not stored."""
         with closing(self._connect()) as con, con:
             cursor = con.execute('DELETE FROM cases WHERE id=?', (case_id,))
             return cursor.rowcount == 1

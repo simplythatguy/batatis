@@ -38,7 +38,10 @@ const routes = config.routes || [];
 
 function statusFor(urlPath) {
   for (const route of routes) {
-    if (route.src && new RegExp(route.src).test(urlPath)) return route.status ?? 200;
+    if (route.src && new RegExp(route.src).test(urlPath)) {
+      if (route.continue) continue;
+      return route.status ?? 200;
+    }
   }
   return null;
 }
@@ -102,13 +105,15 @@ function jsFiles(dir, found = []) {
 }
 
 const chrome = readFileSync(join(dist, "index.html"), "utf8") + jsFiles(dist).map((path) => readFileSync(path, "utf8")).join("\n");
-if (!chrome.includes("Do not upload personal information. Demo data may be deleted.")) {
-  console.error("built sidebar is missing the privacy sentence");
+if (!chrome.includes('name="robots"') || !chrome.includes("noindex, nofollow")) {
+  console.error("built index.html is missing the robots noindex tag");
   process.exit(1);
 }
-if (!chrome.includes("OpenAI (US) is a processor of text sent for a live model call.")) {
-  console.error("built sidebar is missing the OpenAI processor line");
-  process.exit(1);
+for (const banned of ["up to 30 days", "DELETE /cases", "cases stay until deleted"]) {
+  if (chrome.includes(banned)) {
+    console.error("built web output still contains notice copy:", banned);
+    process.exit(1);
+  }
 }
 
-console.log("codedb paths 404; privacy notice is in the build");
+console.log("codedb paths 404; robots noindex is in the build");

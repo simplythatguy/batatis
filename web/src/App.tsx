@@ -1,11 +1,13 @@
+import { useRef, useState } from "react";
+import { engine } from "./api/client";
 import { Icon } from "./components";
+import { freshCase, type Action } from "./model";
 import { useFocusParam, useRoute } from "./router";
 import { Application } from "./screens/Application";
 import { CodeCheck } from "./screens/CodeCheck";
 import { Describe } from "./screens/Describe";
 import { Accuracy, Officer } from "./screens/Placeholders";
 import { SectionC } from "./screens/SectionC";
-import { DELETE_LINE, DONT_PASTE, PRIVACY_SENTENCE, PROCESSOR_LINE } from "./privacy";
 import { resetCase, useCase } from "./store";
 
 const EXPLICIT_ROUTES = ["/code-check", "/section-c", "/application", "/officer", "/accuracy"];
@@ -23,6 +25,65 @@ const NAV = [
   { area: "Officer", items: [{ path: "/officer", label: "Officer review", icon: "officer" }] },
   { area: "Accuracy", items: [{ path: "/accuracy", label: "Accuracy report", icon: "accuracy" }] },
 ];
+
+function DeleteCase({ caseId, dispatch }: { caseId: string; dispatch: (action: Action) => void }) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+
+  async function confirm() {
+    setPending(true);
+    setError("");
+    try {
+      await engine.deleteCase(caseId);
+      dispatch({ type: "reset", to: freshCase() });
+      location.hash = "#/describe";
+      dialog.current?.close();
+    } catch {
+      setError("The case could not be deleted. Nothing was cleared.");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        className="btn btn-ghost"
+        onClick={() => {
+          setError("");
+          dialog.current?.showModal();
+        }}
+      >
+        Delete this case
+      </button>
+      <dialog className="dialog" ref={dialog} aria-labelledby="delete-case-title" aria-describedby="delete-case-description">
+        <div className="dialog-body">
+          <h2 className="dialog-title" id="delete-case-title">
+            Delete this case
+          </h2>
+          <p className="meta" id="delete-case-description">
+            This removes the stored case and starts a new empty case on this screen.
+          </p>
+          {error ? (
+            <p className="meta" role="alert">
+              {error}
+            </p>
+          ) : null}
+        </div>
+        <div className="footer-bar">
+          <button type="button" className="btn btn-ghost" onClick={() => dialog.current?.close()} disabled={pending}>
+            Cancel
+          </button>
+          <button type="button" className="btn btn-primary" onClick={confirm} disabled={pending}>
+            Delete this case
+          </button>
+        </div>
+      </dialog>
+    </>
+  );
+}
 
 export function App() {
   const route = useRoute();
@@ -85,22 +146,14 @@ export function App() {
           ))}
         </nav>
         <div className="sidebar-foot">
-          <p className="meta privacy-notice">
-            {PRIVACY_SENTENCE}
-            <br />
-            {PROCESSOR_LINE}
-            <br />
-            {DONT_PASTE}
-            <br />
-            {DELETE_LINE}
-          </p>
           <div className="case-card">
-            <span className="case-title">{c.title}</span>
-            <span className="meta">Fixture case · fictional applicant</span>
+            <span className="case-title">{c.title || "New case"}</span>
+            <span className="meta">{c.title ? "Fixture case · fictional applicant" : "Empty case"}</span>
           </div>
           <button type="button" className="btn btn-ghost" onClick={() => resetCase(dispatch)}>
             Reset case
           </button>
+          <DeleteCase caseId={c.id} dispatch={dispatch} />
         </div>
       </aside>
       <main className="main-panel">{screen}</main>

@@ -208,3 +208,21 @@ export function reducer(c: Case, a: Action): Case {
 }
 
 export const candidateById = (c: Case, id: string): Candidate | undefined => c.candidates.find((x) => x.id === id);
+
+/** Empty case after a delete. Not the fixture. */
+export function freshCase(): Case {
+  const id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : newId("case");
+  return {
+    id: id.startsWith("case-") ? id : `case-${id}`,
+    title: "",
+    applicantType: "owner",
+    codeEdition: "NBC(AE) 2023, 2nd printing",
+    description: "",
+    files: [],
+    facts: [],
+    questions: [],
+    candidates: [],
+    sectionC: [],
+    process: { rationale: "", risk: "", mitigation: "", assumptions: "" },
+  };
+}

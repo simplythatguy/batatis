@@ -72,11 +72,22 @@ def check_quotes(picks: list[Pick], candidates: list[str], arts: dict[str, dict]
     return keep, dropped
 
 
+def anthropic_verifier_allowed() -> bool:
+    """Live mode and the hosted engine are OpenAI only."""
+    return os.environ.get('BATATIS_LIVE') != '1' and not os.environ.get('VERCEL')
+
+
+def _refuse_anthropic() -> None:
+    if not anthropic_verifier_allowed():
+        raise RuntimeError('The Anthropic verifier does not run on the deployed path. Live mode is OpenAI only.')
+
+
 class ClaudeVerifier:
     """Adapter over the Anthropic Messages API (structured output). `client` is injectable for tests."""
 
     def __init__(self, db_path: Path | str, *, client=None, model: str = VERIFIER_MODEL, effort: str = 'medium',
                  max_tokens: int = 16000):
+        _refuse_anthropic()
         self.arts = articles(Path(db_path))
         self.model, self.effort, self.max_tokens = model, effort, max_tokens
         if client is None:
@@ -91,6 +102,7 @@ class ClaudeVerifier:
         return f'<proposal>\n{query}\n</proposal>\n\n<candidates>\n{listed}\n</candidates>'
 
     def verify(self, query: str, candidates: list[str]) -> Verification:
+        _refuse_anthropic()
         candidates = [a for a in candidates if a in self.arts]
         t0 = time.monotonic()
         resp = self.client.messages.parse(

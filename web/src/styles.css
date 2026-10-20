@@ -46,11 +46,6 @@ body {
   align-items: flex-start;
 }
 
-.privacy-notice {
-  margin: 0;
-  line-height: 1.4;
-}
-
 .case-card {
   display: flex;
   flex-direction: column;

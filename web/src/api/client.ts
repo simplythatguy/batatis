@@ -87,6 +87,25 @@ export function createEngine(base: string) {
     /** Section C rows by deterministic lookup, in input order (an article expands to its sentences). */
     sectionC: (provisions: string[], signal?: AbortSignal) =>
       call<SectionCRow[]>("POST", "/section-c", { provisions }, signal),
+    /** 204 removes the case. 404 means the engine has no such case; both resolve. */
+    deleteCase: async (id: string, signal?: AbortSignal): Promise<void> => {
+      let res: Response;
+      try {
+        res = await fetch(`${base}/cases/${enc(id)}`, { method: "DELETE", signal });
+      } catch (e) {
+        if (signal?.aborted) throw e;
+        throw new EngineError(0, e instanceof Error ? e.message : String(e));
+      }
+      if (res.status === 204 || res.status === 404) return;
+      let detail = res.statusText;
+      try {
+        const body = await res.json();
+        detail = typeof body.detail === "string" ? body.detail : JSON.stringify(body.detail ?? body);
+      } catch {
+        /* keep statusText */
+      }
+      throw new EngineError(res.status, detail);
+    },
   };
 }
 

@@ -13,7 +13,7 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `GET /codedb.sqlite`, `GET /codedb/build/codedb.sqlite`, `GET /api/codedb/build/codedb.sqlite` | `404` `{ "detail": "not found" }`. The code database file is not the body. |
 | `POST /cases` | `201` Case. Body is optional: `title`, `jurisdiction` (`id`, `name`, `authority`). |
 | `GET /cases/{case_id}` | Case, or `404` with detail `case not found`. |
-| `DELETE /cases/{case_id}` | `204` with an empty body when the case is removed. `404` detail `case not found` when it is not stored. Cases stay until this route deletes them. |
+| `DELETE /cases/{case_id}` | `204` with an empty body when the case is removed. `404` detail `case not found` when it is not stored. |
 | `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. |
 | `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`. |
 | `GET /code/search` | Query `q`, `division` (`A` `B` or `C`, default `B`), `limit` (1–100, default 20). Hits as returned: `id`, `division`, `level`, `article_title`, `title`, `text`, `citation`. |
@@ -28,15 +28,7 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 
 ### Privacy notice
 
-Every response sets `X-Batatis-Notice`. While live mode is off the header is:
-
-`Do not upload personal information. Demo data may be deleted. OpenAI (US) is a processor of text sent for a live model call. Don't paste personal information you don't need. Delete a stored case with DELETE /cases/{case_id}.`
-
-When `BATATIS_LIVE=1` and `OPENAI_API_KEY` is set, the header adds that pasted text and uploaded content are sent to OpenAI (US) for processing, and OpenAI's own retention statement:
-
-`Pasted text and uploaded content are sent to OpenAI (US) for processing. Don't paste personal information you don't need. Delete a stored case with DELETE /cases/{case_id}. OpenAI may securely retain API inputs and outputs for up to 30 days to provide the services and to identify abuse, except for certain endpoints and features listed in its platform documentation, and unless the law requires longer retention. See https://openai.com/policies/api-data-usage-policies`
-
-That 30-day period is OpenAI's, quoted from that page on 2026-10-20 (page updated January 8, 2026): "Except for certain endpoints and features listed in our platform documentation, OpenAI may securely retain API inputs and outputs for up to 30 days to provide the services and to identify abuse. After 30 days, API inputs and outputs are removed from our systems, unless we are legally required to retain them." Stored cases in this app do not expire on a timer. `DELETE /cases/{case_id}` removes one case. The sidebar shows the offline sentences, including how to delete a case. The notice is not a finding that a design complies.
+The notice text is owned by #24 (`backend/deploy`): `web/src/privacy.ts` and the engine mirror. `engine/privacy.py` is the only import site on this branch. It does not contain notice copy. `X-Batatis-Notice` is set only after that import returns the shared string. Every response sets `X-Robots-Tag: noindex, nofollow`.
 
 ### Labels
 
