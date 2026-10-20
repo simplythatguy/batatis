@@ -1,0 +1,58 @@
+{
+  "version": "scc_2026-10",
+  "form": "Safety Codes Council, Variance Form for Proposed Alternative Solution (5 pages, 87 AcroForm fields)",
+  "sha256": "f44640ca005c957c11a2387d2768fffc35ef93c97125dcca37436fcc0b9afc1d",
+  "field_count": 87,
+  "note": "Field names are the form's own /T values, typos included ('Date of Reqeuest'). Fact keys are Case.facts[].field.",
+  "text_fields": {
+    "Owner": {"fact": "owner_name", "section": "A", "label": "Owner's Name"},
+    "Owner Rep": {"fact": "owner_rep_name", "section": "A", "label": "Owner's Representative"},
+    "Mailing Address": {"fact": "mailing_address", "section": "A", "label": "Mailing Address"},
+    "Date of Reqeuest": {"fact": "request_date", "section": "A", "label": "Date of Request"},
+    "Permit": {"fact": "permit_number", "section": "B", "label": "Permit Number (if applicable)"},
+    "Municipal Address": {"fact": "municipal_address", "section": "B", "label": "Municipal Address"},
+    "Lot": {"fact": "lot", "section": "B", "label": "Lot"},
+    "Block": {"fact": "block", "section": "B", "label": "Block"},
+    "Plan": {"fact": "plan", "section": "B", "label": "Plan"},
+    "QTR": {"fact": "ats_qtr", "section": "B", "label": "ATS QTR"},
+    "SEC": {"fact": "ats_sec", "section": "B", "label": "ATS SEC"},
+    "TWP": {"fact": "ats_twp", "section": "B", "label": "ATS TWP"},
+    "RGE": {"fact": "ats_rge", "section": "B", "label": "ATS RGE"},
+    "MER": {"fact": "ats_mer", "section": "B", "label": "ATS MER"},
+    "Code or Standard": {"fact": "code_or_standard", "section": "C", "label": "Applicable Code or Standard",
+                         "default": "National Building Code - 2023 Alberta Edition (2nd printing), Division B"},
+    "Owner Print": {"fact": "owner_name", "section": "Signatures", "label": "Owner's name (please print)"},
+    "Date1": {"fact": "owner_signature_date", "section": "Signatures", "label": "Owner's signature date"},
+    "Owner Rep Print": {"fact": "owner_rep_name", "section": "Signatures", "label": "Owner's representative's name (please print)"},
+    "Date2": {"fact": "owner_rep_signature_date", "section": "Signatures", "label": "Owner's representative's signature date"}
+  },
+  "checkboxes": {
+    "Check Box": {"fact": "submitted_to_scc", "section": "B",
+                  "label": "Submitted to the Safety Codes Council for review for jurisdictional use", "on": "/Yes"}
+  },
+  "required_facts": ["owner_name", "mailing_address", "request_date", "municipal_address"],
+  "section_c_rows": [
+    {"article": "Article(s)", "objective": "Objective", "function": "Function", "intent": "Intent statement"},
+    {"article": "Article(s)1", "objective": "Objective1", "function": "Function1", "intent": "Intent statement1"},
+    {"article": "Article(s)2", "objective": "Objective2", "function": "Function2", "intent": "Intent statement2"},
+    {"article": "Article(s)3", "objective": "Objective3", "function": "Function3", "intent": "Intent statement3"},
+    {"article": "Article(s)4", "objective": "Objective4", "function": "Function4", "intent": "Intent statement4"}
+  ],
+  "section_d_rows": [
+    {"document": "Supporting Doc", "responsible": "Name Responsible"},
+    {"document": "Supporting Doc2", "responsible": "Name Responsible2"},
+    {"document": "Supporting Doc3", "responsible": "Name Responsible3"},
+    {"document": "Supporting Doc4", "responsible": "Name Responsible4"},
+    {"document": "Supporting Doc5", "responsible": "Name Responsible5"}
+  ],
+  "section_d_facts": {"document": "supporting_doc.{n}.name", "responsible": "supporting_doc.{n}.responsible"},
+  "skipped": {
+    "officer": ["Date Review", "Jurisdiction", "Agency", "SCO", "Discipline", "Certification", "Designation",
+                "Must be Met", "SCO Date", "Check Box6", "Date Review1", "Jurisdiction1", "Agency1", "SCO1",
+                "Discipline1", "Certification1", "Designation1", "Reasons for Refusal", "SCO Date1", "B1", "B2",
+                "B3", "date_refusal", "Type of Format"],
+    "signature": ["Signature1", "Signature2", "Signature6", "Signature9"],
+    "button": ["Logo", "ATS", "Section C Button", "Supp Doc Button", "Appeals Info"],
+    "help": ["Logo Popup", "ATS Popup", "Section C Popup", "Supp Doc Popup"]
+  }
+}
