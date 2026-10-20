@@ -1,6 +1,7 @@
 """The validator must reject planted errors. Run: .venv/bin/python -m pytest evals_dev -q"""
 import copy
 import json
+import os
 import pathlib
 import sqlite3
 
@@ -13,9 +14,12 @@ CASES = sorted((pathlib.Path(__file__).parent / 'cases').glob('*.json'))
 
 @pytest.fixture(scope='module')
 def con():
-    if not pathlib.Path(vc.DEFAULT_DB).is_file():
-        pytest.skip('code database not built')
-    return sqlite3.connect(f'file:{vc.DEFAULT_DB}?mode=ro', uri=True)
+    path = vc.database_path()
+    if os.environ.get('BATATIS_CODEDB') and not path.is_file():
+        pytest.fail(f'BATATIS_CODEDB is set but the file is missing: {path}')
+    if not path.is_file():
+        pytest.skip('code database not built at codedb/build/codedb.sqlite')
+    return sqlite3.connect(f'file:{path}?mode=ro', uri=True)
 
 
 @pytest.fixture(scope='module')

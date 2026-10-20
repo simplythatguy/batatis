@@ -26,7 +26,7 @@ Searched, not found or not used (stated so the sample is not mistaken for comple
 
 Primary-source note relevant to the target article: Edmonton's house-permit page says the plot plan must be prepared by an Alberta Land Surveyor (preferred scale 1:300) and must show "Dimensions (closest distance), location and distance to property lines of all existing and proposed structures including air conditioners, cantilevers, eaves, overhangs, unenclosed steps and landings, and all projections" (read on the page 2026-10-20). So in Edmonton the plot plan is meant to carry both setbacks and eave projections.
 
-Tooling note: no poppler, no mutool, no OCR on this machine. I used pypdf 6.21.1 (operators, images, text) and pypdfium2 5.14 plus PIL (text boxes, rendering to PNG), all already installed in /Users/aamia/.t3/projects/batatis/.venv (run with `python -I`; nothing installed or modified). The brief mentioned sips for rendering; pypdfium2 was used instead because it handles any page and rotation.
+Tooling note: no poppler, no mutool, no OCR on this machine. I used pypdf 6.21.1 (operators, images, text) and pypdfium2 5.14 plus PIL (text boxes, rendering to PNG), all already installed in .venv (run with `python -I`; nothing installed or modified). The brief mentioned sips for rendering; pypdfium2 was used instead because it handles any page and rotation.
 
 ## 2. Table of sets
 
@@ -119,7 +119,7 @@ Two-week fit: the triage, extraction, merge and rotate steps, the tiled render w
 
 ## 6. Reproduce
 
-All code is in /tmp/drawing-probe/scripts (run with `/Users/aamia/.t3/projects/batatis/.venv/bin/python -I`, paths as arguments): dl.sh and dl_cookie.sh (downloads into new empty directories, sha256 into manifest.tsv), analyze_pdf.py (per-page operators, images, text, dimension strings, keywords, JSON), aggregate.py, final_counts.py, key_sheets.py, dump_text.py (strings with boxes), page_fonts.py, render_page.py, contact_sheet.py, pdf_outline.py, pdf_links.py, scan_agenda.py. One known quirk: page_fonts.py does not restore the text render mode on Q, so its "invisible text" counts are wrong; analyze_pdf.py restores it and is the one used for every number here (it found OCR-style invisible text dominating only 2 of 177 plan pages, both Canmore survey/analysis sheets).
+All code is in /tmp/drawing-probe/scripts (run with `.venv/bin/python -I`, paths as arguments): dl.sh and dl_cookie.sh (downloads into new empty directories, sha256 into manifest.tsv), analyze_pdf.py (per-page operators, images, text, dimension strings, keywords, JSON), aggregate.py, final_counts.py, key_sheets.py, dump_text.py (strings with boxes), page_fonts.py, render_page.py, contact_sheet.py, pdf_outline.py, pdf_links.py, scan_agenda.py. One known quirk: page_fonts.py does not restore the text render mode on Q, so its "invisible text" counts are wrong; analyze_pdf.py restores it and is the one used for every number here (it found OCR-style invisible text dominating only 2 of 177 plan pages, both Canmore survey/analysis sheets).
 
 ## 7. Risks and unknowns (inference or not measured)
 
@@ -134,6 +134,6 @@ All code is in /tmp/drawing-probe/scripts (run with `/Users/aamia/.t3/projects/b
 
 ## 8. Methods used
 
-- t3-workflow router: /Users/aamia/.codex/skills/t3-workflow/SKILL.md and route map /Users/aamia/.codex/skills/t3-workflow/references/routes.md (route: Research / external technical research).
-- Matt Pocock research method: /Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md (primary sources, current evidence; its "spin up a background agent" step was not used because the brief forbids delegation, so I researched directly).
+- t3-workflow router: ~/.codex/skills/t3-workflow/SKILL.md and route map ~/.codex/skills/t3-workflow/references/routes.md (route: Research / external technical research).
+- Matt Pocock research method: ~/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md (primary sources, current evidence; its "spin up a background agent" step was not used because the brief forbids delegation, so I researched directly).
 - No pstack, better-ui or visual-evidence files were read (no feature surface; research only).
