@@ -164,10 +164,11 @@ def regressions() -> list[dict]:
             **common,
             'id': 'reg-firestop-plastic-pipe',
             'query': 'firestop plastic pipe penetration',
-            'expected': ['3.1.9.4.(2)', '3.1.9.4.(4)', '3.1.9.4.(7)', '9.10.9.7.'],
+            'expected': ['3.1.9.4.(2)', '3.1.9.4.(4)', '3.1.9.4.(7)', '9.10.9.7.', '3.1.9.1.(1)'],
+            'exact': ['3.1.9.1.(1)'],
             'top_k': 8,
             'gold_source': None,
-            'note': 'Unc GC firestop run. In-sample regression, not gold. This query covers 3.1.9.4.(2)/(4)/(7) and 9.10.9.7. The paired query covers 9.10.9.6.',
+            'note': 'Unc GC firestop run, plus Karen: 3.1.9.1.(1) itself is required in the top 8. In-sample regression, not gold. Also covers 3.1.9.4.(2)/(4)/(7) and 9.10.9.7.',
             'assert': 'expected_covered_in_top_k',
         },
         {

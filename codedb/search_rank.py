@@ -8,7 +8,9 @@ V3 is the combination shipped by `codedb.search`: V1's query, a concept
 heading boost (not a blanket title weight), one same-section neighbour
 when the leader matches every concept, and the furring article kept
 next to an attachment article. Part 9 is a small tie-break when the
-query names a Part 9 building.
+query names a Part 9 building. V3 tries an AND of the content words
+first. Zero or very few AND hits relax by dropping the blocking word,
+then fall back to the OR query, still ranked by BM25.
 
 Synonym groups are generic building terms. They are not provision ids
 and they are not keyed to a fixture. The public `search` signature is
@@ -30,6 +32,12 @@ _WORD = re.compile(r'[^\W_]+', re.UNICODE)
 _ARTICLE = re.compile(r'(\d+\.\d+\.\d+\.\d+\.)')
 _NOTE_ONLY = re.compile(r'^\(See Notes?\b.*\)$', re.IGNORECASE)
 SNIPPET_WORDS = 25
+# One search response may quote at most this many NRC words in total.
+RESPONSE_WORDS = 75
+# AND of every content word. Fewer hits than this is "very few": relax, then OR.
+AND_FEW = 5
+# Longer prose is not required to co-occur in one provision. Those queries stay OR.
+AND_MAX_TERMS = 6
 
 # Function words only. Building nouns stay in the query.
 STOP = frozenset("""
@@ -169,6 +177,71 @@ def _fts_query(words: list[str], *, phrase: bool) -> str:
     return ' OR '.join(parts)
 
 
+def _and_query(words: list[str]) -> str:
+    return ' AND '.join('"' + word.replace('"', '') + '"' for word in words)
+
+
+def _norm_token(word: str) -> str:
+    return word.lower().strip('.,;:()[]"“”\'')
+
+
+def _term_match(token: str, term: str) -> bool:
+    """True when a text word and a query word share a stem, not a short prefix."""
+    if not token or not term:
+        return False
+    if token == term:
+        return True
+    if token.startswith(term) or term.startswith(token):
+        short, long = (token, term) if len(token) <= len(term) else (term, token)
+        if len(short) >= 5:
+            return True
+        return len(long) - len(short) <= 3
+    shared = 0
+    for left, right in zip(token, term):
+        if left != right:
+            break
+        shared += 1
+    return shared >= 5
+
+
+def _window_score(words: list[str], start: int, limit: int, terms: list[str]) -> tuple[int, int]:
+    tokens = [_norm_token(word) for word in words[start:start + limit]]
+    distinct = 0
+    hits = 0
+    for term in terms:
+        matched = sum(1 for token in tokens if _term_match(token, term.lower()))
+        if matched:
+            distinct += 1
+            hits += matched
+    return (distinct, hits)
+
+
+def _best_window(text: str, terms: list[str], limit: int = SNIPPET_WORDS) -> str:
+    """The 25-word span that covers the most query words, then the most repeats."""
+    words = (text or '').split()
+    if len(words) <= limit:
+        return ' '.join(words)
+    best_at = 0
+    best_score = (-1, -1)
+    for start in range(len(words) - limit + 1):
+        score = _window_score(words, start, limit, terms)
+        if score > best_score:
+            best_score = score
+            best_at = start
+    return ' '.join(words[best_at:best_at + limit])
+
+
+def _best_passage(rows: list[dict], terms: list[str]) -> dict:
+    """One child, the one that shares the most query words. Not every sentence."""
+    def score(index: int, row: dict) -> tuple:
+        words = (row.get('text') or '').split()
+        distinct, hits = _window_score(words, 0, max(len(words), 1), terms) if words else (0, 0)
+        return (distinct, hits, -index)
+
+    best = max(range(len(rows)), key=lambda index: score(index, rows[index]))
+    return rows[best]
+
+
 def _fts(con, query: str, *, doc: str, division: str | None, limit: int, title_weight: float):
     sql = ('SELECT p.*, bm25(provisions_fts,0,0,0,?,1) AS rank '
            'FROM provisions_fts JOIN provisions p ON p.doc=provisions_fts.doc '
@@ -181,6 +254,47 @@ def _fts(con, query: str, *, doc: str, division: str | None, limit: int, title_w
         args.append(division.upper())
     args.append(limit)
     return [_record(row) for row in con.execute(sql, args)]
+
+
+def _drop_blocking_term(con, words: list[str], *, doc: str, division: str | None, title_weight: float) -> list[str]:
+    """Drop the word whose removal lets the most provisions match.
+
+    Ties drop the rarer word. The remaining words stay in their original order.
+    """
+    ranked = []
+    for word in words:
+        rest = [other for other in words if other != word]
+        query = _and_query(rest) if len(rest) > 1 else '"' + rest[0].replace('"', '') + '"'
+        hits = len(_fts(con, query, doc=doc, division=division, limit=AND_FEW, title_weight=title_weight))
+        alone = '"' + word.replace('"', '') + '"'
+        frequency = len(_fts(con, alone, doc=doc, division=division, limit=50, title_weight=title_weight))
+        ranked.append((hits, frequency, word))
+    ranked.sort(key=lambda item: (-item[0], item[1], words.index(item[2])))
+    dropped = ranked[0][2]
+    return [word for word in words if word != dropped]
+
+
+def _and_then_or(con, words: list[str], or_query: str, *, doc: str, division: str | None,
+                 title_weight: float, pool: int) -> tuple[list[dict], str]:
+    """AND the content words. On zero or very few hits, drop blocking words, then OR.
+
+    The returned rows are BM25 order. `mode` is `and`, `relaxed`, or `or`.
+    """
+    if len(words) < 2 or len(words) > AND_MAX_TERMS:
+        rows = _fts(con, or_query, doc=doc, division=division, limit=pool, title_weight=title_weight)
+        return rows, 'or'
+    current = list(words)
+    mode = 'and'
+    while True:
+        rows = _fts(con, _and_query(current), doc=doc, division=division, limit=pool, title_weight=title_weight)
+        if len(rows) >= AND_FEW:
+            return rows, mode
+        if len(current) <= 2:
+            break
+        current = _drop_blocking_term(con, current, doc=doc, division=division, title_weight=title_weight)
+        mode = 'relaxed'
+    rows = _fts(con, or_query, doc=doc, division=division, limit=pool, title_weight=title_weight)
+    return rows, 'or'
 
 
 def _groups_of(tokens) -> set[int]:
@@ -340,57 +454,90 @@ def _placeholder(text: str | None) -> bool:
     return not collapsed or bool(_NOTE_ONLY.fullmatch(collapsed))
 
 
-def _snippet(text: str, limit: int = SNIPPET_WORDS) -> str:
-    return ' '.join((text or '').split()[:limit])
+def _passages(value) -> list[dict]:
+    if value is None:
+        return []
+    if isinstance(value, dict):
+        return [value]
+    return [row for row in value if row]
 
 
-def present_article_hit(row: dict, first_sentence: dict | None, clauses: list[dict]) -> list[dict]:
-    """Give an article hit a short sentence snippet, or replace it with clauses.
+def present_article_hit(row: dict, first_sentence, clauses: list[dict], *, terms: list[str] | None = None) -> list[dict]:
+    """One card for an empty article: a 25-word window, then a page to open.
 
     Article rows in the index are often empty, or only "(See Note A-…)".
-    The first child sentence supplies at most 25 words. With no usable
-    sentence, the article is omitted and its clauses are returned instead.
+    The child sentence that shares the most query words supplies one window.
+    With no usable sentence, one clause does. The other sentences stay off the card.
     """
+    terms = list(terms or [])
     if row.get('level') != 'article' or not _placeholder(row.get('text')):
-        return [row]
-    if first_sentence and not _placeholder(first_sentence.get('text')):
         shown = dict(row)
-        shown['text'] = _snippet(first_sentence.get('text') or '')
+        shown['text'] = _best_window(shown.get('text') or '', terms)
         return [shown]
-    return [clause for clause in clauses if clause.get('text') and not _placeholder(clause.get('text'))]
+    sentences = [item for item in _passages(first_sentence) if not _placeholder(item.get('text'))]
+    if sentences:
+        best = _best_passage(sentences, terms)
+        shown = dict(row)
+        shown['text'] = _best_window(best.get('text') or '', terms)
+        if best.get('pdf_page'):
+            shown['pdf_page'] = best['pdf_page']
+        return [shown]
+    usable = [clause for clause in clauses if clause.get('text') and not _placeholder(clause.get('text'))]
+    if not usable:
+        return []
+    best = _best_passage(usable, terms)
+    shown = dict(best)
+    shown['text'] = _best_window(best.get('text') or '', terms)
+    return [shown]
 
 
-def _first_sentence(con, doc: str, division: str, article: str):
-    fetched = con.execute(
-        "SELECT * FROM provisions WHERE doc=? AND division=? AND parent_id=? AND level='sentence' "
-        'ORDER BY sort_key LIMIT 1',
-        (doc, division, article)).fetchone()
-    return _record(fetched) if fetched else None
-
-
-def _child_clauses(con, doc: str, division: str, article: str) -> list[dict]:
-    fetched = con.execute(
-        "SELECT * FROM provisions WHERE doc=? AND division=? AND parent_id=? AND level='clause' "
-        'ORDER BY sort_key',
-        (doc, division, article)).fetchall()
+def _child_level(con, doc: str, division: str, article: str, level: str) -> list[dict]:
+    if level == 'sentence':
+        fetched = con.execute(
+            "SELECT * FROM provisions WHERE doc=? AND division=? AND parent_id=? AND level='sentence' "
+            'ORDER BY sort_key',
+            (doc, division, article)).fetchall()
+    else:
+        # Clauses hang off the sentence, not the article row.
+        fetched = con.execute(
+            "SELECT * FROM provisions WHERE doc=? AND division=? AND article=? AND level='clause' "
+            'ORDER BY sort_key',
+            (doc, division, article)).fetchall()
     return [_record(row) for row in fetched]
 
 
-def _present_rows(con, rows: list[dict], *, doc: str, division: str | None, limit: int) -> list[dict]:
+def _cap_response(rows: list[dict]) -> None:
+    """Keep each snippet at 25 words and the whole response at 75."""
+    remaining = RESPONSE_WORDS
+    for row in rows:
+        words = (row.get('text') or '').split()
+        if remaining <= 0 or not words:
+            row['text'] = ''
+            continue
+        keep = words[:min(SNIPPET_WORDS, remaining)]
+        row['text'] = ' '.join(keep)
+        remaining -= len(keep)
+
+
+def _present_rows(con, rows: list[dict], *, doc: str, division: str | None, limit: int, terms: str) -> list[dict]:
     if not rows:
         return []
     division_sql = division or rows[0].get('division')
+    window_terms = _expand(_tokens(terms))
     selected = []
     seen = set()
     for row in rows:
         if row.get('level') == 'article' and _placeholder(row.get('text')) and division_sql:
             produced = present_article_hit(
                 row,
-                _first_sentence(con, doc, division_sql, row['id']),
-                _child_clauses(con, doc, division_sql, row['id']),
+                _child_level(con, doc, division_sql, row['id'], 'sentence'),
+                _child_level(con, doc, division_sql, row['id'], 'clause'),
+                terms=window_terms,
             )
         else:
-            produced = [row]
+            shown = dict(row)
+            shown['text'] = _best_window(shown.get('text') or '', window_terms)
+            produced = [shown]
         for item in produced:
             if item['id'] in seen:
                 continue
@@ -400,6 +547,7 @@ def _present_rows(con, rows: list[dict], *, doc: str, division: str | None, limi
                 break
         if len(selected) >= limit:
             break
+    _cap_response(selected)
     for index, row in enumerate(selected):
         row['rank'] = float(index)
     return selected
@@ -498,9 +646,19 @@ def search_variant(terms: str, variant: str, *, doc='NBC-AE', division=None, lim
         else:
             expanded = _expand(_tokens(terms))
             phrase = any(_group(word) == 2 for word in _content(terms))
-            query = _fts_query(expanded, phrase=phrase)
-            rows = _fts(con, query, doc=doc, division=division, limit=max(limit, V3_POOL), title_weight=V3_TITLE_WEIGHT)
+            or_query = _fts_query(expanded, phrase=phrase)
+            pool = max(limit, V3_POOL)
+            # Two or more concept groups keep the OR pool. That pool is what the
+            # concept rerank was tuned on. Fewer groups are the AND path: a
+            # strict AND that misses falls back to a relaxed AND, then to OR.
+            if len(_query_groups(terms)) >= 2:
+                rows = _fts(con, or_query, doc=doc, division=division, limit=pool, title_weight=V3_TITLE_WEIGHT)
+            else:
+                rows, _mode = _and_then_or(
+                    con, _content(terms), or_query,
+                    doc=doc, division=division, title_weight=V3_TITLE_WEIGHT, pool=pool,
+                )
             rows = _rerank_v3(con, rows, terms, doc=doc, division=division, limit=limit)
             if len(_query_groups(terms)) < 2:
                 rows = _promote_rare_headings(con, rows, terms, doc=doc, division=division)
-        return _present_rows(con, rows, doc=doc, division=division, limit=limit)
+        return _present_rows(con, rows, doc=doc, division=division, limit=limit, terms=terms)

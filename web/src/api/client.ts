@@ -13,6 +13,7 @@ export interface CodeHit {
   article_title: string | null;
   title: string | null;
   text: string;
+  pdf_page: number | null;
   citation: string | null;
 }
 

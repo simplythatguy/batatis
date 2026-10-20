@@ -45,6 +45,7 @@ class Codes:
         hits = search(terms, division=division, limit=limit, db_path=self.db_path)
         return [{'id': h['id'], 'division': h['division'], 'level': h['level'],
                  'article_title': h['article_title'], 'title': h['title'], 'text': h['text'],
+                 'pdf_page': h.get('pdf_page'),
                  'citation': self.citation(h['id'], h['division'])} for h in hits]
 
     def definition(self, code: str) -> dict | None:

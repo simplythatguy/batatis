@@ -67,6 +67,7 @@ def test_case_a_identify_queries_omit_interior_nail_article():
 
 def test_firestop_queries_keep_pipe_and_separation_hits():
     pipe = _ids('firestop plastic pipe penetration')
+    assert '3.1.9.1.(1)' in pipe
     for gold in ('3.1.9.4.(2)', '3.1.9.4.(4)', '3.1.9.4.(7)', '9.10.9.7.'):
         assert any(covers(hit, gold) or article_of(hit) == gold for hit in pipe), (gold, pipe)
     separation = _ids('fire separation penetration')
@@ -80,20 +81,38 @@ def test_sprinkler_firestop_reaches_article_and_combustible_piping():
     assert any(covers(hit, '3.1.9.4.(1)') for hit in ids)
 
 
-def test_article_hit_carries_first_sentence_snippet():
+def test_article_hit_uses_one_child_window_and_the_response_stays_short():
     from codedb import children
-    from codedb.search_rank import SNIPPET_WORDS, present_article_hit
+    from codedb.search_rank import RESPONSE_WORDS, SNIPPET_WORDS, present_article_hit
 
     rows = search('firestop plastic pipe penetration', division='B', limit=8)
+    quoted = [len((row.get('text') or '').split()) for row in rows]
+    assert sum(quoted) <= RESPONSE_WORDS
+    assert all(count <= SNIPPET_WORDS for count in quoted)
+    assert all(row.get('pdf_page') for row in rows)
     by_id = {row['id']: row for row in rows}
-    for article in ('3.1.9.4.', '9.10.9.7.'):
-        assert article in by_id, rows
-        text = by_id[article]['text']
+    assert '3.1.9.1.(1)' in by_id
+
+    def window_of(article: str) -> str:
+        sentences = [child for child in children(article, division='B') if child['level'] == 'sentence']
+        shown = present_article_hit(
+            {'id': article, 'level': 'article', 'text': ''},
+            sentences,
+            [],
+            terms=['firestop', 'plastic', 'pipe', 'penetration'],
+        )
+        return shown[0]['text']
+
+    for article in ('3.1.9.1.', '3.1.9.4.'):
+        text = window_of(article)
         words = text.split()
         assert words and len(words) <= SNIPPET_WORDS
         assert not text.startswith('(See Note')
-        first = next(child for child in children(article) if child['level'] == 'sentence')
-        assert text == ' '.join(first['text'].split()[:SNIPPET_WORDS])
+        collapsed = [' '.join(child['text'].split()) for child in children(article, division='B') if child.get('text')]
+        assert sum(text in body for body in collapsed) == 1
+
+    firestop = window_of('3.1.9.1.')
+    assert 'firestop' in firestop.lower()
 
     replaced = present_article_hit(
         {'id': '9.1.1.1.', 'level': 'article', 'text': '(See Note A-9.1.1.1.)'},
