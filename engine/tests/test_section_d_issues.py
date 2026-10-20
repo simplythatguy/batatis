@@ -1,0 +1,217 @@
+"""Section D issues recommend evidence. They do not certify a design or invent a citation."""
+import json
+import re
+
+from fastapi.testclient import TestClient
+
+from engine.api import create_app
+from engine.models import Case, Source
+from engine.section_d import ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER
+from engine.section_d_flag_eval import RULE_IDS, main
+from engine.section_d_issues import section_d_issues
+from engine.store import CaseStore
+from engine.tests.case_builder_fixtures import fact
+
+# Recommendation text must not claim compliance or safety. Objective titles from the
+# code ("Safety") are not copied into these strings; the test scans the whole payload.
+CLAIM_PHRASES = (
+    r'\bcomplies\b', r'\bcompliant\b', r'\bcompliance\b', r'\bsafe\b', r'\bsafety\b',
+    r'meets the code', r'meets code', r'satisfies the code', r'\bwe conclude\b',
+    r'has been approved', r'\bis approved\b', r'performance is achieved',
+    r'equivalent performance is', r'design is acceptable', r'this design complies',
+)
+
+BENCHMARK = '9.10.15.5.(8)'
+NO_ROW = '9.10.14.2.(1)'
+UNKNOWN = '9.99.99.99.(1)'
+
+
+class FakeCodes:
+    """In-memory stand-in. Every citation string is recorded when it is handed out."""
+
+    def __init__(self):
+        self.rows = {}
+        self.issued: set[str] = set()
+
+    def add(self, division, provision_id, **extra):
+        citation = extra.pop('citation', f'fixture:{division}:{provision_id}')
+        row = {'id': provision_id, 'division': division, 'citation': citation, 'level': 'sentence',
+               'children': [], 'attributions': [], 'attribution_status': {'status': 'none', 'root_provision': None,
+               'root_method': None}, 'intents': [], 'intent_comparison': []}
+        row.update(extra)
+        self.rows[(division, provision_id)] = row
+        return self
+
+    def provision(self, provision_id, division='B'):
+        row = self.rows.get((division, provision_id))
+        if row:
+            self.issued.add(row['citation'])
+        return row
+
+    def citation(self, provision_id, division='B'):
+        row = self.provision(provision_id, division)
+        return row['citation'] if row else None
+
+    def definition(self, code):
+        return None
+
+
+def codes_with_rules():
+    codes = FakeCodes()
+    for division, provision_id in RULE_IDS:
+        codes.add(division, provision_id)
+    codes.add('B', BENCHMARK, attribution_status={'status': 'direct', 'root_provision': None, 'root_method': None},
+              attributions=[{'bracket': '[F03-OP3.1]', 'clauses': [], 'application_note': None,
+                             'table_id': 'Table 9.38.1.1.', 'pdf_page': 1, 'fs': ['F03'], 'objectives': ['OP3.1']}])
+    codes.add('B', NO_ROW)
+    return codes
+
+
+def _strings(payload):
+    if isinstance(payload, str):
+        yield payload
+    elif isinstance(payload, dict):
+        for value in payload.values():
+            yield from _strings(value)
+    elif isinstance(payload, list):
+        for value in payload:
+            yield from _strings(value)
+
+
+def _citations(payload):
+    if isinstance(payload, dict):
+        for key, value in payload.items():
+            if key == 'citation' and isinstance(value, str):
+                yield value
+            else:
+                yield from _citations(value)
+    elif isinstance(payload, list):
+        for value in payload:
+            yield from _citations(value)
+
+
+def _house_facts():
+    values = dict(occupancy='single_family', part4_design=False, preserved_wood_foundation_part4=False,
+                  roof_trusses=False, prescriptive_route_confirmed=True, ahj_requires_professional=False,
+                  special_safety_concerns=False, professional_judgement_required=False,
+                  professional_scope_resolved=True, fire_suppression=False, fire_alarm=False)
+    return [fact(key, value) for key, value in values.items()]
+
+
+def test_confirmed_provision_recommends_ladder_and_lists_empty_process_fields():
+    codes = codes_with_rules()
+    issue = section_d_issues(Case(provisions=[BENCHMARK]), codes)[0]
+    assert issue.provision.provision_id == BENCHMARK and issue.provision.citation == codes.rows[('B', BENCHMARK)]['citation']
+    assert issue.objective == 'OP3.1' and issue.function == 'F03'
+    assert issue.recommended_evidence_types == CONFIDENCE_LADDER + ALTERNATIVE_EVIDENCE_TYPES
+    empty = [field.id for field in issue.empty_process_fields]
+    assert {'risk_assessment', 'mitigating_measures', 'assumptions_and_limits'} <= set(empty)
+    assert not set(empty) & set(issue.recommended_evidence_types)
+    assert issue.status == 'open' and issue.practice_of_engineering.value == 'unknown'
+    assert issue.practice_of_engineering.question
+
+
+def test_unknown_reference_has_no_citation_and_missing_attribution_asks():
+    codes = codes_with_rules()
+    issues = section_d_issues(Case(provisions=[UNKNOWN, NO_ROW]), codes)
+    missing = next(issue for issue in issues if issue.entered_reference == UNKNOWN)
+    assert missing.provision is None and missing.question
+    assert UNKNOWN not in ''.join(_citations(missing.model_dump()))
+    assert not re.search(r'NBC\(AE\).{0,80}' + re.escape(UNKNOWN), missing.model_dump_json())
+    blank = next(issue for issue in issues if issue.provision and issue.provision.provision_id == NO_ROW)
+    assert blank.objective is None and blank.function is None and blank.question
+    assert blank.provision.citation == codes.rows[('B', NO_ROW)]['citation']
+
+
+def test_no_issue_text_claims_compliance_or_safety_and_citations_stay_inside_codedb():
+    codes = codes_with_rules()
+    cases = [
+        Case(provisions=[BENCHMARK, UNKNOWN, NO_ROW]),
+        Case(provisions=[BENCHMARK], facts=[fact('part4_design', True)]),
+        Case(provisions=[BENCHMARK], facts=_house_facts()),
+        Case(provisions=[BENCHMARK], facts=[fact('span_m', 18)]),
+        Case(provisions=[BENCHMARK], facts=[fact('pathway', 'acceptable')]),
+    ]
+    for case in cases:
+        payload = [issue.model_dump() for issue in section_d_issues(case, codes)]
+        blob = json.dumps(payload)
+        for pattern in CLAIM_PHRASES:
+            assert re.search(pattern, blob, re.I) is None, pattern
+        for citation in _citations(payload):
+            assert citation in codes.issued
+        assert 'NBC(AE)' not in blob
+
+
+def test_span_handoff_cites_only_a_resolved_sentence():
+    codes = codes_with_rules()
+    del codes.rows[('B', '9.23.1.1.(2)')]
+    quiet = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact('span_m', 18)]), codes)[0]
+    assert quiet.practice_of_engineering.value is True
+    assert '9.23.1.1' not in quiet.model_dump_json()
+    codes.add('B', '9.23.1.1.(2)')
+    cited = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact('span_m', 18)]), codes)[0]
+    assert codes.rows[('B', '9.23.1.1.(2)')]['citation'] in cited.practice_of_engineering.reason
+    assert codes.rows[('B', '9.23.1.1.(2)')]['citation'] in codes.issued
+
+
+def test_status_addressed_by_applicant_item_and_needs_professional_without_one():
+    codes = codes_with_rules()
+    bare = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact('part4_design', True)]), codes)[0]
+    assert bare.status == 'needs_professional' and bare.practice_of_engineering.value is True
+    assert bare.practice_of_engineering.division == 'C' and bare.practice_of_engineering.citation in codes.issued
+    file = Source(type='file', ref='applicant-report.pdf', quote='Applicant report metadata.')
+    case = Case(provisions=[BENCHMARK], facts=[fact('part4_design', True)])
+    case.facts += [fact(f'evidence.{bare.id}.file_ref', file.ref, source=file),
+                   fact(f'evidence.{bare.id}.responsible_party', 'Named applicant professional')]
+    supplied = section_d_issues(case, codes)[0]
+    assert supplied.status == 'addressed' and supplied.practice_of_engineering.value is True
+    house = section_d_issues(Case(provisions=[BENCHMARK], facts=_house_facts()), codes)[0]
+    assert house.practice_of_engineering.value is False and house.status == 'open'
+    assert house.practice_of_engineering.citation in codes.issued
+
+
+def test_acceptable_path_drops_variance_process_fields_and_extra_evidence_types():
+    case = Case(provisions=[BENCHMARK], facts=[fact('pathway', 'acceptable')])
+    issue = section_d_issues(case, codes_with_rules())[0]
+    assert issue.empty_process_fields == ()
+    assert issue.recommended_evidence_types == CONFIDENCE_LADDER
+
+
+def test_no_benchmark_asks_and_does_not_invent_a_provision():
+    issue = section_d_issues(Case(), codes_with_rules())[0]
+    assert issue.provision is None and issue.question and issue.status == 'open'
+
+
+def test_route_is_read_only_and_missing_case_is_404(tmp_path):
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    client = TestClient(create_app(store, codes_with_rules()))
+    assert client.get('/cases/missing/section-d/issues').status_code == 404
+    case = store.put(Case(provisions=[BENCHMARK, UNKNOWN]))
+    before = store.get(case.id).model_dump_json()
+    response = client.get(f'/cases/{case.id}/section-d/issues')
+    assert response.status_code == 200
+    body = response.json()
+    assert body[0]['entered_reference'] == UNKNOWN and body[0]['provision'] is None
+    assert body[1]['provision']['citation']
+    assert store.get(case.id).model_dump_json() == before
+
+
+def test_eval_script_prints_variant_table_with_zero_under_flag(capsys):
+    assert main() == 0
+    out = capsys.readouterr().out
+    assert out.splitlines()[0].split() == ['variant', 'scored', 'agreement', 'under_flag', 'skipped']
+    assert 'winner: rules_plus_unknown' in out
+    assert 'under_flag_target: 0' in out
+    plus = next(line for line in out.splitlines() if line.startswith('rules_plus_unknown'))
+    only = next(line for line in out.splitlines() if line.startswith('rules_only'))
+    plus_parts, only_parts = plus.split(), only.split()
+    assert int(plus_parts[3]) == 0
+    assert int(plus_parts[1]) + int(plus_parts[4]) == 60
+    assert int(plus_parts[1]) > 0
+    assert float(plus_parts[2]) >= float(only_parts[2])
+
+
+def test_claim_blocklist_matches_compliance_and_safety_claims():
+    sample = 'The design complies, is safe, meets the code, and performance is achieved.'
+    assert any(re.search(pattern, sample, re.I) for pattern in CLAIM_PHRASES)
+    assert re.search(r'\bsafe\b', 'is safe', re.I) and re.search(r'\bcompliance\b', 'compliance', re.I)
