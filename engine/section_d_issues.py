@@ -14,7 +14,9 @@ from pydantic import BaseModel, ConfigDict, model_validator
 from .codes import Codes
 from .models import Case
 from .process_fields import ProcessField, alternative_path, confirmed_value, process_fields
-from .professional import ProfessionalFacts, ProfessionalReason, ProfessionalResult, professional_involvement
+from .professional import (
+    PracticePrompt, ProfessionalFacts, ProfessionalReason, ProfessionalResult, professional_involvement,
+)
 from .section_d import (
     ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, EvidencePlanItem, EvidenceType, section_d_plan,
 )
@@ -105,6 +107,7 @@ class PracticeOfEngineering(BaseModel):
     citation: str | None = None
     reason: str
     question: str | None = None
+    prompts: tuple[PracticePrompt, ...] = ()
 
     @model_validator(mode='after')
     def _shape(self):
@@ -182,24 +185,29 @@ def render_practice(result: ProfessionalResult, codes: Codes, *, span_handoff: b
             'Recommend a registered professional for the stated scope.')
         if span_handoff:
             text += ' The stated span is recorded as Part 4 design, so the same Division C rule applies.'
-        return PracticeOfEngineering(value=True, rule=rule or None, division=division or None,
-                                     citation=reason.citation if reason else None, reason=text, question=None)
+        return _with_prompts(PracticeOfEngineering(
+            value=True, rule=rule or None, division=division or None,
+            citation=reason.citation if reason else None, reason=text, question=None), result)
     if result.required == 'no':
         reason = _pick(result, 'no') or _pick(result, 'depends')
         rule, division = _rule(reason) if reason else ('', '')
-        return PracticeOfEngineering(
+        return _with_prompts(PracticeOfEngineering(
             value=False, rule=rule or None, division=division or None,
             citation=reason.citation if reason else None,
             reason=('The stated facts fit a general exception. Recommend checking component duties and any '
                     'authority direction. This screen does not decide professional-law scope.'),
-            question=None)
+            question=None), result)
     reason = _pick(result, 'depends')
     rule, division = _rule(reason) if reason else ('', '')
-    return PracticeOfEngineering(
+    return _with_prompts(PracticeOfEngineering(
         value='unknown', rule=rule or None, division=division or None,
         citation=reason.citation if reason else None,
         reason=result.answer,
-        question=_question(result))
+        question=_question(result)), result)
+
+
+def _with_prompts(flag: PracticeOfEngineering, result: ProfessionalResult) -> PracticeOfEngineering:
+    return flag.model_copy(update={'prompts': tuple(result.prompts)})
 
 
 def _at_stake(item: EvidencePlanItem) -> str:

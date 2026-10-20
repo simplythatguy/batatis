@@ -30,6 +30,66 @@ def _condition(message: str) -> str:
     return text
 
 
+# Same option and help sentences as #26 (`PracticePrompt` / `_HELP` on
+# backend/section-d-routing). A Not sure answer is not a yes or a no.
+NOT_SURE_OPTION = 'Not sure (the officer decides)'
+DEFAULT_HELP = (
+    'State the fact if you know it. Yes and No are the two answers when the question is a yes or no. '
+    'Not sure: the officer decides.'
+)
+# #26's Part 4 screening question. This branch asks that fact inside "Do we need an engineer?"
+# The Yes and No meanings stay the #26 sentence.
+PART4_QUESTION = 'Is any design carried out under Part 4, including beams, connections or foundations?'
+PART4_HELP = 'Yes means the project includes Part 4 design. No means it does not. Not sure: the officer decides.'
+_HELP = {
+    PART4_QUESTION: PART4_HELP,
+    'Do we need an engineer? The deciding fact is whether any design is carried out under Part 4.': PART4_HELP,
+    'Has the authority determined whether size or complexity requires professional involvement, and for which scope?':
+        'Yes means the authority has required a registered professional for a stated scope. '
+        'No means it has not. Not sure: the officer decides.',
+    'Does the project include a preserved wood foundation designed under Part 4?':
+        'Yes means that foundation is in the project. No means it is not. Not sure: the officer decides.',
+    'Are wood roof trusses or truss assembly connections included?':
+        'Yes means wood roof trusses or those connections are included. No means they are not. '
+        'Not sure: the officer decides.',
+    'Is a fire suppression system being installed, and does the general professional requirement apply?':
+        'Yes means that system is being installed on a building outside the general exceptions. '
+        'No means it is not. Not sure: the officer decides.',
+    'Is a fire alarm system being installed, and does the general professional requirement apply?':
+        'Yes means that system is being installed on a building outside the general exceptions. '
+        'No means it is not. Not sure: the officer decides.',
+    'Which design route applies, and does any proposed analysis require reserved professional judgement?':
+        'Yes means the design uses reserved professional judgement. No means it does not. '
+        'Not sure: the officer decides.',
+    'Have the applicable professional-law, discipline and local submission requirements been resolved?':
+        'Yes means those requirements are resolved. No means they are not. Not sure: the officer decides.',
+    'What gross area applies, and does a basement count in that area?':
+        'State the gross area if you know it. Yes and No do not settle this. Not sure: the officer decides.',
+    'Which part applies to this building, Part 3 or Part 9?':
+        'Name Part 3 or Part 9. Not sure: the officer decides.',
+    'Is a fire suppression or fire alarm system being installed, and does the general professional requirement apply?':
+        'Yes means a fire suppression or fire alarm system is being installed on a building outside the general exceptions. '
+        'No means it is not. Not sure: the officer decides.',
+    'Does the fire separation stay intact at each penetration, including sprinkler piping?':
+        'Yes means the fire separation stays intact at each penetration, including sprinkler piping. '
+        'No means it does not. Not sure: the officer decides.',
+}
+
+
+class PracticePrompt(BaseModel):
+    """One deciding question, with what Yes and No mean and a Not sure option."""
+
+    model_config = ConfigDict(extra='forbid')
+    text: str
+    help: str
+    not_sure: str = NOT_SURE_OPTION
+
+
+def prompt_for(text: str) -> PracticePrompt:
+    """Help matches #26 when the question is one of its screening questions."""
+    return PracticePrompt(text=text, help=_HELP.get(text, DEFAULT_HELP), not_sure=NOT_SURE_OPTION)
+
+
 def practice_answer(required: str, reasons, needs: list[str]) -> str:
     """One human sentence. The machine token stays on ``required``."""
     if required in ('yes', 'no'):
@@ -176,6 +236,20 @@ class ProfessionalResult(BaseModel):
     def answer(self) -> str:
         """The sentence to show. Never ``depends. depends.``"""
         return practice_answer(self.required, self.reasons, self.needs)
+
+    @computed_field
+    @property
+    def prompts(self) -> list[PracticePrompt]:
+        """Help and a Not sure option for the engineer question and for a depends answer."""
+        texts: list[str] = []
+        for text in self.questions:
+            if text and text not in texts:
+                texts.append(text)
+        if self.required == 'depends':
+            sentence = self.answer
+            if sentence and sentence not in texts:
+                texts.append(sentence)
+        return [prompt_for(text) for text in texts]
 
 
 # Building area, never gross area summed across floors.

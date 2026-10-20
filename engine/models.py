@@ -164,7 +164,7 @@ class Case(BaseModel):
     @computed_field
     @property
     def route_notice(self) -> str | None:
-        """Manufacturer or province-wide scope: this tool prepares a site variance. None otherwise."""
+        """Shown as soon as the role is a manufacturer, or the scope is province-wide. None otherwise."""
         from .route_notice import route_notice
         return route_notice(self)
 

@@ -9,8 +9,11 @@ from engine.export.forms import resolve_form
 from engine.identify.answers import apply_answers
 from engine.identify.questions import generate_questions, question_matches
 from engine.models import Case, Fact, Source
-from engine.professional import ProfessionalFacts, professional_involvement
-from engine.route_notice import ASK_WHICH_ROUTE, CCMC_PAS_URL, CCMC_URL, CALGARY_PRODUCT_URL
+from engine.professional import (
+    DEFAULT_HELP, NOT_SURE_OPTION, PART4_HELP, ProfessionalFacts, professional_involvement,
+)
+from engine.route_notice import CCMC_SENTENCE, IB_2026_10_01_URL, SCC_FORM_URL
+from engine.section_d_issues import render_practice
 from engine.store import CaseStore
 from engine.tests.test_professional import ordinary_house
 
@@ -35,11 +38,14 @@ def test_route_notice_for_a_manufacturer_or_a_province_wide_scope(tmp_path):
         'field': 'applicant.role', 'value': 'manufacturer', 'kind': 'pointed',
         'source': {'type': 'user_text', 'ref': 'role', 'quote': 'manufacturer'}})
     notice = posted.json()['route_notice']
-    assert 'Province-wide product acceptance is a different route from a single-site variance.' in notice
+    assert notice.startswith('A variance covers one site.')
     assert 'This tool prepares a site variance application.' in notice
-    assert CCMC_URL in notice and CCMC_PAS_URL in notice and CALGARY_PRODUCT_URL in notice
-    assert '2.2.1.2' in notice and 'A-2.2.1.2' in notice
-    assert ASK_WHICH_ROUTE in notice
+    assert IB_2026_10_01_URL in notice and 'specific location' in notice
+    assert 'jurisdictional alternative solutions' in notice
+    assert 'Section B checkbox' in notice and SCC_FORM_URL in notice
+    assert CCMC_SENTENCE in notice and 'Canadian Construction Materials Centre' in notice
+    assert 'PAS-001' not in notice and 'calgary.ca' not in notice and '2.2.1.2' not in notice
+    assert 'ask the Safety Codes Officer' not in notice
     form = resolve_form()
     assert form.jurisdiction == 'alberta' and form.form_id == 'scc-variance'
 
@@ -69,6 +75,19 @@ def test_engineer_question_names_the_deciding_facts_and_not_eight_cites():
     assert missing.questions[0] == (
         'Do we need an engineer? The deciding fact is whether any design is carried out under Part 4.')
     assert not _CITE.search(missing.questions[0])
+    assert missing.prompts[0].text == missing.questions[0]
+    assert missing.prompts[0].help == PART4_HELP
+    assert missing.prompts[0].not_sure == NOT_SURE_OPTION
+    assert missing.prompts[-1].text == missing.answer
+    assert missing.prompts[-1].help == DEFAULT_HELP
+    assert 'depends. depends' not in missing.prompts[-1].help
+    shown = render_practice(missing, Codes())
+    assert shown.prompts[0].help == PART4_HELP
+    assert shown.prompts[0].not_sure == NOT_SURE_OPTION
+    empty = screen.prompts
+    assert empty[0].text == question and empty[0].help == DEFAULT_HELP
+    assert empty[0].not_sure == NOT_SURE_OPTION
+    assert empty[-1].text == screen.answer and 'depends. depends' not in empty[-1].help
 
 
 def test_province_wide_and_multiple_sites_set_the_jurisdiction_wide_field():

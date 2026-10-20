@@ -10,7 +10,7 @@ from engine.identify.questions import generate_questions
 from engine.identify.storeys import parse_storeys
 from engine.identify.title import short_title, title_should_replace
 from engine.models import Fact, Source
-from engine.professional import ProfessionalReason, ProfessionalResult, professional_involvement
+from engine.professional import NOT_SURE_OPTION, ProfessionalReason, ProfessionalResult, professional_involvement
 from engine.section_d_issues import render_practice
 from engine.store import CaseStore
 from engine.tests.test_professional import ordinary_house
@@ -62,6 +62,10 @@ def test_a_duplicated_depends_token_is_not_the_answer():
         questions=['Which fact is still open?'], needs=[])
     assert screen.answer == 'unknown: needs a deciding fact'
     assert 'depends' not in screen.answer.casefold()
+    assert screen.prompts[0].text == 'Which fact is still open?'
+    assert screen.prompts[-1].text == screen.answer
+    assert all(prompt.not_sure == NOT_SURE_OPTION for prompt in screen.prompts)
+    assert all('depends. depends' not in prompt.help for prompt in screen.prompts)
 
 
 def test_short_title_is_type_place_and_provision():

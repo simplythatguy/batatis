@@ -786,7 +786,7 @@
               "type": "null"
             }
           ],
-          "description": "Manufacturer or province-wide scope: this tool prepares a site variance. None otherwise.",
+          "description": "Shown as soon as the role is a manufacturer, or the scope is province-wide. None otherwise.",
           "readOnly": true,
           "title": "Route Notice"
         },

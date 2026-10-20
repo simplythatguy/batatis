@@ -1,8 +1,17 @@
-"""Tell a manufacturer, or a province-wide request, which application this tool prepares.
+"""Tell a manufacturer, as soon as the role is known, which application this tool prepares.
 
-The notice is informational. It does not switch the variance form. Every route named
-here is one the repo's research already documents, and each public page is a link
-already recorded there. A route the research does not name is not invented.
+The notice is informational. It does not switch the variance form. A sentence stays
+only when codedb or IB-2026-10-01, as quoted in this repo, supports it.
+
+- One site, and a variance that relies on a jurisdictional alternative solution:
+  IB-2026-10-01, quoted in docs/implementation-plan.md. "All variances must be
+  registered individually, for a specific location, including those relying on
+  jurisdictional alternative solutions."
+- Section B checkbox: the revised form that bulletin requires. docs/implementation-plan.md
+  records the field as "has been submitted to the Safety Codes Council for review
+  for jurisdictional use." The form link is the one that section cites.
+- CCMC: codedb NBC(AE) Division A Sentence 1.2.2.1.(2). The database has no public
+  URL for that sentence, so the notice cites the sentence id and does not add one.
 """
 from __future__ import annotations
 
@@ -10,29 +19,14 @@ import re
 
 from .models import Case
 
-# evals/demo-cases/sources.md W12. Product evaluation, not a site variance.
-CCMC_URL = (
-    'https://nrc.canada.ca/en/certifications-evaluations-standards/'
-    'canadian-construction-materials-centre'
+# docs/implementation-plan.md, the IB-2026-10-01 quotation and the form it requires.
+IB_2026_10_01_URL = (
+    'https://ebs.safetycodes.ab.ca/documents/webdocs/SR/'
+    'IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf'
 )
-# evals/demo-cases/sources.md W23, and docs/implementation-plan.md. A CCMC assessment
-# is not a mandatory requirement.
-CCMC_PAS_URL = (
-    'https://nrc.canada.ca/en/certifications-evaluations-standards/'
-    'canadian-construction-materials-centre/ccmc-publications/document.html?id=PAS-001&type=policy'
-)
-# evals/demo-cases/sources.md W11. A new product's alternative solution is submitted
-# with the building permit and is site- and project-specific.
-CALGARY_PRODUCT_URL = (
-    'https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/'
-    'b23-014-new-products-materials-and-systems-in-building-construction.pdf'
-)
-# research/facts/process-and-admin.md. Div C Article 2.2.1.2 and Note A-2.2.1.2.
-# The code has no separate public URL in the repo; the citation is the documented source.
-PROVINCIAL_ROUTE = (
-    'NBC(AE) 2023 Division C Article 2.2.1.2 and Note A-2.2.1.2'
-)
-ASK_WHICH_ROUTE = 'ask the Safety Codes Officer or the province which route applies'
+SCC_FORM_URL = 'https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf'
+# codedb provisions, doc NBC-AE, division A, id 1.2.2.1.(2).
+CCMC_SENTENCE = '1.2.2.1.(2)'
 
 _ROLE_FIELDS = ('role', 'applicant.role', 'applicant_type')
 _SCOPE_FIELDS = ('scope', 'jurisdiction_wide')
@@ -57,20 +51,17 @@ def is_province_wide(case: Case) -> bool:
 
 
 def route_notice(case: Case) -> str | None:
-    """Plain notice, or None when this case is a single-site application by someone else."""
+    """Plain notice as soon as the role is a manufacturer, or the scope is province-wide."""
     if not is_manufacturer(case) and not is_province_wide(case):
         return None
     return (
-        'Province-wide product acceptance is a different route from a single-site variance. '
-        'This tool prepares a site variance application. '
-        f'A CCMC evaluation is a product-acceptance route, not this site variance ({CCMC_URL}). '
-        'Division A Sentence 1.2.2.1.(2) lets an evaluation report from the Canadian Construction '
-        'Materials Centre be used in determining compliance. A CCMC assessment is not a mandatory '
-        f'requirement ({CCMC_PAS_URL}). '
-        f'A province-wide variance is a written request to the Provincial Building Administrator under '
-        f'{PROVINCIAL_ROUTE}: the request has to show a province-wide issue, and an issued variance '
-        'applies throughout Alberta. '
-        'Calgary describes a new product\'s alternative solution as site- and project-specific, '
-        f'submitted with the building permit ({CALGARY_PRODUCT_URL}). '
-        f'For a route this research does not name, {ASK_WHICH_ROUTE}.'
+        'A variance covers one site. This tool prepares a site variance application. '
+        'IB-2026-10-01 says all variances must be registered individually, for a specific location, '
+        'including those relying on jurisdictional alternative solutions '
+        f'({IB_2026_10_01_URL}). '
+        'The revised variance form that bulletin requires has a Section B checkbox for whether '
+        'the proposal has been submitted to the Safety Codes Council for review for jurisdictional use '
+        f'({SCC_FORM_URL}). '
+        f'Division A Sentence {CCMC_SENTENCE} lets an evaluation report from the Canadian Construction '
+        'Materials Centre be used in determining compliance.'
     )
