@@ -15,7 +15,7 @@ from typing import Literal
 from pydantic import BaseModel, Field, model_validator
 
 FactKind = Literal['exact', 'pointed', 'computed', 'proposed']
-FactStatus = Literal['confirmed', 'unconfirmed']
+FactStatus = Literal['confirmed', 'unconfirmed', 'open', 'unknown']
 SourceType = Literal['code', 'file', 'user_text', 'drawing', 'user_click']
 AttributionStatus = Literal['direct', 'inherited from parent', 'no row in the attribution table']
 
@@ -94,6 +94,13 @@ class IntentBlock(BaseModel):
     pdf_page: int
 
 
+class Explainer(BaseModel):
+    """Short note on a Section C row. A quote is copied from codedb; the note never finds compliance."""
+    text: str
+    quote: str
+    source: Literal['ai_written', 'deterministic']
+
+
 class SectionCRow(BaseModel):
     provision_id: str
     citation: str
@@ -107,6 +114,7 @@ class SectionCRow(BaseModel):
     only_in_ae: list[str] = []
     related_root: str | None = None            # codedb heuristic (e.g. referenced sentence); never implied as a row
     related_root_method: str | None = None
+    explainer: Explainer | None = None         # deterministic template, or null when there is nothing to quote
 
 
 class EvidenceItem(BaseModel):

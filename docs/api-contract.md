@@ -11,6 +11,12 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `POST /cases` | `201` Case. Body is optional: `title`, `jurisdiction` (`id`, `name`, `authority`). |
 | `GET /cases/{case_id}` | Case, or `404` with detail `case not found`. |
 | `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. |
+| `POST /cases/{case_id}/identify` | Ranked article cards. Does not write `provisions`. See Identify. |
+| `GET /cases/{case_id}/identify` | The stored card payload from the last identify call, or `404` detail `identify result not found`. |
+| `GET /cases/{case_id}/identify/stream` | Query `prose`. Server-sent stage events. See Identify. |
+| `POST /cases/{case_id}/identify/{provision_id}/decision` | Body `{ "decision": "yes" \| "no" \| "not_sure" }`. Returns a `SectionCRow`. See Identify. |
+| `GET /cases/{case_id}/information-request` | Officer draft: `{ "case_id", "items" }`. Each `not_sure` decision is an item with `id`, `provision_id`, and `text`. |
+| `POST /cases/{case_id}/identify/confirm` | Body `{ "provisions": ["…"] }`. Writes `provisions` and Section C after a codedb check. |
 | `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`. |
 | `GET /code/search` | Query `q`, `division` (`A` `B` or `C`, default `B`), `limit` (1–100, default 20). Hits as returned: `id`, `division`, `level`, `article_title`, `title`, `text`, `citation`. |
 | `GET /code/{provision_id}` | Query `division` optional. The codedb provision record, or `404` detail `provision not found`. `400` when the id is invalid or the division is ambiguous. |
@@ -22,13 +28,61 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `GET /cases/{case_id}/process-fields` | Process-field list. Empty when the pathway is an acceptable solution. |
 | `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` when the blank form file is missing; that detail is the form error text. `500` on other export failures. |
 
-A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
+A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed`, `unconfirmed`, `open`, or `unknown`. A `proposed` fact cannot be `confirmed`.
 
 A fact's `source.type` is `code`, `file`, `user_text`, `drawing`, or `user_click`.
 
 Gap `severity` is `blocking` or `warning`.
 
-The fixed 404 detail strings are `case not found` and `provision not found`.
+The fixed 404 detail strings are `case not found` and `provision not found`. A case that has not been identified is `identify result not found`.
+
+## Identify
+
+`POST /cases/{id}/identify` is the primary call. Body:
+
+```json
+{"prose": "applicant description", "answers": [{"field": "building.storeys", "answer": "not sure"}]}
+```
+
+`GET /cases/{id}/identify/stream?prose=` and `POST` with `Accept: text/event-stream` emit stage events in order: `screen`, `rerank`, `verify`, `questions`, `done`. They are stage markers, not tokens.
+
+Identify does not write `provisions` and does not accept an article onto the case. A ranking hint is not a Yes.
+
+An answer of "not sure" or unknown on an intake question is stored as a fact with status `unknown` and is returned in `open_questions`. Identification continues. That intake answer is separate from the per-article decision below.
+
+`open_questions` entries have `field`, `text`, `why`, and `status` (`open` or `unknown`). The question id is stable for that field.
+
+Every identify response has `mode`: `live`, `cached_demo`, or `bm25_fallback`. `cached` is `true` only when `mode` is `cached_demo`. That replay is the stored demo cache. It does not accept an article. Any other description that cannot call the live ranker is `bm25_fallback` with `cached` `false`. When that path cannot read the code database, the response is still HTTP 200 with empty `articles` and no citation.
+
+`GET /cases/{id}/identify` returns that same body after POST or the stream. A case that has not been identified is HTTP 404 with detail `identify result not found`.
+
+When a live identify needs the code database and the file is missing, the response is HTTP 503 with the fixed detail `code database not found`. The body does not include a filesystem path.
+
+### Article card
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `provision` | string | Article id, such as `9.10.15.5.` |
+| `provision_id` | string or null | Sentence id when one codedb sentence contains the quote. Otherwise null. |
+| `title` | string or null | Article title from the identify result. |
+| `status` | string | `suggested`, `candidate`, or `unknown`. A ranking hint. Not an acceptance. |
+| `decision` | string or null | `yes`, `no`, or `not_sure` after the decision route. Null until the user decides. |
+| `open_question_id` | string or null | Stable id of the open question when `decision` is `not_sure`. Otherwise null. |
+| `why` | string or null | The match reason already on the article. |
+
+### Article decision
+
+`POST /cases/{id}/identify/{provision_id}/decision` with `{ "decision": "yes" | "no" | "not_sure" }` records the user's choice for one ranked article. `provision_id` may be the article id or the sentence id on that card.
+
+The response is a `SectionCRow`: the deterministic Section C lookup for that article. `explainer` on the row is a note on the quoted text. It is not a finding that the design meets the Code. `not_sure` and `no` still return the row when the lookup succeeds, and they do not add the article to `provisions`.
+
+The same route may instead return the stored identify body (`articles` and `section_c`). `open_question_id` is on the matching article. A bare `SectionCRow` has no question id; that id is then the matching item from `GET /cases/{id}/information-request`.
+
+`yes` writes one confirmed `user_click` citation and adds the article to `provisions`. `not_sure` removes that citation and opens one question. The question id is stable for the case and article (`open_question_id`). `GET /cases/{id}/gaps` includes it (`section` `C`, `severity` `warning`, `id` equal to that question id). `GET /cases/{id}/information-request` includes the same id, the article, and the question text in `items`. `no` removes the citation and the open question.
+
+The same decision posted again does not add a second citation or a second question.
+
+An unknown article is HTTP 404 detail `provision not found`. A case with no identify result is HTTP 404 detail `identify result not found`. Another `decision` value is HTTP 422.
 
 ### Section D plan item
 

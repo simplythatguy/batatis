@@ -3,7 +3,7 @@
  * Vite proxies `/api` to the engine at http://127.0.0.1:8000 (vite.config.ts). Set VITE_ENGINE_URL
  * to call another engine directly. `createEngine(base)` serves scripts and tests outside Vite.
  */
-import { publicDetail, takeSseEvents } from "../rules";
+import { failureKind, publicDetail, takeSseEvents } from "../rules";
 import type { Case, FactInput, NewCase, SectionCRow } from "./types.gen";
 
 /** A provision returned by GET /code/search (engine/codes.py `Codes.search`). */
@@ -131,8 +131,30 @@ export function createEngine(base: string) {
      * POST /cases/{id}/identify with Accept: text/event-stream, from PR #12.
      * 404 on today's dev. The caller keeps the description cards.
      */
+    /**
+     * POST /cases/{id}/identify. When that route is missing and there are no answers,
+     * GET /cases/{id}/identify/stream is tried once.
+     */
     identify: (caseId: string, prose: string, answers: { field?: string | null; question_id?: string | null; answer: string }[] = [], signal?: AbortSignal, onStage?: (stage: string) => void) =>
-      identifyCase(base, caseId, prose, answers, signal, onStage),
+      rankCase(base, caseId, prose, answers, signal, onStage),
+    /** GET /cases/{id}/identify. 404 detail `identify result not found` when nothing is stored. */
+    storedIdentify: (caseId: string, signal?: AbortSignal) =>
+      call<IdentifyResult>("GET", `/cases/${enc(caseId)}/identify`, undefined, signal),
+    /** GET /cases/{id}/identify/stream?prose= */
+    identifyStream: (caseId: string, prose: string, signal?: AbortSignal, onStage?: (stage: string) => void) =>
+      identifyStream(base, caseId, prose, signal, onStage),
+    /**
+     * POST /cases/{id}/identify/{provision}/decision.
+     * Body is yes, no, or not_sure. The body may be a SectionCRow or the stored identify payload.
+     */
+    decide: (caseId: string, provisionId: string, decision: "yes" | "no" | "not_sure", signal?: AbortSignal) =>
+      call<unknown>("POST", `/cases/${enc(caseId)}/identify/${enc(provisionId)}/decision`, { decision }, signal),
+    /** GET /cases/{id}/information-request. Items are not_sure decisions. */
+    informationRequest: (caseId: string, signal?: AbortSignal) =>
+      call<InformationRequest>("GET", `/cases/${enc(caseId)}/information-request`, undefined, signal),
+    /** POST /cases/{id}/identify/confirm. Writes provisions after a code-database check. */
+    confirmIdentify: (caseId: string, provisions: string[], signal?: AbortSignal) =>
+      call<Case>("POST", `/cases/${enc(caseId)}/identify/confirm`, { provisions }, signal),
   };
 }
 
@@ -203,19 +225,35 @@ export interface SectionDIssue {
 
 export interface IdentifyArticle {
   provision: string;
+  provision_id?: string | null;
   division?: string;
   title: string | null;
-  part: number;
-  quote: string | null;
-  reason: string | null;
-  committed?: boolean;
+  part?: number;
+  quote?: string | null;
+  snippet?: string | null;
+  reason?: string | null;
+  why?: string | null;
+  citation?: string | null;
+  /** Ranking hint. Not an acceptance. */
+  status?: "suggested" | "candidate" | "unknown" | string;
+  decision?: "yes" | "no" | "not_sure" | null;
+  open_question_id?: string | null;
 }
 
 export interface IdentifyResult {
+  mode?: "live" | "cached_demo" | "bm25_fallback" | string | null;
+  cached?: boolean;
+  source?: string | null;
   articles: IdentifyArticle[];
+  section_c?: SectionCRow[];
   questions?: string[];
-  open_questions?: { field?: string; text?: string; why?: string; status?: string }[];
+  open_questions?: { id?: string; field?: string; text?: string; why?: string; status?: string }[];
   persisted?: boolean;
+}
+
+export interface InformationRequest {
+  case_id: string;
+  items: { id: string; provision_id: string; text: string }[];
 }
 
 export interface UploadedFile {
@@ -328,30 +366,7 @@ async function uploadPdf(base: string, caseId: string, file: File, signal?: Abor
   return (await res.json()) as UploadedFile;
 }
 
-async function identifyCase(
-  base: string,
-  caseId: string,
-  prose: string,
-  answers: { field?: string | null; question_id?: string | null; answer: string }[],
-  signal?: AbortSignal,
-  onStage?: (stage: string) => void,
-): Promise<IdentifyResult> {
-  const timed = withTimeout(signal, 25000);
-  let res: Response;
-  try {
-    res = await fetch(`${base}/cases/${enc(caseId)}/identify`, {
-      method: "POST",
-      signal: timed.signal,
-      headers: { Accept: "text/event-stream", "Content-Type": "application/json" },
-      body: JSON.stringify({ prose, answers }),
-    });
-  } catch (e) {
-    if (signal?.aborted) throw e;
-    if (timed.timedOut()) throw new EngineError(0, "The engine did not answer in time.");
-    throw new EngineError(0, e instanceof Error ? e.message : String(e));
-  } finally {
-    timed.clear();
-  }
+async function readIdentifyResponse(res: Response, onStage?: (stage: string) => void): Promise<IdentifyResult> {
   if (!res.ok) throw new EngineError(res.status, await readError(res));
   const type = res.headers.get("content-type") ?? "";
   if (!type.includes("text/event-stream")) return (await res.json()) as IdentifyResult;
@@ -380,6 +395,78 @@ async function identifyCase(
   }
   if (!donePayload) throw new EngineError(0, "Article ranking did not finish.");
   return donePayload;
+}
+
+async function identifyCase(
+  base: string,
+  caseId: string,
+  prose: string,
+  answers: { field?: string | null; question_id?: string | null; answer: string }[],
+  signal?: AbortSignal,
+  onStage?: (stage: string) => void,
+): Promise<IdentifyResult> {
+  const timed = withTimeout(signal, 25000);
+  let res: Response;
+  try {
+    res = await fetch(`${base}/cases/${enc(caseId)}/identify`, {
+      method: "POST",
+      signal: timed.signal,
+      headers: { Accept: "text/event-stream", "Content-Type": "application/json" },
+      body: JSON.stringify({ prose, answers }),
+    });
+  } catch (e) {
+    if (signal?.aborted) throw e;
+    if (timed.timedOut()) throw new EngineError(0, "The engine did not answer in time.");
+    throw new EngineError(0, e instanceof Error ? e.message : String(e));
+  } finally {
+    timed.clear();
+  }
+  return readIdentifyResponse(res, onStage);
+}
+
+async function identifyStream(
+  base: string,
+  caseId: string,
+  prose: string,
+  signal?: AbortSignal,
+  onStage?: (stage: string) => void,
+): Promise<IdentifyResult> {
+  const timed = withTimeout(signal, 25000);
+  const q = new URLSearchParams({ prose });
+  let res: Response;
+  try {
+    res = await fetch(`${base}/cases/${enc(caseId)}/identify/stream?${q}`, {
+      method: "GET",
+      signal: timed.signal,
+      headers: { Accept: "text/event-stream" },
+    });
+  } catch (e) {
+    if (signal?.aborted) throw e;
+    if (timed.timedOut()) throw new EngineError(0, "The engine did not answer in time.");
+    throw new EngineError(0, e instanceof Error ? e.message : String(e));
+  } finally {
+    timed.clear();
+  }
+  return readIdentifyResponse(res, onStage);
+}
+
+async function rankCase(
+  base: string,
+  caseId: string,
+  prose: string,
+  answers: { field?: string | null; question_id?: string | null; answer: string }[],
+  signal?: AbortSignal,
+  onStage?: (stage: string) => void,
+): Promise<IdentifyResult> {
+  try {
+    return await identifyCase(base, caseId, prose, answers, signal, onStage);
+  } catch (e) {
+    if (signal?.aborted) throw e;
+    if (e instanceof EngineError && failureKind(e.status, e.detail) === "missing-route" && answers.length === 0) {
+      return identifyStream(base, caseId, prose, signal, onStage);
+    }
+    throw e;
+  }
 }
 
 export function failureText(e: unknown): string {

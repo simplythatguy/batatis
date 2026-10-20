@@ -46,6 +46,7 @@ export function failureKind(status: number, detail: string): FailureKind {
   if (status === 0) return "unreachable";
   if (status === 404 && /case not found/i.test(detail)) return "stale-case";
   if (status === 404 && /provision not found/i.test(detail)) return "other";
+  if (status === 404 && /identify result not found/i.test(detail)) return "other";
   if (status === 404) return "missing-route";
   if (/code database not found/i.test(detail)) return "codedb";
   return "other";

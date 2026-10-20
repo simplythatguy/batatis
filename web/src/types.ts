@@ -40,6 +40,10 @@ export interface Question {
   /** The fact field an answer fills. */
   field: string;
   answer?: string;
+  /** Set when article ranking or an article decision created the question. */
+  kind?: "intake" | "article";
+  /** Code-check card, kept when the id is replaced by the engine's question id. */
+  cardId?: string;
 }
 
 /** A verbatim span copied from the code database, with its built citation. */

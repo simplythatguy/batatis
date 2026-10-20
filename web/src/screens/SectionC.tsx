@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { engine, EngineError, type CodeHit } from "../api/client";
-import { useProvisionText, useSectionC, type SectionCSource } from "../api/sectionC";
+import { toViewRow, useProvisionText, useSectionC, type SectionCSource } from "../api/sectionC";
 import { CODE_EDITION } from "../config";
+import { applyIdentifyPlan, CONFIRM_UNAVAILABLE, DECISION_UNAVAILABLE, planIdentify, readDecisionBody } from "../identify";
 import { failureKind, sectionCQuoteLabel } from "../rules";
 import { DemoFallback, GapStrip, PanelHeader, StatusPill } from "../components";
 import { CODE_TERMS } from "../fixture";
@@ -110,26 +111,11 @@ function ProvisionSearch() {
       if (engineId) {
         try {
           const ranked = await engine.identify(engineId, prose, [], ctl.signal);
-          const articles = (ranked.articles ?? []).filter((a) => /^\d/.test(a.provision));
           if (cancelled) return;
-          if (articles.length) {
-            dispatch({
-              type: "addIdentified",
-              articles: articles.slice(0, 5).map((a) => ({
-                provision: a.provision,
-                title: a.title,
-                part: a.part || Number(String(a.provision).split(".")[0]) || 0,
-                quote: a.quote,
-                reason: a.reason,
-              })),
-            });
-            const returned = (ranked.open_questions ?? [])
-              .filter((q) => q.field && q.text)
-              .map((q) => ({ field: q.field ?? "", text: q.text ?? "", why: q.why }));
-            if (returned.length || ranked.open_questions) {
-              dispatch({ type: "noteIdentifyQuestions", questions: returned });
-            }
-            setNote("Provisions were suggested from your description. Choose Yes before they count. Nothing is accepted until you do.");
+          const plan = planIdentify(ranked, 5);
+          if (plan.articles.length) {
+            applyIdentifyPlan(dispatch, plan);
+            setNote(plan.note);
             return;
           }
         } catch (e) {
@@ -223,6 +209,7 @@ export function SectionC() {
   const { c, gaps, dispatch, engineId, saveDraft } = useCase();
   // Confirmed departures and the ones still awaiting an answer; a "no" drops the provision.
   const [attempt, setAttempt] = useState(0);
+  const [confirmNote, setConfirmNote] = useState("");
   const wanted = useMemo(
     () =>
       c.candidates
@@ -244,6 +231,23 @@ export function SectionC() {
       ? selCand.quote
       : null;
   const open = unresolvedCandidates(c);
+  const yesKey = c.candidates
+    .filter((a) => a.answer === "yes" && /^\d/.test(a.provision))
+    .map((a) => a.provision)
+    .join("|");
+
+  useEffect(() => {
+    if (!engineId || !yesKey) return;
+    const provisions = yesKey.split("|");
+    const ctl = new AbortController();
+    void engine.confirmIdentify(engineId, provisions, ctl.signal).catch((err: unknown) => {
+      if (ctl.signal.aborted) return;
+      if (err instanceof EngineError && failureKind(err.status, err.detail) === "missing-route") {
+        setConfirmNote(CONFIRM_UNAVAILABLE);
+      }
+    });
+    return () => ctl.abort();
+  }, [engineId, yesKey]);
 
   return (
     <>
@@ -258,6 +262,11 @@ export function SectionC() {
           )}
           {source === "live" && rows.length > 0 && <span className="meta">Rows from the engine's code database for this case</span>}
         </div>
+        {confirmNote && (
+          <p className="empty" role="status">
+            {confirmNote}
+          </p>
+        )}
         <p className="meta intro">
           Objectives and functions come from {CODE_EDITION}, by lookup after you confirm a departure that names an article. Rows are not invented when no article is known.
         </p>
@@ -411,7 +420,19 @@ export function SectionC() {
                   ];
                   void (async () => {
                     const id = engineId ?? (await saveDraft());
-                    if (id) await engine.sectionD(id, provisions).catch(() => undefined);
+                    if (!id) return;
+                    if (selCand.suggestion === "identify") {
+                      try {
+                        const body = await engine.decide(id, selCand.provision, "yes");
+                        const read = readDecisionBody(body, selCand.provision);
+                        if (read.row) dispatch({ type: "noteSectionC", rows: [toViewRow(read.row, selCand.id)] });
+                      } catch (err: unknown) {
+                        if (err instanceof EngineError && failureKind(err.status, err.detail) === "missing-route") {
+                          setConfirmNote(DECISION_UNAVAILABLE);
+                        }
+                      }
+                    }
+                    await engine.sectionD(id, provisions).catch(() => undefined);
                   })();
                 }}
               >

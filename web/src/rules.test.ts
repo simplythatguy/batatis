@@ -34,6 +34,8 @@ test("the engine-down state is only an unreachable engine", () => {
   assert.equal(failureKind(0, "failed to fetch"), "unreachable");
   assert.equal(failureKind(404, "Not Found"), "missing-route");
   assert.equal(failureKind(404, "case not found"), "stale-case");
+  assert.equal(failureKind(404, "provision not found"), "other");
+  assert.equal(failureKind(404, "identify result not found"), "other");
   assert.equal(publicDetail(404, "case not found"), "case not found");
   assert.equal(publicDetail(404, "provision not found"), "provision not found");
   assert.doesNotMatch(publicDetail(404, "Not Found"), /no route/i);

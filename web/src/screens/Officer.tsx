@@ -1,9 +1,19 @@
 import { useEffect, useState } from "react";
-import { EngineError, engine, type CompletenessReport } from "../api/client";
+import { EngineError, engine, type CompletenessReport, type InformationRequest } from "../api/client";
 import { MissingItems, RecordHeading } from "../completenessView";
 import { PanelHeader, RoleNote } from "../components";
 import { EXAMPLES } from "../examples";
-import { notSureQuestions, officerRequest, professionalFlagLines, rankingQuestions, roleNote, SCO_JUDGEMENT } from "../humanReview";
+import { INFORMATION_UNAVAILABLE } from "../identify";
+import {
+  notSureQuestions,
+  officerRequest,
+  professionalFlagLines,
+  rankingQuestions,
+  roleNote,
+  SCO_JUDGEMENT,
+  unseenRequestItems,
+  type InformationItem,
+} from "../humanReview";
 import { failureKind } from "../rules";
 import { useCase } from "../store";
 
@@ -39,6 +49,8 @@ export function Officer() {
   const [settled, setSettled] = useState(blank);
   const [report, setReport] = useState<ReportState>({ phase: "loading" });
   const [copyNote, setCopyNote] = useState("");
+  const [requestItems, setRequestItems] = useState<InformationItem[]>([]);
+  const [requestNote, setRequestNote] = useState("");
 
   useEffect(() => {
     if (blank) return;
@@ -46,6 +58,8 @@ export function Officer() {
     let cancelled = false;
     setSettled(false);
     setCopyNote("");
+    setRequestItems([]);
+    setRequestNote("");
     setReport({ phase: "loading" });
     void (async () => {
       const id = await saveDraft();
@@ -72,6 +86,26 @@ export function Officer() {
           });
         }
       }
+      if (!cancelled && id) {
+        try {
+          const info: InformationRequest = await engine.informationRequest(id, ctl.signal);
+          if (!cancelled) {
+            setRequestItems(info.items ?? []);
+            setRequestNote("");
+          }
+        } catch (e) {
+          if (!cancelled && !ctl.signal.aborted) {
+            setRequestItems([]);
+            if (e instanceof EngineError && failureKind(e.status, e.detail) === "missing-route") {
+              setRequestNote(INFORMATION_UNAVAILABLE);
+            } else if (e instanceof EngineError) {
+              setRequestNote(e.detail);
+            } else {
+              setRequestNote("The officer information request did not load.");
+            }
+          }
+        }
+      }
       if (!cancelled) setSettled(true);
     })();
     return () => {
@@ -88,6 +122,7 @@ export function Officer() {
   const exampleLabel = c.exampleId ? (EXAMPLES.find((ex) => ex.id === c.exampleId)?.label ?? "Loaded example") : undefined;
   const reportNote = report.phase === "loading" ? null : report.note;
   const pending = !blank && !settled;
+  const engineItems = unseenRequestItems(openNotSure, requestItems);
   const request = officerRequest({
     title: c.title,
     exampleLabel,
@@ -99,6 +134,7 @@ export function Officer() {
     record: completenessRecord,
     role: roleNote(c.applicantType),
     reportNote,
+    engineItems,
   });
   const sectionById = new Map(engineGaps.map((gap) => [gap.id, gap.section]));
 
@@ -189,7 +225,7 @@ export function Officer() {
                 <h2 id="not-sure-title" className="section-title">
                   Open Not sure
                 </h2>
-                {openNotSure.length === 0 ? (
+                {openNotSure.length === 0 && engineItems.length === 0 ? (
                   <p className="empty">No open Not sure answers.</p>
                 ) : (
                   <ul className="plain-list">
@@ -197,6 +233,12 @@ export function Officer() {
                       <li key={q.id}>
                         {q.text}
                         <div className="meta">{q.why}</div>
+                      </li>
+                    ))}
+                    {engineItems.map((item) => (
+                      <li key={item.id}>
+                        {item.text}
+                        <div className="meta">{item.provision_id}</div>
                       </li>
                     ))}
                   </ul>
@@ -243,6 +285,11 @@ export function Officer() {
             <h2 id="request-title" className="section-title">
               Information request
             </h2>
+            {!pending && requestNote && (
+              <p className="empty" role="status">
+                {requestNote}
+              </p>
+            )}
             {!pending && (
               <div className="field">
                 <label htmlFor="request-text">Request</label>

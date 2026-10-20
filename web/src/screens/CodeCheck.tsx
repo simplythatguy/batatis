@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { engine, EngineError, type CodeHit, type IdentifyArticle } from "../api/client";
+import { engine, EngineError, type CodeHit } from "../api/client";
+import { toViewRow } from "../api/sectionC";
 import { DemoFallback, DraftNote, GapStrip, Icon, PanelHeader, RoleNote, StatusPill, type Dot } from "../components";
 import { CODE_EDITION } from "../config";
+import { applyIdentifyPlan, DECISION_UNAVAILABLE, planIdentify, readDecisionBody, wireDecision } from "../identify";
 import { answeredYes, unresolvedCandidates } from "../model";
 import { exitCountWarning, failureKind } from "../rules";
 import { useCase } from "../store";
@@ -20,8 +22,17 @@ const STATUS: Record<string, { dot: Dot; label: string }> = {
   none: { dot: "blocking", label: "Needs your answer" },
 };
 
-function CandidateCard({ a, index, total }: { a: Candidate; index: number; total: number }) {
-  const { dispatch } = useCase();
+function CandidateCard({
+  a,
+  index,
+  total,
+  onAnswer,
+}: {
+  a: Candidate;
+  index: number;
+  total: number;
+  onAnswer: (candidate: Candidate, answer: CandidateAnswer) => void;
+}) {
   const s = STATUS[a.answer ?? "none"];
   return (
     <article className="card" id={`cand-${a.id}`} tabIndex={-1} aria-labelledby={`cand-${a.id}-topic`}>
@@ -57,7 +68,7 @@ function CandidateCard({ a, index, total }: { a: Candidate; index: number; total
             type="button"
             className="btn"
             aria-pressed={a.answer === o.value}
-            onClick={() => dispatch({ type: "answerCandidate", id: a.id, answer: o.value })}
+            onClick={() => onAnswer(a, o.value)}
           >
             {o.label}
           </button>
@@ -98,6 +109,7 @@ type Filter = "all" | "open" | "yes";
 export function CodeCheck() {
   const { c, gaps, dispatch, saveDraft, engineId } = useCase();
   const [identifyNote, setIdentifyNote] = useState("");
+  const [decisionNote, setDecisionNote] = useState("");
   const [identifyDown, setIdentifyDown] = useState(false);
   const [identifyAttempt, setIdentifyAttempt] = useState(0);
   const [filter, setFilter] = useState<Filter>("all");
@@ -122,38 +134,25 @@ export function CodeCheck() {
     const ctl = new AbortController();
     setIdentifyDown(false);
     setIdentifyNote("Ranking articles from your description…");
-    engine
-      .identify(engineId, prose, [], ctl.signal, (stage) => {
-        if (stage !== "done" && stage !== "error") setIdentifyNote(`Ranking articles (${stage})…`);
-      })
-      .then((result) => {
-        const articles = (result.articles ?? []).filter((a): a is IdentifyArticle => Boolean(a?.provision));
-        if (articles.length) {
-          dispatch({
-            type: "addIdentified",
-            articles: articles.map((a) => ({
-              provision: a.provision,
-              title: a.title,
-              part: a.part || Number(String(a.provision).split(".")[0]) || 0,
-              quote: a.quote,
-              reason: a.reason,
-            })),
-          });
-        }
-        const returned = (result.open_questions ?? [])
-          .filter((q) => q.field && q.text)
-          .map((q) => ({ field: q.field ?? "", text: q.text ?? "", why: q.why }));
-        if (returned.length || result.open_questions) {
-          dispatch({ type: "noteIdentifyQuestions", questions: returned });
-        }
-        const questions = result.questions ?? [];
-        setIdentifyNote(
-          articles.length
-            ? `${articles.length} articles ranked. Choose Yes, No, or Not sure on each one. Nothing is accepted until you choose Yes.`
-            : questions[0] ?? "Article ranking returned no articles for this description.",
-        );
-      })
-      .catch((err: unknown) => {
+    void (async () => {
+      try {
+        const stored = await engine.storedIdentify(engineId, ctl.signal);
+        if (ctl.signal.aborted) return;
+        const storedPlan = planIdentify(stored);
+        applyIdentifyPlan(dispatch, storedPlan);
+        if (storedPlan.articles.length) setIdentifyNote(storedPlan.note);
+      } catch {
+        if (ctl.signal.aborted) return;
+      }
+      try {
+        const result = await engine.identify(engineId, prose, [], ctl.signal, (stage) => {
+          if (stage !== "done" && stage !== "error") setIdentifyNote(`Ranking articles (${stage})…`);
+        });
+        if (ctl.signal.aborted) return;
+        const plan = planIdentify(result);
+        applyIdentifyPlan(dispatch, plan);
+        setIdentifyNote(plan.note);
+      } catch (err: unknown) {
         if (ctl.signal.aborted) return;
         if (err instanceof EngineError && failureKind(err.status, err.detail) === "missing-route") {
           setIdentifyNote("Article ranking isn't available on this engine yet. These cards are questions from your description.");
@@ -172,9 +171,43 @@ export function CodeCheck() {
         }
         setIdentifyNote(err instanceof EngineError ? err.detail : "Article ranking did not finish.");
         setIdentifyDown(false);
-      });
+      }
+    })();
     return () => ctl.abort();
   }, [engineId, c.description, dispatch, identifyAttempt]);
+
+  function onAnswer(candidate: Candidate, answer: CandidateAnswer) {
+    dispatch({ type: "answerCandidate", id: candidate.id, answer });
+    if (!engineId || candidate.suggestion !== "identify" || !/^\d/.test(candidate.provision)) return;
+    const provision = candidate.provision;
+    void engine
+      .decide(engineId, provision, wireDecision(answer))
+      .then(async (body) => {
+        const read = readDecisionBody(body, provision);
+        if (read.row) dispatch({ type: "noteSectionC", rows: [toViewRow(read.row, candidate.id)] });
+        let questionId = read.openQuestionId;
+        if (answer === "not-sure" && !questionId) {
+          try {
+            const request = await engine.informationRequest(engineId);
+            questionId = request.items.find((item) => item.provision_id === provision || provision.startsWith(item.provision_id))?.id ?? null;
+          } catch {
+            questionId = null;
+          }
+        }
+        if (answer === "not-sure" && questionId) {
+          dispatch({ type: "bindOpenQuestion", candidateId: candidate.id, questionId });
+        }
+      })
+      .catch((err: unknown) => {
+        if (err instanceof EngineError && failureKind(err.status, err.detail) === "missing-route") {
+          setDecisionNote(DECISION_UNAVAILABLE);
+          return;
+        }
+        if (err instanceof EngineError && failureKind(err.status, err.detail) !== "unreachable") {
+          setDecisionNote(err.detail);
+        }
+      });
+  }
   return (
     <>
       <PanelHeader title="Code check" meta={CODE_EDITION} />
@@ -191,6 +224,11 @@ export function CodeCheck() {
           {identifyNote && (
             <p className="field-note" role="status">
               {identifyNote}
+            </p>
+          )}
+          {decisionNote && (
+            <p className="empty" role="status">
+              {decisionNote}
             </p>
           )}
           {identifyDown && <DemoFallback reason={identifyNote} onRetry={() => setIdentifyAttempt((n) => n + 1)} />}
@@ -296,7 +334,9 @@ export function CodeCheck() {
             </ul>
           )}
           {shown.length ? (
-            shown.map((a) => <CandidateCard key={a.id} a={a} index={c.candidates.indexOf(a)} total={c.candidates.length} />)
+            shown.map((a) => (
+              <CandidateCard key={a.id} a={a} index={c.candidates.indexOf(a)} total={c.candidates.length} onAnswer={onAnswer} />
+            ))
           ) : (
             <p className="empty">
               {filter === "yes"

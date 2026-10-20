@@ -55,12 +55,27 @@ export function roleNote(type: ApplicantType): { engineer: string; officer: stri
 
 /** Not sure on an article or on a professional-scope question. Intake starters are not included. */
 export function notSureQuestions(questions: Question[]): Question[] {
-  return questions.filter((q) => !q.answer && (q.id.startsWith("q-from-") || q.id.startsWith("q-scope-")));
+  return questions.filter(
+    (q) => !q.answer && (q.kind === "article" || q.id.startsWith("q-from-") || q.id.startsWith("q-scope-") || q.id.startsWith("oq_")),
+  );
 }
 
 /** Open questions returned by article ranking, once that route exists. */
 export function rankingQuestions(questions: Question[]): Question[] {
-  return questions.filter((q) => !q.answer && q.id.startsWith("q-identify-"));
+  return questions.filter((q) => !q.answer && (q.kind === "intake" || q.id.startsWith("q-identify-")));
+}
+
+export interface InformationItem {
+  id: string;
+  provision_id: string;
+  text: string;
+}
+
+/** Engine items that are not already in the local Not sure list. */
+export function unseenRequestItems(notSure: { id: string; text: string }[], items: InformationItem[]): InformationItem[] {
+  const ids = new Set(notSure.map((q) => q.id));
+  const texts = new Set(notSure.map((q) => q.text.trim()));
+  return items.filter((item) => item.id.trim() && item.text.trim() && !ids.has(item.id) && !texts.has(item.text.trim()));
 }
 
 export function professionalFlagLines(c: Pick<Case, "practiceOfEngineering" | "facts">): string[] {
@@ -145,6 +160,7 @@ export function officerRequest(input: {
   record: CompletenessRecord | null;
   role: { engineer: string; officer: string };
   reportNote: string | null;
+  engineItems?: InformationItem[];
 }): string {
   const lines = [
     ...(input.exampleLabel ? [`EXAMPLE — ${input.exampleLabel}`, "For practice. Not for submission."] : []),
@@ -165,11 +181,16 @@ export function officerRequest(input: {
       lines.push(`- ${file.name}${pages} (${state})`);
     }
   }
+  const engineItems = unseenRequestItems(input.notSure, input.engineItems ?? []);
   lines.push("", "Open questions (Not sure)");
-  if (!input.notSure.length) lines.push("No open Not sure answers.");
+  if (!input.notSure.length && !engineItems.length) lines.push("No open Not sure answers.");
   for (const q of input.notSure) {
     lines.push(`- ${q.text}`);
     if (q.why) lines.push(`  ${q.why}`);
+  }
+  for (const item of engineItems) {
+    lines.push(`- ${item.text}`);
+    lines.push(`  ${item.provision_id}`);
   }
   if (input.ranking.length) {
     lines.push("", "Open questions from article ranking");

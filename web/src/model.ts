@@ -1,6 +1,6 @@
 import { applyDescription } from "./intake";
 import { professionalConfirmed, type ScopeField } from "./professional";
-import type { Candidate, CandidateAnswer, Case, Fact, Gap, ProcessFieldId } from "./types";
+import type { Candidate, CandidateAnswer, Case, Fact, Gap, ProcessFieldId, SectionCRow } from "./types";
 
 /** Section A and B fields. Values live only in `case.facts`; nothing here holds a default. */
 export interface DetailField {
@@ -178,16 +178,20 @@ export function getGaps(c: Case): Gap[] {
       });
     }
   }
-  for (const q of c.questions) {
+    for (const q of c.questions) {
     if (!q.answer) {
-      const routed = q.id.startsWith("q-from-") || q.id.startsWith("q-scope-") || q.id.startsWith("q-identify-");
+      const article = q.kind === "article" || q.id.startsWith("q-from-") || q.id.startsWith("oq_") || Boolean(q.cardId);
+      const intake = q.kind === "intake" || q.id.startsWith("q-identify-");
+      const scope = q.id.startsWith("q-scope-");
+      const routed = article || intake || scope;
+      const card = q.cardId || (q.id.startsWith("q-from-") ? q.id.slice("q-from-".length) : "");
       gaps.push({
         id: `question-${q.id}`,
         severity: "warning",
         label: routed ? `Open question: ${q.text}` : `Open question: ${factLabel(q.field).toLowerCase()}`,
-        href: q.id.startsWith("q-from-")
-          ? `#/code-check?focus=cand-${q.id.slice("q-from-".length)}`
-          : q.id.startsWith("q-scope-")
+        href: card
+          ? `#/code-check?focus=cand-${card}`
+          : scope
             ? "#/application?tab=D"
             : `#/describe?focus=q-${q.id}`,
       });
@@ -231,7 +235,9 @@ export type Action =
       type: "addIdentified";
       articles: { provision: string; title: string | null; part: number; quote: string | null; reason: string | null }[];
     }
-  | { type: "noteIdentifyQuestions"; questions: { field: string; text: string; why?: string | null }[] }
+  | { type: "noteIdentifyQuestions"; questions: { id?: string; field: string; text: string; why?: string | null }[] }
+  | { type: "bindOpenQuestion"; candidateId: string; questionId: string }
+  | { type: "noteSectionC"; rows: SectionCRow[] }
   | { type: "saveEvidence"; itemId: string; document: string; responsible: string; date: string }
   | { type: "setProfessionalFact"; field: string; value: string | number | boolean }
   | { type: "answerScope"; field: ScopeField; answer: "yes" | "no" | "not-sure" }
@@ -308,12 +314,14 @@ export function reducer(c: Case, a: Action): Case {
         x.id === a.id ? { ...x, answer: a.answer, benchmark: a.answer === "yes" } : x,
       );
       const qid = `q-from-${a.id}`;
-      let questions = c.questions.filter((q) => q.id !== qid);
+      let questions = c.questions.filter((q) => q.id !== qid && q.cardId !== a.id);
       if (a.answer === "not-sure" && cand) {
         questions = [
           ...questions,
           {
             id: qid,
+            kind: "article",
+            cardId: a.id,
             text: cand.clarifyingQuestion,
             why: `You answered Not sure on “${cand.topic}”. This stays an open question for the officer.`,
             field: "project.description",
@@ -373,16 +381,33 @@ export function reducer(c: Case, a: Action): Case {
       return { ...c, candidates: [...rest, ...made] };
     }
     case "noteIdentifyQuestions": {
-      const rest = c.questions.filter((q) => !q.id.startsWith("q-identify-"));
+      const rest = c.questions.filter((q) => q.kind !== "intake" && !q.id.startsWith("q-identify-"));
       const made = a.questions
         .filter((q) => q.field.trim() && q.text.trim())
         .map((q) => ({
-          id: `q-identify-${q.field}`,
+          id: q.id?.trim() || `q-identify-${q.field.trim()}`,
+          kind: "intake" as const,
           text: q.text.trim(),
           why: q.why?.trim() || "Article ranking left this open. It does not assume a value.",
           field: q.field.trim(),
         }));
       return { ...c, questions: [...rest, ...made] };
+    }
+    case "bindOpenQuestion": {
+      const local = `q-from-${a.candidateId}`;
+      if (!a.questionId.trim() || a.questionId === local) return c;
+      return {
+        ...c,
+        questions: c.questions.map((q) =>
+          q.id === local || q.cardId === a.candidateId ? { ...q, id: a.questionId, kind: "article" as const, cardId: a.candidateId } : q,
+        ),
+      };
+    }
+    case "noteSectionC": {
+      const rest = c.sectionC.filter(
+        (row) => !a.rows.some((next) => next.candidateId === row.candidateId && next.provision === row.provision),
+      );
+      return { ...c, sectionC: [...rest, ...a.rows] };
     }
     case "saveEvidence": {
       const ref = a.document.trim();
