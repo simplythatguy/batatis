@@ -63,7 +63,11 @@ html, body { margin: 0; height: 100%; background: var(--color-stage); font-famil
 /* ===== Body layouts ===== */
 .slide-body { flex: 1 1 auto; min-height: 0; display: grid; gap: 36px; }
 .layout-text .slide-body { grid-template-columns: 1fr; }
-.layout-shot .slide-body { grid-template-columns: 1.05fr 1fr; }
+.layout-shot .slide-body { grid-template-columns: 1fr 1.1fr; }
+.hero { display: flex; flex-direction: column; margin: 4px 0 26px; }
+.hero-num { font-size: 84px; line-height: 1; font-weight: 800; color: var(--color-accent); letter-spacing: -.01em; }
+.hero-label { font-size: 22px; color: var(--color-muted); margin-top: 8px; }
+.has-hero .bullets, .layout-shot .bullets { --bullet-size: 28px; }
 .layout-shot.dense .slide-body { grid-template-columns: 1.55fr 1fr; gap: 28px; }
 .bullets-wrap { min-height: 0; overflow: hidden; }
 .bullets { margin: 0; padding: 0; list-style: none; font-size: var(--bullet-fs, var(--bullet-size)); line-height: 1.32; }
@@ -75,24 +79,25 @@ code { font-family: var(--font-mono); font-size: .92em; }
 
 /* ===== Screenshot slots ===== */
 .shots { min-height: 0; display: flex; flex-direction: column; gap: 16px; }
-.shot { position: relative; margin: 0; flex: 1 1 0; min-height: 0; border-radius: var(--radius); overflow: hidden; }
+.shot { position: relative; margin: 0; flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.shot-frame { position: relative; flex: 1 1 auto; min-height: 0; border-radius: var(--radius); overflow: hidden; }
 .shot-img { display: none; width: 100%; height: 100%; object-fit: contain; background: var(--color-placeholder-bg); }
 .shot.has-img .shot-img { display: block; }
 .shot.has-img .shot-placeholder { display: none; }
 .shot-placeholder {
-  height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
-  gap: 10px; padding: 22px 28px;
+  position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+  gap: 12px; padding: 16px; overflow: hidden;
   background: var(--color-placeholder-bg);
   background-image: repeating-linear-gradient(45deg, transparent 0 14px, rgba(0,0,0,.025) 14px 28px);
   border: 2px dashed var(--color-placeholder-border); border-radius: var(--radius);
   color: var(--color-muted);
 }
-.shot-icon { width: 54px; height: 40px; border: 3px solid var(--color-placeholder-border); border-radius: 6px; position: relative; }
+.shot-icon { flex: 0 0 auto; width: 54px; height: 40px; border: 3px solid var(--color-placeholder-border); border-radius: 6px; position: relative; }
+.shots-2 .shot-icon { width: 42px; height: 31px; }
 .shot-icon::after { content: ""; position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border: 3px solid var(--color-placeholder-border); border-radius: 50%; }
-.shot-label { font-size: 17px; line-height: 1.35; font-weight: 600; color: var(--color-text); max-width: 46ch; }
-.shots-2 .shot-label { font-size: 15px; }
-.shot-source { font-size: 14px; color: var(--color-accent); font-weight: 600; }
-.shot-id { font-family: var(--font-mono); font-size: 12px; }
+.shots-2 .shot-icon::after { width: 10px; height: 10px; margin: -5px 0 0 -5px; }
+.shot-pending { font-size: 18px; font-weight: 600; color: var(--color-muted); letter-spacing: .02em; }
+.shot-caption { flex: 0 0 auto; font-size: 16px; line-height: 1.3; color: var(--color-text); text-align: center; }
 .example-badge { position: absolute; top: 10px; right: 10px; font-size: 11px; font-weight: 700; letter-spacing: .1em; padding: 4px 8px; border-radius: 4px; color: var(--color-example); background: var(--color-example-bg); border: 1px solid currentColor; }
 .slide-badge { position: static; }
 
@@ -106,7 +111,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
 #notes-panel { position: fixed; left: 0; right: 0; bottom: 0; max-height: 38vh; overflow: auto; background: #111820; color: #e8edf2; padding: 18px 28px; font-size: 16px; line-height: 1.5; display: none; z-index: 10; }
 body.show-notes #notes-panel { display: block; }
 #notes-panel h3 { margin: 0 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: #8fd3cd; }
-#notes-panel p { margin: 0 0 12px; }
+#notes-panel p, #notes-panel ul { margin: 0 0 12px; }
 #notes-panel .timing { font-size: 13px; color: #9aa6b2; }
 #notes-panel a { color: #8fd3cd; }
 
@@ -131,21 +136,24 @@ body.show-notes #notes-panel { display: block; }
     <h2 class="slide-title">Alberta's variance paperwork keeps bouncing back</h2>
     <div class="slide-body">
       <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">1,713</span><span class="hero-label">building variances registered in Alberta in 2022 · SCC Annual Report 2023</span></div>
         <ul class="bullets">
-          <li>1,553 / 637 / 1,698 / 1,713 building variances in 2019–2022</li>
           <li>Edmonton: about 67% of 2023 variances (all disciplines)</li>
           <li>No published service standard for variance review</li>
         </ul>
       </div>
       
     </div>
-    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/Annual%20Report%202023.pdf">SCC Annual Report 2023</a>; <a href="https://edmontonunlimited.com/wp-content/uploads/2026/09/Building-Codes-Challenge-with-Appendix-.pdf">challenge scope</a></footer>
+    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/Annual%20Report%202023.pdf">SCC Annual Report 2023</a>; <a href="https://edmontonunlimited.com/wp-content/uploads/2026/09/Building-Codes-Challenge-with-Appendix-.pdf">challenge scope</a>; full list in speaker notes</footer>
     <aside class="notes" hidden>
       <h3>Narration</h3>
       <p class="narration">A variance request goes to a safety codes officer. Alberta registered seventeen thirteen building variances in twenty twenty-two.</p>
       <p class="timing"><strong>Time (150 wpm):</strong> 0:00–0:07  |  <strong>Spoken words:</strong> 18  |  <strong>At 150 wpm:</strong> 7.2 s  |  <strong>At 140 wpm:</strong> 7.7 s</p>
+      <h3>Slide detail</h3><ul><li>1,553 / 637 / 1,698 / 1,713 building variances in 2019–2022</li><li>Edmonton: about 67% of 2023 variances (all disciplines)</li><li>No published service standard for variance review</li></ul>
       <h3>Background</h3>
-      <p>A variance request goes to a safety codes officer of the reviewing authority; Batatis fills the Council's current form (Calgary uses its own form). Incomplete packages lead to repeated "more information" requests, which cost applicants and officers time. The 2023 count (837) was still partial when the Council published it, so we quote the full years.</p>
+      <p>A variance request goes to a safety codes officer of the reviewing authority; Batatis fills the Council's current form (Calgary's guide points applicants to its own attached Request for Specific Variance form). Incomplete packages lead to repeated "more information" requests, which cost applicants and officers time. The 2023 count (837) was still partial when the Council published it, so we quote the full years.</p>
+      <h3>Sources</h3>
+      <p><a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/Annual%20Report%202023.pdf">SCC Annual Report 2023</a>; <a href="https://edmontonunlimited.com/wp-content/uploads/2026/09/Building-Codes-Challenge-with-Appendix-.pdf">challenge scope</a></p>
     </aside>
   </section>
   <section class="slide layout-shot" id="s02" data-index="2">
@@ -156,33 +164,37 @@ body.show-notes #notes-panel { display: block; }
     <h2 class="slide-title">Describe your project in plain words<span class="rubric"> [Intake, 20]</span></h2>
     <div class="slide-body">
       <div class="bullets-wrap">
+        
         <ul class="bullets">
-          <li>Your description becomes facts, each tagged with where it came from <span class="status">[if merged: PR #16]</span></li>
-          <li>Designed so applicant and site details come only from you; upload isn't available yet</li>
-          <li>"Not sure" becomes an open question instead of a dead end (in review, PR #16)</li>
+          <li>Keeps your words; picks out a few facts</li>
+          <li>The rest become questions (in review)</li>
         </ul>
       </div>
       <div class="shots"><figure class="shot" id="shot-s02-describe" data-shot="shot-s02-describe">
-        <img class="shot-img" src="img/shot-s02-describe.png" alt="Screenshot: PR #16 Describe screen with pasted case C (homebuilder) text, authority set to Edmonton, Review gaps listing owner, mailing address and legal description as missing" onload="this.parentNode.classList.add('has-img')" onerror="this.remove()">
-        <div class="shot-placeholder" aria-hidden="true">
-          <div class="shot-icon"></div>
-          <div class="shot-label">Screenshot: PR #16 Describe screen with pasted case C (homebuilder) text, authority set to Edmonton, Review gaps listing owner, mailing address and legal description as missing</div>
-          <div class="shot-source">PR #16 screen (in review)</div>
-          <div class="shot-id">shot-s02-describe</div>
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s02-describe.png" alt="Describe screen with a pasted homebuilder description and the gaps listed" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
         </div>
-        <span class="example-badge">EXAMPLE DATA</span>
+        <figcaption class="shot-caption">Describe screen lists gaps · in review</figcaption>
       </figure></div>
     </div>
-    <footer class="sources"><span class="sources-label">Sources:</span> dev <code>engine/models.py</code>, <code>engine/completeness.py</code>; <a href="https://github.com/simplythatguy/batatis/pull/16">PR #16</a></footer>
+    <footer class="sources"><span class="sources-label">Sources:</span> in speaker notes</footer>
     <aside class="notes" hidden>
       <h3>Narration</h3>
       <p class="narration">In the app, in review, you pick your role and reviewing authority, then describe the project. Gaps become questions, and Not sure is saved as an open question, not a guess.</p>
       <p class="timing"><strong>Time (150 wpm):</strong> 0:08–0:20  |  <strong>Spoken words:</strong> 31  |  <strong>At 150 wpm:</strong> 12.4 s  |  <strong>At 140 wpm:</strong> 13.3 s</p>
+      <h3>Slide detail</h3><ul><li>Each fact carries a status and its source (engine on dev); reading facts out of your description is in progress (BAT-65, not built; PR #23, open, reads storeys, area and occupancy). On the in-review screens (PR #16 @27bec3e), only the storey count was read from a pasted description; the rest become questions</li><li>Designed so applicant and site details come only from you; upload isn't available yet</li><li>"Not sure" becomes an open question instead of a dead end (in review, PR #16)</li></ul>
       <h3>Background</h3>
       <p>Intake is a fifth of the score, so we start with it. Batatis is designed to build Sections A and B from the applicant's description; today the engine lists what's missing, and the end-to-end screen flow is in review in PR #16, not yet on dev. Anything it can't confirm, it is designed to ask about instead of filling in.</p>
+      <h3>Sources</h3>
+      <p>dev <code>engine/models.py</code>, <code>engine/completeness.py</code>; <a href="https://github.com/simplythatguy/batatis/pull/16">PR #16</a></p>
     </aside>
   </section>
-  <section class="slide layout-shot dense" id="s03" data-index="3">
+  <section class="slide layout-shot has-hero" id="s03" data-index="3">
     <header class="slide-head">
       <span class="brand">Batatis</span>
       <span class="slide-num">3 / 12</span>
@@ -190,33 +202,37 @@ body.show-notes #notes-panel { display: block; }
     <h2 class="slide-title">It asks before it guesses, and we test that<span class="rubric"> [Intake, 20]</span></h2>
     <div class="slide-body">
       <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">50/60</span><span class="hero-label">in-sample · model-checked</span></div>
         <ul class="bullets">
-          <li>Missing fields become plain questions, each tied to a form section (engine on dev; screen in review)</li>
-          <li>Engineer-needed flag (PR #8, on dev): rules_only 55/60 in-sample, 1 under-flag; shipped rules_plus_unknown 50/60 in-sample, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind); model-checked, not human-verified. (rules_only is the rules-only checker.)</li>
-          <li>Accuracy across all applicant types: still to be measured</li>
+          <li>27 unknowns sent to the applicant</li>
+          <li>Held-out: 7/8 blind, 4/8 after a fix</li>
         </ul>
       </div>
       <div class="shots"><figure class="shot" id="shot-s03-not-sure" data-shot="shot-s03-not-sure">
-        <img class="shot-img" src="img/shot-s03-not-sure.png" alt="Screenshot: PR #16 Code check screen with the manufacturer&#x27;s two “Your words” cards, both answered Not sure and logged as open questions" onload="this.parentNode.classList.add('has-img')" onerror="this.remove()">
-        <div class="shot-placeholder" aria-hidden="true">
-          <div class="shot-icon"></div>
-          <div class="shot-label">Screenshot: PR #16 Code check screen with the manufacturer's two “Your words” cards, both answered Not sure and logged as open questions</div>
-          <div class="shot-source">PR #16 screen (in review)</div>
-          <div class="shot-id">shot-s03-not-sure</div>
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s03-not-sure.png" alt="Code check cards answered Not sure and logged as open questions" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
         </div>
-        <span class="example-badge">EXAMPLE DATA</span>
+        <figcaption class="shot-caption">“Not sure” logged as questions · in review</figcaption>
       </figure></div>
     </div>
-    <footer class="sources"><span class="sources-label">Sources:</span> dev <code>engine/completeness.py</code>; <a href="https://github.com/simplythatguy/batatis/pull/8">PR #8</a></footer>
+    <footer class="sources"><span class="sources-label">Sources:</span> in speaker notes</footer>
     <aside class="notes" hidden>
       <h3>Narration</h3>
-      <p class="narration">Our engineer-needed check is now built into the engine. The shipped variant matched fifty of sixty cases it was tuned on, and sent twenty-seven unknowns to the applicant. On eight held-out cases, blind before a fix, the shipped variant got seven; after the fix, no longer blind, four.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 0:21–0:40  |  <strong>Spoken words:</strong> 48  |  <strong>At 150 wpm:</strong> 19.2 s  |  <strong>At 140 wpm:</strong> 20.6 s</p>
+      <p class="narration">Our engineer-needed check is now built into the engine. The shipped variant matched fifty of sixty in-sample cases, model-checked, and sent twenty-seven unknowns to the applicant. On eight held-out cases, blind before a fix, it got seven; after the fix, no longer blind, four.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 0:21–0:38  |  <strong>Spoken words:</strong> 44  |  <strong>At 150 wpm:</strong> 17.6 s  |  <strong>At 140 wpm:</strong> 18.9 s</p>
+      <h3>Slide detail</h3><ul><li>Missing fields become plain questions, each tied to a form section (engine on dev; screen in review)</li><li>Engineer-needed flag (PR #8, on dev): rules_only 55/60 in-sample, 1 under-flag; shipped rules_plus_unknown 50/60 in-sample, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind); model-checked, not human-verified. (rules_only is the rules-only checker.)</li><li>Accuracy across all applicant types: still to be measured</li></ul>
       <h3>Background</h3>
       <p>The completeness check on dev names each missing field and the question to ask. The engineer-needed flag has two variants on dev (PR #8). The shipped variant, rules_plus_unknown, scored 50 of 60 on the in-sample dev set with 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction) and 27 unknowns sent to the applicant, and 7 of 8 on a held-out set that was blind before a later fix, and 4 of 8 after that fix, which is no longer blind. The unshipped rules_only variant scored 55 of 60 in-sample. All answer keys are model-checked, not human-verified, so treat this as an early signal.</p>
+      <h3>Sources</h3>
+      <p>dev <code>engine/completeness.py</code>; <a href="https://github.com/simplythatguy/batatis/pull/8">PR #8</a></p>
     </aside>
   </section>
-  <section class="slide layout-shot shots-2" id="s04" data-index="4">
+  <section class="slide layout-shot has-hero shots-2" id="s04" data-index="4">
     <header class="slide-head">
       <span class="brand">Batatis</span>
       <span class="slide-num">4 / 12</span>
@@ -224,77 +240,84 @@ body.show-notes #notes-panel { display: block; }
     <h2 class="slide-title">A ranked shortlist, measured against a named acceptable solution<span class="rubric"> [Code Identification, 20]</span></h2>
     <div class="slide-body">
       <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">0.312 m²</span><span class="hero-label">Example case · window opening vs 0.35 m² required</span></div>
         <ul class="bullets">
-          <li>Ranked articles with a named benchmark acceptable solution <span class="status">[if merged: PR #12]</span></li>
-          <li>Identify never adds an article on its own; you confirm each one. p ≥ 0.75 only sets a "suggested" hint (uncalibrated) <span class="status">[if merged: PR #12]</span>; the command-line tool on dev still auto-commits Part 9 articles</li>
-          <li>Section C objectives and functions are looked up from the code's tables where a row exists; otherwise the screen says the lookup is not available (on dev); the table stays empty until an article is added from Search, because identification is command-line only</li>
+          <li>Ranked against a named acceptable solution (draft, not in app)</li>
         </ul>
       </div>
       <div class="shots"><figure class="shot" id="shot-s04-search" data-shot="shot-s04-search">
-        <img class="shot-img" src="img/shot-s04-search.png" alt="Screenshot: PR #16 Code search for the bedroom window, the returned row added to the check, and its Section C row looked up from the attribution tables" onload="this.parentNode.classList.add('has-img')" onerror="this.remove()">
-        <div class="shot-placeholder" aria-hidden="true">
-          <div class="shot-icon"></div>
-          <div class="shot-label">Screenshot: PR #16 Code search for the bedroom window, the returned row added to the check, and its Section C row looked up from the attribution tables</div>
-          <div class="shot-source">PR #16 screen (in review)</div>
-          <div class="shot-id">shot-s04-search</div>
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s04-search.png" alt="Code search for the bedroom window article, added to the check" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
         </div>
-        <span class="example-badge">EXAMPLE DATA</span>
+        <figcaption class="shot-caption">Code search adds window article · in review</figcaption>
       </figure>
 <figure class="shot" id="shot-s04-benchmark" data-shot="shot-s04-benchmark">
-        <img class="shot-img" src="img/shot-s04-benchmark.png" alt="Still: PR #12 identify output and benchmark card" onload="this.parentNode.classList.add('has-img')" onerror="this.remove()">
-        <div class="shot-placeholder" aria-hidden="true">
-          <div class="shot-icon"></div>
-          <div class="shot-label">Still: PR #12 identify output and benchmark card</div>
-          <div class="shot-source">PR #12 still, labelled ‘not in this app build’</div>
-          <div class="shot-id">shot-s04-benchmark</div>
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s04-benchmark.png" alt="Identify output and benchmark card from the draft build" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
         </div>
-        <span class="example-badge">EXAMPLE DATA</span>
+        <figcaption class="shot-caption">Identify output · draft, not in app</figcaption>
       </figure></div>
     </div>
-    <footer class="sources"><span class="sources-label">Sources:</span> dev <code>engine/section_c.py</code>, <code>engine/identify/</code>; <a href="https://github.com/simplythatguy/batatis/pull/12">PR #12</a>; case C (PR #14, on dev)</footer>
+    <footer class="sources"><span class="sources-label">Sources:</span> in speaker notes</footer>
     <aside class="notes" hidden>
       <h3>Narration</h3>
       <p class="narration">Search finds nine point nine point ten point one, sentence two, second printing: at least point three five square metres. The window opens point three one two. Section C looks up its objective and function.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 0:40–0:54  |  <strong>Spoken words:</strong> 35  |  <strong>At 150 wpm:</strong> 14.0 s  |  <strong>At 140 wpm:</strong> 15.0 s</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 0:39–0:53  |  <strong>Spoken words:</strong> 35  |  <strong>At 150 wpm:</strong> 14.0 s  |  <strong>At 140 wpm:</strong> 15.0 s</p>
+      <h3>Slide detail</h3><ul><li>Ranked articles with a named benchmark acceptable solution [if merged: PR #12]</li><li>In draft PR #12, identify never adds an article on its own: you confirm each one, and p ≥ 0.75 only sets a "suggested" hint (uncalibrated). Until #12 merges, the command-line tool on dev still auto-commits up to 3 Part 9 articles at p ≥ 0.75; no screen does.</li><li>Section C objectives and functions are looked up from the code's tables where a row exists; otherwise the screen says the lookup is not available (on dev); the table stays empty until an article is added from Search, because identification is command-line only</li></ul>
       <h3>Background</h3>
       <p>For the homebuilder's window, the benchmark acceptable solution is Sentence 9.9.10.1.(2): at least 0.35 m² unobstructed, no dimension under 380 mm, and the case's 0.312 m² opening is the departure. Showing each requirement beside the code text is the design; on today's screens that view is still being fixed, so in the demo it is a labelled still from PR #12 (not in this app build). Ranking is command-line only on dev and moves to HTTP in PR #12, which also runs BM25 (keyword search ranking) first, then an OpenAI rerank and verifier.</p>
+      <h3>Sources</h3>
+      <p>dev <code>engine/section_c.py</code>, <code>engine/identify/</code>; <a href="https://github.com/simplythatguy/batatis/pull/12">PR #12</a>; case C (PR #14, on dev)</p>
     </aside>
   </section>
-  <section class="slide layout-shot dense" id="s05" data-index="5">
+  <section class="slide layout-shot has-hero" id="s05" data-index="5">
     <header class="slide-head">
       <span class="brand">Batatis</span>
       <span class="slide-num">5 / 12</span>
     </header>
-    <h2 class="slide-title">Every citation resolves, or it's dropped<span class="rubric"> [Code Identification, 20]</span></h2>
+    <h2 class="slide-title">Citations come from the code database<span class="rubric"> [Code Identification, 20]</span></h2>
     <div class="slide-body">
       <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">9/11</span><span class="hero-label">right article first · draft, not in the app</span></div>
         <ul class="bullets">
-          <li>Built by script from the official NBC(AE) 2023; the codedb README on dev names the 2nd printing; the SHA-256 pin is in draft PR #12</li>
-          <li>A citation that doesn't quote the code word for word is removed (on dev)</li>
-          <li>Identification (model aliases, not pinned): C$0.0277 per case, 5.7 s median, 11.3 s p95 (measured, 20 dev cases, cost and latency over 3 repeats, identification step only (excludes the completeness judge and Section D))</li>
+          <li>NBC(AE) 2023, 2nd printing · model-checked, single run</li>
         </ul>
       </div>
       <div class="shots"><figure class="shot" id="shot-s05-eval" data-shot="shot-s05-eval">
-        <img class="shot-img" src="img/shot-s05-eval.png" alt="Still: evaluation results, one labelled line per variant" onload="this.parentNode.classList.add('has-img')" onerror="this.remove()">
-        <div class="shot-placeholder" aria-hidden="true">
-          <div class="shot-icon"></div>
-          <div class="shot-label">Still: evaluation results, one labelled line per variant</div>
-          <div class="shot-source">Eval still, labelled model-checked</div>
-          <div class="shot-id">shot-s05-eval</div>
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s05-eval.png" alt="Evaluation results, one labelled line per variant" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          
         </div>
-        
+        <figcaption class="shot-caption">Evaluation results per variant · model-checked</figcaption>
       </figure></div>
     </div>
-    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://www.alberta.ca/building-codes-and-standards">Alberta building codes</a>; draft <a href="https://github.com/simplythatguy/batatis/pull/12">PR #12</a> (keyed run, Oct 20, 2026; accuracy from one run only); Implementation Plan §9</footer>
+    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://www.alberta.ca/building-codes-and-standards">Alberta building codes</a>; full list in speaker notes</footer>
     <aside class="notes" hidden>
       <h3>Narration</h3>
-      <p class="narration">In an open pull request, the AI ranking put the right article first, and in the top five, on nine of eleven practice cases, in a single run. Keyword search alone put it first on five. It asked instead of guessing on forty percent. All of it is model-checked.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 0:55–1:14  |  <strong>Spoken words:</strong> 49  |  <strong>At 150 wpm:</strong> 19.6 s  |  <strong>At 140 wpm:</strong> 21.0 s</p>
+      <p class="narration">In a draft pull request, the AI ranking put the right article first, and in the top five, on nine of eleven practice cases with a gold answer, nine excluded, single run; model-checked, not human-verified. Keyword search alone put it first on five. It asked instead of guessing on forty percent.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 0:53–1:13  |  <strong>Spoken words:</strong> 51  |  <strong>At 150 wpm:</strong> 20.4 s  |  <strong>At 140 wpm:</strong> 21.9 s</p>
+      <h3>Slide detail</h3><ul><li>Built by script from the official NBC(AE) 2023; the codedb README on dev names the 2nd printing; the SHA-256 pin is in draft PR #12</li><li>In the identify step (command line on dev; HTTP in draft PR #12), a citation that doesn't quote the code word for word is removed; app search shows database rows, and some article-level rows have no text yet</li><li>Identification (draft PR #12; model aliases, not pinned): C$0.0277 per case, 5.7 s median, 11.3 s p95 (measured, 20 dev cases, cost and latency over 3 repeats, identification step only (excludes the completeness judge and Section D))</li></ul>
       <h3>Background</h3>
-      <p>Hallucinated citations are the failure that would sink an application, so the verifier drops any citation whose quote doesn't match the code text. Each Section C row carries its article, objective and function from the attribution tables (where the attribution table has a row; otherwise the screen shows that the lookup is not available), so the rationale follows the code's own structure; the three demo articles were checked against our code database. Code identification: top-1 9/11 and recall@5 (correct article in the top 5) 9/11 on the model-checked dev cases that have a gold article (in-sample, single run, 9 cases without gold excluded); the BM25 baseline gets 5/11; it asks the applicant on 40% of cases. These are dev cases, not real applications, and the models are aliases until they are pinned to dated snapshots in PR #12 (in progress).</p>
+      <p>Hallucinated citations are the failure that would sink an application, so the identify step's verifier (command line on dev) drops any citation whose quote doesn't match the code text. Each Section C row carries its article, objective and function from the attribution tables (where the attribution table has a row; otherwise the screen shows that the lookup is not available), so the rationale follows the code's own structure; the three demo articles were checked against our code database. Code identification (draft PR #12, not on dev): top-1 9/11 and recall@5 (correct article in the top 5) 9/11 on the model-checked dev cases that have a gold article (in-sample, single run, 9 cases without gold excluded); the BM25 baseline gets 5/11; it asks the applicant on 40% of cases. These are dev cases, not real applications, and the models are aliases until they are pinned to dated snapshots in PR #12 (in progress).</p>
+      <h3>Sources</h3>
+      <p><a href="https://www.alberta.ca/building-codes-and-standards">Alberta building codes</a>; draft <a href="https://github.com/simplythatguy/batatis/pull/12">PR #12</a> (keyed run, Oct 20, 2026; accuracy from one run only); Implementation Plan §9</p>
     </aside>
   </section>
-  <section class="slide layout-shot" id="s06" data-index="6">
+  <section class="slide layout-shot has-hero" id="s06" data-index="6">
     <header class="slide-head">
       <span class="brand">Batatis</span>
       <span class="slide-num">6 / 12</span>
@@ -302,33 +325,37 @@ body.show-notes #notes-panel { display: block; }
     <h2 class="slide-title">It knows where to stop<span class="rubric"> [Recommendations, 10]</span></h2>
     <div class="slide-body">
       <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">50 Pa</span><span class="hero-label">Example case · firestop test pressure differential</span></div>
         <ul class="bullets">
-          <li>Lists the evidence an alternative solution needs, in order (engine on dev; screen in review)</li>
-          <li>Says when a registered professional is required, and cites the Division C rule (e.g. 2.4.1.1.(3), 2.4.1.2.(1)) when it applies (engine on dev)</li>
-          <li>Never writes engineering judgment itself</li>
+          <li>Designed to say an engineer's judgment is needed, and stop</li>
+          <li>Never writes the evidence</li>
         </ul>
       </div>
       <div class="shots"><figure class="shot" id="shot-s06-section-d" data-shot="shot-s06-section-d">
-        <img class="shot-img" src="img/shot-s06-section-d.png" alt="Screenshot: PR #16 Alternative path with its six fields left empty and the Section D card stating the tool does not write the evidence or the professional opinion" onload="this.parentNode.classList.add('has-img')" onerror="this.remove()">
-        <div class="shot-placeholder" aria-hidden="true">
-          <div class="shot-icon"></div>
-          <div class="shot-label">Screenshot: PR #16 Alternative path with its six fields left empty and the Section D card stating the tool does not write the evidence or the professional opinion</div>
-          <div class="shot-source">PR #16 screen (in review)</div>
-          <div class="shot-id">shot-s06-section-d</div>
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s06-section-d.png" alt="Alternative path with its fields left empty and the Section D card" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
         </div>
-        <span class="example-badge">EXAMPLE DATA</span>
+        <figcaption class="shot-caption">Section D leaves evidence blank · in review</figcaption>
       </figure></div>
     </div>
-    <footer class="sources"><span class="sources-label">Sources:</span> dev <code>engine/section_d.py</code>, <code>engine/professional.py</code>; <a href="https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf">IFC engineering-judgment guidelines</a>; case B (PR #14, on dev)</footer>
+    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf">IFC engineering-judgment guidelines</a>; full list in speaker notes</footer>
     <aside class="notes" hidden>
       <h3>Narration</h3>
-      <p class="narration">It says when a registered professional is needed, cites the Division C rule, and never writes the evidence. An open fix keeps that flag until a professional is confirmed.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 1:15–1:26  |  <strong>Spoken words:</strong> 29  |  <strong>At 150 wpm:</strong> 11.6 s  |  <strong>At 140 wpm:</strong> 12.4 s</p>
+      <p class="narration">Where no tested system fits, it's designed to say an engineer's judgment is needed, and stop. It never writes the evidence.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 1:14–1:22  |  <strong>Spoken words:</strong> 21  |  <strong>At 150 wpm:</strong> 8.4 s  |  <strong>At 140 wpm:</strong> 9.0 s</p>
+      <h3>Slide detail</h3><ul><li>Lists the evidence an alternative solution needs, in order (engine on dev; screen in review)</li><li>The engine says when a registered professional is required, and cites the Division C rule (e.g. 2.4.1.1.(3), 2.4.1.2.(1)) when it applies (engine on dev; not yet on screen, where the answer shows as "depends")</li><li>Never writes engineering judgment itself</li></ul>
       <h3>Background</h3>
-      <p>The professional-involvement check answers yes, depends or no and cites the Division C rule (e.g. 2.4.1.1.(3), 2.4.1.2.(1)) when it applies. In the firestop demo case, plastic pipe in a 5-storey building needs firestops tested at a 50 Pa pressure differential (Clause 3.1.9.4.(4)(b)), and the tool is designed to say an engineering judgment is required where no tested system fits, list what it must contain, and stop. That case hasn't been run through the engine yet.</p>
+      <p>Where no tested system fits, it's designed to say an engineer's judgment is needed, and stop. It never writes the evidence. The engine's professional-involvement check answers yes, depends or no, and the engine cites the Division C rule (e.g. 2.4.1.1.(3), 2.4.1.2.(1)) when it applies; on screen the answer shows as "depends" without the rule. In the firestop demo case, plastic pipe in a 5-storey building needs firestops tested at a 50 Pa pressure differential (Clause 3.1.9.4.(4)(b)), and the tool is designed to say an engineering judgment is required where no tested system fits, list what it must contain, and stop. A simulated general-contractor walkthrough of this case on an in-review build (PR #16 @27bec3e) reached a draft 8-page PDF (marked "DRAFT - not for submission") in about 6 minutes, but the final application download stayed disabled with 1 blocking item (professional involvement), which a contractor can't clear without a professional registration number or seal. Search found 3.1.9.4.(2)/(4)/(7) and 9.10.9.7 with the S115 text, but not 3.1.9.1; the app gave no variance-vs-fix guidance, didn't flag the sales-rep email as not an engineering judgment, and didn't challenge the sprinkler "exempt" claim.</p>
+      <h3>Sources</h3>
+      <p>dev <code>engine/section_d.py</code>, <code>engine/professional.py</code>; <a href="https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf">IFC engineering-judgment guidelines</a>; case B (PR #14, on dev)</p>
     </aside>
   </section>
-  <section class="slide layout-shot" id="s07" data-index="7">
+  <section class="slide layout-shot has-hero" id="s07" data-index="7">
     <header class="slide-head">
       <span class="brand">Batatis</span>
       <span class="slide-num">7 / 12</span>
@@ -336,33 +363,37 @@ body.show-notes #notes-panel { display: block; }
     <h2 class="slide-title">Completeness review: built in the engine, officer screen in review<span class="rubric"> [Review, 10]</span></h2>
     <div class="slide-body">
       <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">A–D</span><span class="hero-label">gaps listed by form section</span></div>
         <ul class="bullets">
-          <li>Gaps listed by form section A–D; completeness only, never compliance (engine on dev)</li>
-          <li>Officer screen with a drafted information request <span class="status">[if merged: PR #16]</span></li>
-          <li>Div C 2.3.1 and one-location gates, portal package <span class="status">[if merged: PR #11]</span></li>
+          <li>Completeness only, not a compliance finding</li>
+          <li>Officer screen in review</li>
         </ul>
       </div>
       <div class="shots"><figure class="shot" id="shot-s07-officer" data-shot="shot-s07-officer">
-        <img class="shot-img" src="img/shot-s07-officer.png" alt="Screenshot: PR #16 Officer review screen with one planted sample package, before and after fixes, and Copy request" onload="this.parentNode.classList.add('has-img')" onerror="this.remove()">
-        <div class="shot-placeholder" aria-hidden="true">
-          <div class="shot-icon"></div>
-          <div class="shot-label">Screenshot: PR #16 Officer review screen with one planted sample package, before and after fixes, and Copy request</div>
-          <div class="shot-source">PR #16 screen (in review)</div>
-          <div class="shot-id">shot-s07-officer</div>
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s07-officer.png" alt="Officer review screen with one planted sample package" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
         </div>
-        <span class="example-badge">EXAMPLE DATA</span>
+        <figcaption class="shot-caption">Officer review, sample package · in review</figcaption>
       </figure></div>
     </div>
-    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf">IB-2025-11-18</a>; <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf">IB-2026-10-01</a>; dev <code>engine/completeness.py</code></footer>
+    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf">IB-2025-11-18</a>; <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf">IB-2026-10-01</a>; full list in speaker notes</footer>
     <aside class="notes" hidden>
       <h3>Narration</h3>
       <p class="narration">For officers, the check lists gaps by form section, never compliance. The screen, in review, shows one planted sample package; Copy request lists administrative items, not a decision. No timing data.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 1:27–1:39  |  <strong>Spoken words:</strong> 31  |  <strong>At 150 wpm:</strong> 12.4 s  |  <strong>At 140 wpm:</strong> 13.3 s</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 1:23–1:35  |  <strong>Spoken words:</strong> 31  |  <strong>At 150 wpm:</strong> 12.4 s  |  <strong>At 140 wpm:</strong> 13.3 s</p>
+      <h3>Slide detail</h3><ul><li>Gaps listed by form section A–D; completeness only, never compliance (engine on dev)</li><li>Officer screen with a drafted information request [if merged: PR #16]</li><li>Div C 2.3.1 and one-location gates, portal package [if merged: PR #11]</li></ul>
       <h3>Background</h3>
       <p>Today the A–D gap check and the export block with reasons run in the engine on dev; the officer screen isn't on dev yet. The bulletin gates and portal package are in a draft pull request, and portal registration is not approval: the officer still decides. Saving an officer time is a target with a planted-gap protocol to measure it; we have no timing data.</p>
+      <h3>Sources</h3>
+      <p><a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf">IB-2025-11-18</a>; <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf">IB-2026-10-01</a>; dev <code>engine/completeness.py</code></p>
     </aside>
   </section>
-  <section class="slide layout-shot dense" id="s08" data-index="8">
+  <section class="slide layout-shot has-hero" id="s08" data-index="8">
     <header class="slide-head">
       <span class="brand">Batatis</span><span class="example-badge slide-badge">EXAMPLE DATA</span>
       <span class="slide-num">8 / 12</span>
@@ -370,33 +401,37 @@ body.show-notes #notes-panel { display: block; }
     <h2 class="slide-title">One tool, three kinds of first-time applicants<span class="rubric"> [General Applicability, 5]</span></h2>
     <div class="slide-body">
       <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">3</span><span class="hero-label">fictional first-time applicants, real code citations</span></div>
         <ul class="bullets">
-          <li>Homebuilder: slab edges need detailing, the unvented roof probably fails its STANDATA as drawn, the window needs a variance and fall protection <span class="status">[case files: PR #14, on dev]</span></li>
-          <li>Manufacturers can seek a voluntary CCMC assessment (or another recognized evaluation) as evidence for the authority having jurisdiction, which makes the approval decision; a site-specific variance covers only that project <span class="status">[case files: PR #14, on dev]</span></li>
-          <li>General contractor: plastic pipe needs 50 Pa-tested firestops, Clause 3.1.9.4.(4)(b) <span class="status">[case files: PR #14, on dev]</span></li>
+          <li>Homebuilder, manufacturer, general contractor</li>
+          <li>Unaided use untested</li>
         </ul>
       </div>
       <div class="shots"><figure class="shot" id="shot-s08-roles" data-shot="shot-s08-roles">
-        <img class="shot-img" src="img/shot-s08-roles.png" alt="Screenshot: PR #16 “Who are you?” role picker: Manufacturer, General contractor, Homebuilder" onload="this.parentNode.classList.add('has-img')" onerror="this.remove()">
-        <div class="shot-placeholder" aria-hidden="true">
-          <div class="shot-icon"></div>
-          <div class="shot-label">Screenshot: PR #16 “Who are you?” role picker: Manufacturer, General contractor, Homebuilder</div>
-          <div class="shot-source">PR #16 screen (in review)</div>
-          <div class="shot-id">shot-s08-roles</div>
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s08-roles.png" alt="Role picker: Manufacturer, General contractor, Homebuilder" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
         </div>
-        <span class="example-badge">EXAMPLE DATA</span>
+        <figcaption class="shot-caption">“Who are you?” role picker · in review</figcaption>
       </figure></div>
     </div>
-    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/2aa7678c-c476-4523-b0c3-36e71256e11b/download/ma-standata-variance-building-23-bcv-017-2025-09.pdf">STANDATA 23-BCV-017</a>; <a href="https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/01b622f0-f4a1-426d-b15f-ffc25e725949/download/ma-standata-variance-building-23-bcv-001-2024-04.pdf">STANDATA 23-BCV-001</a>; <a href="https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/3915ba54-96dd-4c54-a9c1-63df5c917836/download/ma-standata-variance-building-23-bcv-003-2024-05.pdf">STANDATA 23-BCV-003</a>; <a href="https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-014-new-products-materials-and-systems-in-building-construction.pdf">Calgary B23-014</a></footer>
+    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/2aa7678c-c476-4523-b0c3-36e71256e11b/download/ma-standata-variance-building-23-bcv-017-2025-09.pdf">STANDATA 23-BCV-017</a>; <a href="https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/01b622f0-f4a1-426d-b15f-ffc25e725949/download/ma-standata-variance-building-23-bcv-001-2024-04.pdf">STANDATA 23-BCV-001</a>; <a href="https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/3915ba54-96dd-4c54-a9c1-63df5c917836/download/ma-standata-variance-building-23-bcv-003-2024-05.pdf">STANDATA 23-BCV-003</a>; <a href="https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-014-new-products-materials-and-systems-in-building-construction.pdf">Calgary B23-014</a>; full list in speaker notes</footer>
     <aside class="notes" hidden>
       <h3>Narration</h3>
-      <p class="narration">Three fictional applicants, one form: homebuilder, manufacturer, general contractor. Each gets a role-shaped start and Not sure on every question, in review.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 1:40–1:48  |  <strong>Spoken words:</strong> 22  |  <strong>At 150 wpm:</strong> 8.8 s  |  <strong>At 140 wpm:</strong> 9.4 s</p>
+      <p class="narration">Three fictional applicants, one form: homebuilder, manufacturer, general contractor. Each gets Not sure on every question, in review.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 1:36–1:43  |  <strong>Spoken words:</strong> 18  |  <strong>At 150 wpm:</strong> 7.2 s  |  <strong>At 140 wpm:</strong> 7.7 s</p>
+      <h3>Slide detail</h3><ul><li>Homebuilder: slab edges need detailing, the unvented roof probably fails its STANDATA as drawn, the window needs a variance and fall protection [case notes, not tool output; case files: PR #14, on dev]</li><li>Manufacturers can seek a voluntary CCMC assessment (or another recognized evaluation) as evidence for the authority having jurisdiction, which makes the approval decision; a site-specific variance covers only that project [case notes, not tool output; case files: PR #14, on dev]</li><li>General contractor: plastic pipe needs 50 Pa-tested firestops, Clause 3.1.9.4.(4)(b) [case notes, not tool output; case files: PR #14, on dev]</li></ul>
       <h3>Background</h3>
       <p>Our three demo cases cover a homebuilder, a manufacturer and a general contractor, with fictional people and real code citations. The STANDATA reasoning (23-BCV-003 covers the under-slab insulation but not the edges; the roof is probably not covered by 23-BCV-017 as drawn) is case content; the tool's STANDATA "you may not need a variance" check is not built. Whether a real first-time applicant could use it unaided is untested.</p>
+      <h3>Sources</h3>
+      <p><a href="https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/2aa7678c-c476-4523-b0c3-36e71256e11b/download/ma-standata-variance-building-23-bcv-017-2025-09.pdf">STANDATA 23-BCV-017</a>; <a href="https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/01b622f0-f4a1-426d-b15f-ffc25e725949/download/ma-standata-variance-building-23-bcv-001-2024-04.pdf">STANDATA 23-BCV-001</a>; <a href="https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/3915ba54-96dd-4c54-a9c1-63df5c917836/download/ma-standata-variance-building-23-bcv-003-2024-05.pdf">STANDATA 23-BCV-003</a>; <a href="https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-014-new-products-materials-and-systems-in-building-construction.pdf">Calgary B23-014</a></p>
     </aside>
   </section>
-  <section class="slide layout-shot shots-2 dense" id="s09" data-index="9">
+  <section class="slide layout-shot has-hero shots-2" id="s09" data-index="9">
     <header class="slide-head">
       <span class="brand">Batatis</span>
       <span class="slide-num">9 / 12</span>
@@ -404,40 +439,45 @@ body.show-notes #notes-panel { display: block; }
     <h2 class="slide-title">Fills the current SCC form; built to travel<span class="rubric"> [Usability and Portability, 10]</span></h2>
     <div class="slide-body">
       <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">Oct 6, 2026</span><span class="hero-label">SCC form version</span></div>
         <ul class="bullets">
-          <li>Fills Part 1, Sections A–D of the Council's current SCC form (PDF last modified Oct 6, 2026), not the brief's older Appendix 1 template; same field names, differences listed in the Implementation Plan (the engine fills the SCC form; in the app, PR #16 in review, Check completeness downloads it unsigned, officer Part 2 blank, once every gap is closed)</li>
-          <li>The engine blocks export with reasons until gaps clear, or returns a labelled draft (engine on dev; in the app (PR #16, in review), once every gap is closed, Check completeness downloads the Council's October 2026 variance form, filled in by the engine, unsigned, officer Part 2 blank, with a notice that it is not a finding that the design complies; Download draft record separately saves a .txt draft record)</li>
-          <li>Designed so local add-ons are configuration; per-jurisdiction form registry in PR #12</li>
+          <li>Unsigned, officer Part 2 blank (in review)</li>
+          <li>Not a compliance finding</li>
         </ul>
       </div>
       <div class="shots"><figure class="shot" id="shot-s09-locked" data-shot="shot-s09-locked">
-        <img class="shot-img" src="img/shot-s09-locked.png" alt="Screenshot: PR #16 Describe authority select, then Application with Check completeness disabled while gaps are open" onload="this.parentNode.classList.add('has-img')" onerror="this.remove()">
-        <div class="shot-placeholder" aria-hidden="true">
-          <div class="shot-icon"></div>
-          <div class="shot-label">Screenshot: PR #16 Describe authority select, then Application with Check completeness disabled while gaps are open</div>
-          <div class="shot-source">PR #16 screen (in review)</div>
-          <div class="shot-id">shot-s09-locked</div>
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s09-locked.png" alt="Application screen with Check completeness disabled while gaps are open" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
         </div>
-        <span class="example-badge">EXAMPLE DATA</span>
+        <figcaption class="shot-caption">Download locked while gaps open · in review</figcaption>
       </figure>
 <figure class="shot" id="shot-s09-scc-form" data-shot="shot-s09-scc-form">
-        <img class="shot-img" src="img/shot-s09-scc-form.png" alt="Screenshot: the downloaded, engine-filled SCC variance form PDF (unsigned, officer Part 2 blank); the ‘not a finding that the design complies’ notice is in the app’s dialog, not the PDF; the PDF appendix says it ‘does not state that the proposed design complies’" onload="this.parentNode.classList.add('has-img')" onerror="this.remove()">
-        <div class="shot-placeholder" aria-hidden="true">
-          <div class="shot-icon"></div>
-          <div class="shot-label">Screenshot: the downloaded, engine-filled SCC variance form PDF (unsigned, officer Part 2 blank); the ‘not a finding that the design complies’ notice is in the app’s dialog, not the PDF; the PDF appendix says it ‘does not state that the proposed design complies’</div>
-          <div class="shot-source">PR #16 (in review): Check completeness download, AI-agent simulated session</div>
-          <div class="shot-id">shot-s09-scc-form</div>
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s09-scc-form.png" alt="Downloaded engine-filled SCC variance form PDF, unsigned, officer Part 2 blank" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
         </div>
-        <span class="example-badge">EXAMPLE DATA</span>
+        <figcaption class="shot-caption">Engine-filled SCC form · simulated session</figcaption>
       </figure></div>
     </div>
-    <footer class="sources"><span class="sources-label">Sources:</span> dev <code>engine/export/field_maps/scc_2026-10.json</code>, <code>engine/export/scc.py</code>; <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf">SCC form</a>; <a href="https://github.com/simplythatguy/batatis/pull/12">PR #12</a></footer>
+    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf">SCC form</a>; full list in speaker notes</footer>
     <aside class="notes" hidden>
       <h3>Narration</h3>
       <p class="narration">In the app, in review, once every gap closes, it downloads the Council's October sixth form, not Appendix 1, filled in by the engine, unsigned, officer's part blank. It is not a compliance finding.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 1:49–2:02  |  <strong>Spoken words:</strong> 34  |  <strong>At 150 wpm:</strong> 13.6 s  |  <strong>At 140 wpm:</strong> 14.6 s</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 1:43–1:57  |  <strong>Spoken words:</strong> 34  |  <strong>At 150 wpm:</strong> 13.6 s  |  <strong>At 140 wpm:</strong> 14.6 s</p>
+      <h3>Slide detail</h3><ul><li>Fills Part 1, Sections A–D of the Council's current SCC form (PDF last modified Oct 6, 2026), not the brief's older Appendix 1 template; same field names, differences listed in the Implementation Plan (the engine fills the SCC form; in the app, PR #16 in review, Check completeness downloads it unsigned, officer Part 2 blank, once every gap is closed)</li><li>The engine blocks export with reasons until gaps clear, or returns a labelled draft (engine on dev; in the app (PR #16, in review), once every gap is closed, Check completeness downloads the Council's October 2026 variance form, filled in by the engine, unsigned, officer Part 2 blank, with a notice that it is not a finding that the design complies; Download draft record separately saves a .txt draft record)</li><li>Designed so local add-ons are configuration; per-jurisdiction form registry in PR #12</li></ul>
       <h3>Background</h3>
       <p>We caught the Council's October form revision and fingerprinted the export to that exact file, leaving the officer's Part 2 blank. A third AI-agent simulated walkthrough on PR #16 @d076aa2 did not reach export; a simulated re-run on PR #16 @579cd2c reached the engine-filled form PDF in about 6 minutes; the professional-involvement gap cleared on the simulated user's own answers, with no confirmed professional; one evidence item was lost. The fix is in PR #26 (open), which requires a confirmed professional before an issue lists evidence. The engine fills the SCC form; in the app (PR #16, in review), once every gap is closed, Check completeness downloads the Council's October 2026 variance form, filled in by the engine, unsigned, officer Part 2 blank, with a notice that it is not a finding that the design complies; Download draft record separately saves a .txt draft record. No real user has tested it.</p>
+      <h3>Sources</h3>
+      <p>dev <code>engine/export/field_maps/scc_2026-10.json</code>, <code>engine/export/scc.py</code>; <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf">SCC form</a>; <a href="https://github.com/simplythatguy/batatis/pull/12">PR #12</a></p>
     </aside>
   </section>
   <section class="slide layout-text" id="s10" data-index="10">
@@ -445,24 +485,28 @@ body.show-notes #notes-panel { display: block; }
       <span class="brand">Batatis</span>
       <span class="slide-num">10 / 12</span>
     </header>
-    <h2 class="slide-title">Ready for December 1<span class="rubric"> [Implementation Plan, 10]</span></h2>
+    <h2 class="slide-title">Built for the December 1 rules<span class="rubric"> [Implementation Plan, 10]</span></h2>
     <div class="slide-body">
       <div class="bullets-wrap">
+        
         <ul class="bullets">
-          <li>From Dec 1, 2026, the SCC portal is the only way to register a variance, and registration is not approval</li>
-          <li>The authority having jurisdiction is the organization, so we pilot with an organization</li>
-          <li>Oct 29 Submission 1 (demo build) → Nov 26 Submission 2, pilot build in a Canadian region (our plan) → Dec 2 – Mar 2 pilot window (not guaranteed)</li>
+          <li>From Dec 1, 2026: SCC portal only; registration is not approval</li>
+          <li>Any pilot would be with an authority having jurisdiction (an organization)</li>
+          <li>Oct 29 Submission 1 → Nov 26 build (our plan) → pilot Dec 2–Mar 2 (not guaranteed)</li>
         </ul>
       </div>
       
     </div>
-    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf">IB-2026-10-01</a>; <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-16_AHJ_Clarification.pdf">IB-2026-10-16</a>; <a href="https://edmontonunlimited.com/wp-content/uploads/2026/09/Built-World-Challenge-Onboarding-Guide.docx.pdf">onboarding guide</a></footer>
+    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf">IB-2026-10-01</a>; <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-16_AHJ_Clarification.pdf">IB-2026-10-16</a>; <a href="https://edmontonunlimited.com/wp-content/uploads/2026/09/Built-World-Challenge-Onboarding-Guide.docx.pdf">onboarding guide</a>; full list in speaker notes</footer>
     <aside class="notes" hidden>
       <h3>Narration</h3>
-      <p class="narration">From December first, the Council's portal is the only way to register; registration isn't approval. A simulated walkthrough reached the form only because the engineer-needed gap cleared on its own answers. An open fix keeps it flagged until a professional and a seal or registration number are confirmed.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 2:03–2:22  |  <strong>Spoken words:</strong> 48  |  <strong>At 150 wpm:</strong> 19.2 s  |  <strong>At 140 wpm:</strong> 20.6 s</p>
+      <p class="narration">From December first, the Council's portal is the only way to register; registration isn't approval. A simulated walkthrough reached the form only because the engineer-needed gap cleared on its own answers. An open fix would keep it flagged until a professional and a seal or registration number are confirmed.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 1:57–2:17  |  <strong>Spoken words:</strong> 49  |  <strong>At 150 wpm:</strong> 19.6 s  |  <strong>At 140 wpm:</strong> 21.0 s</p>
+      <h3>Slide detail</h3><ul><li>From Dec 1, 2026, the SCC portal is the only way to register a variance, and registration is not approval</li><li>The authority having jurisdiction is the organization, so any pilot would be with an organization</li><li>Oct 29 Submission 1 (demo build) → Nov 26 Submission 2, pilot build in a Canadian region (our plan) → Dec 2 – Mar 2 pilot window (not guaranteed)</li></ul>
       <h3>Background</h3>
       <p>The Council says registration in its portal is not approval and doesn't move responsibility for the decision. The SCO still decides and still registers; Batatis is designed to prepare the package they upload. The Council invites high-volume organizations to build approved integrations, and we'd do that only on its terms; no pilot partner exists yet, and we have contacted no one.</p>
+      <h3>Sources</h3>
+      <p><a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf">IB-2026-10-01</a>; <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-16_AHJ_Clarification.pdf">IB-2026-10-16</a>; <a href="https://edmontonunlimited.com/wp-content/uploads/2026/09/Built-World-Challenge-Onboarding-Guide.docx.pdf">onboarding guide</a></p>
     </aside>
   </section>
   <section class="slide layout-text" id="s11" data-index="11">
@@ -473,22 +517,25 @@ body.show-notes #notes-panel { display: block; }
     <h2 class="slide-title">Applicants pay to arrive complete<span class="rubric"> [Business Plan, 10]</span></h2>
     <div class="slide-body">
       <div class="bullets-wrap">
+        
         <ul class="bullets">
-          <li>First buyer: production homebuilders, who write the Div C 2.3.1 documentation</li>
-          <li>Price to test: C$125–750 per bespoke package (untested hypothesis)</li>
-          <li>Identification model cost (model aliases, not pinned): C$0.0277 per case, about 0.02% of the C$125 floor (measured on dev cases; identification step only)</li>
-          <li>Defensible as models improve: form-version tracking, the Section C attribution layer with its citation validator, and a place in the officer's workflow (Judge Q&amp;A 13)</li>
+          <li>Production homebuilders pay C$125–750 per package (untested hypothesis)</li>
+          <li>Identification: C$0.0277 per case, about 0.02% of the floor (draft, measured)</li>
+          <li>Defensible as models improve: form tracking, citation validator, officer workflow</li>
         </ul>
       </div>
       
     </div>
-    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://github.com/simplythatguy/batatis/pull/12">draft PR #12</a> (keyed run, Oct 20, 2026); <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/sr/council%20fee%20schedule%20asca%20v2.pdf">SCC fee schedule</a>; <a href="https://www.edmonton.ca/sites/default/files/public-files/Procurement%20Standard.pdf">Edmonton Procurement Standard</a>; <a href="https://www.calgary.ca/buy-sell/supply-to-city/procurement-policy.html">Calgary procurement policy</a></footer>
+    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/sr/council%20fee%20schedule%20asca%20v2.pdf">SCC fee schedule</a>; <a href="https://www.edmonton.ca/sites/default/files/public-files/Procurement%20Standard.pdf">Edmonton Procurement Standard</a>; <a href="https://www.calgary.ca/buy-sell/supply-to-city/procurement-policy.html">Calgary procurement policy</a>; full list in speaker notes</footer>
     <aside class="notes" hidden>
       <h3>Narration</h3>
-      <p class="narration">First buyer: production homebuilders. Price to test: one twenty-five to seven fifty dollars a package. Identification costs under three cents a case on dev cases, five point seven seconds median.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 2:23–2:35  |  <strong>Spoken words:</strong> 30  |  <strong>At 150 wpm:</strong> 12.0 s  |  <strong>At 140 wpm:</strong> 12.9 s</p>
+      <p class="narration">First buyer: production homebuilders. Price to test: one twenty-five to seven fifty dollars a package. In the draft pull request, identification cost under three cents a case on practice cases, five point seven seconds median.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 2:17–2:31  |  <strong>Spoken words:</strong> 35  |  <strong>At 150 wpm:</strong> 14.0 s  |  <strong>At 140 wpm:</strong> 15.0 s</p>
+      <h3>Slide detail</h3><ul><li>First buyer: production homebuilders, who write the Div C 2.3.1 documentation</li><li>Price to test: C$125–750 per bespoke package (untested hypothesis)</li><li>Identification model cost (model aliases, not pinned): C$0.0277 per case, about 0.02% of the C$125 floor (measured on dev cases; identification step only)</li><li>Defensible as models improve: form-version tracking, the Section C attribution layer with its citation validator, and a place in the officer's workflow (Judge Q&amp;A 13)</li></ul>
       <h3>Background</h3>
       <p>The low end of the range is one hour at the Council's own C$125/hour alternative-solution rate. No buyer has seen a price. Authority pilots would sit under the C$75,000 trade-agreement threshold that Edmonton and Calgary apply.</p>
+      <h3>Sources</h3>
+      <p><a href="https://github.com/simplythatguy/batatis/pull/12">draft PR #12</a> (keyed run, Oct 20, 2026); <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/sr/council%20fee%20schedule%20asca%20v2.pdf">SCC fee schedule</a>; <a href="https://www.edmonton.ca/sites/default/files/public-files/Procurement%20Standard.pdf">Edmonton Procurement Standard</a>; <a href="https://www.calgary.ca/buy-sell/supply-to-city/procurement-policy.html">Calgary procurement policy</a></p>
     </aside>
   </section>
   <section class="slide layout-text" id="s12" data-index="12">
@@ -499,22 +546,25 @@ body.show-notes #notes-panel { display: block; }
     <h2 class="slide-title">We read the regulator's own data<span class="rubric"> [X Factor, 5]</span></h2>
     <div class="slide-body">
       <div class="bullets-wrap">
+        
         <ul class="bullets">
           <li>Caught the Council's Oct 6, 2026 form change; export pinned to it</li>
-          <li>1,501 of 3,088 building article entries (Q1–Q2 2026) are one soffit article, 9.10.15.5.(8)</li>
+          <li>1,501 of 3,088 building article entries (Q1–Q2 2026): one soffit article</li>
           <li>Designed around three SCC bulletins from the past year</li>
-          <li>No code-AI product we reviewed advertises officer-side alternative-solution review</li>
         </ul>
       </div>
       
     </div>
-    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://www.safetycodes.ab.ca/data-hub/variance-data/">SCC Data Hub</a>; Business Plan §7</footer>
+    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://www.safetycodes.ab.ca/data-hub/variance-data/">SCC Data Hub</a>; full list in speaker notes</footer>
     <aside class="notes" hidden>
       <h3>Narration</h3>
       <p class="narration">In Q-one to Q-two twenty twenty-six, fifteen oh one of three thousand eighty-eight building article entries were one soffit article. No real user has tried Batatis. Batatis checks completeness. The officer decides.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 2:35–2:48  |  <strong>Spoken words:</strong> 32  |  <strong>At 150 wpm:</strong> 12.8 s  |  <strong>At 140 wpm:</strong> 13.7 s</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 2:32–2:45  |  <strong>Spoken words:</strong> 32  |  <strong>At 150 wpm:</strong> 12.8 s  |  <strong>At 140 wpm:</strong> 13.7 s</p>
+      <h3>Slide detail</h3><ul><li>Caught the Council's Oct 6, 2026 form change; export pinned to it</li><li>1,501 of 3,088 building article entries (Q1–Q2 2026) are one soffit article, 9.10.15.5.(8)</li><li>Designed around three SCC bulletins from the past year</li><li>No code-AI product we reviewed advertises officer-side alternative-solution review</li></ul>
       <h3>Background</h3>
       <p>Reading the Council's own data and bulletins is how we found both the form change and the soffit concentration. The competitor claim rests on public product pages as of Oct 20, 2026, so it's absence of evidence, not proof. This is a prototype: no real user, officer or pilot partner has used it.</p>
+      <h3>Sources</h3>
+      <p><a href="https://www.safetycodes.ab.ca/data-hub/variance-data/">SCC Data Hub</a>; Business Plan §7</p>
     </aside>
   </section>
 </main>
