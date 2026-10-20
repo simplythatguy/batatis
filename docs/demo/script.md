@@ -170,17 +170,17 @@ Say `9.9.10.1.(2)` only if that id is the row on screen.
 
 **Narration for the app frames.** “Search returns database rows only. Section C is a lookup. The code asks for 0.35 square metres. Read the function and objective printed there, and the intent text on screen. Batatis checks completeness. The officer decides compliance.”
 
-**1:11–1:22, ranked list still.** This list is not the search box, and it is not in this app build. Caption the still `[if merged: PR #12]`, and also `baseline order, not the 9/11 model`. This paste is not a seeded model run, so do not caption it Cached demo run or Keyword search, no AI key. The payload fields are provision, title, probability, and `committed`. On this BM25 fallback still `committed` is false, and identify does not auto-commit. Read only values printed on the still. If you have no payload, omit the still and do not say ranked.
+**1:11–1:22, ranked list still.** This list is not the search box, and it is not in this app build. Caption the still `[if merged: PR #12]`, and also `baseline order, not the reranked model`. This paste is not a seeded model run, so do not caption it Cached demo run or Keyword search, no AI key. The payload fields are provision, title, probability, and `committed`. On this BM25 fallback still `committed` is false, and identify does not auto-commit. Read only values printed on the still. If you have no payload, omit the still and do not say ranked.
 
 **1:22–1:29, benchmark card.** Caption the still `[if merged: PR #12]`. The card’s role line is `benchmark_acceptable_solution`. Read the provision, the explanation, and the citation if they are on the card. `9.9.10.1.(2)` is an example of that field only when the card prints it. If the card says no article was identified, read that sentence and stop. If you have no card, do not say benchmark. Do not say OSB, furring, or a millimetre thickness.
 
 **Narration for the stills.** “The ranked list and the benchmark card are stills. Read only what is printed. They are not this app’s search.”
 
-**1:29–1:36, eval still.** A full-frame still, not `#/accuracy`. The identify line depends on PR #12: caption it `[if merged: PR #12]`. Copy these lines and no others:
+**1:29–1:36, eval still.** A full-frame still, not `#/accuracy`. The identify line depends on PR #12 (PR #12, not on dev): caption it `[if merged: PR #12]`. Copy these lines and no others:
 
 - `rules_plus_unknown 50/60 in-sample, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind); model-checked, not human-verified`
 - `rules_only`, dev set: 55/60 in-sample, 1 under-flag
-- `[if merged: PR #12] c_openai_rerank_verify: top-1 9/11 and recall@5 9/11 on the 11 dev cases with a gold article (in-sample, single run, 9 cases without gold excluded); BM25 baseline 5/11; asks the applicant on 40% of cases, model-checked, not human-verified`
+- `[if merged: PR #12] c_openai_rerank_verify: top-1 0.76 and recall@5 0.76 on the 11 dev cases with a gold article (mean of 3 runs, in-sample, 9 cases without gold excluded); BM25 baseline 0.45; asks the applicant on 42% of cases; model-checked, not human-verified`
 
 These figures are not a finding that a design complies, is safe, or is certified.
 
