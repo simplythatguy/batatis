@@ -1,0 +1,19 @@
+{
+  "id": "hold-003",
+  "description": "We are building a single-storey detached house. The roof has a 12.20 m clear span. The rest of the framing is ordinary closely spaced lumber.",
+  "known_facts": [
+    "single-storey detached house",
+    "12.20 m clear span"
+  ],
+  "gold": {
+    "engineering_required": "no",
+    "engineering_reason": "The span handoff applies only above 12.20 m. A span of 12.20 m is not recorded as Part 4 design. A single-family dwelling is a general exception.",
+    "limit_source": "engine/section_d_issues.py PART9_MAX_SPAN_M = 12.20 compared with a strict greater-than; engine/professional.py occupancy single_family sets general to no through Div C 2.4.1.1.(1)"
+  },
+  "authoring": {
+    "source": "engine/professional.py",
+    "gold_written": "before any system run",
+    "label": "model-checked",
+    "notes": "Held-out span equal to 12.20 m. Gold written from the rule text before the flag script was run on this file. Not human-reviewed."
+  }
+}
