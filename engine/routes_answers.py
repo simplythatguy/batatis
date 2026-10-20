@@ -86,11 +86,6 @@ def _blank_to_none(value: str | None) -> str | None:
     return text or None
 
 
-def _stored_file(case: Case, file_id: str) -> bool:
-    """True when a fact already on the case points at this file. Bytes are not read."""
-    return any(fact.source.type == 'file' and fact.source.ref == file_id for fact in case.facts)
-
-
 def _user_text(field: str, value: str) -> Fact:
     """Applicant-typed listing metadata. This is not a file reference."""
     return Fact(field=field, value=value, kind='pointed', status='confirmed',
@@ -138,9 +133,10 @@ def create_answers_router(cases: Callable[[], CaseStore], code: Callable[[], Cod
     @router.post('/cases/{case_id}/evidence', response_model=EvidenceCreated, status_code=201)
     def add_evidence(case_id: str, body: EvidenceCreate):
         case = get_case(case_id)
-        if body.file_id is not None and not _stored_file(case, body.file_id):
+        # #24's case_files store is not here yet. A fact posted with source.type file is not one.
+        if body.file_id is not None:
             raise HTTPException(400, 'file_id does not match a stored file')
-        kind = 'file' if body.file_id is not None else 'text'
+        kind = 'text'
         if body.provision_id is None:
             try:
                 items = open_items(case)

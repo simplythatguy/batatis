@@ -120,23 +120,12 @@ def test_evidence_post_groups_and_closes_then_delete_reopens(client):
 def test_pair_evidence_closes_only_that_pair_and_rejects_unknown_pairs(client):
     http, store = client
     case = _case(store)
-    rejected = http.post(f'/cases/{case.id}/evidence', json={
-        'provision_id': '9.99.1.1.(1)', 'objective': 'Q1', 'function': 'P1',
-        'evidence_type': 'CCMC evaluation', 'description': 'Applicant named a CCMC report they will attach',
-        'file_id': 'file_applicant_1'})
-    assert rejected.status_code == 400
-    assert rejected.json()['detail'] == 'file_id does not match a stored file'
-    case.facts.append(fact(
-        'file', 'file_applicant_1',
-        source=Source(type='file', ref='file_applicant_1', quote='Applicant file metadata.')))
-    store.put(case)
     created = http.post(f'/cases/{case.id}/evidence', json={
         'provision_id': '9.99.1.1.(1)', 'objective': 'Q1', 'function': 'P1',
-        'evidence_type': 'CCMC evaluation', 'description': 'Applicant named a CCMC report they will attach',
-        'file_id': 'file_applicant_1'})
+        'evidence_type': 'CCMC evaluation', 'description': 'Applicant named a CCMC report they will attach'})
     assert created.status_code == 201
-    assert created.json()['evidence']['file_id'] == 'file_applicant_1'
-    assert created.json()['evidence']['kind'] == 'file'
+    assert created.json()['evidence']['file_id'] is None
+    assert created.json()['evidence']['kind'] == 'text'
     assert created.json()['evidence']['status'] == 'evidence_listed'
     stored = store.get(case.id)
     assert not any(entry.field.endswith('.file_ref') for entry in stored.facts)
@@ -298,3 +287,30 @@ def test_unknown_file_id_is_400(client):
     assert rejected.status_code == 400
     assert rejected.json()['detail'] == 'file_id does not match a stored file'
     assert store.get(case.id).evidence == []
+
+
+def test_client_posted_file_source_fact_does_not_validate_file_id(client):
+    """A fact from POST /cases/{id}/facts with source.type file is not a stored file.
+
+    Every file_id is 400 until #24's case_files store exists.
+    """
+    http, store = client
+    case = _case(store)
+    posted = http.post(f'/cases/{case.id}/facts', json={
+        'field': 'attachment', 'value': 'file_applicant_1', 'kind': 'pointed', 'status': 'confirmed',
+        'source': {'type': 'file', 'ref': 'file_applicant_1', 'quote': 'Applicant file metadata.'}})
+    assert posted.status_code == 200
+    assert any(item['source']['type'] == 'file' and item['source']['ref'] == 'file_applicant_1'
+               for item in posted.json()['facts'])
+    listing = {
+        'evidence_type': 'CCMC evaluation',
+        'description': 'Applicant named a CCMC report they will attach',
+        'file_id': 'file_applicant_1',
+    }
+    for payload in ({**listing, 'provision_id': '9.99.1.1.(1)'}, listing):
+        rejected = http.post(f'/cases/{case.id}/evidence', json=payload)
+        assert rejected.status_code == 400
+        assert rejected.json()['detail'] == 'file_id does not match a stored file'
+    stored = store.get(case.id)
+    assert stored.evidence == []
+    assert not any(item.field.startswith('evidence.') for item in stored.facts)
