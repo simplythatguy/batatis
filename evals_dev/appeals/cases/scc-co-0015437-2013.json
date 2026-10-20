@@ -1,0 +1,126 @@
+{
+  "id": "scc-co-0015437-2013",
+  "title": "Building \u2013 Electromagnetic Locking Devices and Impeded Egress Zone December 2013",
+  "decision_date": "2013-12-30",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2013/Redacted_Building_Electromagnetic_Locking_Devices_and_Impeded_Egress_Zone_December_2013.pdf",
+  "applicant_type": null,
+  "topic": null,
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "A health-care provider built a sprinklered, two-storey combustible supportive-living building, divided by 2 h firewalls, with a secure dementia (SL-4D) area. It installed electromagnetic locks that would not release 15 seconds after pressure was applied.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "alternative solution",
+    "electromagnetic locks",
+    "impeded egress zone",
+    "care occupancy",
+    "staffing not equivalency",
+    "superseded STANDATA"
+  ],
+  "missing_info": [],
+  "edition_original": "ABC 2006",
+  "other_codes": [],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": "R2_insufficient",
+    "basis_type": "analogous",
+    "basis": "analogous: appeal of an s.49 order issued after a Request for Specific Variance. The panel found both insufficient evidence and non-equivalence (form reason 3 also supported)."
+  },
+  "outcome": "varied",
+  "outcome_summary": "Compliance with 3.4.6.15.(4)(e) was still required, but the deadline changed from 11 Oct 2013 to 'prior to building occupancy'.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "3.4.6.15.(4)(e)",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.4.6.15.(4)(e)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.2.2.19.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.2.19.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.2.2.16.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.2.16.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.2.2.18.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.2.18.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "1.2.1.1.",
+      "source_code": "ABC 2006",
+      "source_division": "A",
+      "source_part": "Part 1",
+      "parsed_id": "1.2.1.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "The measures listed as (1) through (13) on pages 6 to 8 of the Mag Lock Alternative Solution Report lack sufficient evidence of achieving at least the level of performance required by Division B",
+      "sentences": 1,
+      "quote_confidence": "standard",
+      "kind": "excerpt",
+      "field": "refusal_reason_evidence"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": false,
+    "weak_flag": null,
+    "label_strength": null,
+    "facts": {}
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": null,
+    "engineering_reason": "",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}

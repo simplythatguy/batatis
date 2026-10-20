@@ -1,0 +1,109 @@
+{
+  "id": "scc-co-0015467-2016",
+  "title": "Building \u2013 The use of an aluminium panel system utilizing polyamide inserts \u2013 August 2016",
+  "decision_date": "2016-09-30",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2016/Redacted_Decision_0015467.pdf",
+  "applicant_type": null,
+  "topic": "cladding",
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "An architectural firm sought a building permit for a building required to be of noncombustible construction, clad in an aluminum panel system with polyamide thermal-break inserts. The municipality refused the permit.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "noncombustible construction",
+    "exterior wall combustible components",
+    "test evidence",
+    "alternative solution process understanding"
+  ],
+  "missing_info": [],
+  "edition_original": "ABC 2014",
+  "other_codes": [],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": "R2_insufficient",
+    "basis_type": "analogous",
+    "basis": "analogous: building permit refusal (no alternative solution filed). The decisive gap was missing CAN/ULC-S134 test evidence."
+  },
+  "outcome": "upheld",
+  "outcome_summary": "Refusal confirmed on the 3.1.5.5 (CAN/ULC-S134) ground only. The panel accepted the minor-combustible-component and non-structural arguments and urged an alternative-solution application.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "3.1.5.2.(h)",
+      "source_code": "ABC 2014",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": null,
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "Identifier could not be parsed as a provision id, so it was not reconstructed."
+    },
+    {
+      "source_article": "3.1.5.5.",
+      "source_code": "ABC 2014",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.1.5.5.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "4.1.1.3.",
+      "source_code": "ABC 2014",
+      "source_division": "B",
+      "source_part": "Part 4",
+      "parsed_id": "4.1.1.3.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "the Wall Cladding System has not undergone such testing, and while future testing may well satisfy the identified criteria; without it, no one can know this for certain",
+      "sentences": 1,
+      "quote_confidence": "standard",
+      "kind": "excerpt",
+      "field": "refusal_reason_evidence"
+    },
+    {
+      "text": "The panel relied in part on 'the professional opinion of LRI Fire Protection and Building Code Engineers'. It noted that any alternative solution would need the steel flashing identified by the Professional Engineer's 6 April 2016 letter.",
+      "sentences": 2,
+      "quote_confidence": "standard",
+      "kind": "excerpt",
+      "field": "professional_involvement"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": true,
+    "weak_flag": "depends",
+    "label_strength": "weak",
+    "facts": {}
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "depends",
+    "engineering_reason": "Weak appeal label only. Not an NBC(AE) 2023 professional-involvement determination.",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}

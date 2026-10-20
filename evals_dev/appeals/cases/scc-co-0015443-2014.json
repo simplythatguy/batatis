@@ -1,0 +1,131 @@
+{
+  "id": "scc-co-0015443-2014",
+  "title": "Building \u2013 Second Storey Fire Resistance Rating and Base Building Classification January 2015",
+  "decision_date": "2015-01-30",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2015/Building%20-%20Second%20Storey%20Fire%20Resistance%20Rating%20and%20Base%20Building%20Classification%20January%202015.pdf",
+  "applicant_type": "architect-engineer",
+  "topic": null,
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "An architect proposed a two-storey tenant fit-out in a sprinklered multi-bay warehouse classified as Group F, Division 2. The second floor of the tenant space was Group D office space over an F3/D main floor.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "multiple major occupancies",
+    "superimposed occupancy",
+    "fire-resistance rating",
+    "building classification"
+  ],
+  "missing_info": [],
+  "edition_original": "ABC 2006",
+  "other_codes": [],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": null,
+    "basis_type": "not applicable",
+    "basis": "not applicable: code-interpretation dispute over a permit refusal; not framed as an alternative solution"
+  },
+  "outcome": "upheld",
+  "outcome_summary": "Refusal confirmed: the floor under a superimposed major occupancy takes the lower (F2) occupancy rating, so 2 h with supports.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "3.2.2.6.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.2.6.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.2.2.7.(2)",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.2.7.(2)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.2.2.8.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.2.8.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.2.2.54.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.2.54.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.2.2.67.(2)(b),(d)",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": null,
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "Combined citation or clause list. Components were not split into 2023 articles."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "the fire and structural objectives of the code would not be met if the tenant space is treated as a separate entity independent of the more restrictive building classification",
+      "sentences": 1,
+      "quote_confidence": "standard",
+      "kind": "excerpt",
+      "field": "refusal_reason_evidence"
+    },
+    {
+      "text": "Not at issue (appellant was an architect).",
+      "sentences": 1,
+      "quote_confidence": "standard",
+      "kind": "summary",
+      "field": "professional_involvement"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": false,
+    "weak_flag": null,
+    "label_strength": null,
+    "facts": {}
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": null,
+    "engineering_reason": "",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}

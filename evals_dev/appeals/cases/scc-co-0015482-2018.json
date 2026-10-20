@@ -1,0 +1,113 @@
+{
+  "id": "scc-co-0015482-2018",
+  "title": "Building \u2013 Egress requirements in the 2006 Alberta Building Code \u2013 January 2018",
+  "decision_date": "2018-01-30",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2018/Building%20-%20Egress%20requirements%20in%20the%202006%20Alberta%20Building%20Code%20-%20January%202018.pdf",
+  "applicant_type": "owner",
+  "topic": null,
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "An owner renovated a third-floor bedroom in a three-storey group home, adding a dormer to raise the ceiling height. The municipality found the third level no longer met the dwelling-unit travel limit to exits or egress doors.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "egress from dwelling units",
+    "bedroom window",
+    "alternative solution",
+    "applicant burden of evidence"
+  ],
+  "missing_info": [],
+  "edition_original": "ABC 2006",
+  "other_codes": [],
+  "text_source_kind": "ocr",
+  "label_strength": "weak",
+  "refusal": {
+    "code": "R3_not_equivalent",
+    "basis_type": "analogous",
+    "basis": "analogous: order appeal. The panel noted earlier alternative solutions were not acceptable or 'did not provide an equivalent level of safety'."
+  },
+  "outcome": "varied",
+  "outcome_summary": "Order varied to allow an egress window in any third-level bedroom, and/or a balcony per 9.9.9.1.(3), or an alternative solution acceptable to the municipality, by 14 Mar 2018. The vacate directive remains.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "9.9.9.1.(1)",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 9",
+      "parsed_id": "9.9.9.1.(1)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "9.9.9.1.(2)",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 9",
+      "parsed_id": "9.9.9.1.(2)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "9.9.9.1.(3)",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 9",
+      "parsed_id": "9.9.9.1.(3)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "2.2.10.1.",
+      "source_code": "ABC 2006",
+      "source_division": "C",
+      "source_part": "Part 2",
+      "parsed_id": "2.2.10.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "Several alternative solutions have been discussed none of which have proved acceptable for one reason or another or did not provide an equivalent level of safety.",
+      "sentences": 1,
+      "quote_confidence": "low",
+      "kind": "excerpt",
+      "field": "refusal_reason_evidence"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": false,
+    "weak_flag": null,
+    "label_strength": null,
+    "facts": {}
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": null,
+    "engineering_reason": "",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}

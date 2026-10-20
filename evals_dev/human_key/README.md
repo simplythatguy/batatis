@@ -77,6 +77,10 @@ evals_dev/outputs/export/*.json
 
 See `evals_dev/output_adapters.py` for the fields that are read.
 
+Appeal decisions are a separate weak-label set under `evals_dev/appeals/`. The
+same command reports them as `label_source: appeals_weak`. Read
+`evals_dev/appeals/README.md` before treating any of those labels as gold.
+
 Tests, including the fake keys under `evals_dev/tests/fixtures/human_key/`:
 
 ```bash

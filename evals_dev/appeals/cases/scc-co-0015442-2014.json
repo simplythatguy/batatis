@@ -1,0 +1,105 @@
+{
+  "id": "scc-co-0015442-2014",
+  "title": "Building \u2013 Exit Stairwell Door and Frame Assemblies and Compliance with ABC 2006 and NFP 80 December 2014",
+  "decision_date": "2014-12-11",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2014/Building_Exit_Stairwell_Door_and_FrameAssemblies_and_Compliance_with_ABC2006_and_NFPA80.pdf",
+  "applicant_type": null,
+  "topic": null,
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "A developer installed exit stair door and frame assemblies whose fire tests were small-scale. The municipality ordered a stop to the work and full-scale CAN4-S104 test results, or an SCC-accredited listing, showing that the doors and frames as installed met the required fire-protection rating and temperature-rise limits.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "fire doors",
+    "closures",
+    "test evidence",
+    "listing/certification",
+    "NFPA 80"
+  ],
+  "missing_info": [],
+  "edition_original": "ABC 2006",
+  "other_codes": [
+    "NFPA 80"
+  ],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": "R2_insufficient",
+    "basis_type": "analogous",
+    "basis": "analogous: appeal of an s.49 order; the issue was ambiguous or insufficient test evidence of compliance"
+  },
+  "outcome": "varied",
+  "outcome_summary": "Order varied to three options: an unambiguous compliance letter from the testing agency, full-scale testing, or removal and reinstallation. Duplicate and unnecessary items were removed.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "3.1.8.4.(1)",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.1.8.4.(1)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.1.8.15.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.1.8.15.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "8.1.2.2.(1)",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 8",
+      "parsed_id": "8.1.2.2.(1)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "There is a lack of clarity in the evidence whether the testing agency is of the opinion that the small scale test demonstrates the assembly is compliant.",
+      "sentences": 1,
+      "quote_confidence": "standard",
+      "kind": "excerpt",
+      "field": "refusal_reason_evidence"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": false,
+    "weak_flag": null,
+    "label_strength": null,
+    "facts": {}
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": null,
+    "engineering_reason": "",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}

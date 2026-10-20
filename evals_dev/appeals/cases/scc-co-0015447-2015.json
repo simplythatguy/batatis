@@ -1,0 +1,124 @@
+{
+  "id": "scc-co-0015447-2015",
+  "title": "Building \u2013 Requirement to provide schedules of Professional Involvement June 2015",
+  "decision_date": "2015-06-26",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2015/Building%20-%20Requirement%20to%20provide%20schedules%20of%20Professional%20Involvement%20June%202015.pdf",
+  "applicant_type": null,
+  "topic": null,
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "An older commercial building used by a local establishment had structural and building-envelope deficiencies identified by a structural engineer (2012) and a building envelope engineer (2012), who recommended phased repairs. Their recommendations were not followed in a timely way.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "professional involvement",
+    "schedules of professional involvement",
+    "unsafe condition",
+    "structural/envelope remediation"
+  ],
+  "missing_info": [],
+  "edition_original": "ABC 2006",
+  "other_codes": [],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": null,
+    "basis_type": "not applicable",
+    "basis": "not applicable: appeal of an s.49 order"
+  },
+  "outcome": "varied",
+  "outcome_summary": "Order varied into two options: stop occupancy until written permission, or take precautions and provide verification of the professionals of record and constructor, full engineer reviews per their Schedule A/B scope by 31 Jul 2015, and a revised permit for remediation.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "2.2.14.1.",
+      "source_code": "ABC 2006",
+      "source_division": "C",
+      "source_part": "Part 2",
+      "parsed_id": "2.2.14.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "8.1.2.2.(1)",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 8",
+      "parsed_id": "8.1.2.2.(1)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "2.2.12.1.",
+      "source_code": "ABC 2006",
+      "source_division": "C",
+      "source_part": "Part 2",
+      "parsed_id": "2.2.12.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "2.4.3.1.",
+      "source_code": "ABC 2006",
+      "source_division": "C",
+      "source_part": "Part 2",
+      "parsed_id": "2.4.3.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "2.2.9.8.",
+      "source_code": "ABC 2006",
+      "source_division": "C",
+      "source_part": "Part 2",
+      "parsed_id": "2.2.9.8.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "Central. The panel supported 'a structured sequential plan and monitoring by engineering specialists and constructor' with ongoing professional monitoring and involvement.",
+      "sentences": 2,
+      "quote_confidence": "standard",
+      "kind": "excerpt",
+      "field": "professional_involvement"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": true,
+    "weak_flag": "yes",
+    "label_strength": "weak",
+    "facts": {}
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "yes",
+    "engineering_reason": "Weak appeal label only. Not an NBC(AE) 2023 professional-involvement determination.",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}

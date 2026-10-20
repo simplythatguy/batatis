@@ -13,6 +13,10 @@ Checks, each ``x of n`` with a Wilson 95% interval:
    ``validate_cases.py`` pair/status comparison for a gold Section C row.
 3. Planted Part 1 A/B missing-field detection, plus false positives on clean controls.
 4. Schema validity of case, identify, completeness, Section D and export metadata.
+5. Appeal decisions, reported separately as ``label_source: appeals_weak``:
+   citation resolution after mapping, the Section C anchor on decision 0015414,
+   professional-involvement agreement on the 12 decisions where it comes up,
+   and the 2022-06, 0015427, and 2024-06 / 0015432 anchors.
 
 A check that needs codedb and does not find ``codedb/build/codedb.sqlite`` (or
 ``BATATIS_CODEDB``) reports n=0 and ``skipped: codedb missing``. The same path is
@@ -33,6 +37,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEV = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
+from evals_dev.appeals.checks import build_appeals_block, load_appeals  # noqa: E402
 from evals_dev.jsoncheck import validate as schema_errors  # noqa: E402
 from evals_dev.output_adapters import citations, discover  # noqa: E402
 from evals_dev.stats import proportion  # noqa: E402
@@ -356,7 +361,8 @@ def _live_documents(db_path: Path) -> tuple[dict[str, list], str | None]:
 
 
 def build_report(*, root: Path, db_path: Path | None, cases: list[dict], manifests: list[dict],
-                 schemas: dict[str, dict], planted_checker=None, documents: dict | None = None) -> dict:
+                 schemas: dict[str, dict], planted_checker=None, documents: dict | None = None,
+                 appeals: list[dict] | None = None, professional_flagger=None) -> dict:
     found = documents if documents is not None else discover(root)
     system = {
         'identify': citations('identify', found.get('identify') or []),
@@ -422,6 +428,10 @@ def build_report(*, root: Path, db_path: Path | None, cases: list[dict], manifes
                 'false_positives': false_positives,
             },
             'schema_validity': score_schemas(docs, schemas, skip),
+            'appeals': build_appeals_block(
+                [] if appeals is None else appeals, db_path, score_citations,
+                professional_flagger=professional_flagger,
+            ),
         },
     }
 
@@ -464,6 +474,23 @@ def render(report: dict) -> str:
     lines.append(_line('overall', schema['overall']))
     for kind, row in schema['by_kind'].items():
         lines.append(_line(kind, row))
+    appeals = checks.get('appeals') or {}
+    lines.extend(['', 'Appeals (weak labels)', appeals.get('note') or ''])
+    cite_row = appeals.get('citation_resolution') or {}
+    if 'label' in cite_row:
+        lines.append(_line('citation resolution after mapping', cite_row))
+    anchor = appeals.get('section_c_anchor') or {}
+    if isinstance(anchor, dict) and 'quote_recorded' in anchor:
+        lines.append(_line('0015414 Section C quote recorded', anchor['quote_recorded']))
+        lines.append(_line('0015414 Section C engine probe', anchor['engine_flags_missing_section_c']))
+    prof = appeals.get('professional_involvement') or {}
+    if isinstance(prof, dict) and 'agreement' in prof:
+        lines.append(_line('professional-involvement agreement', prof['agreement']))
+    extra = appeals.get('anchors') or {}
+    if isinstance(extra, dict) and 'insufficient_information_2022_06' in extra:
+        lines.append(_line('2022-06 insufficient information', extra['insufficient_information_2022_06']['recorded']))
+        lines.append(_line('0015427 accepted with a condition', extra['accepted_with_condition_0015427']['recorded']))
+        lines.append(_line('2024-06 vs 0015432 deference opposed', extra['officer_deference_opposed']['recorded']))
     lines.extend(['', '--- json ---', json.dumps(report, indent=2)])
     return '\n'.join(lines) + '\n'
 
@@ -483,6 +510,7 @@ def main(argv: list[str] | None = None) -> int:
         cases=load_cases(args.root / 'cases'),
         manifests=load_manifests(args.root / 'planted' / 'ab_minimal'),
         schemas=load_schemas(args.root / 'schemas'),
+        appeals=load_appeals(args.root / 'appeals' / 'cases'),
     )
     text = render(report)
     if args.json:

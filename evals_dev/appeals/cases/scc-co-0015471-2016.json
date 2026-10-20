@@ -1,0 +1,105 @@
+{
+  "id": "scc-co-0015471-2016",
+  "title": "Building \u2013 Meeting the requirements of exposing building face \u2013 November 2016",
+  "decision_date": "2016-11-30",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2016/Building%20-%20Meeting%20the%20requirements%20of%20exposing%20building%20face%20-%20November%202016.pdf",
+  "applicant_type": "homebuilder",
+  "topic": "part9-spatial-separation",
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "A home builder constructed a house with a secondary suite that encroached within 1.2 m of the property line, by 0.01 m to 0.05 m. The north wall had two glazed openings.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "spatial separation",
+    "limiting distance",
+    "dimensional tolerance",
+    "exposing building face"
+  ],
+  "missing_info": [],
+  "edition_original": "ABC 2006",
+  "other_codes": [],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": null,
+    "basis_type": "not applicable",
+    "basis": "not applicable: appeal of an s.49 order; no alternative solution was submitted"
+  },
+  "outcome": "upheld",
+  "outcome_summary": "Order confirmed. The encroachment exceeded the 2% dimensional tolerance in Div C 2.2.2.4, and Table 9.10.15.4 allows zero glazed area at under 1.2 m limiting distance.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "9.10.15.5.(2)",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 9",
+      "parsed_id": "9.10.15.5.(2)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "9.10.15.4.(1)",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 9",
+      "parsed_id": "9.10.15.4.(1)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "2.2.2.4.",
+      "source_code": "ABC 2006",
+      "source_division": "C",
+      "source_part": "Part 2",
+      "parsed_id": "2.2.2.4.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "Table 9.10.15.4.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 9",
+      "parsed_id": null,
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "Table citation. Not mapped without a verified NBC(AE) 2023 table id."
+    }
+  ],
+  "quotes": [],
+  "professional_involvement": {
+    "addressed": false,
+    "weak_flag": null,
+    "label_strength": null,
+    "facts": {}
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": null,
+    "engineering_reason": "",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}

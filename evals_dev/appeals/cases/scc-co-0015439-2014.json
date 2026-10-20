@@ -1,0 +1,143 @@
+{
+  "id": "scc-co-0015439-2014",
+  "title": "Building \u2013 Construction of a Retaining Structure Existing Without a Permit August 2014",
+  "decision_date": "2014-08-08",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2014/Redacted_Building_Construction%20of%20a%20Retaining%20Structure%20Existing%20Without%20a%20Permit%20August%202014_15439.pdf",
+  "applicant_type": null,
+  "topic": "part4-structural",
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "Property owners built a retaining structure on a riverbank lot without a permit, in an area with a history of bank subsidence. The municipality ordered the dwelling vacated.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "retaining structure",
+    "geotechnical",
+    "slope stability",
+    "completeness of permit information",
+    "professional involvement"
+  ],
+  "missing_info": [],
+  "edition_original": "ABC 2006",
+  "other_codes": [],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": "R2_insufficient",
+    "basis_type": "analogous",
+    "basis": "analogous: order appeal in which the order itself states the submitted information is inadequate; the panel found permit application requirements unmet"
+  },
+  "outcome": "varied",
+  "outcome_summary": "The evacuation directive was removed (no imminent danger per the appellants' engineer) and replaced with barriers. The permit information requirements remain, with a reasonable time to comply.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "4.1.3.2.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 4",
+      "parsed_id": "4.1.3.2.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "4.2.2.1.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 4",
+      "parsed_id": "4.2.2.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "4.2.2.3.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 4",
+      "parsed_id": "4.2.2.3.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "4.2.4.1.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 4",
+      "parsed_id": "4.2.4.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "2.2.14.1.",
+      "source_code": "ABC 2006",
+      "source_division": "C",
+      "source_part": "Part 2",
+      "parsed_id": "2.2.14.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "2.2.2.2.",
+      "source_code": "ABC 2006",
+      "source_division": "C",
+      "source_part": "Part 2",
+      "parsed_id": "2.2.2.2.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "The information provided is inadequate to confirm compliance with the Alberta Building Code requirements. Please provide a detailed slope stability study prepared by a qualified geotechnical engineer.",
+      "sentences": 2,
+      "quote_confidence": "standard",
+      "kind": "excerpt",
+      "field": "refusal_reason_evidence"
+    },
+    {
+      "text": "The order required a qualified geotechnical engineer's slope stability study, peer review by a consultant familiar with the site, geotechnical on-site review, and in-situ testing and drawings by a qualified structural engineer. The panel accepted the appellants' engineering company evidence on imminent danger and repairability.",
+      "sentences": 2,
+      "quote_confidence": "standard",
+      "kind": "excerpt",
+      "field": "professional_involvement"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": true,
+    "weak_flag": "yes",
+    "label_strength": "weak",
+    "facts": {}
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "yes",
+    "engineering_reason": "Weak appeal label only. Not an NBC(AE) 2023 professional-involvement determination.",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}

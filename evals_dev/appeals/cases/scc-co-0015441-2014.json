@@ -1,0 +1,132 @@
+{
+  "id": "scc-co-0015441-2014",
+  "title": "Building \u2013 Permit Refusal Residential Occupancy Alternative Solution October 2014",
+  "decision_date": "2014-10-21",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2014/Redacted_Permit%20Refusal%20Residential%20Occupancy%20Alternative%20Solution%20October%202014_0015441.pdf",
+  "applicant_type": null,
+  "topic": null,
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "A developer applied to build a sprinklered multi-storey residential building on a sloping ravine site. Its stated aims were to reduce structural weight on poor soils and to drop the 2 h floor ratings.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "alternative solution",
+    "building classification",
+    "building height/grade",
+    "fire-resistance rating",
+    "firefighting access"
+  ],
+  "missing_info": [],
+  "edition_original": "ABC 2006",
+  "other_codes": [],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": "R3_not_equivalent",
+    "basis_type": "analogous",
+    "basis": "analogous: building permit refusal under Safety Codes Act s.44(3) for a proposed alternative solution (pre-dates the SCC variance form)"
+  },
+  "outcome": "upheld",
+  "outcome_summary": "Council confirmed the building permit refusal. Sprinklering was required under both classifications, so it was not an enhancement, and the building area also exceeded the 3.2.2.43 limit.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "1.2.1.1.",
+      "source_code": "ABC 2006",
+      "source_division": "A",
+      "source_part": "Part 1",
+      "parsed_id": "1.2.1.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "1.3.3.4.",
+      "source_code": "ABC 2006",
+      "source_division": "A",
+      "source_part": "Part 1",
+      "parsed_id": "1.3.3.4.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "1.4.1.2.",
+      "source_code": "ABC 2006",
+      "source_division": "A",
+      "source_part": "Part 1",
+      "parsed_id": "1.4.1.2.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.2.2.42.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.2.42.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.2.2.43.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.2.43.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "does not satisfy the requirements of a Group C, up to six storeys, sprinklered building, nor does it provide an equivalent level of safety to a Group C, any height, any area, sprinklered (3.2.2.42.) building",
+      "sentences": 1,
+      "quote_confidence": "standard",
+      "kind": "excerpt",
+      "field": "refusal_reason_evidence"
+    },
+    {
+      "text": "Not at issue. The appellants were represented at the hearing by an engineer and an architect.",
+      "sentences": 2,
+      "quote_confidence": "standard",
+      "kind": "summary",
+      "field": "professional_involvement"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": false,
+    "weak_flag": null,
+    "label_strength": null,
+    "facts": {}
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": null,
+    "engineering_reason": "",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}
