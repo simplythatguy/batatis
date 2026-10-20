@@ -1,6 +1,6 @@
 # Judging Criteria and Weighting
 
-Source: Building Codes Challenge. Built World Tech — Venture Pilots 2026. PDF title: Building Codes_Challenge Scope - Sept 15 2026.docx. Section 3, Judging Criteria and Weighting.
+Source (editor's note): Building Codes Challenge. Built World Tech — Venture Pilots 2026. PDF title: Building Codes_Challenge Scope - Sept 15 2026.docx. Section 3, Judging Criteria and Weighting.
 
 https://edmontonunlimited.com/wp-content/uploads/2026/09/Building-Codes-Challenge-with-Appendix-.pdf
 
@@ -21,4 +21,3 @@ Rubric for evaluating innovator team submissions at Semi-Finals and Demo Day. Th
 ## Editor's notes (not in the PDF)
 
 - The nine weights sum to 100. That sum is computed; the PDF prints no total row.
-- Semi-Finals and Demo Day usage is stated in the PDF's opening rubric sentence: "Rubric for evaluating innovator team submissions at Semi-Finals and Demo Day. These judging criteria follow the criteria provided in Section 2 to the applicants."
