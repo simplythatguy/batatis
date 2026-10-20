@@ -28,6 +28,7 @@ def test_heldout_v11_scorer_skips_null_labels_and_splits_source(tmp_path):
     text = report(loaded, codes)
     assert text.startswith(SECTION)
     assert INTERPRETATION in text
+    assert '(on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction)' in text
     assert 'internal' in text and 'not judge-facing' in text
     assert 'confident_wrong' in text
     assert 'unknown_rate' in text

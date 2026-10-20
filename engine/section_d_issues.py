@@ -59,7 +59,6 @@ log = logging.getLogger(__name__)
 # Used only when the Division C screen is unresolved and every specific question was unusable.
 GENERIC_FALLBACK_QUESTION = (
     'Which building facts are still unconfirmed before this practice-of-engineering flag can be set?')
-generic_fallback_fires = 0
 
 # The applicant has to confirm these. A name or seal copied off a document does not count.
 PROFESSIONAL_REQUEST = (
@@ -76,9 +75,9 @@ _REGISTRATION_FIELDS = (
     'professional.registration_number', 'professional.registration',
     'registered_professional.registration_number', 'apega_number', 'aaa_number',
 )
-_ROLE_VALUES = frozenset({
-    'engineer', 'architect', 'professional engineer', 'registered engineer',
-    'professional architect', 'registered architect',
+# Commercial roles are not a registered professional, even beside the word engineer.
+_REJECT_ROLE = frozenset({
+    'sales', 'rep', 'supplier', 'manufacturer', 'salesperson', 'vendor',
 })
 _PROCESS_RULE_IDS = {
     'rationale': ('C', '2.3.1.1.(2)(a)'),
@@ -184,12 +183,10 @@ class SectionDIssue(BaseModel):
 
 
 def _question(result: ProfessionalResult) -> str:
-    global generic_fallback_fires
     for question in result.questions:
         folded = question.casefold()
         if question.strip() and 'safe' not in folded and 'compli' not in folded:
             return question
-    generic_fallback_fires += 1
     log.info('generic fallback practice question')
     return GENERIC_FALLBACK_QUESTION
 
@@ -207,10 +204,13 @@ def _applicant_confirmed(case: Case, *fields: str) -> str | None:
 
 
 def _role_confirmed(value: str) -> bool:
-    tokens = re.findall(r'[a-z]+', value.casefold())
-    if 'sales' in tokens:
+    """Case-insensitive. Punctuation is removed. Engineer and architect variants pass; commercial roles do not."""
+    tokens = re.sub(r'[^a-z0-9]+', ' ', value.casefold()).split()
+    if any(token in _REJECT_ROLE for token in tokens):
         return False
-    return ' '.join(tokens) in _ROLE_VALUES
+    if 'peng' in tokens or {'p', 'eng'} <= set(tokens):
+        return True
+    return 'engineer' in tokens or 'architect' in tokens
 
 
 def professional_confirmed(case: Case) -> bool:
@@ -386,14 +386,15 @@ def generic_fallback_on_dev(cases: list[dict], codes: Codes) -> int:
     Each case contributes its seed provision only. The route does not read the prose
     and does not infer facts from it.
     """
-    global generic_fallback_fires
-    generic_fallback_fires = 0
+    fired = 0
     for case in cases:
         seed = case.get('seed_provision')
         provisions = [seed] if isinstance(seed, str) and seed else []
-        section_d_issues(Case(provisions=provisions), codes)
-    log.info('generic fallback practice question fired %s times on %s dev cases', generic_fallback_fires, len(cases))
-    return generic_fallback_fires
+        issues = section_d_issues(Case(provisions=provisions), codes)
+        if any(issue.practice_of_engineering.question == GENERIC_FALLBACK_QUESTION for issue in issues):
+            fired += 1
+    log.info('generic fallback practice question fired %s times on %s dev cases', fired, len(cases))
+    return fired
 
 
 def _cited(issue: SectionDIssue) -> list[tuple[str, str, str]]:

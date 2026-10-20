@@ -31,6 +31,8 @@ Gold `depends` matches system `unknown`. Under-flag is gold yes and system no. O
 no and system yes. A case is skipped when codedb (or the rule lookup standing in for it) cannot
 resolve a provision the screen asks for.
 
+(on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction)
+
 Part 4 on text-only cases is derived from stated facts. A wood-frame building inside Part 9 with no Part 4 trigger is part4_design false, so the screen can answer no. On this dev set (model-checked, in-sample) the shipped screen still emits 0 no labels.
 """
 from __future__ import annotations

@@ -214,6 +214,41 @@ def test_status_lists_evidence_only_after_a_confirmed_professional():
     assert supplied_house.practice_of_engineering.value is False and supplied_house.status == 'evidence_listed'
 
 
+def test_role_variants_confirm_only_with_an_applicant_number_or_seal():
+    codes = codes_with_rules()
+    bare = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact('part4_design', True)]), codes)[0]
+    file = Source(type='file', ref='applicant-report.pdf', quote='Applicant report metadata.')
+    accepted = (
+        'structural engineer', 'professional engineer', 'P.Eng.', 'P Eng', 'PEng',
+        'registered professional engineer', 'ENGINEER', 'architect', 'registered architect',
+        'Architect!',
+    )
+    rejected = ('sales', 'rep', 'supplier', 'manufacturer', 'salesperson', 'vendor', 'sales engineer')
+
+    def listed(role: str, **extra):
+        return Case(provisions=[BENCHMARK], facts=[
+            fact('part4_design', True),
+            fact('professional.role', role),
+            fact(f'evidence.{bare.id}.file_ref', file.ref, source=file),
+            *extra.get('facts', []),
+        ])
+
+    for role in accepted:
+        numbered = listed(role, facts=[fact('professional.registration_number', 'APEGA-1')])
+        assert professional_confirmed(numbered), role
+        assert section_d_issues(numbered, codes)[0].status == 'evidence_listed', role
+        role_only = listed(role)
+        assert not professional_confirmed(role_only), role
+        assert section_d_issues(role_only, codes)[0].status == 'needs_professional', role
+    sealed = listed('P.Eng.', facts=[fact('professional.seal', 'applicant-confirmed seal')])
+    assert professional_confirmed(sealed)
+    assert section_d_issues(sealed, codes)[0].status == 'evidence_listed'
+    for role in rejected:
+        case = listed(role, facts=[fact('professional.registration_number', 'APEGA-1')])
+        assert not professional_confirmed(case), role
+        assert section_d_issues(case, codes)[0].status == 'needs_professional', role
+
+
 def test_part3_sales_rep_email_stays_needs_professional():
     """Case B input: a Part 3 building plus the sales-rep email. The email is not a professional.
 
@@ -341,11 +376,16 @@ def test_eval_script_prints_in_sample_wilson_table(capsys):
         'Part 9 with no Part 4 trigger is part4_design false, so the screen can answer no. '
         'On this dev set (model-checked, in-sample) the shipped screen still emits 0 no labels.'
     )
+    construction = (
+        '(on text-only cases it answers only yes or ask, never no, '
+        'so 0 under-flags holds by construction)'
+    )
     for path in ('docs/api-contract.md', 'README.md', 'engine/section_d_flag_eval.py'):
         text = Path(path).read_text()
         if path != 'engine/section_d_flag_eval.py':
             assert expected in text
         assert disclosure in text
+        assert construction in text
     assert 'gold: model-checked' in out
     assert 'split: dev (in-sample; pending out-of-sample confirmation)' in out
     assert 'rules_plus_unknown on this dev table is in-sample and pending out-of-sample confirmation' in out
@@ -490,17 +530,16 @@ def test_generic_fallback_question_on_the_dev_set(caplog):
 
 
 def test_generic_fallback_counter_records_an_unusable_question():
-    import engine.section_d_issues as issues
     from engine.professional import ProfessionalReason, ProfessionalResult
+    from engine.section_d_issues import _question
 
-    issues.generic_fallback_fires = 0
     result = ProfessionalResult(
         required='depends', general_required='depends',
         reasons=[ProfessionalReason(code='general_unresolved', required='depends', message='Ask.',
                                     citation='rule:C:2.4.1.1.(1)')],
         questions=['This design complies and is safe.'])
-    assert issues._question(result) == GENERIC_FALLBACK_QUESTION
-    assert issues.generic_fallback_fires == 1
+    assert _question(result) == GENERIC_FALLBACK_QUESTION
+    assert 'generic_fallback_fires' not in Path('engine/section_d_issues.py').read_text()
 
 
 def test_second_printing_citations_resolve_when_codedb_is_present():
