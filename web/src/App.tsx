@@ -5,6 +5,7 @@ import { CodeCheck } from "./screens/CodeCheck";
 import { Describe } from "./screens/Describe";
 import { Accuracy, Officer } from "./screens/Placeholders";
 import { SectionC } from "./screens/SectionC";
+import { PRIVACY_SENTENCE, PROCESSOR_LINE } from "./privacy";
 import { resetCase, useCase } from "./store";
 
 const EXPLICIT_ROUTES = ["/code-check", "/section-c", "/application", "/officer", "/accuracy"];
@@ -84,6 +85,11 @@ export function App() {
           ))}
         </nav>
         <div className="sidebar-foot">
+          <p className="meta privacy-notice">
+            {PRIVACY_SENTENCE}
+            <br />
+            {PROCESSOR_LINE}
+          </p>
           <div className="case-card">
             <span className="case-title">{c.title}</span>
             <span className="meta">Fixture case · fictional applicant</span>

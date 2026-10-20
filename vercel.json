@@ -1,0 +1,8 @@
+{
+  "routes": [
+    { "src": "^/codedb\\.sqlite$", "status": 404 },
+    { "src": "^/codedb/build/codedb\\.sqlite$", "status": 404 },
+    { "src": "^/api/codedb\\.sqlite$", "status": 404 },
+    { "src": "^/api/codedb/build/codedb\\.sqlite$", "status": 404 }
+  ]
+}

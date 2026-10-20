@@ -1,16 +1,20 @@
 """HTTP interface for the engine. Run: uvicorn engine.api:app --reload"""
 from __future__ import annotations
 
-from fastapi import FastAPI, HTTPException, Query, Response
+from fastapi import FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from codedb import AmbiguousProvisionError
 
 from .codes import CodeDbMissing, Codes
 from .export import ExportBlocked, ExportError, FormNotFound, export_case
+from .identify_http import CODEDB_DOWNLOADS, IdentifyRequest, IdentifyResponse, identify
 from .models import Case, Fact, Jurisdiction, SectionCRow
+from .privacy import PRIVACY_HEADER
 from .section_c import section_c_rows
+from .spend import BudgetStatus, budget_status
 from .store import CaseStore
 
 
@@ -27,11 +31,23 @@ class ExportRequest(BaseModel):
     draft: bool = False
 
 
-def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> FastAPI:
+def create_app(store: CaseStore | None = None, codes: Codes | None = None, identify_client=None) -> FastAPI:
     app = FastAPI(title='Batatis engine')
     app.add_middleware(CORSMiddleware, allow_origin_regex=r'http://(localhost|127\.0\.0\.1)(:\d+)?',
                        allow_methods=['*'], allow_headers=['*'])
-    state = {'store': store, 'codes': codes}
+
+    @app.middleware('http')
+    async def privacy_and_codedb(request: Request, call_next):
+        # The code database is not a download. The body is fixed and has no file bytes.
+        if request.url.path in CODEDB_DOWNLOADS:
+            denied = JSONResponse(status_code=404, content={'detail': 'not found'})
+            denied.headers['X-Batatis-Notice'] = PRIVACY_HEADER
+            return denied
+        response = await call_next(request)
+        response.headers['X-Batatis-Notice'] = PRIVACY_HEADER
+        return response
+
+    state = {'store': store, 'codes': codes, 'identify_client': identify_client}
 
     def cases() -> CaseStore:
         if state['store'] is None:
@@ -42,6 +58,19 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         if state['codes'] is None:
             state['codes'] = Codes()
         return state['codes']
+
+    @app.get('/status/budget', response_model=BudgetStatus)
+    def status_budget():
+        # Ledger problems stay on this 200. The body has no key and no per-call rows.
+        return budget_status()
+
+    @app.post('/identify', response_model=IdentifyResponse, responses={429: {'description': 'per-IP limit'}})
+    def identify_route(body: IdentifyRequest, request: Request):
+        outcome = identify(request, body, codes=state['codes'], client=state['identify_client'] or _refuse_live_client)
+        if isinstance(outcome, tuple):
+            status, payload, retry_after = outcome
+            return JSONResponse(status_code=status, content=payload, headers={'Retry-After': str(retry_after)})
+        return outcome
 
     @app.post('/cases', response_model=Case, status_code=201)
     def create_case(body: NewCase | None = None):
@@ -103,8 +132,6 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         except ValueError as e:
             raise HTTPException(400, f'invalid provision id: {e}')
 
-    from fastapi.responses import JSONResponse
-
     @app.exception_handler(CodeDbMissing)
     def missing_codedb(_request, _exc: CodeDbMissing):
         # Not FileNotFoundError. The body is fixed and carries no filesystem path.
@@ -112,6 +139,11 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
 
     app.include_router(__import__('engine.routes_case', fromlist=['create_router']).create_router(cases, code))
     return app
+
+
+def _refuse_live_client():
+    """No injected client. A live call that reached here did not reserve a provider request."""
+    raise RuntimeError('OpenAI client is not configured')
 
 
 app = create_app()

@@ -8,6 +8,9 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 
 | Method and path | Response |
 | --- | --- |
+| `GET /status/budget` | `200` `{ "live", "cap_usd", "spent_usd", "remaining_usd" }`. See below. |
+| `POST /identify` | Body `{ "query" }`. `200` `{ "label", "notice", "hits" }`. Over the per-IP limit, `429` with `Retry-After`. A full spend cap is `200` with `label` `keyword search, no AI`. |
+| `GET /codedb.sqlite`, `GET /codedb/build/codedb.sqlite`, `GET /api/codedb/build/codedb.sqlite` | `404` `{ "detail": "not found" }`. The code database file is not the body. |
 | `POST /cases` | `201` Case. Body is optional: `title`, `jurisdiction` (`id`, `name`, `authority`). |
 | `GET /cases/{case_id}` | Case, or `404` with detail `case not found`. |
 | `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. |
@@ -21,6 +24,39 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `GET /ccmc/search` | Query `q` (1–200 characters) and `limit` (1–50, default 20). `422` on a rejected query. `503` when the registry is unavailable; that detail is the registry error text. |
 | `GET /cases/{case_id}/process-fields` | Process-field list. Empty when the pathway is an acceptable solution. |
 | `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` when the blank form file is missing; that detail is the form error text. `500` on other export failures. |
+
+### Privacy notice
+
+Every response sets `X-Batatis-Notice` to:
+
+`Do not upload personal information. Demo data may be deleted. OpenAI (US) is a processor of text sent for a live model call.`
+
+The sidebar shows the same two sentences, with the processor on its own line. OpenAI (US) is the processor for text sent on a live model call. The notice is not a finding that a design complies.
+
+### Spend cap and `notice`
+
+Keyed OpenAI calls — identify rerank and verify, the completeness judge, Section D, and any other model call — reserve against one total cap before the provider is contacted (`BATATIS_TOTAL_BUDGET_USD`, default 20). There is no daily cap.
+
+`GET /status/budget` returns only:
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `live` | bool | True when `BATATIS_LIVE=1` and `OPENAI_API_KEY` is set. The key is not in the body. |
+| `cap_usd` | number or null | The total cap, in dollars, rounded to cents. Null when the variable is not a non-negative number. |
+| `spent_usd` | number or null | Settled spend, rounded to cents. Null when the ledger cannot be read. |
+| `remaining_usd` | number or null | Cap minus settled spend minus open reservations, rounded to cents, never below zero. Null when the ledger cannot be read. |
+
+The body has no per-request rows and no credentials. A missing ledger or a ledger error is still HTTP 200.
+
+When a keyed call is refused, the route answers with its existing offline result, HTTP 200, and a `notice` string. It does not return 5xx because of the cap or because the ledger could not be checked.
+
+| Situation | `notice` |
+| --- | --- |
+| Settled spend plus open reservations plus this call's worst-case estimate is over the cap | `Live AI is off: the demo's spending limit has been reached. Showing offline results.` |
+| No database, or the ledger raises | `Live AI is off: the spending limit could not be checked. Showing offline results.` |
+| The model id is not in the price table | `Live AI is off: this model has no price on file, so the call was refused. Showing offline results.` |
+
+`BATATIS_LIVE` unset, or no key: the provider is not called, the ledger is not written, and `notice` is omitted. That is the ordinary offline path.
 
 A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
 

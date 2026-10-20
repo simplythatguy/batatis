@@ -33,6 +33,8 @@ jobs:
           npm ci
           npm run typecheck
           npm run build
+      - name: Code database is not in the static build
+        run: node web/scripts/assert-no-codedb.mjs
       - name: UI smoke
         run: |
           npm init -y --prefix "${RUNNER_TEMP}/ui-smoke"
