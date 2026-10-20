@@ -1,7 +1,10 @@
-"""Per-IP limit for /identify. This is not a spend cap.
+"""Per-IP limits for /identify and /ccmc/search. This is not a spend cap.
 
 The spend cap is the Postgres total in engine.spend (BATATIS_TOTAL_BUDGET_USD,
 default 20). There is no daily cap. BATATIS_DAILY_SPEND_CAP_USD is not read.
+
+Each limit is an in-memory window on this process. It is per instance. It is
+not backed by Postgres, so two engine instances do not share a count.
 """
 from __future__ import annotations
 
@@ -42,17 +45,19 @@ class SlidingWindow:
 
 
 _llm_window = SlidingWindow()
+_search_window = SlidingWindow()
 
 
 def reset_for_tests() -> None:
     _llm_window.reset()
+    _search_window.reset()
 
 
-def llm_budget() -> tuple[int, float]:
+def _budget(limit_name: str, limit_default: str, window_name: str, window_default: str) -> tuple[int, float]:
     """Requests per window. A bad value refuses the call (limit 0) instead of failing open."""
     try:
-        limit = int((os.environ.get('BATATIS_LLM_RATE_LIMIT') or '20').strip())
-        window = float((os.environ.get('BATATIS_LLM_RATE_WINDOW_SECONDS') or '600').strip())
+        limit = int((os.environ.get(limit_name) or limit_default).strip())
+        window = float((os.environ.get(window_name) or window_default).strip())
     except ValueError:
         return 0, 1.0
     if limit < 0 or window <= 0:
@@ -60,17 +65,34 @@ def llm_budget() -> tuple[int, float]:
     return limit, window
 
 
+def llm_budget() -> tuple[int, float]:
+    return _budget('BATATIS_LLM_RATE_LIMIT', '20', 'BATATIS_LLM_RATE_WINDOW_SECONDS', '600')
+
+
+def search_budget() -> tuple[int, float]:
+    return _budget('BATATIS_SEARCH_RATE_LIMIT', '60', 'BATATIS_SEARCH_RATE_WINDOW_SECONDS', '600')
+
+
+def _retry_after(window: SlidingWindow, budget, client_ip: str) -> int | None:
+    limit, seconds = budget()
+    key = client_ip or 'unknown'
+    if window.allow(key, limit, seconds):
+        return None
+    return window.retry_after(key, seconds)
+
+
 def llm_retry_after(client_ip: str) -> int | None:
     """None when this IP may call /identify. Otherwise the Retry-After delay in seconds."""
-    limit, window = llm_budget()
-    key = client_ip or 'unknown'
-    if _llm_window.allow(key, limit, window):
-        return None
-    return _llm_window.retry_after(key, window)
+    return _retry_after(_llm_window, llm_budget, client_ip)
+
+
+def search_retry_after(client_ip: str) -> int | None:
+    """None when this IP may call /ccmc/search. Otherwise the Retry-After delay in seconds."""
+    return _retry_after(_search_window, search_budget, client_ip)
 
 
 def client_ip_from(request) -> str:
-    """First forwarded hop, else the peer address. The value is not logged."""
+    """x-vercel-forwarded-for first, then X-Forwarded-For, else the peer. Not logged."""
     for header in ('x-vercel-forwarded-for', 'x-forwarded-for'):
         raw = request.headers.get(header)
         if not raw:

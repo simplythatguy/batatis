@@ -5,7 +5,7 @@ import { CodeCheck } from "./screens/CodeCheck";
 import { Describe } from "./screens/Describe";
 import { Accuracy, Officer } from "./screens/Placeholders";
 import { SectionC } from "./screens/SectionC";
-import { PRIVACY_SENTENCE, PROCESSOR_LINE } from "./privacy";
+import { DELETE_LINE, DONT_PASTE, PRIVACY_SENTENCE, PROCESSOR_LINE } from "./privacy";
 import { resetCase, useCase } from "./store";
 
 const EXPLICIT_ROUTES = ["/code-check", "/section-c", "/application", "/officer", "/accuracy"];
@@ -89,6 +89,10 @@ export function App() {
             {PRIVACY_SENTENCE}
             <br />
             {PROCESSOR_LINE}
+            <br />
+            {DONT_PASTE}
+            <br />
+            {DELETE_LINE}
           </p>
           <div className="case-card">
             <span className="case-title">{c.title}</span>

@@ -18,7 +18,11 @@ Set these on the Vercel project for the engine runtime. Do not commit values. `O
 
 `BATATIS_DAILY_SPEND_CAP_USD` is ignored if it is set. The earlier $5-a-day cap is not used. The cap is one total, default 20, stored in Postgres.
 
-`POST /identify` also counts toward `BATATIS_LLM_RATE_LIMIT` (default 20) per IP per `BATATIS_LLM_RATE_WINDOW_SECONDS` (default 600). Over the limit the response is HTTP 429. Over the spend cap the response stays HTTP 200 and `label` is `keyword search, no AI`.
+`POST /identify` counts toward `BATATIS_LLM_RATE_LIMIT` (default 20) per IP per `BATATIS_LLM_RATE_WINDOW_SECONDS` (default 600). `GET /ccmc/search` counts toward `BATATIS_SEARCH_RATE_LIMIT` (default 60) per IP per `BATATIS_SEARCH_RATE_WINDOW_SECONDS` (default 600). The client IP is the first hop of `x-vercel-forwarded-for`, then `X-Forwarded-For`, then the peer address. A request over the limit is HTTP 429 with `Retry-After` and a detail that says which limit was reached. Both windows are in memory on one process. They are per instance unless a later change stores them in Postgres. They are not the spend cap.
+
+Over the spend cap, or when the ledger cannot be checked, `POST /identify` stays HTTP 200. `label` is `keyword search, no AI`, `notice` is set, and `hits` are the BM25 list. A live model result uses `label` `model output, not verified` and does not carry an accuracy or score field.
+
+When live mode is on, `X-Batatis-Notice` says pasted text and uploaded content are sent to OpenAI (US) for processing, says not to paste personal information you don't need, and names `DELETE /cases/{case_id}` as the way to remove a stored case. Cases do not expire on a timer. OpenAI's API retention period is the one on https://openai.com/policies/api-data-usage-policies (checked 2026-10-20; up to 30 days, with the exceptions quoted in `docs/api-contract.md`).
 
 The code database is not a public file. `vercel.json` answers `/codedb.sqlite`, `/codedb/build/codedb.sqlite`, and `/api/codedb/build/codedb.sqlite` with 404, ahead of any later rewrite. Those routes have to stay. The service layout itself is a separate change. The web build's `dist/` does not contain `codedb.sqlite`.
 

@@ -5,10 +5,10 @@ lives in Postgres (``DATABASE_URL``, or ``POSTGRES_URL`` when that is unset),
 in one table, ``spend_ledger``. There is no daily cap.
 ``BATATIS_DAILY_SPEND_CAP_USD`` is ignored.
 
-A reservation is one SQL statement. It inserts a row only when settled spend
-plus open reservations plus this call's worst-case estimate is within
-``BATATIS_TOTAL_BUDGET_USD`` (default 20). Postgres takes a transaction
-advisory lock in that same statement so concurrent serverless instances cannot
+A reservation inserts a row only when settled spend plus open reservations
+plus this call's worst-case estimate is within ``BATATIS_TOTAL_BUDGET_USD``
+(default 20). Postgres takes a transaction advisory lock in the statement
+before that insert, and holds it until commit, so concurrent instances cannot
 pass the check together. After the provider returns, the row is settled to the
 cost of the reported tokens. An error releases the reservation.
 

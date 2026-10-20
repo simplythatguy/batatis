@@ -9,10 +9,11 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | Method and path | Response |
 | --- | --- |
 | `GET /status/budget` | `200` `{ "live", "cap_usd", "spent_usd", "remaining_usd" }`. See below. |
-| `POST /identify` | Body `{ "query" }`. `200` `{ "label", "notice", "hits" }`. Over the per-IP limit, `429` with `Retry-After`. A full spend cap is `200` with `label` `keyword search, no AI`. |
+| `POST /identify` | Body `{ "query" }`. `200` `{ "label", "notice", "hits" }`. A live model result has `label` `model output, not verified` and no accuracy or score field. Over the cap, or when the ledger cannot be checked, `label` is `keyword search, no AI`, `notice` is set, and `hits` are the BM25 article ids. Over the per-IP limit, `429` with `Retry-After` and detail `Live model limit reached; try again in N seconds`. The limit is in memory on each engine instance. |
 | `GET /codedb.sqlite`, `GET /codedb/build/codedb.sqlite`, `GET /api/codedb/build/codedb.sqlite` | `404` `{ "detail": "not found" }`. The code database file is not the body. |
 | `POST /cases` | `201` Case. Body is optional: `title`, `jurisdiction` (`id`, `name`, `authority`). |
 | `GET /cases/{case_id}` | Case, or `404` with detail `case not found`. |
+| `DELETE /cases/{case_id}` | `204` with an empty body when the case is removed. `404` detail `case not found` when it is not stored. Cases stay until this route deletes them. |
 | `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. |
 | `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`. |
 | `GET /code/search` | Query `q`, `division` (`A` `B` or `C`, default `B`), `limit` (1–100, default 20). Hits as returned: `id`, `division`, `level`, `article_title`, `title`, `text`, `citation`. |
@@ -21,17 +22,29 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `POST /cases/{case_id}/section-d` | Body optional `{ "provisions": ["…"] }`. `{ "items", "notices" }`. Writes the case. |
 | `GET /cases/{case_id}/section-d/issues` | Issue list below. Read-only. Does not write the case. |
 | `GET /cases/{case_id}/professional` | `required` and `general_required`: `yes`, `no`, or `depends`. Also `reasons`, `questions`, `scope_note`. |
-| `GET /ccmc/search` | Query `q` (1–200 characters) and `limit` (1–50, default 20). `422` on a rejected query. `503` when the registry is unavailable; that detail is the registry error text. |
+| `GET /ccmc/search` | Query `q` (1–200 characters) and `limit` (1–50, default 20). `422` on a rejected query. `503` when the registry is unavailable; that detail is the registry error text. Over the per-IP limit, `429` with `Retry-After` and detail `Search limit reached; try again in N seconds`. The limit is in memory on each engine instance, separate from the `/identify` window. |
 | `GET /cases/{case_id}/process-fields` | Process-field list. Empty when the pathway is an acceptable solution. |
 | `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` when the blank form file is missing; that detail is the form error text. `500` on other export failures. |
 
 ### Privacy notice
 
-Every response sets `X-Batatis-Notice` to:
+Every response sets `X-Batatis-Notice`. While live mode is off the header is:
 
-`Do not upload personal information. Demo data may be deleted. OpenAI (US) is a processor of text sent for a live model call.`
+`Do not upload personal information. Demo data may be deleted. OpenAI (US) is a processor of text sent for a live model call. Don't paste personal information you don't need. Delete a stored case with DELETE /cases/{case_id}.`
 
-The sidebar shows the same two sentences, with the processor on its own line. OpenAI (US) is the processor for text sent on a live model call. The notice is not a finding that a design complies.
+When `BATATIS_LIVE=1` and `OPENAI_API_KEY` is set, the header adds that pasted text and uploaded content are sent to OpenAI (US) for processing, and OpenAI's own retention statement:
+
+`Pasted text and uploaded content are sent to OpenAI (US) for processing. Don't paste personal information you don't need. Delete a stored case with DELETE /cases/{case_id}. OpenAI may securely retain API inputs and outputs for up to 30 days to provide the services and to identify abuse, except for certain endpoints and features listed in its platform documentation, and unless the law requires longer retention. See https://openai.com/policies/api-data-usage-policies`
+
+That 30-day period is OpenAI's, quoted from that page on 2026-10-20 (page updated January 8, 2026): "Except for certain endpoints and features listed in our platform documentation, OpenAI may securely retain API inputs and outputs for up to 30 days to provide the services and to identify abuse. After 30 days, API inputs and outputs are removed from our systems, unless we are legally required to retain them." Stored cases in this app do not expire on a timer. `DELETE /cases/{case_id}` removes one case. The sidebar shows the offline sentences, including how to delete a case. The notice is not a finding that a design complies.
+
+### Labels
+
+A live model result uses the label `model output, not verified`. It does not include an accuracy field, a score field, or an eval fraction such as `9/11` or `50/60`. Over the spend cap, or when the ledger is unavailable, `POST /identify` stays HTTP 200 and returns `label` `keyword search, no AI` together with `notice`. The `hits` on that fallback are BM25 article ids from the code database, or an empty list when that database cannot be read.
+
+### Rate limits
+
+`POST /identify` uses `BATATIS_LLM_RATE_LIMIT` (default 20) per `BATATIS_LLM_RATE_WINDOW_SECONDS` (default 600). `GET /ccmc/search` uses `BATATIS_SEARCH_RATE_LIMIT` (default 60) per `BATATIS_SEARCH_RATE_WINDOW_SECONDS` (default 600). The two windows are separate. The client IP is the first hop of `x-vercel-forwarded-for`, then `X-Forwarded-For`, then the peer address. Each window is in memory on one engine instance. It is not stored in Postgres, so the limit is per instance.
 
 ### Spend cap and `notice`
 
@@ -224,7 +237,9 @@ A live response copies the citation string the code database returns. The placeh
 
 | Status | When |
 | --- | --- |
+| 204 | `DELETE /cases/{case_id}` removed the case. The body is empty. |
 | 404 | Fixed detail strings are `case not found` and `provision not found`. Section C, the plan, and this issues route can also 404 with the text of a missing codedb provision. |
+| 429 | `POST /identify` detail `Live model limit reached; try again in N seconds`, or `GET /ccmc/search` detail `Search limit reached; try again in N seconds`. Both set `Retry-After`. The count is per engine instance. |
 | 400 | Invalid provision id, or an ambiguous division on `GET /code/{provision_id}`. |
 | 409 | Export is blocked. Detail is the object under Routes. |
 | 422 | A `proposed` fact was sent as `confirmed`, or `GET /ccmc/search` rejected the query. |

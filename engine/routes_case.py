@@ -3,10 +3,12 @@ from __future__ import annotations
 
 from typing import Callable
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from .ccmc import CCMCRegistry, RegistrySearch, RegistryUnavailable
+from .llm_gate import client_ip_from, search_retry_after
 from .codes import Codes
 from .completeness import Gap, check_completeness
 from .process_fields import ProcessField, process_fields
@@ -60,8 +62,17 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
     def professional(case_id: str):
         return professional_involvement(get_case(case_id), code())
 
-    @router.get('/ccmc/search', response_model=RegistrySearch)
-    def ccmc_search(q: str = Query(min_length=1, max_length=200), limit: int = Query(20, ge=1, le=50)):
+    @router.get('/ccmc/search', response_model=RegistrySearch,
+                responses={429: {'description': 'per-IP limit'}})
+    def ccmc_search(request: Request, q: str = Query(min_length=1, max_length=200),
+                    limit: int = Query(20, ge=1, le=50)):
+        wait = search_retry_after(client_ip_from(request))
+        if wait is not None:
+            return JSONResponse(
+                status_code=429,
+                content={'detail': f'Search limit reached; try again in {wait} seconds'},
+                headers={'Retry-After': str(wait)},
+            )
         try:
             return registry.search(q, limit=limit)
         except ValueError as error:

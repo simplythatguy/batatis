@@ -9,9 +9,10 @@ from pydantic import BaseModel, Field
 
 from .codes import Codes, default_db
 from .llm_gate import client_ip_from, llm_retry_after
-from .spend import CAP_NOTICE, ROUTE_IDENTIFY_RERANK, keyed_openai_call
+from .spend import ROUTE_IDENTIFY_RERANK, keyed_openai_call
 
 KEYWORD_LABEL = 'keyword search, no AI'
+MODEL_LABEL = 'model output, not verified'
 IDENTIFY_MODEL = 'gpt-4.1-mini'
 IDENTIFY_MAX_INPUT = 16_000
 IDENTIFY_MAX_OUTPUT = 2_000
@@ -58,6 +59,11 @@ def identify(request, body: IdentifyRequest, *, codes: Codes | None, client) -> 
         client=client,
     )
     if result.offline:
-        notice = result.notice if result.notice == CAP_NOTICE else result.notice
-        return IdentifyResponse(label=KEYWORD_LABEL, notice=notice, hits=keyword_hits(body.query, codes))
-    return IdentifyResponse(label='model', notice=None, hits=[])
+        # Cap and ledger refusals keep the keyword label and the notice together.
+        # A missing notice is only the ordinary offline path (live mode unset).
+        return IdentifyResponse(
+            label=KEYWORD_LABEL,
+            notice=result.notice,
+            hits=keyword_hits(body.query, codes),
+        )
+    return IdentifyResponse(label=MODEL_LABEL, notice=None, hits=[])

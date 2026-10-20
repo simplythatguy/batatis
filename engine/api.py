@@ -12,9 +12,9 @@ from .codes import CodeDbMissing, Codes
 from .export import ExportBlocked, ExportError, FormNotFound, export_case
 from .identify_http import CODEDB_DOWNLOADS, IdentifyRequest, IdentifyResponse, identify
 from .models import Case, Fact, Jurisdiction, SectionCRow
-from .privacy import PRIVACY_HEADER
+from .privacy import privacy_header
+from .spend import BudgetStatus, budget_status, live_enabled
 from .section_c import section_c_rows
-from .spend import BudgetStatus, budget_status
 from .store import CaseStore
 
 
@@ -31,7 +31,8 @@ class ExportRequest(BaseModel):
     draft: bool = False
 
 
-def create_app(store: CaseStore | None = None, codes: Codes | None = None, identify_client=None) -> FastAPI:
+def create_app(store: CaseStore | None = None, codes: Codes | None = None, identify_client=None,
+               registry=None) -> FastAPI:
     app = FastAPI(title='Batatis engine')
     app.add_middleware(CORSMiddleware, allow_origin_regex=r'http://(localhost|127\.0\.0\.1)(:\d+)?',
                        allow_methods=['*'], allow_headers=['*'])
@@ -41,10 +42,10 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, ident
         # The code database is not a download. The body is fixed and has no file bytes.
         if request.url.path in CODEDB_DOWNLOADS:
             denied = JSONResponse(status_code=404, content={'detail': 'not found'})
-            denied.headers['X-Batatis-Notice'] = PRIVACY_HEADER
+            denied.headers['X-Batatis-Notice'] = privacy_header(live=live_enabled())
             return denied
         response = await call_next(request)
-        response.headers['X-Batatis-Notice'] = PRIVACY_HEADER
+        response.headers['X-Batatis-Notice'] = privacy_header(live=live_enabled())
         return response
 
     state = {'store': store, 'codes': codes, 'identify_client': identify_client}
@@ -82,6 +83,12 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, ident
         if case is None:
             raise HTTPException(404, 'case not found')
         return case
+
+    @app.delete('/cases/{case_id}', status_code=204)
+    def delete_case(case_id: str):
+        if not cases().delete(case_id):
+            raise HTTPException(404, 'case not found')
+        return Response(status_code=204)
 
     @app.post('/cases/{case_id}/facts', response_model=Case)
     def add_fact(case_id: str, fact: Fact):
@@ -137,7 +144,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, ident
         # Not FileNotFoundError. The body is fixed and carries no filesystem path.
         return JSONResponse(status_code=503, content={'detail': 'code database not found'})
 
-    app.include_router(__import__('engine.routes_case', fromlist=['create_router']).create_router(cases, code))
+    app.include_router(__import__('engine.routes_case', fromlist=['create_router']).create_router(cases, code, registry))
     return app
 
 
