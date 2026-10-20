@@ -62,7 +62,7 @@ The **Safety Codes Council / Build Forward Alberta** is a statutory council (acc
 | AI review for cities | CivCheck: "free to our City Partners, forever", with a small applicant prescreening fee. But Denver approved up to US$4.6M over 5 years with CivCheck's operator | [civcheck.com](https://civcheck.com/), [Colorado Politics](https://www.coloradopolitics.com/2026/03/09/denver-approves-4-6m-ai-powered-permit-review-contract/) |
 
 **Price range to test (hypotheses, untested; no buyer has seen a price):**
-- **Applicant, per bespoke package: C$125–750.** *Arithmetic:* the low end is 1 hour at the SCC's own C$125/h alternative-solution rate. The high end is 2 hours at the top of the C$160–375/h engineering proxy (2 × C$375). The test is whether a builder pays roughly one to two hours of review-equivalent time to arrive complete.
+- **Applicant, per bespoke package: C$125–750.** *Arithmetic:* the low end is 1 hour at the SCC's own C$125/h alternative-solution rate. The high end is 2 hours at the top of the C$160–375/h engineering proxy (2 × C$375). The test is whether a builder pays roughly the price of one to two hours of the authority's own fee or an engineer's time to arrive complete. The low end is the authority's fee, not a measured applicant cost.
 - **Applicant, seat plan for repeat filers: US$39–250 per user per month.** Bounded by UpCodes Essentials (US$39) at the low end and CodeComply.Ai (US$3,000/yr ÷ 12 = US$250) at the high end. Lawtonica's C$30/month shows a cheaper Canadian code-search tier exists.
 - **Authority licence: no price stated.** Authority willingness to pay is untested. The program's Venture Pilots stream may fund a pilot of roughly $10k–50k to the team (a quote from the program lead to media, not an official figure, and not an authority budget; [Taproot, Sep 22, 2026](https://edmonton.taproot.news/briefs/2026/09/22/pilot-builds-on-foundation-with-new-challenge-ahead-of-startup-week)). For context, both Edmonton and Calgary apply the New West Partnership Trade Agreement's C$75,000 goods-and-services threshold ([Edmonton](https://www.edmonton.ca/sites/default/files/public-files/Procurement%20Standard.pdf), [Calgary](https://www.calgary.ca/buy-sell/supply-to-city/procurement-policy.html)).
 
@@ -71,19 +71,15 @@ The **Safety Codes Council / Build Forward Alberta** is a statutory council (acc
 ## 6. Cost per application
 > **Measured cost and latency per application (unmeasured):** *[slot: median and 90th-percentile cost (C$) and latency (seconds) per case across 20 or more dev cases, with provider, model ids, case count and run date. Shown alongside it: measured cost ÷ C$125 (the low end of the per-package price range) as the share of the floor price that model cost consumes.]*
 
-**How a run is built.** In the current build, code identification runs in four steps:
-1. A hosted screening model (Jev, from TypeSafe) scores every Division B article in batches.
-2. The top candidates are re-ranked together in one request.
-3. An optional verifier (Anthropic Claude in the current build) picks the governing articles with word-for-word quotes.
-4. BM25 keyword search is kept as a keyless baseline and fallback.
+**How a run is built.** Code identification runs BM25 keyword search first (no model cost), then an OpenAI rerank and an OpenAI verifier that picks the governing articles with word-for-word quotes. Jev screening (from TypeSafe) and an Anthropic verifier remain optional, switchable paths that the demo build doesn't use. The provider switch is in draft [PR #12](https://github.com/simplythatguy/batatis/pull/12) on `backend/identify-api`. Section C attribution and the completeness rules are database lookups and rules, with no model cost, unless the LLM completeness judge (draft PR #11, variant C) ships, in which case its calls are included below.
 
-**In progress** on `backend/identify-api` (draft [PR #12](https://github.com/simplythatguy/batatis/pull/12), not yet merged): a provider switch for the verifier and rerank (`BATATIS_LLM_PROVIDER=openai|anthropic`; the OpenAI verifier defaults to `gpt-4.1`, overridable), with Jev optional. The Oct 29 demo is planned to run on OpenAI, which is the key the team holds, once the switch merges. The production provider will be chosen by the keyed benchmark. Section C attribution and the completeness rules are database lookups and rules, with no model cost.
+**Formula** (list prices of the pinned, dated model snapshots at run time; retries and failed calls are counted):
 
-**Formula** (list prices of the pinned models at run time):
+cost per case (US$) = Σ over model calls (uncached input tokens × input price + cached input tokens × cached-input price + output tokens × output price) ÷ 1,000,000
 
-cost per case = Σ over model calls (input tokens × input price + output tokens × output price) ÷ 1,000,000
+cost per case (C$) = cost per case (US$) × 1.4097 (Bank of Canada rate, Oct 19, 2026)
 
-- **Provider-switched build (draft PR #12):** BM25 first stage (no model cost), then an OpenAI rerank (`gpt-4.1-mini` by default) and an OpenAI verifier (`gpt-4.1` by default), or Anthropic if chosen. Jev is only an optional reranker, and its calls are added only if it is turned on.
+- **Demo build:** BM25 first stage (no model cost), then an OpenAI rerank and an OpenAI verifier. The measured model snapshot ids are reported with the benchmark result above. Jev and Anthropic calls are added only if those paths are turned on.
 - **Keyless fallback** (BM25 plus rules plus deterministic Section C): model cost is zero. The only cost is hosting, at lower identification quality.
 
 ## 7. Competitive landscape
