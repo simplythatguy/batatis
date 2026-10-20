@@ -47,14 +47,15 @@ def _pairs(rows, codes: Codes) -> list[AttributionPair]:
 
 
 def _source_id(rows) -> str | None:
-    found = list(dict.fromkeys(a['provision_id'] for a in rows))
+    found = list(dict.fromkeys(pid for a in rows if (pid := a.get('provision_id'))))
     if not found:
         return None
     return found[0] if len(found) == 1 else ', '.join(found)
 
 
 def _exact_rows(attributions, provision_id: str):
-    return [a for a in attributions or [] if a.get('provision_id') == provision_id]
+    """Rows stored for this id. A row with no id belongs to the provision being read."""
+    return [a for a in attributions or [] if a.get('provision_id', provision_id) == provision_id]
 
 
 def _parent_rows(pid: str, codes: Codes):

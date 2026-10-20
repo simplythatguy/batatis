@@ -1,0 +1,19 @@
+{
+  "id": "hold-004",
+  "description": "We are building a single-storey detached house. The roof has a clear span member, but the application does not give the length of that span.",
+  "known_facts": [
+    "single-storey detached house",
+    "clear span member with no length stated"
+  ],
+  "gold": {
+    "engineering_required": "depends",
+    "engineering_reason": "Missing facts cannot produce an overall no. The span length is the fact that decides whether the member is recorded as Part 4 design, and it is absent.",
+    "limit_source": "engine/professional.py module note: missing facts cannot produce an overall no; part4_design unset stays on Div C 2.4.1.2.(1) as unresolved. Span cutoff is engine/section_d_issues.py PART9_MAX_SPAN_M = 12.20 and cannot be applied without a length."
+  },
+  "authoring": {
+    "source": "engine/professional.py",
+    "gold_written": "before any system run",
+    "label": "model-checked",
+    "notes": "Held-out missing span. Gold written from the rule text before the flag script was run on this file. Not human-reviewed."
+  }
+}

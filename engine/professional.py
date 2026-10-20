@@ -13,9 +13,8 @@ from .codes import Codes
 from .models import Case
 from .process_fields import confirmed_value
 
-# Same span field and threshold as engine/section_d_issues.py on
-# origin/backend/section-d-issues (PR #8, not merged). A confirmed span above
-# this value is Part 4 design for the screen only; it is not stored as a new fact.
+# Same span field and threshold as PART9_MAX_SPAN_M in engine/section_d_issues.py.
+# A confirmed span above this value is Part 4 design for the screen only; it is not stored as a new fact.
 # The cited rule remains the Part 4 professional provision this module already looks up.
 PART9_MAX_SPAN_M = 12.20
 

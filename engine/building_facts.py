@@ -1,8 +1,7 @@
 """Typed building facts the professional-involvement screen reads.
 
 Field names are ``ProfessionalFacts`` in engine/professional.py, plus ``span_m``
-from engine/section_d_issues.py on origin/backend/section-d-issues (PR #8, not
-merged). This module does not decide that a design complies or is safe.
+from engine/section_d_issues.py. This module does not decide that a design complies or is safe.
 """
 from __future__ import annotations
 
