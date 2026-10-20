@@ -8,7 +8,8 @@ Part 4 design (cited only as Div C 2.4.1.2.(1) from professional.py), and return
 of no when a deciding fact was not stated.
 
 The gold labels are model-checked, not human-reviewed. `rules_plus_unknown` was written while
-looking at this same development set, so the agreement is in-sample. There is no held-out split.
+looking at this same development set, so the dev agreement is in-sample. A small held-out set
+(evals_dev/section_d_heldout, 8 model-checked cases) is scored separately.
 
 Gold `depends` matches system `unknown`. Under-flag is gold yes and system no. A case is skipped
 when codedb (or the rule lookup standing in for it) cannot resolve a provision the screen asks for.
@@ -28,7 +29,7 @@ from .section_d_issues import PART9_MAX_SPAN_M, PROCESS_RULES, PROFESSIONAL_RULE
 CASES = Path(__file__).resolve().parents[1] / 'evals_dev' / 'cases'
 HELDOUT = Path(__file__).resolve().parents[1] / 'evals_dev' / 'section_d_heldout'
 _HEADLINE = (
-    'Engineer-needed flag: {matched}/{scored} agreement on the model-checked dev set (in-sample), '
+    'Engineer-needed flag, rules_only baseline: {matched}/{scored} agreement on the model-checked dev set (in-sample), '
     '{under_flag} under-flag, {unknown} unknowns sent to the applicant.'
 )
 VARIANTS = ('rules_only', 'rules_plus_unknown', 'always_unknown')

@@ -71,7 +71,6 @@ def find_codedb() -> Path | None:
     env = os.environ.get('BATATIS_CODEDB')
     candidates = [Path(env)] if env else []
     candidates.append(DEV.parent / 'codedb' / 'build' / 'codedb.sqlite')
-    candidates.append(Path('/Users/aamia/.t3/projects/batatis/codedb/build/codedb.sqlite'))
     for path in candidates:
         if path.is_file():
             return path

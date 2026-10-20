@@ -8,7 +8,7 @@
   "gold": {
     "engineering_required": "yes",
     "engineering_reason": "More than three storeys is outside the general exception, before building area is compared.",
-    "limit_source": "engine/professional.py: occupancy in _AREA_LIMITS and storeys greater than 3 sets general to yes. The three-storey cap is the height limit implemented for Div C 2.4.1.1.(1)"
+    "limit_source": "engine/professional.py: occupancy in _AREA_LIMITS and storeys greater than 3 sets general to yes through Div C 2.4.1.1.(3)"
   },
   "authoring": {
     "source": "engine/professional.py",

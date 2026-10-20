@@ -150,6 +150,8 @@ def engine_professional_flagger(db_path: Path):
     from engine.professional import ProfessionalFacts, professional_involvement
 
     codes = Codes(db_path)
+    if codes.provision('2.4.1.1.(1)', 'C') is None:
+        raise LookupError('division C professional rules are not in codedb')
 
     def flagger(case: dict) -> str:
         facts = ProfessionalFacts.model_validate((case.get('professional_involvement') or {}).get('facts') or {})
@@ -240,7 +242,7 @@ def build_appeals_block(cases: list[dict], db_path: Path | None, score, *, profe
     if flagger is None and db_path is not None:
         try:
             flagger = engine_professional_flagger(db_path)
-        except ImportError as exc:
+        except (ImportError, LookupError) as exc:
             flagger_skip = f'skipped: engine unavailable ({type(exc).__name__})'
     return {
         'label_source': LABEL_SOURCE,

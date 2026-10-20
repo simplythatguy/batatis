@@ -167,6 +167,11 @@ def test_status_addressed_by_applicant_item_and_needs_professional_without_one()
     house = section_d_issues(Case(provisions=[BENCHMARK], facts=_house_facts()), codes)[0]
     assert house.practice_of_engineering.value is False and house.status == 'open'
     assert house.practice_of_engineering.citation in codes.issued
+    from types import SimpleNamespace
+    from engine.section_d_issues import PracticeOfEngineering, _status
+    unknown = PracticeOfEngineering(value='unknown', reason='missing fact', question='Which occupancy applies?')
+    linked = [SimpleNamespace(responsible_party='Named person', professional_seal=None)]
+    assert _status(unknown, linked) == 'open'
 
 
 def test_acceptable_path_drops_variance_process_fields_and_extra_evidence_types():
@@ -213,7 +218,7 @@ def test_eval_script_prints_in_sample_wilson_table(capsys):
     assert main() == 0
     out = capsys.readouterr().out
     assert out.startswith(
-        'Engineer-needed flag: 55/60 agreement on the model-checked dev set (in-sample), '
+        'Engineer-needed flag, rules_only baseline: 55/60 agreement on the model-checked dev set (in-sample), '
         '1 under-flag, 13 unknowns sent to the applicant.\n')
     assert 'gold: model-checked' in out
     assert 'split: dev (in-sample; pending out-of-sample confirmation)' in out

@@ -2,7 +2,7 @@
 
 ## Section D — evidence issues
 
-Engineer-needed flag: 55/60 agreement on the model-checked dev set (in-sample), 1 under-flag, 13 unknowns sent to the applicant.
+Engineer-needed flag, `rules_only` baseline: 55/60 agreement on the model-checked dev set (in-sample), 1 under-flag, 13 unknowns sent to the applicant. This baseline fills unstated component facts and does not apply the span handoff. The route uses `practice_of_engineering()`, which does not fill those defaults and does apply the span handoff.
 
 `GET /cases/{case_id}/section-d/issues`
 

@@ -3,6 +3,8 @@ import json
 import sqlite3
 from pathlib import Path
 
+import pytest
+
 from evals_dev.appeals.score_professional import LINE, load_addressed, predict, render, score_cases
 
 from engine.section_d_flag_eval import load_codes
@@ -133,6 +135,48 @@ def test_professional_agreement_is_separate_and_not_forced(tmp_path):
     assert report['checks']['appeals']['citation_resolution']['skipped'] == CODEDB_MISSING
     text = json.dumps(report)
     assert 'human-verified' not in text
+
+
+def test_panel_conclusion_is_not_a_screen_fact_and_paraphrases_stay_summaries():
+    by_id = {case['id']: case for case in _cases()}
+    panel = by_id['scc-co-0015416-2012']['professional_involvement']
+    assert panel['facts'] == {}
+    assert 'weak yes label' in panel['facts_provenance']
+    summaries = ('scc-co-0015439-2014', 'scc-co-2022-06', 'scc-co-0015427-2012')
+    excerpts = ('scc-co-2023-03', 'scc-co-0015467-2016')
+    for case_id in summaries:
+        quotes = [quote for quote in by_id[case_id]['quotes'] if quote['field'] == 'professional_involvement']
+        assert quotes and quotes[0]['kind'] == 'summary', case_id
+    for case_id in excerpts:
+        quotes = [quote for quote in by_id[case_id]['quotes'] if quote['field'] == 'professional_involvement']
+        assert quotes and quotes[0]['kind'] == 'excerpt', case_id
+
+
+def test_missing_division_c_skips_the_professional_screen(monkeypatch):
+    from evals_dev.appeals.checks import engine_professional_flagger
+
+    class EmptyCodes:
+        def __init__(self, path):
+            pass
+
+        def provision(self, provision_id, division):
+            return None
+
+    monkeypatch.setattr('engine.codes.Codes', EmptyCodes)
+    with pytest.raises(LookupError):
+        engine_professional_flagger(Path('unused'))
+
+    def missing(_path):
+        raise LookupError('division C professional rules are not in codedb')
+
+    monkeypatch.setattr('evals_dev.appeals.checks.engine_professional_flagger', missing)
+    monkeypatch.setattr('evals_dev.appeals.checks.citation_resolution', lambda *args, **kwargs: {})
+    monkeypatch.setattr('evals_dev.appeals.checks.section_c_anchor', lambda *args, **kwargs: {})
+    monkeypatch.setattr('evals_dev.appeals.checks.other_anchors', lambda *args, **kwargs: {})
+    block = build_appeals_block(
+        [{'id': 'x', 'professional_involvement': {'addressed': True, 'weak_flag': 'yes'}}],
+        Path('db'), score_citations)
+    assert block['professional_involvement']['agreement']['skipped'] == 'skipped: engine unavailable (LookupError)'
 
 
 def test_practice_screen_uses_stored_facts_and_not_the_label():

@@ -100,9 +100,8 @@
     "addressed": true,
     "weak_flag": "yes",
     "label_strength": "weak",
-    "facts": {
-      "special_safety_concerns": true
-    }
+    "facts": {},
+    "facts_provenance": "The panel sentence about special safety concerns is the weak yes label. It is not stored as a screen fact."
   },
   "anchors": [],
   "gold": {

@@ -82,9 +82,11 @@ are not adjusted from this set. The report line is
   `yes` (the panel required involvement) and seven are `depends` (the point was
   not a yes/no trigger, including the two deference cases). The agreement line
   compares the engine screen with those flags and reports `x of n` with a Wilson
-  95% interval. The screen only receives a `ProfessionalFacts` field the decision
-  states in the engine's own vocabulary. An order to file schedules, or a panel
-  conclusion, is not rewritten as `ahj_requires_professional`. Without codedb the
+  95% interval. The screen only receives a `ProfessionalFacts` field recorded on the case.
+  Panel conclusions are not stored as facts. Decision 0015416 records that its
+  special-safety sentence is the weak yes label and leaves `facts` empty. An
+  order to file schedules is not rewritten as `ahj_requires_professional`.
+  Without codedb the
   agreement line is `skipped: codedb missing`. The twelve flags are still counted
   under `weak_labels`.
 - **2022-06.** Close analog of insufficient information. The source provision is

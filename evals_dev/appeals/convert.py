@@ -29,6 +29,9 @@ _SENT = re.compile(
     r'|(?<=[.?!]["])\s+(?=[A-Z])'
 )
 _PROVISION = re.compile(r'\b\d{1,2}(?:\.\d{1,3}){2,}')
+# A quoted span of several words. A possessive apostrophe is not a quotation mark.
+# Apostrophes inside a word, as in "engineer's", are not quotation marks.
+_QUOTED_SPAN = re.compile(r"""(?<!\w)['"\u201c](.+?)['"\u201d](?!\w)""", re.S)
 # Holdings that are not the first two sentences of the researcher's note.
 QUOTE_OVERRIDE = {
     ('scc-co-2024-06', 'professional_involvement'): (
@@ -79,9 +82,13 @@ WEAK_FLAG = {
     'scc-co-2024-06': 'depends',
 }
 # Only fields the decision states in the engine's own vocabulary.
-# An order to file schedules is not rewritten as ahj_requires_professional.
-PROFESSIONAL_FACTS = {
-    'scc-co-0015416-2012': {'special_safety_concerns': True},
+# A panel conclusion is not stored as a fact. It is the weak label.
+PROFESSIONAL_FACTS: dict[str, dict] = {}
+FACTS_PROVENANCE = {
+    'scc-co-0015416-2012': (
+        'The panel sentence about special safety concerns is the weak yes label. '
+        'It is not stored as a screen fact.'
+    ),
 }
 DEFERENCE = {
     'scc-co-0015432-2013': 'officer_not_bound',
@@ -128,6 +135,13 @@ def _description(facts: str) -> str:
     return ' '.join(kept)
 
 
+def _has_quoted_span(text: str | None) -> bool:
+    for match in _QUOTED_SPAN.finditer(text or ''):
+        if len(match.group(1).split()) >= 4:
+            return True
+    return False
+
+
 def _other_codes(code_edition: str) -> list[str]:
     found = []
     for label, pattern in (
@@ -160,8 +174,7 @@ def convert_record(rec: dict, index_row: dict) -> dict:
     for field in ('refusal_reason_evidence', 'professional_involvement'):
         override = QUOTE_OVERRIDE.get((case_id, field))
         source = override if override is not None else (rec.get(field) if isinstance(rec.get(field), str) else None)
-        quoted = bool(re.search(r"['\"]", source or ''))
-        kind = 'excerpt' if field == 'refusal_reason_evidence' or quoted else 'summary'
+        kind = 'excerpt' if field == 'refusal_reason_evidence' or override is not None or _has_quoted_span(source) else 'summary'
         item = _quote(source, confidence, kind=kind)
         if item:
             item['field'] = field
@@ -213,6 +226,7 @@ def convert_record(rec: dict, index_row: dict) -> dict:
             'weak_flag': flag,
             'label_strength': 'weak' if addressed else None,
             'facts': dict(PROFESSIONAL_FACTS.get(case_id) or {}),
+            **({'facts_provenance': FACTS_PROVENANCE[case_id]} if case_id in FACTS_PROVENANCE else {}),
         },
         'anchors': anchors,
         'gold': {

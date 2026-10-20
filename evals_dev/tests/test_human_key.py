@@ -3,7 +3,7 @@ import json
 import sqlite3
 from pathlib import Path
 
-from evals_dev.human_key.score import calibrate, score_keys
+from evals_dev.human_key.score import _canon_field, calibrate, score_keys
 from evals_dev.human_key.select import SEED, persona_of, select_cases
 from evals_dev.human_key.validate import key_errors, page_warnings, validate_keys
 from evals_dev.stats import wilson_interval
@@ -20,6 +20,13 @@ ANSWER = (
 
 def cases():
     return [json.loads(p.read_text()) for p in sorted(CASES.glob('dev-*.json'))]
+
+
+def test_canon_field_reads_engine_names():
+    assert _canon_field('application_date') == 'date_of_request'
+    assert _canon_field('owner_rep_name') == 'representative'
+    assert _canon_field('owner_name') == 'owner'
+    assert _canon_field('scope') is None
 
 
 def test_selection_is_reproducible_and_balanced():

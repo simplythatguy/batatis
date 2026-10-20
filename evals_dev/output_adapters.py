@@ -12,7 +12,8 @@ Drop one JSON document per file:
 Identify files contribute article citations. Section C files contribute row
 citations. Section D files contribute issue citations (``items`` or ``issues``).
 The other three kinds are schema-checked only. A file may be one object or a
-list of objects. Nothing here calls a model.
+list of objects. A completeness file is one findings array, including an empty
+array. Nothing here calls a model.
 """
 from __future__ import annotations
 
@@ -32,11 +33,13 @@ def discover(root: Path) -> dict[str, list[dict]]:
     base = root / 'outputs'
     for kind in KINDS:
         for path in sorted((base / kind).glob('*.json')):
-            found[kind].extend(_documents(json.loads(path.read_text())))
+            found[kind].extend(_documents(json.loads(path.read_text()), kind))
     return found
 
 
-def _documents(payload) -> list[dict]:
+def _documents(payload, kind: str | None = None) -> list:
+    if kind == 'completeness' and isinstance(payload, list):
+        return [payload]
     if isinstance(payload, list):
         return [item for item in payload if isinstance(item, dict)]
     if isinstance(payload, dict) and isinstance(payload.get('cases'), list):

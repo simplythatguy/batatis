@@ -7,7 +7,7 @@ from evals_dev.deterministic_checks import (
     AB_FIELDS, CODEDB_MISSING, build_report, load_schemas, provision_exact, render,
     score_citations, score_planted,
 )
-from evals_dev.output_adapters import citations
+from evals_dev.output_adapters import citations, discover
 from evals_dev.stats import wilson_interval
 
 DEV = Path(__file__).resolve().parents[1]
@@ -69,6 +69,15 @@ def test_adapters_read_each_output_kind():
     section_d = citations('section_d', [{'issues': [{'citation': 'Div B Sentence 9.10.15.5.(8)'}]}])
     assert [c['source'] for c in identify + section_c + section_d] == ['identify', 'section_c', 'section_d']
     assert {c['provision'] for c in identify + section_c + section_d} == {'9.10.15.5.(8)'}
+
+
+def test_completeness_output_stays_one_document(tmp_path):
+    folder = tmp_path / 'outputs' / 'completeness'
+    folder.mkdir(parents=True)
+    (folder / 'findings.json').write_text(json.dumps([{'field': 'owner_name'}]))
+    (folder / 'empty.json').write_text('[]')
+    found = discover(tmp_path)
+    assert found['completeness'] == [[], [{'field': 'owner_name'}]]
 
 
 def test_planted_detection_is_known_by_construction():

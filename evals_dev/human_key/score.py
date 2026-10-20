@@ -47,7 +47,7 @@ def _norm(text: str) -> str:
 
 
 def _canon_field(text: str) -> str | None:
-    t = text.casefold()
+    t = re.sub(r'[_\-]+', ' ', text.casefold())
     if 'mailing' in t:
         return 'mailing_address'
     if 'civic' in t or 'municipal' in t:

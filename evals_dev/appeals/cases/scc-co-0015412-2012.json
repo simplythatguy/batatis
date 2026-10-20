@@ -36,11 +36,11 @@
       "source_code": "ABC 2006",
       "source_division": "C",
       "source_part": "Part 2",
-      "parsed_id": null,
+      "parsed_id": "2.2.9.9.(1)",
       "nbc_ae_2023": null,
       "method": null,
       "confidence": null,
-      "unmapped_reason": "Identifier could not be parsed as a provision id, so it was not reconstructed."
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
     },
     {
       "source_article": "9.10.15.1.(9)",
