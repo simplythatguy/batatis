@@ -104,15 +104,23 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
             state['codes'] = Codes()
         return state['codes']
 
+    def purge_cases(*, force: bool = False) -> int:
+        current = cases()
+        try:
+            return current.purge_expired() if force else maybe_purge(current)
+        except Exception as exc:
+            logger.warning('case purge failed: %s', type(exc).__name__)
+            raise HTTPException(503, 'case purge failed') from None
+
     @app.post('/cases', response_model=Case, status_code=201)
     def create_case(body: NewCase | None = None):
-        maybe_purge(cases())
+        purge_cases()
         return cases().put(Case(**(body.model_dump() if body else {})))
 
     @app.get('/retention/purge')
     def retention_purge():
         """Unthrottled purge. The daily Vercel cron calls this route."""
-        return {'deleted': cases().purge_expired()}
+        return {'deleted': purge_cases(force=True)}
 
     @app.get('/cases/{case_id}', response_model=Case)
     def get_case(case_id: str):

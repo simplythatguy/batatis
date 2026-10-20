@@ -71,32 +71,41 @@ class PostgresCaseStore:
 
     def get_version(self, case_id: str) -> int | None:
         with self._conn() as con:
+            self._purge_expired(con, case_id)
             row = con.execute('SELECT version FROM cases WHERE id=%s', (case_id,)).fetchone()
         return int(row[0]) if row else None
 
     def get(self, case_id: str) -> Case | None:
         with self._conn() as con:
+            self._purge_expired(con, case_id)
             row = con.execute('SELECT data FROM cases WHERE id=%s', (case_id,)).fetchone()
         return Case.model_validate(row[0]) if row else None
 
     def delete(self, case_id: str) -> bool:
         """Remove the case, its facts, its evidence, and its files."""
         with self._conn() as con:
+            con.execute('SELECT id FROM cases WHERE id=%s FOR UPDATE', (case_id,)).fetchone()
             con.execute('DELETE FROM case_files WHERE case_id=%s', (case_id,))
             cur = con.execute('DELETE FROM cases WHERE id=%s', (case_id,))
             return cur.rowcount == 1
 
     def purge_expired(self) -> int:
-        """Delete every case created more than 7 days ago, and its files."""
-        cutoff = retention_cutoff()
+        """Delete expired cases and files together, locking parents before their files."""
         with self._conn() as con:
-            rows = con.execute("SELECT id FROM cases WHERE data->>'created_at' < %s", (cutoff,)).fetchall()
-            ids = [row[0] for row in rows]
-            if not ids:
-                return 0
-            con.execute('DELETE FROM case_files WHERE case_id = ANY(%s)', (ids,))
-            con.execute('DELETE FROM cases WHERE id = ANY(%s)', (ids,))
-            return len(ids)
+            return self._purge_expired(con)
+
+    def _purge_expired(self, con, case_id: str | None = None) -> int:
+        where = "(data->>'created_at')::timestamptz < %s::timestamptz"
+        params = [retention_cutoff()]
+        if case_id is not None:
+            where += ' AND id=%s'
+            params.append(case_id)
+        rows = con.execute(f'SELECT id FROM cases WHERE {where} FOR UPDATE', params).fetchall()
+        ids = [row[0] for row in rows]
+        if not ids:
+            return 0
+        con.execute('DELETE FROM case_files WHERE case_id = ANY(%s)', (ids,))
+        return con.execute('DELETE FROM cases WHERE id = ANY(%s)', (ids,)).rowcount
 
     def put(self, case: Case, *, expected_version: int | None = None) -> Case:
         case.updated_at = now()
@@ -109,23 +118,26 @@ class PostgresCaseStore:
                             (case.id, payload, case.updated_at))
                 return case
             if expected_version == 0:
-                try:
-                    con.execute('INSERT INTO cases (id, data, version, updated_at) VALUES (%s, %s, 1, %s)',
-                                (case.id, payload, case.updated_at))
-                except self._psycopg.errors.UniqueViolation as exc:
-                    raise VersionConflict(case.id, 0, self.get_version(case.id)) from exc
+                row = con.execute('INSERT INTO cases (id, data, version, updated_at) VALUES (%s, %s, 1, %s) '
+                                  'ON CONFLICT (id) DO NOTHING RETURNING version',
+                                  (case.id, payload, case.updated_at)).fetchone()
+                if row is None:
+                    actual = con.execute('SELECT version FROM cases WHERE id=%s', (case.id,)).fetchone()
+                    raise VersionConflict(case.id, 0, int(actual[0]) if actual else None)
                 return case
             cur = con.execute('UPDATE cases SET data=%s, version=version+1, updated_at=%s '
                               'WHERE id=%s AND version=%s',
                               (payload, case.updated_at, case.id, expected_version))
             if cur.rowcount != 1:
-                raise VersionConflict(case.id, expected_version, self.get_version(case.id))
+                row = con.execute('SELECT version FROM cases WHERE id=%s', (case.id,)).fetchone()
+                raise VersionConflict(case.id, expected_version, int(row[0]) if row else None)
         return case
 
     def add_fact(self, case_id: str, fact: Fact) -> Case | None:
         """Lock the row, then update only if the version is unchanged."""
         for _ in range(5):
             with self._conn() as con:
+                self._purge_expired(con, case_id)
                 row = con.execute('SELECT data, version FROM cases WHERE id=%s FOR UPDATE', (case_id,)).fetchone()
                 if row is None:
                     return None
@@ -142,10 +154,12 @@ class PostgresCaseStore:
     def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf') -> dict | None:
         if len(data) > PDF_MAX_BYTES:
             raise FileTooLarge()
-        if self.get(case_id) is None:
-            return None
         file_id = f'file_{uuid.uuid4().hex[:12]}'
         with self._conn() as con:
+            self._purge_expired(con, case_id)
+            # The parent lock prevents a delete/purge from racing this file insert.
+            if con.execute('SELECT id FROM cases WHERE id=%s FOR KEY SHARE', (case_id,)).fetchone() is None:
+                return None
             con.execute('INSERT INTO case_files (id, case_id, name, content_type, size, data, created_at) '
                         'VALUES (%s, %s, %s, %s, %s, %s, %s)',
                         (file_id, case_id, name, content_type, len(data), data, now()))
@@ -153,6 +167,7 @@ class PostgresCaseStore:
 
     def get_file(self, case_id: str, file_id: str) -> dict | None:
         with self._conn() as con:
+            self._purge_expired(con, case_id)
             row = con.execute('SELECT name, content_type, size, data FROM case_files WHERE id=%s AND case_id=%s',
                               (file_id, case_id)).fetchone()
         if row is None:

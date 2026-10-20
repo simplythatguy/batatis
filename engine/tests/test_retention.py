@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import logging
 import sqlite3
 import subprocess
 import sys
@@ -89,6 +90,31 @@ def test_delete_is_empty_204_then_404_and_removes_files(retention_store):
     assert store.get_file(case_id, file_id) is None
     assert store.get(case_id) is None
     assert client.delete(f'/cases/{case_id}').status_code == 404
+
+
+@pytest.mark.parametrize('trigger', ['cold_create', 'explicit_purge'])
+def test_purge_failure_in_a_route_is_a_safe_503(tmp_path, monkeypatch, caplog, trigger):
+    class FailingStore(CaseStore):
+        fail = False
+
+        def purge_expired(self):
+            if self.fail:
+                raise RuntimeError('postgresql://private-user:private-password@private-host/cases')
+            return super().purge_expired()
+
+    reset_purge_clock()
+    store = FailingStore(tmp_path / 'cases.sqlite')
+    monkeypatch.setattr('engine.api.open_store', lambda: store)
+    client = TestClient(create_app(), raise_server_exceptions=False)
+    if trigger == 'explicit_purge':
+        assert client.post('/cases').status_code == 201
+    store.fail = True
+    with caplog.at_level(logging.WARNING):
+        response = client.post('/cases') if trigger == 'cold_create' else client.get('/retention/purge')
+    assert response.status_code == 503
+    assert response.json()['detail'] == 'case purge failed'
+    assert 'private-' not in response.text + caplog.text
+    reset_purge_clock()
 
 
 def test_retention_boundary_uses_elapsed_days_including_timezone_offsets(retention_store, monkeypatch):
