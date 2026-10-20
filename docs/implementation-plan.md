@@ -53,12 +53,12 @@ The officer review and the bundle are not built yet (§6).
 
 ## 4. Architecture, models, hosting and residency
 - **Built today:** a FastAPI engine; a read-only SQLite code database built from official NBC(AE) 2023 sources (2nd printing, in force per [Alberta.ca](https://www.alberta.ca/building-codes-and-standards)); cases in a SQLite JSON store; a React + Vite front end, currently running on fixture data with the engine not yet connected. **Nothing is hosted yet.**
-- **Models in the current build:**
-  - code identification uses a hosted screening and reranking model (Jev 1.13.0, from TypeSafe, at `api.typesafe.ai`; hosting location not published);
-  - an optional verifier on Anthropic Claude;
-  - BM25 keyword search as the keyless baseline and fallback.
+- **Models in the Oct 29 demo build (OpenAI end to end; the switch is in draft [PR #12](https://github.com/simplythatguy/batatis/pull/12), not yet merged):**
+  - **code identification:** BM25 keyword search first (local, no model cost), then an OpenAI rerank, then an OpenAI verifier that keeps a citation only if it quotes the code text word for word;
+  - **completeness:** rules only, unless the model-assisted judge in draft PR #11 (variant C) ships;
+  - **optional, switchable paths the demo build doesn't use:** Jev screening (TypeSafe, at `api.typesafe.ai`; hosting location not published) and an Anthropic verifier. The current `dev` branch still calls these two until PR #12 merges.
 
-  **In progress** on `backend/identify-api` (draft [PR #12](https://github.com/simplythatguy/batatis/pull/12), not yet merged): the verifier and rerank become provider-switchable (`BATATIS_LLM_PROVIDER=openai|anthropic`; the OpenAI verifier defaults to `gpt-4.1`), with Jev optional. The Oct 29 demo is planned to run on OpenAI, which is the key the team holds, once the switch merges. The production provider will be chosen by the keyed benchmark (numbers pending). Each case records the model ids it used.
+  The exact model snapshot ids are pinned and reported by the keyed benchmark, and each case records the model ids it used. Cost and latency per case: **to be measured; keyed benchmark pending.**
 - **Pilot:** cases move to managed Postgres, with encrypted file storage in the same region. Everything runs in one container plus a database, in a Canadian cloud region (e.g. AWS Calgary or Montreal, or Azure Canada Central). The front end is served from the same provider.
 - **Residency.** Model calls don't stay in Canada by default.
   - **OpenAI:** its Canada region (`ca.api.openai.com`) offers *storage at rest* in Canada but *not processing* in Canada, and requires approval for Modified Abuse Monitoring or Zero Data Retention ([OpenAI data controls](https://developers.openai.com/api/docs/guides/your-data)).
@@ -91,7 +91,7 @@ The officer review and the bundle are not built yet (§6).
 ## 7. User-testing protocol: how testing changes the design
 The protocol files (session script, consent form, officer-timing protocol) are in the repository under [`docs/user-testing/`](https://github.com/simplythatguy/batatis/tree/cursor/docs-user-testing-kit-3078/docs/user-testing) (currently in pull request #6, pending merge into dev).
 
-**AI-agent simulated sessions so far.** These were scripted walkthroughs run by an AI agent playing a fictional first-time applicant ("Dana", an Edmonton small builder with a hempcrete garden suite). They were not run by people, and we report their findings, not ratings.
+**AI-agent simulated sessions so far.** These were scripted walkthroughs run by an AI agent playing a fictional first-time applicant (an Edmonton small builder with a hempcrete garden suite). They were not run by people, and we report their findings, not ratings.
 | Session (Oct 20, 2026) | Front end | Outcome | Findings | Design change it drives | Status |
 |---|---|---|---|---|---|
 | 1 | Earlier front end (now frozen) | Could not start an application | Scaffold landing page; no entry point or upload; export was a placeholder | Plain-language "What are you building?" entry; one end-to-end path; label every field | Front end replaced by the current React + Vite app. **The specific fixes haven't been re-tested** |
@@ -149,6 +149,6 @@ All people, companies and products are fictional, and only code and STANDATA cit
 - **No officer timing exists.** "Saves an SCO time" is a target with a protocol.
 - **No pilot partner has agreed.** We have not contacted anyone.
 - **Cost and latency per case: to be measured; keyed benchmark pending.** No figure is reported until the run exists.
-- **The OpenAI provider switch** is in progress (draft PR #12) and not merged. The current build calls Jev and Anthropic, and we hold neither key. **If PR #12 isn't merged by Oct 29, the demo runs on the keyless path:** BM25 retrieval, rule-based completeness and deterministic Section C, with no automatic code commits, and the UI says so.
+- **The OpenAI demo build** (BM25 → OpenAI rerank → OpenAI verifier) is in draft PR #12 and not merged; `dev` still calls Jev and Anthropic, and we hold neither key. **If PR #12 isn't merged by Oct 29, the demo runs on the keyless path:** BM25 retrieval, rule-based completeness and deterministic Section C, with no automatic code commits, and the UI says so.
 - **Commit thresholds are uncalibrated,** and the human-verified eval subset depends on a person being available.
 - **Residency and retention:** model processing is outside Canada; Zero Data Retention has not been requested or granted yet.
