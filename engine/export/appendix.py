@@ -89,7 +89,7 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
     if codes is not None:
         rec = codes.provision(row.provision_id, 'B')
         if rec and rec.get('text'):
-            out.append(_kv('Provision text', rec['article_title'] or ''))
+            out.append(_kv('Provision text', f'Article {rec["article"]} {rec["article_title"] or ""}'.strip()))
             out.append(_p(_reflow(rec['text']), CODE))
     out.append(Paragraph(f'<b>{escape(INTENT_LABEL)}</b>', BODY))
     if row.differs:
