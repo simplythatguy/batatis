@@ -22,7 +22,7 @@
 
 ### Slide 3: It asks before it guesses, and we test that [Intake, 20]
 - Missing fields become plain questions, each tied to a form section (engine on dev; screen in review)
-- Engineer-needed flag (PR #8, not merged; model-checked): rules_only 55/60 in-sample, 1 under-flag; shipped rules_plus_unknown 50/60 in-sample; held-out 7/8 blind pre-fix, 4/8 post-fix (not blind).
+- Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind) (PR #8, not merged).
 - Accuracy across all applicant types: still to be measured
 
 **Speaker notes:** The completeness check on dev names each missing field and the question to ask. The engineer-needed flag has two variants in PR #8: rules_only scored 55 of 60 on the in-sample dev set, and rules_plus_unknown scored 7 of 8 on a held-out set that was blind before a later fix; re-runs after that fix are not blind. All answer keys are model-checked, not human-verified, so treat this as an early signal.
