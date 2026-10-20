@@ -171,6 +171,16 @@ def test_status_addressed_by_applicant_item_and_needs_professional_without_one()
     house = section_d_issues(Case(provisions=[BENCHMARK], facts=_house_facts()), codes)[0]
     assert house.practice_of_engineering.value is False and house.status == 'open'
     assert house.practice_of_engineering.citation in codes.issued
+    unsigned = Source(type='file', ref='unsigned-note.pdf', quote='Applicant file metadata.')
+    unknown = section_d_issues(Case(provisions=[BENCHMARK]), codes)[0]
+    unknown_case = Case(provisions=[BENCHMARK], facts=[
+        fact(f'evidence.{unknown.id}.file_ref', unsigned.ref, source=unsigned)])
+    still_open = section_d_issues(unknown_case, codes)[0]
+    assert still_open.practice_of_engineering.value == 'unknown' and still_open.status == 'open'
+    house_case = Case(provisions=[BENCHMARK], facts=_house_facts() + [
+        fact(f'evidence.{house.id}.file_ref', unsigned.ref, source=unsigned)])
+    supplied_house = section_d_issues(house_case, codes)[0]
+    assert supplied_house.practice_of_engineering.value is False and supplied_house.status == 'addressed'
 
 
 def test_acceptable_path_drops_variance_process_fields_and_extra_evidence_types():

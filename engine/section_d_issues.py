@@ -215,7 +215,7 @@ def _status(flag: PracticeOfEngineering, attachments) -> IssueStatus:
     named = any((doc.responsible_party or '').strip() or doc.professional_seal for doc in attachments)
     if flag.value is True and not named:
         return 'needs_professional'
-    if attachments:
+    if attachments and flag.value != 'unknown':
         return 'addressed'
     return 'open'
 
