@@ -101,11 +101,10 @@ test("the officer professional line waits for the professional route", () => {
 });
 
 test("a check that did not export does not say the PDF was blocked", () => {
-  assert.deepEqual(pdfOutcomeLine({ example: true, downloaded: null, exportAttempted: false, blockingCount: 4 }), ["Example: PDF not offered."]);
-  const checked = pdfOutcomeLine({ example: false, downloaded: null, exportAttempted: false, blockingCount: 3 });
-  assert.match(checked[0], /not requested/);
-  assert.match(checked[0], /3 required items remain/);
-  assert.doesNotMatch(checked[0], /blocked/);
+  assert.deepEqual(pdfOutcomeLine({ example: true, downloaded: null }), ["Example: PDF not offered."]);
+  const checked = pdfOutcomeLine({ example: false, downloaded: null });
+  assert.match(checked[0], /not prepared in this session/);
+  assert.doesNotMatch(checked.join("\n"), /blocked/);
   const record = textRecord({
     title: "House",
     description: "Hempcrete",
@@ -118,11 +117,27 @@ test("a check that did not export does not say the PDF was blocked", () => {
   assert.match(record, /Completeness: 3 required items, 1 open question, checked at 2026-10-20/);
   assert.match(record, /does not decide whether the design complies or is safe/);
   assert.doesNotMatch(record, /\(pointed, confirmed\)/);
+  const blocked = pdfOutcomeLine({
+    example: false,
+    downloaded: null,
+    blocked: true,
+    reasons: ["Owner name missing", "Authority missing"],
+  });
+  assert.deepEqual(blocked, ["Application PDF: blocked. Reasons:", "- Owner name missing", "- Authority missing"]);
+  const failed = pdfOutcomeLine({
+    example: false,
+    downloaded: null,
+    failed: true,
+    reasons: ["The application PDF form is unavailable. Download a text record or try again later."],
+  });
+  assert.deepEqual(failed, [
+    "Application PDF: could not be prepared.",
+    "The application PDF form is unavailable. Download a text record or try again later.",
+  ]);
   const downloaded = pdfOutcomeLine({
     example: false,
     downloaded: { name: "case-homebuilder-scc-variance-DRAFT.pdf", draft: true, at: "2026-10-20" },
-    exportAttempted: true,
-    blockingCount: 0,
+    failed: true,
   });
   const afterPdf = textRecord({
     title: "House",
@@ -133,9 +148,10 @@ test("a check that did not export does not say the PDF was blocked", () => {
     checkedAt: "2026-10-20",
     pdfLines: downloaded,
   });
-  assert.match(afterPdf, /case-homebuilder-scc-variance-DRAFT\.pdf/);
+  assert.match(afterPdf, /Application PDF: downloaded draft PDF case-homebuilder-scc-variance-DRAFT\.pdf/);
   assert.doesNotMatch(afterPdf, /did not return that PDF/);
   assert.doesNotMatch(afterPdf, /The engine did not return/);
+  assert.doesNotMatch(afterPdf, /could not be prepared/);
 });
 
 test("the Section D practice line does not repeat depends", () => {
