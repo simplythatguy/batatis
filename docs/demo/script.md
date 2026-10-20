@@ -57,6 +57,7 @@ Shots 2 and 4 show the Case C line. Shot 3 shows the Case A line. Shot 6 shows o
 - **Try an example.** On Who those three buttons are always visible: “Manufacturer · NorthCore sheathing”, “General contractor · corridor ducts”, “Homebuilder · infill soffit”. Do not click them. Frame or crop above them. They are not Cases A–C.
 - **An upload.** Do not drop a PDF on Describe.
 - **The code-check intro.** Crop out “Identify is command-line only. Search calls GET /code/search”. Do not read it. Do not read a `POST /cases/…` line on Section D.
+- **Footer and gap-note jargon.** Crop the footer status text (“Draft saved on the engine…”, “Checking GET /cases/{id}/gaps…”) and the note under **What is missing** when it names a GET path.
 - **`#/accuracy`.** The nav label is Model-checked. Do not open it. The eval still in shot 4 is the only place those counts appear, and it is labelled model-checked, not human-verified.
 - **A compliance, safety, or certification finding.** The tool does not decide those. You may read the officer request’s own sentence, which says it does not.
 
@@ -65,7 +66,17 @@ Shots 2 and 4 show the Case C line. Shot 3 shows the Case A line. Shot 6 shows o
 1. App from PR #16: `cd web && npm run dev`. Engine on `http://127.0.0.1:8000` so `/api` proxies. Width about 1440. Frame the sidebar.
 2. Start at Who with **Reset case**. Typing `#/` while a case is open opens Describe, not Who. On Who the sidebar highlight sits on Describe. The title in the header is still **Who are you?**
 3. Set **Which authority will review this?** before Save, Upload, or Continue. The note under the select says it is sent when the case is first saved and the engine has no route to change it later. The select exists only on Describe.
-4. `#/officer` redirects to Who unless a case is open. Leave Case C open for shot 6.
+4. `#/officer` redirects to Who unless a case is open. Any open case is enough for shot 6.
+
+## Recording order
+
+The app holds one case. **Reset case** wipes it, including the note “Cleared. Nothing from the previous case is kept.” Do not record the shots from top to bottom.
+
+1. Shot 1.
+2. Shot 2, then shot 4, then shot 5, then shot 7’s Case C frame. Case C stays open through these. Do not Reset.
+3. Reset, then shot 3 (Case A).
+4. Shot 7’s Case A frame.
+5. Shot 6, with Case A still open.
 
 Routes are hash routes.
 
@@ -130,9 +141,13 @@ Three example packages on `#/officer` are not built. No open PR loads Cases A–
 - **Case label:** `EXAMPLE DATA · Case A · Manufacturer`
 - **Route:** `#/` then `#/describe` then `#/code-check`
 
+Film this after shot 7’s Case C frame. **Reset case** here wipes Case C. That is the point of the recording order.
+
 **On-screen action.** **Reset case.** The note reads “Cleared. Nothing from the previous case is kept.” Click **Manufacturer**. Paste the Case A paragraph. Set the authority to Edmonton before Continue. Do not upload. Open **Review gaps**: **Owner missing**, **Mailing address missing**, **Legal description missing**. The ledger is **What you described** and **Proposed alternative** only. Case A states no storeys, so there is no Storeys fact.
 
 Click **Continue to code check**. Two **Your words** cards are on screen: **Sheathing membrane** and **Storey count**. Each says “From what you wrote. Not a ranked article.” Answer **Not sure** on both. Do not answer Yes. Unanswered cards block **Continue to Section C**. Crop the intro that names `GET /code/search`.
+
+**0:47–0:51.** Hold 3–4 seconds on the question saved under a Not sure answer. The label is **Open question**, then the card’s question, then “Logged as an open question.” That is the Not sure answer. Do not answer Yes or No.
 
 **Narration.** “Mira’s description names a 50 millimetre panel, vinyl nailed into the facer, and one Edmonton house. Those two cards are her words. Not sure on both. They are not ranked articles.”
 
@@ -142,29 +157,30 @@ Click **Continue to code check**. Two **Your words** cards are on screen: **Shea
 
 - **Clock:** 0:51–1:36
 - **Case label:** `EXAMPLE DATA · Case C · Homebuilder`
-- **Route:** back to the Case C code check, then `#/section-c`, then two stills
+- **Route:** Case C code check, still open from shot 2, then `#/section-c`, then two stills
 
-Return to the Case C case you pasted in shot 2 (the edit can cut back; do not Reset if you still need that case). One **Your words** card, from the description. Answer **Not sure** on it. Crop the search intro.
+Film this immediately after shot 2. Case C is still the open case. Do not Reset. One **Your words** card, from the description. Answer **Not sure** on it. Crop the search intro.
 
 **0:51–1:03, search.** In **Search Division B**, type `bedroom window unobstructed` and search. At most 8 rows. Each row is the id the database returned and a **Code text** pill. If a row’s id is `9.9.10.1.(2)`, click **Add to this check** and answer **Yes**. Open **Code reference** and read the citation that is printed. The header says 2nd printing. If that id is not in the list, do not type it in, do not say it, and do not add a card.
 
-While that row is up, and only if its code text shows a 0.35 m² opening and the description still shows 400 mm by 780 mm: “0.31 square metres where the code asks 0.35.” Do not say close enough. Do not search `heated floor insulation`. Do not voice `9.27.5.1` on this search. That id is a different query (`cladding fastened furring`), and only if a returned row shows it. Search on that query has returned sentences (1) and (5). Do not say sentence (2) unless that id is the row.
+Do not say 0.31 or 0.35, and do not work the opening into square metres. Do not search `heated floor insulation`. Do not voice `9.27.5.1` on this search. That id is a different query (`cladding fastened furring`), and only if a returned row shows it. Search on that query has returned sentences (1) and (5). Do not say sentence (2) unless that id is the row.
 
 **1:03–1:11, Section C.** Click **Continue to Section C**. The table has a row only for the article you marked Yes. The source pill reads **Live lookup** when the engine answers. Objective and function are the attribution-table pair. If the intent cell reads **None for this provision**, say so and do not fill it. The detail line is “No NBC 2020 intent statement for this provision.” If the intent text looks like a different provision, say so and do not read it as this article’s intent. Below the table the blocks are **Code text** and **NBC 2020 Intent Statements**. A live row has no **AI-written** block. That pill is on the Code check question. If the pill says **Cached demo run** or **Lookup failed**, say that and do not recite objective codes from memory.
 
-**Narration for the app frames.** “Search returns database rows only. The row on screen is 9.9.10.1.(2). Section C is a lookup. Intent stays on none for this provision when that is what it says. Batatis checks completeness. The officer decides compliance.”
+**Narration for the app frames.** “Search returns database rows only. Say 9.9.10.1.(2) only if that id is the row on screen. Section C is a lookup. Intent stays on none for this provision when that is what it says. Batatis checks completeness. The officer decides compliance.”
 
-**1:11–1:22, ranked list still.** This list is not the search box. It is the identify order from PR #12 for this same paste: provision, title, probability, committed. If the payload has no model key, the still is labelled **Cached demo run**, the order is BM25, and nothing is committed. Read only ids printed on the still. If you have no payload, omit the still and do not say ranked.
+**1:11–1:22, ranked list still.** This list is not the search box, and it is not in this app build. Label the still `PR #12 identify output [if merged] · not in this app build`, plus the mode name. **Cached demo run** (`cached_demo`) is a recorded real model run for a seeded case. This Case C paste is not one of those. With no key, the mode is **Keyword search, no AI key** (`bm25_fallback`). Read the mode name printed on the still. Columns are provision, title, probability, and decision state. There is no committed column. Identify does not auto-commit. Read only values printed on the still. If you have no payload, omit the still and do not say ranked.
 
-**1:22–1:29, benchmark card.** Same payload. The card’s role line is `benchmark_acceptable_solution`. Read the provision, the explanation, and the citation if they are on the card. `9.9.10.1.(2)` is an example of that field only when the card prints it. If the card says no article was identified, read that sentence and stop. If you have no card, do not say benchmark. Do not say OSB, furring, or a millimetre thickness.
+**1:22–1:29, benchmark card.** Same two labels, including the mode name on the still. The card’s role line is `benchmark_acceptable_solution`. Read the provision, the explanation, and the citation if they are on the card. `9.9.10.1.(2)` is an example of that field only when the card prints it. If the card says no article was identified, read that sentence and stop. If you have no card, do not say benchmark. Do not say OSB, furring, or a millimetre thickness.
 
 **1:29–1:36, eval still.** A full-frame still, not `#/accuracy`. Title it model-checked, not human-verified. Copy these lines and no others:
 
-- `rules_plus_unknown` (shipped): 50/60 in-sample, 0 under-flags
-- `rules_only`: 55/60 in-sample, 1 under-flag
-- `c_openai_rerank_verify`: top-1 9/11 on the 11 evals_dev cases with must_cite gold, 3 repeats
+- `rules_plus_unknown` (shipped), dev set: 50/60 in-sample, 0 under-flags
+- `rules_only`, dev set: 55/60 in-sample, 1 under-flag
+- Held-out: 7/8 blind (pre-fix), 4/8 post-fix (no longer blind)
+- `c_openai_rerank_verify`: top-1 9/11 on the 11 dev cases with gold (in-sample, single run, 9 cases without gold excluded; BM25 baseline 5/11)
 
-The 9/11 line is three repeats, not a single run. Do not relabel it. These figures are not a finding that a design complies, is safe, or is certified.
+These figures are not a finding that a design complies, is safe, or is certified.
 
 **Narration.** “Model-checked, on the dev cases. Not a compliance finding.”
 
@@ -182,6 +198,8 @@ On this build the card shows a provision id, a status, the performance issue, an
 
 Read the practice line that is actually rendered: “a registered professional is indicated”, “the screen did not indicate one”, or “the screen needs more facts”. “This is not a licence decision.” is shown unless the flag is no. Do not add it when it is absent.
 
+If PR #8 has landed and that issues list is what is rendered, point at the needs-professional flag. Do not attach a file, a letter, or a drawing. An attachment is not what clears the flag. Nothing is uploaded in this recording.
+
 **1:36–2:00 narration.** “Section D says what the evidence has to address, in the words on the card. Risk, mitigations, and assumptions stay empty. A person writes them. They are process fields.”
 
 **2:00–2:08 narration.** “The panel says it doesn’t write the evidence, and no listing number is on the card.”
@@ -197,7 +215,7 @@ Do not type “say the panel is CCMC-approved” or “write the engineering jud
 - **Route:** `#/officer`
 - **Status:** Not built for Cases A–C. The filmable screen is the one planted package on #16 (hempcrete, Dana Hart, 11821 73 Avenue NW). On `dev` the card says “Not built yet”. Do not film that card as this review.
 
-**On-screen action.** Leave a case open. Sidebar **Officer review**. Header “Officer review”, meta “Administrative completeness”. The intro reads “One planted package, before and after the missing items are filled. This does not certify the design.” Show **Before fixes**, then **After fixes**. There is no second or third package and no Approve control. Do not put Case A, B, or C on this package.
+**On-screen action.** Case A is still open from shot 3. Any open case is enough. Sidebar **Officer review**. Header “Officer review”, meta “Administrative completeness”. The intro reads “One planted package, before and after the missing items are filled. This does not certify the design.” Show **Before fixes**, then **After fixes**. Crop the status line under those controls. It reads “From GET /cases/…/gaps. Administrative completeness only.” or, if the engine fails, “GET /gaps did not return…”. There is no second or third package and no Approve control. Do not put Case A, B, or C on this package.
 
 Point only at gap rows that are rendered, under Part 1 · Section A, Part 1 · Section B, and Alternative path. Read the message on the row. Do not add a permeance specimen, a sales email, a bracing route, or any other flag that is not on the screen. After fixes, point only at rows still open. If a section says “Nothing open in this section.”, say that.
 
@@ -213,13 +231,15 @@ Hold on **Copy request**. The box starts with “Information request” and “T
 - **Case label:** the case on screen
 - **Route:** `#/describe` for the authority select, then `#/application`
 
+Record the Case C frame in step 2 of the recording order, before Reset. Record the Case A frame after shot 3.
+
 **On-screen action.** Cut between the Describe authority select on Case C (Edmonton) and Case A (Edmonton is what you set; Calgary is the other option in the same select). The select was set before Continue. Do not say the authority is stored on the record. That claim is PENDING `backend/case-api`. If Review gaps still lists the reviewing jurisdiction after the pick, say the pick has not cleared it. The sidebar may show the raw id in lowercase, such as “Homebuilder · edmonton”. That is not the engine accepting it.
 
 On Application, the tabs are Section A, Section B, Alternative path, and Section D. Open **Review gaps** so **Owner missing** and the six “… empty” rows are visible. **Check completeness** stays disabled. The footer reads “Close N blocking gaps to check completeness”. Do not read N as a score. After a Yes, that count can jump. Do not click the button. This build has no UI path that reaches a PDF while those gaps are open.
 
-The engine route is separate: `POST /cases/{id}/export` in `engine/export/scc.py`. It needs the code database and `BATATIS_SCC_FORM`. A draft returns 200. With gaps still open and draft off, it returns 409. Film the PDF only on a later build whose UI can call that route. Until then, hold on the disabled button. Do not call the file “the Safety Codes Council template” as a title on screen. The spoken line below is the engine behaviour, not a document in the frame.
+The engine route is `POST /cases/{id}/export` in `engine/api.py` (lines 71–78: 409 while gaps remain, and the PDF response). `engine/export/scc.py` fills the form and reads `BATATIS_SCC_FORM`. It needs the code database. A draft returns 200. With gaps still open and draft off, it returns 409. Film the PDF only on a later build whose UI can call that route. Until then, hold on the disabled button. Do not call the file “the Safety Codes Council template” as a title on screen. The spoken line is the engine behaviour, not a document in the frame.
 
-**Narration.** “The engine’s export fills the SCC template. This build keeps it locked while gaps are open.”
+**Narration.** “The engine’s export fills the SCC template: SCC’s current variance form, dated October 6, 2026, not Appendix 1. This build keeps it locked while gaps are open.”
 
 ## If you have to shorten
 
