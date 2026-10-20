@@ -103,6 +103,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         except ValueError as e:
             raise HTTPException(400, f'invalid provision id: {e}')
 
+    app.include_router(__import__('engine.routes_case', fromlist=['create_router']).create_router(cases, code))
     return app
 
 
