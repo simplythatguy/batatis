@@ -150,7 +150,7 @@ Scoring question, from `docs/judging-rubric.md`: "Can it review a completed appl
   - The body says variant A still misses generic risk (D09 1/2), unrelated mitigations (D10 1/2), contradictions (D14 0/2), and relevance (D15 0/2), and that D05 and D07 are absent from that table because they need the code database.
   - Pytest written in the body, without a code database: 12 passed across `test_bulletin_gates.py`, `test_portal_package.py`, `test_jurisdiction_wording.py`, and `test_schema_export.py`.
   - The body says the draft is not ready to merge.
-- [#16](https://github.com/simplythatguy/batatis/pull/16). PR #16, in review (not on `dev` yet). No screen on that branch reaches export: Check completeness stays disabled. The body also says `GET /gaps` returned 503 when `BATATIS_CODEDB` was missing.
+- [#16](https://github.com/simplythatguy/batatis/pull/16). PR #16, in review (not on `dev` yet). "Download draft record" saves a .txt draft record, and only once every gap is closed. "Check completeness" downloads the engine-filled Safety Codes Council variance form PDF (7 pages, the Oct 6, 2026 form) behind a "not a finding that the design complies" dialog. The body also says `GET /gaps` returned 503 when `BATATIS_CODEDB` was missing.
 
 ### GAP
 
@@ -221,7 +221,7 @@ Scoring question, from `docs/judging-rubric.md`: "Overall user experience for bo
 
 ### Open pull requests
 
-- [#16](https://github.com/simplythatguy/batatis/pull/16). PR #16, in review (not on `dev` yet). No screen on that branch reaches export: Check completeness stays disabled, and picking a jurisdiction does not clear the reviewing-jurisdiction gap. The body says the product surface moves to `web/`. Screenshots in that body are of a local preview.
+- [#16](https://github.com/simplythatguy/batatis/pull/16). PR #16, in review (not on `dev` yet). "Download draft record" saves a .txt draft record, and only once every gap is closed. "Check completeness" downloads the engine-filled Safety Codes Council variance form PDF (7 pages, the Oct 6, 2026 form) behind a "not a finding that the design complies" dialog. The body says the product surface moves to `web/`. Screenshots in that body are of a local preview.
 - [#11](https://github.com/simplythatguy/batatis/pull/11). The body says wire fields on `Jurisdiction` stay `id`, `name`, and `authority`, and that "authority having jurisdiction" wording follows IB-2026-10-16. That wording change is not on `dev`.
 
 ### GAP
