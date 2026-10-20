@@ -16,7 +16,7 @@ All web sources below were accessed 2026-10-20 unless a different date is shown.
 ## Code-citation rule used in this file
 
 Alberta requirements are cited only to NBC(AE) 2023 2nd printing (and NFC(AE) 2023 2nd printing) from the local text
-`/Users/aamia/.t3/projects/batatis/reference/text/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.jsonl`, and only after I saw the text on that PDF page.
+`reference/text/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.jsonl`, and only after I saw the text on that PDF page.
 Form: `NBC(AE) 2023, Div B, Article 9.10.15.4. [PDF p.N]`. No 2019, 2025 or 1st-printing number is presented as current. No NBC 2020 intent statements were used in this file.
 
 ## Progress ledger
@@ -345,7 +345,7 @@ Licences and activity read from each repository's licence file and the GitHub AP
 
 ### 5.2 My measurement (micro-benchmark), what it does and does not show
 
-Checked against pstack's benchmark checklist (`/Users/aamia/.agents/skill-libraries/pstack/skills/benchmark-checklist/SKILL.md`).
+Checked against pstack's benchmark checklist (`~/.agents/skill-libraries/pstack/skills/benchmark-checklist/SKILL.md`).
 
 Claim in the words I would ship: on HeadlessChrome 154 (macOS, 15 logical cores, devicePixelRatio 1, 900x600 surface, background load average about 2.4), editing one element of a 20,000-polygon SVG scene costs under 0.5 ms of script plus style plus layout; redrawing 20,000 polygons on a raw Canvas2D including the raster flush takes about 5 ms; a naive single-layer Konva 9.3.22 scene takes about 60 ms per full redraw with its hit graph on and about 26 ms with it off.
 
@@ -411,7 +411,7 @@ STATUS: DONE
 
 ### 6.1 Method and caveats
 
-- Source: the local text `/Users/aamia/.t3/projects/batatis/reference/text/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.jsonl` (one JSON object per PDF page; the `page` field is the PDF page number used below). The page footers confirm "National Building Code - 2023 Alberta Edition", Volume 1 (Division A and Part 3) and Volume 2 (Part 9). Every "Rule" cell below summarizes text I read on the cited PDF page (VERIFIED); numbers are copied from that text. Nothing here uses a 2019, 2020, 2025 or first-printing number. Where I cite a Table I give the example rows I read, not the whole table.
+- Source: the local text `reference/text/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.jsonl` (one JSON object per PDF page; the `page` field is the PDF page number used below). The page footers confirm "National Building Code - 2023 Alberta Edition", Volume 1 (Division A and Part 3) and Volume 2 (Part 9). Every "Rule" cell below summarizes text I read on the cited PDF page (VERIFIED); numbers are copied from that text. Nothing here uses a 2019, 2020, 2025 or first-printing number. Where I cite a Table I give the example rows I read, not the whole table.
 - Article numbers differ from older editions. Examples I checked against the text: travel distance limits for exits are in 3.4.2.5 (not 3.4.2.4, which defines travel distance); public-corridor width and dead ends are in 3.3.1.9; the barrier-free doorway rule is 3.8.3.6; spatial separation for houses is 9.10.15 and for other small buildings 9.10.14.
 - The "Inputs", "Sheets" and "On permit drawings?" columns are my judgment (ESTIMATE), not data. Sheet codes: P floor plans, S site plan, E elevations, X sections/details/stair details, K schedules (doors, windows), N code summary or sheet notes. "H/M/L" means high/medium/low likelihood that a normal permit set already contains the input. Evidence base for the likelihood column is limited to Calgary's published requirements (floor plans and site plan at preferred scale 1:100 or 1/4 in = 1 ft; "Include labels and dimensions for all spaces, buildings and openings"; Alberta homeowner path accepts hand drawings: https://www.calgary.ca/content/dam/www/pda/pd/documents/permit-checklists/new-and-additions.pdf and https://www.calgary.ca/drawingstandards, read 2026-10-20) and general practice.
 - The requested "room minimum areas" check: I string-searched Parts 3 and 9 (pages 160-1120) for "minimum room area", "natural light", "natural lighting", "glazing area ... floor area" and found none; "glass area" appears only in glass-thickness and safety-glazing tables (9.6, e.g., PDF p.843, 846). The closest room-size rules are the area-over-which-ceiling-height-applies in Table 9.5.3.1 (row P9-01) and hallway and doorway sizes (P9-02, P9-03). Minimum room sizes or daylight rules, if an Alberta authority enforces them, are not in the NBC(AE) pages searched (UNVERIFIED where else they might live, e.g., land-use or secondary-suite bylaws).
@@ -596,11 +596,11 @@ Process notes
 ### (d) Methods used
 
 Method files actually read and applied:
-- `/Users/aamia/.codex/skills/t3-workflow/SKILL.md` (router and scope)
-- `/Users/aamia/.codex/skills/t3-workflow/references/routes.md` (Research route)
-- `/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md` (primary sources, cite every claim, one Markdown file)
-- `/Users/aamia/.agents/skill-libraries/pstack/skills/benchmark-checklist/SKILL.md` (applied to the Section 5.2 micro-benchmark after I decided to report measurements)
-- `/Users/aamia/.codex/skills/jev-search/SKILL.md` (read; the optional `jev search` CLI was not run)
+- `~/.codex/skills/t3-workflow/SKILL.md` (router and scope)
+- `~/.codex/skills/t3-workflow/references/routes.md` (Research route)
+- `~/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md` (primary sources, cite every claim, one Markdown file)
+- `~/.agents/skill-libraries/pstack/skills/benchmark-checklist/SKILL.md` (applied to the Section 5.2 micro-benchmark after I decided to report measurements)
+- `~/.codex/skills/jev-search/SKILL.md` (read; the optional `jev search` CLI was not run)
 - The bundled `claude-api` skill (`/private/tmp/claude-501/bundled-skills/2.1.304/2e0f1a07113fc2115ab61f8112ac84bf/claude-api`, SKILL.md only), used solely for its cached Claude price table dated 2026-10-06 (the live pricing page was not re-fetched)
 
 Prior research read first: `/tmp/batatis-archive/research/product-vision-2026-10-18/06-document-ingestion.md` and `05-architecture-and-evaluation.md`.

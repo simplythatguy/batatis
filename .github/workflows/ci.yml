@@ -17,9 +17,11 @@ jobs:
   web:
     name: web
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
@@ -31,6 +33,15 @@ jobs:
           npm ci
           npm run typecheck
           npm run build
+      - name: UI smoke
+        run: |
+          npm init -y --prefix "${RUNNER_TEMP}/ui-smoke"
+          npm install --prefix "${RUNNER_TEMP}/ui-smoke" playwright-core@1.64.1
+          node "${RUNNER_TEMP}/ui-smoke/node_modules/playwright-core/cli.js" install chromium
+          chrome="$(find "${HOME}/.cache/ms-playwright" -type f -name chrome -path '*chrome-linux*' | head -n 1)"
+          test -n "${chrome}"
+          ln -s "${RUNNER_TEMP}/ui-smoke/node_modules" node_modules
+          CHROME_PATH="${chrome}" node evals/ui-artifacts/smoke.mjs
 
   engine:
     name: engine
@@ -47,6 +58,8 @@ jobs:
       BATATIS_LIVE_JEV: ""
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
@@ -58,7 +71,7 @@ jobs:
       - name: Install from requirements files
         run: python -m pip install -r engine/requirements.txt -r codedb/requirements.txt -r research/precedents/requirements.txt
       - name: Engine tests and key-free evals
-        run: python -m pytest -q engine/tests evals_dev -rs
+        run: python -m pytest -q engine/tests codedb/tests evals_dev -rs
 
   gitleaks:
     name: gitleaks
@@ -71,6 +84,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
         env:
           # Automatic workflow token, used to read the pull request diff. Not a provider key.
