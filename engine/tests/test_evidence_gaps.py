@@ -51,6 +51,8 @@ def test_missing_objective_is_one_warning_and_does_not_invent_a_pair():
         performance_issue='synthetic issue', recommended_types=("manufacturer's literature",))
     [gap] = group_evidence_gaps([blank])
     assert gap.severity == 'warning' and gap.pairs == [] and gap.rule == 'evidence_scope'
+    assert gap.evidence_types == ["manufacturer's literature"]
+    assert "manufacturer's literature" in gap.fix_hint
     assert 'inferred' in gap.fix_hint
 
 

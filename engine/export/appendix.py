@@ -86,6 +86,8 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
                             + (f'; clauses {", ".join(p.clauses)}' if p.clauses else '')
                             + (f'; {p.application_note}' if p.application_note else '')]
                            for p in row.pairs], [2.3 * inch, 2.3 * inch, 2.4 * inch]))
+    elif row.attribution_label:
+        out.append(_p(row.attribution_label))
     else:
         out.append(_p('The NBC(AE) 2023 attribution table has no row for this provision, so no objective or '
                       'functional statement is attributed to it here.'))

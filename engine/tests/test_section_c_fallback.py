@@ -3,7 +3,10 @@ import pytest
 
 from codedb.tests.mini_db import build
 from engine.codes import Codes
-from engine.section_c import section_c_rows
+from engine.evidence_gaps import group_evidence_gaps
+from engine.models import Case
+from engine.section_c import NOT_ATTRIBUTED, NOT_ATTRIBUTED_LABEL, section_c_rows
+from engine.section_d import section_d_plan
 
 
 @pytest.fixture
@@ -56,6 +59,26 @@ def test_sentence_falls_back_to_an_article_row(codes):
     assert row.attribution_status == 'inherited from parent'
     assert row.attributed_via == '8.1.1.1.'
     assert [(pair.function, pair.objective) for pair in row.pairs] == [('F10', 'OS3.7')]
+
+
+def test_not_determined_sentence_states_that_and_does_not_copy_the_article(codes):
+    """9.23.17.3.(1) in the fixture: status none / not_determined, intent only, article pair present."""
+    [row] = section_c_rows(['9.23.17.3.(1)'], codes)
+    assert row.attribution == NOT_ATTRIBUTED
+    assert row.attribution_label == NOT_ATTRIBUTED_LABEL
+    assert row.attribution_status == 'no row in the attribution table'
+    assert row.pairs == [] and row.attributed_via is None
+    assert row.intents and row.intents[0].intents == ['SYNTHETIC intent for an unattributed sentence']
+    assert row.intents[0].objective is None
+    plan = section_d_plan(Case(provisions=['9.23.17.3.(1)']), codes)
+    assert plan.items and all(item.objective is None and item.function is None for item in plan.items)
+    [gap] = group_evidence_gaps(plan.items)
+    assert gap.pairs == []
+    assert gap.evidence_types == list(plan.items[0].recommended_types)
+    text = gap.fix_hint
+    assert NOT_ATTRIBUTED_LABEL in text
+    assert 'F99' not in text and 'OS9.9' not in text
+    assert "manufacturer's literature" in text
 
 
 def test_division_c_sentence_is_not_a_section_c_row(codes):

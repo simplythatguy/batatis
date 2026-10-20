@@ -703,6 +703,31 @@
           "default": null,
           "title": "Attributed Via"
         },
+        "attribution": {
+          "anyOf": [
+            {
+              "const": "not_attributed",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attribution"
+        },
+        "attribution_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attribution Label"
+        },
         "attribution_status": {
           "enum": [
             "direct",
@@ -797,6 +822,8 @@
         "citation",
         "attribution_status",
         "attributed_via",
+        "attribution",
+        "attribution_label",
         "pairs",
         "intents",
         "intent_comparison",

@@ -28,9 +28,9 @@ def build(path) -> None:
         con.execute('INSERT INTO attribution_status VALUES (?,?,?,?,?)',
                     ('NBC-AE', pid, name, root, how))
 
-    def intent(pid, text, comparison):
+    def intent(pid, text, comparison, objective='OS9'):
         con.execute('INSERT INTO intents VALUES (?,?,?,?,?,?,?,?,?,?)',
-                    ('NBC-2020-IS', 'NBC-AE', pid, 0, 'OS9', '[]', '[]', json.dumps([text]), 1, 1))
+                    ('NBC-2020-IS', 'NBC-AE', pid, 0, objective, '[]', '[]', json.dumps([text]), 1, 1))
         con.execute('INSERT INTO intent_comparison VALUES (?,?,?,?,?,?,?)',
                     ('NBC-2020-IS', 'NBC-AE', pid, int(comparison != 'provision_missing_in_ae'),
                      comparison, None, None))
@@ -78,6 +78,14 @@ def build(path) -> None:
     attr('3.1.4.2.(1)', 'F02', 'OS1.2')
     status('3.1.4.2.(1)', 'direct')
     status('3.1.4.2.(1)(a)', 'inherits', '3.1.4.2.(1)', 'parent_sentence')
+
+    # Shaped like 9.23.17.3.(1): codedb status none / not_determined, an intent, and an
+    # article row that must not be copied onto the sentence.
+    prov('B', '9.23.17.3.', 'article')
+    prov('B', '9.23.17.3.(1)', 'sentence', '9.23.17.3.')
+    attr('9.23.17.3.', 'F99', 'OS9.9')
+    status('9.23.17.3.(1)', 'none', None, 'not_determined')
+    intent('9.23.17.3.(1)', 'SYNTHETIC intent for an unattributed sentence', 'match', objective=None)
 
     prov('B', '8.1.1.1.', 'article')
     prov('B', '8.1.1.1.(1)', 'sentence', '8.1.1.1.')

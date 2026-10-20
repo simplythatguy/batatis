@@ -104,6 +104,8 @@ export interface SectionCRequest {
 
 export interface SectionCRow {
   attributed_via: string | null;
+  attribution: "not_attributed" | null;
+  attribution_label: string | null;
   attribution_status: "direct" | "inherited from parent" | "no row in the attribution table";
   citation: string;
   differs: boolean;

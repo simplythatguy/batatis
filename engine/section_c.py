@@ -7,6 +7,8 @@ clause). Attribution status is reported literally:
                                      or from a clause when the sentence itself has none. attributed_via
                                      is that source id
   no row in the attribution table  - nothing on this id, its parent sentence, or its article; never guess
+A codedb status of none with root method not_determined is not a parent to copy. The row stays
+without an objective or function and says so: attribution ``not_attributed``.
 National 2020 intent statements are explanatory only. They attach to Division B rows, and a comparison
 status of provision_missing_in_ae is not attached.
 """
@@ -16,6 +18,9 @@ from codedb import ids
 
 from .codes import Codes
 from .models import AttributionPair, IntentBlock, SectionCRow
+
+NOT_ATTRIBUTED = 'not_attributed'
+NOT_ATTRIBUTED_LABEL = 'No objective or function attributed in NBC(AE) 2023 for this provision'
 
 def section_c_rows(provision_ids: list[str], codes: Codes) -> list[SectionCRow]:
     """Rows for Division B provisions, in input order. Raises KeyError for an id not in Division B."""
@@ -80,6 +85,15 @@ def _parent_rows(pid: str, codes: Codes):
     return [], None
 
 
+def _unattributed(rec: dict) -> bool:
+    """Codedb says this provision has no attribution and no determined root.
+
+    Parent rows are not copied onto it. That would invent an objective or function.
+    """
+    status = rec.get('attribution_status') or {}
+    return status.get('status') == 'none' and status.get('root_method') == 'not_determined'
+
+
 def _attribution(rec: dict, codes: Codes):
     """Own row, else rows lookup already inherited, else the parent chain."""
     pid = rec['id']
@@ -87,6 +101,8 @@ def _attribution(rec: dict, codes: Codes):
     own = _exact_rows(rows, pid)
     if own:
         return own, 'direct', None
+    if _unattributed(rec):
+        return [], 'no row in the attribution table', None
     other = [a for a in rows if a.get('provision_id') != pid]
     if other:
         return other, 'inherited from parent', _source_id(other)
@@ -112,9 +128,12 @@ def _row(rec: dict, codes: Codes) -> SectionCRow:
                for i in rec.get('intents') or [] if own_intent(i['provision_id']) and i['provision_id'] not in missing]
     cmp = next((c for c in comparisons if c['provision_id'] == pid and c['provision_id'] not in missing), None)
     related = st.get('root_provision') if status == 'no row in the attribution table' and raw_status == 'none' else None
+    unattributed = not pairs and _unattributed(rec)
     return SectionCRow(
         provision_id=pid, citation=rec['citation'], attribution_status=status,
         attributed_via=via, pairs=pairs, intents=intents,
+        attribution=NOT_ATTRIBUTED if unattributed else None,
+        attribution_label=NOT_ATTRIBUTED_LABEL if unattributed else None,
         intent_comparison=cmp['status'] if cmp else None,
         differs=bool(cmp and cmp['status'] == 'differs'),
         only_in_intent=(cmp or {}).get('only_in_intent') or [],

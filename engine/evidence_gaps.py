@@ -18,6 +18,7 @@ from pydantic import BaseModel, ConfigDict
 from codedb import ids
 
 from .models import Case, EvidenceItem
+from .section_c import NOT_ATTRIBUTED_LABEL
 from .section_d import (
     ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, EvidencePlanItem,
 )
@@ -189,12 +190,14 @@ def group_evidence_gaps(items: Sequence[EvidencePlanItem]) -> list[ProvisionEvid
                           'not every ladder rung is required. Listing evidence records what was named. '
                           'It does not assess or verify it.')))
         else:
+            type_list = ', '.join(types) if types else 'the evidence types the responsible designer selects'
             gaps.append(ProvisionEvidenceGap(
                 provision_id=provision_id, citation=citation, pairs=[], evidence_types=types,
                 severity='warning', rule='evidence_scope', field=f'evidence.{provision_id}.scope',
-                missing=f'an identified performance benchmark for {provision_id}.',
-                fix_hint=('The attribution table has no objective or function for this provision. '
-                          'Ask the responsible designer which benchmark applies before selecting evidence. '
+                missing=f'supporting evidence for {provision_id}.',
+                fix_hint=(f'{NOT_ATTRIBUTED_LABEL}. '
+                          f'Evidence types to discuss: {type_list}. '
+                          'No objective or function is on this gap. '
                           'No objective or function is inferred.')))
     return gaps
 
