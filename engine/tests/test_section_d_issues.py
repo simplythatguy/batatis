@@ -15,7 +15,7 @@ from engine.section_d_flag_eval import (
 )
 from engine.section_d_issues import (
     GENERIC_FALLBACK_QUESTION, PROCESS_RULES, PROFESSIONAL_REQUEST, PROFESSIONAL_RULES,
-    generic_fallback_on_dev, professional_confirmed, section_d_issues,
+    generic_fallback_on_dev, professional_confirmed, render_practice, section_d_issues,
 )
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import fact
@@ -234,6 +234,34 @@ def test_part3_sales_rep_email_stays_needs_professional():
     assert issue.practice_of_engineering.question == PROFESSIONAL_REQUEST
     payload = issue.model_dump_json()
     assert 'FireSeal' not in payload and 'Example Sealants' not in payload and 'sales rep' not in payload
+
+
+def test_missing_division_c_citation_is_unknown_and_the_route_does_not_500(tmp_path):
+    codes = codes_with_rules()
+    codes.rows[('C', '2.4.1.2.(1)')]['citation'] = ''
+    issue = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact('part4_design', True)]), codes)[0]
+    assert issue.practice_of_engineering.value == 'unknown'
+    assert issue.practice_of_engineering.reason
+    assert issue.practice_of_engineering.question
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    client = TestClient(create_app(store, codes), raise_server_exceptions=False)
+    case = store.put(Case(provisions=[BENCHMARK], facts=[fact('part4_design', True)]))
+    response = client.get(f'/cases/{case.id}/section-d/issues')
+    assert response.status_code == 200
+    flag = response.json()[0]['practice_of_engineering']
+    assert flag['value'] == 'unknown'
+    assert flag['reason']
+    assert flag['question']
+    from engine.professional import ProfessionalReason, ProfessionalResult
+    unmapped = ProfessionalResult(
+        required='yes', general_required='yes',
+        reasons=[ProfessionalReason(code='not_in_the_table', required='yes', message='Ask.',
+                                    citation='fixture:C:2.4.1.1.(3)')],
+        questions=[])
+    flag = render_practice(unmapped, codes)
+    assert flag.value == 'unknown'
+    assert flag.reason
+    assert flag.question
 
 
 def test_acceptable_path_drops_variance_process_fields_and_extra_evidence_types():

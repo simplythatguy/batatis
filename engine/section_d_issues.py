@@ -242,26 +242,38 @@ def practice_of_engineering(case: Case, codes: Codes) -> PracticeOfEngineering:
     return render_practice(result, codes, span_handoff=span_handoff)
 
 
+_UNRESOLVED_CITATION_REASON = (
+    'The Division C rule for this practice screen did not resolve in the code database. '
+    'Ask before setting the flag to yes or no.')
+_UNRESOLVED_CITATION_QUESTION = (
+    'Which Division C professional-involvement rule applies? No citation was returned.')
+
+
+def _flag(value: PracticeValue, reason_row: ProfessionalReason | None, text: str, question: str | None) -> PracticeOfEngineering:
+    """A yes or no flag needs the looked-up rule. A missing citation becomes unknown, not an error."""
+    rule, division = _rule(reason_row) if reason_row else ('', '')
+    citation = reason_row.citation if reason_row else None
+    if value == 'unknown' or (rule and division and citation and str(citation).strip()):
+        return PracticeOfEngineering(value=value, rule=rule or None, division=division or None,
+                                     citation=citation or None, reason=text, question=question)
+    return PracticeOfEngineering(value='unknown', reason=_UNRESOLVED_CITATION_REASON,
+                                 question=_UNRESOLVED_CITATION_QUESTION)
+
+
 def render_practice(result: ProfessionalResult, codes: Codes, *, span_handoff: bool = False) -> PracticeOfEngineering:
     if result.required == 'yes':
         reason = _pick(result, 'yes')
-        rule, division = _rule(reason) if reason else ('', '')
         text = _YES_TEXT.get(reason.code, 'Recommend a registered professional for the stated scope.') if reason else (
             'Recommend a registered professional for the stated scope.')
         if span_handoff:
             text += ' The stated span is recorded as Part 4 design, so the same Division C rule applies.'
-        return PracticeOfEngineering(value=True, rule=rule or None, division=division or None,
-                                     citation=reason.citation if reason else None, reason=text,
-                                     question=PROFESSIONAL_REQUEST)
+        return _flag(True, reason, text, PROFESSIONAL_REQUEST)
     if result.required == 'no':
         reason = _pick(result, 'no') or _pick(result, 'depends')
-        rule, division = _rule(reason) if reason else ('', '')
-        return PracticeOfEngineering(
-            value=False, rule=rule or None, division=division or None,
-            citation=reason.citation if reason else None,
-            reason=('The stated facts fit a general exception. Recommend checking component duties and any '
-                    'authority direction. This screen does not decide professional-law scope.'),
-            question=None)
+        return _flag(False, reason,
+                     ('The stated facts fit a general exception. Recommend checking component duties and any '
+                      'authority direction. This screen does not decide professional-law scope.'),
+                     None)
     reason = _pick(result, 'depends')
     rule, division = _rule(reason) if reason else ('', '')
     return PracticeOfEngineering(

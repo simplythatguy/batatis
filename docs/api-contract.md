@@ -114,7 +114,7 @@ Process fields are required on the alternative path. They are not rungs of the e
 
 | Field | Type | Meaning |
 | --- | --- | --- |
-| `value` | `true`, `false`, or `"unknown"` | `true` or `false` only when the Division C screen resolves. `"unknown"` when a deciding fact is missing. The service does not guess a boolean. |
+| `value` | `true`, `false`, or `"unknown"` | `true` or `false` only when the Division C screen resolves. `"unknown"` when a deciding fact is missing, or when a yes or no result has no resolvable Division C citation. In that citation case `reason` says the rule did not resolve. The route returns that flag; it does not return 500. The service does not guess a boolean. |
 | `rule` | string or null | Provision id of the Division C rule that triggered the flag, or of the rule that could not be applied. |
 | `division` | `"A"` \| `"B"` \| `"C"` or null | Division of `rule`. |
 | `citation` | string or null | That rule's citation from the code database. Omitted when the rule does not resolve. The rule id is one `engine/professional.py` already passes to its screen. |
