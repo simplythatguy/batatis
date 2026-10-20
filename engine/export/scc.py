@@ -28,7 +28,7 @@ from ..section_c import section_c_rows
 from ..section_d import supporting_documents
 from .text import fit, pdf_safe
 
-DEFAULT_FORM = Path('/Users/aamia/.t3/projects/batatis/reference/guides/SCC-Variance-Form.pdf')
+DEFAULT_FORM = Path(__file__).resolve().parents[2] / 'reference' / 'guides' / 'SCC-Variance-Form.pdf'
 MAP_DIR = Path(__file__).parent / 'field_maps'
 CURRENT_MAP = 'scc_2026-10'
 MULTILINE = 1 << 12
