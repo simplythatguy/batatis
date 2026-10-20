@@ -1,10 +1,10 @@
-"""ASGI guard: strip /api, tag robots, budget NRC text, and log ids, routes, and status."""
+"""ASGI guard: strip /api, tag robots, attribute NRC text, and log ids, routes, and status."""
 from __future__ import annotations
 
 import json
 import logging
 
-from .copyright import PII_NOTICE, attach_meta, clip_response
+from .copyright import PII_NOTICE, attach_meta, attribute_code
 
 access_log = logging.getLogger('engine.access')
 
@@ -58,7 +58,7 @@ class HttpGuard:
             headers = list(started.get('headers') or [])
             if raw and b'application/json' in _header(headers, b'content-type'):
                 try:
-                    payload = attach_meta(clip_response(json.loads(raw)))
+                    payload = attach_meta(attribute_code(json.loads(raw)))
                     raw = json.dumps(payload).encode()
                 except (ValueError, UnicodeError):
                     pass

@@ -1,11 +1,8 @@
-"""Keep NRC code text inside one response budget. The code is linked, not redistributed."""
+"""Attach NRC attribution to code text. The text is returned whole."""
 from __future__ import annotations
 
 import re
 
-# Each NRC snippet, and the NRC text carried by one response. Both limits apply.
-SNIPPET_MAX_WORDS = 25
-RESPONSE_NRC_MAX_WORDS = 75
 NRC_PUBLICATION_URL = (
     'https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499'
 )
@@ -26,27 +23,6 @@ def words(text: str) -> list[str]:
     return _WORD.findall(text)
 
 
-def snippet(text: str | None, limit: int = SNIPPET_MAX_WORDS) -> str | None:
-    """At most `limit` words. Short strings are returned unchanged."""
-    if text is None:
-        return None
-    found = words(text)
-    if len(found) <= limit:
-        return text
-    return ' '.join(found[:limit])
-
-
-def clip_marker(page) -> str:
-    """Page from the enclosing attribution, or the edition when the page is unknown."""
-    if isinstance(page, bool):
-        page = None
-    if isinstance(page, int) and page > 0:
-        return f'… [clipped, see NBC p.{page}]'
-    if isinstance(page, str) and page.isdigit() and int(page) > 0:
-        return f'… [clipped, see NBC p.{int(page)}]'
-    return '… [clipped, see NBC(AE) 2023]'
-
-
 def _source_type(parent) -> str | None:
     """`code`, `user_text`, and the other fact source types, from this object or its `source`."""
     if not isinstance(parent, dict):
@@ -61,7 +37,7 @@ def _source_type(parent) -> str | None:
 
 
 def is_nrc_string(key, text, parent=None) -> bool:
-    """True when this string is NRC code text the response budget has to count.
+    """True when this string is NRC code text that keeps its citation and the publication link.
 
     A `quote` or a fact `value` counts only when `source.type` is `code`.
     Applicant `user_text` and engine question strings are not code text.
@@ -84,96 +60,31 @@ def is_nrc_string(key, text, parent=None) -> bool:
     return False
 
 
-def _page(node: dict, inherited):
-    own = node.get('pdf_page')
-    if isinstance(own, int) and not isinstance(own, bool) and own > 0:
-        return own
-    if isinstance(own, str) and own.isdigit() and int(own) > 0:
-        return int(own)
-    return inherited
-
-
-class _Budget:
-    def __init__(self) -> None:
-        self.left = RESPONSE_NRC_MAX_WORDS
-
-
-def _mark(owners: list[dict]) -> None:
-    """Flag every ancestor. The object that holds the string gains the NRC link."""
-    for owner in owners:
-        owner['clipped'] = True
-    if owners and 'url' not in owners[0] and 'href' not in owners[0]:
-        owners[0]['url'] = NRC_PUBLICATION_URL
-
-
-def _clip_string(text: str, page, budget: _Budget, owners: list[dict]) -> str:
-    found = words(text)
-    if not found:
-        return text
-    room = min(SNIPPET_MAX_WORDS, budget.left)
-    if len(found) <= room:
-        budget.left -= len(found)
-        return text
-    _mark(owners)
-    if room <= 0:
-        return clip_marker(page)
-    budget.left -= room
-    return ' '.join(found[:room]) + ' ' + clip_marker(page)
-
-
-def _walk(node, key, page, budget: _Budget, owners: list[dict], parent):
+def _holds_code(node, key=None, parent=None) -> bool:
     if isinstance(node, dict):
-        page = _page(node, page)
-        out: dict = {}
-        child_owners = [out, *owners]
+        return any(_holds_code(value, name, node) for name, value in node.items())
+    if isinstance(node, list):
+        return any(_holds_code(item, key, parent) for item in node)
+    return isinstance(node, str) and is_nrc_string(key, node, parent)
+
+
+def attribute_code(node, key=None, parent=None):
+    """Return code text unchanged and put the NRC publication link on each object that carries it.
+
+    A citation already on the object stays. Applicant text is left alone and gets no link.
+    """
+    if isinstance(node, dict):
+        out = {}
         for name, value in node.items():
             if name in ('clipped', 'clipped_fields'):
                 continue
-            out[name] = _walk(value, name, page, budget, child_owners, node)
+            out[name] = attribute_code(value, name, node)
+        if _holds_code(node) and 'url' not in out and 'href' not in out:
+            out['url'] = NRC_PUBLICATION_URL
         return out
     if isinstance(node, list):
-        return [_walk(item, key, page, budget, owners, parent) for item in node]
-    if isinstance(node, str) and is_nrc_string(key, node, parent):
-        return _clip_string(node, page, budget, owners)
+        return [attribute_code(item, key, parent) for item in node]
     return node
-
-
-def clip_response(node):
-    """Apply the response budget to one JSON body.
-
-    Each NRC snippet is at most 25 words. The body keeps at most 75 words of NRC text.
-    Past that, the string is the page marker only, and the object keeps its citation,
-    gains the NRC link, and sets clipped to true.
-    """
-    return _walk(node, None, None, _Budget(), [], None)
-
-
-def clip_tree(node, key: str | None = None):
-    """Same guard as clip_response. `key` applies when `node` itself is an NRC string."""
-    if isinstance(node, str):
-        return _walk(node, key, None, _Budget(), [], None)
-    return clip_response(node)
-
-
-def new_response_budget():
-    """One 75-word NRC budget shared by every snippet on a surface, including one exported PDF."""
-    return _Budget()
-
-
-def clip_snippet(text: str, *, page=None, budget=None, citation: str | None = None) -> str:
-    """At most 25 words, drawn from `budget`. Past the snippet or the budget, keep the marker, the citation, and the NRC link."""
-    if not isinstance(text, str):
-        return text
-    budget = new_response_budget() if budget is None else budget
-    clipped = _clip_string(text, page, budget, [])
-    if clipped == text:
-        return text
-    parts = [clipped]
-    if citation and citation not in clipped:
-        parts.append(citation)
-    if NRC_PUBLICATION_URL not in clipped:
-        parts.append(NRC_PUBLICATION_URL)
-    return ' '.join(parts)
 
 
 def attach_meta(payload):

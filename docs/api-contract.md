@@ -36,25 +36,19 @@ The fixed 404 detail strings are `case not found` and `provision not found`.
 
 `POST /cases/{case_id}/files` is the single implementation of this upload. It is database-backed: the PDF is stored in `case_files`, and a file over 4 MB is HTTP 413 with `PDF too large: the limit is 4 MB. Try compressing the file or splitting it.` The body may be a raw `application/pdf` or multipart. A function disk is ephemeral, and Vercel stops request bodies at 4.5 MB. #21's PDF parser plugs in as a helper this route calls. There is no separate disk-backed route.
 
-### NRC text budget
+### NRC attribution
 
-Every JSON response is under one budget for NRC code text. The budget counts provision text, objective and functional-statement wording, intent statements and notes, clauses, fact quotes, and search snippets. Identifiers, citations, and URLs are not counted.
+Code text is returned in full. That includes provision text, objective and functional-statement wording, intent statements and notes, clauses, and a fact `quote` or `value` when `source.type` is `code`. An applicant `user_text` quote is not code text, and it is not given the NRC link. The object keeps its citation and gains the NRC publication link (`https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499`) when it had no link.
 
-`title` and `article_title` are headings, not provision sentences, so the clipper does not shorten them and they do not spend the 25-word snippet cap. They are not a place to repeat a provision. The route check counts seeded code-text words across the entire JSON body, including `message`, `fix_hint`, `reasons`, `title`, and `article_title`. That total is still at most 75. Engine prose in `message`, `fix_hint`, and `reasons` is administrative and does not carry provision sentences.
+`GET /code/{provision_id}` returns that one provision, including its full clause text. It accepts only `division`. It exposes no sentence offset, page, cursor, or other parameter. `GET /code/search` returns at most 20 hits.
 
-A single snippet is at most 25 words (`SNIPPET_MAX_WORDS`). The response carries at most 75 words of that text in total (`RESPONSE_NRC_MAX_WORDS`). Both limits apply. Words past either limit are not returned. A fact `quote` or `value` counts only when `source.type` is `code`. An applicant `user_text` quote is not code text, and it is not given the NRC marker or link. The object keeps its citation, gains the NRC publication link (`https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499` when the object had no link), sets `clipped` to true, and the clipped string is `… [clipped, see NBC p.N]`, where N is the `pdf_page` on that object, or `… [clipped, see NBC(AE) 2023]` when no page is known. An unclipped string has no marker, and an object with no clipped text has no `clipped` flag.
-
-`GET /code/{provision_id}` accepts only `division`. It exposes no sentence offset, page, cursor, or other parameter a client can use to reassemble an article.
-
-A clipped field is not a finding that a design complies.
+Returning code text is not a finding that a design complies. The code database file is not served by any route.
 
 ### Exported PDF
 
 `POST /cases/{case_id}/export` fills the Safety Codes Council form and appends a generated appendix. The form cells carry provision ids, objective and function codes, and a pointer to the appendix for the intent statement. They do not carry provision sentences.
 
-The appendix carries the NRC text for each Section C row: the citation, objective and functional-statement titles, any application note, the provision text, and the NBC 2020 intent statements and their notes. Applicant-written process answers and other confirmed form values stay the applicant's words.
-
-That NRC text follows the same snippet rules as a JSON response. Each snippet is 25 words or fewer, and the PDF keeps at most 75 words of NRC text in total. Beyond that budget the appendix keeps the citation and the NRC publication link, with `… [clipped, see NBC p.N]` (or `… [clipped, see NBC(AE) 2023]` when no page is known).
+The appendix carries the NRC text for each Section C row: the citation, objective and functional-statement titles, any application note, the full provision text, and the NBC 2020 intent statements and their notes, each with the NRC publication link. Applicant-written process answers and other confirmed form values stay the applicant's words.
 
 ### Demo data and retention
 

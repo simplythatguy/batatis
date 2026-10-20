@@ -13,8 +13,7 @@ from codedb import store as codedb_store
 from engine.api import create_app, read_capped
 from engine.export import EXPORT_FAILED_DETAIL, FORM_NOT_FOUND_DETAIL
 from engine.codes import Codes
-from engine.copyright import (NRC_PUBLICATION_URL, PII_NOTICE, RESPONSE_NRC_MAX_WORDS, SNIPPET_MAX_WORDS,
-                              clip_marker, clip_response, has_consecutive_words, is_nrc_string, words)
+from engine.copyright import NRC_PUBLICATION_URL, PII_NOTICE, attribute_code, has_consecutive_words
 from engine.llm_gate import reset_for_tests
 from engine.store import CaseStore
 from engine.uploads import PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL
@@ -93,115 +92,23 @@ def _synthetic_db(path):
     return text.split()
 
 
-def test_responses_keep_at_most_25_provision_words(tmp_path, monkeypatch):
+def test_search_rejects_more_than_20_hits(tmp_path, monkeypatch):
     monkeypatch.setenv('BATATIS_SEARCH_RATE_LIMIT', '10')
     reset_for_tests()
     path = tmp_path / 'codedb.sqlite'
     provision_words = _synthetic_db(path)
     client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes(path)))
-    bodies = [
-        client.get('/code/9.1.1.1.(1)', params={'division': 'B'}).text,
-        client.get('/code/search', params={'q': 'w00', 'limit': 20}).text,
-    ]
+    found = client.get('/code/search', params={'q': 'w00', 'limit': 20})
+    assert found.status_code == 200
+    plain = ' '.join(re.findall(r'[A-Za-z0-9]+', found.text))
+    assert has_consecutive_words(plain, provision_words)
     rejected = client.get('/code/search', params={'q': 'w00', 'limit': 21})
     assert rejected.status_code == 422 and rejected.json()['detail'] == 'The maximum is 20.'
-    for body in bodies:
-        # JSON quotes stick to the first and last word; compare the word sequence, not the raw tokens.
-        plain = ' '.join(re.findall(r'[A-Za-z0-9]+', body))
-        assert has_consecutive_words(plain, provision_words[:25])
-        assert not has_consecutive_words(plain, provision_words[:26])
-
-
-def _nrc_snippets(node, key=None, parent=None):
-    if isinstance(node, dict):
-        found = []
-        for name, value in node.items():
-            if name in ('meta', 'clipped', 'url', 'href'):
-                continue
-            found.extend(_nrc_snippets(value, name, node))
-        return found
-    if isinstance(node, list):
-        found = []
-        for item in node:
-            found.extend(_nrc_snippets(item, key, parent))
-        return found
-    if is_nrc_string(key, node, parent):
-        return [node.split('… [clipped', 1)[0].strip()]
-    return []
-
-
-def _assert_budget(payload):
-    snippets = _nrc_snippets(payload)
-    assert all(len(words(snippet)) <= SNIPPET_MAX_WORDS for snippet in snippets)
-    assert sum(len(words(snippet)) for snippet in snippets) <= RESPONSE_NRC_MAX_WORDS
-
-
-def seeded_code_word_count(text, seeds):
-    """Seeded provision tokens anywhere in a response, not only clipper fields.
-
-    `message`, `fix_hint`, `reasons`, `title`, and `article_title` count. A route
-    that copies provision sentences into those fields still has to stay at 75.
-    """
-    return sum(1 for token in re.findall(r'[A-Za-z0-9]+', text) if token in seeds)
-
-
-def _assert_seeded_budget(text, seeds):
-    count = seeded_code_word_count(text, seeds)
-    assert count <= RESPONSE_NRC_MAX_WORDS, count
-
-
-def test_whole_response_counts_seeded_words_in_message_fix_hint_reasons_and_titles():
-    """The route check is the whole JSON body. Clipper-exempt fields still spend the 75."""
-    seeds = {f'w{i:02d}' for i in range(40)}
-    chunk = ' '.join(f'w{i:02d}' for i in range(20))
-    body = {'message': chunk, 'fix_hint': chunk, 'reasons': [chunk], 'title': chunk, 'article_title': 'Synthetic'}
-    text = json.dumps(body)
-    assert seeded_code_word_count(text, seeds) == 80
-    with pytest.raises(AssertionError):
-        _assert_seeded_budget(text, seeds)
-    under = json.dumps({'title': ' '.join(f'w{i:02d}' for i in range(10)), 'message': 'administrative gap only'})
-    assert seeded_code_word_count(under, seeds) == 10
-    _assert_seeded_budget(under, seeds)
-
-
-def test_titles_are_headings_and_are_not_clipped():
-    """`title` and `article_title` are headings. The clipper leaves them whole."""
-    long = _long('t')
-    clipped = clip_response({'title': long, 'article_title': long, 'text': 'one short sentence'})
-    assert clipped['title'] == long
-    assert clipped['article_title'] == long
-    assert clipped['text'] == 'one short sentence'
-    assert 'clipped' not in clipped
-
-
-def test_snippet_cap_is_25_words_not_the_response_total():
-    """One passage stops at SNIPPET_MAX_WORDS even when the response still has room."""
-    long = _long('p')
-    assert SNIPPET_MAX_WORDS == 25 and RESPONSE_NRC_MAX_WORDS == 75
-    assert len(words(long)) > SNIPPET_MAX_WORDS
-    clipped = clip_response({'text': long, 'pdf_page': 4, 'citation': 'NBC(AE) 2023 p2, Div B, Sentence 9.1.1.1.(1)'})
-    kept = clipped['text'].split('… [clipped', 1)[0].strip()
-    assert len(words(kept)) == SNIPPET_MAX_WORDS
-    assert len(words(kept)) < RESPONSE_NRC_MAX_WORDS
-    assert clipped['citation'].startswith('NBC(AE)')
-    assert clipped['url'] == NRC_PUBLICATION_URL
-
-
-def test_response_cap_is_75_words_across_snippets():
-    """Short passages share RESPONSE_NRC_MAX_WORDS. The per-snippet cap is not what stops them."""
-    passages = [' '.join(f'n{i:02d}{j:02d}' for j in range(20)) for i in range(6)]
-    assert all(SNIPPET_MAX_WORDS >= len(words(passage)) for passage in passages)
-    assert sum(len(words(passage)) for passage in passages) > RESPONSE_NRC_MAX_WORDS
-    clipped = clip_response({'notes': passages, 'pdf_page': 8})
-    kept = [note.split('… [clipped', 1)[0].strip() for note in clipped['notes']]
-    assert sum(len(words(note)) for note in kept) == RESPONSE_NRC_MAX_WORDS
-    assert any(note.startswith('… [clipped') for note in clipped['notes'])
-    assert clipped['url'] == NRC_PUBLICATION_URL
 
 
 def test_applicant_quotes_are_not_labelled_as_code_text():
     long = _long('u')
-    applicant = clip_response({
+    applicant = attribute_code({
         'field': 'note',
         'value': long,
         'question': long,
@@ -210,49 +117,42 @@ def test_applicant_quotes_are_not_labelled_as_code_text():
     assert applicant['value'] == long
     assert applicant['question'] == long
     assert applicant['source']['quote'] == long
-    assert 'clipped' not in applicant and 'url' not in applicant
-    assert 'clipped' not in applicant['source']
-    code = clip_response({
+    assert 'url' not in applicant and 'url' not in applicant['source']
+    code = attribute_code({
         'value': long,
         'source': {'type': 'code', 'ref': '9.1.1.1.(1)', 'quote': long},
         'pdf_page': 4,
     })
-    assert len(words(code['source']['quote'].split('… [clipped', 1)[0])) == SNIPPET_MAX_WORDS
-    assert code['source']['clipped'] is True
+    assert code['source']['quote'] == long
+    assert code['value'] == long
     assert code['source']['url'] == NRC_PUBLICATION_URL
+    assert code['url'] == NRC_PUBLICATION_URL
 
 
-def test_response_budget_caps_each_snippet_and_the_total():
+def test_code_text_stays_whole_and_keeps_its_citation_and_link():
     long = _long('p')
-    clipped = clip_response({
+    body = attribute_code({
         'id': '9.1.1.1.(1)',
-        'citation': 'NBC(AE) 2023 p2, Div B, Sentence 9.1.1.1.(1) [PDF p.1] ' + long,
-        'url': 'https://example.test/' + long.replace(' ', '-'),
+        'citation': 'NBC(AE) 2023 p2, Div B, Sentence 9.1.1.1.(1)',
         'division': 'B',
         'pdf_page': 12,
         'text': long,
-        'notes': [long, {'text': long, 'note_id': 'A-9.1.1.1.'}, long, long],
+        'notes': [long, {'text': long, 'note_id': 'A-9.1.1.1.'}],
         'clauses': [long, [long, 'a']],
         'title': 'kept whole ' + long,
     })
-    plain = clip_marker(12)
-    assert clipped['id'] == '9.1.1.1.(1)'
-    assert clipped['citation'].startswith('NBC(AE) 2023 p2')
-    assert plain not in clipped['citation'] and plain not in clipped['url']
-    assert clipped['division'] == 'B'
-    assert clipped['title'] == 'kept whole ' + long
-    assert clipped['text'] == ' '.join(words(long)[:25]) + ' ' + plain
-    assert clipped['clipped'] is True
-    assert clipped['clauses'][1][1] == 'a'
-    assert clipped['notes'][1]['note_id'] == 'A-9.1.1.1.'
-    _assert_budget(clipped)
-    # Past 75 words the rest is the marker, the citation, and the NRC link.
-    assert any(note == plain or (isinstance(note, dict) and note.get('text') == plain) for note in clipped['notes'])
-    untouched = clip_response({'id': '9.1.1.1.(1)', 'text': 'one short sentence'})
-    assert 'clipped' not in untouched and '…' not in untouched['text'] and 'url' not in untouched
+    assert body['text'] == long
+    assert body['clauses'] == [long, [long, 'a']]
+    assert body['notes'][0] == long
+    assert body['notes'][1]['text'] == long
+    assert body['title'] == 'kept whole ' + long
+    assert body['citation'].startswith('NBC(AE) 2023 p2')
+    assert body['url'] == NRC_PUBLICATION_URL
+    assert body['notes'][1]['url'] == NRC_PUBLICATION_URL
+    assert 'clipped' not in body
 
 
-def test_code_response_clips_notes_clauses_and_nested_lists(tmp_path, monkeypatch):
+def test_code_lookup_returns_the_full_clause(tmp_path, monkeypatch):
     monkeypatch.setenv('BATATIS_SEARCH_RATE_LIMIT', '10')
     reset_for_tests()
     path = tmp_path / 'codedb.sqlite'
@@ -260,14 +160,12 @@ def test_code_response_clips_notes_clauses_and_nested_lists(tmp_path, monkeypatc
     client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes(path)))
     body = client.get('/code/9.1.1.1.(1)', params={'division': 'B'}).json()
     assert body['id'] == '9.1.1.1.(1)'
-    assert body['citation'].startswith('NBC(AE) 2023 p2')
-    assert '… [clipped' not in body['citation']
-    page = '… [clipped, see NBC p.1]'
-    assert body['text'].endswith(page)
-    assert body['clipped'] is True
+    assert body['text'] == _long('w')
+    assert body['clauses'][0] == _long('c')
     assert body['clauses'][1] == 'a'
+    assert body['citation'].startswith('NBC(AE) 2023 p2')
     assert body['url'] == NRC_PUBLICATION_URL
-    _assert_budget(body)
+    assert 'clipped' not in body
     blocked = client.get('/code/9.1.1.1.(1)', params={'division': 'B', 'offset': 2, 'sentence': 1})
     assert blocked.status_code == 400 and blocked.json()['detail'] == 'this route accepts only division'
     long = _long('q')
@@ -278,11 +176,10 @@ def test_code_response_clips_notes_clauses_and_nested_lists(tmp_path, monkeypatc
     })
     assert saved.status_code == 200
     fact = saved.json()['facts'][0]
-    assert fact['source']['quote'].endswith('… [clipped, see NBC(AE) 2023]')
-    assert fact['source']['clipped'] is True
+    assert fact['source']['quote'] == long
     assert fact['source']['url'] == NRC_PUBLICATION_URL
     assert fact['source']['ref'] == '9.1.1.1.(1)'
-    _assert_budget(saved.json())
+    assert 'clipped' not in fact['source']
 
 
 def test_unreachable_database_is_503():
@@ -395,13 +292,13 @@ CASE_BUILDER_ROUTES = {
 }
 
 
-def test_every_registered_route_stays_inside_the_nrc_budget(tmp_path, monkeypatch):
+def test_every_registered_route_returns_code_text_and_not_the_sqlite(tmp_path, monkeypatch):
     from fastapi.routing import APIRoute
 
     monkeypatch.setenv('BATATIS_SEARCH_RATE_LIMIT', '100')
     reset_for_tests()
     path = tmp_path / 'codedb.sqlite'
-    seeded = _synthetic_db(path)
+    _synthetic_db(path)
     con = sqlite3.connect(path)
     for index, pid in enumerate(('9.1.1.2.(1)', '9.1.1.3.(1)', '9.1.1.4.(1)')):
         _insert_provision(con, 'B', pid, _long('w'), index + 2)
@@ -466,8 +363,8 @@ def test_every_registered_route_stays_inside_the_nrc_budget(tmp_path, monkeypatc
         elif route_path == '/cases' and method == 'POST':
             kwargs['json'] = {'title': 'another'}
         response = client.request(method, url, **kwargs)
-        plain = ' '.join(re.findall(r'[A-Za-z0-9]+', response.text))
-        assert not has_consecutive_words(plain, seeded[:26]), (method, route_path, response.status_code)
+        assert not response.content.startswith(b'SQLite format 3'), (method, route_path)
+        assert b'codedb.sqlite' not in response.headers.get('content-disposition', '').encode()
         assert response.headers.get('x-batatis-notice') == PII_NOTICE, (
             method, route_path, response.status_code, response.text[:500])
         if (method, route_path) in required:
@@ -475,37 +372,39 @@ def test_every_registered_route_stays_inside_the_nrc_budget(tmp_path, monkeypatc
         if 'application/json' in response.headers.get('content-type', '') and response.content:
             payload = response.json()
             assert isinstance(payload, dict) and payload['meta']['notice'] == PII_NOTICE
-            _assert_budget(payload)
-            seeds = set(seeded) | set(_long('c').split()) | set(_long('n').split()) | set(_long('k').split()) | set(long.split())
-            _assert_seeded_budget(response.text, seeds)
+    for sqlite_path in ('/codedb/build/codedb.sqlite', '/codedb.sqlite', '/api/codedb/build/codedb.sqlite'):
+        missed = client.get(sqlite_path)
+        assert missed.status_code == 404
+        assert not missed.content.startswith(b'SQLite format 3')
     assert client.get(f'/cases/{case_id}').status_code == 404
 
 
-def test_search_hits_share_one_response_budget(tmp_path, monkeypatch):
+def test_search_returns_full_hits_up_to_the_limit(tmp_path, monkeypatch):
     monkeypatch.setenv('BATATIS_SEARCH_RATE_LIMIT', '10')
     reset_for_tests()
     path = tmp_path / 'codedb.sqlite'
     _synthetic_db(path)
     con = sqlite3.connect(path)
+    passages = []
     for index in range(4):
-        _insert_provision(con, 'B', f'9.8.1.{index + 1}.(1)', 'qxshared ' + _long(f'h{index}'), 30 + index)
+        passage = 'qxshared ' + _long(f'h{index}')
+        passages.append(passage)
+        _insert_provision(con, 'B', f'9.8.1.{index + 1}.(1)', passage, 30 + index)
     con.commit()
     con.close()
     client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes(path)))
     response = client.get('/code/search', params={'q': 'qxshared', 'limit': 20})
     assert response.status_code == 200
     hits = response.json()['items']
+    assert 1 <= len(hits) <= 20
     assert len(hits) >= 4
-    _assert_budget(response.json())
-    snippets = [hit['text'].split('… [clipped', 1)[0].strip() for hit in hits]
-    assert sum(len(words(snippet)) for snippet in snippets) <= RESPONSE_NRC_MAX_WORDS
-    assert sum(len(words(snippet)) for snippet in snippets) < len(hits) * SNIPPET_MAX_WORDS
-    assert any(hit['text'].startswith('… [clipped') for hit in hits)
+    by_text = {hit['text'] for hit in hits}
+    assert set(passages) <= by_text
     assert all(hit['citation'] for hit in hits)
-    assert all(hit['url'] == NRC_PUBLICATION_URL for hit in hits if hit.get('clipped'))
+    assert all(hit['url'] == NRC_PUBLICATION_URL for hit in hits)
 
 
-def test_exported_pdf_obeys_the_snippet_budget(tmp_path):
+def test_exported_pdf_keeps_the_full_provision_and_the_nrc_link(tmp_path):
     import io
     from types import SimpleNamespace
 
@@ -539,9 +438,8 @@ def test_exported_pdf_obeys_the_snippet_budget(tmp_path):
     pdf = build_appendix(case, plan, {}, {'version': 'test'}, codes=codes, open_items=[])
     text = '\n'.join(page.extract_text() or '' for page in PdfReader(io.BytesIO(pdf)).pages)
     for needle in [seeded, *extras]:
-        assert not has_consecutive_words(text, needle[:26])
+        assert has_consecutive_words(text, needle)
     assert case.section_c[0].citation in text
-    assert 'clipped' in text
     assert '0316d953-0d55-4311-af69-cad55efec499' in text
 
 
