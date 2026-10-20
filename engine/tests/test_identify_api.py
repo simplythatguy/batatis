@@ -1,13 +1,15 @@
 """Identify HTTP behaviour the applicant UI depends on, without a live model."""
 import json
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
 from engine.api import create_app
 from engine.codes import Codes
 from engine.identify.answers import apply_answers
+from engine.identify.demo_cache import match_demo
 from engine.identify.departure import NOT_INDICATED, assess_variance, detect_redirect
-from engine.identify.pipeline import run
+from engine.identify.pipeline import overlay_ai_explainers, run
 from engine.identify.questions import generate_questions
 from engine.identify.verify import Pick, Verification
 from engine.models import Case
@@ -112,3 +114,94 @@ def test_new_case_keeps_only_the_applicants_facts_and_unknown_answers(tmp_path, 
     streamed = client.get(f'/cases/{case_id}/identify/stream', params={'prose': 'hempcrete walls'})
     order = [line.removeprefix('event: ').strip() for line in streamed.text.splitlines() if line.startswith('event:')]
     assert order == ['screen', 'rerank', 'verify', 'questions', 'done']
+
+
+def _demo(case_id: str) -> str:
+    return json.loads((Path('evals_dev/cases') / f'{case_id}.json').read_text())['description']
+
+
+def test_demo_cache_matches_the_three_descriptions_and_keeps_short_quotes():
+    soffit = match_demo(_demo('dev-001'))
+    damper = match_demo('  ' + _demo('dev-003').replace('\n', ' ') + '  ')
+    exits = match_demo(_demo('dev-013'))
+    assert match_demo('a different house') is None
+    assert soffit['cached'] is True and soffit['persisted'] is False and soffit['mode'] == 'cached'
+    assert soffit['benchmark']['provision'] == '9.10.15.5.'
+    assert 'projecting roof soffits shall not be constructed' in soffit['benchmark']['quote']
+    assert damper['benchmark']['provision'] == '9.10.13.13.'
+    assert 'fire damper' in damper['benchmark']['quote']
+    assert exits['benchmark']['provision'] == '3.4.2.1.'
+    assert 'at least 2 exits' in exits['benchmark']['quote']
+    for payload in (soffit, damper, exits):
+        assert payload['model_ids']['invoked'] is False
+        assert payload['commit_policy']['status'] == 'placeholder_uncalibrated'
+        assert payload['generated_at']
+        quote = payload['benchmark']['quote']
+        assert quote and len(quote) <= 240
+        row = payload['benchmark']['section_c'][0]
+        assert row['explainer']['source'] == 'deterministic'
+        assert 'compli' not in json.dumps(payload).lower()
+        assert '9.9.4.4' not in json.dumps(payload)
+    unknown = match_demo(_demo('dev-001'), facts=[{'field': 'building.storeys', 'status': 'unknown', 'value': None}])
+    assert any(q['field'] == 'building.storeys' and q['status'] == 'unknown' for q in unknown['open_questions'])
+
+
+def test_exact_demo_description_is_cached_without_a_model_or_a_database(tmp_path, monkeypatch):
+    monkeypatch.setattr('engine.routes_case.has_live_model', lambda: False)
+    monkeypatch.setattr('engine.routes_case.default_db', lambda: Path('/tmp/batatis-missing-codedb.sqlite'))
+    client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes()))
+    case_id = client.post('/cases').json()['id']
+    identified = client.post(f'/cases/{case_id}/identify', json={
+        'prose': _demo('dev-013'),
+        'answers': [{'field': 'building.storeys', 'answer': 'not sure'}],
+    })
+    assert identified.status_code == 200
+    body = identified.json()
+    assert body['cached'] is True and body['benchmark']['provision'] == '3.4.2.1.'
+    assert any(q['status'] == 'unknown' and q['field'] == 'building.storeys' for q in body['open_questions'])
+    saved = client.get(f'/cases/{case_id}').json()
+    assert saved['provisions'] == [] and 'NorthCore' not in json.dumps(saved)
+
+
+def test_quote_checked_reason_is_ai_written_unless_it_claims_compliance():
+    rows = [{
+        'provision': '9.10.15.5.(8)',
+        'explainer': {'text': 'Division B quote.', 'quote': 'projecting roof soffits shall not', 'source': 'deterministic'},
+    }]
+    overlay_ai_explainers(rows, {
+        '9.10.15.5.': Pick(article='9.10.15.5.', quote='projecting roof soffits shall not',
+                           reason='The soffit projects over the exposing face this sentence limits.', confidence=0.8),
+    })
+    assert rows[0]['explainer']['source'] == 'ai_written'
+    assert rows[0]['explainer']['quote'] == 'projecting roof soffits shall not'
+    claimed = [{
+        'provision': '9.10.15.5.(8)',
+        'explainer': {'text': 'Division B quote.', 'quote': 'projecting roof soffits shall not', 'source': 'deterministic'},
+    }]
+    overlay_ai_explainers(claimed, {
+        '9.10.15.5.': Pick(article='9.10.15.5.', quote='projecting roof soffits shall not',
+                           reason='The design complies and is safe.', confidence=0.8),
+    })
+    assert claimed[0]['explainer']['source'] == 'deterministic'
+    codes = Codes()
+    rec = codes.provision('9.10.15.5.', 'B')
+    arts = {'9.10.15.5.': {
+        'id': '9.10.15.5.', 'part': 9, 'title': rec['title'], 'section': rec['section'],
+        'subsection': rec['subsection'], 'text': rec['text'],
+    }}
+
+    class Verifier:
+        def verify(self, query, candidates):
+            return Verification(picks=[Pick(
+                article='9.10.15.5.',
+                quote='projecting roof soffits shall not be constructed above the exposing building face',
+                reason='The proposal departs from the soffit limit in this article.',
+                confidence=0.91,
+            )], dropped=[])
+
+    out = run('soffit variance on the side yard', arts=arts, codes=codes, ranker='bm25', verifier=Verifier())
+    explained = [row for row in out['benchmark']['section_c'] if row['provision'] == '9.10.15.5.(8)']
+    assert explained and explained[0]['explainer']['source'] == 'ai_written'
+    assert 'projecting roof soffits' in explained[0]['explainer']['quote']
+    assert 'compli' not in explained[0]['explainer']['text'].lower()
+    assert out['section_c'] == []

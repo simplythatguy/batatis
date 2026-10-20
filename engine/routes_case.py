@@ -98,12 +98,12 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
 
     def _identify_result(prose: str, facts, on_stage=None) -> dict:
         if not default_db().exists():
-            cached = match_demo(prose)
+            cached = match_demo(prose, facts)
             if cached:
                 return cached
             raise FileNotFoundError('code database not found and this description is not a cached demo')
         if not has_live_model():
-            cached = match_demo(prose)
+            cached = match_demo(prose, facts)
             if cached:
                 return cached
         result = identify_run(prose, facts=facts, on_stage=on_stage)

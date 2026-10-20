@@ -1,0 +1,445 @@
+[
+  {
+    "id": "dev-001",
+    "description": "We're building a new two-storey single detached house with a building area of 150 m2 on a narrow infill lot. The north side wall sits 0.3 m from the property line, which is the side yard against the neighbour's lot, not a street or lane. The client wants the same 450 mm roof overhang all the way around, including over that north wall. The soffit would be vented aluminum. Can we do this as a variance and what would we need to show?",
+    "candidates": [
+      {
+        "provision": "9.10.15.5.",
+        "title": "Construction of Exposing Building Face of Houses",
+        "text": "8) Except as provided in Sentence (10), where the exposing building face has a limiting distance of not more than 0.45 m, projecting roof soffits shall not be constructed above the exposing building face. (See Note A-3.2.3.6.(2).)",
+        "part": 9
+      }
+    ],
+    "payload": {
+      "articles": [
+        {
+          "provision": "9.10.15.5.",
+          "division": "B",
+          "committed": false,
+          "title": "Construction of Exposing Building Face of Houses",
+          "part": 9,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "quote": "8) Except as provided in Sentence (10), where the exposing building face has a limiting distance of not more than 0.45 m, projecting roof soffits shall not be constructed above the exposing building face. (See Note A-3.2.3.6.(2).)",
+          "reason": "The proposal is measured against Division B Article 9.10.15.5. (Construction of Exposing Building Face of Houses).",
+          "stage": "cached"
+        }
+      ],
+      "section_c": [],
+      "benchmark": {
+        "identified": true,
+        "provision": "9.10.15.5.",
+        "division": "B",
+        "role": "benchmark_acceptable_solution",
+        "relation": "measured_against",
+        "explanation": "The proposal is measured against Division B Article 9.10.15.5. (Construction of Exposing Building Face of Houses), the benchmark acceptable solution. Tied to the proposal text as given.",
+        "quote": "8) Except as provided in Sentence (10), where the exposing building face has a limiting distance of not more than 0.45 m, projecting roof soffits shall not be constructed above the exposing building face. (See Note A-3.2.3.6.(2).)",
+        "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.15.5.(8) [PDF p.904]",
+        "confidence": {
+          "probability": null,
+          "calibration": "placeholder_uncalibrated"
+        },
+        "section_c": [
+          {
+            "provision": "9.10.15.5.(8)",
+            "division": "B",
+            "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.15.5.(8) [PDF p.904]",
+            "attribution_status": "direct",
+            "pairs": [
+              {
+                "function": "F03",
+                "objective": "OP3.1",
+                "condition": null
+              }
+            ],
+            "explainer": {
+              "text": "Division B 9.10.15.5.(8) is quoted from the code database. Attribution status: direct. Objectives: OP3.1. Functions: F03. NBC 2020 Intent Statements, explanatory only.",
+              "quote": "8) Except as provided in Sentence (10), where the exposing building face has a limiting distance of not more than 0.45 m, projecting roof soffits shall not be constructed above the exposing building face. (See Note A-3.2.3.6.(2).)",
+              "source": "deterministic"
+            }
+          }
+        ]
+      },
+      "engineering_required": "depends",
+      "intake_action": "ask",
+      "redirect_to": null,
+      "variance_needed": "likely",
+      "variance_explanation": "The description treats the design as doing something other than the cited acceptable solution. A variance is the application that asks the Safety Codes Officer to consider that alternative. This identification does not decide whether the alternative performs as well.",
+      "questions": [
+        "How many storeys does the building have?",
+        "What is the limiting distance from the exposing building face to the property line?",
+        "What is the building area of each storey?"
+      ],
+      "open_questions": [
+        {
+          "field": "building.storeys",
+          "text": "How many storeys does the building have?",
+          "why": "Storey count changes which exit, fire-separation, and spatial-separation articles are in the set.",
+          "status": "open",
+          "disambiguates": [
+            "9.10.15.5."
+          ],
+          "answer": null
+        },
+        {
+          "field": "site.limiting_distance",
+          "text": "What is the limiting distance from the exposing building face to the property line?",
+          "why": "Limiting distance decides which spatial-separation articles, and which unprotected-opening limits, stay in the set.",
+          "status": "open",
+          "disambiguates": [
+            "9.10.15.5."
+          ],
+          "answer": null
+        },
+        {
+          "field": "building.area",
+          "text": "What is the building area of each storey?",
+          "why": "Building area changes the Part 9 / Part 3 boundary and several construction articles.",
+          "status": "open",
+          "disambiguates": [
+            "9.10.15.5."
+          ],
+          "answer": null
+        }
+      ],
+      "mode": "cached",
+      "persisted": false,
+      "cached": true,
+      "generated_at": "2026-10-20T18:45:00Z",
+      "model_ids": {
+        "screen": "gpt-4.1-mini",
+        "rerank": "gpt-4.1-mini",
+        "verifier": "gpt-4.1",
+        "invoked": false
+      },
+      "commit_policy": {
+        "threshold": 0.75,
+        "max_commits": 3,
+        "parts": [
+          9
+        ],
+        "status": "placeholder_uncalibrated",
+        "calibration_set": "evals_dev/human_key/"
+      }
+    }
+  },
+  {
+    "id": "dev-003",
+    "description": "Mechanical contractor here. On a three-storey, twelve-unit wood-frame apartment with a building area of 480 m2 we have supply ducts that pass through the rated corridor walls. There's no room above the ceiling for damper access panels, so we'd like to skip the fire dampers and instead use 26 gauge steel duct sealed with a listed firestop at each wall. The ducts are about 150 by 250 mm and serve the suites' heat recovery ventilators.",
+    "candidates": [
+      {
+        "provision": "9.10.13.13.",
+        "title": "Fire Dampers",
+        "text": "1) Except as permitted by Sentences (2) to (5), 9.10.5.1.(3) and 9.10.9.9.(5), a duct that penetrates an assembly required to be a fire separation with a fire-resistance rating shall be equipped with a fire damper in conformance with",
+        "part": 9
+      }
+    ],
+    "payload": {
+      "articles": [
+        {
+          "provision": "9.10.13.13.",
+          "division": "B",
+          "committed": false,
+          "title": "Fire Dampers",
+          "part": 9,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "quote": "1) Except as permitted by Sentences (2) to (5), 9.10.5.1.(3) and 9.10.9.9.(5), a duct that penetrates an assembly required to be a fire separation with a fire-resistance rating shall be equipped with a fire damper in conformance with",
+          "reason": "The proposal is measured against Division B Article 9.10.13.13. (Fire Dampers).",
+          "stage": "cached"
+        }
+      ],
+      "section_c": [],
+      "benchmark": {
+        "identified": true,
+        "provision": "9.10.13.13.",
+        "division": "B",
+        "role": "benchmark_acceptable_solution",
+        "relation": "measured_against",
+        "explanation": "The proposal is measured against Division B Article 9.10.13.13. (Fire Dampers), the benchmark acceptable solution. Tied to the proposal text as given.",
+        "quote": "1) Except as permitted by Sentences (2) to (5), 9.10.5.1.(3) and 9.10.9.9.(5), a duct that penetrates an assembly required to be a fire separation with a fire-resistance rating shall be equipped with a fire damper in conformance with",
+        "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.13.13.(1) [PDF p.893]",
+        "confidence": {
+          "probability": null,
+          "calibration": "placeholder_uncalibrated"
+        },
+        "section_c": [
+          {
+            "provision": "9.10.13.13.(1)",
+            "division": "B",
+            "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.13.13.(1) [PDF p.893]",
+            "attribution_status": "direct",
+            "pairs": [
+              {
+                "function": "F03",
+                "objective": "OS1.2",
+                "condition": null
+              },
+              {
+                "function": "F03",
+                "objective": "OP1.2",
+                "condition": null
+              }
+            ],
+            "explainer": {
+              "text": "Division B 9.10.13.13.(1) is quoted from the code database. Attribution status: direct. Objectives: OS1.2, OP1.2. Functions: F03. NBC 2020 Intent Statements, explanatory only.",
+              "quote": "1) Except as permitted by Sentences (2) to (5), 9.10.5.1.(3) and 9.10.9.9.(5), a duct that penetrates an assembly required to be a fire separation with a fire-resistance rating shall be equipped with a fire damper in conformance with",
+              "source": "deterministic"
+            }
+          }
+        ]
+      },
+      "engineering_required": "depends",
+      "intake_action": "ask",
+      "redirect_to": null,
+      "variance_needed": "likely",
+      "variance_explanation": "The description treats the design as doing something other than the cited acceptable solution. A variance is the application that asks the Safety Codes Officer to consider that alternative. This identification does not decide whether the alternative performs as well.",
+      "questions": [
+        "What is the wall assembly made of, and what are its fire-resistance and thermal properties?",
+        "How many storeys does the building have?",
+        "What is the occupancy (and, if you have it, the occupant load)?",
+        "What is the building area of each storey?"
+      ],
+      "open_questions": [
+        {
+          "field": "assembly.material",
+          "text": "What is the wall assembly made of, and what are its fire-resistance and thermal properties?",
+          "why": "The material and its fire or thermal properties decide which wall, insulation, and fire-resistance articles apply.",
+          "status": "open",
+          "disambiguates": [
+            "9.10.13.13."
+          ],
+          "answer": null
+        },
+        {
+          "field": "building.storeys",
+          "text": "How many storeys does the building have?",
+          "why": "Storey count changes which exit, fire-separation, and spatial-separation articles are in the set.",
+          "status": "open",
+          "disambiguates": [
+            "9.10.13.13."
+          ],
+          "answer": null
+        },
+        {
+          "field": "building.occupancy",
+          "text": "What is the occupancy (and, if you have it, the occupant load)?",
+          "why": "Occupancy and occupant load move a design between Part 9 housing articles and Part 3 assembly or care articles.",
+          "status": "open",
+          "disambiguates": [
+            "9.10.13.13."
+          ],
+          "answer": null
+        },
+        {
+          "field": "building.area",
+          "text": "What is the building area of each storey?",
+          "why": "Building area changes the Part 9 / Part 3 boundary and several construction articles.",
+          "status": "open",
+          "disambiguates": [
+            "9.10.13.13."
+          ],
+          "answer": null
+        }
+      ],
+      "mode": "cached",
+      "persisted": false,
+      "cached": true,
+      "generated_at": "2026-10-20T18:45:00Z",
+      "model_ids": {
+        "screen": "gpt-4.1-mini",
+        "rerank": "gpt-4.1-mini",
+        "verifier": "gpt-4.1",
+        "invoked": false
+      },
+      "commit_policy": {
+        "threshold": 0.75,
+        "max_commits": 3,
+        "parts": [
+          9
+        ],
+        "status": "placeholder_uncalibrated",
+        "calibration_set": "evals_dev/human_key/"
+      }
+    }
+  },
+  {
+    "id": "dev-013",
+    "description": "We're designing a four-storey, sprinklered wood-frame apartment with eight units per floor on a mid-block lot. To make the floor plate work we want a single exit stair serving every floor, with a pressurized stair and a short corridor. Each floor is about 600 m2.",
+    "candidates": [
+      {
+        "provision": "3.4.2.1.",
+        "title": "Minimum Number of Exits",
+        "text": "1) Except as permitted by Sentences (2) to (4), every floor area intended for occupancy shall be served by at least 2 exits.",
+        "part": 3
+      }
+    ],
+    "payload": {
+      "articles": [
+        {
+          "provision": "3.4.2.1.",
+          "division": "B",
+          "committed": false,
+          "title": "Minimum Number of Exits",
+          "part": 3,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "quote": "1) Except as permitted by Sentences (2) to (4), every floor area intended for occupancy shall be served by at least 2 exits.",
+          "reason": "The proposal is measured against Division B Article 3.4.2.1. (Minimum Number of Exits).",
+          "stage": "cached"
+        }
+      ],
+      "section_c": [],
+      "benchmark": {
+        "identified": true,
+        "provision": "3.4.2.1.",
+        "division": "B",
+        "role": "benchmark_acceptable_solution",
+        "relation": "measured_against",
+        "explanation": "The proposal is measured against Division B Article 3.4.2.1. (Minimum Number of Exits), the benchmark acceptable solution. Tied to the proposal text as given.",
+        "quote": "1) Except as permitted by Sentences (2) to (4), every floor area intended for occupancy shall be served by at least 2 exits.",
+        "citation": "NBC(AE) 2023 p2, Div B, Sentence 3.4.2.1.(1) [PDF p.269]",
+        "confidence": {
+          "probability": null,
+          "calibration": "placeholder_uncalibrated"
+        },
+        "section_c": [
+          {
+            "provision": "3.4.2.1.(1)",
+            "division": "B",
+            "citation": "NBC(AE) 2023 p2, Div B, Sentence 3.4.2.1.(1) [PDF p.269]",
+            "attribution_status": "direct",
+            "pairs": [
+              {
+                "function": "F10",
+                "objective": "OS3.7",
+                "condition": null
+              },
+              {
+                "function": "F12",
+                "objective": "OS3.7",
+                "condition": null
+              },
+              {
+                "function": "F05",
+                "objective": "OS3.7",
+                "condition": null
+              },
+              {
+                "function": "F06",
+                "objective": "OS3.7",
+                "condition": null
+              },
+              {
+                "function": "F12",
+                "objective": "OS1.2",
+                "condition": null
+              },
+              {
+                "function": "F06",
+                "objective": "OS1.2",
+                "condition": null
+              },
+              {
+                "function": "F12",
+                "objective": "OP1.2",
+                "condition": null
+              },
+              {
+                "function": "F06",
+                "objective": "OP1.2",
+                "condition": null
+              }
+            ],
+            "explainer": {
+              "text": "Division B 3.4.2.1.(1) is quoted from the code database. Attribution status: direct. Objectives: OS3.7, OS1.2, OP1.2. Functions: F10, F12, F05, F06. NBC 2020 Intent Statements, explanatory only.",
+              "quote": "1) Except as permitted by Sentences (2) to (4), every floor area intended for occupancy shall be served by at least 2 exits.",
+              "source": "deterministic"
+            }
+          }
+        ]
+      },
+      "engineering_required": "depends",
+      "intake_action": "ask",
+      "redirect_to": null,
+      "variance_needed": "not_indicated",
+      "variance_explanation": "No departure from the acceptable solution has been identified; if the design follows the cited acceptable solution, a variance may not be needed. Confirm with your Safety Codes Officer.",
+      "questions": [
+        "How many storeys does the building have?",
+        "What is the occupancy (and, if you have it, the occupant load)?",
+        "What is the building area of each storey?",
+        "Is the building sprinklered?"
+      ],
+      "open_questions": [
+        {
+          "field": "building.storeys",
+          "text": "How many storeys does the building have?",
+          "why": "Storey count changes which exit, fire-separation, and spatial-separation articles are in the set.",
+          "status": "open",
+          "disambiguates": [
+            "3.4.2.1."
+          ],
+          "answer": null
+        },
+        {
+          "field": "building.occupancy",
+          "text": "What is the occupancy (and, if you have it, the occupant load)?",
+          "why": "Occupancy and occupant load move a design between Part 9 housing articles and Part 3 assembly or care articles.",
+          "status": "open",
+          "disambiguates": [
+            "3.4.2.1."
+          ],
+          "answer": null
+        },
+        {
+          "field": "building.area",
+          "text": "What is the building area of each storey?",
+          "why": "Building area changes the Part 9 / Part 3 boundary and several construction articles.",
+          "status": "open",
+          "disambiguates": [
+            "3.4.2.1."
+          ],
+          "answer": null
+        },
+        {
+          "field": "building.sprinklered",
+          "text": "Is the building sprinklered?",
+          "why": "Sprinkler status changes which exit and fire-separation relaxations are candidates.",
+          "status": "open",
+          "disambiguates": [
+            "3.4.2.1."
+          ],
+          "answer": null
+        }
+      ],
+      "mode": "cached",
+      "persisted": false,
+      "cached": true,
+      "generated_at": "2026-10-20T18:45:00Z",
+      "model_ids": {
+        "screen": "gpt-4.1-mini",
+        "rerank": "gpt-4.1-mini",
+        "verifier": "gpt-4.1",
+        "invoked": false
+      },
+      "commit_policy": {
+        "threshold": 0.75,
+        "max_commits": 3,
+        "parts": [
+          9
+        ],
+        "status": "placeholder_uncalibrated",
+        "calibration_set": "evals_dev/human_key/"
+      }
+    }
+  }
+]

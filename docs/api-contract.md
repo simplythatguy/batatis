@@ -35,7 +35,9 @@ That sentence is not a compliance finding. `intake_action` is `redirect` for a r
 
 `POST /cases/{id}/identify/confirm` with `{"provisions": ["9.10.15.5.(8)"]}` checks each id in the code database, then writes `provisions` and Section C. An unknown id returns 404 and leaves the case unchanged.
 
-With no provider key, the runner uses BM25, commits nothing, and sets `mode` to `bm25_fallback`. A cached demo, when one is shipped, is served for an exact description match when there is no key or no code database, with `cached: true`.
+With no provider key, the runner uses BM25, commits nothing, and sets `mode` to `bm25_fallback`. An exact description match (whitespace collapsed) for one of the three cached demos is served instead when there is no key or no code database. The payload has `cached: true`, `generated_at`, pinned model ids with `invoked: false`, and a short codedb quote. `Section C` on a committed or benchmark row carries `explainer.source` of `deterministic`, or `ai_written` when a quote-checked verifier reason does not claim compliance. A compliance claim leaves the deterministic explainer in place. `explainer` is null when there is no codedb quote.
+
+From a checkout that has no virtualenv, the same benchmark flags work through `scripts/bench_identify.sh`. The script creates `.venv` and installs `engine/requirements.txt` and `codedb/requirements.txt`. `OPENAI_API_KEY` is still required and is not printed.
 
 ## Export
 

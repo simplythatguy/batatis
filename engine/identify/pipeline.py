@@ -127,6 +127,29 @@ def _benchmark(ranked, arts, prose, facts, codes, policy) -> dict:
     }
 
 
+_COMPLIANCE = re.compile(r'\b(?:complies|compliant|compliance|safe)\b', re.I)
+
+
+def overlay_ai_explainers(rows: list[dict], by_pick: dict) -> None:
+    """Replace a deterministic explainer with the verifier's reason when its quote checked out.
+
+    A reason that claims compliance is left off the row. The quote stays the codedb sentence.
+    """
+    for row in rows:
+        match = _ARTICLE.search(row.get('provision') or '')
+        pick = by_pick.get(match.group(1)) if match else None
+        if pick is None:
+            continue
+        reason = (pick.reason or '').strip()
+        if not reason or _COMPLIANCE.search(reason):
+            continue
+        existing = row.get('explainer') or {}
+        quote = existing.get('quote') or short_quote(pick.quote, 240)
+        if not quote:
+            continue
+        row['explainer'] = {'text': reason, 'quote': quote, 'source': 'ai_written'}
+
+
 def _checked_verifier(verifier, prose, ranked_ids, arts):
     raw = verifier.verify(prose, ranked_ids)
     picks = getattr(raw, 'picks', raw) or []
@@ -296,6 +319,9 @@ def run(prose: str, db_path: Path | str | None = None, judge: Judge | None = Non
         intake = 'ask'
     trace.setdefault('usage', usage)
     benchmark = _benchmark(ranked, arts, prose, facts, codes, policy)
+    if by_pick:
+        overlay_ai_explainers(rows, by_pick)
+        overlay_ai_explainers(benchmark.get('section_c') or [], by_pick)
     result = {
         'articles': out_articles,
         'section_c': rows,
