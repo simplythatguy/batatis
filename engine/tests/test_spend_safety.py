@@ -1,0 +1,167 @@
+"""Adversarial spending checks at the real request/ledger and HTTP seams. No network."""
+from decimal import Decimal
+import json
+import sqlite3
+
+import pytest
+from fastapi.testclient import TestClient
+
+from engine import spend
+from engine.api import create_app
+from engine.llm_gate import reset_for_tests
+from engine.tests.test_spend import _prepare, _rows, _messages, _reply
+
+MODEL = 'gpt-4.1-mini'
+
+
+def call(messages=None, **kwargs):
+    return spend.openai_chat_json(messages or _messages(), model=MODEL,
+                                  max_completion_tokens=8, **kwargs)
+
+
+def test_ambiguous_billed_timeout_cannot_restore_the_lifetime_budget(tmp_path, monkeypatch):
+    path = _prepare(tmp_path, monkeypatch)
+    estimate = spend.token_cost(MODEL, spend.estimate_input_tokens(_messages()), 8)
+    ledger = spend.open_ledger()
+    row = ledger.reserve('seed', MODEL, Decimal('20') - estimate, Decimal('20'))
+    ledger.settle(row, Decimal('20') - estimate)
+    seen = []
+
+    def post(payload, key):
+        seen.append(payload)
+        raise TimeoutError('response lost after the provider accepted the request')
+
+    monkeypatch.setattr(spend, '_post_chat', post)
+    with pytest.raises((TimeoutError, spend.SpendError)):
+        call()
+    result = call()
+    assert result.offline and result.notice == spend.CAP_NOTICE
+    assert len(seen) == 1
+    assert _rows(path)[1]['status'] in {'reserved', 'settled'}
+    assert sum(ledger.totals()) == Decimal('20')
+
+
+def test_reservation_covers_unicode_schema_and_complete_request(tmp_path, monkeypatch):
+    path = _prepare(tmp_path, monkeypatch)
+    messages = _messages('💥' * 1000)
+    schema = {'type': 'json_schema', 'json_schema': {
+        'name': 'rank', 'strict': True, 'schema': {'type': 'object',
+        'properties': {'hits': {'type': 'array', 'items': {'type': 'string', 'enum': ['a' * 2000]}}},
+        'required': ['hits'], 'additionalProperties': False}}}
+
+    def post(payload, key):
+        # Byte-level BPE cannot require more tokens than its serialized UTF-8
+        # bytes. Message/schema framing must be covered as well.
+        byte_bound = len(json.dumps(payload, ensure_ascii=False, separators=(',', ':')).encode())
+        reserved = Decimal(_rows(path)[0]['est_usd'])
+        assert reserved >= spend.token_cost(MODEL, byte_bound, 8)
+        assert payload['service_tier'] == 'default'
+        assert payload['model'].endswith('-2025-04-14')
+        return _reply(payload, 100, 1)
+
+    monkeypatch.setattr(spend, '_post_chat', post)
+    assert not call(messages, response_format=schema).offline
+
+
+def test_fractional_microdollars_never_round_available_budget_up(tmp_path, monkeypatch):
+    estimate = spend.token_cost(MODEL, spend.estimate_input_tokens(_messages()), 8)
+    _prepare(tmp_path, monkeypatch, cap=str(estimate - Decimal('0.0000001')))
+    seen = []
+    monkeypatch.setattr(spend, '_post_chat', lambda payload, key: seen.append(payload) or _reply(payload, 1, 1))
+    assert call().offline
+    assert not seen
+    assert spend.token_cost(MODEL, 2, 1) >= Decimal('0.0000024')
+
+
+def test_hosted_sqlite_is_refused_before_the_provider(tmp_path, monkeypatch):
+    _prepare(tmp_path, monkeypatch)
+    monkeypatch.setenv('VERCEL', '1')
+    seen = []
+    monkeypatch.setattr(spend, '_post_chat', lambda payload, key: seen.append(payload) or _reply(payload, 1, 1))
+    assert call().notice == spend.LEDGER_NOTICE
+    assert not seen
+    assert spend.budget_status().remaining_usd is None
+
+
+@pytest.mark.parametrize('amount', ['-1.000000', 'garbage', '1e-3', '0.0000001'])
+def test_invalid_ledger_amounts_fail_closed(tmp_path, monkeypatch, amount):
+    path = _prepare(tmp_path, monkeypatch)
+    with sqlite3.connect(path) as con:
+        con.execute("INSERT INTO spend_ledger (ts,route,model,est_usd,status) VALUES ('now','x',?,?, 'reserved')",
+                    (MODEL, amount))
+    seen = []
+    monkeypatch.setattr(spend, '_post_chat', lambda payload, key: seen.append(payload) or _reply(payload, 1, 1))
+    assert call().notice == spend.LEDGER_NOTICE
+    assert not seen
+
+
+@pytest.mark.parametrize('cap', ['', 'NaN', 'Infinity', '-1', '20.01', '1e100'])
+def test_invalid_or_unauthorized_budget_configuration_refuses(tmp_path, monkeypatch, cap):
+    _prepare(tmp_path, monkeypatch, cap=cap)
+    seen = []
+    monkeypatch.setattr(spend, '_post_chat', lambda payload, key: seen.append(payload) or _reply(payload, 1, 1))
+    assert call().offline
+    assert not seen
+
+
+@pytest.mark.parametrize('bad', [Decimal('NaN'), Decimal('-1'), Decimal('0')])
+def test_invalid_pricing_refuses_before_provider(tmp_path, monkeypatch, bad):
+    _prepare(tmp_path, monkeypatch)
+    monkeypatch.setitem(spend.MODEL_PRICES, MODEL, (bad, Decimal('1.60')))
+    seen = []
+    monkeypatch.setattr(spend, '_post_chat', lambda payload, key: seen.append(payload) or _reply(payload, 1, 1))
+    assert call().offline
+    assert not seen
+
+
+@pytest.mark.parametrize('content', [
+    [{'type': 'image_url', 'image_url': {'url': 'https://example.test/image'}}],
+    {'text': 'not a text-only message'},
+])
+def test_unpriced_modalities_are_refused(tmp_path, monkeypatch, content):
+    _prepare(tmp_path, monkeypatch)
+    seen = []
+    monkeypatch.setattr(spend, '_post_chat', lambda payload, key: seen.append(payload) or _reply(payload, 1, 1))
+    assert call([{'role': 'user', 'content': content}]).offline
+    assert not seen
+
+
+def test_jev_adapter_and_lowest_transport_are_disabled_when_hosted(monkeypatch):
+    from engine.identify.screen import jev_ask
+    from engine.identify.jevkit import client
+    monkeypatch.setenv('VERCEL', '1')
+    seen = []
+    with monkeypatch.context() as patch:
+        patch.setattr(client, 'ask', lambda *args, **kwargs: seen.append('adapter'))
+        with pytest.raises(RuntimeError):
+            jev_ask()({'proposal': 'fixture'}, {'q': client.noul('fixture')}, 1)
+    monkeypatch.setattr(client._POOL, 'borrow', lambda *args: seen.append('wire'))
+    with pytest.raises(RuntimeError):
+        client.post('https://example.test', b'{}', {}, 1)
+    assert not seen
+
+
+def test_default_identify_uses_query_and_validated_corpus_ids(tmp_path, monkeypatch):
+    _prepare(tmp_path, monkeypatch)
+    reset_for_tests()
+    monkeypatch.setattr('engine.identify.corpus.bm25_rank', lambda *a, **k: ['9.10.15.4.', '9.9.10.1.'])
+    monkeypatch.setattr('engine.identify.corpus.articles', lambda *a: {
+        '9.10.15.4.': {'title': 'Openings', 'text': 'Fixture text'},
+        '9.9.10.1.': {'title': 'Egress', 'text': 'Fixture text'},
+    })
+    seen = []
+
+    def post(payload, key):
+        seen.append(payload)
+        result = _reply(payload, 100, 8)
+        result['choices'] = [{'finish_reason': 'stop', 'message': {'content': json.dumps({
+            'hits': ['9.9.10.1.', '9.10.15.4.']})}}]
+        return result
+
+    monkeypatch.setattr(spend, '_post_chat', post)
+    response = TestClient(create_app()).post('/identify', json={'query': 'soffit fixture'})
+    assert response.status_code == 200
+    assert response.json()['label'] == 'model output, not verified'
+    assert response.json()['hits'] == ['9.9.10.1.', '9.10.15.4.']
+    assert 'soffit fixture' in json.dumps(seen[0]['messages'])
+    assert seen[0]['response_format']['type'] == 'json_schema'
