@@ -15,11 +15,24 @@ class ProviderOutage(RuntimeError):
     """The live model call did not succeed. Identify should serve the demo cache."""
 
 
+def _flag_on(name: str) -> bool:
+    return os.environ.get(name, '').strip().lower() in {'1', 'true', 'yes', 'on'}
+
+
 def offline_mode() -> bool:
-    flag = os.environ.get('BATATIS_OFFLINE', '').strip().lower()
-    if flag in {'1', 'true', 'yes', 'on'}:
+    if _flag_on('BATATIS_OFFLINE'):
         return True
     return not (os.environ.get('OPENAI_API_KEY') or '').strip()
+
+
+def http_live() -> bool:
+    """POST /cases/{id}/identify calls a provider only when a key is set and BATATIS_LIVE is on.
+
+    The benchmark calls pipeline.run directly and does not read BATATIS_LIVE.
+    """
+    if offline_mode():
+        return False
+    return _flag_on('BATATIS_LIVE')
 
 
 def is_provider_outage(exc: BaseException) -> bool:

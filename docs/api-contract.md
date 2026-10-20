@@ -14,7 +14,8 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `POST /cases` | `201` Case. Body is optional: `title`, `jurisdiction` (`id`, `name`, `authority`). |
 | `GET /cases/{case_id}` | Case, or `404` with detail `case not found`. |
 | `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. |
-| `POST /cases/{case_id}/identify` | Ranked articles for the description. Does not write `provisions`. See Identify. |
+| `POST /cases/{case_id}/identify` | Ranked article cards. Does not write `provisions`. See Identify. |
+| `GET /cases/{case_id}/identify` | The stored card payload from the last identify call, or `404` detail `identify result not found`. |
 | `GET /cases/{case_id}/identify/stream` | Query `prose`. Server-sent stage events. See Identify. |
 | `POST /cases/{case_id}/identify/confirm` | Body `{ "provisions": ["…"] }`. Writes `provisions` and Section C after a codedb check. |
 | `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`. |
@@ -63,13 +64,39 @@ Each item in `section_c`, including the rows under `benchmark.section_c`, uses `
 
 `POST /cases/{id}/identify/confirm` with `{"provisions": ["9.10.15.5.(8)"]}` checks each id in the code database, then writes `provisions` and Section C. An unknown id returns 404 and leaves the case unchanged.
 
-Every identify response has `source`: `live` when a provider call succeeded, `cache` when the body was served from `engine/identify/demo_cache.json`, or `offline-miss` when offline mode has nothing stored for that description. Offline mode is `BATATIS_OFFLINE=1`, or it is selected on its own when `OPENAI_API_KEY` is absent, or when the live call fails with an authentication, network, or timeout error. The cache key is the SHA-256 of the description after Unicode NFC, with surrounding whitespace removed and internal whitespace collapsed to one space. Answers are not part of the key.
+Every identify response has `mode`: `live`, `cached_demo`, or `bm25_fallback`.
 
-A cache hit has `cached: true` and the stored quotes. A miss is HTTP 200 with `message` set to `offline: no cached result for this case`, empty `articles` and `section_c`, and no citation. The demo does not invent an article to fill that miss. The cached descriptions are `dev-001`, `dev-003`, and `dev-013`. `scripts/build_demo_cache.py` records a fresh live result for those three when `OPENAI_API_KEY` is set, and it exits without writing a file when the key is absent.
+`live` is used only when `OPENAI_API_KEY` is set and `BATATIS_LIVE` is `1` (also `true`, `yes`, or `on`). `BATATIS_OFFLINE=1` forces the non-live path even if both of those are set. The benchmark command calls `pipeline.run` directly and does not read `BATATIS_LIVE`.
 
-When a live identify needs the code database and the file is missing, the response is HTTP 503 with the fixed detail `code database not found`. The body does not include a filesystem path. Offline mode does not need the database to return a cache hit or an offline miss.
+Without a live call, a description whose normalized text matches a seeded demo case is the committed cache in `engine/identify/demo_cache.json`, with `mode` `cached_demo` and `source` `cache`. The cache key is the SHA-256 of the description after Unicode NFC, with surrounding whitespace removed and internal whitespace collapsed to one space. Answers are not part of the key. The seeded descriptions are `dev-001`, `dev-003`, and `dev-013`. Any other description is BM25: `mode` `bm25_fallback`, `source` `bm25`, `section_c` empty, and no article has `committed: true`. When that BM25 path cannot read the code database, the response is still HTTP 200 with empty `articles` and no citation. It does not invent an article.
 
-`Section C` on a committed or benchmark row carries `explainer.source` of `deterministic`, or `ai_written` when a quote-checked verifier reason does not claim compliance. A compliance claim leaves the deterministic explainer in place. `explainer` is null when there is no codedb quote. The benchmark command's BM25 variant is unchanged and is not this offline path.
+`GET /cases/{id}/identify` returns that same body after POST or the stream. It does not write `provisions`. A case that has not been identified is HTTP 404 with detail `identify result not found`.
+
+When a live identify needs the code database and the file is missing, the response is HTTP 503 with the fixed detail `code database not found`. The body does not include a filesystem path. A live call that fails with an authentication, network, or timeout error uses the same non-live path as a missing key.
+
+`scripts/build_demo_cache.py` records a fresh live result for the three seeded cases when `OPENAI_API_KEY` is set, and it exits without writing a file when the key is absent.
+
+### Article card
+
+Each item in `articles` keeps `provision` (the Division B article id) and adds the fields below. `provision_id` and `benchmark_acceptable_solution` are the same sentence id when one codedb sentence, or one stored Section C row, contains the article's verbatim quote. More than one match, or no match, leaves both null. The service does not pick a first sentence and does not invent an id such as `9.9.10.1.(2)`.
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `rank` | number | 1-based order of the returned articles. |
+| `provision` | string | Article id, such as `9.10.15.5.` |
+| `provision_id` | string or null | Sentence id, such as `9.10.15.5.(8)`, when resolved as above. |
+| `link` | string | Article lookup, `/code/{provision}?division=B`. |
+| `citation` | string or null | Citation copied from codedb, or from the stored Section C row when the database is not open. |
+| `title` | string | Article title from the identify result. |
+| `snippet` | string or null | First 25 words of the resolved codedb sentence, or of the stored quote when the database is not open. Whitespace collapsed. Not a paraphrase. |
+| `verifier_status` | string | `committed` when the article is committed on a live result. `candidate` when a verifier ran and the article was not committed. `unknown` for BM25 and for a cached demo replay, which does not re-run the verifier. |
+| `why` | string or null | The match reason already on the article. |
+| `benchmark_acceptable_solution` | string or null | The resolved sentence id. Null when the sentence is unknown. |
+| `explainer` | object or null | `{ "text", "quote", "source", "label" }`. `label` is `explanation`. `source` is `deterministic` or `ai_written`. `quote` is the snippet. A reason that claims the design meets the Code stays off `text`; `source` stays `deterministic`. Null when there is no quote to ground it. |
+
+`explainer.text` says it is an explanation of the quoted text. It is not a finding that the design meets the Code.
+
+`Section C` on a committed or benchmark row still carries `explainer.source` of `deterministic`, or `ai_written` when a quote-checked verifier reason does not claim the design meets the Code. A claim of that kind leaves the deterministic explainer in place. The benchmark command's BM25 variant is unchanged and is not this HTTP path.
 
 From a checkout that has no virtualenv, the same flags work through `scripts/bench_identify.sh`. The script creates `.venv`, installs `engine/requirements.txt` and `codedb/requirements.txt`, and sets `BATATIS_LLM_PROVIDER=openai`. The only value the caller supplies is `OPENAI_API_KEY`, and the script does not print it.
 

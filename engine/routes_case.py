@@ -14,8 +14,9 @@ from .ccmc import CCMCRegistry, RegistrySearch, RegistryUnavailable
 from .codes import CodeDbMissing, Codes, default_db
 from .completeness import Gap, check_completeness
 from .identify.answers import apply_answers
-from .identify.demo_cache import match_demo, offline_miss
-from .identify.offline import ProviderOutage, is_provider_outage, offline_mode
+from .identify.cards import empty_bm25, present
+from .identify.demo_cache import match_demo
+from .identify.offline import ProviderOutage, http_live, is_provider_outage
 from .identify.pipeline import run as identify_run
 from .models import Case
 from .process_fields import ProcessField, process_fields
@@ -104,28 +105,65 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
     def gaps(case_id: str):
         return check_completeness(get_case(case_id), code())
 
-    def _serve_offline(prose: str, facts, on_stage=None) -> dict:
-        result = match_demo(prose, facts) or offline_miss()
+    def _codes_or_none() -> Codes | None:
+        try:
+            if not default_db().exists():
+                return None
+            return code()
+        except CodeDbMissing:
+            return None
+
+    def _stages(on_stage):
+        """Forward stage markers. The done event is emitted once, after card fields are attached."""
+        if on_stage is None:
+            return None
+
+        def inner(stage, payload=None):
+            if stage == 'done':
+                return
+            on_stage(stage, payload)
+
+        return inner
+
+    def _bm25(prose: str, facts, on_stage) -> dict:
+        if not default_db().exists():
+            return empty_bm25()
+        try:
+            return identify_run(prose, facts=facts, on_stage=_stages(on_stage), ranker='bm25')
+        except (CodeDbMissing, FileNotFoundError):
+            return empty_bm25()
+        except Exception as exc:
+            if isinstance(exc, ProviderOutage) or is_provider_outage(exc):
+                return empty_bm25()
+            raise
+
+    def _without_provider(prose: str, facts, on_stage) -> tuple[dict, str]:
+        cached = match_demo(prose, facts)
+        if cached is not None:
+            return cached, 'cached_demo'
+        return _bm25(prose, facts, on_stage), 'bm25_fallback'
+
+    def _identify_result(case_id: str, prose: str, facts, on_stage=None) -> dict:
+        if http_live():
+            if not default_db().exists():
+                raise CodeDbMissing()
+            try:
+                raw = identify_run(prose, facts=facts, on_stage=_stages(on_stage))
+                mode = 'live'
+            except Exception as exc:
+                if isinstance(exc, ProviderOutage) or is_provider_outage(exc):
+                    raw, mode = _without_provider(prose, facts, on_stage)
+                else:
+                    raise
+        else:
+            raw, mode = _without_provider(prose, facts, on_stage)
+        result = present(raw, _codes_or_none(), mode)
+        cases().put_identify(case_id, result)
         if on_stage:
             on_stage('done', result)
         return result
 
-    def _identify_result(prose: str, facts, on_stage=None) -> dict:
-        if offline_mode():
-            return _serve_offline(prose, facts, on_stage)
-        if not default_db().exists():
-            raise CodeDbMissing()
-        try:
-            result = identify_run(prose, facts=facts, on_stage=on_stage)
-        except Exception as exc:
-            if isinstance(exc, ProviderOutage) or is_provider_outage(exc):
-                return _serve_offline(prose, facts, on_stage)
-            raise
-        result['persisted'] = False
-        result['source'] = 'live'
-        return result
-
-    def _stream(prose: str, facts):
+    def _stream(case_id: str, prose: str, facts):
         events: queue.Queue = queue.Queue()
 
         def on_stage(stage, payload=None):
@@ -133,7 +171,7 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
 
         def worker():
             try:
-                _identify_result(prose, facts, on_stage=on_stage)
+                _identify_result(case_id, prose, facts, on_stage=on_stage)
             except Exception as exc:
                 events.put(('error', {'message': type(exc).__name__}))
             finally:
@@ -160,9 +198,9 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
             apply_answers(case, body.answers)
             cases().put(case)
         if 'text/event-stream' in request.headers.get('accept', ''):
-            return _stream(body.prose, case.facts)
+            return _stream(case_id, body.prose, case.facts)
         try:
-            result = _identify_result(body.prose, case.facts)
+            result = _identify_result(case_id, body.prose, case.facts)
         except (CodeDbMissing, FileNotFoundError):
             raise HTTPException(503, 'code database not found') from None
         saved = cases().get(case_id)
@@ -170,10 +208,19 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
             raise HTTPException(500, 'identify must not change provisions')
         return result
 
+    @router.get('/cases/{case_id}/identify')
+    def identify_stored(case_id: str):
+        """The last identify response for this case. The same card shape as POST."""
+        get_case(case_id)
+        stored = cases().get_identify(case_id)
+        if stored is None:
+            raise HTTPException(404, 'identify result not found')
+        return stored
+
     @router.get('/cases/{case_id}/identify/stream')
     def identify_stream(case_id: str, prose: str = Query(min_length=1)):
         case = get_case(case_id)
-        return _stream(prose, case.facts)
+        return _stream(case_id, prose, case.facts)
 
     @router.post('/cases/{case_id}/identify/confirm', response_model=Case)
     def confirm(case_id: str, body: ConfirmRequest):

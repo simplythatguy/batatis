@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 
 from engine.api import create_app
 from engine.codes import Codes, default_db
-from engine.identify.demo_cache import DEMO_CASE_IDS, OFFLINE_MISS, cache_key, match_demo
+from engine.identify.demo_cache import DEMO_CASE_IDS, cache_key, match_demo
 from engine.identify.offline import ProviderOutage
 from engine.identify.pipeline import run
 from engine.store import CaseStore
@@ -41,7 +41,7 @@ def test_no_key_serves_cached_demo_cases(tmp_path, monkeypatch):
     expected = {'dev-001': '9.10.15.5.', 'dev-003': '9.10.13.13.', 'dev-013': '3.4.2.1.'}
     for case_id, provision in expected.items():
         body = _post(client, _description(case_id)).json()
-        assert body['source'] == 'cache'
+        assert body['source'] == 'cache' and body['mode'] == 'cached_demo'
         assert body['benchmark']['provision'] == provision
         assert body['articles']
         assert 'compli' not in json.dumps(body).lower()
@@ -53,28 +53,33 @@ def test_unknown_case_is_an_offline_miss_without_a_citation(tmp_path, monkeypatc
     response = _post(_client(tmp_path), 'a proposal that is not one of the demo descriptions')
     assert response.status_code == 200
     body = response.json()
-    assert body['source'] == 'offline-miss'
-    assert body['message'] == OFFLINE_MISS
-    assert body['articles'] == [] and body['section_c'] == []
-    assert body['benchmark']['citation'] is None and body['benchmark']['quote'] is None
-    assert '9.10.' not in response.text and '3.4.2.1' not in response.text
+    assert body['mode'] == 'bm25_fallback' and body['source'] == 'bm25'
+    assert body['section_c'] == []
+    assert not any(article.get('committed') for article in body['articles'])
+    assert all(article['verifier_status'] == 'unknown' for article in body['articles'])
+    assert 'hidden' not in response.text
 
 
 def test_network_error_falls_back_to_the_cache(tmp_path, monkeypatch):
     monkeypatch.setenv('OPENAI_API_KEY', 'test-not-a-real-key')
+    monkeypatch.setenv('BATATIS_LIVE', '1')
     monkeypatch.delenv('BATATIS_OFFLINE', raising=False)
 
     def boom(*args, **kwargs):
+        if kwargs.get('ranker') == 'bm25':
+            from engine.identify.pipeline import run as real_run
+            return real_run(*args, **kwargs)
         raise httpx.ConnectError('simulated network failure')
 
     monkeypatch.setattr('engine.routes_case.identify_run', boom)
     hit = _post(_client(tmp_path), _description('dev-001'))
     assert hit.status_code == 200
-    assert hit.json()['source'] == 'cache'
+    assert hit.json()['source'] == 'cache' and hit.json()['mode'] == 'cached_demo'
     assert hit.json()['benchmark']['provision'] == '9.10.15.5.'
     miss = _post(_client(tmp_path), 'something the cache has never seen')
-    assert miss.status_code == 200 and miss.json()['source'] == 'offline-miss'
-    assert miss.json()['articles'] == []
+    assert miss.status_code == 200 and miss.json()['mode'] == 'bm25_fallback'
+    assert miss.json()['section_c'] == []
+    assert not any(article.get('committed') for article in miss.json()['articles'])
 
 
 def test_verifier_timeout_is_a_provider_outage(monkeypatch):
@@ -105,8 +110,8 @@ def test_offline_mode_makes_no_socket_connection(tmp_path, monkeypatch):
     client = _client(tmp_path)
     hit = _post(client, _description('dev-003'))
     miss = _post(client, 'not a cached description')
-    assert hit.json()['source'] == 'cache'
-    assert miss.json()['source'] == 'offline-miss'
+    assert hit.json()['source'] == 'cache' and hit.json()['mode'] == 'cached_demo'
+    assert miss.json()['mode'] == 'bm25_fallback'
 
 
 def test_build_script_refuses_to_write_without_a_key(tmp_path):
