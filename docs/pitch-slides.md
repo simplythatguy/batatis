@@ -55,16 +55,16 @@
 *Sources:* dev `engine/section_c.py`, `engine/identify/`; [PR #12](https://github.com/simplythatguy/batatis/pull/12); case C (PR #14, on dev)
 
 ### Slide 5: Citations come from the code database [Code Identification, 20]
-**Hero:** 9/11 | right article first · draft, not in the app
-- NBC(AE) 2023, 2nd printing · model-checked, single run
+**Hero:** 76% | right article first · 3-run mean · draft
+- NBC(AE) 2023, 2nd printing · model-checked, 11 cases
 
 **Full slide detail (in notes):**
 * Built by script from the official NBC(AE) 2023; the codedb README on dev names the 2nd printing; the SHA-256 pin is in draft PR #12
 * In the identify step (command line on dev; HTTP in draft PR #12), a citation that doesn't quote the code word for word is removed; app search shows database rows, and some article-level rows have no text yet
-* Identification (draft PR #12; model aliases, not pinned): C$0.0277 per case, 5.7 s median, 11.3 s p95 (measured, 20 dev cases, cost and latency over 3 repeats, identification step only (excludes the completeness judge and Section D))
+* Identification (draft PR #12; pinned 2025-04-14 models): C$0.027 per case, 4.5 s median, 9.1 s p95 (measured, 20 dev cases, mean of 3 repeats, identification step only (excludes the completeness judge and Section D))
 
-**Speaker notes:** Hallucinated citations are the failure that would sink an application, so the identify step's verifier (command line on dev) drops any citation whose quote doesn't match the code text. Each Section C row carries its article, objective and function from the attribution tables (where the attribution table has a row; otherwise the screen shows that the lookup is not available), so the rationale follows the code's own structure; the three demo articles were checked against our code database. Code identification (draft PR #12, not on dev): top-1 9/11 and recall@5 (correct article in the top 5) 9/11 on the model-checked dev cases that have a gold article (in-sample, single run, 9 cases without gold excluded); the BM25 baseline gets 5/11; it asks the applicant on 40% of cases. These are dev cases, not real applications, and the models are aliases until they are pinned to dated snapshots in PR #12 (in progress).
-*Sources:* [Alberta building codes](https://www.alberta.ca/building-codes-and-standards); draft [PR #12](https://github.com/simplythatguy/batatis/pull/12) (keyed run, Oct 20, 2026; accuracy from one run only); Implementation Plan §9
+**Speaker notes:** Hallucinated citations are the failure that would sink an application, so the identify step's verifier (command line on dev) drops any citation whose quote doesn't match the code text. Each Section C row carries its article, objective and function from the attribution tables (where the attribution table has a row; otherwise the screen shows that the lookup is not available), so the rationale follows the code's own structure; the three demo articles were checked against our code database. Code identification (draft PR #12, not on dev): top-1 0.758 and recall@5 (correct article in the top 5) 0.758 (MRR 0.761) on the 11 model-checked dev cases that have a gold article (mean of 3 repeats, in-sample, not human-verified; the 4 ask cases are scored separately, top-1 0.25 at most; 5 cases have no gold); the BM25 baseline gets top-1 0.455, and a 700-character verifier variant reaches recall@5 0.818; it asks the applicant on 42% of cases. These are dev cases, not real applications, and the models are pinned to dated 2025-04-14 snapshots in draft PR #12.
+*Sources:* [Alberta building codes](https://www.alberta.ca/building-codes-and-standards); draft [PR #12](https://github.com/simplythatguy/batatis/pull/12) (keyed run, Oct 20, 2026; mean of 3 repeats); Implementation Plan §9
 
 ### Slide 6: It knows where to stop [Recommendations, 10]
 **Hero:** 50 Pa | Example case · firestop test pressure differential
@@ -73,10 +73,10 @@
 
 **Full slide detail (in notes):**
 * Lists the evidence an alternative solution needs, in order (engine on dev; screen in review)
-* The engine says when a registered professional is required, and cites the Division C rule (e.g. 2.4.1.1.(3), 2.4.1.2.(1)) when it applies (engine on dev; not yet on screen, where the answer shows as "depends")
+* The engine says when a registered professional is required, and cites the Division C rule (e.g. 2.4.1.1.(3), 2.4.1.2.(1)) when it applies (engine on dev; on screen, in review, no rule is shown, and a missing-facts answer reads "More facts are needed before this screen can say whether practice of engineering applies. This is not a licence decision.")
 * Never writes engineering judgment itself
 
-**Speaker notes:** Where no tested system fits, it's designed to say an engineer's judgment is needed, and stop. It never writes the evidence. The engine's professional-involvement check answers yes, depends or no, and the engine cites the Division C rule (e.g. 2.4.1.1.(3), 2.4.1.2.(1)) when it applies; on screen the answer shows as "depends" without the rule. In the firestop demo case, plastic pipe in a 5-storey building needs firestops tested at a 50 Pa pressure differential (Clause 3.1.9.4.(4)(b)), and the tool is designed to say an engineering judgment is required where no tested system fits, list what it must contain, and stop. A simulated general-contractor walkthrough of this case on an in-review build (PR #16 @27bec3e) reached a draft 8-page PDF (marked "DRAFT - not for submission") in about 6 minutes, but the final application PDF download stayed locked with 1 blocking item (professional involvement), which a contractor can't clear without a professional registration number or seal. Search found 3.1.9.4.(2)/(4)/(7) and 9.10.9.7 with the S115 text, but not 3.1.9.1; the app gave no variance-vs-fix guidance, didn't flag the sales-rep email as not an engineering judgment, and didn't challenge the sprinkler "exempt" claim.
+**Speaker notes:** Where no tested system fits, it's designed to say an engineer's judgment is needed, and stop. It never writes the evidence. The engine's professional-involvement check answers yes, depends or no, and the engine cites the Division C rule (e.g. 2.4.1.1.(3), 2.4.1.2.(1)) when it applies; on screen (PR #16, in review) no rule is shown, and when facts are missing it reads "More facts are needed before this screen can say whether practice of engineering applies. This is not a licence decision." In the firestop demo case, plastic pipe in a 5-storey building needs firestops tested at a 50 Pa pressure differential (Clause 3.1.9.4.(4)(b)), and the tool is designed to say an engineering judgment is required where no tested system fits, list what it must contain, and stop. A simulated general-contractor walkthrough of this case on an in-review build (PR #16 @27bec3e) reached a draft 8-page PDF (marked "DRAFT - not for submission") in about 6 minutes, but the final application PDF download stayed locked with 1 blocking item (professional involvement), which a contractor can't clear without a professional registration number or seal. Search found 3.1.9.4.(2)/(4)/(7) and 9.10.9.7 with the S115 text, but not 3.1.9.1; the app gave no variance-vs-fix guidance, didn't flag the sales-rep email as not an engineering judgment, and didn't challenge the sprinkler "exempt" claim.
 *Sources:* dev `engine/section_d.py`, `engine/professional.py`; [IFC engineering-judgment guidelines](https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf); case B (PR #14, on dev)
 
 ### Slide 7: Completeness review: built in the engine, officer screen in review [Review, 10]
@@ -133,13 +133,13 @@
 
 ### Slide 11: Applicants pay to arrive complete [Business Plan, 10]
 - Production homebuilders pay C$125–750 per package (untested hypothesis)
-- Identification: C$0.0277 per case, about 0.02% of the floor (draft, measured)
+- Identification: C$0.027 per case, about 0.02% of the floor (draft, measured)
 - Defensible as models improve: form tracking, citation validator, officer workflow
 
 **Full slide detail (in notes):**
 * First buyer: production homebuilders, who write the Div C 2.3.1 documentation
 * Price to test: C$125–750 per bespoke package (untested hypothesis)
-* Identification model cost (model aliases, not pinned): C$0.0277 per case, about 0.02% of the C$125 floor (measured on dev cases; identification step only)
+* Identification model cost (pinned models): C$0.027 per case, about 0.02% of the C$125 floor (measured on dev cases; identification step only)
 * Defensible as models improve: form-version tracking, the Section C attribution layer with its citation validator, and a place in the officer's workflow (Judge Q&A 13)
 
 **Speaker notes:** The low end of the range is one hour at the Council's own C$125/hour alternative-solution rate. No buyer has seen a price. Authority pilots would sit under the C$75,000 trade-agreement threshold that Edmonton and Calgary apply.
