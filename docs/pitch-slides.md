@@ -62,7 +62,7 @@
 
 ### Slide 8: One tool, three kinds of first-time applicants [General Applicability, 5]
 - Homebuilder: slab edges need detailing, the unvented roof probably fails its STANDATA as drawn, the window needs a variance and fall protection [case files: PR #14]
-- Manufacturer: product acceptance goes to CCMC; the variance stays project-specific [case files: PR #14]
+- Manufacturers can seek a voluntary CCMC assessment (or another recognized evaluation) as evidence for the authority having jurisdiction, which makes the approval decision; the variance stays project-specific [case files: PR #14]
 - General contractor: plastic pipe needs 50 Pa-tested firestops, Clause 3.1.9.4.(4)(b) [case files: PR #14]
 
 **Speaker notes:** Our three demo cases cover a homebuilder, a manufacturer and a general contractor, with fictional people and real code citations. The STANDATA reasoning (23-BCV-003 covers the under-slab insulation but not the edges; the roof is probably not covered by 23-BCV-017 as drawn) is case content; the tool's STANDATA "you may not need a variance" check is not built. Whether a real first-time applicant could use it unaided is untested.
