@@ -36,6 +36,16 @@ Product UI system: [`docs/design-system-linear.md`](./docs/design-system-linear.
 - Prefer NBC(AE) 2023 **2nd printing**.
 - UI → Opus 5.5 implement **and** review; default look = Linear-caliber tokens (no prompt required).
 
+## Product UI kit
+
+Linear-themed shadcn lives in [`apps/web`](./apps/web). Stock imports are `@/components/ui/*`. Colors map in `apps/web/app/globals.css`. Eval colors live in [`docs/design/variables.css`](./docs/design/variables.css).
+
+```bash
+cd apps/web && npm install && npm run dev
+# open /gallery
+node scripts/assert-linear-theme.mjs
+```
+
 ## Status
 
-Clone-ready **agent environment** (rules, skills, evals, docs). Application product code is not the focus of this PR.
+Clone-ready **agent environment** (rules, skills, evals, docs) plus a Linear-themed shadcn kit under `apps/web`.
