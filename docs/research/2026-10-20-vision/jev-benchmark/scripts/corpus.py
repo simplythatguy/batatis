@@ -1,6 +1,8 @@
 """Build the Div B article corpus and a BM25 article ranker from codedb.sqlite (read-only)."""
-import re, sqlite3, json, sys
-DB = '/Users/aamia/.t3/projects/batatis/codedb/build/codedb.sqlite'
+import os, re, sqlite3, json, sys
+from pathlib import Path
+_REPO = next(p for p in Path(__file__).resolve().parents if (p / 'codedb').is_dir())
+DB = os.environ.get('BATATIS_CODEDB') or str(_REPO / 'codedb' / 'build' / 'codedb.sqlite')
 STOP = set("""a an and are as at be been but by can for from has have if in into is it its may must not of on or
 our shall should such than that the their then there these this those to under was were when where which while
 who will with within without would per via any all each other also only more most than some same apply applies

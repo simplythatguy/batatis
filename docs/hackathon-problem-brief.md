@@ -67,6 +67,8 @@ Batatis product flow maps onto the **No** branch (variance) while still helping 
 
 Intake 20% · Code ID 20% · Recommendations 10% · Review 10% · Applicability 5% · Implementation 10% · Business 10% · Usability/portability 10% · X-factor 5%.
 
+Verbatim source: [docs/judging-rubric.md](./judging-rubric.md).
+
 ## Primary sources
 
 Challenge Scope PDF (Edmonton Unlimited / team Research pack), Data Package docx, SCC variance template, Calgary/Edmonton alternative-solution guides, team Omar solution + EU Hack notes, **NBC(AE) acceptable-vs-alternative flow diagram**. See `.cursor/skills/batatis-hackathon/references/data-package-index.md`.

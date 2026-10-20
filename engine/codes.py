@@ -8,7 +8,8 @@ from pathlib import Path
 
 from codedb import lookup, search, store
 
-DEFAULT_DB = Path('/Users/aamia/.t3/projects/batatis/codedb/build/codedb.sqlite')
+_REPO = Path(__file__).resolve().parents[1]
+DEFAULT_DB = _REPO / 'codedb' / 'build' / 'codedb.sqlite'
 OBJECTIVES_PROVISION = ('2.2.1.1.(1)', 'A')        # Div A listing of objectives
 FUNCTIONS_PROVISION = ('3.2.1.1.(1)', 'A')         # Div A listing of functional statements
 
