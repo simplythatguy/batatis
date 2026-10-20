@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 from codedb import store as codedb_store
 from engine.api import create_app, read_capped
 from engine.codes import Codes
-from engine.copyright import (NRC_PUBLICATION_URL, PII_NOTICE, RESPONSE_WORD_BUDGET, SNIPPET_WORD_LIMIT,
+from engine.copyright import (NRC_PUBLICATION_URL, PII_NOTICE, RESPONSE_NRC_MAX_WORDS, SNIPPET_MAX_WORDS,
                               clip_marker, clip_response, has_consecutive_words, is_nrc_string, words)
 from engine.llm_gate import reset_for_tests
 from engine.store import CaseStore
@@ -81,7 +81,7 @@ def _synthetic_db(path):
                 ('NBC-AE', 'B', 'A-9.1.1.1.', '9.1.1.1.(1)', 'note_id'))
     con.execute('INSERT INTO intents VALUES (?,?,?,?,?,?,?,?,?,?)',
                 ('NBC-2020', 'NBC-AE', '9.1.1.1.(1)', 0, 'OS1.1', '[]',
-                 json.dumps([[nested, 'keep-me'], nested]), json.dumps([note]), 1, 1))
+                 json.dumps([nested, nested]), json.dumps([note, note]), 1, 1))
     con.execute('INSERT INTO provisions_fts (doc, division, id, title, text) VALUES (?,?,?,?,?)',
                 ('NBC-AE', 'B', '9.1.1.1.(1)', 'Synthetic sentence', text))
     con.execute('INSERT INTO docs VALUES (?,?,?,?,?,?,?)',
@@ -130,8 +130,56 @@ def _nrc_snippets(node, key=None, parent=None):
 
 def _assert_budget(payload):
     snippets = _nrc_snippets(payload)
-    assert all(len(words(snippet)) <= SNIPPET_WORD_LIMIT for snippet in snippets)
-    assert sum(len(words(snippet)) for snippet in snippets) <= RESPONSE_WORD_BUDGET
+    assert all(len(words(snippet)) <= SNIPPET_MAX_WORDS for snippet in snippets)
+    assert sum(len(words(snippet)) for snippet in snippets) <= RESPONSE_NRC_MAX_WORDS
+
+
+def test_snippet_cap_is_25_words_not_the_response_total():
+    """One passage stops at SNIPPET_MAX_WORDS even when the response still has room."""
+    long = _long('p')
+    assert SNIPPET_MAX_WORDS == 25 and RESPONSE_NRC_MAX_WORDS == 75
+    assert len(words(long)) > SNIPPET_MAX_WORDS
+    clipped = clip_response({'text': long, 'pdf_page': 4, 'citation': 'NBC(AE) 2023 p2, Div B, Sentence 9.1.1.1.(1)'})
+    kept = clipped['text'].split('… [clipped', 1)[0].strip()
+    assert len(words(kept)) == SNIPPET_MAX_WORDS
+    assert len(words(kept)) < RESPONSE_NRC_MAX_WORDS
+    assert clipped['citation'].startswith('NBC(AE)')
+    assert clipped['url'] == NRC_PUBLICATION_URL
+
+
+def test_response_cap_is_75_words_across_snippets():
+    """Short passages share RESPONSE_NRC_MAX_WORDS. The per-snippet cap is not what stops them."""
+    passages = [' '.join(f'n{i:02d}{j:02d}' for j in range(20)) for i in range(6)]
+    assert all(SNIPPET_MAX_WORDS >= len(words(passage)) for passage in passages)
+    assert sum(len(words(passage)) for passage in passages) > RESPONSE_NRC_MAX_WORDS
+    clipped = clip_response({'notes': passages, 'pdf_page': 8})
+    kept = [note.split('… [clipped', 1)[0].strip() for note in clipped['notes']]
+    assert sum(len(words(note)) for note in kept) == RESPONSE_NRC_MAX_WORDS
+    assert any(note.startswith('… [clipped') for note in clipped['notes'])
+    assert clipped['url'] == NRC_PUBLICATION_URL
+
+
+def test_applicant_quotes_are_not_labelled_as_code_text():
+    long = _long('u')
+    applicant = clip_response({
+        'field': 'note',
+        'value': long,
+        'question': long,
+        'source': {'type': 'user_text', 'ref': 'msg', 'quote': long},
+    })
+    assert applicant['value'] == long
+    assert applicant['question'] == long
+    assert applicant['source']['quote'] == long
+    assert 'clipped' not in applicant and 'url' not in applicant
+    assert 'clipped' not in applicant['source']
+    code = clip_response({
+        'value': long,
+        'source': {'type': 'code', 'ref': '9.1.1.1.(1)', 'quote': long},
+        'pdf_page': 4,
+    })
+    assert len(words(code['source']['quote'].split('… [clipped', 1)[0])) == SNIPPET_MAX_WORDS
+    assert code['source']['clipped'] is True
+    assert code['source']['url'] == NRC_PUBLICATION_URL
 
 
 def test_response_budget_caps_each_snippet_and_the_total():
@@ -226,6 +274,13 @@ def test_export_without_the_scc_form_is_503(tmp_path, monkeypatch):
     assert response.json()['detail'] == 'PDF export is unavailable on this deployment: SCC form not configured'
 
 
+def _assert_search_limited(response):
+    assert response.status_code == 429
+    assert response.json()['detail'].startswith('Search limit reached; try again in ')
+    assert response.json()['detail'].endswith(' seconds')
+    assert response.headers['retry-after'].isdigit()
+
+
 def test_search_is_rate_limited(tmp_path, monkeypatch):
     monkeypatch.setenv('BATATIS_SEARCH_RATE_LIMIT', '2')
     reset_for_tests()
@@ -234,11 +289,18 @@ def test_search_is_rate_limited(tmp_path, monkeypatch):
     client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes(path)))
     assert client.get('/code/search', params={'q': 'w00'}).status_code == 200
     assert client.get('/code/search', params={'q': 'w00'}).status_code == 200
-    limited = client.get('/code/search', params={'q': 'w00'})
-    assert limited.status_code == 429
-    assert limited.json()['detail'].startswith('Search limit reached; try again in ')
-    assert limited.json()['detail'].endswith(' seconds')
-    assert limited.headers['retry-after'].isdigit()
+    _assert_search_limited(client.get('/code/search', params={'q': 'w00'}))
+
+
+def test_ccmc_search_shares_the_search_limit(tmp_path, monkeypatch):
+    monkeypatch.setenv('BATATIS_SEARCH_RATE_LIMIT', '2')
+    reset_for_tests()
+    path = tmp_path / 'codedb.sqlite'
+    _synthetic_db(path)
+    client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes(path)))
+    assert client.get('/code/search', params={'q': 'w00'}).status_code == 200
+    assert client.get('/ccmc/search', params={'q': 'board'}).status_code in (200, 503)
+    _assert_search_limited(client.get('/ccmc/search', params={'q': 'board'}))
 
 
 def _insert_provision(con, division, pid, text, page):
@@ -250,6 +312,24 @@ def _insert_provision(con, division, pid, text, page):
                  None, 'Synthetic', pid, text, text, json.dumps(['a']), page, page, 1, pid))
     con.execute('INSERT INTO provisions_fts (doc, division, id, title, text) VALUES (?,?,?,?,?)',
                 ('NBC-AE', division, pid, pid, text))
+
+
+# Engine routes the Vite client calls (web/src/api/client.ts).
+WEB_BUNDLE_ROUTES = {
+    ('POST', '/cases'),
+    ('GET', '/cases/{case_id}'),
+    ('POST', '/cases/{case_id}/facts'),
+    ('GET', '/code/search'),
+    ('GET', '/code/{provision_id}'),
+    ('POST', '/section-c'),
+}
+CASE_BUILDER_ROUTES = {
+    ('POST', '/cases/{case_id}/section-d'),
+    ('GET', '/cases/{case_id}/section-d/issues'),
+    ('GET', '/cases/{case_id}/professional'),
+    ('GET', '/cases/{case_id}/process-fields'),
+    ('GET', '/cases/{case_id}/gaps'),
+}
 
 
 def test_every_registered_route_stays_inside_the_nrc_budget(tmp_path, monkeypatch):
@@ -275,16 +355,28 @@ def test_every_registered_route_stays_inside_the_nrc_budget(tmp_path, monkeypatc
     long = _long('q')
     calls = []
     delete = []
+    api_routes = [route for route in app.routes if isinstance(route, APIRoute)]
     for route in app.routes:
-        if not isinstance(route, APIRoute):
-            continue
+        original = getattr(route, 'original_router', None)
+        if original is not None:
+            api_routes.extend(child for child in original.routes if isinstance(child, APIRoute))
+    for route in api_routes:
         for method in sorted(route.methods - {'HEAD', 'OPTIONS'}):
             (delete if method == 'DELETE' else calls).append((method, route.path))
     assert calls
+    required = WEB_BUNDLE_ROUTES | CASE_BUILDER_ROUTES
+    missing = required - set(calls)
+    assert not missing, missing
     lookup = next(route for route in app.routes if getattr(route, 'path', None) == '/code/{provision_id}')
     names = {getattr(param, 'alias', None) or param.name for param in lookup.dependant.query_params}
     assert names <= {'division'}
-    for method, route_path in calls + delete:
+    # Section D writes Section C. Gaps then validates citations against the source text,
+    # which this synthetic database does not include. Read the gaps route first.
+    def _before_section_d(item):
+        method, path = item
+        return 1 if method == 'POST' and path.endswith('/section-d') else 0
+
+    for method, route_path in sorted(calls, key=_before_section_d) + delete:
         url = (route_path.replace('{case_id}', case_id)
                .replace('{provision_id}', '9.1.1.1.(1)'))
         kwargs = {}
@@ -313,12 +405,79 @@ def test_every_registered_route_stays_inside_the_nrc_budget(tmp_path, monkeypatc
         response = client.request(method, url, **kwargs)
         plain = ' '.join(re.findall(r'[A-Za-z0-9]+', response.text))
         assert not has_consecutive_words(plain, seeded[:26]), (method, route_path, response.status_code)
-        assert response.headers.get('x-batatis-notice') == PII_NOTICE
+        assert response.headers.get('x-batatis-notice') == PII_NOTICE, (
+            method, route_path, response.status_code, response.text[:500])
+        if (method, route_path) in required:
+            assert response.status_code < 500, (method, route_path, response.status_code, response.text)
         if 'application/json' in response.headers.get('content-type', '') and response.content:
             payload = response.json()
             assert isinstance(payload, dict) and payload['meta']['notice'] == PII_NOTICE
             _assert_budget(payload)
     assert client.get(f'/cases/{case_id}').status_code == 404
+
+
+def test_search_hits_share_one_response_budget(tmp_path, monkeypatch):
+    monkeypatch.setenv('BATATIS_SEARCH_RATE_LIMIT', '10')
+    reset_for_tests()
+    path = tmp_path / 'codedb.sqlite'
+    _synthetic_db(path)
+    con = sqlite3.connect(path)
+    for index in range(4):
+        _insert_provision(con, 'B', f'9.8.1.{index + 1}.(1)', 'qxshared ' + _long(f'h{index}'), 30 + index)
+    con.commit()
+    con.close()
+    client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes(path)))
+    response = client.get('/code/search', params={'q': 'qxshared', 'limit': 20})
+    assert response.status_code == 200
+    hits = response.json()['items']
+    assert len(hits) >= 4
+    _assert_budget(response.json())
+    snippets = [hit['text'].split('… [clipped', 1)[0].strip() for hit in hits]
+    assert sum(len(words(snippet)) for snippet in snippets) <= RESPONSE_NRC_MAX_WORDS
+    assert sum(len(words(snippet)) for snippet in snippets) < len(hits) * SNIPPET_MAX_WORDS
+    assert any(hit['text'].startswith('… [clipped') for hit in hits)
+    assert all(hit['citation'] for hit in hits)
+    assert all(hit['url'] == NRC_PUBLICATION_URL for hit in hits if hit.get('clipped'))
+
+
+def test_exported_pdf_obeys_the_snippet_budget(tmp_path):
+    import io
+    from types import SimpleNamespace
+
+    from pypdf import PdfReader
+
+    from engine.export.appendix import build_appendix
+    from engine.models import Case
+    from engine.section_c import section_c_rows
+
+    path = tmp_path / 'codedb.sqlite'
+    seeded = _synthetic_db(path)
+    con = sqlite3.connect(path)
+    extras = []
+    ids = ['9.1.1.1.(1)']
+    for index in range(3):
+        pid = f'9.8.2.{index + 1}.(1)'
+        ids.append(pid)
+        text = _long(f'p{index}')
+        extras.append(text.split())
+        _insert_provision(con, 'B', pid, text, 40 + index)
+        con.execute('INSERT INTO intents VALUES (?,?,?,?,?,?,?,?,?,?)',
+                    ('NBC-2020', 'NBC-AE', pid, 0, 'OS1.1', '[]',
+                     json.dumps([text]), json.dumps([text]), 40 + index, 40 + index))
+    for pid in ('2.3.1.1.(2)(a)', '2.3.1.1.(3)', '2.3.1.1.(2)(b)', '2.3.1.1.(4)'):
+        _insert_provision(con, 'C', pid, _long('w'), 9)
+    con.commit()
+    con.close()
+    codes = Codes(path)
+    case = Case(title='pdf budget', provisions=ids, section_c=section_c_rows(ids, codes))
+    plan = SimpleNamespace(overflow=[], rows_in_form=1, docs_in_form=0)
+    pdf = build_appendix(case, plan, {}, {'version': 'test'}, codes=codes, open_items=[])
+    text = '\n'.join(page.extract_text() or '' for page in PdfReader(io.BytesIO(pdf)).pages)
+    for needle in [seeded, *extras]:
+        assert not has_consecutive_words(text, needle[:26])
+    assert case.section_c[0].citation in text
+    assert 'clipped' in text
+    assert '0316d953-0d55-4311-af69-cad55efec499' in text
 
 
 def test_access_log_has_ids_route_and_status_only(tmp_path, caplog):

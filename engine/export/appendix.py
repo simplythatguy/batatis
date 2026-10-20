@@ -3,6 +3,8 @@
 Sections: X (form values too long for their cell), C (one entry per Section C row: citation, attribution
 pairs with their Division A text and table source, provision text, NBC 2020 intent statements labelled as
 explanatory only), D (every supporting document) and, for drafts, the open items that block a final export.
+NRC prose in section C is limited to 25 words per snippet and 75 words for the PDF; beyond that the
+appendix keeps the citation and the NRC link.
 """
 from __future__ import annotations
 
@@ -19,6 +21,7 @@ from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
 from reportlab.platypus import KeepTogether, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
+from ..copyright import clip_snippet, new_response_budget
 from ..models import INTENT_LABEL, Case, SectionCRow
 from ..process_fields import process_fields
 from ..section_d import section_d_plan, supporting_documents
@@ -71,7 +74,13 @@ def _table(header: list[str], rows: list[list[str]], widths: list[float]) -> Tab
     return t
 
 
-def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
+def _nrc(text, page, budget, citation: str) -> str:
+    if not text:
+        return ''
+    return clip_snippet(str(text), page=page, budget=budget, citation=citation)
+
+
+def _row_story(k: int, row: SectionCRow, codes, in_form: bool, budget) -> list:
     out = [Paragraph(f'C-{k}&nbsp;&nbsp;{escape(row.provision_id)}', H3),
            _kv('Citation', row.citation),
            _kv('On the form', f'row {k}' if in_form else 'appendix only (more than five rows)')]
@@ -81,10 +90,11 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
     out.append(_kv('Attribution status', status))
     if row.pairs:
         out.append(_table(['Function', 'Objective', 'Source'],
-                          [[f'{p.function} {p.function_text or ""}'.strip(), f'{p.objective} {p.objective_text or ""}'.strip(),
+                          [[f'{p.function} {_nrc(p.function_text, p.pdf_page, budget, row.citation)}'.strip(),
+                            f'{p.objective} {_nrc(p.objective_text, p.pdf_page, budget, row.citation)}'.strip(),
                             f'{p.table}, NBC(AE) 2023 PDF p. {p.pdf_page}'
                             + (f'; clauses {", ".join(p.clauses)}' if p.clauses else '')
-                            + (f'; {p.application_note}' if p.application_note else '')]
+                            + (f'; {_nrc(p.application_note, p.pdf_page, budget, row.citation)}' if p.application_note else '')]
                            for p in row.pairs], [2.3 * inch, 2.3 * inch, 2.4 * inch]))
     else:
         out.append(_p('The NBC(AE) 2023 attribution table has no row for this provision, so no objective or '
@@ -93,7 +103,7 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
         rec = codes.provision(row.provision_id, 'B')
         if rec and rec.get('text'):
             out.append(_kv('Provision text', f'Article {rec["article"]} {rec["article_title"] or ""}'.strip()))
-            out.append(_p(_reflow(rec['text']), CODE))
+            out.append(_p(_nrc(_reflow(rec['text']), rec.get('pdf_page'), budget, row.citation), CODE))
     out.append(Paragraph(f'<b>{escape(INTENT_LABEL)}</b>', BODY))
     if row.differs:
         out.append(_p('The national 2020 intent statement is attributed differently from NBC(AE) 2023.'
@@ -105,12 +115,13 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
         head = f'{blk.provision_id}' + (f', objective {blk.objective}' if blk.objective else '') \
             + (f', attribution {"; ".join(blk.brackets)}' if blk.brackets else '') + f' (intent PDF p. {blk.pdf_page})'
         out.append(_p(head, SMALL))
-        out += [_p(t, CODE) for t in blk.intents]
-        out += [_p(f'Note: {n}', SMALL) for n in blk.notes]
+        out += [_p(_nrc(t, blk.pdf_page, budget, row.citation), CODE) for t in blk.intents]
+        out += [_p(f'Note: {_nrc(n, blk.pdf_page, budget, row.citation)}', SMALL) for n in blk.notes]
     return out
 
 
 def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, open_items: list[str]) -> bytes:
+    budget = new_response_budget()
     story: list = [Paragraph('Appendix to the Variance Form for Proposed Alternative Solution', H1),
                    _p(f'Case {case.title or ""} ({case.id}). Generated {date.today().isoformat()} by Batatis with '
                       f'field map {fmap["version"]}. Code references are to the National Building Code - 2023 '
@@ -154,7 +165,7 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
     if not case.section_c:
         story.append(_p('No provisions identified.'))
     for k, row in enumerate(case.section_c, start=1):
-        story += _row_story(k, row, codes, k <= plan.rows_in_form)
+        story += _row_story(k, row, codes, k <= plan.rows_in_form, budget)
 
     docs = supporting_documents(case)
     story.append(Paragraph('D. Supporting documentation', H2))

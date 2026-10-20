@@ -14,7 +14,7 @@ else
   python -m codedb build
 fi
 if [ ! -s "$ROOT/codedb/build/codedb.sqlite" ]; then
-  echo "engine build failed: codedb/build/codedb.sqlite is missing. Refusing to deploy without a verified code database. Do not commit the NRC PDF or the sqlite." >&2
+  echo "engine build failed: codedb/build/codedb.sqlite is missing. Refusing to deploy without a sha256-checked code database. Do not commit the NRC PDF or the sqlite." >&2
   exit 1
 fi
 echo "engine build: codedb/build/codedb.sqlite is present"
@@ -23,4 +23,4 @@ if [ ! -s "$ROOT/codedb/build/SCC-Variance-Form.pdf" ]; then
   echo "engine build failed: codedb/build/SCC-Variance-Form.pdf is missing. Do not commit the SCC form." >&2
   exit 1
 fi
-echo "engine build: SCC variance form sha256 verified"
+echo "engine build: SCC variance form sha256-checked"

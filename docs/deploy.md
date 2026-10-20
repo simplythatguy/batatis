@@ -21,14 +21,14 @@ Every response sets `X-Robots-Tag: noindex, nofollow`. `web/public/robots.txt` d
 
 ## Code database: official URL or a private object
 
-The builder needs the NBC(AE) 2023 2nd-printing PDF and the NBC 2020 intent-statements PDF. Both are checked against pinned sha256 values. A mismatch is deleted. Nothing is committed.
+The builder needs the NBC(AE) 2023 2nd-printing PDF and the NBC 2020 intent-statements PDF. Both are sha256-checked. A mismatch is deleted. Nothing is committed.
 
 1. **Official publications (default).** The build downloads from `nrc-publications.canada.ca` with retries (`curl --retry`). Use this when the Vercel builder can reach that host.
 2. **Private object (when the builder cannot reach NRC).** Upload each PDF once to a private Vercel Blob or a Neon object. The object must not be publicly readable. Put the signed or otherwise authenticated URLs in:
    - `CODEDB_PDF_URL` — NBC(AE) PDF
    - `CODEDB_INTENT_PDF_URL` — intent-statements PDF
 
-   The build still tries the official URL first. Set `CODEDB_SKIP_OFFICIAL=1` to skip the NRC host when both private URLs are set. A private URL is never printed in the build log. If both the official download and the private URL fail, or the sha256 does not match, the engine build fails and the deployment does not go out.
+   The build still tries the official URL first. Set `CODEDB_SKIP_OFFICIAL=1` to skip the NRC host when both private URLs are set. A private URL is never printed in the build log. If both the official download and the private URL fail, or a file is not sha256-checked, the engine build fails and the deployment does not go out.
 
 Do not work around a failed download by committing the PDF or the sqlite.
 
@@ -44,10 +44,10 @@ Set these on the Vercel project for Preview and Production. Leave the project Ro
 | `DATABASE_URL` | engine runtime | Neon (or any Postgres) URL. `sslmode=require` is added when the URL omits it. |
 | `BATATIS_LIVE` | engine runtime | Unset or anything other than `1` keeps the offline path. Live calls also need `OPENAI_API_KEY`. |
 | `OPENAI_API_KEY` | engine runtime, sensitive | Server only. Do not use a `VITE_` name. The process never logs the value. |
-| `BATATIS_DAILY_SPEND_CAP_USD` | engine runtime | Default `5`. Over the cap, model calls return the offline path with `source: "offline-cap"`. The cap is shared across instances only when `BATATIS_STORE=postgres`. The file store keeps it in memory for that process. |
+| `BATATIS_DAILY_SPEND_CAP_USD` | engine runtime | Default `5`. Over the cap, model calls return the offline path with `source: "offline-cap"`. On Vercel this cap requires `BATATIS_STORE=postgres`. The per-instance memory ledger is not used there: if `VERCEL` is set and the store is not postgres, live calls stay on `offline-cap` and do not spend from memory. Off Vercel, the file store keeps the cap in memory for that process. |
 | `BATATIS_LLM_RATE_LIMIT` | engine runtime | Default `20` live model calls per IP per window. |
 | `BATATIS_LLM_RATE_WINDOW_SECONDS` | engine runtime | Default `600`. |
-| `BATATIS_SEARCH_RATE_LIMIT` | engine runtime | Default `60` code searches per IP per window. |
+| `BATATIS_SEARCH_RATE_LIMIT` | engine runtime | Default `60` searches per IP per window. `GET /code/search` and `GET /ccmc/search` share this window. The client IP is the first hop of `x-vercel-forwarded-for`, then `X-Forwarded-For`, then the peer address. |
 | `BATATIS_SEARCH_RATE_WINDOW_SECONDS` | engine runtime | Default `600` (10 minutes). A 429 body is `Search limit reached; try again in N seconds` and sets `Retry-After`. |
 | `BATATIS_SCC_FORM` | engine runtime | Optional filesystem path to the SCC variance form. The build's copy is `codedb/build/SCC-Variance-Form.pdf`. |
 | `SCC_FORM_URL` | engine build | Optional private URL for the SCC variance form. Still sha256-checked. |
@@ -59,7 +59,7 @@ Set these on the Vercel project for Preview and Production. Leave the project Ro
 
 Local file runs ignore `DATABASE_URL`. Uploaded PDF bytes go in `case_files` (Postgres `bytea`, or sqlite blob locally), capped at 4 MB. A larger PDF is HTTP 413 with `{"detail": "PDF too large: the limit is 4 MB. Try compressing the file or splitting it."}`.
 
-Every JSON response keeps at most 25 words in one NRC snippet and at most 75 words of NRC text in total. Past that budget the body keeps the citation and the NRC link, with `clipped: true` and `… [clipped, see NBC p.N]`. Search still returns at most 20 hits. Cases older than 7 days are deleted with their files. Do not upload personal information; demo data may be deleted.
+Every JSON response keeps at most 25 words in one NRC snippet and at most 75 words of NRC text in total. Past that budget the body keeps the citation and the NRC link, with `clipped: true` and `… [clipped, see NBC p.N]`. Search hits share that one budget. Search still returns at most 20 hits. The exported PDF uses the same limits: form cells carry provision ids and objective/function codes, and the appendix carries citations, objective and functional-statement titles, application notes, provision text, and NBC 2020 intent statements and notes, at 25 words or fewer per snippet and 75 words in the PDF. Beyond that, the appendix keeps the citation and the NRC link. Cases older than 7 days are deleted with their files. Do not upload personal information; demo data may be deleted.
 
 ## Preview
 
@@ -89,6 +89,7 @@ Production tracks `dev`, and only after #12 and `backend/case-api` have merged t
 ```text
 #12 owns engine/identify; this branch does not change it.
 Call engine.llm_gate.authorize before a provider request and record after with the actual token counts.
+Clip code quotes in identify responses with the same NRC snippet rules.
 Live only when BATATIS_LIVE=1 and OPENAI_API_KEY are both set; otherwise stay offline and do not contact a provider.
 ```
 

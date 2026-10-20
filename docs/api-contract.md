@@ -20,9 +20,9 @@ These are the routes the engine serves. `POST /cases/{case_id}/files` stores the
 | `POST /cases/{case_id}/section-d` | Body optional `{ "provisions": ["…"] }`. `{ "items", "notices", "meta" }`. Writes the case. |
 | `GET /cases/{case_id}/section-d/issues` | `{ "items", "meta" }`. `items` is the issue list below. Read-only. Does not write the case. |
 | `GET /cases/{case_id}/professional` | `required` and `general_required`: `yes`, `no`, or `depends`. Also `reasons`, `questions`, `scope_note`. |
-| `GET /ccmc/search` | Query `q` (1–200 characters) and `limit` (1–50, default 20). `422` on a rejected query. `503` when the registry is unavailable; that detail is the registry error text. |
+| `GET /ccmc/search` | Query `q` (1–200 characters) and `limit` (1–50, default 20). `422` on a rejected query. `503` when the registry is unavailable; that detail is the registry error text. `429` uses the same detail, `Retry-After` header, and per-IP window as `GET /code/search`. The two routes share that window. |
 | `GET /cases/{case_id}/process-fields` | `{ "items", "meta" }`. `items` is the process-field list. Empty when the pathway is an acceptable solution. |
-| `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` when the blank form file is missing; that detail is the form error text. `500` on other export failures. |
+| `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` detail `PDF export is unavailable on this deployment: SCC form not configured` when the blank form file is missing. `500` on other export failures. The PDF's NRC text is described under Exported PDF. |
 
 A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
 
@@ -40,11 +40,19 @@ The fixed 404 detail strings are `case not found` and `provision not found`.
 
 Every JSON response is under one budget for NRC code text. The budget counts provision text, objective and functional-statement wording, intent statements and notes, clauses, fact quotes, and search snippets. Identifiers, citations, and URLs are not counted.
 
-A single snippet is at most 25 words. The response carries at most 75 words of that text in total. Words past either limit are not returned. The object keeps its citation, gains the NRC publication link (`https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499` when the object had no link), sets `clipped` to true, and the clipped string is `… [clipped, see NBC p.N]`, where N is the `pdf_page` on that object, or `… [clipped, see NBC(AE) 2023]` when no page is known. An unclipped string has no marker, and an object with no clipped text has no `clipped` flag.
+A single snippet is at most 25 words (`SNIPPET_MAX_WORDS`). The response carries at most 75 words of that text in total (`RESPONSE_NRC_MAX_WORDS`). Both limits apply. Words past either limit are not returned. A fact `quote` or `value` counts only when `source.type` is `code`. An applicant `user_text` quote is not code text, and it is not given the NRC marker or link. The object keeps its citation, gains the NRC publication link (`https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499` when the object had no link), sets `clipped` to true, and the clipped string is `… [clipped, see NBC p.N]`, where N is the `pdf_page` on that object, or `… [clipped, see NBC(AE) 2023]` when no page is known. An unclipped string has no marker, and an object with no clipped text has no `clipped` flag.
 
 `GET /code/{provision_id}` accepts only `division`. It exposes no sentence offset, page, cursor, or other parameter a client can use to reassemble an article.
 
 A clipped field is not a finding that a design complies.
+
+### Exported PDF
+
+`POST /cases/{case_id}/export` fills the Safety Codes Council form and appends a generated appendix. The form cells carry provision ids, objective and function codes, and a pointer to the appendix for the intent statement. They do not carry provision sentences.
+
+The appendix carries the NRC text for each Section C row: the citation, objective and functional-statement titles, any application note, the provision text, and the NBC 2020 intent statements and their notes. Applicant-written process answers and other confirmed form values stay the applicant's words.
+
+That NRC text follows the same snippet rules as a JSON response. Each snippet is 25 words or fewer, and the PDF keeps at most 75 words of NRC text in total. Beyond that budget the appendix keeps the citation and the NRC publication link, with `… [clipped, see NBC p.N]` (or `… [clipped, see NBC(AE) 2023]` when no page is known).
 
 ### Demo data and retention
 
@@ -220,7 +228,7 @@ A live response copies the citation string the code database returns. The placeh
 | 413 | `POST /cases/{case_id}/files` when the PDF is over 4 MB. Detail is `PDF too large: the limit is 4 MB. Try compressing the file or splitting it.` |
 | 415 | `POST /cases/{case_id}/files` when the body is not a PDF. Detail is `only PDF files are accepted`. |
 | 422 | A `proposed` fact was sent as `confirmed`, `GET /code/search` `limit` is above 20 (detail `The maximum is 20.`), or `GET /ccmc/search` rejected the query. |
-| 429 | `GET /code/search` when the caller is over the search rate limit. Detail is `Search limit reached; try again in N seconds`. The response also sets `Retry-After: N`. |
+| 429 | `GET /code/search` or `GET /ccmc/search` when the caller is over the shared search rate limit. Detail is `Search limit reached; try again in N seconds`. The response also sets `Retry-After: N`. |
 | 500 | Export failed for a reason other than a missing form. |
 | 503 | The code database file is absent. Body is exactly `{"detail": "code database not found"}`. Raised only by `CodeDbMissing` in `engine/codes.py`. Not a `FileNotFoundError`. The body has no server path. A missing SCC variance form is HTTP 503 with detail `PDF export is unavailable on this deployment: SCC form not configured`. An unavailable CCMC registry is also HTTP 503, and its detail is that error's own text. An unreachable case database is HTTP 503 with detail `case store unavailable`, and that body does not include the server address. |
 | 200 | An unknown Division B token on this issues route does not 404. It returns `provision: null` and a question. |

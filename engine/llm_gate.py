@@ -18,7 +18,6 @@ from decimal import Decimal, ROUND_HALF_UP
 PRICES = {
     'gpt-4.1-mini': (Decimal('0.40'), Decimal('1.60')),
     'gpt-4.1': (Decimal('2'), Decimal('8')),
-    'claude-sonnet-5-5': (Decimal('2'), Decimal('10')),
 }
 CONSERVATIVE = (Decimal('10'), Decimal('30'))
 DEFAULT_MODEL = 'gpt-4.1-mini'
@@ -28,6 +27,10 @@ class OfflineLLM(Exception):
     def __init__(self, source: str):
         self.source = source
         super().__init__(source)
+
+
+class SpendStoreRequired(RuntimeError):
+    """VERCEL is set and the spend ledger is not Postgres, so the memory ledger must not be used."""
 
 
 @dataclass(frozen=True)
@@ -128,9 +131,18 @@ def estimate_usd(model: str, input_tokens: int, output_tokens: int) -> Decimal:
 
 
 def _ledger():
-    """Memory cap for the file store. One Postgres connection, created once, when the store is postgres."""
+    """Memory cap for a local file store. On Vercel the cap is the Postgres ledger only.
+
+    A set `VERCEL` with any other `BATATIS_STORE` raises SpendStoreRequired. The per-instance
+    memory ledger is not a fallback there.
+    """
     global _spend
-    if (os.environ.get('BATATIS_STORE') or '').strip().lower() != 'postgres':
+    store = (os.environ.get('BATATIS_STORE') or '').strip().lower()
+    if os.environ.get('VERCEL') and store != 'postgres':
+        raise SpendStoreRequired(
+            'Refusing the spend cap: VERCEL is set and BATATIS_STORE is not postgres. '
+            'The per-instance memory ledger is not used on Vercel.')
+    if store != 'postgres':
         return _memory
     with _spend_lock:
         if _spend is None:
@@ -167,15 +179,23 @@ def authorize(*, model: str = DEFAULT_MODEL, max_input_tokens: int, max_output_t
     if not _llm_window.allow(client_ip or 'local', limit, window):
         return Decision(False, 'rate-limited')
     estimate = estimate_usd(model, max_input_tokens, max_output_tokens)
-    if not _reserve(_ledger(), estimate, daily_cap()):
+    try:
+        ledger = _ledger()
+    except SpendStoreRequired:
+        return Decision(False, 'offline-cap')
+    if not _reserve(ledger, estimate, daily_cap()):
         return Decision(False, 'offline-cap')
     return Decision(True, 'live', estimate)
 
 
 def record(*, model: str, input_tokens: int, output_tokens: int, reserved_usd: Decimal | float = 0) -> None:
     """Replace the reservation with actual token cost. Does not log credentials."""
+    try:
+        ledger = _ledger()
+    except SpendStoreRequired:
+        return
     actual = estimate_usd(model, input_tokens, output_tokens)
-    _adjust(_ledger(), actual - Decimal(str(reserved_usd)))
+    _adjust(ledger, actual - Decimal(str(reserved_usd)))
 
 
 def search_retry_after(client_ip: str) -> int | None:
@@ -190,9 +210,18 @@ def search_retry_after(client_ip: str) -> int | None:
     return _search_window.retry_after(key, window)
 
 
+def _first_hop(value: str | None) -> str | None:
+    if not value:
+        return None
+    hop = value.split(',')[0].strip()
+    return hop or None
+
+
 def client_ip_from(request) -> str:
-    forwarded = request.headers.get('x-forwarded-for')
-    if forwarded:
-        return forwarded.split(',')[0].strip() or 'unknown'
+    """Vercel's client IP, then the first X-Forwarded-For hop, then the peer address."""
+    for header in ('x-vercel-forwarded-for', 'x-forwarded-for'):
+        hop = _first_hop(request.headers.get(header))
+        if hop:
+            return hop
     client = request.client
-    return client.host if client else 'unknown'
+    return client.host if client and client.host else 'unknown'

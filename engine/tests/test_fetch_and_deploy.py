@@ -98,7 +98,7 @@ def test_vercel_config_keeps_sqlite_on_the_engine_only():
     build = (ROOT / 'scripts' / 'vercel_build_engine.sh').read_text()
     assert 'scripts/build_codedb.sh' in build
     assert 'fetch_sources.py' in build
-    assert 'Refusing to deploy without a verified code database' in build
+    assert 'Refusing to deploy without a sha256-checked code database' in build
     client = (ROOT / 'web' / 'src' / 'api' / 'client.ts').read_text()
     assert 'VITE_API_BASE' in client
     assert 'PDF too large' not in client

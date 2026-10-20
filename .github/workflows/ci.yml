@@ -32,6 +32,7 @@ jobs:
         run: |
           npm ci
           npm run typecheck
+          npm run test:unwrap
           npm run build
       - name: UI smoke
         run: |

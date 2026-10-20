@@ -1,4 +1,4 @@
-"""Download the NBC(AE) PDFs the codedb builder needs, and check the pinned sha256.
+"""Download the NBC(AE) PDFs the codedb builder needs. Each download is sha256-checked.
 
 Official URLs are tried first, with retries. When a build machine cannot reach
 nrc-publications.canada.ca, set CODEDB_PDF_URL and CODEDB_INTENT_PDF_URL to private
@@ -55,15 +55,15 @@ SCC_FORM = {
     'path': 'codedb/build/SCC-Variance-Form.pdf',
 }
 
-FAIL = ('engine build failed: {detail} The engine will not deploy without a verified code database. '
+FAIL = ('engine build failed: {detail} The engine will not deploy without a sha256-checked code database. '
         'Do not commit the NRC PDF or codedb.sqlite. If the build machine cannot reach '
         'nrc-publications.canada.ca, set CODEDB_PDF_URL and CODEDB_INTENT_PDF_URL to private '
         'Vercel Blob or Neon object URLs that are not publicly readable. The bytes are still '
-        'checked against the pinned sha256.')
+        'sha256-checked.')
 
 SCC_FAIL = ('engine build failed: {detail} Do not commit the SCC variance form. '
             'If the builder cannot reach ebs.safetycodes.ab.ca, set SCC_FORM_URL to a private '
-            'URL that is not publicly readable. The bytes are still checked against the pinned sha256.')
+            'URL that is not publicly readable. The bytes are still sha256-checked.')
 
 
 class DownloadError(Exception):
@@ -122,7 +122,7 @@ def acquire(item: dict, *, root: Path, env: dict | None = None, fetcher=curl_fet
     env = os.environ if env is None else env
     dest = root / item['path']
     if dest.is_file() and dest.stat().st_size == int(item['bytes']) and sha256(dest) == item['sha256']:
-        log(f'ok {item["key"]} already matches pinned sha256')
+        log(f'ok {item["key"]} already sha256-checked')
         return dest
     errors = []
     for kind, url in _candidates(item, env):
@@ -140,7 +140,7 @@ def acquire(item: dict, *, root: Path, env: dict | None = None, fetcher=curl_fet
                 continue
             dest.parent.mkdir(parents=True, exist_ok=True)
             tmp.replace(dest)
-            log(f'ok {item["key"]} sha256 verified via {kind} source')
+            log(f'ok {item["key"]} sha256-checked via {kind} source')
             return dest
         except DownloadError as exc:
             tmp.unlink(missing_ok=True)
@@ -166,7 +166,7 @@ def extract_jsonl(pdf: Path, dest: Path, expect_sha: str | None) -> None:
     if expect_sha and sha256(partial) != expect_sha:
         partial.unlink(missing_ok=True)
         raise DownloadError(FAIL.format(detail=(
-            f'{dest.name} page extract does not match the pinned jsonl sha256. '
+            f'{dest.name} page extract is not sha256-checked. '
             'The codedb was not built from an unverified extract.')))
     partial.replace(dest)
     print(f'extracted {dest.name} pages={len(reader.pages)}', file=sys.stderr)

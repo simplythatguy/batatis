@@ -3,16 +3,17 @@ from __future__ import annotations
 
 import re
 
-SNIPPET_WORD_LIMIT = 25
-RESPONSE_WORD_BUDGET = 75
-WORD_LIMIT = SNIPPET_WORD_LIMIT
+# Each NRC snippet, and the NRC text carried by one response. Both limits apply.
+SNIPPET_MAX_WORDS = 25
+RESPONSE_NRC_MAX_WORDS = 75
 NRC_PUBLICATION_URL = (
     'https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499'
 )
 PII_NOTICE = 'Do not upload personal information. Demo data may be deleted.'
 # Prose copied from the code. Identifiers, citations, and URLs are not in this set.
+# `quote` is not in this set: it counts only when its source type is `code`.
 PROSE_KEYS = frozenset({
-    'text', 'text_raw', 'objective_text', 'function_text', 'application_note', 'quote',
+    'text', 'text_raw', 'objective_text', 'function_text', 'application_note',
 })
 # List items under these keys are prose when they are sentences, not clause letters.
 LIST_PROSE_KEYS = frozenset({
@@ -25,7 +26,7 @@ def words(text: str) -> list[str]:
     return _WORD.findall(text)
 
 
-def snippet(text: str | None, limit: int = SNIPPET_WORD_LIMIT) -> str | None:
+def snippet(text: str | None, limit: int = SNIPPET_MAX_WORDS) -> str | None:
     """At most `limit` words. Short strings are returned unchanged."""
     if text is None:
         return None
@@ -46,18 +47,40 @@ def clip_marker(page) -> str:
     return '… [clipped, see NBC(AE) 2023]'
 
 
+def _source_type(parent) -> str | None:
+    """`code`, `user_text`, and the other fact source types, from this object or its `source`."""
+    if not isinstance(parent, dict):
+        return None
+    source = parent.get('source')
+    if isinstance(source, dict) and isinstance(source.get('type'), str):
+        return source['type']
+    kind = parent.get('type')
+    if kind in ('code', 'file', 'user_text', 'drawing', 'user_click'):
+        return kind
+    return None
+
+
 def is_nrc_string(key, text, parent=None) -> bool:
-    """True when this string is NRC code text the response budget has to count."""
+    """True when this string is NRC code text the response budget has to count.
+
+    A `quote` or a fact `value` counts only when `source.type` is `code`.
+    Applicant `user_text` and engine question strings are not code text.
+    Provision fields (`text`, intent notes, and the rest of PROSE_KEYS) count
+    when the object is not itself an applicant source.
+    """
     if not isinstance(text, str) or not key:
+        return False
+    if key in ('question', 'questions', 'prompt', 'message', 'fix_hint', 'label'):
+        return False
+    kind = _source_type(parent)
+    if key in ('quote', 'value'):
+        return kind == 'code'
+    if kind not in (None, 'code'):
         return False
     if key in PROSE_KEYS:
         return True
     if key in LIST_PROSE_KEYS and len(words(text)) >= 2:
         return True
-    if key == 'value' and isinstance(parent, dict):
-        source = parent.get('source')
-        if isinstance(source, dict) and source.get('type') == 'code':
-            return True
     return False
 
 
@@ -72,7 +95,7 @@ def _page(node: dict, inherited):
 
 class _Budget:
     def __init__(self) -> None:
-        self.left = RESPONSE_WORD_BUDGET
+        self.left = RESPONSE_NRC_MAX_WORDS
 
 
 def _mark(owners: list[dict]) -> None:
@@ -87,7 +110,7 @@ def _clip_string(text: str, page, budget: _Budget, owners: list[dict]) -> str:
     found = words(text)
     if not found:
         return text
-    room = min(SNIPPET_WORD_LIMIT, budget.left)
+    room = min(SNIPPET_MAX_WORDS, budget.left)
     if len(found) <= room:
         budget.left -= len(found)
         return text
@@ -130,6 +153,27 @@ def clip_tree(node, key: str | None = None):
     if isinstance(node, str):
         return _walk(node, key, None, _Budget(), [], None)
     return clip_response(node)
+
+
+def new_response_budget():
+    """One 75-word NRC budget shared by every snippet on a surface, including one exported PDF."""
+    return _Budget()
+
+
+def clip_snippet(text: str, *, page=None, budget=None, citation: str | None = None) -> str:
+    """At most 25 words, drawn from `budget`. Past the snippet or the budget, keep the marker, the citation, and the NRC link."""
+    if not isinstance(text, str):
+        return text
+    budget = new_response_budget() if budget is None else budget
+    clipped = _clip_string(text, page, budget, [])
+    if clipped == text:
+        return text
+    parts = [clipped]
+    if citation and citation not in clipped:
+        parts.append(citation)
+    if NRC_PUBLICATION_URL not in clipped:
+        parts.append(NRC_PUBLICATION_URL)
+    return ' '.join(parts)
 
 
 def attach_meta(payload):
