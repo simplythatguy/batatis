@@ -79,16 +79,48 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: read
-      pull-requests: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # Full history so both ends of the scanned range are present.
           fetch-depth: 0
           persist-credentials: false
-      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+      - name: Install gitleaks 8.30.1
+        run: |
+          set -euo pipefail
+          version=8.30.1
+          archive="${RUNNER_TEMP}/gitleaks.tar.gz"
+          curl -fsSL -o "${archive}" "https://github.com/gitleaks/gitleaks/releases/download/v${version}/gitleaks_${version}_linux_x64.tar.gz"
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  ${archive}" | sha256sum -c -
+          tar -xzf "${archive}" -C "${RUNNER_TEMP}" gitleaks
+          mkdir -p "${RUNNER_TEMP}/bin"
+          install -m 0755 "${RUNNER_TEMP}/gitleaks" "${RUNNER_TEMP}/bin/gitleaks"
+          echo "${RUNNER_TEMP}/bin" >> "${GITHUB_PATH}"
+          "${RUNNER_TEMP}/bin/gitleaks" version
+      - name: Scan the explicit commit range
         env:
-          # Automatic workflow token, used to read the pull request diff. Not a provider key.
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_VERSION: "8.30.1"
-          GITLEAKS_ENABLE_COMMENTS: "false"
-          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          zero=0000000000000000000000000000000000000000
+          if [ "${EVENT_NAME}" = pull_request ]; then
+            range="${PR_BASE}..${PR_HEAD}"
+          elif [ "${EVENT_NAME}" = push ] && [ "${PUSH_BEFORE}" = "${zero}" ]; then
+            echo "github.event.before is all zeros; scanning the full history of ${PUSH_SHA}"
+            gitleaks detect --redact --verbose --exit-code=2
+            exit
+          elif [ "${EVENT_NAME}" = push ]; then
+            range="${PUSH_BEFORE}..${PUSH_SHA}"
+          else
+            echo "unsupported event: ${EVENT_NAME}" >&2
+            exit 1
+          fi
+          echo "gitleaks range: ${range}"
+          git rev-parse --verify "${range%%..*}^{commit}" >/dev/null
+          git rev-parse --verify "${range##*..}^{commit}" >/dev/null
+          # Two-dot range, with no --first-parent and no --no-merges.
+          gitleaks detect --redact --verbose --exit-code=2 --log-opts="${range}"
