@@ -1,11 +1,12 @@
 {
+  "source_attribution": "Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research; see https://nrc-publications.canada.ca/ (record id 0316d953-0d55-4311-af69-cad55efec499).",
   "meta": {
     "title": "Identify regression set: plain-language applicant descriptions (manufacturer / general contractor / homebuilder)",
     "generated": "2026-10-20 (America/Edmonton)",
     "label": "model-checked, not human-verified",
     "trigger": "Unc session 5 (cold manufacturer run, PR #16 @579cd2c): identify missed case A provisions 9.27.5.1/9.27.5.3 and returned 9.29.9.3.(2).",
     "codedb_snapshot": {
-      "path": "/workspace/batatis/codedb-snapshot/codedb.sqlite",
+      "path": "/workspace/batatis/codedb-snapshot/codedb.sqlite (local, not in repo)",
       "sha256": "65e6504075167c3d12731593d57f9c58571bdf4fd5575af262011d1b18902192",
       "edition": "NBC(AE) 2023 2nd printing"
     },
@@ -124,13 +125,13 @@
         }
       ],
       "authoring": {
-        "source": "verbatim: /workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/README.md line 24 (demo script step 1, typed text)",
+        "source": "verbatim: /workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/README.md (local, not in repo) line 24 (demo script step 1, typed text)",
         "label": "model-checked, not human-verified",
         "notes": "Unc's scripted typed phrasing for case A (demo script step 1). 9.23.17.3 is confirmed gold (confirmed by Unc), pinned to Sentence 9.23.17.3.(1), p.990; codedb attribution_status is 'none' (no objective or function)."
       },
       "verification": "model-checked, not human-verified",
       "verbatim_from": {
-        "file": "/workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/README.md",
+        "file": "/workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/README.md (local, not in repo)",
         "line": 24,
         "kind": "scripted demo input; the text Mira actually typed in session 5 is not recorded"
       }
@@ -234,13 +235,13 @@
         }
       ],
       "authoring": {
-        "source": "verbatim: /workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/input/project-brief.md line 7",
+        "source": "verbatim: /workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/input/project-brief.md (local, not in repo) line 7",
         "label": "model-checked, not human-verified",
         "notes": "Verbatim line from the case A persona brief, markdown kept as written. 9.23.17.3 is confirmed gold (confirmed by Unc), pinned to Sentence 9.23.17.3.(1), p.990; codedb attribution_status is 'none' (no objective or function)."
       },
       "verification": "model-checked, not human-verified",
       "verbatim_from": {
-        "file": "/workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/input/project-brief.md",
+        "file": "/workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/input/project-brief.md (local, not in repo)",
         "line": 7,
         "kind": "persona brief text"
       }
@@ -1950,7 +1951,7 @@
             "page": 1,
             "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/57cebce9-5fe6-4583-a0bd-f2e4c7eedec9/download/ma-23-bci-005-approved-organization-qai-laboratories.pdf",
             "quote": "This interpretation recognizes QAI Laboratories as an approved organization that issues evaluation reports that may be used to determine compliance … NBC(AE).",
-            "verification": "source-PDF-checked (local copy /workspace/batatis/sources/standata/23-BCI-005.pdf), p.1",
+            "verification": "source-PDF-checked (local copy /workspace/batatis/sources/standata/23-BCI-005.pdf (local, not in repo; https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/57cebce9-5fe6-4583-a0bd-f2e4c7eedec9/download/ma-23-bci-005-approved-organization-qai-laboratories.pdf)), p.1",
             "licence": "Open Government Licence - Alberta",
             "quote_clipped": true
           }
@@ -1978,7 +1979,7 @@
             "page": 3,
             "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/01b622f0-f4a1-426d-b15f-ffc25e725949/download/ma-standata-variance-building-23-bcv-001-2024-04.pdf",
             "quote": "This VARIANCE is applicable throughout the Province of Alberta.",
-            "verification": "source-PDF-checked (local copy /workspace/batatis/sources/standata/23-BCV-001.pdf), p.3",
+            "verification": "source-PDF-checked (local copy /workspace/batatis/sources/standata/23-BCV-001.pdf (local, not in repo; https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/01b622f0-f4a1-426d-b15f-ffc25e725949/download/ma-standata-variance-building-23-bcv-001-2024-04.pdf)), p.3",
             "licence": "Open Government Licence - Alberta"
           }
         ]
@@ -1991,7 +1992,7 @@
             "page": 31,
             "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
             "quote": "An Administrator or a safety codes officer may issue a written variance … of the opinion that the variance provides approximately equivalent or greater safety performance",
-            "verification": "source-PDF-checked (local copy /workspace/batatis/research/src/leg/S01.pdf), p.31",
+            "verification": "source-PDF-checked (local copy /workspace/batatis/research/src/leg/S01.pdf (local, not in repo; https://kings-printer.alberta.ca/documents/Acts/S01.pdf)), p.31",
             "quote_clipped": true
           },
           {
@@ -1999,7 +2000,7 @@
             "page": 31,
             "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
             "quote": "A safety codes officer on issuing a variance shall notify an Administrator.",
-            "verification": "source-PDF-checked (local copy /workspace/batatis/research/src/leg/S01.pdf), p.31"
+            "verification": "source-PDF-checked (local copy /workspace/batatis/research/src/leg/S01.pdf (local, not in repo; https://kings-printer.alberta.ca/documents/Acts/S01.pdf)), p.31"
           }
         ]
       },
@@ -2011,14 +2012,14 @@
             "page": 2,
             "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf",
             "quote": "Submit a copy of each variance to the Safety Codes Council within 10 days of issuance.",
-            "verification": "source-PDF-checked (local copy /workspace/batatis/sources/IB-2025-11-18.pdf), p.2"
+            "verification": "source-PDF-checked (local copy /workspace/batatis/sources/IB-2025-11-18.pdf (local, not in repo; https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf)), p.2"
           },
           {
             "source": "IB-2025-11-18",
             "page": 2,
             "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf",
             "quote": "Document alternative solutions as required by Division C of the applicable code.",
-            "verification": "source-PDF-checked (local copy /workspace/batatis/sources/IB-2025-11-18.pdf), p.2"
+            "verification": "source-PDF-checked (local copy /workspace/batatis/sources/IB-2025-11-18.pdf (local, not in repo; https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf)), p.2"
           }
         ]
       },
@@ -2030,14 +2031,14 @@
             "page": 2,
             "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf",
             "quote": "Variances must be registered in OVP at the time of issuance or as soon as reasonably practicable thereafter.",
-            "verification": "source-PDF-checked (local copy /workspace/batatis/forms/IB-2026-10-01.pdf), p.2"
+            "verification": "source-PDF-checked (local copy /workspace/batatis/forms/IB-2026-10-01.pdf (local, not in repo; https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf)), p.2"
           },
           {
             "source": "IB-2026-10-01",
             "page": 1,
             "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf",
             "quote": "Registration of an order or variance through OVP does not constitute Council approval of that order or variance",
-            "verification": "source-PDF-checked (local copy /workspace/batatis/forms/IB-2026-10-01.pdf), p.1"
+            "verification": "source-PDF-checked (local copy /workspace/batatis/forms/IB-2026-10-01.pdf (local, not in repo; https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf)), p.1"
           }
         ]
       },
@@ -2049,7 +2050,7 @@
             "page": 51,
             "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
             "quote": "An Administrator may place an entry on the relevant information system that briefly indicates the subject-matter of a variance and the location …",
-            "verification": "source-PDF-checked (local copy /workspace/batatis/research/src/leg/S01.pdf), p.51",
+            "verification": "source-PDF-checked (local copy /workspace/batatis/research/src/leg/S01.pdf (local, not in repo; https://kings-printer.alberta.ca/documents/Acts/S01.pdf)), p.51",
             "quote_clipped": true
           }
         ]

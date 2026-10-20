@@ -103,7 +103,7 @@ patches=[dict(file=f'evals_dev/cases/{k}.json',op='add',path='/gold/identify_gol
 patches+=[dict(file=f'evals_dev/cases/{k}.json',op='add',path='/gold/identify_gold_candidates',value=[dict(division=g['division'],provision=g['provision'],role=g['role'],confidence=v['confidence'],label=LABEL) for g in v['gold_proposed']+v['competing']]) for k,v in kept.items() if k!='dev-020']
 out=dict(meta=dict(title='Identify gold v2: high-confidence group for BAT-26', generated='2026-10-20 (America/Edmonton, MDT UTC-6)', label=LABEL, supersedes='research/identify-gold-proposals.{md,json} (v1, kept unchanged)',
   codedb_snapshot=dict(path=DB,sha256=hashlib.sha256(open(DB,'rb').read()).hexdigest()), edition='NBC(AE) 2023 2nd printing', scoring='Article level (engine/identify/benchmark.py _article()); must_cite stays empty on ask cases (SCHEMA rule 3); gold goes in gold.identify_gold',
-  high_group=order, high_n=len(order), scored_n_if_adopted=11+len(order), guardrails='Golds name the provision at issue; they never say the design complies or fails. Evidence = case description + known_facts + codedb + public sources; case gold/should_cite/seed fields were not used as evidence.', builder='research/src/gold_v2_build.py'),
+  high_group=order, high_n=len(order), scored_n_if_adopted=11+len(order), guardrails='Golds name the provision at issue; they never say the design complies or fails. Evidence = case description + known_facts + codedb + public sources; case gold/should_cite/seed fields were not used as evidence.', builder='docs/research/2026-10-20-data-nerd/src/gold_v2_build.py'),
  climate_data=climate, high=high, not_high=kept, patches=patches)
 json.dump(out,open(R+'identify-gold-v2.json','w'),ensure_ascii=False,indent=2)
 # ---- md

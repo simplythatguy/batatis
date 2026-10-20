@@ -1,6 +1,8 @@
 # Human-review trigger table (Batatis)
 
-Label: **model-checked, not human-verified**. Built 2026-10-20 (MDT). Machine-readable twin: `human-review-triggers.json`. Builder: `research/src/hrt_build.py`.
+Label: **model-checked, not human-verified**. Built 2026-10-20 (MDT). Machine-readable twin: `human-review-triggers.json`. Builder: `research/src/hrt_build.py` (not committed).
+
+Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research; see https://nrc-publications.canada.ca/ (record id 0316d953-0d55-4311-af69-cad55efec499).
 
 Every quote below was string-checked. Code quotes were matched against codedb (NBC(AE) 2023, 2nd printing; snapshot sha256 `65e650407516…`). Every other quote was matched against `pdftotext` of the local copy of the cited PDF, with the page found automatically. Page numbers are PDF page numbers. Internal-only appeal decisions are not included in this public variant.
 
@@ -191,7 +193,7 @@ Not mandatory (codedb-only):
   > Where the conditions in Sentence (1) are exceeded for wood constructions, the design of the framing and fastening shall conform to Subsection 4.3.1.
 - NBC(AE) 2023, 2nd printing, Div B Sentence 9.4.2.2.(3), PDF p.838 (https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en). Verification: codedb-checked, 2nd printing, PDF p.838.
   > Bow string, arch or semi-circular roof trusses having an unsupported span greater than 6 m shall be designed in conformance with the snow load requirements …
-- **Notes:** Full list of Part 9 sentences pointing to Part 4/Section 4.x found by SQL LIKE (33 hits) is in research/src/hrt_part9_part4.txt.
+- **Notes:** Full list of Part 9 sentences pointing to Part 4/Section 4.x found by SQL LIKE (33 hits) is in `research/src/hrt_part9_part4.txt` (not committed).
 - **Engine today:** NOT covered as facts.
 
 ### HR-08: Wood roof trusses (Part 9): truss design and interconnections need a registered engineering professional.
@@ -619,5 +621,5 @@ This section is a product feature spec, not a judging criterion. The challenge b
 
 `python -m codedb validate human-review-triggers.md` (public variant): 0 errors, 2 warnings (unbound source-PDF pages for non-code documents). Internal-only appeal quotes are not included in this variant.
 
-All remaining quotes were string-checked by `src/hrt_build.py`: code quotes against codedb, and everything else against `pdftotext` of the source PDF.
+All remaining quotes were string-checked by `research/src/hrt_build.py` (not committed): code quotes against codedb, and everything else against `pdftotext` of the source PDF.
 

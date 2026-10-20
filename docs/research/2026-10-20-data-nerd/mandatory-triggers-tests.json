@@ -1,4 +1,5 @@
 {
+  "source_attribution": "Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research; see https://nrc-publications.canada.ca/ (record id 0316d953-0d55-4311-af69-cad55efec499).",
   "generated": "2026-10-20 (America/Edmonton)",
   "label": "model-checked, not human-verified",
   "purpose": "Karen rubric gap #5 (Recommendations): mandatory-trigger sourcing and drop-in tests for Backy's #26/#30",

@@ -1,12 +1,14 @@
 # Carlos S1 backing: variance vs redesign, sprinkler "exempt", fact-extraction regression cases
 
-**Label: model-checked, not human-verified.** Generated 2026-10-20 (America/Edmonton, MDT UTC-6) by Data Nerd. Public sources only. Codedb: NBC(AE) 2023 2nd printing, sha256 `65e650407516…`. Builder: `research/src/carlos_s1_build.py` (every quote is string-matched against codedb or pdftotext; the build fails on a mismatch). Report: `/workspace/unc-reports/session3-carlos-gc.md (S1 issues 1-3 at lines 8-10)`.
+**Label: model-checked, not human-verified.** Generated 2026-10-20 (America/Edmonton, MDT UTC-6) by Data Nerd. Public sources only. Codedb: NBC(AE) 2023 2nd printing, sha256 `65e650407516…`. Builder: `docs/research/2026-10-20-data-nerd/src/carlos_s1_build.py` (every quote is string-matched against codedb or pdftotext; the build fails on a mismatch). Report: `/workspace/unc-reports/session3-carlos-gc.md (local, not in repo) (S1 issues 1-3 at lines 8-10)`.
+
+Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research; see https://nrc-publications.canada.ca/ (record id 0316d953-0d55-4311-af69-cad55efec499).
 
 ## 1. Variance vs redesign: decision rule
 
 **App answer:** Two routes; the officer decides. (1) Replace or repair with a tested, listed firestop system for the actual pipe and gap — the code's acceptable-solution route (Div A 1.2.1.1.(1)(a)); the inspector or safety codes officer confirms it. (2) If no tested system fits, propose an alternative solution with the documents in Div C 2.3.1.1 and request a variance; the safety codes officer decides (SCA s.38(1)), and installed work stays at risk until then. Batatis can't tell you either route will be accepted.
 
-*Wording: Karen review, /workspace/karen/pr-reviews.md "Carlos S1 backing" (Oct 20, 2026 ~2:31 PM MDT), verbatim.*
+*Wording: Karen review, /workspace/karen/pr-reviews.md (local, not in repo) "Carlos S1 backing" (Oct 20, 2026 ~2:31 PM MDT), verbatim.*
 
 - Step 1 (route 1): Show the Division B acceptable solution that governs the item. For Carlos that is a tested, listed CAN/ULC-S115 firestop system for the actual pipe and gap. Replacing or repairing to it is the acceptable-solution route (Div A 1.2.1.1.(1)(a)). The inspector or safety codes officer confirms it; the app never states that the work complies.
 - Step 2: Only where the acceptable solution cannot be met (no tested system fits the field condition) is an alternative solution the route, under Div A 1.2.1.1.(1)(b). It must reach at least the performance required "in the areas defined by the objectives and functional statements attributed to the applicable acceptable solutions".
@@ -50,7 +52,7 @@
 
 ## 2. The sprinkler 'exempt' claim
 
-Report: `/workspace/unc-reports/session3-carlos-gc.md` line 9: `2. The sprinkler "exempt" claim isn't challenged; 3.1.9.4.(1) and 9.10.9.9.(3) show in search but aren't connected to the claim or to the sealant around the sprinkler pipes. (Backy)`
+Report: `/workspace/unc-reports/session3-carlos-gc.md (local, not in repo)` line 9: `2. The sprinkler "exempt" claim isn't challenged; 3.1.9.4.(1) and 9.10.9.9.(3) show in search but aren't connected to the claim or to the sealant around the sprinkler pipes. (Backy)`
 
 - `evals/demo-cases/b-contractor-firestop-nonconformance/input/project-brief.md @ simplythatguy/batatis@914b8ec` line 20: `The sprinkler fitter used the same sealant around the sprinkler branch lines. The sub says sprinklers are "exempt".`
 - `evals/demo-cases/b-contractor-firestop-nonconformance/input/ncr-firestop-EXAMPLE.md @ simplythatguy/batatis@914b8ec` line 13: `| L3–L4 | Sprinkler branch lines (steel) | 22 | Rated floor | Same sealant | **Not assessed:** inspector asks the design team to confirm treatment |`

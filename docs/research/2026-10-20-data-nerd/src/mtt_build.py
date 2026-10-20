@@ -150,7 +150,7 @@ out = {'generated': '2026-10-20 (America/Edmonton)', 'label': 'model-checked, no
 json.dump(out, open(R + '/mandatory-triggers-tests.json', 'w'), ensure_ascii=False, indent=2)
 # markdown
 L = ['# Mandatory human-review triggers: sourcing and drop-in tests', '',
-     'Label: **model-checked, not human-verified**. Built 2026-10-20 (America/Edmonton) by `research/src/mtt_build.py`. Machine-readable: `mandatory-triggers-tests.json`.', '',
+     'Label: **model-checked, not human-verified**. Built 2026-10-20 (America/Edmonton) by `docs/research/2026-10-20-data-nerd/src/mtt_build.py`. Machine-readable: `mandatory-triggers-tests.json`.', '',
      "Purpose: Karen's rubric gap #5 (Recommendations). For triggers HR-02, HR-05, HR-06, HR-07, HR-30 and HR-32 of `human-review-triggers.json`: the exact basis, whether the text makes it mandatory, the facts that fire it and the near-misses that don't, and drop-in tests for Backy's #26/#30.", '',
      '**Checks:** every code quote is an exact substring of codedb text (NBC(AE) 2023 2nd printing) with its PDF page. Safety Codes Act quotes are checked against page 31 of the Act PDF. Every quote is 25 words or fewer.', '',
      '**Guardrails in every test:** the expected route is human review by the named professional or officer. No test expects a compliance verdict. No README, expected/ or keys/ content was used.', '',

@@ -168,7 +168,7 @@ fx=[
 for f in fx: f['label']=LABEL
 
 if ERR: print('\n'.join(ERR)); sys.exit(1)
-out=dict(meta=dict(title='Carlos S1 backing: variance vs redesign, sprinkler "exempt", fact-extraction regression cases', generated='2026-10-20 (America/Edmonton, MDT UTC-6)', label=LABEL, persona='Carlos Mendes (GC, Calgary), case B', report='/workspace/unc-reports/session3-carlos-gc.md (S1 issues 1-3 at lines 8-10)', codedb_snapshot=dict(path=DB, sha256=hashlib.sha256(open(DB,'rb').read()).hexdigest(), edition='NBC(AE) 2023 2nd printing'), public_sources_only=True, builder='research/src/carlos_s1_build.py'),
+out=dict(meta=dict(title='Carlos S1 backing: variance vs redesign, sprinkler "exempt", fact-extraction regression cases', generated='2026-10-20 (America/Edmonton, MDT UTC-6)', label=LABEL, persona='Carlos Mendes (GC, Calgary), case B', report='/workspace/unc-reports/session3-carlos-gc.md (S1 issues 1-3 at lines 8-10)', codedb_snapshot=dict(path=DB, sha256=hashlib.sha256(open(DB,'rb').read()).hexdigest(), edition='NBC(AE) 2023 2nd printing'), public_sources_only=True, builder='docs/research/2026-10-20-data-nerd/src/carlos_s1_build.py'),
  part1_variance_vs_redesign=part1, part2_sprinkler_exempt=part2, part3_fact_extraction_cases=fx)
 json.dump(out,open(R/'carlos-s1-backing.json','w'),ensure_ascii=False,indent=2)
 print('OK json', sum(len(v) for v in P2c.values()), len(part1['citations']), len(fx))

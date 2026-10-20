@@ -2,6 +2,8 @@
 
 Label: **model-checked, not human-verified**. Written 2026-10-20, about 2:45 PM MDT (UTC-6), by Data Nerd. Read-only: the GitHub repo (simplythatguy/batatis), local research files, and public sources. Nobody was contacted and nothing was posted.
 
+Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research; see https://nrc-publications.canada.ca/ (record id 0316d953-0d55-4311-af69-cad55efec499).
+
 **Scope:** IP and BP are docs, out of scope; X Factor recorded as observations only (no pass/fail).
 
 **Where each fact comes from**
@@ -9,7 +11,7 @@ Label: **model-checked, not human-verified**. Written 2026-10-20, about 2:45 PM 
   - `evals/demo-cases/{a,b,c}-*/input/*`
   - `engine/export/field_maps/scc_2026-10.json`
   - PR descriptions #11, #12, #16, #21, #23–#26, #30–#34
-- **Unc reports in `/workspace/unc-reports/`:**
+- **Unc reports in `/workspace/unc-reports/ (local, not in repo)`:**
   - session 4 (Dana, #16 @579cd2c)
   - session 5 (Mira, #16 @579cd2c)
   - session 3 (Carlos, #16 @579cd2c, plus BAT-55 at @27bec3e)
@@ -273,7 +275,7 @@ The app routes each of these to a person and states none of them as satisfied.
 - **Smoke alarms:** locations not yet shown.
 - **owner_rep_name / mailing_address:** open.
 
-**C2. Gold citations (confirmed by Karen).** Code text is from codedb (2nd printing). The STANDATA are the local copies in `/workspace/batatis/sources/standata/`.
+**C2. Gold citations (confirmed by Karen).** Code text is from codedb (2nd printing). The STANDATA are the local copies in `/workspace/batatis/sources/standata/ (local, not in repo)`.
 
 | Provision | PDF page | Quote (≤25 words) |
 |---|---|---|

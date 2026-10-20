@@ -1,22 +1,23 @@
 {
+  "source_attribution": "Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research; see https://nrc-publications.canada.ca/ (record id 0316d953-0d55-4311-af69-cad55efec499).",
   "meta": {
     "title": "Carlos S1 backing: variance vs redesign, sprinkler \"exempt\", fact-extraction regression cases",
     "generated": "2026-10-20 (America/Edmonton, MDT UTC-6)",
     "label": "model-checked, not human-verified",
     "persona": "Carlos Mendes (GC, Calgary), case B",
-    "report": "/workspace/unc-reports/session3-carlos-gc.md (S1 issues 1-3 at lines 8-10)",
+    "report": "/workspace/unc-reports/session3-carlos-gc.md (local, not in repo) (S1 issues 1-3 at lines 8-10)",
     "codedb_snapshot": {
-      "path": "/workspace/batatis/codedb-snapshot/codedb.sqlite",
+      "path": "/workspace/batatis/codedb-snapshot/codedb.sqlite (local, not in repo)",
       "sha256": "65e6504075167c3d12731593d57f9c58571bdf4fd5575af262011d1b18902192",
       "edition": "NBC(AE) 2023 2nd printing"
     },
     "public_sources_only": true,
-    "builder": "research/src/carlos_s1_build.py"
+    "builder": "docs/research/2026-10-20-data-nerd/src/carlos_s1_build.py"
   },
   "part1_variance_vs_redesign": {
     "question": "When does an Alberta applicant need an alternative solution / variance, and when should they just change the design to meet the acceptable solutions?",
     "app_answer": "Two routes; the officer decides. (1) Replace or repair with a tested, listed firestop system for the actual pipe and gap — the code's acceptable-solution route (Div A 1.2.1.1.(1)(a)); the inspector or safety codes officer confirms it. (2) If no tested system fits, propose an alternative solution with the documents in Div C 2.3.1.1 and request a variance; the safety codes officer decides (SCA s.38(1)), and installed work stays at risk until then. Batatis can't tell you either route will be accepted.",
-    "app_answer_source": "Karen review, /workspace/karen/pr-reviews.md \"Carlos S1 backing\" (Oct 20, 2026 ~2:31 PM MDT), verbatim",
+    "app_answer_source": "Karen review, /workspace/karen/pr-reviews.md (local, not in repo) \"Carlos S1 backing\" (Oct 20, 2026 ~2:31 PM MDT), verbatim",
     "rule": [
       "Step 1 (route 1): Show the Division B acceptable solution that governs the item. For Carlos that is a tested, listed CAN/ULC-S115 firestop system for the actual pipe and gap. Replacing or repairing to it is the acceptable-solution route (Div A 1.2.1.1.(1)(a)). The inspector or safety codes officer confirms it; the app never states that the work complies.",
       "Step 2: Only where the acceptable solution cannot be met (no tested system fits the field condition) is an alternative solution the route, under Div A 1.2.1.1.(1)(b). It must reach at least the performance required \"in the areas defined by the objectives and functional statements attributed to the applicable acceptable solutions\".",
@@ -133,7 +134,7 @@
       {
         "source": "Safety Codes Act, RSA 2000, c S-1 (King's Printer, current as of December 1, 2025)",
         "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
-        "local": "/workspace/batatis/research/src/leg/S01.pdf",
+        "local": "/workspace/batatis/research/src/leg/S01.pdf (local, not in repo; https://kings-printer.alberta.ca/documents/Acts/S01.pdf)",
         "pdf_page": 31,
         "quote": "An Administrator or a safety codes officer may issue a written variance … of the opinion that the variance provides approximately equivalent or greater safety performance",
         "why": "SCA s.38(1) variance basis",
@@ -143,7 +144,7 @@
       {
         "source": "Safety Codes Act, RSA 2000, c S-1 (King's Printer, current as of December 1, 2025)",
         "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
-        "local": "/workspace/batatis/research/src/leg/S01.pdf",
+        "local": "/workspace/batatis/research/src/leg/S01.pdf (local, not in repo; https://kings-printer.alberta.ca/documents/Acts/S01.pdf)",
         "pdf_page": 32,
         "quote": "An applicant who receives a notice referred to in subsection (6) may, within 30 days … appeal the refusal to the Council",
         "why": "SCA s.38(7) appeal of refusal",
@@ -153,7 +154,7 @@
       {
         "source": "International Firestop Council, IFC EJ Guidelines (Rev. Feb 2024) - industry guidance, not code",
         "url": "https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf",
-        "local": "/workspace/batatis/sources/ifc/ifc-ej-guidelines-2024-02.pdf",
+        "local": "/workspace/batatis/sources/ifc/ifc-ej-guidelines-2024-02.pdf (local, not in repo; https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf)",
         "pdf_page": 2,
         "quote": "Not be used in lieu of tested systems when available",
         "why": "IFC EJ guideline 1",
@@ -162,7 +163,7 @@
       {
         "source": "International Firestop Council, IFC EJ Guidelines (Rev. Feb 2024) - industry guidance, not code",
         "url": "https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf",
-        "local": "/workspace/batatis/sources/ifc/ifc-ej-guidelines-2024-02.pdf",
+        "local": "/workspace/batatis/sources/ifc/ifc-ej-guidelines-2024-02.pdf (local, not in repo; https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf)",
         "pdf_page": 2,
         "quote": "… issued only by a firestop manufacturer’s qualified technical personnel or in concert with the manufacturer … registered Professional Engineer … or an independent testing agency",
         "why": "IFC EJ guideline 2 (who may issue)",
@@ -172,7 +173,7 @@
       {
         "source": "International Firestop Council, IFC EJ Guidelines (Rev. Feb 2024) - industry guidance, not code",
         "url": "https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf",
-        "local": "/workspace/batatis/sources/ifc/ifc-ej-guidelines-2024-02.pdf",
+        "local": "/workspace/batatis/sources/ifc/ifc-ej-guidelines-2024-02.pdf (local, not in repo; https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf)",
         "pdf_page": 3,
         "quote": "Include dates of issue and authorization signature as well as the issuer’s name, address and telephone number",
         "why": "IFC EJ content item",
@@ -181,7 +182,7 @@
       {
         "source": "International Firestop Council, IFC EJ Guidelines (Rev. Feb 2024) - industry guidance, not code",
         "url": "https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf",
-        "local": "/workspace/batatis/sources/ifc/ifc-ej-guidelines-2024-02.pdf",
+        "local": "/workspace/batatis/sources/ifc/ifc-ej-guidelines-2024-02.pdf (local, not in repo; https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf)",
         "pdf_page": 3,
         "quote": "Reference tested system(s) upon which design (EJ or TE) is based on",
         "why": "IFC EJ content item",
@@ -190,7 +191,7 @@
       {
         "source": "International Firestop Council, IFC EJ Guidelines (Rev. Feb 2024) - industry guidance, not code",
         "url": "https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf",
-        "local": "/workspace/batatis/sources/ifc/ifc-ej-guidelines-2024-02.pdf",
+        "local": "/workspace/batatis/sources/ifc/ifc-ej-guidelines-2024-02.pdf (local, not in repo; https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf)",
         "pdf_page": 3,
         "quote": "Identify the job name, project location and firm EJ (TE) is issued to",
         "why": "IFC EJ content item",
@@ -258,7 +259,7 @@
   },
   "part2_sprinkler_exempt": {
     "claim_in_report": {
-      "file": "/workspace/unc-reports/session3-carlos-gc.md",
+      "file": "/workspace/unc-reports/session3-carlos-gc.md (local, not in repo)",
       "line": 9,
       "text": "2. The sprinkler \"exempt\" claim isn't challenged; 3.1.9.4.(1) and 9.10.9.9.(3) show in search but aren't connected to the claim or to the sealant around the sprinkler pipes. (Backy)"
     },
@@ -630,7 +631,7 @@
         {
           "source": "Safety Codes Council, \"National Building Code - 2023 Alberta Edition, Part 3 - Code update information\"",
           "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/PI/National%20Building%20Code%20-%202023%20Alberta%20Edition_Part%203.pdf",
-          "local": "/workspace/batatis/sources/nbcae-updates/nbcae2023-part3-update.pdf",
+          "local": "/workspace/batatis/sources/nbcae-updates/nbcae2023-part3-update.pdf (local, not in repo; https://ebs.safetycodes.ab.ca/documents/webdocs/PI/National%20Building%20Code%20-%202023%20Alberta%20Edition_Part%203.pdf)",
           "pdf_page": 12,
           "quote": "AB specific Sentences (3) and (4) deleted; harmonized with NBC.",
           "why": "historical context: entry for the \"Automatic Sprinkler System Required\" Article, previous Alberta Edition to 2023; the Alberta-specific sprinkler sentences were removed",

@@ -1,11 +1,12 @@
 {
+  "source_attribution": "Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research; see https://nrc-publications.canada.ca/ (record id 0316d953-0d55-4311-af69-cad55efec499).",
   "meta": {
     "title": "Identify gold v2: high-confidence group for BAT-26",
     "generated": "2026-10-20 (America/Edmonton, MDT UTC-6)",
     "label": "model-checked, not human-verified",
     "supersedes": "research/identify-gold-proposals.{md,json} (v1, kept unchanged)",
     "codedb_snapshot": {
-      "path": "/workspace/batatis/codedb-snapshot/codedb.sqlite",
+      "path": "/workspace/batatis/codedb-snapshot/codedb.sqlite (local, not in repo)",
       "sha256": "65e6504075167c3d12731593d57f9c58571bdf4fd5575af262011d1b18902192"
     },
     "edition": "NBC(AE) 2023 2nd printing",
@@ -20,11 +21,11 @@
     "high_n": 5,
     "scored_n_if_adopted": 16,
     "guardrails": "Golds name the provision at issue; they never say the design complies or fails. Evidence = case description + known_facts + codedb + public sources; case gold/should_cite/seed fields were not used as evidence.",
-    "builder": "research/src/gold_v2_build.py"
+    "builder": "docs/research/2026-10-20-data-nerd/src/gold_v2_build.py"
   },
   "climate_data": {
     "source": "NBC(AE) 2023 2nd printing, Division B Appendix C, Table C-2 \"Climatic Design Data for Selected Locations in Alberta\" and Table C-3 \"Seismic Design Data for Selected Locations in Alberta for Part 9 Design\"",
-    "pdf": "/workspace/batatis-pr16/reference/codes/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.pdf",
+    "pdf": "/workspace/batatis-pr16/reference/codes/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.pdf (local, not in repo; https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499)",
     "pdf_sha256_prefix": "3d45376d6c71d54b",
     "table_C2_pages": [
       667,

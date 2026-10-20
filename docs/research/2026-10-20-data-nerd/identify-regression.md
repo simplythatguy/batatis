@@ -1,10 +1,12 @@
 # Identify regression set (plain-language applicant descriptions)
 
-Label: **model-checked, not human-verified**. Built 2026-10-20 (America/Edmonton). Machine-readable: `identify-regression.json`. Builders: `research/src/idr_build.py` (cases) and `research/src/idr_pav.py` (product-approval note).
+Label: **model-checked, not human-verified**. Built 2026-10-20 (America/Edmonton). Machine-readable: `identify-regression.json`. Builders: `docs/research/2026-10-20-data-nerd/src/idr_build.py` (cases) and `docs/research/2026-10-20-data-nerd/src/idr_pav.py` (product-approval note).
+
+Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research; see https://nrc-publications.canada.ca/ (record id 0316d953-0d55-4311-af69-cad55efec499).
 
 **Why:** Unc session 5 (cold manufacturer run, PR #16 @579cd2c): identify missed case A provisions 9.27.5.1/9.27.5.3 and returned 9.29.9.3.(2).
 
-**Unc's exact phrasing.** Session 5 (`/workspace/unc-reports/session5-mira-pr16-579cd2c.md`) does **not** record the text Mira typed. The closest verbatim sources are in case A, `/workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/`: the scripted demo input (`README.md` line 24) is idr-001, and the persona brief (`input/project-brief.md` line 7) is idr-002. Local case A is the NailBase insulating-sheathing case. Its shortlist is 9.27.5.1.(1)/(2), with furring 9.27.5.3.(1)/(3) as the benchmark alternative. The "S115:2018" mentioned in the request belongs to case B (firestop), not case A. No case pinned to 9.27.5.3.(3)(b) was found locally, so idr-003 is a new furring case built around that pin.
+**Unc's exact phrasing.** Session 5 (`/workspace/unc-reports/session5-mira-pr16-579cd2c.md (local, not in repo)`) does **not** record the text Mira typed. The closest verbatim sources are in case A, `/workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/ (local, not in repo)`: the scripted demo input (`README.md` line 24) is idr-001, and the persona brief (`input/project-brief.md` line 7) is idr-002. Local case A is the NailBase insulating-sheathing case. Its shortlist is 9.27.5.1.(1)/(2), with furring 9.27.5.3.(1)/(3) as the benchmark alternative. The "S115:2018" mentioned in the request belongs to case B (firestop), not case A. No case pinned to 9.27.5.3.(3)(b) was found locally, so idr-003 is a new furring case built around that pin.
 
 **9.23.17.3 (idr-001, idr-002).** Confirmed gold: Unc confirmed it on Oct 20, 2026 (relayed by the parent agent). It is pinned to Sentence 9.23.17.3.(1), PDF p.990, and the quote was checked against codedb: "Gypsum sheathing, rigid insulation and fibreboard shall not be used for the attachment of cladding materials." codedb `attribution_status` for 9.23.17.3.(1) is `none` (root_method `not_determined`), so no objective or function is attributed and no Section C row can be looked up for it.
 

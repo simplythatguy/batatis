@@ -1,6 +1,8 @@
 # Mandatory human-review triggers: sourcing and drop-in tests
 
-Label: **model-checked, not human-verified**. Built 2026-10-20 (America/Edmonton) by `research/src/mtt_build.py`. Machine-readable: `mandatory-triggers-tests.json`.
+Label: **model-checked, not human-verified**. Built 2026-10-20 (America/Edmonton) by `docs/research/2026-10-20-data-nerd/src/mtt_build.py`. Machine-readable: `mandatory-triggers-tests.json`.
+
+Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research; see https://nrc-publications.canada.ca/ (record id 0316d953-0d55-4311-af69-cad55efec499).
 
 Purpose: Karen's rubric gap #5 (Recommendations). For triggers HR-02, HR-05, HR-06, HR-07, HR-30 and HR-32 of `human-review-triggers.json`: the exact basis, whether the text makes it mandatory, the facts that fire it and the near-misses that don't, and drop-in tests for Backy's #26/#30.
 

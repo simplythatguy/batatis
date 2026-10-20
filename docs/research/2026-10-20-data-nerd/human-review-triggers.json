@@ -1,4 +1,5 @@
 {
+  "source_attribution": "Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research; see https://nrc-publications.canada.ca/ (record id 0316d953-0d55-4311-af69-cad55efec499).",
   "generated": "2026-10-20",
   "label": "model-checked, not human-verified",
   "codedb_sha256": "65e6504075167c3d12731593d57f9c58571bdf4fd5575af262011d1b18902192",
@@ -544,7 +545,7 @@
           "quote_clipped": true
         }
       ],
-      "notes": "Full list of Part 9 sentences pointing to Part 4/Section 4.x found by SQL LIKE (33 hits) is in research/src/hrt_part9_part4.txt.",
+      "notes": "Full list of Part 9 sentences pointing to Part 4/Section 4.x found by SQL LIKE (33 hits) is in `research/src/hrt_part9_part4.txt` (not committed).",
       "engine_coverage": "NOT covered as facts.",
       "verification": [
         "codedb-checked, 2nd printing, PDF p.831",

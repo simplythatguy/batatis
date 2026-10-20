@@ -2,6 +2,8 @@
 
 **Label: model-checked, not human-verified.** Generated 2026-10-20 (America/Edmonton, MDT UTC-6) by Data Nerd. Read-only. Codedb NBC(AE) 2023 2nd printing (sha256 `65e650407516…`). v1 (`identify-gold-proposals.*`) is kept unchanged.
 
+Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research; see https://nrc-publications.canada.ca/ (record id 0316d953-0d55-4311-af69-cad55efec499).
+
 **High group: n = 5** (dev-006, dev-009, dev-010, dev-011, dev-015). If Backy adopts it, the scored set grows from 11 to 16. Scoring is at Article level. `must_cite` stays empty on these ask cases (SCHEMA rule 3); the gold goes in `gold.identify_gold`.
 
 **Guardrails.** Golds name the provision at issue; they never say the design complies or fails. Evidence = case description + known_facts + codedb + public sources; case gold/should_cite/seed fields were not used as evidence.
