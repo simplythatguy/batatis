@@ -80,14 +80,18 @@ def test_claude_verifier_uses_full_text_and_checks_quotes():
     assert arts['9.9.10.1.']['text'][-200:] in sent['messages'][0]['content']   # full text, not cut at 700
 
 
-@pytest.mark.skipif(not os.environ.get('ANTHROPIC_API_KEY'), reason='ANTHROPIC_API_KEY not set')
+@pytest.mark.skipif(not os.environ.get('ANTHROPIC_API_KEY') or os.environ.get('BATATIS_LIVE') != '1'
+                    or not os.environ.get('OPENAI_API_KEY'),
+                    reason='needs BATATIS_LIVE=1, OPENAI_API_KEY, and ANTHROPIC_API_KEY')
 def test_live_claude_verifier():
     case = next(c for c in json.load(open(CASES)) if c['id'] == 'standata-nbc2023-variance-23-bcv-001')
     res = ClaudeVerifier(DB).verify(case['query'], ['9.8.8.1.', '9.9.10.1.', '9.7.2.1.', '9.6.1.3.'])
     assert res.picks and {p.article for p in res.picks} <= {'9.8.8.1.', '9.9.10.1.', '9.7.2.1.', '9.6.1.3.'}
 
 
-@pytest.mark.skipif(os.environ.get('BATATIS_LIVE_JEV') != '1', reason='set BATATIS_LIVE_JEV=1 for a live Jev call')
+@pytest.mark.skipif(os.environ.get('BATATIS_LIVE_JEV') != '1' or os.environ.get('BATATIS_LIVE') != '1'
+                    or not os.environ.get('OPENAI_API_KEY'),
+                    reason='set BATATIS_LIVE_JEV=1, BATATIS_LIVE=1, and OPENAI_API_KEY for a live Jev call')
 def test_live_jev_screen():
     case = next(c for c in json.load(open(CASES)) if c['id'] == 'standata-nbc2023-variance-23-bcv-001')
     res = identify(case['query'], DB)

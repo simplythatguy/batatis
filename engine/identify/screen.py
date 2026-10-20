@@ -12,6 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from typing import Any, Callable, Mapping
 
+from ..llm_gate import OfflineLLM
 from .corpus import card
 
 JEV_MODEL = 'jev-1.13.0'
@@ -24,11 +25,24 @@ Ask = Callable[[Any, Mapping[str, Mapping[str, Any]], float], Mapping[str, Any]]
 
 
 def jev_ask(model: str = JEV_MODEL) -> Ask:
-    """The live adapter: vendored jevkit client, pinned model. Needs SSL_CERT_FILE=/etc/ssl/cert.pem on this Mac."""
+    """The live adapter: vendored jevkit client, pinned model. Needs SSL_CERT_FILE=/etc/ssl/cert.pem on this Mac.
+
+    The call goes through llm_gate. Offline (the default) raises OfflineLLM before any network use.
+    """
+    from ..llm_gate import OfflineLLM, authorize, record
     from .jevkit import client
 
     def ask(state, questions, timeout):
-        return client.ask(state, questions, timeout=timeout, model=model, provider=JEV_PROVIDER)
+        encoded = json.dumps(state)
+        decision = authorize(model=model, max_input_tokens=max(1, len(encoded) // 4),
+                             max_output_tokens=200 * max(1, len(questions)))
+        if not decision.allowed:
+            raise OfflineLLM(decision.source)
+        rep = client.ask(state, questions, timeout=timeout, model=model, provider=JEV_PROVIDER)
+        usage = rep.get('usage') or {}
+        record(model=model, input_tokens=int(usage.get('input_tokens') or 0),
+               output_tokens=int(usage.get('output_tokens') or 0), reserved_usd=decision.reserved_usd)
+        return rep
     return ask
 
 
@@ -97,6 +111,8 @@ class Judge:
                         for i, (a, _) in enumerate(batch):
                             probs[a] = rep['answers'][f'q{i}']['noul']
                     return
+                except OfflineLLM:
+                    raise
                 except Exception:
                     with self._lock:
                         self.usage.errors += 1

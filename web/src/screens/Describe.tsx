@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { EngineError, PDF_MAX_BYTES, PDF_TOO_LARGE, engine } from "../api/client";
 import { DetailFields, FactLedger, QuestionChips } from "../case-parts";
 import { GapStrip, Icon, PanelHeader } from "../components";
 import { DETAIL_FIELDS, factFor, valueText } from "../model";
@@ -10,12 +11,22 @@ function DropZone() {
   const [over, setOver] = useState(false);
   const [error, setError] = useState("");
 
-  function take(list: FileList | null) {
+  async function take(list: FileList | null) {
     if (!list) return;
     const all = [...list];
     const pdfs = all.filter((f) => f.type === "application/pdf" || f.name.toLowerCase().endsWith(".pdf"));
-    setError(pdfs.length < all.length ? "Only PDF files for now. Other formats were skipped." : "");
-    if (pdfs.length) dispatch({ type: "addFiles", names: pdfs.map((f) => f.name) });
+    const oversized = pdfs.filter((f) => f.size > PDF_MAX_BYTES);
+    const accepted = pdfs.filter((f) => f.size <= PDF_MAX_BYTES);
+    if (oversized.length) setError(PDF_TOO_LARGE);
+    else setError(pdfs.length < all.length ? "Only PDF files for now. Other formats were skipped." : "");
+    if (accepted.length) dispatch({ type: "addFiles", names: accepted.map((f) => f.name) });
+    for (const file of accepted) {
+      try {
+        await engine.uploadPdf(c.id, file);
+      } catch (e) {
+        if (e instanceof EngineError && e.status === 413) setError(e.detail || PDF_TOO_LARGE);
+      }
+    }
   }
 
   return (

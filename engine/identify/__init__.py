@@ -11,6 +11,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
+from ..llm_gate import OfflineLLM
 from .corpus import articles, bm25_rank
 from .screen import JEV_MODEL, Judge
 
@@ -31,13 +32,20 @@ def identify(query: str, db_path: Path | str, judge: Judge | None = None, *, rer
     arts = articles(Path(db_path))
     ids = [a for a, v in arts.items() if parts is None or v['part'] in parts]
     judge = judge or Judge()
-    t0 = time.monotonic()
-    screen = judge.judge(query, arts, ids)
-    t1 = time.monotonic()
-    top = sorted(ids, key=lambda a: -screen[a])[:rerank_n]
-    rerank_requests_before = judge.usage.requests
-    rer = judge.judge(query, arts, top)
-    t2 = time.monotonic()
+    try:
+        t0 = time.monotonic()
+        screen = judge.judge(query, arts, ids)
+        t1 = time.monotonic()
+        top = sorted(ids, key=lambda a: -screen[a])[:rerank_n]
+        rerank_requests_before = judge.usage.requests
+        rer = judge.judge(query, arts, top)
+        t2 = time.monotonic()
+    except OfflineLLM as exc:
+        ranked = [(article, 0.0) for article in bm25_rank(query, Path(db_path))[:rerank_n]]
+        return Identification(ranked=ranked, screen={}, usage={
+            'source': exc.source, 'requests': 0, 'input_tokens': 0, 'output_tokens': 0, 'errors': 0,
+            'rerank_requests': 0, 'latency_p50_ms': None, 'latency_max_ms': None},
+            screen_seconds=0.0, rerank_seconds=0.0, model='offline')
     usage = judge.usage.summary() | {'rerank_requests': judge.usage.requests - rerank_requests_before}
     return Identification(ranked=sorted(((a, rer[a]) for a in top), key=lambda x: -x[1]), screen=screen,
                           usage=usage, screen_seconds=t1 - t0, rerank_seconds=t2 - t1, model=JEV_MODEL)
