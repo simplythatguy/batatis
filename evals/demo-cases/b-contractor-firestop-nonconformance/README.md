@@ -2,6 +2,8 @@
 
 > **EXAMPLE DATA.** The companies, people, address, products, listings and letters are all fictional. Code citations are real and verified; see `../sources.md`.
 
+This is a demo case. No loader reads it yet. Only files in `input/` are ever uploaded to the tool. This README contains the demo script and expected answers, so it is not uploaded. `expected/` is not uploaded. `presenter/known-gaps.md` is the presenter answer key.
+
 ## Persona
 **Carlos Mendes**, Project Manager at **Northgate Example Builders Ltd. (fictional)**, Calgary. He has 20 years in construction and knows the schedule cold. He has never written a variance. Drywall close-in is booked in 9 days. His opening position: *"Can we just get a variance and keep going?"*
 
@@ -31,5 +33,6 @@
 8. **SCO role:** upload the draft → completeness review.
 
 ## Files
-- `input/`: project brief (md, html, pdf), NCR from the firestop inspector (EXAMPLE), manufacturer EJ draft (EXAMPLE), architect email (EXAMPLE), penetration schedule, known gaps
+- `input/`: the only files uploaded to the tool — project brief (md, html, pdf), NCR from the firestop inspector (EXAMPLE), manufacturer EJ draft (EXAMPLE), architect email (EXAMPLE), penetration schedule
+- `presenter/known-gaps.md`: presenter answer key (never upload)
 - `expected/`: intake summary, article shortlist, Section A–D draft, evidence plan, completeness checklist, SCO review, must-not

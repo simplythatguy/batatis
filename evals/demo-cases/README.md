@@ -1,5 +1,7 @@
 # Batatis demo cases: General Applicability (backlog #7)
 
+These are **demo cases** (demo materials). No loader reads `evals/demo-cases/` yet.
+
 > **Edition caveat:** the cases were checked against the **NBC(AE) 2023 1st printing**. The 2nd printing (Aug 17, 2026) is in force; its wording and page numbers are unverified. The code is a free NRC download: https://nrc-publications.canada.ca/eng/view/object/?id=0316d953-0d55-4311-af69-cad55efec499
 
 > **EVERYTHING HERE IS EXAMPLE DATA.** All people, companies, addresses, legal descriptions, products, listings, test reports and letters are **fictional**. Only code, STANDATA, standard and process citations are real, and each is traced in [`sources.md`](sources.md).
@@ -10,15 +12,21 @@
 | [B: General contractor](b-contractor-firestop-nonconformance/README.md) | Carlos Mendes, Northgate Example Builders Ltd. | 5-storey sprinklered mixed-use, Calgary; 46 plastic pipe penetrations firestopped with an out-of-scope listed system, found mid-construction | **Remediate to tested CAN/ULC-S115 systems first** (3.1.9.1.(1)), **50 Pa-tested for plastic pipe in this >3-storey building** (3.1.9.4.(4)(b)); variance + IFC-grade EJ only where no tested system exists; sprinkler exception needs NFPA 13 metal escutcheons (3.1.9.1.(4)) |
 | [C: Homebuilder](c-homebuilder-infill-house/README.md) | Priya Natarajan, Larkspur Example Homes | 2-storey Edmonton infill: heated slab, unvented low-slope roof, narrow bedroom window | Under-slab **complies via 23-BCV-003** (edges still per 9.36.2.8.(5)/(7)); roof **probably outside 23-BCV-017** as drawn (2% slope, SPF + batt); bedroom window is the departure (**9.9.10.1.(2)**) and needs fall protection (**9.8.8.1.(4)/(5)**, ASTM F2090 WOCD per **23-BCV-001** / Edmonton **B23-02**) |
 
+## What is uploaded
+Only the files inside a case's `input/` folder are ever uploaded to the tool. Each case `README.md` contains the demo script and the expected answers, so it is not uploaded. `expected/` is not uploaded.
+
+`presenter/` and `tester-samples/key/` are answer keys. Never upload them, and do not show them to the tool or the participant.
+
+For [`tester-samples/`](tester-samples/README.md), only the `01`–`03` bundle files are ever uploaded. Never upload `key/`.
+
 ## Each case contains
-- `README.md`: persona, project, compliance split, demo script
-- `input/`: what the user uploads (brief as md + **PDF stamped EXAMPLE DATA**, evidence marked EXAMPLE) and `known-gaps.md` (presenter key, don't upload)
+- `README.md`: persona, project, compliance split, demo script (not an upload)
+- `input/`: the only files uploaded to the tool (brief as md + **PDF stamped EXAMPLE DATA**, evidence marked EXAMPLE)
+- `presenter/known-gaps.md`: presenter answer key
 - `expected/`: intake summary, article shortlist, Section A–D draft, evidence plan, completeness checklist, SCO review, `must-not.md`
 
 ## Tester samples
-[`tester-samples/`](tester-samples/README.md): fictional user-testing documents. `01` and `02` are applicant inputs. `03` is the planted-gap SCO submission bundle for the officer timing protocol in `docs/user-testing/` (Round 1b).
-
-`known-gaps.md` and `TESTER-KEY` files are presenter or tester answer keys. Never upload them to the tool.
+[`tester-samples/`](tester-samples/README.md): fictional demo materials for user testing. Only the `01`–`03` bundle files are ever uploaded. `01` and `02` are applicant inputs. `03` is the planted-gap SCO submission bundle for the officer timing protocol in `docs/user-testing/` (Round 1b). [`key/03-sco-bundle-TESTER-KEY.md`](tester-samples/key/03-sco-bundle-TESTER-KEY.md) is the tester answer key.
 
 ## Verification legend (used in `sources.md`)
 - **WEB:** fetched from the official source on 2026-10-20; snapshot in `_source-snapshots/`

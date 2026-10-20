@@ -2,6 +2,8 @@
 
 > **EXAMPLE DATA.** The people, companies, address and drawings are fictional. Code and STANDATA citations are real and verified; see `../sources.md`.
 
+This is a demo case. No loader reads it yet. Only files in `input/` are ever uploaded to the tool. This README contains the demo script and expected answers, so it is not uploaded. `expected/` is not uploaded. `presenter/known-gaps.md` is the presenter answer key.
+
 ## Persona
 **Priya Natarajan**, owner of **Larkspur Example Homes (fictional)**, Edmonton. She's a small custom builder doing 6–8 houses a year. She's confident with Part 9, but new to variances. Her client wants an architectural "modern box". Her question: *"Which parts of this house need a variance?"*
 
@@ -33,5 +35,6 @@ A **2-storey single-family infill house** (about 210 m², no secondary suite, **
 7. **SCO role:** upload the draft → completeness review.
 
 ## Files
-- `input/`: project brief (md, html, pdf), drawing notes, window schedule, roof assembly note, known gaps
+- `input/`: the only files uploaded to the tool — project brief (md, html, pdf), drawing notes, window schedule, roof assembly note
+- `presenter/known-gaps.md`: presenter answer key (never upload)
 - `expected/`: intake summary, article shortlist, Section A–D draft, evidence plan, completeness checklist, SCO review, must-not

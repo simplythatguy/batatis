@@ -2,6 +2,8 @@
 
 > **EXAMPLE DATA.** The company, product, people, addresses, test data and letters are all fictional. Code citations are real and verified; see `../sources.md`.
 
+This is a demo case. No loader reads it yet. Only files in `input/` are ever uploaded to the tool. This README contains the demo script and expected answers, so it is not uploaded. `expected/` is not uploaded. `presenter/known-gaps.md` is the presenter answer key.
+
 ## Persona
 **Mira Okafor**, Technical Director at **Example Panel Works Ltd. (fictional)**, Nisku-area plant (fictional). She is a materials engineer who knows her product well, but has never dealt with Alberta building approvals. Her plan: "Get Alberta approval so builders can use our panel everywhere." She thinks a "variance" is a product approval.
 
@@ -32,5 +34,6 @@
 8. **Switch to the SCO role** and upload the draft → completeness review (`expected/sco-review.md`).
 
 ## Files
-- `input/`: project brief (md, html, pdf), product data sheet, test summary (EXAMPLE), draft engineer letter (EXAMPLE), wall section note, known gaps
+- `input/`: the only files uploaded to the tool — project brief (md, html, pdf), product data sheet, test summary (EXAMPLE), draft engineer letter (EXAMPLE), wall section note
+- `presenter/known-gaps.md`: presenter answer key (never upload)
 - `expected/`: intake summary, article shortlist, Section A–D draft, evidence plan, completeness checklist, SCO review, must-not
