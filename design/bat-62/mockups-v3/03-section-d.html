@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<title>Batatis · Application · Evidence (Section D) (after v3, status language) · BAT-62 mockup</title>
+<meta name="viewport" content="width=1440, height=900">
+<script>if(location.hash==="#light")document.documentElement.className="light"</script>
+<style>
+/* Linear shadcn kit tokens (PR #3). Dark default; open with #light for the light check. Status tokens: spec § Status language. */
+:root{
+  --background:#080808; --sidebar:#0c0c0d; --card:#131315; --popover:#19191b;
+  --muted:rgba(255,255,255,.04); --accent:rgba(255,255,255,.06); --input:#121214;
+  --sidebar-border:rgba(255,255,255,.06); --border:rgba(255,255,255,.1); --border-strong:rgba(255,255,255,.16);
+  --foreground:#eeeeef; --muted-foreground:#9b9ba1; --text-tertiary:#808086;
+  --primary:#e6e6e6; --primary-foreground:#141415; --ring:#8a8a8e; --code-bg:#161618;
+  --status-blocking:#eb5757; --status-warning:#f2c94c; --status-done:#4cb782; --status-pending:#8a8a8e;
+  --status-warning-soft:rgba(242,201,76,.14); --status-warning-line:rgba(242,201,76,.4); --status-on-solid:#141415;
+  --status-info:#7cb0f7; --status-info-soft:rgba(124,176,247,.14); --status-info-line:rgba(124,176,247,.4);
+  --radius:6px; --radius-sm:4px; --radius-lg:8px;
+  --font-sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,monospace;
+  --text-xs:11px; --text-sm:12px; --text-md:13px; --text-base:14px; --text-lg:16px;
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-6:24px; --space-8:32px;
+  --sidebar-width:244px; --header-height:48px; --input-height:32px;
+}
+html.light{
+  --background:#f4f4f5; --sidebar:#f4f4f5; --card:#ffffff; --popover:#ffffff;
+  --muted:#eeeeef; --accent:rgba(0,0,0,.04); --input:#ffffff;
+  --sidebar-border:rgba(0,0,0,.08); --border:rgba(0,0,0,.1); --border-strong:rgba(0,0,0,.16);
+  --foreground:#1a1a1c; --muted-foreground:#5c5c62; --text-tertiary:#6b6b70; --code-bg:#f4f4f5;
+  --status-blocking:#c42b2b; --status-warning:#855800; --status-done:#18733a; --status-pending:#6b6b70;
+  --status-warning-soft:rgba(133,88,0,.1); --status-warning-line:rgba(133,88,0,.4); --status-on-solid:#ffffff;
+  --status-info:#1d5bb8; --status-info-soft:rgba(29,91,184,.1); --status-info-line:rgba(29,91,184,.4);
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:1440px;height:900px;overflow:hidden;background:var(--background);color:var(--foreground);font:400 var(--text-base)/1.45 var(--font-sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+svg.g{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+svg.w{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.si{display:inline-grid;place-items:center;flex-shrink:0;width:18px;height:18px}
+.si svg{width:16px;height:16px}
+.si.ok{color:var(--status-done)}
+.si.attention{color:var(--status-warning);background:var(--status-warning-soft);box-shadow:inset 0 0 0 1px var(--status-warning-line);border-radius:5px}
+.si.attention svg{width:12px;height:12px;stroke-width:2.4}
+.si.blocked{color:var(--status-on-solid);background:var(--status-blocking);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.si.blocked svg{width:11px;height:11px;stroke-width:3}
+.si.info{color:var(--status-info);background:var(--status-info-soft);box-shadow:inset 0 0 0 1px var(--status-info-line);border-radius:50%}
+.si.info svg{width:12px;height:12px;stroke-width:2.4}
+.si.sm{width:14px;height:14px}.si.sm svg{width:12px;height:12px}.si.attention.sm svg,.si.blocked.sm svg{width:9px;height:9px}
+
+.shell{display:grid;grid-template-columns:var(--sidebar-width) 1fr;height:900px}
+.sidebar{background:var(--sidebar);border-right:1px solid var(--sidebar-border);padding:var(--space-3);display:flex;flex-direction:column;gap:var(--space-2)}
+.brand{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2);font-weight:600;font-size:var(--text-md);margin-bottom:var(--space-2)}
+.brand i{width:20px;height:20px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);display:grid;place-items:center;font-style:normal;font-size:10px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;gap:var(--space-2);height:32px;padding:0 var(--space-2);border-radius:var(--radius);color:var(--muted-foreground);font-size:var(--text-md);font-weight:500;text-decoration:none}
+.nav a.active{background:var(--accent);color:var(--foreground)}
+.case{margin-top:auto;padding:var(--space-2);display:flex;flex-direction:column;gap:2px;font-size:var(--text-sm)}
+.case .t{font-size:var(--text-md);font-weight:500}
+.case .m{color:var(--muted-foreground)}
+.case .f{color:var(--muted-foreground);margin-top:var(--space-2)}
+.case .links{display:flex;flex-wrap:wrap;gap:2px var(--space-3);margin-top:var(--space-2)}
+.case .links a{color:var(--muted-foreground);text-decoration:none;white-space:nowrap}
+.main{margin:var(--space-2);background:var(--card);border:1px solid var(--sidebar-border);border-radius:var(--radius-lg);display:flex;flex-direction:column;height:calc(900px - 16px);overflow:hidden}
+.example{height:32px;flex-shrink:0;display:flex;align-items:center;gap:var(--space-2);padding:0 var(--space-4);border-bottom:1px solid var(--border);background:var(--popover);font-size:var(--text-sm);color:var(--muted-foreground)}
+.example b{color:var(--foreground);font-weight:600;letter-spacing:.02em}
+.example a{margin-left:auto;color:var(--muted-foreground);text-decoration:underline;text-decoration-color:var(--border-strong);text-underline-offset:3px}
+.header{height:var(--header-height);flex-shrink:0;display:flex;align-items:center;gap:var(--space-4);padding:0 var(--space-4);border-bottom:1px solid var(--sidebar-border)}
+.title{margin:0;font-size:var(--text-lg);font-weight:600;letter-spacing:-.01em}
+.tabs{display:flex;gap:2px}
+.tabs a{height:26px;display:inline-flex;align-items:center;gap:6px;padding:0 10px 0 8px;border-radius:var(--radius);font-size:var(--text-sm);font-weight:500;color:var(--muted-foreground);text-decoration:none}
+.tabs a.active{background:var(--accent);color:var(--foreground)}
+.tabs .l{color:var(--muted-foreground);font-weight:400}
+.gaps{margin-left:auto;display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 var(--space-2);border:1px solid transparent;border-radius:var(--radius);background:transparent;font-size:var(--text-sm);font-weight:500;cursor:pointer}
+.body{flex:1;overflow:auto}
+.col{width:720px;margin:0 auto;padding:var(--space-8) 0}
+.footer{flex-shrink:0;display:flex;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-4);border-top:1px solid var(--sidebar-border)}
+.footer .note{margin-right:auto;display:flex;align-items:center;gap:6px;font-size:var(--text-sm);color:var(--muted-foreground)}
+.btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 var(--space-3);border-radius:var(--radius);border:1px solid var(--border);background:var(--popover);font-size:var(--text-sm);font-weight:500;white-space:nowrap;cursor:pointer}
+.btn-primary{background:var(--primary);color:var(--primary-foreground);border-color:transparent}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--muted-foreground)}
+.btn-sm{height:24px;padding:0 var(--space-2);font-size:var(--text-xs)}
+.mono{font-family:var(--font-mono);font-size:var(--text-sm);color:var(--muted-foreground)}
+
+.limit{margin:0 0 var(--space-4);font-size:var(--text-sm);color:var(--muted-foreground)}
+.flag{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-md);margin-bottom:var(--space-6)}
+.flag .m{color:var(--muted-foreground);font-size:var(--text-sm)}
+.flag a{color:var(--muted-foreground);font-size:var(--text-sm);text-decoration:underline;text-decoration-color:var(--border-strong);text-underline-offset:3px}
+.gh{display:flex;align-items:baseline;gap:var(--space-2);margin:0 0 var(--space-2);font-size:var(--text-sm);font-weight:500;color:var(--muted-foreground)}
+.gh .types{margin-left:auto;font-weight:400;color:var(--muted-foreground);text-decoration:underline;text-decoration-color:var(--border-strong);text-underline-offset:3px}
+.list{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.open{padding:var(--space-4)}
+.oh{display:flex;align-items:center;gap:var(--space-2);margin:0 0 var(--space-1)}
+.oh h2{margin:0;font-size:var(--text-base);font-weight:600}
+.open .sub{margin:0 0 var(--space-4) 26px;font-size:var(--text-sm);color:var(--muted-foreground)}
+.pf{display:grid;grid-template-columns:230px 1fr;gap:var(--space-3);align-items:center;margin:0 0 var(--space-2) 26px;font-size:var(--text-sm);color:var(--muted-foreground)}
+/* Professional fields: "Not sure" and "Not engaged yet" are always-visible options (must-have, never in a menu). */
+.choice{display:inline-flex;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;height:30px}
+.choice > *{display:inline-flex;align-items:center;gap:6px;height:100%;padding:0 12px;border:none;border-right:1px solid var(--border);background:transparent;font-size:var(--text-md);color:var(--foreground);cursor:pointer}
+.choice > *:last-child{border-right:none}
+.choice .on{background:var(--primary);color:var(--primary-foreground)}
+.choice input{width:150px;background:var(--input);color:var(--foreground);outline:none;cursor:text}
+.choice input::placeholder{color:var(--muted-foreground)}
+.result{display:flex;flex-direction:column;gap:6px;margin:var(--space-4) 0 0 26px;font-size:var(--text-sm);color:var(--muted-foreground)}
+.result div{display:flex;align-items:center;gap:var(--space-2)}
+.result b{color:var(--foreground);font-weight:500}
+.row{display:flex;align-items:center;gap:var(--space-3);height:44px;padding:0 var(--space-4);border-top:1px solid var(--sidebar-border);font-size:var(--text-md)}
+.row .t{flex:1;color:var(--muted-foreground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .chev{color:var(--text-tertiary);display:flex}
+.done{margin-top:var(--space-4);display:flex;align-items:center;gap:var(--space-4);height:40px;padding:0 var(--space-4);border:1px solid var(--sidebar-border);border-radius:var(--radius-lg);background:var(--muted);font-size:var(--text-sm);color:var(--muted-foreground)}
+.done .i{display:inline-flex;align-items:center;gap:6px}
+.done .h{color:var(--foreground);font-weight:500;display:inline-flex;align-items:center;gap:6px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- lucide glyphs (ISC), 24 viewBox -->
+  <symbol id="g-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="g-alert" viewBox="0 0 24 24"><path d="M12 7v6"/><path d="M12 17h.01"/></symbol>
+  <symbol id="g-info" viewBox="0 0 24 24"><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+  <symbol id="g-help" viewBox="0 0 24 24"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+  <symbol id="g-dashed" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke-dasharray="3.2 3.1"/></symbol>
+  <symbol id="g-circle-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="g-list-checks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></symbol>
+  <symbol id="g-hardhat" viewBox="0 0 24 24"><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M14 6a6 6 0 0 1 6 6v3"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><rect x="2" y="15" width="20" height="4" rx="1"/></symbol>
+  <symbol id="g-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <!-- web/src/components.tsx Icon set, 16 viewBox -->
+  <symbol id="w-chevron" viewBox="0 0 16 16"><path d="m6 4 4 4-4 4"/></symbol>
+  <symbol id="w-upload" viewBox="0 0 16 16"><path d="M8 11V3.5M5 6.5l3-3 3 3M3 12.5h10"/></symbol>
+</svg>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><i>B</i>Batatis</div>
+    <nav class="nav" aria-label="Steps">
+      <a href="#"><span class="si attention" role="img" aria-label="4 facts to check"><svg class="g"><use href="#g-dashed"/></svg></span>Describe</a>
+      <a href="#"><span class="si attention" role="img" aria-label="1 open question"><svg class="g"><use href="#g-help"/></svg></span>Code check</a>
+      <a class="active" href="#" aria-current="page"><span class="si blocked" role="img" aria-label="Blocks the PDF"><svg class="g"><use href="#g-x"/></svg></span>Application</a>
+    </nav>
+    <div class="case">
+      <span class="t">NorthCore CX exterior sheathing board</span>
+      <span class="m">Manufacturer · Example data</span>
+      <span class="f">Checks paperwork, not compliance.</span>
+      <span class="links"><a href="#">Officer view</a><a href="#">How we checked</a><a href="#">Reset</a></span>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="example" role="note" aria-label="Example data">
+      <b>EXAMPLE DATA</b> · fictional · Manufacturer · NorthCore sheathing
+      <a href="#">Start my own</a>
+    </div>
+    <header class="header">
+      <h1 class="title">Application</h1>
+      <!-- Tab counts ("D · 3") cut: each tab carries its worst mark. -->
+      <nav class="tabs" aria-label="Form sections">
+        <a href="#"><span class="si blocked sm" role="img" aria-label="Blocks the PDF"><svg class="g"><use href="#g-x"/></svg></span>Applicant <span class="l">A</span></a>
+        <a href="#"><span class="si blocked sm" role="img" aria-label="Blocks the PDF"><svg class="g"><use href="#g-x"/></svg></span>Project <span class="l">B</span></a>
+        <a href="#"><span class="si attention sm" role="img" aria-label="Needs attention"><svg class="g"><use href="#g-alert"/></svg></span>Code references <span class="l">C</span></a>
+        <a href="#"><span class="si blocked sm" role="img" aria-label="Blocks the PDF"><svg class="g"><use href="#g-x"/></svg></span>Your alternative</a>
+        <a class="active" href="#" aria-current="page"><span class="si blocked sm" role="img" aria-label="Blocks the PDF"><svg class="g"><use href="#g-x"/></svg></span>Evidence <span class="l">D</span></a>
+      </nav>
+      <!-- Info (PR #40 severity 'info', e.g. a Calgary form notice): neutral circle, never counted as to fix or attention. -->
+      <button class="gaps" aria-label="12 to fix before the PDF. 3 need attention. 1 notice for your information, not counted. Open the gap list." title="12 to fix · 3 need attention · 1 notice">
+        <span class="si blocked" aria-hidden="true"><svg class="g"><use href="#g-x"/></svg></span>12
+        <span class="si attention" aria-hidden="true" style="margin-left:6px"><svg class="g"><use href="#g-alert"/></svg></span>3
+        <span class="si info" aria-hidden="true" style="margin-left:6px"><svg class="g"><use href="#g-info"/></svg></span>1
+      </button>
+    </header>
+
+    <div class="body">
+      <div class="col">
+        <!-- Limitation line: verdict-like screen, stays visible as text (Karen ruling 1). -->
+        <p class="limit">Recommendations only. You write the evidence and the answers. This does not decide that the design complies or is safe.</p>
+
+        <!-- Professional flag (guardrail wording kept). Reasons behind Why? -->
+        <div class="flag">
+          <span class="si attention" role="img" aria-label="Needs a professional: not decided yet"><svg class="g"><use href="#g-hardhat"/></svg></span>
+          Engineer or architect: not decided yet <span class="m">· not a licence decision</span> <a href="#">Why?</a>
+        </div>
+
+        <!-- Unc6 #11: the "Evidence types to consider" text appears once per screen, never repeated in each evidence block. -->
+        <div class="gh">To do <a class="types" href="#">Evidence types to consider ›</a></div>
+        <div class="list">
+          <section class="open" aria-label="Current item">
+            <div class="oh">
+              <span class="si attention" role="img" aria-label="Needs a professional"><svg class="g"><use href="#g-hardhat"/></svg></span>
+              <h2>Your registered professional</h2>
+            </div>
+            <p class="sub">An engineer or architect with an APEGA or AAA registration number or seal. Haven't engaged one? Say so; that's fine.</p>
+            <div class="pf"><span>Engineer or architect engaged</span>
+              <span class="choice" role="radiogroup" aria-label="Engineer or architect engaged"><button role="radio" aria-checked="false">Yes</button><button role="radio" aria-checked="false">Not sure</button><button class="on" role="radio" aria-checked="true">Not engaged yet</button></span></div>
+            <div class="pf"><span>APEGA or AAA registration number</span>
+              <span class="choice" role="radiogroup" aria-label="Registration number"><input placeholder="Type the number" autocomplete="off" aria-label="Registration number"><button role="radio" aria-checked="false">Not sure</button><button class="on" role="radio" aria-checked="true">Not engaged yet</button></span></div>
+            <div class="pf"><span>Seal</span>
+              <span class="choice" role="radiogroup" aria-label="Seal"><button role="radio" aria-checked="false"><svg class="w" width="12" height="12" aria-hidden="true"><use href="#w-upload"/></svg>Attach</button><button role="radio" aria-checked="false">Not sure</button><button class="on" role="radio" aria-checked="true">Not engaged yet</button></span></div>
+            <!-- Two consequences, two marks: routed (attention) and official PDF locked (blocked, ruling 6). -->
+            <div class="result" role="status">
+              <div><span class="si attention sm" aria-hidden="true"><svg class="g"><use href="#g-hardhat"/></svg></span>Sent to the officer. Not blocking the draft.</div>
+              <div><span class="si blocked sm" role="img" aria-label="Official PDF locked"><svg class="g"><use href="#g-lock"/></svg></span><b>Official PDF</b> Routed to the officer: whether a registered professional is required</div>
+            </div>
+          </section>
+          <div class="row">
+            <span class="si attention" role="img" aria-label="To answer"><svg class="g"><use href="#g-dashed"/></svg></span>
+            <span class="t">Does the design follow the written prescriptive rules, with no reserved professional judgement?</span>
+            <span class="chev"><svg class="w" width="14" height="14" aria-hidden="true"><use href="#w-chevron"/></svg></span>
+          </div>
+          <div class="row">
+            <span class="si blocked" role="img" aria-label="Blocks the PDF: evidence missing"><svg class="g"><use href="#g-x"/></svg></span>
+            <span class="t">Evidence: using the board to hold the siding</span><span class="mono">9.23.17.3.(1)</span>
+            <button class="btn btn-sm">Add evidence</button>
+          </div>
+        </div>
+
+        <!-- Done, collapsed: marks replace the sentence list. Evidence and upload wording are guardrails and stay. -->
+        <div class="done" aria-label="Done, 3 items">
+          <span class="h"><svg class="w" width="12" height="12" aria-hidden="true"><use href="#w-chevron"/></svg>Done · 3</span>
+          <span class="i"><span class="si ok sm" role="img" aria-label="Confirmed"><svg class="g"><use href="#g-circle-check"/></svg></span>Authority requirement</span>
+          <span class="i"><span class="si ok sm" role="img" aria-label="Evidence listed"><svg class="g"><use href="#g-list-checks"/></svg></span>Vapour test · Evidence listed (not reviewed)</span>
+          <span class="i"><span class="si attention sm" role="img" aria-label="Open question for the officer"><svg class="g"><use href="#g-help"/></svg></span>1 Not sure · to the officer</span>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <span class="note">Saved ·
+        <span class="si attention sm" aria-hidden="true"><svg class="g"><use href="#g-dashed"/></svg></span>2<span class="sr">left after this one</span>
+      </span>
+      <button class="btn btn-ghost">Back</button>
+      <button class="btn btn-primary">Check completeness</button>
+    </footer>
+  </main>
+</div>
+</body>
+</html>

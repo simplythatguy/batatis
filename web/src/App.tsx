@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { ConfirmDialog, STATUS_WORDS, StatusIcon, worstStatus } from "./components";
 import { useFocusParam, useRoute } from "./router";
 import { Application } from "./screens/Application";
 import { CodeCheck } from "./screens/CodeCheck";
@@ -30,9 +32,15 @@ const ROLE: Record<ApplicantType, string> = {
   owner: "Owner",
 };
 
+/** The step a gap's fix lives in, from its route. */
+const stepOf = (href: string) =>
+  href.startsWith("#/code-check") ? "/code-check" : href.startsWith("#/application") || href.startsWith("#/section-c") ? "/application" : "/describe";
+
 export function App() {
   const route = useRoute();
-  const { c, dispatch } = useCase();
+  const { c, gaps, dispatch, restored } = useCase();
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [askResume, setAskResume] = useState(restored);
   useFocusParam(route);
 
   let screen;
@@ -70,12 +78,11 @@ export function App() {
           <ol className="plain-list nav-group">
             {STEPS.map((s, i) => {
               const active = s.routes.length ? s.routes.includes(route.path) : !STEP_ROUTES.includes(route.path) && !onFootLink;
+              const mark = worstStatus(gaps.filter((g) => stepOf(g.href) === s.path));
               return (
                 <li key={s.path}>
                   <a className="nav-item" href={`#${s.path}`} data-active={active} aria-current={active ? "step" : undefined}>
-                    <span className="step-num" aria-hidden="true">
-                      {i + 1}
-                    </span>
+                    <StatusIcon status={mark} label={`Step ${i + 1}: ${STATUS_WORDS[mark]}`} />
                     {s.label}
                   </a>
                 </li>
@@ -95,7 +102,7 @@ export function App() {
                 {l.label}
               </a>
             ))}
-            <button type="button" className="foot-link" onClick={() => resetCase(dispatch)}>
+            <button type="button" className="foot-link" aria-haspopup="dialog" onClick={() => setConfirmReset(true)}>
               Reset
             </button>
           </div>
@@ -110,6 +117,33 @@ export function App() {
         </div>
         {screen}
       </main>
+      <ConfirmDialog
+        open={confirmReset}
+        title="Reset this case?"
+        confirm="Reset"
+        cancel="Cancel"
+        onCancel={() => setConfirmReset(false)}
+        onConfirm={() => {
+          resetCase(dispatch);
+          setConfirmReset(false);
+        }}
+      >
+        Your changes in this browser tab are cleared and the example case comes back. This can't be undone.
+      </ConfirmDialog>
+      <ConfirmDialog
+        open={askResume}
+        title="Pick up where you left off?"
+        confirm="Resume"
+        cancel="Start again"
+        onConfirm={() => setAskResume(false)}
+        onEscape={() => setAskResume(false)}
+        onCancel={() => {
+          resetCase(dispatch);
+          setAskResume(false);
+        }}
+      >
+        This browser tab has a case you changed: {c.title}. Start again clears your changes and opens the example case.
+      </ConfirmDialog>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useProvisionText, useSectionC, type SectionCSource } from "../api/sectionC";
-import { Citation, Icon, StatusPill } from "../components";
+import { CodeText, Icon, StatusBadge } from "../components";
 import { CODE_TERMS } from "../fixture";
 import { candidateById } from "../model";
 import { useCase } from "../store";
@@ -21,15 +21,10 @@ const rowKey = (r: SectionCRow) => `${r.candidateId}:${r.provision}`;
 const term = (r: SectionCRow, code: string) => r.terms?.[code] ?? CODE_TERMS[code];
 
 /** Where the rows came from: the engine's lookup, or the bundled sample when the engine is unreachable. */
-function SourceLabel({ source, error }: { source: SectionCSource; error?: string }) {
-  if (source === "live") return <StatusPill dot="done">Live lookup</StatusPill>;
-  if (source === "loading") return <StatusPill dot="pending">Looking up…</StatusPill>;
-  return (
-    <span className="label-pill" title={error ? `Engine not reachable: ${error}` : undefined}>
-      <span className="status-dot warning" />
-      Offline sample
-    </span>
-  );
+function SourceLabel({ source }: { source: SectionCSource }) {
+  if (source === "live") return <StatusBadge status="ok" size="sm" label="Live lookup" text="Live lookup" />;
+  if (source === "loading") return <span className="meta">Looking up…</span>;
+  return <StatusBadge status="attention" size="sm" label="Offline sample" text="Offline sample" />;
 }
 
 function Pairs({ row }: { row: SectionCRow }) {
@@ -77,7 +72,7 @@ export function SectionCBody() {
   return (
     <div className="stack">
       <div className="sc-source">
-        <SourceLabel source={source} error={error} />
+        <SourceLabel source={source} />
         <span className="meta">
           Looked up from NBC(AE) 2023, 2nd printing, Table 9.38.1.1. Greyed rows wait for your answer in{" "}
           <a className="text-link" href="#/code-check">
@@ -87,9 +82,8 @@ export function SectionCBody() {
         </span>
       </div>
       {source === "offline" && (
-        <p className="field-note" role="status">
-          <span className="status-dot warning" />
-          The engine is not reachable, so these rows are a bundled offline sample, not a lookup for this case.
+        <p className="meta" role="status" title={error}>
+          Can't reach the checker, so these rows are a bundled sample, not a lookup for this case.
         </p>
       )}
       {source !== "loading" && !rows.length && (
@@ -125,11 +119,11 @@ export function SectionCBody() {
                   >
                     <td data-label="Your answer">
                       {confirmed ? (
-                        <StatusPill dot="done">You said: different</StatusPill>
+                        <StatusBadge kind="confirmed" size="sm" label="Answered" text="Different" />
+                      ) : cand?.answer === "not-sure" ? (
+                        <StatusBadge kind="open-question" size="sm" label="Open question for the officer" text="Not sure" />
                       ) : (
-                        <StatusPill dot={cand?.answer === "not-sure" ? "warning" : "blocking"}>
-                          {cand?.answer === "not-sure" ? "Not sure" : "Unanswered"}
-                        </StatusPill>
+                        <StatusBadge kind="unconfirmed" size="sm" label="Not answered yet" text="Unanswered" />
                       )}
                     </td>
                     <td data-label="Provision">
@@ -139,9 +133,8 @@ export function SectionCBody() {
                     <td data-label="In the list">
                       <ListCell row={r} />
                       {r.differs && (
-                        <span className="label-pill differs" title={r.differsDetail}>
-                          <span className="status-dot warning" />
-                          Differs from NBC 2020 intent
+                        <span className="differs" title={r.differsDetail}>
+                          <StatusBadge kind="info" size="sm" label="For your information" text="Differs from NBC 2020 intent" />
                         </span>
                       )}
                     </td>
@@ -159,8 +152,7 @@ export function SectionCBody() {
       {sel && (
         <div className="sc-detail">
           <section className="source-block">
-            <blockquote className="cite-block quote">{quote?.text ?? "Loading the provision text…"}</blockquote>
-            <Citation text={quote?.citation ?? sel.citation} />
+            <CodeText text={quote?.text} citation={quote?.citation ?? sel.citation} loading={!quote && source !== "offline"} />
             {(sel.attributionStatus !== "direct" || sel.differs) && (
               <p className="meta">
                 {sel.attributionStatus === "inherited" && `Uses the list row of ${sel.inheritedFrom}. `}

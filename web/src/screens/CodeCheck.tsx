@@ -1,4 +1,4 @@
-import { Citation, PanelHeader, StatusPill, type Dot } from "../components";
+import { CodeText, PanelHeader, StatusIcon, type StatusKind } from "../components";
 import { unresolvedCandidates } from "../model";
 import { useCase } from "../store";
 import type { Candidate, CandidateAnswer } from "../types";
@@ -9,29 +9,27 @@ const ANSWERS: { value: CandidateAnswer; label: string }[] = [
   { value: "not-sure", label: "Not sure" },
 ];
 
-const STATUS: Record<string, { dot: Dot; label: string }> = {
-  yes: { dot: "done", label: "You said: different" },
-  no: { dot: "pending", label: "Same as the code" },
-  "not-sure": { dot: "warning", label: "Not sure · open question for the officer" },
-  none: { dot: "blocking", label: "Needs your answer" },
+/** The answer itself shows on the pressed button; the mark says where the card stands. */
+const MARK: Record<string, { kind: StatusKind; label: string }> = {
+  yes: { kind: "confirmed", label: "Answered: different from the code" },
+  no: { kind: "confirmed", label: "Answered: same as the code" },
+  "not-sure": { kind: "open-question", label: "Not sure: open question for the officer" },
+  none: { kind: "unconfirmed", label: "Not answered yet" },
 };
 
 function CandidateCard({ a }: { a: Candidate }) {
   const { dispatch } = useCase();
-  const s = STATUS[a.answer ?? "none"];
+  const m = MARK[a.answer ?? "none"];
   return (
     <article className="card" id={`cand-${a.id}`} tabIndex={-1} aria-labelledby={`cand-${a.id}-topic`}>
       <div className="card-head">
+        <StatusIcon kind={m.kind} label={m.label} />
         {a.benchmark && <span className="label-pill">Main code rule</span>}
         <h2 className="card-topic" id={`cand-${a.id}-topic`}>
           {a.topic}
         </h2>
-        <StatusPill dot={s.dot}>{s.label}</StatusPill>
       </div>
-      <div>
-        <blockquote className="cite-block quote">{a.quote.text}</blockquote>
-        <Citation text={a.quote.citation} />
-      </div>
+      <CodeText text={a.quote.text} citation={a.quote.citation} />
       <div>
         <p className="ask">
           Does your design <strong>{a.departure}</strong> instead?
@@ -47,6 +45,7 @@ function CandidateCard({ a }: { a: Candidate }) {
             aria-pressed={a.answer === o.value}
             onClick={() => dispatch({ type: "answerCandidate", id: a.id, answer: o.value })}
           >
+            {o.value === "not-sure" && <StatusIcon kind="open-question" size="sm" label="" decorative />}
             {o.label}
           </button>
         ))}
@@ -83,8 +82,15 @@ export function CodeCheck() {
       </div>
       <div className="footer-bar">
         <span className="status-note" role="status">
-          {c.candidates.length ? `${answered} of ${c.candidates.length} answered` : ""}
-          {open.length ? ` · answer Yes or No on the rest to continue` : ""}
+          {c.candidates.length > 0 && (
+            <span className="mark-row" role="img" aria-label={`${answered} of ${c.candidates.length} answered`}>
+              {c.candidates.map((a) => {
+                const m = MARK[a.answer ?? "none"];
+                return <StatusIcon key={a.id} kind={m.kind} size="sm" label="" decorative />;
+              })}
+            </span>
+          )}
+          {open.length > 0 && " Yes or No on each card to continue"}
         </span>
         <a className="btn btn-ghost" href="#/describe">
           Back

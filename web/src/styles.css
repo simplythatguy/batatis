@@ -33,9 +33,135 @@
   --text-tertiary: #808086;
   --border-danger: rgba(235, 87, 87, 0.55);
   --code-bg: #161618;
+  /* Status language (spec § Status language). Dark values; the light values live in the spec
+     for when the app gets a light mode. --status-info overrides the grey alias in tokens.css. */
+  --status-warning-soft: rgba(242, 201, 76, 0.14);
+  --status-warning-line: rgba(242, 201, 76, 0.4);
+  --status-on-solid: #141415;
+  --status-info: #7cb0f7;
+  --status-info-soft: rgba(124, 176, 247, 0.14);
+  --status-info-line: rgba(124, 176, 247, 0.4);
   /* App additions */
   --strip-height: 32px;
   --column-width: 720px;
+}
+
+/* —— Status marks: shape per state, never colour alone —— */
+
+.si {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  vertical-align: -4px;
+}
+
+.si svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.si.ok {
+  color: var(--status-done);
+}
+
+.si.attention {
+  color: var(--status-warning);
+  background: var(--status-warning-soft);
+  box-shadow: inset 0 0 0 1px var(--status-warning-line);
+  border-radius: 5px;
+}
+
+.si.info {
+  color: var(--status-info);
+  background: var(--status-info-soft);
+  box-shadow: inset 0 0 0 1px var(--status-info-line);
+  border-radius: 50%;
+}
+
+.si.attention svg,
+.si.info svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2.4;
+}
+
+.si.blocked {
+  color: var(--status-on-solid);
+  background: var(--status-blocking);
+  clip-path: polygon(29.3% 0, 70.7% 0, 100% 29.3%, 100% 70.7%, 70.7% 100%, 29.3% 100%, 0 70.7%, 0 29.3%);
+}
+
+.si.blocked svg {
+  width: 11px;
+  height: 11px;
+  stroke-width: 3;
+}
+
+.si.sm {
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+}
+
+.si.sm svg {
+  width: 12px;
+  height: 12px;
+}
+
+.si.sm.attention svg,
+.si.sm.blocked svg,
+.si.sm.info svg {
+  width: 9px;
+  height: 9px;
+}
+
+.si.lg {
+  width: 24px;
+  height: 24px;
+}
+
+.si.lg svg {
+  width: 20px;
+  height: 20px;
+}
+
+.si.lg.attention svg,
+.si.lg.blocked svg,
+.si.lg.info svg {
+  width: 13px;
+  height: 13px;
+  stroke-width: 2.6;
+}
+
+/* Forced colours drop backgrounds: keep the octagon readable as an outlined glyph. */
+@media (forced-colors: active) {
+  .si.blocked {
+    clip-path: none;
+    color: CanvasText;
+    outline: 1px solid CanvasText;
+  }
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.mark-row {
+  display: inline-flex;
+  gap: 4px;
+  vertical-align: -2px;
 }
 
 html,
@@ -93,23 +219,6 @@ body {
 .foot-link:focus-visible {
   outline: 2px solid var(--sidebar-ring);
   outline-offset: 1px;
-}
-
-.step-num {
-  display: inline-grid;
-  place-content: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 1px solid var(--border-strong);
-  font-size: 10px;
-  font-variant-numeric: tabular-nums;
-  color: var(--muted-foreground);
-}
-
-.nav-item[data-active="true"] .step-num {
-  border-color: var(--foreground);
-  color: var(--foreground);
 }
 
 .sidebar-foot {
@@ -231,8 +340,8 @@ a.btn:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
-.gap-control .tab-count {
-  margin-left: 0;
+.gap-control .si:not(:first-child) {
+  margin-left: 6px;
 }
 
 .drawer {
@@ -315,10 +424,97 @@ a.btn:focus-visible {
 
 .fix-list {
   margin-top: var(--space-3);
+  max-height: min(50vh, 360px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--sidebar-border);
+  border-radius: var(--radius-md);
 }
 
 .fix-label {
   flex: 1;
+  min-width: 0;
+}
+
+.gap-list .drawer-row .meta {
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 3px;
+}
+
+.gap-group > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.gap-group > summary::-webkit-details-marker {
+  display: none;
+}
+
+.gap-group > summary svg:last-child {
+  color: var(--text-tertiary);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.gap-group[open] > summary svg:last-child {
+  transform: rotate(90deg);
+}
+
+.gap-group > ul {
+  padding-left: var(--space-6);
+}
+
+.dialog-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.dialog-head .dialog-title {
+  margin: 0;
+}
+
+/* Must be read before acting: foreground colour, above the list. */
+.dialog .dialog-notice {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--foreground);
+}
+
+.dialog .drawer-group {
+  margin-top: var(--space-4);
+}
+
+.code-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.code-missing {
+  margin: 0;
+  padding: var(--space-2) 0;
+}
+
+.code-credit {
+  margin: 2px 0 0;
+  font-size: var(--text-sm);
+}
+
+.code-credit a {
+  color: var(--muted-foreground);
+}
+
+.code-credit a:hover {
+  color: var(--foreground);
+}
+
+.code-credit a:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .toolbar,
@@ -357,11 +553,6 @@ a.pill {
   outline-offset: 1px;
 }
 
-.tab-count {
-  color: var(--text-tertiary);
-  font-variant-numeric: tabular-nums;
-  margin-left: 2px;
-}
 
 /* —— Scrolling panes: the page never scrolls —— */
 
@@ -819,7 +1010,7 @@ a.pill {
   font-weight: var(--weight-medium);
 }
 
-.chip-q .status-dot {
+.chip-q .si {
   margin-top: 5px;
 }
 
@@ -1023,7 +1214,8 @@ a.pill {
   border-bottom: 0;
 }
 
-.sc-table td > .label-pill + .label-pill {
+.sc-table td > .differs {
+  display: flex;
   margin-top: 4px;
 }
 
@@ -1104,10 +1296,6 @@ a.pill {
   margin: 0 0 var(--space-3);
 }
 
-.differs .status-dot {
-  width: 6px;
-  height: 6px;
-}
 
 .sc-detail {
   display: grid;

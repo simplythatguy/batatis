@@ -98,7 +98,9 @@ export interface SectionCRow {
 
 export type ProcessFieldId = "rationale" | "risk" | "mitigation" | "assumptions";
 
-export type GapSeverity = "blocking" | "warning";
+/** `info` (PR #40, e.g. a Calgary form notice) is display-only: never counted as to fix or attention,
+ *  never blocks. The dev model produces none. */
+export type GapSeverity = "blocking" | "warning" | "info";
 
 export interface Gap {
   id: string;

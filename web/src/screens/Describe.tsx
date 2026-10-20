@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { DetailFields, FactLedger, QuestionChips } from "../case-parts";
-import { Icon, PanelHeader } from "../components";
+import { Icon, PanelHeader, StatusBadge, StatusIcon } from "../components";
+import { useDraft } from "../draft";
 import { DETAIL_FIELDS, factFor, valueText } from "../model";
 import { useCase } from "../store";
 
@@ -53,8 +54,7 @@ function DropZone() {
       </div>
       {error && (
         <p className="field-note" role="status">
-          <span className="status-dot warning" />
-          {error}
+          <StatusBadge status="attention" size="sm" label="Skipped" text={error} />
         </p>
       )}
       {c.files.length > 0 && (
@@ -82,6 +82,7 @@ function DropZone() {
 
 export function Describe() {
   const { c, dispatch } = useCase();
+  const description = useDraft(c.description, (text) => dispatch({ type: "setDescription", text }));
   const missingDetails = DETAIL_FIELDS.filter((d) => d.required && !valueText(factFor(c, d.id)).trim()).length;
   const toCheck = c.facts.filter((f) => f.status === "unconfirmed").length;
   return (
@@ -98,8 +99,9 @@ export function Describe() {
               className="describe-text"
               rows={4}
               autoComplete="off"
-              value={c.description}
-              onChange={(e) => dispatch({ type: "setDescription", text: e.target.value })}
+              value={description.value}
+              onChange={(e) => description.onChange(e.target.value)}
+              onBlur={description.onBlur}
               placeholder="What are you building or selling, and what does it do differently?"
             />
           </div>
@@ -110,7 +112,12 @@ export function Describe() {
             <summary>
               <Icon name="chevron" size={12} />
               <span className="disclosure-title">Applicant and site details</span>
-              <span className="meta">Sections A and B · {missingDetails ? `${missingDetails} missing` : "complete"}</span>
+              <span className="meta">Sections A and B</span>
+              {missingDetails > 0 ? (
+                <StatusBadge kind="unconfirmed" size="sm" label={`${missingDetails} required fields missing`} text={missingDetails} />
+              ) : (
+                <StatusIcon kind="confirmed" size="sm" label="Complete" />
+              )}
             </summary>
             <p className="meta disclosure-hint">Filled only from your files or your typing. Batatis never guesses these.</p>
             <h3 className="sub-title">Section A · Applicant</h3>
@@ -122,7 +129,13 @@ export function Describe() {
       </div>
       <div className="footer-bar">
         <span className="status-note" role="status">
-          Saved in this browser{toCheck ? ` · ${toCheck} fact${toCheck > 1 ? "s" : ""} still need you. You can come back.` : ""}
+          Saved in this browser
+          {toCheck > 0 && (
+            <>
+              {" · "}
+              <StatusBadge kind="unconfirmed" size="sm" label={`${toCheck} facts still need you`} text={toCheck} />
+            </>
+          )}
         </span>
         <a className="btn btn-primary" href="#/code-check">
           Continue to code check

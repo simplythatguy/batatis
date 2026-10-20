@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Icon, KindBadge, StatusPill } from "./components";
+import { Icon, KindBadge, StatusBadge, StatusIcon } from "./components";
+import { useDraft } from "./draft";
 import { DETAIL_FIELDS, PROCESS_FIELDS, displayValue, factFor, factLabel, isTyped, valueText, type DetailField } from "./model";
 import { useCase } from "./store";
-import type { Fact, Question, Source } from "./types";
+import type { Fact, ProcessFieldId, Question, Source } from "./types";
 
 function sourceLine(s: Source): string {
   const parts = [s.ref];
@@ -21,22 +22,20 @@ function FactRow({ fact }: { fact: Fact }) {
   return (
     <li className="fact" id={`fact-${fact.id}`} tabIndex={-1}>
       <div className="fact-head">
-        <KindBadge fact={fact} />
+        {pending ? (
+          <StatusIcon kind="unconfirmed" label="Not confirmed yet" />
+        ) : (
+          <StatusIcon kind="confirmed" label={fact.kind === "proposed" ? "Confirmed by you" : "Confirmed"} />
+        )}
         <span className="fact-field">{factLabel(fact.field)}</span>
-        {pending && <StatusPill dot="warning">Check</StatusPill>}
+        <KindBadge fact={fact} />
       </div>
       <div className={`fact-value ${staleInputs ? "is-stale" : ""}`}>{displayValue(fact)}</div>
       {fact.formula && <div className="mono fact-formula">{fact.formula}</div>}
-      {staleInputs && (
-        <div className="field-note">
-          <span className="status-dot pending" />
-          An input changed. The engine recomputes this when connected.
-        </div>
-      )}
+      {staleInputs && <div className="field-note">An input changed. The engine recomputes this when connected.</div>}
       {!staleInputs && unconfirmedInputs && (
         <div className="field-note">
-          <span className="status-dot warning" />
-          Uses a value you have not confirmed yet
+          <StatusBadge kind="unconfirmed" size="sm" label="Not confirmed yet" text="Uses a value you have not confirmed yet" />
         </div>
       )}
       <div className="fact-source">
@@ -48,12 +47,6 @@ function FactRow({ fact }: { fact: Fact }) {
         {fact.source.quote && <q className="fact-quote">{fact.source.quote}</q>}
         {fact.kind === "proposed" && fact.confidence != null && (
           <span className="meta">Confidence {Math.round(fact.confidence * 100)}%</span>
-        )}
-        {fact.kind === "proposed" && !pending && (
-          <span className="field-note">
-            <span className="status-dot done" />
-            Confirmed by you
-          </span>
         )}
       </div>
       {pending && (
@@ -79,10 +72,12 @@ export function FactLedger() {
       <summary>
         <Icon name="chevron" size={12} />
         <span className="disclosure-title">Facts</span>
-        <span className="meta">
-          {c.facts.length}
-          {pending ? ` · ${pending} to check` : c.facts.length ? " · all confirmed" : ""}
-        </span>
+        <span className="meta">{c.facts.length}</span>
+        {pending > 0 ? (
+          <StatusBadge kind="unconfirmed" size="sm" label={`${pending} facts still need your check`} text={pending} />
+        ) : (
+          c.facts.length > 0 && <StatusIcon kind="confirmed" size="sm" label="All confirmed" />
+        )}
         <span className="meta summary-sub">Model-checked from your words. Nothing counts until you confirm.</span>
       </summary>
       {c.facts.length ? (
@@ -106,7 +101,7 @@ function QuestionChip({ q }: { q: Question }) {
     return (
       <li className="chip is-answered" id={`q-${q.id}`} tabIndex={-1}>
         <span className="chip-q">
-          <span className="status-dot done" />
+          <StatusIcon kind="confirmed" size="sm" label="Answered" />
           {q.text}
         </span>
         <span className="chip-why">You said: {q.answer}</span>
@@ -151,7 +146,11 @@ export function QuestionChips() {
         <h2 id="questions-title" className="section-title">
           A few questions
         </h2>
-        <span className="meta">{open ? `${open} open` : "All answered"}</span>
+        {open > 0 ? (
+          <StatusBadge kind="open-question" size="sm" label={`${open} open`} text={open} />
+        ) : (
+          <StatusIcon kind="confirmed" size="sm" label="All answered" />
+        )}
       </div>
       <p className="meta questions-note">Not sure? It goes to the officer as an open question.</p>
       <ul className="plain-list chips">
@@ -167,13 +166,14 @@ function DetailInput({ def }: { def: DetailField }) {
   const { c, dispatch } = useCase();
   const fact = factFor(c, def.id);
   const value = valueText(fact);
-  const empty = def.required && !value.trim();
-  const id = `field-${def.id}`;
   const set = (v: string) => dispatch({ type: "setDetail", field: def.id, value: v, section: def.section });
+  const draft = useDraft(value, set);
+  const empty = def.required && !draft.value.trim();
+  const id = `field-${def.id}`;
   return (
     <div className={`field ${def.multiline ? "full" : ""} ${empty ? "is-empty" : ""}`}>
       <div className="field-label-row">
-        {empty && <span className="status-dot pending" />}
+        {empty && <StatusIcon kind="unconfirmed" size="sm" label="Missing" />}
         <label htmlFor={id}>{def.label}</label>
         {!def.required && <span className="meta optional">Optional</span>}
       </div>
@@ -187,14 +187,18 @@ function DetailInput({ def }: { def: DetailField }) {
           ))}
         </select>
       ) : def.multiline ? (
-        <textarea id={id} rows={3} autoComplete="off" value={value} onChange={(e) => set(e.target.value)} />
+        <textarea id={id} rows={3} autoComplete="off" value={draft.value} onChange={(e) => draft.onChange(e.target.value)} onBlur={draft.onBlur} />
       ) : (
-        <input id={id} autoComplete="off" value={value} onChange={(e) => set(e.target.value)} />
+        <input id={id} autoComplete="off" value={draft.value} onChange={(e) => draft.onChange(e.target.value)} onBlur={draft.onBlur} />
       )}
       <div className="field-foot">
         {fact && !isTyped(fact) ? (
           <span className="field-note">
-            <span className={`status-dot ${fact.status === "confirmed" ? "done" : "warning"}`} />
+            {fact.status === "confirmed" ? (
+              <StatusIcon kind="confirmed" size="sm" label="Confirmed" />
+            ) : (
+              <StatusIcon kind="unconfirmed" size="sm" label="Not confirmed yet" />
+            )}
             {fact.kind === "proposed" ? "Our guess, from" : "From"} {sourceLine(fact.source)}
             {fact.source.quote && <q className="field-quote">{fact.source.quote}</q>}
             {fact.status === "unconfirmed" && (
@@ -223,38 +227,44 @@ export function DetailFields({ section }: { section: "A" | "B" }) {
   );
 }
 
-export function ProcessFields() {
+function ProcessField({ id: field, label, prompts }: { id: ProcessFieldId; label: string; prompts: string[] }) {
   const { c, dispatch } = useCase();
+  const draft = useDraft(c.process[field], (value) => dispatch({ type: "setProcess", field, value }));
+  const empty = !draft.value.trim();
+  const id = `field-${field}`;
+  return (
+    <div className={`field full ${empty ? "is-empty" : ""}`}>
+      <div className="field-label-row">
+        {empty && <StatusIcon kind="unconfirmed" size="sm" label="Not written yet" />}
+        <label htmlFor={id}>{label}</label>
+      </div>
+      <ul className="plain-list prompts" id={`${id}-prompts`}>
+        {prompts.map((t) => (
+          <li key={t}>{t}</li>
+        ))}
+      </ul>
+      <textarea
+        id={id}
+        rows={4}
+        autoComplete="off"
+        aria-describedby={`${id}-prompts`}
+        value={draft.value}
+        onChange={(e) => draft.onChange(e.target.value)}
+        onBlur={draft.onBlur}
+      />
+    </div>
+  );
+}
+
+export function ProcessFields() {
   return (
     <div className="form-grid">
       <p className="meta full section-hint">
         Batatis asks; you write. These answers go into the form exactly as written, and Batatis never drafts them.
       </p>
-      {PROCESS_FIELDS.map((p) => {
-        const empty = !c.process[p.id].trim();
-        const id = `field-${p.id}`;
-        return (
-          <div key={p.id} className={`field full ${empty ? "is-empty" : ""}`}>
-            <div className="field-label-row">
-              {empty && <span className="status-dot pending" />}
-              <label htmlFor={id}>{p.label}</label>
-            </div>
-            <ul className="plain-list prompts" id={`${id}-prompts`}>
-              {p.prompts.map((t) => (
-                <li key={t}>{t}</li>
-              ))}
-            </ul>
-            <textarea
-              id={id}
-              rows={4}
-              autoComplete="off"
-              aria-describedby={`${id}-prompts`}
-              value={c.process[p.id]}
-              onChange={(e) => dispatch({ type: "setProcess", field: p.id, value: e.target.value })}
-            />
-          </div>
-        );
-      })}
+      {PROCESS_FIELDS.map((p) => (
+        <ProcessField key={p.id} {...p} />
+      ))}
     </div>
   );
 }

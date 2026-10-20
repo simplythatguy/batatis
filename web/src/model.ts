@@ -67,10 +67,22 @@ export const FACT_LABELS: Record<string, string> = {
   "building.part": "Code part",
   "site.climate": "Where it is installed",
   "code.edition": "Code edition",
+  "professional.fire_suppression": "Fire suppression",
+  "professional.ahj_requires_professional": "Whether the authority requires a professional",
   ...Object.fromEntries(DETAIL_FIELDS.map((f) => [f.id, f.label])),
 };
 
-export const factLabel = (field: string) => FACT_LABELS[field] ?? field;
+/** An unknown key never shows raw: "professional.fire_suppression" reads "Fire suppression". */
+function humanise(field: string): string {
+  const words = (field.split(".").pop() ?? field)
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .trim()
+    .toLowerCase();
+  return words ? words[0].toUpperCase() + words.slice(1) : field;
+}
+
+export const factLabel = (field: string) => FACT_LABELS[field] ?? humanise(field);
 
 export const factFor = (c: Case, field: string): Fact | undefined => c.facts.find((f) => f.field === field);
 

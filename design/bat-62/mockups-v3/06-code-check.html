@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<title>Batatis · Code check (after v3, status language) · BAT-62 mockup</title>
+<meta name="viewport" content="width=1440, height=900">
+<script>if(location.hash==="#light")document.documentElement.className="light"</script>
+<style>
+/* Linear shadcn kit tokens (PR #3). Dark default; open with #light for the light check. Status tokens: spec § Status language. */
+:root{
+  --background:#080808; --sidebar:#0c0c0d; --card:#131315; --popover:#19191b;
+  --muted:rgba(255,255,255,.04); --accent:rgba(255,255,255,.06); --input:#121214;
+  --sidebar-border:rgba(255,255,255,.06); --border:rgba(255,255,255,.1); --border-strong:rgba(255,255,255,.16);
+  --foreground:#eeeeef; --muted-foreground:#9b9ba1; --text-tertiary:#808086;
+  --primary:#e6e6e6; --primary-foreground:#141415; --ring:#8a8a8e; --code-bg:#161618;
+  --status-blocking:#eb5757; --status-warning:#f2c94c; --status-done:#4cb782; --status-pending:#8a8a8e;
+  --status-warning-soft:rgba(242,201,76,.14); --status-warning-line:rgba(242,201,76,.4); --status-on-solid:#141415;
+  --status-info:#7cb0f7; --status-info-soft:rgba(124,176,247,.14); --status-info-line:rgba(124,176,247,.4);
+  --radius:6px; --radius-sm:4px; --radius-lg:8px;
+  --font-sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"JetBrains Mono","SF Mono",ui-monospace,Menlo,monospace;
+  --text-xs:11px; --text-sm:12px; --text-md:13px; --text-base:14px; --text-lg:16px;
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-6:24px; --space-8:32px;
+  --sidebar-width:244px; --header-height:48px;
+}
+html.light{
+  --background:#f4f4f5; --sidebar:#f4f4f5; --card:#ffffff; --popover:#ffffff;
+  --muted:#eeeeef; --accent:rgba(0,0,0,.04); --input:#ffffff;
+  --sidebar-border:rgba(0,0,0,.08); --border:rgba(0,0,0,.1); --border-strong:rgba(0,0,0,.16);
+  --foreground:#1a1a1c; --muted-foreground:#5c5c62; --text-tertiary:#6b6b70; --code-bg:#f4f4f5;
+  --status-blocking:#c42b2b; --status-warning:#855800; --status-done:#18733a; --status-pending:#6b6b70;
+  --status-warning-soft:rgba(133,88,0,.1); --status-warning-line:rgba(133,88,0,.4); --status-on-solid:#ffffff;
+  --status-info:#1d5bb8; --status-info-soft:rgba(29,91,184,.1); --status-info-line:rgba(29,91,184,.4);
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:1440px;height:900px;overflow:hidden;background:var(--background);color:var(--foreground);font:400 var(--text-base)/1.45 var(--font-sans);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+svg.g{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+svg.w{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.si{display:inline-grid;place-items:center;flex-shrink:0;width:18px;height:18px}
+.si svg{width:16px;height:16px}
+.si.ok{color:var(--status-done)}
+.si.attention{color:var(--status-warning);background:var(--status-warning-soft);box-shadow:inset 0 0 0 1px var(--status-warning-line);border-radius:5px}
+.si.attention svg{width:12px;height:12px;stroke-width:2.4}
+.si.blocked{color:var(--status-on-solid);background:var(--status-blocking);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.si.blocked svg{width:11px;height:11px;stroke-width:3}
+.si.info{color:var(--status-info);background:var(--status-info-soft);box-shadow:inset 0 0 0 1px var(--status-info-line);border-radius:50%}
+.si.info svg{width:12px;height:12px;stroke-width:2.4}
+.si.sm{width:14px;height:14px}.si.sm svg{width:12px;height:12px}.si.attention.sm svg,.si.blocked.sm svg{width:9px;height:9px}
+
+.shell{display:grid;grid-template-columns:var(--sidebar-width) 1fr;height:900px}
+.sidebar{background:var(--sidebar);border-right:1px solid var(--sidebar-border);padding:var(--space-3);display:flex;flex-direction:column;gap:var(--space-2)}
+.brand{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2);font-weight:600;font-size:var(--text-md);margin-bottom:var(--space-2)}
+.brand i{width:20px;height:20px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);display:grid;place-items:center;font-style:normal;font-size:10px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;gap:var(--space-2);height:32px;padding:0 var(--space-2);border-radius:var(--radius);color:var(--muted-foreground);font-size:var(--text-md);font-weight:500;text-decoration:none}
+.nav a.active{background:var(--accent);color:var(--foreground)}
+.case{margin-top:auto;padding:var(--space-2);display:flex;flex-direction:column;gap:2px;font-size:var(--text-sm)}
+.case .t{font-size:var(--text-md);font-weight:500}
+.case .m{color:var(--muted-foreground)}
+.case .f{color:var(--muted-foreground);margin-top:var(--space-2)}
+.case .links{display:flex;flex-wrap:wrap;gap:2px var(--space-3);margin-top:var(--space-2)}
+.case .links a{color:var(--muted-foreground);text-decoration:none;white-space:nowrap}
+.main{margin:var(--space-2);background:var(--card);border:1px solid var(--sidebar-border);border-radius:var(--radius-lg);display:flex;flex-direction:column;height:calc(900px - 16px);overflow:hidden}
+.example{height:32px;flex-shrink:0;display:flex;align-items:center;gap:var(--space-2);padding:0 var(--space-4);border-bottom:1px solid var(--border);background:var(--popover);font-size:var(--text-sm);color:var(--muted-foreground)}
+.example b{color:var(--foreground);font-weight:600;letter-spacing:.02em}
+.example a{margin-left:auto;color:var(--muted-foreground);text-decoration:underline;text-decoration-color:var(--border-strong);text-underline-offset:3px}
+.header{height:var(--header-height);flex-shrink:0;display:flex;align-items:center;gap:var(--space-3);padding:0 var(--space-4);border-bottom:1px solid var(--sidebar-border)}
+.title{margin:0;font-size:var(--text-lg);font-weight:600;letter-spacing:-.01em}
+.hright{margin-left:auto;display:flex;align-items:center;gap:var(--space-3);font-size:var(--text-sm);color:var(--muted-foreground)}
+.gaps{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 var(--space-2);border:1px solid transparent;border-radius:var(--radius);background:transparent;font-size:var(--text-sm);font-weight:500;color:var(--foreground);cursor:pointer}
+.body{flex:1;overflow:auto}
+.col{width:720px;margin:0 auto;padding:var(--space-8) 0}
+.footer{flex-shrink:0;display:flex;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-4);border-top:1px solid var(--sidebar-border)}
+.footer .note{margin-right:auto;display:flex;align-items:center;gap:4px;font-size:var(--text-sm);color:var(--muted-foreground)}
+.btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 var(--space-3);border-radius:var(--radius);border:1px solid var(--border);background:var(--popover);font-size:var(--text-sm);font-weight:500;white-space:nowrap;cursor:pointer}
+.btn-primary{background:var(--primary);color:var(--primary-foreground);border-color:transparent}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--muted-foreground)}
+.tag{display:inline-flex;align-items:center;height:22px;padding:0 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:var(--text-xs);color:var(--muted-foreground);white-space:nowrap}
+.list{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.card{padding:var(--space-4)}
+.ch{display:flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-3)}
+.ch h2{margin:0;font-size:var(--text-base);font-weight:600}
+.ind{margin-left:26px}
+.cite-block{margin:0;background:var(--code-bg);border:1px solid var(--sidebar-border);border-radius:var(--radius);padding:var(--space-3);font-size:var(--text-md);line-height:1.55}
+.cite-block .clip{color:var(--muted-foreground)}
+.cite{margin:6px 0 var(--space-4);font-size:var(--text-sm);color:var(--muted-foreground)}
+.cite .credit{display:block;margin-top:2px}
+.cite .credit a{text-decoration-color:transparent}
+.cite a{color:var(--muted-foreground);text-decoration:underline;text-decoration-color:var(--border-strong);text-underline-offset:3px}
+.q{font-size:var(--text-base);margin:0 0 var(--space-3)}
+.q small{display:block;font-size:var(--text-xs);color:var(--muted-foreground);margin-top:2px}
+.ans{display:flex;align-items:center;gap:var(--space-3)}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.seg button{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 16px;border:none;border-right:1px solid var(--border);background:transparent;font-size:var(--text-md);color:var(--foreground);cursor:pointer}
+.seg button:last-child{border-right:none}
+.seg button .si{width:16px;height:16px}
+.route{margin:var(--space-2) 0 0;font-size:var(--text-sm);color:var(--muted-foreground)}
+.more{font-size:var(--text-sm);color:var(--muted-foreground);text-decoration:underline;text-decoration-color:var(--border-strong);text-underline-offset:3px}
+.row{display:flex;align-items:center;gap:var(--space-3);height:44px;padding:0 var(--space-3) 0 var(--space-4);border-top:1px solid var(--sidebar-border);font-size:var(--text-md)}
+.row .chev{color:var(--text-tertiary);display:flex}
+.row .t{flex:1;color:var(--muted-foreground)}
+.row .a{font-size:var(--text-sm);color:var(--muted-foreground)}
+.none{display:flex;align-items:center;gap:var(--space-2);margin-top:var(--space-4);font-size:var(--text-sm);color:var(--muted-foreground)}
+.none a{color:var(--muted-foreground);text-decoration:underline;text-decoration-color:var(--border-strong);text-underline-offset:3px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- lucide glyphs (ISC), 24 viewBox -->
+  <symbol id="g-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="g-alert" viewBox="0 0 24 24"><path d="M12 7v6"/><path d="M12 17h.01"/></symbol>
+  <symbol id="g-info" viewBox="0 0 24 24"><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+  <symbol id="g-help" viewBox="0 0 24 24"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+  <symbol id="g-dashed" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke-dasharray="3.2 3.1"/></symbol>
+  <symbol id="g-circle-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+  <!-- web/src/components.tsx Icon set, 16 viewBox -->
+  <symbol id="w-chevron" viewBox="0 0 16 16"><path d="m6 4 4 4-4 4"/></symbol>
+</svg>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><i>B</i>Batatis</div>
+    <nav class="nav" aria-label="Steps">
+      <a href="#"><span class="si attention" role="img" aria-label="4 facts to check"><svg class="g"><use href="#g-dashed"/></svg></span>Describe</a>
+      <a class="active" href="#" aria-current="page"><span class="si attention" role="img" aria-label="1 open question"><svg class="g"><use href="#g-help"/></svg></span>Code check</a>
+      <a href="#"><span class="si blocked" role="img" aria-label="Blocks the PDF"><svg class="g"><use href="#g-x"/></svg></span>Application</a>
+    </nav>
+    <div class="case">
+      <span class="t">NorthCore CX exterior sheathing board</span>
+      <span class="m">Manufacturer · Example data</span>
+      <span class="f">Checks paperwork, not compliance.</span>
+      <span class="links"><a href="#">Officer view</a><a href="#">How we checked</a><a href="#">Reset</a></span>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="example" role="note" aria-label="Example data">
+      <b>EXAMPLE DATA</b> · fictional · Manufacturer · NorthCore sheathing
+      <a href="#">Start my own</a>
+    </div>
+    <header class="header">
+      <h1 class="title">Code check</h1>
+      <div class="hright">
+        <span>NBC(AE) 2023 · 2nd printing · keyword search (no AI key)</span>
+        <!-- Info (PR #40 severity 'info'): neutral circle, never counted as to fix or attention. -->
+        <button class="gaps" aria-label="13 to fix before the PDF. 4 need attention. 1 notice for your information, not counted. Open the gap list." title="13 to fix · 4 need attention · 1 notice">
+          <span class="si blocked" aria-hidden="true"><svg class="g"><use href="#g-x"/></svg></span>13
+          <span class="si attention" aria-hidden="true" style="margin-left:6px"><svg class="g"><use href="#g-alert"/></svg></span>4
+          <span class="si info" aria-hidden="true" style="margin-left:6px"><svg class="g"><use href="#g-info"/></svg></span>1
+        </button>
+      </div>
+    </header>
+
+    <div class="body">
+      <div class="col">
+        <!-- One card open; the rest are one-line rows. "1 of 3" cut (cut list #10); progress lives in the footer marks. -->
+        <div class="list">
+          <article class="card">
+            <div class="ch">
+              <span class="si attention" role="img" aria-label="Not answered yet"><svg class="g"><use href="#g-dashed"/></svg></span>
+              <span class="tag">Main rule</span><h2>Where a vapour-resistant board may sit in the wall</h2>
+            </div>
+            <div class="ind">
+              <blockquote class="cite-block">Sheet and panel-type materials described in Article 9.25.5.1. shall be installed a) on the warm face of the assembly (see also Article 9.25.4.2.), b) at <span class="clip">… [clipped, see NBC p.1000]</span></blockquote>
+              <!-- NRC credit: one shared CodeCredit line wherever code text appears (Search rows, Code reference, Section C, cards). Link: the NBC 2023 Alberta Edition page on nrc.canada.ca (already in the repo). -->
+              <div class="cite">NBC(AE) 2023 · 2nd printing · Div B 9.25.5.2.(1)(b) · <a href="#">PDF p.1000 ↗</a>
+                <span class="credit"><a href="https://nrc.canada.ca/en/certifications-evaluations-standards/codes-canada/codes-canada-publications/national-building-code-2023-alberta-edition" aria-label="Code text: National Research Council of Canada (opens nrc.canada.ca)">Code text: National Research Council of Canada ↗</a></span></div>
+              <p class="q">Does your product go on the outside of the studs, where the outside-to-inside insulation ratio may be lower than the table asks for?<small>AI-written question</small></p>
+              <div class="ans">
+                <span class="seg" role="radiogroup" aria-label="Answer">
+                  <button role="radio" aria-checked="false">Yes</button><button role="radio" aria-checked="false">No</button>
+                  <button role="radio" aria-checked="false"><span class="si attention" aria-hidden="true"><svg class="g"><use href="#g-help"/></svg></span>Not sure</button>
+                </span>
+                <a class="more" href="#">Before you answer: 1 question ›</a>
+              </div>
+              <!-- Routing line: required text (must-keep 1). v2 footer's old "the officer will ask" copy removed. -->
+              <p class="route">Not sure? It goes to the officer as an open question.</p>
+            </div>
+          </article>
+          <div class="row">
+            <span class="si attention" role="img" aria-label="Not sure: open question for the officer"><svg class="g"><use href="#g-help"/></svg></span>
+            <span class="t">What material counts as the sheathing membrane</span>
+            <span class="chev"><svg class="w" width="14" height="14" aria-hidden="true"><use href="#w-chevron"/></svg></span>
+          </div>
+          <div class="row">
+            <span class="si ok" role="img" aria-label="Answered"><svg class="g"><use href="#g-circle-check"/></svg></span>
+            <span class="t">Using the board to hold the siding</span>
+            <!-- The answer itself is content, not status: kept as plain text. -->
+            <span class="a">Same as the code</span>
+            <span class="chev"><svg class="w" width="14" height="14" aria-hidden="true"><use href="#w-chevron"/></svg></span>
+          </div>
+        </div>
+        <p class="none">None of these fit your product? <a href="#">Ask the officer</a> · <a href="#">Search the code</a></p>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <!-- Was "2 of 3 answered · Not sure is fine, the officer will ask". One mark per card, in card order. -->
+      <span class="note" role="img" aria-label="2 of 3 answered">
+        <span class="si attention sm"><svg class="g"><use href="#g-dashed"/></svg></span>
+        <span class="si attention sm"><svg class="g"><use href="#g-help"/></svg></span>
+        <span class="si ok sm"><svg class="g"><use href="#g-circle-check"/></svg></span>
+      </span>
+      <button class="btn btn-ghost">Back</button>
+      <button class="btn btn-primary">Continue to application</button>
+    </footer>
+  </main>
+</div>
+</body>
+</html>

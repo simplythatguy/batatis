@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<title>Batatis · Officer view (after v3, status language) · BAT-62 mockup</title>
+<meta name="viewport" content="width=1440, height=900">
+<script>if(location.hash==="#light")document.documentElement.className="light"</script>
+<style>
+/* Linear shadcn kit tokens (PR #3). Dark default; open with #light for the light check. Status tokens: spec § Status language. */
+:root{
+  --background:#080808; --sidebar:#0c0c0d; --card:#131315; --popover:#19191b;
+  --muted:rgba(255,255,255,.04); --accent:rgba(255,255,255,.06); --input:#121214;
+  --sidebar-border:rgba(255,255,255,.06); --border:rgba(255,255,255,.1); --border-strong:rgba(255,255,255,.16);
+  --foreground:#eeeeef; --muted-foreground:#9b9ba1; --text-tertiary:#808086;
+  --primary:#e6e6e6; --primary-foreground:#141415; --ring:#8a8a8e; --code-bg:#161618;
+  --status-blocking:#eb5757; --status-warning:#f2c94c; --status-done:#4cb782; --status-pending:#8a8a8e;
+  --status-warning-soft:rgba(242,201,76,.14); --status-warning-line:rgba(242,201,76,.4); --status-on-solid:#141415;
+  --radius:6px; --radius-sm:4px; --radius-lg:8px;
+  --font-sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --text-xs:11px; --text-sm:12px; --text-md:13px; --text-base:14px; --text-lg:16px;
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-6:24px; --space-8:32px;
+  --sidebar-width:244px; --header-height:48px;
+}
+html.light{
+  --background:#f4f4f5; --sidebar:#f4f4f5; --card:#ffffff; --popover:#ffffff;
+  --muted:#eeeeef; --accent:rgba(0,0,0,.04); --input:#ffffff;
+  --sidebar-border:rgba(0,0,0,.08); --border:rgba(0,0,0,.1); --border-strong:rgba(0,0,0,.16);
+  --foreground:#1a1a1c; --muted-foreground:#5c5c62; --text-tertiary:#6b6b70; --code-bg:#f4f4f5;
+  --status-blocking:#c42b2b; --status-warning:#855800; --status-done:#18733a; --status-pending:#6b6b70;
+  --status-warning-soft:rgba(133,88,0,.1); --status-warning-line:rgba(133,88,0,.4); --status-on-solid:#ffffff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:1440px;height:900px;overflow:hidden;background:var(--background);color:var(--foreground);font:400 var(--text-base)/1.45 var(--font-sans);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+svg.g{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+svg.w{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.si{display:inline-grid;place-items:center;flex-shrink:0;width:18px;height:18px}
+.si svg{width:16px;height:16px}
+.si.ok{color:var(--status-done)}
+.si.attention{color:var(--status-warning);background:var(--status-warning-soft);box-shadow:inset 0 0 0 1px var(--status-warning-line);border-radius:5px}
+.si.attention svg{width:12px;height:12px;stroke-width:2.4}
+.si.blocked{color:var(--status-on-solid);background:var(--status-blocking);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.si.blocked svg{width:11px;height:11px;stroke-width:3}
+.si.sm{width:14px;height:14px}.si.sm svg{width:12px;height:12px}.si.attention.sm svg,.si.blocked.sm svg{width:9px;height:9px}
+
+.shell{display:grid;grid-template-columns:var(--sidebar-width) 1fr;height:900px}
+.sidebar{background:var(--sidebar);border-right:1px solid var(--sidebar-border);padding:var(--space-3);display:flex;flex-direction:column;gap:var(--space-2)}
+.brand{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2);font-weight:600;font-size:var(--text-md);margin-bottom:var(--space-2)}
+.brand i{width:20px;height:20px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);display:grid;place-items:center;font-style:normal;font-size:10px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;gap:var(--space-2);height:32px;padding:0 var(--space-2);border-radius:var(--radius);color:var(--muted-foreground);font-size:var(--text-md);font-weight:500;text-decoration:none}
+.case{margin-top:auto;padding:var(--space-2);display:flex;flex-direction:column;gap:2px;font-size:var(--text-sm)}
+.case .t{font-size:var(--text-md);font-weight:500}
+.case .m{color:var(--muted-foreground)}
+.case .f{color:var(--muted-foreground);margin-top:var(--space-2)}
+.case .links{display:flex;flex-wrap:wrap;gap:2px var(--space-3);margin-top:var(--space-2)}
+.case .links a{color:var(--muted-foreground);text-decoration:none;white-space:nowrap}
+.case .links a.on{color:var(--foreground)}
+.main{margin:var(--space-2);background:var(--card);border:1px solid var(--sidebar-border);border-radius:var(--radius-lg);display:flex;flex-direction:column;height:calc(900px - 16px);overflow:hidden}
+.example{height:32px;flex-shrink:0;display:flex;align-items:center;gap:var(--space-2);padding:0 var(--space-4);border-bottom:1px solid var(--border);background:var(--popover);font-size:var(--text-sm);color:var(--muted-foreground)}
+.example b{color:var(--foreground);font-weight:600;letter-spacing:.02em}
+.example a{margin-left:auto;color:var(--muted-foreground);text-decoration:underline;text-decoration-color:var(--border-strong);text-underline-offset:3px}
+.header{height:var(--header-height);flex-shrink:0;display:flex;align-items:center;padding:0 var(--space-4);border-bottom:1px solid var(--sidebar-border)}
+.title{margin:0;font-size:var(--text-lg);font-weight:600;letter-spacing:-.01em}
+.hright{margin-left:auto;font-size:var(--text-sm);color:var(--muted-foreground)}
+.body{flex:1;overflow:auto}
+.col{width:720px;margin:0 auto;padding:var(--space-8) 0}
+.footer{flex-shrink:0;display:flex;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-4);border-top:1px solid var(--sidebar-border)}
+.footer .note{margin-right:auto;font-size:var(--text-sm);color:var(--muted-foreground)}
+.btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 var(--space-3);border-radius:var(--radius);border:1px solid var(--border);background:var(--popover);font-size:var(--text-sm);font-weight:500;white-space:nowrap;cursor:pointer}
+.btn-primary{background:var(--primary);color:var(--primary-foreground);border-color:transparent}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--muted-foreground)}
+
+.top{display:flex;align-items:center;gap:var(--space-3);margin:0 0 var(--space-1)}
+h2{margin:0;font-size:var(--text-lg);font-weight:600;letter-spacing:-.01em}
+/* Tally: three marks replace "N items need attention" breakdown prose. */
+.tally{margin-left:auto;display:flex;align-items:center;gap:var(--space-3);font-size:var(--text-sm);color:var(--muted-foreground)}
+.tally span{display:inline-flex;align-items:center;gap:6px}
+.tally b{color:var(--foreground);font-weight:500}
+.pkg{display:flex;align-items:center;gap:var(--space-2);margin:var(--space-2) 0 var(--space-1);font-size:var(--text-sm);color:var(--muted-foreground)}
+.limit{margin:0 0 var(--space-6);font-size:var(--text-sm);color:var(--muted-foreground)}
+.list{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.row{display:grid;grid-template-columns:18px 170px 1fr 14px;gap:var(--space-3);align-items:center;height:44px;padding:0 var(--space-3) 0 var(--space-4);border-top:1px solid var(--sidebar-border);font-size:var(--text-md)}
+.row:first-child{border-top:none}
+.row .chev{color:var(--text-tertiary);display:flex}
+.row .k{font-weight:500}
+.row .k span{color:var(--muted-foreground);font-weight:400;margin-left:4px}
+.row .t{color:var(--muted-foreground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .t em{font-style:normal;color:var(--foreground)}
+.row.quiet{background:var(--muted)}
+.row.quiet .k{font-weight:400;color:var(--muted-foreground)}
+.ic-neutral{color:var(--muted-foreground);display:grid;place-items:center}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- lucide glyphs (ISC), 24 viewBox -->
+  <symbol id="g-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="g-alert" viewBox="0 0 24 24"><path d="M12 7v6"/><path d="M12 17h.01"/></symbol>
+  <symbol id="g-help" viewBox="0 0 24 24"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+  <symbol id="g-dashed" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke-dasharray="3.2 3.1"/></symbol>
+  <symbol id="g-circle-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="g-hardhat" viewBox="0 0 24 24"><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M14 6a6 6 0 0 1 6 6v3"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><rect x="2" y="15" width="20" height="4" rx="1"/></symbol>
+  <symbol id="g-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="g-file-search" viewBox="0 0 24 24"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M4.268 21a2 2 0 0 0 1.727 1H18a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3"/><path d="m9 18-1.5-1.5"/><circle cx="5" cy="14" r="3"/></symbol>
+  <!-- web/src/components.tsx Icon set, 16 viewBox -->
+  <symbol id="w-file" viewBox="0 0 16 16"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></symbol>
+  <symbol id="w-chevron" viewBox="0 0 16 16"><path d="m6 4 4 4-4 4"/></symbol>
+</svg>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><i>B</i>Batatis</div>
+    <nav class="nav" aria-label="Steps">
+      <a href="#"><span class="si attention" role="img" aria-label="4 facts to check"><svg class="g"><use href="#g-dashed"/></svg></span>Describe</a>
+      <a href="#"><span class="si attention" role="img" aria-label="1 open question"><svg class="g"><use href="#g-help"/></svg></span>Code check</a>
+      <a href="#"><span class="si blocked" role="img" aria-label="Blocks the PDF"><svg class="g"><use href="#g-x"/></svg></span>Application</a>
+    </nav>
+    <div class="case">
+      <span class="t">NorthCore CX exterior sheathing board</span>
+      <span class="m">Manufacturer · Example data</span>
+      <span class="f">Checks paperwork, not compliance.</span>
+      <span class="links"><a class="on" href="#" aria-current="page">Officer view</a><a href="#">How we checked</a><a href="#">Reset</a></span>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="example" role="note" aria-label="Example data">
+      <b>EXAMPLE DATA</b> · fictional · Officer view of the loaded example · Manufacturer · NorthCore sheathing
+      <a href="#">Return to application</a>
+    </div>
+    <header class="header">
+      <h1 class="title">Officer view</h1>
+      <span class="hright">Administrative completeness</span>
+    </header>
+
+    <div class="body">
+      <div class="col">
+        <div class="top">
+          <h2>18 items need attention</h2>
+          <div class="tally" aria-label="14 missing and blocking the PDF, 4 need attention">
+            <span><span class="si blocked sm" aria-hidden="true"><svg class="g"><use href="#g-x"/></svg></span><b>14</b></span>
+            <span><span class="si attention sm" aria-hidden="true"><svg class="g"><use href="#g-alert"/></svg></span><b>4</b></span>
+          </div>
+        </div>
+        <!-- Package line (unsigned, Part 2 blank) and limitation line stay as text (ruling 1). -->
+        <p class="pkg"><span class="si blocked sm" role="img" aria-label="Official PDF locked"><svg class="g"><use href="#g-lock"/></svg></span>Draft · unsigned · officer Part 2 blank · no export requested yet</p>
+        <p class="limit">Checks that information is present. It does not decide whether the design complies or is safe.</p>
+
+        <!-- One list; group counts sit after the label, the mark shows the worst state in the group.
+             Unc6 #7 (#16 @4a4c122): each missing item appears once here; no second "Current missing items" list and no
+             separate "Open question"/"Confirm" lines. Only title, tally, package line and limitation line sit above it.
+             An unavailable route shows at most one plain line per screen, never "isn't available on this engine yet". -->
+        <div class="list">
+          <div class="row"><span class="si blocked" role="img" aria-label="Missing, blocks the PDF"><svg class="g"><use href="#g-x"/></svg></span><span class="k">Applicant <span>A · 4</span></span><span class="t">Representative, mailing address, date of request, confirm owner</span><span class="chev"><svg class="w" width="14" height="14" aria-hidden="true"><use href="#w-chevron"/></svg></span></div>
+          <div class="row"><span class="si blocked" role="img" aria-label="Missing, blocks the PDF"><svg class="g"><use href="#g-x"/></svg></span><span class="k">Project <span>B · 4</span></span><span class="t">Municipal address, legal description, proposed alternative, confirm jurisdiction-wide</span><span class="chev"><svg class="w" width="14" height="14" aria-hidden="true"><use href="#w-chevron"/></svg></span></div>
+          <div class="row"><span class="si attention" role="img" aria-label="Not answered yet"><svg class="g"><use href="#g-dashed"/></svg></span><span class="k">Code references <span>C · 1</span></span><span class="t">Unanswered card: using the board to hold the siding</span><span class="chev"><svg class="w" width="14" height="14" aria-hidden="true"><use href="#w-chevron"/></svg></span></div>
+          <div class="row"><span class="si blocked" role="img" aria-label="Missing, blocks the PDF"><svg class="g"><use href="#g-x"/></svg></span><span class="k">Your alternative <span>6</span></span><span class="t">All six answers not written yet</span><span class="chev"><svg class="w" width="14" height="14" aria-hidden="true"><use href="#w-chevron"/></svg></span></div>
+          <!-- Professional flag wording is a guardrail: kept; the pill is gone, the hard hat says "professional". -->
+          <div class="row"><span class="si attention" role="img" aria-label="Needs a professional: not decided yet"><svg class="g"><use href="#g-hardhat"/></svg></span><span class="k">Evidence <span>D</span></span><span class="t"><em>Engineer or architect: not decided yet</em> · not a licence decision</span><span class="chev"><svg class="w" width="14" height="14" aria-hidden="true"><use href="#w-chevron"/></svg></span></div>
+          <div class="row"><span class="si attention" role="img" aria-label="Needs evidence, officer will check"><svg class="g"><use href="#g-file-search"/></svg></span><span class="k">Applicant claims <span>1</span></span><span class="t">Needs evidence · <em>“No separate sheathing membrane is needed”</em></span><span class="chev"><svg class="w" width="14" height="14" aria-hidden="true"><use href="#w-chevron"/></svg></span></div>
+          <div class="row"><span class="si attention" role="img" aria-label="Open question for the officer"><svg class="g"><use href="#g-help"/></svg></span><span class="k">Not sure <span>1</span></span><span class="t">Open question for the officer: <em>Which standard was the foil facer tested to, and who ran the test?</em></span><span class="chev"><svg class="w" width="14" height="14" aria-hidden="true"><use href="#w-chevron"/></svg></span></div>
+          <!-- Uploads are not a status: neutral file glyph, guardrail wording kept. -->
+          <div class="row quiet"><span class="ic-neutral"><svg class="w" width="16" height="16" aria-hidden="true"><use href="#w-file"/></svg></span><span class="k">Documents <span>2</span></span><span class="t">Product data sheet, vapour-permeance test · Saved, not read yet</span><span class="chev"><svg class="w" width="14" height="14" aria-hidden="true"><use href="#w-chevron"/></svg></span></div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <span class="note">An officer reviews and decides.</span>
+      <button class="btn btn-ghost">Preview request</button>
+      <button class="btn btn-primary">Copy information request</button>
+    </footer>
+  </main>
+</div>
+</body>
+</html>

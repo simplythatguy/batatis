@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<title>Batatis · Landing (after v3, status language) · BAT-62 mockup</title>
+<meta name="viewport" content="width=1440, height=900">
+<script>if(location.hash==="#light")document.documentElement.className="light"</script>
+<style>
+/* Linear shadcn kit tokens (PR #3, apps/web/app/globals.css). Dark = .dark, light = :root/.light. Open with #light for the light check. */
+:root{
+  --background:#080808; --sidebar:#0c0c0d; --card:#131315; --popover:#19191b;
+  --muted:rgba(255,255,255,.04); --accent:rgba(255,255,255,.06); --input:#121214;
+  --sidebar-border:rgba(255,255,255,.06); --border:rgba(255,255,255,.1); --border-strong:rgba(255,255,255,.16);
+  --foreground:#eeeeef; --muted-foreground:#9b9ba1; --text-tertiary:#808086;
+  --primary:#e6e6e6; --primary-foreground:#141415; --ring:#8a8a8e; --code-bg:#161618;
+  /* Status language (spec § Status language). Colour sits on the mark only; the container shape carries the status too. */
+  --status-blocking:#eb5757; --status-warning:#f2c94c; --status-done:#4cb782; --status-pending:#8a8a8e;
+  --status-warning-soft:rgba(242,201,76,.14); --status-warning-line:rgba(242,201,76,.4); --status-on-solid:#141415;
+  --radius:6px; --radius-sm:4px; --radius-lg:8px;
+  --font-sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --text-xs:11px; --text-sm:12px; --text-md:13px; --text-base:14px; --text-lg:16px;
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-6:24px; --space-8:32px;
+  --sidebar-width:244px; --header-height:48px;
+}
+html.light{
+  --background:#f4f4f5; --sidebar:#f4f4f5; --card:#ffffff; --popover:#ffffff;
+  --muted:#eeeeef; --accent:rgba(0,0,0,.04); --input:#ffffff;
+  --sidebar-border:rgba(0,0,0,.08); --border:rgba(0,0,0,.1); --border-strong:rgba(0,0,0,.16);
+  --foreground:#1a1a1c; --muted-foreground:#5c5c62; --text-tertiary:#6b6b70; --code-bg:#f4f4f5;
+  --status-blocking:#c42b2b; --status-warning:#855800; --status-done:#18733a; --status-pending:#6b6b70;
+  --status-warning-soft:rgba(133,88,0,.1); --status-warning-line:rgba(133,88,0,.4); --status-on-solid:#ffffff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:1440px;height:900px;overflow:hidden;background:var(--background);color:var(--foreground);font:400 var(--text-base)/1.45 var(--font-sans);-webkit-font-smoothing:antialiased}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+svg.g{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+svg.w{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+/* StatusIcon: blocked = solid octagon, attention = tinted square, ok = bare glyph */
+.si{display:inline-grid;place-items:center;flex-shrink:0;width:18px;height:18px}
+.si svg{width:16px;height:16px}
+.si.ok{color:var(--status-done)}
+.si.attention{color:var(--status-warning);background:var(--status-warning-soft);box-shadow:inset 0 0 0 1px var(--status-warning-line);border-radius:5px}
+.si.attention svg{width:12px;height:12px;stroke-width:2.4}
+.si.blocked{color:var(--status-on-solid);background:var(--status-blocking);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.si.blocked svg{width:11px;height:11px;stroke-width:3}
+
+.shell{display:grid;grid-template-columns:var(--sidebar-width) 1fr;height:900px}
+.sidebar{background:var(--sidebar);border-right:1px solid var(--sidebar-border);padding:var(--space-3);display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2);font-weight:600;font-size:var(--text-md)}
+.brand i{width:20px;height:20px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);display:grid;place-items:center;font-style:normal;font-size:10px}
+.side-foot{margin-top:auto;padding:var(--space-2);font-size:var(--text-sm);color:var(--text-tertiary)}
+.main{margin:var(--space-2);background:var(--card);border:1px solid var(--sidebar-border);border-radius:var(--radius-lg);display:flex;flex-direction:column;height:calc(900px - 16px);overflow:hidden}
+.header{height:var(--header-height);flex-shrink:0;display:flex;align-items:center;padding:0 var(--space-4);border-bottom:1px solid var(--sidebar-border)}
+.title{margin:0;font-size:var(--text-lg);font-weight:600;letter-spacing:-.01em}
+.col{width:640px;margin:0 auto;padding:120px 0 0}
+.lede{margin:0 0 var(--space-6);color:var(--muted-foreground);font-size:var(--text-md)}
+.roles{border:1px solid var(--sidebar-border);border-radius:var(--radius-lg);overflow:hidden}
+.role{display:flex;align-items:center;gap:var(--space-4);padding:var(--space-4);border-bottom:1px solid var(--sidebar-border);cursor:pointer}
+.role:last-child{border-bottom:none}
+.role.hover{background:var(--muted)}
+.role .ic{width:32px;height:32px;border-radius:var(--radius);border:1px solid var(--border);display:grid;place-items:center;color:var(--muted-foreground);flex-shrink:0}
+.role .ic svg{width:16px;height:16px}
+.role .n{font-size:var(--text-base);font-weight:500}
+.role .d{font-size:var(--text-md);color:var(--muted-foreground)}
+.role .chev{margin-left:auto;color:var(--text-tertiary);display:flex}
+.examples{margin-top:var(--space-6);font-size:var(--text-sm);color:var(--text-tertiary)}
+.examples a{color:var(--muted-foreground);text-decoration:underline;text-decoration-color:var(--border-strong);text-underline-offset:3px}
+/* Legend: the only place the three marks are spelled out. */
+.legend{margin-top:56px;padding-top:var(--space-4);border-top:1px solid var(--sidebar-border);display:flex;gap:var(--space-6);font-size:var(--text-sm);color:var(--muted-foreground)}
+.legend li{display:flex;align-items:center;gap:var(--space-2);list-style:none}
+.legend ul{display:contents}
+.legend .k{color:var(--text-tertiary);margin-right:auto}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- lucide glyphs (ISC), 24 viewBox -->
+  <symbol id="g-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="g-alert" viewBox="0 0 24 24"><path d="M12 7v6"/><path d="M12 17h.01"/></symbol>
+  <symbol id="g-circle-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="g-factory" viewBox="0 0 24 24"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1M12 18h1M7 18h1"/></symbol>
+  <symbol id="g-hammer" viewBox="0 0 24 24"><path d="m15 12-8.373 8.373a1 1 0 1 1-3-3L12 9"/><path d="m18 15 4-4"/><path d="m21.5 11.5-1.914-1.914A2 2 0 0 1 19 8.172V7l-2.26-2.26a6 6 0 0 0-4.202-1.756L9 2.96l.92.82A6.18 6.18 0 0 1 12 8.4V10l2 2h1.172a2 2 0 0 1 1.414.586L18.5 14.5"/></symbol>
+  <symbol id="g-house" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <!-- web/src/components.tsx Icon set, 16 viewBox -->
+  <symbol id="w-chevron" viewBox="0 0 16 16"><path d="m6 4 4 4-4 4"/></symbol>
+</svg>
+<div class="shell">
+  <aside class="sidebar" aria-label="Batatis">
+    <div class="brand"><i>B</i>Batatis</div>
+    <div class="side-foot">Checks paperwork, not compliance.</div>
+  </aside>
+  <main class="main">
+    <header class="header"><h1 class="title">Who are you?</h1></header>
+    <div class="col">
+      <p class="lede">It starts empty. Nothing is filled in for you.</p>
+      <!-- The one thing: pick a role. Role copy verbatim. Role glyphs are neutral (never status colours). -->
+      <div class="roles" role="list">
+        <div class="role hover" role="listitem" tabindex="0">
+          <span class="ic"><svg class="g" aria-hidden="true"><use href="#g-factory"/></svg></span>
+          <div><div class="n">Manufacturer</div><div class="d">A product you want builders to use. The case starts from the product, not from one house.</div></div>
+          <span class="chev"><svg class="w" width="14" height="14" aria-hidden="true"><use href="#w-chevron"/></svg></span>
+        </div>
+        <div class="role" role="listitem" tabindex="0">
+          <span class="ic"><svg class="g" aria-hidden="true"><use href="#g-hammer"/></svg></span>
+          <div><div class="n">General contractor</div><div class="d">One job that cannot follow an acceptable solution as written.</div></div>
+          <span class="chev"><svg class="w" width="14" height="14" aria-hidden="true"><use href="#w-chevron"/></svg></span>
+        </div>
+        <div class="role" role="listitem" tabindex="0">
+          <span class="ic"><svg class="g" aria-hidden="true"><use href="#g-house"/></svg></span>
+          <div><div class="n">Homebuilder</div><div class="d">A house or suite. Storeys and the site are the first questions.</div></div>
+          <span class="chev"><svg class="w" width="14" height="14" aria-hidden="true"><use href="#w-chevron"/></svg></span>
+        </div>
+      </div>
+      <p class="examples">Or <a href="#">open an example</a> (Example data, fictional).</p>
+
+      <!-- First-run legend: the three marks used on every later screen. Green is "nothing left for you", never "complies". -->
+      <div class="legend" role="note" aria-label="What the marks mean">
+        <span class="k">The marks</span>
+        <ul>
+          <li><span class="si blocked" aria-hidden="true"><svg class="g"><use href="#g-x"/></svg></span>Blocks the PDF</li>
+          <li><span class="si attention" aria-hidden="true"><svg class="g"><use href="#g-alert"/></svg></span>Needs you or the officer</li>
+          <li><span class="si ok" aria-hidden="true"><svg class="g"><use href="#g-circle-check"/></svg></span>Nothing left for you</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

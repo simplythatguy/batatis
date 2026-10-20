@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<title>Batatis · Check completeness dialog (after v3, status language) · BAT-62 mockup</title>
+<meta name="viewport" content="width=1440, height=900">
+<script>if(location.hash==="#light")document.documentElement.className="light"</script>
+<style>
+/* Linear shadcn kit tokens (PR #3). Dark default; open with #light for the light check. Status tokens: spec § Status language. */
+:root{
+  --background:#080808; --sidebar:#0c0c0d; --card:#131315; --popover:#19191b;
+  --muted:rgba(255,255,255,.04); --accent:rgba(255,255,255,.06); --input:#121214;
+  --sidebar-border:rgba(255,255,255,.06); --border:rgba(255,255,255,.1); --border-strong:rgba(255,255,255,.16);
+  --foreground:#eeeeef; --muted-foreground:#9b9ba1; --text-tertiary:#808086;
+  --primary:#e6e6e6; --primary-foreground:#141415; --ring:#8a8a8e;
+  --status-blocking:#eb5757; --status-warning:#f2c94c; --status-done:#4cb782; --status-pending:#8a8a8e;
+  --status-warning-soft:rgba(242,201,76,.14); --status-warning-line:rgba(242,201,76,.4); --status-on-solid:#141415;
+  --radius:6px; --radius-sm:4px; --radius-lg:8px;
+  --font-sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --text-xs:11px; --text-sm:12px; --text-md:13px; --text-base:14px; --text-lg:16px;
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-6:24px; --space-8:32px;
+  --sidebar-width:244px; --header-height:48px; --input-height:32px;
+}
+html.light{
+  --background:#f4f4f5; --sidebar:#f4f4f5; --card:#ffffff; --popover:#ffffff;
+  --muted:#eeeeef; --accent:rgba(0,0,0,.04); --input:#ffffff;
+  --sidebar-border:rgba(0,0,0,.08); --border:rgba(0,0,0,.1); --border-strong:rgba(0,0,0,.16);
+  --foreground:#1a1a1c; --muted-foreground:#5c5c62; --text-tertiary:#6b6b70;
+  --status-blocking:#c42b2b; --status-warning:#855800; --status-done:#18733a; --status-pending:#6b6b70;
+  --status-warning-soft:rgba(133,88,0,.1); --status-warning-line:rgba(133,88,0,.4); --status-on-solid:#ffffff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:1440px;height:900px;overflow:hidden;background:var(--background);color:var(--foreground);font:400 var(--text-base)/1.45 var(--font-sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+svg.g{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+svg.w{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.si{display:inline-grid;place-items:center;flex-shrink:0;width:18px;height:18px}
+.si svg{width:16px;height:16px}
+.si.ok{color:var(--status-done)}
+.si.attention{color:var(--status-warning);background:var(--status-warning-soft);box-shadow:inset 0 0 0 1px var(--status-warning-line);border-radius:5px}
+.si.attention svg{width:12px;height:12px;stroke-width:2.4}
+.si.blocked{color:var(--status-on-solid);background:var(--status-blocking);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.si.blocked svg{width:11px;height:11px;stroke-width:3}
+.si.sm{width:14px;height:14px}.si.sm svg{width:12px;height:12px}.si.attention.sm svg,.si.blocked.sm svg{width:9px;height:9px}
+.si.lg{width:24px;height:24px}.si.blocked.lg svg{width:13px;height:13px;stroke-width:2.6}
+
+.shell{display:grid;grid-template-columns:var(--sidebar-width) 1fr;height:900px}
+.sidebar{background:var(--sidebar);border-right:1px solid var(--sidebar-border);padding:var(--space-3);display:flex;flex-direction:column;gap:var(--space-2)}
+.brand{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2);font-weight:600;font-size:var(--text-md);margin-bottom:var(--space-2)}
+.brand i{width:20px;height:20px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);display:grid;place-items:center;font-style:normal;font-size:10px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;gap:var(--space-2);height:32px;padding:0 var(--space-2);border-radius:var(--radius);color:var(--muted-foreground);font-size:var(--text-md);font-weight:500;text-decoration:none}
+.nav a.active{background:var(--accent);color:var(--foreground)}
+.case{margin-top:auto;padding:var(--space-2);display:flex;flex-direction:column;gap:2px;font-size:var(--text-sm)}
+.case .t{font-size:var(--text-md);font-weight:500}
+.case .m{color:var(--muted-foreground)}
+.case .f{color:var(--muted-foreground);margin-top:var(--space-2)}
+.main{margin:var(--space-2);background:var(--card);border:1px solid var(--sidebar-border);border-radius:var(--radius-lg);display:flex;flex-direction:column;height:calc(900px - 16px);overflow:hidden}
+.example{height:32px;flex-shrink:0;display:flex;align-items:center;gap:var(--space-2);padding:0 var(--space-4);border-bottom:1px solid var(--border);background:var(--popover);font-size:var(--text-sm);color:var(--muted-foreground)}
+.example b{color:var(--foreground);font-weight:600;letter-spacing:.02em}
+.header{height:var(--header-height);flex-shrink:0;display:flex;align-items:center;gap:var(--space-4);padding:0 var(--space-4);border-bottom:1px solid var(--sidebar-border)}
+.title{margin:0;font-size:var(--text-lg);font-weight:600}
+.tabs{display:flex;gap:2px}
+.tabs a{height:26px;display:inline-flex;align-items:center;gap:6px;padding:0 10px 0 8px;border-radius:var(--radius);font-size:var(--text-sm);font-weight:500;color:var(--muted-foreground);text-decoration:none}
+.tabs a.active{background:var(--accent);color:var(--foreground)}
+.tabs .l{color:var(--muted-foreground);font-weight:400}
+.body{flex:1;padding:var(--space-8) 0}
+.col{width:720px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)}
+.field label{display:block;font-size:var(--text-xs);color:var(--muted-foreground);font-weight:500;margin-bottom:4px}
+.field input{width:100%;height:var(--input-height);background:var(--input);border:1px solid var(--border);border-radius:var(--radius);padding:0 var(--space-3)}
+.footer{flex-shrink:0;display:flex;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-4);border-top:1px solid var(--sidebar-border)}
+.footer .note{margin-right:auto;font-size:var(--text-sm);color:var(--muted-foreground)}
+.btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 var(--space-3);border-radius:var(--radius);border:1px solid var(--border);background:var(--popover);font-size:var(--text-sm);font-weight:500;white-space:nowrap;cursor:pointer}
+.btn-primary{background:var(--primary);color:var(--primary-foreground);border-color:transparent}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--muted-foreground)}
+.btn[aria-disabled="true"]{cursor:not-allowed}
+/* dialog */
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:grid;place-items:center}
+html.light .backdrop{background:rgba(0,0,0,.3)}
+.dialog{width:480px;display:flex;flex-direction:column;background:var(--popover);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:0 16px 48px rgba(0,0,0,.5)}
+.dh{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-4) var(--space-4) 0}
+.dh h2{margin:0;font-size:var(--text-base);font-weight:600}
+.x{margin-left:auto;width:24px;height:24px;display:grid;place-items:center;border:none;background:transparent;color:var(--muted-foreground);border-radius:var(--radius);cursor:pointer}
+.db{padding:var(--space-3) var(--space-4) var(--space-4);display:flex;flex-direction:column;gap:var(--space-4)}
+/* --muted-foreground, not --text-tertiary: tertiary on --popover is 4.47:1 in dark (fails 4.5). */
+.exnote{font-size:var(--text-sm);color:var(--muted-foreground)}
+.exnote b{color:var(--foreground);font-weight:600;letter-spacing:.02em}
+.list{border:1px solid var(--sidebar-border);border-radius:var(--radius);overflow:hidden}
+.r{display:flex;align-items:center;gap:var(--space-3);min-height:40px;padding:6px var(--space-3);border-top:1px solid var(--sidebar-border);font-size:var(--text-md)}
+.r:first-child{border-top:none}
+.r .t{flex:1;min-width:0}
+.r .s{font-size:var(--text-xs);color:var(--muted-foreground)}
+.r a{font-size:var(--text-sm);color:var(--muted-foreground);text-decoration:underline;text-decoration-color:var(--border-strong);text-underline-offset:3px}
+.r .exp{display:inline-flex;align-items:center;gap:6px;padding:0;border:none;background:none;text-align:left;font-size:var(--text-md);cursor:pointer}
+.r .exp svg{color:var(--text-tertiary);flex-shrink:0}
+.notice{margin:0;font-size:var(--text-sm);color:var(--muted-foreground);line-height:1.5}
+.notice b{color:var(--foreground);font-weight:500;display:block}
+.df{display:flex;justify-content:flex-end;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-4);border-top:1px solid var(--sidebar-border)}
+.df .lock{margin-right:auto;display:inline-flex;align-items:center;gap:6px;font-size:var(--text-sm);color:var(--muted-foreground)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- lucide glyphs (ISC), 24 viewBox -->
+  <symbol id="g-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="g-alert" viewBox="0 0 24 24"><path d="M12 7v6"/><path d="M12 17h.01"/></symbol>
+  <symbol id="g-help" viewBox="0 0 24 24"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+  <symbol id="g-circle-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="g-dashed" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke-dasharray="3.2 3.1"/></symbol>
+  <symbol id="g-hardhat" viewBox="0 0 24 24"><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M14 6a6 6 0 0 1 6 6v3"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><rect x="2" y="15" width="20" height="4" rx="1"/></symbol>
+  <symbol id="g-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <!-- web/src/components.tsx Icon set, 16 viewBox -->
+  <symbol id="w-close" viewBox="0 0 16 16"><path d="m4.5 4.5 7 7m0-7-7 7"/></symbol>
+  <symbol id="w-chevron" viewBox="0 0 16 16"><path d="m6 4 4 4-4 4"/></symbol>
+</svg>
+<div class="shell">
+  <aside class="sidebar" aria-hidden="true">
+    <div class="brand"><i>B</i>Batatis</div>
+    <nav class="nav">
+      <a href="#"><span class="si attention"><svg class="g"><use href="#g-dashed"/></svg></span>Describe</a>
+      <a href="#"><span class="si attention"><svg class="g"><use href="#g-help"/></svg></span>Code check</a>
+      <a class="active" href="#"><span class="si blocked"><svg class="g"><use href="#g-x"/></svg></span>Application</a>
+    </nav>
+    <div class="case"><span class="t">NorthCore CX exterior sheathing board</span><span class="m">Manufacturer · Example data</span><span class="f">Checks paperwork, not compliance.</span></div>
+  </aside>
+  <main class="main" aria-hidden="true">
+    <div class="example"><b>EXAMPLE DATA</b> · fictional · Manufacturer · NorthCore sheathing</div>
+    <header class="header"><h1 class="title">Application</h1>
+      <nav class="tabs">
+        <a class="active" href="#"><span class="si blocked sm"><svg class="g"><use href="#g-x"/></svg></span>Applicant <span class="l">A</span></a>
+        <a href="#"><span class="si ok sm"><svg class="g"><use href="#g-circle-check"/></svg></span>Project <span class="l">B</span></a>
+        <a href="#"><span class="si ok sm"><svg class="g"><use href="#g-circle-check"/></svg></span>Code references <span class="l">C</span></a>
+        <a href="#"><span class="si ok sm"><svg class="g"><use href="#g-circle-check"/></svg></span>Your alternative</a>
+        <a href="#"><span class="si blocked sm"><svg class="g"><use href="#g-x"/></svg></span>Evidence <span class="l">D</span></a>
+      </nav></header>
+    <div class="body"><div class="col">
+      <div class="field"><label>Owner or company</label><input value="Northwind Board Works Ltd."></div>
+      <div class="field"><label>Representative</label><input></div>
+    </div></div>
+    <footer class="footer"><span class="note">Saved</span><button class="btn btn-ghost">Back</button><button class="btn btn-primary">Check completeness</button></footer>
+  </main>
+
+  <div class="backdrop">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-t" aria-describedby="dlg-n">
+      <div class="dh">
+        <span class="si blocked lg" role="img" aria-label="PDF locked"><svg class="g"><use href="#g-lock"/></svg></span>
+        <h2 id="dlg-t">18 items to fix before the PDF</h2>
+        <button class="x" aria-label="Close"><svg class="w" width="12" height="12" aria-hidden="true"><use href="#w-close"/></svg></button>
+      </div>
+      <div class="db">
+        <!-- Must be read before any download: stays visible, as text, ABOVE the list so a long list never pushes it off screen (Unc6 #4). -->
+        <p class="notice" id="dlg-n"><b>Checks that information is present. Not a finding that the design complies.</b>The PDF is unsigned, with officer Part 2 left blank. An officer reviews and decides.</p>
+        <div class="exnote"><b>EXAMPLE DATA</b> · downloads are for practice; text record only until example PDFs carry the stamp</div>
+        <!-- Red dots → blocked octagons; the glyph tells which kind of fix. Repeated gaps of one kind collapse into one group row (Unc6 #4: 16 near-identical lines). -->
+        <div class="list">
+          <div class="r"><span class="si blocked" role="img" aria-label="Blocks the PDF: missing"><svg class="g"><use href="#g-x"/></svg></span><span class="t">Representative <span class="s">· Applicant A</span></span><a href="#">Fix</a></div>
+          <!-- Ruling 6: engineer flag not decided + "Not engaged yet" still blocks the official PDF. v2's "or mark Not engaged yet" hint removed (it would not unlock it). -->
+          <div class="r"><span class="si blocked" role="img" aria-label="Blocks the PDF: needs a professional"><svg class="g"><use href="#g-hardhat"/></svg></span><span class="t">Routed to the officer: whether a registered professional is required <span class="s">· Evidence D</span></span><a href="#">Fix</a></div>
+          <div class="r grp"><span class="si blocked" role="img" aria-label="Blocks the PDF: evidence missing"><svg class="g"><use href="#g-x"/></svg></span><button class="t exp" aria-expanded="false"><svg class="w" width="12" height="12" aria-hidden="true"><use href="#w-chevron"/></svg>16 code clauses missing supporting evidence <span class="s">· Evidence D</span></button><a href="#">Fix the first</a></div>
+        </div>
+      </div>
+      <div class="df">
+        <span class="lock"><span class="si blocked sm" aria-hidden="true"><svg class="g"><use href="#g-lock"/></svg></span>Official PDF<span class="sr">: locked until the 18 items are fixed</span></span>
+        <button class="btn btn-ghost">Download text record</button>
+        <button class="btn btn-primary">Fix the first item</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

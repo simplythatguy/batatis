@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { DetailFields, ProcessFields } from "../case-parts";
-import { PanelHeader } from "../components";
+import { GapList, PanelHeader, STATUS_WORDS, StatusIcon, splitGaps, worstStatus, type Status } from "../components";
+import { unresolvedCandidates } from "../model";
 import type { Route } from "../router";
 import { useCase } from "../store";
 import { SectionCBody } from "./SectionC";
@@ -16,25 +17,32 @@ const TABS: { id: TabId; label: string; href: string }[] = [
 ];
 
 export function Application({ route, tab: forced }: { route: Route; tab?: TabId }) {
-  const { gaps } = useCase();
+  const { c, gaps } = useCase();
   const tab = forced ?? TABS.find((t) => t.id === route.params.get("tab"))?.id ?? "A";
   const dialog = useRef<HTMLDialogElement>(null);
   // Empty fields turn red only after a completeness check, never on load.
   const [checked, setChecked] = useState(false);
-  const blocking = gaps.filter((g) => g.severity === "blocking");
-  const countFor = (t: TabId) => blocking.filter((g) => g.href.startsWith(`#/application?tab=${t}&`)).length;
+  const { blocking, info } = splitGaps(gaps);
+  // Each tab carries its worst mark. C has no gaps of its own: rows waiting in Code check need attention.
+  const markFor = (t: TabId): Status =>
+    t === "C"
+      ? unresolvedCandidates(c).length
+        ? "attention"
+        : "ok"
+      : worstStatus(gaps.filter((g) => g.href.startsWith(`#/application?tab=${t}&`)));
   const label = TABS.find((t) => t.id === tab)!.label;
+  const close = () => dialog.current?.close();
 
   return (
     <>
       <PanelHeader title="Application" />
       <nav className="toolbar" aria-label="Application sections">
         {TABS.map((t) => {
-          const n = countFor(t.id);
+          const s = markFor(t.id);
           return (
             <a key={t.id} className="pill" href={t.href} data-active={tab === t.id} aria-current={tab === t.id ? "page" : undefined}>
+              <StatusIcon status={s} size="sm" label={STATUS_WORDS[s]} />
               {t.label}
-              {n > 0 && <span className="tab-count">{n}</span>}
             </a>
           );
         })}
@@ -45,9 +53,6 @@ export function Application({ route, tab: forced }: { route: Route; tab?: TabId 
         </div>
       </div>
       <div className="footer-bar">
-        <span className="status-note" role="status">
-          {blocking.length ? `${blocking.length} to fix before the form can be filled` : "Nothing blocking"}
-        </span>
         <a className="btn btn-ghost" href="#/code-check">
           Back
         </a>
@@ -65,29 +70,35 @@ export function Application({ route, tab: forced }: { route: Route; tab?: TabId 
       <dialog className="dialog" ref={dialog} aria-labelledby="completeness-title" aria-describedby="completeness-description">
         <form method="dialog">
           <div className="dialog-body">
-            <h2 className="dialog-title" id="completeness-title">
-              {blocking.length ? `${blocking.length} item${blocking.length > 1 ? "s" : ""} to fix` : "No blocking items"}
-            </h2>
-            <p className="meta" id="completeness-description">
+            <div className="dialog-head">
+              {blocking.length ? (
+                <StatusIcon status="blocked" size="lg" label="Blocks the form" />
+              ) : (
+                <StatusIcon status="ok" size="lg" label="Nothing blocking" />
+              )}
+              <h2 className="dialog-title" id="completeness-title">
+                {blocking.length ? `${blocking.length} item${blocking.length > 1 ? "s" : ""} to fix` : "No blocking items"}
+              </h2>
+            </div>
+            {/* Above the list, so a long list never pushes it out of view (Unc6 #4). */}
+            <p className="dialog-notice" id="completeness-description">
               Checks that information is present. Not a finding that the design complies.
             </p>
             {blocking.length > 0 ? (
-              <ul className="plain-list fix-list">
-                {blocking.map((g) => (
-                  <li key={g.id}>
-                    <a className="drawer-row" href={g.href} onClick={() => dialog.current?.close()}>
-                      <span className="status-dot blocking" />
-                      <span className="fix-label">{g.label}</span>
-                      <span className="meta">Fix</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
+              <div className="fix-list">
+                <GapList gaps={blocking} fix onGo={close} />
+              </div>
             ) : (
               <p className="meta">
                 Every required field has a value with a source, and every guess is confirmed. Filling the official SCC
                 form arrives with the engine.
               </p>
+            )}
+            {info.length > 0 && (
+              <section className="drawer-group" aria-label="For your information, not counted">
+                <h3 className="drawer-group-title">For your information · not counted</h3>
+                <GapList gaps={info} onGo={close} />
+              </section>
             )}
           </div>
           <div className="footer-bar">
