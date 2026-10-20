@@ -30,7 +30,7 @@ class ExportRequest(BaseModel):
 def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> FastAPI:
     app = FastAPI(title='Batatis engine')
     app.add_middleware(CORSMiddleware, allow_origin_regex=r'http://(localhost|127\.0\.0\.1)(:\d+)?',
-                       allow_methods=['*'], allow_headers=['*'])
+                       allow_methods=['*'], allow_headers=['*'], expose_headers=['X-Batatis-Notice'])
     state = {'store': store, 'codes': codes}
 
     def cases() -> CaseStore:
@@ -75,8 +75,10 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         except ExportError as e:
             raise HTTPException(500, str(e))
         name = f'{case_id}-scc-variance{"-DRAFT" if draft else ""}.pdf'
-        return Response(res.pdf, media_type='application/pdf',
-                        headers={'Content-Disposition': f'attachment; filename="{name}"'})
+        headers = {'Content-Disposition': f'attachment; filename="{name}"'}
+        if res.notice:
+            headers['X-Batatis-Notice'] = res.notice
+        return Response(res.pdf, media_type='application/pdf', headers=headers)
 
     @app.get('/code/search')
     def code_search(q: str, division: str | None = Query('B', pattern='^[ABC]$'), limit: int = Query(20, ge=1, le=100)):

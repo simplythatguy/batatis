@@ -11,7 +11,7 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `POST /cases` | `201` Case. Body is optional: `title`, `jurisdiction` (`id`, `name`, `authority`). |
 | `GET /cases/{case_id}` | Case, or `404` with detail `case not found`. |
 | `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. |
-| `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`. |
+| `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking`, `warning`, or `info`), `fix_hint`, `citation`. |
 | `GET /code/search` | Query `q`, `division` (`A` `B` or `C`, default `B`), `limit` (1–100, default 20). Hits as returned: `id`, `division`, `level`, `article_title`, `title`, `text`, `citation`. |
 | `GET /code/{provision_id}` | Query `division` optional. The codedb provision record, or `404` detail `provision not found`. `400` when the id is invalid or the division is ambiguous. |
 | `POST /section-c` | Body `{ "provisions": ["…"] }`. `SectionCRow` list. `404` when a provision is missing from codedb. `400` on an invalid id. |
@@ -20,13 +20,27 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `GET /cases/{case_id}/professional` | `required` and `general_required`: `yes`, `no`, or `depends`. Also `reasons`, `questions`, `scope_note`. |
 | `GET /ccmc/search` | Query `q` (1–200 characters) and `limit` (1–50, default 20). `422` on a rejected query. `503` when the registry is unavailable; that detail is the registry error text. |
 | `GET /cases/{case_id}/process-fields` | Process-field list. Empty when the pathway is an acceptable solution. |
-| `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` when the blank form file is missing; that detail is the form error text. `500` on other export failures. |
+| `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. When `jurisdiction.id` is `calgary`, that `200` (draft and final) also sends `X-Batatis-Notice` with the Calgary sentence below. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. The Calgary sentence is not a reason and does not block draft or final. `503` when the blank form file is missing; that detail is the form error text. `500` on other export failures. |
 
 A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
 
 A fact's `source.type` is `code`, `file`, `user_text`, `drawing`, or `user_click`.
 
-Gap `severity` is `blocking` or `warning`.
+Gap `severity` is `blocking`, `warning`, or `info`. `info` does not block export.
+
+### Calgary variance form
+
+When `jurisdiction.id` is `calgary`, three places carry this exact sentence:
+
+`Calgary's guide asks for its own Request for Specific Variance form. Confirm with your Safety Codes Officer which form they accept.`
+
+- Response header `X-Batatis-Notice` on `200` from `POST /cases/{case_id}/export`, draft and final. The header is omitted for every other jurisdiction, including Edmonton.
+- `GET /cases/{case_id}/gaps`: one item, `id` `info:calgary_variance_form`, `section` `B`, `field` `calgary_variance_form`, `severity` `info`, `message` the sentence above. It is not a blocking gap.
+- The engine-generated appendix page of the exported PDF, under the heading `Local variance form`.
+
+The sentence does not say that Calgary accepts the Safety Codes Council form. Export of that form still returns `200` when the rest of the case is ready.
+
+City of Calgary, *Guide to Applying for an Alternative Solution (Variance)*, 23 November 2023, step 3: "Refer to the Request for Specific Variance form (attached). In accordance with SCC policy, the form must be completed and submitted for all variance applications regardless of what formal documentation is also submitted." https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf (listed at https://www.calgary.ca/development/permits/building-regulation-advisories.html).
 
 The fixed 404 detail strings are `case not found` and `provision not found`.
 

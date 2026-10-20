@@ -19,6 +19,7 @@ from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
 from reportlab.platypus import KeepTogether, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
+from ..jurisdiction_notice import calgary_form_notice
 from ..models import INTENT_LABEL, Case, SectionCRow
 from ..process_fields import process_fields
 from ..section_d import section_d_plan, supporting_documents
@@ -116,6 +117,11 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
                       f'field map {fmap["version"]}. Code references are to the National Building Code - 2023 '
                       'Alberta Edition, 2nd printing (NBC(AE) 2023). This appendix lists what the application '
                       'cites; it does not state that the proposed design complies.', SMALL)]
+
+    # Draft and final both carry this. It is information for the applicant, not an export block.
+    notice = calgary_form_notice(case)
+    if notice:
+        story += [Paragraph('Local variance form', H2), _p(notice)]
 
     if open_items:
         story += [Paragraph('Open items (draft export)', H2),

@@ -124,7 +124,7 @@ class Gap(BaseModel):
     section: Literal['A', 'B', 'C', 'D', 'process']
     field: str
     message: str
-    severity: Literal['blocking', 'warning'] = 'blocking'
+    severity: Literal['blocking', 'warning', 'info'] = 'blocking'
 
 
 class Case(BaseModel):

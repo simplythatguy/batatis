@@ -1,7 +1,7 @@
 > agent-authored, model-checked, not human-verified or official
 
 # Expected: relevant-article shortlist (Case C)
-> EXAMPLE DATA. National Building Code (Alberta Edition) (NBC(AE)) 2023, checked against the **1st printing**. The 2nd printing is in force. Spot-checked in the 2nd-printing code database: 9.9.10.1.(2). The full list is in [cited-provisions.txt](../../../cited-provisions.txt); a check that every cited provision exists in the 2nd printing: all 95 listed ids present (presence only). Sources in [sources.md](../../../sources.md).
+> EXAMPLE DATA. National Building Code (Alberta Edition) (NBC(AE)) 2023, checked against the **1st printing**. The 2nd printing is in force. Spot-checked in the 2nd-printing code database: 9.9.10.1.(2); 9.10.19.3.(1), article title Location of Smoke Alarms, PDF p.909, attribution status direct. The full list is in [cited-provisions.txt](../../../cited-provisions.txt); a check that every cited provision exists in the 2nd printing: all 96 listed ids present (presence only). Sources in [sources.md](../../../sources.md).
 
 | Rank | Provision / document | Why it applies | Status |
 |---|---|---|---|
@@ -14,6 +14,7 @@
 | 4 | **9.36.2.8.(5), (7)** | (5) Heated floors-on-ground insulated under the full bottom surface **including the edges**. (7) **In addition**, vertically around the perimeter or on the outside of the foundation wall down to the bottom of the floor. 23-BCV-003 doesn't vary these. | **Gap.** Edge detail not shown. It needs the Table value (RSI 2.84, Zone 7A). |
 | 4 | **9.36.2.8.(9)** | Slab-on-grade with an integral perimeter footing: Table row RSI 3.72 (no HRV) / 2.84 (HRV) plus skirt insulation; Part 4 design per 9.16.1.2 | **Ask** the foundation type |
 | 5 | **STANDATA 23-BCV-017** → varies **9.19.1.1.(1)** | Part 9 residential unvented roofs per the RDH 32139.000 design requirements; report provided with the permit | **Probably not met as drawn** (2% slope vs >2%; SPF + batt isn't one of the three assemblies; SPF thickness TBD) |
+| 6 | **9.10.19.3.(1)** | Location of Smoke Alarms | **Check.** |
 | — | Div A 1.2.1.1.(1)(b) | An alternative solution is needed for W-07 if not fixed (and for the roof if not redesigned) | Route |
 | — | Div C 2.3.1.1 | Documentation for any alternative solution | Admin |
 | — | Div C 2.4.1.1.(1), (4) | Professional involvement not required by default; the AHJ may require it | Admin |

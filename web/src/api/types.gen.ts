@@ -66,7 +66,7 @@ export interface Gap {
   id: string;
   message: string;
   section: "A" | "B" | "C" | "D" | "process";
-  severity: "blocking" | "warning";
+  severity: "blocking" | "warning" | "info";
 }
 
 export interface IntentBlock {

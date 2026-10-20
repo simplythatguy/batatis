@@ -1,7 +1,7 @@
 > agent-authored, model-checked, not human-verified or official
 
 # Expected: intake summary (Case A)
-> EXAMPLE DATA. This is what a good tool should produce after intake. In the 2nd printing, 9.27.5.1.(2) and 9.27.5.3.(3)(b) were checked by codedb lookup; other wording and all page cites are 1st printing. The full list is in [cited-provisions.txt](../../../cited-provisions.txt); a check that every cited provision exists in the 2nd printing: all 95 listed ids present (presence only). See [sources.md](../../../sources.md).
+> EXAMPLE DATA. This is what a good tool should produce after intake. In the 2nd printing, 9.27.5.1.(2) and 9.27.5.3.(3)(b) were checked by codedb lookup; other wording and all page cites are 1st printing. The full list is in [cited-provisions.txt](../../../cited-provisions.txt); a check that every cited provision exists in the 2nd printing: all 96 listed ids present (presence only). See [sources.md](../../../sources.md).
 
 **Who's asking:** Example Panel Works Ltd. (manufacturer), represented by Mira Okafor. *Role: manufacturer and evidence supplier, not the owner.*
 **What they want, in two separate goals:**

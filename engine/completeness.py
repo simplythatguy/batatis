@@ -14,6 +14,7 @@ from pathlib import Path
 from codedb import validate_text
 
 from .codes import Codes
+from .jurisdiction_notice import calgary_form_notice
 from .models import INTENT_LABEL, Case, Gap as CaseGap
 from .process_fields import confirmed_value, latest_fact, process_fields
 from .professional import ProfessionalResult, professional_involvement
@@ -39,6 +40,17 @@ _CORE = (
 _PLACEHOLDERS = {'tbd', 'tobedetermined', 'tobeprovided', 'unknown', 'pending', 'na', 'notprovided', 'placeholder'}
 _HISTORICAL = re.compile(r'\b(?:historical|history|superseded|not current|earlier edition)\b', re.I)
 _PID = re.compile(r'\d+(?:\.\d+){3}\.(?:\(\d+\)(?:\([a-z]+\))?)?')
+
+
+def calgary_form_gap(case: Case) -> Gap | None:
+    """Info-only reminder. It does not block the SCC variance form in draft or final."""
+    notice = calgary_form_notice(case)
+    if notice is None:
+        return None
+    return Gap(id='info:calgary_variance_form', severity='info', section='B', field='calgary_variance_form',
+               message=notice,
+               fix_hint='Ask the Safety Codes Officer which variance request form to file. '
+                        'This item does not stop the SCC variance form from being exported.')
 
 
 def _missing(value) -> bool:
@@ -246,4 +258,7 @@ def check_completeness(case: Case, codes: Codes, *,
                 add('evidence', 'D', f'evidence.{item.id}', f'supporting evidence for {item.provision_id}, {item.function}–{item.objective}.',
                     item.performance_issue + ' Select appropriate evidence types with the responsible designer; not every ladder rung is required.',
                     item.citation)
+    form_notice = calgary_form_gap(case)
+    if form_notice:
+        gaps.append(form_notice)
     return gaps

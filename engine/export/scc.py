@@ -23,6 +23,7 @@ from pypdf.generic import ArrayObject, NameObject, NumberObject, RectangleObject
 from ..models import INTENT_LABEL, Case, SectionCRow
 from ..codes import Codes
 from ..completeness import check_completeness
+from ..jurisdiction_notice import calgary_form_notice
 from ..process_fields import PROCESS_ALIASES
 from ..section_c import section_c_rows
 from ..section_d import supporting_documents
@@ -76,6 +77,7 @@ class ExportResult:
     placements: list[Placement] = field(default_factory=list)
     blank_fields: list[str] = field(default_factory=list)
     open_items: list[str] = field(default_factory=list)
+    notice: str | None = None
 
 
 def form_path() -> Path:
@@ -127,15 +129,26 @@ def confirmed_values(case: Case) -> dict[str, object]:
             and f.value is not None and str(f.value).strip() != ''}
 
 
+def blocking_gap_lines(gaps, *, with_fix: bool) -> list[str]:
+    """Export stops only for severity blocking. An info notice, including Calgary's form note, does not."""
+    lines = []
+    for gap in gaps:
+        if gap.severity != 'blocking':
+            continue
+        line = f'blocking gap in section {gap.section}, {gap.field}: {gap.message}'
+        if with_fix:
+            line += f' Fix: {gap.fix_hint}'
+        lines.append(line)
+    return lines
+
+
 def blockers(case: Case, fmap: dict, codes: Codes | None = None) -> list[str]:
     codes = codes or Codes()
     values = confirmed_values(case)
     reasons = [f'unconfirmed {f.kind} fact "{f.field}" ({f.id})' for f in _latest(case).values()
                if f.export()['status'] != 'confirmed']
-    reasons += [f'blocking gap in section {g.section}, {g.field}: {g.message} Fix: {g.fix_hint}'
-                for g in check_completeness(case, codes) if g.severity == 'blocking']
-    reasons += [f'blocking gap in section {g.section}, {g.field}: {g.message}' for g in case.gaps
-                if g.severity == 'blocking']
+    reasons += blocking_gap_lines(check_completeness(case, codes), with_fix=True)
+    reasons += blocking_gap_lines(case.gaps, with_fix=False)
     reasons += [f'required field "{k}" is empty' for k in fmap['required_facts'] if k not in values]
     if not case.section_c:
         reasons.append('Section C has no provisions')
@@ -346,4 +359,5 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
                          *[f for r in fmap['section_d_rows'] for f in r.values()]] if n not in filled_names]
     return ExportResult(pdf=buf.getvalue(), field_map=fmap['version'], form_pages=form_pages,
                         appendix_pages=len(app_reader.pages), draft=draft, placements=placements,
-                        blank_fields=blank, open_items=reasons if draft else [])
+                        blank_fields=blank, open_items=reasons if draft else [],
+                        notice=calgary_form_notice(case))
