@@ -145,12 +145,13 @@ def test_window_benchmark_uses_case_c_accepted_opening(tmp_path, monkeypatch):
 
     decided = client.post(f'/cases/{case_id}/identify/{SENTENCE}/decision', json={'decision': 'yes'})
     assert decided.status_code == 200
-    row = next(item for item in decided.json()['section_c_row'] if item['provision'] == SENTENCE)
+    row = next(item for item in decided.json()['section_c_row'] if item['provision_id'] == SENTENCE)
+    pair = next(item for item in row['pairs'] if item['function'] == 'F10' and item['objective'] == 'OS3.7')
+    assert pair['bracket']
+    assert pair['function_text'] == codes.definition('F10')['title']
+    assert pair['objective_text'] == codes.definition('OS3.7')['title']
     intent = sentence['intents'][0]['intents'][0]
-    assert row['objectives'] == card['objectives']
-    assert row['functions'] == card['functions']
-    assert row['intent'] == intent
-    assert row['intent'] != 'lookup not available'
-    assert row['attribution_missing'] is False
+    assert any(intent in block['intents'] for block in row['intents'])
+    assert 'provision' not in row
     saved = client.get(f'/cases/{case_id}').json()
     assert WINDOW in saved['provisions']

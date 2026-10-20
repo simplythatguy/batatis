@@ -1,5 +1,587 @@
 {
   "$defs": {
+    "AcceptableBenchmark": {
+      "additionalProperties": true,
+      "properties": {
+        "citation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Citation"
+        },
+        "division": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Division"
+        },
+        "explanation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Explanation"
+        },
+        "identified": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Identified"
+        },
+        "provision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision"
+        },
+        "question": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Question"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        },
+        "section_c": {
+          "default": [],
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Section C",
+          "type": "array"
+        }
+      },
+      "required": [
+        "identified",
+        "provision",
+        "division",
+        "role",
+        "explanation",
+        "quote",
+        "citation",
+        "question",
+        "section_c"
+      ],
+      "title": "AcceptableBenchmark",
+      "type": "object"
+    },
+    "AnswerIn": {
+      "additionalProperties": false,
+      "description": "One answer. `question_id` is the question's stable id, which is the fact field.",
+      "properties": {
+        "answer": {
+          "default": "",
+          "title": "Answer",
+          "type": "string"
+        },
+        "field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "question_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Question Id"
+        }
+      },
+      "title": "AnswerIn",
+      "type": "object"
+    },
+    "ArticleBenchmark": {
+      "additionalProperties": true,
+      "description": "Numeric comparison for one resolved sentence. Distinct from the top-level benchmark.",
+      "properties": {
+        "comparison": {
+          "anyOf": [
+            {
+              "enum": [
+                "below",
+                "above",
+                "equal"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comparison"
+        },
+        "fact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fact Id"
+        },
+        "proposed_unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Proposed Unit"
+        },
+        "proposed_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Proposed Value"
+        },
+        "provision_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision Id"
+        },
+        "required_unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Required Unit"
+        },
+        "required_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Required Value"
+        },
+        "requirement_snippet": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Requirement Snippet"
+        }
+      },
+      "required": [
+        "provision_id",
+        "requirement_snippet",
+        "required_value",
+        "required_unit",
+        "proposed_value",
+        "proposed_unit",
+        "fact_id",
+        "comparison"
+      ],
+      "title": "ArticleBenchmark",
+      "type": "object"
+    },
+    "ArticleCard": {
+      "additionalProperties": true,
+      "properties": {
+        "attribution_missing": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attribution Missing"
+        },
+        "benchmark": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArticleBenchmark"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "benchmark_acceptable_solution": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Benchmark Acceptable Solution"
+        },
+        "citation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Citation"
+        },
+        "decision": {
+          "anyOf": [
+            {
+              "enum": [
+                "yes",
+                "no",
+                "not_sure"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decision"
+        },
+        "excluded": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Excluded"
+        },
+        "explainer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CardExplainer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "functions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Term"
+          },
+          "title": "Functions",
+          "type": "array"
+        },
+        "link": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Link"
+        },
+        "objectives": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Term"
+          },
+          "title": "Objectives",
+          "type": "array"
+        },
+        "open_question_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Open Question Id"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "printing": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Printing"
+        },
+        "provision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision"
+        },
+        "provision_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision Id"
+        },
+        "rank": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rank"
+        },
+        "snippet": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Snippet"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status"
+        },
+        "suggested": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Suggested"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "verifier_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Verifier Status"
+        },
+        "why": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Why"
+        }
+      },
+      "required": [
+        "rank",
+        "provision",
+        "provision_id",
+        "link",
+        "url",
+        "printing",
+        "page",
+        "citation",
+        "title",
+        "snippet",
+        "status",
+        "verifier_status",
+        "suggested",
+        "decision",
+        "open_question_id",
+        "excluded",
+        "why",
+        "objectives",
+        "functions",
+        "attribution_missing",
+        "benchmark_acceptable_solution",
+        "benchmark",
+        "explainer"
+      ],
+      "title": "ArticleCard",
+      "type": "object"
+    },
     "AttributionPair": {
       "properties": {
         "application_note": {
@@ -79,6 +661,67 @@
         "pdf_page"
       ],
       "title": "AttributionPair",
+      "type": "object"
+    },
+    "CardExplainer": {
+      "additionalProperties": true,
+      "properties": {
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        }
+      },
+      "required": [
+        "text",
+        "quote",
+        "source",
+        "label"
+      ],
+      "title": "CardExplainer",
       "type": "object"
     },
     "Case": {
@@ -172,6 +815,215 @@
         "gaps"
       ],
       "title": "Case",
+      "type": "object"
+    },
+    "DecisionRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "enum": [
+            "yes",
+            "no",
+            "not_sure"
+          ],
+          "title": "Decision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision"
+      ],
+      "title": "DecisionRequest",
+      "type": "object"
+    },
+    "DecisionResponse": {
+      "additionalProperties": true,
+      "description": "The identify payload plus the Section C rows a `yes` decision wrote.",
+      "properties": {
+        "articles": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ArticleCard"
+          },
+          "title": "Articles",
+          "type": "array"
+        },
+        "benchmark": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AcceptableBenchmark"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "cached": {
+          "default": false,
+          "title": "Cached",
+          "type": "boolean"
+        },
+        "engineering_required": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Engineering Required"
+        },
+        "intake_action": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intake Action"
+        },
+        "mode": {
+          "default": "bm25_fallback",
+          "enum": [
+            "live",
+            "cached_demo",
+            "bm25_fallback"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "model_ids": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Ids"
+        },
+        "open_questions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/OpenQuestion"
+          },
+          "title": "Open Questions",
+          "type": "array"
+        },
+        "persisted": {
+          "default": false,
+          "title": "Persisted",
+          "type": "boolean"
+        },
+        "questions": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Questions",
+          "type": "array"
+        },
+        "redirect_to": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Redirect To"
+        },
+        "section_c": {
+          "default": [],
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Section C",
+          "type": "array"
+        },
+        "section_c_row": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/SectionCRow"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section C Row"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "variance_explanation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variance Explanation"
+        },
+        "variance_needed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variance Needed"
+        }
+      },
+      "required": [
+        "mode",
+        "cached",
+        "persisted",
+        "source",
+        "articles",
+        "section_c",
+        "questions",
+        "open_questions",
+        "benchmark",
+        "variance_needed",
+        "variance_explanation",
+        "intake_action",
+        "redirect_to",
+        "engineering_required",
+        "model_ids",
+        "section_c_row"
+      ],
+      "title": "DecisionResponse",
       "type": "object"
     },
     "EvidenceItem": {
@@ -529,6 +1381,203 @@
       "title": "Gap",
       "type": "object"
     },
+    "IdentifyRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "answers": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AnswerIn"
+          },
+          "title": "Answers",
+          "type": "array"
+        },
+        "prose": {
+          "minLength": 1,
+          "title": "Prose",
+          "type": "string"
+        }
+      },
+      "required": [
+        "prose"
+      ],
+      "title": "IdentifyRequest",
+      "type": "object"
+    },
+    "IdentifyResponse": {
+      "additionalProperties": true,
+      "description": "Ranked article cards. Identify does not accept an article onto the case.",
+      "properties": {
+        "articles": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ArticleCard"
+          },
+          "title": "Articles",
+          "type": "array"
+        },
+        "benchmark": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AcceptableBenchmark"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "cached": {
+          "default": false,
+          "title": "Cached",
+          "type": "boolean"
+        },
+        "engineering_required": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Engineering Required"
+        },
+        "intake_action": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intake Action"
+        },
+        "mode": {
+          "default": "bm25_fallback",
+          "enum": [
+            "live",
+            "cached_demo",
+            "bm25_fallback"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "model_ids": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Ids"
+        },
+        "open_questions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/OpenQuestion"
+          },
+          "title": "Open Questions",
+          "type": "array"
+        },
+        "persisted": {
+          "default": false,
+          "title": "Persisted",
+          "type": "boolean"
+        },
+        "questions": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Questions",
+          "type": "array"
+        },
+        "redirect_to": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Redirect To"
+        },
+        "section_c": {
+          "default": [],
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Section C",
+          "type": "array"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "variance_explanation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variance Explanation"
+        },
+        "variance_needed": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variance Needed"
+        }
+      },
+      "required": [
+        "mode",
+        "cached",
+        "persisted",
+        "source",
+        "articles",
+        "section_c",
+        "questions",
+        "open_questions",
+        "benchmark",
+        "variance_needed",
+        "variance_explanation",
+        "intake_action",
+        "redirect_to",
+        "engineering_required",
+        "model_ids"
+      ],
+      "title": "IdentifyResponse",
+      "type": "object"
+    },
     "IntentBlock": {
       "properties": {
         "brackets": {
@@ -677,6 +1726,97 @@
         }
       },
       "title": "NewCase",
+      "type": "object"
+    },
+    "OpenQuestion": {
+      "additionalProperties": true,
+      "properties": {
+        "answer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Answer"
+        },
+        "disambiguates": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Disambiguates",
+          "type": "array"
+        },
+        "field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Id"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status"
+        },
+        "text": {
+          "default": "",
+          "title": "Text",
+          "type": "string"
+        },
+        "why": {
+          "default": "",
+          "title": "Why",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "field",
+        "text",
+        "why",
+        "status",
+        "disambiguates",
+        "answer"
+      ],
+      "title": "OpenQuestion",
       "type": "object"
     },
     "SectionCRequest": {
@@ -982,6 +2122,33 @@
         "ref"
       ],
       "title": "Source",
+      "type": "object"
+    },
+    "Term": {
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "Term",
       "type": "object"
     }
   },

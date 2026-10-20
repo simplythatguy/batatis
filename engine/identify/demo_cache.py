@@ -1,8 +1,8 @@
 """Cached identify payloads for the offline demo.
 
-The lookup key is the SHA-256 of the normalized description: Unicode NFC,
-stripped, with internal whitespace collapsed. Answers are applied after a hit
-and are not part of the key. The cache does not call a model.
+A hit is the exact case id, or the SHA-256 of the normalized description:
+Unicode NFC, stripped, with internal whitespace collapsed. Answers are applied
+after a hit and are not part of the key. The cache does not call a model.
 """
 from __future__ import annotations
 
@@ -18,8 +18,12 @@ from engine.identify.departure import assess_variance, detect_redirect
 from engine.identify.questions import generate_questions
 
 _PATH = Path(__file__).with_name('demo_cache.json')
-_CACHE: dict[str, dict] | None = None
-DEMO_CASE_IDS = ('dev-001', 'dev-003', 'dev-013')
+_CACHE: dict | None = None
+DEMO_CASE_IDS = (
+    'a-manufacturer-nailbase-sheathing',
+    'b-contractor-firestop-nonconformance',
+    'c-homebuilder-infill-house',
+)
 OFFLINE_MISS = 'offline: no cached result for this case'
 
 
@@ -32,11 +36,17 @@ def cache_key(text: str) -> str:
     return hashlib.sha256(normalize_case_input(text).encode('utf-8')).hexdigest()
 
 
-def _load() -> dict[str, dict]:
+def _load() -> dict:
+    """Index by description hash and by exact case id. A description is not a substring match."""
     global _CACHE
     if _CACHE is None:
         rows = json.loads(_PATH.read_text())
-        _CACHE = {cache_key(row['description']): row for row in rows}
+        by_hash: dict[str, dict] = {}
+        by_id: dict[str, dict] = {}
+        for row in rows:
+            by_hash[cache_key(row['description'])] = row
+            by_id[normalize_case_input(row['id'])] = row
+        _CACHE = {'hash': by_hash, 'id': by_id}
     return _CACHE
 
 
@@ -71,7 +81,9 @@ def offline_miss() -> dict:
 
 
 def match_demo(prose: str, facts=None) -> dict | None:
-    row = _load().get(cache_key(prose))
+    index = _load()
+    normalized = normalize_case_input(prose)
+    row = index['hash'].get(cache_key(prose)) or index['id'].get(normalized)
     if row is None:
         return None
     payload = copy.deepcopy(row['payload'])
@@ -98,6 +110,6 @@ def match_demo(prose: str, facts=None) -> dict | None:
         confidence['calibration'] = status
     payload['cached'] = True
     payload['persisted'] = False
-    payload['mode'] = 'cached'
+    payload['mode'] = 'cached_demo'
     payload['source'] = 'cache'
     return payload

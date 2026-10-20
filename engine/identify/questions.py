@@ -151,6 +151,7 @@ def generate_questions(prose: str, candidates: list[dict], facts=None, *, cap: i
         if any(k in prose.lower() for k in probe.get('boost', ())):
             score += 50
         scored.append((score, {
+            'id': probe['field'],
             'field': probe['field'],
             'text': text,
             'why': probe['why'],
@@ -173,6 +174,7 @@ def generate_questions(prose: str, candidates: list[dict], facts=None, *, cap: i
         if fact.get('status') not in ('open', 'unknown') or field in seen:
             continue
         chosen.append({
+            'id': field,
             'field': field,
             'text': f'{field} is still {fact.get("status")}. Identify continues without assuming a value.',
             'why': 'The applicant answered that this fact is unknown.',

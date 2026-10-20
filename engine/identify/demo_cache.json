@@ -1,198 +1,987 @@
 [
   {
-    "id": "dev-001",
-    "description": "We're building a new two-storey single detached house with a building area of 150 m2 on a narrow infill lot. The north side wall sits 0.3 m from the property line, which is the side yard against the neighbour's lot, not a street or lane. The client wants the same 450 mm roof overhang all the way around, including over that north wall. The soffit would be vented aluminum. Can we do this as a variance and what would we need to show?",
+    "id": "a-manufacturer-nailbase-sheathing",
+    "description": "# Project brief: EPW NailBase CI-50 pilot house\n\n**From:** Mira Okafor, Technical Director, Example Panel Works Ltd. *(fictional)*\n**Date:** 2026-10-12  **To:** \"whoever approves building products in Alberta\"\n\n## What we want\nOur panel is selling in two other provinces. We want **approval to sell it across Alberta** and a first **pilot house** in Edmonton this spring. Builders love it because vinyl siding nails **straight into the facer**, so there's no OSB and no strapping.\n\n## The product (see the data sheet)\n- 50 mm rigid foam core with a 6 mm fibre-cement nail-base facer, factory-bonded. No wood content.\n- Shiplap edges. We tape the joints with our own tape.\n- Replaces 11 mm OSB on 2\u00d76 walls at 400 mm o.c.\n\n## Pilot house\n| Item | Detail |\n|---|---|\n| Builder | Birchfield Example Homes *(fictional)*, contact Dev Rahman |\n| Owner | \"The buyer, not decided yet\". Builder-owned spec home until sale |\n| Address | 0000 Example Way NW, Edmonton, AB *(fictional)* |\n| Legal description | *Don't have it* |\n| Permit # | *Not applied yet* |\n| Building | 2-storey single-family, about 190 m\u00b2, unsprinklered, HRV planned |\n| Wall, inside to out | 12.7 mm gypsum, poly, 2\u00d76 studs with batts, **NailBase CI-50**, housewrap? (*maybe not needed*), vertical vinyl siding nailed to facer |\n\n## What we have\n1. Product data sheet (ours)\n2. Permeance test summary from a lab in the US *(EXAMPLE)*\n3. Draft letter from our consulting engineer about nail pull-out *(EXAMPLE, not signed yet)*\n4. In-house wind-load pull-out tests (spreadsheet, not attached)\n\n## What we don't have yet\n- Any CCMC or other evaluation report. We \"started an enquiry\".\n- Air-leakage test, a bracing design, and a flame-spread / foam-protection argument.\n\n## Our questions\n1. How do we get approved for all of Alberta?\n2. Can the pilot house go ahead on a variance while we wait?\n3. Do we need an engineer to stamp anything?\n",
+    "description_sha256": "c853ad7b872d05c0d568d5050fe5dba640a76bbfd0a37baceddedf77e97bcc9b",
     "candidates": [
       {
-        "provision": "9.10.15.5.",
-        "title": "Construction of Exposing Building Face of Houses",
-        "text": "8) Except as provided in Sentence (10), where the exposing building face has a limiting distance of not more than 0.45 m, projecting roof soffits shall not be constructed above the exposing building face. (See Note A-3.2.3.6.(2).)",
+        "provision": "9.29.5.8.",
+        "title": "Spacing of Nails",
+        "text": "1) For single-layer application on a ceiling, nails shall be spaced a) not more than 180 mm o.c. on ceiling supports, or b) every 300",
+        "part": 9
+      },
+      {
+        "provision": "9.29.9.3.",
+        "title": "Nails",
+        "text": "1) Except as provided in Sentence (2), nails for fastening particleboard, OSB or waferboard shall be not less than 38 mm casing or finishing nails",
+        "part": 9
+      },
+      {
+        "provision": "9.29.6.3.",
+        "title": "Nails and Staples",
+        "text": "1) Except as provided in Sentence (2), nails for attaching plywood finishes shall not be less than 38 mm casing or finishing nails spaced not",
+        "part": 9
+      },
+      {
+        "provision": "9.23.13.6.",
+        "title": "Materials in Braced Wall Panels",
+        "text": "1) Required braced wall panels shall be a) clad with panel-type cladding complying with Section 9.27. and Table 9.23.3.4., b) sheathed with plywood, OSB, waferboard",
+        "part": 9
+      },
+      {
+        "provision": "9.27.3.6.",
+        "title": "Face Sealed Cladding",
+        "text": "1) Sheathing membrane is permitted to be omitted beneath cladding when the joints in the cladding are formed to effectively prevent the passage of wind",
+        "part": 9
+      },
+      {
+        "provision": "9.23.13.5.",
+        "title": "Braced Wall Panels in Braced Wall Bands",
+        "text": "1) Except as provided in Sentences (2) to (5) and Article 9.23.13.7., braced wall panels shall a) be located within braced wall bands, b) extend,",
+        "part": 9
+      },
+      {
+        "provision": "3.1.5.8.",
+        "title": "Nailing Elements",
+        "text": "1) Wood nailing elements attached directly to or set into a continuous noncombustible backing for the attachment of interior finishes are permitted in a building",
+        "part": 3
+      },
+      {
+        "provision": "9.27.12.1.",
+        "title": "Material Standards",
+        "text": "1) Vinyl siding shall conform to ASTM D3679, \u201cStandard Specification for Rigid Poly (Vinyl Chloride) (PVC) Siding.\u201d",
+        "part": 9
+      },
+      {
+        "provision": "9.29.5.6.",
+        "title": "Nails",
+        "text": "1) Nails for fastening gypsum board to wood supports shall conform to a) ASTM F1667/F1667M, \u201cStandard Specification for Driven Fasteners: Nails, Spikes, and Staples,\u201d or",
+        "part": 9
+      },
+      {
+        "provision": "9.20.11.4.",
+        "title": "Anchoring Wood-Frame Roof Systems to Masonry Walls",
+        "text": "1) Except as permitted in Sentence (2), roof systems of wood-frame construction shall be anchored to exterior masonry walls by not less than 12.7 mm",
         "part": 9
       }
     ],
     "payload": {
       "articles": [
         {
-          "provision": "9.10.15.5.",
+          "provision": "9.29.5.8.",
           "division": "B",
           "suggested": false,
-          "title": "Construction of Exposing Building Face of Houses",
+          "title": "Spacing of Nails",
           "part": 9,
           "probability": null,
           "confidence": {
             "probability": null,
             "calibration": "placeholder_uncalibrated"
           },
-          "quote": "8) Except as provided in Sentence (10), where the exposing building face has a limiting distance of not more than 0.45 m, projecting roof soffits shall not be constructed above the exposing building face. (See Note A-3.2.3.6.(2).)",
-          "reason": "The proposal is measured against Division B Article 9.10.15.5. (Construction of Exposing Building Face of Houses).",
-          "stage": "cached"
-        }
-      ],
-      "section_c": [],
-      "benchmark": {
-        "identified": true,
-        "provision": "9.10.15.5.",
-        "division": "B",
-        "role": "benchmark_acceptable_solution",
-        "relation": "measured_against",
-        "explanation": "The proposal is measured against Division B Article 9.10.15.5. (Construction of Exposing Building Face of Houses), the benchmark acceptable solution. Tied to the proposal text as given.",
-        "quote": "8) Except as provided in Sentence (10), where the exposing building face has a limiting distance of not more than 0.45 m, projecting roof soffits shall not be constructed above the exposing building face. (See Note A-3.2.3.6.(2).)",
-        "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.15.5.(8) [PDF p.904]",
-        "confidence": {
-          "probability": null,
-          "calibration": "placeholder_uncalibrated"
-        },
-        "section_c": [
-          {
-            "division": "B",
-            "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.15.5.(8) [PDF p.904]",
-            "attribution_status": "direct",
-            "pairs": [
-              {
-                "function": "F03",
-                "objective": "OP3.1",
-                "condition": null
-              }
-            ],
-            "explainer": {
-              "text": "Division B 9.10.15.5.(8) is quoted from the code database. Attribution status: direct. Objectives: OP3.1. Functions: F03. NBC 2020 Intent Statements, explanatory only.",
-              "quote": "8) Except as provided in Sentence (10), where the exposing building face has a limiting distance of not more than 0.45 m, projecting roof soffits shall not be constructed above the exposing building face. (See Note A-3.2.3.6.(2).)",
-              "source": "deterministic"
-            },
-            "provision_id": "9.10.15.5.(8)"
+          "reason": "The proposal is compared with \"Spacing of Nails\" (Division B Article 9.29.5.8.).",
+          "stage": "bm25",
+          "snippet": "1) For single-layer application on a ceiling, nails shall be spaced a) not more than 180 mm o.c. on ceiling supports, or b) every 300",
+          "benchmark": {
+            "provision_id": "9.29.5.8.(1)",
+            "requirement_snippet": "not more than 180 mm",
+            "required_value": 180,
+            "required_unit": "mm",
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
           }
-        ]
-      },
-      "engineering_required": "depends",
-      "intake_action": "ask",
-      "redirect_to": null,
-      "variance_needed": "likely",
-      "variance_explanation": "The description treats the design as doing something other than the cited acceptable solution. A variance is the application that asks the Safety Codes Officer to consider that alternative. This identification does not decide whether the alternative performs as well.",
-      "questions": [
-        "How many storeys does the building have?",
-        "What is the limiting distance from the exposing building face to the property line?",
-        "What is the building area of each storey?"
-      ],
-      "open_questions": [
-        {
-          "field": "building.storeys",
-          "text": "How many storeys does the building have?",
-          "why": "Storey count changes which exit, fire-separation, and spatial-separation articles are in the set.",
-          "status": "open",
-          "disambiguates": [
-            "9.10.15.5."
-          ],
-          "answer": null
         },
         {
-          "field": "site.limiting_distance",
-          "text": "What is the limiting distance from the exposing building face to the property line?",
-          "why": "Limiting distance decides which spatial-separation articles, and which unprotected-opening limits, stay in the set.",
-          "status": "open",
-          "disambiguates": [
-            "9.10.15.5."
-          ],
-          "answer": null
-        },
-        {
-          "field": "building.area",
-          "text": "What is the building area of each storey?",
-          "why": "Building area changes the Part 9 / Part 3 boundary and several construction articles.",
-          "status": "open",
-          "disambiguates": [
-            "9.10.15.5."
-          ],
-          "answer": null
-        }
-      ],
-      "mode": "cached",
-      "persisted": false,
-      "cached": true,
-      "generated_at": "2026-10-20T18:45:00Z",
-      "model_ids": {
-        "screen": "gpt-4.1-mini-2025-04-14",
-        "rerank": "gpt-4.1-mini-2025-04-14",
-        "verifier": "gpt-4.1-2025-04-14",
-        "invoked": false
-      },
-      "commit_policy": {
-        "threshold": 0.75,
-        "max_commits": 3,
-        "parts": [
-          9
-        ],
-        "status": "placeholder_uncalibrated",
-        "calibration_set": "evals_dev/human_key/"
-      }
-    },
-    "description_sha256": "ce292647ba8cd863652c1a2b9566863877ef6145c930541ccf0009e6358946a7"
-  },
-  {
-    "id": "dev-003",
-    "description": "Mechanical contractor here. On a three-storey, twelve-unit wood-frame apartment with a building area of 480 m2 we have supply ducts that pass through the rated corridor walls. There's no room above the ceiling for damper access panels, so we'd like to skip the fire dampers and instead use 26 gauge steel duct sealed with a listed firestop at each wall. The ducts are about 150 by 250 mm and serve the suites' heat recovery ventilators.",
-    "candidates": [
-      {
-        "provision": "9.10.13.13.",
-        "title": "Fire Dampers",
-        "text": "1) Except as permitted by Sentences (2) to (5), 9.10.5.1.(3) and 9.10.9.9.(5), a duct that penetrates an assembly required to be a fire separation with a fire-resistance rating shall be equipped with a fire damper in conformance with",
-        "part": 9
-      }
-    ],
-    "payload": {
-      "articles": [
-        {
-          "provision": "9.10.13.13.",
+          "provision": "9.29.9.3.",
           "division": "B",
           "suggested": false,
-          "title": "Fire Dampers",
+          "title": "Nails",
           "part": 9,
           "probability": null,
           "confidence": {
             "probability": null,
             "calibration": "placeholder_uncalibrated"
           },
-          "quote": "1) Except as permitted by Sentences (2) to (5), 9.10.5.1.(3) and 9.10.9.9.(5), a duct that penetrates an assembly required to be a fire separation with a fire-resistance rating shall be equipped with a fire damper in conformance with",
-          "reason": "The proposal is measured against Division B Article 9.10.13.13. (Fire Dampers).",
-          "stage": "cached"
+          "reason": "The proposal is compared with \"Nails\" (Division B Article 9.29.9.3.).",
+          "stage": "bm25",
+          "snippet": "1) Except as provided in Sentence (2), nails for fastening particleboard, OSB or waferboard shall be not less than 38 mm casing or finishing nails",
+          "benchmark": {
+            "provision_id": "9.29.9.3.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "9.29.6.3.",
+          "division": "B",
+          "suggested": false,
+          "title": "Nails and Staples",
+          "part": 9,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Nails and Staples\" (Division B Article 9.29.6.3.).",
+          "stage": "bm25",
+          "snippet": "1) Except as provided in Sentence (2), nails for attaching plywood finishes shall not be less than 38 mm casing or finishing nails spaced not",
+          "benchmark": {
+            "provision_id": "9.29.6.3.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "9.23.13.6.",
+          "division": "B",
+          "suggested": false,
+          "title": "Materials in Braced Wall Panels",
+          "part": 9,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Materials in Braced Wall Panels\" (Division B Article 9.23.13.6.).",
+          "stage": "bm25",
+          "snippet": "1) Required braced wall panels shall be a) clad with panel-type cladding complying with Section 9.27. and Table 9.23.3.4., b) sheathed with plywood, OSB, waferboard",
+          "benchmark": {
+            "provision_id": "9.23.13.6.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "9.27.3.6.",
+          "division": "B",
+          "suggested": false,
+          "title": "Face Sealed Cladding",
+          "part": 9,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Face Sealed Cladding\" (Division B Article 9.27.3.6.).",
+          "stage": "bm25",
+          "snippet": "1) Sheathing membrane is permitted to be omitted beneath cladding when the joints in the cladding are formed to effectively prevent the passage of wind",
+          "benchmark": {
+            "provision_id": "9.27.3.6.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "9.23.13.5.",
+          "division": "B",
+          "suggested": false,
+          "title": "Braced Wall Panels in Braced Wall Bands",
+          "part": 9,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Braced Wall Panels in Braced Wall Bands\" (Division B Article 9.23.13.5.).",
+          "stage": "bm25",
+          "snippet": "1) Except as provided in Sentences (2) to (5) and Article 9.23.13.7., braced wall panels shall a) be located within braced wall bands, b) extend,",
+          "benchmark": {
+            "provision_id": "9.23.13.5.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "3.1.5.8.",
+          "division": "B",
+          "suggested": false,
+          "title": "Nailing Elements",
+          "part": 3,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Nailing Elements\" (Division B Article 3.1.5.8.).",
+          "stage": "bm25",
+          "snippet": "1) Wood nailing elements attached directly to or set into a continuous noncombustible backing for the attachment of interior finishes are permitted in a building",
+          "benchmark": {
+            "provision_id": "3.1.5.8.(1)",
+            "requirement_snippet": "not more than 50 mm",
+            "required_value": 50,
+            "required_unit": "mm",
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "9.27.12.1.",
+          "division": "B",
+          "suggested": false,
+          "title": "Material Standards",
+          "part": 9,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Material Standards\" (Division B Article 9.27.12.1.).",
+          "stage": "bm25",
+          "snippet": "1) Vinyl siding shall conform to ASTM D3679, \u201cStandard Specification for Rigid Poly (Vinyl Chloride) (PVC) Siding.\u201d",
+          "benchmark": {
+            "provision_id": "9.27.12.1.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "9.29.5.6.",
+          "division": "B",
+          "suggested": false,
+          "title": "Nails",
+          "part": 9,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Nails\" (Division B Article 9.29.5.6.).",
+          "stage": "bm25",
+          "snippet": "1) Nails for fastening gypsum board to wood supports shall conform to a) ASTM F1667/F1667M, \u201cStandard Specification for Driven Fasteners: Nails, Spikes, and Staples,\u201d or",
+          "benchmark": {
+            "provision_id": "9.29.5.6.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "9.20.11.4.",
+          "division": "B",
+          "suggested": false,
+          "title": "Anchoring Wood-Frame Roof Systems to Masonry Walls",
+          "part": 9,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Anchoring Wood-Frame Roof Systems to Masonry Walls\" (Division B Article 9.20.11.4.).",
+          "stage": "bm25",
+          "snippet": "1) Except as permitted in Sentence (2), roof systems of wood-frame construction shall be anchored to exterior masonry walls by not less than 12.7 mm",
+          "benchmark": {
+            "provision_id": "9.20.11.4.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
         }
       ],
       "section_c": [],
       "benchmark": {
         "identified": true,
-        "provision": "9.10.13.13.",
+        "provision": "9.29.5.8.",
         "division": "B",
         "role": "benchmark_acceptable_solution",
         "relation": "measured_against",
-        "explanation": "The proposal is measured against Division B Article 9.10.13.13. (Fire Dampers), the benchmark acceptable solution. Tied to the proposal text as given.",
-        "quote": "1) Except as permitted by Sentences (2) to (5), 9.10.5.1.(3) and 9.10.9.9.(5), a duct that penetrates an assembly required to be a fire separation with a fire-resistance rating shall be equipped with a fire damper in conformance with",
-        "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.13.13.(1) [PDF p.893]",
+        "explanation": "The proposal is measured against Division B Article 9.29.5.8. (Spacing of Nails), the benchmark acceptable solution. Tied to the proposal text as given.",
+        "quote": "1) For single-layer application on a ceiling, nails shall be spaced a) not more than 180 mm o.c. on ceiling supports, or b) every 300",
+        "citation": "NBC(AE) 2023 p2, Div B, Article 9.29.5.8. [PDF p.1032]",
         "confidence": {
           "probability": null,
           "calibration": "placeholder_uncalibrated"
         },
         "section_c": [
           {
+            "provision_id": "9.29.5.8.(1)",
             "division": "B",
-            "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.13.13.(1) [PDF p.893]",
+            "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.29.5.8.(1) [PDF p.1032]",
             "attribution_status": "direct",
             "pairs": [
               {
-                "function": "F03",
-                "objective": "OS1.2",
+                "function": "F20",
+                "objective": "OP2.1",
                 "condition": null
               },
               {
-                "function": "F03",
-                "objective": "OP1.2",
+                "function": "F20",
+                "objective": "OP2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OS2.1",
                 "condition": null
+              },
+              {
+                "function": "F20",
+                "objective": "OS2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OH1.1",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OH1.2",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OS1.2",
+                "condition": "Applies where interior finishes are required to act as fire protection forfoamed plastics or to contribute to the required fire resistance of assemblies."
+              },
+              {
+                "function": "F20",
+                "objective": "OP1.2",
+                "condition": "Applies where interior finishes are required to act as fire protection forfoamed plastics or to contribute to the required fire resistance of assemblies."
               }
             ],
             "explainer": {
-              "text": "Division B 9.10.13.13.(1) is quoted from the code database. Attribution status: direct. Objectives: OS1.2, OP1.2. Functions: F03. NBC 2020 Intent Statements, explanatory only.",
-              "quote": "1) Except as permitted by Sentences (2) to (5), 9.10.5.1.(3) and 9.10.9.9.(5), a duct that penetrates an assembly required to be a fire separation with a fire-resistance rating shall be equipped with a fire damper in conformance with",
+              "text": "Division B 9.29.5.8.(1) is quoted from the code database. Attribution status: direct. Objectives: OP2.1, OP2.3, OS2.1, OS2.3, OH1.1, OH1.2, OS1.2, OP1.2. Functions: F20. NBC 2020 Intent Statements, explanatory only.",
+              "quote": "1) For single-layer application on a ceiling, nails shall be spaced a) not more than 180 mm o.c. on ceiling supports, or b) every 300",
               "source": "deterministic"
-            },
-            "provision_id": "9.10.13.13.(1)"
+            }
+          },
+          {
+            "provision_id": "9.29.5.8.(2)",
+            "division": "B",
+            "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.29.5.8.(2) [PDF p.1032]",
+            "attribution_status": "no row in the attribution table",
+            "pairs": [],
+            "explainer": {
+              "text": "Division B 9.29.5.8.(2) is quoted from the code database. Attribution status: no row in the attribution table. The NBC(AE) attribution table has no objective or function for this sentence. NBC 2020 Intent Statements, explanatory only.",
+              "quote": "2) Where the ceiling sheets are supported by the wall sheets around the perimeter of the ceiling, this support may be considered as equivalent to",
+              "source": "deterministic"
+            }
+          },
+          {
+            "provision_id": "9.29.5.8.(3)",
+            "division": "B",
+            "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.29.5.8.(3) [PDF p.1032]",
+            "attribution_status": "direct",
+            "pairs": [
+              {
+                "function": "F20",
+                "objective": "OS2.1",
+                "condition": null
+              },
+              {
+                "function": "F20",
+                "objective": "OS2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OP2.1",
+                "condition": null
+              },
+              {
+                "function": "F20",
+                "objective": "OP2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OH1.1",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OH1.2",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              }
+            ],
+            "explainer": {
+              "text": "Division B 9.29.5.8.(3) is quoted from the code database. Attribution status: direct. Objectives: OS2.1, OS2.3, OP2.1, OP2.3, OH1.1, OH1.2. Functions: F20. NBC 2020 Intent Statements, explanatory only.",
+              "quote": "3) Except as required by Sentence (4), for single-layer application on walls, nails shall be spaced a) not more than 200 mm o.c. on vertical",
+              "source": "deterministic"
+            }
+          },
+          {
+            "provision_id": "9.29.5.8.(4)",
+            "division": "B",
+            "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.29.5.8.(4) [PDF p.1032]",
+            "attribution_status": "direct",
+            "pairs": [
+              {
+                "function": "F20",
+                "objective": "OS2.1",
+                "condition": null
+              },
+              {
+                "function": "F20",
+                "objective": "OS2.5",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F22",
+                "objective": "OS2.4",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F22",
+                "objective": "OS2.5",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F20",
+                "objective": "OS2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OS2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OP2.1",
+                "condition": null
+              },
+              {
+                "function": "F20",
+                "objective": "OP2.5",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F22",
+                "objective": "OP2.4",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F22",
+                "objective": "OP2.5",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F20",
+                "objective": "OP2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OP2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OH1.1",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs, or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OH1.2",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs, or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OH1.3",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs, or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OH1.1",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs, or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OH1.2",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs, or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OH1.3",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs, or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OS1.2",
+                "condition": "Applies where interior finishes are required to act as fire protection for foamed plastics or contribute to the required fire resistance of assemblies."
+              },
+              {
+                "function": "F20",
+                "objective": "OH4",
+                "condition": "Applies where walls support floors and where interior finishes contribute to the required bracing or lateral support for studs or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OH4",
+                "condition": "Applies where walls support floors and where interior finishes contribute to the required bracing or lateral support for studs or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OS3.1",
+                "condition": "Applies where walls support floorsandwhereinteriorfinishescontributetotherequired bracing or lateral support for studs or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OS3.7",
+                "condition": "Applies where walls support floorsandwhereinteriorfinishescontributetotherequired bracing or lateral support for studs or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OS3.1",
+                "condition": "Applies where walls support floorsandwhereinteriorfinishescontributetotherequired bracing or lateral support for studs or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OS3.7",
+                "condition": "Applies where walls support floorsandwhereinteriorfinishescontributetotherequired bracing or lateral support for studs or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OP3.1",
+                "condition": "Applies where interior finishes are installed to contribute to the required fire resistance of exterior walls."
+              },
+              {
+                "function": "F20",
+                "objective": "OP1.2",
+                "condition": "Applies where interior finishes are required to act as fire protection for foamed plastics or contribute to the required fire resistance of assemblies."
+              }
+            ],
+            "explainer": {
+              "text": "Division B 9.29.5.8.(4) is quoted from the code database. Attribution status: direct. Objectives: OS2.1, OS2.5, OS2.4, OS2.3, OP2.1, OP2.5, OP2.4, OP2.3, OH1.1, OH1.2, OH1.3, OS1.2, OH4, OS3.1, OS3.7, OP3.1, OP1.2. Functions: F20, F22. NBC 2020 Intent Statements, explanatory only.",
+              "quote": "4) For single-layer application on walls, where gypsum board provides required bracing in braced wall panels, lateral support for studs, or fire protection, nails shall",
+              "source": "deterministic"
+            }
+          },
+          {
+            "provision_id": "9.29.5.8.(5)",
+            "division": "B",
+            "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.29.5.8.(5) [PDF p.1032]",
+            "attribution_status": "direct",
+            "pairs": [
+              {
+                "function": "F20",
+                "objective": "OS2.1",
+                "condition": null
+              },
+              {
+                "function": "F20",
+                "objective": "OS2.5",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F22",
+                "objective": "OS2.4",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F22",
+                "objective": "OS2.5",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F20",
+                "objective": "OS2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OS2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OP2.1",
+                "condition": null
+              },
+              {
+                "function": "F20",
+                "objective": "OP2.5",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F22",
+                "objective": "OP2.4",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F22",
+                "objective": "OP2.5",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F20",
+                "objective": "OP2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OP2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OH1.1",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs, or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OH1.2",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs, or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OH1.3",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs, or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OH1.1",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs, or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OH1.2",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs, or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OH1.3",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs, or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OH4",
+                "condition": "Applies where walls support floors and where interior finishes contribute to the required bracing or lateral support for studs or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OS3.1",
+                "condition": "Applies where walls support floors and where interior finishes contribute to the required bracing or lateral support for studs or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OS3.7",
+                "condition": "Applies where walls support floors and where interior finishes contribute to the required bracing or lateral support for studs or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OS1.2",
+                "condition": "Applies where interior finishes are required to act as fire protection forfoamed plastics or to contribute to the required fire resistance of assemblies."
+              },
+              {
+                "function": "F20",
+                "objective": "OP1.2",
+                "condition": "Applies where interior finishes are required to act as fire protection forfoamed plastics or to contribute to the required fire resistance of assemblies."
+              },
+              {
+                "function": "F20",
+                "objective": "OP3.1",
+                "condition": "Applies where interior finishes are installed to contribute to the required fire resistance of exterior walls."
+              }
+            ],
+            "explainer": {
+              "text": "Division B 9.29.5.8.(5) is quoted from the code database. Attribution status: direct. Objectives: OS2.1, OS2.5, OS2.4, OS2.3, OP2.1, OP2.5, OP2.4, OP2.3, OH1.1, OH1.2, OH1.3, OH4, OS3.1, OS3.7, OS1.2, OP1.2, OP3.1. Functions: F20, F22. NBC 2020 Intent Statements, explanatory only.",
+              "quote": "5) The uppermost nails on vertical wall supports shall be not more than 200 mm below the ceiling.",
+              "source": "deterministic"
+            }
+          },
+          {
+            "provision_id": "9.29.5.8.(6)",
+            "division": "B",
+            "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.29.5.8.(6) [PDF p.1032]",
+            "attribution_status": "direct",
+            "pairs": [
+              {
+                "function": "F20",
+                "objective": "OS2.1",
+                "condition": null
+              },
+              {
+                "function": "F20",
+                "objective": "OS2.5",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F22",
+                "objective": "OS2.4",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F22",
+                "objective": "OS2.5",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F20",
+                "objective": "OS2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OS2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OS1.2",
+                "condition": "Applies where interior finishes are required to act as fire protection for foamed plastics orto contribute to the required fire resistance of assemblies."
+              },
+              {
+                "function": "F20",
+                "objective": "OH1.1",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OH1.2",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OH1.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OH1.1",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OH1.2",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OH1.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OP2.1",
+                "condition": null
+              },
+              {
+                "function": "F20",
+                "objective": "OP2.5",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F22",
+                "objective": "OP2.4",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F22",
+                "objective": "OP2.5",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F20",
+                "objective": "OP2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OP2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OH4",
+                "condition": "Applies where walls support floors and where interior finishes contribute to the required bracing or lateral support for studs or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OP1.2",
+                "condition": "Applies where interior finishes are required to act as fire protection for foamed plastics orto contribute to the required fire resistance of assemblies."
+              },
+              {
+                "function": "F20",
+                "objective": "OS3.1",
+                "condition": "Applies where walls support floors and where interior finishes contribute to the required bracing or lateral support for studs or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OS3.7",
+                "condition": "Applies where walls support floors and where interior finishes contribute to the required bracing or lateral support for studs or where interior finishes support or serve as required environmental separation elements."
+              }
+            ],
+            "explainer": {
+              "text": "Division B 9.29.5.8.(6) is quoted from the code database. Attribution status: direct. Objectives: OS2.1, OS2.5, OS2.4, OS2.3, OS1.2, OH1.1, OH1.2, OH1.3, OP2.1, OP2.5, OP2.4, OP2.3, OH4, OP1.2, OS3.1, OS3.7. Functions: F20, F22. NBC 2020 Intent Statements, explanatory only.",
+              "quote": "6) Nails shall be located not less than 10 mm from the side or edge of the board.",
+              "source": "deterministic"
+            }
+          },
+          {
+            "provision_id": "9.29.5.8.(7)",
+            "division": "B",
+            "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.29.5.8.(7) [PDF p.1032]",
+            "attribution_status": "direct",
+            "pairs": [
+              {
+                "function": "F20",
+                "objective": "OS2.1",
+                "condition": null
+              },
+              {
+                "function": "F20",
+                "objective": "OS2.5",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F22",
+                "objective": "OS2.4",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F22",
+                "objective": "OS2.5",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F20",
+                "objective": "OS2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OS2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OP2.1",
+                "condition": null
+              },
+              {
+                "function": "F20",
+                "objective": "OP2.5",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F22",
+                "objective": "OP2.4",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F22",
+                "objective": "OP2.5",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs."
+              },
+              {
+                "function": "F20",
+                "objective": "OP2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OP2.3",
+                "condition": "Applies where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OH1.1",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs, or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OH1.2",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs, or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OH1.3",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs, or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OH1.1",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs, or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OH1.2",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs, or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F22",
+                "objective": "OH1.3",
+                "condition": "Applies where interior finishes contribute to the required bracing or lateral support for studs, or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OH4",
+                "condition": "Applies where walls support floors and where interior finishes contribute to the required bracing or lateral support for studs or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OS3.1",
+                "condition": "Applies where walls support floors and where interior finishes contribute to the required bracing or lateral support for studs or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OS3.7",
+                "condition": "Applies where walls support floors and where interior finishes contribute to the required bracing or lateral support for studs or where interior finishes support or serve as required environmental separation elements."
+              },
+              {
+                "function": "F20",
+                "objective": "OS1.2",
+                "condition": "Applies where interior finishes are required to act as fire protection forfoamed plastics or to contribute to the required fire resistance of assemblies."
+              },
+              {
+                "function": "F20",
+                "objective": "OP1.2",
+                "condition": "Applies where interior finishes are required to act as fire protection forfoamed plastics or to contribute to the required fire resistance of assemblies."
+              },
+              {
+                "function": "F20",
+                "objective": "OP3.1",
+                "condition": "Applies where interior finishes are installed to contribute to the required fire resistance of exterior walls."
+              }
+            ],
+            "explainer": {
+              "text": "Division B 9.29.5.8.(7) is quoted from the code database. Attribution status: direct. Objectives: OS2.1, OS2.5, OS2.4, OS2.3, OP2.1, OP2.5, OP2.4, OP2.3, OH1.1, OH1.2, OH1.3, OH4, OS3.1, OS3.7, OS1.2, OP1.2, OP3.1. Functions: F20, F22. NBC 2020 Intent Statements, explanatory only.",
+              "quote": "7) Nails shall be driven so that the heads do not puncture the paper.",
+              "source": "deterministic"
+            }
           }
         ]
       },
@@ -204,59 +993,86 @@
       "questions": [
         "What is the wall assembly made of, and what are its fire-resistance and thermal properties?",
         "How many storeys does the building have?",
-        "What is the occupancy (and, if you have it, the occupant load)?",
-        "What is the building area of each storey?"
+        "What is the building area of each storey?",
+        "Is the building sprinklered?",
+        "What is the occupancy (and, if you have it, the occupant load)?"
       ],
       "open_questions": [
         {
+          "id": "assembly.material",
           "field": "assembly.material",
           "text": "What is the wall assembly made of, and what are its fire-resistance and thermal properties?",
           "why": "The material and its fire or thermal properties decide which wall, insulation, and fire-resistance articles apply.",
           "status": "open",
           "disambiguates": [
-            "9.10.13.13."
+            "9.29.9.3.",
+            "9.29.6.3.",
+            "9.23.13.6.",
+            "9.27.3.6.",
+            "9.23.13.5.",
+            "3.1.5.8."
           ],
           "answer": null
         },
         {
+          "id": "building.storeys",
           "field": "building.storeys",
           "text": "How many storeys does the building have?",
           "why": "Storey count changes which exit, fire-separation, and spatial-separation articles are in the set.",
           "status": "open",
           "disambiguates": [
-            "9.10.13.13."
+            "9.29.5.8.",
+            "9.29.9.3.",
+            "9.29.6.3."
           ],
           "answer": null
         },
         {
-          "field": "building.occupancy",
-          "text": "What is the occupancy (and, if you have it, the occupant load)?",
-          "why": "Occupancy and occupant load move a design between Part 9 housing articles and Part 3 assembly or care articles.",
-          "status": "open",
-          "disambiguates": [
-            "9.10.13.13."
-          ],
-          "answer": null
-        },
-        {
+          "id": "building.area",
           "field": "building.area",
           "text": "What is the building area of each storey?",
           "why": "Building area changes the Part 9 / Part 3 boundary and several construction articles.",
           "status": "open",
           "disambiguates": [
-            "9.10.13.13."
+            "9.29.5.8.",
+            "9.29.9.3.",
+            "9.29.6.3."
+          ],
+          "answer": null
+        },
+        {
+          "id": "building.sprinklered",
+          "field": "building.sprinklered",
+          "text": "Is the building sprinklered?",
+          "why": "Sprinkler status changes which exit and fire-separation relaxations are candidates.",
+          "status": "open",
+          "disambiguates": [
+            "9.29.5.8.",
+            "9.29.9.3.",
+            "9.29.6.3."
+          ],
+          "answer": null
+        },
+        {
+          "id": "building.occupancy",
+          "field": "building.occupancy",
+          "text": "What is the occupancy (and, if you have it, the occupant load)?",
+          "why": "Occupancy and occupant load move a design between Part 9 housing articles and Part 3 assembly or care articles.",
+          "status": "open",
+          "disambiguates": [
+            "9.23.13.5."
           ],
           "answer": null
         }
       ],
-      "mode": "cached",
+      "mode": "cached_demo",
       "persisted": false,
       "cached": true,
-      "generated_at": "2026-10-20T18:45:00Z",
+      "source": "cache",
       "model_ids": {
-        "screen": "gpt-4.1-mini-2025-04-14",
-        "rerank": "gpt-4.1-mini-2025-04-14",
-        "verifier": "gpt-4.1-2025-04-14",
+        "screen": null,
+        "rerank": null,
+        "verifier": null,
         "invoked": false
       },
       "commit_policy": {
@@ -268,169 +1084,582 @@
         "status": "placeholder_uncalibrated",
         "calibration_set": "evals_dev/human_key/"
       }
-    },
-    "description_sha256": "ac129ebf812901d1e6f536b09884cdd890c1f1cf552be74c539979396b100c54"
+    }
   },
   {
-    "id": "dev-013",
-    "description": "We're designing a four-storey, sprinklered wood-frame apartment with eight units per floor on a mid-block lot. To make the floor plate work we want a single exit stair serving every floor, with a pressurized stair and a short corridor. Each floor is about 600 m2.",
+    "id": "b-contractor-firestop-nonconformance",
+    "description": "# Project brief: Example Commons, firestop issue on L3\u2013L4\n\n**From:** Carlos Mendes, PM, Northgate Example Builders Ltd. *(fictional)*  **Date:** 2026-10-15\n\n## Project\n| Item | Detail |\n|---|---|\n| Name | Example Commons *(fictional)* |\n| Address | 0000 Example Avenue SW, Calgary, AB *(fictional)* |\n| Legal | Lot 0, Block 0, Plan 0000000 *(fictional placeholder)* |\n| Owner | Example Commons Holdings Inc. *(fictional)* |\n| Building permit | BP-0000-00000 *(fictional)*, issued |\n| Building | 5 storeys, sprinklered, retail at grade, 64 dwelling units above |\n| Design team | Example Architecture Inc. *(fictional)*, coordinating registered professional; Example MEP Engineering *(fictional)* |\n| Floor assemblies | Rated fire separations. *Rating per the architect's code analysis: \"1 h\"* |\n\n## What happened\nOur firestop sub sealed the plumbing penetrations on L3 and L4 with **Example FireSeal 200** *(fictional)* and handed in listing **EX-FS-1234** *(fictional)*. The third-party firestop inspector says that listing only covers **metal pipes**. Ours are mostly **PVC drain pipe and bundles of PEX**, and some holes are bigger than the listing allows. L2 (copper) passed.\n\nThe sprinkler fitter used the same sealant around the sprinkler branch lines. The sub says sprinklers are \"exempt\".\n\n## What we need\n- Keep the **drywall close-in on 2026-10-24**\n- Ideally \"a variance so we don't have to rip it out\"\n- We have a **draft EJ email** from the sealant rep\n\n## Who we've talked to\n- Architect (email attached). Not yet the City inspector.\n",
+    "description_sha256": "3d552f6d7fdf8de8c3a653d178e1ffa77f386f3b667ec757b735fdb484344a01",
     "candidates": [
       {
-        "provision": "3.4.2.1.",
-        "title": "Minimum Number of Exits",
-        "text": "1) Except as permitted by Sentences (2) to (4), every floor area intended for occupancy shall be served by at least 2 exits.",
+        "provision": "3.2.2.52.",
+        "title": "Group C, up to 4 Storeys, Sprinklered",
+        "text": "1) A building classified as Group C is permitted to conform to Sentence (2) provided a) except as permitted by Sentences 3.2.2.7.(1) and 3.2.2.18.(2), the",
+        "part": 3
+      },
+      {
+        "provision": "3.2.2.55.",
+        "title": "Group C, up to 3 Storeys, Sprinklered",
+        "text": "1) A building classified as Group C is permitted to conform to Sentence (2) provided a) except as permitted by Sentences 3.2.2.7.(1) and 3.2.2.18.(2), the",
+        "part": 3
+      },
+      {
+        "provision": "3.1.9.4.",
+        "title": "Combustible Piping Penetrations",
+        "text": "1) Combustible sprinkler piping is permitted to penetrate a fire separation provided the fire compartments on each side of the fire separation are sprinklered.",
+        "part": 3
+      },
+      {
+        "provision": "3.1.9.1.",
+        "title": "Firestops",
+        "text": "1) Except as provided in Sentences (2) to (7) and Article 3.1.9.3., penetrations of a fire separation or a membrane forming part of an assembly",
+        "part": 3
+      },
+      {
+        "provision": "9.10.9.9.",
+        "title": "Penetrations by Raceways, Sprinklers and Fire Dampers",
+        "text": "1) Combustible totally enclosed raceways that are embedded in a concrete floor slab are permitted in an assembly required to have a fire-resistance rating, provided",
+        "part": 9
+      },
+      {
+        "provision": "9.10.9.7.",
+        "title": "Piping Penetrations",
+        "text": "1) Except as provided in Sentences (2) and (5), piping for drain, waste, vent and central vacuum systems that is not located in a vertical",
+        "part": 9
+      },
+      {
+        "provision": "3.2.2.48.",
+        "title": "Group C, up to 12 Storeys, Sprinklered",
+        "text": "1) A building classified as Group C is permitted to conform to Sentence (2), provided a) it is sprinklered throughout, b) it is not more",
+        "part": 3
+      },
+      {
+        "provision": "3.2.2.49.",
+        "title": "Group C, up to 6 Storeys, Sprinklered, Noncombustible Construction",
+        "text": "1) A building classified as Group C is permitted to conform to Sentence (2) provided a) except as permitted by Sentences 3.2.2.7.(1) and 3.2.2.18.(2), the",
+        "part": 3
+      },
+      {
+        "provision": "3.2.2.51.",
+        "title": "Group C, up to 6 Storeys, Sprinklered",
+        "text": "1) A building classified as Group C is permitted to conform to Sentence (2), provided a) it is sprinklered throughout, b) it is not more",
+        "part": 3
+      },
+      {
+        "provision": "3.1.5.19.",
+        "title": "Combustible Piping Materials",
+        "text": "1) Except as permitted by Clause 3.1.5.2.(1)(d) and Sentences (2) and (3), combustible piping and tubing and associated adhesives are permitted to be used in",
         "part": 3
       }
     ],
     "payload": {
       "articles": [
         {
-          "provision": "3.4.2.1.",
+          "provision": "3.2.2.52.",
           "division": "B",
           "suggested": false,
-          "title": "Minimum Number of Exits",
+          "title": "Group C, up to 4 Storeys, Sprinklered",
           "part": 3,
           "probability": null,
           "confidence": {
             "probability": null,
             "calibration": "placeholder_uncalibrated"
           },
-          "quote": "1) Except as permitted by Sentences (2) to (4), every floor area intended for occupancy shall be served by at least 2 exits.",
-          "reason": "The proposal is measured against Division B Article 3.4.2.1. (Minimum Number of Exits).",
-          "stage": "cached"
+          "reason": "The proposal is compared with \"Group C, up to 4 Storeys, Sprinklered\" (Division B Article 3.2.2.52.).",
+          "stage": "bm25",
+          "snippet": "1) A building classified as Group C is permitted to conform to Sentence (2) provided a) except as permitted by Sentences 3.2.2.7.(1) and 3.2.2.18.(2), the",
+          "benchmark": {
+            "provision_id": "3.2.2.52.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "3.2.2.55.",
+          "division": "B",
+          "suggested": false,
+          "title": "Group C, up to 3 Storeys, Sprinklered",
+          "part": 3,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Group C, up to 3 Storeys, Sprinklered\" (Division B Article 3.2.2.55.).",
+          "stage": "bm25",
+          "snippet": "1) A building classified as Group C is permitted to conform to Sentence (2) provided a) except as permitted by Sentences 3.2.2.7.(1) and 3.2.2.18.(2), the",
+          "benchmark": {
+            "provision_id": "3.2.2.55.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "3.1.9.4.",
+          "division": "B",
+          "suggested": false,
+          "title": "Combustible Piping Penetrations",
+          "part": 3,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Combustible Piping Penetrations\" (Division B Article 3.1.9.4.).",
+          "stage": "bm25",
+          "snippet": "1) Combustible sprinkler piping is permitted to penetrate a fire separation provided the fire compartments on each side of the fire separation are sprinklered.",
+          "benchmark": {
+            "provision_id": "3.1.9.4.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "3.1.9.1.",
+          "division": "B",
+          "suggested": false,
+          "title": "Firestops",
+          "part": 3,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Firestops\" (Division B Article 3.1.9.1.).",
+          "stage": "bm25",
+          "snippet": "1) Except as provided in Sentences (2) to (7) and Article 3.1.9.3., penetrations of a fire separation or a membrane forming part of an assembly",
+          "benchmark": {
+            "provision_id": "3.1.9.1.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "9.10.9.9.",
+          "division": "B",
+          "suggested": false,
+          "title": "Penetrations by Raceways, Sprinklers and Fire Dampers",
+          "part": 9,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Penetrations by Raceways, Sprinklers and Fire Dampers\" (Division B Article 9.10.9.9.).",
+          "stage": "bm25",
+          "snippet": "1) Combustible totally enclosed raceways that are embedded in a concrete floor slab are permitted in an assembly required to have a fire-resistance rating, provided",
+          "benchmark": {
+            "provision_id": "9.10.9.9.(1)",
+            "requirement_snippet": "not less than 50 mm",
+            "required_value": 50,
+            "required_unit": "mm",
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "9.10.9.7.",
+          "division": "B",
+          "suggested": false,
+          "title": "Piping Penetrations",
+          "part": 9,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Piping Penetrations\" (Division B Article 9.10.9.7.).",
+          "stage": "bm25",
+          "snippet": "1) Except as provided in Sentences (2) and (5), piping for drain, waste, vent and central vacuum systems that is not located in a vertical",
+          "benchmark": {
+            "provision_id": "9.10.9.7.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "3.2.2.48.",
+          "division": "B",
+          "suggested": false,
+          "title": "Group C, up to 12 Storeys, Sprinklered",
+          "part": 3,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Group C, up to 12 Storeys, Sprinklered\" (Division B Article 3.2.2.48.).",
+          "stage": "bm25",
+          "snippet": "1) A building classified as Group C is permitted to conform to Sentence (2), provided a) it is sprinklered throughout, b) it is not more",
+          "benchmark": {
+            "provision_id": "3.2.2.48.(1)",
+            "requirement_snippet": "not more than 42 m",
+            "required_value": 42,
+            "required_unit": "m",
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "3.2.2.49.",
+          "division": "B",
+          "suggested": false,
+          "title": "Group C, up to 6 Storeys, Sprinklered, Noncombustible Construction",
+          "part": 3,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Group C, up to 6 Storeys, Sprinklered, Noncombustible Construction\" (Division B Article 3.2.2.49.).",
+          "stage": "bm25",
+          "snippet": "1) A building classified as Group C is permitted to conform to Sentence (2) provided a) except as permitted by Sentences 3.2.2.7.(1) and 3.2.2.18.(2), the",
+          "benchmark": {
+            "provision_id": "3.2.2.49.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "3.2.2.51.",
+          "division": "B",
+          "suggested": false,
+          "title": "Group C, up to 6 Storeys, Sprinklered",
+          "part": 3,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Group C, up to 6 Storeys, Sprinklered\" (Division B Article 3.2.2.51.).",
+          "stage": "bm25",
+          "snippet": "1) A building classified as Group C is permitted to conform to Sentence (2), provided a) it is sprinklered throughout, b) it is not more",
+          "benchmark": {
+            "provision_id": "3.2.2.51.(1)",
+            "requirement_snippet": "not more than 18 m",
+            "required_value": 18,
+            "required_unit": "m",
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "3.1.5.19.",
+          "division": "B",
+          "suggested": false,
+          "title": "Combustible Piping Materials",
+          "part": 3,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Combustible Piping Materials\" (Division B Article 3.1.5.19.).",
+          "stage": "bm25",
+          "snippet": "1) Except as permitted by Clause 3.1.5.2.(1)(d) and Sentences (2) and (3), combustible piping and tubing and associated adhesives are permitted to be used in",
+          "benchmark": {
+            "provision_id": "3.1.5.19.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
         }
       ],
       "section_c": [],
       "benchmark": {
         "identified": true,
-        "provision": "3.4.2.1.",
+        "provision": "3.2.2.52.",
         "division": "B",
         "role": "benchmark_acceptable_solution",
         "relation": "measured_against",
-        "explanation": "The proposal is measured against Division B Article 3.4.2.1. (Minimum Number of Exits), the benchmark acceptable solution. Tied to the proposal text as given.",
-        "quote": "1) Except as permitted by Sentences (2) to (4), every floor area intended for occupancy shall be served by at least 2 exits.",
-        "citation": "NBC(AE) 2023 p2, Div B, Sentence 3.4.2.1.(1) [PDF p.269]",
+        "explanation": "The proposal is measured against Division B Article 3.2.2.52. (Group C, up to 4 Storeys, Sprinklered), the benchmark acceptable solution. Tied to the proposal text as given.",
+        "quote": "1) A building classified as Group C is permitted to conform to Sentence (2) provided a) except as permitted by Sentences 3.2.2.7.(1) and 3.2.2.18.(2), the",
+        "citation": "NBC(AE) 2023 p2, Div B, Article 3.2.2.52. [PDF p.189]",
         "confidence": {
           "probability": null,
           "calibration": "placeholder_uncalibrated"
         },
         "section_c": [
           {
+            "provision_id": "3.2.2.52.(1)",
             "division": "B",
-            "citation": "NBC(AE) 2023 p2, Div B, Sentence 3.4.2.1.(1) [PDF p.269]",
+            "citation": "NBC(AE) 2023 p2, Div B, Sentence 3.2.2.52.(1) [PDF p.189]",
             "attribution_status": "direct",
             "pairs": [
               {
-                "function": "F10",
-                "objective": "OS3.7",
-                "condition": null
-              },
-              {
-                "function": "F12",
-                "objective": "OS3.7",
-                "condition": null
-              },
-              {
-                "function": "F05",
-                "objective": "OS3.7",
-                "condition": null
-              },
-              {
-                "function": "F06",
-                "objective": "OS3.7",
-                "condition": null
-              },
-              {
-                "function": "F12",
+                "function": "F02",
                 "objective": "OS1.2",
-                "condition": null
+                "condition": "Applies to portion of Code text: \u201c\u2026 the building is sprinklered throughout \u2026\u201d"
               },
               {
-                "function": "F06",
+                "function": "F02",
+                "objective": "OS1.3",
+                "condition": "Applies to portion of Code text: \u201c\u2026 the building is sprinklered throughout \u2026\u201d"
+              },
+              {
+                "function": "F04",
                 "objective": "OS1.2",
+                "condition": "Applies to portion of Code text: \u201c\u2026 the building is sprinklered throughout \u2026\u201d"
+              },
+              {
+                "function": "F04",
+                "objective": "OS1.3",
+                "condition": "Applies to portion of Code text: \u201c\u2026 the building is sprinklered throughout \u2026\u201d"
+              },
+              {
+                "function": "F02",
+                "objective": "OP1.2",
+                "condition": "Applies to portion of Code text: \u201c\u2026 the building is sprinklered throughout \u2026\u201d"
+              },
+              {
+                "function": "F02",
+                "objective": "OP1.3",
+                "condition": "Applies to portion of Code text: \u201c\u2026 the building is sprinklered throughout \u2026\u201d"
+              },
+              {
+                "function": "F04",
+                "objective": "OP1.2",
+                "condition": "Applies to portion of Code text: \u201c\u2026 the building is sprinklered throughout \u2026\u201d"
+              },
+              {
+                "function": "F04",
+                "objective": "OP1.3",
+                "condition": "Applies to portion of Code text: \u201c\u2026 the building is sprinklered throughout \u2026\u201d"
+              }
+            ],
+            "explainer": {
+              "text": "Division B 3.2.2.52.(1) is quoted from the code database. Attribution status: direct. Objectives: OS1.2, OS1.3, OP1.2, OP1.3. Functions: F02, F04. NBC 2020 Intent Statements, explanatory only.",
+              "quote": "1) A building classified as Group C is permitted to conform to Sentence (2) provided a) except as permitted by Sentences 3.2.2.7.(1) and 3.2.2.18.(2), the",
+              "source": "deterministic"
+            }
+          },
+          {
+            "provision_id": "3.2.2.52.(2)",
+            "division": "B",
+            "citation": "NBC(AE) 2023 p2, Div B, Sentence 3.2.2.52.(2) [PDF p.190]",
+            "attribution_status": "direct",
+            "pairs": [
+              {
+                "function": "F03",
+                "objective": "OS1.2",
+                "condition": "Applies to portion of Code text: \u201c... (a) ... floor assemblies shall be fire separations with a fire-resistance rating not less than 1 h, . . . \u201dand to Clause( c ) ."
+              },
+              {
+                "function": "F04",
+                "objective": "OS1.2",
+                "condition": "Applies to portion of Code text: \u201c... (a) ... floor assemblies shall be fire separations with a fire-resistance rating not less than 1 h, . . . \u201dand to Clause( c ) ."
+              },
+              {
+                "function": "F04",
+                "objective": "OS1.3",
+                "condition": "Applies to portion of Code text: \u201c... (a) ... floor assemblies shall be fire separations with a fire-resistance rating not less than 1 h, . . . \u201dand to Clause( c ) ."
+              },
+              {
+                "function": "F03",
+                "objective": "OP1.2",
+                "condition": "Applies to portion of Code text: \u201c... (a) ... floor assemblies shall be fire separations with a fire-resistance rating not less than 1 h, . . . \u201dand to Clause( c ) ."
+              },
+              {
+                "function": "F04",
+                "objective": "OP1.2",
+                "condition": "Applies to portion of Code text: \u201c... (a) ... floor assemblies shall be fire separations with a fire-resistance rating not less than 1 h, . . . \u201dand to Clause( c ) ."
+              },
+              {
+                "function": "F04",
+                "objective": "OP1.3",
+                "condition": "Applies to portion of Code text: \u201c... (a) ... floor assemblies shall be fire separations with a fire-resistance rating not less than 1 h, . . . \u201dand to Clause( c ) ."
+              },
+              {
+                "function": "F04",
+                "objective": "OS1.3",
                 "condition": null
               },
               {
-                "function": "F12",
-                "objective": "OP1.2",
-                "condition": null
-              },
-              {
-                "function": "F06",
-                "objective": "OP1.2",
+                "function": "F04",
+                "objective": "OP1.3",
                 "condition": null
               }
             ],
             "explainer": {
-              "text": "Division B 3.4.2.1.(1) is quoted from the code database. Attribution status: direct. Objectives: OS3.7, OS1.2, OP1.2. Functions: F10, F12, F05, F06. NBC 2020 Intent Statements, explanatory only.",
-              "quote": "1) Except as permitted by Sentences (2) to (4), every floor area intended for occupancy shall be served by at least 2 exits.",
+              "text": "Division B 3.2.2.52.(2) is quoted from the code database. Attribution status: direct. Objectives: OS1.2, OS1.3, OP1.2, OP1.3. Functions: F03, F04. NBC 2020 Intent Statements, explanatory only.",
+              "quote": "2) The building referred to in Sentence (1) is permitted to be of combustible construction or noncombustible construction used singly or in combination, and a)",
               "source": "deterministic"
-            },
-            "provision_id": "3.4.2.1.(1)"
+            }
+          },
+          {
+            "provision_id": "3.2.2.52.(3)",
+            "division": "B",
+            "citation": "NBC(AE) 2023 p2, Div B, Sentence 3.2.2.52.(3) [PDF p.190]",
+            "attribution_status": "no row in the attribution table",
+            "pairs": [],
+            "explainer": {
+              "text": "Division B 3.2.2.52.(3) is quoted from the code database. Attribution status: no row in the attribution table. The NBC(AE) attribution table has no objective or function for this sentence. NBC 2020 Intent Statements, explanatory only.",
+              "quote": "3) In a building that contains dwelling units that have more than one storey, subject to the requirements of Sentence 3.3.4.2.(3), the floor assemblies, including",
+              "source": "deterministic"
+            }
+          },
+          {
+            "provision_id": "3.2.2.52.(4)",
+            "division": "B",
+            "citation": "NBC(AE) 2023 p2, Div B, Sentence 3.2.2.52.(4) [PDF p.190]",
+            "attribution_status": "no row in the attribution table",
+            "pairs": [],
+            "explainer": {
+              "text": "Division B 3.2.2.52.(4) is quoted from the code database. Attribution status: no row in the attribution table. The NBC(AE) attribution table has no objective or function for this sentence. NBC 2020 Intent Statements, explanatory only.",
+              "quote": "4) In a building in which there is no dwelling unit above another dwelling unit, the fire-resistance rating for floor assemblies entirely within the dwelling",
+              "source": "deterministic"
+            }
           }
         ]
       },
       "engineering_required": "depends",
       "intake_action": "ask",
       "redirect_to": null,
-      "variance_needed": "not_indicated",
-      "variance_explanation": "No departure from the acceptable solution has been identified; if the design follows the cited acceptable solution, a variance may not be needed. Confirm with your Safety Codes Officer.",
+      "variance_needed": "likely",
+      "variance_explanation": "The description treats the design as doing something other than the cited acceptable solution. A variance is the application that asks the Safety Codes Officer to consider that alternative. This identification does not decide whether the alternative performs as well.",
       "questions": [
         "How many storeys does the building have?",
-        "What is the occupancy (and, if you have it, the occupant load)?",
+        "What is the building height in storeys and metres?",
         "What is the building area of each storey?",
-        "Is the building sprinklered?"
+        "What is the wall assembly made of, and what are its fire-resistance and thermal properties?",
+        "What is the occupancy (and, if you have it, the occupant load)?"
       ],
       "open_questions": [
         {
+          "id": "building.storeys",
           "field": "building.storeys",
           "text": "How many storeys does the building have?",
           "why": "Storey count changes which exit, fire-separation, and spatial-separation articles are in the set.",
           "status": "open",
           "disambiguates": [
-            "3.4.2.1."
+            "3.2.2.52.",
+            "3.2.2.55.",
+            "3.1.9.4.",
+            "3.2.2.48.",
+            "3.2.2.49.",
+            "3.2.2.51."
           ],
           "answer": null
         },
         {
-          "field": "building.occupancy",
-          "text": "What is the occupancy (and, if you have it, the occupant load)?",
-          "why": "Occupancy and occupant load move a design between Part 9 housing articles and Part 3 assembly or care articles.",
+          "id": "building.height",
+          "field": "building.height",
+          "text": "What is the building height in storeys and metres?",
+          "why": "Height decides whether Part 9 or Part 3 exit and construction articles govern.",
           "status": "open",
           "disambiguates": [
-            "3.4.2.1."
+            "3.2.2.52.",
+            "3.2.2.55.",
+            "3.1.9.4.",
+            "3.2.2.48.",
+            "3.2.2.49.",
+            "3.2.2.51."
           ],
           "answer": null
         },
         {
+          "id": "building.area",
           "field": "building.area",
           "text": "What is the building area of each storey?",
           "why": "Building area changes the Part 9 / Part 3 boundary and several construction articles.",
           "status": "open",
           "disambiguates": [
-            "3.4.2.1."
+            "3.2.2.52.",
+            "3.2.2.55.",
+            "3.2.2.48.",
+            "3.2.2.49.",
+            "3.2.2.51.",
+            "3.1.5.19."
           ],
           "answer": null
         },
         {
-          "field": "building.sprinklered",
-          "text": "Is the building sprinklered?",
-          "why": "Sprinkler status changes which exit and fire-separation relaxations are candidates.",
+          "id": "assembly.material",
+          "field": "assembly.material",
+          "text": "What is the wall assembly made of, and what are its fire-resistance and thermal properties?",
+          "why": "The material and its fire or thermal properties decide which wall, insulation, and fire-resistance articles apply.",
           "status": "open",
           "disambiguates": [
-            "3.4.2.1."
+            "3.2.2.52.",
+            "3.2.2.55.",
+            "3.1.9.4.",
+            "3.1.9.1.",
+            "9.10.9.9.",
+            "3.2.2.48.",
+            "3.2.2.49.",
+            "3.2.2.51.",
+            "3.1.5.19."
+          ],
+          "answer": null
+        },
+        {
+          "id": "building.occupancy",
+          "field": "building.occupancy",
+          "text": "What is the occupancy (and, if you have it, the occupant load)?",
+          "why": "Occupancy and occupant load move a design between Part 9 housing articles and Part 3 assembly or care articles.",
+          "status": "open",
+          "disambiguates": [
+            "3.2.2.52.",
+            "3.2.2.55.",
+            "3.1.9.4.",
+            "3.1.9.1.",
+            "9.10.9.9.",
+            "9.10.9.7.",
+            "3.2.2.48.",
+            "3.2.2.49.",
+            "3.2.2.51."
           ],
           "answer": null
         }
       ],
-      "mode": "cached",
+      "mode": "cached_demo",
       "persisted": false,
       "cached": true,
-      "generated_at": "2026-10-20T18:45:00Z",
+      "source": "cache",
       "model_ids": {
-        "screen": "gpt-4.1-mini-2025-04-14",
-        "rerank": "gpt-4.1-mini-2025-04-14",
-        "verifier": "gpt-4.1-2025-04-14",
+        "screen": null,
+        "rerank": null,
+        "verifier": null,
         "invoked": false
       },
       "commit_policy": {
@@ -442,7 +1671,487 @@
         "status": "placeholder_uncalibrated",
         "calibration_set": "evals_dev/human_key/"
       }
-    },
-    "description_sha256": "a73e97a0aaabd4cdd91ea3f0023229cd37418f9cb0957fa152d9aef49e1879fd"
+    }
+  },
+  {
+    "id": "c-homebuilder-infill-house",
+    "description": "# Project brief: Example Crescent infill house\n\n**From:** Priya Natarajan, Larkspur Example Homes *(fictional)*  **Date:** 2026-10-16\n\n| Item | Detail |\n|---|---|\n| Address | 0000 Example Crescent NW, Edmonton, AB *(fictional)* |\n| Legal | Lot 0, Block 0, Plan 0000000 *(fictional placeholder)* |\n| Owner (client) | J. & R. Example *(fictional)* |\n| Builder / applicant | Larkspur Example Homes *(fictional)* |\n| Building | Detached single-family, 2 storeys, ~210 m\u00b2, no suite, **no sprinklers** |\n| Permit | Not yet applied for |\n| Designer | In-house drafting (no architect or engineer of record yet). Truss and spray-foam suppliers to be confirmed. |\n\n## Design features we think are \"different\"\n1. **No basement.** A slab-on-grade with in-floor hydronic heat. We want **R-7.5 rigid insulation** under the slab (the code table says more; we heard there's a STANDATA).\n2. **Flat-look roof** (low slope) with **no attic vents**. Closed-cell spray foam sprayed under the roof deck, with batts below.\n3. **Bedroom 3 \"slot\" window:** the client loves a tall, narrow casement on the street side. Clear opening per the supplier is **400 mm wide \u00d7 780 mm high**. It's the only window in that bedroom.\n\n## Ask\nTell us what needs a variance, and draft whatever's needed so we can apply for the permit by mid-November.\n",
+    "description_sha256": "0f731e376b932a7afe286954e84b8bd366a86603706ff5f0f29e17c80f207647",
+    "candidates": [
+      {
+        "provision": "9.25.2.5.",
+        "title": "Installation of Spray-Applied Polyurethane",
+        "text": "1) Spray-applied polyurethane insulation shall be installed in accordance with CAN/ULC-S705.2, \u201cStandard for Thermal Insulation \u2013 Spray Applied Rigid Polyurethane Foam, Medium Density \u2013 Application.\u201d",
+        "part": 9
+      },
+      {
+        "provision": "3.1.5.15.",
+        "title": "Foamed Plastic Insulation",
+        "text": "1) Foamed plastic insulation is permitted to be installed above roof decks, outside of foundation walls below ground level, and beneath concrete slabs-on-ground of a",
+        "part": 3
+      },
+      {
+        "provision": "7.2.8.1.",
+        "title": "General",
+        "text": "1) In addition to the requirements of Sentences (2) to (5), a water spray park shall be constructed in accordance with the remainder of this",
+        "part": 7
+      },
+      {
+        "provision": "9.23.14.11.",
+        "title": "Roof Trusses",
+        "text": "1) Wood roof trusses shall be designed in accordance with good engineering practice such as that described in TPIC 2019, \u201cTruss Design Procedures and Specifications",
+        "part": 9
+      },
+      {
+        "provision": "9.10.20.2.",
+        "title": "Access to Basements",
+        "text": "1) Except for basements in houses with a secondary suite or basements serving not more than one dwelling unit, each basement that is not sprinklered",
+        "part": 9
+      },
+      {
+        "provision": "3.2.5.12.",
+        "title": "Automatic Sprinkler Systems",
+        "text": "1) Except as permitted by Sentences (2) to (4) and (9), an automatic sprinkler system shall be designed, constructed, installed and tested in conformance with",
+        "part": 3
+      },
+      {
+        "provision": "9.9.6.3.",
+        "title": "Clear Opening Width at Doorways",
+        "text": "1) Except as provided in Sentence (4), the clear opening width of doorways shall comply with Sentence (2) at a) exit doors, and b) doors",
+        "part": 9
+      },
+      {
+        "provision": "3.2.8.6.",
+        "title": "Draft Stops",
+        "text": "1) A draft stop shall be provided at each floor level within an interconnected floor space, immediately adjacent to and surrounding the opening, and shall",
+        "part": 3
+      },
+      {
+        "provision": "9.36.5.14.",
+        "title": "Modeling Building Envelope of Reference House",
+        "text": "1) The energy model calculations for the reference house shall include the same values as those used for the proposed house with regard to a)",
+        "part": 9
+      },
+      {
+        "provision": "9.9.6.2.",
+        "title": "Clear Opening Height at Doorways",
+        "text": "1) Except as provided in Sentences (2) and (3), the clear opening height of doorways shall be not less than 2 030 mm high at",
+        "part": 9
+      }
+    ],
+    "payload": {
+      "articles": [
+        {
+          "provision": "9.25.2.5.",
+          "division": "B",
+          "suggested": false,
+          "title": "Installation of Spray-Applied Polyurethane",
+          "part": 9,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Installation of Spray-Applied Polyurethane\" (Division B Article 9.25.2.5.).",
+          "stage": "bm25",
+          "snippet": "1) Spray-applied polyurethane insulation shall be installed in accordance with CAN/ULC-S705.2, \u201cStandard for Thermal Insulation \u2013 Spray Applied Rigid Polyurethane Foam, Medium Density \u2013 Application.\u201d",
+          "benchmark": {
+            "provision_id": "9.25.2.5.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "3.1.5.15.",
+          "division": "B",
+          "suggested": false,
+          "title": "Foamed Plastic Insulation",
+          "part": 3,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Foamed Plastic Insulation\" (Division B Article 3.1.5.15.).",
+          "stage": "bm25",
+          "snippet": "1) Foamed plastic insulation is permitted to be installed above roof decks, outside of foundation walls below ground level, and beneath concrete slabs-on-ground of a",
+          "benchmark": {
+            "provision_id": "3.1.5.15.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "7.2.8.1.",
+          "division": "B",
+          "suggested": false,
+          "title": "General",
+          "part": 7,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"General\" (Division B Article 7.2.8.1.).",
+          "stage": "bm25",
+          "snippet": "1) In addition to the requirements of Sentences (2) to (5), a water spray park shall be constructed in accordance with the remainder of this",
+          "benchmark": {
+            "provision_id": "7.2.8.1.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "9.23.14.11.",
+          "division": "B",
+          "suggested": false,
+          "title": "Roof Trusses",
+          "part": 9,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Roof Trusses\" (Division B Article 9.23.14.11.).",
+          "stage": "bm25",
+          "snippet": "1) Wood roof trusses shall be designed in accordance with good engineering practice such as that described in TPIC 2019, \u201cTruss Design Procedures and Specifications",
+          "benchmark": {
+            "provision_id": "9.23.14.11.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "9.10.20.2.",
+          "division": "B",
+          "suggested": false,
+          "title": "Access to Basements",
+          "part": 9,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Access to Basements\" (Division B Article 9.10.20.2.).",
+          "stage": "bm25",
+          "snippet": "1) Except for basements in houses with a secondary suite or basements serving not more than one dwelling unit, each basement that is not sprinklered",
+          "benchmark": {
+            "provision_id": "9.10.20.2.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "3.2.5.12.",
+          "division": "B",
+          "suggested": false,
+          "title": "Automatic Sprinkler Systems",
+          "part": 3,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Automatic Sprinkler Systems\" (Division B Article 3.2.5.12.).",
+          "stage": "bm25",
+          "snippet": "1) Except as permitted by Sentences (2) to (4) and (9), an automatic sprinkler system shall be designed, constructed, installed and tested in conformance with",
+          "benchmark": {
+            "provision_id": "3.2.5.12.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "9.9.6.3.",
+          "division": "B",
+          "suggested": false,
+          "title": "Clear Opening Width at Doorways",
+          "part": 9,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Clear Opening Width at Doorways\" (Division B Article 9.9.6.3.).",
+          "stage": "bm25",
+          "snippet": "1) Except as provided in Sentence (4), the clear opening width of doorways shall comply with Sentence (2) at a) exit doors, and b) doors",
+          "benchmark": {
+            "provision_id": "9.9.6.3.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "3.2.8.6.",
+          "division": "B",
+          "suggested": false,
+          "title": "Draft Stops",
+          "part": 3,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Draft Stops\" (Division B Article 3.2.8.6.).",
+          "stage": "bm25",
+          "snippet": "1) A draft stop shall be provided at each floor level within an interconnected floor space, immediately adjacent to and surrounding the opening, and shall",
+          "benchmark": {
+            "provision_id": "3.2.8.6.(1)",
+            "requirement_snippet": "not less than 500 mm",
+            "required_value": 500,
+            "required_unit": "mm",
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "9.36.5.14.",
+          "division": "B",
+          "suggested": false,
+          "title": "Modeling Building Envelope of Reference House",
+          "part": 9,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Modeling Building Envelope of Reference House\" (Division B Article 9.36.5.14.).",
+          "stage": "bm25",
+          "snippet": "1) The energy model calculations for the reference house shall include the same values as those used for the proposed house with regard to a)",
+          "benchmark": {
+            "provision_id": "9.36.5.14.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        },
+        {
+          "provision": "9.9.6.2.",
+          "division": "B",
+          "suggested": false,
+          "title": "Clear Opening Height at Doorways",
+          "part": 9,
+          "probability": null,
+          "confidence": {
+            "probability": null,
+            "calibration": "placeholder_uncalibrated"
+          },
+          "reason": "The proposal is compared with \"Clear Opening Height at Doorways\" (Division B Article 9.9.6.2.).",
+          "stage": "bm25",
+          "snippet": "1) Except as provided in Sentences (2) and (3), the clear opening height of doorways shall be not less than 2 030 mm high at",
+          "benchmark": {
+            "provision_id": "9.9.6.2.(1)",
+            "requirement_snippet": null,
+            "required_value": null,
+            "required_unit": null,
+            "proposed_value": null,
+            "proposed_unit": null,
+            "fact_id": null,
+            "comparison": null
+          }
+        }
+      ],
+      "section_c": [],
+      "benchmark": {
+        "identified": true,
+        "provision": "9.25.2.5.",
+        "division": "B",
+        "role": "benchmark_acceptable_solution",
+        "relation": "measured_against",
+        "explanation": "The proposal is measured against Division B Article 9.25.2.5. (Installation of Spray-Applied Polyurethane), the benchmark acceptable solution. Tied to the proposal text as given.",
+        "quote": "1) Spray-applied polyurethane insulation shall be installed in accordance with CAN/ULC-S705.2, \u201cStandard for Thermal Insulation \u2013 Spray Applied Rigid Polyurethane Foam, Medium Density \u2013 Application.\u201d",
+        "citation": "NBC(AE) 2023 p2, Div B, Article 9.25.2.5. [PDF p.996]",
+        "confidence": {
+          "probability": null,
+          "calibration": "placeholder_uncalibrated"
+        },
+        "section_c": [
+          {
+            "provision_id": "9.25.2.5.(1)",
+            "division": "B",
+            "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.25.2.5.(1) [PDF p.996]",
+            "attribution_status": "direct",
+            "pairs": [
+              {
+                "function": "F51",
+                "objective": "OH1.1",
+                "condition": null
+              },
+              {
+                "function": "F41",
+                "objective": "OH1.1",
+                "condition": null
+              },
+              {
+                "function": "F63",
+                "objective": "OH1.1",
+                "condition": null
+              },
+              {
+                "function": "F51",
+                "objective": "OH1.2",
+                "condition": null
+              },
+              {
+                "function": "F63",
+                "objective": "OH1.2",
+                "condition": null
+              },
+              {
+                "function": "F63",
+                "objective": "OS2.3",
+                "condition": null
+              }
+            ],
+            "explainer": {
+              "text": "Division B 9.25.2.5.(1) is quoted from the code database. Attribution status: direct. Objectives: OH1.1, OH1.2, OS2.3. Functions: F51, F41, F63. NBC 2020 Intent Statements, explanatory only.",
+              "quote": "1) Spray-applied polyurethane insulation shall be installed in accordance with CAN/ULC-S705.2, \u201cStandard for Thermal Insulation \u2013 Spray Applied Rigid Polyurethane Foam, Medium Density \u2013 Application.\u201d",
+              "source": "deterministic"
+            }
+          }
+        ]
+      },
+      "engineering_required": "depends",
+      "intake_action": "ask",
+      "redirect_to": null,
+      "variance_needed": "likely",
+      "variance_explanation": "The description treats the design as doing something other than the cited acceptable solution. A variance is the application that asks the Safety Codes Officer to consider that alternative. This identification does not decide whether the alternative performs as well.",
+      "questions": [
+        "What is the wall assembly made of, and what are its fire-resistance and thermal properties?",
+        "What is the occupancy (and, if you have it, the occupant load)?",
+        "Is the building sprinklered?",
+        "How many storeys does the building have?",
+        "What is the building height in storeys and metres?"
+      ],
+      "open_questions": [
+        {
+          "id": "assembly.material",
+          "field": "assembly.material",
+          "text": "What is the wall assembly made of, and what are its fire-resistance and thermal properties?",
+          "why": "The material and its fire or thermal properties decide which wall, insulation, and fire-resistance articles apply.",
+          "status": "open",
+          "disambiguates": [
+            "9.25.2.5.",
+            "3.1.5.15.",
+            "9.23.14.11.",
+            "3.2.5.12.",
+            "9.36.5.14."
+          ],
+          "answer": null
+        },
+        {
+          "id": "building.occupancy",
+          "field": "building.occupancy",
+          "text": "What is the occupancy (and, if you have it, the occupant load)?",
+          "why": "Occupancy and occupant load move a design between Part 9 housing articles and Part 3 assembly or care articles.",
+          "status": "open",
+          "disambiguates": [
+            "3.1.5.15.",
+            "9.10.20.2.",
+            "3.2.5.12.",
+            "9.9.6.3.",
+            "9.36.5.14.",
+            "9.9.6.2."
+          ],
+          "answer": null
+        },
+        {
+          "id": "building.sprinklered",
+          "field": "building.sprinklered",
+          "text": "Is the building sprinklered?",
+          "why": "Sprinkler status changes which exit and fire-separation relaxations are candidates.",
+          "status": "open",
+          "disambiguates": [
+            "3.1.5.15.",
+            "9.10.20.2.",
+            "3.2.5.12."
+          ],
+          "answer": null
+        },
+        {
+          "id": "building.storeys",
+          "field": "building.storeys",
+          "text": "How many storeys does the building have?",
+          "why": "Storey count changes which exit, fire-separation, and spatial-separation articles are in the set.",
+          "status": "open",
+          "disambiguates": [
+            "9.10.20.2.",
+            "3.2.5.12."
+          ],
+          "answer": null
+        },
+        {
+          "id": "building.height",
+          "field": "building.height",
+          "text": "What is the building height in storeys and metres?",
+          "why": "Height decides whether Part 9 or Part 3 exit and construction articles govern.",
+          "status": "open",
+          "disambiguates": [
+            "3.2.5.12."
+          ],
+          "answer": null
+        }
+      ],
+      "mode": "cached_demo",
+      "persisted": false,
+      "cached": true,
+      "source": "cache",
+      "model_ids": {
+        "screen": null,
+        "rerank": null,
+        "verifier": null,
+        "invoked": false
+      },
+      "commit_policy": {
+        "threshold": 0.75,
+        "max_commits": 3,
+        "parts": [
+          9
+        ],
+        "status": "placeholder_uncalibrated",
+        "calibration_set": "evals_dev/human_key/"
+      }
+    }
   }
 ]

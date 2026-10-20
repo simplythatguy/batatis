@@ -1,6 +1,7 @@
 """Offline identify serves the demo cache and does not invent a citation."""
 import json
 import os
+import re
 import socket
 import subprocess
 import sys
@@ -21,8 +22,8 @@ ROOT = Path(__file__).resolve().parents[2]
 CACHE = ROOT / 'engine' / 'identify' / 'demo_cache.json'
 
 
-def _description(case_id: str) -> str:
-    return json.loads((ROOT / 'evals_dev' / 'cases' / f'{case_id}.json').read_text())['description']
+def _brief(case_id: str) -> str:
+    return (ROOT / 'evals' / 'demo-cases' / case_id / 'input' / 'project-brief.md').read_text()
 
 
 def _client(tmp_path):
@@ -38,12 +39,12 @@ def test_no_key_serves_cached_demo_cases(tmp_path, monkeypatch):
     monkeypatch.delenv('OPENAI_API_KEY', raising=False)
     monkeypatch.delenv('BATATIS_OFFLINE', raising=False)
     client = _client(tmp_path)
-    expected = {'dev-001': '9.10.15.5.', 'dev-003': '9.10.13.13.', 'dev-013': '3.4.2.1.'}
-    for case_id, provision in expected.items():
-        body = _post(client, _description(case_id)).json()
-        assert body['source'] == 'cache' and body['mode'] == 'cached_demo'
-        assert body['benchmark']['provision'] == provision
+    for case_id in DEMO_CASE_IDS:
+        body = _post(client, _brief(case_id)).json()
+        assert body['source'] == 'cache' and body['mode'] == 'cached_demo' and body['cached'] is True
         assert body['articles']
+        assert all(article['suggested'] is False for article in body['articles'])
+        assert all(article['snippet'] and len(article['snippet'].split()) <= 25 for article in body['articles'])
         assert 'compli' not in json.dumps(body).lower()
 
 
@@ -55,6 +56,8 @@ def test_unknown_case_is_an_offline_miss_without_a_citation(tmp_path, monkeypatc
     body = response.json()
     assert body['mode'] == 'bm25_fallback' and body['source'] == 'bm25'
     assert body['section_c'] == []
+    assert body['cached'] is False
+    assert all(article['suggested'] is False for article in body['articles'])
     assert not any('committed' in article for article in body['articles'])
     assert all(article['decision'] is None and article['verifier_status'] == 'unknown' for article in body['articles'])
     assert 'hidden' not in response.text
@@ -72,10 +75,11 @@ def test_network_error_falls_back_to_the_cache(tmp_path, monkeypatch):
         raise httpx.ConnectError('simulated network failure')
 
     monkeypatch.setattr('engine.routes_case.identify_run', boom)
-    hit = _post(_client(tmp_path), _description('dev-001'))
+    hit = _post(_client(tmp_path), DEMO_CASE_IDS[0])
     assert hit.status_code == 200
     assert hit.json()['source'] == 'cache' and hit.json()['mode'] == 'cached_demo'
-    assert hit.json()['benchmark']['provision'] == '9.10.15.5.'
+    assert hit.json()['cached'] is True
+    assert all(article['suggested'] is False for article in hit.json()['articles'])
     miss = _post(_client(tmp_path), 'something the cache has never seen')
     assert miss.status_code == 200 and miss.json()['mode'] == 'bm25_fallback'
     assert miss.json()['section_c'] == []
@@ -108,22 +112,28 @@ def test_offline_mode_makes_no_socket_connection(tmp_path, monkeypatch):
     monkeypatch.setattr(socket.socket, 'connect', blocked)
     monkeypatch.setattr(socket, 'create_connection', blocked)
     client = _client(tmp_path)
-    hit = _post(client, _description('dev-003'))
+    hit = _post(client, DEMO_CASE_IDS[1])
     miss = _post(client, 'not a cached description')
     assert hit.json()['source'] == 'cache' and hit.json()['mode'] == 'cached_demo'
     assert miss.json()['mode'] == 'bm25_fallback'
 
 
-def test_build_script_refuses_to_write_without_a_key(tmp_path):
+def test_build_script_records_the_offline_run_without_a_key(tmp_path):
     env = os.environ.copy()
     env.pop('OPENAI_API_KEY', None)
+    env.pop('ANTHROPIC_API_KEY', None)
+    env.pop('BATATIS_LIVE', None)
     env.pop('BATATIS_OFFLINE', None)
     before = CACHE.read_bytes()
     done = subprocess.run([sys.executable, str(ROOT / 'scripts' / 'build_demo_cache.py')],
                           cwd=ROOT, env=env, capture_output=True, text=True)
-    assert done.returncode == 2
-    assert 'OPENAI_API_KEY is not set' in done.stderr
     assert 'sk-' not in done.stderr and 'sk-' not in done.stdout
+    if not default_db().exists():
+        assert done.returncode == 2
+        assert 'code database not found' in done.stderr
+        assert CACHE.read_bytes() == before
+        return
+    assert done.returncode == 0, done.stderr
     assert CACHE.read_bytes() == before
 
 
@@ -149,4 +159,29 @@ def test_cached_citations_resolve_in_codedb():
             assert codes.provision(provision_id, 'B') is not None
             seen.append(provision_id)
         assert match_demo(row['description'])['source'] == 'cache'
+        assert match_demo(row['id'])['mode'] == 'cached_demo'
     assert seen
+
+
+def test_cached_snippets_are_verbatim_codedb_prefixes():
+    if not default_db().exists():
+        pytest.skip('codedb is not built')
+    codes = Codes()
+    raw = CACHE.read_text()
+    rows = json.loads(raw)
+    for row in rows:
+        for article in row['payload']['articles']:
+            record = codes.provision(article['provision'], 'B')
+            flat = re.sub(r'\s+', ' ', record['text'] or '').strip()
+            snippet = article['snippet']
+            assert 1 <= len(snippet.split()) <= 25
+            sentence_hit = False
+            for child in record.get('children') or []:
+                if child.get('level') != 'sentence':
+                    continue
+                sentence = codes.provision(child['id'], 'B') or {}
+                text = re.sub(r'\s+', ' ', sentence.get('text') or '').strip()
+                sentence_hit = sentence_hit or text.startswith(snippet)
+            assert flat.startswith(snippet) or sentence_hit
+            if len(flat.split()) > 25:
+                assert flat not in raw and record['text'] not in raw

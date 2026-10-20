@@ -256,24 +256,71 @@ def _explainer(article: dict, sentence_id: str | None, snippet: str | None, stor
     return {'text': text, 'quote': snippet, 'source': source, 'label': 'explanation'}
 
 
+def _short_recorded(text) -> str | None:
+    """A snippet already stored on a cache row. A longer string is not promoted."""
+    if not isinstance(text, str):
+        return None
+    flat = _flat(text)
+    if not flat or len(flat.split(' ')) > SNIPPET_WORDS:
+        return None
+    return flat
+
+
+def _recorded_benchmark(value) -> dict | None:
+    if not isinstance(value, dict):
+        return None
+    snippet = value.get('requirement_snippet')
+    if isinstance(snippet, str) and len(_flat(snippet).split(' ')) > SNIPPET_WORDS:
+        return None
+    return value
+
+
+def _sentence_from_snippet(codes: Codes | None, article_id: str, snippet: str | None) -> str | None:
+    """The sentence whose opening words are this snippet, when exactly one sentence matches."""
+    if codes is None or not snippet or not article_id:
+        return None
+    record = _provision(codes, article_id)
+    matched = []
+    for child in (record or {}).get('children') or []:
+        if child.get('level') != 'sentence' or not _SENTENCE.match(child.get('id') or ''):
+            continue
+        full = _provision(codes, child['id']) or child
+        text = _flat(full.get('text'))
+        if text and _words(text) == snippet:
+            matched.append(child['id'])
+    if len(matched) == 1:
+        return matched[0]
+    return None
+
+
 def _annotate(card: dict, sentence_id: str | None, codes: Codes | None, facts, source: dict,
               stored: list[dict]) -> dict:
-    """Codedb fields. Snippet and the requirement are read from the sentence, never from a model quote."""
+    """Codedb fields. A model quote is never copied into the snippet."""
+    recorded_snippet = _short_recorded(card.get('snippet'))
+    recorded_benchmark = _recorded_benchmark(card.get('benchmark'))
     card.pop('quote', None)
     card.pop('text', None)
     record = _provision(codes, sentence_id) if sentence_id else None
     sentence = record.get('text') if record and record.get('id') == sentence_id else None
-    snippet = _words(sentence) if sentence else None
-    card['snippet'] = snippet
+    if sentence:
+        snippet = _words(sentence)
+        card['snippet'] = snippet
+        card['page'] = _page(record)
+        objectives, functions, missing = _terms(record, codes)
+        card['objectives'] = objectives
+        card['functions'] = functions
+        card['attribution_missing'] = missing
+        card['benchmark'] = requirement_benchmark(sentence_id, sentence, facts)
+    else:
+        card['snippet'] = recorded_snippet
+        card['page'] = None
+        card['objectives'] = []
+        card['functions'] = []
+        card['attribution_missing'] = True
+        card['benchmark'] = recorded_benchmark
     card['url'] = source.get('url')
     card['printing'] = source.get('printing')
-    card['page'] = _page(record)
-    objectives, functions, missing = _terms(record, codes)
-    card['objectives'] = objectives
-    card['functions'] = functions
-    card['attribution_missing'] = missing
-    card['benchmark'] = requirement_benchmark(sentence_id, sentence, facts)
-    card['explainer'] = _explainer(card, sentence_id, snippet, stored)
+    card['explainer'] = _explainer(card, sentence_id, card.get('snippet'), stored)
     return card
 
 
@@ -287,6 +334,8 @@ def _card(article: dict, rank: int, stored: list[dict], codes: Codes | None, res
     else:
         article_id = article.get('provision') or ''
         sentence_id = _sentence_id(article_id, article.get('quote'), stored, codes)
+        if sentence_id is None:
+            sentence_id = _sentence_from_snippet(codes, article_id, article.get('snippet'))
         card = dict(article)
         card.update({
             'rank': rank,

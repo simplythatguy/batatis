@@ -44,6 +44,7 @@ def test_questions_name_the_assembly_and_the_candidates_they_split():
     assert 1 <= len([q for q in questions if q['field'] != 'building.storeys' or q['disambiguates']]) <= 5
     assert any('assembly' in q['text'].lower() and '9.10.3.1.' in q['disambiguates'] for q in questions)
     assert any(q['text'].startswith('Confirm number of storeys') for q in questions)
+    assert all(q['id'] == q['field'] for q in questions)
 
 
 def test_no_departure_is_not_indicated_and_redirect_follows_the_gold_regimes():
@@ -120,35 +121,36 @@ def test_new_case_keeps_only_the_applicants_facts_and_unknown_answers(tmp_path, 
     assert order == ['screen', 'rerank', 'verify', 'questions', 'done']
 
 
-def _demo(case_id: str) -> str:
-    return json.loads((Path('evals_dev/cases') / f'{case_id}.json').read_text())['description']
+def _brief(case_id: str) -> str:
+    return (Path('evals/demo-cases') / case_id / 'input' / 'project-brief.md').read_text()
 
 
-def test_demo_cache_matches_the_three_descriptions_and_keeps_short_quotes():
-    soffit = match_demo(_demo('dev-001'))
-    damper = match_demo('  ' + _demo('dev-003').replace('\n', ' ') + '  ')
-    exits = match_demo(_demo('dev-013'))
+def test_demo_cache_matches_the_seeded_cases_by_id_or_exact_brief():
+    from engine.identify.demo_cache import DEMO_CASE_IDS
+
     assert match_demo('a different house') is None
-    assert soffit['cached'] is True and soffit['persisted'] is False and soffit['mode'] == 'cached'
-    assert soffit['benchmark']['provision'] == '9.10.15.5.'
-    assert 'projecting roof soffits shall not be constructed' in soffit['benchmark']['quote']
-    assert damper['benchmark']['provision'] == '9.10.13.13.'
-    assert 'fire damper' in damper['benchmark']['quote']
-    assert exits['benchmark']['provision'] == '3.4.2.1.'
-    assert 'at least 2 exits' in exits['benchmark']['quote']
-    for payload in (soffit, damper, exits):
-        assert payload['model_ids']['invoked'] is False
-        assert payload['commit_policy']['status'] == 'placeholder_uncalibrated'
-        assert payload['generated_at']
-        quote = payload['benchmark']['quote']
-        assert quote and len(quote) <= 240
-        row = payload['benchmark']['section_c'][0]
+    for case_id in DEMO_CASE_IDS:
+        by_id = match_demo(case_id)
+        by_brief = match_demo('  ' + _brief(case_id).replace('\n', ' ') + '  ')
+        assert by_id['cached'] is True and by_id['persisted'] is False and by_id['mode'] == 'cached_demo'
+        assert by_brief['mode'] == 'cached_demo' and by_brief['cached'] is True
+        assert by_id['articles'][0]['provision'] == by_brief['articles'][0]['provision']
+        assert by_id['model_ids']['invoked'] is False
+        assert by_id['commit_policy']['status'] == 'placeholder_uncalibrated'
+        assert not any(article.get('suggested') for article in by_id['articles'])
+        quote = by_id['benchmark']['quote']
+        assert quote and len(quote.split()) <= 25
+        for article in by_id['articles']:
+            assert article['snippet'] and len(article['snippet'].split()) <= 25
+            assert 'quote' not in article
+        row = by_id['benchmark']['section_c'][0]
         assert row['provision_id'] and 'provision' not in row
         assert row['explainer']['source'] == 'deterministic'
-        assert 'compli' not in json.dumps(payload).lower()
-        assert '9.9.4.4' not in json.dumps(payload)
-    unknown = match_demo(_demo('dev-001'), facts=[{'field': 'building.storeys', 'status': 'unknown', 'value': None}])
-    assert any(q['field'] == 'building.storeys' and q['status'] == 'unknown' for q in unknown['open_questions'])
+        assert len(row['explainer']['quote'].split()) <= 25
+        assert 'compli' not in json.dumps(by_id).lower()
+    unknown = match_demo(DEMO_CASE_IDS[0], facts=[{'field': 'building.storeys', 'status': 'unknown', 'value': None}])
+    assert any(q['id'] == 'building.storeys' and q['field'] == 'building.storeys' and q['status'] == 'unknown'
+               for q in unknown['open_questions'])
 
 
 def test_missing_database_response_does_not_include_a_path(tmp_path, monkeypatch):
@@ -180,22 +182,40 @@ def test_missing_database_response_does_not_include_a_path(tmp_path, monkeypatch
 
 
 def test_exact_demo_description_is_cached_without_a_model_or_a_database(tmp_path, monkeypatch):
+    from engine.identify.demo_cache import DEMO_CASE_IDS
+
     monkeypatch.delenv('OPENAI_API_KEY', raising=False)
     monkeypatch.delenv('BATATIS_OFFLINE', raising=False)
     monkeypatch.setattr('engine.routes_case.default_db', lambda: Path('/tmp/batatis-missing-codedb.sqlite'))
     client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes()))
     case_id = client.post('/cases').json()['id']
     identified = client.post(f'/cases/{case_id}/identify', json={
-        'prose': _demo('dev-013'),
-        'answers': [{'field': 'building.storeys', 'answer': 'not sure'}],
+        'prose': _brief(DEMO_CASE_IDS[2]),
+        'answers': [{'question_id': 'building.storeys', 'answer': 'not sure'}],
     })
     assert identified.status_code == 200
     body = identified.json()
     assert body['source'] == 'cache' and body['cached'] is True and body['mode'] == 'cached_demo'
-    assert body['benchmark']['provision'] == '3.4.2.1.'
-    assert any(q['status'] == 'unknown' and q['field'] == 'building.storeys' for q in body['open_questions'])
+    assert all(article['suggested'] is False for article in body['articles'])
+    assert all(article['snippet'] and len(article['snippet'].split()) <= 25 for article in body['articles'])
+    assert any(q['id'] == 'building.storeys' and q['status'] == 'unknown' for q in body['open_questions'])
     saved = client.get(f'/cases/{case_id}').json()
     assert saved['provisions'] == [] and 'NorthCore' not in json.dumps(saved)
+    stored = next(fact for fact in saved['facts'] if fact['field'] == 'building.storeys')
+    assert stored['status'] == 'unknown'
+
+
+def test_identify_routes_publish_response_models(tmp_path):
+    app = create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes())
+    spec = app.openapi()
+    posted = spec['paths']['/cases/{case_id}/identify']['post']['responses']['200']
+    stored = spec['paths']['/cases/{case_id}/identify']['get']['responses']['200']
+    stream = spec['paths']['/cases/{case_id}/identify/stream']['get']['responses']['200']
+    decided = spec['paths']['/cases/{case_id}/identify/{provision_id}/decision']['post']['responses']['200']
+    assert posted['content']['application/json']['schema']['$ref'].endswith('/IdentifyResponse')
+    assert stored['content']['application/json']['schema']['$ref'].endswith('/IdentifyResponse')
+    assert stream['content']['application/json']['schema']['$ref'].endswith('/IdentifyResponse')
+    assert decided['content']['application/json']['schema']['$ref'].endswith('/DecisionResponse')
 
 
 def test_quote_checked_reason_is_ai_written_unless_it_claims_compliance():

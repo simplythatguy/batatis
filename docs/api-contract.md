@@ -17,7 +17,7 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `POST /cases/{case_id}/identify` | Ranked article cards. Does not write `provisions`. See Identify. |
 | `GET /cases/{case_id}/identify` | The stored card payload from the last identify call, or `404` detail `identify result not found`. |
 | `GET /cases/{case_id}/identify/stream` | Query `prose`. Server-sent stage events. See Identify. |
-| `POST /cases/{case_id}/identify/{provision_id}/decision` | Body `{ "decision": "yes" \| "no" \| "not_sure" }`. `yes` adds a `user_click` citation. `not_sure` opens a question. `no` records an exclusion. |
+| `POST /cases/{case_id}/identify/{provision_id}/decision` | `DecisionResponse`. Body `{ "decision": "yes" \| "no" \| "not_sure" }`. `yes` adds a `user_click` citation and returns `section_c_row` as `SectionCRow` values. `not_sure` opens a question. `no` records an exclusion. |
 | `GET /cases/{case_id}/information-request` | Officer draft: `{ "case_id", "items" }`. Each `not_sure` decision is an item with `id`, `provision_id`, and `text`. |
 | `POST /cases/{case_id}/identify/confirm` | Body `{ "provisions": ["…"] }`. Writes `provisions` and Section C after a codedb check. |
 | `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`. |
@@ -45,7 +45,7 @@ The fixed 404 detail strings are `case not found` and `provision not found`.
 `POST /cases/{id}/identify` is the primary call. Body:
 
 ```json
-{"prose": "applicant description", "answers": [{"field": "building.storeys", "answer": "not sure"}]}
+{"prose": "applicant description", "answers": [{"question_id": "building.storeys", "answer": "not sure"}]}
 ```
 
 `GET /cases/{id}/identify/stream?prose=` and `POST` with `Accept: text/event-stream` emit stage events in order: `screen`, `rerank`, `verify`, `questions`, `done`. They are stage markers, not tokens.
@@ -54,7 +54,7 @@ The same function serves `engine/cli_sut.py`. Identify does not write `provision
 
 An answer of "not sure" or unknown on an intake question is stored as a fact with status `unknown` and is returned in `open_questions`. Identification continues. That intake answer is separate from the per-article decision below.
 
-`open_questions` has at most about five targeted questions, plus any unknown answer that did not already appear. Each question has `field`, `text`, `why`, `status` (`open` or `unknown`), and `disambiguates` (candidate article ids). An unconfirmed value is asked back as a confirmation.
+`open_questions` has at most about five targeted questions, plus any unknown answer that did not already appear. Each question has a stable `id` equal to its fact `field`, plus `text`, `why`, `status` (`open` or `unknown`), and `disambiguates` (candidate article ids). An answer may send that `id` as `question_id`. The fact is stored on that field. An answer may still send `field` instead. An unconfirmed value is asked back as a confirmation.
 
 `variance_needed` is `not_indicated`, `likely`, or `unknown`. When nothing has confirmed a departure, the explanation is:
 
@@ -72,13 +72,15 @@ Every identify response has `mode`: `live`, `cached_demo`, or `bm25_fallback`.
 
 `live` is used only when `OPENAI_API_KEY` is set and `BATATIS_LIVE` is `1` (also `true`, `yes`, or `on`). `BATATIS_OFFLINE=1` forces the non-live path even if both of those are set. The benchmark command calls `pipeline.run` directly and does not read `BATATIS_LIVE`.
 
-Without a live call, a description whose normalized text matches a seeded demo case is the stored cache in `engine/identify/demo_cache.json`, with `mode` `cached_demo` and `source` `cache`. The cache key is the SHA-256 of the description after Unicode NFC, with surrounding whitespace removed and internal whitespace collapsed to one space. Answers are not part of the key. The seeded descriptions are `dev-001`, `dev-003`, and `dev-013`. Any other description is BM25: `mode` `bm25_fallback`, `source` `bm25`, `section_c` empty, and no article is `suggested`. When that BM25 path cannot read the code database, the response is still HTTP 200 with empty `articles` and no citation. It does not invent an article.
+Without a live call, prose that matches a seeded demo case is the stored cache in `engine/identify/demo_cache.json`, with `mode` `cached_demo`, `cached` true, and `source` `cache`. A match is the case id, or the exact seed description: Unicode NFC, surrounding whitespace removed, internal whitespace collapsed to one space, then SHA-256. Answers are not part of the key. The seeded cases are `a-manufacturer-nailbase-sheathing`, `b-contractor-firestop-nonconformance`, and `c-homebuilder-infill-house`. Each description is the text of that case's `evals/demo-cases/<id>/input/project-brief.md`. The cache is one offline BM25 run of those three briefs. Each article `snippet` is verbatim codedb text of 25 words or fewer. The file does not contain a whole article. Any other description is BM25: `mode` `bm25_fallback`, `source` `bm25`, `cached` false, `section_c` empty, and no article is `suggested`. When that BM25 path cannot read the code database, the response is still HTTP 200 with empty `articles` and no citation. It does not invent an article.
+
+`POST` and `GET` `/cases/{id}/identify` return `IdentifyResponse`. The decision route returns `DecisionResponse`, which adds `section_c_row`. The stream route's `done` event carries that same identify payload; its HTTP body stays `text/event-stream`. Those models are in `web/src/api/engine.schema.json`. The web client calls them as `identify`, `getIdentify`, and `decideArticle`.
 
 `GET /cases/{id}/identify` returns that same body after POST or the stream. It does not write `provisions`. A case that has not been identified is HTTP 404 with detail `identify result not found`.
 
 When a live identify needs the code database and the file is missing, the response is HTTP 503 with the fixed detail `code database not found`. The body does not include a filesystem path. A live call that fails with an authentication, network, or timeout error uses the same non-live path as a missing key.
 
-`scripts/build_demo_cache.py` records a fresh live result for the three seeded cases when `OPENAI_API_KEY` is set, and it exits without writing a file when the key is absent.
+`scripts/build_demo_cache.py` records that offline BM25 run. It unsets provider keys for its own process. It exits without writing when the code database is missing, and it refuses to write a snippet longer than 25 words or a whole article.
 
 ### Article card
 
@@ -95,7 +97,7 @@ Each item in `articles` keeps `provision` (the Division B article id) and adds t
 | `page` | number or null | `pdf_page` of the resolved codedb sentence. Null when the sentence is unknown or the database is not open. |
 | `citation` | string or null | Citation copied from codedb, or from the stored Section C row when the database is not open. |
 | `title` | string | Article title from the identify result. |
-| `snippet` | string or null | First 25 words of the resolved codedb sentence, whitespace collapsed. Verbatim codedb text. Null when that sentence is not open. Not a paraphrase and not a stored quote. |
+| `snippet` | string or null | First 25 words of the resolved codedb sentence when that sentence is open. On a cached demo with the database closed, the snippet recorded from that same codedb text. A stored quote is not copied into `snippet`. Null when neither source has one. Whitespace collapsed. 25 words or fewer. |
 | `status` | string | Ranking hint. `suggested` when the model probability is at least 0.75 and the suggest cap and part rule would have marked it. `candidate` when a verifier ran and the article is not suggested. `unknown` for BM25 and for a cached demo replay. This is not an acceptance. |
 | `verifier_status` | string | The same value as `status`. |
 | `decision` | string or null | `yes`, `no`, or `not_sure` after `POST .../decision`. Null until the user decides. |
@@ -106,7 +108,7 @@ Each item in `articles` keeps `provision` (the Division B article id) and adds t
 | `functions` | list | `{ "id", "label" }` from those same attribution rows. Empty when there are no rows. |
 | `attribution_missing` | boolean | True when the resolved sentence has no attribution rows. The lists stay empty. Nothing is generated. |
 | `benchmark_acceptable_solution` | string or null | The resolved sentence id. Null when the sentence is unknown. |
-| `benchmark` | object or null | Numeric comparison for the resolved sentence, or null when that sentence text is not open. See below. Distinct from the top-level acceptable-solution `benchmark`. |
+| `benchmark` | object or null | Numeric comparison for the resolved sentence. When the sentence text is open, it is recomputed from that text and the accepted facts. When the database is closed, a comparison recorded on the cache row is kept. Otherwise null. Distinct from the top-level acceptable-solution `benchmark`. |
 | `explainer` | object or null | `{ "text", "quote", "source", "label" }`. `label` is `explanation`. `source` is `deterministic` or `ai_written`. `quote` is the snippet. A reason that claims the design meets the Code stays off `text`; `source` stays `deterministic`. Null when there is no codedb snippet to ground it. |
 
 The article card does not include `quote`. A full code sentence is not served. Any other `quote` on the identify response, including the top-level acceptable-solution benchmark, is capped at 25 words. `snippet` and `benchmark.requirement_snippet` are the only code text on the card, and both are verbatim codedb text of 25 words or fewer. The card links `url` to the NRC publication.
@@ -140,7 +142,7 @@ The article card does not include `quote`. A full code sentence is not served. A
 
 `yes` writes one case citation: a confirmed fact whose `source.type` is `user_click`, whose `source.ref` is the article id, and whose field is `citation.{article}`. That article is added to `provisions`, and Section C is the deterministic lookup for the case provisions. A second `yes` keeps the same fact id.
 
-The `yes` response includes `section_c_row`, the rows written for that article, so the Section C table can fill from this response. Each row is `{ "provision", "objectives", "functions", "intent", "attribution_missing" }`. `objectives` and `functions` are `{ "id", "label" }` from the attribution lookup. `intent` is the codedb intent text. When the lookup has no intent text, `intent` is `lookup not available`. `no` and `not_sure` set `section_c_row` to null.
+The `yes` response includes `section_c_row`, the `SectionCRow` values written for that article, so the Section C table can fill from this response. Each row uses `provision_id`, `citation`, `attribution_status`, `pairs` (`bracket`, `function`, `function_text`, `objective`, `objective_text`, and the rest of `AttributionPair`), and `intents`. `no` and `not_sure` set `section_c_row` to null.
 
 `not_sure` removes that citation and opens one question. The question id is stable for the case and article. The text names the article and asks whether it applies. `GET /cases/{id}/gaps` includes it (`section` `C`, `severity` `warning`, `id` equal to `open_question_id`). `GET /cases/{id}/information-request` includes the same id, the article, and the question text in `items`.
 

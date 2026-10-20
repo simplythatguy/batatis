@@ -14,7 +14,7 @@ def apply_answers(case, answers) -> list[Fact]:
     for answer in answers or []:
         data = answer.model_dump() if hasattr(answer, 'model_dump') else dict(answer)
         raw = '' if data.get('answer') is None else str(data.get('answer'))
-        field = data.get('field') or (f"question.{data['question_id']}" if data.get('question_id') else 'identify.answer')
+        field = data.get('field') or data.get('question_id') or 'identify.answer'
         unknown = is_unknown_answer(raw)
         case.facts = [fact for fact in case.facts if fact.field != field]
         fact = Fact(

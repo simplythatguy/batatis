@@ -9,7 +9,7 @@ import hashlib
 import re
 
 from engine.completeness import Gap
-from engine.models import Fact, SectionCRow, Source
+from engine.models import Fact, Source
 
 _ARTICLE = re.compile(r'^(\d+\.\d+\.\d+\.\d+\.)')
 DECISIONS = {'yes', 'no', 'not_sure'}
@@ -151,39 +151,13 @@ def record_decision(case, result: dict, provision_id: str, decision: str, codes)
 
 
 def section_c_table(case, article: str) -> list[dict]:
-    """Rows the yes decision just wrote for this article. Objectives and intent are the lookup."""
+    """SectionCRow dumps the yes decision just wrote for this article."""
     rows = []
     for row in case.section_c:
         if article_of(row.provision_id) != article and row.provision_id != article:
             continue
-        rows.append(_table_row(row))
+        rows.append(row.model_dump())
     return rows
-
-
-def _table_row(row: SectionCRow) -> dict:
-    objectives: list[dict] = []
-    functions: list[dict] = []
-    seen_objectives: list[str] = []
-    seen_functions: list[str] = []
-    for pair in row.pairs:
-        if pair.objective not in seen_objectives:
-            seen_objectives.append(pair.objective)
-            objectives.append({'id': pair.objective, 'label': pair.objective_text})
-        if pair.function not in seen_functions:
-            seen_functions.append(pair.function)
-            functions.append({'id': pair.function, 'label': pair.function_text})
-    intent_lines: list[str] = []
-    for block in row.intents:
-        for line in block.intents:
-            if line and line not in intent_lines:
-                intent_lines.append(line)
-    return {
-        'provision': row.provision_id,
-        'objectives': objectives,
-        'functions': functions,
-        'intent': '\n'.join(intent_lines) if intent_lines else 'lookup not available',
-        'attribution_missing': not row.pairs,
-    }
 
 
 def _refresh_section_c(case, codes):

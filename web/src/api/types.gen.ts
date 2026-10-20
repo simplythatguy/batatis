@@ -2,6 +2,63 @@
 // Do not edit: change the engine model, run `python -m engine.schema_export`, then `npm run gen:types`.
 // Fields with a default are optional here because the engine accepts them omitted; responses always carry them.
 
+export interface AcceptableBenchmark {
+  citation: string | null;
+  division: string | null;
+  explanation: string | null;
+  identified: boolean | null;
+  provision: string | null;
+  question: string | null;
+  quote: string | null;
+  role: string | null;
+  section_c: (Record<string, unknown>)[];
+}
+
+/** One answer. `question_id` is the question's stable id, which is the fact field. */
+export interface AnswerIn {
+  answer?: string;
+  field?: string | null;
+  question_id?: string | null;
+}
+
+/** Numeric comparison for one resolved sentence. Distinct from the top-level benchmark. */
+export interface ArticleBenchmark {
+  comparison: "below" | "above" | "equal" | null;
+  fact_id: string | null;
+  proposed_unit: string | null;
+  proposed_value: number | null;
+  provision_id: string | null;
+  required_unit: string | null;
+  required_value: number | null;
+  requirement_snippet: string | null;
+}
+
+export interface ArticleCard {
+  attribution_missing: boolean | null;
+  benchmark: ArticleBenchmark | null;
+  benchmark_acceptable_solution: string | null;
+  citation: string | null;
+  decision: "yes" | "no" | "not_sure" | null;
+  excluded: boolean | null;
+  explainer: CardExplainer | null;
+  functions: Term[];
+  link: string | null;
+  objectives: Term[];
+  open_question_id: string | null;
+  page: number | null;
+  printing: string | null;
+  provision: string | null;
+  provision_id: string | null;
+  rank: number | null;
+  snippet: string | null;
+  status: string | null;
+  suggested: boolean | null;
+  title: string | null;
+  url: string | null;
+  verifier_status: string | null;
+  why: string | null;
+}
+
 export interface AttributionPair {
   application_note: string | null;
   bracket: string;
@@ -12,6 +69,13 @@ export interface AttributionPair {
   objective_text: string | null;
   pdf_page: number;
   table: string;
+}
+
+export interface CardExplainer {
+  label: string | null;
+  quote: string | null;
+  source: string | null;
+  text: string | null;
 }
 
 export interface Case {
@@ -25,6 +89,30 @@ export interface Case {
   section_c: SectionCRow[];
   title: string | null;
   updated_at: string;
+}
+
+export interface DecisionRequest {
+  decision: "yes" | "no" | "not_sure";
+}
+
+/** The identify payload plus the Section C rows a `yes` decision wrote. */
+export interface DecisionResponse {
+  articles: ArticleCard[];
+  benchmark: AcceptableBenchmark | null;
+  cached: boolean;
+  engineering_required: string | null;
+  intake_action: string | null;
+  mode: "live" | "cached_demo" | "bm25_fallback";
+  model_ids: Record<string, unknown> | null;
+  open_questions: OpenQuestion[];
+  persisted: boolean;
+  questions: string[];
+  redirect_to: string | null;
+  section_c: (Record<string, unknown>)[];
+  section_c_row: SectionCRow[] | null;
+  source: string | null;
+  variance_explanation: string | null;
+  variance_needed: string | null;
 }
 
 export interface EvidenceItem {
@@ -76,6 +164,30 @@ export interface Gap {
   severity: "blocking" | "warning";
 }
 
+export interface IdentifyRequest {
+  answers?: AnswerIn[];
+  prose: string;
+}
+
+/** Ranked article cards. Identify does not accept an article onto the case. */
+export interface IdentifyResponse {
+  articles: ArticleCard[];
+  benchmark: AcceptableBenchmark | null;
+  cached: boolean;
+  engineering_required: string | null;
+  intake_action: string | null;
+  mode: "live" | "cached_demo" | "bm25_fallback";
+  model_ids: Record<string, unknown> | null;
+  open_questions: OpenQuestion[];
+  persisted: boolean;
+  questions: string[];
+  redirect_to: string | null;
+  section_c: (Record<string, unknown>)[];
+  source: string | null;
+  variance_explanation: string | null;
+  variance_needed: string | null;
+}
+
 export interface IntentBlock {
   brackets: string[];
   intents: string[];
@@ -101,6 +213,16 @@ export interface JurisdictionInput {
 export interface NewCase {
   jurisdiction?: JurisdictionInput | null;
   title?: string | null;
+}
+
+export interface OpenQuestion {
+  answer: string | number | boolean | null;
+  disambiguates: string[];
+  field: string | null;
+  id: string | null;
+  status: string | null;
+  text: string;
+  why: string;
 }
 
 export interface SectionCRequest {
@@ -137,4 +259,9 @@ export interface SourceInput {
   quote?: string | null;
   ref: string;
   type: "code" | "file" | "user_text" | "drawing" | "user_click";
+}
+
+export interface Term {
+  id: string;
+  label: string | null;
 }

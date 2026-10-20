@@ -17,6 +17,7 @@ from .identify.answers import apply_answers
 from .identify.cards import empty_bm25, present
 from .identify.decisions import decision_gaps, information_request, overlay_decisions, record_decision
 from .identify.demo_cache import match_demo
+from .identify.http_models import DecisionRequest, DecisionResponse, IdentifyRequest, IdentifyResponse
 from .identify.offline import ProviderOutage, http_live, is_provider_outage
 from .identify.pipeline import run as identify_run
 from .models import Case
@@ -34,27 +35,9 @@ class SectionDRequest(BaseModel):
     provisions: list[str] | None = Field(default=None, min_length=1)
 
 
-class AnswerIn(BaseModel):
-    model_config = ConfigDict(extra='forbid')
-    field: str | None = None
-    question_id: str | None = None
-    answer: str = ''
-
-
-class IdentifyRequest(BaseModel):
-    model_config = ConfigDict(extra='forbid')
-    prose: str = Field(min_length=1)
-    answers: list[AnswerIn] = []
-
-
 class ConfirmRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
     provisions: list[str] = Field(min_length=1)
-
-
-class DecisionRequest(BaseModel):
-    model_config = ConfigDict(extra='forbid')
-    decision: str
 
 
 def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
@@ -206,7 +189,7 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
 
         return StreamingResponse(generate(), media_type='text/event-stream')
 
-    @router.post('/cases/{case_id}/identify')
+    @router.post('/cases/{case_id}/identify', response_model=IdentifyResponse)
     def identify(case_id: str, body: IdentifyRequest, request: Request):
         """Rank articles and record unknown answers. Does not write provisions."""
         case = get_case(case_id)
@@ -225,7 +208,7 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
             raise HTTPException(500, 'identify must not change provisions')
         return result
 
-    @router.get('/cases/{case_id}/identify')
+    @router.get('/cases/{case_id}/identify', response_model=IdentifyResponse)
     def identify_stored(case_id: str):
         """The last identify response for this case. The same card shape as POST."""
         get_case(case_id)
@@ -234,7 +217,7 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
             raise HTTPException(404, 'identify result not found')
         return overlay_decisions(stored, get_case(case_id))
 
-    @router.get('/cases/{case_id}/identify/stream')
+    @router.get('/cases/{case_id}/identify/stream', response_model=IdentifyResponse)
     def identify_stream(case_id: str, prose: str = Query(min_length=1)):
         case = get_case(case_id)
         return _stream(case_id, prose, case.facts)
@@ -257,11 +240,9 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
         case.section_c = section_c_rows(body.provisions, codes)
         return cases().put(case)
 
-    @router.post('/cases/{case_id}/identify/{provision_id}/decision')
+    @router.post('/cases/{case_id}/identify/{provision_id}/decision', response_model=DecisionResponse)
     def identify_decision(case_id: str, provision_id: str, body: DecisionRequest):
         """Record the applicant's decision. Identify itself never accepts an article."""
-        if body.decision not in {'yes', 'no', 'not_sure'}:
-            raise HTTPException(422, 'decision must be yes, no, or not_sure')
         case = get_case(case_id)
         stored = cases().get_identify(case_id)
         if stored is None:

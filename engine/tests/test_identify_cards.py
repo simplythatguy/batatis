@@ -1,7 +1,6 @@
 """Article cards on POST /cases/{id}/identify and GET of the stored result."""
 import json
 import re
-from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -11,12 +10,7 @@ from engine.codes import Codes, default_db
 from engine.identify.cards import present
 from engine.store import CaseStore
 
-ROOT = Path(__file__).resolve().parents[2]
 _WS = re.compile(r'\s+')
-
-
-def _description(case_id: str) -> str:
-    return json.loads((ROOT / 'evals_dev' / 'cases' / f'{case_id}.json').read_text())['description']
 
 
 def _client(tmp_path):
@@ -143,28 +137,32 @@ def test_bm25_cards_commit_nothing():
 
 
 def test_http_demo_cards_and_stored_get_match(tmp_path, monkeypatch):
+    from engine.identify.demo_cache import DEMO_CASE_IDS
+
     monkeypatch.delenv('OPENAI_API_KEY', raising=False)
     monkeypatch.delenv('BATATIS_LIVE', raising=False)
     monkeypatch.delenv('BATATIS_OFFLINE', raising=False)
     monkeypatch.setattr('engine.routes_case.default_db', lambda: tmp_path / 'missing.sqlite')
     client = _client(tmp_path)
-    case_id, response = _post(client, _description('dev-001'))
+    case_id, response = _post(client, DEMO_CASE_IDS[0])
     assert response.status_code == 200
     body = response.json()
-    assert body['mode'] == 'cached_demo'
+    assert body['mode'] == 'cached_demo' and body['cached'] is True
     card = body['articles'][0]
     assert card['rank'] == 1
-    assert card['provision'] == '9.10.15.5.'
-    assert card['provision_id'] == '9.10.15.5.(8)'
-    assert card['benchmark_acceptable_solution'] == '9.10.15.5.(8)'
-    assert card['link'] == '/code/9.10.15.5.?division=B'
+    assert card['provision']
+    assert card['link'] == f"/code/{card['provision']}?division=B"
     assert card['title']
-    assert card['snippet'] is None and 'quote' not in card
-    assert 'constructed above the exposing building face' not in response.text
-    assert card['page'] is None and card['benchmark'] is None
+    assert card['snippet'] and len(card['snippet'].split()) <= 25
+    assert 'quote' not in card
+    assert card['page'] is None
     assert card['attribution_missing'] is True
+    assert card['suggested'] is False
     assert card['verifier_status'] == 'unknown'
     assert card['why']
+    if card['benchmark'] is not None:
+        snippet = card['benchmark'].get('requirement_snippet')
+        assert snippet is None or len(snippet.split()) <= 25
     assert 'compli' not in json.dumps(body).lower()
     assert client.get(f'/cases/{case_id}').json()['provisions'] == []
     stored = client.get(f'/cases/{case_id}/identify')
@@ -190,7 +188,7 @@ def test_live_flag_is_required_before_a_provider_call(tmp_path, monkeypatch):
     monkeypatch.setattr('engine.routes_case.identify_run', boom)
     client = _client(tmp_path)
     demo = client.post(f"/cases/{client.post('/cases').json()['id']}/identify",
-                       json={'prose': _description('dev-013')})
+                       json={'prose': 'c-homebuilder-infill-house'})
     assert demo.status_code == 200 and demo.json()['mode'] == 'cached_demo'
     other = client.post(f"/cases/{client.post('/cases').json()['id']}/identify",
                         json={'prose': 'a proposal the demo cache does not store'})

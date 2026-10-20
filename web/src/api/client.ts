@@ -3,7 +3,16 @@
  * Vite proxies `/api` to the engine at http://127.0.0.1:8000 (vite.config.ts). Set VITE_ENGINE_URL
  * to call another engine directly. `createEngine(base)` serves scripts and tests outside Vite.
  */
-import type { Case, FactInput, NewCase, SectionCRow } from "./types.gen";
+import type {
+  Case,
+  DecisionRequest,
+  DecisionResponse,
+  FactInput,
+  IdentifyRequest,
+  IdentifyResponse,
+  NewCase,
+  SectionCRow,
+} from "./types.gen";
 
 /** A provision returned by GET /code/search (engine/codes.py `Codes.search`). */
 export interface CodeHit {
@@ -87,6 +96,20 @@ export function createEngine(base: string) {
     /** Section C rows by deterministic lookup, in input order (an article expands to its sentences). */
     sectionC: (provisions: string[], signal?: AbortSignal) =>
       call<SectionCRow[]>("POST", "/section-c", { provisions }, signal),
+    /** Ranked article cards. Does not write provisions. */
+    identify: (caseId: string, body: IdentifyRequest, signal?: AbortSignal) =>
+      call<IdentifyResponse>("POST", `/cases/${enc(caseId)}/identify`, body, signal),
+    /** The stored identify payload, the same card shape as POST. */
+    getIdentify: (caseId: string, signal?: AbortSignal) =>
+      call<IdentifyResponse>("GET", `/cases/${enc(caseId)}/identify`, undefined, signal),
+    /** Record yes, no, or not_sure. `yes` returns Section C rows for that article. */
+    decideArticle: (caseId: string, provisionId: string, body: DecisionRequest, signal?: AbortSignal) =>
+      call<DecisionResponse>(
+        "POST",
+        `/cases/${enc(caseId)}/identify/${enc(provisionId)}/decision`,
+        body,
+        signal,
+      ),
   };
 }
 

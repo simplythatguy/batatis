@@ -11,7 +11,9 @@ def test_committed_schema_matches_models():
 
 def test_schema_names_and_enums():
     defs = schema_export.schema()['$defs']
-    assert {'Case', 'Fact', 'FactInput', 'SectionCRow', 'NewCase', 'SectionCRequest'} <= set(defs)
+    assert {'Case', 'Fact', 'FactInput', 'SectionCRow', 'NewCase', 'SectionCRequest',
+            'IdentifyResponse', 'DecisionResponse', 'IdentifyRequest', 'DecisionRequest'} <= set(defs)
+    assert defs['DecisionResponse']['properties']['section_c_row']['anyOf'][0]['items']['$ref'].endswith('SectionCRow')
     assert defs['Fact']['properties']['kind']['enum'] == ['exact', 'pointed', 'computed', 'proposed']
     assert set(defs['Fact']['required']) == set(defs['Fact']['properties'])          # responses carry every field
     assert set(defs['FactInput']['required']) == {'field', 'value', 'kind', 'source'}
