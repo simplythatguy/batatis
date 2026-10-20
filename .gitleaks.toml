@@ -1,0 +1,8 @@
+title = "batatis"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Log-test marker in e641ad9. Ordinary applicant text, not a credential."
+regexes = ['''SECRETQUOTE9f3a7c''', '''SECRETBYTES9f3a7c''']
