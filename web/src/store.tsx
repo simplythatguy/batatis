@@ -1,17 +1,17 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type Dispatch, type ReactNode } from "react";
 import { EngineError, type EngineGap } from "./api/client";
 import { type CompletenessRecord } from "./humanReview";
-import { clearEngineSession, engineCaseId, ensureEngineCase, pushFacts, refreshGaps, syncJurisdiction } from "./api/sync";
+import { clearEngineSession, engineCaseId, ensureEngineCase, pushFacts, pushListedEvidence, refreshGaps, syncJurisdiction } from "./api/sync";
 import { shouldConfirmReplace } from "./rules";
 import { exampleCase } from "./examples";
 import { emptyCase } from "./intake";
-import { getGaps, reducer, type Action } from "./model";
+import { gapLabel, getGaps, reducer, type Action } from "./model";
 import type { ApplicantType, Case, Gap } from "./types";
 
 const KEY = "batatis-web-case-v4";
 
 interface Persisted {
-  phase: "who" | "case";
+  phase: "who" | "case" | "resume";
   case: Case;
   note: string;
 }
@@ -28,7 +28,7 @@ function load(): Persisted {
       const blank = emptyCase(parsed.case?.applicantType || "homebuilder");
       if (parsed.phase === "case" && parsed.case) {
         return {
-          phase: "case",
+          phase: "resume",
           note: parsed.note ?? "",
           case: {
             ...blank,
@@ -68,12 +68,13 @@ interface Store {
   /** Increments after facts are pushed, so Section D can reload on the new facts. */
   factsEpoch: number;
   savedNote: string;
-  phase: "who" | "case";
+  phase: "who" | "case" | "resume";
   /** Shown after Reset so the clear is visible. */
   resetNote: string;
   dispatch: Dispatch<Action>;
   saveDraft: () => Promise<string | null>;
   beginEmpty: (type: ApplicantType) => void;
+  continueCase: () => void;
   loadExample: (id: string) => void;
   /** Opens an example, or asks first when that would wipe a case the user started. */
   askExample: (id: string) => void;
@@ -106,21 +107,58 @@ const FIELD_HREF: Record<string, string> = {
   maintenance_operation: "#/application?tab=alt&focus=field-maintenance",
   qualifications: "#/application?tab=alt&focus=field-qualifications",
   provisions: "#/code-check",
-  responsible_professional: "#/application?tab=alt",
   professional_qualifications: "#/application?tab=alt&focus=field-qualifications",
-  professional_requirement: "#/application?tab=D",
+  professional_requirement: "#/application?tab=D&focus=prof-role",
+  responsible_professional: "#/application?tab=D&focus=prof-role",
 };
+
+const FIELD_ALIASES: Record<string, string[]> = {
+  owner_name: ["owner_name", "owner", "section_a.owner_name"],
+  owner: ["owner_name", "owner", "section_a.owner_name"],
+  representative: ["representative", "section_a.representative"],
+  mailing_address: ["mailing_address", "mailingAddress", "section_a.mailing_address"],
+  mailingAddress: ["mailing_address", "mailingAddress"],
+  application_date: ["application_date", "date"],
+  date: ["application_date", "date"],
+  civic_address: ["civic_address", "municipalAddress"],
+  municipalAddress: ["civic_address", "municipalAddress"],
+  legal_description: ["legal_description", "legalDescription"],
+  legalDescription: ["legal_description", "legalDescription"],
+  alternative_description: ["alternative_description", "alternative"],
+  alternative: ["alternative_description", "alternative"],
+  scope: ["scope"],
+  "assembly.cavityRsi": ["assembly.cavityRsi"],
+  "professional.role": ["professional.role", "professional_requirement", "responsible_professional"],
+  professional_requirement: ["professional.role", "professional_requirement", "responsible_professional"],
+  responsible_professional: ["professional.role", "professional_requirement", "responsible_professional"],
+};
+
+function aliasKeys(field: string): string[] {
+  return FIELD_ALIASES[field] ?? [field];
+}
 
 function composeGaps(localCase: Case, source: Store["gapsSource"], engine: EngineGap[]): Gap[] {
   const local = getGaps(localCase);
   if (source !== "engine") return local;
-  const admin: Gap[] = engine.map((g) => ({
-    id: g.id,
-    severity: g.severity,
-    label: g.message,
-    href: hrefFor(g.field),
-  }));
-  const workflow = local.filter((g) => !g.id.startsWith("detail-") && !g.id.startsWith("process-"));
+  const seen = new Set<string>();
+  const admin: Gap[] = [];
+  for (const g of engine) {
+    const keys = aliasKeys(g.field);
+    if (keys.some((key) => seen.has(key))) continue;
+    for (const key of keys) seen.add(key);
+    admin.push({
+      id: g.id,
+      severity: g.severity,
+      label: gapLabel(g.message, g.fix_hint),
+      href: hrefFor(g.field),
+      field: g.field,
+    });
+  }
+  const workflow = local.filter((g) => {
+    if (g.id.startsWith("detail-") || g.id.startsWith("process-")) return false;
+    if (!g.field) return true;
+    return !aliasKeys(g.field).some((key) => seen.has(key));
+  });
   return [...admin, ...workflow];
 }
 
@@ -166,6 +204,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       if (c.authority) id = await syncJurisdiction(id, c.authority, c.title);
       setEngineId(id);
       const factError = await pushFacts(id, c.facts);
+      const evidenceError = await pushListedEvidence(id, c.listedEvidence ?? []);
       setFactsEpoch((n) => n + 1);
       const got = await refreshGaps(id);
       if (got.error && /case not found/i.test(got.error)) {
@@ -182,9 +221,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       } else {
         setEngineGaps(got.gaps);
         setGapsSource("engine");
-        setReviewDetail(factError ?? "");
+        setReviewDetail(factError ?? evidenceError ?? "");
         setGapsNote("Online administrative review finished. This does not decide whether the design complies or is safe.");
-        setSyncOk(!factError);
+        setSyncOk(!factError && !evidenceError);
         latestGaps.current = composeGaps(c, "engine", got.gaps);
       }
       if (announce) {
@@ -257,6 +296,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       dispatch,
       saveDraft: () => sync(true),
       beginEmpty: (type) => openCase(emptyCase(type)),
+      continueCase: () => setPhase("case"),
       loadExample: (id) => {
         const next = exampleCase(id);
         if (next) openCase(next);

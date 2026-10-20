@@ -172,7 +172,7 @@ export function DemoFallback({ reason, onRetry }: { reason: string; onRetry?: ()
   return (
     <div className="demo-offer" role="alert">
       <p>{reason}</p>
-      <p className="meta">The engine could not be reached. Retry, or open a cached example. An example does not replace your case until you confirm.</p>
+      <p className="meta">The review service did not respond. Retry, or open a cached example. An example does not replace your case until you confirm.</p>
       <div className="btn-row">
         {onRetry && (
           <button type="button" className="btn" onClick={onRetry}>

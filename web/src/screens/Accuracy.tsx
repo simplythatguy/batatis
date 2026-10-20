@@ -1,6 +1,9 @@
 import { PanelHeader, StatusPill } from "../components";
-import { factLabel } from "../model";
+import { displayValue, factLabel } from "../model";
 import { useCase } from "../store";
+
+const SHIPPED_LABEL =
+  "Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind).";
 
 /** Proposed facts the model suggested. Confirmation is the applicant's, not a score. */
 export function Accuracy() {
@@ -9,26 +12,32 @@ export function Accuracy() {
   const confirmed = c.facts.filter((f) => f.status === "confirmed" && f.kind !== "proposed");
   return (
     <>
-      <PanelHeader title="Model-checked" meta="Proposals only" />
+      <PanelHeader title="Accuracy report" meta="Model-checked" />
       <div className="pane scroll-body">
         <div className="content-col stack">
           <p className="meta intro">
-            Model-checked means a proposal is on the ledger with a confidence and a source. It is not confirmed until you accept it, and it is not a finding that the design complies or is safe.
+            A proposal stays here until you accept it. Accepting it does not mean the design complies or is safe.
           </p>
           <p>
-            Engineer-needed flag, shipped rules_plus_unknown: 50 of 60 in-sample, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), 27 unknowns sent to the applicant; held-out 7 of 8 blind (pre-fix), post-fix 4 of 8 (no longer blind); model-checked, not human-verified. That is the Section D issues evaluation, not a score for this case.
+            The engineer-needed flag agreed on 50 of 60 practice cases and missed none; it asked a question on 27. On 8 new cases: 7 of 8 before a fix, 4 of 8 after. Checked by a model, not by a person.
           </p>
           <p>
             <StatusPill dot="warning">{proposed.length} still proposed</StatusPill>{" "}
-            <StatusPill dot="done">{confirmed.length} confirmed by you or typed by you</StatusPill>
+            <StatusPill dot="done">
+              {c.exampleId ? `${confirmed.length} set in this example` : `${confirmed.length} confirmed by you or typed by you`}
+            </StatusPill>
           </p>
+          <details>
+            <summary>Technical detail</summary>
+            <p>{SHIPPED_LABEL}</p>
+          </details>
           {proposed.length === 0 ? (
             <p className="empty">No model proposals are waiting.</p>
           ) : (
             <ul className="plain-list">
               {proposed.map((f) => (
                 <li key={f.id} id={`model-${f.id}`}>
-                  <span className="status-dot warning" /> {factLabel(f.field)}: {f.value == null ? "—" : String(f.value)}
+                  <span className="status-dot warning" /> {factLabel(f.field)}: {f.value == null ? "—" : displayValue(f)}
                   {f.confidence != null && <span className="meta"> Confidence {Math.round(f.confidence * 100)}%</span>}
                   <div className="meta">{f.status === "confirmed" ? "Confirmed" : "Needs your check"} · {f.source.ref}</div>
                 </li>

@@ -5,13 +5,14 @@ looked up in the adopted second printing. Missing facts cannot produce an overal
 """
 from __future__ import annotations
 
+import re
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from .codes import Codes
 from .models import Case
-from .process_fields import confirmed_value
+from .process_fields import confirmed_value, latest_fact
 
 Requirement = Literal['yes', 'no', 'depends']
 Occupancy = Literal['single_family', 'multi_family', 'hotel', 'assembly', 'care', 'treatment',
@@ -50,6 +51,52 @@ class ProfessionalFacts(BaseModel):
                     continue  # Bad/ambiguous types are unknown; e.g. the string "false" is not False.
                 data[name] = value
         return cls(**data)
+
+
+# Applicant-confirmed role. A name or seal copied off a document does not count.
+# Same rule as PR #26: engineer or architect, plus a seal or registration number.
+_APPLICANT_SOURCES = frozenset({'user_text', 'user_click'})
+_ROLE_FIELDS = (
+    'professional.role', 'professional.discipline', 'registered_professional.role',
+    'registered_professional.discipline', 'professional_name', 'responsible_professional', 'professional.name',
+)
+_SEAL_FIELDS = ('professional.seal', 'professional_seal', 'registered_professional.seal')
+_REGISTRATION_FIELDS = (
+    'professional.registration_number', 'professional.registration',
+    'registered_professional.registration_number', 'apega_number', 'aaa_number',
+)
+_REJECT_ROLE = frozenset({
+    'sales', 'rep', 'supplier', 'manufacturer', 'salesperson', 'vendor',
+})
+
+
+def _applicant_text(case: Case, *fields: str) -> str | None:
+    fact = latest_fact(case, *fields)
+    if fact is None or fact.status != 'confirmed' or fact.kind == 'proposed':
+        return None
+    if fact.source.type not in _APPLICANT_SOURCES:
+        return None
+    if not isinstance(fact.value, str) or not fact.value.strip():
+        return None
+    return fact.value.strip()
+
+
+def role_confirmed(value: str) -> bool:
+    """Case-insensitive. Punctuation is removed. Engineer and architect variants pass; commercial roles do not."""
+    tokens = re.sub(r'[^a-z0-9]+', ' ', value.casefold()).split()
+    if any(token in _REJECT_ROLE for token in tokens):
+        return False
+    if 'peng' in tokens or {'p', 'eng'} <= set(tokens):
+        return True
+    return 'engineer' in tokens or 'architect' in tokens
+
+
+def professional_confirmed(case: Case) -> bool:
+    """Engineer or architect, plus a seal or registration number, confirmed by the applicant."""
+    role = _applicant_text(case, *_ROLE_FIELDS)
+    if role is None or not role_confirmed(role):
+        return False
+    return _applicant_text(case, *_SEAL_FIELDS) is not None or _applicant_text(case, *_REGISTRATION_FIELDS) is not None
 
 
 class ProfessionalReason(BaseModel):

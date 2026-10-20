@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ExampleBanner, Icon } from "./components";
 import { useFocusParam, useRoute } from "./router";
 import { Application } from "./screens/Application";
@@ -30,8 +30,10 @@ const NAV = [
 
 export function App() {
   const route = useRoute();
-  const { c, phase, askExample, resetToWho, pendingExampleId, confirmExample, dismissExample } = useCase();
+  const { c, phase, askExample, resetToWho, continueCase, pendingExampleId, confirmExample, dismissExample } = useCase();
   const confirmDialog = useRef<HTMLDialogElement>(null);
+  const resetDialog = useRef<HTMLDialogElement>(null);
+  const [resetOpen, setResetOpen] = useState(false);
   useFocusParam(route);
   const isDescribeRoute = !EXPLICIT_ROUTES.includes(route.path);
   useEffect(() => {
@@ -40,9 +42,32 @@ export function App() {
     if (pendingExampleId && !dialog.open) dialog.showModal();
     if (!pendingExampleId && dialog.open) dialog.close();
   }, [pendingExampleId]);
+  useEffect(() => {
+    const dialog = resetDialog.current;
+    if (!dialog) return;
+    if (resetOpen && !dialog.open) dialog.showModal();
+    if (!resetOpen && dialog.open) dialog.close();
+  }, [resetOpen]);
 
   let screen;
-  if (phase !== "case") {
+  if (phase === "resume") {
+    screen = (
+      <div className="pane scroll-body">
+        <div className="content-col stack">
+          <h1 className="section-title">Continue your case or start new?</h1>
+          <p>A case is already in this browser. Nothing from it is shown on this card.</p>
+          <div className="btn-row">
+            <button type="button" className="btn btn-primary" onClick={continueCase}>
+              Continue
+            </button>
+            <button type="button" className="btn" onClick={resetToWho}>
+              Start new
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  } else if (phase !== "case") {
     screen = <Who />;
   } else switch (route.path) {
     case "/code-check":
@@ -116,7 +141,7 @@ export function App() {
               ))}
             </details>
           )}
-          <button type="button" className="btn btn-ghost" onClick={resetToWho}>
+          <button type="button" className="btn btn-ghost" onClick={() => setResetOpen(true)}>
             Reset case
           </button>
         </div>
@@ -125,6 +150,29 @@ export function App() {
         {phase === "case" && c.exampleId && <ExampleBanner officer={route.path === "/officer"} />}
         {screen}
       </main>
+      <dialog className="dialog" ref={resetDialog} aria-labelledby="reset-confirm-title" onClose={() => setResetOpen(false)}>
+        <form method="dialog">
+          <div className="dialog-body">
+            <h2 className="dialog-title" id="reset-confirm-title">Clear this case?</h2>
+            <p className="meta">Reset removes the case in this browser. It does not show what was in it.</p>
+          </div>
+          <div className="footer-bar">
+            <button type="button" className="btn" onClick={() => resetDialog.current?.close()}>
+              Keep this case
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                resetDialog.current?.close();
+                resetToWho();
+              }}
+            >
+              Reset case
+            </button>
+          </div>
+        </form>
+      </dialog>
       <dialog className="dialog" ref={confirmDialog} aria-labelledby="example-confirm-title" onClose={dismissExample}>
         <form method="dialog">
           <div className="dialog-body">

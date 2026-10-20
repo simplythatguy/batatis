@@ -131,6 +131,18 @@ export interface Gap {
   label: string;
   /** Hash route that fixes the gap. */
   href: string;
+  /** Engine or local field, used to drop a second copy of the same item. */
+  field?: string;
+}
+
+/** Applicant-typed evidence. Posted as text to POST /cases/{id}/evidence. Never a file reference. */
+export interface ListedEvidence {
+  id: string;
+  provisionId: string;
+  evidenceType: string;
+  description: string;
+  responsible: string;
+  date: string;
 }
 
 export type ApplicantType = "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";
@@ -157,4 +169,6 @@ export interface Case {
    * Applicant yes/no answers do not set this, and they do not clear it.
    */
   practiceOfEngineering?: true | false | "unknown";
+  /** Typed evidence waiting for POST /cases/{id}/evidence. Not file references. */
+  listedEvidence?: ListedEvidence[];
 }

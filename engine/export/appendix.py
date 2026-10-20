@@ -21,7 +21,7 @@ from reportlab.platypus import KeepTogether, Paragraph, SimpleDocTemplate, Space
 
 from ..models import INTENT_LABEL, Case, SectionCRow
 from ..process_fields import process_fields
-from ..section_d import section_d_plan, supporting_documents
+from ..section_d import section_d_plan, supporting_documents, text_evidence
 from .text import faithful_font_text
 
 INK = colors.HexColor('#1f2328')
@@ -157,11 +157,14 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
         story += _row_story(k, row, codes, k <= plan.rows_in_form)
 
     docs = supporting_documents(case)
+    typed = text_evidence(case)
     story.append(Paragraph('D. Supporting documentation', H2))
-    if docs:
+    if docs or typed:
         story.append(_table(['Ref', 'Name of supporting documentation', 'Responsible', 'On the form'],
                             [[f'D-{n}', d.title, d.responsible_party or '(not given)', f'row {n}' if n <= plan.docs_in_form else 'appendix only']
-                             for n, d in enumerate(docs, start=1)],
+                             for n, d in enumerate(docs, start=1)]
+                            + [[f'D-{n}', title, who or '(not given)', 'applicant text, not a file']
+                               for n, (title, who) in enumerate(typed, start=len(docs) + 1)],
                             [0.5 * inch, 3.1 * inch, 2.4 * inch, 1.0 * inch]))
         evidence = section_d_plan(case, codes, docs) if codes is not None else None
         labels = {item.id: f'{item.provision_id}, {item.function or "no table function"} / '

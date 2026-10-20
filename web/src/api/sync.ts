@@ -7,10 +7,11 @@
 import { engine, EngineError } from "./client";
 import type { EngineGap } from "./client";
 import { factSignature, jurisdictionBody, jurisdictionForCreate } from "../rules";
-import type { AuthorityId, Fact } from "../types";
+import type { AuthorityId, Fact, ListedEvidence } from "../types";
 
 const ID_KEY = "batatis-engine-case-id";
 const POSTED_KEY = "batatis-engine-posted";
+const EVIDENCE_KEY = "batatis-engine-evidence";
 
 let inflight: Promise<string> | null = null;
 
@@ -21,6 +22,7 @@ export function engineCaseId(): string | null {
 export function clearEngineSession() {
   sessionStorage.removeItem(ID_KEY);
   sessionStorage.removeItem(POSTED_KEY);
+  sessionStorage.removeItem(EVIDENCE_KEY);
   inflight = null;
 }
 
@@ -102,6 +104,62 @@ export async function pushFacts(caseId: string, facts: Fact[]): Promise<string |
       done.add(signature);
       remember(caseId, done);
     } catch (e) {
+      error = e instanceof EngineError ? e.detail : String(e);
+    }
+  }
+  return error;
+}
+
+function evidencePosted(caseId: string): Set<string> {
+  try {
+    const raw = JSON.parse(sessionStorage.getItem(EVIDENCE_KEY) || "{}") as Record<string, string[]>;
+    const list = raw[caseId];
+    return new Set(Array.isArray(list) ? list.map(String) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function rememberEvidence(caseId: string, ids: Set<string>) {
+  let map: Record<string, string[]> = {};
+  try {
+    const raw = JSON.parse(sessionStorage.getItem(EVIDENCE_KEY) || "{}");
+    if (raw && typeof raw === "object" && !Array.isArray(raw)) map = raw as Record<string, string[]>;
+  } catch {
+    map = {};
+  }
+  map[caseId] = [...ids];
+  sessionStorage.setItem(EVIDENCE_KEY, JSON.stringify(map));
+}
+
+/**
+ * POST typed evidence as text. A 404 means this engine does not serve the route yet.
+ * The local record stays text either way. Nothing here is stored as a file reference.
+ */
+export async function pushListedEvidence(caseId: string, items: ListedEvidence[]): Promise<string | null> {
+  const done = evidencePosted(caseId);
+  let error: string | null = null;
+  for (const item of items) {
+    if (!item.provisionId || !item.evidenceType || !item.description.trim()) continue;
+    const signature = `${item.id}:${item.description}`;
+    if (done.has(signature)) continue;
+    const description = item.date
+      ? `${item.description}. Person responsible: ${item.responsible}. Date: ${item.date}.`
+      : `${item.description}. Person responsible: ${item.responsible}.`;
+    try {
+      await engine.addEvidence(caseId, {
+        provision_id: item.provisionId,
+        evidence_type: item.evidenceType,
+        description,
+      });
+      done.add(signature);
+      rememberEvidence(caseId, done);
+    } catch (e) {
+      if (e instanceof EngineError && e.status === 404) {
+        done.add(signature);
+        rememberEvidence(caseId, done);
+        continue;
+      }
       error = e instanceof EngineError ? e.detail : String(e);
     }
   }

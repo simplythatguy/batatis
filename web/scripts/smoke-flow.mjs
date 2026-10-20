@@ -289,11 +289,14 @@ try {
 
   await page.goto(`${preview}/#/accuracy`, { waitUntil: "networkidle0" });
   text = await jargon(page, "accuracy");
-  assert(/50 of 60/.test(text), "model-checked screen is missing the shipped 50/60 in-sample figure");
-  assert(/in-sample/.test(text), "model-checked screen does not label the figure in-sample");
-  assert(/0 under-flags/.test(text), "model-checked screen is missing 0 under-flags");
-  assert(/27 unknowns/.test(text), "model-checked screen is missing 27 unknowns");
-  assert(!/55 of 60/.test(text), "model-checked screen still shows the rules_only 55/60 figure");
+  assert(/50 of 60/.test(text), "model-checked screen is missing the shipped 50/60 figure");
+  assert(/missed none/.test(text), "model-checked screen does not say the flag missed none");
+  assert(/asked a question on 27/.test(text), "model-checked screen is missing the 27 questions");
+  const technical = await page.$eval("details", (el) => el.textContent ?? "");
+  assert(/rules_only 55\/60/.test(technical), "technical detail is missing rules_only 55/60");
+  assert(/in-sample/.test(technical), "technical detail does not label the figure in-sample");
+  assert(/0 under-flags/.test(technical), "technical detail is missing 0 under-flags");
+  assert(/27 unknowns/.test(technical), "technical detail is missing 27 unknowns");
   await shot(page, "08-accuracy");
 
   console.log("ok: cold path finished at the draft record");

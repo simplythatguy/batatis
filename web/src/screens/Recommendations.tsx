@@ -10,7 +10,7 @@ import {
 } from "../api/client";
 import { DemoFallback, RoleNote } from "../components";
 import { practiceFlagLine, practicePrompt } from "../humanReview";
-import { answeredYes } from "../model";
+import { answeredYes, shownProcessAnswer } from "../model";
 import { evidenceLinked, evidenceRecorded, isScopeField, practiceFromReview, professionalConfirmed, SCOPE_HELP, sectionDIssueStatus } from "../professional";
 import { failureKind } from "../rules";
 import { useCase } from "../store";
@@ -69,6 +69,11 @@ const PROFESSIONAL_FIELDS: { field: string; label: string; kind: ProfKind }[] = 
   { field: "farm_public_use", label: "Is the farm building for public use?", kind: "bool" },
 ];
 
+function deferredChoice(c: Case, field: string): "" | "not_sure" | "not_engaged_yet" {
+  const fact = [...c.facts].reverse().find((item) => item.field === `professional.${field}` && item.status === "unconfirmed");
+  return fact?.value === "not_sure" || fact?.value === "not_engaged_yet" ? fact.value : "";
+}
+
 function confirmedValue(c: Case, field: string): unknown {
   const fact = [...c.facts].reverse().find((f) => f.field === field && f.status === "confirmed" && f.kind !== "proposed");
   return fact?.value;
@@ -80,26 +85,55 @@ function flagDot(flag: "yes" | "no" | "depends"): string {
   return "pending";
 }
 
-function EvidenceAnswer({ itemId, title }: { itemId: string; title: string }) {
+const EVIDENCE_TYPES = [
+  "manufacturer's literature",
+  "existing STANDATA variance",
+  "ISO 17025 test report",
+  "evaluation",
+  "evaluation + testing",
+  "qualification",
+  "ISO 17065 certification",
+  "CCMC evaluation",
+  "ICC-ES evaluation",
+  "registered professional opinion",
+  "engineering review",
+] as const;
+
+function EvidenceAnswer({
+  itemId,
+  title,
+  provisionId,
+  types,
+}: {
+  itemId: string;
+  title: string;
+  provisionId: string;
+  types: string[];
+}) {
   const { c, dispatch } = useCase();
-  const savedDoc = confirmedValue(c, `evidence.${itemId}.file_ref`);
-  const savedWho = confirmedValue(c, `evidence.${itemId}.responsible_party`);
-  const savedDate = confirmedValue(c, `evidence.${itemId}.date`);
-  const [document, setDocument] = useState(typeof savedDoc === "string" ? savedDoc : "");
-  const [responsible, setResponsible] = useState(typeof savedWho === "string" ? savedWho : "");
-  const [date, setDate] = useState(typeof savedDate === "string" ? savedDate : "");
+  const [document, setDocument] = useState("");
+  const [responsible, setResponsible] = useState("");
+  const [date, setDate] = useState("");
+  const [evidenceType, setEvidenceType] = useState("");
   const [note, setNote] = useState("");
+  const typeOptions = types.length ? types : [...EVIDENCE_TYPES];
   const docId = `evidence-doc-${itemId}`;
   const whoId = `evidence-who-${itemId}`;
   const dateId = `evidence-date-${itemId}`;
 
   function save() {
-    if (!document.trim() || !responsible.trim()) {
-      setNote("Name the document and the person responsible. Both stay blank until you write them.");
+    const ref = document.trim();
+    const who = responsible.trim();
+    if (!ref || !who || !evidenceType) {
+      setNote("Name the document, the person responsible, and the evidence type. Typed evidence is text, not a file.");
       return;
     }
-    dispatch({ type: "saveEvidence", itemId, document, responsible, date });
-    setNote("Saved. Earlier documents stay on the case. This does not assess the document.");
+    dispatch({ type: "saveEvidence", itemId, document: ref, responsible: who, date, evidenceType, provisionId });
+    setDocument("");
+    setResponsible("");
+    setDate("");
+    setEvidenceType("");
+    setNote(`Saved: ${ref}. Evidence listed (not reviewed). It stays on this case. Add another document if you have one.`);
   }
 
   const earlier = c.facts
@@ -110,6 +144,17 @@ function EvidenceAnswer({ itemId, title }: { itemId: string; title: string }) {
   return (
     <div className="form-grid">
       <p className="meta full">{title}</p>
+      <div className="field">
+        <label htmlFor={`evidence-type-${itemId}`}>Evidence type</label>
+        <select id={`evidence-type-${itemId}`} value={evidenceType} onChange={(e) => setEvidenceType(e.target.value)}>
+          <option value="">Not chosen</option>
+          {typeOptions.map((type) => (
+            <option key={type} value={type}>
+              {type}
+            </option>
+          ))}
+        </select>
+      </div>
       <div className="field">
         <label htmlFor={docId}>Document name</label>
         <input id={docId} value={document} onChange={(e) => setDocument(e.target.value)} />
@@ -178,33 +223,56 @@ function ProfessionalAnswers() {
           );
         }
         if (q.kind === "role") {
-          const value = typeof current === "string" ? current : "";
+          const held = deferredChoice(c, q.field);
+          const value = held || (current === "engineer" || current === "architect" ? current : "");
           return (
             <div key={q.field} className={`field full ${value ? "" : "is-empty"}`}>
               <label htmlFor="prof-role">{q.label}</label>
-              <p className="field-note">Engineer or architect. A name copied from a document does not count. A seal can stand in for the registration number.</p>
+              <p className="field-note">Engineer or architect, with a seal or registration number. Not sure and Not engaged yet go to the officer and keep the official PDF closed.</p>
               <select
                 id="prof-role"
-                value={value === "engineer" || value === "architect" ? value : ""}
+                value={value}
                 onChange={(e) => {
-                  if (e.target.value === "engineer" || e.target.value === "architect") {
-                    dispatch({ type: "setProfessionalFact", field: q.field, value: e.target.value });
+                  const next = e.target.value;
+                  if (next === "not_sure" || next === "not_engaged_yet") {
+                    dispatch({ type: "deferProfessional", field: q.field, choice: next, label: q.label });
+                  } else if (next === "engineer" || next === "architect") {
+                    dispatch({ type: "setProfessionalFact", field: q.field, value: next });
                   }
                 }}
               >
                 <option value="">Not answered</option>
                 <option value="engineer">Engineer</option>
                 <option value="architect">Architect</option>
+                <option value="not_sure">Not sure</option>
+                <option value="not_engaged_yet">Not engaged yet</option>
               </select>
             </div>
           );
         }
         if (q.kind === "text") {
-          const value = typeof current === "string" ? current : "";
+          const held = deferredChoice(c, q.field);
+          const value = held ? "" : typeof current === "string" ? current : "";
           return (
-            <div key={q.field} className={`field full ${value ? "" : "is-empty"}`}>
+            <div key={q.field} className={`field full ${held || value ? "" : "is-empty"}`}>
               <label htmlFor={id}>{q.label}</label>
-              <input id={id} value={value} onChange={(e) => dispatch({ type: "setProfessionalFact", field: q.field, value: e.target.value })} />
+              <select
+                aria-label={`${q.label} choice`}
+                value={held}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  if (next === "not_sure" || next === "not_engaged_yet") {
+                    dispatch({ type: "deferProfessional", field: q.field, choice: next, label: q.label });
+                  }
+                }}
+              >
+                <option value="">Enter it here</option>
+                <option value="not_sure">Not sure</option>
+                <option value="not_engaged_yet">Not engaged yet</option>
+              </select>
+              {held === "" && (
+                <input id={id} value={value} onChange={(e) => dispatch({ type: "setProfessionalFact", field: q.field, value: e.target.value })} />
+              )}
             </div>
           );
         }
@@ -302,9 +370,11 @@ export function Recommendations() {
           return;
         }
         if (e instanceof EngineError && failureKind(e.status, e.detail) === "missing-route") {
-          issuesNote = "Section D issues aren't available on this engine yet.";
+          issuesNote = null;
         } else if (e instanceof EngineError && failureKind(e.status, e.detail) === "codedb") {
-          issuesNote = "code database not found";
+          issuesNote = "The code database is not available.";
+        } else if (e instanceof EngineError) {
+          issuesNote = e.detail;
         } else {
           issuesNote = failureText(e);
         }
@@ -359,7 +429,7 @@ export function Recommendations() {
       <RoleNote />
       <p className="meta">{load.note}</p>
       {load.phase === "unreachable" && (
-        <DemoFallback reason={load.note || "The engine could not be reached."} onRetry={() => setAttempt((n) => n + 1)} />
+        <DemoFallback reason={load.note || "The review service did not respond."} onRetry={() => setAttempt((n) => n + 1)} />
       )}
       {load.phase === "error" && engineId && (
         <p className="field-note" role="status">
@@ -426,7 +496,12 @@ export function Recommendations() {
                   Evidence types to consider: {issue.recommended_types.join(", ") || "none listed"}. Not results, and not filled in for you.
                 </p>
                 {issue.provision?.citation && <p className="mono meta">{issue.provision.citation}</p>}
-                <EvidenceAnswer itemId={issue.id} title="Name the document you are supplying for this issue. The words are yours." />
+                <EvidenceAnswer
+                  itemId={issue.id}
+                  provisionId={issue.provision?.provision_id ?? ""}
+                  types={issue.recommended_types}
+                  title="Name the document you are supplying for this issue. The words are yours. This is text, not a file."
+                />
               </article>
             );
           })}
@@ -452,7 +527,12 @@ export function Recommendations() {
                 Evidence types to consider: {item.recommended_types.join(", ") || "none listed"}. Not results, and not filled in for you.
               </p>
               {item.citation && <p className="mono meta">{item.citation}</p>}
-              <EvidenceAnswer itemId={item.id} title="Name the document you are supplying. The words are yours." />
+              <EvidenceAnswer
+                itemId={item.id}
+                provisionId={item.provision_id}
+                types={item.recommended_types}
+                title="Name the document you are supplying. The words are yours. This is text, not a file."
+              />
             </article>
           ))}
           {load.plan.notices.map((n) => (
@@ -466,11 +546,14 @@ export function Recommendations() {
         <div>
           <h3 className="sub-title">Process answers stored for this case</h3>
           <ul className="plain-list">
-            {load.fields.map((f) => (
-              <li key={f.id}>
-                <span className={`status-dot ${f.answer ? "done" : "blocking"}`} /> {f.label}: {f.answer ? f.answer.value : "not written yet"}
-              </li>
-            ))}
+            {load.fields.map((f) => {
+              const written = shownProcessAnswer(f.id, f.answer?.value, c.process);
+              return (
+                <li key={f.id}>
+                  <span className={`status-dot ${written ? "done" : "blocking"}`} /> {f.label}: {written || "not written yet"}
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

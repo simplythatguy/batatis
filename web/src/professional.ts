@@ -19,6 +19,9 @@ const ROLE_FIELDS = [
   "professional.discipline",
   "registered_professional.role",
   "registered_professional.discipline",
+  "professional_name",
+  "responsible_professional",
+  "professional.name",
 ];
 const SEAL_FIELDS = ["professional.seal", "professional_seal", "registered_professional.seal"];
 const REGISTRATION_FIELDS = [
@@ -28,14 +31,7 @@ const REGISTRATION_FIELDS = [
   "apega_number",
   "aaa_number",
 ];
-const ROLE_VALUES = new Set([
-  "engineer",
-  "architect",
-  "professional engineer",
-  "registered engineer",
-  "professional architect",
-  "registered architect",
-]);
+const REJECT_ROLE = new Set(["sales", "rep", "supplier", "manufacturer", "salesperson", "vendor"]);
 
 export const SCOPE_FIELDS = ["prescriptive_route_confirmed", "professional_judgement_required"] as const;
 export type ScopeField = (typeof SCOPE_FIELDS)[number];
@@ -67,10 +63,16 @@ function applicantText(facts: ProfessionalFact[], fields: string[]): string | nu
   return fact.value.trim();
 }
 
-function roleConfirmed(value: string): boolean {
-  const tokens: string[] = value.toLowerCase().match(/[a-z]+/g) ?? [];
-  if (tokens.includes("sales")) return false;
-  return ROLE_VALUES.has(tokens.join(" "));
+/** Same rule as PR #26. Punctuation is ignored. A commercial role never confirms. */
+export function roleConfirmed(value: string): boolean {
+  const tokens = value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+  if (tokens.some((token) => REJECT_ROLE.has(token))) return false;
+  if (tokens.includes("peng") || (tokens.includes("p") && tokens.includes("eng"))) return true;
+  return tokens.includes("engineer") || tokens.includes("architect");
 }
 
 /**

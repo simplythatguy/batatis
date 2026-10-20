@@ -48,27 +48,28 @@ export function failureKind(status: number, detail: string): FailureKind {
   if (status === 404 && /provision not found/i.test(detail)) return "other";
   if (status === 404 && /identify result not found/i.test(detail)) return "other";
   if (status === 404) return "missing-route";
-  if (/code database not found/i.test(detail)) return "codedb";
+  if (/code database not found|code database is not available/i.test(detail)) return "codedb";
   return "other";
 }
 
 /** Applicant-facing text. A 404 shows the engine's detail in plain language. Never echoes a path. */
 export function publicDetail(status: number, detail: string): string {
   const kind = failureKind(status, detail);
-  if (kind === "unreachable") return detail || "The engine could not be reached.";
+  if (kind === "unreachable") return "The review service did not respond.";
   if (/case not found/i.test(detail)) return "case not found";
   if (/provision not found/i.test(detail)) return "provision not found";
   if (kind === "missing-route") return "That is not available on this engine yet.";
-  if (kind === "codedb") return CODED_DB_MESSAGE;
-  if (status === 503 || /[/\\]|BATATIS_/.test(detail)) return "The engine is missing a file it needs.";
+  if (kind === "codedb") return "The code database is not available.";
+  if (status >= 500 && /[/\\]|BATATIS_/.test(detail)) return "The engine is missing a file it needs.";
+  if (/^(bad gateway|internal server error|service unavailable)$/i.test(detail.trim())) return "The review service did not respond.";
   return detail;
 }
 
 export function uploadMessage(status: number, detail: string): string {
   const kind = failureKind(status, detail);
   if (kind === "missing-route") return UPLOAD_UNAVAILABLE;
-  if (kind === "unreachable") return "The engine could not be reached, so this PDF was not read.";
-  if (kind === "codedb") return CODED_DB_MESSAGE;
+  if (kind === "unreachable") return "The review service did not respond, so this PDF was not read.";
+  if (kind === "codedb") return "The code database is not available.";
   return "This PDF was not read.";
 }
 

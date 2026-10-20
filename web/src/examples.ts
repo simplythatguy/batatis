@@ -57,7 +57,7 @@ const homebuilder: Case = {
       clarifyingQuestion: "Is the north wall facing a side lot line, and is the overhang still wanted there?",
       quote: {
         text: "Roof soffit projects over an exposing building face whose limiting distance is 0.45 m or less.",
-        citation: "Summary from development case dev-001, not the code sentence. Provision named there: 9.10.15.5.(8).",
+        citation: "Summary from a development case, not the code sentence. Provision named there: 9.10.15.5.(8).",
       },
     },
   ],
@@ -65,7 +65,7 @@ const homebuilder: Case = {
     {
       candidateId: "ex-soffit",
       provision: "9.10.15.5.(8)",
-      citation: "Cached from development case dev-001. Not a live lookup.",
+      citation: "Cached from a development case. Not a live lookup.",
       attributionStatus: "direct",
       pairs: [{ bracket: "[F03-OP3.1]", functions: ["F03"], objectives: ["OP3.1"] }],
       intent: [],
@@ -146,7 +146,7 @@ export const EXAMPLES: Example[] = [
   {
     id: "homebuilder-soffit",
     label: "Homebuilder · infill soffit",
-    blurb: "Two-storey house, soffit over a 0.3 m side yard. Cached summary from development case dev-001.",
+    blurb: "Two-storey house, soffit over a 0.3 m side yard. Cached summary from a development case.",
     case: homebuilder,
   },
 ];

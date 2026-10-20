@@ -104,7 +104,95 @@ export const FACT_LABELS: Record<string, string> = {
   ...Object.fromEntries(DETAIL_FIELDS.map((f) => [f.id, f.label])),
 };
 
-export const factLabel = (field: string) => FACT_LABELS[field] ?? field;
+const PROFESSIONAL_LABELS: Record<string, string> = {
+  role: "Registered professional",
+  discipline: "Registered professional",
+  registration_number: "Registration number",
+  registration: "Registration number",
+  seal: "Professional seal",
+  occupancy: "Occupancy",
+  principal_dwelling_units: "Principal dwelling units",
+  storeys: "Storeys",
+  building_area_m2: "Building area",
+  part4_design: "Part 4 design",
+  ahj_requires_professional: "Authority requires a professional",
+  special_safety_concerns: "Size or complexity",
+  roof_trusses: "Wood roof trusses",
+  preserved_wood_foundation_part4: "Preserved wood foundation",
+  prescriptive_route_confirmed: "Prescriptive route",
+  professional_judgement_required: "Reserved professional judgement",
+  professional_scope_resolved: "Professional requirements resolved",
+  fire_suppression: "Fire suppression",
+  fire_alarm: "Fire alarm",
+  farm_public_use: "Farm building for public use",
+};
+
+const EVIDENCE_LABELS: Record<string, string> = {
+  file_ref: "Evidence document",
+  title: "Evidence document",
+  responsible_party: "Person responsible for the evidence",
+  date: "Evidence date",
+  professional_seal: "Seal on the evidence",
+};
+
+const OCCUPANCY_LABELS: Record<string, string> = {
+  single_family: "Single-family house",
+  multi_family: "Multi-family",
+  hotel: "Hotel",
+  assembly: "Assembly",
+  care: "Care",
+  treatment: "Treatment",
+  detention: "Detention",
+  business: "Business",
+  mercantile: "Mercantile",
+  industrial: "Industrial",
+  farm: "Farm",
+  relocatable_industrial_camp: "Relocatable industrial camp",
+  mixed: "Mixed use",
+  other: "Other",
+};
+
+function humanize(field: string): string {
+  const last = field.split(".").pop() ?? field;
+  const words = last.replace(/_/g, " ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+/** A label a person can read. A raw field key is never returned. */
+export function factLabel(field: string): string {
+  if (FACT_LABELS[field]) return FACT_LABELS[field];
+  if (field.startsWith("evidence.")) return EVIDENCE_LABELS[field.split(".").pop() ?? ""] ?? "Evidence document";
+  if (field.startsWith("professional.")) return PROFESSIONAL_LABELS[field.slice("professional.".length)] ?? humanize(field);
+  if (field.startsWith("process.")) return humanize(field.slice("process.".length));
+  if (field.includes(".") || field.includes("_")) return humanize(field);
+  return field;
+}
+
+const ENGINE_PROCESS: Record<string, ProcessFieldId> = {
+  rationale: "rationale",
+  risk_assessment: "risk",
+  risk: "risk",
+  mitigating_measures: "mitigation",
+  mitigation: "mitigation",
+  assumptions_and_limits: "assumptions",
+  assumptions: "assumptions",
+  maintenance_operation: "maintenance",
+  qualifications: "qualifications",
+};
+
+/** What Section D shows for a process answer. A value just typed wins over a stale engine copy. */
+export function shownProcessAnswer(engineId: string, remote: string | null | undefined, process: Case["process"]): string {
+  const localId = ENGINE_PROCESS[engineId];
+  const local = localId ? process[localId].trim() : "";
+  return local || remote?.trim() || "";
+}
+
+/** The gap names the question the engine sent, when the message does not already include it. */
+export function gapLabel(message: string, hint?: string | null): string {
+  const question = hint?.trim();
+  if (!question || message.includes(question)) return message;
+  return `${message} ${question}`;
+}
 
 /** Newest fact for a field. Matches the engine, where the latest entry wins. */
 export const factFor = (c: Case, field: string): Fact | undefined => {
@@ -117,8 +205,12 @@ export const valueText = (f: Fact | undefined): string => (f?.value == null ? ""
 
 /** The displayed value of a fact (select-backed fields show their option label). */
 export function displayValue(f: Fact): string {
+  if (typeof f.value === "boolean") return f.value ? "Yes" : "No";
   const def = DETAIL_FIELDS.find((d) => d.id === f.field);
   const text = valueText(f);
+  if (f.field === "professional.occupancy" || f.field.endsWith(".occupancy")) return OCCUPANCY_LABELS[text] ?? text;
+  if (text === "true") return "Yes";
+  if (text === "false") return "No";
   return def?.options?.[text] ?? text;
 }
 
@@ -137,6 +229,26 @@ export const answeredYes = (c: Case) => c.candidates.filter((a) => a.answer === 
 /** Unanswered cards block Continue. "Not sure" is an open question and does not. */
 export const unresolvedCandidates = (c: Case) => c.candidates.filter((a) => a.answer === null);
 
+/** Unanswered code-check cards name the question. They do not say "Answer: what you described". */
+export function codeCheckLabel(topic: string, question?: string): string {
+  const using = topic.match(/^using\s+(.+)$/i);
+  if (using) {
+    const rest = using[1].charAt(0).toLowerCase() + using[1].slice(1);
+    return `Code check: answer whether your design relies on ${rest}`;
+  }
+  if (/^what you described$/i.test(topic.trim()) && question?.trim()) return `Code check: ${question.trim()}`;
+  const named = topic.charAt(0).toLowerCase() + topic.slice(1);
+  return `Code check: answer whether your design relies on ${named}`;
+}
+
+/** Words for the text record. The fact kind and status enums are not printed. */
+export function plainFactStatus(kind: string, status: string): string {
+  if (kind === "proposed") return "proposed, needs your check";
+  if (status === "confirmed" && kind === "exact") return "from the form";
+  if (status === "confirmed") return "from what you entered";
+  return "needs your check";
+}
+
 /** Derived gap list: the only list any surface renders. */
 export function getGaps(c: Case): Gap[] {
   const gaps: Gap[] = [];
@@ -151,21 +263,28 @@ export function getGaps(c: Case): Gap[] {
   for (const d of DETAIL_FIELDS) {
     const fact = factFor(c, d.id);
     if (d.required && !valueText(fact).trim()) {
-      gaps.push({ id: `detail-${d.id}`, severity: "blocking", label: `${d.label} missing`, href: routeForDetail(d.id) });
+      gaps.push({ id: `detail-${d.id}`, severity: "blocking", label: `${d.label} missing`, href: routeForDetail(d.id), field: d.id });
     }
   }
   for (const f of c.facts) {
     if (f.status !== "unconfirmed") continue;
-    gaps.push({
+      gaps.push({
       id: `confirm-${f.id}`,
       severity: "blocking",
       label: `Confirm ${factLabel(f.field).toLowerCase()}`,
       href: DETAIL_IDS.has(f.field) ? routeForDetail(f.field) : `#/describe?focus=fact-${f.id}`,
+      field: f.field,
     });
   }
   for (const a of c.candidates) {
     if (a.answer === null) {
-      gaps.push({ id: `answer-${a.id}`, severity: "blocking", label: `Answer: ${a.topic.toLowerCase()}`, href: `#/code-check?focus=cand-${a.id}` });
+      gaps.push({
+        id: `answer-${a.id}`,
+        severity: "blocking",
+        label: codeCheckLabel(a.topic, a.clarifyingQuestion),
+        href: `#/code-check?focus=cand-${a.id}`,
+        field: `candidate.${a.id}`,
+      });
     }
   }
   for (const p of PROCESS_FIELDS) {
@@ -175,10 +294,12 @@ export function getGaps(c: Case): Gap[] {
         severity: "blocking",
         label: `${p.label} empty`,
         href: `#/application?tab=alt&focus=field-${p.id}`,
+        field: PROCESS_FACT[p.id],
       });
     }
   }
-    for (const q of c.questions) {
+  for (const q of c.questions) {
+    if (q.id.startsWith("q-prof-")) continue;
     if (!q.answer) {
       const article = q.kind === "article" || q.id.startsWith("q-from-") || q.id.startsWith("oq_") || Boolean(q.cardId);
       const intake = q.kind === "intake" || q.id.startsWith("q-identify-");
@@ -194,6 +315,7 @@ export function getGaps(c: Case): Gap[] {
           : scope
             ? "#/application?tab=D"
             : `#/describe?focus=q-${q.id}`,
+        field: q.field,
       });
     }
   }
@@ -204,6 +326,16 @@ export function getGaps(c: Case): Gap[] {
       label:
         "Registered professional not confirmed. Routed to the officer. Name an engineer or architect and their seal or registration number.",
       href: "#/application?tab=D&focus=prof-role",
+      field: "professional.role",
+    });
+  }
+  if (c.questions.some((q) => q.id.startsWith("q-prof-") && !q.answer)) {
+    gaps.push({
+      id: "professional-not-engaged",
+      severity: "blocking",
+      label: "Registered professional not confirmed. Not sure and not engaged yet are routed to the officer. Official export stays blocked.",
+      href: "#/application?tab=D&focus=prof-role",
+      field: "professional.role",
     });
   }
   const blocking = gaps.some((g) => g.severity === "blocking");
@@ -239,7 +371,8 @@ export type Action =
   | { type: "noteIdentifyQuestions"; questions: { id?: string; field: string; text: string; why?: string | null }[] }
   | { type: "bindOpenQuestion"; candidateId: string; questionId: string }
   | { type: "noteSectionC"; rows: SectionCRow[] }
-  | { type: "saveEvidence"; itemId: string; document: string; responsible: string; date: string }
+  | { type: "saveEvidence"; itemId: string; document: string; responsible: string; date: string; evidenceType: string; provisionId: string }
+  | { type: "deferProfessional"; field: string; choice: "not_sure" | "not_engaged_yet"; label: string }
   | { type: "setProfessionalFact"; field: string; value: string | number | boolean }
   | { type: "answerScope"; field: string; answer: "yes" | "no" | "not-sure" | "clear"; text?: string }
   | { type: "notePractice"; value: true | false | "unknown" }
@@ -411,10 +544,11 @@ export function reducer(c: Case, a: Action): Case {
       return { ...c, sectionC: [...rest, ...a.rows] };
     }
     case "saveEvidence": {
-      const ref = a.document.trim();
+      const description = a.document.trim();
       const who = a.responsible.trim();
       const date = a.date.trim();
-      if (!ref || !who) return c;
+      const evidenceType = a.evidenceType.trim();
+      if (!description || !who || !evidenceType) return c;
       const taken = new Set(c.facts.filter((f) => f.field.startsWith("evidence.")).map((f) => f.field.split(".")[1]));
       let slot = a.itemId;
       if (taken.has(a.itemId)) {
@@ -423,7 +557,7 @@ export function reducer(c: Case, a: Action): Case {
         slot = `${a.itemId}~${n}`;
       }
       const prefix = `evidence.${slot}.`;
-      const pointed = (field: string, value: string, source: Fact["source"]): Fact => ({
+      const text = (field: string, value: string): Fact => ({
         id: newId("f"),
         field,
         value,
@@ -432,16 +566,53 @@ export function reducer(c: Case, a: Action): Case {
         confidence: null,
         formula: null,
         inputs: [],
-        source,
+        source: { type: "user_text", ref: "Your evidence", quote: value },
       });
       const facts = [
         ...c.facts,
-        pointed(`${prefix}file_ref`, ref, { type: "file", ref, quote: ref }),
-        pointed(`${prefix}title`, ref, { type: "user_text", ref: "Your evidence", quote: ref }),
-        pointed(`${prefix}responsible_party`, who, { type: "user_text", ref: "Your evidence", quote: who }),
+        text(`${prefix}description`, description),
+        text(`${prefix}title`, description),
+        text(`${prefix}responsible_party`, who),
+        text(`${prefix}evidence_type`, evidenceType),
       ];
-      if (date) facts.push(pointed(`${prefix}date`, date, { type: "user_text", ref: "Your evidence", quote: date }));
-      return { ...c, facts };
+      if (date) facts.push(text(`${prefix}date`, date));
+      const listed = [
+        ...(c.listedEvidence ?? []),
+        {
+          id: slot,
+          provisionId: a.provisionId.trim(),
+          evidenceType,
+          description,
+          responsible: who,
+          date,
+        },
+      ];
+      return { ...c, facts, listedEvidence: listed };
+    }
+    case "deferProfessional": {
+      const field = `professional.${a.field}`;
+      const facts = c.facts.filter((f) => f.field !== field);
+      const qid = `q-prof-${a.field}`;
+      const why =
+        a.choice === "not_sure"
+          ? "You answered Not sure. This is routed to the officer. Official export stays blocked."
+          : "You answered Not engaged yet. This is routed to the officer. Official export stays blocked.";
+      facts.push({
+        id: newId("f"),
+        field,
+        value: a.choice,
+        kind: "pointed",
+        status: "unconfirmed",
+        confidence: null,
+        formula: null,
+        inputs: [],
+        source: { type: "user_click", ref: "Your answer", quote: a.choice },
+      });
+      return {
+        ...c,
+        facts,
+        questions: [...c.questions.filter((q) => q.id !== qid), { id: qid, text: a.label, why, field }],
+      };
     }
     case "answerScope": {
       const qid = `q-scope-${a.field}`;
@@ -494,6 +665,7 @@ export function reducer(c: Case, a: Action): Case {
       const quote = typeof a.value === "boolean" ? (a.value ? "yes" : "no") : String(a.value);
       return {
         ...c,
+        questions: c.questions.filter((q) => q.id !== `q-prof-${a.field}`),
         facts: upsertUserFact(c, field, String(a.value), { type: "user_click", ref: "Your answer", quote }).map((f) =>
           f.field === field && f.source.ref === "Your answer" ? { ...f, value: a.value } : f,
         ),

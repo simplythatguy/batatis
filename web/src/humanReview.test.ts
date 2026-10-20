@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { notSureQuestions, officerRequest, practiceFlagLine, practicePrompt, SCO_JUDGEMENT } from "./humanReview.ts";
+import { notSureQuestions, officerProfessionalLines, officerRequest, pdfOutcomeLine, practiceFlagLine, practicePrompt, SCO_JUDGEMENT, textRecord } from "./humanReview.ts";
 import { emptyCase } from "./intake.ts";
 import { getGaps, reducer, unresolvedCandidates } from "./model.ts";
 
@@ -78,6 +78,46 @@ test("Not sure is an open question and does not block Continue", () => {
   assert.match(letter, /No documents uploaded/);
   assert.doesNotMatch(letter, /complies or is safe\.\nAdministrative/);
   assert.match(letter, /does not decide whether the design complies or is safe/);
+  assert.match(letter, /Questions the applicant marked Not sure/);
+  const grouped = officerRequest({
+    title: "Case",
+    files: [],
+    gaps: [{ id: "g-scope", severity: "blocking", label: "Jurisdiction-wide variance missing", href: "#/describe", field: "scope" }],
+    notSure: [],
+    ranking: [],
+    professional: ["Not yet checked."],
+    record: null,
+    role: { engineer: "Name an engineer.", officer: "The officer decides." },
+    reportNote: null,
+    sectionById: new Map([["g-scope", "B"]]),
+  });
+  assert.match(grouped, /Section B/);
+  assert.doesNotMatch(grouped, /Facts and questions\n- Jurisdiction-wide variance missing/);
+});
+
+test("the officer professional line waits for the professional route", () => {
+  assert.deepEqual(officerProfessionalLines("pending", true, []), ["Not yet checked."]);
+  assert.match(officerProfessionalLines("ready", "unknown", [])[0], /More facts are needed/);
+});
+
+test("a check that did not export does not say the PDF was blocked", () => {
+  assert.deepEqual(pdfOutcomeLine({ example: true, downloaded: null, exportAttempted: false, blockingCount: 4 }), ["Example: PDF not offered."]);
+  const checked = pdfOutcomeLine({ example: false, downloaded: null, exportAttempted: false, blockingCount: 3 });
+  assert.match(checked[0], /not requested/);
+  assert.match(checked[0], /3 required items remain/);
+  assert.doesNotMatch(checked[0], /blocked/);
+  const record = textRecord({
+    title: "House",
+    description: "Hempcrete",
+    factLines: ["Owner: Ada (from what you entered)"],
+    blockingCount: 3,
+    warningCount: 1,
+    checkedAt: "2026-10-20",
+    pdfLines: checked,
+  });
+  assert.match(record, /Completeness: 3 required items, 1 open question, checked at 2026-10-20/);
+  assert.match(record, /does not decide whether the design complies or is safe/);
+  assert.doesNotMatch(record, /\(pointed, confirmed\)/);
 });
 
 test("the Section D practice line does not repeat depends", () => {

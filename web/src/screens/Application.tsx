@@ -1,10 +1,11 @@
 import { useRef, useState } from "react";
 import { EngineError, ExportBlockedError, engine } from "../api/client";
 import { DetailFields, ProcessFields } from "../case-parts";
-import { MissingItems, RecordHeading } from "../completenessView";
+import { MissingItems } from "../completenessView";
 import { DraftNote, GapStrip, PanelHeader } from "../components";
 import { EXAMPLES } from "../examples";
-import { factLabel } from "../model";
+import { displayValue, factLabel, plainFactStatus } from "../model";
+import { UNSIGNED_LINE, pdfOutcomeLine, textRecord } from "../humanReview";
 import type { Route } from "../router";
 import { useCase } from "../store";
 import type { Gap } from "../types";
@@ -20,7 +21,7 @@ const TABS = [
 type Stage = "idle" | "checking" | "preparing" | "blocked" | "error" | "ready";
 
 export function Application({ route }: { route: Route }) {
-  const { gaps, saveDraft, c, gapsSource, syncOk, reviewDetail, engineGaps, readSync, readGaps, setCompletenessRecord, completenessRecord } = useCase();
+  const { gaps, saveDraft, c, gapsSource, syncOk, reviewDetail, engineGaps, readSync, readGaps, setCompletenessRecord } = useCase();
   const tab = TABS.find((t) => t.id === route.params.get("tab"))?.id ?? "A";
   const dialog = useRef<HTMLDialogElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -30,6 +31,7 @@ export function Application({ route }: { route: Route }) {
   const [tech, setTech] = useState("");
   const [statusText, setStatusText] = useState("Review missing or unconfirmed information before downloading the application PDF.");
   const [file, setFile] = useState<{ url: string; name: string; draft: boolean; downloadedAt: Date } | null>(null);
+  const [exportAttempted, setExportAttempted] = useState(false);
   const blocking = gaps.filter((g) => g.severity === "blocking");
   const warnings = gaps.filter((g) => g.severity === "warning").length;
   const example = EXAMPLES.find((ex) => ex.id === c.exampleId);
@@ -52,6 +54,7 @@ export function Application({ route }: { route: Route }) {
     setReasons([]);
     setTech("");
     setDraftIntent(false);
+    setExportAttempted(false);
     forgetFile();
     setStage("checking");
     setStatusText(`Saving and reviewing ${subject}…`);
@@ -69,22 +72,22 @@ export function Application({ route }: { route: Route }) {
         return;
       }
       if (c.exampleId) {
-        const note = "Example PDFs are not yet labelled. Download the example text record instead.";
+        const note = "Example: PDF not offered.";
         setStage("blocked");
         setStatusText(note);
-        setCompletenessRecord({ label: "Export blocked", reasons: [note], note });
+        setCompletenessRecord({ label: "Not exported yet", reasons: [], note });
         return;
       }
       if (blockers.length) {
-        const note = "Some required information is missing or unconfirmed. The reasons are the missing items in this record.";
+        const note = `Not exported yet. Official PDF closed while ${blockers.length} required item${blockers.length === 1 ? "" : "s"} remain.`;
         setStage("blocked");
-        setStatusText("The PDF was blocked. Review the current missing items below.");
-        setCompletenessRecord({ label: "Export blocked", reasons: [], note });
+        setStatusText("Not exported yet.");
+        setCompletenessRecord({ label: "Not exported yet", reasons: [], note });
         return;
       }
       setStage("idle");
       setStatusText("No blocking administrative items found. Review any open questions before downloading.");
-      setCompletenessRecord(null);
+      setCompletenessRecord({ label: "Not exported yet", reasons: [], note: "No export has been requested yet." });
     });
   }
 
@@ -92,12 +95,13 @@ export function Application({ route }: { route: Route }) {
     setDraftIntent(draft);
     setReasons([]);
     setTech("");
+    setExportAttempted(true);
     forgetFile();
     if (c.exampleId) {
-      const note = "Example PDFs are not yet labelled. Download the example text record instead.";
+      const note = "Example: PDF not offered.";
       setStage("blocked");
       setStatusText(note);
-      setCompletenessRecord({ label: "Export blocked", reasons: [note], note });
+      setCompletenessRecord({ label: "Not exported yet", reasons: [], note });
       return;
     }
     if (!draft && !officialReady) {
@@ -128,6 +132,12 @@ export function Application({ route }: { route: Route }) {
       if (draft) {
         const note = "Your draft PDF is ready. This draft may have missing or unconfirmed information.";
         setCompletenessRecord({ label: "Draft", reasons: [], note });
+      } else {
+        setCompletenessRecord({
+          label: "Application PDF",
+          reasons: [],
+          note: `${UNSIGNED_LINE} This does not decide whether the design complies or is safe.`,
+        });
       }
       const a = Object.assign(document.createElement("a"), { href: url, download: got.filename });
       document.body.append(a);
@@ -160,25 +170,23 @@ export function Application({ route }: { route: Route }) {
   }
 
   function downloadRecord() {
-    const pdfLines = file
-      ? [`Application PDF: downloaded ${file.draft ? "draft PDF " : ""}${file.name} at ${file.downloadedAt.toLocaleString()}.`]
-      : stage === "blocked"
-        ? ["Application PDF: blocked. Reasons:", ...(reasons.length ? reasons : [statusText]).map((reason) => `- ${reason}`)]
-        : stage === "error"
-          ? ["Application PDF: could not be prepared.", ...(statusText !== "The PDF could not be prepared." ? [statusText] : [])]
-          : ["Application PDF: not prepared in this session."];
-    const text = [
-      ...(c.exampleId ? [`EXAMPLE — ${exampleLabel}`, "For practice. Not for submission.", ""] : []),
-      c.title,
-      c.description,
-      "",
-      ...c.facts.map((f) => `${factLabel(f.field)}: ${f.value ?? ""} (${f.kind}, ${f.status})`),
-      "",
-      "Application PDF",
-      ...pdfLines,
-      "",
-      "A text record is not the Safety Codes Council form.",
-    ].join("\n");
+    const pdfLines = pdfOutcomeLine({
+      example: Boolean(c.exampleId),
+      downloaded: file ? { name: file.name, draft: file.draft, at: file.downloadedAt.toLocaleString() } : null,
+      exportAttempted: exportAttempted && !c.exampleId,
+      blockingCount: blocking.length,
+    });
+    if (exportAttempted && !file && reasons.length) pdfLines.push(...reasons.map((reason) => `- ${reason}`));
+    const text = textRecord({
+      exampleLabel: c.exampleId ? exampleLabel : undefined,
+      title: c.title,
+      description: c.description,
+      factLines: c.facts.map((f) => `${factLabel(f.field)}: ${displayValue(f)} (${plainFactStatus(f.kind, f.status)})`),
+      blockingCount: blocking.length,
+      warningCount: warnings,
+      checkedAt: new Date().toLocaleString(),
+      pdfLines,
+    });
     const blob = new Blob([text], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const name = `${c.exampleId ? "EXAMPLE-" : ""}${c.id}-text-record.txt`;
@@ -244,11 +252,10 @@ export function Application({ route }: { route: Route }) {
       </nav>
       <div className="pane scroll-body" role="region" aria-label={TABS.find((t) => t.id === tab)?.label}>
         <div className="content-col stack">
-          {tab === "D" || tab === "alt" ? (
-            <>
-              <ProcessFields />
-              <Recommendations />
-            </>
+          {tab === "D" ? (
+            <Recommendations />
+          ) : tab === "alt" ? (
+            <ProcessFields />
           ) : (
             <DetailFields section={tab === "B" ? "B" : "A"} />
           )}
@@ -286,6 +293,8 @@ export function Application({ route }: { route: Route }) {
                 {stage === "preparing" ? "Cancel download" : "Close"}
               </button>
             </div>
+            <p>This is an administrative completeness check. It does not decide whether the design complies or is safe.</p>
+            {stage === "ready" && file && !file.draft && <p>{UNSIGNED_LINE}</p>}
             {c.exampleId && (
               <p className="example-banner-title">
                 EXAMPLE · {exampleLabel}
@@ -296,28 +305,7 @@ export function Application({ route }: { route: Route }) {
               {statusText}
             </p>
             {blank && stage !== "ready" && <p>Start with the applicant and project details.</p>}
-            {c.exampleId && stage !== "ready" && <p>Example PDFs are not yet labelled. Download the example text record instead.</p>}
             {busy && <progress aria-label={statusText} />}
-            {(stage === "blocked" || stage === "ready" || stage === "error") && <RecordHeading record={completenessRecord} />}
-            {stage === "blocked" && (
-              <>
-                <p>
-                  {c.exampleId
-                    ? "Review the items below, or download the example text record to continue working."
-                    : "Review the items below, or download a draft PDF to continue working."}
-                </p>
-                {!gaps.length && (
-                  <p>The PDF was blocked, but its reasons could not be matched to a field. Retry the review. If this continues, include the technical detail when asking for help.</p>
-                )}
-              </>
-            )}
-            {stage === "error" && (
-              <p>
-                {statusText.startsWith("Online")
-                  ? "Showing a limited check of fields in this browser. Your information is still here."
-                  : "Try again, or download a text record of the information in this browser."}
-              </p>
-            )}
             {stage === "ready" && file && (
               <p>
                 Download started: {file.name}.{" "}
@@ -327,7 +315,6 @@ export function Application({ route }: { route: Route }) {
               </p>
             )}
             {stage !== "ready" && <MissingItems gaps={gaps} sectionById={sectionById} onFollow={follow} />}
-            <p>This is an administrative completeness check. It does not decide whether the design complies or is safe.</p>
             {(tech || reasons.length > 0) && (
               <details>
                 <summary>Technical detail</summary>

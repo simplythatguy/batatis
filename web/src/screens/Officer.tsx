@@ -3,17 +3,17 @@ import { EngineError, engine, type CompletenessReport, type InformationRequest }
 import { MissingItems, RecordHeading } from "../completenessView";
 import { PanelHeader, RoleNote } from "../components";
 import { EXAMPLES } from "../examples";
-import { INFORMATION_UNAVAILABLE } from "../identify";
 import {
   notSureQuestions,
+  officerProfessionalLines,
   officerRequest,
-  professionalFlagLines,
   rankingQuestions,
   roleNote,
   SCO_JUDGEMENT,
   unseenRequestItems,
   type InformationItem,
 } from "../humanReview";
+import { practiceFromReview } from "../professional";
 import { failureKind } from "../rules";
 import { useCase } from "../store";
 
@@ -43,14 +43,15 @@ function reportFrom(body: CompletenessReport): ReportState {
 }
 
 export function Officer() {
-  const { c, gaps, gapsSource, gapsNote, reviewDetail, saveDraft, engineGaps, completenessRecord } = useCase();
+  const { c, gaps, gapsSource, gapsNote, reviewDetail, saveDraft, engineGaps, completenessRecord, dispatch } = useCase();
   const blank = !c.exampleId && !c.description.trim() && c.facts.length === 0 && !c.authority;
   const [attempt, setAttempt] = useState(0);
   const [settled, setSettled] = useState(blank);
   const [report, setReport] = useState<ReportState>({ phase: "loading" });
   const [copyNote, setCopyNote] = useState("");
   const [requestItems, setRequestItems] = useState<InformationItem[]>([]);
-  const [requestNote, setRequestNote] = useState("");
+  const [professionalChecked, setProfessionalChecked] = useState<"pending" | "ready">("pending");
+  const [technical, setTechnical] = useState<string[]>([]);
 
   useEffect(() => {
     if (blank) return;
@@ -59,7 +60,8 @@ export function Officer() {
     setSettled(false);
     setCopyNote("");
     setRequestItems([]);
-    setRequestNote("");
+    setProfessionalChecked("pending");
+    setTechnical([]);
     setReport({ phase: "loading" });
     void (async () => {
       const id = await saveDraft();
@@ -70,38 +72,45 @@ export function Officer() {
         return;
       }
       try {
+        const professional = await engine.professional(id, ctl.signal);
+        if (!cancelled) {
+          const practice = practiceFromReview(
+            c.practiceOfEngineering,
+            professional.required,
+            false,
+          );
+          if (c.practiceOfEngineering !== practice) dispatch({ type: "notePractice", value: practice });
+          setProfessionalChecked("ready");
+        }
+      } catch (e) {
+        if (!cancelled && !ctl.signal.aborted && e instanceof EngineError && failureKind(e.status, e.detail) !== "missing-route") {
+          setTechnical((current) => [...current, e.technical]);
+        }
+      }
+      try {
         const body = await engine.completeness(id, ctl.signal);
         if (cancelled) return;
         setReport(reportFrom(body));
       } catch (e) {
         if (cancelled || ctl.signal.aborted) return;
         if (e instanceof EngineError && failureKind(e.status, e.detail) === "missing-route") {
-          setReport({ phase: "missing", note: "The grouped completeness report isn't available on this engine yet." });
-        } else if (e instanceof EngineError && failureKind(e.status, e.detail) === "codedb") {
-          setReport({ phase: "unavailable", note: "code database not found" });
+          setReport({ phase: "missing", note: "" });
+        } else if (e instanceof EngineError) {
+          setTechnical((current) => [...current, e.technical]);
+          setReport({ phase: "unavailable", note: e.detail });
         } else {
-          setReport({
-            phase: "unavailable",
-            note: e instanceof EngineError ? e.detail : "The grouped completeness report did not load.",
-          });
+          setReport({ phase: "unavailable", note: "The grouped completeness report did not load." });
         }
       }
       if (!cancelled && id) {
         try {
           const info: InformationRequest = await engine.informationRequest(id, ctl.signal);
-          if (!cancelled) {
-            setRequestItems(info.items ?? []);
-            setRequestNote("");
-          }
+          if (!cancelled) setRequestItems(info.items ?? []);
         } catch (e) {
           if (!cancelled && !ctl.signal.aborted) {
             setRequestItems([]);
-            if (e instanceof EngineError && failureKind(e.status, e.detail) === "missing-route") {
-              setRequestNote(INFORMATION_UNAVAILABLE);
-            } else if (e instanceof EngineError) {
-              setRequestNote(e.detail);
-            } else {
-              setRequestNote("The officer information request did not load.");
+            if (e instanceof EngineError && failureKind(e.status, e.detail) !== "missing-route") {
+              setTechnical((current) => [...current, e.technical]);
             }
           }
         }
@@ -118,10 +127,13 @@ export function Officer() {
 
   const openNotSure = notSureQuestions(c.questions);
   const ranked = rankingQuestions(c.questions);
-  const flags = professionalFlagLines(c);
+  const flags = officerProfessionalLines(professionalChecked, c.practiceOfEngineering, c.facts);
   const exampleLabel = c.exampleId ? (EXAMPLES.find((ex) => ex.id === c.exampleId)?.label ?? "Loaded example") : undefined;
-  const reportNote = report.phase === "loading" ? null : report.note;
+  const reportNote = report.phase === "ready" ? report.note : null;
   const pending = !blank && !settled;
+  const pendingLine = c.exampleId ? "Reviewing this example…" : "Reviewing your application…";
+  const statusLine = pending ? pendingLine : gapsSource === "engine" ? gapsNote : "Online review unavailable.";
+  const techLines = [...technical, ...(gapsSource === "browser" && reviewDetail ? [reviewDetail] : [])].filter(Boolean);
   const engineItems = unseenRequestItems(openNotSure, requestItems);
   const request = officerRequest({
     title: c.title,
@@ -135,6 +147,7 @@ export function Officer() {
     role: roleNote(c.applicantType),
     reportNote,
     engineItems,
+    sectionById: new Map(engineGaps.map((gap) => [gap.id, gap.section])),
   });
   const sectionById = new Map(engineGaps.map((gap) => [gap.id, gap.section]));
 
@@ -174,32 +187,28 @@ export function Officer() {
           <RoleNote />
           <p className="meta intro">This review is of the application in front of you. It checks whether information is present. It does not decide whether the design complies or is safe.</p>
           <p className="meta" role="status">
-            {pending ? "Reviewing your application…" : gapsSource === "engine" ? gapsNote : "Online review unavailable"}
+            {statusLine}
           </p>
           {pending && (
             <div aria-busy="true">
               <p>
                 <span className="status-dot pending" /> Missing items will appear here when the review finishes.
               </p>
-              <progress aria-label="Reviewing your application" />
+              <progress aria-label={pendingLine} />
             </div>
           )}
           {!pending && gapsSource === "browser" && (
-            <>
-              <h2 className="section-title">Online review unavailable</h2>
-              <p>
-                <span className="status-dot warning" /> {gapsNote}
-              </p>
-              <button type="button" className="btn" onClick={() => setAttempt((n) => n + 1)}>
-                Retry review
-              </button>
-              {reviewDetail && (
-                <details>
-                  <summary>Technical detail</summary>
-                  <p>{reviewDetail}</p>
-                </details>
-              )}
-            </>
+            <button type="button" className="btn" onClick={() => setAttempt((n) => n + 1)}>
+              Retry review
+            </button>
+          )}
+          {!pending && techLines.length > 0 && (
+            <details>
+              <summary>Technical detail</summary>
+              {techLines.map((line) => (
+                <p key={line}>{line}</p>
+              ))}
+            </details>
           )}
           {!pending && (
             <>
@@ -223,10 +232,10 @@ export function Officer() {
               </section>
               <section aria-labelledby="not-sure-title">
                 <h2 id="not-sure-title" className="section-title">
-                  Open Not sure
+                  Questions the applicant marked Not sure
                 </h2>
                 {openNotSure.length === 0 && engineItems.length === 0 ? (
-                  <p className="empty">No open Not sure answers.</p>
+                  <p className="empty">No questions marked Not sure.</p>
                 ) : (
                   <ul className="plain-list">
                     {openNotSure.map((q) => (
@@ -247,7 +256,7 @@ export function Officer() {
               {ranked.length > 0 && (
                 <section aria-labelledby="ranked-questions">
                   <h2 id="ranked-questions" className="section-title">
-                    Open questions from article ranking
+                    Questions from code matching
                   </h2>
                   <ul className="plain-list">
                     {ranked.map((q) => (
@@ -268,16 +277,14 @@ export function Officer() {
               </section>
               <RecordHeading record={completenessRecord} />
               <MissingItems gaps={gaps} sectionById={sectionById} />
-              <section aria-labelledby="report-title">
-                <h2 id="report-title" className="section-title">
-                  Grouped completeness report
-                </h2>
-                {report.phase === "ready" ? (
+              {report.phase === "ready" && (
+                <section aria-labelledby="report-title">
+                  <h2 id="report-title" className="section-title">
+                    Grouped completeness report
+                  </h2>
                   <p>{report.note}</p>
-                ) : (
-                  <p className="empty">{report.phase === "loading" ? "Loading the grouped completeness report…" : report.note}</p>
-                )}
-              </section>
+                </section>
+              )}
               <Judgement skipped={report.phase === "ready" ? report.skipped : []} />
             </>
           )}
@@ -285,11 +292,6 @@ export function Officer() {
             <h2 id="request-title" className="section-title">
               Information request
             </h2>
-            {!pending && requestNote && (
-              <p className="empty" role="status">
-                {requestNote}
-              </p>
-            )}
             {!pending && (
               <div className="field request-field">
                 <label htmlFor="request-text">Request</label>

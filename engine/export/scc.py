@@ -25,7 +25,7 @@ from ..codes import Codes
 from ..completeness import check_completeness
 from ..process_fields import PROCESS_ALIASES
 from ..section_c import section_c_rows
-from ..section_d import supporting_documents
+from ..section_d import supporting_documents, text_evidence
 from .text import fit, pdf_safe
 
 DEFAULT_FORM = Path(__file__).resolve().parents[2] / 'reference' / 'guides' / 'SCC-Variance-Form.pdf'
@@ -235,6 +235,7 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict) -> _Plan:
 
     dslots = fmap['section_d_rows']
     docs = [(pdf_safe(d.title), pdf_safe(d.responsible_party)) for d in supporting_documents(case)]
+    docs += [(pdf_safe(title), pdf_safe(who)) for title, who in text_evidence(case)]
     shown_docs = docs if len(docs) <= len(dslots) else docs[:len(dslots) - 1]
     for n, (slot, (doc, who)) in enumerate(zip(dslots, shown_docs), start=1):
         ref = f'D-{n}'

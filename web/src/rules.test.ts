@@ -42,7 +42,9 @@ test("the engine-down state is only an unreachable engine", () => {
   assert.doesNotMatch(publicDetail(404, "case not found"), /no route/i);
   assert.equal(failureKind(500, "Internal Server Error"), "other");
   assert.equal(failureKind(503, "code database not found: /tmp/secret.sqlite"), "codedb");
-  assert.equal(publicDetail(503, "code database not found: /tmp/secret.sqlite (set BATATIS_CODEDB)"), "code database not found");
+  assert.equal(publicDetail(503, "code database not found: /tmp/secret.sqlite (set BATATIS_CODEDB)"), "The code database is not available.");
+  assert.equal(publicDetail(502, "Bad Gateway"), "The review service did not respond.");
+  assert.equal(publicDetail(503, "SCC variance form not found"), "SCC variance form not found");
   assert.equal(publicDetail(503, "missing /Users/aamia/form.pdf"), "The engine is missing a file it needs.");
   assert.doesNotMatch(publicDetail(503, "code database not found: /tmp/secret.sqlite"), /\/tmp|BATATIS/);
 });

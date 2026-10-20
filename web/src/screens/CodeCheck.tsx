@@ -160,12 +160,12 @@ export function CodeCheck() {
           return;
         }
         if (err instanceof EngineError && failureKind(err.status, err.detail) === "codedb") {
-          setIdentifyNote("code database not found");
+          setIdentifyNote("The code database is not available.");
           setIdentifyDown(false);
           return;
         }
         if (err instanceof EngineError && failureKind(err.status, err.detail) === "unreachable") {
-          setIdentifyNote(err.detail);
+          setIdentifyNote("The review service did not respond.");
           setIdentifyDown(true);
           return;
         }
@@ -261,7 +261,7 @@ export function CodeCheck() {
                   setSearchNote("");
                   const down = err instanceof EngineError && failureKind(err.status, err.detail) === "unreachable";
                   setSearchDown(down);
-                  setSearchError(err instanceof EngineError ? err.detail : "The engine could not be reached.");
+                  setSearchError(err instanceof EngineError ? err.detail : "The review service did not respond.");
                 });
             }}
           >

@@ -34,14 +34,16 @@ export interface CodeRecord {
 
 type Division = "A" | "B" | "C";
 
-/** status 0 = the engine could not be reached. */
+/** status 0 = the review service did not respond. `technical` keeps the raw HTTP text. */
 export class EngineError extends Error {
   readonly status: number;
   readonly detail: string;
-  constructor(status: number, detail: string) {
+  readonly technical: string;
+  constructor(status: number, detail: string, technical?: string) {
     super(status ? `Engine ${status}: ${detail}` : `Engine unreachable: ${detail}`);
     this.status = status;
     this.detail = detail;
+    this.technical = technical ?? detail;
   }
 }
 
@@ -73,7 +75,7 @@ export function createEngine(base: string) {
       } catch {
         /* keep statusText */
       }
-      throw new EngineError(res.status, publicDetail(res.status, detail));
+      throw new EngineError(res.status, publicDetail(res.status, detail), detail);
     }
     return (await res.json()) as T;
   }
@@ -152,6 +154,15 @@ export function createEngine(base: string) {
     /** GET /cases/{id}/information-request. Items are not_sure decisions. */
     informationRequest: (caseId: string, signal?: AbortSignal) =>
       call<InformationRequest>("GET", `/cases/${enc(caseId)}/information-request`, undefined, signal),
+    /**
+     * POST /cases/{id}/evidence from PR #23. Typed evidence is text: description and
+     * evidence_type, never a file_id. 404 until that route is on this engine.
+     */
+    addEvidence: (
+      caseId: string,
+      body: { provision_id: string; evidence_type: string; description: string; objective?: string; function?: string },
+      signal?: AbortSignal,
+    ) => call<{ evidence: { id: string; status: string } }>("POST", `/cases/${enc(caseId)}/evidence`, body, signal),
     /** POST /cases/{id}/identify/confirm. Writes provisions after a code-database check. */
     confirmIdentify: (caseId: string, provisions: string[], signal?: AbortSignal) =>
       call<Case>("POST", `/cases/${enc(caseId)}/identify/confirm`, { provisions }, signal),
@@ -330,7 +341,7 @@ async function exportPdf(base: string, caseId: string, draft: boolean, signal?: 
       /* keep statusText */
     }
     if (res.status === 409) throw new ExportBlockedError(reasons, detail);
-    throw new EngineError(res.status, publicDetail(res.status, detail));
+    throw new EngineError(res.status, publicDetail(res.status, detail), detail);
   }
   const blob = await res.blob();
   const match = /filename="([^"]+)"/.exec(res.headers.get("Content-Disposition") ?? "");
@@ -471,7 +482,7 @@ async function rankCase(
 
 export function failureText(e: unknown): string {
   if (e instanceof EngineError) return e.detail || e.message;
-  return "The engine could not be reached.";
+  return "The review service did not respond.";
 }
 
 export type Engine = ReturnType<typeof createEngine>;

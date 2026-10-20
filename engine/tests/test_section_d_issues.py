@@ -167,7 +167,11 @@ def test_status_addressed_by_applicant_item_and_needs_professional_without_one()
     case.facts += [fact(f'evidence.{bare.id}.file_ref', file.ref, source=file),
                    fact(f'evidence.{bare.id}.responsible_party', 'Named applicant professional')]
     supplied = section_d_issues(case, codes)[0]
-    assert supplied.status == 'addressed' and supplied.practice_of_engineering.value is True
+    assert supplied.status == 'needs_professional' and supplied.practice_of_engineering.value is True
+    case.facts += [fact('professional.role', 'professional engineer'),
+                   fact('professional.registration_number', 'APEGA-1000')]
+    cleared = section_d_issues(case, codes)[0]
+    assert cleared.status == 'addressed' and cleared.practice_of_engineering.value is True
     house = section_d_issues(Case(provisions=[BENCHMARK], facts=_house_facts()), codes)[0]
     assert house.practice_of_engineering.value is False and house.status == 'open'
     assert house.practice_of_engineering.citation in codes.issued

@@ -14,7 +14,7 @@ from pydantic import BaseModel, ConfigDict, model_validator
 from .codes import Codes
 from .models import Case
 from .process_fields import ProcessField, alternative_path, confirmed_value, process_fields
-from .professional import ProfessionalFacts, ProfessionalReason, ProfessionalResult, professional_involvement
+from .professional import ProfessionalFacts, ProfessionalReason, ProfessionalResult, professional_confirmed, professional_involvement
 from .section_d import (
     ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, EvidencePlanItem, EvidenceType, section_d_plan,
 )
@@ -211,9 +211,13 @@ def _at_stake(item: EvidencePlanItem) -> str:
             'designer which performance benchmark applies before selecting evidence.')
 
 
-def _status(flag: PracticeOfEngineering, attachments) -> IssueStatus:
-    named = any((doc.responsible_party or '').strip() or doc.professional_seal for doc in attachments)
-    if flag.value is True and not named:
+def _status(flag: PracticeOfEngineering, attachments, case: Case) -> IssueStatus:
+    """A document that names a person or a seal does not clear needs_professional.
+
+    Only an applicant-confirmed engineer or architect, with a seal or registration
+    number, does. Prescriptive-route answers are not that confirmation.
+    """
+    if flag.value is True and not professional_confirmed(case):
         return 'needs_professional'
     if attachments and flag.value != 'unknown':
         return 'addressed'
@@ -244,7 +248,7 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
                 'Confirm the Division B benchmark provisions before recommending performance evidence.'),
             at_stake='No confirmed benchmark is on the case. Recommend evidence only after a provision resolves in the code database.',
             recommended_types=recommended_fallback, practice_of_engineering=flag,
-            empty_process_fields=empty, status=_status(flag, ()))]
+            empty_process_fields=empty, status=_status(flag, (), case))]
 
     known: list[str] = []
     unresolved: list[SectionDIssue] = []
@@ -256,7 +260,7 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
                 question='This entered reference was not found in the code database. Ask which Division B provision is the benchmark. No replacement article is suggested.',
                 at_stake='Recommend evidence only after the benchmark resolves in the code database.',
                 recommended_types=recommended_fallback, practice_of_engineering=flag,
-                empty_process_fields=empty, status=_status(flag, ())))
+                empty_process_fields=empty, status=_status(flag, (), case)))
         else:
             known.append(provision_id)
 
@@ -275,7 +279,7 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
                 objective=None, function=None,
                 at_stake='Recommend evidence only after the benchmark resolves in the code database.',
                 recommended_types=item.recommended_types, practice_of_engineering=flag,
-                empty_process_fields=empty, status=_status(flag, item.attachments)))
+                empty_process_fields=empty, status=_status(flag, item.attachments, case)))
             continue
         question = None
         if not (item.objective and item.function):
@@ -286,5 +290,5 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
             question=question, objective=item.objective, function=item.function,
             at_stake=_at_stake(item),
             recommended_types=item.recommended_types, practice_of_engineering=flag,
-            empty_process_fields=empty, status=_status(flag, item.attachments)))
+            empty_process_fields=empty, status=_status(flag, item.attachments, case)))
     return issues
