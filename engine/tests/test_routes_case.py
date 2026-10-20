@@ -37,7 +37,9 @@ def test_routes_are_mounted_and_rebuild_only_confirmed_rows(context):
 def test_professional_process_and_gaps_use_latest_persisted_facts(context):
     client, store, codes = context
     case = store.put(complete_case())
-    assert client.get(f'/cases/{case.id}/professional').json()['required'] == 'no'
+    professional = client.get(f'/cases/{case.id}/professional').json()
+    assert professional['involvement'] == 'professional_involved'
+    assert professional['required'] != 'no'
     assert client.get(f'/cases/{case.id}/gaps').json() == []
     fields = client.get(f'/cases/{case.id}/process-fields').json()
     assert len(fields) == 6 and all(f['answer']['author'] == 'applicant' for f in fields)

@@ -24,9 +24,10 @@ def complete_case(provisions=None):
         maintenance_operation='Synthetic applicant operation and maintenance conditions.',
         qualifications='Synthetic named test author and their stated test qualifications.',
         occupancy='single_family', part4_design=False, preserved_wood_foundation_part4=False,
-        roof_trusses=False, prescriptive_route_confirmed=True, ahj_requires_professional=False,
-        special_safety_concerns=False, professional_judgement_required=False, professional_scope_resolved=True,
-        fire_suppression=False, fire_alarm=False)
+        roof_trusses=False, prescriptive_route_confirmed=False, ahj_requires_professional=False,
+        special_safety_concerns=False, professional_judgement_required=True, professional_scope_resolved=True,
+        fire_suppression=False, fire_alarm=False,
+        **{'professional.role': 'R. Singh, P.Eng.', 'professional.registration_number': 'A00000'})
     case = Case(title='Synthetic administrative fixture', jurisdiction=Jurisdiction(id='alberta-other', name='Synthetic AHJ'),
         facts=[fact(k, v) for k, v in values.items()], provisions=provisions, section_c=section_c_rows(provisions, codes))
     file = Source(type='file', ref='synthetic-evidence-fixture.txt', quote='Synthetic evidence metadata; no test was performed.')

@@ -63,6 +63,42 @@ def _edition_crosswalks() -> tuple[dict, ...]:
                  and 'successor' in a.get('status', ''))
 
 
+def professional_involvement_gaps(case: Case, codes: Codes, process, *,
+                                  professional: ProfessionalResult | None = None,
+                                  documents: list[SupportingDocument] | None = None) -> list[Gap]:
+    """Administrative professional gap. An alternative case does not clear by a prescriptive Yes."""
+    gaps: list[Gap] = []
+
+    def add(rule, section, field, missing, fix_hint, citation=None, severity='blocking'):
+        gaps.append(Gap(id=f'{rule}:{field}', severity=severity, section=section, field=field,
+                        message=f'Your application appears to be missing {missing}', fix_hint=fix_hint, citation=citation))
+
+    professional = professional or professional_involvement(case, codes)
+    required = professional.required == 'yes' or confirmed_value(case, 'engineering_required') in ('yes', True)
+    if required:
+        citation = next((r.citation for r in professional.reasons if r.required == 'yes'), codes.citation('2.4.1.1.(3)', 'C'))
+        if _missing(confirmed_value(case, 'professional_name', 'responsible_professional', 'professional.name')):
+            add('D12', 'D', 'responsible_professional', 'a named registered professional required for this work.',
+                'Ask who takes responsibility, their discipline and scope, and obtain their own authenticated work.', citation)
+        qualifications = next((item.answer for item in process if item.id == 'qualifications'), None)
+        if qualifications is None and _missing(confirmed_value(case, 'professional.qualifications', 'professional_qualifications')):
+            add('D12', 'D', 'professional_qualifications', 'the qualifications of the responsible professional.',
+                'Request their qualifications, experience and background; do not draft them.', codes.citation('2.3.1.1.(4)', 'C'))
+        docs = supporting_documents(case) if documents is None else documents
+        if (_missing(confirmed_value(case, 'professional_seal', 'professional.seal'))
+                and not any(doc.professional_seal and doc.professional_seal.strip() for doc in docs)):
+            add('D12', 'D', 'professional_authentication', 'authentication information for the required professional work.',
+                'Request the responsible professional’s authenticated document; authenticity and scope need human review.',
+                codes.citation('2.4.1.1.(5)', 'C'))
+    elif professional.involvement == 'professional_involved':
+        pass
+    elif professional.required == 'depends' or professional.involvement == 'unresolved':
+        named = ', '.join(professional.missing_facts) or 'the unresolved professional-involvement facts'
+        add('professional', 'D', 'professional_requirement', f'{named} to resolve professional involvement.',
+            ' '.join(professional.questions), next((r.citation for r in professional.reasons if r.required == 'depends'), None))
+    return gaps
+
+
 def check_completeness(case: Case, codes: Codes, *,
                        professional: ProfessionalResult | None = None,
                        documents: list[SupportingDocument] | None = None) -> list[Gap]:
@@ -195,26 +231,7 @@ def check_completeness(case: Case, codes: Codes, *,
             add('D08', 'C', field + '.intent_label', 'the explanatory label for the national 2020 intent statement; it is not Alberta law.',
                 f'Use the label: {INTENT_LABEL}. Keep the Alberta code benchmark separate.')
 
-    professional = professional or professional_involvement(case, codes)
-    required = professional.required == 'yes' or confirmed_value(case, 'engineering_required') in ('yes', True)
-    if required:
-        citation = next((r.citation for r in professional.reasons if r.required == 'yes'), codes.citation('2.4.1.1.(3)', 'C'))
-        if _missing(confirmed_value(case, 'professional_name', 'responsible_professional', 'professional.name')):
-            add('D12', 'D', 'responsible_professional', 'a named registered professional required for this work.',
-                'Ask who takes responsibility, their discipline and scope, and obtain their own authenticated work.', citation)
-        qualifications = next((f.answer for f in process if f.id == 'qualifications'), None)
-        if qualifications is None and _missing(confirmed_value(case, 'professional.qualifications', 'professional_qualifications')):
-            add('D12', 'D', 'professional_qualifications', 'the qualifications of the responsible professional.',
-                'Request their qualifications, experience and background; do not draft them.', codes.citation('2.3.1.1.(4)', 'C'))
-        docs = supporting_documents(case) if documents is None else documents
-        if (_missing(confirmed_value(case, 'professional_seal', 'professional.seal'))
-                and not any(d.professional_seal and d.professional_seal.strip() for d in docs)):
-            add('D12', 'D', 'professional_authentication', 'authentication information for the required professional work.',
-                'Request the responsible professional’s authenticated document; authenticity and scope need human review.',
-                codes.citation('2.4.1.1.(5)', 'C'))
-    elif professional.required == 'depends':
-        add('professional', 'D', 'professional_requirement', 'facts needed to resolve professional involvement.',
-            ' '.join(professional.questions), next((r.citation for r in professional.reasons if r.required == 'depends'), None))
+    gaps.extend(professional_involvement_gaps(case, codes, process, professional=professional, documents=documents))
 
     docs = supporting_documents(case) if documents is None else documents
     for doc in docs:

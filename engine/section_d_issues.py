@@ -9,7 +9,6 @@ discipline, seal, or registration number.
 from __future__ import annotations
 
 import logging
-import re
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, model_validator
@@ -18,7 +17,9 @@ from .codes import Codes
 from .human_review import HumanReview, human_reviews
 from .models import Case
 from .process_fields import ProcessField, alternative_path, confirmed_value, latest_fact, process_fields
-from .professional import ProfessionalFacts, ProfessionalReason, ProfessionalResult, professional_involvement
+from .professional import (
+    ProfessionalFacts, ProfessionalReason, ProfessionalResult, professional_confirmed, professional_involvement,
+)
 from .section_d import (
     ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, EvidencePlanItem, EvidenceType, section_d_plan,
 )
@@ -66,19 +67,6 @@ PROFESSIONAL_REQUEST = (
     'and APEGA or AAA registration number. A seal the applicant confirms can stand in for the number. '
     'This screen does not fill the name, the discipline, or the number.')
 _APPLICANT_SOURCES = frozenset({'user_text', 'user_click'})
-_ROLE_FIELDS = (
-    'professional.role', 'professional.discipline', 'registered_professional.role',
-    'registered_professional.discipline',
-)
-_SEAL_FIELDS = ('professional.seal', 'professional_seal', 'registered_professional.seal')
-_REGISTRATION_FIELDS = (
-    'professional.registration_number', 'professional.registration',
-    'registered_professional.registration_number', 'apega_number', 'aaa_number',
-)
-# Commercial roles are not a registered professional, even beside the word engineer.
-_REJECT_ROLE = frozenset({
-    'sales', 'rep', 'supplier', 'manufacturer', 'salesperson', 'vendor',
-})
 _PROCESS_RULE_IDS = {
     'rationale': ('C', '2.3.1.1.(2)(a)'),
     'maintenance_operation': ('C', '2.3.1.1.(2)(b)'),
@@ -201,24 +189,6 @@ def _applicant_confirmed(case: Case, *fields: str) -> str | None:
     if not isinstance(fact.value, str) or not fact.value.strip():
         return None
     return fact.value.strip()
-
-
-def _role_confirmed(value: str) -> bool:
-    """Case-insensitive. Punctuation is removed. Engineer and architect variants pass; commercial roles do not."""
-    tokens = re.sub(r'[^a-z0-9]+', ' ', value.casefold()).split()
-    if any(token in _REJECT_ROLE for token in tokens):
-        return False
-    if 'peng' in tokens or {'p', 'eng'} <= set(tokens):
-        return True
-    return 'engineer' in tokens or 'architect' in tokens
-
-
-def professional_confirmed(case: Case) -> bool:
-    """Engineer or architect, plus a seal or registration number, confirmed by the applicant."""
-    role = _applicant_confirmed(case, *_ROLE_FIELDS)
-    if role is None or not _role_confirmed(role):
-        return False
-    return _applicant_confirmed(case, *_SEAL_FIELDS) is not None or _applicant_confirmed(case, *_REGISTRATION_FIELDS) is not None
 
 
 def _pick(result: ProfessionalResult, required: str) -> ProfessionalReason | None:

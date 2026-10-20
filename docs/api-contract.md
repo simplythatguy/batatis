@@ -17,7 +17,9 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `POST /section-c` | Body `{ "provisions": ["…"] }`. `SectionCRow` list. `404` when a provision is missing from codedb. `400` on an invalid id. |
 | `POST /cases/{case_id}/section-d` | Body optional `{ "provisions": ["…"] }`. `{ "items", "notices" }`. Writes the case. |
 | `GET /cases/{case_id}/section-d/issues` | Issue list below. Read-only. Does not write the case. |
-| `GET /cases/{case_id}/professional` | `required` and `general_required`: `yes`, `no`, or `depends`. Also `reasons`, `questions`, `scope_note`. |
+| `GET /cases/{case_id}/professional` | `required` and `general_required`: `yes`, `no`, or `depends`. `involvement`: `professional_involved`, `not_required`, or `unresolved`. Also `reasons`, `questions`, `missing_facts`, `scope_note`. |
+| `POST /cases/{case_id}/evidence` | `201` `EvidenceItem`. Body: `description` (required), optional `responsible_party`, `date`, `evidence_type`. Appends a new item with a server id. A second save does not replace the first. |
+| `DELETE /cases/{case_id}/evidence/{evidence_id}` | `204`. Removes that item and its `evidence.<id>.*` facts. `404` detail `evidence not found`. |
 | `GET /ccmc/search` | Query `q` (1–200 characters) and `limit` (1–50, default 20). `422` on a rejected query. `503` when the registry is unavailable; that detail is the registry error text. |
 | `GET /cases/{case_id}/process-fields` | Process-field list. Empty when the pathway is an acceptable solution. |
 | `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` when the blank form file is missing; that detail is the form error text. `500` on other export failures. |
@@ -28,7 +30,7 @@ A fact's `source.type` is `code`, `file`, `user_text`, `drawing`, or `user_click
 
 Gap `severity` is `blocking` or `warning`.
 
-The fixed 404 detail strings are `case not found` and `provision not found`.
+The fixed 404 detail strings are `case not found`, `provision not found`, and `evidence not found`.
 
 ### Section D plan item
 
@@ -55,6 +57,8 @@ The fixed 404 detail strings are `case not found` and `provision not found`.
 ### Practice-of-engineering on `GET /professional`
 
 `required` and `general_required` are `yes`, `no`, or `depends`. `depends` means a deciding fact is missing. That route does not return `true`, `false`, or `"unknown"`.
+
+`involvement` is `professional_involved`, `not_required`, or `unresolved`. An alternative-solution case never counts `prescriptive_route_confirmed` as yes. Reserved professional judgement yes, plus an applicant-confirmed engineer or architect (normalised role match, for example `R. Singh, P.Eng.`, and a registration or seal number), resolves `involvement` to `professional_involved`. That resolution is not `not_required`. While `involvement` is `unresolved`, `missing_facts` names the facts still needed, and the completeness gap `professional:professional_requirement` repeats those names.
 
 The issues route maps the same screen: `yes` → `true`, `no` → `false`, `depends` → `"unknown"`. `"unknown"` requires a question. `depends` and `"unknown"` are not the same token.
 

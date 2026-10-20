@@ -5,13 +5,14 @@ looked up in the adopted second printing. Missing facts cannot produce an overal
 """
 from __future__ import annotations
 
+import re
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from .codes import Codes
 from .models import Case
-from .process_fields import confirmed_value
+from .process_fields import alternative_path, confirmed_value, latest_fact
 
 Requirement = Literal['yes', 'no', 'depends']
 Occupancy = Literal['single_family', 'multi_family', 'hotel', 'assembly', 'care', 'treatment',
@@ -63,11 +64,69 @@ class ProfessionalReason(BaseModel):
     citation: str
 
 
+Involvement = Literal['professional_involved', 'not_required', 'unresolved']
+
+# Applicant-confirmed role. A name or seal copied off a document does not count.
+_APPLICANT_SOURCES = frozenset({'user_text', 'user_click'})
+_ROLE_FIELDS = (
+    'professional.role', 'professional.discipline', 'registered_professional.role',
+    'registered_professional.discipline', 'professional_name', 'responsible_professional', 'professional.name',
+)
+_SEAL_FIELDS = ('professional.seal', 'professional_seal', 'registered_professional.seal')
+_REGISTRATION_FIELDS = (
+    'professional.registration_number', 'professional.registration',
+    'registered_professional.registration_number', 'apega_number', 'aaa_number',
+)
+_REJECT_ROLE = frozenset({
+    'sales', 'rep', 'supplier', 'manufacturer', 'salesperson', 'vendor',
+})
+_DEPENDS_FIELDS = {
+    'special_safety': ('ahj_requires_professional', 'special_safety_concerns'),
+    'part4_unknown': ('part4_design',),
+    'foundation_unknown': ('preserved_wood_foundation_part4',),
+    'trusses_unknown': ('roof_trusses',),
+    'suppression_unknown': ('fire_suppression',),
+    'fire_alarm_unknown': ('fire_alarm',),
+    'professional_law': ('professional_scope_resolved',),
+}
+
+
+def _applicant_text(case: Case, *fields: str) -> str | None:
+    fact = latest_fact(case, *fields)
+    if fact is None or fact.status != 'confirmed' or fact.kind == 'proposed':
+        return None
+    if fact.source.type not in _APPLICANT_SOURCES:
+        return None
+    if not isinstance(fact.value, str) or not fact.value.strip():
+        return None
+    return fact.value.strip()
+
+
+def role_confirmed(value: str) -> bool:
+    """Case-insensitive. Punctuation is removed. Engineer and architect variants pass; commercial roles do not."""
+    tokens = re.sub(r'[^a-z0-9]+', ' ', value.casefold()).split()
+    if any(token in _REJECT_ROLE for token in tokens):
+        return False
+    if 'peng' in tokens or {'p', 'eng'} <= set(tokens):
+        return True
+    return 'engineer' in tokens or 'architect' in tokens
+
+
+def professional_confirmed(case: Case) -> bool:
+    """Engineer or architect, plus a seal or registration number, confirmed by the applicant."""
+    role = _applicant_text(case, *_ROLE_FIELDS)
+    if role is None or not role_confirmed(role):
+        return False
+    return _applicant_text(case, *_SEAL_FIELDS) is not None or _applicant_text(case, *_REGISTRATION_FIELDS) is not None
+
+
 class ProfessionalResult(BaseModel):
     required: Requirement
     general_required: Requirement
     reasons: list[ProfessionalReason]
     questions: list[str]
+    involvement: Involvement = 'unresolved'
+    missing_facts: tuple[str, ...] = ()
     scope_note: str = ('This screens documented professional duties. The responsible professional, regulator '
                        'and authority resolve scope, competence and local conditions.')
 
@@ -85,11 +144,50 @@ def _listed(provisions: tuple[str, ...], prefix: str) -> bool:
     return any(provision.startswith(prefix) for provision in provisions)
 
 
+def _missing_facts(facts: ProfessionalFacts, reasons: list[ProfessionalReason], *, confirmed: bool) -> tuple[str, ...]:
+    """Fact names still needed. An alternative case is not asked to set the prescriptive route to yes."""
+    names: list[str] = []
+    for reason in reasons:
+        if reason.required != 'depends':
+            continue
+        if reason.code == 'design_scope':
+            if facts.professional_judgement_required is not True:
+                names.append('professional_judgement_required')
+            if not confirmed:
+                names.append('professional.role')
+                names.append('professional.registration_number or professional.seal')
+            continue
+        if reason.code == 'general_unresolved':
+            if facts.occupancy is None:
+                names.append('occupancy')
+            elif facts.occupancy == 'multi_family' and facts.principal_dwelling_units is None:
+                names.append('principal_dwelling_units')
+            elif facts.occupancy in _AREA_LIMITS:
+                if facts.storeys is None:
+                    names.append('storeys')
+                if facts.building_area_m2 is None:
+                    names.append('building_area_m2')
+            elif facts.occupancy == 'farm' and facts.farm_public_use is None:
+                names.append('farm_public_use')
+            else:
+                names.append('occupancy')
+            continue
+        for name in _DEPENDS_FIELDS.get(reason.code, ()):
+            if getattr(facts, name) is None:
+                names.append(name)
+    return tuple(dict.fromkeys(names))
+
+
 def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
                              provisions: tuple[str, ...] = ()) -> ProfessionalResult:
+    case = facts if isinstance(facts, Case) else None
     if isinstance(facts, Case):
         provisions = tuple(facts.provisions)
-        facts = ProfessionalFacts.from_case(facts)
+        loaded = ProfessionalFacts.from_case(facts)
+        # An alternative-solution case is never on the prescriptive route. A Yes answer is not used.
+        if alternative_path(facts) and loaded.prescriptive_route_confirmed is True:
+            loaded = loaded.model_copy(update={'prescriptive_route_confirmed': False})
+        facts = loaded
     reasons: list[ProfessionalReason] = []
     questions: list[str] = []
 
@@ -198,5 +296,19 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
 
     required: Requirement = 'yes' if any(r.required == 'yes' for r in reasons) else (
         'depends' if any(r.required == 'depends' for r in reasons) else 'no')
+    confirmed = professional_confirmed(case) if case is not None else False
+    alternative = case is not None and alternative_path(case)
+    other_depends = [reason for reason in reasons if reason.required == 'depends' and reason.code != 'design_scope']
+    if (alternative and facts.professional_judgement_required is True and confirmed and not other_depends):
+        involvement: Involvement = 'professional_involved'
+        missing: tuple[str, ...] = ()
+    elif required == 'no' and not alternative:
+        involvement = 'not_required'
+        missing = ()
+    else:
+        # An alternative case does not become not_required by answering the prescriptive route as yes.
+        involvement = 'unresolved'
+        missing = _missing_facts(facts, reasons, confirmed=confirmed)
     return ProfessionalResult(required=required, general_required=general, reasons=reasons,
-                              questions=list(dict.fromkeys(questions)))
+                              questions=list(dict.fromkeys(questions)), involvement=involvement,
+                              missing_facts=missing)
