@@ -21,6 +21,8 @@ limit check is reported separately and is no longer blind for missing-fact cases
 
 Gold `depends` matches system `unknown`. Under-flag is gold yes and system no. A case is skipped
 when codedb (or the rule lookup standing in for it) cannot resolve a provision the screen asks for.
+
+(on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction)
 """
 from __future__ import annotations
 

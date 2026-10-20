@@ -39,6 +39,6 @@ User-testing protocol: [`docs/user-testing/README.md`](./docs/user-testing/READM
 
 ## Status
 
-Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind).
+Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind). (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction)
 
 Clone-ready **agent environment** (rules, skills, evals, docs). Application product code is not the focus of this PR.

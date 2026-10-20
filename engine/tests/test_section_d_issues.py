@@ -327,8 +327,15 @@ def test_eval_script_prints_in_sample_wilson_table(capsys):
     assert shipped in expected
     assert f'shipped {shipped}:' in expected
     assert out.startswith(expected + '\n')
-    for path in ('docs/api-contract.md', 'README.md'):
-        assert expected in Path(path).read_text()
+    disclosure = (
+        '(on text-only cases it answers only yes or ask, never no, '
+        'so 0 under-flags holds by construction)'
+    )
+    for path in ('docs/api-contract.md', 'README.md', 'engine/section_d_flag_eval.py'):
+        text = Path(path).read_text()
+        if path != 'engine/section_d_flag_eval.py':
+            assert expected in text
+        assert disclosure in text
     assert 'gold: model-checked' in out
     assert 'split: dev (in-sample; pending out-of-sample confirmation)' in out
     assert 'rules_plus_unknown on this dev table is in-sample and pending out-of-sample confirmation' in out
