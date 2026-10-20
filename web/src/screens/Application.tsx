@@ -1,10 +1,10 @@
 import { useRef, useState } from "react";
 import { EngineError, ExportBlockedError, engine } from "../api/client";
 import { DetailFields, ProcessFields } from "../case-parts";
+import { MissingItems, RecordHeading } from "../completenessView";
 import { DraftNote, GapStrip, PanelHeader } from "../components";
 import { EXAMPLES } from "../examples";
 import { factLabel } from "../model";
-import { SECTION_ORDER } from "../planted";
 import type { Route } from "../router";
 import { useCase } from "../store";
 import type { Gap } from "../types";
@@ -17,30 +17,10 @@ const TABS = [
   { id: "D", label: "Section D" },
 ] as const;
 
-const GROUP_LABEL: Record<string, string> = {
-  A: "Section A · Applicant",
-  B: "Section B · Project",
-  C: "Section C · Code references",
-  D: "Section D · Supporting information",
-  process: "Alternative path",
-  facts: "Facts and questions",
-};
-
 type Stage = "idle" | "checking" | "preparing" | "blocked" | "error" | "ready";
 
-function groupOf(gap: Gap, section: string | undefined): string {
-  if (section === "A" || section === "B" || section === "C" || section === "D" || section === "process") return section;
-  const href = gap.href;
-  if (href.includes("tab=A")) return "A";
-  if (href.includes("tab=B")) return "B";
-  if (href.includes("section-c") || href.includes("code-check") || href.includes("provisions")) return "C";
-  if (href.includes("tab=D")) return "D";
-  if (href.includes("tab=alt")) return "process";
-  return "facts";
-}
-
 export function Application({ route }: { route: Route }) {
-  const { gaps, saveDraft, c, gapsSource, syncOk, reviewDetail, engineGaps, readSync } = useCase();
+  const { gaps, saveDraft, c, gapsSource, syncOk, reviewDetail, engineGaps, readSync, readGaps, setCompletenessRecord, completenessRecord } = useCase();
   const tab = TABS.find((t) => t.id === route.params.get("tab"))?.id ?? "A";
   const dialog = useRef<HTMLDialogElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -59,12 +39,7 @@ export function Application({ route }: { route: Route }) {
   const officialReady = !c.exampleId && syncOk && gapsSource === "engine" && blocking.length === 0;
   const countFor = (t: string) => blocking.filter((g) => g.href.includes(`tab=${t}`)).length;
 
-  const engineSection = new Map(engineGaps.map((gap) => [gap.id, gap.section]));
-  const groups = new Map<string, Gap[]>();
-  for (const gap of gaps) {
-    const key = groupOf(gap, engineSection.get(gap.id));
-    groups.set(key, [...(groups.get(key) ?? []), gap]);
-  }
+  const sectionById = new Map(engineGaps.map((gap) => [gap.id, gap.section]));
 
   function forgetFile() {
     setFile((current) => {
@@ -84,26 +59,48 @@ export function Application({ route }: { route: Route }) {
     void saveDraft().then((id) => {
       if (!dialog.current?.open) return;
       const sync = readSync();
+      const blockers = readGaps().filter((gap) => gap.severity === "blocking");
       if (!id || !sync.reviewed) {
+        const note = "Online review unavailable.";
         setTech(sync.detail);
         setStage("error");
-        setStatusText("Online review unavailable.");
+        setStatusText(note);
+        setCompletenessRecord({ label: "Online review unavailable", reasons: [], note });
+        return;
+      }
+      if (c.exampleId) {
+        const note = "Example PDFs are not yet labelled. Download the example text record instead.";
+        setStage("blocked");
+        setStatusText(note);
+        setCompletenessRecord({ label: "Export blocked", reasons: [note], note });
+        return;
+      }
+      if (blockers.length) {
+        const note = "Some required information is missing or unconfirmed. The reasons are the missing items in this record.";
+        setStage("blocked");
+        setStatusText("The PDF was blocked. Review the current missing items below.");
+        setCompletenessRecord({ label: "Export blocked", reasons: [], note });
         return;
       }
       setStage("idle");
-      setStatusText("Review missing or unconfirmed information before downloading the application PDF.");
+      setStatusText("No blocking administrative items found. Review any open questions before downloading.");
+      setCompletenessRecord(null);
     });
   }
 
   async function prepare(draft: boolean) {
     if (c.exampleId) {
+      const note = "Example PDFs are not yet labelled. Download the example text record instead.";
       setStage("blocked");
-      setStatusText("Example PDFs are not yet labelled. Download the example text record instead.");
+      setStatusText(note);
+      setCompletenessRecord({ label: "Export blocked", reasons: [note], note });
       return;
     }
     if (!draft && !officialReady) {
+      const note = "Some required information is missing or unconfirmed. The reasons are the missing items in this record.";
       setStage("blocked");
-      setStatusText("Some required information is missing or unconfirmed.");
+      setStatusText(note);
+      setCompletenessRecord({ label: "Export blocked", reasons: [], note });
       return;
     }
     const ctl = new AbortController();
@@ -129,6 +126,10 @@ export function Application({ route }: { route: Route }) {
       if (ctl.signal.aborted) return;
       const url = URL.createObjectURL(got.blob);
       setFile({ url, name: got.filename, draft });
+      if (draft) {
+        const note = "Your draft PDF is ready. This draft may have missing or unconfirmed information.";
+        setCompletenessRecord({ label: "Draft", reasons: [], note });
+      }
       const a = Object.assign(document.createElement("a"), { href: url, download: got.filename });
       document.body.append(a);
       a.click();
@@ -138,21 +139,23 @@ export function Application({ route }: { route: Route }) {
     } catch (e) {
       if (ctl.signal.aborted) return;
       if (e instanceof ExportBlockedError) {
+        const note = "The PDF was blocked. Review the current missing items below. The full response is in Technical detail.";
         setReasons(e.reasons);
         setTech(e.reasons.join("\n"));
         setStage("blocked");
-        setStatusText("The PDF was blocked. Review the current missing items below. The full response is in Technical detail.");
+        setStatusText(note);
+        setCompletenessRecord({ label: "Export blocked", reasons: e.reasons, note });
         return;
       }
       const detail = e instanceof EngineError ? e.detail : "";
       const missingForm = e instanceof EngineError && (e.status === 503 || /missing a file/i.test(detail));
+      const note = missingForm
+        ? "The application PDF form is unavailable. Download a text record or try again later."
+        : "The PDF could not be prepared.";
       setTech(detail);
       setStage("error");
-      setStatusText(
-        missingForm
-          ? "The application PDF form is unavailable. Download a text record or try again later."
-          : "The PDF could not be prepared.",
-      );
+      setStatusText(note);
+      setCompletenessRecord({ label: "Export blocked", reasons: [], note });
     }
   }
 
@@ -283,9 +286,9 @@ export function Application({ route }: { route: Route }) {
             {blank && stage !== "ready" && <p>Start with the applicant and project details.</p>}
             {c.exampleId && stage !== "ready" && <p>Example PDFs are not yet labelled. Download the example text record instead.</p>}
             {busy && <progress aria-label={statusText} />}
+            {(stage === "blocked" || stage === "ready" || stage === "error") && <RecordHeading record={completenessRecord} />}
             {stage === "blocked" && (
               <>
-                <h3 className="sub-title">Some required information is missing or unconfirmed.</h3>
                 <p>
                   {c.exampleId
                     ? "Review the items below, or download the example text record to continue working."
@@ -311,35 +314,7 @@ export function Application({ route }: { route: Route }) {
                   : "This PDF is for administrative review. It does not confirm that the design complies or is safe."}
               </p>
             )}
-            {stage !== "ready" && gaps.length > 0 && (
-              <div className="stack">
-                <h3 className="sub-title">Current missing items</h3>
-                {[...SECTION_ORDER, "facts"].map((key) => {
-                  const items = groups.get(key);
-                  if (!items?.length) return null;
-                  return (
-                    <section key={key}>
-                      <h4 className="sub-title">{GROUP_LABEL[key]}</h4>
-                      <ul className="plain-list">
-                        {items.map((gap) => (
-                          <li key={gap.id}>
-                            <a
-                              href={gap.href}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                follow(gap);
-                              }}
-                            >
-                              {gap.label}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
-                  );
-                })}
-              </div>
-            )}
+            {stage !== "ready" && <MissingItems gaps={gaps} sectionById={sectionById} onFollow={follow} />}
             <p>This is an administrative completeness check. It does not decide whether the design complies or is safe.</p>
             {(tech || reasons.length > 0) && (
               <details>

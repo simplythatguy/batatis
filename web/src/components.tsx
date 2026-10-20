@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { EXAMPLES } from "./examples";
+import { roleNote } from "./humanReview";
 import { useCase } from "./store";
 import type { FactKind, Gap } from "./types";
 
@@ -206,19 +207,17 @@ export function DraftNote() {
   );
 }
 
-/** Persistent example provenance. Not dismissible. Officer always names the sample package. */
+/** Persistent example provenance. Not dismissible. Shown only while an example is loaded. */
 export function ExampleBanner({ officer = false }: { officer?: boolean }) {
   const { c, resetToWho } = useCase();
-  const label = officer
-    ? "Officer review · Hempcrete garden suite"
-    : (EXAMPLES.find((ex) => ex.id === c.exampleId)?.label ?? "Loaded example");
+  const label = EXAMPLES.find((ex) => ex.id === c.exampleId)?.label ?? "Loaded example";
   return (
     <aside className="example-banner" role="note" aria-label="Example data">
       <div className="example-banner-copy">
         <p className="example-banner-title">EXAMPLE · {label}</p>
         <p className="example-banner-body">
           {officer
-            ? "This review uses a sample package. Your application is not being reviewed here."
+            ? "This officer review is of the loaded example."
             : "You are viewing a sample application. Starting your own application clears this example."}
         </p>
       </div>
@@ -232,6 +231,17 @@ export function ExampleBanner({ officer = false }: { officer?: boolean }) {
         </button>
       )}
     </aside>
+  );
+}
+
+/** When this role needs an engineer, and what the officer decides. */
+export function RoleNote() {
+  const { c } = useCase();
+  const note = roleNote(c.applicantType);
+  return (
+    <p className="field-note">
+      {note.engineer} {note.officer}
+    </p>
   );
 }
 

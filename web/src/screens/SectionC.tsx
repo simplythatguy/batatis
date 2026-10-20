@@ -121,10 +121,15 @@ function ProvisionSearch() {
                 part: a.part || Number(String(a.provision).split(".")[0]) || 0,
                 quote: a.quote,
                 reason: a.reason,
-                committed: a.committed,
               })),
             });
-            setNote("Provisions were suggested from your description. Confirm each one before you submit.");
+            const returned = (ranked.open_questions ?? [])
+              .filter((q) => q.field && q.text)
+              .map((q) => ({ field: q.field ?? "", text: q.text ?? "", why: q.why }));
+            if (returned.length || ranked.open_questions) {
+              dispatch({ type: "noteIdentifyQuestions", questions: returned });
+            }
+            setNote("Provisions were suggested from your description. Choose Yes before they count. Nothing is accepted until you do.");
             return;
           }
         } catch (e) {
@@ -221,7 +226,7 @@ export function SectionC() {
   const wanted = useMemo(
     () =>
       c.candidates
-        .filter((a) => /^\d/.test(a.provision) && (a.answer === "yes" || a.suggestion === "search" || a.suggestion === "identify"))
+        .filter((a) => /^\d/.test(a.provision) && (a.answer === "yes" || (a.suggestion === "search" && a.answer === null)))
         .map((a) => ({ candidateId: a.id, provision: a.provision })),
     [c.candidates],
   );
@@ -427,7 +432,8 @@ export function SectionC() {
       </div>
       <div className="footer-bar">
         <span className="status-note" role="status">
-          {open.length ? `${open.length} row${open.length > 1 ? "s" : ""} wait for your answer in Code check` : ""}
+          {open.length ? `${open.length} row${open.length > 1 ? "s" : ""} wait for your answer in Code check. ` : ""}
+          Not sure does not block Continue.
         </span>
         <a className="btn btn-ghost" href="#/code-check">
           Back

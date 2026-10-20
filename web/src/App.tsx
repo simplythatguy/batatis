@@ -122,9 +122,7 @@ export function App() {
         </div>
       </aside>
       <main className="main-panel">
-        {phase === "case" && (route.path === "/officer" || c.exampleId) && (
-          <ExampleBanner officer={route.path === "/officer"} />
-        )}
+        {phase === "case" && c.exampleId && <ExampleBanner officer={route.path === "/officer"} />}
         {screen}
       </main>
       <dialog className="dialog" ref={confirmDialog} aria-labelledby="example-confirm-title" onClose={dismissExample}>

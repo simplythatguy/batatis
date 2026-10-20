@@ -1,93 +1,116 @@
 import { useEffect, useState } from "react";
-import { EngineError, engine, type EngineGap } from "../api/client";
-import { PanelHeader } from "../components";
-import { browserPlantedGaps, PLANTED_AFTER, PLANTED_BEFORE, SECTION_LABEL, SECTION_ORDER } from "../planted";
+import { EngineError, engine, type CompletenessReport } from "../api/client";
+import { MissingItems, RecordHeading } from "../completenessView";
+import { PanelHeader, RoleNote } from "../components";
+import { EXAMPLES } from "../examples";
+import { notSureQuestions, officerRequest, professionalFlagLines, rankingQuestions, roleNote, SCO_JUDGEMENT } from "../humanReview";
+import { failureKind } from "../rules";
 import { useCase } from "../store";
 
-type Side = "before" | "after";
+type ReportState =
+  | { phase: "loading" }
+  | { phase: "missing"; note: string }
+  | { phase: "unavailable"; note: string }
+  | { phase: "ready"; note: string; skipped: { label: string; reason: string }[] };
 
-interface Review {
-  side: Side;
-  source: "engine" | "browser";
-  note: string;
-  gaps: EngineGap[];
-}
-
-const SAMPLE = "EXAMPLE — Officer review · Hempcrete garden suite";
-
-function requestText(gaps: EngineGap[], side: Side, source: Review["source"]): string {
-  const version = side === "before" ? "Original example" : "Updated example";
-  const lines = [
-    SAMPLE,
-    version,
-    source === "engine" ? "Online administrative review" : "EXAMPLE — Limited browser check; online review unavailable.",
-    "This asks for missing administrative items. It does not decide whether the design complies or is safe.",
-    "",
-  ];
-  for (const section of SECTION_ORDER) {
-    const group = gaps.filter((g) => g.section === section);
-    if (!group.length) continue;
-    lines.push(SECTION_LABEL[section]);
-    for (const g of group) lines.push(`- ${g.message}`);
-    lines.push("");
-  }
-  if (gaps.length === 0) {
-    lines.push(
-      source === "engine"
-        ? "No missing administrative items found in this review."
-        : "No missing fields found by this browser check. The online review has not completed.",
-    );
-  }
-  return lines.join("\n");
+function reportFrom(body: CompletenessReport): ReportState {
+  const reasons = (body.reviews ?? []).flatMap((review) =>
+    Array.isArray(review.export_reasons) ? review.export_reasons.filter((item): item is string => typeof item === "string") : [],
+  );
+  const skipped = (body.reviews ?? []).flatMap((review) =>
+    (review.sections ?? []).flatMap((section) =>
+      (section.elements ?? [])
+        .filter((element) => element.lookup_skipped === true && typeof element.label === "string")
+        .map((element) => ({
+          label: element.label as string,
+          reason: typeof element.reason === "string" ? element.reason : "",
+        })),
+    ),
+  );
+  const notice = typeof body.notice === "string" ? body.notice : "Administrative completeness only.";
+  const reasonLine = reasons.length ? `Export reasons: ${reasons.join(" ")}` : "";
+  return { phase: "ready", note: [notice, reasonLine].filter(Boolean).join(" "), skipped };
 }
 
 export function Officer() {
-  const { c } = useCase();
+  const { c, gaps, gapsSource, gapsNote, reviewDetail, saveDraft, engineGaps, completenessRecord } = useCase();
   const blank = !c.exampleId && !c.description.trim() && c.facts.length === 0 && !c.authority;
-  const [side, setSide] = useState<Side>("before");
   const [attempt, setAttempt] = useState(0);
-  const [review, setReview] = useState<Review | null>(null);
+  const [settled, setSettled] = useState(blank);
+  const [report, setReport] = useState<ReportState>({ phase: "loading" });
   const [copyNote, setCopyNote] = useState("");
 
   useEffect(() => {
     if (blank) return;
-    const facts = side === "before" ? PLANTED_BEFORE : PLANTED_AFTER;
     const ctl = new AbortController();
-    setReview(null);
+    let cancelled = false;
+    setSettled(false);
     setCopyNote("");
-    (async () => {
-      const key = `batatis-planted-${side}`;
-      try {
-        let id = sessionStorage.getItem(key);
-        if (!id) {
-          const created = await engine.createCase({ title: `Planted package · ${side}` });
-          id = created.id;
-          for (const fact of facts) await engine.addFact(id, fact);
-          sessionStorage.setItem(key, id);
-        }
-        const gaps = await engine.gaps(id, ctl.signal);
-        if (ctl.signal.aborted) return;
-        setReview({
-          side,
-          source: "engine",
-          note: "Online administrative review",
-          gaps,
-        });
-      } catch (e) {
-        if (ctl.signal.aborted) return;
-        const message = e instanceof EngineError ? e.detail : e instanceof Error ? e.message : String(e);
-        setReview({
-          side,
-          source: "browser",
-          note: message,
-          gaps: browserPlantedGaps(facts),
-        });
+    setReport({ phase: "loading" });
+    void (async () => {
+      const id = await saveDraft();
+      if (cancelled) return;
+      if (!id) {
+        setReport({ phase: "unavailable", note: "Online review unavailable." });
+        setSettled(true);
+        return;
       }
+      try {
+        const body = await engine.completeness(id, ctl.signal);
+        if (cancelled) return;
+        setReport(reportFrom(body));
+      } catch (e) {
+        if (cancelled || ctl.signal.aborted) return;
+        if (e instanceof EngineError && failureKind(e.status, e.detail) === "missing-route") {
+          setReport({ phase: "missing", note: "The grouped completeness report isn't available on this engine yet." });
+        } else if (e instanceof EngineError && failureKind(e.status, e.detail) === "codedb") {
+          setReport({ phase: "unavailable", note: "code database not found" });
+        } else {
+          setReport({
+            phase: "unavailable",
+            note: e instanceof EngineError ? e.detail : "The grouped completeness report did not load.",
+          });
+        }
+      }
+      if (!cancelled) setSettled(true);
     })();
-    return () => ctl.abort();
-  }, [side, attempt, blank]);
+    return () => {
+      cancelled = true;
+      ctl.abort();
+    };
+    // Retry is explicit. saveDraft changes identity every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blank, attempt]);
 
-  const openQuestions = c.questions.filter((q) => q.id.startsWith("q-scope-") && !q.answer);
+  const openNotSure = notSureQuestions(c.questions);
+  const ranked = rankingQuestions(c.questions);
+  const flags = professionalFlagLines(c);
+  const exampleLabel = c.exampleId ? (EXAMPLES.find((ex) => ex.id === c.exampleId)?.label ?? "Loaded example") : undefined;
+  const reportNote = report.phase === "loading" ? null : report.note;
+  const pending = !blank && !settled;
+  const request = officerRequest({
+    title: c.title,
+    exampleLabel,
+    files: c.files.map((file) => ({ name: file.name, pages: file.pages, read: file.read, error: file.error })),
+    gaps,
+    notSure: openNotSure,
+    ranking: ranked,
+    professional: flags,
+    record: completenessRecord,
+    role: roleNote(c.applicantType),
+    reportNote,
+  });
+  const sectionById = new Map(engineGaps.map((gap) => [gap.id, gap.section]));
+
+  async function copy() {
+    if (pending) return;
+    try {
+      await navigator.clipboard.writeText(request);
+      setCopyNote("Information request copied.");
+    } catch {
+      setCopyNote("Copy was unavailable. Select the request text below and copy it.");
+    }
+  }
 
   if (blank) {
     return (
@@ -95,22 +118,9 @@ export function Officer() {
         <PanelHeader title="Officer review" meta="Administrative completeness" />
         <div className="pane scroll-body">
           <div className="content-col stack">
-            {openQuestions.length > 0 && (
-              <section aria-labelledby="open-questions">
-                <h2 id="open-questions" className="section-title">
-                  Open questions
-                </h2>
-                <ul className="plain-list">
-                  {openQuestions.map((q) => (
-                    <li key={q.id}>
-                      {q.text}
-                      <div className="meta">{q.why}</div>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
+            <RoleNote />
             <p>Your application is blank. This screen does not open the sample package.</p>
+            <Judgement skipped={[]} />
             <a className="btn" href="#/describe">
               Return to application
             </a>
@@ -120,146 +130,128 @@ export function Officer() {
     );
   }
 
-  const current = review && review.side === side ? review : null;
-  const pending = !current;
-  const letter = current ? requestText(current.gaps, side, current.source) : "";
-  const version = side === "before" ? "Original example" : "Updated example";
-
-  async function copy() {
-    if (!current) return;
-    try {
-      await navigator.clipboard.writeText(letter);
-      setCopyNote("Example information request copied.");
-    } catch {
-      setCopyNote("Copy was unavailable. Select the request text below and copy it.");
-    }
-  }
-
-  function choose(next: Side) {
-    setCopyNote("");
-    setSide(next);
-  }
-
-  const n = current?.gaps.length ?? 0;
-  const allClear = current != null && n === 0;
-
   return (
     <>
       <PanelHeader title="Officer review" meta="Administrative completeness" />
       <div className="pane scroll-body">
         <div className="content-col stack">
-          <p className="meta intro">Compare two versions of an example package. Both may still have missing administrative items.</p>
-          {openQuestions.length > 0 && (
-            <section aria-labelledby="open-questions">
-              <h2 id="open-questions" className="section-title">
-                Open questions from this application
-              </h2>
-              <ul className="plain-list">
-                {openQuestions.map((q) => (
-                  <li key={q.id}>
-                    {q.text}
-                    <div className="meta">{q.why}</div>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-          <div className="toolbar" role="group" aria-label="Package version">
-            <button type="button" className="pill" data-active={side === "before"} aria-pressed={side === "before"} onClick={() => choose("before")}>
-              Original example
-            </button>
-            <button type="button" className="pill" data-active={side === "after"} aria-pressed={side === "after"} onClick={() => choose("after")}>
-              Updated example
-            </button>
-          </div>
+          <RoleNote />
+          <p className="meta intro">This review is of the application in front of you. It checks whether information is present. It does not decide whether the design complies or is safe.</p>
           <p className="meta" role="status">
-            {pending ? "Reviewing the example package…" : current.source === "engine" ? "Online administrative review" : "Online review unavailable"}
+            {pending ? "Reviewing your application…" : gapsSource === "engine" ? gapsNote : "Online review unavailable"}
           </p>
           {pending && (
             <div aria-busy="true">
               <p>
                 <span className="status-dot pending" /> Missing items will appear here when the review finishes.
               </p>
-              <progress aria-label="Reviewing the example package" />
+              <progress aria-label="Reviewing your application" />
             </div>
           )}
-          {current?.source === "browser" && (
+          {!pending && gapsSource === "browser" && (
             <>
               <h2 className="section-title">Online review unavailable</h2>
               <p>
-                <span className="status-dot warning" /> Showing a limited check of the example’s fields in this browser. The online review may find more missing items.
+                <span className="status-dot warning" /> {gapsNote}
               </p>
               <button type="button" className="btn" onClick={() => setAttempt((n) => n + 1)}>
                 Retry review
               </button>
-              <details>
-                <summary>Technical detail</summary>
-                <p>{current.note}</p>
-              </details>
+              {reviewDetail && (
+                <details>
+                  <summary>Technical detail</summary>
+                  <p>{reviewDetail}</p>
+                </details>
+              )}
             </>
           )}
-          {current && (
-            <div>
-              {current.source === "engine" && (
-                <p>
-                  {allClear
-                    ? "No missing administrative items found in this review."
-                    : `Review finished. ${n} administrative item${n === 1 ? "" : "s"} need attention.`}
-                </p>
+          {!pending && (
+            <>
+              <section aria-labelledby="docs-title">
+                <h2 id="docs-title" className="section-title">
+                  Documents
+                </h2>
+                {c.files.length === 0 ? (
+                  <p className="empty">No documents uploaded on this application.</p>
+                ) : (
+                  <ul className="plain-list">
+                    {c.files.map((file) => (
+                      <li key={file.id}>
+                        {file.name}
+                        {file.pages ? ` · ${file.pages} pages` : ""}
+                        <div className="meta">{file.error ? file.error : file.read ? "Stored" : "Not read yet"}</div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+              <section aria-labelledby="not-sure-title">
+                <h2 id="not-sure-title" className="section-title">
+                  Open Not sure
+                </h2>
+                {openNotSure.length === 0 ? (
+                  <p className="empty">No open Not sure answers.</p>
+                ) : (
+                  <ul className="plain-list">
+                    {openNotSure.map((q) => (
+                      <li key={q.id}>
+                        {q.text}
+                        <div className="meta">{q.why}</div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+              {ranked.length > 0 && (
+                <section aria-labelledby="ranked-questions">
+                  <h2 id="ranked-questions" className="section-title">
+                    Open questions from article ranking
+                  </h2>
+                  <ul className="plain-list">
+                    {ranked.map((q) => (
+                      <li key={q.id}>{q.text}</li>
+                    ))}
+                  </ul>
+                </section>
               )}
-              {current.source === "browser" && allClear && (
-                <p>No missing fields found by this browser check. The online review has not completed.</p>
-              )}
-              {allClear && current.source === "engine" && (
-                <p>This review checks whether information is present. It does not decide whether the design complies or is safe.</p>
-              )}
-              {SECTION_ORDER.map((section) => {
-                const group = current.gaps.filter((g) => g.section === section);
-                return (
-                  <section key={section} aria-labelledby={`sec-${section}`}>
-                    <h2 id={`sec-${section}`} className="sub-title">
-                      {SECTION_LABEL[section]}
-                    </h2>
-                    {group.length === 0 ? (
-                      <p className="empty">
-                        {current.source === "engine"
-                          ? "No missing administrative items found in this section."
-                          : "No missing fields found by this limited browser check. Online review is still needed."}
-                      </p>
-                    ) : (
-                      <ul className="plain-list">
-                        {group.map((g) => (
-                          <li key={g.id}>
-                            <span className={`status-dot ${g.severity}`} /> {g.message}
-                            {g.fix_hint && <div className="meta">Reviewer note: {g.fix_hint}</div>}
-                            {g.citation && <div className="mono meta">{g.citation}</div>}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </section>
-                );
-              })}
-              {allClear && (
-                <a className="btn" href="#/describe">
-                  Return to application
-                </a>
-              )}
-            </div>
+              <section aria-labelledby="professional-flags">
+                <h2 id="professional-flags" className="section-title">
+                  Professional
+                </h2>
+                <ul className="plain-list">
+                  {flags.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </section>
+              <RecordHeading record={completenessRecord} />
+              <MissingItems gaps={gaps} sectionById={sectionById} />
+              <section aria-labelledby="report-title">
+                <h2 id="report-title" className="section-title">
+                  Grouped completeness report
+                </h2>
+                {report.phase === "ready" ? (
+                  <p>{report.note}</p>
+                ) : (
+                  <p className="empty">{report.phase === "loading" ? "Loading the grouped completeness report…" : report.note}</p>
+                )}
+              </section>
+              <Judgement skipped={report.phase === "ready" ? report.skipped : []} />
+            </>
           )}
           <section aria-labelledby="request-title">
             <h2 id="request-title" className="section-title">
               Information request
             </h2>
-            {current && (
+            {!pending && (
               <div className="field">
-                <label htmlFor="request-text">{version}</label>
-                <textarea id="request-text" readOnly rows={10} value={letter} />
+                <label htmlFor="request-text">Request</label>
+                <textarea id="request-text" readOnly rows={12} value={request} />
               </div>
             )}
             <div className="btn-row">
               <button type="button" className="btn btn-primary" disabled={pending} onClick={() => void copy()}>
-                Copy example request
+                Copy request
               </button>
               <a className="btn btn-ghost" href="#/describe">
                 Return to application
@@ -274,5 +266,34 @@ export function Officer() {
         </div>
       </div>
     </>
+  );
+}
+
+function Judgement({ skipped }: { skipped: { label: string; reason: string }[] }) {
+  return (
+    <section aria-labelledby="sco-judgement">
+      <h2 id="sco-judgement" className="section-title">
+        <span className="label-pill">SCO judgement</span>
+      </h2>
+      <p>Administrative completeness does not decide these.</p>
+      <ul className="plain-list">
+        {SCO_JUDGEMENT.map((item) => (
+          <li key={item.id}>{item.label}</li>
+        ))}
+      </ul>
+      {skipped.length > 0 && (
+        <>
+          <h3 className="sub-title">Skipped by the completeness report</h3>
+          <ul className="plain-list">
+            {skipped.map((item) => (
+              <li key={item.label}>
+                {item.label}
+                {item.reason && <div className="meta">{item.reason}</div>}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </section>
   );
 }

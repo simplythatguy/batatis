@@ -98,9 +98,15 @@ export function createEngine(base: string) {
     /** Section C rows by deterministic lookup, in input order (an article expands to its sentences). */
     sectionC: (provisions: string[], signal?: AbortSignal) =>
       call<SectionCRow[]>("POST", "/section-c", { provisions }, signal),
-    /** Administrative gaps. Mounted in engine/routes_case.py, not POST /completeness. */
+    /** Administrative gaps. Mounted in engine/routes_case.py. */
     gaps: (caseId: string, signal?: AbortSignal) =>
       call<EngineGap[]>("GET", `/cases/${enc(caseId)}/gaps`, undefined, signal),
+    /**
+     * POST /cases/{id}/completeness from PR #11. Body is empty until that route
+     * accepts documents. 404 on today's dev. The caller shows an empty state.
+     */
+    completeness: (caseId: string, signal?: AbortSignal) =>
+      call<CompletenessReport>("POST", `/cases/${enc(caseId)}/completeness`, {}, signal),
     processFields: (caseId: string, signal?: AbortSignal) =>
       call<EngineProcessField[]>("GET", `/cases/${enc(caseId)}/process-fields`, undefined, signal),
     professional: (caseId: string, signal?: AbortSignal) =>
@@ -128,6 +134,21 @@ export function createEngine(base: string) {
     identify: (caseId: string, prose: string, answers: { field?: string | null; question_id?: string | null; answer: string }[] = [], signal?: AbortSignal, onStage?: (stage: string) => void) =>
       identifyCase(base, caseId, prose, answers, signal, onStage),
   };
+}
+
+/** Fields that exist on PR #11 CompletenessResponse. Extra keys are ignored. */
+export interface CompletenessReport {
+  notice?: string;
+  reviews?: {
+    export_reasons?: unknown;
+    sections?: {
+      elements?: {
+        label?: unknown;
+        reason?: unknown;
+        lookup_skipped?: unknown;
+      }[];
+    }[];
+  }[];
 }
 
 export interface EngineGap {
@@ -193,7 +214,7 @@ export interface IdentifyArticle {
 export interface IdentifyResult {
   articles: IdentifyArticle[];
   questions?: string[];
-  open_questions?: { field?: string; text?: string; status?: string }[];
+  open_questions?: { field?: string; text?: string; why?: string; status?: string }[];
   persisted?: boolean;
 }
 

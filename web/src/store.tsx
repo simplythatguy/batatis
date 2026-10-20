@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type Dispatch, type ReactNode } from "react";
-import type { EngineGap } from "./api/client";
-import { EngineError } from "./api/client";
+import { EngineError, type EngineGap } from "./api/client";
+import { type CompletenessRecord } from "./humanReview";
 import { clearEngineSession, engineCaseId, ensureEngineCase, pushFacts, refreshGaps, syncJurisdiction } from "./api/sync";
 import { shouldConfirmReplace } from "./rules";
 import { exampleCase } from "./examples";
@@ -79,6 +79,10 @@ interface Store {
   confirmExample: () => void;
   dismissExample: () => void;
   resetToWho: () => void;
+  completenessRecord: CompletenessRecord | null;
+  setCompletenessRecord: (record: CompletenessRecord | null) => void;
+  /** Gap list from the latest review, including one that has not re-rendered yet. */
+  readGaps: () => Gap[];
 }
 
 const Ctx = createContext<Store | null>(null);
@@ -105,6 +109,19 @@ const FIELD_HREF: Record<string, string> = {
   professional_requirement: "#/application?tab=D",
 };
 
+function composeGaps(localCase: Case, source: Store["gapsSource"], engine: EngineGap[]): Gap[] {
+  const local = getGaps(localCase);
+  if (source !== "engine") return local;
+  const admin: Gap[] = engine.map((g) => ({
+    id: g.id,
+    severity: g.severity,
+    label: g.message,
+    href: hrefFor(g.field),
+  }));
+  const workflow = local.filter((g) => !g.id.startsWith("detail-") && !g.id.startsWith("process-"));
+  return [...admin, ...workflow];
+}
+
 function hrefFor(field: string): string {
   if (FIELD_HREF[field]) return FIELD_HREF[field];
   if (field.startsWith("section_c") || field.startsWith("provisions")) return "#/section-c";
@@ -127,6 +144,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const syncState = useRef({ reviewed: false, detail: "" });
   const [savedNote, setSavedNote] = useState("");
   const [pendingExampleId, setPendingExampleId] = useState<string | null>(null);
+  const [completenessRecord, setCompletenessRecord] = useState<CompletenessRecord | null>(null);
+  const latestGaps = useRef<Gap[]>([]);
 
   useEffect(() => sessionStorage.setItem(KEY, JSON.stringify({ phase, case: c, note: resetNote })), [phase, c, resetNote]);
 
@@ -155,12 +174,14 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         setReviewDetail(got.error);
         setGapsNote("Online review unavailable. Showing a limited check of fields in this browser.");
         setSyncOk(false);
+        latestGaps.current = composeGaps(c, "browser", []);
       } else {
         setEngineGaps(got.gaps);
         setGapsSource("engine");
         setReviewDetail(factError ?? "");
         setGapsNote("Online administrative review finished. This does not decide whether the design complies or is safe.");
         setSyncOk(!factError);
+        latestGaps.current = composeGaps(c, "engine", got.gaps);
       }
       if (announce) {
         setSavedNote(got.error || factError ? "Draft saved in this browser." : "Draft saved.");
@@ -176,6 +197,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       setReviewDetail(message);
       setGapsNote("Online review unavailable. Showing a limited check of fields in this browser.");
       setSyncOk(false);
+      latestGaps.current = composeGaps(c, "browser", []);
       syncState.current = { reviewed: false, detail: message };
       if (announce) setSavedNote("Draft saved in this browser.");
       return null;
@@ -198,6 +220,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     setSyncOk(false);
     setSavedNote("");
     setReviewDetail("");
+    setCompletenessRecord(null);
     const blank = !next.facts.length && !next.authority;
     setGapsSource(blank ? "idle" : "loading");
     setGapsNote(blank ? "Your application has not been reviewed online yet." : next.exampleId ? "Reviewing this example…" : "Reviewing your application…");
@@ -207,18 +230,10 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     location.hash = "#/describe";
   }
 
-  const gaps = useMemo(() => {
-    const local = getGaps(c);
-    if (gapsSource !== "engine") return local;
-    const admin: Gap[] = engineGaps.map((g) => ({
-      id: g.id,
-      severity: g.severity,
-      label: g.message,
-      href: hrefFor(g.field),
-    }));
-    const workflow = local.filter((g) => !g.id.startsWith("detail-") && !g.id.startsWith("process-"));
-    return [...admin, ...workflow];
-  }, [c, engineGaps, gapsSource]);
+  const gaps = useMemo(() => composeGaps(c, gapsSource, engineGaps), [c, engineGaps, gapsSource]);
+  useEffect(() => {
+    latestGaps.current = gaps;
+  }, [gaps]);
 
   const value = useMemo<Store>(
     () => ({
@@ -257,6 +272,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         if (next) openCase(next);
       },
       dismissExample: () => setPendingExampleId(null),
+      completenessRecord,
+      setCompletenessRecord,
+      readGaps: () => latestGaps.current,
       resetToWho: () => {
         clearEngineSession();
         setEngineId(null);
@@ -266,6 +284,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         setReviewDetail("");
         setSyncOk(false);
         setSavedNote("");
+        setCompletenessRecord(null);
         dispatch({ type: "reset", to: emptyCase("homebuilder") });
         setPhase("who");
         setResetNote("Cleared. Nothing from the previous case is kept.");
@@ -274,7 +293,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     }),
     // sync closes over the latest case via the render that built it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [c, gaps, engineGaps, gapsSource, gapsNote, reviewDetail, syncOk, engineId, savedNote, phase, resetNote, pendingExampleId],
+    [c, gaps, engineGaps, gapsSource, gapsNote, reviewDetail, syncOk, engineId, savedNote, phase, resetNote, pendingExampleId, completenessRecord],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

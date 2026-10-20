@@ -2,7 +2,7 @@ import { useState } from "react";
 import { AUTHORITIES } from "../config";
 import { UPLOAD_UPFRONT } from "../rules";
 import { DetailFields, FactLedger, QuestionChips } from "../case-parts";
-import { DraftNote, GapStrip, Icon, PanelHeader } from "../components";
+import { DraftNote, GapStrip, Icon, PanelHeader, RoleNote } from "../components";
 import { applicantLabel } from "../intake";
 import { DETAIL_FIELDS, factFor, valueText } from "../model";
 import { useCase } from "../store";
@@ -45,6 +45,7 @@ export function Describe() {
       <GapStrip gaps={gaps} />
       <div className="describe">
         <div className="describe-main pane">
+          <RoleNote />
           <div className="field">
             <label htmlFor="description" className="lead-label">
               What are you building?

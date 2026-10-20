@@ -8,7 +8,8 @@ import {
   type SectionDIssue,
   type SectionDPlan,
 } from "../api/client";
-import { DemoFallback } from "../components";
+import { DemoFallback, RoleNote } from "../components";
+import { practicePrompt } from "../humanReview";
 import { answeredYes } from "../model";
 import { evidenceLinked, isScopeField, SCOPE_HELP, sectionDIssueStatus } from "../professional";
 import { failureKind } from "../rules";
@@ -22,9 +23,10 @@ type Load = {
   issues: SectionDIssue[] | null;
   professional: ProfessionalResult | null;
   fields: EngineProcessField[];
+  issuesNote: string | null;
 };
 
-const IDLE: Load = { phase: "idle", note: "", plan: null, issues: null, professional: null, fields: [] };
+const IDLE: Load = { phase: "idle", note: "", plan: null, issues: null, professional: null, fields: [], issuesNote: null };
 
 const OCCUPANCY = [
   ["", "Not answered"],
@@ -284,23 +286,30 @@ export function Recommendations() {
         issues: null,
         professional: null,
         fields: [],
+        issuesNote: null,
       });
       return;
     }
     const ctl = new AbortController();
-    setLoad({ phase: "loading", note: "Loading Section D…", plan: null, issues: null, professional: null, fields: [] });
+    setLoad({ phase: "loading", note: "Loading Section D…", plan: null, issues: null, professional: null, fields: [], issuesNote: null });
     const ids = provisions ? provisions.split("|") : undefined;
     void (async () => {
       let issues: SectionDIssue[] | null = null;
+      let issuesNote: string | null = null;
       try {
         issues = await engine.sectionDIssues(engineId, ctl.signal);
       } catch (e) {
         if (ctl.signal.aborted) return;
-        if (!(e instanceof EngineError) || failureKind(e.status, e.detail) !== "missing-route") {
-          if (e instanceof EngineError && failureKind(e.status, e.detail) === "unreachable") {
-            setLoad({ phase: "unreachable", note: e.detail, plan: null, issues: null, professional: null, fields: [] });
-            return;
-          }
+        if (e instanceof EngineError && failureKind(e.status, e.detail) === "unreachable") {
+          setLoad({ phase: "unreachable", note: e.detail, plan: null, issues: null, professional: null, fields: [], issuesNote: null });
+          return;
+        }
+        if (e instanceof EngineError && failureKind(e.status, e.detail) === "missing-route") {
+          issuesNote = "Section D issues aren't available on this engine yet.";
+        } else if (e instanceof EngineError && failureKind(e.status, e.detail) === "codedb") {
+          issuesNote = "code database not found";
+        } else {
+          issuesNote = failureText(e);
         }
       }
       try {
@@ -320,6 +329,7 @@ export function Recommendations() {
           issues,
           professional,
           fields,
+          issuesNote,
         });
       } catch (e) {
         if (ctl.signal.aborted) return;
@@ -332,6 +342,7 @@ export function Recommendations() {
           issues,
           professional: null,
           fields: [],
+          issuesNote,
         });
       }
     })();
@@ -345,6 +356,7 @@ export function Recommendations() {
       <h2 id="reco-title" className="section-title">
         Section D and professional screening
       </h2>
+      <RoleNote />
       <p className="meta">{load.note}</p>
       {load.phase === "unreachable" && (
         <DemoFallback reason={load.note || "The engine could not be reached."} onRetry={() => setAttempt((n) => n + 1)} />
@@ -376,13 +388,15 @@ export function Recommendations() {
         </p>
       ))}
       <ProfessionalAnswers />
+      {load.issues === null && load.issuesNote && <p className="empty">{load.issuesNote}</p>}
       {load.issues && (
         <div className="stack">
           <h3 className="sub-title">Section D issues</h3>
           {load.issues.length === 0 && <p className="empty">No Section D issues returned.</p>}
           {load.issues.map((issue) => {
             const practice = issue.practice_of_engineering;
-            const unknown = practice.value === "unknown";
+            const practiceValue = practice.value === true ? true : practice.value === false ? false : "unknown";
+            const prompt = practicePrompt(practiceValue, practice.question);
             const status = sectionDIssueStatus({
               practice: practice.value === true ? true : practice.value === false ? false : "unknown",
               facts: c.facts,
@@ -400,15 +414,10 @@ export function Recommendations() {
                 <p>{issue.at_stake}</p>
                 {issue.question && <p className="field-note">{issue.question}</p>}
                 <p>
-                  <span className={`status-dot ${practice.value === true ? "blocking" : unknown ? "warning" : "pending"}`} />{" "}
-                  {unknown
-                    ? "Practice of engineering is unknown. Answer the question. This is not a yes or a no."
-                    : practice.value === true
-                      ? "Practice of engineering is indicated."
-                      : "Practice of engineering was not indicated."}{" "}
-                  {practice.reason}
+                  <span className={`status-dot ${practiceValue === true ? "blocking" : practiceValue === "unknown" ? "warning" : "pending"}`} />{" "}
+                  {prompt.lead}
                 </p>
-                {unknown && practice.question && <p className="field-note">{practice.question}</p>}
+                {prompt.question && <p className="field-note">{prompt.question}</p>}
                 <p className="meta">
                   Evidence types to consider: {issue.recommended_types.join(", ") || "none listed"}. Not results, and not filled in for you.
                 </p>

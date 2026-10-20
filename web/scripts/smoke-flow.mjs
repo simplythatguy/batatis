@@ -79,8 +79,9 @@ try {
 
   await page.goto(`${preview}/#/officer`, { waitUntil: "networkidle0" });
   let text = await jargon(page, "blank officer");
-  assert(/EXAMPLE · Officer review · Hempcrete garden suite/.test(text), "blank officer is missing the example banner");
+  assert(/SCO judgement/.test(text), "blank officer does not name SCO judgement");
   assert(/does not open the sample package/.test(text), "blank officer opened the hempcrete package");
+  assert(!/Hempcrete garden suite/.test(text), "blank officer still names the sample package");
   assert(!/Nothing open in this section/.test(text), "blank officer says nothing is open");
   assert(!/Your application appears to be missing/.test(text), "blank officer lists planted gaps");
   assert(!/Engine \d+/.test(text), "blank officer shows an engine status");
@@ -260,23 +261,26 @@ try {
   };
   page.on("request", delayGaps);
   await page.goto(`${preview}/#/officer`, { waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() => document.body.innerText.includes("Reviewing the example package"), { timeout: 10000 });
+  await page.waitForFunction(() => document.body.innerText.includes("Reviewing your application"), { timeout: 10000 });
   text = await jargon(page, "officer pending");
   assert(!/Nothing open in this section/.test(text), "officer says nothing is open while the review is pending");
   assert(!/No missing administrative items found/.test(text), "officer claims a clean review before it returns");
   const pendingCopy = await page.evaluate(() => {
-    const button = [...document.querySelectorAll("button")].find((b) => b.textContent?.includes("Copy example request"));
+    const button = [...document.querySelectorAll("button")].find((b) => b.textContent?.includes("Copy request"));
     return { disabled: button?.disabled ?? false, hasRequest: Boolean(document.querySelector("#request-text")) };
   });
-  assert(pendingCopy.disabled, "Copy example request is enabled before the review returns");
-  assert(!pendingCopy.hasRequest, "the example request is written before the review returns");
-  await page.waitForFunction(() => /Retry review|Review finished|No missing administrative items found in this review/.test(document.body.innerText), {
+  assert(pendingCopy.disabled, "Copy request is enabled before the review returns");
+  assert(!pendingCopy.hasRequest, "the request is written before the review returns");
+  await page.waitForFunction(() => /Retry review|Online administrative review finished|Export blocked/.test(document.body.innerText), {
     timeout: 20000,
   });
   page.off("request", delayGaps);
   await page.setRequestInterception(false);
   text = await jargon(page, "officer");
-  assert(/EXAMPLE · Officer review/.test(text), "officer does not label the sample review");
+  assert(/SCO judgement/.test(text), "officer does not label SCO judgement");
+  assert(/Copy request/.test(text), "officer has no copy request");
+  assert(!/Copy example request/.test(text), "officer still copies an example request");
+  assert(!/Hempcrete garden suite/.test(text), "officer still names the sample package");
   assert(/Retry review/.test(text), "officer engine-down has no Retry");
   assert(!/case_[0-9a-f]{6,}/.test(text), "officer shows a raw case id");
   assert(!/Engine \d+/.test(text), "officer shows a raw engine status");

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { engine, EngineError, type CodeHit, type IdentifyArticle } from "../api/client";
-import { DemoFallback, DraftNote, GapStrip, Icon, PanelHeader, StatusPill, type Dot } from "../components";
+import { DemoFallback, DraftNote, GapStrip, Icon, PanelHeader, RoleNote, StatusPill, type Dot } from "../components";
 import { CODE_EDITION } from "../config";
 import { answeredYes, unresolvedCandidates } from "../model";
 import { exitCountWarning, failureKind } from "../rules";
@@ -32,7 +32,8 @@ function CandidateCard({ a, index, total }: { a: Candidate; index: number; total
         <h2 className="card-topic" id={`cand-${a.id}-topic`}>
           {a.topic}
         </h2>
-        {a.benchmark && <span className="label-pill">Main requirement</span>}
+        {a.benchmark && a.answer === "yes" && <span className="label-pill">Main requirement</span>}
+        {a.suggestion && a.answer === null && <span className="label-pill">Suggested</span>}
         <StatusPill dot={s.dot}>{s.label}</StatusPill>
       </div>
       <div className="code-said">
@@ -66,7 +67,7 @@ function CandidateCard({ a, index, total }: { a: Candidate; index: number; total
         <div className="followup">
           <div className="meta">Open question</div>
           <p>{a.clarifyingQuestion}</p>
-          <p className="meta">Logged as an open question. You can continue. Section C does not treat this as a confirmed departure.</p>
+          <p className="meta">Logged as an open question. Not sure does not block Continue. Section C does not treat this as a confirmed departure.</p>
         </div>
       )}
       {exitCountWarning(a.provision, a.topic) && (
@@ -136,14 +137,19 @@ export function CodeCheck() {
               part: a.part || Number(String(a.provision).split(".")[0]) || 0,
               quote: a.quote,
               reason: a.reason,
-              committed: a.committed,
             })),
           });
+        }
+        const returned = (result.open_questions ?? [])
+          .filter((q) => q.field && q.text)
+          .map((q) => ({ field: q.field ?? "", text: q.text ?? "", why: q.why }));
+        if (returned.length || result.open_questions) {
+          dispatch({ type: "noteIdentifyQuestions", questions: returned });
         }
         const questions = result.questions ?? [];
         setIdentifyNote(
           articles.length
-            ? `${articles.length} articles ranked. A quote is shown only when the code database returned one.`
+            ? `${articles.length} articles ranked. Choose Yes, No, or Not sure on each one. Nothing is accepted until you choose Yes.`
             : questions[0] ?? "Article ranking returned no articles for this description.",
         );
       })
@@ -188,8 +194,9 @@ export function CodeCheck() {
             </p>
           )}
           {identifyDown && <DemoFallback reason={identifyNote} onRetry={() => setIdentifyAttempt((n) => n + 1)} />}
+          <RoleNote />
           <p className="meta intro">
-            A departure means your design does something differently from a requirement. Cards from your description are questions until article ranking returns a provision. Search shows only what the code database returns.
+            A departure means your design does something differently from a requirement. An article is not accepted until you choose Yes. Not sure stays an open question and does not block Continue. Search shows only what the code database returns.
           </p>
           <form
             className="field"
@@ -306,7 +313,8 @@ export function CodeCheck() {
       <div className="footer-bar">
         <DraftNote />
         <span className="status-note" role="status">
-          {open.length ? `Answer ${open.map((a) => a.topic.toLowerCase()).join("; ")} before Section C` : ""}
+          {open.length ? `Answer ${open.map((a) => a.topic.toLowerCase()).join("; ")} before Section C. ` : ""}
+          Not sure does not block Continue.
         </span>
         <button type="button" className="btn" onClick={() => void saveDraft()}>
           Save draft

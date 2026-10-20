@@ -180,7 +180,17 @@ export function getGaps(c: Case): Gap[] {
   }
   for (const q of c.questions) {
     if (!q.answer) {
-      gaps.push({ id: `question-${q.id}`, severity: "warning", label: `Open question: ${factLabel(q.field).toLowerCase()}`, href: `#/describe?focus=q-${q.id}` });
+      const routed = q.id.startsWith("q-from-") || q.id.startsWith("q-scope-") || q.id.startsWith("q-identify-");
+      gaps.push({
+        id: `question-${q.id}`,
+        severity: "warning",
+        label: routed ? `Open question: ${q.text}` : `Open question: ${factLabel(q.field).toLowerCase()}`,
+        href: q.id.startsWith("q-from-")
+          ? `#/code-check?focus=cand-${q.id.slice("q-from-".length)}`
+          : q.id.startsWith("q-scope-")
+            ? "#/application?tab=D"
+            : `#/describe?focus=q-${q.id}`,
+      });
     }
   }
   if (c.practiceOfEngineering === true && !professionalConfirmed(c.facts)) {
@@ -219,8 +229,9 @@ export type Action =
   | { type: "addCandidate"; candidate: Candidate }
   | {
       type: "addIdentified";
-      articles: { provision: string; title: string | null; part: number; quote: string | null; reason: string | null; committed?: boolean }[];
+      articles: { provision: string; title: string | null; part: number; quote: string | null; reason: string | null }[];
     }
+  | { type: "noteIdentifyQuestions"; questions: { field: string; text: string; why?: string | null }[] }
   | { type: "saveEvidence"; itemId: string; document: string; responsible: string; date: string }
   | { type: "setProfessionalFact"; field: string; value: string | number | boolean }
   | { type: "answerScope"; field: ScopeField; answer: "yes" | "no" | "not-sure" }
@@ -293,7 +304,9 @@ export function reducer(c: Case, a: Action): Case {
     }
     case "answerCandidate": {
       const cand = c.candidates.find((x) => x.id === a.id);
-      const candidates = c.candidates.map((x) => (x.id === a.id ? { ...x, answer: a.answer } : x));
+      const candidates = c.candidates.map((x) =>
+        x.id === a.id ? { ...x, answer: a.answer, benchmark: a.answer === "yes" } : x,
+      );
       const qid = `q-from-${a.id}`;
       let questions = c.questions.filter((q) => q.id !== qid);
       if (a.answer === "not-sure" && cand) {
@@ -302,7 +315,7 @@ export function reducer(c: Case, a: Action): Case {
           {
             id: qid,
             text: cand.clarifyingQuestion,
-            why: `You answered Not sure on “${cand.topic}”.`,
+            why: `You answered Not sure on “${cand.topic}”. This stays an open question for the officer.`,
             field: "project.description",
           },
         ];
@@ -345,7 +358,7 @@ export function reducer(c: Case, a: Action): Case {
             topic: article.title || article.provision,
             provision: article.provision,
             part: article.part,
-            benchmark: Boolean(article.committed),
+            benchmark: prev?.answer === "yes",
             identified: true,
             suggestion: "identify" as const,
             quote: quote
@@ -358,6 +371,18 @@ export function reducer(c: Case, a: Action): Case {
         });
       const rest = c.candidates.filter((card) => !made.some((item) => item.provision === card.provision));
       return { ...c, candidates: [...rest, ...made] };
+    }
+    case "noteIdentifyQuestions": {
+      const rest = c.questions.filter((q) => !q.id.startsWith("q-identify-"));
+      const made = a.questions
+        .filter((q) => q.field.trim() && q.text.trim())
+        .map((q) => ({
+          id: `q-identify-${q.field}`,
+          text: q.text.trim(),
+          why: q.why?.trim() || "Article ranking left this open. It does not assume a value.",
+          field: q.field.trim(),
+        }));
+      return { ...c, questions: [...rest, ...made] };
     }
     case "saveEvidence": {
       const ref = a.document.trim();
