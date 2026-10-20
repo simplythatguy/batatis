@@ -89,7 +89,6 @@ export function Describe() {
       <GapStrip gaps={gaps} />
       <div className="describe">
         <div className="describe-main pane">
-          <PrivacyNotice />
           <div className="field">
             <label htmlFor="description" className="lead-label">
               Describe your idea in a sentence or two
@@ -102,6 +101,7 @@ export function Describe() {
               onChange={(e) => dispatch({ type: "setDescription", text: e.target.value })}
               placeholder="What are you building or selling, and what does it do differently?"
             />
+            <PrivacyNotice />
           </div>
           <DropZone />
           <QuestionChips />
