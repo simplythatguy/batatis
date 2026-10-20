@@ -1,5 +1,8 @@
 /**
- * Keep recorder steps aligned with docs/demo/script.md.
+ * Keep recorder steps aligned with the demo script.
+ *
+ * The script file belongs to #20. The recorder reads it from that branch, or
+ * from a path passed with --script. It is not stored on this branch.
  *
  * Shot ids and titles come from `### Shot N —` headings.
  * The primary route is the first hash route on that shot's `**Route:**` line.
@@ -38,12 +41,12 @@ export function diffScript(steps, markdown) {
   const stepById = new Map(steps.map((step) => [step.id, step]));
   const shotIds = new Set(shots.map((shot) => shot.id));
   if (shots.length === 0) {
-    problems.push("docs/demo/script.md has no shot-list rows the recorder can read.");
+    problems.push("The demo script has no shot-list rows the recorder can read.");
   }
   for (const shot of shots) {
     const step = stepById.get(shot.id);
     if (!step) {
-      problems.push(`Shot ${shot.id} is in docs/demo/script.md and missing from the recorder.`);
+      problems.push(`Shot ${shot.id} is in the demo script and missing from the recorder.`);
       continue;
     }
     if (shot.title && step.title !== shot.title) {
@@ -54,7 +57,7 @@ export function diffScript(steps, markdown) {
     }
   }
   for (const step of steps) {
-    if (!shotIds.has(step.id)) problems.push(`Recorder step ${step.id} is not in the script shot list.`);
+    if (!shotIds.has(step.id)) problems.push(`Recorder step ${step.id} is not in the demo script.`);
   }
   return { shots, problems };
 }

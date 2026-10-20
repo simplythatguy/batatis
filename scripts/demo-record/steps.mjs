@@ -1,7 +1,7 @@
 /**
  * Walkthrough for the Batatis demo recording.
  *
- * Ids, titles, and primary routes match docs/demo/script.md (7 shots).
+ * Ids, titles, and primary routes match #20's docs/demo/script.md (7 shots).
  * The burned-in caption names only text that is on screen. It is not the
  * shot title. The EXAMPLE DATA label and the caption sit in a band at the top
  * of the frame. The app is inset below that band so the header subtitle and
@@ -43,7 +43,8 @@ const CASES = {
 };
 
 const OPEN_QUESTION_HOLD_MS = 3500;
-const LIMIT_LINE = "This tool does not write the evidence or the professional opinion.";
+const LIMIT_LINE =
+  "Recommendations only. You write the evidence and the answers. This does not decide that the design complies or is safe.";
 const REAL_ADDRESS = "11821 73 Avenue NW";
 const FICTIONAL_ADDRESS = "100 Example Street NW";
 
@@ -224,18 +225,38 @@ async function overlayClearsChrome(page) {
       const rect = el.getBoundingClientRect();
       return rect.width > 1 && rect.height > 1;
     });
+    const disclaimerRe =
+      /not a finding that the design complies|does not decide whether the design complies|does not confirm that the design complies/i;
+    let disclaimer = null;
+    let disclaimerArea = Infinity;
+    for (const el of document.querySelectorAll("body *")) {
+      if (el.closest("#demo-recorder-band")) continue;
+      const text = (el.innerText || "").replace(/\s+/g, " ").trim();
+      if (!disclaimerRe.test(text)) continue;
+      const rect = el.getBoundingClientRect();
+      if (rect.width < 1 || rect.height < 1) continue;
+      const area = rect.width * rect.height;
+      if (area < disclaimerArea) {
+        disclaimer = el;
+        disclaimerArea = area;
+      }
+    }
     const subtitleRect = subtitle?.getBoundingClientRect();
     const footerRect = footer?.getBoundingClientRect();
+    const disclaimerRect = disclaimer?.getBoundingClientRect();
     const problems = [];
     if (subtitle && subtitleRect && subtitleRect.width > 1 && overlaps(bandRect, subtitleRect)) problems.push("the header subtitle");
     if (footer && footerRect && overlaps(bandRect, footerRect)) problems.push("the footer");
+    if (disclaimer && disclaimerRect && overlaps(bandRect, disclaimerRect)) problems.push("the compliance disclaimer");
     if (subtitle && subtitleRect && subtitleRect.width > 1 && !inView(subtitleRect)) problems.push("the header subtitle is outside the frame");
     if (footer && footerRect && !inView(footerRect)) problems.push("the footer is outside the frame");
+    if (disclaimer && disclaimerRect && !inView(disclaimerRect)) problems.push("the compliance disclaimer is outside the frame");
     return {
       ok: problems.length === 0,
       reason: problems.length ? `The recorder band leaves app text hidden: ${problems.join("; ")}.` : "",
       subtitle: subtitle ? subtitle.textContent.replace(/\s+/g, " ").trim() : "",
       footer: footer ? footer.innerText.replace(/\s+/g, " ").trim() : "",
+      disclaimer: disclaimer ? disclaimer.innerText.replace(/\s+/g, " ").trim() : "",
     };
   });
 }
@@ -292,6 +313,7 @@ async function settle(page, api, lower, { holdMs, suffix, caption } = {}) {
   if (!chrome.ok) return { ok: false, reason: chrome.reason };
   if (chrome.subtitle) api.notes.push(`Header subtitle visible: ${chrome.subtitle}`);
   if (chrome.footer) api.notes.push(`Footer visible: ${chrome.footer}`);
+  if (chrome.disclaimer) api.notes.push(`Compliance disclaimer visible: ${chrome.disclaimer}`);
   await sleep(holdMs ?? api.holdMs);
   const file = join(
     api.framesDir,
@@ -816,8 +838,8 @@ export const STEPS = [
   { id: "3", title: "Not sure (0:23)", route: "#/", run: shot3 },
   { id: "4", title: "Code identification (0:45)", route: "#/section-c", run: shot4 },
   { id: "5", title: "Section D, then the limit (0:24 + 0:08)", route: "#/application?tab=alt", run: shot5 },
-  { id: "6", title: "Officer, one planted package (0:36)", route: "#/officer", run: shot6 },
-  { id: "7", title: "Authority, gaps still open (0:16)", route: "#/describe", run: shot7 },
+  { id: "6", title: "Officer review of the open application (0:36)", route: "#/officer", run: shot6 },
+  { id: "7", title: "Authority, gaps open, then the draft variance-form PDF (0:16)", route: "#/describe", run: shot7 },
 ];
 
 function mergeParts(step, parts) {
@@ -915,6 +937,7 @@ async function saveStill(page, api, lower, filePath) {
   if (!chrome.ok) return { ok: false, reason: chrome.reason };
   if (chrome.subtitle) api.notes.push(`Header subtitle visible: ${chrome.subtitle}`);
   if (chrome.footer) api.notes.push(`Footer visible: ${chrome.footer}`);
+  if (chrome.disclaimer) api.notes.push(`Compliance disclaimer visible: ${chrome.disclaimer}`);
   await sleep(300);
   const buffer = await page.screenshot({ type: "png" });
   const size = pngSize(buffer);
@@ -927,6 +950,10 @@ async function saveStill(page, api, lower, filePath) {
 
 export async function runDeckStills(page, opts) {
   const outDir = opts.outDir;
+  const sourceBranch = opts.sourceBranch || "unknown";
+  const shortSha = opts.sourceSha ? String(opts.sourceSha).slice(0, 7) : "unknown";
+  const date = String(opts.recordedAt || new Date().toISOString()).slice(0, 10);
+  const source = `${sourceBranch}@${shortSha}`;
   const api = {
     holdMs: 400,
     framesDir: outDir,
@@ -954,19 +981,29 @@ export async function runDeckStills(page, opts) {
     });
   }
 
-  async function capture(id, lower) {
+  async function capture(id, lower, caseName) {
     const slot = DECK_STILLS.find((item) => item.id === id);
     const saved = await saveStill(page, api, lower, join(outDir, slot.file));
     const notes = [...api.notes];
     api.notes.length = 0;
-    if (!saved.ok) return finish(id, { status: "skipped", reason: saved.reason, notes });
-    return finish(id, { status: "captured", width: saved.width, height: saved.height, notes });
+    if (!saved.ok) return finish(id, { status: "pending", reason: saved.reason, notes });
+    const caseLabel = caseName || "unspecified";
+    return finish(id, {
+      status: "captured",
+      width: saved.width,
+      height: saved.height,
+      notes,
+      provenance: `scripted demo capture, ${source}, ${caseLabel}, ${date}`,
+      source,
+      case: caseLabel,
+      date,
+    });
   }
 
   function skip(id, reason) {
     const notes = [...api.notes];
     api.notes.length = 0;
-    return finish(id, { status: "skipped", reason, notes });
+    return finish(id, { status: "pending", reason, notes });
   }
 
   try {
@@ -986,7 +1023,7 @@ export async function runDeckStills(page, opts) {
       skip("shot-s08-roles", `Role buttons not on screen: ${missingRole.join(", ")}.`);
     } else {
       api.notes.push("Try an example was left unclicked.");
-      await capture("shot-s08-roles", ALL_LOWER);
+      await capture("shot-s08-roles", ALL_LOWER, "All three");
     }
 
     const filledC = api.state.sawWho ? await fillIntake(page, api, CASES.C) : { ok: false, reason: "Who are you? is not on this build, so Case C was not pasted." };
@@ -1005,7 +1042,7 @@ export async function runDeckStills(page, opts) {
         } else {
           const summary = page.locator("summary").filter({ hasText: "Review gaps" }).first();
           if (await visible(summary, 500)) await summary.scrollIntoViewIfNeeded().catch(() => {});
-          await capture("shot-s02-describe", CASES.C.lower);
+          await capture("shot-s02-describe", CASES.C.lower, "Case C");
         }
       }
     }
@@ -1032,7 +1069,7 @@ export async function runDeckStills(page, opts) {
             skip("shot-s04-search", `Section C has no row for ${search.added}. The lookup still was not drawn.`);
           } else {
             await row.scrollIntoViewIfNeeded().catch(() => {});
-            await capture("shot-s04-search", CASES.C.lower);
+            await capture("shot-s04-search", CASES.C.lower, "Case C");
           }
         }
       }
@@ -1056,17 +1093,15 @@ export async function runDeckStills(page, opts) {
       if (!(await visible(heading, 5000))) {
         skip("shot-s06-section-d", "Section D and professional screening is not on this build.");
       } else {
-        const limit = page.getByText("This tool does not write the evidence or the professional opinion.").first();
+        const limit = page.getByText(LIMIT_LINE).first();
         if (await visible(limit, 800)) {
           api.notes.push("The on-screen limit line is visible.");
           await limit.scrollIntoViewIfNeeded().catch(() => {});
         } else {
-          api.notes.push(
-            "The sentence \"This tool does not write the evidence or the professional opinion.\" is not on this screen. It was not added.",
-          );
+          api.notes.push(`The sentence "${LIMIT_LINE}" is not on this screen. It was not added.`);
           await heading.scrollIntoViewIfNeeded().catch(() => {});
         }
-        await capture("shot-s06-section-d", CASES.C.lower);
+        await capture("shot-s06-section-d", CASES.C.lower, "Case C");
       }
     }
 
@@ -1087,7 +1122,7 @@ export async function runDeckStills(page, opts) {
       } else {
         api.notes.push("Check completeness is disabled. It was not clicked. No PDF was downloaded.");
         await check.scrollIntoViewIfNeeded().catch(() => {});
-        await capture("shot-s09-locked", CASES.C.lower);
+        await capture("shot-s09-locked", CASES.C.lower, "Case C");
       }
     }
 
@@ -1119,7 +1154,7 @@ export async function runDeckStills(page, opts) {
             );
           } else {
             await cards.first().scrollIntoViewIfNeeded().catch(() => {});
-            await capture("shot-s03-not-sure", CASES.A.lower);
+            await capture("shot-s03-not-sure", CASES.A.lower, "Case A");
           }
         }
       }
@@ -1159,7 +1194,7 @@ export async function runDeckStills(page, opts) {
             const copy = namedButton(page, ["Copy request", "Copy example request"]);
             if (await visible(copy, 800)) await copy.scrollIntoViewIfNeeded().catch(() => {});
             else api.notes.push("Copy request is not on this screen.");
-            await capture("shot-s07-officer", LOWER.officer);
+            await capture("shot-s07-officer", LOWER.officer, "Case A");
           }
         }
       }
@@ -1167,14 +1202,14 @@ export async function runDeckStills(page, opts) {
 
     skip(
       "shot-s09-scc-form",
-      "The filled SCC form is an engine PDF. Check completeness was not clicked, and this run does not call the engine, so the form was not captured.",
+      "The filled SCC form is an engine PDF. Check completeness was not clicked, so the form was not captured.",
     );
   } catch (error) {
     const reason = `Stills stopped: ${error instanceof Error ? error.message : String(error)}`;
     for (const slot of DECK_STILLS) {
-      if (!byId.has(slot.id)) finish(slot.id, { status: "skipped", reason, notes: [] });
+      if (!byId.has(slot.id)) finish(slot.id, { status: "pending", reason, notes: [] });
     }
   }
 
-  return DECK_STILLS.map((slot) => byId.get(slot.id) || { id: slot.id, file: slot.file, status: "skipped", reason: "Not reached.", notes: [] });
+  return DECK_STILLS.map((slot) => byId.get(slot.id) || { id: slot.id, file: slot.file, status: "pending", reason: "Not reached.", notes: [] });
 }

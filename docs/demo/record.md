@@ -1,6 +1,6 @@
 # Record a demo video
 
-One command boots the Vite app in `web/`, walks the seven shots in `docs/demo/script.md`, and writes an mp4 plus a key frame for each shot that was actually on screen.
+One command boots the Vite app in `web/`, walks the seven shots in #20's demo script, and writes an mp4 plus a key frame for each shot that was actually on screen. `docs/demo/script.md` belongs to #20 (`cursor/demo-video-script-1e38`). This branch does not add that file.
 
 ```bash
 ./scripts/record-demo.sh
@@ -20,7 +20,7 @@ No API key is required. By default the recorder starts `uvicorn engine.api:app` 
 
 Chrome (or `CHROME_PATH`), `ffmpeg`, and `ffprobe` must be on the machine. `ffprobe` checks that the mp4 is H.264 and at least three seconds. The first run installs `playwright-core` under `scripts/demo-record/` and downloads Playwright's ffmpeg into `~/.cache/ms-playwright/ffmpeg-*` (on Linux the binary is `ffmpeg-linux`). That copy only muxes the browser capture. The system `ffmpeg` writes the mp4 and the system `ffprobe` checks it. Chrome is also looked up at the usual Linux Chromium paths and under `/Applications` on macOS. If `web/node_modules` is missing, the same run installs those dependencies.
 
-Burned-in captions name the text on screen. They are not the shot titles. The EXAMPLE DATA label and the caption sit in a band across the top, and the app is inset below that band, so the header subtitle and the footer stay in the frame. Shot 4 is skipped when search does not return `9.9.10.1.(2)`. Shot 5 is skipped when “This tool does not write the evidence or the professional opinion.” is not on screen. Neither line is typed in.
+Burned-in captions name the text on screen. They are not the shot titles. The EXAMPLE DATA label and the caption sit in a reserved band across the top of the frame, in the video and in the stills, and the app is inset below that band. The band does not cover the header subtitle, the footer, or a visible compliance line (“not a finding that the design complies”, or the on-screen “does not decide whether the design complies” line). A frame where that text is covered or pushed out of view is not saved. Shot 4 is skipped, and the log says why, when search does not return `9.9.10.1.(2)`. Shot 5 is skipped, and the log says why, when “Recommendations only. You write the evidence and the answers. This does not decide that the design complies or is safe.” is not on screen. Neither line is typed in. An empty shot 4 or shot 5 is never marked recorded.
 
 `--engine` is the same as the default. `--offline` is the only switch that keeps `/api` closed. An engine the recorder started is stopped when the run ends. An engine that was already listening is left running.
 
@@ -44,7 +44,7 @@ To record a checkout you already have:
 
 ## Keeping steps in sync with the script
 
-Walkthrough steps live in `scripts/demo-record/steps.mjs`. There are seven shots. Each step's id, title, and primary route match `docs/demo/script.md`: the `### Shot N —` heading, and the first hash route on that shot's `**Route:**` line. The burned-in caption describes the screen. The catalog title stays the `### Shot N —` heading.
+Walkthrough steps live in `scripts/demo-record/steps.mjs`. There are seven shots. Each step's id, title, and primary route match the demo script: the `### Shot N —` heading, and the first hash route on that shot's `**Route:**` line. The burned-in caption describes the screen. The catalog title stays the `### Shot N —` heading. The script is read from `origin/cursor/demo-video-script-1e38:docs/demo/script.md`, or from the file given with `--script`.
 
 The camera follows the script's order, not shot numbers. Case C stays open for shots 2, 4, 5, and shot 7's Case C frame. Reset runs at the start of shot 3 and wipes Case C. Shot 7's Case A frame is next, then shot 6. Case B is named on shot 1 and is not walked. Shot 3 holds on the saved open question. Ranked-list, benchmark, and eval stills are not in the app, so they are logged and omitted.
 
@@ -54,8 +54,8 @@ The camera follows the script's order, not shot numbers. Case C stays open for s
 ./scripts/record-demo.sh --stills --branch cursor/e2e-product-flow-4362
 ```
 
-`--stills` writes the deck PNGs named in the screenshot slot list, 1440×900, under `artifacts/deck-stills/`. It does not record the mp4. A slot whose screen is not in the build is skipped and listed in `stills-log.json`. Nothing is drawn in its place. Seeded frames carry the `EXAMPLE DATA` label. The run does not upload a PDF and does not click Check completeness.
+`--stills` writes the deck PNGs named in the screenshot slot list, 1440×900, under `artifacts/deck-stills/`. It does not record the mp4. A slot whose screen is not in the build is `pending` in `stills-log.json`, with the reason. Nothing is drawn in its place. Each captured slot has a provenance caption: source branch@sha, case, and date (`scripted demo capture, <branch>@<sha>, <case>, <date>`). Seeded frames carry the `EXAMPLE DATA` label. The run does not upload a PDF and does not click Check completeness.
 
-`--check-script` diffs the script against the step catalog and exits non-zero on drift. It does not record, including when `--out` is also set. When `docs/demo/script.md` is absent, the check reports that and exits zero. A normal recording prints the same report and still records.
+`--check-script` diffs the script against the step catalog and exits non-zero when they disagree or the script cannot be read. It does not record, including when `--out` is also set. A recording and a `--stills` run use the same check. Drift is a hard failure: the app is not started, and the command exits non-zero. There is no warning-and-continue path.
 
 `node --test scripts/demo-record/sync.test.mjs` checks the parser and that the catalog still lists those seven shots.

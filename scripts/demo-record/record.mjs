@@ -77,7 +77,7 @@ Options
   --out <dir>       Output directory (default artifacts/demo, or artifacts/deck-stills with --stills)
   --hold <ms>       Pause on each recorded shot (default 1600)
   --base <url>      Record an app that is already running
-  --script <file>   Shot list to diff (default docs/demo/script.md)
+  --script <file>   Shot list to diff (default: docs/demo/script.md on #20, cursor/demo-video-script-1e38)
   --stills          Write the deck PNGs at 1440×900 and skip the mp4
   --strict          Exit non-zero unless every shot or still is captured
   --offline         Do not start the engine, and abort /api and port 8000
@@ -362,31 +362,65 @@ async function blockTraffic(page, { offline }) {
   });
 }
 
-function scriptReport(scriptPath) {
-  if (!existsSync(scriptPath)) {
+const SCRIPT_SPEC = "origin/cursor/demo-video-script-1e38:docs/demo/script.md";
+
+function reportScript(markdown, source) {
+  const diff = diffScript(STEPS, markdown);
+  const drifted = diff.problems.length > 0;
+  return {
+    status: drifted ? "drift" : "ok",
+    source,
+    problems: diff.problems,
+    note: drifted
+      ? "The demo script and the recorder steps do not match. This is a hard failure."
+      : `Recorder steps match ${source}.`,
+  };
+}
+
+async function loadScript(args) {
+  if (args.script) {
+    const path = resolve(args.script);
+    if (!existsSync(path)) {
+      return {
+        status: "missing",
+        source: args.script,
+        problems: [`Script file not found: ${path}`],
+        note: `Script file not found: ${args.script}. Leave --script unset to read #20, or pass a shot list.`,
+      };
+    }
+    return reportScript(readFileSync(path, "utf8"), args.script);
+  }
+  try {
+    await run("git", ["fetch", "--quiet", "origin", "cursor/demo-video-script-1e38"], { cwd: repoRoot });
+  } catch (error) {
+    const line = (error instanceof Error ? error.message : String(error)).split("\n")[0];
+    console.log(`Could not refresh cursor/demo-video-script-1e38 (${line}). Reading ${SCRIPT_SPEC}.`);
+  }
+  try {
+    const { stdout } = await run("git", ["show", SCRIPT_SPEC], { cwd: repoRoot });
+    return reportScript(stdout, SCRIPT_SPEC);
+  } catch (error) {
+    const line = (error instanceof Error ? error.message : String(error)).split("\n")[0];
     return {
-      status: "absent",
-      path: scriptPath,
-      problems: [],
-      note: "docs/demo/script.md is not on this branch. Step ids still follow that shot list, and --check-script will diff them once the file is present.",
+      status: "missing",
+      source: SCRIPT_SPEC,
+      problems: [`Could not read ${SCRIPT_SPEC}. ${line}`],
+      note: `Could not read the demo script from #20 (${SCRIPT_SPEC}).`,
     };
   }
-  const diff = diffScript(STEPS, readFileSync(scriptPath, "utf8"));
-  return {
-    status: diff.problems.length ? "drift" : "ok",
-    path: scriptPath,
-    problems: diff.problems,
-    note: diff.problems.length ? "The recorder steps and the shot list disagree." : "Recorder steps match the shot list.",
-  };
 }
 
 function printStills(results) {
   const captured = results.filter((slot) => slot.status === "captured");
-  const skipped = results.filter((slot) => slot.status !== "captured");
+  const pending = results.filter((slot) => slot.status !== "captured");
   console.log(`\nCaptured ${captured.length} of ${results.length} deck stills.`);
-  for (const slot of captured) console.log(`  captured  ${slot.file}`);
-  for (const slot of skipped) {
-    console.log(`  skipped   ${slot.file}`);
+  for (const slot of captured) {
+    console.log(`  captured  ${slot.file}`);
+    if (slot.provenance) console.log(`            ${slot.provenance}`);
+  }
+  for (const slot of pending) {
+    const label = String(slot.status || "pending").padEnd(8);
+    console.log(`  ${label} ${slot.file}`);
     console.log(`            ${slot.reason}`);
   }
 }
@@ -474,9 +508,16 @@ async function captureDeckStills({ args, outDir, base, webDir, gitInfo, engineSe
       await page.goto(`${base.replace(/\/$/, "")}/?reset`, { waitUntil: "domcontentloaded", timeout: 30000 });
       await h1Ready(page);
       await page.evaluate(() => document.fonts?.ready);
-      const results = await runDeckStills(page, { outDir });
+      const recordedAt = new Date().toISOString();
+      const sourceBranch = args.branch || (gitInfo.branch && gitInfo.branch !== "HEAD" ? gitInfo.branch : "detached");
+      const results = await runDeckStills(page, {
+        outDir,
+        sourceBranch,
+        sourceSha: gitInfo.sha,
+        recordedAt,
+      });
       const log = {
-        recordedAt: new Date().toISOString(),
+        recordedAt,
         mode: "stills",
         networkMode: engineSession.networkMode,
         engineState: engineSession.engineState,
@@ -519,15 +560,15 @@ async function main() {
     console.log(HELP);
     return;
   }
-  const scriptPath = resolve(args.script || join(repoRoot, "docs/demo/script.md"));
-  const sync = scriptReport(scriptPath);
+  const sync = await loadScript(args);
   console.log(sync.note);
   for (const problem of sync.problems) console.log(`  ${problem}`);
-  if (args.checkScript) {
-    if (sync.status === "drift") process.exitCode = 1;
+  if (sync.status !== "ok") {
+    process.exitCode = 1;
+    if (!args.checkScript) console.log("Stopped before recording.");
     return;
   }
-  if (sync.status === "drift") console.log("Recording anyway. Fix the shot list or the step catalog, then re-run --check-script.");
+  if (args.checkScript) return;
 
   let cleanup = async () => {};
   let webDir = resolve(args.web || join(repoRoot, "web"));

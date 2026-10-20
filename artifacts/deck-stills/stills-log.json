@@ -1,5 +1,5 @@
 {
-  "recordedAt": "2026-10-20T20:59:59.943Z",
+  "recordedAt": "2026-10-20T21:08:32.351Z",
   "mode": "stills",
   "networkMode": "engine",
   "engineState": "started",
@@ -7,19 +7,19 @@
     "width": 1440,
     "height": 900
   },
-  "webDir": "/tmp/batatis-record-cursor-e2e-product-flow-4362-jlUtYl/checkout/web",
+  "webDir": "/tmp/batatis-record-cursor-e2e-product-flow-4362-7pWfPW/checkout/web",
   "git": {
     "sha": "4a4c1222e6fc4dacfd1c71039f1d30fec712f0ae",
     "branch": "HEAD",
     "requestedBranch": "cursor/e2e-product-flow-4362"
   },
-  "baseUrl": "http://127.0.0.1:41689/",
+  "baseUrl": "http://127.0.0.1:33433/",
   "engine": "Started uvicorn engine.api:app on 127.0.0.1:8000 from the recorded checkout. Browser requests to /api are proxied to it. Code search returned 503. The recorder did not call a model API. No PDF is uploaded.",
   "scriptSync": {
     "status": "ok",
-    "path": "/workspace/docs/demo/script.md",
+    "source": "origin/cursor/demo-video-script-1e38:docs/demo/script.md",
     "problems": [],
-    "note": "Recorder steps match the shot list."
+    "note": "Recorder steps match origin/cursor/demo-video-script-1e38:docs/demo/script.md."
   },
   "pageErrors": [],
   "downloads": [],
@@ -32,7 +32,11 @@
       ],
       "status": "captured",
       "width": 1440,
-      "height": 900
+      "height": 900,
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362@4a4c122, All three, 2026-10-20",
+      "source": "cursor/e2e-product-flow-4362@4a4c122",
+      "case": "All three",
+      "date": "2026-10-20"
     },
     {
       "id": "shot-s02-describe",
@@ -45,7 +49,11 @@
       ],
       "status": "captured",
       "width": 1440,
-      "height": 900
+      "height": 900,
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362@4a4c122, Case C, 2026-10-20",
+      "source": "cursor/e2e-product-flow-4362@4a4c122",
+      "case": "Case C",
+      "date": "2026-10-20"
     },
     {
       "id": "shot-s03-not-sure",
@@ -59,7 +67,11 @@
       ],
       "status": "captured",
       "width": 1440,
-      "height": 900
+      "height": 900,
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362@4a4c122, Case A, 2026-10-20",
+      "source": "cursor/e2e-product-flow-4362@4a4c122",
+      "case": "Case A",
+      "date": "2026-10-20"
     },
     {
       "id": "shot-s04-search",
@@ -68,55 +80,59 @@
         "Answered Not sure on 1 Your words card(s): What you described. Did not answer Yes or No.",
         "Search for \"bedroom window unobstructed\" did not report a result. No article id was typed in."
       ],
-      "status": "skipped",
+      "status": "pending",
       "reason": "Search did not show a returned row for 9.9.10.1.(2). No article id was typed in, and the Section C lookup was not drawn."
     },
     {
       "id": "shot-s04-benchmark",
       "file": "shot-s04-benchmark.png",
       "notes": [],
-      "status": "skipped",
+      "status": "pending",
       "reason": "The ranked list and benchmark card are not in this app build. The still was not drawn."
     },
     {
       "id": "shot-s05-eval",
       "file": "shot-s05-eval.png",
       "notes": [],
-      "status": "skipped",
+      "status": "pending",
       "reason": "The eval still is not a screen in this build. #/accuracy was not opened, and the figures were not drawn."
     },
     {
       "id": "shot-s06-section-d",
       "file": "shot-s06-section-d.png",
       "notes": [
-        "The sentence \"This tool does not write the evidence or the professional opinion.\" is not on this screen. It was not added.",
+        "The sentence \"Recommendations only. You write the evidence and the answers. This does not decide that the design complies or is safe.\" is not on this screen. It was not added.",
         "Header subtitle visible: Variance template · Sections A, B and process fields",
         "Footer visible: Online review unavailable. Showing a limited check of fields in this browser. Draft saved in this browser. 13 required items need attention. Check completeness stays available so you can review them. The official PDF stays closed until they are cleared. Back Save draft Check completeness"
       ],
       "status": "captured",
       "width": 1440,
-      "height": 900
+      "height": 900,
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362@4a4c122, Case C, 2026-10-20",
+      "source": "cursor/e2e-product-flow-4362@4a4c122",
+      "case": "Case C",
+      "date": "2026-10-20"
     },
     {
       "id": "shot-s07-officer",
       "file": "shot-s07-officer.png",
       "notes": [],
-      "status": "skipped",
+      "status": "pending",
       "reason": "Officer review opened without a package version control."
     },
     {
       "id": "shot-s09-locked",
       "file": "shot-s09-locked.png",
       "notes": [],
-      "status": "skipped",
+      "status": "pending",
       "reason": "Check completeness is enabled while gaps are open. The disabled control is not on this build, and the still was not faked."
     },
     {
       "id": "shot-s09-scc-form",
       "file": "shot-s09-scc-form.png",
       "notes": [],
-      "status": "skipped",
-      "reason": "The filled SCC form is an engine PDF. Check completeness was not clicked, and this run does not call the engine, so the form was not captured."
+      "status": "pending",
+      "reason": "The filled SCC form is an engine PDF. Check completeness was not clicked, so the form was not captured."
     }
   ]
 }

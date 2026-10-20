@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 import { diffScript, parseDemoScript } from "./sync.mjs";
@@ -12,8 +13,8 @@ const EXPECTED = [
   ["3", "Not sure (0:23)", "#/"],
   ["4", "Code identification (0:45)", "#/section-c"],
   ["5", "Section D, then the limit (0:24 + 0:08)", "#/application?tab=alt"],
-  ["6", "Officer, one planted package (0:36)", "#/officer"],
-  ["7", "Authority, gaps still open (0:16)", "#/describe"],
+  ["6", "Officer review of the open application (0:36)", "#/officer"],
+  ["7", "Authority, gaps open, then the draft variance-form PDF (0:16)", "#/describe"],
 ];
 
 const SCRIPT_EXCERPT = `
@@ -32,10 +33,10 @@ const SCRIPT_EXCERPT = `
 ### Shot 5 — Section D, then the limit (0:24 + 0:08)
 - **Route:** \`#/application?tab=alt\`, then \`#/application?tab=D\`
 
-### Shot 6 — Officer, one planted package (0:36)
+### Shot 6 — Officer review of the open application (0:36)
 - **Route:** \`#/officer\`
 
-### Shot 7 — Authority, gaps still open (0:16)
+### Shot 7 — Authority, gaps open, then the draft variance-form PDF (0:16)
 - **Route:** \`#/describe\` for the authority select, then \`#/application\`
 `;
 
@@ -90,9 +91,16 @@ test("shot 4 and shot 5 skip when their subject is not on screen", () => {
   assert.match(shot4, /offline sample/);
   assert.match(shot5, /LIMIT_LINE/);
   assert.match(shot5, /is not on screen/);
+  assert.match(shot4, /return skipped/);
+  assert.match(shot5, /return skipped/);
   assert.match(source, /demo-recorder-band/);
+  assert.match(source, /not a finding that the design complies/);
   assert.equal(source.includes('top: "12px"'), false);
   assert.equal(source.includes('bottom: "16px"'), false);
+  const stills = source.slice(source.indexOf("export async function runDeckStills"));
+  assert.match(stills, /status: "pending"/);
+  assert.match(stills, /provenance:/);
+  assert.equal(stills.includes('status: "skipped"'), false);
 });
 
 test("the recorder uses the engine unless --offline is set", () => {
@@ -102,6 +110,9 @@ test("the recorder uses the engine unless --offline is set", () => {
   assert.match(source, /networkMode: engineSession\.networkMode/);
   assert.match(source, /engineState: engineSession\.engineState/);
   assert.equal(source.includes("blockEngineAndModels"), false);
+  assert.equal(source.includes("Recording anyway"), false);
+  assert.match(source, /origin\/cursor\/demo-video-script-1e38:docs\/demo\/script\.md/);
+  assert.match(source, /sync\.status !== "ok"/);
 });
 
 test("the walk does not upload a PDF", () => {
@@ -147,10 +158,15 @@ test("diff accepts the recorder against the 7-shot list", () => {
   assert.deepEqual(diff.problems, []);
 });
 
-test("diff accepts the recorder against docs/demo/script.md", () => {
-  const path = new URL("../../docs/demo/script.md", import.meta.url);
-  assert.equal(existsSync(path), true, "docs/demo/script.md is required for --check-script");
-  const diff = diffScript(STEPS, readFileSync(path, "utf8"));
+test("this branch does not carry docs/demo/script.md", () => {
+  assert.equal(existsSync(new URL("../../docs/demo/script.md", import.meta.url)), false);
+});
+
+test("diff accepts the recorder against #20's script", () => {
+  const markdown = execFileSync("git", ["show", "origin/cursor/demo-video-script-1e38:docs/demo/script.md"], {
+    encoding: "utf8",
+  });
+  const diff = diffScript(STEPS, markdown);
   assert.equal(diff.shots.length, 7);
   assert.deepEqual(diff.problems, []);
 });
