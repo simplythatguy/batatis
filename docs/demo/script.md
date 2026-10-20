@@ -2,7 +2,7 @@
 
 Edit clocks below. Spoken lines are sized for that slot. If a click runs long, drop a sentence from the end of the narration. Keep the empty fields, the on-screen line “Recommendations only. You write the evidence and the answers. This does not decide that the design complies or is safe.”, and the officer line “This does not decide whether the design complies or is safe.”
 
-This cut is recordable on PR #16’s screens at `f66a461` (re-check against #16's merge sha before recording), plus three stills you add in the edit: the ranked list, the benchmark card, and the eval card. The app does not show a ranked identify list, a benchmark card, or the eval numbers. After #16 merges, re-check the Code check note (“Article ranking isn't available on this engine yet…”) and the gap labels once more.
+This cut is recordable on PR #16’s screens at `4a4c122` (re-check against #16's merge sha before recording), plus three stills you add in the edit: the ranked list, the benchmark card, and the eval card. The app does not show a ranked identify list, a benchmark card, or the eval numbers. After #16 merges, re-check the Code check note (“Article ranking isn't available on this engine yet…”) and the gap labels once more.
 
 | Criterion | Time | Where it is |
 | --- | --- | --- |
@@ -20,7 +20,7 @@ Dropped from the previous draft: the refusal shot (she asks, Batatis refuses) an
 
 | Source | Branch | What you take from it |
 | --- | --- | --- |
-| [PR #16](https://github.com/simplythatguy/batatis/pull/16) | `cursor/e2e-product-flow-4362` @ `f66a461` (re-check against #16's merge sha before recording) | The screens you film: `#/`, `#/describe`, `#/code-check`, `#/section-c`, `#/application`, `#/officer`. Run the engine from this branch. |
+| [PR #16](https://github.com/simplythatguy/batatis/pull/16) | `cursor/e2e-product-flow-4362` @ `4a4c122` (re-check against #16's merge sha before recording) | The screens you film: `#/`, `#/describe`, `#/code-check`, `#/section-c`, `#/application`, `#/officer`. Run the engine from this branch. |
 | [PR #12](https://github.com/simplythatguy/batatis/pull/12) | `backend/identify-api` | The ranked-list still and the `benchmark_acceptable_solution` still, from an identify payload for the pasted text. The published top-1 line on the eval still. Do not run this engine while filming. |
 
 Run `web/` from PR #16. Run the engine from PR #16’s branch, not #12. #12’s `/cases/{id}/identify` adds unanswered ranked cards, which changes the Your-words card counts and blocks **Continue to Section C**. Do not film `dev` and call it this demo. On `dev` the app opens a preloaded NorthCore fixture, there is no Who screen, no Search, and no “Add to this check”. Officer review is the “Not built yet” card. The application button on `dev` already reads **Check completeness**.
@@ -61,10 +61,11 @@ Shots 2 and 4 show the Case C line. Shot 3 shows the Case A line. Shot 6 shows t
 
 ## Setup
 
-1. App from PR #16 at `f66a461` (re-check against #16's merge sha before recording): `cd web && npm run dev`. Run the engine from PR #16’s branch, not #12. Engine on `http://127.0.0.1:8000` so `/api` proxies. Width about 1440.
+1. App from PR #16 at `4a4c122` (re-check against #16's merge sha before recording): `cd web && npm run dev`. Run the engine from PR #16’s branch, not #12. Engine on `http://127.0.0.1:8000` so `/api` proxies. Width about 1440.
 2. Start at Who with **Reset case**. Typing `#/` while a case is open opens Describe, not Who. On Who there is no sidebar nav, only the case card and **Reset case**. The title in the header is still **Who are you?**
 3. Set **Which authority will review this?** before Continue. The note under the select is “Nothing is sent until you pick. You can change it later.” Picking Edmonton clears **Reviewing authority missing**. The select exists only on Describe.
 4. `#/officer` shows Who unless a case is open. Any open case is enough for shot 6.
+5. If any screen shows “Online review unavailable”, “Failed to fetch” or “Lookup failed”, stop. Do not film it. Do not record with #28 until it can reach the engine.
 
 ## Recording order
 
@@ -127,9 +128,9 @@ The gap strip is collapsed to “N blocking · N warning” until you open **Rev
 - **Case label:** `EXAMPLE DATA · Case C · Homebuilder`
 - **Route:** `#/describe`
 
-**On-screen action.** Click **Homebuilder**. The header is “What are you building?” Paste the Case C paragraph. Set **Which authority will review this?** to Edmonton before Continue. Leave **Paste text from your plans** empty. Open **Review gaps** and point at **Owner missing**, **Mailing address missing**, and **Legal description missing**. Permit stays empty. It is optional and has no chip. Open the fact ledger. It shows **What you described** and **Proposed alternative**, both from Your description, plus a **Storeys** fact. Storeys is a proposed fact, with **Confirm** and **Not right**. Leave it unconfirmed. That adds a blocking gap labelled **Confirm storeys**. Do not narrate a slab STANDATA, a roof STANDATA, or a supplier quote. That classification is not on this build.
+**On-screen action.** Click **Homebuilder**. The header is “What are you building?” Paste the Case C paragraph. Set **Which authority will review this?** to Edmonton before Continue. Leave **Paste text from your plans** empty. Open **Review gaps** and point at **Owner missing**, **Mailing address missing**, and **Legal description missing**. Permit stays empty. It is optional and has no chip. Open the fact ledger. It shows **What you described** and **Proposed alternative**, both from Your description, a **Municipal address** fact reading “0000 Example Crescent NW, Edmonton”, plus a **Storeys** fact. Storeys is a proposed fact, with **Confirm** and **Not right**. Leave it unconfirmed. That adds a blocking gap labelled **Confirm storeys**. Do not narrate a slab STANDATA, a roof STANDATA, or a supplier quote. That classification is not on this build.
 
-**Narration.** “Priya’s description is a two-storey Edmonton infill. The window opening on screen is 400 by 780 millimetres. Owner, mailing address, and legal description are missing. Storeys is still unconfirmed.”
+**Narration.** “Priya’s two-storey Edmonton infill. Her bedroom window opens 400 by 780 millimetres. Owner, mailing address and legal description are missing.”
 
 ---
 
@@ -141,13 +142,13 @@ The gap strip is collapsed to “N blocking · N warning” until you open **Rev
 
 Film this after shot 7’s Case C frame. **Reset case** here wipes Case C. That is the point of the recording order.
 
-**On-screen action.** **Reset case.** The note reads “Cleared. Nothing from the previous case is kept.” Click **Manufacturer**. Paste the Case A paragraph. Set the authority to Edmonton before Continue. Leave **Paste text from your plans** empty. Open **Review gaps**: **Owner missing**, **Mailing address missing**, **Legal description missing**. The ledger is **What you described** and **Proposed alternative** only. Case A states no storeys, so there is no Storeys fact.
+**On-screen action.** **Reset case.** The note reads “Cleared. Nothing from the previous case is kept.” Click **Manufacturer**. Paste the Case A paragraph. Set the authority to Edmonton before Continue. Leave **Paste text from your plans** empty. Open **Review gaps**: **Owner missing**, **Mailing address missing**, **Legal description missing**. The ledger is **What you described**, **Proposed alternative**, and a **Municipal address** fact. That fact reads “0000 Example Way NW, Edmonton. Owner not decided. No legal description. No permit yet.” Case A states no storeys, so there is no Storeys fact.
 
 Click **Continue to code check**. The note on this engine is “Article ranking isn't available on this engine yet. These cards are questions from your description.” Two **Your words** cards are on screen: **Sheathing membrane** and **Storey count**. Each says “From what you wrote. Not a ranked article.” Answer **Not sure** on both. Do not answer Yes. Unanswered cards block **Continue to Section C**.
 
 **0:47–0:51.** Hold 3–4 seconds on the question saved under a Not sure answer. The label is **Open question**, then the card’s question, then “Logged as an open question.” That is the Not sure answer. Do not answer Yes or No.
 
-**Narration.** “Mira’s description names a 50 millimetre panel, vinyl nailed into the facer, and one Edmonton house. Those two cards are her words. Not sure on both. They are not ranked articles.”
+**Narration.** “Mira’s description names a 50 millimetre panel, vinyl nailed into the facer, and one Edmonton house. The address fact takes the rest of that paste with it. Those two cards are her words. Not sure on both. They are not ranked articles.”
 
 ---
 
@@ -197,7 +198,7 @@ If there is no engine case, the note is “Save the draft first. Then this page 
 
 Section D has evidence fields and professional-question dropdowns. Leave them untouched, and don't Save. Do not type into an evidence box. Do not click **Save this evidence**.
 
-Read “Practice of engineering: {flag}. {sentence}” as shown. On this build a depends flag reads "Practice of engineering: depends. The screen needs more facts. This is not a licence decision." A no flag reads "Practice of engineering: no. The screen did not indicate one." Read it as shown. `at_stake` and a per-issue `practice_of_engineering` value are on a card only when that issues list is rendered. Speak them only when those words are on screen. Do not attach a file, a letter, or a drawing. An attachment is not what clears the flag. Nothing is uploaded in this recording.
+Read the practice line as shown. A yes reads "Practice of engineering is indicated. A registered professional is needed. This is not a licence decision." A depends reads "More facts are needed before this screen can say whether practice of engineering applies. This is not a licence decision." A no reads "The screen did not indicate practice of engineering." Read it as shown. `at_stake` and a per-issue `practice_of_engineering` value are on a card only when that issues list is rendered. Speak them only when those words are on screen. Do not attach a file, a letter, or a drawing. An attachment is not what clears the flag. Nothing is uploaded in this recording.
 
 **1:36–2:00 narration.** “Section D says what the evidence has to address, in the words on the card. Risk, mitigations, and assumptions stay empty. A person writes them. They are process fields.”
 
@@ -240,11 +241,11 @@ Record the Case C frame in step 2 of the recording order, before Reset. Record t
 
 **On-screen action.** Cut between the Describe authority select on Case C (Edmonton) and Case A (Edmonton is what you set; Calgary is the other option in the same select). The note under the select is “Nothing is sent until you pick. You can change it later.” Picking Edmonton clears **Reviewing authority missing**. The sidebar may show the raw id in lowercase, such as “Homebuilder · edmonton”.
 
-On Application, the tabs are Section A, Section B, Alternative path, and Section D. Open **Review gaps** so **Owner missing**, **Confirm storeys** on Case C, and the six “… empty” rows are visible. While those gaps are open the footer reads "N required items need attention." Do not read N as a score.
+On Application, the tabs are Section A, Section B, Alternative path, and Section D. Open **Review gaps** so **Owner missing**, **Confirm storeys** on Case C, and the six “… empty” rows are visible. While those gaps are open the footer reads "N required items need attention. Check completeness stays available so you can review them. The official PDF stays closed until they are cleared." Do not read N as a score.
 
-Then click **Check completeness**. It opens a review dialog. While blocking gaps are open, **Download application PDF** stays disabled; it is enabled only when the engine reports 0 blocking items. Click **Download draft PDF**. That is the engine-filled Safety Codes Council variance form: the 5-page Oct 6, 2026 form plus engine-generated attachment pages (7 for Unc's 3b case; not the brief's Appendix 1). The saved name is the filename the engine returns. The dialog shows it as “Download started:” plus that name. Do not call the attachment pages the brief's Appendix 1. **Download text record** is a separate .txt file. It is not this PDF, and it is not the Safety Codes Council form. The dialog prints “This is an administrative completeness check. It does not decide whether the design complies or is safe.” After the draft is ready, read the sentence that is printed. “This PDF is for administrative review. It does not confirm that the design complies or is safe.” is the line printed when the application PDF is ready, not after the draft.
+Then click **Check completeness**. It opens a review dialog. While blocking gaps are open, **Download application PDF** stays disabled; it is enabled only when the engine reports 0 blocking items. Click **Download draft PDF**. That is the engine-filled Safety Codes Council variance form: the 5-page Oct 6, 2026 form plus engine-generated attachment pages (7 for Unc's 3b case; not the brief's Appendix 1). The saved name is the filename the engine returns. The dialog shows it as “Download started:” plus that name. Do not call the attachment pages the brief's Appendix 1. **Download text record** is a separate .txt file. It is not this PDF, and it is not the Safety Codes Council form. The dialog prints “This is an administrative completeness check. It does not decide whether the design complies or is safe.” After the draft downloads, the screen shows “This draft may have missing or unconfirmed information.”
 
-**Narration.** “Edmonton is selected, and that clears Reviewing authority missing. Check completeness lists what is still missing. The dialog says: This is an administrative completeness check. It does not decide whether the design complies or is safe. When the application PDF is ready, the screen says: This PDF is for administrative review. It does not confirm that the design complies or is safe.”
+**Narration.** “Edmonton clears the authority gap. Check completeness downloads a draft of the Council’s variance form. The dialog says: This is an administrative completeness check. It does not decide whether the design complies or is safe.”
 
 ## If you have to shorten
 
