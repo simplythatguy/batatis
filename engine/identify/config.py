@@ -1,6 +1,7 @@
 """Commit policy and model pins for code identification.
 
-The 0.75 probability threshold and the cap of 3 commits are placeholder_uncalibrated.
+The 0.75 probability threshold and the cap of 3 suggestions are placeholder_uncalibrated.
+They set the identify `suggested` hint. They do not accept an article onto a case.
 A later file at evals_dev/human_key/calibration.json replaces them only when it says
 `"status": "calibrated"`. This module does not create that directory or invent its contents.
 

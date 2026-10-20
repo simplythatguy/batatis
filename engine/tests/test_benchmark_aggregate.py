@@ -10,11 +10,11 @@ from engine.identify.benchmark import (
 )
 
 
-def _result(order, committed, intake):
+def _result(order, suggested, intake):
     return {
         'mode': 'openai',
         'intake_action': intake,
-        'articles': [{'provision': art, 'committed': art in committed} for art in order],
+        'articles': [{'provision': art, 'suggested': art in suggested} for art in order],
         'trace': {
             'ranked_ids': order,
             'usage': {
@@ -90,15 +90,15 @@ def test_every_repeat_is_scored_and_no_gold_commits_are_separate(tmp_path):
     assert [row['recall5'] for row in repeats] == [1.0, 1.0, 1.0]
     assert repeats[2]['mrr'] == pytest.approx(1 / 3)
     assert [row['ask_rate'] for row in repeats] == [0.5, 0.5, 1.0]
-    assert [row['committed_errors_gold'] for row in repeats] == [1, 0, 0]
-    assert [row['commits_no_gold'] for row in repeats] == [1, 0, 0]
+    assert [row['suggested_errors_gold'] for row in repeats] == [1, 0, 0]
+    assert [row['suggestions_no_gold'] for row in repeats] == [1, 0, 0]
     assert variant['series']['top1']['mean'] == pytest.approx(2 / 3)
     assert variant['series']['top1']['min'] == 0.0 and variant['series']['top1']['max'] == 1.0
     assert variant['series']['top1']['mean'] != repeats[0]['top1']
     assert variant['series']['mrr']['mean'] == pytest.approx((1 + 1 + 1 / 3) / 3)
     assert variant['series']['ask_rate']['mean'] == pytest.approx(2 / 3)
-    assert variant['series']['committed_errors_gold']['mean'] == pytest.approx(1 / 3)
-    assert variant['series']['commits_no_gold']['mean'] == pytest.approx(1 / 3)
+    assert variant['series']['suggested_errors_gold']['mean'] == pytest.approx(1 / 3)
+    assert variant['series']['suggestions_no_gold']['mean'] == pytest.approx(1 / 3)
     assert variant['stability'] == pytest.approx(0.5)
     assert variant['majority_top1_accuracy'] == pytest.approx(1.0)
 
@@ -108,11 +108,11 @@ def test_every_repeat_is_scored_and_no_gold_commits_are_separate(tmp_path):
     assert gold['majority_top1'] == '9.10.15.5.'
     assert gold['stable'] is False
     assert [rep['top5'][0] for rep in gold['repeats']] == ['9.10.15.5.', '9.10.15.5.', '9.8.8.8.']
-    assert gold['repeats'][0]['committed'] == ['9.10.15.5.', '9.99.99.99.']
+    assert gold['repeats'][0]['suggested'] == ['9.10.15.5.', '9.99.99.99.']
     assert [rep['intake'] for rep in gold['repeats']] == ['proceed_conditionally', 'proceed_conditionally', 'ask']
     nogold = next(row for row in variant['cases'] if row['id'] == 'no-gold-case')
     assert nogold['gold'] == [] and nogold['stable'] is True
-    assert nogold['repeats'][0]['committed'] == ['9.1.1.1.']
+    assert nogold['repeats'][0]['suggested'] == ['9.1.1.1.']
     assert variant['returned_models']['rerank'] == ['gpt-4.1-mini-2025-04-14']
     assert variant['returned_models']['verifier'] == ['gpt-4.1-2025-04-14']
     ask = variant['groups'][ASK_GROUP]
@@ -121,7 +121,7 @@ def test_every_repeat_is_scored_and_no_gold_commits_are_separate(tmp_path):
     assert variant['groups'][MUST_GROUP]['series']['top1']['mean'] == variant['series']['top1']['mean']
 
     csv_text = (tmp_path / 'summary.csv').read_text()
-    assert 'committed_errors_gold' in csv_text and 'commits_no_gold' in csv_text
+    assert 'suggested_errors_gold' in csv_text and 'suggestions_no_gold' in csv_text
     assert '1.4097' in csv_text and '2026-10-19' in csv_text
 
 
@@ -152,20 +152,20 @@ def test_sentence_gold_matches_article_ids_and_ask_group_stays_separate(tmp_path
     variant = payload['variants'][0]
     assert variant['n_gold'] == 1 and variant['n_no_gold'] == 1 and variant['n'] == 3
     assert [row['top1'] for row in variant['per_repeat']] == [1.0, 1.0]
-    assert [row['committed_errors_gold'] for row in variant['per_repeat']] == [0, 0]
-    assert [row['commits_no_gold'] for row in variant['per_repeat']] == [1, 1]
+    assert [row['suggested_errors_gold'] for row in variant['per_repeat']] == [0, 0]
+    assert [row['suggestions_no_gold'] for row in variant['per_repeat']] == [1, 1]
     ask = variant['groups'][ASK_GROUP]
     assert ask['n'] == 1 and ask['note'] == ASK_NOTE and ask['label'] == GOLD_LABEL
     assert [row['top1'] for row in ask['per_repeat']] == [1.0, 0.0]
     assert [row['recall5'] for row in ask['per_repeat']] == [1.0, 0.0]
-    assert [row['committed_errors_ask'] for row in ask['per_repeat']] == [0, 1]
+    assert [row['suggested_errors_ask'] for row in ask['per_repeat']] == [0, 1]
     assert variant['groups'][MUST_GROUP]['series']['top1']['mean'] == 1.0
     assert variant['groups'][MUST_GROUP]['series']['top1']['mean'] != ask['series']['top1']['mean']
     assert 'sentence_id' in payload['gold_provenance'] or '9.25.5.2.(1)' in payload['gold_provenance']
     public = next(row for row in variant['cases'] if row['id'] == 'ask_case')
     assert public['group'] == ASK_GROUP
     assert public['repeats'][0]['top5'][0] == '9.25.5.2.'
-    assert public['repeats'][0]['committed'] == ['9.9.10.1.']
+    assert public['repeats'][0]['suggested'] == ['9.9.10.1.']
     rows = list(csv_rows(tmp_path / 'summary.csv'))
     headline = [row for row in rows if row['group'] == MUST_GROUP and row['variant'] == variant['name']]
     ask_rows = [row for row in rows if row['group'] == ASK_GROUP and row['variant'] == variant['name']]
@@ -173,8 +173,8 @@ def test_sentence_gold_matches_article_ids_and_ask_group_stays_separate(tmp_path
     assert all(row['n_gold'] == '1' for row in headline)
     assert all(row['n'] == '1' and row['n_gold'] == '' for row in ask_rows)
     assert ask_rows[0]['note'] == ASK_NOTE
-    assert [row['committed_errors_ask'] for row in ask_rows if row['row'] == 'repeat'] == ['0', '1']
-    assert headline[0]['committed_errors_ask'] == ''
+    assert [row['suggested_errors_ask'] for row in ask_rows if row['row'] == 'repeat'] == ['0', '1']
+    assert headline[0]['suggested_errors_ask'] == ''
 
 
 def csv_rows(path):

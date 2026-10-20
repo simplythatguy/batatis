@@ -20,7 +20,7 @@ Variants:
 Leave-one-family-out does not change these ranks: identification does not read the
 precedent index.
 
-Every repeat is scored. The printed top-1, recall@5, MRR, ask rate and commit
+Every repeat is scored. The printed top-1, recall@5, MRR, ask rate and suggestion
 counts are the mean, with min, max and the per-repeat values.
 
 Two groups are reported and never pooled:
@@ -28,9 +28,9 @@ Two groups are reported and never pooled:
 - scored_must_cite is the headline. Gold is must_cite only.
 - scored_ask_identify_gold scores ask cases that carry gold.identify_gold.
   It measures retrieval of the primary article. It does not decide that the
-  article applies. Its committed errors are a separate count.
+  article applies. Its suggested errors are a separate count.
 
-A case with neither list is unscored. A commit on it is commits_no_gold, not
+A case with neither list is unscored. A suggestion on it is suggestions_no_gold, not
 an error. Article match uses the leading N.N.N.N. id, so a sentence such as
 9.25.5.2.(1) matches the ranked article 9.25.5.2.
 """
@@ -55,8 +55,8 @@ if str(ROOT) not in sys.path:
 PRICE_FLOOR_CAD = 125.0
 ARTICLE = re.compile(r'(\d+\.\d+\.\d+\.\d+\.)')
 SECRET_ENV = re.compile(r'(KEY|TOKEN|SECRET|PASSWORD)', re.I)
-METRIC_KEYS = ('top1', 'recall5', 'mrr', 'ask_rate', 'committed_errors_gold', 'commits_no_gold')
-ASK_METRIC_KEYS = ('top1', 'recall5', 'mrr', 'committed_errors_ask')
+METRIC_KEYS = ('top1', 'recall5', 'mrr', 'ask_rate', 'suggested_errors_gold', 'suggestions_no_gold')
+ASK_METRIC_KEYS = ('top1', 'recall5', 'mrr', 'suggested_errors_ask')
 ASK_GROUP = 'scored_ask_identify_gold'
 MUST_GROUP = 'scored_must_cite'
 ASK_NOTE = ('retrieval of the candidate article on ask cases; '
@@ -137,8 +137,8 @@ def split_identify_gold(entries) -> tuple[list[str], list[dict], list[str]]:
     """Primary benchmark articles, their role rows, and secondary articles.
 
     Only ``role: benchmark`` is the retrieval target. ``role: secondary`` is
-    recorded and is not a recall target. A commit of a secondary article is
-    not a committed error.
+    recorded and is not a recall target. A suggestion of a secondary article is
+    not a suggested error.
     """
     primary = [row for row in entries or [] if row.get('role') == 'benchmark']
     secondary = [row for row in entries or [] if row.get('role') == 'secondary']
@@ -181,10 +181,11 @@ def _percentile(values: list[float], pct: float) -> float | None:
 
 
 def repeat_metrics(rows: list[dict]) -> dict:
-    """Score one repeat. `rows` each have gold, order, intake, and committed.
+    """Score one repeat. `rows` each have gold, order, intake, and suggested.
 
     Top-1, recall@5 and MRR use only rows whose gold list is non-empty.
-    A commit on a no-gold row is `commits_no_gold`, not an error.
+    A suggestion on a no-gold row is `suggestions_no_gold`, not an error.
+    `suggested` is the would-suggest hint. It is not a case acceptance.
     """
     n = len(rows)
     scored = [row for row in rows if row['gold']]
@@ -204,23 +205,23 @@ def repeat_metrics(rows: list[dict]) -> dict:
     else:
         top1 = recall5 = mrr = None
     errors_gold = 0
-    commits_no_gold = 0
+    suggestions_no_gold = 0
     n_ask = 0
     for row in rows:
         if row['gold']:
             gold = set(row['gold'])
-            errors_gold += sum(1 for art in row['committed'] if art not in gold)
+            errors_gold += sum(1 for art in row['suggested'] if art not in gold)
         elif row.get('ask_gold'):
             n_ask += 1
         else:
-            commits_no_gold += len(row['committed'])
+            suggestions_no_gold += len(row['suggested'])
     return {
         'top1': top1,
         'recall5': recall5,
         'mrr': mrr,
         'ask_rate': (sum(row['intake'] == 'ask' for row in rows) / n) if n else None,
-        'committed_errors_gold': errors_gold,
-        'commits_no_gold': commits_no_gold,
+        'suggested_errors_gold': errors_gold,
+        'suggestions_no_gold': suggestions_no_gold,
         'n_gold': n_gold,
         'n_no_gold': n - n_gold - n_ask,
         'n_ask_gold': n_ask,
@@ -232,11 +233,11 @@ def ask_repeat_metrics(rows: list[dict]) -> dict:
     """Retrieval metrics for ask cases with identify_gold. Not mixed into the headline.
 
     ``gold`` here is the primary article list. ``secondary`` articles are not
-    recall targets, and committing one is not an error.
+    recall targets, and suggesting one is not an error.
     """
     n = len(rows)
     if not rows:
-        return {'top1': None, 'recall5': None, 'mrr': None, 'committed_errors_ask': 0, 'n': 0}
+        return {'top1': None, 'recall5': None, 'mrr': None, 'suggested_errors_ask': 0, 'n': 0}
     top1 = recall5 = mrr = 0.0
     errors = 0
     for row in rows:
@@ -247,12 +248,12 @@ def ask_repeat_metrics(rows: list[dict]) -> dict:
         top1 += 1 if set(order[:1]) & gold else 0
         recall5 += len(set(order[:5]) & gold) / len(gold)
         mrr += (1 / (hits[0] + 1)) if hits else 0
-        errors += sum(1 for art in row['committed'] if art not in allowed)
+        errors += sum(1 for art in row['suggested'] if art not in allowed)
     return {
         'top1': top1 / n,
         'recall5': recall5 / n,
         'mrr': mrr / n,
-        'committed_errors_ask': errors,
+        'suggested_errors_ask': errors,
         'n': n,
     }
 
@@ -287,7 +288,7 @@ def aggregate(per_case: list[dict]) -> dict:
         rows = [{'gold': case['gold'], 'ask_gold': case.get('ask_gold') or [],
                  'order': case['repeats'][index]['order'],
                  'intake': case['repeats'][index]['intake'],
-                 'committed': case['repeats'][index]['committed']} for case in per_case]
+                 'suggested': case['repeats'][index]['suggested']} for case in per_case]
         metrics = repeat_metrics(rows)
         metrics['repeat'] = index
         per_repeat.append(metrics)
@@ -318,7 +319,7 @@ def ask_group_summary(per_case: list[dict]) -> dict:
             'gold': case['ask_gold'],
             'secondary': case.get('ask_secondary') or [],
             'order': case['repeats'][index]['order'],
-            'committed': case['repeats'][index]['committed'],
+            'suggested': case['repeats'][index]['suggested'],
         } for case in cases]
         metrics = ask_repeat_metrics(rows)
         metrics['repeat'] = index
@@ -381,13 +382,13 @@ def _read_repeat(result: dict, gold: list[str]) -> dict:
     usage = (result.get('trace') or {}).get('usage') or {}
     order = _articles((result.get('trace') or {}).get('ranked_ids') or
                       [row['provision'] for row in result.get('articles') or []])
-    committed = _articles(row['provision'] for row in result.get('articles') or [] if row.get('committed'))
+    suggested = _articles(row['provision'] for row in result.get('articles') or [] if row.get('suggested'))
     gold_set = set(gold)
     first = next((index for index, art in enumerate(order) if art in gold_set), None) if gold else None
     return {
         'order': order,
         'top5': order[:5],
-        'committed': committed,
+        'suggested': suggested,
         'intake': result.get('intake_action'),
         'input_tokens': int(usage.get('input_tokens') or 0),
         'output_tokens': int(usage.get('output_tokens') or 0),
@@ -409,7 +410,7 @@ def _public_case(case: dict) -> dict:
         'stable': case['stable'],
         'repeats': [{
             'top5': rep['top5'],
-            'committed': rep['committed'],
+            'suggested': rep['suggested'],
             'intake': rep['intake'],
             'input_tokens': rep['input_tokens'],
             'output_tokens': rep['output_tokens'],
@@ -439,8 +440,8 @@ def _variant_lines(name: str, pins: dict, per_case: list[dict], summary: dict, *
             f"variant={name} repeat={rep['repeat']} "
             f"top-1={_fmt(rep['top1'])} recall@5={_fmt(rep['recall5'])} MRR={_fmt(rep['mrr'])} "
             f"ask_rate={_fmt(rep['ask_rate'])} "
-            f"committed_errors_gold={rep['committed_errors_gold']} "
-            f"commits_no_gold={rep['commits_no_gold']} "
+            f"suggested_errors_gold={rep['suggested_errors_gold']} "
+            f"suggestions_no_gold={rep['suggestions_no_gold']} "
             f"n_gold={rep['n_gold']} n_ask_gold={rep['n_ask_gold']} n_no_gold={rep['n_no_gold']}"
         )
     lines.append(
@@ -492,7 +493,7 @@ def write_results(payload: dict, out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / 'results.json').write_text(text)
     fields = ['group', 'variant', 'row', 'repeat', 'top1', 'recall5', 'mrr', 'ask_rate',
-              'committed_errors_gold', 'committed_errors_ask', 'commits_no_gold',
+              'suggested_errors_gold', 'suggested_errors_ask', 'suggestions_no_gold',
               'n_gold', 'n_no_gold', 'n',
               'stability', 'majority_top1', 'input_tokens_per_case', 'output_tokens_per_case',
               'p50_ms', 'p95_ms', 'usd_per_case', 'cad_per_case', 'fx_usd_cad', 'fx_date',
@@ -508,7 +509,7 @@ def write_results(payload: dict, out_dir: Path) -> None:
                 'n_no_gold': variant['n_no_gold'],
                 'n': variant['n'],
                 'note': 'headline',
-                'committed_errors_ask': '',
+                'suggested_errors_ask': '',
                 'fx_usd_cad': payload['fx_usd_cad'],
                 'fx_date': payload['fx_date'],
                 'rerank_model': (variant['requested_models'] or {}).get('rerank') or '',
@@ -526,8 +527,8 @@ def write_results(payload: dict, out_dir: Path) -> None:
                 writer.writerow({**common, 'row': 'repeat', 'repeat': rep['repeat'],
                                  'top1': rep['top1'], 'recall5': rep['recall5'], 'mrr': rep['mrr'],
                                  'ask_rate': rep['ask_rate'],
-                                 'committed_errors_gold': rep['committed_errors_gold'],
-                                 'commits_no_gold': rep['commits_no_gold'],
+                                 'suggested_errors_gold': rep['suggested_errors_gold'],
+                                 'suggestions_no_gold': rep['suggestions_no_gold'],
                                  'stability': '', 'majority_top1': ''})
             series = variant['series']
             for label, pick in (('mean', 'mean'), ('min', 'min'), ('max', 'max')):
@@ -535,8 +536,8 @@ def write_results(payload: dict, out_dir: Path) -> None:
                     **common, 'row': label, 'repeat': '',
                     'top1': series['top1'][pick], 'recall5': series['recall5'][pick],
                     'mrr': series['mrr'][pick], 'ask_rate': series['ask_rate'][pick],
-                    'committed_errors_gold': series['committed_errors_gold'][pick],
-                    'commits_no_gold': series['commits_no_gold'][pick],
+                    'suggested_errors_gold': series['suggested_errors_gold'][pick],
+                    'suggestions_no_gold': series['suggestions_no_gold'][pick],
                     'stability': variant['stability'] if label == 'mean' else '',
                     'majority_top1': variant['majority_top1_accuracy'] if label == 'mean' else '',
                 })
@@ -549,8 +550,8 @@ def write_results(payload: dict, out_dir: Path) -> None:
                 'n_no_gold': '',
                 'n': ask.get('n') or 0,
                 'note': ask.get('note') or ASK_NOTE,
-                'committed_errors_gold': '',
-                'commits_no_gold': '',
+                'suggested_errors_gold': '',
+                'suggestions_no_gold': '',
                 'ask_rate': '',
                 'fx_usd_cad': payload['fx_usd_cad'],
                 'fx_date': payload['fx_date'],
@@ -568,7 +569,7 @@ def write_results(payload: dict, out_dir: Path) -> None:
             for rep in ask.get('per_repeat') or []:
                 writer.writerow({**ask_common, 'row': 'repeat', 'repeat': rep['repeat'],
                                  'top1': rep['top1'], 'recall5': rep['recall5'], 'mrr': rep['mrr'],
-                                 'committed_errors_ask': rep['committed_errors_ask'],
+                                 'suggested_errors_ask': rep['suggested_errors_ask'],
                                  'stability': '', 'majority_top1': ''})
             for label, pick in (('mean', 'mean'), ('min', 'min'), ('max', 'max')):
                 writer.writerow({
@@ -576,7 +577,7 @@ def write_results(payload: dict, out_dir: Path) -> None:
                     'top1': (ask_series.get('top1') or {}).get(pick),
                     'recall5': (ask_series.get('recall5') or {}).get(pick),
                     'mrr': (ask_series.get('mrr') or {}).get(pick),
-                    'committed_errors_ask': (ask_series.get('committed_errors_ask') or {}).get(pick),
+                    'suggested_errors_ask': (ask_series.get('suggested_errors_ask') or {}).get(pick),
                     'stability': ask.get('stability') if label == 'mean' else '',
                     'majority_top1': ask.get('majority_top1_accuracy') if label == 'mean' else '',
                 })
@@ -644,7 +645,7 @@ def run_variants(cases: list[dict], repeats: int, fx: float, fx_date: str, *,
         for rep in ask_summary['per_repeat']:
             print(f"group={ASK_GROUP} variant={name} repeat={rep['repeat']} "
                   f"top-1={_fmt(rep['top1'])} recall@5={_fmt(rep['recall5'])} MRR={_fmt(rep['mrr'])} "
-                  f"committed_errors_ask={rep['committed_errors_ask']} n={rep['n']} "
+                  f"suggested_errors_ask={rep['suggested_errors_ask']} n={rep['n']} "
                   f"label={GOLD_LABEL!r}")
         ask_series = ask_summary['series']
         print(f"group={ASK_GROUP} variant={name} summary n={ask_summary['n']} "
@@ -669,8 +670,8 @@ def run_variants(cases: list[dict], repeats: int, fx: float, fx_date: str, *,
                 'verifier': [] if not pins.get('verifier') else _returned_ids(per_case, pins['verifier']).split(','),
             },
             'per_repeat': [{key: rep[key] for key in
-                            ('repeat', 'top1', 'recall5', 'mrr', 'ask_rate', 'committed_errors_gold',
-                             'commits_no_gold', 'n_gold', 'n_no_gold', 'n')}
+                            ('repeat', 'top1', 'recall5', 'mrr', 'ask_rate', 'suggested_errors_gold',
+                             'suggestions_no_gold', 'n_gold', 'n_no_gold', 'n')}
                            for rep in summary['per_repeat']],
             'series': summary['series'],
             'stability': summary['stability'],

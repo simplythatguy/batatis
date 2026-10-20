@@ -64,9 +64,10 @@ A ranked id and a gold provision match when they share the article id: the leadi
 is ignored. Stored gold keeps the sentence id. `engine.identify.benchmark` compares
 the article ids, so a sentence-level gold matches an article-level ranked id and the
 reverse. For `identify_gold`, only `role: benchmark` is the retrieval target.
-`role: secondary` is not a recall target, and committing that article is not a
-committed error. Committed errors on `scored_ask_identify_gold` are counted apart
-from `committed_errors_gold` and from `commits_no_gold`.
+`role: secondary` is not a recall target, and suggesting that article is not a
+suggested error. Suggested errors on `scored_ask_identify_gold` are counted apart
+from `suggested_errors_gold` and from `suggestions_no_gold`. `suggested` is the
+would-suggest hint. It is not an article accepted onto a case.
 
 ## Refreshing deterministic Section C values
 

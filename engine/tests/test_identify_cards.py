@@ -116,7 +116,9 @@ def test_bm25_cards_commit_nothing():
     }, None, 'bm25_fallback')
     assert shaped['mode'] == 'bm25_fallback' and shaped['section_c'] == []
     card = shaped['articles'][0]
-    assert card['committed'] is False and card['verifier_status'] == 'unknown'
+    assert 'committed' not in card and card['suggested'] is False
+    assert card['status'] == 'unknown' and card['verifier_status'] == 'unknown'
+    assert card['decision'] is None and card['open_question_id'] is None
     assert card['provision_id'] == '9.10.15.5.(8)'
 
 
@@ -194,7 +196,8 @@ def test_snippet_is_a_codedb_sentence_prefix_when_the_database_is_present():
     }, codes, 'live')
     card = shaped['articles'][0]
     assert card['provision_id'] == '9.10.15.5.(8)'
-    assert card['verifier_status'] == 'committed'
+    assert card['status'] == 'suggested' and card['verifier_status'] == 'suggested'
+    assert card['decision'] is None and 'committed' not in card
     assert card['citation'] == codes.citation('9.10.15.5.(8)', 'B')
     assert flat.startswith(card['snippet'])
     assert len(card['snippet'].split()) <= 25

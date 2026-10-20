@@ -17,6 +17,8 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `POST /cases/{case_id}/identify` | Ranked article cards. Does not write `provisions`. See Identify. |
 | `GET /cases/{case_id}/identify` | The stored card payload from the last identify call, or `404` detail `identify result not found`. |
 | `GET /cases/{case_id}/identify/stream` | Query `prose`. Server-sent stage events. See Identify. |
+| `POST /cases/{case_id}/identify/{provision_id}/decision` | Body `{ "decision": "yes" \| "no" \| "not_sure" }`. `yes` adds a `user_click` citation. `not_sure` opens a question. `no` records an exclusion. |
+| `GET /cases/{case_id}/information-request` | Officer draft: `{ "case_id", "items" }`. Each `not_sure` decision is an item with `id`, `provision_id`, and `text`. |
 | `POST /cases/{case_id}/identify/confirm` | Body `{ "provisions": ["…"] }`. Writes `provisions` and Section C after a codedb check. |
 | `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`. |
 | `GET /code/search` | Query `q`, `division` (`A` `B` or `C`, default `B`), `limit` (1–100, default 20). Hits as returned: `id`, `division`, `level`, `article_title`, `title`, `text`, `citation`. |
@@ -29,7 +31,7 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `GET /cases/{case_id}/process-fields` | Process-field list. Empty when the pathway is an acceptable solution. |
 | `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` when the blank form file is missing; that detail is the form error text. `500` on other export failures. |
 
-A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
+A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed`, `unconfirmed`, `open`, or `unknown`. A `proposed` fact cannot be `confirmed`.
 
 A fact's `source.type` is `code`, `file`, `user_text`, `drawing`, or `user_click`.
 
@@ -48,7 +50,9 @@ The fixed 404 detail strings are `case not found` and `provision not found`.
 
 `GET /cases/{id}/identify/stream?prose=` and `POST` with `Accept: text/event-stream` emit stage events in order: `screen`, `rerank`, `verify`, `questions`, `done`. They are stage markers, not tokens.
 
-The same function serves `engine/cli_sut.py`. Identify does not write `provisions`. An answer of "not sure" or unknown is stored as a fact with status `unknown` and is returned in `open_questions`. Identification continues.
+The same function serves `engine/cli_sut.py`. Identify does not write `provisions` and does not accept an article onto the case. Model confidence at or above 0.75 is a ranking hint only. It sets `status` to `suggested`. It does not create a citation.
+
+An answer of "not sure" or unknown on an intake question is stored as a fact with status `unknown` and is returned in `open_questions`. Identification continues. That intake answer is separate from the per-article decision below.
 
 `open_questions` has at most about five targeted questions, plus any unknown answer that did not already appear. Each question has `field`, `text`, `why`, `status` (`open` or `unknown`), and `disambiguates` (candidate article ids). An unconfirmed value is asked back as a confirmation.
 
@@ -68,7 +72,7 @@ Every identify response has `mode`: `live`, `cached_demo`, or `bm25_fallback`.
 
 `live` is used only when `OPENAI_API_KEY` is set and `BATATIS_LIVE` is `1` (also `true`, `yes`, or `on`). `BATATIS_OFFLINE=1` forces the non-live path even if both of those are set. The benchmark command calls `pipeline.run` directly and does not read `BATATIS_LIVE`.
 
-Without a live call, a description whose normalized text matches a seeded demo case is the committed cache in `engine/identify/demo_cache.json`, with `mode` `cached_demo` and `source` `cache`. The cache key is the SHA-256 of the description after Unicode NFC, with surrounding whitespace removed and internal whitespace collapsed to one space. Answers are not part of the key. The seeded descriptions are `dev-001`, `dev-003`, and `dev-013`. Any other description is BM25: `mode` `bm25_fallback`, `source` `bm25`, `section_c` empty, and no article has `committed: true`. When that BM25 path cannot read the code database, the response is still HTTP 200 with empty `articles` and no citation. It does not invent an article.
+Without a live call, a description whose normalized text matches a seeded demo case is the stored cache in `engine/identify/demo_cache.json`, with `mode` `cached_demo` and `source` `cache`. The cache key is the SHA-256 of the description after Unicode NFC, with surrounding whitespace removed and internal whitespace collapsed to one space. Answers are not part of the key. The seeded descriptions are `dev-001`, `dev-003`, and `dev-013`. Any other description is BM25: `mode` `bm25_fallback`, `source` `bm25`, `section_c` empty, and no article is `suggested`. When that BM25 path cannot read the code database, the response is still HTTP 200 with empty `articles` and no citation. It does not invent an article.
 
 `GET /cases/{id}/identify` returns that same body after POST or the stream. It does not write `provisions`. A case that has not been identified is HTTP 404 with detail `identify result not found`.
 
@@ -89,14 +93,30 @@ Each item in `articles` keeps `provision` (the Division B article id) and adds t
 | `citation` | string or null | Citation copied from codedb, or from the stored Section C row when the database is not open. |
 | `title` | string | Article title from the identify result. |
 | `snippet` | string or null | First 25 words of the resolved codedb sentence, or of the stored quote when the database is not open. Whitespace collapsed. Not a paraphrase. |
-| `verifier_status` | string | `committed` when the article is committed on a live result. `candidate` when a verifier ran and the article was not committed. `unknown` for BM25 and for a cached demo replay, which does not re-run the verifier. |
+| `status` | string | Ranking hint. `suggested` when the model probability is at least 0.75 and the suggest cap and part rule would have marked it. `candidate` when a verifier ran and the article is not suggested. `unknown` for BM25 and for a cached demo replay. This is not an acceptance. |
+| `verifier_status` | string | The same value as `status`. |
+| `decision` | string or null | `yes`, `no`, or `not_sure` after `POST .../decision`. Null until the user decides. |
+| `open_question_id` | string or null | Stable id of the open question when `decision` is `not_sure`. Otherwise null. |
+| `excluded` | boolean | True when `decision` is `no`. |
 | `why` | string or null | The match reason already on the article. |
 | `benchmark_acceptable_solution` | string or null | The resolved sentence id. Null when the sentence is unknown. |
 | `explainer` | object or null | `{ "text", "quote", "source", "label" }`. `label` is `explanation`. `source` is `deterministic` or `ai_written`. `quote` is the snippet. A reason that claims the design meets the Code stays off `text`; `source` stays `deterministic`. Null when there is no quote to ground it. |
 
 `explainer.text` says it is an explanation of the quoted text. It is not a finding that the design meets the Code.
 
-`Section C` on a committed or benchmark row still carries `explainer.source` of `deterministic`, or `ai_written` when a quote-checked verifier reason does not claim the design meets the Code. A claim of that kind leaves the deterministic explainer in place. The benchmark command's BM25 variant is unchanged and is not this HTTP path.
+`Section C` on a suggested or benchmark row still carries `explainer.source` of `deterministic`, or `ai_written` when a quote-checked verifier reason does not claim the design meets the Code. A claim of that kind leaves the deterministic explainer in place. The benchmark command's BM25 variant is unchanged and is not this HTTP path.
+
+### Article decision
+
+`POST /cases/{id}/identify/{provision_id}/decision` with `{ "decision": "yes" | "no" | "not_sure" }` records the user's choice for one ranked article. `provision_id` may be the article id (`9.10.15.5.`) or the sentence id on that card. The same decision posted again does not add a second citation or a second question.
+
+`yes` writes one case citation: a confirmed fact whose `source.type` is `user_click`, whose `source.ref` is the article id, and whose field is `citation.{article}`. That article is added to `provisions`, and Section C is the deterministic lookup for the case provisions. A second `yes` keeps the same fact id.
+
+`not_sure` removes that citation and opens one question. The question id is stable for the case and article. The text names the article and asks whether it applies. `GET /cases/{id}/gaps` includes it (`section` `C`, `severity` `warning`, `id` equal to `open_question_id`). `GET /cases/{id}/information-request` includes the same id, the article, and the question text in `items`.
+
+`no` removes the citation and the open question. The article stays on the identify response with `decision` `no` and `excluded` true.
+
+An unknown article is HTTP 404 detail `provision not found`. A case with no identify result is HTTP 404 detail `identify result not found`. Another `decision` value is HTTP 422.
 
 From a checkout that has no virtualenv, the same flags work through `scripts/bench_identify.sh`. The script creates `.venv`, installs `engine/requirements.txt` and `codedb/requirements.txt`, and sets `BATATIS_LLM_PROVIDER=openai`. The only value the caller supplies is `OPENAI_API_KEY`, and the script does not print it.
 
@@ -122,11 +142,13 @@ The process exits 2 when `OPENAI_API_KEY` is missing. It does not print the key.
 
 Accuracy is the mean of every repeat, with min, max, and the per-repeat values. The command reports two groups and does not pool them.
 
-`scored_must_cite` is the headline. Gold is `must_cite` only. On the first 20 development cases that is n=11. A case with neither `must_cite` nor `identify_gold` stays out of both rates. A commit on that case is `commits_no_gold`, not an error.
+`scored_must_cite` is the headline. Gold is `must_cite` only. On the first 20 development cases that is n=11. A case with neither `must_cite` nor `identify_gold` stays out of both rates. A suggestion on that case is `suggestions_no_gold`, not an error.
 
-`scored_ask_identify_gold` is separate. It scores ask cases whose `gold.identify_gold` has `role: benchmark`. The note on that group is: retrieval of the candidate article on ask cases; measures finding the article, not deciding it applies. Those rows are labelled model-checked, not human-verified. On the first 20 development cases that is n=4 (`dev-006`, `dev-010`, `dev-011`, `dev-015`). `identify_gold_candidates` is unscored. Committed errors on the ask group are `committed_errors_ask`, not `committed_errors_gold` and not `commits_no_gold`.
+`scored_ask_identify_gold` is separate. It scores ask cases whose `gold.identify_gold` has `role: benchmark`. The note on that group is: retrieval of the candidate article on ask cases; measures finding the article, not deciding it applies. Those rows are labelled model-checked, not human-verified. On the first 20 development cases that is n=4 (`dev-006`, `dev-010`, `dev-011`, `dev-015`). `identify_gold_candidates` is unscored. Suggested errors on the ask group are `suggested_errors_ask`, not `suggested_errors_gold` and not `suggestions_no_gold`.
 
-Article match uses the leading `N.N.N.N.` id. A sentence such as `9.25.5.2.(1)` matches the ranked article `9.25.5.2.`. The stored gold keeps the sentence id. Only `role: benchmark` is the ask retrieval target. `role: secondary` is not a recall target, and committing that article is not an ask committed error.
+`suggested` is the would-suggest hint (probability at least 0.75, within the cap and part rule). It is not an article accepted onto a case. The counts are `suggested_errors_gold` and `suggested_errors_ask`.
+
+Article match uses the leading `N.N.N.N.` id. A sentence such as `9.25.5.2.(1)` matches the ranked article `9.25.5.2.`. The stored gold keeps the sentence id. Only `role: benchmark` is the ask retrieval target. `role: secondary` is not a recall target, and suggesting that article is not an ask suggested error.
 
 The CSV `group` column keeps the two blocks apart. On ask rows, `n` is the group size and `n_gold` is blank, so the headline gold count is not repeated there.
 

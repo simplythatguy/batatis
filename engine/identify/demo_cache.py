@@ -87,7 +87,8 @@ def match_demo(prose: str, facts=None) -> dict | None:
     if redirect:
         payload['intake_action'] = 'redirect'
         for article in payload['articles']:
-            article['committed'] = False
+            article['suggested'] = False
+            article.pop('committed', None)
     payload['commit_policy'] = policy
     status = policy['status']
     for article in payload['articles']:

@@ -57,7 +57,8 @@ def test_no_departure_is_not_indicated_and_redirect_follows_the_gold_regimes():
     assert 'Private Sewage' in detect_redirect('I want a different septic tank and disposal-field layout.')
     out = run('air admittance valve instead of a roof vent', arts=ARTS, ranker='bm25')
     assert out['intake_action'] == 'redirect' and out['variance_needed'] == 'unknown'
-    assert not any(row['committed'] for row in out['articles'])
+    assert not any(row.get('suggested') for row in out['articles'])
+    assert not any(row.get('committed') for row in out['articles'])
 
 
 def test_a_quote_that_is_not_in_codedb_is_dropped():

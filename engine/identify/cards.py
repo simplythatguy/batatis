@@ -53,7 +53,8 @@ def present(result: dict, codes: Codes | None, mode: str) -> dict:
         result['source'] = 'bm25'
         result['cached'] = False
         for article in result.get('articles') or []:
-            article['committed'] = False
+            article['suggested'] = False
+            article.pop('committed', None)
         result['section_c'] = []
     elif mode == 'live':
         result['source'] = 'live'
@@ -157,15 +158,36 @@ def _citation(sentence_id: str | None, article_id: str, stored: list[dict], code
     return None
 
 
-def _verifier_status(article: dict, result: dict, mode: str) -> str:
+def _status(article: dict, result: dict, mode: str) -> str:
+    """Ranking hint. `suggested` is not an acceptance of the article for the case."""
     if mode == 'bm25_fallback':
         return 'unknown'
-    if article.get('committed'):
-        return 'committed'
+    if article.get('suggested') or article.get('committed'):
+        return 'suggested'
     verifier = (result.get('trace') or {}).get('verifier')
     if isinstance(verifier, dict) or article.get('stage') == 'verify':
         return 'candidate'
+    current = article.get('status') or article.get('verifier_status')
+    if current in {'suggested', 'candidate', 'unknown'}:
+        return current
     return 'unknown'
+
+
+def _finish(article: dict, result: dict, mode: str) -> dict:
+    legacy = bool(article.pop('committed', False))
+    if mode == 'bm25_fallback':
+        article['suggested'] = False
+    elif legacy and 'suggested' not in article:
+        article['suggested'] = True
+    status = _status(article, result, mode)
+    article['status'] = status
+    article['verifier_status'] = status
+    if article.get('decision') not in {'yes', 'no', 'not_sure'}:
+        article['decision'] = None
+    if article.get('decision') != 'not_sure':
+        article['open_question_id'] = None
+    article['excluded'] = article.get('decision') == 'no'
+    return article
 
 
 def _explainer(article: dict, sentence_id: str | None, quote: str | None, snippet: str | None,
@@ -196,10 +218,7 @@ def _explainer(article: dict, sentence_id: str | None, quote: str | None, snippe
 def _card(article: dict, rank: int, stored: list[dict], codes: Codes | None, result: dict, mode: str) -> dict:
     if article.get('verifier_status') and article.get('explainer', {}).get('label') == 'explanation':
         article['rank'] = rank
-        if mode == 'bm25_fallback':
-            article['committed'] = False
-            article['verifier_status'] = 'unknown'
-        return article
+        return _finish(article, result, mode)
     article_id = article.get('provision') or ''
     quote = article.get('quote')
     sentence_id = _sentence_id(article_id, quote, stored, codes)
@@ -212,9 +231,8 @@ def _card(article: dict, rank: int, stored: list[dict], codes: Codes | None, res
         'citation': _citation(sentence_id, article_id, stored, codes),
         'title': article.get('title'),
         'snippet': snippet,
-        'verifier_status': _verifier_status(article, result, mode),
         'why': article.get('reason'),
         'benchmark_acceptable_solution': sentence_id,
         'explainer': _explainer(article, sentence_id, quote, snippet, stored),
     })
-    return card
+    return _finish(card, result, mode)

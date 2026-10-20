@@ -15,6 +15,7 @@ from .codes import CodeDbMissing, Codes, default_db
 from .completeness import Gap, check_completeness
 from .identify.answers import apply_answers
 from .identify.cards import empty_bm25, present
+from .identify.decisions import decision_gaps, information_request, overlay_decisions, record_decision
 from .identify.demo_cache import match_demo
 from .identify.offline import ProviderOutage, http_live, is_provider_outage
 from .identify.pipeline import run as identify_run
@@ -49,6 +50,11 @@ class IdentifyRequest(BaseModel):
 class ConfirmRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
     provisions: list[str] = Field(min_length=1)
+
+
+class DecisionRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    decision: str
 
 
 def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
@@ -103,7 +109,17 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
 
     @router.get('/cases/{case_id}/gaps', response_model=list[Gap])
     def gaps(case_id: str):
-        return check_completeness(get_case(case_id), code())
+        case = get_case(case_id)
+        codes = code()
+        found = check_completeness(case, codes)
+        extra = decision_gaps(case, codes)
+        seen = {item.id for item in found}
+        return found + [item for item in extra if item.id not in seen]
+
+    @router.get('/cases/{case_id}/information-request')
+    def officer_information_request(case_id: str):
+        """Draft of what the officer still needs to ask. Includes identify not_sure questions."""
+        return information_request(get_case(case_id))
 
     def _codes_or_none() -> Codes | None:
         try:
@@ -158,6 +174,7 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
         else:
             raw, mode = _without_provider(prose, facts, on_stage)
         result = present(raw, _codes_or_none(), mode)
+        overlay_decisions(result, cases().get(case_id))
         cases().put_identify(case_id, result)
         if on_stage:
             on_stage('done', result)
@@ -215,7 +232,7 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
         stored = cases().get_identify(case_id)
         if stored is None:
             raise HTTPException(404, 'identify result not found')
-        return stored
+        return overlay_decisions(stored, get_case(case_id))
 
     @router.get('/cases/{case_id}/identify/stream')
     def identify_stream(case_id: str, prose: str = Query(min_length=1)):
@@ -239,5 +256,30 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
         case.provisions = list(body.provisions)
         case.section_c = section_c_rows(body.provisions, codes)
         return cases().put(case)
+
+    @router.post('/cases/{case_id}/identify/{provision_id}/decision')
+    def identify_decision(case_id: str, provision_id: str, body: DecisionRequest):
+        """Record the applicant's decision. Identify itself never accepts an article."""
+        if body.decision not in {'yes', 'no', 'not_sure'}:
+            raise HTTPException(422, 'decision must be yes, no, or not_sure')
+        case = get_case(case_id)
+        stored = cases().get_identify(case_id)
+        if stored is None:
+            raise HTTPException(404, 'identify result not found')
+        try:
+            codes = code()
+        except CodeDbMissing:
+            if body.decision == 'yes':
+                raise
+            codes = None
+        try:
+            record_decision(case, stored, provision_id, body.decision, codes)
+        except KeyError:
+            raise HTTPException(404, 'provision not found') from None
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from None
+        cases().put(case)
+        cases().put_identify(case_id, stored)
+        return stored
 
     return router

@@ -1,8 +1,9 @@
 """Shared identification used by the CLI and by POST /cases/{id}/identify.
 
 A caller that passes `judge` keeps the Jev screen-and-rerank path the CLI tests use.
-With no judge and no provider key, the run is BM25 only: nothing is committed, and Jev
+With no judge and no provider key, the run is BM25 only: nothing is suggested, and Jev
 is not called. Citations that are not in the candidate articles are never returned.
+`suggested` is a ranking hint for the benchmark. It does not accept an article onto a case.
 """
 from __future__ import annotations
 
@@ -199,7 +200,7 @@ def run(prose: str, db_path: Path | str | None = None, judge: Judge | None = Non
         except Exception as exc:
             use_bm25(f'{type(exc).__name__}: {exc}', emit_screen=False)
     elif ranker == 'bm25' or not has_live_model():
-        use_bm25(None if ranker == 'bm25' else 'no model key; ranked with BM25 and committed nothing', emit_screen=True)
+        use_bm25(None if ranker == 'bm25' else 'no model key; ranked with BM25 and suggested nothing', emit_screen=True)
     else:
         which = 'jev' if rerank_mode() == 'jev' and judge is None else provider()
         try:
@@ -283,13 +284,14 @@ def run(prose: str, db_path: Path | str | None = None, judge: Judge | None = Non
         ranked = [(a, prob.get(a)) for a in lead] + [(a, p) for a, p in ranked if a not in lead]
 
     by_pick = {p.article: p for p in picks} if picks else {}
-    out_articles, n_committed = [], 0
+    out_articles, n_suggested = [], 0
     for art, prob in ranked[:TOP_K]:
         if art not in arts:
             continue
-        committed = (n_committed < max_commits and prob is not None and prob >= threshold
+        # p >= threshold is a status hint only. The case citation waits for a user decision.
+        suggested = (n_suggested < max_commits and prob is not None and prob >= threshold
                      and arts[art]['part'] in COMMIT_PARTS and (picks is None or art in by_pick))
-        n_committed += committed
+        n_suggested += suggested
         pick: Pick | None = by_pick.get(art)
         quote = pick.quote if pick else short_quote(arts[art].get('text'))
         if quote and not pick:
@@ -297,7 +299,7 @@ def run(prose: str, db_path: Path | str | None = None, judge: Judge | None = Non
             if not keep:
                 quote = None
         out_articles.append({
-            'provision': art, 'division': 'B', 'committed': committed,
+            'provision': art, 'division': 'B', 'suggested': suggested,
             'title': arts[art]['title'], 'part': arts[art]['part'],
             'probability': None if prob is None else round(prob, 4),
             'confidence': {'probability': None if prob is None else round(prob, 4), 'calibration': policy['status']},
@@ -309,10 +311,10 @@ def run(prose: str, db_path: Path | str | None = None, judge: Judge | None = Non
     redirect = detect_redirect(prose)
     if redirect:
         for art in out_articles:
-            art['committed'] = False
-        n_committed = 0
-    committed_ids = [a['provision'] for a in out_articles if a['committed']]
-    rows = section_c_dicts(committed_ids, codes) if committed_ids and codes is not None else []
+            art['suggested'] = False
+        n_suggested = 0
+    suggested_ids = [a['provision'] for a in out_articles if a['suggested']]
+    rows = section_c_dicts(suggested_ids, codes) if suggested_ids and codes is not None else []
     questions = generate_questions(prose, [
         {'provision': a['provision'], 'title': a['title'], 'text': arts[a['provision']].get('text', ''), 'part': a['part']}
         for a in out_articles
@@ -320,7 +322,7 @@ def run(prose: str, db_path: Path | str | None = None, judge: Judge | None = Non
     variance, explanation = assess_variance(prose, facts)
     if redirect:
         intake = 'redirect'
-    elif committed_ids:
+    elif suggested_ids:
         intake = 'proceed_conditionally'
     else:
         intake = 'ask'

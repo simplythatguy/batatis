@@ -55,8 +55,8 @@ def test_unknown_case_is_an_offline_miss_without_a_citation(tmp_path, monkeypatc
     body = response.json()
     assert body['mode'] == 'bm25_fallback' and body['source'] == 'bm25'
     assert body['section_c'] == []
-    assert not any(article.get('committed') for article in body['articles'])
-    assert all(article['verifier_status'] == 'unknown' for article in body['articles'])
+    assert not any('committed' in article for article in body['articles'])
+    assert all(article['decision'] is None and article['verifier_status'] == 'unknown' for article in body['articles'])
     assert 'hidden' not in response.text
 
 
@@ -79,7 +79,7 @@ def test_network_error_falls_back_to_the_cache(tmp_path, monkeypatch):
     miss = _post(_client(tmp_path), 'something the cache has never seen')
     assert miss.status_code == 200 and miss.json()['mode'] == 'bm25_fallback'
     assert miss.json()['section_c'] == []
-    assert not any(article.get('committed') for article in miss.json()['articles'])
+    assert not any('committed' in article for article in miss.json()['articles'])
 
 
 def test_verifier_timeout_is_a_provider_outage(monkeypatch):

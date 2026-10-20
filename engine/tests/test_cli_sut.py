@@ -18,11 +18,12 @@ def test_commits_only_part9_above_threshold_and_builds_section_c(monkeypatch):
     assert set(out) >= {'articles', 'section_c', 'engineering_required', 'intake_action', 'questions'}
     arts = out['articles']
     assert len(arts) == cli_sut.TOP_K and all(a['division'] == 'B' for a in arts)
-    committed = [a for a in arts if a['committed']]
-    assert 0 < len(committed) <= cli_sut.MAX_COMMITS
-    assert all(a['part'] == 9 and a['probability'] >= cli_sut.COMMIT_THRESHOLD for a in committed)
-    assert any(a['part'] != 9 and a['probability'] >= cli_sut.COMMIT_THRESHOLD and not a['committed'] for a in arts)
-    assert out['section_c'] and all(any(r['provision_id'].startswith(a['provision']) for a in committed)
+    suggested = [a for a in arts if a['suggested']]
+    assert 0 < len(suggested) <= cli_sut.MAX_COMMITS
+    assert all(a['part'] == 9 and a['probability'] >= cli_sut.COMMIT_THRESHOLD for a in suggested)
+    assert any(a['part'] != 9 and a['probability'] >= cli_sut.COMMIT_THRESHOLD and not a['suggested'] for a in arts)
+    assert not any(a.get('committed') for a in arts)
+    assert out['section_c'] and all(any(r['provision_id'].startswith(a['provision']) for a in suggested)
                                     for r in out['section_c'])
     pair = next(p for r in out['section_c'] for p in r['pairs'])
     assert set(pair) == {'function', 'objective', 'condition'}
@@ -38,7 +39,7 @@ def test_jev_failure_falls_back_to_bm25_without_commits(monkeypatch):
         raise ConnectionError('offline')
     out = cli_sut.run('bedroom egress window opening', DB, Judge(broken, attempts=1))
     assert out['trace']['ranker'] == 'bm25 fallback'
-    assert out['articles'] and not any(a['committed'] for a in out['articles'])
+    assert out['articles'] and not any(a.get('suggested') for a in out['articles'])
     assert out['section_c'] == [] and out['intake_action'] == 'ask' and out['questions']
 
 
