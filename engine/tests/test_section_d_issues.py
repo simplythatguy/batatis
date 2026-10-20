@@ -746,6 +746,224 @@ def test_generic_fallback_counter_records_an_unusable_question():
     assert 'generic_fallback_fires' not in Path('engine/section_d_issues.py').read_text()
 
 
+def _pdf_text(pdf: bytes) -> str:
+    import io
+
+    from pypdf import PdfReader
+    return ' '.join(' '.join((page.extract_text() or '').split()) for page in PdfReader(io.BytesIO(pdf)).pages)
+
+
+def test_gc_not_engaged_allows_export_with_the_open_item(monkeypatch):
+    """A GC can say no professional is engaged yet. Export stays allowed and names the open item."""
+    from types import SimpleNamespace
+
+    from engine.completeness import professional_involvement_gaps
+    from engine.export.appendix import build_appendix
+    from engine.export.scc import ExportBlocked, ExportError, blockers, export_case, load_field_map, package_notes
+    from engine.models import Jurisdiction
+    from engine.professional import NOT_ENGAGED_ITEM, professional_confirmed, professional_involvement
+    from engine.section_c import section_c_rows
+
+    monkeypatch.setattr('engine.completeness.validate_text', lambda *args, **kwargs: {'errors': []})
+    codes = codes_with_rules()
+    codes.db_path = Path('unused')
+    row = section_c_rows([NO_ROW], codes)[0]
+    shared = [
+        fact('owner_name', 'Case General Contracting'),
+        fact('request_date', '2026-10-20'),
+        fact('mailing_address', '100 Site Office Road'),
+        fact('municipal_address', '100 Site Office Road, Calgary'),
+        fact('legal_description', 'Lot 1 Block 2 Plan 3'),
+        fact('representative', 'The general contractor'),
+        fact('alternative_description', 'A proposed firestop detail at sprinkler piping.'),
+        fact('scope', 'site'),
+        fact('rationale', 'The applicant wrote why this departure is proposed.'),
+        fact('risk_assessment', 'The applicant wrote the risks of this departure.'),
+        fact('mitigating_measures', 'The applicant wrote the measures for this departure.'),
+        fact('assumptions_and_limits', 'The applicant wrote the assumptions and limits.'),
+        fact('maintenance_operation', 'The applicant wrote the operation conditions.'),
+        fact('qualifications', 'No registered professional is engaged yet.'),
+        fact('occupancy', 'mercantile'),
+        fact('storeys', 5),
+        fact('part4_design', True),
+    ]
+
+    def build(status: str | None) -> Case:
+        facts = list(shared)
+        if status is not None:
+            facts.append(fact('professional_status', status))
+        return Case(
+            title='GC firestop',
+            jurisdiction=Jurisdiction(id='calgary', name='Calgary'),
+            provisions=[NO_ROW],
+            section_c=[row],
+            facts=facts,
+        )
+
+    blocked = build(None)
+    blocked_reasons = blockers(blocked, load_field_map(), codes)
+    assert any('named registered professional' in reason for reason in blocked_reasons)
+    assert_export_blocked_on_professional(blocked, codes)
+
+    for status in ('not_engaged', 'No professional engaged yet'):
+        case = build(status)
+        before = case.model_dump()
+        result = professional_involvement(case, codes)
+        gaps = professional_involvement_gaps(case, codes, [])
+        section_d_issues(case, codes)
+        assert case.model_dump() == before
+        assert result.professional_status == 'not_engaged'
+        assert professional_confirmed(case) is False
+        blob = case.model_dump_json().casefold()
+        assert 'apega' not in blob and 'aaa-' not in blob
+        assert not any(item.field in (
+            'professional.registration_number', 'apega_number', 'aaa_number', 'professional.seal',
+        ) for item in case.facts)
+        open_item = next(gap for gap in gaps if gap.field == 'professional_requirement')
+        assert open_item.message == NOT_ENGAGED_ITEM
+        assert open_item.severity == 'warning' and open_item.routed_to == 'officer'
+        assert not any(gap.id.startswith('D12:') for gap in gaps)
+        reasons = blockers(case, load_field_map(), codes)
+        assert reasons == []
+        assert NOT_ENGAGED_ITEM not in '\n'.join(reasons)
+        assert package_notes(case, codes) == [NOT_ENGAGED_ITEM]
+        appendix = build_appendix(
+            case, SimpleNamespace(overflow=[], rows_in_form=0, docs_in_form=0), {},
+            {'version': 'test'}, codes=codes, open_items=[], package_notes=package_notes(case, codes))
+        assert NOT_ENGAGED_ITEM in _pdf_text(appendix)
+        assert 'Open items (draft export)' not in _pdf_text(appendix)
+        try:
+            exported = export_case(case, draft=False, codes=codes)
+        except ExportBlocked as blocked_export:
+            raise AssertionError(blocked_export.reasons) from blocked_export
+        except ExportError:
+            exported = None
+        if exported is not None:
+            assert exported.draft is False
+            assert NOT_ENGAGED_ITEM in exported.open_items
+            packaged = _pdf_text(exported.pdf)
+            assert NOT_ENGAGED_ITEM in packaged
+            assert 'DRAFT' not in packaged
+
+
+def assert_export_blocked_on_professional(case, codes):
+    from engine.export.scc import ExportBlocked, export_case
+    try:
+        export_case(case, draft=False, codes=codes)
+    except ExportBlocked as blocked:
+        assert any('named registered professional' in reason for reason in blocked.reasons)
+        return blocked
+    raise AssertionError('official export was allowed without a professional')
+
+
+def test_no_path_confirms_a_professional_without_a_seal_or_number():
+    from engine.professional import professional_confirmed
+    codes = codes_with_rules()
+    file = Source(type='file', ref='note.pdf', quote='A file is not an applicant statement.')
+    officer = Source(type='officer', ref='ahj', quote='Officer note.')
+    negative = [
+        [fact('professional_status', 'not_engaged')],
+        [fact('professional_status', 'No professional engaged yet')],
+        [fact('professional_status', 'not_engaged'), fact('professional.role', 'engineer')],
+        [fact('professional_status', 'not_engaged'), fact('professional_name', 'Ada GC')],
+        [fact('professional.role', 'P.Eng.')],
+        [fact('professional.role', 'architect'),
+         fact('professional.registration_number', 'AAA-1', source=file)],
+        [fact('professional.role', 'engineer'),
+         fact('professional.seal', 'stamp image on the pdf', source=file)],
+        [fact('professional.role', 'sales'), fact('professional.registration_number', 'APEGA-9')],
+        [fact('professional_status', 'not_engaged', source=officer)],
+        [fact('professional_status', 'not_engaged', source=file)],
+        [],
+    ]
+    for extra in negative:
+        case = Case(provisions=[BENCHMARK], facts=[fact('part4_design', True), *extra])
+        before = case.model_dump()
+        assert professional_confirmed(case) is False
+        issue = section_d_issues(case, codes)[0]
+        assert issue.status == 'needs_professional'
+        assert case.model_dump() == before
+        assert professional_involvement_status(case, codes) != 'not_engaged' or any(
+            item.field == 'professional_status' and item.source.type == 'user_text' for item in case.facts)
+    numbered = Case(provisions=[BENCHMARK], facts=[
+        fact('part4_design', True),
+        fact('professional.role', 'engineer'),
+        fact('professional.registration_number', 'APEGA-1'),
+    ])
+    sealed = Case(provisions=[BENCHMARK], facts=[
+        fact('part4_design', True),
+        fact('professional.role', 'architect'),
+        fact('professional.seal', 'applicant-confirmed seal'),
+    ])
+    assert professional_confirmed(numbered) and professional_confirmed(sealed)
+    assert section_d_issues(numbered, codes)[0].status != 'needs_professional'
+    assert section_d_issues(sealed, codes)[0].status != 'needs_professional'
+
+
+def professional_involvement_status(case, codes):
+    from engine.professional import professional_involvement
+    return professional_involvement(case, codes).professional_status
+
+
+def test_every_screening_question_offers_not_sure():
+    """No yes/no question is offered without Not sure, including fire alarm and suppression."""
+    from engine.professional import NOT_SURE_OPTION, ProfessionalFacts, professional_involvement
+    codes = codes_with_rules()
+    codes.add('B', '3.1.9.1.(1)')
+    officer = Source(type='officer', ref='ahj', quote='authority answer')
+    screens = [
+        professional_involvement(Case(provisions=[BENCHMARK]), codes),
+        professional_involvement(Case(provisions=[BENCHMARK], facts=[
+            fact('occupancy', 'single_family'), fact('storeys', 2), fact('part4_design', True),
+        ]), codes),
+        professional_involvement(Case(
+            title='Firestop at sprinkler-pipe penetrations',
+            provisions=['3.1.9.1.(1)'],
+            facts=[fact('occupancy', 'mercantile'), fact('storeys', 5)],
+        ), codes),
+        professional_involvement(ProfessionalFacts(occupancy='mercantile', storeys=5), codes),
+        professional_involvement(ProfessionalFacts(), codes),
+    ]
+    alarm = Case(provisions=[BENCHMARK], facts=[
+        fact('occupancy', 'mercantile'),
+        fact('fire_suppression', False, source=officer),
+    ])
+    suppression = Case(provisions=[BENCHMARK], facts=[
+        fact('occupancy', 'mercantile'),
+        fact('fire_alarm', False, source=officer),
+    ])
+    screens.append(professional_involvement(alarm, codes))
+    screens.append(professional_involvement(suppression, codes))
+    for result in screens:
+        assert [prompt.text for prompt in result.prompts] == list(dict.fromkeys(result.questions))
+        assert result.prompts
+        for prompt in result.prompts:
+            assert prompt.not_sure == NOT_SURE_OPTION
+            assert prompt.help
+    alarm_result = screens[-2]
+    suppression_result = screens[-1]
+    assert any('fire alarm' in prompt.text and prompt.not_sure == NOT_SURE_OPTION for prompt in alarm_result.prompts)
+    assert any('2.4.1.4.(1)' in reason.citation for reason in alarm_result.reasons)
+    assert any('fire suppression' in prompt.text and prompt.not_sure == NOT_SURE_OPTION
+               for prompt in suppression_result.prompts)
+    assert any('2.4.1.3.(1)' in reason.citation for reason in suppression_result.reasons)
+    issue = section_d_issues(alarm, codes)[0]
+    assert issue.practice_of_engineering.prompts
+    assert all(prompt.not_sure == NOT_SURE_OPTION for prompt in issue.practice_of_engineering.prompts)
+    unsure = Case(provisions=[BENCHMARK], facts=[
+        fact('occupancy', 'mercantile'),
+        fact('fire_suppression', NOT_SURE_OPTION),
+        fact('fire_alarm', NOT_SURE_OPTION),
+    ])
+    unsure_result = professional_involvement(unsure, codes)
+    unsure_issue = section_d_issues(unsure, codes)[0]
+    assert {'fire_suppression', 'fire_alarm'} <= set(unsure_result.not_sure_fields)
+    assert unsure_issue.practice_of_engineering.value == 'unknown'
+    assert unsure_issue.routed_to == 'officer'
+    assert any('fire suppression' in prompt.text and 'fire alarm' in prompt.text
+               and prompt.not_sure == NOT_SURE_OPTION for prompt in unsure_issue.practice_of_engineering.prompts)
+
+
 def test_second_printing_citations_resolve_when_codedb_is_present():
     import pytest
     from engine.codes import CodeDbMissing, Codes

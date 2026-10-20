@@ -17,8 +17,8 @@ from .codes import Codes
 from .models import INTENT_LABEL, Case, Gap as CaseGap
 from .process_fields import confirmed_value, latest_fact, process_fields
 from .professional import (
-    OFFICER_PROFESSIONAL_GAP, PRESCRIPTIVE_CONTRADICTION, ProfessionalResult, commercial_party,
-    professional_involvement, unresolved_item,
+    NOT_ENGAGED_ITEM, OFFICER_PROFESSIONAL_GAP, PRESCRIPTIVE_CONTRADICTION, ProfessionalResult,
+    commercial_party, professional_confirmed, professional_involvement, unresolved_item,
 )
 from .section_c import section_c_rows
 from .section_d import SupportingDocument, section_d_plan, supporting_documents
@@ -83,6 +83,15 @@ def professional_involvement_gaps(case: Case, codes: Codes, process, *,
             field='prescriptive_route_confirmed', message=PRESCRIPTIVE_CONTRADICTION,
             fix_hint='Leave the prescriptive answer unset. It does not close professional involvement.',
             citation=None, routed_to='officer'))
+    # An honest "no professional engaged yet" does not invent a number. The blocking
+    # name, qualifications, and seal gaps become one officer-routed warning.
+    if professional.professional_status == 'not_engaged' and not professional_confirmed(case):
+        gaps.append(Gap(
+            id='professional:not_engaged', severity='warning', section='D',
+            field='professional_requirement', message=NOT_ENGAGED_ITEM,
+            fix_hint='The officer decides whether a registered professional is required. No registration number has been entered.',
+            citation=None, routed_to='officer'))
+        return gaps
     required = professional.required == 'yes' or confirmed_value(case, 'engineering_required') in ('yes', True)
     if required:
         citation = next((r.citation for r in professional.reasons if r.required == 'yes'), codes.citation('2.4.1.1.(3)', 'C'))

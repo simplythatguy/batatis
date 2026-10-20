@@ -110,7 +110,8 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
     return out
 
 
-def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, open_items: list[str]) -> bytes:
+def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, open_items: list[str],
+                   package_notes: list[str] | None = None) -> bytes:
     story: list = [Paragraph('Appendix to the Variance Form for Proposed Alternative Solution', H1),
                    _p(f'Case {case.title or ""} ({case.id}). Generated {date.today().isoformat()} by Batatis with '
                       f'field map {fmap["version"]}. Code references are to the National Building Code - 2023 '
@@ -124,6 +125,11 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
         story += [_p(f'- {r}') for r in open_items]
         story.append(_p('Section C below was rebuilt from verified confirmed provisions. Unverified or changed '
                         'source text has been excluded; rebuilding does not resolve the listed open items.', SMALL))
+
+    if package_notes:
+        story += [Paragraph('Open items', H2),
+                  _p('These items remain open. The officer decides them. This export does not close them.')]
+        story += [_p(f'- {note}') for note in package_notes]
 
     if plan.overflow:
         story.append(Paragraph('X. Form values continued', H2))

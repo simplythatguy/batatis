@@ -90,6 +90,9 @@ _NOT_SURE_VALUES = frozenset({
     'not sure', 'not_sure', 'not sure (the officer decides)',
 })
 NOT_SURE_OPTION = 'Not sure (the officer decides)'
+NOT_ENGAGED_ITEM = (
+    'Professional involvement not yet confirmed; the officer decides whether it is required.'
+)
 OFFICER_PROFESSIONAL_GAP = 'Routed to the officer: whether a registered professional is required'
 PRESCRIPTIVE_CONTRADICTION = (
     'An answer of yes for the prescriptive route contradicts this variance request. That answer clears nothing.'
@@ -104,6 +107,8 @@ _REGISTRATION_FIELDS = (
     'professional.registration_number', 'professional.registration',
     'registered_professional.registration_number', 'apega_number', 'aaa_number',
 )
+_STATUS_FIELDS = ('professional_status', 'professional.status')
+_NOT_ENGAGED = frozenset({'not_engaged', 'no professional engaged yet'})
 _REJECT_ROLE = frozenset({
     'sales', 'rep', 'supplier', 'manufacturer', 'salesperson', 'vendor',
 })
@@ -170,11 +175,29 @@ def role_confirmed(value: str) -> bool:
 
 
 def professional_confirmed(case: Case) -> bool:
-    """Engineer or architect, plus a seal or registration number, confirmed by the applicant."""
+    """Engineer or architect, plus a seal or registration number, confirmed by the applicant.
+
+    ``not_engaged`` is not a role and not a number. Nothing here writes a registration fact.
+    """
     role = _applicant_text(case, *_ROLE_FIELDS)
     if role is None or not role_confirmed(role):
         return False
     return _applicant_text(case, *_SEAL_FIELDS) is not None or _applicant_text(case, *_REGISTRATION_FIELDS) is not None
+
+
+def stated_professional_status(case: Case) -> str | None:
+    """Applicant-stated engagement. A file or an officer note cannot invent ``not_engaged``."""
+    fact = latest_fact(case, *_STATUS_FIELDS)
+    if fact is None or fact.status != 'confirmed' or fact.kind == 'proposed':
+        return None
+    if fact.source.type not in _APPLICANT_SOURCES:
+        return None
+    if not isinstance(fact.value, str):
+        return None
+    token = ' '.join(fact.value.split()).casefold()
+    if token in _NOT_ENGAGED:
+        return 'not_engaged'
+    return None
 
 
 class PracticePrompt(BaseModel):
@@ -212,6 +235,12 @@ _HELP = {
         'State the gross area if you know it. Yes and No do not settle this. Not sure: the officer decides.',
     'Which part applies to this building, Part 3 or Part 9?':
         'Name Part 3 or Part 9. Not sure: the officer decides.',
+    'Is a fire suppression or fire alarm system being installed, and does the general professional requirement apply?':
+        'Yes means a fire suppression or fire alarm system is being installed on a building outside the general exceptions. '
+        'No means it is not. Not sure: the officer decides.',
+    'Does the fire separation stay intact at each penetration, including sprinkler piping?':
+        'Yes means the fire separation stays intact at each penetration, including sprinkler piping. '
+        'No means it does not. Not sure: the officer decides.',
 }
 
 
@@ -219,6 +248,7 @@ def _prompt_for(text: str) -> PracticePrompt:
     return PracticePrompt(
         text=text,
         help=_HELP.get(text, 'State the fact if you know it. Yes and No are the two answers when the question is a yes or no. Not sure: the officer decides.'),
+        not_sure=NOT_SURE_OPTION,
     )
 
 
@@ -268,6 +298,8 @@ class ProfessionalResult(BaseModel):
     applicant_sourced: bool = False
     not_sure_fields: tuple[str, ...] = ()
     prescriptive_contradiction: str | None = None
+    # Applicant-stated. not_engaged does not confirm a professional and does not supply a number.
+    professional_status: Literal['not_engaged'] | None = None
     scope_note: str = ('This screens documented professional duties. The responsible professional, regulator '
                        'and authority resolve scope, competence and local conditions.')
 
@@ -494,9 +526,10 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
         if general == 'yes' and present is True:
             add(code, 'yes', f'The owner must document professional retention for system design, installation field reviews '
                 f'and witnessing {task}, before construction.', pid)
-        elif scope != 'fire' and general != 'no' and (present is None or (present is True and general == 'depends')):
+        elif general != 'no' and (present is None or (present is True and general == 'depends')):
             # Div C 2.4.1.3 and 2.4.1.4 apply to a 2.4.1.1.(3) building. A resolved
             # general exception is out of scope, so an unanswered system does not ask.
+            # A fire-separation case still asks these, so Not sure is offered on both.
             pending_systems.append((field, code, pid))
     if len(pending_systems) >= 2:
         for _field, _code, pid in pending_systems:
@@ -544,6 +577,7 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
     if blocked and required == 'no':
         required = 'depends'
     confirmed = professional_confirmed(case) if case is not None else False
+    status = stated_professional_status(case) if case is not None else None
     alternative = case is not None and alternative_path(case)
     other_depends = [reason for reason in reasons if reason.required == 'depends' and reason.code != 'design_scope']
     if (not blocked and alternative and facts.professional_judgement_required is True
@@ -599,4 +633,4 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
                               questions=unique_questions, prompts=prompts,
                               involvement=involvement, missing_facts=missing, routed_to=routed,
                               applicant_sourced=bool(applicant), not_sure_fields=not_sure,
-                              prescriptive_contradiction=contradiction)
+                              prescriptive_contradiction=contradiction, professional_status=status)

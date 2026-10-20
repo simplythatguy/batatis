@@ -23,6 +23,7 @@ from pypdf.generic import ArrayObject, NameObject, NumberObject, RectangleObject
 from ..models import INTENT_LABEL, Case, SectionCRow
 from ..codes import Codes
 from ..completeness import check_completeness
+from ..professional import NOT_ENGAGED_ITEM
 from ..process_fields import PROCESS_ALIASES
 from ..section_c import section_c_rows
 from ..section_d import supporting_documents
@@ -125,6 +126,13 @@ def confirmed_values(case: Case) -> dict[str, object]:
     """Latest logical field wins, even when its revision is blank, proposed or unconfirmed."""
     return {key: f.value for key, f in _latest(case).items() if f.export()['status'] == 'confirmed'
             and f.value is not None and str(f.value).strip() != ''}
+
+
+def package_notes(case: Case, codes: Codes | None = None) -> list[str]:
+    """Non-blocking items that still belong in an official package."""
+    codes = codes or Codes()
+    return [gap.message for gap in check_completeness(case, codes)
+            if gap.severity == 'warning' and gap.message == NOT_ENGAGED_ITEM]
 
 
 def blockers(case: Case, fmap: dict, codes: Codes | None = None) -> list[str]:
@@ -323,12 +331,14 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
     reasons = blockers(case, fmap, codes)
     if reasons and not draft:
         raise ExportBlocked(reasons)
+    notes = package_notes(case, codes)
     case = _canonical_case(case, codes)
     blank_form = load_form(form, fmap)
     values = confirmed_values(case)
     plan = _plan(case, values, fmap, _rects(blank_form, fmap))
     filled, placements = _fill_and_flatten(blank_form, plan)
-    appendix = build_appendix(case, plan, values, fmap, codes=codes, open_items=reasons if draft else [])
+    appendix = build_appendix(case, plan, values, fmap, codes=codes,
+                              open_items=reasons if draft else [], package_notes=notes)
 
     out = PdfWriter(clone_from=io.BytesIO(filled))
     form_pages = len(out.pages)
@@ -344,6 +354,7 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
     filled_names = set(plan.text) | {k for k, v in plan.checks.items() if v != '/Off'}
     blank = [n for n in [*fmap['text_fields'], *[f for r in fmap['section_c_rows'] for f in r.values()],
                          *[f for r in fmap['section_d_rows'] for f in r.values()]] if n not in filled_names]
+    visible = list(dict.fromkeys((reasons if draft else []) + notes))
     return ExportResult(pdf=buf.getvalue(), field_map=fmap['version'], form_pages=form_pages,
                         appendix_pages=len(app_reader.pages), draft=draft, placements=placements,
-                        blank_fields=blank, open_items=reasons if draft else [])
+                        blank_fields=blank, open_items=visible)
