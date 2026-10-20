@@ -1,13 +1,14 @@
 """HTTP interface for the engine. Run: uvicorn engine.api:app --reload"""
 from __future__ import annotations
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from codedb import AmbiguousProvisionError
 
 from .codes import Codes
+from .export import ExportBlocked, ExportError, FormNotFound, export_case
 from .models import Case, Fact, Jurisdiction, SectionCRow
 from .section_c import section_c_rows
 from .store import CaseStore
@@ -20,6 +21,10 @@ class NewCase(BaseModel):
 
 class SectionCRequest(BaseModel):
     provisions: list[str]
+
+
+class ExportRequest(BaseModel):
+    draft: bool = False
 
 
 def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> FastAPI:
@@ -55,6 +60,23 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         if case is None:
             raise HTTPException(404, 'case not found')
         return case
+
+    @app.post('/cases/{case_id}/export', response_class=Response,
+              responses={200: {'content': {'application/pdf': {}}}, 409: {'description': 'export blocked'}})
+    def export(case_id: str, body: ExportRequest | None = None):
+        case = get_case(case_id)
+        draft = bool(body and body.draft)
+        try:
+            res = export_case(case, draft=draft, codes=code())
+        except ExportBlocked as e:
+            raise HTTPException(409, {'message': 'export blocked; resolve these or export a draft', 'reasons': e.reasons})
+        except FormNotFound as e:
+            raise HTTPException(503, str(e))
+        except ExportError as e:
+            raise HTTPException(500, str(e))
+        name = f'{case_id}-scc-variance{"-DRAFT" if draft else ""}.pdf'
+        return Response(res.pdf, media_type='application/pdf',
+                        headers={'Content-Disposition': f'attachment; filename="{name}"'})
 
     @app.get('/code/search')
     def code_search(q: str, division: str | None = Query('B', pattern='^[ABC]$'), limit: int = Query(20, ge=1, le=100)):
