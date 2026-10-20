@@ -31,6 +31,10 @@ class ProfessionalFacts(BaseModel):
     # The code screen still uses building area and principal_dwelling_units.
     gross_area_per_floor_m2: Annotated[float, Field(gt=0, allow_inf_nan=False)] | None = None
     total_unit_count: Count | None = None
+    # Explicit negative. "No engineer" is not an unresolved design route.
+    engineer_engaged: bool | None = None
+    # Medium confidence. True asks; it does not answer no.
+    gross_area_unsettled: bool | None = None
     farm_public_use: bool | None = None
     part4_design: bool | None = None
     preserved_wood_foundation_part4: bool | None = None
@@ -286,6 +290,20 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
             # general exception is out of scope, so an unanswered system does not ask.
             add(code + '_unknown', 'depends', 'System presence or applicability of the general building requirement is unresolved.',
                 pid, f'Is a {field.replace("_", " ")} system being installed, and does the general professional requirement apply?')
+
+    # The Acts count suites. Div C 2.4.1.1.(2) does not. Above 4 is a yes even when the code exception is no.
+    # The cite is the codedb authentication sentence. The Act pinpoint is source-pdf and is not a routing cite.
+    if facts.total_unit_count is not None and facts.total_unit_count > 4 and (
+            facts.principal_dwelling_units is None or facts.principal_dwelling_units <= 4):
+        add('acts_units', 'yes',
+            'Dwelling units counted with suites are above 4. Div C 2.4.1.1.(5) is the authentication '
+            'sentence that follows the professional Acts.',
+            '2.4.1.1.(5)')
+    if facts.gross_area_unsettled is True:
+        add('gross_area_acts', 'depends',
+            'Gross area can be read more than one way. This screen does not answer no from building area alone.',
+            '2.4.1.1.(5)',
+            'What gross area applies, and does a basement count in that area?')
 
     if facts.prescriptive_route_confirmed is not True or facts.professional_judgement_required is not False:
         add('design_scope', 'depends', 'Non-prescriptive work or performance judgements need a competent professional-scope assessment.',

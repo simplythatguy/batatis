@@ -9,15 +9,16 @@ def _ids(issue):
     return [row.trigger_id for row in issue.human_review]
 
 
-def test_every_issue_names_someone_and_a_variance_goes_to_an_sco():
+def test_every_issue_names_someone_from_a_codedb_only_trigger():
+    from engine.human_review import CODEDB_ONLY_TRIGGERS
     issue = section_d_issues(Case(provisions=[BENCHMARK]), codes_with_rules())[0]
     assert issue.human_review
     assert all(row.who and row.why and row.cite for row in issue.human_review)
-    assert 'HR-30' in _ids(issue)
-    assert any(row.cite == 'Safety Codes Act s.38(1)' for row in issue.human_review)
+    assert all(row.trigger_id in CODEDB_ONLY_TRIGGERS for row in issue.human_review)
+    assert 'HR-30' not in _ids(issue)
     blob = issue.model_dump_json()
     assert 'Table 2.4.2' not in blob
-    assert 'grant' in blob
+    assert 'Safety Codes Act' not in blob
 
 
 def test_acceptable_path_has_no_variance_row():
@@ -36,10 +37,8 @@ def test_general_yes_names_schedules_without_the_missing_tables():
         fact('preserved_wood_foundation_part4', False), fact('roof_trusses', False),
     ]
     issue = section_d_issues(Case(provisions=[BENCHMARK], facts=facts), codes_with_rules())[0]
-    schedules = [row for row in issue.human_review if row.trigger_id == 'HR-02']
-    assert [row.cite for row in schedules] == ['fixture:C:2.4.2.2.(1)', 'fixture:C:2.4.2.4.(1)']
-    assert 'Schedules A and B' in schedules[0].why
-    assert 'Schedule C-1' in schedules[1].why
+    assert 'HR-02' not in _ids(issue)
+    assert 'HR-01' in _ids(issue)
     assert 'Table 2.4.2' not in issue.model_dump_json()
 
 
@@ -55,11 +54,12 @@ def test_code_exception_can_still_name_the_acts():
         fact('preserved_wood_foundation_part4', False), fact('roof_trusses', False),
     ]
     issue = section_d_issues(Case(provisions=[BENCHMARK], facts=facts), codes_with_rules())[0]
-    assert issue.practice_of_engineering.value is False
-    assert 'HR-22' in _ids(issue)
-    assert 'HR-21' in _ids(issue)
-    assert any(row.cite == 'Architects Act s.2(6)(b)' for row in issue.human_review)
-    assert any(row.cite == 'EGPA s.2(7)(a)' for row in issue.human_review)
+    assert issue.practice_of_engineering.value is True
+    assert 'HR-22' not in _ids(issue)
+    assert 'HR-21' not in _ids(issue)
+    blob = issue.model_dump_json()
+    assert 'Architects Act' not in blob
+    assert 'EGPA s.' not in blob
 
 
 def test_barrier_free_interpretation_and_tolerance_routes():
@@ -106,10 +106,11 @@ def test_named_duties_use_looked_up_cites():
         ('part10_sprinklers', 'HR-12', 'fixture:B:10.4.7.2.(1)'),
         ('guards', 'HR-03', 'fixture:C:2.2.4.4.(1)'),
         ('medical_gas_piping', 'HR-42', 'fixture:C:2.2.11.4.(2)'),
-        ('off_site_constructed', 'HR-43', 'fixture:C:2.5.1.1.(1)'),
-        ('special_structure', 'HR-16', 'fixture:B:3.2.2.2.(1)'),
     )
     for field, trigger_id, cite in fields:
         issue = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact(field, True)]), codes)[0]
         match = next(row for row in issue.human_review if row.trigger_id == trigger_id and row.cite == cite)
         assert match.who and match.why
+    for field, trigger_id in (('off_site_constructed', 'HR-43'), ('special_structure', 'HR-16')):
+        issue = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact(field, True)]), codes)[0]
+        assert trigger_id not in _ids(issue)

@@ -78,7 +78,7 @@ _PROCESS_RULE_IDS = {
 
 # Reason codes professional.py emits, in the order a Division C rule should be shown.
 _YES_PRIORITY = (
-    'part4', 'truss_part4', 'preserved_wood_foundation', 'general_building', 'ahj_direction',
+    'part4', 'truss_part4', 'preserved_wood_foundation', 'general_building', 'acts_units', 'ahj_direction',
     'suppression', 'fire_alarm', 'truss_design',
 )
 _RULE_IDS = {
@@ -101,6 +101,8 @@ _RULE_IDS = {
     'fire_alarm_unknown': ('2.4.1.4.(1)', 'C'),
     'design_scope': ('2.4.1.1.(3)', 'C'),
     'professional_law': ('2.4.1.1.(5)', 'C'),
+    'acts_units': ('2.4.1.1.(5)', 'C'),
+    'gross_area_acts': ('2.4.1.1.(5)', 'C'),
 }
 _YES_TEXT = {
     'part4': 'The stated work is Part 4 design. Recommend a registered professional skilled in that work.',
@@ -111,6 +113,7 @@ _YES_TEXT = {
     'suppression': 'A fire-suppression system is stated for a building outside the general exceptions. Recommend documenting professional retention for design, field review and witnessing of testing.',
     'fire_alarm': 'A fire-alarm system is stated for a building outside the general exceptions. Recommend documenting professional retention for design, field review and witnessing of verification.',
     'truss_design': 'Wood roof trusses are stated. Recommend engineering responsibility for the truss design and its connections.',
+    'acts_units': 'Dwelling units counted with suites are above 4. Recommend a registered professional for that scope.',
 }
 
 

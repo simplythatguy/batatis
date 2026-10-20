@@ -1,7 +1,8 @@
 """Who must see a Section D issue. This is not a compliance determination.
 
 Code citations are copied from a codedb lookup. A provision that does not resolve is omitted.
-Statute pinpoints are the cite strings in the human-review research file, and only those.
+Only triggers whose research verification_class is codedb-only are returned. Mixed and
+source-pdf-only triggers are left off this list.
 """
 from __future__ import annotations
 
@@ -28,7 +29,13 @@ REVIEW_PROVISIONS = (
     ('B', '3.2.2.2.(1)'),  # HR-16 special structure
 )
 
-# Source-PDF-checked pinpoints. Not code citations, and not rewritten.
+# verification_class == codedb-only in the human-review research file. 21 of 36.
+# The other 7 are mixed and the other 8 are source-pdf-only. Those are not emitted.
+CODEDB_ONLY_TRIGGERS = frozenset({
+    'HR-01', 'HR-03', 'HR-04', 'HR-05', 'HR-06', 'HR-07', 'HR-11', 'HR-12', 'HR-13', 'HR-14',
+    'HR-15', 'HR-17', 'HR-31', 'HR-32', 'HR-33', 'HR-34', 'HR-35', 'HR-40', 'HR-41', 'HR-42', 'HR-44',
+})
+# Source-pdf pinpoints. Rows that use them are built and then dropped by the codedb-only filter.
 _ACT_ARCHITECTS = 'Architects Act s.2(6)(b)'
 _ACT_ENGINEERING = 'EGPA s.2(7)(a)'
 _ACT_VARIANCE = 'Safety Codes Act s.38(1)'
@@ -199,4 +206,4 @@ def human_reviews(case: Case, codes: Codes) -> tuple[HumanReview, ...]:
         _add(rows, seen, 'HR-30', 'SCO or Administrator',
              'A variance is decided by an SCO or an Administrator. This list does not grant it.',
              _ACT_VARIANCE)
-    return tuple(rows)
+    return tuple(row for row in rows if row.trigger_id in CODEDB_ONLY_TRIGGERS)
