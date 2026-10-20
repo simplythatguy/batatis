@@ -64,7 +64,7 @@ Set these on the Vercel project for Preview and Production. Leave the project Ro
 
 | Variable | Where | Purpose |
 | --- | --- | --- |
-| `BATATIS_STORE` | engine runtime | `file` locally (default). `postgres` with `DATABASE_URL` opens the shared Neon store. Without those, the process still starts as a single-instance demo and keeps cases in `BATATIS_CASES`. |
+| `BATATIS_STORE` | engine runtime | `file` locally (default). Hosted runs require `postgres` and a nonempty `DATABASE_URL`; startup refuses an ephemeral file store. |
 | `DATABASE_URL` | engine runtime | Neon (or any Postgres) URL. `sslmode=require` is added when the URL omits it. |
 | `BATATIS_LIVE` | engine runtime | Unset or anything other than `1` keeps the offline path. Live calls also need `OPENAI_API_KEY`. |
 | `OPENAI_API_KEY` | engine runtime, sensitive | Server only. Do not use a `VITE_` name. The process never logs the value. |
@@ -85,9 +85,15 @@ Local file runs ignore `DATABASE_URL`. Uploaded PDF bytes go in `case_files` (Po
 
 Every JSON response returns code text in full, with its citation and the NRC publication link. Search still returns at most 20 hits. No route serves `codedb.sqlite`. The exported PDF uses the same rule: form cells carry provision ids and objective/function codes, and the appendix carries citations, objective and functional-statement titles, application notes, the full provision text, and NBC 2020 intent statements and notes, each with the NRC link.
 
-Do not upload personal information. In live mode, text you enter is sent to OpenAI (US) for processing and is retained by OpenAI under its API data policy (https://openai.com/policies/api-data-usage-policies); Batatis deletes its own stored case data and files after 7 days or on request. That sentence is `meta.notice` and the `X-Batatis-Notice` header. Cases and their files are deleted 7 days after `created_at`, or sooner on `DELETE /cases/{case_id}`. The sqlite store and Neon Postgres both purge. Case create and the per-request sweep do it at most once every 10 minutes per instance. `python -m engine.retention` runs it immediately, and so does the Hobby cron `GET /api/retention/purge` (`0 6 * * *`, once a day). A second purge deletes nothing.
+Do not upload personal information. In live mode, text you enter is sent to OpenAI (US) for processing and is retained by OpenAI under its API data policy (https://openai.com/policies/api-data-usage-policies); Batatis deletes its own stored case data and files after 7 days or on request. That sentence is `meta.notice` and the default `X-Batatis-Notice` header; a route-specific header is preserved. Cases and their files expire 7 days after `created_at`, or sooner on `DELETE /cases/{case_id}`. The sqlite store and Neon Postgres both remove expired cases and files on access, including between sweeps. Case create and the per-request sweep run the bulk purge at most once every 10 minutes per instance. `python -m engine.retention` runs it immediately, and so does the Hobby cron `GET /api/retention/purge` (`0 6 * * *`, once a day). A second purge deletes nothing. A failed purge returns `503` detail `case purge failed`, with no connection string in the response or log.
 
-This project's Vercel environment has no `DATABASE_URL`, so the Neon case store is not usable here. The deploy is a single-instance demo: cases stay in that instance's temporary folder (`BATATIS_CASES`) and can vanish earlier than 7 days, or be missing on another instance. Set `BATATIS_STORE=postgres` and `DATABASE_URL` to use the shared Neon store. The web app says "Single-instance demo. Cases stay on this instance until a Postgres store is configured."
+The existing Vercel project is connected to a dedicated Neon `batatis-db` resource
+on the `free_v3` plan in `iad1`. `DATABASE_URL` is supplied by that integration and
+`BATATIS_STORE=postgres` selects it. Local checks against the real database have
+verified that two app instances can create, read and delete the same synthetic
+case. That verifies shared storage locally; the hosted engine still needs the
+same check after the approved deployment. Hosted startup refuses missing or
+non-Postgres storage settings. `BATATIS_CASES` selects a sqlite path for local runs.
 
 ## Preview
 
@@ -123,9 +129,26 @@ Live only when BATATIS_LIVE=1 and OPENAI_API_KEY are both set; otherwise stay of
 
 ## Accounts and plan limits
 
-Not created by this change:
+The existing Vercel project uses the dedicated free Neon resource `batatis-db`
+(`free_v3`). Keep `BATATIS_STORE=postgres` and its private `DATABASE_URL`
+configured. Hosted startup refuses a missing Postgres configuration; there is
+no temporary-disk fallback. Keep `BATATIS_LIVE=0` and the OpenAI key unset until
+the US$20 total cap in #41 is integrated and passes its gate. The daily ledger
+in this branch does not satisfy that gate.
 
-- A Neon free-tier database (or another Postgres) and its `DATABASE_URL`, if the project does not already have one. The stateless engine needs it. The file store is for a single machine.
+Configure an independent, random server-only `CRON_SECRET` for the scheduled
+retention purge (at least 16 characters). Vercel sends it as
+`Authorization: Bearer <CRON_SECRET>`; see
+[Securing cron jobs](https://vercel.com/docs/cron-jobs/manage-cron-jobs#securing-cron-jobs).
+Without that secret a hosted purge returns `503` detail
+`retention purge not configured`; a missing or incorrect bearer token returns
+`401` detail `unauthorized`. Neither response triggers a bulk purge. Responses
+are not cached, and tokens are never logged. The operator CLI remains available
+as `python -m engine.retention`. Local HTTP runs require bearer auth when
+`CRON_SECRET` is set, and allow unauthenticated purges when it is unset.
+
+Other prerequisites:
+
 - An OpenAI key, only if live model calls are turned on. Offline works without one.
 - A private Blob or Neon object for the two PDFs, only if the Vercel builder cannot reach `nrc-publications.canada.ca`.
 

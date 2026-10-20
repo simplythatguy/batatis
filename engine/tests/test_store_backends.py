@@ -22,6 +22,8 @@ def _exercise(store, created: list | None = None):
         created.append(case.id)
     version = store.get_version(case.id)
     assert version == 1
+    with pytest.raises(VersionConflict):
+        store.put(case, expected_version=0)
     case.title = 'Changed'
     store.put(case, expected_version=version)
     assert store.get_version(case.id) == 2
@@ -73,15 +75,21 @@ def test_cases_older_than_seven_days_are_purged_with_files(tmp_path):
     assert_retention(CaseStore(tmp_path / 'cases.sqlite'))
 
 
-def test_vercel_without_postgres_is_a_single_instance_demo(monkeypatch, tmp_path):
+def test_vercel_refuses_an_unset_file_store(monkeypatch, tmp_path):
     monkeypatch.setenv('VERCEL', '1')
     monkeypatch.delenv('BATATIS_STORE', raising=False)
-    monkeypatch.delenv('DATABASE_URL', raising=False)
     monkeypatch.setenv('BATATIS_CASES', str(tmp_path / 'cases.sqlite'))
-    from engine.store import single_instance_demo
-    store = open_store()
-    assert isinstance(store, CaseStore)
-    assert single_instance_demo()
+    with pytest.raises(RuntimeError, match='BATATIS_STORE is not postgres'):
+        open_store()
+
+
+def test_vercel_refuses_postgres_without_a_database_url(monkeypatch):
+    from engine.api import create_app
+    monkeypatch.setenv('VERCEL', '1')
+    monkeypatch.setenv('BATATIS_STORE', 'postgres')
+    monkeypatch.delenv('DATABASE_URL', raising=False)
+    with pytest.raises(RuntimeError, match='DATABASE_URL'):
+        create_app()
 
 
 def test_postgres_backend(monkeypatch):

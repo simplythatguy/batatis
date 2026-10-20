@@ -4,7 +4,10 @@ from __future__ import annotations
 import json
 import logging
 
-from .copyright import PII_NOTICE, attach_meta, attribute_code
+from starlette.responses import JSONResponse
+
+from .copyright import attach_meta, attribute_code
+from .privacy import PII_NOTICE
 
 access_log = logging.getLogger('engine.access')
 
@@ -25,25 +28,17 @@ class HttpGuard:
         if scope.get('type') != 'http':
             await self.app(scope, receive, send)
             return
-        if self.sweep is not None:
+        # The explicit purge authenticates in its route before touching the store.
+        if self.sweep is not None and scope.get('path') not in ('/retention/purge', '/api/retention/purge'):
             try:
                 self.sweep()
             except Exception as exc:
-                # The exception text can name a database host. Log the type, and answer 503.
+                # Database errors may contain credentials. Only log the exception type.
                 access_log.warning('case purge failed: %s', type(exc).__name__)
-                payload = {'detail': 'case purge failed', 'meta': {'notice': PII_NOTICE}}
-                raw = json.dumps(payload).encode()
-                await send({
-                    'type': 'http.response.start',
-                    'status': 503,
-                    'headers': [
-                        (b'content-type', b'application/json'),
-                        (b'content-length', str(len(raw)).encode()),
-                        (b'x-robots-tag', b'noindex, nofollow'),
-                        (b'x-batatis-notice', PII_NOTICE.encode()),
-                    ],
-                })
-                await send({'type': 'http.response.body', 'body': raw})
+                response = JSONResponse(
+                    attach_meta({'detail': 'case purge failed'}), status_code=503,
+                    headers={'X-Robots-Tag': 'noindex, nofollow', 'X-Batatis-Notice': PII_NOTICE})
+                await response(scope, receive, send)
                 return
         path = scope.get('path') or ''
         if path == '/api' or path.startswith('/api/'):
@@ -78,9 +73,12 @@ class HttpGuard:
                     pass
                 headers = [(key, value) for key, value in headers if key.lower() != b'content-length']
                 headers.append((b'content-length', str(len(raw)).encode()))
-            headers = [(key, value) for key, value in headers if key.lower() not in (b'x-robots-tag', b'x-batatis-notice')]
+            notice = next(((key, value) for key, value in headers if key.lower() == b'x-batatis-notice'),
+                          (b'x-batatis-notice', PII_NOTICE.encode()))
+            headers = [(key, value) for key, value in headers
+                       if key.lower() not in (b'x-robots-tag', b'x-batatis-notice')]
             headers.append((b'x-robots-tag', b'noindex, nofollow'))
-            headers.append((b'x-batatis-notice', PII_NOTICE.encode()))
+            headers.append(notice)
             start = dict(started['message'])
             start['headers'] = headers
             # Ids, route, and status only. Never the body, a quote, or uploaded bytes.

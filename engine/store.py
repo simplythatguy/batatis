@@ -54,32 +54,30 @@ def default_path() -> Path:
     return Path(os.environ.get('BATATIS_CASES') or DEFAULT_PATH)
 
 
-def postgres_configured() -> bool:
-    """True when the shared Neon store can be opened."""
-    kind = (os.environ.get('BATATIS_STORE') or '').strip().lower()
-    return kind == 'postgres' and bool((os.environ.get('DATABASE_URL') or '').strip())
-
-
-def single_instance_demo() -> bool:
-    """True when cases stay on this process because Postgres is not configured."""
-    return not postgres_configured()
-
-
 def assert_durable_when_hosted() -> None:
-    """Postgres is the shared store. Without it the process still starts, as a single-instance demo."""
-    return
+    """A Vercel function disk is ephemeral. Refuse the file store instead of dropping cases."""
+    if not os.environ.get('VERCEL'):
+        return
+    kind = (os.environ.get('BATATIS_STORE') or '').strip().lower()
+    if kind != 'postgres':
+        raise RuntimeError(
+            'Refusing to start: VERCEL is set and BATATIS_STORE is not postgres. '
+            'Set BATATIS_STORE=postgres and DATABASE_URL. A file store on this host is an ephemeral disk.')
+    if not (os.environ.get('DATABASE_URL') or '').strip():
+        raise RuntimeError('Refusing to start: VERCEL is set but DATABASE_URL is not set. '
+                           'Configure the shared Postgres case store before deploying.')
 
 
 def open_store(path: Path | str | None = None) -> CaseBackend:
-    """Postgres when BATATIS_STORE=postgres and DATABASE_URL are set. Otherwise the file store."""
+    """File backend unless BATATIS_STORE=postgres, which also needs DATABASE_URL."""
     assert_durable_when_hosted()
-    if postgres_configured():
+    kind = (os.environ.get('BATATIS_STORE') or 'file').strip().lower()
+    if kind in ('', 'file', 'sqlite'):
+        return CaseStore(path)
+    if kind == 'postgres':
         from .store_postgres import PostgresCaseStore
         return PostgresCaseStore()
-    kind = (os.environ.get('BATATIS_STORE') or 'file').strip().lower()
-    if kind not in ('', 'file', 'sqlite', 'postgres'):
-        raise RuntimeError(f'BATATIS_STORE must be file or postgres, not {kind!r}')
-    return CaseStore(path)
+    raise RuntimeError(f'BATATIS_STORE must be file or postgres, not {kind!r}')
 
 
 class CaseStore:
@@ -100,7 +98,8 @@ class CaseStore:
         return sqlite3.connect(self.path, timeout=5)
 
     def get_version(self, case_id: str) -> int | None:
-        with closing(self._connect()) as con:
+        with closing(self._connect()) as con, con:
+            self._purge_expired(con, case_id)
             row = con.execute('SELECT version FROM cases WHERE id=?', (case_id,)).fetchone()
         return int(row[0]) if row else None
 
@@ -118,17 +117,20 @@ class CaseStore:
                     con.execute('INSERT INTO cases (id, json, updated_at, version) VALUES (?,?,?,1)',
                                 (case.id, payload, case.updated_at))
                 except sqlite3.IntegrityError as exc:
-                    actual = self.get_version(case.id)
+                    row = con.execute('SELECT version FROM cases WHERE id=?', (case.id,)).fetchone()
+                    actual = int(row[0]) if row else None
                     raise VersionConflict(case.id, 0, actual) from exc
                 return case
             cur = con.execute('UPDATE cases SET json=?, updated_at=?, version=version+1 '
                               'WHERE id=? AND version=?', (payload, case.updated_at, case.id, expected_version))
             if cur.rowcount != 1:
-                raise VersionConflict(case.id, expected_version, self.get_version(case.id))
+                row = con.execute('SELECT version FROM cases WHERE id=?', (case.id,)).fetchone()
+                raise VersionConflict(case.id, expected_version, int(row[0]) if row else None)
         return case
 
     def get(self, case_id: str) -> Case | None:
-        with closing(self._connect()) as con:
+        with closing(self._connect()) as con, con:
+            self._purge_expired(con, case_id)
             row = con.execute('SELECT json FROM cases WHERE id=?', (case_id,)).fetchone()
         return Case.model_validate_json(row[0]) if row else None
 
@@ -140,17 +142,20 @@ class CaseStore:
             return cur.rowcount == 1
 
     def purge_expired(self) -> int:
-        """Delete every case created more than 7 days ago, and its files. One statement pair."""
-        cutoff = retention_cutoff()
+        """Delete expired cases and files together in one transaction."""
         with closing(self._connect()) as con, con:
-            ids = [row[0] for row in con.execute(
-                "SELECT id FROM cases WHERE json_extract(json, '$.created_at') < ?", (cutoff,))]
-            if not ids:
-                return 0
-            con.executemany('DELETE FROM case_files WHERE case_id=?', [(case_id,) for case_id in ids])
-            con.execute(
-                f"DELETE FROM cases WHERE id IN ({','.join('?' for _ in ids)})", ids)
-            return len(ids)
+            return self._purge_expired(con)
+
+    def _purge_expired(self, con, case_id: str | None = None) -> int:
+        # Targeted access uses the case primary key; only periodic sweeps scan all cases.
+        where = "julianday(json_extract(json, '$.created_at')) < julianday(?)"
+        params = [retention_cutoff()]
+        if case_id is not None:
+            where += ' AND id=?'
+            params.append(case_id)
+        con.execute('DELETE FROM case_files WHERE case_id IN '
+                    f'(SELECT id FROM cases WHERE {where})', params)
+        return con.execute(f'DELETE FROM cases WHERE {where}', params).rowcount
 
     def add_fact(self, case_id: str, fact: Fact) -> Case | None:
         """Read-modify-write under a reserved lock so two writers cannot drop a fact."""
@@ -158,9 +163,10 @@ class CaseStore:
             con = sqlite3.connect(self.path, timeout=5, isolation_level=None)
             try:
                 con.execute('BEGIN IMMEDIATE')
+                self._purge_expired(con, case_id)
                 row = con.execute('SELECT json, version FROM cases WHERE id=?', (case_id,)).fetchone()
                 if row is None:
-                    con.execute('ROLLBACK')
+                    con.execute('COMMIT')
                     return None
                 case = Case.model_validate_json(row[0])
                 case.facts = [item for item in case.facts if item.id != fact.id] + [fact]
@@ -185,16 +191,18 @@ class CaseStore:
     def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf') -> dict | None:
         if len(data) > PDF_MAX_BYTES:
             raise FileTooLarge()
-        if self.get(case_id) is None:
-            return None
         file_id = f'file_{uuid.uuid4().hex[:12]}'
         with closing(self._connect()) as con, con:
+            self._purge_expired(con, case_id)
+            if con.execute('SELECT id FROM cases WHERE id=?', (case_id,)).fetchone() is None:
+                return None
             con.execute('INSERT INTO case_files VALUES (?,?,?,?,?,?,?)',
                         (file_id, case_id, name, content_type, len(data), data, now()))
         return {'id': file_id, 'case_id': case_id, 'name': name, 'content_type': content_type, 'size': len(data)}
 
     def get_file(self, case_id: str, file_id: str) -> dict | None:
-        with closing(self._connect()) as con:
+        with closing(self._connect()) as con, con:
+            self._purge_expired(con, case_id)
             row = con.execute('SELECT name, content_type, size, data FROM case_files WHERE id=? AND case_id=?',
                               (file_id, case_id)).fetchone()
         if row is None:

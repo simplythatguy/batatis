@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import logging
+import os
+import secrets
 
 import psycopg
 from fastapi import FastAPI, HTTPException, Query, Request, Response
@@ -104,15 +106,34 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
             state['codes'] = Codes()
         return state['codes']
 
+    def purge_cases(*, force: bool = False) -> int:
+        current = cases()
+        try:
+            return current.purge_expired() if force else maybe_purge(current)
+        except Exception as exc:
+            logger.warning('case purge failed: %s', type(exc).__name__)
+            raise HTTPException(503, 'case purge failed', headers={'Cache-Control': 'no-store'}) from None
+
     @app.post('/cases', response_model=Case, status_code=201)
     def create_case(body: NewCase | None = None):
-        maybe_purge(cases())
+        purge_cases()
         return cases().put(Case(**(body.model_dump() if body else {})))
 
     @app.get('/retention/purge')
-    def retention_purge():
-        """Unthrottled purge. The daily Vercel cron calls this route."""
-        return {'deleted': cases().purge_expired()}
+    def retention_purge(request: Request, response: Response):
+        """The daily Vercel cron authenticates before an unthrottled purge."""
+        secret = os.environ.get('CRON_SECRET') or ''
+        private_headers = {'Cache-Control': 'no-store'}
+        if not secret and os.environ.get('VERCEL'):
+            raise HTTPException(503, 'retention purge not configured', headers=private_headers)
+        if secret:
+            authorization = request.headers.get('authorization', '').encode('utf-8')
+            expected = ('Bearer ' + secret).encode('utf-8')
+            if not secrets.compare_digest(authorization, expected):
+                raise HTTPException(401, 'unauthorized',
+                                    headers={**private_headers, 'WWW-Authenticate': 'Bearer'})
+        response.headers['Cache-Control'] = 'no-store'
+        return {'deleted': purge_cases(force=True)}
 
     @app.get('/cases/{case_id}', response_model=Case)
     def get_case(case_id: str):
