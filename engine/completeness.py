@@ -49,7 +49,7 @@ def calgary_form_gap(case: Case) -> Gap | None:
         return None
     return Gap(id='info:calgary_variance_form', severity='info', section='B', field='calgary_variance_form',
                message=notice,
-               fix_hint='Ask the Safety Codes Officer which variance request form to file. '
+               fix_hint='Keep the SCC form and appendix. Ask the Safety Codes Officer whether they want the City form as well. '
                         'This item does not stop the SCC variance form from being exported.')
 
 

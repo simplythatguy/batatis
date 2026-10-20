@@ -30,15 +30,15 @@ Gap `severity` is `blocking`, `warning`, or `info`. `info` does not block export
 
 ### Calgary variance form
 
-When `jurisdiction.id` is `calgary`, three places carry this exact sentence:
+When `jurisdiction.id` is `calgary`, three places carry this exact sentence. The link is the City guide URL in `CALGARY_FORM_SOURCE`:
 
-`Calgary's guide asks for its own Request for Specific Variance form. Confirm with your Safety Codes Officer which form they accept.`
+`Calgary also asks for its own Request for Specific Variance form (in the City's Guide to Applying for an Alternative Solution: https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf). Keep this SCC form and appendix; ask your Safety Codes Officer whether they want both.`
 
 - Response header `X-Batatis-Notice` on `200` from `POST /cases/{case_id}/export`, draft and final. The header is omitted for every other jurisdiction, including Edmonton.
 - `GET /cases/{case_id}/gaps`: one item, `id` `info:calgary_variance_form`, `section` `B`, `field` `calgary_variance_form`, `severity` `info`, `message` the sentence above. It is not a blocking gap.
 - The engine-generated appendix page of the exported PDF, under the heading `Local variance form`.
 
-The sentence does not say that Calgary accepts the Safety Codes Council form. Export of that form still returns `200` when the rest of the case is ready.
+The sentence keeps the SCC form and appendix and asks the officer whether they want the City form as well. It does not say that Calgary accepts the Safety Codes Council form. Export of that form still returns `200` when the rest of the case is ready.
 
 City of Calgary, *Guide to Applying for an Alternative Solution (Variance)*, 23 November 2023, step 3: "Refer to the Request for Specific Variance form (attached). In accordance with SCC policy, the form must be completed and submitted for all variance applications regardless of what formal documentation is also submitted." https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf (listed at https://www.calgary.ca/development/permits/building-regulation-advisories.html).
 
