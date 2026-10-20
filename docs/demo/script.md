@@ -2,7 +2,7 @@
 
 Edit clocks below. Spoken lines are sized for that slot. If a click runs long, drop a sentence from the end of the narration. Keep the empty fields, the on-screen limit (“does not write the evidence”), and the officer line “This does not certify the design.”
 
-This cut is recordable on PR #16’s screens today, plus two stills you add in the edit. The app does not show a ranked identify list, a benchmark card, or the eval numbers.
+This cut is recordable on PR #16’s screens today, plus three stills you add in the edit: the ranked list, the benchmark card, and the eval card. The app does not show a ranked identify list, a benchmark card, or the eval numbers.
 
 | Criterion | Time | Where it is |
 | --- | --- | --- |
@@ -104,7 +104,7 @@ The gap strip is collapsed to “N blocking · N warning” until you open **Rev
 | 4 | 0:51–1:36 | Case C | Search, Section C, ranked list, benchmark card, eval still | Code identification |
 | 5 | 1:36–2:08 | Case C | Section D, then the on-screen limit | Recommendations, then X factor |
 | 6 | 2:08–2:44 | Sample officer package | One planted package | Review |
-| 7 | 2:44–3:00 | Case on screen | Authority select and locked export | Usability and portability |
+| 7 | 2:44–3:00 | Case on screen | Authority select, gaps still open | Usability and portability |
 
 Three example packages on `#/officer` are not built. No open PR loads Cases A–C there. Shot 6 films the one planted package that #16 already renders.
 
@@ -157,7 +157,7 @@ Click **Continue to code check**. Two **Your words** cards are on screen: **Shea
 
 - **Clock:** 0:51–1:36
 - **Case label:** `EXAMPLE DATA · Case C · Homebuilder`
-- **Route:** Case C code check, still open from shot 2, then `#/section-c`, then two stills
+- **Route:** Case C code check, still open from shot 2, then `#/section-c`, then three stills
 
 Film this immediately after shot 2. Case C is still the open case. Do not Reset. One **Your words** card, from the description. Answer **Not sure** on it. Crop the search intro.
 
@@ -165,17 +165,17 @@ Film this immediately after shot 2. Case C is still the open case. Do not Reset.
 
 Do not say 0.31 or 0.35, and do not work the opening into square metres. Do not search `heated floor insulation`. Do not voice `9.27.5.1` on this search. That id is a different query (`cladding fastened furring`), and only if a returned row shows it. Search on that query has returned sentences (1) and (5). Do not say sentence (2) unless that id is the row.
 
-**1:03–1:11, Section C.** Click **Continue to Section C**. The table has a row only for the article you marked Yes. The source pill reads **Live lookup** when the engine answers. Objective and function are the attribution-table pair. If the intent cell reads **None for this provision**, say so and do not fill it. The detail line is “No NBC 2020 intent statement for this provision.” If the intent text looks like a different provision, say so and do not read it as this article’s intent. Below the table the blocks are **Code text** and **NBC 2020 Intent Statements**. A live row has no **AI-written** block. That pill is on the Code check question. If the pill says **Cached demo run** or **Lookup failed**, say that and do not recite objective codes from memory.
+**1:03–1:11, Section C.** Click **Continue to Section C**. The table has a row only for the article you marked Yes. The source pill reads **Live lookup** when the engine answers. For `9.9.10.1.(2)` the lookup returns function F10 and objective OS3.7. Read that pair off the row. Read the intent text in the intent cell. Do not say this provision has no intent. If the intent text looks like a different provision, say so and do not read it as this article’s intent. Below the table the blocks are **Code text** and **NBC 2020 Intent Statements**. A live row has no **AI-written** block. That pill is on the Code check question. If the pill says **Lookup failed**, say that and do not recite objective codes from memory.
 
-**Narration for the app frames.** “Search returns database rows only. Say 9.9.10.1.(2) only if that id is the row on screen. Section C is a lookup. Intent stays on none for this provision when that is what it says. Batatis checks completeness. The officer decides compliance.”
+**Narration for the app frames.** “Search returns database rows only. Say 9.9.10.1.(2) only if that id is the row on screen. Section C is a lookup. The row shows F10 and OS3.7, and the intent text on screen. Batatis checks completeness. The officer decides compliance.”
 
-**1:11–1:22, ranked list still.** This list is not the search box, and it is not in this app build. Label the still `PR #12 identify output [if merged] · not in this app build`, plus the mode name. **Cached demo run** (`cached_demo`) is a recorded real model run for a seeded case. This Case C paste is not one of those. With no key, the mode is **Keyword search, no AI key** (`bm25_fallback`). Read the mode name printed on the still. Columns are provision, title, probability, and decision state. There is no committed column. Identify does not auto-commit. Read only values printed on the still. If you have no payload, omit the still and do not say ranked.
+**1:11–1:22, ranked list still.** This list is not the search box, and it is not in this app build. Caption the still `BM25 fallback, no model, engine output from #12, not in the app yet`. This paste is not a seeded model run, so do not caption it Cached demo run or Keyword search, no AI key. Columns are provision, title, probability, and decision state. There is no committed column. Identify does not auto-commit. Read only values printed on the still. If you have no payload, omit the still and do not say ranked.
 
-**1:22–1:29, benchmark card.** Same two labels, including the mode name on the still. The card’s role line is `benchmark_acceptable_solution`. Read the provision, the explanation, and the citation if they are on the card. `9.9.10.1.(2)` is an example of that field only when the card prints it. If the card says no article was identified, read that sentence and stop. If you have no card, do not say benchmark. Do not say OSB, furring, or a millimetre thickness.
+**1:22–1:29, benchmark card.** Same caption: `BM25 fallback, no model, engine output from #12, not in the app yet`. The card’s role line is `benchmark_acceptable_solution`. Read the provision, the explanation, and the citation if they are on the card. `9.9.10.1.(2)` is an example of that field only when the card prints it. If the card says no article was identified, read that sentence and stop. If you have no card, do not say benchmark. Do not say OSB, furring, or a millimetre thickness.
 
 **1:29–1:36, eval still.** A full-frame still, not `#/accuracy`. Title it model-checked, not human-verified. Copy these lines and no others:
 
-- `rules_plus_unknown` (shipped), dev set: 50/60 in-sample, 0 under-flags
+- `rules_plus_unknown` (shipped), dev set: 50/60 in-sample, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction)
 - `rules_only`, dev set: 55/60 in-sample, 1 under-flag
 - Held-out: 7/8 blind (pre-fix), 4/8 post-fix (no longer blind)
 - `c_openai_rerank_verify`: top-1 9/11 on the 11 dev cases with gold (in-sample, single run, 9 cases without gold excluded; BM25 baseline 5/11)
@@ -225,7 +225,7 @@ Hold on **Copy request**. The box starts with “Information request” and “T
 
 ---
 
-### Shot 7 — Authority and a locked export (0:16)
+### Shot 7 — Authority, gaps still open (0:16)
 
 - **Clock:** 2:44–3:00
 - **Case label:** the case on screen
@@ -235,12 +235,10 @@ Record the Case C frame in step 2 of the recording order, before Reset. Record t
 
 **On-screen action.** Cut between the Describe authority select on Case C (Edmonton) and Case A (Edmonton is what you set; Calgary is the other option in the same select). The select was set before Continue. Do not say the authority is stored on the record. That claim is PENDING `backend/case-api`. If Review gaps still lists the reviewing jurisdiction after the pick, say the pick has not cleared it. The sidebar may show the raw id in lowercase, such as “Homebuilder · edmonton”. That is not the engine accepting it.
 
-On Application, the tabs are Section A, Section B, Alternative path, and Section D. Open **Review gaps** so **Owner missing** and the six “… empty” rows are visible. **Check completeness** stays disabled. The footer reads “Close N blocking gaps to check completeness”. Do not read N as a score. After a Yes, that count can jump. Do not click the button. This build has no UI path that reaches a PDF while those gaps are open.
+On Application, the tabs are Section A, Section B, Alternative path, and Section D. Open **Review gaps** so **Owner missing** and the six “… empty” rows are visible. **Check completeness** stays disabled. The footer reads “Close N blocking gaps to check completeness”. Do not read N as a score. After a Yes, that count can jump. Do not click the button. Hold on that disabled button and the gap list. Do not describe an export, a PDF, a form title, or a route.
 
-The engine route is `POST /cases/{id}/export` in `engine/api.py` (lines 71–78: 409 while gaps remain, and the PDF response). `engine/export/scc.py` fills the form and reads `BATATIS_SCC_FORM`. It needs the code database. A draft returns 200. With gaps still open and draft off, it returns 409. Film the PDF only on a later build whose UI can call that route. Until then, hold on the disabled button. Do not call the file “the Safety Codes Council template” as a title on screen. The spoken line is the engine behaviour, not a document in the frame.
-
-**Narration.** “The engine’s export fills the SCC template: SCC’s current variance form, dated October 6, 2026, not Appendix 1. This build keeps it locked while gaps are open.”
+**Narration.** “Edmonton is selected. Calgary is the other choice in the same list. Owner is still missing, and the process fields are still empty. Check completeness stays closed.”
 
 ## If you have to shorten
 
-Drop the eval still’s `rules_only` line, then the ranked-list still, then the Calgary option in shot 7. Do not drop the Not sure answers, the empty intent handling, the benchmark card’s “read only what is printed” rule, shot 6’s “does not certify”, or the locked-export line. Do not put the refusal scene or the STANDATA split back in.
+Drop the eval still’s `rules_only` line, then the ranked-list still, then the Calgary option in shot 7. Do not drop the Not sure answers, the F10 and OS3.7 line, the benchmark card’s “read only what is printed” rule, shot 6’s “does not certify”, or the disabled Check completeness button. Do not put the refusal scene, the STANDATA split, or an export line back in.
