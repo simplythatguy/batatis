@@ -86,9 +86,16 @@ _YES_NO_FIELDS = (
     'professional_judgement_required', 'professional_scope_resolved',
     'fire_suppression', 'fire_alarm',
 )
+# not_engaged_yet is an explicit engagement answer. It is not a boolean no, and it is
+# not professional_status not_engaged.
 _NOT_SURE_VALUES = frozenset({
-    'not sure', 'not_sure', 'not sure (the officer decides)',
+    'not sure', 'not_sure', 'not sure (the officer decides)', 'not_engaged_yet',
 })
+# Engineer/architect engaged, and whether a registered professional is engaged.
+# architect_engaged is the same question as engineer_engaged.
+_ENGAGEMENT_FIELDS = (
+    'engineer_engaged', 'architect_engaged', 'registered_professional',
+)
 NOT_SURE_OPTION = 'Not sure (the officer decides)'
 NOT_ENGAGED_ITEM = (
     'Professional involvement not yet confirmed; the officer decides whether it is required.'
@@ -265,13 +272,14 @@ def _apply_case_sources(case: Case, facts: ProfessionalFacts):
     applicant: list[str] = []
     not_sure: list[str] = []
     withheld: dict[str, None] = {}
-    for name in _YES_NO_FIELDS:
+    for name in dict.fromkeys((*_YES_NO_FIELDS, *_ENGAGEMENT_FIELDS)):
         fact = latest_fact(case, f'professional.{name}', name)
         if fact is None or fact.status != 'confirmed' or fact.kind == 'proposed':
             continue
         if _not_sure_value(fact.value):
             not_sure.append(name)
-            withheld[name] = None
+            if name in ProfessionalFacts.model_fields:
+                withheld[name] = None
             continue
         if fact.source.type not in _AUTHORITY_SOURCES:
             applicant.append(name)

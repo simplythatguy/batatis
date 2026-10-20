@@ -91,6 +91,38 @@ def test_posted_confirmed_user_answers_cannot_return_no(tmp_path):
     assert any(gap['message'] == OFFICER_PROFESSIONAL_GAP and gap['routed_to'] == 'officer' for gap in gaps)
 
 
+def _engagement_stays_unknown(value: str):
+    """A cleared screen must not become no when engagement is not_sure or not_engaged_yet."""
+    codes = codes_with_rules()
+    officer = Source(type='officer', ref='ahj', quote='authority answer')
+    for field in ('engineer_engaged', 'architect_engaged', 'registered_professional'):
+        for source in (officer, Source(type='user_text', ref='applicant', quote=value)):
+            facts = [fact(name, answer, source=officer) for name, answer in CLEARING_ANSWERS.items()]
+            facts.append(fact('pathway', 'acceptable', source=officer))
+            facts.append(fact(field, value, source=source))
+            case = Case(provisions=[BENCHMARK], facts=facts)
+            result = professional_involvement(case, codes)
+            assert result.required != 'no', field
+            issue = section_d_issues(case, codes)[0]
+            assert issue.practice_of_engineering.value == 'unknown', field
+            assert issue.practice_of_engineering.value is not False, field
+            assert issue.routed_to == 'officer', field
+            gap = _officer_gap(case)
+            assert gap.message == OFFICER_PROFESSIONAL_GAP
+            assert gap.severity == 'blocking' and gap.routed_to == 'officer'
+        only = Case(provisions=[BENCHMARK], facts=[fact(field, value)])
+        assert section_d_issues(only, codes)[0].practice_of_engineering.value == 'unknown'
+        assert _officer_gap(only).message == OFFICER_PROFESSIONAL_GAP
+
+
+def test_not_sure_on_professional_engagement_stays_unknown():
+    _engagement_stays_unknown('not_sure')
+
+
+def test_not_engaged_yet_on_professional_engagement_stays_unknown():
+    _engagement_stays_unknown('not_engaged_yet')
+
+
 def test_not_sure_is_an_officer_routed_open_item():
     codes = codes_with_rules()
     officer = Source(type='officer', ref='ahj', quote='authority answer')
