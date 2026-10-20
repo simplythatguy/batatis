@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Hand check of the case flow against a live uvicorn engine.api:app.
 #
-# Creates a case, posts one fact, uploads a synthetic PDF generated in a temp
-# directory, then requests gaps and export. The PDF is not a user file and
-# contains no code text. Uploads stay in that temp directory.
+# Creates a case, posts one fact, then requests gaps and export. The upload
+# runs only when OpenAPI lists POST /cases/{case_id}/files. Otherwise the
+# script prints "skip upload: route not served" and continues. The PDF is not
+# a user file and contains no code text. Uploads stay in that temp directory.
 #
 # Gaps and export need the code database. When it is absent those two steps
 # expect HTTP 503 {"detail":"code database not found"} and the script exits 0.
@@ -70,8 +71,6 @@ if [[ "$ready" -ne 1 ]]; then
   exit 1
 fi
 
-"$PY" -c 'from reportlab.pdfgen import canvas; c=canvas.Canvas("'"$WORK"'/sheet.pdf"); c.drawString(36,72,"SYNTHETIC e2e attachment"); c.showPage(); c.save()'
-
 json_field() {
   "$PY" -c 'import json,sys; print(json.load(sys.stdin)[sys.argv[1]])' "$1"
 }
@@ -88,14 +87,22 @@ curl -sf -X POST "$BASE/cases/${case_id}/facts" \
   >/dev/null
 
 echo "upload"
-uploaded="$(curl -sf -X POST "$BASE/cases/${case_id}/files" -F "file=@${WORK}/sheet.pdf;type=application/pdf")"
-file_id="$(printf '%s' "$uploaded" | json_field id)"
-file_name="$(printf '%s' "$uploaded" | json_field name)"
-test "$file_name" = "sheet.pdf"
-stored="${BATATIS_FILES}/${case_id}/${file_id}.pdf"
-test -f "$stored"
-cmp -s "$WORK/sheet.pdf" "$stored"
-echo "stored bytes ${file_id} (${file_name})"
+openapi="$(curl -sf "$BASE/openapi.json")"
+if printf '%s' "$openapi" | "$PY" -c 'import json,sys; raise SystemExit(0 if "/cases/{case_id}/files" in json.load(sys.stdin).get("paths", {}) else 1)'; then
+  "$PY" -c 'from reportlab.pdfgen import canvas; c=canvas.Canvas("'"$WORK"'/sheet.pdf"); c.drawString(36,72,"SYNTHETIC e2e attachment"); c.showPage(); c.save()'
+  uploaded="$(curl -sf -X POST "$BASE/cases/${case_id}/files" -F "file=@${WORK}/sheet.pdf;type=application/pdf")"
+  file_id="$(printf '%s' "$uploaded" | json_field id)"
+  file_name="$(printf '%s' "$uploaded" | json_field name)"
+  test "$file_name" = "sheet.pdf"
+  stored="${BATATIS_FILES}/${case_id}/${file_id}.pdf"
+  test -f "$stored"
+  cmp -s "$WORK/sheet.pdf" "$stored"
+  echo "stored bytes ${file_id} (${file_name})"
+  upload_step="upload"
+else
+  echo "skip upload: route not served"
+  upload_step="skip upload"
+fi
 
 db_present="$("$PY" -c 'from engine.codes import default_db; print("yes" if default_db().is_file() else "no")')"
 
@@ -110,7 +117,7 @@ if [[ "$db_present" == "no" ]]; then
   test "$export_code" = "503"
   "$PY" -c 'import json,sys; body=json.load(open(sys.argv[1])); assert body=={"detail":"code database not found"}; assert "/" not in open(sys.argv[1]).read()' "$export_body"
   echo "export: skipped, code database not built (503)"
-  echo "e2e smoke: create, facts, upload ran; gaps and export skipped"
+  echo "e2e smoke: create, facts, ${upload_step}; gaps and export skipped"
   exit 0
 fi
 
@@ -127,7 +134,7 @@ echo "export: 409"
 form_present="$("$PY" -c 'from engine.export import form_path; print("yes" if form_path().is_file() else "no")')"
 if [[ "$form_present" == "no" ]]; then
   echo "export 200: skipped, SCC form not present"
-  echo "e2e smoke: create, facts, upload, gaps, export 409"
+  echo "e2e smoke: create, facts, ${upload_step}, gaps, export 409"
   exit 0
 fi
 
@@ -137,4 +144,4 @@ test "$draft_code" = "200"
 grep -q '%PDF' "$WORK/draft.pdf"
 grep -i 'content-disposition:.*DRAFT' "$WORK/draft.headers" >/dev/null
 echo "export: 200 draft"
-echo "e2e smoke: create, facts, upload, gaps, export 409, draft 200"
+echo "e2e smoke: create, facts, ${upload_step}, gaps, export 409, draft 200"
