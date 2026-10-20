@@ -4,12 +4,20 @@
 
 `rules_only` fills unstated component facts with "not triggered" and returns professional.py's
 yes/no/depends. `rules_plus_unknown` keeps that screen, records a stated span above 12.20 m as
-Part 4 design (cited only as Div C 2.4.1.2.(1) from professional.py), and returns unknown instead
-of no when a deciding fact was not stated.
+Part 4 design (cited only as Div C 2.4.1.2.(1) from professional.py), and returns unknown with a
+question when span, area, storeys, occupancy, or Part 4 design is missing. It does not default
+those facts to a boolean. A rule that already resolves to yes still returns yes.
+
+`rules_plus_unknown_cf` is the same frozen screen, run once for every combination of the missing
+deciding facts at fixed extremes (the value that most pushes toward yes, and the value that most
+pushes toward no). Those extremes come from the rule thresholds and do not change per case. If
+every combination returns the same answer, that answer is used. If they disagree, the flag is
+unknown and the question names the first missing fact that flips the answer. This variant is
+reported beside the shipped screen. The shipped screen stays `rules_plus_unknown`.
 
 The gold labels are model-checked, not human-reviewed. `rules_plus_unknown` was written while
-looking at this same development set, so the dev agreement is in-sample. A small held-out set
-(evals_dev/section_d_heldout, 8 model-checked cases) is scored separately.
+looking at this same development set, so agreement on those 60 cases is in-sample. The eight-case
+limit check is reported separately and is no longer blind for missing-fact cases.
 
 Gold `depends` matches system `unknown`. Under-flag is gold yes and system no. A case is skipped
 when codedb (or the rule lookup standing in for it) cannot resolve a provision the screen asks for.
@@ -20,19 +28,32 @@ import json
 import math
 import re
 from dataclasses import dataclass, field
+from itertools import product
 from pathlib import Path
 
-from .codes import Codes
+from .codes import CodeDbMissing, Codes
 from .professional import ProfessionalFacts, professional_involvement
 from .section_d_issues import PART9_MAX_SPAN_M, PROCESS_RULES, PROFESSIONAL_RULES
 
 CASES = Path(__file__).resolve().parents[1] / 'evals_dev' / 'cases'
 HELDOUT = Path(__file__).resolve().parents[1] / 'evals_dev' / 'section_d_heldout'
-_HEADLINE = (
-    'Engineer-needed flag, rules_only baseline: {matched}/{scored} agreement on the model-checked dev set (in-sample), '
-    '{under_flag} under-flag, {unknown} unknowns sent to the applicant.'
-)
-VARIANTS = ('rules_only', 'rules_plus_unknown', 'always_unknown')
+# Recorded before the missing-fact fix. hold-004 was the miss. Do not recompute this line.
+_BLIND_HELDOUT_RULES_PLUS = '7/8 [0.5291, 0.9776]'
+_MISSING_QUESTION = {
+    'span': 'What is the span in metres?',
+    'area': 'What is the building area in square metres, not the sum of every floor?',
+    'storeys': 'How many storeys does the building have?',
+    'occupancy': 'What is the confirmed occupancy or building type?',
+    'part4_design': 'Is any design carried out under Part 4, including beams, connections or foundations?',
+}
+
+def _count_phrase(count: int, singular: str) -> str:
+    return f'{count} {singular if count == 1 else singular + "s"}'
+
+
+VARIANTS = ('rules_only', 'rules_plus_unknown', 'rules_plus_unknown_cf', 'always_unknown')
+# Not selected. The shipped screen stays rules_plus_unknown even when this variant agrees more.
+_NOT_SHIPPED = frozenset({'always_unknown', 'rules_plus_unknown_cf'})
 GOLD_ROWS = ('yes', 'depends', 'no')
 SYSTEM_COLS = ('yes', 'unknown', 'no')
 
@@ -54,6 +75,13 @@ _AREA_LIMITS = {
     'detention': (300, 150, 100), 'hotel': (400, 200, 130),
     'business': (500, 250, 165), 'mercantile': (500, 250, 165), 'industrial': (500, 250, 165),
 }
+# Fixed extremes from engine/professional.py and PART9_MAX_SPAN_M. Not fitted to a gold label.
+# Yes: span above 12.20 m, area above every _AREA_LIMITS entry, storeys > 3,
+# multi_family with principal_dwelling_units > 4, part4_design true.
+# No: span at 12.20 m (the handoff is strict greater-than), area 1 m2, one storey,
+# single_family, part4_design false.
+_CF_AREA_YES = max(limit for limits in _AREA_LIMITS.values() for limit in limits) + 1
+_CF_UNITS_YES = 5  # professional.py sets multi_family general to yes only when units > 4
 # Lookup stub ids. Sources are the third field of PROFESSIONAL_RULES and PROCESS_RULES.
 RULE_IDS = tuple((division, provision_id) for division, provision_id, _source in (*PROFESSIONAL_RULES, *PROCESS_RULES))
 _WILSON_Z = 1.959963984540054  # 95%
@@ -79,7 +107,6 @@ class RuleLookup:
     """Resolves rule ids without emitting an NBC citation string."""
 
     def provision(self, provision_id: str, division: str | None = 'B'):
-        """Resolve only declared rule ids, returning fixture metadata without an NBC citation."""
         if division is None:
             raise ValueError(f'division required for {provision_id}')
         key = (division.upper(), provision_id)
@@ -90,12 +117,10 @@ class RuleLookup:
                 'intents': [], 'intent_comparison': []}
 
     def citation(self, provision_id: str, division: str | None = 'B'):
-        """Return the rule fixture marker, or None when its id is not declared."""
         record = self.provision(provision_id, division)
         return record['citation'] if record else None
 
     def definition(self, code: str):
-        """Return no definition text because this fixture supplies rule ids only."""
         return None
 
 
@@ -122,7 +147,6 @@ class VariantScore:
 
     @property
     def agreement(self) -> float:
-        """Return the exact-match fraction among scored cases, or zero for an empty set."""
         return self.matched / self.scored if self.scored else 0.0
 
 
@@ -139,25 +163,21 @@ def wilson_interval(matched: int, scored: int) -> tuple[float, float]:
 
 
 def _number(token: str) -> int:
-    """Parse a numeric token or a supported English number word."""
     token = token.lower().replace(',', '')
     return _NUM[token] if token in _NUM else int(float(token))
 
 
 def _case_text(case: dict) -> str:
-    """Combine the applicant description and known facts without reading gold labels."""
     return '\n'.join([case.get('description') or '', *(case.get('known_facts') or [])])
 
 
 def _storeys(text: str) -> int | None:
-    """Return the largest stated building height in storeys, or None if absent."""
     found = [1] if re.search(r'\bsingle-storey\b', text, re.I) else []
     found += [_number(match.group(1)) for match in re.finditer(rf'\b({_TOKEN})[-\s]storeys?\b', text, re.I)]
     return max(found) if found else None
 
 
 def _area(text: str) -> float | None:
-    """Prefer an explicitly labelled building area; reject ambiguous unlabelled areas."""
     for pattern in (r'building area of\s+(\d[\d,]*(?:\.\d+)?)\s*m', r'(\d[\d,]*(?:\.\d+)?)\s*m\s*(?:2|²)\s+building area'):
         labelled = re.findall(pattern, text, re.I)
         if labelled:
@@ -173,7 +193,6 @@ def _area(text: str) -> float | None:
 
 
 def _units(text: str, storeys: int | None) -> int | None:
-    """Extract dwelling counts, using a stated total or units per floor when available."""
     total = re.search(rf'\b({_TOKEN})\s+in total\b', text, re.I)
     if total:
         return _number(total.group(1))
@@ -193,14 +212,12 @@ def _units(text: str, storeys: int | None) -> int | None:
 
 
 def _span(text: str) -> float | None:
-    """Return the largest stated span in metres, excluding square-metre quantities."""
     found = [float(match.group(1)) for match in re.finditer(
         rf'\b(\d+(?:\.\d+)?)\s*m(?!\s*(?:2|²))(?:\s+\S+){{0,4}}\s+\S*span\b', text, re.I)]
     return max(found) if found else None
 
 
 def _occupancy(text: str, units: int | None) -> str | None:
-    """Map recognized applicant wording and dwelling counts to an occupancy category."""
     if re.search(r'\b(?:community hall|arena|library)\b', text, re.I):
         return 'assembly'
     if re.search(r'\b(?:warehouse|industrial building|industrial park)\b', text, re.I):
@@ -250,7 +267,6 @@ def observe(case: dict) -> tuple[ProfessionalFacts, Signals]:
 
 
 def _plain_exemption(data: dict) -> bool:
-    """Check whether the observed building fits a general exception without explicit triggers."""
     if data.get('part4_design') is True or data.get('roof_trusses') is True or data.get('ahj_requires_professional') is True:
         return False
     occupancy, units, storeys, area = data.get('occupancy'), data.get('principal_dwelling_units'), data.get('storeys'), data.get('building_area_m2')
@@ -265,16 +281,39 @@ def _plain_exemption(data: dict) -> bool:
     return False
 
 
+def missing_deciding_facts(facts: ProfessionalFacts, signals: Signals) -> tuple[str, ...]:
+    """Span, area, storeys, occupancy, and Part 4 design. None of these is defaulted to a boolean."""
+    missing = []
+    if signals.span_m is None:
+        missing.append('span')
+    if facts.building_area_m2 is None:
+        missing.append('area')
+    if facts.storeys is None:
+        missing.append('storeys')
+    if facts.occupancy is None:
+        missing.append('occupancy')
+    if facts.part4_design is None:
+        missing.append('part4_design')
+    return tuple(missing)
+
+
 def prepare(facts: ProfessionalFacts, signals: Signals, variant: str) -> ProfessionalFacts:
-    """Apply variant-specific defaults and the development span handoff to observed facts."""
     data = facts.model_dump()
     # This span handoff came from development case dev-050 (stated 18 m span, gold yes).
     # A stated span above PART9_MAX_SPAN_M is recorded as Part 4 design. The cited
     # provision stays Div C 2.4.1.2.(1) from engine/professional.py.
     if variant == 'rules_plus_unknown' and signals.span_m is not None and signals.span_m > PART9_MAX_SPAN_M:
         data['part4_design'] = True
+    candidate = ProfessionalFacts(**data)
+    # rules_only fills unstated component facts. rules_plus_unknown does that only when
+    # every deciding fact is already present. A missing span, area, storey count,
+    # occupancy, or Part 4 design stays unset.
     fill = variant == 'rules_only' or (
-        variant == 'rules_plus_unknown' and _plain_exemption(data) and not signals.flags and data.get('part4_design') is not True)
+        variant == 'rules_plus_unknown'
+        and not missing_deciding_facts(candidate, signals)
+        and _plain_exemption(data)
+        and not signals.flags
+        and data.get('part4_design') is not True)
     if fill:
         for key, value in _NO_DEFAULTS.items():
             if data.get(key) is None:
@@ -282,15 +321,90 @@ def prepare(facts: ProfessionalFacts, signals: Signals, variant: str) -> Profess
     return ProfessionalFacts(**data)
 
 
-def flag_label(case: dict, codes, variant: str) -> str:
-    """Run one screen variant on applicant facts without reading the target label."""
+def _with_span_handoff(facts: ProfessionalFacts, signals: Signals) -> ProfessionalFacts:
+    if signals.span_m is not None and signals.span_m > PART9_MAX_SPAN_M and facts.part4_design is not True:
+        return facts.model_copy(update={'part4_design': True})
+    return facts
+
+
+def _assign_extremes(facts: ProfessionalFacts, signals: Signals, assignment: dict[str, bool]) -> ProfessionalFacts:
+    """Set each missing deciding fact to its frozen yes-push or no-push value, then apply the span handoff."""
+    data = facts.model_dump()
+    span = signals.span_m
+    for name, toward_yes in assignment.items():
+        if name == 'span':
+            span = PART9_MAX_SPAN_M + 0.01 if toward_yes else PART9_MAX_SPAN_M
+        elif name == 'area':
+            data['building_area_m2'] = _CF_AREA_YES if toward_yes else 1.0
+        elif name == 'storeys':
+            data['storeys'] = 4 if toward_yes else 1
+        elif name == 'occupancy':
+            if toward_yes:
+                data['occupancy'] = 'multi_family'
+                data['principal_dwelling_units'] = _CF_UNITS_YES
+            else:
+                data['occupancy'] = 'single_family'
+                data['principal_dwelling_units'] = None
+        elif name == 'part4_design':
+            data['part4_design'] = bool(toward_yes)
+    if span is not None and span > PART9_MAX_SPAN_M:
+        data['part4_design'] = True
+    if _plain_exemption(data) and not signals.flags and data.get('part4_design') is not True:
+        for key, value in _NO_DEFAULTS.items():
+            if data.get(key) is None:
+                data[key] = value
+    return ProfessionalFacts(**data)
+
+
+def counterfactual(facts: ProfessionalFacts, signals: Signals, codes) -> tuple[str, str | None]:
+    """Return the shared answer when every extreme agrees, otherwise unknown and the first flipping fact."""
+    base = _with_span_handoff(facts, signals)
+    missing = missing_deciding_facts(base, signals)
+    labels: dict[tuple[bool, ...], tuple[str, list[str]]] = {}
+    bits_list = list(product((False, True), repeat=len(missing))) or [()]
+    for bits in bits_list:
+        assignment = {name: bit for name, bit in zip(missing, bits)}
+        result = professional_involvement(_assign_extremes(base, signals, assignment), codes)
+        labels[bits] = (result.required, result.questions)
+    answers = {bits: required for bits, (required, _questions) in labels.items()}
+    if len(set(answers.values())) == 1:
+        only = next(iter(answers.values()))
+        if only == 'depends':
+            questions = next(iter(labels.values()))[1]
+            question = _MISSING_QUESTION[missing[0]] if missing else (questions[0] if questions else None)
+            return 'unknown', question or 'Which deciding building fact is still unconfirmed?'
+        return only, None
+    baseline = tuple(False for _ in missing)
+    for index, name in enumerate(missing):
+        trial = list(baseline)
+        trial[index] = True
+        if answers[tuple(trial)] != answers[baseline]:
+            return 'unknown', _MISSING_QUESTION[name]
+    return 'unknown', _MISSING_QUESTION[missing[0]]
+
+
+def evaluate(case: dict, codes, variant: str) -> tuple[str, str | None]:
     if variant == 'always_unknown':
-        return 'unknown'
+        return 'unknown', None
     facts, signals = observe(case)
-    result = professional_involvement(prepare(facts, signals, variant), codes)
-    if variant == 'rules_plus_unknown' and result.required == 'depends':
-        return 'unknown'
-    return result.required
+    if variant == 'rules_plus_unknown_cf':
+        return counterfactual(facts, signals, codes)
+    prepared = prepare(facts, signals, variant)
+    result = professional_involvement(prepared, codes)
+    if variant == 'rules_plus_unknown' and result.required != 'yes':
+        missing = missing_deciding_facts(prepared, signals)
+        if missing or result.required == 'depends':
+            question = _MISSING_QUESTION[missing[0]] if missing else (result.questions[0] if result.questions else None)
+            return 'unknown', question or 'Which deciding building fact is still unconfirmed?'
+    return result.required, None
+
+
+def flag_label(case: dict, codes, variant: str) -> str:
+    return evaluate(case, codes, variant)[0]
+
+
+def flag_question(case: dict, codes, variant: str) -> str | None:
+    return evaluate(case, codes, variant)[1]
 
 
 def _column(label: str) -> str:
@@ -301,7 +415,6 @@ def _column(label: str) -> str:
 
 
 def under_flag_fact(case: dict, variant: str) -> str:
-    """Describe observed facts and omitted span handling for an under-flagged case."""
     facts, signals = observe(case)
     parts = [f'occupancy={facts.occupancy}', f'part4_design={"true" if facts.part4_design is True else "unset"}']
     if signals.span_m is not None:
@@ -313,24 +426,21 @@ def under_flag_fact(case: dict, variant: str) -> str:
 
 
 def _matches(system: str, gold: str) -> bool:
-    """Compare labels with unknown and depends treated as the same abstention."""
     normalized = {'unknown': 'depends'}
     return normalized.get(system, system) == normalized.get(gold, gold)
 
 
 def load_codes():
-    """Use codedb when its professional sentinel exists; otherwise use declared rule fixtures."""
     try:
         codes = Codes()
         if codes.provision('2.4.1.1.(1)', 'C') is None:
             raise FileNotFoundError('division C professional rules are not in codedb')
         return codes, 'present'
-    except FileNotFoundError:
+    except (CodeDbMissing, FileNotFoundError):
         return RuleLookup(), 'missing'
 
 
 def score(codes, cases: list[dict] | None = None) -> dict[str, VariantScore]:
-    """Tally exact matches, abstentions, errors and confusion counts for each variant."""
     rows = cases if cases is not None else load_cases()
     totals = {name: VariantScore(name) for name in VARIANTS}
     for case in rows:
@@ -360,18 +470,16 @@ def score(codes, cases: list[dict] | None = None) -> dict[str, VariantScore]:
 
 
 def load_cases() -> list[dict]:
-    """Load development cases in stable filename order."""
     return [json.loads(path.read_text()) for path in sorted(CASES.glob('dev-*.json'))]
 
 
 def load_heldout() -> list[dict]:
-    """Load the separately authored held-out cases in stable filename order."""
     return [json.loads(path.read_text()) for path in sorted(HELDOUT.glob('hold-*.json'))]
 
 
 def winner(totals: dict[str, VariantScore]) -> str:
-    """Rank measured rule variants by under-flag avoidance, agreement and tie preference."""
-    ranked = sorted((row for row in totals.values() if row.name != 'always_unknown'),
+    # rules_plus_unknown_cf is measured here and is not eligible. The shipped screen stays rules_plus_unknown.
+    ranked = sorted((row for row in totals.values() if row.name not in _NOT_SHIPPED),
                     key=lambda row: (row.under_flag > 0, -row.agreement, row.name != 'rules_plus_unknown'))
     if not ranked or ranked[0].scored == 0:
         return 'none'
@@ -379,45 +487,50 @@ def winner(totals: dict[str, VariantScore]) -> str:
 
 
 def _agreement_cell(row: VariantScore) -> str:
-    """Format agreement counts and their Wilson 95% interval for the report."""
     lower, upper = wilson_interval(row.matched, row.scored)
     upper_text = '1.0' if round(upper, 4) == 1 else f'{upper:.4f}'
     return f'{row.matched}/{row.scored} [{lower:.4f}, {upper_text}]'
 
 
 def _yes_unknown(row: VariantScore) -> str:
-    """List gold-yes cases receiving an abstention, or return none."""
     return 'none' if not row.gold_yes_unknown else ', '.join(row.gold_yes_unknown)
 
 
 def _count_cell(count: int, scored: int) -> str:
-    """Format a count and denominator with their Wilson 95% interval."""
     lower, upper = wilson_interval(count, scored)
     upper_text = '1.0' if round(upper, 4) == 1 else f'{upper:.4f}'
     return f'{count}/{scored} [{lower:.4f}, {upper_text}]'
 
 
+def _variant_lines(row: VariantScore) -> list[str]:
+    lines = [
+        f'{row.name:<22} {row.scored:>6} {_agreement_cell(row):>22} {row.under_flag:>10} {row.unknown:>7} {row.skipped:>7}',
+        f'unknown_rate {row.name}: {_count_cell(row.unknown, row.scored)}',
+        f'confident_wrong {row.name}: {_count_cell(row.confident_wrong, row.scored)}',
+        f'confusion {row.name}  rows=gold  columns=system yes unknown no',
+    ]
+    for gold in GOLD_ROWS:
+        cells = '  '.join(f'{row.matrix[gold][column]:>3}' for column in SYSTEM_COLS)
+        lines.append(f'  {gold:<7} {cells}')
+    lines.append(f'gold_yes_as_unknown {row.name}: {_yes_unknown(row)}')
+    facts = '; '.join(row.under_flag_facts) if row.under_flag_facts else 'none'
+    lines.append(f'under_flag {row.name}: {facts}')
+    return lines
+
+
+def _table_header() -> str:
+    return f'{"variant":<22} {"scored":>6} {"agreement":>22} {"under_flag":>10} {"unknown":>7} {"skipped":>7}'
+
+
 def report(totals: dict[str, VariantScore], codedb: str) -> str:
-    """Render development metrics, error cases and measurement caveats for all variants."""
     scored = max((row.scored for row in totals.values()), default=0)
     skipped = max((row.skipped for row in totals.values()), default=0)
     lines = [
-        f'{"variant":<22} {"scored":>6} {"agreement":>22} {"under_flag":>10} {"unknown":>7} {"skipped":>7}',
+        _table_header(),
         'note: rules_only abstains with depends; that label is counted in the unknown column',
     ]
     for name in VARIANTS:
-        row = totals[name]
-        lines.append(
-            f'{name:<22} {row.scored:>6} {_agreement_cell(row):>22} {row.under_flag:>10} {row.unknown:>7} {row.skipped:>7}')
-        lines.append(f'unknown_rate {name}: {_count_cell(row.unknown, row.scored)}')
-        lines.append(f'confident_wrong {name}: {_count_cell(row.confident_wrong, row.scored)}')
-        lines.append(f'confusion {name}  rows=gold  columns=system yes unknown no')
-        for gold in GOLD_ROWS:
-            cells = '  '.join(f'{row.matrix[gold][column]:>3}' for column in SYSTEM_COLS)
-            lines.append(f'  {gold:<7} {cells}')
-        lines.append(f'gold_yes_as_unknown {name}: {_yes_unknown(row)}')
-        facts = '; '.join(row.under_flag_facts) if row.under_flag_facts else 'none'
-        lines.append(f'under_flag {name}: {facts}')
+        lines.extend(_variant_lines(totals[name]))
     lines.append('rules_plus_unknown on this dev table is in-sample and pending out-of-sample confirmation')
     lines.append(f'winner: {winner(totals)}')
     lines.append('under_flag_target: 0')
@@ -434,32 +547,46 @@ def report(totals: dict[str, VariantScore], codedb: str) -> str:
 
 
 def heldout_report(totals: dict[str, VariantScore]) -> str:
-    """Render separate held-out agreement and missed-case summaries."""
     lines = [
         'held-out: evals_dev/section_d_heldout',
         'held-out gold: model-checked',
+        f'held-out rules_plus_unknown: {_BLIND_HELDOUT_RULES_PLUS}',
+        'post-fix, no longer blind',
+        _table_header(),
     ]
     for name in VARIANTS:
-        row = totals[name]
-        misses = ', '.join(row.misses) if row.misses else 'none'
-        lines.append(f'held-out {name}: {_agreement_cell(row)}')
-        lines.append(f'held-out misses {name}: {misses}')
+        lines.extend(_variant_lines(totals[name]))
+        misses = ', '.join(totals[name].misses) if totals[name].misses else 'none'
+        lines.append(f'misses {name}: {misses}')
     return '\n'.join(lines)
 
 
-def headline(totals: dict[str, VariantScore]) -> str:
-    """Format the rules_only baseline counts as the report headline."""
-    row = totals['rules_only']
-    return _HEADLINE.format(matched=row.matched, scored=row.scored, under_flag=row.under_flag, unknown=row.unknown)
+def headline(dev: dict[str, VariantScore], heldout: dict[str, VariantScore]) -> str:
+    """Name rules_only and whichever variant winner() ships. Counts come from those rows."""
+    baseline = dev['rules_only']
+    shipped_name = winner(dev)
+    shipped = dev[shipped_name]
+    post = heldout[shipped_name]
+    blind = _BLIND_HELDOUT_RULES_PLUS.split(' ', 1)[0]
+    return (
+        'Engineer-needed flag (model-checked): '
+        f'rules_only {baseline.matched}/{baseline.scored} on the dev set (in-sample), '
+        f'{_count_phrase(baseline.under_flag, "under-flag")}; '
+        f'shipped {shipped_name}: {shipped.matched}/{shipped.scored} in-sample, '
+        f'{_count_phrase(shipped.under_flag, "under-flag")}, '
+        f'{_count_phrase(shipped.unknown, "unknown")} sent to the applicant; '
+        f'held-out {blind} blind (pre-fix), '
+        f'post-fix {post.matched}/{post.scored} (no longer blind).'
+    )
 
 
 def main() -> int:
-    """Print development and held-out reports using codedb or declared rule fixtures."""
     codes, codedb = load_codes()
     dev = score(codes)
-    print(headline(dev))
+    heldout = score(codes, load_heldout())
+    print(headline(dev, heldout))
     print(report(dev, codedb))
-    print(heldout_report(score(codes, load_heldout())))
+    print(heldout_report(heldout))
     return 0
 
 

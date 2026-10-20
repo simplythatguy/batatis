@@ -18,11 +18,18 @@ def default_db() -> Path:
     return Path(os.environ.get('BATATIS_CODEDB') or DEFAULT_DB)
 
 
+class CodeDbMissing(Exception):
+    """Raised only when the code database file is absent. The message has no path."""
+
+    def __init__(self) -> None:
+        super().__init__('code database not found')
+
+
 class Codes:
     def __init__(self, db_path: Path | str | None = None):
         self.db_path = Path(db_path) if db_path else default_db()
         if not self.db_path.exists():
-            raise FileNotFoundError(f'code database not found: {self.db_path} (set BATATIS_CODEDB)')
+            raise CodeDbMissing()
         self._definition = lru_cache(maxsize=None)(self._definition_uncached)
 
     def provision(self, provision_id: str, division: str | None = 'B') -> dict | None:

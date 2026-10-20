@@ -15,7 +15,9 @@ from .codes import Codes
 from .models import Case
 from .process_fields import ProcessField, alternative_path, confirmed_value, process_fields
 from .professional import ProfessionalFacts, ProfessionalReason, ProfessionalResult, professional_involvement
-from .section_d import ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, EvidencePlanItem, section_d_plan
+from .section_d import (
+    ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, EvidencePlanItem, EvidenceType, section_d_plan,
+)
 
 # A confirmed span above this value is stored as Part 4 design before the practice screen.
 # This handoff came from development case dev-050. The only provision cited for that
@@ -106,7 +108,6 @@ class PracticeOfEngineering(BaseModel):
 
     @model_validator(mode='after')
     def _shape(self):
-        """Require a question for unknown flags and a sourced rule for boolean flags."""
         if self.value == 'unknown':
             if not (self.question and self.question.strip()):
                 raise ValueError('unknown practice of engineering requires a question')
@@ -136,14 +137,13 @@ class SectionDIssue(BaseModel):
     objective: str | None = None
     function: str | None = None
     at_stake: str
-    recommended_evidence_types: tuple[str, ...]
+    recommended_types: tuple[EvidenceType, ...]
     practice_of_engineering: PracticeOfEngineering
     empty_process_fields: tuple[EmptyProcessField, ...]
     status: IssueStatus
 
 
 def _question(result: ProfessionalResult) -> str:
-    """Select a neutral clarification question from the professional screen result."""
     for question in result.questions:
         folded = question.casefold()
         if question.strip() and 'safe' not in folded and 'compli' not in folded:
@@ -152,7 +152,6 @@ def _question(result: ProfessionalResult) -> str:
 
 
 def _pick(result: ProfessionalResult, required: str) -> ProfessionalReason | None:
-    """Choose a reason for the requested outcome, prioritizing explicit professional triggers."""
     chosen = [reason for reason in result.reasons if reason.required == required]
     if required == 'yes':
         order = {code: index for index, code in enumerate(_YES_PRIORITY)}
@@ -161,7 +160,6 @@ def _pick(result: ProfessionalResult, required: str) -> ProfessionalReason | Non
 
 
 def _rule(reason: ProfessionalReason) -> tuple[str, str]:
-    """Map a professional reason code to its declared provision id and division."""
     return _RULE_IDS.get(reason.code, ('', ''))
 
 
@@ -177,7 +175,6 @@ def practice_of_engineering(case: Case, codes: Codes) -> PracticeOfEngineering:
 
 
 def render_practice(result: ProfessionalResult, codes: Codes, *, span_handoff: bool = False) -> PracticeOfEngineering:
-    """Convert a professional result to a sourced recommendation or an unknown with a question."""
     if result.required == 'yes':
         reason = _pick(result, 'yes')
         rule, division = _rule(reason) if reason else ('', '')
@@ -206,7 +203,6 @@ def render_practice(result: ProfessionalResult, codes: Codes, *, span_handoff: b
 
 
 def _at_stake(item: EvidencePlanItem) -> str:
-    """Describe evidence questions for an objective/function pair or unresolved attribution."""
     if item.objective and item.function:
         return (f'Recommend evidence that addresses {item.function} and {item.objective} for benchmark {item.citation}. '
                 'Identify the proposed configuration, the comparison the responsible designer selects, '
@@ -216,25 +212,20 @@ def _at_stake(item: EvidencePlanItem) -> str:
 
 
 def _status(flag: PracticeOfEngineering, attachments) -> IssueStatus:
-    """Keep unknown practice flags open and classify supplied items for resolved flags."""
     named = any((doc.responsible_party or '').strip() or doc.professional_seal for doc in attachments)
     if flag.value is True and not named:
         return 'needs_professional'
-    if flag.value == 'unknown':
-        return 'open'
-    if attachments:
+    if attachments and flag.value != 'unknown':
         return 'addressed'
     return 'open'
 
 
 def _empty_fields(fields: list[ProcessField]) -> tuple[EmptyProcessField, ...]:
-    """List required process fields with no confirmed applicant answer."""
     return tuple(EmptyProcessField(id=field.id, label=field.label, citation=field.citation)
                  for field in fields if field.answer is None)
 
 
 def _lookup(codes: Codes, provision_id: str, division: str):
-    """Resolve a provision, treating malformed or missing keys as unresolved input."""
     try:
         return codes.provision(provision_id, division)
     except (ValueError, KeyError):
@@ -252,7 +243,7 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
             id='benchmark-unconfirmed', provision=None, question=(
                 'Confirm the Division B benchmark provisions before recommending performance evidence.'),
             at_stake='No confirmed benchmark is on the case. Recommend evidence only after a provision resolves in the code database.',
-            recommended_evidence_types=recommended_fallback, practice_of_engineering=flag,
+            recommended_types=recommended_fallback, practice_of_engineering=flag,
             empty_process_fields=empty, status=_status(flag, ()))]
 
     known: list[str] = []
@@ -264,7 +255,7 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
                 id=f'unresolved-{provision_id}', provision=None, entered_reference=provision_id,
                 question='This entered reference was not found in the code database. Ask which Division B provision is the benchmark. No replacement article is suggested.',
                 at_stake='Recommend evidence only after the benchmark resolves in the code database.',
-                recommended_evidence_types=recommended_fallback, practice_of_engineering=flag,
+                recommended_types=recommended_fallback, practice_of_engineering=flag,
                 empty_process_fields=empty, status=_status(flag, ())))
         else:
             known.append(provision_id)
@@ -283,7 +274,7 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
                 question='This provision did not resolve in the code database. Ask for the benchmark again. No citation is offered.',
                 objective=None, function=None,
                 at_stake='Recommend evidence only after the benchmark resolves in the code database.',
-                recommended_evidence_types=item.recommended_types, practice_of_engineering=flag,
+                recommended_types=item.recommended_types, practice_of_engineering=flag,
                 empty_process_fields=empty, status=_status(flag, item.attachments)))
             continue
         question = None
@@ -294,6 +285,6 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
             provision=CitedProvision(provision_id=item.provision_id, division='B', citation=citation),
             question=question, objective=item.objective, function=item.function,
             at_stake=_at_stake(item),
-            recommended_evidence_types=item.recommended_types, practice_of_engineering=flag,
+            recommended_types=item.recommended_types, practice_of_engineering=flag,
             empty_process_fields=empty, status=_status(flag, item.attachments)))
     return issues
