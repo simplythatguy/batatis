@@ -1,0 +1,17 @@
+{
+  "_fixture": "FAKE — not a human answer key. Do not copy into evals_dev/human_key/.",
+  "case_id": "dev-902",
+  "status": "verified",
+  "persona": "manufacturer",
+  "variance_kind": "cladding",
+  "scenario": "FAKE scenario with no verifier.",
+  "section_ab_required_fields": null,
+  "expected_top_articles": null,
+  "benchmark_acceptable_solution": null,
+  "engineer_needed": "yes",
+  "intake_action": "proceed_conditionally",
+  "verifier_name": null,
+  "date_verified": null,
+  "source_page_refs": null,
+  "notes": "FAKE fixture missing the verifier on purpose"
+}

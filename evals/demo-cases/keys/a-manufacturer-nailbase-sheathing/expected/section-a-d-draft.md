@@ -21,7 +21,7 @@
 | Description | On wall type W1, vertical vinyl siding is fastened with ring-shank nails @ 400 mm o.c. **directly into the fibre-cement facer of a 50 mm non-wood insulating sheathing panel (EPW NailBase CI-50)** instead of into framing, furring, blocking or a listed sheathing. | ✓ Specific |
 
 ## Section C: Justification (acceptable-solution comparison)
-**Applicable code or standard:** National Building Code – 2023 Alberta Edition (2nd printing in force; rows checked against the 1st printing), Division B.
+**Applicable code or standard:** National Building Code (Alberta Edition) 2023 (2nd printing in force), Division B.
 
 | Article(s) | Objective | Function | Intent statement (NBC 2020 Intent Statements, explanatory) | Source |
 |---|---|---|---|---|
@@ -44,4 +44,4 @@
 | Product data sheet and installation guide | Example Panel Works Ltd. *(fictional)* | ⚠ Manufacturer claims only |
 | O&M / inspection statement for the fastening | `[designer + owner acceptance]` | ❌ |
 
-**Truthful status line:** *Citations checked against the NBC(AE) 2023 1st printing. All 102 cited provisions present in the 2nd-printing code database (pages p.322, p.323, p.1126, p.1201 confirmed). Applicant/site data, the analysis and the performance evidence are incomplete. Not ready to submit. This draft makes no safety or compliance finding.*
+**Truthful status line:** *In the 2nd printing, 9.27.5.1.(2) and 9.27.5.3.(3)(b) were checked by codedb lookup; other wording and all page cites are 1st printing. The full list is in [cited-provisions.txt](../../../cited-provisions.txt); a check that every cited provision exists in the 2nd printing: all 95 listed ids present (presence only). Applicant/site data, the analysis and the performance evidence are incomplete. Not ready to submit. This draft makes no safety or compliance finding.*
