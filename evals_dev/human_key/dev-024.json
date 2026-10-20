@@ -1,0 +1,16 @@
+{
+  "case_id": "dev-024",
+  "status": "unverified",
+  "persona": "general contractor",
+  "variance_kind": "out-of-scope",
+  "scenario": "Plumbing contractor. In a basement bathroom we can't tie the new vent into the existing stack, so we want to use an air admittance valve under the vanity instead of running a vent through the roof. Can you write up the variance for the vent?",
+  "section_ab_required_fields": null,
+  "expected_top_articles": null,
+  "benchmark_acceptable_solution": null,
+  "engineer_needed": null,
+  "intake_action": null,
+  "verifier_name": null,
+  "date_verified": null,
+  "source_page_refs": null,
+  "notes": null
+}
