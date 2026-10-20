@@ -12,6 +12,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, model_validator
 
 from .codes import Codes
+from .evidence_gaps import OUT_OF_SCOPE_ROLES, provision_roles
 from .models import Case
 from .process_fields import ProcessField, alternative_path, confirmed_value, process_fields
 from .professional import ProfessionalFacts, ProfessionalReason, ProfessionalResult, professional_involvement
@@ -49,6 +50,13 @@ PROCESS_RULES = (
 
 PracticeValue = bool | Literal['unknown']
 IssueStatus = Literal['open', 'addressed', 'needs_professional']
+QuestionKind = Literal['benchmark', 'objective_performance']
+AskedOf = Literal['applicant', 'professional', 'officer']
+
+# A contractor or owner does not answer these. general_contractor is the GC firestop role.
+LAY_APPLICANTS = frozenset({'contractor', 'owner', 'general_contractor'})
+HANDOFF_LABEL = 'Needs a registered professional or the officer'
+NOT_MY_ROLE = 'Not sure / not my role'
 
 # Reason codes professional.py emits, in the order a Division C rule should be shown.
 _YES_PRIORITY = (
@@ -141,6 +149,12 @@ class SectionDIssue(BaseModel):
     practice_of_engineering: PracticeOfEngineering
     empty_process_fields: tuple[EmptyProcessField, ...]
     status: IssueStatus
+    question_kind: QuestionKind | None = None
+    asked_of: AskedOf = 'applicant'
+    # Shown instead of asking a contractor or owner to answer.
+    handoff: str | None = None
+    answers: tuple[str, ...] = ()
+    answer: str | None = None
 
 
 def _question(result: ProfessionalResult) -> str:
@@ -225,6 +239,56 @@ def _empty_fields(fields: list[ProcessField]) -> tuple[EmptyProcessField, ...]:
                  for field in fields if field.answer is None)
 
 
+def applicant_role(case: Case) -> str | None:
+    """Confirmed ``applicant_role``. A general contractor is ``contractor``."""
+    value = confirmed_value(case, 'applicant_role')
+    if not isinstance(value, str) or not value.strip():
+        return None
+    role = value.strip().casefold().replace('-', '_').replace(' ', '_')
+    if role == 'gc':
+        return 'contractor'
+    return role
+
+
+def question_audience(case: Case, provision_id: str | None, kind: QuestionKind) -> AskedOf:
+    """Benchmark and objective-performance questions leave a contractor or owner.
+
+    ``departure`` and ``affected`` go to a registered professional. ``citing`` and
+    ``supporting`` go to the officer. Any other provision role still leaves the
+    lay applicant, and goes to a professional.
+    """
+    if applicant_role(case) not in LAY_APPLICANTS or kind not in ('benchmark', 'objective_performance'):
+        return 'applicant'
+    role = provision_roles(case).get(provision_id or '')
+    if role in OUT_OF_SCOPE_ROLES:
+        return 'officer'
+    return 'professional'
+
+
+def not_my_role_ids(case: Case) -> list[str]:
+    """Provisions whose lay applicant answered ``Not sure / not my role``."""
+    if applicant_role(case) not in LAY_APPLICANTS:
+        return []
+    found = []
+    for provision_id in dict.fromkeys(case.provisions):
+        if confirmed_value(case, f'question.{provision_id}') == NOT_MY_ROLE:
+            found.append(provision_id)
+    return found
+
+
+def _routed(case: Case, provision_id: str | None, kind: QuestionKind, question: str | None) -> dict:
+    asked = question_audience(case, provision_id, kind)
+    answered = NOT_MY_ROLE if provision_id and provision_id in not_my_role_ids(case) else None
+    if asked == 'applicant':
+        return dict(question=question, question_kind=kind, asked_of=asked, handoff=None, answers=(), answer=None)
+    if provision_id and kind == 'benchmark':
+        question = f'performance benchmark for {provision_id}'
+    elif provision_id and kind == 'objective_performance':
+        question = f'objective performance for {provision_id}'
+    return dict(question=question, question_kind=kind, asked_of=asked, handoff=HANDOFF_LABEL,
+                answers=(NOT_MY_ROLE,), answer=answered)
+
+
 def _lookup(codes: Codes, provision_id: str, division: str):
     try:
         return codes.provision(provision_id, division)
@@ -240,11 +304,12 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
 
     if not case.provisions:
         return [SectionDIssue(
-            id='benchmark-unconfirmed', provision=None, question=(
-                'Confirm the Division B benchmark provisions before recommending performance evidence.'),
+            id='benchmark-unconfirmed', provision=None,
             at_stake='No confirmed benchmark is on the case. Recommend evidence only after a provision resolves in the code database.',
             recommended_types=recommended_fallback, practice_of_engineering=flag,
-            empty_process_fields=empty, status=_status(flag, ()))]
+            empty_process_fields=empty, status=_status(flag, ()),
+            **_routed(case, None, 'benchmark',
+                      'Confirm the Division B benchmark provisions before recommending performance evidence.'))]
 
     known: list[str] = []
     unresolved: list[SectionDIssue] = []
@@ -253,10 +318,11 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
         if record is None or not record.get('citation'):
             unresolved.append(SectionDIssue(
                 id=f'unresolved-{provision_id}', provision=None, entered_reference=provision_id,
-                question='This entered reference was not found in the code database. Ask which Division B provision is the benchmark. No replacement article is suggested.',
                 at_stake='Recommend evidence only after the benchmark resolves in the code database.',
                 recommended_types=recommended_fallback, practice_of_engineering=flag,
-                empty_process_fields=empty, status=_status(flag, ())))
+                empty_process_fields=empty, status=_status(flag, ()),
+                **_routed(case, provision_id, 'benchmark',
+                          'This entered reference was not found in the code database. Ask which Division B provision is the benchmark. No replacement article is suggested.')))
         else:
             known.append(provision_id)
 
@@ -271,20 +337,26 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
         if not citation:
             issues.append(SectionDIssue(
                 id=item.id, provision=None, entered_reference=item.provision_id,
-                question='This provision did not resolve in the code database. Ask for the benchmark again. No citation is offered.',
                 objective=None, function=None,
                 at_stake='Recommend evidence only after the benchmark resolves in the code database.',
                 recommended_types=item.recommended_types, practice_of_engineering=flag,
-                empty_process_fields=empty, status=_status(flag, item.attachments)))
+                empty_process_fields=empty, status=_status(flag, item.attachments),
+                **_routed(case, item.provision_id, 'benchmark',
+                          'This provision did not resolve in the code database. Ask for the benchmark again. No citation is offered.')))
             continue
-        question = None
-        if not (item.objective and item.function):
-            question = 'The attribution table has no objective or function for this provision. Ask the responsible designer which benchmark applies.'
+        if item.objective and item.function:
+            kind: QuestionKind = 'objective_performance'
+            question = None
+        else:
+            kind = 'benchmark'
+            question = ('The attribution table has no objective or function for this provision. '
+                        'Ask the responsible designer which benchmark applies.')
         issues.append(SectionDIssue(
             id=item.id,
             provision=CitedProvision(provision_id=item.provision_id, division='B', citation=citation),
-            question=question, objective=item.objective, function=item.function,
+            objective=item.objective, function=item.function,
             at_stake=_at_stake(item),
             recommended_types=item.recommended_types, practice_of_engineering=flag,
-            empty_process_fields=empty, status=_status(flag, item.attachments)))
+            empty_process_fields=empty, status=_status(flag, item.attachments),
+            **_routed(case, item.provision_id, kind, question)))
     return issues

@@ -20,6 +20,7 @@ from .process_fields import confirmed_value, latest_fact, process_fields
 from .professional import ProfessionalResult, professional_involvement
 from .section_c import section_c_rows
 from .section_d import SupportingDocument, section_d_plan, supporting_documents
+from .section_d_issues import HANDOFF_LABEL, not_my_role_ids
 
 
 class Gap(CaseGap):
@@ -256,4 +257,11 @@ def check_completeness(case: Case, codes: Codes, *,
                 message=f'Your application appears to be missing {spec.missing}', fix_hint=spec.fix_hint,
                 citation=spec.citation, provision_id=spec.provision_id, pairs=list(spec.pairs),
                 evidence_types=list(spec.evidence_types)))
+    for provision_id in not_my_role_ids(case):
+        gaps.append(Gap(
+            id=f'open:{provision_id}', severity='warning', section='D', field=f'question.{provision_id}',
+            message=HANDOFF_LABEL,
+            fix_hint=('Leave this open for a registered professional or the officer. '
+                      'The applicant does not clear it by answering the benchmark.'),
+            citation=next((row.citation for row in case.section_c if row.provision_id == provision_id), None)))
     return rank_gaps(gaps)

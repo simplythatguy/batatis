@@ -91,6 +91,8 @@ The ledger accepts `process.<id>` and the bare id. Aliases, from `engine/process
 
 Open evidence gaps from `GET /cases/{id}/gaps` are one per provision the design departs from or that is directly affected. `id` is `evidence:{provision_id}`, `field` is `evidence.{provision_id}`, and `pairs` lists every objective/function pair on that provision. `evidence_types` lists the plan's evidence types once, in ladder order (test report, evaluation, professional opinion, product evaluation, and the rest of the ladder that the plan already names). The gap `message` names that provision, each `function/objective` pair, and each evidence type. The gap does not repeat a document, person, or date slot per pair. A provision with no objective and no function is one warning, `id` `evidence_scope:{provision_id}`. Its `pairs` list is empty and `evidence_types` lists the plan's evidence types. Its `message` names the provision and those evidence types. The gap text includes `No objective or function attributed in NBC(AE) 2023 for this provision`. Evidence gap text does not say the evidence was addressed, satisfied, or compliant. A plan item whose status is `provided` is a confirmed file-source `evidence.<id>.file_ref` fact. That plan flag is separate from `evidence_listed`.
 
+A confirmed fact `applicant_role` of `contractor`, `general_contractor`, or `owner` does not answer benchmark or objective-performance questions. Those questions are handed to `professional` or `officer` (see Section D issues). A confirmed fact `question.<provision id>` with value `Not sure / not my role` leaves a warning gap whose message is `Needs a registered professional or the officer`. That gap is not blocking.
+
 A confirmed fact `provision_role` with value `departure:<provision id>` or `affected:<provision id>` marks a provision that takes an evidence gap. `supporting:<provision id>` and `citing:<provision id>` are citing-chain provisions and do not. A sentence of a departure article takes a gap unless that sentence is itself `citing` or `supporting`. When the case has no confirmed `provision_role` fact, every confirmed provision still takes an evidence gap. An unconfirmed or proposed role is ignored.
 
 `POST /cases/{case_id}/section-d` with `provisions` is the add-provision path for a user-added or identified provision. Each id in that body is stored as confirmed `departure:<id>` (`kind` `pointed`, `source.type` `user_text`). Article and Sentence references in those provisions, and references reached from that chain, are appended to `provisions` and stored as confirmed `citing:<id>` (`kind` `exact`, `source.type` `code`). A reference that is the departure, or a sentence of a departure article, is not appended. The chain stops at provisions the code database does not resolve, and it keeps at most 16 citing provisions. Sending `provisions` replaces earlier `provision_role` facts. Citing provisions remain on the case for Section C and do not take an evidence gap.
@@ -113,7 +115,12 @@ An empty list is not returned for a case with no confirmed benchmark. That case 
 | `provision.division` | `"A"` \| `"B"` \| `"C"` | Division of that row. Benchmark issues use `"B"`. |
 | `provision.citation` | string | Citation string copied from the code database. The service does not format its own citation. |
 | `entered_reference` | string or null | The applicant's unresolved token. Not a citation. |
-| `question` | string or null | Present when the benchmark, the attribution, or the practice screen is incomplete. |
+| `question` | string or null | Present when the benchmark, the attribution, or the practice screen is incomplete. For a contractor or owner this is `performance benchmark for <provision id>` or `objective performance for <provision id>`, and it is not theirs to answer. |
+| `question_kind` | `"benchmark"` \| `"objective_performance"` or null | Which question was routed. |
+| `asked_of` | `"applicant"` \| `"professional"` \| `"officer"` | Who answers. A confirmed `applicant_role` of `contractor`, `general_contractor`, or `owner` sends benchmark and objective-performance questions to `professional` when `provision_role` is `departure` or `affected` (or unlabeled), and to `officer` when it is `citing` or `supporting`. Other applicant roles stay `applicant`. |
+| `handoff` | string or null | `Needs a registered professional or the officer` when `asked_of` is not `applicant`. That is the line to show. |
+| `answers` | string[] | `Not sure / not my role` when the question was handed off. Empty otherwise. |
+| `answer` | string or null | The confirmed fact `question.<provision id>` when it is `Not sure / not my role`. |
 | `objective` | string or null | Objective code from the attribution row, such as `OP3.1`. Null when the table has no row. |
 | `function` | string or null | Functional-statement code from the same row, such as `F03`. |
 | `at_stake` | string | What the evidence should address. Wording recommends; it does not conclude. |
@@ -151,7 +158,7 @@ Confirmed `professional.span_m` (or `span_m`) above 12.20 m is recorded as Part 
 | --- | --- |
 | `needs_professional` | `practice_of_engineering.value` is `true` and no applicant-supplied item linked to the issue names a responsible party or a seal. |
 | `addressed` | An applicant-supplied file is linked to the issue (and, if a professional is indicated, a responsible party or seal is named). This records that the file was linked. It does not assess the item. `GET /cases/{id}/gaps` does not use this word. Listing evidence on `POST /cases/{id}/evidence` closes a gap with reason `evidence listed (not reviewed)`. |
-| `open` | No applicant-supplied item is linked. Also used when the practice flag is `"unknown"`. |
+| `open` | No applicant-supplied item is linked. Also used when the practice flag is `"unknown"`, and when the applicant's answer is `Not sure / not my role`. That answer is an open item. It is not a blocking gap. |
 
 ### Evidence-type order
 
