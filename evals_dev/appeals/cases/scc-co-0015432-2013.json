@@ -1,0 +1,128 @@
+{
+  "id": "scc-co-0015432-2013",
+  "title": "Building and Fire \u2013 Mercantile Occupancy December 2013",
+  "decision_date": "2013-12-23",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2013/Redacted_Building%20and%20Fire_Mercantile_Occupancy_December_2013.pdf",
+  "applicant_type": "owner",
+  "topic": null,
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "Owners built three additions to a former low-hazard industrial (F3) building without permits, then applied for a permit without engineered drawings. The building was used for an internet retail business with a walk-in sales floor (roughly 30\u201370 visitors a day). The building SCO asked for a code review by an architect and a professional engineer.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "occupancy classification",
+    "mercantile",
+    "unpermitted additions",
+    "professional opinions",
+    "no alternative solution submitted"
+  ],
+  "missing_info": [],
+  "edition_original": "ABC 2006",
+  "other_codes": [
+    "AFC 2006"
+  ],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": null,
+    "basis_type": "not applicable",
+    "basis": "not applicable: permit refusal based on occupancy classification (mercantile, not F3); no alternative solution was proposed"
+  },
+  "outcome": "upheld",
+  "outcome_summary": "Permit refusal confirmed (major occupancy is Group E mercantile, defined by use, not visitor numbers). The fire order was varied to add evacuation if directives are not met.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "1.2.1.1.",
+      "source_code": "ABC 2006",
+      "source_division": "A",
+      "source_part": "Part 1",
+      "parsed_id": "1.2.1.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.2.2.6.(1)",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.2.6.(1)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.2.5.7.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.5.7.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "Section 2.8.",
+      "source_code": "AFC 2006",
+      "source_division": "B",
+      "source_part": "Part 2",
+      "parsed_id": null,
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "Fire-code or other-standard citation, not an NBC(AE) article."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "The Appeal Panel was not provided with any alternative solutions for their consideration.",
+      "sentences": 1,
+      "quote_confidence": "standard",
+      "kind": "excerpt",
+      "field": "refusal_reason_evidence",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2013/Redacted_Building%20and%20Fire_Mercantile_Occupancy_December_2013.pdf"
+    },
+    {
+      "text": "The SCO requested a building code review by an architect and a professional engineer. The panel held that 'a safety codes officer is not bound by the judgment of the registered professionals engaged by the Appellants' (in the context of s.49 orders and reclassification).",
+      "sentences": 2,
+      "quote_confidence": "standard",
+      "kind": "summary",
+      "field": "professional_involvement",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2013/Redacted_Building%20and%20Fire_Mercantile_Occupancy_December_2013.pdf"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": true,
+    "weak_flag": "depends",
+    "label_strength": "weak",
+    "facts": {}
+  },
+  "anchors": [
+    "officer_deference"
+  ],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "depends",
+    "engineering_reason": "Weak appeal label only. Not an NBC(AE) 2023 professional-involvement determination.",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  },
+  "deference": "officer_not_bound"
+}

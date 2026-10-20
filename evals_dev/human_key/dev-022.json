@@ -1,0 +1,16 @@
+{
+  "case_id": "dev-022",
+  "status": "unverified",
+  "persona": "manufacturer",
+  "variance_kind": "envelope-insulation-sheathing",
+  "scenario": "We have a new exterior insulation board and want it approved for use in Alberta. What do you need from us?",
+  "section_ab_required_fields": null,
+  "expected_top_articles": null,
+  "benchmark_acceptable_solution": null,
+  "engineer_needed": null,
+  "intake_action": null,
+  "verifier_name": null,
+  "date_verified": null,
+  "source_page_refs": null,
+  "notes": null
+}

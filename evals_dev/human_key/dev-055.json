@@ -1,0 +1,16 @@
+{
+  "case_id": "dev-055",
+  "status": "unverified",
+  "persona": "manufacturer",
+  "variance_kind": "envelope-insulation-sheathing",
+  "scenario": "We call our proposed board BTRboard. Builders are asking if it can replace both OSB and housewrap while also providing continuous exterior insulation. We have not specified its composition, thickness, structural function or joint details here. What should we send before you decide whether a variance is needed?",
+  "section_ab_required_fields": null,
+  "expected_top_articles": null,
+  "benchmark_acceptable_solution": null,
+  "engineer_needed": null,
+  "intake_action": null,
+  "verifier_name": null,
+  "date_verified": null,
+  "source_page_refs": null,
+  "notes": null
+}
