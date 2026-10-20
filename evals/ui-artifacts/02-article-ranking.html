@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Batatis — Article ranking</title>
+    <link rel="stylesheet" href="../../docs/design/tokens.css" />
+    <style>
+      .split {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        flex: 1;
+        min-height: 0;
+      }
+      .list {
+        overflow: auto;
+        border-right: 1px solid var(--border-subtle);
+      }
+      .detail {
+        padding: var(--space-4) var(--space-5) var(--space-4) var(--space-4);
+        overflow: auto;
+        min-width: 0;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 28px 88px 1fr auto;
+        gap: var(--space-3);
+        align-items: center;
+        min-height: 40px;
+        padding: 0 var(--space-4);
+        border-bottom: 1px solid var(--border-subtle);
+        cursor: pointer;
+      }
+      .row:hover,
+      .row.selected {
+        background: var(--bg-hover);
+      }
+      .row:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: -2px;
+      }
+      .group-h {
+        padding: var(--space-2) var(--space-4);
+        font-size: var(--text-sm);
+        color: var(--text-secondary);
+        border-bottom: 1px solid var(--border-subtle);
+        background: var(--bg-elevated);
+      }
+      .empty {
+        padding: var(--space-6) var(--space-4);
+        color: var(--text-secondary);
+        font-size: var(--text-md);
+      }
+      .question {
+        margin-top: var(--space-4);
+        padding: var(--space-3);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        font-size: var(--text-md);
+        color: var(--text-secondary);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" data-shell></aside>
+      <main class="main-panel">
+        <header class="panel-header">
+          <h1 class="panel-title">Article ranking</h1>
+          <span class="meta">NBC(AE) 2023 · 2nd printing</span>
+        </header>
+        <div class="gap-strip" id="gap-strip" aria-label="Administrative gaps"></div>
+        <div class="toolbar" role="tablist" aria-label="Filter articles">
+          <button type="button" class="pill" data-filter="all">Candidates · <span data-count="all"></span></button>
+          <button type="button" class="pill" data-filter="confirmed">Confirmed · <span data-count="confirmed"></span></button>
+          <button type="button" class="pill" data-filter="needs-clarification">Needs clarification · <span data-count="needs-clarification"></span></button>
+        </div>
+        <div class="split">
+          <div class="list" id="list"></div>
+          <div class="detail" id="detail"></div>
+        </div>
+        <div class="footer-bar">
+          <span class="status-note" id="gate-hint"></span>
+          <a class="btn btn-ghost" href="01-intake.html">Back to intake</a>
+          <button type="button" class="btn btn-primary" id="continue-btn">Continue to Section C</button>
+        </div>
+      </main>
+    </div>
+    <script type="module">
+      import { getArticles, setArticleStatus, articleCounts, unconfirmedArticles, renderGapStrip, statusPill, renderShell, wireTabs } from "./shared-gaps.js";
+
+      renderShell("ranking");
+      const QUESTIONS = {
+        "9.25.2.1.": "Which insulation value does the straw-bale assembly target, and how was it measured?",
+        "9.25.3.1.": "Does the assembly include a separate air barrier, or is the plaster finish relied on as the air barrier?",
+      };
+      let selectedId = getArticles()[0].id;
+      let filter = "all";
+
+      function render() {
+        const articles = getArticles();
+        const counts = articleCounts(articles);
+        document.querySelectorAll("[data-count]").forEach((el) => (el.textContent = counts[el.dataset.count]));
+        renderGapStrip(document.getElementById("gap-strip"));
+
+        const visible = articles.filter((a) => filter === "all" || a.status === filter);
+        const row = (a) =>
+          `<div class="row ${a.id === selectedId ? "selected" : ""}" data-id="${a.id}" tabindex="0" role="button" aria-pressed="${a.id === selectedId}">
+            <span class="meta">${a.rank}</span>
+            <span class="article-id">${a.id}</span>
+            <span>${a.title}</span>
+            ${statusPill(a.status)}
+          </div>`;
+        const bench = visible.filter((a) => a.benchmark);
+        const other = visible.filter((a) => !a.benchmark);
+        let html = "";
+        if (bench.length) html += `<div class="group-h">Benchmark recommended · ${bench.length}</div>${bench.map(row).join("")}`;
+        if (other.length) html += `<div class="group-h">Other candidates · ${other.length}</div>${other.map(row).join("")}`;
+        document.getElementById("list").innerHTML = html || `<div class="empty">No articles in this view.</div>`;
+        document.querySelectorAll(".row").forEach((r) => {
+          const pick = () => {
+            selectedId = r.dataset.id;
+            render();
+            document.querySelector(`.row[data-id="${selectedId}"]`)?.focus();
+          };
+          r.addEventListener("click", pick);
+          r.addEventListener("keydown", (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), pick()));
+        });
+
+        const a = articles.find((x) => x.id === selectedId);
+        document.getElementById("detail").innerHTML = `
+          <h2 style="margin: 0 0 8px; font-size: var(--text-lg)">${a.benchmark ? "Benchmark acceptable solution" : "Candidate article"}</h2>
+          <p class="meta" style="margin-top: 0; display: flex; align-items: center; gap: 6px">Article ${a.id} · ranked #${a.rank} ${statusPill(a.status)}</p>
+          <p class="ai-explain">${a.explainRanking}</p>
+          <div class="btn-row" style="margin-top: 16px">
+            <button type="button" class="btn" data-act="confirmed" ${a.status === "confirmed" ? "disabled" : ""}>Confirm article</button>
+            <button type="button" class="btn" data-act="rejected" ${a.status === "rejected" ? "disabled" : ""}>Reject</button>
+            <button type="button" class="btn" data-act="needs-clarification">Ask clarifying question</button>
+          </div>
+          ${a.status === "needs-clarification" ? `<div class="question"><div class="meta" style="margin-bottom: 4px">Question for applicant</div>${QUESTIONS[a.id]}</div>` : ""}`;
+        document.querySelectorAll("[data-act]").forEach((b) =>
+          b.addEventListener("click", () => {
+            setArticleStatus(a.id, b.dataset.act);
+            render();
+          })
+        );
+
+        const unresolved = unconfirmedArticles(articles);
+        const cont = document.getElementById("continue-btn");
+        cont.disabled = unresolved.length > 0;
+        document.getElementById("gate-hint").textContent = unresolved.length
+          ? `Resolve ${unresolved.map((a) => a.id).join(", ")} (confirm or reject) to continue`
+          : "";
+      }
+
+      document.getElementById("continue-btn").addEventListener("click", () => (location.href = "03-section-c.html"));
+      wireTabs("[data-filter]", "data-filter-panel", (value) => {
+        filter = value;
+        render();
+      })("all");
+    </script>
+  </body>
+</html>

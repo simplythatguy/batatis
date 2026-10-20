@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Batatis — Intake</title>
+    <link rel="stylesheet" href="../../docs/design/tokens.css" />
+    <style>
+      .panel-body {
+        overflow: auto;
+        flex: 1;
+      }
+      .form-grid {
+        display: none;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-4);
+        padding: var(--space-5) var(--space-4);
+      }
+      .form-grid[data-active="true"] {
+        display: grid;
+      }
+      .form-grid .full {
+        grid-column: 1 / -1;
+      }
+      .field-foot {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        min-height: 22px;
+      }
+      .tab-count {
+        color: var(--text-tertiary);
+        font-variant-numeric: tabular-nums;
+      }
+      .tab-count:empty {
+        display: none;
+      }
+      .assumption {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: var(--text-xs);
+        color: var(--text-secondary);
+        cursor: pointer;
+      }
+      .field[data-required]:not(.is-empty) .field-label-row .status-dot {
+        display: none;
+      }
+      .section-hint {
+        grid-column: 1 / -1;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" data-shell></aside>
+      <main class="main-panel">
+        <header class="panel-header">
+          <h1 class="panel-title">Applicant intake</h1>
+          <span class="meta">Variance Template · Sections A–B</span>
+        </header>
+        <div class="gap-strip" id="gap-strip" aria-label="Administrative gaps"></div>
+        <div class="toolbar" role="tablist" aria-label="Intake sections">
+          <button type="button" class="pill" data-tab="A">Section A <span class="tab-count" data-tab-count="A"></span></button>
+          <button type="button" class="pill" data-tab="B">Section B <span class="tab-count" data-tab-count="B"></span></button>
+          <button type="button" class="pill" data-tab="alt">Alternative path <span class="tab-count" data-tab-count="alt"></span></button>
+        </div>
+        <div class="panel-body">
+          <div class="content-col">
+            <section class="form-grid" data-section="A" role="tabpanel">
+              <div class="field">
+                <label for="owner">Owner</label>
+                <input id="owner" data-field="owner" />
+                <div class="field-foot" id="owner-foot"></div>
+              </div>
+              <div class="field" data-required="rep">
+                <div class="field-label-row"><span class="status-dot blocking"></span><label for="rep">Representative</label></div>
+                <input id="rep" data-field="rep" placeholder="Required" />
+              </div>
+              <div class="field" data-required="mail">
+                <div class="field-label-row"><span class="status-dot blocking"></span><label for="mail">Mailing address</label></div>
+                <input id="mail" data-field="mail" placeholder="Required" />
+              </div>
+              <div class="field">
+                <label for="date">Date</label>
+                <input id="date" data-field="date" type="text" inputmode="numeric" />
+                <div class="field-foot"><span class="field-note"><span class="status-dot pending"></span>Defaulted to today</span></div>
+              </div>
+            </section>
+
+            <section class="form-grid" data-section="B" role="tabpanel">
+              <div class="field">
+                <label for="permit">Permit #</label>
+                <input id="permit" data-field="permit" placeholder="If issued" />
+              </div>
+              <div class="field" data-required="juris">
+                <div class="field-label-row"><span class="status-dot blocking"></span><label for="juris">Jurisdiction-wide variance?</label></div>
+                <select id="juris" data-field="juris">
+                  <option value="">Select…</option>
+                  <option value="site">No — site specific</option>
+                  <option value="jurisdiction">Yes — jurisdiction-wide</option>
+                </select>
+              </div>
+              <div class="field" data-required="muni">
+                <div class="field-label-row"><span class="status-dot blocking"></span><label for="muni">Municipal address</label></div>
+                <input id="muni" data-field="muni" placeholder="Required" />
+              </div>
+              <div class="field">
+                <div class="field-label-row"><span class="status-dot warning" id="ats-dot"></span><label for="ats">Legal description / ATS</label></div>
+                <input id="ats" data-field="ats" />
+                <div class="field-foot">
+                  <label class="assumption" for="atsAssumption"><input type="checkbox" id="atsAssumption" data-field="atsAssumption" /> Treat as assumption until verified</label>
+                </div>
+              </div>
+              <div class="field full">
+                <label for="alternative">Proposed alternative (clear description)</label>
+                <textarea id="alternative" data-field="alternative" rows="3"></textarea>
+              </div>
+            </section>
+
+            <section class="form-grid" data-section="alt" role="tabpanel">
+              <p class="meta section-hint">Required for the alternative path. Values carry into the export as written.</p>
+              <div class="field full" data-required="risk">
+                <div class="field-label-row"><span class="status-dot blocking"></span><label for="risk">Risk assessment</label></div>
+                <textarea id="risk" data-field="risk" rows="3" placeholder="Required"></textarea>
+              </div>
+              <div class="field full">
+                <label for="mitigation">Mitigating measures</label>
+                <textarea id="mitigation" data-field="mitigation" rows="3"></textarea>
+              </div>
+              <div class="field full" data-required="assumptions">
+                <div class="field-label-row"><span class="status-dot blocking"></span><label for="assumptions">Assumptions / limits</label></div>
+                <textarea id="assumptions" data-field="assumptions" rows="3" placeholder="Required"></textarea>
+              </div>
+            </section>
+          </div>
+        </div>
+        <div class="footer-bar">
+          <span class="status-note" id="save-note" role="status"></span>
+          <button type="button" class="btn btn-ghost" id="save-btn">Save draft</button>
+          <a class="btn btn-primary" href="02-article-ranking.html">Continue to code identification</a>
+        </div>
+      </main>
+    </div>
+    <script type="module">
+      import { state, setField, save, getGaps, renderGapStrip, renderShell, wireTabs } from "./shared-gaps.js";
+
+      renderShell("intake");
+      const TAB_GAPS = { A: ["owner", "rep", "mail"], B: ["muni", "juris", "ats"], alt: ["risk", "assumptions"] };
+      const fieldTab = Object.fromEntries(
+        [...document.querySelectorAll("[data-section]")].flatMap((s) =>
+          [...s.querySelectorAll("[data-field]")].map((f) => [f.id, s.dataset.section])
+        )
+      );
+
+      function renderOwner() {
+        const foot = document.getElementById("owner-foot");
+        foot.innerHTML = state.fields.ownerConfirmed
+          ? `<span class="field-note"><span class="status-dot done"></span>Confirmed by applicant</span>`
+          : `<span class="field-note"><span class="status-dot warning"></span>Inferred from upload</span>
+             <button type="button" class="btn btn-ghost" id="owner-confirm" style="height: 22px; padding: 0 6px">Confirm</button>`;
+        document.getElementById("owner-confirm")?.addEventListener("click", () => {
+          setField("ownerConfirmed", true);
+          renderOwner();
+          refresh();
+        });
+      }
+
+      function refresh() {
+        renderGapStrip(document.getElementById("gap-strip"));
+        const ids = new Set(getGaps().map((g) => g.id));
+        document.querySelectorAll("[data-required]").forEach((el) => el.classList.toggle("is-empty", ids.has(el.dataset.required)));
+        document.getElementById("ats-dot").hidden = !state.fields.atsAssumption;
+        document.querySelectorAll("[data-tab-count]").forEach((el) => {
+          const n = TAB_GAPS[el.dataset.tabCount].filter((id) => ids.has(id)).length;
+          el.textContent = n ? String(n) : "";
+        });
+      }
+
+      document.querySelectorAll("[data-field]").forEach((el) => {
+        const id = el.dataset.field;
+        if (el.type === "checkbox") el.checked = Boolean(state.fields[id]);
+        else el.value = state.fields[id] ?? "";
+        el.addEventListener(el.type === "checkbox" || el.tagName === "SELECT" ? "change" : "input", () => {
+          setField(id, el.type === "checkbox" ? el.checked : el.value);
+          if (id === "owner") setField("ownerConfirmed", true), renderOwner();
+          refresh();
+        });
+      });
+
+      document.getElementById("save-btn").addEventListener("click", () => {
+        state.savedAt = new Date().toISOString();
+        save();
+        const t = new Date(state.savedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        document.getElementById("save-note").textContent = `Draft saved · ${t}`;
+      });
+
+      const selectTab = wireTabs("[data-tab]", "data-section");
+      function focusFromHash() {
+        const id = location.hash.slice(1);
+        selectTab(fieldTab[id] || "A");
+        if (fieldTab[id]) document.getElementById(id).focus();
+      }
+      window.addEventListener("hashchange", focusFromHash);
+      focusFromHash();
+      renderOwner();
+      refresh();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Batatis — Evidence plan</title>
+    <link rel="stylesheet" href="../../docs/design/tokens.css" />
+    <style>
+      .panel-body {
+        overflow: auto;
+        flex: 1;
+        padding: var(--space-4);
+      }
+      .item-title {
+        display: block;
+        font-weight: var(--weight-medium);
+        color: var(--text-primary);
+      }
+      .item-note {
+        display: block;
+        margin-top: 2px;
+      }
+      .intro {
+        margin: 0 0 var(--space-4);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" data-shell></aside>
+      <main class="main-panel">
+        <header class="panel-header">
+          <h1 class="panel-title">Section D · Evidence plan</h1>
+          <span class="meta">Documentation the applicant supplies</span>
+        </header>
+        <div class="gap-strip" id="gap-strip" aria-label="Administrative gaps"></div>
+        <div class="panel-body">
+          <div class="content-col">
+            <p class="meta intro">This plan lists what will demonstrate equivalent performance and who provides it. Missing uploads are listed as gaps until attached. The tool does not author test results or engineering opinions.</p>
+            <table class="table">
+              <thead>
+                <tr><th>Item</th><th>Responsible</th><th>Status</th><th></th></tr>
+              </thead>
+              <tbody id="plan-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="footer-bar">
+          <a class="btn btn-ghost" href="03-section-c.html">Back to Section C</a>
+          <a class="btn btn-primary" href="05-export.html">Continue to export</a>
+        </div>
+      </main>
+    </div>
+    <script type="module">
+      import { sectionD, sectionDPill, setUpload, renderGapStrip, renderShell } from "./shared-gaps.js";
+
+      renderShell("evidence");
+      renderGapStrip(document.getElementById("gap-strip"));
+      function render() {
+        const body = document.getElementById("plan-body");
+        body.innerHTML = sectionD()
+          .map(
+            (d) => `<tr>
+              <td><span class="item-title">${d.item}</span>${d.note ? `<span class="meta item-note">${d.note}</span>` : ""}</td>
+              <td class="meta">${d.by}</td>
+              <td data-status-of="${d.id}">${sectionDPill(d)}</td>
+              <td style="text-align: right"><button type="button" class="btn" data-pick="${d.id}">${d.uploaded ? "Replace file" : "Upload file"}</button><input type="file" hidden data-upload="${d.id}" aria-label="Upload file for ${d.item}" /></td>
+            </tr>`
+          )
+          .join("");
+        body.querySelectorAll("[data-pick]").forEach((b) =>
+          b.addEventListener("click", () => body.querySelector(`[data-upload="${b.dataset.pick}"]`).click())
+        );
+        body.querySelectorAll("[data-upload]").forEach((input) =>
+          input.addEventListener("change", () => {
+            if (!input.files[0]) return;
+            setUpload(input.dataset.upload, input.files[0].name);
+            renderGapStrip(document.getElementById("gap-strip"));
+            render();
+          })
+        );
+      }
+      render();
+    </script>
+  </body>
+</html>

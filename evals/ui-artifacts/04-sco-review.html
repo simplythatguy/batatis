@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Batatis — SCO review</title>
+    <link rel="stylesheet" href="../../docs/design/tokens.css" />
+    <style>
+      .tri {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        flex: 1;
+        min-height: 0;
+      }
+      .mid {
+        border-right: 1px solid var(--border-subtle);
+        overflow: auto;
+      }
+      .detail {
+        overflow: auto;
+        padding: var(--space-4);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+      }
+      .item {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: var(--space-3) var(--space-4);
+        border: 0;
+        border-bottom: 1px solid var(--border-subtle);
+        background: transparent;
+        cursor: pointer;
+      }
+      .item.selected,
+      .item:hover {
+        background: var(--bg-hover);
+      }
+      .item:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: -2px;
+      }
+      .item-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+      }
+      .pane {
+        display: none;
+      }
+      .pane[data-active="true"] {
+        display: block;
+      }
+      .detail-toolbar {
+        display: flex;
+        gap: var(--space-2);
+        margin: -4px 0 0;
+      }
+      .tab-count {
+        color: var(--text-tertiary);
+        font-variant-numeric: tabular-nums;
+      }
+      .entry + .entry {
+        margin-top: var(--space-4);
+      }
+      .entry-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .coverage {
+        margin: 0 0 var(--space-3);
+      }
+      .empty-state {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-secondary);
+      }
+      .dialog textarea {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" data-shell></aside>
+      <main class="main-panel">
+        <header class="panel-header">
+          <h1 class="panel-title">Administrative review</h1>
+          <span class="meta">Completeness only · not technical correctness</span>
+        </header>
+        <div class="tri">
+          <div class="mid" role="listbox" aria-label="Review queue">
+            <button type="button" class="item" data-project="VAR-1042" role="option">
+              <span class="item-title"><span class="status-dot blocking" id="q-dot"></span> VAR-1042 · Straw wall</span>
+              <span class="meta" style="display: block; margin-top: 4px"><span id="gap-summary"></span> · updated 1h</span>
+            </button>
+            <button type="button" class="item" data-project="VAR-1038" role="option">
+              <span class="item-title"><span class="status-dot done"></span> VAR-1038 · Stair geometry</span>
+              <span class="meta" style="display: block; margin-top: 4px">Admin-complete · 3h</span>
+            </button>
+          </div>
+          <div class="detail" id="detail-1042">
+            <div class="detail-toolbar" role="tablist" aria-label="Review sections">
+              <button type="button" class="pill" data-pane="gaps">Gaps <span class="tab-count" id="gap-count"></span></button>
+              <button type="button" class="pill" data-pane="citations">Citations <span class="tab-count" id="cite-count"></span></button>
+              <button type="button" class="pill" data-pane="explanations">Explanations <span class="tab-count" id="explain-count"></span></button>
+            </div>
+            <div class="pane" data-pane-panel="gaps" role="tabpanel">
+              <ul class="plain-list" id="gap-list"></ul>
+            </div>
+            <div class="pane" data-pane-panel="citations" role="tabpanel">
+              <p class="meta coverage" id="cite-coverage"></p>
+              <div id="cite-list"></div>
+            </div>
+            <div class="pane" data-pane-panel="explanations" role="tabpanel">
+              <p class="meta coverage">AI explanations are for navigation only. This view does not determine whether the alternative meets code.</p>
+              <div id="explain-list"></div>
+            </div>
+          </div>
+          <div class="detail" id="detail-1038" hidden>
+            <div class="empty-state"><span class="status-dot done"></span>VAR-1038 has no open administrative gaps. Marked administratively complete 3h ago.</div>
+          </div>
+        </div>
+        <div class="footer-bar">
+          <span class="status-note" id="gate-reason" role="status"></span>
+          <button type="button" class="btn" id="request-btn">Request applicant fixes</button>
+          <button type="button" class="btn btn-primary" data-requires-no-blocking-gaps>Mark administratively complete</button>
+        </div>
+      </main>
+    </div>
+
+    <dialog class="dialog" id="request-dialog">
+      <form method="dialog">
+        <div class="dialog-body">
+          <h2 class="dialog-title">Request fixes for VAR-1042</h2>
+          <p class="meta" style="margin: 0 0 8px">These items are sent to the applicant:</p>
+          <ul class="plain-list" id="request-list"></ul>
+          <div class="field" style="margin-top: 12px">
+            <label for="request-note">Note to applicant (optional)</label>
+            <textarea id="request-note" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="footer-bar">
+          <button type="submit" class="btn btn-ghost" value="cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" value="send" id="request-send">Send request</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module">
+      import { getGaps, blockingGaps, sectionCArticles, renderGapList, applyGating, gapSummary, statusPill, renderShell, wireTabs } from "./shared-gaps.js";
+
+      renderShell("review", "sco");
+      const cited = sectionCArticles();
+      const confirmed = cited.filter((a) => a.status === "confirmed").length;
+      renderGapList(document.getElementById("gap-list"), { links: false });
+      renderGapList(document.getElementById("request-list"), { links: false });
+      document.getElementById("gap-summary").textContent = gapSummary();
+      document.getElementById("gap-count").textContent = getGaps().length;
+      document.getElementById("cite-count").textContent = cited.length;
+      document.getElementById("explain-count").textContent = cited.length;
+      document.getElementById("cite-coverage").textContent =
+        `Citations ${cited.length}/${cited.length} retrieved · ${confirmed}/${cited.length} articles confirmed · Section C ${confirmed === cited.length ? "complete" : "incomplete"}`;
+      const head = (a) => `<div class="entry-head"><span class="article-id">${a.id}</span> ${statusPill(a.status)}</div>`;
+      document.getElementById("cite-list").innerHTML = cited
+        .map((a) => `<div class="entry">${head(a)}<pre class="cite-block">${a.excerpt}</pre></div>`)
+        .join("");
+      document.getElementById("explain-list").innerHTML = cited
+        .map((a) => `<div class="entry">${head(a)}<p class="ai-explain" style="margin: 0">${a.explainSectionC}</p></div>`)
+        .join("");
+
+      const footerFor1042 = () => {
+        const n = applyGating();
+        document.getElementById("gate-reason").textContent = n ? `Resolve ${n} blocking gaps to mark complete` : "";
+        document.getElementById("q-dot").className = `status-dot ${n ? "blocking" : "done"}`;
+      };
+      const items = document.querySelectorAll("[data-project]");
+      items.forEach((item) =>
+        item.addEventListener("click", () => {
+          const is1042 = item.dataset.project === "VAR-1042";
+          items.forEach((i) => {
+            i.classList.toggle("selected", i === item);
+            i.setAttribute("aria-selected", String(i === item));
+          });
+          document.getElementById("detail-1042").hidden = !is1042;
+          document.getElementById("detail-1038").hidden = is1042;
+          document.getElementById("request-btn").hidden = !is1042;
+          document.querySelector("[data-requires-no-blocking-gaps]").hidden = !is1042;
+          if (is1042) footerFor1042();
+          else document.getElementById("gate-reason").textContent = "Administratively complete";
+        })
+      );
+      items[0].click();
+
+      const dialog = document.getElementById("request-dialog");
+      document.getElementById("request-btn").addEventListener("click", () => dialog.showModal());
+      dialog.addEventListener("close", () => {
+        if (dialog.returnValue !== "send") return;
+        const n = getGaps().length;
+        document.getElementById("gate-reason").textContent = `Fix request sent · ${n} items · ${blockingGaps().length} blocking`;
+      });
+      wireTabs("[data-pane]", "data-pane-panel")("gaps");
+    </script>
+  </body>
+</html>

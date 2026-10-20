@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Batatis — Section C</title>
+    <link rel="stylesheet" href="../../docs/design/tokens.css" />
+    <style>
+      .panel-body {
+        overflow: auto;
+        flex: 1;
+        padding: var(--space-4);
+      }
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+        margin-top: var(--space-5);
+      }
+      .table tbody tr {
+        cursor: pointer;
+      }
+      .table tbody tr:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: -2px;
+      }
+      .table tr.unconfirmed td {
+        color: var(--text-secondary);
+      }
+      .cell-gap {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text-secondary);
+      }
+      .intent-text {
+        display: block;
+        max-width: 380px;
+      }
+      .intent-ref {
+        display: block;
+        margin-top: 2px;
+      }
+      .provenance {
+        font-size: var(--text-sm);
+        color: var(--text-secondary);
+        margin: var(--space-2) 0 0;
+      }
+      .block-label {
+        margin-bottom: 8px;
+      }
+      .dialog textarea {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" data-shell></aside>
+      <main class="main-panel">
+        <header class="panel-header">
+          <h1 class="panel-title">Section C · Attributions</h1>
+          <span class="label-pill">Source · attribution registry</span>
+        </header>
+        <div class="gap-strip" id="gap-strip" aria-label="Administrative gaps"></div>
+        <div class="panel-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Code</th>
+                <th>Article</th>
+                <th>Objective</th>
+                <th>Function</th>
+                <th>Intent</th>
+              </tr>
+            </thead>
+            <tbody id="attr-body"></tbody>
+          </table>
+          <p class="provenance" id="provenance"></p>
+          <div class="stack">
+            <div>
+              <div class="meta block-label">Retrieved code text · <span id="cite-article"></span></div>
+              <pre class="cite-block" id="cite-block"></pre>
+              <a class="text-link" id="cite-link" href="https://nrc.canada.ca/en/certifications-evaluations-standards/codes-canada" target="_blank" rel="noopener" style="margin-top: 8px; display: inline-block"></a>
+            </div>
+            <div>
+              <div class="meta block-label">AI explainer · <span id="explain-article"></span> (not source text)</div>
+              <p class="ai-explain" id="ai-explain" style="margin: 0"></p>
+            </div>
+          </div>
+        </div>
+        <div class="footer-bar">
+          <span class="status-note" id="gate-reason" role="status"></span>
+          <button type="button" class="btn" id="rerun-btn">Re-run lookup</button>
+          <a class="btn btn-ghost" href="02-article-ranking.html">Back to ranking</a>
+          <button type="button" class="btn btn-primary" id="continue-btn">Continue to evidence plan</button>
+        </div>
+      </main>
+    </div>
+
+    <dialog class="dialog" id="intent-dialog">
+      <form method="dialog">
+        <div class="dialog-body">
+          <h2 class="dialog-title">Add intent for <span id="intent-article"></span></h2>
+          <p class="meta" style="margin: 0 0 12px">The registry returned no intent statement. Paste it verbatim from the code appendix; it is labelled as applicant-entered until the registry has it.</p>
+          <div class="field">
+            <label for="intent-input">Intent statement</label>
+            <textarea id="intent-input" rows="4"></textarea>
+          </div>
+        </div>
+        <div class="footer-bar">
+          <button type="submit" class="btn btn-ghost" value="cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" value="save" id="intent-save">Save intent</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module">
+      import { CODE_EDITION, getArticles, sectionCArticles, unconfirmedArticles, setIntent, renderGapStrip, statusPill, renderShell } from "./shared-gaps.js";
+
+      renderShell("sectionC");
+      let selectedId = sectionCArticles()[0]?.id;
+      let lookedUpAt = null;
+      const dialog = document.getElementById("intent-dialog");
+
+      function render() {
+        const rows = sectionCArticles();
+        renderGapStrip(document.getElementById("gap-strip"));
+        const body = document.getElementById("attr-body");
+        body.innerHTML = rows
+          .map((a) => {
+            const intent = a.intent
+              ? `<span class="intent-text">${a.intent}</span><span class="meta intent-ref">${a.intentRef}</span>`
+              : `<span class="cell-gap"><span class="status-dot blocking"></span>— <button type="button" class="btn btn-ghost" data-add-intent="${a.id}" style="height: 22px; padding: 0 6px">Add intent</button></span>`;
+            return `<tr class="${a.id === selectedId ? "selected" : ""} ${a.status === "confirmed" ? "" : "unconfirmed"}" data-id="${a.id}" tabindex="0" aria-selected="${a.id === selectedId}">
+              <td>${statusPill(a.status)}</td>
+              <td>${CODE_EDITION}</td>
+              <td class="article-id">${a.id}</td>
+              <td data-value="objective">${a.objective}</td>
+              <td data-value="fn">${a.fn}</td>
+              <td data-value="intent">${intent}</td>
+            </tr>`;
+          })
+          .join("");
+        body.querySelectorAll("tr").forEach((tr) => {
+          const pick = () => {
+            selectedId = tr.dataset.id;
+            render();
+            body.querySelector(`tr[data-id="${selectedId}"]`)?.focus();
+          };
+          tr.addEventListener("click", (e) => !e.target.closest("[data-add-intent]") && pick());
+          tr.addEventListener("keydown", (e) => e.key === "Enter" && e.target === tr && pick());
+        });
+        body.querySelectorAll("[data-add-intent]").forEach((b) =>
+          b.addEventListener("click", () => {
+            document.getElementById("intent-article").textContent = b.dataset.addIntent;
+            document.getElementById("intent-input").value = "";
+            dialog.dataset.article = b.dataset.addIntent;
+            dialog.showModal();
+          })
+        );
+
+        const a = rows.find((x) => x.id === selectedId);
+        document.getElementById("cite-article").textContent = a.id;
+        document.getElementById("cite-block").textContent = a.excerpt;
+        document.getElementById("cite-link").textContent = `Full text of ${a.id} on Codes Canada ↗`;
+        document.getElementById("explain-article").textContent = a.id;
+        document.getElementById("ai-explain").textContent = a.explainSectionC;
+
+        const unresolved = unconfirmedArticles();
+        document.getElementById("continue-btn").disabled = unresolved.length > 0;
+        document.getElementById("gate-reason").textContent = unresolved.length
+          ? `Resolve ${unresolved.map((a) => a.id).join(", ")} (confirm or reject) to continue`
+          : "";
+        document.getElementById("provenance").textContent =
+          `Objective, function and intent are deterministic registry lookups for ${CODE_EDITION}, 2nd printing` +
+          (lookedUpAt ? ` · refreshed ${lookedUpAt}` : "") +
+          ". Unconfirmed articles are shown for reference and are not exported as attributions.";
+      }
+
+      dialog.addEventListener("close", () => {
+        const text = document.getElementById("intent-input").value.trim();
+        if (dialog.returnValue === "save" && text) {
+          setIntent(dialog.dataset.article, text);
+          render();
+        }
+      });
+
+      const rerun = document.getElementById("rerun-btn");
+      rerun.addEventListener("click", () => {
+        rerun.disabled = true;
+        rerun.textContent = "Looking up…";
+        setTimeout(() => {
+          rerun.disabled = false;
+          rerun.textContent = "Re-run lookup";
+          lookedUpAt = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+          render();
+        }, 600);
+      });
+      document.getElementById("continue-btn").addEventListener("click", () => (location.href = "06-evidence-plan.html"));
+      render();
+    </script>
+  </body>
+</html>
