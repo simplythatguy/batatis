@@ -35,21 +35,32 @@ That returns `HTTP/1.1 201 Created`.
 
 ### Code database
 
-Code search, Section C lookup, and PDF export read `codedb/build/codedb.sqlite`. That file is not in git. Build it with:
+Code search, Section C lookup, and PDF export read `codedb/build/codedb.sqlite`. That file is not in git.
+
+Download the two source PDFs from the NRC Publications Archive. They are copyrighted. Save them on your machine under these exact names, and do not commit them. `codedb build` looks only at these paths:
+
+- NBC(AE) 2023, **2nd printing** (Volumes 1 and 2 in one PDF): [NRC record](https://nrc-publications.canada.ca/eng/view/object/?id=0316d953-0d55-4311-af69-cad55efec499). Save the 2nd-printing download as `reference/codes/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.pdf`.
+- Supplement to the NBC 2020: Intent Statements (national, explanatory, not Alberta law): [NRC record](https://nrc-publications.canada.ca/eng/view/object/?id=de0e0ec9-a452-4337-bc84-002a230c9d66). Save it as `reference/codes/NBC-2020-Intent-Statements.pdf`.
+
+Then extract page text and build. `tools/extract_text.py` reads every PDF under `reference/` and writes `reference/text/<pdf name>.jsonl`. Run it after the PDFs are in place, and before `codedb build`.
 
 ```bash
+mkdir -p reference/codes
 .venv/bin/pip install -r codedb/requirements.txt
+.venv/bin/python tools/extract_text.py
 .venv/bin/python -m codedb build
 ```
 
-The build needs these four local files, and it checks them in this order. They are not in the repository. NBC text is copyrighted; keep the copies on your machine.
+`mkdir -p reference/codes` is required first. With no `reference/` directory, `tools/extract_text.py` exits 1 because it cannot create `reference/text`. After `reference/codes` exists and is empty, the same command exits 0 and writes no JSONL.
+
+`codedb build` then checks these four files, in this order. The two `.jsonl` files are the extract output; the two `.pdf` files are the downloads above.
 
 - `reference/text/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.jsonl`
 - `reference/codes/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.pdf`
 - `reference/text/NBC-2020-Intent-Statements.jsonl`
 - `reference/codes/NBC-2020-Intent-Statements.pdf`
 
-On a fresh clone the command stops at the first missing file, exits 2, and writes nothing under `codedb/build/`:
+On a fresh clone, with the PDFs absent, `codedb build` stops at the first missing file, exits 2, and writes nothing under `codedb/build/`:
 
 ```text
 codedb: Required source missing: <repo>/reference/text/NBC-AE-2023-2nd-printing-FULL-Vol1+Vol2.jsonl; existing build was not replaced
