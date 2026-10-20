@@ -10,6 +10,7 @@ from engine.export import form_path
 from engine.export.sample import sample_case
 from engine.models import Fact, Source
 from engine.store import CaseStore
+from engine.tests.json_body import listed
 
 pytestmark = pytest.mark.skipif(not form_path().exists(), reason='SCC form not present (git-excluded)')
 
@@ -51,7 +52,7 @@ def test_final_roundtrip_and_direct_api_bypass(ctx):
     draft = client.post(f'/cases/{incomplete.id}/export', json={'draft': True})
     assert draft.status_code == 200 and 'DRAFT' in draft.headers['content-disposition']
     store.put(complete)
-    assert not any(g['severity'] == 'blocking' for g in client.get(f'/cases/{complete.id}/gaps').json())
+    assert not any(g['severity'] == 'blocking' for g in listed(client.get(f'/cases/{complete.id}/gaps').json()))
     final = client.post(f'/cases/{complete.id}/export')
     assert final.status_code == 200
     pdf = PdfReader(io.BytesIO(final.content))

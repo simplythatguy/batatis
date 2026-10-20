@@ -125,6 +125,17 @@ export function GapStrip({ gaps }: { gaps: Gap[] }) {
   );
 }
 
+export const PRIVACY_NOTICE =
+  "Don't paste personal information you don't need. Applicant text is sent to OpenAI (US) for processing in live mode, and data is deleted after 7 days or on request.";
+
+export function PrivacyNotice() {
+  return (
+    <p className="privacy-notice" role="note">
+      {PRIVACY_NOTICE}
+    </p>
+  );
+}
+
 export function PanelHeader({ title, meta }: { title: string; meta?: ReactNode }) {
   return (
     <header className="panel-header">

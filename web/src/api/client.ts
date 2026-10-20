@@ -46,6 +46,22 @@ export class EngineError extends Error {
 
 const enc = encodeURIComponent;
 
+/** Array routes are `{items, meta}`. A body that already has other keys stays intact. */
+export function unwrapList<T>(payload: unknown): T[] {
+  if (Array.isArray(payload)) return payload as T[];
+  if (
+    payload !== null &&
+    typeof payload === "object" &&
+    "items" in payload &&
+    "meta" in payload &&
+    Array.isArray((payload as { items: unknown }).items) &&
+    Object.keys(payload).length === 2
+  ) {
+    return (payload as { items: T[] }).items;
+  }
+  return payload as T[];
+}
+
 export function createEngine(base: string) {
   async function call<T>(method: "GET" | "POST", path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
     let res: Response;
@@ -82,11 +98,11 @@ export function createEngine(base: string) {
       call<CodeRecord>("GET", `/code/${enc(id)}${division ? `?division=${division}` : ""}`, undefined, signal),
     search: (q: string, opts: { division?: Division; limit?: number } = {}, signal?: AbortSignal) => {
       const p = new URLSearchParams({ q, division: opts.division ?? "B", limit: String(opts.limit ?? 20) });
-      return call<CodeHit[]>("GET", `/code/search?${p}`, undefined, signal);
+      return call<unknown>("GET", `/code/search?${p}`, undefined, signal).then((payload) => unwrapList<CodeHit>(payload));
     },
     /** Section C rows by deterministic lookup, in input order (an article expands to its sentences). */
     sectionC: (provisions: string[], signal?: AbortSignal) =>
-      call<SectionCRow[]>("POST", "/section-c", { provisions }, signal),
+      call<unknown>("POST", "/section-c", { provisions }, signal).then((payload) => unwrapList<SectionCRow>(payload)),
   };
 }
 

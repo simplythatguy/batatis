@@ -9,6 +9,7 @@ from codedb import AmbiguousProvisionError
 
 from .codes import CodeDbMissing, Codes
 from .export import ExportBlocked, ExportError, FormNotFound, export_case
+from .http_guard import HttpGuard
 from .models import Case, Fact, Jurisdiction, SectionCRow
 from .section_c import section_c_rows
 from .store import CaseStore
@@ -29,9 +30,17 @@ class ExportRequest(BaseModel):
 
 def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> FastAPI:
     app = FastAPI(title='Batatis engine')
+    state = {'store': store, 'codes': codes}
+
+    def sweep():
+        current = state['store']
+        purge = getattr(current, 'purge_expired', None) if current is not None else None
+        if purge:
+            purge()
+
     app.add_middleware(CORSMiddleware, allow_origin_regex=r'http://(localhost|127\.0\.0\.1)(:\d+)?',
                        allow_methods=['*'], allow_headers=['*'])
-    state = {'store': store, 'codes': codes}
+    app.add_middleware(HttpGuard, sweep=sweep)
 
     def cases() -> CaseStore:
         if state['store'] is None:
@@ -46,6 +55,12 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
     @app.post('/cases', response_model=Case, status_code=201)
     def create_case(body: NewCase | None = None):
         return cases().put(Case(**(body.model_dump() if body else {})))
+
+    @app.delete('/cases/{case_id}', status_code=204)
+    def delete_case(case_id: str):
+        if not cases().delete(case_id):
+            raise HTTPException(404, 'case not found')
+        return Response(status_code=204)
 
     @app.get('/cases/{case_id}', response_model=Case)
     def get_case(case_id: str):

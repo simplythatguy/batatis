@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { DetailFields, FactLedger, QuestionChips } from "../case-parts";
-import { GapStrip, Icon, PanelHeader } from "../components";
+import { GapStrip, Icon, PanelHeader, PrivacyNotice } from "../components";
 import { DETAIL_FIELDS, factFor, valueText } from "../model";
 import { useCase } from "../store";
 
@@ -89,6 +89,7 @@ export function Describe() {
       <GapStrip gaps={gaps} />
       <div className="describe">
         <div className="describe-main pane">
+          <PrivacyNotice />
           <div className="field">
             <label htmlFor="description" className="lead-label">
               Describe your idea in a sentence or two

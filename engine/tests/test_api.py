@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 from engine.api import create_app
 from engine.codes import Codes
 from engine.store import CaseStore
+from engine.tests.json_body import listed
 
 
 @pytest.fixture(scope='module')
@@ -35,14 +36,14 @@ def test_code_lookup_and_search(client):
     r = client.get('/code/9.10.15.5.(8)', params={'division': 'B'})
     assert r.status_code == 200 and r.json()['citation'].startswith('NBC(AE) 2023 p2, Div B, Sentence 9.10.15.5.(8)')
     assert client.get('/code/9.99.99.99.', params={'division': 'B'}).status_code == 404
-    hits = client.get('/code/search', params={'q': 'limiting distance unprotected openings'}).json()
+    hits = listed(client.get('/code/search', params={'q': 'limiting distance unprotected openings'}).json())
     assert hits and all(h['division'] == 'B' and h['citation'] for h in hits)
 
 
 def test_section_c_endpoint(client):
     r = client.post('/section-c', json={'provisions': ['9.10.13.13.(1)', '9.10.14.2.']})
     assert r.status_code == 200
-    rows = r.json()
+    rows = listed(r.json())
     assert rows[0]['attribution_status'] == 'direct'
     assert {x['attribution_status'] for x in rows[1:]} == {'no row in the attribution table'}
     assert client.post('/section-c', json={'provisions': ['9.99.99.99.(1)']}).status_code == 404

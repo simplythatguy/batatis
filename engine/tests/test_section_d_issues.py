@@ -16,6 +16,7 @@ from engine.section_d_flag_eval import (
 from engine.section_d_issues import PROCESS_RULES, PROFESSIONAL_RULES, section_d_issues
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import fact
+from engine.tests.json_body import listed
 
 # Recommendation text must not claim compliance or safety. Objective titles from the
 # code ("Safety") are not copied into these strings; the test scans the whole payload.
@@ -203,7 +204,7 @@ def test_route_is_read_only_and_missing_case_is_404(tmp_path):
     before = store.get(case.id).model_dump_json()
     response = client.get(f'/cases/{case.id}/section-d/issues')
     assert response.status_code == 200
-    body = response.json()
+    body = listed(response.json())
     assert body[0]['entered_reference'] == UNKNOWN and body[0]['provision'] is None
     assert body[1]['provision']['citation']
     assert store.get(case.id).model_dump_json() == before
@@ -216,7 +217,7 @@ def test_missing_codedb_returns_503_without_a_path(tmp_path, monkeypatch):
     assert created.status_code == 201
     response = client.get(f"/cases/{created.json()['id']}/section-d/issues")
     assert response.status_code == 503
-    assert response.json() == {'detail': 'code database not found'}
+    assert response.json()['detail'] == 'code database not found'
     assert 'no-such.sqlite' not in response.text
     assert str(tmp_path) not in response.text
 

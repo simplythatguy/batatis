@@ -32,6 +32,7 @@ jobs:
         run: |
           npm ci
           npm run typecheck
+          node --experimental-strip-types scripts/unwrap-list.check.ts
           npm run build
       - name: UI smoke
         run: |

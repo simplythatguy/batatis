@@ -1,0 +1,37 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    }
+  ],
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": { "service": "engine" } },
+    { "source": "/codedb/(.*)", "destination": { "service": "engine" } },
+    { "source": "/(.*\\.sqlite)", "destination": { "service": "engine" } },
+    { "source": "/(.*)", "destination": { "service": "web" } }
+  ],
+  "services": {
+    "web": {
+      "root": "web",
+      "framework": "vite",
+      "outputDirectory": "dist",
+      "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+    },
+    "engine": {
+      "root": ".",
+      "framework": "fastapi",
+      "entrypoint": "engine.api:app",
+      "installCommand": "pip install -r engine/requirements.txt -r codedb/requirements.txt",
+      "buildCommand": "bash scripts/vercel_build_engine.sh",
+      "rewrites": [{ "source": "/api/:path(.*)?", "destination": "/:path" }],
+      "functions": {
+        "engine/api.py": {
+          "includeFiles": "{codedb/build/codedb.sqlite,reference/guides/SCC-Variance-Form.pdf}",
+          "excludeFiles": "{engine/tests/**,codedb/tests/**,evals/**,evals_dev/**,**/*fixture*/**,web/**,docs/**,research/**,reference/codes/**,reference/text/**,codedb/build/export/**,.cursor/**,.agents/**}"
+        }
+      }
+    }
+  }
+}

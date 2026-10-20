@@ -1,0 +1,107 @@
+"""ASGI guard: strip /api, refuse the code database file, tag robots, and clip NRC text."""
+from __future__ import annotations
+
+import json
+import logging
+
+from .copyright import PII_NOTICE, attach_meta, clip_response
+
+access_log = logging.getLogger('engine.access')
+
+
+def _header(headers, name: bytes) -> bytes:
+    for key, value in headers:
+        if key.lower() == name:
+            return value
+    return b''
+
+
+def database_path_blocked(path: str) -> bool:
+    """True for the built sqlite and any path that would name that file.
+
+    The database is an engine input. It is not a download.
+    """
+    route = (path or '').split('?', 1)[0]
+    if route == '/codedb' or route.startswith('/codedb/'):
+        return True
+    name = route.rsplit('/', 1)[-1]
+    return name.endswith('.sqlite') or name.endswith('.sqlite-journal')
+
+
+def _not_found():
+    raw = json.dumps(attach_meta({'detail': 'not found'})).encode()
+    headers = [
+        (b'content-type', b'application/json'),
+        (b'content-length', str(len(raw)).encode()),
+        (b'x-robots-tag', b'noindex, nofollow'),
+        (b'x-batatis-notice', PII_NOTICE.encode()),
+    ]
+    return raw, headers
+
+
+class HttpGuard:
+    def __init__(self, app, sweep=None):
+        self.app = app
+        self.sweep = sweep
+
+    async def __call__(self, scope, receive, send):
+        if scope.get('type') != 'http':
+            await self.app(scope, receive, send)
+            return
+        if self.sweep is not None:
+            try:
+                self.sweep()
+            except Exception:
+                # A sweep failure must not replace the route's own error.
+                pass
+        path = scope.get('path') or ''
+        if path == '/api' or path.startswith('/api/'):
+            scope = dict(scope)
+            scope['path'] = path[4:] or '/'
+            raw_path = scope.get('raw_path') or b''
+            if raw_path.startswith(b'/api'):
+                scope['raw_path'] = raw_path[4:] or b'/'
+            path = scope['path']
+        route = path.split('?', 1)[0]
+        if database_path_blocked(route):
+            raw, headers = _not_found()
+            access_log.info('%s %s 404', scope.get('method', '-'), route)
+            await send({'type': 'http.response.start', 'status': 404, 'headers': headers})
+            body = b'' if scope.get('method') == 'HEAD' else raw
+            await send({'type': 'http.response.body', 'body': body})
+            return
+        started: dict = {}
+        chunks: list[bytes] = []
+
+        async def send_wrap(message):
+            if message['type'] == 'http.response.start':
+                started['message'] = message
+                started['headers'] = list(message.get('headers') or [])
+                return
+            if message['type'] != 'http.response.body':
+                await send(message)
+                return
+            chunks.append(message.get('body') or b'')
+            if message.get('more_body'):
+                return
+            raw = b''.join(chunks)
+            headers = list(started.get('headers') or [])
+            if raw and b'application/json' in _header(headers, b'content-type'):
+                try:
+                    payload = attach_meta(clip_response(json.loads(raw)))
+                    raw = json.dumps(payload).encode()
+                except (ValueError, UnicodeError):
+                    pass
+                headers = [(key, value) for key, value in headers if key.lower() != b'content-length']
+                headers.append((b'content-length', str(len(raw)).encode()))
+            headers = [(key, value) for key, value in headers if key.lower() not in (b'x-robots-tag', b'x-batatis-notice')]
+            headers.append((b'x-robots-tag', b'noindex, nofollow'))
+            headers.append((b'x-batatis-notice', PII_NOTICE.encode()))
+            start = dict(started['message'])
+            start['headers'] = headers
+            # Method, route, and status only. Never the body, a quote, or uploaded bytes.
+            access_log.info('%s %s %s', scope.get('method', '-'), route, start.get('status', '-'))
+            await send(start)
+            await send({'type': 'http.response.body', 'body': raw})
+
+        await self.app(scope, receive, send_wrap)
