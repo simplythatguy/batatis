@@ -4,7 +4,7 @@ import { toViewRow, useProvisionText, useSectionC, type SectionCSource } from ".
 import { CODE_EDITION } from "../config";
 import { applyIdentifyPlan, CONFIRM_UNAVAILABLE, DECISION_UNAVAILABLE, planIdentify, readDecisionBody } from "../identify";
 import { failureKind, sectionCQuoteLabel } from "../rules";
-import { DemoFallback, GapStrip, PanelHeader, StatusPill } from "../components";
+import { CodeQuote, DemoFallback, GapStrip, PanelHeader, StatusPill } from "../components";
 import { CODE_TERMS } from "../fixture";
 import { candidateById, unresolvedCandidates } from "../model";
 import { useCase } from "../store";
@@ -79,6 +79,7 @@ function ProvisionSearch() {
   const [hits, setHits] = useState<CodeHit[]>([]);
   const [note, setNote] = useState("");
   const edited = useRef(false);
+  const searchSeq = useRef(0);
 
   useEffect(() => {
     if (!edited.current) setQuery(c.description);
@@ -91,14 +92,17 @@ function ProvisionSearch() {
       setHits([]);
       return;
     }
-    setNote("Searching the code database…");
+    const seq = ++searchSeq.current;
+    setNote("Searching the code…");
     try {
       const rows = await engine.search(q, { division: "B", limit: 8 });
+      if (seq !== searchSeq.current) return;
       setHits(rows);
       setNote(rows.length ? `${rows.length} provisions. Pick the one that fits what you are proposing.` : "No provisions matched those words.");
     } catch (e) {
+      if (seq !== searchSeq.current) return;
       setHits([]);
-      setNote(e instanceof EngineError ? e.detail : "The code database did not answer.");
+      setNote(e instanceof EngineError ? e.detail : "The code search did not answer.");
     }
   }
 
@@ -166,9 +170,10 @@ function ProvisionSearch() {
             <li key={h.id} className="card">
               <div className="card-head">
                 <span className="article-id">{h.id}</span>
+                {h.article_title && <span className="card-topic">{h.article_title}</span>}
                 <span className="label-pill">Code text</span>
               </div>
-              <blockquote className="cite-block quote">{h.text}</blockquote>
+              {h.text.trim() ? <CodeQuote text={h.text} /> : <p className="meta">Article heading. Its sentences are shown once the provision is in the table.</p>}
               <p className="mono meta">{h.citation ?? "No citation returned"}</p>
               <p className="meta">{SUGGESTED}</p>
               <button
@@ -186,7 +191,7 @@ function ProvisionSearch() {
                       benchmark: false,
                       identified: true,
                       suggestion: "search",
-                      quote: { text: h.text, citation: h.citation ?? "No citation returned" },
+                      quote: { text: h.text, citation: h.citation ?? "No citation returned", source: "code" },
                       departure: "do something other than what this sentence requires",
                       clarifyingQuestion: "Which part of this sentence does the design not follow?",
                       answer: null,
@@ -277,7 +282,7 @@ export function SectionC() {
           </p>
         )}
         {(source === "cached" || source === "error") && failureKind(status ?? 0, error ?? "") === "unreachable" && (
-          <DemoFallback reason={error ?? "The engine could not be reached."} onRetry={() => setAttempt((n) => n + 1)} />
+          <DemoFallback reason={error ?? "The review service did not respond."} onRetry={() => setAttempt((n) => n + 1)} />
         )}
         {(source === "cached" || source === "error") && failureKind(status ?? 0, error ?? "") !== "unreachable" && (
           <p className="field-note" role="status">
@@ -378,9 +383,13 @@ export function SectionC() {
                   {quote?.citation ? ` · ${quote.citation}` : liveText.state === "error" ? ` · ${liveText.message}` : ""}
                 </span>
               </div>
-              <blockquote className="cite-block quote">
-                {fromCodedb ? quote?.text : liveText.state === "loading" ? "Loading the provision text…" : (quote?.text ?? "No code sentence is available for this row.")}
-              </blockquote>
+              {fromCodedb ? (
+                <CodeQuote text={quote?.text} />
+              ) : (
+                <blockquote className="cite-block quote">
+                  {liveText.state === "loading" ? "Loading the provision text…" : (quote?.text ?? "No code sentence is available for this row.")}
+                </blockquote>
+              )}
               <p className="meta">
                 Section C row: {sel.citation}
                 {sel.attributionStatus === "inherited" && ` · uses the table row of ${sel.inheritedFrom}`}
@@ -400,9 +409,17 @@ export function SectionC() {
               </div>
               {!sel.intent.length && <p className="meta">No NBC 2020 intent statement for this provision.</p>}
               {sel.intent.map((i) => (
-                <blockquote key={i.text} className="cite-block quote intent-block">
-                  {i.objective && <span className="meta">{i.objective} · </span>}{i.text}
-                </blockquote>
+                <CodeQuote
+                  key={i.text}
+                  source="intent"
+                  className="intent-block"
+                  text={
+                    <>
+                      {i.objective && <span className="meta">{i.objective} · </span>}
+                      {i.text}
+                    </>
+                  }
+                />
               ))}
             </section>
             {selCand?.suggestion && selCand.answer !== "yes" && (

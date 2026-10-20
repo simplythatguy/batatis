@@ -46,10 +46,16 @@ export interface Question {
   cardId?: string;
 }
 
-/** A verbatim span copied from the code database, with its built citation. */
+/** The text on a card, with its built citation. */
 export interface CodeQuote {
   text: string;
   citation: string;
+  /**
+   * Where `text` came from. Only "code" is verbatim code-database text.
+   * "ranking" is the AI's reason for ranking the article; "summary" is a cached case summary.
+   * Absent on older cards: the citation decides (see `quoteKind`).
+   */
+  source?: "code" | "ranking" | "summary";
 }
 
 export type CandidateAnswer = "yes" | "no" | "not-sure";

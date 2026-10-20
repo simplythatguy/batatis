@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { EngineError, ExportBlockedError, engine } from "../api/client";
 import { DetailFields, ProcessFields } from "../case-parts";
 import { MissingItems } from "../completenessView";
-import { DraftNote, GapStrip, PanelHeader } from "../components";
+import { DraftNote, GapStrip, Notices, PanelHeader } from "../components";
 import { EXAMPLES } from "../examples";
 import { displayValue, factLabel, plainFactStatus } from "../model";
 import { UNSIGNED_LINE, pdfOutcomeLine, textRecord } from "../humanReview";
@@ -21,7 +21,7 @@ const TABS = [
 type Stage = "idle" | "checking" | "preparing" | "blocked" | "error" | "ready";
 
 export function Application({ route }: { route: Route }) {
-  const { gaps, saveDraft, c, gapsSource, syncOk, reviewDetail, engineGaps, readSync, readGaps, setCompletenessRecord } = useCase();
+  const { gaps, notices, saveDraft, c, gapsSource, syncOk, reviewDetail, engineGaps, readSync, readGaps, setCompletenessRecord } = useCase();
   const tab = TABS.find((t) => t.id === route.params.get("tab"))?.id ?? "A";
   const dialog = useRef<HTMLDialogElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -30,7 +30,7 @@ export function Application({ route }: { route: Route }) {
   const [reasons, setReasons] = useState<string[]>([]);
   const [tech, setTech] = useState("");
   const [statusText, setStatusText] = useState("Review missing or unconfirmed information before downloading the application PDF.");
-  const [file, setFile] = useState<{ url: string; name: string; draft: boolean; downloadedAt: Date } | null>(null);
+  const [file, setFile] = useState<{ url: string; name: string; draft: boolean; downloadedAt: Date; notice: string } | null>(null);
   const [exportAttempted, setExportAttempted] = useState(false);
   const blocking = gaps.filter((g) => g.severity === "blocking");
   const warnings = gaps.filter((g) => g.severity === "warning").length;
@@ -143,7 +143,7 @@ export function Application({ route }: { route: Route }) {
       document.body.append(a);
       a.click();
       a.remove();
-      setFile({ url, name: got.filename, draft, downloadedAt: new Date() });
+      setFile({ url, name: got.filename, draft, downloadedAt: new Date(), notice: got.notice });
       setStage("ready");
       setStatusText(draft ? "Your draft PDF is ready." : "Your application PDF is ready.");
     } catch (e) {
@@ -259,6 +259,7 @@ export function Application({ route }: { route: Route }) {
           ) : (
             <DetailFields section={tab === "B" ? "B" : "A"} />
           )}
+          <Notices notices={notices} />
         </div>
       </div>
       <div className="footer-bar">
@@ -314,6 +315,7 @@ export function Application({ route }: { route: Route }) {
                   : "This PDF is for administrative review. It does not confirm that the design complies or is safe."}
               </p>
             )}
+            {stage === "ready" && file?.notice && <Notices notices={[file.notice]} />}
             {stage !== "ready" && <MissingItems gaps={gaps} sectionById={sectionById} onFollow={follow} />}
             {(tech || reasons.length > 0) && (
               <details>

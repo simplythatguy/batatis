@@ -257,3 +257,16 @@ test("not sure on the prescriptive route stays an open question", () => {
     false,
   );
 });
+
+test("an unknown engineer flag blocks the official PDF and is routed to the officer (homebuilder, all No)", () => {
+  let c = reducer(emptyCase("homebuilder"), { type: "notePractice", value: "unknown" });
+  for (const field of ["part4_design", "ahj_requires_professional", "special_safety_concerns", "roof_trusses"] as const) {
+    c = reducer(c, { type: "answerScope", field, answer: "no" });
+  }
+  const gap = getGaps(c).find((g) => g.id === "practice-unknown");
+  assert.equal(gap?.severity, "blocking");
+  assert.match(gap?.label ?? "", /^Routed to the officer: whether a registered professional is required\./);
+  c = reducer(c, { type: "setProfessionalFact", field: "role", value: "engineer" });
+  c = reducer(c, { type: "setProfessionalFact", field: "registration_number", value: "M-1234" });
+  assert.equal(getGaps(c).some((g) => g.id === "practice-unknown"), false);
+});

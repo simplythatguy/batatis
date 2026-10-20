@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { engine, EngineError, type CodeHit } from "../api/client";
 import { toViewRow } from "../api/sectionC";
-import { DemoFallback, DraftNote, GapStrip, Icon, PanelHeader, RoleNote, StatusPill, type Dot } from "../components";
+import { CodeQuote, DemoFallback, DraftNote, GapStrip, Icon, PanelHeader, RoleNote, StatusPill, type Dot } from "../components";
 import { CODE_EDITION } from "../config";
 import { applyIdentifyPlan, DECISION_UNAVAILABLE, planIdentify, readDecisionBody, wireDecision } from "../identify";
 import { answeredYes, unresolvedCandidates } from "../model";
-import { exitCountWarning, failureKind } from "../rules";
+import { exitCountWarning, failureKind, QUOTE_LABEL, quoteKind } from "../rules";
 import { useCase } from "../store";
 import type { Candidate, CandidateAnswer } from "../types";
 
@@ -34,6 +34,7 @@ function CandidateCard({
   onAnswer: (candidate: Candidate, answer: CandidateAnswer) => void;
 }) {
   const s = STATUS[a.answer ?? "none"];
+  const kind = quoteKind(a);
   return (
     <article className="card" id={`cand-${a.id}`} tabIndex={-1} aria-labelledby={`cand-${a.id}-topic`}>
       <div className="card-head">
@@ -49,14 +50,16 @@ function CandidateCard({
       </div>
       <div className="code-said">
         <div className="block-label">
-          <span className="label-pill">
-            {a.identified === false ? "Your words" : a.quote.citation.includes("not the code sentence") ? "Case summary" : "Code text"}
-          </span>
-          <span className="meta">
-            {a.identified === false ? "From what you wrote. Not a ranked article." : a.quote.citation.includes("not the code sentence") ? "Cached summary" : "The code says"}
-          </span>
+          <span className={`label-pill${kind === "ranking" ? " ai-pill" : ""}`}>{QUOTE_LABEL[kind].pill}</span>
+          <span className="meta">{QUOTE_LABEL[kind].meta}</span>
         </div>
-        <blockquote className="cite-block quote">{a.quote.text}</blockquote>
+        {kind === "code" ? (
+          <CodeQuote text={a.quote.text} />
+        ) : kind === "ranking" ? (
+          <p className="ai-explain">{a.quote.text}</p>
+        ) : kind === "missing" ? null : (
+          <blockquote className="cite-block quote">{a.quote.text}</blockquote>
+        )}
       </div>
       <p className="ask">
         <span className="label-pill ai-pill">AI-written</span> Does your design <strong>{a.departure}</strong> instead?
@@ -118,6 +121,7 @@ export function CodeCheck() {
   const [searchNote, setSearchNote] = useState("");
   const [searchError, setSearchError] = useState("");
   const [searchDown, setSearchDown] = useState(false);
+  const [adding, setAdding] = useState<string | null>(null);
   const open = unresolvedCandidates(c);
   const yes = answeredYes(c);
   const counts: Record<Filter, number> = { all: c.candidates.length, open: open.length, yes: yes.length };
@@ -155,7 +159,7 @@ export function CodeCheck() {
       } catch (err: unknown) {
         if (ctl.signal.aborted) return;
         if (err instanceof EngineError && failureKind(err.status, err.detail) === "missing-route") {
-          setIdentifyNote("Article ranking isn't available on this engine yet. These cards are questions from your description.");
+          setIdentifyNote("Article ranking isn't available yet. These cards are questions from your description.");
           setIdentifyDown(false);
           return;
         }
@@ -296,18 +300,37 @@ export function CodeCheck() {
                 <li key={h.id} className="card">
                   <div className="card-head">
                     <span className="article-id">{h.id}</span>
+                    {h.article_title && <span className="card-topic">{h.article_title}</span>}
                     <span className="label-pill">Code text</span>
                   </div>
-                  <blockquote className="cite-block quote">{h.text}</blockquote>
+                  {h.text.trim() ? (
+                    <CodeQuote text={h.text} />
+                  ) : (
+                    <p className="meta">Article heading. Its sentences load when you add it.</p>
+                  )}
                   <p className="mono meta">{h.citation ?? "No citation returned"}</p>
                   <button
                     type="button"
                     className="btn"
-                    onClick={() => {
-                      if (c.candidates.some((x) => x.provision === h.id)) {
+                    disabled={adding === h.id}
+                    onClick={async () => {
+                      const existing = c.candidates.find((x) => x.provision === h.id);
+                      if (existing) {
                         setSearchNote(`${h.id} is already on this check.`);
-                        document.getElementById(`cand-search-${h.id}`)?.focus();
+                        document.getElementById(`cand-${existing.id}`)?.focus();
                         return;
+                      }
+                      let text = h.text.trim();
+                      if (!text) {
+                        setAdding(h.id);
+                        setSearchNote(`Loading the wording of ${h.id}…`);
+                        try {
+                          text = (await engine.provision(h.id, "B")).text.trim();
+                        } catch {
+                          text = "";
+                        } finally {
+                          setAdding(null);
+                        }
                       }
                       dispatch({
                         type: "addCandidate",
@@ -317,14 +340,18 @@ export function CodeCheck() {
                           provision: h.id,
                           part: Number(h.id.split(".")[0]) || 0,
                           benchmark: false,
-                          quote: { text: h.text, citation: h.citation ?? "No citation returned" },
+                          quote: { text, citation: h.citation ?? "No citation returned", source: "code" },
                           identified: true,
                           departure: "do something other than what this sentence requires",
                           clarifyingQuestion: "Which part of this sentence does the design not follow?",
                           answer: null,
                         },
                       });
-                      setSearchNote(`Added ${h.id}. Answer the new card before Section C.`);
+                      setSearchNote(
+                        text
+                          ? `Added ${h.id} to this check. Answer the new card before Section C.`
+                          : `Added ${h.id} to this check. Its wording did not load; the citation is under Code reference. Answer the new card before Section C.`,
+                      );
                     }}
                   >
                     Add to this check

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { KindBadge, StatusPill } from "./components";
+import { KindBadge, NrcCredit, StatusPill } from "./components";
 import { DETAIL_FIELDS, PROCESS_FIELDS, displayValue, factFor, factLabel, isTyped, valueText, type DetailField } from "./model";
 import { useCase } from "./store";
 import type { Fact, Question, Source } from "./types";
@@ -46,6 +46,7 @@ function FactRow({ fact }: { fact: Fact }) {
             : `From ${sourceLine(fact.source)}`}
         </span>
         {fact.source.quote && <q className="fact-quote">{fact.source.quote}</q>}
+        {fact.source.quote && fact.source.type === "code" && <NrcCredit />}
         {fact.kind === "proposed" && fact.confidence != null && (
           <span className="meta">Confidence {Math.round(fact.confidence * 100)}%</span>
         )}
@@ -212,6 +213,7 @@ function DetailInput({ def }: { def: DetailField }) {
             <span className={`status-dot ${fact.status === "confirmed" ? "done" : "warning"}`} />
             {fact.kind === "proposed" ? "Proposed from" : "From"} {sourceLine(fact.source)}
             {fact.source.quote && <q className="field-quote">{fact.source.quote}</q>}
+            {fact.source.quote && fact.source.type === "code" && <NrcCredit />}
             {fact.status === "unconfirmed" && (
               <button type="button" className="btn btn-ghost btn-xs" aria-label={`Confirm ${def.label}`} onClick={() => dispatch({ type: "confirmFact", id: fact.id })}>
                 Confirm

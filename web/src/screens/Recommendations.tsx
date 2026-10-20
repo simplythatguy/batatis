@@ -24,6 +24,8 @@ type Load = {
   professional: ProfessionalResult | null;
   fields: EngineProcessField[];
   issuesNote: string | null;
+  /** The case the live content belongs to. A refresh for the same case keeps it on screen. */
+  engineId?: string;
 };
 
 const IDLE: Load = { phase: "idle", note: "", plan: null, issues: null, professional: null, fields: [], issuesNote: null };
@@ -367,7 +369,13 @@ export function Recommendations() {
       return;
     }
     const ctl = new AbortController();
-    setLoad({ phase: "loading", note: "Loading Section D…", plan: null, issues: null, professional: null, fields: [], issuesNote: null });
+    // A refresh after a save keeps the current plan on screen until the new one arrives.
+    // Clearing it would unmount the fields the applicant is typing in.
+    setLoad((prev) =>
+      prev.phase === "live" && prev.engineId === engineId
+        ? prev
+        : { phase: "loading", note: "Loading Section D…", plan: null, issues: null, professional: null, fields: [], issuesNote: null },
+    );
     const ids = provisions ? provisions.split("|") : undefined;
     void (async () => {
       let issues: SectionDIssue[] | null = null;
@@ -411,6 +419,7 @@ export function Recommendations() {
           professional,
           fields,
           issuesNote,
+          engineId,
         });
       } catch (e) {
         if (ctl.signal.aborted) return;

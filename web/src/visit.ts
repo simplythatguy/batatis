@@ -11,9 +11,8 @@ export interface Visit {
   note: string;
 }
 
-/** Ignore `stored`. A new visitor does not resume the previous case. */
-export function initialVisit(stored: string | null): Visit {
-  void stored;
+/** A new visitor does not resume the previous case. Any stored value is ignored. */
+export function initialVisit(_stored?: string | null): Visit {
   return { phase: "who", case: emptyCase("homebuilder"), note: "" };
 }
 

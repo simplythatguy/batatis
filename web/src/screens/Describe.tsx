@@ -2,7 +2,7 @@ import { useState } from "react";
 import { AUTHORITIES } from "../config";
 import { UPLOAD_UPFRONT } from "../rules";
 import { DetailFields, FactLedger, QuestionChips } from "../case-parts";
-import { DraftNote, GapStrip, Icon, PanelHeader, RoleNote } from "../components";
+import { DraftNote, GapStrip, Icon, Notices, PanelHeader, RoleNote } from "../components";
 import { applicantLabel } from "../intake";
 import { DETAIL_FIELDS, factFor, valueText } from "../model";
 import { useCase } from "../store";
@@ -37,7 +37,7 @@ function PastePlans() {
 }
 
 export function Describe() {
-  const { c, gaps, gapsNote, dispatch, saveDraft } = useCase();
+  const { c, gaps, notices, gapsNote, dispatch, saveDraft } = useCase();
   const missingDetails = DETAIL_FIELDS.filter((d) => d.required && !valueText(factFor(c, d.id)).trim()).length;
   return (
     <>
@@ -104,6 +104,7 @@ export function Describe() {
             ) : (
               <p className="empty">Nothing in this list is open.</p>
             )}
+            <Notices notices={notices} />
           </section>
           <QuestionChips />
           <details className="disclosure">

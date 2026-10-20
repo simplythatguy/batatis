@@ -17,3 +17,19 @@ export const EXIT_COUNT = {
   part3: "3.4.2.1.(1)",
   part9: "9.9.8.2.(1)",
 } as const;
+
+/**
+ * NRC credit shown next to code text. Same publication link as engine/copyright.py
+ * (NRC_PUBLICATION_URL); the intent supplement link is the README's source record.
+ */
+export const NRC_CREDIT = "© National Research Council of Canada";
+export const NRC_SOURCES = {
+  code: {
+    title: CODE_EDITION,
+    url: "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
+  },
+  intent: {
+    title: "Supplement to the NBC 2020: Intent Statements",
+    url: "https://nrc-publications.canada.ca/eng/view/object/?id=de0e0ec9-a452-4337-bc84-002a230c9d66",
+  },
+} as const;

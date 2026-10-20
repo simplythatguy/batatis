@@ -193,7 +193,8 @@ export interface EngineGap {
   section: "A" | "B" | "C" | "D" | "process";
   field: string;
   message: string;
-  severity: "blocking" | "warning";
+  /** `info` is advice (for example Calgary's own form). It is not a missing item and never blocks export. */
+  severity: "blocking" | "warning" | "info";
   fix_hint?: string;
   citation?: string | null;
 }
@@ -312,6 +313,29 @@ function withTimeout(parent: AbortSignal | undefined, ms: number) {
   return { signal: ctl.signal, clear: () => clearTimeout(timer), timedOut: () => ctl.signal.aborted && !parent?.aborted };
 }
 
+/**
+ * The export's own notice (for example Calgary's form note), or "".
+ * PR #24 also puts the privacy notice in this header; that one belongs to the privacy notice, not to the download.
+ */
+/** One 409 reason as text. PR #21 sends {label, fix_hint, ...}; older engines send strings. */
+export function exportReason(reason: unknown): string {
+  if (typeof reason === "string") return reason.trim();
+  if (reason && typeof reason === "object") {
+    const r = reason as { label?: unknown; message?: unknown; fix_hint?: unknown };
+    const label = typeof r.label === "string" ? r.label.trim() : typeof r.message === "string" ? r.message.trim() : "";
+    const hint = typeof r.fix_hint === "string" ? r.fix_hint.trim() : "";
+    if (label && hint && !label.includes(hint)) return `${label} ${hint}`;
+    return label || hint;
+  }
+  return "";
+}
+
+export function exportNotice(header: string | null): string {
+  const text = header?.trim() ?? "";
+  if (!text || /^Do not upload personal information/i.test(text)) return "";
+  return text;
+}
+
 async function exportPdf(base: string, caseId: string, draft: boolean, signal?: AbortSignal) {
   const timed = withTimeout(signal, 20000);
   let res: Response;
@@ -336,7 +360,7 @@ async function exportPdf(base: string, caseId: string, draft: boolean, signal?: 
       const j = await res.json();
       const raw = j.detail ?? j;
       if (raw && typeof raw === "object" && Array.isArray(raw.reasons)) {
-        reasons = raw.reasons.map(String);
+        reasons = raw.reasons.map(exportReason).filter(Boolean);
         detail = String(raw.message ?? "export blocked");
       } else {
         detail = typeof raw === "string" ? raw : JSON.stringify(raw);
@@ -349,7 +373,7 @@ async function exportPdf(base: string, caseId: string, draft: boolean, signal?: 
   }
   const blob = await res.blob();
   const match = /filename="([^"]+)"/.exec(res.headers.get("Content-Disposition") ?? "");
-  return { blob, filename: match?.[1] ?? `${caseId}-scc-variance.pdf` };
+  return { blob, filename: match?.[1] ?? `${caseId}-scc-variance.pdf`, notice: exportNotice(res.headers.get("X-Batatis-Notice")) };
 }
 
 async function readError(res: Response): Promise<string> {
