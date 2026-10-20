@@ -3,6 +3,7 @@
  * Vite proxies `/api` to the engine at http://127.0.0.1:8000 (vite.config.ts). Set VITE_ENGINE_URL
  * to call another engine directly. `createEngine(base)` serves scripts and tests outside Vite.
  */
+import type { IdentifyAnswer, IdentifyResult } from "./identify";
 import type { Case, FactInput, NewCase, SectionCRow } from "./types.gen";
 
 /** A provision returned by GET /code/search (engine/codes.py `Codes.search`). */
@@ -87,6 +88,15 @@ export function createEngine(base: string) {
     /** Section C rows by deterministic lookup, in input order (an article expands to its sentences). */
     sectionC: (provisions: string[], signal?: AbortSignal) =>
       call<SectionCRow[]>("POST", "/section-c", { provisions }, signal),
+    /** Ranked Division B article cards for the description. Does not write `provisions`. */
+    identify: (caseId: string, prose: string, answers: IdentifyAnswer[] = [], signal?: AbortSignal) =>
+      call<IdentifyResult>("POST", `/cases/${enc(caseId)}/identify`, { prose, answers }, signal),
+    /** The stored payload of the last identify call; 404 `identify result not found` before one. */
+    identifyResult: (caseId: string, signal?: AbortSignal) =>
+      call<IdentifyResult>("GET", `/cases/${enc(caseId)}/identify`, undefined, signal),
+    /** Writes `provisions` and Section C after a codedb check; 404 for an unknown id, 503 without codedb. */
+    confirmIdentify: (caseId: string, provisions: string[], signal?: AbortSignal) =>
+      call<Case>("POST", `/cases/${enc(caseId)}/identify/confirm`, { provisions }, signal),
   };
 }
 

@@ -14,7 +14,7 @@ const NAV = [
     area: "Applicant",
     items: [
       { path: "/describe", label: "Describe", icon: "describe" },
-      { path: "/code-check", label: "Code check", icon: "check" },
+      { path: "/code-check", label: "Code ID", icon: "check" },
       { path: "/section-c", label: "Section C", icon: "table" },
       { path: "/application", label: "Application", icon: "application" },
     ],

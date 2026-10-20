@@ -3,7 +3,7 @@ import type { AttributionStatus, SectionCRow } from "../types";
 import { engine } from "./client";
 import type { SectionCRow as EngineRow } from "./types.gen";
 
-const STATUS: Record<EngineRow["attribution_status"], AttributionStatus> = {
+export const ATTRIBUTION_STATUS: Record<EngineRow["attribution_status"], AttributionStatus> = {
   direct: "direct",
   "inherited from parent": "inherited",
   "no row in the attribution table": "no-row",
@@ -31,7 +31,7 @@ export function toViewRow(r: EngineRow, candidateId: string): SectionCRow {
     candidateId,
     provision: r.provision_id,
     citation: r.citation,
-    attributionStatus: STATUS[r.attribution_status],
+    attributionStatus: ATTRIBUTION_STATUS[r.attribution_status],
     inheritedFrom: r.attributed_via ?? undefined,
     pairs: [...brackets].map(([bracket, b]) => ({ bracket, functions: [...b.functions], objectives: [...b.objectives] })),
     // The same statement can repeat across intent blocks (one per objective); show it once.

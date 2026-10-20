@@ -124,7 +124,7 @@ export function Describe() {
       <div className="footer-bar">
         <span className="status-note">Fixture data · the engine connects next</span>
         <a className="btn btn-primary" href="#/code-check">
-          Continue to code check
+          Continue to Code ID
         </a>
       </div>
     </>

@@ -4,6 +4,7 @@
  * the tool; it points to a source, computes from sources, or proposes for the user to confirm.
  */
 
+import type { IdentifyMode, IdentifyResult } from "./api/identify";
 import type { FactInput, SourceInput } from "./api/types.gen";
 
 /** Fact, Source and their enums are the engine's (engine/models.py via src/api/types.gen.ts).
@@ -62,7 +63,8 @@ export interface Candidate {
   answer: CandidateAnswer | null;
 }
 
-export type AttributionStatus = "direct" | "inherited" | "no-row";
+/** `unavailable`: the source gave no attribution row to look up (not the same as "no row in the table"). */
+export type AttributionStatus = "direct" | "inherited" | "no-row" | "unavailable";
 
 /** One bracket from the attribution table: functions paired with objectives. */
 export interface AttributionPair {
@@ -94,6 +96,40 @@ export interface SectionCRow {
   terms?: Record<string, string>;
   /** AI-written, never code text. Absent on live lookup rows until the engine writes explanations. */
   explanation?: string;
+  /** Rows from an accepted Code ID card: taken from the stored identify payload, not POST /section-c. */
+  codeId?: {
+    title: string;
+    answer: CodeIdAnswer;
+    /** Verbatim code text as returned; `clipped` when it is not the whole sentence. */
+    quote: string | null;
+    clipped: boolean;
+    explainer?: { text: string; source: "deterministic" | "ai_written" };
+    mode: IdentifyMode;
+  };
+}
+
+/** The applicant's answer on a Code ID article card. "no" = doesn't apply to this project. */
+export type CodeIdAnswer = "yes" | "not-sure" | "no";
+
+/** An open question recorded from Code ID: a "Not sure" card, or "None of these fit" for the officer. */
+export interface CodeIdQuestion {
+  id: string;
+  /** Article id the question is about; null for "none of these fit". */
+  provision: string | null;
+  text: string;
+  why: string;
+  to: "applicant" | "officer";
+}
+
+/** The last identify run for this case, kept in the browser with the applicant's answers. */
+export interface CodeIdRun {
+  prose: string;
+  result: IdentifyResult;
+  /** Keyed by article id (`provision`). */
+  answers: Record<string, CodeIdAnswer>;
+  questions: CodeIdQuestion[];
+  /** Outcome of the last POST /identify/confirm. */
+  confirm?: { ok: boolean; provisions: string[]; detail?: string };
 }
 
 export type ProcessFieldId = "rationale" | "risk" | "mitigation" | "assumptions";
@@ -123,4 +159,8 @@ export interface Case {
   sectionC: SectionCRow[];
   /** Written by the applicant only; the tool supplies prompts, never content. */
   process: Record<ProcessFieldId, string>;
+  /** Engine case id (POST /cases), created on the first Code ID run. */
+  engineCaseId?: string;
+  /** Code ID results. While absent, Code check shows the fixture candidates as example data. */
+  codeId?: CodeIdRun;
 }

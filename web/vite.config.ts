@@ -3,7 +3,9 @@ import react from "@vitejs/plugin-react";
 
 // The shared design tokens live in ../docs/design/tokens.css; allow Vite to read the repo root.
 // /api/* goes to the engine (uvicorn engine.api:app, default http://127.0.0.1:8000); see src/api/client.ts.
-const ENGINE = "http://127.0.0.1:8000";
+// BATATIS_ENGINE_URL points the proxy at another engine, e.g. BATATIS_ENGINE_URL=http://127.0.0.1:8012 npm run dev.
+declare const process: { env: Record<string, string | undefined> };
+const ENGINE = process.env.BATATIS_ENGINE_URL ?? "http://127.0.0.1:8000";
 
 export default defineConfig({
   plugins: [react()],
