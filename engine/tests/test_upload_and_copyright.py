@@ -365,8 +365,12 @@ def test_every_registered_route_returns_code_text_and_not_the_sqlite(tmp_path, m
         response = client.request(method, url, **kwargs)
         assert not response.content.startswith(b'SQLite format 3'), (method, route_path)
         assert b'codedb.sqlite' not in response.headers.get('content-disposition', '').encode()
-        assert response.headers.get('x-batatis-notice') == PII_NOTICE, (
-            method, route_path, response.status_code, response.text[:500])
+        notices = [value.decode() for key, value in response.headers.raw
+                   if key.lower() == b'x-batatis-notice']
+        robots = [value.decode() for key, value in response.headers.raw
+                  if key.lower() == b'x-robots-tag']
+        assert notices == [PII_NOTICE], (method, route_path, response.status_code, notices)
+        assert robots == ['noindex, nofollow'], (method, route_path, robots)
         if (method, route_path) in required:
             assert response.status_code < 500, (method, route_path, response.status_code, response.text)
         if 'application/json' in response.headers.get('content-type', '') and response.content:

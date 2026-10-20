@@ -6,7 +6,8 @@ import logging
 
 from starlette.responses import JSONResponse
 
-from .copyright import PII_NOTICE, attach_meta, attribute_code
+from .copyright import attach_meta, attribute_code
+from .privacy import PII_NOTICE
 
 access_log = logging.getLogger('engine.access')
 
@@ -71,10 +72,12 @@ class HttpGuard:
                     pass
                 headers = [(key, value) for key, value in headers if key.lower() != b'content-length']
                 headers.append((b'content-length', str(len(raw)).encode()))
-            headers = [(key, value) for key, value in headers if key.lower() != b'x-robots-tag']
+            notice = next(((key, value) for key, value in headers if key.lower() == b'x-batatis-notice'),
+                          (b'x-batatis-notice', PII_NOTICE.encode()))
+            headers = [(key, value) for key, value in headers
+                       if key.lower() not in (b'x-robots-tag', b'x-batatis-notice')]
             headers.append((b'x-robots-tag', b'noindex, nofollow'))
-            if not any(key.lower() == b'x-batatis-notice' for key, _ in headers):
-                headers.append((b'x-batatis-notice', PII_NOTICE.encode()))
+            headers.append(notice)
             start = dict(started['message'])
             start['headers'] = headers
             # Ids, route, and status only. Never the body, a quote, or uploaded bytes.
