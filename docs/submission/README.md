@@ -5,7 +5,9 @@ Checklist for Submission 1 of the Alberta Building Codes Challenge (Built World 
 Evidence base:
 
 - `dev` at `9813702` (`Enable CodeRabbit reviews on pull requests into dev (#10)`). Paths below are on that commit.
+- Pull request [#7](https://github.com/simplythatguy/batatis/pull/7) merged into `dev` at `bbdd051` (`web: small a11y and copy polish (polish-1)`). That commit is after the pin above. Path citations in this file were checked at `9813702`.
 - Open pull requests into `dev`. An open pull request is not on `dev`.
+- Open pull request [#18](https://github.com/simplythatguy/batatis/pull/18), branch `docs/plans-draft`, adds `docs/business-plan.md`, `docs/implementation-plan.md`, `docs/pitch-outline.md`, and `docs/pilot-adoption-plan.md`.
 - Numbers already written in those pull-request bodies. A number this file calls **model-checked** is model-checked. It is not human-verified.
 
 This file does not add scores, citations, or demo results.
@@ -39,10 +41,18 @@ These are the deliverables we expect the package to need. Discord has not been c
 | Deliverable | Status |
 | --- | --- |
 | Demo video | `GAP:` no submission demo video is in the repo. [`2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) has a six-minute demo script ("The six-minute demo"). That is a script. Pull request [#16](https://github.com/simplythatguy/batatis/pull/16) links an agent screen recording of a local preview (`vite-who-to-completeness.mp4`). That recording is a development walkthrough of the branch, not a submission video. |
-| Business plan | `GAP:` no submission business-plan document. Closest material on `dev` is research: [`docs/research/2026-10-20-vision/C-market-provinces-business.md`](../research/2026-10-20-vision/C-market-provinces-business.md), section "(a) One-page business case". That section labels itself "ESTIMATES unless marked" and the file's header says "Research only." |
-| Implementation plan | `GAP:` no submission implementation-plan document. Closest material on `dev` is the research schedule [`2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) (dated 2026-10-20). Open pull request [#6](https://github.com/simplythatguy/batatis/pull/6) is a user-testing appendix whose body says it backs an implementation plan. The same body says no real-user or officer sessions have been run, simulated sessions are labelled SIMULATED, and the results tables are blank. |
-| Working link | `GAP:` no deployed URL is in the repo. On `dev`, `web/src/api/client.ts` proxies `/api` to `http://127.0.0.1:8000`. [`2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) says "Demo runs locally" and "A skeleton deploys on day 3". Pull request [#16](https://github.com/simplythatguy/batatis/pull/16) records a production preview against `http://127.0.0.1:8000`. |
-| Repo | Present: [https://github.com/simplythatguy/batatis](https://github.com/simplythatguy/batatis). This checklist's tree is `dev` at `9813702`, plus the open pull requests named below. The root [`README.md`](../../README.md) status line still says application product code is not the focus of that document. `engine/` and `web/` are already on `dev`. |
+| Business plan | in PR #18: [`docs/business-plan.md`](https://github.com/simplythatguy/batatis/blob/docs/plans-draft/docs/business-plan.md) on open pull request [#18](https://github.com/simplythatguy/batatis/pull/18), branch `docs/plans-draft`. It is not on `dev`. Research on `dev` remains [`docs/research/2026-10-20-vision/C-market-provinces-business.md`](../research/2026-10-20-vision/C-market-provinces-business.md). This checklist does not restate the plan. |
+| Implementation plan | in PR #18: [`docs/implementation-plan.md`](https://github.com/simplythatguy/batatis/blob/docs/plans-draft/docs/implementation-plan.md) on open pull request [#18](https://github.com/simplythatguy/batatis/pull/18), branch `docs/plans-draft`. It is not on `dev`. Closest material on `dev` is the research schedule [`2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) (dated 2026-10-20). Open pull request [#6](https://github.com/simplythatguy/batatis/pull/6) is a user-testing appendix whose body says it backs an implementation plan. The same body says no real-user or officer sessions have been run, simulated sessions are labelled SIMULATED, and the results tables are blank. |
+| Pitch outline | in PR #18: [`docs/pitch-outline.md`](https://github.com/simplythatguy/batatis/blob/docs/plans-draft/docs/pitch-outline.md) on open pull request [#18](https://github.com/simplythatguy/batatis/pull/18), branch `docs/plans-draft`. It is not on `dev`. |
+| Pilot plan | in PR #18: [`docs/pilot-adoption-plan.md`](https://github.com/simplythatguy/batatis/blob/docs/plans-draft/docs/pilot-adoption-plan.md) on open pull request [#18](https://github.com/simplythatguy/batatis/pull/18), branch `docs/plans-draft`. It is not on `dev`. |
+| Working link | `GAP:` hosting plan in progress. No deployed URL is in the repo. On `dev`, `web/src/api/client.ts` proxies `/api` to `http://127.0.0.1:8000`. [`2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) says "Demo runs locally" and "A skeleton deploys on day 3". Pull request [#16](https://github.com/simplythatguy/batatis/pull/16) records a production preview against `http://127.0.0.1:8000`. |
+| Repo | Present: [https://github.com/simplythatguy/batatis](https://github.com/simplythatguy/batatis). This checklist's tree is `dev` at `9813702`, plus the open pull requests named below. Pull request [#7](https://github.com/simplythatguy/batatis/pull/7) merged into `dev` at `bbdd051` after that pin. The root [`README.md`](../../README.md) status line still says application product code is not the focus of that document. `engine/` and `web/` are already on `dev`. |
+
+## Risks
+
+| Risk | Status |
+| --- | --- |
+| Appendix 1 vs the Oct 6 SCC form | Brief §2.5(a) asks for Appendix 1. Export uses the Oct 6 SCC form. An explicit statement is being written in pull request [#18](https://github.com/simplythatguy/batatis/pull/18). |
 
 ## 1. Intake — 20%
 
@@ -131,7 +141,7 @@ Scoring question, from pull request #15: "Can it review a completed application,
 - Route: `GET /cases/{id}/gaps` in [`engine/routes_case.py`](../../engine/routes_case.py).
 - Tests for those classes: [`engine/tests/test_completeness.py`](../../engine/tests/test_completeness.py). This checklist does not restate a pass count; none is written beside the file.
 - Planted-defect protocol only: [`evals_dev/planted/SPEC.md`](../../evals_dev/planted/SPEC.md). The spec says generating the seeded PDFs waits for form export. The directory contains that spec and no planted applications.
-- Applicant pre-flight chrome: [`web/src/screens/Application.tsx`](../../web/src/screens/Application.tsx). "Run pre-flight" stays disabled while blocking gaps from the client model remain. The dialog says filling the official SCC form arrives with the engine, and that the check is administrative.
+- Applicant pre-flight chrome: [`web/src/screens/Application.tsx`](../../web/src/screens/Application.tsx) at `9813702`. "Run pre-flight" stays disabled while blocking gaps from the client model remain. The dialog says filling the official SCC form arrives with the engine, and that the check is administrative. Pull request [#7](https://github.com/simplythatguy/batatis/pull/7) merged into `dev` at `bbdd051` and renames that button to "Check completeness".
 - Officer screen: [`web/src/screens/Placeholders.tsx`](../../web/src/screens/Placeholders.tsx) renders "Not built yet" for officer review. The accuracy page in the same file says "No evaluation runs yet".
 
 ### Open pull requests
@@ -179,12 +189,12 @@ Scoring question, from pull request #15: "Is there a realistic path to beta. How
 
 ### Open pull requests
 
+- [#18](https://github.com/simplythatguy/batatis/pull/18). in PR #18: `docs/implementation-plan.md` and `docs/pilot-adoption-plan.md` on branch `docs/plans-draft`. They are not on `dev`. This checklist does not restate those files.
 - [#6](https://github.com/simplythatguy/batatis/pull/6). `docs/user-testing/`: round plan, think-aloud script, SUS, a consent form marked DRAFT, and an officer timing protocol. The body says this appendix backs the implementation plan, that no real-user or officer sessions have been run, and that the results tables are blank. Round 1 is planned as 3 applicants. Round 1b is planned as 1–2 officers.
 
 ### GAP
 
-- `GAP:` no submission implementation-plan document.
-- `GAP:` no user-test results that could inform a final design. The testing kit is an open pull request with blank tables.
+- `GAP:` no user-test results that could inform a final design. The testing kit is an open pull request with blank tables. The submission implementation plan and the pilot plan are in PR #18.
 
 ## 7. Business Plan — 10%
 
@@ -196,9 +206,9 @@ Scoring question, from pull request #15: "Is there a credible company here — b
 - Section "(a) One-page business case" is labelled "ESTIMATES unless marked". It discusses who pays, a cost-per-application anchor, and a moat. Those sentences stay inside that file's labels. This checklist does not promote them to a business plan.
 - Section 5 records the file's own reading of willingness to pay. The same file says Alberta or Canadian consultant fees for alternative solutions were still not found after that pass.
 
-### GAP
+### Open pull requests
 
-- `GAP:` no submission business-plan document. Buyer, willingness to pay, cost per application, and the defensive position are research notes with the labels above, not a plan a judge can read as the deliverable.
+- [#18](https://github.com/simplythatguy/batatis/pull/18). in PR #18: `docs/business-plan.md` on branch `docs/plans-draft`. It is not on `dev`. This checklist does not restate that file. The pitch outline on the same pull request is `docs/pitch-outline.md`.
 
 ## 8. Usability and Portability — 10%
 
@@ -210,11 +220,11 @@ Scoring question, from pull request #15: "Overall user experience for both sides
 - Visual system: [`docs/design-system-linear.md`](../design-system-linear.md) and [`docs/design/tokens.css`](../design/tokens.css).
 - Jurisdiction is a data field, not a pack. [`engine/models.py`](../../engine/models.py) `Jurisdiction` has `id`, `name`, and `authority`. [`evals_dev/SCHEMA.md`](../../evals_dev/SCHEMA.md) says `jurisdiction` is kept as data so cases stay portable across jurisdictions. A search of the tree finds no jurisdiction-pack files. Packs are described as future work in [`2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) and in the market research note.
 - Export route on the engine: `POST /cases/{id}/export` in [`engine/api.py`](../../engine/api.py), implementation under [`engine/export/`](../../engine/export/). The Application screen on `dev` does not call it. The dialog says the SCC form arrives with the engine.
+- After the pin: pull request [#7](https://github.com/simplythatguy/batatis/pull/7) merged into `dev` at `bbdd051`. Copy and accessibility polish on `web/`. The body says it renames the user-facing "Run pre-flight" button to "Check completeness".
 
 ### Open pull requests
 
 - [#16](https://github.com/simplythatguy/batatis/pull/16). The body says the product surface moves to `web/`, that export is called after blocking gaps close, and that the official PDF still needs the code database and `BATATIS_SCC_FORM` on the machine that runs the engine. Screenshots in that body are of a local preview.
-- [#7](https://github.com/simplythatguy/batatis/pull/7) (not merged). Copy and accessibility polish on `web/`. The body says it renames the user-facing "Run pre-flight" button to "Check completeness".
 - [#11](https://github.com/simplythatguy/batatis/pull/11). The body says wire fields on `Jurisdiction` stay `id`, `name`, and `authority`, and that "authority having jurisdiction" wording follows IB-2026-10-16. That wording change is not on `dev`.
 
 ### GAP
@@ -241,10 +251,11 @@ Scoring question, from pull request #15: "Hard-to-quantify edge — team, insigh
 Nothing below is a result. It is the list of `GAP:` lines that still have no file.
 
 1. Submission demo video.
-2. Submission business plan. Research section (a) is not that document.
-3. Submission implementation plan, plus any user-test result. Pull request #6 is a blank protocol.
-4. A working link. Local preview only.
-5. A scored identification run with a published accuracy. Pull request #12 has the command and says the live OpenAI score is absent.
-6. Human-verified intake, code-identification, and professional-flag scores. What exists is model-checked, or marked weak, or a research measurement with the limits written in its own file.
-7. An officer view with a time measurement. The screen on `dev` is a placeholder.
-8. Jurisdiction packs, and the three applicant demo cases (pull request #14) loaded by the product.
+2. A working link. Hosting plan in progress. Local preview only.
+3. A scored identification run with a published accuracy. Pull request #12 has the command and says the live OpenAI score is absent.
+4. Human-verified intake, code-identification, and professional-flag scores. What exists is model-checked, or marked weak, or a research measurement with the limits written in its own file.
+5. An officer view with a time measurement. The screen on `dev` is a placeholder.
+6. Jurisdiction packs, and the three applicant demo cases (pull request #14) loaded by the product.
+7. User-test results that could inform a final design. Pull request #6 is a protocol with blank tables.
+
+The business plan, the implementation plan, the pitch outline, and the pilot plan are in PR #18.
