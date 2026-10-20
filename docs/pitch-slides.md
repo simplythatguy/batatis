@@ -22,10 +22,10 @@
 
 ### Slide 3: It asks before it guesses, and we test that [Intake, 20]
 - Missing fields become plain questions, each tied to a form section (engine on dev; screen in review)
-- Engineer-needed flag (PR #8, not merged): rules_only 55/60 in-sample, 1 under-flag; shipped rules_plus_unknown 50/60 in-sample, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind); model-checked, not human-verified.
+- Engineer-needed flag (PR #8, on dev): rules_only 55/60 in-sample, 1 under-flag; shipped rules_plus_unknown 50/60 in-sample, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind); model-checked, not human-verified.
 - Accuracy across all applicant types: still to be measured
 
-**Speaker notes:** The completeness check on dev names each missing field and the question to ask. The engineer-needed flag has two variants in PR #8 (not merged). The shipped variant, rules_plus_unknown, scored 50 of 60 on the in-sample dev set with 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), and 7 of 8 on a held-out set that was blind before a later fix; re-runs after that fix are not blind. The unshipped rules_only variant scored 55 of 60 in-sample. All answer keys are model-checked, not human-verified, so treat this as an early signal.
+**Speaker notes:** The completeness check on dev names each missing field and the question to ask. The engineer-needed flag has two variants on dev (PR #8). The shipped variant, rules_plus_unknown, scored 50 of 60 on the in-sample dev set with 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), and 7 of 8 on a held-out set that was blind before a later fix; re-runs after that fix are not blind. The unshipped rules_only variant scored 55 of 60 in-sample. All answer keys are model-checked, not human-verified, so treat this as an early signal.
 *Sources:* dev `engine/completeness.py`; [PR #8](https://github.com/simplythatguy/batatis/pull/8)
 
 ### Slide 4: A ranked shortlist, measured against a named acceptable solution [Code Identification, 20]
@@ -34,7 +34,7 @@
 - Section C objectives and functions are looked up from the code's tables (on dev); the table stays empty until an article is added from Search, because identification is command-line only
 
 **Speaker notes:** For the homebuilder's window, the benchmark acceptable solution is Sentence 9.9.10.1.(2): at least 0.35 m² unobstructed, no dimension under 380 mm, and the case's 0.312 m² opening is the departure. Showing each requirement beside the code text is the design; on today's screens that view is still being fixed, so in the demo it is a labelled still from PR #12 (not in this app build). Ranking is command-line only on dev and moves to HTTP in PR #12, which also runs BM25 first, then an OpenAI rerank and verifier.
-*Sources:* dev `engine/section_c.py`, `engine/identify/`; [PR #12](https://github.com/simplythatguy/batatis/pull/12); case C [if merged: PR #14]
+*Sources:* dev `engine/section_c.py`, `engine/identify/`; [PR #12](https://github.com/simplythatguy/batatis/pull/12); case C (PR #14, on dev)
 
 ### Slide 5: Every citation resolves, or it's dropped [Code Identification, 20]
 - Built by script from the official NBC(AE) 2023; the 2nd-printing pin is in PR #12
@@ -50,7 +50,7 @@
 - Never writes engineering judgment itself
 
 **Speaker notes:** The professional-involvement check answers yes, depends or no and cites the rule. In the firestop demo case, plastic pipe in a 5-storey building needs firestops tested at a 50 Pa pressure differential (Clause 3.1.9.4.(4)(b)), and the tool is designed to say an engineering judgment is required where no tested system fits, list what it must contain, and stop. That case hasn't been run through the engine yet.
-*Sources:* dev `engine/section_d.py`, `engine/professional.py`; [IFC engineering-judgment guidelines](https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf); case B [if merged: PR #14]
+*Sources:* dev `engine/section_d.py`, `engine/professional.py`; [IFC engineering-judgment guidelines](https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf); case B (PR #14, on dev)
 
 ### Slide 7: Completeness review: built in the engine, officer screen in review [Review, 10]
 - Gaps listed by form section A–D; completeness only, never compliance (engine on dev)
@@ -61,9 +61,9 @@
 *Sources:* [IB-2025-11-18](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf); [IB-2026-10-01](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf); dev `engine/completeness.py`
 
 ### Slide 8: One tool, three kinds of first-time applicants [General Applicability, 5]
-- Homebuilder: slab edges need detailing, the unvented roof probably fails its STANDATA as drawn, the window needs a variance and fall protection [case files: PR #14]
-- Manufacturers can seek a voluntary CCMC assessment (or another recognized evaluation) as evidence for the authority having jurisdiction, which makes the approval decision; the variance stays project-specific [case files: PR #14]
-- General contractor: plastic pipe needs 50 Pa-tested firestops, Clause 3.1.9.4.(4)(b) [case files: PR #14]
+- Homebuilder: slab edges need detailing, the unvented roof probably fails its STANDATA as drawn, the window needs a variance and fall protection [case files: PR #14, on dev]
+- Manufacturers can seek a voluntary CCMC assessment (or another recognized evaluation) as evidence for the authority having jurisdiction, which makes the approval decision; the variance stays project-specific [case files: PR #14, on dev]
+- General contractor: plastic pipe needs 50 Pa-tested firestops, Clause 3.1.9.4.(4)(b) [case files: PR #14, on dev]
 
 **Speaker notes:** Our three demo cases cover a homebuilder, a manufacturer and a general contractor, with fictional people and real code citations. The STANDATA reasoning (23-BCV-003 covers the under-slab insulation but not the edges; the roof is probably not covered by 23-BCV-017 as drawn) is case content; the tool's STANDATA "you may not need a variance" check is not built. Whether a real first-time applicant could use it unaided is untested.
 *Sources:* [STANDATA 23-BCV-017](https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/2aa7678c-c476-4523-b0c3-36e71256e11b/download/ma-standata-variance-building-23-bcv-017-2025-09.pdf); [STANDATA 23-BCV-001](https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/01b622f0-f4a1-426d-b15f-ffc25e725949/download/ma-standata-variance-building-23-bcv-001-2024-04.pdf); [STANDATA 23-BCV-003](https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/3915ba54-96dd-4c54-a9c1-63df5c917836/download/ma-standata-variance-building-23-bcv-003-2024-05.pdf); [Calgary B23-014](https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-014-new-products-materials-and-systems-in-building-construction.pdf)
