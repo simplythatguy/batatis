@@ -32,6 +32,7 @@ export function toViewRow(r: EngineRow, candidateId: string): SectionCRow {
     provision: r.provision_id,
     citation: r.citation,
     attributionStatus: STATUS[r.attribution_status],
+    attributionLabel: r.attribution_label ?? undefined,
     inheritedFrom: r.attributed_via ?? undefined,
     pairs: [...brackets].map(([bracket, b]) => ({ bracket, functions: [...b.functions], objectives: [...b.objectives] })),
     // The same statement can repeat across intent blocks (one per objective); show it once.

@@ -7,9 +7,10 @@ clause). Attribution status is reported literally:
                                      or from a clause when the sentence itself has none. attributed_via
                                      is that source id
   no row in the attribution table  - nothing on this id, its parent sentence, or its article; never guess
-A cited provision is always one of those rows. When the row has no objective or function, it says so:
-attribution ``not_attributed``. A codedb status of none with root method not_determined is not a parent
-to copy, and a sibling sentence is not copied either.
+A cited provision is always one of those rows. When the row has no objective or function, attribution
+is ``not_attributed`` and the user-facing label is ``lookup not available``. The intent statement
+stays when the database has one. A codedb status of none with root method not_determined is not a
+parent to copy, and a sibling sentence is not copied either.
 National 2020 intent statements are explanatory only. They attach to Division B rows, and a comparison
 status of provision_missing_in_ae is not attached.
 """
@@ -21,7 +22,7 @@ from .codes import Codes
 from .models import AttributionPair, IntentBlock, SectionCRow
 
 NOT_ATTRIBUTED = 'not_attributed'
-NOT_ATTRIBUTED_LABEL = 'No objective or function attributed in NBC(AE) 2023 for this provision'
+NOT_ATTRIBUTED_LABEL = 'lookup not available'
 
 def section_c_rows(provision_ids: list[str], codes: Codes) -> list[SectionCRow]:
     """Rows for Division B provisions, in input order. Raises KeyError for an id not in Division B."""

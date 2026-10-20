@@ -7,7 +7,7 @@ from engine.completeness import check_completeness
 from engine.evidence_gaps import group_evidence_gaps
 from engine.models import Case, Jurisdiction
 from engine.professional import ProfessionalResult
-from engine.section_c import NOT_ATTRIBUTED, NOT_ATTRIBUTED_LABEL, section_c_rows
+from engine.section_c import NOT_ATTRIBUTED, section_c_rows
 from engine.section_d import section_d_plan
 from engine.tests.case_builder_fixtures import fact
 
@@ -32,7 +32,7 @@ def test_sentence_without_an_article_row_stays_a_gap(codes, pid, root):
     assert row.pairs == []
     assert row.attribution_status == 'no row in the attribution table'
     assert row.attribution == NOT_ATTRIBUTED
-    assert row.attribution_label == NOT_ATTRIBUTED_LABEL
+    assert row.attribution_label == 'lookup not available'
     assert row.attributed_via is None
     assert row.related_root == root
     assert 'compli' not in row.citation.casefold()
@@ -71,7 +71,7 @@ def test_not_determined_sentence_states_that_and_does_not_copy_the_article(codes
     """9.23.17.3.(1) in the fixture: status none / not_determined, intent only, article pair present."""
     [row] = section_c_rows(['9.23.17.3.(1)'], codes)
     assert row.attribution == NOT_ATTRIBUTED
-    assert row.attribution_label == NOT_ATTRIBUTED_LABEL
+    assert row.attribution_label == 'lookup not available'
     assert row.attribution_status == 'no row in the attribution table'
     assert row.pairs == [] and row.attributed_via is None
     assert row.intents and row.intents[0].intents == ['SYNTHETIC intent for an unattributed sentence']
@@ -82,7 +82,7 @@ def test_not_determined_sentence_states_that_and_does_not_copy_the_article(codes
     assert gap.pairs == []
     assert gap.evidence_types == list(plan.items[0].recommended_types)
     text = gap.fix_hint
-    assert NOT_ATTRIBUTED_LABEL in text
+    assert 'lookup not available' in text
     assert 'F99' not in text and 'OS9.9' not in text
     assert "manufacturer's literature" in text
 
@@ -105,7 +105,7 @@ def test_codedb_status_none_is_not_attributed(codes, pid):
     assert row.provision_id == pid
     assert row.pairs == []
     assert row.attribution == NOT_ATTRIBUTED
-    assert row.attribution_label == NOT_ATTRIBUTED_LABEL
+    assert row.attribution_label == 'lookup not available'
     assert row.attribution_status == 'no row in the attribution table'
     assert row.attributed_via is None
 
@@ -123,7 +123,7 @@ def test_3_1_9_1_1_is_the_attributed_control(codes):
     [blank] = section_c_rows(['3.1.9.1.(4)'], codes)
     assert blank.pairs == []
     assert blank.attribution == NOT_ATTRIBUTED
-    assert 'F03' not in blank.attribution_label and 'OS1.2' not in blank.attribution_label
+    assert blank.attribution_label == 'lookup not available'
 
 
 def test_cited_3_1_9_4_4_is_an_explicit_section_c_row(codes):
@@ -132,7 +132,7 @@ def test_cited_3_1_9_4_4_is_an_explicit_section_c_row(codes):
     assert row.provision_id == '3.1.9.4.(4)'
     assert row.pairs == []
     assert row.attribution == NOT_ATTRIBUTED
-    assert row.attribution_label == NOT_ATTRIBUTED_LABEL
+    assert row.attribution_label == 'lookup not available'
     assert row.attribution_status == 'no row in the attribution table'
     assert row.attributed_via is None
     rows = {item.provision_id: item for item in section_c_rows(['3.1.9.4.'], codes)}

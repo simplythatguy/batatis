@@ -14,6 +14,7 @@ function AttributionCell({ row }: { row: SectionCRow }) {
         Inherited · {row.inheritedFrom}
       </span>
     );
+  if (row.attributionLabel) return <span className="label-pill">{row.attributionLabel}</span>;
   return <span className="label-pill">No row in table</span>;
 }
 
@@ -33,7 +34,9 @@ function SourceLabel({ source, error }: { source: SectionCSource; error?: string
 }
 
 function Pairs({ row }: { row: SectionCRow }) {
-  if (!row.pairs.length) return <span className="muted-text">No objective or function in the attribution table for this provision</span>;
+  if (!row.pairs.length) {
+    return <span className="muted-text">{row.attributionLabel ?? "No objective or function in the attribution table for this provision"}</span>;
+  }
   return (
     <ul className="plain-list pairs">
       {row.pairs.map((p) => (
@@ -170,7 +173,9 @@ export function SectionC() {
               <p className="meta">
                 Section C row: {sel.citation}
                 {sel.attributionStatus === "inherited" && ` · uses the table row of ${sel.inheritedFrom}`}
-                {sel.attributionStatus === "no-row" && " · the attribution table has no row for it"}
+                {sel.attributionLabel
+                  ? ` · ${sel.attributionLabel}`
+                  : sel.attributionStatus === "no-row" && " · the attribution table has no row for it"}
               </p>
               {sel.differs && (
                 <p className="field-note">

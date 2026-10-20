@@ -83,6 +83,8 @@ export interface SectionCRow {
   citation: string;
   pairs: AttributionPair[];
   attributionStatus: AttributionStatus;
+  /** User-facing label from the engine, such as "lookup not available". */
+  attributionLabel?: string;
   /** Inherited rows: the provision whose table row applies. */
   inheritedFrom?: string;
   /** NBC 2020 Intent Statements, explanatory only. */
