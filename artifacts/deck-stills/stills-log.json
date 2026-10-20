@@ -109,20 +109,10 @@
       "id": "shot-s06-section-d",
       "file": "shot-s06-section-d.png",
       "notes": [
-        "Section D tab is current. The recommendations limit line is on screen.",
-        "Header subtitle visible: Variance template · Sections A, B and process fields",
-        "Footer visible: Online administrative review finished. This does not decide whether the design complies or is safe. Draft saved. 15 required items need attention. Check completeness stays available so you can review them. The official PDF stays closed until they are cleared. Back Save draft Check completeness",
-        "Compliance disclaimer visible: Online administrative review finished. This does not decide whether the design complies or is safe. Draft saved."
+        "Header subtitle visible: Variance template · Sections A, B and process fields"
       ],
-      "status": "captured",
-      "width": 1440,
-      "height": 900,
-      "caption": "scripted demo capture, cursor/e2e-product-flow-4362 @ 29971ab",
-      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362 @ 29971ab",
-      "source": "cursor/e2e-product-flow-4362 @ 29971ab",
-      "case": "Case C",
-      "date": "2026-10-20",
-      "onScreen": ""
+      "status": "pending",
+      "reason": "The header is the Application screen (\"Variance template · Sections A, B and process fields\"), not a Section D screen. The still was not captured."
     },
     {
       "id": "shot-s07-officer",

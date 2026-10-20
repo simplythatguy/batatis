@@ -101,7 +101,8 @@ test("shot 4 and shot 5 skip when their subject is not on screen", () => {
   assert.match(stills, /status >= 500/);
   assert.match(stills, /An \/api call returned \$\{failedStatus\}/);
   assert.match(stills, /LIMIT_LINE/);
-  assert.match(stills, /Section D tab is current/);
+  assert.match(stills, /not a Section D screen/);
+  assert.match(stills, /Variance template · Sections A, B and process fields/);
   assert.equal(stills.includes('captureOfficer("shot-s06-section-d")'), false);
   assert.match(stills, /captureOfficer\("shot-s07-officer"\)/);
   assert.match(stills, /Officer review of the open Case A application/);
@@ -247,7 +248,7 @@ test("a frame with the compliance disclaimer pushed off screen is rejected", () 
   assert.ok(rejected.includes("the compliance disclaimer is outside the frame"));
 });
 
-test("captured stills are not engine-down, and s06 is Section D", () => {
+test("captured stills are not engine-down, and s06 is pending", () => {
   const log = JSON.parse(readFileSync(new URL("../../artifacts/deck-stills/stills-log.json", import.meta.url), "utf8"));
   assert.equal(log.webDir.includes("/tmp/"), false);
   assert.match(log.engine, /Code search answered/);
@@ -264,9 +265,8 @@ test("captured stills are not engine-down, and s06 is Section D", () => {
     }
   }
   const sectionD = log.slots.find((slot) => slot.id === "shot-s06-section-d");
-  assert.equal(sectionD.status, "captured");
-  const notes = sectionD.notes.join(" ");
-  assert.match(notes, /Section D tab is current/);
-  assert.match(notes, /recommendations limit line is on screen/);
-  assert.equal(notes.includes("is not on this screen"), false);
+  assert.equal(sectionD.status, "pending");
+  assert.match(sectionD.reason, /Application screen/);
+  assert.match(sectionD.reason, /not a Section D screen/);
+  assert.equal(sectionD.provenance, undefined);
 });

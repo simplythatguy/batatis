@@ -1323,6 +1323,14 @@ export async function runDeckStills(page, opts) {
         skip(id, "The Section D heading or the limit line is outside the frame. The still was not captured.");
         return;
       }
+      const subtitle = ((await page.locator(".header-meta").first().innerText().catch(() => "")) || "").replace(/\s+/g, " ").trim();
+      if (/Variance template · Sections A, B and process fields/.test(subtitle)) {
+        skip(
+          id,
+          `The header is the Application screen ("${subtitle}"), not a Section D screen. The still was not captured.`,
+        );
+        return;
+      }
       api.notes.push("Section D tab is current. The recommendations limit line is on screen.");
       await capture(id, CASES.C.lower, "Case C");
     }
