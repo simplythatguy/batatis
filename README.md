@@ -39,6 +39,8 @@ User-testing protocol: [`docs/user-testing/README.md`](./docs/user-testing/READM
 
 ## Status
 
-Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags. On the 60 text-only dev cases it answered only yes or ask, with 0 no answers, so 0 under-flags there is by design. On the 11 model-constructed no-ground-truth (no-gt) Section D cases (PR #26) it answered no 8 times, with 0 under-flags. All in-sample, model-checked, not human-verified. 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind).
+Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind).
+
+Caveat on the 0 under-flags: On the 60 text-only dev cases it answered only yes or ask, with 0 no answers, so 0 under-flags there is by design. On the 11 model-constructed no-ground-truth (no-gt) Section D cases (PR #26) it answered no 8 times, with 0 under-flags. All in-sample, model-checked, not human-verified.
 
 Clone-ready **agent environment** (rules, skills, evals, docs). Application product code is not the focus of this PR.
