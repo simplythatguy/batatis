@@ -44,11 +44,11 @@ Process fields are required on the alternative path. They are not rungs of the e
 | `value` | `true`, `false`, or `"unknown"` | `true` or `false` only when the Division C screen resolves. `"unknown"` when a deciding fact is missing. The service does not guess a boolean. |
 | `rule` | string or null | Provision id of the Division C rule that triggered the flag, or of the rule that could not be applied. |
 | `division` | `"A"` \| `"B"` \| `"C"` or null | Division of `rule`. |
-| `citation` | string or null | That rule's citation from the code database. Omitted when the rule does not resolve. A wood-span handoff may also quote Division B Sentence 9.23.1.1.(2) inside `reason` when that sentence resolves. |
+| `citation` | string or null | That rule's citation from the code database. Omitted when the rule does not resolve. The rule id is one `engine/professional.py` already passes to its screen. |
 | `reason` | string | Recommendation tied to the rule. |
 | `question` | string or null | Required when `value` is `"unknown"`. |
 
-Confirmed `professional.span_m` (or `span_m`) above 12.20 m is treated as Part 4 design under the prescriptive framing limit. The Division B handoff sentence is cited only when the code database returns it.
+Confirmed `professional.span_m` (or `span_m`) above 12.20 m is recorded as Part 4 design. The cited rule is Div C 2.4.1.2.(1), the same provision `engine/professional.py` already uses for Part 4 design. No other provision id is added for the span.
 
 ### `status`
 

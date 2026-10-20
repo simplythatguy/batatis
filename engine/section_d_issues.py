@@ -17,10 +17,32 @@ from .process_fields import ProcessField, alternative_path, confirmed_value, pro
 from .professional import ProfessionalFacts, ProfessionalReason, ProfessionalResult, professional_involvement
 from .section_d import ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, EvidencePlanItem, section_d_plan
 
-# NBC(AE) 2023 p2, Div B, Sentence 9.23.1.1.(1) limits prescriptive wood framing to spans of
-# 12.20 m or less. Sentence 9.23.1.1.(2) sends framing outside that limit to Part 4. The
-# citation is attached only when that sentence resolves in codedb.
+# A confirmed span above this value is stored as Part 4 design before the practice screen.
+# The only provision cited for that result is Div C 2.4.1.2.(1), which engine/professional.py
+# already passes to add(). This module does not add a provision id.
 PART9_MAX_SPAN_M = 12.20
+
+# Every practice-screen id below is a string literal already passed to add() in
+# engine/professional.py. Process-field ids are the literals in engine/process_fields.py
+# _FIELDS. Nothing else is looked up as a rule.
+PROFESSIONAL_RULES = (
+    ('C', '2.4.1.1.(1)', 'engine/professional.py: general_exception, general_unresolved'),
+    ('C', '2.4.1.1.(2)', 'engine/professional.py: secondary_suites'),
+    ('C', '2.4.1.1.(3)', 'engine/professional.py: general_building, design_scope'),
+    ('C', '2.4.1.1.(4)', 'engine/professional.py: ahj_direction, special_safety'),
+    ('C', '2.4.1.1.(5)', 'engine/professional.py: professional_law'),
+    ('C', '2.4.1.2.(1)', 'engine/professional.py: part4, part4_unknown, truss_part4, trusses_unknown'),
+    ('C', '2.4.1.2.(2)', 'engine/professional.py: preserved_wood_foundation, foundation_unknown'),
+    ('C', '2.4.1.3.(1)', 'engine/professional.py: suppression, suppression_unknown'),
+    ('C', '2.4.1.4.(1)', 'engine/professional.py: fire_alarm, fire_alarm_unknown'),
+    ('B', '9.23.14.11.(2)', 'engine/professional.py: truss_design'),
+)
+PROCESS_RULES = (
+    ('C', '2.3.1.1.(2)(a)', 'engine/process_fields.py: rationale'),
+    ('C', '2.3.1.1.(2)(b)', 'engine/process_fields.py: maintenance_operation'),
+    ('C', '2.3.1.1.(3)', 'engine/process_fields.py: risk_assessment, mitigating_measures, assumptions_and_limits'),
+    ('C', '2.3.1.1.(4)', 'engine/process_fields.py: qualifications'),
+)
 
 PracticeValue = bool | Literal['unknown']
 IssueStatus = Literal['open', 'addressed', 'needs_professional']
@@ -156,12 +178,7 @@ def render_practice(result: ProfessionalResult, codes: Codes, *, span_handoff: b
         text = _YES_TEXT.get(reason.code, 'Recommend a registered professional for the stated scope.') if reason else (
             'Recommend a registered professional for the stated scope.')
         if span_handoff:
-            handoff = codes.provision('9.23.1.1.(2)', 'B')
-            if handoff and handoff.get('citation'):
-                text += f' The stated span is above the prescriptive framing limit at {handoff["citation"]}.'
-            else:
-                text += (' The stated span is above the prescriptive framing limit. The Part 4 handoff sentence '
-                         'was not found in the code database, so it is not cited.')
+            text += ' The stated span is recorded as Part 4 design, so the same Division C rule applies.'
         return PracticeOfEngineering(value=True, rule=rule or None, division=division or None,
                                      citation=reason.citation if reason else None, reason=text, question=None)
     if result.required == 'no':

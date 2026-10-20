@@ -3,8 +3,12 @@
     python -m engine.section_d_flag_eval
 
 `rules_only` fills unstated component facts with "not triggered" and returns professional.py's
-yes/no/depends. `rules_plus_unknown` keeps that screen, adds the Part 9 span handoff, and returns
-unknown instead of no when a deciding fact was not stated.
+yes/no/depends. `rules_plus_unknown` keeps that screen, records a stated span above 12.20 m as
+Part 4 design (cited only as Div C 2.4.1.2.(1) from professional.py), and returns unknown instead
+of no when a deciding fact was not stated.
+
+The gold labels are model-checked, not human-reviewed. `rules_plus_unknown` was written while
+looking at this same development set, so the agreement is in-sample. There is no held-out split.
 
 Gold `depends` matches system `unknown`. Under-flag is gold yes and system no. A case is skipped
 when codedb (or the rule lookup standing in for it) cannot resolve a provision the screen asks for.
@@ -12,13 +16,14 @@ when codedb (or the rule lookup standing in for it) cannot resolve a provision t
 from __future__ import annotations
 
 import json
+import math
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from .codes import Codes
 from .professional import ProfessionalFacts, professional_involvement
-from .section_d_issues import PART9_MAX_SPAN_M
+from .section_d_issues import PART9_MAX_SPAN_M, PROCESS_RULES, PROFESSIONAL_RULES
 
 CASES = Path(__file__).resolve().parents[1] / 'evals_dev' / 'cases'
 VARIANTS = ('rules_only', 'rules_plus_unknown')
@@ -41,14 +46,9 @@ _AREA_LIMITS = {
     'detention': (300, 150, 100), 'hotel': (400, 200, 130),
     'business': (500, 250, 165), 'mercantile': (500, 250, 165), 'industrial': (500, 250, 165),
 }
-# Provision ids professional.py and the span handoff already name. A lookup stub may resolve
-# these ids when codedb is absent; it does not invent NBC citation text.
-RULE_IDS = (
-    ('C', '2.4.1.1.(1)'), ('C', '2.4.1.1.(2)'), ('C', '2.4.1.1.(3)'), ('C', '2.4.1.1.(4)'),
-    ('C', '2.4.1.1.(5)'), ('C', '2.4.1.2.(1)'), ('C', '2.4.1.2.(2)'), ('C', '2.4.1.3.(1)'),
-    ('C', '2.4.1.4.(1)'), ('C', '2.3.1.1.(2)(a)'), ('C', '2.3.1.1.(2)(b)'), ('C', '2.3.1.1.(3)'),
-    ('C', '2.3.1.1.(4)'), ('B', '9.23.14.11.(2)'), ('B', '9.23.1.1.(1)'), ('B', '9.23.1.1.(2)'),
-)
+# Lookup stub ids. Sources are the third field of PROFESSIONAL_RULES and PROCESS_RULES.
+RULE_IDS = tuple((division, provision_id) for division, provision_id, _source in (*PROFESSIONAL_RULES, *PROCESS_RULES))
+_WILSON_Z = 1.959963984540054  # 95%
 _PART4 = re.compile(
     r'\b(?:under part 4|part 4 design|designed under part 4|design under part 4|carrying out part 4|'
     r'part 4 (?:roof|wind|industrial|foundation)|structural(?:ly)? design(?:ed)? (?:is )?under part 4)\b',
@@ -101,10 +101,24 @@ class VariantScore:
     skipped: int = 0
     matched: int = 0
     under_flag: int = 0
+    unknown: int = 0
+    gold_yes_unknown: list[str] = field(default_factory=list)
 
     @property
     def agreement(self) -> float:
         return self.matched / self.scored if self.scored else 0.0
+
+
+def wilson_interval(matched: int, scored: int) -> tuple[float, float]:
+    """Wilson score interval for a binomial proportion, 95%."""
+    if scored <= 0:
+        return (0.0, 0.0)
+    z2 = _WILSON_Z * _WILSON_Z
+    p = matched / scored
+    denom = 1 + z2 / scored
+    centre = p + z2 / (2 * scored)
+    margin = _WILSON_Z * math.sqrt(p * (1 - p) / scored + z2 / (4 * scored * scored))
+    return (max(0.0, (centre - margin) / denom), min(1.0, (centre + margin) / denom))
 
 
 def _number(token: str) -> int:
@@ -275,8 +289,12 @@ def score(codes, cases: list[dict] | None = None) -> dict[str, VariantScore]:
                 continue
             totals[name].scored += 1
             totals[name].matched += int(_matches(label, gold))
+            if label == 'unknown':
+                totals[name].unknown += 1
             if gold == 'yes' and label == 'no':
                 totals[name].under_flag += 1
+            if gold == 'yes' and label == 'unknown':
+                totals[name].gold_yes_unknown.append(case['id'])
     return totals
 
 
@@ -291,17 +309,31 @@ def winner(totals: dict[str, VariantScore]) -> str:
     return ranked[0].name
 
 
+def _agreement_cell(row: VariantScore) -> str:
+    lower, upper = wilson_interval(row.matched, row.scored)
+    upper_text = '1.0' if round(upper, 4) == 1 else f'{upper:.4f}'
+    return f'{row.matched}/{row.scored} [{lower:.4f}, {upper_text}]'
+
+
+def _yes_unknown(row: VariantScore) -> str:
+    return 'none' if not row.gold_yes_unknown else ', '.join(row.gold_yes_unknown)
+
+
 def report(totals: dict[str, VariantScore], codedb: str) -> str:
     scored = max(row.scored for row in totals.values())
     skipped = max(row.skipped for row in totals.values())
     lines = [
-        f'{"variant":<22} {"scored":>6} {"agreement":>10} {"under_flag":>10} {"skipped":>7}',
+        f'{"variant":<22} {"scored":>6} {"agreement":>22} {"under_flag":>10} {"unknown":>7} {"skipped":>7}',
     ]
     for name in VARIANTS:
         row = totals[name]
-        lines.append(f'{name:<22} {row.scored:>6} {row.agreement:>10.4f} {row.under_flag:>10} {row.skipped:>7}')
+        lines.append(
+            f'{name:<22} {row.scored:>6} {_agreement_cell(row):>22} {row.under_flag:>10} {row.unknown:>7} {row.skipped:>7}')
+        lines.append(f'gold_yes_as_unknown {name}: {_yes_unknown(row)}')
     lines.append(f'winner: {winner(totals)}')
     lines.append('under_flag_target: 0')
+    lines.append('gold: model-checked')
+    lines.append('split: dev (in-sample; no held-out)')
     lines.append(f'codedb: {codedb}')
     lines.append(f'scored: {scored}')
     lines.append(f'skipped: {skipped}')
