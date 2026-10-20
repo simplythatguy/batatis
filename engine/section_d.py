@@ -98,7 +98,11 @@ def supporting_documents(case: Case) -> list[SupportingDocument]:
             if entry.field.startswith(prefix + 'covers.') and confirmed_value(case, entry.field) is True:
                 links.append(entry.field[len(prefix + 'covers.'):])
         text = lambda key: metadata[key] if isinstance(metadata[key], str) else ''  # noqa: E731
-        docs.append(SupportingDocument(id=eid, title=text('title') or (legacy[eid].description if eid in legacy else eid),
+        title = text('title')
+        if not title:
+            title = ('(title not provided or not confirmed)' if latest_fact(case, prefix + 'title') is not None else
+                     legacy[eid].description if eid in legacy else eid)
+        docs.append(SupportingDocument(id=eid, title=title,
                     file=FileSource(**fact.source.model_dump()), item_ids=tuple(dict.fromkeys(links)),
                     responsible_party=text('responsible_party'), issuer=text('issuer'), date=text('date') or None,
                     professional_seal=text('professional_seal') or None))

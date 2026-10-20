@@ -218,6 +218,9 @@ def check_completeness(case: Case, codes: Codes, *,
 
     docs = supporting_documents(case) if documents is None else documents
     for doc in docs:
+        if latest_fact(case, f'evidence.{doc.id}.title') is not None and _missing(confirmed_value(case, f'evidence.{doc.id}.title')):
+            add('D13', 'D', f'evidence.{doc.id}.title', 'a confirmed title for a supporting document.',
+                'Ask the applicant to confirm the current document title; do not reuse an older title.')
         if not doc.responsible_party.strip():
             add('D13', 'D', f'evidence.{doc.id}.responsible_party', f'a responsible person or organisation for supporting document “{doc.title}”.',
                 'Ask who takes responsibility for this document and record their role and scope.', codes.citation('2.3.1.1.(4)', 'C'))
@@ -232,7 +235,7 @@ def check_completeness(case: Case, codes: Codes, *,
             if _missing(confirmed_value(case, f'evidence.{evidence.id}.responsible_party')):
                 add('D13', 'D', f'evidence.{evidence.id}.responsible_party', f'a responsible person for supporting document “{evidence.description}”.',
                     'Ask for the author, issuer or responsible organisation and their scope.')
-    if expected and len(expected) >= 1:
+    if expected:
         # Use only verified provisions so a bad reference becomes a gap, not an exception/500.
         verified = case.model_copy(update={'provisions': list(expected)})
         for item in section_d_plan(verified, codes, docs).items:

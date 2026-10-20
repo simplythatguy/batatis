@@ -15,6 +15,9 @@ import pytest
 from engine.codes import Codes
 from engine.export import ExportBlocked, FormMismatch, export_case, form_path, load_field_map
 from engine.export.sample import FACTS, sample_case
+from engine.export.text import faithful_font_text, pdf_safe
+from engine.process_fields import process_fields
+from engine.section_d import supporting_documents
 from engine.models import INTENT_LABEL, Fact, Gap, Source
 
 FORM = form_path()
@@ -86,7 +89,7 @@ def test_blocks_on_unconfirmed_facts_and_blocking_gaps(case, codes):
         export_case(blocked, codes=codes)
     text = ' '.join(e.value.reasons)
     assert 'risk assessment not written' in text and 'required field "owner_name"' in text
-    assert '"lot"' not in text            # an unconfirmed fact with a confirmed value for the field does not block
+    assert 'unconfirmed proposed fact "lot"' in text  # the newer unknown revision supersedes the old value
     blocked.facts.append(Fact(field='storeys', value=2, kind='proposed', source=src, confidence=0.6))
     with pytest.raises(ExportBlocked, match='unconfirmed proposed fact "storeys"'):
         export_case(blocked, codes=codes)
@@ -96,7 +99,7 @@ def test_blocks_on_unconfirmed_facts_and_blocking_gaps(case, codes):
     assert all('DRAFT' in t for t in texts)
     assert 'risk assessment not written' in appendix_text(draft.pdf, draft.form_pages)
     assert '99' not in norm(texts[0]).split()          # proposed value never reaches the form
-    assert FACTS['lot'] in norm(texts[0]).split()
+    assert 'Lot' not in {p.field for p in draft.placements}  # the older lot value must not silently return
 
 
 def test_final_export_has_no_widgets_or_help_popups(final):
@@ -187,3 +190,107 @@ def test_long_section_a_value_moves_to_appendix(case, codes):
     pl = next(p for p in res.placements if p.field == 'Mailing Address')
     assert pl.lines == [f'See Appendix {pl.ref}'] and pl.value == addr
     assert addr in appendix_text(res.pdf, res.form_pages)
+
+
+def test_direct_export_cannot_bypass_authoritative_completeness(case, codes):
+    bypass = case.model_copy(deep=True)
+    keep = {'owner_name', 'mailing_address', 'request_date', 'municipal_address'}
+    bypass.facts = [f for f in bypass.facts if f.field in keep]
+    bypass.evidence = []
+    bypass.gaps = []
+    with pytest.raises(ExportBlocked) as error:
+        export_case(bypass, codes=codes)
+    reasons = ' '.join(error.value.reasons)
+    assert 'risk_assessment' in reasons and 'mitigating_measures' in reasons
+    assert 'assumptions_and_limits' in reasons and 'supporting evidence' in reasons
+    assert 'professional' in reasons and 'legal_description' in reasons
+    # Omitting the Codes argument cannot turn a verified export into a trust-the-caller path.
+    with pytest.raises(ExportBlocked):
+        export_case(bypass)
+
+
+@pytest.mark.parametrize('change', ['wrong_citation', 'fabricated_intent', 'intent_page', 'comparison', 'wrong_pair', 'deleted_row'])
+def test_stale_section_c_blocks_final_and_draft_rebuilds_from_database(codes, change):
+    case = sample_case(codes, provisions=['9.25.2.2.(1)'])
+    row = case.section_c[0]
+    if change == 'wrong_citation':
+        row.citation = codes.citation('9.9.10.1.(1)', 'B')
+    elif change == 'fabricated_intent':
+        row.intents[0].intents = ['FORGED INTENT CONTENT MUST NEVER BE EXPORTED']
+    elif change == 'intent_page':
+        row.intents[0].pdf_page = 1
+    elif change == 'comparison':
+        row.intent_comparison = 'fabricated'
+    elif change == 'wrong_pair':
+        row.pairs[0].objective = 'FORGED-OBJECTIVE'
+    else:
+        case.section_c = []
+    case.gaps = []
+    before = case.model_dump_json()
+    with pytest.raises(ExportBlocked):
+        export_case(case, codes=codes)
+    result = export_case(case, codes=codes, draft=True)
+    text = appendix_text(result.pdf, result.form_pages)
+    assert 'FORGED INTENT CONTENT' not in text and 'FORGED-OBJECTIVE' not in text
+    assert 'rebuilt from verified confirmed provisions' in text and result.open_items
+    assert codes.citation('9.25.2.2.(1)', 'B') in text
+    assert case.model_dump_json() == before
+
+
+@pytest.mark.parametrize('field', ['owner_name', 'owner', 'request_date', 'lot', 'assumptions_limits',
+    'process.assumptions_and_limits', 'evidence.synthetic_1.responsible_party', 'evidence.synthetic_1.file_ref',
+    'evidence.synthetic_1.title'])
+def test_latest_unknown_revision_blocks_final_and_does_not_restore_old_values(case, codes, field):
+    revised = case.model_copy(deep=True)
+    revised.facts.append(Fact(field=field, value='NEW UNCONFIRMED VALUE', kind='pointed', status='unconfirmed',
+                             source=Source(type='user_text', ref='synthetic-revision')))
+    with pytest.raises(ExportBlocked):
+        export_case(revised, codes=codes)
+    draft = export_case(revised, codes=codes, draft=True)
+    shown = {p.field: p.value for p in draft.placements}
+    assert 'NEW UNCONFIRMED VALUE' not in ' '.join(page_texts(draft.pdf))
+    if field in ('owner_name', 'owner'):
+        assert 'Owner' not in shown and 'Owner Print' not in shown
+    if field == 'request_date':
+        assert 'Date of Reqeuest' not in shown
+    if field == 'lot':
+        assert 'Lot' not in shown
+    if field in ('assumptions_limits', 'process.assumptions_and_limits'):
+        assert FACTS['assumptions_limits'] not in appendix_text(draft.pdf, draft.form_pages)
+    if field == 'evidence.synthetic_1.title':
+        assert FACTS['supporting_doc.1.name'] not in appendix_text(draft.pdf, draft.form_pages)
+
+
+def test_authentic_process_answers_and_linked_files_are_in_final_appendix(final, case, codes):
+    text = appendix_text(final.pdf, final.form_pages)
+    assert 'P. Applicant-written process fields' in text and 'SYNTHETIC' in text
+    for field in process_fields(case, codes):
+        assert field.answer is not None
+        assert norm(field.answer.value) in text and field.answer.source.ref in text
+    for doc in supporting_documents(case):
+        assert norm(doc.title) in text and norm(doc.responsible_party) in text and doc.file.ref in text
+    assert 'Section C performance issues addressed' in text
+
+
+def test_generated_or_altered_process_content_never_exports(codes):
+    case = sample_case(codes, provisions=['9.25.2.2.(1)'])
+    for fact in case.facts:
+        if fact.field == 'risk_assessment':
+            fact.value = 'GENERATED RISK CONTENT MUST NOT APPEAR'
+    with pytest.raises(ExportBlocked):
+        export_case(case, codes=codes)
+    draft = export_case(case, codes=codes, draft=True)
+    assert 'GENERATED RISK CONTENT' not in ' '.join(page_texts(draft.pdf))
+
+
+def test_source_units_use_explicit_fallbacks_instead_of_question_marks(codes):
+    assert faithful_font_text('10⁻⁴ W/(m²·K), m⁴, CO₂, μ, ≤') == '10^(-4) W/(m²·K), m^(4), CO_(2), µ, <='
+    assert 'U+03B4 GREEK SMALL LETTER DELTA' in faithful_font_text('δ')
+    assert '?' not in pdf_safe('10⁻⁴ m⁴ δ')
+    case = sample_case(codes, provisions=['9.25.2.2.(1)'])
+    for fact in case.facts:
+        if fact.field == 'assumptions_limits':
+            fact.value = 'SYNTHETIC units passage: 10⁻⁴ W/(m²·K), m⁴, CO₂ and μ.'
+            fact.source.quote = fact.value
+    result = export_case(case, codes=codes)
+    assert '10^(-4) W/(m²·K), m^(4), CO_(2) and µ.' in appendix_text(result.pdf, result.form_pages)

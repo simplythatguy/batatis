@@ -20,6 +20,9 @@ from reportlab.pdfgen import canvas
 from reportlab.platypus import KeepTogether, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 from ..models import INTENT_LABEL, Case, SectionCRow
+from ..process_fields import process_fields
+from ..section_d import section_d_plan, supporting_documents
+from .text import faithful_font_text
 
 INK = colors.HexColor('#1f2328')
 MUTED = colors.HexColor('#59636e')
@@ -27,9 +30,9 @@ RULE = colors.HexColor('#d0d7de')
 
 H1 = ParagraphStyle('h1', fontName='Helvetica-Bold', fontSize=14, leading=18, textColor=INK, spaceAfter=4)
 H2 = ParagraphStyle('h2', fontName='Helvetica-Bold', fontSize=11.5, leading=15, textColor=INK, spaceBefore=12,
-                    spaceAfter=4)
+                    spaceAfter=4, keepWithNext=True)
 H3 = ParagraphStyle('h3', fontName='Helvetica-Bold', fontSize=10, leading=13, textColor=INK, spaceBefore=9,
-                    spaceAfter=2)
+                    spaceAfter=2, keepWithNext=True)
 BODY = ParagraphStyle('body', fontName='Helvetica', fontSize=9, leading=12, textColor=INK, spaceAfter=3)
 SMALL = ParagraphStyle('small', parent=BODY, fontSize=8, leading=10.5, textColor=MUTED)
 CELL = ParagraphStyle('cell', parent=BODY, fontSize=8.5, leading=11, spaceAfter=0)
@@ -45,8 +48,8 @@ def _reflow(text: str) -> str:
 
 
 def _safe(text) -> str:
-    """reportlab's standard fonts are WinAnsi (cp1252): bullets and curly quotes survive, others become '?'."""
-    return str(text).encode('cp1252', 'replace').decode('cp1252')
+    """Keep numerical meaning when the official form's font lacks a scientific character."""
+    return faithful_font_text(text)
 
 
 def _p(text, style=BODY) -> Paragraph:
@@ -108,7 +111,6 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
 
 
 def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, open_items: list[str]) -> bytes:
-    from .scc import supporting_docs
     story: list = [Paragraph('Appendix to the Variance Form for Proposed Alternative Solution', H1),
                    _p(f'Case {case.title or ""} ({case.id}). Generated {date.today().isoformat()} by Batatis with '
                       f'field map {fmap["version"]}. Code references are to the National Building Code - 2023 '
@@ -120,11 +122,33 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
                   _p('This draft was exported before these items were resolved. Unconfirmed values are not shown '
                      'on the form.')]
         story += [_p(f'- {r}') for r in open_items]
+        story.append(_p('Section C below was rebuilt from verified confirmed provisions. Unverified or changed '
+                        'source text has been excluded; rebuilding does not resolve the listed open items.', SMALL))
 
     if plan.overflow:
         story.append(Paragraph('X. Form values continued', H2))
         for ref, label, value in plan.overflow:
             story.append(KeepTogether([Paragraph(f'{escape(ref)}&nbsp;&nbsp;{escape(label)}', H3), _p(value)]))
+
+    story.append(Paragraph('B. Proposed alternative and scope', H2))
+    for label, key in (('Proposed alternative', 'alternative_description'), ('Scope', 'scope')):
+        story.append(_kv(label, str(values.get(key, '(not provided or not confirmed)'))))
+    if case.jurisdiction:
+        story.append(_kv('Reviewing jurisdiction', case.jurisdiction.name))
+    if codes is not None:
+        story.append(Paragraph('P. Applicant-written process fields', H2))
+        story.append(_p('The following passages were supplied and confirmed by the applicant. Batatis supplies '
+                        'prompts and checks presence; it does not author or validate the technical analysis.', SMALL))
+        for n, field in enumerate(process_fields(case, codes), start=1):
+            block = [Paragraph(f'P-{n}&nbsp;&nbsp;{escape(field.label)}', H3)]
+            if field.answer:
+                block.append(_p(field.answer.value))
+                source = field.answer.source
+                block.append(_kv('Applicant source', source.ref + (f', page {source.page}' if source.page else '')))
+            else:
+                block.append(_p('(Not provided or not confirmed. No answer has been supplied by Batatis.)'))
+            block.append(_p(field.citation, SMALL))
+            story.append(KeepTogether(block))
 
     story.append(Paragraph('C. Attributions to acceptable solutions', H2))
     if not case.section_c:
@@ -132,13 +156,27 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
     for k, row in enumerate(case.section_c, start=1):
         story += _row_story(k, row, codes, k <= plan.rows_in_form)
 
-    docs = supporting_docs(values, fmap)
+    docs = supporting_documents(case)
     story.append(Paragraph('D. Supporting documentation', H2))
     if docs:
         story.append(_table(['Ref', 'Name of supporting documentation', 'Responsible', 'On the form'],
-                            [[f'D-{n}', d, w or '(not given)', f'row {n}' if n <= plan.docs_in_form else 'appendix only']
-                             for n, (d, w) in enumerate(docs, start=1)],
+                            [[f'D-{n}', d.title, d.responsible_party or '(not given)', f'row {n}' if n <= plan.docs_in_form else 'appendix only']
+                             for n, d in enumerate(docs, start=1)],
                             [0.5 * inch, 3.1 * inch, 2.4 * inch, 1.0 * inch]))
+        evidence = section_d_plan(case, codes, docs) if codes is not None else None
+        labels = {item.id: f'{item.provision_id}, {item.function or "no table function"} / '
+                           f'{item.objective or "no table objective"}' for item in evidence.items} if evidence else {}
+        for n, doc in enumerate(docs, start=1):
+            block = [Paragraph(f'D-{n}&nbsp;&nbsp;Attachment and performance links', H3)]
+            block += [_kv('File reference', doc.file.ref + (f', page {doc.file.page}' if doc.file.page else '')),
+                      _kv('Issue/revision date', doc.date or '(not given)'), _kv('Issuer', doc.issuer or '(not given)')]
+            if doc.professional_seal:
+                block.append(_kv('Applicant-reported authentication', doc.professional_seal))
+            linked = list(dict.fromkeys(labels[key] for key in doc.item_ids if key in labels))
+            block.append(_kv('Section C performance issues addressed', '; '.join(linked) or '(no matched issue link)'))
+            story.append(KeepTogether(block))
+        story.append(_p('An attachment and its links record what the applicant supplied. The responsible designer '
+                        'and authority must review its authenticity, scope, limitations and technical adequacy.', SMALL))
     else:
         story.append(_p('No supporting documents listed.'))
 
@@ -170,7 +208,7 @@ def _draft_page(width: float, height: float):
     c.restoreState()
     c.setFillColor(colors.Color(0.7, 0.1, 0.1))
     c.setFont('Helvetica-Bold', 8)
-    c.drawCentredString(width / 2, height - 22, 'DRAFT - exported with open items; not for submission')
+    c.drawCentredString(width / 2, height - 22, 'DRAFT - not for submission; see appendix for review status')
     c.save()
     return PdfReader(io.BytesIO(buf.getvalue())).pages[0]
 

@@ -2,7 +2,7 @@ import pytest
 
 from engine.codes import Codes
 from engine.completeness import Gap, check_completeness
-from engine.models import EvidenceItem, Source
+from engine.models import EvidenceItem
 from engine.section_c import section_c_rows
 from engine.tests.case_builder_fixtures import complete_case, fact
 

@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from engine.api import create_app
 from engine.ccmc import CCMCRegistry
 from engine.codes import Codes
-from engine.models import Case, Fact, Source
+from engine.models import Case
 from engine.routes_case import create_router
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import complete_case, fact

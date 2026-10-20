@@ -14,7 +14,6 @@ import hashlib
 import io
 import json
 import os
-import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -22,6 +21,11 @@ from pypdf import PdfReader, PdfWriter
 from pypdf.generic import ArrayObject, NameObject, NumberObject, RectangleObject, TextStringObject
 
 from ..models import INTENT_LABEL, Case, SectionCRow
+from ..codes import Codes
+from ..completeness import check_completeness
+from ..process_fields import PROCESS_ALIASES
+from ..section_c import section_c_rows
+from ..section_d import supporting_documents
 from .text import fit, pdf_safe
 
 DEFAULT_FORM = Path('/Users/aamia/.t3/projects/batatis/reference/guides/SCC-Variance-Form.pdf')
@@ -96,33 +100,57 @@ def load_form(path: Path | str | None, fmap: dict) -> bytes:
 
 # ---------------------------------------------------------------- case values
 
-def confirmed_values(case: Case) -> dict[str, object]:
-    """Latest confirmed fact per field. Proposed facts are never confirmed (see models.Fact)."""
-    out: dict[str, object] = {}
-    for f in case.facts:
-        if f.export()['status'] == 'confirmed' and f.value is not None and str(f.value).strip() != '':
-            out[f.field] = f.value
+_ALIASES = {
+    'owner_name': ('owner_name', 'owner', 'section_a.owner_name'),
+    'owner_rep_name': ('owner_rep_name', 'representative', 'applicant_name'),
+    'request_date': ('request_date', 'application_date', 'date', 'section_a.date'),
+    'mailing_address': ('mailing_address', 'mailingAddress'),
+    'municipal_address': ('municipal_address', 'municipalAddress', 'civic_address', 'address'),
+    'legal_description': ('legal_description', 'legalDescription', 'section_b.legal_description'),
+    'alternative_description': ('alternative_description', 'alternative'),
+}
+_FIELD_KEYS = {alias: key for key, aliases in _ALIASES.items() for alias in aliases}
+_FIELD_KEYS.update({alias: 'process.' + key for key, names in PROCESS_ALIASES.items()
+                    for name in names for alias in (name, 'process.' + name)})
+
+
+def _latest(case: Case):
+    out = {}
+    for fact in case.facts:
+        out[_FIELD_KEYS.get(fact.field, fact.field)] = fact
     return out
 
 
-def blockers(case: Case, fmap: dict) -> list[str]:
+def confirmed_values(case: Case) -> dict[str, object]:
+    """Latest logical field wins, even when its revision is blank, proposed or unconfirmed."""
+    return {key: f.value for key, f in _latest(case).items() if f.export()['status'] == 'confirmed'
+            and f.value is not None and str(f.value).strip() != ''}
+
+
+def blockers(case: Case, fmap: dict, codes: Codes | None = None) -> list[str]:
+    codes = codes or Codes()
     values = confirmed_values(case)
-    reasons = [f'unconfirmed {f.kind} fact "{f.field}" ({f.id})' for f in case.facts
-               if f.export()['status'] != 'confirmed' and f.field not in values]
+    reasons = [f'unconfirmed {f.kind} fact "{f.field}" ({f.id})' for f in _latest(case).values()
+               if f.export()['status'] != 'confirmed']
+    reasons += [f'blocking gap in section {g.section}, {g.field}: {g.message} Fix: {g.fix_hint}'
+                for g in check_completeness(case, codes) if g.severity == 'blocking']
     reasons += [f'blocking gap in section {g.section}, {g.field}: {g.message}' for g in case.gaps
                 if g.severity == 'blocking']
     reasons += [f'required field "{k}" is empty' for k in fmap['required_facts'] if k not in values]
     if not case.section_c:
         reasons.append('Section C has no provisions')
-    return reasons
+    return list(dict.fromkeys(reasons))
 
 
-def supporting_docs(values: dict[str, object], fmap: dict) -> list[tuple[str, str]]:
-    """(document, responsible) pairs from facts supporting_doc.<n>.name / .responsible, in n order."""
-    doc_key, resp_key = fmap['section_d_facts']['document'], fmap['section_d_facts']['responsible']
-    pat = re.compile('^' + re.escape(doc_key).replace(r'\{n\}', r'(\d+)') + '$')
-    nums = sorted(int(m.group(1)) for k in values if (m := pat.match(k)))
-    return [(pdf_safe(values[doc_key.format(n=n)]), pdf_safe(values.get(resp_key.format(n=n), ''))) for n in nums]
+def _canonical_case(case: Case, codes: Codes) -> Case:
+    """Drafts show verified confirmed rows, excluding supplied forged/stale material."""
+    rows = {}
+    for pid in dict.fromkeys(case.provisions):
+        try:
+            rows.update((row.provision_id, row) for row in section_c_rows([pid], codes))
+        except (KeyError, ValueError):
+            continue  # The authoritative findings retain the invalid reference as an open item.
+    return case.model_copy(deep=True, update={'provisions': list(rows), 'section_c': list(rows.values())})
 
 
 def _codes(row: SectionCRow, attr: str) -> list[str]:
@@ -171,6 +199,14 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict) -> _Plan:
     for name, spec in fmap['checkboxes'].items():
         plan.checks[name] = spec['on'] if values.get(spec['fact']) is True else '/Off'
 
+    # The form provides structured legal-description boxes. A free-text legal description
+    # continues in the appendix; it is never split into invented lot/block/plan components.
+    if values.get('legal_description') and not all(values.get(k) for k in ('lot', 'block', 'plan')):
+        ref = f'X-{len(plan.overflow) + 1}'
+        value = pdf_safe(values['legal_description'])
+        put('Lot', f'See Appendix {ref}', ref, value)
+        plan.overflow.append((ref, 'Legal description', value))
+
     slots, rows = fmap['section_c_rows'], case.section_c
     shown_rows = rows if len(rows) <= len(slots) else rows[:len(slots) - 1]
     for k, (slot, row) in enumerate(zip(slots, shown_rows), start=1):
@@ -196,7 +232,8 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict) -> _Plan:
         put(last['function'], 'See Appendix C')
         put(last['intent'], f'Section C rows {k0} to {n} continue in the appendix (C-{k0} to C-{n}).')
 
-    dslots, docs = fmap['section_d_rows'], supporting_docs(values, fmap)
+    dslots = fmap['section_d_rows']
+    docs = [(pdf_safe(d.title), pdf_safe(d.responsible_party)) for d in supporting_documents(case)]
     shown_docs = docs if len(docs) <= len(dslots) else docs[:len(dslots) - 1]
     for n, (slot, (doc, who)) in enumerate(zip(dslots, shown_docs), start=1):
         ref = f'D-{n}'
@@ -278,13 +315,15 @@ def _rects(form: bytes, fmap: dict) -> dict[str, tuple[float, float, float, floa
 
 def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str | None = None,
                 version: str = CURRENT_MAP) -> ExportResult:
-    """Fill, flatten and append. `codes` (engine.codes.Codes) adds the provision text to the appendix."""
+    """Authoritatively check, canonicalize, fill, flatten and append; no prior gap request is needed."""
     from .appendix import build_appendix, stamp_draft
 
     fmap = load_field_map(version)
-    reasons = blockers(case, fmap)
+    codes = codes or Codes()
+    reasons = blockers(case, fmap, codes)
     if reasons and not draft:
         raise ExportBlocked(reasons)
+    case = _canonical_case(case, codes)
     blank_form = load_form(form, fmap)
     values = confirmed_values(case)
     plan = _plan(case, values, fmap, _rects(blank_form, fmap))
