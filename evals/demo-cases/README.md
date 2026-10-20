@@ -4,7 +4,7 @@
 
 These are **demo cases** (demo materials). No loader reads `evals/demo-cases/` yet.
 
-> **Edition caveat:** the cases were checked against the **NBC(AE) 2023 1st printing**. The 2nd printing (Aug 17, 2026) is in force. Spot-checked in the 2nd-printing code database: 9.27.5.1.(2), 3.1.9.1.(1), 9.9.10.1.(2), CAN/ULC-S115:2018 edition [Div B Table 1.3.1.2, p.116]. The full list is in [cited-provisions.txt](cited-provisions.txt); a full presence check is not yet run. The code is a free NRC download: https://nrc-publications.canada.ca/eng/view/object/?id=0316d953-0d55-4311-af69-cad55efec499
+> **Edition caveat:** the cases were checked against the **National Building Code (Alberta Edition) (NBC(AE)) 2023 1st printing**. The 2nd printing (Aug 17, 2026) is in force. Spot-checked in the 2nd-printing code database: 9.27.5.1.(2), 3.1.9.1.(1), 9.9.10.1.(2), CAN/ULC-S115:2018 edition [NBC(AE) 2023 Div B Table 1.3.1.2, PDF p.116]. The full list is in [cited-provisions.txt](cited-provisions.txt); a check that every cited provision exists in the 2nd printing: all 95 listed ids present (presence only). The code is a free NRC download: https://nrc-publications.canada.ca/eng/view/object/?id=0316d953-0d55-4311-af69-cad55efec499
 
 > **EVERYTHING HERE IS EXAMPLE DATA.** All people, companies, addresses, legal descriptions, products, listings, test reports and letters are **fictional**. Only code, STANDATA, standard and process citations are real (not fictional), and each is traced in [`sources.md`](sources.md).
 
@@ -31,7 +31,7 @@ Answer keys for each case are in `keys/<case>/`:
 ## Verification legend (used in `sources.md`)
 - **WEB:** fetched from the official source on 2026-10-20. Snapshots were kept locally by the author and not committed.
 - **CODE-1P:** checked in the NBC(AE) 2023 1st printing (free NRC PDF) by the Data Nerd review
-- **RESEARCH:** from the Batatis research notes (`feat/build-foundations`). Spot-checked in the 2nd-printing code database: 9.27.5.1.(2), 3.1.9.1.(1), 9.9.10.1.(2), CAN/ULC-S115:2018 edition [Div B Table 1.3.1.2, p.116]. The full list is in [cited-provisions.txt](cited-provisions.txt); a full presence check is not yet run.
+- **RESEARCH:** from the Batatis research notes (`feat/build-foundations`). Spot-checked in the 2nd-printing code database: 9.27.5.1.(2), 3.1.9.1.(1), 9.9.10.1.(2), CAN/ULC-S115:2018 edition [NBC(AE) 2023 Div B Table 1.3.1.2, PDF p.116]. The full list is in [cited-provisions.txt](cited-provisions.txt); a check that every cited provision exists in the 2nd printing: all 95 listed ids present (presence only).
 - **TO VERIFY:** not confirmed. Phrased generically in the cases.
 
 ## Cross-cutting rules applied in every case

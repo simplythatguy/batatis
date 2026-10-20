@@ -4,7 +4,7 @@
 > EXAMPLE DATA.
 
 **Who's asking:** Larkspur Example Homes (builder) for the owners J. & R. Example *(fictional)*. An owner authorization is needed.
-**Stage:** pre-permit design. **Code:** NBC(AE) 2023 (in force May 1, 2024; W2). The 2nd printing (Aug 17, 2026) is current; this case was checked against the 1st printing.
+**Stage:** pre-permit design. **Code:** National Building Code (Alberta Edition) (NBC(AE)) 2023 (in force May 1, 2024; W2). The 2nd printing (Aug 17, 2026) is current; this case was checked against the 1st printing.
 **Classification:** Part 9 (2 storeys, ~210 m², residential; Div A 1.3.3.3.(1)).
 **Professionals:** not required by default for a single-family house (Div C 2.4.1.1.(1)). The AHJ may require them (2.4.1.1.(4)).
 **AHJ:** City of Edmonton (accredited municipality), acting through its building SCO (IB-2026-10-16). Confirm accreditation via the SCC search (W5).

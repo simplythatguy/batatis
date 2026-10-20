@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Check cited-provisions.txt against the repo code database.
 
-Reads provision ids from cited-provisions.txt (one per line). When
-codedb/build/codedb.sqlite or BATATIS_CODEDB is present, looks each id up
-through engine.codes.Codes. When that database file is absent, prints
-SKIPPED and does not invent FOUND or MISSING rows.
+Reads provision ids from cited-provisions.txt (one per line) and looks each
+one up through engine.codes.Codes.
+
+Exit codes:
+  0  every id is present; prints "N/N present (presence only)"
+  1  the database was read and at least one id is MISSING
+  2  SKIPPED: the database file is absent, or the loader failed to import
 """
 from __future__ import annotations
 
@@ -32,7 +35,13 @@ def provision_ids() -> list[str]:
     ]
 
 
-def report(codes, pid: str, ambiguous: type[Exception]) -> None:
+def skipped(message: str) -> int:
+    print("SKIPPED")
+    print(message)
+    return 2
+
+
+def report(codes, pid: str, ambiguous: type[Exception]) -> bool:
     try:
         row = codes.provision(pid, division=None)
     except ambiguous:
@@ -43,39 +52,39 @@ def report(codes, pid: str, ambiguous: type[Exception]) -> None:
                 hits.append(row)
         if not hits:
             print(f"MISSING {pid}")
-            return
+            return False
         for row in hits:
             print(f"FOUND {pid} Div {row['division']} p.{row.get('pdf_page')}")
-        return
+        return True
     if not row:
         print(f"MISSING {pid}")
-        return
+        return False
     print(f"FOUND {pid} Div {row['division']} p.{row.get('pdf_page')}")
+    return True
 
 
 def main() -> int:
     path = db_path()
     if not path.is_file():
-        print("SKIPPED")
-        return 0
+        return skipped("code database not found")
     sys.path.insert(0, str(REPO))
     try:
         from codedb import AmbiguousProvisionError
         from engine.codes import CodeDbMissing, Codes
     except Exception as exc:
-        print(
-            f"{type(exc).__name__}: code database loader could not be imported",
-            file=sys.stderr,
-        )
-        print("SKIPPED")
-        return 0
+        return skipped(f"{type(exc).__name__}: {exc}")
     try:
         codes = Codes(path)
-    except CodeDbMissing:
-        print("SKIPPED")
-        return 0
-    for pid in provision_ids():
-        report(codes, pid, AmbiguousProvisionError)
+    except CodeDbMissing as exc:
+        return skipped(str(exc))
+    ids = provision_ids()
+    if not ids:
+        print("MISSING cited-provisions.txt has no ids")
+        return 1
+    found = sum(1 for pid in ids if report(codes, pid, AmbiguousProvisionError))
+    if found != len(ids):
+        return 1
+    print(f"{found}/{len(ids)} present (presence only)")
     return 0
 
 

@@ -1,7 +1,7 @@
 > agent-authored, model-checked, not human-verified or official
 
 # Expected: relevant-article shortlist (Case C)
-> EXAMPLE DATA. NBC(AE) 2023, checked against the **1st printing**. Spot-checked in the 2nd-printing code database: 9.27.5.1.(2), 3.1.9.1.(1), 9.9.10.1.(2), CAN/ULC-S115:2018 edition [Div B Table 1.3.1.2, p.116]. The full list is in [cited-provisions.txt](../../../cited-provisions.txt); a full presence check is not yet run. Sources in [sources.md](../../../sources.md).
+> EXAMPLE DATA. National Building Code (Alberta Edition) (NBC(AE)) 2023, checked against the **1st printing**. The 2nd printing is in force. Spot-checked in the 2nd-printing code database: 9.9.10.1.(2). The full list is in [cited-provisions.txt](../../../cited-provisions.txt); a check that every cited provision exists in the 2nd printing: all 95 listed ids present (presence only). Sources in [sources.md](../../../sources.md).
 
 | Rank | Provision / document | Why it applies | Status |
 |---|---|---|---|
