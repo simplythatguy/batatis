@@ -1,57 +1,71 @@
 # Demo video script (3:00)
 
-Shot list for one continuous recording of the Vite app in `web/`. One applicant prepares a variance application. One Safety Codes Officer reviews the packages for administrative completeness.
+Edit clocks below. Spoken lines are sized for that slot. If a click runs long, drop a sentence from the end of the narration. Keep the empty fields, the on-screen limit (“does not write the evidence”), and the officer line “This does not certify the design.”
 
-Clock below is the edit. Spoken lines are sized for that slot. If a click runs long, drop a sentence from the end of the narration. Keep the refusal, the empty fields, and the word incomplete.
+This cut is recordable on PR #16’s screens today, plus two stills you add in the edit. The app does not show a ranked identify list, a benchmark card, or the eval numbers.
+
+| Criterion | Time | Where it is |
+| --- | --- | --- |
+| General applicability | 0:18 | Shot 1 |
+| Intake | 0:33 | Shots 2 and 3 |
+| Code identification | 0:45 | Shot 4, including the 0:07 eval still |
+| Recommendations | 0:24 | Shot 5 |
+| X factor | 0:08 | Shot 5, second beat |
+| Review | 0:36 | Shot 6 |
+| Usability and portability | 0:16 | Shot 7 |
+
+Dropped from the previous draft: the refusal shot (she asks, Batatis refuses) and the homebuilder STANDATA split. The homebuilder paste is 0:10. There is no contractor walkthrough and no upload.
 
 ## What this recording uses
 
 | Source | Branch | What you take from it |
 | --- | --- | --- |
-| [PR #14](https://github.com/simplythatguy/batatis/pull/14) | `cursor/evals-demo-cases-7ecf` | The three example cases under `evals/demo-cases/`. Files only. Nothing in the app loads them. |
-| [PR #16](https://github.com/simplythatguy/batatis/pull/16) | `cursor/e2e-product-flow-4362` | The Vite flow: `#/`, `#/describe`, `#/code-check`, `#/section-c`, `#/application`, `#/officer`. |
-| [PR #8](https://github.com/simplythatguy/batatis/pull/8) | `backend/section-d-issues` | `GET /cases/{id}/section-d/issues` and the practice-of-engineering screen on each issue. |
+| [PR #14](https://github.com/simplythatguy/batatis/pull/14) | `cursor/evals-demo-cases-7ecf` | Paste text below. Cue sheets live under `evals/demo-cases/keys/<case>/` (`expected/` and `presenter/` moved there). Nothing in the app loads them. |
+| [PR #16](https://github.com/simplythatguy/batatis/pull/16) | `cursor/e2e-product-flow-4362` | The screens you film: `#/`, `#/describe`, `#/code-check`, `#/section-c`, `#/application`, `#/officer`. |
+| [PR #12](https://github.com/simplythatguy/batatis/pull/12) | `backend/identify-api` | The ranked-list still and the `benchmark_acceptable_solution` still, from an identify payload for the pasted text. The published top-1 line on the eval still. |
+| [PR #8](https://github.com/simplythatguy/batatis/pull/8) | `backend/section-d-issues` | The variant headline on the eval still. The issues payload (`at_stake`, `practice_of_engineering`) is not on the #16 card. |
 
-Do not merge those branches to record. Copy the three PDFs out of PR #14 and run the `web/` app from PR #16 when you are ready to shoot the pending shots.
-
-`PENDING #<pr>` means that shot is not on `dev` yet. On `dev` today the app opens a preloaded NorthCore fixture. Officer review is the “Not built yet” card. There is no Section D tab and no practice-of-engineering screen. Do not film `dev` and call it this demo.
+Do not merge those branches to record. Run `web/` from PR #16. Do not film `dev` and call it this demo. On `dev` the app opens a preloaded NorthCore fixture, there is no Who screen, no Search, and no “Add to this check”. Officer review is the “Not built yet” card. The application button on `dev` already reads **Check completeness**.
 
 ## Cases (example data)
 
-People, companies, addresses, products, listings, tests, and letters are fictional. Code, STANDATA, and process citations in the case files were checked against the NBC(AE) 2023 **1st printing**. The 2nd printing is the edition in force. Its wording was not re-verified for this video. Say that once (shot 3). Do not quote a 2nd-printing page.
+People, companies, addresses, and products in the paste are fictional. Citations on a code row come from the NBC(AE) 2023 **2nd-printing** code database. The Code check header reads “NBC(AE) 2023 · 2nd printing”. A citation on a row looks like `NBC(AE) 2023 p2, Div B, … [PDF p.952]`. Read the string on the row. Do not quote a page from memory.
 
-| Label (keep this on screen) | Who | Paste this into Describe |
+Narrate a fact only when it is on screen after the paste: in the description box, on a chip, in the ledger, or on a code row. Do not narrate the PDFs. Permeance, an unsigned letter, a sales email, a supplier quote, bracing, and an OSB or furring thickness are not in the paste. Leave them out.
+
+| Label (edit overlay) | Who | Paste this into Describe |
 | --- | --- | --- |
-| `EXAMPLE DATA · Case A · Manufacturer` | Mira Okafor, Example Panel Works Ltd. Product: EPW NailBase CI-50. | We make EPW NailBase CI-50, a 50 mm insulating sheathing panel, and we want it approved across Alberta so builders can nail vinyl siding straight into the facer. One pilot house: 0000 Example Way NW, Edmonton. Owner not decided. No legal description. No permit yet. |
-| `EXAMPLE DATA · Case B · General contractor` | Carlos Mendes, Northgate Example Builders Ltd. Example Commons, Calgary. | Firestop inspection failed 46 plastic pipe penetrations on levels 3 and 4 at Example Commons, 0000 Example Avenue SW, Calgary. Five-storey sprinklered building, permit already issued. Drywall close-in is in 9 days. Can we get a variance and keep going? |
 | `EXAMPLE DATA · Case C · Homebuilder` | Priya Natarajan, Larkspur Example Homes. | Two-storey infill at 0000 Example Crescent NW, Edmonton, about 210 m², no sprinklers. Heated slab with R-7.5 under it. Unvented low-slope roof, spray foam thickness still TBD. Bedroom 3 window clear opening 400 mm by 780 mm. What needs a variance? |
+| `EXAMPLE DATA · Case A · Manufacturer` | Mira Okafor, Example Panel Works Ltd. Product: EPW NailBase CI-50. | We make EPW NailBase CI-50, a 50 mm insulating sheathing panel, and we want it approved across Alberta so builders can nail vinyl siding straight into the facer. One pilot house: 0000 Example Way NW, Edmonton. Owner not decided. No legal description. No permit yet. |
 
-Upload only `input/project-brief.pdf` from that case. Each PDF is stamped EXAMPLE DATA. Leave `README.md`, `expected/`, and `presenter/` off the machine you upload from. Those files are cue sheets. Their headers say agent-authored, model-checked, not human-verified. Do not put a score from them on screen, and do not call them human-verified.
+Do not upload `project-brief.pdf`. On this build the file row says **Not read** and “The engine has no file upload route, so this PDF was not read.” Upload stays off camera (PENDING a `/files` route). Cue sheets under `evals/demo-cases/keys/<case>/` stay off the machine and off camera. Their headers say agent-authored, model-checked, not human-verified. Do not read `sco-review.md` as the officer script.
 
-## Lower third (every shot)
+## Lower third (edit overlay, not app UI)
 
-Bottom left, for the whole shot, including the first frame:
+“EXAMPLE DATA” is not in the app. You add it in the edit, bottom left, including the first frame. If the app later has its own EXAMPLE banner, keep this overlay off that banner.
+
+Shot 1 shows all three lines (the contractor line is named there and not walked through):
 
 `EXAMPLE DATA · Case A · Manufacturer`
 `EXAMPLE DATA · Case B · General contractor`
 `EXAMPLE DATA · Case C · Homebuilder`
 
-Shots 1, 10, and 11 show all three lines. Every other shot shows the one line for the case in that shot. The sidebar role name is extra. It does not replace this lower third.
+Shots 2 and 4 show the Case C line. Shot 3 shows the Case A line. Shot 6 shows only `EXAMPLE DATA · Sample officer package`. Shot 7 shows the case that is actually on screen.
 
 ## Do not record
 
-- **Try an example.** Those three buttons are different projects: “Manufacturer · NorthCore sheathing”, “General contractor · corridor ducts”, “Homebuilder · infill soffit”. They are not Cases A–C.
-- **The officer’s planted package.** On PR #16, `#/officer` reviews one garden-suite package (hempcrete, Dana Hart, 11821 73 Avenue NW). Do not put Case A, B, or C labels on that package.
-- **Model-checked numbers.** Do not open `#/accuracy`. Do not read “55 of 60”, any “x of y”, or a confidence interval. A proposal with a confidence is still a proposal. Confirmation is the applicant’s. Nothing on that screen is a human-verified score, and nothing on it is a compliance finding.
-- **A finished professional opinion.** The practice-of-engineering screen flags, asks, or recommends that a registered professional be named. It does not write the letter, the engineering judgment, the listing, or the rating. It does not decide that a design complies, is safe, or is approved.
-
-Narration never says: complies, safe, approved, equivalent performance, “close enough”, or “the panel is CCMC-approved” as the tool’s conclusion.
+- **Try an example.** On Who those three buttons are always visible: “Manufacturer · NorthCore sheathing”, “General contractor · corridor ducts”, “Homebuilder · infill soffit”. Do not click them. Frame or crop above them. They are not Cases A–C.
+- **An upload.** Do not drop a PDF on Describe.
+- **The code-check intro.** Crop out “Identify is command-line only. Search calls GET /code/search”. Do not read it. Do not read a `POST /cases/…` line on Section D.
+- **`#/accuracy`.** The nav label is Model-checked. Do not open it. The eval still in shot 4 is the only place those counts appear, and it is labelled model-checked, not human-verified.
+- **A compliance, safety, or certification finding.** The tool does not decide those. You may read the officer request’s own sentence, which says it does not.
 
 ## Setup
 
-1. App from PR #16: `cd web && npm run dev`. Engine on `http://127.0.0.1:8000` so `/api` proxies. Frame the sidebar. Width about 1440.
-2. Start at `#/`. The screen title is **Who are you?**
-3. Reset between cases with **Reset case**, which returns to Who. Then pick the next role. Do not use Try an example.
+1. App from PR #16: `cd web && npm run dev`. Engine on `http://127.0.0.1:8000` so `/api` proxies. Width about 1440. Frame the sidebar.
+2. Start at Who with **Reset case**. Typing `#/` while a case is open opens Describe, not Who. On Who the sidebar highlight sits on Describe. The title in the header is still **Who are you?**
+3. Set **Which authority will review this?** before Save, Upload, or Continue. The note under the select says it is sent when the case is first saved and the engine has no route to change it later. The select exists only on Describe.
+4. `#/officer` redirects to Who unless a case is open. Leave Case C open for shot 6.
 
 Routes are hash routes.
 
@@ -65,206 +79,148 @@ Routes are hash routes.
 | `#/application?tab=D` | Application · Section D and professional screening |
 | `#/officer` | Officer review · Administrative completeness |
 
+The application tabs are **Section A**, **Section B**, **Alternative path**, and **Section D**. Section C is its own nav item.
+
+The gap strip is collapsed to “N blocking · N warning” until you open **Review gaps**.
+
 ## Shot list
 
-| Shot | Clock | Case label | Route | Criterion | Pending |
-| --- | --- | --- | --- | --- | --- |
-| 1 | 0:00–0:12 | All three | `#/` | General Applicability 5 | PENDING #16 |
-| 2 | 0:12–0:30 | Case A | `#/describe` | Intake 20 | PENDING #16, PENDING #14 |
-| 3 | 0:30–0:48 | Case A | `#/code-check` | Code Identification 20 | PENDING #16 |
-| 4 | 0:48–1:03 | Case A | `#/section-c` | Code Identification 20 | PENDING #16 |
-| 5 | 1:03–1:22 | Case A | `#/application?tab=D` | Recommendations 10 | PENDING #16, PENDING #8 |
-| 6 | 1:22–1:34 | Case A | `#/application?tab=D` | X Factor 5 | PENDING #16, PENDING #8 |
-| 7 | 1:34–1:52 | Case B | `#/describe` → `#/code-check` | Code Identification 20 | PENDING #16, PENDING #14 |
-| 8 | 1:52–2:04 | Case B | `#/application?tab=D` | Recommendations 10 | PENDING #16, PENDING #8 |
-| 9 | 2:04–2:22 | Case C | `#/describe` → `#/code-check` | General Applicability 5 | PENDING #16, PENDING #14 |
-| 10 | 2:22–2:44 | All three | `#/officer` | Review 10 | PENDING #16 |
-| 11 | 2:44–3:00 | All three | `#/application` | Usability and Portability 10 | PENDING #16 |
+| Shot | Clock | Case label | What | Criterion |
+| --- | --- | --- | --- | --- |
+| 1 | 0:00–0:18 | All three | Who | General applicability |
+| 2 | 0:18–0:28 | Case C | Paste. No upload. | Intake |
+| 3 | 0:28–0:51 | Case A | Paste, then both Not sure cards | Intake |
+| 4 | 0:51–1:36 | Case C | Search, Section C, ranked list, benchmark card, eval still | Code identification |
+| 5 | 1:36–2:08 | Case C | Section D, then the on-screen limit | Recommendations, then X factor |
+| 6 | 2:08–2:44 | Sample officer package | One planted package | Review |
+| 7 | 2:44–3:00 | Case on screen | Authority select and locked export | Usability and portability |
+
+Three example packages on `#/officer` are not built. No open PR loads Cases A–C there. Shot 6 films the one planted package that #16 already renders.
 
 ---
 
-### Shot 1 — Three applicants, one template
+### Shot 1 — Three applicants (0:18)
 
-- **Clock:** 0:00–0:12
+- **Clock:** 0:00–0:18
 - **Case label:** all three lines
 - **Route:** `#/` Who are you?
-- **Status:** PENDING #16. `dev` has no Who screen. It opens Describe on the NorthCore fixture.
-- **Criterion:** General Applicability 5
+- **On `dev`:** no Who screen. It opens Describe on the NorthCore fixture.
 
-**On-screen action.** Hold on Who. The three buttons read Manufacturer, General contractor, Homebuilder. Leave **Try an example** closed and unclicked. The lower third carries all three example-case labels.
+**On-screen action.** Hold on Who. The role buttons read Manufacturer, General contractor, Homebuilder. Do not click the three buttons under **Try an example**. Crop above them. Do not click a role yet.
 
-**Narration.** “Three example cases. A manufacturer, a general contractor, and a homebuilder. Same variance template for each. The people and the projects are fictional.”
-
----
-
-### Shot 2 — Manufacturer intake
-
-- **Clock:** 0:12–0:30
-- **Case label:** `EXAMPLE DATA · Case A · Manufacturer`
-- **Route:** `#/describe`
-- **Status:** PENDING #16 for the empty case and the authority field. PENDING #14 for `evals/demo-cases/a-manufacturer-nailbase-sheathing/input/project-brief.pdf`.
-- **Criterion:** Intake 20
-
-**On-screen action.** Click **Manufacturer**. The header is “What are you building?” and the sidebar reads Manufacturer. Paste the Case A paragraph. Set **Which authority will review this?** to Edmonton. Upload the Case A `project-brief.pdf` (EXAMPLE DATA stamp visible in the file name row, or flash page 1 of the PDF). Open **Applicant and site details**. Leave Owner, mailing address, legal description, and permit empty. Point at the gap chips for those fields. In the fact ledger, the pasted description is a fact from “Your description”. Nothing else is filled in.
-
-The description contains the word “sheathing”. Code check will grow a “Your words” card from that. Do not treat it as the article. That happens in shot 3.
-
-**Narration.** “Mira wants the panel approved across Alberta, and she has one Edmonton pilot house. Owner, legal description, and permit stay empty. The manufacturer is not written in as the owner.”
+**Narration.** “Three example cases. A manufacturer, a general contractor, and a homebuilder. Same variance template. The people and the projects are fictional.”
 
 ---
 
-### Shot 3 — The fastening article
+### Shot 2 — Homebuilder paste (0:10)
 
-- **Clock:** 0:30–0:48
-- **Case label:** `EXAMPLE DATA · Case A · Manufacturer`
-- **Route:** `#/code-check`
-- **Status:** PENDING #16. Search and “Add to this check” are not on `dev`. Identify stays command-line only. This shot does not cut to a terminal.
-- **Criterion:** Code Identification 20
-
-**On-screen action.** Click **Continue to code check**. The card built from the paragraph wears **Your words** and “Not a ranked article.” Answer **Not sure** on that card. Do not answer Yes on it.
-
-In **Search Division B**, type `cladding fastened furring` and search. The list is at most 8 rows, and each row is **Code text** plus the id the database returned. If a row’s id is `9.27.5.1`, click **Add to this check** and answer **Yes**. Open **Code reference** so the provision id and the citation string are readable. If `9.27.5.1` is not in the list, do not type it in. Say the database did not return it, and skip shot 4.
-
-**Narration.** “That card is her words. Search returns database rows only. This example’s departure is 9.27.5.1, vinyl nailed into the facer. The benchmark is 11 mm OSB, or furring. First printing only. Second-printing wording is unverified.”
-
----
-
-### Shot 4 — Section C lookup
-
-- **Clock:** 0:48–1:03
-- **Case label:** `EXAMPLE DATA · Case A · Manufacturer`
-- **Route:** `#/section-c`
-- **Status:** PENDING #16 for the live lookup on a case that started empty. `dev` can look up the fixture’s own rows. Those rows are NorthCore, not NailBase.
-- **Criterion:** Code Identification 20
-
-**On-screen action.** Click **Continue to Section C**. The table has a row only for the article you marked Yes. The source pill reads **Live lookup** when the engine answers. Objective and function codes are the attribution-table pair. Intent is captioned “NBC 2020 Intent Statements, explanatory only”. If the intent cell is empty, leave it empty. Below the table, **Code text** and **AI-written** sit in separate blocks. Do not read the AI block as the code sentence.
-
-If the lookup pill says **Cached demo run** or **Lookup failed**, say that on camera and do not recite objective codes from memory.
-
-**Narration.** “Section C is a lookup. Objective and function come from the attribution table after the article is confirmed. Intent is the national explainer, labeled as an explainer. An empty intent cell stays empty.”
-
----
-
-### Shot 5 — What the evidence must address
-
-- **Clock:** 1:03–1:22
-- **Case label:** `EXAMPLE DATA · Case A · Manufacturer`
-- **Route:** `#/application?tab=alt`, then `#/application?tab=D`
-- **Status:** PENDING #16 for the Section D tab and the panel “Section D and professional screening”. PENDING #8 for the issues list (`at_stake`, evidence types, `practice_of_engineering`, empty process fields, status). PR #16’s panel calls the older plan and professional routes. The issues payload is the PR #8 screen. Film the issues response when both are available. Until then, do not mock the JSON.
-- **Criterion:** Recommendations 10
-
-**On-screen action.** Open **Alternative path**. The six fields are empty: Rationale, Risk assessment, Mitigating measures, Assumptions and limits, Maintenance and operation, Qualifications. Do not type into them. Open **Section D**. The panel’s own line is on screen: recommendations only, and the tool does not write the evidence or the professional opinion.
-
-Point at the practice-of-engineering line and read the words that are actually rendered. PR #16’s panel, from `GET /professional`, says “a registered professional is indicated”, “the screen did not indicate one”, or “the screen needs more facts”, then “This is not a licence decision.” PR #8’s issues payload uses `true`, `false`, or `"unknown"`, and `"unknown"` carries a question. For this Part 9 house the honest line is that question, or a Division C recommendation, until someone states a Part 4 bracing route. The unsigned draft letter is not completed on screen. No seal appears.
-
-The issue card recommends evidence types. It does not show a test result, a CCMC number, or a filled engineer’s conclusion. Permeance tested at 25 mm against a 50 mm panel stays a gap in the recommendation, not a passed test.
-
-**Narration.** “Section D says what the evidence has to address. The permeance specimen is 25 mm. The panel is 50. The letter is an unsigned draft. The practice screen flags that and stops. Risk, mitigations, and assumptions stay blank for a person to write. They are process fields.”
-
----
-
-### Shot 6 — It will not invent the listing
-
-- **Clock:** 1:22–1:34
-- **Case label:** `EXAMPLE DATA · Case A · Manufacturer`
-- **Route:** `#/application?tab=D` (stay here)
-- **Status:** PENDING #16, PENDING #8, same as shot 5.
-- **Criterion:** X Factor 5
-
-**On-screen action.** Do not paste “Just say the panel is CCMC-approved” into the description. That box would store the sentence as the applicant’s fact. Stay on Section D. With a finger or the cursor, trace the on-screen refusal: the tool does not write the evidence, the practice line is not a licence decision, and no listing number is on the card. The case file’s enquiry stays an enquiry.
-
-**Narration.** “She asks for a line that the panel is CCMC-approved. Batatis refuses. An enquiry is not an evaluation report. No listing number is written.”
-
----
-
-### Shot 7 — General contractor, tested system first
-
-- **Clock:** 1:34–1:52
-- **Case label:** `EXAMPLE DATA · Case B · General contractor`
-- **Route:** `#/` → `#/describe` → `#/code-check`
-- **Status:** PENDING #16. PENDING #14 for `evals/demo-cases/b-contractor-firestop-nonconformance/input/project-brief.pdf`.
-- **Criterion:** Code Identification 20
-
-**On-screen action.** **Reset case.** Click **General contractor**. Paste the Case B paragraph. Set the authority to Calgary. Upload that case’s `project-brief.pdf`. Continue to code check. Answer **Not sure** on any **Your words** card. Search `combustible piping firestop`. Add a row only when its id is `3.1.9.1` or `3.1.9.4`, then answer **Yes** on that card. If neither id comes back, do not invent the card. Say the search missed it.
-
-While that code-text card is up, the spoken route is the one in the case: a tested, listed CAN/ULC-S115 system first, including the 50 Pa differential for plastic pipe in this building over three storeys. A variance is the path only where no tested system fits. Do not say the sprinkler branch lines are exempt. Copper on level 2, where the listing matches, is not a departure.
-
-**Narration.** “Carlos has nine days to drywall and 46 failed plastic penetrations in a five-storey Calgary building. The article on screen is the firestop sentence. A tested, listed system comes first. A variance is only if no tested system fits. Sprinkler lines are not waved through.”
-
----
-
-### Shot 8 — It will not write the engineering judgment
-
-- **Clock:** 1:52–2:04
-- **Case label:** `EXAMPLE DATA · Case B · General contractor`
-- **Route:** `#/application?tab=D`
-- **Status:** PENDING #16, PENDING #8.
-- **Criterion:** Recommendations 10
-
-**On-screen action.** Open Section D for Case B. Do not type “Write the EJ yourself” into a field. The sales email is not on the card as an engineering judgment. The practice line recommends a registered professional for this Part 3 building, or it asks for the missing fact. Either way the next sentence on screen is that this is not a licence decision. No rating, no listing number, and no test result is filled in by the tool. The coordinating registered professional is not replaced by the contractor.
-
-**Narration.** “He asks Batatis to write the engineering judgment. It will not. The rep’s email is not that judgment. The screen flags practice of engineering and does not decide the rating.”
-
----
-
-### Shot 9 — Homebuilder, one house, one variance
-
-- **Clock:** 2:04–2:22
+- **Clock:** 0:18–0:28
 - **Case label:** `EXAMPLE DATA · Case C · Homebuilder`
-- **Route:** `#/` → `#/describe` → `#/code-check`
-- **Status:** PENDING #16. PENDING #14 for `evals/demo-cases/c-homebuilder-infill-house/input/project-brief.pdf`. The three-way split below is the case’s expected classification. Speak it only while the matching code-text card, or a gap that names the STANDATA, is actually on screen. If the screen only shows the pasted paragraph, say that the classification is not on this build yet and cut the STANDATA sentences.
-- **Criterion:** General Applicability 5
+- **Route:** `#/describe`
 
-**On-screen action.** **Reset case.** Click **Homebuilder**. Paste the Case C paragraph. Authority: Edmonton. Upload that case’s PDF. On code check, answer **Not sure** on **Your words**. Search `bedroom window unobstructed`. Add `9.9.10.1` only if that id is returned, and answer **Yes**. A second search, `heated floor insulation`, is optional and only if you still have the seconds. Add nothing whose id you did not read off a returned row.
+**On-screen action.** Click **Homebuilder**. The header is “What are you building?” Paste the Case C paragraph. Set **Which authority will review this?** to Edmonton before Continue. Do not upload. Open **Review gaps** and point at **Owner missing**, **Mailing address missing**, and **Legal description missing**. Permit stays empty. It is optional and has no chip. Open the fact ledger. It shows **What you described** and **Proposed alternative**, both from Your description, plus a **Storeys** fact. Do not narrate a slab STANDATA, a roof STANDATA, or a supplier quote. That classification is not on this build.
 
-The classification this example is built to show, when the screen actually shows it:
-
-- Heated slab at R-7.5: covered by STANDATA 23-BCV-003, no new variance request, the officer confirms. Slab edges are still 9.36.2.8. The drawing note leaves the edges off.
-- Unvented roof as drawn (2% slope, spray foam plus batt, thickness TBD): probably outside STANDATA 23-BCV-017.
-- Bedroom 3 window, 400 mm by 780 mm: the departure from 9.9.10.1.(2). Fall protection is a separate check. A rotary operator is not the limiter.
-
-Do not say the opening is close enough. Do not say the owner accepts the risk.
-
-**Narration.** “Priya has three ideas on one Edmonton house. The heated slab is already a province-wide STANDATA, and the edges are still open. The roof, as drawn, sits outside that roof STANDATA. The bedroom window is the variance. One product, three different routes.”
+**Narration.** “Priya’s description is a two-storey Edmonton infill. The window opening on screen is 400 by 780 millimetres. Owner, mailing address, and legal description are missing.”
 
 ---
 
-### Shot 10 — Officer, administrative completeness
+### Shot 3 — Not sure (0:23)
 
-- **Clock:** 2:22–2:44
-- **Case label:** all three lines, each on its own package
+- **Clock:** 0:28–0:51
+- **Case label:** `EXAMPLE DATA · Case A · Manufacturer`
+- **Route:** `#/` then `#/describe` then `#/code-check`
+
+**On-screen action.** **Reset case.** The note reads “Cleared. Nothing from the previous case is kept.” Click **Manufacturer**. Paste the Case A paragraph. Set the authority to Edmonton before Continue. Do not upload. Open **Review gaps**: **Owner missing**, **Mailing address missing**, **Legal description missing**. The ledger is **What you described** and **Proposed alternative** only. Case A states no storeys, so there is no Storeys fact.
+
+Click **Continue to code check**. Two **Your words** cards are on screen: **Sheathing membrane** and **Storey count**. Each says “From what you wrote. Not a ranked article.” Answer **Not sure** on both. Do not answer Yes. Unanswered cards block **Continue to Section C**. Crop the intro that names `GET /code/search`.
+
+**Narration.** “Mira’s description names a 50 millimetre panel, vinyl nailed into the facer, and one Edmonton house. Those two cards are her words. Not sure on both. They are not ranked articles.”
+
+---
+
+### Shot 4 — Code identification (0:45)
+
+- **Clock:** 0:51–1:36
+- **Case label:** `EXAMPLE DATA · Case C · Homebuilder`
+- **Route:** back to the Case C code check, then `#/section-c`, then two stills
+
+Return to the Case C case you pasted in shot 2 (the edit can cut back; do not Reset if you still need that case). One **Your words** card, from the description. Answer **Not sure** on it. Crop the search intro.
+
+**0:51–1:03, search.** In **Search Division B**, type `bedroom window unobstructed` and search. At most 8 rows. Each row is the id the database returned and a **Code text** pill. If a row’s id is `9.9.10.1.(2)`, click **Add to this check** and answer **Yes**. Open **Code reference** and read the citation that is printed. The header says 2nd printing. If that id is not in the list, do not type it in, do not say it, and do not add a card.
+
+While that row is up, and only if its code text shows a 0.35 m² opening and the description still shows 400 mm by 780 mm: “0.31 square metres where the code asks 0.35.” Do not say close enough. Do not search `heated floor insulation`. Do not voice `9.27.5.1` on this search. That id is a different query (`cladding fastened furring`), and only if a returned row shows it. Search on that query has returned sentences (1) and (5). Do not say sentence (2) unless that id is the row.
+
+**1:03–1:11, Section C.** Click **Continue to Section C**. The table has a row only for the article you marked Yes. The source pill reads **Live lookup** when the engine answers. Objective and function are the attribution-table pair. If the intent cell reads **None for this provision**, say so and do not fill it. The detail line is “No NBC 2020 intent statement for this provision.” If the intent text looks like a different provision, say so and do not read it as this article’s intent. Below the table the blocks are **Code text** and **NBC 2020 Intent Statements**. A live row has no **AI-written** block. That pill is on the Code check question. If the pill says **Cached demo run** or **Lookup failed**, say that and do not recite objective codes from memory.
+
+**Narration for the app frames.** “Search returns database rows only. The row on screen is 9.9.10.1.(2). Section C is a lookup. Intent stays on none for this provision when that is what it says. Batatis checks completeness. The officer decides compliance.”
+
+**1:11–1:22, ranked list still.** This list is not the search box. It is the identify order from PR #12 for this same paste: provision, title, probability, committed. If the payload has no model key, the still is labelled **Cached demo run**, the order is BM25, and nothing is committed. Read only ids printed on the still. If you have no payload, omit the still and do not say ranked.
+
+**1:22–1:29, benchmark card.** Same payload. The card’s role line is `benchmark_acceptable_solution`. Read the provision, the explanation, and the citation if they are on the card. `9.9.10.1.(2)` is an example of that field only when the card prints it. If the card says no article was identified, read that sentence and stop. If you have no card, do not say benchmark. Do not say OSB, furring, or a millimetre thickness.
+
+**1:29–1:36, eval still.** A full-frame still, not `#/accuracy`. Title it model-checked, not human-verified. Copy these lines and no others:
+
+- `rules_plus_unknown` (shipped): 50/60 in-sample, 0 under-flags
+- `rules_only`: 55/60 in-sample, 1 under-flag
+- `c_openai_rerank_verify`: top-1 9/11 on the 11 evals_dev cases with must_cite gold, 3 repeats
+
+The 9/11 line is three repeats, not a single run. Do not relabel it. These figures are not a finding that a design complies, is safe, or is certified.
+
+**Narration.** “Model-checked, on the dev cases. Not a compliance finding.”
+
+---
+
+### Shot 5 — Section D, then the limit (0:24 + 0:08)
+
+- **Clock:** 1:36–2:08
+- **Case label:** `EXAMPLE DATA · Case C · Homebuilder`
+- **Route:** `#/application?tab=alt`, then `#/application?tab=D`
+
+**On-screen action.** Open **Alternative path**. The six fields are empty: Rationale, Risk assessment, Mitigating measures, Assumptions and limits, Maintenance and operation, Qualifications. Do not type into them. Open **Review gaps** so **Owner missing** and the six “… empty” rows are visible. Open **Section D**. The panel title is “Section D and professional screening”.
+
+On this build the card shows a provision id, a status, the performance issue, and “Evidence types to consider: … Not results”, and only when those routes return. The line you read is “This tool does not write the evidence or the professional opinion.” It is on screen only after the routes return, and a route path is printed just before it. Do not read the route. If the panel says the routes did not return, say that and do not invent a card. `at_stake` and a per-issue `practice_of_engineering` value (`true`, `false`, or `"unknown"`) are the PR #8 payload. Speak them only when those words are on screen.
+
+Read the practice line that is actually rendered: “a registered professional is indicated”, “the screen did not indicate one”, or “the screen needs more facts”. “This is not a licence decision.” is shown unless the flag is no. Do not add it when it is absent.
+
+**1:36–2:00 narration.** “Section D says what the evidence has to address, in the words on the card. Risk, mitigations, and assumptions stay empty. A person writes them. They are process fields.”
+
+**2:00–2:08 narration.** “The panel says it doesn’t write the evidence, and no listing number is on the card.”
+
+Do not type “say the panel is CCMC-approved” or “write the engineering judgment”. Do not narrate a refusal of a question that was never asked.
+
+---
+
+### Shot 6 — Officer, one planted package (0:36)
+
+- **Clock:** 2:08–2:44
+- **Case label:** `EXAMPLE DATA · Sample officer package`
 - **Route:** `#/officer`
-- **Status:** PENDING #16. The officer screen on that branch does not read Cases A–C. It reviews the planted garden-suite package. Do not relabel that package. `dev` shows “Not built yet”. Do not film that card as a finished review. Record this shot when Officer review lists the open example package.
-- **Criterion:** Review 10
+- **Status:** Not built for Cases A–C. The filmable screen is the one planted package on #16 (hempcrete, Dana Hart, 11821 73 Avenue NW). On `dev` the card says “Not built yet”. Do not film that card as this review.
 
-**On-screen action.** Sidebar **Officer review**. Header: “Officer review”, meta “Administrative completeness”. Show three packages, in order, each with its lower-third label. Every package’s status line is incomplete, return to the applicant. There is no Approve control.
+**On-screen action.** Leave a case open. Sidebar **Officer review**. Header “Officer review”, meta “Administrative completeness”. The intro reads “One planted package, before and after the missing items are filled. This does not certify the design.” Show **Before fixes**, then **After fixes**. There is no second or third package and no Approve control. Do not put Case A, B, or C on this package.
 
-Hold on Case A and **Copy request**. The request text starts with an information request and says it asks for missing administrative items. It is not a decision on the variance.
+Point only at gap rows that are rendered, under Part 1 · Section A, Part 1 · Section B, and Alternative path. Read the message on the row. Do not add a permeance specimen, a sales email, a bracing route, or any other flag that is not on the screen. After fixes, point only at rows still open. If a section says “Nothing open in this section.”, say that.
 
-Case A flags to point at, in order: Section A owner missing, legal description and permit missing, no code analysis and no assumptions and limits, permeance specimen 25 mm against a 50 mm panel, engineer letter still an unsigned draft, bracing route not stated, product-approval wording. Case B: no listed-system remediation, the engineering judgment is a sales email, scope of penetrations unclear, intent cell still empty. Case C: mailing address and owner authorization, no code analysis, window opening taken from a supplier quote, fall protection not addressed.
+Hold on **Copy request**. The box starts with “Information request” and “This asks for missing administrative items. It is not a decision on the variance, and it does not say the design complies or is safe.”
 
-The may-say line on screen is about missing information. The must-not line is absent: no “equivalent performance”, no “approved”, no “FireSeal will hold the rating”, no “0.31 m² is close enough”.
-
-The cue sheet for those flags is `expected/sco-review.md` in each case. That file is model-checked, not human-verified. Use it to recognize the right gaps. Do not put its header, or any count, in the frame.
-
-**Narration.** “The officer opens the same three example packages. Each one is administratively incomplete. The manufacturer is missing the owner, the legal description, and a signed letter, and the ask still says product approval. The request lists those items. It never says complies, safe, or approved. The other two packages come back the same way.”
+**Narration.** “The officer opens one sample package, before the gaps are filled and after. The screen says this does not certify the design. The request lists the administrative items on screen. It is not a decision on the variance.”
 
 ---
 
-### Shot 11 — Same record, two authorities
+### Shot 7 — Authority and a locked export (0:16)
 
 - **Clock:** 2:44–3:00
-- **Case label:** all three lines stay in the lower third
-- **Route:** `#/application` (Case A still loaded is fine; cut in the Case B authority field if you have the frame)
-- **Status:** PENDING #16 for the authority select and for **Check completeness**. On `dev` the button is **Run pre-flight** and there is no authority field.
-- **Criterion:** Usability and Portability 10
+- **Case label:** the case on screen
+- **Route:** `#/describe` for the authority select, then `#/application`
 
-**On-screen action.** Cut from Edmonton selected on Case A to Calgary selected on Case B. Same sidebar, same Sections A–D. The gap strip still lists empty owner and empty process fields. **Check completeness** is disabled, and the footer counts the blocking gaps. Do not fill the gaps in order to unlock the button. Do not download a PDF in this minute. The picker itself lists Calgary and Edmonton. Say that. The portable part is the case record and the Safety Codes Council template, which is the export the engine is built to return, not a second app for each authority.
+**On-screen action.** Cut between the Describe authority select on Case C (Edmonton) and Case A (Edmonton is what you set; Calgary is the other option in the same select). The select was set before Continue. Do not say the authority is stored on the record. That claim is PENDING `backend/case-api`. If Review gaps still lists the reviewing jurisdiction after the pick, say the pick has not cleared it. The sidebar may show the raw id in lowercase, such as “Homebuilder · edmonton”. That is not the engine accepting it.
 
-Applicant surface in this shot: empty fields stayed empty, and proposed items would sit under Model-checked until the applicant confirms them. You do not open that page. Officer surface was shot 10: code text and the AI explanation were separate blocks in shot 4, and the officer list was administrative gaps.
+On Application, the tabs are Section A, Section B, Alternative path, and Section D. Open **Review gaps** so **Owner missing** and the six “… empty” rows are visible. **Check completeness** stays disabled. The footer reads “Close N blocking gaps to check completeness”. Do not read N as a score. After a Yes, that count can jump. Do not click the button. This build has no UI path that reaches a PDF while those gaps are open.
 
-**Narration.** “Edmonton on the houses, Calgary on the tower. The authority is a field on the same record. The export is the Safety Codes Council template, so it is not locked to one city. The PDF stays shut while the gaps are open. Completeness is not a safety finding.”
+The engine route is separate: `POST /cases/{id}/export` in `engine/export/scc.py`. It needs the code database and `BATATIS_SCC_FORM`. A draft returns 200. With gaps still open and draft off, it returns 409. Film the PDF only on a later build whose UI can call that route. Until then, hold on the disabled button. Do not call the file “the Safety Codes Council template” as a title on screen. The spoken line below is the engine behaviour, not a document in the frame.
+
+**Narration.** “The engine’s export fills the SCC template. This build keeps it locked while gaps are open.”
 
 ## If you have to shorten
 
-Drop shot 6’s second sentence, then shot 9’s edge-insulation clause, then the copper-pipe clause in shot 7. Do not drop shot 8, shot 10’s “incomplete”, or the empty practice-of-engineering refusal.
+Drop the eval still’s `rules_only` line, then the ranked-list still, then the Calgary option in shot 7. Do not drop the Not sure answers, the empty intent handling, the benchmark card’s “read only what is printed” rule, shot 6’s “does not certify”, or the locked-export line. Do not put the refusal scene or the STANDATA split back in.
