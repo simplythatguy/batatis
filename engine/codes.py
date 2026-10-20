@@ -8,20 +8,73 @@ from pathlib import Path
 
 from codedb import lookup, search, store
 
-DEFAULT_DB = Path('/Users/aamia/.t3/projects/batatis/codedb/build/codedb.sqlite')
+_REPO = Path(__file__).resolve().parents[1]
+# Canonical build output. `codedb.store.DB_PATH` is the same file the builder writes.
+DEFAULT_DB = _REPO / 'codedb' / 'build' / 'codedb.sqlite'
 OBJECTIVES_PROVISION = ('2.2.1.1.(1)', 'A')        # Div A listing of objectives
 FUNCTIONS_PROVISION = ('3.2.1.1.(1)', 'A')         # Div A listing of functional statements
 
 
+def repo_codedb_candidates() -> tuple[Path, ...]:
+    """Repo-relative databases, starting with the file the codedb package builds."""
+    seen: list[Path] = []
+    for path in (Path(store.DB_PATH), DEFAULT_DB, _REPO / 'codedb' / 'codedb.sqlite'):
+        if path not in seen:
+            seen.append(path)
+    return tuple(seen)
+
+
+def _codedb_label(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(_REPO.resolve()).as_posix()
+    except ValueError:
+        return str(path)
+
+
+def resolve_codedb() -> Path:
+    """First existing file: BATATIS_CODEDB, then repo-relative codedb locations.
+
+    Raises FileNotFoundError with the paths that were checked when none exist.
+    """
+    tried: list[Path] = []
+    env = (os.environ.get('BATATIS_CODEDB') or '').strip()
+    if env:
+        tried.append(Path(env))
+    tried.extend(repo_codedb_candidates())
+    for path in tried:
+        if path.is_file():
+            return path
+    looked = '; '.join(_codedb_label(path) for path in tried)
+    raise FileNotFoundError(
+        'code database not found. Set BATATIS_CODEDB to the SQLite file, or build '
+        f'codedb/build/codedb.sqlite. Looked for: {looked}.')
+
+
 def default_db() -> Path:
-    return Path(os.environ.get('BATATIS_CODEDB') or DEFAULT_DB)
+    """Database path for callers that open it themselves.
+
+    Same order as `resolve_codedb`. When nothing exists yet, returns BATATIS_CODEDB
+    if it is set, otherwise the canonical repo build path.
+    """
+    try:
+        return resolve_codedb()
+    except FileNotFoundError:
+        env = (os.environ.get('BATATIS_CODEDB') or '').strip()
+        if env:
+            return Path(env)
+        return repo_codedb_candidates()[0]
 
 
 class Codes:
     def __init__(self, db_path: Path | str | None = None):
-        self.db_path = Path(db_path) if db_path else default_db()
-        if not self.db_path.exists():
-            raise FileNotFoundError(f'code database not found: {self.db_path} (set BATATIS_CODEDB)')
+        if db_path is None:
+            self.db_path = resolve_codedb()
+        else:
+            self.db_path = Path(db_path)
+            if not self.db_path.is_file():
+                raise FileNotFoundError(
+                    f'code database not found: {self.db_path}. '
+                    'Set BATATIS_CODEDB or build codedb/build/codedb.sqlite.')
         self._definition = lru_cache(maxsize=None)(self._definition_uncached)
 
     def provision(self, provision_id: str, division: str | None = 'B') -> dict | None:
