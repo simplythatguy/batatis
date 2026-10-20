@@ -180,7 +180,7 @@ Say `9.9.10.1.(2)` only if that id is the row on screen.
 
 - `rules_plus_unknown 50/60 in-sample, 0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction), 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind); model-checked, not human-verified`
 - `rules_only`, dev set: 55/60 in-sample, 1 under-flag
-- `[if merged: PR #12] c_openai_rerank_verify: top-1 0.76 and recall@5 0.76 on the 11 dev cases with a gold article (mean of 3 runs, in-sample, 9 cases without gold excluded); BM25 baseline 0.45; asks the applicant on 42% of cases; model-checked, not human-verified`
+- `[if merged: PR #12] c_openai_rerank_verify: top-1 0.76 and recall@5 0.76 on the 11 dev cases with a must-cite gold article (mean of 3 runs, in-sample; 4 ask-gold cases scored separately, 5 without gold); BM25 baseline 0.45; asks the applicant on 42% of cases; model-checked, not human-verified`
 
 These figures are not a finding that a design complies, is safe, or is certified.
 
