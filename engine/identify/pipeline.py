@@ -76,7 +76,7 @@ def _codes_for(db, codes):
     if db is not None and Path(db).exists():
         try:
             return Codes(db)
-        except FileNotFoundError:
+        except (FileNotFoundError, CodeDbMissing):
             return None
     return None
 

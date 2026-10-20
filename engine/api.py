@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from codedb import AmbiguousProvisionError
 
-from .codes import Codes
+from .codes import CodeDbMissing, Codes
 from .export import ExportBlocked, ExportError, FormMismatch, FormNotFound, export_case
 from .models import Case, Fact, Jurisdiction, SectionCRow
 from .section_c import section_c_rows
@@ -113,6 +113,13 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
             raise HTTPException(404, e.args[0])
         except ValueError as e:
             raise HTTPException(400, f'invalid provision id: {e}')
+
+    from fastapi.responses import JSONResponse
+
+    @app.exception_handler(CodeDbMissing)
+    def missing_codedb(_request, _exc: CodeDbMissing):
+        # Not FileNotFoundError. The body is fixed and carries no filesystem path.
+        return JSONResponse(status_code=503, content={'detail': 'code database not found'})
 
     app.include_router(__import__('engine.routes_case', fromlist=['create_router']).create_router(cases, code))
     return app

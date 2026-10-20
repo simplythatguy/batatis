@@ -18,8 +18,8 @@ def default_db() -> Path:
     return Path(os.environ.get('BATATIS_CODEDB') or DEFAULT_DB)
 
 
-class CodeDbMissing(FileNotFoundError):
-    """The code database file is absent. The message is fixed and never includes a path."""
+class CodeDbMissing(Exception):
+    """Raised only when the code database file is absent. The message has no path."""
 
     def __init__(self) -> None:
         super().__init__('code database not found')
