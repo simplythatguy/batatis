@@ -2,7 +2,7 @@
 
 **Label: model-checked, not human-verified.** Generated 2026-10-20 (America/Edmonton, MDT UTC-6) by Data Nerd. Read-only. Codedb NBC(AE) 2023 2nd printing (sha256 `65e650407516…`). v1 (`identify-gold-proposals.*`) is kept unchanged.
 
-Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research; see https://nrc-publications.canada.ca/ (record id 0316d953-0d55-4311-af69-cad55efec499).
+Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
 
 **High group: n = 5** (dev-006, dev-009, dev-010, dev-011, dev-015). If Backy adopts it, the scored set grows from 11 to 16. Scoring is at Article level. `must_cite` stays empty on these ask cases (SCHEMA rule 3); the gold goes in `gold.identify_gold`.
 
@@ -25,18 +25,18 @@ Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd p
 ## Upgraded: dev-009
 
 - **Div B 9.27.2.2.(5)** (Minimum Protection from Precipitation Ingress, PDF p.1014). Role `benchmark`, tier primary, confidence **high (Article 9.27.2.2.); pinpoint (5) medium**. *model-checked, not human-verified*
-  - Quote: "… second plane of protection incorporating a capillary break … b) the number of degree-days is 3400 or more, and the moisture index is greater than 1.00."
+  - Quote: "… second plane of protection incorporating a capillary break … b) the number of degree-days is 3400 or more, and the moisture index is greater than 1.00." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: The inspectors' "gap behind the cladding" is the capillary break, and the Sentence that says when one is required is 9.27.2.2.(5). Scoring is at Article level, and every reading of the case (capillary break required or not, the (6) exceptions, what counts as a break under (1)) sits in Article 9.27.2.2., so the Article is high-confidence. Whether (5) is triggered depends on the site climate. The Table C-2 values are recorded below for the officer; the gold does not decide whether the panel complies.
 - **Div B 9.27.2.2.(4)** (Minimum Protection from Precipitation Ingress, PDF p.1014). Role `scope`, tier secondary, confidence **high**. *model-checked, not human-verified*
-  - Quote: "Exterior walls exposed to precipitation shall be protected against precipitation ingress by an exterior cladding assembly … where such walls enclose spaces of residential occupancy"
+  - Quote: "Exterior walls exposed to precipitation shall be protected against precipitation ingress by an exterior cladding assembly … where such walls enclose spaces of residential occupancy" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: Houses: the two-plane requirement applies regardless of climate; same Article.
 - **Div B 9.27.2.2.(1)** (Minimum Protection from Precipitation Ingress, PDF p.1013). Role `definition`, tier secondary, confidence **high**. *model-checked, not human-verified*
-  - Quote: "a cladding assembly is deemed to have a capillary break … a) there is a drained and vented air space not less than 9.5 mm deep"
+  - Quote: "a cladding assembly is deemed to have a capillary break … a) there is a drained and vented air space not less than 9.5 mm deep" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: What counts as a capillary break; same Article.
 - **Div B 9.27.2.2.(6)** (Minimum Protection from Precipitation Ingress, PDF p.1014). Role `exception`, tier secondary, confidence **medium**. *model-checked, not human-verified*
-  - Quote: "the first and second planes of protection need not incorporate a capillary break … will not adversely affect the performance of the building assemblies"
+  - Quote: "the first and second planes of protection need not incorporate a capillary break … will not adversely affect the performance of the building assemblies" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: The route the manufacturer's evidence would target if (5) applies; same Article.
-- Note A-9.27.2. (on PDF page 1429): "Part 5 and Part 9 of the NBC(AE) recognize that mass walls and face-sealed, concealed barrier and rainscreen assemblies have their place …"
+- Note A-9.27.2. (on PDF page 1429): "Part 5 and Part 9 of the NBC(AE) recognize that mass walls and face-sealed, concealed barrier and rainscreen assemblies have their place …" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
 - Climate facts: Table C-2 (PDF pages 667-670): 147 Alberta locations parsed. Lowest degree-days 4460 (so every listed location is in branch (5)(b), "3400 or more"); highest moisture index 0.6 (the (5)(b) threshold is "greater than 1.00"). These are recorded facts for the officer and are not a compliance finding. A site not listed in Table C-2 needs its own values.
 - Still to confirm (does not change the Article): site location (if not in Table C-2), backing materials (for 9.27.2.2.(6)(c)).
 - Evidence basis: case description + known_facts + codedb + Appendix C of the official PDF; the case gold/should_cite fields were not used as evidence.
@@ -44,16 +44,16 @@ Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd p
 ## Not upgraded: dev-005 (low)
 
 - **Div B 9.10.14.5.(1)** (Construction of Exposing Building Face and Walls above Exposing Building Face, PDF p.897). Role `benchmark`, tier primary, confidence **low**. *model-checked, not human-verified*
-  - Quote: "each exposing building face and any exterior wall located above an exposing building face … shall be constructed in conformance with Table 9.10.14.5.-A"
+  - Quote: "each exposing building face and any exterior wall located above an exposing building face … shall be constructed in conformance with Table 9.10.14.5.-A" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: Part 9 branch.
 - **Div B 3.2.3.7.(1)** (Construction of Exposing Building Face, PDF p.212). Role `candidate`, tier secondary, confidence **low**. *model-checked, not human-verified*
-  - Quote: "the fire-resistance rating, construction and cladding for exposing building faces … of Group A, B, C, D … shall comply with Table 3.2.3.7."
+  - Quote: "the fire-resistance rating, construction and cladding for exposing building faces … of Group A, B, C, D … shall comply with Table 3.2.3.7." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: Part 3 branch.
 - **Div B 9.10.15.1.(1)** (Application, PDF p.900). Role `scope`, tier secondary, confidence **low**. *model-checked, not human-verified*
-  - Quote: "buildings that contain only dwelling units and have no dwelling unit above another dwelling unit"
+  - Quote: "buildings that contain only dwelling units and have no dwelling unit above another dwelling unit" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: If no dwelling unit is above another, 9.10.15. (not 9.10.14.) governs.
 - **Div A 1.3.3.3.(1)** (Application of Parts 9, 10 and 11, PDF p.40). Role `scope`, tier scope, confidence **n/a**. *model-checked, not human-verified*
-  - Quote: "of 3 storeys or less in building height, having a building area not exceeding 600 m²"
+  - Quote: "of 3 storeys or less in building height, having a building area not exceeding 600 m²" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: Part 9 limits
 - Settling fact: **building height in storeys and building area**, which settles Part 9 vs Part 3: Div A 1.3.3.3.(1) (3 storeys or less, 600 m² or less); above either limit, Div B 3.2.3.7..
 - Settling fact: **whether any dwelling unit is above another dwelling unit**, which settles Div B 9.10.15. (no unit above another, Div B 9.10.15.1.(1)) vs Div B 9.10.14..
@@ -66,33 +66,33 @@ Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd p
 ## Not upgraded: dev-007 (medium)
 
 - **Div B 9.27.3.3.(1)** (Required Sheathing Membrane and Installation, PDF p.1015). Role `benchmark`, tier primary, confidence **medium**. *model-checked, not human-verified*
-  - Quote: "Except as provided in Articles 9.27.3.4. to 9.27.3.6., at least one layer of sheathing membrane shall be applied beneath cladding."
+  - Quote: "Except as provided in Articles 9.27.3.4. to 9.27.3.6., at least one layer of sheathing membrane shall be applied beneath cladding." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: Omitting the housewrap departs from this Sentence unless an exception Article applies.
 - **Div B 9.27.3.4.(1)** (Insulating Sheathing in lieu of Sheathing Membrane, PDF p.1015). Role `candidate`, tier secondary, confidence **medium**. *model-checked, not human-verified*
-  - Quote: "Where non-wood-based rigid exterior insulating sheathing, or exterior insulating sheathing with an integral sheathing membrane is installed, a separate sheathing membrane is not required."
+  - Quote: "Where non-wood-based rigid exterior insulating sheathing, or exterior insulating sheathing with an integral sheathing membrane is installed, a separate sheathing membrane is not required." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: If the board qualifies, no membrane is required and the departure moves to the joints in 9.27.3.4.(2) (butted, unsealed).
 - **Div B 9.27.3.4.(2)** (Insulating Sheathing in lieu of Sheathing Membrane, PDF p.1015). Role `candidate`, tier secondary, confidence **medium**. *model-checked, not human-verified*
-  - Quote: "the joints of sheathing panels not subject to moisture deterioration shall be i) sealed at all joints, or ii) lapped or tongue and groove …"
+  - Quote: "the joints of sheathing panels not subject to moisture deterioration shall be i) sealed at all joints, or ii) lapped or tongue and groove …" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: Joint rule if 9.27.3.4.(1) applies.
-- Note A-9.27.3.4.(2) (PDF p.1432): "Butt joints can drain to either side and so should not be used unless they are sealed."
+- Note A-9.27.3.4.(2) (PDF p.1432): "Butt joints can drain to either side and so should not be used unless they are sealed." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
 - **Why not high:** The scored Article flips between 9.27.3.3. and 9.27.3.4. depending on whether the specified board is "non-wood-based rigid exterior insulating sheathing" (9.27.3.4.(1)). The applicant calls it "semi-rigid". The code does not define "rigid", and codedb has no Note on 9.27.3.4.(1) (only A-9.27.3.4.(2) on joints). No public Alberta guidance was found in this pass that classifies semi-rigid mineral wool board.
 - **Missing fact(s):** product data sheet / material standard and rigidity classification of the mineral wool board.
 
 ## Not upgraded: dev-012 (medium)
 
 - **Div B 9.4.1.1.(1)** (General, PDF p.836). Role `benchmark`, tier primary, confidence **medium**. *model-checked, not human-verified*
-  - Quote: "structural members and their connections shall a) conform to requirements provided elsewhere in this Part, b) be designed according to good engineering practice"
+  - Quote: "structural members and their connections shall a) conform to requirements provided elsewhere in this Part, b) be designed according to good engineering practice" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: Route Article for structural members outside the Section 9.23. prescriptive scope. CCMC 13016-R (below) frames SIP framing as an alternative solution to 9.4.1.1.(1)(c) and Section 9.23.
 - **Div B 9.23.13.1.(2)** (Requirements for Low to Moderate Wind and Seismic Forces, PDF p.978). Role `candidate`, tier secondary, confidence **medium**. *model-checked, not human-verified*
-  - Quote: "Bracing to resist lateral loads shall be designed and constructed as follows"
+  - Quote: "Bracing to resist lateral loads shall be designed and constructed as follows" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: Applies only if the SIP system is inside Section 9.23. (members at 600 mm o.c. or less); its Clause (b) also allows Part 4 or good engineering practice.
 - **Div B 9.23.13.1.(1)** (Requirements for Low to Moderate Wind and Seismic Forces, PDF p.978). Role `scope`, tier secondary, confidence **high (for the climate branch)**. *model-checked, not human-verified*
-  - Quote: "This Article applies in locations where … Sa(0.2), is not more than 0.70 and the 1-in-50 hourly wind pressure is less than 0.80 kPa."
+  - Quote: "This Article applies in locations where … Sa(0.2), is not more than 0.70 and the 1-in-50 hourly wind pressure is less than 0.80 kPa." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: Cochrane values below.
 - **Div B 9.23.1.1.(1)** (Limitations, PDF p.962). Role `scope`, tier secondary, confidence **medium**. *model-checked, not human-verified*
-  - Quote: "the small repetitive structural members are spaced not more than 600 mm o.c."
+  - Quote: "the small repetitive structural members are spaced not more than 600 mm o.c." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: The scope test that decides between the two Articles. The one public CCMC SIP evaluation read has ribs at 1.2 m o.c.
-- Note A-9.23.1.1. (PDF p.1405): "The prescriptive requirements in Section 9.23. apply only to standard light wood-frame construction."
+- Note A-9.23.1.1. (PDF p.1405): "The prescriptive requirements in Section 9.23. apply only to standard light wood-frame construction." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
 - Resolved: Cochrane: Table C-3 Sa(0.2) = 0.236 (PDF page 672); Table C-2 1-in-50 hourly wind pressure = 0.48 kPa (PDF page 667). Both are within the 9.23.13.1.(1) limits, so the high-force branch 9.23.13.2. is not the scoped Article for this town.
 - Public source: NRC CCMC Registry, CCMC 13016-R, Insulspan Structural Insulated Panel (SIP) System (Plasti-Fab Ltd.), status Active, modified 2025-10-21; compliance NBC 2010 and NBC 2015 (historical context: not the NBC(AE) 2023, and not shown to be the case product). <https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13016-R&type=cert>. Verification: quotes checked against the WebFetch rendering of the public page on 2026-10-20; a direct curl from the box failed (HTTP 000). *model-checked, not human-verified*
   - "an alternative solution to Clause 9.4.1.1.(1)(c), General (Structural Design Requirements and Application Limitations), and Section 9.23., Wood-Frame Construction"
@@ -111,16 +111,16 @@ Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd p
 ## Kept from v1 (high)
 
 - dev-006: **Div B 9.25.5.2.(1)** (Position of Low Permeance Materials, PDF p.1000). Role `benchmark`, tier primary, confidence **high**. *model-checked, not human-verified*
-  - Quote: "… the ratio between the total thermal resistance of all materials outboard … inboard of that surface is not less than that required by Table 9.25.5.2."
+  - Quote: "… the ratio between the total thermal resistance of all materials outboard … inboard of that surface is not less than that required by Table 9.25.5.2." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: 'Outboard insulation is too thin for that wall' is exactly the outboard-to-inboard thermal-resistance ratio in Clause (1)(b); the foil-faced (essentially impermeable) board is a low-permeance sheet material. Whether the design actually fails the ratio is an intake question, but the provision at issue is this one.
 - dev-010: **Div B 9.10.15.5.(2)** (Construction of Exposing Building Face of Houses, PDF p.902). Role `benchmark`, tier primary, confidence **high**. *model-checked, not human-verified*
-  - Quote: "where the limiting distance is less than 0.6 m, the exposing building face … shall have a fire-resistance rating of not less than 45 min"
+  - Quote: "where the limiting distance is less than 0.6 m, the exposing building face … shall have a fire-resistance rating of not less than 45 min" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: A house (9.10.15. applies per 9.10.15.1.(1)) with the east wall 0.5 m from the property line: limiting distance < 0.6 m. The city's 'metal or noncombustible siding' matches Clause (2)(a). Clause (2)(b) is a conditional vinyl route (9.27.12., gypsum backing, FSR ≤ 25, ≤ 2 mm), so whether a variance is needed is an intake question, but the provision is this one.
 - dev-011: **Div B 9.23.10.1.(1)** (Stud Size and Spacing, PDF p.974). Role `benchmark`, tier primary, confidence **high**. *model-checked, not human-verified*
-  - Quote: "The size and spacing of studs shall conform to Table 9.23.10.1."
+  - Quote: "The size and spacing of studs shall conform to Table 9.23.10.1." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: Table 9.23.10.1. (PDF p.975, checked visually): exterior walls carrying 'roof with or without attic storage plus one floor' allow 38 × 89 at max 400 mm (or 38 × 140 at 600 mm). 2x4 at 600 mm supporting the second floor and roof departs from the table.
 - dev-015: **Div B 9.9.9.1.(1)** (Travel Limit to Exits or Egress Doors, PDF p.872). Role `benchmark`, tier primary, confidence **high**. *model-checked, not human-verified*
-  - Quote: "… dwelling unit containing more than 1 storey shall have exits or egress doors … not be necessary to travel up or down more than 1 storey"
+  - Quote: "… dwelling unit containing more than 1 storey shall have exits or egress doors … not be necessary to travel up or down more than 1 storey" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
   - Reasoning: Attic bedroom in a two-storey house: from the attic the occupant travels down two storeys to the front door. The window exception (2) needs a ≥1 m × 0.55 m opening with a sill ≤1 m above the floor; 'small skylights' is not a measurement, so the case stays 'ask', but this is the provision.
 
 ## Climate data used

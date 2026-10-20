@@ -31,7 +31,7 @@ for p in range(660,676):
 if not ('Table C-2' in page_txt(min(c2pages)) and len(C2)>100): ERR.append('Table C-2 parse')
 mi_max=max(v['moisture_index'] for v in C2.values()); hdd_min=min(v['HDD'] for v in C2.values())
 coch=dict(C2['Cochrane'], **{'Sa02':C3['Cochrane']['Sa02'],'Sa02_page':C3['Cochrane']['page']})
-climate=dict(source='NBC(AE) 2023 2nd printing, Division B Appendix C, Table C-2 "Climatic Design Data for Selected Locations in Alberta" and Table C-3 "Seismic Design Data for Selected Locations in Alberta for Part 9 Design"', pdf=PDF, pdf_sha256_prefix=hashlib.sha256(open(PDF,'rb').read()).hexdigest()[:16],
+climate=dict(source='NBC(AE) 2023 2nd printing, Division B Appendix C, Table C-2 "Climatic Design Data for Selected Locations in Alberta" and Table C-3 "Seismic Design Data for Selected Locations in Alberta for Part 9 Design"', pdf='https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499', pdf_sha256_prefix=hashlib.sha256(open(PDF,'rb').read()).hexdigest()[:16],
   table_C2_pages=sorted(c2pages), table_C3_pages=sorted(c3pages), C2_locations_parsed=len(C2), C2_moisture_index_max=mi_max, C2_HDD_min=hdd_min,
   cochrane=coch, method='pdftotext -layout row parse (16 numeric columns; HDD = col 6, moisture index = col 10, 1/50 hourly wind pressure = last); '+LABEL)
 
@@ -102,7 +102,7 @@ order=['dev-006','dev-009','dev-010','dev-011','dev-015']
 patches=[dict(file=f'evals_dev/cases/{k}.json',op='add',path='/gold/identify_gold',value=[dict(division=g['division'],provision=g['provision'],role=g['role'],confidence='high',label=LABEL) for g in high[k]['gold']]) for k in order]
 patches+=[dict(file=f'evals_dev/cases/{k}.json',op='add',path='/gold/identify_gold_candidates',value=[dict(division=g['division'],provision=g['provision'],role=g['role'],confidence=v['confidence'],label=LABEL) for g in v['gold_proposed']+v['competing']]) for k,v in kept.items() if k!='dev-020']
 out=dict(meta=dict(title='Identify gold v2: high-confidence group for BAT-26', generated='2026-10-20 (America/Edmonton, MDT UTC-6)', label=LABEL, supersedes='research/identify-gold-proposals.{md,json} (v1, kept unchanged)',
-  codedb_snapshot=dict(path=DB,sha256=hashlib.sha256(open(DB,'rb').read()).hexdigest()), edition='NBC(AE) 2023 2nd printing', scoring='Article level (engine/identify/benchmark.py _article()); must_cite stays empty on ask cases (SCHEMA rule 3); gold goes in gold.identify_gold',
+  codedb_snapshot=dict(path='local codedb snapshot (NBC(AE) 2023 2nd printing), not in this repo',sha256=hashlib.sha256(open(DB,'rb').read()).hexdigest()), edition='NBC(AE) 2023 2nd printing', scoring='Article level (engine/identify/benchmark.py _article()); must_cite stays empty on ask cases (SCHEMA rule 3); gold goes in gold.identify_gold',
   high_group=order, high_n=len(order), scored_n_if_adopted=11+len(order), guardrails='Golds name the provision at issue; they never say the design complies or fails. Evidence = case description + known_facts + codedb + public sources; case gold/should_cite/seed fields were not used as evidence.', builder='docs/research/2026-10-20-data-nerd/src/gold_v2_build.py'),
  climate_data=climate, high=high, not_high=kept, patches=patches)
 json.dump(out,open(R+'identify-gold-v2.json','w'),ensure_ascii=False,indent=2)

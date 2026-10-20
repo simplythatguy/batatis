@@ -2,7 +2,7 @@
 
 Label: **model-checked, not human-verified**. Built 2026-10-20 (America/Edmonton) by `docs/research/2026-10-20-data-nerd/src/mtt_build.py`. Machine-readable: `mandatory-triggers-tests.json`.
 
-Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research; see https://nrc-publications.canada.ca/ (record id 0316d953-0d55-4311-af69-cad55efec499).
+Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
 
 Purpose: Karen's rubric gap #5 (Recommendations). For triggers HR-02, HR-05, HR-06, HR-07, HR-30 and HR-32 of `human-review-triggers.json`: the exact basis, whether the text makes it mandatory, the facts that fire it and the near-misses that don't, and drop-in tests for Backy's #26/#30.
 
@@ -27,12 +27,12 @@ Purpose: Karen's rubric gap #5 (Recommendations). For triggers HR-02, HR-05, HR-
 
 **Basis:**
 
-- Div C 2.4.1.1.(3), PDF p.740: "For buildings other than those described in Sentence (1), the drawings and specifications shall be authenticated by one or more registered professionals"
-- Div C 2.4.2.1.(1), PDF p.741: "This Subsection applies to a project that falls within the scope of Sentence 2.4.1.1.(3)."
-- Div C 2.4.2.2.(1), PDF p.741: "Before applying for a permit, the owner shall a) retain a coordinating registered professional"
-- Div C 2.4.2.2.(1), PDF p.741: "c) provide the authority having jurisdiction with Schedules A and B"
-- Div C 2.4.1.1.(1), PDF p.739: "b) classified as a residential occupancy that is i) a single-family dwelling, or ii) a multiple-family dwelling that contains 4 dwelling units or less"
-- Div C 2.4.1.1.(4), PDF p.740: "the authority having jurisdiction may require the involvement of one or more registered professionals"
+- Div C 2.4.1.1.(3), PDF p.740: "For buildings other than those described in Sentence (1), the drawings and specifications shall be authenticated by one or more registered professionals" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div C 2.4.2.1.(1), PDF p.741: "This Subsection applies to a project that falls within the scope of Sentence 2.4.1.1.(3)." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div C 2.4.2.2.(1), PDF p.741: "Before applying for a permit, the owner shall a) retain a coordinating registered professional" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div C 2.4.2.2.(1), PDF p.741: "c) provide the authority having jurisdiction with Schedules A and B" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div C 2.4.1.1.(1), PDF p.739: "b) classified as a residential occupancy that is i) a single-family dwelling, or ii) a multiple-family dwelling that contains 4 dwelling units or less" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div C 2.4.1.1.(4), PDF p.740: "the authority having jurisdiction may require the involvement of one or more registered professionals" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
 
 **Fires when:**
 
@@ -57,10 +57,10 @@ Purpose: Karen's rubric gap #5 (Recommendations). For triggers HR-02, HR-05, HR-
 
 **Basis:**
 
-- Div B 9.23.3.5.(4), PDF p.967: "Fastening of sheathing shall conform to Part 4, a) where the 1-in-50 hourly wind pressure is equal to or greater than 1.2 kPa"
-- Div B 9.23.6.1.(6), PDF p.970: "Where … Sa(0.2), is greater than 1.8 or … wind pressure is equal to or greater than 1.2 kPa, anchorage shall be designed according to Part 4."
-- Div B 9.23.16.5.(3), PDF p.988: "Lumber roof sheathing shall be designed according to Part 4, where a) the seismic spectral acceleration, Sa(0.2), is greater than 1.2"
-- Div C 2.4.1.2.(1), PDF p.740: "For design carried out in accordance with Part 4 … the designer shall be a registered professional skilled in the work concerned."
+- Div B 9.23.3.5.(4), PDF p.967: "Fastening of sheathing shall conform to Part 4, a) where the 1-in-50 hourly wind pressure is equal to or greater than 1.2 kPa" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div B 9.23.6.1.(6), PDF p.970: "Where … Sa(0.2), is greater than 1.8 or … wind pressure is equal to or greater than 1.2 kPa, anchorage shall be designed according to Part 4." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div B 9.23.16.5.(3), PDF p.988: "Lumber roof sheathing shall be designed according to Part 4, where a) the seismic spectral acceleration, Sa(0.2), is greater than 1.2" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div C 2.4.1.2.(1), PDF p.740: "For design carried out in accordance with Part 4 … the designer shall be a registered professional skilled in the work concerned." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
 
 **Fires when:**
 
@@ -89,12 +89,12 @@ Purpose: Karen's rubric gap #5 (Recommendations). For triggers HR-02, HR-05, HR-
 
 **Basis:**
 
-- Div B 9.15.3.3.(2), PDF p.925: "where the span of the supported joists exceeds 4.9 m, footings shall be designed in accordance with Section 4.2."
-- Div B 9.15.3.3.(3), PDF p.925: "Where the specified live load exceeds 2.4 kPa, footings shall be designed in accordance with Section 4.2."
-- Div B 9.16.1.2.(1), PDF p.933: "Floors-on-ground that support loads from the superstructure shall be designed in conformance with Part 4."
-- Div B 9.23.4.1.(2), PDF p.967: "Spans for joists, beams and lintels supporting floors shall be determined according to Subsection 4.1.3. where the supported floors a) serve other than residential areas"
-- Div B 9.15.1.2.(1), PDF p.924: "Buildings erected on permafrost shall have foundations designed by a designer competent in this field in accordance with the appropriate requirements of Part 4."
-- Div C 2.4.1.2.(1), PDF p.740: "For design carried out in accordance with Part 4 … the designer shall be a registered professional skilled in the work concerned."
+- Div B 9.15.3.3.(2), PDF p.925: "where the span of the supported joists exceeds 4.9 m, footings shall be designed in accordance with Section 4.2." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div B 9.15.3.3.(3), PDF p.925: "Where the specified live load exceeds 2.4 kPa, footings shall be designed in accordance with Section 4.2." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div B 9.16.1.2.(1), PDF p.933: "Floors-on-ground that support loads from the superstructure shall be designed in conformance with Part 4." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div B 9.23.4.1.(2), PDF p.967: "Spans for joists, beams and lintels supporting floors shall be determined according to Subsection 4.1.3. where the supported floors a) serve other than residential areas" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div B 9.15.1.2.(1), PDF p.924: "Buildings erected on permafrost shall have foundations designed by a designer competent in this field in accordance with the appropriate requirements of Part 4." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div C 2.4.1.2.(1), PDF p.740: "For design carried out in accordance with Part 4 … the designer shall be a registered professional skilled in the work concerned." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
 
 **Fires when:**
 
@@ -124,13 +124,13 @@ Purpose: Karen's rubric gap #5 (Recommendations). For triggers HR-02, HR-05, HR-
 
 **Basis:**
 
-- Div B 9.3.1.1.(3), PDF p.831: "Except as provided in Sentence (4), reinforced concrete shall be designed to conform to the requirements of Part 4."
-- Div B 9.3.1.1.(4), PDF p.831: "For flat insulating concrete form walls not exceeding 2 storeys in building height and having a maximum floor to floor height of 3 m"
-- Div B 9.24.1.1.(2), PDF p.991: "Where loadbearing steel studs are used, they shall be designed in conformance with Part 4."
-- Div B 9.17.1.1.(2), PDF p.935: "Columns for applications other than as described in Sentence (1) shall be designed in accordance with Part 4."
-- Div B 9.23.1.1.(2), PDF p.962: "Where the conditions in Sentence (1) are exceeded for wood constructions, the design of the framing and fastening shall conform to Subsection 4.3.1."
-- Div B 9.4.2.2.(3), PDF p.838: "Bow string, arch or semi-circular roof trusses having an unsupported span greater than 6 m shall be designed in conformance with the snow load requirements"
-- Div C 2.4.1.2.(1), PDF p.740: "For design carried out in accordance with Part 4 … the designer shall be a registered professional skilled in the work concerned."
+- Div B 9.3.1.1.(3), PDF p.831: "Except as provided in Sentence (4), reinforced concrete shall be designed to conform to the requirements of Part 4." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div B 9.3.1.1.(4), PDF p.831: "For flat insulating concrete form walls not exceeding 2 storeys in building height and having a maximum floor to floor height of 3 m" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div B 9.24.1.1.(2), PDF p.991: "Where loadbearing steel studs are used, they shall be designed in conformance with Part 4." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div B 9.17.1.1.(2), PDF p.935: "Columns for applications other than as described in Sentence (1) shall be designed in accordance with Part 4." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div B 9.23.1.1.(2), PDF p.962: "Where the conditions in Sentence (1) are exceeded for wood constructions, the design of the framing and fastening shall conform to Subsection 4.3.1." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div B 9.4.2.2.(3), PDF p.838: "Bow string, arch or semi-circular roof trusses having an unsupported span greater than 6 m shall be designed in conformance with the snow load requirements" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div C 2.4.1.2.(1), PDF p.740: "For design carried out in accordance with Part 4 … the designer shall be a registered professional skilled in the work concerned." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
 
 **Fires when:**
 
@@ -162,8 +162,8 @@ Purpose: Karen's rubric gap #5 (Recommendations). For triggers HR-02, HR-05, HR-
 - Safety Codes Act s.38(1), page 31 of the Act PDF: "An Administrator or a safety codes officer may issue a written variance"
 - Safety Codes Act s.38(1), page 31 of the Act PDF: "if the Administrator or officer is of the opinion that the variance provides approximately equivalent or greater safety performance"
 - Safety Codes Act s.38(3), page 31 of the Act PDF: "A safety codes officer on issuing a variance shall notify an Administrator."
-- Div A 1.2.1.1.(1), PDF p.38: "b) using alternative solutions that will achieve at least the minimum level of performance required by Division B"
-- Div C 2.2.1.2.(1), PDF p.729: "A written request for a variance may be submitted to the Provincial Building Administrator."
+- Div A 1.2.1.1.(1), PDF p.38: "b) using alternative solutions that will achieve at least the minimum level of performance required by Division B" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div C 2.2.1.2.(1), PDF p.729: "A written request for a variance may be submitted to the Provincial Building Administrator." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
 
 **Fires when:**
 
@@ -190,9 +190,9 @@ Purpose: Karen's rubric gap #5 (Recommendations). For triggers HR-02, HR-05, HR-
 
 **Basis:**
 
-- Div C 2.2.1.4.(1), PDF p.730: "The Provincial Barrier-Free Administrator or Provincial Building Administrator may grant relaxation of one or more of the requirements of Section 3.8. of Division B"
-- Div C 2.2.1.4.(1), PDF p.730: "a) the specific requirements are unnecessary, or b) extraordinary circumstances prevent conformance."
-- Div B 3.8.1.1.(1), PDF p.301: "This Section is concerned with the barrier-free design of buildings."
+- Div C 2.2.1.4.(1), PDF p.730: "The Provincial Barrier-Free Administrator or Provincial Building Administrator may grant relaxation of one or more of the requirements of Section 3.8. of Division B" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div C 2.2.1.4.(1), PDF p.730: "a) the specific requirements are unnecessary, or b) extraordinary circumstances prevent conformance." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
+- Div B 3.8.1.1.(1), PDF p.301: "This Section is concerned with the barrier-free design of buildings." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
 
 **Fires when:**
 

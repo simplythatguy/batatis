@@ -21,7 +21,7 @@ def code(div, pid, quote, kind='provision'):
                 url='codedb snapshot (NBC(AE) 2023 2nd printing PDF)', quote=quote, verification=f'codedb-checked, PDF p.{r[0] if r else "?"}')
 def pdf(label, path, url, quote, licence=None):
     p = pdfpage(path, quote)
-    d = dict(source=label, page=p, url=url, quote=quote, verification=f'source-PDF-checked (local copy {path}), p.{p}')
+    d = dict(source=label, page=p, url=url, quote=quote, verification=f'source-PDF-checked, p.{p}; {url}')
     if licence: d['licence'] = licence
     return d
 B = '/workspace/batatis'

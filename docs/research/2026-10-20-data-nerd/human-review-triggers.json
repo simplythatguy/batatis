@@ -1,5 +1,5 @@
 {
-  "source_attribution": "Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research; see https://nrc-publications.canada.ca/ (record id 0316d953-0d55-4311-af69-cad55efec499).",
+  "source_attribution": "Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
   "generated": "2026-10-20",
   "label": "model-checked, not human-verified",
   "codedb_sha256": "65e6504075167c3d12731593d57f9c58571bdf4fd5575af262011d1b18902192",
@@ -55,6 +55,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 740,
           "quote": "For buildings other than those described in Sentence (1), the drawings and specifications shall be authenticated by one or more registered professionals …",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.740",
           "quote_clipped": true
@@ -66,6 +67,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 739,
           "quote": "involvement of a registered professional is not required for a building a) 3 storeys or less in building height, classified as an assembly, care, treatment …",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.739",
           "quote_clipped": true
@@ -77,6 +79,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 740,
           "quote": "For the purposes of Sentence (1), secondary suites need not be considered as dwelling units.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.740"
         },
@@ -87,6 +90,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 740,
           "quote": "Drawings and specifications required to be authenticated by a registered professional shall be authenticated … Architects Act or the Engineering and Geoscience Professions Act.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.740",
           "quote_clipped": true
@@ -134,6 +138,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 741,
           "quote": "This Subsection applies to a project that falls within the scope of Sentence 2.4.1.1.(3).",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.741"
         },
@@ -144,6 +149,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 741,
           "quote": "Before applying for a permit, the owner shall a) retain a coordinating registered professional to coordinate the design and field reviews of the registered professionals …",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.741",
           "quote_clipped": true
@@ -155,6 +161,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 741,
           "quote": "c) provide the authority having jurisdiction with Schedules A and B",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.741"
         },
@@ -165,6 +172,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 742,
           "quote": "Before issuing an occupancy permit or giving permission to occupy, the authority having jurisdiction shall receive Schedule C-1 from the coordinating registered professional.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.742"
         },
@@ -175,6 +183,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 742,
           "quote": "work on the portion … shall stop until a replacement is retained and a new Schedule A is submitted to the authority having jurisdiction.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.742",
           "quote_clipped": true
@@ -221,6 +230,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 740,
           "quote": "For design carried out in accordance with Part 4 of Division B, the designer shall be a registered professional skilled in the work concerned.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.740"
         },
@@ -231,6 +241,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 732,
           "quote": "Structural drawings and related documents submitted with the application to build shall be authenticated by a registered professional as required by Sentence 2.4.1.2.(1).",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.732"
         },
@@ -241,6 +252,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 732,
           "quote": "Structural drawings of parts or components including guards shall be authenticated by a registered professional.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.732"
         }
@@ -283,6 +295,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 39,
           "quote": "Parts 3, 4, 5, and 6 of Division B apply … c) exceeding 600 m² in building area or exceeding 3 storeys in building height",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.39",
           "quote_clipped": true
@@ -294,6 +307,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 40,
           "quote": "Part 9 of Division B applies to all buildings … of 3 storeys or less in building height, having a building area not exceeding 600 m²",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.40",
           "quote_clipped": true
@@ -335,6 +349,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 967,
           "quote": "Fastening of sheathing shall conform to Part 4 … wind pressure is equal to or greater than 1.2 kPa … Sa(0.2), is greater than 1.8.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.967",
           "quote_clipped": true
@@ -346,6 +361,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 970,
           "quote": "Where … Sa(0.2), is greater than 1.8 or … wind pressure is equal to or greater than 1.2 kPa, anchorage shall be designed according to Part 4.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.970",
           "quote_clipped": true
@@ -357,6 +373,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 988,
           "quote": "… roof sheathing shall be designed according to Part 4 … Sa(0.2), is greater than 1.2, or … wind pressure is equal to or greater than 1.20 kPa.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.988",
           "quote_clipped": true
@@ -402,6 +419,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 925,
           "quote": "Except as provided in Sentence 9.15.3.4.(2), where the span of the supported joists exceeds 4.9 m, footings shall be designed in accordance with Section 4.2.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.925"
         },
@@ -412,6 +430,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 925,
           "quote": "Where the specified live load exceeds 2.4 kPa, footings shall be designed in accordance with Section 4.2.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.925"
         },
@@ -422,6 +441,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 967,
           "quote": "Spans for joists, beams and lintels supporting floors shall be determined according to Subsection 4.1.3. where the supported floors a) serve other than residential areas …",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.967",
           "quote_clipped": true
@@ -433,6 +453,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 933,
           "quote": "Floors-on-ground that support loads from the superstructure shall be designed in conformance with Part 4.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.933"
         },
@@ -443,6 +464,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 924,
           "quote": "Buildings erected on permafrost shall have foundations designed by a designer competent in this field in accordance with the appropriate requirements of Part 4.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.924"
         }
@@ -489,6 +511,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 831,
           "quote": "Except as provided in Sentence (4), reinforced concrete shall be designed to conform to the requirements of Part 4.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.831"
         },
@@ -499,6 +522,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 991,
           "quote": "Where loadbearing steel studs are used, they shall be designed in conformance with Part 4.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.991"
         },
@@ -509,6 +533,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 935,
           "quote": "Columns for applications other than as described in Sentence (1) shall be designed in accordance with Part 4.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.935"
         },
@@ -519,6 +544,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 944,
           "quote": "Steel angle lintels supporting masonry other than veneer, masonry and reinforced concrete lintels, and masonry arches shall be designed in accordance with Part 4 …",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.944",
           "quote_clipped": true
@@ -530,6 +556,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 962,
           "quote": "Where the conditions in Sentence (1) are exceeded for wood constructions, the design of the framing and fastening shall conform to Subsection 4.3.1.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.962"
         },
@@ -540,12 +567,13 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 838,
           "quote": "Bow string, arch or semi-circular roof trusses having an unsupported span greater than 6 m shall be designed in conformance with the snow load requirements …",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.838",
           "quote_clipped": true
         }
       ],
-      "notes": "Full list of Part 9 sentences pointing to Part 4/Section 4.x found by SQL LIKE (33 hits) is in `research/src/hrt_part9_part4.txt` (not committed).",
+      "notes": "Full list of Part 9 sentences pointing to Part 4/Section 4.x found by SQL LIKE (33 hits) is not included in this pack.",
       "engine_coverage": "NOT covered as facts.",
       "verification": [
         "codedb-checked, 2nd printing, PDF p.831",
@@ -588,6 +616,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 986,
           "quote": "Wood roof trusses shall be designed in accordance with good engineering practice such as that described in TPIC 2019",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.986"
         },
@@ -598,6 +627,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 986,
           "quote": "The joint connections used in trusses described in Sentence (1) shall be designed in conformance with the requirements in Subsection 4.3.1.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.986"
         },
@@ -649,6 +679,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 836,
           "quote": "b) be designed according to good engineering practice such as that provided in CWC 2014 … or c) be designed according to Part 4",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.836",
           "quote_clipped": true
@@ -660,6 +691,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 979,
           "quote": "Bracing to resist lateral loads shall be designed and constructed in accordance with a) Part 4, or b) good engineering practice",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.979"
         },
@@ -670,6 +702,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 593,
           "quote": "Heating, ventilating and air-conditioning systems, including mechanical refrigeration equipment, shall be designed, constructed and installed in conformance with good engineering practice",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.593"
         },
@@ -680,6 +713,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 626,
           "quote": "A drainage system shall be designed in accordance with good engineering practice.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.626"
         },
@@ -734,6 +768,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 740,
           "quote": "If a preserved wood foundation designed in accordance with Part 4 … retained a registered professional to perform field reviews of the foundation system during installation.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.740",
           "quote_clipped": true
@@ -785,6 +820,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 740,
           "quote": "If an automatic fire suppression system is to be installed … the owner shall submit evidence … retained a registered professional to a) design the system …",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.740",
           "quote_clipped": true
@@ -796,6 +832,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 740,
           "quote": "If a fire alarm system is to be installed … the owner shall submit evidence … retained a registered professional to a) design the system …",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.740",
           "quote_clipped": true
@@ -807,6 +844,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 731,
           "quote": "Unless deemed by the authority having jurisdiction … minor alteration … all plans … for an automatic fire suppression system … shall be authenticated by a registered professional.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.731",
           "quote_clipped": true
@@ -818,6 +856,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 731,
           "quote": "Unless deemed by the authority having jurisdiction … minor alteration … all plans for a fire alarm system … shall be authenticated by a registered professional.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.731",
           "quote_clipped": true
@@ -862,6 +901,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 1504,
           "quote": "If a sprinkler system is installed, it shall be designed by a registered professional in conformance with NFPA 13",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.1504"
         },
@@ -872,6 +912,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 1499,
           "quote": "this Part applies to a building providing accommodation for an industrial workforce living and working in a temporary location",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.1499"
         }
@@ -910,6 +951,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 734,
           "quote": "… the drawings and specifications for a swimming pool or water spray park shall be authenticated by a registered professional.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.734",
           "quote_clipped": true
@@ -949,6 +991,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 505,
           "quote": "A subsurface investigation, including groundwater conditions, shall be carried out by or under the direction of a registered professional having knowledge and experience …",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.505",
           "quote_clipped": true
@@ -960,6 +1003,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 507,
           "quote": "the geotechnical components of loads and the factored geotechnical resistances at ULS shall be determined by a suitably qualified and experienced registered professional.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.507"
         },
@@ -970,6 +1014,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 510,
           "quote": "the determination of the number and type of load test and the interpretation of the results shall be carried out by a registered professional …",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.510",
           "quote_clipped": true
@@ -1011,6 +1056,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 737,
           "quote": "The constructor … when required, shall retain a registered professional to design temporary structural members such as formwork, falsework, hoarding and scaffolding.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.737",
           "quote_clipped": true
@@ -1049,6 +1095,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 175,
           "quote": "A structure that cannot be identified with the characteristics of a building in Articles 3.2.2.20. to 3.2.2.92. … good fire protection engineering practice.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.175",
           "quote_clipped": true
@@ -1101,6 +1148,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 739,
           "quote": "The Code analysis … shall include information about the qualifications, experience and background of the person or persons taking responsibility for the design.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.739",
           "quote_clipped": true
@@ -1112,6 +1160,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 739,
           "quote": "the applicant for the permit shall identify a single person to co-ordinate the preparation of the design, Code analysis and documentation …",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.739",
           "quote_clipped": true
@@ -1123,6 +1172,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 739,
           "quote": "any assumptions, limiting or restricting factors, testing procedures, engineering studies or building performance parameters that will support a Code compliance assessment.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.739"
         }
@@ -1187,6 +1237,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 740,
           "quote": "If the size or complexity of a project may give rise to special safety concerns … may require the involvement of one or more registered professionals …",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.740",
           "quote_clipped": true
@@ -1528,6 +1579,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 729,
           "quote": "A written request for a variance may be submitted to the Provincial Building Administrator.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.729"
         },
@@ -1538,6 +1590,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 729,
           "quote": "A written request for an interpretation may be submitted to the Provincial Building Administrator … a) specific Code references, and b) a statement identifying the ambiguity …",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.729",
           "quote_clipped": true
@@ -1577,6 +1630,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 730,
           "quote": "The Provincial Barrier-Free Administrator or Provincial Building Administrator may grant relaxation of one or more of the requirements of Section 3.8. of Division B",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.730"
         }
@@ -1615,6 +1669,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 730,
           "quote": "If life safety will not be reduced, the authority having jurisdiction may accept a minor variation, not more than 2%, of a dimension …",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.730",
           "quote_clipped": true
@@ -1653,6 +1708,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 38,
           "quote": "A change in occupancy or alteration … shall be permitted if the level of safety and building performance proposed are acceptable to the authority having jurisdiction.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.38",
           "quote_clipped": true
@@ -1664,6 +1720,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 38,
           "quote": "The authority having jurisdiction may accept existing construction not in complete compliance with this Code and may place conditions on the existing construction.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.38"
         }
@@ -1704,6 +1761,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 731,
           "quote": "The design of a water treatment system using ozone, ultraviolet light … shall be submitted for review and acceptance by the authority having jurisdiction.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.731",
           "quote_clipped": true
@@ -1715,6 +1773,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 735,
           "quote": "A tent or air-supported structure shall not be erected unless written permission has been obtained from the authority having jurisdiction.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.735"
         },
@@ -1725,6 +1784,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 735,
           "quote": "The authority having jurisdiction may permit selective compliance with this Code for a temporary building referred to in Sentence (1).",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.735"
         },
@@ -1735,6 +1795,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 1508,
           "quote": "each design shall be submitted to the authority having jurisdiction for review.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.1508"
         }
@@ -1833,6 +1894,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 151,
           "quote": "shall be determined on the basis of the results of tests conducted in conformance with CAN/ULC-S101",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.151"
         }
@@ -1870,6 +1932,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 137,
           "quote": "when tested in accordance with CAN/ULC-S134, “Standard Method of Fire Test of Exterior Wall Assemblies,”",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.137"
         }
@@ -1906,6 +1969,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 736,
           "quote": "The testing agency that does the inspection and testing required by Sentence (1) shall provide a report",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.736"
         },
@@ -1916,6 +1980,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 736,
           "quote": "A non-flammable medical gas piping system shall not be used until the report required by Sentence (1) has been accepted by the authority having jurisdiction.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.736"
         }
@@ -1955,6 +2020,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 742,
           "quote": "Where a component of a building is assembled off the building site … cannot be reviewed on site, off-site reviews shall be carried out …",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.742",
           "quote_clipped": true
@@ -1966,6 +2032,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 742,
           "quote": "Every relocatable industrial camp building that is constructed after 01 May 2024 shall be certified by an organization approved … by the Provincial Building Administrator",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.742",
           "quote_clipped": true
@@ -2017,6 +2084,7 @@
           "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
           "page": 730,
           "quote": "If requested by the authority having jurisdiction, the owner shall submit evidence … fabricators and erectors of welded construction … are certified by the Canadian Welding Bureau.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "checked": "codedb",
           "verification": "codedb-checked, 2nd printing, PDF p.730",
           "quote_clipped": true

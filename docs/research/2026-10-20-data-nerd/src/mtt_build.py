@@ -1,6 +1,6 @@
 """Build research/mandatory-triggers-tests.{json,md} (Karen rubric gap #5). Model-checked, not human-verified.
 Every code quote is checked as an exact substring of codedb text (NBC(AE) 2023 2nd printing); SCA quotes against
-pdftotext of research/src/leg/S01.pdf (whitespace-normalised). Quotes <= 25 words (pieces split on '…')."""
+pdftotext of the King's Printer Safety Codes Act PDF (local, not in this repo). Quotes <= 25 words (pieces split on '…')."""
 import json, re, sqlite3, subprocess, os, sys
 R = os.path.dirname(os.path.abspath(__file__)) + '/..'
 DB = '/workspace/batatis/codedb-snapshot/codedb.sqlite'

@@ -2,7 +2,7 @@
 
 Label: **model-checked, not human-verified**. Written 2026-10-20, about 2:45 PM MDT (UTC-6), by Data Nerd. Read-only: the GitHub repo (simplythatguy/batatis), local research files, and public sources. Nobody was contacted and nothing was posted.
 
-Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research; see https://nrc-publications.canada.ca/ (record id 0316d953-0d55-4311-af69-cad55efec499).
+Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499
 
 **Scope:** IP and BP are docs, out of scope; X Factor recorded as observations only (no pass/fail).
 
@@ -11,7 +11,7 @@ Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd p
   - `evals/demo-cases/{a,b,c}-*/input/*`
   - `engine/export/field_maps/scc_2026-10.json`
   - PR descriptions #11, #12, #16, #21, #23–#26, #30–#34
-- **Unc reports in `/workspace/unc-reports/ (local, not in repo)`:**
+- **Unc session notes (not in this repo):**
   - session 4 (Dana, #16 @579cd2c)
   - session 5 (Mira, #16 @579cd2c)
   - session 3 (Carlos, #16 @579cd2c, plus BAT-55 at @27bec3e)
@@ -138,21 +138,21 @@ Screen names come from #16, the live page and the Unc reports.
 
 | Provision | PDF page | Quote (≤25 words) |
 |---|---|---|
-| Div B 9.23.17.3.(1) | p.990 | "Gypsum sheathing, rigid insulation and fibreboard shall not be used for the attachment of cladding materials." |
-| Div B 9.27.5.1.(1) | p.1017 | "cladding shall be fastened to the framing members or furring members, or to blocking between the framing members." |
-| Div B 9.27.5.1.(2) | p.1018 | "vertically applied vinyl siding … attached to sheathing only where the sheathing consists of not less than … 11 mm OSB." |
-| Div B 9.27.5.3.(3)(b) | p.1018 | "spaced not more than 600 mm o.c." (furring, the benchmark alternative the applicant skipped) |
+| Div B 9.23.17.3.(1) | p.990 | "Gypsum sheathing, rigid insulation and fibreboard shall not be used for the attachment of cladding materials." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499 |
+| Div B 9.27.5.1.(1) | p.1017 | "cladding shall be fastened to the framing members or furring members, or to blocking between the framing members." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499 |
+| Div B 9.27.5.1.(2) | p.1018 | "vertically applied vinyl siding … attached to sheathing only where the sheathing consists of not less than … 11 mm OSB." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499 |
+| Div B 9.27.5.3.(3)(b) | p.1018 | "spaced not more than 600 mm o.c." (furring, the benchmark alternative the applicant skipped) — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499 |
 
 **Must not be offered as relevant:** Div B 9.29.9.3. (the session 5 failure: OSB/particleboard nails used as an interior finish).
 
 **A3. Routes** (the app routes; a person decides).
 - **(a) "Approved for all of Alberta".** Two routes, and the app must present them as routes, not as an approval:
   - product evaluation by CCMC or a Provincial Building Administrator (PBA)-approved evaluator (`identify-regression.json` product_approval_vs_variance, claims 1–2)
-  - a province-wide variance request to the PBA, Div C 2.2.1.2.(1), PDF p.729: "A written request for a variance may be submitted to the Provincial Building Administrator." (HR-31)
+  - a province-wide variance request to the PBA, Div C 2.2.1.2.(1), PDF p.729: "A written request for a variance may be submitted to the Provincial Building Administrator." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499 (HR-31)
 - **(b) Pilot house on a variance.** A site-specific variance is the SCO's decision: SCA s.38(1) and HR-30 (mandatory routing).
 - **(c) "Engineer stamp?"**
   - Route this through Section D: HR-21 (practice of engineering) and HR-03 if anything is designed under Part 4.
-  - HR-05: Div B 9.23.3.5.(4), PDF p.967: "Fastening of sheathing shall conform to Part 4, a) where the 1-in-50 hourly wind pressure is equal to or greater than 1.2 kPa". The app may state the threshold and the location values as facts and must leave the conclusion to the officer.
+  - HR-05: Div B 9.23.3.5.(4), PDF p.967: "Fastening of sheathing shall conform to Part 4, a) where the 1-in-50 hourly wind pressure is equal to or greater than 1.2 kPa" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499. The app may state the threshold and the location values as facts and must leave the conclusion to the officer.
   - Edmonton 1-in-50 hourly wind pressure 0.45 kPa and Sa(0.2) 0.103: from no-ground-truth-cases.json, not codedb-checkable.
 - **(d) Bracing "by sheathing".** This is an open question; the app must not state the bracing design.
 
@@ -216,10 +216,10 @@ Screen names come from #16, the live page and the Unc reports.
 
 | Provision | PDF page | Quote (≤25 words) |
 |---|---|---|
-| Div B 3.1.9.1.(1) | p.159 | "sealed by a firestop that … CAN/ULC-S115 … has an F rating not less than the required fire-resistance rating of the fire separation" |
-| Div B 3.1.9.4.(2) | p.160 | "Combustible water distribution piping is permitted to penetrate a fire separation" (PEX) |
-| Div B 3.1.9.4.(4) | p.160 | "Combustible drain, waste and vent piping is permitted to penetrate a fire separation" (PVC DWV) |
-| Div B 3.1.9.1.(4) | p.159 | "Sprinklers are permitted to penetrate … without having to meet the firestop requirements … provided … covered by a metal escutcheon plate" |
+| Div B 3.1.9.1.(1) | p.159 | "sealed by a firestop that … CAN/ULC-S115 … has an F rating not less than the required fire-resistance rating of the fire separation" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499 |
+| Div B 3.1.9.4.(2) | p.160 | "Combustible water distribution piping is permitted to penetrate a fire separation" (PEX) — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499 |
+| Div B 3.1.9.4.(4) | p.160 | "Combustible drain, waste and vent piping is permitted to penetrate a fire separation" (PVC DWV) — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499 |
+| Div B 3.1.9.1.(4) | p.159 | "Sprinklers are permitted to penetrate … without having to meet the firestop requirements … provided … covered by a metal escutcheon plate" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499 |
 | Div A 1.2.1.1.(1) | p.38 | the acceptable-solution route (a) vs the alternative-solution route (b) |
 | Div C 2.3.1.1.(1) | p.739 | alternative-solution documentation |
 | SCA s.38(1) | page 31 of the Act PDF | the SCO may issue a written variance |
@@ -275,18 +275,18 @@ The app routes each of these to a person and states none of them as satisfied.
 - **Smoke alarms:** locations not yet shown.
 - **owner_rep_name / mailing_address:** open.
 
-**C2. Gold citations (confirmed by Karen).** Code text is from codedb (2nd printing). The STANDATA are the local copies in `/workspace/batatis/sources/standata/ (local, not in repo)`.
+**C2. Gold citations (confirmed by Karen).** Code text is from codedb (2nd printing). The STANDATA quotes below are from the published Alberta STANDATA. Those PDFs are not in this repo.
 
 | Provision | PDF page | Quote (≤25 words) |
 |---|---|---|
-| Div B 9.9.10.1.(2) | p.873 | "provide an unobstructed opening of not less than 0.35 m² in area with no dimension less than 380 mm" |
-| Div B 9.9.10.1.(1) | p.873 | "each bedroom or combination bedroom shall have at least one outside window or exterior door openable from the inside" |
-| Div B 9.36.2.8.(5) | p.1077 | "floors-on-ground with embedded heating ducts, cables or pipes shall be insulated … under their full bottom surface including the edges." |
+| Div B 9.9.10.1.(2) | p.873 | "provide an unobstructed opening of not less than 0.35 m² in area with no dimension less than 380 mm" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499 |
+| Div B 9.9.10.1.(1) | p.873 | "each bedroom or combination bedroom shall have at least one outside window or exterior door openable from the inside" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499 |
+| Div B 9.36.2.8.(5) | p.1077 | "floors-on-ground with embedded heating ducts, cables or pipes shall be insulated … under their full bottom surface including the edges." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499 |
 | STANDATA 23-BCV-003 | page 3 of the STANDATA PDF | "A minimum RSI 1.32 (R 7.5) under slab insulation complies when installed for a heated floor in contact with the ground." |
-| Div B 9.19.1.1.(1) | p.939 | "vents shall be installed to permit the transfer of moisture from the space to the exterior." |
+| Div B 9.19.1.1.(1) | p.939 | "vents shall be installed to permit the transfer of moisture from the space to the exterior." — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499 |
 | STANDATA 23-BCV-017 | page 2 of the STANDATA PDF | "design requirements from the following documents which are to be provided with the permit application" (RDH report 32139.000) |
-| Div B 9.10.19.1.(1) | p.909 | "smoke alarms conforming to CAN/ULC-S531, “Standard for Smoke Alarms,” shall be installed in a) each dwelling unit" |
-| Div B 9.10.19.3.(1) | p.909 | "Within dwelling units, sufficient smoke alarms shall be installed so that a) there is at least one smoke alarm installed on each storey" (smoke-alarm locations gap) |
+| Div B 9.10.19.1.(1) | p.909 | "smoke alarms conforming to CAN/ULC-S531, “Standard for Smoke Alarms,” shall be installed in a) each dwelling unit" — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499 |
+| Div B 9.10.19.3.(1) | p.909 | "Within dwelling units, sufficient smoke alarms shall be installed so that a) there is at least one smoke alarm installed on each storey" (smoke-alarm locations gap) — © National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499 |
 
 The 23-BCV-003 quote is the STANDATA's own wording. The app may quote it with attribution and must not restate it as its own verdict (section 5).
 

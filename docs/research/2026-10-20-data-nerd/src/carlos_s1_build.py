@@ -14,7 +14,7 @@ def pages(pdf):
 def pdfcite(label,pdf,url,quote,why=''):
     P=pages(pdf); hit=[i+1 for i,t in enumerate(P) if n(quote) in t]
     if not hit: ERR.append(f'quote not found in {pdf}: {quote[:60]}')
-    return dict(source=label, url=url, local=pdf, pdf_page=hit[0] if hit else None, quote=quote, why=why, verification='pdftotext string-match, '+LABEL)
+    return dict(source=label, url=url, local='not in this repo', pdf_page=hit[0] if hit else None, quote=quote, why=why, verification='pdftotext string-match, '+LABEL)
 def attr(pid):
     rows=c.execute('select table_id,bracket,pdf_page from attributions where provision_id=? order by seq',(pid,)).fetchall()
     st=c.execute("select status from attribution_status where doc='NBC-AE' and provision_id=?",(pid,)).fetchone()
@@ -35,7 +35,7 @@ REPO='simplythatguy/batatis@914b8ec'; RP='evals/demo-cases/b-contractor-firestop
 LOCAL='/workspace/batatis/research/src/repo-914b8ec/'+RP
 if 'Current as of December 1, 2025' not in pages(SCA[1])[0]: ERR.append('SCA currency date not found')
 def line(f,ln,sub=None):
-    if f.startswith('/workspace/unc-reports/'): src=f; out=f
+    if f.startswith('/workspace/unc-reports/'): src=f; out='Unc session note (not in this repo)'
     else: src=LOCAL+f; out=f'{RP}{f} @ {REPO}'
     L=open(src).read().split('\n')[ln-1]
     if sub and sub not in L: ERR.append(f'{f}:{ln} missing {sub[:50]}')
@@ -45,7 +45,7 @@ def line(f,ln,sub=None):
 part1=dict(
  question='When does an Alberta applicant need an alternative solution / variance, and when should they just change the design to meet the acceptable solutions?',
  app_answer='Two routes; the officer decides. (1) Replace or repair with a tested, listed firestop system for the actual pipe and gap — the code\'s acceptable-solution route (Div A 1.2.1.1.(1)(a)); the inspector or safety codes officer confirms it. (2) If no tested system fits, propose an alternative solution with the documents in Div C 2.3.1.1 and request a variance; the safety codes officer decides (SCA s.38(1)), and installed work stays at risk until then. Batatis can\'t tell you either route will be accepted.',
- app_answer_source='Karen review, /workspace/karen/pr-reviews.md "Carlos S1 backing" (Oct 20, 2026 ~2:31 PM MDT), verbatim',
+ app_answer_source='Karen review, "Carlos S1 backing" (Oct 20, 2026 ~2:31 PM MDT), verbatim (review note not in this repo)',
  rule=[
   'Step 1 (route 1): Show the Division B acceptable solution that governs the item. For Carlos that is a tested, listed CAN/ULC-S115 firestop system for the actual pipe and gap. Replacing or repairing to it is the acceptable-solution route (Div A 1.2.1.1.(1)(a)). The inspector or safety codes officer confirms it; the app never states that the work complies.',
   'Step 2: Only where the acceptable solution cannot be met (no tested system fits the field condition) is an alternative solution the route, under Div A 1.2.1.1.(1)(b). It must reach at least the performance required "in the areas defined by the objectives and functional statements attributed to the applicable acceptable solutions".',
@@ -168,7 +168,7 @@ fx=[
 for f in fx: f['label']=LABEL
 
 if ERR: print('\n'.join(ERR)); sys.exit(1)
-out=dict(meta=dict(title='Carlos S1 backing: variance vs redesign, sprinkler "exempt", fact-extraction regression cases', generated='2026-10-20 (America/Edmonton, MDT UTC-6)', label=LABEL, persona='Carlos Mendes (GC, Calgary), case B', report='/workspace/unc-reports/session3-carlos-gc.md (S1 issues 1-3 at lines 8-10)', codedb_snapshot=dict(path=DB, sha256=hashlib.sha256(open(DB,'rb').read()).hexdigest(), edition='NBC(AE) 2023 2nd printing'), public_sources_only=True, builder='docs/research/2026-10-20-data-nerd/src/carlos_s1_build.py'),
+out=dict(meta=dict(title='Carlos S1 backing: variance vs redesign, sprinkler "exempt", fact-extraction regression cases', generated='2026-10-20 (America/Edmonton, MDT UTC-6)', label=LABEL, persona='Carlos Mendes (GC, Calgary), case B', report='Unc session 3, Carlos GC, S1 issues 1-3 at lines 8-10 (session note not in this repo)', codedb_snapshot=dict(path='local codedb snapshot (NBC(AE) 2023 2nd printing), not in this repo', sha256=hashlib.sha256(open(DB,'rb').read()).hexdigest(), edition='NBC(AE) 2023 2nd printing'), public_sources_only=True, builder='docs/research/2026-10-20-data-nerd/src/carlos_s1_build.py'),
  part1_variance_vs_redesign=part1, part2_sprinkler_exempt=part2, part3_fact_extraction_cases=fx)
 json.dump(out,open(R/'carlos-s1-backing.json','w'),ensure_ascii=False,indent=2)
 print('OK json', sum(len(v) for v in P2c.values()), len(part1['citations']), len(fx))

@@ -1,13 +1,13 @@
 {
-  "source_attribution": "Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research; see https://nrc-publications.canada.ca/ (record id 0316d953-0d55-4311-af69-cad55efec499).",
+  "source_attribution": "Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
   "meta": {
     "title": "Carlos S1 backing: variance vs redesign, sprinkler \"exempt\", fact-extraction regression cases",
     "generated": "2026-10-20 (America/Edmonton, MDT UTC-6)",
     "label": "model-checked, not human-verified",
     "persona": "Carlos Mendes (GC, Calgary), case B",
-    "report": "/workspace/unc-reports/session3-carlos-gc.md (local, not in repo) (S1 issues 1-3 at lines 8-10)",
+    "report": "Unc session 3, Carlos GC, S1 issues 1-3 at lines 8-10 (session note not in this repo)",
     "codedb_snapshot": {
-      "path": "/workspace/batatis/codedb-snapshot/codedb.sqlite (local, not in repo)",
+      "path": "local codedb snapshot (NBC(AE) 2023 2nd printing), not in this repo",
       "sha256": "65e6504075167c3d12731593d57f9c58571bdf4fd5575af262011d1b18902192",
       "edition": "NBC(AE) 2023 2nd printing"
     },
@@ -17,7 +17,7 @@
   "part1_variance_vs_redesign": {
     "question": "When does an Alberta applicant need an alternative solution / variance, and when should they just change the design to meet the acceptable solutions?",
     "app_answer": "Two routes; the officer decides. (1) Replace or repair with a tested, listed firestop system for the actual pipe and gap — the code's acceptable-solution route (Div A 1.2.1.1.(1)(a)); the inspector or safety codes officer confirms it. (2) If no tested system fits, propose an alternative solution with the documents in Div C 2.3.1.1 and request a variance; the safety codes officer decides (SCA s.38(1)), and installed work stays at risk until then. Batatis can't tell you either route will be accepted.",
-    "app_answer_source": "Karen review, /workspace/karen/pr-reviews.md (local, not in repo) \"Carlos S1 backing\" (Oct 20, 2026 ~2:31 PM MDT), verbatim",
+    "app_answer_source": "Karen review, \"Carlos S1 backing\" (Oct 20, 2026 ~2:31 PM MDT), verbatim (review note not in this repo)",
     "rule": [
       "Step 1 (route 1): Show the Division B acceptable solution that governs the item. For Carlos that is a tested, listed CAN/ULC-S115 firestop system for the actual pipe and gap. Replacing or repairing to it is the acceptable-solution route (Div A 1.2.1.1.(1)(a)). The inspector or safety codes officer confirms it; the app never states that the work complies.",
       "Step 2: Only where the acceptable solution cannot be met (no tested system fits the field condition) is an alternative solution the route, under Div A 1.2.1.1.(1)(b). It must reach at least the performance required \"in the areas defined by the objectives and functional statements attributed to the applicable acceptable solutions\".",
@@ -33,6 +33,7 @@
         "provision": "1.2.1.1.(1)",
         "pdf_page": 38,
         "quote": "Compliance with this Code shall be achieved by a) complying with the applicable acceptable solutions in Division B",
+        "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
         "why": "compliance option (a): acceptable solutions",
         "verification": "codedb string-match, model-checked, not human-verified"
       },
@@ -42,6 +43,7 @@
         "provision": "1.2.1.1.(1)",
         "pdf_page": 38,
         "quote": "b) using alternative solutions that will achieve at least the minimum level of performance required by Division B … attributed to the applicable acceptable solutions",
+        "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
         "why": "compliance option (b): alternative solutions",
         "verification": "codedb string-match, model-checked, not human-verified",
         "quote_clipped": true
@@ -52,6 +54,7 @@
         "provision": "1.2.1.1.(2)",
         "pdf_page": 38,
         "quote": "the objectives and functional statements attributed to the acceptable solutions in Division B shall be … referred to in Subsection 1.1.2. of Division B",
+        "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
         "why": "which objectives/functions count",
         "verification": "codedb string-match, model-checked, not human-verified",
         "quote_clipped": true
@@ -62,6 +65,7 @@
         "provision": "2.1.1.2.(1)",
         "pdf_page": 67,
         "quote": "only to the extent that they relate to compliance with this Code as required in Article 1.2.1.1.",
+        "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
         "why": "objectives (Div A Part 2) apply only via Div A 1.2.1.1",
         "verification": "codedb string-match, model-checked, not human-verified"
       },
@@ -71,6 +75,7 @@
         "provision": "2.2.1.1.(1)",
         "pdf_page": 68,
         "quote": "OS1 Fire Safety An objective of this Code is to limit the probability that",
+        "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
         "why": "objective OS1 (fire safety)",
         "verification": "codedb string-match, model-checked, not human-verified"
       },
@@ -80,6 +85,7 @@
         "provision": "3.2.1.1.(1)",
         "pdf_page": 79,
         "quote": "F03 To retard the effects of fire on areas beyond its point of origin.",
+        "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
         "why": "functional statement F03 (Div A Part 3)",
         "verification": "codedb string-match, model-checked, not human-verified"
       },
@@ -89,6 +95,7 @@
         "provision": "3.2.1.1.(1)",
         "pdf_page": 79,
         "quote": "F04 To retard failure or collapse due to the effects of fire.",
+        "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
         "why": "functional statement F04",
         "verification": "codedb string-match, model-checked, not human-verified"
       },
@@ -98,6 +105,7 @@
         "provision": "1.1.2.1.(1)",
         "pdf_page": 89,
         "quote": "… acceptable solutions in Division B shall be the objectives and functional statements identified in Sections 3.10., 4.5., 5.10., 6.10., 7.3., 8.3., 9.38., 10.8. and 11.3.",
+        "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
         "why": "attribution (Div B 1.1.2)",
         "verification": "codedb string-match, model-checked, not human-verified",
         "quote_clipped": true
@@ -108,6 +116,7 @@
         "provision": "3.10.1.1.(1)",
         "pdf_page": 321,
         "quote": "shall be the objectives and functional statements listed in Table 3.10.1.1.",
+        "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
         "why": "Part 3 attribution table",
         "verification": "codedb string-match, model-checked, not human-verified"
       },
@@ -117,6 +126,7 @@
         "provision": "2.3.1.1.(1)",
         "pdf_page": 739,
         "quote": "Documentation … shall be provided by the person requesting the use of an alternative solution to demonstrate that the proposed alternative solution complies with this Code.",
+        "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
         "why": "documentation duty",
         "verification": "codedb string-match, model-checked, not human-verified",
         "quote_clipped": true
@@ -127,6 +137,7 @@
         "provision": "2.3.1.1.(2)",
         "pdf_page": 739,
         "quote": "a Code analysis … rationales … that a proposed alternative solution will achieve at least the level of performance required by Clause 1.2.1.1.(1)(b) of Division A",
+        "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
         "why": "required code analysis",
         "verification": "codedb string-match, model-checked, not human-verified",
         "quote_clipped": true
@@ -134,7 +145,7 @@
       {
         "source": "Safety Codes Act, RSA 2000, c S-1 (King's Printer, current as of December 1, 2025)",
         "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
-        "local": "/workspace/batatis/research/src/leg/S01.pdf (local, not in repo; https://kings-printer.alberta.ca/documents/Acts/S01.pdf)",
+        "local": "not in this repo",
         "pdf_page": 31,
         "quote": "An Administrator or a safety codes officer may issue a written variance … of the opinion that the variance provides approximately equivalent or greater safety performance",
         "why": "SCA s.38(1) variance basis",
@@ -144,7 +155,7 @@
       {
         "source": "Safety Codes Act, RSA 2000, c S-1 (King's Printer, current as of December 1, 2025)",
         "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
-        "local": "/workspace/batatis/research/src/leg/S01.pdf (local, not in repo; https://kings-printer.alberta.ca/documents/Acts/S01.pdf)",
+        "local": "not in this repo",
         "pdf_page": 32,
         "quote": "An applicant who receives a notice referred to in subsection (6) may, within 30 days … appeal the refusal to the Council",
         "why": "SCA s.38(7) appeal of refusal",
@@ -154,7 +165,7 @@
       {
         "source": "International Firestop Council, IFC EJ Guidelines (Rev. Feb 2024) - industry guidance, not code",
         "url": "https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf",
-        "local": "/workspace/batatis/sources/ifc/ifc-ej-guidelines-2024-02.pdf (local, not in repo; https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf)",
+        "local": "not in this repo",
         "pdf_page": 2,
         "quote": "Not be used in lieu of tested systems when available",
         "why": "IFC EJ guideline 1",
@@ -163,7 +174,7 @@
       {
         "source": "International Firestop Council, IFC EJ Guidelines (Rev. Feb 2024) - industry guidance, not code",
         "url": "https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf",
-        "local": "/workspace/batatis/sources/ifc/ifc-ej-guidelines-2024-02.pdf (local, not in repo; https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf)",
+        "local": "not in this repo",
         "pdf_page": 2,
         "quote": "… issued only by a firestop manufacturer’s qualified technical personnel or in concert with the manufacturer … registered Professional Engineer … or an independent testing agency",
         "why": "IFC EJ guideline 2 (who may issue)",
@@ -173,7 +184,7 @@
       {
         "source": "International Firestop Council, IFC EJ Guidelines (Rev. Feb 2024) - industry guidance, not code",
         "url": "https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf",
-        "local": "/workspace/batatis/sources/ifc/ifc-ej-guidelines-2024-02.pdf (local, not in repo; https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf)",
+        "local": "not in this repo",
         "pdf_page": 3,
         "quote": "Include dates of issue and authorization signature as well as the issuer’s name, address and telephone number",
         "why": "IFC EJ content item",
@@ -182,7 +193,7 @@
       {
         "source": "International Firestop Council, IFC EJ Guidelines (Rev. Feb 2024) - industry guidance, not code",
         "url": "https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf",
-        "local": "/workspace/batatis/sources/ifc/ifc-ej-guidelines-2024-02.pdf (local, not in repo; https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf)",
+        "local": "not in this repo",
         "pdf_page": 3,
         "quote": "Reference tested system(s) upon which design (EJ or TE) is based on",
         "why": "IFC EJ content item",
@@ -191,7 +202,7 @@
       {
         "source": "International Firestop Council, IFC EJ Guidelines (Rev. Feb 2024) - industry guidance, not code",
         "url": "https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf",
-        "local": "/workspace/batatis/sources/ifc/ifc-ej-guidelines-2024-02.pdf (local, not in repo; https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf)",
+        "local": "not in this repo",
         "pdf_page": 3,
         "quote": "Identify the job name, project location and firm EJ (TE) is issued to",
         "why": "IFC EJ content item",
@@ -259,7 +270,7 @@
   },
   "part2_sprinkler_exempt": {
     "claim_in_report": {
-      "file": "/workspace/unc-reports/session3-carlos-gc.md (local, not in repo)",
+      "file": "Unc session 3, Carlos GC (session note not in this repo)",
       "line": 9,
       "text": "2. The sprinkler \"exempt\" claim isn't challenged; 3.1.9.4.(1) and 9.10.9.9.(3) show in search but aren't connected to the claim or to the sealant around the sprinkler pipes. (Backy)"
     },
@@ -284,6 +295,7 @@
           "provision": "1.3.3.2.(1)",
           "pdf_page": 39,
           "quote": "c) exceeding 600 m² in building area or exceeding 3 storeys in building height used for major occupancies classified as i) Group C, residential occupancies",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "Part 3 scope",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -293,6 +305,7 @@
           "provision": "1.3.3.3.(1)",
           "pdf_page": 40,
           "quote": "applies to all buildings described in Article 1.1.1.1. of 3 storeys or less in building height, having a building area not exceeding 600 m²",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "Part 9 scope (the Sentence opens \"Part 9 of Division B\")",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -302,6 +315,7 @@
           "provision": "3.1.2.1.(1)",
           "pdf_page": 129,
           "quote": "every building or part thereof shall be classified according to its major occupancy as belonging to one of the Groups or Divisions … Table 3.1.2.1.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "occupancy classification",
           "verification": "codedb string-match, model-checked, not human-verified",
           "quote_clipped": true
@@ -315,6 +329,7 @@
           "pdf_page": 43,
           "page_note": "term located on PDF p.43 by string-match against the code text (definitions list, Sentence 1.4.1.2.(1), PDF p.42-53)",
           "quote": "Building area means the greatest horizontal area of a building above grade within the outside surface of exterior walls … and the centre line of firewalls.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb string-match, model-checked, not human-verified",
           "quote_clipped": true
         },
@@ -325,6 +340,7 @@
           "pdf_page": 43,
           "page_note": "term located on PDF p.43 by string-match against the code text (definitions list, Sentence 1.4.1.2.(1), PDF p.42-53)",
           "quote": "Building height (in storeys) means the number of storeys contained between the roof and the floor of the first storey.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
         {
@@ -334,6 +350,7 @@
           "pdf_page": 45,
           "page_note": "term located on PDF p.45 by string-match against the code text (definitions list, Sentence 1.4.1.2.(1), PDF p.42-53)",
           "quote": "Firewall means a type of fire separation of noncombustible construction that subdivides a building … structural stability to remain intact under fire conditions",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb string-match, model-checked, not human-verified",
           "quote_clipped": true
         },
@@ -344,6 +361,7 @@
           "pdf_page": 45,
           "page_note": "term located on PDF p.45 by string-match against the code text (definitions list, Sentence 1.4.1.2.(1), PDF p.42-53)",
           "quote": "First storey means the uppermost storey having its floor level not more than 2 m above grade.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
         {
@@ -353,6 +371,7 @@
           "pdf_page": 51,
           "page_note": "term located on PDF p.51 by string-match against the code text (definitions list, Sentence 1.4.1.2.(1), PDF p.42-53)",
           "quote": "Sprinklered (as applying to a building or part thereof) means that the building or part thereof is equipped with a system of automatic sprinklers.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb string-match, model-checked, not human-verified"
         }
       ],
@@ -363,6 +382,7 @@
           "provision": "3.2.2.5.(1)",
           "pdf_page": 176,
           "quote": "the building height and building area of the entire building shall be used",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "whole-building height/area",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -372,6 +392,7 @@
           "provision": "3.2.2.6.(1)",
           "pdf_page": 176,
           "quote": "the requirements of this Subsection for the most restricted major occupancy contained shall apply to the whole building",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "multiple occupancies",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -381,6 +402,7 @@
           "provision": "3.2.2.7.(1)",
           "pdf_page": 176,
           "quote": "… one major occupancy is located entirely above another major occupancy … shall apply to that portion as if the entire building were of that major occupancy",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "superimposed occupancies (retail below residential)",
           "verification": "codedb string-match, model-checked, not human-verified",
           "quote_clipped": true
@@ -391,6 +413,7 @@
           "provision": "3.2.2.8.(1)",
           "pdf_page": 176,
           "quote": "these major occupancies need not be considered as major occupancies for the purposes of this Subsection",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "10% exception",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -400,6 +423,7 @@
           "provision": "3.2.2.18.(1)",
           "pdf_page": 178,
           "quote": "an automatic sprinkler system conforming to the requirements of Articles … shall be installed throughout a building regulated by one or more of Articles",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "sprinklers required for listed Articles (includes 3.2.2.47.-3.2.2.49., 3.2.2.51., 3.2.2.52., 3.2.2.55., 3.2.2.66., 3.2.2.67., 3.2.2.69.)",
           "verification": "codedb string-match, model-checked, not human-verified",
           "quote_clipped": true
@@ -410,6 +434,7 @@
           "provision": "3.2.2.18.(2)",
           "pdf_page": 179,
           "quote": "the automatic sprinkler system shall also be installed throughout all lower storeys in the building",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "lower storeys",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -419,6 +444,7 @@
           "provision": "3.2.2.47.(1)",
           "pdf_page": 187,
           "quote": "Except as permitted by Articles 3.2.2.48. to 3.2.2.55., a building classified as Group C shall conform to Sentence (2).",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "Group C any height/area, sprinklered",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -428,6 +454,7 @@
           "provision": "3.2.2.48.(1)",
           "pdf_page": 188,
           "quote": "it is not more than 12 storeys in building height, c) it has a height not more than 42 m",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "Group C up to 12 storeys, sprinklered",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -437,6 +464,7 @@
           "provision": "3.2.2.48.(4)",
           "pdf_page": 188,
           "quote": "b) the Group E major occupancy is located below the third storey",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "Group E inside a 3.2.2.48 building",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -446,6 +474,7 @@
           "provision": "3.2.2.49.(1)",
           "pdf_page": 188,
           "quote": "iv) not more than 7 200 m² if 5 storeys in building height",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "Group C up to 6 storeys, noncombustible, sprinklered",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -455,6 +484,7 @@
           "provision": "3.2.2.51.(1)",
           "pdf_page": 189,
           "quote": "b) it is not more than 6 storeys in building height, c) it has a height not more than 18 m",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "Group C up to 6 storeys, sprinklered",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -464,6 +494,7 @@
           "provision": "3.2.2.51.(1)",
           "pdf_page": 189,
           "quote": "v) 1 800 m² if 5 storeys in building height",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "3.2.2.51 area at 5 storeys",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -473,6 +504,7 @@
           "provision": "3.2.2.51.(5)",
           "pdf_page": 189,
           "quote": "a) the Group A, Division 2 major occupancy and Group E major occupancy are located below the third storey",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "Group E inside a 3.2.2.51 building",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -482,6 +514,7 @@
           "provision": "3.2.2.52.(1)",
           "pdf_page": 189,
           "quote": "b) it is not more than 4 storeys in building height",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "Group C up to 4 storeys: excludes 5 storeys",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -491,6 +524,7 @@
           "provision": "3.2.2.55.(1)",
           "pdf_page": 190,
           "quote": "b) it is not more than 3 storeys in building height",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "Group C up to 3 storeys: excludes 5 storeys",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -500,6 +534,7 @@
           "provision": "3.2.2.67.(1)",
           "pdf_page": 195,
           "quote": "b) it is not more than 4 storeys in building height, and c) it has a building area not more than 1 800 m²",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "Group E up to 4 storeys",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -509,6 +544,7 @@
           "provision": "3.2.5.12.(1)",
           "pdf_page": 233,
           "quote": "an automatic sprinkler system shall be designed, constructed, installed and tested in conformance with NFPA 13",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "sprinkler standard",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -518,6 +554,7 @@
           "provision": "3.2.5.12.(2)",
           "pdf_page": 233,
           "quote": "i) is not more than 4 storeys in building height and conforms to Article 3.2.2.47., 3.2.2.49., 3.2.2.51., 3.2.2.52. or 3.2.2.55.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "NFPA 13R limits",
           "verification": "codedb string-match, model-checked, not human-verified"
         }
@@ -529,6 +566,7 @@
           "provision": "9.10.1.3.(8)",
           "pdf_page": 876,
           "quote": "Sprinkler systems shall be designed, constructed and installed in conformance with Articles 3.2.5.12. to 3.2.5.15. and 3.2.5.17.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "Part 9 sprinkler design",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -538,6 +576,7 @@
           "provision": "9.10.2.2.(2)",
           "pdf_page": 877,
           "quote": "be i) sprinklered in conformance with NFPA 13D",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "Part 9 sprinkler mandate found: home-type care",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -547,6 +586,7 @@
           "provision": "9.10.9.9.(3)",
           "pdf_page": 885,
           "quote": "Sprinkler piping is permitted to penetrate a fire separation, provided the fire compartments on each side of the fire separation are sprinklered.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "Part 9 sprinkler piping penetration",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -556,6 +596,7 @@
           "provision": "9.10.9.9.(4)",
           "pdf_page": 885,
           "quote": "provided the annular space created by the penetration of a fire sprinkler is covered by a metal escutcheon plate in accordance with NFPA 13",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "Part 9 sprinkler escutcheon exception",
           "verification": "codedb string-match, model-checked, not human-verified"
         }
@@ -567,6 +608,7 @@
           "provision": "3.1.9.1.(1)",
           "pdf_page": 159,
           "quote": "sealed by a firestop that … CAN/ULC-S115 … has an F rating not less than the required fire-resistance rating of the fire separation … b) cast in place",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "general firestop rule",
           "verification": "codedb string-match, model-checked, not human-verified",
           "quote_clipped": true
@@ -577,6 +619,7 @@
           "provision": "3.1.9.1.(4)",
           "pdf_page": 159,
           "quote": "Sprinklers are permitted to penetrate … without having to meet the firestop requirements … provided … covered by a metal escutcheon plate in accordance with NFPA 13",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "the only sprinkler \"exemption\" (sprinklers, with escutcheon)",
           "verification": "codedb string-match, model-checked, not human-verified",
           "quote_clipped": true
@@ -587,6 +630,7 @@
           "provision": "3.1.9.2.(1)",
           "pdf_page": 159,
           "quote": "pipes, totally enclosed raceways",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "service penetrations",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -596,6 +640,7 @@
           "provision": "3.1.9.2.(1)",
           "pdf_page": 159,
           "quote": "provided they are protected at the penetration with a firestop conforming to Sentence 3.1.9.1.(1)",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "service penetrations need a 3.1.9.1.(1) firestop",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -605,6 +650,7 @@
           "provision": "3.1.9.4.(1)",
           "pdf_page": 160,
           "quote": "Combustible sprinkler piping is permitted to penetrate a fire separation provided the fire compartments on each side of the fire separation are sprinklered.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "combustible sprinkler piping",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -614,6 +660,7 @@
           "provision": "3.1.9.4.(4)(b)",
           "pdf_page": 160,
           "quote": "in buildings more than 3 storeys in building height, the piping is sealed at the penetration by a firestop",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "DWV in >3 storeys",
           "verification": "codedb string-match, model-checked, not human-verified"
         },
@@ -623,6 +670,7 @@
           "provision": "3.1.9.4.(4)(b)",
           "pdf_page": 160,
           "quote": "with a pressure differential of 50 Pa between the exposed and unexposed sides",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "why": "50 Pa",
           "verification": "codedb string-match, model-checked, not human-verified"
         }
@@ -631,7 +679,7 @@
         {
           "source": "Safety Codes Council, \"National Building Code - 2023 Alberta Edition, Part 3 - Code update information\"",
           "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/PI/National%20Building%20Code%20-%202023%20Alberta%20Edition_Part%203.pdf",
-          "local": "/workspace/batatis/sources/nbcae-updates/nbcae2023-part3-update.pdf (local, not in repo; https://ebs.safetycodes.ab.ca/documents/webdocs/PI/National%20Building%20Code%20-%202023%20Alberta%20Edition_Part%203.pdf)",
+          "local": "not in this repo",
           "pdf_page": 12,
           "quote": "AB specific Sentences (3) and (4) deleted; harmonized with NBC.",
           "why": "historical context: entry for the \"Automatic Sprinkler System Required\" Article, previous Alberta Edition to 2023; the Alberta-specific sprinkler sentences were removed",

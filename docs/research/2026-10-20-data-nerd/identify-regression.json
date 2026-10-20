@@ -1,12 +1,12 @@
 {
-  "source_attribution": "Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research; see https://nrc-publications.canada.ca/ (record id 0316d953-0d55-4311-af69-cad55efec499).",
+  "source_attribution": "Code text: National Building Code – 2023 Alberta Edition (NBC(AE) 2023), 2nd printing, © National Research Council of Canada. Excerpts quoted with attribution for research. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
   "meta": {
     "title": "Identify regression set: plain-language applicant descriptions (manufacturer / general contractor / homebuilder)",
     "generated": "2026-10-20 (America/Edmonton)",
     "label": "model-checked, not human-verified",
     "trigger": "Unc session 5 (cold manufacturer run, PR #16 @579cd2c): identify missed case A provisions 9.27.5.1/9.27.5.3 and returned 9.29.9.3.(2).",
     "codedb_snapshot": {
-      "path": "/workspace/batatis/codedb-snapshot/codedb.sqlite (local, not in repo)",
+      "path": "local codedb snapshot (NBC(AE) 2023 2nd printing), not in this repo",
       "sha256": "65e6504075167c3d12731593d57f9c58571bdf4fd5575af262011d1b18902192",
       "edition": "NBC(AE) 2023 2nd printing"
     },
@@ -49,6 +49,7 @@
           "role": "benchmark",
           "pdf_page": 1017,
           "quote": "cladding shall be fastened to the framing members or furring members, or to blocking between the framing members",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1017"
         },
         {
@@ -68,6 +69,7 @@
           "role": "benchmark (acceptable alternative the applicant skipped)",
           "pdf_page": 1018,
           "quote": "furring for the attachment of cladding shall be not less than 19 mm by 38 mm lumber when applied over sheathing",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1018"
         },
         {
@@ -83,6 +85,7 @@
           "role": "gold (confirmed by Unc; pinned to Sentence 9.23.17.3.(1))",
           "pdf_page": 990,
           "quote": "Gypsum sheathing, rigid insulation and fibreboard shall not be used for the attachment of cladding materials",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.990",
           "pinned_sentence": "9.23.17.3.(1)",
           "confirmed_by": "Unc",
@@ -125,13 +128,13 @@
         }
       ],
       "authoring": {
-        "source": "verbatim: /workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/README.md (local, not in repo) line 24 (demo script step 1, typed text)",
+        "source": "verbatim: case A demo script, README.md line 24 (demo script step 1, typed text; file not in this repo)",
         "label": "model-checked, not human-verified",
         "notes": "Unc's scripted typed phrasing for case A (demo script step 1). 9.23.17.3 is confirmed gold (confirmed by Unc), pinned to Sentence 9.23.17.3.(1), p.990; codedb attribution_status is 'none' (no objective or function)."
       },
       "verification": "model-checked, not human-verified",
       "verbatim_from": {
-        "file": "/workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/README.md (local, not in repo)",
+        "file": "case A README.md line 24 (not in this repo)",
         "line": 24,
         "kind": "scripted demo input; the text Mira actually typed in session 5 is not recorded"
       }
@@ -166,6 +169,7 @@
           "role": "benchmark",
           "pdf_page": 1017,
           "quote": "cladding shall be fastened to the framing members or furring members, or to blocking between the framing members",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1017"
         },
         {
@@ -185,6 +189,7 @@
           "role": "benchmark (acceptable alternative the applicant skipped)",
           "pdf_page": 1018,
           "quote": "furring for the attachment of cladding shall be not less than 19 mm by 38 mm lumber when applied over sheathing",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1018"
         },
         {
@@ -200,6 +205,7 @@
           "role": "gold (confirmed by Unc; pinned to Sentence 9.23.17.3.(1))",
           "pdf_page": 990,
           "quote": "Gypsum sheathing, rigid insulation and fibreboard shall not be used for the attachment of cladding materials",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.990",
           "pinned_sentence": "9.23.17.3.(1)",
           "confirmed_by": "Unc",
@@ -235,13 +241,13 @@
         }
       ],
       "authoring": {
-        "source": "verbatim: /workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/input/project-brief.md (local, not in repo) line 7",
+        "source": "verbatim: case A persona brief, input/project-brief.md line 7 (file not in this repo)",
         "label": "model-checked, not human-verified",
         "notes": "Verbatim line from the case A persona brief, markdown kept as written. 9.23.17.3 is confirmed gold (confirmed by Unc), pinned to Sentence 9.23.17.3.(1), p.990; codedb attribution_status is 'none' (no objective or function)."
       },
       "verification": "model-checked, not human-verified",
       "verbatim_from": {
-        "file": "/workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/input/project-brief.md (local, not in repo)",
+        "file": "case A input/project-brief.md line 7 (not in this repo)",
         "line": 7,
         "kind": "persona brief text"
       }
@@ -275,6 +281,7 @@
           "role": "benchmark (pinned: 9.27.5.3.(3)(b) spacing; (1) lumber size)",
           "pdf_page": 1018,
           "quote": "spaced not more than 600 mm o.c.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1018"
         },
         {
@@ -290,6 +297,7 @@
           "role": "benchmark",
           "pdf_page": 1017,
           "quote": "cladding shall be fastened to the framing members or furring members",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1017"
         }
       ],
@@ -348,6 +356,7 @@
           "role": "benchmark",
           "pdf_page": 1020,
           "quote": "Fasteners for vinyl cladding, insulated vinyl cladding and polypropylene cladding shall penetrate through the nail-holding base or not less than 32 mm into the framing",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1020"
         },
         {
@@ -363,6 +372,7 @@
           "role": "related",
           "pdf_page": 1018,
           "quote": "Nail or staple size and spacing for the attachment of cladding and trim",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1018"
         },
         {
@@ -378,6 +388,7 @@
           "role": "related",
           "pdf_page": 1020,
           "quote": "shall be corrosion-resistant and shall be compatible with the cladding material",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1020"
         }
       ],
@@ -435,6 +446,7 @@
           "role": "benchmark",
           "pdf_page": 1015,
           "quote": "Sheathing membranes shall conform to the performance requirements of CAN/CGSB-51.32-M",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1015"
         },
         {
@@ -450,6 +462,7 @@
           "role": "scope",
           "pdf_page": 1015,
           "quote": "at least one layer of sheathing membrane shall be applied beneath cladding",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1015"
         }
       ],
@@ -507,6 +520,7 @@
           "role": "benchmark",
           "pdf_page": 995,
           "quote": "thermal insulation shall conform to the requirements of",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.995"
         }
       ],
@@ -575,6 +589,7 @@
           "role": "benchmark",
           "pdf_page": 860,
           "quote": "all guards shall be not less than 1 070 mm high",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.860"
         },
         {
@@ -590,6 +605,7 @@
           "role": "related",
           "pdf_page": 859,
           "quote": "guards shall be designed to resist the specified loads prescribed in Table 9.8.8.2.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.859"
         }
       ],
@@ -651,6 +667,7 @@
           "role": "benchmark",
           "pdf_page": 927,
           "quote": "shall be not less than the greater of",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.927"
         },
         {
@@ -666,6 +683,7 @@
           "role": "related",
           "pdf_page": 927,
           "quote": "Flat wall insulating concrete form units shall conform to CAN/ULC-S717.1",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.927"
         }
       ],
@@ -724,6 +742,7 @@
           "role": "benchmark",
           "pdf_page": 1017,
           "quote": "cladding shall be fastened to the framing members or furring members, or to blocking between the framing members",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1017"
         },
         {
@@ -739,6 +758,7 @@
           "role": "benchmark",
           "pdf_page": 990,
           "quote": "rigid insulation and fibreboard shall not be used for the attachment of cladding materials",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.990"
         }
       ],
@@ -797,6 +817,7 @@
           "role": "benchmark",
           "pdf_page": 1018,
           "quote": "spaced not more than 600 mm o.c.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1018"
         }
       ],
@@ -854,6 +875,7 @@
           "role": "benchmark",
           "pdf_page": 965,
           "quote": "fastening of sheathing and subflooring shall conform to Table 9.23.3.5.-A",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.965"
         }
       ],
@@ -911,6 +933,7 @@
           "role": "benchmark",
           "pdf_page": 852,
           "quote": "the rise, which is measured as the vertical nosing-to-nosing distance, shall comply with Table 9.8.4.1.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.852"
         }
       ],
@@ -968,6 +991,7 @@
           "role": "benchmark",
           "pdf_page": 927,
           "quote": "the thickness of foundation walls made of unreinforced concrete block",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.927"
         }
       ],
@@ -1026,6 +1050,7 @@
           "role": "benchmark",
           "pdf_page": 861,
           "quote": "… no member, attachment or opening located between 140 mm and 900 mm above the level protected by the guard facilitates climbing",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.861",
           "quote_clipped": true
         },
@@ -1042,6 +1067,7 @@
           "role": "related",
           "pdf_page": 861,
           "quote": "prevents the passage of a spherical object having a diameter of 100 mm",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.861"
         }
       ],
@@ -1104,6 +1130,7 @@
           "role": "benchmark",
           "pdf_page": 1015,
           "quote": "a separate sheathing membrane is not required",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1015"
         },
         {
@@ -1119,6 +1146,7 @@
           "role": "scope",
           "pdf_page": 1015,
           "quote": "at least one layer of sheathing membrane shall be applied beneath cladding",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1015"
         }
       ],
@@ -1177,6 +1205,7 @@
           "role": "benchmark",
           "pdf_page": 852,
           "quote": "shall comply with Table 9.8.4.1.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.852"
         },
         {
@@ -1192,6 +1221,7 @@
           "role": "benchmark",
           "pdf_page": 853,
           "quote": "the run shall comply with Table 9.8.4.2.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.853"
         }
       ],
@@ -1250,6 +1280,7 @@
           "role": "benchmark",
           "pdf_page": 861,
           "quote": "prevents the passage of a spherical object having a diameter of 100 mm",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.861"
         }
       ],
@@ -1306,6 +1337,7 @@
           "role": "benchmark",
           "pdf_page": 995,
           "quote": "Insulation shall be installed over the full height of foundation walls enclosing a basement or heated crawl space",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.995"
         }
       ],
@@ -1364,6 +1396,7 @@
           "role": "benchmark",
           "pdf_page": 926,
           "quote": "the footing width for walls shall be not less than twice the width required",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.926"
         }
       ],
@@ -1422,6 +1455,7 @@
           "role": "benchmark",
           "pdf_page": 1017,
           "quote": "vertically applied vinyl siding",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1017"
         },
         {
@@ -1437,6 +1471,7 @@
           "role": "related",
           "pdf_page": 989,
           "quote": "it shall conform to either Table 9.23.17.2.-A or 9.23.17.2.-B",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.989"
         }
       ],
@@ -1494,6 +1529,7 @@
           "role": "benchmark",
           "pdf_page": 1020,
           "quote": "Nails or staples for the attachment of cladding and wood trim shall be corrosion-resistant",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.1020"
         }
       ],
@@ -1552,6 +1588,7 @@
           "role": "benchmark",
           "pdf_page": 189,
           "quote": "b) it is not more than 6 storeys in building height",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.189"
         },
         {
@@ -1567,6 +1604,7 @@
           "role": "related (taller Group C Article; its construction requirements are in Sentence (2))",
           "pdf_page": 188,
           "quote": "b) it is not more than 12 storeys in building height",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.188"
         }
       ],
@@ -1625,6 +1663,7 @@
           "role": "benchmark",
           "pdf_page": 130,
           "quote": "major occupancies shall be separated from adjoining major occupancies by fire separations having fire-resistance ratings conforming to Table 3.1.3.1.",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.130"
         },
         {
@@ -1640,6 +1679,7 @@
           "role": "related (superimposed occupancies)",
           "pdf_page": 176,
           "quote": "in a building in which one major occupancy is located entirely above another major occupancy",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.176"
         }
       ],
@@ -1702,6 +1742,7 @@
           "role": "benchmark",
           "pdf_page": 269,
           "quote": "every floor area intended for occupancy shall be served by at least 2 exits",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.269"
         },
         {
@@ -1717,6 +1758,7 @@
           "role": "related (two egress doorways from the room)",
           "pdf_page": 246,
           "quote": "b) intended for an occupant load more than 60",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.246"
         }
       ],
@@ -1776,6 +1818,7 @@
           "role": "benchmark",
           "pdf_page": 194,
           "quote": "floor assemblies shall be fire separations and, if of combustible construction, shall have a fire-resistance rating not less than 45 min",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.194"
         },
         {
@@ -1791,6 +1834,7 @@
           "role": "benchmark (alternative Group D Article; which one applies depends on building area against Tables 3.2.2.62. and 3.2.2.64.)",
           "pdf_page": 193,
           "quote": "floor assemblies shall be fire separations and, if of combustible construction, shall have a fire-resistance rating not less than 45 min",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.193"
         }
       ],
@@ -1850,6 +1894,7 @@
           "role": "benchmark",
           "pdf_page": 159,
           "quote": "has an F rating not less than the required fire-resistance rating of the fire separation",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.159"
         },
         {
@@ -1865,6 +1910,7 @@
           "role": "benchmark (service penetrations)",
           "pdf_page": 159,
           "quote": "electrical wires and cables, and other similar service equipment are permitted to penetrate a fire separation",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.159"
         },
         {
@@ -1880,6 +1926,7 @@
           "role": "benchmark (outlet boxes)",
           "pdf_page": 160,
           "quote": "Combustible outlet boxes are permitted to penetrate the membrane of an assembly … provided they are sealed at the penetration by a firestop",
+          "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
           "verification": "codedb-checked, NBC(AE) 2023 2nd printing, PDF p.160",
           "quote_clipped": true
         }
@@ -1938,6 +1985,7 @@
             "page": 38,
             "url": "codedb snapshot (NBC(AE) 2023 2nd printing PDF)",
             "quote": "Evaluation reports issued by the Canadian Construction Materials Centre … or an organization approved by the Provincial Building Administrator may be used in determining compliance",
+            "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
             "verification": "codedb-checked, PDF p.38",
             "quote_clipped": true
           }
@@ -1951,7 +1999,7 @@
             "page": 1,
             "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/57cebce9-5fe6-4583-a0bd-f2e4c7eedec9/download/ma-23-bci-005-approved-organization-qai-laboratories.pdf",
             "quote": "This interpretation recognizes QAI Laboratories as an approved organization that issues evaluation reports that may be used to determine compliance … NBC(AE).",
-            "verification": "source-PDF-checked (local copy /workspace/batatis/sources/standata/23-BCI-005.pdf (local, not in repo; https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/57cebce9-5fe6-4583-a0bd-f2e4c7eedec9/download/ma-23-bci-005-approved-organization-qai-laboratories.pdf)), p.1",
+            "verification": "source-PDF-checked, p.1; https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/57cebce9-5fe6-4583-a0bd-f2e4c7eedec9/download/ma-23-bci-005-approved-organization-qai-laboratories.pdf",
             "licence": "Open Government Licence - Alberta",
             "quote_clipped": true
           }
@@ -1965,6 +2013,7 @@
             "page": 729,
             "url": "codedb snapshot (NBC(AE) 2023 2nd printing PDF)",
             "quote": "A written request for a variance may be submitted to the Provincial Building Administrator.",
+            "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
             "verification": "codedb-checked, PDF p.729"
           },
           {
@@ -1972,6 +2021,7 @@
             "page": 743,
             "url": "codedb snapshot (NBC(AE) 2023 2nd printing PDF)",
             "quote": "The application to the Provincial Building Administrator must show that the issue is province-wide.",
+            "nrc_attribution": "© National Research Council of Canada. Source: https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
             "verification": "codedb-checked, PDF p.743"
           },
           {
@@ -1979,7 +2029,7 @@
             "page": 3,
             "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/01b622f0-f4a1-426d-b15f-ffc25e725949/download/ma-standata-variance-building-23-bcv-001-2024-04.pdf",
             "quote": "This VARIANCE is applicable throughout the Province of Alberta.",
-            "verification": "source-PDF-checked (local copy /workspace/batatis/sources/standata/23-BCV-001.pdf (local, not in repo; https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/01b622f0-f4a1-426d-b15f-ffc25e725949/download/ma-standata-variance-building-23-bcv-001-2024-04.pdf)), p.3",
+            "verification": "source-PDF-checked, p.3; https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/01b622f0-f4a1-426d-b15f-ffc25e725949/download/ma-standata-variance-building-23-bcv-001-2024-04.pdf",
             "licence": "Open Government Licence - Alberta"
           }
         ]
@@ -1992,7 +2042,7 @@
             "page": 31,
             "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
             "quote": "An Administrator or a safety codes officer may issue a written variance … of the opinion that the variance provides approximately equivalent or greater safety performance",
-            "verification": "source-PDF-checked (local copy /workspace/batatis/research/src/leg/S01.pdf (local, not in repo; https://kings-printer.alberta.ca/documents/Acts/S01.pdf)), p.31",
+            "verification": "source-PDF-checked, p.31; https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
             "quote_clipped": true
           },
           {
@@ -2000,7 +2050,7 @@
             "page": 31,
             "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
             "quote": "A safety codes officer on issuing a variance shall notify an Administrator.",
-            "verification": "source-PDF-checked (local copy /workspace/batatis/research/src/leg/S01.pdf (local, not in repo; https://kings-printer.alberta.ca/documents/Acts/S01.pdf)), p.31"
+            "verification": "source-PDF-checked, p.31; https://kings-printer.alberta.ca/documents/Acts/S01.pdf"
           }
         ]
       },
@@ -2012,14 +2062,14 @@
             "page": 2,
             "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf",
             "quote": "Submit a copy of each variance to the Safety Codes Council within 10 days of issuance.",
-            "verification": "source-PDF-checked (local copy /workspace/batatis/sources/IB-2025-11-18.pdf (local, not in repo; https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf)), p.2"
+            "verification": "source-PDF-checked, p.2; https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf"
           },
           {
             "source": "IB-2025-11-18",
             "page": 2,
             "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf",
             "quote": "Document alternative solutions as required by Division C of the applicable code.",
-            "verification": "source-PDF-checked (local copy /workspace/batatis/sources/IB-2025-11-18.pdf (local, not in repo; https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf)), p.2"
+            "verification": "source-PDF-checked, p.2; https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf"
           }
         ]
       },
@@ -2031,14 +2081,14 @@
             "page": 2,
             "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf",
             "quote": "Variances must be registered in OVP at the time of issuance or as soon as reasonably practicable thereafter.",
-            "verification": "source-PDF-checked (local copy /workspace/batatis/forms/IB-2026-10-01.pdf (local, not in repo; https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf)), p.2"
+            "verification": "source-PDF-checked, p.2; https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf"
           },
           {
             "source": "IB-2026-10-01",
             "page": 1,
             "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf",
             "quote": "Registration of an order or variance through OVP does not constitute Council approval of that order or variance",
-            "verification": "source-PDF-checked (local copy /workspace/batatis/forms/IB-2026-10-01.pdf (local, not in repo; https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf)), p.1"
+            "verification": "source-PDF-checked, p.1; https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf"
           }
         ]
       },
@@ -2050,7 +2100,7 @@
             "page": 51,
             "url": "https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
             "quote": "An Administrator may place an entry on the relevant information system that briefly indicates the subject-matter of a variance and the location …",
-            "verification": "source-PDF-checked (local copy /workspace/batatis/research/src/leg/S01.pdf (local, not in repo; https://kings-printer.alberta.ca/documents/Acts/S01.pdf)), p.51",
+            "verification": "source-PDF-checked, p.51; https://kings-printer.alberta.ca/documents/Acts/S01.pdf",
             "quote_clipped": true
           }
         ]

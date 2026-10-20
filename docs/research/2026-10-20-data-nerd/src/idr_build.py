@@ -53,16 +53,16 @@ case('idr-001', 'manufacturer', "We make a new insulated sheathing panel and wan
   X('9.27.10.1.', 'Material standard for OSB used AS cladding; here OSB is the substrate being replaced.'),
   X('9.23.15.2.', 'Subfloor panel standards; floors, not walls.')],
  notes="Unc's scripted typed phrasing for case A (demo script step 1). 9.23.17.3 is confirmed gold (confirmed by Unc), pinned to Sentence 9.23.17.3.(1), p.990; codedb attribution_status is 'none' (no objective or function).",
- source='verbatim: /workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/README.md line 24 (demo script step 1, typed text)',
- verbatim_from=dict(file='/workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/README.md', line=24, kind='scripted demo input; the text Mira actually typed in session 5 is not recorded'))
+ source='verbatim: case A demo script, README.md line 24 (demo script step 1, typed text; file not in this repo)',
+ verbatim_from=dict(file='case A README.md line 24 (not in this repo)', line=24, kind='scripted demo input; the text Mira actually typed in session 5 is not recorded'))
 case('idr-002', 'manufacturer', "Our panel is selling in two other provinces *(claim not verified)*. We want **approval to sell it across Alberta** and a first **pilot house** in Edmonton this spring. Builders love it because vinyl siding nails **straight into the facer**, so there's no OSB and no strapping.",
  ['panel replaces OSB', 'vinyl siding nailed into the panel facer', 'no strapping (furring)', 'pilot house in Edmonton', 'wants Alberta-wide approval'],
  [CLAD, FURR, RIGID_GOLD],
  [OSBNAILS, X('9.29.9.2.', 'Interior OSB finish thickness; "no OSB" refers to wall sheathing, not interior finish.'),
   X('9.27.12.1.', 'Vinyl siding material standard; the question is how it is attached, not the siding product.')],
  notes="Verbatim line from the case A persona brief, markdown kept as written. 9.23.17.3 is confirmed gold (confirmed by Unc), pinned to Sentence 9.23.17.3.(1), p.990; codedb attribution_status is 'none' (no objective or function).",
- source='verbatim: /workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/input/project-brief.md line 7',
- verbatim_from=dict(file='/workspace/unc-demo-cases/a-manufacturer-nailbase-sheathing/input/project-brief.md', line=7, kind='persona brief text'))
+ source='verbatim: case A persona brief, input/project-brief.md line 7 (file not in this repo)',
+ verbatim_from=dict(file='case A input/project-brief.md line 7 (not in this repo)', line=7, kind='persona brief text'))
 case('idr-003', 'manufacturer', "We make a recycled-plastic rainscreen strapping strip. Builders screw it through the foam board into the studs at 24 inches on centre and hang fibre-cement siding on it. Some framers want to space it at 32 inches to save material. Is our strip OK in place of wood strapping, and does the spacing matter?",
  ['manufacturer of plastic rainscreen strapping', 'installed over foam board, screwed into studs', '24 in. (610 mm) and proposed 32 in. (813 mm) spacing', 'fibre-cement siding'],
  [G('9.27.5.3.', ['9.27.5.3.(1)', '9.27.5.3.(3)'], 'spaced not more than 600 mm o.c.', role='benchmark (pinned: 9.27.5.3.(3)(b) spacing; (1) lumber size)'),
@@ -215,7 +215,7 @@ from collections import Counter
 meta = dict(title='Identify regression set: plain-language applicant descriptions (manufacturer / general contractor / homebuilder)',
   generated='2026-10-20 (America/Edmonton)', label=LABEL,
   trigger='Unc session 5 (cold manufacturer run, PR #16 @579cd2c): identify missed case A provisions 9.27.5.1/9.27.5.3 and returned 9.29.9.3.(2).',
-  codedb_snapshot=dict(path=DB, sha256=hashlib.sha256(open(DB, 'rb').read()).hexdigest(), edition='NBC(AE) 2023 2nd printing'),
+  codedb_snapshot=dict(path='local codedb snapshot (NBC(AE) 2023 2nd printing), not in this repo', sha256=hashlib.sha256(open(DB, 'rb').read()).hexdigest(), edition='NBC(AE) 2023 2nd printing'),
   scoring_note='Score at Article level (as engine/identify/benchmark.py _article()). gold_articles uses the identify_gold shape {division, provision->article, role}; sentences[] give the pinpoints. must_not_return: any of these in the top-k is a regression.',
   quote_check='every quote is an exact substring of the codedb sentence text (whitespace-normalised)',
   counts=dict(Counter(x['role'] for x in CASES)), total=len(CASES))
