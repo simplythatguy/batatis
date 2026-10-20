@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { engine, EngineError, type CodeHit } from "../api/client";
 import { toViewRow } from "../api/sectionC";
-import { CodeQuote, DemoFallback, DraftNote, GapStrip, Icon, PanelHeader, RoleNote, StatusPill, type Dot } from "../components";
+import { CodeQuote, ServiceUnavailable, CheckAction, DraftNote, GapStrip, Icon, PanelHeader, StatusPill, type Dot } from "../components";
 import { CODE_EDITION } from "../config";
-import { applyIdentifyPlan, DECISION_UNAVAILABLE, planIdentify, readDecisionBody, wireDecision } from "../identify";
+import { DECISION_UNAVAILABLE, readDecisionBody, wireDecision } from "../identify";
 import { answeredYes, unresolvedCandidates } from "../model";
 import { exitCountWarning, failureKind, QUOTE_LABEL, quoteKind } from "../rules";
 import { useCase } from "../store";
@@ -48,7 +48,7 @@ function CandidateCard({
         {a.suggestion && a.answer === null && <span className="label-pill">Suggested</span>}
         <StatusPill dot={s.dot}>{s.label}</StatusPill>
       </div>
-      <div className="code-said">
+      <details className="code-said compact-help"><summary>{kind === "code" ? "Code wording" : "Why this appears"}</summary>
         <div className="block-label">
           <span className={`label-pill${kind === "ranking" ? " ai-pill" : ""}`}>{QUOTE_LABEL[kind].pill}</span>
           <span className="meta">{QUOTE_LABEL[kind].meta}</span>
@@ -60,9 +60,9 @@ function CandidateCard({
         ) : kind === "missing" ? null : (
           <blockquote className="cite-block quote">{a.quote.text}</blockquote>
         )}
-      </div>
+      </details>
       <p className="ask">
-        <span className="label-pill ai-pill">AI-written</span> Does your design <strong>{a.departure}</strong> instead?
+        Does your design <strong>{a.departure}</strong> instead?
       </p>
       <div className="segmented" role="group" aria-label={`Answer for ${a.topic}`}>
         {ANSWERS.map((o) => (
@@ -110,11 +110,9 @@ function CandidateCard({
 type Filter = "all" | "open" | "yes";
 
 export function CodeCheck() {
-  const { c, gaps, dispatch, saveDraft, engineId } = useCase();
-  const [identifyNote, setIdentifyNote] = useState("");
+  const { c, gaps, dispatch, saveDraft, engineId, checkStatus, noteLookupFailure } = useCase();
   const [decisionNote, setDecisionNote] = useState("");
-  const [identifyDown, setIdentifyDown] = useState(false);
-  const [identifyAttempt, setIdentifyAttempt] = useState(0);
+  const [cardIndex, setCardIndex] = useState(0);
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<CodeHit[]>([]);
@@ -127,58 +125,6 @@ export function CodeCheck() {
   const counts: Record<Filter, number> = { all: c.candidates.length, open: open.length, yes: yes.length };
   const shown = c.candidates.filter((a) => filter === "all" || (filter === "open" ? open.includes(a) : a.answer === "yes"));
   const labels: Record<Filter, string> = { all: "All", open: "Needs an answer", yes: "Departures" };
-
-  useEffect(() => {
-    const prose = c.description.trim();
-    if (!engineId || prose.length < 8) {
-      setIdentifyNote("");
-      setIdentifyDown(false);
-      return;
-    }
-    const ctl = new AbortController();
-    setIdentifyDown(false);
-    setIdentifyNote("Ranking articles from your description…");
-    void (async () => {
-      try {
-        const stored = await engine.storedIdentify(engineId, ctl.signal);
-        if (ctl.signal.aborted) return;
-        const storedPlan = planIdentify(stored);
-        applyIdentifyPlan(dispatch, storedPlan);
-        if (storedPlan.articles.length) setIdentifyNote(storedPlan.note);
-      } catch {
-        if (ctl.signal.aborted) return;
-      }
-      try {
-        const result = await engine.identify(engineId, prose, [], ctl.signal, (stage) => {
-          if (stage !== "done" && stage !== "error") setIdentifyNote(`Ranking articles (${stage})…`);
-        });
-        if (ctl.signal.aborted) return;
-        const plan = planIdentify(result);
-        applyIdentifyPlan(dispatch, plan);
-        setIdentifyNote(plan.note);
-      } catch (err: unknown) {
-        if (ctl.signal.aborted) return;
-        if (err instanceof EngineError && failureKind(err.status, err.detail) === "missing-route") {
-          setIdentifyNote("Article ranking isn't available yet. These cards are questions from your description.");
-          setIdentifyDown(false);
-          return;
-        }
-        if (err instanceof EngineError && failureKind(err.status, err.detail) === "codedb") {
-          setIdentifyNote("The code database is not available.");
-          setIdentifyDown(false);
-          return;
-        }
-        if (err instanceof EngineError && failureKind(err.status, err.detail) === "unreachable") {
-          setIdentifyNote("The review service did not respond.");
-          setIdentifyDown(true);
-          return;
-        }
-        setIdentifyNote(err instanceof EngineError ? err.detail : "Article ranking did not finish.");
-        setIdentifyDown(false);
-      }
-    })();
-    return () => ctl.abort();
-  }, [engineId, c.description, dispatch, identifyAttempt]);
 
   function onAnswer(candidate: Candidate, answer: CandidateAnswer) {
     dispatch({ type: "answerCandidate", id: candidate.id, answer });
@@ -215,31 +161,24 @@ export function CodeCheck() {
   return (
     <>
       <PanelHeader title="Code check" meta={CODE_EDITION} />
-      <GapStrip gaps={gaps} />
+      {(checkStatus === "ready" || checkStatus === "needs_answers") && <GapStrip gaps={gaps} />}
       <div className="toolbar" role="toolbar" aria-label="Filter">
         {(Object.keys(labels) as Filter[]).map((f) => (
-          <button key={f} type="button" className="pill" data-active={filter === f} aria-pressed={filter === f} onClick={() => setFilter(f)}>
+          <button key={f} type="button" className="pill" data-active={filter === f} aria-pressed={filter === f} onClick={() => { setFilter(f); setCardIndex(0); }}>
             {labels[f]} <span className="tab-count">{counts[f]}</span>
           </button>
         ))}
       </div>
       <div className="pane scroll-body">
         <div className="content-col stack">
-          {identifyNote && (
-            <p className="field-note" role="status">
-              {identifyNote}
-            </p>
-          )}
           {decisionNote && (
             <p className="empty" role="status">
               {decisionNote}
             </p>
           )}
-          {identifyDown && <DemoFallback reason={identifyNote} onRetry={() => setIdentifyAttempt((n) => n + 1)} />}
-          <RoleNote />
-          <p className="meta intro">
-            A departure means your design does something differently from a requirement. An article is not accepted until you choose Yes. Not sure stays an open question and does not block Continue. Search shows only what the code database returns.
-          </p>
+          <CheckAction />
+          <details className="disclosure manual-search" open={checkStatus === "unavailable" || undefined}>
+            <summary>Search code manually</summary>
           <form
             className="field"
             onSubmit={(e) => {
@@ -265,11 +204,12 @@ export function CodeCheck() {
                   setSearchNote("");
                   const down = err instanceof EngineError && failureKind(err.status, err.detail) === "unreachable";
                   setSearchDown(down);
+                  noteLookupFailure(err instanceof Error ? err.message : String(err));
                   setSearchError(err instanceof EngineError ? err.detail : "The review service did not respond.");
                 });
             }}
           >
-            <label htmlFor="code-search">Search Division B</label>
+            <label htmlFor="code-search">Code keywords or article number</label>
             <input id="code-search" value={query} onChange={(e) => setQuery(e.target.value)} />
             <button type="submit" className="btn">
               Search
@@ -280,18 +220,18 @@ export function CodeCheck() {
               </p>
             )}
             {searchError && searchDown && (
-              <DemoFallback
+              <ServiceUnavailable
                 reason={searchError}
                 onRetry={() => document.getElementById("code-search")?.closest("form")?.requestSubmit()}
               />
             )}
             {searchError && !searchDown && (
-              <p className="field-note" role="status">
-                <span className="status-dot warning" /> {searchError}{" "}
+              <div className="field-note" role="status">
+                <span className="status-dot warning" /> Search unavailable. Try again. <details><summary>Technical detail</summary>{searchError}</details>
                 <button type="button" className="btn" onClick={() => document.getElementById("code-search")?.closest("form")?.requestSubmit()}>
                   Retry
                 </button>
-              </p>
+              </div>
             )}
           </form>
           {hits.length > 0 && (
@@ -360,8 +300,9 @@ export function CodeCheck() {
               ))}
             </ul>
           )}
+          </details>
           {shown.length ? (
-            shown.map((a) => (
+            shown.slice(Math.min(cardIndex, shown.length - 1), Math.min(cardIndex, shown.length - 1) + 1).map((a) => (
               <CandidateCard key={a.id} a={a} index={c.candidates.indexOf(a)} total={c.candidates.length} onAnswer={onAnswer} />
             ))
           ) : (
@@ -372,17 +313,18 @@ export function CodeCheck() {
                   ? "No requirements need an answer."
                   : c.candidates.length
                     ? "No requirements to review."
-                    : "No cards yet. What you write on Describe becomes the questions here. Or try an example."}
+                    : "No provisions selected yet."}
             </p>
           )}
+          {shown.length > 1 && <div className="step-controls">
+            <button type="button" className="btn" disabled={cardIndex === 0} onClick={() => setCardIndex(n => n - 1)}>Previous</button>
+            <span className="meta">{Math.min(cardIndex + 1, shown.length)} of {shown.length}</span>
+            <button type="button" className="btn" disabled={cardIndex >= shown.length - 1} onClick={() => setCardIndex(n => n + 1)}>Next question</button>
+          </div>}
         </div>
       </div>
       <div className="footer-bar">
         <DraftNote />
-        <span className="status-note" role="status">
-          {open.length ? `Answer ${open.map((a) => a.topic.toLowerCase()).join("; ")} before Section C. ` : ""}
-          Not sure does not block Continue.
-        </span>
         <button type="button" className="btn" onClick={() => void saveDraft()}>
           Save draft
         </button>
@@ -391,18 +333,10 @@ export function CodeCheck() {
         </a>
         <button
           type="button"
-          className="btn btn-primary"
-          onClick={() => {
-            if (!open.length) {
-              location.hash = "#/section-c";
-              return;
-            }
-            const first = document.getElementById(`cand-${open[0].id}`);
-            first?.focus();
-            first?.scrollIntoView({ block: "center" });
-          }}
+          className={checkStatus === "not_requested" || checkStatus === "unavailable" ? "btn" : "btn btn-primary"}
+          onClick={() => { location.hash = "#/section-c"; }}
         >
-          Continue to Section C
+          Continue
         </button>
       </div>
     </>

@@ -1,70 +1,28 @@
-import { EXAMPLES } from "../examples";
-import { applicantLabel } from "../intake";
+import { useState } from "react";
+import { Icon } from "../components";
 import { useCase } from "../store";
 import type { ApplicantType } from "../types";
 
-const CHOICES: { id: ApplicantType; label: string; detail: string }[] = [
-  {
-    id: "manufacturer",
-    label: "Manufacturer",
-    detail: "A product you want builders to use. The case starts from the product, not from one house.",
-  },
-  {
-    id: "contractor",
-    label: "General contractor",
-    detail: "One job that cannot follow an acceptable solution as written.",
-  },
-  {
-    id: "homebuilder",
-    label: "Homebuilder",
-    detail: "A house or suite. Storeys and the site are the first questions.",
-  },
+const CHOICES: { id: ApplicantType; label: string }[] = [
+  { id: "manufacturer", label: "Manufacturer" },
+  { id: "contractor", label: "General contractor" },
+  { id: "homebuilder", label: "Homebuilder" },
 ];
 
 export function Who() {
-  const { beginEmpty, askExample, resetNote } = useCase();
-  return (
-    <>
-      <header className="panel-header">
-        <h1 className="panel-title">Who are you?</h1>
-      </header>
-      <div className="pane scroll-body">
-        <div className="content-col stack">
-          {resetNote && (
-            <p className="field-note" role="status">
-              {resetNote}
-            </p>
-          )}
-          <p className="meta intro">
-            Pick the role that fits this application. It starts empty. Nothing is filled in for you.
-          </p>
-          <div className="choice-list">
-            {CHOICES.map((choice) => (
-              <button key={choice.id} type="button" className="btn choice" onClick={() => beginEmpty(choice.id)}>
-                <span className="choice-label">{choice.label}</span>
-                <span className="meta">{choice.detail}</span>
-              </button>
-            ))}
-          </div>
-          <section aria-labelledby="examples-title">
-            <h2 id="examples-title" className="section-title">
-              Try an example
-            </h2>
-            <p className="meta">Saved cases you can open. They are not the starting application.</p>
-            <ul className="plain-list">
-              {EXAMPLES.map((ex) => (
-                <li key={ex.id}>
-                  <button type="button" className="btn" onClick={() => askExample(ex.id)}>
-                    {ex.label}
-                  </button>
-                  <p className="meta">{ex.blurb}</p>
-                </li>
-              ))}
-            </ul>
-          </section>
-          <p className="meta">Roles: {CHOICES.map((c) => applicantLabel(c.id)).join(", ")}.</p>
-        </div>
+  const { beginEmpty, resetNote } = useCase();
+  const [role, setRole] = useState<ApplicantType | null>(null);
+  return <div className="pane onboarding">
+    <div className="role-step">
+      <h1>Your role</h1>
+      <p className="step-intro">Let’s start your application.</p>
+      <div className="role-options" role="group" aria-label="Your role">
+        {CHOICES.map(choice => <button key={choice.id} type="button" className="role-option" aria-pressed={role === choice.id} onClick={() => setRole(choice.id)}>
+          {choice.label}<span className="role-mark" aria-hidden="true">{role === choice.id && <Icon name="check" />}</span>
+        </button>)}
       </div>
-    </>
-  );
+      <button className="btn btn-primary role-continue" type="button" disabled={!role} onClick={() => role && beginEmpty(role)}>Continue <Icon name="chevron" /></button>
+      {resetNote && <p className="meta" role="status">{resetNote}</p>}
+    </div>
+  </div>;
 }

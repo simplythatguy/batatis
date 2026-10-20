@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { EngineError, engine, type CompletenessReport, type InformationRequest } from "../api/client";
 import { MissingItems, RecordHeading } from "../completenessView";
 import { PanelHeader, RoleNote } from "../components";
-import { EXAMPLES } from "../examples";
 import {
   notSureQuestions,
   officerProfessionalLines,
@@ -43,7 +42,7 @@ function reportFrom(body: CompletenessReport): ReportState {
 }
 
 export function Officer() {
-  const { c, gaps, gapsSource, gapsNote, reviewDetail, saveDraft, engineGaps, completenessRecord, dispatch } = useCase();
+  const { c, gaps, gapsSource, checkNote, reviewDetail, saveDraft, engineGaps, completenessRecord, dispatch } = useCase();
   const openNotSure = notSureQuestions(c.questions);
   const ranked = rankingQuestions(c.questions);
   const blank =
@@ -134,11 +133,11 @@ export function Officer() {
   }, [blank, attempt]);
 
   const flags = officerProfessionalLines(professionalChecked, c.practiceOfEngineering, c.facts);
-  const exampleLabel = c.exampleId ? (EXAMPLES.find((ex) => ex.id === c.exampleId)?.label ?? "Loaded example") : undefined;
+  const exampleLabel = c.exampleId ? "Test fixture" : undefined;
   const reportNote = report.phase === "ready" ? report.note : null;
   const pending = !blank && !settled;
   const pendingLine = c.exampleId ? "Reviewing this example…" : "Reviewing your application…";
-  const statusLine = pending ? pendingLine : gapsSource === "engine" ? gapsNote : "Online review unavailable.";
+  const statusLine = pending ? pendingLine : checkNote || "Full check not requested.";
   const techLines = [...technical, ...(gapsSource === "browser" && reviewDetail ? [reviewDetail] : [])].filter(Boolean);
   const engineItems = unseenRequestItems(openNotSure, requestItems);
   const request = officerRequest({

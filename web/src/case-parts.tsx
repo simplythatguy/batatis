@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { KindBadge, NrcCredit, StatusPill } from "./components";
+import { FieldSteps, KindBadge, NrcCredit, StatusPill } from "./components";
 import { DETAIL_FIELDS, PROCESS_FIELDS, displayValue, factFor, factLabel, isTyped, valueText, type DetailField } from "./model";
 import { useCase } from "./store";
 import type { Fact, Question, Source } from "./types";
@@ -78,7 +78,7 @@ export function FactLedger() {
     <section className="ledger" aria-labelledby="ledger-title">
       <div className="ledger-head">
         <h2 id="ledger-title" className="section-title">
-          Fact ledger
+          Captured details
         </h2>
         <span className="meta">
           {c.facts.length} facts{pending ? ` · ${pending} to check` : ""}
@@ -91,7 +91,7 @@ export function FactLedger() {
           ))}
         </ul>
       ) : (
-        <p className="empty">No facts yet. Describe your idea or drop a file.</p>
+        <p className="empty">No details yet.</p>
       )}
     </section>
   );
@@ -228,7 +228,7 @@ function DetailInput({ def }: { def: DetailField }) {
           </button>
         ) : (
           (shapeHint(c.applicantType, def.id) ?? def.hint) && (
-            <span className="field-note">{shapeHint(c.applicantType, def.id) ?? def.hint}</span>
+            <details className="compact-help"><summary>Help</summary><p>{shapeHint(c.applicantType, def.id) ?? def.hint}</p></details>
           )
         )}
       </div>
@@ -237,46 +237,24 @@ function DetailInput({ def }: { def: DetailField }) {
 }
 
 export function DetailFields({ section }: { section: "A" | "B" }) {
-  return (
-    <div className="form-grid">
-      {DETAIL_FIELDS.filter((d) => d.section === section).map((d) => (
-        <DetailInput key={d.id} def={d} />
-      ))}
-    </div>
-  );
+  const fields = DETAIL_FIELDS.filter(d => d.section === section);
+  const groups = Array.from({ length: Math.ceil(fields.length / 2) }, (_, i) => fields.slice(i * 2, i * 2 + 2));
+  return <FieldSteps key={section} nextHref={section === "A" ? "#/application?tab=B" : "#/code-check"} steps={groups.map(group => ({
+    title: group[0].label,
+    fields: group.map(d => `field-${d.id}`),
+    content: <div className="form-grid">{group.map(d => <DetailInput key={d.id} def={d} />)}</div>,
+  }))} />;
 }
 
 export function ProcessFields() {
   const { c, dispatch } = useCase();
-  return (
-    <div className="form-grid">
-      <p className="meta full section-hint">
-        Batatis asks; you write. These answers go into the form exactly as written, and Batatis never drafts them.
-      </p>
-      {PROCESS_FIELDS.map((p) => {
-        const empty = !c.process[p.id].trim();
-        const id = `field-${p.id}`;
-        return (
-          <div key={p.id} className={`field full ${empty ? "is-empty" : ""}`}>
-            <div className="field-label-row">
-              {empty && <span className="status-dot blocking" />}
-              <label htmlFor={id}>{p.label}</label>
-            </div>
-            <ul className="plain-list prompts" id={`${id}-prompts`}>
-              {p.prompts.map((t) => (
-                <li key={t}>{t}</li>
-              ))}
-            </ul>
-            <textarea
-              id={id}
-              rows={4}
-              aria-describedby={`${id}-prompts`}
-              value={c.process[p.id]}
-              onChange={(e) => dispatch({ type: "setProcess", field: p.id, value: e.target.value })}
-            />
-          </div>
-        );
-      })}
-    </div>
-  );
+  return <FieldSteps nextHref="#/application?tab=D" steps={PROCESS_FIELDS.map(p => ({
+    title: p.label,
+    fields: [`field-${p.id}`],
+    content: <div className="field">
+      <label className="sr-only" htmlFor={`field-${p.id}`}>{p.label}</label>
+      <textarea id={`field-${p.id}`} rows={5} value={c.process[p.id]} onChange={e => dispatch({type:"setProcess",field:p.id,value:e.target.value})} />
+      <details className="compact-help"><summary>What to include</summary><ul className="plain-list prompts">{p.prompts.map(t => <li key={t}>{t}</li>)}</ul><p>Write your own answer. Professional analysis must come from your professional.</p></details>
+    </div>,
+  }))} />;
 }

@@ -1,9 +1,8 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { EngineError, ExportBlockedError, engine } from "../api/client";
 import { DetailFields, ProcessFields } from "../case-parts";
 import { MissingItems } from "../completenessView";
 import { DraftNote, GapStrip, Notices, PanelHeader } from "../components";
-import { EXAMPLES } from "../examples";
 import { displayValue, factLabel, plainFactStatus } from "../model";
 import { UNSIGNED_LINE, pdfOutcomeLine, professionalRouteNote, textRecord } from "../humanReview";
 import type { Route } from "../router";
@@ -21,7 +20,7 @@ const TABS = [
 type Stage = "idle" | "checking" | "preparing" | "blocked" | "error" | "ready";
 
 export function Application({ route }: { route: Route }) {
-  const { gaps, notices, saveDraft, c, gapsSource, syncOk, reviewDetail, engineGaps, readSync, readGaps, setCompletenessRecord } = useCase();
+  const { gaps, notices, saveDraft, c, gapsSource, syncOk, reviewDetail, engineGaps, readSync, readGaps, setCompletenessRecord, requestCheck, checkStatus, checkNote, checkDetail, checkedAt } = useCase();
   const tab = TABS.find((t) => t.id === route.params.get("tab"))?.id ?? "A";
   const dialog = useRef<HTMLDialogElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -34,11 +33,10 @@ export function Application({ route }: { route: Route }) {
   const [exportAttempted, setExportAttempted] = useState(false);
   const blocking = gaps.filter((g) => g.severity === "blocking");
   const warnings = gaps.filter((g) => g.severity === "warning").length;
-  const example = EXAMPLES.find((ex) => ex.id === c.exampleId);
-  const exampleLabel = example?.label ?? "Loaded example";
-  const subject = c.exampleId ? "this example" : "your application";
+  const exampleLabel = "Test fixture";
+  const subject = "your draft";
   const blank = !c.description.trim() && c.facts.length === 0;
-  const officialReady = !c.exampleId && syncOk && gapsSource === "engine" && blocking.length === 0;
+  const officialReady = !c.exampleId && syncOk && ["ready", "needs_answers"].includes(checkStatus) && gapsSource === "engine" && blocking.length === 0;
   const countFor = (t: string) => blocking.filter((g) => g.href.includes(`tab=${t}`)).length;
 
   const sectionById = new Map(engineGaps.map((gap) => [gap.id, gap.section]));
@@ -57,14 +55,14 @@ export function Application({ route }: { route: Route }) {
     setExportAttempted(false);
     forgetFile();
     setStage("checking");
-    setStatusText(`Saving and reviewing ${subject}…`);
+    setStatusText(`Saving ${subject}…`);
     dialog.current?.showModal();
-    void saveDraft().then((id) => {
+    void requestCheck(checkStatus === "unavailable").then((id) => {
       if (!dialog.current?.open) return;
       const sync = readSync();
       const blockers = readGaps().filter((gap) => gap.severity === "blocking");
       if (!id || !sync.reviewed) {
-        const note = "Online review unavailable.";
+        const note = "Check unavailable. Your work is still here.";
         setTech(sync.detail);
         setStage("error");
         setStatusText(note);
@@ -116,13 +114,13 @@ export function Application({ route }: { route: Route }) {
     const ctl = new AbortController();
     abortRef.current = ctl;
     setStage("checking");
-    setStatusText(`Saving and reviewing ${subject}…`);
+    setStatusText(`Saving ${subject}…`);
     const caseId = await saveDraft();
     if (ctl.signal.aborted) return;
-    if (!caseId) {
+    if (!caseId || !readSync().saved || (!draft && (!readSync().reviewed || readGaps().some(g => g.severity === "blocking")))) {
       setStage("error");
-      setTech(reviewDetail);
-      setStatusText("Online review unavailable.");
+      setTech(readSync().detail || reviewDetail);
+      setStatusText("Save not confirmed. Keep this page open.");
       return;
     }
     setStage("preparing");
@@ -187,7 +185,7 @@ export function Application({ route }: { route: Route }) {
       factLines: c.facts.map((f) => `${factLabel(f.field)}: ${displayValue(f)} (${plainFactStatus(f.kind, f.status)})`),
       blockingCount: blocking.length,
       warningCount: warnings,
-      checkedAt: new Date().toLocaleString(),
+      checkedAt,
       pdfLines,
     });
     const blob = new Blob([text], { type: "text/plain" });
@@ -222,23 +220,26 @@ export function Application({ route }: { route: Route }) {
   }
 
   const busy = stage === "checking" || stage === "preparing";
-  const gapCount = `${blocking.length} required item${blocking.length === 1 ? "" : "s"} need attention. Check completeness stays available so you can review them. The official PDF stays closed until they are cleared.`;
-  const footerLine =
-    gapsSource === "idle"
-      ? `Your application has not been reviewed online yet. ${gapCount}`
-      : blocking.length
-        ? gapCount
-        : gapsSource === "engine"
-          ? `No blocking administrative items found. Review any open questions before downloading.${warnings ? ` ${warnings} open question${warnings === 1 ? "" : "s"}.` : ""}`
-          : "";
+  const footerLine = checkStatus === "not_requested" ? "" : checkNote;
+  useEffect(() => {
+    if (route.params.get("download") === "1" || route.params.get("review") === "1") dialog.current?.showModal();
+  }, [route.params.get("download"), route.params.get("review")]);
+  useEffect(() => {
+    if (checkStatus !== "stale") return;
+    abortRef.current?.abort();
+    forgetFile();
+    setStage("idle");
+    setExportAttempted(false);
+  }, [checkStatus]);
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   return (
     <>
-      <PanelHeader title="Application" meta="Variance template · Sections A, B and process fields" />
+      <PanelHeader title="Application" meta="Your details" />
       <GapStrip gaps={gaps} />
       <nav className="toolbar" aria-label="Application sections">
         {TABS.map((t) => {
-          const n = countFor(t.id);
+          const n = checkStatus === "not_requested" ? 0 : countFor(t.id);
           return (
             <a
               key={t.id}
@@ -260,7 +261,7 @@ export function Application({ route }: { route: Route }) {
           ) : tab === "alt" ? (
             <ProcessFields />
           ) : (
-            <DetailFields section={tab === "B" ? "B" : "A"} />
+            <DetailFields key={tab} section={tab === "B" ? "B" : "A"} />
           )}
           <Notices notices={notices} />
         </div>
@@ -276,8 +277,8 @@ export function Application({ route }: { route: Route }) {
         <button type="button" className="btn" onClick={() => void saveDraft()}>
           Save draft
         </button>
-        <button type="button" className="btn btn-primary" disabled={busy} onClick={openCheck}>
-          Check completeness
+        <button type="button" className="btn" disabled={busy || checkStatus === "running"} onClick={openCheck}>
+          {checkStatus === "unavailable" ? "Try check again" : "Ready to submit"}
         </button>
       </div>
       <dialog
@@ -291,25 +292,19 @@ export function Application({ route }: { route: Route }) {
           <div className="dialog-body">
             <div className="dialog-head">
               <h2 className="dialog-title" id="completeness-title">
-                Check completeness
+                Review your draft
               </h2>
               <button type="submit" className="btn">
                 {stage === "preparing" ? "Cancel download" : "Close"}
               </button>
             </div>
-            <p>This is an administrative completeness check. It does not decide whether the design complies or is safe.</p>
+            <p className="meta">This check does not submit your application.</p><details className="compact-help"><summary>About this review</summary><p>This checks administrative completeness, not code compliance or design safety.</p></details>
             {stage === "ready" && file && !file.draft && <p>{UNSIGNED_LINE}</p>}
-            {c.exampleId && (
-              <p className="example-banner-title">
-                EXAMPLE · {exampleLabel}
-                <span className="meta"> Downloads from this example are for practice.</span>
-              </p>
-            )}
             <p className="meta" id="completeness-description">
-              {statusText}
+              {exportAttempted ? statusText : checkNote || "Check your draft before preparing the application."}
             </p>
             {blank && stage !== "ready" && <p>Start with the applicant and project details.</p>}
-            {busy && <progress aria-label={statusText} />}
+            {(exportAttempted ? busy : checkStatus === "running") && <progress aria-label="Checking draft" />}
             {stage === "ready" && file && (
               <p>
                 Download started: {file.name}.{" "}
@@ -319,8 +314,8 @@ export function Application({ route }: { route: Route }) {
               </p>
             )}
             {stage === "ready" && file?.notice && <Notices notices={[file.notice]} />}
-            {stage !== "ready" && <MissingItems gaps={gaps} sectionById={sectionById} onFollow={follow} />}
-            {(tech || reasons.length > 0) && (
+            {stage !== "ready" && checkStatus !== "not_requested" && checkStatus !== "running" && <details className="disclosure"><summary>{blocking.length} required items</summary><MissingItems gaps={gaps} sectionById={sectionById} onFollow={follow} /></details>}
+            {(tech || checkDetail || reasons.length > 0) && (
               <details>
                 <summary>Technical detail</summary>
                 {reasons.length > 0 && (
@@ -330,48 +325,37 @@ export function Application({ route }: { route: Route }) {
                     ))}
                   </ul>
                 )}
-                {tech && !reasons.length && <p>{tech}</p>}
+                {!reasons.length && <p>{tech || checkDetail}</p>}
               </details>
             )}
           </div>
           <div className="footer-bar">
-            {blocking.length > 0 && stage !== "ready" && stage !== "error" && (
+            {blocking.length > 0 && !busy && checkStatus !== "not_requested" && checkStatus !== "unavailable" && stage !== "ready" && stage !== "error" && (
               <button type="button" className="btn btn-primary" onClick={reviewFirst}>
                 Review first item
               </button>
             )}
-            {stage === "error" && (
-              <button type="button" className="btn btn-primary" disabled={busy} onClick={() => void prepare(draftIntent)}>
-                {statusText.startsWith("Online") ? "Retry review" : "Try again"}
+            {(stage === "error" || (!exportAttempted && checkStatus === "unavailable")) && (
+              <button type="button" className="btn btn-primary" disabled={busy} onClick={() => exportAttempted ? void prepare(draftIntent) : openCheck()}>
+                {exportAttempted ? "Try download again" : "Try check again"}
               </button>
             )}
+            {checkStatus === "not_requested" && !exportAttempted && <button type="button" className="btn btn-primary" onClick={openCheck}>Check my draft</button>}
             {stage === "ready" && (
               <button type="button" className="btn btn-primary" onClick={downloadAgain}>
                 Download again
               </button>
             )}
-            {!c.exampleId && stage !== "ready" && stage !== "error" && (
-              <>
-                <button
-                  type="button"
-                  className={blocking.length > 0 ? "btn" : "btn btn-primary"}
-                  disabled={busy || !officialReady}
-                  data-requires-no-blocking-gaps={blocking.length > 0 ? "true" : undefined}
-                  onClick={() => void prepare(false)}
-                >
-                  Download application PDF
-                </button>
-                <button type="button" className="btn" disabled={busy} onClick={() => void prepare(true)}>
-                  Download draft PDF
-                </button>
-              </>
-            )}
-            <button type="button" className="btn" onClick={downloadRecord}>
-              Download text record
-            </button>
-            <button type="submit" className="btn">
-              Close
-            </button>
+            <details className="download-options">
+              <summary>Download options</summary>
+              <div className="btn-row">
+                <button type="button" className="btn" disabled={busy || !officialReady} data-requires-no-blocking-gaps={blocking.length ? "true" : undefined} onClick={() => void prepare(false)}>Download application PDF</button>
+                <button type="button" className="btn" disabled={busy || Boolean(c.exampleId)} onClick={() => void prepare(true)}>Download draft PDF</button>
+                <button type="button" className="btn" onClick={downloadRecord}>Download text record</button>
+              </div>
+              {!officialReady && <p className="meta">Application PDF needs a current check and no required items left.</p>}
+              <p className="meta">Drafts can be incomplete. The text record is not the official form.</p>
+            </details>
           </div>
         </form>
       </dialog>

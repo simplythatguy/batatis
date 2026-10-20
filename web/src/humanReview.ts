@@ -306,7 +306,7 @@ export function textRecord(input: {
   factLines: string[];
   blockingCount: number;
   warningCount: number;
-  checkedAt: string;
+  checkedAt?: string;
   pdfLines: string[];
 }): string {
   const questions = `${input.warningCount} open question${input.warningCount === 1 ? "" : "s"}`;
@@ -318,7 +318,7 @@ export function textRecord(input: {
     "",
     ...input.factLines,
     "",
-    `Completeness: ${required}, ${questions}, checked at ${input.checkedAt}.`,
+    input.checkedAt ? `Completeness: ${required}, ${questions}, checked at ${input.checkedAt}.` : "Completeness has not been checked for this draft revision.",
     "This does not decide whether the design complies or is safe.",
     "",
     ...input.pdfLines,

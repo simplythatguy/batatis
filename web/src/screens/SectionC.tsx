@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { engine, EngineError, type CodeHit } from "../api/client";
 import { toViewRow, useProvisionText, useSectionC, type SectionCSource } from "../api/sectionC";
-import { CODE_EDITION } from "../config";
-import { applyIdentifyPlan, CONFIRM_UNAVAILABLE, DECISION_UNAVAILABLE, planIdentify, readDecisionBody } from "../identify";
+import { CONFIRM_UNAVAILABLE, DECISION_UNAVAILABLE, readDecisionBody } from "../identify";
 import { failureKind, sectionCQuoteLabel } from "../rules";
-import { CodeQuote, DemoFallback, GapStrip, PanelHeader, StatusPill } from "../components";
-import { CODE_TERMS } from "../fixture";
+import { CodeQuote, ServiceUnavailable, GapStrip, PanelHeader, StatusPill } from "../components";
 import { candidateById, unresolvedCandidates } from "../model";
 import { useCase } from "../store";
 import type { SectionCRow } from "../types";
@@ -22,20 +20,12 @@ function AttributionCell({ row }: { row: SectionCRow }) {
 }
 
 const rowKey = (r: SectionCRow) => `${r.candidateId}:${r.provision}`;
-const term = (r: SectionCRow, code: string) => r.terms?.[code] ?? CODE_TERMS[code];
+const term = (r: SectionCRow, code: string) => r.terms?.[code];
 
-/** Where the rows came from: the engine's lookup, or the bundled sample when the engine is unreachable. */
+/** Current deterministic lookup status. Product cases have no sample fallback. */
 function SourceLabel({ source, error }: { source: SectionCSource; error?: string }) {
   if (source === "live") return <StatusPill dot="done">Live lookup</StatusPill>;
   if (source === "loading") return <StatusPill dot="pending">Looking up…</StatusPill>;
-  if (source === "cached") {
-    return (
-      <span className="label-pill" title={error}>
-        <span className="status-dot warning" />
-        Cached demo run
-      </span>
-    );
-  }
   return (
     <span className="label-pill" title={error}>
       <span className="status-dot blocking" />
@@ -71,24 +61,21 @@ function Pairs({ row }: { row: SectionCRow }) {
   );
 }
 
-const SUGGESTED = "Suggested by search, confirm before submitting";
+const SUGGESTED = "Confirm before using";
 
 function ProvisionSearch() {
-  const { c, dispatch, engineId } = useCase();
-  const [query, setQuery] = useState(c.description);
+  const { c, dispatch, noteLookupFailure } = useCase();
+  const [query, setQuery] = useState("");
   const [hits, setHits] = useState<CodeHit[]>([]);
   const [note, setNote] = useState("");
-  const edited = useRef(false);
+  const [technical, setTechnical] = useState("");
   const searchSeq = useRef(0);
 
-  useEffect(() => {
-    if (!edited.current) setQuery(c.description);
-  }, [c.description]);
-
   async function runSearch(text: string) {
+    setTechnical("");
     const q = text.trim();
     if (q.length < 3) {
-      setNote("Type a few words from your description to search.");
+      setNote("Enter code keywords or an article number.");
       setHits([]);
       return;
     }
@@ -102,42 +89,11 @@ function ProvisionSearch() {
     } catch (e) {
       if (seq !== searchSeq.current) return;
       setHits([]);
-      setNote(e instanceof EngineError ? e.detail : "The code search did not answer.");
+      setNote("Search unavailable. Try again when you’re ready.");
+      setTechnical(e instanceof EngineError ? e.technical : String(e));
+      noteLookupFailure(e instanceof Error ? e.message : String(e));
     }
   }
-
-  useEffect(() => {
-    const prose = c.description.trim();
-    if (prose.length < 8) return;
-    const ctl = new AbortController();
-    let cancelled = false;
-    (async () => {
-      if (engineId) {
-        try {
-          const ranked = await engine.identify(engineId, prose, [], ctl.signal);
-          if (cancelled) return;
-          const plan = planIdentify(ranked, 5);
-          if (plan.articles.length) {
-            applyIdentifyPlan(dispatch, plan);
-            setNote(plan.note);
-            return;
-          }
-        } catch (e) {
-          if (ctl.signal.aborted || cancelled) return;
-          if (!(e instanceof EngineError) || failureKind(e.status, e.detail) !== "missing-route") {
-            /* search below is the path on this engine */
-          }
-        }
-      }
-      if (!cancelled) await runSearch(prose);
-    })();
-    return () => {
-      cancelled = true;
-      ctl.abort();
-    };
-    // Search again when the description changes. The box stays editable.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [engineId, c.description]);
 
   return (
     <form
@@ -152,7 +108,6 @@ function ProvisionSearch() {
         id="section-c-search"
         value={query}
         onChange={(e) => {
-          edited.current = true;
           setQuery(e.target.value);
         }}
       />
@@ -164,6 +119,7 @@ function ProvisionSearch() {
           {note}
         </p>
       )}
+      {technical && <details><summary>Technical detail</summary><p>{technical}</p></details>}
       {hits.length > 0 && (
         <ul className="plain-list">
           {hits.map((h) => (
@@ -222,8 +178,7 @@ export function SectionC() {
         .map((a) => ({ candidateId: a.id, provision: a.provision })),
     [c.candidates],
   );
-  const confirmedWithoutArticle = c.candidates.some((a) => a.answer === "yes" && !/^\d/.test(a.provision));
-  const { rows, source, error, status } = useSectionC(wanted, c.sectionC, attempt);
+  const { rows, source, error } = useSectionC(wanted, [], attempt);
   const [selected, setSelected] = useState<string>();
   const sel = rows.find((r) => rowKey(r) === selected) ?? rows[0];
   const selCand = sel && candidateById(c, sel.candidateId);
@@ -256,7 +211,7 @@ export function SectionC() {
 
   return (
     <>
-      <PanelHeader title="Section C · Objectives, functions and intent" meta="Lookup from the attribution tables" />
+      <PanelHeader title="Section C" meta="Code references" />
       <GapStrip gaps={gaps} />
       <div className="pane scroll-body">
         <div className="sc-source">
@@ -272,39 +227,10 @@ export function SectionC() {
             {confirmNote}
           </p>
         )}
-        <p className="meta intro">
-          Objectives and functions come from {CODE_EDITION}, by lookup after you confirm a departure that names an article. Rows are not invented when no article is known.
-        </p>
-        {source === "cached" && (
-          <p className="field-note" role="status">
-            <span className="status-dot warning" />
-            Cached demo run. The engine did not return a live lookup ({error}). These rows were saved with the example.
-          </p>
-        )}
-        {(source === "cached" || source === "error") && failureKind(status ?? 0, error ?? "") === "unreachable" && (
-          <DemoFallback reason={error ?? "The review service did not respond."} onRetry={() => setAttempt((n) => n + 1)} />
-        )}
-        {(source === "cached" || source === "error") && failureKind(status ?? 0, error ?? "") !== "unreachable" && (
-          <p className="field-note" role="status">
-            <span className="status-dot warning" />
-            {error ?? "The lookup did not return."}{" "}
-            <button type="button" className="btn" onClick={() => setAttempt((n) => n + 1)}>
-              Retry
-            </button>
-          </p>
-        )}
-        <ProvisionSearch />
-        {!rows.length && (
-          <div className="empty-guide">
-            <h2 className="section-title">This table is empty</h2>
-            <p>
-              {confirmedWithoutArticle
-                ? "You confirmed a departure, and no Division B article is attached. Search above and pick the provision that fits. This table stays empty until you do, so it does not invent a row."
-                : "Nothing is listed yet. Search above. Results come from the code database. Pick a provision, then confirm it before you submit."}
-            </p>
-          </div>
-        )}
-        {rows.length > 0 && <div className="table-wrap">
+        <details className="compact-help"><summary>About Section C</summary><p>Objectives explain why a code requirement exists. Functions describe what it must achieve. These come from the code tables, not AI.</p></details>
+        {source === "error" && <ServiceUnavailable reason={error ?? "The lookup did not return."} onRetry={() => setAttempt(n => n + 1)} />}
+        <details className="disclosure" open={!rows.length || undefined}><summary>Add a code reference</summary><ProvisionSearch /></details>
+        {rows.length > 0 && <details className="disclosure"><summary>All references ({rows.length})</summary><div className="table-wrap">
           <table className="table sc-table">
             <thead>
               <tr>
@@ -371,11 +297,12 @@ export function SectionC() {
               })}
             </tbody>
           </table>
-        </div>}
+        </div></details>}
 
+        {rows.length > 0 && <div className="field"><label htmlFor="reference-choice">Review a reference</label><select id="reference-choice" value={sel ? rowKey(sel) : ""} onChange={e => setSelected(e.target.value)}>{rows.map(r => <option key={rowKey(r)} value={rowKey(r)}>{r.provision}</option>)}</select></div>}
         {sel && (
           <div className="sc-detail">
-            <section className="source-block">
+            <details className="source-block disclosure"><summary>Code text and source</summary>
               <div className="block-label">
                 <span className="label-pill">{quoteLabel.pill}</span>
                 <span className="meta">
@@ -401,8 +328,8 @@ export function SectionC() {
                   {sel.differsDetail}
                 </p>
               )}
-            </section>
-            <section className="source-block">
+            </details>
+            <details className="source-block disclosure"><summary>Intent statements</summary>
               <div className="block-label">
                 <span className="label-pill">NBC 2020 Intent Statements</span>
                 <span className="meta">Explanatory only, not part of NBC(AE) 2023</span>
@@ -421,7 +348,8 @@ export function SectionC() {
                   }
                 />
               ))}
-            </section>
+            </details>
+            <div className="card"><h2 className="section-title">{sel.provision}</h2><Pairs row={sel} /></div>
             {selCand?.suggestion && selCand.answer !== "yes" && (
               <button
                 type="button"
@@ -477,7 +405,7 @@ export function SectionC() {
           Back
         </a>
         <button type="button" className="btn btn-primary" onClick={() => (location.hash = "#/application?tab=D")}>
-          Continue to application
+          Continue
         </button>
       </div>
     </>

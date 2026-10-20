@@ -1,7 +1,7 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useRoute } from "./router";
 import { NRC_CREDIT, NRC_SOURCES } from "./config";
 import { splitNoticeUrl } from "./rules";
-import { EXAMPLES } from "./examples";
 import { roleNote } from "./humanReview";
 import { useCase } from "./store";
 import type { FactKind, Gap } from "./types";
@@ -97,7 +97,9 @@ export function KindBadge({ kind }: { kind: FactKind }) {
 }
 
 export function GapStrip({ gaps }: { gaps: Gap[] }) {
-  const { gapsSource, c } = useCase();
+  const { gapsSource, checkStatus, checkNote } = useCase();
+  if (checkStatus === "not_requested") return null;
+  if (checkStatus === "stale" || checkStatus === "running" || checkStatus === "unavailable") return <p className="check-summary" role="status">{checkNote}</p>;
   if (gapsSource === "idle") {
     return (
       <div className="gap-summary gap-panel" aria-label="Administrative gaps">
@@ -113,7 +115,7 @@ export function GapStrip({ gaps }: { gaps: Gap[] }) {
       <div className="gap-summary gap-panel" aria-label="Administrative gaps">
         <span className="gap-chip">
           <span className="status-dot pending" />
-          Reviewing {c.exampleId ? "this example" : "your application"}…
+          Reviewing your draft…
         </span>
         <span className="meta">The missing-item list may change when the review finishes.</span>
       </div>
@@ -146,7 +148,7 @@ export function GapStrip({ gaps }: { gaps: Gap[] }) {
         {gapsSource === "loading" && (
           <span className="gap-chip">
             <span className="status-dot pending" />
-            Reviewing {c.exampleId ? "this example" : "your application"}…
+            Reviewing your draft…
           </span>
         )}
         <span className="gap-chip">
@@ -175,72 +177,67 @@ export function GapStrip({ gaps }: { gaps: Gap[] }) {
   );
 }
 
-/** Shown only when the engine cannot be reached. Example buttons ask before they replace a case. */
-export function DemoFallback({ reason, onRetry }: { reason: string; onRetry?: () => void }) {
-  const { askExample } = useCase();
-  return (
-    <div className="demo-offer" role="alert">
-      <p>{reason}</p>
-      <p className="meta">The review service did not respond. Retry, or open a cached example. An example does not replace your case until you confirm.</p>
-      <div className="btn-row">
-        {onRetry && (
-          <button type="button" className="btn" onClick={onRetry}>
-            Retry
-          </button>
-        )}
-      </div>
-      <div className="btn-row">
-        <button type="button" className="btn" onClick={() => askExample("manufacturer-northcore")}>
-          Manufacturer example
-        </button>
-        <button type="button" className="btn" onClick={() => askExample("contractor-dampers")}>
-          Contractor example
-        </button>
-        <button type="button" className="btn" onClick={() => askExample("homebuilder-soffit")}>
-          Homebuilder example
-        </button>
-      </div>
-    </div>
-  );
+/** Plain recovery; no synthetic case may replace real work. */
+export function ServiceUnavailable({ reason, onRetry }: { reason: string; onRetry?: () => void }) {
+  return <div className="recovery" role="status">
+    <p>Couldn’t load this information.</p>
+    {onRetry && <button type="button" className="btn" onClick={onRetry}>Try again</button>}
+    <details><summary>Technical detail</summary><p>{reason}</p></details>
+  </div>;
 }
 
 export function DraftNote() {
-  const { savedNote, gapsNote } = useCase();
-  if (!gapsNote && !savedNote) return null;
-  return (
-    <span className="status-note" role="status">
-      {gapsNote}
-      {gapsNote && savedNote ? " " : ""}
-      {savedNote}
-    </span>
-  );
+  const { savedNote, saveStatus, saveDetail, saveDraft } = useCase();
+  return <div className="save-receipt">
+    <span className="status-note" role="status">{savedNote || "Current visit only"}</span>
+    {saveStatus === "failed" && <button type="button" className="btn btn-xs" onClick={() => void saveDraft()}>Try saving again</button>}
+    <details className="save-help"><summary aria-label="About saving">About saving</summary>
+      <p>Changes are sent to Batatis as you type. This page won’t reopen your draft after a reload. Download a draft to keep a copy.</p>
+      <a className="text-link" href="#/application?download=1">Download options</a>
+      {saveDetail && <details><summary>Technical detail</summary><p>{saveDetail}</p></details>}
+    </details>
+  </div>;
 }
 
-/** Persistent example provenance. Not dismissible. Shown only while an example is loaded. */
-export function ExampleBanner({ officer = false }: { officer?: boolean }) {
-  const { c, resetToWho } = useCase();
-  const label = EXAMPLES.find((ex) => ex.id === c.exampleId)?.label ?? "Loaded example";
-  return (
-    <aside className="example-banner" role="note" aria-label="Example data">
-      <div className="example-banner-copy">
-        <p className="example-banner-title">EXAMPLE · {label}</p>
-        <p className="example-banner-body">
-          {officer
-            ? "This officer review is of the loaded example."
-            : "You are viewing a sample application. Starting your own application clears this example."}
-        </p>
-      </div>
-      {officer ? (
-        <a className="btn" href="#/describe">
-          Return to application
-        </a>
-      ) : (
-        <button type="button" className="btn" onClick={resetToWho}>
-          Start my own application
-        </button>
-      )}
-    </aside>
-  );
+export function CheckAction() {
+  const { checkStatus, checkNote, checkDetail, requestCheck } = useCase();
+  const busy = checkStatus === "running";
+  const finished = checkStatus === "ready" || checkStatus === "needs_answers";
+  return <section className="check-action" aria-label="Draft check">
+    <div>
+      <h2 className="section-title">{finished ? "Your draft check" : "Check when you’re ready"}</h2>
+      <p className="meta" role="status">{checkNote || "Fill in what you know. You can leave questions for later."}</p>
+    </div>
+    <button type="button" className={finished ? "btn" : "btn btn-primary"} disabled={busy} onClick={() => finished ? (location.hash = "#/application?review=1") : void requestCheck(checkStatus === "unavailable")}>
+      {busy ? "Checking…" : checkStatus === "unavailable" ? "Try check again" : finished ? "View check" : "Check my draft"}
+    </button>
+    <details className="compact-help"><summary>What gets checked?</summary>
+      <p>Saves your draft, looks for code articles, then checks for missing information. This may use AI. Nothing is submitted or downloaded.</p>
+      <p>This checks completeness, not design safety or code compliance.</p>
+      {checkDetail && <details><summary>Technical detail</summary><p>{checkDetail}</p></details>}
+    </details>
+  </section>;
+}
+
+/** Small field groups; deep links open the group containing the requested field. */
+export function FieldSteps({ steps, nextHref }: { steps: { title: string; fields: string[]; content: ReactNode }[]; nextHref?: string }) {
+  const route = useRoute();
+  const focus = route.params.get("focus");
+  const focusIndex = steps.findIndex(step => focus && step.fields.includes(focus));
+  const [index, setIndex] = useState(Math.max(0, focusIndex));
+  useEffect(() => { if (focusIndex >= 0) setIndex(focusIndex); }, [focusIndex, focus]);
+  const current = Math.min(index, steps.length - 1);
+  const step = steps[current];
+  if (!step) return null;
+  return <section className="field-step">
+    <div className="step-heading"><h2>{step.title}</h2><span className="meta">{current + 1} of {steps.length}</span></div>
+    {step.content}
+    <div className="step-controls">
+      <button type="button" className="btn btn-ghost" disabled={current === 0} onClick={() => setIndex(current - 1)}>Previous</button>
+      <details className="jump-menu"><summary>All fields</summary><div>{steps.map((item, n) => <button key={item.title} type="button" className="btn btn-ghost" aria-current={current === n ? "step" : undefined} onClick={e => { setIndex(n); e.currentTarget.closest("details")?.removeAttribute("open"); }}>{item.title}</button>)}</div></details>
+      {current < steps.length - 1 ? <button type="button" className="btn btn-primary" onClick={() => setIndex(current + 1)}>Continue</button> : nextHref ? <a className="btn btn-primary" href={nextHref}>Continue</a> : <span className="meta">You can return to any answer.</span>}
+    </div>
+  </section>;
 }
 
 /** When this role needs an engineer, and what the officer decides. */

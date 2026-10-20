@@ -141,11 +141,11 @@ await check('overlapping fact saves persist the newest revision after an older d
  globalThis.fetch=mapped;
  assert.equal((await plain.processFields(id)).find(x=>x.id==='risk_assessment').answer.value,'SYNTHETIC new risk');
 });
-await check('reset invalidates jurisdiction fallback creation and preserves new in-flight create',async()=>{
+await check('reset invalidates unsupported jurisdiction acknowledgement and preserves new case',async()=>{
  sync.clearEngineSession(); const before=await sync.ensureEngineCase('SYNTHETIC unknown jurisdiction','');
  const mapped=globalThis.fetch; let release, ready;
  const entered=new Promise(resolve=>ready=resolve); const wait=new Promise(resolve=>release=resolve); let held=false;
- globalThis.fetch=async(input,init)=>{const response=await mapped(input,init);if(!held&&String(input).endsWith('/cases')&&init?.method==='POST'){held=true;ready();await wait;}return response;};
+ globalThis.fetch=async(input,init)=>{const response=await mapped(input,init);if(!held&&String(input).endsWith('/jurisdiction')&&init?.method==='PUT'){held=true;ready();await wait;}return response;};
  const old=sync.syncJurisdiction(before,'calgary','SYNTHETIC old jurisdiction'); await entered;
  sync.clearEngineSession(); const next=await sync.ensureEngineCase('SYNTHETIC new role','edmonton');
  const rejected=assert.rejects(old,{name:'StaleEngineSession'}); release(); await rejected;

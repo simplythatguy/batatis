@@ -8,10 +8,10 @@ import {
   type SectionDIssue,
   type SectionDPlan,
 } from "../api/client";
-import { DemoFallback, RoleNote } from "../components";
+import { ServiceUnavailable, FieldSteps } from "../components";
 import { practiceFlagLine, practicePrompt } from "../humanReview";
 import { answeredYes, evidenceDocuments, sectionDWhileRefreshing, shownProcessAnswer } from "../model";
-import { AUTHORITY_DECISION_FIELDS, evidenceLinked, evidenceRecorded, isScopeField, practiceFromReview, professionalConfirmed, SCOPE_HELP, sectionDIssueStatus } from "../professional";
+import { AUTHORITY_DECISION_FIELDS, evidenceLinked, evidenceRecorded, isScopeField, practiceFromReview, SCOPE_HELP, sectionDIssueStatus } from "../professional";
 import { failureKind } from "../rules";
 import { useCase } from "../store";
 import type { Case } from "../types";
@@ -79,11 +79,7 @@ function confirmedValue(c: Case, field: string): unknown {
   return fact?.value;
 }
 
-function flagDot(flag: "yes" | "no" | "depends"): string {
-  if (flag === "yes") return "blocking";
-  if (flag === "depends") return "warning";
-  return "pending";
-}
+
 
 const EVIDENCE_TYPES = [
   "manufacturer's literature",
@@ -195,19 +191,14 @@ function EvidenceAnswer({
 
 function ProfessionalAnswers() {
   const { c, dispatch } = useCase();
-  return (
-    <div className="form-grid">
-      <p className="meta full section-hint">
-        These start empty. A registered professional is an engineer or architect you confirm, with a seal or a registration number. Yes, No, and Not sure on the questions below do not clear that. Not sure is sent to the officer. You can return a question to Not answered.
-      </p>
-      {PROFESSIONAL_FIELDS.map((q) => {
+  const inputs = PROFESSIONAL_FIELDS.map((q) => {
         const id = `prof-${q.field}`;
         const current = confirmedValue(c, `professional.${q.field}`);
         if (q.kind === "occupancy") {
           const value = typeof current === "string" ? current : "";
           return (
             <div key={q.field} className={`field full ${value ? "" : "is-empty"}`}>
-              <label htmlFor={id}>{q.label}</label>
+              <label className="sr-only" htmlFor={id}>{q.label}</label>
               <select
                 id={id}
                 value={value}
@@ -229,8 +220,8 @@ function ProfessionalAnswers() {
           const value = held || (current === "engineer" || current === "architect" ? current : "");
           return (
             <div key={q.field} className={`field full ${value ? "" : "is-empty"}`}>
-              <label htmlFor="prof-role">{q.label}</label>
-              <p className="field-note">This item is routed to the officer until an engineer or architect confirms a seal or registration number. Not sure and Not engaged yet send the question to the officer. That does not open the official PDF. Download a draft PDF or copy the officer request. Do not invent a number.</p>
+              <label className="sr-only" htmlFor="prof-role">{q.label}</label>
+              <details className="compact-help"><summary>Why we ask</summary><p>An engineer or architect must confirm their registration. Not sure keeps the official PDF on hold for officer review. A draft remains available.</p></details>
               <select
                 id="prof-role"
                 value={value}
@@ -259,7 +250,7 @@ function ProfessionalAnswers() {
           const value = held ? "" : typeof current === "string" ? current : "";
           return (
             <div key={q.field} className={`field full ${held || value ? "" : "is-empty"}`}>
-              <label htmlFor={id}>{q.label}</label>
+              <label className="sr-only" htmlFor={id}>{q.label}</label>
               <select
                 aria-label={`${q.label} choice`}
                 value={held}
@@ -286,7 +277,7 @@ function ProfessionalAnswers() {
           const value = typeof current === "number" ? String(current) : "";
           return (
             <div key={q.field} className={`field full ${value ? "" : "is-empty"}`}>
-              <label htmlFor={id}>{q.label}</label>
+              <label className="sr-only" htmlFor={id}>{q.label}</label>
               <input
                 id={id}
                 type="number"
@@ -315,11 +306,11 @@ function ProfessionalAnswers() {
         const value = notSure ? "not-sure" : chosen === true ? "yes" : chosen === false ? "no" : "";
         return (
           <div key={q.field} className={`field full ${value ? "" : "is-empty"}`}>
-            <label htmlFor={id}>{q.label}</label>
-            {scopeField && <p className="field-note">{SCOPE_HELP[scopeField]}</p>}
+            <label className="sr-only" htmlFor={id}>{q.label}</label>
+            {scopeField && <details className="compact-help"><summary>Help</summary><p>{SCOPE_HELP[scopeField]}</p></details>}
             {authorityField && (
               <p className="field-note">
-                Not sure is sent to the officer as an open question. Yes or No reports what the authority decided. It does not decide that a registered professional is unnecessary.
+                Report the authority’s decision, or choose Not sure.
               </p>
             )}
             <select
@@ -344,9 +335,12 @@ function ProfessionalAnswers() {
             </select>
           </div>
         );
-      })}
-    </div>
-  );
+      });
+  return <FieldSteps steps={PROFESSIONAL_FIELDS.map((q, i) => ({
+    title: q.label,
+    fields: [`prof-${q.field}`],
+    content: <div className="form-grid">{inputs[i]}</div>,
+  }))} />;
 }
 
 /**
@@ -355,6 +349,8 @@ function ProfessionalAnswers() {
  */
 export function Recommendations() {
   const { c, engineId, dispatch, factsEpoch } = useCase();
+  const [view, setView] = useState("professional");
+  const [evidenceIndex, setEvidenceIndex] = useState(0);
   const provisions = answeredYes(c).map((a) => a.provision).filter((id) => /^\d/.test(id)).join("|");
   const [attempt, setAttempt] = useState(0);
   const [load, setLoad] = useState<Load>(IDLE);
@@ -440,51 +436,34 @@ export function Recommendations() {
 
   return (
     <section className="stack" aria-labelledby="reco-title">
-      <h2 id="reco-title" className="section-title">
-        Section D and professional screening
-      </h2>
-      <RoleNote />
-      <p className="meta">{load.note}</p>
-      {load.phase === "unreachable" && (
-        <DemoFallback reason={load.note || "The review service did not respond."} onRetry={() => setAttempt((n) => n + 1)} />
-      )}
-      {load.phase === "error" && engineId && (
-        <p className="field-note" role="status">
-          <span className="status-dot warning" /> {load.note}{" "}
-          <button type="button" className="btn" onClick={() => setAttempt((n) => n + 1)}>
-            Try again
-          </button>
-        </p>
-      )}
-      {load.phase === "loading" && !load.plan && !load.professional && !load.issues && <p className="empty">Loading…</p>}
-      {flag && (
-        <p>
-          <span className={`status-dot ${flagDot(flag)}`} /> {practiceFlagLine(flag)}
-        </p>
-      )}
-      {c.practiceOfEngineering === true && !professionalConfirmed(c.facts) && (
-        <p className="field-note" role="status">
-          This item is routed to the officer. Name an engineer or architect and their seal or registration number, or choose Not sure or Not engaged yet. That does not open the official PDF. Download a draft PDF, or open Officer review and copy the request. Do not invent a number. This screen does not write their judgment.
-        </p>
-      )}
-      {load.professional?.reasons.map((r) => (
-        <p key={r.code} className="meta">
-          {r.message} {r.citation ? <span className="mono">{r.citation}</span> : null}
-        </p>
-      ))}
-      {load.professional?.questions.map((q) => (
-        <p key={q} className="field-note">
-          <span className="status-dot warning" />
-          {q}
-        </p>
-      ))}
+      <div className="step-heading"><h2 id="reco-title" className="section-title">Supporting documents</h2></div>
+      <div className="toolbar section-switch" aria-label="Supporting document steps">
+        <button className="pill" aria-pressed={view === "professional"} data-active={view === "professional"} onClick={() => setView("professional")}>Professional</button>
+        <button className="pill" aria-pressed={view === "evidence"} data-active={view === "evidence"} onClick={() => setView("evidence")}>Evidence</button>
+      </div>
+      {view === "professional" && <>
       <ProfessionalAnswers />
+      <details className="compact-help"><summary>Professional review notes</summary>
+        {flag && <p>{practiceFlagLine(flag)}</p>}
+        <p>Batatis recommends evidence. Your professional supplies the analysis. This is not a safety or compliance decision.</p>
+        {load.professional?.reasons.map(r => <p key={r.code}>{r.message} {r.citation}</p>)}
+        {load.professional?.questions.map(q => <p key={q}>{q}</p>)}
+      </details>
+      </>}
+      {view === "evidence" && <>
+      {(load.phase === "error" || load.phase === "unreachable") && <ServiceUnavailable reason={load.note} onRetry={() => setAttempt(n => n + 1)} />}
+      {load.phase === "loading" && <p className="meta" role="status">Loading evidence…</p>}
+      {((load.issues?.length ?? 0) + (load.plan?.items.length ?? 0)) > 0 && <div className="field"><label htmlFor="evidence-choice">Document to add</label><select id="evidence-choice" value={evidenceIndex} onChange={e => setEvidenceIndex(Number(e.target.value))}>
+        {load.issues?.map((issue, i) => <option key={`issue-${issue.id}`} value={i}>{issue.provision?.provision_id ?? "Open question"} · issue {i + 1}</option>)}
+        {load.plan?.items.map((item, i) => <option key={`plan-${item.id}`} value={(load.issues?.length ?? 0) + i}>{item.provision_id} · evidence {i + 1}</option>)}
+      </select></div>}
+
       {load.issues === null && load.issuesNote && <p className="empty">{load.issuesNote}</p>}
       {load.issues && (
         <div className="stack">
           <h3 className="sub-title">Section D issues</h3>
           {load.issues.length === 0 && <p className="empty">No Section D issues returned.</p>}
-          {load.issues.map((issue) => {
+          {load.issues.filter((_, i) => i === evidenceIndex).map((issue) => {
             const practice = issue.practice_of_engineering;
             const practiceValue = practice.value === true ? true : practice.value === false ? false : "unknown";
             const prompt = practicePrompt(practiceValue, practice.question);
@@ -502,7 +481,7 @@ export function Recommendations() {
                     {status === "needs_professional" ? "Routed to the officer" : status === "evidence_listed" ? "evidence listed" : "open"}
                   </span>
                 </div>
-                <p>{issue.at_stake}</p>
+                <details className="compact-help"><summary>What this document should address</summary><p>{issue.at_stake}</p>
                 {issue.question && <p className="field-note">{issue.question}</p>}
                 <p>
                   <span className={`status-dot ${practiceValue === true ? "blocking" : practiceValue === "unknown" ? "warning" : "pending"}`} />{" "}
@@ -513,11 +492,12 @@ export function Recommendations() {
                   Evidence types to consider: {issue.recommended_types.join(", ") || "none listed"}. Not results, and not filled in for you.
                 </p>
                 {issue.provision?.citation && <p className="mono meta">{issue.provision.citation}</p>}
+                </details>
                 <EvidenceAnswer
                   itemId={issue.id}
                   provisionId={issue.provision?.provision_id ?? ""}
                   types={issue.recommended_types}
-                  title="Name the document you are supplying for this issue. The words are yours. This is text, not a file."
+                  title="Document name"
                 />
               </article>
             );
@@ -530,7 +510,7 @@ export function Recommendations() {
           {load.plan.items.length === 0 && (
             <p className="empty">No evidence items yet. Confirm a provision on Section C, then each item appears here for you to answer.</p>
           )}
-          {load.plan.items.map((item) => (
+          {load.plan.items.filter((_, i) => i + (load.issues?.length ?? 0) === evidenceIndex).map((item) => (
             <article key={item.id} className="card">
               <div className="card-head">
                 <span className="article-id">{item.provision_id}</span>
@@ -539,16 +519,17 @@ export function Recommendations() {
                   {item.status}
                 </span>
               </div>
-              <p>{item.performance_issue}</p>
+              <details className="compact-help"><summary>What this document should address</summary><p>{item.performance_issue}</p>
               <p className="meta">
                 Evidence types to consider: {item.recommended_types.join(", ") || "none listed"}. Not results, and not filled in for you.
               </p>
               {item.citation && <p className="mono meta">{item.citation}</p>}
+              </details>
               <EvidenceAnswer
                 itemId={item.id}
                 provisionId={item.provision_id}
                 types={item.recommended_types}
-                title="Name the document you are supplying. The words are yours. This is text, not a file."
+                title="Document name"
               />
             </article>
           ))}
@@ -559,9 +540,10 @@ export function Recommendations() {
           ))}
         </div>
       )}
+      </>}
       {load.fields.length > 0 && (
         <div>
-          <h3 className="sub-title">Process answers stored for this case</h3>
+          <details className="compact-help"><summary>Saved process answers</summary>
           <ul className="plain-list">
             {load.fields.map((f) => {
               const written = shownProcessAnswer(f.id, f.answer?.value, c.process);
@@ -571,7 +553,7 @@ export function Recommendations() {
                 </li>
               );
             })}
-          </ul>
+          </ul></details>
         </div>
       )}
     </section>

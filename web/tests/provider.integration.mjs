@@ -83,13 +83,14 @@ try {
   await scenario('derived professional review keeps its hold while a save completes', async page => {
     await begin(page);
     await dispatch(page, {type:'setDetail', field:'owner', value:'Synthetic applicant', section:'A'});
-    await hold(page, '/gaps', 'GET');
+    await hold(page, '/facts', 'POST');
     await startSave(page); await waitHeld(page);
     await dispatch(page, {type:'notePractice', value:true});
     const id = await release(page);
     assert.ok(id);
     const state = await page.evaluate(() => ({sync:window.caseStore.readSync(), gaps:window.caseStore.readGaps()}));
-    assert.equal(state.sync.reviewed, true);
+    assert.equal(state.sync.saved, true);
+    assert.equal(state.sync.reviewed, false);
     assert.ok(state.gaps.some(x=>x.field==='professional.role' || x.field==='professional_requirement'));
   });
 
@@ -99,7 +100,9 @@ try {
       await dispatch(page, {type:'setProcess', field:'risk', value:'Synthetic old role risk'});
       await hold(page, suffix, suffix === '/gaps' ? 'GET' : 'POST');
       await page.evaluate(() => { window.oldSave = window.caseStore.saveDraft; });
-      await startSave(page); await waitHeld(page);
+      if (suffix === '/gaps') await page.evaluate(() => { window.pending = window.caseStore.requestCheck(); });
+      else await startSave(page);
+      await waitHeld(page);
       await page.evaluate(() => window.caseStore.resetToWho());
       await page.waitForFunction(() => window.caseStore.phase === 'who');
       await page.evaluate(() => window.caseStore.beginEmpty('contractor'));

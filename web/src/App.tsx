@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ExampleBanner, Icon } from "./components";
+import { Icon } from "./components";
 import { useFocusParam, useRoute } from "./router";
 import { Application } from "./screens/Application";
 import { CodeCheck } from "./screens/CodeCheck";
@@ -10,7 +10,6 @@ import { SectionC } from "./screens/SectionC";
 import { Who } from "./screens/Who";
 import { applicantLabel } from "./intake";
 import { AUTHORITIES } from "./config";
-import { EXAMPLES } from "./examples";
 import { useCase } from "./store";
 
 const EXPLICIT_ROUTES = ["/code-check", "/section-c", "/application", "/officer", "/accuracy"];
@@ -31,18 +30,11 @@ const NAV = [
 
 export function App() {
   const route = useRoute();
-  const { c, phase, askExample, resetToWho, pendingExampleId, confirmExample, dismissExample } = useCase();
-  const confirmDialog = useRef<HTMLDialogElement>(null);
+  const { c, phase, resetToWho } = useCase();
   const resetDialog = useRef<HTMLDialogElement>(null);
   const [resetOpen, setResetOpen] = useState(false);
   useFocusParam(route);
   const isDescribeRoute = !EXPLICIT_ROUTES.includes(route.path);
-  useEffect(() => {
-    const dialog = confirmDialog.current;
-    if (!dialog) return;
-    if (pendingExampleId && !dialog.open) dialog.showModal();
-    if (!pendingExampleId && dialog.open) dialog.close();
-  }, [pendingExampleId]);
   useEffect(() => {
     const dialog = resetDialog.current;
     if (!dialog) return;
@@ -74,7 +66,7 @@ export function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell${phase === "who" ? " onboarding-shell" : ""}`}>
       <aside className="sidebar">
         <div className="workspace">
           <span className="logo" aria-hidden="true">
@@ -110,35 +102,24 @@ export function App() {
         )}
         <div className="sidebar-foot">
           <div className="case-card">
-            <span className="case-title">{phase === "case" ? c.title || "New application" : "No case yet"}</span>
+            <span className="case-title">{phase === "case" ? c.title || "New application" : ""}</span>
             <span className="meta">
-              {phase === "case" ? `${applicantLabel(c.applicantType)} · ${AUTHORITIES.find((a) => a.id === c.authority)?.name ?? "Authority not selected"}` : "No case yet"}
+              {phase === "case" ? `${applicantLabel(c.applicantType)} · ${AUTHORITIES.find((a) => a.id === c.authority)?.name ?? "Authority not selected"}` : ""}
             </span>
           </div>
-          {phase === "case" && (
-            <details className="example-menu">
-              <summary>Try an example</summary>
-              {EXAMPLES.map((ex) => (
-                <button key={ex.id} type="button" className="btn btn-ghost" onClick={() => askExample(ex.id)}>
-                  {ex.label}
-                </button>
-              ))}
-            </details>
-          )}
           <button type="button" className="btn btn-ghost" onClick={() => setResetOpen(true)}>
             Reset case
           </button>
         </div>
       </aside>
       <main className="main-panel">
-        {phase === "case" && c.exampleId && <ExampleBanner officer={route.path === "/officer"} />}
         {screen}
       </main>
       <dialog className="dialog" ref={resetDialog} aria-labelledby="reset-confirm-title" onClose={() => setResetOpen(false)}>
         <form method="dialog">
           <div className="dialog-body">
             <h2 className="dialog-title" id="reset-confirm-title">Clear this case?</h2>
-            <p className="meta">Reset removes the case in this browser. It does not show what was in it.</p>
+            <p className="meta">This clears your current visit. Download a copy first if you need it.</p>
           </div>
           <div className="footer-bar">
             <button type="button" className="btn" onClick={() => resetDialog.current?.close()}>
@@ -157,22 +138,7 @@ export function App() {
           </div>
         </form>
       </dialog>
-      <dialog className="dialog" ref={confirmDialog} aria-labelledby="example-confirm-title" onClose={dismissExample}>
-        <form method="dialog">
-          <div className="dialog-body">
-            <h2 className="dialog-title" id="example-confirm-title">Replace your case with an example?</h2>
-            <p className="meta">Your description and answers will be cleared. The example stays labelled as an example and is not a real application.</p>
-          </div>
-          <div className="footer-bar">
-            <button type="button" className="btn" onClick={dismissExample}>
-              Keep my case
-            </button>
-            <button type="button" className="btn btn-primary" onClick={confirmExample}>
-              Replace with the example
-            </button>
-          </div>
-        </form>
-      </dialog>
+
     </div>
   );
 }

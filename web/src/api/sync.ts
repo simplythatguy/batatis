@@ -1,8 +1,8 @@
 /**
  * Push the browser case to the engine.
  * Facts go to POST /cases/{id}/facts. Jurisdiction goes to PUT /cases/{id}/jurisdiction
- * once the applicant picks an authority (backend/case-api). Today's dev has no PUT,
- * so a case that was opened with no jurisdiction is recreated with one.
+ * once the applicant picks an authority (backend/case-api). Never recreate a case
+ * when that route is unavailable; keep the draft and report the unacknowledged update.
  */
 import { engine, EngineError } from "./client";
 import type { EngineGap } from "./client";
@@ -86,35 +86,29 @@ export function ensureEngineCase(title: string, authority: AuthorityId): Promise
   return request;
 }
 
-/**
- * Tell the engine which authority was picked. PUT is the contract.
- * On today's dev that route 404s. If the case was already created with this
- * jurisdiction, leave it. Otherwise open a new case that carries it, because
- * POST /cases is the only way this engine stores a jurisdiction.
- */
-export async function syncJurisdiction(caseId: string, authority: Exclude<AuthorityId, "">, title: string): Promise<string> {
+/** PUT is the update contract. Older engines may only acknowledge the jurisdiction
+ * supplied at creation. A mismatched value must fail without making an orphan copy. */
+export async function syncJurisdiction(caseId: string, authority: AuthorityId, _title: string): Promise<string> {
   const token = generation;
+  if (!authority) {
+    const current = await engine.getCase(caseId);
+    assertGeneration(token);
+    if (!current.jurisdiction) return caseId;
+    throw new EngineError(409, "The cleared reviewing authority could not be saved. Your draft is still open.", "This engine cannot clear a saved jurisdiction yet.");
+  }
   const body = jurisdictionBody(authority);
   try {
     await engine.setJurisdiction(caseId, body);
     assertGeneration(token);
     return caseId;
   } catch (e) {
-    if (!(e instanceof EngineError) || e.status !== 404) throw e;
-  }
-  try {
     assertGeneration(token);
+    if (!(e instanceof EngineError) || ![404, 405].includes(e.status)) throw e;
     const current = await engine.getCase(caseId);
     assertGeneration(token);
     if (current.jurisdiction?.id === body.id) return caseId;
-  } catch (e) {
-    if (!(e instanceof EngineError) || e.status === 0) throw e;
+    throw new EngineError(e.status, "The reviewing authority could not be saved. Your draft is still open.", e.technical);
   }
-  assertGeneration(token);
-  const created = await engine.createCase({ title, jurisdiction: body });
-  assertGeneration(token);
-  sessionStorage.setItem(ID_KEY, created.id);
-  return created.id;
 }
 
 /** Reconcile a complete browser fact snapshot, including withdrawals. Serialize writes

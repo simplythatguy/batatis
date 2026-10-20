@@ -4,7 +4,7 @@
  * proxies `/api` to the same URL (vite.config.ts). The default is http://127.0.0.1:8000.
  * `createEngine(base)` serves scripts and tests outside Vite.
  */
-import { failureKind, publicDetail, takeSseEvents } from "../rules";
+import { publicDetail, takeSseEvents } from "../rules";
 import type { Case, FactInput, NewCase, SectionCRow } from "./types.gen";
 
 /** A provision returned by GET /code/search (engine/codes.py `Codes.search`). */
@@ -135,17 +135,14 @@ export function createEngine(base: string) {
      * 404 on today's dev. The caller keeps the description cards.
      */
     /**
-     * POST /cases/{id}/identify. When that route is missing and there are no answers,
-     * GET /cases/{id}/identify/stream is tried once.
+     * Explicit start only. Missing routes fail without another provider attempt.
      */
     identify: (caseId: string, prose: string, answers: { field?: string | null; question_id?: string | null; answer: string }[] = [], signal?: AbortSignal, onStage?: (stage: string) => void) =>
-      rankCase(base, caseId, prose, answers, signal, onStage),
+      identifyCase(base, caseId, prose, answers, signal, onStage),
     /** GET /cases/{id}/identify. 404 detail `identify result not found` when nothing is stored. */
     storedIdentify: (caseId: string, signal?: AbortSignal) =>
       call<IdentifyResult>("GET", `/cases/${enc(caseId)}/identify`, undefined, signal),
-    /** GET /cases/{id}/identify/stream?prose= */
-    identifyStream: (caseId: string, prose: string, signal?: AbortSignal, onStage?: (stage: string) => void) =>
-      identifyStream(base, caseId, prose, signal, onStage),
+
     /**
      * POST /cases/{id}/identify/{provision}/decision.
      * Body is yes, no, or not_sure. The body may be a SectionCRow or the stored identify payload.
@@ -453,58 +450,13 @@ async function identifyCase(
       headers: { Accept: "text/event-stream", "Content-Type": "application/json" },
       body: JSON.stringify({ prose, answers }),
     });
+    return await readIdentifyResponse(res, onStage);
   } catch (e) {
-    if (signal?.aborted) throw e;
+    if (signal?.aborted || e instanceof EngineError) throw e;
     if (timed.timedOut()) throw new EngineError(0, "The engine did not answer in time.");
     throw new EngineError(0, e instanceof Error ? e.message : String(e));
   } finally {
     timed.clear();
-  }
-  return readIdentifyResponse(res, onStage);
-}
-
-async function identifyStream(
-  base: string,
-  caseId: string,
-  prose: string,
-  signal?: AbortSignal,
-  onStage?: (stage: string) => void,
-): Promise<IdentifyResult> {
-  const timed = withTimeout(signal, 25000);
-  const q = new URLSearchParams({ prose });
-  let res: Response;
-  try {
-    res = await fetch(`${base}/cases/${enc(caseId)}/identify/stream?${q}`, {
-      method: "GET",
-      signal: timed.signal,
-      headers: { Accept: "text/event-stream" },
-    });
-  } catch (e) {
-    if (signal?.aborted) throw e;
-    if (timed.timedOut()) throw new EngineError(0, "The engine did not answer in time.");
-    throw new EngineError(0, e instanceof Error ? e.message : String(e));
-  } finally {
-    timed.clear();
-  }
-  return readIdentifyResponse(res, onStage);
-}
-
-async function rankCase(
-  base: string,
-  caseId: string,
-  prose: string,
-  answers: { field?: string | null; question_id?: string | null; answer: string }[],
-  signal?: AbortSignal,
-  onStage?: (stage: string) => void,
-): Promise<IdentifyResult> {
-  try {
-    return await identifyCase(base, caseId, prose, answers, signal, onStage);
-  } catch (e) {
-    if (signal?.aborted) throw e;
-    if (e instanceof EngineError && failureKind(e.status, e.detail) === "missing-route" && answers.length === 0) {
-      return identifyStream(base, caseId, prose, signal, onStage);
-    }
-    throw e;
   }
 }
 

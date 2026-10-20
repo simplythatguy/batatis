@@ -157,7 +157,7 @@ export interface Case {
   id: string;
   title: string;
   applicantType: ApplicantType;
-  /** Set only when this case was opened from "Try an example". */
+  /** Test-fixture provenance only. Product visits never load sample cases. */
   exampleId?: string;
   codeEdition: string;
   /** Empty until the applicant picks an authority. Sent only on POST /cases. */
