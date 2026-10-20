@@ -2,7 +2,7 @@
 
 > Not a university Research Ethics Board (REB)-approved study. This is informal product testing for a student hackathon project. **Runner:** if the results will be published beyond the hackathon (paper, thesis, public report), check with the University of Alberta Research Ethics Office whether ethics approval is needed *before* running sessions.
 
-**What this is.** Batatis is a prototype built by a first-year Computing Science student for the Alberta Building Codes Challenge hackathon. It helps people put together alternative-solution (variance) applications under NBC(AE) 2023, and it helps officers check them for completeness. We want to see where it is easy or confusing to use.
+**What this is.** Batatis is a prototype built by a student hackathon team for the Alberta Building Codes Challenge hackathon. It helps people put together alternative-solution (variance) applications under NBC(AE) 2023, and it helps officers check them for completeness. We want to see where it is easy or confusing to use.
 
 **What you'll do.** You'll take part in one session of about 20 minutes, online or in person. You'll try a few tasks with fictional example documents and think out loud while you work, then fill in a short 10-question survey and answer a few questions. We are testing the tool, not you. There are no wrong answers.
 

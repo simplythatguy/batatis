@@ -1,28 +1,32 @@
 # User-testing protocol (appendix to the Implementation Plan)
 
-This folder describes the user testing **we would run** on Batatis with real applicants and Safety Codes Officers (SCOs). No sessions have been run yet, and these files contain no results. Every number in a results table is blank until a session takes place.
+This folder describes the user testing **we would run** on Batatis with real applicants and Safety Codes Officers (SCOs). No real-user or officer sessions have been run yet. Simulated AI-agent sessions (Round S) are reported separately and labelled SIMULATED. Every number in a results table is blank until a session takes place.
 
 Batatis checks alternative-solution (variance) applications under NBC(AE) 2023 for **administrative completeness, not technical correctness**. The tests measure that claim.
 
 | File | What it is |
 |---|---|
-| `session-script.md` | 20-minute moderated think-aloud for applicants (Rounds 1 and 1b), with SUS and a compact findings table |
+| `session-script.md` | 20-minute moderated think-aloud for applicants (Round 1, and a retest of Round 1), with SUS and a compact findings table |
 | `consent-form.md` | One-page plain-language consent with recording opt-ins |
-| `officer-timing-protocol.md` | Within-subjects timing comparison for SCOs: manual checklist vs Batatis on a planted-gap package |
+| `officer-timing-protocol.md` | Round 1b. Within-subjects timing comparison for SCOs: manual checklist vs Batatis on a planted-gap package |
 
 ## Rounds
-- **Round 1 (baseline):** 3–5 applicants (homebuilder, general contractor, manufacturer or designer), plus 1–3 SCOs or permit staff on the timing protocol. We fix S1/S2 findings afterwards.
-- **Round 1b (retest):** after the fixes, with new participants where possible, same tasks plus 1–2 trap tasks. We compare task success, time on task, first stuck point and SUS with Round 1.
+- **Round S (simulated):** AI-agent first-timer sessions. Reported separately and labelled SIMULATED. This folder does not record those results.
+- **Round 1 (real applicants):** 3–5 applicants (homebuilder, general contractor, manufacturer or designer) on the think-aloud script. We fix S1/S2 findings afterwards.
+- **Retest of Round 1:** after the fixes, with new participants where possible, same tasks plus 1–2 trap tasks. We compare task success, time on task, first stuck point and SUS with Round 1.
+- **Round 1b (real officers):** 1–3 SCOs or permit staff on the timing protocol (manual checklist vs Batatis).
 
 ## How to run a session
-1. Use a build that has the full workflow (Describe → CodeCheck → SectionC → Application/export). Record the commit.
-2. Have the sample files ready (`unc-samples/01`, `02`, `03`). All of them are labelled EXAMPLE DATA. Never show `03-sco-bundle-TESTER-KEY.md` to a participant.
+1. Use a build that has the full workflow (Describe your idea → Code check → Section C → Application). Record the commit.
+2. Have a planted-gap SCO sample package and its answer key (to be added under evals/demo-cases/). Example documents are labelled EXAMPLE DATA. Never show the answer key to a participant.
 3. Get a signed consent form, then follow the script or protocol word for word. Fill in the tables during or right after the session.
 
 ## What the evidence supports
-- **Usability and Portability (10%):** task success, time to a finished application, first stuck point, SUS.
+- **Usability and Portability (10%):** task success, time to a finished application, first stuck point, SUS, and the officer side (would an SCO open it twice?).
 - **General Applicability (5%):** results by role (homebuilder, GC, manufacturer, designer, SCO).
-- **Implementation and Business Plan:** officer review speed-up and gap recall.
+- **Review (10%):** officer time saved vs the manual checklist, gap recall, false positives.
+- **Implementation Plan (10%):** Round 1 findings, then fixes, then retest ('how will testing with users inform final design').
+- **Business Plan (10%), optional:** time saved, only once there's real data.
 
 With small samples (n < 10), results are **indicative only**. We will report raw numbers per participant and will not claim statistical significance.
 

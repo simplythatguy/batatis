@@ -1,6 +1,7 @@
 # Applicant session script: 20-minute moderated think-aloud
 
-**Who:** one participant and one moderator (a separate note-taker is optional). **Materials:** a build with the full workflow, `unc-samples/01-hartley-garden-suite-brief.pdf`, `unc-samples/02-mehta-drawing-notes.pdf`, a stopwatch, this sheet and a signed consent form.
+**Round:** 1 (real applicants). A later pass with the same tasks, after fixes, is a retest of Round 1. Officer timing is Round 1b and uses `officer-timing-protocol.md`.
+**Who:** one participant and one moderator (a separate note-taker is optional). **Materials:** a build with the full workflow, a planted-gap SCO sample package and its answer key (to be added under evals/demo-cases/), a stopwatch, this sheet and a signed consent form. Never show the answer key to a participant.
 **Golden rule:** don't explain the UI. If the participant asks how something works, reply with a neutral prompt (see below). If they're stuck for 60 s, record a stuck point. If they're stuck for 90 s or hit the task cap, give the scripted hint, mark the task **Partial** or **N**, and move on.
 
 | Block | Time |
@@ -24,25 +25,25 @@ Confirm the consent form is signed and the recording boxes are ticked. Start rec
 ## 3. Tasks (12 min, about 3 min each in Round 1)
 Read each prompt aloud, hand over the file and **start the clock when you finish reading**. **Stop the clock** when the participant says they're done, reaches the success state, or hits the cap. Pick the variant that matches the participant's role. Only the framing changes; the success criteria stay the same.
 
-| Variant | Framing | File |
+| Variant | Framing | Example |
 |---|---|---|
-| Homebuilder (cold) | "This is your project. You build a house or two a year." | 01 |
-| General contractor | "The owner hired you to build this and get it permitted." | 01 |
-| Manufacturer / supplier | "Your client wants to use your hempcrete product. Help them apply." | 01 |
-| Designer (optional) | "You're the architect, and the permit deadline is Friday." | 02 |
+| Homebuilder (cold) | "This is your project. You build a house or two a year." | project brief |
+| General contractor | "The owner hired you to build this and get it permitted." | project brief |
+| Manufacturer / supplier | "Your client wants to use your hempcrete product. Help them apply." | project brief |
+| Designer (optional) | "You're the architect, and the permit deadline is Friday." | drawing notes |
 
-| # | Prompt (read verbatim) | Success = | Plan ref |
-|---|---|---|---|
-| R1 Intake | "Here's the project brief. Get the project into the tool." | Project described in **Describe**. Missing legal description and permit # are left as gaps, not invented. | T1 |
-| R2 Why a variance? | "Find out whether this project needs a variance, and why." | Participant can explain, in their own words, which code articles in **CodeCheck** the design departs from, or that it may not need one. | T2 |
-| R3 Section C | "Finish the part where you explain what each rule is for." | **SectionC** rows complete. Participant can tell code text from AI explanation. | T3 |
-| R4 Export | "Get a copy you could hand to the municipality." (Leave risk assessment empty.) | Participant notices the pre-flight warning and can name what's missing, or completes the missing fields and exports. | T5 |
+| # | Prompt (read verbatim) | Success = |
+|---|---|---|
+| R1 Intake | "Here's the project brief. Get the project into the tool." | Project described in **Describe your idea**. Missing legal description and permit # are left as gaps, not invented. |
+| R2 Why a variance? | "Find out whether this project needs a variance, and why." | Participant can explain, in their own words, which code articles in **Code check** the design departs from, or that it may not need one. |
+| R3 Section C | "Finish the part where you explain what each rule is for." | **Section C** rows complete. Participant can tell code text from AI explanation. |
+| R4 Export | "Get a copy you could hand to the municipality." (Leave risk assessment empty.) | Participant notices **Check completeness** and can name what's missing, or completes the missing fields and uses **Choose PDFs**. |
 
 **Time to finished application** runs from the start of R1 to a successful R4, or the time at cap with the task marked N.
 
 **Scripted hints** (only at 90 s or at the cap; log that a hint was used): R1 "Where would you start describing the project?" · R2 "Is there anywhere that lists the relevant code?" · R3 "Which part are you on now?" · R4 "Is there anything stopping the download?"
 
-### Round 1b (retest after fixes)
+### Retest of Round 1 (after fixes)
 Run R1–R4 with a 2.5-minute cap each, then **one** trap task (2 min). Add a second trap only if you're ahead of time.
 
 | Trap | Prompt | Pass = | Fail (S1) = |
@@ -92,4 +93,4 @@ Hand over the SUS (1 = strongly disagree, 5 = strongly agree). Don't help with w
 
 Severity: **S1** blocker or unsafe (invented citation, compliance claim, silent incomplete export, core flow broken) · **S2** major (needs a workaround, or the output is misleading) · **S3** minor friction or unclear copy · **S4** cosmetic.
 
-**Round 1 vs 1b summary:** report task success rate per task, median time per task, median SUS and the most common first stuck point, for each round side by side. Use raw counts ("3/4"), not percentages, while n < 10.
+**Round 1 vs retest of Round 1:** report task success rate per task, median time per task, median SUS and the most common first stuck point, for Round 1 and its retest side by side. Use raw counts ("3/4"), not percentages, while n < 10. Officer timing (Round 1b) is scored in `officer-timing-protocol.md`, not in this table.

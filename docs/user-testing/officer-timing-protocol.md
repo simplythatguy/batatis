@@ -1,12 +1,12 @@
 # Officer timing protocol: manual vs Batatis completeness review
 
+**Round:** 1b (real officers). Applicant think-alouds are Round 1, in `session-script.md`.
 **Question:** Does Batatis help a Safety Codes Officer (or permit reviewer) find **administrative completeness** gaps faster and more completely than a manual checklist?
 **Scope, said out loud to the officer:** "Please judge only whether each submission is *complete*: required fields, signatures, attributions, mandatory alternative-solution items and evidence listed. Don't judge whether the design is technically correct or would perform. That decision isn't part of this exercise." Write any technical comments in a separate column. They don't count as gaps or as false positives.
 
 ## Materials
-- **Package P-03:** `unc-samples/03-sco-submission-bundle.pdf` (3 submissions, fictional, labelled EXAMPLE DATA).
-- **Package P-03b:** an equivalent second package (see below). You need it whenever one officer does both conditions.
-- **Answer keys:** `03-sco-bundle-TESTER-KEY.md` and the matching key for P-03b. Only the runner sees these.
+- **Package P-03:** a planted-gap SCO sample package and its answer key (to be added under evals/demo-cases/). Three submissions, fictional, labelled EXAMPLE DATA. Only the runner sees the answer key.
+- **Package P-03b:** an equivalent second package (see below), with its own answer key in the same place. You need it whenever one officer does both conditions. Only the runner sees the key.
 - **Manual checklist** (on paper or as a PDF form, one per submission):
   - A: owner · representative · mailing address · date · signature
   - B: permit # or "pending" · legal description · municipal address · project description
