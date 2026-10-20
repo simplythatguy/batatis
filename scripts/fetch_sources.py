@@ -44,11 +44,26 @@ DEFAULTS = (
     },
 )
 
+# Safety Codes Council variance form. Live URL checked 2026-10-20; sha256 matches
+# engine/export/field_maps/scc_2026-10.json. Not a codedb input. Never commit the PDF.
+SCC_FORM = {
+    'key': 'scc_form',
+    'env': 'SCC_FORM_URL',
+    'url': 'https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf',
+    'sha256': 'f44640ca005c957c11a2387d2768fffc35ef93c97125dcca37436fcc0b9afc1d',
+    'bytes': 334580,
+    'path': 'codedb/build/SCC-Variance-Form.pdf',
+}
+
 FAIL = ('engine build failed: {detail} The engine will not deploy without a verified code database. '
         'Do not commit the NRC PDF or codedb.sqlite. If the build machine cannot reach '
         'nrc-publications.canada.ca, set CODEDB_PDF_URL and CODEDB_INTENT_PDF_URL to private '
         'Vercel Blob or Neon object URLs that are not publicly readable. The bytes are still '
         'checked against the pinned sha256.')
+
+SCC_FAIL = ('engine build failed: {detail} Do not commit the SCC variance form. '
+            'If the builder cannot reach ebs.safetycodes.ab.ca, set SCC_FORM_URL to a private '
+            'URL that is not publicly readable. The bytes are still checked against the pinned sha256.')
 
 
 class DownloadError(Exception):
@@ -101,7 +116,8 @@ def _candidates(item: dict, env: dict) -> list[tuple[str, str]]:
     return urls
 
 
-def acquire(item: dict, *, root: Path, env: dict | None = None, fetcher=curl_fetch, log=print) -> Path:
+def acquire(item: dict, *, root: Path, env: dict | None = None, fetcher=curl_fetch, log=print,
+            fail: str = FAIL) -> Path:
     """Download one pinned PDF. Raises DownloadError with a deploy-stopping message."""
     env = os.environ if env is None else env
     dest = root / item['path']
@@ -133,7 +149,7 @@ def acquire(item: dict, *, root: Path, env: dict | None = None, fetcher=curl_fet
             tmp.unlink(missing_ok=True)
             errors.append(f'{kind} source failed: {exc}')
     detail = f'could not fetch {item["key"]} ({"; ".join(errors) or "no URL"}).'
-    raise DownloadError(FAIL.format(detail=detail))
+    raise DownloadError(fail.format(detail=detail))
 
 
 def extract_jsonl(pdf: Path, dest: Path, expect_sha: str | None) -> None:
@@ -157,12 +173,15 @@ def extract_jsonl(pdf: Path, dest: Path, expect_sha: str | None) -> None:
 
 
 def main(argv=None) -> int:
-    del argv
+    argv = list(sys.argv[1:] if argv is None else argv)
+    form_only = '--scc-form' in argv
     try:
-        for item in load_sources():
-            pdf = acquire(item, root=ROOT, log=lambda msg: print(msg, file=sys.stderr))
-            if item.get('jsonl'):
-                extract_jsonl(pdf, ROOT / item['jsonl'], item.get('jsonl_sha256'))
+        if not form_only:
+            for item in load_sources():
+                pdf = acquire(item, root=ROOT, log=lambda msg: print(msg, file=sys.stderr))
+                if item.get('jsonl'):
+                    extract_jsonl(pdf, ROOT / item['jsonl'], item.get('jsonl_sha256'))
+        acquire(SCC_FORM, root=ROOT, fail=SCC_FAIL, log=lambda msg: print(msg, file=sys.stderr))
     except DownloadError as exc:
         print(str(exc), file=sys.stderr)
         return 1

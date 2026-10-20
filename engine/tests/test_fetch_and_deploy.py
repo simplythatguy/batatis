@@ -85,7 +85,9 @@ def test_vercel_config_keeps_sqlite_on_the_engine_only():
     assert 'codedb' not in json.dumps(web)
     included = engine['functions']['engine/api.py']['includeFiles']
     excluded = engine['functions']['engine/api.py']['excludeFiles']
-    assert included == 'codedb/build/codedb.sqlite'
+    assert 'codedb/build/codedb.sqlite' in included
+    assert 'codedb/build/SCC-Variance-Form.pdf' in included
+    assert 'reference/**' in excluded
     assert 'engine/tests/**' in excluded and 'evals/**' in excluded and 'reference/**' in excluded
     assert config['rewrites'][0]['source'] == '/api/(.*)'
     assert config['rewrites'][0]['destination'] == {'service': 'engine'}

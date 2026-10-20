@@ -12,7 +12,7 @@ from codedb import AmbiguousProvisionError
 from .codes import CodeDbMissing, Codes
 from .export import ExportBlocked, ExportError, FormNotFound, export_case
 from .http_guard import HttpGuard
-from .llm_gate import client_ip_from, search_allowed
+from .llm_gate import client_ip_from, search_retry_after
 from .models import Case, Fact, Jurisdiction, SectionCRow
 from .section_c import section_c_rows
 from .store import CaseStore, FileTooLarge, VersionConflict, assert_durable_when_hosted, open_store
@@ -151,10 +151,14 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
 
     @app.get('/code/search')
     def code_search(request: Request, q: str, division: str | None = Query('B', pattern='^[ABC]$'),
-                    limit: int = Query(20, ge=1, le=20)):
-        if not search_allowed(client_ip_from(request)):
-            raise HTTPException(429, 'code search is rate-limited')
-        return code().search(q, division=division, limit=min(limit, 20))
+                    limit: int = Query(20, ge=1)):
+        if limit > 20:
+            raise HTTPException(422, 'The maximum is 20.')
+        wait = search_retry_after(client_ip_from(request))
+        if wait is not None:
+            raise HTTPException(429, f'Search limit reached; try again in {wait} seconds',
+                                headers={'Retry-After': str(wait)})
+        return code().search(q, division=division, limit=limit)
 
     @app.get('/code/{provision_id}')
     def code_lookup(provision_id: str, division: str | None = Query(None, pattern='^[ABC]$')):

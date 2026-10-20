@@ -53,6 +53,15 @@ class SlidingWindow:
             self.events[key] = kept
             return True
 
+    def retry_after(self, key: str, window_s: float) -> int:
+        """Seconds until the oldest hit in the window expires. At least 1."""
+        now = time.monotonic()
+        with self._lock:
+            kept = [stamp for stamp in self.events.get(key, []) if now - stamp < window_s]
+        if not kept:
+            return 1
+        return max(1, int(window_s - (now - min(kept)) + 0.999))
+
     def reset(self) -> None:
         with self._lock:
             self.events.clear()
@@ -169,9 +178,16 @@ def record(*, model: str, input_tokens: int, output_tokens: int, reserved_usd: D
     _adjust(_ledger(), actual - Decimal(str(reserved_usd)))
 
 
-def search_allowed(client_ip: str) -> bool:
-    limit, window = _rate_limit('BATATIS_SEARCH_RATE', '30', '600')
-    return _search_window.allow(client_ip or 'unknown', limit, window)
+def search_retry_after(client_ip: str) -> int | None:
+    """None when this IP may search. Otherwise the Retry-After delay in seconds.
+
+    Default budget is 60 searches per 10 minutes per IP.
+    """
+    limit, window = _rate_limit('BATATIS_SEARCH_RATE', '60', '600')
+    key = client_ip or 'unknown'
+    if _search_window.allow(key, limit, window):
+        return None
+    return _search_window.retry_after(key, window)
 
 
 def client_ip_from(request) -> str:

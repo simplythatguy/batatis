@@ -26,7 +26,7 @@
       "rewrites": [{ "source": "/api/:path(.*)?", "destination": "/:path" }],
       "functions": {
         "engine/api.py": {
-          "includeFiles": "codedb/build/codedb.sqlite",
+          "includeFiles": "{codedb/build/codedb.sqlite,codedb/build/SCC-Variance-Form.pdf}",
           "excludeFiles": "{engine/tests/**,codedb/tests/**,evals/**,evals_dev/**,**/*fixture*/**,web/**,docs/**,research/**,reference/**,.cursor/**,.agents/**}"
         }
       }

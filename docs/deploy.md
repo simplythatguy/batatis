@@ -15,6 +15,8 @@ That script runs `scripts/build_codedb.sh` when that file exists (`backend/coded
 
 The engine also accepts paths with or without the `/api` prefix, so a service rewrite that strips `/api` and a request that still has the prefix both work.
 
+The engine runtime is Python 3.12, the same version CI installs. Dependencies come from `engine/requirements.txt` and `codedb/requirements.txt`: FastAPI, uvicorn, pydantic, httpx, psycopg with the binary wheel, pypdf, pypdfium2, and reportlab. No extra system packages are required. `psycopg[binary]` bundles libpq, and the PDF fetch uses `curl`, which is already on the build image.
+
 Every response sets `X-Robots-Tag: noindex, nofollow`. `web/public/robots.txt` disallows every path.
 
 ## Code database: official URL or a private object
@@ -30,6 +32,8 @@ The builder needs the NBC(AE) 2023 2nd-printing PDF and the NBC 2020 intent-stat
 
 Do not work around a failed download by committing the PDF or the sqlite.
 
+The same build downloads the Safety Codes Council variance form from `https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf`. The pinned sha256 is `f44640ca005c957c11a2387d2768fffc35ef93c97125dcca37436fcc0b9afc1d` (334580 bytes), the same digest as `engine/export/field_maps/scc_2026-10.json`. The file lands at `codedb/build/SCC-Variance-Form.pdf` and is included in the engine bundle. It is not committed. If that host is unreachable, set `SCC_FORM_URL` to a private object. `CODEDB_SKIP_OFFICIAL=1` skips the official URL when the private one is set. A missing form at runtime makes `POST /cases/{id}/export` return 503 with `PDF export is unavailable on this deployment: SCC form not configured`.
+
 ## Environment variables
 
 Set these on the Vercel project for Preview and Production. Leave the project Root Directory at the repository root so both services build. Do not set a dashboard Output Directory that would override `web/dist`.
@@ -43,8 +47,10 @@ Set these on the Vercel project for Preview and Production. Leave the project Ro
 | `BATATIS_DAILY_SPEND_CAP_USD` | engine runtime | Default `5`. Over the cap, model calls return the offline path with `source: "offline-cap"`. The cap is shared across instances only when `BATATIS_STORE=postgres`. The file store keeps it in memory for that process. |
 | `BATATIS_LLM_RATE_LIMIT` | engine runtime | Default `20` live model calls per IP per window. |
 | `BATATIS_LLM_RATE_WINDOW_SECONDS` | engine runtime | Default `600`. |
-| `BATATIS_SEARCH_RATE_LIMIT` | engine runtime | Default `30` code searches per IP per window. |
-| `BATATIS_SEARCH_RATE_WINDOW_SECONDS` | engine runtime | Default `600`. |
+| `BATATIS_SEARCH_RATE_LIMIT` | engine runtime | Default `60` code searches per IP per window. |
+| `BATATIS_SEARCH_RATE_WINDOW_SECONDS` | engine runtime | Default `600` (10 minutes). A 429 body is `Search limit reached; try again in N seconds` and sets `Retry-After`. |
+| `BATATIS_SCC_FORM` | engine runtime | Optional filesystem path to the SCC variance form. The build's copy is `codedb/build/SCC-Variance-Form.pdf`. |
+| `SCC_FORM_URL` | engine build | Optional private URL for the SCC variance form. Still sha256-checked. |
 | `CODEDB_PDF_URL` | engine build | Optional private URL for the NBC(AE) PDF. |
 | `CODEDB_INTENT_PDF_URL` | engine build | Optional private URL for the intent PDF. |
 | `CODEDB_SKIP_OFFICIAL` | engine build | `1` skips the NRC host when the private URL for that file is set. |
@@ -53,7 +59,7 @@ Set these on the Vercel project for Preview and Production. Leave the project Ro
 
 Local file runs ignore `DATABASE_URL`. Uploaded PDF bytes go in `case_files` (Postgres `bytea`, or sqlite blob locally), capped at 4 MB. A larger PDF is HTTP 413 with `{"detail": "PDF too large: the limit is 4 MB. Try compressing the file or splitting it."}`.
 
-`GET /code/*` and `POST /section-c` keep at most 25 words of every string except ids, citations, enums, and URLs. Search returns at most 20 hits. That is not a compliance determination.
+`GET /code/*` and `POST /section-c` keep at most 25 words of every string except ids, citations, enums, and URLs. A clipped string ends with `… [clipped, see NBC p.N]` or `… [clipped, see NBC(AE) 2023]`, and the object lists those keys in `clipped_fields`. Search returns at most 20 hits.
 
 ## Preview
 

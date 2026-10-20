@@ -18,3 +18,9 @@ if [ ! -s "$ROOT/codedb/build/codedb.sqlite" ]; then
   exit 1
 fi
 echo "engine build: codedb/build/codedb.sqlite is present"
+python "$ROOT/scripts/fetch_sources.py" --scc-form
+if [ ! -s "$ROOT/codedb/build/SCC-Variance-Form.pdf" ]; then
+  echo "engine build failed: codedb/build/SCC-Variance-Form.pdf is missing. Do not commit the SCC form." >&2
+  exit 1
+fi
+echo "engine build: SCC variance form sha256 verified"

@@ -29,6 +29,8 @@ from ..section_d import supporting_documents
 from .text import fit, pdf_safe
 
 DEFAULT_FORM = Path(__file__).resolve().parents[2] / 'reference' / 'guides' / 'SCC-Variance-Form.pdf'
+BUNDLE_FORM = Path(__file__).resolve().parents[2] / 'codedb' / 'build' / 'SCC-Variance-Form.pdf'
+FORM_UNCONFIGURED = 'PDF export is unavailable on this deployment: SCC form not configured'
 MAP_DIR = Path(__file__).parent / 'field_maps'
 CURRENT_MAP = 'scc_2026-10'
 MULTILINE = 1 << 12
@@ -79,7 +81,13 @@ class ExportResult:
 
 
 def form_path() -> Path:
-    return Path(os.environ.get('BATATIS_SCC_FORM') or DEFAULT_FORM)
+    """Explicit path, then a local guide copy, then the file the engine build downloads."""
+    override = (os.environ.get('BATATIS_SCC_FORM') or '').strip()
+    if override:
+        return Path(override)
+    if DEFAULT_FORM.is_file():
+        return DEFAULT_FORM
+    return BUNDLE_FORM
 
 
 def load_field_map(version: str = CURRENT_MAP) -> dict:
@@ -88,8 +96,8 @@ def load_field_map(version: str = CURRENT_MAP) -> dict:
 
 def load_form(path: Path | str | None, fmap: dict) -> bytes:
     path = Path(path) if path else form_path()
-    if not path.exists():
-        raise FormNotFound(f'SCC variance form not found at {path} (set BATATIS_SCC_FORM)')
+    if not path.is_file():
+        raise FormNotFound(FORM_UNCONFIGURED)
     data = path.read_bytes()
     digest = hashlib.sha256(data).hexdigest()
     if digest != fmap['sha256']:

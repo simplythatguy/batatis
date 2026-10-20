@@ -13,7 +13,7 @@ These are the routes the engine serves. `POST /cases/{case_id}/files` stores the
 | `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. `409` detail `case was updated concurrently` when the stored version changed during the write. |
 | `POST /cases/{case_id}/files` | `201` `{ "id", "name", "size", "content_type" }`. Body is raw `application/pdf` (optional header `x-filename`) or multipart with one file part. Bytes go in `case_files`. `404` detail `case not found`. `413` detail `PDF too large: the limit is 4 MB. Try compressing the file or splitting it.` `415` detail `only PDF files are accepted`. |
 | `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`. |
-| `GET /code/search` | Query `q`, `division` (`A` `B` or `C`, default `B`), `limit` (1–20, default 20). `422` when `limit` is 21 or otherwise outside 1–20. `429` detail `code search is rate-limited`. Hits as returned: `id`, `division`, `level`, `article_title`, `title`, `text`, `citation`. |
+| `GET /code/search` | Query `q`, `division` (`A` `B` or `C`, default `B`), `limit` (1–20, default 20). `422` detail `The maximum is 20.` when `limit` is above 20. `429` detail `Search limit reached; try again in N seconds`, with a `Retry-After` header of N seconds. Default budget is 60 searches per 10 minutes per IP. Hits as returned: `id`, `division`, `level`, `article_title`, `title`, `text`, `citation`. |
 | `GET /code/{provision_id}` | Query `division` optional. The codedb provision record, or `404` detail `provision not found`. `400` when the id is invalid or the division is ambiguous. |
 | `POST /section-c` | Body `{ "provisions": ["…"] }`. `SectionCRow` list. `404` when a provision is missing from codedb. `400` on an invalid id. |
 | `POST /cases/{case_id}/section-d` | Body optional `{ "provisions": ["…"] }`. `{ "items", "notices" }`. Writes the case. |
@@ -37,7 +37,7 @@ The fixed 404 detail strings are `case not found` and `provision not found`.
 
 ### Code text
 
-JSON from `GET /code/search`, `GET /code/{provision_id}`, and `POST /section-c` keeps at most 25 words of every string. Ids, citations, enums, and URLs stay whole. That includes provision `text`, intent `notes`, and `clauses`, including strings nested in lists. Case, gap, and Section D JSON are not clipped. A clipped field is not a finding that a design complies.
+JSON from `GET /code/search`, `GET /code/{provision_id}`, and `POST /section-c` keeps at most 25 words of every string. Ids, citations, enums, and URLs stay whole. That includes provision `text`, intent `notes`, and `clauses`, including strings nested in lists. A clipped string ends with `… [clipped, see NBC p.N]`, where N is the `pdf_page` on that object, or `… [clipped, see NBC(AE) 2023]` when no page is known. The same object gains `clipped_fields`, the list of keys whose text was clipped. An unclipped string has no marker, and an object with no clipped text has no `clipped_fields`. Case, gap, and Section D JSON are not clipped. A clipped field is not a finding that a design complies.
 
 ### Section D plan item
 
@@ -202,8 +202,8 @@ A live response copies the citation string the code database returns. The placeh
 | 409 | Export is blocked. Detail is the object under Routes. `POST /cases/{case_id}/facts` also returns 409 with detail `case was updated concurrently`. |
 | 413 | `POST /cases/{case_id}/files` when the PDF is over 4 MB. Detail is `PDF too large: the limit is 4 MB. Try compressing the file or splitting it.` |
 | 415 | `POST /cases/{case_id}/files` when the body is not a PDF. Detail is `only PDF files are accepted`. |
-| 422 | A `proposed` fact was sent as `confirmed`, `GET /code/search` `limit` is outside 1–20 (21 is 422), or `GET /ccmc/search` rejected the query. |
-| 429 | `GET /code/search` when the caller is over the search rate limit. Detail is `code search is rate-limited`. |
+| 422 | A `proposed` fact was sent as `confirmed`, `GET /code/search` `limit` is above 20 (detail `The maximum is 20.`), or `GET /ccmc/search` rejected the query. |
+| 429 | `GET /code/search` when the caller is over the search rate limit. Detail is `Search limit reached; try again in N seconds`. The response also sets `Retry-After: N`. |
 | 500 | Export failed for a reason other than a missing form. |
-| 503 | The code database file is absent. Body is exactly `{"detail": "code database not found"}`. Raised only by `CodeDbMissing` in `engine/codes.py`. Not a `FileNotFoundError`. The body has no server path. A missing blank form and an unavailable CCMC registry are also HTTP 503, and their detail is that error's own text. An unreachable case database is HTTP 503 with detail `case store unavailable`, and that body does not include the server address. |
+| 503 | The code database file is absent. Body is exactly `{"detail": "code database not found"}`. Raised only by `CodeDbMissing` in `engine/codes.py`. Not a `FileNotFoundError`. The body has no server path. A missing SCC variance form is HTTP 503 with detail `PDF export is unavailable on this deployment: SCC form not configured`. An unavailable CCMC registry is also HTTP 503, and its detail is that error's own text. An unreachable case database is HTTP 503 with detail `case store unavailable`, and that body does not include the server address. |
 | 200 | An unknown Division B token on this issues route does not 404. It returns `provision: null` and a question. |

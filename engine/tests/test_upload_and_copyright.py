@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 from codedb import store as codedb_store
 from engine.api import create_app, read_capped
 from engine.codes import Codes
-from engine.copyright import clip_tree, has_consecutive_words, words
+from engine.copyright import clip_marker, clip_tree, has_consecutive_words, words
 from engine.llm_gate import reset_for_tests
 from engine.store import CaseStore
 from engine.uploads import PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL
@@ -98,7 +98,8 @@ def test_responses_keep_at_most_25_provision_words(tmp_path, monkeypatch):
         client.get('/code/9.1.1.1.(1)', params={'division': 'B'}).text,
         client.get('/code/search', params={'q': 'w00', 'limit': 20}).text,
     ]
-    assert client.get('/code/search', params={'q': 'w00', 'limit': 21}).status_code == 422
+    rejected = client.get('/code/search', params={'q': 'w00', 'limit': 21})
+    assert rejected.status_code == 422 and rejected.json()['detail'] == 'The maximum is 20.'
     for body in bodies:
         # JSON quotes stick to the first and last word; compare the word sequence, not the raw tokens.
         plain = ' '.join(re.findall(r'[A-Za-z0-9]+', body))
@@ -118,17 +119,27 @@ def test_clip_tree_clips_notes_clauses_and_nested_lists():
         'clauses': [long, [long, 'a']],
     }
     clipped = clip_tree(tree)
+    plain = '… [clipped, see NBC(AE) 2023]'
     assert clipped['id'] == tree['id']
     assert clipped['citation'] == tree['citation']
     assert clipped['url'] == tree['url']
     assert clipped['division'] == 'B'
-    assert words(clipped['text']) == words(long)[:25]
-    assert words(clipped['notes'][0]) == words(long)[:25]
-    assert words(clipped['notes'][1]['text']) == words(long)[:25]
+    assert plain not in clipped['id'] and plain not in clipped['citation']
+    assert 'clipped_fields' not in clip_tree({'id': '9.1.1.1.(1)', 'text': 'one short sentence'})
+    assert clipped['text'] == ' '.join(words(long)[:25]) + ' ' + plain
+    assert clipped['notes'][0].endswith(plain)
+    assert clipped['notes'][1]['text'].endswith(plain)
     assert clipped['notes'][1]['note_id'] == 'A-9.1.1.1.'
-    assert words(clipped['clauses'][0]) == words(long)[:25]
-    assert words(clipped['clauses'][1][0]) == words(long)[:25]
+    assert 'text' in clipped['notes'][1]['clipped_fields']
+    assert clipped['clauses'][0].endswith(plain)
+    assert clipped['clauses'][1][0].endswith(plain)
     assert clipped['clauses'][1][1] == 'a'
+    assert set(clipped['clipped_fields']) >= {'text', 'notes', 'clauses'}
+    paged = clip_tree({'pdf_page': 12, 'text': long, 'title': 'kept whole ' + long})
+    assert paged['text'].endswith(clip_marker(12))
+    assert 'text' in paged['clipped_fields']
+    assert paged['title'] == 'kept whole ' + long
+    assert 'title' not in paged['clipped_fields']
 
 
 def test_code_response_clips_notes_clauses_and_nested_lists(tmp_path, monkeypatch):
@@ -140,13 +151,20 @@ def test_code_response_clips_notes_clauses_and_nested_lists(tmp_path, monkeypatc
     body = client.get('/code/9.1.1.1.(1)', params={'division': 'B'}).json()
     assert body['id'] == '9.1.1.1.(1)'
     assert body['citation'].startswith('NBC(AE) 2023 p2')
-    assert words(body['notes'][0]['text']) == words(_long('n'))[:25]
-    assert words(body['clauses'][0]) == words(_long('c'))[:25]
+    assert '… [clipped' not in body['citation']
+    page = '… [clipped, see NBC p.1]'
+    assert body['text'].endswith(page)
+    assert 'text' in body['clipped_fields']
+    assert body['notes'][0]['text'].endswith(page)
+    assert 'text' in body['notes'][0]['clipped_fields']
+    assert body['clauses'][0].endswith(page)
     assert body['clauses'][1] == 'a'
+    assert 'clauses' in body['clipped_fields']
     nested = body['intents'][0]['attribution_notes']
-    assert words(nested[0][0]) == words(_long('k'))[:25]
+    assert nested[0][0].endswith(page)
     assert nested[0][1] == 'keep-me'
-    assert words(nested[1]) == words(_long('k'))[:25]
+    assert nested[1].endswith(page)
+    assert 'attribution_notes' in body['intents'][0]['clipped_fields']
     long = _long('q')
     case_id = client.post('/cases', json={'title': 'facts stay whole'}).json()['id']
     saved = client.post(f'/cases/{case_id}/facts', json={
@@ -156,6 +174,7 @@ def test_code_response_clips_notes_clauses_and_nested_lists(tmp_path, monkeypatc
     assert saved.status_code == 200
     fact = saved.json()['facts'][0]
     assert fact['value'] == long and fact['source']['quote'] == long
+    assert 'clipped_fields' not in saved.json() and '… [clipped' not in saved.text
 
 
 def test_unreachable_database_is_503():
@@ -172,6 +191,21 @@ def test_unreachable_database_is_503():
     assert 'secret-host' not in response.text
 
 
+def test_export_without_the_scc_form_is_503(tmp_path, monkeypatch):
+    monkeypatch.delenv('BATATIS_SCC_FORM', raising=False)
+    monkeypatch.setattr('engine.export.scc.DEFAULT_FORM', tmp_path / 'missing-guide.pdf')
+    monkeypatch.setattr('engine.export.scc.BUNDLE_FORM', tmp_path / 'missing-bundle.pdf')
+    monkeypatch.setattr('engine.export.scc.blockers', lambda *args, **kwargs: [])
+    monkeypatch.setattr('engine.export.scc._canonical_case', lambda case, codes: case)
+    path = tmp_path / 'codedb.sqlite'
+    _synthetic_db(path)
+    client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes(path)))
+    case_id = client.post('/cases', json={'title': 'export'}).json()['id']
+    response = client.post(f'/cases/{case_id}/export', json={'draft': True})
+    assert response.status_code == 503
+    assert response.json() == {'detail': 'PDF export is unavailable on this deployment: SCC form not configured'}
+
+
 def test_search_is_rate_limited(tmp_path, monkeypatch):
     monkeypatch.setenv('BATATIS_SEARCH_RATE_LIMIT', '2')
     reset_for_tests()
@@ -180,4 +214,8 @@ def test_search_is_rate_limited(tmp_path, monkeypatch):
     client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes(path)))
     assert client.get('/code/search', params={'q': 'w00'}).status_code == 200
     assert client.get('/code/search', params={'q': 'w00'}).status_code == 200
-    assert client.get('/code/search', params={'q': 'w00'}).status_code == 429
+    limited = client.get('/code/search', params={'q': 'w00'})
+    assert limited.status_code == 429
+    assert limited.json()['detail'].startswith('Search limit reached; try again in ')
+    assert limited.json()['detail'].endswith(' seconds')
+    assert limited.headers['retry-after'].isdigit()
