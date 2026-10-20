@@ -1,9 +1,9 @@
 /**
  * Keep recorder steps aligned with docs/demo/script.md.
  *
- * The script file lands with the demo-script change. Until it is on the
- * branch, checkScriptFile reports "absent" and recording still runs.
- * Step ids, titles, and primary routes are the shot-list columns.
+ * Shot ids and titles come from `### Shot N —` headings.
+ * The primary route is the first hash route on that shot's `**Route:**` line.
+ * Older shot tables that put one route in backticks are still read.
  */
 
 export function parseDemoScript(markdown) {
@@ -14,11 +14,20 @@ export function parseDemoScript(markdown) {
   while ((match = rowRe.exec(text))) {
     byId.set(match[1], { id: match[1], route: match[2].trim(), title: "" });
   }
-  const headRe = /^### Shot (\d+) — (.+)$/gm;
-  while ((match = headRe.exec(text))) {
-    const shot = byId.get(match[1]) ?? { id: match[1], route: "", title: "" };
-    shot.title = match[2].trim();
-    byId.set(match[1], shot);
+  const sections = text.split(/^### Shot /m).slice(1);
+  for (const section of sections) {
+    const head = section.match(/^(\d+) — ([^\n]+)/);
+    if (!head) continue;
+    const id = head[1];
+    const title = head[2].trim();
+    const prev = byId.get(id) ?? { id, route: "", title: "" };
+    const routeLine = section.match(/\*\*Route:\*\*[ \t]*([^\n]+)/);
+    let route = prev.route;
+    if (routeLine) {
+      const hashes = [...routeLine[1].matchAll(/`(#\/[^`]*)`/g)].map((item) => item[1].trim());
+      if (hashes.length) route = hashes[0];
+    }
+    byId.set(id, { id, route, title });
   }
   return [...byId.values()].sort((a, b) => Number(a.id) - Number(b.id));
 }

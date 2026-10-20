@@ -23,6 +23,7 @@ const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 function parseArgs(argv) {
   const out = {
     checkScript: false,
+    strict: false,
     holdMs: 1600,
     web: null,
     branch: null,
@@ -39,6 +40,7 @@ function parseArgs(argv) {
       return value;
     };
     if (arg === "--check-script") out.checkScript = true;
+    else if (arg === "--strict") out.strict = true;
     else if (arg === "--web") out.web = next();
     else if (arg === "--branch") out.branch = next();
     else if (arg === "--out") out.out = next();
@@ -59,12 +61,14 @@ const HELP = `Record a Batatis walkthrough mp4.
   ./scripts/record-demo.sh --branch <git-ref>
   ./scripts/record-demo.sh --web <path-to-web>
   ./scripts/record-demo.sh --check-script
+  ./scripts/record-demo.sh --strict
 
 Options
   --out <dir>       Output directory (default artifacts/demo)
   --hold <ms>       Pause on each recorded shot (default 1600)
   --base <url>      Record an app that is already running
   --script <file>   Shot list to diff (default docs/demo/script.md)
+  --strict          Exit non-zero when any shot is skipped
 `;
 
 function run(cmd, args, opts = {}) {
@@ -208,6 +212,26 @@ async function engineNote() {
   }
 }
 
+async function blockEngineAndModels(page) {
+  await page.route("**/*", (route) => {
+    let blocked = false;
+    try {
+      const url = new URL(route.request().url());
+      blocked =
+        url.port === "8000" ||
+        url.pathname === "/api" ||
+        url.pathname.startsWith("/api/") ||
+        url.hostname === "api.openai.com" ||
+        url.hostname.endsWith(".openai.com") ||
+        url.hostname === "api.anthropic.com";
+    } catch {
+      blocked = false;
+    }
+    if (blocked) return route.abort();
+    return route.continue();
+  });
+}
+
 function scriptReport(scriptPath) {
   if (!existsSync(scriptPath)) {
     return {
@@ -293,7 +317,7 @@ async function main() {
   const sync = scriptReport(scriptPath);
   console.log(sync.note);
   for (const problem of sync.problems) console.log(`  ${problem}`);
-  if (args.checkScript && !args.branch && !args.web && !args.base && !args.out) {
+  if (args.checkScript && !args.branch && !args.web && !args.base) {
     if (sync.status === "drift") process.exitCode = 1;
     return;
   }
@@ -331,7 +355,7 @@ async function main() {
     }
     const sha = await git(["rev-parse", "HEAD"], webDir).catch(() => "");
     const branchName = await git(["rev-parse", "--abbrev-ref", "HEAD"], webDir).catch(() => "");
-    const engine = await engineNote();
+    const engine = `${await engineNote()} Browser requests to /api and port 8000 are aborted, so this recording does not call the engine or a model. No PDF is uploaded.`;
     console.log(engine);
     await ensurePlaywrightFfmpeg();
 
@@ -350,7 +374,10 @@ async function main() {
         const page = await context.newPage();
         page.setDefaultTimeout(8000);
         const pageErrors = [];
+        const downloads = [];
         page.on("pageerror", (error) => pageErrors.push(error.message));
+        page.on("download", (download) => downloads.push(download.suggestedFilename()));
+        await blockEngineAndModels(page);
         await page.goto(`${base.replace(/\/$/, "")}/?reset`, { waitUntil: "domcontentloaded", timeout: 30000 });
         await h1Ready(page);
         await page.evaluate(() => document.fonts?.ready);
@@ -375,6 +402,7 @@ async function main() {
           media,
           mp4,
           pageErrors,
+          downloads,
           steps: results,
         };
         const logPath = join(outDir, "record-log.json");
@@ -382,8 +410,16 @@ async function main() {
         printReport(results);
         console.log(`\nmp4 ${mp4} (${media.duration.toFixed(1)}s, ${media.width}x${media.height} ${media.codec})`);
         console.log(`log ${logPath}`);
+        if (downloads.length) {
+          throw new Error(`A file was downloaded (${downloads.join(", ")}). The recorder does not save a PDF.`);
+        }
         if (!results.some((step) => step.status === "recorded")) {
           throw new Error("No shot was recorded.");
+        }
+        const missing = results.filter((step) => step.status !== "recorded");
+        if (args.strict && missing.length) {
+          const detail = missing.map((step) => `${step.id} ${step.title}`).join("; ");
+          throw new Error(`--strict: ${missing.length} shot(s) missing: ${detail}`);
         }
       } finally {
         await context.close().catch(() => {});

@@ -1,48 +1,47 @@
 /**
- * Walkthrough steps for the Batatis demo recording.
+ * Walkthrough for the Batatis demo recording.
  *
- * Ids, titles, and primary routes match the shot list in docs/demo/script.md
- * (the demo-script change). `./scripts/record-demo.sh --check-script` diffs
- * this list against that file when it is on the branch.
+ * Ids, titles, and primary routes match docs/demo/script.md (7 shots).
+ * Overlay caption is `Shot N · <title>`. The lower third is the script's
+ * EXAMPLE DATA line for the case actually on screen.
  *
- * A step whose screen is missing is skipped and logged. The runner does not
- * invent article numbers, listings, test results, or professional opinions.
- * It does not click "Try an example" and it does not open the accuracy page.
+ * Recording order follows the script: Case C stays open through shots 2, 4, 5,
+ * and 7's Case C frame. Reset runs before shot 3 and wipes Case C. Shot 6 is
+ * last, with Case A still open. Case B is named on shot 1 and is not walked.
+ *
+ * A screen that is not in the build is skipped and logged. The runner does not
+ * invent article numbers, listings, test results, professional opinions, or
+ * stills. It does not upload a PDF, click Try an example, or open Accuracy.
  */
-import { existsSync } from "node:fs";
 import { join } from "node:path";
 
-const CASE_PDF = {
-  A: "evals/demo-cases/a-manufacturer-nailbase-sheathing/input/project-brief.pdf",
-  B: "evals/demo-cases/b-contractor-firestop-nonconformance/input/project-brief.pdf",
-  C: "evals/demo-cases/c-homebuilder-infill-house/input/project-brief.pdf",
+const LOWER = {
+  A: "EXAMPLE DATA · Case A · Manufacturer",
+  B: "EXAMPLE DATA · Case B · General contractor",
+  C: "EXAMPLE DATA · Case C · Homebuilder",
+  officer: "EXAMPLE DATA · Sample officer package",
 };
+
+const ALL_LOWER = `${LOWER.A}\n${LOWER.B}\n${LOWER.C}`;
 
 const CASES = {
   A: {
     role: "Manufacturer",
     authority: "Edmonton",
-    pdf: "A",
-    lower: "EXAMPLE DATA · Case A · Manufacturer",
+    lower: LOWER.A,
     text: "We make EPW NailBase CI-50, a 50 mm insulating sheathing panel, and we want it approved across Alberta so builders can nail vinyl siding straight into the facer. One pilot house: 0000 Example Way NW, Edmonton. Owner not decided. No legal description. No permit yet.",
-  },
-  B: {
-    role: "General contractor",
-    authority: "Calgary",
-    pdf: "B",
-    lower: "EXAMPLE DATA · Case B · General contractor",
-    text: "Firestop inspection failed 46 plastic pipe penetrations on levels 3 and 4 at Example Commons, 0000 Example Avenue SW, Calgary. Five-storey sprinklered building, permit already issued. Drywall close-in is in 9 days. Can we get a variance and keep going?",
   },
   C: {
     role: "Homebuilder",
     authority: "Edmonton",
-    pdf: "C",
-    lower: "EXAMPLE DATA · Case C · Homebuilder",
+    lower: LOWER.C,
     text: "Two-storey infill at 0000 Example Crescent NW, Edmonton, about 210 m², no sprinklers. Heated slab with R-7.5 under it. Unvented low-slope roof, spray foam thickness still TBD. Bedroom 3 window clear opening 400 mm by 780 mm. What needs a variance?",
   },
 };
 
-const ALL_LOWER = `${CASES.A.lower}\n${CASES.B.lower}\n${CASES.C.lower}`;
+const OPEN_QUESTION_HOLD_MS = 3500;
+const REAL_ADDRESS = "11821 73 Avenue NW";
+const FICTIONAL_ADDRESS = "100 Example Street NW";
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -64,6 +63,12 @@ function slug(title) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 48);
+}
+
+function exampleLabel(lower) {
+  if (!lower) return "EXAMPLE DATA";
+  if (lower.includes("EXAMPLE DATA")) return lower;
+  return `EXAMPLE DATA\n${lower}`;
 }
 
 async function visible(locator, timeout = 1000) {
@@ -110,7 +115,7 @@ async function overlay(page, { caption, lower }) {
         top: "12px",
         right: "16px",
         zIndex: "10000",
-        background: "rgba(20,20,20,0.88)",
+        background: "rgba(20,20,20,0.92)",
         color: "#f4f4f5",
         font: "600 13px/1.3 ui-sans-serif, system-ui, sans-serif",
         padding: "6px 10px",
@@ -124,17 +129,19 @@ async function overlay(page, { caption, lower }) {
         left: "16px",
         bottom: "16px",
         zIndex: "10000",
-        background: "rgba(20,20,20,0.88)",
-        color: "#f4f4f5",
-        font: "500 13px/1.45 ui-sans-serif, system-ui, sans-serif",
+        background: "#fff7ed",
+        color: "#7c2d12",
+        border: "2px solid #c2410c",
+        font: "700 16px/1.35 ui-sans-serif, system-ui, sans-serif",
         padding: "8px 12px",
         borderRadius: "6px",
         pointerEvents: "none",
         whiteSpace: "pre",
-        maxWidth: "420px",
+        maxWidth: "460px",
       });
       low.textContent = lower || "";
       low.style.display = lower ? "block" : "none";
+      low.setAttribute("data-example-data", lower && lower.includes("EXAMPLE DATA") ? "true" : "false");
     },
     { caption, lower: lower || "" },
   );
@@ -161,12 +168,58 @@ async function cover(page, on) {
   }, on);
 }
 
-async function settle(page, api, lower) {
-  await overlay(page, { caption: `Shot ${api.step.id} · ${api.step.title}`, lower });
-  await sleep(api.holdMs);
-  const file = join(api.framesDir, `shot-${api.step.id.padStart(2, "0")}-${slug(api.step.title)}.png`);
+async function maskRealAddress(page, api) {
+  const replaced = await page.evaluate(
+    ({ from, to }) => {
+      let count = 0;
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      let node = walker.nextNode();
+      while (node) {
+        if (node.nodeValue && node.nodeValue.includes(from)) {
+          node.nodeValue = node.nodeValue.split(from).join(to);
+          count += 1;
+        }
+        node = walker.nextNode();
+      }
+      for (const el of document.querySelectorAll("input, textarea")) {
+        if (typeof el.value === "string" && el.value.includes(from)) {
+          el.value = el.value.split(from).join(to);
+          count += 1;
+        }
+      }
+      const still =
+        document.body.innerText.includes(from) ||
+        [...document.querySelectorAll("input, textarea")].some((el) => (el.value || "").includes(from));
+      return { count, still };
+    },
+    { from: REAL_ADDRESS, to: FICTIONAL_ADDRESS },
+  );
+  if (replaced.count) {
+    api.notes.push(
+      `Replaced ${replaced.count} on-screen occurrence(s) of ${REAL_ADDRESS} with ${FICTIONAL_ADDRESS}. The frame is labelled EXAMPLE DATA.`,
+    );
+  }
+  return replaced;
+}
+
+async function settle(page, api, lower, { holdMs, suffix } = {}) {
+  const label = exampleLabel(lower);
+  const masked = await maskRealAddress(page, api);
+  if (masked.still) {
+    return {
+      ok: false,
+      reason: `${REAL_ADDRESS} is still on screen. The shot was not captured with that address.`,
+    };
+  }
+  await overlay(page, { caption: `Shot ${api.step.id} · ${api.step.title}`, lower: label });
+  await sleep(holdMs ?? api.holdMs);
+  const file = join(
+    api.framesDir,
+    `shot-${api.step.id.padStart(2, "0")}-${slug(api.step.title)}${suffix ? `-${suffix}` : ""}.png`,
+  );
   await page.screenshot({ path: file });
   api.frames.push(file);
+  return { ok: true };
 }
 
 async function goHash(page, hash) {
@@ -177,26 +230,31 @@ async function goHash(page, hash) {
   await sleep(350);
 }
 
-function findPdf(roots, key) {
-  const rel = CASE_PDF[key];
-  for (const root of roots) {
-    const path = join(root, rel);
-    if (existsSync(path)) return path;
-  }
-  return null;
-}
-
-async function clickSummary(page, name) {
+async function openDisclosure(page, name) {
   const summary = page.locator("summary").filter({ hasText: name }).first();
   if (!(await visible(summary, 800))) return false;
-  await summary.scrollIntoViewIfNeeded().catch(() => {});
-  await summary.click();
+  const details = page.locator("details").filter({ has: summary }).first();
+  const isOpen = await details.evaluate((el) => el.open).catch(() => false);
+  if (!isOpen) {
+    await summary.scrollIntoViewIfNeeded().catch(() => {});
+    await summary.click();
+    await sleep(250);
+  }
   return true;
 }
 
-async function showDescribeExtras(page, api) {
-  if (await clickSummary(page, "Applicant and site details")) await sleep(300);
-  else api.notes.push("Applicant and site details is not on this screen.");
+async function openReviewGaps(page, api) {
+  if (await openDisclosure(page, "Review gaps")) return;
+  api.notes.push("Review gaps is not on this screen.");
+}
+
+async function showLedger(page, api) {
+  const ledger = page.getByRole("heading", { name: "Fact ledger" }).first();
+  if (!(await visible(ledger, 800))) {
+    api.notes.push("Fact ledger is not on this screen.");
+    return;
+  }
+  await ledger.scrollIntoViewIfNeeded().catch(() => {});
 }
 
 async function ensureRole(page, api, label) {
@@ -218,23 +276,20 @@ async function ensureRole(page, api, label) {
     if (!(await visible(describeHeading(page), 8000))) {
       return { ok: false, reason: `Choosing ${label} did not open the describe screen.` };
     }
-    api.state.roles.add(label);
     return { ok: true, mode: "role" };
   }
-  if (await visible(describeHeading(page), 1500)) return { ok: true, mode: "fixture" };
+  if (await visible(describeHeading(page), 1500)) {
+    return {
+      ok: false,
+      reason: "Who are you? is not on this build, so this case was not started over the fixture.",
+    };
+  }
   return { ok: false, reason: "Neither Who are you? nor the describe screen is on this build." };
 }
 
 async function fillIntake(page, api, spec) {
   const started = await ensureRole(page, api, spec.role);
   if (!started.ok) return started;
-  if (started.mode === "fixture") {
-    api.notes.push(
-      "This build has no Who are you? screen, so the preloaded fixture case stays on screen. The script paragraph was not pasted over it.",
-    );
-    await showDescribeExtras(page, api);
-    return { ok: true, mode: "fixture" };
-  }
   const box = page.getByRole("textbox", { name: /What are you building\?|Describe your idea/ }).first();
   if (await visible(box, 2000)) await box.fill(spec.text);
   else api.notes.push("The description field was not found, so the script paragraph was not pasted.");
@@ -248,42 +303,51 @@ async function fillIntake(page, api, spec) {
   } else {
     api.notes.push("Which authority will review this? is not on this build.");
   }
-  const pdf = findPdf([api.webRoot, join(api.webRoot, ".."), api.repoRoot], spec.pdf);
-  if (!pdf) {
-    api.notes.push(`Did not upload a PDF. ${CASE_PDF[spec.pdf]} is not in this checkout.`);
-  } else {
-    const input = page.locator('input[type="file"]');
-    if ((await input.count()) === 0) api.notes.push("Choose PDFs is not on this screen, so the case PDF was not uploaded.");
-    else {
-      await input.first().setInputFiles(pdf);
-      api.notes.push(`Uploaded ${CASE_PDF[spec.pdf]}.`);
-      await sleep(900);
-    }
-  }
-  await showDescribeExtras(page, api);
+  api.notes.push("Did not upload a PDF.");
+  await openReviewGaps(page, api);
+  await showLedger(page, api);
+  if (await visible(box, 500)) await box.scrollIntoViewIfNeeded().catch(() => {});
+  api.state.caseOpen = true;
   return { ok: true, mode: "role", lower: spec.lower };
 }
 
+async function goDescribe(page) {
+  if (await visible(describeHeading(page), 400)) return true;
+  const nav = navLink(page, "Describe");
+  if (await visible(nav, 800)) await nav.click();
+  else await goHash(page, "/describe");
+  return visible(describeHeading(page), 8000);
+}
+
 async function goCodeCheck(page) {
-  const cont = page.getByRole("link", { name: "Continue to code check" }).first();
-  if (await visible(cont, 800)) await cont.click();
+  const button = page.getByRole("button", { name: "Continue to code check" }).first();
+  if (await visible(button, 800)) await button.click();
   else {
-    const nav = navLink(page, "Code check");
-    if (!(await visible(nav, 800))) return false;
-    await nav.click();
+    const link = page.getByRole("link", { name: "Continue to code check" }).first();
+    if (await visible(link, 800)) await link.click();
+    else {
+      const nav = navLink(page, "Code check");
+      if (!(await visible(nav, 800))) return false;
+      await nav.click();
+    }
   }
   return visible(h1(page, "Code check"), 8000);
 }
 
-async function goSectionC(page) {
-  const cont = page.getByRole("link", { name: "Continue to Section C" }).first();
-  if (await visible(cont, 800)) await cont.click();
+async function goSectionC(page, api) {
+  const button = page.getByRole("button", { name: "Continue to Section C" }).first();
+  if (await visible(button, 800)) await button.click();
   else {
-    const nav = navLink(page, "Section C");
-    if (!(await visible(nav, 800))) return false;
-    await nav.click();
+    const link = page.getByRole("link", { name: "Continue to Section C" }).first();
+    if (await visible(link, 800)) await link.click();
   }
-  return visible(h1(page, /Section C/), 8000);
+  if (await visible(h1(page, /Section C/), 2500)) return true;
+  const nav = navLink(page, "Section C");
+  if (!(await visible(nav, 800))) return false;
+  await nav.click();
+  if (!(await visible(h1(page, /Section C/), 8000))) return false;
+  if (api) api.notes.push("Continue to Section C did not leave Code check. Section C was opened from the sidebar.");
+  return true;
 }
 
 async function goApplication(page, tabLabel) {
@@ -305,69 +369,122 @@ async function goApplication(page, tabLabel) {
   return true;
 }
 
-async function answerYourWords(page) {
+async function answerNotSure(page, api) {
   const cards = page.locator("article").filter({ hasText: "Your words" });
   const count = await cards.count();
+  const topics = [];
   let clicked = 0;
   for (let i = 0; i < count; i += 1) {
-    const button = cards.nth(i).getByRole("button", { name: "Not sure", exact: true });
+    const card = cards.nth(i);
+    const topic = (await card.locator("h2").first().innerText().catch(() => "")).trim();
+    if (topic) topics.push(topic);
+    const button = card.getByRole("button", { name: "Not sure", exact: true });
     if (await visible(button, 500)) {
-      await cards.nth(i).scrollIntoViewIfNeeded().catch(() => {});
+      await card.scrollIntoViewIfNeeded().catch(() => {});
       await button.click();
       clicked += 1;
     }
   }
-  return { count, clicked };
+  api.notes.push(
+    count
+      ? `Answered Not sure on ${clicked} Your words card(s)${topics.length ? `: ${topics.join("; ")}` : ""}. Did not answer Yes or No.`
+      : "No Your words card is on this screen, so Not sure was not clicked.",
+  );
+  const openQ = page.getByText("Open question", { exact: true }).last();
+  if (clicked && (await visible(openQ, 1000))) {
+    await openQ.scrollIntoViewIfNeeded().catch(() => {});
+    return true;
+  }
+  if (clicked) {
+    api.notes.push("Not sure was clicked, but the Open question label was not on screen. That sentence was not invented.");
+  }
+  return false;
 }
 
-async function searchDivisionB(page, query, acceptIds) {
+async function searchDivisionB(page, query, acceptId) {
   const box = page.getByLabel("Search Division B").first();
   if (!(await visible(box, 1000))) {
     return { note: "Search Division B is not on this build. No article id was typed in." };
   }
   await box.fill(query);
-  await page.getByRole("button", { name: "Search", exact: true }).first().click();
-  const finished = page.getByText(/\d+ provisions returned|No provisions returned|did not return|could not be reached|Bad Gateway/).first();
+  const form = box.locator("xpath=ancestor::form[1]");
+  const search = form.getByRole("button", { name: "Search", exact: true });
+  if (!(await visible(search, 800))) {
+    return { note: `The Search button for "${query}" is not on this screen. No article id was typed in.` };
+  }
+  await search.click();
+  const finished = page
+    .getByText(/\d+ provisions returned|No provisions returned|did not return|could not be reached|unreachable|Failed to fetch|Bad Gateway|ERR_/)
+    .first();
   if (!(await visible(finished, 8000))) {
     return { note: `Search for "${query}" did not report a result. No article id was typed in.` };
   }
   const text = await page.locator("main").innerText();
-  if (/did not return|unreachable|could not be reached|bad gateway/i.test(text) && !/\d+ provisions returned/.test(text)) {
+  if (
+    /did not return|unreachable|could not be reached|bad gateway|failed to fetch|err_/i.test(text) &&
+    !/\d+ provisions returned/.test(text)
+  ) {
     return {
-      note: `Search for "${query}" did not return (no engine or code database). No article id was typed in.`,
+      note: `Search for "${query}" did not return (no engine or code database). ${acceptId} was not typed in.`,
     };
   }
-  const found = acceptIds.find((id) => text.includes(id));
-  if (!found) {
-    return { note: `Search for "${query}" did not show ${acceptIds.join(" or ")}. Nothing was added.` };
+  const rows = page.locator("li").filter({ has: page.getByRole("button", { name: "Add to this check" }) });
+  const count = await rows.count();
+  let matched = null;
+  const seen = [];
+  for (let i = 0; i < count; i += 1) {
+    const row = rows.nth(i);
+    const idText = (await row.locator(".article-id").first().innerText().catch(() => "")).trim();
+    if (idText) seen.push(idText);
+    if (idText === acceptId) matched = row;
   }
-  const item = page
-    .locator("li, article")
-    .filter({ hasText: found })
-    .filter({ has: page.getByRole("button", { name: "Add to this check" }) })
-    .first();
-  if (!(await visible(item, 1000))) {
-    return { note: `Saw ${found} in the page text but not on an Add to this check row. Nothing was added.` };
+  if (!matched) {
+    return {
+      note: `Search for "${query}" did not show a row whose id is ${acceptId}${seen.length ? ` (rows: ${seen.join(", ")})` : ""}. Nothing was added.`,
+    };
   }
-  await item.getByRole("button", { name: "Add to this check" }).click();
+  await matched.getByRole("button", { name: "Add to this check" }).click();
   await sleep(400);
-  const card = page.locator("article").filter({ hasText: found }).last();
+  const card = page.locator("article").filter({ hasText: acceptId }).last();
   const yes = card.getByRole("button", { name: "Yes", exact: true });
   if (await visible(yes, 1500)) await yes.click();
-  return { added: found, note: `Added ${found} from the returned search rows and answered Yes on that card.` };
+  else return { added: acceptId, note: `Added ${acceptId} from the returned rows. The Yes button was not on that card.` };
+  return { added: acceptId, note: `Added ${acceptId} from the returned search rows and answered Yes on that card.` };
 }
 
-async function openFirstCodeReference(page) {
-  return clickSummary(page, "Code reference");
-}
-
-async function resetCase(page) {
+async function resetCase(page, api) {
   const button = page.getByRole("button", { name: "Reset case" }).first();
   if (!(await visible(button, 1500))) return false;
   await button.click();
   await sleep(400);
-  await visible(h1(page, "Who are you?"), 4000);
+  const who = await visible(h1(page, "Who are you?"), 4000);
+  if (!who) return false;
+  api.state.sawWho = true;
+  api.state.caseOpen = false;
+  api.state.caseC = false;
+  api.state.caseA = false;
+  const note = page.getByText("Cleared. Nothing from the previous case is kept.").first();
+  if (await visible(note, 800)) {
+    api.notes.push("Reset case showed: Cleared. Nothing from the previous case is kept.");
+  } else {
+    api.notes.push("Reset case returned to Who are you?. The cleared-note sentence was not on screen.");
+  }
   return true;
+}
+
+async function noteCheckCompleteness(page, api) {
+  const check = page.getByRole("button", { name: /Check completeness|Run pre-flight/ }).first();
+  if (!(await visible(check, 800))) {
+    api.notes.push("Neither Check completeness nor Run pre-flight is on this build. No PDF was downloaded.");
+    return;
+  }
+  const disabled = await check.isDisabled();
+  api.notes.push(
+    disabled
+      ? "Check completeness stays disabled. It was not clicked, and no PDF was downloaded."
+      : "Check completeness is enabled. It was not clicked, so no PDF was downloaded.",
+  );
+  await check.scrollIntoViewIfNeeded().catch(() => {});
 }
 
 async function shot1(page, api) {
@@ -378,167 +495,130 @@ async function shot1(page, api) {
   }
   api.state.sawWho = true;
   api.notes.push("Try an example was left unclicked.");
-  await settle(page, api, ALL_LOWER);
+  const frame = await settle(page, api, ALL_LOWER);
+  if (!frame.ok) return skipped(frame.reason);
   return recorded();
 }
 
 async function shot2(page, api) {
-  const filled = await fillIntake(page, api, CASES.A);
+  const filled = await fillIntake(page, api, CASES.C);
   if (!filled.ok) return skipped(filled.reason);
   if (!(await visible(describeHeading(page), 2000))) return skipped("The describe screen is not showing.");
-  await settle(page, api, filled.lower);
+  api.state.caseC = true;
+  const frame = await settle(page, api, filled.lower);
+  if (!frame.ok) return skipped(frame.reason);
   return recorded();
 }
 
 async function shot3(page, api) {
-  if (!(await goCodeCheck(page))) return skipped("Code check is not on this build.");
-  const words = await answerYourWords(page);
-  api.notes.push(
-    words.count
-      ? `Answered Not sure on ${words.clicked} Your words card(s). Did not answer Yes on them.`
-      : "No Your words card is on this screen, so Not sure was not clicked.",
-  );
-  const search = await searchDivisionB(page, "cladding fastened furring", ["9.27.5.1"]);
-  api.notes.push(search.note);
-  if (!(await openFirstCodeReference(page))) api.notes.push("Code reference disclosure was not found.");
-  const filters = page.getByRole("toolbar", { name: "Filter" });
-  if (await visible(filters, 600)) {
-    const needs = filters.getByRole("button", { name: /Needs an answer/ });
-    if (await visible(needs, 400)) await needs.click();
-    await sleep(400);
-    const all = filters.getByRole("button", { name: /^All\b/ });
-    if (await visible(all, 400)) await all.click();
+  if (!api.state.sawWho) {
+    return skipped("Who are you? is not on this build, so the manufacturer case cannot be started.");
   }
-  await settle(page, api, api.state.roles.has("Manufacturer") ? CASES.A.lower : undefined);
+  if (!(await resetCase(page, api))) return skipped("Reset case is not available, so Case A was not started.");
+  const filled = await fillIntake(page, api, CASES.A);
+  if (!filled.ok || filled.mode !== "role") {
+    return skipped(filled.reason || "Manufacturer did not open an empty describe screen.");
+  }
+  api.state.caseA = true;
+  const paste = await settle(page, api, CASES.A.lower, { suffix: "paste" });
+  if (!paste.ok) return skipped(paste.reason);
+  if (!(await goCodeCheck(page))) return skipped("Code check did not open for the manufacturer case.");
+  const sawOpen = await answerNotSure(page, api);
+  const frame = await settle(page, api, CASES.A.lower, {
+    holdMs: sawOpen ? Math.max(api.holdMs, OPEN_QUESTION_HOLD_MS) : api.holdMs,
+    suffix: "open-question",
+  });
+  if (!frame.ok) return skipped(frame.reason);
   return recorded();
 }
 
 async function shot4(page, api) {
-  if (!(await goSectionC(page))) return skipped("Section C is not on this build.");
-  const offline = page.getByText(/Offline sample|not a lookup for this case|bundled offline sample/);
+  if (!api.state.caseC) return skipped("Case C is not the open case, so the code-identification shot was not recorded.");
+  if (!(await visible(h1(page, "Code check"), 400)) && !(await goCodeCheck(page))) {
+    return skipped("Code check is not on this build.");
+  }
+  await answerNotSure(page, api);
+  const search = await searchDivisionB(page, "bedroom window unobstructed", "9.9.10.1.(2)");
+  api.notes.push(search.note);
+  if (search.added) {
+    const reference = page
+      .locator("article")
+      .filter({ hasText: search.added })
+      .locator("summary")
+      .filter({ hasText: "Code reference" })
+      .first();
+    if (await visible(reference, 800)) {
+      await reference.click();
+      api.notes.push("Opened Code reference on the row that was added.");
+    } else api.notes.push("Code reference disclosure was not on the added row.");
+  }
+  const searchBox = page.getByLabel("Search Division B").first();
+  if (await visible(searchBox, 500)) await searchBox.scrollIntoViewIfNeeded().catch(() => {});
+  const searchFrame = await settle(page, api, CASES.C.lower, { suffix: "search" });
+  if (!searchFrame.ok) return skipped(searchFrame.reason);
+  if (!(await goSectionC(page, api))) return skipped("Section C is not on this build.");
+  const offline = page.getByText(/Offline sample|not a lookup for this case|bundled offline sample|Lookup failed|did not return|could not be reached/);
   if (await visible(offline, 1200)) {
-    api.notes.push("Section C is the bundled offline sample. The engine lookup is not reachable, and no attribution was invented.");
+    api.notes.push("Section C did not show a live lookup. No objective, function, or intent was invented.");
   }
-  const row = page.getByRole("row").nth(1);
-  if (await visible(row, 1000)) await row.click();
-  else api.notes.push("Section C has no attribution row to select.");
-  await settle(page, api, api.state.roles.has("Manufacturer") ? CASES.A.lower : undefined);
+  if (search.added) {
+    const row = page.getByRole("row").filter({ hasText: search.added }).first();
+    if (await visible(row, 1000)) await row.click();
+    else api.notes.push(`Section C has no row for ${search.added}. No attribution was typed in.`);
+  } else {
+    api.notes.push("No article was added, so no Section C row was selected.");
+  }
+  api.notes.push("Ranked list still is not in this build. Omitted. No ranked caption was added.");
+  api.notes.push("Benchmark card is not in this build. Omitted.");
+  api.notes.push("Eval still is not in this build. Omitted. #/accuracy was not opened.");
+  const frame = await settle(page, api, CASES.C.lower);
+  if (!frame.ok) return skipped(frame.reason);
   return recorded();
-}
-
-async function sectionDNote(page, api) {
-  const heading = page.getByRole("heading", { name: "Section D and professional screening" }).first();
-  if (!(await visible(heading, 5000))) return false;
-  await sleep(400);
-  const stub = page.getByText(/No engine case|stay blank|did not return|could not be reached|Bad Gateway/).first();
-  if (await visible(stub, 1500)) {
-    api.notes.push(
-      "Section D issues are blank. Those routes need the engine, and the recorder does not call a model or invent evidence.",
-    );
-  }
-  return true;
 }
 
 async function shot5(page, api) {
-  if (!(await goApplication(page, "Section D"))) {
-    return skipped("Section D is not an application tab on this build. The practice-of-engineering screen is a later change.");
+  if (!api.state.caseC) return skipped("Case C is not the open case, so Section D was not recorded.");
+  if (!(await goApplication(page, "Alternative path"))) {
+    return skipped("Alternative path is not an application tab on this build.");
   }
-  if (!(await sectionDNote(page, api))) {
+  const risk = page.getByLabel("Risk assessment").first();
+  if (await visible(risk, 800)) await risk.scrollIntoViewIfNeeded().catch(() => {});
+  else api.notes.push("Risk assessment is not on the alternative path.");
+  api.notes.push("Process fields were left empty. Nothing was typed into them.");
+  await openReviewGaps(page, api);
+  const altFrame = await settle(page, api, CASES.C.lower, { suffix: "alternative-path" });
+  if (!altFrame.ok) return skipped(altFrame.reason);
+  if (!(await goApplication(page, "Section D"))) return skipped("Section D is not an application tab on this build.");
+  const heading = page.getByRole("heading", { name: "Section D and professional screening" }).first();
+  if (!(await visible(heading, 5000))) {
     return skipped("The Section D tab opened without the professional screening heading.");
   }
-  await settle(page, api, api.state.roles.has("Manufacturer") ? CASES.A.lower : undefined);
+  const limit = page.getByText(/does not write the evidence|not a licence decision|This is not a licence decision/i).first();
+  if (await visible(limit, 1000)) {
+    api.notes.push("The on-screen limit line is visible. It was not typed by the recorder.");
+    await limit.scrollIntoViewIfNeeded().catch(() => {});
+  } else {
+    api.notes.push(
+      "The limit line is not on screen. Section D routes did not return a card, and no evidence or judgement was invented.",
+    );
+  }
+  const frame = await settle(page, api, CASES.C.lower, { suffix: "section-d" });
+  if (!frame.ok) return skipped(frame.reason);
   return recorded();
+}
+
+async function waitOfficerLoaded(page) {
+  const loading = page.getByText("Loading the package…").first();
+  if (await visible(loading, 600)) {
+    await loading.waitFor({ state: "hidden", timeout: 8000 }).catch(() => {});
+  }
+  await sleep(300);
 }
 
 async function shot6(page, api) {
-  const heading = page.getByRole("heading", { name: "Section D and professional screening" }).first();
-  if (!(await visible(heading, 800))) {
-    if (!(await goApplication(page, "Section D"))) {
-      return skipped("Section D is not on this build, so the listing refusal cannot be shown.");
-    }
+  if (!api.state.caseOpen) {
+    return skipped("No case is open, so Officer review stays on Who are you?. The planted package was not recorded.");
   }
-  if (!(await visible(heading, 3000))) return skipped("Section D professional screening is not on screen.");
-  const main = await page.locator("main").innerText();
-  if (!/does not write the evidence|not a licence decision|listing number/i.test(main)) {
-    return skipped(
-      "The refusal line (the tool does not write a listing or a professional opinion) is not visible. Section D routes did not return, and that sentence was not invented.",
-    );
-  }
-  await settle(page, api, api.state.roles.has("Manufacturer") ? CASES.A.lower : undefined);
-  return recorded();
-}
-
-async function shot7(page, api) {
-  if (!api.state.sawWho) {
-    return skipped("Who are you? is not on this build, so the general-contractor case cannot be started.");
-  }
-  if (!(await resetCase(page))) return skipped("Reset case is not available, so Case B was not started.");
-  const filled = await fillIntake(page, api, CASES.B);
-  if (!filled.ok || filled.mode !== "role") {
-    return skipped(filled.reason || "General contractor did not open an empty describe screen.");
-  }
-  if (!(await goCodeCheck(page))) return skipped("Code check did not open for the general-contractor case.");
-  const words = await answerYourWords(page);
-  api.notes.push(
-    words.count
-      ? `Answered Not sure on ${words.clicked} Your words card(s).`
-      : "No Your words card appeared from the Case B paragraph.",
-  );
-  const search = await searchDivisionB(page, "combustible piping firestop", ["3.1.9.1", "3.1.9.4"]);
-  api.notes.push(search.note);
-  await settle(page, api, CASES.B.lower);
-  return recorded();
-}
-
-async function shot8(page, api) {
-  if (!api.state.roles.has("General contractor")) {
-    return skipped("The general-contractor case was not started, so Section D for that case was not recorded.");
-  }
-  if (!(await goApplication(page, "Section D"))) return skipped("Section D is not on this build.");
-  const tab = page
-    .getByRole("navigation", { name: "Application sections" })
-    .getByRole("link", { name: /^Section D\b/ })
-    .first();
-  if ((await tab.getAttribute("aria-current")) !== "page") {
-    return skipped("Section D is not the selected application tab.");
-  }
-  if (!(await sectionDNote(page, api))) return skipped("Section D professional screening is not on screen.");
-  const practice = page.getByText(/Practice of engineering:|not a licence decision|registered professional is indicated/).first();
-  if (!(await visible(practice, 1000))) {
-    return skipped(
-      "The practice-of-engineering line is not on screen. The recorder did not invent an engineering judgment or a licence decision.",
-    );
-  }
-  await settle(page, api, CASES.B.lower);
-  return recorded();
-}
-
-async function shot9(page, api) {
-  if (!api.state.sawWho) {
-    return skipped("Who are you? is not on this build, so the homebuilder case cannot be started.");
-  }
-  if (!(await resetCase(page))) return skipped("Reset case is not available, so Case C was not started.");
-  const filled = await fillIntake(page, api, CASES.C);
-  if (!filled.ok || filled.mode !== "role") {
-    return skipped(filled.reason || "Homebuilder did not open an empty describe screen.");
-  }
-  if (!(await goCodeCheck(page))) return skipped("Code check did not open for the homebuilder case.");
-  const words = await answerYourWords(page);
-  api.notes.push(
-    words.count
-      ? `Answered Not sure on ${words.clicked} Your words card(s).`
-      : "No Your words card appeared from the Case C paragraph.",
-  );
-  const search = await searchDivisionB(page, "bedroom window unobstructed", ["9.9.10.1"]);
-  api.notes.push(search.note);
-  api.notes.push(
-    "STANDATA classification sentences were not spoken or typed. They are recorded only when a matching code-text card is actually returned.",
-  );
-  await settle(page, api, CASES.C.lower);
-  return recorded();
-}
-
-async function shot10(page, api) {
   const nav = navLink(page, "Officer review");
   if (!(await visible(nav, 1500))) return skipped("Officer review is not in the navigation.");
   const href = (await nav.getAttribute("href")) || "#/officer";
@@ -552,100 +632,122 @@ async function shot10(page, api) {
     if (!(await visible(title, 8000))) return skipped("Officer review did not open.");
     if (await visible(page.getByRole("heading", { name: "Not built yet" }), 1000)) {
       await goHash(page, "/describe");
-      return skipped(
-        "Officer review is the Not built yet placeholder. The script records this shot when the screen lists an open package.",
-      );
+      return skipped("Officer review is the Not built yet placeholder. The planted package was not recorded.");
     }
-    const request = page.getByRole("heading", { name: "Information request" }).first();
-    if (!(await visible(request, 8000))) {
-      return skipped("Officer review opened without an information request, so it was not recorded as the completeness review.");
+    if (await visible(h1(page, "Who are you?"), 400)) {
+      return skipped("Officer review sent the browser back to Who are you?. The planted package was not recorded.");
+    }
+    const before = page.getByRole("button", { name: "Before fixes" }).first();
+    if (!(await visible(before, 8000))) {
+      return skipped("Officer review opened without Before fixes, so the planted package was not recorded.");
     }
     await cover(page, false);
-    api.notes.push(
-      "The officer screen on this build is one planted package, not Cases A, B, and C. Those case labels were not overlaid.",
-    );
-    const before = page.getByRole("button", { name: "Before fixes" }).first();
-    if (await visible(before, 800)) await before.click();
-    await request.scrollIntoViewIfNeeded().catch(() => {});
+    api.notes.push("The officer screen is one planted package. Case A, B, and C labels were not overlaid.");
+    await before.click();
+    await waitOfficerLoaded(page);
+    const beforeFrame = await settle(page, api, LOWER.officer, { suffix: "before" });
+    if (!beforeFrame.ok) return skipped(beforeFrame.reason);
+    const after = page.getByRole("button", { name: "After fixes" }).first();
+    if (await visible(after, 800)) await after.click();
+    else api.notes.push("After fixes is not on this screen.");
+    await waitOfficerLoaded(page);
+    const request = page.getByRole("heading", { name: "Information request" }).first();
+    if (await visible(request, 2000)) await request.scrollIntoViewIfNeeded().catch(() => {});
+    else api.notes.push("Information request is not on this screen.");
     const copy = page.getByRole("button", { name: "Copy request" }).first();
-    if (await visible(copy, 800)) await copy.click();
+    if (await visible(copy, 800)) await copy.scrollIntoViewIfNeeded().catch(() => {});
     else api.notes.push("Copy request is not on this screen.");
-    await settle(page, api);
+    const afterFrame = await settle(page, api, LOWER.officer, { suffix: "after" });
+    if (!afterFrame.ok) return skipped(afterFrame.reason);
+    const shown = await page.evaluate((from) => document.body.innerText.includes(from), REAL_ADDRESS);
+    if (shown) return skipped(`${REAL_ADDRESS} is on the officer screen. The shot was not kept.`);
     return recorded();
   } finally {
     await cover(page, false);
   }
 }
 
-async function shot11(page, api) {
-  if (!(await goApplication(page))) return skipped("The application screen is not on this build.");
-  for (const tab of ["Section A", "Section B", "Alternative path"]) {
-    const link = page
-      .getByRole("navigation", { name: "Application sections" })
-      .getByRole("link", { name: new RegExp(`^${escapeReg(tab)}\\b`) })
-      .first();
-    if (await visible(link, 700)) {
-      await link.click();
-      await sleep(450);
-    } else api.notes.push(`${tab} is not on the application tabs.`);
-  }
-  const risk = page.getByLabel("Risk assessment").first();
-  if (await visible(risk, 600)) await risk.scrollIntoViewIfNeeded().catch(() => {});
-  const check = page.getByRole("button", { name: /Check completeness|Run pre-flight/ }).first();
-  if (await visible(check, 800)) {
-    const disabled = await check.isDisabled();
-    api.notes.push(
-      disabled
-        ? "Check completeness stays disabled. Gaps were not filled to unlock it, and no PDF was downloaded."
-        : "Check completeness is enabled. It was not clicked, so no PDF was downloaded.",
-    );
-    await check.scrollIntoViewIfNeeded().catch(() => {});
-  } else {
-    api.notes.push("Neither Check completeness nor Run pre-flight is on this build.");
-  }
+async function authorityFrame(page, api, spec, suffix) {
+  if (!(await goDescribe(page))) return skipped("The describe screen is not available for the authority select.");
   const authority = page.getByLabel(/Which authority will review this/).first();
-  if (!(await visible(authority, 400))) {
+  if (await visible(authority, 800)) {
+    await authority.scrollIntoViewIfNeeded().catch(() => {});
+    const value = await authority.inputValue().catch(() => "");
     api.notes.push(
-      "The authority field is not on the application screen. Edmonton and Calgary appear on Describe when that select exists.",
+      value
+        ? `Authority select value is "${value}". It was not changed on this frame.`
+        : "The authority select is empty. It was not given a new value on this frame.",
     );
+  } else api.notes.push("Which authority will review this? is not on this screen.");
+  const describeFrame = await settle(page, api, spec.lower, { suffix: `${suffix}-authority` });
+  if (!describeFrame.ok) return skipped(describeFrame.reason);
+  if (!(await goApplication(page, "Alternative path"))) {
+    return skipped("The application screen is not on this build for the gaps frame.");
   }
-  const walkedAll = ["Manufacturer", "General contractor", "Homebuilder"].every((role) => api.state.roles.has(role));
-  await settle(page, api, walkedAll ? ALL_LOWER : undefined);
+  await openReviewGaps(page, api);
+  await noteCheckCompleteness(page, api);
+  const appFrame = await settle(page, api, spec.lower, { suffix: `${suffix}-application` });
+  if (!appFrame.ok) return skipped(appFrame.reason);
   return recorded();
 }
 
+async function shot7(page, api) {
+  if (api.frame === "A") {
+    if (!api.state.caseA) return skipped("Case A is not the open case, so its authority frame was not recorded.");
+    api.notes.push("Case A authority frame.");
+    return authorityFrame(page, api, CASES.A, "case-a");
+  }
+  if (!api.state.caseC) return skipped("Case C is not the open case, so its authority frame was not recorded.");
+  api.notes.push("Case C authority frame.");
+  return authorityFrame(page, api, CASES.C, "case-c");
+}
+
 export const STEPS = [
-  { id: "1", title: "Three applicants, one template", route: "#/", run: shot1 },
-  { id: "2", title: "Manufacturer intake", route: "#/describe", run: shot2 },
-  { id: "3", title: "The fastening article", route: "#/code-check", run: shot3 },
-  { id: "4", title: "Section C lookup", route: "#/section-c", run: shot4 },
-  { id: "5", title: "What the evidence must address", route: "#/application?tab=D", run: shot5 },
-  { id: "6", title: "It will not invent the listing", route: "#/application?tab=D", run: shot6 },
-  { id: "7", title: "General contractor, tested system first", route: "#/describe", run: shot7 },
-  { id: "8", title: "It will not write the engineering judgment", route: "#/application?tab=D", run: shot8 },
-  { id: "9", title: "Homebuilder, one house, one variance", route: "#/describe", run: shot9 },
-  { id: "10", title: "Officer, administrative completeness", route: "#/officer", run: shot10 },
-  { id: "11", title: "Same record, two authorities", route: "#/application", run: shot11 },
+  { id: "1", title: "Three applicants (0:18)", route: "#/", run: shot1 },
+  { id: "2", title: "Homebuilder paste (0:10)", route: "#/describe", run: shot2 },
+  { id: "3", title: "Not sure (0:23)", route: "#/", run: shot3 },
+  { id: "4", title: "Code identification (0:45)", route: "#/section-c", run: shot4 },
+  { id: "5", title: "Section D, then the limit (0:24 + 0:08)", route: "#/application?tab=alt", run: shot5 },
+  { id: "6", title: "Officer, one planted package (0:36)", route: "#/officer", run: shot6 },
+  { id: "7", title: "Authority, gaps still open (0:16)", route: "#/describe", run: shot7 },
 ];
+
+function mergeParts(step, parts) {
+  const failed = parts.filter((part) => part.status !== "recorded");
+  const notes = parts.flatMap((part) => part.notes || []);
+  const frames = parts.flatMap((part) => part.frames || []);
+  if (failed.length) {
+    return {
+      id: step.id,
+      title: step.title,
+      route: step.route,
+      status: "skipped",
+      reason: failed.map((part) => part.reason).filter(Boolean).join(" "),
+      notes,
+      frames,
+    };
+  }
+  return { id: step.id, title: step.title, route: step.route, status: "recorded", notes, frames };
+}
 
 export async function runWalkthrough(page, opts) {
   const apiBase = {
     holdMs: opts.holdMs ?? 1600,
     framesDir: opts.framesDir,
-    repoRoot: opts.repoRoot,
-    webRoot: opts.webRoot,
-    state: { sawWho: false, roles: new Set() },
+    state: { sawWho: false, caseOpen: false, caseC: false, caseA: false },
   };
-  const results = [];
-  for (const step of STEPS) {
+  const stepById = new Map(STEPS.map((step) => [step.id, step]));
+
+  async function exec(id, extra) {
+    const step = stepById.get(id);
     const notes = [];
     const frames = [];
-    const api = { ...apiBase, step, notes, frames };
+    const api = { ...apiBase, step, notes, frames, ...extra };
     try {
       const outcome = await step.run(page, api);
-      results.push({ id: step.id, title: step.title, route: step.route, notes, frames, ...outcome });
+      return { id: step.id, title: step.title, route: step.route, notes, frames, ...outcome };
     } catch (error) {
-      results.push({
+      return {
         id: step.id,
         title: step.title,
         route: step.route,
@@ -653,8 +755,22 @@ export async function runWalkthrough(page, opts) {
         reason: `Step threw and was skipped: ${error instanceof Error ? error.message : String(error)}`,
         notes,
         frames,
-      });
+      };
     }
   }
-  return results;
+
+  // Script order: 1, 2, 4, 5, 7 (Case C), reset inside 3, 7 (Case A), 6.
+  const shot1Result = await exec("1");
+  const shot2Result = await exec("2");
+  const shot4Result = await exec("4");
+  const shot5Result = await exec("5");
+  const shot7c = await exec("7", { frame: "C" });
+  const shot3Result = await exec("3");
+  const shot7a = await exec("7", { frame: "A" });
+  const shot6Result = await exec("6");
+  const shot7Result = mergeParts(stepById.get("7"), [shot7c, shot7a]);
+
+  return [shot1Result, shot2Result, shot3Result, shot4Result, shot5Result, shot6Result, shot7Result].sort(
+    (a, b) => Number(a.id) - Number(b.id),
+  );
 }
