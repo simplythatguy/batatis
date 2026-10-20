@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import re
 from contextlib import closing
 from pathlib import Path
 
@@ -101,18 +100,11 @@ def children(provision_id: str, *, doc='NBC-AE', division=None, db_path=None):
 
 
 def search(terms: str, *, doc='NBC-AE', division=None, limit=20, db_path=None):
-    """Ranked FTS5 search of titles and sentences; terms are literal words, not SQL/FTS syntax."""
-    words = re.findall(r'[^\W_]+', terms, re.UNICODE)
-    if not words:
-        return []
-    if not 1 <= limit <= 1000:
-        raise ValueError('limit must be between 1 and 1000')
-    query = ' OR '.join('"' + w + '"' for w in words)
-    with closing(store.connect(db_path)) as con:
-        rows = con.execute('SELECT p.*, bm25(provisions_fts,0,0,0,5,1) AS rank '
-                           'FROM provisions_fts JOIN provisions p ON p.doc=provisions_fts.doc '
-                           'AND p.division=provisions_fts.division AND p.id=provisions_fts.id '
-                           'WHERE provisions_fts MATCH ? AND p.doc=?' +
-                           (' AND p.division=?' if division else '') + ' ORDER BY rank,p.sort_key LIMIT ?',
-                           (query, doc, division.upper(), limit) if division else (query, doc, limit))
-        return [record(r) for r in rows]
+    """Ranked search of titles and sentences. Terms are words, not SQL/FTS syntax.
+
+    The signature is unchanged: `limit` is still 1..1000, default 20. The
+    engine route continues to clamp the caller's limit. Ranking is the
+    shipped variant from the recall comparison (`codedb.search_rank`).
+    """
+    from .search_rank import SHIPPED, search_variant
+    return search_variant(terms, SHIPPED, doc=doc, division=division, limit=limit, db_path=db_path)

@@ -1,0 +1,1094 @@
+{
+  "label": "model-checked, not human-verified",
+  "seed": 20261020,
+  "split_algorithm": "random.Random(20261020). Shuffle sorted repo-key ids first, then sorted idr ids. Hold out round(0.30*n) from the front of each shuffled list. Regression queries are forced in-sample and are not shuffled.",
+  "gold_counts": {
+    "repo_key_with_gold": 38,
+    "identify_regression_with_gold": 21,
+    "mira_regressions_with_gold_reported_separately": 3,
+    "regressions_without_gold": 3,
+    "note": "Gold is copied from evals_dev must_cite or identify-regression gold_articles. Nothing was added by hand except Unc's confirmation that 9.23.17.3.(1) counts for idr-001/002, where that article was already on the list."
+  },
+  "queries": [
+    {
+      "id": "dev-001",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "We're building a new two-storey single detached house with a building area of 150 m2 on a narrow infill lot. The north side wall sits 0.3 m from the property line, which is the side yard against the neighbour's lot, not a street or lane. The client wants the same 450 mm roof overhang all the way around, including over that north wall. The soffit would be vented aluminum. Can we do this as a variance and what would we need to show?",
+      "gold": [
+        "9.10.15.5.(8)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-001.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "held-out"
+    },
+    {
+      "id": "dev-002",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "We're planning a row of six two-storey townhouses across six adjacent fee-simple parcels, with party walls on the parcel boundaries and a total building area of 500 m2, proposed as a single building without internal firewalls, and every unit will have a legal basement suite. We'd like to build every party wall the same way, as a 1-hour rated double-stud wall running from the footing to the underside of the roof deck, instead of making some of them full firewalls. Is there a way to get that approved?",
+      "gold": [
+        "9.10.11.2.(2)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-002.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-003",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "Mechanical contractor here. On a three-storey, twelve-unit wood-frame apartment with a building area of 480 m2 we have supply ducts that pass through the rated corridor walls. There's no room above the ceiling for damper access panels, so we'd like to skip the fire dampers and instead use 26 gauge steel duct sealed with a listed firestop at each wall. The ducts are about 150 by 250 mm and serve the suites' heat recovery ventilators.",
+      "gold": [
+        "9.10.13.13.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-003.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-004",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "I'm the architect on a two-storey side-by-side duplex with a building area of 240 m2 and no dwelling above another. One wall is angled about 20 degrees to the side property line, so it runs from 1.2 m to 3.0 m away. For the window-area calculation we'd like to use the average distance of the wall, about 2.1 m, rather than drawing the plane at the closest point. One of the windows is at the 1.2 m end, in front of our proposed average-distance plane. Using the closest window plane cuts our glazing allowance by more than half.",
+      "gold": [
+        "9.10.15.2.(3)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-004.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-008",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "For our next phase of two-storey single-family homes, each with a building area of 160 m2, we want to drop the OSB on exterior walls and put 50 mm rigid foam directly on the studs, then large-format fibre cement panels screwed through the foam into the studs. The panels need fastening between studs according to the maker, and we propose to put those intermediate fasteners into the foam alone, with no wood or metal backing between the studs. Racking would be handled by let-in steel strap bracing.",
+      "gold": [
+        "9.23.17.3.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-008.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-013",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "We're designing a four-storey, sprinklered wood-frame apartment with eight units per floor on a mid-block lot. To make the floor plate work we want a single exit stair serving every floor, with a pressurized stair and a short corridor. Each floor is about 600 m2.",
+      "gold": [
+        "3.4.2.1.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-013.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-014",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "We're putting up a three-storey walk-up with two apartments on each floor, six in total, about 280 m2 per floor. We'd like just one interior stair from the top floor down, plus each upper unit gets a balcony. Is one stair acceptable if we add something else?",
+      "gold": [
+        "9.9.8.2.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-014.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-016",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "Five-storey office building sprinklered throughout of noncombustible construction. The owner wants a charred solid-timber board rainscreen cladding on the street elevation. This is not a plywood-clad or other prescriptive Appendix D exterior-wall assembly. The supplier has a reaction-to-fire test from Europe but not the Canadian full-scale wall test. Can the European test support an alternative solution?",
+      "gold": [
+        "3.1.5.5.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-016.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-017",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "Design-build contractor on an encapsulated mass timber residential building with forty apartments, eight storeys. In the top-floor suites the developer wants the CLT ceilings left fully exposed, about 60% of each suite's ceiling, with a clear intumescent coating. Walls would stay covered with gypsum.",
+      "gold": [
+        "3.1.6.4.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-017.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "held-out"
+    },
+    {
+      "id": "dev-018",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "Structural engineer carrying out Part 4 design on a large single-storey warehouse in a suburban industrial park, with other buildings across the street. We want to use a reduced wind exposure factor of 0.75 for the roof snow load because the site is flat and windy. Normal importance category.",
+      "gold": [
+        "4.1.6.2.(3)",
+        "4.1.6.2.(4)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-018.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "held-out"
+    },
+    {
+      "id": "dev-019",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "We supply curtain wall and rainscreen cladding for a 20-storey tower, with structural cladding-anchor design under Part 4. Our engineering team ran computational fluid dynamics to get the cladding wind pressures, which come out lower than the code's static method. We'd like to design the anchors to the CFD values.",
+      "gold": [
+        "4.1.7.1.(6)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-019.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-026",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "Our new one-storey community hall has an 800 m2 building area and a design occupant load of 120 people. It is not sprinklered. We want one public exit at the front and no other exit, using staff to manage an evacuation. What would an alternative application need?",
+      "gold": [
+        "3.4.2.1.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-026.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-027",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "On an eight-storey office, the two required exits from each 1,200 m2 floor would be only 4 m apart along an open public corridor. The rectangular floor is 30 m by 40 m, so its maximum diagonal is 50 m. There is no intervening fire separation that lengthens the smoke path or divides the floor into separate zones. We want to keep both stairs in this compact core.",
+      "gold": [
+        "3.4.2.3.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-027.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-028",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "We are building a six-storey apartment with eighteen units and two contiguous scissors stairs. The wall between the stairs is rated. The team wants a self-closing rated crossover door through that wall at every second landing to simplify access. The doors would connect the two exit stairs directly.",
+      "gold": [
+        "3.4.4.4.(3)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-028.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-029",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "In our twenty-storey, 120-unit apartment tower, a new shared laundry room would have its only doorway directly into an enclosed exit stair. There is no intervening corridor or vestibule. We propose a rated self-closing door because moving the doorway would cost a lot.",
+      "gold": [
+        "3.4.4.4.(8)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-029.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "held-out"
+    },
+    {
+      "id": "dev-030",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "A four-storey office has a 900 m2 building area. The common exit stair discharges through a hinged exterior door that we want to swing inward, against the direction people leave. This is the common building exit, not a door for a dwelling or storage unit. We would add a larger landing and clear signs.",
+      "gold": [
+        "3.4.6.12.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-030.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-031",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "Our combustible timber rainscreen has exterior-wall fire-test documentation. The proposed project is a seven-storey, 1,100 m2 office building required to use noncombustible construction, with no sprinklers anywhere. We want to use the cladding on upper storeys on the strength of the wall test alone. Please address this cladding proposal; the sprinkler design is a separate unresolved issue.",
+      "gold": [
+        "3.1.5.5.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-031.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-032",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "We manufacture fire-retardant-treated wood cladding for a six-storey sprinklered office required to be noncombustible. Our proposed wall assembly was fire-tested only with unweathered cladding. We want to omit accelerated weathering before the fire-exposure test. The assembly is not one of the prescriptive Appendix D exterior-wall assemblies; our proposal relies on the tested-wall route.",
+      "gold": [
+        "3.1.5.5.(3)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-032.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-033",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "For a fifteen-storey apartment tower with 100 dwelling units, the top occupied floor is 42 m above grade. We want ordinary alarm bells and an optional phone notification app in place of a building voice communication system. There would be no installed voice system. What must the alternative proposal address?",
+      "gold": [
+        "3.2.6.8.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-033.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "held-out"
+    },
+    {
+      "id": "dev-034",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "Our twelve-storey residential tower has eighty apartments, with the highest occupied floor 33 m above grade. The elevators are ordinary passenger elevators; none would be provided for firefighter use. The developer proposes relying on the stairs for firefighters instead. We need the application checklist for that change.",
+      "gold": [
+        "3.2.6.5.(3)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-034.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-035",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "We want to supply CLT structural walls for an encapsulated mass timber apartment building, ten storeys and sixty units. Our proposed adhesive has room-temperature bond data only. We are explicitly proposing not to meet the elevated-temperature adhesive performance requirements in the CLT product standard, using extra panel thickness as our rationale.",
+      "gold": [
+        "3.1.6.3.(3)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-035.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-036",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "An eight-storey, forty-unit encapsulated mass timber apartment design leaves two opposite-facing CLT wall surfaces exposed inside each suite. Together they are 20% of the suite perimeter-wall area and have a stated flame-spread rating of 100. All ceilings, beams and columns remain encapsulated. We want the opposite walls exposed without adding protection.",
+      "gold": [
+        "3.1.6.4.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-036.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "held-out"
+    },
+    {
+      "id": "dev-037",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "We propose decorative timber strips on all eight storeys of a forty-unit encapsulated mass timber apartment. The strips cover 20% of each exterior wall on every storey and run continuously from bottom to top. The flame-spread rating is stated as 75. The assembly has no full-scale exterior-wall test and is not one of the prescriptive Appendix D wall assemblies. We want to justify it with our own detail.",
+      "gold": [
+        "3.1.6.9.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-037.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-038",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "On a nine-storey apartment with sixty dwellings, rated CLT walls form part of the encapsulated mass timber structure. Electrical outlet boxes on opposite sides of one wall would be only 250 mm apart. We want to keep that spacing and submit a local protection detail instead of moving the boxes.",
+      "gold": [
+        "3.1.6.17.(3)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-038.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "held-out"
+    },
+    {
+      "id": "dev-039",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "Our new 2,500 m2 arena is being structurally designed under Part 4. We want roof members designed for 25% less snow load because our operations contractor promises to shovel the roof after every storm. Can the snow-removal contract be the basis for the reduced design load?",
+      "gold": [
+        "4.1.6.14.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-039.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-040",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "For the main structure of a 70 m office tower, our Part 4 wind design would use only the static procedure. The lowest natural frequency is 2 Hz, the minimum effective width is 30 m, and the site study identifies no wake buffeting or channelling. We want to treat the tower as not dynamically sensitive because its frequency is high.",
+      "gold": [
+        "4.1.7.1.(3)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-040.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-041",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "We are supplying proprietary timber load-bearing wall members for a four-storey office whose structural design is under Part 4. We propose to use only our internal resistance factors and a European wood design method instead of demonstrating conformity with the Canadian engineering-design-in-wood standard. Our catalogue capacities are the intended basis.",
+      "gold": [
+        "4.3.1.1.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-041.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-042",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "Our imported structural steel frame is for a Part 4 industrial building. The connection package is explicitly designed to Eurocode 3 only, with no conformity demonstration to the Canadian structural steel design standard. The client wants to submit the unchanged overseas package as the alternative basis.",
+      "gold": [
+        "4.3.4.1.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-042.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-043",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "We are designing a long-span floor for a municipal library under Part 4. The team proposes submitting strength and stability checks only. We would omit all serviceability-limit-state checks, including deflection and vibration, because the predicted member strength is ample. What must our alternative submission address?",
+      "gold": [
+        "4.1.3.4.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-043.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "held-out"
+    },
+    {
+      "id": "dev-044",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "For a continuous multi-span office floor designed under Part 4, our live-load analysis would load every span simultaneously and stop there. We would not check any partial-area loading patterns even where they could produce a larger effect in a member. We want to use this simplified loading method in the submission.",
+      "gold": [
+        "4.1.5.3.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-044.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-045",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "We are planning a four-storey office with foundations designed under Part 4. To save time, we propose no subsurface investigation of our site and no investigation of groundwater. We would use soil values copied from a nearby project, with no registered professional directing a site investigation. Can this be put forward as an alternative?",
+      "gold": [
+        "4.2.2.1.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-045.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-046",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "A new commercial basement foundation is being designed under Part 4. The design information says groundwater can rise high enough to put upward water pressure on the foundation. We propose leaving hydrostatic uplift out of the structural design and relying on a maintenance promise for portable pumps instead.",
+      "gold": [
+        "4.2.4.8.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-046.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-047",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "We are adding two floors to an existing one-storey warehouse. The altered building and foundation work are being designed under Part 4. The proposal is to reuse every existing footing without checking any of the applicable foundation requirements for the new building, because the old building has shown no visible settlement.",
+      "gold": [
+        "4.2.8.2.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-047.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "held-out"
+    },
+    {
+      "id": "dev-048",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "For a new two-storey detached house with a building area of 180 m2, our wall has a foil-faced exterior insulation layer between the stud cavity and the cladding. The design location has 6,500 heating degree-days. At the innermost impermeable surface, the total RSI outboard is 0.5 and inboard is 4.0. Measured dry-cup vapour permeance is 5 ng/(Pa s m2), and air leakage is 0.02 L/(s m2) at 75 Pa. There is no air space inboard of that layer, it is not on the warm face, and indoor moisture generation is ordinary. We want to keep this arrangement.",
+      "gold": [
+        "9.25.5.2.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-048.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "held-out"
+    },
+    {
+      "id": "dev-049",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "A new single-storey detached home with a building area of 220 m2 includes an indoor swimming-pool room that will generate high indoor moisture. We want the wall enclosing that room designed only with the ordinary prescriptive house-wall moisture details. We propose no Part 5 envelope design for the pool room and would justify the omission with a larger exhaust fan.",
+      "gold": [
+        "9.25.5.1.(2)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-049.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-050",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "Our proposed two-storey wood-framed detached home with a building area of 200 m2 has an 18 m clear-span structural roof member. We want to keep the design entirely within the ordinary Part 9 framing tables, without designing the framing and fastening to the Part 4 wood-design provisions. The rest of the house uses closely spaced lumber framing. What should our application address?",
+      "gold": [
+        "9.23.1.1.(2)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-050.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "dev-051",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "I am adding a basement secondary suite inside my two-storey detached house with a building area of 160 m2. The only dwellings will be the main home and that suite. Each dwelling will have interconnected smoke alarms internally, but I want no connection between the two sets, wireless or wired. I do not want an alarm in one dwelling to sound in the other.",
+      "gold": [
+        "9.10.19.5.(2)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-051.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "held-out"
+    },
+    {
+      "id": "dev-052",
+      "pool": "repo-key",
+      "scored": true,
+      "query": "For a new two-storey detached house with one basement secondary suite and a building area of 180 m2, we want 9.5 mm gypsum on both sides of the walls and below the floor framing that separate the dwellings. It is continuous and smoke-tight, but we are not offering a rated fire-separation assembly. We are proposing this thinner board in place of the thicker-board secondary-suite option.",
+      "gold": [
+        "9.10.9.16.(3)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "evals_dev/cases/dev-052.json gold.must_cite",
+      "distractors": [],
+      "label": "model-checked dev keys, not human-verified",
+      "split": "in-sample"
+    },
+    {
+      "id": "idr-001",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "manufacturer",
+      "query": "We make a new insulated sheathing panel and want it approved in Alberta so builders can nail siding straight onto it. What do I need?",
+      "gold_articles": [
+        "9.27.5.1.",
+        "9.27.5.3.",
+        "9.23.17.3."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.29.9.2.",
+        "9.27.10.1.",
+        "9.23.15.2."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": "Unc confirmed 9.23.17.3.(1) is gold for case A. Counted as gold. model-checked, not human-verified.",
+      "split": "in-sample"
+    },
+    {
+      "id": "idr-002",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "manufacturer",
+      "query": "Our panel is selling in two other provinces *(claim not verified)*. We want **approval to sell it across Alberta** and a first **pilot house** in Edmonton this spring. Builders love it because vinyl siding nails **straight into the facer**, so there's no OSB and no strapping.",
+      "gold_articles": [
+        "9.27.5.1.",
+        "9.27.5.3.",
+        "9.23.17.3."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.29.9.2.",
+        "9.27.12.1."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": "Unc confirmed 9.23.17.3.(1) is gold for case A. Counted as gold. model-checked, not human-verified.",
+      "split": "in-sample"
+    },
+    {
+      "id": "idr-003",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "manufacturer",
+      "query": "We make a recycled-plastic rainscreen strapping strip. Builders screw it through the foam board into the studs at 24 inches on centre and hang fibre-cement siding on it. Some framers want to space it at 32 inches to save material. Is our strip OK in place of wood strapping, and does the spacing matter?",
+      "gold_articles": [
+        "9.27.5.3.",
+        "9.27.5.1."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.27.5.2.",
+        "9.23.3.5."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "in-sample"
+    },
+    {
+      "id": "idr-004",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "manufacturer",
+      "query": "We sell stainless ring-shank nails for vinyl siding. On houses with 1-1/2 inch foam outside the OSB, our 2-inch nail only gets about 3/4 inch into the studs. Contractors ask whether that's enough or if they need a longer nail.",
+      "gold_articles": [
+        "9.27.5.7.",
+        "9.27.5.4.",
+        "9.27.5.5."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.23.3.4.",
+        "9.23.3.5."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "in-sample"
+    },
+    {
+      "id": "idr-005",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "manufacturer",
+      "query": "Our synthetic housewrap is sold all over the US and tested to ASTM standards, but we've never had it tested to a Canadian standard. Can Alberta builders use it behind siding?",
+      "gold_articles": [
+        "9.27.3.2.",
+        "9.27.3.3."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.25.4.1.",
+        "9.20.13.1."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "in-sample"
+    },
+    {
+      "id": "idr-006",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "manufacturer",
+      "query": "We make a hemp-fibre batt insulation for walls and attics. There's no Canadian product standard written for hemp. What do inspectors in Alberta need from us before builders can use it?",
+      "gold_articles": [
+        "9.25.2.2."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.25.2.3.",
+        "9.36.2.6.",
+        "9.10.17.10."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "in-sample"
+    },
+    {
+      "id": "idr-007",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "manufacturer",
+      "query": "We make a frameless glass railing for decks and balconies. Homeowners like the clean look at 36 inches high. Can we sell it at that height for house decks that are about 8 feet above the yard?",
+      "gold_articles": [
+        "9.8.8.3.",
+        "9.8.8.2."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.8.7.4.",
+        "9.8.8.6."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "in-sample"
+    },
+    {
+      "id": "idr-008",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "manufacturer",
+      "query": "We make insulating concrete form blocks for basements. Our new thin-core block pours a 140 mm concrete core to save concrete. Can builders use it for basement walls on houses?",
+      "gold_articles": [
+        "9.15.4.2.",
+        "9.15.4.1."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.15.3.4.",
+        "9.27.5.1."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "in-sample"
+    },
+    {
+      "id": "idr-009",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "general_contractor",
+      "query": "On a duplex we're finishing, the siding sub nailed the vinyl siding straight into the rigid foam boards on two walls instead of into strapping or studs. The inspector flagged it. Can we leave it with some kind of approval?",
+      "gold_articles": [
+        "9.27.5.1.",
+        "9.23.17.3."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.27.12.1.",
+        "9.25.2.3."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "held-out"
+    },
+    {
+      "id": "idr-010",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "general_contractor",
+      "query": "Our framer put up 1x3 strapping over the sheathing at about 32 inches apart so the cedar siding has a rain gap. Is that spacing a problem?",
+      "gold_articles": [
+        "9.27.5.3."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.27.5.2.",
+        "9.27.6.1."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "held-out"
+    },
+    {
+      "id": "idr-011",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "general_contractor",
+      "query": "Crew nailed the OSB wall sheathing at 12 inches on the panel edges and 24 in the field because the nail gun was set wrong. What's the actual requirement and do we have to renail?",
+      "gold_articles": [
+        "9.23.3.5."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.27.5.4.",
+        "9.23.3.4."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "in-sample"
+    },
+    {
+      "id": "idr-012",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "general_contractor",
+      "query": "Building a small two-storey office. The stair between floors came out with 210 mm risers because the floor got thicker. Do we have to rebuild it?",
+      "gold_articles": [
+        "9.8.4.1."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.8.4.3.",
+        "9.8.7.4."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "held-out"
+    },
+    {
+      "id": "idr-013",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "general_contractor",
+      "query": "We want to use 190 mm plain concrete block for a basement wall with about 2.4 m of backfill against it, no rebar. Is that thick enough?",
+      "gold_articles": [
+        "9.15.4.2."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.15.3.4.",
+        "9.15.4.1."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "held-out"
+    },
+    {
+      "id": "idr-014",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "general_contractor",
+      "query": "On a three-storey walk-up, the architect drew horizontal cable railings on the top-floor balconies, about 5 m above the ground. The owner likes the look. Any issue?",
+      "gold_articles": [
+        "9.8.8.6.",
+        "9.8.8.5."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.8.8.3.",
+        "9.8.7.4."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "held-out"
+    },
+    {
+      "id": "idr-015",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "homebuilder",
+      "query": "We're putting 2 inches of foil-faced foam board on the outside of our houses with taped seams. Can we skip the housewrap behind the vinyl siding?",
+      "gold_articles": [
+        "9.27.3.4.",
+        "9.27.3.3."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.25.5.1.",
+        "9.25.4.1."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "in-sample"
+    },
+    {
+      "id": "idr-016",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "homebuilder",
+      "query": "Our back-deck stairs have 8-inch risers and 9-inch treads to fit the yard. Will that pass?",
+      "gold_articles": [
+        "9.8.4.1.",
+        "9.8.4.2."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.8.4.3.",
+        "9.8.8.3."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "held-out"
+    },
+    {
+      "id": "idr-017",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "homebuilder",
+      "query": "For a modern look we want horizontal wood slats on the open side of the basement stairs, with about 4-1/2 inch gaps between slats. Is that allowed in a house?",
+      "gold_articles": [
+        "9.8.8.5."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.8.8.6.",
+        "9.8.8.3."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "in-sample"
+    },
+    {
+      "id": "idr-018",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "homebuilder",
+      "query": "To save money we only insulate the basement walls down to about 2 feet below grade. Is full-height basement insulation actually required?",
+      "gold_articles": [
+        "9.25.2.3."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.36.2.6.",
+        "9.25.2.2."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "in-sample"
+    },
+    {
+      "id": "idr-019",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "homebuilder",
+      "query": "The lot is silty and the geotech says the water table is about 300 mm below where the footings will sit. We sized the strip footings from the normal house table at 400 mm wide. OK?",
+      "gold_articles": [
+        "9.15.3.4."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.15.4.2.",
+        "9.13.2.1."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "in-sample"
+    },
+    {
+      "id": "idr-020",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "homebuilder",
+      "query": "We're switching to 3/8-inch OSB wall sheathing to cut costs and nailing vertical vinyl siding straight to it, no strapping. Any problem?",
+      "gold_articles": [
+        "9.27.5.1.",
+        "9.23.17.2."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.29.9.2.",
+        "9.27.10.1."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "in-sample"
+    },
+    {
+      "id": "idr-021",
+      "pool": "identify-regression",
+      "scored": true,
+      "role": "general_contractor",
+      "query": "Fibre-cement lap siding went up with regular bright (uncoated) nails because the coated ones were back-ordered. Do we need to pull it?",
+      "gold_articles": [
+        "9.27.5.5."
+      ],
+      "gold_level": "article",
+      "gold_source": "datanerd identify-regression.json gold_articles (codedb-checked 2nd printing); quotes not copied",
+      "distractors": [
+        "9.29.9.3.",
+        "9.20.16.1.",
+        "9.23.3.4."
+      ],
+      "label": "model-checked, not human-verified",
+      "note": null,
+      "split": "in-sample"
+    },
+    {
+      "pool": "regression",
+      "split": "in-sample",
+      "scored": false,
+      "forced_in_sample": true,
+      "label": "model-checked, not human-verified",
+      "id": "mira-sheathing-nail-siding",
+      "query": "sheathing nail siding",
+      "gold": [
+        "9.27.5.1.(2)",
+        "9.27.5.3.(3)(b)",
+        "9.23.17.3.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "Case A article-shortlist (9.27.5.1.(2), 9.27.5.3.(3)(b)) and Unc confirmation of 9.23.17.3.(1)",
+      "distractors": [
+        "9.29.9.3."
+      ],
+      "assert": "all_gold_covered_in_top5_and_distractor_absent"
+    },
+    {
+      "pool": "regression",
+      "split": "in-sample",
+      "scored": false,
+      "forced_in_sample": true,
+      "label": "model-checked, not human-verified",
+      "id": "mira-foam-insulation-sheathing",
+      "query": "foam insulation sheathing",
+      "gold": [
+        "9.27.5.1.(2)",
+        "9.27.5.3.(3)(b)",
+        "9.23.17.3.(1)"
+      ],
+      "gold_level": "provision",
+      "gold_source": "Case A article-shortlist (9.27.5.1.(2), 9.27.5.3.(3)(b)) and Unc confirmation of 9.23.17.3.(1)",
+      "distractors": [
+        "9.29.9.3."
+      ],
+      "assert": "all_gold_covered_in_top5_and_distractor_absent"
+    },
+    {
+      "pool": "regression",
+      "split": "in-sample",
+      "scored": false,
+      "forced_in_sample": true,
+      "label": "model-checked, not human-verified",
+      "id": "mira-nailbase-long",
+      "query": "We manufacture NailBase CI-50, a 50 mm rigid foam panel with a 6 mm fibre-cement facer that replaces 11 mm OSB sheathing on 2x6 walls at 400 mm o.c. Vinyl siding is nailed directly into the facer with no furring. We want approval to sell it across Alberta and to build a pilot house in Edmonton: 2-storey single-family, about 190 m2, unsprinklered, builder Birchfield Example Homes, address 0000 Example Way NW. We have our product data sheet, a US lab permeance test summary, and an unsigned draft engineer letter about nail pull-out. We have no CCMC evaluation yet, no air-leakage test, and no bracing design. Do we need an engineer to stamp anything?",
+      "gold": [
+        "9.27.5.1.(2)",
+        "9.27.5.3.(3)(b)",
+        "9.23.17.3.(1)"
+      ],
+      "gold_articles": [
+        "9.27.5.1.",
+        "9.27.5.3.",
+        "9.23.17.3."
+      ],
+      "gold_level": "provision",
+      "gold_source": "Same three provisions as the short Mira queries. Article check: at least 2 of 3 in the top 5.",
+      "distractors": [
+        "9.29.9.3."
+      ],
+      "assert": "at_least_2_of_3_articles_in_top5_and_distractor_absent"
+    },
+    {
+      "pool": "regression",
+      "split": "in-sample",
+      "scored": false,
+      "forced_in_sample": true,
+      "label": "model-checked, not human-verified",
+      "id": "reg-cladding-furring",
+      "query": "cladding fastened through exterior insulation into furring",
+      "expected": [
+        "9.27.5.1.(1)",
+        "9.27.5.1.(2)",
+        "9.27.5.3."
+      ],
+      "gold_level": "provision",
+      "gold_source": null,
+      "note": "Regression, not gold. The phrasing is not a repo key. Expected ids are the Case A sentences and the furring article named for this check.",
+      "distractors": [
+        "9.29.9.3."
+      ],
+      "assert": "cladding_sentences_and_furring_article_in_top5"
+    },
+    {
+      "pool": "regression",
+      "split": "in-sample",
+      "scored": false,
+      "forced_in_sample": true,
+      "label": "model-checked, not human-verified",
+      "id": "reg-mfr-vinyl-into-facer",
+      "query": "vertical vinyl siding, ring-shank nails @ 400 o.c. into facer, no furring",
+      "gold_source": null,
+      "note": "Manufacturer phrasing copied from the Case A wall-section note. Regression, not gold: the note is not a keyed query.",
+      "assert": null
+    },
+    {
+      "pool": "regression",
+      "split": "in-sample",
+      "scored": false,
+      "forced_in_sample": true,
+      "label": "model-checked, not human-verified",
+      "id": "reg-caseb-pex",
+      "query": "Ours are mostly PVC drain pipe and bundles of PEX, and some holes are bigger than the listing allows.",
+      "gold_source": null,
+      "note": "Case B phrasing copied from the project brief. Regression, not gold: this sentence is not a keyed query.",
+      "assert": null
+    }
+  ]
+}
