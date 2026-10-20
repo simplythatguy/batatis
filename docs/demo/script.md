@@ -102,7 +102,7 @@ The gap strip is collapsed to “N blocking · N warning” until you open **Rev
 | 4 | 0:51–1:36 | Case C | Search, Section C, ranked list, benchmark card, eval still | Code identification |
 | 5 | 1:36–2:08 | Case C | Section D, then the on-screen limit | Recommendations, then X factor |
 | 6 | 2:08–2:44 | Sample officer package | One planted package | Review |
-| 7 | 2:44–3:00 | Case on screen | Authority select, gaps still open | Usability and portability |
+| 7 | 2:44–3:00 | Case on screen | Authority select, then the SCC variance-form PDF | Usability and portability |
 
 Three example packages on `#/officer` are not built. No open PR loads Cases A–C there. Shot 6 films the one planted package that #16 already renders.
 
@@ -169,16 +169,15 @@ Say `9.9.10.1.(2)` only if that id is the row on screen.
 
 **Narration for the app frames.** “Search returns database rows only. Section C is a lookup. Read the function and objective printed there, and the intent text on screen. Batatis checks completeness. The officer decides compliance.”
 
-**1:11–1:22, ranked list still.** This list is not the search box, and it is not in this app build. Caption the still `PR #12 identify output [if merged] · not in this app build · BM25 fallback, no model`, and also `baseline order, not the 9/11 model`. This paste is not a seeded model run, so do not caption it Cached demo run or Keyword search, no AI key. The payload fields are provision, title, probability, and `committed`. On this BM25 fallback still `committed` is false, and identify does not auto-commit. Read only values printed on the still. If you have no payload, omit the still and do not say ranked.
+**1:11–1:22, ranked list still.** This list is not the search box, and it is not in this app build. Caption the still `[if merged: PR #12]`, and also `baseline order, not the 9/11 model`. This paste is not a seeded model run, so do not caption it Cached demo run or Keyword search, no AI key. The payload fields are provision, title, probability, and `committed`. On this BM25 fallback still `committed` is false, and identify does not auto-commit. Read only values printed on the still. If you have no payload, omit the still and do not say ranked.
 
-**1:22–1:29, benchmark card.** Same caption: `PR #12 identify output [if merged] · not in this app build · BM25 fallback, no model`. The card’s role line is `benchmark_acceptable_solution`. Read the provision, the explanation, and the citation if they are on the card. `9.9.10.1.(2)` is an example of that field only when the card prints it. If the card says no article was identified, read that sentence and stop. If you have no card, do not say benchmark. Do not say OSB, furring, or a millimetre thickness.
+**1:22–1:29, benchmark card.** Caption the still `[if merged: PR #12]`. The card’s role line is `benchmark_acceptable_solution`. Read the provision, the explanation, and the citation if they are on the card. `9.9.10.1.(2)` is an example of that field only when the card prints it. If the card says no article was identified, read that sentence and stop. If you have no card, do not say benchmark. Do not say OSB, furring, or a millimetre thickness.
 
-**1:29–1:36, eval still.** A full-frame still, not `#/accuracy`. Title it model-checked, not human-verified. Copy these lines and no others:
+**1:29–1:36, eval still.** A full-frame still, not `#/accuracy`. The identify line depends on PR #12: caption it `[if merged: PR #12]`. Copy these lines and no others:
 
-- `rules_plus_unknown (shipped), dev set: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction)`
+- `rules_plus_unknown 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind); model-checked, not human-verified`
 - `rules_only`, dev set: 55/60 in-sample, 1 under-flag
-- Held-out: 7/8 blind (pre-fix), 4/8 post-fix (no longer blind)
-- `c_openai_rerank_verify: top-1 9/11 and recall@5 9/11 on the 11 dev cases with a gold article (in-sample, single run, 9 cases without gold excluded); BM25 baseline 5/11; asks the applicant on 40% of cases`
+- `c_openai_rerank_verify: top-1 9/11 and recall@5 9/11 on the 11 dev cases with a gold article (in-sample, single run, 9 cases without gold excluded); BM25 baseline 5/11; asks the applicant on 40% of cases, model-checked, not human-verified`
 
 These figures are not a finding that a design complies, is safe, or is certified.
 
@@ -225,7 +224,7 @@ Hold on **Copy request**. The box starts with “Information request”, “Plan
 
 ---
 
-### Shot 7 — Authority, gaps still open (0:16)
+### Shot 7 — Authority, then the variance-form PDF (0:16)
 
 - **Clock:** 2:44–3:00
 - **Case label:** the case on screen
@@ -235,10 +234,12 @@ Record the Case C frame in step 2 of the recording order, before Reset. Record t
 
 **On-screen action.** Cut between the Describe authority select on Case C (Edmonton) and Case A (Edmonton is what you set; Calgary is the other option in the same select). The note under the select is “Nothing is sent until you pick. You can change it later.” Picking Edmonton clears **Reviewing authority missing**. The sidebar may show the raw id in lowercase, such as “Homebuilder · edmonton”.
 
-On Application, the tabs are Section A, Section B, Alternative path, and Section D. Open **Review gaps** so **Owner missing**, **Confirm storeys** on Case C, and the six “… empty” rows are visible. **Check completeness** stays disabled. The footer reads “Close N blocking gaps to check completeness”. Do not read N as a score. After a Yes, that count can jump. Do not click the button. Hold on that disabled button and the gap list. Do not describe an export, a PDF, a form title, or a route. **Download draft record** is not in this shot. It is a `.txt` file named `{id}-draft-record.txt`, with the line “Not the Safety Codes Council form. The engine did not return that PDF.”, and the button is inside the completeness dialog, which stays closed while blocking gaps remain.
+On Application, the tabs are Section A, Section B, Alternative path, and Section D. Open **Review gaps** so **Owner missing**, **Confirm storeys** on Case C, and the six “… empty” rows are visible. While those gaps are open the footer reads “Close N blocking gaps to check completeness”. Do not read N as a score.
 
-**Narration.** “Edmonton is selected, and that clears Reviewing authority missing. Calgary is the other choice in the same list. Owner is still missing, and the process fields are still empty. Check completeness stays closed.”
+Then show the **Check completeness** download. It is the engine-filled Safety Codes Council variance form PDF: the 5-page Oct 6, 2026 form plus engine-generated attachment pages (7 for Unc's 3b case; not the brief's Appendix 1). The dialog says this is not a finding that the design complies. Do not call the attachment pages the brief's Appendix 1. **Download draft record** is a separate `.txt` file, `{id}-draft-record.txt`, and only once every gap is closed. It is not this PDF, and it is not the Safety Codes Council form.
+
+**Narration.** “Edmonton is selected, and that clears Reviewing authority missing. Check completeness downloads the Safety Codes Council variance form: the five-page October 6, 2026 form, plus the engine’s attachment pages. On Unc’s 3b case those attachment pages are seven. They are not Appendix 1. The dialog says this is not a finding that the design complies.”
 
 ## If you have to shorten
 
-Drop the eval still’s `rules_only` line, then the ranked-list still, then the Calgary option in shot 7. If `rules_only` is cut, the shipped line keeps `27 unknowns sent to the applicant` and `(on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction)`. Do not drop the Not sure answers, the function and objective printed there, the benchmark card’s “read only what is printed” rule, shot 6’s “does not certify”, or the disabled Check completeness button. Do not put the refusal scene, the STANDATA split, or an export line back in.
+Drop the eval still’s `rules_only` line, then the ranked-list still, then the Calgary option in shot 7. If `rules_only` is cut, the shipped line stays `rules_plus_unknown 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind); model-checked, not human-verified`. Do not drop the Not sure answers, the function and objective printed there, the benchmark card’s “read only what is printed” rule, shot 6’s “does not certify”, or shot 7’s variance-form PDF (the 5-page Oct 6, 2026 form plus engine-generated attachment pages). Do not put the refusal scene or the STANDATA split back in.
