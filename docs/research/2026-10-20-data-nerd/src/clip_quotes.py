@@ -1,3 +1,4 @@
+# clip_originals.json is generated locally by the builders and is not committed (NRC text, over 25 words); see .gitignore
 """Clip verbatim quotes >25 words (Backy, Oct 20 2026). Run AFTER the builders.
 Map: src/clip_map.txt (index<TAB>clip), keyed to the long-quote order in /tmp-independent originals stored in src/clip_originals.json.
 Every clipped piece (split on …) is verified to be an exact substring of the original verified quote."""
