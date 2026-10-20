@@ -61,7 +61,7 @@ class Block:
                 # Removing a bracket first would make the remaining text a
                 # discontinuous span that cannot align with the PDF any more.
                 value = source_text(ln, self.source, self.page, self.page_end)
-                notes.append(SourceText(rest, remove(value.readable), value.unmatched, self.source)
+                notes.append(SourceText(rest, remove(value.readable), value.unmatched, self.source, value.uncertain_lines)
                              if isinstance(value, SourceText) else rest)
         return notes
 

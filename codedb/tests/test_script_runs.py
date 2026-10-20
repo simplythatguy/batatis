@@ -27,7 +27,9 @@ def test_p477_homogeneous_60_is_not_partly_lowered():
     ('1234567890', -2, '₁₂₃₄₅₆₇₈₉₀'),
     ('1234567890', 3, '¹²³⁴⁵⁶⁷⁸⁹⁰'),
     ('12+-34', -2, '₁₂₊₋₃₄'),
-    ('12ab34', -2, '12ab34'),  # unsupported script letters: preserve the whole run
+    ('12ab34', -2, None),  # unsupported script letters: preserve/audit the whole raw line
+    ('0.2', 3, None),
+    ('3/4', 3, None),
     ('60', 0, '60'),
 ])
 def test_synthetic_homogeneous_runs(tmp_path, monkeypatch, token, offset, expected):
@@ -50,7 +52,16 @@ def test_synthetic_homogeneous_runs(tmp_path, monkeypatch, token, offset, expect
     textnorm.page_text.cache_clear()
     try:
         value = textnorm.page_text('synthetic', 1)
-        assert value.candidates(f'{token} = average') == {f'{expected} = average'}
+        raw_line = f'{token} = average'
+        if expected is None:
+            assert value.uncertain
+            assert value.candidates(raw_line) == set()
+            source = textnorm.source_text(raw_line, 'synthetic', 1)
+            assert source.readable == str(source) == raw_line
+            assert source.unmatched == (raw_line,)
+            assert source.uncertain_lines == (raw_line,)
+        else:
+            assert value.candidates(raw_line) == {f'{expected} = average'}
     finally:
         textnorm.page_text.cache_clear()
         doc.close()

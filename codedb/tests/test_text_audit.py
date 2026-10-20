@@ -23,3 +23,10 @@ def test_defined_term_substrings_in_normal_words_are_not_glue():
     detector = Detector(['Permit means permission. Supply duct means a duct.\n'
                          'permit ted permit ted permitted permitted supply duct work ductwork ductwork'])
     assert not [x for x in detector.scan('permitted supply ductwork') if x[0] == 'glued_defined_terms']
+
+
+def test_adjacent_digit_scripts_are_flagged_without_rewriting_formulae():
+    detector = Detector([])
+    assert ('mixed_digit_scripts', '6₀') in detector.scan('6₀ = penetration resistance')
+    assert ('mixed_digit_scripts', '1²') in detector.scan('x1²')
+    assert not detector.scan('₆₀ = penetration resistance; m²; CO₂; 75 Pa')

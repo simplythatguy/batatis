@@ -17,7 +17,9 @@ from pathlib import Path
 from . import store
 
 WORD = re.compile(r"[A-Za-z]+")
-CATEGORIES = ("split_words", "glued_defined_terms", "broken_units", "hyphen_remnants")
+CATEGORIES = ("split_words", "glued_defined_terms", "broken_units", "hyphen_remnants", "mixed_digit_scripts")
+_SUPERSCRIPT_DIGITS = '⁰¹²³⁴⁵⁶⁷⁸⁹'
+_SUBSCRIPT_DIGITS = '₀₁₂₃₄₅₆₇₈₉'
 
 
 @dataclass(frozen=True)
@@ -94,6 +96,14 @@ class Detector:
             a, b = m[1].lower(), m[2].lower()
             if a+b in self.dictionary and (a not in self.dictionary or b not in self.dictionary):
                 found.add(("hyphen_remnants", m[0]))
+        # A formula can legitimately mix baselines. Flag adjacent digit styles
+        # for a geometry/source check, rather than assuming that every flag is a
+        # partial conversion. Letters such as the base in CO₂ are not digits.
+        for m in re.finditer(r'[0-9' + _SUPERSCRIPT_DIGITS + _SUBSCRIPT_DIGITS + r']{2,}', text):
+            styles = {('raised' if c in _SUPERSCRIPT_DIGITS else
+                       'lowered' if c in _SUBSCRIPT_DIGITS else 'baseline') for c in m[0]}
+            if len(styles) > 1:
+                found.add(('mixed_digit_scripts', m[0]))
         return sorted(found)
 
 
@@ -121,7 +131,8 @@ def unaligned_sources(path=None):
 
     Full source text belongs only in ignored local outputs. This is separate from
     the heuristic warnings: a formula can be unalignable without looking like a
-    broken word, and an unusual but correct word can trigger a heuristic warning.
+    broken word; unsupported script runs also keep the full raw source line. An
+    unusual but correct word can trigger a heuristic warning.
     """
     from . import intents, textnorm
     con = store.connect(path)
@@ -149,7 +160,9 @@ def unaligned_sources(path=None):
         for line in value.unmatched:
             counts[table] += 1
             issues.append({'table': table, 'id': identifier, 'pdf_pages': [first, last], 'raw_line': line})
-    return {'unreconstructed_lines': len(issues), 'by_table': dict(counts), 'lines': issues}
+            issues[-1]['uncertain_script'] = line in value.uncertain_lines
+    return {'unreconstructed_lines': len(issues), 'uncertain_script_lines': sum(r['uncertain_script'] for r in issues),
+            'by_table': dict(counts), 'lines': issues}
 
 
 def main():
