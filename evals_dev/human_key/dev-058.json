@@ -1,0 +1,16 @@
+{
+  "case_id": "dev-058",
+  "status": "unverified",
+  "persona": "homebuilder",
+  "variance_kind": "part3-fire-protection",
+  "scenario": "We are planning an eight-storey encapsulated mass timber apartment with sixty units. We want exactly 25% of each suite ceiling left as exposed CLT. We do not yet have the exposed-surface flame-spread rating or a decision about leaving some timber walls exposed too. Is a variance necessarily needed?",
+  "section_ab_required_fields": null,
+  "expected_top_articles": null,
+  "benchmark_acceptable_solution": null,
+  "engineer_needed": null,
+  "intake_action": null,
+  "verifier_name": null,
+  "date_verified": null,
+  "source_page_refs": null,
+  "notes": null
+}

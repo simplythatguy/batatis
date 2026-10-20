@@ -1,0 +1,149 @@
+{
+  "id": "scc-co-0015470-2016",
+  "title": "Building \u2013 Installation of two glazed openings in an exposed buildingface \u2013 December 2016",
+  "decision_date": "2016-12-14",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2016/Building%20-%20Installation%20of%20two%20glazed%20openings%20in%20an%20exposed%20buildingface%20-%20December%202016.pdf",
+  "applicant_type": "homebuilder",
+  "topic": "part9-spatial-separation",
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "A home builder installed two glazed windows in an exposing building face, at a limiting distance where no unprotected openings were permitted. It fitted 22-gauge steel fire shutters on the exterior and used a fire-retardant-coated wood sheathing product (Protektor board) instead of 12.7 mm exterior gypsum under vinyl siding.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "spatial separation",
+    "exposing building face",
+    "unprotected openings",
+    "fire shutters",
+    "alternative product evidence",
+    "alternative solution"
+  ],
+  "missing_info": [],
+  "edition_original": "ABC 2006",
+  "other_codes": [],
+  "text_source_kind": "ocr",
+  "label_strength": "weak",
+  "refusal": {
+    "code": "R2_insufficient",
+    "basis_type": "analogous",
+    "basis": "analogous: appeal of an s.49 order, not a variance refusal. The panel's reasoning turns on missing evidence for the proposed alternative solutions."
+  },
+  "outcome": "varied",
+  "outcome_summary": "Order varied. Interior-mounted fire shutters may be an acceptable alternative, and Protektor board may be considered if evidence is provided against the criteria in the Government of Alberta's 1 Feb 2012 Notice.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "9.10.15.4.(1)",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 9",
+      "parsed_id": "9.10.15.4.(1)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "9.10.15.5.(2)",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 9",
+      "parsed_id": "9.10.15.5.(2)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "9.10.15.3.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 9",
+      "parsed_id": "9.10.15.3.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "9.10.13.1.(1)",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 9",
+      "parsed_id": "9.10.13.1.(1)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.2.3.1.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.3.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.2.3.5.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.3.5.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.1.5.5.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.1.5.5.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "provide adequate information in an alternative solution acceptable to the authority having jurisdiction (AHJ), to allow them to consider Protektor board as an alternative to gypsum board",
+      "sentences": 1,
+      "quote_confidence": "low",
+      "kind": "excerpt",
+      "field": "refusal_reason_evidence",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2016/Building%20-%20Installation%20of%20two%20glazed%20openings%20in%20an%20exposed%20buildingface%20-%20December%202016.pdf"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": false,
+    "weak_flag": null,
+    "label_strength": null,
+    "facts": {}
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": null,
+    "engineering_reason": "",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}
