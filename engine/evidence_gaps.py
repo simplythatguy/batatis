@@ -18,7 +18,6 @@ from pydantic import BaseModel, ConfigDict
 from codedb import ids
 
 from .models import Case, EvidenceItem
-from .section_c import NOT_ATTRIBUTED_LABEL
 from .section_d import (
     ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, EvidencePlanItem,
 )
@@ -28,6 +27,31 @@ class OpenPair(BaseModel):
     model_config = ConfigDict(extra='forbid')
     function: str
     objective: str
+    function_text: str | None = None
+    objective_text: str | None = None
+
+
+def pair_words(function_text: str | None, objective_text: str | None) -> str | None:
+    """Applicant-facing wording from an attribution pair. Codes are not a substitute."""
+    parts = [part.strip() for part in (function_text, objective_text) if part and part.strip()]
+    return '; '.join(parts) if parts else None
+
+
+def list_documents(provision_id: str) -> str:
+    """Plain evidence hint. One sentence, no ladder dump and no field id."""
+    return (
+        f"List the documents you'll rely on for Sentence {provision_id}, "
+        "for example a test report, a listing, or a registered professional's opinion. "
+        "Batatis records what you list; it doesn't review it."
+    )
+
+
+def no_table_note(provision_id: str) -> str:
+    """Plain note for a sentence the objectives table does not attribute."""
+    return (
+        f"The code's objectives table has no entry for Sentence {provision_id}. "
+        "If your design relies on it, ask your designer which objective it serves."
+    )
 
 
 # Why an open evidence gap leaves the list. Listing is not a review.
@@ -149,7 +173,20 @@ def provision_in_scope(case: Case, provision_id: str) -> bool:
 
 
 def scoped_plan_items(case: Case, items: Sequence[EvidencePlanItem]) -> list[EvidencePlanItem]:
-    return [item for item in items if provision_in_scope(case, item.provision_id)]
+    """Keep in-scope items. A no-row sentence expanded from an article is not a gap.
+
+    The applicant has to confirm that sentence on its own before Section D asks about it.
+    ``related_root`` is not a table row and is not used here.
+    """
+    confirmed = set(case.provisions)
+    kept = []
+    for item in items:
+        if not provision_in_scope(case, item.provision_id):
+            continue
+        if item.attribution == 'not_attributed' and item.provision_id not in confirmed:
+            continue
+        kept.append(item)
+    return kept
 
 
 def _evidence_types(items: Sequence[EvidencePlanItem]) -> list[str]:
@@ -163,17 +200,16 @@ def _evidence_types(items: Sequence[EvidencePlanItem]) -> list[str]:
     return sorted(found, key=lambda kind: (order.index(kind) if kind in order else len(order), found.index(kind)))
 
 
-def _type_list(types: Sequence[str]) -> str:
-    return ', '.join(types) if types else 'the evidence types the responsible designer selects'
-
-
-def _missing_evidence(provision_id: str, types: Sequence[str], pairs: Sequence[OpenPair]) -> str:
-    """The completeness message names the provision and each missing evidence item."""
-    listed = _type_list(types)
-    if pairs:
-        named = ', '.join(f'{pair.function}/{pair.objective}' for pair in pairs)
-        return f'supporting evidence for {provision_id} ({named}): {listed}.'
-    return f'supporting evidence for {provision_id}: {listed}.'
+def _missing_evidence(provision_id: str, pairs: Sequence[OpenPair]) -> str:
+    """Name the sentence and the objectives-table wording. Do not print bare codes."""
+    words = []
+    for pair in pairs:
+        named = pair_words(pair.function_text, pair.objective_text)
+        if named and named not in words:
+            words.append(named)
+    if words:
+        return f'documents for Sentence {provision_id}: {"; ".join(words)}.'
+    return f'documents for Sentence {provision_id}.'
 
 
 def group_evidence_gaps(items: Sequence[EvidencePlanItem]) -> list[ProvisionEvidenceGap]:
@@ -190,32 +226,25 @@ def group_evidence_gaps(items: Sequence[EvidencePlanItem]) -> list[ProvisionEvid
             pairs: list[OpenPair] = []
             seen = set()
             for item in paired:
-                key = (item.function, item.objective)
+                key = (item.function, item.objective, item.function_text, item.objective_text)
                 if key in seen:
                     continue
                 seen.add(key)
-                pairs.append(OpenPair(function=item.function, objective=item.objective))
-            type_list = _type_list(types)
+                pairs.append(OpenPair(function=item.function, objective=item.objective,
+                                      function_text=item.function_text, objective_text=item.objective_text))
             gaps.append(ProvisionEvidenceGap(
                 provision_id=provision_id, citation=citation, pairs=pairs, evidence_types=types,
                 severity='blocking', rule='evidence', field=f'evidence.{provision_id}',
-                missing=_missing_evidence(provision_id, types, pairs),
-                fix_hint=(f'List evidence the applicant supplies for this provision. '
-                          f'{len(pairs)} objective/function pairs are on this gap. '
-                          f'Evidence types to discuss: {type_list}. '
-                          'Select appropriate evidence types with the responsible designer; '
-                          'not every ladder rung is required. Listing evidence records what was named. '
-                          'It does not assess or verify it.')))
+                missing=_missing_evidence(provision_id, pairs),
+                fix_hint=list_documents(provision_id)))
         else:
-            type_list = _type_list(types)
+            unattributed = any(item.attribution == 'not_attributed' for item in group)
+            hint = no_table_note(provision_id) if unattributed else group[0].performance_issue
             gaps.append(ProvisionEvidenceGap(
                 provision_id=provision_id, citation=citation, pairs=[], evidence_types=types,
-                severity='warning', rule='evidence_scope', field=f'evidence.{provision_id}.scope',
-                missing=_missing_evidence(provision_id, types, ()),
-                fix_hint=(f'{NOT_ATTRIBUTED_LABEL}. '
-                          f'Evidence types to discuss: {type_list}. '
-                          'No objective or function is on this gap. '
-                          'No objective or function is inferred.')))
+                severity='warning', rule='evidence_scope', field=f'evidence.{provision_id}',
+                missing=_missing_evidence(provision_id, ()),
+                fix_hint=hint))
     return gaps
 
 

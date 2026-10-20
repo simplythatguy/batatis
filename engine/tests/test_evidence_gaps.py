@@ -1,5 +1,5 @@
 """Evidence gaps are one per provision, and applicant evidence closes the ones it names."""
-from engine.evidence_gaps import evidence_covers_item, group_evidence_gaps, uncovered_items
+from engine.evidence_gaps import evidence_covers_item, group_evidence_gaps, list_documents, uncovered_items
 from engine.models import EvidenceItem
 from engine.section_d import EvidencePlanItem, SectionDPlan
 
@@ -53,14 +53,32 @@ def test_file_backed_plan_status_stays_covered_without_an_evidence_item():
 def test_missing_objective_is_one_warning_and_does_not_invent_a_pair():
     blank = EvidencePlanItem(
         id='scope', provision_id='9.99.1.3.(1)', citation='synthetic citation',
-        attribution_status='no row in the attribution table', objective=None, function=None,
-        performance_issue='synthetic issue', recommended_types=("manufacturer's literature",))
+        attribution_status='no row in the attribution table', attribution='not_attributed',
+        objective=None, function=None, performance_issue='synthetic issue',
+        recommended_types=("manufacturer's literature",))
     [gap] = group_evidence_gaps([blank])
     assert gap.severity == 'warning' and gap.pairs == [] and gap.rule == 'evidence_scope'
     assert gap.evidence_types == ["manufacturer's literature"]
-    assert gap.missing == "supporting evidence for 9.99.1.3.(1): manufacturer's literature."
-    assert "manufacturer's literature" in gap.fix_hint
-    assert 'inferred' in gap.fix_hint
+    assert gap.fix_hint == (
+        "The code's objectives table has no entry for Sentence 9.99.1.3.(1). "
+        "If your design relies on it, ask your designer which objective it serves.")
+    assert 'F' not in gap.fix_hint and 'inferred' not in gap.fix_hint
+
+
+def test_gap_text_uses_pair_wording_and_not_bare_codes():
+    named = EvidencePlanItem(
+        id='words', provision_id='3.1.9.1.(1)', citation='synthetic citation',
+        attribution_status='direct', objective='OS1.2', function='F03',
+        function_text='synthetic function wording', objective_text='synthetic objective wording',
+        performance_issue='synthetic issue', recommended_types=("manufacturer's literature",))
+    [gap] = group_evidence_gaps([named])
+    assert gap.missing == ('documents for Sentence 3.1.9.1.(1): '
+                           'synthetic function wording; synthetic objective wording.')
+    assert gap.fix_hint == list_documents('3.1.9.1.(1)')
+    assert 'F03-OS1.2' not in gap.missing and 'F03/OS1.2' not in gap.missing
+    assert 'F03-OS1.2' not in gap.fix_hint and 'F03/OS1.2' not in gap.fix_hint
+    assert gap.pairs[0].function_text == 'synthetic function wording'
+    assert gap.pairs[0].objective_text == 'synthetic objective wording'
 
 
 def test_plan_shape_round_trip_is_stable():

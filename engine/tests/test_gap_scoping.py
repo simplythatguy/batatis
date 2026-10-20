@@ -333,10 +333,11 @@ def test_unlabelled_article_keeps_sentence_evidence_gaps(expanding_client):
     case = _unlabelled(store, _ExpandingCodes(), _ARTICLE)
     evidence = _evidence(http.get(f'/cases/{case.id}/gaps').json())
     by_id = {gap['provision_id']: gap for gap in evidence}
-    assert set(by_id) == {_SENTENCE_DIRECT, _SENTENCE_NONE}
+    # A no-row sentence expanded from the article is not a Section D gap.
+    assert set(by_id) == {_SENTENCE_DIRECT}
     assert by_id[_SENTENCE_DIRECT]['severity'] == 'blocking'
     assert by_id[_SENTENCE_DIRECT]['field'] == f'evidence.{_SENTENCE_DIRECT}'
-    assert by_id[_SENTENCE_NONE]['severity'] == 'warning'
+    assert _SENTENCE_NONE not in by_id
 
 
 def test_unlabelled_clause_level_sentence_keeps_the_clause_gap(expanding_client):

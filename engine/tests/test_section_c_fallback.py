@@ -1,4 +1,6 @@
 """Section C pairs come only from codedb attribution_status. None stays empty."""
+import re
+import sqlite3
 from contextlib import closing
 
 import pytest
@@ -7,7 +9,7 @@ from codedb import store
 from codedb.tests.mini_db import build
 from engine.codes import Codes
 from engine.completeness import check_completeness
-from engine.evidence_gaps import group_evidence_gaps
+from engine.evidence_gaps import group_evidence_gaps, list_documents, no_table_note
 from engine.models import Case, Jurisdiction
 from engine.professional import ProfessionalResult
 from engine.section_c import NOT_ATTRIBUTED, section_c_rows
@@ -93,13 +95,15 @@ def test_not_determined_sentence_states_that_and_does_not_copy_the_article(codes
     assert row.intents[0].objective is None
     plan = section_d_plan(Case(provisions=['9.23.17.3.(1)']), codes)
     assert plan.items and all(item.objective is None and item.function is None for item in plan.items)
+    note = ("The code's objectives table has no entry for Sentence 9.23.17.3.(1). "
+            "If your design relies on it, ask your designer which objective it serves.")
+    assert note in plan.notices
     [gap] = group_evidence_gaps(plan.items)
     assert gap.pairs == []
     assert gap.evidence_types == list(plan.items[0].recommended_types)
-    text = gap.fix_hint
-    assert 'lookup not available' in text
-    assert 'F99' not in text and 'OS9.9' not in text
-    assert "manufacturer's literature" in text
+    assert gap.fix_hint == note
+    assert 'F99' not in gap.fix_hint and 'OS9.9' not in gap.fix_hint
+    assert 'related_root' not in gap.fix_hint
 
 
 CONTROL_PAIRS = (
@@ -184,10 +188,108 @@ def test_adding_3_1_9_4_7_names_each_new_blocking_gap(codes, monkeypatch):
     for gap in new:
         assert gap.provision_id == '3.1.9.4.(7)'
         assert '3.1.9.4.(7)' in gap.message
-        assert 'F03/OS1.2' in gap.message
+        assert "List the documents you'll rely on for Sentence 3.1.9.4.(7)" in gap.fix_hint
+        assert "doesn't review it" in gap.fix_hint
+        assert 'F03/OS1.2' not in gap.message and 'F03-OS1.2' not in gap.fix_hint
         assert gap.evidence_types
-        for kind in gap.evidence_types:
-            assert kind in gap.message
+
+
+_FIELD_ID = re.compile(
+    r'(?:evidence|section_c|provision_role|process)\.[A-Za-z0-9_(]|'
+    r'\b(?:file_ref|related_root|related_root_method|attribution_status|function_text|objective_text)\b')
+
+
+def _quiet(monkeypatch):
+    monkeypatch.setattr('engine.completeness.validate_text', lambda *args, **kwargs: {'errors': []})
+    monkeypatch.setattr('engine.completeness.process_fields', lambda case, codes: [])
+    monkeypatch.setattr(
+        'engine.completeness.professional_involvement',
+        lambda case, codes: ProfessionalResult(required='no', general_required='no', reasons=[], questions=[]))
+
+
+def _filled(provisions, codes):
+    return Case(
+        provisions=provisions,
+        section_c=section_c_rows(provisions, codes),
+        jurisdiction=Jurisdiction(id='alberta-other', name='Synthetic AHJ'),
+        facts=[fact(name, 'synthetic') for name in (
+            'owner_name', 'application_date', 'civic_address', 'legal_description',
+            'representative', 'mailing_address', 'alternative_description', 'scope')])
+
+
+def _evidence(case, codes):
+    return [gap for gap in check_completeness(case, codes) if gap.id.startswith('evidence')]
+
+
+def _visible(gaps, notices):
+    texts = [gap.message for gap in gaps] + [gap.fix_hint for gap in gaps] + list(notices)
+    return texts
+
+
+def test_article_3_1_9_1_gaps_skip_sentences_with_no_table_row(codes, monkeypatch):
+    """Confirming the article, with no roles, gaps sentences 1, 2, 3, 6 and 7 only."""
+    _quiet(monkeypatch)
+    with sqlite3.connect(codes.db_path) as con:
+        con.executemany(
+            'INSERT INTO definitions VALUES (?,?,?,?,?,?,?)',
+            [('NBC-AE', 'F03', 'function', 'synthetic function wording', 'synthetic', None, 1),
+             ('NBC-AE', 'OS1.2', 'objective', 'synthetic objective wording', 'synthetic', None, 1)])
+    case = _filled(['3.1.9.1.'], codes)
+    assert {row.provision_id for row in case.section_c} >= {
+        '3.1.9.1.(1)', '3.1.9.1.(2)', '3.1.9.1.(3)', '3.1.9.1.(4)',
+        '3.1.9.1.(5)', '3.1.9.1.(6)', '3.1.9.1.(7)'}
+    plan = section_d_plan(case, codes)
+    assert {item.provision_id for item in plan.items} == {
+        '3.1.9.1.(1)', '3.1.9.1.(2)', '3.1.9.1.(3)', '3.1.9.1.(6)', '3.1.9.1.(7)'}
+    assert not any('3.1.9.1.(4)' in notice or '3.1.9.1.(5)' in notice for notice in plan.notices)
+    gaps = _evidence(case, codes)
+    assert [gap.provision_id for gap in gaps] == [
+        '3.1.9.1.(1)', '3.1.9.1.(2)', '3.1.9.1.(3)', '3.1.9.1.(6)', '3.1.9.1.(7)']
+    assert all(gap.severity == 'blocking' and gap.priority for gap in gaps)
+    assert [gap.fix_hint for gap in gaps] == [list_documents(gap.provision_id) for gap in gaps]
+    lead = next(gap for gap in gaps if gap.provision_id == '3.1.9.1.(1)')
+    assert 'synthetic function wording' in lead.message
+    assert 'synthetic objective wording' in lead.message
+    assert 'F03-OS1.2' not in lead.message and 'F03/OS1.2' not in lead.message
+    assert 'F03-OS1.2' not in lead.fix_hint and 'F03/OS1.2' not in lead.fix_hint
+    for text in _visible(gaps, plan.notices):
+        assert _FIELD_ID.search(text) is None
+    for item in plan.items:
+        assert _FIELD_ID.search(item.performance_issue) is None
+
+
+def test_confirmed_sentence_with_no_table_row_uses_the_plain_note(codes, monkeypatch):
+    """A no-row sentence the applicant confirmed on its own gets the plain note, not a related root."""
+    _quiet(monkeypatch)
+    pid = '3.1.9.1.(4)'
+    case = _filled([pid], codes)
+    plan = section_d_plan(case, codes)
+    note = no_table_note(pid)
+    assert note in plan.notices
+    [gap] = _evidence(case, codes)
+    assert gap.provision_id == pid
+    assert gap.severity == 'warning'
+    assert gap.message == note and gap.fix_hint == note
+    assert '3.1.9.1.(1)' not in gap.message
+    for text in _visible([gap], plan.notices):
+        assert _FIELD_ID.search(text) is None
+
+    root = '9.8.8.1.(4)'
+    exception = '9.8.8.1.(5)'
+    article = _filled(['9.8.8.1.'], codes)
+    article_plan = section_d_plan(article, codes)
+    assert {item.provision_id for item in article_plan.items} == {root}
+    assert exception not in {gap.provision_id for gap in _evidence(article, codes)}
+    assert not any(exception in notice for notice in article_plan.notices)
+    alone = _filled([exception], codes)
+    alone_plan = section_d_plan(alone, codes)
+    exception_note = no_table_note(exception)
+    assert exception_note in alone_plan.notices
+    [exception_gap] = _evidence(alone, codes)
+    assert exception_gap.message == exception_note
+    assert root not in exception_gap.message and root not in exception_gap.fix_hint
+    for text in _visible([exception_gap], alone_plan.notices):
+        assert _FIELD_ID.search(text) is None
 
 
 def test_every_none_status_returns_empty_pairs(codes):

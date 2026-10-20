@@ -58,15 +58,22 @@ def build(path) -> None:
     status('3.1.9.4.(7)', 'direct')
 
     prov('B', '3.1.9.1.', 'article')
-    prov('B', '3.1.9.1.(1)', 'sentence', '3.1.9.1.')
-    prov('B', '3.1.9.1.(4)', 'sentence', '3.1.9.1.')
-    # Table 3.10.1.1., PDF p.323. Positive control beside the unattributed (4).
+    # Shaped like Table 3.10.1.1.: rows for sentences 1, 2, 3, 6 and 7.
+    # Sentences (4) and (5) are the sprinkler and fire-damper exemptions and have no row.
+    # Sibling pairs are fixture stand-ins so those sentences count as having a row.
+    # They are not a claim about the printed brackets. Sentence (1) keeps the real control.
+    for sentence in ('1', '2', '3', '4', '5', '6', '7'):
+        prov('B', f'3.1.9.1.({sentence})', 'sentence', '3.1.9.1.')
     for seq, (function, objective) in enumerate(
             (('F03', 'OS1.2'), ('F04', 'OS1.3'), ('F03', 'OP1.2'), ('F04', 'OP1.3')), start=1):
         attr('3.1.9.1.(1)', function, objective, seq, page=323, table='Table 3.10.1.1.')
     status('3.1.9.1.(1)', 'direct')
+    for sentence in ('2', '3', '6', '7'):
+        attr(f'3.1.9.1.({sentence})', 'F03', 'OS1.2', table='Table synthetic')
+        status(f'3.1.9.1.({sentence})', 'direct')
     # Codedb attribution_status for (4) is none. The (1) pairs are not copied onto it.
     status('3.1.9.1.(4)', 'none')
+    status('3.1.9.1.(5)', 'none')
 
     prov('B', '9.25.5.1.', 'article')
     prov('B', '9.25.5.1.(1)', 'sentence', '9.25.5.1.')

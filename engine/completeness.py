@@ -252,9 +252,13 @@ def check_completeness(case: Case, codes: Codes, *,
         verified = case.model_copy(update={'provisions': list(expected)})
         open_items = scoped_plan_items(case, uncovered_items(section_d_plan(verified, codes, docs).items, case.evidence))
         for spec in group_evidence_gaps(open_items):
+            if spec.rule == 'evidence_scope':
+                message = spec.fix_hint
+            else:
+                message = f'Your application appears to be missing {spec.missing}'
             gaps.append(Gap(
                 id=f'{spec.rule}:{spec.provision_id}', severity=spec.severity, section='D', field=spec.field,
-                message=f'Your application appears to be missing {spec.missing}', fix_hint=spec.fix_hint,
+                message=message, fix_hint=spec.fix_hint,
                 citation=spec.citation, provision_id=spec.provision_id, pairs=list(spec.pairs),
                 evidence_types=list(spec.evidence_types)))
     for provision_id in not_my_role_ids(case):

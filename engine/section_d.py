@@ -14,7 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from .codes import Codes
 from .models import AttributionStatus, Case, Source
 from .process_fields import alternative_path, confirmed_value, latest_fact
-from .section_c import section_c_rows
+from .section_c import NOT_ATTRIBUTED, section_c_rows
 
 EvidenceType = Literal["manufacturer's literature", 'existing STANDATA variance', 'ISO 17025 test report',
                        'evaluation', 'evaluation + testing', 'qualification', 'ISO 17065 certification',
@@ -52,8 +52,11 @@ class EvidencePlanItem(BaseModel):
     citation: str
     attribution_status: AttributionStatus
     attributed_via: str | None = None
+    attribution: Literal['not_attributed'] | None = None
     objective: str | None
     function: str | None
+    function_text: str | None = None
+    objective_text: str | None = None
     bracket: str | None = None
     clauses: tuple[str, ...] = ()
     application_note: str | None = None
@@ -118,13 +121,21 @@ def section_d_plan(case: Case, codes: Codes, documents: list[SupportingDocument]
                'The responsible designer must assess scope, code edition, installation differences and limitations.']
     if not rows:
         notices.append('Confirm the benchmark provisions before preparing the Section D evidence plan.')
+    from .evidence_gaps import list_documents, no_table_note, pair_words
+
+    confirmed = set(case.provisions)
     items: list[EvidencePlanItem] = []
     seen = set()
     for row in rows:
+        # An article expands to every sentence. A sentence with no objectives-table row
+        # is not a Section D item unless the applicant confirmed that sentence itself.
+        no_table = not row.pairs and row.attribution == NOT_ATTRIBUTED
+        if no_table and row.provision_id not in confirmed:
+            continue
         pairs = row.pairs or [None]
-        if not row.pairs:
-            notices.append(f'{row.provision_id}: no row in the attribution table. Identify the applicable performance '
-                           'benchmark with the responsible designer; no objective/function is inferred.')
+        if no_table:
+            note = no_table_note(row.provision_id)
+            notices.append(note)
         for pair in pairs:
             key = (row.provision_id, pair.function if pair else None, pair.objective if pair else None,
                    pair.bracket if pair else None, tuple(pair.clauses) if pair else (), pair.application_note if pair else None)
@@ -133,17 +144,23 @@ def section_d_plan(case: Case, codes: Codes, documents: list[SupportingDocument]
             seen.add(key)
             eid = 'ev_' + hashlib.sha256(repr(key).encode()).hexdigest()[:16]
             attached = tuple(d for d in documents if eid in d.item_ids)
-            issue = (f'Provide a comparison with the acceptable-solution performance for {row.provision_id}. '
-                     f'Address {pair.function}: {pair.function_text or pair.function}; '
-                     f'{pair.objective}: {pair.objective_text or pair.objective}. '
-                     'Identify the proposed configuration, comparison method, supporting report passages, differences and limits.'
-                     if pair else 'The attribution table has no row for this provision. Ask the responsible designer '
-                     'to identify the applicable benchmark before selecting performance evidence.')
-            if pair and pair.application_note:
-                issue += f' Attribution condition: {pair.application_note}'
+            if no_table:
+                issue = no_table_note(row.provision_id)
+            elif pair is None:
+                issue = row.attribution_label or list_documents(row.provision_id)
+            else:
+                words = pair_words(pair.function_text, pair.objective_text)
+                issue = list_documents(row.provision_id)
+                if words:
+                    issue += f' The objectives table describes this as: {words}.'
+                if pair.application_note:
+                    issue += f' This applies where: {pair.application_note}'
             items.append(EvidencePlanItem(id=eid, provision_id=row.provision_id, citation=row.citation,
                 attribution_status=row.attribution_status, attributed_via=row.attributed_via,
+                attribution=row.attribution,
                 objective=pair.objective if pair else None, function=pair.function if pair else None,
+                function_text=pair.function_text if pair else None,
+                objective_text=pair.objective_text if pair else None,
                 bracket=pair.bracket if pair else None, clauses=tuple(pair.clauses) if pair else (),
                 application_note=pair.application_note if pair else None, performance_issue=issue,
                 recommended_types=recommended, responsible_party='; '.join(dict.fromkeys(

@@ -30,7 +30,7 @@ def test_unconfirmed_or_forged_section_c_cannot_generate_evidence_claims():
 def test_absent_attribution_stays_absent_and_clauses_keep_conditions():
     plan = section_d_plan(Case(provisions=['9.10.14.2.(1)', '3.1.4.2.(1)(a)']), Codes())
     absent = next(e for e in plan.items if e.provision_id == '9.10.14.2.(1)')
-    assert absent.objective is absent.function is None and 'no row' in absent.performance_issue
+    assert absent.objective is absent.function is None and 'no entry' in absent.performance_issue
     inherited = [e for e in plan.items if e.provision_id.endswith('(a)')]
     assert inherited and all(e.clauses == () and e.attributed_via == '3.1.4.2.(1)' for e in inherited)
 
