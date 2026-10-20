@@ -65,6 +65,7 @@ export interface Gap {
   field: string;
   id: string;
   message: string;
+  routed_to: "officer" | "professional" | "applicant" | null;
   section: "A" | "B" | "C" | "D" | "process";
   severity: "blocking" | "warning";
 }
@@ -120,7 +121,7 @@ export interface Source {
   page: number | null;
   quote: string | null;
   ref: string;
-  type: "code" | "file" | "user_text" | "drawing" | "user_click";
+  type: "code" | "file" | "user_text" | "drawing" | "user_click" | "officer" | "professional";
 }
 
 export interface SourceInput {
@@ -128,5 +129,5 @@ export interface SourceInput {
   page?: number | null;
   quote?: string | null;
   ref: string;
-  type: "code" | "file" | "user_text" | "drawing" | "user_click";
+  type: "code" | "file" | "user_text" | "drawing" | "user_click" | "officer" | "professional";
 }

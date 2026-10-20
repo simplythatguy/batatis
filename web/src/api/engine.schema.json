@@ -466,6 +466,23 @@
           "title": "Message",
           "type": "string"
         },
+        "routed_to": {
+          "anyOf": [
+            {
+              "enum": [
+                "officer",
+                "professional",
+                "applicant"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Routed To"
+        },
         "section": {
           "enum": [
             "A",
@@ -492,7 +509,8 @@
         "section",
         "field",
         "message",
-        "severity"
+        "severity",
+        "routed_to"
       ],
       "title": "Gap",
       "type": "object"
@@ -847,7 +865,9 @@
             "file",
             "user_text",
             "drawing",
-            "user_click"
+            "user_click",
+            "officer",
+            "professional"
           ],
           "title": "Type",
           "type": "string"
@@ -927,7 +947,9 @@
             "file",
             "user_text",
             "drawing",
-            "user_click"
+            "user_click",
+            "officer",
+            "professional"
           ],
           "title": "Type",
           "type": "string"

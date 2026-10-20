@@ -1,6 +1,6 @@
 # API contract
 
-Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind). (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction) Part 4 on text-only cases is derived from stated facts. A wood-frame building inside Part 9 with no Part 4 trigger is part4_design false, so the screen can answer no. On this dev set (model-checked, in-sample) the shipped screen still emits 0 no labels.
+Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind). (on the 60 text-only dev cases it answered only yes or ask, 0 no, so 0 under-flags is partly by design; since 4425089 it can answer no when stated facts clear every trigger) Part 4 on text-only cases is derived from stated facts. A wood-frame building inside Part 9 with no Part 4 trigger is part4_design false, so the screen can answer no. On this dev set (model-checked, in-sample) the shipped screen still emits 0 no labels.
 
 These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 
@@ -10,8 +10,8 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | --- | --- |
 | `POST /cases` | `201` Case. Body is optional: `title`, `jurisdiction` (`id`, `name`, `authority`). |
 | `GET /cases/{case_id}` | Case, or `404` with detail `case not found`. |
-| `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. |
-| `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`. |
+| `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. There is no `PATCH /cases/{case_id}/facts`. A `confirmed` status on `user_text` or `user_click` stays applicant-sourced. |
+| `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`, `routed_to` (`officer`, `professional`, `applicant`, or null). |
 | `GET /code/search` | Query `q`, `division` (`A` `B` or `C`, default `B`), `limit` (1–100, default 20). Hits as returned: `id`, `division`, `level`, `article_title`, `title`, `text`, `citation`. |
 | `GET /code/{provision_id}` | Query `division` optional. The codedb provision record, or `404` detail `provision not found`. `400` when the id is invalid or the division is ambiguous. |
 | `POST /section-c` | Body `{ "provisions": ["…"] }`. `SectionCRow` list. `404` when a provision is missing from codedb. `400` on an invalid id. |
@@ -26,7 +26,7 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 
 A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
 
-A fact's `source.type` is `code`, `file`, `user_text`, `drawing`, or `user_click`.
+A fact's `source.type` is `code`, `file`, `user_text`, `drawing`, `user_click`, `officer`, or `professional`. `officer` and `professional` are authority sources. `user_text`, `user_click`, and `drawing` are applicant sources. `confirmed` does not change the source. Only an `officer`, `professional`, or `code` source can produce professional-screen `no`.
 
 Gap `severity` is `blocking` or `warning`.
 
@@ -58,7 +58,7 @@ The fixed 404 detail strings are `case not found`, `provision not found`, and `e
 
 `required` and `general_required` are `yes`, `no`, or `depends`. `depends` means a deciding fact is missing. That route does not return `true`, `false`, or `"unknown"`.
 
-`involvement` is `professional_involved`, `not_required`, or `unresolved`. An alternative-solution case never counts `prescriptive_route_confirmed` as yes. Reserved professional judgement yes, plus an applicant-confirmed engineer or architect (normalised role match, for example `R. Singh, P.Eng.`, and a registration or seal number), resolves `involvement` to `professional_involved`. That resolution is not `not_required`. While `involvement` is `unresolved`, `missing_facts` names the facts still needed, and the completeness gap `professional:professional_requirement` repeats those names.
+`involvement` is `professional_involved`, `not_required`, or `unresolved`. An alternative-solution case never counts `prescriptive_route_confirmed` as yes. A Yes on that route is a contradiction and clears nothing. Reserved professional judgement, professional scope, authority-requires-professional, and special-safety answers whose only source is the applicant stay unresolved. `professional_involved` is reached only when those answers come from an `officer`, `professional`, or `code` source and the applicant has confirmed an engineer or architect (normalised role match, for example `R. Singh, P.Eng.`, and a registration or seal number). That resolution is not `not_required`. If any Yes/No input to the screen is applicant-sourced, including a user-confirmed fact, the screen does not return `no`; it returns `depends`. The completeness gap is then exactly `Routed to the officer: whether a registered professional is required`, `routed_to` `officer`, severity `blocking`. That gap blocks the official PDF. A draft export stays allowed. `questions` remains a list of strings. `prompts` repeats each question with `help` (what Yes means and what No means) and `not_sure` (`Not sure (the officer decides)`). A Not sure answer is an open item routed to the officer.
 
 The issues route maps the same screen: `yes` → `true`, `no` → `false`, `depends` → `"unknown"`. `"unknown"` requires a question. `depends` and `"unknown"` are not the same token.
 
@@ -102,8 +102,9 @@ An empty list is not returned for a case with no confirmed benchmark. That case 
 | `recommended_types` | string[] | Same `EvidenceType` values as a Section D plan item, in ladder order. The field name matches `engine/section_d.py`. |
 | `practice_of_engineering` | object | Whether the stated facts indicate practice of engineering. |
 | `empty_process_fields` | object[] | Required alternative-path process fields that still have no confirmed applicant answer. Not evidence types. |
-| `human_review` | object[] | `{trigger_id, who, why, cite}`. Each row is a codedb-only trigger. Mixed and source-pdf-only triggers are left off. Not a sign-off or compliance determination. |
+| `human_review` | object[] | `{trigger_id, who, why, cite, source, act, quote}`. `source` is `codedb` or `statute`. Not a sign-off or compliance determination. |
 | `status` | string | `open`, `evidence_listed`, or `needs_professional`. This is the issues enum. The plan route uses `not provided` or `provided`. Not a sign-off or compliance determination. |
+| `routed_to` | string or null | `officer`, `professional`, or `applicant`. An unknown flag from an applicant answer or from Not sure is `officer`. `needs_professional` is `professional`. |
 
 `empty_process_fields[]`:
 
@@ -125,6 +126,8 @@ Process fields are required on the alternative path. They are not rungs of the e
 | `citation` | string or null | That rule's citation from the code database. Omitted when the rule does not resolve. The rule id is one `engine/professional.py` already passes to its screen. |
 | `reason` | string | Recommendation tied to the rule. |
 | `question` | string or null | Required when `value` is `"unknown"`: the deciding question, not a generic stand-in unless every specific question was unusable. When `value` is `true`, the question asks the applicant for the registered professional's name, discipline (engineer or architect), and APEGA or AAA registration number. A seal the applicant confirms can stand in for the number. The service does not fill those fields. |
+| `prompts` | object[] | Each asked question: `text`, `help`, `not_sure`. `help` says what Yes and No mean. `not_sure` is `Not sure (the officer decides)`. |
+| `routed_to` | string or null | `officer`, `professional`, or `applicant`, same as the issue. |
 
 Confirmed `professional.span_m` (or `span_m`) above 12.20 m is recorded as Part 4 design. This span handoff came from development case dev-050. The cited rule is Div C 2.4.1.2.(1), the same provision `engine/professional.py` already uses for Part 4 design. No other provision id is added for the span.
 
@@ -138,7 +141,9 @@ Confirmed `professional.span_m` (or `span_m`) above 12.20 m is recorded as Part 
 
 The UI does not read the old issue status `addressed`, so that token is not accepted as an alias. Plan-item `not provided` and `provided` are also not a sign-off or compliance determination. The issues route does not write the case and does not fill the professional's name, discipline, or registration number.
 
-`human_review` is routing, not a determination. Code `cite` values are copied from the code database; a provision that does not resolve is left off the list. Only triggers with `verification_class` `codedb-only` are emitted (21 of 36). The 7 mixed triggers and the 8 source-pdf-only triggers are left off, including `HR-02`, `HR-08`, `HR-10`, `HR-16`, `HR-20`, `HR-21`, `HR-22`, `HR-30`, and `HR-43`. There is no Table 2.4.2.1. A Division B `3.8` provision routes to the Provincial Barrier-Free Administrator or the Provincial Building Administrator (Div C 2.2.1.4.(1)). `requests_interpretation` routes to the Provincial Building Administrator (Div C 2.2.1.3.(1)). A dimensional difference of not more than 2% stays with the authority having jurisdiction (Div C 2.2.2.3.(1)). `total_unit_count` includes suites. Above 4, the practice flag is yes and cites Div C 2.4.1.1.(5), the codedb authentication sentence. That yes does not add a source-pdf routing row. An unsettled gross area is medium confidence: the flag is unknown and asks. It does not answer no. `gross_area_per_floor_m2` and `total_unit_count` are confirmed facts. The code screen still uses building area and principal dwelling units.
+`human_review` is routing, not a determination. Every row has `source`: `codedb` or `statute`. Code `cite` values are copied from the code database; a provision that does not resolve is left off the list. Triggers with `verification_class` `codedb-only` are emitted with `source` `codedb` (21 of 36). Mixed code triggers stay off, including `HR-02`, `HR-08`, `HR-10`, `HR-16`, `HR-20`, and `HR-43`. There is no Table 2.4.2.1. A Division B `3.8` provision routes to the Provincial Barrier-Free Administrator or the Provincial Building Administrator (Div C 2.2.1.4.(1)). `requests_interpretation` routes to the Provincial Building Administrator (Div C 2.2.1.3.(1)). A dimensional difference of not more than 2% stays with the authority having jurisdiction (Div C 2.2.2.3.(1)). Statute rows are emitted only for a pinpoint confirmed from the Act. `HR-21` dwelling units cite `EGPA s.2(7)(b)(ii)`. `HR-22` cites `Architects Act s.2(6)(b)(ii)`. Their `why` is `counts dwelling units (4 or less); whether a suite counts is for the officer`. `EGPA s.2(7)(a)` is emitted only for assembly or institutional occupancy. Other occupancies get no Act gross-area row. `HR-30` cites `Safety Codes Act s.38(1)`. A statute row carries `act` (full name, RSA chapter, current-as-of date) and a verbatim `quote`. `total_unit_count` includes suites. Above 4, the practice flag can be yes and cites Div C 2.4.1.1.(5), the codedb authentication sentence. An unsettled gross area is medium confidence: the flag is unknown and asks. It does not answer no. `gross_area_per_floor_m2` and `total_unit_count` are confirmed facts. The code screen still uses building area and principal dwelling units.
+
+The per-variant table is `python3 -m engine.section_d_flag_eval --codedb PATH`. Without a readable codedb the script prints `numbers: not final`. With one, it also prints `citation_resolution: resolved/total`. The README placeholder for that run is: (on the 60 text-only dev cases it answered only yes or ask, 0 no, so 0 under-flags is partly by design; since 4425089 it can answer no when stated facts clear every trigger).
 
 ### Evidence-type order
 

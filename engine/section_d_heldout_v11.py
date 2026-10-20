@@ -21,7 +21,7 @@ from .section_d_flag_eval import VARIANTS, _agreement_cell, _count_cell, load_co
 SECTION = 'Held-out v1.1: first run, frozen rules, retrieval off'
 INTERPRETATION = (
     'the shipped screen asks rather than says no on most BCV cases, whose no labels come from silence; '
-    '0 under-flags (on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction); '
+    '0 under-flags (on the 60 text-only dev cases it answered only yes or ask, 0 no, so 0 under-flags is partly by design; since 4425089 it can answer no when stated facts clear every trigger); '
     'low agreement here reflects asking, not wrong answers. '
     'Weak labels, internal, not judge-facing.'
 )

@@ -34,22 +34,24 @@ Gold `depends` matches system `unknown`. Under-flag is gold yes and system no. O
 no and system yes. A case is skipped when codedb (or the rule lookup standing in for it) cannot
 resolve a provision the screen asks for.
 
-(on text-only cases it answers only yes or ask, never no, so 0 under-flags holds by construction)
+(on the 60 text-only dev cases it answered only yes or ask, 0 no, so 0 under-flags is partly by design; since 4425089 it can answer no when stated facts clear every trigger)
 
 Part 4 on text-only cases is derived from stated facts. A wood-frame building inside Part 9 with no Part 4 trigger is part4_design false, so the screen can answer no. On this dev set (model-checked, in-sample) the shipped screen still emits 0 no labels.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import math
 import re
+import sys
 from dataclasses import dataclass, field
 from itertools import product
 from pathlib import Path
 
 from .codes import CodeDbMissing, Codes
 from .professional import ProfessionalFacts, professional_involvement
-from .section_d_issues import PART9_MAX_SPAN_M, PROCESS_RULES, PROFESSIONAL_RULES
+from .section_d_issues import PART9_MAX_SPAN_M, PROCESS_RULES, PROFESSIONAL_RULES, citation_resolution
 
 CASES = Path(__file__).resolve().parents[1] / 'evals_dev' / 'cases'
 HELDOUT = Path(__file__).resolve().parents[1] / 'evals_dev' / 'section_d_heldout'
@@ -646,9 +648,9 @@ def _matches(system: str, gold: str) -> bool:
     return normalized.get(system, system) == normalized.get(gold, gold)
 
 
-def load_codes():
+def load_codes(db_path: Path | str | None = None):
     try:
-        codes = Codes()
+        codes = Codes(db_path) if db_path else Codes()
         if codes.provision('2.4.1.1.(1)', 'C') is None:
             raise FileNotFoundError('division C professional rules are not in codedb')
         return codes, 'present'
@@ -824,14 +826,29 @@ def headline(dev: dict[str, VariantScore], heldout: dict[str, VariantScore]) -> 
     )
 
 
-def main() -> int:
-    codes, codedb = load_codes()
+def main(argv: list[str] | None = None) -> int:
+    """Score the variants. Pass --codedb PATH to use a real snapshot.
+
+    A missing codedb turns a yes or no with no resolvable Division C citation into unknown,
+    so those variant numbers are not final.
+    """
+    parser = argparse.ArgumentParser(description='Score practice-of-engineering flag variants.')
+    parser.add_argument('--codedb', type=Path, default=None,
+                        help='Path to codedb.sqlite. Without a readable database the table is not final.')
+    args = parser.parse_args(sys.argv[1:] if argv is None else argv)
+    codes, codedb = load_codes(args.codedb)
     dev = score(codes)
     heldout = score(codes, load_heldout())
     print(headline(dev, heldout))
     print(report(dev, codedb))
     print(heldout_report(heldout))
     print(ngt_report(score(codes, load_ngt())))
+    if codedb == 'missing':
+        print('numbers: not final (codedb missing; since 7f3aac2 a yes or no without a resolvable '
+              'Division C citation becomes unknown)')
+    else:
+        resolved, total = citation_resolution(load_cases(), codes)
+        print(f'citation_resolution: {resolved}/{total}')
     return 0
 
 

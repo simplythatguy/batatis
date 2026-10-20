@@ -18,7 +18,8 @@ from .human_review import HumanReview, human_reviews
 from .models import Case
 from .process_fields import ProcessField, alternative_path, confirmed_value, latest_fact, process_fields
 from .professional import (
-    ProfessionalFacts, ProfessionalReason, ProfessionalResult, professional_confirmed, professional_involvement,
+    PracticePrompt, ProfessionalReason, ProfessionalResult, professional_confirmed,
+    professional_involvement,
 )
 from .section_d import (
     ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, EvidencePlanItem, EvidenceType, section_d_plan,
@@ -134,6 +135,8 @@ class PracticeOfEngineering(BaseModel):
     citation: str | None = None
     reason: str
     question: str | None = None
+    prompts: tuple[PracticePrompt, ...] = ()
+    routed_to: Literal['officer', 'professional', 'applicant'] | None = None
 
     @model_validator(mode='after')
     def _shape(self):
@@ -171,6 +174,7 @@ class SectionDIssue(BaseModel):
     empty_process_fields: tuple[EmptyProcessField, ...]
     human_review: tuple[HumanReview, ...] = ()
     status: IssueStatus
+    routed_to: Literal['officer', 'professional', 'applicant'] | None = None
 
 
 def _question(result: ProfessionalResult) -> str:
@@ -210,10 +214,7 @@ def practice_of_engineering(case: Case, codes: Codes) -> PracticeOfEngineering:
     """Ledger-only screen. Missing facts stay unknown; nothing is defaulted to a boolean."""
     span = confirmed_value(case, 'professional.span_m', 'span_m')
     span_handoff = isinstance(span, (int, float)) and not isinstance(span, bool) and span > PART9_MAX_SPAN_M
-    facts = ProfessionalFacts.from_case(case)
-    if span_handoff and facts.part4_design is not True:
-        facts = facts.model_copy(update={'part4_design': True})
-    result = professional_involvement(facts, codes, provisions=tuple(case.provisions))
+    result = professional_involvement(case, codes, span_handoff=span_handoff)
     return render_practice(result, codes, span_handoff=span_handoff)
 
 
@@ -235,6 +236,10 @@ def _flag(value: PracticeValue, reason_row: ProfessionalReason | None, text: str
                                  question=_UNRESOLVED_CITATION_QUESTION)
 
 
+def _with_prompts(flag: PracticeOfEngineering, result: ProfessionalResult) -> PracticeOfEngineering:
+    return flag.model_copy(update={'prompts': tuple(result.prompts), 'routed_to': result.routed_to})
+
+
 def render_practice(result: ProfessionalResult, codes: Codes, *, span_handoff: bool = False) -> PracticeOfEngineering:
     if result.required == 'yes':
         reason = _pick(result, 'yes')
@@ -242,20 +247,20 @@ def render_practice(result: ProfessionalResult, codes: Codes, *, span_handoff: b
             'Recommend a registered professional for the stated scope.')
         if span_handoff:
             text += ' The stated span is recorded as Part 4 design, so the same Division C rule applies.'
-        return _flag(True, reason, text, PROFESSIONAL_REQUEST)
+        return _with_prompts(_flag(True, reason, text, PROFESSIONAL_REQUEST), result)
     if result.required == 'no':
         reason = _pick(result, 'no') or _pick(result, 'depends')
-        return _flag(False, reason,
+        return _with_prompts(_flag(False, reason,
                      ('The stated facts fit a general exception. Recommend checking component duties and any '
                       'authority direction. This screen does not decide professional-law scope.'),
-                     None)
+                     None), result)
     reason = _pick(result, 'depends')
     rule, division = _rule(reason) if reason else ('', '')
-    return PracticeOfEngineering(
+    return _with_prompts(PracticeOfEngineering(
         value='unknown', rule=rule or None, division=division or None,
         citation=reason.citation if reason else None,
         reason='These facts do not establish whether practice of engineering applies. Ask before setting the flag to yes or no.',
-        question=_question(result))
+        question=_question(result)), result)
 
 
 def _at_stake(item: EvidencePlanItem) -> str:
@@ -290,9 +295,18 @@ def _lookup(codes: Codes, provision_id: str, division: str):
         return None
 
 
+def _routed(flag: PracticeOfEngineering, status: IssueStatus):
+    if status == 'needs_professional':
+        return 'professional'
+    return flag.routed_to
+
+
 def _with_review(case: Case, codes: Codes, issues: list[SectionDIssue]) -> list[SectionDIssue]:
     reviews = human_reviews(case, codes)
-    return [issue.model_copy(update={'human_review': reviews}) for issue in issues]
+    return [issue.model_copy(update={
+        'human_review': reviews,
+        'routed_to': _routed(issue.practice_of_engineering, issue.status),
+    }) for issue in issues]
 
 
 def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:

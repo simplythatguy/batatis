@@ -16,7 +16,8 @@ from pydantic import BaseModel, Field, model_validator
 
 FactKind = Literal['exact', 'pointed', 'computed', 'proposed']
 FactStatus = Literal['confirmed', 'unconfirmed']
-SourceType = Literal['code', 'file', 'user_text', 'drawing', 'user_click']
+SourceType = Literal['code', 'file', 'user_text', 'drawing', 'user_click', 'officer', 'professional']
+RouteTarget = Literal['officer', 'professional', 'applicant']
 AttributionStatus = Literal['direct', 'inherited from parent', 'no row in the attribution table']
 
 INTENT_LABEL = 'NBC 2020 Intent Statements, explanatory only'
@@ -125,6 +126,7 @@ class Gap(BaseModel):
     field: str
     message: str
     severity: Literal['blocking', 'warning'] = 'blocking'
+    routed_to: RouteTarget | None = None
 
 
 class Case(BaseModel):

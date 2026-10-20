@@ -9,16 +9,22 @@ def _ids(issue):
     return [row.trigger_id for row in issue.human_review]
 
 
-def test_every_issue_names_someone_from_a_codedb_only_trigger():
+def test_every_issue_names_someone_and_labels_the_source():
     from engine.human_review import CODEDB_ONLY_TRIGGERS
     issue = section_d_issues(Case(provisions=[BENCHMARK]), codes_with_rules())[0]
     assert issue.human_review
     assert all(row.who and row.why and row.cite for row in issue.human_review)
-    assert all(row.trigger_id in CODEDB_ONLY_TRIGGERS for row in issue.human_review)
-    assert 'HR-30' not in _ids(issue)
+    assert all(row.source == 'statute' or row.trigger_id in CODEDB_ONLY_TRIGGERS for row in issue.human_review)
+    assert all(row.source == 'codedb' and row.act is None and row.quote is None
+               for row in issue.human_review if row.source == 'codedb')
+    variance = next(row for row in issue.human_review if row.trigger_id == 'HR-30')
+    assert variance.source == 'statute'
+    assert variance.cite == 'Safety Codes Act s.38(1)'
+    assert variance.act == 'Safety Codes Act, RSA 2000 c S-1 (current as of Dec 1, 2025)'
+    assert variance.quote.startswith('An Administrator or a safety codes officer may issue a written variance')
+    assert 'approximately equivalent or greater safety performance' in variance.quote
     blob = issue.model_dump_json()
     assert 'Table 2.4.2' not in blob
-    assert 'Safety Codes Act' not in blob
 
 
 def test_acceptable_path_has_no_variance_row():
@@ -55,11 +61,15 @@ def test_code_exception_can_still_name_the_acts():
     ]
     issue = section_d_issues(Case(provisions=[BENCHMARK], facts=facts), codes_with_rules())[0]
     assert issue.practice_of_engineering.value is True
-    assert 'HR-22' not in _ids(issue)
-    assert 'HR-21' not in _ids(issue)
-    blob = issue.model_dump_json()
-    assert 'Architects Act' not in blob
-    assert 'EGPA s.' not in blob
+    units = [row for row in issue.human_review if row.cite in (
+        'Architects Act s.2(6)(b)(ii)', 'EGPA s.2(7)(b)(ii)')]
+    assert {row.cite for row in units} == {'Architects Act s.2(6)(b)(ii)', 'EGPA s.2(7)(b)(ii)'}
+    assert all(row.source == 'statute' and row.why ==
+               'counts dwelling units (4 or less); whether a suite counts is for the officer' for row in units)
+    assert all(row.act and row.quote for row in units)
+    assert 'EGPA s.2(7)(a)' not in _ids(issue) and all(row.cite != 'EGPA s.2(7)(a)' for row in issue.human_review)
+    assert 'Architects Act s.2(6)(a)' not in issue.model_dump_json()
+    assert 'does not exclude suites' not in issue.model_dump_json()
 
 
 def test_barrier_free_interpretation_and_tolerance_routes():
@@ -81,6 +91,38 @@ def test_barrier_free_interpretation_and_tolerance_routes():
     outside = section_d_issues(Case(provisions=[BENCHMARK], facts=[
         fact('dimension_required', 100.0), fact('dimension_proposed', 103.0)]), codes)[0]
     assert 'HR-33' not in _ids(outside)
+
+
+def test_assembly_gross_area_cites_only_the_confirmed_paragraph():
+    facts = [
+        fact('occupancy', 'assembly'), fact('storeys', 1), fact('building_area_m2', 200.0),
+        fact('gross_area_per_floor_m2', 280.0),
+        fact('part4_design', False), fact('prescriptive_route_confirmed', True),
+        fact('ahj_requires_professional', False), fact('special_safety_concerns', False),
+        fact('professional_judgement_required', False), fact('professional_scope_resolved', True),
+        fact('fire_suppression', False), fact('fire_alarm', False),
+        fact('preserved_wood_foundation_part4', False), fact('roof_trusses', False),
+        fact('pathway', 'acceptable'),
+    ]
+    issue = section_d_issues(Case(provisions=[BENCHMARK], facts=facts), codes_with_rules())[0]
+    gross = [row for row in issue.human_review if row.cite == 'EGPA s.2(7)(a)']
+    assert len(gross) == 1 and gross[0].source == 'statute'
+    assert gross[0].act == 'Engineering and Geoscience Professions Act, RSA 2000 c E-11 (current as of Dec 7, 2023)'
+    assert '300 square metres or less' in gross[0].quote
+    assert 'assembly occupancy or institutional occupancy' in gross[0].quote
+
+
+def test_other_occupancies_emit_no_act_gross_area_row():
+    facts = [
+        fact('occupancy', 'hotel'), fact('storeys', 1), fact('building_area_m2', 300.0),
+        fact('gross_area_per_floor_m2', 450.0), fact('pathway', 'acceptable'),
+        fact('part4_design', False), fact('prescriptive_route_confirmed', True),
+        fact('professional_judgement_required', False), fact('professional_scope_resolved', True),
+        fact('ahj_requires_professional', False), fact('special_safety_concerns', False),
+    ]
+    issue = section_d_issues(Case(provisions=[BENCHMARK], facts=facts), codes_with_rules())[0]
+    assert all(row.cite != 'EGPA s.2(7)(a)' for row in issue.human_review)
+    assert all('s.2(7)(c)' not in row.cite and 's.2(6)(a)' not in row.cite for row in issue.human_review)
 
 
 def test_unanswered_components_ask_only_in_scope():

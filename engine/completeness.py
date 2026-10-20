@@ -16,7 +16,9 @@ from codedb import validate_text
 from .codes import Codes
 from .models import INTENT_LABEL, Case, Gap as CaseGap
 from .process_fields import confirmed_value, latest_fact, process_fields
-from .professional import ProfessionalResult, professional_involvement
+from .professional import (
+    OFFICER_PROFESSIONAL_GAP, PRESCRIPTIVE_CONTRADICTION, ProfessionalResult, professional_involvement,
+)
 from .section_c import section_c_rows
 from .section_d import SupportingDocument, section_d_plan, supporting_documents
 
@@ -74,6 +76,12 @@ def professional_involvement_gaps(case: Case, codes: Codes, process, *,
                         message=f'Your application appears to be missing {missing}', fix_hint=fix_hint, citation=citation))
 
     professional = professional or professional_involvement(case, codes)
+    if professional.prescriptive_contradiction:
+        gaps.append(Gap(
+            id='professional:prescriptive_route_confirmed', severity='warning', section='D',
+            field='prescriptive_route_confirmed', message=PRESCRIPTIVE_CONTRADICTION,
+            fix_hint='Leave the prescriptive answer unset. It does not close professional involvement.',
+            citation=None, routed_to='officer'))
     required = professional.required == 'yes' or confirmed_value(case, 'engineering_required') in ('yes', True)
     if required:
         citation = next((r.citation for r in professional.reasons if r.required == 'yes'), codes.citation('2.4.1.1.(3)', 'C'))
@@ -92,10 +100,22 @@ def professional_involvement_gaps(case: Case, codes: Codes, process, *,
                 codes.citation('2.4.1.1.(5)', 'C'))
     elif professional.involvement == 'professional_involved':
         pass
+    elif professional.applicant_sourced or professional.not_sure_fields:
+        gaps.append(Gap(
+            id='professional:professional_requirement', severity='blocking', section='D',
+            field='professional_requirement', message=OFFICER_PROFESSIONAL_GAP,
+            fix_hint='The officer decides whether a registered professional is required. An applicant yes or no does not close this.',
+            citation=next((r.citation for r in professional.reasons if r.required == 'depends'), None),
+            routed_to='officer'))
     elif professional.required == 'depends' or professional.involvement == 'unresolved':
         named = ', '.join(professional.missing_facts) or 'the unresolved professional-involvement facts'
-        add('professional', 'D', 'professional_requirement', f'{named} to resolve professional involvement.',
-            ' '.join(professional.questions), next((r.citation for r in professional.reasons if r.required == 'depends'), None))
+        gaps.append(Gap(
+            id='professional:professional_requirement', severity='blocking', section='D',
+            field='professional_requirement',
+            message=f'Your application appears to be missing {named} to resolve professional involvement.',
+            fix_hint=' '.join(professional.questions),
+            citation=next((r.citation for r in professional.reasons if r.required == 'depends'), None),
+            routed_to=professional.routed_to))
     return gaps
 
 

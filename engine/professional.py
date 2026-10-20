@@ -69,9 +69,32 @@ class ProfessionalReason(BaseModel):
 
 
 Involvement = Literal['professional_involved', 'not_required', 'unresolved']
+RouteTarget = Literal['officer', 'professional', 'applicant']
 
 # Applicant-confirmed role. A name or seal copied off a document does not count.
 _APPLICANT_SOURCES = frozenset({'user_text', 'user_click'})
+# A confirmed status does not move a user_text or user_click fact into this set.
+_AUTHORITY_SOURCES = frozenset({'officer', 'professional', 'code'})
+_RESERVED_FIELDS = frozenset({
+    'ahj_requires_professional', 'special_safety_concerns',
+    'professional_scope_resolved', 'professional_judgement_required',
+})
+_YES_NO_FIELDS = (
+    'farm_public_use', 'engineer_engaged', 'gross_area_unsettled',
+    'part4_design', 'preserved_wood_foundation_part4', 'roof_trusses',
+    'prescriptive_route_confirmed', 'ahj_requires_professional', 'special_safety_concerns',
+    'professional_judgement_required', 'professional_scope_resolved',
+    'fire_suppression', 'fire_alarm',
+)
+_NOT_SURE_VALUES = frozenset({
+    'not sure', 'not_sure', 'not sure (the officer decides)',
+})
+NOT_SURE_OPTION = 'Not sure (the officer decides)'
+OFFICER_PROFESSIONAL_GAP = 'Routed to the officer: whether a registered professional is required'
+PRESCRIPTIVE_CONTRADICTION = (
+    'An answer of yes for the prescriptive route contradicts this variance request. That answer clears nothing.'
+)
+_OFFICER_REASONS = frozenset({'special_safety', 'professional_law', 'design_scope'})
 _ROLE_FIELDS = (
     'professional.role', 'professional.discipline', 'registered_professional.role',
     'registered_professional.discipline', 'professional_name', 'responsible_professional', 'professional.name',
@@ -124,13 +147,91 @@ def professional_confirmed(case: Case) -> bool:
     return _applicant_text(case, *_SEAL_FIELDS) is not None or _applicant_text(case, *_REGISTRATION_FIELDS) is not None
 
 
+class PracticePrompt(BaseModel):
+    """One deciding question, with what Yes and No mean and a Not sure option."""
+
+    model_config = ConfigDict(extra='forbid')
+    text: str
+    help: str
+    not_sure: str = NOT_SURE_OPTION
+
+
+_HELP = {
+    'Has the authority determined whether size or complexity requires professional involvement, and for which scope?':
+        'Yes means the authority has required a registered professional for a stated scope. '
+        'No means it has not. Not sure: the officer decides.',
+    'Is any design carried out under Part 4, including beams, connections or foundations?':
+        'Yes means the project includes Part 4 design. No means it does not. Not sure: the officer decides.',
+    'Does the project include a preserved wood foundation designed under Part 4?':
+        'Yes means that foundation is in the project. No means it is not. Not sure: the officer decides.',
+    'Are wood roof trusses or truss assembly connections included?':
+        'Yes means wood roof trusses or those connections are included. No means they are not. '
+        'Not sure: the officer decides.',
+    'Is a fire suppression system being installed, and does the general professional requirement apply?':
+        'Yes means that system is being installed on a building outside the general exceptions. '
+        'No means it is not. Not sure: the officer decides.',
+    'Is a fire alarm system being installed, and does the general professional requirement apply?':
+        'Yes means that system is being installed on a building outside the general exceptions. '
+        'No means it is not. Not sure: the officer decides.',
+    'Which design route applies, and does any proposed analysis require reserved professional judgement?':
+        'Yes means the design uses reserved professional judgement. No means it does not. '
+        'Not sure: the officer decides.',
+    'Have the applicable professional-law, discipline and local submission requirements been resolved?':
+        'Yes means those requirements are resolved. No means they are not. Not sure: the officer decides.',
+    'What gross area applies, and does a basement count in that area?':
+        'State the gross area if you know it. Yes and No do not settle this. Not sure: the officer decides.',
+}
+
+
+def _prompt_for(text: str) -> PracticePrompt:
+    return PracticePrompt(
+        text=text,
+        help=_HELP.get(text, 'State the fact if you know it. Yes and No are the two answers when the question is a yes or no. Not sure: the officer decides.'),
+    )
+
+
+def _not_sure_value(value: object) -> bool:
+    return isinstance(value, str) and ' '.join(value.split()).casefold() in _NOT_SURE_VALUES
+
+
+def _apply_case_sources(case: Case, facts: ProfessionalFacts):
+    """Applicant Yes/No answers, including a confirmed user fact, cannot clear the screen."""
+    contradiction = None
+    if alternative_path(case) and facts.prescriptive_route_confirmed is True:
+        facts = facts.model_copy(update={'prescriptive_route_confirmed': False})
+        contradiction = PRESCRIPTIVE_CONTRADICTION
+    applicant: list[str] = []
+    not_sure: list[str] = []
+    withheld: dict[str, None] = {}
+    for name in _YES_NO_FIELDS:
+        fact = latest_fact(case, f'professional.{name}', name)
+        if fact is None or fact.status != 'confirmed' or fact.kind == 'proposed':
+            continue
+        if _not_sure_value(fact.value):
+            not_sure.append(name)
+            withheld[name] = None
+            continue
+        if fact.source.type not in _AUTHORITY_SOURCES:
+            applicant.append(name)
+            if name in _RESERVED_FIELDS:
+                withheld[name] = None
+    if withheld:
+        facts = facts.model_copy(update=withheld)
+    return facts, tuple(applicant), tuple(not_sure), contradiction
+
+
 class ProfessionalResult(BaseModel):
     required: Requirement
     general_required: Requirement
     reasons: list[ProfessionalReason]
     questions: list[str]
+    prompts: list[PracticePrompt] = []
     involvement: Involvement = 'unresolved'
     missing_facts: tuple[str, ...] = ()
+    routed_to: RouteTarget | None = None
+    applicant_sourced: bool = False
+    not_sure_fields: tuple[str, ...] = ()
+    prescriptive_contradiction: str | None = None
     scope_note: str = ('This screens documented professional duties. The responsible professional, regulator '
                        'and authority resolve scope, competence and local conditions.')
 
@@ -183,15 +284,18 @@ def _missing_facts(facts: ProfessionalFacts, reasons: list[ProfessionalReason], 
 
 
 def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
-                             provisions: tuple[str, ...] = ()) -> ProfessionalResult:
+                             provisions: tuple[str, ...] = (), span_handoff: bool = False) -> ProfessionalResult:
     case = facts if isinstance(facts, Case) else None
+    applicant: tuple[str, ...] = ()
+    not_sure: tuple[str, ...] = ()
+    contradiction = None
     if isinstance(facts, Case):
         provisions = tuple(facts.provisions)
         loaded = ProfessionalFacts.from_case(facts)
-        # An alternative-solution case is never on the prescriptive route. A Yes answer is not used.
-        if alternative_path(facts) and loaded.prescriptive_route_confirmed is True:
-            loaded = loaded.model_copy(update={'prescriptive_route_confirmed': False})
+        loaded, applicant, not_sure, contradiction = _apply_case_sources(facts, loaded)
         facts = loaded
+    if span_handoff and facts.part4_design is not True:
+        facts = facts.model_copy(update={'part4_design': True})
     reasons: list[ProfessionalReason] = []
     questions: list[str] = []
 
@@ -314,10 +418,15 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
 
     required: Requirement = 'yes' if any(r.required == 'yes' for r in reasons) else (
         'depends' if any(r.required == 'depends' for r in reasons) else 'no')
+    # Facts-only calls have no applicant source, so the eval can still answer no.
+    blocked = bool(applicant or not_sure)
+    if blocked and required == 'no':
+        required = 'depends'
     confirmed = professional_confirmed(case) if case is not None else False
     alternative = case is not None and alternative_path(case)
     other_depends = [reason for reason in reasons if reason.required == 'depends' and reason.code != 'design_scope']
-    if (alternative and facts.professional_judgement_required is True and confirmed and not other_depends):
+    if (not blocked and alternative and facts.professional_judgement_required is True
+            and confirmed and not other_depends):
         involvement: Involvement = 'professional_involved'
         missing: tuple[str, ...] = ()
     elif required == 'no' and not alternative:
@@ -327,6 +436,19 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
         # An alternative case does not become not_required by answering the prescriptive route as yes.
         involvement = 'unresolved'
         missing = _missing_facts(facts, reasons, confirmed=confirmed)
+    if blocked and required != 'yes':
+        routed: RouteTarget | None = 'officer'
+    elif any(reason.required == 'depends' and reason.code in _OFFICER_REASONS for reason in reasons):
+        routed = 'officer'
+    elif required == 'yes':
+        routed = 'professional'
+    elif required == 'depends':
+        routed = 'applicant'
+    else:
+        routed = None
+    unique_questions = list(dict.fromkeys(questions))
     return ProfessionalResult(required=required, general_required=general, reasons=reasons,
-                              questions=list(dict.fromkeys(questions)), involvement=involvement,
-                              missing_facts=missing)
+                              questions=unique_questions, prompts=[_prompt_for(text) for text in unique_questions],
+                              involvement=involvement, missing_facts=missing, routed_to=routed,
+                              applicant_sourced=bool(applicant), not_sure_fields=not_sure,
+                              prescriptive_contradiction=contradiction)

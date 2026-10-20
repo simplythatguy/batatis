@@ -9,7 +9,7 @@ from engine.api import create_app
 from engine.completeness import professional_involvement_gaps
 from engine.export.appendix import build_appendix
 from engine.models import Case
-from engine.professional import ProfessionalFacts, professional_involvement
+from engine.professional import OFFICER_PROFESSIONAL_GAP, ProfessionalFacts, professional_involvement
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import fact
 from engine.tests.test_section_d_issues import codes_with_rules
@@ -57,16 +57,18 @@ def _pdf_text(case: Case) -> str:
     return ' '.join(text.split())
 
 
-def test_dana_truthful_answers_resolve_to_professional_involved():
+def test_dana_truthful_answers_do_not_clear_the_professional_gap():
     assert len(DANA_ANSWERS) == 13
     assert DANA_ANSWERS['prescriptive_route_confirmed'] is False
     assert DANA_ANSWERS['professional_judgement_required'] is True
     case = _case(DANA_ANSWERS, engineer=True)
     result = professional_involvement(case, codes_with_rules())
-    assert result.involvement == 'professional_involved'
+    assert result.involvement != 'professional_involved'
     assert result.involvement != 'not_required'
     assert result.required != 'no'
-    assert _gaps(case) == []
+    assert result.applicant_sourced
+    gaps = [gap for gap in _gaps(case) if gap.severity == 'blocking']
+    assert gaps and all(gap.message == OFFICER_PROFESSIONAL_GAP and gap.routed_to == 'officer' for gap in gaps)
 
 
 def test_false_prescriptive_answers_are_not_cleaner_than_the_truthful_ones():
@@ -77,31 +79,29 @@ def test_false_prescriptive_answers_are_not_cleaner_than_the_truthful_ones():
     false_result = professional_involvement(false_case, codes_with_rules())
     truthful_gaps = [gap for gap in _gaps(truthful) if gap.severity == 'blocking']
     false_gaps = [gap for gap in _gaps(false_case) if gap.severity == 'blocking']
-    assert truthful_result.involvement == 'professional_involved'
+    assert truthful_result.required != 'no' and false_result.required != 'no'
+    assert truthful_result.involvement != 'professional_involved'
     assert false_result.involvement != 'not_required'
     assert false_result.involvement != 'professional_involved'
-    assert false_result.required != 'no'
-    assert len(false_gaps) > len(truthful_gaps)
-    assert any(gap.field == 'professional_requirement' for gap in false_gaps)
-    assert 'professional_judgement_required' in false_gaps[0].message
+    assert truthful_gaps and false_gaps
+    assert all(gap.message == OFFICER_PROFESSIONAL_GAP for gap in truthful_gaps + false_gaps)
+    assert false_result.prescriptive_contradiction
+    assert truthful_result.prescriptive_contradiction is None
     assert 'prescriptive_route_confirmed' not in false_gaps[0].message
 
 
-def test_open_professional_gap_names_the_missing_facts():
+def test_applicant_answers_route_the_professional_gap_to_the_officer():
     unanswered = _case(DANA_ANSWERS, engineer=False)
     gaps = _gaps(unanswered)
     message = next(gap.message for gap in gaps if gap.field == 'professional_requirement')
-    assert 'professional.role' in message
-    assert 'professional.registration_number or professional.seal' in message
-    assert 'facts needed to resolve professional involvement' not in message
-    assert 'prescriptive_route_confirmed' not in message
+    assert message == OFFICER_PROFESSIONAL_GAP
+    assert next(gap.routed_to for gap in gaps if gap.field == 'professional_requirement') == 'officer'
 
     missing_part4 = dict(DANA_ANSWERS)
     del missing_part4['part4_design']
     part4_message = next(gap.message for gap in _gaps(_case(missing_part4, engineer=True))
                          if gap.field == 'professional_requirement')
-    assert 'part4_design' in part4_message
-    assert 'facts needed to resolve professional involvement' not in part4_message
+    assert part4_message == OFFICER_PROFESSIONAL_GAP
 
 
 def test_fact_screen_can_still_answer_not_required():

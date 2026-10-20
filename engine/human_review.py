@@ -1,10 +1,13 @@
 """Who must see a Section D issue. This is not a compliance determination.
 
 Code citations are copied from a codedb lookup. A provision that does not resolve is omitted.
-Only triggers whose research verification_class is codedb-only are returned. Mixed and
-source-pdf-only triggers are left off this list.
+Triggers whose research verification_class is codedb-only are returned with source codedb.
+Statute rows are returned only for a pinpoint confirmed from the Act text, with source statute.
+Mixed triggers, and statute pinpoints that were not confirmed, are left off this list.
 """
 from __future__ import annotations
+
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
@@ -35,10 +38,40 @@ CODEDB_ONLY_TRIGGERS = frozenset({
     'HR-01', 'HR-03', 'HR-04', 'HR-05', 'HR-06', 'HR-07', 'HR-11', 'HR-12', 'HR-13', 'HR-14',
     'HR-15', 'HR-17', 'HR-31', 'HR-32', 'HR-33', 'HR-34', 'HR-35', 'HR-40', 'HR-41', 'HR-42', 'HR-44',
 })
-# Source-pdf pinpoints. Rows that use them are built and then dropped by the codedb-only filter.
-_ACT_ARCHITECTS = 'Architects Act s.2(6)(b)'
-_ACT_ENGINEERING = 'EGPA s.2(7)(a)'
-_ACT_VARIANCE = 'Safety Codes Act s.38(1)'
+# Pinpoints confirmed from the King's Printer office consolidations Karen checked.
+# Architects Act, RSA 2000 c A-44, current as of November 16, 2022, s.2(6)(b)(ii).
+# Engineering and Geoscience Professions Act, RSA 2000 c E-11, current as of December 7, 2023:
+# s.2(7)(b)(ii) counts dwelling units; s.2(7)(a) is assembly or institutional gross area.
+# Other occupancies get no Act gross-area row. Safety Codes Act s.38(1) is unchanged.
+_ACT_ARCHITECTS = 'Architects Act, RSA 2000 c A-44 (current as of Nov 16, 2022)'
+_ACT_ENGINEERING = 'Engineering and Geoscience Professions Act, RSA 2000 c E-11 (current as of Dec 7, 2023)'
+_ACT_VARIANCE_NAME = 'Safety Codes Act, RSA 2000 c S-1 (current as of Dec 1, 2025)'
+_CITE_ARCH_UNITS = 'Architects Act s.2(6)(b)(ii)'
+_CITE_EGPA_UNITS = 'EGPA s.2(7)(b)(ii)'
+_CITE_EGPA_GROSS = 'EGPA s.2(7)(a)'
+_CITE_VARIANCE = 'Safety Codes Act s.38(1)'
+_QUOTE_ARCH_UNITS = (
+    'a building for residential occupancy that (i) is a single family dwelling, or '
+    '(ii) is a multiple family dwelling containing 4 dwelling units or less;'
+)
+_QUOTE_EGPA_UNITS = (
+    'a building for residential occupancy that (i) is a single family dwelling, or '
+    '(ii) is a multiple family dwelling, containing 4 dwelling units or less;'
+)
+_QUOTE_EGPA_GROSS = (
+    'a building, 3 storeys or less in height, for assembly occupancy or institutional occupancy that, '
+    '(i) in the case of a single storey building, has a gross area of 300 square metres or less, '
+    '(ii) in the case of a 2 storey building, has a gross area of 150 square metres or less on each floor, or '
+    '(iii) in the case of a 3 storey building, has a gross area of 100 square metres or less on each floor;'
+)
+_QUOTE_VARIANCE = (
+    'An Administrator or a safety codes officer may issue a written variance with respect to any thing, '
+    'process or activity to which this Act applies if the Administrator or officer is of the opinion that '
+    'the variance provides approximately equivalent or greater safety performance with respect to persons '
+    'and property as that provided for by this Act.'
+)
+_UNITS_WHY = 'counts dwelling units (4 or less); whether a suite counts is for the officer'
+_ASSEMBLY_OR_INSTITUTIONAL = frozenset({'assembly', 'care', 'treatment', 'detention'})
 
 _FLAG_ROWS = {
     'general_building': ('HR-01', 'Registered architectural and/or engineering professional', '2.4.1.1.(3)', 'C'),
@@ -68,6 +101,9 @@ class HumanReview(BaseModel):
     who: str
     why: str
     cite: str
+    source: Literal['codedb', 'statute'] = 'codedb'
+    act: str | None = None
+    quote: str | None = None
 
 
 def _lookup_cite(codes: Codes, provision_id: str, division: str) -> str | None:
@@ -80,14 +116,19 @@ def _lookup_cite(codes: Codes, provision_id: str, division: str) -> str | None:
     return str(record['citation'])
 
 
-def _add(rows: list[HumanReview], seen: set[tuple[str, str]], trigger_id: str, who: str, why: str, cite: str | None):
+def _add(rows: list[HumanReview], seen: set[tuple[str, str]], trigger_id: str, who: str, why: str,
+         cite: str | None, *, source: Literal['codedb', 'statute'] = 'codedb',
+         act: str | None = None, quote: str | None = None):
     if not cite:
+        return
+    if source == 'statute' and not (act and quote):
         return
     key = (trigger_id, cite)
     if key in seen:
         return
     seen.add(key)
-    rows.append(HumanReview(trigger_id=trigger_id, who=who, why=why, cite=cite))
+    rows.append(HumanReview(trigger_id=trigger_id, who=who, why=why, cite=cite,
+                            source=source, act=act, quote=quote))
 
 
 def _screen(case: Case, codes: Codes) -> tuple[ProfessionalResult, ProfessionalFacts]:
@@ -132,22 +173,20 @@ def _acts(result: ProfessionalResult, facts: ProfessionalFacts, rows: list[Human
         and facts.total_unit_count is not None
         and facts.total_unit_count > 4)
     if code_exception and units_above_act:
-        _add(rows, seen, 'HR-22', 'Registered architect',
-             'Total dwelling units, including suites, are above 4. The code exception can still be no.',
-             _ACT_ARCHITECTS)
-        _add(rows, seen, 'HR-21', 'Professional engineer',
-             'The engineering small-building list does not exclude suites. The code exception can still be no.',
-             _ACT_ENGINEERING)
+        _add(rows, seen, 'HR-22', 'Registered architect', _UNITS_WHY, _CITE_ARCH_UNITS,
+             source='statute', act=_ACT_ARCHITECTS, quote=_QUOTE_ARCH_UNITS)
+        _add(rows, seen, 'HR-21', 'Professional engineer', _UNITS_WHY, _CITE_EGPA_UNITS,
+             source='statute', act=_ACT_ENGINEERING, quote=_QUOTE_EGPA_UNITS)
     gross_differs = (
         code_exception
+        and facts.occupancy in _ASSEMBLY_OR_INSTITUTIONAL
         and facts.gross_area_per_floor_m2 is not None
         and facts.building_area_m2 is not None
         and facts.gross_area_per_floor_m2 > facts.building_area_m2)
     if gross_differs:
         _add(rows, seen, 'HR-21', 'Professional engineer',
-             'Gross area per floor is larger than the building area used for the code exception. '
-             'No gross-area limit from the Act quote is applied here.',
-             _ACT_ENGINEERING)
+             'The Act lists gross area for assembly or institutional occupancy. This row does not apply a limit.',
+             _CITE_EGPA_GROSS, source='statute', act=_ACT_ENGINEERING, quote=_QUOTE_EGPA_GROSS)
 
 
 def _routing(case: Case, codes: Codes, rows: list[HumanReview], seen: set[tuple[str, str]]) -> None:
@@ -205,5 +244,5 @@ def human_reviews(case: Case, codes: Codes) -> tuple[HumanReview, ...]:
     if alternative_path(case):
         _add(rows, seen, 'HR-30', 'SCO or Administrator',
              'A variance is decided by an SCO or an Administrator. This list does not grant it.',
-             _ACT_VARIANCE)
-    return tuple(row for row in rows if row.trigger_id in CODEDB_ONLY_TRIGGERS)
+             _CITE_VARIANCE, source='statute', act=_ACT_VARIANCE_NAME, quote=_QUOTE_VARIANCE)
+    return tuple(row for row in rows if row.source == 'statute' or row.trigger_id in CODEDB_ONLY_TRIGGERS)

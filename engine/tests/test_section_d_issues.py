@@ -147,7 +147,8 @@ def test_no_issue_text_claims_compliance_or_safety_and_citations_stay_inside_cod
         scanned = json.loads(json.dumps(payload))
         def drop_cites(node):
             if isinstance(node, dict):
-                return {key: drop_cites(value) for key, value in node.items() if key != 'cite'}
+                return {key: drop_cites(value) for key, value in node.items()
+                        if key not in ('cite', 'quote', 'act')}
             if isinstance(node, list):
                 return [drop_cites(value) for value in node]
             return node
@@ -199,8 +200,8 @@ def test_status_lists_evidence_only_after_a_confirmed_professional():
     listed = section_d_issues(confirmed, codes)[0]
     assert professional_confirmed(confirmed) and listed.status == 'evidence_listed'
     house = section_d_issues(Case(provisions=[BENCHMARK], facts=_house_facts()), codes)[0]
-    assert house.practice_of_engineering.value is False and house.status == 'open'
-    assert house.practice_of_engineering.citation in codes.issued
+    assert house.practice_of_engineering.value == 'unknown' and house.status == 'open'
+    assert house.routed_to == 'officer'
     unsigned = Source(type='file', ref='unsigned-note.pdf', quote='Applicant file metadata.')
     unknown = section_d_issues(Case(provisions=[BENCHMARK]), codes)[0]
     unknown_case = Case(provisions=[BENCHMARK], facts=[
@@ -211,7 +212,7 @@ def test_status_lists_evidence_only_after_a_confirmed_professional():
     house_case = Case(provisions=[BENCHMARK], facts=_house_facts() + [
         fact(f'evidence.{house.id}.file_ref', unsigned.ref, source=unsigned)])
     supplied_house = section_d_issues(house_case, codes)[0]
-    assert supplied_house.practice_of_engineering.value is False and supplied_house.status == 'evidence_listed'
+    assert supplied_house.practice_of_engineering.value == 'unknown' and supplied_house.status == 'open'
 
 
 def test_role_variants_confirm_only_with_an_applicant_number_or_seal():
@@ -361,7 +362,7 @@ def test_rule_table_uses_only_provisions_already_in_the_repo():
 
 
 def test_eval_script_prints_in_sample_wilson_table(capsys):
-    assert main() == 0
+    assert main([]) == 0
     out = capsys.readouterr().out
     codes, _codedb = load_codes()
     dev = score(codes)
@@ -377,8 +378,9 @@ def test_eval_script_prints_in_sample_wilson_table(capsys):
         'On this dev set (model-checked, in-sample) the shipped screen still emits 0 no labels.'
     )
     construction = (
-        '(on text-only cases it answers only yes or ask, never no, '
-        'so 0 under-flags holds by construction)'
+        '(on the 60 text-only dev cases it answered only yes or ask, 0 no, '
+        'so 0 under-flags is partly by design; since 4425089 it can answer no '
+        'when stated facts clear every trigger)'
     )
     for path in ('docs/api-contract.md', 'README.md', 'engine/section_d_flag_eval.py'):
         text = Path(path).read_text()
@@ -527,6 +529,11 @@ def test_generic_fallback_question_on_the_dev_set(caplog):
         fired = generic_fallback_on_dev(cases, codes)
     assert fired == 0
     assert 'generic fallback practice question fired 0 times on 60 dev cases' in caplog.text
+
+
+def test_eval_codedb_argument_marks_a_missing_database_not_final(capsys, tmp_path):
+    assert main(['--codedb', str(tmp_path / 'absent.sqlite')]) == 0
+    assert 'numbers: not final' in capsys.readouterr().out
 
 
 def test_generic_fallback_counter_records_an_unusable_question():

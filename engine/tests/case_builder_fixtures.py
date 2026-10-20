@@ -12,6 +12,16 @@ def fact(field, value, **changes):
     return Fact(**data)
 
 
+# These Yes/No answers are the authority's, so a clean administrative fixture can resolve.
+_AUTHORITY_SCREEN = {
+    'part4_design', 'preserved_wood_foundation_part4', 'roof_trusses',
+    'prescriptive_route_confirmed', 'ahj_requires_professional', 'special_safety_concerns',
+    'professional_judgement_required', 'professional_scope_resolved',
+    'fire_suppression', 'fire_alarm',
+}
+_OFFICER = Source(type='officer', ref='synthetic-authority-fixture', quote='Authority recorded this screen answer.')
+
+
 def complete_case(provisions=None):
     codes = Codes()
     provisions = provisions or ['9.10.9.16.(1)']
@@ -29,7 +39,8 @@ def complete_case(provisions=None):
         fire_suppression=False, fire_alarm=False,
         **{'professional.role': 'R. Singh, P.Eng.', 'professional.registration_number': 'A00000'})
     case = Case(title='Synthetic administrative fixture', jurisdiction=Jurisdiction(id='alberta-other', name='Synthetic AHJ'),
-        facts=[fact(k, v) for k, v in values.items()], provisions=provisions, section_c=section_c_rows(provisions, codes))
+        facts=[fact(k, v, source=_OFFICER) if k in _AUTHORITY_SCREEN else fact(k, v) for k, v in values.items()],
+        provisions=provisions, section_c=section_c_rows(provisions, codes))
     file = Source(type='file', ref='synthetic-evidence-fixture.txt', quote='Synthetic evidence metadata; no test was performed.')
     case.facts += [fact('evidence.synthetic.file_ref', file.ref, source=file),
                    fact('evidence.synthetic.responsible_party', 'Synthetic test author'),
