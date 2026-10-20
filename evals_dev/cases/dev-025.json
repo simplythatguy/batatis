@@ -1,0 +1,44 @@
+{
+  "id": "dev-025",
+  "applicant_type": "owner",
+  "topic": "out-of-scope",
+  "code_part": null,
+  "jurisdiction": "Lethbridge",
+  "seed_provision": "9.34.1.1.(1)",
+  "description": "I'm moving my electrical panel from the basement to the garage and want to run the new feeder through the attic in aluminum cable. The electrician says it needs a variance. Can you prepare it?",
+  "known_facts": [
+    "electrical panel relocation",
+    "aluminum feeder through the attic"
+  ],
+  "missing_info": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.34.1.1.(1)",
+        "why": "the building code defers electrical installations to the Electrical Code Regulation"
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "depends",
+    "engineering_reason": "Decided under the electrical regime (Canadian Electrical Code as adopted in Alberta), not by this tool.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      }
+    ],
+    "intake_action": "redirect",
+    "out_of_scope": true,
+    "redirect_to": "Electrical Code Regulation / Canadian Electrical Code (electrical permit and electrical safety codes officer)"
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis evaluation builder (Claude Opus 5.5)",
+    "date": "2026-10-20",
+    "notes": "Written from the code database only; held-out judge set not consulted."
+  }
+}

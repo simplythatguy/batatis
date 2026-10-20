@@ -1,0 +1,80 @@
+{
+  "id": "dev-007",
+  "applicant_type": "contractor",
+  "topic": "envelope-insulation-sheathing",
+  "code_part": 9,
+  "jurisdiction": "Lethbridge",
+  "seed_provision": "9.27.3.4.(2)",
+  "description": "Renovation contractor. On a bungalow re-side we're adding 50 mm semi-rigid mineral wool boards over the existing OSB, strapping and fibre cement siding. We want to leave out the housewrap and let the mineral wool act as the drainage layer, with the board joints just butted together, not taped or lapped.",
+  "known_facts": [
+    "single detached bungalow",
+    "50 mm mineral wool exterior boards over OSB",
+    "no sheathing membrane",
+    "butted unsealed joints",
+    "fibre cement on strapping"
+  ],
+  "missing_info": [
+    {
+      "field": "owner name and contact",
+      "why": "Section A of the variance form",
+      "priority": "administrative"
+    },
+    {
+      "field": "civic address and legal description",
+      "why": "Section A identifies the property",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Insulating sheathing used in lieu of a sheathing membrane with joints neither sealed nor lapped, over moisture-sensitive OSB.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "9.27.3.4.(2)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.27.3.4.(1)",
+        "why": "when insulating sheathing can replace the membrane"
+      },
+      {
+        "division": "B",
+        "provision": "9.27.3.1.(1)",
+        "why": "second plane of protection"
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "9.27.3.4.(2)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F61,F55-OH1.1,OH1.2,OH1.3]",
+          "[F61,F55-OS2.3]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "no",
+    "engineering_reason": "Single-family dwelling renovation within the exemption.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis evaluation builder (Claude Opus 5.5)",
+    "date": "2026-10-20",
+    "notes": "Written from the code database only; held-out judge set not consulted."
+  }
+}

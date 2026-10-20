@@ -1,0 +1,80 @@
+{
+  "id": "dev-022",
+  "applicant_type": "manufacturer",
+  "topic": "envelope-insulation-sheathing",
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": "9.25.5.2.(1)",
+  "description": "We have a new exterior insulation board and want it approved for use in Alberta. What do you need from us?",
+  "known_facts": [
+    "exterior insulation board",
+    "wants acceptance in Alberta"
+  ],
+  "missing_info": [
+    {
+      "field": "material type, thickness and vapour permeance",
+      "why": "decides which positioning and protection rules apply",
+      "priority": "critical"
+    },
+    {
+      "field": "intended wall assembly and building types",
+      "why": "Part 9 or Part 3 rules and fire requirements differ",
+      "priority": "critical"
+    },
+    {
+      "field": "whether a specific project exists",
+      "why": "a variance is project-specific; product-wide acceptance is a different route",
+      "priority": "critical"
+    },
+    {
+      "field": "existing evaluations or test reports",
+      "why": "Section D evidence",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.25.5.1.(1)",
+        "why": "branch: low-permeance sheet or panel material"
+      },
+      {
+        "division": "B",
+        "provision": "9.25.5.2.(1)",
+        "why": "branch: positioning of low-permeance materials"
+      },
+      {
+        "division": "B",
+        "provision": "9.27.3.4.(1)",
+        "why": "branch: insulating sheathing in lieu of membrane"
+      },
+      {
+        "division": "B",
+        "provision": "9.10.17.10.(1)",
+        "why": "branch: foamed plastic protection"
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "depends",
+    "engineering_reason": "No project or building is identified.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      }
+    ],
+    "intake_action": "ask",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis evaluation builder (Claude Opus 5.5)",
+    "date": "2026-10-20",
+    "notes": "Written from the code database only; held-out judge set not consulted."
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "id": "dev-006",
+  "applicant_type": "manufacturer",
+  "topic": "envelope-insulation-sheathing",
+  "code_part": 9,
+  "jurisdiction": "Edmonton",
+  "seed_provision": "9.25.5.2.(1)",
+  "description": "Our product is a 25 mm foil-faced polyiso board meant to go on the outside of 2x6 walls with R-20 batts, as continuous insulation under the siding. The foil makes it essentially vapour-impermeable. A builder in Edmonton was told the outboard insulation is too thin for that wall. We think the foil is fine because the joints are taped. How do we make the case?",
+  "known_facts": [
+    "25 mm foil-faced polyiso exterior insulation",
+    "2x6 wall with R-20 batts",
+    "low vapour permeance",
+    "Edmonton",
+    "taped joints"
+  ],
+  "missing_info": [
+    {
+      "field": "whether there is a vented air space outboard of the board",
+      "why": "one of the acceptable positions",
+      "priority": "administrative"
+    },
+    {
+      "field": "interior moisture loads (any high-humidity use)",
+      "why": "high-moisture uses need design under Part 5",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Low-permeance exterior insulation placed where the outboard-to-inboard thermal resistance ratio is below the tabulated minimum.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "9.25.5.2.(1)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.25.5.1.(1)",
+        "why": "which sheet materials the positioning rule applies to"
+      },
+      {
+        "division": "B",
+        "provision": "9.25.5.1.(2)",
+        "why": "Part 5 design for high-moisture interiors"
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "9.25.5.2.(1)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F62,F63-OH1.1,OH1.2]",
+          "[F62,F63-OS2.3]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "depends",
+    "engineering_reason": "Depends on the building type and whether a hygrothermal design under Part 5 is used to justify the assembly.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(4)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis evaluation builder (Claude Opus 5.5)",
+    "date": "2026-10-20",
+    "notes": "Written from the code database only; held-out judge set not consulted."
+  }
+}

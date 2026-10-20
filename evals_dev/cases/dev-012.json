@@ -1,0 +1,104 @@
+{
+  "id": "dev-012",
+  "applicant_type": "architect-engineer",
+  "topic": "engineered-walls",
+  "code_part": 9,
+  "jurisdiction": "Cochrane",
+  "seed_provision": "9.23.13.1.(2)",
+  "description": "Designer on a custom home built from structural insulated panels. We'd like to rely on the panels themselves for resisting wind racking, using the panel supplier's shear values, with no separate braced wall panels laid out. No engineer is on the project yet.",
+  "known_facts": [
+    "custom single-family home",
+    "structural insulated panels",
+    "supplier shear values for lateral resistance",
+    "no engineer engaged"
+  ],
+  "missing_info": [
+    {
+      "field": "owner name and contact",
+      "why": "Section A of the variance form",
+      "priority": "administrative"
+    },
+    {
+      "field": "civic address and legal description",
+      "why": "Section A identifies the property",
+      "priority": "administrative"
+    },
+    {
+      "field": "site wind and seismic values",
+      "why": "whether the low-to-moderate force provisions apply",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Lateral bracing provided by proprietary SIP shear values rather than the listed sheathing, panel cladding or engineered design.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "9.23.13.1.(2)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.4.1.1.(1)",
+        "why": "engineering design route for Part 9 structural members"
+      },
+      {
+        "division": "B",
+        "provision": "9.23.13.1.(1)",
+        "why": "applicability limits on wind and seismic forces"
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "9.23.13.1.(2)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F20,F22-OH1.1,OH1.2,OH1.3]",
+          "[F20-OP2.1,OP2.3,OP2.5]",
+          "[F20-OS2.1,OS2.3,OS2.5]",
+          "[F22-OP2.3,OP2.4,OP2.5]",
+          "[F22-OS2.3,OS2.4,OS2.5]"
+        ],
+        "conditional": [
+          {
+            "pair": "[F20,F22-OH4]",
+            "when": "Applies to walls that support floors."
+          },
+          {
+            "pair": "[F20,F22-OS1.2]",
+            "when": "Applies to assemblies required to provide fire resistance."
+          },
+          {
+            "pair": "[F22-OS3.1]",
+            "when": "Applies to walls that support floors."
+          },
+          {
+            "pair": "[F22-OS3.7]",
+            "when": "Applies to walls that contain doors or windows required for emergency egress."
+          }
+        ]
+      }
+    ],
+    "engineering_required": "yes",
+    "engineering_reason": "Lateral design outside the prescriptive options needs Part 4 design by a registered professional.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.2.(1)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis evaluation builder (Claude Opus 5.5)",
+    "date": "2026-10-20",
+    "notes": "Written from the code database only; held-out judge set not consulted."
+  }
+}

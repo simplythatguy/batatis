@@ -1,0 +1,78 @@
+{
+  "id": "dev-015",
+  "applicant_type": "owner",
+  "topic": "single-exit",
+  "code_part": 9,
+  "jurisdiction": "St. Albert",
+  "seed_provision": "9.9.9.1.(1)",
+  "description": "I'm finishing the attic of my two-storey house as a bedroom and office. The only way out of the attic is down to the second floor and then down the main stair to the front door. The attic windows are small skylights. I don't want to add a dormer. What are my options?",
+  "known_facts": [
+    "two-storey single-family house",
+    "attic converted to a bedroom",
+    "two storeys of travel to the exit door",
+    "only small skylights"
+  ],
+  "missing_info": [
+    {
+      "field": "owner name and contact",
+      "why": "Section A of the variance form",
+      "priority": "administrative"
+    },
+    {
+      "field": "civic address and legal description",
+      "why": "Section A identifies the property",
+      "priority": "administrative"
+    },
+    {
+      "field": "skylight opening size and height above floor",
+      "why": "whether an egress-window route is available",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Travel of more than one storey from the attic level to an exit or egress door without the window or balcony alternatives.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "9.9.9.1.(1)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.9.9.1.(2)",
+        "why": "window alternative for units not above or below another suite"
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "9.9.9.1.(1)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F10-OS3.7]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "no",
+    "engineering_reason": "Single-family dwelling within the exemption.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis evaluation builder (Claude Opus 5.5)",
+    "date": "2026-10-20",
+    "notes": "Written from the code database only; held-out judge set not consulted."
+  }
+}

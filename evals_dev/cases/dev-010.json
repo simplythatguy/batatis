@@ -1,0 +1,79 @@
+{
+  "id": "dev-010",
+  "applicant_type": "owner",
+  "topic": "cladding",
+  "code_part": 9,
+  "jurisdiction": "Calgary",
+  "seed_provision": "9.10.15.5.(2)",
+  "description": "I'm re-siding my house myself. The east wall is only half a metre from the fence on the property line, with my neighbour's house beyond it. I want to use vinyl siding on that wall to match the rest. The city says that wall needs metal or noncombustible siding. Can I get permission for vinyl?",
+  "known_facts": [
+    "owner-occupied house",
+    "east wall 0.5 m from the property line",
+    "faces neighbour house",
+    "vinyl siding proposed"
+  ],
+  "missing_info": [
+    {
+      "field": "owner name and contact",
+      "why": "Section A of the variance form",
+      "priority": "administrative"
+    },
+    {
+      "field": "civic address and legal description",
+      "why": "Section A identifies the property",
+      "priority": "administrative"
+    },
+    {
+      "field": "current wall construction (gypsum sheathing, rating)",
+      "why": "mitigation options",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Combustible vinyl cladding on an exposing building face with a limiting distance under 0.6 m.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.15.5.(2)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [],
+    "must_not_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.15.5.(4)",
+        "prohibited_use": "as removing the cladding requirement",
+        "why": "the wall faces a neighbouring house, not a garage or accessory building on the same property"
+      }
+    ],
+    "section_c": [
+      {
+        "provision": "9.10.15.5.(2)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F02,F03-OP3.1]"
+        ],
+        "conditional": []
+      }
+    ],
+    "engineering_required": "no",
+    "engineering_reason": "Single-family dwelling within the exemption.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis evaluation builder (Claude Opus 5.5)",
+    "date": "2026-10-20",
+    "notes": "Written from the code database only; held-out judge set not consulted."
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "id": "dev-008",
+  "applicant_type": "homebuilder",
+  "topic": "envelope-insulation-sheathing",
+  "code_part": 9,
+  "jurisdiction": "Airdrie",
+  "seed_provision": "9.23.17.1.(1)",
+  "description": "For our next phase of single-family homes we want to drop the OSB on exterior walls and put 50 mm rigid foam directly on the studs, then large-format fibre cement panels screwed through the foam into the studs. The panels need fastening between studs according to the maker. Racking would be handled by let-in steel strap bracing.",
+  "known_facts": [
+    "single-family homes",
+    "no wood sheathing",
+    "50 mm rigid foam on studs",
+    "fibre cement panels needing intermediate fastening",
+    "steel strap bracing"
+  ],
+  "missing_info": [
+    {
+      "field": "owner name and contact",
+      "why": "Section A of the variance form",
+      "priority": "administrative"
+    },
+    {
+      "field": "civic address and legal description",
+      "why": "Section A identifies the property",
+      "priority": "administrative"
+    },
+    {
+      "field": "how the bracing is designed (prescriptive or engineered)",
+      "why": "decides whether a professional must design the lateral system",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "Exterior walls left unsheathed although the cladding requires intermediate fastening between supports.",
+    "must_cite": [
+      {
+        "division": "B",
+        "provision": "9.23.17.1.(1)",
+        "role": "benchmark"
+      }
+    ],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.23.13.1.(2)",
+        "why": "bracing for lateral loads normally relies on sheathing or panel-type finishes"
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [
+      {
+        "provision": "9.23.17.1.(1)",
+        "status": "direct",
+        "root_provision": null,
+        "pairs": [
+          "[F20,F22-OH1.1,OH1.2,OH1.3]",
+          "[F20-OP2.1,OP2.3,OP2.5]",
+          "[F20-OS2.1,OS2.3,OS2.5]",
+          "[F22-OP2.3,OP2.4,OP2.5]",
+          "[F22-OS2.3,OS2.5]"
+        ],
+        "conditional": [
+          {
+            "pair": "[F20,F22-OH4]",
+            "when": "Applies to floors and elements that support floors."
+          },
+          {
+            "pair": "[F22-OS3.1]",
+            "when": "Applies to floors and elements that support floors."
+          },
+          {
+            "pair": "[F22-OS3.7]",
+            "when": "Applies to walls, and elements that support walls, that contain doors or windows required for emergency egress."
+          }
+        ]
+      }
+    ],
+    "engineering_required": "depends",
+    "engineering_reason": "Depends on whether lateral bracing is engineered; Part 4 design must be done by a registered professional.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.2.(1)"
+      }
+    ],
+    "intake_action": "proceed_conditionally",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis evaluation builder (Claude Opus 5.5)",
+    "date": "2026-10-20",
+    "notes": "Written from the code database only; held-out judge set not consulted."
+  }
+}

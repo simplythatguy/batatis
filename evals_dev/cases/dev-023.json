@@ -1,0 +1,84 @@
+{
+  "id": "dev-023",
+  "applicant_type": "owner",
+  "topic": "part9-spatial-separation",
+  "code_part": 9,
+  "jurisdiction": "Edmonton",
+  "seed_provision": "9.10.15.5.(2)",
+  "description": "I want to turn my detached garage into a small suite for my mother. The garage is right by the back lane and pretty close to the neighbour's fence. Do I need a variance?",
+  "known_facts": [
+    "detached garage conversion to a suite",
+    "near the back lane and a side fence"
+  ],
+  "missing_info": [
+    {
+      "field": "distance from each garage wall to the property line or lane centre line",
+      "why": "sets the limiting distance and wall construction",
+      "priority": "critical"
+    },
+    {
+      "field": "window and door openings on each wall",
+      "why": "unprotected openings limits",
+      "priority": "critical"
+    },
+    {
+      "field": "existing wall construction and cladding",
+      "why": "whether the existing walls can be kept",
+      "priority": "critical"
+    },
+    {
+      "field": "owner name and contact",
+      "why": "Section A of the variance form",
+      "priority": "administrative"
+    },
+    {
+      "field": "civic address and legal description",
+      "why": "Section A identifies the property",
+      "priority": "administrative"
+    }
+  ],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.15.4.(1)",
+        "why": "branch: glazed openings in the suite walls"
+      },
+      {
+        "division": "B",
+        "provision": "9.10.15.5.(2)",
+        "why": "branch: limiting distance under 0.6 m"
+      },
+      {
+        "division": "B",
+        "provision": "9.10.15.5.(3)",
+        "why": "branch: limiting distance 0.6 m to 1.2 m"
+      }
+    ],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "no",
+    "engineering_reason": "Single-family property with a suite stays within the exemption; secondary suites are not counted as dwelling units.",
+    "engineering_citations": [
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(1)"
+      },
+      {
+        "division": "C",
+        "provision": "2.4.1.1.(2)"
+      }
+    ],
+    "intake_action": "ask",
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "codedb",
+    "author": "Batatis evaluation builder (Claude Opus 5.5)",
+    "date": "2026-10-20",
+    "notes": "Written from the code database only; held-out judge set not consulted."
+  }
+}

@@ -1,0 +1,563 @@
+[
+ {
+  "id": "standata-abc2014-variance-14-bcv-009",
+  "type": "variance",
+  "edition": "ABC 2014",
+  "query": "Polyethylene film for greenhouse enclosures . Allows greenhouse polyethylene film that does not meet the tent-film standard for staff-only plant-growing facilities. Applies to: Commercial plant-growing greenhouses closed to the public.",
+  "gold": [
+   "3.1.18.5."
+  ],
+  "family": "standata-abc2014-variance-14-bcv-009"
+ },
+ {
+  "id": "standata-nbc2023-bulletin-23-bcb-001",
+  "type": "bulletin",
+  "edition": "NBC(AE) 2023",
+  "query": "Energy efficiency Tier 1 of [ref] . Explains Alberta’s Tier 1 housing energy requirements and distinguishes voluntary higher tiers. Applies to: Housing/small-building energy compliance under [ref]",
+  "gold": [
+   "9.36.1.3.",
+   "9.36.5.10.",
+   "9.36.7.3."
+  ],
+  "family": "standata-nbc2023-bulletin-23-bcb-001"
+ },
+ {
+  "id": "standata-nbc2023-bulletin-23-bcb-002",
+  "type": "bulletin",
+  "edition": "NBC(AE) 2023",
+  "query": "Roof truss layout for one- and two-family dwellings. Historical roof-truss documentation bulletin for one- and two-family dwellings; now archived. Applies to: Former truss submission/authentication arrangements.",
+  "gold": [
+   "9.23.14.11."
+  ],
+  "family": "standata-nbc2023-bulletin-23-bcb-002"
+ },
+ {
+  "id": "standata-nbc2023-bulletin-23-bcb-002r1",
+  "type": "bulletin",
+  "edition": "NBC(AE) 2023",
+  "query": "Building roof trusses for one- and two-family dwellings. Historical roof-truss documentation bulletin for one- and two-family dwellings; now archived. Applies to: Former truss submission/authentication arrangements.",
+  "gold": [
+   "9.23.14.11."
+  ],
+  "family": "standata-nbc2023-bulletin-23-bcb-002"
+ },
+ {
+  "id": "standata-nbc2023-bulletin-23-bcb-003",
+  "type": "bulletin",
+  "edition": "NBC(AE) 2023",
+  "query": "2021 Canadian Electrical Code, Part I, Section 64. Archived joint electrical variance/building bulletin addressing residential energy-storage installations before adoption of the newer electrical code. Applies to: Historical residential ESS installations under the 2021 electrical code.",
+  "gold": [
+   "9.10.3.1."
+  ],
+  "family": "standata-nbc2023-bulletin-23-bcb-003"
+ },
+ {
+  "id": "standata-nbc2023-bulletin-23-bcb-004",
+  "type": "bulletin",
+  "edition": "NBC(AE) 2023",
+  "query": "Occupancy of buildings under construction. Provides guidance for AHJ permission to occupy completed parts of buildings while construction continues. Applies to: Phased occupancy, occupied additions and alterations.",
+  "gold": [
+   "8.1.1.1."
+  ],
+  "family": "standata-nbc2023-bulletin-23-bcb-004"
+ },
+ {
+  "id": "standata-nbc2023-bulletin-23-bcb-006",
+  "type": "bulletin",
+  "edition": "NBC(AE) 2023",
+  "query": "SEER2 and HSPF2 application. Explains SEER2/HSPF2 equipment-efficiency metrics and their relationship to code requirements. Applies to: Electrically operated air-cooled air conditioners and heat pumps under NBC(AE)/NECB.",
+  "gold": [
+   "9.36.3.10."
+  ],
+  "family": "standata-nbc2023-bulletin-23-bcb-006"
+ },
+ {
+  "id": "standata-nbc2023-bulletin-23-bcb-007",
+  "type": "bulletin",
+  "edition": "NBC(AE) 2023",
+  "query": "Houses with a secondary suite. Consolidates dispersed Part 9 secondary-suite provisions for navigation alongside the actual code. Applies to: Houses with a secondary suite.",
+  "gold": [
+   "9.10.11.2.",
+   "9.10.9.3.",
+   "9.32.1.2."
+  ],
+  "family": "standata-nbc2023-bulletin-23-bcb-007"
+ },
+ {
+  "id": "standata-nbc2023-bulletin-23-bcb-008",
+  "type": "bulletin",
+  "edition": "NBC(AE) 2023",
+  "query": "Access to roof-mounted HVAC equipment. Consolidates requirements for safe access to rooftop HVAC equipment with the newer gas-installation standard context. Applies to: Roof-mounted HVAC equipment under the building/gas codes.",
+  "gold": [
+   "3.6.4.7.",
+   "6.2.1.6.",
+   "9.33.1.2."
+  ],
+  "family": "standata-nbc2023-bulletin-23-bcb-008"
+ },
+ {
+  "id": "standata-nbc2023-bulletin-23-bcb-013",
+  "type": "bulletin",
+  "edition": "NBC(AE) 2023",
+  "query": "Radon/soil gas pipe labelling. Identifies labelling requirements for radon/soil-gas piping and distinguishes Part 3 and Part 9 routes. Applies to: Radon rough-in/active soil-depressurization piping.",
+  "gold": [
+   "6.2.1.1.",
+   "9.13.4.3."
+  ],
+  "family": "standata-nbc2023-bulletin-23-bcb-013"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-001",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Use of shipping containers (sea-cans) for storage. Explains building/fire-code treatment of storage sea-cans and why normal prefabricated steel-building certifications do not automatically cover them. Applies to: Shipping containers for material storage with authorized-personnel access.",
+  "gold": [
+   "4.1.1.1."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-001"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-002",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Overnight child care. Distinguishes residential dayhomes from daycare occupancies offering overnight care and consolidates their safety requirements. Applies to: Licensed overnight child-care dayhomes/daycares.",
+  "gold": [
+   "3.2.4.20.",
+   "9.10.19.2."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-002"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-003",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Occupant loads. Coordinates design and operational occupant-load calculations for assembly uses. Applies to: Assembly occupancies/licensed beverage establishments under building and fire authorities.",
+  "gold": [
+   "3.1.17.1.",
+   "3.2.5.12.",
+   "3.4.2.6."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-003"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-004",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "NFPA 33 spray booths, application of the safety codes. Clarifies permits and the use of NFPA 33 for spray-finishing systems where the building code relies on good engineering practice. Applies to: Spray booths, areas and rooms involving flammable/combustible materials.",
+  "gold": [
+   "6.2.1.1.",
+   "6.9.1.2."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-004"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-008",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Smoke detectors in smoke or fire/smoke damper installation. Clarifies whether damper-operating smoke detectors must connect to a building fire alarm system. Applies to: Smoke/fire-smoke dampers in HVAC systems.",
+  "gold": [
+   "3.1.8.11.",
+   "3.2.4.1."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-008"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-009",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Fixed fire suppression and exhaust systems – cooking, cleaning, maintenance and qualified persons. Separates installation/design authority from ongoing fire-code maintenance duties for commercial cooking suppression/exhaust systems. Applies to: Commercial kitchen fixed suppression and exhaust systems.",
+  "gold": [
+   "6.3.1.6.",
+   "9.10.1.4."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-009"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-010",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Special events. Explains multi-discipline safety-code permitting and emergency planning for special events. Applies to: Indoor/outdoor events requiring permits, occupant-load assessment or emergency planning.",
+  "gold": [
+   "3.1.17.1.",
+   "3.1.18.1."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-010"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-011",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Existing fire alarm systems. Explains maintenance, replacement, modernization and alternative-solution options for existing fire alarm systems. Applies to: Existing fire alarm systems of any age undergoing work or testing.",
+  "gold": [
+   "3.2.4.19.",
+   "3.2.4.5."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-011"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-014",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Integrated testing coordinator. Defines the professional qualifications of an integrated testing coordinator for fire/life-safety systems. Applies to: Integrated testing of fire-protection/life-safety systems and interacting building systems.",
+  "gold": [
+   "3.2.9.1.",
+   "9.10.1.2."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-014"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-015",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Wood roof truss systems in Part 9 buildings. Requires engineered/authenticated wood trusses and their connections as an assembly, including necessary interface information. Applies to: Wood trusses and roof assemblies in Part 9 buildings.",
+  "gold": [
+   "9.23.14.11."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-015"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-015r1",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Design of wood trusses for roof assemblies in Part 9 buildings. Requires engineered/authenticated wood trusses and their connections as an assembly, including necessary interface information. Applies to: Wood trusses and roof assemblies in Part 9 buildings.",
+  "gold": [
+   "9.23.14.11."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-015"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-016",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Barrier-free design requirements: relaxations. Distinguishes AHJ assessment of code-exempt accessibility situations from a provincial barrier-free relaxation request. Applies to: Projects assessed for the listed barrier-free exceptions/uses.",
+  "gold": [
+   "3.8.2.1."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-016"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-017",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Photoluminescent exit signs. Explains when charging lights for listed photoluminescent exit signs need not connect to emergency power. Applies to: Photoluminescent exit signs and their dedicated charging lights.",
+  "gold": [
+   "3.4.5.1.",
+   "9.9.11.3."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-017"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-018",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Guard requirements for glazing in a window. Discusses fall/collision protection for low glazing and openable windows; the official publication is on hold under review. Applies to: Window glazing positioned where guard/fall-protection concerns arise.",
+  "gold": [
+   "3.3.1.18.",
+   "9.8.8.1."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-018"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-020",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Mechanically vented appliances. Clarifies appliance categories and when combustion systems need protection against dwelling depressurization. Applies to: Fuel-fired space/water-heating appliances and dwelling ventilation.",
+  "gold": [
+   "9.32.3.8."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-020"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-022",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Energy efficiency exemptions for buildings. Identifies certain building uses that may be exempt from the building energy-efficiency provisions. Applies to: Listed low-occupancy industrial/equipment shelters and specific impractical-to-comply uses.",
+  "gold": [
+   "9.25.2.1.",
+   "9.36.1.3."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-022"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-025",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Service/utility room for energy storage systems. Assigns building-SCO review of energy-storage-system room construction and clarifies dual permit needs. Applies to: Service/utility rooms required by the identified electrical-code ESS rules.",
+  "gold": [
+   "9.10.3.1."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-025"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-030",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Measures to mitigate fire spread to adjacent buildings. Consolidates building/fire-code considerations for reducing fire spread during construction/demolition. Applies to: Construction/demolition sites from houses to multistorey buildings.",
+  "gold": [
+   "3.2.5.6.",
+   "8.1.1.1."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-030"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-034",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Elevator operation and accessibility for residential buildings. Clarifies the duty to maintain operational elevating devices serving a required accessible path in residential buildings. Applies to: Residential buildings whose required barrier-free path is served by an elevator/platform device.",
+  "gold": [
+   "3.8.2.3.",
+   "3.8.3.7."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-034"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-035",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Attached garage serving a house with a secondary suite. Explains the garage-separation exception where an attached garage serves a house with a secondary suite. Applies to: Attached storage garages for five vehicles or fewer serving that house/suite arrangement.",
+  "gold": [
+   "9.10.9.18."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-035"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-037",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Lightning protection systems. Clarifies the applicable lightning-protection standard and electrical permitting. Applies to: New/altered/added lightning-protection systems.",
+  "gold": [
+   "3.6.1.3."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-037"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-038",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Firefighters' Emergency Operation for alterations (FEO). Clarifies whether alterations to existing elevators require firefighters’ emergency-operation upgrades. Applies to: Existing elevating devices where FEO was not originally installed/required.",
+  "gold": [
+   "3.2.4.14.",
+   "3.5.2.1."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-038"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-042",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Hydronic heating systems. Explains design/submission and verification for hydronic systems heating building interiors. Applies to: Primary/secondary interior hydronic heat; excludes systems such as exterior snowmelt that do not heat the building interior.",
+  "gold": [
+   "9.33.4.1."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-042"
+ },
+ {
+  "id": "standata-nbc2023-interpretation-23-bci-043",
+  "type": "interpretation",
+  "edition": "NBC(AE) 2023",
+  "query": "Electromagnetic locks – installation, maintenance, testing, and verification. Coordinates permits, professional involvement and qualified installation/testing of electromagnetic locks connected to fire alarms. Applies to: New/existing maglock installations and their maintenance/testing/verification.",
+  "gold": [
+   "3.2.4.5.",
+   "3.2.9.1."
+  ],
+  "family": "standata-nbc2023-interpretation-23-bci-043"
+ },
+ {
+  "id": "standata-nbc2023-variance-23-bcv-001",
+  "type": "variance",
+  "edition": "NBC(AE) 2023",
+  "query": "Window opening control devices (WOCD). Accepts ASTM F2090 window-opening control devices for both fall protection and bedroom escape requirements in eligible Part 9 residential occupancies. Applies to: Part 9 residential windows subject to the cited guard/bedroom escape requirements.",
+  "gold": [
+   "9.8.8.1.",
+   "9.9.10.1."
+  ],
+  "family": "standata-nbc2023-variance-23-bcv-001"
+ },
+ {
+  "id": "standata-nbc2023-variance-23-bcv-003",
+  "type": "variance",
+  "edition": "NBC(AE) 2023",
+  "query": "Insulation below a heated floor. Accepts a specified minimum under-slab insulation value for heated floors in ground contact. Applies to: Heated floors in contact with ground.",
+  "gold": [
+   "9.36.2.8."
+  ],
+  "family": "standata-nbc2023-variance-23-bcv-003"
+ },
+ {
+  "id": "standata-nbc2023-variance-23-bcv-004",
+  "type": "variance",
+  "edition": "NBC(AE) 2023",
+  "query": "Sprinkler-protected glazing in fire-resistant wall assemblies. Accepts listed sprinkler-protected glazing in qualifying rated wall assemblies as an alternative to the normal fire-endurance test route. Applies to: Interior/exterior fire-resistance-rated wall glazing within the listing and variance limits.",
+  "gold": [
+   "3.1.7.1.",
+   "9.10.3.1."
+  ],
+  "family": "standata-nbc2023-variance-23-bcv-004"
+ },
+ {
+  "id": "standata-nbc2023-variance-23-bcv-005",
+  "type": "variance",
+  "edition": "NBC(AE) 2023",
+  "query": "Occupancy classification of oil and gas processing buildings. Allows small oil/gas processing buildings to use an F2 occupancy classification when an engineered risk assessment and compensating safeguards address the hazards. Applies to: Oil/gas processing buildings no larger than 150 m².",
+  "gold": [
+   "3.3.1.5."
+  ],
+  "family": "standata-nbc2023-variance-23-bcv-005"
+ },
+ {
+  "id": "standata-nbc2023-variance-23-bcv-007",
+  "type": "variance",
+  "edition": "NBC(AE) 2023",
+  "query": "Maximum span values for joists, rafters and beams. Accepts maximum joist, rafter and beam spans from the 2020 Canadian Wood Council Span Book. Applies to: Part 9 wood framing within the referenced 2020 Span Book scope.",
+  "gold": [
+   "9.23.4.2."
+  ],
+  "family": "standata-nbc2023-variance-23-bcv-007"
+ },
+ {
+  "id": "standata-nbc2023-variance-23-bcv-008-rev1",
+  "type": "variance",
+  "edition": "NBC(AE) 2023",
+  "query": "008(REV1) - Residential exhaust outlet clearance from air intakes. Allows moisture-bearing residential exhaust outlets to use the clearance geometry in the variance diagram. Applies to: Residential exhaust outlets and air intakes within this variance.",
+  "gold": [
+   "9.32.3.13."
+  ],
+  "family": "standata-nbc2023-variance-23-bcv-008"
+ },
+ {
+  "id": "standata-nbc2023-variance-23-bcv-008",
+  "type": "variance",
+  "edition": "NBC(AE) 2023",
+  "query": "Residential exhaust outlet clearance from air intakes. Historical version allows reduced horizontal clearance between certain residential exhaust outlets and their own air intake. Applies to: Kitchen, bathroom and clothes-dryer exhaust serving an individual dwelling or house with secondary suite.",
+  "gold": [
+   "9.32.3.13."
+  ],
+  "family": "standata-nbc2023-variance-23-bcv-008"
+ },
+ {
+  "id": "standata-nbc2023-variance-23-bcv-009",
+  "type": "variance",
+  "edition": "NBC(AE) 2023",
+  "query": "CSA B52:23 Mechanical refrigeration code. Recognizes CSA B52:23 as an alternative refrigeration installation standard under the Alberta building code. Applies to: Mechanical refrigeration installations addressed by the NBC(AE).",
+  "gold": [
+   "6.2.1.5.",
+   "9.33.5.2."
+  ],
+  "family": "standata-nbc2023-variance-23-bcv-009"
+ },
+ {
+  "id": "standata-nbc2023-variance-23-bcv-010",
+  "type": "variance",
+  "edition": "NBC(AE) 2023",
+  "query": "Engineer authentication for the qualification of structural steel fabricators. Allows professionally authenticated welding controls instead of the normal fabricator certification route for qualifying structural-steel fabrication. Applies to: Structural steel fabricated by non-CSA W47.1-certified fabricators.",
+  "gold": [
+   "4.3.4.1."
+  ],
+  "family": "standata-nbc2023-variance-23-bcv-010"
+ },
+ {
+  "id": "standata-nbc2023-variance-23-bcv-010r1",
+  "type": "variance",
+  "edition": "NBC(AE) 2023",
+  "query": "Engineer's authentication for welding procedures. Accepts a registered-engineer welding equivalency route for fabricators not certified to CSA W47.1. Applies to: Structural-steel welding/fabrication within the variance scope.",
+  "gold": [
+   "4.3.4.1."
+  ],
+  "family": "standata-nbc2023-variance-23-bcv-010"
+ },
+ {
+  "id": "standata-nbc2023-variance-23-bcv-011r1",
+  "type": "variance",
+  "edition": "NBC(AE) 2023",
+  "query": "Polyethylene film for greenhouse enclosures. Adds a tightly scoped public-retail greenhouse option while retaining the staff-only plant-growing option for polyethylene film. Applies to: Staff-only plant growing, or a qualifying one-storey F3 greenhouse selling plants/horticultural products.",
+  "gold": [
+   "3.1.18.5."
+  ],
+  "family": "standata-nbc2023-variance-23-bcv-011"
+ },
+ {
+  "id": "standata-nbc2023-variance-23-bcv-012r1",
+  "type": "variance",
+  "edition": "NBC(AE) 2023",
+  "query": "Permanent wood foundations with mechanically laminated timber panels for Part 9 residential buildings. Recognizes a specific engineered guide for mechanically laminated timber panel permanent wood foundations in eligible Part 9 housing. Applies to: Residential MLTP foundations within the guide and prescriptive-foundation scope.",
+  "gold": [
+   "9.15.2.4."
+  ],
+  "family": "standata-nbc2023-variance-23-bcv-012"
+ },
+ {
+  "id": "standata-nbc2023-variance-23-bcv-013",
+  "type": "variance",
+  "edition": "NBC(AE) 2023",
+  "query": "Elevator and passenger-elevating devices. Allows a passenger elevator in place of an accessibility platform lift or LULA with revised travel/car-size and FEO conditions. Applies to: Elevators substituted for accessibility lifts or LULA in the joint building/elevating-device variance.",
+  "gold": [
+   "3.5.4.1."
+  ],
+  "family": "standata-nbc2023-variance-23-bcv-013"
+ },
+ {
+  "id": "standata-nbc2023-variance-23-bcv-014",
+  "type": "variance",
+  "edition": "NBC(AE) 2023",
+  "query": "Multi-level storage racking systems. Treats qualifying multilevel storage racks as special/unusual structures under a detailed alternative design package. Applies to: Authorized-personnel storage/retrieval racks in permitted industrial or mercantile buildings.",
+  "gold": [
+   "3.2.2.2."
+  ],
+  "family": "standata-nbc2023-variance-23-bcv-014"
+ },
+ {
+  "id": "standata-nbc2023-variance-23-bcv-017",
+  "type": "variance",
+  "edition": "NBC(AE) 2023",
+  "query": "Unvented roof assembly. Allows unvented Part 9 residential roof assemblies designed under the specifically referenced building-science evaluation report. Applies to: Part 9 residential roof assemblies within the report scope.",
+  "gold": [
+   "9.19.1.1.",
+   "9.19.1.4."
+  ],
+  "family": "standata-nbc2023-variance-23-bcv-017"
+ },
+ {
+  "id": "standata-nbc2023-variance-23-bcv-018",
+  "type": "variance",
+  "edition": "NBC(AE) 2023",
+  "query": "Vented soffit protection. Accepts tested intumescent-coated vented soffit materials as an alternative to specified non-vented/protective soffit construction. Applies to: Soffits within the listed Part 9 exposure-protection situations.",
+  "gold": [
+   "9.10.12.4.",
+   "9.10.14.5.",
+   "9.10.15.5."
+  ],
+  "family": "standata-nbc2023-variance-23-bcv-018"
+ },
+ {
+  "id": "calgary-spv-001-zero-lot-line-2026-03",
+  "type": "spv",
+  "edition": "NBC(AE), edition not explicitly numbered in PDF; current Calgary posting",
+  "query": "Zero Lot Line (Revision 5). Provides a permit-referenced, paired-house construction package for qualifying Calgary zero-lot-line homes. Applies to: Calgary single-family houses up to three storeys, including houses with secondary suites, within the SPV configuration.",
+  "gold": [
+   "9.10.15.5."
+  ],
+  "family": "calgary-spv-001-zero-lot-line-2026-03"
+ },
+ {
+  "id": "calgary-spv-003-construction-of-exposed-building-face",
+  "type": "spv",
+  "edition": "NBC(AE), edition not explicitly numbered in PDF; current Calgary posting",
+  "query": "Construction of Exposed Building Face (Revision 3). Accepts a specified encapsulated wood-frame exposed-wall assembly for qualifying single-storey F3 Part 9 buildings facing dwellings they do not serve. Applies to: Calgary F3 accessory/garage-type buildings and facing multidwelling buildings in the stated spatial-separation situation.",
+  "gold": [
+   "9.10.14.2.",
+   "9.10.14.5."
+  ],
+  "family": "calgary-spv-003-construction-of-exposed-building-face"
+ },
+ {
+  "id": "calgary-spv-006-firewall-rowhouse-secondary-suites",
+  "type": "spv",
+  "edition": "NBC(AE), edition not explicitly numbered in PDF; current Calgary posting",
+  "query": "Firewall in a Rowhouse with Secondary Suites. Accepts a package of compartmentation, egress and service protections instead of the prescribed firewall in qualifying rowhouses with secondary suites. Applies to: Calgary rowhouses containing more than two houses with secondary suites.",
+  "gold": [
+   "9.10.11.2.",
+   "9.10.13.13."
+  ],
+  "family": "calgary-spv-006-firewall-rowhouse-secondary-suites"
+ }
+]
