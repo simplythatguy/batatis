@@ -17,6 +17,7 @@ from .identify.answers import apply_answers
 from .identify.config import has_live_model
 from .identify.demo_cache import match_demo
 from .identify.pipeline import run as identify_run
+from .models import Case
 from .process_fields import ProcessField, process_fields
 from .professional import ProfessionalResult, professional_involvement
 from .section_c import section_c_rows
@@ -94,5 +95,87 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
     @router.get('/cases/{case_id}/gaps', response_model=list[Gap])
     def gaps(case_id: str):
         return check_completeness(get_case(case_id), code())
+
+    def _identify_result(prose: str, facts, on_stage=None) -> dict:
+        if not default_db().exists():
+            cached = match_demo(prose)
+            if cached:
+                return cached
+            raise FileNotFoundError('code database not found and this description is not a cached demo')
+        if not has_live_model():
+            cached = match_demo(prose)
+            if cached:
+                return cached
+        result = identify_run(prose, facts=facts, on_stage=on_stage)
+        result['persisted'] = False
+        return result
+
+    def _stream(prose: str, facts):
+        events: queue.Queue = queue.Queue()
+
+        def on_stage(stage, payload=None):
+            events.put((stage, payload))
+
+        def worker():
+            try:
+                _identify_result(prose, facts, on_stage=on_stage)
+            except Exception as exc:
+                events.put(('error', {'message': type(exc).__name__}))
+            finally:
+                events.put(None)
+
+        threading.Thread(target=worker, daemon=True).start()
+
+        def generate():
+            while True:
+                item = events.get()
+                if item is None:
+                    break
+                stage, payload = item
+                yield f'event: {stage}\ndata: {json.dumps(payload, default=str)}\n\n'
+
+        return StreamingResponse(generate(), media_type='text/event-stream')
+
+    @router.post('/cases/{case_id}/identify')
+    def identify(case_id: str, body: IdentifyRequest, request: Request):
+        """Rank articles and record unknown answers. Does not write provisions."""
+        case = get_case(case_id)
+        provisions = list(case.provisions)
+        if body.answers:
+            apply_answers(case, body.answers)
+            cases().put(case)
+        if 'text/event-stream' in request.headers.get('accept', ''):
+            return _stream(body.prose, case.facts)
+        try:
+            result = _identify_result(body.prose, case.facts)
+        except FileNotFoundError as exc:
+            raise HTTPException(503, str(exc)) from exc
+        saved = cases().get(case_id)
+        if list(saved.provisions) != provisions:
+            raise HTTPException(500, 'identify must not change provisions')
+        return result
+
+    @router.get('/cases/{case_id}/identify/stream')
+    def identify_stream(case_id: str, prose: str = Query(min_length=1)):
+        case = get_case(case_id)
+        return _stream(prose, case.facts)
+
+    @router.post('/cases/{case_id}/identify/confirm', response_model=Case)
+    def confirm(case_id: str, body: ConfirmRequest):
+        case = get_case(case_id)
+        codes = code()
+        missing = []
+        for provision_id in body.provisions:
+            try:
+                found = codes.provision(provision_id, 'B')
+            except ValueError as exc:
+                raise HTTPException(400, f'invalid provision id: {exc}') from exc
+            if found is None:
+                missing.append(provision_id)
+        if missing:
+            raise HTTPException(404, {'message': 'citation not in the code database', 'provisions': missing})
+        case.provisions = list(body.provisions)
+        case.section_c = section_c_rows(body.provisions, codes)
+        return cases().put(case)
 
     return router

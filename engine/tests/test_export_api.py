@@ -27,6 +27,10 @@ def test_export_route(ctx):
     r = client.post(f'/cases/{case.id}/export')
     assert r.status_code == 200 and r.headers['content-type'] == 'application/pdf'
     assert r.content.startswith(b'%PDF') and 'DRAFT' not in r.headers['content-disposition']
+    assert r.headers['x-batatis-form-version'] == 'scc_2026-10'
+    assert r.headers['x-batatis-form-date'] == '2026-10-06'
+    assert r.headers['x-batatis-form-id'] == 'scc-variance'
+    assert r.headers['x-batatis-jurisdiction'] == 'alberta'
 
     store.add_fact(case.id, Fact(field='storeys', value=2, kind='proposed', source=Source(type='user_text', ref='m'),
                                  confidence=0.5))

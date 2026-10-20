@@ -67,22 +67,22 @@ def _facts(facts) -> list[dict]:
     return out
 
 
-def _departure_confirmed(facts: list[dict]) -> bool | None:
-    """True, False, or None when a departure answer is present but unknown."""
-    seen = None
+def _departure_confirmed(facts: list[dict]) -> str:
+    """`yes`, `no`, `unknown`, or `absent` for an answer about whether the design departs."""
+    state = 'absent'
     for fact in facts:
         field = str(fact.get('field') or '')
         if field not in {'departure', 'variance.departure'} and not field.startswith('candidate.'):
             continue
-        if fact.get('status') in ('open', 'unknown') or is_unknown_answer(fact.get('value') if isinstance(fact.get('value'), str) else None):
-            if fact.get('status') in ('open', 'unknown'):
-                return None
-        value = str(fact.get('value') or '').strip().lower()
-        if value in {'yes', 'departs', 'departure'}:
-            seen = True
-        elif value in {'no', 'follows', 'acceptable'}:
-            seen = False if seen is None else seen
-    return seen
+        value = fact.get('value')
+        if fact.get('status') in ('open', 'unknown') or is_unknown_answer(value if isinstance(value, str) else None):
+            return 'unknown'
+        text = str(value or '').strip().lower()
+        if text in {'yes', 'departs', 'departure'}:
+            state = 'yes'
+        elif text in {'no', 'follows', 'acceptable'} and state != 'yes':
+            state = 'no'
+    return state
 
 
 def assess_variance(prose: str, facts=None) -> tuple[str, str]:
@@ -93,12 +93,8 @@ def assess_variance(prose: str, facts=None) -> tuple[str, str]:
         return 'unknown', (f'This request reads as {dest}. It is outside the building-code variance '
                            f'this tool prepares. Confirm the responsible Safety Codes Officer.')
     flag = _departure_confirmed(_facts(facts))
-    if flag is True:
+    if flag == 'yes' or any(cue in prose.lower() for cue in DEPARTURE_CUES):
         return LIKELY
-    if flag is None:
+    if flag == 'unknown':
         return UNKNOWN
-    if any(cue in prose.lower() for cue in DEPARTURE_CUES):
-        return LIKELY
-    if flag is False:
-        return NOT_INDICATED
     return NOT_INDICATED

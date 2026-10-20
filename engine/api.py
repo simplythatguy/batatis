@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from codedb import AmbiguousProvisionError
 
 from .codes import Codes
-from .export import ExportBlocked, ExportError, FormNotFound, export_case
+from .export import ExportBlocked, ExportError, FormMismatch, FormNotFound, export_case
 from .models import Case, Fact, Jurisdiction, SectionCRow
 from .section_c import section_c_rows
 from .store import CaseStore
@@ -25,6 +25,8 @@ class SectionCRequest(BaseModel):
 
 class ExportRequest(BaseModel):
     draft: bool = False
+    jurisdiction: str | None = None
+    form_id: str | None = None
 
 
 def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> FastAPI:
@@ -67,16 +69,25 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         case = get_case(case_id)
         draft = bool(body and body.draft)
         try:
-            res = export_case(case, draft=draft, codes=code())
+            res = export_case(case, draft=draft, codes=code(),
+                              jurisdiction=body.jurisdiction if body else None,
+                              form_id=body.form_id if body else None)
         except ExportBlocked as e:
             raise HTTPException(409, {'message': 'export blocked; resolve these or export a draft', 'reasons': e.reasons})
         except FormNotFound as e:
             raise HTTPException(503, str(e))
+        except FormMismatch as e:
+            raise HTTPException(422, str(e))
         except ExportError as e:
             raise HTTPException(500, str(e))
-        name = f'{case_id}-scc-variance{"-DRAFT" if draft else ""}.pdf'
-        return Response(res.pdf, media_type='application/pdf',
-                        headers={'Content-Disposition': f'attachment; filename="{name}"'})
+        name = f'{case_id}-{res.form_id or "variance"}{"-DRAFT" if draft else ""}.pdf'
+        return Response(res.pdf, media_type='application/pdf', headers={
+            'Content-Disposition': f'attachment; filename="{name}"',
+            'X-Batatis-Form-Version': res.form_version,
+            'X-Batatis-Form-Date': res.form_date,
+            'X-Batatis-Form-Id': res.form_id,
+            'X-Batatis-Jurisdiction': res.jurisdiction,
+        })
 
     @app.get('/code/search')
     def code_search(q: str, division: str | None = Query('B', pattern='^[ABC]$'), limit: int = Query(20, ge=1, le=100)):
