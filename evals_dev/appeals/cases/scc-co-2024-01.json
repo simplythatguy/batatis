@@ -1,0 +1,73 @@
+{
+  "id": "scc-co-2024-01",
+  "title": "Building \u2013 Secondary Suite \u2013 March 2024",
+  "decision_date": "2024-05-22",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2024/2024-01%20DECISION%20Signed_Redacted.pdf",
+  "applicant_type": null,
+  "topic": null,
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "A City SCO issued an order requiring the owner to upgrade and permit a basement as a secondary suite built without permits. The SCO's grounds included a basement bedroom, a toilet room, an unplugged toaster oven, a microwave in the garage, and an exterior side entrance.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "order appeal",
+    "evidence standard",
+    "existing buildings",
+    "secondary suite",
+    "SCO discretion"
+  ],
+  "missing_info": [],
+  "edition_original": "unspecified",
+  "other_codes": [],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": null,
+    "basis_type": "not applicable",
+    "basis": "not applicable: appeal of an order under Safety Codes Act s.49, not a refusal"
+  },
+  "outcome": "overturned",
+  "outcome_summary": "Order revoked: the SCO lacked reasonable and probable grounds, since the presence of features common to finished basements is not evidence of a suite.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "A-1.1.1.2 (Note)",
+      "source_code": "Building Code (edition not stated in decision)",
+      "source_division": "B",
+      "source_part": "Part 1",
+      "parsed_id": null,
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "The decision does not name the code edition."
+    }
+  ],
+  "quotes": [],
+  "professional_involvement": {
+    "addressed": false,
+    "weak_flag": null,
+    "label_strength": null,
+    "facts": {}
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": null,
+    "engineering_reason": "",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}

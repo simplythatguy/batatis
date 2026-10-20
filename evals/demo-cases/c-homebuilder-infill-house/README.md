@@ -1,6 +1,6 @@
 # Case C: Homebuilder with a non-standard infill house
 
-> **EXAMPLE DATA.** The people, companies, address and drawings are fictional. Code and STANDATA citations checked against the NBC(AE) 2023 1st printing. See `../sources.md`.
+> **EXAMPLE DATA.** The people, companies, address and drawings are fictional. Code and STANDATA citations checked against the National Building Code (Alberta Edition) (NBC(AE)) 2023 1st printing. The 2nd printing is in force. See `../sources.md`.
 
 This is a demo case. No loader reads it yet. Only files in `input/` are ever uploaded to the tool. This README contains the demo script, so it is not uploaded. Answer keys are in [`../keys/c-homebuilder-infill-house/`](../keys/c-homebuilder-infill-house/) and are never uploaded.
 

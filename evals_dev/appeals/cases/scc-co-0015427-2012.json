@@ -1,0 +1,122 @@
+{
+  "id": "scc-co-0015427-2012",
+  "title": "Building \u2013 Installation of Standpipe System in Hydrocarbon Building October 2012",
+  "decision_date": "2012-10-19",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2012/REDACTED_Bldg_Installation%20of%20Standpipe%20System%20in%20Hydrocarbon%20Buildin%20October%202012_0015427.pdf",
+  "applicant_type": null,
+  "topic": null,
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "An oil sands operator planned four hydrocarbon process buildings more than 14 m high. An accredited agency ordered standpipe systems in them.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "alternative solution accepted",
+    "standpipe",
+    "firefighting water supply",
+    "industrial hydrocarbon process building",
+    "variance with conditions"
+  ],
+  "missing_info": [],
+  "edition_original": "ABC 2006",
+  "other_codes": [],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": null,
+    "basis_type": "not applicable",
+    "basis": "not applicable: appeal of an order; the Council accepted the alternative solution"
+  },
+  "outcome": "varied",
+  "outcome_summary": "Order varied: the standpipe requirement (ABC 2006 3.2.5.8/ABC 2006 3.2.5.9) was removed on acceptance of the alternative solution, but the ABC 2006 3.2.5.7 firefighting water supply and the other plans-examination requirements stand.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "3.2.5.7.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.5.7.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.2.5.8.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.5.8.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.2.5.9.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.5.9.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.2.5.16.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.5.16.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "Appellant relied on a review by a 'safety specialist'; no professional-involvement requirement was at issue.",
+      "sentences": 1,
+      "quote_confidence": "standard",
+      "kind": "summary",
+      "field": "professional_involvement",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2012/REDACTED_Bldg_Installation%20of%20Standpipe%20System%20in%20Hydrocarbon%20Buildin%20October%202012_0015427.pdf"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": true,
+    "weak_flag": "depends",
+    "label_strength": "weak",
+    "facts": {}
+  },
+  "anchors": [
+    "alternative_accepted_with_condition"
+  ],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "depends",
+    "engineering_reason": "Weak appeal label only. Not an NBC(AE) 2023 professional-involvement determination.",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  },
+  "accepted_with_condition": {
+    "outcome": "varied",
+    "condition": "Standpipe requirement removed on acceptance of the alternative. Firefighting water supply and the other plans-examination requirements remain.",
+    "condition_kind": "paraphrase"
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "id": "scc-co-2023-02",
+  "title": "Building \u2013 Eligibility of Existing Secondary Suite \u2013 April 2023",
+  "decision_date": "2023-05-25",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2023/2023-02%20Council%20Order%20Decision_Redacted.pdf",
+  "applicant_type": null,
+  "topic": null,
+  "code_part": null,
+  "jurisdiction": "Calgary",
+  "seed_provision": null,
+  "description": "A homeowner applied to the City of Calgary for a building permit for an 'existing' secondary suite, which would let the basement meet reduced life-safety requirements under the City's program. It covers suites existing before 12 March 2018 that have all elements of a self-contained dwelling unit, including a non-portable cooking facility, and no fundamental changes since.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "refusal for insufficient/incorrect information",
+    "existing buildings",
+    "secondary suite",
+    "AHJ acceptance"
+  ],
+  "missing_info": [],
+  "edition_original": "NBC(AE) 2019",
+  "other_codes": [],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": "R1_incorrect",
+    "basis_type": "analogous",
+    "basis": "analogous: building permit refusal under Permit Regulation s.26(b) ('incorrect or insufficient information'); not an SCC variance-form refusal"
+  },
+  "outcome": "upheld",
+  "outcome_summary": "The tribunal confirmed the refusal and encouraged the parties to work toward a permit for a new suite, 'including providing alternative solutions as applicable'.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "1.1.1.2.",
+      "source_code": "NBC(AE) 2019",
+      "source_division": "B",
+      "source_part": "Part 1",
+      "parsed_id": "1.1.1.2.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "incorrect or insufficient information was submitted respecting the permit, namely that the Building had an eligible existing secondary suite",
+      "sentences": 1,
+      "quote_confidence": "standard",
+      "kind": "excerpt",
+      "field": "refusal_reason_evidence",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2023/2023-02%20Council%20Order%20Decision_Redacted.pdf"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": false,
+    "weak_flag": null,
+    "label_strength": null,
+    "facts": {}
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": null,
+    "engineering_reason": "",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}

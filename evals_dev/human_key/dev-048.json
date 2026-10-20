@@ -1,0 +1,16 @@
+{
+  "case_id": "dev-048",
+  "status": "unverified",
+  "persona": "homebuilder",
+  "variance_kind": "envelope-insulation-sheathing",
+  "scenario": "For a new two-storey detached house with a building area of 180 m2, our wall has a foil-faced exterior insulation layer between the stud cavity and the cladding. The design location has 6,500 heating degree-days. At the innermost impermeable surface, the total RSI outboard is 0.5 and inboard is 4.0. Measured dry-cup vapour permeance is 5 ng/(Pa s m2), and air leakage is 0.02 L/(s m2) at 75 Pa. There is no air space inboard of that layer, it is not on the warm face, and indoor moisture generation is ordinary. We want to keep this arrangement.",
+  "section_ab_required_fields": null,
+  "expected_top_articles": null,
+  "benchmark_acceptable_solution": null,
+  "engineer_needed": null,
+  "intake_action": null,
+  "verifier_name": null,
+  "date_verified": null,
+  "source_page_refs": null,
+  "notes": null
+}
