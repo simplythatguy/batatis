@@ -10,8 +10,14 @@ from codedb import AmbiguousProvisionError
 from .codes import CodeDbMissing, Codes
 from .export import ExportBlocked, ExportError, FormMismatch, FormNotFound, export_case
 from .models import Case, Fact, Jurisdiction, SectionCRow
+from .quotes import clip_body
 from .section_c import section_c_rows
 from .store import CaseStore
+
+
+def _public_case(case: Case) -> Case:
+    """Case JSON with code quotes and provision text passed through the clipper."""
+    return Case.model_validate(clip_body(case.model_dump()))
 
 
 class NewCase(BaseModel):
@@ -45,28 +51,31 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
             state['codes'] = Codes()
         return state['codes']
 
-    @app.post('/cases', response_model=Case, status_code=201)
-    def create_case(body: NewCase | None = None):
-        return cases().put(Case(**(body.model_dump() if body else {})))
-
-    @app.get('/cases/{case_id}', response_model=Case)
-    def get_case(case_id: str):
+    def load_case(case_id: str) -> Case:
         case = cases().get(case_id)
         if case is None:
             raise HTTPException(404, 'case not found')
         return case
+
+    @app.post('/cases', response_model=Case, status_code=201)
+    def create_case(body: NewCase | None = None):
+        return _public_case(cases().put(Case(**(body.model_dump() if body else {}))))
+
+    @app.get('/cases/{case_id}', response_model=Case)
+    def get_case(case_id: str):
+        return _public_case(load_case(case_id))
 
     @app.post('/cases/{case_id}/facts', response_model=Case)
     def add_fact(case_id: str, fact: Fact):
         case = cases().add_fact(case_id, fact)
         if case is None:
             raise HTTPException(404, 'case not found')
-        return case
+        return _public_case(case)
 
     @app.post('/cases/{case_id}/export', response_class=Response,
               responses={200: {'content': {'application/pdf': {}}}, 409: {'description': 'export blocked'}})
     def export(case_id: str, body: ExportRequest | None = None):
-        case = get_case(case_id)
+        case = load_case(case_id)
         draft = bool(body and body.draft)
         try:
             res = export_case(case, draft=draft, codes=code(),
@@ -91,7 +100,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
 
     @app.get('/code/search')
     def code_search(q: str, division: str | None = Query('B', pattern='^[ABC]$'), limit: int = Query(20, ge=1, le=100)):
-        return code().search(q, division=division, limit=limit)
+        return clip_body(code().search(q, division=division, limit=limit))
 
     @app.get('/code/{provision_id}')
     def code_lookup(provision_id: str, division: str | None = Query(None, pattern='^[ABC]$')):
@@ -103,12 +112,13 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
             raise HTTPException(400, f'invalid provision id: {e}')
         if rec is None:
             raise HTTPException(404, 'provision not found')
-        return rec
+        return clip_body(rec)
 
     @app.post('/section-c', response_model=list[SectionCRow])
     def section_c(body: SectionCRequest):
         try:
-            return section_c_rows(body.provisions, code())
+            rows = section_c_rows(body.provisions, code())
+            return [SectionCRow.model_validate(item) for item in clip_body([row.model_dump() for row in rows])]
         except KeyError as e:
             raise HTTPException(404, e.args[0])
         except ValueError as e:

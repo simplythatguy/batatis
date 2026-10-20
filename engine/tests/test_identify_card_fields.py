@@ -121,8 +121,11 @@ def test_window_benchmark_uses_case_c_accepted_opening(tmp_path, monkeypatch):
     assert identified.status_code == 200
     card = identified.json()['articles'][0]
     assert card['provision_id'] == SENTENCE
-    assert card['snippet'] and len(card['snippet'].split()) <= 25
-    assert flat.startswith(card['snippet']) and card['snippet'] != flat
+    prose = card['snippet'].split(' … [clipped, see NBC')[0]
+    assert card['snippet'] and len(prose.split()) <= 25
+    assert flat.startswith(prose) and card['snippet'] != flat
+    assert card['snippet'].endswith('… [clipped, see NBC p.873]')
+    assert card['clipped'] is True
     assert 'quote' not in card and flat not in json.dumps(card)
     assert '380' not in json.dumps(card)
     assert '0.99' not in json.dumps(card['benchmark'])
@@ -148,10 +151,22 @@ def test_window_benchmark_uses_case_c_accepted_opening(tmp_path, monkeypatch):
     row = next(item for item in decided.json()['section_c_row'] if item['provision_id'] == SENTENCE)
     pair = next(item for item in row['pairs'] if item['function'] == 'F10' and item['objective'] == 'OS3.7')
     assert pair['bracket']
-    assert pair['function_text'] == codes.definition('F10')['title']
-    assert pair['objective_text'] == codes.definition('OS3.7')['title']
+
+    def _fits(served: str, source: str) -> None:
+        """Code words stay a prefix of the source. Past the budget, the string is the marker."""
+        if served.startswith('… [clipped, see NBC'):
+            return
+        head = served.split(' … [clipped, see NBC')[0]
+        assert source.startswith(head)
+        assert len(head.split()) <= 25
+        if served != source:
+            assert '… [clipped, see NBC' in served
+
+    _fits(pair['function_text'], codes.definition('F10')['title'])
+    _fits(pair['objective_text'], codes.definition('OS3.7')['title'])
     intent = sentence['intents'][0]['intents'][0]
-    assert any(intent in block['intents'] for block in row['intents'])
+    served = next(text for block in row['intents'] for text in block['intents'])
+    _fits(served, intent)
     assert 'provision' not in row
     saved = client.get(f'/cases/{case_id}').json()
     assert WINDOW in saved['provisions']

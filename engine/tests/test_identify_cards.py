@@ -219,10 +219,13 @@ def test_snippet_is_a_codedb_sentence_prefix_when_the_database_is_present():
     assert card['status'] == 'suggested' and card['verifier_status'] == 'suggested'
     assert card['decision'] is None and 'committed' not in card
     assert card['citation'] == codes.citation('9.10.15.5.(8)', 'B')
-    assert flat.startswith(card['snippet'])
-    assert len(card['snippet'].split()) <= 25
-    assert card['snippet'] in flat
+    prose = card['snippet'].split(' … [clipped, see NBC')[0]
+    assert flat.startswith(prose)
+    assert len(prose.split()) <= 25
+    assert prose in flat
     assert card['snippet'] != flat and 'quote' not in card
+    assert card['snippet'].endswith('… [clipped, see NBC p.%s]' % card['page'])
+    assert card['clipped'] is True
     assert card['page'] == codes.provision('9.10.15.5.(8)', 'B')['pdf_page']
     assert card['printing'] == '2nd'
     assert card['url'].startswith('https://nrc-publications.canada.ca/')
@@ -233,4 +236,4 @@ def test_snippet_is_a_codedb_sentence_prefix_when_the_database_is_present():
     assert card['benchmark']['required_unit'] == 'm'
     assert card['benchmark']['proposed_value'] is None and card['benchmark']['comparison'] is None
     assert card['explainer']['quote'] == card['snippet']
-    assert len(card['explainer']['quote'].split()) <= 25
+    assert len(card['explainer']['quote'].split(' … [clipped, see NBC')[0].split()) <= 25

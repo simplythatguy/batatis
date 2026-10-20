@@ -22,7 +22,9 @@ from .identify.offline import ProviderOutage, http_live, is_provider_outage
 from .identify.pipeline import run as identify_run
 from .identify.storeys import parse_storeys
 from .identify.title import short_title, title_should_replace
+from .llm_gate import Decision, authorize, client_ip_from, record
 from .models import Case, Fact, Source
+from .quotes import clip_body
 from .process_fields import ProcessField, process_fields
 from .professional import ProfessionalResult, professional_involvement
 from .section_c import section_c_rows
@@ -40,6 +42,44 @@ class SectionDRequest(BaseModel):
 class ConfirmRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
     provisions: list[str] = Field(min_length=1)
+
+
+# Worst-case reservation for one identify run (screen, rerank, verifier).
+# The dated snapshot ids price as these aliases inside the gate.
+_GATE_MODEL = 'gpt-4.1'
+_GATE_INPUT_TOKENS = 80_000
+_GATE_OUTPUT_TOKENS = 4_000
+
+
+def _priced(model: str) -> str:
+    if 'mini' in model:
+        return 'gpt-4.1-mini'
+    if model.startswith('gpt-4.1'):
+        return 'gpt-4.1'
+    return model
+
+
+def _release(decision: Decision) -> None:
+    record(model=_GATE_MODEL, input_tokens=0, output_tokens=0, reserved_usd=decision.reserved_usd)
+
+
+def _record_usage(raw: dict, decision: Decision) -> None:
+    """Replace the reservation with the tokens the provider actually reported."""
+    trace = raw.get('trace') if isinstance(raw, dict) else None
+    usage = trace.get('usage') if isinstance(trace, dict) else None
+    usage = usage if isinstance(usage, dict) else {}
+    by_model = usage.get('by_model') if isinstance(usage.get('by_model'), dict) else None
+    if not by_model:
+        record(model=_GATE_MODEL, input_tokens=int(usage.get('input_tokens') or 0),
+               output_tokens=int(usage.get('output_tokens') or 0), reserved_usd=decision.reserved_usd)
+        return
+    reserved = decision.reserved_usd
+    for model, slot in by_model.items():
+        if not isinstance(slot, dict):
+            continue
+        record(model=_priced(str(model)), input_tokens=int(slot.get('input_tokens') or 0),
+               output_tokens=int(slot.get('output_tokens') or 0), reserved_usd=reserved)
+        reserved = 0
 
 
 def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
@@ -162,27 +202,38 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
             return
         case.title = short_title(prose, case.facts, result)
 
-    def _identify_result(case_id: str, prose: str, facts, on_stage=None) -> dict:
+    def _identify_result(case_id: str, prose: str, facts, on_stage=None, client_ip: str | None = None) -> dict:
         case = cases().get(case_id)
         storeys_before = len(case.facts) if case is not None else 0
         title_before = case.title if case is not None else None
         if case is not None:
             _remember_storeys(case, prose)
             facts = case.facts
+        gate_source = None
         if http_live():
             if not default_db().exists():
                 raise CodeDbMissing()
-            try:
-                raw = identify_run(prose, facts=facts, on_stage=_stages(on_stage))
-                mode = 'live'
-            except Exception as exc:
-                if isinstance(exc, ProviderOutage) or is_provider_outage(exc):
-                    raw, mode = _without_provider(prose, facts, on_stage)
-                else:
-                    raise
+            decision = authorize(model=_GATE_MODEL, max_input_tokens=_GATE_INPUT_TOKENS,
+                                 max_output_tokens=_GATE_OUTPUT_TOKENS, client_ip=client_ip)
+            if not decision.allowed:
+                raw, mode = _without_provider(prose, facts, on_stage)
+                gate_source = decision.source
+            else:
+                try:
+                    raw = identify_run(prose, facts=facts, on_stage=_stages(on_stage))
+                    mode = 'live'
+                    _record_usage(raw, decision)
+                except Exception as exc:
+                    _release(decision)
+                    if isinstance(exc, ProviderOutage) or is_provider_outage(exc):
+                        raw, mode = _without_provider(prose, facts, on_stage)
+                    else:
+                        raise
         else:
             raw, mode = _without_provider(prose, facts, on_stage)
         result = present(raw, _codes_or_none(), mode, facts)
+        if gate_source:
+            result['source'] = gate_source
         if case is not None:
             _remember_title(case, prose, result)
             if case.title != title_before or len(case.facts) != storeys_before:
@@ -194,7 +245,7 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
             on_stage('done', result)
         return result
 
-    def _stream(case_id: str, prose: str, facts):
+    def _stream(case_id: str, prose: str, facts, client_ip: str | None = None):
         events: queue.Queue = queue.Queue()
 
         def on_stage(stage, payload=None):
@@ -202,7 +253,7 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
 
         def worker():
             try:
-                _identify_result(case_id, prose, facts, on_stage=on_stage)
+                _identify_result(case_id, prose, facts, on_stage=on_stage, client_ip=client_ip)
             except Exception as exc:
                 events.put(('error', {'message': type(exc).__name__}))
             finally:
@@ -228,10 +279,11 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
         if body.answers:
             apply_answers(case, body.answers)
             cases().put(case)
+        client_ip = client_ip_from(request)
         if 'text/event-stream' in request.headers.get('accept', ''):
-            return _stream(case_id, body.prose, case.facts)
+            return _stream(case_id, body.prose, case.facts, client_ip)
         try:
-            result = _identify_result(case_id, body.prose, case.facts)
+            result = _identify_result(case_id, body.prose, case.facts, client_ip=client_ip)
         except (CodeDbMissing, FileNotFoundError):
             raise HTTPException(503, 'code database not found') from None
         saved = cases().get(case_id)
@@ -249,9 +301,9 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
         return overlay_decisions(stored, get_case(case_id))
 
     @router.get('/cases/{case_id}/identify/stream', response_model=IdentifyResponse)
-    def identify_stream(case_id: str, prose: str = Query(min_length=1)):
+    def identify_stream(case_id: str, request: Request, prose: str = Query(min_length=1)):
         case = get_case(case_id)
-        return _stream(case_id, prose, case.facts)
+        return _stream(case_id, prose, case.facts, client_ip_from(request))
 
     @router.post('/cases/{case_id}/identify/confirm', response_model=Case)
     def confirm(case_id: str, body: ConfirmRequest):
@@ -269,7 +321,8 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
             raise HTTPException(404, {'message': 'citation not in the code database', 'provisions': missing})
         case.provisions = list(body.provisions)
         case.section_c = section_c_rows(body.provisions, codes)
-        return cases().put(case)
+        saved = cases().put(case)
+        return Case.model_validate(clip_body(saved.model_dump()))
 
     @router.post('/cases/{case_id}/identify/{provision_id}/decision', response_model=DecisionResponse)
     def identify_decision(case_id: str, provision_id: str, body: DecisionRequest):
@@ -291,6 +344,9 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
         except ValueError as exc:
             raise HTTPException(422, str(exc)) from None
         cases().put(case)
+        clipped = clip_body(stored)
+        stored.clear()
+        stored.update(clipped)
         cases().put_identify(case_id, stored)
         return stored
 

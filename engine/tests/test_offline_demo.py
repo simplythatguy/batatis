@@ -44,7 +44,9 @@ def test_no_key_serves_cached_demo_cases(tmp_path, monkeypatch):
         assert body['source'] == 'cache' and body['mode'] == 'cached_demo' and body['cached'] is True
         assert body['articles']
         assert all(article['suggested'] is False for article in body['articles'])
-        assert all(article['snippet'] and len(article['snippet'].split()) <= 25 for article in body['articles'])
+        assert all(
+            article['snippet'] and len(article['snippet'].split(' … [clipped, see NBC')[0].split()) <= 25
+            for article in body['articles'])
         assert 'compli' not in json.dumps(body).lower()
 
 

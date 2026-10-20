@@ -11,6 +11,7 @@ import re
 from engine.codes import CodeDbMissing, Codes
 from engine.identify.publication import publication
 from engine.identify.requirement import benchmark as requirement_benchmark
+from engine.quotes import clip_body
 
 _ARTICLE = re.compile(r'^(\d+(?:\.\d+){3}\.)')
 _SENTENCE = re.compile(r'^\d+(?:\.\d+){3}\.\(\d+\)$')
@@ -67,8 +68,10 @@ def present(result: dict, codes: Codes | None, mode: str, facts=None) -> dict:
     for index, article in enumerate(result.get('articles') or [], start=1):
         shaped.append(_card(article, index, stored, codes, result, mode, facts, source))
     result['articles'] = shaped
-    _guard_quotes(result)
     result['engineering_answer'] = _engineering_answer(result, codes, facts)
+    clipped = clip_body(result)
+    result.clear()
+    result.update(clipped)
     return result
 
 
@@ -198,18 +201,6 @@ def _label(codes: Codes | None, code: str) -> str | None:
     return title if isinstance(title, str) and title.strip() else None
 
 
-def _guard_quotes(node) -> None:
-    """No served quote is longer than 25 words. Article cards drop `quote` before this runs."""
-    if isinstance(node, dict):
-        if isinstance(node.get('quote'), str):
-            node['quote'] = _words(node['quote'])
-        for value in node.values():
-            _guard_quotes(value)
-    elif isinstance(node, list):
-        for item in node:
-            _guard_quotes(item)
-
-
 def _citation(sentence_id: str | None, article_id: str, stored: list[dict], codes: Codes | None) -> str | None:
     if sentence_id and codes is not None:
         record = _provision(codes, sentence_id)
@@ -332,8 +323,9 @@ def _annotate(card: dict, sentence_id: str | None, codes: Codes | None, facts, s
     record = _provision(codes, sentence_id) if sentence_id else None
     sentence = record.get('text') if record and record.get('id') == sentence_id else None
     if sentence:
-        snippet = _words(sentence)
-        card['snippet'] = snippet
+        # The full sentence is clipped once, at the response boundary, so a longer
+        # sentence keeps the copyright marker instead of a silent 25-word cut.
+        card['snippet'] = _flat(sentence)
         card['page'] = _page(record)
         objectives, functions, missing = _terms(record, codes)
         card['objectives'] = objectives
