@@ -1,0 +1,144 @@
+[
+  {
+    "id": "part9-travel-distance",
+    "description": "This is a house under Part 9. How far can an occupant travel inside the house to reach an exit?",
+    "must_cite": [
+      {"division": "B", "provision": "9.9.8.2.(1)", "role": "benchmark"}
+    ],
+    "must_not_cite": [
+      {
+        "division": "B",
+        "provision": "3.4.2.4.",
+        "prohibited_use": "as the Part 9 travel-distance limit",
+        "why": "That is a Part 3 travel-distance number, not the Part 9 limit."
+      },
+      {
+        "division": "B",
+        "provision": "9.9.8.1.",
+        "prohibited_use": "as the Part 9 travel-distance limit",
+        "why": "The Part 9 travel distance is Sentence 9.9.8.2.(1)."
+      }
+    ]
+  },
+  {
+    "id": "sprinkler-requirement",
+    "description": "A Part 3 building. Which provision decides that sprinklers are required, as distinct from how a sprinkler system is installed?",
+    "must_cite": [
+      {"division": "B", "provision": "3.2.2.18.(1)", "role": "benchmark"}
+    ],
+    "must_not_cite": [
+      {
+        "division": "B",
+        "provision": "3.2.5.12.",
+        "prohibited_use": "as the provision that decides sprinklers are required",
+        "why": "Whether sprinklers are required comes from the 3.2.2 classification article together with Sentence 3.2.2.18.(1)."
+      },
+      {
+        "division": "B",
+        "provision": "9.10.1.3.(8)",
+        "prohibited_use": "as the sprinkler requirement",
+        "why": "Sentence 9.10.1.3.(8) only points to Section 3.2.5. It does not decide that sprinklers are required."
+      }
+    ]
+  },
+  {
+    "id": "not-an-exit",
+    "description": "Where is the exit from this suite? Do not treat a room-egress rule, or a rule about openings beside an exterior exit stair, as the exit.",
+    "must_cite": [],
+    "must_not_cite": [
+      {
+        "division": "B",
+        "provision": "9.9.4.4.",
+        "prohibited_use": "as the exit",
+        "why": "Article 9.9.4.4. is openings near exterior exit stairs."
+      },
+      {
+        "division": "B",
+        "provision": "3.3.1.5.",
+        "prohibited_use": "as the exit",
+        "why": "Article 3.3.1.5. is room and suite egress, not the exit."
+      },
+      {
+        "division": "B",
+        "provision": "9.9.7.4.",
+        "prohibited_use": "as the exit",
+        "why": "Article 9.9.7.4. is room and suite egress, not the exit."
+      }
+    ]
+  },
+  {
+    "id": "egress-dwelling-only",
+    "description": "An office suite, not a dwelling, needs a second way out of the suite. Which egress provision applies to this occupancy?",
+    "must_cite": [],
+    "must_not_cite": [
+      {
+        "division": "B",
+        "provision": "9.9.9.1.",
+        "prohibited_use": "as egress for an occupancy other than a dwelling unit",
+        "why": "Article 9.9.9.1. applies to dwelling units only."
+      }
+    ]
+  },
+  {
+    "id": "group-c-sprinklered",
+    "description": "A sprinklered Group C residential building under Part 3. Which building classification article applies? Do not use a reserved article number.",
+    "must_cite": [
+      {"division": "B", "provision": "3.2.2.51.", "role": "benchmark"}
+    ],
+    "must_not_cite": [
+      {
+        "division": "B",
+        "provision": "3.2.2.50.",
+        "prohibited_use": "as the sprinklered Group C classification",
+        "why": "Article 3.2.2.50. is Reserved. Sprinklered Group C is Article 3.2.2.51."
+      }
+    ]
+  },
+  {
+    "id": "spatial-separation-by-building-type",
+    "description": "A house with no dwelling above another, beside a property line. Which spatial-separation subsection applies, and which sentence decides that?",
+    "must_cite": [
+      {"division": "B", "provision": "9.10.15.1.(1)", "role": "scope"}
+    ],
+    "must_not_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.14.",
+        "prohibited_use": "as the spatial-separation subsection for a building Sentence 9.10.15.1.(1) places under the house subsection",
+        "why": "Subsection 9.10.14 or 9.10.15 depends on the building type in Sentence 9.10.15.1.(1)."
+      }
+    ]
+  },
+  {
+    "id": "between-dwelling-units",
+    "description": "A fire separation is required between two dwelling units in the same house. Which article is the separation between dwelling units?",
+    "must_cite": [
+      {"division": "B", "provision": "9.10.9.16.", "role": "benchmark"}
+    ],
+    "must_not_cite": [
+      {
+        "division": "B",
+        "provision": "9.10.9.15.",
+        "prohibited_use": "as the separation between dwelling units",
+        "why": "Between dwelling units, cite Article 9.10.9.16., not Article 9.10.9.15."
+      }
+    ]
+  },
+  {
+    "id": "part9-floor-rating",
+    "description": "A Part 9 house. What fire-resistance rating applies to the floor assembly?",
+    "must_cite": [
+      {"division": "B", "provision": "9.10.8.1.", "role": "benchmark"}
+    ],
+    "must_not_cite": []
+  },
+  {
+    "id": "stair-rise-run",
+    "description": "What rise and run are permitted for a stair in a house?",
+    "must_cite": [
+      {"division": "B", "provision": "Table 9.8.4.1.", "role": "benchmark"},
+      {"division": "B", "provision": "Table 9.8.4.2.", "role": "benchmark"}
+    ],
+    "must_not_cite": []
+  }
+]
