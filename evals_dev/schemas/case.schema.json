@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Engine case JSON",
+  "type": "object",
+  "required": ["id", "facts", "provisions", "section_c"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "facts": {"type": "array"},
+    "provisions": {"type": "array", "items": {"type": "string"}},
+    "section_c": {"type": "array"},
+    "evidence": {"type": "array"},
+    "gaps": {"type": "array"}
+  }
+}

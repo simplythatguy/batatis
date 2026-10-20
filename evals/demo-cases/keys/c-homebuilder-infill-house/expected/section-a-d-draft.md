@@ -19,7 +19,7 @@
 | Description | Bedroom 3 (2nd floor) sole window W-07, casement, unobstructed opening 400 × 780 mm = **0.312 m²** where 0.35 m² is required; minimum dimension 400 mm (≥380 mm). House unsprinklered. Fall protection: `[REQUIRED: ASTM F2090 WOCD per STANDATA 23-BCV-001 / Edmonton B23-02, or a guard per 9.8.8.1.(4)/(5)]`. | ⚠ The opening basis needs confirming |
 
 ## Section C
-**Applicable code:** NBC(AE) 2023, Division B (2nd printing in force; rows checked against the 1st printing).
+**Applicable code:** National Building Code (Alberta Edition) (NBC(AE)) 2023, Division B (2nd printing in force; rows checked against the 1st printing).
 
 | Article | Objective | Function | Intent statement *(NBC 2020 national explanatory supplement, not Alberta law; not independently checked again)* | Source |
 |---|---|---|---|---|

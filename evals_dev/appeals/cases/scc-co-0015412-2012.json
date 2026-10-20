@@ -1,0 +1,95 @@
+{
+  "id": "scc-co-0015412-2012",
+  "title": "Building \u2013 Distance of Roof Soffits and the Exposing Building Face of a Detached Garage March 2012",
+  "decision_date": "2012-03-28",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2012/REDACTED_Bldg_Limiting%20Distance%20of%20Roof%20Soffits%20and%20the%20Exposing%20Building%20Face%20of%20a%20Detached%20Garage%20March%202012_0015412.pdf",
+  "applicant_type": null,
+  "topic": "part9-spatial-separation",
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "A property owner built a detached garage whose roof soffit projected closer to the property line than the 0.45 m allowed. The as-built location also differed from the permit plans.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "spatial separation",
+    "roof soffits",
+    "HIRF",
+    "permit conditions",
+    "variance route"
+  ],
+  "missing_info": [],
+  "edition_original": "ABC 2006",
+  "other_codes": [],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": null,
+    "basis_type": "not applicable",
+    "basis": "not applicable: appeal of an order; the panel pointed to a variance as an available route"
+  },
+  "outcome": "varied",
+  "outcome_summary": "Directives were unchanged, but the deadline moved from 31 Jan 2012 to 30 June 2012, giving time to comply or seek a variance.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "2.2.9.9.(1)",
+      "source_code": "ABC 2006",
+      "source_division": "C",
+      "source_part": "Part 2",
+      "parsed_id": "2.2.9.9.(1)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "9.10.15.1.(9)",
+      "source_code": "ABC 2006 (HIRF provisions)",
+      "source_division": "B",
+      "source_part": "Part 9",
+      "parsed_id": "9.10.15.1.(9)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "9.10.15.5.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 9",
+      "parsed_id": "9.10.15.5.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    }
+  ],
+  "quotes": [],
+  "professional_involvement": {
+    "addressed": false,
+    "weak_flag": null,
+    "label_strength": null,
+    "facts": {}
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": null,
+    "engineering_reason": "",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}
