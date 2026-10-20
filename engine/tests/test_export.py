@@ -7,6 +7,7 @@ and every value the form shows only as a reference must appear in the appendix t
 import io
 import re
 import shutil
+from pathlib import Path
 
 import pypdf
 import pypdfium2 as pdfium
@@ -16,9 +17,10 @@ from engine.codes import Codes
 from engine.export import ExportBlocked, FormMismatch, export_case, form_path, load_field_map
 from engine.export.sample import FACTS, sample_case
 from engine.export.text import faithful_font_text, pdf_safe
+from engine.fact_extraction import apply_patch, record_description
+from engine.models import INTENT_LABEL, Case, Fact, Gap, Source
 from engine.process_fields import process_fields
 from engine.section_d import supporting_documents
-from engine.models import INTENT_LABEL, Fact, Gap, Source
 
 FORM = form_path()
 pytestmark = pytest.mark.skipif(
@@ -101,6 +103,38 @@ def test_blocks_on_unconfirmed_facts_and_blocking_gaps(case, codes):
     assert 'risk assessment not written' in appendix_text(draft.pdf, draft.form_pages)
     assert '99' not in norm(texts[0]).split()          # proposed value never reaches the form
     assert 'Lot' not in {p.field for p in draft.placements}  # the older lot value must not silently return
+
+
+class _CitationCodes:
+    """Enough of Codes for a draft appendix. No code database."""
+
+    def provision(self, provision_id, division=None):
+        return {'id': provision_id, 'citation': f'NBC(AE) 2023 p2, Div {division or "C"}, {provision_id}', 'text': ''}
+
+
+def test_case_b_permit_is_blank_until_the_fact_is_confirmed(monkeypatch):
+    """Issue #14 Case B. An unconfirmed permit stays off the form and keeps its gap."""
+    monkeypatch.setattr('engine.export.scc.check_completeness', lambda case, codes: [])
+    brief = Path(__file__).resolve().parents[2] / 'evals/demo-cases/b-contractor-firestop-nonconformance/input/project-brief.md'
+    case = Case(title='Case B')
+    record_description(case, brief.read_text())
+    codes = _CitationCodes()
+    draft = export_case(case, draft=True, codes=codes)
+    assert 'Permit' not in {p.field for p in draft.placements}
+    assert 'BP-0000-00000' not in norm(page_texts(draft.pdf)[0])
+    assert any('unconfirmed' in item and 'permit_number' in item for item in draft.open_items)
+
+    apply_patch(case, {'permit_number': 'BP-0000-00000'})
+    confirmed = export_case(case, draft=True, codes=codes)
+    shown = {p.field: norm(' '.join(p.lines)) for p in confirmed.placements}
+    assert shown['Permit'] == 'BP-0000-00000'
+    assert not any('unconfirmed' in item and 'permit_number' in item for item in confirmed.open_items)
+
+    screen = Case(title='Section B permit id')
+    screen.facts.append(Fact(field='permit', value='BP-0000-00000', kind='pointed', status='confirmed',
+                             source=Source(type='user_text', ref='applicant', quote='BP-0000-00000')))
+    from_screen = export_case(screen, draft=True, codes=codes)
+    assert {p.field: norm(' '.join(p.lines)) for p in from_screen.placements}['Permit'] == 'BP-0000-00000'
 
 
 def test_final_export_has_no_widgets_or_help_popups(final):
