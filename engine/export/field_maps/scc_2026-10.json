@@ -20,7 +20,7 @@
     "RGE": {"fact": "ats_rge", "section": "B", "label": "ATS RGE"},
     "MER": {"fact": "ats_mer", "section": "B", "label": "ATS MER"},
     "Code or Standard": {"fact": "code_or_standard", "section": "C", "label": "Applicable Code or Standard",
-                         "default": "National Building Code - 2023 Alberta Edition (2nd printing), Division B"},
+                         "default": "NBC(AE) 2023"},
     "Owner Print": {"fact": "owner_name", "section": "Signatures", "label": "Owner's name (please print)"},
     "Date1": {"fact": "owner_signature_date", "section": "Signatures", "label": "Owner's signature date"},
     "Owner Rep Print": {"fact": "owner_rep_name", "section": "Signatures", "label": "Owner's representative's name (please print)"},

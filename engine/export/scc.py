@@ -25,8 +25,9 @@ from ..codes import Codes
 from ..completeness import check_completeness
 from ..process_fields import PROCESS_ALIASES
 from ..section_c import section_c_rows
-from ..section_d import supporting_documents
-from .text import fit, pdf_safe
+from ..section_d import applicant_statements, supporting_documents
+from .edition import code_or_standard_value
+from .text import fit, fit_words, pdf_safe
 
 DEFAULT_FORM = Path(__file__).resolve().parents[2] / 'reference' / 'guides' / 'SCC-Variance-Form.pdf'
 MAP_DIR = Path(__file__).parent / 'field_maps'
@@ -102,7 +103,7 @@ def load_form(path: Path | str | None, fmap: dict) -> bytes:
 
 _ALIASES = {
     'owner_name': ('owner_name', 'owner', 'section_a.owner_name'),
-    'owner_rep_name': ('owner_rep_name', 'representative', 'applicant_name'),
+    'owner_rep_name': ('owner_rep_name', 'representative'),
     'request_date': ('request_date', 'application_date', 'date', 'section_a.date'),
     'mailing_address': ('mailing_address', 'mailingAddress'),
     'municipal_address': ('municipal_address', 'municipalAddress', 'civic_address', 'address'),
@@ -171,7 +172,24 @@ class _Plan:
     docs_in_form: int = 0
 
 
-def _plan(case: Case, values: dict, fmap: dict, rects: dict) -> _Plan:
+def owner_representative_name(values: dict) -> str | None:
+    """Owner's Representative is an explicit name, or applicant_name only after applicant_role=owner_representative."""
+    explicit = values.get('owner_rep_name')
+    if isinstance(explicit, str) and explicit.strip():
+        return explicit.strip()
+    if values.get('applicant_role') == 'owner_representative':
+        name = values.get('applicant_name')
+        if isinstance(name, str) and name.strip():
+            return name.strip()
+    return None
+
+
+def _plan(case: Case, values: dict, fmap: dict, rects: dict, codes=None) -> _Plan:
+    values = dict(values)
+    representative = owner_representative_name(values)
+    if representative:
+        values['owner_rep_name'] = representative
+    values['code_or_standard'] = code_or_standard_value(values.get('code_or_standard'), codes)
     plan = _Plan(rects=rects)
     for slot in fmap['section_c_rows']:
         plan.sizes.update({slot[k]: SECTION_C_SIZES for k in ('article', 'objective', 'function', 'intent')})
@@ -218,11 +236,17 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict) -> _Plan:
         put(slot['function'], ', '.join(fns) if fns else 'No table row', ref, None, see)
         notes = {'direct': '', 'inherited from parent': f'Attribution inherited from {row.attributed_via}. ',
                  'no row in the attribution table': 'No row in the NBC(AE) attribution table. '}
-        intent = notes[row.attribution_status]
-        if row.differs:
-            intent += 'The 2020 intent is attributed differently from NBC(AE) 2023. '
-        intent += f'{INTENT_LABEL}: Appendix {ref}.' if row.intents else f'No NBC 2020 intent statement; Appendix {ref}.'
-        put(slot['intent'], intent, ref, None, see)
+        intent_text = ' '.join(part for block in row.intents for part in block.intents).strip()
+        if intent_text:
+            lead = notes[row.attribution_status]
+            if row.differs:
+                lead += 'The 2020 intent is attributed differently from NBC(AE) 2023. '
+            full = (lead + intent_text).strip()
+            shown = fit_words(full, rects[slot['intent']], *plan.sizes.get(slot['intent'], ()))
+            put(slot['intent'], shown or see, ref, full, see)
+        else:
+            intent = notes[row.attribution_status] or 'No NBC 2020 intent statement is attached to this provision.'
+            put(slot['intent'], intent, ref, intent, see)
     plan.rows_in_form = len(shown_rows)
     if len(rows) > len(slots):
         k0, n = len(slots), len(rows)
@@ -234,6 +258,7 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict) -> _Plan:
 
     dslots = fmap['section_d_rows']
     docs = [(pdf_safe(d.title), pdf_safe(d.responsible_party)) for d in supporting_documents(case)]
+    docs += [(pdf_safe(s.title), pdf_safe(s.responsible_party)) for s in applicant_statements(case)]
     shown_docs = docs if len(docs) <= len(dslots) else docs[:len(dslots) - 1]
     for n, (slot, (doc, who)) in enumerate(zip(dslots, shown_docs), start=1):
         ref = f'D-{n}'
@@ -326,7 +351,7 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
     case = _canonical_case(case, codes)
     blank_form = load_form(form, fmap)
     values = confirmed_values(case)
-    plan = _plan(case, values, fmap, _rects(blank_form, fmap))
+    plan = _plan(case, values, fmap, _rects(blank_form, fmap), codes)
     filled, placements = _fill_and_flatten(blank_form, plan)
     appendix = build_appendix(case, plan, values, fmap, codes=codes, open_items=reasons if draft else [])
 

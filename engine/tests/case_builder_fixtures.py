@@ -18,6 +18,7 @@ def complete_case(provisions=None):
     values = dict(owner_name='Synthetic owner', application_date='2026-10-20',
         civic_address='123 Synthetic Street', legal_description='Synthetic lot 1 block 2 plan 3',
         representative='Synthetic applicant', mailing_address='123 Synthetic Street', scope='site',
+        not_site_specific=False,
         alternative_description='Synthetic test departure, no technical conclusion.',
         rationale='Synthetic applicant rationale.', risk_assessment='Synthetic applicant risk assessment.',
         mitigating_measures='Synthetic applicant measures.', assumptions_and_limits='Synthetic applicant limits.',

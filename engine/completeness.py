@@ -31,7 +31,7 @@ _CORE = (
     ('D02', 'A', 'application_date', 'application date', ('application_date', 'request_date', 'date', 'section_a.date')),
     ('D03', 'B', 'civic_address', 'civic address', ('civic_address', 'municipal_address', 'municipalAddress', 'address')),
     ('D04', 'B', 'legal_description', 'legal description', ('legal_description', 'legalDescription', 'section_b.legal_description')),
-    ('admin', 'A', 'representative', 'applicant representative', ('representative', 'owner_rep_name', 'applicant_name')),
+    ('admin', 'A', 'representative', 'applicant representative', ('representative', 'owner_rep_name')),
     ('admin', 'A', 'mailing_address', 'mailing address', ('mailing_address', 'mailingAddress')),
     ('admin', 'B', 'alternative_description', 'description of the proposed alternative', ('alternative_description', 'alternative')),
     ('admin', 'B', 'scope', 'site or jurisdiction-wide scope', ('scope',)),
@@ -63,6 +63,20 @@ def _edition_crosswalks() -> tuple[dict, ...]:
                  and 'successor' in a.get('status', ''))
 
 
+def _confirmed_text(case: Case, field: str) -> str | None:
+    value = confirmed_value(case, field)
+    return value.strip() if isinstance(value, str) and value.strip() else None
+
+
+def _applicant_is_owner_rep(case: Case) -> bool:
+    return confirmed_value(case, 'applicant_role') == 'owner_representative' and _confirmed_text(case, 'applicant_name') is not None
+
+
+def _not_site_specific_answered(case: Case) -> bool:
+    fact = latest_fact(case, 'not_site_specific')
+    return fact is not None and fact.export()['status'] == 'confirmed' and fact.value in (True, False)
+
+
 def check_completeness(case: Case, codes: Codes, *,
                        professional: ProfessionalResult | None = None,
                        documents: list[SupportingDocument] | None = None) -> list[Gap]:
@@ -82,6 +96,8 @@ def check_completeness(case: Case, codes: Codes, *,
                 if all(not _missing(part) for part in parts):
                     value = ' / '.join(parts)
                     break
+        if field == 'representative' and _applicant_is_owner_rep(case):
+            continue
         if not _missing(value):
             continue
         presence = confirmed_value(case, f'presence.{field}', f'review.{field}.presence')
@@ -104,6 +120,15 @@ def check_completeness(case: Case, codes: Codes, *,
             add('D02', 'A', name, f'the {name.replace("_", " ")}.', 'Ask the signatory to supply the signature date.')
     if case.jurisdiction is None:
         add('admin', 'B', 'jurisdiction', 'the reviewing jurisdiction.', 'Ask which authority will receive the application.')
+    if _confirmed_text(case, 'applicant_name') and not _applicant_is_owner_rep(case):
+        add('admin', 'A', 'applicant_role', "confirmation that the named applicant is the owner's representative.",
+            'Record a confirmed fact applicant_role with value owner_representative before that name is written as '
+            "Owner's Representative. If that is not the role, leave Owner's Representative blank.")
+    if not _not_site_specific_answered(case):
+        add('admin', 'B', 'not_site_specific',
+            'an answer to whether this request is for a jurisdiction and is not site-specific.',
+            'Record a confirmed fact not_site_specific as true or false. This is the Appendix 1 question. '
+            'It does not mean the application was submitted to the Safety Codes Council.')
 
     process = process_fields(case, codes)
     for field in process:

@@ -28,6 +28,7 @@ FACTS = {
     'municipal_address': '1234 Sample Crescent SW, Calgary, AB T2X 0Y0',
     'lot': '14', 'block': '7', 'plan': '2610001',
     'scope': 'site',
+    'not_site_specific': False,
     'alternative_description': 'SYNTHETIC TEST: Continuous exterior sheathing insulation on a Part 9 wood-frame house. '
                                'This exercises administrative fields and contains no technical equivalency conclusion.',
     'rationale': 'SYNTHETIC applicant rationale: test an exterior-insulation departure against the selected benchmark.',

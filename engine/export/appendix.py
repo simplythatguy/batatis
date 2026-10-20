@@ -21,7 +21,9 @@ from reportlab.platypus import KeepTogether, Paragraph, SimpleDocTemplate, Space
 
 from ..models import INTENT_LABEL, Case, SectionCRow
 from ..process_fields import process_fields
-from ..section_d import section_d_plan, supporting_documents
+from ..section_d import applicant_statements, section_d_plan, supporting_documents
+from .article_notes import notes_for
+from .edition import edition_label
 from .text import faithful_font_text
 
 INK = colors.HexColor('#1f2328')
@@ -71,7 +73,7 @@ def _table(header: list[str], rows: list[list[str]], widths: list[float]) -> Tab
     return t
 
 
-def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
+def _row_story(k: int, row: SectionCRow, codes, in_form: bool, case: Case | None = None) -> list:
     out = [Paragraph(f'C-{k}&nbsp;&nbsp;{escape(row.provision_id)}', H3),
            _kv('Citation', row.citation),
            _kv('On the form', f'row {k}' if in_form else 'appendix only (more than five rows)')]
@@ -89,6 +91,14 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
     else:
         out.append(_p('The NBC(AE) 2023 attribution table has no row for this provision, so no objective or '
                       'functional statement is attributed to it here.'))
+    note = notes_for(case, row, codes) if case is not None else None
+    if note is not None:
+        out.append(_kv('Explainer', note.explainer))
+        out.append(_kv('Benchmark acceptable solution', note.benchmark))
+        if note.citation:
+            out.append(_kv('Code database citation', note.citation))
+        if note.source_url:
+            out.append(_kv('NRC source', note.source_url))
     if codes is not None:
         rec = codes.provision(row.provision_id, 'B')
         if rec and rec.get('text'):
@@ -113,9 +123,9 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
 def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, open_items: list[str]) -> bytes:
     story: list = [Paragraph('Appendix to the Variance Form for Proposed Alternative Solution', H1),
                    _p(f'Case {case.title or ""} ({case.id}). Generated {date.today().isoformat()} by Batatis with '
-                      f'field map {fmap["version"]}. Code references are to the National Building Code - 2023 '
-                      'Alberta Edition, 2nd printing (NBC(AE) 2023). This appendix lists what the application '
-                      'cites; it does not state that the proposed design complies.', SMALL)]
+                      f'field map {fmap["version"]}. Code references are to {edition_label(codes)}. '
+                      'This appendix lists what the application cites; it does not state that the proposed design complies.',
+                      SMALL)]
 
     if open_items:
         story += [Paragraph('Open items (draft export)', H2),
@@ -154,15 +164,20 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
     if not case.section_c:
         story.append(_p('No provisions identified.'))
     for k, row in enumerate(case.section_c, start=1):
-        story += _row_story(k, row, codes, k <= plan.rows_in_form)
+        story += _row_story(k, row, codes, k <= plan.rows_in_form, case)
 
     docs = supporting_documents(case)
+    statements = applicant_statements(case)
     story.append(Paragraph('D. Supporting documentation', H2))
-    if docs:
+    if docs or statements:
+        rows = [[f'D-{n}', d.title, d.responsible_party or '(not given)',
+                 f'row {n}' if n <= plan.docs_in_form else 'appendix only']
+                for n, d in enumerate(docs, start=1)]
+        rows += [[f'D-{n}', f'{s.title} ({s.label})', s.responsible_party or '(not given)',
+                  f'row {n}' if n <= plan.docs_in_form else 'appendix only']
+                 for n, s in enumerate(statements, start=len(docs) + 1)]
         story.append(_table(['Ref', 'Name of supporting documentation', 'Responsible', 'On the form'],
-                            [[f'D-{n}', d.title, d.responsible_party or '(not given)', f'row {n}' if n <= plan.docs_in_form else 'appendix only']
-                             for n, d in enumerate(docs, start=1)],
-                            [0.5 * inch, 3.1 * inch, 2.4 * inch, 1.0 * inch]))
+                            rows, [0.5 * inch, 3.1 * inch, 2.4 * inch, 1.0 * inch]))
         evidence = section_d_plan(case, codes, docs) if codes is not None else None
         labels = {item.id: f'{item.provision_id}, {item.function or "no table function"} / '
                            f'{item.objective or "no table objective"}' for item in evidence.items} if evidence else {}
@@ -175,8 +190,19 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
             linked = list(dict.fromkeys(labels[key] for key in doc.item_ids if key in labels))
             block.append(_kv('Section C performance issues addressed', '; '.join(linked) or '(no matched issue link)'))
             story.append(KeepTogether(block))
-        story.append(_p('An attachment and its links record what the applicant supplied. The responsible designer '
-                        'and authority must review its authenticity, scope, limitations and technical adequacy.', SMALL))
+        for n, statement in enumerate(statements, start=len(docs) + 1):
+            linked = list(dict.fromkeys(labels[key] for key in statement.item_ids if key in labels))
+            story.append(KeepTogether([
+                Paragraph(f'D-{n}&nbsp;&nbsp;Applicant-typed statement', H3),
+                _kv('Label', statement.label),
+                _p(statement.text),
+                _kv('Source', statement.source_ref),
+                _kv('Section C performance issues addressed', '; '.join(linked) or '(no matched issue link)'),
+            ]))
+        story.append(_p('An attachment and its links record what the applicant supplied. A statement labelled '
+                        'stated by applicant, not verified is not a verified document and is not professional evidence. '
+                        'The responsible designer and authority must review authenticity, scope, limitations and technical adequacy.',
+                        SMALL))
     else:
         story.append(_p('No supporting documents listed.'))
 

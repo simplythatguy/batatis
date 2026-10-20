@@ -72,6 +72,37 @@ def wrap(text: str, width: float, size: float) -> list[str] | None:
     return lines
 
 
+CONTINUED_IN_APPENDIX = '… (continued in appendix)'
+
+
+def fit_words(text: str, rect: tuple[float, float, float, float], max_size: float = MAX_SIZE,
+              min_size: float = MIN_SIZE) -> str:
+    """Fit text in a form cell, cutting only on a word boundary.
+
+    The form font has no ellipsis glyph, so the continuation marker is stored as
+    the latin-1 fallback of ``CONTINUED_IN_APPENDIX``.
+    """
+    shown = pdf_safe(text)
+    if not shown:
+        return ''
+    if fit(shown, rect, max_size, min_size) is not None:
+        return shown
+    suffix = pdf_safe(CONTINUED_IN_APPENDIX)
+    words = shown.split(' ')
+    best = suffix if fit(suffix, rect, max_size, min_size) is not None else ''
+    lo, hi = 0, len(words)
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        head = ' '.join(words[:mid]).strip()
+        candidate = f'{head} {suffix}'.strip() if head else suffix
+        if candidate and fit(candidate, rect, max_size, min_size) is not None:
+            best = candidate
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return best
+
+
 def fit(text: str, rect: tuple[float, float, float, float], max_size: float = MAX_SIZE,
         min_size: float = MIN_SIZE) -> tuple[list[str], float] | None:
     width = rect[2] - rect[0] - H_PAD
