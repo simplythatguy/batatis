@@ -38,7 +38,7 @@ Batatis never types a fact; it points to one. Every value on screen is **exact**
 
 1. Every citation is built from the database (`lookup().citation`) and passes the citation validator.
 2. Section C values equal the attribution tables, checked against an independent re-extraction of the tables. The exported PDF shows the same text: a test renders the PDF and compares the extracted text.
-3. Where a table has no row for the article (for example Article 9.10.14.2.), Section C says so. Where the national 2020 intent statement is attributed differently from NBC(AE) 2023 (64 provisions), Section C labels the difference.
+3. Where a table has no row for the article (for example Article 9.10.14.2.), Section C says so. Where the national 2020 intent statement is attributed differently from NBC(AE) 2023 (8 provisions after the day-1 parser fix; 64 before it), Section C labels the difference.
 4. No Section A or B value appears without a source. Export stays blocked while a required field is empty or a proposed item is unconfirmed.
 5. Batatis never writes the officer's decision, the risk assessment or mitigating measures, or any statement that a design complies.
 
