@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from engine.api import create_app
 from engine.models import Case, Source
 from engine.section_d import ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER
-from engine.section_d_flag_eval import RULE_IDS, main
+from engine.section_d_flag_eval import RULE_IDS, flag_label, flag_question, load_codes, main, score
 from engine.section_d_issues import PROCESS_RULES, PROFESSIONAL_RULES, section_d_issues
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import fact
@@ -221,17 +221,16 @@ def test_eval_script_prints_in_sample_wilson_table(capsys):
     assert 'out_of_sample: evals_dev/appeals (built on another branch; not scored here)' in out
     assert 'held-out: evals_dev/section_d_heldout' in out
     assert 'held-out gold: model-checked' in out
-    assert 'held-out rules_only: 6/8 [0.4093, 0.9285]' in out
     assert 'held-out rules_plus_unknown: 7/8 [0.5291, 0.9776]' in out
-    assert 'held-out always_unknown: 1/8 [0.0224, 0.4709]' in out
-    assert 'held-out misses rules_plus_unknown: hold-004 gold=depends system=no' in out
+    assert 'held-out (post-fix, no longer blind for missing-fact cases) rules_plus_unknown: 4/8 [0.2152, 0.7848]' in out
+    assert 'hold-004' not in out.split('held-out (post-fix, no longer blind for missing-fact cases) misses')[-1]
     assert 'dev-050' in Path('engine/section_d_flag_eval.py').read_text()
     assert 'winner: rules_plus_unknown' in out
     assert 'under_flag_target: 0' in out
     assert 'note: rules_only abstains with depends; that label is counted in the unknown column' in out
     plus = next(line for line in out.splitlines() if line.startswith('rules_plus_unknown'))
-    assert '60/60 [' in plus and ', 1.0]' in plus
-    assert re.search(r'\]\s+0\s+17\s+0\s*$', plus)
+    assert '50/60 [' in plus
+    assert re.search(r'\]\s+0\s+27\s+0\s*$', plus)
     only = next(line for line in out.splitlines() if line.startswith('rules_only '))
     assert '55/60 [' in only
     assert re.search(r'\]\s+1\s+13\s+0\s*$', only)
@@ -239,7 +238,7 @@ def test_eval_script_prints_in_sample_wilson_table(capsys):
     assert '17/60 [' in baseline
     assert re.search(r'\]\s+0\s+60\s+0\s*$', baseline)
     assert 'unknown_rate rules_only: 13/60 [' in out
-    assert 'unknown_rate rules_plus_unknown: 17/60 [' in out
+    assert 'unknown_rate rules_plus_unknown: 27/60 [' in out
     assert 'unknown_rate always_unknown: 60/60 [' in out and ', 1.0]' in out
     assert 'confident_wrong rules_only: 5/60 [' in out
     assert 'confident_wrong rules_plus_unknown: 0/60 [' in out
@@ -249,7 +248,7 @@ def test_eval_script_prints_in_sample_wilson_table(capsys):
     assert 'confusion always_unknown  rows=gold  columns=system yes unknown no' in out
     assert re.search(r'confusion rules_only.*\n  yes\s+32\s+0\s+1\n  depends\s+0\s+13\s+4\n  no\s+0\s+0\s+10\n', out)
     assert re.search(
-        r'confusion rules_plus_unknown.*\n  yes\s+33\s+0\s+0\n  depends\s+0\s+17\s+0\n  no\s+0\s+0\s+10\n', out)
+        r'confusion rules_plus_unknown.*\n  yes\s+33\s+0\s+0\n  depends\s+0\s+17\s+0\n  no\s+0\s+10\s+0\n', out)
     assert re.search(
         r'confusion always_unknown.*\n  yes\s+0\s+33\s+0\n  depends\s+0\s+17\s+0\n  no\s+0\s+10\s+0\n', out)
     assert 'gold_yes_as_unknown rules_plus_unknown: none' in out
@@ -276,6 +275,23 @@ def test_heldout_gold_was_written_from_repo_limits():
         assert '9.23.1.1' not in json.dumps(case)
         assert case['authoring']['gold_written'] == 'before any system run'
         assert case['authoring']['label'] == 'model-checked'
+
+
+def test_missing_deciding_fact_is_unknown_with_a_question():
+    codes, _codedb = load_codes()
+    missing_span = json.loads(Path('evals_dev/section_d_heldout/hold-004.json').read_text())
+    assert flag_label(missing_span, codes, 'rules_plus_unknown') == 'unknown'
+    question = flag_question(missing_span, codes, 'rules_plus_unknown')
+    assert question and 'span' in question.casefold()
+    assert flag_label(json.loads(Path('evals_dev/section_d_heldout/hold-002.json').read_text()), codes, 'rules_plus_unknown') == 'yes'
+    assert flag_label(json.loads(Path('evals_dev/section_d_heldout/hold-005.json').read_text()), codes, 'rules_plus_unknown') == 'yes'
+    assert flag_label(json.loads(Path('evals_dev/section_d_heldout/hold-006.json').read_text()), codes, 'rules_plus_unknown') == 'yes'
+    issue = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact('occupancy', 'single_family')]), codes_with_rules())[0]
+    assert issue.practice_of_engineering.value == 'unknown'
+    assert issue.practice_of_engineering.question
+    dev = score(codes)
+    assert dev['rules_plus_unknown'].scored == 60
+    assert dev['rules_plus_unknown'].under_flag == 0
 
 
 def test_claim_blocklist_matches_compliance_and_safety_claims():

@@ -118,4 +118,5 @@ A live response copies the citation string the code database returns. The placeh
 | Status | When |
 | --- | --- |
 | 404 | The case does not exist, or a Division C rule the screen names is missing from the code database. |
+| 503 | The code database is not available. Body: `{"detail": "code database not found"}`. |
 | 200 | An unknown Division B token does not 404. It returns `provision: null` and a question. |

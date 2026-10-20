@@ -4,11 +4,13 @@
 
 `rules_only` fills unstated component facts with "not triggered" and returns professional.py's
 yes/no/depends. `rules_plus_unknown` keeps that screen, records a stated span above 12.20 m as
-Part 4 design (cited only as Div C 2.4.1.2.(1) from professional.py), and returns unknown instead
-of no when a deciding fact was not stated.
+Part 4 design (cited only as Div C 2.4.1.2.(1) from professional.py), and returns unknown with a
+question when span, area, storeys, occupancy, or Part 4 design is missing. It does not default
+those facts to a boolean. A rule that already resolves to yes still returns yes.
 
 The gold labels are model-checked, not human-reviewed. `rules_plus_unknown` was written while
-looking at this same development set, so the agreement is in-sample. There is no held-out split.
+looking at this same development set, so agreement on those 60 cases is in-sample. The eight-case
+limit check is reported separately and is no longer blind for missing-fact cases.
 
 Gold `depends` matches system `unknown`. Under-flag is gold yes and system no. A case is skipped
 when codedb (or the rule lookup standing in for it) cannot resolve a provision the screen asks for.
@@ -27,6 +29,15 @@ from .section_d_issues import PART9_MAX_SPAN_M, PROCESS_RULES, PROFESSIONAL_RULE
 
 CASES = Path(__file__).resolve().parents[1] / 'evals_dev' / 'cases'
 HELDOUT = Path(__file__).resolve().parents[1] / 'evals_dev' / 'section_d_heldout'
+# Recorded before the missing-fact fix. hold-004 was the miss. Do not recompute this line.
+_BLIND_HELDOUT_RULES_PLUS = '7/8 [0.5291, 0.9776]'
+_MISSING_QUESTION = {
+    'span': 'What is the span in metres?',
+    'area': 'What is the building area in square metres, not the sum of every floor?',
+    'storeys': 'How many storeys does the building have?',
+    'occupancy': 'What is the confirmed occupancy or building type?',
+    'part4_design': 'Is any design carried out under Part 4, including beams, connections or foundations?',
+}
 _HEADLINE = (
     'Engineer-needed flag: {matched}/{scored} agreement on the model-checked dev set (in-sample), '
     '{under_flag} under-flag, {unknown} unknowns sent to the applicant.'
@@ -252,6 +263,22 @@ def _plain_exemption(data: dict) -> bool:
     return False
 
 
+def missing_deciding_facts(facts: ProfessionalFacts, signals: Signals) -> tuple[str, ...]:
+    """Span, area, storeys, occupancy, and Part 4 design. None of these is defaulted to a boolean."""
+    missing = []
+    if signals.span_m is None:
+        missing.append('span')
+    if facts.building_area_m2 is None:
+        missing.append('area')
+    if facts.storeys is None:
+        missing.append('storeys')
+    if facts.occupancy is None:
+        missing.append('occupancy')
+    if facts.part4_design is None:
+        missing.append('part4_design')
+    return tuple(missing)
+
+
 def prepare(facts: ProfessionalFacts, signals: Signals, variant: str) -> ProfessionalFacts:
     data = facts.model_dump()
     # This span handoff came from development case dev-050 (stated 18 m span, gold yes).
@@ -259,8 +286,16 @@ def prepare(facts: ProfessionalFacts, signals: Signals, variant: str) -> Profess
     # provision stays Div C 2.4.1.2.(1) from engine/professional.py.
     if variant == 'rules_plus_unknown' and signals.span_m is not None and signals.span_m > PART9_MAX_SPAN_M:
         data['part4_design'] = True
+    candidate = ProfessionalFacts(**data)
+    # rules_only fills unstated component facts. rules_plus_unknown does that only when
+    # every deciding fact is already present. A missing span, area, storey count,
+    # occupancy, or Part 4 design stays unset.
     fill = variant == 'rules_only' or (
-        variant == 'rules_plus_unknown' and _plain_exemption(data) and not signals.flags and data.get('part4_design') is not True)
+        variant == 'rules_plus_unknown'
+        and not missing_deciding_facts(candidate, signals)
+        and _plain_exemption(data)
+        and not signals.flags
+        and data.get('part4_design') is not True)
     if fill:
         for key, value in _NO_DEFAULTS.items():
             if data.get(key) is None:
@@ -268,14 +303,26 @@ def prepare(facts: ProfessionalFacts, signals: Signals, variant: str) -> Profess
     return ProfessionalFacts(**data)
 
 
-def flag_label(case: dict, codes, variant: str) -> str:
+def evaluate(case: dict, codes, variant: str) -> tuple[str, str | None]:
     if variant == 'always_unknown':
-        return 'unknown'
+        return 'unknown', None
     facts, signals = observe(case)
-    result = professional_involvement(prepare(facts, signals, variant), codes)
-    if variant == 'rules_plus_unknown' and result.required == 'depends':
-        return 'unknown'
-    return result.required
+    prepared = prepare(facts, signals, variant)
+    result = professional_involvement(prepared, codes)
+    if variant == 'rules_plus_unknown' and result.required != 'yes':
+        missing = missing_deciding_facts(prepared, signals)
+        if missing or result.required == 'depends':
+            question = _MISSING_QUESTION[missing[0]] if missing else (result.questions[0] if result.questions else None)
+            return 'unknown', question or 'Which deciding building fact is still unconfirmed?'
+    return result.required, None
+
+
+def flag_label(case: dict, codes, variant: str) -> str:
+    return evaluate(case, codes, variant)[0]
+
+
+def flag_question(case: dict, codes, variant: str) -> str | None:
+    return evaluate(case, codes, variant)[1]
 
 
 def _column(label: str) -> str:
@@ -408,15 +455,17 @@ def report(totals: dict[str, VariantScore], codedb: str) -> str:
 
 
 def heldout_report(totals: dict[str, VariantScore]) -> str:
+    row = totals['rules_plus_unknown']
+    misses = ', '.join(row.misses) if row.misses else 'none'
     lines = [
         'held-out: evals_dev/section_d_heldout',
         'held-out gold: model-checked',
+        f'held-out rules_plus_unknown: {_BLIND_HELDOUT_RULES_PLUS}',
+        'held-out (post-fix, no longer blind for missing-fact cases) '
+        f'rules_plus_unknown: {_agreement_cell(row)}',
+        'held-out (post-fix, no longer blind for missing-fact cases) '
+        f'misses rules_plus_unknown: {misses}',
     ]
-    for name in VARIANTS:
-        row = totals[name]
-        misses = ', '.join(row.misses) if row.misses else 'none'
-        lines.append(f'held-out {name}: {_agreement_cell(row)}')
-        lines.append(f'held-out misses {name}: {misses}')
     return '\n'.join(lines)
 
 
