@@ -3,18 +3,19 @@ from __future__ import annotations
 
 import hashlib
 import io
+import logging
 import os
 from dataclasses import dataclass
 from pathlib import Path
 
 from pypdf import PdfReader
-from pypdf.errors import PyPdfError
 
 from .models import new_id
 
 _REPO = Path(__file__).resolve().parents[1]
 DEFAULT_FILES = _REPO / '.batatis-files'
 DEFAULT_MAX_BYTES = 20 * 1024 * 1024
+logger = logging.getLogger(__name__)
 
 
 class NotAPdf(Exception):
@@ -42,7 +43,14 @@ def max_upload_bytes() -> int:
     raw = os.environ.get('BATATIS_FILE_MAX_BYTES')
     if raw is None or not raw.strip():
         return DEFAULT_MAX_BYTES
-    return int(raw)
+    try:
+        limit = int(raw)
+        if limit > 0:
+            return limit
+    except ValueError:
+        pass
+    logger.warning('invalid BATATIS_FILE_MAX_BYTES; using the default upload limit')
+    return DEFAULT_MAX_BYTES
 
 
 def _safe_name(filename: str | None) -> str:
@@ -72,11 +80,12 @@ def _is_pdf(data: bytes) -> bool:
 def _page_count(data: bytes) -> int:
     try:
         return len(PdfReader(io.BytesIO(data)).pages)
-    except PyPdfError as exc:
+    except Exception as exc:
         raise NotAPdf() from exc
 
 
 def save_pdf(case_id: str, filename: str | None, data: bytes) -> StoredPdf:
+    directory = _case_dir(case_id)
     if len(data) > max_upload_bytes():
         raise FileTooLarge()
     if not _is_pdf(data):
@@ -85,12 +94,14 @@ def save_pdf(case_id: str, filename: str | None, data: bytes) -> StoredPdf:
     file_id = new_id('file')
     name = _safe_name(filename)
     digest = hashlib.sha256(data).hexdigest()
-    directory = _case_dir(case_id)
     directory.mkdir(parents=True, exist_ok=True)
     dest = directory / f'{file_id}.pdf'
     partial = dest.with_suffix('.pdf.part')
-    partial.write_bytes(data)
-    partial.replace(dest)
+    try:
+        partial.write_bytes(data)
+        partial.replace(dest)
+    finally:
+        partial.unlink(missing_ok=True)
     return StoredPdf(id=file_id, name=name, pages=pages, sha256=digest)
 
 

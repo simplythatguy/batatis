@@ -1,10 +1,13 @@
 """Case API: jurisdiction gap, uploads, missing code database, and concurrent writes."""
+import asyncio
 import hashlib
 import io
 import logging
+import sqlite3
 import threading
 from pathlib import Path
 
+import httpx
 import pytest
 from fastapi import Response
 from fastapi.testclient import TestClient
@@ -151,11 +154,109 @@ def test_upload_rejects_missing_case_non_pdf_and_oversize(api, monkeypatch):
     too_big = client.post(f'/cases/{cid}/files', files={'file': ('a.pdf', data, 'application/pdf')})
     assert too_big.status_code == 413 and too_big.json() == {'detail': 'file too large'}
     assert client.get(f'/cases/{cid}').json()['facts'] == []
-    assert client.post(f'/cases/{cid}/files').status_code == 422
+    missing = client.post(f'/cases/{cid}/files')
+    assert missing.status_code == 422
+    assert isinstance(missing.json()['detail'], list)
     magic = b'%PDF-1.4\nnot a readable pdf'
     unreadable = client.post(f'/cases/{cid}/files', files={'file': ('bad.pdf', magic, 'application/pdf')})
     assert unreadable.status_code == 415
     assert client.get(f'/cases/{cid}').json()['facts'] == []
+
+
+@pytest.mark.parametrize('error', [ValueError, KeyError, IndexError, TypeError,
+                                 AttributeError, RecursionError, RuntimeError])
+@pytest.mark.parametrize('stage', ['reader', 'pages'])
+def test_upload_maps_parser_failures_to_415(api, tmp_path, monkeypatch, error, stage):
+    client, _store = api
+    cid = client.post('/cases').json()['id']
+
+    class BrokenReader:
+        def __init__(self, *_args):
+            if stage == 'reader':
+                raise error('synthetic parser failure')
+
+        @property
+        def pages(self):
+            raise error('synthetic page-tree failure')
+
+    monkeypatch.setattr('engine.files.PdfReader', BrokenReader)
+    response = client.post(f'/cases/{cid}/files', files={'file': ('a.pdf', _pdf(), 'application/pdf')})
+    assert response.status_code == 415
+    assert response.json() == {'detail': 'not a PDF'}
+    assert client.get(f'/cases/{cid}').json()['facts'] == []
+    assert not list((tmp_path / 'files').rglob('*'))
+
+
+@pytest.mark.parametrize('outcome', ['missing', 'error', 'cleanup_error'])
+def test_upload_discards_pdf_when_case_update_fails(api, tmp_path, monkeypatch, outcome, caplog):
+    client, store = api
+    cid = client.post('/cases').json()['id']
+    failure = sqlite3.OperationalError('synthetic database lock')
+
+    def fail_update(*_args):
+        if outcome == 'missing':
+            return None
+        raise failure
+
+    monkeypatch.setattr(store, 'mutate', fail_update)
+    if outcome == 'cleanup_error':
+        def fail_cleanup(*_args):
+            raise OSError('synthetic cleanup failure')
+
+        monkeypatch.setattr('engine.api.discard_pdf', fail_cleanup)
+
+    if outcome == 'missing':
+        response = client.post(f'/cases/{cid}/files', files={'file': ('a.pdf', _pdf(), 'application/pdf')})
+        assert response.status_code == 404
+        assert response.json() == {'detail': 'case not found'}
+    else:
+        with pytest.raises(sqlite3.OperationalError) as raised:
+            client.post(f'/cases/{cid}/files', files={'file': ('a.pdf', _pdf(), 'application/pdf')})
+        assert raised.value is failure
+
+    assert store.get(cid).facts == []
+    if outcome == 'cleanup_error':
+        assert 'failed to discard PDF' in caplog.text
+    else:
+        assert not list((tmp_path / 'files').rglob('*.pdf'))
+
+
+@pytest.mark.parametrize('operation', ['get', 'save_pdf', 'mutate'])
+def test_upload_blocking_work_allows_other_requests(api, monkeypatch, operation):
+    client, store = api
+    cid = client.post('/cases').json()['id']
+    entered = threading.Event()
+    release = threading.Event()
+    if operation == 'save_pdf':
+        import engine.api as api_module
+        owner = api_module
+    else:
+        owner = store
+    original = getattr(owner, operation)
+
+    def blocked(*args, **kwargs):
+        entered.set()
+        if not release.wait(3):
+            raise RuntimeError('upload blocked the event loop')
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(owner, operation, blocked)
+
+    async def exercise():
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=client.app),
+                                     base_url='http://test') as concurrent:
+            uploading = asyncio.create_task(concurrent.post(
+                f'/cases/{cid}/files', files={'file': ('a.pdf', _pdf(), 'application/pdf')}))
+            try:
+                assert await asyncio.to_thread(entered.wait, 2)
+                probe = await asyncio.wait_for(concurrent.get('/openapi.json'), timeout=1)
+                assert probe.status_code == 200
+            finally:
+                release.set()
+                response = await uploading
+            assert response.status_code == 201
+
+    asyncio.run(exercise())
 
 
 def test_missing_codedb_is_503_without_a_path(tmp_path, monkeypatch, caplog):
