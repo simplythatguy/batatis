@@ -1,0 +1,81 @@
+{
+  "id": "scc-co-2023-08",
+  "title": "Building \u2013 Restoring Building to Last Approved State \u2013 December 2023",
+  "decision_date": "2024-02-07",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2023/2023-08%20Appeal%20Decision%20(003)_Redacted.pdf",
+  "applicant_type": null,
+  "topic": null,
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "A city ordered the owners of a place of worship under construction to vacate, and to remedy life-safety deficiencies or restore the building to its last approved state. The deficiencies were work deviating from approved plans, unprotected construction areas open to the public, non-operational fire alarm, lighting, panic hardware, and fire safety plan, and continued sleeping, kitchen use and public events.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "order appeal",
+    "construction safety",
+    "professional field reviews",
+    "fire safety plan"
+  ],
+  "missing_info": [],
+  "edition_original": "NBC(AE) 2019",
+  "other_codes": [],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": null,
+    "basis_type": "not applicable",
+    "basis": "not applicable: appeal of an order"
+  },
+  "outcome": "upheld",
+  "outcome_summary": "Order upheld: life-safety deficiencies persisted, and later partial compliance did not justify revoking it.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "Part 8 (construction safety measures; no specific article extracted)",
+      "source_code": "NBC(AE) 2019",
+      "source_division": "B",
+      "source_part": "Part 8",
+      "parsed_id": null,
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "Not an article identifier."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "The order required 'copies of the field reviews conducted by all registered professionals of record including associated and current professional schedules' as one compliance path.",
+      "sentences": 1,
+      "quote_confidence": "standard",
+      "kind": "summary",
+      "field": "professional_involvement",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2023/2023-08%20Appeal%20Decision%20(003)_Redacted.pdf"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": true,
+    "weak_flag": "yes",
+    "label_strength": "weak",
+    "facts": {}
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "yes",
+    "engineering_reason": "Weak appeal label only. Not an NBC(AE) 2023 professional-involvement determination.",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}

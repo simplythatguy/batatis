@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Export metadata (no PDF bytes)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["field_map", "form_pages", "appendix_pages", "draft", "blank_fields", "open_items"],
+  "properties": {
+    "field_map": {"type": "string", "minLength": 1},
+    "form_pages": {"type": "integer", "minimum": 0},
+    "appendix_pages": {"type": "integer", "minimum": 0},
+    "draft": {"type": "boolean"},
+    "blank_fields": {"type": "array", "items": {"type": "string"}},
+    "open_items": {"type": "array", "items": {"type": "string"}}
+  }
+}

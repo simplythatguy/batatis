@@ -1,0 +1,146 @@
+{
+  "id": "scc-co-2022-06",
+  "title": "Building and Fire \u2013 Property Hazard Classification \u2013 January 2023",
+  "decision_date": "2023-01-27",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2023/Council%20Order%202022-06%20-%20Apr%204,%202023_Redacted.pdf",
+  "applicant_type": null,
+  "topic": null,
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "Appellants applied for a building permit for premises storing and tinting paint and similar products in small containers, classified as Group F, Division 2 medium-hazard by their Professional Engineer and code consultant's Code Review Report. The appellants argued that 'bulk storage' and 'sufficient quantity' are undefined, that small containers are not bulk storage, and that tinting is comparable to retail paint mixing.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "refusal for insufficient information",
+    "occupancy classification",
+    "high hazard industrial",
+    "alternative solution documentation (Div C 2.3.1.1)"
+  ],
+  "missing_info": [],
+  "edition_original": "NBC(AE) 2019",
+  "other_codes": [
+    "NFC(AE) 2019"
+  ],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": "R2_insufficient",
+    "basis_type": "close analog",
+    "basis": "close analog: permit refused under Div C 2.2.10.8.(2)(b) ('information submitted is inadequate to determine compliance'); not a variance-form refusal"
+  },
+  "outcome": "upheld",
+  "outcome_summary": "Refusal confirmed for inadequate information given a potential special fire hazard. The tribunal pointed to a variance under NBC(AE) 2019 Div C 2.3.1.1 as a possible route.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "2.2.10.8.(2)(a),(b)",
+      "source_code": "NBC(AE) 2019",
+      "source_division": "C",
+      "source_part": "Part 2",
+      "parsed_id": null,
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "Combined citation or clause list. Components were not split into 2023 articles."
+    },
+    {
+      "source_article": "2.3.1.1.",
+      "source_code": "NBC(AE) 2019",
+      "source_division": "C",
+      "source_part": "Part 2",
+      "parsed_id": "2.3.1.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "A-3.1.2.1.(1) (Appendix note)",
+      "source_code": "NBC(AE) 2019",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": null,
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "Appendix note. A note id is not recorded as an NBC(AE) 2023 article citation."
+    },
+    {
+      "source_article": "3.2.2.6.",
+      "source_code": "NBC(AE) 2019",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.2.6.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.2.2.8.",
+      "source_code": "NBC(AE) 2019",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.2.8.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "the information submitted by the Appellants was inadequate to determine compliance with the applicable codes and standards; accordingly, the permit refusal is confirmed",
+      "sentences": 1,
+      "quote_confidence": "standard",
+      "kind": "excerpt",
+      "field": "refusal_reason_evidence",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2023/Council%20Order%202022-06%20-%20Apr%204,%202023_Redacted.pdf"
+    },
+    {
+      "text": "The appellant's Code Review Report was by a Professional Engineer / Safety Codes Consultant. The tribunal did not adopt its F2 classification and found the submitted information inadequate.",
+      "sentences": 2,
+      "quote_confidence": "standard",
+      "kind": "summary",
+      "field": "professional_involvement",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2023/Council%20Order%202022-06%20-%20Apr%204,%202023_Redacted.pdf"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": true,
+    "weak_flag": "depends",
+    "label_strength": "weak",
+    "facts": {}
+  },
+  "anchors": [
+    "insufficient_information"
+  ],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "depends",
+    "engineering_reason": "Weak appeal label only. Not an NBC(AE) 2023 professional-involvement determination.",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  },
+  "insufficient_information": {
+    "source_provision": "2.2.10.8.(2)(b)",
+    "source_division": "C",
+    "source_edition": "NBC(AE) 2019",
+    "nbc_ae_2023": null,
+    "presented_as_2023": false,
+    "refusal_code": "R2_insufficient",
+    "basis_type": "close analog"
+  }
+}

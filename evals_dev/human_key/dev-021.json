@@ -1,0 +1,16 @@
+{
+  "case_id": "dev-021",
+  "status": "unverified",
+  "persona": "homebuilder",
+  "variance_kind": "part9-spatial-separation",
+  "scenario": "The city flagged the eaves on one of our new houses as too close to the property line. We need a variance. Can you start the form?",
+  "section_ab_required_fields": null,
+  "expected_top_articles": null,
+  "benchmark_acceptable_solution": null,
+  "engineer_needed": null,
+  "intake_action": null,
+  "verifier_name": null,
+  "date_verified": null,
+  "source_page_refs": null,
+  "notes": null
+}

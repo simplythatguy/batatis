@@ -1,0 +1,115 @@
+{
+  "id": "scc-co-0015421-2012",
+  "title": "Building \u2013 Performance Platform and Requirement of Sprinkler Deluge System June 2012",
+  "decision_date": "2012-06-25",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2012/REDACTED_Bldg_Performance%20Platform%20Classification%20and%20Requirement%20of%20Sprinkler%20Deluge%20System%20June%202012_0015421.pdf",
+  "applicant_type": null,
+  "topic": null,
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "A theatre company's building had a raised performance platform. The municipality treated it as a 'stage' requiring a sprinkler deluge system and venting at the proscenium opening.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "definitions",
+    "stage",
+    "assembly occupancy",
+    "sprinkler deluge",
+    "applicability"
+  ],
+  "missing_info": [],
+  "edition_original": "ABC 2006",
+  "other_codes": [],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": null,
+    "basis_type": "not applicable",
+    "basis": "not applicable: appeal of an order; definitional interpretation"
+  },
+  "outcome": "overturned",
+  "outcome_summary": "Order revoked: the platform does not meet the Div A definition of 'Stage', so the deluge requirements do not apply.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "1.4.1.2. (definition of 'Stage')",
+      "source_code": "ABC 2006",
+      "source_division": "A",
+      "source_part": "Part 1",
+      "parsed_id": "1.4.1.2.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "Definition citation. Not mapped as an article gold label."
+    },
+    {
+      "source_article": "3.3.2.13.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.3.2.13.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "3.2.2.13.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.2.13.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "1.3.3.4.",
+      "source_code": "ABC 2006",
+      "source_division": "A",
+      "source_part": "Part 1",
+      "parsed_id": "1.3.3.4.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "An engineering company prepared a Building Code Equivalency Report for the appellant. No PI requirement was at issue.",
+      "sentences": 2,
+      "quote_confidence": "standard",
+      "kind": "summary",
+      "field": "professional_involvement",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2012/REDACTED_Bldg_Performance%20Platform%20Classification%20and%20Requirement%20of%20Sprinkler%20Deluge%20System%20June%202012_0015421.pdf"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": true,
+    "weak_flag": "depends",
+    "label_strength": "weak",
+    "facts": {}
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "depends",
+    "engineering_reason": "Weak appeal label only. Not an NBC(AE) 2023 professional-involvement determination.",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}
