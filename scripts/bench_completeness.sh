@@ -2,6 +2,9 @@
 # Plain-checkout entry point for the keyed completeness benchmark.
 # From the repository root, with only OPENAI_API_KEY already in the environment:
 #   bash scripts/bench_completeness.sh
+# The code database is resolved in Python: BATATIS_CODEDB, then repo-relative
+# codedb files. A missing database fails with a clear message. The process
+# exit code follows --gate, which defaults to variant B.
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
