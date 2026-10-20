@@ -73,7 +73,7 @@ Intake 20% · Code identification 20% · Recommendations 10% · Review 10% · Ap
 9. On the alternative fork: skipping risk assessment, mitigating measures, or assumptions/limits.
 10. Inventing evidence ladder outputs (tests, CCMC, STANDATA, certifications).
 11. Building product UX that ignores the official NBC(AE) yes/no fork.
-12. Attribute and link NRC text; no word cap for the hackathon (aamia's ruling, Oct 20). Full clause text is allowed with NRC attribution and a link. STANDATA is OGL-Alberta.
+12. Showing NRC code text without NRC attribution and a link to the source (no word cap for the hackathon, per aamia, Oct 20; STANDATA is OGL-Alberta).
 13. Treating completeness review as a safety/compliance certification for SCOs.
 14. Mis-attributing **jurisdiction portability** as an SCO-surface UX rule (it is data-model / judging Usability & portability).
 15. Calling risk / mitigations / assumptions “evidence types” or ladder rungs (they are alt-path **process** requirements).
