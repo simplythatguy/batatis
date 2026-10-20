@@ -106,6 +106,8 @@ The case gains one confirmed fact. Nothing else is extracted.
 | `source.ref` | the file id |
 | `source.quote` | null |
 
+The PDF bytes are stored at `{BATATIS_FILES}/{case_id}/{file_id}.pdf`. The case JSON keeps the base name and the file id. It does not keep the bytes. There is no route that returns the file. A portal package in this process can read those bytes back from that path by case id and file id. The directory is git-ignored. Uploaded files are never committed.
+
 `404` unknown case. `413` `{"detail": "file too large"}`. `415` `{"detail": "not a PDF"}` when the magic bytes fail or the PDF cannot be opened for a page count. `422` when the `file` field is missing. Error bodies do not include a filesystem path.
 
 ### `POST /cases/{id}/export`
