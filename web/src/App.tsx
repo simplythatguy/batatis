@@ -13,6 +13,8 @@ import { applicantLabel } from "./intake";
 import { EXAMPLES } from "./examples";
 import { useCase } from "./store";
 
+const EXPLICIT_ROUTES = ["/code-check", "/section-c", "/application", "/officer", "/accuracy"];
+
 const NAV = [
   {
     area: "Applicant",
@@ -24,7 +26,7 @@ const NAV = [
     ],
   },
   { area: "Officer", items: [{ path: "/officer", label: "Officer review", icon: "officer" }] },
-  { area: "Accuracy", items: [{ path: "/accuracy", label: "Model-checked", icon: "accuracy" }] },
+  { area: "Accuracy", items: [{ path: "/accuracy", label: "Accuracy report", icon: "accuracy" }] },
 ];
 
 export function App() {
@@ -32,6 +34,7 @@ export function App() {
   const { c, phase, askExample, resetToWho, pendingExampleId, confirmExample, dismissExample } = useCase();
   const confirmDialog = useRef<HTMLDialogElement>(null);
   useFocusParam(route);
+  const isDescribeRoute = !EXPLICIT_ROUTES.includes(route.path);
   useEffect(() => {
     const dialog = confirmDialog.current;
     if (!dialog) return;
@@ -78,9 +81,15 @@ export function App() {
                 <div className="sidebar-section-label">{g.area}</div>
                 <div className="nav-group">
                   {g.items.map((i) => {
-                    const active = route.path === i.path || ((route.path === "/" || route.path === "/who") && i.path === "/describe");
+                    const active = route.path === i.path || (i.path === "/describe" && isDescribeRoute);
                     return (
-                      <a key={i.path} className="nav-item" href={`#${i.path}`} data-active={active} aria-current={active ? "page" : undefined}>
+                      <a
+                        key={i.path}
+                        className="nav-item"
+                        href={`#${i.path}`}
+                        data-active={active}
+                        aria-current={active ? "page" : undefined}
+                      >
                         <Icon name={i.icon} />
                         {i.label}
                       </a>

@@ -16,7 +16,7 @@ const TABS = [
 
 export function Application({ route }: { route: Route }) {
   const { gaps, engineId, saveDraft, c } = useCase();
-  const tab = route.params.get("tab") ?? "A";
+  const tab = TABS.find((t) => t.id === route.params.get("tab"))?.id ?? "A";
   const dialog = useRef<HTMLDialogElement>(null);
   const [exportNote, setExportNote] = useState("Check completeness saves the case, then asks the engine for the PDF.");
   const [exportUnreachable, setExportUnreachable] = useState(false);
@@ -110,12 +110,7 @@ export function Application({ route }: { route: Route }) {
       </nav>
       <div className="pane scroll-body" role="region" aria-label={TABS.find((t) => t.id === tab)?.label}>
         <div className="content-col stack">
-          {tab === "D" ? (
-            <>
-              <ProcessFields />
-              <Recommendations />
-            </>
-          ) : tab === "alt" ? (
+          {tab === "D" || tab === "alt" ? (
             <>
               <ProcessFields />
               <Recommendations />
