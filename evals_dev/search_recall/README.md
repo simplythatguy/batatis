@@ -11,7 +11,12 @@ Numbers in `results.json` are **model-checked, not human-verified**. Each row is
 | repo-key | 38 | `evals_dev` `must_cite`, provision level, ancestor/descendant counts | 27 in-sample, 11 held-out |
 | identify-regression | 21 | `gold_articles`, article level, plus distractor@5 | 15 in-sample, 6 held-out |
 | Mira regressions | 3 | Case A key `9.27.5.1.(2)`, `9.27.5.3.(3)(b)`, and `9.23.17.3.(1)` after Unc confirmed that article. Reported separately. Not in the scored n. | forced in-sample |
-| other regressions | 3 | No repo key, so not gold. The cladding/furring phrase is asserted in the test. | forced in-sample |
+| other regressions | 6 | No repo key, so not gold. Includes the cladding/furring phrase and Unc's firestop queries. | forced in-sample |
+| part3-held-out | 5 (idr-022..026) | Part 3 articles. idr-025 counts if either `3.2.2.64.(2)(a)` or `3.2.2.62.(2)` is covered. | held out as a block, not shuffled |
+
+`idr-001`..`idr-021` are unchanged. The Part 3 block is scored on its own (`part3_hit@8` and `must_not_return@8`), so a Part 9 analogue is visible separately from a Part 3 hit.
+
+Gold v2 is a second table, label `gold v2, 16 scored, article-level for 009`. It is the identify benchmark's 11 `must_cite` cases, still scored at provision level, plus dev-006, dev-010, dev-011, dev-015, and dev-009. dev-009 is scored as Article 9.27.2.2. The canonical identify label from PR #12 stays `model-checked, not human-verified`.
 
 `evals/fixtures` and `evals/battle-prompts` have no provision gold. `should_cite` was not used. 9.23.17.3.(1) is counted as gold for idr-001 and idr-002. There is no with/without split.
 
@@ -25,5 +30,7 @@ Seed `20261020`, drawn before tuning and not reshuffled. `random.Random(seed)` s
 - **v3** — v1's query. When the query names two or more of those concepts: rank articles by how many concepts they match, then by whether the heading matches a concept, then by BM25. One extra full-match article from the leading section is pinned to position 2 when the head does not already have two. An attachment article keeps its furring article beside it when the query names sheathing or furring. Part 9 is a 1.15 tie-break on BM25, only when a house is named. Queries with fewer than two concepts keep the FTS order.
 
 v2's blanket title boost is the one that pulls 9.29.9.3.(2) (heading "Nails") into the top 5 of `sheathing nail siding`. v3 does not do that.
+
+An article whose indexed text is empty, or only a "See Note" pointer, is returned with the first 25 words of its first sentence. If it has no sentence, the article is omitted and its clauses are returned instead. A heading that is the only article title containing a query word is placed in front of its child sentence. That is how `3.1.9.1.` (heading "Firestops") enters the sprinkler query.
 
 Recall is the fraction of gold covered in the top 5 or top 8. A hit covers gold when it is the gold id, an ancestor, or a descendant. MRR is 1 over the first covered rank. distractor@5 is the fraction of queries whose top 5 contains any listed `must_not_return` article. Lower is better.

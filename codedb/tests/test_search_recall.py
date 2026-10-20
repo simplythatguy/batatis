@@ -63,3 +63,51 @@ def test_cladding_through_insulation_ranks_attachment_and_furring():
 def test_case_a_identify_queries_omit_interior_nail_article():
     for terms in (IDR_001, IDR_002):
         _no_interior_nail(_ids(terms))
+
+
+def test_firestop_queries_keep_pipe_and_separation_hits():
+    pipe = _ids('firestop plastic pipe penetration')
+    for gold in ('3.1.9.4.(2)', '3.1.9.4.(4)', '3.1.9.4.(7)', '9.10.9.7.'):
+        assert any(covers(hit, gold) or article_of(hit) == gold for hit in pipe), (gold, pipe)
+    separation = _ids('fire separation penetration')
+    for gold in ('9.10.9.6.', '9.10.9.7.', '3.1.9.4.(2)'):
+        assert any(covers(hit, gold) or article_of(hit) == gold for hit in separation), (gold, separation)
+
+
+def test_sprinkler_firestop_reaches_article_and_combustible_piping():
+    ids = _ids('sealant around sprinkler pipes through a fire separation, firestop system')
+    assert '3.1.9.1.' in ids
+    assert any(covers(hit, '3.1.9.4.(1)') for hit in ids)
+
+
+def test_article_hit_carries_first_sentence_snippet():
+    from codedb import children
+    from codedb.search_rank import SNIPPET_WORDS, present_article_hit
+
+    rows = search('firestop plastic pipe penetration', division='B', limit=8)
+    by_id = {row['id']: row for row in rows}
+    for article in ('3.1.9.4.', '9.10.9.7.'):
+        assert article in by_id, rows
+        text = by_id[article]['text']
+        words = text.split()
+        assert words and len(words) <= SNIPPET_WORDS
+        assert not text.startswith('(See Note')
+        first = next(child for child in children(article) if child['level'] == 'sentence')
+        assert text == ' '.join(first['text'].split()[:SNIPPET_WORDS])
+
+    replaced = present_article_hit(
+        {'id': '9.1.1.1.', 'level': 'article', 'text': '(See Note A-9.1.1.1.)'},
+        None,
+        [
+            {'id': '9.1.1.1.(1)(a)', 'level': 'clause', 'text': 'alpha beta gamma'},
+            {'id': '9.1.1.1.(1)(b)', 'level': 'clause', 'text': ''},
+        ],
+    )
+    assert [row['id'] for row in replaced] == ['9.1.1.1.(1)(a)']
+    kept = present_article_hit(
+        {'id': '9.1.1.1.', 'level': 'article', 'text': ''},
+        {'id': '9.1.1.1.(1)', 'text': 'one two three four'},
+        [],
+    )
+    assert kept[0]['text'] == 'one two three four'
+    assert kept[0]['id'] == '9.1.1.1.'

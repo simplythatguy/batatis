@@ -28,6 +28,8 @@ _JSON = {'clauses', 'fs', 'objectives', 'brackets', 'attribution_notes', 'intent
          'only_in_intent', 'only_in_ae'}
 _WORD = re.compile(r'[^\W_]+', re.UNICODE)
 _ARTICLE = re.compile(r'(\d+\.\d+\.\d+\.\d+\.)')
+_NOTE_ONLY = re.compile(r'^\(See Notes?\b.*\)$', re.IGNORECASE)
+SNIPPET_WORDS = 25
 
 # Function words only. Building nouns stay in the query.
 STOP = frozenset("""
@@ -332,6 +334,137 @@ def _rerank_v3(con, rows: list[dict], terms: str, *, doc: str, division: str | N
     return selected
 
 
+def _placeholder(text: str | None) -> bool:
+    """Empty article preamble, or a preamble that is only a See Note pointer."""
+    collapsed = ' '.join((text or '').split())
+    return not collapsed or bool(_NOTE_ONLY.fullmatch(collapsed))
+
+
+def _snippet(text: str, limit: int = SNIPPET_WORDS) -> str:
+    return ' '.join((text or '').split()[:limit])
+
+
+def present_article_hit(row: dict, first_sentence: dict | None, clauses: list[dict]) -> list[dict]:
+    """Give an article hit a short sentence snippet, or replace it with clauses.
+
+    Article rows in the index are often empty, or only "(See Note A-…)".
+    The first child sentence supplies at most 25 words. With no usable
+    sentence, the article is omitted and its clauses are returned instead.
+    """
+    if row.get('level') != 'article' or not _placeholder(row.get('text')):
+        return [row]
+    if first_sentence and not _placeholder(first_sentence.get('text')):
+        shown = dict(row)
+        shown['text'] = _snippet(first_sentence.get('text') or '')
+        return [shown]
+    return [clause for clause in clauses if clause.get('text') and not _placeholder(clause.get('text'))]
+
+
+def _first_sentence(con, doc: str, division: str, article: str):
+    fetched = con.execute(
+        "SELECT * FROM provisions WHERE doc=? AND division=? AND parent_id=? AND level='sentence' "
+        'ORDER BY sort_key LIMIT 1',
+        (doc, division, article)).fetchone()
+    return _record(fetched) if fetched else None
+
+
+def _child_clauses(con, doc: str, division: str, article: str) -> list[dict]:
+    fetched = con.execute(
+        "SELECT * FROM provisions WHERE doc=? AND division=? AND parent_id=? AND level='clause' "
+        'ORDER BY sort_key',
+        (doc, division, article)).fetchall()
+    return [_record(row) for row in fetched]
+
+
+def _present_rows(con, rows: list[dict], *, doc: str, division: str | None, limit: int) -> list[dict]:
+    if not rows:
+        return []
+    division_sql = division or rows[0].get('division')
+    selected = []
+    seen = set()
+    for row in rows:
+        if row.get('level') == 'article' and _placeholder(row.get('text')) and division_sql:
+            produced = present_article_hit(
+                row,
+                _first_sentence(con, doc, division_sql, row['id']),
+                _child_clauses(con, doc, division_sql, row['id']),
+            )
+        else:
+            produced = [row]
+        for item in produced:
+            if item['id'] in seen:
+                continue
+            seen.add(item['id'])
+            selected.append(item)
+            if len(selected) >= limit:
+                break
+        if len(selected) >= limit:
+            break
+    for index, row in enumerate(selected):
+        row['rank'] = float(index)
+    return selected
+
+
+def _title_word(word: str) -> str:
+    if len(word) > 5 and word.endswith('s'):
+        return word[:-1]
+    return word
+
+
+def _title_has(title: str, word: str) -> bool:
+    """Whole-word match, plural-insensitive. Short prefixes do not count."""
+    needle = _title_word(word)
+    if len(needle) < 7:
+        return False
+    for token in _tokens(title):
+        other = _title_word(token)
+        if other == needle:
+            return True
+        if len(other) >= 7 and abs(len(other) - len(needle)) <= 2 and (
+                other.startswith(needle) or needle.startswith(other)):
+            return True
+    return False
+
+
+def _promote_rare_headings(con, rows: list[dict], terms: str, *, doc: str, division: str | None) -> list[dict]:
+    """Surface an article whose heading is the only one that uses a query word.
+
+    An empty article such as "Firestops" loses BM25 to its own sentences.
+    When that heading is unique in the division and a child is already in
+    the list, the article is placed immediately before that child.
+    """
+    if not rows:
+        return rows
+    division_sql = division or rows[0].get('division')
+    titles = con.execute(
+        "SELECT id, article_title FROM provisions WHERE doc=? AND division=? AND level='article'",
+        (doc, division_sql)).fetchall()
+    present = {row['id'] for row in rows}
+    inserts = []
+    for word in _content(terms):
+        if len(_title_word(word)) < 7:
+            continue
+        hits = [row['id'] for row in titles if _title_has(row['article_title'] or '', word)]
+        if len(hits) != 1 or hits[0] in present:
+            continue
+        article = hits[0]
+        child_at = next((
+            index for index, row in enumerate(rows)
+            if (row.get('article') or article_of(row['id'])) == article
+        ), None)
+        if child_at is None:
+            continue
+        inserts.append((child_at, article))
+        present.add(article)
+    for child_at, article in sorted(inserts, reverse=True):
+        fetched = con.execute(
+            'SELECT * FROM provisions WHERE doc=? AND division=? AND id=?',
+            (doc, division_sql, article)).fetchone()
+        if fetched is not None:
+            rows.insert(child_at, _record(fetched))
+    return rows
+
+
 def _part9_scale(rows: list[dict], terms: str, limit: int) -> list[dict]:
     if part9_building(terms):
         for row in rows:
@@ -353,17 +486,21 @@ def search_variant(terms: str, variant: str, *, doc='NBC-AE', division=None, lim
     with closing(store.connect(db_path)) as con:
         if variant == 'v0':
             query = _fts_query([w for w in raw], phrase=False)
-            return _fts(con, query, doc=doc, division=division, limit=limit, title_weight=5.0)
-        if variant == 'v1':
+            rows = _fts(con, query, doc=doc, division=division, limit=limit, title_weight=5.0)
+        elif variant == 'v1':
             query = _fts_query(_expand(_tokens(terms)), phrase=any(_group(w) == 2 for w in _content(terms)))
-            return _fts(con, query, doc=doc, division=division, limit=limit, title_weight=5.0)
-        if variant == 'v2':
+            rows = _fts(con, query, doc=doc, division=division, limit=limit, title_weight=5.0)
+        elif variant == 'v2':
             query = _fts_query([w for w in raw], phrase=False)
             pool = max(limit, 80)
             rows = _fts(con, query, doc=doc, division=division, limit=pool, title_weight=V2_TITLE_WEIGHT)
-            return _part9_scale(rows, terms, limit)
-        expanded = _expand(_tokens(terms))
-        phrase = any(_group(word) == 2 for word in _content(terms))
-        query = _fts_query(expanded, phrase=phrase)
-        rows = _fts(con, query, doc=doc, division=division, limit=max(limit, V3_POOL), title_weight=V3_TITLE_WEIGHT)
-        return _rerank_v3(con, rows, terms, doc=doc, division=division, limit=limit)
+            rows = _part9_scale(rows, terms, limit)
+        else:
+            expanded = _expand(_tokens(terms))
+            phrase = any(_group(word) == 2 for word in _content(terms))
+            query = _fts_query(expanded, phrase=phrase)
+            rows = _fts(con, query, doc=doc, division=division, limit=max(limit, V3_POOL), title_weight=V3_TITLE_WEIGHT)
+            rows = _rerank_v3(con, rows, terms, doc=doc, division=division, limit=limit)
+            if len(_query_groups(terms)) < 2:
+                rows = _promote_rare_headings(con, rows, terms, doc=doc, division=division)
+        return _present_rows(con, rows, doc=doc, division=division, limit=limit)

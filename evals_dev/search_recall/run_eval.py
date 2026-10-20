@@ -83,6 +83,107 @@ def aggregate(rows: list[dict]) -> dict:
     return out
 
 
+# The identify benchmark's first 20 evals_dev cases contain these 11 must_cite
+# rows. That 11-case provision scoring is unchanged. Gold v2 adds five ask
+# cases beside it and does not relabel scored_must_cite.
+GOLD_V2_ELEVEN = (
+    'dev-001', 'dev-002', 'dev-003', 'dev-004', 'dev-008', 'dev-013',
+    'dev-014', 'dev-016', 'dev-017', 'dev-018', 'dev-019',
+)
+GOLD_V2_HIGH = {
+    'dev-006': ['9.25.5.2.(1)'],
+    'dev-010': ['9.10.15.5.(2)'],
+    'dev-011': ['9.23.10.1.(1)'],
+    'dev-015': ['9.9.9.1.(1)'],
+}
+GOLD_V2_ARTICLE = {'dev-009': '9.27.2.2.'}
+GOLD_V2_LABEL = 'gold v2, 16 scored, article-level for 009'
+
+
+def _case_description(case_id: str) -> str:
+    path = HERE.parent / 'cases' / f'{case_id}.json'
+    return json.loads(path.read_text())['description']
+
+
+def _case_must_cite(case_id: str) -> list[str]:
+    path = HERE.parent / 'cases' / f'{case_id}.json'
+    gold = json.loads(path.read_text())['gold']['must_cite']
+    return [row['provision'] for row in gold if row.get('division') == 'B' and row.get('provision')]
+
+
+def score_part3(queries: list[dict]) -> list[dict]:
+    """Held-out Part 3 block. Hit@8 is separate from must_not_return@8."""
+    cases = [query for query in queries if query.get('pool') == 'part3-held-out']
+    summary = []
+    for variant in VARIANTS:
+        hits = 0
+        violations = 0
+        analogue = 0
+        nail = 0
+        per_case = []
+        for query in cases:
+            ids = [row['id'] for row in ranks(query['query'], variant, limit=8)]
+            if query.get('gold_any'):
+                hit = any(covers(provision, gold) for gold in query['gold_any'] for provision in ids)
+            else:
+                hit = any(article_hit(ids, article) is not None for article in query['gold_articles'])
+            found = sorted(set(query.get('distractors') or []) & {article_of(provision) for provision in ids})
+            hits += int(hit)
+            violations += int(bool(found))
+            analogue += int(any(item != '9.29.9.3.' for item in found))
+            nail += int('9.29.9.3.' in found)
+            per_case.append({'id': query['id'], 'part3_hit@8': hit, 'must_not_return': found, 'top8': ids})
+        n = len(cases)
+        summary.append({
+            'variant': variant,
+            'split': 'held-out',
+            'n': n,
+            'label': 'model-checked, not human-verified',
+            'part3_hit@8': hits / n if n else None,
+            'must_not_return@8': violations / n if n else None,
+            'part9_analogue@8': analogue / n if n else None,
+            'distractor_9.29.9.3@8': nail / n if n else None,
+            'cases': per_case,
+        })
+    return summary
+
+
+def print_part3(rows: list[dict]) -> None:
+    print('-- part3 held-out idr-022..026 (not tuned; model-checked, not human-verified)')
+    for row in rows:
+        print(f"{row['variant']:3} part3-held-out held-out n={row['n']} "
+              f"part3_hit@8={row['part3_hit@8']:.3f} must_not_return@8={row['must_not_return@8']:.3f} "
+              f"part9_analogue@8={row['part9_analogue@8']:.3f} 9.29.9.3@8={row['distractor_9.29.9.3@8']:.3f}")
+
+
+def score_gold_v2() -> dict:
+    """Additional table. The original 11 stay provision-level. dev-009 is the article."""
+    items = []
+    for case_id in GOLD_V2_ELEVEN:
+        items.append({'id': case_id, 'query': _case_description(case_id), 'gold': _case_must_cite(case_id), 'gold_level': 'provision'})
+    for case_id, gold in GOLD_V2_HIGH.items():
+        items.append({'id': case_id, 'query': _case_description(case_id), 'gold': gold, 'gold_level': 'provision'})
+    for case_id, article in GOLD_V2_ARTICLE.items():
+        items.append({'id': case_id, 'query': _case_description(case_id), 'gold_articles': [article], 'gold_level': 'article'})
+    per_variant = []
+    for variant in VARIANTS:
+        scored = []
+        for item in items:
+            ids = [row['id'] for row in ranks(item['query'], variant)]
+            scored.append(score_query(item, ids))
+        metrics = aggregate(scored)
+        metrics.update({'variant': variant, 'label': GOLD_V2_LABEL, 'also': 'model-checked, not human-verified'})
+        per_variant.append(metrics)
+    return {'label': GOLD_V2_LABEL, 'also': 'model-checked, not human-verified', 'n': len(items), 'variants': per_variant}
+
+
+def print_gold_v2(payload: dict) -> None:
+    print(f"-- {payload['label']} ({payload['also']})")
+    for row in payload['variants']:
+        print(f"{row['variant']:3} gold-v2 n={row['n']} recall@5={row['recall@5']:.3f} "
+              f"recall@8={row['recall@8']:.3f} MRR={row['mrr']:.3f}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('--split', choices=('all', 'in-sample', 'held-out'), default='all')
@@ -123,8 +224,9 @@ def main() -> None:
     for query in queries:
         if query.get('pool') != 'regression':
             continue
+        window = int(query.get('top_k') or 5)
         for variant in VARIANTS:
-            ids = [row['id'] for row in ranks(query['query'], variant, limit=8)]
+            ids = [row['id'] for row in ranks(query['query'], variant, limit=max(8, window))]
             scored = score_query(query, ids)
             if query['id'] == 'mira-nailbase-long':
                 arts = {article_of(provision) for provision in ids[:5]}
@@ -134,14 +236,28 @@ def main() -> None:
                 print(f"{variant:3} {query['id']:32} r5={scored['recall_at'][5]:.2f} r8={scored['recall_at'][8]:.2f} "
                       f"d929={scored['distractor_92993_at_5']} top5={ids[:5]}")
             elif query.get('expected'):
-                covered = [item for item in query['expected'] if any(covers(provision, item) or article_of(provision) == item for provision in ids[:5])]
-                print(f"{variant:3} {query['id']:32} covered={covered} top5={ids[:5]}")
+                head = ids[:window]
+                exact = set(query.get('exact') or [])
+                def matched(item: str) -> bool:
+                    if item in exact:
+                        return item in head
+                    return any(covers(provision, item) or article_of(provision) == item for provision in head)
+                covered = [item for item in query['expected'] if matched(item)]
+                plus = [item for item in (query.get('plus') or []) if any(covers(provision, item) for provision in head)]
+                print(f"{variant:3} {query['id']:32} covered={covered} plus={plus} top{window}={head}")
+    extra = {}
+    if args.split == 'all':
+        extra['part3_held_out'] = score_part3(queries)
+        extra['gold_v2'] = score_gold_v2()
+        print_part3(extra['part3_held_out'])
+        print_gold_v2(extra['gold_v2'])
     if args.write and args.split == 'all':
         out = {
             'label': 'model-checked, not human-verified',
             'shipped': SHIPPED,
             'summary': summary,
             'detail': detail,
+            **extra,
         }
         (HERE / 'results.json').write_text(json.dumps(out, indent=2) + '\n')
         print('wrote results.json')

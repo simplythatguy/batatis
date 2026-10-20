@@ -7,9 +7,10 @@ same split; it does not retune anything.
 Holdout draw, in order, from random.Random(20261020):
   1. repo-key ids (evals_dev must_cite), sorted, then shuffled
   2. identify-regression ids idr-001..idr-021, sorted, then shuffled
-About 30% (Python round) of each pool is held out. Mira's three regressions
-and the other regression phrasings are forced onto the in-sample side and are
-not part of either shuffle.
+About 30% (Python round) of each pool is held out. Mira's regressions, the
+firestop regressions, and the other regression phrasings are forced onto the
+in-sample side and are not part of either shuffle. idr-022..026 are a separate
+held-out block and are not shuffled into the original 21.
 """
 from __future__ import annotations
 
@@ -159,7 +160,98 @@ def regressions() -> list[dict]:
             'note': 'Case B phrasing copied from the project brief. Regression, not gold: this sentence is not a keyed query.',
             'assert': None,
         },
+        {
+            **common,
+            'id': 'reg-firestop-plastic-pipe',
+            'query': 'firestop plastic pipe penetration',
+            'expected': ['3.1.9.4.(2)', '3.1.9.4.(4)', '3.1.9.4.(7)', '9.10.9.7.'],
+            'top_k': 8,
+            'gold_source': None,
+            'note': 'Unc GC firestop run. In-sample regression, not gold. This query covers 3.1.9.4.(2)/(4)/(7) and 9.10.9.7. The paired query covers 9.10.9.6.',
+            'assert': 'expected_covered_in_top_k',
+        },
+        {
+            **common,
+            'id': 'reg-fire-separation-penetration',
+            'query': 'fire separation penetration',
+            'expected': ['9.10.9.6.', '9.10.9.7.', '3.1.9.4.(2)'],
+            'top_k': 8,
+            'gold_source': None,
+            'note': 'Unc GC firestop run. In-sample regression, not gold. Covers 9.10.9.6, 9.10.9.7, and 3.1.9.4.(2).',
+            'assert': 'expected_covered_in_top_k',
+        },
+        {
+            **common,
+            'id': 'reg-sprinkler-firestop',
+            'query': 'sealant around sprinkler pipes through a fire separation, firestop system',
+            'expected': ['3.1.9.1.', '3.1.9.4.(1)'],
+            'exact': ['3.1.9.1.'],
+            'plus': ['9.10.9.9.(3)'],
+            'top_k': 8,
+            'gold_source': None,
+            'note': 'Unc GC firestop run. 3.1.9.1 and 3.1.9.4.(1) are required in the top 8. 9.10.9.9.(3) is a plus, not required.',
+            'assert': 'expected_covered_in_top_k',
+        },
     ]
+
+
+# Held out as a block. Not part of the seeded shuffle. Part 3 gold,
+# Part 9 analogues in must_not_return. No code quotes.
+PART3 = [
+    {
+        'id': 'idr-022',
+        'query': "We're the GC on a six-storey wood-frame apartment, all rental units, sprinklered throughout. The developer now wants to add a seventh floor of units on top, still wood. Is that a problem, or can we just keep framing?",
+        'gold_articles': ['3.2.2.51.', '3.2.2.48.'],
+        'distractors': ['9.29.9.3.', '9.10.8.1.', '9.10.4.1.'],
+    },
+    {
+        'id': 'idr-023',
+        'query': "Four storeys: shops on the street level, apartments on the three floors above, sprinklered. The drawings show the floor over the shops as the same 1-hour floor as every other level. The owner asks if that's enough between the stores and the apartments.",
+        'gold_articles': ['3.1.3.1.', '3.2.2.7.'],
+        'distractors': ['9.29.9.3.', '9.10.9.13.', '9.10.8.1.'],
+    },
+    {
+        'id': 'idr-024',
+        'query': 'Fit-out of a banquet hall on the second floor of an existing two-storey building, about 400 seats. The owner wants only one exit stair from the hall so the kitchen can go where the second stair is drawn. Can we do that?',
+        'gold_articles': ['3.4.2.1.', '3.3.1.5.'],
+        'distractors': ['9.29.9.3.', '9.9.8.2.', '9.9.9.1.'],
+    },
+    {
+        'id': 'idr-025',
+        'query': "Two-storey office building, about 1,400 m2 on each floor, wood frame, no sprinklers. The floor between the levels is drawn as plain joists and drywall with no rating. The owner says it's just an office so it doesn't need anything special.",
+        'gold_articles': ['3.2.2.64.', '3.2.2.62.'],
+        'gold_any': ['3.2.2.64.(2)(a)', '3.2.2.62.(2)'],
+        'distractors': ['9.29.9.3.', '9.10.8.1.', '9.10.18.2.'],
+        'note': 'A hit is either 3.2.2.64.(2)(a) or 3.2.2.62.(2).',
+    },
+    {
+        'id': 'idr-026',
+        'query': 'Six-storey hotel. The electrician ran bundles of cable through the rated corridor walls and the drywallers packed the holes with mineral wool and regular caulk. There are also plastic electrical boxes back-to-back in the suite walls. The inspector wants a listed system for each one. Can we leave them?',
+        'gold_articles': ['3.1.9.1.', '3.1.9.2.', '3.1.9.3.'],
+        'distractors': ['9.29.9.3.', '9.10.9.6.', '9.10.9.7.'],
+    },
+]
+
+
+def part3_queries() -> list[dict]:
+    rows = []
+    for case in PART3:
+        rows.append({
+            'pool': 'part3-held-out',
+            'split': 'held-out',
+            'scored': False,
+            'forced_held_out': True,
+            'id': case['id'],
+            'query': case['query'],
+            'gold_articles': case['gold_articles'],
+            'gold_any': case.get('gold_any'),
+            'gold_level': 'article',
+            'gold_source': 'identify-regression.json idr-022..026 Part 3 gold; quotes not copied',
+            'distractors': case['distractors'],
+            'label': 'model-checked, not human-verified',
+            'note': case.get('note') or 'Held out as a block before scoring. Not in the seeded shuffle.',
+        })
+    return rows
 
 
 def main() -> None:
@@ -174,21 +266,24 @@ def main() -> None:
         row['split'] = 'in-sample' if row['id'] in repo_in else 'held-out'
     for row in idr:
         row['split'] = 'in-sample' if row['id'] in idr_in else 'held-out'
-    queries = repo + idr + regressions()
+    part3 = part3_queries()
+    queries = repo + idr + part3 + regressions()
     payload = {
         'label': LABEL,
         'seed': SEED,
         'split_algorithm': (
             'random.Random(20261020). Shuffle sorted repo-key ids first, then sorted '
-            'idr ids. Hold out round(0.30*n) from the front of each shuffled list. '
-            'Regression queries are forced in-sample and are not shuffled.'
+            'idr-001..021 ids. Hold out round(0.30*n) from the front of each shuffled list. '
+            'Regression queries are forced in-sample and are not shuffled. '
+            'idr-022..026 are a separate held-out block and are not shuffled.'
         ),
         'gold_counts': {
             'repo_key_with_gold': len(repo),
             'identify_regression_with_gold': len(idr),
+            'part3_held_out': len(part3),
             'mira_regressions_with_gold_reported_separately': 3,
-            'regressions_without_gold': 3,
-            'note': 'Gold is copied from evals_dev must_cite or identify-regression gold_articles. Nothing was added by hand except Unc\'s confirmation that 9.23.17.3.(1) counts for idr-001/002, where that article was already on the list.',
+            'regressions_without_gold': 6,
+            'note': 'Gold is copied from evals_dev must_cite or identify-regression gold_articles. Nothing was added by hand except Unc\'s confirmation that 9.23.17.3.(1) counts for idr-001/002, where that article was already on the list. idr-022..026 are scored on their own and do not change the 21-case split.',
         },
         'queries': queries,
     }
@@ -198,6 +293,7 @@ def main() -> None:
     print('idr', len(idr_in), 'in-sample', len(idr_out), 'held-out')
     print('held-out repo', sorted(repo_out))
     print('held-out idr', sorted(idr_out))
+    print('part3 held-out', [row['id'] for row in part3])
 
 
 if __name__ == '__main__':
