@@ -111,4 +111,4 @@ Pages are **1st printing** (CODE-1P) unless marked. "2nd pr." pages come from th
 | T11 | Edmonton AHJ and route | C | **Partial** | Route verified (W20); accreditation still to look up (W5) |
 | T12 | NBC(AE) source URL | all | **Resolved** | Free NRC download (W18) |
 | T13 | 2nd-printing wording, page numbers and S115 edition | all | **Open** | See the edition caveat at the top |
-| T14 | NBC 2020 Intent Statements (I1/I2 and IS pages) | A, C | **Open** | Labelled national and not re-verified |
+| T14 | NBC 2020 Intent Statements (I1/I2 and IS pages) | A, C | **Open** | Intent cells are flagged GAP in cases A and C. Labelled national and not re-verified |

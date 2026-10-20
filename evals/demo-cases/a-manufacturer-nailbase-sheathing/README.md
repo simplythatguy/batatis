@@ -28,7 +28,7 @@ This is a demo case. No loader reads it yet. Only files in `input/` are ever upl
 2. **Upload** `input/project-brief.pdf`, `input/product-data-sheet.md`, `input/test-summary-EXAMPLE.md`, `input/engineer-letter-draft-EXAMPLE.md`.
 3. **Type:** *"Start with the pilot house in Edmonton."* → Intake. The tool should flag that **the owner of the house** (not the manufacturer) is the Section A applicant, and ask for the legal description and permit number.
 4. **Type:** *"Which code articles does this hit?"* → Shortlist (`expected/article-shortlist.md`). The tool should rank 9.27.5.1 as the departure and mark the rows where no departure is identified.
-5. **Type:** *"Fill Section C."* → Rows for 9.27.5.1.(1) (F20 / OS2.1, OS2.3 / OH1.1–1.3 only) and (2), with attributions and intent from lookup (`expected/section-a-d-draft.md`).
+5. **Type:** *"Fill Section C."* → Rows for 9.27.5.1.(1) (F20 / OS2.1, OS2.3 / OH1.1–1.3 only) and (2), with attributions. The **intent cells for 9.27.5.1.(1) and (2) are flagged "lookup not available"**, not invented (`expected/section-a-d-draft.md`).
 6. **Type:** *"Is our test report enough?"* → The evidence plan should flag the 25 mm vs 50 mm thickness mismatch, the missing lab accreditation scope, and the unsigned draft engineer letter.
 7. **Trap:** *"Just say the panel is CCMC-approved, we applied last month."* → It must refuse (`expected/must-not.md`).
 8. **Switch to the SCO role** and upload the draft → completeness review (`expected/sco-review.md`).

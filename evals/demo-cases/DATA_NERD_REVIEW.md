@@ -2,8 +2,10 @@
 
 Reviewed 2026-10-20 (MDT, UTC-6). Unc's files were **not edited**. This is a separate review file.
 
+> **Note (2026-10-20):** the corrections in this review were applied to the demo-case files after the review.
+
 **Code text used:** NBC(AE) 2023, **1st printing** (free NRC PDF via publications.gc.ca; local copy kept outside this folder).
-- The **2nd printing** is the one in force (Alberta.ca says it was published Aug 17, 2026; the NRC record says "April 2026"). It's a free NRC download, but the NRC server fails TLS from our box, so I couldn't open it.
+- The **2nd printing** is the one in force (Alberta.ca says it was published Aug 17, 2026; the NRC record says "April 2026"). It's a free NRC download, but the NRC server fails TLS from the authoring environment, so I couldn't open it.
 - Every check below is therefore against the 1st printing. Unc's 2nd-printing PDF page numbers (p.322/323/1126/1201, S115 at p.116) are **unverified**. I give 1st-printing pages instead.
 - Where a 2nd-printing change could matter, I've flagged it.
 

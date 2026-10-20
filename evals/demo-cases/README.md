@@ -6,7 +6,7 @@ These are **demo cases** (demo materials). No loader reads `evals/demo-cases/` y
 
 > **Edition caveat:** the cases were checked against the **NBC(AE) 2023 1st printing**. Page cites are from the NBC(AE) 2023 1st printing. The 2nd printing (Aug 17, 2026) is in force; its wording and page numbers are unverified. The code is a free NRC download: https://nrc-publications.canada.ca/eng/view/object/?id=0316d953-0d55-4311-af69-cad55efec499
 
-> **EVERYTHING HERE IS EXAMPLE DATA.** All people, companies, addresses, legal descriptions, products, listings, test reports and letters are **fictional**. Only code, STANDATA, standard and process citations are real, and each is traced in [`sources.md`](sources.md).
+> **EVERYTHING HERE IS EXAMPLE DATA.** All people, companies, addresses, legal descriptions, products, listings, test reports and letters are **fictional**. Only code, STANDATA, standard and process citations are real (not fictional), and each is traced in [`sources.md`](sources.md).
 
 | Case | Persona | Situation | Route the tool should find |
 |---|---|---|---|
