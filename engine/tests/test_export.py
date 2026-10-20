@@ -294,3 +294,21 @@ def test_source_units_use_explicit_fallbacks_instead_of_question_marks(codes):
             fact.source.quote = fact.value
     result = export_case(case, codes=codes)
     assert '10^(-4) W/(m²·K), m^(4), CO_(2) and µ.' in appendix_text(result.pdf, result.form_pages)
+
+
+def test_scientific_notation_in_real_provision_text_survives_export(codes):
+    # With the rebuilt database these source sentences contain x₃₀, h₁/h₂ and Greek α.
+    # The same test also verifies faithful source text when run against the older build.
+    provisions = ['4.1.6.10.(4)', '4.1.7.13.(6)']
+    case = sample_case(codes, provisions=provisions)
+    case.title = 'SYNTHETIC source-notation export test (no technical assessment)'
+    result = export_case(case, codes=codes)
+    text = appendix_text(result.pdf, result.form_pages)
+    for pid in provisions:
+        source = codes.provision(pid, 'B')['text']
+        assert norm(faithful_font_text(source)) in text
+        for glyphs, notation in [('x₃₀', 'x_(30)'), ('h₁', 'h_(1)'), ('h₂', 'h_(2)')]:
+            if glyphs in source:
+                assert notation in text
+        if 'α' in source:
+            assert '[U+03B1 GREEK SMALL LETTER ALPHA]' in text
