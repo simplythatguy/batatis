@@ -14,7 +14,7 @@ from engine.section_d_flag_eval import load_codes
 from evals_dev.appeals.checks import (
     LABEL_SOURCE, build_appeals_block, citation_resolution, engine_professional_flagger, professional_agreement,
 )
-from evals_dev.appeals.convert import WEAK_FLAG, convert_record, split_sentences
+from evals_dev.appeals.convert import WEAK_FLAG, convert_record, prefix_source_edition, split_sentences
 from evals_dev.appeals.mapping import attempt_mapping
 from evals_dev.deterministic_checks import CODEDB_MISSING, build_report, load_schemas, score_citations
 from evals_dev.stats import wilson_interval
@@ -27,6 +27,18 @@ PROVISION = __import__('re').compile(r'\b\d{1,2}(?:\.\d{1,3}){2,}')
 def _cases():
     """Load the committed appeal cases in stable order."""
     return [json.loads(path.read_text()) for path in sorted(CASES.glob('scc-*.json'))]
+
+
+def _assert_outcome_articles_name_their_edition(case: dict) -> None:
+    """A pre-2023 article in the outcome paraphrase carries its source edition."""
+    text = case['outcome_summary']
+    edition = case['edition_original']
+    bridge = __import__('re').compile(r'(?:Div(?:ision)?\s+[ABC]|Table)?')
+    for match in PROVISION.finditer(text):
+        before = text[:match.start()]
+        assert edition in before, case['id']
+        tail = before[before.rfind(edition) + len(edition):].strip()
+        assert bridge.fullmatch(tail), (case['id'], match.group(), tail)
 
 
 def test_converted_set_keeps_short_fields_and_no_2023_gold():
@@ -46,6 +58,7 @@ def test_converted_set_keeps_short_fields_and_no_2023_gold():
         assert case['description'] and len(split_sentences(case['description'])) <= 2
         assert not PROVISION.search(case['description'])
         assert len(split_sentences(case['outcome_summary'])) <= 2
+        _assert_outcome_articles_name_their_edition(case)
         for row in case['article_mapping']:
             assert row['nbc_ae_2023'] is None
             assert row['unmapped_reason']
@@ -320,6 +333,17 @@ def test_converter_distinguishes_paraphrases_from_opening_quotes(text, kind):
     quotes = {q['field']: q for q in case['quotes']}
     assert quotes['professional_involvement']['kind'] == kind
     assert quotes['refusal_reason_evidence']['kind'] == 'excerpt'
+
+
+def test_outcome_summary_prefixes_a_bare_source_article():
+    """Converter names the source edition on an article left in the outcome paraphrase."""
+    case = convert_record(
+        {'id': 'synthetic-appeal', 'code_edition': 'NBC(AE) 2019',
+         'outcome_explanation': 'The panel cited 3.2.2.6. and stopped.'},
+        {'professional_involvement_addressed': False},
+    )
+    assert case['outcome_summary'] == 'The panel cited NBC(AE) 2019 3.2.2.6. and stopped.'
+    assert prefix_source_edition(case['outcome_summary'], 'NBC(AE) 2019') == case['outcome_summary']
 
 
 def test_panel_conclusion_is_excluded_from_professional_inputs():

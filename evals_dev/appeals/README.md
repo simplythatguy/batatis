@@ -87,15 +87,16 @@ all 12 appeals have empty facts, so every variant answers unknown; 7/12 is the a
   flagged `D16`.
 - **Professional involvement.** Twelve decisions address it. Five weak flags are
   `yes` (the panel required involvement) and seven are `depends` (the point was
-  not a yes/no trigger, including the two deference cases). The agreement line
-  compares the engine screen with those flags and reports `x of n` with a Wilson
-  95% interval. The screen only receives a `ProfessionalFacts` field recorded on the case.
+  not a yes/no trigger, including the two deference cases).
+  `python evals_dev/appeals/score_professional.py` is the screen that does not
+  need codedb. It reads only a `ProfessionalFacts` field recorded on the case,
+  and it prints `7/12` with `decided: 0/12` even when codedb is absent.
   Panel conclusions are not stored as facts. Decision 0015416 records that its
   special-safety sentence is the weak yes label and leaves `facts` empty. An
   order to file schedules is not rewritten as `ahj_requires_professional`.
-  Without codedb the
-  agreement line is `skipped: codedb missing`. The twelve flags are still counted
-  under `weak_labels`.
+  The separate agreement line in `python evals_dev/deterministic_checks.py` does
+  open codedb. Without codedb that line is `skipped: codedb missing`. The twelve
+  flags are still counted under `weak_labels`.
 - **2022-06.** Close analog of insufficient information. The source provision is
   NBC(AE) 2019 Division C 2.2.10.8.(2)(b). `presented_as_2023` is false.
 - **0015427.** Alternative accepted with a condition (outcome varied).

@@ -173,6 +173,9 @@ def _markdown(selected: list[dict]) -> str:
         'The key files next to this note are **unfilled**. Current evals are **model-checked**.',
         'Nothing here is human verification.',
         '',
+        'Label: in-sample. These 15 cases are drawn from the development set. '
+        'Scores on this subset are in-sample.',
+        '',
         f'Seed `{SEED}`. Reproduce with `python evals_dev/human_key/select.py`.',
         '',
         '## Persona rule',

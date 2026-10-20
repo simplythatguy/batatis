@@ -29,6 +29,10 @@ _SENT = re.compile(
     r'|(?<=[.?!]["])\s+(?=[A-Z])'
 )
 _PROVISION = re.compile(r'\b\d{1,2}(?:\.\d{1,3}){2,}')
+_CITATION = re.compile(
+    r'(?<![\w.)])((?:Div(?:ision)?\s+[ABC]\s+)?(?:Table\s+)?'
+    r'\d{1,2}(?:\.\d{1,3}){2,}(?:\.\(\d+\))?(?:\([0-9a-z]+\))*)'
+)
 # Holdings that are not the first two sentences of the researcher's note.
 QUOTE_OVERRIDE = {
     ('scc-co-2024-06', 'professional_involvement'): (
@@ -127,6 +131,19 @@ def _sentences(text: str, n: int = 2) -> str:
     return ' '.join(kept)
 
 
+def prefix_source_edition(text: str, edition: str) -> str:
+    """Put the source edition in front of each pre-2023 article left in a paraphrase."""
+    if not text or not edition:
+        return text
+
+    def repl(match: re.Match) -> str:
+        if text[:match.start()].endswith(edition + ' '):
+            return match.group(0)
+        return f'{edition} {match.group(0)}'
+
+    return _CITATION.sub(repl, text)
+
+
 def _description(facts: str) -> str:
     """Opening paraphrase with provision numbers removed so they are not read as citations."""
     parts = _SENT.split(' '.join((facts or '').split()))
@@ -222,7 +239,9 @@ def convert_record(rec: dict, index_row: dict) -> dict:
             'basis': _sentences(rec.get('refusal_reason_basis') or '', 2),
         },
         'outcome': rec.get('outcome'),
-        'outcome_summary': _sentences(rec.get('outcome_explanation') or '', 2),
+        'outcome_summary': prefix_source_edition(
+            _sentences(rec.get('outcome_explanation') or '', 2), edition,
+        ),
         'outcome_summary_kind': 'paraphrase',
         'article_mapping': [classify_article(article, edition) for article in rec.get('articles_at_issue') or []],
         'quotes': quotes,

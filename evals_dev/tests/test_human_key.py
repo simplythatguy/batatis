@@ -44,8 +44,10 @@ def test_selection_is_reproducible_and_balanced():
     assert counts == {'manufacturer': 5, 'general contractor': 5, 'homebuilder': 5}
     assert len({c['topic'] for c in selected}) >= 3
     assert {c['gold']['intake_action'] for c in selected} == {'ask', 'proceed_conditionally', 'redirect'}
-    listed = [line.split('`')[1] for line in (KEYS / 'SELECTION.md').read_text().splitlines() if line.startswith('| `dev-')]
+    selection = (KEYS / 'SELECTION.md').read_text()
+    listed = [line.split('`')[1] for line in selection.splitlines() if line.startswith('| `dev-')]
     assert listed == first
+    assert 'in-sample' in selection
 
 
 def test_blank_keys_carry_the_scenario_and_no_gold():
