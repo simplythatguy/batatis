@@ -20,7 +20,7 @@ These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 | `GET /cases/{case_id}/professional` | `required` and `general_required`: `yes`, `no`, or `depends`. Also `reasons`, `questions`, `scope_note`. |
 | `GET /ccmc/search` | Query `q` (1–200 characters) and `limit` (1–50, default 20). `422` on a rejected query. `503` when the registry is unavailable; that detail is the registry error text. |
 | `GET /cases/{case_id}/process-fields` | Process-field list. Empty when the pathway is an acceptable solution. |
-| `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` when the blank form file is missing; that detail is the form error text. `500` on other export failures. |
+| `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` when the blank form file is missing; that detail is exactly `SCC variance form not found`. `500` on other export failures; that detail is exactly `The SCC variance form could not be exported.` |
 
 A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
 
@@ -192,6 +192,6 @@ A live response copies the citation string the code database returns. The placeh
 | 400 | Invalid provision id, or an ambiguous division on `GET /code/{provision_id}`. |
 | 409 | Export is blocked. Detail is the object under Routes. |
 | 422 | A `proposed` fact was sent as `confirmed`, or `GET /ccmc/search` rejected the query. |
-| 500 | Export failed for a reason other than a missing form. |
-| 503 | The code database file is absent. Body is exactly `{"detail": "code database not found"}`. Raised only by `CodeDbMissing` in `engine/codes.py`. Not a `FileNotFoundError`. The body has no server path. A missing blank form and an unavailable CCMC registry are also HTTP 503, and their detail is that error's own text. |
+| 500 | Export failed for a reason other than a missing form. Body is exactly `{"detail": "The SCC variance form could not be exported."}`. The body has no server path. |
+| 503 | The code database file is absent. Body is exactly `{"detail": "code database not found"}`. Raised only by `CodeDbMissing` in `engine/codes.py`. Not a `FileNotFoundError`. The body has no server path. A missing blank form is HTTP 503 with body exactly `{"detail": "SCC variance form not found"}`. An unavailable CCMC registry is also HTTP 503, and that detail is the registry error text. |
 | 200 | An unknown Division B token on this issues route does not 404. It returns `provision: null` and a question. |

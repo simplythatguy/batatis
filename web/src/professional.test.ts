@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { notSureQuestions } from "./humanReview.ts";
 import { emptyCase } from "./intake.ts";
-import { codeCheckLabel, displayValue, evidenceDocuments, factLabel, gapLabel, getGaps, plainFactStatus, reducer, sectionDRefreshKey, shownProcessAnswer } from "./model.ts";
-import { evidenceRecorded, practiceFromReview, professionalConfirmed, roleConfirmed, sectionDIssueStatus } from "./professional.ts";
+import { codeCheckLabel, displayValue, evidenceDocuments, factLabel, gapLabel, getGaps, plainFactStatus, reducer, sectionDRefreshKey, sectionDWhileRefreshing, shownProcessAnswer } from "./model.ts";
+import { AUTHORITY_DECISION_FIELDS, evidenceRecorded, practiceFromReview, professionalConfirmed, roleConfirmed, sectionDIssueStatus } from "./professional.ts";
 import type { Fact } from "./types.ts";
 
 test("prescriptive yes and reserved judgement no leave needs_professional open", () => {
@@ -40,10 +40,15 @@ test("applicant No/Yes/Yes/No does not clear needs-professional", () => {
   assert.equal(c.practiceOfEngineering, true);
   for (const [field] of answers) {
     const fact = c.facts.find((item) => item.field === `professional.${field}`);
-    assert.equal(fact?.status, "unconfirmed");
+    assert.equal(fact?.status, "confirmed");
+    assert.equal(fact?.source.type, "user_click");
   }
+  assert.equal(professionalConfirmed(c.facts), false);
   assert.equal(practiceFromReview(true, "no", false), true);
+  assert.equal(practiceFromReview(false, "no", false), "unknown");
   assert.equal(practiceFromReview(undefined, "no", false), "unknown");
+  const cleared = reducer(c, { type: "notePractice", value: false });
+  assert.equal(cleared.practiceOfEngineering, true);
   assert.equal(evidenceRecorded("provided"), true);
   assert.equal(evidenceRecorded("evidence_listed"), true);
   assert.equal(evidenceRecorded("not provided"), false);
@@ -233,6 +238,63 @@ test("removing one evidence document keeps the other and queues a deletion", () 
   assert.notEqual(sectionDRefreshKey(c), before);
   c = reducer(c, { type: "ackEvidenceDeletion", ids: ["wall"] });
   assert.deepEqual(c.deletedEvidence, []);
+});
+
+test("authority decisions offer Not sure and cannot set practice to false", () => {
+  let c = reducer(emptyCase("homebuilder"), { type: "notePractice", value: true });
+  for (const field of AUTHORITY_DECISION_FIELDS) {
+    c = reducer(c, { type: "answerScope", field, answer: "not-sure", text: `Question about ${field}` });
+    const question = c.questions.find((item) => item.id === `q-scope-${field}`);
+    assert.ok(question);
+    assert.match(question?.why ?? "", /officer/);
+    assert.equal(c.facts.some((fact) => fact.field === `professional.${field}`), false);
+    assert.ok(notSureQuestions(c.questions).some((item) => item.id === `q-scope-${field}`));
+  }
+  assert.equal(c.practiceOfEngineering, true);
+  assert.ok(getGaps(c).some((gap) => gap.id === "needs-professional"));
+
+  c = reducer(emptyCase("homebuilder"), { type: "notePractice", value: true });
+  c = reducer(c, { type: "answerScope", field: "prescriptive_route_confirmed", answer: "yes" });
+  c = reducer(c, { type: "answerScope", field: "professional_judgement_required", answer: "no" });
+  for (const field of AUTHORITY_DECISION_FIELDS) {
+    const answer = field === "professional_scope_resolved" ? "yes" : "no";
+    c = reducer(c, { type: "answerScope", field, answer });
+  }
+  c = reducer(c, { type: "notePractice", value: false });
+  assert.equal(c.practiceOfEngineering, true);
+  assert.equal(professionalConfirmed(c.facts), false);
+  assert.ok(getGaps(c).some((gap) => gap.id === "needs-professional"));
+});
+
+test("a Section D refresh keeps the plan and the professional screen", () => {
+  const plan = { items: [{ id: "wall", status: "not provided" }] };
+  const professional = { required: "depends" as const };
+  const issues = [{ id: "unresolved-9.10.15.5" }];
+  const next = sectionDWhileRefreshing({
+    phase: "live" as const,
+    note: "old",
+    plan,
+    issues,
+    professional,
+    fields: [{ id: "risk_assessment" }],
+    issuesNote: null,
+  });
+  assert.equal(next.phase, "loading");
+  assert.equal(next.note, "Updating Section D…");
+  assert.equal(next.plan, plan);
+  assert.equal(next.issues, issues);
+  assert.equal(next.professional, professional);
+  const first = sectionDWhileRefreshing({
+    phase: "idle" as const,
+    note: "",
+    plan: null,
+    issues: null,
+    professional: null,
+    fields: [],
+    issuesNote: null,
+  });
+  assert.equal(first.note, "Loading Section D…");
+  assert.equal(first.plan, null);
 });
 
 test("a Section D answer changes the refresh key", () => {

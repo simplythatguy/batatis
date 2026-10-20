@@ -75,7 +75,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         except ExportBlocked as e:
             raise HTTPException(409, {'message': 'export blocked; resolve these or export a draft', 'reasons': e.reasons})
         except FormNotFound as e:
-            # The contract's 503 detail is the form error's own text.
+            # Fixed string from FormNotFound: "SCC variance form not found". No server path.
             raise HTTPException(503, str(e)) from None
         except ExportError:
             raise HTTPException(500, 'The SCC variance form could not be exported.')

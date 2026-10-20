@@ -170,13 +170,14 @@ export function Application({ route }: { route: Route }) {
   }
 
   function downloadRecord() {
+    const exportReasons = reasons.length ? reasons : statusText.trim() ? [statusText.trim()] : [];
     const pdfLines = pdfOutcomeLine({
       example: Boolean(c.exampleId),
       downloaded: file ? { name: file.name, draft: file.draft, at: file.downloadedAt.toLocaleString() } : null,
-      exportAttempted: exportAttempted && !c.exampleId,
-      blockingCount: blocking.length,
+      blocked: exportAttempted && stage === "blocked" && !c.exampleId,
+      failed: exportAttempted && stage === "error" && !c.exampleId,
+      reasons: exportReasons,
     });
-    if (exportAttempted && !file && reasons.length) pdfLines.push(...reasons.map((reason) => `- ${reason}`));
     const text = textRecord({
       exampleLabel: c.exampleId ? exampleLabel : undefined,
       title: c.title,

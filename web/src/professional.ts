@@ -34,6 +34,12 @@ const REGISTRATION_FIELDS = [
 const REJECT_ROLE = new Set(["sales", "rep", "supplier", "manufacturer", "salesperson", "vendor"]);
 
 export const SCOPE_FIELDS = ["prescriptive_route_confirmed", "professional_judgement_required"] as const;
+/** What the authority decided. Not sure on these is an open question for the officer. */
+export const AUTHORITY_DECISION_FIELDS = [
+  "ahj_requires_professional",
+  "special_safety_concerns",
+  "professional_scope_resolved",
+] as const;
 /** An authority's own requirement. It does not name an engineer or architect. */
 export const AUTHORITY_ONLY_FIELDS = ["ahj_requires_professional", "special_safety_concerns"] as const;
 export type ScopeField = (typeof SCOPE_FIELDS)[number];
@@ -78,16 +84,17 @@ export function roleConfirmed(value: string): boolean {
 }
 
 /**
- * An applicant's Yes or No cannot turn a raised practice flag off.
- * The engine's "no" does not either. A seal or registration number is what clears the gap.
+ * An applicant's Yes or No cannot turn practice off.
+ * The engine's "no", which is computed from those answers, cannot either.
+ * A seal or registration number is what clears the gap.
  */
 export function practiceFromReview(
   current: true | false | "unknown" | undefined,
   required: "yes" | "no" | "depends",
   issueSaysYes: boolean,
-): true | false | "unknown" {
+): true | "unknown" {
   if (issueSaysYes || required === "yes" || current === true) return true;
-  return current === false ? false : "unknown";
+  return "unknown";
 }
 
 /** #23 will rename gap status `provided` to `evidence_listed`. Both mean the applicant listed evidence. */

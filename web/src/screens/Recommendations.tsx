@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   engine,
   EngineError,
@@ -10,8 +10,8 @@ import {
 } from "../api/client";
 import { DemoFallback, RoleNote } from "../components";
 import { practiceFlagLine, practicePrompt } from "../humanReview";
-import { answeredYes, evidenceDocuments, sectionDRefreshKey, shownProcessAnswer } from "../model";
-import { evidenceLinked, evidenceRecorded, isScopeField, practiceFromReview, professionalConfirmed, SCOPE_HELP, sectionDIssueStatus } from "../professional";
+import { answeredYes, evidenceDocuments, sectionDWhileRefreshing, shownProcessAnswer } from "../model";
+import { AUTHORITY_DECISION_FIELDS, evidenceLinked, evidenceRecorded, isScopeField, practiceFromReview, professionalConfirmed, SCOPE_HELP, sectionDIssueStatus } from "../professional";
 import { failureKind } from "../rules";
 import { useCase } from "../store";
 import type { Case } from "../types";
@@ -24,8 +24,6 @@ type Load = {
   professional: ProfessionalResult | null;
   fields: EngineProcessField[];
   issuesNote: string | null;
-  /** The case the live content belongs to. A refresh for the same case keeps it on screen. */
-  engineId?: string;
 };
 
 const IDLE: Load = { phase: "idle", note: "", plan: null, issues: null, professional: null, fields: [], issuesNote: null };
@@ -48,7 +46,7 @@ const OCCUPANCY = [
   ["other", "Other"],
 ] as const;
 
-type ProfKind = "bool" | "number" | "occupancy" | "role" | "text";
+type ProfKind = "bool" | "authority" | "number" | "occupancy" | "role" | "text";
 
 const PROFESSIONAL_FIELDS: { field: string; label: string; kind: ProfKind }[] = [
   { field: "role", label: "Who is the registered professional for this scope?", kind: "role" },
@@ -59,13 +57,13 @@ const PROFESSIONAL_FIELDS: { field: string; label: string; kind: ProfKind }[] = 
   { field: "storeys", label: "How many storeys is the building?", kind: "number" },
   { field: "building_area_m2", label: "What is the building area in square metres (not the total of every floor)?", kind: "number" },
   { field: "part4_design", label: "Is any design carried out under Part 4, including beams, connections, or foundations?", kind: "bool" },
-  { field: "ahj_requires_professional", label: "Has the authority required a registered professional for this project?", kind: "bool" },
-  { field: "special_safety_concerns", label: "Has the authority found that size or complexity requires a professional?", kind: "bool" },
+  { field: "ahj_requires_professional", label: "Has the authority required a registered professional for this project?", kind: "authority" },
+  { field: "special_safety_concerns", label: "Has the authority found that size or complexity requires a professional?", kind: "authority" },
   { field: "roof_trusses", label: "Are wood roof trusses or truss assembly connections included?", kind: "bool" },
   { field: "preserved_wood_foundation_part4", label: "Does the project include a preserved wood foundation designed under Part 4?", kind: "bool" },
   { field: "prescriptive_route_confirmed", label: "Is the design following the prescriptive route, with no reserved professional judgement?", kind: "bool" },
   { field: "professional_judgement_required", label: "Does any proposed analysis require reserved professional judgement?", kind: "bool" },
-  { field: "professional_scope_resolved", label: "Have the professional-law, discipline, and local submission requirements been resolved?", kind: "bool" },
+  { field: "professional_scope_resolved", label: "Have the professional-law, discipline, and local submission requirements been resolved?", kind: "authority" },
   { field: "fire_suppression", label: "Is a fire suppression system being installed?", kind: "bool" },
   { field: "fire_alarm", label: "Is a fire alarm system being installed?", kind: "bool" },
   { field: "farm_public_use", label: "Is the farm building for public use?", kind: "bool" },
@@ -308,7 +306,9 @@ function ProfessionalAnswers() {
             </div>
           );
         }
+        if (q.kind !== "bool" && q.kind !== "authority") return null;
         const scopeField = isScopeField(q.field) ? q.field : null;
+        const authorityField = (AUTHORITY_DECISION_FIELDS as readonly string[]).includes(q.field);
         const notSure = c.questions.some((question) => question.id === `q-scope-${q.field}` && !question.answer);
         const recorded = [...c.facts].reverse().find((fact) => fact.field === `professional.${q.field}` && fact.kind !== "proposed");
         const chosen = recorded?.value;
@@ -317,6 +317,11 @@ function ProfessionalAnswers() {
           <div key={q.field} className={`field full ${value ? "" : "is-empty"}`}>
             <label htmlFor={id}>{q.label}</label>
             {scopeField && <p className="field-note">{SCOPE_HELP[scopeField]}</p>}
+            {authorityField && (
+              <p className="field-note">
+                Not sure is sent to the officer as an open question. Yes or No reports what the authority decided. It does not decide that a registered professional is unnecessary.
+              </p>
+            )}
             <select
               id={id}
               value={value}
@@ -351,9 +356,10 @@ function ProfessionalAnswers() {
 export function Recommendations() {
   const { c, engineId, dispatch, factsEpoch } = useCase();
   const provisions = answeredYes(c).map((a) => a.provision).filter((id) => /^\d/.test(id)).join("|");
-  const refreshKey = sectionDRefreshKey(c);
   const [attempt, setAttempt] = useState(0);
   const [load, setLoad] = useState<Load>(IDLE);
+  const practiceNow = useRef(c.practiceOfEngineering);
+  practiceNow.current = c.practiceOfEngineering;
 
   useEffect(() => {
     if (!engineId) {
@@ -369,13 +375,7 @@ export function Recommendations() {
       return;
     }
     const ctl = new AbortController();
-    // A refresh after a save keeps the current plan on screen until the new one arrives.
-    // Clearing it would unmount the fields the applicant is typing in.
-    setLoad((prev) =>
-      prev.phase === "live" && prev.engineId === engineId
-        ? prev
-        : { phase: "loading", note: "Loading Section D…", plan: null, issues: null, professional: null, fields: [], issuesNote: null },
-    );
+    setLoad((previous) => sectionDWhileRefreshing(previous));
     const ids = provisions ? provisions.split("|") : undefined;
     void (async () => {
       let issues: SectionDIssue[] | null = null;
@@ -385,7 +385,7 @@ export function Recommendations() {
       } catch (e) {
         if (ctl.signal.aborted) return;
         if (e instanceof EngineError && failureKind(e.status, e.detail) === "unreachable") {
-          setLoad({ phase: "unreachable", note: e.detail, plan: null, issues: null, professional: null, fields: [], issuesNote: null });
+          setLoad((previous) => ({ ...previous, phase: "unreachable", note: e.detail }));
           return;
         }
         if (e instanceof EngineError && failureKind(e.status, e.detail) === "missing-route") {
@@ -406,11 +406,11 @@ export function Recommendations() {
         ]);
         if (ctl.signal.aborted) return;
         const practice = practiceFromReview(
-          c.practiceOfEngineering,
+          practiceNow.current,
           professional.required,
           Boolean(issues?.some((issue) => issue.practice_of_engineering.value === true)),
         );
-        if (c.practiceOfEngineering !== practice) dispatch({ type: "notePractice", value: practice });
+        if (practiceNow.current !== practice) dispatch({ type: "notePractice", value: practice });
         setLoad({
           phase: "live",
           note: "Recommendations only. You write the evidence and the answers. This does not decide that the design complies or is safe.",
@@ -419,25 +419,22 @@ export function Recommendations() {
           professional,
           fields,
           issuesNote,
-          engineId,
         });
       } catch (e) {
         if (ctl.signal.aborted) return;
         const message = failureText(e);
         const unreachable = e instanceof EngineError && failureKind(e.status, e.detail) === "unreachable";
-        setLoad({
+        setLoad((previous) => ({
+          ...previous,
           phase: unreachable ? "unreachable" : "error",
           note: message,
-          plan: null,
-          issues,
-          professional: null,
-          fields: [],
+          issues: issues ?? previous.issues,
           issuesNote,
-        });
+        }));
       }
     })();
     return () => ctl.abort();
-  }, [engineId, provisions, attempt, factsEpoch, refreshKey, c.practiceOfEngineering, dispatch]);
+  }, [engineId, provisions, attempt, factsEpoch, dispatch]);
 
   const flag = load.professional?.required;
 
@@ -459,7 +456,7 @@ export function Recommendations() {
           </button>
         </p>
       )}
-      {load.phase === "loading" && <p className="empty">Loading…</p>}
+      {load.phase === "loading" && !load.plan && !load.professional && !load.issues && <p className="empty">Loading…</p>}
       {flag && (
         <p>
           <span className={`status-dot ${flagDot(flag)}`} /> {practiceFlagLine(flag)}

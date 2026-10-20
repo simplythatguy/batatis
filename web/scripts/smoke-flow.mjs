@@ -302,13 +302,21 @@ try {
 
   await go(page, "#/accuracy");
   text = await jargon(page, "accuracy");
+  assert(/rules_plus_unknown/.test(text), "model-checked screen is missing the shipped rules_plus_unknown label");
   assert(/50\/60/.test(text), "model-checked screen is missing the shipped 50/60 figure");
+  assert(!/55 of 60/.test(text), "model-checked screen still leads with the unshipped 55 of 60 wording");
   assert(/0 under-flags/.test(text), "model-checked screen is missing 0 under-flags");
   assert(/0 under-flags holds by construction/.test(text), "model-checked screen is missing the text-only construction note");
   assert(/27 unknowns/.test(text), "model-checked screen is missing the 27 unknowns");
   assert(/7\/8 blind \(pre-fix\)/.test(text), "model-checked screen is missing held-out 7/8");
-  assert(/post-fix 4\/8/.test(text), "model-checked screen is missing post-fix 4/8");
-  const technical = await page.$eval("main details", (el) => el.textContent ?? "");
+  assert(/4\/8 post-fix/.test(text), "model-checked screen is missing post-fix 4/8");
+  assert(/model-checked, not human-verified/.test(text), "model-checked screen is missing the not-human-verified clause");
+  const technical = await page.evaluate(() => {
+    const details = [...document.querySelectorAll("details")].find((el) =>
+      el.querySelector("summary")?.textContent?.includes("Technical detail"),
+    );
+    return details?.textContent ?? "";
+  });
   assert(/rules_only 55\/60/.test(technical), "technical detail is missing rules_only 55/60");
   assert(/in-sample/.test(technical), "technical detail does not label the figure in-sample");
   await shot(page, "08-accuracy");
