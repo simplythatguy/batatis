@@ -2,6 +2,30 @@
 
 One Vercel project serves the Vite app in `web/` and the FastAPI engine. Public `/api/*` is rewritten to the engine. Everything else goes to the static app. Vercel Services is in beta on all plans.
 
+## Deployment controls
+
+Keep the project Root Directory at the repository root, with Framework Preset,
+Build Command, Install Command and Output Directory set to automatic. The
+root `vercel.json` owns the two services. A dashboard root of `web` builds only
+the frontend; a Services framework override on a branch without service
+declarations fails with `MISSING_SERVICES`.
+
+Set the production branch to `dev`. Only reviewed merges to `dev` should trigger
+automatic deployments: `git.deploymentEnabled` disables other branches. Keep
+automatic PR previews disabled in the project settings so older PR branches
+without this configuration cannot use the deployment allowance. Use local
+builds and explicitly requested previews for review. Do not redeploy an unchanged
+`dev` SHA on every team standup.
+
+The Hobby project's deployment allowance was exhausted on October 20, 2026
+(`api-deployments-free-per-day`, more than 100 deployments). When Vercel reports
+that limit, record its retry time and continue local work until the allowance
+resets. Repeated retries and upgrading to a paid plan are not part of this
+workflow. A `READY` frontend build alone does not verify the engine: exercise
+`/api` case creation, code search, export, and deletion on the same deployment.
+
+The branch allowlist follows [Vercel's Git configuration](https://vercel.com/docs/project-configuration/git-configuration).
+
 This repository does not deploy or create accounts. A person with the existing Vercel project connects the Git repository and sets the variables below. Do not commit the NRC PDF, `codedb/build/codedb.sqlite`, `.env`, or uploads.
 
 ## What the build does

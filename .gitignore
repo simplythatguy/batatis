@@ -12,3 +12,5 @@ __pycache__/
 reference/codes/*.pdf
 reference/text/
 reference/guides/*.pdf
+.vercel
+.env*
