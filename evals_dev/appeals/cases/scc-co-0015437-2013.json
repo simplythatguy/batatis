@@ -94,7 +94,8 @@
       "sentences": 1,
       "quote_confidence": "standard",
       "kind": "excerpt",
-      "field": "refusal_reason_evidence"
+      "field": "refusal_reason_evidence",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2013/Redacted_Building_Electromagnetic_Locking_Devices_and_Impeded_Egress_Zone_December_2013.pdf"
     }
   ],
   "professional_involvement": {

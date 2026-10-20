@@ -73,7 +73,8 @@
       "sentences": 1,
       "quote_confidence": "standard",
       "kind": "excerpt",
-      "field": "refusal_reason_evidence"
+      "field": "refusal_reason_evidence",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2014/Building_Exit_Stairwell_Door_and_FrameAssemblies_and_Compliance_with_ABC2006_and_NFPA80.pdf"
     }
   ],
   "professional_involvement": {

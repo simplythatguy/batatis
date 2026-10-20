@@ -165,6 +165,7 @@ def convert_record(rec: dict, index_row: dict) -> dict:
         item = _quote(source, confidence, kind=kind)
         if item:
             item['field'] = field
+            item['source_url'] = rec.get('url')
             quotes.append(item)
     addressed = bool(index_row.get('professional_involvement_addressed'))
     flag = WEAK_FLAG.get(case_id)

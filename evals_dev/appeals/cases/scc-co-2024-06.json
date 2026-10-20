@@ -117,14 +117,16 @@
       "sentences": 1,
       "quote_confidence": "standard",
       "kind": "excerpt",
-      "field": "refusal_reason_evidence"
+      "field": "refusal_reason_evidence",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2024/2024-06%20Decision_Signed_Redacted.pdf"
     },
     {
       "text": "Permit issuers are not permitted to declare an expert's conclusions incorrect. If the City requires expert assessments it must recognize their legitimacy, or substantiate concerns with competing evidence.",
       "sentences": 2,
       "quote_confidence": "standard",
       "kind": "excerpt",
-      "field": "professional_involvement"
+      "field": "professional_involvement",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2024/2024-06%20Decision_Signed_Redacted.pdf"
     }
   ],
   "professional_involvement": {

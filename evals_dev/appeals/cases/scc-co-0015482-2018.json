@@ -81,7 +81,8 @@
       "sentences": 1,
       "quote_confidence": "low",
       "kind": "excerpt",
-      "field": "refusal_reason_evidence"
+      "field": "refusal_reason_evidence",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2018/Building%20-%20Egress%20requirements%20in%20the%202006%20Alberta%20Building%20Code%20-%20January%202018.pdf"
     }
   ],
   "professional_involvement": {

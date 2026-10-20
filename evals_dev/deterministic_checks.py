@@ -23,6 +23,10 @@ A check that needs codedb and does not find ``codedb/build/codedb.sqlite`` (or
 read again on the next run, so a database built by the identify-api fetch script
 is picked up with no change here. Other branches plug in by dropping JSON in
 ``evals_dev/outputs/<kind>/`` (see ``output_adapters.py``).
+
+The Section D practice screen on the 12 professional-involvement appeals is a
+separate command, ``python evals_dev/appeals/score_professional.py``. It does
+not need codedb and it does not read the weak label as an input.
 """
 from __future__ import annotations
 

@@ -115,7 +115,8 @@
       "sentences": 1,
       "quote_confidence": "standard",
       "kind": "excerpt",
-      "field": "refusal_reason_evidence"
+      "field": "refusal_reason_evidence",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2012/REDACTED_Bldg_Fire%20and%20Smoke%20Alarm%20Systems%20for%20Part%2010%20Modules%20April%202012_0015414.pdf"
     }
   ],
   "professional_involvement": {

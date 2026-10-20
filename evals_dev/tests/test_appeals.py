@@ -3,6 +3,9 @@ import json
 import sqlite3
 from pathlib import Path
 
+from evals_dev.appeals.score_professional import LINE, load_addressed, predict, render, score_cases
+
+from engine.section_d_flag_eval import load_codes
 from evals_dev.appeals.checks import (
     LABEL_SOURCE, build_appeals_block, citation_resolution, professional_agreement,
 )
@@ -42,6 +45,7 @@ def test_converted_set_keeps_short_fields_and_no_2023_gold():
         for quote in case['quotes']:
             assert quote['sentences'] <= 2
             assert len(split_sentences(quote['text'])) <= 2
+            assert quote['source_url'] == case['source_url']
             if case['text_source_kind'] == 'ocr':
                 assert quote['quote_confidence'] == 'low'
         if case['text_source_kind'] == 'ocr':
@@ -129,6 +133,48 @@ def test_professional_agreement_is_separate_and_not_forced(tmp_path):
     assert report['checks']['appeals']['citation_resolution']['skipped'] == CODEDB_MISSING
     text = json.dumps(report)
     assert 'human-verified' not in text
+
+
+def test_practice_screen_uses_stored_facts_and_not_the_label():
+    cases = load_addressed()
+    assert len(cases) == 12
+    codes, _codedb = load_codes()
+    original = cases[0]
+    flipped = json.loads(json.dumps(original))
+    flipped['professional_involvement']['weak_flag'] = 'no'
+    flipped['gold']['engineering_required'] = 'no'
+    flipped['description'] = 'This project is a Part 4 design under part 4 with an 18 m span.'
+    flipped['known_facts'] = ['part 4 design', '18 m span']
+    for variant in ('rules_only', 'rules_plus_unknown', 'always_unknown'):
+        assert predict(original, codes, variant) == predict(flipped, codes, variant)
+    totals = score_cases(cases, codes)
+    text = render(totals)
+    assert LINE in text
+    assert text.splitlines()[0] == LINE
+    for name, row in totals.items():
+        assert row['n'] == 12
+        assert f'{name}: {row["matched"]}/12 ' in text
+        assert sum(sum(cols.values()) for cols in row['matrix'].values()) == 12
+        assert f'unknown {name}: {row["unknown"]}' in text
+        assert 'confident_wrong' in text
+    assert totals['always_unknown']['unknown'] == 12
+    assert totals['always_unknown']['confident_wrong'] == []
+    depends = sum(case['professional_involvement']['weak_flag'] == 'depends' for case in cases)
+    assert totals['always_unknown']['matched'] == depends
+
+
+def test_repo_holds_no_appeal_pdf_or_unattributed_excerpt():
+    appeals = CASES.parent
+    assert list(appeals.rglob('*.pdf')) == []
+    for path in CASES.glob('*.json'):
+        text = path.read_text()
+        assert 'pdf_path' not in text
+        assert 'text_path' not in text
+    for case in _cases():
+        assert case['source_url'].startswith('https://')
+        for quote in case['quotes']:
+            assert quote['source_url'].startswith('https://ebs.safetycodes.ab.ca/')
+            assert len(split_sentences(quote['text'])) <= 2
 
 
 def test_mapped_citation_resolves_only_after_a_2023_id_is_set(tmp_path):

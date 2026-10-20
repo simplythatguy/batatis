@@ -48,8 +48,25 @@ Their quotes have `quote_confidence: low`.
 
 ## How the deterministic report uses them
 
+Each excerpt in `quotes` carries the decision `source_url`. An excerpt is at most
+two sentences. OCR decisions keep `quote_confidence: low`.
+
 `python evals_dev/deterministic_checks.py` adds an `appeals` block with
 `label_source: appeals_weak`. It is not mixed with model-graded scores.
+
+The Section D practice screen, from `engine/section_d_flag_eval.py`, is scored
+on the 12 professional-involvement decisions with:
+
+```bash
+python evals_dev/appeals/score_professional.py
+```
+
+That screen reads `professional_involvement.facts` only. It does not read the
+weak label, and it does not need codedb. The report is `x/12` with a Wilson
+95% interval for `rules_only`, `rules_plus_unknown` and `always_unknown`, plus
+a confusion matrix, the unknown count and the confident-wrong ids. The rules
+are not adjusted from this set. The report line is
+`label_strength: weak; editions pre-2023`.
 
 - **Citation resolution after mapping.** Only rows with `nbc_ae_2023` set are
   resolved. With nothing mapped, a missing codedb reports `skipped: codedb missing`.

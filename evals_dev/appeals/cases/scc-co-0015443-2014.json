@@ -92,14 +92,16 @@
       "sentences": 1,
       "quote_confidence": "standard",
       "kind": "excerpt",
-      "field": "refusal_reason_evidence"
+      "field": "refusal_reason_evidence",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2015/Building%20-%20Second%20Storey%20Fire%20Resistance%20Rating%20and%20Base%20Building%20Classification%20January%202015.pdf"
     },
     {
       "text": "Not at issue (appellant was an architect).",
       "sentences": 1,
       "quote_confidence": "standard",
       "kind": "summary",
-      "field": "professional_involvement"
+      "field": "professional_involvement",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2015/Building%20-%20Second%20Storey%20Fire%20Resistance%20Rating%20and%20Base%20Building%20Classification%20January%202015.pdf"
     }
   ],
   "professional_involvement": {

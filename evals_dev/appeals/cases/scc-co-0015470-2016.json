@@ -116,7 +116,8 @@
       "sentences": 1,
       "quote_confidence": "low",
       "kind": "excerpt",
-      "field": "refusal_reason_evidence"
+      "field": "refusal_reason_evidence",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2016/Building%20-%20Installation%20of%20two%20glazed%20openings%20in%20an%20exposed%20buildingface%20-%20December%202016.pdf"
     }
   ],
   "professional_involvement": {

@@ -48,7 +48,8 @@
       "sentences": 1,
       "quote_confidence": "standard",
       "kind": "excerpt",
-      "field": "refusal_reason_evidence"
+      "field": "refusal_reason_evidence",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2023/2023-02%20Council%20Order%20Decision_Redacted.pdf"
     }
   ],
   "professional_involvement": {

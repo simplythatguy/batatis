@@ -70,14 +70,16 @@
       "sentences": 1,
       "quote_confidence": "standard",
       "kind": "excerpt",
-      "field": "refusal_reason_evidence"
+      "field": "refusal_reason_evidence",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2016/Redacted_Decision_0015467.pdf"
     },
     {
       "text": "The panel relied in part on 'the professional opinion of LRI Fire Protection and Building Code Engineers'. It noted that any alternative solution would need the steel flashing identified by the Professional Engineer's 6 April 2016 letter.",
       "sentences": 2,
       "quote_confidence": "standard",
       "kind": "excerpt",
-      "field": "professional_involvement"
+      "field": "professional_involvement",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2016/Redacted_Decision_0015467.pdf"
     }
   ],
   "professional_involvement": {

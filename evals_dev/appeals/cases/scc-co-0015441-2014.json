@@ -93,14 +93,16 @@
       "sentences": 1,
       "quote_confidence": "standard",
       "kind": "excerpt",
-      "field": "refusal_reason_evidence"
+      "field": "refusal_reason_evidence",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2014/Redacted_Permit%20Refusal%20Residential%20Occupancy%20Alternative%20Solution%20October%202014_0015441.pdf"
     },
     {
       "text": "Not at issue. The appellants were represented at the hearing by an engineer and an architect.",
       "sentences": 2,
       "quote_confidence": "standard",
       "kind": "summary",
-      "field": "professional_involvement"
+      "field": "professional_involvement",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2014/Redacted_Permit%20Refusal%20Residential%20Occupancy%20Alternative%20Solution%20October%202014_0015441.pdf"
     }
   ],
   "professional_involvement": {
