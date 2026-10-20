@@ -86,7 +86,7 @@ test("retired 11-shot titles are not in the catalog", () => {
 test("shot 4 and shot 5 skip when their subject is not on screen", () => {
   const source = readFileSync(new URL("./steps.mjs", import.meta.url), "utf8");
   const shot4 = source.slice(source.indexOf("async function shot4"), source.indexOf("async function shot5"));
-  const shot5 = source.slice(source.indexOf("async function shot5"), source.indexOf("async function waitOfficerLoaded"));
+  const shot5 = source.slice(source.indexOf("async function shot5"), source.indexOf("async function openOfficerReview"));
   assert.match(shot4, /if \(!search\.added\)/);
   assert.match(shot4, /offline sample/);
   assert.match(shot5, /LIMIT_LINE/);
@@ -113,6 +113,19 @@ test("the recorder uses the engine unless --offline is set", () => {
   assert.equal(source.includes("Recording anyway"), false);
   assert.match(source, /origin\/cursor\/demo-video-script-1e38:docs\/demo\/script\.md/);
   assert.match(source, /sync\.status !== "ok"/);
+});
+
+test("the officer shot reviews the open application", () => {
+  const source = readFileSync(new URL("./steps.mjs", import.meta.url), "utf8");
+  const shot6 = source.slice(source.indexOf("async function shot6"), source.indexOf("async function authorityFrame"));
+  const stills = source.slice(source.indexOf("shot-s07-officer"), source.lastIndexOf("shot-s09-scc-form"));
+  assert.match(shot6, /openOfficerReview/);
+  assert.match(shot6, /return pending/);
+  assert.match(shot6, /Copy request/);
+  assert.equal(shot6.includes("Before fixes"), false);
+  assert.equal(shot6.includes("Original example"), false);
+  assert.equal(stills.includes("package version control"), false);
+  assert.match(source, /OFFICER_INTRO/);
 });
 
 test("the walk does not upload a PDF", () => {

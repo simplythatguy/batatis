@@ -161,8 +161,12 @@ async function materializeBranch(ref) {
   try {
     await run("git", ["fetch", "origin", `${ref}:${localRef}`], { cwd: repoRoot });
   } catch (error) {
-    rmSync(parent, { recursive: true, force: true });
-    throw new Error(`Could not fetch ${ref}. ${error.message}`);
+    const local = await git(["rev-parse", "--verify", `${ref}^{commit}`], repoRoot).catch(() => "");
+    if (!local) {
+      rmSync(parent, { recursive: true, force: true });
+      throw new Error(`Could not fetch ${ref}. ${error.message}`);
+    }
+    await run("git", ["update-ref", localRef, local], { cwd: repoRoot });
   }
   try {
     await run("git", ["worktree", "add", "--detach", dir, localRef], { cwd: repoRoot });
@@ -434,7 +438,7 @@ function printReport(results) {
     console.log(`  recorded  ${step.id}  ${step.title}${extra}`);
   }
   for (const step of skipped) {
-    const label = step.status === "failed" ? "failed   " : "skipped  ";
+    const label = step.status === "failed" ? "failed   " : step.status === "pending" ? "pending  " : "skipped  ";
     console.log(`  ${label} ${step.id}  ${step.title}`);
     console.log(`            ${step.reason}`);
   }
@@ -485,6 +489,29 @@ async function convertMp4(webm, mp4, trimSeconds) {
   return { duration, codec, width: Number(width), height: Number(height) };
 }
 
+async function stillSourceBranch(args, gitInfo) {
+  const requested = args.branch;
+  const sha = gitInfo.sha || "";
+  if (requested && sha && !sha.startsWith(requested) && requested !== "HEAD") return requested;
+  if (sha) {
+    try {
+      const { stdout } = await run("git", ["branch", "-r", "--contains", sha], { cwd: repoRoot });
+      const names = stdout
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line.startsWith("origin/") && !line.includes("->"))
+        .map((line) => line.replace(/^origin\//, ""));
+      if (names.length === 1) return names[0];
+    } catch {
+      // A detached sha with no containing branch keeps the short sha below.
+    }
+  }
+  if (requested && sha.startsWith(requested)) return sha.slice(0, 7);
+  if (requested) return requested;
+  if (gitInfo.branch && gitInfo.branch !== "HEAD") return gitInfo.branch;
+  return "detached";
+}
+
 async function captureDeckStills({ args, outDir, base, webDir, gitInfo, engineSession, sync }) {
   const browser = await chromium.launch({
     executablePath: chromePath(),
@@ -509,7 +536,7 @@ async function captureDeckStills({ args, outDir, base, webDir, gitInfo, engineSe
       await h1Ready(page);
       await page.evaluate(() => document.fonts?.ready);
       const recordedAt = new Date().toISOString();
-      const sourceBranch = args.branch || (gitInfo.branch && gitInfo.branch !== "HEAD" ? gitInfo.branch : "detached");
+      const sourceBranch = await stillSourceBranch(args, gitInfo);
       const results = await runDeckStills(page, {
         outDir,
         sourceBranch,

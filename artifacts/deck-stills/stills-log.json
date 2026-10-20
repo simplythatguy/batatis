@@ -1,5 +1,5 @@
 {
-  "recordedAt": "2026-10-20T21:08:32.351Z",
+  "recordedAt": "2026-10-20T21:17:36.248Z",
   "mode": "stills",
   "networkMode": "engine",
   "engineState": "started",
@@ -7,13 +7,13 @@
     "width": 1440,
     "height": 900
   },
-  "webDir": "/tmp/batatis-record-cursor-e2e-product-flow-4362-7pWfPW/checkout/web",
+  "webDir": "/tmp/batatis-record-2413ad9-IY1kKj/checkout/web",
   "git": {
-    "sha": "4a4c1222e6fc4dacfd1c71039f1d30fec712f0ae",
+    "sha": "2413ad9a6478b83f28425d673ab7ce084e7a318d",
     "branch": "HEAD",
-    "requestedBranch": "cursor/e2e-product-flow-4362"
+    "requestedBranch": "2413ad9"
   },
-  "baseUrl": "http://127.0.0.1:33433/",
+  "baseUrl": "http://127.0.0.1:41319/",
   "engine": "Started uvicorn engine.api:app on 127.0.0.1:8000 from the recorded checkout. Browser requests to /api are proxied to it. Code search returned 503. The recorder did not call a model API. No PDF is uploaded.",
   "scriptSync": {
     "status": "ok",
@@ -33,8 +33,8 @@
       "status": "captured",
       "width": 1440,
       "height": 900,
-      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362@4a4c122, All three, 2026-10-20",
-      "source": "cursor/e2e-product-flow-4362@4a4c122",
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362@2413ad9, All three, 2026-10-20",
+      "source": "cursor/e2e-product-flow-4362@2413ad9",
       "case": "All three",
       "date": "2026-10-20"
     },
@@ -50,8 +50,8 @@
       "status": "captured",
       "width": 1440,
       "height": 900,
-      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362@4a4c122, Case C, 2026-10-20",
-      "source": "cursor/e2e-product-flow-4362@4a4c122",
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362@2413ad9, Case C, 2026-10-20",
+      "source": "cursor/e2e-product-flow-4362@2413ad9",
       "case": "Case C",
       "date": "2026-10-20"
     },
@@ -68,8 +68,8 @@
       "status": "captured",
       "width": 1440,
       "height": 900,
-      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362@4a4c122, Case A, 2026-10-20",
-      "source": "cursor/e2e-product-flow-4362@4a4c122",
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362@2413ad9, Case A, 2026-10-20",
+      "source": "cursor/e2e-product-flow-4362@2413ad9",
       "case": "Case A",
       "date": "2026-10-20"
     },
@@ -103,22 +103,32 @@
       "notes": [
         "The sentence \"Recommendations only. You write the evidence and the answers. This does not decide that the design complies or is safe.\" is not on this screen. It was not added.",
         "Header subtitle visible: Variance template · Sections A, B and process fields",
-        "Footer visible: Online review unavailable. Showing a limited check of fields in this browser. Draft saved in this browser. 13 required items need attention. Check completeness stays available so you can review them. The official PDF stays closed until they are cleared. Back Save draft Check completeness"
+        "Footer visible: Online review unavailable. Showing a limited check of fields in this browser. Draft saved in this browser. 14 required items need attention. Back Save draft Check completeness"
       ],
       "status": "captured",
       "width": 1440,
       "height": 900,
-      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362@4a4c122, Case C, 2026-10-20",
-      "source": "cursor/e2e-product-flow-4362@4a4c122",
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362@2413ad9, Case C, 2026-10-20",
+      "source": "cursor/e2e-product-flow-4362@2413ad9",
       "case": "Case C",
       "date": "2026-10-20"
     },
     {
       "id": "shot-s07-officer",
       "file": "shot-s07-officer.png",
-      "notes": [],
-      "status": "pending",
-      "reason": "Officer review opened without a package version control."
+      "notes": [
+        "Officer sections on screen: Documents, Open Not sure, Professional, Grouped completeness report, Information request.",
+        "Copy request is on screen. No package version control was clicked.",
+        "Header subtitle visible: Administrative completeness",
+        "Compliance disclaimer visible: This review is of the application in front of you. It checks whether information is present. It does not decide whether the design complies or is safe."
+      ],
+      "status": "captured",
+      "width": 1440,
+      "height": 900,
+      "provenance": "scripted demo capture, cursor/e2e-product-flow-4362@2413ad9, Case A, 2026-10-20",
+      "source": "cursor/e2e-product-flow-4362@2413ad9",
+      "case": "Case A",
+      "date": "2026-10-20"
     },
     {
       "id": "shot-s09-locked",

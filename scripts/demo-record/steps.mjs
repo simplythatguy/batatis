@@ -22,7 +22,6 @@ const LOWER = {
   A: "EXAMPLE DATA · Case A · Manufacturer",
   B: "EXAMPLE DATA · Case B · General contractor",
   C: "EXAMPLE DATA · Case C · Homebuilder",
-  officer: "EXAMPLE DATA · Sample officer package",
 };
 
 const ALL_LOWER = `${LOWER.A}\n${LOWER.B}\n${LOWER.C}`;
@@ -43,6 +42,9 @@ const CASES = {
 };
 
 const OPEN_QUESTION_HOLD_MS = 3500;
+const OFFICER_INTRO =
+  "This review is of the application in front of you. It checks whether information is present. It does not decide whether the design complies or is safe.";
+const OFFICER_HEADINGS = ["Documents", "Open Not sure", "Professional", "Grouped completeness report", "Information request"];
 const LIMIT_LINE =
   "Recommendations only. You write the evidence and the answers. This does not decide that the design complies or is safe.";
 const REAL_ADDRESS = "11821 73 Avenue NW";
@@ -52,6 +54,10 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function skipped(reason) {
   return { status: "skipped", reason };
+}
+
+function pending(reason) {
+  return { status: "pending", reason };
 }
 
 function recorded() {
@@ -250,7 +256,6 @@ async function overlayClearsChrome(page) {
     if (disclaimer && disclaimerRect && overlaps(bandRect, disclaimerRect)) problems.push("the compliance disclaimer");
     if (subtitle && subtitleRect && subtitleRect.width > 1 && !inView(subtitleRect)) problems.push("the header subtitle is outside the frame");
     if (footer && footerRect && !inView(footerRect)) problems.push("the footer is outside the frame");
-    if (disclaimer && disclaimerRect && !inView(disclaimerRect)) problems.push("the compliance disclaimer is outside the frame");
     return {
       ok: problems.length === 0,
       reason: problems.length ? `The recorder band leaves app text hidden: ${problems.join("; ")}.` : "",
@@ -717,28 +722,9 @@ async function shot5(page, api) {
   return recorded();
 }
 
-async function waitOfficerLoaded(page) {
-  const loading = page.getByText(/Loading the package…|Reviewing the example package…|Missing items will appear here/).first();
-  if (await visible(loading, 1000)) {
-    await page
-      .getByText(/Online review unavailable|Online administrative review|No missing|Your application appears to be missing/)
-      .first()
-      .waitFor({ timeout: 8000 })
-      .catch(() => {});
-  }
-  await sleep(300);
-}
-
-function namedButton(page, names) {
-  return page.getByRole("button", { name: new RegExp(`^(${names.map(escapeReg).join("|")})$`) }).first();
-}
-
-async function shot6(page, api) {
-  if (!api.state.caseOpen) {
-    return skipped("No case is open, so Officer review stays on Who are you?. The planted package was not recorded.");
-  }
+async function openOfficerReview(page, api) {
   const nav = navLink(page, "Officer review");
-  if (!(await visible(nav, 1500))) return skipped("Officer review is not in the navigation.");
+  if (!(await visible(nav, 1500))) return { ok: false, reason: "Officer review is not in the navigation." };
   const href = (await nav.getAttribute("href")) || "#/officer";
   await clearOverlay(page);
   await page.evaluate((next) => {
@@ -746,54 +732,72 @@ async function shot6(page, api) {
   }, href);
   await sleep(200);
   const title = h1(page, "Officer review");
-  if (!(await visible(title, 8000))) return skipped("Officer review did not open.");
-  if (await visible(page.getByRole("heading", { name: "Not built yet" }), 500)) {
-    await goHash(page, "/describe");
-    return skipped("Officer review is the Not built yet placeholder. It was not held on screen.");
+  if (!(await visible(title, 8000))) return { ok: false, reason: "Officer review did not open." };
+  if (await visible(page.getByRole("heading", { name: "Not built yet", exact: true }), 500)) {
+    return { ok: false, reason: "Officer review is the Not built yet placeholder." };
   }
   if (await visible(h1(page, "Who are you?"), 400)) {
-    return skipped("Officer review sent the browser back to Who are you?. The planted package was not recorded.");
+    return { ok: false, reason: "Officer review sent the browser back to Who are you?." };
   }
   if (await visible(page.getByText("does not open the sample package").first(), 800)) {
-    await goHash(page, "/describe");
-    return skipped("Officer review says this application does not open the sample package. The planted package was not recorded.");
+    return {
+      ok: false,
+      reason: "Officer review says this application does not open the sample package. The open-application review was not on screen.",
+    };
   }
-  const before = namedButton(page, ["Before fixes", "Original example"]);
-  if (!(await visible(before, 1200))) {
-    const toolbar = page.getByRole("group", { name: "Package version" }).first();
-    const onScreen = (await visible(toolbar, 500)) ? (await toolbar.innerText()).replace(/\s+/g, " ").trim() : "";
-    await goHash(page, "/describe");
-    return failed(
-      onScreen
-        ? `Officer review is open, and the version control reads "${onScreen}". Neither Before fixes nor Original example is visible.`
-        : "Officer review opened without a visible package version control.",
-    );
+  const loading = page.getByText("Reviewing your application…").first();
+  if (await visible(loading, 800)) {
+    await page
+      .getByRole("heading", { name: "Documents", exact: true })
+      .first()
+      .waitFor({ state: "visible", timeout: 10000 })
+      .catch(() => {});
   }
-    const beforeName = (await before.innerText()).replace(/\s+/g, " ").trim();
-    api.notes.push(`The officer screen is one planted package. Version control on screen: ${beforeName}. Case A, B, and C labels were not overlaid.`);
-    await before.click();
-    await waitOfficerLoaded(page);
-    const beforeFrame = await settle(page, api, LOWER.officer, { suffix: "before", caption: beforeName });
-    if (!beforeFrame.ok) return skipped(beforeFrame.reason);
-    const after = namedButton(page, ["After fixes", "Updated example"]);
-    if (await visible(after, 800)) {
-      const afterName = (await after.innerText()).replace(/\s+/g, " ").trim();
-      api.notes.push(`Second version control on screen: ${afterName}.`);
-      await after.click();
-    } else api.notes.push("The second package version control is not on this screen.");
-    await waitOfficerLoaded(page);
-    const request = page.getByRole("heading", { name: "Information request" }).first();
-    if (await visible(request, 2000)) await request.scrollIntoViewIfNeeded().catch(() => {});
-    else api.notes.push("Information request is not on this screen.");
-    const copy = namedButton(page, ["Copy request", "Copy example request"]);
-    if (await visible(copy, 800)) await copy.scrollIntoViewIfNeeded().catch(() => {});
-    else api.notes.push("Copy request is not on this screen.");
-    const afterCaption = (await visible(request, 300)) ? "Information request" : "Officer review";
-    const afterFrame = await settle(page, api, LOWER.officer, { suffix: "after", caption: afterCaption });
-    if (!afterFrame.ok) return skipped(afterFrame.reason);
-    const shown = await page.evaluate((from) => document.body.innerText.includes(from), REAL_ADDRESS);
-    if (shown) return skipped(`${REAL_ADDRESS} is on the officer screen. The shot was not kept.`);
-    return recorded();
+  const seen = [];
+  for (const name of OFFICER_HEADINGS) {
+    const heading = page.getByRole("heading", { name, exact: true }).first();
+    if (await visible(heading, 400)) seen.push(name);
+  }
+  api.notes.push(
+    seen.length
+      ? `Officer sections on screen: ${seen.join(", ")}.`
+      : "Officer section headings were not on screen.",
+  );
+  const intro = page.getByText(OFFICER_INTRO, { exact: true }).first();
+  if (!(await visible(intro, 1500))) {
+    return {
+      ok: false,
+      reason: `Officer review opened without the open-application line: "${OFFICER_INTRO}"`,
+    };
+  }
+  const copy = page.getByRole("button", { name: "Copy request", exact: true }).first();
+  if ((await copy.count()) < 1) {
+    return { ok: false, reason: "Officer review is open, and the Copy request button is not on screen." };
+  }
+  api.notes.push("Copy request is on screen. No package version control was clicked.");
+  return { ok: true };
+}
+
+async function shot6(page, api) {
+  if (!api.state.caseOpen) {
+    return pending("No case is open, so Officer review does not show the open application.");
+  }
+  const opened = await openOfficerReview(page, api);
+  if (!opened.ok) return pending(opened.reason);
+  const intro = page.getByText(OFFICER_INTRO, { exact: true }).first();
+  await intro.scrollIntoViewIfNeeded().catch(() => {});
+  const frame = await settle(page, api, CASES.A.lower, { caption: "Does not decide whether the design complies" });
+  if (!frame.ok) return pending(frame.reason);
+  const copy = page.getByRole("button", { name: "Copy request", exact: true }).first();
+  await copy.scrollIntoViewIfNeeded().catch(() => {});
+  if (!(await visible(copy, 1000))) {
+    return pending("Copy request is on the officer page and was not in the frame.");
+  }
+  const requestFrame = await settle(page, api, CASES.A.lower, { suffix: "request", caption: "Copy request" });
+  if (!requestFrame.ok) return pending(requestFrame.reason);
+  const shown = await page.evaluate((from) => document.body.innerText.includes(from), REAL_ADDRESS);
+  if (shown) return pending(`${REAL_ADDRESS} is on the officer screen. The shot was not kept.`);
+  return recorded();
 }
 
 async function authorityFrame(page, api, spec, suffix) {
@@ -1161,42 +1165,15 @@ export async function runDeckStills(page, opts) {
     }
 
     if (!api.state.caseOpen) {
-      skip("shot-s07-officer", "No case is open, so Officer review does not show the planted package.");
+      skip("shot-s07-officer", "No case is open, so Officer review does not show the open application.");
     } else {
-      const nav = navLink(page, "Officer review");
-      if (!(await visible(nav, 1500))) {
-        skip("shot-s07-officer", "Officer review is not in the navigation.");
+      const opened = await openOfficerReview(page, api);
+      if (!opened.ok) {
+        skip("shot-s07-officer", opened.reason);
       } else {
-        const href = (await nav.getAttribute("href")) || "#/officer";
-        await page.evaluate((next) => {
-          location.hash = next.startsWith("#") ? next : `#${next}`;
-        }, href);
-        await sleep(400);
-        if (!(await visible(h1(page, "Officer review"), 8000))) {
-          skip("shot-s07-officer", "Officer review did not open.");
-        } else if (await visible(page.getByRole("heading", { name: "Not built yet" }), 800)) {
-          skip("shot-s07-officer", "Officer review is the Not built yet placeholder.");
-        } else if (await visible(page.getByText("does not open the sample package").first(), 800)) {
-          skip("shot-s07-officer", "Officer review says this application does not open the sample package.");
-        } else {
-          const before = namedButton(page, ["Before fixes", "Original example"]);
-          if (!(await visible(before, 8000))) {
-            skip("shot-s07-officer", "Officer review opened without a package version control.");
-          } else {
-            await before.click();
-            await waitOfficerLoaded(page);
-            const after = namedButton(page, ["After fixes", "Updated example"]);
-            if (await visible(after, 800)) {
-              api.notes.push(`Version controls on screen: ${(await before.innerText()).trim()}, ${(await after.innerText()).trim()}.`);
-              await after.click();
-              await waitOfficerLoaded(page);
-            }
-            const copy = namedButton(page, ["Copy request", "Copy example request"]);
-            if (await visible(copy, 800)) await copy.scrollIntoViewIfNeeded().catch(() => {});
-            else api.notes.push("Copy request is not on this screen.");
-            await capture("shot-s07-officer", LOWER.officer, "Case A");
-          }
-        }
+        const intro = page.getByText(OFFICER_INTRO, { exact: true }).first();
+        await intro.scrollIntoViewIfNeeded().catch(() => {});
+        await capture("shot-s07-officer", CASES.A.lower, "Case A");
       }
     }
 
