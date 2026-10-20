@@ -1,0 +1,16 @@
+{
+  "case_id": "dev-059",
+  "status": "unverified",
+  "persona": "general contractor",
+  "variance_kind": "out-of-scope",
+  "scenario": "The gas fitter wants an alternative pipe-sizing and regulator arrangement for the natural gas supply to a house cooktop. This request is only about the gas supply installation; no building wall, appliance clearance or exit is being changed. Can this building-variance tool prepare that gas application?",
+  "section_ab_required_fields": null,
+  "expected_top_articles": null,
+  "benchmark_acceptable_solution": null,
+  "engineer_needed": null,
+  "intake_action": null,
+  "verifier_name": null,
+  "date_verified": null,
+  "source_page_refs": null,
+  "notes": null
+}

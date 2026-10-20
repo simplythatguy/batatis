@@ -1,0 +1,24 @@
+{
+  "_fixture": "FAKE — not a human answer key. Do not copy into evals_dev/human_key/.",
+  "case_id": "dev-901",
+  "status": "verified",
+  "persona": "homebuilder",
+  "variance_kind": "part9-spatial-separation",
+  "scenario": "FAKE scenario. A person would judge this text. It is not a development case.",
+  "section_ab_required_fields": ["owner", "municipal_address"],
+  "expected_top_articles": [
+    {
+      "provision": "9.99.99.99.(1)",
+      "division": "B",
+      "citation": "FAKE NBC(AE) 2023 2nd printing, Div B, Sentence 9.99.99.99.(1)",
+      "page": 4
+    }
+  ],
+  "benchmark_acceptable_solution": "FAKE acceptable solution",
+  "engineer_needed": "no",
+  "intake_action": "ask",
+  "verifier_name": "Fake Verifier",
+  "date_verified": "2026-10-20",
+  "source_page_refs": ["FAKE PDF p.4"],
+  "notes": "FAKE fixture"
+}
