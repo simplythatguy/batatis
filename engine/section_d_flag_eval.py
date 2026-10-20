@@ -1,6 +1,11 @@
 """Compare practice-of-engineering flag variants on the 60 development cases.
 
     python -m engine.section_d_flag_eval
+    python -m engine.section_d_flag_eval --cases cases.jsonl
+    python -m engine.section_d_flag_eval --codedb PATH --cases cases.jsonl
+
+`--cases` reads a JSONL file in the #8 case format (`id`, `description`, `known_facts`,
+`gold.engineering_required`) and scores only the shipped variant, `rules_plus_unknown`.
 
 `rules_only` fills unstated component facts with "not triggered" and returns professional.py's
 yes/no/depends. `rules_plus_unknown` keeps that screen, records a stated span above 12.20 m as
@@ -658,12 +663,27 @@ def load_codes(db_path: Path | str | None = None):
         return RuleLookup(), 'missing'
 
 
-def score(codes, cases: list[dict] | None = None) -> dict[str, VariantScore]:
+def load_case_jsonl(path: Path) -> list[dict]:
+    """One #8-format case per line: id, description, known_facts, gold.engineering_required."""
+    cases = []
+    for line_number, line in enumerate(path.read_text().splitlines(), start=1):
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        gold = row.get('gold') if isinstance(row, dict) else None
+        if not isinstance(gold, dict) or 'engineering_required' not in gold:
+            raise SystemExit(f'{path}:{line_number}: expected a #8 case with gold.engineering_required')
+        cases.append(row)
+    return cases
+
+
+def score(codes, cases: list[dict] | None = None, *,
+          variants: tuple[str, ...] = VARIANTS) -> dict[str, VariantScore]:
     rows = cases if cases is not None else load_cases()
-    totals = {name: VariantScore(name) for name in VARIANTS}
+    totals = {name: VariantScore(name) for name in variants}
     for case in rows:
         gold = case['gold']['engineering_required']
-        for name in VARIANTS:
+        for name in variants:
             try:
                 label = flag_label(case, codes, name)
             except (KeyError, ValueError):
@@ -835,8 +855,18 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description='Score practice-of-engineering flag variants.')
     parser.add_argument('--codedb', type=Path, default=None,
                         help='Path to codedb.sqlite. Without a readable database the table is not final.')
+    parser.add_argument('--cases', type=Path, default=None,
+                        help='JSONL in the #8 case format. Scores only the shipped variant, rules_plus_unknown.')
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
     codes, codedb = load_codes(args.codedb)
+    if args.cases is not None:
+        shipped = score(codes, load_case_jsonl(args.cases), variants=('rules_plus_unknown',))
+        print(_score_line('shipped', shipped['rules_plus_unknown']))
+        print('variant: rules_plus_unknown')
+        if codedb == 'missing':
+            print('numbers: not final (codedb missing; since 7f3aac2 a yes or no without a resolvable '
+                  'Division C citation becomes unknown)')
+        return 0
     dev = score(codes)
     heldout = score(codes, load_heldout())
     print(headline(dev, heldout))

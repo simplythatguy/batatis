@@ -1,12 +1,15 @@
 """Who must see a Section D issue. This is not a compliance determination.
 
 Code citations are copied from a codedb lookup. A provision that does not resolve is omitted.
-Triggers whose research verification_class is codedb-only are returned with source codedb.
-Statute rows are returned only for a pinpoint confirmed from the Act text, with source statute.
-Mixed triggers, and statute pinpoints that were not confirmed, are left off this list.
+Only codedb-only triggers marked mandatory are returned as codedb rows, in routing order.
+Those rows can push the practice flag toward yes. The other codedb-only triggers are
+discretionary or an authority-having-jurisdiction acceptance. They set routed_to officer
+and do not push yes. Statute rows stay for a pinpoint confirmed from the Act text.
+Mixed triggers stay off this list.
 """
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
@@ -16,28 +19,48 @@ from .models import Case
 from .process_fields import alternative_path, confirmed_value
 from .professional import ProfessionalFacts, ProfessionalResult, professional_involvement
 
-# (division, provision id). Each id is a codedb-checked sentence in the research table.
+# (division, provision id). Each id is a codedb-checked sentence the mandatory rows look up.
 REVIEW_PROVISIONS = (
-    ('C', '2.4.2.2.(1)'),  # HR-02 Schedules A and B, coordinating registered professional
-    ('C', '2.4.2.4.(1)'),  # HR-02 Schedule C-1 before occupancy
-    ('C', '2.2.1.4.(1)'),  # HR-32 barrier-free relaxation
-    ('C', '2.2.1.3.(1)'),  # HR-31 interpretation
-    ('C', '2.2.2.3.(1)'),  # HR-33 minor variation, authority having jurisdiction
+    ('C', '2.4.1.2.(1)'),  # HR-03 Part 4 designer
+    ('C', '2.4.1.1.(3)'),  # HR-01 authentication outside the general exceptions
+    ('B', '9.15.3.3.(2)'),  # HR-06 joist span
+    ('B', '9.15.3.3.(3)'),  # HR-06 live load
+    ('B', '9.23.4.1.(2)'),  # HR-06 non-residential floors
+    ('B', '9.16.1.2.(1)'),  # HR-06 floor-on-ground
+    ('B', '9.15.1.2.(1)'),  # HR-06 permafrost
+    ('B', '9.3.1.1.(3)'),  # HR-07 reinforced concrete
+    ('B', '9.24.1.1.(2)'),  # HR-07 loadbearing steel studs
+    ('B', '9.17.1.1.(2)'),  # HR-07 columns
+    ('B', '9.20.5.2.(3)'),  # HR-07 lintels
+    ('B', '9.23.1.1.(2)'),  # HR-07 framing past the Part 9 wood limits
+    ('B', '9.4.2.2.(3)'),  # HR-07 bowstring / arch truss span
+    ('B', '9.23.3.5.(4)'),  # HR-05 sheathing fastening
+    ('B', '9.23.6.1.(6)'),  # HR-05 anchorage
+    ('B', '9.23.16.5.(3)'),  # HR-05 lumber roof sheathing
+    ('A', '1.3.3.2.(1)'),  # HR-04 Parts 3 to 6 apply
+    ('A', '1.3.3.3.(1)'),  # HR-04 Part 9 scope, checked with the sentence above
+    ('C', '2.4.1.3.(1)'),  # HR-11 suppression
+    ('C', '2.4.1.4.(1)'),  # HR-11 fire alarm
+    ('B', '4.2.2.1.(1)'),  # HR-14 subsurface investigation
+    ('B', '4.2.4.1.(3)'),  # HR-14 geotechnical resistance
+    ('B', '4.2.7.2.(2)'),  # HR-14 load tests
     ('C', '2.2.9.2.(1)'),  # HR-13 aquatic facility
-    ('B', '4.2.2.1.(1)'),  # HR-14 geotechnical
     ('B', '10.4.7.2.(1)'),  # HR-12 Part 10 sprinklers
-    ('C', '2.2.4.4.(1)'),  # guards, named from HR-03's codedb-checked sentence
-    ('C', '2.2.11.4.(2)'),  # HR-42 medical gas report
-    ('C', '2.5.1.1.(1)'),  # HR-43 off-site construction
-    ('B', '3.2.2.2.(1)'),  # HR-16 special structure
+    ('B', '10.1.1.2.(2)'),  # HR-12 Part 10 applies to workforce accommodation
 )
 
-# verification_class == codedb-only in the human-review research file. 21 of 36.
-# The other 7 are mixed and the other 8 are source-pdf-only. Those are not emitted.
+# verification_class == codedb-only. 21 of 36. Mandatory routing uses the ten below.
 CODEDB_ONLY_TRIGGERS = frozenset({
     'HR-01', 'HR-03', 'HR-04', 'HR-05', 'HR-06', 'HR-07', 'HR-11', 'HR-12', 'HR-13', 'HR-14',
     'HR-15', 'HR-17', 'HR-31', 'HR-32', 'HR-33', 'HR-34', 'HR-35', 'HR-40', 'HR-41', 'HR-42', 'HR-44',
 })
+# routing_priority from the research file. Discretionary codedb-only ids are the rest.
+MANDATORY_ORDER = (
+    'HR-03', 'HR-01', 'HR-06', 'HR-07', 'HR-05', 'HR-04', 'HR-11', 'HR-14', 'HR-13', 'HR-12',
+)
+MANDATORY_TRIGGERS = frozenset(MANDATORY_ORDER)
+DISCRETIONARY_TRIGGERS = CODEDB_ONLY_TRIGGERS - MANDATORY_TRIGGERS
+
 # Pinpoints confirmed from the King's Printer office consolidations Karen checked.
 # Architects Act, RSA 2000 c A-44, current as of November 16, 2022, s.2(6)(b)(ii).
 # Engineering and Geoscience Professions Act, RSA 2000 c E-11, current as of December 7, 2023:
@@ -72,25 +95,45 @@ _QUOTE_VARIANCE = (
 )
 _UNITS_WHY = 'counts dwelling units (4 or less); whether a suite counts is for the officer'
 _ASSEMBLY_OR_INSTITUTIONAL = frozenset({'assembly', 'care', 'treatment', 'detention'})
-
-_FLAG_ROWS = {
-    'general_building': ('HR-01', 'Registered architectural and/or engineering professional', '2.4.1.1.(3)', 'C'),
-    'general_exception': ('HR-01', 'Registered architectural and/or engineering professional', '2.4.1.1.(1)', 'C'),
-    'general_unresolved': ('HR-01', 'Registered architectural and/or engineering professional', '2.4.1.1.(1)', 'C'),
-    'part4': ('HR-03', 'Registered professional skilled in the work concerned', '2.4.1.2.(1)', 'C'),
-    'part4_unknown': ('HR-03', 'Registered professional skilled in the work concerned', '2.4.1.2.(1)', 'C'),
-    'preserved_wood_foundation': ('HR-10', 'Registered professional for field reviews', '2.4.1.2.(2)', 'C'),
-    'foundation_unknown': ('HR-10', 'Registered professional for field reviews', '2.4.1.2.(2)', 'C'),
-    'truss_design': ('HR-08', 'Registered engineering professional', '9.23.14.11.(2)', 'B'),
-    'truss_part4': ('HR-03', 'Registered professional skilled in the work concerned', '2.4.1.2.(1)', 'C'),
-    'trusses_unknown': ('HR-08', 'Registered engineering professional', '2.4.1.2.(1)', 'C'),
-    'suppression': ('HR-11', 'Registered professional for the suppression system', '2.4.1.3.(1)', 'C'),
-    'suppression_unknown': ('HR-11', 'Registered professional for the suppression system', '2.4.1.3.(1)', 'C'),
-    'fire_alarm': ('HR-11', 'Registered professional for the fire-alarm system', '2.4.1.4.(1)', 'C'),
-    'fire_alarm_unknown': ('HR-11', 'Registered professional for the fire-alarm system', '2.4.1.4.(1)', 'C'),
-    'ahj_direction': ('HR-20', 'SCO', '2.4.1.1.(4)', 'C'),
-    'special_safety': ('HR-20', 'SCO', '2.4.1.1.(4)', 'C'),
-}
+_OUTSIDE_PART9_OCCUPANCY = _ASSEMBLY_OR_INSTITUTIONAL
+_JOIST_SPAN_M = 4.9
+_LIVE_LOAD_KPA = 2.4
+_WIND_KPA = 1.2
+_SA_FASTENING = 1.8
+_SA_LUMBER_ROOF = 1.2
+_PART9_STOREYS = 3
+_PART9_AREA_M2 = 600
+_ARCH_TRUSS_SPAN_M = 6
+_ARCH_TRUSS_TYPES = frozenset({
+    'bowstring', 'bow_string', 'arch', 'semi_circular', 'semicircular',
+})
+_ELEMENT_PROVISIONS = (
+    ('reinforced_concrete', 'B', '9.3.1.1.(3)',
+     'Reinforced concrete is stated, so that design is Part 4 work for a registered professional.'),
+    ('loadbearing_steel_studs', 'B', '9.24.1.1.(2)',
+     'Loadbearing steel studs are stated, so that design is Part 4 work for a registered professional.'),
+    ('steel_studs', 'B', '9.24.1.1.(2)',
+     'Loadbearing steel studs are stated, so that design is Part 4 work for a registered professional.'),
+    ('nonstandard_columns', 'B', '9.17.1.1.(2)',
+     'Columns outside the Part 9 cases are stated, so that design is Part 4 work for a registered professional.'),
+    ('non_standard_columns', 'B', '9.17.1.1.(2)',
+     'Columns outside the Part 9 cases are stated, so that design is Part 4 work for a registered professional.'),
+    ('masonry_or_steel_lintel', 'B', '9.20.5.2.(3)',
+     'A masonry or steel lintel is stated, so that design is Part 4 work for a registered professional.'),
+    ('masonry_lintel', 'B', '9.20.5.2.(3)',
+     'A masonry or steel lintel is stated, so that design is Part 4 work for a registered professional.'),
+    ('steel_lintel', 'B', '9.20.5.2.(3)',
+     'A masonry or steel lintel is stated, so that design is Part 4 work for a registered professional.'),
+    ('framing_exceeds_9_23_1_1', 'B', '9.23.1.1.(2)',
+     'Framing is past the Part 9 wood-construction limits, so that design is Part 4 work for a registered professional.'),
+)
+_ELEMENT_FIELDS = (
+    ('reinforced_concrete', 'reinforced_concrete'),
+    ('loadbearing_steel_studs', 'loadbearing_steel_studs'),
+    ('nonstandard_columns', 'nonstandard_columns'),
+    ('masonry_or_steel_lintel', 'masonry_or_steel_lintel'),
+    ('framing_exceeds_9_23_1_1', 'framing_exceeds_9_23_1_1'),
+)
 
 
 class HumanReview(BaseModel):
@@ -104,6 +147,18 @@ class HumanReview(BaseModel):
     source: Literal['codedb', 'statute'] = 'codedb'
     act: str | None = None
     quote: str | None = None
+
+
+@dataclass(frozen=True)
+class MandatoryHit:
+    """One mandatory codedb-only row whose cite was copied from a lookup."""
+
+    trigger_id: str
+    who: str
+    why: str
+    cite: str
+    division: Literal['A', 'B', 'C']
+    provision_id: str
 
 
 def _lookup_cite(codes: Codes, provision_id: str, division: str) -> str | None:
@@ -131,36 +186,280 @@ def _add(rows: list[HumanReview], seen: set[tuple[str, str]], trigger_id: str, w
                             source=source, act=act, quote=quote))
 
 
-def _screen(case: Case, codes: Codes) -> tuple[ProfessionalResult, ProfessionalFacts]:
-    from .section_d_issues import PART9_MAX_SPAN_M
-    span = confirmed_value(case, 'professional.span_m', 'span_m')
-    facts = ProfessionalFacts.from_case(case)
-    if isinstance(span, (int, float)) and not isinstance(span, bool) and span > PART9_MAX_SPAN_M and facts.part4_design is not True:
-        facts = facts.model_copy(update={'part4_design': True})
-    return professional_involvement(facts, codes, provisions=tuple(case.provisions)), facts
+def _number(case: Case, name: str) -> float | None:
+    value = confirmed_value(case, f'professional.{name}', name)
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    return float(value)
 
 
-def _flag_rows(result: ProfessionalResult, codes: Codes, rows: list[HumanReview], seen: set[tuple[str, str]]) -> None:
-    chosen = [reason for reason in result.reasons if reason.required == 'yes'] or list(result.reasons)
-    for reason in chosen:
-        spec = _FLAG_ROWS.get(reason.code)
-        if spec is None:
+def _yes(case: Case, name: str) -> bool:
+    return confirmed_value(case, f'professional.{name}', name) is True
+
+
+def _text(case: Case, name: str) -> str | None:
+    value = confirmed_value(case, f'professional.{name}', name)
+    if not isinstance(value, str) or not value.strip():
+        return None
+    return value.strip()
+
+
+def _tokens(case: Case, name: str) -> set[str]:
+    value = confirmed_value(case, f'professional.{name}', name)
+    if isinstance(value, str):
+        value = [value]
+    if not isinstance(value, (list, tuple)):
+        return set()
+    tokens = set()
+    for item in value:
+        token = str(item).strip().lower().replace('-', '_').replace(' ', '_')
+        if not token or token.startswith('non_loadbearing') or token.startswith('nonloadbearing'):
             continue
-        trigger_id, who, provision_id, division = spec
-        _add(rows, seen, trigger_id, who,
-             'The practice flag names this person or authority. This is not a determination.',
-             _lookup_cite(codes, provision_id, division))
+        tokens.add(token)
+    return tokens
 
 
-def _schedules(result: ProfessionalResult, codes: Codes, rows: list[HumanReview], seen: set[tuple[str, str]]) -> None:
+def _remember(hits: list[MandatoryHit], seen: set[tuple[str, str]], codes: Codes,
+              trigger_id: str, who: str, why: str, division: Literal['A', 'B', 'C'],
+              provision_id: str) -> None:
+    key = (trigger_id, provision_id)
+    if key in seen:
+        return
+    cite = _lookup_cite(codes, provision_id, division)
+    if not cite:
+        return
+    seen.add(key)
+    hits.append(MandatoryHit(trigger_id=trigger_id, who=who, why=why, cite=cite,
+                             division=division, provision_id=provision_id))
+
+
+def _part4_chain_resolves(codes: Codes) -> bool:
+    """HR-04, HR-05, HR-06 and HR-07 name a Part 4 duty. Both sentences have to resolve."""
+    return _lookup_cite(codes, '2.4.1.2.(1)', 'C') is not None
+
+
+def _hr03(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]]) -> None:
+    from .section_d_issues import PART9_MAX_SPAN_M
+    span = _number(case, 'span_m')
+    elements = _tokens(case, 'part4_elements')
+    if not (_yes(case, 'part4_design') or elements or (span is not None and span > PART9_MAX_SPAN_M)):
+        return
+    _remember(hits, seen, codes, 'HR-03', 'Registered professional skilled in the work concerned',
+              'Part 4 design is stated. Recommend a registered professional skilled in that work.',
+              'C', '2.4.1.2.(1)')
+
+
+def _hr01(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]]) -> None:
+    result = professional_involvement(case, codes)
     if result.general_required != 'yes':
         return
-    _add(rows, seen, 'HR-02', 'Coordinating registered professional',
-         'Before the permit application, retain a coordinating registered professional and provide Schedules A and B.',
-         _lookup_cite(codes, '2.4.2.2.(1)', 'C'))
-    _add(rows, seen, 'HR-02', 'Coordinating registered professional',
-         'Schedule C-1 is required from the coordinating registered professional before occupancy.',
-         _lookup_cite(codes, '2.4.2.4.(1)', 'C'))
+    _remember(hits, seen, codes, 'HR-01', 'Registered architectural and/or engineering professional',
+              'The stated building is outside the general exceptions. Recommend that a registered '
+              'professional authenticate the applicable drawings and specifications.',
+              'C', '2.4.1.1.(3)')
+
+
+def _hr06(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]]) -> None:
+    if not _part4_chain_resolves(codes):
+        return
+    who = 'Registered professional for the structural or geotechnical work'
+    span = _number(case, 'supported_joist_span_m')
+    live = _number(case, 'specified_live_load_kPa')
+    if span is not None and span > _JOIST_SPAN_M:
+        _remember(hits, seen, codes, 'HR-06', who,
+                  'Supported joist span is above 4.9 m, so the footing design is Part 4 work for a registered professional.',
+                  'B', '9.15.3.3.(2)')
+    if live is not None and live > _LIVE_LOAD_KPA:
+        _remember(hits, seen, codes, 'HR-06', who,
+                  'Specified live load is above 2.4 kPa, so the footing design is Part 4 work for a registered professional.',
+                  'B', '9.15.3.3.(3)')
+    if _yes(case, 'floor_use_non_residential'):
+        _remember(hits, seen, codes, 'HR-06', who,
+                  'The supported floor is other than residential, so the spans are Part 4 work for a registered professional.',
+                  'B', '9.23.4.1.(2)')
+    if _yes(case, 'slab_supports_superstructure'):
+        _remember(hits, seen, codes, 'HR-06', who,
+                  'A floor-on-ground supports the superstructure, so that design is Part 4 work for a registered professional.',
+                  'B', '9.16.1.2.(1)')
+    if _yes(case, 'permafrost'):
+        _remember(hits, seen, codes, 'HR-06', who,
+                  'The building is on permafrost, so the foundation design is Part 4 work for a registered professional.',
+                  'B', '9.15.1.2.(1)')
+
+
+def _hr07(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]]) -> None:
+    if not _part4_chain_resolves(codes):
+        return
+    who = 'Registered professional for the structural work'
+    tokens = _tokens(case, 'structural_elements')
+    for token, field in _ELEMENT_FIELDS:
+        if _yes(case, field):
+            tokens.add(token)
+    emitted: set[str] = set()
+    for token, division, provision_id, why in _ELEMENT_PROVISIONS:
+        if token in tokens and provision_id not in emitted:
+            emitted.add(provision_id)
+            _remember(hits, seen, codes, 'HR-07', who, why, division, provision_id)
+    truss = _text(case, 'truss_type')
+    truss_span = _number(case, 'unsupported_span_m')
+    if truss and truss_span is not None and truss_span > _ARCH_TRUSS_SPAN_M:
+        normalized = truss.lower().replace('-', '_').replace(' ', '_')
+        if normalized in _ARCH_TRUSS_TYPES:
+            _remember(hits, seen, codes, 'HR-07', who,
+                      'A bowstring, arch, or semi-circular truss spans more than 6 m, so that design is Part 4 work for a registered professional.',
+                      'B', '9.4.2.2.(3)')
+
+
+def _hr05(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]]) -> None:
+    if not _part4_chain_resolves(codes):
+        return
+    who = 'Registered professional for the structural work'
+    wind = _number(case, 'hourly_wind_pressure_1in50_kPa')
+    sa = _number(case, 'Sa_0_2')
+    if sa is None:
+        sa = _number(case, 'sa_0_2')
+    lumber = _yes(case, 'lumber_roof_sheathing')
+    braced = _yes(case, 'braced_wall_panels_required')
+    wind_hit = wind is not None and wind >= _WIND_KPA
+    sa_fastening = sa is not None and sa > _SA_FASTENING
+    if wind_hit or (braced and sa_fastening):
+        _remember(hits, seen, codes, 'HR-05', who,
+                  'Wind or seismic demand sends sheathing fastening to Part 4, so a registered professional is named for that work.',
+                  'B', '9.23.3.5.(4)')
+    if wind_hit or sa_fastening:
+        _remember(hits, seen, codes, 'HR-05', who,
+                  'Wind or seismic demand sends anchorage to Part 4, so a registered professional is named for that work.',
+                  'B', '9.23.6.1.(6)')
+    if lumber and ((sa is not None and sa > _SA_LUMBER_ROOF) or wind_hit):
+        _remember(hits, seen, codes, 'HR-05', who,
+                  'Lumber roof sheathing is stated with the wind or seismic demand, so that design is Part 4 work for a registered professional.',
+                  'B', '9.23.16.5.(3)')
+
+
+def _outside_part9(case: Case, facts: ProfessionalFacts) -> bool:
+    storeys = facts.storeys
+    area = facts.building_area_m2
+    if storeys is not None and storeys > _PART9_STOREYS:
+        return True
+    if area is not None and area > _PART9_AREA_M2:
+        return True
+    if facts.occupancy in _OUTSIDE_PART9_OCCUPANCY:
+        return True
+    if _yes(case, 'post_disaster') or _yes(case, 'high_hazard_industrial') or _yes(case, 'group_f1'):
+        return True
+    return False
+
+
+def _hr04(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]]) -> None:
+    facts = ProfessionalFacts.from_case(case)
+    if not _outside_part9(case, facts):
+        return
+    if not _part4_chain_resolves(codes) or _lookup_cite(codes, '1.3.3.3.(1)', 'A') is None:
+        return
+    _remember(hits, seen, codes, 'HR-04', 'Registered professional for the Part 4 design',
+              'This building is outside Part 9 scope, so Part 4 design applies and a registered professional is named for that design.',
+              'A', '1.3.3.2.(1)')
+
+
+def _hr11(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]]) -> None:
+    if _yes(case, 'minor_alteration_existing_system'):
+        return
+    result = professional_involvement(case, codes)
+    if result.general_required != 'yes':
+        return
+    if _yes(case, 'fire_suppression'):
+        _remember(hits, seen, codes, 'HR-11',
+                  'Registered professional for fire protection, mechanical, or electrical',
+                  'A fire-suppression system is stated for a building outside the general exceptions. '
+                  'Recommend documenting professional retention for design, field review and witnessing of testing.',
+                  'C', '2.4.1.3.(1)')
+    if _yes(case, 'fire_alarm'):
+        _remember(hits, seen, codes, 'HR-11',
+                  'Registered professional for fire protection, mechanical, or electrical',
+                  'A fire-alarm system is stated for a building outside the general exceptions. '
+                  'Recommend documenting professional retention for design, field review and witnessing of verification.',
+                  'C', '2.4.1.4.(1)')
+
+
+def _hr14(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]]) -> None:
+    who = 'Registered professional for geotechnical work'
+    if _yes(case, 'geotechnical_part4') or _yes(case, 'part4_foundation'):
+        _remember(hits, seen, codes, 'HR-14', who,
+                  'Part 4 geotechnical work goes to a registered professional.',
+                  'B', '4.2.2.1.(1)')
+    if _yes(case, 'deep_foundations'):
+        _remember(hits, seen, codes, 'HR-14', who,
+                  'Geotechnical loads and resistances go to a registered professional.',
+                  'B', '4.2.4.1.(3)')
+    if _yes(case, 'load_tests'):
+        _remember(hits, seen, codes, 'HR-14', who,
+                  'Deep-foundation load-test interpretation goes to a registered professional.',
+                  'B', '4.2.7.2.(2)')
+
+
+def _hr13(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]]) -> None:
+    if not _yes(case, 'aquatic_facility'):
+        return
+    _remember(hits, seen, codes, 'HR-13', 'Registered professional',
+              'Drawings for an aquatic facility go to a registered professional.',
+              'C', '2.2.9.2.(1)')
+
+
+def _hr12(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]]) -> None:
+    sprinklers = _yes(case, 'part10_sprinklers') or (
+        _yes(case, 'part10_building') and _yes(case, 'fire_suppression'))
+    if not sprinklers:
+        return
+    if _yes(case, 'part10_building') and _lookup_cite(codes, '10.1.1.2.(2)', 'B') is None:
+        return
+    _remember(hits, seen, codes, 'HR-12', 'Registered professional for the sprinkler system',
+              'A Part 10 sprinkler system goes to a registered professional.',
+              'B', '10.4.7.2.(1)')
+
+
+def mandatory_hits(case: Case, codes: Codes) -> tuple[MandatoryHit, ...]:
+    """Mandatory codedb-only triggers whose cites resolved, in routing order."""
+    hits: list[MandatoryHit] = []
+    seen: set[tuple[str, str]] = set()
+    _hr03(case, codes, hits, seen)
+    _hr01(case, codes, hits, seen)
+    _hr06(case, codes, hits, seen)
+    _hr07(case, codes, hits, seen)
+    _hr05(case, codes, hits, seen)
+    _hr04(case, codes, hits, seen)
+    _hr11(case, codes, hits, seen)
+    _hr14(case, codes, hits, seen)
+    _hr13(case, codes, hits, seen)
+    _hr12(case, codes, hits, seen)
+    order = {trigger_id: index for index, trigger_id in enumerate(MANDATORY_ORDER)}
+    hits.sort(key=lambda hit: order[hit.trigger_id])
+    return tuple(hits)
+
+
+def discretionary_review(case: Case) -> bool:
+    """True when a discretionary or authority-acceptance trigger is present. This does not push yes."""
+    if any(provision.startswith('3.8.') for provision in case.provisions):
+        return True
+    if confirmed_value(case, 'requests_interpretation') is True:
+        return True
+    required = _number(case, 'dimension_required')
+    proposed = _number(case, 'dimension_proposed')
+    if required is not None and proposed is not None and required > 0 and abs(proposed - required) / required <= 0.02:
+        return True
+    flags = (
+        'temporary_works', 'multiple_responsible_persons', 'supporting_tests_or_studies',
+        'change_of_occupancy', 'alteration_existing', 'aquatic_equipment', 'tent_or_air_supported',
+        'temporary_building', 'fire_resistance_rating_by_test', 'cladding_combustible',
+        'medical_gas_piping', 'welded_steel', 'minor_alteration_existing_system',
+    )
+    if any(_yes(case, name) for name in flags):
+        return True
+    if _text(case, 'coordinator_name'):
+        return True
+    source = _text(case, 'fire_resistance_rating_source')
+    if source and source.casefold() in {'test', 'can/ulc-s101', 's101'}:
+        return True
+    return False
 
 
 def _acts(result: ProfessionalResult, facts: ProfessionalFacts, rows: list[HumanReview], seen: set[tuple[str, str]]) -> None:
@@ -189,60 +488,15 @@ def _acts(result: ProfessionalResult, facts: ProfessionalFacts, rows: list[Human
              _CITE_EGPA_GROSS, source='statute', act=_ACT_ENGINEERING, quote=_QUOTE_EGPA_GROSS)
 
 
-def _routing(case: Case, codes: Codes, rows: list[HumanReview], seen: set[tuple[str, str]]) -> None:
-    if any(provision.startswith('3.8.') for provision in case.provisions):
-        _add(rows, seen, 'HR-32', 'Provincial Barrier-Free Administrator or Provincial Building Administrator',
-             'A relaxation under Division B Section 3.8 goes to the Provincial Barrier-Free Administrator or the Provincial Building Administrator.',
-             _lookup_cite(codes, '2.2.1.4.(1)', 'C'))
-    if confirmed_value(case, 'requests_interpretation') is True:
-        _add(rows, seen, 'HR-31', 'Provincial Building Administrator',
-             'A request for an interpretation goes to the Provincial Building Administrator.',
-             _lookup_cite(codes, '2.2.1.3.(1)', 'C'))
-    required = confirmed_value(case, 'dimension_required')
-    proposed = confirmed_value(case, 'dimension_proposed')
-    if isinstance(required, (int, float)) and isinstance(proposed, (int, float)) and not isinstance(required, bool) and not isinstance(proposed, bool) and required > 0:
-        if abs(proposed - required) / required <= 0.02:
-            _add(rows, seen, 'HR-33', 'Authority having jurisdiction',
-                 'A dimensional difference of not more than 2% stays with the authority having jurisdiction. This list does not accept the variation.',
-                 _lookup_cite(codes, '2.2.2.3.(1)', 'C'))
-
-
-_DUTIES = (
-    ('aquatic_facility', 'HR-13', 'Registered professional', 'C', '2.2.9.2.(1)',
-     'Drawings for an aquatic facility go to a registered professional.'),
-    ('geotechnical_part4', 'HR-14', 'Registered professional for geotechnical work', 'B', '4.2.2.1.(1)',
-     'Part 4 geotechnical work goes to a registered professional.'),
-    ('part10_sprinklers', 'HR-12', 'Registered professional for the sprinkler system', 'B', '10.4.7.2.(1)',
-     'A Part 10 sprinkler system goes to a registered professional.'),
-    ('guards', 'HR-03', 'Registered professional', 'C', '2.2.4.4.(1)',
-     'Structural drawings of guards go to a registered professional.'),
-    ('medical_gas_piping', 'HR-42', 'Testing agency and the authority having jurisdiction', 'C', '2.2.11.4.(2)',
-     'Medical gas piping needs the testing agency report before use.'),
-    ('off_site_constructed', 'HR-43', 'Certification organization or registered professional', 'C', '2.5.1.1.(1)',
-     'Off-site construction needs the certification or professional review named for that work.'),
-    ('special_structure', 'HR-16', 'Registered professional for fire protection', 'B', '3.2.2.2.(1)',
-     'A structure outside Articles 3.2.2.20. to 3.2.2.92. needs fire protection engineering practice.'),
-)
-
-
-def _duties(case: Case, codes: Codes, rows: list[HumanReview], seen: set[tuple[str, str]]) -> None:
-    for field, trigger_id, who, division, provision_id, why in _DUTIES:
-        if confirmed_value(case, field) is True:
-            _add(rows, seen, trigger_id, who, why, _lookup_cite(codes, provision_id, division))
-
-
 def human_reviews(case: Case, codes: Codes) -> tuple[HumanReview, ...]:
-    """Pinpoint rows for this case. A missing lookup is skipped rather than invented."""
-    result, facts = _screen(case, codes)
-    rows: list[HumanReview] = []
-    seen: set[tuple[str, str]] = set()
-    _flag_rows(result, codes, rows, seen)
-    _schedules(result, codes, rows, seen)
-    _acts(result, facts, rows, seen)
-    _routing(case, codes, rows, seen)
-    _duties(case, codes, rows, seen)
+    """Mandatory codedb rows, then confirmed statute rows. A missing lookup is skipped."""
+    rows = [HumanReview(trigger_id=hit.trigger_id, who=hit.who, why=hit.why, cite=hit.cite)
+            for hit in mandatory_hits(case, codes)]
+    seen = {(row.trigger_id, row.cite) for row in rows}
+    result = professional_involvement(case, codes)
+    _acts(result, ProfessionalFacts.from_case(case), rows, seen)
     if alternative_path(case):
         _add(rows, seen, 'HR-30', 'SCO or Administrator',
              'A variance is decided by an SCO or an Administrator. This list does not grant it.',
              _CITE_VARIANCE, source='statute', act=_ACT_VARIANCE_NAME, quote=_QUOTE_VARIANCE)
-    return tuple(row for row in rows if row.source == 'statute' or row.trigger_id in CODEDB_ONLY_TRIGGERS)
+    return tuple(row for row in rows if row.source == 'statute' or row.trigger_id in MANDATORY_TRIGGERS)

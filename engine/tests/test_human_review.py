@@ -10,11 +10,11 @@ def _ids(issue):
 
 
 def test_every_issue_names_someone_and_labels_the_source():
-    from engine.human_review import CODEDB_ONLY_TRIGGERS
+    from engine.human_review import MANDATORY_TRIGGERS
     issue = section_d_issues(Case(provisions=[BENCHMARK]), codes_with_rules())[0]
     assert issue.human_review
     assert all(row.who and row.why and row.cite for row in issue.human_review)
-    assert all(row.source == 'statute' or row.trigger_id in CODEDB_ONLY_TRIGGERS for row in issue.human_review)
+    assert all(row.source == 'statute' or row.trigger_id in MANDATORY_TRIGGERS for row in issue.human_review)
     assert all(row.source == 'codedb' and row.act is None and row.quote is None
                for row in issue.human_review if row.source == 'codedb')
     variance = next(row for row in issue.human_review if row.trigger_id == 'HR-30')
@@ -73,20 +73,24 @@ def test_code_exception_can_still_name_the_acts():
 
 
 def test_barrier_free_interpretation_and_tolerance_routes():
+    """Discretionary codedb-only triggers route to the officer and do not push yes."""
     codes = codes_with_rules()
     barrier = section_d_issues(Case(provisions=[BENCHMARK, '3.8.3.1.(1)']), codes)[0]
-    row = next(item for item in barrier.human_review if item.trigger_id == 'HR-32')
-    assert row.cite == 'fixture:C:2.2.1.4.(1)'
-    assert 'Provincial Barrier-Free Administrator' in row.who
+    assert 'HR-32' not in _ids(barrier)
+    assert barrier.practice_of_engineering.value is not True
+    assert barrier.routed_to == 'officer'
 
     interpretation = section_d_issues(
         Case(provisions=[BENCHMARK], facts=[fact('requests_interpretation', True)]), codes)[0]
-    assert next(item.cite for item in interpretation.human_review if item.trigger_id == 'HR-31') == 'fixture:C:2.2.1.3.(1)'
+    assert 'HR-31' not in _ids(interpretation)
+    assert interpretation.practice_of_engineering.value is not True
+    assert interpretation.routed_to == 'officer'
 
     within = section_d_issues(Case(provisions=[BENCHMARK], facts=[
         fact('dimension_required', 100.0), fact('dimension_proposed', 101.0)]), codes)[0]
-    assert next(item.cite for item in within.human_review if item.trigger_id == 'HR-33') == 'fixture:C:2.2.2.3.(1)'
-    assert next(item.who for item in within.human_review if item.trigger_id == 'HR-33') == 'Authority having jurisdiction'
+    assert 'HR-33' not in _ids(within)
+    assert within.practice_of_engineering.value is not True
+    assert within.routed_to == 'officer'
 
     outside = section_d_issues(Case(provisions=[BENCHMARK], facts=[
         fact('dimension_required', 100.0), fact('dimension_proposed', 103.0)]), codes)[0]
@@ -143,16 +147,120 @@ def test_unanswered_components_ask_only_in_scope():
 def test_named_duties_use_looked_up_cites():
     codes = codes_with_rules()
     fields = (
-        ('aquatic_facility', 'HR-13', 'fixture:C:2.2.9.2.(1)'),
-        ('geotechnical_part4', 'HR-14', 'fixture:B:4.2.2.1.(1)'),
-        ('part10_sprinklers', 'HR-12', 'fixture:B:10.4.7.2.(1)'),
-        ('guards', 'HR-03', 'fixture:C:2.2.4.4.(1)'),
-        ('medical_gas_piping', 'HR-42', 'fixture:C:2.2.11.4.(2)'),
+        ('aquatic_facility', 'HR-13', 'C', '2.2.9.2.(1)'),
+        ('geotechnical_part4', 'HR-14', 'B', '4.2.2.1.(1)'),
+        ('part10_sprinklers', 'HR-12', 'B', '10.4.7.2.(1)'),
     )
-    for field, trigger_id, cite in fields:
+    for field, trigger_id, division, provision_id in fields:
         issue = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact(field, True)]), codes)[0]
+        cite = codes.provision(provision_id, division)['citation']
         match = next(row for row in issue.human_review if row.trigger_id == trigger_id and row.cite == cite)
         assert match.who and match.why
-    for field, trigger_id in (('off_site_constructed', 'HR-43'), ('special_structure', 'HR-16')):
+        assert issue.practice_of_engineering.value is True
+        assert issue.status == 'needs_professional'
+    for field, trigger_id in (
+        ('guards', 'HR-03'),
+        ('medical_gas_piping', 'HR-42'),
+        ('off_site_constructed', 'HR-43'),
+        ('special_structure', 'HR-16'),
+    ):
         issue = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact(field, True)]), codes)[0]
         assert trigger_id not in _ids(issue)
+        assert issue.practice_of_engineering.value is not True
+    gas = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact('medical_gas_piping', True)]), codes)[0]
+    assert gas.routed_to == 'officer'
+
+
+def _base(**extra):
+    """A Part 9 house inside the general exception. None of the mandatory triggers are met."""
+    values = dict(
+        occupancy='single_family', storeys=2, building_area_m2=150.0,
+        part4_design=False, preserved_wood_foundation_part4=False, roof_trusses=False,
+        prescriptive_route_confirmed=True, ahj_requires_professional=False,
+        special_safety_concerns=False, professional_judgement_required=False,
+        professional_scope_resolved=True, fire_suppression=False, fire_alarm=False,
+        geotechnical_part4=False, aquatic_facility=False, part10_sprinklers=False,
+        part10_building=False, reinforced_concrete=False, framing_exceeds_9_23_1_1=False,
+        supported_joist_span_m=4.9, specified_live_load_kPa=2.4,
+        hourly_wind_pressure_1in50_kPa=1.1, Sa_0_2=1.8, post_disaster=False,
+        minor_alteration_existing_system=False,
+    )
+    values.update(extra)
+    return [fact(key, value) for key, value in values.items()]
+
+
+def _screen(facts):
+    codes = codes_with_rules()
+    return codes, section_d_issues(Case(provisions=[BENCHMARK], facts=facts), codes)[0]
+
+
+def test_mandatory_triggers_fire_in_routing_order_with_looked_up_cites():
+    from engine.human_review import MANDATORY_ORDER
+    codes, issue = _screen(_base(
+        occupancy='multi_family', principal_dwelling_units=6, storeys=4,
+        part4_design=True, supported_joist_span_m=5.0, reinforced_concrete=True,
+        hourly_wind_pressure_1in50_kPa=1.2, fire_suppression=True,
+        geotechnical_part4=True, aquatic_facility=True, part10_sprinklers=True,
+    ))
+    codedb = [row.trigger_id for row in issue.human_review if row.source == 'codedb']
+    collapsed = []
+    for trigger_id in codedb:
+        if not collapsed or collapsed[-1] != trigger_id:
+            collapsed.append(trigger_id)
+    assert collapsed == list(MANDATORY_ORDER)
+    assert all(row.cite in codes.issued for row in issue.human_review if row.source == 'codedb')
+    assert issue.practice_of_engineering.value is True
+    assert issue.status == 'needs_professional'
+
+
+def test_each_mandatory_trigger_has_a_positive_and_a_negative_case():
+    cases = (
+        ('HR-03', 'C', '2.4.1.2.(1)', dict(part4_design=True), dict(part4_design=False)),
+        ('HR-01', 'C', '2.4.1.1.(3)',
+         dict(occupancy='multi_family', principal_dwelling_units=6),
+         dict(occupancy='multi_family', principal_dwelling_units=4)),
+        ('HR-06', 'B', '9.15.3.3.(2)', dict(supported_joist_span_m=5.0), dict(supported_joist_span_m=4.9)),
+        ('HR-07', 'B', '9.3.1.1.(3)', dict(reinforced_concrete=True), dict(reinforced_concrete=False)),
+        ('HR-05', 'B', '9.23.3.5.(4)',
+         dict(hourly_wind_pressure_1in50_kPa=1.2), dict(hourly_wind_pressure_1in50_kPa=1.19)),
+        ('HR-04', 'A', '1.3.3.2.(1)', dict(storeys=4), dict(storeys=2, building_area_m2=150.0)),
+        ('HR-11', 'C', '2.4.1.3.(1)',
+         dict(occupancy='multi_family', principal_dwelling_units=6, fire_suppression=True),
+         dict(fire_suppression=True)),
+        ('HR-14', 'B', '4.2.2.1.(1)', dict(geotechnical_part4=True), dict(geotechnical_part4=False)),
+        ('HR-13', 'C', '2.2.9.2.(1)', dict(aquatic_facility=True), dict(aquatic_facility=False)),
+        ('HR-12', 'B', '10.4.7.2.(1)',
+         dict(part10_sprinklers=True), dict(part10_building=True, fire_suppression=False)),
+    )
+    for trigger_id, division, provision_id, positive, negative in cases:
+        codes, yes_issue = _screen(_base(**positive))
+        cite = codes.provision(provision_id, division)['citation']
+        match = next(row for row in yes_issue.human_review if row.trigger_id == trigger_id and row.cite == cite)
+        assert match.who and match.why and match.cite in codes.issued
+        assert yes_issue.practice_of_engineering.value is True
+        assert yes_issue.status == 'needs_professional'
+        _neg_codes, no_issue = _screen(_base(**negative))
+        assert trigger_id not in _ids(no_issue)
+        assert no_issue.practice_of_engineering.value is not True
+        assert no_issue.status != 'needs_professional'
+
+
+def test_minor_alteration_does_not_fire_the_suppression_trigger():
+    codes, issue = _screen(_base(
+        occupancy='multi_family', principal_dwelling_units=6, fire_suppression=True,
+        minor_alteration_existing_system=True,
+    ))
+    assert 'HR-11' not in _ids(issue)
+    assert codes.provision('2.4.1.3.(1)', 'C')['citation'] not in [row.cite for row in issue.human_review]
+
+
+def test_discretionary_trigger_on_a_cleared_screen_stays_no():
+    from engine.models import Source
+    officer = Source(type='officer', ref='ahj', quote='authority answer')
+    facts = _base(medical_gas_piping=True, pathway='acceptable')
+    for item in facts:
+        item.source = officer
+    issue = section_d_issues(Case(provisions=[BENCHMARK], facts=facts), codes_with_rules())[0]
+    assert 'HR-42' not in _ids(issue)
+    assert issue.practice_of_engineering.value is False
+    assert issue.routed_to == 'officer'

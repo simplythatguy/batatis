@@ -14,7 +14,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, model_validator
 
 from .codes import Codes
-from .human_review import HumanReview, human_reviews
+from .human_review import HumanReview, discretionary_review, human_reviews, mandatory_hits
 from .models import Case
 from .process_fields import ProcessField, alternative_path, confirmed_value, latest_fact, process_fields
 from .professional import (
@@ -215,7 +215,26 @@ def practice_of_engineering(case: Case, codes: Codes) -> PracticeOfEngineering:
     span = confirmed_value(case, 'professional.span_m', 'span_m')
     span_handoff = isinstance(span, (int, float)) and not isinstance(span, bool) and span > PART9_MAX_SPAN_M
     result = professional_involvement(case, codes, span_handoff=span_handoff)
-    return render_practice(result, codes, span_handoff=span_handoff)
+    return _apply_trigger_routing(case, codes, render_practice(result, codes, span_handoff=span_handoff))
+
+
+def _apply_trigger_routing(case: Case, codes: Codes, flag: PracticeOfEngineering) -> PracticeOfEngineering:
+    """A mandatory codedb-only hit can push yes. A discretionary hit only routes to the officer."""
+    hits = mandatory_hits(case, codes)
+    if hits and flag.value is not True:
+        top = hits[0]
+        return flag.model_copy(update={
+            'value': True,
+            'rule': top.provision_id,
+            'division': top.division,
+            'citation': top.cite,
+            'reason': top.why,
+            'question': PROFESSIONAL_REQUEST,
+            'routed_to': 'professional',
+        })
+    if flag.value is not True and discretionary_review(case):
+        return flag.model_copy(update={'routed_to': 'officer'})
+    return flag
 
 
 _UNRESOLVED_CITATION_REASON = (

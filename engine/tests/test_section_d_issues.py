@@ -531,6 +531,22 @@ def test_generic_fallback_question_on_the_dev_set(caplog):
     assert 'generic fallback practice question fired 0 times on 60 dev cases' in caplog.text
 
 
+def test_cases_jsonl_scores_only_the_shipped_variant(tmp_path, capsys):
+    path = tmp_path / 'cases.jsonl'
+    path.write_text(json.dumps({
+        'id': 'cli-1',
+        'description': 'A two-storey single detached house with a building area of 150 m2, wood frame.',
+        'known_facts': ['single detached house'],
+        'gold': {'engineering_required': 'no'},
+    }) + '\n')
+    assert main(['--cases', str(path)]) == 0
+    out = capsys.readouterr().out
+    assert 'shipped rules_plus_unknown:' in out
+    assert 'variant: rules_plus_unknown' in out
+    assert 'rules_plus_unknown_cf' not in out
+    assert 'Engineer-needed flag' not in out
+
+
 def test_eval_codedb_argument_marks_a_missing_database_not_final(capsys, tmp_path):
     assert main(['--codedb', str(tmp_path / 'absent.sqlite')]) == 0
     assert 'numbers: not final' in capsys.readouterr().out
