@@ -1,3 +1,5 @@
+> agent-authored, model-checked, not human-verified or official
+
 # Must-not list (Case C)
 A good tool must **not**:
 1. Draft variance requests for the heated slab or the roof when the STANDATAs 23-BCV-003 / 23-BCV-017 can cover them.

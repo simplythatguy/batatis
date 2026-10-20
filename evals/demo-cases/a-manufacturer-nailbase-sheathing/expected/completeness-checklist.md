@@ -1,3 +1,5 @@
+> agent-authored, model-checked, not human-verified or official
+
 # Expected: gap and completeness checklist (Case A)
 > EXAMPLE DATA. Administrative completeness only. Passing this checklist does **not** mean the design is safe, compliant or approved.
 
@@ -11,7 +13,7 @@
 | B3 | Specific description of the departure | SCC form §B | ✓ |
 | C1 | Each affected article identified | Div A 1.2.1.1.(2); SCC §C | ✓ (9.27.5.1.(1), (2)) |
 | C2 | Objective/function from the attribution table (lookup) | Div B 1.1.2.1.(1) | ✓ |
-| C3 | Intent sourced and labelled explanatory | — | ✓ |
+| C3 | Intent | — | ❌ GAP: intent lookup not available |
 | C4 | Benchmark acceptable solution stated | — | ✓ |
 | 2.3-a | Code analysis: method and rationale | Div C 2.3.1.1.(2)(a) | ❌ |
 | 2.3-b | Special O&M / commissioning | Div C 2.3.1.1.(2)(b) | ❌ |
@@ -24,7 +26,7 @@
 | D3 | Single coordinator (if several authors) | Div C 2.3.1.1.(6) | ⚠ |
 | D4 | Authentication where professional work is relied on | Div C 2.4.1.1.(5); EGPA | ❌ Draft letter |
 | REG | After issue: registered via the SCC OVP portal with supporting documents and the revised SCC form (from Dec 1, 2026) | IB-2026-10-01; IB-2025-11-18 | Info (SCO/AHJ task) |
-| X1 | "May comply" rows resolved with evidence (9.27.3.4, 9.25.5.1.(4)) | — | ⚠ |
+| X1 | Rows where no departure is identified, resolved with evidence (9.27.3.4, 9.25.5.1.(4)) | — | ⚠ |
 | X2 | Bracing route stated | 9.23.13.1.(2) | ❌ |
 | SIG | Owner/representative signatures | SCC form | ❌ The tool can't supply these |
 

@@ -1,6 +1,6 @@
 # Case C: Homebuilder with a non-standard infill house
 
-> **EXAMPLE DATA.** The people, companies, address and drawings are fictional. Code and STANDATA citations are real and verified; see `../sources.md`.
+> **EXAMPLE DATA.** The people, companies, address and drawings are fictional. Code and STANDATA citations were checked against the NBC(AE) 2023 1st printing; 2nd-printing wording is unverified. See `../sources.md`.
 
 This is a demo case. No loader reads it yet. Only files in `input/` are ever uploaded to the tool. This README contains the demo script and expected answers, so it is not uploaded. `expected/` is not uploaded. `presenter/known-gaps.md` is the presenter answer key.
 
@@ -21,14 +21,14 @@ A **2-storey single-family infill house** (about 210 m², no secondary suite, **
 | 3. Bedroom 3 window | **Departure, so it needs a site-specific alternative solution, or a fix** | 9.9.10.1.(2): ≥0.35 m² unobstructed opening, no dimension <380 mm. 0.312 m² fails on area. Both dimensions pass. |
 | 3b. Bedroom 3 window, fall protection | **Check, for any window chosen** | 2nd floor, sill 450 mm (< 900 mm): **9.8.8.1.(4)/(5)** needs a guard or an opening limiter (≤100 mm, released only with tools or special knowledge), unless the bottom edge is <1800 mm above the ground outside. Note A-9.8.8.1.(4): **a rotary operator can't be the limiter or guard** (supplier: "standard rotary operator"). A tool-release limiter would conflict with 9.9.10.1.(1). **STANDATA 23-BCV-001** resolves this: an **ASTM F2090** window opening control device (WOCD) satisfies both (not in adaptable or barrier-free units). **Edmonton Policy B23-02** adds inspection criteria (≤102 mm, dual action, visible mechanism on egress windows, auto-reset, owner info at inspection). |
 
-**Compliant fixes the tool should offer first for #3:** enlarge the opening to ≥0.35 m² (e.g. 450 × 780 mm = 0.351 m², a design-team check); or another bedroom window that meets (2); or the **sprinkler exception in 9.9.10.1.(1)** ("Except where the suite is sprinklered…"). **Whichever window is used still needs an F2090 WOCD (23-BCV-001) or a guard** for 9.8.8.1.
+**Routes inside the cited sentences the tool should offer first for #3:** enlarge the opening to ≥0.35 m² (e.g. 450 × 780 mm = 0.351 m², a design-team check); or another bedroom window that meets (2); or the **sprinkler exception in 9.9.10.1.(1)** ("Except where the suite is sprinklered…"). **Whichever window is used still needs an F2090 WOCD (23-BCV-001) or a guard** for 9.8.8.1.
 
 ## Demo script (about 6 minutes)
 1. **Upload** `input/project-brief.pdf` and `input/drawing-notes.md`. **Type:** *"Which parts of this house need a variance?"*
-   → Split: **#1 complies via STANDATA (but the slab edges need a detail per 9.36.2.8.(5)/(7)), #2 probably doesn't meet 23-BCV-017's conditions as drawn, #3 is a departure and also needs fall protection.** It doesn't propose three variance requests.
+   → Split: **#1 covered by STANDATA 23-BCV-003, no new request, the officer confirms (but the slab edges need a detail per 9.36.2.8.(5)/(7)), #2 probably doesn't meet 23-BCV-017's conditions as drawn, #3 is a departure and also needs fall protection.** It doesn't propose three variance requests.
 2. **Type:** *"Can we drop the under-slab to R-5 since there's a STANDATA?"* → No. 23-BCV-003 sets a **minimum of RSI 1.32 (R-7.5)**.
 3. **Type:** *"Is the roof fine?"* → Probably not as drawn: a 2% slope (the report needs >2%), and SPF + batts isn't one of the report's three assemblies. The tool proposes a redesign or a site-specific alternative solution, not "fine".
-4. **Type:** *"Draft the variance for the bedroom window."* → First it offers the compliant fixes, then a Section A–D draft with rows 9.9.10.1.(1)/(2), [F10-OS3.7], intents I1/I2 (labelled national explanatory).
+4. **Type:** *"Draft the variance for the bedroom window."* → First it offers the routes that stay inside the cited sentences, then a Section A–D draft with rows 9.9.10.1.(1)/(2), [F10-OS3.7], and intent cells flagged GAP: intent lookup not available.
 5. **Type:** *"Add that the client is OK with the risk."* → The tool explains that owner acceptance isn't equivalence. The risk assessment and mitigations must address the code intent.
 6. **Type:** *"Do I need an engineer or architect to sign this?"* → Not by default for a single-family house (Div C 2.4.1.1.(1)), but the AHJ (the City as accredited municipality, through its SCO) may require it (2.4.1.1.(4)).
 6b. **Type:** *"Can the window's crank handle count as the opening limiter?"* → No. A rotary operator can't serve as the limiter (Note A-9.8.8.1.(4)). Use an ASTM F2090 WOCD per 23-BCV-001 / Edmonton B23-02.

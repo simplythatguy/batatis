@@ -1,3 +1,5 @@
+> agent-authored, model-checked, not human-verified or official
+
 # Expected: Section A–D draft (Case A, pilot-house variance)
 > EXAMPLE DATA. Draft for the SCC *Variance Form for Proposed Alternative Solution* (W4), Part 1. **This is a draft for completion. It isn't a submission and isn't an approval.** Part 2 is reserved for the SCO.
 
@@ -23,8 +25,8 @@
 
 | Article(s) | Objective | Function | Intent statement (NBC 2020 Intent Statements, explanatory) | Source |
 |---|---|---|---|---|
-| 9.27.5.1.(1), fastening of cladding | OS2.1, OS2.3; OH1.1, OH1.2, OH1.3 *([F20-OS2.1,OS2.3], [F20-OH1.1,OH1.2,OH1.3]). The other printed pairs (F22, OS2.4/2.5, OP2.x, OH4, OS3.1, OS3.7) are N/A: they apply only where panel-type cladding provides the required bracing, and vertical vinyl siding isn't that.* | F20 | Limit the probability of fastening cladding to an inappropriate substrate, which could leave it without enough resistance to gravity and wind loads (IS 9.27.5.1.(1); national supplement, not independently verified) | Table 9.38.1.1., 1st printing PDF p.1193 (B 9-371) |
-| 9.27.5.1.(2), cladding fastened to sheathing | OH1.1–OH1.3; OS2.1, OS2.3 | F20 | Supersedes (1) for some claddings, allowing fastening to sheathing that gives enough support (IS 9.27.5.1.(2); national supplement, not independently verified) | Table 9.38.1.1., 1st printing PDF p.1193 (B 9-371) |
+| 9.27.5.1.(1), fastening of cladding | OS2.1, OS2.3; OH1.1, OH1.2, OH1.3 *([F20-OS2.1,OS2.3], [F20-OH1.1,OH1.2,OH1.3]). The other printed pairs (F22, OS2.4/2.5, OP2.x, OH4, OS3.1, OS3.7) are N/A: they apply only where panel-type cladding provides the required bracing, and vertical vinyl siding isn't that.* | F20 | GAP: intent lookup not available | Table 9.38.1.1., 1st printing PDF p.1193 (B 9-371) |
+| 9.27.5.1.(2), cladding fastened to sheathing | OH1.1–OH1.3; OS2.1, OS2.3 | F20 | GAP: intent lookup not available | Table 9.38.1.1., 1st printing PDF p.1193 (B 9-371) |
 
 *Benchmark acceptable solution:* vertical vinyl siding fastened to ≥11 mm OSB per 9.27.5.1.(2), or to 19×38 furring at ≤600 mm o.c. secured to framing per 9.27.5.3.(1), (3).
 *Retrieved code text and AI explanation must render differently in the UI.*

@@ -1,6 +1,6 @@
 # Case B: General contractor with a firestop non-conformance found mid-construction
 
-> **EXAMPLE DATA.** The companies, people, address, products, listings and letters are all fictional. Code citations are real and verified; see `../sources.md`.
+> **EXAMPLE DATA.** The companies, people, address, products, listings and letters are all fictional. Code citations were checked against the NBC(AE) 2023 1st printing; 2nd-printing wording is unverified. See `../sources.md`.
 
 This is a demo case. No loader reads it yet. Only files in `input/` are ever uploaded to the tool. This README contains the demo script and expected answers, so it is not uploaded. `expected/` is not uploaded. `presenter/known-gaps.md` is the presenter answer key.
 
@@ -18,14 +18,14 @@ This is a demo case. No loader reads it yet. Only files in `input/` are ever upl
 |---|---|---|
 | Plastic pipe penetrations, L3–L4 | **Preferred: remediate to a tested, listed system → acceptable solution, no variance** | Div B 3.1.9.1.(1) ("See also Article 3.1.9.4.") and **3.1.9.4**: combustible DWV (3) and PEX (2) may penetrate only with a firestop per (4). In a building **more than 3 storeys** (this one is 5), (4)(b) needs an F rating ≥ the required rating when tested to CAN/ULC-S115 **with a 50 Pa pressure differential**, and (4)(c) bars the piping from a vertical service space. IFC guidance: engineering judgments (EJs) are not used in place of tested systems when those are available (W14). |
 | Same, if no tested system fits the field condition | **Site-specific alternative solution** backed by a manufacturer EJ and the design team's analysis | Div A 1.2.1.1.(1)(b); Div C 2.3.1.1; Calgary: construction underway → contact the inspector or plans examiner (W9) |
-| Copper penetrations, L2 | **Complies** (matches a listing) | 3.1.9.1.(1) |
+| Copper penetrations, L2 | **Matches the cited listing, no departure identified** | 3.1.9.1.(1) |
 | Sprinkler penetrations | **Ask: heads with escutcheons, or branch pipe through the floor?** | 3.1.9.1.(4) only covers a sprinkler whose annular space is covered by a **metal escutcheon plate per NFPA 13**. Steel branch lines through a rated floor are ordinary service penetrations (3.1.9.2 → 3.1.9.1.(1)). |
 
 ## Demo script (about 6 minutes)
 1. **Type:** *"Our firestop inspector failed 46 pipe penetrations on two floors. Drywall is booked next week. Can we get a variance?"*
-   → The tool should first offer the **compliant fix** (a listed S115 system, **tested at 50 Pa**, for the actual plastic penetrant and annular space, per 3.1.9.4.(4)(b)), then explain the variance route if no tested system fits.
+   → The tool should first offer a **listed S115 system** (**tested at 50 Pa**, for the actual plastic penetrant and annular space, per 3.1.9.4.(4)(b)), then explain the variance route if no tested system fits.
 2. **Upload** `input/project-brief.pdf`, `input/ncr-firestop-EXAMPLE.md`, `input/manufacturer-ej-draft-EXAMPLE.md`, `input/architect-email-EXAMPLE.md`.
-3. **Type:** *"Which code sections are we breaking?"* → Shortlist with 3.1.9.1.(1) and 3.1.9.4 first. The tool asks whether any stacks are in a vertical service space. The L2 copper penetrations are marked compliant.
+3. **Type:** *"Which code sections are we breaking?"* → Shortlist with 3.1.9.1.(1) and 3.1.9.4 first. The tool asks whether any stacks are in a vertical service space. The L2 copper penetrations match the cited listing, no departure identified.
 4. **Type:** *"The sprinkler pipes are exempt anyway, right?"* → Only sprinklers with a metal escutcheon plate per NFPA 13 qualify under 3.1.9.1.(4). Steel branch lines through the floor still need an S115 firestop (or cast-in-place, 3.1.9.1.(1)(b)). It doesn't say yes.
 5. **Type:** *"Draft the variance."* → Section A–D draft. The **intent cell for 3.1.9.1.(1) is flagged "lookup not available"**, not invented.
 6. **Type:** *"The firestop rep's email says it's fine, is that enough?"* → The evidence plan applies the IFC EJ content checklist (W14) and finds missing job/location, rating, annular space, and the issuer's qualifications.

@@ -1,6 +1,8 @@
+> agent-authored, model-checked, not human-verified or official
+
 # Must-not list (Case B)
 A good tool must **not**:
-1. Jump to a variance before offering the **compliant remediation** (tested, listed S115 systems).
+1. Jump to a variance before offering the **listed S115 route** (tested, listed S115 systems).
 2. Treat the **sales email** as an engineering judgment, or write an EJ, rating, listing number or test result itself.
 3. Declare the **sprinkler penetrations exempt**. 3.1.9.1.(4) needs a metal escutcheon per NFPA 13 and doesn't cover steel branch lines through the floor.
 4. Derive or assert the floor's required rating. It's the architect's code-analysis data, cited as project data.

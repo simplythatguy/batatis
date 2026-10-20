@@ -1,3 +1,5 @@
+> agent-authored, model-checked, not human-verified or official
+
 # Expected: intake summary (Case C)
 > EXAMPLE DATA.
 
@@ -11,9 +13,9 @@
 
 | Feature | Classification | Next step |
 |---|---|---|
-| Heated slab, RSI 1.32 under | **Under-slab complies via STANDATA 23-BCV-003** | Note the STANDATA on A-101. **Add the edge/perimeter detail** per 9.36.2.8.(5)/(7) at the Table value (or (9) if integral footing). |
+| Heated slab, RSI 1.32 under | **Covered by STANDATA 23-BCV-003, no new request, the officer confirms** | Note the STANDATA on A-101. **Add the edge/perimeter detail** per 9.36.2.8.(5)/(7) at the Table value (or (9) if integral footing). |
 | Unvented roof | **Probably not within 23-BCV-017 as drawn** | 2% slope (report: >2%); SPF + batt isn't a listed assembly; SPF thickness TBD. Redesign or a site-specific alternative solution. |
-| W-07 bedroom window | **Departure from 9.9.10.1.(2)** (0.312 < 0.35 m²) | Offer compliant fixes. Otherwise prepare one site-specific alternative solution. |
+| W-07 bedroom window | **Departure from 9.9.10.1.(2)** (0.312 < 0.35 m²) | Offer routes that stay inside 9.9.10.1. Otherwise prepare one site-specific alternative solution. |
 | W-07 fall protection | **Check 9.8.8.1.(4)/(5)** (2nd floor, 450 mm sill) | F2090 WOCD per 23-BCV-001 / B23-02, or a guard. The rotary operator doesn't count. |
 
 **The tool should say first:** *"Only one item, the Bedroom 3 window, departs from the code in a way that needs a variance. The heated slab is covered by a province-wide STANDATA, but you still need to insulate the slab edges. The roof, as drawn, probably doesn't fit the RDH report that STANDATA 23-BCV-017 relies on. And the bedroom window needs a window opening control device or a guard whatever size it ends up."*

@@ -1,6 +1,8 @@
+> agent-authored, model-checked, not human-verified or official
+
 # Must-not list (Case A)
 A good tool must **not**:
-1. Call a site-specific variance a **product approval**, or imply a variance makes the panel acceptable "across Alberta" (W9, W11).
+1. Call a site-specific variance a **product approval**, or imply a variance makes the panel acceptable "across Alberta" (GAP: Edmonton guide not verified).
 2. State or imply the panel is **CCMC-evaluated or listed**, or invent a CCMC number, because "pending" is an enquiry only.
 3. Treat the **25 mm** permeance result as proof for the **50 mm** product, or treat a lab of unknown accreditation as ISO/IEC 17025-accredited.
 4. Invent air-leakage, fastener withdrawal, flame-spread or RSI values, or "fill in" the engineer's conclusion.

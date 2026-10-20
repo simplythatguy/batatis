@@ -1,10 +1,10 @@
 # Sources (Batatis demo cases, backlog #7)
 
-> **Edition caveat.** The cases were checked against the **NBC(AE) 2023 1st printing** (free NRC PDF, mirrored at publications.gc.ca). The **2nd printing** (revisions and errata released Aug 17, 2026) is the edition now in force. Its wording and page numbers are **unverified**, because the NRC server failed TLS from the review box. Page numbers below are 1st-printing unless marked "2nd pr. (research, unverified)". Re-check against the 2nd printing before quoting pages.
+> **Edition caveat.** The cases were checked against the **NBC(AE) 2023 1st printing** (free NRC PDF, mirrored at publications.gc.ca). Page cites are from the NBC(AE) 2023 1st printing. The **2nd printing** (revisions and errata released Aug 17, 2026) is the edition now in force. Its wording and page numbers are **unverified**, because the NRC server failed TLS from the review box. Page numbers below are 1st-printing unless marked "2nd pr. (research, unverified)". Re-check against the 2nd printing before quoting pages.
 
 Every code article, standard and STANDATA cited in the demo cases is listed here with how it was verified. The Data Nerd review (`DATA_NERD_REVIEW.md`, in this folder) is the cross-check behind this revision.
 **Verification levels**
-- **WEB**: the primary source was fetched on 2026-10-20 (MT) and the cited text read. Copies of the original fetches are in `_source-snapshots/`.
+- **WEB**: the primary source was fetched on 2026-10-20 (MT) and the cited text read. Snapshots kept locally, not committed.
 - **CODE-1P**: checked directly in the NBC(AE) 2023 1st printing by the Data Nerd review.
 - **RESEARCH**: from the Batatis research notes (branch `feat/build-foundations`). Their 2nd-printing page cites are unverified.
 - **TO VERIFY**: not confirmed. The cases phrase these generically and flag them.

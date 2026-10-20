@@ -1,3 +1,5 @@
+> agent-authored, model-checked, not human-verified or official
+
 # Expected: evidence plan (Case C)
 > EXAMPLE DATA. Ladder: manufacturer literature → STANDATA → ISO/IEC 17025 test → evaluation → evaluation + testing → qualification → ISO/IEC 17065 certification.
 

@@ -1,3 +1,5 @@
+> agent-authored, model-checked, not human-verified or official
+
 # Expected: Section A–D draft (Case B, only for penetrations with no tested system)
 > EXAMPLE DATA. Draft for the SCC form (W4; from Dec 1, 2026 the **revised** SCC form goes with OVP-portal registration, IB-2026-10-01) and the Calgary *Request for Specific Variance* (W10). **Calgary: one request per issue/permit**, so the sprinkler question, if needed, is a separate request. This is not an approval.
 

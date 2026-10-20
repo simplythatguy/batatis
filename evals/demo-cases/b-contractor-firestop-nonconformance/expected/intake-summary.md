@@ -1,3 +1,5 @@
+> agent-authored, model-checked, not human-verified or official
+
 # Expected: intake summary (Case B)
 > EXAMPLE DATA. Citations verified (`../../sources.md`).
 

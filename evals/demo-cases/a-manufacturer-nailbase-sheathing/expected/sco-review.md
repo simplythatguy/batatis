@@ -1,3 +1,5 @@
+> agent-authored, model-checked, not human-verified or official
+
 # Expected: SCO administrative completeness review (Case A)
 > EXAMPLE DATA. Review mode checks **administrative completeness only**. It must not judge whether the panel fastening is technically adequate.
 
@@ -12,7 +14,7 @@
 5. **Engineer letter is an unsigned draft** with scope exclusions (bracing, joints, fire).
 6. **Bracing route not stated.** The panel isn't a listed bracing sheathing (9.23.13.1.(2)).
 7. **O&M/inspection** for the fastening isn't addressed (2.3.1.1.(2)(b)).
-8. **Product-approval language:** the applicant asks for "Alberta approval". A site variance isn't product approval (Calgary guide, W9). Note this for the applicant.
+8. **Product-approval language:** the applicant asks for "Alberta approval". A site variance isn't product approval (GAP: Edmonton guide not verified). Note this for the applicant.
 
 **Suggested actions:** *Request applicant fixes* (send the list above). Do **not** offer "approve", "code-compliant" or "safe".
 **Record-keeping note:** if issued, the variance and its supporting documents must be kept and registered with the SCC (IB-2025-11-18; from Dec 1, 2026, via the OVP portal with the revised SCC form, IB-2026-10-01).

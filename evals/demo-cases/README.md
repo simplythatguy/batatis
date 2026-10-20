@@ -1,8 +1,10 @@
+> agent-authored, model-checked, not human-verified or official
+
 # Batatis demo cases: General Applicability (backlog #7)
 
 These are **demo cases** (demo materials). No loader reads `evals/demo-cases/` yet.
 
-> **Edition caveat:** the cases were checked against the **NBC(AE) 2023 1st printing**. The 2nd printing (Aug 17, 2026) is in force; its wording and page numbers are unverified. The code is a free NRC download: https://nrc-publications.canada.ca/eng/view/object/?id=0316d953-0d55-4311-af69-cad55efec499
+> **Edition caveat:** the cases were checked against the **NBC(AE) 2023 1st printing**. Page cites are from the NBC(AE) 2023 1st printing. The 2nd printing (Aug 17, 2026) is in force; its wording and page numbers are unverified. The code is a free NRC download: https://nrc-publications.canada.ca/eng/view/object/?id=0316d953-0d55-4311-af69-cad55efec499
 
 > **EVERYTHING HERE IS EXAMPLE DATA.** All people, companies, addresses, legal descriptions, products, listings, test reports and letters are **fictional**. Only code, STANDATA, standard and process citations are real, and each is traced in [`sources.md`](sources.md).
 
@@ -10,7 +12,7 @@ These are **demo cases** (demo materials). No loader reads `evals/demo-cases/` y
 |---|---|---|---|
 | [A: Manufacturer](a-manufacturer-nailbase-sheathing/README.md) | Mira Okafor, Example Panel Works Ltd. | Novel foam + fibre-cement nail-base panel replacing OSB; vinyl siding fastened to the facer; Edmonton pilot house | Departure from **9.27.5.1**; product acceptance via **CCMC/PBA-recognized evaluator** (Div A 1.2.2.1.(2)), plus a project-specific alternative solution; not "Alberta product approval" |
 | [B: General contractor](b-contractor-firestop-nonconformance/README.md) | Carlos Mendes, Northgate Example Builders Ltd. | 5-storey sprinklered mixed-use, Calgary; 46 plastic pipe penetrations firestopped with an out-of-scope listed system, found mid-construction | **Remediate to tested CAN/ULC-S115 systems first** (3.1.9.1.(1)), **50 Pa-tested for plastic pipe in this >3-storey building** (3.1.9.4.(4)(b)); variance + IFC-grade EJ only where no tested system exists; sprinkler exception needs NFPA 13 metal escutcheons (3.1.9.1.(4)) |
-| [C: Homebuilder](c-homebuilder-infill-house/README.md) | Priya Natarajan, Larkspur Example Homes | 2-storey Edmonton infill: heated slab, unvented low-slope roof, narrow bedroom window | Under-slab **complies via 23-BCV-003** (edges still per 9.36.2.8.(5)/(7)); roof **probably outside 23-BCV-017** as drawn (2% slope, SPF + batt); bedroom window is the departure (**9.9.10.1.(2)**) and needs fall protection (**9.8.8.1.(4)/(5)**, ASTM F2090 WOCD per **23-BCV-001** / Edmonton **B23-02**) |
+| [C: Homebuilder](c-homebuilder-infill-house/README.md) | Priya Natarajan, Larkspur Example Homes | 2-storey Edmonton infill: heated slab, unvented low-slope roof, narrow bedroom window | Under-slab **covered by STANDATA 23-BCV-003, no new request, the officer confirms** (edges still per 9.36.2.8.(5)/(7)); roof **probably outside 23-BCV-017** as drawn (2% slope, SPF + batt); bedroom window is the departure (**9.9.10.1.(2)**) and needs fall protection (**9.8.8.1.(4)/(5)**, ASTM F2090 WOCD per **23-BCV-001** / Edmonton **B23-02**) |
 
 ## What is uploaded
 Only the files inside a case's `input/` folder are ever uploaded to the tool. Each case `README.md` contains the demo script and the expected answers, so it is not uploaded. `expected/` is not uploaded.
@@ -29,7 +31,7 @@ For [`tester-samples/`](tester-samples/README.md), only the `01`–`03` bundle f
 [`tester-samples/`](tester-samples/README.md): fictional demo materials for user testing. Only the `01`–`03` bundle files are ever uploaded. `01` and `02` are applicant inputs. `03` is the planted-gap SCO submission bundle for the officer timing protocol in `docs/user-testing/` (Round 1b). [`key/03-sco-bundle-TESTER-KEY.md`](tester-samples/key/03-sco-bundle-TESTER-KEY.md) is the tester answer key.
 
 ## Verification legend (used in `sources.md`)
-- **WEB:** fetched from the official source on 2026-10-20; snapshot in `_source-snapshots/`
+- **WEB:** fetched from the official source on 2026-10-20; snapshots kept locally, not committed
 - **CODE-1P:** checked in the NBC(AE) 2023 1st printing (free NRC PDF) by the Data Nerd review
 - **RESEARCH:** from the Batatis research notes (`feat/build-foundations`); their 2nd-printing page cites are unverified
 - **TO VERIFY:** not confirmed. Phrased generically in the cases.

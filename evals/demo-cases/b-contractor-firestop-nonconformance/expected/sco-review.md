@@ -1,3 +1,5 @@
+> agent-authored, model-checked, not human-verified or official
+
 # Expected: SCO administrative completeness review (Case B)
 > EXAMPLE DATA. Completeness only. No judgment on whether the sealant performs.
 
