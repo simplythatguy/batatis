@@ -1,0 +1,20 @@
+{
+  "id": "hold-007",
+  "description": "We are building a single-storey detached house for one family. The building area of 120 m2 is the house. No roof-member length is in question.",
+  "known_facts": [
+    "single-storey detached house",
+    "building area of 120 m2",
+    "one family"
+  ],
+  "gold": {
+    "engineering_required": "no",
+    "engineering_reason": "A single-family dwelling is a general exception. No span, height, or area trigger is stated.",
+    "limit_source": "engine/professional.py occupancy single_family sets general to no through Div C 2.4.1.1.(1). Area and storey limits in _AREA_LIMITS are not applied to single_family."
+  },
+  "authoring": {
+    "source": "engine/professional.py",
+    "gold_written": "before any system run",
+    "label": "model-checked",
+    "notes": "Held-out plain exemption. Gold written from the rule text before the flag script was run on this file. Not human-reviewed."
+  }
+}
