@@ -1,0 +1,114 @@
+{
+  "recordedAt": "2026-10-20T20:29:42.235Z",
+  "mode": "stills",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "webDir": "/tmp/batatis-record-cursor-e2e-product-flow-4362/web",
+  "git": {
+    "sha": "58ceb237c5ea846fb5093bac86af184613141847",
+    "branch": "HEAD",
+    "requestedBranch": "cursor/e2e-product-flow-4362"
+  },
+  "baseUrl": "http://127.0.0.1:46311/",
+  "engine": "No engine is listening on 127.0.0.1:8000. The recording uses the app's fixture, example, and offline paths. Browser requests to /api and port 8000 are aborted, so this recording does not call the engine or a model. No PDF is uploaded.",
+  "scriptSync": {
+    "status": "ok",
+    "path": "/workspace/docs/demo/script.md",
+    "problems": [],
+    "note": "Recorder steps match the shot list."
+  },
+  "pageErrors": [],
+  "downloads": [],
+  "slots": [
+    {
+      "id": "shot-s08-roles",
+      "file": "shot-s08-roles.png",
+      "notes": [
+        "Try an example was left unclicked."
+      ],
+      "status": "captured",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "id": "shot-s02-describe",
+      "file": "shot-s02-describe.png",
+      "notes": [
+        "Did not upload a PDF.",
+        "Missing-item text on screen: Owner, Mailing address, Legal description."
+      ],
+      "status": "captured",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "id": "shot-s03-not-sure",
+      "file": "shot-s03-not-sure.png",
+      "notes": [
+        "Reset case showed: Cleared. Nothing from the previous case is kept.",
+        "Did not upload a PDF.",
+        "Answered Not sure on 2 Your words card(s): Sheathing membrane; Storey count. Did not answer Yes or No."
+      ],
+      "status": "captured",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "id": "shot-s04-search",
+      "file": "shot-s04-search.png",
+      "notes": [
+        "Answered Not sure on 1 Your words card(s): What you described. Did not answer Yes or No.",
+        "Search for \"bedroom window unobstructed\" did not return (no engine or code database). 9.9.10.1.(2) was not typed in."
+      ],
+      "status": "skipped",
+      "reason": "Search did not show a returned row for 9.9.10.1.(2). No article id was typed in, and the Section C lookup was not drawn."
+    },
+    {
+      "id": "shot-s04-benchmark",
+      "file": "shot-s04-benchmark.png",
+      "notes": [],
+      "status": "skipped",
+      "reason": "The ranked list and benchmark card are not in this app build. The still was not drawn."
+    },
+    {
+      "id": "shot-s05-eval",
+      "file": "shot-s05-eval.png",
+      "notes": [],
+      "status": "skipped",
+      "reason": "The eval still is not a screen in this build. #/accuracy was not opened, and the figures were not drawn."
+    },
+    {
+      "id": "shot-s06-section-d",
+      "file": "shot-s06-section-d.png",
+      "notes": [
+        "The sentence \"This tool does not write the evidence or the professional opinion.\" is not on this screen. It was not added."
+      ],
+      "status": "captured",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "id": "shot-s07-officer",
+      "file": "shot-s07-officer.png",
+      "notes": [],
+      "status": "skipped",
+      "reason": "Officer review opened without a package version control."
+    },
+    {
+      "id": "shot-s09-locked",
+      "file": "shot-s09-locked.png",
+      "notes": [],
+      "status": "skipped",
+      "reason": "Check completeness is enabled while gaps are open. The disabled control is not on this build, and the still was not faked."
+    },
+    {
+      "id": "shot-s09-scc-form",
+      "file": "shot-s09-scc-form.png",
+      "notes": [],
+      "status": "skipped",
+      "reason": "The filled SCC form is an engine PDF. Check completeness was not clicked, and this run does not call the engine, so the form was not captured."
+    }
+  ]
+}

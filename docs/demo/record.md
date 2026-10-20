@@ -45,7 +45,10 @@ The camera follows the script's order, not shot numbers. Case C stays open for s
 ```bash
 ./scripts/record-demo.sh --check-script
 ./scripts/record-demo.sh --strict
+./scripts/record-demo.sh --stills --branch cursor/e2e-product-flow-4362
 ```
+
+`--stills` writes the deck PNGs named in the screenshot slot list, 1440×900, under `artifacts/deck-stills/`. It does not record the mp4. A slot whose screen is not in the build is skipped and listed in `stills-log.json`. Nothing is drawn in its place. Seeded frames carry the `EXAMPLE DATA` label. The run does not upload a PDF and does not click Check completeness.
 
 `--check-script` diffs the script against the step catalog and exits non-zero on drift. It does not record, including when `--out` is also set. When `docs/demo/script.md` is absent, the check reports that and exits zero. A normal recording prints the same report and still records.
 
