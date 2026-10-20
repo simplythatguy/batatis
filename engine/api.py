@@ -76,10 +76,10 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
             res = export_case(case, draft=draft, codes=code())
         except ExportBlocked as e:
             raise HTTPException(409, {'message': 'export blocked; resolve these or export a draft', 'reasons': e.reasons})
-        except FormNotFound as e:
-            raise HTTPException(503, str(e))
-        except ExportError as e:
-            raise HTTPException(500, str(e))
+        except FormNotFound:
+            raise HTTPException(503, 'SCC variance form not found')
+        except ExportError:
+            raise HTTPException(500, 'The SCC variance form could not be exported.')
         name = f'{case_id}-scc-variance{"-DRAFT" if draft else ""}.pdf'
         return Response(res.pdf, media_type='application/pdf',
                         headers={'Content-Disposition': f'attachment; filename="{name}"'})

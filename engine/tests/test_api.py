@@ -51,3 +51,39 @@ def test_section_c_endpoint(client):
 def test_cors_allows_localhost(client):
     r = client.options('/cases', headers={'Origin': 'http://localhost:5173', 'Access-Control-Request-Method': 'POST'})
     assert r.headers.get('access-control-allow-origin') == 'http://localhost:5173'
+
+
+def test_missing_scc_form_response_does_not_expose_path(tmp_path, monkeypatch):
+    from engine import api
+    from engine.export.scc import load_form
+
+    missing_form = tmp_path / 'private-scc-form.pdf'
+    monkeypatch.setenv('BATATIS_SCC_FORM', str(missing_form))
+    monkeypatch.setattr(api, 'export_case', lambda *args, **kwargs: load_form(None, {}))
+    client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=object()))
+    case_id = client.post('/cases').json()['id']
+
+    response = client.post(f'/cases/{case_id}/export')
+
+    assert response.status_code == 503
+    assert response.json() == {'detail': 'SCC variance form not found'}
+    assert str(tmp_path) not in response.text
+    assert 'BATATIS_SCC_FORM' not in response.text
+
+
+def test_export_error_response_does_not_expose_path(tmp_path, monkeypatch):
+    from engine import api
+    from engine.export import FormMismatch
+
+    def mismatched_form(*args, **kwargs):
+        raise FormMismatch(f'{tmp_path}/private-scc-form.pdf has an unexpected SHA-256')
+
+    monkeypatch.setattr(api, 'export_case', mismatched_form)
+    client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=object()))
+    case_id = client.post('/cases').json()['id']
+
+    response = client.post(f'/cases/{case_id}/export')
+
+    assert response.status_code == 500
+    assert response.json() == {'detail': 'The SCC variance form could not be exported.'}
+    assert str(tmp_path) not in response.text
