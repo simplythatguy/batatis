@@ -9,7 +9,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from engine.api import create_app
-from engine.demo_seed import CASE_IDS, STAMP, build_cases, demo_enabled, seed_cases
+from engine.demo_seed import CASE_IDS, OFFICER_AFTER_ID, OFFICER_STORY, STAMP, build_cases, demo_enabled, seed_cases
 from engine.models import Fact, Source
 from engine.store import CaseStore
 
@@ -31,8 +31,10 @@ def test_cases_use_fixed_ids_and_only_input_files():
     first = [case.model_dump() for case in build_cases()]
     second = [case.model_dump() for case in build_cases()]
     assert first == second
-    assert [case['id'] for case in first] == list(CASE_IDS)
+    assert [case['id'] for case in first] == [*CASE_IDS, OFFICER_AFTER_ID]
     for case in first:
+        if case['id'] == OFFICER_AFTER_ID:
+            continue
         assert case['created_at'] == case['updated_at'] == STAMP
         assert case['provisions'] == [] and case['section_c'] == [] and case['evidence'] == []
         assert case['facts']
@@ -59,7 +61,9 @@ def test_example_drafts_are_not_professional_evidence():
     assert letter.value == 'engineer-letter-draft-EXAMPLE.md'
     permeance = next(fact for fact in cases[CASE_IDS[0]].facts if fact.field == 'product.permeance')
     assert permeance.status == 'unconfirmed'
-    for case in cases.values():
+    for case_id, case in cases.items():
+        if case_id == OFFICER_AFTER_ID:
+            continue
         assert all(fact.field != 'professional_seal' for fact in case.facts)
 
 
@@ -95,7 +99,7 @@ def test_route_is_404_until_the_flag_is_set(tmp_path, monkeypatch):
     assert seeded.status_code == 200
     assert again.json() == seeded.json()
     body = seeded.json()
-    assert [case['id'] for case in body] == list(CASE_IDS)
+    assert [case['id'] for case in body] == [*CASE_IDS, OFFICER_AFTER_ID]
     assert body[0]['section_c'] == [] and body[0]['provisions'] == []
     blob = json.dumps(body)
     assert 'expected/' not in blob and 'presenter/' not in blob
@@ -119,7 +123,7 @@ def test_script_writes_nothing_without_the_flag_and_is_stable_with_it(tmp_path, 
                            capture_output=True, text=True)
     assert on.returncode == 0 and on.stdout == again.stdout
     payload = json.loads(on.stdout)
-    assert [case['id'] for case in payload] == list(CASE_IDS)
+    assert [case['id'] for case in payload] == [*CASE_IDS, OFFICER_AFTER_ID]
 
 
 def test_build_does_not_open_a_socket(monkeypatch):

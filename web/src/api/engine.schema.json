@@ -95,6 +95,18 @@
           "title": "Evidence",
           "type": "array"
         },
+        "example_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Example Id"
+        },
         "facts": {
           "default": [],
           "items": {
@@ -125,6 +137,15 @@
             }
           ],
           "default": null
+        },
+        "provenance": {
+          "default": "user",
+          "enum": [
+            "example",
+            "user"
+          ],
+          "title": "Provenance",
+          "type": "string"
         },
         "provisions": {
           "default": [],
@@ -157,6 +178,11 @@
         "updated_at": {
           "title": "Updated At",
           "type": "string"
+        },
+        "version": {
+          "default": 1,
+          "title": "Version",
+          "type": "integer"
         }
       },
       "required": [
@@ -164,6 +190,9 @@
         "title",
         "created_at",
         "updated_at",
+        "version",
+        "provenance",
+        "example_id",
         "jurisdiction",
         "facts",
         "provisions",
@@ -620,6 +649,18 @@
     },
     "NewCase": {
       "properties": {
+        "example_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Example Id"
+        },
         "jurisdiction": {
           "anyOf": [
             {

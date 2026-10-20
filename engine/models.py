@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field, model_validator
 FactKind = Literal['exact', 'pointed', 'computed', 'proposed']
 FactStatus = Literal['confirmed', 'unconfirmed']
 SourceType = Literal['code', 'file', 'user_text', 'drawing', 'user_click']
+Provenance = Literal['example', 'user']
 AttributionStatus = Literal['direct', 'inherited from parent', 'no row in the attribution table']
 
 INTENT_LABEL = 'NBC 2020 Intent Statements, explanatory only'
@@ -132,12 +133,21 @@ class Case(BaseModel):
     title: str | None = None
     created_at: str = Field(default_factory=now)
     updated_at: str = Field(default_factory=now)
+    version: int = 1                           # monotonic; the store advances it on every later write
+    provenance: Provenance = 'user'
+    example_id: str | None = None              # set with provenance 'example'; edits do not clear it
     jurisdiction: Jurisdiction | None = None
     facts: list[Fact] = []
     provisions: list[str] = []                 # Division B ids the applicant confirmed
     section_c: list[SectionCRow] = []
     evidence: list[EvidenceItem] = []
     gaps: list[Gap] = []
+
+    @model_validator(mode='after')
+    def _example_keeps_its_id(self):
+        if self.example_id:
+            self.provenance = 'example'
+        return self
 
     def export_facts(self) -> list[dict]:
         return [f.export() for f in self.facts]

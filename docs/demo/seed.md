@@ -13,15 +13,18 @@ curl -X POST http://127.0.0.1:8000/demo/seed
 
 `BATATIS_DEMO` must be the character `1`. Any other value, including an unset variable, leaves the seed off. The script exits 2 and writes nothing. `POST /demo/seed` returns 404 `{"detail":"not found"}`. Leave the variable unset in production.
 
-The script prints the three cases as JSON. A second run prints the same JSON and puts the same documents back, including after a later edit. Case ids, fact ids, and timestamps are fixed.
+The script prints the cases as JSON. A second run prints the same JSON and puts the same documents back, including after a later edit. Case ids, fact ids, and timestamps are fixed. Each case has `provenance` `example`, `example_id` equal to its id, and `version` 1.
 
 | Id | Input directory | City on the brief |
 | --- | --- | --- |
 | `demo-a-manufacturer-nailbase` | `evals/demo-cases/a-manufacturer-nailbase-sheathing/input/` | Edmonton |
 | `demo-b-gc-firestop` | `evals/demo-cases/b-contractor-firestop-nonconformance/input/` | Calgary |
 | `demo-c-homebuilder-infill` | `evals/demo-cases/c-homebuilder-infill-house/input/` | Edmonton |
+| `demo-officer-after-fixes` | `evals/demo-cases/tester-samples/03-sco-submission-bundle.html` and `01-hartley-garden-suite-brief.html` | County of Example |
 
-Facts come only from those `input/` files. `keys/`, `expected/`, and `presenter/` are not read. Each fact's `source.ref` is the repo path under `input/`, and its `source.quote` is a substring of that file. `confirmed` means the file states it. It does not mean the statement was verified, and it is not a professional opinion. Unsigned drafts stay labelled by the `DRAFT` or `EXAMPLE` line in the file. Manufacturer performance claims stay `unconfirmed`.
+The first three are the applicant cases. The fourth is the officer package after the stated fixes. Its `package.story` is `blocking gaps drop to only what a professional must supply`. Jurisdiction and authority are the County of Example named on the bundle. Section D professional facts stay the unconfirmed label `needs professional`. The Division B benchmark is `identify.ranked` on the case: a JSON list of provision ids. The seed stores `[]`, and `apply_identify_benchmark` keeps only ids the code database resolves in Division B. It does not substitute an article, and it does not fill Section C. `keys/` is not read.
+
+Facts for the first three cases come only from those `input/` files. `keys/`, `expected/`, and `presenter/` are not read. Each of those facts' `source.ref` is the repo path under `input/`, and its `source.quote` is a substring of that file. `confirmed` means the file states it. It does not mean the statement was verified, and it is not a professional opinion. Unsigned drafts stay labelled by the `DRAFT` or `EXAMPLE` line in the file. Manufacturer performance claims stay `unconfirmed`.
 
 The seed does not copy PDF bytes and does not write `file.{id}.name`. The recorder still uploads a brief itself when this file is already on disk:
 

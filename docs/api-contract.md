@@ -34,6 +34,9 @@ A JSON string `"edmonton"` is rejected with 422. A body that only has `jurisdict
   "title": "New house application",
   "created_at": "2026-10-20T18:00:00+00:00",
   "updated_at": "2026-10-20T18:00:00+00:00",
+  "version": 1,
+  "provenance": "user",
+  "example_id": null,
   "jurisdiction": { "id": "edmonton", "name": "Edmonton", "authority": null },
   "facts": [],
   "provisions": [],
@@ -45,17 +48,33 @@ A JSON string `"edmonton"` is rejected with 422. A body that only has `jurisdict
 
 Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed` (422). `source.type` is `code`, `file`, `user_text`, `drawing`, or `user_click`.
 
-`POST /cases` and `POST /cases/{id}/facts` and `PUT /cases/{id}/jurisdiction` serialize writes per case. A fact added while Section D is rebuilding is kept.
+`POST /cases`, `PATCH /cases/{id}`, `POST /cases/{id}/facts`, `POST /cases/{id}/gaps`, and `PUT /cases/{id}/jurisdiction` serialize writes per case. A fact added while Section D is rebuilding is kept.
+
+`version` starts at 1 on the first save and increases by 1 on every later write. A read does not change it. `provenance` is `user` or `example`. `example_id` is set only for an example, by `POST /cases` with `example_id` or by `POST /demo/seed`. A later fact or description edit leaves both fields as they were.
 
 ### `POST /cases`
 
 Body, all fields optional:
 
 ```json
-{ "title": "New house application", "jurisdiction": { "id": "edmonton", "name": "Edmonton", "authority": null } }
+{ "title": "New house application", "jurisdiction": { "id": "edmonton", "name": "Edmonton", "authority": null }, "example_id": null }
 ```
 
-`201` returns the Case. `422` when `jurisdiction` is not the object above (a string is 422). Unknown keys such as `jurisdiction_id` are ignored, which leaves `jurisdiction` null.
+`201` returns the Case, including `version` 1. `422` when `jurisdiction` is not the object above (a string is 422). Unknown keys such as `jurisdiction_id` are ignored, which leaves `jurisdiction` null. When `example_id` is a non-empty string, the case is stored with `provenance` `example` and that `example_id`.
+
+### `PATCH /cases/{id}`
+
+Body fields are optional. Extra keys are 422.
+
+```json
+{ "jurisdiction": { "id": "edmonton", "name": "Edmonton", "authority": "City of Edmonton" } }
+```
+
+`jurisdiction` replaces the object. `authority` sets `jurisdiction.authority` on the object already stored, or on the object in the same body. `422` `{"detail":"jurisdiction is not set"}` when `authority` is sent and the case has no jurisdiction. An empty body `{}` returns the case and does not change `version`. A body that changes jurisdiction or authority returns the case with `version` increased by 1. `404` unknown case.
+
+### `POST /cases/{id}/gaps`
+
+Body is one Gap (`id`, `section`, `field`, `message`, `severity`). `200` is the Case, with `version` increased. `404` unknown case, body `{"detail":"case not found"}` and no case `id`. `422` when the gap is invalid. A failed write is never HTTP 200.
 
 ### `GET /cases/{id}`
 
@@ -73,7 +92,7 @@ Body is the jurisdiction object, not wrapped:
 
 ### `POST /cases/{id}/facts`
 
-Body is one Fact. `200` the Case. `404` unknown case. `422` when the fact is invalid, including a proposed fact sent as confirmed.
+Body is one Fact. `200` the Case, with `version` increased. `404` unknown case, body `{"detail":"case not found"}` and no case `id`. `422` when the fact is invalid, including a proposed fact sent as confirmed. A failed fact or gap write is never HTTP 200.
 
 ### `POST /cases/{id}/files`
 
@@ -110,11 +129,31 @@ The PDF bytes are stored at `{BATATIS_FILES}/{case_id}/{file_id}.pdf`. The case 
 
 ### `POST /cases/{id}/export`
 
-Body optional: `{ "draft": false }`. `200` is `application/pdf` with `Content-Disposition: attachment; filename="<id>-scc-variance.pdf"` (`-DRAFT` when `draft` is true). `404` unknown case. `409`:
+Body optional: `{ "draft": false, "expected_version": 1 }`. `expected_version` is optional. When it is sent and it is not the case's current `version`, the response is `409`:
 
 ```json
-{ "detail": { "message": "export blocked; resolve these or export a draft", "reasons": ["…"] } }
+{ "code": "version_conflict", "current_version": 2 }
 ```
+
+That check runs before the blocked-export check. `200` is `application/pdf` with `Content-Disposition: attachment; filename="<id>-scc-variance.pdf"` (`-DRAFT` when `draft` is true). The PDF metadata records `/BatatisCaseVersion` and `/BatatisFactsHash` (SHA-256 of the case facts). An example case (`provenance` `example`) also stamps `EXAMPLE DATA, fictional, not a real application` on every page and in `/Subject`. A draft stamps `DRAFT, open gaps` on every page and in `/Keywords`. `404` unknown case. `409` when the export is blocked:
+
+```json
+{
+  "detail": ["unconfirmed pointed fact \"owner_name\" (fact_…)"],
+  "reasons": [
+    {
+      "section": "A",
+      "gap_id": "unconfirmed:owner_name",
+      "fact_key": "owner_name",
+      "label": "unconfirmed pointed fact \"owner_name\" (fact_…)",
+      "fix_hint": "Confirm this fact, or remove it, before a final export.",
+      "severity": "blocking"
+    }
+  ]
+}
+```
+
+`detail` is the string list from before this shape. `reasons` is the structured list. `section` is `A`, `B`, `C`, or `D`. A process-section gap keeps its stable completeness id and is reported with `section` `D`. `gap_id` is stable for the same content. `fact_key` is null when the blocker is not a single field, including `section_c:empty`.
 
 `503` `{"detail": "SCC variance form not found"}` when the blank form file is missing. The path is logged on the server and is not in the body. `503` `{"detail": "code database not found"}` when the code database is missing. `500` for another export failure.
 
@@ -186,11 +225,13 @@ These are the routes the engine serves. `POST /demo/seed` is off unless `BATATIS
 
 | Method and path | Response |
 | --- | --- |
-| `POST /cases` | `201` Case. Body is optional: `title`, `jurisdiction` (`id`, `name`, `authority`). |
+| `POST /cases` | `201` Case. Body is optional: `title`, `jurisdiction` (`id`, `name`, `authority`), `example_id`. |
 | `GET /cases/{case_id}` | Case, or `404` with detail `case not found`. |
+| `PATCH /cases/{case_id}` | Updated Case. Body may set `jurisdiction` and `authority`. `422` when authority is sent with no jurisdiction, or when the body has an unknown key. |
 | `PUT /cases/{case_id}/jurisdiction` | Updated Case. Body is a jurisdiction object (`id`, `name`, optional `authority`). `404` unknown case; `422` invalid body. |
 | `POST /cases/{case_id}/files` | `201` stored-file metadata. Multipart `file`, PDF only. `404` unknown case; `413` too large; `415` unreadable PDF; `422` missing file. |
-| `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. |
+| `POST /cases/{case_id}/facts` | Case. Body is a Fact. `422` when a `proposed` fact is sent as `confirmed`. `404` unknown case. A failure is not HTTP 200. |
+| `POST /cases/{case_id}/gaps` | Case. Body is a Gap. `422` invalid gap. `404` unknown case. A failure is not HTTP 200. |
 | `GET /cases/{case_id}/gaps` | `completeness.Gap` list: `id`, `section` (`A` `B` `C` `D` `process`), `field`, `message`, `severity` (`blocking` or `warning`), `fix_hint`, `citation`. |
 | `GET /code/search` | Query `q`, `division` (`A` `B` or `C`, default `B`), `limit` (1–100, default 20). Hits as returned: `id`, `division`, `level`, `article_title`, `title`, `text`, `citation`. |
 | `GET /code/{provision_id}` | Query `division` optional. The codedb provision record, or `404` detail `provision not found`. `400` when the id is invalid or the division is ambiguous. |
@@ -200,10 +241,10 @@ These are the routes the engine serves. `POST /demo/seed` is off unless `BATATIS
 | `GET /cases/{case_id}/professional` | `required` and `general_required`: `yes`, `no`, or `depends`. Also `reasons`, `questions`, `scope_note`. |
 | `GET /ccmc/search` | Query `q` (1–200 characters) and `limit` (1–50, default 20). `422` on a rejected query. `503` when the registry is unavailable; that detail is the registry error text. |
 | `GET /cases/{case_id}/process-fields` | Process-field list. Empty when the pathway is an acceptable solution. |
-| `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` when the blank form file is missing; detail is exactly `SCC variance form not found`. `500` on other export failures. |
-| `POST /demo/seed` | The three fictional demo cases, or `404` `{"detail":"not found"}` unless `BATATIS_DEMO` is `1`. |
+| `POST /cases/{case_id}/export` | Body optional `{ "draft": false, "expected_version": 1 }`. `200` is `application/pdf`. `409` is either `{ "code": "version_conflict", "current_version": N }` or `{ "detail": ["…"], "reasons": […] }`. `503` when the blank form file is missing; detail is exactly `SCC variance form not found`. `500` on other export failures. |
+| `POST /demo/seed` | The fictional demo cases, including the officer after-fixes package, or `404` `{"detail":"not found"}` unless `BATATIS_DEMO` is `1`. |
 
-A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
+A Case has `id`, `title`, `created_at`, `updated_at`, `version`, `provenance` (`example` or `user`), `example_id`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
 
 A fact's `source.type` is `code`, `file`, `user_text`, `drawing`, or `user_click`.
 
@@ -213,7 +254,7 @@ The fixed 404 detail strings are `case not found`, `provision not found`, and, w
 
 ### `POST /demo/seed`
 
-Off unless `BATATIS_DEMO` is exactly `1`. Otherwise `404` `{"detail":"not found"}`. With the flag, `200` is the three fictional cases from `evals/demo-cases/<case>/input/` only, in the order `demo-a-manufacturer-nailbase`, `demo-b-gc-firestop`, `demo-c-homebuilder-infill`. A second call returns the same documents. `provisions` and `section_c` are empty, so this route does not fill Code ID cards. `scripts/seed_demo.py` writes the same cases with no network. The Playwright recorder notes are in `docs/demo/seed.md`.
+Off unless `BATATIS_DEMO` is exactly `1`. Otherwise `404` `{"detail":"not found"}`. With the flag, `200` is the fictional cases. The first three come from `evals/demo-cases/<case>/input/` only, in the order `demo-a-manufacturer-nailbase`, `demo-b-gc-firestop`, `demo-c-homebuilder-infill`. The fourth is `demo-officer-after-fixes`. A second call returns the same documents. `provisions` and `section_c` are empty, so this route does not fill Code ID cards. `scripts/seed_demo.py` writes the same cases with no network. The Playwright recorder notes are in `docs/demo/seed.md`. Every seeded case has `provenance` `example` and `example_id` equal to its case id. `version` is 1.
 
 ### Section D plan item
 

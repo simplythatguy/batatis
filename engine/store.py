@@ -41,6 +41,13 @@ class CaseStore:
     def _write(self, case: Case, *, keep_timestamps: bool = False) -> Case:
         if not keep_timestamps:
             case.updated_at = now()
+            with closing(self._connect()) as con:
+                row = con.execute('SELECT json FROM cases WHERE id=?', (case.id,)).fetchone()
+            if row is None:
+                if case.version < 1:
+                    case.version = 1
+            else:
+                case.version = Case.model_validate_json(row[0]).version + 1
         with closing(self._connect()) as con, con:
             con.execute('INSERT INTO cases VALUES (?,?,?) ON CONFLICT(id) DO UPDATE SET json=excluded.json, '
                         'updated_at=excluded.updated_at', (case.id, case.model_dump_json(), case.updated_at))

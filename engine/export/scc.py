@@ -22,7 +22,6 @@ from pypdf.generic import ArrayObject, NameObject, NumberObject, RectangleObject
 
 from ..models import INTENT_LABEL, Case, SectionCRow
 from ..codes import Codes
-from ..completeness import check_completeness
 from ..process_fields import PROCESS_ALIASES
 from ..section_c import section_c_rows
 from ..section_d import supporting_documents
@@ -48,8 +47,9 @@ class FormMismatch(ExportError):
 
 
 class ExportBlocked(ExportError):
-    def __init__(self, reasons: list[str]):
+    def __init__(self, reasons: list[str], items: list[dict] | None = None):
         self.reasons = reasons
+        self.items = items or []
         super().__init__('export blocked: ' + '; '.join(reasons))
 
 
@@ -127,19 +127,38 @@ def confirmed_values(case: Case) -> dict[str, object]:
             and f.value is not None and str(f.value).strip() != ''}
 
 
-def blockers(case: Case, fmap: dict, codes: Codes | None = None) -> list[str]:
+def blocker_rows(case: Case, fmap: dict, codes: Codes | None = None) -> tuple[list[str], list[dict]]:
+    from .reasons import blocker_rows as _rows
+
     codes = codes or Codes()
-    values = confirmed_values(case)
-    reasons = [f'unconfirmed {f.kind} fact "{f.field}" ({f.id})' for f in _latest(case).values()
-               if f.export()['status'] != 'confirmed']
-    reasons += [f'blocking gap in section {g.section}, {g.field}: {g.message} Fix: {g.fix_hint}'
-                for g in check_completeness(case, codes) if g.severity == 'blocking']
-    reasons += [f'blocking gap in section {g.section}, {g.field}: {g.message}' for g in case.gaps
-                if g.severity == 'blocking']
-    reasons += [f'required field "{k}" is empty' for k in fmap['required_facts'] if k not in values]
-    if not case.section_c:
-        reasons.append('Section C has no provisions')
-    return list(dict.fromkeys(reasons))
+    return _rows(case, fmap, codes, _latest(case), confirmed_values(case))
+
+
+def blockers(case: Case, fmap: dict, codes: Codes | None = None) -> list[str]:
+    return blocker_rows(case, fmap, codes)[0]
+
+
+def facts_hash(case: Case) -> str:
+    """Stable hash of the case facts as stored. It is not a finding about the design."""
+    body = json.dumps([fact.model_dump(mode='json') for fact in case.facts],
+                      sort_keys=True, separators=(',', ':'), ensure_ascii=False)
+    return hashlib.sha256(body.encode()).hexdigest()
+
+
+def export_metadata(case: Case, *, draft: bool, field_map: str) -> dict[str, str]:
+    from .appendix import DRAFT_OPEN_GAPS, EXAMPLE_STAMP
+
+    meta = {
+        '/Title': 'Variance Form for Proposed Alternative Solution' + (' (DRAFT)' if draft else ''),
+        '/Producer': f'Batatis export, field map {field_map}',
+        '/BatatisCaseVersion': str(case.version),
+        '/BatatisFactsHash': facts_hash(case),
+    }
+    if case.provenance == 'example':
+        meta['/Subject'] = EXAMPLE_STAMP
+    if draft:
+        meta['/Keywords'] = DRAFT_OPEN_GAPS
+    return meta
 
 
 def _canonical_case(case: Case, codes: Codes) -> Case:
@@ -316,13 +335,13 @@ def _rects(form: bytes, fmap: dict) -> dict[str, tuple[float, float, float, floa
 def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str | None = None,
                 version: str = CURRENT_MAP) -> ExportResult:
     """Authoritatively check, canonicalize, fill, flatten and append; no prior gap request is needed."""
-    from .appendix import build_appendix, stamp_draft
+    from .appendix import build_appendix, stamp_pages
 
     fmap = load_field_map(version)
     codes = codes or Codes()
-    reasons = blockers(case, fmap, codes)
+    reasons, items = blocker_rows(case, fmap, codes)
     if reasons and not draft:
-        raise ExportBlocked(reasons)
+        raise ExportBlocked(reasons, items)
     case = _canonical_case(case, codes)
     blank_form = load_form(form, fmap)
     values = confirmed_values(case)
@@ -335,10 +354,8 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
     app_reader = PdfReader(io.BytesIO(appendix))
     for page in app_reader.pages:
         out.add_page(page)
-    if draft:
-        stamp_draft(out)
-    out.add_metadata({'/Title': 'Variance Form for Proposed Alternative Solution' + (' (DRAFT)' if draft else ''),
-                      '/Producer': f'Batatis export, field map {fmap["version"]}'})
+    stamp_pages(out, example=case.provenance == 'example', draft=draft)
+    out.add_metadata(export_metadata(case, draft=draft, field_map=fmap['version']))
     buf = io.BytesIO()
     out.write(buf)
     filled_names = set(plan.text) | {k for k, v in plan.checks.items() if v != '/Off'}

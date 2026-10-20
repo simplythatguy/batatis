@@ -22,7 +22,11 @@ from reportlab.platypus import KeepTogether, Paragraph, SimpleDocTemplate, Space
 from ..models import INTENT_LABEL, Case, SectionCRow
 from ..process_fields import process_fields
 from ..section_d import section_d_plan, supporting_documents
+from ..wording import ACCEPTANCE, ALTERNATIVE_SOLUTION
 from .text import faithful_font_text
+
+EXAMPLE_STAMP = 'EXAMPLE DATA, fictional, not a real application'
+DRAFT_OPEN_GAPS = 'DRAFT, open gaps'
 
 INK = colors.HexColor('#1f2328')
 MUTED = colors.HexColor('#59636e')
@@ -115,7 +119,9 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
                    _p(f'Case {case.title or ""} ({case.id}). Generated {date.today().isoformat()} by Batatis with '
                       f'field map {fmap["version"]}. Code references are to the National Building Code - 2023 '
                       'Alberta Edition, 2nd printing (NBC(AE) 2023). This appendix lists what the application '
-                      'cites; it does not state that the proposed design complies.', SMALL)]
+                      'cites; it does not state that the proposed design complies.', SMALL),
+                   _p(ALTERNATIVE_SOLUTION, SMALL),
+                   _p(ACCEPTANCE, SMALL)]
 
     if open_items:
         story += [Paragraph('Open items (draft export)', H2),
@@ -196,23 +202,41 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
     return buf.getvalue()
 
 
-def _draft_page(width: float, height: float):
+def _overlay_page(width: float, height: float, *, example: bool, draft: bool):
     buf = io.BytesIO()
     c = canvas.Canvas(buf, pagesize=(width, height))
-    c.saveState()
-    c.setFillColor(colors.Color(0.8, 0.1, 0.1, alpha=0.18))
-    c.setFont('Helvetica-Bold', 120)
-    c.translate(width / 2, height / 2)
-    c.rotate(45)
-    c.drawCentredString(0, -40, 'DRAFT')
-    c.restoreState()
-    c.setFillColor(colors.Color(0.7, 0.1, 0.1))
-    c.setFont('Helvetica-Bold', 8)
-    c.drawCentredString(width / 2, height - 22, 'DRAFT - not for submission; see appendix for review status')
+    if draft:
+        c.saveState()
+        c.setFillColor(colors.Color(0.8, 0.1, 0.1, alpha=0.18))
+        c.setFont('Helvetica-Bold', 120)
+        c.translate(width / 2, height / 2)
+        c.rotate(45)
+        c.drawCentredString(0, -40, 'DRAFT')
+        c.restoreState()
+        c.setFillColor(colors.Color(0.7, 0.1, 0.1))
+        c.setFont('Helvetica-Bold', 8)
+        c.drawCentredString(width / 2, height - 22, 'DRAFT - not for submission; see appendix for review status')
+        c.drawCentredString(width / 2, height - 34, DRAFT_OPEN_GAPS)
+    if example:
+        c.setFillColor(colors.Color(0.55, 0.1, 0.1))
+        c.setFont('Helvetica-Bold', 8)
+        c.drawCentredString(width / 2, 16, EXAMPLE_STAMP)
     c.save()
     return PdfReader(io.BytesIO(buf.getvalue())).pages[0]
 
 
-def stamp_draft(writer: PdfWriter) -> None:
+def stamp_pages(writer: PdfWriter, *, example: bool = False, draft: bool = False) -> None:
+    """Stamp example data, a draft with open gaps, or both, on every page."""
+    if not example and not draft:
+        return
     for page in writer.pages:
-        page.merge_page(_draft_page(float(page.mediabox.width), float(page.mediabox.height)), over=True)
+        page.merge_page(_overlay_page(float(page.mediabox.width), float(page.mediabox.height),
+                                      example=example, draft=draft), over=True)
+
+
+def stamp_draft(writer: PdfWriter) -> None:
+    stamp_pages(writer, draft=True)
+
+
+def stamp_example(writer: PdfWriter) -> None:
+    stamp_pages(writer, example=True)

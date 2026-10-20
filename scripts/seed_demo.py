@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Write the three fictional demo cases into the local case store.
+"""Write the fictional demo cases into the local case store.
 
 Offline. No API key and no network. Reads evals/demo-cases/<case>/input/ only.
 

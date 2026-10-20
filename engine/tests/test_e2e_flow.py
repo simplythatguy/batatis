@@ -98,9 +98,9 @@ def test_e2e_gaps_then_export_409_and_draft_200(tmp_path, monkeypatch):
 
     blocked = client.post(f'/cases/{case_id}/export')
     assert blocked.status_code == 409
-    detail = blocked.json()['detail']
-    assert detail['message'] == 'export blocked; resolve these or export a draft'
-    assert detail['reasons']
+    body = blocked.json()
+    assert isinstance(body['detail'], list) and body['detail']
+    assert body['reasons']
     assert 'complies' not in blocked.text.lower()
 
     if not form_path().exists():

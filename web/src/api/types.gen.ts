@@ -17,14 +17,17 @@ export interface AttributionPair {
 export interface Case {
   created_at: string;
   evidence: EvidenceItem[];
+  example_id: string | null;
   facts: Fact[];
   gaps: Gap[];
   id: string;
   jurisdiction: Jurisdiction | null;
+  provenance: "example" | "user";
   provisions: string[];
   section_c: SectionCRow[];
   title: string | null;
   updated_at: string;
+  version: number;
 }
 
 export interface EvidenceItem {
@@ -92,6 +95,7 @@ export interface JurisdictionInput {
 }
 
 export interface NewCase {
+  example_id?: string | null;
   jurisdiction?: JurisdictionInput | null;
   title?: string | null;
 }

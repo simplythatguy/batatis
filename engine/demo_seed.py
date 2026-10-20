@@ -11,10 +11,13 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from .benchmark import apply_identify_benchmark
 from .models import Case, Fact, Jurisdiction, Source
 from .store import CaseStore
 
 STAMP = '2026-10-20T00:00:00+00:00'
+OFFICER_AFTER_ID = 'demo-officer-after-fixes'
+OFFICER_STORY = 'blocking gaps drop to only what a professional must supply'
 REPO = Path(__file__).resolve().parents[1]
 DEMO_ROOT = REPO / 'evals' / 'demo-cases'
 FORBIDDEN = frozenset({'keys', 'expected', 'presenter'})
@@ -39,8 +42,11 @@ def build_cases() -> list[Case]:
     """Canonical cases. The same call always returns the same documents."""
     specs = (_manufacturer(), _firestop(), _homebuilder())
     cases = [_case(spec) for spec in specs]
-    if tuple(case.id for case in cases) != CASE_IDS:
+    cases.append(_officer_after_fixes())
+    if tuple(case.id for case in cases[:3]) != CASE_IDS:
         raise DemoSeedError('demo case ids changed')
+    if cases[3].id != OFFICER_AFTER_ID:
+        raise DemoSeedError('officer after-fixes id changed')
     return cases
 
 
@@ -164,9 +170,116 @@ def _case(spec: dict) -> Case:
     if len(fields) != len(set(fields)):
         raise DemoSeedError(f'{slug}: duplicate fact field')
     return Case(
-        id=spec['id'], title=title, created_at=STAMP, updated_at=STAMP,
+        id=spec['id'], title=title, created_at=STAMP, updated_at=STAMP, version=1,
+        provenance='example', example_id=spec['id'],
         jurisdiction=Jurisdiction(id=city_id, name=city_name, authority=None),
         facts=facts, provisions=[], section_c=[], evidence=[], gaps=[])
+
+
+def _officer_after_fixes() -> Case:
+    """Fictional officer package after the applicant's stated fixes.
+
+    Quotes come from the tester-sample bundle and the Hartley brief. ``keys/`` is not read.
+    Professional facts stay the label ``needs professional``. The Division B benchmark is
+    whatever ``identify.ranked`` the code database can resolve, which is empty in this seed.
+    """
+    bundle = _tester_html('03-sco-submission-bundle.html')
+    brief = _tester_html('01-hartley-garden-suite-brief.html')
+    bundle_ref = 'evals/demo-cases/tester-samples/03-sco-submission-bundle.html'
+    brief_ref = 'evals/demo-cases/tester-samples/01-hartley-garden-suite-brief.html'
+    address = _slice(bundle, '10432', ' (fictional address)')
+    address_quote = address + ' (fictional address)'
+    scope_quote = 'A small one-bedroom garden suite at the back of my lot for my mother.'
+    description = '60 m² garden suite, 300 mm hempcrete walls, no poly.'
+    facts = [
+        _file_fact(OFFICER_AFTER_ID, 'authority', 'County of Example', bundle_ref, 'County of Example'),
+        _file_fact(OFFICER_AFTER_ID, 'jurisdiction', 'County of Example', bundle_ref, 'County of Example'),
+        _file_fact(OFFICER_AFTER_ID, 'municipalAddress', address, bundle_ref, address_quote),
+        _file_fact(OFFICER_AFTER_ID, 'representative', 'D. Hartley', bundle_ref, 'Rep: D. Hartley'),
+        _file_fact(OFFICER_AFTER_ID, 'alternative', description, bundle_ref, description),
+        _file_fact(OFFICER_AFTER_ID, 'owner', 'Dana Hartley', brief_ref, 'Dana Hartley (owner / builder)'),
+        _file_fact(OFFICER_AFTER_ID, 'date', '2026-10-14', brief_ref, '2026-10-14'),
+        _file_fact(OFFICER_AFTER_ID, 'scope', 'at the back of my lot', brief_ref, scope_quote),
+        _file_fact(OFFICER_AFTER_ID, 'identify.query', description, bundle_ref, description),
+        _identify_ranked(OFFICER_AFTER_ID),
+        _story_fact(OFFICER_AFTER_ID),
+        _needs_professional(OFFICER_AFTER_ID, 'responsible_professional', brief_ref),
+        _needs_professional(OFFICER_AFTER_ID, 'professional_qualifications', brief_ref),
+        _needs_professional(OFFICER_AFTER_ID, 'professional_seal', brief_ref),
+    ]
+    case = Case(
+        id=OFFICER_AFTER_ID, title='Officer review, after fixes',
+        created_at=STAMP, updated_at=STAMP, version=1,
+        provenance='example', example_id=OFFICER_AFTER_ID,
+        jurisdiction=Jurisdiction(id='county-of-example', name='County of Example',
+                                  authority='County of Example'),
+        facts=facts, provisions=[], section_c=[], evidence=[], gaps=[])
+    apply_identify_benchmark(case, _Unresolved())
+    return case
+
+
+class _Unresolved:
+    """Seed-time stand-in. It resolves no provision, so the seed cannot invent a benchmark."""
+
+    def provision(self, provision_id, division=None):
+        return None
+
+
+def _tester_html(name: str) -> str:
+    path = (DEMO_ROOT / 'tester-samples' / name).resolve()
+    demo = DEMO_ROOT.resolve()
+    if demo not in path.parents or path.parent.name != 'tester-samples':
+        raise DemoSeedError(f'{name}: left the tester-samples directory')
+    if FORBIDDEN & set(path.parts):
+        raise DemoSeedError(f'{name}: refusing a key path')
+    if not path.is_file():
+        raise DemoSeedError(f'{name}: missing tester sample')
+    return path.read_text(encoding='utf-8')
+
+
+def _slice(text: str, start: str, end: str) -> str:
+    at = text.find(start)
+    if at < 0:
+        raise DemoSeedError(f'missing {start!r}')
+    stop = text.find(end, at)
+    if stop < 0:
+        raise DemoSeedError(f'missing {end!r}')
+    return text[at:stop]
+
+
+def _file_fact(case_id: str, field: str, value: str, ref: str, quote: str) -> Fact:
+    path = REPO / ref
+    text = path.read_text(encoding='utf-8')
+    if quote not in text or value not in quote:
+        raise DemoSeedError(f'{case_id}: {field} is not in {ref}')
+    if any(part in FORBIDDEN for part in Path(ref).parts):
+        raise DemoSeedError(f'refusing {ref}')
+    return _fact(case_id, field, value, 'confirmed', ref, quote)
+
+
+def _identify_ranked(case_id: str) -> Fact:
+    return Fact(
+        id=f'fact_{case_id}_identify_ranked', field='identify.ranked', value='[]',
+        kind='computed', status='confirmed', formula='identify.ranked',
+        source=Source(type='user_text', ref='identify-output', quote='[]'))
+
+
+def _story_fact(case_id: str) -> Fact:
+    return Fact(
+        id=f'fact_{case_id}_package_story', field='package.story', value=OFFICER_STORY,
+        kind='pointed', status='confirmed',
+        source=Source(type='user_text', ref='demo-seed:officer-after-fixes', quote=OFFICER_STORY))
+
+
+def _needs_professional(case_id: str, field: str, ref: str) -> Fact:
+    quote = 'No lab tests, no engineer yet'
+    if quote not in (REPO / ref).read_text(encoding='utf-8'):
+        raise DemoSeedError(f'{case_id}: professional basis is not in {ref}')
+    token = ''.join(ch if ch.isalnum() else '_' for ch in field)
+    return Fact(
+        id=f'fact_{case_id}_{token}', field=field, value='needs professional',
+        kind='pointed', status='unconfirmed',
+        source=Source(type='file', ref=ref, quote=quote))
 
 
 def _input_dir(slug: str) -> Path:

@@ -6,7 +6,8 @@ from typing import Literal
 
 from fastapi import FastAPI, File, HTTPException, Query, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, ConfigDict
 from starlette.datastructures import MutableHeaders
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
@@ -16,7 +17,7 @@ from .codes import CodeDbMissing, Codes, default_db
 from .demo_seed import demo_enabled, seed_cases
 from .export import ExportBlocked, ExportError, FormNotFound, export_case
 from .files import FileTooLarge, NotAPdf, discard_pdf, max_upload_bytes, save_pdf
-from .models import Case, Fact, Jurisdiction, SectionCRow, Source
+from .models import Case, Fact, Gap, Jurisdiction, SectionCRow, Source
 from .section_c import section_c_rows
 from .store import CaseStore
 
@@ -65,6 +66,15 @@ class ExposeBatatisHeaders:
 class NewCase(BaseModel):
     title: str | None = None
     jurisdiction: Jurisdiction | None = None
+    example_id: str | None = None
+
+
+class CasePatch(BaseModel):
+    """Partial update. Jurisdiction replaces the object. Authority updates that object's authority."""
+
+    model_config = ConfigDict(extra='forbid')
+    jurisdiction: Jurisdiction | None = None
+    authority: str | None = None
 
 
 class SectionCRequest(BaseModel):
@@ -73,6 +83,7 @@ class SectionCRequest(BaseModel):
 
 class ExportRequest(BaseModel):
     draft: bool = False
+    expected_version: int | None = None
 
 
 class StoredFile(BaseModel):
@@ -107,7 +118,13 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
 
     @app.post('/cases', response_model=Case, status_code=201)
     def create_case(body: NewCase | None = None):
-        return cases().put(Case(**(body.model_dump() if body else {})))
+        data = body.model_dump() if body else {}
+        example_id = data.pop('example_id', None) or None
+        case = Case(**data)
+        if example_id:
+            case.provenance = 'example'
+            case.example_id = example_id
+        return cases().put(case)
 
     @app.get('/cases/{case_id}', response_model=Case)
     def get_case(case_id: str):
@@ -126,11 +143,46 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
             raise HTTPException(404, 'case not found')
         return case
 
+    @app.patch('/cases/{case_id}', response_model=Case)
+    def patch_case(case_id: str, body: CasePatch):
+        if not body.model_fields_set:
+            case = cases().get(case_id)
+            if case is None:
+                raise HTTPException(404, 'case not found')
+            return case
+
+        def apply(case: Case) -> None:
+            if 'jurisdiction' in body.model_fields_set:
+                case.jurisdiction = body.jurisdiction
+            if 'authority' in body.model_fields_set:
+                if case.jurisdiction is None:
+                    raise HTTPException(422, 'jurisdiction is not set')
+                case.jurisdiction = case.jurisdiction.model_copy(update={'authority': body.authority})
+
+        case = cases().mutate(case_id, apply)
+        if case is None:
+            raise HTTPException(404, 'case not found')
+        return case
+
     @app.post('/cases/{case_id}/facts', response_model=Case)
     def add_fact(case_id: str, fact: Fact):
         case = cases().add_fact(case_id, fact)
         if case is None:
             raise HTTPException(404, 'case not found')
+        if not any(stored.id == fact.id for stored in case.facts):
+            raise HTTPException(500, 'fact was not stored')
+        return case
+
+    @app.post('/cases/{case_id}/gaps', response_model=Case)
+    def add_gap(case_id: str, gap: Gap):
+        def apply(case: Case) -> None:
+            case.gaps = [stored for stored in case.gaps if stored.id != gap.id] + [gap]
+
+        case = cases().mutate(case_id, apply)
+        if case is None:
+            raise HTTPException(404, 'case not found')
+        if not any(stored.id == gap.id for stored in case.gaps):
+            raise HTTPException(500, 'gap was not stored')
         return case
 
     @app.post('/cases/{case_id}/files', response_model=StoredFile, status_code=201)
@@ -174,10 +226,13 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
     def export(case_id: str, body: ExportRequest | None = None):
         case = get_case(case_id)
         draft = bool(body and body.draft)
+        if body is not None and body.expected_version is not None and body.expected_version != case.version:
+            return JSONResponse(status_code=409, content={
+                'code': 'version_conflict', 'current_version': case.version})
         try:
             res = export_case(case, draft=draft, codes=code())
         except ExportBlocked as e:
-            raise HTTPException(409, {'message': 'export blocked; resolve these or export a draft', 'reasons': e.reasons})
+            return JSONResponse(status_code=409, content={'detail': e.reasons, 'reasons': e.items})
         except FormNotFound as e:
             logger.error('SCC variance form not found: %s', e)
             raise HTTPException(503, 'SCC variance form not found') from None
@@ -218,8 +273,6 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         if not demo_enabled():
             raise HTTPException(404, 'not found')
         return seed_cases(cases())
-
-    from fastapi.responses import JSONResponse
 
     @app.exception_handler(CodeDbMissing)
     def missing_codedb(_request, _exc: CodeDbMissing):
