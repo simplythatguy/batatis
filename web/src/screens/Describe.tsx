@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { DetailFields, FactLedger, QuestionChips } from "../case-parts";
 import { GapStrip, Icon, PanelHeader } from "../components";
-import { DETAIL_FIELDS, factFor } from "../model";
+import { DETAIL_FIELDS, factFor, valueText } from "../model";
 import { useCase } from "../store";
 
 function DropZone() {
@@ -82,7 +82,7 @@ function DropZone() {
 
 export function Describe() {
   const { c, gaps, dispatch } = useCase();
-  const missingDetails = DETAIL_FIELDS.filter((d) => d.required && !factFor(c, d.id)?.value.trim()).length;
+  const missingDetails = DETAIL_FIELDS.filter((d) => d.required && !valueText(factFor(c, d.id)).trim()).length;
   return (
     <>
       <PanelHeader title="Describe your idea" meta={c.title} />

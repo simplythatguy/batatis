@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { KindBadge, StatusPill } from "./components";
-import { DETAIL_FIELDS, PROCESS_FIELDS, displayValue, factFor, factLabel, isTyped, type DetailField } from "./model";
+import { DETAIL_FIELDS, PROCESS_FIELDS, displayValue, factFor, factLabel, isTyped, valueText, type DetailField } from "./model";
 import { useCase } from "./store";
 import type { Fact, Question, Source } from "./types";
 
@@ -46,7 +46,7 @@ function FactRow({ fact }: { fact: Fact }) {
             : `From ${sourceLine(fact.source)}`}
         </span>
         {fact.source.quote && <q className="fact-quote">{fact.source.quote}</q>}
-        {fact.kind === "proposed" && fact.confidence !== undefined && (
+        {fact.kind === "proposed" && fact.confidence != null && (
           <span className="meta">Confidence {Math.round(fact.confidence * 100)}%</span>
         )}
         {fact.kind === "proposed" && !pending && (
@@ -162,7 +162,7 @@ export function QuestionChips() {
 function DetailInput({ def }: { def: DetailField }) {
   const { c, dispatch } = useCase();
   const fact = factFor(c, def.id);
-  const value = fact?.value ?? "";
+  const value = valueText(fact);
   const empty = def.required && !value.trim();
   const id = `field-${def.id}`;
   const set = (v: string) => dispatch({ type: "setDetail", field: def.id, value: v, section: def.section });

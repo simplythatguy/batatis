@@ -4,47 +4,20 @@
  * the tool; it points to a source, computes from sources, or proposes for the user to confirm.
  */
 
-/** exact = code database or form; pointed = a span from the user's words or files;
- *  computed = code over exact and pointed values; proposed = AI judgement, needs a click. */
-export type FactKind = "exact" | "pointed" | "computed" | "proposed";
+import type { FactInput, SourceInput } from "./api/types.gen";
 
-export type SourceType = "code" | "file" | "user_text" | "drawing" | "user_click";
+/** Fact, Source and their enums are the engine's (engine/models.py via src/api/types.gen.ts).
+ *  exact = code database or form; pointed = a span from the user's words or files;
+ *  computed = code over exact and pointed values (with `formula` and `inputs`);
+ *  proposed = AI judgement, needs a click. */
+export type Source = SourceInput;
+export type SourceType = Source["type"];
+export type FactKind = FactInput["kind"];
+export type FactStatus = NonNullable<FactInput["status"]>;
 
-/** PDF user-space box, in points, on `page`. */
-export interface BBox {
-  x0: number;
-  y0: number;
-  x1: number;
-  y1: number;
-}
-
-export interface Source {
-  type: SourceType;
-  /** File name, provision citation, or a short description of where the user said it. */
-  ref: string;
-  page?: number;
-  bbox?: BBox;
-  /** Verbatim span the value was pointed from. */
-  quote?: string;
-}
-
-export type FactStatus = "confirmed" | "unconfirmed";
-
-export interface Fact {
-  id: string;
-  /** Case field this fact fills, e.g. `owner` or `product.permeance`. */
-  field: string;
-  value: string;
-  kind: FactKind;
-  source: Source;
-  /** 0..1; shown for proposed facts. */
-  confidence?: number;
-  status: FactStatus;
-  /** Computed facts only: the formula, shown as written. */
-  formula?: string;
-  /** Computed facts only: ids of the facts the formula reads. */
-  inputs?: string[];
-}
+/** A fact as the web holds it: the engine's input shape with the id and status always set.
+ *  An engine response `Fact` is assignable to it. `source.bbox` is [x0, y0, x1, y1] in PDF points. */
+export type Fact = FactInput & { id: string; status: FactStatus };
 
 export interface CaseFile {
   id: string;
@@ -117,8 +90,10 @@ export interface SectionCRow {
   /** The national 2020 intent statement is attributed differently from NBC(AE) 2023. */
   differs: boolean;
   differsDetail?: string;
-  /** AI-written, never code text. */
-  explanation: string;
+  /** Objective and function titles by code (live rows carry them from the engine). */
+  terms?: Record<string, string>;
+  /** AI-written, never code text. Absent on live lookup rows until the engine writes explanations. */
+  explanation?: string;
 }
 
 export type ProcessFieldId = "rationale" | "risk" | "mitigation" | "assumptions";

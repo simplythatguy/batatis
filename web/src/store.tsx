@@ -3,7 +3,7 @@ import { FIXTURE } from "./fixture";
 import { getGaps, reducer, type Action } from "./model";
 import type { Case, Gap } from "./types";
 
-const KEY = "batatis-web-case-v1";
+const KEY = "batatis-web-case-v2";
 
 function load(): Case {
   if (new URLSearchParams(location.search).has("reset")) sessionStorage.removeItem(KEY);
