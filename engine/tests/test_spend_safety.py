@@ -198,8 +198,8 @@ def test_missing_or_untrusted_usage_consumes_the_whole_reservation(tmp_path, mon
     assert row['actual_usd'] == row['est_usd']
 
 
-def test_responses_style_usage_objects_use_the_reported_tokens():
-    assert spend._usage_tokens(SimpleNamespace(usage=SimpleNamespace(input_tokens=2, output_tokens=3))) == (2, 3)
+def test_responses_style_usage_objects_cannot_authorize_a_chat_refund():
+    assert spend._usage_tokens(SimpleNamespace(usage=SimpleNamespace(input_tokens=2, output_tokens=3))) is None
 
 
 def test_failed_settlement_keeps_the_reservation_and_refuses_a_retry(tmp_path, monkeypatch):

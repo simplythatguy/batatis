@@ -74,7 +74,8 @@ def _messages(text='soffit'):
 def _reply(payload, prompt, completion):
     return {
         'model': payload['model'],
-        'usage': {'prompt_tokens': prompt, 'completion_tokens': completion},
+        'usage': {'prompt_tokens': prompt, 'completion_tokens': completion,
+                  'total_tokens': prompt + completion},
         'service_tier': 'default',
         'choices': [{'finish_reason': 'stop', 'message': {'content': '{}'}}],
     }

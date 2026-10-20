@@ -538,27 +538,16 @@ def open_ledger():
 
 
 def _usage_tokens(value: Any) -> tuple[int, int] | None:
-    usage = value.get('usage') if isinstance(value, Mapping) else getattr(value, 'usage', None)
-    if usage is None:
-        return None
+    """Only coherent Chat Completions accounting can reduce a reservation."""
+    usage = value.get('usage') if isinstance(value, Mapping) else None
     if not isinstance(usage, Mapping):
-        usage = {
-            'prompt_tokens': getattr(usage, 'prompt_tokens', None),
-            'completion_tokens': getattr(usage, 'completion_tokens', None),
-            'input_tokens': getattr(usage, 'input_tokens', None),
-            'output_tokens': getattr(usage, 'output_tokens', None),
-        }
+        return None
     inn = usage.get('prompt_tokens')
-    if inn is None:
-        inn = usage.get('input_tokens')
     out = usage.get('completion_tokens')
-    if out is None:
-        out = usage.get('output_tokens')
-    if inn is None or out is None:
+    total = usage.get('total_tokens')
+    if any(type(n) is not int or n < 0 for n in (inn, out, total)):
         return None
-    if type(inn) is not int or type(out) is not int:
-        return None
-    if inn < 0 or out < 0:
+    if total != inn + out:
         return None
     return inn, out
 
