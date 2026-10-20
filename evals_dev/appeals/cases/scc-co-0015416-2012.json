@@ -1,0 +1,126 @@
+{
+  "id": "scc-co-0015416-2012",
+  "title": "Building \u2013 Construction Compliance with ABC 2006 and Professional Involvement Compliance July 2012",
+  "decision_date": "2012-07-23",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2012/REDACTED_Bldg_Construction%20Compliance%20with%20ABC%202006%20and%20is%20Professional%20Involvement%20Compliant%20July%202012_0015416.pdf",
+  "applicant_type": "owner",
+  "topic": null,
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "An owner's long-stalled residential construction project used manufactured engineered products (trusses, sheathing) left exposed to the weather. A consulting engineer's report found the structure not sound and not built to plan, and recommended 12 corrective items or removal and rebuilding of the superstructure.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "professional involvement",
+    "engineered products",
+    "Part 9 limits",
+    "unsafe construction"
+  ],
+  "missing_info": [],
+  "edition_original": "ABC 2006",
+  "other_codes": [],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": null,
+    "basis_type": "not applicable",
+    "basis": "not applicable: appeal of an s.49 order"
+  },
+  "outcome": "varied",
+  "outcome_summary": "Order substance kept (complete the engineer's items 1\u201312 or rebuild), but the deadline was extended to 14 Sept 2012.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "2.4.1.1.",
+      "source_code": "ABC 2006",
+      "source_division": "C",
+      "source_part": "Part 2",
+      "parsed_id": "2.4.1.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "2.4.2.1.",
+      "source_code": "ABC 2006",
+      "source_division": "C",
+      "source_part": "Part 2",
+      "parsed_id": "2.4.2.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "2.4.3.1.",
+      "source_code": "ABC 2006",
+      "source_division": "C",
+      "source_part": "Part 2",
+      "parsed_id": "2.4.3.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "2.2.14.1.",
+      "source_code": "ABC 2006",
+      "source_division": "C",
+      "source_part": "Part 2",
+      "parsed_id": "2.2.14.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "Part 9 (scope)",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 9",
+      "parsed_id": null,
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "Not an article identifier."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "'The complexity of this project has given rise to special safety concerns and requires professional involvement.' The panel found the project 'exceeded the intentions and requirements of a Part 9 building' and 'requires the involvement of professional engineering'.",
+      "sentences": 2,
+      "quote_confidence": "standard",
+      "kind": "excerpt",
+      "field": "professional_involvement",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2012/REDACTED_Bldg_Construction%20Compliance%20with%20ABC%202006%20and%20is%20Professional%20Involvement%20Compliant%20July%202012_0015416.pdf"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": true,
+    "weak_flag": "yes",
+    "label_strength": "weak",
+    "facts": {},
+    "facts_provenance": "The panel sentence about special safety concerns is the weak yes label. It is not stored as a screen fact."
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "yes",
+    "engineering_reason": "Weak appeal label only. Not an NBC(AE) 2023 professional-involvement determination.",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold. special_safety_concerns was omitted: it comes from the panel conclusion that also supplies the weak yes label, not an independent authority statement."
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "case_id": "dev-049",
+  "status": "unverified",
+  "persona": "homebuilder",
+  "variance_kind": "envelope-insulation-sheathing",
+  "scenario": "A new single-storey detached home with a building area of 220 m2 includes an indoor swimming-pool room that will generate high indoor moisture. We want the wall enclosing that room designed only with the ordinary prescriptive house-wall moisture details. We propose no Part 5 envelope design for the pool room and would justify the omission with a larger exhaust fan.",
+  "section_ab_required_fields": null,
+  "expected_top_articles": null,
+  "benchmark_acceptable_solution": null,
+  "engineer_needed": null,
+  "intake_action": null,
+  "verifier_name": null,
+  "date_verified": null,
+  "source_page_refs": null,
+  "notes": null
+}

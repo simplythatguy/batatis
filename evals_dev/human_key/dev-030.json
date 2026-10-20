@@ -1,0 +1,16 @@
+{
+  "case_id": "dev-030",
+  "status": "unverified",
+  "persona": "general contractor",
+  "variance_kind": "single-exit",
+  "scenario": "A four-storey office has a 900 m2 building area. The common exit stair discharges through a hinged exterior door that we want to swing inward, against the direction people leave. This is the common building exit, not a door for a dwelling or storage unit. We would add a larger landing and clear signs.",
+  "section_ab_required_fields": null,
+  "expected_top_articles": null,
+  "benchmark_acceptable_solution": null,
+  "engineer_needed": null,
+  "intake_action": null,
+  "verifier_name": null,
+  "date_verified": null,
+  "source_page_refs": null,
+  "notes": null
+}

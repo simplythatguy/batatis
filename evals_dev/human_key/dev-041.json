@@ -1,0 +1,16 @@
+{
+  "case_id": "dev-041",
+  "status": "unverified",
+  "persona": "manufacturer",
+  "variance_kind": "part4-structural",
+  "scenario": "We are supplying proprietary timber load-bearing wall members for a four-storey office whose structural design is under Part 4. We propose to use only our internal resistance factors and a European wood design method instead of demonstrating conformity with the Canadian engineering-design-in-wood standard. Our catalogue capacities are the intended basis.",
+  "section_ab_required_fields": null,
+  "expected_top_articles": null,
+  "benchmark_acceptable_solution": null,
+  "engineer_needed": null,
+  "intake_action": null,
+  "verifier_name": null,
+  "date_verified": null,
+  "source_page_refs": null,
+  "notes": null
+}

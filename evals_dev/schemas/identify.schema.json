@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Identify / intake output",
+  "type": "object",
+  "required": ["articles", "intake_action"],
+  "properties": {
+    "articles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["provision", "division"],
+        "properties": {
+          "provision": {"type": "string", "minLength": 1},
+          "division": {"enum": ["A", "B", "C"]},
+          "committed": {"type": "boolean"},
+          "probability": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+          "citation": {"type": "string"},
+          "title": {"type": "string"},
+          "part": {"type": "integer"}
+        }
+      }
+    },
+    "section_c": {"type": "array"},
+    "engineering_required": {"enum": ["yes", "no", "depends"]},
+    "intake_action": {"enum": ["ask", "proceed_conditionally", "redirect"]},
+    "questions": {"type": "array", "items": {"type": "string"}}
+  }
+}
