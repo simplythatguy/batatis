@@ -104,10 +104,10 @@ def test_confirmed_provision_recommends_ladder_and_lists_empty_process_fields():
     issue = section_d_issues(Case(provisions=[BENCHMARK]), codes)[0]
     assert issue.provision.provision_id == BENCHMARK and issue.provision.citation == codes.rows[('B', BENCHMARK)]['citation']
     assert issue.objective == 'OP3.1' and issue.function == 'F03'
-    assert issue.recommended_evidence_types == CONFIDENCE_LADDER + ALTERNATIVE_EVIDENCE_TYPES
+    assert issue.recommended_types == CONFIDENCE_LADDER + ALTERNATIVE_EVIDENCE_TYPES
     empty = [field.id for field in issue.empty_process_fields]
     assert {'risk_assessment', 'mitigating_measures', 'assumptions_and_limits'} <= set(empty)
-    assert not set(empty) & set(issue.recommended_evidence_types)
+    assert not set(empty) & set(issue.recommended_types)
     assert issue.status == 'open' and issue.practice_of_engineering.value == 'unknown'
     assert issue.practice_of_engineering.question
 
@@ -173,7 +173,7 @@ def test_acceptable_path_drops_variance_process_fields_and_extra_evidence_types(
     case = Case(provisions=[BENCHMARK], facts=[fact('pathway', 'acceptable')])
     issue = section_d_issues(case, codes_with_rules())[0]
     assert issue.empty_process_fields == ()
-    assert issue.recommended_evidence_types == CONFIDENCE_LADDER
+    assert issue.recommended_types == CONFIDENCE_LADDER
 
 
 def test_no_benchmark_asks_and_does_not_invent_a_provision():
@@ -193,6 +193,18 @@ def test_route_is_read_only_and_missing_case_is_404(tmp_path):
     assert body[0]['entered_reference'] == UNKNOWN and body[0]['provision'] is None
     assert body[1]['provision']['citation']
     assert store.get(case.id).model_dump_json() == before
+
+
+def test_missing_codedb_returns_503_without_a_path(tmp_path, monkeypatch):
+    monkeypatch.setenv('BATATIS_CODEDB', str(tmp_path / 'no-such.sqlite'))
+    client = TestClient(create_app(CaseStore(tmp_path / 'cases.sqlite')))
+    created = client.post('/cases', json={})
+    assert created.status_code == 201
+    response = client.get(f"/cases/{created.json()['id']}/section-d/issues")
+    assert response.status_code == 503
+    assert response.json() == {'detail': 'code database not found'}
+    assert 'no-such.sqlite' not in response.text
+    assert str(tmp_path) not in response.text
 
 
 def test_rule_table_uses_only_provisions_already_in_the_repo():

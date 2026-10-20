@@ -23,7 +23,7 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .codes import Codes
+from .codes import CodeDbMissing, Codes
 from .professional import ProfessionalFacts, professional_involvement
 from .section_d_issues import PART9_MAX_SPAN_M, PROCESS_RULES, PROFESSIONAL_RULES
 
@@ -354,7 +354,7 @@ def load_codes():
         if codes.provision('2.4.1.1.(1)', 'C') is None:
             raise FileNotFoundError('division C professional rules are not in codedb')
         return codes, 'present'
-    except FileNotFoundError:
+    except (CodeDbMissing, FileNotFoundError):
         return RuleLookup(), 'missing'
 
 

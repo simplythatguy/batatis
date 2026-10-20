@@ -15,7 +15,9 @@ from .codes import Codes
 from .models import Case
 from .process_fields import ProcessField, alternative_path, confirmed_value, process_fields
 from .professional import ProfessionalFacts, ProfessionalReason, ProfessionalResult, professional_involvement
-from .section_d import ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, EvidencePlanItem, section_d_plan
+from .section_d import (
+    ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, EvidencePlanItem, EvidenceType, section_d_plan,
+)
 
 # A confirmed span above this value is stored as Part 4 design before the practice screen.
 # This handoff came from development case dev-050. The only provision cited for that
@@ -135,7 +137,7 @@ class SectionDIssue(BaseModel):
     objective: str | None = None
     function: str | None = None
     at_stake: str
-    recommended_evidence_types: tuple[str, ...]
+    recommended_types: tuple[EvidenceType, ...]
     practice_of_engineering: PracticeOfEngineering
     empty_process_fields: tuple[EmptyProcessField, ...]
     status: IssueStatus
@@ -241,7 +243,7 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
             id='benchmark-unconfirmed', provision=None, question=(
                 'Confirm the Division B benchmark provisions before recommending performance evidence.'),
             at_stake='No confirmed benchmark is on the case. Recommend evidence only after a provision resolves in the code database.',
-            recommended_evidence_types=recommended_fallback, practice_of_engineering=flag,
+            recommended_types=recommended_fallback, practice_of_engineering=flag,
             empty_process_fields=empty, status=_status(flag, ()))]
 
     known: list[str] = []
@@ -253,7 +255,7 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
                 id=f'unresolved-{provision_id}', provision=None, entered_reference=provision_id,
                 question='This entered reference was not found in the code database. Ask which Division B provision is the benchmark. No replacement article is suggested.',
                 at_stake='Recommend evidence only after the benchmark resolves in the code database.',
-                recommended_evidence_types=recommended_fallback, practice_of_engineering=flag,
+                recommended_types=recommended_fallback, practice_of_engineering=flag,
                 empty_process_fields=empty, status=_status(flag, ())))
         else:
             known.append(provision_id)
@@ -272,7 +274,7 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
                 question='This provision did not resolve in the code database. Ask for the benchmark again. No citation is offered.',
                 objective=None, function=None,
                 at_stake='Recommend evidence only after the benchmark resolves in the code database.',
-                recommended_evidence_types=item.recommended_types, practice_of_engineering=flag,
+                recommended_types=item.recommended_types, practice_of_engineering=flag,
                 empty_process_fields=empty, status=_status(flag, item.attachments)))
             continue
         question = None
@@ -283,6 +285,6 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
             provision=CitedProvision(provision_id=item.provision_id, division='B', citation=citation),
             question=question, objective=item.objective, function=item.function,
             at_stake=_at_stake(item),
-            recommended_evidence_types=item.recommended_types, practice_of_engineering=flag,
+            recommended_types=item.recommended_types, practice_of_engineering=flag,
             empty_process_fields=empty, status=_status(flag, item.attachments)))
     return issues
