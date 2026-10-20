@@ -11,8 +11,22 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-from .attributions import PAIR_RE, parse_bracket
+from .attributions import parse_bracket
 from .sources import load_pages
+
+_BRACKET = re.compile(r"\[[^\]]*\]")
+
+
+def parse_attribution_bracket(raw: str):
+    """Parse one intent-supplement attribution bracket, tolerating PDF letter spacing.
+
+    The supplement's justified lines are often letter-spaced on extraction, e.g.
+    "[ F 1 0 ,F 1 2 ,F 0 5 ,F 0 6 - O S 3 . 7 ]" or "[F20, F80-OH 4]" or "[F6 3-OS2.3]".
+    An attribution bracket contains only F/O codes, digits, dots, commas and one hyphen, so
+    whitespace inside it carries no meaning: drop it all before matching. Non-attribution
+    brackets (quoted Code words such as "[noncombustible]") still fail and return None.
+    """
+    return parse_bracket(re.sub(r"\s+", "", raw))
 
 
 @dataclass
@@ -24,19 +38,18 @@ class Block:
 
     @property
     def brackets(self):
-        out = []
-        for ln in self.attribution_lines:
-            for m in re.finditer(r"\[[^\]]*\]", ln):
-                b = parse_bracket(m.group(0))
-                if b:
-                    out.append(b)
-        return out
+        found = (parse_attribution_bracket(m.group(0)) for ln in self.attribution_lines for m in _BRACKET.finditer(ln))
+        return [b for b in found if b]
 
     @property
     def attribution_notes(self) -> list[str]:
+        """Attribution text other than parsed brackets (clause scopes, "Applies to ..." notes).
+
+        Bracketed words that are not attributions (e.g. "[noncombustible]" quoted from Code text) stay in the note.
+        """
         notes = []
         for ln in self.attribution_lines:
-            rest = re.sub(r"\[[^\]]*\]", "", ln).strip()
+            rest = _BRACKET.sub(lambda m: "" if parse_attribution_bracket(m.group(0)) else m.group(0), ln).strip()
             if rest:
                 notes.append(rest)
         return notes
