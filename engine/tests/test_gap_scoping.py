@@ -250,6 +250,112 @@ def test_added_departure_pulls_the_citing_chain_and_gaps_stay_few(chain_client):
     assert envelope['total'] == len(listed.json()) and envelope['gaps'] == listed.json()
 
 
+# Synthetic stand-ins for an article and a clause-level sentence. The pairs are not codedb rows.
+_ARTICLE = '3.1.9.4.'
+_SENTENCE_DIRECT = '3.1.9.4.(1)'
+_SENTENCE_NONE = '3.1.9.4.(4)'
+_CLAUSE_SENTENCE = '3.1.8.1.(1)'
+_CLAUSE = '3.1.8.1.(1)(a)'
+
+
+def _pair(pid):
+    return {'provision_id': pid, 'fs': ['F03'], 'objectives': ['OS1.2'], 'bracket': '[F03-OS1.2]',
+            'clauses': [], 'application_note': None, 'table_id': 'synthetic', 'pdf_page': 1}
+
+
+def _rec(pid, level, status, children=None, attributions=None):
+    return {
+        'id': pid, 'division': 'B', 'citation': f'synthetic Div B {pid}', 'level': level,
+        'attributions': attributions or [], 'intents': [], 'intent_comparison': [],
+        'attribution_status': {'status': status, 'root_provision': None},
+        'children': children or [], 'text': 'synthetic', 'pdf_page': 1, 'pdf_page_end': 1,
+        'article_title': 'synthetic',
+    }
+
+
+class _ExpandingCodes:
+    """An article expands to sentences. A clause-level sentence adds its direct clause."""
+
+    db_path = 'synthetic'
+
+    def __init__(self):
+        self._rows = {
+            _ARTICLE: _rec(_ARTICLE, 'article', 'none', children=[
+                {'id': _SENTENCE_DIRECT, 'level': 'sentence'},
+                {'id': _SENTENCE_NONE, 'level': 'sentence'}]),
+            _SENTENCE_DIRECT: _rec(_SENTENCE_DIRECT, 'sentence', 'direct', attributions=[_pair(_SENTENCE_DIRECT)]),
+            _SENTENCE_NONE: _rec(_SENTENCE_NONE, 'sentence', 'none'),
+            _CLAUSE_SENTENCE: _rec(_CLAUSE_SENTENCE, 'sentence', 'clause_level', children=[
+                {'id': _CLAUSE, 'level': 'clause'}]),
+            _CLAUSE: _rec(_CLAUSE, 'clause', 'direct', attributions=[_pair(_CLAUSE)]),
+        }
+
+    def provision(self, pid, division='B'):
+        if division != 'B':
+            return None
+        return self._rows.get(pid)
+
+    def citation(self, pid, division='B'):
+        found = self.provision(pid, division)
+        return found['citation'] if found else None
+
+    def definition(self, code):
+        return None
+
+
+@pytest.fixture
+def expanding_client(tmp_path, monkeypatch):
+    monkeypatch.setattr('engine.completeness.validate_text', lambda *args, **kwargs: {'errors': []})
+    monkeypatch.setattr('engine.completeness.process_fields', lambda case, codes: [])
+    monkeypatch.setattr(
+        'engine.completeness.professional_involvement',
+        lambda case, codes: ProfessionalResult(required='no', general_required='no', reasons=[], questions=[]))
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    return TestClient(create_app(store, _ExpandingCodes())), store
+
+
+def _unlabelled(store, codes, provision_id):
+    from engine.section_c import section_c_rows
+
+    return store.put(Case(
+        provisions=[provision_id], section_c=section_c_rows([provision_id], codes),
+        jurisdiction=Jurisdiction(id='alberta-other', name='Synthetic AHJ')))
+
+
+def test_unlabelled_article_keeps_sentence_evidence_gaps(expanding_client):
+    from engine.evidence_gaps import provision_in_scope
+
+    http, store = expanding_client
+    bare = Case(provisions=[_ARTICLE])
+    assert provision_in_scope(bare, _SENTENCE_DIRECT)
+    assert provision_in_scope(bare, _SENTENCE_NONE)
+    assert not provision_in_scope(bare, '9.10.1.1.(1)')
+    case = _unlabelled(store, _ExpandingCodes(), _ARTICLE)
+    evidence = _evidence(http.get(f'/cases/{case.id}/gaps').json())
+    by_id = {gap['provision_id']: gap for gap in evidence}
+    assert set(by_id) == {_SENTENCE_DIRECT, _SENTENCE_NONE}
+    assert by_id[_SENTENCE_DIRECT]['severity'] == 'blocking'
+    assert by_id[_SENTENCE_DIRECT]['field'] == f'evidence.{_SENTENCE_DIRECT}'
+    assert by_id[_SENTENCE_NONE]['severity'] == 'warning'
+
+
+def test_unlabelled_clause_level_sentence_keeps_the_clause_gap(expanding_client):
+    from engine.evidence_gaps import provision_in_scope
+
+    http, store = expanding_client
+    bare = Case(provisions=[_CLAUSE_SENTENCE])
+    assert provision_in_scope(bare, _CLAUSE_SENTENCE)
+    assert provision_in_scope(bare, _CLAUSE)
+    assert not provision_in_scope(bare, '3.1.8.1.(2)')
+    case = _unlabelled(store, _ExpandingCodes(), _CLAUSE_SENTENCE)
+    evidence = _evidence(http.get(f'/cases/{case.id}/gaps').json())
+    by_id = {gap['provision_id']: gap for gap in evidence}
+    assert set(by_id) == {_CLAUSE_SENTENCE, _CLAUSE}
+    assert by_id[_CLAUSE]['severity'] == 'blocking'
+    assert by_id[_CLAUSE]['field'] == f'evidence.{_CLAUSE}'
+    assert by_id[_CLAUSE_SENTENCE]['severity'] == 'warning'
+
+
 def test_rank_returns_every_gap_and_marks_the_first_five():
     gaps = [Gap(id=f'g{index}', section='D', field=f'f{index}', message='synthetic',
                 fix_hint='synthetic', severity='warning' if index % 2 else 'blocking')

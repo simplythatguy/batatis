@@ -133,17 +133,18 @@ def evidence_provision_ids(case: Case) -> list[str]:
 
 
 def provision_in_scope(case: Case, provision_id: str) -> bool:
-    """True when this provision, or a departure article that contains it, takes a gap.
+    """True when this provision, or a stored article or sentence that contains it, takes a gap.
 
     A sentence marked ``citing`` stays out of scope even when its article is a departure.
-    With no role labels, only an id stored on the case is in scope.
+    With no role labels, a stored id and every sentence or clause under it are in scope.
+    The plan expands an article into sentences and a clause-level sentence into clauses.
     """
     if provision_roles(case).get(provision_id) in OUT_OF_SCOPE_ROLES:
         return False
     roles = provision_roles(case)
     confirmed = list(dict.fromkeys(case.provisions))
     if not roles:
-        return provision_id in confirmed
+        return any(_under(provision_id, root) for root in confirmed)
     return any(roles.get(root) in DEPARTURE_ROLES and _under(provision_id, root) for root in confirmed)
 
 

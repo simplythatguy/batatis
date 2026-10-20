@@ -56,6 +56,9 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
 
     @app.post('/cases/{case_id}/facts', response_model=Case)
     def add_fact(case_id: str, fact: Fact):
+        # A file source is server-written (sample, export, ingest). This route has no upload.
+        if fact.source.type == 'file':
+            raise HTTPException(422, 'a file source is not accepted')
         case = cases().add_fact(case_id, fact)
         if case is None:
             raise HTTPException(404, 'case not found')

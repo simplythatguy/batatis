@@ -289,19 +289,20 @@ def test_unknown_file_id_is_400(client):
     assert store.get(case.id).evidence == []
 
 
-def test_client_posted_file_source_fact_does_not_validate_file_id(client):
-    """A fact from POST /cases/{id}/facts with source.type file is not a stored file.
+def test_client_posted_file_source_fact_is_refused_and_file_id_is_400(client):
+    """POST /cases/{id}/facts refuses source.type file. A file_id against that ref is 400.
 
-    Every file_id is 400 until #24's case_files store exists.
+    File sources stay server-written until #24's case_files store exists.
     """
     http, store = client
     case = _case(store)
     posted = http.post(f'/cases/{case.id}/facts', json={
         'field': 'attachment', 'value': 'file_applicant_1', 'kind': 'pointed', 'status': 'confirmed',
         'source': {'type': 'file', 'ref': 'file_applicant_1', 'quote': 'Applicant file metadata.'}})
-    assert posted.status_code == 200
-    assert any(item['source']['type'] == 'file' and item['source']['ref'] == 'file_applicant_1'
-               for item in posted.json()['facts'])
+    assert posted.status_code == 422
+    assert posted.json()['detail'] == 'a file source is not accepted'
+    stored = store.get(case.id)
+    assert not any(item.source.type == 'file' for item in stored.facts)
     listing = {
         'evidence_type': 'CCMC evaluation',
         'description': 'Applicant named a CCMC report they will attach',
