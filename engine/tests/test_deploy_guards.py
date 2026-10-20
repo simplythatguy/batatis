@@ -1,5 +1,6 @@
 """Deploy guards: the code database is not a download, NRC text stays inside the word budget, and the privacy notice matches the web app."""
 import json
+import logging
 import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -121,6 +122,27 @@ def test_privacy_notice_matches_the_web_app():
     sources = [item['source'] for item in vercel['rewrites']]
     assert sources.index('/codedb/(.*)') < sources.index('/(.*)')
     assert any(source.endswith('sqlite)') for source in sources)
+
+
+def test_a_failed_purge_is_logged_and_the_request_continues(tmp_path, caplog):
+    class Broken(CaseStore):
+        def __init__(self, path):
+            super().__init__(path)
+            self.sweeps = 0
+
+        def purge_expired(self):
+            self.sweeps += 1
+            if self.sweeps == 1:
+                raise RuntimeError('postgres://user:secret@db.example/batatis')
+            return super().purge_expired()
+
+    caplog.set_level(logging.WARNING, logger='engine.access')
+    client = TestClient(create_app(Broken(tmp_path / 'cases.sqlite')))
+    response = client.post('/cases', json={'title': 'still served'})
+    assert response.status_code == 201
+    assert 'case purge failed: RuntimeError' in caplog.text
+    assert 'secret' not in caplog.text
+    assert 'db.example' not in caplog.text
 
 
 def test_cases_older_than_seven_days_are_deleted(tmp_path):

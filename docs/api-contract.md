@@ -4,6 +4,10 @@ Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample
 
 These are the routes the engine serves. `POST /cases/{case_id}/files` stores the PDF in the case database.
 
+The public path on Vercel is `/api` plus the path in the table. `vercel.json` sends `/api/(.*)` to the engine and rewrites it to `/:path`. `HttpGuard` also strips a leading `/api` before the route runs, so `GET /api/cases/{id}` and `GET /cases/{id}` are the same handler. Local Vite proxies `/api` to the engine. The web client base is `/api` (`VITE_API_BASE`).
+
+Every response sets `X-Robots-Tag: noindex, nofollow` and `X-Batatis-Notice` to the privacy notice below. Every JSON body includes `meta.notice` with that same sentence. A JSON array is returned as `{ "items": [...], "meta": { "notice": "..." } }`. An object keeps its own fields and gains `meta`. `GET /cases/{case_id}/professional` is an object, so the client reads its fields directly. List routes (`search`, section C, gaps, process fields, section D issues) are unwrapped with `unwrapItems`.
+
 ## Routes
 
 | Method and path | Response |
@@ -19,7 +23,7 @@ These are the routes the engine serves. `POST /cases/{case_id}/files` stores the
 | `POST /section-c` | Body `{ "provisions": ["…"] }`. `{ "items", "meta" }` where `items` is the `SectionCRow` list. `404` when a provision is missing from codedb. `400` on an invalid id. |
 | `POST /cases/{case_id}/section-d` | Body optional `{ "provisions": ["…"] }`. `{ "items", "notices", "meta" }`. Writes the case. |
 | `GET /cases/{case_id}/section-d/issues` | `{ "items", "meta" }`. `items` is the issue list below. Read-only. Does not write the case. |
-| `GET /cases/{case_id}/professional` | `required` and `general_required`: `yes`, `no`, or `depends`. Also `reasons`, `questions`, `scope_note`. |
+| `GET /cases/{case_id}/professional` | Object, plus `meta`. `required` and `general_required`: `yes`, `no`, or `depends`. Also `reasons`, `questions`, `scope_note`. Not an `{ items }` list. |
 | `GET /ccmc/search` | Query `q` (1–200 characters) and `limit` (1–50, default 20). `422` on a rejected query. `503` when the registry is unavailable; that detail is the registry error text. `429` uses the same detail, `Retry-After` header, and per-IP window as `GET /code/search`. The two routes share that window. |
 | `GET /cases/{case_id}/process-fields` | `{ "items", "meta" }`. `items` is the process-field list. Empty when the pathway is an acceptable solution. |
 | `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` detail `PDF export is unavailable on this deployment: SCC form not configured` when the blank form file is missing. `500` on other export failures. The PDF's NRC text is described under Exported PDF. |
@@ -52,9 +56,9 @@ A clipped field is not a finding that a design complies.
 
 `POST /cases/{case_id}/export` fills the Safety Codes Council form and appends a generated appendix. The form cells carry provision ids, objective and function codes, and a pointer to the appendix for the intent statement. They do not carry provision sentences.
 
-The appendix carries the NRC text for each Section C row: the citation, objective and functional-statement titles, any application note, the provision text, and the NBC 2020 intent statements and their notes. Applicant-written process answers and other confirmed form values stay the applicant's words.
+The appendix carries the NRC text for each Section C row: the citation, objective and functional-statement titles, any application note, the full provision text, and the NBC 2020 intent statements and their notes, plus the NBC(AE) attribution and the NRC publication link. Applicant-written process answers and other confirmed form values stay the applicant's words.
 
-That NRC text follows the same snippet rules as a JSON response. Each snippet is 25 words or fewer, and the PDF keeps at most 75 words of NRC text in total. Beyond that budget the appendix keeps the citation and the NRC publication link, with `… [clipped, see NBC p.N]` (or `… [clipped, see NBC(AE) 2023]` when no page is known).
+The 25-word and 75-word limits apply to JSON responses. They do not clip the export appendix.
 
 ### Demo data and retention
 
@@ -66,7 +70,7 @@ The engine log line is the method, the path, and the status. It does not include
 
 ### Section D plan item
 
-`POST /cases/{case_id}/section-d` returns `{ "items", "notices" }`. Each item is `engine/section_d.py` `EvidencePlanItem`. Every plan item is a provision codedb already resolved. `provision_id` and `citation` sit on the item.
+`POST /cases/{case_id}/section-d` returns `{ "items", "notices", "meta" }`. Each item is `engine/section_d.py` `EvidencePlanItem`. Every plan item is a provision codedb already resolved. `provision_id` and `citation` sit on the item.
 
 | Field | Type | Meaning |
 | --- | --- | --- |
@@ -232,5 +236,5 @@ A live response copies the citation string the code database returns. The placeh
 | 422 | A `proposed` fact was sent as `confirmed`, `GET /code/search` `limit` is above 20 (detail `The maximum is 20.`), or `GET /ccmc/search` rejected the query. |
 | 429 | `GET /code/search` or `GET /ccmc/search` when the caller is over the shared search rate limit. Detail is `Search limit reached; try again in N seconds`. The response also sets `Retry-After: N`. The limit is per engine instance (an in-memory window), per IP. |
 | 500 | Export failed for a reason other than a missing form. |
-| 503 | The code database file is absent. Body is exactly `{"detail": "code database not found"}`. Raised only by `CodeDbMissing` in `engine/codes.py`. Not a `FileNotFoundError`. The body has no server path. A missing SCC variance form is HTTP 503 with detail `PDF export is unavailable on this deployment: SCC form not configured`. An unavailable CCMC registry is also HTTP 503, and its detail is that error's own text. An unreachable case database is HTTP 503 with detail `case store unavailable`, and that body does not include the server address. |
+| 503 | The code database file is absent. Body is `{ "detail": "code database not found", "meta": { "notice": "<the privacy notice>" } }`. Raised only by `CodeDbMissing` in `engine/codes.py`. Not a `FileNotFoundError`. The body has no server path. A missing SCC variance form is HTTP 503 with detail `PDF export is unavailable on this deployment: SCC form not configured`, plus `meta`. An unavailable CCMC registry is also HTTP 503, and its detail is that error's own text, plus `meta`. An unreachable case database is HTTP 503 with detail `case store unavailable`, plus `meta`, and that body does not include the server address. |
 | 200 | An unknown Division B token on this issues route does not 404. It returns `provision: null` and a question. |

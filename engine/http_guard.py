@@ -28,9 +28,9 @@ class HttpGuard:
         if self.sweep is not None:
             try:
                 self.sweep()
-            except Exception:
-                # A sweep failure must not log a connection string or replace the route's own error.
-                pass
+            except Exception as exc:
+                # The exception text can name a database host. Log the type only, and still serve the route.
+                access_log.warning('case purge failed: %s', type(exc).__name__)
         path = scope.get('path') or ''
         if path == '/api' or path.startswith('/api/'):
             scope = dict(scope)

@@ -17,6 +17,38 @@ def _item(payload: bytes):
             'path': 'reference/codes/sample.pdf'}
 
 
+def test_a_good_digest_is_accepted(tmp_path):
+    payload = b'%PDF-good-digest'
+    seen = []
+
+    def fetcher(url, dest):
+        seen.append(url)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(payload)
+
+    item = _item(payload)
+    path = fetch_sources.acquire(item, root=tmp_path, env={}, fetcher=fetcher, log=lambda _m: None)
+    assert seen == [item['url']]
+    assert path.read_bytes() == payload
+    assert fetch_sources.sha256(path) == item['sha256']
+
+
+def test_curl_failure_falls_through_then_fails_closed(tmp_path):
+    item = _item(b'the-real-bytes')
+    seen = []
+
+    def fetcher(url, dest):
+        seen.append(url)
+        raise fetch_sources.DownloadError('curl exit 28')
+
+    with pytest.raises(fetch_sources.DownloadError):
+        fetch_sources.acquire(item, root=tmp_path, env={'CODEDB_PDF_URL': 'https://private.example/obj'},
+                              fetcher=fetcher, log=lambda _m: None)
+    assert seen == [item['url'], 'https://private.example/obj']
+    assert not (tmp_path / item['path']).exists()
+    assert list(tmp_path.rglob('*.partial')) == []
+
+
 def test_official_failure_then_private_url_is_not_logged(tmp_path):
     payload = b'%PDF-private-bytes'
     logs = []

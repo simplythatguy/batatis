@@ -216,7 +216,10 @@ def test_missing_codedb_returns_503_without_a_path(tmp_path, monkeypatch):
     assert created.status_code == 201
     response = client.get(f"/cases/{created.json()['id']}/section-d/issues")
     assert response.status_code == 503
-    assert response.json()['detail'] == 'code database not found'
+    body = response.json()
+    assert body['detail'] == 'code database not found'
+    assert set(body) == {'detail', 'meta'}
+    assert body['meta']['notice']
     assert 'no-such.sqlite' not in response.text
     assert str(tmp_path) not in response.text
 
