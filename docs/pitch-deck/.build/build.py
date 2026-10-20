@@ -58,7 +58,7 @@ SHOTS = {  # (placeholder id, on-slide caption of 6 words or fewer, alt text, EX
  6: [("shot-s06-section-d", "Section D leaves evidence blank · in review", "Alternative path with its fields left empty and the Section D card", True)],
  7: [("shot-s07-officer", "Officer review, sample package · in review", "Officer review screen with one planted sample package", True)],
  8: [("shot-s08-roles", "\u201cWho are you?\u201d role picker · in review", "Role picker: Manufacturer, General contractor, Homebuilder", True)],
- 9: [("shot-s09-locked", "Download locked while gaps open · in review", "Application screen with Check completeness disabled while gaps are open", True),
+ 9: [("shot-s09-locked", "Download locked while gaps open · in review", "Application screen: Check completeness opens a review; the official PDF stays locked while blocking gaps remain", True),
      ("shot-s09-scc-form", "Engine-filled SCC form · simulated session", "Downloaded engine-filled SCC variance form PDF, unsigned, officer Part 2 blank", True)],
 }
 EXAMPLE_SLIDES = {8}

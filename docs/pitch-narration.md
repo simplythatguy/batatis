@@ -50,12 +50,12 @@
 > In the app, in review, once every gap closes, it downloads the Council's October sixth form, not Appendix 1, filled in by the engine, unsigned, officer's part blank. It is not a compliance finding.
 
 ### Slide 10: Built for the December 1 rules
-**Time (150 wpm):** 1:57–2:17  |  **Spoken words:** 49  |  **At 150 wpm:** 19.6 s  |  **At 140 wpm:** 21.0 s
+**Time (150 wpm):** 1:57–2:17  |  **Spoken words:** 50  |  **At 150 wpm:** 20.0 s  |  **At 140 wpm:** 21.4 s
 
-> From December first, the Council's portal is the only way to register; registration isn't approval. A simulated walkthrough reached the form only because the engineer-needed gap cleared on its own answers. An open fix would keep it flagged until a professional and a seal or registration number are confirmed.
+> From December first, the Council's portal is the only way to register; registration isn't approval. A simulated walkthrough reached the form only because the engineer-needed gap cleared on its own answers. A fix to keep it flagged until a professional's seal or registration number is confirmed is still in review.
 
 ### Slide 11: Applicants pay to arrive complete
-**Time (150 wpm):** 2:17–2:31  |  **Spoken words:** 35  |  **At 150 wpm:** 14.0 s  |  **At 140 wpm:** 15.0 s
+**Time (150 wpm):** 2:18–2:32  |  **Spoken words:** 35  |  **At 150 wpm:** 14.0 s  |  **At 140 wpm:** 15.0 s
 
 > First buyer: production homebuilders. Price to test: one twenty-five to seven fifty dollars a package. In the draft pull request, identification cost under three cents a case on practice cases, five point seven seconds median.
 
@@ -66,7 +66,7 @@
 
 ---
 
-**Total: 399 spoken words. With about 5 s of slide changes: 2:44 at 150 wpm, 2:56 at 140 wpm.**
+**Total: 400 spoken words. With about 5 s of slide changes: 2:45 at 150 wpm, 2:56 at 140 wpm.**
 ## Traceability
 
 BP = business-plan.md, IP = implementation-plan.md, QA = judge-qa.md, PO = pitch-outline.md (the files in this docs/ folder). PR #20 = `docs/demo/script.md` at c432e32. PR #14 = demo case C README. PR #12 = PR body, keyed results at 67f06bc.
@@ -94,7 +94,7 @@ BP = business-plan.md, IP = implementation-plan.md, QA = judge-qa.md, PO = pitch
 | 8 | Three fictional applicants, one form, "Not sure" on every question (PR #16, in review) | IP §9; PR #20 shots 1 and 3 |
 | 9 | In the app (PR #16, in review), once every gap is closed, Check completeness downloads the Council's Oct 6, 2026 form (not Appendix 1), filled in by the engine, unsigned, officer Part 2 blank; the "not a finding that the design complies" notice is the app's dialog | Hands-on downloads at #16 @579cd2c (the 5-page Oct 6, 2026 form plus engine-generated attachment pages, 7 in total for the simulated walkthrough case; not the brief's Appendix 1; field map scc_2026-10); IP §3; BP §1; QA Q6 |
 | 10 | From Dec 1, the portal is the only registration route; registration is not approval | IP §3 |
-| 10 | A simulated walkthrough reached the form only because the engineer-needed gap cleared on the simulated user's own answers; PR #26 (open) would keep it flagged until a professional and a seal or registration number are confirmed | IP §7 (session 3 re-run row); QA Q17; PR #26 |
+| 10 | A simulated walkthrough reached the form only because the engineer-needed gap cleared on the simulated user's own answers; PR #26 (open, not merged) is the fix in review to keep it flagged until a professional and a seal or registration number are confirmed | IP §7 (session 3 re-run row); QA Q17; PR #26 |
 | 11 | First buyer: production homebuilders | BP §4 |
 | 11 | Price to test C$125–750 per package | BP §5 |
 | 11 | Identification model cost under three cents a case on practice (dev) cases, in draft PR #12 (C$0.0277; US$0.019676 × 1.4097 = C$0.027738) | BP §6; IP §4; PR #12 |
