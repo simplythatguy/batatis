@@ -154,6 +154,106 @@ def test_cli_missing_database_is_setup_error(tmp_path):
     assert json.loads(r.stdout)['errors'][0]['code']=='command_error'
 
 
+def _division_db(tmp_path):
+    """Small NBC-AE database so division rules can be tested without the repo build.
+
+    1.2.1.1.(1) is in A, B and C, matching the real collision. 2.3.1.1.(1) and
+    Note A-2.4.1.2.(1) are Division C only. Note A-1.2.1.1.(1)(a) is Division A only.
+    """
+    import sqlite3
+    from codedb import store
+    path = tmp_path / 'divisions.sqlite'
+    con = sqlite3.connect(path)
+    con.executescript(store.SCHEMA)
+    provisions = [
+        ('A', '1.2.1.1.(1)', 'sentence'),
+        ('B', '1.2.1.1.(1)', 'sentence'),
+        ('C', '1.2.1.1.(1)', 'sentence'),
+        ('A', '1.2.1.1.(1)(b)', 'clause'),
+        ('A', '1.1.1.2.(5)', 'sentence'),
+        ('C', '2.3.1.1.(1)', 'sentence'),
+        ('C', '2.2.1.2.(1)', 'sentence'),
+        ('C', '2.4.1.2.(1)', 'sentence'),
+        ('A', '1.1.2.', 'section'),
+        ('B', '1.1.2.', 'section'),
+    ]
+    for division, pid, level in provisions:
+        con.execute(
+            'INSERT INTO provisions (doc, division, id, level, pdf_page, pdf_page_end, clauses) '
+            'VALUES (?,?,?,?,?,?,?)',
+            ('NBC-AE', division, pid, level, 1, 1, '[]'))
+    for division, note_id in (
+        ('A', 'A-1.2.1.1.(1)(a)'),
+        ('A', 'A-1.2.1.1.(1)(b)'),
+        ('C', 'A-2.4.1.2.(1)'),
+    ):
+        con.execute(
+            'INSERT INTO notes (doc, division, note_id, pdf_page, pdf_page_end) VALUES (?,?,?,?,?)',
+            ('NBC-AE', division, note_id, 1, 1))
+    con.commit()
+    con.close()
+    return path
+
+
+def test_mixed_division_table_states_division_and_flags_ambiguity(tmp_path):
+    """A mixed Div A/C table must not borrow a nearby division word.
+
+    A prefix, an "of Division X", or a column header that names one division is
+    the stated division. A missing division on an id that exists in more than one
+    division is an ambiguous-division error that lists the candidates.
+    """
+    db = _division_db(tmp_path)
+
+    def errors(text):
+        return validate_text(text, db_path=db)['errors']
+
+    mixed = (
+        '| Brief\'s citation | Correct ID (division) | Verbatim |\n'
+        '|---|---|---|\n'
+        '| Division A 1.2.1.1.(3) | Div A 1.2.1.1.(1) | '
+        '**1.2.1.1.(1):** acceptable solutions in Division B (see Note A-1.2.1.1.(1)(a)). |\n'
+        '| Division C 2.2.1.2.(1) | Div C 2.3.1.1.(1) | '
+        '**2.4.1.2.(1):** registered professional. (See Note A-2.4.1.2.(1).) |\n'
+    )
+    mixed_errors = errors(mixed)
+    assert [(item['code'], item['citation']) for item in mixed_errors] == [
+        ('nonexistent_provision', '1.2.1.1.(3)'),
+        ('ambiguous_division', '1.2.1.1.(1)'),
+    ]
+    assert 'Div A' in mixed_errors[0]['message']
+    ambiguous = mixed_errors[1]
+    assert ambiguous['message'].startswith('ambiguous division:')
+    assert 'Div A, Div B, Div C' in ambiguous['message']
+
+    columns = (
+        '| Division A | Division C |\n'
+        '|---|---|\n'
+        '| 1.2.1.1.(1) | 2.3.1.1.(1) |\n'
+    )
+    assert errors(columns) == []
+
+    bare = errors('1.2.1.1.(1)')
+    assert [item['code'] for item in bare] == ['ambiguous_division']
+    assert 'ambiguous division:' in bare[0]['message']
+    assert 'Div A, Div B, Div C' in bare[0]['message']
+    assert errors('9.9.9.9.(1)')[0]['code'] == 'nonexistent_provision'
+    assert errors('Note A-9.9.9.9.(1)')[0]['code'] == 'nonexistent_note'
+
+    # A stated division that misses is not filled from another division.
+    wrong = errors('Div B Note A-1.2.1.1.(1)(a)')
+    assert [item['code'] for item in wrong] == ['nonexistent_note']
+    assert 'Div B' in wrong[0]['message']
+
+    # The division word has to introduce the citation. Nearby prose is not a guess.
+    assert errors('performance required by Division B (see Note A-1.2.1.1.(1)(b))') == []
+    assert errors('acceptable solutions in Division B. The article is 2.3.1.1.(1).') == []
+    assert errors('Subsection 1.1.2. of Division B') == []
+    assert errors('# Division A and Division C\n\n1.2.1.1.(1)')[0]['code'] == 'ambiguous_division'
+    headed = errors('# Division A\n\n2.3.1.1.(1)')
+    assert headed[0]['code'] == 'nonexistent_provision' and 'Div A' in headed[0]['message']
+    assert errors('{"division": "C", "id": "2.3.1.1.(1)"}') == []
+
+
 def test_nfc_article_is_located_in_text_but_not_certified():
     # NFC(AE) is not built into the database: an article printed in the NFC text is a warning, and its page is bound.
     r = validate_text('NFC(AE) 2023 p2 Article 6.1.1.2. [PDF p.313]')

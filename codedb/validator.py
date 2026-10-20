@@ -3,6 +3,14 @@
 Markdown, JSON and YAML are scanned as text (no execution or YAML dependencies).
 Every error has a stable code and location. A clean report proves only the citations
 recognized here, never that a technical claim or an application is correct.
+
+A citation is checked in a division only when that division is stated for it: a
+Div A/B/C prefix, "of Division X" immediately after the id, a table column whose
+header names one division, a division field on the open record, or a heading that
+names one division. If no division is stated and the id exists in more than one
+division, the error says ambiguous division and lists those divisions. A division
+word elsewhere in the sentence is not used. An id that exists in exactly one
+division is checked there.
 """
 from __future__ import annotations
 
@@ -86,19 +94,63 @@ def _nfc_article_pages(pid, doc):
     return _NFC_TEXT['found'][article]
 
 
-def _note_rows(con, doc, note_id, div):
-    """Resolve a note across divisions.
+_INTRODUCER = r'Sentences?|Articles?|Sections?|Subsections?|Clauses?|Notes?'
+_STRUCT_DIV = re.compile(r'["\']?division["\']?\s*:\s*["\']?([ABC])\b', re.I)
+_SEPARATOR = re.compile(r'^\s*\|?\s*:?-{3,}:?(?:\s*\|\s*:?-{3,}:?)+\s*\|?\s*$')
 
-    The Division letter nearest a citation is often about the sentence's subject
-    (Clause 1.2.1.1.(1)(b) mentions Division B) while the note itself is in
-    Division A. Prefer an explicit division when that division has the note;
-    otherwise use every division that has it.
+
+def _prefix_division(before: str) -> str | None:
+    """Division letter that introduces this citation, not an earlier prose mention.
+
+    "Div C, Article 2.3.1.1." states C. "solutions in Division B (see Note A-..." does not
+    state a division for the note. Nothing between the letter and the id is allowed except
+    a comma and an introducer such as Sentence or Article.
     """
-    rows = con.execute('SELECT * FROM notes WHERE doc=? AND note_id=?', (doc, note_id)).fetchall()
-    if not rows or not div:
-        return rows
-    preferred = [row for row in rows if row['division'] == div]
-    return preferred or rows
+    found = list(_DIV.finditer(before))
+    if not found:
+        return None
+    tail = before[found[-1].end():]
+    if re.fullmatch(rf'[\s,]*(?:(?:{_INTRODUCER})\s*)?', tail, re.I):
+        return found[-1].group(1).upper()
+    return None
+
+
+def _cells(line: str) -> list[str]:
+    return [cell.strip() for cell in line.strip().strip('|').split('|')]
+
+
+def _header_divisions(line: str) -> list[str | None]:
+    """One division per column, and only when that header names a single division."""
+    divisions = []
+    for cell in _cells(line):
+        found = [match.group(1).upper() for match in _DIV.finditer(cell)]
+        divisions.append(found[0] if len(set(found)) == 1 else None)
+    return divisions
+
+
+def _column_at(line: str, pos: int) -> int | None:
+    pipes = [index for index, char in enumerate(line) if char == '|']
+    for index in range(len(pipes) - 1):
+        if pipes[index] < pos < pipes[index + 1]:
+            return index
+    return None
+
+
+def _ambiguous(pid: str, divisions) -> str:
+    names = ', '.join(f'Div {division}' for division in divisions)
+    return f'ambiguous division: {pid} is in {names}'
+
+
+def _note_rows(con, doc, note_id, div):
+    """Notes in the stated division, or every division when none was stated.
+
+    A stated division that does not contain the note is a miss. Other divisions
+    are not searched in its place.
+    """
+    if div:
+        return con.execute('SELECT * FROM notes WHERE doc=? AND note_id=? AND division=?',
+                           (doc, note_id, div)).fetchall()
+    return con.execute('SELECT * FROM notes WHERE doc=? AND note_id=?', (doc, note_id)).fetchall()
 
 
 def _scan(text, path, con, report, default_doc):
@@ -106,17 +158,31 @@ def _scan(text, path, con, report, default_doc):
     # reset at headings/list rows so an unrelated paragraph cannot supply a target.
     previous = []
     paragraph_scope = ''
-    paragraph_division = None
+    heading_division = None
+    record_division = None
+    table_columns = None
+    previous_line = ''
     offset = 0
     for line in text.splitlines(keepends=True):
         if not line.strip() or re.match(r'^\s*#{1,6}\s', line):
             previous = []
             paragraph_scope = ''
-            paragraph_division = None
+            record_division = None
+            table_columns = None
+            if line.strip():
+                named = [match.group(1).upper() for match in _DIV.finditer(line)]
+                heading_division = named[0] if len(set(named)) == 1 else None
         elif line.lstrip().startswith('|'):
             # A table row stands alone: an earlier row's document or intent mention must not leak into it.
             previous = []
             paragraph_scope = ''
+        if _SEPARATOR.match(line) and previous_line.lstrip().startswith('|'):
+            table_columns = _header_divisions(previous_line)
+        structured = _STRUCT_DIV.search(line)
+        if structured:
+            record_division = structured.group(1).upper()
+        elif line.strip().startswith('{'):
+            record_division = None
         scope = paragraph_scope + ' ' + line
         doc, intent = _scope(scope, default_doc)
         prior_scope = paragraph_scope  # context from earlier lines only, never this line's later text
@@ -147,13 +213,26 @@ def _scan(text, path, con, report, default_doc):
             except ValueError as exc:
                 _issue(report,path,text,offset+m.start(),'malformed_provision',m.group(),str(exc))
                 continue
-            # Prefer the closest division before this id, or an explicit "of Division X" after it.
-            divs = list(_DIV.finditer(before))
-            after = line[m.end():matches[i+1].start() if i+1<len(matches) else len(line)]
-            post_div = re.search(r'\bof\s+Division\s+([ABC])\b', after, re.I)
-            scope_divs = list(_DIV.finditer(paragraph_scope))
-            div = post_div.group(1).upper() if post_div else (
-                divs[-1].group(1).upper() if divs else (scope_divs[-1].group(1).upper() if scope_divs else paragraph_division))
+            # A stated division is a prefix of this citation, "of Division X" immediately
+            # after it, this table column's header, a division field in the open record,
+            # or a heading that names one division. A Division word elsewhere in the line
+            # is not a guess.
+            after = line[m.end():matches[i+1].start() if i+1 < len(matches) else len(line)]
+            post_div = re.match(r'\s*of\s+Division\s+([ABC])\b', after, re.I)
+            prefix = _prefix_division(before)
+            column_division = None
+            if line.lstrip().startswith('|') and table_columns:
+                column = _column_at(line, m.start())
+                if column is not None and column < len(table_columns):
+                    column_division = table_columns[column]
+            if prefix:
+                div = prefix
+            elif post_div:
+                div = post_div.group(1).upper()
+            elif column_division:
+                div = column_division
+            else:
+                div = record_division or heading_division
             local_doc, local_intent = _scope(before, doc)
             # Source kind follows the latest mention before this citation, not later text on the same line.
             _, before_intent = _scope(prior_scope + ' ' + before, doc)
@@ -198,7 +277,14 @@ def _scan(text, path, con, report, default_doc):
                     rows = con.execute('SELECT *,pdf_page AS pdf_page_end FROM code_tables WHERE doc=? AND table_id=?'+
                                        (' AND division=?' if div else ''),
                                        (local_doc,table_id,div) if div else (local_doc,table_id)).fetchall()
-                if not rows:
+                divisions = list(dict.fromkeys(row['division'] for row in rows))
+                if not div and len(divisions) > 1:
+                    shown = m.group()+(letter.group(0) if letter and not note else '')
+                    _issue(report, path, text, offset+m.start(), 'ambiguous_division', shown,
+                           _ambiguous(shown, divisions))
+                    target['invalid'] = True
+                    rows = []
+                if not rows and not target['invalid']:
                     shown = m.group()+(letter.group(0) if letter and not note else '')
                     if historical and not note:
                         _issue(report,path,text,offset+m.start(),'historical_number',shown,
@@ -216,8 +302,11 @@ def _scan(text, path, con, report, default_doc):
             else:
                 try:
                     row = resolve(con,pid,local_doc,div)
-                except AmbiguousProvisionError as exc:
-                    _issue(report,path,text,offset+m.start(),'ambiguous_division',m.group(),str(exc))
+                except AmbiguousProvisionError:
+                    found = [row['division'] for row in con.execute(
+                        'SELECT division FROM provisions WHERE doc=? AND id=? ORDER BY division', (local_doc, pid))]
+                    _issue(report, path, text, offset+m.start(), 'ambiguous_division', m.group(),
+                           _ambiguous(pid, found))
                     target['invalid'] = True
                     row = None
                 if row:
@@ -298,9 +387,9 @@ def _scan(text, path, con, report, default_doc):
                        'Page is in range, but no provision or attribution is linked; add a source citation',True)
         if candidates:
             previous = candidates
-        divisions = list(_DIV.finditer(line))
-        if divisions:
-            paragraph_division = divisions[-1].group(1).upper()
+        if '}' in line and not structured:
+            record_division = None
+        previous_line = line
         offset += len(line)
 
 
