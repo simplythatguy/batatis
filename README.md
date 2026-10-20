@@ -36,16 +36,14 @@ Product UI system: [`docs/design-system-linear.md`](./docs/design-system-linear.
 - Prefer NBC(AE) 2023 **2nd printing**.
 - UI → Opus 5.5 implement **and** review; default look = Linear-caliber tokens (no prompt required).
 
-## Product UI kit
+## Product
 
-Linear-themed shadcn lives in [`apps/web`](./apps/web). Stock imports are `@/components/ui/*`. Colors map in `apps/web/app/globals.css`. Eval colors live in [`docs/design/variables.css`](./docs/design/variables.css).
+The product is the Vite app in [`web/`](./web). It is the canonical frontend ([ADR 0001](./docs/adr/0001-vite-web-canonical.md)): Describe, Code check, Section C, and Application are wired to the engine. Linear tokens live in [`docs/design/tokens.css`](./docs/design/tokens.css) and [`docs/design/variables.css`](./docs/design/variables.css). `apps/web` is not the product and is not on this branch.
 
 ```bash
-cd apps/web && npm install && npm run dev
-# open /gallery
-node scripts/assert-linear-theme.mjs
+cd web && npm install && npm run dev
 ```
 
 ## Status
 
-Clone-ready **agent environment** (rules, skills, evals, docs) plus a Linear-themed shadcn kit under `apps/web`.
+Clone-ready **agent environment** (rules, skills, evals, docs) plus the Vite product in `web/`.

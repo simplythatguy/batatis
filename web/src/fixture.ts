@@ -1,3 +1,4 @@
+import { CODE_EDITION } from "./config";
 import type { Case } from "./types";
 
 /**
@@ -13,7 +14,7 @@ export const FIXTURE: Case = {
   id: "case-northcore-cx",
   title: "NorthCore CX exterior sheathing board",
   applicantType: "manufacturer",
-  codeEdition: "NBC(AE) 2023, 2nd printing",
+  codeEdition: CODE_EDITION,
   authority: "",
   description:
     "We make NorthCore CX, a foil-faced rigid board that goes on the outside of the studs as continuous insulation and replaces the housewrap. We want builders to use it on houses and townhomes anywhere in Alberta.",
@@ -112,7 +113,7 @@ export const FIXTURE: Case = {
     {
       id: "f-edition",
       field: "code.edition",
-      value: "NBC(AE) 2023, 2nd printing",
+      value: CODE_EDITION,
       kind: "exact",
       source: { type: "code", ref: "Code database" },
       status: "confirmed",

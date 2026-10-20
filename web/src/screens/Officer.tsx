@@ -15,6 +15,7 @@ interface Review {
 function requestText(gaps: EngineGap[]): string {
   const lines = [
     "Information request",
+    "Planted example. Not a real application.",
     "This asks for missing administrative items. It is not a decision on the variance, and it does not say the design complies or is safe.",
     "",
   ];
@@ -22,9 +23,7 @@ function requestText(gaps: EngineGap[]): string {
     const group = gaps.filter((g) => g.section === section);
     if (!group.length) continue;
     lines.push(SECTION_LABEL[section]);
-    for (const g of group) {
-      lines.push(`- ${g.message} ${g.fix_hint ?? ""}`.trim());
-    }
+    for (const g of group) lines.push(`- ${g.message}`);
     lines.push("");
   }
   if (gaps.length === 0) lines.push("No administrative gaps are open on this version of the package.");
@@ -55,7 +54,7 @@ export function Officer() {
         setReview({
           side,
           source: "engine",
-          note: `From GET /cases/${id}/gaps. Administrative completeness only.`,
+          note: "Administrative completeness for this planted example. This does not certify the design.",
           gaps,
         });
       } catch (e) {
@@ -64,7 +63,7 @@ export function Officer() {
         setReview({
           side,
           source: "browser",
-          note: `GET /gaps did not return (${message}). The list is the browser check for this planted package, not the engine citation review.`,
+          note: `The engine's check did not return (${message}). This list is the browser check for the planted example, not a code review.`,
           gaps: browserPlantedGaps(facts),
         });
       }
@@ -89,6 +88,9 @@ export function Officer() {
       <PanelHeader title="Officer review" meta="Administrative completeness" />
       <div className="pane scroll-body">
         <div className="content-col stack">
+          <p className="example-banner" role="status">
+            Planted example. Not a real application.
+          </p>
           <p className="meta intro">
             One planted package, before and after the missing items are filled. This does not certify the design.
           </p>
@@ -117,7 +119,7 @@ export function Officer() {
                     {group.map((g) => (
                       <li key={g.id}>
                         <span className={`status-dot ${g.severity}`} /> {g.message}
-                        {g.fix_hint && <div className="meta">{g.fix_hint}</div>}
+                        {g.fix_hint && <div className="meta">Reviewer note: {g.fix_hint}</div>}
                         {g.citation && <div className="mono meta">{g.citation}</div>}
                       </li>
                     ))}

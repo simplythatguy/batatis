@@ -1,134 +1,37 @@
-import { useRef, useState } from "react";
-import { engine, failureText } from "../api/client";
-import { ensureEngineCase } from "../api/sync";
+import { useState } from "react";
+import { AUTHORITIES } from "../config";
+import { UPLOAD_UPFRONT } from "../rules";
 import { DetailFields, FactLedger, QuestionChips } from "../case-parts";
-import { DemoFallback, DraftNote, GapStrip, Icon, PanelHeader } from "../components";
+import { DraftNote, GapStrip, Icon, PanelHeader } from "../components";
 import { applicantLabel } from "../intake";
 import { DETAIL_FIELDS, factFor, valueText } from "../model";
 import { useCase } from "../store";
 
-let fileSeq = 0;
-const fileId = () => `file-${Date.now().toString(36)}-${(fileSeq++).toString(36)}`;
-
-function uploadMessage(e: unknown): string {
-  const text = failureText(e);
-  if (text.includes("no route")) return "The engine has no file upload route, so this PDF was not read.";
-  if (text.includes("time")) return "The engine did not answer in time, so this PDF was not read.";
-  return "The engine could not be reached, so this PDF was not read.";
-}
-
-function DropZone() {
+function PastePlans() {
   const { c, dispatch } = useCase();
-  const input = useRef<HTMLInputElement>(null);
-  const held = useRef(new Map<string, File>());
-  const [over, setOver] = useState(false);
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState<string | null>(null);
-
-  async function transmit(id: string, name: string) {
-    dispatch({ type: "setFileResult", id, error: null });
-    setBusy(id);
-    try {
-      const caseId = await ensureEngineCase(c.title || "New application", c.authority);
-      await engine.upload(caseId, name);
-      dispatch({ type: "setFileResult", id, error: null, read: true });
-    } catch (e) {
-      dispatch({ type: "setFileResult", id, error: uploadMessage(e) });
-    } finally {
-      setBusy((cur) => (cur === id ? null : cur));
-    }
-  }
-
-  function take(list: FileList | null) {
-    if (!list) return;
-    const all = [...list];
-    const pdfs = all.filter((f) => f.type === "application/pdf" || f.name.toLowerCase().endsWith(".pdf"));
-    setError(pdfs.length < all.length ? "Only PDF files for now. Other formats were skipped." : "");
-    const added = pdfs.map((file) => ({ id: fileId(), name: file.name, file }));
-    if (!added.length) return;
-    for (const item of added) held.current.set(item.id, item.file);
-    dispatch({ type: "addFiles", files: added.map(({ id, name }) => ({ id, name })) });
-    for (const item of added) void transmit(item.id, item.name);
-  }
-
+  const [text, setText] = useState("");
+  const [note, setNote] = useState("");
   return (
-    <div className="drop-wrap">
-      <div
-        className="drop-zone"
-        data-over={over}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setOver(true);
-        }}
-        onDragLeave={() => setOver(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setOver(false);
-          take(e.dataTransfer.files);
+    <div className="field">
+      <p className="field-note" role="status">
+        {UPLOAD_UPFRONT}
+      </p>
+      <label htmlFor="paste-plans">Paste text from your plans</label>
+      <textarea id="paste-plans" rows={4} value={text} onChange={(e) => setText(e.target.value)} />
+      <button
+        type="button"
+        className="btn"
+        disabled={!text.trim()}
+        onClick={() => {
+          const next = [c.description.trim(), text.trim()].filter(Boolean).join("\n\n");
+          dispatch({ type: "setDescription", text: next });
+          setText("");
+          setNote("Added to your description.");
         }}
       >
-        <Icon name="upload" size={16} />
-        <span>Upload your plans (PDF). The file is sent to the engine. If that fails, you get an error and a retry.</span>
-        <button type="button" className="btn" onClick={() => input.current?.click()}>
-          Choose PDFs
-        </button>
-        <input
-          ref={input}
-          type="file"
-          accept="application/pdf,.pdf"
-          multiple
-          hidden
-          onChange={(e) => {
-            take(e.target.files);
-            e.target.value = "";
-          }}
-        />
-      </div>
-      {error && (
-        <p className="field-note" role="status">
-          <span className="status-dot warning" />
-          {error}
-        </p>
-      )}
-      {c.files.length > 0 && (
-        <ul className="plain-list file-list" aria-label="Attached files">
-          {c.files.map((f) => (
-            <li key={f.id} className="file-row">
-              <Icon name="file" />
-              <span className="file-name" title={f.name}>{f.name}</span>
-              <span className="meta file-state">
-                {busy === f.id ? "Sending…" : f.read ? `Read · ${f.pages ?? "the"} file` : f.error ? "Not read" : "Sending…"}
-              </span>
-              <button
-                type="button"
-                className="btn btn-ghost btn-icon"
-                aria-label={`Remove ${f.name}`}
-                onClick={() => dispatch({ type: "removeFile", id: f.id })}
-              >
-                <Icon name="close" size={12} />
-              </button>
-              {f.error && (
-                <div className="file-error">
-                  <DemoFallback
-                    reason={f.error}
-                    onRetry={() => {
-                      if (!held.current.has(f.id)) {
-                        dispatch({
-                          type: "setFileResult",
-                          id: f.id,
-                          error: "Choose the PDF again. It is not kept after a refresh.",
-                        });
-                        return;
-                      }
-                      void transmit(f.id, f.name);
-                    }}
-                  />
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+        Add this text
+      </button>
+      {note && <p className="meta">{note}</p>}
     </div>
   );
 }
@@ -170,12 +73,15 @@ export function Describe() {
               onChange={(e) => dispatch({ type: "setAuthority", authority: e.target.value as typeof c.authority })}
             >
               <option value="">Select…</option>
-              <option value="calgary">Calgary</option>
-              <option value="edmonton">Edmonton</option>
+              {AUTHORITIES.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name}
+                </option>
+              ))}
             </select>
-            <p className="field-note">Sent with the case when it is first saved. The engine has no route to change it later.</p>
+            <p className="field-note">Nothing is sent until you pick. You can change it later.</p>
           </div>
-          <DropZone />
+          <PastePlans />
           <section aria-labelledby="missing-title">
             <div className="ledger-head">
               <h2 id="missing-title" className="section-title">

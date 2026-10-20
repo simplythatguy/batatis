@@ -21,11 +21,11 @@ function fact(field: string, value: string): Fact {
 
 const shared: Fact[] = [
   fact("alternative", "Hempcrete walls for a garden suite behind an existing house in Edmonton."),
-  fact("municipalAddress", "11821 73 Avenue NW, Edmonton"),
-  fact("mailingAddress", "11821 73 Avenue NW, Edmonton"),
+  fact("municipalAddress", "100 Example Street NW, Edmonton"),
+  fact("mailingAddress", "100 Example Street NW, Edmonton"),
   fact("scope", "site"),
-  fact("process.mitigation", "The walls stay above grade, with a rainscreen and a capillary break at the sill."),
-  fact("process.assumptions", "One storey, one suite, no second dwelling unit inside the garden suite."),
+  fact("process.mitigating_measures", "The walls stay above grade, with a rainscreen and a capillary break at the sill."),
+  fact("process.assumptions_and_limits", "One storey, one suite, no second dwelling unit inside the garden suite."),
   fact("process.rationale", "The owner wants hempcrete instead of the Part 9 wall the acceptable solution describes."),
 ];
 
@@ -36,11 +36,11 @@ export const PLANTED_BEFORE: Fact[] = [
 
 export const PLANTED_AFTER: Fact[] = [
   ...shared,
-  fact("owner", "Dana Hart"),
-  fact("representative", "Dana Hart"),
+  fact("owner", "Example Applicant"),
+  fact("representative", "Example Applicant"),
   fact("date", "2026-10-20"),
-  fact("legalDescription", "Lot 12, Block 4, Plan 2221234"),
-  fact("process.risk", "If the hempcrete stays wet, the wall can lose strength and the suite can grow mould."),
+  fact("legalDescription", "Lot 1, Block 1, Plan EXAMPLE"),
+  fact("process.risk_assessment", "If the hempcrete stays wet, the wall can lose strength and the suite can grow mould."),
   fact("process.maintenance_operation", "The owner checks the rainscreen vents once a year."),
   fact("process.qualifications", "No professional is named yet."),
 ];
@@ -54,8 +54,8 @@ const CHECKS: { id: string; section: EngineGap["section"]; field: string; label:
   { id: "D04:legal_description", section: "B", field: "legal_description", label: "a completed legal description", aliases: ["legalDescription", "legal_description"] },
   { id: "admin:alternative_description", section: "B", field: "alternative_description", label: "the description of the proposed alternative", aliases: ["alternative"] },
   { id: "D09:risk_assessment", section: "process", field: "risk_assessment", label: "the applicant-written risk assessment", aliases: ["process.risk", "process.risk_assessment"] },
-  { id: "D10:mitigating_measures", section: "process", field: "mitigating_measures", label: "the applicant-written mitigating measures", aliases: ["process.mitigation"] },
-  { id: "D11:assumptions_and_limits", section: "process", field: "assumptions_and_limits", label: "the applicant-written assumptions and limits", aliases: ["process.assumptions"] },
+  { id: "D10:mitigating_measures", section: "process", field: "mitigating_measures", label: "the applicant-written mitigating measures", aliases: ["process.mitigation", "process.mitigating_measures"] },
+  { id: "D11:assumptions_and_limits", section: "process", field: "assumptions_and_limits", label: "the applicant-written assumptions and limits", aliases: ["process.assumptions", "process.assumptions_and_limits"] },
 ];
 
 function confirmed(facts: Fact[], aliases: string[]): string | null {

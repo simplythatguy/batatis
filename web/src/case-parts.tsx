@@ -30,7 +30,7 @@ function FactRow({ fact }: { fact: Fact }) {
       {staleInputs && (
         <div className="field-note">
           <span className="status-dot pending" />
-          An input changed. This computed value is left as it was. There is no route that recomputes it.
+          An input changed. This computed value is left as it was. Nothing recalculates it.
         </div>
       )}
       {!staleInputs && unconfirmedInputs && (

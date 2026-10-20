@@ -223,8 +223,8 @@ a.pill {
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-4);
-  min-height: 36px;
+  padding: var(--space-3) var(--space-4);
+  min-height: 44px;
   font-size: var(--text-sm);
   color: var(--text-secondary);
   cursor: pointer;
@@ -245,6 +245,9 @@ a.pill {
   align-items: center;
   gap: 4px;
   margin-left: auto;
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  font-size: var(--text-md, 14px);
 }
 
 .gap-toggle svg,
@@ -1102,6 +1105,15 @@ blockquote.cite-block {
   .cell-sub {
     max-width: none;
   }
+}
+
+.example-banner {
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle, var(--border));
+  background: var(--bg-raised, transparent);
+  color: var(--text);
+  font-size: var(--text-sm, 13px);
 }
 
 @media (max-width: 560px) {

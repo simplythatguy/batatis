@@ -126,30 +126,28 @@ export function GapStrip({ gaps }: { gaps: Gap[] }) {
   );
 }
 
+/** Shown only when the engine cannot be reached. Example buttons ask before they replace a case. */
 export function DemoFallback({ reason, onRetry }: { reason: string; onRetry?: () => void }) {
-  const { loadExample } = useCase();
+  const { askExample } = useCase();
   return (
     <div className="demo-offer" role="alert">
       <p>{reason}</p>
-      <p className="meta">Retry the engine, or open a cached demo run. A cached run is a saved example, not a live lookup, so the demo can continue.</p>
+      <p className="meta">The engine could not be reached. Retry, or open a cached example. An example does not replace your case until you confirm.</p>
       <div className="btn-row">
         {onRetry && (
           <button type="button" className="btn" onClick={onRetry}>
             Retry
           </button>
         )}
-        <a className="btn btn-ghost" href="#/">
-          Try an example
-        </a>
       </div>
       <div className="btn-row">
-        <button type="button" className="btn" onClick={() => loadExample("manufacturer-northcore")}>
+        <button type="button" className="btn" onClick={() => askExample("manufacturer-northcore")}>
           Manufacturer example
         </button>
-        <button type="button" className="btn" onClick={() => loadExample("contractor-dampers")}>
+        <button type="button" className="btn" onClick={() => askExample("contractor-dampers")}>
           Contractor example
         </button>
-        <button type="button" className="btn" onClick={() => loadExample("homebuilder-soffit")}>
+        <button type="button" className="btn" onClick={() => askExample("homebuilder-soffit")}>
           Homebuilder example
         </button>
       </div>

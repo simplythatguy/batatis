@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
-import { ExportBlockedError, engine, failureText } from "../api/client";
+import { EngineError, ExportBlockedError, engine } from "../api/client";
+import { EXAMPLE_EXPORT_BLOCK, exampleExportBlocked, failureKind } from "../rules";
 import { DetailFields, ProcessFields } from "../case-parts";
 import { DemoFallback, DraftNote, GapStrip, PanelHeader } from "../components";
 import type { Route } from "../router";
@@ -17,17 +18,26 @@ export function Application({ route }: { route: Route }) {
   const { gaps, engineId, saveDraft, c } = useCase();
   const tab = route.params.get("tab") ?? "A";
   const dialog = useRef<HTMLDialogElement>(null);
-  const [exportNote, setExportNote] = useState("Check completeness saves the case, then calls POST /cases/{id}/export and downloads the PDF when the engine returns one.");
+  const [exportNote, setExportNote] = useState("Check completeness saves the case, then asks the engine for the PDF.");
+  const [exportUnreachable, setExportUnreachable] = useState(false);
   const [reasons, setReasons] = useState<string[]>([]);
   const [exportFailed, setExportFailed] = useState(false);
   const blocking = gaps.filter((g) => g.severity === "blocking");
+  const exampleBlocked = exampleExportBlocked(c.exampleId);
   const countFor = (t: string) =>
     blocking.filter((g) => g.href.includes(`tab=${t}`)).length;
 
   async function runExport() {
+    if (exampleExportBlocked(c.exampleId)) {
+      setExportNote(EXAMPLE_EXPORT_BLOCK);
+      setExportFailed(false);
+      dialog.current?.showModal();
+      return;
+    }
     setReasons([]);
     setExportFailed(false);
-    setExportNote("Saving the case, then calling POST /cases/{id}/export…");
+    setExportUnreachable(false);
+    setExportNote("Saving the case, then asking the engine for the PDF…");
     dialog.current?.showModal();
     const caseId = engineId ?? (await saveDraft());
     if (!caseId) {
@@ -49,14 +59,17 @@ export function Application({ route }: { route: Route }) {
         setReasons(e.reasons);
         setExportNote(`${e.message} The official PDF stays closed while these are open.`);
       } else {
+        const unreachable = e instanceof EngineError && failureKind(e.status, e.detail) === "unreachable";
         setExportFailed(true);
-        setExportNote(failureText(e));
+        setExportUnreachable(unreachable);
+        setExportNote(e instanceof EngineError ? e.detail : "The engine could not be reached.");
       }
     }
   }
 
   function downloadRecord() {
     const text = [
+      ...(c.exampleId ? ["EXAMPLE, NOT A REAL APPLICATION"] : []),
       c.title,
       c.description,
       "",
@@ -97,7 +110,12 @@ export function Application({ route }: { route: Route }) {
       </nav>
       <div className="pane scroll-body" role="region" aria-label={TABS.find((t) => t.id === tab)?.label}>
         <div className="content-col stack">
-          {tab === "D" ? <Recommendations /> : tab === "alt" ? (
+          {tab === "D" ? (
+            <>
+              <ProcessFields />
+              <Recommendations />
+            </>
+          ) : tab === "alt" ? (
             <>
               <ProcessFields />
               <Recommendations />
@@ -110,7 +128,11 @@ export function Application({ route }: { route: Route }) {
       <div className="footer-bar">
         <DraftNote />
         <span className="status-note" role="status">
-          {blocking.length ? `Close ${blocking.length} blocking gap${blocking.length > 1 ? "s" : ""} to check completeness` : "Completeness check is open."}
+          {exampleBlocked
+            ? EXAMPLE_EXPORT_BLOCK
+            : blocking.length
+              ? `Close ${blocking.length} blocking gap${blocking.length > 1 ? "s" : ""} to check completeness`
+              : "Completeness check is open."}
         </span>
         <a className="btn btn-ghost" href="#/section-c">
           Back
@@ -123,7 +145,13 @@ export function Application({ route }: { route: Route }) {
             Review the first gap
           </a>
         )}
-        <button type="button" className="btn btn-primary" disabled={blocking.length > 0} onClick={() => void runExport()}>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={blocking.length > 0 || exampleBlocked}
+          data-requires-no-blocking-gaps={blocking.length > 0 ? "true" : undefined}
+          onClick={() => void runExport()}
+        >
           Check completeness
         </button>
       </div>
@@ -142,7 +170,9 @@ export function Application({ route }: { route: Route }) {
               </ul>
             )}
             <p className="meta">An administrative check does not decide that the design complies or is safe.</p>
-            {exportFailed && <DemoFallback reason="Export did not return a PDF. Retry, or open a cached demo run." onRetry={() => void runExport()} />}
+            {exportFailed && exportUnreachable && (
+              <DemoFallback reason="The engine could not be reached, so no PDF came back." onRetry={() => void runExport()} />
+            )}
           </div>
           <div className="footer-bar">
             <button type="button" className="btn" onClick={downloadRecord}>

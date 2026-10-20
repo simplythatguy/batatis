@@ -27,6 +27,9 @@ export interface CaseFile {
   read: boolean;
   /** Set when the upload attempt failed. Empty while a try is in flight. */
   error?: string;
+  sha256?: string;
+  /** True only when the engine could not be reached. A missing route is not this. */
+  unreachable?: boolean;
 }
 
 export interface Question {
@@ -62,9 +65,11 @@ export interface Candidate {
   /** Asked when the applicant answers "Not sure". */
   clarifyingQuestion: string;
   answer: CandidateAnswer | null;
+  /** Set when search or identify suggested the provision and the applicant has not confirmed it. */
+  suggestion?: "search" | "identify";
   /**
-   * False when the card is a question drawn from the applicant's words.
-   * Identify is command-line only, so those cards do not carry an article.
+   * False when the card is a question drawn from the applicant's words
+   * and no article has been ranked for it yet.
    */
   identified?: boolean;
 }
@@ -111,7 +116,7 @@ export type ProcessFieldId =
   | "maintenance"
   | "qualifications";
 
-/** Set before the engine case is created. There is no route to change it afterwards. */
+/** Empty until the applicant picks. PUT /cases/{id}/jurisdiction records the choice. */
 export type AuthorityId = "" | "calgary" | "edmonton";
 
 export type GapSeverity = "blocking" | "warning";

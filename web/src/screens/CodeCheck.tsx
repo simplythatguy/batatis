@@ -1,7 +1,9 @@
-import { useState } from "react";
-import { engine, failureText, type CodeHit } from "../api/client";
+import { useEffect, useState } from "react";
+import { engine, EngineError, type CodeHit, type IdentifyArticle } from "../api/client";
 import { DemoFallback, DraftNote, GapStrip, Icon, PanelHeader, StatusPill, type Dot } from "../components";
+import { CODE_EDITION } from "../config";
 import { answeredYes, unresolvedCandidates } from "../model";
+import { exitCountWarning, failureKind } from "../rules";
 import { useCase } from "../store";
 import type { Candidate, CandidateAnswer } from "../types";
 
@@ -67,6 +69,11 @@ function CandidateCard({ a, index, total }: { a: Candidate; index: number; total
           <p className="meta">Logged as an open question. You can continue. Section C does not treat this as a confirmed departure.</p>
         </div>
       )}
+      {exitCountWarning(a.provision, a.topic) && (
+        <p className="field-note" role="status">
+          <span className="status-dot warning" /> {exitCountWarning(a.provision, a.topic)}
+        </p>
+      )}
       <details className="disclosure ref">
         <summary>
           <Icon name="chevron" size={12} />
@@ -88,20 +95,83 @@ function CandidateCard({ a, index, total }: { a: Candidate; index: number; total
 type Filter = "all" | "open" | "yes";
 
 export function CodeCheck() {
-  const { c, gaps, dispatch, saveDraft } = useCase();
+  const { c, gaps, dispatch, saveDraft, engineId } = useCase();
+  const [identifyNote, setIdentifyNote] = useState("");
+  const [identifyDown, setIdentifyDown] = useState(false);
+  const [identifyAttempt, setIdentifyAttempt] = useState(0);
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<CodeHit[]>([]);
   const [searchNote, setSearchNote] = useState("");
   const [searchError, setSearchError] = useState("");
+  const [searchDown, setSearchDown] = useState(false);
   const open = unresolvedCandidates(c);
   const yes = answeredYes(c);
   const counts: Record<Filter, number> = { all: c.candidates.length, open: open.length, yes: yes.length };
   const shown = c.candidates.filter((a) => filter === "all" || (filter === "open" ? open.includes(a) : a.answer === "yes"));
   const labels: Record<Filter, string> = { all: "All", open: "Needs an answer", yes: "Departures" };
+
+  useEffect(() => {
+    const prose = c.description.trim();
+    if (!engineId || prose.length < 8) {
+      setIdentifyNote("");
+      setIdentifyDown(false);
+      return;
+    }
+    const ctl = new AbortController();
+    setIdentifyDown(false);
+    setIdentifyNote("Ranking articles from your description…");
+    engine
+      .identify(engineId, prose, [], ctl.signal, (stage) => {
+        if (stage !== "done" && stage !== "error") setIdentifyNote(`Ranking articles (${stage})…`);
+      })
+      .then((result) => {
+        const articles = (result.articles ?? []).filter((a): a is IdentifyArticle => Boolean(a?.provision));
+        if (articles.length) {
+          dispatch({
+            type: "addIdentified",
+            articles: articles.map((a) => ({
+              provision: a.provision,
+              title: a.title,
+              part: a.part || Number(String(a.provision).split(".")[0]) || 0,
+              quote: a.quote,
+              reason: a.reason,
+              committed: a.committed,
+            })),
+          });
+        }
+        const questions = result.questions ?? [];
+        setIdentifyNote(
+          articles.length
+            ? `${articles.length} articles ranked. A quote is shown only when the code database returned one.`
+            : questions[0] ?? "Article ranking returned no articles for this description.",
+        );
+      })
+      .catch((err: unknown) => {
+        if (ctl.signal.aborted) return;
+        if (err instanceof EngineError && failureKind(err.status, err.detail) === "missing-route") {
+          setIdentifyNote("Article ranking isn't available on this engine yet. These cards are questions from your description.");
+          setIdentifyDown(false);
+          return;
+        }
+        if (err instanceof EngineError && failureKind(err.status, err.detail) === "codedb") {
+          setIdentifyNote("code database not found");
+          setIdentifyDown(false);
+          return;
+        }
+        if (err instanceof EngineError && failureKind(err.status, err.detail) === "unreachable") {
+          setIdentifyNote(err.detail);
+          setIdentifyDown(true);
+          return;
+        }
+        setIdentifyNote(err instanceof EngineError ? err.detail : "Article ranking did not finish.");
+        setIdentifyDown(false);
+      });
+    return () => ctl.abort();
+  }, [engineId, c.description, dispatch, identifyAttempt]);
   return (
     <>
-      <PanelHeader title="Code check" meta="NBC(AE) 2023 · 2nd printing" />
+      <PanelHeader title="Code check" meta={CODE_EDITION} />
       <GapStrip gaps={gaps} />
       <div className="toolbar" role="toolbar" aria-label="Filter">
         {(Object.keys(labels) as Filter[]).map((f) => (
@@ -112,8 +182,14 @@ export function CodeCheck() {
       </div>
       <div className="pane scroll-body">
         <div className="content-col stack">
+          {identifyNote && (
+            <p className="field-note" role="status">
+              {identifyNote}
+            </p>
+          )}
+          {identifyDown && <DemoFallback reason={identifyNote} onRetry={() => setIdentifyAttempt((n) => n + 1)} />}
           <p className="meta intro">
-            A departure means your design does something differently from a requirement. Cards from your description are questions, not ranked articles. Identify is command-line only. Search calls GET /code/search and shows only what the code database returns.
+            A departure means your design does something differently from a requirement. Cards from your description are questions until article ranking returns a provision. Search shows only what the code database returns.
           </p>
           <form
             className="field"
@@ -123,10 +199,12 @@ export function CodeCheck() {
               if (!q) {
                 setSearchNote("Type a few words to search.");
                 setSearchError("");
+                setSearchDown(false);
                 return;
               }
               setSearchNote("Searching…");
               setSearchError("");
+              setSearchDown(false);
               engine
                 .search(q, { division: "B", limit: 8 })
                 .then((rows) => {
@@ -136,7 +214,9 @@ export function CodeCheck() {
                 .catch((err: unknown) => {
                   setHits([]);
                   setSearchNote("");
-                  setSearchError(failureText(err));
+                  const down = err instanceof EngineError && failureKind(err.status, err.detail) === "unreachable";
+                  setSearchDown(down);
+                  setSearchError(err instanceof EngineError ? err.detail : "The engine could not be reached.");
                 });
             }}
           >
@@ -150,14 +230,19 @@ export function CodeCheck() {
                 {searchNote}
               </p>
             )}
-            {searchError && (
+            {searchError && searchDown && (
               <DemoFallback
-                reason={`Search did not return. ${searchError}`}
-                onRetry={() => {
-                  const form = document.getElementById("code-search");
-                  form?.closest("form")?.requestSubmit();
-                }}
+                reason={searchError}
+                onRetry={() => document.getElementById("code-search")?.closest("form")?.requestSubmit()}
               />
+            )}
+            {searchError && !searchDown && (
+              <p className="field-note" role="status">
+                <span className="status-dot warning" /> {searchError}{" "}
+                <button type="button" className="btn" onClick={() => document.getElementById("code-search")?.closest("form")?.requestSubmit()}>
+                  Retry
+                </button>
+              </p>
             )}
           </form>
           {hits.length > 0 && (

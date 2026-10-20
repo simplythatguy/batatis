@@ -3,6 +3,7 @@
  * Sentence text is included only where this repo already stores it (the NorthCore fixture).
  * The other two name provisions from evals_dev and label the summary as not code text.
  */
+import { CODE_EDITION } from "./config";
 import { FIXTURE } from "./fixture";
 import type { Case, Fact } from "./types";
 
@@ -33,7 +34,7 @@ const homebuilder: Case = {
   exampleId: "homebuilder-soffit",
   title: "Soffit on a narrow infill lot",
   applicantType: "homebuilder",
-  codeEdition: "NBC(AE) 2023, 2nd printing",
+  codeEdition: CODE_EDITION,
   authority: "calgary",
   description: soffit,
   files: [],
@@ -79,7 +80,7 @@ const contractor: Case = {
   exampleId: "contractor-dampers",
   title: "Ducts through a rated corridor wall",
   applicantType: "contractor",
-  codeEdition: "NBC(AE) 2023, 2nd printing",
+  codeEdition: CODE_EDITION,
   authority: "",
   description: ducts,
   files: [],

@@ -9,6 +9,7 @@
     "gen:types": "node scripts/gen-types.mjs",
     "smoke:api": "node scripts/smoke-api.ts",
     "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --import ./scripts/register-ts.mjs --test src/rules.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -1,12 +1,12 @@
 /**
  * Turn the applicant's own words into facts and code-check cards.
- * Cards from this module are questions, not ranked articles. Identify is command-line only.
+ * Cards from this module are questions, not ranked articles. Search and identify run from Section C.
  */
+import { CODE_EDITION } from "./config";
 import type { ApplicantType, Candidate, CandidateAnswer, Case, Fact, Question } from "./types";
 
 export const FROM_YOU = "Your description";
-export const NOT_IDENTIFIED =
-  "Your description. No article has been ranked. Identify is command-line only.";
+export const NOT_IDENTIFIED = "Your description. No article has been ranked yet.";
 
 const EMPTY_PROCESS: Case["process"] = {
   rationale: "",
@@ -83,7 +83,7 @@ export function emptyCase(type: ApplicantType): Case {
     id: `case-${shaped}`,
     title: defaultTitle(shaped),
     applicantType: shaped,
-    codeEdition: "NBC(AE) 2023, 2nd printing",
+    codeEdition: CODE_EDITION,
     authority: "",
     description: "",
     files: [],
@@ -200,7 +200,20 @@ export function applyDescription(c: Case, text: string): Case {
   }
 
   const storey = trimmed.match(STOREY);
-  if (storey) facts.push(pointed("desc-storeys", "building.storeys", storey[0]));
+  // A count read out of the sentence is a proposal. It is not a confirmed fact.
+  if (storey && !facts.some((f) => f.field === "building.storeys")) {
+    facts.push({
+      id: "desc-storeys",
+      field: "building.storeys",
+      value: storey[0],
+      kind: "proposed",
+      status: "unconfirmed",
+      confidence: null,
+      formula: null,
+      inputs: [],
+      source: { type: "user_text", ref: FROM_YOU, quote: storey[0] },
+    });
+  }
 
   const made: Candidate[] = [];
   const hits = SUBJECTS.filter((s) => s.re.test(trimmed)).slice(0, 2);

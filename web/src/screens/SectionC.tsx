@@ -1,5 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { engine, EngineError, type CodeHit } from "../api/client";
 import { useProvisionText, useSectionC, type SectionCSource } from "../api/sectionC";
+import { CODE_EDITION } from "../config";
+import { failureKind, sectionCQuoteLabel } from "../rules";
 import { DemoFallback, GapStrip, PanelHeader, StatusPill } from "../components";
 import { CODE_TERMS } from "../fixture";
 import { candidateById, unresolvedCandidates } from "../model";
@@ -67,24 +70,174 @@ function Pairs({ row }: { row: SectionCRow }) {
   );
 }
 
+const SUGGESTED = "Suggested by search, confirm before submitting";
+
+function ProvisionSearch() {
+  const { c, dispatch, engineId } = useCase();
+  const [query, setQuery] = useState(c.description);
+  const [hits, setHits] = useState<CodeHit[]>([]);
+  const [note, setNote] = useState("");
+  const edited = useRef(false);
+
+  useEffect(() => {
+    if (!edited.current) setQuery(c.description);
+  }, [c.description]);
+
+  async function runSearch(text: string) {
+    const q = text.trim();
+    if (q.length < 3) {
+      setNote("Type a few words from your description to search.");
+      setHits([]);
+      return;
+    }
+    setNote("Searching the code database…");
+    try {
+      const rows = await engine.search(q, { division: "B", limit: 8 });
+      setHits(rows);
+      setNote(rows.length ? `${rows.length} provisions. Pick the one that fits what you are proposing.` : "No provisions matched those words.");
+    } catch (e) {
+      setHits([]);
+      setNote(e instanceof EngineError ? e.detail : "The code database did not answer.");
+    }
+  }
+
+  useEffect(() => {
+    const prose = c.description.trim();
+    if (prose.length < 8) return;
+    const ctl = new AbortController();
+    let cancelled = false;
+    (async () => {
+      if (engineId) {
+        try {
+          const ranked = await engine.identify(engineId, prose, [], ctl.signal);
+          const articles = (ranked.articles ?? []).filter((a) => /^\d/.test(a.provision));
+          if (cancelled) return;
+          if (articles.length) {
+            dispatch({
+              type: "addIdentified",
+              articles: articles.slice(0, 5).map((a) => ({
+                provision: a.provision,
+                title: a.title,
+                part: a.part || Number(String(a.provision).split(".")[0]) || 0,
+                quote: a.quote,
+                reason: a.reason,
+                committed: a.committed,
+              })),
+            });
+            setNote("Provisions were suggested from your description. Confirm each one before you submit.");
+            return;
+          }
+        } catch (e) {
+          if (ctl.signal.aborted || cancelled) return;
+          if (!(e instanceof EngineError) || failureKind(e.status, e.detail) !== "missing-route") {
+            /* search below is the path on this engine */
+          }
+        }
+      }
+      if (!cancelled) await runSearch(prose);
+    })();
+    return () => {
+      cancelled = true;
+      ctl.abort();
+    };
+    // Search again when the description changes. The box stays editable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [engineId, c.description]);
+
+  return (
+    <form
+      className="field"
+      onSubmit={(e) => {
+        e.preventDefault();
+        void runSearch(query);
+      }}
+    >
+      <label htmlFor="section-c-search">Search the code for a provision</label>
+      <input
+        id="section-c-search"
+        value={query}
+        onChange={(e) => {
+          edited.current = true;
+          setQuery(e.target.value);
+        }}
+      />
+      <button type="submit" className="btn">
+        Search
+      </button>
+      {note && (
+        <p className="field-note" role="status">
+          {note}
+        </p>
+      )}
+      {hits.length > 0 && (
+        <ul className="plain-list">
+          {hits.map((h) => (
+            <li key={h.id} className="card">
+              <div className="card-head">
+                <span className="article-id">{h.id}</span>
+                <span className="label-pill">Code text</span>
+              </div>
+              <blockquote className="cite-block quote">{h.text}</blockquote>
+              <p className="mono meta">{h.citation ?? "No citation returned"}</p>
+              <p className="meta">{SUGGESTED}</p>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => {
+                  if (c.candidates.some((x) => x.provision === h.id)) return;
+                  dispatch({
+                    type: "addCandidate",
+                    candidate: {
+                      id: `search-${h.id}`,
+                      topic: h.article_title || h.title || h.id,
+                      provision: h.id,
+                      part: Number(h.id.split(".")[0]) || 0,
+                      benchmark: false,
+                      identified: true,
+                      suggestion: "search",
+                      quote: { text: h.text, citation: h.citation ?? "No citation returned" },
+                      departure: "do something other than what this sentence requires",
+                      clarifyingQuestion: "Which part of this sentence does the design not follow?",
+                      answer: null,
+                    },
+                  });
+                  setNote(`${h.id} is in the table. Confirm it before you submit.`);
+                }}
+              >
+                Use this provision
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </form>
+  );
+}
+
 export function SectionC() {
-  const { c, gaps } = useCase();
+  const { c, gaps, dispatch, engineId, saveDraft } = useCase();
   // Confirmed departures and the ones still awaiting an answer; a "no" drops the provision.
   const [attempt, setAttempt] = useState(0);
   const wanted = useMemo(
     () =>
       c.candidates
-        .filter((a) => a.answer === "yes" && /^\d/.test(a.provision))
+        .filter((a) => /^\d/.test(a.provision) && (a.answer === "yes" || a.suggestion === "search" || a.suggestion === "identify"))
         .map((a) => ({ candidateId: a.id, provision: a.provision })),
     [c.candidates],
   );
   const confirmedWithoutArticle = c.candidates.some((a) => a.answer === "yes" && !/^\d/.test(a.provision));
-  const { rows, source, error } = useSectionC(wanted, c.sectionC, attempt);
+  const { rows, source, error, status } = useSectionC(wanted, c.sectionC, attempt);
   const [selected, setSelected] = useState<string>();
   const sel = rows.find((r) => rowKey(r) === selected) ?? rows[0];
   const selCand = sel && candidateById(c, sel.candidateId);
-  const liveText = useProvisionText(source === "live" ? sel?.provision : undefined);
-  const quote = liveText ?? (selCand && selCand.provision === sel?.provision ? selCand.quote : null);
+  const liveText = useProvisionText(source === "live" ? sel?.provision : undefined, attempt);
+  const fromCodedb = liveText.state === "live";
+  const quoteLabel = sectionCQuoteLabel(fromCodedb);
+  const quote = fromCodedb
+    ? { text: liveText.text, citation: liveText.citation }
+    : selCand && selCand.provision === sel?.provision
+      ? selCand.quote
+      : null;
   const open = unresolvedCandidates(c);
 
   return (
@@ -93,11 +246,15 @@ export function SectionC() {
       <GapStrip gaps={gaps} />
       <div className="pane scroll-body">
         <div className="sc-source">
-          <SourceLabel source={source} error={error} />
-          {source === "live" && <span className="meta">Rows from the engine's code database for this case</span>}
+          {source === "live" && rows.length === 0 ? (
+            <StatusPill dot="pending">No provisions picked yet</StatusPill>
+          ) : (
+            <SourceLabel source={source} error={error} />
+          )}
+          {source === "live" && rows.length > 0 && <span className="meta">Rows from the engine's code database for this case</span>}
         </div>
         <p className="meta intro">
-          Objectives and functions come from NBC(AE) 2023, 2nd printing, by lookup after you confirm a departure that names an article. Rows are not invented when no article is known.
+          Objectives and functions come from {CODE_EDITION}, by lookup after you confirm a departure that names an article. Rows are not invented when no article is known.
         </p>
         {source === "cached" && (
           <p className="field-note" role="status">
@@ -105,19 +262,26 @@ export function SectionC() {
             Cached demo run. The engine did not return a live lookup ({error}). These rows were saved with the example.
           </p>
         )}
-        {(source === "cached" || source === "error") && (
-          <DemoFallback
-            reason={source === "cached" ? "The live lookup failed. The table below is the cached demo run." : `Section C lookup failed. ${error ?? "The engine did not answer."}`}
-            onRetry={() => setAttempt((n) => n + 1)}
-          />
+        {(source === "cached" || source === "error") && failureKind(status ?? 0, error ?? "") === "unreachable" && (
+          <DemoFallback reason={error ?? "The engine could not be reached."} onRetry={() => setAttempt((n) => n + 1)} />
         )}
+        {(source === "cached" || source === "error") && failureKind(status ?? 0, error ?? "") !== "unreachable" && (
+          <p className="field-note" role="status">
+            <span className="status-dot warning" />
+            {error ?? "The lookup did not return."}{" "}
+            <button type="button" className="btn" onClick={() => setAttempt((n) => n + 1)}>
+              Retry
+            </button>
+          </p>
+        )}
+        <ProvisionSearch />
         {!rows.length && (
           <div className="empty-guide">
             <h2 className="section-title">This table is empty</h2>
             <p>
               {confirmedWithoutArticle
-                ? "You confirmed a departure from your description, and no Division B article is attached. Search on Code check, or run identify from the command line. This table stays empty so it does not invent a row."
-                : "Nothing is listed yet. On Code check, answer Yes on a card that names an article. Identify, which ranks articles, is command-line only and is not called from this screen."}
+                ? "You confirmed a departure, and no Division B article is attached. Search above and pick the provision that fits. This table stays empty until you do, so it does not invent a row."
+                : "Nothing is listed yet. Search above. Results come from the code database. Pick a provision, then confirm it before you submit."}
             </p>
           </div>
         )}
@@ -148,6 +312,9 @@ export function SectionC() {
                     onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), setSelected(rowKey(r)))}
                   >
                     <td data-label="Your answer">
+                      {cand?.suggestion && cand.answer !== "yes" && (
+                        <span className="meta cell-sub">{cand.suggestion === "search" ? SUGGESTED : "Suggested from your description, confirm before submitting"}</span>
+                      )}
                       {confirmed ? (
                         <StatusPill dot="done">Departure</StatusPill>
                       ) : (
@@ -191,10 +358,15 @@ export function SectionC() {
           <div className="sc-detail">
             <section className="source-block">
               <div className="block-label">
-                <span className="label-pill">Code text</span>
-                <span className="meta">Retrieved verbatim · {quote?.citation ?? sel.citation}</span>
+                <span className="label-pill">{quoteLabel.pill}</span>
+                <span className="meta">
+                  {quoteLabel.meta}
+                  {quote?.citation ? ` · ${quote.citation}` : liveText.state === "error" ? ` · ${liveText.message}` : ""}
+                </span>
               </div>
-              <blockquote className="cite-block quote">{quote?.text ?? "Loading the provision text…"}</blockquote>
+              <blockquote className="cite-block quote">
+                {fromCodedb ? quote?.text : liveText.state === "loading" ? "Loading the provision text…" : (quote?.text ?? "No code sentence is available for this row.")}
+              </blockquote>
               <p className="meta">
                 Section C row: {sel.citation}
                 {sel.attributionStatus === "inherited" && ` · uses the table row of ${sel.inheritedFrom}`}
@@ -219,6 +391,28 @@ export function SectionC() {
                 </blockquote>
               ))}
             </section>
+            {selCand?.suggestion && selCand.answer !== "yes" && (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  dispatch({ type: "answerCandidate", id: selCand.id, answer: "yes" });
+                  const provisions = [
+                    ...new Set(
+                      c.candidates
+                        .filter((a) => /^\d/.test(a.provision) && (a.answer === "yes" || a.id === selCand.id))
+                        .map((a) => a.provision),
+                    ),
+                  ];
+                  void (async () => {
+                    const id = engineId ?? (await saveDraft());
+                    if (id) await engine.sectionD(id, provisions).catch(() => undefined);
+                  })();
+                }}
+              >
+                Confirm this provision
+              </button>
+            )}
             {sel.explanation && (
               <section className="ai-block">
                 <div className="block-label">
@@ -238,9 +432,9 @@ export function SectionC() {
         <a className="btn btn-ghost" href="#/code-check">
           Back
         </a>
-        <a className="btn btn-primary" href="#/application?tab=alt">
+        <button type="button" className="btn btn-primary" onClick={() => (location.hash = "#/application?tab=D")}>
           Continue to application
-        </a>
+        </button>
       </div>
     </>
   );

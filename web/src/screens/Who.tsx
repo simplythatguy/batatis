@@ -22,7 +22,7 @@ const CHOICES: { id: ApplicantType; label: string; detail: string }[] = [
 ];
 
 export function Who() {
-  const { beginEmpty, loadExample, resetNote } = useCase();
+  const { beginEmpty, askExample, resetNote } = useCase();
   return (
     <>
       <header className="panel-header">
@@ -54,7 +54,7 @@ export function Who() {
             <ul className="plain-list">
               {EXAMPLES.map((ex) => (
                 <li key={ex.id}>
-                  <button type="button" className="btn" onClick={() => loadExample(ex.id)}>
+                  <button type="button" className="btn" onClick={() => askExample(ex.id)}>
                     {ex.label}
                   </button>
                   <p className="meta">{ex.blurb}</p>

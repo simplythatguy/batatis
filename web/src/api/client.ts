@@ -3,6 +3,7 @@
  * Vite proxies `/api` to the engine at http://127.0.0.1:8000 (vite.config.ts). Set VITE_ENGINE_URL
  * to call another engine directly. `createEngine(base)` serves scripts and tests outside Vite.
  */
+import { publicDetail, takeSseEvents } from "../rules";
 import type { Case, FactInput, NewCase, SectionCRow } from "./types.gen";
 
 /** A provision returned by GET /code/search (engine/codes.py `Codes.search`). */
@@ -47,7 +48,7 @@ export class EngineError extends Error {
 const enc = encodeURIComponent;
 
 export function createEngine(base: string) {
-  async function call<T>(method: "GET" | "POST", path: string, body?: unknown, signal?: AbortSignal, ms = ENGINE_WAIT_MS): Promise<T> {
+  async function call<T>(method: "GET" | "POST" | "PUT", path: string, body?: unknown, signal?: AbortSignal, ms = ENGINE_WAIT_MS): Promise<T> {
     const timed = withTimeout(signal, ms);
     let res: Response;
     try {
@@ -72,13 +73,19 @@ export function createEngine(base: string) {
       } catch {
         /* keep statusText */
       }
-      throw new EngineError(res.status, detail);
+      throw new EngineError(res.status, publicDetail(res.status, detail));
     }
     return (await res.json()) as T;
   }
 
   return {
     createCase: (body: NewCase = {}, signal?: AbortSignal) => call<Case>("POST", "/cases", body, signal),
+    /**
+     * PUT /cases/{id}/jurisdiction from backend/case-api. Body is the Jurisdiction model.
+     * Today's dev returns 404. The caller keeps the case working when that happens.
+     */
+    setJurisdiction: (caseId: string, jurisdiction: { id: string; name: string; authority: null }, signal?: AbortSignal) =>
+      call<Case>("PUT", `/cases/${enc(caseId)}/jurisdiction`, jurisdiction, signal),
     getCase: (id: string, signal?: AbortSignal) => call<Case>("GET", `/cases/${enc(id)}`, undefined, signal),
     addFact: (caseId: string, fact: FactInput, signal?: AbortSignal) =>
       call<Case>("POST", `/cases/${enc(caseId)}/facts`, fact, signal),
@@ -98,22 +105,28 @@ export function createEngine(base: string) {
       call<EngineProcessField[]>("GET", `/cases/${enc(caseId)}/process-fields`, undefined, signal),
     professional: (caseId: string, signal?: AbortSignal) =>
       call<ProfessionalResult>("GET", `/cases/${enc(caseId)}/professional`, undefined, signal),
-    /** Persists confirmed provisions, re-looks up Section C, and returns the Section D plan. */
+    /** Persists confirmed provisions, re-looks up Section C, and returns the Section D plan on today's dev. */
     sectionD: (caseId: string, provisions?: string[], signal?: AbortSignal) =>
       call<SectionDPlan>("POST", `/cases/${enc(caseId)}/section-d`, provisions ? { provisions } : {}, signal),
+    /** GET /cases/{id}/section-d/issues from PR #8. 404 on today's dev. */
+    sectionDIssues: (caseId: string, signal?: AbortSignal) =>
+      call<SectionDIssue[]>("GET", `/cases/${enc(caseId)}/section-d/issues`, undefined, signal),
     /**
-     * Official SCC PDF. 200 is bytes. 409 lists blocking reasons. 503 means the blank form file is missing.
-     * TODO(engine): identify is CLI-only (engine/cli_sut.py). There is no rank route to call.
-     * TODO(engine): no file-upload route. PDF names stay in the browser.
-     * TODO(engine): no route updates jurisdiction after POST /cases.
+     * Official SCC PDF. 200 is bytes. 409 lists blocking reasons.
+     * A missing code database is not turned into a 503 on this branch.
      */
     exportPdf: (caseId: string, draft = false, signal?: AbortSignal) => exportPdf(base, caseId, draft, signal),
     /**
-     * There is no file route. The call still goes out so a missing engine fails fast
-     * instead of leaving the row on "Waiting for the engine".
+     * Multipart PDF upload (FormData field `file`). Not served on today's dev.
+     * When backend/case-api lands, this sends the PDF bytes and reads {id, name, pages, sha256, read}.
      */
-    upload: (caseId: string, name: string, signal?: AbortSignal) =>
-      call<{ name: string }>("POST", `/cases/${enc(caseId)}/files`, { name }, signal),
+    upload: (caseId: string, file: File, signal?: AbortSignal) => uploadPdf(base, caseId, file, signal),
+    /**
+     * POST /cases/{id}/identify with Accept: text/event-stream, from PR #12.
+     * 404 on today's dev. The caller keeps the description cards.
+     */
+    identify: (caseId: string, prose: string, answers: { field?: string | null; question_id?: string | null; answer: string }[] = [], signal?: AbortSignal, onStage?: (stage: string) => void) =>
+      identifyCase(base, caseId, prose, answers, signal, onStage),
   };
 }
 
@@ -145,12 +158,59 @@ export interface ProfessionalResult {
   scope_note: string;
 }
 
+/** One issue from GET /cases/{id}/section-d/issues (PR #8). */
+export interface SectionDIssue {
+  id: string;
+  provision: { provision_id: string; division: "A" | "B" | "C"; citation: string } | null;
+  entered_reference: string | null;
+  question: string | null;
+  objective: string | null;
+  function: string | null;
+  at_stake: string;
+  recommended_evidence_types: string[];
+  practice_of_engineering: {
+    value: boolean | "unknown";
+    rule: string | null;
+    division: "A" | "B" | "C" | null;
+    citation: string | null;
+    reason: string;
+    question: string | null;
+  };
+  empty_process_fields: { id: string; label: string; citation: string }[];
+  status: "open" | "addressed" | "needs_professional";
+}
+
+export interface IdentifyArticle {
+  provision: string;
+  division?: string;
+  title: string | null;
+  part: number;
+  quote: string | null;
+  reason: string | null;
+  committed?: boolean;
+}
+
+export interface IdentifyResult {
+  articles: IdentifyArticle[];
+  questions?: string[];
+  open_questions?: { field?: string; text?: string; status?: string }[];
+  persisted?: boolean;
+}
+
+export interface UploadedFile {
+  id: string;
+  name: string;
+  pages: number;
+  sha256: string;
+  read: boolean;
+}
+
 export interface SectionDPlan {
   items: {
     id: string;
     provision_id: string;
     citation: string;
-    status: string;
+    status: "not provided" | "provided";
     objective: string | null;
     function: string | null;
     performance_issue: string;
@@ -211,19 +271,98 @@ async function exportPdf(base: string, caseId: string, draft: boolean, signal?: 
       /* keep statusText */
     }
     if (res.status === 409) throw new ExportBlockedError(reasons, detail);
-    throw new EngineError(res.status, detail);
+    throw new EngineError(res.status, publicDetail(res.status, detail));
   }
   const blob = await res.blob();
   const match = /filename="([^"]+)"/.exec(res.headers.get("Content-Disposition") ?? "");
   return { blob, filename: match?.[1] ?? `${caseId}-scc-variance.pdf` };
 }
 
-export function failureText(e: unknown): string {
-  if (e instanceof EngineError) {
-    if (e.status === 0) return e.detail;
-    if (e.status === 404) return "The engine has no route for this request.";
-    return e.message;
+async function readError(res: Response): Promise<string> {
+  let detail = res.statusText;
+  try {
+    const j = await res.json();
+    detail = typeof j.detail === "string" ? j.detail : JSON.stringify(j.detail ?? j);
+  } catch {
+    /* keep statusText */
   }
+  return publicDetail(res.status, detail);
+}
+
+async function uploadPdf(base: string, caseId: string, file: File, signal?: AbortSignal): Promise<UploadedFile> {
+  const timed = withTimeout(signal, ENGINE_WAIT_MS);
+  const body = new FormData();
+  body.append("file", file, file.name);
+  let res: Response;
+  try {
+    res = await fetch(`${base}/cases/${enc(caseId)}/files`, { method: "POST", body, signal: timed.signal });
+  } catch (e) {
+    if (signal?.aborted) throw e;
+    if (timed.timedOut()) throw new EngineError(0, "The engine did not answer in time.");
+    throw new EngineError(0, e instanceof Error ? e.message : String(e));
+  } finally {
+    timed.clear();
+  }
+  if (!res.ok) throw new EngineError(res.status, await readError(res));
+  return (await res.json()) as UploadedFile;
+}
+
+async function identifyCase(
+  base: string,
+  caseId: string,
+  prose: string,
+  answers: { field?: string | null; question_id?: string | null; answer: string }[],
+  signal?: AbortSignal,
+  onStage?: (stage: string) => void,
+): Promise<IdentifyResult> {
+  const timed = withTimeout(signal, 25000);
+  let res: Response;
+  try {
+    res = await fetch(`${base}/cases/${enc(caseId)}/identify`, {
+      method: "POST",
+      signal: timed.signal,
+      headers: { Accept: "text/event-stream", "Content-Type": "application/json" },
+      body: JSON.stringify({ prose, answers }),
+    });
+  } catch (e) {
+    if (signal?.aborted) throw e;
+    if (timed.timedOut()) throw new EngineError(0, "The engine did not answer in time.");
+    throw new EngineError(0, e instanceof Error ? e.message : String(e));
+  } finally {
+    timed.clear();
+  }
+  if (!res.ok) throw new EngineError(res.status, await readError(res));
+  const type = res.headers.get("content-type") ?? "";
+  if (!type.includes("text/event-stream")) return (await res.json()) as IdentifyResult;
+  const reader = res.body?.getReader();
+  if (!reader) throw new EngineError(0, "The engine did not answer.");
+  const dec = new TextDecoder();
+  let buf = "";
+  let donePayload: IdentifyResult | null = null;
+  while (true) {
+    const step = await reader.read();
+    if (step.done) break;
+    buf += dec.decode(step.value, { stream: true });
+    const parsed = takeSseEvents(buf);
+    buf = parsed.rest;
+    for (const ev of parsed.events) {
+      onStage?.(ev.event);
+      if (ev.event === "error") throw new EngineError(503, "Article ranking failed.");
+      if (ev.event === "done") {
+        try {
+          donePayload = JSON.parse(ev.data) as IdentifyResult;
+        } catch {
+          donePayload = null;
+        }
+      }
+    }
+  }
+  if (!donePayload) throw new EngineError(0, "Article ranking did not finish.");
+  return donePayload;
+}
+
+export function failureText(e: unknown): string {
+  if (e instanceof EngineError) return e.detail || e.message;
   return "The engine could not be reached.";
 }
 

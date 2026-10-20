@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from fastapi import FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from codedb import AmbiguousProvisionError
@@ -32,11 +31,6 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
     app = FastAPI(title='Batatis engine')
     app.add_middleware(CORSMiddleware, allow_origin_regex=r'http://(localhost|127\.0\.0\.1)(:\d+)?',
                        allow_methods=['*'], allow_headers=['*'])
-
-    @app.exception_handler(FileNotFoundError)
-    def missing_dependency(_request, exc: FileNotFoundError):
-        # A bare 500 is emitted outside CORS middleware, so the browser cannot read it.
-        return JSONResponse(status_code=503, content={'detail': str(exc)})
     state = {'store': store, 'codes': codes}
 
     def cases() -> CaseStore:
@@ -46,7 +40,13 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
 
     def code() -> Codes:
         if state['codes'] is None:
-            state['codes'] = Codes()
+            try:
+                state['codes'] = Codes()
+            except FileNotFoundError:
+                # Not a 503, and not the filesystem path. The CodeDbMissing 503
+                # belongs on backend/case-api. An unhandled error would skip CORS
+                # and the browser would treat a live engine as unreachable.
+                raise HTTPException(500, 'Internal Server Error')
         return state['codes']
 
     @app.post('/cases', response_model=Case, status_code=201)

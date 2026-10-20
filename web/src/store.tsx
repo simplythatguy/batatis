@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, useState, type Dispatch, type ReactNode } from "react";
 import type { EngineGap } from "./api/client";
-import { clearEngineSession, engineCaseId, ensureEngineCase, pushFacts, refreshGaps } from "./api/sync";
+import { EngineError } from "./api/client";
+import { clearEngineSession, engineCaseId, ensureEngineCase, pushFacts, refreshGaps, syncJurisdiction } from "./api/sync";
+import { shouldConfirmReplace } from "./rules";
 import { exampleCase } from "./examples";
 import { emptyCase } from "./intake";
 import { getGaps, reducer, type Action } from "./model";
@@ -65,6 +67,11 @@ interface Store {
   saveDraft: () => Promise<string | null>;
   beginEmpty: (type: ApplicantType) => void;
   loadExample: (id: string) => void;
+  /** Opens an example, or asks first when that would wipe a case the user started. */
+  askExample: (id: string) => void;
+  pendingExampleId: string | null;
+  confirmExample: () => void;
+  dismissExample: () => void;
   resetToWho: () => void;
 }
 
@@ -89,13 +96,13 @@ const FIELD_HREF: Record<string, string> = {
   provisions: "#/code-check",
   responsible_professional: "#/application?tab=alt",
   professional_qualifications: "#/application?tab=alt&focus=field-qualifications",
-  professional_requirement: "#/application?tab=alt",
+  professional_requirement: "#/application?tab=D",
 };
 
 function hrefFor(field: string): string {
   if (FIELD_HREF[field]) return FIELD_HREF[field];
   if (field.startsWith("section_c") || field.startsWith("provisions")) return "#/section-c";
-  if (field.startsWith("evidence")) return "#/application?tab=alt";
+  if (field.startsWith("evidence") || field.startsWith("professional")) return "#/application?tab=D";
   return "#/describe";
 }
 
@@ -107,25 +114,31 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const [engineId, setEngineId] = useState<string | null>(null);
   const [engineGaps, setEngineGaps] = useState<EngineGap[]>([]);
   const [gapsSource, setGapsSource] = useState<Store["gapsSource"]>("loading");
-  const [gapsNote, setGapsNote] = useState("Checking GET /cases/{id}/gaps…");
+  const [gapsNote, setGapsNote] = useState("Checking what is still missing…");
   const [savedNote, setSavedNote] = useState("");
+  const [pendingExampleId, setPendingExampleId] = useState<string | null>(null);
 
   useEffect(() => sessionStorage.setItem(KEY, JSON.stringify({ phase, case: c, note: resetNote })), [phase, c, resetNote]);
 
   async function sync(announce: boolean): Promise<string | null> {
     try {
-      const id = await ensureEngineCase(c.title, c.authority);
+      let id = await ensureEngineCase(c.title, c.authority);
+      if (c.authority) id = await syncJurisdiction(id, c.authority, c.title);
       setEngineId(id);
       const factError = await pushFacts(id, c.facts);
       const got = await refreshGaps(id);
+      if (got.error && /case not found/i.test(got.error)) {
+        clearEngineSession();
+        setEngineId(null);
+      }
       if (got.error) {
         setEngineGaps([]);
         setGapsSource("browser");
-        setGapsNote(`GET /cases/${id}/gaps did not return (${got.error}). The list is the browser check for empty fields, not the engine citation review.`);
+        setGapsNote(`The administrative check did not return (${got.error}). This list is what is still empty here. It is not a finding that the design complies.`);
       } else {
         setEngineGaps(got.gaps);
         setGapsSource("engine");
-        setGapsNote(`From GET /cases/${id}/gaps. This is an administrative check, not a finding that the design complies.`);
+        setGapsNote("From the engine's administrative check. This is not a finding that the design complies.");
       }
       if (announce) {
         setSavedNote(factError ? `Draft saved. One fact was not accepted: ${factError}` : `Draft saved on the engine (${id}).`);
@@ -135,9 +148,10 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       setEngineId(engineCaseId());
       setEngineGaps([]);
       setGapsSource("browser");
-      const message = e instanceof Error ? e.message : String(e);
-      setGapsNote(`The engine did not take this case (${message}). The list is the browser check for empty fields.`);
-      if (announce) setSavedNote(`Draft saved in this browser. The engine was not reached (${message}).`);
+      const message = e instanceof EngineError ? e.detail : e instanceof Error ? e.message : String(e);
+      if (e instanceof EngineError && e.status === 404 && /case not found/i.test(e.detail)) clearEngineSession();
+      setGapsNote(`The engine did not take this case (${message}). This list is what is still empty here.`);
+      if (announce) setSavedNote(`Draft saved in this browser. ${message}`);
       return null;
     }
   }
@@ -156,7 +170,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     setEngineId(null);
     setEngineGaps([]);
     setGapsSource("loading");
-    setGapsNote("Checking GET /cases/{id}/gaps…");
+    setGapsNote("Checking what is still missing…");
     setResetNote("");
     dispatch({ type: "reset", to: next });
     setPhase("case");
@@ -194,6 +208,22 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         const next = exampleCase(id);
         if (next) openCase(next);
       },
+      askExample: (id) => {
+        if (phase === "case" && shouldConfirmReplace({ description: c.description, factCount: c.facts.length, fileCount: c.files.length })) {
+          setPendingExampleId(id);
+          return;
+        }
+        const next = exampleCase(id);
+        if (next) openCase(next);
+      },
+      pendingExampleId,
+      confirmExample: () => {
+        const id = pendingExampleId;
+        setPendingExampleId(null);
+        const next = id ? exampleCase(id) : undefined;
+        if (next) openCase(next);
+      },
+      dismissExample: () => setPendingExampleId(null),
       resetToWho: () => {
         clearEngineSession();
         setEngineId(null);
@@ -209,7 +239,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     }),
     // sync closes over the latest case via the render that built it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [c, gaps, engineGaps, gapsSource, gapsNote, engineId, savedNote, phase, resetNote],
+    [c, gaps, engineGaps, gapsSource, gapsNote, engineId, savedNote, phase, resetNote, pendingExampleId],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

@@ -67,12 +67,15 @@ export const PROCESS_FIELDS: { id: ProcessFieldId; label: string; prompts: strin
   },
 ];
 
-/** Fact field names the engine's process checker accepts. */
+/**
+ * Canonical process fact ids. GET /process-fields returns these names
+ * (risk_assessment, mitigating_measures, assumptions_and_limits).
+ */
 export const PROCESS_FACT: Record<ProcessFieldId, string> = {
   rationale: "process.rationale",
-  risk: "process.risk",
-  mitigation: "process.mitigation",
-  assumptions: "process.assumptions",
+  risk: "process.risk_assessment",
+  mitigation: "process.mitigating_measures",
+  assumptions: "process.assumptions_and_limits",
   maintenance: "process.maintenance_operation",
   qualifications: "process.qualifications",
 };
@@ -131,6 +134,14 @@ export const unresolvedCandidates = (c: Case) => c.candidates.filter((a) => a.an
 /** Derived gap list: the only list any surface renders. */
 export function getGaps(c: Case): Gap[] {
   const gaps: Gap[] = [];
+  if (!c.authority) {
+    gaps.push({
+      id: "detail-jurisdiction",
+      severity: "blocking",
+      label: "Reviewing authority missing",
+      href: "#/describe",
+    });
+  }
   for (const d of DETAIL_FIELDS) {
     const fact = factFor(c, d.id);
     if (d.required && !valueText(fact).trim()) {
@@ -182,7 +193,7 @@ export function getGaps(c: Case): Gap[] {
 export type Action =
   | { type: "setDescription"; text: string }
   | { type: "addFiles"; files: { id: string; name: string }[] }
-  | { type: "setFileResult"; id: string; error: string | null; read?: boolean }
+  | { type: "setFileResult"; id: string; error: string | null; read?: boolean; pages?: number; sha256?: string; unreachable?: boolean }
   | { type: "removeFile"; id: string }
   | { type: "confirmFact"; id: string }
   | { type: "dismissFact"; id: string }
@@ -192,6 +203,12 @@ export type Action =
   | { type: "setProcess"; field: ProcessFieldId; value: string }
   | { type: "setAuthority"; authority: Case["authority"] }
   | { type: "addCandidate"; candidate: Candidate }
+  | {
+      type: "addIdentified";
+      articles: { provision: string; title: string | null; part: number; quote: string | null; reason: string | null; committed?: boolean }[];
+    }
+  | { type: "saveEvidence"; itemId: string; document: string; responsible: string; date: string }
+  | { type: "setProfessionalFact"; field: string; value: string | number | boolean }
   | { type: "reset"; to: Case };
 
 let seq = 0;
@@ -213,7 +230,18 @@ export function reducer(c: Case, a: Action): Case {
     case "setFileResult":
       return {
         ...c,
-        files: c.files.map((f) => (f.id === a.id ? { ...f, error: a.error ?? undefined, read: a.read ?? f.read } : f)),
+        files: c.files.map((f) =>
+          f.id === a.id
+            ? {
+                ...f,
+                error: a.error ?? undefined,
+                read: a.read ?? f.read,
+                pages: a.pages ?? f.pages,
+                sha256: a.sha256 ?? f.sha256,
+                unreachable: a.error ? Boolean(a.unreachable) : false,
+              }
+            : f,
+        ),
       };
     case "removeFile":
       return { ...c, files: c.files.filter((f) => f.id !== a.id) };
@@ -290,6 +318,68 @@ export function reducer(c: Case, a: Action): Case {
       return c.candidates.some((x) => x.provision === a.candidate.provision)
         ? c
         : { ...c, candidates: [...c.candidates, a.candidate] };
+    case "addIdentified": {
+      const made: Candidate[] = a.articles
+        .filter((article) => /^\d/.test(article.provision))
+        .map((article) => {
+          const prev = c.candidates.find((card) => card.provision === article.provision);
+          const quote = article.quote?.trim();
+          return {
+            id: `id-${article.provision}`,
+            topic: article.title || article.provision,
+            provision: article.provision,
+            part: article.part,
+            benchmark: Boolean(article.committed),
+            identified: true,
+            suggestion: "identify" as const,
+            quote: quote
+              ? { text: quote, citation: "Quoted from the code database." }
+              : { text: article.reason || "No sentence was returned for this article.", citation: "No code sentence was returned." },
+            departure: "do something other than what this sentence requires",
+            clarifyingQuestion: "Which part of this sentence does the design not follow?",
+            answer: prev?.answer ?? null,
+          };
+        });
+      const rest = c.candidates.filter((card) => !made.some((item) => item.provision === card.provision));
+      return { ...c, candidates: [...rest, ...made] };
+    }
+    case "saveEvidence": {
+      const ref = a.document.trim();
+      const who = a.responsible.trim();
+      const date = a.date.trim();
+      if (!ref || !who) return c;
+      const prefix = `evidence.${a.itemId}.`;
+      const keep = c.facts.filter((f) => !f.field.startsWith(prefix));
+      const pointed = (field: string, value: string, source: Fact["source"]): Fact => ({
+        id: newId("f"),
+        field,
+        value,
+        kind: "pointed",
+        status: "confirmed",
+        confidence: null,
+        formula: null,
+        inputs: [],
+        source,
+      });
+      const facts = [
+        ...keep,
+        pointed(`${prefix}file_ref`, ref, { type: "file", ref, quote: ref }),
+        pointed(`${prefix}title`, ref, { type: "user_text", ref: "Your evidence", quote: ref }),
+        pointed(`${prefix}responsible_party`, who, { type: "user_text", ref: "Your evidence", quote: who }),
+      ];
+      if (date) facts.push(pointed(`${prefix}date`, date, { type: "user_text", ref: "Your evidence", quote: date }));
+      return { ...c, facts };
+    }
+    case "setProfessionalFact": {
+      const field = `professional.${a.field}`;
+      const quote = typeof a.value === "boolean" ? (a.value ? "yes" : "no") : String(a.value);
+      return {
+        ...c,
+        facts: upsertUserFact(c, field, String(a.value), { type: "user_click", ref: "Your answer", quote }).map((f) =>
+          f.field === field && f.source.ref === "Your answer" ? { ...f, value: a.value } : f,
+        ),
+      };
+    }
     case "reset":
       return a.to;
   }
