@@ -47,7 +47,9 @@ export function toViewRow(r: EngineRow, candidateId: string): SectionCRow {
 /** True when `row` (a sentence or clause id) belongs to the candidate provision `p` (itself or below it). */
 const within = (row: string, p: string) => row === p || (row.startsWith(p) && (p.endsWith(".") || row[p.length] === "("));
 
-export type SectionCSource = "loading" | "live" | "offline";
+export type SectionCSource = "loading" | "live" | "cached" | "error";
+
+const PROVISION_ID = /^\d+(?:\.\d+)+/;
 
 export interface Wanted {
   candidateId: string;
@@ -58,8 +60,9 @@ export interface Wanted {
  * Section C rows from POST /section-c for the given provisions. When the engine cannot be reached or
  * rejects the request, falls back to `offline` rows (the fixture), and says so through `source`.
  */
-export function useSectionC(wanted: Wanted[], offline: SectionCRow[]) {
-  const key = wanted.map((w) => `${w.candidateId}=${w.provision}`).join("|");
+export function useSectionC(wanted: Wanted[], offline: SectionCRow[], attempt = 0) {
+  const real = wanted.filter((w) => PROVISION_ID.test(w.provision));
+  const key = `${attempt}|` + real.map((w) => `${w.candidateId}=${w.provision}`).join("|");
   const [state, setState] = useState<{ key: string; source: SectionCSource; rows: SectionCRow[]; error?: string }>({
     key: "",
     source: "loading",
@@ -67,7 +70,7 @@ export function useSectionC(wanted: Wanted[], offline: SectionCRow[]) {
   });
 
   useEffect(() => {
-    if (!wanted.length) {
+    if (!real.length) {
       setState({ key, source: "live", rows: [] });
       return;
     }
@@ -75,20 +78,23 @@ export function useSectionC(wanted: Wanted[], offline: SectionCRow[]) {
     setState((s) => ({ ...s, key, source: "loading" }));
     engine
       .sectionC(
-        wanted.map((w) => w.provision),
+        real.map((w) => w.provision),
         ctl.signal,
       )
       .then((rows) => {
-        const view = wanted.flatMap((w) => rows.filter((r) => within(r.provision_id, w.provision)).map((r) => toViewRow(r, w.candidateId)));
+        const view = real.flatMap((w) => rows.filter((r) => within(r.provision_id, w.provision)).map((r) => toViewRow(r, w.candidateId)));
         setState({ key, source: "live", rows: view });
       })
       .catch((e: unknown) => {
         if (ctl.signal.aborted) return;
-        const ids = new Set(wanted.map((w) => w.candidateId));
-        setState({ key, source: "offline", rows: offline.filter((r) => ids.has(r.candidateId)), error: String(e instanceof Error ? e.message : e) });
+        const ids = new Set(real.map((w) => w.candidateId));
+        const cached = offline.filter((r) => ids.has(r.candidateId));
+        const message = e instanceof Error ? e.message : String(e);
+        if (cached.length) setState({ key, source: "cached", rows: cached, error: message });
+        else setState({ key, source: "error", rows: [], error: message });
       });
     return () => ctl.abort();
-    // `key` captures `wanted`; `offline` is the static fixture.
+    // `key` captures the provisions and the retry count.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 

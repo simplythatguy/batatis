@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useCase } from "./store";
 import type { FactKind, Gap } from "./types";
 
 const ICONS: Record<string, ReactNode> = {
@@ -108,7 +109,7 @@ export function GapStrip({ gaps }: { gaps: Gap[] }) {
           {gaps.length - blocking} warning
         </span>
         <span className="meta gap-toggle">
-          Show gaps <Icon name="chevron" size={12} />
+          Review gaps <Icon name="chevron" size={12} />
         </span>
       </summary>
       <ul className="plain-list gap-grid" aria-label="Administrative gaps">
@@ -122,6 +123,46 @@ export function GapStrip({ gaps }: { gaps: Gap[] }) {
         ))}
       </ul>
     </details>
+  );
+}
+
+export function DemoFallback({ reason, onRetry }: { reason: string; onRetry?: () => void }) {
+  const { loadExample } = useCase();
+  return (
+    <div className="demo-offer" role="alert">
+      <p>{reason}</p>
+      <p className="meta">Retry the engine, or open a cached demo run. A cached run is a saved example, not a live lookup, so the demo can continue.</p>
+      <div className="btn-row">
+        {onRetry && (
+          <button type="button" className="btn" onClick={onRetry}>
+            Retry
+          </button>
+        )}
+        <a className="btn btn-ghost" href="#/">
+          Try an example
+        </a>
+      </div>
+      <div className="btn-row">
+        <button type="button" className="btn" onClick={() => loadExample("manufacturer-northcore")}>
+          Manufacturer example
+        </button>
+        <button type="button" className="btn" onClick={() => loadExample("contractor-dampers")}>
+          Contractor example
+        </button>
+        <button type="button" className="btn" onClick={() => loadExample("homebuilder-soffit")}>
+          Homebuilder example
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function DraftNote() {
+  const { savedNote, gapsNote } = useCase();
+  return (
+    <span className="status-note" role="status">
+      {savedNote || gapsNote}
+    </span>
   );
 }
 

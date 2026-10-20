@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { GapStrip, Icon, PanelHeader, StatusPill, type Dot } from "../components";
+import { engine, failureText, type CodeHit } from "../api/client";
+import { DemoFallback, DraftNote, GapStrip, Icon, PanelHeader, StatusPill, type Dot } from "../components";
 import { answeredYes, unresolvedCandidates } from "../model";
 import { useCase } from "../store";
 import type { Candidate, CandidateAnswer } from "../types";
@@ -34,8 +35,12 @@ function CandidateCard({ a, index, total }: { a: Candidate; index: number; total
       </div>
       <div className="code-said">
         <div className="block-label">
-          <span className="label-pill">Code text</span>
-          <span className="meta">The code says</span>
+          <span className="label-pill">
+            {a.identified === false ? "Your words" : a.quote.citation.includes("not the code sentence") ? "Case summary" : "Code text"}
+          </span>
+          <span className="meta">
+            {a.identified === false ? "From what you wrote. Not a ranked article." : a.quote.citation.includes("not the code sentence") ? "Cached summary" : "The code says"}
+          </span>
         </div>
         <blockquote className="cite-block quote">{a.quote.text}</blockquote>
       </div>
@@ -57,9 +62,9 @@ function CandidateCard({ a, index, total }: { a: Candidate; index: number; total
       </div>
       {a.answer === "not-sure" && (
         <div className="followup">
-          <div className="meta">We will ask</div>
+          <div className="meta">Open question</div>
           <p>{a.clarifyingQuestion}</p>
-          <p className="meta">Answer Yes or No once you know; Section C waits for it.</p>
+          <p className="meta">Logged as an open question. You can continue. Section C does not treat this as a confirmed departure.</p>
         </div>
       )}
       <details className="disclosure ref">
@@ -83,8 +88,12 @@ function CandidateCard({ a, index, total }: { a: Candidate; index: number; total
 type Filter = "all" | "open" | "yes";
 
 export function CodeCheck() {
-  const { c, gaps } = useCase();
+  const { c, gaps, dispatch, saveDraft } = useCase();
   const [filter, setFilter] = useState<Filter>("all");
+  const [query, setQuery] = useState("");
+  const [hits, setHits] = useState<CodeHit[]>([]);
+  const [searchNote, setSearchNote] = useState("");
+  const [searchError, setSearchError] = useState("");
   const open = unresolvedCandidates(c);
   const yes = answeredYes(c);
   const counts: Record<Filter, number> = { all: c.candidates.length, open: open.length, yes: yes.length };
@@ -104,32 +113,137 @@ export function CodeCheck() {
       <div className="pane scroll-body">
         <div className="content-col stack">
           <p className="meta intro">
-            Each card quotes one requirement your design may depart from. Answer in your own terms; you do not need the
-            article numbers.
+            A departure means your design does something differently from a requirement. Cards from your description are questions, not ranked articles. Identify is command-line only. Search calls GET /code/search and shows only what the code database returns.
           </p>
+          <form
+            className="field"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const q = query.trim();
+              if (!q) {
+                setSearchNote("Type a few words to search.");
+                setSearchError("");
+                return;
+              }
+              setSearchNote("Searching…");
+              setSearchError("");
+              engine
+                .search(q, { division: "B", limit: 8 })
+                .then((rows) => {
+                  setHits(rows);
+                  setSearchNote(rows.length ? `${rows.length} provisions returned.` : "No provisions returned.");
+                })
+                .catch((err: unknown) => {
+                  setHits([]);
+                  setSearchNote("");
+                  setSearchError(failureText(err));
+                });
+            }}
+          >
+            <label htmlFor="code-search">Search Division B</label>
+            <input id="code-search" value={query} onChange={(e) => setQuery(e.target.value)} />
+            <button type="submit" className="btn">
+              Search
+            </button>
+            {searchNote && (
+              <p className="field-note" role="status">
+                {searchNote}
+              </p>
+            )}
+            {searchError && (
+              <DemoFallback
+                reason={`Search did not return. ${searchError}`}
+                onRetry={() => {
+                  const form = document.getElementById("code-search");
+                  form?.closest("form")?.requestSubmit();
+                }}
+              />
+            )}
+          </form>
+          {hits.length > 0 && (
+            <ul className="plain-list">
+              {hits.map((h) => (
+                <li key={h.id} className="card">
+                  <div className="card-head">
+                    <span className="article-id">{h.id}</span>
+                    <span className="label-pill">Code text</span>
+                  </div>
+                  <blockquote className="cite-block quote">{h.text}</blockquote>
+                  <p className="mono meta">{h.citation ?? "No citation returned"}</p>
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={() => {
+                      if (c.candidates.some((x) => x.provision === h.id)) {
+                        setSearchNote(`${h.id} is already on this check.`);
+                        document.getElementById(`cand-search-${h.id}`)?.focus();
+                        return;
+                      }
+                      dispatch({
+                        type: "addCandidate",
+                        candidate: {
+                          id: `search-${h.id}`,
+                          topic: h.article_title || h.title || h.id,
+                          provision: h.id,
+                          part: Number(h.id.split(".")[0]) || 0,
+                          benchmark: false,
+                          quote: { text: h.text, citation: h.citation ?? "No citation returned" },
+                          identified: true,
+                          departure: "do something other than what this sentence requires",
+                          clarifyingQuestion: "Which part of this sentence does the design not follow?",
+                          answer: null,
+                        },
+                      });
+                      setSearchNote(`Added ${h.id}. Answer the new card before Section C.`);
+                    }}
+                  >
+                    Add to this check
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
           {shown.length ? (
             shown.map((a) => <CandidateCard key={a.id} a={a} index={c.candidates.indexOf(a)} total={c.candidates.length} />)
           ) : (
-            <p className="empty">Nothing in this view.</p>
+            <p className="empty">
+              {filter === "yes"
+                ? "No confirmed departures yet."
+                : filter === "open"
+                  ? "No requirements need an answer."
+                  : c.candidates.length
+                    ? "No requirements to review."
+                    : "No cards yet. What you write on Describe becomes the questions here. Or try an example."}
+            </p>
           )}
         </div>
       </div>
       <div className="footer-bar">
+        <DraftNote />
         <span className="status-note" role="status">
-          {open.length ? `Answer ${open.map((a) => a.topic.toLowerCase()).join("; ")} to continue` : ""}
+          {open.length ? `Answer ${open.map((a) => a.topic.toLowerCase()).join("; ")} before Section C` : ""}
         </span>
+        <button type="button" className="btn" onClick={() => void saveDraft()}>
+          Save draft
+        </button>
         <a className="btn btn-ghost" href="#/describe">
           Back
         </a>
-        {open.length ? (
-          <button type="button" className="btn btn-primary" disabled>
-            Continue to Section C
-          </button>
-        ) : (
-          <a className="btn btn-primary" href="#/section-c">
-            Continue to Section C
-          </a>
-        )}
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => {
+            if (!open.length) {
+              location.hash = "#/section-c";
+              return;
+            }
+            const first = document.getElementById(`cand-${open[0].id}`);
+            first?.focus();
+            first?.scrollIntoView({ block: "center" });
+          }}
+        >
+          Continue to Section C
+        </button>
       </div>
     </>
   );

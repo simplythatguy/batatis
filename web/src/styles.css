@@ -148,6 +148,56 @@ a.pill {
   font-size: var(--text-md);
 }
 
+.choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  height: auto;
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+}
+
+.choice-label {
+  font-weight: var(--weight-medium);
+}
+
+.demo-offer,
+.empty-guide,
+.file-error {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.example-menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.example-menu summary {
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.file-row {
+  flex-wrap: wrap;
+}
+
+.file-error {
+  flex-basis: 100%;
+}
+
 .muted-text {
   color: var(--text-secondary);
   font-size: var(--text-sm);

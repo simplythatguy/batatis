@@ -14,6 +14,7 @@ export const FIXTURE: Case = {
   title: "NorthCore CX exterior sheathing board",
   applicantType: "manufacturer",
   codeEdition: "NBC(AE) 2023, 2nd printing",
+  authority: "",
   description:
     "We make NorthCore CX, a foil-faced rigid board that goes on the outside of the studs as continuous insulation and replaces the housewrap. We want builders to use it on houses and townhomes anywhere in Alberta.",
   files: [
@@ -275,7 +276,7 @@ export const FIXTURE: Case = {
         "Applies only if the siding relies on the board to hold its fasteners. The attribution table has no row for this sentence, so Section C states that instead of inventing an objective.",
     },
   ],
-  process: { rationale: "", risk: "", mitigation: "", assumptions: "" },
+  process: { rationale: "", risk: "", mitigation: "", assumptions: "", maintenance: "", qualifications: "" },
 };
 
 /**

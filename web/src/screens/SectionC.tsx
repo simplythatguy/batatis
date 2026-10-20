@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useProvisionText, useSectionC, type SectionCSource } from "../api/sectionC";
-import { GapStrip, PanelHeader, StatusPill } from "../components";
+import { DemoFallback, GapStrip, PanelHeader, StatusPill } from "../components";
 import { CODE_TERMS } from "../fixture";
 import { candidateById, unresolvedCandidates } from "../model";
 import { useCase } from "../store";
@@ -24,10 +24,18 @@ const term = (r: SectionCRow, code: string) => r.terms?.[code] ?? CODE_TERMS[cod
 function SourceLabel({ source, error }: { source: SectionCSource; error?: string }) {
   if (source === "live") return <StatusPill dot="done">Live lookup</StatusPill>;
   if (source === "loading") return <StatusPill dot="pending">Looking up…</StatusPill>;
+  if (source === "cached") {
+    return (
+      <span className="label-pill" title={error}>
+        <span className="status-dot warning" />
+        Cached demo run
+      </span>
+    );
+  }
   return (
-    <span className="label-pill" title={error ? `Engine not reachable: ${error}` : undefined}>
-      <span className="status-dot warning" />
-      Offline sample
+    <span className="label-pill" title={error}>
+      <span className="status-dot blocking" />
+      Lookup failed
     </span>
   );
 }
@@ -62,11 +70,16 @@ function Pairs({ row }: { row: SectionCRow }) {
 export function SectionC() {
   const { c, gaps } = useCase();
   // Confirmed departures and the ones still awaiting an answer; a "no" drops the provision.
+  const [attempt, setAttempt] = useState(0);
   const wanted = useMemo(
-    () => c.candidates.filter((a) => a.answer !== "no").map((a) => ({ candidateId: a.id, provision: a.provision })),
+    () =>
+      c.candidates
+        .filter((a) => a.answer === "yes" && /^\d/.test(a.provision))
+        .map((a) => ({ candidateId: a.id, provision: a.provision })),
     [c.candidates],
   );
-  const { rows, source, error } = useSectionC(wanted, c.sectionC);
+  const confirmedWithoutArticle = c.candidates.some((a) => a.answer === "yes" && !/^\d/.test(a.provision));
+  const { rows, source, error } = useSectionC(wanted, c.sectionC, attempt);
   const [selected, setSelected] = useState<string>();
   const sel = rows.find((r) => rowKey(r) === selected) ?? rows[0];
   const selCand = sel && candidateById(c, sel.candidateId);
@@ -84,16 +97,31 @@ export function SectionC() {
           {source === "live" && <span className="meta">Rows from the engine's code database for this case</span>}
         </div>
         <p className="meta intro">
-          Objectives and functions come from NBC(AE) 2023, 2nd printing, Table 9.38.1.1., by lookup after you confirm a
-          departure. Rows still waiting for your answer are shown greyed and are not exported.
+          Objectives and functions come from NBC(AE) 2023, 2nd printing, by lookup after you confirm a departure that names an article. Rows are not invented when no article is known.
         </p>
-        {source === "offline" && (
+        {source === "cached" && (
           <p className="field-note" role="status">
             <span className="status-dot warning" />
-            The engine is not reachable, so these rows are a bundled offline sample, not a lookup for this case.
+            Cached demo run. The engine did not return a live lookup ({error}). These rows were saved with the example.
           </p>
         )}
-        <div className="table-wrap">
+        {(source === "cached" || source === "error") && (
+          <DemoFallback
+            reason={source === "cached" ? "The live lookup failed. The table below is the cached demo run." : `Section C lookup failed. ${error ?? "The engine did not answer."}`}
+            onRetry={() => setAttempt((n) => n + 1)}
+          />
+        )}
+        {!rows.length && (
+          <div className="empty-guide">
+            <h2 className="section-title">This table is empty</h2>
+            <p>
+              {confirmedWithoutArticle
+                ? "You confirmed a departure from your description, and no Division B article is attached. Search on Code check, or run identify from the command line. This table stays empty so it does not invent a row."
+                : "Nothing is listed yet. On Code check, answer Yes on a card that names an article. Identify, which ranks articles, is command-line only and is not called from this screen."}
+            </p>
+          </div>
+        )}
+        {rows.length > 0 && <div className="table-wrap">
           <table className="table sc-table">
             <thead>
               <tr>
@@ -157,7 +185,7 @@ export function SectionC() {
               })}
             </tbody>
           </table>
-        </div>
+        </div>}
 
         {sel && (
           <div className="sc-detail">

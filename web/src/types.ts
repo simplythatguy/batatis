@@ -23,8 +23,10 @@ export interface CaseFile {
   id: string;
   name: string;
   pages?: number;
-  /** Set by the engine once it has read the file. */
+  /** Set once a file route has actually read the bytes. */
   read: boolean;
+  /** Set when the upload attempt failed. Empty while a try is in flight. */
+  error?: string;
 }
 
 export interface Question {
@@ -60,6 +62,11 @@ export interface Candidate {
   /** Asked when the applicant answers "Not sure". */
   clarifyingQuestion: string;
   answer: CandidateAnswer | null;
+  /**
+   * False when the card is a question drawn from the applicant's words.
+   * Identify is command-line only, so those cards do not carry an article.
+   */
+  identified?: boolean;
 }
 
 export type AttributionStatus = "direct" | "inherited" | "no-row";
@@ -96,7 +103,16 @@ export interface SectionCRow {
   explanation?: string;
 }
 
-export type ProcessFieldId = "rationale" | "risk" | "mitigation" | "assumptions";
+export type ProcessFieldId =
+  | "rationale"
+  | "risk"
+  | "mitigation"
+  | "assumptions"
+  | "maintenance"
+  | "qualifications";
+
+/** Set before the engine case is created. There is no route to change it afterwards. */
+export type AuthorityId = "" | "calgary" | "edmonton";
 
 export type GapSeverity = "blocking" | "warning";
 
@@ -108,13 +124,17 @@ export interface Gap {
   href: string;
 }
 
-export type ApplicantType = "manufacturer" | "contractor" | "builder" | "designer" | "owner";
+export type ApplicantType = "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";
 
 export interface Case {
   id: string;
   title: string;
   applicantType: ApplicantType;
+  /** Set only when this case was opened from "Try an example". */
+  exampleId?: string;
   codeEdition: string;
+  /** Empty until the applicant picks an authority. Sent only on POST /cases. */
+  authority: AuthorityId;
   description: string;
   files: CaseFile[];
   facts: Fact[];

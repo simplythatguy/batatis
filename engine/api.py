@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from codedb import AmbiguousProvisionError
@@ -31,6 +32,11 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
     app = FastAPI(title='Batatis engine')
     app.add_middleware(CORSMiddleware, allow_origin_regex=r'http://(localhost|127\.0\.0\.1)(:\d+)?',
                        allow_methods=['*'], allow_headers=['*'])
+
+    @app.exception_handler(FileNotFoundError)
+    def missing_dependency(_request, exc: FileNotFoundError):
+        # A bare 500 is emitted outside CORS middleware, so the browser cannot read it.
+        return JSONResponse(status_code=503, content={'detail': str(exc)})
     state = {'store': store, 'codes': codes}
 
     def cases() -> CaseStore:

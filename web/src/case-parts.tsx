@@ -30,7 +30,7 @@ function FactRow({ fact }: { fact: Fact }) {
       {staleInputs && (
         <div className="field-note">
           <span className="status-dot pending" />
-          An input changed. The engine recomputes this when connected.
+          An input changed. This computed value is left as it was. There is no route that recomputes it.
         </div>
       )}
       {!staleInputs && unconfirmedInputs && (
@@ -58,10 +58,10 @@ function FactRow({ fact }: { fact: Fact }) {
       </div>
       {pending && (
         <div className="btn-row fact-actions">
-          <button type="button" className="btn" onClick={() => dispatch({ type: "confirmFact", id: fact.id })}>
+          <button type="button" className="btn" aria-label={`Confirm ${factLabel(fact.field)}`} onClick={() => dispatch({ type: "confirmFact", id: fact.id })}>
             Confirm
           </button>
-          <button type="button" className="btn btn-ghost" onClick={() => dispatch({ type: "dismissFact", id: fact.id })}>
+          <button type="button" className="btn btn-ghost" aria-label={`Not right: ${factLabel(fact.field)}`} onClick={() => dispatch({ type: "dismissFact", id: fact.id })}>
             Not right
           </button>
         </div>
@@ -113,12 +113,13 @@ function QuestionChip({ q }: { q: Question }) {
   }
   return (
     <li className="chip" data-open={open}>
-      <button type="button" className="chip-button" id={`q-${q.id}`} aria-expanded={open} onClick={() => setOpen(!open)}>
+      <button type="button" className="chip-button" id={`q-${q.id}`} aria-expanded={open} aria-controls={open ? `answer-${q.id}` : undefined} onClick={() => setOpen(!open)}>
         <span className="chip-q">{q.text}</span>
         <span className="chip-why">Why we ask: {q.why}</span>
       </button>
       {open && (
         <form
+          id={`answer-${q.id}`}
           className="chip-answer"
           onSubmit={(e) => {
             e.preventDefault();
@@ -126,7 +127,7 @@ function QuestionChip({ q }: { q: Question }) {
           }}
         >
           <label className="sr-only" htmlFor={`qa-${q.id}`}>
-            Your answer
+            Your answer: {q.text}
           </label>
           <input id={`qa-${q.id}`} className="input" value={text} onChange={(e) => setText(e.target.value)} placeholder="Your answer" autoFocus />
           <button type="submit" className="btn" disabled={!text.trim()}>
@@ -159,6 +160,24 @@ export function QuestionChips() {
   );
 }
 
+const SHAPE_HINT: Partial<Record<string, Partial<Record<string, string>>>> = {
+  manufacturer: {
+    municipalAddress: "Only if this variance is for one site. A product used in many places is often jurisdiction-wide.",
+    scope: "Choose jurisdiction-wide when the product is not limited to one address.",
+  },
+  contractor: {
+    municipalAddress: "The job site. Section B needs it.",
+  },
+  homebuilder: {
+    municipalAddress: "The house address.",
+    alternative: "What about this house does not follow the acceptable solution? Include storeys and any suite.",
+  },
+};
+
+function shapeHint(type: string, field: string): string | undefined {
+  return SHAPE_HINT[type]?.[field];
+}
+
 function DetailInput({ def }: { def: DetailField }) {
   const { c, dispatch } = useCase();
   const fact = factFor(c, def.id);
@@ -185,7 +204,7 @@ function DetailInput({ def }: { def: DetailField }) {
       ) : def.multiline ? (
         <textarea id={id} rows={3} value={value} onChange={(e) => set(e.target.value)} />
       ) : (
-        <input id={id} value={value} onChange={(e) => set(e.target.value)} />
+        <input id={id} type={def.inputType ?? "text"} value={value} onChange={(e) => set(e.target.value)} />
       )}
       <div className="field-foot">
         {fact && !isTyped(fact) ? (
@@ -194,7 +213,7 @@ function DetailInput({ def }: { def: DetailField }) {
             {fact.kind === "proposed" ? "Proposed from" : "From"} {sourceLine(fact.source)}
             {fact.source.quote && <q className="field-quote">{fact.source.quote}</q>}
             {fact.status === "unconfirmed" && (
-              <button type="button" className="btn btn-ghost btn-xs" onClick={() => dispatch({ type: "confirmFact", id: fact.id })}>
+              <button type="button" className="btn btn-ghost btn-xs" aria-label={`Confirm ${def.label}`} onClick={() => dispatch({ type: "confirmFact", id: fact.id })}>
                 Confirm
               </button>
             )}
@@ -206,7 +225,9 @@ function DetailInput({ def }: { def: DetailField }) {
             Start from my description
           </button>
         ) : (
-          def.hint && <span className="field-note">{def.hint}</span>
+          (shapeHint(c.applicantType, def.id) ?? def.hint) && (
+            <span className="field-note">{shapeHint(c.applicantType, def.id) ?? def.hint}</span>
+          )
         )}
       </div>
     </div>
@@ -238,7 +259,6 @@ export function ProcessFields() {
             <div className="field-label-row">
               {empty && <span className="status-dot blocking" />}
               <label htmlFor={id}>{p.label}</label>
-              <span className="meta optional">Required</span>
             </div>
             <ul className="plain-list prompts" id={`${id}-prompts`}>
               {p.prompts.map((t) => (
