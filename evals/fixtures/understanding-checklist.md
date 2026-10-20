@@ -14,7 +14,10 @@ Agents (or humans editing skills) should answer all items correctly. Expected an
 10. **False** — wrong citations are worse than uncertainty.
 11. **Safety Codes Officer (SCO)** / AHJ reviewer.
 12. **Claude Opus 5.5** (highest available Opus 5.5 tier).
+13. After “complies with applicable acceptable solution(s)?”: **Yes** = evidence ladder → permit; **No** = SSRIA variance path.
+14. On alternative path, must include **risk assessment, mitigating measures, assumptions/limits** (never skip).
+15. Evidence ladder (low→high): manufacturer lit → STANDATA → ISO 17025 test → evaluation → eval+testing → qualification → ISO 17065 certification (plus CCMC / ICC-ES / professional opinion / engineering review on alt path). Never invent these.
 
 ## Fixture prompt (for manual or CI agent evals)
 
-> Using only this repository’s agent docs (AGENTS.md, .cursor/rules, .cursor/skills), answer the 12 quiz items in `evals/fixtures/quiz-prompt.md` as JSON `{"answers":[...],"notes":"..."}`.
+> Using only this repository’s agent docs (AGENTS.md, .cursor/rules, .cursor/skills, docs/), answer the quiz items in `evals/fixtures/quiz-prompt.md` as JSON `{"answers":[...],"notes":"..."}`.

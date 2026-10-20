@@ -14,3 +14,6 @@ Answer each in one short line:
 10. Is a confident wrong article citation OK?
 11. Who is the reviewer-facing UI for?
 12. Required model for Batatis UI work?
+13. After “complies with acceptable solution(s)?”, what are the Yes vs No paths?
+14. Which three analysis fields must not be skipped on the alternative path?
+15. Name the evidence confidence ladder endpoints (lowest and highest)?

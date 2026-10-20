@@ -21,7 +21,8 @@ Open the repo in **Cursor**. New agent threads should:
    - `batatis-ui-opus` — **all UI work uses Claude Opus 5.5** (highest available Opus 5.5 tier)
 4. Use [`evals/fixtures/understanding-checklist.md`](./evals/fixtures/understanding-checklist.md) to verify agents still understand the challenge after skill/rule edits.
 
-Human-oriented brief: [`docs/hackathon-problem-brief.md`](./docs/hackathon-problem-brief.md).
+Human-oriented brief: [`docs/hackathon-problem-brief.md`](./docs/hackathon-problem-brief.md).  
+NBC(AE) acceptable vs alternative process: [`docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png`](./docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png).
 
 ## Non-negotiables (short)
 

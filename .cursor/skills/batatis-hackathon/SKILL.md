@@ -37,6 +37,17 @@ Expand beyond NBC only after NBC(AE) path works.
 
 One **article** ≈ one rule = **acceptable solution** (default recipe) + **objective** (why) + **function** (what must be achieved). Alternative solution = different recipe, same-or-better performance vs those objectives/functions. **Division C** (esp. **2.3**) documents how to argue that administratively.
 
+## NBC(AE) decision fork (official process)
+
+Diagram: `../../../docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png`
+
+Shared: Design → identify applicable acceptable solutions → code analysis (objectives / functional / intent) → min performance → compare → gaps → **complies with applicable acceptable solution(s)?**
+
+- **Yes:** complete analysis → evidence of compliance (ladder) → finalise permit application.
+- **No (our product focus):** SSRIA Request for Specific Variance → rationale → detailed Div B analysis (sentences + objectives / functional / intent) → **risk assessment** → **mitigating measures** → **assumptions/limits** → demonstrate equivalent performance → finalise permit application.
+
+**Evidence confidence ladder** (lower → higher): manufacturer lit → STANDATA variance → ISO 17025 test → evaluation → eval+testing → qualification → ISO 17065 certification. Alternative path also cites CCMC, ICC-ES, registered professional opinion, engineering review.
+
 ## Data priorities
 
 NBC – 2023 Alberta Edition **2nd printing**; Intent Statements; Safety Codes Act + Building Code / Permit / Exemption regulations; STANDATA; SCC variance form; Calgary/Edmonton alt-solution guides; CCMC registry. See `references/data-package-index.md`.
@@ -50,14 +61,18 @@ Intake 20% · Code identification 20% · Recommendations 10% · Review 10% · Ap
 1. Saying “this complies” / “this is safe.”
 2. Fabricated article numbers.
 3. LLM-memorized Section C attributions instead of lookup.
-4. Completing Section D as if the model were the engineer.
+4. Completing Section D as if the model were the engineer / inventing professional judgment.
 5. Ignoring Division C documentation requirements.
 6. Hard-coding one municipality’s form forever.
 7. Skipping clarifying questions when interpretation is ambiguous.
 8. Mixing assumptions into “known facts” without labeling.
+9. On the alternative fork: skipping risk assessment, mitigating measures, or assumptions/limits.
+10. Inventing evidence ladder outputs (tests, CCMC, STANDATA, certifications).
+11. Building product UX that ignores the official NBC(AE) yes/no fork.
 
 ## Related
 
 - Workflow skill: `../batatis-variance-workflow/SKILL.md`
 - UI (Opus 5.5): `../batatis-ui-opus/SKILL.md`
 - Full brief: `../../../docs/hackathon-problem-brief.md`
+- Process diagram: `../../../docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png`
