@@ -151,6 +151,27 @@ class PostgresCaseStore:
                     return case
         raise VersionConflict(case_id)
 
+    def remove_evidence(self, case_id: str, evidence_id: str) -> Case | None:
+        """Lock the current case so withdrawal cannot lose a fact or recreate a deleted case."""
+        prefix = f'evidence.{evidence_id}.'
+        with self._conn() as con:
+            row = con.execute('SELECT data, version FROM cases WHERE id=%s FOR UPDATE', (case_id,)).fetchone()
+            if row is None:
+                return None
+            # Recheck retention after the lock: a waiting read may see a newly expired row.
+            if self._purge_expired(con, case_id):
+                return None
+            case = Case.model_validate(row[0])
+            case.facts = [fact for fact in case.facts if not fact.field.startswith(prefix)]
+            case.evidence = [item for item in case.evidence if item.id != evidence_id]
+            case.updated_at = now()
+            cur = con.execute('UPDATE cases SET data=%s, version=version+1, updated_at=%s '
+                              'WHERE id=%s AND version=%s',
+                              (Jsonb(case.model_dump(mode='json')), case.updated_at, case_id, row[1]))
+            if cur.rowcount != 1:
+                raise VersionConflict(case_id, row[1])
+            return case
+
     def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf') -> dict | None:
         if len(data) > PDF_MAX_BYTES:
             raise FileTooLarge()

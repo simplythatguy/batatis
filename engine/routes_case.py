@@ -15,7 +15,8 @@ from .section_c import section_c_rows
 from .section_d import SectionDPlan, section_d_plan
 from .section_d_issues import SectionDIssue, section_d_issues
 from .llm_gate import client_ip_from, search_retry_after
-from .store import CaseStore
+from .models import Case
+from .store import CaseBackend, VersionConflict
 
 
 class SectionDRequest(BaseModel):
@@ -24,7 +25,7 @@ class SectionDRequest(BaseModel):
     provisions: list[str] | None = Field(default=None, min_length=1)
 
 
-def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
+def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
                   registry: CCMCRegistry | None = None) -> APIRouter:
     router = APIRouter(tags=['case building'])
     registry = registry or CCMCRegistry()
@@ -82,5 +83,15 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
     @router.get('/cases/{case_id}/gaps', response_model=list[Gap])
     def gaps(case_id: str):
         return check_completeness(get_case(case_id), code())
+
+    @router.delete('/cases/{case_id}/evidence/{evidence_id}', response_model=Case)
+    def delete_evidence(case_id: str, evidence_id: str):
+        try:
+            case = cases().remove_evidence(case_id, evidence_id)
+        except VersionConflict as error:
+            raise HTTPException(409, 'case was updated concurrently') from error
+        if case is None:
+            raise HTTPException(404, 'case not found')
+        return case
 
     return router

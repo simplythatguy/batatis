@@ -39,6 +39,7 @@ class CaseBackend(Protocol):
     def get_version(self, case_id: str) -> int | None: ...
     def put(self, case: Case, *, expected_version: int | None = None) -> Case: ...
     def add_fact(self, case_id: str, fact: Fact) -> Case | None: ...
+    def remove_evidence(self, case_id: str, evidence_id: str) -> Case | None: ...
     def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf') -> dict | None: ...
     def get_file(self, case_id: str, file_id: str) -> dict | None: ...
     def delete(self, case_id: str) -> bool: ...
@@ -184,6 +185,36 @@ class CaseStore:
                     con.execute('ROLLBACK')
                 except sqlite3.Error:
                     pass
+            finally:
+                con.close()
+        raise VersionConflict(case_id)
+
+    def remove_evidence(self, case_id: str, evidence_id: str) -> Case | None:
+        """Withdraw exactly one slot under the same reserved lock as fact writes."""
+        prefix = f'evidence.{evidence_id}.'
+        for _ in range(5):
+            con = self._connect()
+            try:
+                con.execute('BEGIN IMMEDIATE')
+                self._purge_expired(con, case_id)
+                row = con.execute('SELECT json, version FROM cases WHERE id=?', (case_id,)).fetchone()
+                if row is None:
+                    con.commit()
+                    return None
+                case = Case.model_validate_json(row[0])
+                case.facts = [fact for fact in case.facts if not fact.field.startswith(prefix)]
+                case.evidence = [item for item in case.evidence if item.id != evidence_id]
+                case.updated_at = now()
+                cur = con.execute('UPDATE cases SET json=?, updated_at=?, version=version+1 '
+                                  'WHERE id=? AND version=?',
+                                  (case.model_dump_json(), case.updated_at, case_id, row[1]))
+                if cur.rowcount != 1:
+                    con.rollback()
+                    continue
+                con.commit()
+                return case
+            except sqlite3.OperationalError:
+                con.rollback()
             finally:
                 con.close()
         raise VersionConflict(case_id)
