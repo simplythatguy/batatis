@@ -1,5 +1,5 @@
 import { applyDescription } from "./intake";
-import { professionalConfirmed, type ScopeField } from "./professional";
+import { professionalConfirmed } from "./professional";
 import type { Candidate, CandidateAnswer, Case, Fact, Gap, ProcessFieldId, SectionCRow } from "./types";
 
 /** Section A and B fields. Values live only in `case.facts`; nothing here holds a default. */
@@ -201,7 +201,8 @@ export function getGaps(c: Case): Gap[] {
     gaps.push({
       id: "needs-professional",
       severity: "blocking",
-      label: "Registered professional not confirmed",
+      label:
+        "Registered professional not confirmed. Routed to the officer. Name an engineer or architect and their seal or registration number.",
       href: "#/application?tab=D&focus=prof-role",
     });
   }
@@ -240,7 +241,7 @@ export type Action =
   | { type: "noteSectionC"; rows: SectionCRow[] }
   | { type: "saveEvidence"; itemId: string; document: string; responsible: string; date: string }
   | { type: "setProfessionalFact"; field: string; value: string | number | boolean }
-  | { type: "answerScope"; field: ScopeField; answer: "yes" | "no" | "not-sure" }
+  | { type: "answerScope"; field: string; answer: "yes" | "no" | "not-sure" | "clear"; text?: string }
   | { type: "notePractice"; value: true | false | "unknown" }
   | { type: "reset"; to: Case };
 
@@ -445,11 +446,15 @@ export function reducer(c: Case, a: Action): Case {
     case "answerScope": {
       const qid = `q-scope-${a.field}`;
       const text =
-        a.field === "prescriptive_route_confirmed"
+        a.text?.trim() ||
+        (a.field === "prescriptive_route_confirmed"
           ? "Is the design following the prescriptive route?"
-          : "Does any proposed analysis require reserved professional judgement?";
+          : a.field === "professional_judgement_required"
+            ? "Does any proposed analysis require reserved professional judgement?"
+            : "This question is still open.");
       const questions = c.questions.filter((q) => q.id !== qid);
       const facts = c.facts.filter((f) => f.field !== `professional.${a.field}`);
+      if (a.answer === "clear") return { ...c, facts, questions };
       if (a.answer === "not-sure") {
         return {
           ...c,
@@ -459,7 +464,7 @@ export function reducer(c: Case, a: Action): Case {
             {
               id: qid,
               text,
-              why: "You answered Not sure. This stays an open question for the officer.",
+              why: "You answered Not sure. This stays an open question for the officer. It does not decide whether a registered professional is required.",
               field: `professional.${a.field}`,
             },
           ],

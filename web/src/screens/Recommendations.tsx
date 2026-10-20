@@ -9,9 +9,9 @@ import {
   type SectionDPlan,
 } from "../api/client";
 import { DemoFallback, RoleNote } from "../components";
-import { practicePrompt } from "../humanReview";
+import { practiceFlagLine, practicePrompt } from "../humanReview";
 import { answeredYes } from "../model";
-import { evidenceLinked, isScopeField, SCOPE_HELP, sectionDIssueStatus } from "../professional";
+import { evidenceLinked, isScopeField, professionalConfirmed, SCOPE_HELP, sectionDIssueStatus } from "../professional";
 import { failureKind } from "../rules";
 import { useCase } from "../store";
 import type { Case } from "../types";
@@ -78,12 +78,6 @@ function flagDot(flag: "yes" | "no" | "depends"): string {
   if (flag === "yes") return "blocking";
   if (flag === "depends") return "warning";
   return "pending";
-}
-
-function flagSentence(flag: "yes" | "no" | "depends"): string {
-  if (flag === "yes") return "a registered professional is indicated";
-  if (flag === "no") return "the screen did not indicate one";
-  return "depends. The screen needs more facts.";
 }
 
 function EvidenceAnswer({ itemId, title }: { itemId: string; title: string }) {
@@ -157,7 +151,7 @@ function ProfessionalAnswers() {
   return (
     <div className="form-grid">
       <p className="meta full section-hint">
-        These start empty. A registered professional is an engineer or architect you confirm, with a seal or a registration number. The prescriptive-route and reserved-judgement answers do not clear that.
+        These start empty. A registered professional is an engineer or architect you confirm, with a seal or a registration number. Yes, No, and Not sure on the questions below do not clear that. Not sure is sent to the officer. You can return a question to Not answered.
       </p>
       {PROFESSIONAL_FIELDS.map((q) => {
         const id = `prof-${q.field}`;
@@ -235,7 +229,7 @@ function ProfessionalAnswers() {
           );
         }
         const scopeField = isScopeField(q.field) ? q.field : null;
-        const notSure = scopeField !== null && c.questions.some((question) => question.id === `q-scope-${scopeField}` && !question.answer);
+        const notSure = c.questions.some((question) => question.id === `q-scope-${q.field}` && !question.answer);
         const value = notSure ? "not-sure" : current === true ? "yes" : current === false ? "no" : "";
         return (
           <div key={q.field} className={`field full ${value ? "" : "is-empty"}`}>
@@ -246,19 +240,20 @@ function ProfessionalAnswers() {
               value={value}
               onChange={(e) => {
                 const next = e.target.value;
-                if (scopeField && (next === "yes" || next === "no" || next === "not-sure")) {
-                  dispatch({ type: "answerScope", field: scopeField, answer: next });
-                  return;
-                }
-                if (next === "yes" || next === "no") {
-                  dispatch({ type: "setProfessionalFact", field: q.field, value: next === "yes" });
+                if (next === "" || next === "yes" || next === "no" || next === "not-sure") {
+                  dispatch({
+                    type: "answerScope",
+                    field: q.field,
+                    answer: next === "" ? "clear" : next,
+                    text: q.label,
+                  });
                 }
               }}
             >
               <option value="">Not answered</option>
               <option value="yes">Yes</option>
               <option value="no">No</option>
-              {scopeField && <option value="not-sure">Not sure</option>}
+              <option value="not-sure">Not sure</option>
             </select>
           </div>
         );
@@ -372,8 +367,12 @@ export function Recommendations() {
       {load.phase === "loading" && <p className="empty">Loading…</p>}
       {flag && (
         <p>
-          <span className={`status-dot ${flagDot(flag)}`} /> Practice of engineering: {flag}. {flagSentence(flag)}
-          {flag !== "no" && " This is not a licence decision."}
+          <span className={`status-dot ${flagDot(flag)}`} /> {practiceFlagLine(flag)}
+        </p>
+      )}
+      {c.practiceOfEngineering === true && !professionalConfirmed(c.facts) && (
+        <p className="field-note" role="status">
+          This is routed to the officer. Name an engineer or architect and their seal or registration number. You can keep preparing the application. Official export stays blocked until that person is confirmed. This screen does not write their judgment.
         </p>
       )}
       {load.professional?.reasons.map((r) => (

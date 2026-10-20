@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { officerRequest, practicePrompt, SCO_JUDGEMENT } from "./humanReview.ts";
+import { notSureQuestions, officerRequest, practiceFlagLine, practicePrompt, SCO_JUDGEMENT } from "./humanReview.ts";
 import { emptyCase } from "./intake.ts";
 import { getGaps, reducer, unresolvedCandidates } from "./model.ts";
 
@@ -81,6 +81,25 @@ test("Not sure is an open question and does not block Continue", () => {
 });
 
 test("a yes asks for the professional and an unknown shows its question", () => {
+  assert.equal(practiceFlagLine("depends"), "Practice of engineering: depends. The screen needs more facts. This is not a licence decision.");
+  assert.doesNotMatch(practiceFlagLine("depends"), /depends\. depends/);
+  assert.doesNotMatch(practiceFlagLine("yes"), /yes\. yes/);
+  let routed = reducer(emptyCase("contractor"), { type: "notePractice", value: true });
+  routed = reducer(routed, {
+    type: "answerScope",
+    field: "fire_alarm",
+    answer: "not-sure",
+    text: "Is a fire alarm system being installed?",
+  });
+  assert.equal(routed.practiceOfEngineering, true);
+  assert.ok(notSureQuestions(routed.questions).some((q) => q.text.includes("fire alarm")));
+  assert.ok(getGaps(routed).some((gap) => gap.id === "needs-professional" && /officer/.test(gap.label)));
+  routed = reducer(routed, { type: "answerScope", field: "fire_alarm", answer: "no", text: "Is a fire alarm system being installed?" });
+  assert.equal(routed.questions.some((q) => q.id === "q-scope-fire_alarm"), false);
+  assert.equal(routed.practiceOfEngineering, true);
+  assert.ok(getGaps(routed).some((gap) => gap.id === "needs-professional"));
+  routed = reducer(routed, { type: "answerScope", field: "fire_alarm", answer: "clear" });
+  assert.equal(routed.facts.some((fact) => fact.field === "professional.fire_alarm"), false);
   const yes = practicePrompt(true, "Is the span over 12.20 m?");
   assert.match(yes.lead, /Name the registered professional/);
   assert.match(yes.lead, /does not state their engineering judgment/);
