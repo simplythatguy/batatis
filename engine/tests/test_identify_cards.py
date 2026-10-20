@@ -71,11 +71,30 @@ def test_sentence_comes_only_from_one_stored_or_codedb_match():
     assert card['title'] == 'Soffit'
     assert card['why'] == article['reason']
     assert card['verifier_status'] == 'unknown'
-    assert card['snippet'] and len(card['snippet'].split()) <= 25
-    assert card['explainer']['label'] == 'explanation'
-    assert card['explainer']['source'] == 'deterministic'
-    assert 'This is an explanation of the quoted text.' in card['explainer']['text']
+    assert card['snippet'] is None and card['explainer'] is None
+    assert 'quote' not in card
+    assert card['page'] is None and card['benchmark'] is None
+    assert card['objectives'] == [] and card['functions'] == []
+    assert card['attribution_missing'] is True
     assert 'compli' not in json.dumps(card).lower()
+
+
+class _Sentence:
+    """One codedb sentence, so the explainer is grounded without serving the model quote."""
+
+    def provision(self, provision_id, division='B'):
+        if provision_id == '9.9.10.1.(2)':
+            return {
+                'id': provision_id,
+                'text': 'The window shall provide an unobstructed opening.',
+                'pdf_page': 873,
+                'attributions': [],
+                'citation': 'stored citation',
+            }
+        return None
+
+    def definition(self, code):
+        return None
 
 
 def test_a_compliance_claim_stays_out_of_the_explainer():
@@ -95,7 +114,7 @@ def test_a_compliance_claim_stays_out_of_the_explainer():
             },
         }]},
         'trace': {'verifier': {'picks': ['9.9.10.1.']}},
-    }, None, 'live')
+    }, _Sentence(), 'live')
     card = shaped['articles'][0]
     assert card['verifier_status'] == 'candidate'
     assert card['benchmark_acceptable_solution'] == '9.9.10.1.(2)'
@@ -120,6 +139,7 @@ def test_bm25_cards_commit_nothing():
     assert card['status'] == 'unknown' and card['verifier_status'] == 'unknown'
     assert card['decision'] is None and card['open_question_id'] is None
     assert card['provision_id'] == '9.10.15.5.(8)'
+    assert 'quote' not in card and card['snippet'] is None
 
 
 def test_http_demo_cards_and_stored_get_match(tmp_path, monkeypatch):
@@ -139,10 +159,12 @@ def test_http_demo_cards_and_stored_get_match(tmp_path, monkeypatch):
     assert card['benchmark_acceptable_solution'] == '9.10.15.5.(8)'
     assert card['link'] == '/code/9.10.15.5.?division=B'
     assert card['title']
-    assert 1 <= len(card['snippet'].split()) <= 25
+    assert card['snippet'] is None and 'quote' not in card
+    assert 'constructed above the exposing building face' not in response.text
+    assert card['page'] is None and card['benchmark'] is None
+    assert card['attribution_missing'] is True
     assert card['verifier_status'] == 'unknown'
     assert card['why']
-    assert card['explainer']['label'] == 'explanation'
     assert 'compli' not in json.dumps(body).lower()
     assert client.get(f'/cases/{case_id}').json()['provisions'] == []
     stored = client.get(f'/cases/{case_id}/identify')
@@ -202,3 +224,15 @@ def test_snippet_is_a_codedb_sentence_prefix_when_the_database_is_present():
     assert flat.startswith(card['snippet'])
     assert len(card['snippet'].split()) <= 25
     assert card['snippet'] in flat
+    assert card['snippet'] != flat and 'quote' not in card
+    assert card['page'] == codes.provision('9.10.15.5.(8)', 'B')['pdf_page']
+    assert card['printing'] == '2nd'
+    assert card['url'].startswith('https://nrc-publications.canada.ca/')
+    assert card['objectives'] == [{'id': 'OP3.1', 'label': codes.definition('OP3.1')['title']}]
+    assert card['functions'] == [{'id': 'F03', 'label': codes.definition('F03')['title']}]
+    assert card['attribution_missing'] is False
+    assert card['benchmark']['required_value'] == 0.45
+    assert card['benchmark']['required_unit'] == 'm'
+    assert card['benchmark']['proposed_value'] is None and card['benchmark']['comparison'] is None
+    assert card['explainer']['quote'] == card['snippet']
+    assert len(card['explainer']['quote'].split()) <= 25

@@ -9,6 +9,8 @@ from __future__ import annotations
 import re
 
 from engine.codes import CodeDbMissing, Codes
+from engine.identify.publication import publication
+from engine.identify.requirement import benchmark as requirement_benchmark
 
 _ARTICLE = re.compile(r'^(\d+(?:\.\d+){3}\.)')
 _SENTENCE = re.compile(r'^\d+(?:\.\d+){3}\.\(\d+\)$')
@@ -42,7 +44,7 @@ def empty_bm25() -> dict:
     }
 
 
-def present(result: dict, codes: Codes | None, mode: str) -> dict:
+def present(result: dict, codes: Codes | None, mode: str, facts=None) -> dict:
     """Attach card fields and set the HTTP mode. Idempotent for an already shaped payload."""
     result['mode'] = mode
     stored = _stored_rows(result)
@@ -60,10 +62,12 @@ def present(result: dict, codes: Codes | None, mode: str) -> dict:
         result['source'] = 'live'
         result['cached'] = False
     result['persisted'] = False
+    source = publication()
     shaped = []
     for index, article in enumerate(result.get('articles') or [], start=1):
-        shaped.append(_card(article, index, stored, codes, result, mode))
+        shaped.append(_card(article, index, stored, codes, result, mode, facts, source))
     result['articles'] = shaped
+    _guard_quotes(result)
     return result
 
 
@@ -127,20 +131,54 @@ def _sentence_id(article_id: str, quote: str | None, stored: list[dict], codes: 
     return None
 
 
-def _snippet(sentence_id: str | None, quote: str | None, stored: list[dict], codes: Codes | None) -> str | None:
-    text = None
-    if sentence_id:
-        record = _provision(codes, sentence_id)
-        if record and record.get('text'):
-            text = record['text']
-        if text is None:
-            for row in stored:
-                if row.get('provision_id') == sentence_id:
-                    text = (row.get('explainer') or {}).get('quote')
-                    break
-    if text is None:
-        text = quote
-    return _words(text)
+def _page(record: dict | None) -> int | None:
+    if not record:
+        return None
+    page = record.get('pdf_page')
+    return page if isinstance(page, int) else None
+
+
+def _terms(record: dict | None, codes: Codes | None) -> tuple[list[dict], list[dict], bool]:
+    """Objective and function ids from attribution rows. Labels are definition titles."""
+    rows = (record or {}).get('attributions') or []
+    if not rows:
+        return [], [], True
+    objectives: list[dict] = []
+    functions: list[dict] = []
+    seen_objectives: list[str] = []
+    seen_functions: list[str] = []
+    for row in rows:
+        for objective in row.get('objectives') or []:
+            if objective in seen_objectives:
+                continue
+            seen_objectives.append(objective)
+            objectives.append({'id': objective, 'label': _label(codes, objective)})
+        for function in row.get('fs') or []:
+            if function in seen_functions:
+                continue
+            seen_functions.append(function)
+            functions.append({'id': function, 'label': _label(codes, function)})
+    return objectives, functions, False
+
+
+def _label(codes: Codes | None, code: str) -> str | None:
+    if codes is None or not hasattr(codes, 'definition'):
+        return None
+    defined = codes.definition(code)
+    title = (defined or {}).get('title') if isinstance(defined, dict) else None
+    return title if isinstance(title, str) and title.strip() else None
+
+
+def _guard_quotes(node) -> None:
+    """No served quote is longer than 25 words. Article cards drop `quote` before this runs."""
+    if isinstance(node, dict):
+        if isinstance(node.get('quote'), str):
+            node['quote'] = _words(node['quote'])
+        for value in node.values():
+            _guard_quotes(value)
+    elif isinstance(node, list):
+        for item in node:
+            _guard_quotes(item)
 
 
 def _citation(sentence_id: str | None, article_id: str, stored: list[dict], codes: Codes | None) -> str | None:
@@ -190,10 +228,16 @@ def _finish(article: dict, result: dict, mode: str) -> dict:
     return article
 
 
-def _explainer(article: dict, sentence_id: str | None, quote: str | None, snippet: str | None,
-               stored: list[dict]) -> dict | None:
+def _explainer(article: dict, sentence_id: str | None, snippet: str | None, stored: list[dict]) -> dict | None:
+    if not snippet:
+        return None
     if article.get('explainer') and article['explainer'].get('label') == 'explanation':
-        return article['explainer']
+        kept = dict(article['explainer'])
+        kept['quote'] = snippet
+        if _COMPLIANCE.search(kept.get('text') or ''):
+            kept['text'] = EXPLANATION_NOTE
+            kept['source'] = 'deterministic'
+        return kept
     row = next((item for item in stored if sentence_id and item.get('provision_id') == sentence_id), None)
     existing = (row or {}).get('explainer') or {}
     source = existing.get('source') if existing.get('source') in {'deterministic', 'ai_written'} else 'deterministic'
@@ -201,9 +245,6 @@ def _explainer(article: dict, sentence_id: str | None, quote: str | None, snippe
     if _COMPLIANCE.search(text):
         source = 'deterministic'
         text = ''
-    grounded = snippet or _words(existing.get('quote') or quote)
-    if not grounded:
-        return None
     if not text:
         named = sentence_id or article.get('provision') or 'the quoted provision'
         text = f'Division B {named} is quoted from the code database.'
@@ -212,27 +253,49 @@ def _explainer(article: dict, sentence_id: str | None, quote: str | None, snippe
     if _COMPLIANCE.search(text):
         text = EXPLANATION_NOTE
         source = 'deterministic'
-    return {'text': text, 'quote': grounded, 'source': source, 'label': 'explanation'}
+    return {'text': text, 'quote': snippet, 'source': source, 'label': 'explanation'}
 
 
-def _card(article: dict, rank: int, stored: list[dict], codes: Codes | None, result: dict, mode: str) -> dict:
-    if article.get('verifier_status') and article.get('explainer', {}).get('label') == 'explanation':
-        article['rank'] = rank
-        return _finish(article, result, mode)
-    article_id = article.get('provision') or ''
-    quote = article.get('quote')
-    sentence_id = _sentence_id(article_id, quote, stored, codes)
-    snippet = _snippet(sentence_id, quote, stored, codes)
-    card = dict(article)
-    card.update({
-        'rank': rank,
-        'provision_id': sentence_id,
-        'link': f'/code/{article_id}?division=B' if article_id else None,
-        'citation': _citation(sentence_id, article_id, stored, codes),
-        'title': article.get('title'),
-        'snippet': snippet,
-        'why': article.get('reason'),
-        'benchmark_acceptable_solution': sentence_id,
-        'explainer': _explainer(article, sentence_id, quote, snippet, stored),
-    })
+def _annotate(card: dict, sentence_id: str | None, codes: Codes | None, facts, source: dict,
+              stored: list[dict]) -> dict:
+    """Codedb fields. Snippet and the requirement are read from the sentence, never from a model quote."""
+    card.pop('quote', None)
+    card.pop('text', None)
+    record = _provision(codes, sentence_id) if sentence_id else None
+    sentence = record.get('text') if record and record.get('id') == sentence_id else None
+    snippet = _words(sentence) if sentence else None
+    card['snippet'] = snippet
+    card['url'] = source.get('url')
+    card['printing'] = source.get('printing')
+    card['page'] = _page(record)
+    objectives, functions, missing = _terms(record, codes)
+    card['objectives'] = objectives
+    card['functions'] = functions
+    card['attribution_missing'] = missing
+    card['benchmark'] = requirement_benchmark(sentence_id, sentence, facts)
+    card['explainer'] = _explainer(card, sentence_id, snippet, stored)
+    return card
+
+
+def _card(article: dict, rank: int, stored: list[dict], codes: Codes | None, result: dict, mode: str,
+          facts, source: dict) -> dict:
+    shaped = bool(article.get('verifier_status') and (article.get('explainer') or {}).get('label') == 'explanation')
+    if shaped:
+        card = article
+        card['rank'] = rank
+        sentence_id = card.get('provision_id')
+    else:
+        article_id = article.get('provision') or ''
+        sentence_id = _sentence_id(article_id, article.get('quote'), stored, codes)
+        card = dict(article)
+        card.update({
+            'rank': rank,
+            'provision_id': sentence_id,
+            'link': f'/code/{article_id}?division=B' if article_id else None,
+            'citation': _citation(sentence_id, article_id, stored, codes),
+            'title': article.get('title'),
+            'why': article.get('reason'),
+            'benchmark_acceptable_solution': sentence_id,
+        })
+    _annotate(card, sentence_id, codes, facts, source, stored)
     return _finish(card, result, mode)

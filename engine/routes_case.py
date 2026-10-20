@@ -173,7 +173,7 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
                     raise
         else:
             raw, mode = _without_provider(prose, facts, on_stage)
-        result = present(raw, _codes_or_none(), mode)
+        result = present(raw, _codes_or_none(), mode, facts)
         overlay_decisions(result, cases().get(case_id))
         cases().put_identify(case_id, result)
         if on_stage:

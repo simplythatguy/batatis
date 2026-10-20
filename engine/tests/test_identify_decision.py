@@ -119,6 +119,13 @@ def test_yes_becomes_a_user_click_citation(tmp_path, monkeypatch):
     assert citation['source']['type'] == 'user_click'
     assert citation['source']['ref'] == ARTICLE and citation['value'] == ARTICLE
     assert citation['status'] == 'confirmed'
+    assert decided.json()['section_c_row'] == [{
+        'provision': '9.10.15.5.(1)',
+        'objectives': [],
+        'functions': [],
+        'intent': 'lookup not available',
+        'attribution_missing': True,
+    }]
 
 
 def test_redecision_is_idempotent(tmp_path, monkeypatch):
@@ -136,6 +143,7 @@ def test_redecision_is_idempotent(tmp_path, monkeypatch):
     assert accepted.status_code == 200
     assert accepted.json()['articles'][0]['decision'] == 'yes'
     assert accepted.json()['articles'][0]['open_question_id'] is None
+    assert accepted.json()['section_c_row'][0]['intent'] == 'lookup not available'
     gaps = client.get(f'/cases/{case_id}/gaps').json()
     assert all(item['id'] != question_id for item in gaps)
     saved = client.get(f'/cases/{case_id}').json()
@@ -150,6 +158,7 @@ def test_redecision_is_idempotent(tmp_path, monkeypatch):
     assert rejected.status_code == 200
     card = rejected.json()['articles'][0]
     assert card['decision'] == 'no' and card['excluded'] is True and card['open_question_id'] is None
+    assert rejected.json()['section_c_row'] is None
     saved = client.get(f'/cases/{case_id}').json()
     assert saved['provisions'] == []
     assert not any(fact['field'].startswith(('citation.', 'open_question.')) for fact in saved['facts'])

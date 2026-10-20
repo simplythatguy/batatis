@@ -90,17 +90,45 @@ Each item in `articles` keeps `provision` (the Division B article id) and adds t
 | `provision` | string | Article id, such as `9.10.15.5.` |
 | `provision_id` | string or null | Sentence id, such as `9.10.15.5.(8)`, when resolved as above. |
 | `link` | string | Article lookup, `/code/{provision}?division=B`. |
+| `url` | string or null | NRC publication URL from `codedb/source_manifest.json` (`nbc_ae.url`). Null when that manifest entry is missing. |
+| `printing` | string or null | `2nd` only when the manifest path, jsonl, or `printing` field proves a 2nd printing. Otherwise null. It is not hardcoded. |
+| `page` | number or null | `pdf_page` of the resolved codedb sentence. Null when the sentence is unknown or the database is not open. |
 | `citation` | string or null | Citation copied from codedb, or from the stored Section C row when the database is not open. |
 | `title` | string | Article title from the identify result. |
-| `snippet` | string or null | First 25 words of the resolved codedb sentence, or of the stored quote when the database is not open. Whitespace collapsed. Not a paraphrase. |
+| `snippet` | string or null | First 25 words of the resolved codedb sentence, whitespace collapsed. Verbatim codedb text. Null when that sentence is not open. Not a paraphrase and not a stored quote. |
 | `status` | string | Ranking hint. `suggested` when the model probability is at least 0.75 and the suggest cap and part rule would have marked it. `candidate` when a verifier ran and the article is not suggested. `unknown` for BM25 and for a cached demo replay. This is not an acceptance. |
 | `verifier_status` | string | The same value as `status`. |
 | `decision` | string or null | `yes`, `no`, or `not_sure` after `POST .../decision`. Null until the user decides. |
 | `open_question_id` | string or null | Stable id of the open question when `decision` is `not_sure`. Otherwise null. |
 | `excluded` | boolean | True when `decision` is `no`. |
 | `why` | string or null | The match reason already on the article. |
+| `objectives` | list | `{ "id", "label" }` from codedb attribution rows on the resolved sentence. `label` is the definition title. Empty when there are no rows. |
+| `functions` | list | `{ "id", "label" }` from those same attribution rows. Empty when there are no rows. |
+| `attribution_missing` | boolean | True when the resolved sentence has no attribution rows. The lists stay empty. Nothing is generated. |
 | `benchmark_acceptable_solution` | string or null | The resolved sentence id. Null when the sentence is unknown. |
-| `explainer` | object or null | `{ "text", "quote", "source", "label" }`. `label` is `explanation`. `source` is `deterministic` or `ai_written`. `quote` is the snippet. A reason that claims the design meets the Code stays off `text`; `source` stays `deterministic`. Null when there is no quote to ground it. |
+| `benchmark` | object or null | Numeric comparison for the resolved sentence, or null when that sentence text is not open. See below. Distinct from the top-level acceptable-solution `benchmark`. |
+| `explainer` | object or null | `{ "text", "quote", "source", "label" }`. `label` is `explanation`. `source` is `deterministic` or `ai_written`. `quote` is the snippet. A reason that claims the design meets the Code stays off `text`; `source` stays `deterministic`. Null when there is no codedb snippet to ground it. |
+
+The article card does not include `quote`. A full code sentence is not served. Any other `quote` on the identify response, including the top-level acceptable-solution benchmark, is capped at 25 words. `snippet` and `benchmark.requirement_snippet` are the only code text on the card, and both are verbatim codedb text of 25 words or fewer. The card links `url` to the NRC publication.
+
+`objectives` and `functions` are copied from codedb attribution rows and definition titles. They are never produced by a model. No rows means `[]` and `attribution_missing: true`.
+
+`benchmark` on the article:
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `provision_id` | string | The resolved sentence. |
+| `requirement_snippet` | string or null | The requirement phrase, 25 words or fewer, verbatim from that sentence. |
+| `required_value` | number or null | The number in that phrase. |
+| `required_unit` | string or null | The unit as printed in the sentence, such as `m²`. |
+| `proposed_value` | number or null | The number from one accepted case fact. |
+| `proposed_unit` | string or null | The unit as written on that fact. |
+| `fact_id` | string or null | Id of the accepted fact. Null when `proposed_value` is null. |
+| `comparison` | string or null | `below`, `above`, or `equal` when both numbers exist and the units match. Otherwise null. |
+
+`required_*` come from a deterministic parse of the codedb sentence. A requirement is a phrase such as "not less than" or "not more than" plus one number and one unit. Zero requirements, or more than one requirement that accepted facts do not narrow to a single unit, leave `required_*` null. A model quote is not parsed. Demo case C is the check: Bedroom 3's accepted clear opening is `0.312 m²` (400 mm × 780 mm on the drawing note). Sentence 9.9.10.1.(2) states `not less than 0.35 m²` and `no dimension less than 380 mm`. The accepted area fact selects the square-metre requirement, so `comparison` is `below`. An unconfirmed `0.31 m²` is not used. A fact whose value is `400 mm × 780 mm` is not one number and is not used.
+
+`proposed_*` are copied from a fact with status `confirmed` whose value is one number and one unit. The response cites that fact in `fact_id`. An unconfirmed fact, a `citation.*` fact, and an `open_question.*` fact are not proposals.
 
 `explainer.text` says it is an explanation of the quoted text. It is not a finding that the design meets the Code.
 
@@ -111,6 +139,8 @@ Each item in `articles` keeps `provision` (the Division B article id) and adds t
 `POST /cases/{id}/identify/{provision_id}/decision` with `{ "decision": "yes" | "no" | "not_sure" }` records the user's choice for one ranked article. `provision_id` may be the article id (`9.10.15.5.`) or the sentence id on that card. The same decision posted again does not add a second citation or a second question.
 
 `yes` writes one case citation: a confirmed fact whose `source.type` is `user_click`, whose `source.ref` is the article id, and whose field is `citation.{article}`. That article is added to `provisions`, and Section C is the deterministic lookup for the case provisions. A second `yes` keeps the same fact id.
+
+The `yes` response includes `section_c_row`, the rows written for that article, so the Section C table can fill from this response. Each row is `{ "provision", "objectives", "functions", "intent", "attribution_missing" }`. `objectives` and `functions` are `{ "id", "label" }` from the attribution lookup. `intent` is the codedb intent text. When the lookup has no intent text, `intent` is `lookup not available`. `no` and `not_sure` set `section_c_row` to null.
 
 `not_sure` removes that citation and opens one question. The question id is stable for the case and article. The text names the article and asks whether it applies. `GET /cases/{id}/gaps` includes it (`section` `C`, `severity` `warning`, `id` equal to `open_question_id`). `GET /cases/{id}/information-request` includes the same id, the article, and the question text in `items`.
 
