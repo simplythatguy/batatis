@@ -44,7 +44,6 @@
         },
         "section_c": [
           {
-            "provision": "9.10.15.5.(8)",
             "division": "B",
             "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.15.5.(8) [PDF p.904]",
             "attribution_status": "direct",
@@ -59,7 +58,8 @@
               "text": "Division B 9.10.15.5.(8) is quoted from the code database. Attribution status: direct. Objectives: OP3.1. Functions: F03. NBC 2020 Intent Statements, explanatory only.",
               "quote": "8) Except as provided in Sentence (10), where the exposing building face has a limiting distance of not more than 0.45 m, projecting roof soffits shall not be constructed above the exposing building face. (See Note A-3.2.3.6.(2).)",
               "source": "deterministic"
-            }
+            },
+            "provision_id": "9.10.15.5.(8)"
           }
         ]
       },
@@ -171,7 +171,6 @@
         },
         "section_c": [
           {
-            "provision": "9.10.13.13.(1)",
             "division": "B",
             "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.13.13.(1) [PDF p.893]",
             "attribution_status": "direct",
@@ -191,7 +190,8 @@
               "text": "Division B 9.10.13.13.(1) is quoted from the code database. Attribution status: direct. Objectives: OS1.2, OP1.2. Functions: F03. NBC 2020 Intent Statements, explanatory only.",
               "quote": "1) Except as permitted by Sentences (2) to (5), 9.10.5.1.(3) and 9.10.9.9.(5), a duct that penetrates an assembly required to be a fire separation with a fire-resistance rating shall be equipped with a fire damper in conformance with",
               "source": "deterministic"
-            }
+            },
+            "provision_id": "9.10.13.13.(1)"
           }
         ]
       },
@@ -314,7 +314,6 @@
         },
         "section_c": [
           {
-            "provision": "3.4.2.1.(1)",
             "division": "B",
             "citation": "NBC(AE) 2023 p2, Div B, Sentence 3.4.2.1.(1) [PDF p.269]",
             "attribution_status": "direct",
@@ -364,7 +363,8 @@
               "text": "Division B 3.4.2.1.(1) is quoted from the code database. Attribution status: direct. Objectives: OS3.7, OS1.2, OP1.2. Functions: F10, F12, F05, F06. NBC 2020 Intent Statements, explanatory only.",
               "quote": "1) Except as permitted by Sentences (2) to (4), every floor area intended for occupancy shall be served by at least 2 exits.",
               "source": "deterministic"
-            }
+            },
+            "provision_id": "3.4.2.1.(1)"
           }
         ]
       },

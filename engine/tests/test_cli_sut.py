@@ -22,7 +22,7 @@ def test_commits_only_part9_above_threshold_and_builds_section_c(monkeypatch):
     assert 0 < len(committed) <= cli_sut.MAX_COMMITS
     assert all(a['part'] == 9 and a['probability'] >= cli_sut.COMMIT_THRESHOLD for a in committed)
     assert any(a['part'] != 9 and a['probability'] >= cli_sut.COMMIT_THRESHOLD and not a['committed'] for a in arts)
-    assert out['section_c'] and all(any(r['provision'].startswith(a['provision']) for a in committed)
+    assert out['section_c'] and all(any(r['provision_id'].startswith(a['provision']) for a in committed)
                                     for r in out['section_c'])
     pair = next(p for r in out['section_c'] for p in r['pairs'])
     assert set(pair) == {'function', 'objective', 'condition'}

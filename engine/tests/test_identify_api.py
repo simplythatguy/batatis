@@ -139,6 +139,7 @@ def test_demo_cache_matches_the_three_descriptions_and_keeps_short_quotes():
         quote = payload['benchmark']['quote']
         assert quote and len(quote) <= 240
         row = payload['benchmark']['section_c'][0]
+        assert row['provision_id'] and 'provision' not in row
         assert row['explainer']['source'] == 'deterministic'
         assert 'compli' not in json.dumps(payload).lower()
         assert '9.9.4.4' not in json.dumps(payload)
@@ -182,7 +183,7 @@ def test_exact_demo_description_is_cached_without_a_model_or_a_database(tmp_path
 
 def test_quote_checked_reason_is_ai_written_unless_it_claims_compliance():
     rows = [{
-        'provision': '9.10.15.5.(8)',
+        'provision_id': '9.10.15.5.(8)',
         'explainer': {'text': 'Division B quote.', 'quote': 'projecting roof soffits shall not', 'source': 'deterministic'},
     }]
     overlay_ai_explainers(rows, {
@@ -192,7 +193,7 @@ def test_quote_checked_reason_is_ai_written_unless_it_claims_compliance():
     assert rows[0]['explainer']['source'] == 'ai_written'
     assert rows[0]['explainer']['quote'] == 'projecting roof soffits shall not'
     claimed = [{
-        'provision': '9.10.15.5.(8)',
+        'provision_id': '9.10.15.5.(8)',
         'explainer': {'text': 'Division B quote.', 'quote': 'projecting roof soffits shall not', 'source': 'deterministic'},
     }]
     overlay_ai_explainers(claimed, {
@@ -217,7 +218,7 @@ def test_quote_checked_reason_is_ai_written_unless_it_claims_compliance():
             )], dropped=[])
 
     out = run('soffit variance on the side yard', arts=arts, codes=codes, ranker='bm25', verifier=Verifier())
-    explained = [row for row in out['benchmark']['section_c'] if row['provision'] == '9.10.15.5.(8)']
+    explained = [row for row in out['benchmark']['section_c'] if row['provision_id'] == '9.10.15.5.(8)']
     assert explained and explained[0]['explainer']['source'] == 'ai_written'
     assert 'projecting roof soffits' in explained[0]['explainer']['quote']
     assert 'compli' not in explained[0]['explainer']['text'].lower()

@@ -31,6 +31,8 @@ The same function serves `engine/cli_sut.py`. Identify does not write `provision
 
 That sentence is not a compliance finding. `intake_action` is `redirect` for a request that belongs to the plumbing, electrical, gas, or private-sewage regime, which is where the development-case gold schema uses `redirect`. `redirect_to` names that regime.
 
+Each item in `section_c`, including the rows under `benchmark.section_c`, uses `provision_id`, the same field as `SectionCRow`.
+
 `benchmark` is one Division B article the proposal is measured against, or `identified: false` plus a question. `commit_policy.status` is `placeholder_uncalibrated` for the 0.75 threshold and the cap of 3 until `evals_dev/human_key/calibration.json` says `calibrated`.
 
 `POST /cases/{id}/identify/confirm` with `{"provisions": ["9.10.15.5.(8)"]}` checks each id in the code database, then writes `provisions` and Section C. An unknown id returns 404 and leaves the case unchanged.

@@ -61,7 +61,7 @@ def section_c_dicts(article_ids: list[str], codes: Codes) -> list[dict]:
                 continue
             seen.add(key)
             pairs.append({'function': pair.function, 'objective': pair.objective, 'condition': pair.application_note})
-        item = {'provision': row.provision_id, 'division': 'B', 'citation': row.citation,
+        item = {'provision_id': row.provision_id, 'division': 'B', 'citation': row.citation,
                 'attribution_status': row.attribution_status, 'pairs': pairs}
         if row.explainer:
             item['explainer'] = row.explainer.model_dump()
@@ -136,7 +136,7 @@ def overlay_ai_explainers(rows: list[dict], by_pick: dict) -> None:
     A reason that claims compliance is left off the row. The quote stays the codedb sentence.
     """
     for row in rows:
-        match = _ARTICLE.search(row.get('provision') or '')
+        match = _ARTICLE.search(row.get('provision_id') or '')
         pick = by_pick.get(match.group(1)) if match else None
         if pick is None:
             continue
