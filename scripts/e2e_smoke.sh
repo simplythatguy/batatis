@@ -2,9 +2,10 @@
 # Hand check of the case flow against a live uvicorn engine.api:app.
 #
 # Creates a case, posts one fact, then requests gaps and export. The upload
-# runs only when OpenAPI lists POST /cases/{case_id}/files. Otherwise the
-# script prints "skip upload: route not served" and continues. The PDF is not
-# a user file and contains no code text. Uploads stay in that temp directory.
+# is probed with POST /cases/{id}/files. A 404 or 405 prints
+# "upload: route not on this branch, skipped" and the script continues. The
+# PDF is not a user file and contains no code text. Uploads stay in that temp
+# directory.
 #
 # Gaps and export need the code database. When it is absent those two steps
 # expect HTTP 503 {"detail":"code database not found"} and the script exits 0.
@@ -87,8 +88,11 @@ curl -sf -X POST "$BASE/cases/${case_id}/facts" \
   >/dev/null
 
 echo "upload"
-openapi="$(curl -sf "$BASE/openapi.json")"
-if printf '%s' "$openapi" | "$PY" -c 'import json,sys; raise SystemExit(0 if "/cases/{case_id}/files" in json.load(sys.stdin).get("paths", {}) else 1)'; then
+probe_code="$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/cases/${case_id}/files" || true)"
+if [[ "$probe_code" == "404" || "$probe_code" == "405" ]]; then
+  echo "upload: route not on this branch, skipped"
+  upload_step="upload skipped"
+else
   "$PY" -c 'from reportlab.pdfgen import canvas; c=canvas.Canvas("'"$WORK"'/sheet.pdf"); c.drawString(36,72,"SYNTHETIC e2e attachment"); c.showPage(); c.save()'
   uploaded="$(curl -sf -X POST "$BASE/cases/${case_id}/files" -F "file=@${WORK}/sheet.pdf;type=application/pdf")"
   file_id="$(printf '%s' "$uploaded" | json_field id)"
@@ -99,9 +103,6 @@ if printf '%s' "$openapi" | "$PY" -c 'import json,sys; raise SystemExit(0 if "/c
   cmp -s "$WORK/sheet.pdf" "$stored"
   echo "stored bytes ${file_id} (${file_name})"
   upload_step="upload"
-else
-  echo "skip upload: route not served"
-  upload_step="skip upload"
 fi
 
 db_present="$("$PY" -c 'from engine.codes import default_db; print("yes" if default_db().is_file() else "no")')"
