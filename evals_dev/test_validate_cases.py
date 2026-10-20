@@ -25,7 +25,10 @@ def cases():
 
 def test_all_cases_pass(con, cases):
     errors, counts = vc.validate(cases, con)
-    assert errors == [] and counts['cases'] == 25
+    expected_ids = [f'dev-{n:03}' for n in range(1, 61)]
+    assert errors == [] and counts['cases'] == 60
+    assert [c['id'] for c in cases] == expected_ids
+    assert [p.stem for p in CASES] == expected_ids
 
 
 def by_id(cases, cid):
@@ -47,7 +50,7 @@ def test_rejects_invented_provision(con, cases):
 
 
 def test_rejects_invented_row_for_no_row_sentence(con, cases):
-    c = by_id(cases, 'dev-004')  # 9.10.14.2.(2) has no table row
+    c = by_id(cases, 'dev-004')  # 9.10.15.2.(3) has no table row
     c['gold']['section_c'][0]['pairs'] = ['[F03-OP3.1]']
     errors, _ = vc.validate([c], con)
     assert any('pairs' in e for e in errors)

@@ -5,14 +5,15 @@
   "code_part": 3,
   "jurisdiction": "Calgary",
   "seed_provision": "3.4.2.3.(1)",
-  "description": "On an eight-storey office, the two required exits from each 1,200 m2 floor would be only 4 m apart along an open public corridor. The maximum floor diagonal is 30 m. There is no intervening fire separation that lengthens the smoke path or divides the floor into separate zones. We want to keep both stairs in this compact core.",
+  "description": "On an eight-storey office, the two required exits from each 1,200 m2 floor would be only 4 m apart along an open public corridor. The rectangular floor is 30 m by 40 m, so its maximum diagonal is 50 m. There is no intervening fire separation that lengthens the smoke path or divides the floor into separate zones. We want to keep both stairs in this compact core.",
   "known_facts": [
     "eight-storey office",
     "two required exits",
     "floor area 1200 m2",
-    "maximum diagonal 30 m",
+    "maximum diagonal 50 m",
     "shortest smoke path between exits 4 m",
-    "public corridor with no intervening fire separation"
+    "public corridor with no intervening fire separation",
+    "rectangular floor 30 m by 40 m"
   ],
   "missing_info": [
     {

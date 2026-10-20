@@ -5,6 +5,11 @@ performed the review and new authoring in the isolated `t3/c1caa94e` worktree, s
 `df9440387f0a790dedc97aefb916e24232eebaf1`. No further agents were delegated. The parent maintenance
 result was reused as instructed. October 29 remains the stated project deadline.
 
+The tooling integration repair resumed from dataset commit `37f04bf01c15d629988b69c8a6ec950562c4bcbd`
+with expanded ownership of the author script, tests, schema documentation and the independently
+reported `dev-027` geometry correction. The current full `evals_dev` suite is green; the former
+integration blockers and their resolutions are recorded below.
+
 The 25 inherited cases were checked against provision text, applicability, permissions/exceptions,
 Division C professional-involvement rules and exact Section C lookup output. Nineteen files were
 revised, including explicit changes to synthetic applicant facts where necessary to make the intended
@@ -128,7 +133,7 @@ structural capacity, air leakage or vapour permeance**.
 | Case | Scenario / deciding distinction | Seed; PDF page | Action |
 | --- | --- | --- | --- |
 | dev-026 | Assembly hall, 120 occupants, one exit; occupant-load condition fails. | 3.4.2.1.(1); 269 | proceed_conditionally |
-| dev-027 | Office exits only 4 m apart with no intervening fire separation. | 3.4.2.3.(1); 271 | proceed_conditionally |
+| dev-027 | Office exits only 4 m apart; 30 × 40 m rectangular floor has a 50 m diagonal and no intervening fire separation. | 3.4.2.3.(1); 271 | proceed_conditionally |
 | dev-028 | Doorway directly through separation between scissors stairs. | 3.4.4.4.(3); 275 | proceed_conditionally |
 | dev-029 | Shared laundry opens directly into an exit. | 3.4.4.4.(8); 275 | proceed_conditionally |
 | dev-030 | Common office exit door swings against exit travel. | 3.4.6.12.(1); 281 | proceed_conditionally |
@@ -199,7 +204,21 @@ alternative evidence is adequate. Risk assessment, mitigating measures, assumpti
 supporting documents remain applicant/professional work. No Section D opinion or invented test
 result, approval, certification or engineering calculation was authored.
 
-## Verification and integration limits
+## Independent model fixture consistency correction
+
+The parent relayed an independent source-review model's finding that `dev-027` combined a 1,200 m²
+floor with a maximum diagonal of 30 m, which is geometrically impossible. Corrected the applicant
+description and known facts to a **30 × 40 m rectangle with a 50 m diagonal**: area 1,200 m² and
+diagonal `sqrt(30² + 40²) = 50 m`. Gold labels, intake action, Section C values and the original
+authoring receipt are unchanged.
+
+The 4 m exit separation remains below the capped 9 m requirement: one-half of 50 m is 25 m, capped
+at 9 m for the stated public-corridor case. Source: **Div B 3.4.2.3.(1)(a), PDF p.271**. This is an
+independent **model** fixture-consistency correction reported by the parent, not human review, a
+professional opinion or an additional claim about source-label accuracy. This worker did not spawn
+another reviewer.
+
+## Verification and integration repair
 
 The initial 25-file validator run passed: 107 citation checks, 21 Section C rows, 56 attribution
 brackets/conditions and three no-row sentences. The following final results apply to the revised
@@ -215,28 +234,39 @@ Final validator totals: **60 cases, 249 citation checks, 39 Section C rows, 68 a
 brackets/conditions and nine no-row sentences**. These are database-conformance checks, not a semantic
 accuracy score. The final rows cover `direct` and `none` statuses; there are no nonempty conditional
 rows or `clause_level` rows in this set. Equality checks therefore do not establish positive coverage
-of those attribution shapes. A final semantic pass also corrected the new `dev-052` seed from the general suite
+of those attribution shapes in the 60 reviewed narratives. The refresher's focused CLI test does exercise
+a nonempty conditional attribution against the real database in a temporary copy; that is tooling
+verification, not a new reviewed case. A final semantic pass also corrected the new `dev-052` seed from the general suite
 sentence to the multi-storey-dwelling sentence before committing; its source page remains 886.
 
 ```text
 /Users/aamia/.t3/projects/batatis/.venv/bin/python -m pytest evals_dev -q
-exit 1; 1 failed, 7 passed in 0.07s
-evals_dev/test_validate_cases.py:28, test_all_cases_pass:
-assert errors == [] and counts['cases'] == 25
-errors == []; counts['cases'] == 60
+exit 0; 17 passed in 2.98s
 
-/Users/aamia/.t3/projects/batatis/.venv/bin/python -m pytest evals_dev -q \
-  -k 'not test_all_cases_pass'
-exit 0; 7 passed, 1 deselected in 0.02s
+/Users/aamia/.t3/projects/batatis/.venv/bin/python -m pytest evals_dev/test_author_cases.py -q
+exit 0; 9 passed in 2.92s
+
+/Users/aamia/.t3/projects/batatis/.venv/bin/python evals_dev/author_cases.py \
+  --db /Users/aamia/.t3/projects/batatis/codedb/build/codedb.sqlite
+exit 0; ok: true; mode: check; cases: 60; section_c_rows: 39; changed_cases: []
+
+/Users/aamia/.t3/projects/batatis/.venv/bin/python evals_dev/author_cases.py \
+  --db /Users/aamia/.t3/projects/batatis/codedb/build/codedb.sqlite --check
+exit 0; ok: true; mode: check; cases: 60; section_c_rows: 39; changed_cases: []
+
+/Users/aamia/.t3/projects/batatis/.venv/bin/python evals_dev/author_cases.py \
+  --db /Users/aamia/.t3/projects/batatis/codedb/build/codedb.sqlite --write
+exit 0; ok: true; mode: write; cases: 60; section_c_rows: 39; changed_cases: []
 
 git diff --check
 exit 0
 ```
 
-The full suite is **not green**: its single failure is the unchanged literal 25-case assertion.
-The count-agnostic negative validator checks and public benchmark-family tests pass. The fixture
-validator itself accepts all 60 files. The test file is outside this worker's ownership and was not
-edited or bypassed to claim a full pass. The parent should update the intended cardinality assertion.
+The old `37f04bf` run had seven passing tests and one failure from the literal 25-case assertion.
+The integration repair replaces that assertion with **60 cases and exact contiguous IDs / filenames
+`dev-001`–`dev-060`**. The stale `dev-004` test comment now names 9.10.15.2.(3). No tests are deselected
+for the current full-suite pass. Validation and tests use the current main CodeDB at the path above,
+read-only; its SHA-256 remains the value in the source receipt.
 
 Additional read-only assertions passed for contiguous `dev-001`–`dev-060` IDs, 60 unique descriptions,
 35 new files with exactly six additional asks and two redirects, seed Part consistency, empty
@@ -244,18 +274,35 @@ departure/mandatory citations/Section C for undecided or redirected cases, no cr
 on proceeding cases, exact benchmark-to-Section-C coverage, and exact Section C equality with
 `codedb.lookup(..., db_path=...)` as well as the validator's independent SQLite queries.
 
-Two other integration limits belong to files outside this worker's ownership:
+The other integration repairs are complete:
 
-1. `evals_dev/author_cases.py` still contains the original 25 specs. Rerunning it will overwrite the
-   reviewed original files with its older labels while leaving the new files on disk. The committed
-   JSON files and this ledger are the reviewed outputs; the parent should synchronize that authoring
-   source before using it again.
-2. `SCHEMA.md` describes `null` Part as out-of-scope in its top-level table, while the inherited author
-   and validator also use it for an undecided Part. This work preserves that existing behavior, with
-   `intake_action` and `out_of_scope` disambiguating. The parent should clarify the prose contract.
+1. **One authoring source:** the old 25 embedded specs were removed from `author_cases.py`.
+   Committed JSON is the only source of narratives, semantic labels and authoring receipts. The script
+   derives only `gold.section_c`, using existing Division B benchmark references from `gold.must_cite`;
+   it never selects benchmarks from the seed, scope references or candidate citations. It does not
+   replace authoring metadata or imply a new review. Default / `--check` runs are read-only; only
+   explicit `--write` allows replacements, and only changed cases are written.
+2. **Batch preflight:** the exact file/ID set, JSON parsing, benchmark lookups and the projected set's
+   existing validator checks all finish before any source file is replaced. Six CLI failure tests
+   plant a missing case, malformed JSON, unknown benchmark, invalid professional label, mismatched ID
+   or unexpected case while an earlier file needs a refresh; every run exits 2 and leaves all input
+   bytes unchanged. Replacements are staged first and use per-file atomic renames; this is not a
+   crash-atomic transaction over the entire directory.
+3. **Preservation proof:** CLI tests refresh stale rows while retaining custom applicant wording,
+   later authoring receipts and every non-Section-C JSON value. Corrected `dev-004` / `dev-008`
+   benchmarks and `dev-005` / `dev-011` ask/professional labels remain intact. Repeated writes are
+   idempotent and leave unchanged files byte-for-byte intact. A separate check of the actual 60 files
+   ran default, explicit check and explicit write modes with zero changes; all gold values and
+   authoring receipts still equal `37f04bf`. Only `dev-027`'s description and known facts differ.
+4. **Null Part clarified:** `SCHEMA.md` now distinguishes unresolved route (`ask`, false
+   `out_of_scope`) from a separate regime (`redirect`, true `out_of_scope`). A null Part alone does
+   not decide scope.
 
-Only `evals_dev/cases/` and this review file are durable edits. Engine, web, CodeDB, schema,
-author/validator code, secrets, protected judge storage and archive branches were not modified.
+The initial dataset commit changed only `evals_dev/cases/` and this review. The integration repair
+changes `author_cases.py`, `test_validate_cases.py`, new focused CLI tests, `SCHEMA.md`, this review
+and `cases/dev-027.json`. Engine, web, CodeDB, validator implementation, secrets, protected judge
+storage and archive branches were not modified. The parent owns combined verification beyond this
+worker's `evals_dev` checks.
 No push, merge, deployment, publication or UI feature was performed; visual product evidence does
 not apply to this nonvisual fixture task.
 
@@ -277,3 +324,11 @@ not apply to this nonvisual fixture task.
   acceptable/alternative fork, deterministic Section C and professional-evidence boundaries.
 - [PDF skill](/Users/aamia/.codex/plugins/cache/openai-primary-runtime/pdf/26.1017.11052/skills/pdf/SKILL.md):
   targeted source-table extraction, rendering and visual inspection. No PDF was edited.
+- Integration repair: [Matt Pocock TDD](/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/tdd/SKILL.md)
+  and its [test guidance](/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/tdd/tests.md).
+  Tested the user-authorized CLI boundary: read-only default, explicit deterministic refresh,
+  preservation and batch rejection. Observed failing CLI tests before implementing the new modes,
+  then exercised the real CodeDB and temporary fixture copies without mocks. Reused the T3 router,
+  routes and Batatis domain/variance sources above; pstack evidence/lead-judgment guidance informed
+  the final direct review. No additional delegation or new PDF inspection was performed for the
+  tooling repair; the prior source-page receipt supports the relayed geometry correction.
