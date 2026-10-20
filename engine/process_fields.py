@@ -80,6 +80,15 @@ _FIELDS = (
      '2.3.1.1.(4)'),
 )
 
+PROCESS_ALIASES = {
+    'rationale': ('rationale',),
+    'risk_assessment': ('risk_assessment', 'risk'),
+    'mitigating_measures': ('mitigating_measures', 'mitigation'),
+    'assumptions_and_limits': ('assumptions_and_limits', 'assumptions_limits', 'assumptions'),
+    'maintenance_operation': ('maintenance_operation', 'operation_maintenance'),
+    'qualifications': ('qualifications',),
+}
+
 
 def latest_fact(case: Case, *fields: str) -> Fact | None:
     """The newest entry controls; an unconfirmed revision must not resurrect an older answer."""
@@ -104,7 +113,8 @@ def process_fields(case: Case, codes: Codes) -> list[ProcessField]:
     fields = []
     for fid, label, prompt, structure, pid in _FIELDS:
         answer = None
-        fact = latest_fact(case, f'process.{fid}', fid)
+        aliases = PROCESS_ALIASES[fid]
+        fact = latest_fact(case, *(f'process.{name}' for name in aliases), *aliases)
         if fact is not None:
             try:
                 answer = ApplicantText.from_fact(fact)

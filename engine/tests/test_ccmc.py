@@ -51,6 +51,8 @@ def test_pagination_is_complete_before_negative(tmp_path):
     client = registry(tmp_path, fetch_json=pages.__getitem__, fetch_text=lambda _: '')
     result = client.search('Esgard')
     assert result.source == 'live' and result.results[0].assessment_kind == 'listing'
+    assert result.results[0].message.startswith('found a listing: 03240-L, Esgard,')
+    assert 'found an evaluation' not in result.results[0].message
     assert result.results[0].date is None
 
 

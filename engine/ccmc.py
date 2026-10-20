@@ -239,7 +239,9 @@ class CCMCRegistry:
                 display_date = f'{kind} {modified}' if modified else 'date not available from registry index'
                 results.append(assessment.model_copy(update={'date': modified, 'date_kind': kind,
                     'date_source_url': assessment.report_url if modified else None,
-                    'message': f'found an evaluation: {assessment.number}, {assessment.title}, {display_date}'}))
+                    'message': f'found a listing: {assessment.number}, {assessment.title}, {display_date}'
+                    if assessment.assessment_kind == 'listing' else
+                    f'found an evaluation: {assessment.number}, {assessment.title}, {display_date}'}))
             searched = self.today().isoformat()
             message = (f'Found {len(matches)} registry assessment(s).' if matches else
                        f'no evaluation found in the registry (searched {searched})')
