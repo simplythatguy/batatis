@@ -50,16 +50,19 @@ Repeat the cycle for O5 and beyond. Take a 2-minute break between conditions.
 
 **Confidence:** right after each condition, ask: "How confident are you that your list catches every completeness gap? (1 = not at all, 5 = completely)."
 
+**Open it again (post-session):** after both conditions are timed, ask once: "Would you open this tool again for the next submission you review? Yes / Maybe / No, and one reason."
+
 ## Scoring
 Planted items keep the numbers in the key (1–11). The clean submission has none.
 - **Planted found:** a listed deficiency matches exactly one numbered item when it names that submission and that missing or contradictory field. A synonym counts ("unsigned" matches 7). One broad note matches only the items it names; it does not cover several items at once. A partial mention that does not name the gap does not match. Count each item once.
 - **False positive:** a listed item that matches no numbered item and isn't a real completeness gap in the text. The runner checks each one against the package. A real gap that wasn't planted is logged as "valid, unplanted" and doesn't count as a false positive. Technical-correctness comments are logged separately.
 - **Classification:** whether each submission was called complete or return correctly (3 per package).
+- **Open again:** descriptive only. Report Yes, Maybe and No as counts out of the officers in the round, plus each officer's verbatim reason. Do not combine it with timing results, and do not treat any answer as a pass threshold. Write it once, on that officer's second row.
 
-| Officer | Order | Cond. | Pkg | Time (mm:ss) | Hard found /8 | All found /11 | Recall (all) | FP | Valid unplanted | Classif. /3 | Confidence 1–5 | Technical comments (not scored) |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| O1 | 1 | Manual | first | | | | | | | | | |
-| O1 | 2 | Batatis | second | | | | | | | | | |
+| Officer | Order | Cond. | Pkg | Time (mm:ss) | Hard found /8 | All found /11 | Recall (all) | FP | Valid unplanted | Classif. /3 | Confidence 1–5 | Open again? (post-session) | Technical comments (not scored) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| O1 | 1 | Manual | first | | | | | | | | | | |
+| O1 | 2 | Batatis | second | | | | | | | | | | |
 
 ## Computing results
 - **Recall** = planted gaps found ÷ planted total (11, and separately 8 hard).

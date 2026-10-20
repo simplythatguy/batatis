@@ -22,7 +22,7 @@ Batatis checks alternative-solution (variance) applications under NBC(AE) 2023 f
 3. Get a signed consent form, then follow the script or protocol word for word. Fill in the tables during or right after the session.
 
 ## What the evidence supports
-- **Usability and Portability (10%):** task success, time to a finished application, first stuck point, SUS, and the officer side (would an SCO open it twice?).
+- **Usability and Portability (10%):** task success, time to a finished application, first stuck point, SUS, and the officer side: would an SCO open it again (officer protocol, post-session question).
 - **General Applicability (5%):** results by role (homebuilder, GC, manufacturer, designer, SCO).
 - **Review (10%):** officer time saved vs the manual checklist, gap recall, false positives.
 - **Implementation Plan (10%):** Round 1 findings, then fixes, then the optional retest ("How will the product testing with users inform final design?").
