@@ -2,6 +2,8 @@
 
 ## Section D — evidence issues
 
+Engineer-needed flag: 55/60 agreement on the model-checked dev set (in-sample), 1 under-flag, 13 unknowns sent to the applicant.
+
 `GET /cases/{case_id}/section-d/issues`
 
 Recommendations for the evidence an alternative-solution application must address. The list is administrative. It does not decide that a design complies, is safe, or that a supplied professional opinion is adequate. The route is read-only.
@@ -48,7 +50,7 @@ Process fields are required on the alternative path. They are not rungs of the e
 | `reason` | string | Recommendation tied to the rule. |
 | `question` | string or null | Required when `value` is `"unknown"`. |
 
-Confirmed `professional.span_m` (or `span_m`) above 12.20 m is recorded as Part 4 design. The cited rule is Div C 2.4.1.2.(1), the same provision `engine/professional.py` already uses for Part 4 design. No other provision id is added for the span.
+Confirmed `professional.span_m` (or `span_m`) above 12.20 m is recorded as Part 4 design. This span handoff came from development case dev-050. The cited rule is Div C 2.4.1.2.(1), the same provision `engine/professional.py` already uses for Part 4 design. No other provision id is added for the span.
 
 ### `status`
 

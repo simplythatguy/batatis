@@ -18,8 +18,9 @@ from .professional import ProfessionalFacts, ProfessionalReason, ProfessionalRes
 from .section_d import ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, EvidencePlanItem, section_d_plan
 
 # A confirmed span above this value is stored as Part 4 design before the practice screen.
-# The only provision cited for that result is Div C 2.4.1.2.(1), which engine/professional.py
-# already passes to add(). This module does not add a provision id.
+# This handoff came from development case dev-050. The only provision cited for that
+# result is Div C 2.4.1.2.(1), which engine/professional.py already passes to add().
+# This module does not add a provision id.
 PART9_MAX_SPAN_M = 12.20
 
 # Every practice-screen id below is a string literal already passed to add() in

@@ -212,9 +212,20 @@ def test_rule_table_uses_only_provisions_already_in_the_repo():
 def test_eval_script_prints_in_sample_wilson_table(capsys):
     assert main() == 0
     out = capsys.readouterr().out
+    assert out.startswith(
+        'Engineer-needed flag: 55/60 agreement on the model-checked dev set (in-sample), '
+        '1 under-flag, 13 unknowns sent to the applicant.\n')
     assert 'gold: model-checked' in out
-    assert 'split: dev (in-sample; no held-out)' in out
+    assert 'split: dev (in-sample; pending out-of-sample confirmation)' in out
+    assert 'rules_plus_unknown on this dev table is in-sample and pending out-of-sample confirmation' in out
     assert 'out_of_sample: evals_dev/appeals (built on another branch; not scored here)' in out
+    assert 'held-out: evals_dev/section_d_heldout' in out
+    assert 'held-out gold: model-checked' in out
+    assert 'held-out rules_only: 6/8 [0.4093, 0.9285]' in out
+    assert 'held-out rules_plus_unknown: 7/8 [0.5291, 0.9776]' in out
+    assert 'held-out always_unknown: 1/8 [0.0224, 0.4709]' in out
+    assert 'held-out misses rules_plus_unknown: hold-004 gold=depends system=no' in out
+    assert 'dev-050' in Path('engine/section_d_flag_eval.py').read_text()
     assert 'winner: rules_plus_unknown' in out
     assert 'under_flag_target: 0' in out
     assert 'note: rules_only abstains with depends; that label is counted in the unknown column' in out
@@ -248,6 +259,23 @@ def test_eval_script_prints_in_sample_wilson_table(capsys):
     assert 'span_m=18' in out
     assert 'under_flag rules_plus_unknown: none' in out
     assert 'under_flag always_unknown: none' in out
+
+
+def test_heldout_gold_was_written_from_repo_limits():
+    folder = Path('evals_dev/section_d_heldout')
+    cases = [json.loads(path.read_text()) for path in sorted(folder.glob('hold-*.json'))]
+    assert len(cases) == 8
+    expected = {
+        'hold-001': 'no', 'hold-002': 'yes', 'hold-003': 'no', 'hold-004': 'depends',
+        'hold-005': 'yes', 'hold-006': 'yes', 'hold-007': 'no', 'hold-008': 'no',
+    }
+    for case in cases:
+        assert case['gold']['engineering_required'] == expected[case['id']]
+        source = case['gold']['limit_source']
+        assert 'engine/professional.py' in source or 'PART9_MAX_SPAN_M' in source
+        assert '9.23.1.1' not in json.dumps(case)
+        assert case['authoring']['gold_written'] == 'before any system run'
+        assert case['authoring']['label'] == 'model-checked'
 
 
 def test_claim_blocklist_matches_compliance_and_safety_claims():

@@ -1,0 +1,19 @@
+{
+  "id": "hold-006",
+  "description": "We are planning a four-storey office. The building area of 100 m2 is the building area, not a sum of the floors.",
+  "known_facts": [
+    "four-storey office",
+    "building area of 100 m2"
+  ],
+  "gold": {
+    "engineering_required": "yes",
+    "engineering_reason": "More than three storeys is outside the general exception, before building area is compared.",
+    "limit_source": "engine/professional.py: occupancy in _AREA_LIMITS and storeys greater than 3 sets general to yes. The three-storey cap is the height limit implemented for Div C 2.4.1.1.(1)"
+  },
+  "authoring": {
+    "source": "engine/professional.py",
+    "gold_written": "before any system run",
+    "label": "model-checked",
+    "notes": "Held-out height over the three-storey limit in engine/professional.py. Gold written from the rule text before the flag script was run on this file. Not human-reviewed."
+  }
+}

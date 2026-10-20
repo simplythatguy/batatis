@@ -26,6 +26,11 @@ from .professional import ProfessionalFacts, professional_involvement
 from .section_d_issues import PART9_MAX_SPAN_M, PROCESS_RULES, PROFESSIONAL_RULES
 
 CASES = Path(__file__).resolve().parents[1] / 'evals_dev' / 'cases'
+HELDOUT = Path(__file__).resolve().parents[1] / 'evals_dev' / 'section_d_heldout'
+_HEADLINE = (
+    'Engineer-needed flag: {matched}/{scored} agreement on the model-checked dev set (in-sample), '
+    '{under_flag} under-flag, {unknown} unknowns sent to the applicant.'
+)
 VARIANTS = ('rules_only', 'rules_plus_unknown', 'always_unknown')
 GOLD_ROWS = ('yes', 'depends', 'no')
 SYSTEM_COLS = ('yes', 'unknown', 'no')
@@ -107,6 +112,7 @@ class VariantScore:
     confident_wrong: int = 0
     gold_yes_unknown: list[str] = field(default_factory=list)
     under_flag_facts: list[str] = field(default_factory=list)
+    misses: list[str] = field(default_factory=list)
     matrix: dict[str, dict[str, int]] = field(default_factory=lambda: {
         gold: {column: 0 for column in SYSTEM_COLS} for gold in GOLD_ROWS})
 
@@ -248,6 +254,9 @@ def _plain_exemption(data: dict) -> bool:
 
 def prepare(facts: ProfessionalFacts, signals: Signals, variant: str) -> ProfessionalFacts:
     data = facts.model_dump()
+    # This span handoff came from development case dev-050 (stated 18 m span, gold yes).
+    # A stated span above PART9_MAX_SPAN_M is recorded as Part 4 design. The cited
+    # provision stays Div C 2.4.1.2.(1) from engine/professional.py.
     if variant == 'rules_plus_unknown' and signals.span_m is not None and signals.span_m > PART9_MAX_SPAN_M:
         data['part4_design'] = True
     fill = variant == 'rules_only' or (
@@ -321,6 +330,8 @@ def score(codes, cases: list[dict] | None = None) -> dict[str, VariantScore]:
                 totals[name].unknown += 1
             if column in ('yes', 'no') and not _matches(label, gold):
                 totals[name].confident_wrong += 1
+            if not _matches(label, gold):
+                totals[name].misses.append(f"{case['id']} gold={gold} system={label}")
             if gold == 'yes' and label == 'no':
                 totals[name].under_flag += 1
                 totals[name].under_flag_facts.append(under_flag_fact(case, name))
@@ -331,6 +342,10 @@ def score(codes, cases: list[dict] | None = None) -> dict[str, VariantScore]:
 
 def load_cases() -> list[dict]:
     return [json.loads(path.read_text()) for path in sorted(CASES.glob('dev-*.json'))]
+
+
+def load_heldout() -> list[dict]:
+    return [json.loads(path.read_text()) for path in sorted(HELDOUT.glob('hold-*.json'))]
 
 
 def winner(totals: dict[str, VariantScore]) -> str:
@@ -377,10 +392,11 @@ def report(totals: dict[str, VariantScore], codedb: str) -> str:
         lines.append(f'gold_yes_as_unknown {name}: {_yes_unknown(row)}')
         facts = '; '.join(row.under_flag_facts) if row.under_flag_facts else 'none'
         lines.append(f'under_flag {name}: {facts}')
+    lines.append('rules_plus_unknown on this dev table is in-sample and pending out-of-sample confirmation')
     lines.append(f'winner: {winner(totals)}')
     lines.append('under_flag_target: 0')
     lines.append('gold: model-checked')
-    lines.append('split: dev (in-sample; no held-out)')
+    lines.append('split: dev (in-sample; pending out-of-sample confirmation)')
     lines.append('out_of_sample: evals_dev/appeals (built on another branch; not scored here)')
     lines.append(f'codedb: {codedb}')
     lines.append(f'scored: {scored}')
@@ -391,9 +407,30 @@ def report(totals: dict[str, VariantScore], codedb: str) -> str:
     return '\n'.join(lines)
 
 
+def heldout_report(totals: dict[str, VariantScore]) -> str:
+    lines = [
+        'held-out: evals_dev/section_d_heldout',
+        'held-out gold: model-checked',
+    ]
+    for name in VARIANTS:
+        row = totals[name]
+        misses = ', '.join(row.misses) if row.misses else 'none'
+        lines.append(f'held-out {name}: {_agreement_cell(row)}')
+        lines.append(f'held-out misses {name}: {misses}')
+    return '\n'.join(lines)
+
+
+def headline(totals: dict[str, VariantScore]) -> str:
+    row = totals['rules_only']
+    return _HEADLINE.format(matched=row.matched, scored=row.scored, under_flag=row.under_flag, unknown=row.unknown)
+
+
 def main() -> int:
     codes, codedb = load_codes()
-    print(report(score(codes), codedb))
+    dev = score(codes)
+    print(headline(dev))
+    print(report(dev, codedb))
+    print(heldout_report(score(codes, load_heldout())))
     return 0
 
 

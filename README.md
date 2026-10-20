@@ -38,4 +38,6 @@ Product UI system: [`docs/design-system-linear.md`](./docs/design-system-linear.
 
 ## Status
 
+Engineer-needed flag: 55/60 agreement on the model-checked dev set (in-sample), 1 under-flag, 13 unknowns sent to the applicant.
+
 Clone-ready **agent environment** (rules, skills, evals, docs). Application product code is not the focus of this PR.
