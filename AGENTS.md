@@ -20,7 +20,7 @@ Single-context: root `GLOSSARY.md` + `docs/adr/` + challenge brief. See `docs/ag
 
 - **Batatis challenge:** `.cursor/skills/batatis-*` (hackathon, variance-workflow, ui-opus, **ui-linear**).
 - **Matt Pocock engineering:** `.agents/skills/` (also symlinked under `.cursor/skills/`). Reinstall with `npx skills@latest add mattpocock/skills -a cursor`.
-- **pstack / poteto-mode:** Cursor plugin (not vendored). See `docs/pstack.md`. Review/judgment roles pinned to Opus 5.5 in `.cursor/rules/pstack-models.mdc`.
+- **pstack / poteto-mode:** Cursor plugin (not vendored). See `docs/pstack.md`. Review/judgment roles pinned to Opus 5.5 in `.cursor/rules/pstack-models.mdc` when available.
 
 ## What we are building
 
@@ -34,8 +34,8 @@ Official NBC(AE) process fork (acceptable vs alternative): [`docs/diagrams/nbc-a
 
 1. Read `.cursor/skills/batatis-hackathon/SKILL.md` (domain + pitfalls + NBC(AE) fork).
 2. For product flow work, read `.cursor/skills/batatis-variance-workflow/SKILL.md`.
-3. For any UI / frontend / visual work: read `.cursor/skills/batatis-ui-linear/SKILL.md` + `.cursor/skills/batatis-ui-opus/SKILL.md`. **Default product look** = Linear-caliber system (`docs/design-system-linear.md`, `docs/design/tokens.css`). Primary CTAs are **neutral grey** (not indigo fill). Use **Claude Opus 5.5** for UI implement **and** formal UI review (Composer is provisional). Simplify ruthlessly without dropping capabilities; meet the bug-free bar + `evals/ui-artifacts/smoke.mjs`.
-4. Run understanding checks in `evals/fixtures/understanding-checklist.md` when changing skills/rules. Blind UI prompts: `evals/battle-prompts/ui-blind/`.
+3. For any UI / frontend / visual work: read `.cursor/skills/batatis-ui-linear/SKILL.md` + `.cursor/skills/batatis-ui-opus/SKILL.md`. **Default product look** = Linear-caliber system (`docs/design-system-linear.md`, `docs/design/tokens.css`). Primary CTAs are **neutral grey** (not indigo fill); focus rings neutral (never indigo); inferred owner + unified resolve continue are Opus P0. Prefer **Claude Opus 5.5** for UI implement **and** formal UI review when available (Composer is provisional — do not fake a seal). Simplify ruthlessly without dropping capabilities; meet the bug-free bar + `evals/ui-artifacts/smoke.mjs`.
+4. Run understanding checks in `evals/fixtures/understanding-checklist.md` when changing skills/rules. Domain adversarial: `evals/battle-prompts/` (BT01–BT50). Blind UI: `evals/battle-prompts/ui-blind/` (UI-B01–B07). Clone walkthrough: `docs/env-guide.md`.
 
 Always-on domain rule: `.cursor/rules/batatis-hackathon.mdc`. UI globs: `.cursor/rules/batatis-ui-opus.mdc`, `.cursor/rules/batatis-ui-linear.mdc`.
 

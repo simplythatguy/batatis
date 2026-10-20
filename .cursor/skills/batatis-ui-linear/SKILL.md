@@ -35,8 +35,11 @@ Smoke: `../../../evals/ui-artifacts/smoke.mjs` · Captures: `../../../evals/ui-a
 | 10 | **No silent defaults** — unanswered selects start at "Select…" with empty styling; prefilled values carry a marker (inferred, defaulted) and a way to confirm. |
 | 11 | **Panes scroll, the page does not** — fixed-height shell; list, detail and preview panes own their overflow. |
 | 12 | **No status word without a gap** — anything labelled Required/Missing must also be in the shared gap list (warning at minimum) and clear when satisfied; otherwise label it Planned. Status cells are pills with dots; provenance notes ("Not authored by this tool") are muted meta, not status. |
+| 13 | **Inferred owner is a shared gap** — “Owner inferred from upload — confirm” lives in `shared-gaps.js` (strip, SCO, export, override). B05 preview shows `(inferred)` until Confirm; Confirm clears the gap everywhere. Never print inferred owner as an unmarked fact. |
+| 14 | **One continue / resolve rule** — ranking and Section C share `unconfirmedArticles()` (or equivalent). Footer: “Resolve … (confirm or reject) to continue”. Continue stays disabled until **every** required article is confirmed **or** rejected — never “confirm at least one.” |
+| 15 | **Neutral focus everywhere** — inputs, textareas, selects, buttons: focus border/outline uses `--focus-ring` / `#8a8a8e` only. Audit every surface; **never** indigo/`#5E6AD2` / `rgb(94,106,210)`. |
 
-`--focus-ring` / `--accent` (`#8a8a8e` neutral grey) = **focus rings only**. Never indigo/`#5E6AD2`. Not CTA identity, not active nav.
+`--focus-ring` / `--accent` (`#8a8a8e` neutral grey) = **focus rings only**. Never indigo/`#5E6AD2`. Not CTA identity, not active nav. Encoded in smoke (`smoke.mjs`).
 
 ## Visual language
 
@@ -59,9 +62,10 @@ Smoke: `../../../evals/ui-artifacts/smoke.mjs` · Captures: `../../../evals/ui-a
 
 ## Anti-patterns (material fail)
 
-- Indigo/purple **filled** primary buttons or active-nav rings
-- Composer “PASS” treated as formal seal
-- Divergent gap lists across intake / SCO / export
+- Indigo/purple **filled** primary buttons, active-nav rings, or **focus rings**
+- Composer / non-Opus “PASS” treated as formal seal (Opus 5.5 when available)
+- Divergent gap lists across intake / SCO / export; inferred owner missing from shared gaps
+- Continue enabled after confirming only one of several required articles; B02/B03 footer wording mismatch
 - Live demo rows; browser-default checkbox/select; wrapping button labels; clipped buttons in narrow panes
 - `[placeholder]` strings or `present` / `from registry` instead of real values in previews
 - Mark admin-complete / Download enabled while blocking gaps open

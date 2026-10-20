@@ -13,8 +13,9 @@ For **all** UI / frontend / visual / UX **implementation and UI review** in this
 - Tier: **highest available** Opus 5.5 reasoning tier in the current session (prefer max → xhigh → high)
 - Example slugs when available: `claude-opus-5-5-max`, `claude-opus-5-5-xhigh`, `claude-opus-5-5-high`
 - Do **not** route UI work or UI review to non-Opus models for cost/speed unless the user explicitly overrides
+- If Opus account usage is blocked, keep iterating with provisional (Composer) checks + `smoke.mjs` — **do not** claim a formal UI seal until Opus 5.5 can re-run
 
-When spawning subagents for UI implement or UI review, set `model` to the Opus 5.5 slug above.
+When spawning subagents for UI implement or UI review, set `model` to the Opus 5.5 slug above when available.
 
 ## Default look (mandatory)
 

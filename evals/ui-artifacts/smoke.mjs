@@ -126,7 +126,9 @@ try {
   const nav = await page.locator(".nav-item.active").evaluate((el) => ({ border: getComputedStyle(el).borderColor, shadow: getComputedStyle(el).boxShadow }));
   assert(!/94,\s*106,\s*210/.test(nav.border) && nav.shadow === "none", "B01: active nav fill only");
   const focusRing = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--focus-ring").trim());
+  const accent = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--accent").trim());
   assert(focusRing.toLowerCase() !== "#5e6ad2" && !/94,\s*106,\s*210/.test(focusRing), `B01: focus ring must be neutral (got ${focusRing})`);
+  assert(accent.toLowerCase() !== "#5e6ad2" && !/94,\s*106,\s*210/.test(accent), `B01: --accent must be neutral (got ${accent})`);
   await page.locator("#owner").focus();
   const ownerFocus = await page.locator("#owner").evaluate((el) => getComputedStyle(el).borderColor);
   assert(!/94,\s*106,\s*210/.test(ownerFocus), `B01: input focus border must not be indigo (got ${ownerFocus})`);
@@ -188,13 +190,14 @@ try {
   await page.waitForFunction(() => document.activeElement?.id === "risk");
   assert((await page.locator('[data-tab="alt"]').getAttribute("aria-selected")) === "true", "B01: gap chip jumps to field");
 
-  // B02 — counts, filters, gate, actions, navigation
+  // B02 — counts, filters, gate, actions, navigation (+ reject path keeps Continue gated)
   await go("02-article-ranking", { reset: true });
   assert((await page.locator(".btn-primary").count()) === 1, "B02: one primary");
   const clarifyCount = Number(await text('[data-count="needs-clarification"]'));
   assert(clarifyCount === (await page.locator('.row [data-status="needs-clarification"]').count()), "B02: clarification count = rows");
   assert(await page.locator("#continue-btn").isDisabled(), "B02: Continue disabled while articles unresolved");
   assert(/Resolve 9\.25\.2\.1\., 9\.25\.3\.1\. \(confirm or reject\) to continue/.test(await text("#gate-hint")), "B02: footer matches shared resolve rule");
+  assert(!/Confirm at least one/i.test(await text("body")), "B02: must not use weaker 'confirm at least one' copy");
   await page.click('[data-filter="confirmed"]');
   assert(/No articles in this view/.test(await text("#list")), "B02: empty filter state");
   await page.click('[data-filter="all"]');
@@ -209,9 +212,16 @@ try {
   assert((await page.locator(".row").count()) === 1, "B02: confirmed filter lists the article");
   await page.click('[data-filter="all"]');
   await page.locator(".row").nth(1).click();
+  await page.click('[data-act="rejected"]');
+  assert(await page.locator("#continue-btn").isEnabled(), "B02: Continue enabled when remaining article rejected");
+  assert((await text("#gate-hint")) === "", "B02: gate hint clears when resolved via reject");
+  // Reset to confirm-both path for Continue → B03 navigation
+  await go("02-article-ranking", { reset: true });
+  await page.locator(".row").nth(0).click();
   await page.click('[data-act="confirmed"]');
-  assert(await page.locator("#continue-btn").isEnabled(), "B02: Continue enabled when both resolved");
-  assert((await text("#gate-hint")) === "", "B02: gate hint clears when resolved");
+  await page.locator(".row").nth(1).click();
+  await page.click('[data-act="confirmed"]');
+  assert(await page.locator("#continue-btn").isEnabled(), "B02: Continue enabled when both confirmed");
   await Promise.all([page.waitForURL(/03-section-c/), page.click("#continue-btn")]);
 
   // B03 — columns, row binding, intent, lookup
@@ -221,6 +231,7 @@ try {
   assert((await page.locator("#attr-body tr [data-status]").count()) === (await page.locator("#attr-body tr").count()), "B03: status per row");
   assert(await page.locator("#continue-btn").isDisabled(), "B03: Continue gated on unresolved articles");
   assert(/Resolve 9\.25\.2\.1\., 9\.25\.3\.1\. \(confirm or reject\) to continue/.test(await text("#gate-reason")), "B03: footer uses Resolve matching shared gap");
+  assert(!/Confirm at least one/i.test(await text("body")), "B03: must not use weaker 'confirm at least one' copy");
   await page.locator("#attr-body tr").nth(1).click();
   assert((await text("#explain-article")) === "9.25.3.1." && (await text("#cite-article")) === "9.25.3.1.", "B03: cite + explainer follow row");
   assert(/air barrier/i.test(await text("#ai-explain")), "B03: explainer text matches row");
@@ -287,6 +298,23 @@ try {
   assert(await page.locator("#download-btn").isDisabled(), "B05: Download disabled");
   assert(/Owner inferred from upload — confirm/.test(await text("#gap-list")), "B05: inferred owner listed in gaps");
   assert(/\(inferred\)/.test(await page.locator("#sheet-a").innerText()), "B05: owner shows (inferred) until confirmed");
+  assert(/not exported/i.test(await text("#sheet")), "B05: unconfirmed articles muted as not exported");
+  // Focus audit: no indigo on interactive controls across surfaces
+  for (const [name, sel] of [
+    ["02-article-ranking", ".row"],
+    ["03-section-c", "#intent-input"],
+    ["05-export", "#override-btn"],
+    ["06-evidence-plan", 'input[type="file"]'],
+  ]) {
+    await go(name, { reset: true });
+    const target = page.locator(sel).first();
+    if (await target.count()) {
+      await target.focus().catch(() => {});
+      const border = await target.evaluate((el) => getComputedStyle(el).borderColor + getComputedStyle(el).outlineColor);
+      assert(!/94,\s*106,\s*210/.test(border), `${name}: focus must not be indigo (got ${border})`);
+    }
+  }
+  await go("05-export", { reset: true });
   for (const v of b03Values) {
     for (const k of ["objective", "fn", "intent"]) {
       const got = (await page.locator(`[data-article="${v.id}"] [data-value="${k}"]`).innerText()).trim();

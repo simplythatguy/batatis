@@ -27,8 +27,11 @@ Default product look for all Batatis UI. Agents apply this **without** being ask
 10. **No silent defaults** — unanswered selects start empty; prefilled values are marked.
 11. **Panes scroll, not the page.**
 12. **No "Required" without a gap** — required-but-missing items are shared gaps (warning minimum); status cells are pills with dots.
+13. **Inferred owner** — shared warning gap until Confirm; export shows `(inferred)` until cleared.
+14. **Unified resolve continue** — ranking and Section C share one gate; footer “Resolve … (confirm or reject) to continue.”
+15. **Neutral focus everywhere** — never indigo/`#5E6AD2` on inputs/textareas.
 
-`--focus-ring: #8a8a8e` (neutral grey) is for **focus only**, not button identity. Never indigo/`#5E6AD2`.
+`--focus-ring: #8a8a8e` (neutral grey) is for **focus only**, not button identity. Never indigo/`#5E6AD2`. Smoke encodes 13–15.
 
 ## Token map
 

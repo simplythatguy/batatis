@@ -9,5 +9,6 @@ Build the Section C screen for confirmed articles.
 - **Retrieved code text** must be visually distinct from **AI explanations**.
 - Support multiple articles in one view.
 - Flag empty attribution cells as administrative gaps.
+- **Continue gate** matches ranking: unresolved articles block Continue; footer uses the same “Resolve … (confirm or reject)” wording (not a weaker “confirm at least one”).
 - Actions: Re-run lookup, Continue to evidence / Section D planner, Back to ranking.
 - Navigation to other workflow steps.

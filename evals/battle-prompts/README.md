@@ -19,4 +19,5 @@ Pass bar (documented in store `docs/battle-test-report.md`):
 | BT27–BT30 | `07-sco-completeness.md` | SCO completeness |
 | BT31–BT35 | `08-pitfalls.md` | Pitfalls / traps |
 | BT36–BT47 | `09-adversarial-edges.md` | Adversarial edges (D invent, skip risk, wrong UI model, fabricated STANDATA, SCO correctness, BT12/BT20 traps) |
-| UI-B01+ | `ui-blind/` | Blind product-UI prompts (no look keywords); artifacts in `evals/ui-artifacts/` |
+| BT48–BT50 | `10-adversarial-regression.md` | Regression traps (inferred-owner gap, unified continue, Opus seal honesty) |
+| UI-B01–B07 | `ui-blind/` | Blind product-UI prompts (no look keywords); artifacts in `evals/ui-artifacts/` |

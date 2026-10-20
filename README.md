@@ -16,15 +16,17 @@ npx skills@latest add mattpocock/skills -a cursor
 Open the repo in **Cursor**. New agent threads should:
 
 1. Read [`AGENTS.md`](./AGENTS.md) (entrypoint).
-2. Follow always-on rules under [`.cursor/rules/`](./.cursor/rules/) (includes **pstack model map** + **review = Opus 5.5**).
-3. Install **pstack** plugin once: `/add-plugin pstack` — see [`docs/pstack.md`](./docs/pstack.md).
+2. Follow always-on rules under [`.cursor/rules/`](./.cursor/rules/) (includes **pstack model map** + **review = Opus 5.5 when available**).
+3. Install **pstack** plugin once: `/add-plugin pstack` — see [`docs/pstack.md`](./docs/pstack.md). Use `/poteto-mode` for nontrivial work.
 4. Load skills as tasks demand:
    - `.cursor/skills/batatis-*` — challenge domain / variance / **UI Linear system** / UI Opus pin
    - `.agents/skills/` — Matt Pocock engineering skills (triage, tdd, grill-*, etc.)
-5. Use [`evals/fixtures/`](./evals/fixtures/) and [`evals/battle-prompts/`](./evals/battle-prompts/) (incl. `ui-blind/`) to verify understanding.
-6. **All quality reviews** of agent outputs use Claude Opus 5.5 (max/xhigh). UI review also Opus 5.5.
+5. Use [`evals/fixtures/`](./evals/fixtures/) and [`evals/battle-prompts/`](./evals/battle-prompts/) (incl. `ui-blind/` UI-B01–B07 + BT01–BT50) to verify understanding.
+6. Prove UI chrome: `node evals/ui-artifacts/smoke.mjs`.
+7. **Prefer Claude Opus 5.5** for quality and UI reviews when account usage allows. Composer reviews are provisional — never claim an Opus formal seal without Opus.
 
 Human-oriented brief: [`docs/hackathon-problem-brief.md`](./docs/hackathon-problem-brief.md).  
+Clone walkthrough: [`docs/env-guide.md`](./docs/env-guide.md).  
 NBC(AE) acceptable vs alternative process: [`docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png`](./docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png).  
 Product UI system: [`docs/design-system-linear.md`](./docs/design-system-linear.md).
 
@@ -34,8 +36,8 @@ Product UI system: [`docs/design-system-linear.md`](./docs/design-system-linear.
 - No fabricated code citations; Section C attributions are lookups.
 - Do not invent Section D professional evidence.
 - Prefer NBC(AE) 2023 **2nd printing**.
-- UI → Opus 5.5 implement **and** review; default look = Linear-caliber tokens (no prompt required).
+- UI → Opus 5.5 implement **and** review when available; default look = Linear-caliber tokens (no prompt required).
 
 ## Status
 
-Clone-ready **agent environment** (rules, skills, evals, docs). Application product code is not the focus of this PR.
+Clone-ready **agent environment** on `main` (rules, skills, evals, docs). Application product code is not the focus of env PRs.

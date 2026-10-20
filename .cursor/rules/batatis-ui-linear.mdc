@@ -14,8 +14,8 @@ alwaysApply: false
 For **all** Batatis product UI / frontend / visual / UX work matching these globs:
 
 1. **Look:** Follow `.cursor/skills/batatis-ui-linear/SKILL.md` + `docs/design/tokens.css`. Charcoal layers, thin borders, Inter-like sans, 8px grid, sidebar+main. User need not say “Linear.”
-2. **Opus P0:** Neutral grey primary CTAs (not indigo fill); active nav faint fill only; shared gap source; gate complete/download while gaps open; no demo leakage; styled controls; nowrap labels in wrapping rows (no clipping); previews show real values (no `[placeholder]` / `present`); every control wired (nav = links, no `alert()`); no silent defaults; one derived data model; no "Required" label without a shared gap; checkbox = true 14px square, checked light fill + dark check. Formal seal = Opus 5.5 (Composer is provisional).
+2. **Opus P0:** Neutral grey primary CTAs (not indigo fill); active nav faint fill only; **neutral focus rings** (never indigo/`#5E6AD2`); shared gap source **including inferred-owner warning**; **unified resolve continue** on ranking + Section C (“Resolve … (confirm or reject)” — not “confirm at least one”); gate complete/download while gaps open; no demo leakage; styled controls; nowrap labels in wrapping rows (no clipping); previews show real values (no `[placeholder]` / `present`); every control wired (nav = links, no `alert()`); no silent defaults; one derived data model; no "Required" label without a shared gap; checkbox = true 14px square, checked light fill + dark check. Formal seal = Opus 5.5 when available (Composer is provisional).
 3. **Simplify ruthlessly without dropping capabilities.**
-4. **Model:** Claude Opus 5.5 for UI implement **and** UI review.
+4. **Model:** Claude Opus 5.5 for UI implement **and** UI review when account usage allows; do not fake a seal with cheaper models.
 5. **Bug-free bar:** smoke `evals/ui-artifacts/smoke.mjs`; cite ≠ AI; confidence/no silent fills.
 6. **Attribution:** portability ≠ SCO UX; process fields ≠ evidence ladder.
