@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field, model_validator
 
 FactKind = Literal['exact', 'pointed', 'computed', 'proposed']
 FactStatus = Literal['confirmed', 'unconfirmed']
-SourceType = Literal['code', 'file', 'user_text', 'drawing', 'user_click']
+SourceType = Literal['code', 'file', 'user_text', 'drawing', 'user_click', 'demo_seed']
 Provenance = Literal['example', 'user']
 AttributionStatus = Literal['direct', 'inherited from parent', 'no row in the attribution table']
 
@@ -136,6 +136,7 @@ class Case(BaseModel):
     version: int = 1                           # monotonic; the store advances it on every later write
     provenance: Provenance = 'user'
     example_id: str | None = None              # set with provenance 'example'; edits do not clear it
+    seeded_at: str | None = None               # seed time for a demo case; not a submission time
     jurisdiction: Jurisdiction | None = None
     facts: list[Fact] = []
     provisions: list[str] = []                 # Division B ids the applicant confirmed

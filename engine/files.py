@@ -67,6 +67,15 @@ def read_pdf(data: bytes) -> int:
     return _page_count(data)
 
 
+def stored_file_fields(pages: int) -> dict[str, int | bool]:
+    """Fields the deploy route copies onto a stored PDF.
+
+    ``stored`` means the bytes were kept. ``text_read`` is false: only the page
+    count is taken from the file. There is no ``read`` flag.
+    """
+    return {'pages': pages, 'stored': True, 'text_read': False}
+
+
 def inspect_upload(case_id: str, data: bytes) -> int:
     """Checks the deploy route applies before it stores the PDF.
 

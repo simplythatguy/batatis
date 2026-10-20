@@ -17,8 +17,8 @@ export const FIXTURE: Case = {
   description:
     "We make NorthCore CX, a foil-faced rigid board that goes on the outside of the studs as continuous insulation and replaces the housewrap. We want builders to use it on houses and townhomes anywhere in Alberta.",
   files: [
-    { id: "file-datasheet", name: "NorthCore-CX_product-data-sheet.pdf", pages: 4, read: true },
-    { id: "file-test", name: "NorthCore-CX_vapour-permeance-test.pdf", pages: 9, read: true },
+    { id: "file-datasheet", name: "NorthCore-CX_product-data-sheet.pdf", pages: 4, stored: true, text_read: false },
+    { id: "file-test", name: "NorthCore-CX_vapour-permeance-test.pdf", pages: 9, stored: true, text_read: false },
   ],
   facts: [
     {

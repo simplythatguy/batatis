@@ -4,7 +4,9 @@ import io
 import pytest
 from reportlab.pdfgen import canvas
 
-from engine.files import PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL, FileTooLarge, NotAPdf, inspect_upload, read_pdf
+from engine.files import (
+    PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL, FileTooLarge, NotAPdf, inspect_upload, read_pdf, stored_file_fields,
+)
 
 
 def _tiny_pdf() -> bytes:
@@ -35,8 +37,11 @@ def _contract(case_id: str, data: bytes) -> tuple[int, str]:
 
 
 def test_readable_pdf_returns_a_page_count():
-    assert read_pdf(_tiny_pdf()) == 1
+    pages = read_pdf(_tiny_pdf())
+    assert pages == 1
     assert inspect_upload('case_ok', _tiny_pdf()) == 1
+    assert stored_file_fields(pages) == {'pages': 1, 'stored': True, 'text_read': False}
+    assert 'read' not in stored_file_fields(pages)
 
 
 def test_truncated_or_garbage_pdf_is_not_a_pdf():

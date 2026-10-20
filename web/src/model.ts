@@ -180,7 +180,7 @@ export function reducer(c: Case, a: Action): Case {
     case "setDescription":
       return { ...c, description: a.text };
     case "addFiles":
-      return { ...c, files: [...c.files, ...a.names.map((name) => ({ id: newId("file"), name, read: false }))] };
+      return { ...c, files: [...c.files, ...a.names.map((name) => ({ id: newId("file"), name, stored: false, text_read: false }))] };
     case "removeFile":
       return { ...c, files: c.files.filter((f) => f.id !== a.id) };
     case "confirmFact":

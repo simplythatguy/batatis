@@ -37,6 +37,7 @@ A JSON string `"edmonton"` is rejected with 422. A body that only has `jurisdict
   "version": 1,
   "provenance": "user",
   "example_id": null,
+  "seeded_at": null,
   "jurisdiction": { "id": "edmonton", "name": "Edmonton", "authority": null },
   "facts": [],
   "provisions": [],
@@ -46,7 +47,7 @@ A JSON string `"edmonton"` is rejected with 422. A body that only has `jurisdict
 }
 ```
 
-Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed` (422). `source.type` is `code`, `file`, `user_text`, `drawing`, or `user_click`.
+Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed` (422). `source.type` is `code`, `file`, `user_text`, `drawing`, `user_click`, or `demo_seed`. `seeded_at` is null on a case the applicant created. On a demo seed it is the seed time, not a submission time.
 
 `POST /cases`, `PATCH /cases/{id}`, `POST /cases/{id}/facts`, `POST /cases/{id}/gaps`, and `PUT /cases/{id}/jurisdiction` serialize writes per case. A fact added while Section D is rebuilding is kept.
 
@@ -244,9 +245,9 @@ These are the routes the engine serves. `POST /demo/seed` is off unless `BATATIS
 | `POST /cases/{case_id}/export` | Body optional `{ "draft": false, "expected_version": 1 }`. `200` is `application/pdf`. `409` is either `{ "code": "version_conflict", "current_version": N }` or `{ "detail": ["…"], "reasons": […] }`. `503` when the blank form file is missing; detail is exactly `SCC variance form not found`. `500` on other export failures. |
 | `POST /demo/seed` | The fictional demo cases, including the officer after-fixes package, or `404` `{"detail":"not found"}` unless `BATATIS_DEMO` is `1`. |
 
-A Case has `id`, `title`, `created_at`, `updated_at`, `version`, `provenance` (`example` or `user`), `example_id`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
+A Case has `id`, `title`, `created_at`, `updated_at`, `version`, `provenance` (`example` or `user`), `example_id`, `seeded_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
 
-A fact's `source.type` is `code`, `file`, `user_text`, `drawing`, or `user_click`.
+A fact's `source.type` is `code`, `file`, `user_text`, `drawing`, `user_click`, or `demo_seed`.
 
 Gap `severity` is `blocking` or `warning`.
 
@@ -254,7 +255,7 @@ The fixed 404 detail strings are `case not found`, `provision not found`, and, w
 
 ### `POST /demo/seed`
 
-Off unless `BATATIS_DEMO` is exactly `1`. Otherwise `404` `{"detail":"not found"}`. With the flag, `200` is the fictional cases. The first three come from `evals/demo-cases/<case>/input/` only, in the order `demo-a-manufacturer-nailbase`, `demo-b-gc-firestop`, `demo-c-homebuilder-infill`. The fourth is `demo-officer-after-fixes`. A second call returns the same documents. `provisions` and `section_c` are empty, so this route does not fill Code ID cards. `scripts/seed_demo.py` writes the same cases with no network. The Playwright recorder notes are in `docs/demo/seed.md`. Every seeded case has `provenance` `example` and `example_id` equal to its case id. `version` is 1.
+Off unless `BATATIS_DEMO` is exactly `1`. Otherwise `404` `{"detail":"not found"}`. With the flag, `200` is the fictional cases. The first three come from `evals/demo-cases/<case>/input/` only, in the order `demo-a-manufacturer-nailbase`, `demo-b-gc-firestop`, `demo-c-homebuilder-infill`. The fourth is `demo-officer-after-fixes`. A second call returns the same documents. `provisions` and `section_c` are empty, so this route does not fill Code ID cards. `scripts/seed_demo.py` writes the same cases with no network. The Playwright recorder notes are in `docs/demo/seed.md`. Every seeded case has `provenance` `example` and `example_id` equal to its case id. `version` is 1. Titles start with `EXAMPLE DATA · `. Seeded facts use `source.type` `demo_seed`. `seeded_at` is the seed time, not a submission time. Case A (`demo-a-manufacturer-nailbase`) has no `building.storeys` fact. `product.permeance` on that case stays `unconfirmed`.
 
 ### Section D plan item
 

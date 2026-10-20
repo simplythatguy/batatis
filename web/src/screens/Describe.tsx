@@ -63,7 +63,7 @@ function DropZone() {
             <li key={f.id} className="file-row">
               <Icon name="file" />
               <span className="file-name" title={f.name}>{f.name}</span>
-              <span className="meta file-state">{f.read ? `Read · ${f.pages} pages` : "Waiting for the engine"}</span>
+              <span className="meta file-state">{f.stored ? `Stored · ${f.pages} pages` : "Waiting for the engine"}</span>
               <button
                 type="button"
                 className="btn btn-ghost btn-icon"

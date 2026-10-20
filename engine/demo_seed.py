@@ -16,6 +16,7 @@ from .models import Case, Fact, Jurisdiction, Source
 from .store import CaseStore
 
 STAMP = '2026-10-20T00:00:00+00:00'
+TITLE_PREFIX = 'EXAMPLE DATA · '
 OFFICER_AFTER_ID = 'demo-officer-after-fixes'
 OFFICER_STORY = 'blocking gaps drop to only what a professional must supply'
 REPO = Path(__file__).resolve().parents[1]
@@ -67,8 +68,6 @@ def _manufacturer() -> dict:
             _stated('municipalAddress', '0000 Example Way NW, Edmonton, AB *(fictional)*', brief,
                     '0000 Example Way NW, Edmonton, AB *(fictional)*'),
             _stated('brief_date', '2026-10-12', brief, '**Date:** 2026-10-12'),
-            _stated('building.storeys', '2-storey', brief,
-                    '2-storey single-family, about 190 m², unsprinklered, HRV planned'),
             _stated('alternative', 'Replaces 11 mm OSB on 2×6 walls at 400 mm o.c.', brief,
                     'Replaces 11 mm OSB on 2×6 walls at 400 mm o.c.'),
             _stated('project.description',
@@ -170,7 +169,8 @@ def _case(spec: dict) -> Case:
     if len(fields) != len(set(fields)):
         raise DemoSeedError(f'{slug}: duplicate fact field')
     return Case(
-        id=spec['id'], title=title, created_at=STAMP, updated_at=STAMP, version=1,
+        id=spec['id'], title=_example_title(title), created_at=STAMP, updated_at=STAMP,
+        seeded_at=STAMP, version=1,
         provenance='example', example_id=spec['id'],
         jurisdiction=Jurisdiction(id=city_id, name=city_name, authority=None),
         facts=facts, provisions=[], section_c=[], evidence=[], gaps=[])
@@ -208,8 +208,8 @@ def _officer_after_fixes() -> Case:
         _needs_professional(OFFICER_AFTER_ID, 'professional_seal', brief_ref),
     ]
     case = Case(
-        id=OFFICER_AFTER_ID, title='Officer review, after fixes',
-        created_at=STAMP, updated_at=STAMP, version=1,
+        id=OFFICER_AFTER_ID, title=_example_title('Officer review, after fixes'),
+        created_at=STAMP, updated_at=STAMP, seeded_at=STAMP, version=1,
         provenance='example', example_id=OFFICER_AFTER_ID,
         jurisdiction=Jurisdiction(id='county-of-example', name='County of Example',
                                   authority='County of Example'),
@@ -261,14 +261,14 @@ def _identify_ranked(case_id: str) -> Fact:
     return Fact(
         id=f'fact_{case_id}_identify_ranked', field='identify.ranked', value='[]',
         kind='computed', status='confirmed', formula='identify.ranked',
-        source=Source(type='user_text', ref='identify-output', quote='[]'))
+        source=Source(type='demo_seed', ref='identify-output', quote='[]'))
 
 
 def _story_fact(case_id: str) -> Fact:
     return Fact(
         id=f'fact_{case_id}_package_story', field='package.story', value=OFFICER_STORY,
         kind='pointed', status='confirmed',
-        source=Source(type='user_text', ref='demo-seed:officer-after-fixes', quote=OFFICER_STORY))
+        source=Source(type='demo_seed', ref='demo-seed:officer-after-fixes', quote=OFFICER_STORY))
 
 
 def _needs_professional(case_id: str, field: str, ref: str) -> Fact:
@@ -279,7 +279,7 @@ def _needs_professional(case_id: str, field: str, ref: str) -> Fact:
     return Fact(
         id=f'fact_{case_id}_{token}', field=field, value='needs professional',
         kind='pointed', status='unconfirmed',
-        source=Source(type='file', ref=ref, quote=quote))
+        source=Source(type='demo_seed', ref=ref, quote=quote))
 
 
 def _input_dir(slug: str) -> Path:
@@ -292,6 +292,10 @@ def _input_dir(slug: str) -> Path:
     if FORBIDDEN & set(root.parts):
         raise DemoSeedError(f'{slug}: refusing a key path')
     return root
+
+
+def _example_title(title: str) -> str:
+    return title if title.startswith(TITLE_PREFIX) else TITLE_PREFIX + title
 
 
 def _title(text: str, slug: str) -> str:
@@ -362,4 +366,4 @@ def _fact(case_id: str, field: str, value: str, status: str, ref: str, quote: st
     return Fact(
         id=f'fact_{case_id}_{token}',
         field=field, value=value, kind='pointed', status=status,
-        source=Source(type='file', ref=ref, quote=quote))
+        source=Source(type='demo_seed', ref=ref, quote=quote))

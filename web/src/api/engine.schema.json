@@ -163,6 +163,18 @@
           "title": "Section C",
           "type": "array"
         },
+        "seeded_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Seeded At"
+        },
         "title": {
           "anyOf": [
             {
@@ -193,6 +205,7 @@
         "version",
         "provenance",
         "example_id",
+        "seeded_at",
         "jurisdiction",
         "facts",
         "provisions",
@@ -888,7 +901,8 @@
             "file",
             "user_text",
             "drawing",
-            "user_click"
+            "user_click",
+            "demo_seed"
           ],
           "title": "Type",
           "type": "string"
@@ -968,7 +982,8 @@
             "file",
             "user_text",
             "drawing",
-            "user_click"
+            "user_click",
+            "demo_seed"
           ],
           "title": "Type",
           "type": "string"

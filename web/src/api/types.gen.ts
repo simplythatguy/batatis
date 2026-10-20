@@ -25,6 +25,7 @@ export interface Case {
   provenance: "example" | "user";
   provisions: string[];
   section_c: SectionCRow[];
+  seeded_at: string | null;
   title: string | null;
   updated_at: string;
   version: number;
@@ -124,7 +125,7 @@ export interface Source {
   page: number | null;
   quote: string | null;
   ref: string;
-  type: "code" | "file" | "user_text" | "drawing" | "user_click";
+  type: "code" | "file" | "user_text" | "drawing" | "user_click" | "demo_seed";
 }
 
 export interface SourceInput {
@@ -132,5 +133,5 @@ export interface SourceInput {
   page?: number | null;
   quote?: string | null;
   ref: string;
-  type: "code" | "file" | "user_text" | "drawing" | "user_click";
+  type: "code" | "file" | "user_text" | "drawing" | "user_click" | "demo_seed";
 }

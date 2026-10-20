@@ -9,7 +9,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 from engine.api import create_app
-from engine.demo_seed import CASE_IDS, OFFICER_AFTER_ID, OFFICER_STORY, STAMP, build_cases, demo_enabled, seed_cases
+from engine.demo_seed import (
+    CASE_IDS, OFFICER_AFTER_ID, OFFICER_STORY, STAMP, TITLE_PREFIX, build_cases, demo_enabled, seed_cases,
+)
 from engine.models import Fact, Source
 from engine.store import CaseStore
 
@@ -50,6 +52,19 @@ def test_cases_use_fixed_ids_and_only_input_files():
                 text = (REPO / ref).read_text(encoding='utf-8')
                 assert quote in text
                 assert fact['value'] == Path(ref).name or fact['value'] in quote
+
+
+def test_seeded_titles_and_facts_are_labelled_as_example_data():
+    cases = build_cases()
+    for case in cases:
+        assert case.title is not None and case.title.startswith(TITLE_PREFIX)
+        assert case.seeded_at == STAMP
+        assert all(fact.source.type == 'demo_seed' for fact in case.facts)
+    nailbase = next(case for case in cases if case.id == CASE_IDS[0])
+    assert all(fact.field != 'building.storeys' for fact in nailbase.facts)
+    permeance = next(fact for fact in nailbase.facts if fact.field == 'product.permeance')
+    assert permeance.status == 'unconfirmed'
+    assert permeance.source.type == 'demo_seed'
 
 
 def test_example_drafts_are_not_professional_evidence():

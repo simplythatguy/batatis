@@ -23,8 +23,10 @@ export interface CaseFile {
   id: string;
   name: string;
   pages?: number;
-  /** Set by the engine once it has read the file. */
-  read: boolean;
+  /** The bytes were kept. The page count may be known. */
+  stored: boolean;
+  /** The file's text was not extracted. */
+  text_read: boolean;
 }
 
 export interface Question {
