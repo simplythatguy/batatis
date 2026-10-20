@@ -12,8 +12,8 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from codedb import AmbiguousProvisionError
 
-from .codes import CodeDbMissing, Codes
-from .codes import default_db
+from .codes import CodeDbMissing, Codes, default_db
+from .demo_seed import demo_enabled, seed_cases
 from .export import ExportBlocked, ExportError, FormNotFound, export_case
 from .files import FileTooLarge, NotAPdf, discard_pdf, max_upload_bytes, save_pdf
 from .models import Case, Fact, Jurisdiction, SectionCRow, Source
@@ -205,6 +205,13 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
             raise HTTPException(404, e.args[0])
         except ValueError as e:
             raise HTTPException(400, f'invalid provision id: {e}')
+
+    @app.post('/demo/seed', response_model=list[Case])
+    def demo_seed():
+        """Three fictional cases. 404 unless BATATIS_DEMO is exactly 1."""
+        if not demo_enabled():
+            raise HTTPException(404, 'not found')
+        return seed_cases(cases())
 
     from fastapi.responses import JSONResponse
 

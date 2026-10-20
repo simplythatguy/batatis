@@ -13,6 +13,7 @@ from .process_fields import ProcessField, process_fields
 from .professional import ProfessionalResult, professional_involvement
 from .section_c import section_c_rows
 from .section_d import SectionDPlan, section_d_plan
+from .section_d_issues import SectionDIssue, section_d_issues
 from .store import CaseStore
 
 
@@ -52,6 +53,13 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
         if cases().mutate(case_id, apply) is None:
             raise HTTPException(404, 'case not found')
         return plan[0]
+
+    @router.get('/cases/{case_id}/section-d/issues', response_model=list[SectionDIssue])
+    def section_d_issues_route(case_id: str):
+        try:
+            return section_d_issues(get_case(case_id), code())
+        except KeyError as error:
+            raise HTTPException(404, error.args[0]) from error
 
     @router.get('/cases/{case_id}/professional', response_model=ProfessionalResult)
     def professional(case_id: str):

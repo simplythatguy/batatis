@@ -38,8 +38,9 @@ class CaseStore:
                 self._locks[case_id] = lock
             return lock
 
-    def _write(self, case: Case) -> Case:
-        case.updated_at = now()
+    def _write(self, case: Case, *, keep_timestamps: bool = False) -> Case:
+        if not keep_timestamps:
+            case.updated_at = now()
         with closing(self._connect()) as con, con:
             con.execute('INSERT INTO cases VALUES (?,?,?) ON CONFLICT(id) DO UPDATE SET json=excluded.json, '
                         'updated_at=excluded.updated_at', (case.id, case.model_dump_json(), case.updated_at))
@@ -50,9 +51,9 @@ class CaseStore:
             row = con.execute('SELECT json FROM cases WHERE id=?', (case_id,)).fetchone()
         return Case.model_validate_json(row[0]) if row else None
 
-    def put(self, case: Case) -> Case:
+    def put(self, case: Case, *, keep_timestamps: bool = False) -> Case:
         with self._case_lock(case.id):
-            return self._write(case)
+            return self._write(case, keep_timestamps=keep_timestamps)
 
     def get(self, case_id: str) -> Case | None:
         return self._read(case_id)
