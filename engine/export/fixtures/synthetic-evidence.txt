@@ -1,0 +1,10 @@
+SYNTHETIC ADMINISTRATIVE TEST ATTACHMENT
+
+This file exists solely to exercise file provenance, document responsibility,
+benchmark links, export gating and PDF roundtrip tests. It is not a product
+test, evaluation, engineering study, professional opinion, drawing or seal.
+No testing, design review, authentication or technical assessment occurred.
+
+All six sample document roles point here deliberately. Their SYNTHETIC titles,
+authors and performance links are test data. They must never be used as evidence
+for a real application. Production modules do not create these attachments.

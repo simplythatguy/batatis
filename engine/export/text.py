@@ -6,6 +6,9 @@ size between MAX_SIZE and MIN_SIZE, or returns None so the caller can move the v
 """
 from __future__ import annotations
 
+import re
+import unicodedata
+
 from reportlab.pdfbase.pdfmetrics import stringWidth
 
 FONT = 'Helvetica'
@@ -16,14 +19,39 @@ H_PAD = 7.0                       # 2 pt left inset + 4 pt right clip + 1 pt sla
 V_PAD = 3.0                       # 1 pt border margin top and bottom + 1 pt slack
 
 _REPLACE = {'–': '-', '—': '-', '‑': '-', '‘': "'", '’': "'", '“': '"',
-            '”': '"', '…': '...', ' ': ' ', '•': '-', '\t': ' '}
+            '”': '"', '…': '...', ' ': ' ', '•': '-', '\t': ' ', '−': '-',
+            '≤': '<=', '≥': '>=', '≈': '~=', 'μ': 'µ', '⋅': '*', '∕': '/'}
+_SUPER = str.maketrans('⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ⁿ', '0123456789+-=()n')
+_SUB = str.maketrans('₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎', '0123456789+-=()')
+
+
+def faithful_font_text(value, encoding: str = 'cp1252') -> str:
+    """Use explicit notation for unsupported scientific glyphs; never replace a value with '?'.
+
+    The official form uses a single-byte font. Common ²/³ remain intact. Other exponent
+    runs become ^(...), subscripts become _(...), and unknown symbols retain their codepoint
+    and Unicode name so a reader can recover the source meaning rather than guess.
+    """
+    science = {'−': '-', '≤': '<=', '≥': '>=', '≈': '~=', 'μ': 'µ', '⋅': '*', '∕': '/'}
+    text = ''.join(science.get(ch, ch) for ch in str(value))
+    text = re.sub('[⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ⁿ]+',
+        lambda m: m.group() if all(ch in '¹²³' for ch in m.group()) else '^(' + m.group().translate(_SUPER) + ')', text)
+    text = re.sub('[₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎]+', lambda m: '_(' + m.group().translate(_SUB) + ')', text)
+    out = []
+    for char in text:
+        try:
+            char.encode(encoding)
+            out.append(char)
+        except UnicodeEncodeError:
+            out.append(f'[U+{ord(char):04X} {unicodedata.name(char, "UNNAMED CHARACTER")}]')
+    return ''.join(out)
 
 
 def pdf_safe(value) -> str:
-    """The form's /Helv font is single-byte; keep text to Latin-1 so no glyph is silently dropped."""
-    s = ''.join(_REPLACE.get(ch, ch) for ch in str(value))
+    """Fit the form's font with faithful text fallbacks for unsupported symbols."""
+    s = faithful_font_text(''.join(_REPLACE.get(ch, ch) for ch in str(value)), encoding='latin-1')
     s = '\n'.join(' '.join(line.split()) for line in s.replace('\r\n', '\n').split('\n'))
-    return s.strip().encode('latin-1', 'replace').decode('latin-1')
+    return s.strip()
 
 
 def wrap(text: str, width: float, size: float) -> list[str] | None:
