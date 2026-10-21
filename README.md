@@ -203,8 +203,16 @@ Do not upload personal information. In live mode, text you enter is sent to Open
 
 A case and its stored files are deleted 7 days after `created_at`, or sooner when the applicant calls `DELETE /cases/{case_id}`. The sqlite store and Neon Postgres use the same purge. Case create and the request sweep run it at most once every 10 minutes per engine instance. `python -m engine.retention` runs it immediately. On Vercel Hobby, a daily cron calls `GET /api/retention/purge`.
 
+## Product
+
+The canonical frontend is [`web/`](./web) (Vite) ([ADR 0001](./docs/adr/0001-vite-web-canonical.md)): Describe, Code check, Section C, and Application are wired to the engine. Linear tokens live in [`docs/design/tokens.css`](./docs/design/tokens.css) and [`docs/design/variables.css`](./docs/design/variables.css). `apps/web` is not used for product work.
+
+```bash
+cd web && npm install && npm run dev
+```
+
 ## Status
 
 Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind). (on the 60 text-only dev cases it answered only yes or ask, 0 no, so 0 under-flags is partly by design; since 4425089 it can answer no when stated facts clear every trigger) Part 4 on text-only cases is derived from stated facts. A wood-frame building inside Part 9 with no Part 4 trigger is part4_design false, so the screen can answer no. On this dev set (model-checked, in-sample) the shipped screen still emits 0 no labels.
 
-Clone-ready **agent environment** (rules, skills, evals, docs). Application product code is not the focus of this PR.
+Clone-ready **agent environment** (rules, skills, evals, docs) plus the Vite product in `web/`.

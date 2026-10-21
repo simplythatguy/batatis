@@ -139,7 +139,7 @@ Scoring question, from `docs/judging-rubric.md`: "Can it review a completed appl
 - Route: `GET /cases/{id}/gaps` in [`engine/routes_case.py`](../../engine/routes_case.py).
 - Tests for those classes: [`engine/tests/test_completeness.py`](../../engine/tests/test_completeness.py). This checklist does not restate a pass count; none is written beside the file.
 - Planted-defect protocol only: [`evals_dev/planted/SPEC.md`](../../evals_dev/planted/SPEC.md). The spec says generating the seeded PDFs waits for form export. The directory contains that spec and no planted applications.
-- Applicant completeness chrome: [`web/src/screens/Application.tsx`](../../web/src/screens/Application.tsx). "Check completeness" stays disabled while blocking gaps from the client model remain. The dialog says filling the official SCC form arrives with the engine, and that the check is administrative. There is no export button on this screen.
+- Applicant completeness chrome: [`web/src/screens/Application.tsx`](../../web/src/screens/Application.tsx). "Check completeness" stays available while blocking gaps remain, so the missing items can be reviewed. The official PDF stays closed until those gaps are cleared. The dialog says filling the official SCC form arrives with the engine, and that the check is administrative. There is no export button on this screen.
 - Officer screen: [`web/src/screens/Placeholders.tsx`](../../web/src/screens/Placeholders.tsx) renders "Not built yet" for officer review. The accuracy page in the same file says "No evaluation runs yet".
 
 ### Open pull requests
@@ -150,7 +150,7 @@ Scoring question, from `docs/judging-rubric.md`: "Can it review a completed appl
   - The body says variant A still misses generic risk (D09 1/2), unrelated mitigations (D10 1/2), contradictions (D14 0/2), and relevance (D15 0/2), and that D05 and D07 are absent from that table because they need the code database.
   - Pytest written in the body, without a code database: 12 passed across `test_bulletin_gates.py`, `test_portal_package.py`, `test_jurisdiction_wording.py`, and `test_schema_export.py`.
   - The body says the draft is not ready to merge.
-- [#16](https://github.com/simplythatguy/batatis/pull/16). #16 is not merged and is CHANGES @ `27bec3e`, not re-tested. At #16 @ `579cd2c`, "Download draft record" saves a .txt draft record, and only once every gap is closed. "Check completeness" downloads the engine-filled Safety Codes Council variance form PDF (the 5-page Oct 6, 2026 form plus engine-generated attachment pages (7 for Unc's 3b case; not the brief's Appendix 1)) behind a "not a finding that the design complies" dialog. The body also says `GET /gaps` returned 503 when `BATATIS_CODEDB` was missing.
+- [#16](https://github.com/simplythatguy/batatis/pull/16). #16 is not merged and is CHANGES @ `27bec3e`, not re-tested. On this branch, Check completeness stays available while blocking gaps remain, and Download text record saves a .txt record either way. The official PDF stays closed until those gaps are cleared, and then downloads the engine-filled Safety Codes Council variance form PDF (the 5-page Oct 6, 2026 form plus engine-generated attachment pages (7 for Unc's 3b case; not the brief's Appendix 1)) behind a "not a finding that the design complies" dialog. The body also says `GET /gaps` returned 503 when `BATATIS_CODEDB` was missing.
 
 ### GAP
 
@@ -221,7 +221,7 @@ Scoring question, from `docs/judging-rubric.md`: "Overall user experience for bo
 
 ### Open pull requests
 
-- [#16](https://github.com/simplythatguy/batatis/pull/16). #16 is not merged and is CHANGES @ `27bec3e`, not re-tested. At #16 @ `579cd2c`, "Download draft record" saves a .txt draft record, and only once every gap is closed. "Check completeness" downloads the engine-filled Safety Codes Council variance form PDF (the 5-page Oct 6, 2026 form plus engine-generated attachment pages (7 for Unc's 3b case; not the brief's Appendix 1)) behind a "not a finding that the design complies" dialog. The body says the product surface moves to `web/`. Screenshots in that body are of a local preview.
+- [#16](https://github.com/simplythatguy/batatis/pull/16). #16 is not merged and is CHANGES @ `27bec3e`, not re-tested. On this branch, Check completeness stays available while blocking gaps remain, and Download text record saves a .txt record either way. The official PDF stays closed until those gaps are cleared, and then downloads the engine-filled Safety Codes Council variance form PDF (the 5-page Oct 6, 2026 form plus engine-generated attachment pages (7 for Unc's 3b case; not the brief's Appendix 1)) behind a "not a finding that the design complies" dialog. The body says the product surface moves to `web/`. Screenshots in that body are of a local preview.
 - [#11](https://github.com/simplythatguy/batatis/pull/11). The body says wire fields on `Jurisdiction` stay `id`, `name`, and `authority`, and that "authority having jurisdiction" wording follows IB-2026-10-16. That wording change is not on `dev`.
 
 ### GAP

@@ -6,4 +6,4 @@ One decision per file, numbered in order: `0001-short-slug.md`, `0002-short-slug
 
 Record a decision when it is hard to reverse, surprising without the context, and the result of a real trade-off. The domain-modeling skill adds a file when a decision of that kind is actually made.
 
-No numbered ADR has been recorded yet. Choices for the current build are written in [`docs/research/2026-10-20-vision/2-week-build.md`](../research/2026-10-20-vision/2-week-build.md), under "Architecture: reuse first" and "Decisions settled on 2026-10-20". Copy one into this directory when it meets the bar above.
+[0001](0001-vite-web-canonical.md) records that `web/` is the canonical frontend. Other choices for the current build are written in [`docs/research/2026-10-20-vision/2-week-build.md`](../research/2026-10-20-vision/2-week-build.md), under "Architecture: reuse first" and "Decisions settled on 2026-10-20". Copy one into this directory when it meets the bar above.

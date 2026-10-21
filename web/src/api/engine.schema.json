@@ -265,6 +265,34 @@
       "title": "EvidenceItem",
       "type": "object"
     },
+    "Explainer": {
+      "description": "Short note on a Section C row. A quote is copied from codedb; the note never finds compliance.",
+      "properties": {
+        "quote": {
+          "title": "Quote",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "ai_written",
+            "deterministic"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "quote",
+        "source"
+      ],
+      "title": "Explainer",
+      "type": "object"
+    },
     "Fact": {
       "properties": {
         "confidence": {
@@ -326,7 +354,9 @@
           "default": "unconfirmed",
           "enum": [
             "confirmed",
-            "unconfirmed"
+            "unconfirmed",
+            "open",
+            "unknown"
           ],
           "title": "Status",
           "type": "string"
@@ -427,7 +457,9 @@
           "default": "unconfirmed",
           "enum": [
             "confirmed",
-            "unconfirmed"
+            "unconfirmed",
+            "open",
+            "unknown"
           ],
           "title": "Status",
           "type": "string"
@@ -723,6 +755,17 @@
           "title": "Differs",
           "type": "boolean"
         },
+        "explainer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Explainer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "intent_comparison": {
           "anyOf": [
             {
@@ -806,7 +849,8 @@
         "only_in_intent",
         "only_in_ae",
         "related_root",
-        "related_root_method"
+        "related_root_method",
+        "explainer"
       ],
       "title": "SectionCRow",
       "type": "object"

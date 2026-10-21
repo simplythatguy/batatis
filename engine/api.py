@@ -129,7 +129,11 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
 
     def code() -> Codes:
         if state['codes'] is None:
-            state['codes'] = Codes()
+            try:
+                state['codes'] = Codes()
+            except (CodeDbMissing, FileNotFoundError):
+                # Fixed detail. The body has no filesystem path.
+                raise HTTPException(503, 'code database not found') from None
         return state['codes']
 
     def purge_cases(*, force: bool = False) -> int:

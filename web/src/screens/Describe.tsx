@@ -1,133 +1,49 @@
-import { useRef, useState } from "react";
-import { DetailFields, FactLedger, QuestionChips } from "../case-parts";
-import { GapStrip, Icon, PanelHeader, PrivacyNotice } from "../components";
-import { DETAIL_FIELDS, factFor, valueText } from "../model";
+import { useState } from "react";
+import { AUTHORITIES } from "../config";
+import { FactLedger, QuestionChips } from "../case-parts";
+import { DraftNote, FieldSteps, GapStrip, PanelHeader } from "../components";
 import { useCase } from "../store";
 
-function DropZone() {
+function PastePlans() {
   const { c, dispatch } = useCase();
-  const input = useRef<HTMLInputElement>(null);
-  const [over, setOver] = useState(false);
-  const [error, setError] = useState("");
-
-  function take(list: FileList | null) {
-    if (!list) return;
-    const all = [...list];
-    const pdfs = all.filter((f) => f.type === "application/pdf" || f.name.toLowerCase().endsWith(".pdf"));
-    setError(pdfs.length < all.length ? "Only PDF files for now. Other formats were skipped." : "");
-    if (pdfs.length) dispatch({ type: "addFiles", names: pdfs.map((f) => f.name) });
-  }
-
-  return (
-    <div className="drop-wrap">
-      <div
-        className="drop-zone"
-        data-over={over}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setOver(true);
-        }}
-        onDragLeave={() => setOver(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setOver(false);
-          take(e.dataTransfer.files);
-        }}
-      >
-        <Icon name="upload" size={16} />
-        <span>Drop PDFs: drawings, product literature, test reports, a filled SCC form</span>
-        <button type="button" className="btn" onClick={() => input.current?.click()}>
-          Choose PDFs
-        </button>
-        <input
-          ref={input}
-          type="file"
-          accept="application/pdf,.pdf"
-          multiple
-          hidden
-          onChange={(e) => {
-            take(e.target.files);
-            e.target.value = "";
-          }}
-        />
-      </div>
-      {error && (
-        <p className="field-note" role="status">
-          <span className="status-dot warning" />
-          {error}
-        </p>
-      )}
-      {c.files.length > 0 && (
-        <ul className="plain-list file-list" aria-label="Attached files">
-          {c.files.map((f) => (
-            <li key={f.id} className="file-row">
-              <Icon name="file" />
-              <span className="file-name" title={f.name}>{f.name}</span>
-              <span className="meta file-state">{f.read ? `Read · ${f.pages} pages` : "Waiting for the engine"}</span>
-              <button
-                type="button"
-                className="btn btn-ghost btn-icon"
-                aria-label={`Remove ${f.name}`}
-                onClick={() => dispatch({ type: "removeFile", id: f.id })}
-              >
-                <Icon name="close" size={12} />
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
+  const [text, setText] = useState("");
+  const [note, setNote] = useState("");
+  return <div className="field">
+    <label htmlFor="paste-plans">Text from your plans</label>
+    <textarea id="paste-plans" rows={4} value={text} onChange={e => setText(e.target.value)} />
+    <button type="button" className="btn" disabled={!text.trim()} onClick={() => {
+      dispatch({ type: "setDescription", text: [c.description.trim(), text.trim()].filter(Boolean).join("\n\n") });
+      setText(""); setNote("Added to your description.");
+    }}>Add text</button>
+    {note && <p className="meta" role="status">{note}</p>}
+  </div>;
 }
 
 export function Describe() {
-  const { c, gaps, dispatch } = useCase();
-  const missingDetails = DETAIL_FIELDS.filter((d) => d.required && !valueText(factFor(c, d.id)).trim()).length;
-  return (
-    <>
-      <PanelHeader title="Describe your idea" meta={c.title} />
-      <GapStrip gaps={gaps} />
-      <div className="describe">
-        <div className="describe-main pane">
+  const { c, gaps, dispatch, saveDraft } = useCase();
+  return <>
+    <PanelHeader title="Your project" />
+    <GapStrip gaps={gaps} />
+    <div className="pane scroll-body"><div className="focused-content">
+      <FieldSteps nextHref="#/application?tab=A" steps={[
+        { title: "What are you building?", fields: ["description"], content: <>
           <div className="field">
-            <label htmlFor="description" className="lead-label">
-              Describe your idea in a sentence or two
-            </label>
-            <textarea
-              id="description"
-              className="describe-text"
-              rows={5}
-              value={c.description}
-              onChange={(e) => dispatch({ type: "setDescription", text: e.target.value })}
-              placeholder="What are you building or selling, and what does it do differently?"
-            />
-            <PrivacyNotice />
+            <label className="sr-only" htmlFor="description">What are you building?</label>
+            <textarea id="description" className="describe-text" rows={5} value={c.description} onChange={e => dispatch({type:"setDescription",text:e.target.value})} placeholder={c.applicantType === "manufacturer" ? "Describe your product and how it will be used…" : "Describe your project and what you want to do differently…"} />
           </div>
-          <DropZone />
-          <QuestionChips />
-          <details className="disclosure">
-            <summary>
-              <Icon name="chevron" size={12} />
-              <span className="disclosure-title">Applicant and site details</span>
-              <span className="meta">Sections A and B · {missingDetails ? `${missingDetails} missing` : "complete"}</span>
-            </summary>
-            <p className="meta disclosure-hint">Filled only from your files or your typing. Batatis never guesses these.</p>
-            <h3 className="sub-title">Section A · Applicant</h3>
-            <DetailFields section="A" />
-            <h3 className="sub-title">Section B · Project</h3>
-            <DetailFields section="B" />
-          </details>
-        </div>
-        <aside className="describe-side pane">
-          <FactLedger />
-        </aside>
-      </div>
-      <div className="footer-bar">
-        <span className="status-note">Fixture data · the engine connects next</span>
-        <a className="btn btn-primary" href="#/code-check">
-          Continue to code check
-        </a>
-      </div>
-    </>
-  );
+          <details className="compact-help"><summary>Add text from plans</summary><PastePlans /></details>
+          <p className="meta visit-note">Changes save to Batatis as you type. Download a copy before leaving.</p>
+        </> },
+        { title: "Who will review it?", fields: ["authority"], content: <div className="field">
+          <label htmlFor="authority">Reviewing authority</label>
+          <select id="authority" value={c.authority} data-empty={!c.authority} onChange={e => dispatch({type:"setAuthority",authority:e.target.value as typeof c.authority})}>
+            <option value="">Choose when you know</option>{AUTHORITIES.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+          </select>
+          <details className="compact-help"><summary>What is an authority?</summary><p>The municipality or organization reviewing your building permit. You can leave this unanswered.</p></details>
+        </div> },
+      ]} />
+      {(c.questions.length > 0 || c.facts.length > 0) && <details className="disclosure"><summary>Review captured details</summary><QuestionChips /><FactLedger /></details>}
+    </div></div>
+    <div className="footer-bar"><DraftNote /><button type="button" className="btn" onClick={() => void saveDraft()}>Save draft</button></div>
+  </>;
 }

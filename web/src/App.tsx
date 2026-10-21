@@ -1,11 +1,16 @@
-import { Icon, PrivacyNotice, SINGLE_INSTANCE_DEMO } from "./components";
+import { useEffect, useRef, useState } from "react";
+import { Icon } from "./components";
 import { useFocusParam, useRoute } from "./router";
 import { Application } from "./screens/Application";
 import { CodeCheck } from "./screens/CodeCheck";
 import { Describe } from "./screens/Describe";
-import { Accuracy, Officer } from "./screens/Placeholders";
+import { Accuracy } from "./screens/Accuracy";
+import { Officer } from "./screens/Officer";
 import { SectionC } from "./screens/SectionC";
-import { resetCase, useCase } from "./store";
+import { Who } from "./screens/Who";
+import { applicantLabel } from "./intake";
+import { AUTHORITIES } from "./config";
+import { useCase } from "./store";
 
 const EXPLICIT_ROUTES = ["/code-check", "/section-c", "/application", "/officer", "/accuracy"];
 
@@ -25,12 +30,23 @@ const NAV = [
 
 export function App() {
   const route = useRoute();
-  const { c, dispatch } = useCase();
+  const { c, phase, resetToWho } = useCase();
+  const navDialog = useRef<HTMLDialogElement>(null);
+  const resetDialog = useRef<HTMLDialogElement>(null);
+  const [resetOpen, setResetOpen] = useState(false);
   useFocusParam(route);
   const isDescribeRoute = !EXPLICIT_ROUTES.includes(route.path);
+  useEffect(() => {
+    const dialog = resetDialog.current;
+    if (!dialog) return;
+    if (resetOpen && !dialog.open) dialog.showModal();
+    if (!resetOpen && dialog.open) dialog.close();
+  }, [resetOpen]);
 
   let screen;
-  switch (route.path) {
+  if (phase !== "case") {
+    screen = <Who />;
+  } else switch (route.path) {
     case "/code-check":
       screen = <CodeCheck />;
       break;
@@ -51,7 +67,7 @@ export function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell${phase === "who" ? " onboarding-shell" : ""}`}>
       <aside className="sidebar">
         <div className="workspace">
           <span className="logo" aria-hidden="true">
@@ -59,43 +75,80 @@ export function App() {
           </span>
           Batatis
         </div>
-        <nav className="nav" aria-label="Main">
-          {NAV.map((g) => (
-            <div key={g.area} className="nav-section">
-              <div className="sidebar-section-label">{g.area}</div>
-              <div className="nav-group">
-                {g.items.map((i) => {
-                  const active = route.path === i.path || (i.path === "/describe" && isDescribeRoute);
-                  return (
-                    <a
-                      key={i.path}
-                      className="nav-item"
-                      href={`#${i.path}`}
-                      data-active={active}
-                      aria-current={active ? "page" : undefined}
-                    >
-                      <Icon name={i.icon} />
-                      {i.label}
-                    </a>
-                  );
-                })}
+        {phase === "case" && <button className="btn phone-navigation" onClick={() => navDialog.current?.showModal()}>Navigation</button>}
+        {phase === "case" && (
+          <nav className="nav" aria-label="Main">
+            {NAV.map((g) => (
+              <div key={g.area} className="nav-section">
+                <div className="sidebar-section-label">{g.area}</div>
+                <div className="nav-group">
+                  {g.items.map((i) => {
+                    const active = route.path === i.path || (i.path === "/describe" && isDescribeRoute);
+                    return (
+                      <a
+                        key={i.path}
+                        className="nav-item"
+                        href={`#${i.path}`}
+                        data-active={active}
+                        aria-current={active ? "page" : undefined}
+                      >
+                        <Icon name={i.icon} />
+                        {i.label}
+                      </a>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
-        </nav>
+            ))}
+          </nav>
+        )}
         <div className="sidebar-foot">
           <div className="case-card">
-            <span className="case-title">{c.title}</span>
-            <span className="meta">Fixture case · fictional applicant</span>
+            <span className="case-title">{phase === "case" ? c.title || "New application" : ""}</span>
+            <span className="meta">
+              {phase === "case" ? `${applicantLabel(c.applicantType)} · ${AUTHORITIES.find((a) => a.id === c.authority)?.name ?? "Authority not selected"}` : ""}
+            </span>
           </div>
-          <button type="button" className="btn btn-ghost" onClick={() => resetCase(dispatch)}>
+          <button type="button" className="btn btn-ghost" onClick={() => setResetOpen(true)}>
             Reset case
           </button>
-          <PrivacyNotice />
-          <p className="meta demo-notice">{SINGLE_INSTANCE_DEMO}</p>
         </div>
       </aside>
-      <main className="main-panel">{screen}</main>
+      <main className="main-panel">
+        {screen}
+      </main>
+      <dialog className="dialog navigation-dialog" ref={navDialog} aria-labelledby="navigation-title">
+        <div className="dialog-body">
+          <div className="dialog-head"><h2 id="navigation-title" className="dialog-title">Navigation</h2><button className="btn" onClick={() => navDialog.current?.close()}>Close</button></div>
+          <nav aria-label="Main navigation">{NAV.flatMap(g => g.items).map(item => <a key={item.path} className="nav-item" href={`#${item.path}`} aria-current={route.path === item.path ? "page" : undefined} onClick={() => navDialog.current?.close()}><Icon name={item.icon} />{item.label}</a>)}</nav>
+          <p className="meta">{applicantLabel(c.applicantType)}</p>
+          <button className="btn btn-ghost" onClick={() => { navDialog.current?.close(); setResetOpen(true); }}>Reset case</button>
+        </div>
+      </dialog>
+      <dialog className="dialog" ref={resetDialog} aria-labelledby="reset-confirm-title" onClose={() => setResetOpen(false)}>
+        <form method="dialog">
+          <div className="dialog-body">
+            <h2 className="dialog-title" id="reset-confirm-title">Clear this case?</h2>
+            <p className="meta">This clears your current visit. Download a copy first if you need it.</p>
+          </div>
+          <div className="footer-bar">
+            <button type="button" className="btn" onClick={() => resetDialog.current?.close()}>
+              Keep this case
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                resetDialog.current?.close();
+                resetToWho();
+              }}
+            >
+              Reset case
+            </button>
+          </div>
+        </form>
+      </dialog>
+
     </div>
   );
 }

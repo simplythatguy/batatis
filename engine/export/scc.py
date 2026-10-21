@@ -26,7 +26,7 @@ from ..completeness import check_completeness
 from ..professional import NOT_ENGAGED_ITEM
 from ..process_fields import PROCESS_ALIASES
 from ..section_c import section_c_rows
-from ..section_d import supporting_documents
+from ..section_d import supporting_documents, text_evidence
 from .text import fit, pdf_safe
 
 DEFAULT_FORM = Path(__file__).resolve().parents[2] / 'reference' / 'guides' / 'SCC-Variance-Form.pdf'
@@ -117,6 +117,7 @@ _ALIASES = {
     'mailing_address': ('mailing_address', 'mailingAddress'),
     'municipal_address': ('municipal_address', 'municipalAddress', 'civic_address', 'address'),
     'legal_description': ('legal_description', 'legalDescription', 'section_b.legal_description'),
+    'permit_number': ('permit_number', 'permit', 'section_b.permit_number'),
     'alternative_description': ('alternative_description', 'alternative'),
 }
 _FIELD_KEYS = {alias: key for key, aliases in _ALIASES.items() for alias in aliases}
@@ -251,6 +252,7 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict) -> _Plan:
 
     dslots = fmap['section_d_rows']
     docs = [(pdf_safe(d.title), pdf_safe(d.responsible_party)) for d in supporting_documents(case)]
+    docs += [(pdf_safe(title), pdf_safe(who)) for title, who in text_evidence(case)]
     shown_docs = docs if len(docs) <= len(dslots) else docs[:len(dslots) - 1]
     for n, (slot, (doc, who)) in enumerate(zip(dslots, shown_docs), start=1):
         ref = f'D-{n}'

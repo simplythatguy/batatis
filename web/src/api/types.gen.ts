@@ -38,6 +38,13 @@ export interface EvidenceItem {
   status: "needed" | "evidence_listed" | "not_applicable";
 }
 
+/** Short note on a Section C row. A quote is copied from codedb; the note never finds compliance. */
+export interface Explainer {
+  quote: string;
+  source: "ai_written" | "deterministic";
+  text: string;
+}
+
 export interface Fact {
   confidence: number | null;
   field: string;
@@ -46,7 +53,7 @@ export interface Fact {
   inputs: string[];
   kind: "exact" | "pointed" | "computed" | "proposed";
   source: Source;
-  status: "confirmed" | "unconfirmed";
+  status: "confirmed" | "unconfirmed" | "open" | "unknown";
   value: string | number | boolean | null;
 }
 
@@ -58,7 +65,7 @@ export interface FactInput {
   inputs?: string[];
   kind: "exact" | "pointed" | "computed" | "proposed";
   source: SourceInput;
-  status?: "confirmed" | "unconfirmed";
+  status?: "confirmed" | "unconfirmed" | "open" | "unknown";
   value: string | number | boolean | null;
 }
 
@@ -107,6 +114,7 @@ export interface SectionCRow {
   attribution_status: "direct" | "inherited from parent" | "no row in the attribution table";
   citation: string;
   differs: boolean;
+  explainer: Explainer | null;
   intent_comparison: string | null;
   intents: IntentBlock[];
   only_in_ae: string[];

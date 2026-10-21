@@ -5,7 +5,7 @@ from engine.codes import Codes
 from engine.models import Case, Fact, Source
 from engine.section_c import section_c_rows
 from engine.section_d import (ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, SupportingDocument,
-                              section_d_plan, supporting_documents)
+                              section_d_plan, supporting_documents, text_evidence)
 
 
 def test_every_confirmed_pair_gets_an_issue_and_ordered_types():
@@ -62,6 +62,49 @@ def test_file_and_metadata_from_ledger():
     assert result.status == 'evidence_listed' and result.responsible_party == 'Named applicant engineer'
     case.facts.append(fact('file_ref', 'mismatch.pdf', file))
     assert supporting_documents(case) == []
+
+
+def test_typed_evidence_is_text_and_both_documents_are_listed():
+    """A pasted document is not a file reference. A second one does not replace the first."""
+    case = Case()
+    user = Source(type='user_text', ref='applicant')
+
+    def pointed(field, value):
+        return Fact(field=field, value=value, kind='pointed', status='confirmed', source=user)
+
+    case.facts = [
+        pointed('evidence.wall.description', 'First report'),
+        pointed('evidence.wall.title', 'First report'),
+        pointed('evidence.wall.responsible_party', 'Example Applicant'),
+        pointed('evidence.wall~2.description', 'Second report'),
+        pointed('evidence.wall~2.title', 'Second report'),
+        pointed('evidence.wall~2.responsible_party', 'Example Engineer'),
+    ]
+    assert supporting_documents(case) == []
+    assert text_evidence(case) == [('First report', 'Example Applicant'), ('Second report', 'Example Engineer')]
+
+
+def test_two_documents_for_one_gap_are_both_listed_for_the_pdf():
+    """The export walks supporting_documents. A second file must not replace the first."""
+    case = Case()
+    first = Source(type='file', ref='first-report.pdf', quote='First report')
+    second = Source(type='file', ref='second-report.pdf', quote='Second report')
+    user = Source(type='user_text', ref='applicant')
+
+    def pointed(field, value, source):
+        return Fact(field=field, value=value, kind='pointed', status='confirmed', source=source)
+
+    case.facts = [
+        pointed('evidence.wall.file_ref', 'first-report.pdf', first),
+        pointed('evidence.wall.title', 'First report', user),
+        pointed('evidence.wall.responsible_party', 'Example Applicant', user),
+        pointed('evidence.wall~2.file_ref', 'second-report.pdf', second),
+        pointed('evidence.wall~2.title', 'Second report', user),
+        pointed('evidence.wall~2.responsible_party', 'Example Engineer', user),
+    ]
+    docs = supporting_documents(case)
+    assert [doc.title for doc in docs] == ['First report', 'Second report']
+    assert [doc.responsible_party for doc in docs] == ['Example Applicant', 'Example Engineer']
 
 
 def test_acceptable_path_has_only_shared_ladder():
