@@ -58,15 +58,20 @@ A threshold fitted for one config is never applied to another (`config_hash` mus
 - Per-IP limit: one slot per run, `BATATIS_IDENTIFY_RATE_LIMIT` (default 6) per `BATATIS_IDENTIFY_RATE_WINDOW_SECONDS` (default 600), per instance. Daily cap: `BATATIS_DAILY_SPEND_CAP_USD` (default 5).
 - Live switch: `BATATIS_LIVE=1` plus `OPENAI_API_KEY` (verifier) and the Jev credential. The Jev credential is `TYPESAFE_API_KEY` or `JEV_API_KEY` in the environment, then the keychain, then `~/.config/jev/credentials`. The engine does not read `.env` itself; load it in the shell (`set -a; . ./.env; set +a`).
 - Outbound text is the description with personal details removed (`engine/redact.py`: `scrub` with `known_values` and `people_names`), as for `/relevance`. The stored `description_sha256` is of the applicant's own text.
-- `BATATIS_PROVIDER=fake` swaps every transport for the deterministic offline fakes in `engine/identify/fakes.py` (still metered under the same model ids). Results are labelled `mode: fake` and "not a measurement". Refused when `VERCEL` is set.
+- `BATATIS_PROVIDER=fake` swaps every transport for the deterministic offline fakes in `engine/identify/fakes.py` (still metered under the same model ids), including the default adapters (`Judge()`, `jev_ask()`, `ClaudeVerifier(db)`) used by `/relevance` and `cli_sut.py`. Nothing reaches the network in fake mode, even with `BATATIS_LIVE=1` and keys set (tested with sockets and HTTP blocked). Results are labelled `mode: fake` and "not a measurement". Refused when `VERCEL` is set.
+- Live providers are OpenAI and Jev. An Anthropic client is built only when `verifier: anthropic` is configured (`BATATIS_IDENTIFY_VERIFIER=anthropic` or `pipeline.json`); `ANTHROPIC_API_KEY` alone never reaches Anthropic.
 
 ## Routes
 
 Owner writes; reviewers read (`engine/access.py`: every POST here is mode `edit`, so a reviewer gets 404 or 409 and a submitted case is read-only).
 
+**Versions.** Every write is one compare-and-swap (docs/api-contract.md): a concurrent write returns 409 `case was updated concurrently` and is never retried on a newer case. Each POST body accepts an optional `expected_version` (the `Case.version` or `case_version` the client last read), as `POST /cases/{id}/section-d` does; a supplied version that is not the stored one is a 409 and nothing is written. Every identify response carries `case_version`, the version after that read or write. An identify run writes its result with one CAS against the version it started from, so any write to the case during the run makes the run a 409 (`error` event with `status: 409` on the stream).
+
 ### `POST /cases/{id}/identify`
 
-Body (all optional): `{"prose": "...", "answers": [{"field": "...", "question_id": "...", "answer": "..."}]}`. Without `prose`, the case's latest `project.description` fact is used; with neither, 409 `Describe your project first`. Answers are stored as unconfirmed facts (an unknown answer has no value).
+Body (all optional): `{"prose": "...", "answers": [{"question_id": "...", "field": "...", "answer": "..."}], "expected_version": 7}`. Without `prose`, the case's latest `project.description` fact is used; with neither, 409 `Describe your project first`.
+
+An answer must name a question this case's stored identification asked (`open_questions[].id`) and can only fill that question's own field (`identify.choice.<article>`; `field` may be omitted). Anything else, including a field such as `project.description`, `citation.*` or `evidence.*.file_ref`, is a 422 and nothing is written, so an answer can never replace a confirmed fact. Accepted answers are stored as unconfirmed facts (an unknown answer has no value).
 
 - `Accept: application/json` returns the `IdentifyResult`.
 - `Accept: text/event-stream` streams one event per stage, in this order: `start`, `screen`, `rerank`, `verify`, `questions`, `done`. Each stage event's data carries status and counts only (`{"stage": "screen", "status": "done", "method": "jev", "articles": 2080}`), never prose or code text. `done` carries the full result, the same body as the JSON response. A failure sends `error` with `{"message", "status"}`. Events are not buffered by the HTTP guard.
@@ -91,19 +96,20 @@ The stored result with decisions overlaid and `stale: true` when the description
 | `benchmark` | the benchmark acceptable solution: `provision`, `provision_id`, `citation`, `sentence` (verbatim), `departure`, `departure_status` (`none`, `proposed`, `confirmed`), `objectives[]`, `functions[]` by lookup, `basis` (`committed`, `top_choice`, `applicant`, `none`), `requirement` (numeric requirement against confirmed facts) |
 | `process_refs[]` | Div A 1.2.1.1. and Div C 2.3.1.1., `read_only: true` |
 | `model_ids`, `commit_policy` | pinned ids per stage; the policy status and reason |
+| `case_version` | the case version after this read or write; send it back as `expected_version` |
 | `trace` | `config`, `config_hash`, `exhaustive`, `articles_expected` (2080), `articles_scored`, `ranker`, `fallback_reason`, `verifier`, `picks`, `dropped[]`, `stages[]` (seconds, requests, tokens per stage), `spend`, `usd`, `seconds` |
 
 ### `POST /cases/{id}/identify/{provision}/decision`
 
-`{"decision": "yes" | "no" | "not_sure"}`. `yes` adds the article to `provisions`, rebuilds Section C by lookup and records a confirmed `citation.<article>` user-click fact; `no` and `not_sure` remove it. `not_sure` gives the card an `open_question_id` and an item in the information request. Returns the `IdentifyResult`. 404 when there is no stored result or the article is not in it. A `yes` stops showing once a reference withdrawal (`POST /cases/{id}/section-d`) removes the provision.
+`{"decision": "yes" | "no" | "not_sure", "expected_version": 8}`. `yes` adds the article to `provisions`, rebuilds Section C by lookup and records a confirmed `citation.<article>` user-click fact; `no` and `not_sure` remove it. `not_sure` gives the card an `open_question_id` and an item in the information request. Returns the `IdentifyResult` plus `section_c`, the Section C rows a `yes` wrote for that article (empty otherwise). 404 when there is no stored result or the article is not in it; 409 on a stale `expected_version`. A `yes` stops showing once a reference withdrawal (`POST /cases/{id}/section-d`) removes the provision.
 
 ### `POST /cases/{id}/identify/confirm`
 
-`{"provisions": ["9.10.15.5.(8)", ...]}`. Each id must exist in Division B (404 lists the missing ones). Writes provisions and Section C. Returns the `Case`.
+`{"provisions": ["9.10.15.5.(8)", ...], "expected_version": 8}`. Each id must exist in Division B (404 lists the missing ones). Writes provisions and Section C. Returns the `Case`.
 
 ### `POST /cases/{id}/identify/benchmark`
 
-`{"provision": "9.10.15.5.(8)", "departure": "one line"}`. The applicant names the requirement the design departs from and confirms the departure. The sentence, citation and objective and function codes are looked up; a departure that claims compliance or safety is refused with 422. Returns the `IdentifyResult` with `benchmark.basis: applicant` and `departure_status: confirmed`.
+`{"provision": "9.10.15.5.(8)", "departure": "one line", "expected_version": 8}`. The applicant names the requirement the design departs from and confirms the departure. The sentence, citation and objective and function codes are looked up; a departure that claims compliance, safety or approval is refused with 422 ("departs from the acceptable solution by ..." is fine). Returns the `IdentifyResult` with `benchmark.basis: applicant` and `departure_status: confirmed`.
 
 ### `GET /cases/{id}/information-request`
 
