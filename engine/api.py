@@ -17,6 +17,7 @@ from pydantic import BaseModel
 
 from codedb import AmbiguousProvisionError
 
+from .code_library import CodeTOC, ProvisionContext, provision_context, table_of_contents
 from .codes import CodeDbMissing, Codes
 from .export import (EXPORT_FAILED_DETAIL, ExportBlocked, ExportError, FORM_NOT_FOUND_DETAIL, FormNotFound,
                      export_case)
@@ -244,8 +245,13 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
                                 headers={'Retry-After': str(wait)})
         return code().search(q, division=division, limit=limit)
 
-    @app.get('/code/{provision_id}')
-    def code_lookup(provision_id: str, request: Request, division: str | None = Query(None, pattern='^[ABC]$')):
+    @app.get('/code/toc', response_model=CodeTOC)
+    def code_toc(division: str = Query('B')):
+        if division not in ('A', 'B', 'C'):
+            raise HTTPException(400, 'invalid division')
+        return table_of_contents(code().db_path, division)
+
+    def lookup_code(provision_id: str, request: Request, division: str | None):
         extra = set(request.query_params) - {'division'}
         if extra:
             raise HTTPException(400, 'this route accepts only division')
@@ -258,6 +264,14 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         if rec is None:
             raise HTTPException(404, 'provision not found')
         return rec
+
+    @app.get('/code/{provision_id}/context', response_model=ProvisionContext)
+    def code_context(provision_id: str, request: Request, division: str = Query('B', pattern='^[ABC]$')):
+        return provision_context(lookup_code(provision_id, request, division), code())
+
+    @app.get('/code/{provision_id}')
+    def code_lookup(provision_id: str, request: Request, division: str | None = Query(None, pattern='^[ABC]$')):
+        return lookup_code(provision_id, request, division)
 
     @app.post('/section-c', response_model=list[SectionCRow])
     def section_c(body: SectionCRequest):
