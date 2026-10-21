@@ -35,7 +35,6 @@ export const ApplicationList = forwardRef<ApplicationListHandle, {
   selectedId: string | null;
   onSelect: (id: string) => void;
   onNew?: () => void;
-  onCollapse?: () => void;
   loading?: boolean;
   error?: string;
   /** Shown above the rows (for example "Not saved to an account. This visit only."). */
@@ -43,7 +42,7 @@ export const ApplicationList = forwardRef<ApplicationListHandle, {
   empty?: ReactNode;
   rowActions?: (a: ApplicationSummary) => ReactNode;
   lineFor?: (a: ApplicationSummary) => { text: string; tone: string; attention: boolean };
-}>(function ApplicationList({ title = "Applications", items, selectedId, onSelect, onNew, onCollapse, loading, error, note, empty, rowActions, lineFor }, ref) {
+}>(function ApplicationList({ title = "Applications", items, selectedId, onSelect, onNew, loading, error, note, empty, rowActions, lineFor }, ref) {
   const [query, setQuery] = useState("");
   const search = useRef<HTMLInputElement>(null);
   useImperativeHandle(ref, () => ({ focusSearch: () => search.current?.focus() }), []);
@@ -53,13 +52,8 @@ export const ApplicationList = forwardRef<ApplicationListHandle, {
       <div className="cf-list-head">
         <h2>{title}</h2>
         <div className="cf-list-tools">
-          {onCollapse && (
-            <button type="button" className="cf-icon-btn is-plain" aria-label={`Hide the list (${MOD_KEY} B)`} title={`Hide the list (${MOD_KEY} B)`} onClick={onCollapse}>
-              <Icon24 name="panel" size={17} />
-            </button>
-          )}
           {onNew && (
-            <button type="button" className="cf-icon-btn is-plain" aria-label="New application" title="New application" onClick={onNew}>
+            <button type="button" className="cf-icon-btn is-plain cf-list-new" aria-label="New application" title="New application" onClick={onNew}>
               <Icon24 name="compose" size={17} />
             </button>
           )}

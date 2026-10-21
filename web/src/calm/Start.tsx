@@ -1,54 +1,37 @@
 import { useEffect, useRef, useState } from "react";
-import { AUTHORITIES } from "../config";
-import { applicantLabel } from "../intake";
-import { PRIVACY_NOTICE } from "../privacy";
-import { splitNoticeUrl } from "../rules";
 import { useCase } from "../store";
-import type { AuthorityId } from "../types";
-import { resetSession, updateSession, useSession, type HeldFile } from "./session";
-import { CIcon, Dot, Eyebrow, Kbd, MOD_KEY } from "./ui";
-
-type Role = "manufacturer" | "contractor" | "homebuilder";
-const ROLES: { id: Role; label: string }[] = [
-  { id: "manufacturer", label: "Manufacturer" },
-  { id: "contractor", label: "Contractor" },
-  { id: "homebuilder", label: "Homebuilder" },
-];
+import { useBegin, useCurrentApplication } from "./begin";
+import { updateSession, useSession } from "./session";
+import { CIcon, Dot, Kbd, MOD_KEY } from "./ui";
 
 let fileSeq = 0;
 const fileId = () => `file-${Date.now().toString(36)}-${(fileSeq++).toString(36)}`;
 const isPdf = (f: File) => f.type === "application/pdf" || /\.pdf$/i.test(f.name);
 const isText = (f: File) => /^text\/(plain|markdown)$/.test(f.type) || /\.(txt|md|markdown)$/i.test(f.name);
 
-const [PRIVACY_LEAD, ...PRIVACY_REST] = PRIVACY_NOTICE.split(/(?<=\.)\s+/);
-const PRIVACY_MORE = splitNoticeUrl(PRIVACY_REST.join(" "));
-
-export function Start({ focus }: { focus: string | null }) {
-  const { c, phase, dispatch, beginEmpty, resetNote, requestCheck } = useCase();
+/** Describe: one headline and the composer. Role and reviewing authority are asked in the deck. */
+export function Start() {
+  const { c, phase, dispatch, resetNote, requestCheck } = useCase();
   const session = useSession();
+  const { begin } = useBegin();
+  const { locked } = useCurrentApplication();
   const inCase = phase === "case";
-  const [held, setHeld] = useState("");
-  const [role, setRole] = useState<Role | null>(null);
-  const [authority, setAuthority] = useState<AuthorityId | "unsure" | null>(null);
-  const [heldFiles, setHeldFiles] = useState<HeldFile[]>([]);
   const [dragging, setDragging] = useState(false);
   const [note, setNote] = useState("");
   const input = useRef<HTMLInputElement>(null);
-  const reviewer = useRef<HTMLDivElement>(null);
-  const text = inCase ? c.description : held;
-  const chosenRole = inCase ? (c.applicantType as Role) : role;
-  const chosenAuthority: AuthorityId | "unsure" | null = inCase ? c.authority || (session.authorityUnsure ? "unsure" : null) : authority;
+  const area = useRef<HTMLTextAreaElement>(null);
+  const text = inCase ? c.description : session.draft;
+  const role = inCase ? c.applicantType : session.role;
 
-  useEffect(() => {
-    if (focus === "authority") reviewer.current?.querySelector<HTMLElement>("button")?.focus();
-  }, [focus]);
+  useEffect(() => { if (!locked) area.current?.focus({ preventScroll: true }); }, [locked]);
 
   function setText(t: string) {
     if (inCase) dispatch({ type: "setDescription", text: t });
-    else setHeld(t);
+    else updateSession({ draft: t });
   }
 
   async function take(list: FileList | File[]) {
+    if (locked) return;
     const files = [...list];
     const pdfs = files.filter(isPdf);
     const texts = files.filter((f) => !isPdf(f) && isText(f));
@@ -58,7 +41,7 @@ export function Start({ focus }: { focus: string | null }) {
       if (inCase) {
         dispatch({ type: "addFiles", files: made.map((m) => ({ id: m.id, name: m.file.name })) });
         updateSession((s) => ({ held: [...s.held, ...made] }));
-      } else setHeldFiles((h) => [...h, ...made]);
+      } else updateSession((s) => ({ draftFiles: [...s.draftFiles, ...made] }));
     }
     if (texts.length) {
       const bodies = await Promise.all(texts.map((f) => f.text()));
@@ -102,7 +85,7 @@ export function Start({ focus }: { focus: string | null }) {
   takeRef.current = take;
 
   // Batatis reads the description; attached PDFs are stored for the officer, not read.
-  const blocked = !chosenRole ? "Pick your role to start." : !text.trim() ? "Describe it in a sentence first. Batatis reads your description, not the PDF text." : "";
+  const blocked = locked ? "Submitted applications are read-only until the officer returns them." : !text.trim() ? "Describe it in a sentence first. Batatis reads your description, not the PDF text." : "";
 
   function start() {
     if (blocked) return;
@@ -112,24 +95,13 @@ export function Start({ focus }: { focus: string | null }) {
       location.hash = "#/questions";
       return;
     }
-    const files = heldFiles;
-    beginEmpty(chosenRole!);
-    if (held.trim()) dispatch({ type: "setDescription", text: held });
-    if (authority && authority !== "unsure") dispatch({ type: "setAuthority", authority });
-    if (files.length) dispatch({ type: "addFiles", files: files.map((f) => ({ id: f.id, name: f.file.name })) });
-    resetSession({ held: files, authorityUnsure: authority === "unsure", checkAfterStart: true });
-    location.hash = "#/questions";
-  }
-
-  function pickAuthority(value: AuthorityId | "unsure") {
-    if (!inCase) return setAuthority(value);
-    dispatch({ type: "setAuthority", authority: value === "unsure" ? "" : value });
-    updateSession({ authorityUnsure: value === "unsure" });
+    // Without a role from onboarding, the deck asks it first; nothing is picked for the applicant.
+    if (!begin()) location.hash = "#/questions";
   }
 
   function removeFile(id: string) {
     if (!inCase) {
-      setHeldFiles((h) => h.filter((f) => f.id !== id));
+      updateSession((s) => ({ draftFiles: s.draftFiles.filter((f) => f.id !== id) }));
       return setNote("Removed. It was not uploaded.");
     }
     const uploaded = c.files.find((f) => f.id === id)?.read;
@@ -152,7 +124,7 @@ export function Start({ focus }: { focus: string | null }) {
                 : { tone: "warning" as const, label: "Not uploaded" };
         return { id: f.id, name: f.name, ...state };
       })
-    : heldFiles.map((f) => ({ id: f.id, name: f.file.name, tone: "pending" as const, label: "Attaches after Start" }));
+    : session.draftFiles.map((f) => ({ id: f.id, name: f.file.name, tone: "pending" as const, label: "Attaches after Start" }));
 
   return (
     <div className="cf-start">
@@ -161,9 +133,7 @@ export function Start({ focus }: { focus: string | null }) {
           <div className="cf-drop-box"><CIcon name="upload" size={22} /><span>Drop to attach</span><small>PDF plans, or .txt and .md notes</small></div>
         </div>
       )}
-      <Eyebrow>Alternative solution application</Eyebrow>
-      <h1 className="cf-display">Tell us what you’re building differently.</h1>
-      <p className="cf-lede">Describe it in a sentence and attach your plans. Batatis finds the code that applies, asks only what’s missing, and drafts your variance application.</p>
+      <h1 className="cf-display">What are you building differently?</h1>
 
       <div className={`cf-composer cf-glass${dragging ? " is-drop" : ""}`}>
         {fileRows.length > 0 && (
@@ -182,7 +152,9 @@ export function Start({ focus }: { focus: string | null }) {
         )}
         <label className="cf-sr" htmlFor="cf-describe">Describe your project</label>
         <textarea
+          ref={area}
           id="cf-describe"
+          readOnly={locked}
           className="cf-composer-text"
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -192,14 +164,14 @@ export function Start({ focus }: { focus: string | null }) {
               start();
             }
           }}
-          placeholder={chosenRole === "manufacturer" ? "What is your product, and how will builders use it?" : "What are you building, and what do you want to do differently?"}
+          placeholder={role === "manufacturer" ? "What is your product, and how will builders use it?" : "What are you building, and what do you want to do differently?"}
         />
         <div className="cf-composer-foot">
           <div className="cf-attach">
             {/* Hidden: the Attach plans button is the control. */}
             <input ref={input} hidden type="file" multiple accept=".pdf,.txt,.md,application/pdf,text/plain,text/markdown" tabIndex={-1} aria-hidden="true"
               onChange={(e) => { if (e.target.files?.length) void take(e.target.files); e.target.value = ""; }} />
-            <button type="button" className="cf-chip" onClick={() => input.current?.click()}>
+            <button type="button" className="cf-chip" disabled={locked} onClick={() => input.current?.click()}>
               <CIcon name="clip" size={14} />Attach plans
             </button>
             <span className="cf-faint cf-small cf-drop-hint">or drop files anywhere</span>
@@ -210,43 +182,10 @@ export function Start({ focus }: { focus: string | null }) {
         </div>
       </div>
       <div className="cf-start-notes">
-        {blocked && <p className="cf-hint" role="note">{blocked}</p>}
+        {blocked && <p className="cf-faint cf-small" role="note">{blocked}</p>}
         {note && <p className="cf-faint cf-small" role="status">{note}</p>}
         {!inCase && resetNote && <p className="cf-faint cf-small" role="status">{resetNote}</p>}
-        <div className="cf-faint cf-small cf-privacy">
-          <span>{PRIVACY_LEAD}</span>
-          <details className="cf-inline-details">
-            <summary>How your text is handled</summary>
-            <span>{PRIVACY_MORE.text}{PRIVACY_MORE.url && <> <a href={PRIVACY_MORE.url} target="_blank" rel="noopener noreferrer">OpenAI API data policy<span className="cf-sr"> (opens in a new tab)</span></a></>}</span>
-          </details>
-        </div>
       </div>
-
-      <div className="cf-choices">
-        <div className="cf-choice-row" role="group" aria-labelledby="cf-role-label">
-          <span className="cf-choice-label" id="cf-role-label">I’m a</span>
-          {ROLES.map((r) => (
-            <button key={r.id} type="button" className="cf-chip" aria-pressed={chosenRole === r.id} aria-disabled={inCase || undefined}
-              onClick={() => { if (!inCase) setRole(r.id); }}>
-              {r.label}
-            </button>
-          ))}
-          {inCase && <span className="cf-faint cf-small">{applicantLabel(c.applicantType)} · Start over to change</span>}
-        </div>
-        <div className="cf-choice-row" role="group" aria-labelledby="cf-auth-label" ref={reviewer}>
-          <span className="cf-choice-label" id="cf-auth-label">Reviewed by</span>
-          {AUTHORITIES.map((a) => (
-            <button key={a.id} type="button" className="cf-chip" aria-pressed={chosenAuthority === a.id} onClick={() => pickAuthority(a.id)}>{a.name}</button>
-          ))}
-          <button type="button" className="cf-chip" aria-pressed={chosenAuthority === "unsure"} onClick={() => pickAuthority("unsure")}>Not sure</button>
-        </div>
-      </div>
-
-      <ol className="cf-how" aria-label="How it works">
-        <li><span>01</span>Describe it</li>
-        <li><span>02</span>Answer a few questions</li>
-        <li><span>03</span>Download your application</li>
-      </ol>
     </div>
   );
 }

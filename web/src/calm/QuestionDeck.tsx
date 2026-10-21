@@ -1,19 +1,22 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { DETAIL_FIELDS, PROCESS_FIELDS, factFor, isTyped, valueText } from "../model";
 import { withinProvision } from "../provisions";
 import { exitCountWarning } from "../rules";
 import { useCandidateAnswer } from "../screens/CodeCheck";
 import { Recommendations } from "../screens/Recommendations";
 import { useCase } from "../store";
+import type { ApplicantType } from "../types";
+import { authorityName } from "./applications";
+import { openAssistant, setAssistantContext } from "./assistant/assistant";
+import { useBegin, useCurrentApplication } from "./begin";
 import { CodeDrawer, type DrawerState } from "./CodeDrawer";
+import { aliasKey, buildDeck, choiceKey, choicesFor, preCaseDeck, SECTIONS, type DeckItem, type SectionId } from "./deck";
+import { Icon24 } from "./icons";
 import { RelevanceRing } from "./RelevanceRing";
-import { aliasKey, buildDeck, choicesFor, type DeckItem } from "./deck";
 import { updateSession, useSession } from "./session";
-import { CIcon, Eyebrow, Kbd, MOD_KEY } from "./ui";
+import { CIcon, MOD_KEY } from "./ui";
 
 type Shown = DeckItem & { gone?: boolean };
-
-const TEXT_KINDS = new Set(["question", "process"]);
 
 function isTextTarget(t: EventTarget | null): boolean {
   const el = t as HTMLElement | null;
@@ -21,32 +24,135 @@ function isTextTarget(t: EventTarget | null): boolean {
   return el.tagName === "TEXTAREA" || el.tagName === "INPUT" || el.tagName === "SELECT" || el.isContentEditable;
 }
 
-/** One card's controls. `onReady` tells the footer whether Continue can commit. */
-function CardBody({
-  item,
-  picked,
-  onPick,
-  draft,
-  setDraft,
-  openDrawer,
-}: {
-  item: Shown;
-  picked?: string;
-  onPick: (value: string) => void;
-  draft: string;
-  setDraft: (v: string) => void;
-  openDrawer: (s: DrawerState) => void;
-}) {
+/** Cards answered by typing several lines continue with Cmd/Ctrl+Enter instead of Enter. */
+function multiline(item: DeckItem): boolean {
+  return item.kind === "question" || item.kind === "process" || item.kind === "describe" || (item.kind === "detail" && Boolean(DETAIL_FIELDS.find((d) => d.id === item.ref)?.multiline));
+}
+
+/* —— Typeform pieces —— */
+
+/** Stacked choices with letter keys. Pressed = selected; the check shows on the chosen one. */
+function Choices({ choices, current, onPick }: { choices: { value: string; label: string }[]; current?: string; onPick: (v: string) => void }) {
+  return (
+    <div className="cf-choices-q" role="group" aria-label="Your answer">
+      {choices.map((o, n) => (
+        <button key={o.value} type="button" className="cf-choice" data-deck-answer aria-pressed={current === o.value} onClick={() => onPick(o.value)}>
+          <span className="cf-choice-key" aria-hidden="true">{choiceKey(n)}</span>
+          <span className="cf-choice-label">{o.label}</span>
+          <span className="cf-choice-check" aria-hidden="true"><Icon24 name="check" size={16} /></span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function OkRow({ label = "OK", disabled, onOk, typed, children }: { label?: string; disabled?: boolean; onOk: () => void; typed: boolean; children?: ReactNode }) {
+  return (
+    <div className="cf-ok-row" data-deck-foot>
+      <button type="button" className="cf-btn is-primary is-lg" disabled={disabled} onClick={onOk}>
+        {label} <Icon24 name="check" size={16} stroke={2} />
+      </button>
+      {!disabled && <span className="cf-ok-hint" aria-hidden="true">press <b>{typed ? `${MOD_KEY} Enter ↵` : "Enter ↵"}</b></span>}
+      {children}
+    </div>
+  );
+}
+
+/** Number and arrow in the accent, then the section label. */
+function QNum({ n, label }: { n: ReactNode; label?: string }) {
+  return (
+    <div className="cf-q-num">
+      <span className="cf-q-n">{n}</span>
+      <Icon24 name="right" size={15} stroke={2} />
+      {label && <span className="cf-q-sec">{label}</span>}
+    </div>
+  );
+}
+
+/** Enter-direction for the vertical slide: forward enters from below, back from above. */
+function useDirection(index: number): "down" | "up" {
+  const prev = useRef(index);
+  const dir = useRef<"down" | "up">("down");
+  if (prev.current !== index) {
+    dir.current = index > prev.current ? "down" : "up";
+    prev.current = index;
+  }
+  return dir.current;
+}
+
+/* —— Footer: progress split by form section, popover per section, up/down —— */
+
+export function SectionFooter({ items, index, onJump, onPrev, onNext, canPrev, canNext }: { items: Shown[]; index: number; onJump: (i: number) => void; onPrev: () => void; onNext: () => void; canPrev: boolean; canNext: boolean }) {
+  const [open, setOpen] = useState<SectionId | null>(null);
+  const timer = useRef<number | undefined>(undefined);
+  const hold = (id: SectionId | null) => { window.clearTimeout(timer.current); setOpen(id); };
+  const later = () => { window.clearTimeout(timer.current); timer.current = window.setTimeout(() => setOpen(null), 160); };
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+  const sections = SECTIONS.map((s) => {
+    const at = items.map((it, i) => ({ it, i })).filter((x) => x.it.section === s.id);
+    const tracked = at.filter((x) => !x.it.optional);
+    return { ...s, at, done: tracked.filter((x) => x.it.done).length, total: tracked.length, on: at.some((x) => x.i === index) };
+  }).filter((s) => s.at.length > 0);
+  const lastHalf = (n: number) => n >= Math.ceil(sections.length / 2);
+  return (
+    <footer className="cf-qfoot" aria-label="Progress">
+      <div className="cf-secs">
+        {sections.map((s, sn) => {
+          const first = s.at.find((x) => !x.it.done) ?? s.at[0];
+          return (
+            <div
+              key={s.id}
+              className={`cf-qsec${s.on ? " is-on" : ""}`}
+              style={{ ["--n" as string]: s.at.length }}
+              onPointerEnter={(e) => { if (e.pointerType === "mouse") hold(s.id); }}
+              onPointerLeave={(e) => { if (e.pointerType === "mouse") later(); }}
+              onFocus={() => hold(s.id)}
+              onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) later(); }}
+              onKeyDown={(e) => { if (e.key === "Escape" && open) { e.stopPropagation(); setOpen(null); } }}
+            >
+              <button type="button" className="cf-qsec-btn" aria-expanded={open === s.id} aria-controls={`cf-qsec-pop-${s.id}`} onClick={() => onJump(first.i)}>
+                <span className="cf-qsec-bar" aria-hidden="true">
+                  {s.at.map((x) => <i key={x.it.key} className={x.i === index ? "is-cur" : x.it.done ? "is-done" : ""} />)}
+                </span>
+                <span className="cf-qsec-lab">
+                  <b>{s.id}<span className="cf-qsec-name"> · {s.label}</span></b>
+                  <span>{s.done}<span className="cf-qsec-name"> of </span><span className="cf-qsec-slash" aria-hidden="true">/</span>{s.total}</span>
+                </span>
+                <span className="cf-sr">. Go to the first open question in Section {s.id}.</span>
+              </button>
+              {open === s.id && (
+                <div id={`cf-qsec-pop-${s.id}`} className={`cf-pop cf-qsec-pop${lastHalf(sn) ? " is-end" : ""}`} role="group" aria-label={`Section ${s.id} questions`}>
+                  {s.at.map((x, k) => (
+                    <button key={x.it.key} type="button" className={`cf-qsec-row${x.i === index ? " is-cur" : ""}`} aria-current={x.i === index ? "step" : undefined} onClick={() => { setOpen(null); onJump(x.i); }}>
+                      <span className="cf-qsec-n">{s.id}{k + 1}</span>
+                      <span className="cf-qsec-t">{x.it.title}</span>
+                      {x.it.done && <span className="cf-qsec-done" aria-label="answered"><Icon24 name="check" size={14} /></span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <div className="cf-qnav">
+        <button type="button" className="cf-icon-btn cf-qnav-btn" aria-label="Previous question (↑)" disabled={!canPrev} onClick={onPrev}><Icon24 name="up" size={16} /></button>
+        <button type="button" className="cf-icon-btn cf-qnav-btn" aria-label="Next question (↓)" disabled={!canNext} onClick={onNext}><Icon24 name="down" size={16} /></button>
+      </div>
+    </footer>
+  );
+}
+
+/* —— One card's controls —— */
+
+function CardBody({ item, picked, onPick, draft, setDraft, openDrawer }: { item: Shown; picked?: string; onPick: (value: string) => void; draft: string; setDraft: (v: string) => void; openDrawer: (s: DrawerState) => void }) {
   const { c, dispatch } = useCase();
+  const session = useSession();
   const [tips, setTips] = useState(false);
   const choices = choicesFor(item);
 
   if (item.kind === "section-d") {
-    return (
-      <div className="cf-embed cf-sectiond">
-        <Recommendations />
-      </div>
-    );
+    return <div className="cf-embed cf-sectiond"><Recommendations /></div>;
   }
 
   const cand = item.kind === "candidate" || item.kind === "storeys" ? c.candidates.find((a) => a.id === item.ref) : undefined;
@@ -55,19 +161,8 @@ function CardBody({
 
   let current: string | undefined = picked;
   if (item.kind === "candidate" && cand) current = cand.answer ?? undefined;
-  if (item.kind === "authority") current = c.authority || undefined;
+  if (item.kind === "authority") current = c.authority || (session.authorityUnsure ? "unsure" : undefined);
   if (item.kind === "detail" && def?.options) current = valueText(fact) || undefined;
-
-  const answers = choices.length > 0 && (
-    <div className={`cf-answers is-${choices.length}`} role="group" aria-label="Your answer">
-      {choices.map((o, n) => (
-        <button key={o.value} type="button" className="cf-answer" data-deck-answer aria-pressed={current === o.value} onClick={() => onPick(o.value)}>
-          <span>{o.label}</span>
-          <Kbd>{n + 1}</Kbd>
-        </button>
-      ))}
-    </div>
-  );
 
   return (
     <>
@@ -80,26 +175,24 @@ function CardBody({
       {item.kind === "storeys" ? (
         <div className="cf-inline-answer">
           <label className="cf-sr" htmlFor="cf-storeys">Number of storeys</label>
-          <input id="cf-storeys" className="cf-input is-number" type="number" inputMode="numeric" min={1} step={1} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="e.g. 2" />
+          <input id="cf-storeys" className="cf-uline is-number" type="number" inputMode="numeric" min={1} step={1} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="e.g. 2" />
           <button type="button" className="cf-chip" aria-pressed={cand?.answer === "not-sure"} onClick={() => { setDraft(""); dispatch({ type: "setStoreyCount", value: "" }); }}>
             Not sure
           </button>
         </div>
       ) : item.kind === "question" ? (
-        <textarea className="cf-textarea" rows={3} aria-label={item.title} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Your answer" />
+        <textarea className="cf-uline is-area" rows={2} aria-label={item.title} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Type your answer here…" />
       ) : item.kind === "process" ? (
         <>
           <textarea
-            className="cf-textarea is-tall"
-            rows={6}
+            className="cf-uline is-area is-tall"
+            rows={4}
             aria-label={item.title}
             value={c.process[item.ref as keyof typeof c.process]}
             onChange={(e) => dispatch({ type: "setProcess", field: item.ref as keyof typeof c.process, value: e.target.value })}
             placeholder="In your own words…"
           />
-          <button type="button" className="cf-btn is-ghost is-sm cf-tips-toggle" aria-expanded={tips} onClick={() => setTips((v) => !v)}>
-            What to include
-          </button>
+          <button type="button" className="cf-link-btn cf-tips-toggle" aria-expanded={tips} onClick={() => setTips((v) => !v)}>What to include</button>
           {tips && (
             <ul className="cf-tips">
               {PROCESS_FIELDS.find((p) => p.id === item.ref)?.prompts.map((p) => <li key={p}>{p}</li>)}
@@ -110,16 +203,16 @@ function CardBody({
       ) : item.kind === "detail" && def && !def.options ? (
         <>
           {def.multiline ? (
-            <textarea id={`field-${def.id}`} className="cf-textarea" rows={3} aria-label={def.label} value={valueText(fact)} onChange={(e) => dispatch({ type: "setDetail", field: def.id, value: e.target.value, section: def.section })} />
+            <textarea id={`field-${def.id}`} className="cf-uline is-area" rows={2} aria-label={def.label} value={valueText(fact)} onChange={(e) => dispatch({ type: "setDetail", field: def.id, value: e.target.value, section: def.section })} placeholder="Type your answer here…" />
           ) : (
             <input
               id={`field-${def.id}`}
-              className={`cf-input${def.inputType === "date" ? " is-date" : ""}`}
+              className={`cf-uline${def.inputType === "date" ? " is-date" : ""}`}
               type={def.inputType ?? "text"}
               aria-label={def.label}
               value={valueText(fact)}
               onChange={(e) => dispatch({ type: "setDetail", field: def.id, value: e.target.value, section: def.section })}
-              placeholder={def.inputType === "date" ? undefined : def.label}
+              placeholder={def.inputType === "date" ? undefined : "Type your answer here…"}
             />
           )}
           {fact && !isTyped(fact) && (
@@ -136,10 +229,10 @@ function CardBody({
           )}
         </>
       ) : (
-        answers
+        choices.length > 0 && <Choices choices={choices} current={current} onPick={onPick} />
       )}
       {item.kind === "candidate" && !item.provision && (
-        <button type="button" className="cf-btn is-ghost is-sm cf-find" onClick={() => openDrawer({ mode: "search" })}>
+        <button type="button" className="cf-link-btn cf-find" onClick={() => openDrawer({ mode: "search" })}>
           <CIcon name="search" size={13} />Find the rule in the code yourself
         </button>
       )}
@@ -150,15 +243,117 @@ function CardBody({
           <p className="cf-faint">Logged as an open question. It does not block you, and it is not treated as a confirmed departure.</p>
         </div>
       )}
+      {item.kind === "authority" && current === "unsure" && <p className="cf-note"><span className="cf-dot is-warning" aria-hidden="true" />Left open. The review keeps it on your list until you pick one.</p>}
       {cand && exitCountWarning(cand.provision, cand.topic) && <p className="cf-note"><span className="cf-dot is-warning" aria-hidden="true" />{exitCountWarning(cand.provision, cand.topic)}</p>}
       {item.kind === "fact" && item.gone && <p className="cf-note"><span className="cf-dot is-done" aria-hidden="true" />{picked === "dismiss" ? "Removed." : "Confirmed."}</p>}
     </>
   );
 }
 
-export function Deck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
+/** Not sure what a question means: the assistant opens on it (it explains; it never answers for you). */
+function AskLink({ item, n }: { item: DeckItem; n: number }) {
+  return (
+    <button
+      type="button"
+      className="cf-assist-link"
+      onClick={() => openAssistant({
+        screen: "question",
+        focus: item.provision ? { kind: "provision", id: item.provision } : { kind: "card", id: item.key },
+        label: `question ${n}${item.provision ? ` and ${item.provision}` : ""}`,
+        suggestions: item.provision ? ["Explain the code", "What does this question mean?"] : ["What does this question mean?", "What should I have ready?"],
+      })}
+    >
+      <Icon24 name="spark" size={15} />Not sure what this means? Ask the assistant
+    </button>
+  );
+}
+
+/* —— Before an application exists: description, then the role when onboarding has none —— */
+
+function PreCaseDeck() {
+  const session = useSession();
+  const { userRole, begin } = useBegin();
+  const items = preCaseDeck(session.draft, !userRole, session.role);
+  const [index, setIndex] = useState(() => Math.max(0, items.findIndex((i) => !i.done)));
+  const at = Math.min(index, items.length - 1);
+  const item = items[at];
+  const dir = useDirection(at);
+  const wrap = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setAssistantContext({ screen: "question", focus: { kind: "card", id: item.key }, label: "your new application", suggestions: ["What is an alternative solution?", "What should I describe?"] });
+    const el = wrap.current;
+    (el?.querySelector<HTMLElement>("textarea") ?? el?.querySelector<HTMLElement>("h2"))?.focus({ preventScroll: true });
+  }, [item.key]);
+
+  function ok() {
+    if (item.kind === "describe" && !session.draft.trim()) return;
+    if (item.kind === "role" && !session.role) return;
+    if (begin()) return;
+    const open = items.findIndex((i) => !i.done);
+    if (open >= 0) setIndex(open);
+  }
+  function pick(v: string) {
+    updateSession({ role: v as ApplicantType });
+  }
+
+  const keys = useRef<(e: KeyboardEvent) => void>(() => {});
+  keys.current = (e) => {
+    if (e.defaultPrevented || document.querySelector("dialog[open]")) return;
+    const t = e.target as HTMLElement | null;
+    if (t?.closest?.(".cf-pop, dialog, [role='menu'], .cf-palette, .cf-assist, .cf-qfoot")) return;
+    const inText = isTextTarget(t);
+    if (e.key === "Enter") {
+      if (t?.tagName === "TEXTAREA" && !(e.metaKey || e.ctrlKey)) return;
+      if (t?.hasAttribute("data-deck-answer") && t.getAttribute("aria-pressed") !== "true") return;
+      if (!inText && t && t !== document.body && !t.hasAttribute("data-deck-answer") && t.tagName !== "H2") return;
+      e.preventDefault();
+      ok();
+    } else if (!inText && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      if (e.key === "ArrowUp" && at > 0) { e.preventDefault(); setIndex(at - 1); }
+      else if (e.key === "ArrowDown" && at < items.length - 1) { e.preventDefault(); setIndex(at + 1); }
+      else if (item.kind === "role" && /^[a-z]$/i.test(e.key)) {
+        const ch = choicesFor(item)[e.key.toUpperCase().charCodeAt(0) - 65];
+        if (ch) { e.preventDefault(); pick(ch.value); }
+      }
+    }
+  };
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => keys.current(e);
+    document.addEventListener("keydown", on);
+    return () => document.removeEventListener("keydown", on);
+  }, []);
+
+  const ready = item.kind === "describe" ? Boolean(session.draft.trim()) : Boolean(session.role);
+  return (
+    <div className="cf-deck-page">
+      <div className="cf-q-stage">
+        <div ref={wrap} key={item.key} className={`cf-q-wrap is-from-${dir}`}>
+          <QNum n={at + 1} label={item.eyebrow} />
+          <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>{item.title}</h2>
+          <p className="cf-q-help">{item.context}</p>
+          {item.kind === "describe" ? (
+            <textarea className="cf-uline is-area" rows={2} aria-labelledby="cf-q" value={session.draft} onChange={(e) => updateSession({ draft: e.target.value })} placeholder="Type your answer here…" />
+          ) : (
+            <Choices choices={choicesFor(item)} current={session.role ?? undefined} onPick={pick} />
+          )}
+          {session.draftFiles.length > 0 && item.kind === "describe" && <p className="cf-faint cf-small">{session.draftFiles.length} {session.draftFiles.length === 1 ? "file" : "files"} attached on Describe.</p>}
+          {!ready && <p className="cf-hint" role="note">{item.kind === "describe" ? "Describe it in a sentence to continue." : "Pick one to continue."}</p>}
+          <OkRow disabled={!ready} onOk={ok} typed={item.kind === "describe"} />
+          <AskLink item={item} n={at + 1} />
+        </div>
+      </div>
+      <SectionFooter items={items} index={at} onJump={setIndex} onPrev={() => setIndex(Math.max(0, at - 1))} onNext={() => setIndex(Math.min(items.length - 1, at + 1))} canPrev={at > 0} canNext={at < items.length - 1} />
+    </div>
+  );
+}
+
+/* —— The application's deck —— */
+
+function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
   const { c, gaps, dispatch, requestCheck, checkStatus, checkNote, checkDetail, sectionCLookup } = useCase();
   const session = useSession();
+  const { app, locked } = useCurrentApplication();
   const { onAnswer, decisionNoteFor } = useCandidateAnswer();
   const seen = useMemo(() => new Set(session.seen), [session.seen]);
   const all = buildDeck(c, gaps, { seen, includeDone: true });
@@ -196,7 +391,8 @@ export function Deck({ focus, codeFirst }: { focus: string | null; codeFirst: bo
   const [drawer, setDrawer] = useState<DrawerState | null>(null);
   const [jumpTo, setJumpTo] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
-  const cardRef = useRef<HTMLElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const dir = useDirection(index);
 
   // Text drafts start from the saved answer each time a card opens.
   useEffect(() => {
@@ -207,6 +403,20 @@ export function Deck({ focus, codeFirst }: { focus: string | null; codeFirst: bo
     else setDraft("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentKey]);
+
+  // The assistant follows the open question.
+  useEffect(() => {
+    if (!item) {
+      setAssistantContext({ screen: "question", label: "your remaining questions", suggestions: ["What happens at review?", "What is still missing?"] });
+      return;
+    }
+    setAssistantContext({
+      screen: "question",
+      focus: item.provision ? { kind: "provision", id: item.provision } : { kind: "card", id: item.key },
+      label: `question ${index + 1}${item.provision ? ` and ${item.provision}` : ""}`,
+      suggestions: item.provision ? ["Explain the code", "What does this question mean?"] : ["What does this question mean?", "What should I have ready?"],
+    });
+  }, [item?.key, index]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Land on a card from a link (?focus=) or the code-check entry, then drop the parameter.
   const mounted = useRef(false);
@@ -256,9 +466,9 @@ export function Deck({ focus, codeFirst }: { focus: string | null; codeFirst: bo
 
   // A card that takes typing gets the caret straight away; otherwise the heading (no ring) holds focus.
   useEffect(() => {
-    const card = cardRef.current;
-    const field = card?.querySelector<HTMLElement>(".cf-card-body input.cf-input, .cf-card-body textarea");
-    (field ?? card?.querySelector<HTMLElement>("h2"))?.focus({ preventScroll: true });
+    const w = wrapRef.current;
+    const field = w?.querySelector<HTMLElement>(".cf-q-body input.cf-uline, .cf-q-body textarea");
+    (field ?? w?.querySelector<HTMLElement>("h2"))?.focus({ preventScroll: true });
   }, [currentKey]);
 
   /** Next open card after `from`. At the end, come back once to cards skipped in this pass. */
@@ -284,10 +494,15 @@ export function Deck({ focus, codeFirst }: { focus: string | null; codeFirst: bo
     }));
   }
 
+  /** Up/down and the footer move through the queue in order, answered cards included. */
+  const goTo = (i: number) => updateSession({ index: Math.max(0, Math.min(queue.length, i)) });
+
   function canContinue(it: Shown): boolean {
+    if (locked) return false;
     if (it.kind === "section-d") return true;
     if (it.kind === "question") return Boolean(draft.trim()) || it.done;
     if (it.kind === "storeys") return (Number.isInteger(Number(draft)) && Number(draft) > 0) || it.done;
+    if (it.kind === "authority") return it.done || Boolean(c.authority) || session.authorityUnsure;
     return it.done;
   }
 
@@ -310,12 +525,12 @@ export function Deck({ focus, codeFirst }: { focus: string | null; codeFirst: bo
   }
 
   function pick(value: string) {
-    if (!item) return;
+    if (!item || locked) return;
     setPicked((p) => ({ ...p, [item.key]: value }));
     if (item.kind === "fact") dispatch({ type: value === "confirm" ? "confirmFact" : "dismissFact", id: item.ref });
     else if (item.kind === "authority") {
-      dispatch({ type: "setAuthority", authority: value as typeof c.authority });
-      updateSession({ authorityUnsure: false });
+      dispatch({ type: "setAuthority", authority: value === "unsure" ? "" : (value as typeof c.authority) });
+      updateSession({ authorityUnsure: value === "unsure" });
     } else if (item.kind === "candidate") {
       const cand = c.candidates.find((a) => a.id === item.ref);
       if (cand) onAnswer(cand, value as "yes" | "no" | "not-sure");
@@ -329,23 +544,28 @@ export function Deck({ focus, codeFirst }: { focus: string | null; codeFirst: bo
   keyHandler.current = (e: KeyboardEvent) => {
     if (drawer || e.defaultPrevented || document.querySelector("dialog[open]")) return;
     const t = e.target as HTMLElement | null;
-    // Keys typed in the menu, a popover or any dialog belong to them.
-    if (t?.closest?.(".cf-pop, dialog, [role='menu'], .cf-palette")) return;
+    // Keys typed in the menu, a popover, the assistant or any dialog belong to them.
+    if (t?.closest?.(".cf-pop, dialog, [role='menu'], .cf-palette, .cf-assist")) return;
     const inText = isTextTarget(t);
-    const embedded = item?.kind === "section-d" && t && t !== document.body && !t.closest("[data-deck-foot]");
+    const embedded = item?.kind === "section-d" && t && t !== document.body && !t.closest("[data-deck-foot]") && t.tagName !== "H2";
     if (embedded) return;
     if (e.key === "Enter") {
+      if (t?.closest?.(".cf-qfoot")) return;
       if (t?.tagName === "TEXTAREA" && !(e.metaKey || e.ctrlKey)) return;
       if (t?.tagName === "SELECT") return;
-      if (!inText && t && t !== document.body && !t.hasAttribute("data-deck-answer") && t !== cardRef.current?.querySelector("h2")) return;
-      // Enter on an unpressed tile selects it (native click); only a pressed tile continues.
+      if (!inText && t && t !== document.body && !t.hasAttribute("data-deck-answer") && t !== wrapRef.current?.querySelector("h2")) return;
+      // Enter on an unpressed choice selects it (native click); only a pressed one continues.
       if (t?.hasAttribute("data-deck-answer") && t.getAttribute("aria-pressed") !== "true") return;
       e.preventDefault();
       next();
       return;
     }
-    if (!inText && !e.metaKey && !e.ctrlKey && !e.altKey && /^[1-3]$/.test(e.key) && item) {
-      const choice = choicesFor(item)[Number(e.key) - 1];
+    if (inText || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === "ArrowUp" && index > 0) { e.preventDefault(); goTo(index - 1); return; }
+    if (e.key === "ArrowDown" && index < queue.length) { e.preventDefault(); goTo(index + 1); return; }
+    if (item && /^[a-z1-9]$/i.test(e.key)) {
+      const n = /\d/.test(e.key) ? Number(e.key) - 1 : e.key.toUpperCase().charCodeAt(0) - 65;
+      const choice = choicesFor(item)[n];
       if (choice) {
         e.preventDefault();
         pick(choice.value);
@@ -358,95 +578,88 @@ export function Deck({ focus, codeFirst }: { focus: string | null; codeFirst: bo
     return () => document.removeEventListener("keydown", on);
   }, []);
 
-  const doneFlags = queue.map((k) => Boolean(itemFor(k)?.done));
-  const remainingAfter = queue.slice(index + 1).filter((k) => !itemFor(k)?.done).length;
+  const shownItems = queue.map((k) => itemFor(k)).filter((x): x is Shown => Boolean(x));
   const openLeft = queue.filter((k) => !itemFor(k)?.done && !itemFor(k)?.optional).length;
-  const segmented = queue.length > 0 && queue.length <= 24;
-  const textEntry = item && (TEXT_KINDS.has(item.kind) || (item.kind === "detail" && DETAIL_FIELDS.find((d) => d.id === item.ref)?.multiline));
+  const typed = Boolean(item && multiline(item));
 
   return (
     <div className="cf-deck-page">
-      <div className="cf-deck-head">
-        <span className="cf-eyebrow is-plain cf-faint" aria-live="polite">
-          {item ? `${index + 1} of ${queue.length}` : queue.length ? `${queue.length} of ${queue.length}` : "Nothing to ask"}
-        </span>
-        {segmented ? (
-          <div className="cf-progress" aria-hidden="true">
-            {doneFlags.map((d, i) => <i key={queue[i]} className={`${d ? "is-on" : ""}${i === index ? " is-current" : ""}`} />)}
-          </div>
-        ) : (
-          <div className="cf-progress is-bar" aria-hidden="true"><i style={{ width: `${queue.length ? (100 * doneFlags.filter(Boolean).length) / queue.length : 100}%` }} /></div>
-        )}
-      </div>
-      {checkStatus === "running" && <p className="cf-deck-status" role="status"><span className="cf-dot is-pending cf-pulse" aria-hidden="true" />{checkNote}</p>}
-      {checkStatus === "unavailable" && (
+      {(locked || checkStatus === "running" || checkStatus === "unavailable") && (
         <div className="cf-deck-status" role="status">
-          <span className="cf-dot is-warning" aria-hidden="true" />{checkNote}
-          <button type="button" className="cf-btn is-xs" onClick={() => void requestCheck(true)}>Try the check again</button>
-          {checkDetail && <details className="cf-tech"><summary>Technical detail</summary><p>{checkDetail}</p></details>}
+          {locked ? (
+            <><span className="cf-dot is-warning" aria-hidden="true" />{app?.status === "accepted" ? "Accepted as administratively complete" : `Sent to ${authorityName(app?.authority) || "the authority"}`}. Read-only until the officer returns it.</>
+          ) : checkStatus === "running" ? (
+            <><span className="cf-dot is-pending cf-pulse" aria-hidden="true" />{checkNote}</>
+          ) : (
+            <>
+              <span className="cf-dot is-warning" aria-hidden="true" />{checkNote}
+              <button type="button" className="cf-btn is-xs" onClick={() => void requestCheck(true)}>Try the check again</button>
+              {checkDetail && <details className="cf-tech"><summary>Technical detail</summary><p>{checkDetail}</p></details>}
+            </>
+          )}
         </div>
       )}
-      <div className="cf-deck">
-        {item && remainingAfter > 1 && <div className="cf-ghost is-2" aria-hidden="true" />}
-        {item && remainingAfter > 0 && <div className="cf-ghost is-1" aria-hidden="true" />}
+      <div className="cf-q-stage">
         {item ? (
-          <article key={item.key} ref={cardRef} className={`cf-card cf-glass cf-enter${item.kind === "section-d" ? " is-wide" : ""}`} aria-labelledby="cf-q">
-            <Eyebrow>{item.eyebrow}</Eyebrow>
-            <h2 id="cf-q" className="cf-q" tabIndex={-1}>{item.title}</h2>
+          <div ref={wrapRef} key={item.key} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
+            <QNum n={index + 1} label={item.eyebrow} />
+            <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>{item.title}</h2>
             {(item.context || item.quote) && (
-              <p className="cf-context">
+              <p className="cf-q-help">
                 {item.context}
                 {item.quote && <> <q>{item.quote}</q></>}
               </p>
             )}
-            <div className="cf-card-body">
+            <fieldset className="cf-q-body" disabled={locked}>
+              <legend className="cf-sr">Your answer</legend>
               <CardBody item={item} picked={picked[item.key]} onPick={pick} draft={draft} setDraft={setDraft} openDrawer={setDrawer} />
-            </div>
+            </fieldset>
             {item.kind === "candidate" && decisionNoteFor(item.ref) && <p className="cf-note">{decisionNoteFor(item.ref)}</p>}
             {why && <p className="cf-why">{item.why}</p>}
-            {!canContinue(item) && <p className="cf-hint" role="note">Answer to continue, or skip for now.</p>}
-            <div className="cf-card-foot" data-deck-foot>
-              <div className="cf-foot-left">
-                <button type="button" className="cf-btn is-ghost is-sm" aria-expanded={why} onClick={() => setWhy((v) => !v)}>Why we ask</button>
-                <button type="button" className="cf-btn is-ghost is-sm" onClick={skip}>{item.optional ? "Skip" : "Skip for now"}</button>
-              </div>
-              <button type="button" className="cf-btn is-primary" disabled={!canContinue(item)} onClick={next}>
-                {item.kind === "section-d" ? "Finish Section D" : "Continue"} <Kbd>{textEntry ? `${MOD_KEY} ↵` : "↵"}</Kbd>
-              </button>
-            </div>
-          </article>
+            {!canContinue(item) && !locked && <p className="cf-hint" role="note">Answer to continue, or skip for now.</p>}
+            <OkRow label={item.kind === "section-d" ? "Finish Section D" : "OK"} disabled={!canContinue(item)} onOk={next} typed={typed}>
+              <span className="cf-ok-more">
+                <button type="button" className="cf-link-btn" aria-expanded={why} onClick={() => setWhy((v) => !v)}>Why we ask</button>
+                <button type="button" className="cf-link-btn" onClick={skip}>{item.optional ? "Skip" : "Skip for now"}</button>
+              </span>
+            </OkRow>
+            <AskLink item={item} n={index + 1} />
+          </div>
         ) : (
-          <article key="finish" className="cf-card cf-glass cf-enter cf-finish" aria-labelledby="cf-q">
-            <Eyebrow>{openLeft ? "For now" : "All caught up"}</Eyebrow>
-            <h2 id="cf-q" className="cf-q" tabIndex={-1}>That’s everything for now.</h2>
-            <p className="cf-context">
+          <div ref={wrapRef} key="finish" className={`cf-q-wrap is-from-${dir}`} aria-labelledby="cf-q" role="group">
+            <QNum n={<Icon24 name="check" size={15} stroke={2} />} label={openLeft ? "For now" : "All caught up"} />
+            <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>That’s everything for now.</h2>
+            <p className="cf-q-help">
               {openLeft
                 ? `You skipped ${openLeft} ${openLeft === 1 ? "question" : "questions"}. They stay on your list and on the review.`
                 : "Batatis checks what you have and shows anything still missing."}
             </p>
-            <div className="cf-card-foot" data-deck-foot>
-              <div className="cf-foot-left">
-                {openLeft > 0 && (
+            <OkRow label="Review my application" onOk={next} typed={false}>
+              {openLeft > 0 && (
+                <span className="cf-ok-more">
                   <button
                     type="button"
-                    className="cf-btn is-sm"
+                    className="cf-link-btn"
                     onClick={() => {
                       const first = queue.findIndex((k) => !itemFor(k)?.done && !itemFor(k)?.optional);
                       updateSession({ index: Math.max(first, 0), skipped: [], wrapped: true });
                     }}
                   >
-                    <CIcon name="back" size={13} />Go back to skipped
+                    Go back to skipped
                   </button>
-                )}
-              </div>
-              <button type="button" className="cf-btn is-primary" onClick={next}>
-                Review my application <Kbd>↵</Kbd>
-              </button>
-            </div>
-          </article>
+                </span>
+              )}
+            </OkRow>
+          </div>
         )}
       </div>
+      <SectionFooter items={shownItems} index={index} onJump={goTo} onPrev={() => goTo(index - 1)} onNext={() => goTo(index + 1)} canPrev={index > 0} canNext={index < queue.length} />
       <CodeDrawer state={drawer} onClose={() => setDrawer(null)} onAdded={(id) => { setDrawer(null); setJumpTo(id); }} />
     </div>
   );
+}
+
+export function Deck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
+  const { phase } = useCase();
+  return phase === "case" ? <CaseDeck focus={focus} codeFirst={codeFirst} /> : <PreCaseDeck />;
 }

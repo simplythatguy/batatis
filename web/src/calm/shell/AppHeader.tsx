@@ -11,6 +11,8 @@ export interface StageRingItem {
   pct: number;
   current?: boolean;
   disabled?: string;
+  /** One quiet line in the tooltip (for example "Nothing here yet"). */
+  hint?: string;
 }
 
 const R = 18;
@@ -27,7 +29,7 @@ function StageRing({ s }: { s: StageRingItem }) {
       {pct > 0 && <circle cx="20" cy="20" r={R} className={`cf-stage-arc${full ? " is-full" : ""}`} strokeDasharray={`${(pct / 100) * C} ${C}`} transform="rotate(-90 20 20)" />}
     </svg>
   );
-  const label = `${s.label}, ${pct}% done${s.disabled ? `. ${s.disabled}` : ""}`;
+  const label = `${s.label}, ${pct}% done${s.disabled ? `. ${s.disabled}` : ""}${s.hint ? `. ${s.hint}` : ""}`;
   const events = { onPointerEnter: () => setTip(true), onPointerLeave: () => setTip(false), onFocus: () => setTip(true), onBlur: () => setTip(false) };
   return (
     <>
@@ -39,6 +41,7 @@ function StageRing({ s }: { s: StageRingItem }) {
       <Tip anchor={ref.current} open={tip} id={`stage-tip-${s.id}`} side="bottom">
         <span>{s.label}</span> <span className="cf-faint cf-mono">{pct}%</span>
         {s.disabled && <p>{s.disabled}</p>}
+        {s.hint && !s.disabled && <p>{s.hint}</p>}
       </Tip>
     </>
   );
@@ -50,17 +53,38 @@ export function StageRings({ stages }: { stages: StageRingItem[] }) {
 }
 
 /**
- * Header of the work area: application title and authority on the left, stage rings in the
- * middle, actions on the right. On phones a menu button opens the rail and list as a sheet.
+ * Header of the work area: the sidebar toggle at the far left (always visible), the application
+ * title and authority, the stage rings centred in the remaining width, actions on the right.
+ * On phones the same toggle opens the rail and list as a sheet.
  */
-export function AppHeader({ title, meta, stages, right, onMenu, menuLabel = "Applications" }: { title: ReactNode; meta?: ReactNode; stages?: StageRingItem[]; right?: ReactNode; onMenu?: () => void; menuLabel?: string }) {
+export function AppHeader({ title, meta, stages, right, onToggleList, listOpen, toggleHint }: { title: ReactNode; meta?: ReactNode; stages?: StageRingItem[]; right?: ReactNode; onToggleList?: () => void; listOpen?: boolean; toggleHint?: string }) {
+  const ref = useRef<HTMLButtonElement>(null);
+  const [tip, setTip] = useState(false);
+  const label = listOpen ? "Hide the sidebar" : "Show the sidebar";
   return (
     <header className="cf-head">
       <div className="cf-head-left">
-        {onMenu && (
-          <button type="button" className="cf-icon-btn is-plain cf-head-menu" aria-label={`Open ${menuLabel.toLowerCase()}`} onClick={onMenu}>
-            <Icon24 name="menu" size={18} />
-          </button>
+        {onToggleList && (
+          <>
+            <button
+              ref={ref}
+              type="button"
+              className="cf-icon-btn is-plain cf-head-toggle"
+              aria-label={label}
+              aria-expanded={listOpen}
+              onClick={onToggleList}
+              onPointerEnter={() => setTip(true)}
+              onPointerLeave={() => setTip(false)}
+              onFocus={() => setTip(true)}
+              onBlur={() => setTip(false)}
+            >
+              <Icon24 name="panel" size={18} />
+            </button>
+            <Tip anchor={ref.current} open={tip} id="cf-head-toggle-tip" side="bottom">
+              <span>{label}</span>
+              {toggleHint && <span className="cf-kbd is-dark cf-tip-kbd">{toggleHint}</span>}
+            </Tip>
+          </>
         )}
         <h1 className="cf-head-title">
           <span className="cf-head-name">{title}</span>

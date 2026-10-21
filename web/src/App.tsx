@@ -4,7 +4,8 @@ import { Application } from "./calm/Application";
 import { CodeLibrary } from "./calm/CodeLibrary";
 import { Deck } from "./calm/QuestionDeck";
 import { Review } from "./calm/Review";
-import { resolveRoute } from "./calm/routes";
+import { resolveRoute, type Screen } from "./calm/routes";
+import { extraRoutes } from "./calm/routes.extra";
 import { getSession, updateSession, useSession } from "./calm/session";
 import { Shell } from "./calm/Shell";
 import { Start } from "./calm/Start";
@@ -57,11 +58,15 @@ function normalHash(hash: string): string {
   return `#${path || "/"}${q ? `?${q}` : ""}`;
 }
 
+/** The four stages and the code library open in every state; the old screens need an application. */
+const OPEN_WITHOUT_CASE: ReadonlySet<Screen> = new Set(["start", "questions", "review", "application", "code"]);
+
 export function App() {
   const route = useRoute();
   const { phase } = useCase();
+  const extra = extraRoutes(route);
   const calm = resolveRoute(route.path, route.params);
-  const screen = phase === "case" ? calm.screen : "start";
+  const screen: Screen = phase === "case" || OPEN_WITHOUT_CASE.has(calm.screen) ? calm.screen : "start";
   const legacy = screen === "officer" || screen === "accuracy" || screen === "references";
   useFocusParam(legacy ? route : { path: route.path, params: new URLSearchParams() });
 
@@ -69,10 +74,13 @@ export function App() {
   // Rewrite only while the address bar still shows the route this render parsed:
   // a handler may already have navigated on (Start sets #/questions right after the role).
   const parsed = normalHash(`#${route.path}?${route.params.toString()}`);
+  const target = screen === calm.screen ? calm.canonical : "#/";
   useEffect(() => {
-    const target = phase === "case" ? calm.canonical : "#/";
+    if (extra) return;
     if (parsed !== target && normalHash(location.hash) === parsed) location.replace(target);
-  }, [calm.canonical, phase, parsed]);
+  }, [target, parsed, Boolean(extra)]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (extra) return <>{extra}</>;
 
   let body;
   switch (screen) {
@@ -98,7 +106,7 @@ export function App() {
       body = <CodeLibrary route={calm} />;
       break;
     default:
-      body = <Start focus={calm.focus} />;
+      body = <Start />;
   }
   return (
     <Shell active={screen}>

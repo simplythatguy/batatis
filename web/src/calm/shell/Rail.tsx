@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { Icon24, type IconName } from "../icons";
 import { Tip } from "../RelevanceRing";
 
@@ -50,25 +50,26 @@ function RailButton({ d }: { d: RailDestination }) {
 }
 
 /**
- * The far-left icon rail. Destinations are a prop, so the applicant (Applications, Code library,
- * Assistant) and the reviewer (Queue, Code library, Assistant) share one component.
+ * The far-left icon rail: brand, then the destinations; at the bottom the notifications bell and
+ * the account avatar. Destinations are a prop, so the applicant (Applications, Code library,
+ * Assistant) and the reviewer (Queue, Code library, Assistant) share one component. The two
+ * bottom slots are filled by the accounts UI (routes.extra.tsx).
  */
-export function Rail({ destinations, footer, account }: { destinations: RailDestination[]; footer?: RailDestination[]; account?: { initials: string; label: string; href?: string; onClick?: () => void } }) {
+export function Rail({ destinations, notificationsSlot, accountSlot }: { destinations: RailDestination[]; notificationsSlot?: ReactNode; accountSlot?: ReactNode }) {
   return (
     <nav className="cf-rail" aria-label="Main">
       <a className="cf-rail-mark" href="#/" aria-label="Batatis home"><span className="cf-mark" aria-hidden="true" /></a>
       {destinations.map((d) => <RailButton key={d.id} d={d} />)}
       <span className="cf-rail-spacer" />
-      {footer?.map((d) => <RailButton key={d.id} d={d} />)}
-      {account && (
-        account.href ? (
-          <a className="cf-avatar" href={account.href} aria-label={account.label}>{account.initials}</a>
-        ) : account.onClick ? (
-          <button type="button" className="cf-avatar" onClick={account.onClick} aria-label={account.label}>{account.initials}</button>
-        ) : (
-          <span className="cf-avatar" role="img" aria-label={account.label}>{account.initials}</span>
-        )
-      )}
+      <div className="cf-rail-foot">
+        {notificationsSlot}
+        {accountSlot}
+      </div>
     </nav>
   );
+}
+
+/** The plain avatar (initials), used until the accounts UI supplies its menu. */
+export function RailAvatar({ initials, label }: { initials: string; label: string }) {
+  return <span className="cf-avatar" role="img" aria-label={label}>{initials}</span>;
 }

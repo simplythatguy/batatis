@@ -7,14 +7,26 @@ import { AUTHORITIES } from "../config";
 import { DETAIL_FIELDS, DETAIL_IDS, PROCESS_FIELDS, displayValue, factFor, factLabel, valueText } from "../model";
 import { isProvision } from "../provisions";
 import { quoteKind } from "../rules";
-import type { Candidate, Case, Gap } from "../types";
+import type { ApplicantType, Candidate, Case, Gap } from "../types";
 import { calmHref } from "./routes";
 
-export type DeckKind = "fact" | "candidate" | "storeys" | "question" | "authority" | "detail" | "process" | "section-d";
+export type DeckKind = "fact" | "candidate" | "storeys" | "question" | "authority" | "detail" | "process" | "section-d" | "describe" | "role";
+
+/** Variance form sections, in the order the deck asks them and the footer shows them. */
+export type SectionId = "A" | "B" | "C" | "D";
+
+export const SECTIONS: { id: SectionId; label: string }[] = [
+  { id: "A", label: "Applicant" },
+  { id: "B", label: "Project" },
+  { id: "C", label: "Code" },
+  { id: "D", label: "Evidence" },
+];
 
 export interface DeckItem {
   key: string;
   kind: DeckKind;
+  /** Form section this card fills (footer progress, popover). */
+  section: SectionId;
   eyebrow: string;
   title: string;
   /** One muted line under the question. */
@@ -86,6 +98,7 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
     return {
       key: `cand-${a.id}`,
       kind: "storeys",
+      section: "C",
       eyebrow: "Code check · Storeys",
       title: "How many storeys is the building?",
       context: "The count decides which part of the code is the benchmark.",
@@ -102,6 +115,7 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
     return {
       key: `cand-${a.id}`,
       kind: "candidate",
+      section: "C",
       eyebrow: `Code check · ${topic}`,
       title: `Does your design ${a.departure}?`,
       context: "You wrote",
@@ -123,6 +137,7 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
   return {
     key: `cand-${a.id}`,
     kind: "candidate",
+    section: "C",
     eyebrow: `Code check · ${topic}`,
     title: "Is your design different from what this rule asks for?",
     context: origin,
@@ -173,20 +188,40 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   // A card a current *blocking* gap points at is open, whatever the local value says.
   // Warnings (Not sure, open questions for the officer) never lock an answered card.
   const gapKeys = new Set(gaps.filter((g) => g.severity === "blocking").map((g) => gapKey(c, g)).filter((k): k is string => !!k));
-  const items: DeckItem[] = [];
+  const bySection: Record<SectionId, DeckItem[]> = { A: [], B: [], C: [], D: [] };
   const push = (item: DeckItem) => {
-    const open = !item.done || (!item.optional && gapKeys.has(item.key) && item.kind !== "section-d");
+    // "Not sure yet" on the authority is an answer, like Not sure on a code card: its gap stays
+    // on the review, but the question is not asked again.
+    const answeredUnsure = item.kind === "authority" && seen.has("authority");
+    const open = !item.done || (!item.optional && gapKeys.has(item.key) && item.kind !== "section-d" && !answeredUnsure);
     const next = { ...item, done: !open };
-    if (opts.includeDone || !next.done) items.push(next);
+    if (opts.includeDone || !next.done) bySection[item.section].push(next);
   };
+  const detailSection = (field: string): SectionId => (DETAIL_FIELDS.find((d) => d.id === field)?.section === "A" ? "A" : "B");
 
-  // 1. What we read from the applicant's words, waiting for a click.
+  // Section B opens with the reviewing authority: a normal question, never a silent default.
+  push({
+    key: "authority",
+    kind: "authority",
+    section: "B",
+    eyebrow: "Section B · Reviewer",
+    title: "Who will review your application?",
+    context: `The authority that issues your permit: ${AUTHORITIES.map((a) => a.name).join(" or ")}. Pick Not sure yet if you don’t know.`,
+    why: "Each authority has its own submission rules. Batatis never picks one for you.",
+    ref: "authority",
+    done: Boolean(c.authority) || seen.has("authority"),
+    optional: false,
+  });
+
+  // What we read from the applicant's words, waiting for a click, in the section it fills.
   for (const f of c.facts) {
     if (f.status !== "unconfirmed") continue;
     const label = factLabel(f.field);
+    const detail = DETAIL_IDS.has(f.field);
     push({
-      key: DETAIL_IDS.has(f.field) ? `field-${f.field}` : `fact-${f.id}`,
+      key: detail ? `field-${f.field}` : `fact-${f.id}`,
       kind: "fact",
+      section: detail ? detailSection(f.field) : "B",
       eyebrow: "Check what we read",
       title: `Is “${displayValue(f)}” your ${label.toLowerCase()}?`,
       context: f.source.quote ? `From ${f.source.ref}` : `Read from ${f.source.ref}`,
@@ -198,37 +233,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     });
   }
 
-  // 2. Code check, in the order the cards were found.
-  for (const a of c.candidates) push(candidateItem(c, a));
-
-  // 3. Open questions.
-  for (const q of c.questions) {
-    if (questionOnOtherCard(c, q.id, q.cardId)) continue;
-    push({
-      key: `q-${q.id}`,
-      kind: "question",
-      eyebrow: q.kind === "intake" || q.id.startsWith("q-identify-") ? "From code matching" : "A quick question",
-      title: q.text,
-      context: "Answer in your own words. A short answer is fine.",
-      why: q.why,
-      ref: q.id,
-      done: Boolean(q.answer?.trim()),
-      optional: false,
-    });
-  }
-
-  // 4. Section A and B details, one per card.
-  push({
-    key: "authority",
-    kind: "authority",
-    eyebrow: "Section B · Reviewer",
-    title: "Who will review your application?",
-    context: `The authority that issues your permit: ${AUTHORITIES.map((a) => a.name).join(" or ")}. Skip it if you don’t know yet.`,
-    why: "Each authority has its own submission rules. Batatis never picks one for you.",
-    ref: "authority",
-    done: Boolean(c.authority),
-    optional: false,
-  });
+  // Section A and B details, one per card.
   for (const d of DETAIL_FIELDS) {
     const fact = factFor(c, d.id);
     if (fact?.status === "unconfirmed") continue; // asked on its "check what we read" card
@@ -238,6 +243,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     push({
       key: `field-${d.id}`,
       kind: "detail",
+      section: d.section,
       eyebrow: d.section === "A" ? "Section A · Applicant" : "Section B · Project",
       title: DETAIL_QUESTION[d.id] ?? d.label,
       context: d.options && valueText(fact).trim() && !filled ? "You answered in words. Pick the choice that fits:" : DETAIL_CONTEXT[d.id] ?? d.hint ?? "",
@@ -249,11 +255,33 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     });
   }
 
-  // 5. The alternative-solution case, written by the applicant.
+  // Open questions: project questions in B, questions from code matching in C.
+  for (const q of c.questions) {
+    if (questionOnOtherCard(c, q.id, q.cardId)) continue;
+    const fromCode = q.kind === "intake" || q.id.startsWith("q-identify-");
+    push({
+      key: `q-${q.id}`,
+      kind: "question",
+      section: fromCode ? "C" : "B",
+      eyebrow: fromCode ? "From code matching" : "A quick question",
+      title: q.text,
+      context: "Answer in your own words. A short answer is fine.",
+      why: q.why,
+      ref: q.id,
+      done: Boolean(q.answer?.trim()),
+      optional: false,
+    });
+  }
+
+  // Code check, in the order the cards were found.
+  for (const a of c.candidates) push(candidateItem(c, a));
+
+  // The alternative-solution case, written by the applicant.
   for (const p of PROCESS_FIELDS) {
     push({
       key: `field-${p.id}`,
       kind: "process",
+      section: "D",
       eyebrow: `Your case · ${p.label}`,
       title: PROCESS_QUESTION[p.id] ?? p.label,
       context: WRITTEN_BY_YOU,
@@ -264,11 +292,12 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     });
   }
 
-  // 6. Section D: professional and evidence documents.
+  // Section D: professional and evidence documents.
   if (sectionDRelevant(c, gaps)) {
     push({
       key: "section-d",
       kind: "section-d",
+      section: "D",
       eyebrow: "Section D · Supporting documents",
       title: "Who is responsible, and which documents back this up?",
       context: "Batatis lists what the evidence must address. Your engineer or architect writes it.",
@@ -278,19 +307,72 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       optional: false,
     });
   }
-  return items;
+  return [...bySection.A, ...bySection.B, ...bySection.C, ...bySection.D];
 }
 
+export const ROLE_CHOICES: { value: ApplicantType; label: string }[] = [
+  { value: "manufacturer", label: "Manufacturer" },
+  { value: "contractor", label: "Contractor" },
+  { value: "homebuilder", label: "Homebuilder" },
+];
+
+/**
+ * Before an application exists: the description, then (without a signed-in applicant type) who is
+ * applying. Answering both starts the application; nothing is assumed for either.
+ */
+export function preCaseDeck(description: string, needsRole: boolean, role: ApplicantType | null): DeckItem[] {
+  const items: DeckItem[] = [
+    {
+      key: "describe",
+      kind: "describe",
+      section: "B",
+      eyebrow: "Section B · Project",
+      title: "What are you building differently?",
+      context: "A sentence or two is enough. Batatis reads your words to find the code that applies.",
+      why: "Your description is where Batatis starts: it finds the code that may apply and asks only what is missing.",
+      ref: "describe",
+      done: Boolean(description.trim()),
+      optional: false,
+    },
+  ];
+  if (needsRole) {
+    items.unshift({
+      key: "role",
+      kind: "role",
+      section: "A",
+      eyebrow: "Section A · Applicant",
+      title: "Who is applying?",
+      context: "This decides which starting questions you get.",
+      why: "Manufacturers, contractors and homebuilders are asked different starting questions. Batatis never picks one for you.",
+      ref: "role",
+      done: Boolean(role),
+      optional: false,
+    });
+  }
+  return items;
+}
 /** Answered out of tracked (non-optional) cards. */
 export function deckProgress(items: DeckItem[]): { done: number; total: number } {
   const tracked = items.filter((i) => !i.optional);
   return { done: tracked.filter((i) => i.done).length, total: tracked.length };
 }
 
-/** Choices for a card, in keyboard order (1, 2, 3). */
+/** Letter key for a choice (A, B, C…), Typeform style. */
+export const choiceKey = (n: number) => String.fromCharCode(65 + n);
+
+/** Per-section progress for the footer: the queue's cards in that section, in queue order. */
+export function sectionProgress(items: DeckItem[]): { id: SectionId; label: string; items: DeckItem[]; done: number }[] {
+  return SECTIONS.map((s) => {
+    const mine = items.filter((i) => i.section === s.id && !i.optional);
+    return { ...s, items: mine, done: mine.filter((i) => i.done).length };
+  });
+}
+
+/** Choices for a card, in keyboard order (A, B, C). */
 export function choicesFor(item: DeckItem): { value: string; label: string }[] {
   if (item.kind === "fact") return [{ value: "confirm", label: "Yes, that’s right" }, { value: "dismiss", label: "Not right" }];
-  if (item.kind === "authority") return AUTHORITIES.map((a) => ({ value: a.id, label: a.name }));
+  if (item.kind === "authority") return [...AUTHORITIES.map((a) => ({ value: a.id as string, label: a.name })), { value: "unsure", label: "Not sure yet" }];
+  if (item.kind === "role") return ROLE_CHOICES.map((r) => ({ value: r.value as string, label: r.label }));
   if (item.kind === "candidate") {
     return item.provision
       ? [{ value: "yes", label: "Yes, it differs" }, { value: "no", label: "No, it follows" }, { value: "not-sure", label: "Not sure" }]

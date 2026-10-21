@@ -2,19 +2,22 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { ApplicationSummary } from "../api/accounts";
 import { groupGaps } from "../humanReview";
 import { useCase } from "../store";
-import { bootAccount, initials, useAccount } from "./account";
+import { bootAccount, initials, refreshApplications, useAccount } from "./account";
 import { authorityName } from "./applications";
 import { AssistantPanel } from "./assistant/AssistantPanel";
-import { setAssistantCase, toggleAssistant, useAssistant } from "./assistant/assistant";
+import { setAssistantCase, setAssistantContext, toggleAssistant, useAssistant } from "./assistant/assistant";
+import { roleOf } from "./begin";
 import { CodePalette, OPEN_PALETTE, openPalette } from "./CodePalette";
 import { buildDeck, deckProgress } from "./deck";
 import { Icon24 } from "./icons";
-import { type Screen } from "./routes";
-import { resetSession, useSession } from "./session";
+import { STAGES, type Screen } from "./routes";
+import { getSession, resetSession, useSession } from "./session";
 import { AppHeader, type StageRingItem } from "./shell/AppHeader";
 import { AppLayout } from "./shell/AppLayout";
 import { ApplicationList, type ApplicationListHandle } from "./shell/ApplicationList";
-import { Rail, type RailDestination } from "./shell/Rail";
+import { Rail, RailAvatar, type RailDestination } from "./shell/Rail";
+import { ReturnedBanner } from "./shell/ReturnedBanner";
+import { AccountMenu, NotificationsPanel } from "./routes.extra";
 import { resetRelevance } from "./useRelevance";
 import { CIcon, ConfirmDialog, Dot, MOD_KEY, type DotTone } from "./ui";
 
@@ -120,33 +123,55 @@ function useStageProgress() {
   }, [c, gaps, phase, checkedAt, engineGaps, session.seen]);
 }
 
-export function Shell({ active, children, application }: { active: Screen; children: ReactNode; application?: ApplicationSummary | null }) {
-  const { c, phase, engineId, resetToWho } = useCase();
+const PHONE = "(max-width: 760px)";
+const isPhone = () => window.matchMedia(PHONE).matches;
+
+export function Shell({ active, children }: { active: Screen; children: ReactNode }) {
+  const { c, phase, engineId, resetToWho, openCase, saveStatus, saveDraft } = useCase();
   const account = useAccount();
   const assistant = useAssistant();
   const [confirm, setConfirm] = useState(false);
   const [palette, setPalette] = useState(false);
   const [listNote, setListNote] = useState("");
+  const [opening, setOpening] = useState<string | null>(null);
   const [listCollapsed, setListCollapsed] = useState(false);
   const [sheet, setSheet] = useState(false);
   const listRef = useRef<ApplicationListHandle>(null);
   const inCase = phase === "case";
   const progress = useStageProgress();
+  const signedIn = account.phase === "signed-in";
+  const onStage = STAGES.some((s) => s.screen === active);
+  /** The last stage page, so Applications in the rail returns to it from the code library. */
+  const lastStage = useRef("#/");
+  if (onStage) lastStage.current = location.hash || "#/";
 
   useEffect(() => { bootAccount(); }, []);
   useEffect(() => { setAssistantCase(engineId); }, [engineId]);
+  // A new owned case appears in the list once the engine has created it.
+  useEffect(() => { if (signedIn && engineId) void refreshApplications(); }, [signedIn, engineId]);
+  // Screens without their own context: the assistant looks at the page.
+  useEffect(() => {
+    if (active === "questions") return;
+    const label = active === "start" ? "your description" : active === "review" ? "your review" : active === "application" ? "your application" : active === "code" ? "the code library" : "your application";
+    setAssistantContext({ screen: active === "start" ? "describe" : active, label });
+  }, [active]);
 
-  // Cmd/Ctrl+B list, +J assistant, +K search applications, +Shift+K search the code.
+  const toggleList = () => {
+    if (isPhone()) setSheet(true);
+    else setListCollapsed((v) => !v);
+  };
+
+  // Cmd/Ctrl+B sidebar, +J assistant, +K search applications, +Shift+K search the code.
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
       if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
       const k = e.key.toLowerCase();
-      if (k === "b") { e.preventDefault(); setListCollapsed((v) => !v); }
+      if (k === "b") { e.preventDefault(); toggleList(); }
       else if (k === "j") { e.preventDefault(); toggleAssistant(); }
-      else if (k === "k" && e.shiftKey) { if (inCase) { e.preventDefault(); setPalette((v) => !v); } }
+      else if (k === "k" && e.shiftKey) { e.preventDefault(); setPalette((v) => !v); }
       else if (k === "k") {
         e.preventDefault();
-        if (window.matchMedia("(max-width: 760px)").matches) setSheet(true);
+        if (isPhone()) setSheet(true);
         else setListCollapsed(false);
         window.setTimeout(() => listRef.current?.focusSearch(), 0);
       }
@@ -155,46 +180,88 @@ export function Shell({ active, children, application }: { active: Screen; child
     document.addEventListener("keydown", on);
     window.addEventListener(OPEN_PALETTE, open);
     return () => { document.removeEventListener("keydown", on); window.removeEventListener(OPEN_PALETTE, open); };
-  }, [inCase]);
+  }, []);
 
-  // Without accounts the list holds this visit's application only.
-  const signedIn = account.phase === "signed-in";
   const deckDone = Math.round(progress.questions);
   const localRow: ApplicationSummary | null = inCase
     ? { id: engineId ?? "this-visit", title: c.title || "New application", status: "draft", authority: c.authority || null, updated_at: new Date().toISOString(), submitted_at: null, completeness: { answered: deckDone, total: 100 }, unread_messages: 0, reviewer: null }
     : null;
-  const items = signedIn ? account.applications ?? [] : localRow ? [localRow] : [];
+  const saved = account.applications ?? [];
+  // Signed in, a new draft shows at once, before the engine has listed it.
+  const items = signedIn ? (localRow && !saved.some((a) => a.id === localRow.id) ? [localRow, ...saved] : saved) : localRow ? [localRow] : [];
   const selectedId = engineId ?? (localRow ? "this-visit" : null);
+  const current = (engineId && saved.find((a) => a.id === engineId)) || null;
 
+  const empty = !inCase && !getSession().draft.trim();
   const stages: StageRingItem[] = [
     { id: "start", label: "Describe", icon: "describe", href: "#/", pct: progress.start, current: active === "start" },
-    { id: "questions", label: "Questions", icon: "questions", href: "#/questions", pct: progress.questions, current: active === "questions", disabled: inCase ? undefined : "Describe your project first." },
-    { id: "review", label: "Review", icon: "review", href: "#/review", pct: progress.review, current: active === "review", disabled: inCase ? undefined : "Describe your project first." },
-    { id: "application", label: "Application", icon: "file", href: "#/application", pct: application && ["submitted", "in_review", "accepted"].includes(application.status) ? 100 : progress.application, current: active === "application", disabled: inCase ? undefined : "Describe your project first." },
+    { id: "questions", label: "Questions", icon: "questions", href: "#/questions", pct: progress.questions, current: active === "questions", hint: inCase ? undefined : "Starts with your description" },
+    { id: "review", label: "Review", icon: "review", href: "#/review", pct: progress.review, current: active === "review", hint: inCase ? undefined : "Nothing to review yet" },
+    { id: "application", label: "Application", icon: "file", href: "#/application", pct: current && ["submitted", "in_review", "accepted"].includes(current.status) ? 100 : progress.application, current: active === "application", hint: inCase ? undefined : "Nothing filled in yet" },
   ];
 
   const destinations: RailDestination[] = [
-    { id: "applications", label: listCollapsed ? "Show applications" : "Hide applications", icon: "inbox", onClick: () => setListCollapsed((v) => !v), current: ["start", "questions", "review", "application"].includes(active), badge: items.some((a) => a.status === "returned" && a.unread_messages > 0), shortcut: `${MOD_KEY} B` },
-    { id: "code", label: "Code library", icon: "book", href: "#/code", current: active === "code" },
+    {
+      id: "applications",
+      label: "Applications",
+      icon: "inbox",
+      onClick: () => {
+        if (isPhone()) setSheet(true);
+        else setListCollapsed(false);
+        if (!onStage) location.hash = lastStage.current;
+      },
+      current: onStage,
+      badge: items.some((a) => a.status === "returned" && a.unread_messages > 0),
+    },
+    { id: "code", label: "Code library", icon: "book", href: "#/code", current: active === "code", shortcut: `${MOD_KEY} ⇧ K` },
     { id: "assistant", label: assistant.open ? "Close the assistant" : "Assistant", icon: "spark", onClick: toggleAssistant, current: assistant.open, shortcut: `${MOD_KEY} J` },
   ];
+
+  function startNew() {
+    setListNote("");
+    resetSession();
+    resetRelevance();
+    resetToWho(signedIn ? "" : undefined);
+  }
+
+  async function open(id: string) {
+    if (id === selectedId) { setListNote(""); if (!onStage) location.hash = lastStage.current; return; }
+    if (!signedIn || opening) return;
+    setOpening(id);
+    setListNote("");
+    // Keep the open draft before switching; a failed save keeps it open and says so.
+    if (inCase && saveStatus === "unsaved" && !(await saveDraft())) {
+      setOpening(null);
+      setListNote("This application isn’t saved yet, so it stays open. Try again once it’s saved.");
+      return;
+    }
+    const role = roleOf(account.user) ?? (c.applicantType as Parameters<typeof openCase>[1]);
+    const error = await openCase(id, role);
+    setOpening(null);
+    if (error) { setListNote(error); return; }
+    resetSession();
+    resetRelevance();
+    location.hash = "#/questions";
+  }
 
   const list = (
     <ApplicationList
       ref={listRef}
       items={items}
-      selectedId={selectedId}
-      onSelect={(id) => {
-        if (id === selectedId) { setListNote(""); location.hash = "#/questions"; return; }
-        // Opening a saved application is not wired yet; say so instead of ignoring the click.
-        setListNote("Opening another saved application isn’t available yet. This one stays open.");
+      selectedId={opening ?? selectedId}
+      onSelect={(id) => void open(id)}
+      onNew={() => {
+        if (!inCase) {
+          setListNote("");
+          location.hash = "#/";
+          window.setTimeout(() => document.getElementById("cf-describe")?.focus(), 0);
+        } else if (signedIn) startNew();
+        else setConfirm(true);
       }}
-      onNew={inCase ? () => setConfirm(true) : undefined}
-      onCollapse={() => setListCollapsed(true)}
       loading={account.loadingList}
       error={account.listError}
-      note={listNote || (!signedIn && inCase ? "Saved for this visit only." : undefined)}
-      empty={<p className="cf-applist-note">Describe what you’re building to start your first application.</p>}
+      note={opening ? "Opening…" : listNote || (!signedIn && inCase ? "Saved for this visit only." : undefined)}
+      empty={<p className="cf-applist-note">{empty ? "Describe what you’re building to start your first application." : "Your new application appears here once it starts."}</p>}
     />
   );
 
@@ -204,37 +271,44 @@ export function Shell({ active, children, application }: { active: Screen; child
       title={title}
       meta={inCase && c.authority ? authorityName(c.authority) : undefined}
       stages={stages}
-      onMenu={() => setSheet(true)}
+      onToggleList={toggleList}
+      listOpen={!listCollapsed}
+      toggleHint={`${MOD_KEY} B`}
       right={
         <>
           <SaveStatus />
           <button type="button" className="cf-btn is-ghost is-sm cf-ask" aria-pressed={assistant.open} onClick={toggleAssistant} title={`Assistant (${MOD_KEY} J)`}>
             <Icon24 name="spark" size={16} /><span className="cf-ask-label">Ask</span>
           </button>
-          {inCase && (
-            <MoreMenu
-              items={[
-                { label: "Look up code", hint: `${MOD_KEY} ⇧ K`, onClick: openPalette },
-                { label: "Code library", href: "#/code" },
-                { label: "Your Section C references", href: "#/references" },
-                { label: "Officer view", href: "#/officer" },
-                { label: "Accuracy report", href: "#/accuracy" },
-                { label: "Download draft", href: "#/application?download=draft", separator: true },
-                { label: "Start over", onClick: () => setConfirm(true) },
-              ]}
-            />
-          )}
+          <MoreMenu
+            items={[
+              { label: "Look up code", hint: `${MOD_KEY} ⇧ K`, onClick: openPalette },
+              { label: "Code library", href: "#/code" },
+              ...(inCase
+                ? [
+                    { label: "Your Section C references", href: "#/references" },
+                    { label: "Officer view", href: "#/officer" },
+                    { label: "Accuracy report", href: "#/accuracy" },
+                    { label: "Download draft", href: "#/application?download=draft", separator: true },
+                    { label: signedIn ? "New application" : "Start over", onClick: () => (signedIn ? startNew() : setConfirm(true)) },
+                  ]
+                : []),
+            ]}
+          />
         </>
       }
     />
   );
 
+  const avatar = account.user ? <RailAvatar initials={initials(account.user.name, account.user.email)} label={`Signed in as ${account.user.name ?? account.user.email}`} /> : null;
+
   return (
     <>
       <AppLayout
-        rail={<Rail destinations={destinations} account={account.user ? { initials: initials(account.user.name, account.user.email), label: `Signed in as ${account.user.name ?? account.user.email}` } : undefined} />}
+        rail={<Rail destinations={destinations} notificationsSlot={<NotificationsPanel />} accountSlot={<AccountMenu fallback={avatar} />} />}
         list={list}
         header={header}
+        banner={onStage && current?.status === "returned" ? <ReturnedBanner app={current} /> : null}
         assistant={assistant.open ? <AssistantPanel /> : null}
         listCollapsed={listCollapsed}
         sheetOpen={sheet}
@@ -242,19 +316,17 @@ export function Shell({ active, children, application }: { active: Screen; child
       >
         {children}
       </AppLayout>
-      {inCase && <CodePalette open={palette} onClose={() => setPalette(false)} />}
+      <CodePalette open={palette} onClose={() => setPalette(false)} />
       <ConfirmDialog
         open={confirm}
         title="Start a new application?"
-        body={<p>{signedIn ? "This application stays in your list." : "Without an account this clears your answers in this browser. Files already uploaded are not deleted now; they expire with the case. Download a draft first if you need a copy."}</p>}
+        body={<p>Without an account this clears your answers in this browser. Files already uploaded are not deleted now; they expire with the case. Download a draft first if you need a copy.</p>}
         cancel="Keep working"
         confirm="Start new"
         onClose={() => setConfirm(false)}
         onConfirm={() => {
           setConfirm(false);
-          resetSession();
-          resetRelevance();
-          resetToWho();
+          startNew();
         }}
       />
     </>
