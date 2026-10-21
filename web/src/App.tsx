@@ -14,6 +14,8 @@ import { Accuracy } from "./screens/Accuracy";
 import { Officer } from "./screens/Officer";
 import { SectionC } from "./screens/SectionC";
 import { useCase } from "./store";
+// U2 test wiring (replace with U1's App): accounts, reviewer and settings routes plus the auth gate.
+import { extraRoutes, isStandaloneRoute, useAuthRedirect } from "./calm/routes.extra";
 
 /** Store effects the calm screens ask for: the check Start requested, and held PDF uploads. */
 function CalmEffects() {
@@ -59,6 +61,8 @@ function normalHash(hash: string): string {
 
 export function App() {
   const route = useRoute();
+  const redirecting = useAuthRedirect(route); // U2 test wiring
+  const extra = extraRoutes(route); // U2 test wiring
   const { phase } = useCase();
   const calm = resolveRoute(route.path, route.params);
   const screen = phase === "case" ? calm.screen : "start";
@@ -70,9 +74,15 @@ export function App() {
   // a handler may already have navigated on (Start sets #/questions right after the role).
   const parsed = normalHash(`#${route.path}?${route.params.toString()}`);
   useEffect(() => {
+    if (extra) return; // U2 test wiring: U2 routes are not legacy links
     const target = phase === "case" ? calm.canonical : "#/";
     if (parsed !== target && normalHash(location.hash) === parsed) location.replace(target);
-  }, [calm.canonical, phase, parsed]);
+  }, [calm.canonical, phase, parsed, extra]);
+
+  // U2 test wiring
+  if (redirecting) return null;
+  if (extra && isStandaloneRoute(route)) return <>{extra}</>;
+  if (extra) return <Shell active={screen} plain>{extra}</Shell>;
 
   let body;
   switch (screen) {
