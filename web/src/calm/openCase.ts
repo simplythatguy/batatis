@@ -8,7 +8,7 @@
  */
 import type { Case as EngineCase } from "../api/types.gen";
 import { emptyCase, applyDescription } from "../intake";
-import { PROCESS_FACT } from "../model";
+import { CODECHECK_PREFIX, PROCESS_FACT, reducer } from "../model";
 import { isProvision } from "../provisions";
 import type { ApplicantType, AuthorityId, Candidate, Case, Fact, ProcessFieldId } from "../types";
 
@@ -66,5 +66,28 @@ export function caseFromEngine(saved: EngineCase, type: ApplicantType): Case {
   // Keep the saved description fact itself (same id and value), so nothing is re-sent.
   if (description) c = { ...c, facts: [...c.facts.filter((f) => f.field !== "project.description"), description] };
   if (saved.title) c = { ...c, title: saved.title };
-  return c;
+  return restoreCardAnswers(c);
+}
+
+/**
+ * Answers to cards read from the description come back from their saved facts: a stored
+ * `codecheck.<card>` answer, and the storey count for the storeys card. The saved facts are kept
+ * as they are (same ids), so reopening sends nothing.
+ */
+function restoreCardAnswers(c: Case): Case {
+  const savedFacts = c.facts;
+  let next = c;
+  for (const f of savedFacts) {
+    if (!f.field.startsWith(CODECHECK_PREFIX)) continue;
+    const id = f.field.slice(CODECHECK_PREFIX.length);
+    const answer = f.value;
+    if ((answer === "yes" || answer === "no" || answer === "not-sure") && next.candidates.some((a) => a.id === id && a.answer === null)) {
+      next = reducer(next, { type: "answerCandidate", id, answer });
+    }
+  }
+  const storeys = savedFacts.find((f) => f.field === "building.storeys" && f.status === "confirmed" && Number.isInteger(Number(f.value)) && Number(f.value) > 0);
+  if (storeys && next.candidates.some((a) => a.id === "desc-storeys" && a.answer === null)) {
+    next = reducer(next, { type: "setStoreyCount", value: String(storeys.value) });
+  }
+  return next === c ? c : { ...next, facts: savedFacts };
 }
