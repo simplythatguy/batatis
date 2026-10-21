@@ -1,0 +1,70 @@
+/**
+ * Rebuild the browser case from a saved engine case (opening an application from the list). Pure.
+ *
+ * What the engine stores: facts (answers, the description, process fields, professional and
+ * evidence facts), the jurisdiction, the title and the confirmed provisions. What it does not
+ * store: unanswered or "No" code-check cards and attached file names. Those are re-derived from
+ * the description (cards) or are simply absent (files), never invented.
+ */
+import type { Case as EngineCase } from "../api/types.gen";
+import { emptyCase, applyDescription } from "../intake";
+import { PROCESS_FACT } from "../model";
+import { isProvision } from "../provisions";
+import type { ApplicantType, AuthorityId, Candidate, Case, Fact, ProcessFieldId } from "../types";
+
+const WITHDRAWN = "Answer withdrawn by applicant";
+
+/** The latest saved fact per field, without withdrawn answers. Order is preserved. */
+export function latestFacts(facts: EngineCase["facts"]): Fact[] {
+  const latest = new Map<string, EngineCase["facts"][number]>();
+  for (const f of facts) latest.set(f.field, f);
+  return [...latest.values()]
+    .filter((f) => f.source?.ref !== WITHDRAWN && !(f.value === "" && f.status === "unconfirmed"))
+    .map((f) => ({ ...f, id: f.id, status: f.status }) as Fact);
+}
+
+export function caseFromEngine(saved: EngineCase, type: ApplicantType): Case {
+  const base = emptyCase(type);
+  const facts = latestFacts(saved.facts);
+  const by = new Map(facts.map((f) => [f.field, f]));
+  const description = by.get("project.description");
+  const authority = (saved.jurisdiction?.id === "calgary" || saved.jurisdiction?.id === "edmonton" ? saved.jurisdiction.id : "") as AuthorityId;
+  const process = { ...base.process };
+  for (const [id, field] of Object.entries(PROCESS_FACT) as [ProcessFieldId, string][]) {
+    const v = by.get(field)?.value;
+    if (typeof v === "string") process[id] = v;
+  }
+  // Starter and intake questions read as answered when their field has a saved answer.
+  const questions = base.questions.map((q) => {
+    const v = by.get(q.field)?.value;
+    return v != null && v !== "" ? { ...q, answer: String(v) } : q;
+  });
+  const confirmed: Candidate[] = saved.provisions.filter(isProvision).map((id) => ({
+    id: `search-${id}`,
+    topic: id,
+    provision: id,
+    part: Number(id.split(".")[0]) || 0,
+    benchmark: true,
+    identified: true,
+    quote: { text: "", citation: "", source: "code" },
+    departure: "do something other than what this sentence requires",
+    clarifyingQuestion: "Which part of this sentence does the design not follow?",
+    answer: "yes",
+  }));
+  let c: Case = {
+    ...base,
+    id: `case-${saved.id}`,
+    title: saved.title || base.title,
+    authority,
+    facts: facts.filter((f) => f.field !== "project.description"),
+    questions,
+    process,
+    candidates: confirmed,
+  };
+  // The description re-derives its own facts and code-check cards, exactly as when typed.
+  if (description && typeof description.value === "string") c = applyDescription(c, description.value);
+  // Keep the saved description fact itself (same id and value), so nothing is re-sent.
+  if (description) c = { ...c, facts: [...c.facts.filter((f) => f.field !== "project.description"), description] };
+  if (saved.title) c = { ...c, title: saved.title };
+  return c;
+}
