@@ -1,6 +1,7 @@
 /** Visit-local intent only. Server-side authorization/deduplication is a separate
  * integration requirement; this state does not protect arbitrary API clients. */
-export type SaveStatus = "idle" | "unsaved" | "saving" | "saved" | "failed";
+/** gone = the saved case was deleted or expired; it is never recreated. */
+export type SaveStatus = "idle" | "unsaved" | "saving" | "saved" | "failed" | "gone";
 export type CheckStatus = "not_requested" | "running" | "needs_answers" | "ready" | "unavailable" | "stale";
 export interface CheckState {
   status: CheckStatus;

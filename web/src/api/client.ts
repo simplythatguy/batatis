@@ -5,7 +5,7 @@
  * `createEngine(base)` serves scripts and tests outside Vite.
  */
 import { publicDetail, takeSseEvents } from "../rules";
-import type { Case, FactInput, NewCase, SectionCRow } from "./types.gen";
+import type { Case, FactInput, Jurisdiction, NewCase, SectionCRow } from "./types.gen";
 
 /** A provision returned by GET /code/search (engine/codes.py `Codes.search`). */
 export interface CodeHit {
@@ -35,6 +35,39 @@ export interface CodeRecord {
 
 type Division = "A" | "B" | "C";
 
+/** JSON array routes come back as `{ items, meta }`. Objects keep their fields and gain `meta`. */
+export interface ItemEnvelope<T> {
+  items: T[];
+  meta?: { notice: string };
+}
+
+export function unwrapItems<T>(body: T[] | ItemEnvelope<T>): T[] {
+  return Array.isArray(body) ? body : body.items;
+}
+
+/** Every engine route whose JSON body is a list. */
+export const ARRAY_ROUTES = [
+  { name: "search", method: "GET", path: "/code/search" },
+  { name: "sectionC", method: "POST", path: "/section-c" },
+  { name: "gaps", method: "GET", path: "/cases/{caseId}/gaps" },
+  { name: "processFields", method: "GET", path: "/cases/{caseId}/process-fields" },
+  { name: "sectionDIssues", method: "GET", path: "/cases/{caseId}/section-d/issues" },
+] as const;
+
+/**
+ * POST /cases/{id}/section-d. Omit `provisions` to rebuild the saved selection.
+ * An explicit list, including [], must carry the last acknowledged Case version.
+ */
+export type SectionDBody =
+  | { provisions: string[]; expected_version: number }
+  | { expected_version?: number };
+
+/** PUT /cases/{id}/jurisdiction. Both fields are required; null clears the authority. */
+export interface JurisdictionBody {
+  jurisdiction: Jurisdiction | null;
+  expected_version: number;
+}
+
 /** status 0 = the review service did not respond. `technical` keeps the raw HTTP text. */
 export class EngineError extends Error {
   readonly status: number;
@@ -46,6 +79,16 @@ export class EngineError extends Error {
     this.detail = detail;
     this.technical = technical ?? detail;
   }
+}
+
+/** The saved case was deleted or passed its 7-day limit. It is never recreated. */
+export function isCaseGone(e: unknown): boolean {
+  return e instanceof EngineError && e.status === 404 && /case not found/i.test(`${e.detail} ${e.technical}`);
+}
+
+/** Another write changed the saved case. Reload and reconcile before writing again. */
+export function isCaseConflict(e: unknown): boolean {
+  return e instanceof EngineError && e.status === 409;
 }
 
 const enc = encodeURIComponent;
@@ -84,11 +127,11 @@ export function createEngine(base: string) {
   return {
     createCase: (body: NewCase = {}, signal?: AbortSignal) => call<Case>("POST", "/cases", body, signal),
     /**
-     * PUT /cases/{id}/jurisdiction from backend/case-api. Body is the Jurisdiction model.
-     * Today's dev returns 404. The caller keeps the case working when that happens.
+     * PUT /cases/{id}/jurisdiction: `{ jurisdiction, expected_version }`, returning the full Case.
+     * Engines without this route answer 404/405; the caller never treats that as saved.
      */
-    setJurisdiction: (caseId: string, jurisdiction: { id: string; name: string; authority: null }, signal?: AbortSignal) =>
-      call<Case>("PUT", `/cases/${enc(caseId)}/jurisdiction`, jurisdiction, signal),
+    setJurisdiction: (caseId: string, body: JurisdictionBody, signal?: AbortSignal) =>
+      call<Case>("PUT", `/cases/${enc(caseId)}/jurisdiction`, body, signal),
     getCase: (id: string, signal?: AbortSignal) => call<Case>("GET", `/cases/${enc(id)}`, undefined, signal),
     addFact: (caseId: string, fact: FactInput, signal?: AbortSignal) =>
       call<Case>("POST", `/cases/${enc(caseId)}/facts`, fact, signal),
@@ -96,14 +139,14 @@ export function createEngine(base: string) {
       call<CodeRecord>("GET", `/code/${enc(id)}${division ? `?division=${division}` : ""}`, undefined, signal),
     search: (q: string, opts: { division?: Division; limit?: number } = {}, signal?: AbortSignal) => {
       const p = new URLSearchParams({ q, division: opts.division ?? "B", limit: String(opts.limit ?? 20) });
-      return call<CodeHit[]>("GET", `/code/search?${p}`, undefined, signal);
+      return call<CodeHit[] | ItemEnvelope<CodeHit>>("GET", `/code/search?${p}`, undefined, signal).then(unwrapItems);
     },
     /** Section C rows by deterministic lookup, in input order (an article expands to its sentences). */
     sectionC: (provisions: string[], signal?: AbortSignal) =>
-      call<SectionCRow[]>("POST", "/section-c", { provisions }, signal),
+      call<SectionCRow[] | ItemEnvelope<SectionCRow>>("POST", "/section-c", { provisions }, signal).then(unwrapItems),
     /** Administrative gaps. Mounted in engine/routes_case.py. */
     gaps: (caseId: string, signal?: AbortSignal) =>
-      call<EngineGap[]>("GET", `/cases/${enc(caseId)}/gaps`, undefined, signal),
+      call<EngineGap[] | ItemEnvelope<EngineGap>>("GET", `/cases/${enc(caseId)}/gaps`, undefined, signal).then(unwrapItems),
     /**
      * POST /cases/{id}/completeness from PR #11. Body is empty until that route
      * accepts documents. 404 on today's dev. The caller shows an empty state.
@@ -111,15 +154,15 @@ export function createEngine(base: string) {
     completeness: (caseId: string, signal?: AbortSignal) =>
       call<CompletenessReport>("POST", `/cases/${enc(caseId)}/completeness`, {}, signal),
     processFields: (caseId: string, signal?: AbortSignal) =>
-      call<EngineProcessField[]>("GET", `/cases/${enc(caseId)}/process-fields`, undefined, signal),
+      call<EngineProcessField[] | ItemEnvelope<EngineProcessField>>("GET", `/cases/${enc(caseId)}/process-fields`, undefined, signal).then(unwrapItems),
     professional: (caseId: string, signal?: AbortSignal) =>
       call<ProfessionalResult>("GET", `/cases/${enc(caseId)}/professional`, undefined, signal),
-    /** Persists confirmed provisions, re-looks up Section C, and returns the Section D plan on today's dev. */
-    sectionD: (caseId: string, provisions?: string[], signal?: AbortSignal) =>
-      call<SectionDPlan>("POST", `/cases/${enc(caseId)}/section-d`, provisions ? { provisions } : {}, signal),
+    /** Saves the selection with a version check and returns the plan with the committed `case_version`. */
+    sectionD: (caseId: string, body: SectionDBody, signal?: AbortSignal) =>
+      call<SectionDPlan>("POST", `/cases/${enc(caseId)}/section-d`, body, signal),
     /** GET /cases/{id}/section-d/issues. A missing code database is a fixed 503, not a missing route. */
     sectionDIssues: (caseId: string, signal?: AbortSignal) =>
-      call<SectionDIssue[]>("GET", `/cases/${enc(caseId)}/section-d/issues`, undefined, signal),
+      call<SectionDIssue[] | ItemEnvelope<SectionDIssue>>("GET", `/cases/${enc(caseId)}/section-d/issues`, undefined, signal).then(unwrapItems),
     /**
      * Official SCC PDF. 200 is bytes. 409 lists blocking reasons.
      * A missing code database is not turned into a 503 on this branch.
@@ -152,18 +195,10 @@ export function createEngine(base: string) {
     /** GET /cases/{id}/information-request. Items are not_sure decisions. */
     informationRequest: (caseId: string, signal?: AbortSignal) =>
       call<InformationRequest>("GET", `/cases/${enc(caseId)}/information-request`, undefined, signal),
-    /**
-     * POST /cases/{id}/evidence from PR #23. Typed evidence is text: description and
-     * evidence_type, never a file_id. 404 until that route is on this engine.
-     */
-    addEvidence: (
-      caseId: string,
-      body: { provision_id: string; evidence_type: string; description: string; objective?: string; function?: string },
-      signal?: AbortSignal,
-    ) => call<{ evidence: { id: string; status: string } }>("POST", `/cases/${enc(caseId)}/evidence`, body, signal),
-    /** DELETE /cases/{id}/evidence/{evidence_id}. Removes one slot and leaves the others. */
-    deleteEvidence: (caseId: string, evidenceId: string, signal?: AbortSignal) =>
-      call<Case>("DELETE", `/cases/${enc(caseId)}/evidence/${enc(evidenceId)}`, undefined, signal),
+    /** DELETE /cases/{id}/evidence/{evidence_id} with `{ expected_version }`. Removes one slot and
+     * leaves the others and uploaded bytes. Engines before the CAS contract ignore the body. */
+    deleteEvidence: (caseId: string, evidenceId: string, expectedVersion: number, signal?: AbortSignal) =>
+      call<Case>("DELETE", `/cases/${enc(caseId)}/evidence/${enc(evidenceId)}`, { expected_version: expectedVersion }, signal),
     /** POST /cases/{id}/identify/confirm. Writes provisions after a code-database check. */
     confirmIdentify: (caseId: string, provisions: string[], signal?: AbortSignal) =>
       call<Case>("POST", `/cases/${enc(caseId)}/identify/confirm`, { provisions }, signal),
@@ -282,13 +317,17 @@ export interface SectionDPlan {
     id: string;
     provision_id: string;
     citation: string;
-    status: "not provided" | "provided" | "evidence_listed";
+    /** `evidence_listed` only when a same-case uploaded file is attached. Typed text never counts. */
+    status: "needed" | "evidence_listed";
     objective: string | null;
     function: string | null;
     performance_issue: string;
     recommended_types: string[];
+    attachments: { id: string; title: string }[];
   }[];
   notices: string[];
+  /** Committed Case version for this save. */
+  case_version: number | null;
 }
 
 export class ExportBlockedError extends EngineError {

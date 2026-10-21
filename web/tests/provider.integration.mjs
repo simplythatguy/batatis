@@ -76,7 +76,7 @@ try {
     await save(page);
     const got = await remote(id);
     assert.equal(got.facts.filter(x=>x.field==='process.risk_assessment').at(-1).status, 'unconfirmed');
-    const gaps = await (await fetch(base + '/cases/' + id + '/gaps')).json();
+    const gaps = (await (await fetch(base + '/cases/' + id + '/gaps')).json()).items;
     assert.ok(gaps.some(x=>x.field==='risk_assessment'));
   });
 

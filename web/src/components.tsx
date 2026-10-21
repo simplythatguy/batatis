@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "re
 import { useRoute } from "./router";
 import { NRC_CREDIT, NRC_SOURCES } from "./config";
 import { splitNoticeUrl } from "./rules";
+import { PRIVACY_NOTICE } from "./privacy";
 import { roleNote } from "./humanReview";
 import { useCase } from "./store";
 import type { FactKind, Gap } from "./types";
@@ -191,8 +192,10 @@ export function DraftNote() {
   return <div className="save-receipt">
     <span className="status-note" role="status">{savedNote || "Current visit only"}</span>
     {saveStatus === "failed" && <button type="button" className="btn btn-xs" onClick={() => void saveDraft()}>Try saving again</button>}
+    {saveStatus === "gone" && <a className="text-link" href="#/application?download=1">Keep a draft</a>}
     <details className="save-help"><summary aria-label="About saving">About saving</summary>
       <p>Changes are sent to Batatis as you type. This page won’t reopen your draft after a reload. Download a draft to keep a copy.</p>
+      <p className="meta">{PRIVACY_NOTICE}</p>
       <a className="text-link" href="#/application?download=1">Download options</a>
       {saveDetail && <details><summary>Technical detail</summary><p>{saveDetail}</p></details>}
     </details>

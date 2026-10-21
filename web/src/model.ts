@@ -388,7 +388,9 @@ export type Action =
   | { type: "noteIdentifyQuestions"; questions: { id?: string; field: string; text: string; why?: string | null }[] }
   | { type: "bindOpenQuestion"; candidateId: string; questionId: string }
   | { type: "noteSectionC"; rows: SectionCRow[] }
-  | { type: "reconcileSectionC"; rows: SectionCRow[] }
+  /** `basis` is the candidate list the rows were looked up for (see lookupBasis). */
+  | { type: "reconcileSectionC"; rows: SectionCRow[]; basis?: string }
+  | { type: "noteUnscopedEvidence"; ids: string[] }
   | { type: "removeCandidate"; id: string }
   | { type: "editEvidenceDraft"; itemId: string; patch: Partial<NonNullable<Case["evidenceDrafts"]>[string]> }
   | { type: "saveEvidence"; itemId: string; document: string; responsible: string; date: string; evidenceType: string; provisionId: string }
@@ -570,7 +572,21 @@ export function reducer(c: Case, a: Action): Case {
     case "removeCandidate":
       return { ...c, candidates: c.candidates.filter(x => x.id !== a.id), sectionC: c.sectionC.filter(r => r.candidateId !== a.id), questions: c.questions.filter(q => q.cardId !== a.id && q.id !== `q-from-${a.id}`) };
     case "reconcileSectionC":
+      // Rows looked up for an older candidate list must not reorder or drop newer answers.
+      if (a.basis !== undefined && a.basis !== lookupBasis(c)) return c;
       return reconcileSectionC(c, a.rows);
+    case "noteUnscopedEvidence": {
+      const next = [...new Set([...(c.unscopedEvidence ?? []), ...a.ids])];
+      if (next.length === (c.unscopedEvidence ?? []).length) return c;
+      // An "Added" receipt on that task's editor would imply a link that no longer exists.
+      // Unfinished typed text in the editor is kept.
+      const drafts = { ...c.evidenceDrafts };
+      for (const id of a.ids) {
+        const task = id.split("~")[0];
+        if (drafts[task]?.note.startsWith("Added:")) drafts[task] = { ...drafts[task], note: "" };
+      }
+      return { ...c, unscopedEvidence: next, evidenceDrafts: drafts };
+    }
     case "noteSectionC": {
       const rest = c.sectionC.filter(
         (row) => !a.rows.some((next) => next.candidateId === row.candidateId && next.provision === row.provision),
@@ -746,6 +762,11 @@ export function reducer(c: Case, a: Action): Case {
   }
 }
 
+/** The candidate list a Section C lookup is computed for. */
+export function lookupBasis(c: Case): string {
+  return c.candidates.filter((a) => isProvision(a.provision)).map((a) => `${a.id}=${a.provision}`).join("|");
+}
+
 export const candidateById = (c: Case, id: string): Candidate | undefined => c.candidates.find((x) => x.id === id);
 
 export type SectionDView = {
@@ -783,12 +804,36 @@ export function sectionDRefreshKey(c: Case): string {
   return `${facts}#${listed}#${removed}#${questions}`;
 }
 
+/** Every listed document slot with a title, in entry order. */
+function documentTitles(c: Case): Map<string, string> {
+  const titles = new Map<string, string>();
+  for (const fact of c.facts) {
+    const match = /^evidence\.([^.]+)\.title$/.exec(fact.field);
+    if (match && typeof fact.value === "string" && fact.value.trim()) titles.set(match[1], fact.value.trim());
+  }
+  return titles;
+}
+
+/** Document slots that belong to none of these acknowledged plan tasks. */
+export function orphanedEvidence(c: Case, taskIds: Iterable<string>): string[] {
+  const tasks = new Set(taskIds);
+  return [...documentTitles(c).keys()].filter((slot) => !tasks.has(slot.split("~")[0]));
+}
+
+/** Documents kept after their reference was withdrawn. */
+export function keptDocuments(c: Case): { id: string; title: string }[] {
+  const kept = new Set(c.unscopedEvidence ?? []);
+  return [...documentTitles(c)].filter(([id]) => kept.has(id)).map(([id, title]) => ({ id, title }));
+}
+
 export function evidenceDocuments(c: Case, itemId: string): { id: string; title: string }[] {
   const titles = new Map<string, string>();
+  const kept = new Set(c.unscopedEvidence ?? []);
   for (const fact of c.facts) {
     const match = /^evidence\.([^.]+)\.title$/.exec(fact.field);
     if (!match) continue;
     const slot = match[1];
+    if (kept.has(slot)) continue;
     if (slot !== itemId && !slot.startsWith(`${itemId}~`)) continue;
     if (typeof fact.value === "string" && fact.value.trim()) titles.set(slot, fact.value.trim());
   }

@@ -1301,8 +1301,9 @@ body { font-size: 14px; line-height: 1.45; }
 .footer-bar { padding: 12px 24px; gap: 12px; flex-wrap: wrap; }
 .footer-bar > .status-note { flex-basis: 100%; margin: 0; }
 .section-switch { padding: 0; border: 0; }
-.recovery { padding: 16px 0; }
-.recovery p { margin: 0 0 12px; }
+.recovery { padding: 16px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.recovery p { margin: 0 0 4px; flex-basis: 100%; }
+.recovery details { flex-basis: 100%; }
 .onboarding-shell { grid-template-columns: 1fr; }
 .onboarding-shell .sidebar { position: absolute; top: 28px; left: 32px; z-index: 1; border: 0; background: transparent; padding: 0; }
 .onboarding-shell .sidebar-foot { display: none; }

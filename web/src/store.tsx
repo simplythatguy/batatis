@@ -1,12 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type Dispatch, type ReactNode } from "react";
-import { engine, EngineError, type EngineGap } from "./api/client";
+import { engine, EngineError, isCaseConflict, isCaseGone, type EngineGap } from "./api/client";
 import { type CompletenessRecord, isProfessionalHold, officerRoutedLabel } from "./humanReview";
-import { clearEngineSession, engineCaseId, engineGeneration, isEngineGeneration, ensureEngineCase, pushDeletedEvidence, pushFacts, pushListedEvidence, refreshGaps, syncJurisdiction } from "./api/sync";
+import { clearEngineSession, engineCaseId, engineGeneration, isEngineGeneration, ensureEngineCase, needsReconcile, pushDeletedEvidence, pushFacts, pushListedEvidence, reconcileEngineCase, refreshGaps, syncJurisdiction } from "./api/sync";
 import { engineNotices, groupEvidenceGaps, missingFromEngine } from "./rules";
 import { applyIdentifyPlan, planIdentify } from "./identify";
 import { checkCurrent, newCheckState, type CheckState, type SaveStatus } from "./checkState";
 import { emptyCase } from "./intake";
-import { gapLabel, getGaps, reducer, type Action } from "./model";
+import { gapLabel, getGaps, lookupBasis, reducer, type Action } from "./model";
 import { caseForRole, initialVisit } from "./visit";
 import type { ApplicantType, Case, Gap } from "./types";
 import { useSectionC } from "./api/sectionC";
@@ -74,6 +74,9 @@ interface Store {
 }
 
 const Ctx = createContext<Store | null>(null);
+
+export const GONE_NOTE = "Not saved: case deleted or expired. Your answers are still here.";
+const CONFLICT_NOTE = "Not saved. The saved case changed somewhere else.";
 
 const FIELD_HREF: Record<string, string> = {
   owner_name: "#/application?tab=A&focus=field-owner",
@@ -165,6 +168,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const revision = useRef(0);
   const syncQueue = useRef<Promise<unknown>>(Promise.resolve());
   const sectionDHold = useRef<{ generation: number; id: string; error: SectionDRecoveryError } | null>(null);
+  /** The saved case was deleted or expired. Nothing is written again until Reset starts a new case. */
+  const goneCase = useRef<string | null>(null);
   const [engineId, setEngineId] = useState<string | null>(null);
   const [factsEpoch, setFactsEpoch] = useState(0);
   const [engineGaps, setEngineGaps] = useState<EngineGap[]>([]);
@@ -195,15 +200,18 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   // Stable dispatch prevents deterministic lookup effects from refiring on status updates.
   const dispatch = useCallback((action: Action) => {
-    const derived = (action.type === "reconcileSectionC" && JSON.stringify(reconcileSectionC(latestCase.current, action.rows).candidates) === JSON.stringify(latestCase.current.candidates)) || [ "editEvidenceDraft", "ackEvidenceDeletion", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions"].includes(action.type);
+    const derived = (action.type === "reconcileSectionC" && JSON.stringify(reducer(latestCase.current, action).candidates) === JSON.stringify(latestCase.current.candidates)) || [ "editEvidenceDraft", "ackEvidenceDeletion", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions"].includes(action.type);
     if (!derived) {
       revision.current += 1;
       activeCheck.current?.ctl.abort();
       syncState.current = { saved: false, reviewed: false, detail: "" };
       setSyncOk(false);
-      setSaveStatus("unsaved");
-      setSaveDetail("");
-      setSavedNote("");
+      // A deleted or expired case stays reported as gone while the applicant keeps editing.
+      if (!goneCase.current || goneCase.current !== engineCaseId()) {
+        setSaveStatus("unsaved");
+        setSaveDetail("");
+        setSavedNote("");
+      }
       setCompletenessRecord(null);
       setGapsSource("idle");
       setEngineGaps([]);
@@ -219,7 +227,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (sectionCLookup.source !== "live") return;
-    if (reconcileSectionC(c, sectionCLookup.rows) !== c) dispatch({ type: "reconcileSectionC", rows: sectionCLookup.rows });
+    if (reconcileSectionC(c, sectionCLookup.rows) !== c) dispatch({ type: "reconcileSectionC", rows: sectionCLookup.rows, basis: lookupBasis(c) });
   }, [sectionCLookup, c.candidates, dispatch]);
 
   function loadSectionD(retry = false): Promise<SectionDRead | null> {
@@ -231,16 +239,22 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     const current = () => isEngineGeneration(token) && revision.current === version && JSON.stringify(latestCase.current.candidates) === candidateKey && JSON.stringify(latestCase.current.sectionC) === rowKey;
     const pending = syncQueue.current.catch(() => {}).then(async () => {
       if (!current()) return null;
+      const engineId = engineCaseId();
+      if (engineId && goneCase.current === engineId) {
+        throw new SectionDRecoveryError("missing", "case not found");
+      }
       const hold = sectionDHold.current;
-      if (hold?.generation === token) {
-        if (hold.error.kind === "missing" || !retry) throw hold.error;
-        // Only the labelled retry may recover a conflict. Read the live case
-        // before writing again; never replace a missing case with a new one.
-        try { await engine.getCase(hold.id); }
+      if (hold?.generation === token && (hold.error.kind === "missing" || !retry)) throw hold.error;
+      if (engineId && (hold?.generation === token || needsReconcile(engineId))) {
+        if (!retry) throw new SectionDRecoveryError("conflict", "A versioned save is waiting for an explicit reconcile.");
+        // Only the labelled retry may recover a conflict. Read the live case and adopt
+        // its version before writing again; never replace a missing case with a new one.
+        try { await reconcileEngineCase(engineId); }
         catch (error) {
-          if (error instanceof EngineError && error.status === 404) {
-            const missing = new SectionDRecoveryError("missing", error.detail);
-            sectionDHold.current = { ...hold, error: missing };
+          if (isCaseGone(error)) {
+            goneCase.current = engineId;
+            const missing = new SectionDRecoveryError("missing", (error as EngineError).detail);
+            sectionDHold.current = { generation: token, id: engineId, error: missing };
             throw missing;
           }
           throw error;
@@ -250,14 +264,19 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       }
       const id = await performSync(snapshot, current);
       if (!id || !current()) {
-        if (current()) throw new Error(syncState.current.detail || "Save was not acknowledged.");
+        if (current()) {
+          if (goneCase.current && goneCase.current === engineCaseId()) throw new SectionDRecoveryError("missing", "case not found");
+          throw new Error(syncState.current.detail || "Save was not acknowledged.");
+        }
         return null;
       }
       try { return await readSectionD(id, snapshot, current); }
       catch (error) {
         if (!current()) return null;
-        if (error instanceof EngineError && (error.status === 409 || (error.status === 404 && /case not found/i.test(error.detail)))) {
-          const recovery = new SectionDRecoveryError(error.status === 409 ? "conflict" : "missing", error.detail);
+        if (isCaseConflict(error) || isCaseGone(error)) {
+          const gone = isCaseGone(error);
+          if (gone) goneCase.current = id;
+          const recovery = new SectionDRecoveryError(gone ? "missing" : "conflict", (error as EngineError).detail);
           sectionDHold.current = { generation: token, id, error: recovery };
           throw recovery;
         }
@@ -268,18 +287,31 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     return pending;
   }
 
-  function sync(_announce: boolean): Promise<string | null> {
+  function sync(explicit: boolean): Promise<string | null> {
     const token = renderGeneration;
     const version = renderRevision;
     const snapshot = c;
     const current = () => isEngineGeneration(token) && revision.current === version;
-    const pending = syncQueue.current.catch(() => {}).then(() => performSync(snapshot, current));
+    const pending = syncQueue.current.catch(() => {}).then(async () => {
+      const id = engineCaseId();
+      // "Try saving again" is the explicit reconcile for a conflicted authority save.
+      if (explicit && id && needsReconcile(id) && goneCase.current !== id) {
+        try { await reconcileEngineCase(id); }
+        catch (error) { if (isCaseGone(error)) goneCase.current = id; }
+      }
+      return performSync(snapshot, current);
+    });
     syncQueue.current = pending;
     return pending;
   }
 
   async function performSync(snapshot: Case, current: () => boolean): Promise<string | null> {
     if (!current()) return null;
+    const existing = engineCaseId();
+    if (existing && goneCase.current === existing) {
+      markGone("case not found");
+      return null;
+    }
     syncState.current = { ...syncState.current, saved: false, detail: "" };
     setSaveStatus("saving");
     setSavedNote("Saving…");
@@ -309,9 +341,14 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       if (!current()) return null;
       const message = e instanceof EngineError ? e.detail : e instanceof Error ? e.message : String(e);
       setEngineId(engineCaseId());
+      if (/case not found/i.test(message)) {
+        goneCase.current = engineCaseId();
+        markGone(message);
+        return null;
+      }
       setSaveStatus("failed");
       setSaveDetail(message);
-      setSavedNote("Not saved. Keep this page open.");
+      setSavedNote(isCaseConflict(e) ? CONFLICT_NOTE : "Not saved. Keep this page open.");
       setSyncOk(false);
       syncState.current = { saved: false, reviewed: false, detail: message };
       setGapsSource("idle");
@@ -323,6 +360,17 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       }
       return null;
     }
+  }
+
+  /** Terminal for this case: keep every local answer, offer a draft download, never recreate. */
+  function markGone(detail: string) {
+    setSaveStatus("gone");
+    setSaveDetail(detail);
+    setSavedNote(GONE_NOTE);
+    setSyncOk(false);
+    syncState.current = { saved: false, reviewed: false, detail };
+    setGapsSource("idle");
+    latestGaps.current = getGaps(latestCase.current);
   }
 
   function requestCheck(retry = false): Promise<string | null> {
@@ -347,7 +395,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     // No fallback start, provider switch, automatic retry or download.
     const promise = (async () => {
       try {
-        const id = await sync(true);
+        // A check never doubles as a conflict reconcile; that stays its own labelled action.
+        const id = await sync(false);
         if (!current()) return null;
         if (!id || !syncState.current.saved) throw new Error(syncState.current.detail || "Save was not acknowledged.");
         publishCheck({ ...run, note: "Checking your draft…" });
@@ -406,6 +455,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     activeCheck.current?.ctl.abort();
     activeCheck.current = null;
     clearEngineSession();
+    goneCase.current = null;
+    sectionDHold.current = null;
     syncQueue.current = Promise.resolve();
     dispatch({ type: "reset", to: next });
     syncState.current = { saved: false, reviewed: false, detail: "" };
