@@ -14,7 +14,7 @@ from .relevance import (CaseScorings, RelevanceInProgress, RelevanceUnavailable,
                         description, live_judge, relevance_record)
 from .relevance_models import RelevanceRecord
 from .store import CaseBackend, VersionConflict
-from .redact import known_values, scrub
+from .redact import known_values, people_names, scrub
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +89,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
                 try:
                     # Jev sees the description with personal details removed; the stored hash
                     # stays on the applicant's own text so staleness is unaffected.
-                    outbound = scrub(text, known_values(case))
+                    outbound = scrub(text, known_values(case, people_names(cases(), case)))
                     result = identify(outbound, codes.db_path, judge=judge, rerank_n=60)
                     record = relevance_record(result, text, now())
                 except Exception as error:

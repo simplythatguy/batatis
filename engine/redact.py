@@ -8,7 +8,8 @@ through here, so article numbers are untouched.
 from __future__ import annotations
 
 import re
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 # Facts that hold names, addresses or identifiers of people and sites.
 PERSONAL_FIELDS = {
@@ -31,9 +32,42 @@ STREET = re.compile(
     r'(?:\s+(?:NW|NE|SW|SE))?')
 
 
-def known_values(case: Any) -> list[str]:
+# Names introduced by contact phrasing ("call Priya Natarajan", "Dr. Ada Lin", "prepared by A. Engineer").
+# Deliberately contextual: bare capitalized pairs are product and code terms far more often than people.
+_NAME = r"(?:[A-Z]\.\s?|[A-Z][a-z'\-]+)(?:\s+(?:[A-Z]\.|[A-Z][a-z'\-]+)){0,2}"
+_HONORIFIC = r"(?:Mr|Mrs|Ms|Miss|Mx|Dr|Prof)\.?\s+"
+_LEAD = (r"(?i:my name is|i am|i'm|this is|contact|call|email|e-mail|text|ask|signed by|prepared by|"
+         r"stamped by|sealed by|reviewed by|regards,|thanks,|thank you,)\s+")
+NAMED = re.compile(r"\b(?:" + _LEAD + r"(?:" + _HONORIFIC + r")?|" + _HONORIFIC + r")" + _NAME)
+_KEEP = re.compile(r"(?:" + _LEAD + r")?(?:" + _HONORIFIC + r")?")
+
+
+def _name_span(match: re.Match) -> str:
+    # Keep the lead-in words and any honorific; replace only the name itself.
+    return _KEEP.match(match.group(0)).group(0) + '[name]'
+
+
+def people_names(store: Any, case: Any, user: Any = None) -> list[str]:
+    """Account names and emails connected to this case: the caller, the owner, reviewers, message authors."""
+    names: set[str] = set()
+    for person in (user, store.get_user(case.owner_id) if case is not None and getattr(case, 'owner_id', None)
+                   and hasattr(store, 'get_user') else None):
+        if person is not None:
+            names.update(v for v in (getattr(person, 'name', None), getattr(person, 'email', None)) if v)
+    if case is not None:
+        for message in getattr(case, 'messages', None) or []:
+            names.add(message.author.name)
+        for change in getattr(case, 'status_history', None) or []:
+            names.add(change.by_name)
+        claim = getattr(case, 'claim', None)
+        if claim is not None:
+            names.add(claim.reviewer_name)
+    return [name for name in names if isinstance(name, str) and len(name.strip()) >= 3]
+
+
+def known_values(case: Any, extra: Iterable[str] = ()) -> list[str]:
     """Personal values the applicant entered, longest first so the full value wins over a part."""
-    values: set[str] = set()
+    values: set[str] = {value.strip() for value in extra if isinstance(value, str) and len(value.strip()) >= 3}
     for fact in getattr(case, 'facts', None) or []:
         field = str(getattr(fact, 'field', ''))
         if field in PERSONAL_FIELDS or field.endswith(PERSONAL_SUFFIXES):
@@ -49,6 +83,7 @@ def scrub(text: str, known: Iterable[str] = ()) -> str:
     for value in known:
         text = re.sub(re.escape(value), '[personal detail]', text, flags=re.I)
     text = EMAIL.sub('[email]', text)
+    text = NAMED.sub(_name_span, text)
     text = PHONE.sub('[phone]', text)
     text = STREET.sub('[address]', text)
     return POSTAL.sub('[postal code]', text)

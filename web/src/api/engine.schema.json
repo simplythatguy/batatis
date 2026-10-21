@@ -1654,8 +1654,8 @@
           "default": null,
           "title": "Status"
         },
-        "text": {
-          "title": "Text",
+        "summary": {
+          "title": "Summary",
           "type": "string"
         }
       },
@@ -1666,7 +1666,7 @@
         "kind",
         "status",
         "actor",
-        "text",
+        "summary",
         "created_at",
         "read"
       ],
