@@ -1513,10 +1513,6 @@ body {
   margin-top: 6px;
 }
 
-.cf-from-desc {
-  margin-top: 12px;
-}
-
 .cf-find {
   margin-top: 14px;
 }
@@ -4634,4 +4630,30 @@ a.cf-save-check {
   .cf-app[data-assistant="open"] .cf-stage-rings {
     gap: 2px;
   }
+}
+
+/* Questions before anything is described: one quiet line and the way back to Start. */
+
+.cf-q-empty-line {
+  margin: 0;
+  max-width: 520px;
+  font-size: 19px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--cf-text-2);
+  text-wrap: pretty;
+}
+
+.cf-q-empty .cf-btn {
+  margin-top: 26px;
+}
+
+/* Start, second step when no role is known: who is applying. */
+
+.cf-start.is-role .cf-q-wrap {
+  width: 100%;
+}
+
+.cf-role-back {
+  margin-top: 28px;
 }
