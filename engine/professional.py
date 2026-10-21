@@ -67,6 +67,8 @@ class ProfessionalReason(BaseModel):
     required: Requirement
     message: str
     citation: str
+    # An unresolved lookup is distinct from an intentionally uncited scope question.
+    source_unresolved: bool = False
 
 
 Involvement = Literal['professional_involved', 'not_required', 'unresolved']
@@ -471,17 +473,31 @@ def _screen_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
     questions: list[str] = []
     asked: dict[str, str] = {}
 
+    def lookup_citation(pid: str, division: str = 'C') -> str:
+        try:
+            rec = codes.provision(pid, division)
+        except (KeyError, ValueError):
+            rec = None
+        return str(rec.get('citation') or '').strip() if rec else ''
+
     def add(code: str, required: Requirement, message: str, pid: str,
             question: str | None = None, division: str = 'C'):
-        rec = codes.provision(pid, division)
-        citation = str(rec.get('citation') or '').strip() if rec else ''
+        citation = lookup_citation(pid, division)
         if not citation:
             required = 'depends'
             message = f'The citation lookup for Division {division} {pid} did not resolve.'
             question = f'Ask the code reviewer to verify Division {division} {pid} before deciding this requirement.'
-        reasons.append(ProfessionalReason(code=code, required=required, message=message, citation=citation))
+        reason = ProfessionalReason(code=code, required=required, message=message,
+                                    citation=citation, source_unresolved=not bool(citation))
+        if reason.source_unresolved:
+            reasons.insert(0, reason)
+        else:
+            reasons.append(reason)
         if question:
-            questions.append(question)
+            if reason.source_unresolved:
+                questions.insert(0, question)
+            else:
+                questions.append(question)
             asked[code] = question
 
     occupancy = facts.occupancy
@@ -581,10 +597,14 @@ def _screen_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
             # A fire-separation case still asks these, so Not sure is offered on both.
             pending_systems.append((field, code, pid))
     if len(pending_systems) >= 2:
-        for _field, _code, pid in pending_systems:
-            if codes.provision(pid, 'C') is None:
-                raise KeyError(f'missing professional-involvement provision: {pid}')
-        add('systems_unknown', 'depends', _SYSTEM_MESSAGE, pending_systems[0][2], _SYSTEM_QUESTION)
+        # Keep the healthy combined question, but check every dependency and let
+        # each failed lookup retain its own rule identity through add().
+        unresolved = [item for item in pending_systems if not lookup_citation(item[2])]
+        if unresolved:
+            for _field, code, pid in unresolved:
+                add(code + '_unknown', 'depends', _SYSTEM_MESSAGE, pid, _SYSTEM_QUESTION)
+        else:
+            add('systems_unknown', 'depends', _SYSTEM_MESSAGE, pending_systems[0][2], _SYSTEM_QUESTION)
     elif len(pending_systems) == 1:
         field, code, pid = pending_systems[0]
         add(code + '_unknown', 'depends', _SYSTEM_MESSAGE, pid,
@@ -642,7 +662,7 @@ def _screen_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
         # An alternative case does not become not_required by answering the prescriptive route as yes.
         involvement = 'unresolved'
         missing = _missing_facts(facts, reasons, confirmed=confirmed)
-    if blocked and required != 'yes':
+    if (blocked or any(reason.source_unresolved for reason in reasons)) and required != 'yes':
         routed: RouteTarget | None = 'officer'
     elif any(reason.required == 'depends' and reason.code in _OFFICER_REASONS for reason in reasons):
         routed = 'officer'
@@ -692,7 +712,7 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
     """One case decision for issues, professional guidance, completeness and export.
 
     Facts-only evaluation keeps its explicit inputs. Case callers also receive the
-    same validated mandatory routing and span handoff; no caller promotes it later.
+    same mandatory routing and source abstention; no caller promotes it later.
     """
     case = facts if isinstance(facts, Case) else None
     if case is not None:
@@ -706,14 +726,51 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
 
     hits = mandatory_hits(case, codes, general_required=result.general_required)
     if hits:
-        reasons = [*result.reasons, *(ProfessionalReason(
-            code=f'mandatory:{hit.division}:{hit.provision_id}', required='yes',
-            message=hit.why, citation=hit.cite) for hit in hits)]
+        mandatory: list[ProfessionalReason] = []
+        failed_sources: dict[tuple[str, str], ProfessionalReason] = {}
+        repair_questions: list[str] = []
+        for hit in hits:
+            code = f'mandatory:{hit.division}:{hit.provision_id}'
+            if not hit.unresolved_sources:
+                mandatory.append(ProfessionalReason(code=code, required='yes', message=hit.why, citation=hit.cite))
+                continue
+            # Keep the detected rule even if a different source in its chain is
+            # unavailable. A resolved primary citation alone cannot assert the duty.
+            if hit.cite:
+                mandatory.append(ProfessionalReason(code=code, required='depends', citation=hit.cite,
+                    message=f'The {hit.trigger_id} trigger for Division {hit.division} {hit.provision_id} '
+                            'was detected, but its required citation chain did not resolve.'))
+            for division, pid in hit.unresolved_sources:
+                question = f'Ask the code reviewer to verify Division {division} {pid} before deciding this requirement.'
+                repair_questions.append(question)
+                failed_sources.setdefault((division, pid), ProfessionalReason(
+                    code=f'mandatory:{division}:{pid}', required='depends', citation='', source_unresolved=True,
+                    message=f'The {hit.trigger_id} trigger for Division {hit.division} {hit.provision_id} was detected. '
+                            f'The citation lookup for Division {division} {pid} did not resolve. {question}'))
+        reasons = [*failed_sources.values(), *result.reasons, *mandatory]
+        required: Requirement = 'yes' if any(reason.required == 'yes' for reason in reasons) else 'depends'
+        confirmed = professional_confirmed(case)
         missing = list(result.missing_facts)
-        if not professional_confirmed(case):
+        if required == 'yes' and not confirmed:
             missing += ['professional.role', 'professional.registration_number or professional.seal']
-        return result.model_copy(update=dict(required='yes', reasons=reasons, decision='',
-                                              routed_to='professional', missing_facts=tuple(dict.fromkeys(missing))))
+        involvement = result.involvement
+        if any(reason.source_unresolved for reason in reasons):
+            involvement = 'unresolved'
+        elif involvement == 'not_required':
+            involvement = 'professional_involved' if confirmed else 'unresolved'
+        routed = 'professional' if required == 'yes' else 'officer'
+        questions = list(dict.fromkeys((*repair_questions, *result.questions)))
+        prompts = []
+        for text in questions:
+            prompt = _prompt_for(text)
+            decider = _DECIDER[routed]
+            if decider.casefold() not in prompt.help.casefold():
+                prompt = prompt.model_copy(update={'help': f'{prompt.help} {decider}'})
+            prompts.append(prompt)
+        decision = unresolved_item(questions[0], routed) if required == 'depends' else ''
+        return result.model_copy(update=dict(required=required, reasons=reasons, decision=decision,
+            involvement=involvement, questions=questions, prompts=prompts,
+            routed_to=routed, missing_facts=tuple(dict.fromkeys(missing))))
     if result.required != 'yes' and discretionary_review(case):
         return result.model_copy(update={'routed_to': 'officer'})
     return result
