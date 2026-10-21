@@ -105,20 +105,21 @@ def part_label(case: BenchCase) -> str:
 
 
 def top1_by_part(L: Loaded, arm: str, cases: list[BenchCase]) -> dict[str, dict]:
-    """Top-1 hit by single Part (and mixed): case-level majority with Wilson, and the per-repeat mean with its range."""
-    groups: dict[str, list[BenchCase]] = defaultdict(list)
-    for c in cases:
-        if c.gold:
-            groups[part_label(c)].append(c)
+    """Top-1 hit by single Part (and mixed): mean share of repeats with the top pick right, Wilson, and the per-repeat range."""
     reps = report.repeats_of(L, arm)
     rows = L.rows.get(arm, {})
+    have = {cid for (cid, _r) in rows}                     # only cases this arm was run on; a case never run is not a miss here
+    groups: dict[str, list[BenchCase]] = defaultdict(list)
+    for c in cases:
+        if c.gold and c.id in have:
+            groups[part_label(c)].append(c)
     out = {}
     for label, members in sorted(groups.items()):
         flags = {c.id: [bool(rows.get((c.id, r)) and rows[(c.id, r)]['order'] and rows[(c.id, r)]['order'][0] in c.gold)
                         for r in range(max(reps, 1))] for c in members}
-        majority = sum(report.majority(f) for f in flags.values())
+        total = sum(sum(f) / len(f) for f in flags.values())
         per_repeat = [sum(f[r] for f in flags.values()) / len(members) for r in range(max(reps, 1))]
-        out[label] = {'cases': len(members), 'majority': rate(majority, len(members)),
+        out[label] = {'cases': len(members), 'rate': report.fractional_rate(total, len(members)),
                       'mean': sum(per_repeat) / len(per_repeat), 'min': min(per_repeat), 'max': max(per_repeat)}
     return out
 

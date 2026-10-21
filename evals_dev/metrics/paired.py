@@ -9,7 +9,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from math import comb
 
-__all__ = ['paired_counts', 'sign_test', 'sign_test_cases']
+__all__ = ['paired_counts', 'paired_counts_graded', 'sign_test', 'sign_test_cases']
 
 
 def paired_counts(a: Mapping[str, bool], b: Mapping[str, bool]) -> dict[str, int]:
@@ -23,6 +23,18 @@ def paired_counts(a: Mapping[str, bool], b: Mapping[str, bool]) -> dict[str, int
     only_b = sum(1 for c in cases if b[c] and not a[c])
     neither = len(cases) - both - only_a - only_b
     return {'n': len(cases), 'both': both, 'only_a': only_a, 'only_b': only_b, 'neither': neither}
+
+
+def paired_counts_graded(a: Mapping[str, float], b: Mapping[str, float], eps: float = 1e-9) -> dict[str, int]:
+    """Like ``paired_counts`` for per-case success *fractions* (the share of a case's repeats that succeeded).
+
+    A case is discordant when the two fractions differ: ``only_a`` counts cases where A's fraction is higher, ``only_b`` where B's is.
+    Equal fractions (including both 0 and both 1) carry no information and are counted as ``same``. The sign test then applies as before.
+    """
+    cases = sorted(set(a) & set(b))
+    only_a = sum(1 for c in cases if a[c] > b[c] + eps)
+    only_b = sum(1 for c in cases if b[c] > a[c] + eps)
+    return {'n': len(cases), 'only_a': only_a, 'only_b': only_b, 'same': len(cases) - only_a - only_b}
 
 
 def sign_test(only_a: int, only_b: int, alternative: str = 'two-sided') -> float:

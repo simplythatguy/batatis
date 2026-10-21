@@ -5,7 +5,7 @@
   to fail on chosen calls.
 * ``fake_openai_http`` is an ``Http`` callable for ``OpenAIChat``. Modes: ``honest`` (picks the best-overlap candidate and
   quotes it exactly), ``liar`` (invents an article, fabricates a quote, repeats a pick), ``rate_limit`` (429 twice, then
-  honest), ``always_429``, ``timeout``, ``refusal``, ``truncated``, ``garbage``, ``no_usage``.
+  honest), ``always_429``, ``timeout``, ``connect_error``, ``refusal``, ``truncated``, ``garbage``, ``no_usage``.
 
 The fakes are deterministic. They are not a model of accuracy; they exist to exercise contracts and failure paths.
 """
@@ -146,6 +146,8 @@ def fake_openai_http(mode: str = 'honest'):
             return 429, {}, {'error': {'message': 'rate limited'}}
         if mode == 'timeout':
             raise TimeoutError('read timed out')
+        if mode == 'connect_error':
+            raise type('ConnectError', (OSError,), {})('could not connect')
         if mode == 'refusal':
             return reply(body, '', refusal='I cannot help with that.')
         if mode == 'truncated':

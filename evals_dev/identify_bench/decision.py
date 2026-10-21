@@ -5,7 +5,8 @@ before any number existed:
 
 1. Compute SR with a 95% interval for every feasible pipeline on the selection folds (public53 and idr26).
 2. ``SR_best`` is the highest SR. A pipeline is *tied* with it when its paired difference from the best is not significantly
-   negative (exact one-sided sign test on the discordant cases, alpha 0.10) and it trails by at most 3 points.
+   negative (exact one-sided sign test on the discordant cases, alpha 0.10) and it trails by at most 3 points. A case is discordant
+   when the two pipelines' shares of successful repeats differ; the sign of the difference is what the test counts.
 3. Among tied pipelines pick the lowest expected cost per case (API dollars, then p95 latency).
 4. Override: if the best pipeline costs more than 3 times a cheaper pipeline that is not significantly worse and trails
    by under 5 points, take the cheaper one.
@@ -21,7 +22,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from evals_dev.metrics import bootstrap_ci, paired_counts, sign_test
+from evals_dev.metrics import bootstrap_ci, paired_counts_graded, sign_test
 
 from .datasets import BenchCase
 from .report import ArmEval
@@ -61,6 +62,7 @@ class Decision:
     best: str | None
     winner: str | None
     trace: list[str]
+    provisional: str | None = None     # the cheapest tied pipeline when none passes robustness; flagged, never silent
 
 
 def hard_filters(e: ArmEval, latency: dict | None) -> dict:
@@ -106,7 +108,7 @@ def decide(evals: dict[str, ArmEval], latency: dict[str, dict], cases: list[Benc
     rows: dict[str, Row] = {}
     families = [c.family for c in gold]
     for name, e in evals.items():
-        vals = [1.0 if e.outcome.get(c.id) else 0.0 for c in gold]
+        vals = [float(e.outcome.get(c.id, 0.0)) for c in gold]
         ci = bootstrap_ci(vals, clusters=families, resamples=2000)
         r = Row(arm=name, sr=e.sr['rate'] or 0.0, sr_label=e.sr['label'], wilson=e.sr['wilson_95'] or [0, 0],
                 cluster_ci=[ci['low'], ci['high']] if ci['low'] is not None else None,
@@ -126,7 +128,7 @@ def decide(evals: dict[str, ArmEval], latency: dict[str, dict], cases: list[Benc
     best_outcome = evals[best].outcome
     for n in feasible:
         r = rows[n]
-        c = paired_counts(evals[n].outcome, best_outcome)
+        c = paired_counts_graded(evals[n].outcome, best_outcome)
         r.only_this, r.only_best = c['only_a'], c['only_b']
         r.p_worse = 1.0 if n == best else sign_test(c['only_a'], c['only_b'], 'less')
         r.tied = (r.p_worse >= TIE_ALPHA) and (rows[best].sr - r.sr <= TIE_POINTS + 1e-12)
@@ -163,13 +165,18 @@ def decide(evals: dict[str, ArmEval], latency: dict[str, dict], cases: list[Benc
                     group_ok = False
                     behind.append(g)
         rows[n].robust = {'top1_agreement': e.top1_agreement, 'agreement_ok': agree_ok, 'not_behind_floor_by_group': group_ok,
-                          'behind_floor_on': behind}
+                          'behind_floor_on': behind, 'vote_of_3_agreement': e.vote_agreement, 'success_agreement': e.success_agreement}
         if agree_ok and group_ok:
             winner = n
             trace.append(f'robustness passed for {n}')
             break
         trace.append(f'robustness failed for {n}: agreement_ok={agree_ok}, behind the BM25 floor on {behind or "none"}')
+    provisional = None
+    if winner is None:
+        provisional = ranked[0]
+        trace.append(f'no tied pipeline passed robustness; {provisional} is carried as provisional, not as a winner: the condition it fails is named '
+                     'above and the choice needs a person')
     pts = {n: (rows[n].sr, rows[n].usd or 0.0) for n in rows if rows[n].usd is not None and rows[n].complete}
     for n in pareto_front(pts):
         rows[n].pareto = True
-    return Decision(sorted(rows.values(), key=lambda r: (-r.sr, r.usd or 0)), best, winner, trace)
+    return Decision(sorted(rows.values(), key=lambda r: (-r.sr, r.usd or 0)), best, winner, trace, provisional)

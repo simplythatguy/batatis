@@ -182,15 +182,16 @@ def cmd_decision(args) -> int:
     else:
         print(decision_text)
     if args.write_pin:
-        if an.decision is None or an.decision.winner is None:
-            print('no winner to pin', file=sys.stderr)
+        chosen = (an.decision.winner or an.decision.provisional) if an.decision else None
+        if chosen is None:
+            print('nothing to pin', file=sys.stderr)
             return 1
-        fields = pin.pin_for(an.arms, an.decision.winner)
+        fields = pin.pin_for(an.arms, chosen)
         chosen_at = max(r['started_at'] for rows in an.L.by_key.values() for r in rows.values() if r['source'] == 'live')[:10]
         target = FOLDS_FILE.parents[2] / 'engine' / 'identify' / 'pipeline.json'
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(pin.pipeline_json(fields, chosen_at=chosen_at, memo_sha=hashlib.sha256(decision_text.encode()).hexdigest()))
-        print('pinned', an.decision.winner, 'config_hash', pin.config_hash(fields), '->', target)
+        print('pinned', chosen, '(provisional)' if not an.decision.winner else '', 'config_hash', pin.config_hash(fields), '->', target)
     return 0
 
 

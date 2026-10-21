@@ -54,9 +54,9 @@ def test_evaluate_arm_counts_misses_and_reports_groups_and_stability(tmp_path):
             add(store, 'A', c, r, by_case[c.id])
     e = report.evaluate_arm(loaded(store, cs, ['A']), 'A', cs)
     assert e.repeats == 3 and e.missing_rows == 0
-    assert e.outcome == {'a': True, 'b': False, 'c': True, 'd': False}      # d succeeds in 1 of 3 repeats only
-    assert e.sr['label'] == '2 of 4'
-    assert e.sr_by_group['part9']['label'] == '1 of 2' and e.sr_by_group['other']['label'] == '1 of 2'
+    assert e.outcome == pytest.approx({'a': 1.0, 'b': 1 / 3, 'c': 2 / 3, 'd': 1 / 3})   # the share of repeats that succeed
+    assert e.sr['label'] == '2.3 of 4' and e.sr['rate'] == pytest.approx(7 / 12)
+    assert e.sr_by_group['part9']['label'] == '1.3 of 2' and e.sr_by_group['other']['label'] == '1 of 2'
     assert e.by_repeat_sr == [0.5, 0.5, 0.75]
     assert e.ranking['hit@1']['min'] <= e.ranking['hit@1']['mean'] <= e.ranking['hit@1']['max']
     assert e.top1_agreement == pytest.approx((1 + 1 / 3 + 1 / 3 + 1 / 3) / 4)
@@ -234,3 +234,56 @@ def test_robustness_rejects_a_pipeline_that_trails_the_bm25_floor_on_a_part_grou
 
 def test_pareto_front():
     assert pareto_front({'a': (0.9, 0.05), 'b': (0.8, 0.01), 'c': (0.7, 0.02), 'd': (0.9, 0.06)}) == {'a', 'b'}
+
+
+def test_arms_with_different_repeat_counts_are_scored_on_the_same_scale(tmp_path):
+    store = RowStore(tmp_path)
+    c = case('a', P9)
+    for r, ok in enumerate([True, False]):                       # two repeats, one success
+        add(store, 'two', c, r, ['9.1.1.1.'] if ok else ['x'])
+    for r, ok in enumerate([True, True, False, False, False]):   # five repeats, two successes
+        add(store, 'five', c, r, ['9.1.1.1.'] if ok else ['x'])
+    L = loaded(store, [c], ['two', 'five'])
+    two, five = report.evaluate_arm(L, 'two', [c]), report.evaluate_arm(L, 'five', [c])
+    assert two.outcome['a'] == 0.5 and five.outcome['a'] == 0.4        # a strict majority would have scored these 0 and 0
+
+
+def test_fractional_rate_equals_the_whole_count_rate_for_whole_counts():
+    from evals_dev.stats import proportion
+    got, want = report.fractional_rate(34.0, 53), proportion(34, 53)
+    assert got['wilson_95'] == want['wilson_95'] and got['label'] == '34 of 53'
+    assert report.fractional_rate(0, 0)['rate'] is None
+
+
+def test_an_unstable_pipeline_is_carried_as_provisional_never_as_a_winner(tmp_path):
+    store = RowStore(tmp_path)
+    cs = [case(f'c{i:02}', OTHER, dataset='public53') for i in range(30)]
+    gold, alt = '3.2.2.51.', '3.2.2.52.'
+    for c in cs:
+        for r in range(3):                                          # always a success, but the top-1 article flips between runs
+            add(store, 'flaky', c, r, [gold, alt] if r == 0 else [alt, gold], usd=0.01)
+            add(store, 'steady', c, r, [gold], usd=0.05)
+    cs_gold = [BenchCase(id=c.id, dataset=c.dataset, query='q', gold=(gold, alt), family=c.family, fold='selection') for c in cs]
+    L = loaded(store, cs_gold, ['flaky', 'steady'])
+    ev = {a: report.evaluate_arm(L, a, cs_gold) for a in ('flaky', 'steady')}
+    assert ev['flaky'].top1_agreement == pytest.approx(1 / 3) and ev['steady'].top1_agreement == 1.0
+    d = decide(ev, {}, cs_gold)
+    rows = {r.arm: r for r in d.rows}
+    assert rows['flaky'].tied and rows['flaky'].usd < rows['steady'].usd
+    assert rows['flaky'].robust['agreement_ok'] is False and d.winner == 'steady' and d.provisional is None
+    # when every tied pipeline is unstable there is no winner, only a flagged provisional choice
+    only = decide({'flaky': ev['flaky']}, {}, cs_gold)
+    assert only.winner is None and only.provisional == 'flaky' and any('provisional' in t for t in only.trace)
+
+
+def test_vote_agreement_is_higher_than_single_run_agreement_for_a_mostly_stable_pipeline(tmp_path):
+    store = RowStore(tmp_path)
+    cs = [BenchCase(id=f'c{i:02}', dataset='dev', query='q', gold=('3.2.2.51.',), fold='selection') for i in range(20)]
+    for c in cs:
+        for r in range(5):
+            add(store, 'A', c, r, ['3.2.2.99.' if r == 4 else '3.2.2.51.'])        # one dissenting run in five
+    L = loaded(store, cs, ['A'])
+    e = report.evaluate_arm(L, 'A', cs)
+    # one run in five dissents: two votes of three agree with probability 0.896**2 + 0.104**2 = 0.814
+    assert e.top1_agreement == pytest.approx(0.6) and e.vote_agreement == pytest.approx(0.814, abs=0.02)
+    assert report.vote_agreement(L, 'A', cs, k=9) is None                         # fewer repeats than the vote size

@@ -334,3 +334,12 @@ def test_a_stop_signal_lets_calls_in_flight_finish_and_leaves_no_open_reservatio
     assert ctx.openai.ledger.summary()['open_reservations'] == 0
     resumed = run_arms(fake_arms(), ['V15f-R5'], cases, ctx, repeats=2)    # and a later run picks up where it stopped
     assert resumed.skipped >= summary.ran and resumed.stopped is None
+
+
+def test_a_failed_connection_costs_nothing_but_a_timeout_after_sending_is_charged(tmp_path):
+    ctx, _ = make_ctx(tmp_path, mode='connect_error')
+    run_arms(fake_arms(), ['V15f-R5'], make_cases(1), ctx, repeats=1)
+    s = ctx.openai.ledger.summary()
+    assert s['requests'] == 0 and Decimal(s['settled_usd']) == 0 and s['open_reservations'] == 0       # nothing left the machine
+    row = ctx.store.arm_rows('V15f-R5')[0]
+    assert row['errors'][-1]['category'] == 'connection' and row['notes']['degraded']

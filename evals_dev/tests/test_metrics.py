@@ -13,7 +13,7 @@ import pytest
 from evals_dev import stats
 from evals_dev.metrics import (bootstrap_ci, clopper_pearson_interval, clopper_pearson_lower,
                                clopper_pearson_upper, evaluate, first_gold_rank, hit_at_k, paired_bootstrap_ci,
-                               paired_counts, rate, recall_at_k, reciprocal_rank, sign_test, sign_test_cases,
+                               paired_counts, paired_counts_graded, rate, recall_at_k, reciprocal_rank, sign_test, sign_test_cases,
                                wilson_interval)
 from evals_dev.metrics.intervals import binom_cdf, binom_sf
 from evals_dev.metrics.ranking import article_of
@@ -183,3 +183,10 @@ def test_recorded_bm25_ranking_reproduces_the_research_numbers():
     assert round(got['mrr'], 3) == 0.485
     assert round(got['hit@1'], 2) == 0.32 and round(got['hit@5'], 2) == 0.66
     assert math.isclose(got['hit@1'], 17 / 53)
+
+
+def test_graded_pairing_counts_only_cases_whose_success_shares_differ():
+    a = {'c1': 1.0, 'c2': 0.5, 'c3': 0.0, 'c4': 0.4, 'c5': 1.0}
+    b = {'c1': 1.0, 'c2': 1.0, 'c3': 0.0, 'c4': 0.2, 'c5': 0.0}
+    assert paired_counts_graded(a, b) == {'n': 5, 'only_a': 2, 'only_b': 1, 'same': 2}
+    assert sign_test(2, 1, 'less') == pytest.approx(7 / 8)

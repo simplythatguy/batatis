@@ -36,30 +36,43 @@ def evaluate_g1(an: Analysis, verifier: str | None = None) -> list[Check]:
     else:
         checks.append(Check('G1.1', 'NOT RUN', 'no live rows for the Jev screen and rerank'))
     verifiers = [n for n in an.selection if an.arms[n].kind == 'verify']
-    target = verifier or (an.decision.winner if an.decision and an.decision.winner in verifiers else (verifiers[0] if verifiers else None))
+    chosen = (an.decision.winner or an.decision.provisional) if an.decision else None
+    target = verifier or (chosen if chosen in verifiers else (verifiers[0] if verifiers else None))
     gold = [c for c in an.cases if c.gold]
     if target is None:
         checks.append(Check('G1.2', 'NOT RUN', 'no verifier rows'))
     else:
         ev = an.selection[target]
-        full = len([c for c in gold]) * ev.repeats
-        rows = sum(1 for c in gold for r in range(ev.repeats) if (c.id, r) in an.L.rows.get(target, {}))
+        full = len(pub) * ev.repeats
+        rows = sum(1 for c in pub for r in range(ev.repeats) if (c.id, r) in an.L.rows.get(target, {}))
         by = top1_by_part(an.L, target, gold)
+        parts = ', '.join(f'{k} {v["rate"]["label"]}' for k, v in by.items())
         ok = ev.repeats >= MIN_VERIFIER_REPEATS and rows == full
         checks.append(Check('G1.2', 'PASS' if ok else 'FAIL',
-                            f'verifier {target}: top-1 by Part with intervals ({", ".join(f"{k} {v["majority"]["label"]}" for k, v in by.items())}); '
-                            f'{ev.repeats} repeats, {rows} of {full} case-repeat rows, reasoning effort medium only (user decision), '
-                            f'need at least {MIN_VERIFIER_REPEATS} repeats on every gold-bearing case'))
-        lat = an.latency.get(target)
+                            f'verifier {target}: top-1 by Part with intervals ({parts}); {ev.repeats} repeats, {rows} of {full} public53 '
+                            f'case-repeat rows, reasoning effort medium only (user decision); need at least {MIN_VERIFIER_REPEATS} repeats '
+                            f'on every public53 case'))
         cost = ev.cost['usd_per_case_run']
-        if lat and lat['n'] >= MIN_LATENCY_CASES and cost is not None:
-            checks.append(Check('G1.3', 'PASS', f'{target}: cost ${cost:.4f} per case run; end-to-end p50 {lat["p50_ms"] / 1000:.1f} s, '
-                                                f'p95 {lat["p95_ms"] / 1000:.1f} s over {lat["n"]} cases (interactive profile)'))
+        checks.append(Check('G1.3', 'PASS' if cost is not None else 'NOT RUN',
+                            f'{target}: cost ${cost:.4f} per case run (all stages, provider-reported usage)' if cost is not None
+                            else f'{target}: no cost recorded'))
+        stage = an.stage_latency.get(target)
+        if stage and stage['n'] >= MIN_LATENCY_CASES:
+            checks.append(Check('G1.4', 'PASS', f'{target}: verifier stage alone, one request at a time: p50 {stage["p50_ms"] / 1000:.1f} s, '
+                                                f'p95 {stage["p95_ms"] / 1000:.1f} s over {stage["n"]} cases'))
         else:
-            checks.append(Check('G1.3', 'NOT RUN', f'{target}: needs interactive-profile latency on at least {MIN_LATENCY_CASES} cases '
-                                                   f'(have {lat["n"] if lat else 0}) and a cost'))
+            checks.append(Check('G1.4', 'NOT RUN', f'{target}: needs the verifier stage timed one request at a time on at least '
+                                                   f'{MIN_LATENCY_CASES} cases (have {stage["n"] if stage else 0})'))
+        lat = an.latency.get(target)
+        if lat and lat.get('n', 0) >= MIN_LATENCY_CASES:
+            checks.append(Check('G1.5', 'PASS' if lat['p95_ms'] < 20_000 else 'FAIL',
+                                f'{target}: end-to-end p50 {lat["p50_ms"] / 1000:.1f} s, p95 {lat["p95_ms"] / 1000:.1f} s over {lat["n"]} cases '
+                                f'(interactive profile, whole chain); H2 limit 20 s'))
+        else:
+            checks.append(Check('G1.5', 'NOT RUN', f'{target}: end-to-end latency needs every stage of the chain timed one case at a time on the '
+                                                   f'interactive profile on at least {MIN_LATENCY_CASES} cases'))
         fab = ev.verifier.get('fabricated_citations_shown')
-        checks.append(Check('G1.4', 'NOT RUN' if fab is None else ('PASS' if fab == 0 else 'FAIL'),
+        checks.append(Check('G1.6', 'NOT RUN' if fab is None else ('PASS' if fab == 0 else 'FAIL'),
                             f'{target}: fabricated citations shown: {fab if fab is not None else "not rechecked"} (quote and database check)'))
     return checks
 

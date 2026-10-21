@@ -6,8 +6,9 @@ Success rate (SR) is what the product shows the applicant on a case that has gol
   choice when nothing is committed);
 * any other case, mixed ones included, succeeds when a gold article is among the three quoted choices.
 
-A case's outcome across repeats is the strict majority (more than half of the repeats succeed); the mean of the per-repeat
-success rates and its range are reported next to it. A missing or failed row is a miss, never skipped.
+A case's outcome is the share of its repeats that succeed, so arms with two repeats and arms with five are compared on the same scale
+(a strict majority would penalise the even count). The success rate is the mean of those shares over the cases; the per-repeat success
+rates and their range are reported next to it. A missing or failed row is a miss, never skipped.
 
 A pipeline is the chain of arms ending at an arm. Its cost is the sum of the chain's dollars (fusion branches add); its
 latency is the sum of the chain's stage times (fusion branches run in parallel, so the slowest counts), measured only on
@@ -15,13 +16,14 @@ rows of the ``interactive`` profile that are not cached.
 """
 from __future__ import annotations
 
+import random
 import re
 from collections import Counter, defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 from statistics import mean
 
-from evals_dev.metrics import evaluate, rate, reciprocal_rank
+from evals_dev.metrics import evaluate, rate, reciprocal_rank, wilson_interval
 from evals_dev.metrics.ranking import first_gold_rank
 
 from .datasets import BenchCase
@@ -45,6 +47,19 @@ def success(case: BenchCase, order: list[str]) -> bool:
 
 def majority(flags: list[bool]) -> bool:
     return len(flags) > 0 and sum(flags) * 2 > len(flags)
+
+
+def fractional_rate(total: float, n: int) -> dict:
+    """``total`` successes out of ``n`` cases where ``total`` may be fractional (a case that succeeded in 2 of 3 repeats is 0.667).
+
+    Only the Wilson interval is given: an exact interval needs whole counts. With whole counts it equals ``stats.proportion``.
+    """
+    return {'x': total, 'n': n, 'label': f'{_count(total)} of {n}', 'rate': (total / n) if n else None,
+            'wilson_95': wilson_interval(min(max(total, 0.0), float(n)), n) if n else None, 'skipped': None}
+
+
+def _count(x: float) -> str:
+    return str(int(round(x))) if abs(x - round(x)) < 1e-9 else f'{x:.1f}'
 
 
 @dataclass
@@ -146,11 +161,42 @@ class ArmEval:
     sr_by_group: dict[str, dict]
     ranking: dict[str, dict]
     top1_agreement: float | None
+    vote_agreement: float | None
+    success_agreement: float | None
     majority_top1_hit: dict
     errors: dict
     cost: dict
     verifier: dict
     commits: dict
+
+
+def vote_agreement(L: Loaded, arm: str, cases: list[BenchCase], *, k: int = 3, resamples: int = 400, seed: int = 20261021) -> float | None:
+    """Agreement of two independent majority votes of ``k`` runs on the top-1 article, estimated by resampling the stored repeats.
+
+    If a pipeline were run ``k`` times and its most common top-1 shown, how often would two such shown answers agree? Each vote draws
+    ``k`` repeats with replacement; a tie takes the article seen first. None when there are fewer than ``k`` repeats to draw from.
+    """
+    reps = repeats_of(L, arm)
+    rows = L.rows.get(arm, {})
+    if reps < k:
+        return None
+    rng = random.Random(seed)
+    per_case = []
+    for c in cases:
+        tops = [rows[(c.id, r)]['order'][0] for r in range(reps) if (c.id, r) in rows and rows[(c.id, r)]['order']]
+        if len(tops) < k:
+            continue
+        agree = 0
+        for _ in range(resamples):
+            votes = []
+            for _v in range(2):
+                draw = [tops[rng.randrange(len(tops))] for _ in range(k)]
+                counts = Counter(draw)
+                best = max(counts.values())
+                votes.append(next(a for a in draw if counts[a] == best))
+            agree += votes[0] == votes[1]
+        per_case.append(agree / resamples)
+    return mean(per_case) if per_case else None
 
 
 def _per_repeat_orders(L: Loaded, arm: str, cases: list[BenchCase], repeat: int) -> dict[str, list[str]]:
@@ -169,14 +215,14 @@ def evaluate_arm(L: Loaded, arm: str, cases: Iterable[BenchCase], *, threshold: 
         per_repeat.append({c.id: success(c, orders[c.id]) for c in cases})
         for c in cases:
             flags[c.id].append(per_repeat[-1][c.id])
-    outcome = {cid: majority(f) for cid, f in flags.items()}
+    outcome = {cid: (sum(f) / len(f)) for cid, f in flags.items()}
     n = len(cases)
-    sr = rate(sum(outcome.values()), n)
+    sr = fractional_rate(sum(outcome.values()), n)
     groups = {}
     for g in GROUPS:
         members = [c for c in cases if c.part_group == g]
         if members:
-            groups[g] = rate(sum(outcome[c.id] for c in members), len(members))
+            groups[g] = fractional_rate(sum(outcome[c.id] for c in members), len(members))
     gold = {c.id: list(c.gold) for c in cases}
     metrics_by_repeat = [evaluate(_per_repeat_orders(L, arm, cases, r), gold, KS) for r in range(max(reps, 1))]
     ranking = {}
@@ -185,12 +231,14 @@ def evaluate_arm(L: Loaded, arm: str, cases: Iterable[BenchCase], *, threshold: 
             continue
         vals = [m[key] for m in metrics_by_repeat]
         ranking[key] = {'mean': mean(vals), 'min': min(vals), 'max': max(vals)}
-    agree, majority_hits = [], []
+    agree, majority_hits, success_agree = [], [], []
     for c in cases:
         tops = [rows[(c.id, r)]['order'][0] for r in range(reps) if (c.id, r) in rows and rows[(c.id, r)]['order']]
         if len(tops) >= 2:
             pairs = [(a, b) for i, a in enumerate(tops) for b in tops[i + 1:]]
             agree.append(sum(a == b for a, b in pairs) / len(pairs))
+            fl = flags[c.id]
+            success_agree.append(sum(x == y for i, x in enumerate(fl) for y in fl[i + 1:]) / (len(fl) * (len(fl) - 1) / 2))
         if tops:
             winner = Counter(tops).most_common(1)[0][0]
             majority_hits.append(winner in c.gold)
@@ -217,6 +265,7 @@ def evaluate_arm(L: Loaded, arm: str, cases: Iterable[BenchCase], *, threshold: 
     return ArmEval(arm=arm, n_cases=n, repeats=reps, missing_rows=n * max(reps, 1) - len(all_rows), outcome=outcome,
                    by_repeat_sr=[sum(p.values()) / n if n else 0.0 for p in per_repeat], sr=sr, sr_by_group=groups,
                    ranking=ranking, top1_agreement=mean(agree) if agree else None,
+                   vote_agreement=vote_agreement(L, arm, cases), success_agreement=mean(success_agree) if success_agree else None,
                    majority_top1_hit=rate(sum(majority_hits), len(majority_hits)),
                    errors=errors, cost=cost, verifier=verifier_integrity(L, all_rows),
                    commits=commit_stats(L, arm, cases, threshold=threshold))
@@ -275,7 +324,7 @@ def committed(row: dict, *, threshold: float, need_pick: bool, max_commits: int 
 def commit_stats(L: Loaded, arm: str, cases: list[BenchCase], *, threshold: float) -> dict:
     need_pick = L.kinds.get(arm) == 'verify'
     rows = L.rows.get(arm, {})
-    picks = right = 0
+    picks = right = right_lenient = 0
     wrong_cases: list[str] = []
     committing = n_cases = 0
     part9 = [c for c in cases if c.part_group == 'part9']
@@ -291,10 +340,12 @@ def commit_stats(L: Loaded, arm: str, cases: list[BenchCase], *, threshold: floa
                 picks += 1
                 if a in c.gold:
                     right += 1
+                    right_lenient += 1
                 else:
                     wrong_cases.append(f'{c.id}#r{r}:{a}')
+                    right_lenient += a in c.acceptable
     return {'threshold': threshold, 'status': 'placeholder_uncalibrated: exploration only, not a fit',
-            'precision': rate(right, picks), 'case_runs': n_cases,
+            'precision': rate(right, picks), 'precision_lenient': rate(right_lenient, picks), 'case_runs': n_cases,
             'coverage': rate(committing, n_cases), 'wrong_commits': wrong_cases}
 
 

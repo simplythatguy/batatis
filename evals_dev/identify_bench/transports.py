@@ -26,6 +26,7 @@ from . import pricing
 from .ledger import BudgetExceeded, Ledger
 
 OPENAI_URL = 'https://api.openai.com/v1/chat/completions'
+NOT_SENT = frozenset({'ConnectError', 'ConnectTimeout', 'PoolTimeout', 'gaierror'})   # failed before any request bytes left
 _KEY_SHAPE = re.compile(r'sk-[A-Za-z0-9_\-]{10,}')
 # (url, headers, json body, timeout seconds) -> (status, response headers, parsed json or None)
 Http = Callable[[str, Mapping[str, str], dict, float], tuple[int, Mapping[str, str], dict | None]]
@@ -115,8 +116,11 @@ class OpenAIChat:
             started = time.monotonic()
             try:
                 status, resp_headers, data = self.http(self.url, headers, body, self.timeout)
-            except Exception as e:                                  # noqa: BLE001 - timeout, reset, TLS: outcome unknown
-                self.ledger.unknown(res, f'{type(e).__name__} after the request was sent', arm=arm, case=case)
+            except Exception as e:                                  # noqa: BLE001 - timeout, reset, TLS
+                if type(e).__name__ in NOT_SENT:                    # the connection was never made: nothing was billed
+                    self.ledger.release(res)
+                else:                                               # the request left; the provider may have billed it
+                    self.ledger.unknown(res, f'{type(e).__name__} after the request was sent', arm=arm, case=case)
                 result.errors.append({'category': 'timeout' if 'Timeout' in type(e).__name__ else 'connection',
                                       'detail': self._redact(type(e).__name__), 'fatal': attempt == self.max_attempts})
                 self._backoff(attempt, None)

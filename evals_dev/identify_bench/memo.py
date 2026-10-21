@@ -28,7 +28,7 @@ def cell(r: dict | None) -> str:
     if not r or not r.get('n'):
         return '0 of 0'
     lo, hi = r['wilson_95']
-    return f"{r['x']} of {r['n']} ({pct(r['rate'])}, {pct(lo)}-{pct(hi)})"
+    return f"{report._count(r['x'])} of {r['n']} ({pct(r['rate'])}, {pct(lo)}-{pct(hi)})"
 
 
 def usd(x: float | None, digits: int = 4) -> str:
@@ -107,27 +107,48 @@ def render_decision(an: Analysis, *, ledger_openai: dict | None = None, ledger_j
     out += ['## Claim (written before any number existed)', '',
             '> Pipeline X has the highest success rate that is not beaten on the paired test, at the lowest cost among tied '
             'pipelines, on public53 plus idr26 (the selection folds), with the Part 9 commit threshold still to be fitted.', '']
-    if d is None or d.winner is None:
+    chosen = (d.winner or d.provisional) if d else None
+    if d is None or chosen is None:
         out += ['## Verdict', '', '**No pipeline met the rule.** ' + ('; '.join(d.trace) if d else 'No arm has rows yet.'), '']
         return '\n'.join(out) + '\n'
     rows = {r.arm: r for r in d.rows}
-    w, ev = rows[d.winner], an.selection[d.winner]
+    w, ev = rows[chosen], an.selection[chosen]
     floor = rows.get('R0-bm25')
-    out += ['## Verdict', '',
-            f'**Chosen pipeline: `{d.winner}`.** {describe(an.arms, d.winner)}.', '',
+    if d.winner:
+        head = f'**Chosen pipeline: `{chosen}`.** {describe(an.arms, chosen)}.'
+    else:
+        rob = w.robust
+        why = []
+        if rob.get('agreement_ok') is False:
+            why.append(f"its run-to-run top-1 agreement is {rob['top1_agreement']:.3f}, under the required {AGREEMENT_MIN:.2f}")
+        if rob.get('not_behind_floor_by_group') is False:
+            why.append('it trails the BM25 floor on ' + ', '.join(rob['behind_floor_on']))
+        head = (f'**Provisional pipeline: `{chosen}`, not a winner.** {describe(an.arms, chosen)}. The rule selects it as the cheapest tied '
+                f'pipeline but it fails the robustness condition: {"; ".join(why)}. It is carried forward so the identify service has a '
+                'configuration to run, and the choice needs a person (see "Open decision" below).')
+    out += ['## Verdict', '', head, '',
             f'- Success rate on the selection folds: **{cell(ev.sr)}** over {sel["n"]} gold-bearing cases '
             f'(Part 9 {sel.get("part9", 0)}, other Parts {sel.get("other", 0)}, mixed {sel.get("mixed", 0)}).',
-            f'- Best success rate in the field: `{d.best}` at {pct(rows[d.best].sr)}; `{d.winner}` is '
-            f'{"the best" if d.best == d.winner else "tied with it"} (rule below).',
+            f'- Best success rate in the field: `{d.best}` at {pct(rows[d.best].sr)}; `{chosen}` is '
+            f'{"the best" if d.best == chosen else "tied with it"} (rule below).',
             f'- Cost per case run (all stages, provider usage): {usd(w.usd)}; end-to-end p95 latency on the interactive profile: '
             f'{secs(w.p95_ms) if w.p95_ms is not None else NOT_RUN}.']
     if floor:
         out.append(f'- BM25 floor on the same cases: {floor.sr_label} ({pct(floor.sr)}).')
     out += ['', '### Why', ''] + [f'- {t}' for t in d.trace] + ['']
+    if not d.winner:
+        out += ['### Open decision', '',
+                'Jev and `gpt-6-luna` accept no seed or temperature, so a single run is not repeatable: the same case can return a different top article '
+                'on a re-run. The rule asks for run-to-run top-1 agreement of at least 0.90 "or deterministic by majority vote". No pipeline built on these '
+                'providers reaches 0.90 in a single run (agreement table below). Options: accept the variation and keep the stored result on the case '
+                '(a re-run is explicit); run the pipeline three times and show the most common top pick (the vote-of-3 column estimates the agreement '
+                'that would give, at three times the stage cost; `IdentifyConfig` has no field for it yet); or lower the reasoning effort. Nothing here '
+                'was changed to make a number pass.', '']
 
     out += ['## Decision rule applied to the selection folds', '',
             f'Success: a Part 9 case succeeds when the first presented article is gold; any other case when a gold article is '
-            f'among the three quoted choices. A case counts as a success when more than half of its repeats do. Tied with the '
+            f'among the three quoted choices. A case scores the share of its repeats that succeed, and the success rate is the mean over '
+            f'cases (a count with a decimal is a case that succeeded in some repeats only). Tied with the '
             f'best means a one-sided exact sign test on the discordant cases does not call it worse at alpha {TIE_ALPHA:.2f} and it '
             f'trails by at most {TIE_POINTS * 100:.0f} points; an override takes a pipeline costing at least '
             f'1/{OVERRIDE_COST_RATIO:g} as much when it trails by under {OVERRIDE_POINTS * 100:.0f} points and is not significantly '
@@ -154,7 +175,8 @@ def render_decision(an: Analysis, *, ledger_openai: dict | None = None, ledger_j
         e = an.selection[r.arm]
         lat = an.latency.get(r.arm, {})
         pt.append([f'`{r.arm}`' + (' *' if r.pareto else ''), cell(e.sr), usd(r.usd), usd(e.cost['usd_per_correct_top1']),
-                   secs(lat.get('p50_ms')), secs(lat.get('p95_ms')), str(lat.get('n', 0))])
+                   secs(lat.get('p50_ms')) if lat.get('n') else NOT_RUN, secs(lat.get('p95_ms')) if lat.get('n') else NOT_RUN,
+                   str(lat.get('n', 0))])
     out += table(['pipeline', 'success rate', '$ per case run', '$ per correct top-1', 'p50 latency', 'p95 latency', 'latency n'], pt) + ['']
 
     out += ['## Success rate by Part group (selection folds)', '']
@@ -179,7 +201,7 @@ def render_decision(an: Analysis, *, ledger_openai: dict | None = None, ledger_j
     out += render_integrity_section(an) + ['']
     out += render_cost_latency_section(an, ledger_openai, ledger_jev) + ['']
     out += render_validity_section(an, ledger_openai) + ['']
-    out += render_g4_needs(an, d.winner) + ['']
+    out += render_g4_needs(an, chosen) + ['']
     out += render_not_run() + ['']
     out += ['## Provenance', ''] + _provenance(an) + [f'- Folds file sha256 {folds_sha[:16]} (seed 20261021).', '',
                                                       'Row files used (sha256 of the bytes on disk):', '']
@@ -206,7 +228,7 @@ def render_g1_section(an: Analysis) -> list[str]:
                 + (f' The 2026-10-20 recorded run (jev-latest) gave {rec:.3f}.' if rec is not None else ''), '']
     else:
         out += [f'Rerank MRR on public53: {NOT_RUN}.', '']
-    out += ['Verifier top-1 by Part (case-level majority over repeats with Wilson 95%; per-repeat mean and range in brackets), '
+    out += ['Verifier top-1 by Part (mean share of repeats with the top pick right, Wilson 95%; per-repeat mean and range in brackets), '
             'all gold-bearing cases:', '']
     gold = [c for c in an.cases if c.gold]
     verifiers = [n for n in an.selection if an.arms[n].kind == 'verify']
@@ -215,7 +237,7 @@ def render_g1_section(an: Analysis) -> list[str]:
         rows = []
         for n in verifiers:
             by = top1_by_part(an.L, n, gold)
-            rows.append([f'`{n}`'] + [(f"{cell(by[l]['majority'])} [{pct(by[l]['mean'])} {pct(by[l]['min'])}-{pct(by[l]['max'])}]"
+            rows.append([f'`{n}`'] + [(f"{cell(by[l]['rate'])} [{pct(by[l]['mean'])} {pct(by[l]['min'])}-{pct(by[l]['max'])}]"
                                         if l in by else '-') for l in labels])
         out += table(['pipeline'] + labels, rows)
     else:
@@ -235,9 +257,10 @@ def render_commit_section(an: Analysis) -> list[str]:
         if c['precision']['n'] or an.arms[n].kind == 'verify':
             wrong = ', '.join(c['wrong_commits'][:6]) + (' ...' if len(c['wrong_commits']) > 6 else '')
             rows.append([f'`{n}`', cell(c['precision']), f"{c['precision'].get('cp_lower_95_one_sided', 0) or 0:.3f}",
-                         cell(c['coverage']), wrong or 'none'])
+                         cell(c['precision_lenient']), cell(c['coverage']), wrong or 'none'])
     if rows:
-        out += table(['pipeline', 'committed picks right (Wilson 95%)', 'exact one-sided 95% lower bound', 'coverage (case runs with a commit)',
+        out += table(['pipeline', 'committed picks right: gold only (Wilson 95%)', 'exact one-sided 95% lower bound',
+                      'right if a related article counts', 'coverage (case runs with a commit)',
                       'wrong commits (case#repeat:article)'], rows)
     else:
         out += [NOT_RUN]
@@ -256,12 +279,14 @@ def render_integrity_section(an: Analysis) -> list[str]:
         v = e.verifier
         rows.append([f'`{n}`', str(e.errors['rows']), str(e.errors['rows_with_errors']), str(e.errors['rows_degraded']),
                      ', '.join(f'{k} {c}' for k, c in e.errors['categories'].items()) or '-',
-                     '-' if e.top1_agreement is None else f'{e.top1_agreement:.3f}', cell(e.majority_top1_hit),
+                     '-' if e.top1_agreement is None else f'{e.top1_agreement:.3f}',
+                     '-' if e.vote_agreement is None else f'{e.vote_agreement:.3f}',
+                     '-' if e.success_agreement is None else f'{e.success_agreement:.3f}', cell(e.majority_top1_hit),
                      '-' if not v else f"{v['raw_picks']} / {v['kept']} / {v['dropped']}",
                      '-' if not v or v.get('quote_match_rate_before_filtering') is None else pct(v['quote_match_rate_before_filtering']),
                      '-' if not v else str(v['fabricated_citations_shown'])])
-    out += table(['pipeline', 'rows', 'rows with errors', 'degraded', 'error categories', 'top-1 agreement across repeats',
-                  'majority top-1 right', 'picks made / kept / dropped', 'quote match before filtering', 'fabricated citations shown'], rows)
+    out += table(['pipeline', 'rows', 'rows with errors', 'degraded', 'error categories', 'top-1 agreement across repeats (one run)',
+                  'top-1 agreement of a vote of 3', 'success agreement across repeats', 'majority top-1 right', 'picks made / kept / dropped', 'quote match before filtering', 'fabricated citations shown'], rows)
     mismatch = sum(e.errors['request_count_mismatch'] for e in an.selection.values())
     out += ['', f'Rows whose Jev request count differed from the expected count: {mismatch}. Dropped picks never reach the screen; '
             'the recheck above re-verifies every shown pick against the database text.']

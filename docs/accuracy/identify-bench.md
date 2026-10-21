@@ -26,7 +26,8 @@ $PY -m evals_dev.identify_bench arms              # arms, config hashes, availab
 $PY -m evals_dev.identify_bench run R5-jev-screen-rerank60 --workers 4        # Jev arms (paid; account credit applies)
 $PY -m evals_dev.identify_bench pilot             # three cases through the Luna verifier: spend against the estimate
 $PY -m evals_dev.identify_bench run V15f-R5 --folds selection --gold-only --workers 6
-$PY -m evals_dev.identify_bench run V15f-R5 --profile interactive --balanced 20 --repeats 1   # latency: one case at a time
+$PY -m evals_dev.identify_bench run V15f-R5 --profile interactive --upstream-profile throughput --folds selection --balanced 40 --repeats 1
+                                                  # latency of one stage, one case at a time, shortlists from stored rows
 $PY -m evals_dev.identify_bench ledger            # spend so far
 $PY -m evals_dev.identify_bench decision --write [--write-pin]   # regenerate the memo, the G1 report and engine/identify/pipeline.json
 $PY scripts/gate_g1.py
@@ -51,3 +52,19 @@ the arm config.
 
 Subclass `methods.base.Arm` (`name`, `kind`, `config()`, `run()`), return a `RowDraft`, register it in `arms.standard_arms`, and the contract tests in
 `evals_dev/tests/test_identify_bench_contract.py` run it against the fakes. Any model id, size, prompt or upstream change gives new rows a new key.
+
+## Incidents and limits of this run
+
+* **The Jev account ran out of credit.** After 6,292 requests (116M input tokens, about US$5.4 at the assumed $0.042 per million) the
+  vendor answered `credits_exhausted` for both the `.env` key and the keychain key. Every case has two complete draws of the screen,
+  the screen-then-rerank and the BM25-then-rerank pipelines; the third draw failed on 12 cases and was set aside in
+  `results/_incidents/jev-credits-exhausted-20261021.jsonl.gz`. The registry therefore defaults to two draws (`jev_repeats=2`) and a verifier repeat `r`
+  reads draw `r mod 2` (`upstream_cycle=2`). The interactive-profile latency of the screen stage could not be measured; the memo says so and
+  quotes the 2026-10-20 recorded timing as context only. `--jev-repeats 5 --upstream-cycle 0` runs the full plan once credit returns; rows
+  already written keep their keys.
+* **Throughput is not latency.** Accuracy runs use several workers; their stage times are inflated by our own concurrency. Only
+  `--profile interactive` rows feed a latency figure.
+* **Connection errors.** A request that never connected (`ConnectError`) is released from the ledger at no charge; one that failed after the request
+  left (`ReadTimeout`, `RemoteProtocolError`) is charged at its worst case because the provider may have billed it.
+* **Prompt cache.** Repeats of one prompt are partly served from OpenAI's prompt cache. The ledger and the cost columns bill cached input at the full
+  price, and latency uses repeat 0 only.
