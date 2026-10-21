@@ -11,7 +11,7 @@ import { caseForRole, initialVisit } from "./visit";
 import type { ApplicantType, Case, Gap } from "./types";
 import { useSectionC } from "./api/sectionC";
 import { readSectionD, SectionDRecoveryError, type SectionDRead } from "./api/sectionD";
-import { isProvision, reconcileSectionC } from "./provisions";
+import { isProvision, reconcileSectionC, sameCards } from "./provisions";
 import { caseFromEngine } from "./calm/openCase";
 
 /** Older builds kept the whole case here. It is removed on load and never written again. */
@@ -212,7 +212,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   // (they upload on their own route) and do not change the gaps, so they must not mark the draft
   // unsaved or abort a running check.
   const dispatch = useCallback((action: Action) => {
-    const derived = (action.type === "reconcileSectionC" && JSON.stringify(reducer(latestCase.current, action).candidates) === JSON.stringify(latestCase.current.candidates)) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions"].includes(action.type);
+    // A lookup that only attaches Section C rows (or re-orders the same cards, as it does right
+    // after a saved case is opened) is derived data, not an edit: the draft stays saved.
+    const derived = (action.type === "reconcileSectionC" && sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates)) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions"].includes(action.type);
     if (!derived) {
       revision.current += 1;
       if (action.type !== "saveEvidence" && action.type !== "removeEvidence") planRevision.current += 1;

@@ -38,3 +38,10 @@ export function confirmedProvisions(c: Case): string[] {
     && c.sectionC.some(r => canonicalProvision(r.provision) === canonicalProvision(a.provision)))
     .map(a => a.provision))];
 }
+
+/** The same cards with the same answers, in any order (a lookup that only re-orders is not an edit). */
+export function sameCards(a: Case["candidates"], b: Case["candidates"]): boolean {
+  if (a.length !== b.length) return false;
+  const key = (list: Case["candidates"]) => JSON.stringify([...list].sort((x, y) => (x.id < y.id ? -1 : x.id > y.id ? 1 : 0)));
+  return key(a) === key(b);
+}
