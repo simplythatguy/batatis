@@ -231,14 +231,16 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   for (const d of DETAIL_FIELDS) {
     const fact = factFor(c, d.id);
     if (fact?.status === "unconfirmed") continue; // asked on its "check what we read" card
-    const filled = Boolean(valueText(fact).trim());
+    // A choice field counts only with one of its choices (a free-text answer elsewhere can land here).
+    const filled = d.options ? valueText(fact) in d.options : Boolean(valueText(fact).trim());
     if (!d.required && filled && !opts.includeDone) continue;
     push({
       key: `field-${d.id}`,
       kind: "detail",
       eyebrow: d.section === "A" ? "Section A · Applicant" : "Section B · Project",
       title: DETAIL_QUESTION[d.id] ?? d.label,
-      context: DETAIL_CONTEXT[d.id] ?? d.hint ?? "",
+      context: d.options && valueText(fact).trim() && !filled ? "You answered in words. Pick the choice that fits:" : DETAIL_CONTEXT[d.id] ?? d.hint ?? "",
+      quote: d.options && valueText(fact).trim() && !filled ? valueText(fact).trim() : undefined,
       why: `Section ${d.section} of the variance form asks for the ${d.label.toLowerCase()}.`,
       ref: d.id,
       done: d.required ? filled : filled || seen.has(`field-${d.id}`),

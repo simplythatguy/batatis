@@ -1,154 +1,105 @@
-import { useEffect, useRef, useState } from "react";
-import { Icon } from "./components";
+import { useEffect } from "react";
+import { engine, EngineError } from "./api/client";
+import { Application } from "./calm/Application";
+import { Deck } from "./calm/QuestionDeck";
+import { Review } from "./calm/Review";
+import { resolveRoute } from "./calm/routes";
+import { getSession, updateSession, useSession } from "./calm/session";
+import { Shell } from "./calm/Shell";
+import { Start } from "./calm/Start";
 import { useFocusParam, useRoute } from "./router";
-import { Application } from "./screens/Application";
-import { CodeCheck } from "./screens/CodeCheck";
-import { Describe } from "./screens/Describe";
+import { uploadMessage } from "./rules";
 import { Accuracy } from "./screens/Accuracy";
 import { Officer } from "./screens/Officer";
 import { SectionC } from "./screens/SectionC";
-import { Who } from "./screens/Who";
-import { applicantLabel } from "./intake";
-import { AUTHORITIES } from "./config";
 import { useCase } from "./store";
 
-const EXPLICIT_ROUTES = ["/code-check", "/section-c", "/application", "/officer", "/accuracy"];
+/** Store effects the calm screens ask for: the check Start requested, and held PDF uploads. */
+function CalmEffects() {
+  const { c, phase, engineId, requestCheck, dispatch } = useCase();
+  const session = useSession();
 
-const NAV = [
-  {
-    area: "Applicant",
-    items: [
-      { path: "/describe", label: "Describe", icon: "describe" },
-      { path: "/code-check", label: "Code check", icon: "check" },
-      { path: "/section-c", label: "Section C", icon: "table" },
-      { path: "/application", label: "Application", icon: "application" },
-    ],
-  },
-  { area: "Officer", items: [{ path: "/officer", label: "Officer review", icon: "officer" }] },
-  { area: "Accuracy", items: [{ path: "/accuracy", label: "Accuracy report", icon: "accuracy" }] },
-];
+  useEffect(() => {
+    if (!session.checkAfterStart || phase !== "case") return;
+    updateSession({ checkAfterStart: false });
+    // Explicit user action: the applicant pressed Start.
+    void requestCheck();
+  }, [session.checkAfterStart, phase, c, requestCheck]);
+
+  useEffect(() => {
+    if (!engineId || !session.held.length) return;
+    const held = getSession().held;
+    updateSession((s) => ({ held: [], uploading: [...s.uploading, ...held.map((h) => h.id)] }));
+    for (const { id, file } of held) {
+      if (!c.files.some((f) => f.id === id)) {
+        updateSession((s) => ({ uploading: s.uploading.filter((x) => x !== id) }));
+        continue;
+      }
+      engine
+        .upload(engineId, file)
+        .then(() => dispatch({ type: "setFileResult", id, error: null, read: true }))
+        .catch((e: unknown) => {
+          const status = e instanceof EngineError ? e.status : 0;
+          const detail = e instanceof EngineError ? e.detail : String(e);
+          dispatch({ type: "setFileResult", id, error: uploadMessage(status, detail), unreachable: status === 0 });
+        })
+        .finally(() => updateSession((s) => ({ uploading: s.uploading.filter((x) => x !== id) })));
+    }
+  }, [engineId, session.held, c.files, dispatch]);
+  return null;
+}
+
+function normalHash(hash: string): string {
+  const raw = hash.replace(/^#/, "") || "/";
+  const [path, query = ""] = raw.split("?");
+  const q = new URLSearchParams(query).toString();
+  return `#${path || "/"}${q ? `?${q}` : ""}`;
+}
 
 export function App() {
   const route = useRoute();
-  const { c, phase, resetToWho } = useCase();
-  const navDialog = useRef<HTMLDialogElement>(null);
-  const resetDialog = useRef<HTMLDialogElement>(null);
-  const [resetOpen, setResetOpen] = useState(false);
-  useFocusParam(route);
-  const isDescribeRoute = !EXPLICIT_ROUTES.includes(route.path);
-  useEffect(() => {
-    const dialog = resetDialog.current;
-    if (!dialog) return;
-    if (resetOpen && !dialog.open) dialog.showModal();
-    if (!resetOpen && dialog.open) dialog.close();
-  }, [resetOpen]);
+  const { phase } = useCase();
+  const calm = resolveRoute(route.path, route.params);
+  const screen = phase === "case" ? calm.screen : "start";
+  const legacy = screen === "officer" || screen === "accuracy" || screen === "references";
+  useFocusParam(legacy ? route : { path: route.path, params: new URLSearchParams() });
 
-  let screen;
-  if (phase !== "case") {
-    screen = <Who />;
-  } else switch (route.path) {
-    case "/code-check":
-      screen = <CodeCheck />;
+  // Legacy links (gap hrefs, old screens) are rewritten to the calm route they mean.
+  // Rewrite only while the address bar still shows the route this render parsed:
+  // a handler may already have navigated on (Start sets #/questions right after the role).
+  const parsed = normalHash(`#${route.path}?${route.params.toString()}`);
+  useEffect(() => {
+    const target = phase === "case" ? calm.canonical : "#/";
+    if (parsed !== target && normalHash(location.hash) === parsed) location.replace(target);
+  }, [calm.canonical, phase, parsed]);
+
+  let body;
+  switch (screen) {
+    case "questions":
+      body = <Deck focus={calm.focus} codeFirst={calm.codeFirst} />;
       break;
-    case "/section-c":
-      screen = <SectionC />;
+    case "review":
+      body = <Review />;
       break;
-    case "/application":
-      screen = <Application route={route} />;
+    case "application":
+      body = <Application download={calm.download} />;
       break;
-    case "/officer":
-      screen = <Officer />;
+    case "officer":
+      body = <div className="cf-legacy"><Officer /></div>;
       break;
-    case "/accuracy":
-      screen = <Accuracy />;
+    case "accuracy":
+      body = <div className="cf-legacy"><Accuracy /></div>;
+      break;
+    case "references":
+      body = <div className="cf-legacy"><SectionC /></div>;
       break;
     default:
-      screen = <Describe />;
+      body = <Start focus={calm.focus} />;
   }
-
   return (
-    <div className={`app-shell${phase === "who" ? " onboarding-shell" : ""}`}>
-      <aside className="sidebar">
-        <div className="workspace">
-          <span className="logo" aria-hidden="true">
-            B
-          </span>
-          Batatis
-        </div>
-        {phase === "case" && <button className="btn phone-navigation" onClick={() => navDialog.current?.showModal()}>Navigation</button>}
-        {phase === "case" && (
-          <nav className="nav" aria-label="Main">
-            {NAV.map((g) => (
-              <div key={g.area} className="nav-section">
-                <div className="sidebar-section-label">{g.area}</div>
-                <div className="nav-group">
-                  {g.items.map((i) => {
-                    const active = route.path === i.path || (i.path === "/describe" && isDescribeRoute);
-                    return (
-                      <a
-                        key={i.path}
-                        className="nav-item"
-                        href={`#${i.path}`}
-                        data-active={active}
-                        aria-current={active ? "page" : undefined}
-                      >
-                        <Icon name={i.icon} />
-                        {i.label}
-                      </a>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </nav>
-        )}
-        <div className="sidebar-foot">
-          <div className="case-card">
-            <span className="case-title">{phase === "case" ? c.title || "New application" : ""}</span>
-            <span className="meta">
-              {phase === "case" ? `${applicantLabel(c.applicantType)} · ${AUTHORITIES.find((a) => a.id === c.authority)?.name ?? "Authority not selected"}` : ""}
-            </span>
-          </div>
-          <button type="button" className="btn btn-ghost" onClick={() => setResetOpen(true)}>
-            Reset case
-          </button>
-        </div>
-      </aside>
-      <main className="main-panel">
-        {screen}
-      </main>
-      <dialog className="dialog navigation-dialog" ref={navDialog} aria-labelledby="navigation-title">
-        <div className="dialog-body">
-          <div className="dialog-head"><h2 id="navigation-title" className="dialog-title">Navigation</h2><button className="btn" onClick={() => navDialog.current?.close()}>Close</button></div>
-          <nav aria-label="Main navigation">{NAV.flatMap(g => g.items).map(item => <a key={item.path} className="nav-item" href={`#${item.path}`} aria-current={route.path === item.path ? "page" : undefined} onClick={() => navDialog.current?.close()}><Icon name={item.icon} />{item.label}</a>)}</nav>
-          <p className="meta">{applicantLabel(c.applicantType)}</p>
-          <button className="btn btn-ghost" onClick={() => { navDialog.current?.close(); setResetOpen(true); }}>Reset case</button>
-        </div>
-      </dialog>
-      <dialog className="dialog" ref={resetDialog} aria-labelledby="reset-confirm-title" onClose={() => setResetOpen(false)}>
-        <form method="dialog">
-          <div className="dialog-body">
-            <h2 className="dialog-title" id="reset-confirm-title">Clear this case?</h2>
-            <p className="meta">This clears your current visit. Download a copy first if you need it.</p>
-          </div>
-          <div className="footer-bar">
-            <button type="button" className="btn" onClick={() => resetDialog.current?.close()}>
-              Keep this case
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() => {
-                resetDialog.current?.close();
-                resetToWho();
-              }}
-            >
-              Reset case
-            </button>
-          </div>
-        </form>
-      </dialog>
-
-    </div>
+    <Shell active={screen}>
+      <CalmEffects />
+      {body}
+    </Shell>
   );
 }
