@@ -62,7 +62,8 @@ function Pairs({ row }: { row: SectionCRow }) {
 
 const SUGGESTED = "Confirm before using";
 
-function ProvisionSearch() {
+/** Manual code search. `onAdded` receives the new card id after "Use this provision". */
+export function ProvisionSearch({ onAdded }: { onAdded?: (candidateId: string) => void } = {}) {
   const { c, dispatch, noteLookupFailure } = useCase();
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<CodeHit[]>([]);
@@ -153,6 +154,7 @@ function ProvisionSearch() {
                     },
                   });
                   setNote(`${h.id} is in the table. Confirm it before you submit.`);
+                  onAdded?.(`search-${h.id}`);
                 }}
               >
                 Use this provision

@@ -203,8 +203,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Stable dispatch prevents deterministic lookup effects from refiring on status updates.
+  // An upload acknowledgement records what the engine already stored; it is not a new edit.
   const dispatch = useCallback((action: Action) => {
-    const derived = (action.type === "reconcileSectionC" && JSON.stringify(reducer(latestCase.current, action).candidates) === JSON.stringify(latestCase.current.candidates)) || [ "editEvidenceDraft", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions"].includes(action.type);
+    const derived = (action.type === "reconcileSectionC" && JSON.stringify(reducer(latestCase.current, action).candidates) === JSON.stringify(latestCase.current.candidates)) || [ "editEvidenceDraft", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions"].includes(action.type);
     if (!derived) {
       revision.current += 1;
       if (action.type !== "saveEvidence" && action.type !== "removeEvidence") planRevision.current += 1;

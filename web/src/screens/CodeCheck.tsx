@@ -122,13 +122,55 @@ function CandidateCard({
   );
 }
 
+/**
+ * Record a code-check answer. For an article ranking suggested, also send the decision so the
+ * engine returns its Section C row and, for Not sure, binds the officer's open question.
+ */
+export function useCandidateAnswer() {
+  const { dispatch, engineId } = useCase();
+  const [decisionNote, setDecisionNote] = useState("");
+  function onAnswer(candidate: Candidate, answer: CandidateAnswer) {
+    dispatch({ type: "answerCandidate", id: candidate.id, answer });
+    if (!engineId || candidate.suggestion !== "identify" || !/^\d/.test(candidate.provision)) return;
+    const provision = candidate.provision;
+    void engine
+      .decide(engineId, provision, wireDecision(answer))
+      .then(async (body) => {
+        const read = readDecisionBody(body, provision);
+        if (read.row) dispatch({ type: "noteSectionC", rows: [toViewRow(read.row, candidate.id)] });
+        let questionId = read.openQuestionId;
+        if (answer === "not-sure" && !questionId) {
+          try {
+            const request = await engine.informationRequest(engineId);
+            questionId = request.items.find((item) => item.provision_id === provision || provision.startsWith(item.provision_id))?.id ?? null;
+          } catch {
+            questionId = null;
+          }
+        }
+        if (answer === "not-sure" && questionId) {
+          dispatch({ type: "bindOpenQuestion", candidateId: candidate.id, questionId });
+        }
+      })
+      .catch((err: unknown) => {
+        if (err instanceof EngineError && failureKind(err.status, err.detail) === "missing-route") {
+          setDecisionNote(DECISION_UNAVAILABLE);
+          return;
+        }
+        if (err instanceof EngineError && failureKind(err.status, err.detail) !== "unreachable") {
+          setDecisionNote(err.detail);
+        }
+      });
+  }
+  return { onAnswer, decisionNote };
+}
+
 type Filter = "all" | "open" | "yes";
 
 export function CodeCheck() {
-  const { c, gaps, dispatch, saveDraft, engineId, checkStatus, noteLookupFailure } = useCase();
+  const { c, gaps, dispatch, saveDraft, checkStatus, noteLookupFailure } = useCase();
   const route = useRoute();
   const focusedProvision = c.candidates.find(a => `cand-${a.id}` === route.params.get("focus"))?.provision;
-  const [decisionNote, setDecisionNote] = useState("");
+  const { onAnswer, decisionNote } = useCandidateAnswer();
   const [cardIndex, setCardIndex] = useState(0);
   const [reviewProvision, setReviewProvision] = useState<string | null>(focusedProvision ?? null);
   const [searchOpen, setSearchOpen] = useState(checkStatus === "unavailable");
@@ -167,38 +209,6 @@ export function CodeCheck() {
     setReviewProvision(provision);
   }
 
-  function onAnswer(candidate: Candidate, answer: CandidateAnswer) {
-    dispatch({ type: "answerCandidate", id: candidate.id, answer });
-    if (!engineId || candidate.suggestion !== "identify" || !/^\d/.test(candidate.provision)) return;
-    const provision = candidate.provision;
-    void engine
-      .decide(engineId, provision, wireDecision(answer))
-      .then(async (body) => {
-        const read = readDecisionBody(body, provision);
-        if (read.row) dispatch({ type: "noteSectionC", rows: [toViewRow(read.row, candidate.id)] });
-        let questionId = read.openQuestionId;
-        if (answer === "not-sure" && !questionId) {
-          try {
-            const request = await engine.informationRequest(engineId);
-            questionId = request.items.find((item) => item.provision_id === provision || provision.startsWith(item.provision_id))?.id ?? null;
-          } catch {
-            questionId = null;
-          }
-        }
-        if (answer === "not-sure" && questionId) {
-          dispatch({ type: "bindOpenQuestion", candidateId: candidate.id, questionId });
-        }
-      })
-      .catch((err: unknown) => {
-        if (err instanceof EngineError && failureKind(err.status, err.detail) === "missing-route") {
-          setDecisionNote(DECISION_UNAVAILABLE);
-          return;
-        }
-        if (err instanceof EngineError && failureKind(err.status, err.detail) !== "unreachable") {
-          setDecisionNote(err.detail);
-        }
-      });
-  }
   return (
     <>
       <PanelHeader title="Code check" meta={CODE_EDITION} />

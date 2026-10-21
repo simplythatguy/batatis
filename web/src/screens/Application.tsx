@@ -19,10 +19,12 @@ const TABS = [
 
 type Stage = "idle" | "checking" | "preparing" | "blocked" | "error" | "ready";
 
-export function Application({ route }: { route: Route }) {
-  const { gaps, notices, saveDraft, saveStatus, c, gapsSource, syncOk, reviewDetail, engineGaps, readSync, readGaps, setCompletenessRecord, requestCheck, checkStatus, checkNote, checkDetail, checkedAt } = useCase();
-  const tab = TABS.find((t) => t.id === route.params.get("tab"))?.id ?? "A";
-  const dialog = useRef<HTMLDialogElement>(null);
+/**
+ * Check, export and text-record logic shared by this screen and the calm Application.
+ * `isActive` tells a finished check whether anyone is still waiting for its result.
+ */
+export function useApplicationExport(isActive: () => boolean = () => true) {
+  const { gaps, saveDraft, c, gapsSource, syncOk, reviewDetail, readSync, readGaps, setCompletenessRecord, requestCheck, checkStatus, checkedAt } = useCase();
   const abortRef = useRef<AbortController | null>(null);
   const [stage, setStage] = useState<Stage>("idle");
   const [draftIntent, setDraftIntent] = useState(false);
@@ -37,9 +39,6 @@ export function Application({ route }: { route: Route }) {
   const subject = "your draft";
   const blank = !c.description.trim() && c.facts.length === 0;
   const officialReady = !c.exampleId && syncOk && ["ready", "needs_answers"].includes(checkStatus) && gapsSource === "engine" && blocking.length === 0;
-  const countFor = (t: string) => blocking.filter((g) => g.href.includes(`tab=${t}`)).length;
-
-  const sectionById = new Map(engineGaps.map((gap) => [gap.id, gap.section]));
 
   function forgetFile() {
     setFile((current) => {
@@ -48,7 +47,7 @@ export function Application({ route }: { route: Route }) {
     });
   }
 
-  function openCheck() {
+  function runCheck() {
     setReasons([]);
     setTech("");
     setDraftIntent(false);
@@ -56,9 +55,8 @@ export function Application({ route }: { route: Route }) {
     forgetFile();
     setStage("checking");
     setStatusText(`Saving ${subject}…`);
-    dialog.current?.showModal();
     void requestCheck(checkStatus === "unavailable").then((id) => {
-      if (!dialog.current?.open) return;
+      if (!isActive()) return;
       const sync = readSync();
       const blockers = readGaps().filter((gap) => gap.severity === "blocking");
       if (!id || !sync.reviewed) {
@@ -208,6 +206,40 @@ export function Application({ route }: { route: Route }) {
     a.remove();
   }
 
+  const busy = stage === "checking" || stage === "preparing";
+  useEffect(() => {
+    if (checkStatus !== "stale") return;
+    abortRef.current?.abort();
+    forgetFile();
+    setStage("idle");
+    setExportAttempted(false);
+  }, [checkStatus]);
+  useEffect(() => () => abortRef.current?.abort(), []);
+
+  return {
+    stage, draftIntent, reasons, tech, statusText, file, exportAttempted, busy,
+    blocking, warnings, blank, officialReady,
+    runCheck, prepare, downloadRecord, downloadAgain,
+    cancel: () => abortRef.current?.abort(),
+  };
+}
+
+export function Application({ route }: { route: Route }) {
+  const { gaps, notices, saveDraft, saveStatus, c, engineGaps, checkStatus, checkNote, checkDetail } = useCase();
+  const tab = TABS.find((t) => t.id === route.params.get("tab"))?.id ?? "A";
+  const dialog = useRef<HTMLDialogElement>(null);
+  const {
+    stage, draftIntent, reasons, tech, statusText, file, exportAttempted, busy,
+    blocking, blank, officialReady, runCheck, prepare, downloadRecord, downloadAgain, cancel,
+  } = useApplicationExport(() => Boolean(dialog.current?.open));
+  const countFor = (t: string) => blocking.filter((g) => g.href.includes(`tab=${t}`)).length;
+  const sectionById = new Map(engineGaps.map((gap) => [gap.id, gap.section]));
+
+  function openCheck() {
+    dialog.current?.showModal();
+    runCheck();
+  }
+
   function reviewFirst() {
     const href = blocking[0]?.href ?? "#/describe";
     dialog.current?.close();
@@ -219,19 +251,10 @@ export function Application({ route }: { route: Route }) {
     location.hash = gap.href.startsWith("#") ? gap.href : `#${gap.href}`;
   }
 
-  const busy = stage === "checking" || stage === "preparing";
   const footerLine = checkStatus === "not_requested" ? "" : checkNote;
   useEffect(() => {
     if (route.params.get("download") === "1" || route.params.get("review") === "1") dialog.current?.showModal();
   }, [route.params.get("download"), route.params.get("review")]);
-  useEffect(() => {
-    if (checkStatus !== "stale") return;
-    abortRef.current?.abort();
-    forgetFile();
-    setStage("idle");
-    setExportAttempted(false);
-  }, [checkStatus]);
-  useEffect(() => () => abortRef.current?.abort(), []);
 
   return (
     <>
@@ -287,7 +310,7 @@ export function Application({ route }: { route: Route }) {
         ref={dialog}
         aria-labelledby="completeness-title"
         aria-describedby="completeness-description"
-        onClose={() => abortRef.current?.abort()}
+        onClose={cancel}
       >
         <form method="dialog">
           <div className="dialog-body">
