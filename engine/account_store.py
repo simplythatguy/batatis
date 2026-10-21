@@ -66,7 +66,7 @@ class AccountsMixin:
             row = db.execute('SELECT data FROM account_users WHERE email=?', (email,)).fetchone()
         return json.loads(row[0]) if row else None
 
-    def update_user(self, user: User):
+    def update_user(self, user: User, *, revoke_sessions: bool = True):
         with self.account_db() as db:
             lock = ' FOR UPDATE' if db.postgres else ''
             row = db.execute('SELECT data FROM account_users WHERE id=?' + lock, (user.id,)).fetchone()
@@ -74,7 +74,8 @@ class AccountsMixin:
             data['user'] = user.model_dump()
             db.execute('UPDATE account_users SET data=? WHERE id=?', (json.dumps(data), user.id))
             # A privilege change invalidates all prior sessions, including other devices.
-            db.execute('DELETE FROM account_sessions WHERE user_id=?', (user.id,))
+            if revoke_sessions:
+                db.execute('DELETE FROM account_sessions WHERE user_id=?', (user.id,))
 
     def save_session(self, digest: str, user_id: str, expires_at: float, old_digest: str | None = None):
         with self.account_db() as db:

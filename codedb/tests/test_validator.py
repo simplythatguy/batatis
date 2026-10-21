@@ -2,7 +2,12 @@ import json
 import subprocess
 import sys
 import pytest
+from pathlib import Path
 from codedb import validate, validate_text
+
+# NFC(AE) is validated from its page text only; scripts/fetch_sources.py does not download it.
+NFC_TEXT = Path(__file__).resolve().parents[2] / 'reference' / 'text' / 'NFC-AE-2023-2nd-printing.jsonl'
+needs_nfc_text = pytest.mark.skipif(not NFC_TEXT.exists(), reason='NFC(AE) page text not present (git-excluded)')
 
 GOOD = 'NBC(AE) 2023 p2, Div B, Sentence 9.9.10.1.(1) [PDF p.873]. [F10-OS3.7] (Div B Table attribution, PDF p.1126)'
 
@@ -26,7 +31,7 @@ def test_canonical_citation_and_separate_table_page():
     ('NBC(AE) 2019 Sentence 9.9.10.1.(1)','superseded_edition'),
     ('NBC(AE) 2023 first printing','superseded_edition'),
     ('NBC 2020 Article 9.9.10.1.','national_edition_as_law'),
-    ('NFC(AE) 2023 p2 Article 9.9.9.9.','unsupported_document'),
+    pytest.param('NFC(AE) 2023 p2 Article 9.9.9.9.', 'unsupported_document', marks=needs_nfc_text),
     ('PDF p.9999','invalid_page'),
     ('Table 9.9.10.1.','nonexistent_table'),
     ('Table 9.23.3.5.-Z','nonexistent_table'),
@@ -141,6 +146,7 @@ def test_cli_missing_database_is_setup_error(tmp_path):
     assert json.loads(r.stdout)['errors'][0]['code']=='command_error'
 
 
+@needs_nfc_text
 def test_nfc_article_is_located_in_text_but_not_certified():
     # NFC(AE) is not built into the database: an article printed in the NFC text is a warning, and its page is bound.
     r = validate_text('NFC(AE) 2023 p2 Article 6.1.1.2. [PDF p.313]')

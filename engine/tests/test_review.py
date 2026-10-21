@@ -242,3 +242,68 @@ def test_new_merged_case_routes_inherit_the_central_guard(scene):
     case = owned(scene)
     assert clients['owner'].get(f'/cases/{case.id}/future-guard-test').status_code == 200
     assert clients['other'].get(f'/cases/{case.id}/future-guard-test').status_code == 404
+
+
+def test_only_reviewable_authorities_can_be_targeted_or_submitted(scene):
+    store, clients, users = scene
+    assert clients['owner'].post('/cases', json={'title': 'Nowhere', 'authority': 'alberta-other'}).status_code == 422
+    case = owned(scene, complete=True)
+    case.authority = 'alberta-other'  # e.g. derived from an older jurisdiction choice
+    case = store.put(case, expected_version=case.version)
+    blocked = clients['owner'].post(f'/cases/{case.id}/submit', json={})
+    assert blocked.status_code == 409
+    assert store.get(case.id).status == 'draft'
+
+
+def test_an_owner_who_becomes_a_reviewer_cannot_review_their_own_application(scene):
+    store, clients, users = scene
+    case = owned(scene, status='submitted', complete=True)
+    # The owner onboards as an Edmonton reviewer with the shared code.
+    became = onboard(clients['owner'], 'reviewer', 'edmonton')
+    assert became['role'] == 'reviewer'
+    assert clients['owner'].get('/auth/me').json()['user']['role'] == 'reviewer'  # still signed in
+    try:
+        assert clients['owner'].post(f'/review/{case.id}/claim', json={}).status_code == 404
+        queue = clients['owner'].get('/review/queue').json()['applications']
+        assert case.id not in {item['id'] for item in queue}
+        assert clients['owner'].post(f'/review/{case.id}/decision', json={'outcome': 'accept'}).status_code == 404
+        draft = owned(scene)
+        assert clients['owner'].post(f'/cases/{draft.id}/submit', json={}).status_code == 403
+    finally:
+        # Leaving the reviewer role needs the same authority code.
+        back = clients['owner'].post('/auth/onboarding', json={'role': 'applicant', 'applicant_type': 'contractor',
+                                                               'access_code': 'officer-secret'})
+        assert back.status_code == 200, back.text
+
+
+def test_unowned_cases_have_no_message_thread(scene):
+    store, clients, users = scene
+    legacy = store.put(Case(title='Legacy anonymous'))
+    for name in ('owner', 'reviewer'):
+        assert clients[name].get(f'/cases/{legacy.id}/messages').status_code == 404
+        assert clients[name].post(f'/cases/{legacy.id}/messages', json={'body': 'Hello there, anyone?'}).status_code == 404
+        assert clients[name].post(f'/cases/{legacy.id}/messages/read', json={}).status_code == 404
+    assert store.get(legacy.id).messages == []
+
+
+def test_notifications_follow_the_other_partys_actions_and_mark_read(scene):
+    store, clients, users = scene
+    case = owned(scene, status='draft', complete=True)
+    assert clients['owner'].post(f'/cases/{case.id}/submit', json={}).status_code == 200
+    reviewer_view = clients['reviewer'].get('/me/notifications').json()
+    assert any(n['case_id'] == case.id and n['status'] == 'submitted' and not n['read']
+               for n in reviewer_view['notifications'])
+    assert clients['reviewer'].post(f'/review/{case.id}/claim', json={}).status_code == 200
+    returned = clients['reviewer'].post(f'/review/{case.id}/decision',
+                                        json={'outcome': 'return', 'message': 'Please add the legal description.'})
+    assert returned.status_code == 200
+    assert clients['reviewer'].post(f'/cases/{case.id}/messages', json={'body': 'Happy to help with this one.'}).status_code == 201
+    mine = clients['owner'].get('/me/notifications').json()
+    kinds = {(n['kind'], n['status']) for n in mine['notifications'] if n['case_id'] == case.id}
+    assert {('status', 'in_review'), ('status', 'returned'), ('message', None)} <= kinds
+    assert all('approved' not in n['text'] for n in mine['notifications'])
+    assert mine['unread'] >= 3
+    assert clients['owner'].post('/me/notifications/read', json={}).status_code == 204
+    assert clients['owner'].get('/me/notifications').json()['unread'] == 0
+    assert clients['owner'].get('/auth/me').status_code == 200  # marking read keeps the session
+    assert clients['anonymous'].get('/me/notifications').status_code == 401

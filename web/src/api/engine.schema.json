@@ -1560,6 +1560,10 @@
         "authority": {
           "anyOf": [
             {
+              "enum": [
+                "calgary",
+                "edmonton"
+              ],
               "type": "string"
             },
             {
@@ -1583,6 +1587,7 @@
         "title": {
           "anyOf": [
             {
+              "maxLength": 500,
               "type": "string"
             },
             {
@@ -1594,6 +1599,129 @@
         }
       },
       "title": "NewCase",
+      "type": "object"
+    },
+    "Notification": {
+      "properties": {
+        "actor": {
+          "$ref": "#/$defs/NotificationActor"
+        },
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "case_title": {
+          "title": "Case Title",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "status",
+            "message"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "read": {
+          "title": "Read",
+          "type": "boolean"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "enum": [
+                "draft",
+                "submitted",
+                "in_review",
+                "returned",
+                "accepted",
+                "withdrawn"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "case_id",
+        "case_title",
+        "kind",
+        "status",
+        "actor",
+        "text",
+        "created_at",
+        "read"
+      ],
+      "title": "Notification",
+      "type": "object"
+    },
+    "NotificationActor": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "enum": [
+                "applicant",
+                "reviewer"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        }
+      },
+      "required": [
+        "name",
+        "role"
+      ],
+      "title": "NotificationActor",
+      "type": "object"
+    },
+    "NotificationsResult": {
+      "properties": {
+        "notifications": {
+          "items": {
+            "$ref": "#/$defs/Notification"
+          },
+          "title": "Notifications",
+          "type": "array"
+        },
+        "unread": {
+          "title": "Unread",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "notifications",
+        "unread"
+      ],
+      "title": "NotificationsResult",
       "type": "object"
     },
     "OnboardingRequest": {
@@ -2692,6 +2820,18 @@
           "title": "Name",
           "type": "string"
         },
+        "notifications_seen_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notifications Seen At"
+        },
         "onboarded": {
           "default": false,
           "title": "Onboarded",
@@ -2722,7 +2862,8 @@
         "applicant_type",
         "authority",
         "onboarded",
-        "created_at"
+        "created_at",
+        "notifications_seen_at"
       ],
       "title": "User",
       "type": "object"

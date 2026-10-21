@@ -57,6 +57,8 @@ class PostgresCaseStore(PostgresAccountsMixin):
         self._psycopg = psycopg
         self.url = url or database_url()
         with self._conn() as con:
+            # Cold starts run this concurrently after a deploy; serialize the additive DDL.
+            con.execute('SELECT pg_advisory_xact_lock(727274)')
             for statement in MIGRATIONS:
                 con.execute(statement)
 

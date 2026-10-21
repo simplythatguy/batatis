@@ -1,7 +1,7 @@
 """Account and administrative review wire records. Credentials never enter a Case."""
 from __future__ import annotations
 
-from typing import Literal
+from typing import get_args, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -10,6 +10,11 @@ from .models_ids import new_id, now
 Role = Literal['applicant', 'reviewer']
 ApplicantType = Literal['manufacturer', 'contractor', 'homebuilder']
 Authority = Literal['calgary', 'edmonton']
+
+
+def reviewing_authority(value: str | None) -> 'Authority | None':
+    """Only authorities that have reviewers; anything else (e.g. alberta-other) is not reviewable."""
+    return value if value in get_args(Authority) else None  # type: ignore[return-value]
 ApplicationStatus = Literal['draft', 'submitted', 'in_review', 'returned', 'accepted', 'withdrawn']
 
 
@@ -22,6 +27,8 @@ class User(BaseModel):
     authority: Authority | None = None
     onboarded: bool = False
     created_at: str = Field(default_factory=now)
+    # Notifications created at or before this instant count as read.
+    notifications_seen_at: str | None = None
 
 
 class UserResult(BaseModel):

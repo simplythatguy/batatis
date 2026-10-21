@@ -121,7 +121,8 @@ def test_browser_state_mismatch_and_expiry_do_not_authenticate(oidc):
 
 
 @pytest.mark.parametrize('redirect', ['https://attacker.test', '//attacker.test', '/\\attacker.test',
-    '/%2fattack.test', '/%252fattack.test', '/%0d%0aLocation:evil', 'relative/path'])
+    '/%2fattack.test', '/%252fattack.test', '/%0d%0aLocation:evil', 'relative/path',
+    '%2F@attacker.test', '%252F@attacker.test'])
 def test_redirect_paths_cannot_escape_the_web_origin(oidc, redirect):
     client, start, *_ = oidc
     assert start('google', redirect).status_code == 400
@@ -153,3 +154,17 @@ def test_google_requires_verified_email(oidc):
     start('google')
     changes['email_verified'] = False
     assert client.get('/auth/oauth/google/callback', params={'state': params['state'], 'code': 'a-code'}).status_code == 400
+
+
+def test_google_issuer_spellings_map_to_one_identity(oidc):
+    client, start, params, changes, exchange, store = oidc
+    start('google')
+    assert client.get('/auth/oauth/google/callback', params={'state': params['state'], 'code': 'a-code'},
+                      follow_redirects=False).status_code == 302
+    first = client.get('/auth/me').json()['user']['id']
+    client.post('/auth/logout', json={})
+    changes['iss'] = 'accounts.google.com'  # Google's other documented issuer spelling
+    start('google')
+    assert client.get('/auth/oauth/google/callback', params={'state': params['state'], 'code': 'a-code'},
+                      follow_redirects=False).status_code == 302
+    assert client.get('/auth/me').json()['user']['id'] == first
