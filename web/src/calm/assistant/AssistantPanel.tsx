@@ -44,7 +44,7 @@ export function AssistantPanel() {
         <p className="cf-assist-ctx">Looking at <b>{a.context.label}</b></p>
         {signedOut && (
           <div className="cf-assist-error" role="status">
-            <p>Sign in to use the assistant.</p>
+            <p><a className="cf-inline-link" href="#/signin">Sign in</a> to use the assistant.</p>
             <p className="cf-fine">It explains questions, code references and officer messages for your own applications. You can still read the code yourself in the code library.</p>
           </div>
         )}

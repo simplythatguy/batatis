@@ -136,7 +136,7 @@ function SubmitPanel() {
   const [error, setError] = useState("");
   const [blockers, setBlockers] = useState<{ id: string; field: string | null; label: string }[]>([]);
   if (account.phase !== "signed-in") {
-    return <p className="cf-faint cf-small cf-submit-note">Submitting to the authority needs an account. You can still download the PDF.</p>;
+    return <p className="cf-faint cf-small cf-submit-note">Submitting to the authority needs an account. <a className="cf-inline-link" href="#/signin">Sign in</a>, or download the PDF.</p>;
   }
   if (!engineId || !app) {
     return <p className="cf-faint cf-small cf-submit-note" role="status">{saveStatus === "failed" || saveStatus === "gone" ? "Submit becomes available once this application is saved." : "Saving your application…"}</p>;
