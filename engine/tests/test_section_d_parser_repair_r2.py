@@ -146,3 +146,17 @@ def test_prescriptive_table_reference_does_not_hide_an_unparsed_member(codes, cu
     row = case(f'{HOUSE}; Part 9 span tables; {cue}')
     assert observe(row)[0].part4_design is None
     assert evaluate(row, codes, 'rules_plus_unknown')[0] == 'unknown'
+
+
+def test_member_explicitly_selected_from_part9_tables_is_an_understood_route(codes):
+    row = case(f'{HOUSE}; lumber rafters and ceiling joists from the Part 9 span tables; '
+               'floor joists span 4.2 m')
+    assert observe(row)[0].part4_design is False
+    assert evaluate(row, codes, 'rules_plus_unknown') == ('no', None)
+
+
+def test_prescriptive_members_do_not_clear_a_different_unparsed_joist(codes):
+    row = case(f'{HOUSE}; ceiling joists from the Part 9 span tables; '
+               'other floor joists span 5200 mm')
+    assert observe(row)[0].part4_design is None
+    assert evaluate(row, codes, 'rules_plus_unknown')[0] == 'unknown'
