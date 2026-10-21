@@ -102,6 +102,7 @@ class MemorySpend:
 _memory = MemorySpend()
 _llm_window = SlidingWindow()
 _search_window = SlidingWindow()
+_assist_window = SlidingWindow()
 _spend = None
 _spend_lock = threading.Lock()
 
@@ -111,14 +112,16 @@ def reset_for_tests() -> None:
     _memory.reset()
     _llm_window.reset()
     _search_window.reset()
+    _assist_window.reset()
     with _spend_lock:
         if _spend is not None:
             _spend.close()
         _spend = None
 
 
-def live_enabled() -> bool:
-    return os.environ.get('BATATIS_LIVE') == '1' and bool((os.environ.get('OPENAI_API_KEY') or '').strip())
+def live_enabled(provider: str = 'openai') -> bool:
+    key = 'ANTHROPIC_API_KEY' if provider == 'anthropic' else 'OPENAI_API_KEY'
+    return os.environ.get('BATATIS_LIVE') == '1' and bool((os.environ.get(key) or '').strip())
 
 
 def daily_cap() -> Decimal:
@@ -173,9 +176,9 @@ def _rate_limit(name: str, default_limit: str, default_window: str) -> tuple[int
 
 
 def authorize(*, model: str = DEFAULT_MODEL, max_input_tokens: int, max_output_tokens: int,
-              client_ip: str | None = None) -> Decision:
+              client_ip: str | None = None, provider: str = 'openai') -> Decision:
     """Reserve the worst-case cost. Refuse without calling a provider when the gate is shut."""
-    if not live_enabled():
+    if not live_enabled(provider):
         return Decision(False, 'offline')
     limit, window = _rate_limit('BATATIS_LLM_RATE', '20', '600')
     if not _llm_window.allow(client_ip or 'local', limit, window):
@@ -188,6 +191,19 @@ def authorize(*, model: str = DEFAULT_MODEL, max_input_tokens: int, max_output_t
     if not _reserve(ledger, estimate, daily_cap()):
         return Decision(False, 'offline-cap')
     return Decision(True, 'live', estimate)
+
+
+def authorize_assist(*, model: str, max_input_tokens: int, max_output_tokens: int,
+                     client_ip: str, provider: str) -> Decision:
+    """The assistant has its own IP budget, plus the shared LLM budget and spend cap."""
+    if not live_enabled(provider):
+        return Decision(False, 'offline')
+    limit = int(os.environ.get('BATATIS_ASSIST_RATE_LIMIT') or os.environ.get('BATATIS_ASSIST_RATE') or '12')
+    window = float(os.environ.get('BATATIS_ASSIST_RATE_WINDOW_SECONDS') or '600')
+    if not _assist_window.allow(client_ip, limit, window):
+        return Decision(False, 'rate-limited')
+    return authorize(model=model, provider=provider, max_input_tokens=max_input_tokens,
+                     max_output_tokens=max_output_tokens, client_ip=client_ip)
 
 
 def record(*, model: str, input_tokens: int, output_tokens: int, reserved_usd: Decimal | float = 0) -> None:

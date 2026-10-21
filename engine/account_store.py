@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import time
 from contextlib import closing, contextmanager
+from types import SimpleNamespace
 
 from .account_models import User
 
@@ -146,6 +147,13 @@ class AccountsMixin:
 
 
 class FileAccountsMixin(AccountsMixin):
+    def access_record(self, case_id: str):
+        with self.account_db() as db:
+            row = db.execute("SELECT json_extract(json,'$.owner_id'), json_extract(json,'$.authority'), "
+                             "COALESCE(json_extract(json,'$.status'),'draft') FROM cases WHERE id=?",
+                             (case_id,)).fetchone()
+        return SimpleNamespace(owner_id=row[0], authority=row[1], status=row[2]) if row else None
+
     def list_applications(self, *, owner_id: str | None = None, authority: str | None = None):
         field, value = ('owner_id', owner_id) if owner_id is not None else ('authority', authority)
         visible = (" AND json_extract(json, '$.owner_id') IS NOT NULL AND "
@@ -164,6 +172,12 @@ class FileAccountsMixin(AccountsMixin):
 
 
 class PostgresAccountsMixin(AccountsMixin):
+    def access_record(self, case_id: str):
+        with self.account_db() as db:
+            row = db.execute("SELECT data->>'owner_id', data->>'authority', "
+                             "COALESCE(data->>'status','draft') FROM cases WHERE id=?", (case_id,)).fetchone()
+        return SimpleNamespace(owner_id=row[0], authority=row[1], status=row[2]) if row else None
+
     def list_applications(self, *, owner_id: str | None = None, authority: str | None = None):
         field, value = ('owner_id', owner_id) if owner_id is not None else ('authority', authority)
         visible = (" AND data->>'owner_id' IS NOT NULL AND "

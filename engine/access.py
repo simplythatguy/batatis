@@ -95,7 +95,9 @@ def access_dependency(cases):
         if not case_id and request.url.path.startswith('/cases/'):
             case_id = request.url.path.split('/')[2]
         if case_id:
-            request.state.case = authorize_case(cases().get(case_id), user, mode=mode)
+            store = cases()
+            read = getattr(store, 'access_record', store.get)
+            request.state.case = authorize_case(read(case_id), user, mode=mode)
         if request.url.path.startswith('/auth/') and request.method not in {'GET', 'HEAD', 'OPTIONS'}:
             content_type = request.headers.get('content-type', '').split(';', 1)[0].strip().lower()
             if content_type != 'application/json':

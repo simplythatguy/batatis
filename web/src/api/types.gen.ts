@@ -2,6 +2,52 @@
 // Do not edit: change the engine model, run `python -m engine.schema_export`, then `npm run gen:types`.
 // Fields with a default are optional here because the engine accepts them omitted; responses always carry them.
 
+export interface ApplicantSummary {
+  applicant_type: "manufacturer" | "contractor" | "homebuilder" | null;
+  name: string;
+}
+
+export interface ApplicationSummary {
+  authority: string | null;
+  completeness: CompletenessSummary | null;
+  id: string;
+  reviewer: ReviewerName | null;
+  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+  submitted_at: string | null;
+  title: string | null;
+  unread_messages: number;
+  updated_at: string;
+}
+
+export interface ApplicationsResult {
+  applications: ApplicationSummary[];
+}
+
+export interface AssistFocus {
+  id: string;
+  kind: string;
+}
+
+export interface AssistRequest {
+  case_id?: string | null;
+  focus?: AssistFocus | null;
+  history?: AssistTurn[];
+  question: string;
+  screen: string;
+}
+
+export interface AssistResult {
+  answer: string;
+  cited: string[];
+  notice: string;
+  removed_citations: string[];
+}
+
+export interface AssistTurn {
+  role: "user" | "assistant";
+  text: string;
+}
+
 export interface AttributionPair {
   application_note: string | null;
   bracket: string;
@@ -42,6 +88,19 @@ export interface Claim {
   reviewer_name: string;
 }
 
+export interface ClaimRequest {
+  take_over?: boolean;
+}
+
+export interface ClaimResult {
+  claim: Claim;
+}
+
+export interface CompletenessSummary {
+  answered: number;
+  total: number;
+}
+
 export interface Decision {
   at: string;
   by_id: string;
@@ -55,6 +114,24 @@ export interface DecisionItem {
   field: string | null;
   gap_id: string | null;
   note: string;
+}
+
+export interface DecisionItemInput {
+  field?: string | null;
+  gap_id?: string | null;
+  note: string;
+}
+
+export interface DecisionRequest {
+  items?: DecisionItemInput[];
+  message?: string | null;
+  outcome: "accept" | "return";
+}
+
+export interface DecisionSummary {
+  at: string;
+  by_name: string;
+  outcome: "accept" | "return";
 }
 
 export interface EvidenceItem {
@@ -141,6 +218,10 @@ export interface MessageAuthor {
   role: "applicant" | "reviewer" | null;
 }
 
+export interface MessageRequest {
+  body: string;
+}
+
 export interface MessagesResult {
   messages: ThreadMessage[];
 }
@@ -156,6 +237,28 @@ export interface OnboardingRequest {
   applicant_type?: "manufacturer" | "contractor" | "homebuilder" | null;
   authority?: "calgary" | "edmonton" | null;
   role: "applicant" | "reviewer";
+}
+
+export interface QueueApplication {
+  applicant: ApplicantSummary;
+  authority: string | null;
+  claim: Claim | null;
+  completeness: CompletenessSummary | null;
+  decision: DecisionSummary | null;
+  id: string;
+  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+  submitted_at: string | null;
+  title: string | null;
+  unread_messages: number;
+  updated_at: string;
+}
+
+export interface QueueResult {
+  applications: QueueApplication[];
+}
+
+export interface ReviewerName {
+  name: string;
 }
 
 export interface SectionCRequest {

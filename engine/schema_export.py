@@ -19,10 +19,14 @@ from .api import NewCase, SectionCRequest
 from .models import Case, Fact, SectionCRow
 from .account_models import UserResult, MessagesResult
 from .routes_auth import SignupRequest, LoginRequest, OnboardingRequest
+from .routes_review import (ApplicationsResult, QueueResult, ClaimResult, ClaimRequest,
+                            DecisionRequest, MessageRequest)
+from .routes_assist import AssistRequest, AssistResult
 
 OUT = Path(__file__).resolve().parent.parent / 'web' / 'src' / 'api' / 'engine.schema.json'
-RESPONSES = (Case, SectionCRow, UserResult, MessagesResult)
-REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest)
+RESPONSES = (Case, SectionCRow, UserResult, MessagesResult, ApplicationsResult, QueueResult, ClaimResult, AssistResult)
+REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
+            ClaimRequest, DecisionRequest, MessageRequest, AssistRequest)
 
 
 class _ResponsesCarryDefaults(GenerateJsonSchema):
