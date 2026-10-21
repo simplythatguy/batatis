@@ -59,6 +59,7 @@ with tempfile.TemporaryDirectory(prefix='batatis-web-sync-') as tmp:
             else:
                 raise RuntimeError('Local engine did not start')
             env['SYNC_TEST_BASE'] = base
+            env['SYNC_TEST_DB'] = str(directory / 'cases.sqlite')
             result = subprocess.run(['node', '--experimental-strip-types', '--import', './scripts/register-ts.mjs', 'tests/sync.integration.mts'], cwd=WEB, env=env, timeout=120)
             if result.returncode == 0 and '--browser' in sys.argv:
                 result = subprocess.run(['node', 'tests/provider.integration.mjs'], cwd=WEB, env=env, timeout=120)
@@ -68,6 +69,10 @@ with tempfile.TemporaryDirectory(prefix='batatis-web-sync-') as tmp:
                     result = subprocess.run(['node', 'tests/repair.integration.mjs'], cwd=WEB, env=env, timeout=120)
                 if result.returncode == 0:
                     result = subprocess.run(['node', 'tests/repair-r6.integration.mjs'], cwd=WEB, env=env, timeout=120)
+                if result.returncode == 0:
+                    result = subprocess.run(['node', '--experimental-strip-types', '--import', './scripts/register-ts.mjs', 'tests/contract-r7.integration.mts'], cwd=WEB, env=env, timeout=120)
+                if result.returncode == 0:
+                    result = subprocess.run(['node', 'tests/contract-r7.integration.mjs'], cwd=WEB, env=env, timeout=180)
             sys.exit(result.returncode)
         finally:
             server.terminate()
