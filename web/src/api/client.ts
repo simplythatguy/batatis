@@ -5,7 +5,7 @@
  * `createEngine(base)` serves scripts and tests outside Vite.
  */
 import { publicDetail, takeSseEvents } from "../rules";
-import type { Case, FactInput, Jurisdiction, NewCase, SectionCRow } from "./types.gen";
+import type { Case, EvidenceItem, FactInput, Jurisdiction, NewCase, SectionCRow } from "./types.gen";
 
 /** A provision returned by GET /code/search (engine/codes.py `Codes.search`). */
 export interface CodeHit {
@@ -66,6 +66,31 @@ export type SectionDBody =
 export interface JurisdictionBody {
   jurisdiction: Jurisdiction | null;
   expected_version: number;
+}
+
+/**
+ * POST /cases/{id}/evidence: one applicant text listing, written atomically against
+ * `expected_version`. Optional details: a string is saved, null withdraws, omission retains.
+ * `scope` omitted retains links; null unlinks; `{ item_id }` links to one current plan task.
+ */
+export interface EvidenceWrite {
+  operation: "create" | "update";
+  evidence_id: string;
+  expected_version: number;
+  title: string;
+  description: string;
+  evidence_type: string;
+  responsible_party?: string | null;
+  date?: string | null;
+  issuer?: string | null;
+  scope?: { item_id: string } | null;
+}
+
+/** The engine's acknowledgement: the actual saved item, the full saved Case and its version. */
+export interface EvidenceSaved {
+  evidence: EvidenceItem;
+  case: Case;
+  case_version: number;
 }
 
 /** status 0 = the review service did not respond. `technical` keeps the raw HTTP text. */
@@ -195,8 +220,11 @@ export function createEngine(base: string) {
     /** GET /cases/{id}/information-request. Items are not_sure decisions. */
     informationRequest: (caseId: string, signal?: AbortSignal) =>
       call<InformationRequest>("GET", `/cases/${enc(caseId)}/information-request`, undefined, signal),
-    /** DELETE /cases/{id}/evidence/{evidence_id} with `{ expected_version }`. Removes one slot and
-     * leaves the others and uploaded bytes. Engines before the CAS contract ignore the body. */
+    /** POST /cases/{id}/evidence. 409 = stale version or existing ID; 404 = case gone or slot absent. */
+    saveEvidence: (caseId: string, body: EvidenceWrite, signal?: AbortSignal) =>
+      call<EvidenceSaved>("POST", `/cases/${enc(caseId)}/evidence`, body, signal),
+    /** DELETE /cases/{id}/evidence/{evidence_id} with `{ expected_version }`. Removes exactly one
+     * slot and returns the full saved Case; other slots and uploaded bytes stay. */
     deleteEvidence: (caseId: string, evidenceId: string, expectedVersion: number, signal?: AbortSignal) =>
       call<Case>("DELETE", `/cases/${enc(caseId)}/evidence/${enc(evidenceId)}`, { expected_version: expectedVersion }, signal),
     /** POST /cases/{id}/identify/confirm. Writes provisions after a code-database check. */

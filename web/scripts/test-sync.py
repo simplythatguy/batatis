@@ -31,6 +31,7 @@ if len(sys.argv) > 1 and sys.argv[1] == '--serve':
     socket.socket.connect = local_connect
     directory = Path(sys.argv[2])
     sock = socket.socket()
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     # SYNC_ENGINE_PORT pins the loopback port for runs that must stay on an assigned port.
     sock.bind(('127.0.0.1', int(os.environ.get('SYNC_ENGINE_PORT', '0'))))
     sock.listen(128)

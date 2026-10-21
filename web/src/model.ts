@@ -1,6 +1,6 @@
 import { applyDescription } from "./intake";
 import { AUTHORITY_ONLY_FIELDS, professionalConfirmed } from "./professional";
-import type { Candidate, CandidateAnswer, Case, Fact, Gap, ProcessFieldId, SectionCRow } from "./types";
+import type { Candidate, CandidateAnswer, Case, EvidenceDraft, Fact, Gap, ListedEvidence, ProcessFieldId, SectionCRow } from "./types";
 import { canonicalProvision, isProvision, reconcileSectionC } from "./provisions";
 
 /** Section A and B fields. Values live only in `case.facts`; nothing here holds a default. */
@@ -392,10 +392,16 @@ export type Action =
   | { type: "reconcileSectionC"; rows: SectionCRow[]; basis?: string }
   | { type: "noteUnscopedEvidence"; ids: string[] }
   | { type: "removeCandidate"; id: string }
-  | { type: "editEvidenceDraft"; itemId: string; patch: Partial<NonNullable<Case["evidenceDrafts"]>[string]> }
-  | { type: "saveEvidence"; itemId: string; document: string; responsible: string; date: string; evidenceType: string; provisionId: string }
+  | { type: "editEvidenceDraft"; itemId: string; patch: Partial<EvidenceDraft> }
+  /** `slot` edits that saved document; without it a new document is staged. */
+  | { type: "saveEvidence"; itemId: string; document: string; responsible: string; date: string; evidenceType: string; provisionId: string; slot?: string }
   | { type: "removeEvidence"; id: string }
-  | { type: "ackEvidenceDeletion"; ids: string[] }
+  /**
+   * The engine's answer to evidence writes. `facts` replaces the browser's evidence mirror.
+   * `refreshed` marks an explicit fresh read: a staged new listing already saved exactly as typed
+   * is acknowledged by it; one whose ID is now taken by a different listing gets a new ID.
+   */
+  | { type: "ackEvidence"; acked?: { id: string; rev: number }[]; deleted?: string[]; rejected?: { id: string; rev?: number; reason: string }[]; facts?: Fact[] | null; refreshed?: boolean; error?: string | null }
   | { type: "deferProfessional"; field: string; choice: "not_sure" | "not_engaged_yet"; label: string }
   | { type: "setProfessionalFact"; field: string; value: string | number | boolean }
   | { type: "answerScope"; field: string; answer: "yes" | "no" | "not-sure" | "clear"; text?: string }
@@ -410,6 +416,84 @@ function upsertUserFact(c: Case, field: string, value: string, source: Fact["sou
   const rest = c.facts.filter((f) => f.field !== field);
   if (!value.trim()) return rest;
   return [...rest, { id: newId("f"), field, value, kind: "pointed", source, status: "confirmed" }];
+}
+
+/** The slot a ledger field belongs to, read the same way as the engine (`.covers.` first). */
+export function evidenceSlot(field: string): string | null {
+  if (!field.startsWith("evidence.")) return null;
+  const name = field.slice("evidence.".length);
+  if (name.includes(".covers.")) return name.split(".covers.")[0];
+  const dot = name.lastIndexOf(".");
+  return dot > 0 ? name.slice(0, dot) : null;
+}
+
+/** Slots the engine has acknowledged (the browser's evidence facts are its mirror). */
+function savedSlots(c: Case): Set<string> {
+  return new Set(c.facts.map((fact) => evidenceSlot(fact.field)).filter((slot): slot is string => !!slot));
+}
+
+/** The task id for the first document, then task~2, task~3… never reusing a known or removing slot. */
+function nextSlot(c: Case, task: string): string {
+  const taken = new Set([...savedSlots(c), ...(c.listedEvidence ?? []).map((item) => item.id), ...(c.deletedEvidence ?? [])]);
+  if (!taken.has(task)) return task;
+  let n = 2;
+  while (taken.has(`${task}~${n}`)) n += 1;
+  return `${task}~${n}`;
+}
+
+/** The text of a refused listing goes back to its task's form, so nothing typed is lost. */
+function restoreDraft(c: Case, op: ListedEvidence, note: string, editing?: string): Case {
+  const current = c.evidenceDrafts?.[op.taskId];
+  if (current && (current.document.trim() || current.responsible.trim() || current.date.trim())) {
+    return { ...c, evidenceIssues: { ...c.evidenceIssues, [op.id]: `${note} Not saved: ${op.description}` } };
+  }
+  const draft: EvidenceDraft = { document: op.description, evidenceType: op.evidenceType, responsible: op.responsible ?? "", date: op.date ?? "", note, step: 0, ...(editing ? { editing } : {}) };
+  return { ...c, evidenceDrafts: { ...c.evidenceDrafts, [op.taskId]: draft } };
+}
+
+function ackEvidence(c: Case, a: Extract<Action, { type: "ackEvidence" }>): Case {
+  let next: Case = c;
+  if (a.facts) next = { ...next, facts: [...next.facts.filter((fact) => !fact.field.startsWith("evidence.")), ...a.facts] };
+  let ops = [...(next.listedEvidence ?? [])];
+  for (const ack of a.acked ?? []) {
+    // A newer edit of the same document stays staged; once its slot exists it is an update.
+    ops = ops.flatMap((op) => op.id !== ack.id ? [op] : op.rev === ack.rev ? [] : [{ ...op, operation: "update" as const }]);
+  }
+  let deleted = (next.deletedEvidence ?? []).filter((id) => !(a.deleted ?? []).includes(id));
+  const issues = { ...next.evidenceIssues };
+  for (const id of a.deleted ?? []) delete issues[id];
+  next = { ...next, listedEvidence: ops, deletedEvidence: deleted, evidenceIssues: issues };
+  for (const refused of a.rejected ?? []) {
+    const op = (next.listedEvidence ?? []).find((item) => item.id === refused.id && item.rev === refused.rev);
+    if (op) {
+      next = { ...next, listedEvidence: (next.listedEvidence ?? []).filter((item) => item !== op) };
+      next = restoreDraft(next, op, refused.reason, op.operation === "update" && savedSlots(next).has(op.id) ? op.id : undefined);
+    } else if (refused.rev === undefined) {
+      deleted = (next.deletedEvidence ?? []).filter((id) => id !== refused.id);
+      next = { ...next, deletedEvidence: deleted, evidenceIssues: { ...next.evidenceIssues, [refused.id]: refused.reason } };
+    }
+  }
+  if (a.refreshed) {
+    const saved = savedSlots(next);
+    const value = (slot: string, field: string) => {
+      const found = factFor(next, `evidence.${slot}.${field}`)?.value;
+      return typeof found === "string" ? found : undefined;
+    };
+    for (const op of [...(next.listedEvidence ?? [])]) {
+      if (op.operation === "create" && saved.has(op.id)) {
+        const same = value(op.id, "title") === op.description && value(op.id, "evidence_type") === op.evidenceType
+          && (op.responsible == null || value(op.id, "responsible_party") === op.responsible)
+          && (op.date == null || value(op.id, "date") === op.date);
+        const rest = (next.listedEvidence ?? []).filter((item) => item !== op);
+        next = same ? { ...next, listedEvidence: rest }
+          : { ...next, listedEvidence: [...rest, { ...op, id: nextSlot({ ...next, listedEvidence: rest }, op.taskId) }] };
+      } else if (op.operation === "update" && !saved.has(op.id)) {
+        next = { ...next, listedEvidence: (next.listedEvidence ?? []).filter((item) => item !== op) };
+        next = restoreDraft(next, op, "This document was removed somewhere else. Your text is still here.");
+      }
+    }
+  }
+  return next;
 }
 
 export function reducer(c: Case, a: Action): Case {
@@ -600,66 +684,54 @@ export function reducer(c: Case, a: Action): Case {
       } } };
     case "saveEvidence": {
       const description = a.document.trim();
+      const evidenceType = a.evidenceType.trim();
+      if (!description || !evidenceType) return c;
       const who = a.responsible.trim();
       const date = a.date.trim();
-      const evidenceType = a.evidenceType.trim();
-      if (!description || !who || !evidenceType) return c;
-      const taken = new Set([
-        ...c.facts.filter((f) => f.field.startsWith("evidence.")).map((f) => f.field.split(".")[1]),
-        ...(c.deletedEvidence ?? []),
-      ]);
-      let slot = a.itemId;
-      if (taken.has(a.itemId)) {
-        let n = 2;
-        while (taken.has(`${a.itemId}~${n}`)) n += 1;
-        slot = `${a.itemId}~${n}`;
+      const rev = (c.evidenceRev ?? 0) + 1;
+      const staged = (c.listedEvidence ?? []).find((item) => item.id === a.slot);
+      let op: ListedEvidence;
+      if (a.slot && (staged || savedSlots(c).has(a.slot))) {
+        const saved = (field: string) => {
+          const value = factFor(c, `evidence.${a.slot}.${field}`)?.value;
+          return typeof value === "string" ? value : "";
+        };
+        // Unchanged details are omitted (kept); a cleared saved value is withdrawn with null.
+        const detail = (value: string, field: string) => value ? (value === saved(field) ? undefined : value) : saved(field) ? null : undefined;
+        op = staged?.operation === "create"
+          ? { ...staged, rev, description, evidenceType, responsible: who || undefined, date: date || undefined }
+          : { id: a.slot, rev, operation: "update", taskId: a.itemId, provisionId: a.provisionId.trim(), description, evidenceType,
+              responsible: detail(who, "responsible_party"), date: detail(date, "date") };
+      } else {
+        op = { id: nextSlot(c, a.itemId), rev, operation: "create", taskId: a.itemId, provisionId: a.provisionId.trim(),
+          description, evidenceType, responsible: who || undefined, date: date || undefined };
       }
-      const prefix = `evidence.${slot}.`;
-      const text = (field: string, value: string): Fact => ({
-        id: newId("f"),
-        field,
-        value,
-        kind: "pointed",
-        status: "confirmed",
-        confidence: null,
-        formula: null,
-        inputs: [],
-        source: { type: "user_text", ref: "Your evidence", quote: value },
-      });
-      const facts = [
-        ...c.facts,
-        text(`${prefix}description`, description),
-        text(`${prefix}title`, description),
-        text(`${prefix}responsible_party`, who),
-        text(`${prefix}evidence_type`, evidenceType),
-      ];
-      if (date) facts.push(text(`${prefix}date`, date));
-      const listed = [
-        ...(c.listedEvidence ?? []),
-        {
-          id: slot,
-          provisionId: a.provisionId.trim(),
-          evidenceType,
-          description,
-          responsible: who,
-          date,
-        },
-      ];
       const drafts = { ...c.evidenceDrafts };
       delete drafts[a.itemId];
-      return { ...c, facts, listedEvidence: listed, evidenceDrafts: drafts };
+      const issues = { ...c.evidenceIssues };
+      delete issues[op.id];
+      return {
+        ...c,
+        evidenceRev: rev,
+        listedEvidence: [...(c.listedEvidence ?? []).filter((item) => item.id !== op.id), op],
+        evidenceDrafts: drafts,
+        evidenceIssues: issues,
+      };
     }
     case "removeEvidence": {
       const id = a.id.trim();
       if (!id) return c;
-      const prefix = `evidence.${id}.`;
+      const drafts = Object.fromEntries(Object.entries(c.evidenceDrafts ?? {}).filter(([, d]) => d.editing !== id));
       return {
         ...c,
-        facts: c.facts.filter((fact) => !fact.field.startsWith(prefix)),
+        // Shown as removing until the engine confirms; a listing never sent needs no request.
         listedEvidence: (c.listedEvidence ?? []).filter((item) => item.id !== id),
         deletedEvidence: [...new Set([...(c.deletedEvidence ?? []), id])],
+        evidenceDrafts: drafts,
       };
     }
+    case "ackEvidence":
+      return ackEvidence(c, a);
     case "deferProfessional": {
       const field = `professional.${a.field}`;
       const facts = c.facts.filter((f) => f.field !== field);
@@ -737,10 +809,6 @@ export function reducer(c: Case, a: Action): Case {
             ]
           : questions,
       };
-    }
-    case "ackEvidenceDeletion": {
-      const gone = new Set(a.ids);
-      return { ...c, deletedEvidence: (c.deletedEvidence ?? []).filter((id) => !gone.has(id)) };
     }
     case "notePractice":
       // An applicant answer, including one the engine reads as "no", must not store false.

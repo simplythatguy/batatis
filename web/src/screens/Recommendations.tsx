@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
 import { SectionDRecoveryError } from "../api/sectionD";
 import {
   failureText,
@@ -9,11 +9,11 @@ import {
 } from "../api/client";
 import { ServiceUnavailable, FieldSteps } from "../components";
 import { practiceFlagLine, practicePrompt } from "../humanReview";
-import { evidenceDocuments, keptDocuments, orphanedEvidence, shownProcessAnswer } from "../model";
+import { evidenceDocuments, factFor, keptDocuments, orphanedEvidence, shownProcessAnswer } from "../model";
 import { AUTHORITY_DECISION_FIELDS, evidenceLinked, evidenceRecorded, isScopeField, practiceFromReview, SCOPE_HELP, sectionDIssueStatus } from "../professional";
 import { useCase } from "../store";
 import { evidenceTask } from "../evidence";
-import type { Case } from "../types";
+import type { Case, EvidenceDraft } from "../types";
 
 type Load = {
   recovery?: SectionDRecoveryError;
@@ -95,88 +95,154 @@ const EVIDENCE_TYPES = [
   "engineering review",
 ] as const;
 
-function EvidenceAnswer({
-  itemId,
-  title,
-  provisionId,
-  types,
-}: {
-  itemId: string;
-  title: string;
-  provisionId: string;
-  types: string[];
-}) {
-  const { c, dispatch } = useCase();
-  const draft = c.evidenceDrafts?.[itemId] ?? { document: "", responsible: "", date: "", evidenceType: "", note: "" };
-  const { document, responsible, date, evidenceType, note } = draft;
-  const edit = (patch: Partial<typeof draft>) => dispatch({ type: "editEvidenceDraft", itemId, patch });
-  const typeOptions = types.length ? types : [...EVIDENCE_TYPES];
+const EMPTY_DRAFT: EvidenceDraft = { document: "", responsible: "", date: "", evidenceType: "", note: "", step: 0 };
+const STEPS = 3;
+
+/** Saved details of one document, or the staged edit waiting for the engine. */
+function documentDetails(c: Case, id: string) {
+  const staged = c.listedEvidence?.find((item) => item.id === id);
+  const saved = (field: string) => {
+    const value = factFor(c, `evidence.${id}.${field}`)?.value;
+    return typeof value === "string" ? value : "";
+  };
+  return {
+    document: staged?.description ?? saved("title"),
+    evidenceType: staged?.evidenceType ?? saved("evidence_type"),
+    responsible: staged && staged.responsible !== undefined ? staged.responsible ?? "" : saved("responsible_party"),
+    date: staged && staged.date !== undefined ? staged.date ?? "" : saved("date"),
+  };
+}
+
+/**
+ * Add or edit one document in three short steps: name, type, optional details. Saving stages
+ * one listing; it shows as saved only after the engine acknowledges it. Nothing here attaches
+ * a file, reviews the document or confirms who prepared it.
+ */
+function EvidenceAnswer({ itemId, provisionId, types }: { itemId: string; provisionId: string; types: string[] }) {
+  const { c, dispatch, saveStatus, saveDraft } = useCase();
+  const draft = { ...EMPTY_DRAFT, ...c.evidenceDrafts?.[itemId] };
+  const step = Math.min(Math.max(draft.step ?? 0, 0), STEPS - 1);
+  const edit = (patch: Partial<EvidenceDraft>) => dispatch({ type: "editEvidenceDraft", itemId, patch });
+  const input = useRef<HTMLInputElement & HTMLSelectElement>(null);
+  const moved = useRef(false);
+  useLayoutEffect(() => {
+    if (!moved.current) return;
+    moved.current = false;
+    input.current?.focus({ preventScroll: true });
+    input.current?.scrollIntoView({ block: "nearest" });
+  });
+  const go = (next: number, patch: Partial<EvidenceDraft> = {}) => {
+    moved.current = true;
+    edit({ ...patch, step: next, note: "" });
+  };
+  const typeOptions = [...new Set([...(types.length ? types : EVIDENCE_TYPES), ...(draft.evidenceType ? [draft.evidenceType] : [])])];
   const docId = `evidence-doc-${itemId}`;
-  const whoId = `evidence-who-${itemId}`;
-  const dateId = `evidence-date-${itemId}`;
 
-  function save() {
-    const ref = document.trim();
-    const who = responsible.trim();
-    if (!ref || !who || !evidenceType) {
-      edit({ note: "Add the document, person responsible and evidence type." });
-      return;
-    }
-    dispatch({ type: "saveEvidence", itemId, document: ref, responsible: who, date, evidenceType, provisionId });
-    edit({ note: `Added: ${ref}. Listed, not reviewed.` });
+  function next() {
+    if (step === 0 && !draft.document.trim()) return edit({ note: "Enter the document name." });
+    if (step === 1 && !draft.evidenceType) return edit({ note: "Choose a document type." });
+    go(step + 1);
   }
+  function save() {
+    moved.current = true;
+    dispatch({ type: "saveEvidence", itemId, document: draft.document, responsible: draft.responsible, date: draft.date, evidenceType: draft.evidenceType, provisionId, ...(draft.editing ? { slot: draft.editing } : {}) });
+  }
+  const onEnter = (e: KeyboardEvent) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    if (step < STEPS - 1) next();
+    else save();
+  };
 
-  const earlier = evidenceDocuments(c, itemId);
+  const saved = evidenceDocuments(c, itemId);
+  const savedIds = new Set(saved.map((doc) => doc.id));
+  const staged = (c.listedEvidence ?? []).filter((item) => item.taskId === itemId && !savedIds.has(item.id) && !c.unscopedEvidence?.includes(item.id));
+  const rows = [...saved.map((doc) => doc.id), ...staged.map((item) => item.id)];
+  const removing = new Set(c.deletedEvidence ?? []);
+  const busy = saveStatus === "saving";
+  const unsaved = rows.some((id) => removing.has(id) || c.listedEvidence?.some((item) => item.id === id));
 
   return (
-    <div className="form-grid">
-      <p className="sr-only">{title}</p>
-      <div className="field">
-        <label htmlFor={`evidence-type-${itemId}`}>Evidence type</label>
-        <select id={`evidence-type-${itemId}`} value={evidenceType} onChange={(e) => edit({ evidenceType: e.target.value })}>
-          <option value="">Not chosen</option>
-          {typeOptions.map((type) => (
-            <option key={type} value={type}>
-              {type}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="field">
-        <label htmlFor={docId}>Document name</label>
-        <input id={docId} value={document} onChange={(e) => edit({ document: e.target.value })} />
-      </div>
-      <div className="field">
-        <label htmlFor={whoId}>Person or organisation responsible</label>
-        <input id={whoId} value={responsible} onChange={(e) => edit({ responsible: e.target.value })} />
-      </div>
-      <div className="field">
-        <label htmlFor={dateId}>Date or revision</label>
-        <input id={dateId} value={date} onChange={(e) => edit({ date: e.target.value })} placeholder="Left blank until you enter it" />
-      </div>
-      <div className="field">
-        <button type="button" className="btn btn-primary" onClick={save}>
-          Save this evidence
-        </button>
-        {note && (
-          <p className="field-note" role="status">
-            {note}
-          </p>
+    <div className="stack doc-block">
+      <div className="doc-entry" role="group" aria-label={draft.editing ? "Edit document" : "Add a document"}>
+        <div className="doc-step-head">
+          <span className="meta">{draft.editing ? `Editing ${documentDetails(c, draft.editing).document || "document"}` : ["Name", "Type", "Details"][step]}</span>
+          <span className="meta">Step {step + 1} of {STEPS}</span>
+        </div>
+        {step === 0 && (
+          <div className="field">
+            <label htmlFor={docId}>Document name</label>
+            <input ref={input} id={docId} value={draft.document} onKeyDown={onEnter} onChange={(e) => edit({ document: e.target.value })} />
+            <p className="field-note">The title on the report, letter or listing.</p>
+          </div>
         )}
+        {step === 1 && (
+          <div className="field">
+            <label htmlFor={`evidence-type-${itemId}`}>Document type</label>
+            <select ref={input} id={`evidence-type-${itemId}`} value={draft.evidenceType} onKeyDown={onEnter} onChange={(e) => edit({ evidenceType: e.target.value })}>
+              <option value="">Choose a type</option>
+              {typeOptions.map((type) => <option key={type} value={type}>{type}</option>)}
+            </select>
+            <details className="compact-help"><summary>About types</summary><p>These are suggestions, not test results. Your designer decides what the evidence must show.</p></details>
+          </div>
+        )}
+        {step === 2 && (
+          <>
+            <div className="field">
+              <label htmlFor={`evidence-who-${itemId}`}>Prepared by (optional)</label>
+              <input ref={input} id={`evidence-who-${itemId}`} value={draft.responsible} onKeyDown={onEnter} onChange={(e) => edit({ responsible: e.target.value })} />
+            </div>
+            <div className="field">
+              <label htmlFor={`evidence-date-${itemId}`}>Date or revision (optional)</label>
+              <input id={`evidence-date-${itemId}`} value={draft.date} onKeyDown={onEnter} onChange={(e) => edit({ date: e.target.value })} />
+            </div>
+            <p className="field-note">This lists the document. It does not attach a file.</p>
+          </>
+        )}
+        {draft.note && <p className="field-note doc-note" role="status">{draft.note}</p>}
+        <div className="step-controls">
+          {step > 0
+            ? <button type="button" className="btn btn-ghost" onClick={() => go(step - 1)}>Back</button>
+            : draft.editing
+              ? <button type="button" className="btn btn-ghost" onClick={() => edit({ ...EMPTY_DRAFT, editing: undefined })}>Cancel</button>
+              : <span />}
+          {step < STEPS - 1
+            ? <button type="button" className="btn btn-primary" onClick={next}>Continue</button>
+            : <button type="button" className="btn btn-primary" onClick={save}>Save document</button>}
+        </div>
       </div>
-      {earlier.length > 0 && (
-        <div className="field full">
-          <p className="meta">Documents already on this case</p>
+      {rows.length > 0 && (
+        <div className="doc-list" aria-live="polite">
+          <p className="meta">Added documents</p>
           <ul className="plain-list">
-            {earlier.map((item) => (
-              <li key={item.id}>
-                {item.title}{" "}
-                <button type="button" className="btn btn-xs" aria-label={`Remove ${item.title}`} onClick={() => dispatch({ type: "removeEvidence", id: item.id })}>
-                  Remove
-                </button>
-              </li>
-            ))}
+            {rows.map((id) => {
+              const details = documentDetails(c, id);
+              const title = details.document || saved.find((doc) => doc.id === id)?.title || id;
+              const pendingRemoval = removing.has(id);
+              const pendingSave = c.listedEvidence?.some((item) => item.id === id);
+              const status = pendingRemoval ? (busy ? "Removing…" : "Not removed yet")
+                : pendingSave ? (busy ? "Saving…" : "Not saved yet")
+                : "Saved · listed, no file attached";
+              return (
+                <li key={id} className="doc-row">
+                  <div className="doc-row-text">
+                    <span className="doc-title">{title}</span>
+                    <span className="meta doc-status">
+                      <span className={`status-dot ${pendingRemoval || pendingSave ? (busy ? "pending" : "warning") : "done"}`} /><span>{status}</span>
+                    </span>
+                    {c.evidenceIssues?.[id] && <span className="field-note">{c.evidenceIssues[id]}</span>}
+                  </div>
+                  {!pendingRemoval && (
+                    <div className="doc-row-actions">
+                      <button type="button" className="btn btn-xs" aria-label={`Edit ${title}`} onClick={() => go(0, { ...details, editing: id })}>Edit</button>
+                      <button type="button" className="btn btn-xs" aria-label={`Remove ${title}`} onClick={() => dispatch({ type: "removeEvidence", id })}>Remove</button>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
+          {unsaved && saveStatus === "failed" && <button type="button" className="btn btn-xs" onClick={() => void saveDraft()}>Try saving again</button>}
         </div>
       )}
     </div>
@@ -452,12 +518,7 @@ export function Recommendations() {
                 <details className="compact-help"><summary>Evidence types</summary><p>{issue.recommended_types.join(", ") || "None listed"}. These are suggestions, not test results.</p></details>
                 {issue.provision?.citation && <p className="mono meta">{issue.provision.citation}</p>}
                 </details>
-                <EvidenceAnswer
-                  itemId={issue.id}
-                  provisionId={issue.provision?.provision_id ?? ""}
-                  types={issue.recommended_types}
-                  title="Document name"
-                />
+                <EvidenceAnswer itemId={issue.id} provisionId={issue.provision?.provision_id ?? ""} types={issue.recommended_types} />
               </article>
             );
           })}
@@ -480,12 +541,7 @@ export function Recommendations() {
               <details className="compact-help"><summary>Evidence types</summary><p>{item.recommended_types.join(", ") || "None listed"}. These are suggestions, not test results.</p></details>
               {item.citation && <p className="mono meta">{item.citation}</p>}
               </details>
-              <EvidenceAnswer
-                itemId={item.id}
-                provisionId={item.provision_id}
-                types={item.recommended_types}
-                title="Document name"
-              />
+              <EvidenceAnswer itemId={item.id} provisionId={item.provision_id} types={item.recommended_types} />
             </article>
           ))}
           {load.plan.notices.length > 0 && <details className="compact-help"><summary>Evidence notes</summary>{load.plan.notices.map((n) => (

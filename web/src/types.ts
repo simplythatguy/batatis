@@ -141,14 +141,35 @@ export interface Gap {
   field?: string;
 }
 
-/** Applicant-typed evidence. Posted as text to POST /cases/{id}/evidence. Never a file reference. */
+/**
+ * One staged listing write for POST /cases/{id}/evidence. Text only, never a file reference.
+ * It stays staged until the engine acknowledges this exact `rev`; only then is it shown as saved.
+ * `responsible`/`date`: a string is sent, null withdraws a saved value, undefined is omitted.
+ */
 export interface ListedEvidence {
   id: string;
+  rev: number;
+  operation: "create" | "update";
+  /** The plan task the document was added to. Create sends it as the explicit scope. */
+  taskId: string;
   provisionId: string;
   evidenceType: string;
+  /** The document name. Sent as both title and description. */
   description: string;
+  responsible?: string | null;
+  date?: string | null;
+}
+
+/** One document editor: three short steps (name, type, optional details). */
+export interface EvidenceDraft {
+  document: string;
   responsible: string;
   date: string;
+  evidenceType: string;
+  note: string;
+  step?: number;
+  /** Slot being edited; absent for a new document. */
+  editing?: string;
 }
 
 export type ApplicantType = "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";
@@ -175,13 +196,17 @@ export interface Case {
    * Applicant yes/no answers do not set this, and they do not clear it.
    */
   practiceOfEngineering?: true | false | "unknown";
-  /** Typed evidence waiting for POST /cases/{id}/evidence. Not file references. */
+  /** Listing writes waiting for the engine's acknowledgement. Not file references. */
   listedEvidence?: ListedEvidence[];
   /** Listed documents whose code reference was withdrawn. They stay on the case, unlinked;
    * selecting that reference again does not relink them (engine `auto_link = false`). */
   unscopedEvidence?: string[];
   /** Evidence slot ids waiting for DELETE /cases/{id}/evidence/{id}. */
   deletedEvidence?: string[];
+  /** Last listing revision number; each staged write takes the next one. */
+  evidenceRev?: number;
+  /** A removal the engine refused (for example an ambiguous older slot). Not retried. */
+  evidenceIssues?: Record<string, string>;
   /** Unfinished editors for this visit only; never sent as facts. Reset clears them. */
-  evidenceDrafts?: Record<string, { document: string; responsible: string; date: string; evidenceType: string; note: string }>;
+  evidenceDrafts?: Record<string, EvidenceDraft>;
 }

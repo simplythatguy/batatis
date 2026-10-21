@@ -268,9 +268,10 @@ export function Application({ route }: { route: Route }) {
         </div>
       </div>
       <div className="footer-bar">
-        {saveStatus === "gone" && <DraftNote />}
+        {/* A deleted or expired case cannot be saved or checked: keep one honest action. */}
+        {saveStatus === "gone" ? <DraftNote /> : <>
         <details className="draft-options"><summary className="btn">Save & options</summary><div className="draft-options-body">
-          {saveStatus !== "gone" && <DraftNote />}
+          <DraftNote />
           <button type="button" className="btn" onClick={() => void saveDraft()}>Save draft</button>
           <a className="btn btn-ghost" href={tab === "A" ? "#/describe?step=last" : tab === "B" ? "#/application?tab=A&step=last" : tab === "alt" ? "#/section-c" : "#/application?tab=alt&step=last"}>Back</a>
           <button type="button" className="btn" onClick={() => dialog.current?.showModal()}>Review missing details</button>
@@ -279,6 +280,7 @@ export function Application({ route }: { route: Route }) {
         <button type="button" className="btn" disabled={busy || checkStatus === "running"} onClick={openCheck}>
           {checkStatus === "unavailable" ? "Try check again" : "Ready to submit"}
         </button>
+        </>}
       </div>
       <dialog
         className="dialog"

@@ -110,11 +110,11 @@ await scenario('R7 expired case: save and Section D say so plainly, never recrea
  await p.evaluate(()=>window.requests=[]);
  await act(p,{type:'setProcess',field:'risk',value:'SYNTHETIC answer kept after expiry'});
  await p.getByText('This saved case is no longer available',{exact:false}).first().waitFor();
- await p.getByText('Not saved: case deleted or expired. Your answers are still here.',{exact:true}).waitFor();
+ await p.getByText('Case deleted or expired. Your answers stay here.',{exact:true}).waitFor();
  assert.equal(await p.getByRole('link',{name:'Keep a draft',exact:true}).count(),1,'one draft action, not a stack');
  assert.equal(await p.getByRole('button',{name:'Try saving again',exact:true}).count(),0);
  assert.equal(await p.getByRole('button',{name:'Refresh case and retry',exact:true}).count(),0);
- await nav(p,'/application?tab=A');await p.getByText('Not saved: case deleted or expired. Your answers are still here.',{exact:true}).waitFor();
+ await nav(p,'/application?tab=A');await p.getByText('Case deleted or expired. Your answers stay here.',{exact:true}).waitFor();
  assert.equal(await p.evaluate(()=>window.caseStore.saveStatus),'gone');
  assert.equal(await p.evaluate(()=>window.caseStore.engineId),id);
  assert.equal(await p.evaluate(()=>window.caseStore.c.process.risk),'SYNTHETIC answer kept after expiry');

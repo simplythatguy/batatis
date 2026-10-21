@@ -72,7 +72,7 @@ await scenario('R8 guided entry shows one step at a time, keeps answers on Back,
  assert.equal(await p.locator('.doc-entry .btn-primary:visible').count(),1,'one primary action per step');
  await entry(p).getByLabel('Prepared by (optional)').fill('SYNTHETIC designer');
  await entry(p).getByRole('button',{name:'Save document',exact:true}).click();
- await row(p,'SYNTHETIC firestop test report').getByText('Saved',{exact:false}).waitFor();
+ await row(p,'SYNTHETIC firestop test report').getByText(/^Saved/).waitFor();
  assert.match(await row(p,'SYNTHETIC firestop test report').innerText(),/no file/i);
  assert.deepEqual(await visibleFields(p),['evidence-doc'],'ready for another document');
  assert.equal(await entry(p).getByLabel('Document name').inputValue(),'');
@@ -93,7 +93,7 @@ await scenario('R8 guided entry shows one step at a time, keeps answers on Back,
  await entry(p).getByRole('button',{name:'Continue',exact:true}).click();
  assert.equal(await entry(p).getByLabel('Prepared by (optional)').inputValue(),'SYNTHETIC designer');
  await entry(p).getByRole('button',{name:'Save document',exact:true}).click();
- await row(p,'SYNTHETIC firestop test report rev 2').getByText('Saved',{exact:false}).waitFor();
+ await row(p,'SYNTHETIC firestop test report rev 2').getByText(/^Saved/).waitFor();
  const update=(await sent(p,'POST','/evidence$')).at(-1);
  assert.equal(update.body.operation,'update');assert.equal(update.body.evidence_id,task);assert.equal('scope' in update.body,false);
  assert.equal(await p.locator('.doc-list li').count(),1,'edited, not duplicated');
@@ -110,10 +110,11 @@ await scenario('R8 a failed save is never shown as saved; the labelled retry sav
  await p.evaluate(()=>window.dropNext={method:'POST',suffix:'/evidence'});
  await enter(p,{name:'SYNTHETIC unsent report',type:'evaluation'});
  await row(p,'SYNTHETIC unsent report').getByText('Not saved yet',{exact:true}).waitFor();
- assert.equal(await row(p,'SYNTHETIC unsent report').getByText('Saved',{exact:false}).count(),0);
- assert.equal(await p.evaluate(()=>window.caseStore.saveStatus),'failed');
+ await p.waitForFunction(()=>window.caseStore.saveStatus==='failed');
+ assert.equal(await row(p,'SYNTHETIC unsent report').getByText('Not saved yet',{exact:true}).count(),1);
+ assert.equal(await row(p,'SYNTHETIC unsent report').getByText(/^Saved/).count(),0);
  await p.locator('.doc-list').getByRole('button',{name:'Try saving again',exact:true}).click();
- await row(p,'SYNTHETIC unsent report').getByText('Saved',{exact:false}).waitFor();
+ await row(p,'SYNTHETIC unsent report').getByText(/^Saved/).waitFor();
  const posts=await sent(p,'POST','/evidence$');
  assert.deepEqual(posts.map(r=>r.status),[-1,200]);
  const id=await p.evaluate(()=>window.caseStore.engineId);
@@ -127,12 +128,13 @@ await scenario('R8 a second writer is a real 409: the document stays unsaved unt
  assert.equal(other.status,200);
  await enter(p,{name:'SYNTHETIC conflict report',type:'evaluation'});
  await row(p,'SYNTHETIC conflict report').getByText('Not saved yet',{exact:true}).waitFor();
+ await p.waitForFunction(()=>window.caseStore.saveStatus==='failed');
  assert.deepEqual((await sent(p,'POST','/evidence$')).map(r=>r.status),[409]);
  await p.waitForTimeout(900);
  assert.equal((await sent(p,'POST','/evidence$')).length,1,'no automatic retry');
  await p.evaluate(()=>window.requests=[]);
  await p.locator('.doc-list').getByRole('button',{name:'Try saving again',exact:true}).click();
- await row(p,'SYNTHETIC conflict report').getByText('Saved',{exact:false}).waitFor();
+ await row(p,'SYNTHETIC conflict report').getByText(/^Saved/).waitFor();
  const order=await p.evaluate(()=>window.requests.map(r=>`${r.method} ${r.path.replace(/\/cases\/[^/]+/,'/cases/:id')}`));
  assert.equal(order[0],'GET /cases/:id','refresh before writing again');
  const saved=await remote(id);
@@ -146,7 +148,7 @@ await scenario('R8 deleted case: the document stays here unsaved, one honest nex
  assert.equal((await fetch(base+'/cases/'+id,{method:'DELETE'})).status,204);
  await p.evaluate(()=>window.requests=[]);
  await enter(p,{name:'SYNTHETIC report after deletion',type:'evaluation'});
- await p.getByText('Not saved: case deleted or expired. Your answers are still here.',{exact:true}).waitFor();
+ await p.getByText('Case deleted or expired. Your answers stay here.',{exact:true}).waitFor();
  await row(p,'SYNTHETIC report after deletion').getByText('Not saved',{exact:false}).waitFor();
  assert.equal(await p.getByRole('button',{name:'Ready to submit',exact:true}).count(),0,'no action that cannot work');
  assert.equal(await p.getByRole('button',{name:'Try saving again',exact:true}).count(),0);
@@ -156,16 +158,17 @@ await scenario('R8 deleted case: the document stays here unsaved, one honest nex
  assert.equal(await assistance(p),0);
 },{width:320,height:568});
 
-await scenario('R8 at 320x568 the gone footer leaves the step action on screen',async p=>{
+await scenario('R8 at 320x568 the gone footer is one compact line and leaves the step action on screen',async p=>{
  const id=await p.evaluate(()=>window.caseStore.engineId);
  assert.equal((await fetch(base+'/cases/'+id,{method:'DELETE'})).status,204);
  await act(p,{type:'setProcess',field:'risk',value:'SYNTHETIC answer after deletion'});
- await p.getByText('Not saved: case deleted or expired. Your answers are still here.',{exact:true}).waitFor();
- await entry(p).getByLabel('Document name').fill('SYNTHETIC name');
- const button=entry(p).getByRole('button',{name:'Continue',exact:true});
- await button.scrollIntoViewIfNeeded();
- const box=await button.boundingBox();const footer=await p.locator('.footer-bar').boundingBox();
- assert.ok(box.y+box.height<=footer.y,'Continue sits above the footer');
+ await p.getByText('This saved case is no longer available',{exact:false}).first().waitFor();
+ await nav(p,'/application?tab=A');await p.locator('.field-step').waitFor();
+ await p.getByText('Case deleted or expired. Your answers stay here.',{exact:true}).waitFor();
+ assert.equal(await p.getByRole('button',{name:'Ready to submit',exact:true}).count(),0);
+ const button=p.locator('.field-step .step-controls .btn-primary');
+ const box=await button.boundingBox();const footer=await p.locator('.footer-bar').first().boundingBox();
+ assert.ok(box.y>=0&&box.y+box.height<=footer.y,`Continue (${box.y}+${box.height}) sits above the footer (${footer.y})`);
  assert.ok(footer.height<=96,`compact footer (${footer.height}px)`);
  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
 },{width:320,height:568});

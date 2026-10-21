@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type Dispatch, type ReactNode } from "react";
 import { engine, EngineError, isCaseConflict, isCaseGone, type EngineGap } from "./api/client";
 import { type CompletenessRecord, isProfessionalHold, officerRoutedLabel } from "./humanReview";
-import { clearEngineSession, engineCaseId, engineGeneration, isEngineGeneration, ensureEngineCase, needsReconcile, pushDeletedEvidence, pushFacts, pushListedEvidence, reconcileEngineCase, refreshGaps, syncJurisdiction } from "./api/sync";
+import { clearEngineSession, engineCaseId, engineGeneration, evidenceFacts, isEngineGeneration, ensureEngineCase, needsReconcile, pushDeletedEvidence, pushFacts, pushListedEvidence, reconcileEngineCase, refreshGaps, syncJurisdiction, type EvidenceOutcome } from "./api/sync";
 import { engineNotices, groupEvidenceGaps, missingFromEngine } from "./rules";
 import { applyIdentifyPlan, planIdentify } from "./identify";
 import { checkCurrent, newCheckState, type CheckState, type SaveStatus } from "./checkState";
@@ -75,7 +75,7 @@ interface Store {
 
 const Ctx = createContext<Store | null>(null);
 
-export const GONE_NOTE = "Not saved: case deleted or expired. Your answers are still here.";
+export const GONE_NOTE = "Case deleted or expired. Your answers stay here.";
 const CONFLICT_NOTE = "Not saved. The saved case changed somewhere else.";
 
 const FIELD_HREF: Record<string, string> = {
@@ -166,6 +166,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const [resetNote, setResetNote] = useState(loaded.note);
   const [c, reduce] = useReducer(reducer, loaded.case);
   const revision = useRef(0);
+  /** Like `revision`, but document saves and removals do not change it: they never alter the
+   * Section D plan, so they must not rebuild (and re-save) it or replace the screen. */
+  const planRevision = useRef(0);
   const syncQueue = useRef<Promise<unknown>>(Promise.resolve());
   const sectionDHold = useRef<{ generation: number; id: string; error: SectionDRecoveryError } | null>(null);
   /** The saved case was deleted or expired. Nothing is written again until Reset starts a new case. */
@@ -190,6 +193,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   latestCase.current = c;
   const renderGeneration = engineGeneration();
   const renderRevision = revision.current;
+  const renderPlanRevision = planRevision.current;
   const [lookupAttempt, setLookupAttempt] = useState(0);
   const sectionCLookup = useSectionC(c.candidates.filter(a => isProvision(a.provision)).map(a => ({ candidateId: a.id, provision: a.provision })), [], lookupAttempt);
 
@@ -200,9 +204,10 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   // Stable dispatch prevents deterministic lookup effects from refiring on status updates.
   const dispatch = useCallback((action: Action) => {
-    const derived = (action.type === "reconcileSectionC" && JSON.stringify(reducer(latestCase.current, action).candidates) === JSON.stringify(latestCase.current.candidates)) || [ "editEvidenceDraft", "ackEvidenceDeletion", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions"].includes(action.type);
+    const derived = (action.type === "reconcileSectionC" && JSON.stringify(reducer(latestCase.current, action).candidates) === JSON.stringify(latestCase.current.candidates)) || [ "editEvidenceDraft", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions"].includes(action.type);
     if (!derived) {
       revision.current += 1;
+      if (action.type !== "saveEvidence" && action.type !== "removeEvidence") planRevision.current += 1;
       activeCheck.current?.ctl.abort();
       syncState.current = { saved: false, reviewed: false, detail: "" };
       setSyncOk(false);
@@ -230,13 +235,27 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     if (reconcileSectionC(c, sectionCLookup.rows) !== c) dispatch({ type: "reconcileSectionC", rows: sectionCLookup.rows, basis: lookupBasis(c) });
   }, [sectionCLookup, c.candidates, dispatch]);
 
+  /** Adopt an explicit fresh read's evidence ledger before writing again (derived, not new input). */
+  function refreshed(saved: Parameters<typeof evidenceFacts>[0], snapshot: Case): Case {
+    const action: Action = { type: "ackEvidence", facts: evidenceFacts(saved), refreshed: true };
+    dispatch(action);
+    return reducer(snapshot, action);
+  }
+
+  function applyEvidence(outcome: EvidenceOutcome, snapshot: Case): Case {
+    const action: Action = { type: "ackEvidence", ...outcome };
+    dispatch(action);
+    return reducer(snapshot, action);
+  }
+
   function loadSectionD(retry = false): Promise<SectionDRead | null> {
-    const token = renderGeneration, version = renderRevision, snapshot = c;
+    const token = renderGeneration, version = renderPlanRevision;
+    let snapshot = c;
     const candidateKey = JSON.stringify(c.candidates);
     const rowKey = JSON.stringify(c.sectionC);
     if (sectionCLookup.source === "loading") return Promise.resolve(null);
     if (sectionCLookup.source !== "live") return Promise.reject(new Error("Code references could not be loaded. Try the lookup again in Section C."));
-    const current = () => isEngineGeneration(token) && revision.current === version && JSON.stringify(latestCase.current.candidates) === candidateKey && JSON.stringify(latestCase.current.sectionC) === rowKey;
+    const current = () => isEngineGeneration(token) && planRevision.current === version && JSON.stringify(latestCase.current.candidates) === candidateKey && JSON.stringify(latestCase.current.sectionC) === rowKey;
     const pending = syncQueue.current.catch(() => {}).then(async () => {
       if (!current()) return null;
       const engineId = engineCaseId();
@@ -249,7 +268,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         if (!retry) throw new SectionDRecoveryError("conflict", "A versioned save is waiting for an explicit reconcile.");
         // Only the labelled retry may recover a conflict. Read the live case and adopt
         // its version before writing again; never replace a missing case with a new one.
-        try { await reconcileEngineCase(engineId); }
+        try { snapshot = refreshed(await reconcileEngineCase(engineId), snapshot); }
         catch (error) {
           if (isCaseGone(error)) {
             goneCase.current = engineId;
@@ -290,13 +309,13 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   function sync(explicit: boolean): Promise<string | null> {
     const token = renderGeneration;
     const version = renderRevision;
-    const snapshot = c;
+    let snapshot = c;
     const current = () => isEngineGeneration(token) && revision.current === version;
     const pending = syncQueue.current.catch(() => {}).then(async () => {
       const id = engineCaseId();
-      // "Try saving again" is the explicit reconcile for a conflicted authority save.
+      // "Try saving again" is the explicit reconcile for a conflicted save.
       if (explicit && id && needsReconcile(id) && goneCase.current !== id) {
-        try { await reconcileEngineCase(id); }
+        try { snapshot = refreshed(await reconcileEngineCase(id), snapshot); }
         catch (error) { if (isCaseGone(error)) goneCase.current = id; }
       }
       return performSync(snapshot, current);
@@ -324,14 +343,24 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       if (!current()) return null;
       const factError = await pushFacts(id, snapshot.facts);
       if (!current()) return null;
-      const evidenceError = await pushListedEvidence(id, snapshot.listedEvidence ?? []);
+      // One atomic write per listing, then removals. Only acknowledged revisions count as saved.
+      const listed = await pushListedEvidence(id, snapshot.listedEvidence ?? []);
       if (!current()) return null;
-      const deleted = await pushDeletedEvidence(id, snapshot.deletedEvidence ?? []);
+      snapshot = applyEvidence(listed, snapshot);
+      const deleted = listed.error ? null : await pushDeletedEvidence(id, snapshot.deletedEvidence ?? []);
       if (!current()) return null;
-      if (deleted.acked.length) dispatch({ type: "ackEvidenceDeletion", ids: deleted.acked });
+      if (deleted) snapshot = applyEvidence(deleted, snapshot);
       if (!factError) setFactsEpoch((n) => n + 1);
-      const failure = factError ?? evidenceError ?? deleted.error;
+      // A refused listing is back in its form with a note; it is not a failed save of the case.
+      const failure = factError ?? listed.error ?? deleted?.error;
       if (failure) throw new Error(failure);
+      // A document staged after this snapshot is not saved yet; the next save sends it.
+      const staged = latestCase.current.listedEvidence?.length || latestCase.current.deletedEvidence?.length;
+      if (staged && !goneCase.current) {
+        setSaveStatus("unsaved");
+        setSavedNote("");
+        return id;
+      }
       setSaveStatus("saved");
       setSavedNote("Saved for this visit");
       syncState.current = { ...syncState.current, saved: true, detail: "" };
@@ -481,7 +510,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   const value: Store = {
     sectionCLookup, retrySectionC: () => setLookupAttempt(n => n + 1),
-    snapshotKey: `${renderGeneration}:${renderRevision}:${JSON.stringify(c.candidates)}:${JSON.stringify(c.sectionC)}:${sectionCLookup.source}`,
+    snapshotKey: `${renderGeneration}:${renderPlanRevision}:${JSON.stringify(c.candidates)}:${JSON.stringify(c.sectionC)}:${sectionCLookup.source}`,
     loadSectionD,
     c, gaps, notices, engineGaps, gapsSource, gapsNote, reviewDetail, syncOk,
     saveStatus, saveDetail, savedNote,

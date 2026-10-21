@@ -1375,3 +1375,29 @@ body { font-size: 14px; line-height: 1.45; }
 .optional-next { align-self: flex-start; padding-inline: 0; }
 .evidence-context { margin: -8px 0 8px; }
 .field-step { padding-bottom: 16px; }
+
+/* Section D document entry: one short step at a time, then a quiet list of what was added. */
+.doc-block { gap: 24px; }
+.doc-entry { display: flex; flex-direction: column; gap: 16px; padding: 16px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--bg-elevated); }
+.doc-step-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.doc-step-head .meta:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.doc-step-head .meta:last-child { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.doc-entry .step-controls { margin-top: 0; }
+.doc-note { margin: 0; }
+.doc-list { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.doc-list > .meta { margin: 0; }
+.doc-list .plain-list { width: 100%; margin: 0; }
+.doc-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border-subtle, var(--border-default)); }
+.doc-row:last-child { border-bottom: 1px solid var(--border-subtle, var(--border-default)); }
+.doc-row-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.doc-title { overflow-wrap: anywhere; }
+.doc-row-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.footer-bar > .save-receipt:only-child { max-width: 100%; }
+@media (max-width: 640px) {
+  .doc-entry { padding: 12px; }
+  .doc-row { flex-wrap: wrap; }
+}
+.doc-status { display: inline-flex; align-items: center; gap: 6px; }
+.save-receipt.is-gone { flex-wrap: nowrap; flex-basis: 100%; max-width: 100%; gap: 12px; }
+.save-receipt.is-gone .status-note { flex: 1; min-width: 0; line-height: 1.4; }
+.save-receipt.is-gone .btn { flex-shrink: 0; }
