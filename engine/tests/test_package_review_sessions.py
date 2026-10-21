@@ -48,6 +48,22 @@ def test_sqlite_sessions(tmp_path):
     _exercise(CaseStore(tmp_path / 'cases.sqlite'))
 
 
+def test_retention_purge_removes_reviews_without_a_review_request(tmp_path):
+    """The 7-day promise covers package reviews: the cron purge drops them with their case."""
+    import sqlite3
+    from engine.retention import purge_now
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    sessions = Sessions(store)
+    old = store.put(Case(title='expired', created_at='2000-01-01T00:00:00+00:00'))
+    sessions.add(_session(old.id, 1, old.id))
+    sessions.record_closeout(old.id, '2000-01-02T00:00:00+00:00', '2000-01-03T00:00:00+00:00', 'Reviewer')
+    sessions.add(_session('pkg_old', 1, None, created_at='2000-01-01T00:00:00+00:00'))
+    assert purge_now(store) == 1
+    with sqlite3.connect(tmp_path / 'cases.sqlite') as con:   # read the tables directly: no sweep on read
+        assert con.execute('SELECT COUNT(*) FROM package_review_sessions').fetchone()[0] == 0
+        assert con.execute('SELECT COUNT(*) FROM package_review_closeouts').fetchone()[0] == 0
+
+
 def test_postgres_sessions(monkeypatch):
     url = os.environ.get('TEST_DATABASE_URL')
     if not url:

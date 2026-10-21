@@ -3,7 +3,8 @@
 Rows live in the same SQLite file or PostgreSQL database as the cases. A
 case-linked package is removed when its case is gone (deleted or purged by
 retention); a standalone upload package follows the same creation-based
-retention as cases. The sweep runs on every package-review access.
+retention as cases. The sweep runs on every package-review access and after every
+retention purge, so nothing outlives its case.
 """
 from __future__ import annotations
 
@@ -36,6 +37,10 @@ class _Sqlite:
 
     def _connect(self):
         return sqlite3.connect(self.path, timeout=5)
+
+    def sweep(self):
+        with closing(self._connect()) as con, con:
+            self._sweep(con)
 
     def _sweep(self, con):
         con.execute('DELETE FROM package_review_sessions WHERE case_id IS NOT NULL AND case_id NOT IN '
@@ -99,6 +104,10 @@ class _Postgres:
     def _connect(self):
         return self._psycopg.connect(self.url, autocommit=False, connect_timeout=10)
 
+    def sweep(self):
+        with closing(self._connect()) as con, con:
+            self._sweep(con)
+
     def _sweep(self, con):
         con.execute('DELETE FROM package_review_sessions WHERE case_id IS NOT NULL AND case_id NOT IN '
                     '(SELECT id FROM cases)')
@@ -156,6 +165,9 @@ class _Memory:
         self.data: dict[str, dict[int, str]] = {}
         self.closeouts: dict[str, tuple] = {}
         self.lock = threading.Lock()
+
+    def sweep(self):
+        pass
 
     def closeout(self, case_id):
         return self.closeouts.get(case_id)
@@ -235,3 +247,8 @@ class Sessions:
         return session
 
 
+
+
+def sweep(store) -> None:
+    """Drop sessions and close-outs whose case is gone, and expired standalone packages."""
+    backend_for(store).sweep()
