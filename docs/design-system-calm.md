@@ -13,8 +13,8 @@ Simple, quiet and fast. The applicant describes the project or drops plans, answ
 
 | Stage | Route | Screen | Job |
 | --- | --- | --- | --- |
-| 01 Describe | `#/` | `Start.tsx` | Role (required), description, plans (drag and drop anywhere), reviewing authority. Start runs the explicit check. |
-| 02 Questions | `#/questions?focus=<key>` | `QuestionDeck.tsx` + `deck.ts` | One card at a time, derived from the case and the shared gaps. |
+| 01 Describe | `#/` | `Start.tsx` | One headline and the composer: description and plans (drag and drop anywhere). No privacy copy, no chips: the role comes from onboarding (anonymous visits get it as the first question) and the reviewing authority is a Section B question. Start runs the explicit check. |
+| 02 Questions | `#/questions?focus=<key>` | `QuestionDeck.tsx` + `deck.ts` | Typeform questions in form order (A, B, C, D), derived from the case and the shared gaps. Footer progress per section with a popover and up/down. Before an application exists it asks the description (and role). |
 | 03 Review | `#/review` | `Review.tsx` | What's left, metric tiles, engineer callout, Sections A–D status. |
 | 04 Application | `#/application` | `Application.tsx` | Paper preview of Part 1 A–D, gated draft and official PDF, text record. |
 | More menu | `#/officer`, `#/references`, `#/accuracy` | existing screens in `.cf-legacy` | Look up code (⌘K), Code library, Officer view, accuracy report. Section C references stay at `#/references`. |
@@ -33,7 +33,7 @@ Legacy hrefs (store gap links, old screens) are translated in `calm/routes.ts`: 
 
 Skip moves on; at the end of the pass the deck comes back once to skipped cards, then shows the finish card ("That's everything for now" → Review my application).
 
-Keyboard: `1` `2` `3` pick a choice, `↵` continues (`⌘↵` inside a text area), `Esc` closes the drawer.
+Keyboard: `A` `B` `C` (or `1` `2` `3`) pick a choice, `↵` continues (`⌘↵` inside a text area), `↑` `↓` move through the form, `Esc` closes the drawer. Shell: `⌘B` sidebar (toggle at the far left of the header), `⌘J` assistant (full-height black column), `⌘K` search applications, `⌘⇧K` search the code. All four stages and the code library open in every state; Review and Application show an empty state before a description exists.
 
 ## Tokens
 
@@ -41,10 +41,10 @@ Keyboard: `1` `2` `3` pick a choice, `↵` continues (`⌘↵` inside a text are
 | --- | --- | --- |
 | `--cf-bg` | `#08090b` | Page |
 | `--cf-text` / `-2` / `-3` | `#f4f4f5` / `#a3a6ad` / `#7b7f87` | Primary, secondary, faint text |
-| `--cf-line` / `-2` | white 8% / 14% | Hairlines, control borders |
+| `--cf-line` / `-2` / `-ctl` | white 7% / 13% / 36% | Every divider, card, chip and button / pressed and state lines / form-control boundary (underline inputs, 3:1) |
 | `--cf-glass` | `rgba(20,22,26,.62)` + blur 24px | Cards, panels, drawer, menus |
 | `--cf-inset` | white 2.5% | Tiles, answer buttons |
-| `--cf-accent` | `#ff6a3d` | Brand mark and eyebrow square only. Never a button fill. |
+| `--cf-accent` | `#ff6a3d` | Brand mark, question number and arrow, current tick. Never a button fill. No eyebrow squares. |
 | `--cf-blocking` / `-warning` / `-done` / `-pending` | `#f87171` / `#fbbf24` / `#4ade80` / `#8b8b94` | Status dots only |
 | `--cf-primary-bg` / `-text` | `#ededed` / `#0b0b0c` | The one primary button |
 | `--cf-focus` | `#9a9aa2` | Focus rings (neutral) |

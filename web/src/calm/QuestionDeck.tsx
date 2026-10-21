@@ -309,7 +309,7 @@ function PreCaseDeck() {
       if (!inText && t && t !== document.body && !t.hasAttribute("data-deck-answer") && t.tagName !== "H2") return;
       e.preventDefault();
       ok();
-    } else if (!inText && !e.metaKey && !e.ctrlKey && !e.altKey) {
+    } else if (!inText && !e.metaKey && !e.ctrlKey && !e.altKey && (!t || t === document.body || t.closest(".cf-deck-page"))) {
       if (e.key === "ArrowUp" && at > 0) { e.preventDefault(); setIndex(at - 1); }
       else if (e.key === "ArrowDown" && at < items.length - 1) { e.preventDefault(); setIndex(at + 1); }
       else if (item.kind === "role" && /^[a-z]$/i.test(e.key)) {
@@ -576,6 +576,8 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       return;
     }
     if (inText || e.metaKey || e.ctrlKey || e.altKey) return;
+    // Letters and arrows belong to the question only when nothing else (list, header) has focus.
+    if (t && t !== document.body && !t.closest(".cf-deck-page")) return;
     if (e.key === "ArrowUp") { e.preventDefault(); step(-1); return; }
     if (e.key === "ArrowDown" && item) { e.preventDefault(); step(1); return; }
     if (item && /^[a-z1-9]$/i.test(e.key)) {
