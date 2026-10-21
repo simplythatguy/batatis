@@ -184,6 +184,29 @@ def test_missing_citation_keeps_the_known_rule_identity(package):
     assert '2.4.1.2.(1)' in flag.question
 
 
+@pytest.mark.parametrize('missing', ['citation', 'record'])
+def test_unresolved_rule_lookup_abstains_at_all_professional_seams(package, tmp_path, missing):
+    case, codes = package
+    _cleared(case)
+    case.facts.append(fact('part4_design', True))
+    key = ('C', '2.4.1.2.(1)')
+    if missing == 'citation':
+        codes.rows[key]['citation'] = ''
+    else:
+        del codes.rows[key]
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    store.put(case)
+    client = TestClient(create_app(store, codes))
+    response = client.get(f'/cases/{case.id}/professional')
+    assert response.status_code == 200
+    assert response.json()['required'] == 'depends'
+    assert any('2.4.1.2.(1)' in question for question in response.json()['questions'])
+    flag = _items(client.get(f'/cases/{case.id}/section-d/issues'))[0]['practice_of_engineering']
+    assert flag['value'] == 'unknown' and flag['rule'] == '2.4.1.2.(1)'
+    assert flag['citation'] is None
+    assert client.post(f'/cases/{case.id}/export', json={'draft': False}).status_code == 409
+
+
 def test_unsettled_suite_count_routes_to_officer_without_an_authentication_count_rule(package):
     _, codes = package
     result = professional_involvement(ProfessionalFacts(
