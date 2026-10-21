@@ -1,4 +1,4 @@
-"""Delete cases older than 7 days, with their files.
+"""Delete cases older than 7 days, with their files and package reviews.
 
 `python -m engine.retention` runs one purge and prints how many cases it deleted.
 A second run deletes nothing. Request traffic calls `maybe_purge`, which runs at most
@@ -31,7 +31,7 @@ def maybe_purge(store, *, interval: float | None = None) -> int:
             return 0
         _last_monotonic = now_m
     try:
-        return int(store.purge_expired())
+        return _purge(store)
     except Exception:
         with _lock:
             _last_monotonic = None
@@ -43,7 +43,15 @@ def purge_now(store=None) -> int:
     if store is None:
         from .store import open_store
         store = open_store()
-    return int(store.purge_expired())
+    return _purge(store)
+
+
+def _purge(store) -> int:
+    """Expired cases and files, then the package reviews that belonged to them."""
+    from .review.sessions import sweep
+    deleted = int(store.purge_expired())
+    sweep(store)
+    return deleted
 
 
 def main() -> None:

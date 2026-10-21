@@ -127,8 +127,10 @@ def _provision(result: dict) -> tuple[str | None, str | None]:
                 break
         if chosen is None:
             chosen = {'provision': target, 'title': None}
-    elif articles:
-        chosen = articles[0]
+    else:
+        # Only an article Batatis put forward (committed or offered as a quoted choice) names the title;
+        # a candidate or labelled-fallback ranking is not a selected result.
+        chosen = next((row for row in articles if row.get('status') in ('committed', 'choice')), None)
     if not chosen:
         return None, None
     shown = _real_id(chosen.get('provision_id')) or _real_id(chosen.get('provision')) or _real_id(target)

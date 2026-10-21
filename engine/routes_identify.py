@@ -5,7 +5,7 @@ GET  /cases/{id}/identify            the stored result; never calls a provider
 POST /cases/{id}/identify/{provision}/decision   yes | no | not_sure
 POST /cases/{id}/identify/confirm    write provisions after a code-database check
 POST /cases/{id}/identify/benchmark  the applicant names the benchmark sentence and confirms the departure
-GET  /cases/{id}/information-request the officer draft of not_sure items
+GET  /cases/{id}/identify/information-request the officer draft of not_sure items
 GET  /cases/{id}/process-refs        Div A 1.2.1.1. and Div C 2.3.1.1., read-only, from codedb
 
 Writes are owner edits (engine/access.py: POST is mode `edit`), so reviewers are read-only. Every write is
@@ -290,7 +290,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         saved, _ = save(case_id, write, expected_version=body.expected_version)
         return _current(saved.identify, saved)
 
-    @router.get('/cases/{case_id}/information-request')
+    @router.get('/cases/{case_id}/identify/information-request')
     def officer_information_request(case_id: str):
         """Draft of what the officer still needs to ask: the applicant's not_sure identify decisions."""
         return information_request(get_case(case_id))

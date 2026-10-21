@@ -241,9 +241,9 @@ export function createEngine(base: string) {
         withVersion({ decision }, expectedVersion),
         signal,
       ),
-    /** GET /cases/{id}/information-request. Items are not_sure decisions. */
+    /** GET /cases/{id}/identify/information-request. Items are not_sure decisions. */
     informationRequest: (caseId: string, signal?: AbortSignal) =>
-      call<InformationRequest>("GET", `/cases/${enc(caseId)}/information-request`, undefined, signal),
+      call<InformationRequest>("GET", `/cases/${enc(caseId)}/identify/information-request`, undefined, signal),
     /** POST /cases/{id}/evidence. 409 = stale version or existing ID; 404 = case gone or slot absent. */
     saveEvidence: (caseId: string, body: EvidenceWrite, signal?: AbortSignal) =>
       call<EvidenceSaved>("POST", `/cases/${enc(caseId)}/evidence`, body, signal),
