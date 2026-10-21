@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 from engine.api import create_app
 from engine.copyright import NRC_PUBLICATION_URL, PII_NOTICE, attribute_code
 from engine.retention import reset_purge_clock
-from engine.models import Case
+from engine.models import Case, Fact
 from engine.store import CaseStore
 
 SQLITE_MAGIC = b'SQLite format 3'
@@ -69,7 +69,9 @@ def test_applicant_text_is_not_treated_as_code():
     assert 'clipped' not in out
 
 
-def test_http_response_keeps_the_full_code_quote(client):
+def test_http_response_keeps_the_full_code_quote(tmp_path):
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    client = TestClient(create_app(store))
     quote = ' '.join(f'word{i}' for i in range(40))
     created = client.post('/cases', json={'title': 'Whole'})
     case_id = created.json()['id']
@@ -80,6 +82,11 @@ def test_http_response_keeps_the_full_code_quote(client):
         'source': {'type': 'code', 'ref': '9.10.15.5.', 'page': 12, 'quote': quote},
     }
     response = client.post(f'/cases/{case_id}/facts', json=fact)
+    assert response.status_code == 422  # A public caller cannot assert code authority.
+    case = store.get(case_id)
+    case.facts.append(Fact.model_validate(fact))  # Trusted deterministic-lookup receipt.
+    store.put(case)
+    response = client.get(f'/cases/{case_id}')
     assert response.status_code == 200
     stored = response.json()['facts'][0]
     assert stored['source']['quote'] == quote

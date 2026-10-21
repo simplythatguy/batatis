@@ -15,6 +15,7 @@ from engine.export import EXPORT_FAILED_DETAIL, FORM_NOT_FOUND_DETAIL
 from engine.codes import Codes
 from engine.copyright import NRC_PUBLICATION_URL, PII_NOTICE, attribute_code, has_consecutive_words
 from engine.llm_gate import reset_for_tests
+from engine.models import Fact
 from engine.store import CaseStore
 from engine.uploads import PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL
 
@@ -157,7 +158,8 @@ def test_code_lookup_returns_the_full_clause(tmp_path, monkeypatch):
     reset_for_tests()
     path = tmp_path / 'codedb.sqlite'
     _synthetic_db(path)
-    client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes(path)))
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    client = TestClient(create_app(store=store, codes=Codes(path)))
     body = client.get('/code/9.1.1.1.(1)', params={'division': 'B'}).json()
     assert body['id'] == '9.1.1.1.(1)'
     assert body['text'] == _long('w')
@@ -174,6 +176,12 @@ def test_code_lookup_returns_the_full_clause(tmp_path, monkeypatch):
         'field': 'occupancy', 'value': long, 'kind': 'pointed', 'status': 'unconfirmed',
         'source': {'type': 'code', 'ref': '9.1.1.1.(1)', 'quote': long},
     })
+    assert saved.status_code == 422  # Source authority is rejected on the public write seam.
+    case = store.get(case_id)
+    case.facts.append(Fact(field='occupancy', value=long, kind='pointed', status='unconfirmed',
+                           source={'type': 'code', 'ref': '9.1.1.1.(1)', 'quote': long}))
+    store.put(case)
+    saved = client.get(f'/cases/{case_id}')
     assert saved.status_code == 200
     fact = saved.json()['facts'][0]
     assert fact['source']['quote'] == long
@@ -200,6 +208,9 @@ def _export_client(tmp_path, monkeypatch):
     monkeypatch.delenv('BATATIS_SCC_FORM', raising=False)
     monkeypatch.setattr('engine.export.scc.blockers', lambda *args, **kwargs: [])
     monkeypatch.setattr('engine.export.scc._canonical_case', lambda case, codes: case)
+    # This fixture isolates the form-loading/error contract with a one-sentence
+    # synthetic corpus, not completeness or professional-scope decisions.
+    monkeypatch.setattr('engine.export.scc.package_notes', lambda *args, **kwargs: [])
     path = tmp_path / 'codedb.sqlite'
     _synthetic_db(path)
     client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=Codes(path)))
