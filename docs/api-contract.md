@@ -8,7 +8,6 @@ Both shipped sets had 0 under-flags, defined only as gold yes to system no. The 
 
 These counts do not establish applicability, equivalence, professional approval or safety, or validate the full Case/API/export flow. They apply only to `d479e82`, not this document branch, newer source, a deployment or a final release. Historical shipped-variant results remain 7/8 blind pre-fix and 4/8 post-fix (no longer blind); neither was rerun for this receipt. Source: [Data Nerd receipt `d75e7ff`](https://github.com/simplythatguy/batatis/blob/d75e7ff0fabb89a2d3f23792ceba8ce116536b35/evals_dev/section_d_flag/RESULTS.md).
 
-Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind). (on the 60 text-only dev cases it answered only yes or ask, 0 no, so 0 under-flags is partly by design; since 4425089 it can answer no when stated facts clear every trigger) Part 4 on text-only cases is derived from stated facts. A wood-frame building inside Part 9 with no Part 4 trigger is part4_design false, so the screen can answer no. On this dev set (model-checked, in-sample) the shipped screen still emits 0 no labels.
 
 These are the routes the engine serves. `POST /cases/{case_id}/files` stores the PDF in the case database.
 
