@@ -1,6 +1,7 @@
 """Who must see a Section D issue. This is not a compliance determination.
 
-Code citations are copied from a codedb lookup. A provision that does not resolve is omitted.
+Code citations are copied from a codedb lookup. Detected mandatory triggers retain
+unresolved source identities; only fully resolved chains become cited review rows.
 Only codedb-only triggers marked mandatory are returned as codedb rows, in routing order.
 Those rows can push the practice flag toward yes. The other codedb-only triggers are
 discretionary or an authority-having-jurisdiction acceptance. They set routed_to officer
@@ -61,6 +62,13 @@ MANDATORY_ORDER = (
 )
 MANDATORY_TRIGGERS = frozenset(MANDATORY_ORDER)
 DISCRETIONARY_TRIGGERS = CODEDB_ONLY_TRIGGERS - MANDATORY_TRIGGERS
+_PART4_SOURCE = ('C', '2.4.1.2.(1)')
+_MANDATORY_DEPENDENCIES = {
+    'HR-04': (_PART4_SOURCE, ('A', '1.3.3.3.(1)')),
+    'HR-05': (_PART4_SOURCE,),
+    'HR-06': (_PART4_SOURCE,),
+    'HR-07': (_PART4_SOURCE,),
+}
 
 # Pinpoints confirmed from the King's Printer office consolidations Karen checked.
 # Architects Act, RSA 2000 c A-44, current as of November 16, 2022, s.2(6)(b)(ii).
@@ -152,7 +160,7 @@ class HumanReview(BaseModel):
 
 @dataclass(frozen=True)
 class MandatoryHit:
-    """One mandatory codedb-only row whose cite was copied from a lookup."""
+    """A detected trigger, independent of whether its required source chain resolved."""
 
     trigger_id: str
     who: str
@@ -160,6 +168,7 @@ class MandatoryHit:
     cite: str
     division: Literal['A', 'B', 'C']
     provision_id: str
+    unresolved_sources: tuple[tuple[str, str], ...] = ()
 
 
 def _lookup_cite(codes: Codes, provision_id: str, division: str) -> str | None:
@@ -222,21 +231,19 @@ def _tokens(case: Case, name: str) -> set[str]:
 
 def _remember(hits: list[MandatoryHit], seen: set[tuple[str, str]], codes: Codes,
               trigger_id: str, who: str, why: str, division: Literal['A', 'B', 'C'],
-              provision_id: str) -> None:
+              provision_id: str, *, dependencies: tuple[tuple[str, str], ...] = ()) -> None:
     key = (trigger_id, provision_id)
     if key in seen:
         return
-    cite = _lookup_cite(codes, provision_id, division)
-    if not cite:
-        return
+    sources = dict.fromkeys(((division, provision_id),
+                             *_MANDATORY_DEPENDENCIES.get(trigger_id, ()), *dependencies))
+    citations = {(div, pid): _lookup_cite(codes, pid, div) for div, pid in sources}
+    unresolved = tuple(source for source, cite in citations.items() if cite is None)
     seen.add(key)
-    hits.append(MandatoryHit(trigger_id=trigger_id, who=who, why=why, cite=cite,
-                             division=division, provision_id=provision_id))
-
-
-def _part4_chain_resolves(codes: Codes) -> bool:
-    """HR-04, HR-05, HR-06 and HR-07 name a Part 4 duty. Both sentences have to resolve."""
-    return _lookup_cite(codes, '2.4.1.2.(1)', 'C') is not None
+    hits.append(MandatoryHit(trigger_id=trigger_id, who=who, why=why,
+                             cite=citations[(division, provision_id)] or '',
+                             division=division, provision_id=provision_id,
+                             unresolved_sources=unresolved))
 
 
 def _hr03(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]]) -> None:
@@ -260,8 +267,6 @@ def _hr01(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[st
 
 
 def _hr06(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]]) -> None:
-    if not _part4_chain_resolves(codes):
-        return
     who = 'Registered professional for the structural or geotechnical work'
     span = _number(case, 'supported_joist_span_m')
     live = _number(case, 'specified_live_load_kPa')
@@ -288,8 +293,6 @@ def _hr06(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[st
 
 
 def _hr07(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]]) -> None:
-    if not _part4_chain_resolves(codes):
-        return
     who = 'Registered professional for the structural work'
     tokens = _tokens(case, 'structural_elements')
     for token, field in _ELEMENT_FIELDS:
@@ -311,8 +314,6 @@ def _hr07(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[st
 
 
 def _hr05(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]]) -> None:
-    if not _part4_chain_resolves(codes):
-        return
     who = 'Registered professional for the structural work'
     wind = _number(case, 'hourly_wind_pressure_1in50_kPa')
     sa = _number(case, 'Sa_0_2')
@@ -353,8 +354,6 @@ def _outside_part9(case: Case, facts: ProfessionalFacts) -> bool:
 def _hr04(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]]) -> None:
     facts = ProfessionalFacts.from_case(case)
     if not _outside_part9(case, facts):
-        return
-    if not _part4_chain_resolves(codes) or _lookup_cite(codes, '1.3.3.3.(1)', 'A') is None:
         return
     _remember(hits, seen, codes, 'HR-04', 'Registered professional for the Part 4 design',
               'This building is outside Part 9 scope, so Part 4 design applies and a registered professional is named for that design.',
@@ -410,15 +409,14 @@ def _hr12(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[st
         _yes(case, 'part10_building') and _yes(case, 'fire_suppression'))
     if not sprinklers:
         return
-    if _yes(case, 'part10_building') and _lookup_cite(codes, '10.1.1.2.(2)', 'B') is None:
-        return
+    dependencies = (('B', '10.1.1.2.(2)'),) if _yes(case, 'part10_building') else ()
     _remember(hits, seen, codes, 'HR-12', 'Registered professional for the sprinkler system',
               'A Part 10 sprinkler system goes to a registered professional.',
-              'B', '10.4.7.2.(1)')
+              'B', '10.4.7.2.(1)', dependencies=dependencies)
 
 
 def mandatory_hits(case: Case, codes: Codes, *, general_required: Requirement | None = None) -> tuple[MandatoryHit, ...]:
-    """Mandatory codedb-only triggers whose cites resolved, in routing order."""
+    """Detected mandatory triggers and unresolved source identities, in routing order."""
     if general_required is None:
         general_required = _screen_involvement(case, codes).general_required
     hits: list[MandatoryHit] = []
@@ -491,9 +489,9 @@ def _acts(result: ProfessionalResult, facts: ProfessionalFacts, rows: list[Human
 
 
 def human_reviews(case: Case, codes: Codes) -> tuple[HumanReview, ...]:
-    """Mandatory codedb rows, then confirmed statute rows. A missing lookup is skipped."""
+    """Fully resolved mandatory codedb rows, then confirmed statute rows."""
     rows = [HumanReview(trigger_id=hit.trigger_id, who=hit.who, why=hit.why, cite=hit.cite)
-            for hit in mandatory_hits(case, codes)]
+            for hit in mandatory_hits(case, codes) if not hit.unresolved_sources]
     seen = {(row.trigger_id, row.cite) for row in rows}
     result = professional_involvement(case, codes)
     _acts(result, ProfessionalFacts.from_case(case), rows, seen)

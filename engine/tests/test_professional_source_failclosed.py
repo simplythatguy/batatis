@@ -166,6 +166,24 @@ def test_other_part4_triggers_retain_the_missing_shared_dependency(package, fiel
     assert flag.value == 'unknown' and flag.rule == '2.4.1.2.(1)' and flag.division == 'C'
 
 
+@pytest.mark.parametrize('extra,division,provision_id,trigger_id', [
+    ({'storeys': 4}, 'A', '1.3.3.3.(1)', 'HR-04'),
+    ({'part10_building': True, 'part10_sprinklers': True}, 'B', '10.1.1.2.(2)', 'HR-12'),
+])
+def test_other_prerequisite_lookups_cannot_erase_a_detected_trigger(package, extra, division, provision_id, trigger_id):
+    case, codes = package
+    _cleared(case)
+    case.facts += [fact(key, value) for key, value in extra.items()]
+    assert professional_involvement(case, codes).required == 'yes'
+    _withhold(codes, division, provision_id, 'blank')
+    result = professional_involvement(case, codes)
+    assert result.required == 'depends'
+    assert any(provision_id in q for q in result.questions)
+    assert trigger_id not in [r.trigger_id for r in human_reviews(case, codes)]
+    assert any(g.severity == 'blocking' and provision_id in g.message
+               for g in professional_involvement_gaps(case, codes, []))
+
+
 def test_missing_source_reopens_previously_resolved_alternative_involvement(package):
     case, codes = package
     _cleared(case)
