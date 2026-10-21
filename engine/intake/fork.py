@@ -65,7 +65,7 @@ def assess(text: str, *, decisions: dict[str, str] | None = None) -> Fork:
     departs, follows = _cues(_DEPARTS, text or ''), _cues(_FOLLOWS, text or '')
     decided = list((decisions or {}).values())
     if departs and not follows or (decided and 'yes' in decided):
-        cue = departs[0] if departs else 'the requirement you marked as one your design departs from'
+        cue = max(departs, key=len) if departs else 'the requirement you marked as one your design departs from'
         return Fork(variance_needed='likely', cues=departs, halves=HALVES, explanation=(
             f'Your description says the design does something other than an acceptable solution ("{cue}"). '
             'That is the alternative-solution path, and it needs two things: the alternative solution, which is '

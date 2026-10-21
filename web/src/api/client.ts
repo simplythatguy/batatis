@@ -241,9 +241,9 @@ export function createEngine(base: string) {
         withVersion({ decision }, expectedVersion),
         signal,
       ),
-    /** GET /cases/{id}/information-request. Items are not_sure decisions. */
+    /** GET /cases/{id}/identify/information-request. Items are not_sure decisions. */
     informationRequest: (caseId: string, signal?: AbortSignal) =>
-      call<InformationRequest>("GET", `/cases/${enc(caseId)}/information-request`, undefined, signal),
+      call<InformationRequest>("GET", `/cases/${enc(caseId)}/identify/information-request`, undefined, signal),
     /** POST /cases/{id}/evidence. 409 = stale version or existing ID; 404 = case gone or slot absent. */
     saveEvidence: (caseId: string, body: EvidenceWrite, signal?: AbortSignal) =>
       call<EvidenceSaved>("POST", `/cases/${enc(caseId)}/evidence`, body, signal),
@@ -489,7 +489,17 @@ async function readIdentifyResponse(res: Response, onStage?: (stage: string) => 
     buf = parsed.rest;
     for (const ev of parsed.events) {
       onStage?.(ev.event);
-      if (ev.event === "error") throw new EngineError(503, "Article ranking failed.");
+      if (ev.event === "error") {
+        // Keep the engine's status (409 conflict, 503 unavailable) and its public message.
+        let payload: { status?: unknown; message?: unknown } = {};
+        try {
+          payload = JSON.parse(ev.data) as typeof payload;
+        } catch {
+          /* fall back below */
+        }
+        const status = typeof payload.status === "number" ? payload.status : 503;
+        throw new EngineError(status, typeof payload.message === "string" ? payload.message : "Article ranking failed.");
+      }
       if (ev.event === "done") {
         try {
           donePayload = JSON.parse(ev.data) as IdentifyResult;

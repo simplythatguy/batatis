@@ -125,3 +125,76 @@ The stored run (same body). Never calls a provider. `404 intake not run` before 
 python -m pytest -q engine/tests/test_intake_extract.py engine/tests/test_intake_pdf.py
 python -m evals_dev.intake_facts.score       # typed-fact precision and recall on the 60 dev cases
 ```
+
+## Plan: scope, fork and questions (WP-22)
+
+Every write below stores `record.plan` (`IntakePlan`) and returns the same `IntakeResult` as `POST /cases/{id}/intake`. The plan is deterministic and never calls a provider. Source: `engine/intake/scope.py`, `fork.py`, `questions.py`, `preapplication.py`, `notices.py`, `plan.py`.
+
+`plan.next` is `redirect` (another regime: show the redirect page), `questions` (at least one critical question is open) or `identify` (go on to code identification).
+
+### Scope (`plan.scope`)
+
+`status` is `in_scope`, `redirect` or `overridden`. On `redirect`, `regime` gives `id` (`plumbing`, `fire`, `energy`, `electrical`, `gas`, `private_sewage`), `name`, `code`, `framework` and `coverage`, and `route` (where to take it); `message` is the copy to show; `cue`/`start`/`end` are the applicant's words that decided it.
+
+- Electrical, gas and private sewage (`framework: no_division_c_framework`, `coverage: not_covered`): the copy says the regime has no equivalent mandatory Division C alternative-solution framework and that best practice is to follow the National Model Codes approach in principle.
+- Fire (NFC(AE)), plumbing (NPC) and energy (NECB) (`framework: national_model_code`, `coverage: roadmap`): the copy says they have the same pathway and Batatis coverage is on the roadmap, not built. A house's energy efficiency (NBC(AE) Section 9.36) is building code and stays in scope.
+- A redirect is also stored on the case as a `computed` fact `scope.redirect` (value: the regime id, `formula` naming the cue, `inputs`: the description fact). It stays unconfirmed, so the official export is blocked; no questions are asked and nothing writes Section C.
+
+Example (`plan.scope` for "Plumbing contractor. We want an air admittance valve instead of a vent through the roof."):
+
+```json
+{"status": "redirect",
+ "regime": {"id": "plumbing", "name": "plumbing", "framework": "national_model_code", "coverage": "roadmap",
+            "code": "Plumbing Code Regulation / National Plumbing Code (plumbing permit and plumbing safety codes officer)",
+            "route": "the plumbing safety codes officer at the office that issues plumbing permits for the site"},
+ "message": "This reads as a plumbing question (...). It is a National Model Code with the same alternative-solution pathway as the building code, but Batatis prepares building-code (NBC(AE)) applications only: plumbing coverage is on the roadmap, not built. Take the request to the plumbing safety codes officer at the office that issues plumbing permits for the site.",
+ "cue": "air admittance valve", "start": 32, "end": 52,
+ "scores": {"plumbing": 5, "electrical": 0, "gas": 0, "private_sewage": 0, "fire": 0, "energy": 0, "building": 0},
+ "override_allowed": true}
+```
+
+#### `POST /cases/{id}/intake/scope`
+
+`{"building_code": true, "expected_version": 3}`: the applicant's "this is a building-code question" override, stored as a confirmed `user_click` fact `scope.redirect` = `overridden`; later intake runs keep it. `{"building_code": false}` checks the scope again.
+
+### Fork (`plan.fork`)
+
+`variance_needed` is `likely`, `not_indicated` or `unknown`, read from the description before Section C (and from identify decisions once they exist: any `yes` is `likely`, all `no` is `not_indicated`). `explanation` never says the design complies, is approved, adequate or safe. `cues` are the applicant's words. `halves` always lists the two distinct things an accepted variance needs:
+
+```json
+[{"id": "variance_request", "label": "Request for variance", "basis": "Safety Codes Act, s.38",
+  "who": "Issued by a safety codes officer or an Administrator, who may set conditions",
+  "what": "The legal authorization to build in a way the code does not prescribe"},
+ {"id": "alternative_solution", "label": "Alternative solution (Div C 2.3.1)", "basis": "NBC(AE) Division C, 2.3.1",
+  "who": "Prepared by the proponent, usually a design professional",
+  "what": "The technical evidence that the design achieves at least the level of performance required by Division B in the attributed objectives and functions"}]
+```
+
+### Questions (`plan.questions`, at most five)
+
+```json
+{"id": "intake.storeys", "field": "storeys", "text": "How many storeys does the building have?",
+ "why": "Storey count decides between Part 9 and Part 3 and changes which exit, fire-separation and construction requirements are candidates.",
+ "unblocks": ["Part 9 or Part 3", "exit and fire-separation requirements"],
+ "splits": ["9.9.8.1.", "3.4.2.1."], "priority": "critical", "kind": "missing", "provision": null}
+```
+
+Order: conflicts in the applicant's own words (`kind: conflict`, "You wrote "two storeys", "three storeys". ...") first; then how evenly the fact splits the open code-identification candidates (`splits` lists the candidate articles it separates; these come from the identify result, so they are codedb articles); then facts that decide the route (Part 9 or Part 3, the departure itself); then Section A and B fields (`priority: administrative`). A field that already has a value on the case is not asked (its confirm card is). Run `POST /cases/{id}/intake/plan` after code identification to re-rank against the candidates.
+
+#### `POST /cases/{id}/intake/answers`
+
+`{"answers": [{"question_id": "intake.storeys", "answer": "three"}], "expected_version": 4}` (1 to 5 answers). Each `question_id` must be in the stored `plan.questions`, and `field`, if sent, must be that question's own field; anything else is `422` and nothing is written. An answer is stored as a confirmed `pointed` fact quoting the applicant's words, typed as the field needs ("three" is 3, "an office" is `business`); an answer that cannot be read as that field is `422`. "Not sure" (or empty) writes no fact: the question id goes to `plan.not_sure`, is not asked again and never blocks anything.
+
+#### `POST /cases/{id}/intake/plan`
+
+`{"expected_version": 4}` (optional): recompute and store the plan.
+
+All three writes follow the same contract as `POST /cases/{id}/intake`: optional `expected_version`, one compare-and-swap, `409 case was updated concurrently` with no retry, `404 case not found`.
+
+### Pre-application note (`plan.pre_application`)
+
+`steps` are `meet_authority` and `emergency_services` ("before you submit": the SCC presentation's process step 2). With a jurisdiction pack (the case's jurisdiction, else a municipality read from the description, `resolved_by: "description"`, unconfirmed) the text adds the authority's name, contact and entry-point notes and any emergency-services guide, with their sources (`origin: "pack"`). Without one the steps are generic.
+
+### Product route notice (`plan.route_notice`)
+
+For a manufacturer, or a request for acceptance across the jurisdiction: `summary` and sourced `bullets` on product acceptance (evaluation reports) versus a site variance. Ported from #44, reworded to keep the variance (Safety Codes Act, s.38) and the alternative solution (Division C, 2.3.1) distinct.

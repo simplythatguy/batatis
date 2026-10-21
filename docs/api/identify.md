@@ -111,7 +111,10 @@ The stored result with decisions overlaid and `stale: true` when the description
 
 `{"provision": "9.10.15.5.(8)", "departure": "one line", "expected_version": 8}`. The applicant names the requirement the design departs from and confirms the departure. The sentence, citation and objective and function codes are looked up; a departure that claims compliance, safety or approval is refused with 422 ("departs from the acceptable solution by ..." is fine). Returns the `IdentifyResult` with `benchmark.basis: applicant` and `departure_status: confirmed`.
 
-### `GET /cases/{id}/information-request`
+### `GET /cases/{id}/identify/information-request`
+
+The officer-facing draft of the applicant's `not_sure` decisions. It is separate from `GET /cases/{id}/information-request`, which is the package review's list of requests an officer has sent (see `docs/api/package-review.md`).
+
 
 `{"case_id", "items": [{"id", "provision_id", "text"}]}`: one item per `not_sure` decision, for the officer.
 

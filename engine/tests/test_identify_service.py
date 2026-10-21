@@ -316,7 +316,7 @@ def test_decisions_yes_no_not_sure_and_information_request(client, codes):
     unsure = http.post(f'/cases/{case_id}/identify/{second}/decision', json={'decision': 'not_sure'}).json()
     card = next(a for a in unsure['articles'] if a['provision'] == second)
     assert card['decision'] == 'not_sure' and card['open_question_id']
-    request = http.get(f'/cases/{case_id}/information-request').json()
+    request = http.get(f'/cases/{case_id}/identify/information-request').json()
     assert [item['provision_id'] for item in request['items']] == [second]
     http.post(f'/cases/{case_id}/identify/{first}/decision', json={'decision': 'no'})
     assert store.get(case_id).provisions == [] and store.get(case_id).section_c == []
@@ -475,6 +475,25 @@ def test_answers_only_fill_questions_identify_asked(client):
     assert len(filled) == 1 and filled[0].status == 'unconfirmed' and filled[0].value == 'yes'
 
 
+def test_answers_are_written_with_the_result_or_not_at_all(client, monkeypatch):
+    """A refused run (429) leaves no answer behind; a successful run is one write, answers included."""
+    import engine.routes_identify as routes
+    http, store = client
+    case_id = described(http)
+    question = http.post(f'/cases/{case_id}/identify', json={}).json()['open_questions'][0]
+    answer = {'question_id': question['id'], 'answer': 'yes'}
+    before = store.get(case_id).version
+    monkeypatch.setattr(routes, 'identify_retry_after', lambda _ip: 30)
+    assert http.post(f'/cases/{case_id}/identify', json={'answers': [answer]}).status_code == 429
+    assert store.get(case_id).version == before
+    assert not [f for f in store.get(case_id).facts if f.field == question['field']]
+    monkeypatch.setattr(routes, 'identify_retry_after', lambda _ip: None)
+    assert http.post(f'/cases/{case_id}/identify', json={'answers': [answer]}).status_code == 200
+    saved = store.get(case_id)
+    assert saved.version == before + 1, 'answers and result are one compare-and-swap'
+    assert [f.value for f in saved.facts if f.field == question['field']] == ['yes']
+
+
 def test_answers_need_a_stored_identification(client):
     http, _ = client
     case_id = described(http)
@@ -597,3 +616,33 @@ def test_identify_run_is_one_cas_and_a_write_during_it_is_a_409(client, monkeypa
     assert reply.status_code == 409
     case = store.get(case_id)
     assert case.identify is None and case.title == 'edited during the run'
+
+
+def test_title_names_only_a_committed_or_offered_article():
+    from engine.identify.title import short_title
+    prose = 'Single-family house in Red Deer with an egress window'
+    rows = lambda status: {'articles': [{'provision': '9.9.10.1.(2)', 'title': 'Egress window', 'status': status}]}  # noqa: E731
+    for status in ('candidate', 'fallback'):
+        assert '9.9.10.1.(2)' not in short_title(prose, [], rows(status))
+    for status in ('committed', 'choice'):
+        assert '9.9.10.1.(2)' in short_title(prose, [], rows(status))
+
+
+@pytest.mark.parametrize('prose', [
+    'A house with a fire-rated wall assembly that departs from the tested listing.',
+    'Please take care to review the surface treatment of the stairs.',
+    'The lot has a stormwater detention pond; the industrial park is next door.',
+    'Single-family house on a working farm lot.',
+])
+def test_ordinary_words_do_not_set_a_building_type(prose):
+    from engine.identify.title import short_title
+    title = short_title(prose, [], None)
+    for wrong in ('Assembly', 'Care', 'Treatment', 'Detention', 'Industrial'):
+        assert not title.startswith(wrong)
+    assert 'Farm' not in title.split(':')[0]
+
+
+def test_occupancy_phrases_still_set_a_building_type():
+    from engine.identify.title import short_title
+    assert short_title('A nursing home addition in Red Deer', [], None).startswith('Care')
+    assert short_title('Retail unit in Calgary', [], None).startswith('Mercantile')

@@ -36,13 +36,15 @@ _TYPE_PROSE = (
     (re.compile(r'\b(?:apartment|apartments|multi[- ]family)\b', re.I), 'Multi-family'),
     (re.compile(r'\bhotel\b', re.I), 'Hotel'),
     (re.compile(r'\b(?:single[- ]family|single detached|detached house|detached home|bungalow|infill house|\bhouse\b)\b', re.I), 'Single-family'),
-    (re.compile(r'\bassembly\b', re.I), 'Assembly'),
-    (re.compile(r'\bcare\b', re.I), 'Care'),
-    (re.compile(r'\btreatment\b', re.I), 'Treatment'),
-    (re.compile(r'\bdetention\b', re.I), 'Detention'),
+    # Occupancy phrases only: bare "assembly", "care", "treatment", "detention", "industrial" and "farm"
+    # appear in ordinary variance prose ("rated wall assembly", "take care", "stormwater detention").
+    (re.compile(r'\b(?:assembly (?:occupancy|building|hall|use)|place of assembly|theatre|auditorium|arena|church)\b', re.I), 'Assembly'),
+    (re.compile(r'\b(?:care (?:occupancy|facility|home)|nursing home|assisted living|long[- ]term care)\b', re.I), 'Care'),
+    (re.compile(r'\b(?:treatment (?:occupancy|facility|centre|center)|hospital|clinic)\b', re.I), 'Treatment'),
+    (re.compile(r'\b(?:detention (?:occupancy|facility|centre|center)|correctional (?:facility|centre|center)|jail)\b', re.I), 'Detention'),
     (re.compile(r'\b(?:mercantile|retail)\b', re.I), 'Mercantile'),
-    (re.compile(r'\bindustrial\b', re.I), 'Industrial'),
-    (re.compile(r'\bfarm\b', re.I), 'Farm'),
+    (re.compile(r'\b(?:industrial (?:occupancy|building|facility|plant|warehouse)|factory|warehouse)\b', re.I), 'Industrial'),
+    (re.compile(r'\b(?:farm (?:building|barn)|agricultural building|barn)\b', re.I), 'Farm'),
 )
 _OCCUPANCY_FIELDS = {'professional.occupancy', 'occupancy', 'building.occupancy', 'building.type'}
 _PLACE_FIELDS = {'municipalAddress', 'site.city', 'site.address', 'building.address', 'site.location'}
@@ -127,8 +129,10 @@ def _provision(result: dict) -> tuple[str | None, str | None]:
                 break
         if chosen is None:
             chosen = {'provision': target, 'title': None}
-    elif articles:
-        chosen = articles[0]
+    else:
+        # Only an article Batatis put forward (committed or offered as a quoted choice) names the title;
+        # a candidate or labelled-fallback ranking is not a selected result.
+        chosen = next((row for row in articles if row.get('status') in ('committed', 'choice')), None)
     if not chosen:
         return None, None
     shown = _real_id(chosen.get('provision_id')) or _real_id(chosen.get('provision')) or _real_id(target)
