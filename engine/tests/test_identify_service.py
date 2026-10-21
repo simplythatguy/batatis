@@ -437,3 +437,15 @@ def test_reviewer_reads_identify_but_cannot_run_or_decide(scene):
                          json={'decision': 'yes'}).status_code in {404, 409}
     assert owner.post(f'/cases/{case.id}/identify', json={}).status_code == 409    # submitted is read-only
     assert store.get(case.id).provisions == []
+
+
+def test_reference_withdrawal_clears_a_yes_on_the_identify_cards(client):
+    http, store = client
+    case_id = described(http)
+    first = http.post(f'/cases/{case_id}/identify', json={}).json()['articles'][0]['provision']
+    http.post(f'/cases/{case_id}/identify/{first}/decision', json={'decision': 'yes'})
+    version = store.get(case_id).version
+    withdrawn = http.post(f'/cases/{case_id}/section-d', json={'provisions': [], 'expected_version': version})
+    assert withdrawn.status_code == 200 and store.get(case_id).provisions == []
+    card = next(a for a in http.get(f'/cases/{case_id}/identify').json()['articles'] if a['provision'] == first)
+    assert card['decision'] is None

@@ -52,6 +52,10 @@ def _current(result: IdentifyResult, case: Case) -> IdentifyResult:
     out = result.model_copy(deep=True)
     out.stale = out.description_sha256 != description_hash(description(case))
     out.persisted = True
+    # A `yes` stands only while the article is still a case provision: a reference withdrawal
+    # (POST /cases/{id}/section-d) clears provisions and citation.* facts without touching this record.
+    kept = {p.split('(')[0] for p in case.provisions}
+    out.decisions = {k: v for k, v in out.decisions.items() if v.decision != 'yes' or k in kept}
     return overlay_decisions(out)
 
 
