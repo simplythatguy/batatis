@@ -16,7 +16,7 @@ from .section_c import section_c_rows
 from .section_d import SectionDPlan, section_d_plan
 from .section_d_issues import SectionDIssue, section_d_issues
 from .llm_gate import client_ip_from, search_retry_after
-from .models import Case
+from .models import Case, Jurisdiction
 from .store import CaseBackend, VersionConflict
 
 
@@ -36,6 +36,12 @@ class SectionDRequest(BaseModel):
         return self
 
 
+class JurisdictionRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    jurisdiction: Jurisdiction | None
+    expected_version: int = Field(ge=1, strict=True)
+
+
 def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
                   registry: CCMCRegistry | None = None) -> APIRouter:
     router = APIRouter(tags=['case building'])
@@ -46,6 +52,23 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         if case is None:
             raise HTTPException(404, 'case not found')
         return case
+
+    @router.put('/cases/{case_id}/jurisdiction', response_model=Case)
+    def set_jurisdiction(case_id: str, body: JurisdictionRequest):
+        store = cases()
+        snapshot = store.get_snapshot(case_id)
+        if snapshot is None:
+            raise HTTPException(404, 'case not found')
+        case, version = snapshot
+        if body.expected_version != version:
+            raise HTTPException(409, 'case was updated concurrently')
+        case.jurisdiction = body.jurisdiction
+        try:
+            return store.put(case, expected_version=version)
+        except VersionConflict as error:
+            if error.actual is None:
+                raise HTTPException(404, 'case not found') from error
+            raise HTTPException(409, 'case was updated concurrently') from error
 
     @router.post('/cases/{case_id}/section-d', response_model=SectionDPlan)
     def section_d(case_id: str, body: SectionDRequest | None = None):

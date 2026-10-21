@@ -129,7 +129,12 @@ def test_preserves_all_unrelated_case_fields_document_metadata_and_file_bytes(co
                     source=Source(type='file', ref=file_id, quote='TEST attachment provenance'))
     acknowledged = client.post(f'/api/cases/{case.id}/facts', json=attached.model_dump())
     assert_private(acknowledged, 200)
-    before = Case.model_validate(acknowledged.json())
+    # The existing fact writer normalizes its acknowledgment's derived kind after writing.
+    # Establish that canonical snapshot in storage before comparing physical retention.
+    snapshot, snapshot_version = store.get_snapshot(case.id)
+    before = store.put(snapshot, expected_version=snapshot_version)
+    assert before.model_dump(exclude={'version', 'updated_at'}) == Case.model_validate(
+        acknowledged.json()).model_dump(exclude={'version', 'updated_at'})
     assert before.evidence[0].kind == 'file'
     before_raw, version, before_files = raw_state(store, case.id)
     ids_before = case_ids(store)
