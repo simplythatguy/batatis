@@ -26,7 +26,7 @@ from .http_guard import HttpGuard
 from .identify import Judge
 from .llm_gate import client_ip_from, search_retry_after
 from .models import Case, Fact, Jurisdiction, SectionCRow
-from .retention import maybe_purge
+from .retention import maybe_purge, purge_now
 from .section_c import section_c_rows
 from .store import CaseStore, FileTooLarge, InvalidAttachment, VersionConflict, assert_durable_when_hosted, open_store
 from .uploads import (MULTIPART_MAX_OVERHEAD_BYTES, MULTIPART_MAX_PARTS,
@@ -149,7 +149,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
     def purge_cases(*, force: bool = False) -> int:
         current = cases()
         try:
-            return current.purge_expired() if force else maybe_purge(current)
+            return purge_now(current) if force else maybe_purge(current)
         except Exception as exc:
             logger.warning('case purge failed: %s', type(exc).__name__)
             raise HTTPException(503, 'case purge failed', headers={'Cache-Control': 'no-store'}) from None
