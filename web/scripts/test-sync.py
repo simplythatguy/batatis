@@ -31,14 +31,15 @@ if len(sys.argv) > 1 and sys.argv[1] == '--serve':
     socket.socket.connect = local_connect
     directory = Path(sys.argv[2])
     sock = socket.socket()
-    sock.bind(('127.0.0.1', 0))
+    # SYNC_ENGINE_PORT pins the loopback port for runs that must stay on an assigned port.
+    sock.bind(('127.0.0.1', int(os.environ.get('SYNC_ENGINE_PORT', '0'))))
     sock.listen(128)
     (directory / 'port').write_text(str(sock.getsockname()[1]))
     app = create_app(store=CaseStore(directory / 'cases.sqlite'))
     uvicorn.Server(uvicorn.Config(app, log_level='warning', access_log=False)).run(sockets=[sock])
     sys.exit(0)
 
-env = {k: os.environ[k] for k in ('PATH', 'HOME', 'LANG', 'BATATIS_CODEDB', 'BATATIS_SCC_FORM', 'SYNC_WEB_BASE', 'CHROME_PATH') if k in os.environ}
+env = {k: os.environ[k] for k in ('PATH', 'HOME', 'LANG', 'BATATIS_CODEDB', 'BATATIS_SCC_FORM', 'SYNC_WEB_BASE', 'CHROME_PATH', 'SYNC_ENGINE_PORT') if k in os.environ}
 env.update(BATATIS_LIVE='0', PYTHONDONTWRITEBYTECODE='1')
 with tempfile.TemporaryDirectory(prefix='batatis-web-sync-') as tmp:
     directory = Path(tmp)
@@ -73,6 +74,10 @@ with tempfile.TemporaryDirectory(prefix='batatis-web-sync-') as tmp:
                     result = subprocess.run(['node', '--experimental-strip-types', '--import', './scripts/register-ts.mjs', 'tests/contract-r7.integration.mts'], cwd=WEB, env=env, timeout=120)
                 if result.returncode == 0:
                     result = subprocess.run(['node', 'tests/contract-r7.integration.mjs'], cwd=WEB, env=env, timeout=180)
+                if result.returncode == 0:
+                    result = subprocess.run(['node', '--experimental-strip-types', '--import', './scripts/register-ts.mjs', 'tests/evidence-r8.integration.mts'], cwd=WEB, env=env, timeout=120)
+                if result.returncode == 0:
+                    result = subprocess.run(['node', 'tests/evidence-r8.integration.mjs'], cwd=WEB, env=env, timeout=180)
             sys.exit(result.returncode)
         finally:
             server.terminate()
