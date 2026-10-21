@@ -75,9 +75,9 @@ An answer must name a question this case's stored identification asked (`open_qu
 
 - `Accept: application/json` returns the `IdentifyResult`.
 - `Accept: text/event-stream` streams one event per stage, in this order: `start`, `screen`, `rerank`, `verify`, `questions`, `done`. Each stage event's data carries status and counts only (`{"stage": "screen", "status": "done", "method": "jev", "articles": 2080}`), never prose or code text. `done` carries the full result, the same body as the JSON response. A failure sends `error` with `{"message", "status"}`. Events are not buffered by the HTTP guard.
-- Errors: 404 case not found, 409 no description or a run already in progress (`Retry-After: 1`), 429 rate limit (`Retry-After`), 503 code database missing or config invalid.
+- Errors: 404 case not found; 409 no description, a run already in progress (`Retry-After: 1`), or a stale or concurrent case version (`expected_version`); 422 an answer to a question this identification did not ask; 429 rate limit (`Retry-After`); 503 code database missing or config invalid.
 
-The run stores the result on the case (`case.identify`) and writes the relevance rings (`case.relevance`) from the same Jev screen, so the code library's rings match the identification. It also sets a short title when the case has none.
+The run stores the result on the case (`case.identify`) and writes the relevance rings (`case.relevance`) from the same Jev screen, so the code library's rings match the identification. It also sets a short title when the case has none, or when the title is still the one an earlier run generated (`IdentifyResult.title` records only Batatis's own title, `null` after the applicant edits it), so later runs keep it current without overwriting an edit.
 
 ### `GET /cases/{id}/identify`
 

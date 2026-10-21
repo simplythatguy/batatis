@@ -57,11 +57,16 @@ def first_sentence(text: str) -> str:
     return re.split(r'(?<=[.!?])\s+', trimmed, maxsplit=1)[0]
 
 
-def title_should_replace(title: str | None, prose: str) -> bool:
-    """Replace a blank title, or one that is just the description's first sentence."""
+def title_should_replace(title: str | None, prose: str, generated: str | None = None) -> bool:
+    """Replace a blank title, one Batatis generated earlier (`generated`), or the description's first sentence.
+
+    A title the applicant edited matches none of these, so it is kept.
+    """
     if title is None or not str(title).strip():
         return True
     current = ' '.join(str(title).split())
+    if generated and current == ' '.join(generated.split()):
+        return True
     first = first_sentence(prose)
     if current == first:
         return True

@@ -130,13 +130,18 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
                 apply_answers(case, answers)
             previous = case.identify.decisions if case.identify else {}
             result.decisions = {k: v for k, v in previous.items() if any(a.provision == k for a in result.articles)}
-            if title_should_replace(case.title, text):
+            generated = case.identify.title if case.identify else None
+            if title_should_replace(case.title, text, generated):
                 case.title = short_title(text, case.facts, result.model_dump())
-            result.title = case.title
+                result.title = case.title
+            else:
+                result.title = generated if case.title == generated else None   # `title` is only ever Batatis's own
             case.identify = result
             if relevance is not None:
                 case.relevance = relevance
         saved, _ = save(case_id, attach, expected_version=base.version)
+        if list(saved.provisions) != list(base.provisions):   # the CAS pinned `base`; `attach` never touches provisions
+            raise HTTPException(500, 'identify must not change provisions')
         logger.info('Identify: case=%s mode=%s scored=%s committed=%s choices=%s dropped=%s usd=%.6f seconds=%.3f',
                     case_id, result.mode, result.trace.articles_scored, len(result.committed), len(result.choices),
                     len(result.trace.dropped), result.trace.usd, result.trace.seconds)
@@ -149,7 +154,6 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         case = get_case(case_id)
         if body.expected_version is not None and body.expected_version != case.version:
             raise HTTPException(409, 'case was updated concurrently')
-        provisions = list(case.provisions)
         if body.answers:
             try:
                 check_answers(case, body.answers)
@@ -177,8 +181,6 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
             raise HTTPException(409, 'Identification already in progress', headers={'Retry-After': '1'}) from None
         except ProcessRefMissing:
             raise HTTPException(503, 'process references missing from the code database') from None
-        if list(get_case(case_id).provisions) != provisions:
-            raise HTTPException(500, 'identify must not change provisions')
         return result
 
     def stream(case_id: str, text: str, outbound: str, client_ip: str, base: Case, answers=()) -> StreamingResponse:
@@ -240,7 +242,10 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         def write(case: Case):
             case.provisions = list(dict.fromkeys(body.provisions))
             case.section_c = section_c_rows(case.provisions, codes)
-        saved, _ = save(case_id, write, expected_version=body.expected_version)
+        try:
+            saved, _ = save(case_id, write, expected_version=body.expected_version)
+        except KeyError as error:   # a section or subsection id: pass an article, sentence or clause
+            raise HTTPException(404, {'message': 'pass an article, sentence or clause', 'detail': str(error.args[0])}) from None
         return saved
 
     @router.post('/cases/{case_id}/identify/{provision_id}/decision', response_model=IdentifyDecisionResponse)

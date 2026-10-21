@@ -646,3 +646,57 @@ def test_occupancy_phrases_still_set_a_building_type():
     from engine.identify.title import short_title
     assert short_title('A nursing home addition in Red Deer', [], None).startswith('Care')
     assert short_title('Retail unit in Calgary', [], None).startswith('Mercantile')
+
+
+def test_a_generated_title_follows_later_runs_but_an_edited_title_is_kept(client):
+    http, store = client
+    case_id = described(http)
+    first = http.post(f'/cases/{case_id}/identify', json={}).json()
+    generated = store.get(case_id).title
+    assert first['title'] == generated
+    # The first run itself records the marker; the test never sets it.
+    assert store.get(case_id).identify.title == generated
+    # The applicant has not touched the title: a changed description produces a new generated title.
+    second = http.post(f'/cases/{case_id}/identify', json={'prose': 'A single-family house in Red Deer with a projecting soffit'}).json()
+    assert store.get(case_id).title == second['title'] and second['title']
+    # An applicant-edited title stays and is no longer recorded as generated.
+    case = store.get(case_id)
+    case.title = 'My own title'
+    store.put(case, expected_version=case.version)
+    third = http.post(f'/cases/{case_id}/identify', json={}).json()
+    assert store.get(case_id).title == 'My own title' and third['title'] is None
+
+
+def test_title_should_replace_a_title_batatis_generated():
+    from engine.identify.title import title_should_replace
+    assert title_should_replace('Variance application', 'x. y', generated='Variance application')
+    assert not title_should_replace('My own title', 'x. y', generated='Variance application')
+    assert not title_should_replace('Variance application', 'x. y')
+
+
+def test_confirm_maps_a_non_article_reference_to_404(client):
+    http, store = client
+    case_id = described(http)
+    reply = http.post(f'/cases/{case_id}/identify/confirm', json={'provisions': ['9.10.']})
+    assert reply.status_code == 404, reply.text
+    assert store.get(case_id).provisions == []
+
+
+def test_a_decision_between_the_write_and_the_reply_does_not_fail_the_run(client, monkeypatch):
+    """The provisions invariant compares the saved case with the run's base, not a second read."""
+    http, store = client
+    case_id = described(http)
+    real_put, done = store.put, []
+
+    def put_then_confirm(case, **kwargs):
+        out = real_put(case, **kwargs)
+        if case.identify is not None and not done:
+            done.append(True)
+            concurrent = store.get(case_id)
+            concurrent.provisions = ['9.10.15.5.']
+            real_put(concurrent, expected_version=concurrent.version)
+        return out
+
+    monkeypatch.setattr(store, 'put', put_then_confirm)
+    assert http.post(f'/cases/{case_id}/identify', json={}).status_code == 200
+    assert done
