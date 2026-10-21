@@ -105,7 +105,7 @@ def chain_tokens(L: Loaded, row: dict) -> dict[str, dict[str, int]]:
 
 def chain_latency_ms(L: Loaded, row: dict) -> float | None:
     """Sequential stages add; parallel fusion branches count once, by the slowest. None if any row is cached or errored."""
-    if row['cached'] or row['source'] != 'live' or row['errors']:
+    if row['cached'] or row['source'] != 'live' or row['errors'] or row['profile'] != 'interactive':
         return None
     own = stage_ms(row)
     ups = []
@@ -343,3 +343,18 @@ def latency_summary(L_interactive: Loaded, arm: str, cases: Iterable[BenchCase])
     return {'n': len(first), 'unusable_rows': errs, 'p50_ms': percentile(first, 0.5), 'p95_ms': percentile(first, 0.95),
             'max_ms': max(first) if first else None,
             'all_repeats_p50_ms': percentile([v for _r, v in vals], 0.5) if vals else None}
+
+
+def stage_latency_summary(L_interactive: Loaded, arm: str, cases: Iterable[BenchCase]) -> dict:
+    """p50, p95 and max milliseconds of this arm's own stage on interactive, uncached, error-free rows (repeat 0 when several).
+
+    Unlike ``latency_summary`` this needs no upstream interactive rows, so a verifier stage can be timed on its own while the
+    screen's credit is unavailable. The end-to-end figure is never inferred from it.
+    """
+    ids = {c.id for c in cases}
+    vals = [(rep, stage_ms(row)) for (cid, rep), row in L_interactive.rows.get(arm, {}).items()
+            if cid in ids and row['profile'] == 'interactive' and not row['cached'] and row['source'] == 'live'
+            and not row['errors']]
+    first = [v for rep, v in vals if rep == 0] or [v for _r, v in vals]
+    return {'n': len(first), 'p50_ms': percentile(first, 0.5), 'p95_ms': percentile(first, 0.95),
+            'max_ms': max(first) if first else None}

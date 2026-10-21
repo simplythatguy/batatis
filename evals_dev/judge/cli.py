@@ -12,6 +12,10 @@ The folder comes from ``BATATIS_JUDGE_DIR`` (default ``~/batatis-judge``). The s
 process, in a temporary directory, with a scrubbed environment and, on macOS, a sandbox that denies reads of the
 judge folder. Its stdout and stderr are never echoed. Per-scenario detail goes to ``<judge folder>/state`` only.
 
+A SUT that calls providers needs the engine's live switch in the judge's environment, which passes BATATIS_* through, for example
+``BATATIS_LIVE=1 BATATIS_DAILY_SPEND_CAP_USD=5 python -m evals_dev.judge run --split dev --sut identify``; provider keys are read
+from the git-ignored .env and set for the SUT only.
+
 Exit status: 0 done, 1 internal error (class and location only, never a message), 2 usage, 3 refused by the
 run-once lock or registration, 4 isolation required but unavailable.
 """
@@ -41,6 +45,7 @@ VERSION = 1
 BUILTIN_SUTS = {
     'engine': [sys.executable, str(REPO / 'engine' / 'cli_sut.py')],
     'bm25-floor': [sys.executable, str(REPO / 'evals_dev' / 'judge' / 'suts' / 'bm25_floor.py')],
+    'identify': [sys.executable, str(REPO / 'evals_dev' / 'judge' / 'suts' / 'identify_pipeline.py')],
 }
 
 

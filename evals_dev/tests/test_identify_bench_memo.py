@@ -49,7 +49,8 @@ def test_pipelines_without_rows_are_left_out_not_invented(world):
 
 def test_latency_comes_only_from_interactive_rows(world):
     an = analyse(world)
-    assert set(an.latency) >= {'V15f-R5', 'R6-bm25-jev-rerank60'} and 'F1-rrf-R5-R1-R2' not in an.latency
+    assert set(an.latency) >= {'V15f-R5', 'R6-bm25-jev-rerank60'}
+    assert an.latency['F1-rrf-R5-R1-R2']['n'] == 0 and an.latency['F1-rrf-R5-R1-R2']['p95_ms'] is None   # only a stage floor
     assert an.latency['V15f-R5']['n'] == 4 and an.latency['V15f-R5']['p95_ms'] > 0
 
 
@@ -108,3 +109,36 @@ def test_g1_checks_fail_closed_on_missing_data(world):
     checks = {c.id: c for c in evaluate_g1(an, 'V15f-R5')}
     assert checks['G1.1'].status in ('PASS', 'FAIL', 'NOT RUN') and checks['G1.2'].status == 'FAIL'    # 2 repeats, 5 are needed
     assert not passed(list(checks.values()))
+
+
+def test_an_interactive_run_can_read_shortlists_from_throughput_rows(tmp_path):
+    ctx, _ = fakes.make_ctx(tmp_path)
+    arms = fakes.fake_arms()
+    cases = fakes.make_cases(4, 'public53', 'selection')
+    run_arms(arms, ['V15f-R5'], cases, ctx, repeats=2, git_sha='t')
+    before = len(ctx.store.arm_rows('R5-jev-screen-rerank60'))
+    run_arms(arms, ['V15f-R5'], cases, ctx, repeats=1, profile='interactive', upstream_profile='throughput', git_sha='t')
+    assert len(ctx.store.arm_rows('R5-jev-screen-rerank60')) == before                  # the screen was not run again
+    an = analysis.analyse(ctx.store, arms=arms, cases=cases, pipelines=('V15f-R5', 'R5-jev-screen-rerank60'))
+    assert an.stage_latency['V15f-R5']['n'] == 4 and an.stage_latency['V15f-R5']['p95_ms'] > 0
+    assert 'V15f-R5' in an.latency and an.latency['V15f-R5']['n'] == 0                   # no end-to-end figure is invented
+    assert an.latency['V15f-R5']['lower_bound_p95_ms'] == an.stage_latency['V15f-R5']['p95_ms']
+
+
+def test_one_stage_over_twenty_seconds_fails_h2_without_the_other_stages():
+    from evals_dev.identify_bench.decision import hard_filters
+    from evals_dev.identify_bench import report
+    e = type('E', (), {'errors': {'rows': 10, 'rows_with_errors': 0}, 'verifier': {'fabricated_citations_shown': 0}})()
+    assert hard_filters(e, {'lower_bound_p95_ms': 21_000})['H2_p95_under_20s'] is False
+    assert hard_filters(e, {'lower_bound_p95_ms': 12_000})['H2_p95_under_20s'] is None
+    assert hard_filters(e, {'p95_ms': 9_000, 'lower_bound_p95_ms': 21_000})['H2_p95_under_20s'] is True
+
+
+def test_the_public_wording_never_names_the_screening_vendor():
+    from evals_dev.identify_bench.arms import public_model_id, standard_arms
+    assert public_model_id('jev-1.13.0') == 'screen-1.13.0' and public_model_id('gpt-6-luna') == 'gpt-6-luna'
+    arms = standard_arms()
+    for name in arms:
+        text = memo.describe(arms, name, public=True)
+        assert 'jev' not in text.lower(), (name, text)
+    assert 'Jev' in memo.describe(arms, 'R4-jev-screen')            # internal files may name it

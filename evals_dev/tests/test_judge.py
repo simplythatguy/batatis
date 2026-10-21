@@ -496,3 +496,17 @@ def test_running_the_judge_does_not_change_the_callers_environment(folder, sut, 
     run_cli(['run', '--split', 'dev', '--label', 'x', '--env-file', str(env_file), '--limit', '1', '--', *sut], folder,
             capsys, monkeypatch)
     assert 'OPENAI_API_KEY' not in os.environ
+
+
+def test_the_identify_pipeline_result_maps_onto_the_judge_contract():
+    from evals_dev.judge.suts.identify_pipeline import to_contract
+    result = {'mode': 'live', 'articles': [
+        {'rank': 1, 'provision': '9.10.15.5.', 'status': 'committed', 'probability': 0.91, 'title': 'T', 'part': 9},
+        {'rank': 2, 'provision': '9.10.9.16.', 'status': 'choice', 'probability': 0.7},
+        {'rank': 3, 'provision': None, 'status': 'candidate'}],
+        'choices': [{'question': 'Does your design do something different?'}], 'trace': {'config_hash': 'abc', 'usd': 0.02}}
+    out = to_contract(result)
+    assert [(a['provision'], a['committed']) for a in out['articles']] == [('9.10.15.5.', True), ('9.10.9.16.', False)]
+    assert out['intake_action'] == 'proceed_conditionally' and out['engineering_required'] == 'depends'
+    assert check_output(out) is None and out['trace']['config_hash'] == 'abc'
+    assert to_contract({'articles': []})['intake_action'] == 'ask'

@@ -69,10 +69,17 @@ def hard_filters(e: ArmEval, latency: dict | None) -> dict:
     rate = (err['rows_with_errors'] / err['rows']) if err['rows'] else None
     h1 = e.verifier.get('fabricated_citations_shown') if e.verifier else 0
     p95 = (latency or {}).get('p95_ms')
+    floor = (latency or {}).get('lower_bound_p95_ms')
+    if p95 is not None:
+        h2_latency = p95 < P95_MAX_MS
+    elif floor is not None and floor >= P95_MAX_MS:        # one stage alone is over the limit, whatever the others take
+        h2_latency = False
+    else:
+        h2_latency = None
     return {
         'H1_no_fabricated_citation': None if h1 is None else h1 == 0,
         'H2_errors_under_2_percent': None if rate is None else rate < ERROR_RATE_MAX,
-        'H2_p95_under_20s': None if p95 is None else p95 < P95_MAX_MS,
+        'H2_p95_under_20s': h2_latency,
     }
 
 

@@ -89,9 +89,16 @@ def cmd_run(args) -> int:
             flag = ' ERROR ' + row['errors'][0]['category'] if row['errors'] else ''
             print(f"  {row['arm']} {row['case_id']} r{row['repeat']} usd={row['usd']:.5f}{flag}", flush=True)
 
+    import signal
+    import threading
+    stop = threading.Event()
+    for sig in (signal.SIGTERM, signal.SIGINT):           # finish the calls in flight, then stop: no orphaned reservation
+        signal.signal(sig, lambda *_: stop.set())
     summary = run_arms(arms, args.arms, cases, ctx, repeats=args.repeats, retry_errors=args.retry_errors,
-                       workers=args.workers, profile=args.profile, codedb_sha256=db_sha, git_sha=git_state(),
-                       on_row=on_row)
+                       workers=args.workers, profile=args.profile, upstream_profile=args.upstream_profile,
+                       codedb_sha256=db_sha, git_sha=git_state(), on_row=on_row, stop=stop)
+    if stop.is_set() and not summary.stopped:
+        summary.stopped = 'interrupted'
     print(json.dumps({'ran': summary.ran, 'skipped': summary.skipped, 'errored': summary.errored,
                       'stopped': summary.stopped, 'by_arm': summary.by_arm}, indent=1))
     return 3 if summary.stopped else 0
@@ -232,6 +239,8 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument('--verifier-repeats', type=int, default=5)
     run.add_argument('--workers', type=int, default=1)
     run.add_argument('--profile', choices=['throughput', 'interactive'], default='throughput')
+    run.add_argument('--upstream-profile', choices=['throughput', 'interactive'],
+                     help='read shortlists from stored rows of this profile and run only the named arms')
     run.add_argument('--retry-errors', action='store_true')
     run.add_argument('--dry-run', action='store_true')
     run.add_argument('--progress', type=int, default=25)

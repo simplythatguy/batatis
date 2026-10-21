@@ -14,6 +14,7 @@ from .analysis import SELECTION, Analysis, chain_of, mrr_by_repeat, top1_by_part
 from .decision import (AGREEMENT_MIN, ERROR_RATE_MAX, OVERRIDE_COST_RATIO, OVERRIDE_POINTS, P95_MAX_MS, TIE_ALPHA,
                        TIE_POINTS)
 from .methods.base import Arm
+from .stage0 import recorded_jev_reference
 
 NOT_RUN = 'not run'
 
@@ -44,15 +45,18 @@ def table(header: list[str], rows: list[list[str]]) -> list[str]:
     return out
 
 
-def describe(arms: dict[str, Arm], name: str) -> str:
-    """One line per chain: what the pipeline does, from the arm configs."""
+def describe(arms: dict[str, Arm], name: str, *, public: bool = False) -> str:
+    """One line per chain: what the pipeline does, from the arm configs. ``public`` never names the screening vendor."""
+    from .arms import public_model_id
     parts = []
     for n in chain_of(arms, name):
         a, c = arms[n], arms[n].config()
+        who = 'the screening model' if public else 'Jev'
+        model = (lambda m: public_model_id(m) if public else m)
         if a.kind == 'screen':
-            parts.append(f"Jev `{c['model']}` judges all 2,080 Division B articles ({c['card_chars']}-character cards)")
+            parts.append(f"{who} `{model(c['model'])}` judges all 2,080 Division B articles ({c['card_chars']}-character cards)")
         elif a.kind == 'rerank' and 'provider' in c:
-            parts.append(f"Jev `{c['model']}` re-judges the top {c['n']} in one request")
+            parts.append(f"{who} `{model(c['model'])}` re-judges the top {c['n']} in one request")
         elif a.kind == 'rerank':
             parts.append(f"`{c['model']}` (effort {c['reasoning_effort']}) scores the top {c['n']} in one request")
         elif a.kind == 'verify':
@@ -60,7 +64,8 @@ def describe(arms: dict[str, Arm], name: str) -> str:
             parts.append(f"`{c['model']}` (effort {c['reasoning_effort']}, standard tier) reads the top {c['shortlist_n']} in "
                          f"{text} and must quote word for word" + (', may name articles outside the list' if c['out_of_list'] else ''))
         elif a.kind == 'fuse':
-            parts.append('reciprocal-rank fusion of ' + ', '.join(a.upstream_names))
+            parts.append('reciprocal-rank fusion of the rankings above' if public
+                         else 'reciprocal-rank fusion of ' + ', '.join(a.upstream_names))
         elif n.startswith('R0'):
             parts.append('BM25 over the Division B provisions (best provision per article)')
         elif n.startswith('R1'):
@@ -161,14 +166,21 @@ def render_decision(an: Analysis, *, ledger_openai: dict | None = None, ledger_j
     out += ['## Development folds (descriptive, not used to choose)', '',
             'Calibration and validation folds pooled, gold-bearing dev cases only. The validation fold is reserved for gate G4 and '
             'nothing was fitted on it.', '']
-    dt = [[f'`{n}`', cell(e.sr), cell(e.sr_by_group.get('part9')), cell(e.sr_by_group.get('other'))] for n, e in an.development.items()]
-    out += table(['pipeline', 'success rate', 'Part 9', 'other Parts'], dt) + ['']
+    dt = [[f'`{n}`', cell(e.sr), cell(e.sr_by_group.get('part9')), cell(e.sr_by_group.get('other')),
+           'complete' if e.missing_rows == 0 else f'{e.missing_rows} rows missing'] for n, e in an.development.items()]
+    out += table(['pipeline', 'success rate', 'Part 9', 'other Parts', 'rows'], dt)
+    skipped = [n for n in an.selection if n not in an.development]
+    if skipped:
+        out += ['', 'Not run on the development folds (the choice was made first, so only the chosen pipeline and the floors were taken there): '
+                + ', '.join(f'`{n}`' for n in skipped) + '.']
+    out += ['']
 
     out += render_commit_section(an) + ['']
     out += render_integrity_section(an) + ['']
     out += render_cost_latency_section(an, ledger_openai, ledger_jev) + ['']
     out += render_validity_section(an, ledger_openai) + ['']
     out += render_g4_needs(an, d.winner) + ['']
+    out += render_not_run() + ['']
     out += ['## Provenance', ''] + _provenance(an) + [f'- Folds file sha256 {folds_sha[:16]} (seed 20261021).', '',
                                                       'Row files used (sha256 of the bytes on disk):', '']
     out += table(['arm', 'rows', 'sha256 (first 16)'], [[f'`{f["arm"]}`', str(f['rows']), f['sha256']] for f in an.row_files]) + ['']
@@ -278,21 +290,37 @@ def render_cost_latency_section(an: Analysis, ledger_openai: dict | None, ledger
                      f"{o.get('reasoning', 0) / n_rows / 1000:.1f}k" if o else '-'])
     out += table(['pipeline', '$ per case run (all stages)', '$ own stage', 'Jev requests', 'Jev input tokens', 'OpenAI input tokens',
                   'OpenAI output tokens (reasoning included)', 'of which reasoning'], rows) + ['']
-    if an.latency:
-        lt = [[f'`{n}`', secs(v.get('p50_ms')), secs(v.get('p95_ms')), secs(v.get('max_ms')), str(v.get('n')), str(v.get('unusable_rows'))]
-              for n, v in an.latency.items()]
-        out += ['Latency is end to end, summed along the chain, from interactive-profile rows (one case at a time) that are not cached, repeat 0:', '']
+    e2e = {n: v for n, v in an.latency.items() if v.get('n')}
+    if e2e:
+        lt = [[f'`{n}`', secs(v.get('p50_ms')), secs(v.get('p95_ms')), secs(v.get('max_ms')), str(v.get('n')), str(v.get('unusable_rows', 0))]
+              for n, v in e2e.items()]
+        out += ['End-to-end latency, summed along the chain, from interactive-profile rows (one case at a time) that are not cached, repeat 0:', '']
         out += table(['pipeline', 'p50', 'p95', 'max', 'cases', 'unusable rows'], lt) + ['']
-        for n in an.latency:
-            rows_ = [r for r in an.LI.rows.get(n, {}).values() if r['tokens'].get('openai') and not r['errors']]
+    else:
+        out += ['End-to-end latency on the interactive profile: not run. It needs the screen stage on one case at a time and the screening '
+                'account had no credit left (`credits_exhausted`) when the latency pass was due.', '']
+    if an.stage_latency:
+        st = [[f'`{n}`', secs(v.get('p50_ms')), secs(v.get('p95_ms')), secs(v.get('max_ms')), str(v.get('n'))] for n, v in an.stage_latency.items()]
+        out += ['Own-stage latency, interactive profile (one request at a time), not cached, repeat 0:', '']
+        out += table(['arm', 'p50', 'p95', 'max', 'cases'], st) + ['']
+        for n in an.stage_latency:
+            rows_ = [r for r in an.LI.rows.get(n, {}).values() if r['tokens'].get('openai') and not r['errors'] and r['profile'] == 'interactive']
             xs = [r['tokens']['openai']['output'] for r in rows_]
             ys = [report.stage_ms(r) for r in rows_]
             c = _corr(xs, ys)
             if c is not None:
-                out.append(f'- `{n}`: verifier stage time against completion tokens (reasoning included) correlates at {c:.2f} over '
+                out.append(f'- `{n}`: stage time against completion tokens (reasoning included) correlates at {c:.2f} over '
                            f'{len(xs)} rows, median {median(ys) / 1000:.1f} s at median {median(xs):.0f} tokens.')
-    else:
-        out += [f'Latency: {NOT_RUN} (no interactive-profile rows).']
+        out.append('')
+    ref = recorded_jev_reference()
+    thr = [r['latency_ms'] for rows in (an.L.rows.get('R4-jev-screen', {}),) for r in rows.values() if not r['errors']]
+    if thr:
+        sc = sorted(v['screen'] for v in thr)
+        out.append(f'Context for the screen stage: on 2026-10-20 the recorded run took {ref["per_case_mean_s"]:.1f} s per case on average '
+                   f'(at most {ref["per_case_max_s"]} s; requests p50 {ref["request_p50_ms"]:.0f} ms, p95 {ref["request_p95_ms"]:.0f} ms) with one case '
+                   f'at a time. The accuracy runs of this benchmark ran four cases at once and measured a screen stage of p50 '
+                   f'{report.percentile(sc, 0.5) / 1000:.1f} s and p95 {report.percentile(sc, 0.95) / 1000:.1f} s; those throughput-profile figures are '
+                   f'not latency figures and are not used above.')
     if ledger_openai:
         out += ['', f"OpenAI ledger: {ledger_openai['requests']} requests, US${float(ledger_openai['settled_usd']):.4f} settled of the "
                 f"US${ledger_openai['stop_usd']} stop (US${float(ledger_openai['remaining_usd']):.2f} left for the demo)."]
@@ -384,3 +412,17 @@ def render_g1_report(an: Analysis, *, ledger_openai: dict | None = None, ledger_
     out += render_g1_section(an) + ['']
     out += render_cost_latency_section(an, ledger_openai, ledger_jev) + ['']
     return '\n'.join(out) + '\n'
+
+
+def render_not_run() -> list[str]:
+    """Arms the plan proposed that were not run, and why. Static: none of it depends on a number."""
+    return ['## Not run', '',
+            '- **Anthropic verifiers and any Claude arm** (V1, Sonnet 5.5 and Opus 5.5 verifiers, the frontier screening ceiling A8): excluded by the '
+            '2026-10-21 provider decision (OpenAI and Jev only; no Anthropic key). The earlier blind Sonnet 5.5 subagent result '
+            '(20 cases, top-1 85%) stays an unreplicated research figure.',
+            '- **OpenAI models other than `gpt-6-luna`** (`gpt-6.1-sol` verifier or ceiling, legacy `gpt-4.1`): not authorised for this run. '
+            'PR #43 measured the legacy `gpt-4.1` variant c on 11 dev cases (top-1 0.758) and is cited, not re-run.',
+            '- **A3 embeddings, A5 other decision models, A6 `gpt-6-luna` screening all 2,080 articles:** not run. A6 would cost about $0.04 per case run '
+            'against the US$10 stop; the verifier arms answer the question the product asks.',
+            '- **Reasoning effort `max`/`high`:** the user fixed `medium`.',
+            '- **The held-out split** is run once, at gate G4, for the registered winner and the BM25 floor (`python -m evals_dev.judge`).']

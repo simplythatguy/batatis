@@ -39,6 +39,7 @@ class RunContext:
     jev_ask: Callable[[str], Callable] | None = None        # model -> ask(state, questions, timeout)
     jev_ledger: Ledger | None = None
     profile: str = 'throughput'
+    upstream_profile: str | None = None      # read upstream rows from this profile (default: the run's own)
     repo_root: Path | None = None
     clock: Callable[[], float] = time.monotonic
 
@@ -48,7 +49,7 @@ class RunContext:
         ``clamp`` falls back to the highest repeat below ``repeat``: a deterministic upstream arm has repeat 0 only.
         """
         chash = self.arm_hashes.get(arm)
-        latest = self.store.latest(arm, chash, self.profile)
+        latest = self.store.latest(arm, chash, self.upstream_profile or self.profile)
         row = latest.get((case.id, repeat))
         while row is None and clamp and repeat > 0:
             repeat -= 1

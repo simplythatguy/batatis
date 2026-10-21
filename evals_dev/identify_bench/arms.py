@@ -6,6 +6,8 @@ top 60, then a verifier that reads the top 15 in full text. The IDs R0, R1, R2, 
 """
 from __future__ import annotations
 
+import re
+
 from .methods.base import Arm
 from .methods.fusion import FuseArm
 from .methods.jev import JevRerankArm, JevScreenArm
@@ -68,3 +70,11 @@ def arm_hashes(arms: dict[str, Arm]) -> dict[str, str]:
         hashes[name] = config_hash({'name': name, 'kind': a.kind, 'config': a.config(),
                                     'upstream': {u: hashes[u] for u in a.upstream_names}})
     return hashes
+
+
+def public_model_id(model_id: str) -> str:
+    """A model id that may be shown to a user: the screening vendor is never named (``jev-1.13.0`` -> ``screen-1.13.0``).
+
+    Internal eval files may name it; the accuracy page and anything else a user sees must go through this.
+    """
+    return re.sub(r'(?i)jev', 'screen', model_id)

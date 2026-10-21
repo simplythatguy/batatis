@@ -38,6 +38,7 @@ class Analysis:
     development: dict[str, ArmEval] = field(default_factory=dict)
     public: dict[str, ArmEval] = field(default_factory=dict)
     latency: dict[str, dict] = field(default_factory=dict)
+    stage_latency: dict[str, dict] = field(default_factory=dict)
     decision: decision.Decision | None = None
     row_files: list[dict] = field(default_factory=list)
 
@@ -76,10 +77,20 @@ def analyse(store: RowStore | None = None, *, arms: dict[str, Arm] | None = None
         if name not in arms or not has_rows(L, name):
             continue
         an.selection[name] = report.evaluate_arm(L, name, sel)
-        an.development[name] = report.evaluate_arm(L, name, dev)
+        if any(cid in {c.id for c in dev} for (cid, _r) in L.rows[name]):        # only arms that were run on the development folds
+            an.development[name] = report.evaluate_arm(L, name, dev)
         an.public[name] = report.evaluate_arm(L, name, pub)
         if has_rows(LI, name):
-            an.latency[name] = report.latency_summary(LI, name, sel + dev)
+            an.stage_latency[name] = report.stage_latency_summary(LI, name, sel + dev)
+            full = report.latency_summary(LI, name, sel + dev)
+            if full['n']:
+                an.latency[name] = full
+    for name in an.selection:
+        stages = [an.stage_latency[n]['p95_ms'] for n in chain_of(arms, name)
+                  if n in an.stage_latency and an.stage_latency[n]['p95_ms'] is not None]
+        if stages:                                         # a single stage already over the limit settles H2 without the rest
+            an.latency.setdefault(name, {'n': 0, 'p50_ms': None, 'p95_ms': None, 'max_ms': None})
+            an.latency[name]['lower_bound_p95_ms'] = max(stages)
     if an.selection:
         an.decision = decision.decide(an.selection, an.latency, sel)
     return an

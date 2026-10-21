@@ -153,5 +153,4 @@ def test_the_committed_openai_ledger_verifies_and_is_under_the_stop():
     if not path.exists():
         pytest.skip('no OpenAI calls recorded yet')
     ledger = Ledger(path, 'openai', OPENAI_STOP_USD)            # opening it verifies the hash chain
-    assert ledger.spent() <= OPENAI_HARD_CAP_USD
-    assert ledger.summary()['open_reservations'] == 0
+    assert ledger.settled() <= OPENAI_HARD_CAP_USD              # a run in flight holds reservations, so test settled spend

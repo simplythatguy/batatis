@@ -117,3 +117,24 @@ def run() -> dict:
     rows = stage0_rows(cases)
     metrics = metrics_from_rows(rows, cases)
     return {'n_cases': len(cases), 'metrics': metrics, 'differences': check(metrics), 'rows': len(rows)}
+
+
+def recorded_jev_reference() -> dict:
+    """Per-case and per-request timing of the 2026-10-20 recorded run (53 cases, 21 requests each, one case at a time, 8 requests in
+    flight). Whole seconds only: the log's elapsed counter has that resolution. Context for today's numbers, never a substitute."""
+    import re
+    pat = re.compile(r'^(\d+)/(\d+) (\S+) done; requests (\d+) tokens (\d+) errors (\d+) elapsed (\d+)s')
+    usage = re.compile(r'latency p50/p95 ms ([\d.]+) ([\d.]+)')
+    prev, durations, req = 0, [], None
+    for line in (RESULTS / 'run_jev.log').read_text().splitlines():
+        m = pat.match(line)
+        if m:
+            durations.append(int(m.group(7)) - prev)
+            prev = int(m.group(7))
+        u = usage.search(line)
+        if u:
+            req = (float(u.group(1)), float(u.group(2)))
+    durations.sort()
+    n = len(durations)
+    return {'cases': n, 'per_case_p50_s': durations[n // 2], 'per_case_max_s': durations[-1], 'per_case_mean_s': sum(durations) / n,
+            'request_p50_ms': req[0] if req else None, 'request_p95_ms': req[1] if req else None}

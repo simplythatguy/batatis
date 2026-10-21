@@ -318,3 +318,19 @@ def test_store_pack_is_deterministic_and_readable(tmp_path):
     assert not (tmp_path / 'rows' / 'R0-bm25.jsonl').exists()
     again = RowStore(tmp_path / 'rows')
     assert len(again.arm_rows('R0-bm25')) == 3 and again.pack('R0-bm25').read_bytes() == a
+
+
+def test_a_stop_signal_lets_calls_in_flight_finish_and_leaves_no_open_reservation(tmp_path):
+    import threading
+    ctx, http = make_ctx(tmp_path)
+    stop = threading.Event()
+    cases = make_cases(6)
+
+    def after_first(row):
+        stop.set()
+
+    summary = run_arms(fake_arms(), ['V15f-R5'], cases, ctx, repeats=2, on_row=after_first, stop=stop)
+    assert 0 < summary.ran < 6 * 2 * 3                                   # stopped early, finished what it started
+    assert ctx.openai.ledger.summary()['open_reservations'] == 0
+    resumed = run_arms(fake_arms(), ['V15f-R5'], cases, ctx, repeats=2)    # and a later run picks up where it stopped
+    assert resumed.skipped >= summary.ran and resumed.stopped is None

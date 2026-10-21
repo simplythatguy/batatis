@@ -47,14 +47,18 @@ def git_state(repo: Path = REPO) -> str | None:
 
 def run_arms(arms: dict[str, Arm], wanted: Sequence[str], cases: Iterable[BenchCase], ctx: RunContext, *,
              repeats: int | None = None, retry_errors: bool = False, workers: int = 1, profile: str = 'throughput',
+             upstream_profile: str | None = None,
              codedb_sha256: str | None = None, git_sha: str | None = None, on_row: Callable[[dict], None] | None = None,
              stop: threading.Event | None = None) -> RunSummary:
     """Run the wanted arms (and their upstream arms) over the cases. Safe to call again: finished rows are skipped."""
     cases = list(cases)
     order = topo_order(arms, list(wanted))
+    if upstream_profile:                       # shortlists come from stored rows of that profile; run only the wanted arms
+        order = [n for n in order if n in wanted]
     hashes = arm_hashes(arms)
     ctx.arm_hashes = hashes
     ctx.profile = profile
+    ctx.upstream_profile = upstream_profile
     if profile == 'interactive':
         workers = 1
     stop = stop or threading.Event()
