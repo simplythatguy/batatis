@@ -442,7 +442,7 @@ async function exportPdf(base: string, caseId: string, draft: boolean, signal?: 
   }
   const blob = await res.blob();
   const match = /filename="([^"]+)"/.exec(res.headers.get("Content-Disposition") ?? "");
-  return { blob, filename: match?.[1] ?? `${caseId}-scc-variance.pdf`, notice: exportNotice(res.headers.get("X-Batatis-Notice")) };
+  return { blob, filename: match?.[1] ?? `${caseId}-scc-variance.pdf`, notice: exportNotice(res.headers.get("X-Batatis-Jurisdiction-Notice")) };
 }
 
 async function readError(res: Response): Promise<string> {

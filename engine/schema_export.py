@@ -23,12 +23,17 @@ from .routes_auth import SignupRequest, LoginRequest, OnboardingRequest
 from .routes_review import (NotificationsResult, ApplicationsResult, QueueResult, ClaimResult, ClaimRequest,
                             DecisionRequest, MessageRequest)
 from .routes_assist import AssistRequest, AssistResult
+from .models_review import InformationRequestEdit, PackageReviewIndex, ReviewSession, SentInformationRequests
+from .models_jurisdictions import JurisdictionDetail, JurisdictionsResult
+from .routes_jurisdictions import CaseJurisdictionPack
 
 OUT = Path(__file__).resolve().parent.parent / 'web' / 'src' / 'api' / 'engine.schema.json'
 RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesResult, ApplicationsResult,
-             QueueResult, ClaimResult, AssistResult, NotificationsResult)  # responses carry every field
+             QueueResult, ClaimResult, AssistResult, NotificationsResult,
+             ReviewSession, PackageReviewIndex, SentInformationRequests,
+             JurisdictionsResult, JurisdictionDetail, CaseJurisdictionPack)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
-            ClaimRequest, DecisionRequest, MessageRequest, AssistRequest)  # defaulted fields optional
+            ClaimRequest, DecisionRequest, MessageRequest, AssistRequest, InformationRequestEdit)  # defaulted fields optional
 
 
 class _ResponsesCarryDefaults(GenerateJsonSchema):
