@@ -24,11 +24,14 @@ from .routes_review import (NotificationsResult, ApplicationsResult, QueueResult
                             DecisionRequest, MessageRequest)
 from .routes_assist import AssistRequest, AssistResult
 from .models_review import InformationRequestEdit, PackageReviewIndex, ReviewSession, SentInformationRequests
+from .models_jurisdictions import JurisdictionDetail, JurisdictionsResult
+from .routes_jurisdictions import CaseJurisdictionPack
 
 OUT = Path(__file__).resolve().parent.parent / 'web' / 'src' / 'api' / 'engine.schema.json'
 RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesResult, ApplicationsResult,
              QueueResult, ClaimResult, AssistResult, NotificationsResult,
-             ReviewSession, PackageReviewIndex, SentInformationRequests)  # responses carry every field
+             ReviewSession, PackageReviewIndex, SentInformationRequests,
+             JurisdictionsResult, JurisdictionDetail, CaseJurisdictionPack)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
             ClaimRequest, DecisionRequest, MessageRequest, AssistRequest, InformationRequestEdit)  # defaulted fields optional
 

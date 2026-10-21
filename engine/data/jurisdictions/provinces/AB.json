@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "province": "AB",
+  "name": "Alberta",
+  "process_notes": [
+    {
+      "id": "ab-who-requests",
+      "topic": "entry_point",
+      "text": "The owner requests a variance from the safety codes officer. A variance may only be issued by a safety codes officer, a technical administrator or the Safety Codes Council.",
+      "sources": [
+        {
+          "title": "Safety Codes Council, Variances",
+          "url": "https://www.safetycodes.ab.ca/permits-inspections/variances/",
+          "retrieved": "2026-10-21",
+          "sha256": "90f0f0d1dfde3839f14e0b74ab6110821a90d2ef661c7123ef3790b08004bc11"
+        }
+      ]
+    },
+    {
+      "id": "ab-appeal",
+      "topic": "appeal",
+      "text": "A Written Notice of Variance Refusal issued by a safety codes officer can be appealed to the Safety Codes Council: the Notice of Appeal Form, a copy of the written notice and the $500 fee within 30 days of service. A refusal issued by an Administrator is not appealable.",
+      "sources": [
+        {
+          "title": "Safety Codes Council, Variances",
+          "url": "https://www.safetycodes.ab.ca/permits-inspections/variances/",
+          "retrieved": "2026-10-21",
+          "sha256": "90f0f0d1dfde3839f14e0b74ab6110821a90d2ef661c7123ef3790b08004bc11"
+        }
+      ]
+    },
+    {
+      "id": "ab-documentation",
+      "topic": "documents",
+      "text": "For building, fire and plumbing variances, officers document the alternative solution as Division C of the applicable code requires (Section 2.3.1), send a copy of each variance to the Safety Codes Council within 10 days of issuance, and keep the supporting documentation available to an Administrator on request.",
+      "sources": [
+        {
+          "title": "SCC Information Bulletin IB-2025-11-18, Mandatory Documentation of Variances",
+          "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf",
+          "retrieved": "2026-10-21",
+          "pages": "pp.1-2",
+          "sha256": "3ca39cbf4d1c0797587f05e0b20f94c24e6684069eb2da2f908660a279301ce9"
+        }
+      ]
+    },
+    {
+      "id": "ab-registration-ovp",
+      "topic": "registration",
+      "text": "From 1 December 2026 the Orders and Variances Portal is the only accepted way to register variances. Only safety codes officers register, supporting documentation is included at registration, and registration is not Council approval of the variance.",
+      "sources": [
+        {
+          "title": "SCC Information Bulletin IB-2026-10-01, Orders and Variances Registration Changes",
+          "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf",
+          "retrieved": "2026-10-21",
+          "pages": "pp.1-2",
+          "sha256": "ac3217ac4603f490dc9dceaa79a2fb539e41a43925840a341637c9a7ac4f64d7"
+        }
+      ]
+    },
+    {
+      "id": "ab-ahj-is-organisation",
+      "topic": "authority",
+      "text": "The authority having jurisdiction is the accredited organisation or the Alberta Safety Codes Authority. Safety codes officers exercise delegated powers on their behalf and are not themselves the authority having jurisdiction.",
+      "sources": [
+        {
+          "title": "SCC Information Bulletin IB-2026-10-16, Clarifying Authority Having Jurisdiction (AHJ) Under the Safety Codes Act",
+          "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-16_AHJ_Clarification.pdf",
+          "retrieved": "2026-10-21",
+          "pages": "p.1",
+          "sha256": "dbd3a61b53f5ad4eac483b3ae20b8aa90aec4e697680177ce94871fa870a23ea"
+        }
+      ]
+    },
+    {
+      "id": "ab-province-wide",
+      "topic": "scope",
+      "text": "Province-wide building variances and interpretations are issued as STANDATA by Municipal Affairs and the Safety Codes Council, and are published through Open Government records. A local office's variance applies to its own site.",
+      "sources": [
+        {
+          "title": "Government of Alberta, Building STANDATA",
+          "url": "https://www.alberta.ca/building-standata",
+          "retrieved": "2026-10-21",
+          "sha256": "03c58d7695fc741dbbb3a28ff7d6227bbf1ab2d6e58864fa908660831872fcd2"
+        }
+      ]
+    }
+  ],
+  "forms": [
+    {
+      "id": "scc-variance",
+      "title": "Variance Form for Proposed Alternative Solution",
+      "issuer": "Safety Codes Council",
+      "role": "primary",
+      "version": "scc_2026-10",
+      "status": "current",
+      "export": "supported",
+      "sha256": "f44640ca005c957c11a2387d2768fffc35ef93c97125dcca37436fcc0b9afc1d",
+      "page_count": 5,
+      "field_count": 87,
+      "pdf_last_modified": "2026-10-06",
+      "field_map": "engine/export/field_maps/scc_2026-10.json",
+      "local_path": "reference/guides/SCC-Variance-Form.pdf",
+      "note": "Official Safety Codes Council variance form, PDF last-modified 2026-10-06 (5 pages, 87 fields). Its SHA-256 matches engine/export/field_maps/scc_2026-10.json. Wording differs from the challenge brief's Appendix 1, so Appendix 1 is not the export target. Known differences: the Section B checkbox label, the privacy text, and the officer line, which on this form reads \"approximately equivalent or greater safety performance\".",
+      "source": {
+        "title": "Safety Codes Council, Variance Template",
+        "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf",
+        "retrieved": "2026-10-21",
+        "sha256": "f44640ca005c957c11a2387d2768fffc35ef93c97125dcca37436fcc0b9afc1d",
+        "note": "Entry ported from PR #12 engine/export/forms.json; the live file fetched on the retrieval date has the same SHA-256."
+      }
+    }
+  ],
+  "bulletins": [
+    {
+      "id": "IB-2026-10-01",
+      "title": "Orders and Variances Registration Changes",
+      "issued": "2026-10-01",
+      "effective": "2026-12-01",
+      "summary": "The Orders and Variances Portal becomes the only registration method; only officers register; each variance is for one location; supporting documentation is included at registration; registration is not Council approval.",
+      "source": {
+        "title": "SCC Information Bulletin IB-2026-10-01",
+        "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf",
+        "retrieved": "2026-10-21",
+        "sha256": "ac3217ac4603f490dc9dceaa79a2fb539e41a43925840a341637c9a7ac4f64d7",
+        "pages": "pp.1-2, 4",
+        "note": "Title and link ported from PR #11 engine/bulletins.py. Individual registration for a specific location is on p.2; redaction of unnecessary personal information on p.4."
+      }
+    },
+    {
+      "id": "IB-2025-11-18",
+      "title": "Mandatory Documentation of Variances",
+      "issued": "2025-11-18",
+      "summary": "Officers document building, fire and plumbing alternative solutions under Division C, Section 2.3.1, send a copy of each variance (not the supporting file) to the Council within 10 days, and keep the supporting documents for an Administrator.",
+      "source": {
+        "title": "SCC Information Bulletin IB-2025-11-18",
+        "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf",
+        "retrieved": "2026-10-21",
+        "pages": "pp.1-2",
+        "sha256": "3ca39cbf4d1c0797587f05e0b20f94c24e6684069eb2da2f908660a279301ce9",
+        "note": "Title and link ported from PR #11 engine/bulletins.py."
+      }
+    },
+    {
+      "id": "IB-2026-10-16",
+      "title": "Clarifying Authority Having Jurisdiction (AHJ) Under the Safety Codes Act",
+      "issued": "2026-10-16",
+      "summary": "The authority having jurisdiction is the accredited organisation or the Alberta Safety Codes Authority, not the individual safety codes officer.",
+      "source": {
+        "title": "SCC Information Bulletin IB-2026-10-16",
+        "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-16_AHJ_Clarification.pdf",
+        "retrieved": "2026-10-21",
+        "pages": "p.1",
+        "sha256": "dbd3a61b53f5ad4eac483b3ae20b8aa90aec4e697680177ce94871fa870a23ea",
+        "note": "Title and link ported from PR #11 engine/bulletins.py."
+      }
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "id": "alberta-other",
+  "name": "Rest of Alberta",
+  "province": "AB",
+  "coverage": "full",
+  "fallback": true,
+  "code_edition": "NBC(AE) 2023, 2nd printing",
+  "summary": "Any Alberta location outside a city that has its own pack: an accredited municipality, or the Alberta Safety Codes Authority and its contracted agencies in unaccredited areas. Province-wide variances go to Municipal Affairs.",
+  "authority": {
+    "name": "Accredited municipality, or the Alberta Safety Codes Authority in unaccredited areas",
+    "kind": "accredited_organisation",
+    "reviewer_code": null,
+    "contact": "Use the Safety Codes Council's Where to get a Permit search to find the office for the project location.",
+    "sources": [
+      {
+        "title": "Safety Codes Council, Where to get a Permit",
+        "url": "https://www.safetycodes.ab.ca/permits-inspections/where-to-get-a-permit/",
+        "retrieved": "2026-10-21",
+        "sha256": "c2e8b2a5f4b4c65ea9b796927dbdb11697e6cbf9fcdf5404fd3165898a7e57f8"
+      }
+    ]
+  },
+  "match": {
+    "ids": ["alberta-other", "alberta", "rest-of-alberta", "asca"],
+    "names": ["Rest of Alberta", "Alberta", "Alberta Safety Codes Authority", "ASCA"]
+  },
+  "process_notes": [
+    {
+      "id": "ab-where-to-apply",
+      "topic": "entry_point",
+      "text": "Permits are available from municipalities accredited to administer the Safety Codes Act, and from agencies that provide inspection services for the Alberta Safety Codes Authority in unaccredited municipalities. The Council's search finds the office for a project location.",
+      "sources": [
+        {
+          "title": "Safety Codes Council, Where to get a Permit",
+          "url": "https://www.safetycodes.ab.ca/permits-inspections/where-to-get-a-permit/",
+          "retrieved": "2026-10-21",
+          "sha256": "c2e8b2a5f4b4c65ea9b796927dbdb11697e6cbf9fcdf5404fd3165898a7e57f8"
+        }
+      ]
+    },
+    {
+      "id": "ab-asca",
+      "topic": "authority",
+      "text": "The Alberta Safety Codes Authority is a division of the Safety Codes Council. It oversees permit-related services under the Safety Codes Act in unaccredited areas, working with accredited agencies.",
+      "sources": [
+        {
+          "title": "Safety Codes Council, Alberta Safety Codes Authority",
+          "url": "https://www.safetycodes.ab.ca/municipalities-corporations-and-agencies/alberta-safety-codes-authority/",
+          "retrieved": "2026-10-21",
+          "sha256": "448d12a8e2b28f6e8e30df4e3aaf93d420af053a45aabb37d8b7da98fd1efa77"
+        }
+      ]
+    },
+    {
+      "id": "ab-local-rules-vary",
+      "topic": "submission",
+      "text": "Each accredited office may have its own intake steps or forms. Batatis has no pack for this office yet, so confirm the intake with the officer before submitting.",
+      "sources": [
+        {
+          "title": "Safety Codes Council, Where to get a Permit",
+          "url": "https://www.safetycodes.ab.ca/permits-inspections/where-to-get-a-permit/",
+          "retrieved": "2026-10-21",
+          "sha256": "c2e8b2a5f4b4c65ea9b796927dbdb11697e6cbf9fcdf5404fd3165898a7e57f8",
+          "status": "unverified",
+          "note": "The page does not describe local intake steps; this note is a caution, not a claim from the source."
+        }
+      ]
+    }
+  ],
+  "forms": [],
+  "standing_packages": [],
+  "guides": [],
+  "notices": []
+}

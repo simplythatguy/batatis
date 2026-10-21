@@ -71,7 +71,7 @@ class Fact(BaseModel):
 
 
 class Jurisdiction(BaseModel):
-    id: str                                    # e.g. "calgary", "edmonton", "alberta-other"
+    id: str                                    # a jurisdiction pack id, see engine/data/jurisdictions/packs
     name: str
     authority: str | None = None
 
@@ -146,7 +146,7 @@ class Gap(BaseModel):
     section: Literal['A', 'B', 'C', 'D', 'process']
     field: str
     message: str
-    severity: Literal['blocking', 'warning'] = 'blocking'
+    severity: Literal['blocking', 'warning', 'info'] = 'blocking'   # info never blocks (jurisdiction pack notices)
     routed_to: RouteTarget | None = None
 
 
