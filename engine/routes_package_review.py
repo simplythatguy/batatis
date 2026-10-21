@@ -2,19 +2,253 @@
 
 Administrative completeness only: these routes never fill a missing item, never
 state compliance, and never write risk, mitigation or the officer's decision.
+
+Access goes through the central guard (engine/access.py): `/review/{case_id}/...`
+paths run in review mode (a reviewer of the case's authority, application
+submitted or later), `/cases/{case_id}/information-request` in read mode (owner
+or that reviewer). Running a review, editing or sending its information request
+additionally needs the current claim. Standalone uploads (`/package-review`) are
+reviewer-only and scoped to the reviewer's authority.
 """
 from __future__ import annotations
 
+import uuid
 from typing import Callable
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, Request
+from starlette.concurrency import run_in_threadpool
 
-from .codes import Codes
+from .access import authorize_case
+from .account_models import DecisionItem, User
+from .codes import CodeDbMissing, Codes
+from .models import now
+from .models_review import (InformationRequestEdit, PackageReviewIndex, ReviewSession, SentInformationRequest,
+                            SentInformationRequests, SessionSummary)
+from .review import information_request as ir
+from .review.package import Parts, review_case, review_uploads
 from .review.routes_completeness import create_router as completeness_router
+from .review.sessions import SessionConflict, Sessions
+from .review.uploads import parse_files, read_body
+from .routes_review import append_message, mutate, reviewer
 from .store import CaseBackend
+
+NOT_FOUND = 'package review not found'
+CLAIM_NEEDED = 'Claim this application before running or changing its package review'
+
+
+def _summary(session: ReviewSession) -> SessionSummary:
+    return SessionSummary(version=session.version, created_at=session.created_at,
+                          created_by_name=session.created_by_name, input_kind=session.input_kind,
+                          open_gaps=len(ir.open_gaps(session.findings)),
+                          statement=session.diff.statement if session.diff else None,
+                          sent_at=session.information_request.sent_at)
+
+
+def _build(package_id: str, case_id: str | None, authority: str, user: User, kind: str, parts: Parts,
+           previous: list[ReviewSession]) -> ReviewSession:
+    last = previous[-1] if previous else None
+    return ReviewSession(
+        package_id=package_id, case_id=case_id, authority=authority, version=(last.version if last else 0) + 1,
+        created_at=now(), created_by_name=user.name, input_kind=kind, case_version=parts.case_version,
+        files=parts.files, fields=parts.fields, findings=parts.findings, documents=parts.documents,
+        citations=parts.citations, section_c=parts.section_c, information_request=ir.build(parts.findings),
+        diff=ir.diff(last.version, last.findings, parts.findings) if last else None,
+        lookup_skipped=parts.lookup_skipped)
 
 
 def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -> APIRouter:
-    router = APIRouter()
+    router = APIRouter(tags=['package review'])
     router.include_router(completeness_router(cases, code))
+
+    def sessions() -> Sessions:
+        return Sessions(cases())
+
+    def optional_codes():
+        try:
+            return code()
+        except CodeDbMissing:
+            return None
+
+    def case_for_reviewer(case_id: str, request: Request, *, claimed: bool):
+        """Central policy in review mode first, so applicants and other authorities see 404, never a 403."""
+        case = authorize_case(cases().get(case_id), getattr(request.state, 'user', None), mode='review')
+        if not case.owner_id:
+            raise HTTPException(404, 'case not found')   # unowned legacy cases have no reviewer workflow
+        user = reviewer(request)
+        if case.authority != user.authority or case.owner_id == user.id:
+            raise HTTPException(404, 'case not found')
+        if claimed and (case.claim is None or case.claim.reviewer_id != user.id or case.status != 'in_review'):
+            raise HTTPException(409, CLAIM_NEEDED)
+        return case, user
+
+    def standalone(package_id: str, user: User) -> list[ReviewSession]:
+        found = sessions().list(package_id)
+        if not found or found[0].case_id is not None or found[0].authority != user.authority:
+            raise HTTPException(404, NOT_FOUND)
+        return found
+
+    def one(found: list[ReviewSession], version: int) -> ReviewSession:
+        for session in found:
+            if session.version == version:
+                return session
+        raise HTTPException(404, NOT_FOUND)
+
+    def save(session: ReviewSession) -> ReviewSession:
+        try:
+            return sessions().add(session)
+        except SessionConflict:
+            raise HTTPException(409, 'package review was updated concurrently') from None
+
+    async def uploaded(request: Request) -> list[tuple[str, bytes]]:
+        return parse_files(await read_body(request), request.headers.get('content-type', ''))
+
+    def edit_request(package_id: str, version: int, body: InformationRequestEdit) -> ReviewSession:
+        current = sessions().get(package_id, version)
+        if current is None:
+            raise HTTPException(404, NOT_FOUND)
+        session, raw = current
+        if session.information_request.sent_at:
+            raise HTTPException(409, 'This information request was already sent; run a new review to ask again')
+        try:
+            updated = ir.edit(session.information_request, body.items, body.intro)
+        except KeyError as error:
+            raise HTTPException(422, f'unknown information request item {error.args[0]}') from None
+        session = session.model_copy(update={'information_request': updated})
+        try:
+            return sessions().replace(session, raw)
+        except SessionConflict:
+            raise HTTPException(409, 'package review was updated concurrently') from None
+
+    # ------------------------------------------------ case in the reviewer queue (#48)
+
+    @router.post('/review/{case_id}/package-review', response_model=ReviewSession, status_code=201)
+    async def run_case_review(case_id: str, request: Request):
+        case, user = case_for_reviewer(case_id, request, claimed=True)
+        content_type = request.headers.get('content-type', '').split(';', 1)[0].strip().lower()
+        previous = await run_in_threadpool(sessions().list, case_id)
+        if content_type == 'multipart/form-data':
+            files = await uploaded(request)
+            parts = await run_in_threadpool(review_uploads, files, await run_in_threadpool(optional_codes))
+            kind = 'upload'
+        else:
+            body = await request.body()
+            if body.strip() not in (b'', b'{}'):
+                raise HTTPException(422, 'Send no body to review the saved case, or multipart PDFs to review uploads')
+            snapshot = await run_in_threadpool(cases().get_snapshot, case_id)
+            if snapshot is None:
+                raise HTTPException(404, 'case not found')
+            try:
+                codes = await run_in_threadpool(code)
+            except CodeDbMissing:
+                raise HTTPException(503, 'code database not found') from None
+            parts = await run_in_threadpool(review_case, snapshot[0], codes, cases())
+            current = await run_in_threadpool(cases().get_snapshot, case_id)
+            if current is None:
+                raise HTTPException(404, 'case not found')
+            if current[1] != snapshot[1]:
+                raise HTTPException(409, 'case was updated concurrently')
+            kind = 'case'
+        session = _build(case_id, case_id, case.authority, user, kind, parts, previous)
+        return await run_in_threadpool(save, session)
+
+    @router.get('/review/{case_id}/package-review', response_model=PackageReviewIndex)
+    def case_index(case_id: str, request: Request):
+        case, _user = case_for_reviewer(case_id, request, claimed=False)
+        found = sessions().list(case_id)
+        return PackageReviewIndex(package_id=case_id, case_id=case_id, authority=case.authority,
+                                  sessions=[_summary(s) for s in found], latest=found[-1] if found else None)
+
+    @router.get('/review/{case_id}/package-review/{version}', response_model=ReviewSession)
+    def case_session(case_id: str, version: int, request: Request):
+        case_for_reviewer(case_id, request, claimed=False)
+        return one(sessions().list(case_id), version)
+
+    @router.put('/review/{case_id}/package-review/{version}/information-request', response_model=ReviewSession)
+    def case_edit(case_id: str, version: int, body: InformationRequestEdit, request: Request):
+        case_for_reviewer(case_id, request, claimed=True)
+        return edit_request(case_id, version, body)
+
+    @router.post('/review/{case_id}/package-review/{version}/information-request/send', response_model=ReviewSession)
+    def case_send(case_id: str, version: int, request: Request):
+        _case, user = case_for_reviewer(case_id, request, claimed=True)
+        current = sessions().get(case_id, version)
+        if current is None:
+            raise HTTPException(404, NOT_FOUND)
+        session, raw = current
+        request_ = session.information_request
+        if request_.sent_at:
+            raise HTTPException(409, 'This information request was already sent')
+        included = [item for item in request_.items if item.included]
+        if not included:
+            raise HTTPException(409, 'Include at least one item before sending')
+        text = ir.render(request_)[:4000]
+
+        def post(case):
+            items = [DecisionItem(field=(item.field or 'information_request')[:200], note=item.text[:2000])
+                     for item in included]
+            return append_message(case, user, text, items=items)
+
+        _, message = mutate(cases(), case_id, user, post)
+        sent = request_.model_copy(update={'sent_at': now(), 'sent_by_name': user.name, 'message_id': message.id,
+                                           'text': ir.render(request_)})
+        try:
+            return sessions().replace(session.model_copy(update={'information_request': sent}), raw)
+        except SessionConflict:
+            raise HTTPException(409, 'package review was updated concurrently') from None
+
+    @router.get('/cases/{case_id}/information-request', response_model=SentInformationRequests)
+    def sent_requests(case_id: str, request: Request):
+        # The guard has authorized the caller (owner, or a reviewer of this authority). Drafts stay private.
+        if getattr(request.state, 'case', None) is None:
+            raise HTTPException(404, 'case not found')
+        if not request.state.case.owner_id:
+            raise HTTPException(404, 'case not found')
+        out = []
+        for session in sessions().list(case_id):
+            sent = session.information_request
+            if not sent.sent_at:
+                continue
+            out.append(SentInformationRequest(
+                package_id=session.package_id, version=session.version, sent_at=sent.sent_at,
+                sent_by_name=sent.sent_by_name or '', intro=sent.intro,
+                items=[item.text for item in sent.items if item.included], text=sent.text))
+        return SentInformationRequests(case_id=case_id, requests=out)
+
+    # ------------------------------------------------ standalone upload (third-party package)
+
+    @router.post('/package-review', response_model=ReviewSession, status_code=201)
+    async def run_upload_review(request: Request):
+        user = reviewer(request)
+        files = await uploaded(request)
+        parts = await run_in_threadpool(review_uploads, files, await run_in_threadpool(optional_codes))
+        session = _build(f'pkg_{uuid.uuid4().hex[:12]}', None, user.authority, user, 'upload', parts, [])
+        return await run_in_threadpool(save, session)
+
+    @router.post('/package-review/{package_id}', response_model=ReviewSession, status_code=201)
+    async def reupload(package_id: str, request: Request):
+        user = reviewer(request)
+        previous = await run_in_threadpool(standalone, package_id, user)
+        files = await uploaded(request)
+        parts = await run_in_threadpool(review_uploads, files, await run_in_threadpool(optional_codes))
+        session = _build(package_id, None, user.authority, user, 'upload', parts, previous)
+        return await run_in_threadpool(save, session)
+
+    @router.get('/package-review/{package_id}', response_model=PackageReviewIndex)
+    def package_index(package_id: str, request: Request):
+        user = reviewer(request)
+        found = standalone(package_id, user)
+        return PackageReviewIndex(package_id=package_id, case_id=None, authority=found[0].authority,
+                                  sessions=[_summary(s) for s in found], latest=found[-1])
+
+    @router.get('/package-review/{package_id}/{version}', response_model=ReviewSession)
+    def package_session(package_id: str, version: int, request: Request):
+        user = reviewer(request)
+        return one(standalone(package_id, user), version)
+
+    @router.put('/package-review/{package_id}/{version}/information-request', response_model=ReviewSession)
+    def package_edit(package_id: str, version: int, body: InformationRequestEdit, request: Request):
+        user = reviewer(request)
+        standalone(package_id, user)
+        return edit_request(package_id, version, body)
+
     return router
