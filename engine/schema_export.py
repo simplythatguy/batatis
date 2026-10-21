@@ -24,10 +24,13 @@ from .routes_review import (NotificationsResult, ApplicationsResult, QueueResult
                             DecisionRequest, MessageRequest)
 from .routes_assist import AssistRequest, AssistResult
 from .routes_intake import IntakeRequest, IntakeResult
+from .models_jurisdictions import JurisdictionDetail, JurisdictionsResult
+from .routes_jurisdictions import CaseJurisdictionPack
 
 OUT = Path(__file__).resolve().parent.parent / 'web' / 'src' / 'api' / 'engine.schema.json'
 RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesResult, ApplicationsResult,
-             QueueResult, ClaimResult, AssistResult, NotificationsResult, IntakeResult)  # responses carry every field
+             QueueResult, ClaimResult, AssistResult, NotificationsResult,
+             JurisdictionsResult, JurisdictionDetail, CaseJurisdictionPack, IntakeResult)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
             ClaimRequest, DecisionRequest, MessageRequest, AssistRequest, IntakeRequest)  # defaulted fields optional
 
