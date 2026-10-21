@@ -180,15 +180,20 @@ def answer(case: Case, answers: list[dict]) -> list[Fact]:
 
 
 def override_scope(case: Case, building_code: bool) -> Fact:
-    """The applicant says this is (or is not) a building-code question. Recorded as their own click."""
-    if building_code:
-        fact = Fact(field=SCOPE_FIELD, value=OVERRIDDEN, kind='pointed', status='confirmed',
-                    source=Source(type='user_click', ref='intake:scope', quote='This is a building-code question.'))
-        case.facts.append(fact)
-    else:
-        case.facts.append(Fact(field=SCOPE_FIELD, value=None, kind='pointed', status='unconfirmed',
-                               source=Source(type='user_click', ref='intake:scope', quote='Check the scope again.')))
+    """The applicant says this is (or, undoing that, may not be) a building-code question. Their own click,
+    always confirmed, so the click itself never blocks export; a redirect read again is a computed fact."""
+    case.facts.append(Fact(
+        field=SCOPE_FIELD, value=OVERRIDDEN if building_code else 'checked', kind='pointed', status='confirmed',
+        source=Source(type='user_click', ref='intake:scope',
+                      quote='This is a building-code question.' if building_code else 'Check the scope again.')))
+    fact = case.facts[-1]
+    if not building_code:
         found = _scope_fact(case)
-        fact = found[0] if found else case.facts[-1]
+        if found is not None:
+            fact, start, end = found
+            if case.intake is None:
+                case.intake = IntakeRecord()
+            case.intake.pointers.append(FactPointer(fact_id=fact.id, field=SCOPE_FIELD, method='rules',
+                                                    source_ref=DESCRIPTION, start=start, end=end))
     refresh(case)
     return fact

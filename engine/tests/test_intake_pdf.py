@@ -186,3 +186,19 @@ def test_a_name_read_from_a_file_is_scrubbed_from_the_description_sent_to_the_mo
     service.run('Jane Example wants a single exit for the new office.', [('f', 'form.pdf', form)],
                 transport=transport, status='fake')
     assert seen and all('Jane Example' not in text for text in seen)
+
+
+def test_pushbuttons_are_not_values_and_radio_children_use_their_own_state():
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=letter)
+    c.drawString(72, 740, 'Form')
+    c.acroForm.radio(name='Kind', value='site', selected=True, x=100, y=600, buttonStyle='circle')
+    c.acroForm.radio(name='Kind', value='wide', selected=False, x=140, y=600, buttonStyle='circle')
+    c.acroForm.checkbox(name='Agree', checked=True, x=100, y=560)
+    c.showPage()
+    c.save()
+    from engine.intake.pdf import read_pdf
+    widgets = read_pdf(buf.getvalue()).widgets
+    radios = [w.value for w in widgets if w.name == 'Kind']
+    assert radios.count(True) == 1
+    assert [w.value for w in widgets if w.name == 'Agree'] == [True]

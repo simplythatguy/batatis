@@ -155,7 +155,7 @@ Example (`plan.scope` for "Plumbing contractor. We want an air admittance valve 
 
 #### `POST /cases/{id}/intake/scope`
 
-`{"building_code": true, "expected_version": 3}`: the applicant's "this is a building-code question" override, stored as a confirmed `user_click` fact `scope.redirect` = `overridden`; later intake runs keep it. `{"building_code": false}` checks the scope again.
+`{"building_code": true, "expected_version": 3}`: the applicant's "this is a building-code question" override, stored as a confirmed `user_click` fact `scope.redirect` = `overridden`; later intake runs keep it. `{"building_code": false}` records a confirmed "check the scope again" click (it never blocks export) and checks the scope again; a redirect found then is a new computed fact.
 
 ### Fork (`plan.fork`)
 

@@ -99,7 +99,15 @@ def _widgets(reader: PdfReader) -> list[Widget]:
                 value = str(raw).strip() if raw is not None and str(raw).strip() else None
                 out.append(Widget(str(name), 'text', value, number, rect))
             elif kind == '/Btn':
-                on = str(raw) not in ('None', '/Off', '') if raw is not None else False
+                flags = int(annot.get('/Ff', parent.get('/Ff', 0)) or 0)
+                if flags & (1 << 16):                   # pushbutton: no value
+                    out.append(Widget(str(name), 'button', None, number, rect))
+                    continue
+                # A widget's own appearance state; radio children never use the group's inherited value.
+                state = annot.get('/AS')
+                if state is None and not flags & (1 << 15):
+                    state = raw
+                on = state is not None and str(state) not in ('None', '/Off', '')
                 out.append(Widget(str(name), 'checkbox', True if on else None, number, rect))
             elif kind == '/Sig':
                 out.append(Widget(str(name), 'signature', None, number, rect))

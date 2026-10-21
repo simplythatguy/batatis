@@ -329,3 +329,16 @@ def test_a_stale_version_is_refused_before_any_model_call(tmp_path):
     assert client.post(f'/cases/{case.id}/intake', json={'text': 'We want to omit the dampers.',
                                                           'expected_version': case.version + 5}).status_code == 409
     assert calls == []
+
+
+def test_checking_the_scope_again_never_blocks_export_by_itself():
+    case = _case('We want a single exit stair in our new four-storey office.')
+    blockers = set(case.export_blockers())
+    service.override_scope(case, True)
+    service.override_scope(case, False)
+    assert set(case.export_blockers()) == blockers and case.intake.plan.scope.status == 'in_scope'
+    red = _case('Can we skip AFCI breakers on the bedroom circuits?')
+    service.override_scope(red, True)
+    service.override_scope(red, False)
+    again = [f for f in red.facts if f.field == SCOPE_FIELD][-1]
+    assert again.kind == 'computed' and again.id in {p.fact_id for p in red.intake.pointers}
