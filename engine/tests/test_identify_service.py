@@ -626,3 +626,23 @@ def test_title_names_only_a_committed_or_offered_article():
         assert '9.9.10.1.(2)' not in short_title(prose, [], rows(status))
     for status in ('committed', 'choice'):
         assert '9.9.10.1.(2)' in short_title(prose, [], rows(status))
+
+
+@pytest.mark.parametrize('prose', [
+    'A house with a fire-rated wall assembly that departs from the tested listing.',
+    'Please take care to review the surface treatment of the stairs.',
+    'The lot has a stormwater detention pond; the industrial park is next door.',
+    'Single-family house on a working farm lot.',
+])
+def test_ordinary_words_do_not_set_a_building_type(prose):
+    from engine.identify.title import short_title
+    title = short_title(prose, [], None)
+    for wrong in ('Assembly', 'Care', 'Treatment', 'Detention', 'Industrial'):
+        assert not title.startswith(wrong)
+    assert 'Farm' not in title.split(':')[0]
+
+
+def test_occupancy_phrases_still_set_a_building_type():
+    from engine.identify.title import short_title
+    assert short_title('A nursing home addition in Red Deer', [], None).startswith('Care')
+    assert short_title('Retail unit in Calgary', [], None).startswith('Mercantile')
