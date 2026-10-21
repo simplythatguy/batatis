@@ -17,6 +17,7 @@ from .account_models import ApplicationStatus, Claim, Decision, StatusChange, St
 
 from .models_intake import IntakeRecord
 from .relevance_models import RelevanceRecord
+from .models_identify import IdentifyResult
 
 FactKind = Literal['exact', 'pointed', 'computed', 'proposed']
 FactStatus = Literal['confirmed', 'unconfirmed']
@@ -172,6 +173,7 @@ class Case(BaseModel):
     evidence: list[EvidenceItem] = []
     gaps: list[Gap] = []
     relevance: RelevanceRecord | None = None   # explicit scoring only; GET recomputes its staleness
+    identify: IdentifyResult | None = None     # last code identification (models_identify.py); never writes provisions
     intake: IntakeRecord | None = None         # last intake run: fact pointers and file reports (models_intake)
 
     @model_validator(mode='after')

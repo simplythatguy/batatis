@@ -1,5 +1,45 @@
 {
   "$defs": {
+    "AnswerIn": {
+      "additionalProperties": false,
+      "description": "One answer. `question_id` is the question's stable id; `field` is the fact field it fills.",
+      "properties": {
+        "answer": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Answer",
+          "type": "string"
+        },
+        "field": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "question_id": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Question Id"
+        }
+      },
+      "title": "AnswerIn",
+      "type": "object"
+    },
     "ApplicantSummary": {
       "properties": {
         "applicant_type": {
@@ -139,6 +179,42 @@
         "applications"
       ],
       "title": "ApplicationsResult",
+      "type": "object"
+    },
+    "ArticleDecision": {
+      "properties": {
+        "decided_at": {
+          "title": "Decided At",
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "yes",
+            "no",
+            "not_sure"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "open_question_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Open Question Id"
+        }
+      },
+      "required": [
+        "decision",
+        "open_question_id",
+        "decided_at"
+      ],
+      "title": "ArticleDecision",
       "type": "object"
     },
     "AssistFocus": {
@@ -422,6 +498,203 @@
       "title": "Authority",
       "type": "object"
     },
+    "BenchmarkConfirmRequest": {
+      "additionalProperties": false,
+      "description": "The applicant names the requirement their design departs from and confirms the one-line departure.",
+      "properties": {
+        "departure": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Departure",
+          "type": "string"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        },
+        "provision": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Provision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provision",
+        "departure"
+      ],
+      "title": "BenchmarkConfirmRequest",
+      "type": "object"
+    },
+    "BenchmarkRecord": {
+      "description": "The benchmark acceptable solution: the quoted Division B sentence the design departs from,\na one-line departure the applicant confirms, and its objective and function codes by lookup.",
+      "properties": {
+        "attribution_missing": {
+          "default": true,
+          "title": "Attribution Missing",
+          "type": "boolean"
+        },
+        "basis": {
+          "default": "none",
+          "enum": [
+            "committed",
+            "top_choice",
+            "applicant",
+            "none"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "citation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Citation"
+        },
+        "departure": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Departure"
+        },
+        "departure_status": {
+          "default": "none",
+          "enum": [
+            "none",
+            "proposed",
+            "confirmed"
+          ],
+          "title": "Departure Status",
+          "type": "string"
+        },
+        "functions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Term"
+          },
+          "title": "Functions",
+          "type": "array"
+        },
+        "identified": {
+          "title": "Identified",
+          "type": "boolean"
+        },
+        "objectives": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Term"
+          },
+          "title": "Objectives",
+          "type": "array"
+        },
+        "provision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision"
+        },
+        "provision_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision Id"
+        },
+        "question": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Question"
+        },
+        "requirement": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Requirement"
+        },
+        "role": {
+          "const": "benchmark_acceptable_solution",
+          "default": "benchmark_acceptable_solution",
+          "title": "Role",
+          "type": "string"
+        },
+        "sentence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sentence"
+        }
+      },
+      "required": [
+        "identified",
+        "role",
+        "basis",
+        "provision",
+        "provision_id",
+        "citation",
+        "sentence",
+        "departure",
+        "departure_status",
+        "objectives",
+        "functions",
+        "attribution_missing",
+        "requirement",
+        "question"
+      ],
+      "title": "BenchmarkRecord",
+      "type": "object"
+    },
     "Bulletin": {
       "additionalProperties": false,
       "description": "A Safety Codes Council information bulletin. Title, date and link; paragraphs are not copied.",
@@ -539,6 +812,17 @@
         "id": {
           "title": "Id",
           "type": "string"
+        },
+        "identify": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IdentifyResult"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "intake": {
           "anyOf": [
@@ -684,6 +968,7 @@
         "evidence",
         "gaps",
         "relevance",
+        "identify",
         "intake"
       ],
       "title": "Case",
@@ -1182,6 +1467,24 @@
         "at"
       ],
       "title": "DecisionSummary",
+      "type": "object"
+    },
+    "DroppedPick": {
+      "properties": {
+        "article": {
+          "title": "Article",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "article",
+        "reason"
+      ],
+      "title": "DroppedPick",
       "type": "object"
     },
     "EvidenceItem": {
@@ -1884,6 +2187,842 @@
         "companions"
       ],
       "title": "Guide",
+      "type": "object"
+    },
+    "IdentifyArticle": {
+      "properties": {
+        "attribution_missing": {
+          "default": true,
+          "title": "Attribution Missing",
+          "type": "boolean"
+        },
+        "citation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Citation"
+        },
+        "commit_reason": {
+          "title": "Commit Reason",
+          "type": "string"
+        },
+        "decision": {
+          "anyOf": [
+            {
+              "enum": [
+                "yes",
+                "no",
+                "not_sure"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decision"
+        },
+        "division": {
+          "const": "B",
+          "default": "B",
+          "title": "Division",
+          "type": "string"
+        },
+        "functions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Term"
+          },
+          "title": "Functions",
+          "type": "array"
+        },
+        "link": {
+          "title": "Link",
+          "type": "string"
+        },
+        "objectives": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Term"
+          },
+          "title": "Objectives",
+          "type": "array"
+        },
+        "open_question_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Open Question Id"
+        },
+        "part": {
+          "title": "Part",
+          "type": "integer"
+        },
+        "probability": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability"
+        },
+        "provision": {
+          "title": "Provision",
+          "type": "string"
+        },
+        "provision_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision Id"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote"
+        },
+        "quote_source": {
+          "anyOf": [
+            {
+              "enum": [
+                "verifier",
+                "codedb"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote Source"
+        },
+        "rank": {
+          "title": "Rank",
+          "type": "integer"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "screen_probability": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Screen Probability"
+        },
+        "status": {
+          "enum": [
+            "committed",
+            "choice",
+            "candidate",
+            "fallback"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "verifier": {
+          "default": "not_run",
+          "enum": [
+            "picked",
+            "not_picked",
+            "not_run"
+          ],
+          "title": "Verifier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rank",
+        "provision",
+        "provision_id",
+        "division",
+        "title",
+        "part",
+        "citation",
+        "link",
+        "quote",
+        "quote_source",
+        "reason",
+        "probability",
+        "screen_probability",
+        "verifier",
+        "status",
+        "commit_reason",
+        "objectives",
+        "functions",
+        "attribution_missing",
+        "decision",
+        "open_question_id"
+      ],
+      "title": "IdentifyArticle",
+      "type": "object"
+    },
+    "IdentifyConfirmRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        },
+        "provisions": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "title": "Provisions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "provisions"
+      ],
+      "title": "IdentifyConfirmRequest",
+      "type": "object"
+    },
+    "IdentifyDecisionRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "enum": [
+            "yes",
+            "no",
+            "not_sure"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        }
+      },
+      "required": [
+        "decision"
+      ],
+      "title": "IdentifyDecisionRequest",
+      "type": "object"
+    },
+    "IdentifyDecisionResponse": {
+      "description": "The identify result after a decision, plus the Section C rows a `yes` wrote for that article.",
+      "properties": {
+        "articles": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/IdentifyArticle"
+          },
+          "title": "Articles",
+          "type": "array"
+        },
+        "benchmark": {
+          "$ref": "#/$defs/BenchmarkRecord"
+        },
+        "cached": {
+          "default": false,
+          "title": "Cached",
+          "type": "boolean"
+        },
+        "case_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Version"
+        },
+        "choices": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/QuotedChoice"
+          },
+          "title": "Choices",
+          "type": "array"
+        },
+        "commit_policy": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Commit Policy",
+          "type": "object"
+        },
+        "committed": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Committed",
+          "type": "array"
+        },
+        "decisions": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ArticleDecision"
+          },
+          "title": "Decisions",
+          "type": "object"
+        },
+        "description_sha256": {
+          "title": "Description Sha256",
+          "type": "string"
+        },
+        "engineering_required": {
+          "const": "depends",
+          "default": "depends",
+          "title": "Engineering Required",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message"
+        },
+        "mode": {
+          "enum": [
+            "live",
+            "fake",
+            "bm25_fallback"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "model_ids": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "default": {},
+          "title": "Model Ids",
+          "type": "object"
+        },
+        "narrowed": {
+          "title": "Narrowed",
+          "type": "boolean"
+        },
+        "open_questions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/OpenQuestion"
+          },
+          "title": "Open Questions",
+          "type": "array"
+        },
+        "persisted": {
+          "default": false,
+          "title": "Persisted",
+          "type": "boolean"
+        },
+        "process_refs": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ProcessRef"
+          },
+          "title": "Process Refs",
+          "type": "array"
+        },
+        "questions": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Questions",
+          "type": "array"
+        },
+        "scored_at": {
+          "title": "Scored At",
+          "type": "string"
+        },
+        "section_c": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SectionCRow"
+          },
+          "title": "Section C",
+          "type": "array"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "stale": {
+          "default": false,
+          "title": "Stale",
+          "type": "boolean"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "trace": {
+          "$ref": "#/$defs/IdentifyTrace"
+        }
+      },
+      "required": [
+        "mode",
+        "source",
+        "label",
+        "narrowed",
+        "message",
+        "articles",
+        "committed",
+        "choices",
+        "questions",
+        "open_questions",
+        "benchmark",
+        "process_refs",
+        "model_ids",
+        "commit_policy",
+        "engineering_required",
+        "title",
+        "scored_at",
+        "description_sha256",
+        "stale",
+        "persisted",
+        "case_version",
+        "cached",
+        "decisions",
+        "trace",
+        "section_c"
+      ],
+      "title": "IdentifyDecisionResponse",
+      "type": "object"
+    },
+    "IdentifyRequest": {
+      "additionalProperties": false,
+      "description": "`prose` defaults to the case's latest project.description fact when omitted.",
+      "properties": {
+        "answers": {
+          "items": {
+            "$ref": "#/$defs/AnswerIn"
+          },
+          "maxItems": 20,
+          "title": "Answers",
+          "type": "array"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        },
+        "prose": {
+          "anyOf": [
+            {
+              "maxLength": 20000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prose"
+        }
+      },
+      "title": "IdentifyRequest",
+      "type": "object"
+    },
+    "IdentifyResult": {
+      "properties": {
+        "articles": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/IdentifyArticle"
+          },
+          "title": "Articles",
+          "type": "array"
+        },
+        "benchmark": {
+          "$ref": "#/$defs/BenchmarkRecord"
+        },
+        "cached": {
+          "default": false,
+          "title": "Cached",
+          "type": "boolean"
+        },
+        "case_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Version"
+        },
+        "choices": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/QuotedChoice"
+          },
+          "title": "Choices",
+          "type": "array"
+        },
+        "commit_policy": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Commit Policy",
+          "type": "object"
+        },
+        "committed": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Committed",
+          "type": "array"
+        },
+        "decisions": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ArticleDecision"
+          },
+          "title": "Decisions",
+          "type": "object"
+        },
+        "description_sha256": {
+          "title": "Description Sha256",
+          "type": "string"
+        },
+        "engineering_required": {
+          "const": "depends",
+          "default": "depends",
+          "title": "Engineering Required",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message"
+        },
+        "mode": {
+          "enum": [
+            "live",
+            "fake",
+            "bm25_fallback"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "model_ids": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "default": {},
+          "title": "Model Ids",
+          "type": "object"
+        },
+        "narrowed": {
+          "title": "Narrowed",
+          "type": "boolean"
+        },
+        "open_questions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/OpenQuestion"
+          },
+          "title": "Open Questions",
+          "type": "array"
+        },
+        "persisted": {
+          "default": false,
+          "title": "Persisted",
+          "type": "boolean"
+        },
+        "process_refs": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ProcessRef"
+          },
+          "title": "Process Refs",
+          "type": "array"
+        },
+        "questions": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Questions",
+          "type": "array"
+        },
+        "scored_at": {
+          "title": "Scored At",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "stale": {
+          "default": false,
+          "title": "Stale",
+          "type": "boolean"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "trace": {
+          "$ref": "#/$defs/IdentifyTrace"
+        }
+      },
+      "required": [
+        "mode",
+        "source",
+        "label",
+        "narrowed",
+        "message",
+        "articles",
+        "committed",
+        "choices",
+        "questions",
+        "open_questions",
+        "benchmark",
+        "process_refs",
+        "model_ids",
+        "commit_policy",
+        "engineering_required",
+        "title",
+        "scored_at",
+        "description_sha256",
+        "stale",
+        "persisted",
+        "case_version",
+        "cached",
+        "decisions",
+        "trace"
+      ],
+      "title": "IdentifyResult",
+      "type": "object"
+    },
+    "IdentifyTrace": {
+      "properties": {
+        "articles_expected": {
+          "title": "Articles Expected",
+          "type": "integer"
+        },
+        "articles_scored": {
+          "title": "Articles Scored",
+          "type": "integer"
+        },
+        "config": {
+          "additionalProperties": true,
+          "title": "Config",
+          "type": "object"
+        },
+        "config_hash": {
+          "title": "Config Hash",
+          "type": "string"
+        },
+        "dropped": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DroppedPick"
+          },
+          "title": "Dropped",
+          "type": "array"
+        },
+        "exhaustive": {
+          "title": "Exhaustive",
+          "type": "boolean"
+        },
+        "fallback_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fallback Reason"
+        },
+        "picks": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Picks",
+          "type": "array"
+        },
+        "ranker": {
+          "title": "Ranker",
+          "type": "string"
+        },
+        "seconds": {
+          "default": 0,
+          "title": "Seconds",
+          "type": "number"
+        },
+        "spend": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Spend",
+          "type": "object"
+        },
+        "stages": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/StageRecord"
+          },
+          "title": "Stages",
+          "type": "array"
+        },
+        "usd": {
+          "default": 0,
+          "title": "Usd",
+          "type": "number"
+        },
+        "verifier": {
+          "title": "Verifier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "config",
+        "config_hash",
+        "exhaustive",
+        "articles_expected",
+        "articles_scored",
+        "ranker",
+        "fallback_reason",
+        "verifier",
+        "picks",
+        "dropped",
+        "stages",
+        "spend",
+        "usd",
+        "seconds"
+      ],
+      "title": "IdentifyTrace",
       "type": "object"
     },
     "IntakeRecord": {
@@ -2775,6 +3914,47 @@
       "title": "OnboardingRequest",
       "type": "object"
     },
+    "OpenQuestion": {
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "provision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "why": {
+          "title": "Why",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "field",
+        "text",
+        "why",
+        "provision"
+      ],
+      "title": "OpenQuestion",
+      "type": "object"
+    },
     "PackNotice": {
       "additionalProperties": false,
       "description": "Information shown on the gaps list and the export. Severity is always info; it never blocks.",
@@ -2925,6 +4105,69 @@
         "note"
       ],
       "title": "PackSource",
+      "type": "object"
+    },
+    "ProcessRef": {
+      "description": "A process reference listed on every case, read-only: how an alternative solution is allowed and documented.",
+      "properties": {
+        "citation": {
+          "title": "Citation",
+          "type": "string"
+        },
+        "division": {
+          "enum": [
+            "A",
+            "C"
+          ],
+          "title": "Division",
+          "type": "string"
+        },
+        "pdf_page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pdf Page"
+        },
+        "provision_id": {
+          "title": "Provision Id",
+          "type": "string"
+        },
+        "read_only": {
+          "const": true,
+          "default": true,
+          "title": "Read Only",
+          "type": "boolean"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provision_id",
+        "division",
+        "title",
+        "citation",
+        "text",
+        "role",
+        "pdf_page",
+        "read_only"
+      ],
+      "title": "ProcessRef",
       "type": "object"
     },
     "ProvisionContext": {
@@ -3186,6 +4429,71 @@
         "applications"
       ],
       "title": "QueueResult",
+      "type": "object"
+    },
+    "QuotedChoice": {
+      "description": "'The code says X. Does your design do something different?' The id sits behind a disclosure.",
+      "properties": {
+        "citation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Citation"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "part": {
+          "title": "Part",
+          "type": "integer"
+        },
+        "provision": {
+          "title": "Provision",
+          "type": "string"
+        },
+        "provision_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision Id"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "quote": {
+          "title": "Quote",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "provision",
+        "provision_id",
+        "title",
+        "part",
+        "citation",
+        "quote",
+        "question"
+      ],
+      "title": "QuotedChoice",
       "type": "object"
     },
     "RelevanceBands": {
@@ -3833,6 +5141,80 @@
       "title": "Source",
       "type": "object"
     },
+    "StageRecord": {
+      "properties": {
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "errors": {
+          "default": 0,
+          "title": "Errors",
+          "type": "integer"
+        },
+        "input_tokens": {
+          "default": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "method": {
+          "title": "Method",
+          "type": "string"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "output_tokens": {
+          "default": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "requests": {
+          "default": 0,
+          "title": "Requests",
+          "type": "integer"
+        },
+        "seconds": {
+          "default": 0,
+          "title": "Seconds",
+          "type": "number"
+        },
+        "stage": {
+          "title": "Stage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "stage",
+        "method",
+        "model",
+        "seconds",
+        "requests",
+        "input_tokens",
+        "output_tokens",
+        "errors",
+        "detail"
+      ],
+      "title": "StageRecord",
+      "type": "object"
+    },
     "StandingPackage": {
       "additionalProperties": false,
       "description": "A published local route (standing posted variance or policy). Metadata only; checklists are WP-32.",
@@ -4061,6 +5443,33 @@
         "read_by"
       ],
       "title": "StoredMessage",
+      "type": "object"
+    },
+    "Term": {
+      "description": "An objective (OS1.2) or functional statement (F03) attributed to the provision, by lookup.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "Term",
       "type": "object"
     },
     "ThreadMessage": {

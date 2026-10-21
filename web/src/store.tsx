@@ -445,7 +445,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         const got = await refreshGaps(id);
         if (!current()) return null;
         if (got.error) throw new Error(got.error);
-        if (result?.mode === "cached_demo" || result?.cached === true) throw new Error("Only a cached demonstration is available. Use manual code search.");
+        // The engine no longer serves a demo cache; a legacy payload is still refused.
+        if ((result?.mode as string | undefined) === "cached_demo" || result?.cached === true) throw new Error("Only a cached demonstration is available. Use manual code search.");
         if (result) {
           const plan = planIdentify(result);
           // Publishing derived output is part of this run, not new user intent.

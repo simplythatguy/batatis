@@ -1,0 +1,29 @@
+{
+  "note": "Alberta place names recognised in case titles. Data, not jurisdiction rules; packs live in packs/.",
+  "places": [
+    "Edmonton",
+    "Calgary",
+    "Red Deer",
+    "Lethbridge",
+    "Medicine Hat",
+    "Grande Prairie",
+    "Airdrie",
+    "Spruce Grove",
+    "St. Albert",
+    "Fort McMurray",
+    "Leduc",
+    "Okotoks",
+    "Cochrane",
+    "Chestermere",
+    "Camrose",
+    "Brooks",
+    "Wetaskiwin",
+    "Lloydminster",
+    "Canmore",
+    "Banff",
+    "Jasper",
+    "Cold Lake",
+    "High River",
+    "Strathmore"
+  ]
+}
