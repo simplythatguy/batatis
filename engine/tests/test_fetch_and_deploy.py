@@ -119,6 +119,8 @@ def test_vercel_config_keeps_sqlite_on_the_engine_only():
     excluded = engine['functions']['engine/api.py']['excludeFiles']
     assert 'codedb/build/codedb.sqlite' in included
     assert 'codedb/build/SCC-Variance-Form.pdf' in included
+    # Jurisdiction packs (and other engine data) are read at runtime by path, so bundle them explicitly.
+    assert 'engine/data/**/*.json' in included
     assert 'reference/**' in excluded
     assert 'engine/tests/**' in excluded and 'evals/**' in excluded and 'reference/**' in excluded
     assert config['rewrites'][0]['source'] == '/api/(.*)'
