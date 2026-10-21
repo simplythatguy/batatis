@@ -12,14 +12,14 @@
   ],
   "gold": {
     "engineering_required": "no",
-    "engineering_reason": "A 1-storey business and personal services building of 500 m2 or less is a general exception (Div C 2.4.1.1.(1)(d)(i)); gross area 240 m2 is within Architects Act s.2(6)(d)(i) and EGPA s.2(7)(d)(i). No Part 9 to Part 4 trigger is stated: spans are at most 12.20 m and floor joists at most 4.9 m, live load is residential, Red Deer 1-in-50 hourly wind pressure is 0.4 kPa (below 1.2) and Sa(0.2) is 0.131 (not above 1.2 or 1.8), no wood roof trusses, no sprinkler/alarm system, and no AHJ direction under Div C 2.4.1.1.(4).",
+    "engineering_reason": "A 1-storey business and personal services building of 500 m2 or less is a general exception (Div C 2.4.1.1.(1)(d)(i)); gross area 240 m2 is within Architects Act s.2(6)(d)(i) and EGPA s.2(7)(d)(i). No Part 9 to Part 4 trigger is stated: spans are at most 12.20 m and floor joists at most 4.9 m, the stated floor is slab-on-ground with no suspended floor, Red Deer 1-in-50 hourly wind pressure is 0.4 kPa (below 1.2) and Sa(0.2) is 0.131 (not above 1.2 or 1.8), no wood roof trusses, no sprinkler/alarm system, and no AHJ direction under Div C 2.4.1.1.(4).",
     "limit_source": "Div A 1.3.3.3.(1) (Part 9 applies); Div C 2.4.1.1.(1) exception; Architects Act s.2(5)-(6) and EGPA s.2(6)-(7) exceptions; Part 4 triggers absent per Div B 9.23.1.1.(1), 9.15.3.3.(1), 9.23.3.5.(4), 9.23.6.1.(6), 9.23.16.5.(3); Div B Appendix C Tables C-2/C-3 (Red Deer)."
   },
   "authoring": {
     "source": "research/no-ground-truth-cases.md (constructed)",
     "gold_written": "before any system run",
     "label": "model-constructed, model-checked, not human-verified",
-    "notes": "Constructed scenario, not a real case. Gold written from the quoted sources before any system run. Not human-reviewed. "
+    "notes": "Constructed scenario, not a real case. Gold written from the quoted sources before any system run. Not human-reviewed.  Rationale-only correction 2026-10-20 (K26-12): replaced unsupported residential-live-load wording with the stated slab-on-ground floor. Applicant inputs and engineering_required unchanged; no scoring run. Model-written correction, not human-verified."
   },
   "evidence": {
     "confidence": "high",

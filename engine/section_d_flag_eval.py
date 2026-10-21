@@ -18,8 +18,9 @@ sentences, are a 1-in-50 hourly wind pressure at or above 1.2 kPa, Sa(0.2) above
 1.2 where lumber roof sheathing is stated), a supported joist span above 4.9 m, a specified live
 load above 2.4 kPa, reinforced concrete, steel studs, permafrost, and a building outside Part 9
 under Div A 1.3.3.2.(1), including a Group A or Group B occupancy that still fits a Division C
-size exception. A wood-frame building inside that Part 9 limit with none of those triggers is
-part4_design false. Stick-framed lumber and Part 9 span tables are the same negative.
+size exception. A wood-frame building inside that Part 9 limit with no positive or unparsed
+relevant cue is part4_design false. An unparsed load, seismic, joist or span cue keeps it unknown.
+Stick-framed lumber and Part 9 span tables are the same negative.
 A Part 4 phrase inside a negation, such as "not designed under Part 4", is not a
 positive trigger, and "not on permafrost" is not one either. "no engineer" records
 engineer_engaged false and is not an unresolved design. That negative is extracted, not filled in.
@@ -315,47 +316,97 @@ _POST_DISASTER = re.compile(r'\bpost-disaster\b', re.I)
 _HIGH_HAZARD = re.compile(r'\b(?:high-hazard industrial|group f,?\s*division\s*1)\b', re.I)
 # Div A 1.3.3.2.(1)(b): Group A, and Group B care, treatment or detention. Not every industrial use.
 _OUTSIDE_PART9_OCCUPANCY = frozenset({'assembly', 'care', 'treatment', 'detention'})
+_CLAUSE_BREAK = re.compile(r'[;,\n]|(?<!\d)\.|\.(?!\d)')
+_PRESSURE_CUE = re.compile(r'\b(?:wind(?:\s+pressure)?|(?:specified\s+)?live load|q50|soil bearing pressure)\b', re.I)
+_SA_CUE = re.compile(r'Sa\s*\(\s*0\.2\s*\)|\bseismic\b', re.I)
+_SPAN_METRES = re.compile(
+    r'\b(\d+(?:\.\d+)?)\s*m\b(?!\s*(?:2|²))'
+    r'(?:\s+(?!and\b|\w*span\b)[\w-]+){0,4}\s+[\w-]*span\b', re.I)
+_JOIST_SPANS = (
+    re.compile(r'(\d+(?:\.\d+)?)\s*m\b(?!\s*(?:2|²))(?:\s+\w+){0,4}\s+joists?\b', re.I),
+    re.compile(r'joists?(?:\s+\w+){0,5}\s+span(?:ning|s)?(?:\s+\w+){0,4}\s+(\d+(?:\.\d+)?)\s*m\b(?!\s*(?:2|²))', re.I),
+)
 
 
-def _kpa_at(text: str, cue: str, limit: float, *, at_least: bool) -> bool:
-    """True when a kPa value beside `cue` meets the Part 9 threshold. Equality follows the sentence."""
+def _clause_start(text: str, end: int) -> int:
+    breaks = list(_CLAUSE_BREAK.finditer(text, 0, end))
+    return breaks[-1].end() if breaks else 0
+
+
+def _covered(cue: re.Match[str], parsed: list[re.Match[str]]) -> bool:
+    return any(match.start() <= cue.start() and cue.end() <= match.end() for match in parsed)
+
+
+def _kpa_at(text: str, cue: str, limit: float, *, at_least: bool) -> bool | None:
+    """Positive, understood subthreshold/absent, or unparsed cue. Never borrow a following cue."""
+    parsed = set()
+    previous_end = 0
     for match in re.finditer(r'(\d+(?:\.\d+)?)\s*kPa', text, re.I):
-        window = text[max(0, match.start() - 80):match.end() + 40]
-        if not re.search(cue, window, re.I):
+        start = max(previous_end, _clause_start(text, match.start()))
+        previous_end = match.end()
+        preceding = list(_PRESSURE_CUE.finditer(text, start, match.start()))
+        if not preceding:
             continue
+        nearest = preceding[-1]
+        owner = re.search(cue, nearest.group(), re.I)
+        if owner is None:
+            continue
+        parsed.add(nearest.start() + owner.start())
         value = float(match.group(1))
         if at_least and value >= limit:
             return True
         if not at_least and value > limit:
             return True
+    if any(match.start() not in parsed for match in re.finditer(cue, text, re.I)):
+        return None
     return False
 
 
-def _sa_triggers_part4(text: str) -> bool:
+def _sa_triggers_part4(text: str) -> bool | None:
     """Sa(0.2) above 1.8, or above 1.2 when lumber roof sheathing is stated.
 
     Div B 9.23.3.5.(4) and 9.23.6.1.(6) use greater than 1.8. Div B 9.23.16.5.(3) uses
     greater than 1.2 for lumber roof sheathing. Both limits are strict.
     """
     lumber_roof = re.search(r'\blumber roof sheathing\b', text, re.I) is not None
-    for match in re.finditer(r'Sa\s*\(\s*0\.2\s*\)(?:[^0-9]{0,40})(\d+(?:\.\d+)?)', text, re.I):
+    parsed = list(re.finditer(
+        r'Sa\s*\(\s*0\.2\s*\)\s*(?:of|is|=|:)?\s*(\d+(?:\.\d+)?)', text, re.I))
+    for match in parsed:
         value = float(match.group(1))
         if value > 1.8 or (lumber_roof and value > 1.2):
             return True
+    for cue in _SA_CUE.finditer(text):
+        if _covered(cue, parsed):
+            continue
+        # A generic seismic cue is understood only with a parsed Sa in its own clause.
+        end = _CLAUSE_BREAK.search(text, cue.end())
+        if cue.group().lower() == 'seismic' and any(
+                _clause_start(text, cue.start()) <= match.start()
+                and match.end() <= (end.start() if end else len(text)) for match in parsed):
+            continue
+        return None
     return False
 
 
-def _joist_span_exceeds_4_9(text: str) -> bool:
+def _joist_span_matches(text: str) -> list[re.Match[str]]:
+    return [match for pattern in _JOIST_SPANS for match in pattern.finditer(text)]
+
+
+def _joist_span_exceeds_4_9(text: str) -> bool | None:
     """Div B 9.15.3.3.(2): supported joist span exceeds 4.9 m. Not the 12.20 m roof-member handoff."""
-    patterns = (
-        r'(\d+(?:\.\d+)?)\s*m(?!\s*(?:2|²))(?:\s+\w+){0,4}\s+joists?\b',
-        r'joists?(?:\s+\w+){0,5}\s+span(?:ning|s)?(?:\s+\w+){0,4}\s+(\d+(?:\.\d+)?)\s*m(?!\s*(?:2|²))',
-    )
-    for pattern in patterns:
-        for match in re.finditer(pattern, text, re.I):
-            if float(match.group(1)) > 4.9:
-                return True
+    parsed = _joist_span_matches(text)
+    if any(float(match.group(1)) > 4.9 for match in parsed):
+        return True
+    if any(not _covered(cue, parsed) and not _immediately_negated(text, cue.start())
+           for cue in re.finditer(r'\bjoists?\b', text, re.I)):
+        return None
     return False
+
+
+def _unparsed_span(text: str) -> bool:
+    parsed = [*_SPAN_METRES.finditer(text), *_joist_span_matches(text)]
+    return any(not _covered(cue, parsed) and not _immediately_negated(text, cue.start())
+               for cue in re.finditer(r'\bspan(?:ning|s)?\b', text, re.I))
 
 
 def _steel_studs(text: str) -> bool:
@@ -411,10 +462,15 @@ def _part4_from_text(text: str, storeys: int | None, area: float | None, occupan
         return True
     if _REINFORCED_CONCRETE.search(text) or _steel_studs(text) or _unnegated(_PERMAFROST, text):
         return True
-    if _kpa_at(text, r'\bwind\b', 1.2, at_least=True) or _sa_triggers_part4(text):
+    parsed = (
+        _kpa_at(text, r'\bwind\b', 1.2, at_least=True), _sa_triggers_part4(text),
+        _joist_span_exceeds_4_9(text), _kpa_at(text, r'\blive load\b', 2.4, at_least=False),
+    )
+    if any(trigger is True for trigger in parsed):
         return True
-    if _joist_span_exceeds_4_9(text) or _kpa_at(text, r'\blive load\b', 2.4, at_least=False):
-        return True
+    # q50 shorthand and unsupported length units are cues to ask, not negative facts.
+    if any(trigger is None for trigger in parsed) or re.search(r'\bq50\b', text, re.I) or _unparsed_span(text):
+        return None
     negated_part4 = any(_immediately_negated(text, match.start()) for match in _PART4.finditer(text))
     framed = _WOOD_FRAME.search(text) or _STICK_FRAME.search(text) or negated_part4
     if framed and _inside_part9(text, storeys, area, occupancy):
@@ -423,9 +479,24 @@ def _part4_from_text(text: str, storeys: int | None, area: float | None, occupan
 
 
 def _span(text: str) -> float | None:
-    found = [float(match.group(1)) for match in re.finditer(
-        rf'\b(\d+(?:\.\d+)?)\s*m(?!\s*(?:2|²))(?:\s+\S+){{0,4}}\s+\S*span\b', text, re.I)]
+    found = [float(match.group(1)) for match in _SPAN_METRES.finditer(text)]
     return max(found) if found else None
+
+
+def _mercantile_use(text: str) -> bool:
+    for cue in re.finditer(r'\b(?:retail(?:\s+shop)?|mercantile|shop)\b', text, re.I):
+        start = _clause_start(text, cue.start())
+        prefix = text[start:cue.start()]
+        if re.search(r'\b(?:supplied|supplier|purchased|bought|ordered|vendor)\b', prefix, re.I):
+            continue
+        if cue.group().lower() != 'shop':
+            return True
+        # Bare shop needs an actual building/use context, not an incidental third party.
+        end = _CLAUSE_BREAK.search(text, cue.end())
+        context = text[start:end.start() if end else len(text)]
+        if re.search(r'\b(?:storey|building|premises|occupancy|use|opening|constructing|operating)\b', context, re.I):
+            return True
+    return False
 
 
 def _occupancy(text: str, units: int | None) -> str | None:
@@ -435,7 +506,12 @@ def _occupancy(text: str, units: int | None) -> str | None:
         return 'industrial'
     if re.search(r'\b(?:hotel|motel)\b', text, re.I):
         return 'hotel'
-    if re.search(r'\b(?:retail(?:\s+shop)?|mercantile|shop)\b', text, re.I):
+    residential = bool(_DETACHED.search(text) or re.search(
+        r'\b(?:apartments?|townhouses?|duplex|dwelling units|multi-family|house|houses|home|homes)\b', text, re.I)
+        or (units is not None and units >= 2))
+    if _mercantile_use(text):
+        if residential:
+            return 'mixed'
         return 'mercantile'
     if _DETACHED.search(text) and not re.search(r'\b(?:apartments?|townhouses?|duplex)\b', text, re.I):
         return 'single_family'
