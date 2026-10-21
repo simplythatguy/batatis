@@ -1,12 +1,29 @@
 """Compare practice-of-engineering flag variants on the 60 development cases.
 
     python -m engine.section_d_flag_eval
+    python -m engine.section_d_flag_eval --cases cases.jsonl
+    python -m engine.section_d_flag_eval --codedb PATH --cases cases.jsonl
+
+`--cases` reads a JSONL file in the #8 case format (`id`, `description`, `known_facts`,
+`gold.engineering_required`) and scores only the shipped variant, `rules_plus_unknown`.
 
 `rules_only` fills unstated component facts with "not triggered" and returns professional.py's
 yes/no/depends. `rules_plus_unknown` keeps that screen, records a stated span above 12.20 m as
 Part 4 design (cited only as Div C 2.4.1.2.(1) from professional.py), and returns unknown with a
 question when span, area, storeys, occupancy, or Part 4 design is missing. It does not default
 those facts to a boolean. A rule that already resolves to yes still returns yes.
+
+Part 4 itself is derived from stated facts. Positive triggers, from the codedb-checked Part 9
+sentences, are a 1-in-50 hourly wind pressure at or above 1.2 kPa, Sa(0.2) above 1.8 (or above
+1.2 where lumber roof sheathing is stated), a supported joist span above 4.9 m, a specified live
+load above 2.4 kPa, reinforced concrete, steel studs, permafrost, and a building outside Part 9
+under Div A 1.3.3.2.(1), including a Group A or Group B occupancy that still fits a Division C
+size exception. A wood-frame building inside that Part 9 limit with no positive or unparsed
+relevant cue is part4_design false. An unparsed load, seismic, joist or span cue keeps it unknown.
+Stick-framed lumber and Part 9 span tables are the same negative.
+A Part 4 phrase inside a negation, such as "not designed under Part 4", is not a
+positive trigger, and "not on permafrost" is not one either. "no engineer" records
+engineer_engaged false and is not an unresolved design. That negative is extracted, not filled in.
 
 `rules_plus_unknown_cf` is the same frozen screen, run once for every combination of the missing
 deciding facts at fixed extremes (the value that most pushes toward yes, and the value that most
@@ -19,24 +36,34 @@ The gold labels are model-checked, not human-reviewed. `rules_plus_unknown` was 
 looking at this same development set, so agreement on those 60 cases is in-sample. The eight-case
 limit check is reported separately and is no longer blind for missing-fact cases.
 
-Gold `depends` matches system `unknown`. Under-flag is gold yes and system no. A case is skipped
-when codedb (or the rule lookup standing in for it) cannot resolve a provision the screen asks for.
+Gold `depends` matches system `unknown`. Under-flag is gold yes and system no. Over-flag is gold
+no and system yes. A case is skipped when codedb (or the rule lookup standing in for it) cannot
+resolve a provision the screen asks for.
+
+(on the 60 text-only dev cases it answered only yes or ask, 0 no, so 0 under-flags is partly by design; since 4425089 it can answer no when stated facts clear every trigger)
+
+Part 4 on text-only cases is derived from stated facts. A wood-frame building inside Part 9 with no Part 4 trigger is part4_design false, so the screen can answer no. On this dev set (model-checked, in-sample) the shipped screen still emits 0 no labels.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import math
 import re
+import sys
 from dataclasses import dataclass, field
 from itertools import product
 from pathlib import Path
 
 from .codes import CodeDbMissing, Codes
 from .professional import ProfessionalFacts, professional_involvement
-from .section_d_issues import PART9_MAX_SPAN_M, PROCESS_RULES, PROFESSIONAL_RULES
+from .section_d_issues import PART9_MAX_SPAN_M, PROCESS_RULES, PROFESSIONAL_RULES, citation_resolution
 
 CASES = Path(__file__).resolve().parents[1] / 'evals_dev' / 'cases'
 HELDOUT = Path(__file__).resolve().parents[1] / 'evals_dev' / 'section_d_heldout'
+NGT = Path(__file__).resolve().parents[1] / 'evals' / 'fixtures' / 'section_d_no_gt'
+# Scenarios built from cited provisions. Not real applications and not human-verified.
+NGT_LABEL = 'model-constructed, model-checked, not human-verified'
 # Recorded before the missing-fact fix. hold-004 was the miss. Do not recompute this line.
 _BLIND_HELDOUT_RULES_PLUS = '7/8 [0.5291, 0.9776]'
 _MISSING_QUESTION = {
@@ -91,7 +118,8 @@ _PART4 = re.compile(
     re.I)
 _UNRESOLVED = re.compile(
     r'\b(?:steel strap|proprietary tables|proprietary header|structural insulated panels?|shear values|'
-    r'into the foam|no engineer(?:s| is)?|part 5)\b', re.I)
+    r'into the foam|part 5)\b', re.I)
+_NO_ENGINEER = re.compile(r'\bno engineers?(?:\s+is|\s+engaged)?\b', re.I)
 _OUT = re.compile(
     r'\b(?:natural gas|gas fitter|gas supply|electrical panel|electrician|air admittance|'
     r'septic|sewage|disposal[- ]field|plumbing contractor)\b', re.I)
@@ -137,6 +165,7 @@ class VariantScore:
     skipped: int = 0
     matched: int = 0
     under_flag: int = 0
+    over_flag: int = 0
     unknown: int = 0
     confident_wrong: int = 0
     gold_yes_unknown: list[str] = field(default_factory=list)
@@ -148,6 +177,10 @@ class VariantScore:
     @property
     def agreement(self) -> float:
         return self.matched / self.scored if self.scored else 0.0
+
+    @property
+    def answered_no(self) -> int:
+        return sum(self.matrix[gold]['no'] for gold in GOLD_ROWS)
 
 
 def wilson_interval(matched: int, scored: int) -> tuple[float, float]:
@@ -178,7 +211,7 @@ def _storeys(text: str) -> int | None:
 
 
 def _area(text: str) -> float | None:
-    for pattern in (r'building area of\s+(\d[\d,]*(?:\.\d+)?)\s*m', r'(\d[\d,]*(?:\.\d+)?)\s*m\s*(?:2|²)\s+building area'):
+    for pattern in (r'building area (?:of|is)\s+(\d[\d,]*(?:\.\d+)?)\s*m', r'(\d[\d,]*(?:\.\d+)?)\s*m\s*(?:2|²)\s+building area'):
         labelled = re.findall(pattern, text, re.I)
         if labelled:
             return float(labelled[-1].replace(',', ''))
@@ -211,10 +244,264 @@ def _units(text: str, storeys: int | None) -> int | None:
     return max(found) if found else None
 
 
+def _total_unit_count(text: str, principal: int | None) -> int | None:
+    """Act total, including suites. A stated 'in total' is that total, not an extra addend."""
+    stated = re.search(rf'\b({_TOKEN})\s+(?:dwelling\s+)?units?\s+in total\b', text, re.I)
+    if stated:
+        return _number(stated.group(1))
+    if re.search(r'\bno secondary suites\b', text, re.I):
+        return principal
+    suites = 0
+    if principal is not None and re.search(r'\beach\b.{0,80}\bsecondary suites?\b', text, re.I):
+        suites = principal
+    elif re.search(r'\b(?:a|an|one|1)\s+(?:[\w-]+\s+){0,4}secondary suite\b', text, re.I):
+        suites = 1
+    else:
+        counted = re.search(rf'\b({_TOKEN})\s+(?:[\w-]+\s+){{0,4}}secondary suites?\b', text, re.I)
+        if counted and not _immediately_negated(text, counted.start()):
+            suites = _number(counted.group(1))
+    if suites and principal is not None:
+        return principal + suites
+    return None
+
+
+# Quote figures used only to see whether two gross-area readings disagree.
+# Hotel: Architects Act s.2(6)(c) 400 m² / 200 m². Mercantile and the like: s.2(6)(d)(i) 500 m².
+# Disagreement is medium confidence and asks. It is not a hard no, and it is not a hard yes.
+_ACT_GROSS_M2 = {
+    'hotel': {1: 400, 2: 200},
+    'business': {1: 500},
+    'mercantile': {1: 500},
+    'industrial': {1: 500},
+}
+
+
+def _basement_area(text: str) -> float | None:
+    if re.search(r'\bno basement\b', text, re.I):
+        return None
+    found = []
+    for match in re.finditer(
+            r'\bbasement\b([^.\n]{0,40}?)(\d[\d,]*(?:\.\d+)?)\s*m\s*(?:2|²)', text, re.I):
+        if re.search(r'\bbuilding area\b', match.group(1), re.I):
+            continue
+        found.append(float(match.group(2).replace(',', '')))
+    return found[-1] if found else None
+
+
+def _gross_area_unsettled(text: str, occupancy: str | None, storeys: int | None, area: float | None) -> bool:
+    """True when a hard no from building area would ignore an unsettled gross-area reading."""
+    named = re.search(r'\bgross area\b(?:[^.]{0,40}?)(\d[\d,]*(?:\.\d+)?)\s*m\s*(?:2|²)?', text, re.I)
+    if re.search(r'\bgross area\b', text, re.I) and named is None:
+        return True
+    basement = _basement_area(text)
+    if basement is None or area is None or storeys is None or occupancy is None:
+        return False
+    limits = _ACT_GROSS_M2.get(occupancy)
+    if not limits or storeys not in limits:
+        return False
+    readings = {area <= limits[storeys], (area + basement) <= limits.get(1, limits[storeys])}
+    per_floor = limits.get(2)
+    if storeys == 1 and per_floor is not None:
+        readings.add(area <= per_floor and basement <= per_floor)
+    return len(readings) > 1
+
+
+_WOOD_FRAME = re.compile(r'\b(?:wood[-\s]?fram(?:e|ed|ing)|light[-\s]frame)\b', re.I)
+_STICK_FRAME = re.compile(r'\b(?:stick[-\s]?fram(?:e|ed|ing)|part 9 span tables)\b', re.I)
+_PERMAFROST = re.compile(r'\bpermafrost\b', re.I)
+# A negation applies only to the words immediately in front of the match.
+_NEG_TAIL = re.compile(r"(?:n't|\b(?:not|no|never|without)\b)(?:[\w'-]*\s+){0,4}$", re.I)
+_REINFORCED_CONCRETE = re.compile(r'\breinforced concrete\b', re.I)
+_POST_DISASTER = re.compile(r'\bpost-disaster\b', re.I)
+_HIGH_HAZARD = re.compile(r'\b(?:high-hazard industrial|group f,?\s*division\s*1)\b', re.I)
+# Div A 1.3.3.2.(1)(b): Group A, and Group B care, treatment or detention. Not every industrial use.
+_OUTSIDE_PART9_OCCUPANCY = frozenset({'assembly', 'care', 'treatment', 'detention'})
+_CLAUSE_BREAK = re.compile(r'[;,\n]|(?<!\d)\.|\.(?!\d)')
+_PRESSURE_CUE = re.compile(r'\b(?:wind(?:\s+pressure)?|(?:specified\s+)?live load|q50|soil bearing pressure)\b', re.I)
+_SA_CUE = re.compile(r'Sa\s*\(\s*0\.2\s*\)|\bseismic\b', re.I)
+_SPAN_METRES = re.compile(
+    r'\b(\d+(?:\.\d+)?)\s*m\b(?!\s*(?:2|²))'
+    r'(?:\s+(?!and\b|\w*span\b)[\w-]+){0,4}\s+[\w-]*span\b', re.I)
+_JOIST_SPANS = (
+    re.compile(r'(\d+(?:\.\d+)?)\s*m\b(?!\s*(?:2|²))(?:\s+\w+){0,4}\s+joists?\b', re.I),
+    re.compile(r'joists?(?:\s+\w+){0,5}\s+span(?:ning|s)?(?:\s+\w+){0,4}\s+(\d+(?:\.\d+)?)\s*m\b(?!\s*(?:2|²))', re.I),
+)
+_TABLE_MEMBERS = re.compile(
+    r'\b(?:rafters?|(?:floor|ceiling|roof)\s+joists?|joists?)'
+    r'(?:\s+and\s+(?:rafters?|(?:floor|ceiling|roof)\s+joists?|joists?))*'
+    r'\s+from\s+(?:the\s+)?Part\s+9\s+span\s+tables\b', re.I)
+
+
+def _clause_start(text: str, end: int) -> int:
+    breaks = list(_CLAUSE_BREAK.finditer(text, 0, end))
+    return breaks[-1].end() if breaks else 0
+
+
+def _covered(cue: re.Match[str], parsed: list[re.Match[str]]) -> bool:
+    return any(match.start() <= cue.start() and cue.end() <= match.end() for match in parsed)
+
+
+def _kpa_at(text: str, cue: str, limit: float, *, at_least: bool) -> bool | None:
+    """Positive, understood subthreshold/absent, or unparsed cue. Never borrow a following cue."""
+    parsed = set()
+    previous_end = 0
+    for match in re.finditer(r'(\d+(?:\.\d+)?)\s*kPa', text, re.I):
+        start = max(previous_end, _clause_start(text, match.start()))
+        previous_end = match.end()
+        preceding = list(_PRESSURE_CUE.finditer(text, start, match.start()))
+        if not preceding:
+            continue
+        nearest = preceding[-1]
+        owner = re.search(cue, nearest.group(), re.I)
+        if owner is None:
+            continue
+        parsed.add(nearest.start() + owner.start())
+        value = float(match.group(1))
+        if at_least and value >= limit:
+            return True
+        if not at_least and value > limit:
+            return True
+    if any(match.start() not in parsed for match in re.finditer(cue, text, re.I)):
+        return None
+    return False
+
+
+def _sa_triggers_part4(text: str) -> bool | None:
+    """Sa(0.2) above 1.8, or above 1.2 when lumber roof sheathing is stated.
+
+    Div B 9.23.3.5.(4) and 9.23.6.1.(6) use greater than 1.8. Div B 9.23.16.5.(3) uses
+    greater than 1.2 for lumber roof sheathing. Both limits are strict.
+    """
+    lumber_roof = re.search(r'\blumber roof sheathing\b', text, re.I) is not None
+    parsed = list(re.finditer(
+        r'Sa\s*\(\s*0\.2\s*\)\s*(?:of|is|=|:)?\s*(\d+(?:\.\d+)?)', text, re.I))
+    for match in parsed:
+        value = float(match.group(1))
+        if value > 1.8 or (lumber_roof and value > 1.2):
+            return True
+    for cue in _SA_CUE.finditer(text):
+        if _covered(cue, parsed):
+            continue
+        # A generic seismic cue is understood only with a parsed Sa in its own clause.
+        end = _CLAUSE_BREAK.search(text, cue.end())
+        if cue.group().lower() == 'seismic' and any(
+                _clause_start(text, cue.start()) <= match.start()
+                and match.end() <= (end.start() if end else len(text)) for match in parsed):
+            continue
+        return None
+    return False
+
+
+def _joist_span_matches(text: str) -> list[re.Match[str]]:
+    return [match for pattern in _JOIST_SPANS for match in pattern.finditer(text)]
+
+
+def _joist_span_exceeds_4_9(text: str) -> bool | None:
+    """Div B 9.15.3.3.(2): supported joist span exceeds 4.9 m. Not the 12.20 m roof-member handoff."""
+    parsed = _joist_span_matches(text)
+    if any(float(match.group(1)) > 4.9 for match in parsed):
+        return True
+    understood = [*parsed, *_TABLE_MEMBERS.finditer(text)]
+    if any(not _covered(cue, understood) and not _immediately_negated(text, cue.start())
+           for cue in re.finditer(r'\bjoists?\b', text, re.I)):
+        return None
+    return False
+
+
+def _unparsed_span(text: str) -> bool:
+    parsed = [*_SPAN_METRES.finditer(text), *_joist_span_matches(text), *_STICK_FRAME.finditer(text)]
+    return any(not _covered(cue, parsed) and not _immediately_negated(text, cue.start())
+               for cue in re.finditer(r'\bspan(?:ning|s)?\b', text, re.I))
+
+
+def _steel_studs(text: str) -> bool:
+    """Div B 9.24.1.1.(2) is loadbearing steel studs. A stated non-loadbearing stud is not that trigger."""
+    for match in re.finditer(r'steel studs?', text, re.I):
+        prefix = text[max(0, match.start() - 20):match.start()]
+        if re.search(r'non[-\s]?loadbearing\s+$', prefix, re.I):
+            continue
+        return True
+    return False
+
+
+def _outside_part9(text: str, storeys: int | None, area: float | None, occupancy: str | None) -> bool:
+    """Div A 1.3.3.2.(1): Part 4 applies even when a Division C 2.4.1.1.(1) size exception is met."""
+    if storeys is not None and storeys > 3:
+        return True
+    if area is not None and area > 600:
+        return True
+    if occupancy in _OUTSIDE_PART9_OCCUPANCY:
+        return True
+    if _POST_DISASTER.search(text) or _HIGH_HAZARD.search(text):
+        return True
+    return False
+
+
+def _inside_part9(text: str, storeys: int | None, area: float | None, occupancy: str | None) -> bool:
+    """Stated size and occupancy put the building on the Part 9 side of Div A 1.3.3.2.(1)."""
+    if storeys is None or storeys > 3 or area is None or area > 600 or occupancy is None:
+        return False
+    if occupancy in _OUTSIDE_PART9_OCCUPANCY or occupancy in {'mixed', 'other'}:
+        return False
+    if _POST_DISASTER.search(text) or _HIGH_HAZARD.search(text):
+        return False
+    return True
+
+
+def _immediately_negated(text: str, start: int) -> bool:
+    return _NEG_TAIL.search(text[max(0, start - 48):start]) is not None
+
+
+def _unnegated(pattern: re.Pattern[str], text: str) -> bool:
+    return any(not _immediately_negated(text, match.start()) for match in pattern.finditer(text))
+
+
+def _part4_phrase(text: str) -> bool:
+    """'under Part 4' counts only when it is not inside a negation."""
+    return _unnegated(_PART4, text)
+
+
+def _part4_from_text(text: str, storeys: int | None, area: float | None, occupancy: str | None) -> bool | None:
+    """True, false, or unknown Part 4 design. A span above 12.20 m is not applied here."""
+    if _part4_phrase(text) or _outside_part9(text, storeys, area, occupancy):
+        return True
+    if _REINFORCED_CONCRETE.search(text) or _steel_studs(text) or _unnegated(_PERMAFROST, text):
+        return True
+    parsed = (
+        _kpa_at(text, r'\bwind\b', 1.2, at_least=True), _sa_triggers_part4(text),
+        _joist_span_exceeds_4_9(text), _kpa_at(text, r'\blive load\b', 2.4, at_least=False),
+    )
+    if any(trigger is True for trigger in parsed):
+        return True
+    # q50 shorthand and unsupported length units are cues to ask, not negative facts.
+    if any(trigger is None for trigger in parsed) or re.search(r'\bq50\b', text, re.I) or _unparsed_span(text):
+        return None
+    negated_part4 = any(_immediately_negated(text, match.start()) for match in _PART4.finditer(text))
+    framed = _WOOD_FRAME.search(text) or _STICK_FRAME.search(text) or negated_part4
+    if framed and _inside_part9(text, storeys, area, occupancy):
+        return False
+    return None
+
+
 def _span(text: str) -> float | None:
-    found = [float(match.group(1)) for match in re.finditer(
-        rf'\b(\d+(?:\.\d+)?)\s*m(?!\s*(?:2|²))(?:\s+\S+){{0,4}}\s+\S*span\b', text, re.I)]
+    found = [float(match.group(1)) for match in _SPAN_METRES.finditer(text)]
     return max(found) if found else None
+
+
+def _mercantile_use(text: str) -> bool:
+    for cue in re.finditer(r'\b(?:retail(?:\s+shop)?|mercantile|shop)\b', text, re.I):
+        start = _clause_start(text, cue.start())
+        prefix = text[start:cue.start()]
+        if re.search(r'\b(?:supplied|supplier|purchased|bought|ordered|vendor)\b', prefix, re.I):
+            continue
+        if cue.group().lower() != 'shop':
+            return True
+        # Bare shop needs an actual building/use context, not an incidental third party.
+        end = _CLAUSE_BREAK.search(text, cue.end())
+        context = text[start:end.start() if end else len(text)]
+        if re.search(r'\b(?:storey|building|premises|occupancy|use|opening|constructing|operating)\b', context, re.I):
+            return True
+    return False
 
 
 def _occupancy(text: str, units: int | None) -> str | None:
@@ -224,6 +511,13 @@ def _occupancy(text: str, units: int | None) -> str | None:
         return 'industrial'
     if re.search(r'\b(?:hotel|motel)\b', text, re.I):
         return 'hotel'
+    residential = bool(_DETACHED.search(text) or re.search(
+        r'\b(?:apartments?|townhouses?|duplex|dwelling units|multi-family|house|houses|home|homes)\b', text, re.I)
+        or (units is not None and units >= 2))
+    if _mercantile_use(text):
+        if residential:
+            return 'mixed'
+        return 'mercantile'
     if _DETACHED.search(text) and not re.search(r'\b(?:apartments?|townhouses?|duplex)\b', text, re.I):
         return 'single_family'
     if re.search(r'\b(?:apartments?|townhouses?|duplex|dwelling units|multi-family)\b', text, re.I) or (
@@ -246,7 +540,7 @@ def observe(case: dict) -> tuple[ProfessionalFacts, Signals]:
         signals.flags.add('out_of_scope')
         return ProfessionalFacts(), signals
     storeys, area = _storeys(text), _area(text)
-    if _PRODUCT.search(text) and storeys is None and area is None and not _PART4.search(text):
+    if _PRODUCT.search(text) and storeys is None and area is None and not _part4_phrase(text):
         signals.flags.add('product_without_building')
         return ProfessionalFacts(), signals
     if re.search(r'not confirmed how many dwellings|dwelling count, use', text, re.I):
@@ -255,14 +549,23 @@ def observe(case: dict) -> tuple[ProfessionalFacts, Signals]:
     if _UNRESOLVED.search(text):
         signals.flags.add('unresolved_design')
     units = _units(text, storeys)
+    occupancy = _occupancy(text, units)
     data = {
-        'occupancy': _occupancy(text, units),
+        'occupancy': occupancy,
         'storeys': storeys,
         'building_area_m2': area,
-        'principal_dwelling_units': units if _occupancy(text, units) == 'multi_family' else None,
+        'principal_dwelling_units': units if occupancy == 'multi_family' else None,
     }
-    if _PART4.search(text):
-        data['part4_design'] = True
+    total_units = _total_unit_count(text, units)
+    if total_units is not None:
+        data['total_unit_count'] = total_units
+    if _NO_ENGINEER.search(text):
+        data['engineer_engaged'] = False
+    if _gross_area_unsettled(text, occupancy, storeys, area):
+        data['gross_area_unsettled'] = True
+    part4 = _part4_from_text(text, storeys, area, occupancy)
+    if part4 is not None:
+        data['part4_design'] = part4
     return ProfessionalFacts(**{key: value for key, value in data.items() if value is not None}), signals
 
 
@@ -416,12 +719,13 @@ def _column(label: str) -> str:
 
 def under_flag_fact(case: dict, variant: str) -> str:
     facts, signals = observe(case)
-    parts = [f'occupancy={facts.occupancy}', f'part4_design={"true" if facts.part4_design is True else "unset"}']
+    part4 = {True: 'true', False: 'false'}.get(facts.part4_design, 'unset')
+    parts = [f'occupancy={facts.occupancy}', f'part4_design={part4}']
     if signals.span_m is not None:
         parts.append(f'span_m={signals.span_m:g}')
     if variant == 'rules_only' and signals.span_m is not None and signals.span_m > PART9_MAX_SPAN_M:
         parts.append(
-            f'rules_only does not apply the {PART9_MAX_SPAN_M:.2f} m span, so part4_design is filled false')
+            f'rules_only does not apply the {PART9_MAX_SPAN_M:.2f} m span, so part4_design stays false')
     return f"{case['id']}: " + '; '.join(parts)
 
 
@@ -430,9 +734,9 @@ def _matches(system: str, gold: str) -> bool:
     return normalized.get(system, system) == normalized.get(gold, gold)
 
 
-def load_codes():
+def load_codes(db_path: Path | str | None = None):
     try:
-        codes = Codes()
+        codes = Codes(db_path) if db_path else Codes()
         if codes.provision('2.4.1.1.(1)', 'C') is None:
             raise FileNotFoundError('division C professional rules are not in codedb')
         return codes, 'present'
@@ -440,12 +744,27 @@ def load_codes():
         return RuleLookup(), 'missing'
 
 
-def score(codes, cases: list[dict] | None = None) -> dict[str, VariantScore]:
+def load_case_jsonl(path: Path) -> list[dict]:
+    """One #8-format case per line: id, description, known_facts, gold.engineering_required."""
+    cases = []
+    for line_number, line in enumerate(path.read_text().splitlines(), start=1):
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        gold = row.get('gold') if isinstance(row, dict) else None
+        if not isinstance(gold, dict) or 'engineering_required' not in gold:
+            raise SystemExit(f'{path}:{line_number}: expected a #8 case with gold.engineering_required')
+        cases.append(row)
+    return cases
+
+
+def score(codes, cases: list[dict] | None = None, *,
+          variants: tuple[str, ...] = VARIANTS) -> dict[str, VariantScore]:
     rows = cases if cases is not None else load_cases()
-    totals = {name: VariantScore(name) for name in VARIANTS}
+    totals = {name: VariantScore(name) for name in variants}
     for case in rows:
         gold = case['gold']['engineering_required']
-        for name in VARIANTS:
+        for name in variants:
             try:
                 label = flag_label(case, codes, name)
             except (KeyError, ValueError):
@@ -464,6 +783,8 @@ def score(codes, cases: list[dict] | None = None) -> dict[str, VariantScore]:
             if gold == 'yes' and label == 'no':
                 totals[name].under_flag += 1
                 totals[name].under_flag_facts.append(under_flag_fact(case, name))
+            if gold == 'no' and label == 'yes':
+                totals[name].over_flag += 1
             if gold == 'yes' and column == 'unknown':
                 totals[name].gold_yes_unknown.append(case['id'])
     return totals
@@ -475,6 +796,16 @@ def load_cases() -> list[dict]:
 
 def load_heldout() -> list[dict]:
     return [json.loads(path.read_text()) for path in sorted(HELDOUT.glob('hold-*.json'))]
+
+
+def load_ngt() -> list[dict]:
+    return [json.loads(path.read_text()) for path in sorted(NGT.glob('ngt-*.json'))]
+
+
+def _score_line(scope: str, row: VariantScore) -> str:
+    return (f'{scope} {row.name}: {row.matched}/{row.scored} correct, '
+            f'under-flags {row.under_flag}, over-flags {row.over_flag}, '
+            f'no {row.answered_no}, unknown {row.unknown}')
 
 
 def winner(totals: dict[str, VariantScore]) -> str:
@@ -515,6 +846,7 @@ def _variant_lines(row: VariantScore) -> list[str]:
     lines.append(f'gold_yes_as_unknown {row.name}: {_yes_unknown(row)}')
     facts = '; '.join(row.under_flag_facts) if row.under_flag_facts else 'none'
     lines.append(f'under_flag {row.name}: {facts}')
+    lines.append(f'over_flag {row.name}: {row.over_flag} (gold no, system yes)')
     return lines
 
 
@@ -531,6 +863,7 @@ def report(totals: dict[str, VariantScore], codedb: str) -> str:
     ]
     for name in VARIANTS:
         lines.extend(_variant_lines(totals[name]))
+        lines.append(_score_line('dev', totals[name]))
     lines.append('rules_plus_unknown on this dev table is in-sample and pending out-of-sample confirmation')
     lines.append(f'winner: {winner(totals)}')
     lines.append('under_flag_target: 0')
@@ -558,6 +891,20 @@ def heldout_report(totals: dict[str, VariantScore]) -> str:
         lines.extend(_variant_lines(totals[name]))
         misses = ', '.join(totals[name].misses) if totals[name].misses else 'none'
         lines.append(f'misses {name}: {misses}')
+        lines.append(f'{_score_line("held-out post-fix, no longer blind", totals[name])}')
+    return '\n'.join(lines)
+
+
+def ngt_report(totals: dict[str, VariantScore]) -> str:
+    """Every line carries the not-human-verified label. Tuning against this set makes it in-sample."""
+    lines = [
+        f'ngt-set: evals/fixtures/section_d_no_gt | {NGT_LABEL}',
+        f'ngt-set tuning: in-sample once tuned against these cases | {NGT_LABEL}',
+    ]
+    for name in VARIANTS:
+        lines.append(f'{_score_line("ngt", totals[name])} | {NGT_LABEL}')
+        misses = ', '.join(totals[name].misses) if totals[name].misses else 'none'
+        lines.append(f'ngt misses {name}: {misses} | {NGT_LABEL}')
     return '\n'.join(lines)
 
 
@@ -580,13 +927,39 @@ def headline(dev: dict[str, VariantScore], heldout: dict[str, VariantScore]) -> 
     )
 
 
-def main() -> int:
-    codes, codedb = load_codes()
+def main(argv: list[str] | None = None) -> int:
+    """Score the variants. Pass --codedb PATH to use a real snapshot.
+
+    A missing codedb turns a yes or no with no resolvable Division C citation into unknown,
+    so those variant numbers are not final.
+    """
+    parser = argparse.ArgumentParser(description='Score practice-of-engineering flag variants.')
+    parser.add_argument('--codedb', type=Path, default=None,
+                        help='Path to codedb.sqlite. Without a readable database the table is not final.')
+    parser.add_argument('--cases', type=Path, default=None,
+                        help='JSONL in the #8 case format. Scores only the shipped variant, rules_plus_unknown.')
+    args = parser.parse_args(sys.argv[1:] if argv is None else argv)
+    codes, codedb = load_codes(args.codedb)
+    if args.cases is not None:
+        shipped = score(codes, load_case_jsonl(args.cases), variants=('rules_plus_unknown',))
+        print(_score_line('shipped', shipped['rules_plus_unknown']))
+        print('variant: rules_plus_unknown')
+        if codedb == 'missing':
+            print('numbers: not final (codedb missing; since 7f3aac2 a yes or no without a resolvable '
+                  'Division C citation becomes unknown)')
+        return 0
     dev = score(codes)
     heldout = score(codes, load_heldout())
     print(headline(dev, heldout))
     print(report(dev, codedb))
     print(heldout_report(heldout))
+    print(ngt_report(score(codes, load_ngt())))
+    if codedb == 'missing':
+        print('numbers: not final (codedb missing; since 7f3aac2 a yes or no without a resolvable '
+              'Division C citation becomes unknown)')
+    else:
+        resolved, total = citation_resolution(load_cases(), codes)
+        print(f'citation_resolution: {resolved}/{total}')
     return 0
 
 

@@ -35,7 +35,7 @@ python3 -m venv .venv
 
 Leave that terminal open. Uvicorn prints `Uvicorn running on http://127.0.0.1:8000`. The route list is at http://127.0.0.1:8000/docs. Stop it with Ctrl+C. Stop the web app the same way, in its own terminal.
 
-Cases are saved in `~/.batatis/cases.sqlite`, which every clone on this machine shares. To keep this clone's cases in the repo directory, start the engine this way instead:
+Cases are saved in `~/.batatis/cases.sqlite`, which every clone on this machine shares. A case and its files are deleted 7 days after `created_at` (see Retention). To keep this clone's cases in the repo directory, start the engine this way instead:
 
 ```bash
 BATATIS_CASES=./.data/cases.sqlite .venv/bin/uvicorn engine.api:app --port 8000
@@ -197,8 +197,26 @@ User-testing protocol: [`docs/user-testing/README.md`](./docs/user-testing/READM
 - Prefer NBC(AE) 2023 **2nd printing**.
 - UI → Opus 5.5 implement **and** review; default look = Linear-caliber tokens (no prompt required).
 
+## Retention
+
+Do not upload personal information. In live mode, text you enter is sent to OpenAI (US) for processing and is retained by OpenAI under its API data policy (https://openai.com/policies/api-data-usage-policies); Batatis deletes its own stored case data and files after 7 days or on request.
+
+A case and its stored files are deleted 7 days after `created_at`, or sooner when the applicant calls `DELETE /cases/{case_id}`. The sqlite store and Neon Postgres use the same purge. Case create and the request sweep run it at most once every 10 minutes per engine instance. `python -m engine.retention` runs it immediately. On Vercel Hobby, a daily cron calls `GET /api/retention/purge`.
+
+## Product
+
+The canonical frontend is [`web/`](./web) (Vite) ([ADR 0001](./docs/adr/0001-vite-web-canonical.md)): Describe, Code check, Section C, and Application are wired to the engine. Linear tokens live in [`docs/design/tokens.css`](./docs/design/tokens.css) and [`docs/design/variables.css`](./docs/design/variables.css). `apps/web` is not used for product work.
+
+```bash
+cd web && npm install && npm run dev
+```
+
 ## Status
 
-Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind).
+Engineer-needed flag. At measured source `d479e82`, the shipped facts-only `rules_plus_unknown` agreed with model gold on 50/60 text-only dev cases (0 no outputs, 27 unknowns) and 8/11 model-constructed no-ground-truth (no-gt) cases (PR #26; 8 no outputs, 3 unknowns). Unshipped `rules_only` had 55/60 dev agreement and 1 under-flag.
 
-Clone-ready **agent environment** (rules, skills, evals, docs). Application product code is not the focus of this PR.
+Both shipped sets had 0 under-flags, defined only as gold yes to system no. The three no-gt gold-yes cases (`ngt-101`, `ngt-102`, `ngt-103`) abstained; these are misses, not correct answers. Zero under-flags on dev is by design because it never answered no. All current cases are in-sample, model-checked, not human-verified. Neither model gold nor the receipt's self-check is independent expert validation.
+
+These counts do not establish applicability, equivalence, professional approval or safety, or validate the full Case/API/export flow. They apply only to `d479e82`, not this document branch, newer source, a deployment or a final release. Historical shipped-variant results remain 7/8 blind pre-fix and 4/8 post-fix (no longer blind); neither was rerun for this receipt. Source: [Data Nerd receipt `d75e7ff`](https://github.com/simplythatguy/batatis/blob/d75e7ff0fabb89a2d3f23792ceba8ce116536b35/evals_dev/section_d_flag/RESULTS.md).
+
+Clone-ready **agent environment** (rules, skills, evals, docs) plus the Vite product in `web/`.

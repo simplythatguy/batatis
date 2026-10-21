@@ -1,0 +1,92 @@
+{
+  "id": "ngt-102",
+  "description": "We are building a row of four two-storey townhouses in Calgary, each with a legal basement secondary suite. The building area is 400 m2. Stick-framed lumber rafters and ceiling joists from the Part 9 span tables (no roof trusses); floor joists span 4.4 m; plain concrete footings and foundation walls from the Section 9.15 tables; no sprinkler or fire alarm system; not on permafrost; the building official has not asked for professional drawings. The longest rafter is a 4.1 m clear span.",
+  "known_facts": [
+    "four two-storey townhouses",
+    "each townhouse has a basement secondary suite",
+    "building area of 400 m2",
+    "Calgary",
+    "4.1 m clear span",
+    "no roof trusses"
+  ],
+  "gold": {
+    "engineering_required": "yes",
+    "engineering_reason": "Code exception passes: 4 principal units, suites need not count (Div C 2.4.1.1.(1)(b)(ii) and (2)). Counting suites as dwelling units gives 8, above the Acts' \"4 dwelling units or less\" (Architects Act s.2(6)(b)(ii); EGPA s.2(7)(b)(ii)). A registered architect (authorized entity) is required for the design (Architects Act s.2(1)).",
+    "limit_source": "Architects Act s.2(1), s.2(6)(b)(ii); EGPA s.2(7)(b)(ii); Div C 2.4.1.1.(2); Div A 1.4.1.2.(1)."
+  },
+  "authoring": {
+    "source": "research/no-ground-truth-cases.md (constructed)",
+    "gold_written": "before any system run",
+    "label": "model-constructed, model-checked, not human-verified",
+    "notes": "Constructed scenario, not a real case. Gold written from the quoted sources before any system run. Not human-reviewed. Code-vs-Act suite counting divergence; code exception sits exactly at its 4-unit limit."
+  },
+  "evidence": {
+    "confidence": "medium-high",
+    "assumptions": [
+      "Same \"dwelling unit\" reading as ngt-101."
+    ],
+    "label": "model-constructed, model-checked, not human-verified",
+    "sources": [
+      {
+        "cite": "Div A 1.3.3.3.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 40,
+        "verification": "codedb-checked, 2nd printing, PDF p.40"
+      },
+      {
+        "cite": "Div C 2.4.1.1.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 739,
+        "verification": "codedb-checked, 2nd printing, PDF p.739"
+      },
+      {
+        "cite": "Div C 2.4.1.1.(2)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 740,
+        "verification": "codedb-checked, 2nd printing, PDF p.740"
+      },
+      {
+        "cite": "Div A 1.4.1.2.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 42,
+        "verification": "codedb-checked, 2nd printing, PDF p.42"
+      },
+      {
+        "cite": "Architects Act s.2(6)(b)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/A44.pdf",
+        "page": 10,
+        "verification": "source-PDF-checked, Architects Act, p.10; not codedb (legislation)"
+      },
+      {
+        "cite": "EGPA s.2(7)(b)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/E11.pdf",
+        "page": 14,
+        "verification": "source-PDF-checked, Engineering and Geoscience Professions Act, p.14; not codedb (legislation)"
+      },
+      {
+        "cite": "Architects Act s.2(5)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/A44.pdf",
+        "page": 9,
+        "verification": "source-PDF-checked, Architects Act, p.9; not codedb (legislation)"
+      },
+      {
+        "cite": "Architects Act s.2(1)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/A44.pdf",
+        "page": 8,
+        "verification": "source-PDF-checked, Architects Act, p.8; not codedb (legislation)"
+      },
+      {
+        "cite": "Table C-2 (Calgary); last column = 1/50 hourly wind pressure, kPa",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 667,
+        "verification": "source-PDF-checked, NBC(AE) 2023 2nd printing PDF, p.667; Appendix C table row (not a codedb provision)"
+      },
+      {
+        "cite": "Table C-3 (Calgary); Sa(0.2)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 671,
+        "verification": "source-PDF-checked, NBC(AE) 2023 2nd printing PDF, p.671; Appendix C table row (not a codedb provision)"
+      }
+    ]
+  }
+}

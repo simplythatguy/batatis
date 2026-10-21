@@ -12,7 +12,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from .codes import Codes
-from .models import AttributionStatus, Case, Source
+from .models import AttributionPair, AttributionStatus, Case, SectionCRow, Source
 from .process_fields import alternative_path, confirmed_value, latest_fact
 from .section_c import section_c_rows
 
@@ -60,13 +60,21 @@ class EvidencePlanItem(BaseModel):
     performance_issue: str
     recommended_types: tuple[EvidenceType, ...]
     responsible_party: str = ''
-    status: Literal['not provided', 'provided'] = 'not provided'
+    status: Literal['needed', 'evidence_listed'] = 'needed'
     attachments: tuple[SupportingDocument, ...] = ()
 
 
 class SectionDPlan(BaseModel):
     items: list[EvidencePlanItem]
     notices: list[str]
+    case_version: int | None = None           # HTTP save acknowledgment; pure offline plans have no store revision
+
+
+def plan_item_id(row: SectionCRow, pair: AttributionPair | None) -> str:
+    """Stable identity shared by planning and withdrawal, including clause conditions."""
+    key = (row.provision_id, pair.function if pair else None, pair.objective if pair else None,
+           pair.bracket if pair else None, tuple(pair.clauses) if pair else (), pair.application_note if pair else None)
+    return 'ev_' + hashlib.sha256(repr(key).encode()).hexdigest()[:16]
 
 
 def supporting_documents(case: Case) -> list[SupportingDocument]:
@@ -74,7 +82,9 @@ def supporting_documents(case: Case) -> list[SupportingDocument]:
 
     Ledger contract: ``evidence.<id>.file_ref`` is a confirmed file-source fact whose value
     equals source.ref. Other fields are ``title``, ``responsible_party``, ``issuer``, ``date``,
-    ``professional_seal`` and ``item_id``. An id equal to a plan-item id links automatically.
+    ``professional_seal`` and ``item_id``. An id equal to a plan-item id links automatically
+    unless ``auto_link = False`` records a withdrawn reference scope. Explicit new ``item_id``
+    or ``covers`` facts can re-link the preserved document after the applicant reviews its scope.
     Repeated ``evidence.<id>.covers.<plan id> = True`` facts link one report to several issues.
     """
     ids = {e.id for e in case.evidence}
@@ -91,7 +101,7 @@ def supporting_documents(case: Case) -> list[SupportingDocument]:
             continue
         metadata = {name: confirmed_value(case, prefix + name) for name in
                     ('title', 'responsible_party', 'issuer', 'date', 'professional_seal', 'item_id')}
-        links = [eid]
+        links = [] if confirmed_value(case, prefix + 'auto_link') is False else [eid]
         if isinstance(metadata['item_id'], str):
             links.append(metadata['item_id'])
         for entry in case.facts:
@@ -109,10 +119,39 @@ def supporting_documents(case: Case) -> list[SupportingDocument]:
     return docs
 
 
-def section_d_plan(case: Case, codes: Codes, documents: list[SupportingDocument] | None = None) -> SectionDPlan:
+def text_evidence(case: Case) -> list[tuple[str, str]]:
+    """Titles the applicant typed. These are not file references."""
+    slots: list[str] = []
+    seen: set[str] = set()
+    for fact in case.facts:
+        if not fact.field.startswith('evidence.'):
+            continue
+        if not (fact.field.endswith('.title') or fact.field.endswith('.description')):
+            continue
+        if fact.source.type == 'file':
+            continue
+        slot = fact.field.split('.')[1]
+        if slot in seen or latest_fact(case, f'evidence.{slot}.file_ref') is not None:
+            continue
+        seen.add(slot)
+        slots.append(slot)
+    rows: list[tuple[str, str]] = []
+    for slot in slots:
+        prefix = f'evidence.{slot}.'
+        title = confirmed_value(case, prefix + 'title')
+        if not isinstance(title, str) or not title.strip():
+            title = confirmed_value(case, prefix + 'description')
+        if not isinstance(title, str) or not title.strip():
+            continue
+        who = confirmed_value(case, prefix + 'responsible_party')
+        rows.append((title.strip(), who.strip() if isinstance(who, str) else ''))
+    return rows
+
+
+def section_d_plan(case: Case, codes: Codes | None, documents: list[SupportingDocument] | None = None) -> SectionDPlan:
     """Re-lookup only confirmed provisions; never trust client-supplied pairs or invent a missing row."""
     documents = supporting_documents(case) if documents is None else documents
-    rows = section_c_rows(case.provisions, codes)
+    rows = section_c_rows(case.provisions, codes) if case.provisions else []
     recommended = CONFIDENCE_LADDER + (ALTERNATIVE_EVIDENCE_TYPES if alternative_path(case) else ())
     notices = ['Evidence types are recommendations, not results or an automatic acceptance ladder. '
                'The responsible designer must assess scope, code edition, installation differences and limitations.']
@@ -126,12 +165,10 @@ def section_d_plan(case: Case, codes: Codes, documents: list[SupportingDocument]
             notices.append(f'{row.provision_id}: no row in the attribution table. Identify the applicable performance '
                            'benchmark with the responsible designer; no objective/function is inferred.')
         for pair in pairs:
-            key = (row.provision_id, pair.function if pair else None, pair.objective if pair else None,
-                   pair.bracket if pair else None, tuple(pair.clauses) if pair else (), pair.application_note if pair else None)
-            if key in seen:
+            eid = plan_item_id(row, pair)
+            if eid in seen:
                 continue
-            seen.add(key)
-            eid = 'ev_' + hashlib.sha256(repr(key).encode()).hexdigest()[:16]
+            seen.add(eid)
             attached = tuple(d for d in documents if eid in d.item_ids)
             issue = (f'Provide a comparison with the acceptable-solution performance for {row.provision_id}. '
                      f'Address {pair.function}: {pair.function_text or pair.function}; '
@@ -148,5 +185,5 @@ def section_d_plan(case: Case, codes: Codes, documents: list[SupportingDocument]
                 application_note=pair.application_note if pair else None, performance_issue=issue,
                 recommended_types=recommended, responsible_party='; '.join(dict.fromkeys(
                     d.responsible_party for d in attached if d.responsible_party.strip())),
-                status='provided' if attached else 'not provided', attachments=attached))
+                status='evidence_listed' if attached else 'needed', attachments=attached))
     return SectionDPlan(items=items, notices=notices)

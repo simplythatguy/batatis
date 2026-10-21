@@ -22,9 +22,39 @@ export interface Case {
   id: string;
   jurisdiction: Jurisdiction | null;
   provisions: string[];
+  relevance: RelevanceRecord | null;
   section_c: SectionCRow[];
   title: string | null;
   updated_at: string;
+  version: number;
+}
+
+export interface CodeTOC {
+  division: string;
+  edition: string;
+  parts: TocPart[];
+}
+
+export interface ContextDefinition {
+  code: string;
+  title: string | null;
+}
+
+export interface ContextIntent {
+  objective: string | null;
+  text: string;
+}
+
+export interface ContextNode {
+  id: string;
+  level: string;
+  title: string | null;
+}
+
+export interface ContextNote {
+  excerpt: string;
+  id: string;
+  title: string | null;
 }
 
 export interface EvidenceItem {
@@ -32,9 +62,17 @@ export interface EvidenceItem {
   evidence_type: string | null;
   function: string | null;
   id: string;
+  kind: "text" | "file";
   objective: string | null;
   professional_required: boolean | null;
-  status: "needed" | "provided" | "not_applicable";
+  status: "needed" | "evidence_listed" | "not_applicable";
+}
+
+/** Short note on a Section C row. A quote is copied from codedb; the note never finds compliance. */
+export interface Explainer {
+  quote: string;
+  source: "ai_written" | "deterministic";
+  text: string;
 }
 
 export interface Fact {
@@ -65,6 +103,7 @@ export interface Gap {
   field: string;
   id: string;
   message: string;
+  routed_to: "officer" | "professional" | "applicant" | null;
   section: "A" | "B" | "C" | "D" | "process";
   severity: "blocking" | "warning";
 }
@@ -96,6 +135,43 @@ export interface NewCase {
   title?: string | null;
 }
 
+export interface ProvisionContext {
+  attribution_status: "direct" | "inherited" | "no-row";
+  citation: string;
+  functions: ContextDefinition[];
+  id: string;
+  inherited_from: string | null;
+  intent: ContextIntent[];
+  intent_differs: boolean;
+  intent_differs_detail: string | null;
+  level: string;
+  notes: ContextNote[];
+  objectives: ContextDefinition[];
+  path: ContextNode[];
+  pdf_page: number;
+  referenced_by: string[];
+  references: string[];
+  title: string | null;
+}
+
+export interface RelevanceBands {
+  status: string;
+  x: number;
+  y: number;
+}
+
+export interface RelevanceRecord {
+  bands: RelevanceBands;
+  description_sha256: string;
+  display: Record<string, number>;
+  model: "jev-1.13.0";
+  rerank: Record<string, number>;
+  scored_at: string;
+  scores: Record<string, number>;
+  stale: boolean;
+  status: "scored";
+}
+
 export interface SectionCRequest {
   provisions: string[];
 }
@@ -105,6 +181,7 @@ export interface SectionCRow {
   attribution_status: "direct" | "inherited from parent" | "no row in the attribution table";
   citation: string;
   differs: boolean;
+  explainer: Explainer | null;
   intent_comparison: string | null;
   intents: IntentBlock[];
   only_in_ae: string[];
@@ -120,7 +197,7 @@ export interface Source {
   page: number | null;
   quote: string | null;
   ref: string;
-  type: "code" | "file" | "user_text" | "drawing" | "user_click";
+  type: "code" | "file" | "user_text" | "drawing" | "user_click" | "officer" | "professional";
 }
 
 export interface SourceInput {
@@ -128,5 +205,29 @@ export interface SourceInput {
   page?: number | null;
   quote?: string | null;
   ref: string;
-  type: "code" | "file" | "user_text" | "drawing" | "user_click";
+  type: "code" | "file" | "user_text" | "drawing" | "user_click" | "officer" | "professional";
+}
+
+export interface TocArticle {
+  id: string;
+  title: string;
+}
+
+export interface TocPart {
+  part: number;
+  sections: TocSection[];
+  title: string | null;
+}
+
+export interface TocSection {
+  articles: TocArticle[];
+  id: string;
+  subsections: TocSubsection[];
+  title: string;
+}
+
+export interface TocSubsection {
+  articles: TocArticle[];
+  id: string;
+  title: string;
 }

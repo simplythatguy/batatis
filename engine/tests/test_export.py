@@ -13,6 +13,7 @@ import pypdfium2 as pdfium
 import pytest
 
 from engine.codes import Codes
+from engine.copyright import NRC_PUBLICATION_URL, has_consecutive_words, words
 from engine.export import ExportBlocked, FormMismatch, export_case, form_path, load_field_map
 from engine.export.sample import FACTS, sample_case
 from engine.export.text import faithful_font_text, pdf_safe
@@ -160,11 +161,14 @@ def test_section_c_cells_and_appendix_match_section_c_rows(final, case, codes):
         assert f'C-{k} {row.provision_id}' in appendix
         assert row.citation in appendix
         for p in row.pairs:
-            assert f'{p.function} {norm(p.function_text or "")}' in appendix
-            assert f'{p.objective} {norm(p.objective_text or "")}' in appendix
+            for piece in (p.function_text, p.objective_text, p.application_note):
+                if piece:
+                    assert has_consecutive_words(appendix, words(piece))
         for blk in row.intents:
-            for t in blk.intents:
-                assert norm(t) in appendix
+            for t in [*blk.intents, *blk.notes]:
+                if t:
+                    assert has_consecutive_words(appendix, words(t))
+    assert NRC_PUBLICATION_URL in appendix
     for n in (5, 6):
         assert FACTS[f'supporting_doc.{n}.name'] in appendix
 
@@ -307,7 +311,9 @@ def test_scientific_notation_in_real_provision_text_survives_export(codes):
     text = appendix_text(result.pdf, result.form_pages)
     for pid in provisions:
         source = codes.provision(pid, 'B')['text']
-        assert norm(faithful_font_text(source)) in text
+        rendered = faithful_font_text(source)
+        assert has_consecutive_words(text, words(rendered))
+        assert NRC_PUBLICATION_URL in text
         for glyphs, notation in [('x₃₀', 'x_(30)'), ('h₁', 'h_(1)'), ('h₂', 'h_(2)')]:
             if glyphs in source:
                 assert notation in text

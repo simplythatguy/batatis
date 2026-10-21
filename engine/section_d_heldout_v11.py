@@ -1,5 +1,7 @@
 """Score the frozen engineer-needed screen on an external heldout-v1.1 file.
 
+The v1.1 labels are internal and not judge-facing.
+
 The case file is not in this repo. Appeal decisions have no stated licence, so this
 script only reads a path you pass in and does not copy the cases.
 
@@ -19,7 +21,9 @@ from .section_d_flag_eval import VARIANTS, _agreement_cell, _count_cell, load_co
 SECTION = 'Held-out v1.1: first run, frozen rules, retrieval off'
 INTERPRETATION = (
     'the shipped screen asks rather than says no on most BCV cases, whose no labels come from silence; '
-    '0 under-flags; low agreement here reflects asking, not wrong answers. Weak labels, not judge-facing.'
+    '0 under-flags (on the 60 text-only dev cases it answered only yes or ask, 0 no, so 0 under-flags is partly by design; since 4425089 it can answer no when stated facts clear every trigger); '
+    'low agreement here reflects asking, not wrong answers. '
+    'Weak labels, internal, not judge-facing.'
 )
 LABEL = (
     'model-extracted labels; BCV no labels are by silence, not explicit negatives; '

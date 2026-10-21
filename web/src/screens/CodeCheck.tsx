@@ -1,6 +1,13 @@
-import { useState } from "react";
-import { GapStrip, Icon, PanelHeader, StatusPill, type Dot } from "../components";
+import { useEffect, useLayoutEffect, useState } from "react";
+import { engine, EngineError, type CodeHit } from "../api/client";
+import { toViewRow } from "../api/sectionC";
+import { CodeQuote, ServiceUnavailable, CheckAction, DraftNote, GapStrip, Icon, PanelHeader, StatusPill, type Dot } from "../components";
+import { CODE_EDITION } from "../config";
+import { DECISION_UNAVAILABLE, readDecisionBody, wireDecision } from "../identify";
 import { answeredYes, unresolvedCandidates } from "../model";
+import { useRoute } from "../router";
+import { withinProvision } from "../provisions";
+import { exitCountWarning, failureKind, QUOTE_LABEL, quoteKind } from "../rules";
 import { useCase } from "../store";
 import type { Candidate, CandidateAnswer } from "../types";
 
@@ -17,9 +24,23 @@ const STATUS: Record<string, { dot: Dot; label: string }> = {
   none: { dot: "blocking", label: "Needs your answer" },
 };
 
-function CandidateCard({ a, index, total }: { a: Candidate; index: number; total: number }) {
-  const { dispatch } = useCase();
-  const s = STATUS[a.answer ?? "none"];
+function CandidateCard({
+  a,
+  index,
+  total,
+  onAnswer,
+}: {
+  a: Candidate;
+  index: number;
+  total: number;
+  onAnswer: (candidate: Candidate, answer: CandidateAnswer) => void;
+}) {
+  const { c, dispatch } = useCase();
+  const [storeys, setStoreys] = useState("");
+  const isStoreys = a.id === "desc-storeys";
+  const savedCount = c.questions.find(q => q.id === "q-desc-storeys")?.answer;
+  const s = isStoreys && savedCount ? { dot: "done" as const, label: "Count recorded" } : STATUS[a.answer ?? "none"];
+  const kind = quoteKind(a);
   return (
     <article className="card" id={`cand-${a.id}`} tabIndex={-1} aria-labelledby={`cand-${a.id}-topic`}>
       <div className="card-head">
@@ -29,18 +50,33 @@ function CandidateCard({ a, index, total }: { a: Candidate; index: number; total
         <h2 className="card-topic" id={`cand-${a.id}-topic`}>
           {a.topic}
         </h2>
-        {a.benchmark && <span className="label-pill">Main requirement</span>}
+        {/^\d/.test(a.provision) && <span className="meta">{a.provision}</span>}
+        {a.benchmark && a.answer === "yes" && <span className="label-pill">Main requirement</span>}
+        {a.suggestion && a.answer === null && <span className="label-pill">Suggested</span>}
         <StatusPill dot={s.dot}>{s.label}</StatusPill>
       </div>
-      <div className="code-said">
+      <details className="code-said compact-help"><summary>{kind === "code" ? "Code wording" : "Why this appears"}</summary>
         <div className="block-label">
-          <span className="label-pill">Code text</span>
-          <span className="meta">The code says</span>
+          <span className={`label-pill${kind === "ranking" ? " ai-pill" : ""}`}>{QUOTE_LABEL[kind].pill}</span>
+          <span className="meta">{QUOTE_LABEL[kind].meta}</span>
         </div>
-        <blockquote className="cite-block quote">{a.quote.text}</blockquote>
-      </div>
-      <p className="ask">
-        <span className="label-pill ai-pill">AI-written</span> Does your design <strong>{a.departure}</strong> instead?
+        {kind === "code" ? (
+          <CodeQuote text={a.quote.text} />
+        ) : kind === "ranking" ? (
+          <p className="ai-explain">{a.quote.text}</p>
+        ) : kind === "missing" ? null : (
+          <blockquote className="cite-block quote">{a.quote.text}</blockquote>
+        )}
+      </details>
+      {isStoreys ? <form className="field" onSubmit={e => {
+        e.preventDefault();
+        if (!Number.isInteger(Number(storeys)) || Number(storeys) < 1) return;
+        dispatch({ type: "setStoreyCount", value: storeys });
+      }}><label htmlFor="storey-count">How many storeys does the building have?</label>
+        <input id="storey-count" type="number" min="1" step="1" value={storeys || savedCount || ""} onChange={e => setStoreys(e.target.value)} />
+        <div className="btn-row"><button className="btn" type="submit">Save count</button><button className="btn" type="button" onClick={() => { setStoreys(""); dispatch({ type: "setStoreyCount", value: "" }); }}>Not sure</button></div>
+      </form> : <><p className="ask">
+        Does your design <strong>{a.departure}</strong> instead?
       </p>
       <div className="segmented" role="group" aria-label={`Answer for ${a.topic}`}>
         {ANSWERS.map((o) => (
@@ -49,18 +85,24 @@ function CandidateCard({ a, index, total }: { a: Candidate; index: number; total
             type="button"
             className="btn"
             aria-pressed={a.answer === o.value}
-            onClick={() => dispatch({ type: "answerCandidate", id: a.id, answer: o.value })}
+            onClick={() => onAnswer(a, o.value)}
           >
             {o.label}
           </button>
         ))}
       </div>
+      </>}
       {a.answer === "not-sure" && (
         <div className="followup">
-          <div className="meta">Check before answering</div>
+          <div className="meta">Open question</div>
           <p>{a.clarifyingQuestion}</p>
-          <p className="meta">Answer Yes or No once you know, before you continue from this check.</p>
+          <p className="meta">Logged as an open question. Not sure does not block Continue. Section C does not treat this as a confirmed departure.</p>
         </div>
+      )}
+      {exitCountWarning(a.provision, a.topic) && (
+        <p className="field-note" role="status">
+          <span className="status-dot warning" /> {exitCountWarning(a.provision, a.topic)}
+        </p>
       )}
       <details className="disclosure ref">
         <summary>
@@ -80,56 +122,277 @@ function CandidateCard({ a, index, total }: { a: Candidate; index: number; total
   );
 }
 
+/**
+ * Record a code-check answer. For an article ranking suggested, also send the decision so the
+ * engine returns its Section C row and, for Not sure, binds the officer's open question.
+ */
+export function useCandidateAnswer() {
+  const { dispatch, engineId } = useCase();
+  // Kept per card, so an error on one card never shows on the next; a new answer clears it.
+  const [note, setNote] = useState<{ id: string; text: string } | null>(null);
+  function onAnswer(candidate: Candidate, answer: CandidateAnswer) {
+    setNote(null);
+    const setDecisionNote = (text: string) => setNote({ id: candidate.id, text });
+    dispatch({ type: "answerCandidate", id: candidate.id, answer });
+    if (!engineId || candidate.suggestion !== "identify" || !/^\d/.test(candidate.provision)) return;
+    const provision = candidate.provision;
+    void engine
+      .decide(engineId, provision, wireDecision(answer))
+      .then(async (body) => {
+        const read = readDecisionBody(body, provision);
+        if (read.row) dispatch({ type: "noteSectionC", rows: [toViewRow(read.row, candidate.id)] });
+        let questionId = read.openQuestionId;
+        if (answer === "not-sure" && !questionId) {
+          try {
+            const request = await engine.informationRequest(engineId);
+            questionId = request.items.find((item) => item.provision_id === provision || provision.startsWith(item.provision_id))?.id ?? null;
+          } catch {
+            questionId = null;
+          }
+        }
+        if (answer === "not-sure" && questionId) {
+          dispatch({ type: "bindOpenQuestion", candidateId: candidate.id, questionId });
+        }
+      })
+      .catch((err: unknown) => {
+        if (err instanceof EngineError && failureKind(err.status, err.detail) === "missing-route") {
+          setDecisionNote(DECISION_UNAVAILABLE);
+          return;
+        }
+        if (err instanceof EngineError && failureKind(err.status, err.detail) !== "unreachable") {
+          setDecisionNote(err.detail);
+        }
+      });
+  }
+  return { onAnswer, decisionNote: note?.text ?? "", decisionNoteFor: (id: string) => (note?.id === id ? note.text : "") };
+}
+
 type Filter = "all" | "open" | "yes";
 
 export function CodeCheck() {
-  const { c, gaps } = useCase();
+  const { c, gaps, dispatch, saveDraft, checkStatus, noteLookupFailure } = useCase();
+  const route = useRoute();
+  const focusedProvision = c.candidates.find(a => `cand-${a.id}` === route.params.get("focus"))?.provision;
+  const { onAnswer, decisionNote } = useCandidateAnswer();
+  const [cardIndex, setCardIndex] = useState(0);
+  const [reviewProvision, setReviewProvision] = useState<string | null>(focusedProvision ?? null);
+  const [searchOpen, setSearchOpen] = useState(checkStatus === "unavailable");
   const [filter, setFilter] = useState<Filter>("all");
+  const [query, setQuery] = useState("");
+  const [hits, setHits] = useState<CodeHit[]>([]);
+  const [searchNote, setSearchNote] = useState("");
+  const [searchError, setSearchError] = useState("");
+  const [searchDown, setSearchDown] = useState(false);
+  const [adding, setAdding] = useState<string | null>(null);
   const open = unresolvedCandidates(c);
   const yes = answeredYes(c);
   const counts: Record<Filter, number> = { all: c.candidates.length, open: open.length, yes: yes.length };
   const shown = c.candidates.filter((a) => filter === "all" || (filter === "open" ? open.includes(a) : a.answer === "yes"));
   const labels: Record<Filter, string> = { all: "All", open: "Needs an answer", yes: "Departures" };
+
+  useEffect(() => {
+    if (!focusedProvision) return;
+    setFilter("all");
+    setReviewProvision(focusedProvision);
+    setSearchOpen(false);
+  }, [focusedProvision]);
+
+  const reviewIndex = reviewProvision ? shown.findIndex(a => withinProvision(a.provision, reviewProvision)) : -1;
+  const currentIndex = reviewIndex >= 0 ? reviewIndex : Math.min(cardIndex, shown.length - 1);
+  const focusedId = reviewProvision ? shown[currentIndex]?.id : undefined;
+  useLayoutEffect(() => {
+    if (!focusedId || searchOpen) return;
+    const card = document.getElementById(`cand-${focusedId}`);
+    card?.focus({ preventScroll: true });
+    card?.scrollIntoView({ block: "start", behavior: "instant" });
+  }, [focusedId, searchOpen]);
+  function reviewAdded(provision: string) {
+    setFilter("all");
+    setSearchOpen(false);
+    setReviewProvision(provision);
+  }
+
   return (
     <>
-      <PanelHeader title="Code check" meta="NBC(AE) 2023 · 2nd printing" />
-      <GapStrip gaps={gaps} />
+      <PanelHeader title="Code check" meta={CODE_EDITION} />
+      {(checkStatus === "ready" || checkStatus === "needs_answers") && <GapStrip gaps={gaps} />}
       <div className="toolbar" role="toolbar" aria-label="Filter">
         {(Object.keys(labels) as Filter[]).map((f) => (
-          <button key={f} type="button" className="pill" data-active={filter === f} aria-pressed={filter === f} onClick={() => setFilter(f)}>
+          <button key={f} type="button" className="pill" data-active={filter === f} aria-pressed={filter === f} onClick={() => { setFilter(f); setCardIndex(0); setReviewProvision(null); }}>
             {labels[f]} <span className="tab-count">{counts[f]}</span>
           </button>
         ))}
       </div>
       <div className="pane scroll-body">
         <div className="content-col stack">
-          <p className="meta intro">
-            A departure means your design does something differently from the quoted requirement. Answer each card; you do
-            not need the article numbers.
-          </p>
-          {shown.length ? (
-            shown.map((a) => <CandidateCard key={a.id} a={a} index={c.candidates.indexOf(a)} total={c.candidates.length} />)
-          ) : (
-            <p className="empty">{filter === "yes" ? "No confirmed departures yet." : filter === "open" ? "No requirements need an answer." : "No requirements to review."}</p>
+          {decisionNote && (
+            <p className="empty" role="status">
+              {decisionNote}
+            </p>
           )}
+          <CheckAction />
+          <details className="disclosure manual-search" open={searchOpen} onToggle={e => setSearchOpen(e.currentTarget.open)}>
+            <summary>Search code manually</summary>
+          <form
+            className="field"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const q = query.trim();
+              if (!q) {
+                setSearchNote("Type a few words to search.");
+                setSearchError("");
+                setSearchDown(false);
+                return;
+              }
+              setSearchNote("Searching…");
+              setSearchError("");
+              setSearchDown(false);
+              engine
+                .search(q, { division: "B", limit: 8 })
+                .then((rows) => {
+                  setHits(rows);
+                  setSearchNote(rows.length ? `${rows.length} provisions returned.` : "No provisions returned.");
+                })
+                .catch((err: unknown) => {
+                  setHits([]);
+                  setSearchNote("");
+                  const down = err instanceof EngineError && failureKind(err.status, err.detail) === "unreachable";
+                  setSearchDown(down);
+                  noteLookupFailure(err instanceof Error ? err.message : String(err));
+                  setSearchError(err instanceof EngineError ? err.detail : "The review service did not respond.");
+                });
+            }}
+          >
+            <label htmlFor="code-search">Code keywords or article number</label>
+            <input id="code-search" value={query} onChange={(e) => setQuery(e.target.value)} />
+            <button type="submit" className="btn">
+              Search
+            </button>
+            {searchNote && (
+              <p className="field-note" role="status">
+                {searchNote}
+              </p>
+            )}
+            {searchError && searchDown && (
+              <ServiceUnavailable
+                reason={searchError}
+                onRetry={() => document.getElementById("code-search")?.closest("form")?.requestSubmit()}
+              />
+            )}
+            {searchError && !searchDown && (
+              <div className="field-note" role="status">
+                <span className="status-dot warning" /> Search unavailable. Try again. <details><summary>Technical detail</summary>{searchError}</details>
+                <button type="button" className="btn" onClick={() => document.getElementById("code-search")?.closest("form")?.requestSubmit()}>
+                  Retry
+                </button>
+              </div>
+            )}
+          </form>
+          {hits.length > 0 && (
+            <ul className="plain-list">
+              {hits.map((h) => (
+                <li key={h.id} className="card">
+                  <div className="card-head">
+                    <span className="article-id">{h.id}</span>
+                    {h.article_title && <span className="card-topic">{h.article_title}</span>}
+                    <span className="label-pill">Code text</span>
+                  </div>
+                  {h.text.trim() ? (
+                    <CodeQuote text={h.text} />
+                  ) : (
+                    <p className="meta">Article heading. Its sentences load when you add it.</p>
+                  )}
+                  <p className="mono meta">{h.citation ?? "No citation returned"}</p>
+                  <button
+                    type="button"
+                    className="btn"
+                    disabled={adding === h.id}
+                    onClick={async () => {
+                      const existing = c.candidates.find((x) => x.provision === h.id);
+                      if (existing) {
+                        setSearchNote(`${h.id} is already on this check.`);
+                        reviewAdded(h.id);
+                        return;
+                      }
+                      let text = h.text.trim();
+                      if (!text) {
+                        setAdding(h.id);
+                        setSearchNote(`Loading the wording of ${h.id}…`);
+                        try {
+                          text = (await engine.provision(h.id, "B")).text.trim();
+                        } catch {
+                          text = "";
+                        } finally {
+                          setAdding(null);
+                        }
+                      }
+                      dispatch({
+                        type: "addCandidate",
+                        candidate: {
+                          id: `search-${h.id}`,
+                          topic: h.article_title || h.title || h.id,
+                          provision: h.id,
+                          part: Number(h.id.split(".")[0]) || 0,
+                          benchmark: false,
+                          quote: { text, citation: h.citation ?? "No citation returned", source: "code" },
+                          identified: true,
+                          departure: "do something other than what this sentence requires",
+                          clarifyingQuestion: "Which part of this sentence does the design not follow?",
+                          answer: null,
+                        },
+                      });
+                      reviewAdded(h.id);
+                      setSearchNote(
+                        text
+                          ? `Added ${h.id} to this check. Answer the new card before Section C.`
+                          : `Added ${h.id} to this check. Its wording did not load; the citation is under Code reference. Answer the new card before Section C.`,
+                      );
+                    }}
+                  >
+                    Add to this check
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          </details>
+          {shown.length ? (
+            shown.slice(currentIndex, currentIndex + 1).map((a) => (
+              <CandidateCard key={a.id} a={a} index={c.candidates.indexOf(a)} total={c.candidates.length} onAnswer={onAnswer} />
+            ))
+          ) : (
+            <p className="empty">
+              {filter === "yes"
+                ? "No confirmed departures yet."
+                : filter === "open"
+                  ? "No requirements need an answer."
+                  : c.candidates.length
+                    ? "No requirements to review."
+                    : "No provisions selected yet."}
+            </p>
+          )}
+          {shown.length > 1 && <div className="step-controls">
+            <button type="button" className="btn" disabled={currentIndex === 0} onClick={() => { setReviewProvision(null); setCardIndex(currentIndex - 1); }}>Previous</button>
+            <span className="meta">{Math.min(currentIndex + 1, shown.length)} of {shown.length}</span>
+            <button type="button" className="btn" disabled={currentIndex >= shown.length - 1} onClick={() => { setReviewProvision(null); setCardIndex(currentIndex + 1); }}>Next question</button>
+          </div>}
         </div>
       </div>
       <div className="footer-bar">
-        <span className="status-note" role="status">
-          {open.length ? `Answer ${open.map((a) => a.topic.toLowerCase()).join("; ")} to continue` : ""}
-        </span>
-        <a className="btn btn-ghost" href="#/describe">
+        <DraftNote />
+        <button type="button" className="btn" onClick={() => void saveDraft()}>
+          Save draft
+        </button>
+        <a className="btn btn-ghost" href="#/application?tab=B&step=last">
           Back
         </a>
-        {open.length ? (
-          <button type="button" className="btn btn-primary" disabled>
-            Continue to Section C
-          </button>
-        ) : (
-          <a className="btn btn-primary" href="#/section-c">
-            Continue to Section C
-          </a>
-        )}
+        <button
+          type="button"
+          className={checkStatus === "not_requested" || checkStatus === "unavailable" ? "btn" : "btn btn-primary"}
+          onClick={() => { location.hash = "#/section-c"; }}
+        >
+          Continue
+        </button>
       </div>
     </>
   );

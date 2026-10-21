@@ -14,9 +14,12 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
+from .relevance_models import RelevanceRecord
+
 FactKind = Literal['exact', 'pointed', 'computed', 'proposed']
 FactStatus = Literal['confirmed', 'unconfirmed']
-SourceType = Literal['code', 'file', 'user_text', 'drawing', 'user_click']
+SourceType = Literal['code', 'file', 'user_text', 'drawing', 'user_click', 'officer', 'professional']
+RouteTarget = Literal['officer', 'professional', 'applicant']
 AttributionStatus = Literal['direct', 'inherited from parent', 'no row in the attribution table']
 
 INTENT_LABEL = 'NBC 2020 Intent Statements, explanatory only'
@@ -94,6 +97,13 @@ class IntentBlock(BaseModel):
     pdf_page: int
 
 
+class Explainer(BaseModel):
+    """Short note on a Section C row. A quote is copied from codedb; the note never finds compliance."""
+    text: str
+    quote: str
+    source: Literal['ai_written', 'deterministic']
+
+
 class SectionCRow(BaseModel):
     provision_id: str
     citation: str
@@ -107,6 +117,7 @@ class SectionCRow(BaseModel):
     only_in_ae: list[str] = []
     related_root: str | None = None            # codedb heuristic (e.g. referenced sentence); never implied as a row
     related_root_method: str | None = None
+    explainer: Explainer | None = None         # deterministic template, or null when there is nothing to quote
 
 
 class EvidenceItem(BaseModel):
@@ -116,7 +127,17 @@ class EvidenceItem(BaseModel):
     description: str
     evidence_type: str | None = None
     professional_required: bool | None = None
-    status: Literal['needed', 'provided', 'not_applicable'] = 'needed'
+    status: Literal['needed', 'evidence_listed', 'not_applicable'] = 'needed'
+    # text: the applicant listed it and no file is attached. file: a confirmed file-source file_ref exists.
+    kind: Literal['text', 'file'] = 'text'
+
+    @model_validator(mode='before')
+    @classmethod
+    def _provided_loads_as_listed(cls, data):
+        """A stored provided row is evidence_listed. Old cases load, and the next write stores the new token."""
+        if isinstance(data, dict) and data.get('status') == 'provided':
+            return {**data, 'status': 'evidence_listed'}
+        return data
 
 
 class Gap(BaseModel):
@@ -125,6 +146,7 @@ class Gap(BaseModel):
     field: str
     message: str
     severity: Literal['blocking', 'warning'] = 'blocking'
+    routed_to: RouteTarget | None = None
 
 
 class Case(BaseModel):
@@ -132,12 +154,27 @@ class Case(BaseModel):
     title: str | None = None
     created_at: str = Field(default_factory=now)
     updated_at: str = Field(default_factory=now)
+    version: int = Field(default=1, ge=1)      # acknowledgment of the store's row version, never input authority
     jurisdiction: Jurisdiction | None = None
     facts: list[Fact] = []
     provisions: list[str] = []                 # Division B ids the applicant confirmed
     section_c: list[SectionCRow] = []
     evidence: list[EvidenceItem] = []
     gaps: list[Gap] = []
+    relevance: RelevanceRecord | None = None   # explicit scoring only; GET recomputes its staleness
+
+    @model_validator(mode='after')
+    def _kind_follows_the_file(self):
+        """kind is file only when a confirmed file-source file_ref exists. Otherwise it is text."""
+        for item in self.evidence:
+            prefix = f'evidence.{item.id}.file_ref'
+            fact = next((entry for entry in reversed(self.facts) if entry.field == prefix), None)
+            has_file = (
+                fact is not None and fact.status == 'confirmed' and fact.kind != 'proposed'
+                and fact.source.type == 'file' and fact.value == fact.source.ref
+                and isinstance(fact.source.ref, str) and fact.source.ref.strip())
+            item.kind = 'file' if has_file else 'text'
+        return self
 
     def export_facts(self) -> list[dict]:
         return [f.export() for f in self.facts]
