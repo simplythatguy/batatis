@@ -1,0 +1,3 @@
+# Plain run files are working copies; `pack` writes the committed .jsonl.gz.
+*.jsonl
+*.tmp

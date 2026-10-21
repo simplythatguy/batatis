@@ -1,0 +1,2 @@
+{"arm": "probe", "case": "probe-1", "id": "5d91777da608", "model": "gpt-6-luna", "op": "reserve", "prev": "000000000000", "seq": 1, "ts": "2026-10-21T18:12:10Z", "worst_case_usd": "0.0023318"}
+{"arm": "probe", "cached_tokens": 0, "case": "probe-1", "id": "5d91777da608", "input_tokens": 184, "model": "gpt-6-luna", "op": "settle", "output_tokens": 133, "prev": "f3f3c8ad7e55", "reasoning_tokens": 37, "request_id": "req_2f630860562b4ec4895feb535c55ebfc", "requests": 1, "returned_model": "gpt-6-luna", "seq": 2, "ts": "2026-10-21T18:12:15Z", "usd": "0.0000849"}
