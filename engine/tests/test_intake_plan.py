@@ -304,3 +304,28 @@ def test_plan_routes_round_trip_offline(http, monkeypatch):
     for payload in (body, done.json(), red, over):
         visible = {k: v for k, v in payload.items() if k != 'meta'}     # meta.notice is the shared privacy notice
         assert not re.search(r'(?i)\bjev\b', json.dumps(visible))
+
+
+def test_ordinary_requests_are_not_read_as_departures():
+    for text in ('We want a deck on the back of the house.', 'We propose a two-storey house on our lot.'):
+        assert assess(text).variance_needed == 'unknown', text
+
+
+def test_a_stale_version_is_refused_before_any_model_call(tmp_path):
+    calls = []
+
+    def factory(ip):
+        def transport(system, user, schema):
+            calls.append(1)
+            return {'facts': []}, {}
+        return transport, 'fake'
+    from engine.routes_intake import create_router
+    from fastapi import FastAPI
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    app = FastAPI()
+    app.include_router(create_router(lambda: store, lambda: None, transport_factory=factory))
+    case = store.put(Case())
+    client = TestClient(app)
+    assert client.post(f'/cases/{case.id}/intake', json={'text': 'We want to omit the dampers.',
+                                                          'expected_version': case.version + 5}).status_code == 409
+    assert calls == []

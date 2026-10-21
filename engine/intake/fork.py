@@ -37,7 +37,8 @@ _DEPARTS = re.compile(
     r"|\b(?:smaller|lighter|narrower|lower|shorter|thinner|less|fewer|higher|larger|wider)\s+than\s+(?:normal|usual|what|the\s+(?:minimum|maximum|required|usual))"
     r"|\b(?:below|short\s+of|under)\s+the\s+(?:\w+\s+)?(?:minimum|required)\b|\babove\s+what\b|\bcall\s+for\s+more\b"
     r"|\bno\s+(?:encapsulation|standard\s+listing|listing|connection|conformity|intervening|subsurface|Part\s+\d)\b"
-    r"|\breplacing\s+the\s+required\b|\bpropos(?:e|es|ed|ing)\b|\bwants?\s+(?:the|an?|one|ordinary)\b"
+    r"|\breplacing\s+the\s+required\b|\bnot\s+to\s+meet\b|\bagainst\s+the\s+direction\b|\b(?:left|leave|leaving)\s+(?:fully\s+)?exposed\b"
+    r"|\bnot\s+(?:a|one\s+of\s+the)\b[^.]{0,40}\bprescriptive\b|\bon\s+the\s+strength\s+of\b[^.]{0,40}\balone\b"
     r"|\b\d+\s*%\s+(?:less|lower|fewer|smaller)\b|\b(?:just|only)\s+one\s+(?:\w+\s+)?(?:exit|stair)\b"
     r"|\bonly\b(?=.{0,40}\b(?:apart|procedure|checks?|data|test|alone|route|values?)\b)|\bpartly\b|\blet\s+the\b")
 _FOLLOWS = re.compile(

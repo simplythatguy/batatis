@@ -159,3 +159,30 @@ def test_files_and_description_merge_without_losing_pointers():
     data = pdf([[(72, 700, 'The building is not sprinklered.')]])
     out = service.run('A two-storey house.', [('f1', 'a.pdf', data)])
     assert {(p.field, p.source_ref) for p in out.pointers} >= {('storeys', 'description'), ('sprinklered', 'f1')}
+
+
+def test_a_form_without_a_text_layer_reports_its_fields_as_read():
+    from engine.intake.pdf import FORM_ONLY
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=letter)
+    c.acroForm.textfield(name='Owner Name', value='Jane Example', x=100, y=600, width=300, height=20)
+    c.showPage()
+    c.save()
+    out = read_file('file_fo', 'form-only.pdf', buf.getvalue())
+    report = out.files[0]
+    assert report.form_fields_read == 1 and [f.value for f in out.facts] == ['Jane Example']
+    assert report.status in ('read', 'partly_read') and report.reason in (None, FORM_ONLY)
+    assert report.reason != NO_TEXT
+
+
+def test_a_name_read_from_a_file_is_scrubbed_from_the_description_sent_to_the_model():
+    seen = []
+
+    def transport(system, user, schema):
+        import json
+        seen.append(json.loads(user)['text'])
+        return {'facts': []}, {}
+    form = pdf([[(72, 740, 'Application')]], fields=[('Owner Name', 'Jane Example', (100, 600, 300, 20))])
+    service.run('Jane Example wants a single exit for the new office.', [('f', 'form.pdf', form)],
+                transport=transport, status='fake')
+    assert seen and all('Jane Example' not in text for text in seen)

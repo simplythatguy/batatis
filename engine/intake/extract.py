@@ -18,7 +18,7 @@ from ..models import Fact, Source
 from ..redact import scrub
 from ..models_intake import FactPointer, FieldConflict, FileReport, ModelPass, UnresolvedCitation
 from . import model as model_pass
-from .pdf import MAX_PAGES, NO_TEXT, NOT_A_PDF, SCC_MAP, TOO_LONG, NotAPdf, read_pdf
+from .pdf import FORM_ONLY, MAX_PAGES, NO_TEXT, NOT_A_PDF, SCC_MAP, TOO_LONG, NotAPdf, read_pdf
 from .rules import PERSONAL, Hit, canonical_citation, read
 
 DESCRIPTION = 'description'
@@ -232,7 +232,11 @@ def read_file(file_id: str, name: str, data: bytes, *, codes=None, outbound: Out
     report.facts = sum(1 for p in out.pointers if p.source_ref == file_id)
     if content.truncated:
         report.pages_not_read += list(range(MAX_PAGES + 1, content.pages + 1))
-    if report.pages_read and not report.pages_not_read:
+    if report.form_fields_read and not report.pages_read:
+        # A fillable form with no text layer: its fields were read, its printed pages were not.
+        report.status = 'partly_read' if report.pages_not_read else 'read'
+        report.reason = FORM_ONLY if report.pages_not_read else None
+    elif report.pages_read and not report.pages_not_read:
         report.status = 'read'
     elif report.pages_read:
         report.status = 'partly_read'

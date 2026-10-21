@@ -26,6 +26,7 @@ NO_TEXT = ('This page has no text layer (it looks like a scan or a photo). Batat
            'so nothing was taken from it. Type the facts, or attach a PDF with selectable text.')
 FLATTENED_SCC = ('This looks like a flattened copy of the SCC variance form: its fill-in fields are gone, so '
                  'the values cannot be told apart from the printed form. Attach the fillable PDF instead.')
+FORM_ONLY = ('The form fields were read. The pages have no text layer, so nothing else was taken from them.')
 TOO_LONG = f'Only the first {MAX_PAGES} pages were read.'
 
 

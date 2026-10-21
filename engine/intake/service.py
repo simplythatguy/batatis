@@ -15,15 +15,12 @@ from ..models_intake import FactPointer, IntakeRecord
 from . import model as model_pass
 from .extract import DESCRIPTION, DESCRIPTION_REF, Extraction, Origin, Outbound, read_file, read_text, scrubbed
 from .plan import OVERRIDDEN, SCOPE_FIELD, build_plan, description, overridden
-from .rules import ENUMS, FIELDS, ROLES, read
+from .rules import ENUMS, FIELDS, PERSONAL, ROLES, read
 from .scope import classify
 from .text import NUMBER, number
 
 
-def run(text: str | None, files: list[tuple[str, str, bytes]], *, codes=None,
-        outbound: Outbound = scrubbed, transport: model_pass.Transport | None = None,
-        status: str = 'off') -> Extraction:
-    """Extraction over the description and each (file id, name, bytes). No ledger change."""
+def _run(text, files, codes, outbound, transport, status) -> Extraction:
     out = Extraction()
     if text and text.strip():
         out.merge(read_text(text, Origin(DESCRIPTION), codes=codes, outbound=outbound,
@@ -31,7 +28,22 @@ def run(text: str | None, files: list[tuple[str, str, bytes]], *, codes=None,
     for file_id, name, data in files:
         out.merge(read_file(file_id, name, data, codes=codes, outbound=outbound, transport=transport,
                             status=status))
-    if transport is not None and out.model.status == 'off':
+    return out
+
+
+def run(text: str | None, files: list[tuple[str, str, bytes]], *, codes=None,
+        outbound: Outbound = scrubbed, transport: model_pass.Transport | None = None,
+        status: str = 'off') -> Extraction:
+    """Extraction over the description and each (file id, name, bytes). No ledger change.
+
+    With a model, the rules and form passes run over every source first, so a name or address read
+    from one file is scrubbed from every text the model sees."""
+    first = _run(text, files, codes, outbound, None, status)
+    if transport is None:
+        return first
+    personal = [str(f.value) for f in first.facts if f.field in PERSONAL and len(str(f.value)) >= 3]
+    out = _run(text, files, codes, lambda s, own: outbound(s, [*own, *personal]), transport, status)
+    if out.model.status == 'off':
         out.model.status = 'not_needed'
     return out
 

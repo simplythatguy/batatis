@@ -101,6 +101,8 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
         case = store.get(case_id)
         if case is None:
             raise HTTPException(404, 'case not found')
+        if body.expected_version is not None and body.expected_version != case.version:
+            raise HTTPException(409, 'case was updated concurrently')   # before any provider call
         files = []
         for file_id in body.file_ids:
             stored = store.get_file(case_id, file_id)
