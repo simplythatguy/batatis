@@ -116,6 +116,8 @@ export function Onboarding() {
       if (e.key === "Enter") {
         const control = (e.target as HTMLElement)?.closest?.("button, a");
         if (control && !control.classList.contains("ac-choice")) return; // OK, Back and links handle their own Enter
+        // Enter on an unpressed choice selects it (native click); only a pressed one continues.
+        if (control && control.getAttribute("aria-pressed") !== "true") return;
         e.preventDefault();
         void ok();
         return;

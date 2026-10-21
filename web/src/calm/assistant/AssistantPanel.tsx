@@ -42,7 +42,13 @@ export function AssistantPanel() {
       </div>
       <div ref={body} className="cf-assist-body" aria-live="polite">
         <p className="cf-assist-ctx">Looking at <b>{a.context.label}</b></p>
-        {signedOut && (
+        {signedOut && account.phase === "anonymous" && (
+          <div className="cf-assist-error" role="status">
+            <p>The assistant isn’t available on this server.</p>
+            <p className="cf-fine">You can still read the code yourself in the code library.</p>
+          </div>
+        )}
+        {signedOut && account.phase === "signed-out" && (
           <div className="cf-assist-error" role="status">
             <p><a className="cf-inline-link" href="#/signin">Sign in</a> to use the assistant.</p>
             <p className="cf-fine">It explains questions, code references and officer messages for your own applications. You can still read the code yourself in the code library.</p>

@@ -64,7 +64,7 @@ export function extraRoutes(route: Route): ReactNode | null {
     case "/review":
       return getAccountState().user?.role === "reviewer" ? <ReviewQueue phoneTools={phoneTools} /> : null;
   }
-  const id = reviewId(path);
+  const id = getAccountState().user?.role === "reviewer" ? reviewId(path) : null;
   if (id) return <ReviewDetail key={id} caseId={id} phoneTools={phoneTools} />;
   return null;
 }

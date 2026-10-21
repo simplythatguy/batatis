@@ -1,5 +1,5 @@
 /** The application's message thread (GET/POST /cases/{id}/messages). Bodies render as text, never HTML. */
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState, type Dispatch, type SetStateAction } from "react";
 import { accounts, AccountsError, type Message } from "../../api/accounts";
 import { Avatar } from "../auth/bits";
 import { MOD_KEY } from "../ui";
@@ -10,7 +10,7 @@ function when(iso: string, now: number): string {
   return day.startsWith("Today") ? clock(iso) : `${day}, ${clock(iso)}`;
 }
 
-export function Messages({ caseId, me, messages, onChange, canWrite }: { caseId: string; me: string | null; messages: Message[] | null; onChange: (m: Message[]) => void; canWrite: boolean }) {
+export function Messages({ caseId, me, messages, onChange, canWrite }: { caseId: string; me: string | null; messages: Message[] | null; onChange: Dispatch<SetStateAction<Message[] | null>>; canWrite: boolean }) {
   const id = useId();
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
@@ -28,7 +28,7 @@ export function Messages({ caseId, me, messages, onChange, canWrite }: { caseId:
     setError("");
     try {
       const m = await accounts.postMessage(caseId, body);
-      onChange([...(messages ?? []), m]);
+      onChange((prev) => [...(prev ?? []), m]);
       setDraft("");
     } catch (e) {
       setError(e instanceof AccountsError ? e.detail : "The message didn’t send. Try again.");

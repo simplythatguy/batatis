@@ -211,7 +211,7 @@
 .ac-ok-row { display: flex; align-items: center; gap: 14px; margin-top: 26px; flex-wrap: wrap; }
 .ac-ok-hint { font-size: 13px; color: var(--cf-text-3); }
 .ac-ok-hint b { color: var(--cf-text-2); font-weight: 600; }
-.ac-back { margin-left: auto; }
+.ac-back { margin-left: -4px; }
 
 .ac-onb-progress { display: flex; gap: 4px; padding: 0 28px 28px max(28px, 18%); width: min(100%, calc(640px + 18%)); }
 .ac-onb-progress i { flex: 1; max-width: 120px; height: 4px; border-radius: 2px; background: var(--cf-line); }
@@ -324,7 +324,9 @@
 .ac-crumb-sep { color: var(--cf-text-4); font-weight: 400; }
 
 .ac-page-body { flex: 1; padding: 28px 32px 40px; }
-.ac-page-body.is-narrow { width: 100%; max-width: 680px; }
+/* Settings, notifications: one centred 640px column with the onboarding screens' rhythm. */
+.ac-page-body.is-narrow { width: 100%; max-width: 704px; margin: 0 auto; padding-top: 56px; }
+.ac-page-title { margin: 0 0 28px; font-size: 34px; line-height: 1.22; letter-spacing: -0.022em; font-weight: 500; }
 
 /* Settings */
 
@@ -397,8 +399,8 @@
   transition-property: background-color, color;
   transition-duration: 150ms;
 }
-.ac-tab[aria-selected="true"] { background: var(--cf-selected); color: var(--cf-text); }
-@media (hover: hover) { .ac-tab:not([aria-selected="true"]):hover { color: var(--cf-text); } }
+.ac-tab[aria-pressed="true"] { background: var(--cf-selected); color: var(--cf-text); }
+@media (hover: hover) { .ac-tab:not([aria-pressed="true"]):hover { color: var(--cf-text); } }
 .ac-tab-n { font: 500 11.5px var(--cf-mono); color: var(--cf-text-3); }
 .ac-empty { margin: 24px 0; color: var(--cf-text-3); font-size: 14.5px; }
 
@@ -565,6 +567,8 @@
   .ac-search { width: 160px; }
   .ac-search-kbd { display: none; }
   .ac-page-body { padding: 20px 16px 32px; }
+  .ac-page-body.is-narrow { padding-top: 24px; }
+  .ac-page-title { font-size: 26px; margin-bottom: 18px; }
   .ac-head-right .cf-btn.is-sm { height: 32px; padding: 0 10px; font-size: 12.5px; }
   .ac-gate-reason { padding: 10px 16px; }
   .ac-row { grid-template-columns: 90px minmax(0, 1fr) auto; gap: 10px; }

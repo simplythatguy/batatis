@@ -104,15 +104,18 @@ export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
             <h2 className="ac-h1">{q.phase === "ready" || q.rows.length ? `${counts.all} ${counts.all === 1 ? "application" : "applications"}` : "Applications"}</h2>
             <p className="ac-lead">{authority ? `Sent to ${authority}. ` : ""}Pick one up to let other officers know you’ve got it.</p>
           </div>
-          <div className="ac-tabs" role="tablist" aria-label="Filter applications">
+          <div className="ac-tabs" role="group" aria-label="Filter applications">
             {TABS.map((t) => (
-              <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} className="ac-tab" onClick={() => setTab(t.id)}>
+              <button key={t.id} type="button" aria-pressed={tab === t.id} className="ac-tab" onClick={() => setTab(t.id)}>
                 {t.label} <span className="ac-tab-n">{counts[t.id]}</span>
               </button>
             ))}
           </div>
         </div>
 
+        {q.error && q.rows.length > 0 && (
+          <p className="ac-empty" role="status">{q.error} These rows may be out of date. <button type="button" className="ac-link" onClick={() => void loadQueue()}>Try again</button></p>
+        )}
         {q.phase === "error" && !q.rows.length ? (
           <p className="ac-empty">{q.error || "The queue didn’t load."} <button type="button" className="ac-link" onClick={() => void loadQueue()}>Try again</button></p>
         ) : q.phase !== "ready" && !q.rows.length ? (
