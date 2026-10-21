@@ -94,7 +94,7 @@ def _slots(case: Case) -> set[str]:
 def _check_slot(case: Case, evidence_id: str) -> bool:
     # Legacy dotted IDs remain deletable when their exact prefix owns no other slot.
     if (not evidence_id.strip() or any(ord(char) < 32 or char in '/\\' for char in evidence_id)
-            or '.covers.' in evidence_id):
+            or '.covers.' in (evidence_id + '.')):
         raise HTTPException(422, 'ambiguous evidence id')
     slots = _slots(case)
     if (any(slot.startswith(evidence_id + '.') for slot in slots if slot != evidence_id)
