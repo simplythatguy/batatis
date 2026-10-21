@@ -446,6 +446,19 @@
           "title": "Departure",
           "type": "string"
         },
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        },
         "provision": {
           "maxLength": 40,
           "minLength": 1,
@@ -1857,6 +1870,19 @@
     "IdentifyConfirmRequest": {
       "additionalProperties": false,
       "properties": {
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        },
         "provisions": {
           "items": {
             "type": "string"
@@ -1884,12 +1910,235 @@
           ],
           "title": "Decision",
           "type": "string"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
         }
       },
       "required": [
         "decision"
       ],
       "title": "IdentifyDecisionRequest",
+      "type": "object"
+    },
+    "IdentifyDecisionResponse": {
+      "description": "The identify result after a decision, plus the Section C rows a `yes` wrote for that article.",
+      "properties": {
+        "articles": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/IdentifyArticle"
+          },
+          "title": "Articles",
+          "type": "array"
+        },
+        "benchmark": {
+          "$ref": "#/$defs/BenchmarkRecord"
+        },
+        "cached": {
+          "default": false,
+          "title": "Cached",
+          "type": "boolean"
+        },
+        "case_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Version"
+        },
+        "choices": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/QuotedChoice"
+          },
+          "title": "Choices",
+          "type": "array"
+        },
+        "commit_policy": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Commit Policy",
+          "type": "object"
+        },
+        "committed": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Committed",
+          "type": "array"
+        },
+        "decisions": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ArticleDecision"
+          },
+          "title": "Decisions",
+          "type": "object"
+        },
+        "description_sha256": {
+          "title": "Description Sha256",
+          "type": "string"
+        },
+        "engineering_required": {
+          "const": "depends",
+          "default": "depends",
+          "title": "Engineering Required",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message"
+        },
+        "mode": {
+          "enum": [
+            "live",
+            "fake",
+            "bm25_fallback"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "model_ids": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "default": {},
+          "title": "Model Ids",
+          "type": "object"
+        },
+        "narrowed": {
+          "title": "Narrowed",
+          "type": "boolean"
+        },
+        "open_questions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/OpenQuestion"
+          },
+          "title": "Open Questions",
+          "type": "array"
+        },
+        "persisted": {
+          "default": false,
+          "title": "Persisted",
+          "type": "boolean"
+        },
+        "process_refs": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ProcessRef"
+          },
+          "title": "Process Refs",
+          "type": "array"
+        },
+        "questions": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Questions",
+          "type": "array"
+        },
+        "scored_at": {
+          "title": "Scored At",
+          "type": "string"
+        },
+        "section_c": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SectionCRow"
+          },
+          "title": "Section C",
+          "type": "array"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "stale": {
+          "default": false,
+          "title": "Stale",
+          "type": "boolean"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "trace": {
+          "$ref": "#/$defs/IdentifyTrace"
+        }
+      },
+      "required": [
+        "mode",
+        "source",
+        "label",
+        "narrowed",
+        "message",
+        "articles",
+        "committed",
+        "choices",
+        "questions",
+        "open_questions",
+        "benchmark",
+        "process_refs",
+        "model_ids",
+        "commit_policy",
+        "engineering_required",
+        "title",
+        "scored_at",
+        "description_sha256",
+        "stale",
+        "persisted",
+        "case_version",
+        "cached",
+        "decisions",
+        "trace",
+        "section_c"
+      ],
+      "title": "IdentifyDecisionResponse",
       "type": "object"
     },
     "IdentifyRequest": {
@@ -1903,6 +2152,19 @@
           "maxItems": 20,
           "title": "Answers",
           "type": "array"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
         },
         "prose": {
           "anyOf": [
@@ -1938,6 +2200,18 @@
           "default": false,
           "title": "Cached",
           "type": "boolean"
+        },
+        "case_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Version"
         },
         "choices": {
           "default": [],
@@ -2101,6 +2375,7 @@
         "description_sha256",
         "stale",
         "persisted",
+        "case_version",
         "cached",
         "decisions",
         "trace"

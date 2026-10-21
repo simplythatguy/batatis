@@ -76,6 +76,7 @@ export interface AttributionPair {
 /** The applicant names the requirement their design departs from and confirms the one-line departure. */
 export interface BenchmarkConfirmRequest {
   departure: string;
+  expected_version?: number | null;
   provision: string;
 }
 
@@ -282,16 +283,48 @@ export interface IdentifyArticle {
 }
 
 export interface IdentifyConfirmRequest {
+  expected_version?: number | null;
   provisions: string[];
 }
 
 export interface IdentifyDecisionRequest {
   decision: "yes" | "no" | "not_sure";
+  expected_version?: number | null;
+}
+
+/** The identify result after a decision, plus the Section C rows a `yes` wrote for that article. */
+export interface IdentifyDecisionResponse {
+  articles: IdentifyArticle[];
+  benchmark: BenchmarkRecord;
+  cached: boolean;
+  case_version: number | null;
+  choices: QuotedChoice[];
+  commit_policy: Record<string, unknown>;
+  committed: string[];
+  decisions: Record<string, ArticleDecision>;
+  description_sha256: string;
+  engineering_required: "depends";
+  label: string;
+  message: string | null;
+  mode: "live" | "fake" | "bm25_fallback";
+  model_ids: Record<string, string | null>;
+  narrowed: boolean;
+  open_questions: OpenQuestion[];
+  persisted: boolean;
+  process_refs: ProcessRef[];
+  questions: string[];
+  scored_at: string;
+  section_c: SectionCRow[];
+  source: string;
+  stale: boolean;
+  title: string | null;
+  trace: IdentifyTrace;
 }
 
 /** `prose` defaults to the case's latest project.description fact when omitted. */
 export interface IdentifyRequest {
   answers?: AnswerIn[];
+  expected_version?: number | null;
   prose?: string | null;
 }
 
@@ -299,6 +332,7 @@ export interface IdentifyResult {
   articles: IdentifyArticle[];
   benchmark: BenchmarkRecord;
   cached: boolean;
+  case_version: number | null;
   choices: QuotedChoice[];
   commit_policy: Record<string, unknown>;
   committed: string[];

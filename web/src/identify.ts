@@ -4,7 +4,7 @@
  * The decision route may return a Section C row or the stored identify body.
  */
 import type { SectionCRow } from "./api/types.gen";
-import type { IdentifyArticle, IdentifyResult } from "./api/client";
+import type { IdentifyArticle, IdentifyResult } from "./api/types.gen";
 import type { Action } from "./model";
 import type { CandidateAnswer } from "./types";
 
@@ -59,15 +59,22 @@ export interface IdentifyPlan {
   note: string;
 }
 
-export function planIdentify(result: IdentifyResult, limit?: number): IdentifyPlan {
-  const ranked = (result.articles ?? []).filter((article): article is IdentifyArticle => Boolean(article?.provision && /^\d/.test(article.provision)));
+/** The fields planIdentify reads. A stored or cached payload may omit any of them. */
+export type IdentifyPayload = Partial<Pick<IdentifyResult, "questions" | "open_questions">> & {
+  mode?: string | null;
+  cached?: boolean | null;
+  articles?: (Pick<IdentifyArticle, "provision" | "title"> & Partial<IdentifyArticle>)[];
+};
+
+export function planIdentify(result: IdentifyPayload, limit?: number): IdentifyPlan {
+  const ranked = (result.articles ?? []).filter((article) => Boolean(article?.provision && /^\d/.test(article.provision)));
   const sliced = limit == null ? ranked : ranked.slice(0, limit);
   const articles = sliced.map((article) => ({
     provision: article.provision,
     title: article.title,
     part: article.part || Number(String(article.provision).split(".")[0]) || 0,
-    quote: article.quote ?? article.snippet ?? null,
-    reason: article.reason ?? article.why ?? null,
+    quote: article.quote ?? null,
+    reason: article.reason ?? null,
   }));
   const questions = (result.open_questions ?? [])
     .filter((q) => q.field && q.text)
