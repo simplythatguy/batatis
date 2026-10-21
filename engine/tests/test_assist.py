@@ -164,12 +164,13 @@ def test_personal_information_is_redacted_before_the_provider_sees_it(assistant,
         fact('mailingAddress', '4410 98 Avenue NW, Edmonton AB T6B 2X3'),
         fact('project.description', 'Call Priya Natarajan at 780-555-0142 or priya@example.test about the wall.'),
     ]))
-    r = ask(client, case_id=case.id, question='Can Priya Natarajan (780-555-0142) add 9.10.9.16.(1)?',
+    r = ask(client, case_id=case.id, question='Can Priya Natarajan (780-555-0142) or call Jordan Lee about 9.10.9.16.(1)?',
             history=[{'role': 'user', 'text': 'My email is priya@example.test'}])
     assert r.status_code == 200, r.text
     sent = json.dumps({key: calls[0][key] if key != 'body' else calls[0][key].model_dump()
                        for key in ('context', 'body')})
-    for secret in ('Priya', 'Natarajan', '780-555-0142', 'priya@example.test', '4410 98 Avenue', 'T6B 2X3'):
+    for secret in ('Priya', 'Natarajan', '780-555-0142', 'priya@example.test', '4410 98 Avenue', 'T6B 2X3',
+                   'Jordan Lee', 'Asker', 'asker@example.test'):
         assert secret not in sent, secret
     assert '9.10.9.16.(1)' in sent  # citations survive redaction
     stored = store.get(case.id)

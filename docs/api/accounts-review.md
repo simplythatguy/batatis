@@ -147,10 +147,15 @@ provider's key are required; otherwise 503 `Assistant unavailable`. Full maximum
 output and a conservative UTF-8-byte input bound are reserved through `llm_gate`.
 Usage reconciles successful calls; uncertain failed calls retain the reservation.
 
-Personal information is redacted before anything leaves for a provider
+Recognizable personal details are redacted before anything leaves for a provider
 (`engine/redact.py`): the applicant's own names, addresses, permit and
-registration values from the case facts, plus email addresses, phone numbers,
-street addresses and postal codes, become placeholders such as `[email]`. Code
+registration values from the case facts; the account names and emails connected
+to the case (caller, owner, reviewers, message authors); names introduced by
+contact phrasing ("call…", "Dr. …", "prepared by…"); and email addresses, phone
+numbers, street addresses and postal codes. They become placeholders such as
+`[email]` or `[name]`. Bare capitalized words are not treated as names (they are
+usually product or code terms), so an unrelated name typed without context can
+still pass; the notice says "recognizes" for that reason. Code
 text, Section C rows and citations are not redacted. Jev relevance scoring sends
 the redacted description as well.
 

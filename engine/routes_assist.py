@@ -18,7 +18,7 @@ from .completeness import check_completeness
 from .privacy import assistant_notice
 from .process_fields import process_fields
 from .section_c import section_c_rows
-from .redact import known_values, scrub, scrub_obj
+from .redact import known_values, people_names, scrub, scrub_obj
 
 MAX_TOKENS = 1200
 SYSTEM = """You are Batatis's in-app assistant for Alberta alternative-solution applications.
@@ -204,7 +204,7 @@ def create_router(cases, code):
         codes = code()
         # Personal information never leaves Batatis: scrub the application data and the user's own
         # words. Code text, Section C rows and product help are not personal and stay verbatim.
-        known = known_values(case) if case is not None else []
+        known = known_values(case, people_names(cases(), case, user)) if case is not None else known_values(None, people_names(cases(), None, user))
         built = build_context(body, case, codes)
         for key in ('application', 'focused_card'):
             if key in built:

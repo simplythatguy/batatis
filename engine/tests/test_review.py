@@ -304,7 +304,9 @@ def test_notifications_follow_the_other_partys_actions_and_mark_read(scene):
     assert all('approved' not in n['summary'] and 'url' not in n for n in mine['notifications'])
     assert mine['unread'] >= 3
     assert clients['owner'].post('/me/notifications/read', json={}).status_code == 204
-    assert clients['owner'].get('/me/notifications').json()['unread'] == 0
+    after = clients['owner'].get('/me/notifications').json()
+    assert after['unread'] == 0
+    assert not any(n['case_id'] == case.id and not n['read'] for n in after['notifications'])
     assert clients['owner'].get('/auth/me').status_code == 200  # marking read keeps the session
     assert clients['anonymous'].get('/me/notifications').status_code == 401
 
