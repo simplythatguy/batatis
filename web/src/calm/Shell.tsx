@@ -202,6 +202,21 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     setAssistantContext({ screen: active === "start" ? "describe" : active, label });
   }, [active]);
 
+  // The code library needs the room: the list folds away while it is open (⌘B or the header
+  // button brings it back) and returns to how it was when the library closes.
+  const listBeforeCode = useRef<boolean | null>(null);
+  useEffect(() => {
+    if (active === "code" && !bare) {
+      if (listBeforeCode.current === null) {
+        listBeforeCode.current = listCollapsed;
+        setListCollapsed(true);
+      }
+    } else if (listBeforeCode.current !== null) {
+      setListCollapsed(listBeforeCode.current);
+      listBeforeCode.current = null;
+    }
+  }, [active, bare]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const toggleList = () => {
     if (isPhone()) setSheet(true);
     else setListCollapsed((v) => !v);
