@@ -337,6 +337,16 @@ def test_delete_safe_legacy_nested_id_and_reject_only_destructive_prefix_ambigui
     assert [item.id for item in store.get(case.id).evidence] == ['wall~2']
 
 
+def test_reserved_legacy_covers_slot_cannot_delete_another_documents_links(ledger):
+    store, create, client = ledger
+    case = create(evidence=[EvidenceItem(id=slot, description=slot) for slot in ('wall', 'wall.covers')],
+        facts=[fact('evidence.wall.title', 'parent document'),
+               fact('evidence.wall.covers.ev_selected', True),
+               fact('evidence.wall.covers.title', 'ambiguous legacy nested document')])
+    private(delete(client, case.id, 'wall.covers', 1), 422)
+    assert store.get(case.id) == case
+
+
 @pytest.mark.parametrize('method', ['post', 'delete'])
 @pytest.mark.parametrize('mutation,status', [('fact', 409), ('clear', 409), ('remove', 409), ('delete', 404), ('expire', 404)])
 def test_racing_mutation_cannot_lose_new_data_or_resurrect_absence(ledger, monkeypatch, method, mutation, status):
