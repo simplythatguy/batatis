@@ -3,7 +3,7 @@ import { accounts, submitBlockers, type ApplicationSummary } from "../api/accoun
 import { EngineError } from "../api/client";
 import { Notices } from "../components";
 import { AUTHORITIES, CODE_EDITION } from "../config";
-import { UNSIGNED_LINE, professionalRouteNote } from "../humanReview";
+import { UNSIGNED_LINE, isProfessionalHold, professionalRouteNote } from "../humanReview";
 import { DETAIL_FIELDS, PROCESS_FIELDS, displayValue, factFor, valueText } from "../model";
 import { useApplicationExport } from "../screens/Application";
 import { useCase } from "../store";
@@ -145,7 +145,10 @@ function SubmitPanel() {
   if (app.status !== "draft" && app.status !== "returned") {
     return <SubmittedStatus app={app} where={where} />;
   }
-  const blocking = gaps.filter((g) => g.severity === "blocking");
+  // Items routed to the officer (whether a registered professional is required) travel with the
+  // application: they close the official PDF, not submission. The engine's submit check agrees.
+  const blocking = gaps.filter((g) => g.severity === "blocking" && !isProfessionalHold(g));
+  const routed = gaps.some((g) => g.severity === "blocking" && isProfessionalHold(g));
   const reason = !c.authority ? "Choose Calgary or Edmonton as the reviewing authority before submitting. Not sure yet keeps it open." : blocking.length ? `${blocking.length} required ${blocking.length === 1 ? "item is" : "items are"} missing.` : "";
 
   async function submit() {
@@ -182,6 +185,7 @@ function SubmitPanel() {
           {reason} <a className="cf-inline-link" href={!c.authority ? "#/questions?focus=authority" : "#/review"}>{!c.authority ? "Pick one" : "See them"}</a>
         </p>
       )}
+      {!reason && routed && <p className="cf-faint cf-small">The professional question goes to the officer with your application.</p>}
       {blockers.length > 0 && (
         <div role="status">
           <p className="cf-small">The authority’s check found {blockers.length} required {blockers.length === 1 ? "item" : "items"} still missing:</p>
