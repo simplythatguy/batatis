@@ -97,7 +97,9 @@ function plain(status: number, raw: string, path: string): string {
   if (status === 429) return "Too many requests right now. Try again in a moment.";
   if (status === 503) return /relevance/.test(path) ? "Relevance scoring is unavailable right now." : "The code library is unavailable right now.";
   if (status === 409 && /describe/i.test(raw)) return "Describe your project first. Scores are estimated from your description.";
-  if (status === 404 && /relevance/.test(path)) return "Not scored yet.";
+  // An engine without the new routes answers a generic 404 (or 400 for "toc" read as an id).
+  if (status === 404 && /relevance/.test(path)) return /not scored/i.test(raw) ? "Not scored yet." : "Relevance scoring is not available on this server yet.";
+  if ((status === 400 || status === 404) && /^\/code\/toc/.test(path)) return "The code library is not available on this server yet.";
   if (status === 404 && /\/code\//.test(path)) return /provision not found/i.test(raw) ? "That provision was not found." : "The code library is not available on this server yet.";
   return raw || `Request failed (${status}).`;
 }
