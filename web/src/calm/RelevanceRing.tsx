@@ -9,18 +9,22 @@ const ESTIMATE = "Jev estimate from your description. Not a compliance decision.
  * A small glass tooltip pinned to an anchor, rendered in <body> so glass panels
  * (backdrop-filter) and scroll panes never clip it.
  */
-export function Tip({ anchor, open, id, children }: { anchor: HTMLElement | null; open: boolean; id: string; children: ReactNode }) {
+export function Tip({ anchor, open, id, children, side = "top" }: { anchor: HTMLElement | null; open: boolean; id: string; children: ReactNode; side?: "top" | "right" | "bottom" }) {
   const tip = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<{ left: number; top: number; below: boolean } | null>(null);
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   useLayoutEffect(() => {
     if (!open || !anchor) return setPos(null);
     const r = anchor.getBoundingClientRect();
     const w = tip.current?.offsetWidth ?? 260;
     const h = tip.current?.offsetHeight ?? 80;
+    if (side === "right") {
+      setPos({ left: r.right + 10, top: Math.min(Math.max(8, r.top + r.height / 2 - h / 2), window.innerHeight - h - 8) });
+      return;
+    }
     const left = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), window.innerWidth - w - 8);
-    const below = r.top - h - 10 < 8;
-    setPos({ left, top: below ? r.bottom + 8 : r.top - h - 8, below });
-  }, [open, anchor]);
+    const below = side === "bottom" || r.top - h - 10 < 8;
+    setPos({ left, top: below ? r.bottom + 8 : r.top - h - 8 });
+  }, [open, anchor, side]);
   if (!open || !anchor) return null;
   return createPortal(
     <div ref={tip} id={id} role="tooltip" className="cf-tip" style={pos ? { left: pos.left, top: pos.top } : { left: -9999, top: -9999 }}>

@@ -4,6 +4,7 @@
  * proxies `/api` to the same URL (vite.config.ts). The default is http://127.0.0.1:8000.
  * `createEngine(base)` serves scripts and tests outside Vite.
  */
+import { credentialsMode } from "./engineAuth";
 import { publicDetail, takeSseEvents } from "../rules";
 import type { Case, EvidenceItem, FactInput, Jurisdiction, NewCase, SectionCRow } from "./types.gen";
 
@@ -125,6 +126,7 @@ export function createEngine(base: string) {
     try {
       res = await fetch(`${base}${path}`, {
         method,
+        credentials: credentialsMode(),
         signal: timed.signal,
         headers: body === undefined ? undefined : { "Content-Type": "application/json" },
         body: body === undefined ? undefined : JSON.stringify(body),
@@ -405,6 +407,7 @@ async function exportPdf(base: string, caseId: string, draft: boolean, signal?: 
   let res: Response;
   try {
     res = await fetch(`${base}/cases/${enc(caseId)}/export`, {
+      credentials: credentialsMode(),
       method: "POST",
       signal: timed.signal,
       headers: { "Content-Type": "application/json" },
@@ -457,7 +460,7 @@ async function uploadPdf(base: string, caseId: string, file: File, signal?: Abor
   body.append("file", file, file.name);
   let res: Response;
   try {
-    res = await fetch(`${base}/cases/${enc(caseId)}/files`, { method: "POST", body, signal: timed.signal });
+    res = await fetch(`${base}/cases/${enc(caseId)}/files`, { method: "POST", body, signal: timed.signal, credentials: credentialsMode() });
   } catch (e) {
     if (signal?.aborted) throw e;
     if (timed.timedOut()) throw new EngineError(0, "The engine did not answer in time.");
@@ -512,6 +515,7 @@ async function identifyCase(
   let res: Response;
   try {
     res = await fetch(`${base}/cases/${enc(caseId)}/identify`, {
+      credentials: credentialsMode(),
       method: "POST",
       signal: timed.signal,
       headers: { Accept: "text/event-stream", "Content-Type": "application/json" },

@@ -451,7 +451,7 @@ export function CodeLibrary({ route }: { route: CalmRoute }) {
             <RingLegend />
           </div>
           <div className="cf-lib-links">
-            <button type="button" className="cf-btn is-sm" onClick={openPalette}><CIcon name="search" size={13} />Search the code <span className="cf-kbd is-dark" aria-hidden="true">{MOD_KEY} K</span></button>
+            <button type="button" className="cf-btn is-sm" onClick={openPalette}><CIcon name="search" size={13} />Search the code <span className="cf-kbd is-dark" aria-hidden="true">{MOD_KEY} ⇧ K</span></button>
             <a className="cf-btn is-ghost is-sm" href="#/references">Your Section C references <CIcon name="arrow" size={13} /></a>
           </div>
         </div>
@@ -479,7 +479,7 @@ export function CodeLibrary({ route }: { route: CalmRoute }) {
           ) : (
             <div className="cf-read-empty">
               <h2 className="cf-read-title">Pick an article to read it.</h2>
-              <p className="cf-muted">Open a chapter on the left, or search with <span className="cf-kbd is-dark">{MOD_KEY} K</span>. The code stays out of your way until you want it.</p>
+              <p className="cf-muted">Open a chapter on the left, or search with <span className="cf-kbd is-dark">{MOD_KEY} ⇧ K</span>. The code stays out of your way until you want it.</p>
               {high.length + mid.length > 0 && (
                 <>
                   <div className="cf-list-label">Likely related to your project</div>

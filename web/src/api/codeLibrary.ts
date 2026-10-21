@@ -4,6 +4,7 @@
  * and the raw text in `technical`; 429 carries `retryAfter` seconds when the engine sends it.
  */
 import { EngineError } from "./client";
+import { credentialsMode } from "./engineAuth";
 
 export type Division = "A" | "B" | "C";
 
@@ -114,6 +115,7 @@ async function call<T>(method: "GET" | "POST", path: string, signal?: AbortSigna
   try {
     res = await fetch(`${BASE}${path}`, {
       method,
+      credentials: credentialsMode(),
       signal: ctl.signal,
       headers: method === "POST" ? { "Content-Type": "application/json" } : undefined,
       body: method === "POST" ? "{}" : undefined,
