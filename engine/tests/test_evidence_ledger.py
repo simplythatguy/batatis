@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import os
+import socket
 import threading
+import time
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -84,6 +86,11 @@ def test_actual_missing_post_route_and_durable_acknowledgment(ledger):
     assert saved['case_version'] == saved['case']['version'] == 2
     assert store.get(case.id).model_dump() == saved['case']
     assert client.get(f'/api/cases/{case.id}').json() == {**saved['case'], 'meta': saved['meta']}
+    routes = client.app.routes
+    assert sum(route.path == '/cases/{case_id}/evidence' and 'POST' in getattr(route, 'methods', set())
+               for route in routes) == 1
+    assert sum(route.path == '/cases/{case_id}/evidence/{evidence_id}' and 'DELETE' in getattr(route, 'methods', set())
+               for route in routes) == 1
 
 
 def test_create_edit_reload_and_delete_use_one_actual_slot_and_keep_revisions(ledger):
@@ -101,7 +108,8 @@ def test_create_edit_reload_and_delete_use_one_actual_slot_and_keep_revisions(le
     for name in ('title', 'description', 'responsible_party', 'date', 'issuer', 'evidence_type'):
         assert confirmed_value(saved, f'evidence.doc_wall.{name}') == edit[name]
     assert all(entry in saved.facts for entry in before.facts)
-    listed = [entry for entry in saved.facts if entry.field.startswith('evidence.doc_wall.')]
+    listed = [entry for entry in saved.facts if entry.field.startswith('evidence.doc_wall.')
+              and entry.field != 'evidence.doc_wall.auto_link']
     assert all(entry.source.type == 'user_text' and entry.kind == 'pointed' for entry in listed)
     assert all(entry.source.quote == str(entry.value) for entry in listed)
     assert supporting_documents(saved) == []
@@ -198,9 +206,11 @@ def test_unscoped_create_edit_delete_never_resolve_corpus(ledger, monkeypatch):
 def test_current_unique_scope_is_ledger_link_not_cross_provision_or_completeness(ledger):
     store, create, client = ledger
     codes = Codes()
-    case = create(provisions=['9.27.3.2.(1)', '9.27.3.2.(2)'])
+    case = create(provisions=['9.27.3.2.(1)', '9.27.3.3.(1)'])
     plan = section_d_plan(case, codes)
-    target = next(item for item in plan.items if item.provision_id == '9.27.3.2.(1)')
+    target = next(item for item in plan.items if item.provision_id == '9.27.3.2.(1)' and item.function == 'F61')
+    assert any(item.provision_id == '9.27.3.3.(1)' and item.function == target.function
+               and item.objective == target.objective for item in plan.items)
     response = post(client, case.id, payload(scope={'item_id': target.id,
         'provision_id': target.provision_id, 'objective': target.objective, 'function': target.function}))
     private(response, 200)
@@ -210,9 +220,9 @@ def test_current_unique_scope_is_ledger_link_not_cross_provision_or_completeness
     assert saved.evidence[0].objective == target.objective
     assert saved.evidence[0].function == target.function
     assert all(item.status == 'needed' for item in section_d_plan(saved, codes).items)
-    gaps = client.get(f'/api/cases/{case.id}/gaps').json()
-    assert any(gap['rule'] == 'attachment' for gap in gaps)
-    assert any(gap['rule'] == 'evidence' for gap in gaps)
+    gaps = client.get(f'/api/cases/{case.id}/gaps').json()['items']
+    assert any(gap['id'].startswith('attachment:') for gap in gaps)
+    assert any(gap['id'].startswith('evidence:') for gap in gaps)
     data = b'%PDF-1.4 Synthetic unchanged upload\n'
     file = store.put_file(case.id, 'scoped.pdf', data)
     private(client.post(f'/api/cases/{case.id}/facts', json=fact('evidence.doc_wall.file_ref',
@@ -263,7 +273,7 @@ def test_clear_reselect_and_metadata_edit_cannot_relink_but_explicit_scope_can(l
 
 def test_no_attribution_scope_does_not_invent_pair(ledger):
     store, create, client = ledger
-    case = create(provisions=['9.25.5.2.(1)(b)'])
+    case = create(provisions=['3.1.9.1.(4)'])
     item = section_d_plan(case, Codes()).items[0]
     assert item.objective is item.function is None
     private(post(client, case.id, payload(scope={'item_id': item.id})), 200)
@@ -277,6 +287,11 @@ def test_actual_attachments_cannot_be_erased_or_converted_by_text_edits(ledger):
     case = create()
     data = b'%PDF-1.4 Synthetic owned attachment\n'
     file = store.put_file(case.id, 'retained.pdf', data)
+    orphan = store.put_file(case.id, 'unlinked.pdf', b'%PDF-1.4 Synthetic unlinked bytes\n')
+    other = create()
+    foreign = store.put_file(other.id, 'other-case.pdf', b'%PDF-1.4 Synthetic other case\n')
+    inventory = {entry['id']: store.get_file(case.id, entry['id']) for entry in (file, orphan)}
+    foreign_before = store.get_file(other.id, foreign['id'])
     store.add_fact(case.id, fact('evidence.doc_wall.file_ref', file['id'], 'file', file['id']))
     before = store.get(case.id)
     private(post(client, case.id, payload(2, operation='update')), 422)
@@ -285,7 +300,9 @@ def test_actual_attachments_cannot_be_erased_or_converted_by_text_edits(ledger):
     assert store.get_file(case.id, file['id'])['data'] == data
     assert confirmed_value(store.get(case.id), 'evidence.doc_wall.file_ref') == file['id']
     private(delete(client, case.id, 'doc_wall', 3), 200)
-    assert store.get_file(case.id, file['id'])['data'] == data
+    assert {file_id: store.get_file(case.id, file_id) for file_id in inventory} == inventory
+    assert store.get_file(other.id, foreign['id']) == foreign_before
+    assert store.get(other.id) == other
     assert [item.id for item in store.get(case.id).evidence] == ['separate']
 
 
@@ -304,6 +321,9 @@ def test_delete_missing_body_and_stale_versions_never_acknowledge_success(ledger
     case = create()
     private(post(client, case.id, payload()), 200)
     private(client.delete(f'/api/cases/{case.id}/evidence/doc_wall'), 422)
+    private(client.request('DELETE', f'/api/cases/{case.id}/evidence/doc_wall', json={}), 422)
+    private(client.request('DELETE', f'/api/cases/{case.id}/evidence/doc_wall',
+                           json={'expected_version': 2, 'file_id': 'claimed'}), 422)
     private(delete(client, case.id, 'doc_wall', 1), 409)
     assert store.get_version(case.id) == 2
 
@@ -327,6 +347,8 @@ def test_delete_safe_legacy_nested_id_and_reject_only_destructive_prefix_ambigui
 def test_racing_mutation_cannot_lose_new_data_or_resurrect_absence(ledger, monkeypatch, method, mutation, status):
     store, create, client = ledger
     case = create()
+    file = store.put_file(case.id, 'race-retained.pdf', b'%PDF-1.4 Synthetic race-owned bytes\n')
+    file_before = store.get_file(case.id, file['id'])
     private(post(client, case.id, payload()), 200)
     put = store.put
     raced = []
@@ -358,6 +380,8 @@ def test_racing_mutation_cannot_lose_new_data_or_resurrect_absence(ledger, monke
     saved = store.get(case.id)
     if mutation in ('delete', 'expire'):
         assert saved is None and store.get_version(case.id) is None
+        assert store.get_file(case.id, file['id']) is None
+        assert store.purge_expired() == 0
     elif mutation == 'remove':
         assert saved.evidence == [] and saved.version == 3
     else:
@@ -365,6 +389,8 @@ def test_racing_mutation_cannot_lose_new_data_or_resurrect_absence(ledger, monke
         assert confirmed_value(saved, 'evidence.doc_wall.title') == payload()['title']
         if mutation == 'fact':
             assert confirmed_value(saved, 'project.concurrent') == 'newer answer'
+    if mutation not in ('delete', 'expire'):
+        assert store.get_file(case.id, file['id']) == file_before
 
 
 @pytest.mark.parametrize('method', ['post', 'delete'])
@@ -382,3 +408,99 @@ def test_terminal_case_never_created_by_evidence(ledger, method, state):
     response = post(client, case_id, payload()) if method == 'post' else delete(client, case_id, 'doc_wall', 1)
     private(response, 404)
     assert store.get(case_id) is None and store.get_version(case_id) is None
+
+
+def test_two_actual_writers_one_snapshot_commit_exactly_one_whole_listing(ledger, monkeypatch):
+    store, create, client = ledger
+    case = create()
+    snapshot = store.get_snapshot
+    barrier = threading.Barrier(2)
+    responses, errors = [], []
+
+    def simultaneous(case_id):
+        result = snapshot(case_id)
+        if threading.current_thread().name.startswith('evidence-writer-'):
+            barrier.wait(timeout=15)
+        return result
+
+    def write(slot):
+        try:
+            responses.append(post(client, case.id, payload(evidence_id=slot, title=slot, issuer=slot)))
+        except BaseException as error:
+            errors.append(error)
+
+    monkeypatch.setattr(store, 'get_snapshot', simultaneous)
+    threads = [threading.Thread(target=write, args=(slot,), name=f'evidence-writer-{slot}')
+               for slot in ('one', 'two')]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(25)
+    assert not errors and not any(thread.is_alive() for thread in threads)
+    assert sorted(response.status_code for response in responses) == [200, 409]
+    winner = next(response.json()['evidence']['id'] for response in responses if response.status_code == 200)
+    saved = store.get(case.id)
+    assert saved.version == 2 and [item.id for item in saved.evidence] == [winner]
+    assert all(entry.field.startswith(f'evidence.{winner}.') for entry in saved.facts)
+    assert confirmed_value(saved, f'evidence.{winner}.title') == winner
+    assert confirmed_value(saved, f'evidence.{winner}.issuer') == winner
+
+
+def test_legacy_unowned_file_claim_is_normalized_and_preserved_as_uncertain(ledger):
+    store, create, client = ledger
+    ghost = fact('evidence.legacy.file_ref', 'file_missing', 'file', 'file_missing')
+    case = create(evidence=[EvidenceItem(id='legacy', description='Legacy listing', status='evidence_listed')],
+                  facts=[ghost, fact('evidence.legacy.title', 'Legacy title')])
+    # A normal snapshot must downgrade the claim; raw JSON byte identity is not promised.
+    response = post(client, case.id, payload(evidence_id='new'))
+    private(response, 200)
+    acknowledged = Case.model_validate(response.json()['case'])
+    preserved = next(entry for entry in acknowledged.facts if entry.id == ghost.id)
+    assert preserved.source == ghost.source and preserved.value == ghost.value
+    assert preserved.status == 'unconfirmed'
+    assert next(item for item in acknowledged.evidence if item.id == 'legacy').kind == 'text'
+    assert store.get(case.id) == acknowledged
+
+
+def test_real_loopback_api_http_has_current_acknowledgment_and_privacy(ledger, monkeypatch):
+    import httpx
+    import uvicorn
+    store, create, _ = ledger
+    case = create()
+    listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    listener.bind(('127.0.0.1', 0))
+    port = listener.getsockname()[1]
+    # The private runner permits only this own loopback port; provider sockets stay denied.
+    monkeypatch.setenv('BATATIS_EVIDENCE_TEST_HTTP_PORT', str(port))
+    server = uvicorn.Server(uvicorn.Config(create_app(store=store), log_level='error', lifespan='off'))
+    errors = []
+
+    def run():
+        try:
+            server.run(sockets=[listener])
+        except BaseException as error:
+            errors.append(error)
+
+    thread = threading.Thread(target=run, daemon=True)
+    thread.start()
+    try:
+        deadline = time.monotonic() + 5
+        while not server.started and not errors and time.monotonic() < deadline:
+            time.sleep(0.01)
+        assert server.started and not errors
+        with httpx.Client(base_url=f'http://127.0.0.1:{port}', trust_env=False, timeout=10) as http:
+            response = post(http, case.id, payload())
+            private(response, 200)
+            assert response.json()['case_version'] == 2
+            read = http.get(f'/api/cases/{case.id}')
+            private(read, 200)
+            assert read.json()['facts'] == response.json()['case']['facts']
+            private(delete(http, case.id, 'doc_wall', 1), 409)
+            removed = delete(http, case.id, 'doc_wall', 2)
+            private(removed, 200)
+            assert removed.json()['version'] == 3 and removed.json()['evidence'] == []
+    finally:
+        server.should_exit = True
+        thread.join(10)
+        listener.close()
+    assert not thread.is_alive() and not errors

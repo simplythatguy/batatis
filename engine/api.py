@@ -279,6 +279,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         return JSONResponse(status_code=503, content={'detail': 'case store unavailable'})
 
     app.include_router(__import__('engine.routes_case', fromlist=['create_router']).create_router(cases, code))
+    app.include_router(__import__('engine.routes_evidence', fromlist=['create_router']).create_router(cases, code))
     return app
 
 
