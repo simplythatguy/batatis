@@ -700,3 +700,42 @@ def test_a_decision_between_the_write_and_the_reply_does_not_fail_the_run(client
     monkeypatch.setattr(store, 'put', put_then_confirm)
     assert http.post(f'/cases/{case_id}/identify', json={}).status_code == 200
     assert done
+
+
+def test_a_decision_on_an_article_also_clears_its_sentences(client):
+    """`confirm` can store sentence ids; deciding the article removes them, and a yes leaves one entry."""
+    http, store = client
+    case_id = described(http)
+    first = http.post(f'/cases/{case_id}/identify', json={}).json()['articles'][0]['provision']
+    sentence = f'{first}(1)'
+    assert http.post(f'/cases/{case_id}/identify/confirm', json={'provisions': [sentence]}).status_code == 200
+    assert store.get(case_id).provisions == [sentence]
+    http.post(f'/cases/{case_id}/identify/{first}/decision', json={'decision': 'no'})
+    assert store.get(case_id).provisions == [] and store.get(case_id).section_c == []
+    assert http.post(f'/cases/{case_id}/identify/confirm', json={'provisions': [sentence]}).status_code == 200
+    http.post(f'/cases/{case_id}/identify/{first}/decision', json={'decision': 'yes'})
+    assert store.get(case_id).provisions == [first]
+
+
+def test_openai_rerank_order_follows_probability(codes, monkeypatch):
+    """A model that lists the articles in screen order must not decide the shortlist."""
+    from types import SimpleNamespace
+    from engine.identify import pipeline
+    from engine.identify.config import IdentifyConfig
+
+    class Stages:
+        def run(self, name, method, model, fn):
+            return fn(SimpleNamespace(errors=0, requests=0, detail=''))
+
+        def emit(self, *a, **k):
+            pass
+
+    db = codes.db_path
+    config = IdentifyConfig(screen='bm25', rerank='openai')
+    pool_ids = pipeline._lexical('bm25', SOFFIT, db, articles(db))[:config.rerank_n]
+    listed = [(pool_ids[0], 0.1), (pool_ids[1], 0.9), (pool_ids[2], 0.5)]      # the model's own order
+    monkeypatch.setattr(pipeline, 'score_candidates', lambda *a, **k: (listed, {}))
+    tp = SimpleNamespace(openai=object(), unavailable={})
+    ranked, _screen, rerank, _n = pipeline._rank(SOFFIT, db, articles(db), list(articles(db)), config, tp, Stages())
+    assert [a for a, p in ranked[:3]] == [pool_ids[1], pool_ids[2], pool_ids[0]]
+    assert [p for a, p in ranked[:3]] == [0.9, 0.5, 0.1] and rerank[pool_ids[1]] == 0.9

@@ -232,6 +232,8 @@ def test_redirect_is_a_computed_fact_with_the_cue_and_blocks_export_until_overri
     assert plan.next == 'redirect' and plan.scope.regime.id == 'plumbing' and plan.scope.cue == fact.source.quote
     assert not case.section_c and not case.provisions
     service.override_scope(case, True)
+    assert fact.id not in case.export_blockers() and fact.id not in {p.fact_id for p in case.intake.pointers}
+    assert not [f for f in case.facts if f.field == SCOPE_FIELD and f.status != 'confirmed']
     plan = case.intake.plan
     assert plan.scope.status == 'overridden' and plan.next != 'redirect' and plan.questions
     latest = [f for f in case.facts if f.field == SCOPE_FIELD][-1]       # export reads the latest revision

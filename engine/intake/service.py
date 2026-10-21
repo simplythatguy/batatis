@@ -179,9 +179,21 @@ def answer(case: Case, answers: list[dict]) -> list[Fact]:
     return created
 
 
+def _drop_redirects(case: Case) -> None:
+    """Remove earlier computed redirects (and their pointers): each override or re-check supersedes them, and an
+    unconfirmed one left behind would keep blocking export."""
+    gone = {f.id for f in case.facts if f.field == SCOPE_FIELD and f.kind == 'computed'}
+    if not gone:
+        return
+    case.facts = [f for f in case.facts if f.id not in gone]
+    if case.intake is not None:
+        case.intake.pointers = [p for p in case.intake.pointers if p.fact_id not in gone]
+
+
 def override_scope(case: Case, building_code: bool) -> Fact:
     """The applicant says this is (or, undoing that, may not be) a building-code question. Their own click,
     always confirmed, so the click itself never blocks export; a redirect read again is a computed fact."""
+    _drop_redirects(case)
     case.facts.append(Fact(
         field=SCOPE_FIELD, value=OVERRIDDEN if building_code else 'checked', kind='pointed', status='confirmed',
         source=Source(type='user_click', ref='intake:scope',

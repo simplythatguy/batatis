@@ -138,6 +138,14 @@ def live_anthropic():
     return anthropic.Anthropic(max_retries=0, timeout=60)
 
 
+class UnreadableResponse(RuntimeError):
+    """The provider answered, and billed, but the content is unusable (a refusal or a truncated answer)."""
+
+    def __init__(self, message: str, usage: dict):
+        super().__init__(message)
+        self.usage = usage
+
+
 def raw_openai_json(name: str, schema: dict, system: str, user: str, *, model: str,
                     max_output_tokens: int = 4096, effort: str | None = None, timeout: float = 60) -> tuple[dict, dict]:
     """One Chat Completions request with a strict JSON schema. Unmetered: use metered_openai_json.
@@ -161,17 +169,24 @@ def raw_openai_json(name: str, schema: dict, system: str, user: str, *, model: s
         response.raise_for_status()
         data = response.json()
     raw = data.get('usage') or {}
-    return json.loads(data['choices'][0]['message']['content']), {
-        'input_tokens': raw.get('prompt_tokens', 0), 'output_tokens': raw.get('completion_tokens', 0),
-        'returned_model': data.get('model')}
+    usage = {'input_tokens': raw.get('prompt_tokens', 0), 'output_tokens': raw.get('completion_tokens', 0),
+             'returned_model': data.get('model')}
+    try:
+        return json.loads(data['choices'][0]['message']['content']), usage
+    except (KeyError, IndexError, TypeError, ValueError) as error:
+        raise UnreadableResponse('OpenAI returned no usable JSON', usage) from error
 
 
 def metered_openai_json(raw: OpenAIJson, *, client_ip: str | None = None, log: SpendLog | None = None) -> OpenAIJson:
     def call(name, schema, system, user, *, model, max_output_tokens=4096, effort=None, timeout=60):
         with metered('openai', model, estimate_tokens(system + user + json.dumps(schema)), max_output_tokens,
                      client_ip=client_ip, log=log) as settle:
-            payload, usage = raw(name, schema, system, user, model=model, max_output_tokens=max_output_tokens,
-                                 effort=effort, timeout=timeout)
+            try:
+                payload, usage = raw(name, schema, system, user, model=model, max_output_tokens=max_output_tokens,
+                                     effort=effort, timeout=timeout)
+            except UnreadableResponse as error:     # billed: settle the real usage, then fail the call
+                settle(error.usage.get('input_tokens', 0), error.usage.get('output_tokens', 0))
+                raise
             settle(usage.get('input_tokens', 0), usage.get('output_tokens', 0))
             return payload, usage
     return call
