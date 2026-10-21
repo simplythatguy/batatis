@@ -5,6 +5,7 @@ plus `VersionConflict`. This module keeps the file backend; `store_postgres.py` 
 """
 from __future__ import annotations
 
+import json
 import os
 import sqlite3
 import uuid
@@ -52,14 +53,15 @@ def attachment_reference(fact: Fact) -> str | None:
     return fact.value
 
 
-def case_with_stored_files(payload: str | dict, file_ids: set[str]) -> Case:
+def case_with_stored_files(payload: str | dict, file_ids: set[str], version: int) -> Case:
     """Old metadata is a listing until this case's stored bytes establish presence.
 
     Preserve its text and provenance, but do not let a legacy or imported file claim
     silently close an attachment gap. The read and file inventory share a transaction.
     Pure offline Case fixtures do not have storage and are not upload evidence.
     """
-    case = Case.model_validate_json(payload) if isinstance(payload, str) else Case.model_validate(payload)
+    data = json.loads(payload) if isinstance(payload, str) else payload
+    case = Case.model_validate({**data, 'version': version})
     for fact in case.facts:
         try:
             reference = attachment_reference(fact)
@@ -145,13 +147,15 @@ class CaseStore:
 
     def put(self, case: Case, *, expected_version: int | None = None) -> Case:
         case.updated_at = now()
-        payload = case.model_dump_json()
+        payload = case.model_dump_json(exclude={'version'})
         conflict = None
         with closing(self._connect()) as con, con:
             if expected_version is None:
-                con.execute('INSERT INTO cases (id, json, updated_at, version) VALUES (?,?,?,1) '
-                            'ON CONFLICT(id) DO UPDATE SET json=excluded.json, updated_at=excluded.updated_at, '
-                            'version=cases.version+1', (case.id, payload, case.updated_at))
+                row = con.execute('INSERT INTO cases (id, json, updated_at, version) VALUES (?,?,?,1) '
+                                  'ON CONFLICT(id) DO UPDATE SET json=excluded.json, updated_at=excluded.updated_at, '
+                                  'version=cases.version+1 RETURNING version',
+                                  (case.id, payload, case.updated_at)).fetchone()
+                case.version = int(row[0])
                 return case
             if expected_version == 0:
                 try:
@@ -161,15 +165,19 @@ class CaseStore:
                     row = con.execute('SELECT version FROM cases WHERE id=?', (case.id,)).fetchone()
                     actual = int(row[0]) if row else None
                     raise VersionConflict(case.id, 0, actual) from exc
+                case.version = 1
                 return case
             # Lock before taking the cutoff, including time spent waiting for another writer.
             con.execute('BEGIN IMMEDIATE')
             self._purge_expired(con, case.id)
-            cur = con.execute('UPDATE cases SET json=?, updated_at=?, version=version+1 '
-                              'WHERE id=? AND version=?', (payload, case.updated_at, case.id, expected_version))
-            if cur.rowcount != 1:
+            row = con.execute('UPDATE cases SET json=?, updated_at=?, version=version+1 '
+                              'WHERE id=? AND version=? RETURNING version',
+                              (payload, case.updated_at, case.id, expected_version)).fetchone()
+            if row is None:
                 row = con.execute('SELECT version FROM cases WHERE id=?', (case.id,)).fetchone()
                 conflict = VersionConflict(case.id, expected_version, int(row[0]) if row else None)
+            else:
+                case.version = int(row[0])
         # Commit an expiry deletion before reporting the conflict; raising inside would roll it back.
         if conflict is not None:
             raise conflict
@@ -187,7 +195,7 @@ class CaseStore:
             if row is None:
                 return None
             files = {item[0] for item in con.execute('SELECT id FROM case_files WHERE case_id=?', (case_id,))}
-            return case_with_stored_files(row[0], files), int(row[1])
+            return case_with_stored_files(row[0], files, int(row[1])), int(row[1])
 
     def delete(self, case_id: str) -> bool:
         """Remove the case, its facts, its evidence, and its files."""
@@ -229,12 +237,14 @@ class CaseStore:
                 if reference is not None and con.execute(
                         'SELECT 1 FROM case_files WHERE id=? AND case_id=?', (reference, case_id)).fetchone() is None:
                     raise InvalidAttachment('Attach an uploaded file from this application before confirming the document.')
-                case = Case.model_validate_json(row[0])
+                files = {item[0] for item in con.execute('SELECT id FROM case_files WHERE case_id=?', (case_id,))}
+                case = case_with_stored_files(row[0], files, int(row[1]))
                 case.facts = [item for item in case.facts if item.id != fact.id] + [fact]
                 case.updated_at = now()
+                case.version = int(row[1]) + 1
                 cur = con.execute('UPDATE cases SET json=?, updated_at=?, version=version+1 '
                                   'WHERE id=? AND version=?',
-                                  (case.model_dump_json(), case.updated_at, case_id, row[1]))
+                                  (case.model_dump_json(exclude={'version'}), case.updated_at, case_id, row[1]))
                 if cur.rowcount != 1:
                     con.execute('ROLLBACK')
                     continue
@@ -261,13 +271,15 @@ class CaseStore:
                 if row is None:
                     con.commit()
                     return None
-                case = Case.model_validate_json(row[0])
+                files = {item[0] for item in con.execute('SELECT id FROM case_files WHERE case_id=?', (case_id,))}
+                case = case_with_stored_files(row[0], files, int(row[1]))
                 case.facts = [fact for fact in case.facts if not fact.field.startswith(prefix)]
                 case.evidence = [item for item in case.evidence if item.id != evidence_id]
                 case.updated_at = now()
+                case.version = int(row[1]) + 1
                 cur = con.execute('UPDATE cases SET json=?, updated_at=?, version=version+1 '
                                   'WHERE id=? AND version=?',
-                                  (case.model_dump_json(), case.updated_at, case_id, row[1]))
+                                  (case.model_dump_json(exclude={'version'}), case.updated_at, case_id, row[1]))
                 if cur.rowcount != 1:
                     con.rollback()
                     continue

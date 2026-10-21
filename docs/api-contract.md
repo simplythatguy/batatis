@@ -25,14 +25,14 @@ Every response sets `X-Robots-Tag: noindex, nofollow` and `X-Batatis-Notice` to 
 | `GET /code/search` | Query `q`, `division` (`A` `B` or `C`, default `B`), `limit` (1–20, default 20). `422` detail `The maximum is 20.` when `limit` is above 20. `429` detail `Search limit reached; try again in N seconds`, with a `Retry-After` header of N seconds. Default budget is 60 searches per 10 minutes per IP. `GET /ccmc/search` shares that budget. The window is in memory on each engine instance, so it is per instance, not a cap shared by every instance. The client IP is the first hop of `x-vercel-forwarded-for`, then `X-Forwarded-For`, then the peer address. Body is `{ "items", "meta" }`. Each hit has `id`, `division`, `level`, `article_title`, `title`, `text`, `citation`. |
 | `GET /code/{provision_id}` | Query `division` only. Any other query parameter, including a sentence offset, page, or cursor, is `400` detail `this route accepts only division`. The codedb provision record, or `404` detail `provision not found`. `400` when the id is invalid or the division is ambiguous. |
 | `POST /section-c` | Body `{ "provisions": ["…"] }`. `{ "items", "meta" }` where `items` is the `SectionCRow` list. `404` when a provision is missing from codedb. `400` on an invalid id. |
-| `POST /cases/{case_id}/section-d` | Body optional `{ "provisions": ["…"] }`. `{ "items", "notices", "meta" }`. Writes only if the case still has the version read before planning. A concurrent change returns `409` detail `case was updated concurrently`; reload the case before retrying. A deleted or expired case returns `404` detail `case not found`. No insert fallback. |
+| `POST /cases/{case_id}/section-d` | Body optional. Omitted `provisions` retains the current selection and rebuilds deterministically. Explicit `provisions: []` withdraws all references; nonempty `provisions` replaces them after CodeDB validation. Either explicit list requires `expected_version` from the client's last Case acknowledgment (strict positive integer). `provisions: null`, a missing mutation version, or an invalid version is `422`. Response `{ "items", "notices", "case_version", "meta" }` acknowledges the committed row version. A stale client version or a concurrent write returns `409` detail `case was updated concurrently`; reload and explicitly reconcile, with no implicit retry. A deleted or expired case returns `404` detail `case not found`. No insert fallback. |
 | `GET /cases/{case_id}/section-d/issues` | `{ "items", "meta" }`. `items` is the issue list below. Read-only. Does not write the case. |
 | `GET /cases/{case_id}/professional` | Object, plus `meta`. `required` and `general_required`: `yes`, `no`, or `depends`. Also `involvement`, `decision`, `general_decision`, `reasons`, `questions`, `missing_facts`, `scope_note`. Not an `{ items }` list. |
 | `GET /ccmc/search` | Query `q` (1–200 characters) and `limit` (1–50, default 20). `422` on a rejected query. `503` when the registry is unavailable; that detail is the registry error text. `429` uses the same detail, `Retry-After` header, and per-IP window as `GET /code/search`. The two routes share that window. The registry index is cached on the instance. Report-date fetches are cached by CCMC number, and one search opens at most 8 new report requests. |
 | `GET /cases/{case_id}/process-fields` | `{ "items", "meta" }`. `items` is the process-field list. Empty when the pathway is an acceptable solution. |
 | `POST /cases/{case_id}/export` | Body optional `{ "draft": false }`. `200` is `application/pdf`. `409` detail is `{ "message": "export blocked; resolve these or export a draft", "reasons": […] }`. `503` detail `SCC variance form not found` when the blank form file is missing. `500` detail `The SCC variance form could not be exported.` on other export failures. That body has no server path. The PDF's NRC text is described under Exported PDF. |
 
-A Case has `id`, `title`, `created_at`, `updated_at`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
+A Case has `id`, `title`, `created_at`, `updated_at`, `version`, `jurisdiction`, `facts`, `provisions`, `section_c`, `evidence`, `gaps`. `version` is the actual stored row version, published consistently by Case create/read/fact-write/evidence-delete responses on both backends. Embedded legacy JSON or caller-supplied Case metadata cannot choose it. A Fact `kind` is `exact`, `pointed`, `computed`, or `proposed`. `status` is `confirmed` or `unconfirmed`. A `proposed` fact cannot be `confirmed`.
 
 A fact's `source.type` is `code`, `file`, `user_text`, `drawing`, `user_click`, `officer`, or `professional`. `officer` and `professional` are authority sources. `user_text`, `user_click`, and `drawing` are applicant sources. `confirmed` does not change the source. Only an `officer`, `professional`, or `code` source can produce professional-screen `no`.
 
@@ -72,11 +72,39 @@ The engine log line is the method, the path, and the status. It does not include
 
 Evidence withdrawal uses one transaction in either backend, serializes with fact writes and case deletion, and increments the case version once on success (including an already absent slot). A `put(..., expected_version=...)` using the prior version conflicts rather than restoring withdrawn evidence. Withdrawal checks the same 7-day `created_at` window and cannot restore a deleted or expired case. Uploaded bytes remain until the case is deleted or expires; withdrawing a slot only removes its evidence item and facts. The JSON privacy notice and response headers apply to this route and its errors too. Integration with the UI uses this single DELETE handler from `engine/routes_case.py`.
 
-Section D uses `get_snapshot(case_id)` to read the Case and version from one stored row, then saves with `put(..., expected_version=version)`. Reading a Case and later calling `get_version` is not a valid snapshot. Versioned updates never insert a missing case. Both backends check the current retention cutoff after acquiring the write lock, including for fact/file additions and Section D saves, and commit expiry removal of the case and its files before reporting failure. New-case creation retains its existing behavior. No version field is added to the public Case JSON.
+Section D uses `get_snapshot(case_id)` to read the Case and version from one stored row, then saves with `put(..., expected_version=version)`. Reading a Case and later calling `get_version` is not a valid snapshot. An explicit replacement/clear must also match the client's `expected_version` before lookup/planning starts. Versioned updates never insert a missing case. Both backends check the current retention cutoff after acquiring the write lock, including for fact/file additions and Section D saves, and commit expiry removal of the case and its files before reporting failure. New-case creation retains its existing behavior. The public Case `version` is taken from the row column in that same transaction, and `case_version` acknowledges the Section D save. File-byte uploads alone do not change the Case JSON/version; the fact write linking an uploaded file does.
+
+### Reference withdrawal and revisions
+
+After a Case acknowledgment with `"version": 7`, these are the three existing-route request forms:
+
+```json
+{}
+```
+
+Omission rebuilds the currently stored selection. It requires no provider or provider intent, and may omit `expected_version`; its own snapshot/CAS still rejects concurrent writes. A supplied `expected_version` is checked even on a rebuild. A successful rebuild increments the version and returns the committed `case_version`.
+
+```json
+{ "provisions": [], "expected_version": 7 }
+```
+
+This withdraws all references. The response has `"items": []` and `"case_version": 8`. It clears stored provisions, Section C rows, cached gaps and all old `citation.*` / `open_question.*` decisions. Replacing a subset withdraws matching removed decisions and scope while retaining unaffected reference links. No stored plan/check/identify-result table exists on this source; later identify integration must bind results and decisions to this same revision and reject stale completions. The version bump already rejects an old snapshot's CAS save.
+
+```json
+{ "provisions": ["9.25.5.2.(1)(b)"], "expected_version": 8 }
+```
+
+Reselection requires a fresh deterministic CodeDB lookup. Invalid/missing provisions leave the Case untouched, and a missing corpus returns the existing fixed `503`. A clear or an already-empty rebuild needs no CodeDB. It returns a missing-benchmark notice with empty C/D; current gaps and final-export preflight still require a confirmed benchmark, alternative-path risk/mitigation/assumptions and applicable professional material.
+
+Withdrawal preserves applicant descriptions, process/professional facts, document ids, titles, dates, issuer/responsible-party/seal metadata and stored bytes. Removed objective/function/provision/plan-coverage links become unscoped. The ledger records `evidence.<id>.auto_link = false` for withdrawn document scope: an id equal to an old stable plan id cannot silently restore coverage when that benchmark is selected again. Explicit new `evidence.<id>.item_id` or `evidence.<id>.covers.<plan id> = true` facts can re-link a preserved document after applicant review. Slot deletion still removes that exact slot's facts and item, including the scope marker, while preserving uploaded bytes.
+
+A stale replacement/clear returns `409 { "detail": "case was updated concurrently", "meta": … }` and preserves all current facts. A missing/deleted/expired case returns `404 { "detail": "case not found", "meta": … }` and remains absent. There is no retry, upsert, or `expected_version: 0` path for either mutation. The client must refresh on conflict and send a newly acknowledged version only after reconciling the draft.
+
+The API model change adds `Case.version`. The parent UI integration must regenerate `web/src/api/engine.schema.json` (`python -m engine.schema_export`) and its generated TypeScript types, and adapt the Section D caller to send the acknowledged version and explicit `[]`. That frontend adaptation is separately owned.
 
 ### Section D plan item
 
-`POST /cases/{case_id}/section-d` returns `{ "items", "notices", "meta" }`. Each item is `engine/section_d.py` `EvidencePlanItem`. Every plan item is a provision codedb already resolved. `provision_id` and `citation` sit on the item.
+`POST /cases/{case_id}/section-d` returns `{ "items", "notices", "case_version", "meta" }`. `case_version` is the committed Case version; an offline `section_d_plan` call has no stored acknowledgment and leaves it null. Each item is `engine/section_d.py` `EvidencePlanItem`. Every plan item is a provision codedb already resolved. `provision_id` and `citation` sit on the item.
 
 | Field | Type | Meaning |
 | --- | --- | --- |
