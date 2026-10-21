@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { BAND_LABEL, BAND_SHORT, pct, type Band, type Shown } from "./relevance";
 import { useRelevance } from "./useRelevance";
 
-const ESTIMATE = "Jev estimate from your description. Not a compliance decision.";
+const ESTIMATE = "Batatis estimate from your description. Not a compliance decision.";
 
 /**
  * A small glass tooltip pinned to an anchor, rendered in <body> so glass panels
@@ -94,8 +94,8 @@ export function RelevanceRing({
   const hide = () => { window.clearTimeout(timer.current); setOpen(false); };
   const label =
     band === "unscored"
-      ? "Jev relevance: not scored"
-      : `Jev relevance ${pct(p!)}${aggregate ? ` (highest in this ${aggregate})` : ""}: ${BAND_SHORT[band]}`;
+      ? "Relevance estimate: not scored"
+      : `Relevance estimate ${pct(p!)}${aggregate ? ` (highest in this ${aggregate})` : ""}: ${BAND_SHORT[band]}`;
   return (
     <>
       <span
@@ -118,7 +118,7 @@ export function RelevanceRing({
         {band === "unscored" ? (
           <>
             <div className="cf-tip-head">Not scored</div>
-            <p>{rel.result ? "This article has no Jev score for your project." : "Score relevance in the code library to see how likely each article applies."}</p>
+            <p>{rel.result ? "This article has no relevance score for your project." : "Score relevance in the code library to see how likely each article applies."}</p>
           </>
         ) : (
           <>
@@ -128,7 +128,7 @@ export function RelevanceRing({
             </div>
             {s.screenedOnly && <p>Screened only: the closer second look did not judge this article, so it never shows yellow or red.</p>}
             <p>{ESTIMATE}</p>
-            <p className="cf-faint cf-mono">{rel.result?.model ? `Model ${rel.result.model}` : ""}{rel.stale ? `${rel.result?.model ? " · " : ""}Out of date` : ""}</p>
+            <p className="cf-faint cf-mono">{rel.result?.model ? `Estimate version ${rel.result.model}` : ""}{rel.stale ? `${rel.result?.model ? " · " : ""}Out of date` : ""}</p>
           </>
         )}
       </Tip>
@@ -154,7 +154,7 @@ export function RingLegend() {
     { band: "high", p: 0.8, text: `${BAND_LABEL.high}. ${pct(y)} or more.` },
     { band: "mid", p: 0.4, text: `${BAND_LABEL.mid}. ${pct(x)} to under ${pct(y)}.` },
     { band: "low", p: 0.1, text: `${BAND_LABEL.low}. Above 0 and under ${pct(x)}.` },
-    { band: "unscored", text: "Dashed: not scored yet, or no Jev score." },
+    { band: "unscored", text: "Dashed: not scored yet, or no relevance score." },
   ];
   return (
     <>

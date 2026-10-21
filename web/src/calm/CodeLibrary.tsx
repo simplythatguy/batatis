@@ -51,7 +51,7 @@ export function ScoreStatus() {
         rel.stale ? (
           <span className="cf-score is-stale"><span className="cf-dot is-warning" aria-hidden="true" />Out of date {scoreBtn("Rescore")}</span>
         ) : (
-          <span className="cf-score" title={rel.result.model ? `Model ${rel.result.model}` : undefined}>
+          <span className="cf-score" title={rel.result.model ? `Estimate version ${rel.result.model}` : undefined}>
             <span className="cf-dot is-done" aria-hidden="true" />Scored for your project{rel.result.scored_at ? ` · ${ago(rel.result.scored_at)}` : ""}
           </span>
         )
@@ -497,7 +497,7 @@ function Reading({ id, filter, onReveal, index, narrow }: { id: string; filter: 
       <footer className="cf-read-src">
         <span>{cx?.citation ?? (text.state === "ready" ? text.value.citation : `NBC(AE) 2023, Division B, Article ${id}`)}{page && !/PDF p/.test(cx?.citation ?? "") ? ` · PDF page ${page}` : ""}</span>
         <NrcCredit />
-        <span>Rings are relevance estimates from your description. They are not a compliance decision and not your Section C, which lists only the rules you confirm.</span>
+        <span>Rings are Batatis estimates from your description. They are not a compliance decision and not your Section C, which lists only the rules you confirm.</span>
       </footer>
     </article>
   );
