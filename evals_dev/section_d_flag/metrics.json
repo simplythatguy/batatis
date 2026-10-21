@@ -1,17 +1,48 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-20T23:24:39.098663+00:00",
-  "source_commit": "99a376c68ffb2d58847076796a27ad95f2712a2a",
+  "receipt_revision": 2,
+  "generated_at": "2026-10-21T00:40:41.360377+00:00",
+  "source_commit": "d479e825487eb1c12efbfe469100fbf34ce90672",
   "source_sha256": {
-    "engine/section_d_flag_eval.py": "4b2e97aac7dcf279921d4c120653c94c242bdc1cfeca44a660f2e60ed9e00405",
-    "engine/professional.py": "592bab2d17ca6c55baac999d583be9f7714685726ca15b454c9a2150fb047f1b",
-    "engine/section_d_issues.py": "a3fa09eece75a8eb5d8f7dd020ccf0f3a3c76d71558af023992da9b95183aaf7",
+    "engine/section_d_flag_eval.py": "72900ba8aed930456b2b0473ccdf1f6f40ea4d6087bf0eca6f75bc57051f20e8",
+    "engine/professional.py": "da0cc288d4ec24b50159084dc2b895c4f48fb102b3a4899b36dcf6ce61974ba6",
+    "engine/section_d_issues.py": "78cd2ce5b4d21256243e2fc4ce389f10522c95af93587be1b241d791d361ffc5",
     "engine/process_fields.py": "cdfd3b92138870698cfca07d2a6a898319dff0b5f8d2e903943526b91124c061",
     "engine/models.py": "e52ad5a7f92992b6e03defdcfac740218118ecc34daef1fb8576df628fbfeea5",
     "engine/codes.py": "a97ade68ba40e08dcc5cdfef65223c6199ee057686e7c6e16cc4954dc0e62f82"
   },
+  "loaded_source_sha256": {
+    "codedb/__init__.py": "3001b97ba05e92d3aa873fb5f861ae523bc88f1737b538f4d5454b6a0534fe6e",
+    "codedb/api.py": "18b7b6a16bb75c3c9a4eb32cc194df857b9f06ac13f4c4d18c1fa7bfa7d5eb18",
+    "codedb/attributions.py": "889b40503490f9a04769c357a1d3b5cd972c569c716a811d86651f7849cd18f2",
+    "codedb/ids.py": "4f91e9f6dac8abc100608607b6e10aaf94ed89720b427e281a09c6af7f1afb6f",
+    "codedb/sources.py": "096b8e8b4baa14d94b80ba4420da28a5ffcc9506533e0d27e508e06524e1740e",
+    "codedb/store.py": "1d7f02204f4d551443dfcba973d76a2cf89d45241323b7ae20da31241a772e33",
+    "codedb/validator.py": "bafefa01b09b7b6747ac287261817639abc28a82cd872102d1ef0313e969b32b",
+    "engine/__init__.py": "52c44e35a4d9e2ee9023dca759dbe2cd94c48be24a3e82825e3963d526fb42de",
+    "engine/codes.py": "a97ade68ba40e08dcc5cdfef65223c6199ee057686e7c6e16cc4954dc0e62f82",
+    "engine/human_review.py": "1d343e5a8127a63e2fa2ff4af219fe1a178d8d1534e86ead7d871f1e78db0f14",
+    "engine/models.py": "e52ad5a7f92992b6e03defdcfac740218118ecc34daef1fb8576df628fbfeea5",
+    "engine/process_fields.py": "cdfd3b92138870698cfca07d2a6a898319dff0b5f8d2e903943526b91124c061",
+    "engine/professional.py": "da0cc288d4ec24b50159084dc2b895c4f48fb102b3a4899b36dcf6ce61974ba6",
+    "engine/section_c.py": "3a9c4436ea863daee66c9156d3284320d305a855e96e0b9c406f4897c1795d99",
+    "engine/section_d.py": "e970a552823a69bfbb8a5bae9c27599b4709eb30cfe89338c059bc5317c3a8da",
+    "engine/section_d_flag_eval.py": "72900ba8aed930456b2b0473ccdf1f6f40ea4d6087bf0eca6f75bc57051f20e8",
+    "engine/section_d_issues.py": "78cd2ce5b4d21256243e2fc4ce389f10522c95af93587be1b241d791d361ffc5"
+  },
   "codedb_sha256": "672f2c44d4ca3568630bb6046c7bfece5837bbab33b01a57a35da9a5b46fc03f",
   "input_sha256": {
+    "evals/fixtures/section_d_no_gt/ngt-001.json": "57e73d50391110a65faad8245412a3314ebde2adf660d318a782fed09f103039",
+    "evals/fixtures/section_d_no_gt/ngt-002.json": "e368451461a2f30f80ea664148d9fb899aee28e069ec6dbcc8486728bace2054",
+    "evals/fixtures/section_d_no_gt/ngt-003.json": "3ad71536bf250ffb43f2df81820501c4e099da11411bbd731c96a49438a5fa94",
+    "evals/fixtures/section_d_no_gt/ngt-004.json": "1924c01b109cf69af5f2fd7724c033833867a2b587d903c8c0ea43da34c16679",
+    "evals/fixtures/section_d_no_gt/ngt-005.json": "e6932c4f473a56b49258477444f50bad4d9282e21397a07a637d7cfc28deb185",
+    "evals/fixtures/section_d_no_gt/ngt-006.json": "9b6ff3044c4405227c177c49ec98c066a9273af7171ca5b43fc4ea28b0ef0542",
+    "evals/fixtures/section_d_no_gt/ngt-007.json": "c6bd9d028c6b62a4c3696495ea02b544a46897ebf143d323145a11ef168dba08",
+    "evals/fixtures/section_d_no_gt/ngt-008.json": "e7ead7f3683be3c63f7a7cdfb014fc5e6c4fd5aa68f268acd8337597faf15025",
+    "evals/fixtures/section_d_no_gt/ngt-101.json": "54c757970e71a17d5ff0f82e3f210cbdc998e75c003623fdcb2a882e62ec79db",
+    "evals/fixtures/section_d_no_gt/ngt-102.json": "e0fb4385dfa06a4ae9c00baace2ec91a2b5de93ed96b67a6a46e4f5a07a82332",
+    "evals/fixtures/section_d_no_gt/ngt-103.json": "972354c7b2021385285cc92e2a95832e4ef3a18aebf7412d1c5dc4a2952b9b4f",
     "evals_dev/cases/dev-001.json": "23945edc31c28c6c98717763eab1b411ef48ae6c25ecbce685b33e44ffa31ba9",
     "evals_dev/cases/dev-002.json": "2b257edd6654ea354bdaf9fc6f936103eeb07c750cb04fd35eb8298618284caf",
     "evals_dev/cases/dev-003.json": "101acc7ad1f3510401f96a26cb3cc079eaabf2ab88e8ace8ab66d82361b04213",
@@ -71,18 +102,7 @@
     "evals_dev/cases/dev-057.json": "1afc232f5db7477466c1601accb75b5f29256fd6de9da4d98cb3b6172d8063d5",
     "evals_dev/cases/dev-058.json": "538d6c10342f1d388f2da3204bd491ae24db3b9c1fdd05de2c3d7fb739ee5a65",
     "evals_dev/cases/dev-059.json": "0cfd3ad10d5d6e110e514cbcba4b0ec4d0b3438f33a725ff2396ff79c9dc2fa6",
-    "evals_dev/cases/dev-060.json": "b53ef1adb2bdaae02456bc2ab0d640fb9a739e48f2b75b39d80340cc77bf5fa0",
-    "evals/fixtures/section_d_no_gt/ngt-001.json": "57e73d50391110a65faad8245412a3314ebde2adf660d318a782fed09f103039",
-    "evals/fixtures/section_d_no_gt/ngt-002.json": "e368451461a2f30f80ea664148d9fb899aee28e069ec6dbcc8486728bace2054",
-    "evals/fixtures/section_d_no_gt/ngt-003.json": "3ad71536bf250ffb43f2df81820501c4e099da11411bbd731c96a49438a5fa94",
-    "evals/fixtures/section_d_no_gt/ngt-004.json": "1924c01b109cf69af5f2fd7724c033833867a2b587d903c8c0ea43da34c16679",
-    "evals/fixtures/section_d_no_gt/ngt-005.json": "e6932c4f473a56b49258477444f50bad4d9282e21397a07a637d7cfc28deb185",
-    "evals/fixtures/section_d_no_gt/ngt-006.json": "9b6ff3044c4405227c177c49ec98c066a9273af7171ca5b43fc4ea28b0ef0542",
-    "evals/fixtures/section_d_no_gt/ngt-007.json": "21785bbe604166a8f0d3e270b77844d9cfe527b5594e9aedd7fa2c45e603466b",
-    "evals/fixtures/section_d_no_gt/ngt-008.json": "4555f311a38482068f6cad16ad09accfaafef180c3db198886bb65205ec00df8",
-    "evals/fixtures/section_d_no_gt/ngt-101.json": "54c757970e71a17d5ff0f82e3f210cbdc998e75c003623fdcb2a882e62ec79db",
-    "evals/fixtures/section_d_no_gt/ngt-102.json": "e0fb4385dfa06a4ae9c00baace2ec91a2b5de93ed96b67a6a46e4f5a07a82332",
-    "evals/fixtures/section_d_no_gt/ngt-103.json": "972354c7b2021385285cc92e2a95832e4ef3a18aebf7412d1c5dc4a2952b9b4f"
+    "evals_dev/cases/dev-060.json": "b53ef1adb2bdaae02456bc2ab0d640fb9a739e48f2b75b39d80340cc77bf5fa0"
   },
   "dev": {
     "rules_only": {
@@ -319,22 +339,26 @@
       "name": "rules_only",
       "scored": 11,
       "skipped": 0,
-      "matched": 10,
+      "matched": 8,
       "under_flag": 0,
       "over_flag": 0,
-      "unknown": 1,
+      "unknown": 3,
       "confident_wrong": 0,
       "gold_yes_unknown": [
+        "ngt-101",
+        "ngt-102",
         "ngt-103"
       ],
       "under_flag_facts": [],
       "misses": [
+        "ngt-101 gold=yes system=depends",
+        "ngt-102 gold=yes system=depends",
         "ngt-103 gold=yes system=depends"
       ],
       "matrix": {
         "yes": {
-          "yes": 2,
-          "unknown": 1,
+          "yes": 0,
+          "unknown": 3,
           "no": 0
         },
         "depends": {
@@ -353,22 +377,26 @@
       "name": "rules_plus_unknown",
       "scored": 11,
       "skipped": 0,
-      "matched": 10,
+      "matched": 8,
       "under_flag": 0,
       "over_flag": 0,
-      "unknown": 1,
+      "unknown": 3,
       "confident_wrong": 0,
       "gold_yes_unknown": [
+        "ngt-101",
+        "ngt-102",
         "ngt-103"
       ],
       "under_flag_facts": [],
       "misses": [
+        "ngt-101 gold=yes system=unknown",
+        "ngt-102 gold=yes system=unknown",
         "ngt-103 gold=yes system=unknown"
       ],
       "matrix": {
         "yes": {
-          "yes": 2,
-          "unknown": 1,
+          "yes": 0,
+          "unknown": 3,
           "no": 0
         },
         "depends": {
@@ -387,22 +415,26 @@
       "name": "rules_plus_unknown_cf",
       "scored": 11,
       "skipped": 0,
-      "matched": 10,
+      "matched": 8,
       "under_flag": 0,
       "over_flag": 0,
-      "unknown": 1,
+      "unknown": 3,
       "confident_wrong": 0,
       "gold_yes_unknown": [
+        "ngt-101",
+        "ngt-102",
         "ngt-103"
       ],
       "under_flag_facts": [],
       "misses": [
+        "ngt-101 gold=yes system=unknown",
+        "ngt-102 gold=yes system=unknown",
         "ngt-103 gold=yes system=unknown"
       ],
       "matrix": {
         "yes": {
-          "yes": 2,
-          "unknown": 1,
+          "yes": 0,
+          "unknown": 3,
           "no": 0
         },
         "depends": {
@@ -468,11 +500,445 @@
     "resolved": 56,
     "total": 56
   },
+  "independent_wilson_intervals": {
+    "dev": {
+      "rules_only": {
+        "matched": {
+          "count": 55,
+          "denominator": 60,
+          "lower": 0.8193105798166558,
+          "upper": 0.9638795433982692,
+          "rounded_4dp": [
+            0.8193,
+            0.9639
+          ]
+        },
+        "unknown": {
+          "count": 13,
+          "denominator": 60,
+          "lower": 0.13123044048190308,
+          "upper": 0.3362002757319478,
+          "rounded_4dp": [
+            0.1312,
+            0.3362
+          ]
+        },
+        "confident_wrong": {
+          "count": 5,
+          "denominator": 60,
+          "lower": 0.03612045660173077,
+          "upper": 0.18068942018334405,
+          "rounded_4dp": [
+            0.0361,
+            0.1807
+          ]
+        },
+        "under_flag": {
+          "count": 1,
+          "denominator": 60,
+          "lower": 0.0029481597947862495,
+          "upper": 0.08855129727590058,
+          "rounded_4dp": [
+            0.0029,
+            0.0886
+          ]
+        },
+        "over_flag": {
+          "count": 0,
+          "denominator": 60,
+          "lower": 6.938893903907228e-18,
+          "upper": 0.06017185214208982,
+          "rounded_4dp": [
+            0.0,
+            0.0602
+          ]
+        }
+      },
+      "rules_plus_unknown": {
+        "matched": {
+          "count": 50,
+          "denominator": 60,
+          "lower": 0.7196838683638547,
+          "upper": 0.9068682302080855,
+          "rounded_4dp": [
+            0.7197,
+            0.9069
+          ]
+        },
+        "unknown": {
+          "count": 27,
+          "denominator": 60,
+          "lower": 0.3309365440675524,
+          "upper": 0.5750806411466565,
+          "rounded_4dp": [
+            0.3309,
+            0.5751
+          ]
+        },
+        "confident_wrong": {
+          "count": 0,
+          "denominator": 60,
+          "lower": 6.938893903907228e-18,
+          "upper": 0.06017185214208982,
+          "rounded_4dp": [
+            0.0,
+            0.0602
+          ]
+        },
+        "under_flag": {
+          "count": 0,
+          "denominator": 60,
+          "lower": 6.938893903907228e-18,
+          "upper": 0.06017185214208982,
+          "rounded_4dp": [
+            0.0,
+            0.0602
+          ]
+        },
+        "over_flag": {
+          "count": 0,
+          "denominator": 60,
+          "lower": 6.938893903907228e-18,
+          "upper": 0.06017185214208982,
+          "rounded_4dp": [
+            0.0,
+            0.0602
+          ]
+        }
+      },
+      "rules_plus_unknown_cf": {
+        "matched": {
+          "count": 50,
+          "denominator": 60,
+          "lower": 0.7196838683638547,
+          "upper": 0.9068682302080855,
+          "rounded_4dp": [
+            0.7197,
+            0.9069
+          ]
+        },
+        "unknown": {
+          "count": 27,
+          "denominator": 60,
+          "lower": 0.3309365440675524,
+          "upper": 0.5750806411466565,
+          "rounded_4dp": [
+            0.3309,
+            0.5751
+          ]
+        },
+        "confident_wrong": {
+          "count": 0,
+          "denominator": 60,
+          "lower": 6.938893903907228e-18,
+          "upper": 0.06017185214208982,
+          "rounded_4dp": [
+            0.0,
+            0.0602
+          ]
+        },
+        "under_flag": {
+          "count": 0,
+          "denominator": 60,
+          "lower": 6.938893903907228e-18,
+          "upper": 0.06017185214208982,
+          "rounded_4dp": [
+            0.0,
+            0.0602
+          ]
+        },
+        "over_flag": {
+          "count": 0,
+          "denominator": 60,
+          "lower": 6.938893903907228e-18,
+          "upper": 0.06017185214208982,
+          "rounded_4dp": [
+            0.0,
+            0.0602
+          ]
+        }
+      },
+      "always_unknown": {
+        "matched": {
+          "count": 17,
+          "denominator": 60,
+          "lower": 0.18506828428432712,
+          "upper": 0.40767285164391176,
+          "rounded_4dp": [
+            0.1851,
+            0.4077
+          ]
+        },
+        "unknown": {
+          "count": 60,
+          "denominator": 60,
+          "lower": 0.93982814785791,
+          "upper": 0.9999999999999998,
+          "rounded_4dp": [
+            0.9398,
+            1.0
+          ]
+        },
+        "confident_wrong": {
+          "count": 0,
+          "denominator": 60,
+          "lower": 6.938893903907228e-18,
+          "upper": 0.06017185214208982,
+          "rounded_4dp": [
+            0.0,
+            0.0602
+          ]
+        },
+        "under_flag": {
+          "count": 0,
+          "denominator": 60,
+          "lower": 6.938893903907228e-18,
+          "upper": 0.06017185214208982,
+          "rounded_4dp": [
+            0.0,
+            0.0602
+          ]
+        },
+        "over_flag": {
+          "count": 0,
+          "denominator": 60,
+          "lower": 6.938893903907228e-18,
+          "upper": 0.06017185214208982,
+          "rounded_4dp": [
+            0.0,
+            0.0602
+          ]
+        }
+      }
+    },
+    "model_constructed_no_gt": {
+      "rules_only": {
+        "matched": {
+          "count": 8,
+          "denominator": 11,
+          "lower": 0.434354698823871,
+          "upper": 0.9025394070997511,
+          "rounded_4dp": [
+            0.4344,
+            0.9025
+          ]
+        },
+        "unknown": {
+          "count": 3,
+          "denominator": 11,
+          "lower": 0.09746059290024897,
+          "upper": 0.565645301176129,
+          "rounded_4dp": [
+            0.0975,
+            0.5656
+          ]
+        },
+        "confident_wrong": {
+          "count": 0,
+          "denominator": 11,
+          "lower": 0.0,
+          "upper": 0.2588329669680316,
+          "rounded_4dp": [
+            0.0,
+            0.2588
+          ]
+        },
+        "under_flag": {
+          "count": 0,
+          "denominator": 11,
+          "lower": 0.0,
+          "upper": 0.2588329669680316,
+          "rounded_4dp": [
+            0.0,
+            0.2588
+          ]
+        },
+        "over_flag": {
+          "count": 0,
+          "denominator": 11,
+          "lower": 0.0,
+          "upper": 0.2588329669680316,
+          "rounded_4dp": [
+            0.0,
+            0.2588
+          ]
+        }
+      },
+      "rules_plus_unknown": {
+        "matched": {
+          "count": 8,
+          "denominator": 11,
+          "lower": 0.434354698823871,
+          "upper": 0.9025394070997511,
+          "rounded_4dp": [
+            0.4344,
+            0.9025
+          ]
+        },
+        "unknown": {
+          "count": 3,
+          "denominator": 11,
+          "lower": 0.09746059290024897,
+          "upper": 0.565645301176129,
+          "rounded_4dp": [
+            0.0975,
+            0.5656
+          ]
+        },
+        "confident_wrong": {
+          "count": 0,
+          "denominator": 11,
+          "lower": 0.0,
+          "upper": 0.2588329669680316,
+          "rounded_4dp": [
+            0.0,
+            0.2588
+          ]
+        },
+        "under_flag": {
+          "count": 0,
+          "denominator": 11,
+          "lower": 0.0,
+          "upper": 0.2588329669680316,
+          "rounded_4dp": [
+            0.0,
+            0.2588
+          ]
+        },
+        "over_flag": {
+          "count": 0,
+          "denominator": 11,
+          "lower": 0.0,
+          "upper": 0.2588329669680316,
+          "rounded_4dp": [
+            0.0,
+            0.2588
+          ]
+        }
+      },
+      "rules_plus_unknown_cf": {
+        "matched": {
+          "count": 8,
+          "denominator": 11,
+          "lower": 0.434354698823871,
+          "upper": 0.9025394070997511,
+          "rounded_4dp": [
+            0.4344,
+            0.9025
+          ]
+        },
+        "unknown": {
+          "count": 3,
+          "denominator": 11,
+          "lower": 0.09746059290024897,
+          "upper": 0.565645301176129,
+          "rounded_4dp": [
+            0.0975,
+            0.5656
+          ]
+        },
+        "confident_wrong": {
+          "count": 0,
+          "denominator": 11,
+          "lower": 0.0,
+          "upper": 0.2588329669680316,
+          "rounded_4dp": [
+            0.0,
+            0.2588
+          ]
+        },
+        "under_flag": {
+          "count": 0,
+          "denominator": 11,
+          "lower": 0.0,
+          "upper": 0.2588329669680316,
+          "rounded_4dp": [
+            0.0,
+            0.2588
+          ]
+        },
+        "over_flag": {
+          "count": 0,
+          "denominator": 11,
+          "lower": 0.0,
+          "upper": 0.2588329669680316,
+          "rounded_4dp": [
+            0.0,
+            0.2588
+          ]
+        }
+      },
+      "always_unknown": {
+        "matched": {
+          "count": 0,
+          "denominator": 11,
+          "lower": 0.0,
+          "upper": 0.2588329669680316,
+          "rounded_4dp": [
+            0.0,
+            0.2588
+          ]
+        },
+        "unknown": {
+          "count": 11,
+          "denominator": 11,
+          "lower": 0.7411670330319684,
+          "upper": 1.0,
+          "rounded_4dp": [
+            0.7412,
+            1.0
+          ]
+        },
+        "confident_wrong": {
+          "count": 0,
+          "denominator": 11,
+          "lower": 0.0,
+          "upper": 0.2588329669680316,
+          "rounded_4dp": [
+            0.0,
+            0.2588
+          ]
+        },
+        "under_flag": {
+          "count": 0,
+          "denominator": 11,
+          "lower": 0.0,
+          "upper": 0.2588329669680316,
+          "rounded_4dp": [
+            0.0,
+            0.2588
+          ]
+        },
+        "over_flag": {
+          "count": 0,
+          "denominator": 11,
+          "lower": 0.0,
+          "upper": 0.2588329669680316,
+          "rounded_4dp": [
+            0.0,
+            0.2588
+          ]
+        }
+      }
+    }
+  },
+  "manifest_method": "sha256 of sorted UTF8 path + NUL + SHA256 + newline",
+  "sha256_manifests": {
+    "declared_sources": "f1facb0f62fe915831af1453efdf27ea3e96b646ed5c5c641c96fc6ff6e5d4cc",
+    "loaded_sources": "2a7d55669e507fd196ad2a9c8a80153a6088cef7740b0b5cb20e0cc0806d908f",
+    "inputs": "9d56569d90ae7dca4c962bdbee821160a8b41e1d254dd29fc2ce222a335dfaa0"
+  },
+  "under_flag_definition": "Only gold yes -> system no; gold yes -> unknown/depends is a miss/abstention.",
   "heldout_read": false,
+  "fixture_directory_scans": 0,
   "provider_calls": 0,
   "limits": [
     "Dev60 and model-constructed no-ground-truth11 are in-sample, model-checked, not human-verified.",
-    "No sealed or external heldout corpus was loaded or scored.",
-    "Citation resolution establishes lookup binding, not legal or technical correctness."
+    "Model gold labels are not expert ground truth; these counts do not establish population accuracy or real-world safety.",
+    "Only the exact 71 authorized development input paths were loaded; no default fixture loaders or protected target inventory.",
+    "The facts-only heuristic measurement does not exercise Case/API/export/file ownership behavior.",
+    "Citation resolution establishes seed-provision citation binding, not legal or technical correctness, applicability, equivalence or approval.",
+    "Historical 7/8 pre-fix and 4/8 post-fix legacy results are not rescored or renewed.",
+    "The historical US$2.21 token-cost estimate is not a billing receipt and is outside this measurement."
   ]
 }
