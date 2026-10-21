@@ -245,7 +245,7 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
   const account = useAccount();
   const { locked } = useCurrentApplication();
   const signedIn = account.phase === "signed-in";
-  const { c, gaps, checkStatus, checkNote, checkDetail, completenessRecord } = useCase();
+  const { c, gaps, checkStatus, checkNote, completenessRecord } = useCase();
   const ex = useApplicationExport();
   const draftBtn = useRef<HTMLButtonElement>(null);
   const checked = checkStatus === "ready" || checkStatus === "needs_answers";
@@ -317,10 +317,10 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
           </div>
         )}
         {route && ex.stage === "blocked" && <p className="cf-faint cf-small">{route}</p>}
-        {(ex.tech || ex.reasons.length > 0 || (checkStatus === "unavailable" && checkDetail)) && (
+        {(ex.tech || ex.reasons.length > 0) && (
           <details className="cf-tech">
             <summary>Technical detail</summary>
-            {ex.reasons.length > 0 ? <ul>{ex.reasons.map((r) => <li key={r}>{r}</li>)}</ul> : <p>{ex.tech || checkDetail}</p>}
+            {ex.reasons.length > 0 ? <ul>{ex.reasons.map((r) => <li key={r}>{r}</li>)}</ul> : <p>{ex.tech}</p>}
           </details>
         )}
         {completenessRecord && <p className="cf-faint cf-small">Record: {completenessRecord.label}. {completenessRecord.note}</p>}

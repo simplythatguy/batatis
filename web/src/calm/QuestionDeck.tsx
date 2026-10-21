@@ -115,8 +115,10 @@ export function SectionFooter({ items, index, onJump, onPrev, onNext, canPrev, c
                   {s.at.map((x) => <i key={x.it.key} className={x.i === index ? "is-cur" : x.it.done ? "is-done" : ""} />)}
                 </span>
                 <span className="cf-qsec-lab">
-                  <b>{s.id}<span className="cf-qsec-name"> · {s.label}</span></b>
-                  <span>{s.done}<span className="cf-qsec-name"> of </span><span className="cf-qsec-slash" aria-hidden="true">/</span>{s.total}</span>
+                  <b className="cf-qsec-l">{s.id}</b>
+                  <span className="cf-qsec-sep" aria-hidden="true">·</span>
+                  <span className="cf-qsec-name">{s.label}</span>
+                  <span className="cf-qsec-count">{s.done}<span className="cf-qsec-of"> of </span><span className="cf-qsec-slash" aria-hidden="true">/</span>{s.total}</span>
                 </span>
                 <span className="cf-sr">. Go to the first open question in Section {s.id}.</span>
               </button>
@@ -351,7 +353,7 @@ function PreCaseDeck() {
 /* —— The application's deck —— */
 
 function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
-  const { c, gaps, dispatch, requestCheck, checkStatus, checkNote, checkDetail, sectionCLookup } = useCase();
+  const { c, gaps, dispatch, requestCheck, sectionCLookup } = useCase();
   const session = useSession();
   const { app, locked } = useCurrentApplication();
   const { onAnswer, decisionNoteFor } = useCandidateAnswer();
@@ -601,19 +603,10 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
 
   return (
     <div className="cf-deck-page">
-      {(locked || checkStatus === "running" || checkStatus === "unavailable") && (
+      {/* The check state lives on Review and in the header; the deck stays quiet. */}
+      {locked && (
         <div className="cf-deck-status" role="status">
-          {locked ? (
-            <><span className="cf-dot is-warning" aria-hidden="true" />{app?.status === "accepted" ? "Accepted as administratively complete" : `Sent to ${authorityName(app?.authority) || "the authority"}`}. Read-only until the officer returns it.</>
-          ) : checkStatus === "running" ? (
-            <><span className="cf-dot is-pending cf-pulse" aria-hidden="true" />{checkNote}</>
-          ) : (
-            <>
-              <span className="cf-dot is-warning" aria-hidden="true" />{checkNote}
-              <button type="button" className="cf-btn is-xs" onClick={() => void requestCheck(true)}>Try the check again</button>
-              {checkDetail && <details className="cf-tech"><summary>Technical detail</summary><p>{checkDetail}</p></details>}
-            </>
-          )}
+          <span className="cf-dot is-warning" aria-hidden="true" />{app?.status === "accepted" ? "Accepted as administratively complete" : `Sent to ${authorityName(app?.authority) || "the authority"}`}. Read-only until the officer returns it.
         </div>
       )}
       <div className="cf-q-stage">

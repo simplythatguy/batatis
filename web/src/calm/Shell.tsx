@@ -34,6 +34,15 @@ function useOutsideClose(open: boolean, close: () => void, ...refs: React.RefObj
   }, [open]);
 }
 
+/** The check's state, quietly beside the save status (Review holds the detail and the big retry). */
+function CheckStatus() {
+  const { phase, checkStatus } = useCase();
+  if (phase !== "case") return null;
+  if (checkStatus === "running") return <span className="cf-save-check" role="status"><span className="cf-dot is-pending cf-pulse" aria-hidden="true" />Checking…</span>;
+  if (checkStatus === "unavailable") return <a className="cf-save-check" href="#/review" role="status" title="The last check couldn’t finish. Retry from the ⋯ menu or open Review.">Check unavailable</a>;
+  return null;
+}
+
 export function SaveStatus() {
   const { phase, saveStatus, savedNote, saveDetail, saveDraft } = useCase();
   const { app, locked } = useCurrentApplication();
@@ -130,7 +139,7 @@ const PHONE = "(max-width: 760px)";
 const isPhone = () => window.matchMedia(PHONE).matches;
 
 export function Shell({ active, children }: { active: Screen; children: ReactNode }) {
-  const { c, phase, engineId, resetToWho, openCase, saveStatus, saveDraft } = useCase();
+  const { c, phase, engineId, resetToWho, openCase, saveStatus, saveDraft, checkStatus, requestCheck } = useCase();
   const account = useAccount();
   const assistant = useAssistant();
   const [confirm, setConfirm] = useState(false);
@@ -279,6 +288,7 @@ export function Shell({ active, children }: { active: Screen; children: ReactNod
       toggleHint={`${MOD_KEY} B`}
       right={
         <>
+          <CheckStatus />
           <SaveStatus />
           <button type="button" className="cf-btn is-ghost is-sm cf-ask" aria-pressed={assistant.open} onClick={toggleAssistant} title={`Assistant (${MOD_KEY} J)`}>
             <Icon24 name="spark" size={16} /><span className="cf-ask-label">Ask</span>
@@ -287,9 +297,10 @@ export function Shell({ active, children }: { active: Screen; children: ReactNod
             items={[
               { label: "Look up code", hint: `${MOD_KEY} ⇧ K`, onClick: openPalette },
               { label: "Code library", href: "#/code" },
+              ...(inCase && checkStatus === "unavailable" ? [{ label: "Try the check again", onClick: () => void requestCheck(true), separator: true }] : []),
               ...(inCase
                 ? [
-                    { label: "Your Section C references", href: "#/references" },
+                    { label: "Your Section C references", href: "#/references", separator: checkStatus === "unavailable" },
                     { label: "Officer view", href: "#/officer" },
                     { label: "Accuracy report", href: "#/accuracy" },
                     { label: "Download draft", href: "#/application?download=draft", separator: true },
