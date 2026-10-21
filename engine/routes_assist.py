@@ -206,7 +206,7 @@ def create_router(cases, code):
         # words. Code text, Section C rows and product help are not personal and stay verbatim.
         known = known_values(case, people_names(cases(), case, user)) if case is not None else known_values(None, people_names(cases(), None, user))
         built = build_context(body, case, codes)
-        for key in ('application', 'focused_card'):
+        for key in ('application', 'focused_card', 'screen'):
             if key in built:
                 built[key] = scrub_obj(built[key], known)
         body = body.model_copy(update={
