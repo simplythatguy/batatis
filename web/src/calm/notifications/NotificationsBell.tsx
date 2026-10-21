@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useAccount } from "../account";
 import { AcIcon, Avatar, PageHead, usePopover } from "../auth/bits";
 import { Tip } from "../RelevanceRing";
-import { loadNotifications, notificationHref, notificationText, openedPanel, shortTime, startPolling, useNotifications } from "./notifications";
+import { loadNotifications, notificationHref, notificationText, openedPanel, rowKeys, shortTime, startPolling, useNotifications } from "./notifications";
 
 /** Poll while signed in (shared across every bell and the page). */
 function useNotificationPolling(enabled: boolean) {
@@ -26,10 +26,11 @@ function NotificationList({ onPick, now }: { onPick?: () => void; now: number })
     return <p className="ac-note-empty">Nothing yet. When a reviewer changes an application’s status or sends a message, it shows up here.</p>;
   }
   const fresh = new Set(n.fresh);
+  const keys = rowKeys(n.items);
   return (
     <ul className="ac-notes" role="list">
-      {n.items.map((item) => (
-        <li key={item.id}>
+      {n.items.map((item, i) => (
+        <li key={keys[i]}>
           <a className={`ac-note${fresh.has(item.id) || !item.read ? " is-new" : ""}`} href={notificationHref(item, role)} onClick={onPick}>
             <Avatar name={item.actor?.name} size="sm" />
             <span className="ac-note-text">{notificationText(item)}</span>

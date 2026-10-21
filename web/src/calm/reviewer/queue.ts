@@ -125,6 +125,11 @@ export function sentLabel(iso: string | null, now = Date.now()): string {
   return new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+/** Mid-sentence form: "today, 9:12 AM", "yesterday", "Oct 19". */
+export function sentPhrase(iso: string | null, now = Date.now()): string {
+  return sentLabel(iso, now).replace(/^Today/, "today").replace(/^Yesterday/, "yesterday");
+}
+
 /** "since 2:14 PM" today, otherwise "since Oct 19". */
 export function sinceLabel(iso: string, now = Date.now()): string {
   const t = Date.parse(iso);

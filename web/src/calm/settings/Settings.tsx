@@ -8,7 +8,7 @@ import { PageHead, clockText, useCountdown } from "../auth/bits";
 import { APPLICANT_CHOICES, APPLICANT_LABEL, AUTHORITY_CHOICES, codeNeeded } from "../auth/onboardingSteps";
 import { saveOnboarding, signOut } from "../auth/useAuthGate";
 
-export const REDACTION_NOTE = "Personal information is automatically redacted before anything is sent to an AI provider.";
+export const REDACTION_NOTE = "Personal information is automatically redacted before anything is sent to an AI provider or to Jev, the relevance scorer.";
 
 function roleLine(role: Role | null, applicantType: string | null, authority: string | null): string {
   if (role === "reviewer") return `Reviewer${authority ? ` · ${authorityName(authority)}` : ""}`;

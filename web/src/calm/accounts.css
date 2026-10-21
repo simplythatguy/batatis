@@ -346,7 +346,7 @@
 .ac-faint-tag { color: var(--cf-text-3); font-size: 12.5px; }
 .ac-saved { display: inline-flex; align-items: center; gap: 6px; color: var(--cf-text-3); font-size: 12.5px; }
 .ac-saved::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--cf-done); }
-.ac-editor { padding: 16px 0 6px; border-bottom: 1px solid var(--cf-line); }
+.ac-editor { padding: 16px 0 6px; }
 .ac-editor .cf-chips { margin-top: 0; }
 .ac-editor-label { margin: 14px 0 8px; font-size: 13px; color: var(--cf-text-2); }
 .ac-editor-label:first-child { margin-top: 0; }
@@ -371,6 +371,8 @@
   transition-duration: 150ms;
 }
 .ac-search:focus-within { border-color: var(--cf-focus); }
+.cf-app .ac-search input:focus-visible { outline: none; }
+.cf-app :is(.ac-in, .ac-ta, .ac-composer-in):focus-visible { outline: none; }
 .ac-search input { flex: 1; min-width: 0; border: 0; background: none; outline: none; color: var(--cf-text); font: 400 13.5px var(--cf-font); appearance: none; }
 .ac-search input::placeholder { color: var(--cf-text-3); }
 .ac-search input::-webkit-search-cancel-button { display: none; }
@@ -409,7 +411,8 @@
 .ac-td-title { font-weight: 520; }
 .ac-row-link { color: var(--cf-text); text-decoration: none; }
 @media (hover: hover) { .ac-row-link:hover { text-decoration: underline; text-decoration-color: var(--cf-line-2); text-underline-offset: 3px; } }
-.ac-unread { display: block; margin-top: 3px; color: var(--cf-accent-ink); font-size: 12.5px; font-weight: 400; }
+.ac-unread { display: flex; align-items: center; gap: 6px; margin-top: 3px; color: var(--cf-text-3); font-size: 12.5px; font-weight: 400; }
+.ac-unread .ac-note-dot { width: 6px; height: 6px; }
 .ac-muted-cell { color: var(--cf-text-2); }
 .ac-comp { display: inline-flex; align-items: center; gap: 8px; color: var(--cf-text-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .ac-ring { flex: none; }
@@ -437,8 +440,10 @@
 .ac-claim { display: inline-flex; align-items: center; gap: 8px; color: var(--cf-text-2); font-size: 13px; white-space: nowrap; }
 .ac-td-action { text-align: right; white-space: nowrap; }
 .ac-td-action .cf-btn { display: inline-flex; }
+.ac-table tr.has-note td { border-bottom-color: transparent; }
+.ac-table .ac-conflict-row td { padding-top: 0; }
 .ac-conflict {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
@@ -446,6 +451,9 @@
   color: var(--cf-text);
   font-size: 13px;
   white-space: normal;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ac-conflict { animation: ac-fade 200ms ease-out both; }
 }
 .ac-conflict > span { display: inline-flex; align-items: center; gap: 7px; margin-right: 4px; }
 .ac-conflict > span::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--cf-warning); }
@@ -513,7 +521,7 @@
 .ac-ta {
   display: block;
   width: 100%;
-  min-height: 132px;
+  min-height: 172px;
   margin-top: 14px;
   padding: 12px 14px;
   border: 1px solid var(--cf-line-2);
@@ -545,6 +553,8 @@
   .ac-table td { padding: 0 !important; border: 0; }
   .ac-table td.ac-td-title { grid-column: 1 / -1; }
   .ac-table td.ac-td-action { grid-column: 1 / -1; text-align: left; }
+  .ac-table tr.ac-conflict-row { display: block; padding-top: 0; }
+  .ac-table tbody tr:hover td { background: none; }
   .ac-conflict { justify-content: flex-start; }
 }
 
@@ -563,4 +573,20 @@
   .ac-q-text { font-size: 26px; }
   .ac-q-help { font-size: 15.5px; }
   .ac-underline { font-size: 21px; }
+}
+
+/* U2 test wiring only: bell and account pinned to the rail footer until U1's Rail has a footer slot. */
+.ac-rail-dock {
+  position: fixed;
+  left: 0;
+  bottom: 14px;
+  width: 60px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+@media (max-width: 760px) {
+  .ac-rail-dock { display: none; }
 }

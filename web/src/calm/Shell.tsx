@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { ApplicationSummary } from "../api/accounts";
 import { groupGaps } from "../humanReview";
 import { useCase } from "../store";
-import { bootAccount, initials, useAccount } from "./account";
+import { bootAccount, useAccount } from "./account";
 import { authorityName } from "./applications";
 import { AssistantPanel } from "./assistant/AssistantPanel";
 import { setAssistantCase, toggleAssistant, useAssistant } from "./assistant/assistant";
@@ -17,6 +17,8 @@ import { ApplicationList, type ApplicationListHandle } from "./shell/Application
 import { Rail, type RailDestination } from "./shell/Rail";
 import { resetRelevance } from "./useRelevance";
 import { CIcon, ConfirmDialog, Dot, MOD_KEY, type DotTone } from "./ui";
+// U2 test wiring (replace with U1's Shell): rail footer slots.
+import { AccountButton, NotificationsBell } from "./routes.extra";
 
 function useOutsideClose(open: boolean, close: () => void, ...refs: React.RefObject<HTMLElement | null>[]) {
   useEffect(() => {
@@ -120,7 +122,7 @@ function useStageProgress() {
   }, [c, gaps, phase, checkedAt, engineGaps, session.seen]);
 }
 
-export function Shell({ active, children, application }: { active: Screen; children: ReactNode; application?: ApplicationSummary | null }) {
+export function Shell({ active, children, application, plain }: { active: Screen; children: ReactNode; application?: ApplicationSummary | null; plain?: boolean }) {
   const { c, phase, engineId, resetToWho } = useCase();
   const account = useAccount();
   const assistant = useAssistant();
@@ -173,7 +175,12 @@ export function Shell({ active, children, application }: { active: Screen; child
     { id: "application", label: "Application", icon: "file", href: "#/application", pct: application && ["submitted", "in_review", "accepted"].includes(application.status) ? 100 : progress.application, current: active === "application", disabled: inCase ? undefined : "Describe your project first." },
   ];
 
-  const destinations: RailDestination[] = [
+  const reviewer = account.user?.role === "reviewer"; // U2 test wiring
+  const destinations: RailDestination[] = reviewer ? [
+    { id: "queue", label: "Review queue", icon: "table", href: "#/review", current: location.hash.startsWith("#/review") },
+    { id: "code", label: "Code library", icon: "book", href: "#/code", current: active === "code" },
+    { id: "assistant", label: assistant.open ? "Close the assistant" : "Assistant", icon: "spark", onClick: toggleAssistant, current: assistant.open, shortcut: `${MOD_KEY} J` },
+  ] : [
     { id: "applications", label: listCollapsed ? "Show applications" : "Hide applications", icon: "inbox", onClick: () => setListCollapsed((v) => !v), current: ["start", "questions", "review", "application"].includes(active), badge: items.some((a) => a.status === "returned" && a.unread_messages > 0), shortcut: `${MOD_KEY} B` },
     { id: "code", label: "Code library", icon: "book", href: "#/code", current: active === "code" },
     { id: "assistant", label: assistant.open ? "Close the assistant" : "Assistant", icon: "spark", onClick: toggleAssistant, current: assistant.open, shortcut: `${MOD_KEY} J` },
@@ -232,9 +239,9 @@ export function Shell({ active, children, application }: { active: Screen; child
   return (
     <>
       <AppLayout
-        rail={<Rail destinations={destinations} account={account.user ? { initials: initials(account.user.name, account.user.email), label: `Signed in as ${account.user.name ?? account.user.email}` } : undefined} />}
-        list={list}
-        header={header}
+        rail={<><Rail destinations={destinations} /><div className="ac-rail-dock"><NotificationsBell /><AccountButton /></div></>}
+        list={plain || reviewer ? undefined : list}
+        header={plain ? null : header}
         assistant={assistant.open ? <AssistantPanel /> : null}
         listCollapsed={listCollapsed}
         sheetOpen={sheet}

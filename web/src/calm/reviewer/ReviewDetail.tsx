@@ -8,7 +8,7 @@ import { useAccount } from "../account";
 import { AcIcon, Avatar, PageHead } from "../auth/bits";
 import { ConfirmDialog } from "../ui";
 import { Messages } from "./Messages";
-import { applicantLine, decisionGate, sentLabel, sinceLabel } from "./queue";
+import { applicantLine, decisionGate, sentLabel, sentPhrase, sinceLabel } from "./queue";
 import { ReturnDialog } from "./ReturnDialog";
 import { StatusPill } from "./ReviewQueue";
 import { loadQueue, patchRow, setBlocking, useQueue } from "./reviewData";
@@ -36,7 +36,7 @@ function Sheet({ c }: { c: EngineCase }) {
   return (
     <article className="cf-sheet ac-sheet" aria-label="Submitted application">
       <h2>Safety Codes Variance — Part 1</h2>
-      <div className="cf-sheet-sub">{CODE_EDITION}{c.submitted_at ? ` · Sent ${sentLabel(c.submitted_at)}` : ""}</div>
+      <div className="cf-sheet-sub">{CODE_EDITION}{c.submitted_at ? ` · Sent ${sentPhrase(c.submitted_at)}` : ""}</div>
       <h4>A · Applicant</h4>
       <Kv rows={s.applicant} />
       <h4>B · Project</h4>
@@ -200,7 +200,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
     await decided();
   }
 
-  const meta = [row ? applicantLine(row) : null, c?.submitted_at ? `sent ${sentLabel(c.submitted_at).replace(/^Today, /, "today, ").replace(/^Yesterday$/, "yesterday")}` : null].filter(Boolean).join(" · ");
+  const meta = [row ? applicantLine(row) : null, c?.submitted_at ? `sent ${sentPhrase(c.submitted_at)}` : null].filter(Boolean).join(" · ");
 
   const otherClaim = conflict ?? (claim && !mine && status === "in_review" ? claim : null);
 

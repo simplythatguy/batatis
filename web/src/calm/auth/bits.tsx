@@ -89,7 +89,9 @@ export function usePopover() {
   useLayoutEffect(() => {
     if (!open || !trigger.current) return;
     const r = trigger.current.getBoundingClientRect();
-    if (r.left < 120) setPos({ left: r.right + 10, bottom: Math.max(8, window.innerHeight - r.bottom) });
+    // Beside the rail: align to the rail's edge, not the button's, so the panel never covers the rail.
+    const rail = trigger.current.closest(".cf-rail, .cf-sidebar, .ac-rail-dock")?.getBoundingClientRect();
+    if (r.left < 120) setPos({ left: Math.max(r.right, rail ? Math.min(rail.right, 80) : r.right) + 8, bottom: Math.max(8, window.innerHeight - r.bottom) });
     else setPos({ right: Math.max(8, window.innerWidth - r.right), top: r.bottom + 8 });
   }, [open]);
 

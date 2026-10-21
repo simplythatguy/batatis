@@ -22,7 +22,7 @@ function useProviders(): AuthProvider[] {
 function errorText(e: unknown, mode: "signin" | "signup"): string {
   if (!(e instanceof AccountsError)) return "Something went wrong. Try again.";
   if (e.status === 401) return "Email or password is incorrect.";
-  if (e.status === 409 && mode === "signup") return "An account with this email already exists. Sign in instead.";
+  if (e.status === 409 && mode === "signup") return "An account with this email already exists.";
   if (e.status === 422) return mode === "signup" ? "Check your name, email and password." : "Enter your email and password.";
   if (e.status === 0) return "Batatis couldn’t reach the server. Check your connection and try again.";
   return e.detail || "Something went wrong. Try again.";
@@ -117,7 +117,7 @@ export function AuthPage({ mode }: { mode: "signin" | "signup" }) {
         {error && (
           <p className="ac-error" role="alert">
             {error}
-            {duplicate && <> <a href="#/signin">Sign in</a></>}
+            {duplicate && <> <a href="#/signin">Sign in instead</a></>}
           </p>
         )}
         {wait > 0 && (

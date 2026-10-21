@@ -96,6 +96,7 @@ export function sortNewest(items: AppNotification[]): AppNotification[] {
 
 const VERB: Record<string, string> = {
   submitted: "sent",
+  resubmitted: "resent",
   in_review: "started reviewing",
   returned: "returned",
   accepted: "accepted",
@@ -103,17 +104,32 @@ const VERB: Record<string, string> = {
 };
 
 /**
- * The row text. The server's own text wins; otherwise it is built from the event
- * ("Dana Ross returned Hempcrete walls", "Dana Ross sent a message").
+ * The row text ("Dana Ross returned Hempcrete walls", "Dana Ross sent a message about …").
+ * Status events with a known status are worded here so the order reads naturally; anything
+ * else uses the server's text, then a generic fallback.
  */
 export function notificationText(n: Pick<AppNotification, "text" | "kind" | "status" | "actor" | "case_title">): string {
+  const who = n.actor?.name?.trim();
+  const title = n.case_title?.trim();
+  if (n.kind === "status" && who && title && n.status && VERB[n.status]) {
+    // A reviewer moving an application back to "submitted" released their claim; they did not send it.
+    if (n.status === "submitted" && n.actor?.role === "reviewer") return `${who} stopped reviewing ${title}`;
+    if (n.status === "accepted") return `${who} accepted ${title} as administratively complete`;
+    return `${who} ${VERB[n.status]} ${title}`;
+  }
   if (n.text && n.text.trim()) return n.text.trim();
-  const who = n.actor?.name?.trim() || "Someone";
-  const title = n.case_title?.trim() || "your application";
-  if (n.kind === "message") return `${who} sent a message about ${title}`;
-  const verb = (n.status && VERB[n.status]) || "updated";
-  if (n.status === "accepted") return `${who} accepted ${title} as administratively complete`;
-  return `${who} ${verb} ${title}`;
+  if (n.kind === "message") return `${who || "Someone"} sent a message about ${title || "your application"}`;
+  return `${who || "Someone"} updated ${title || "your application"}`;
+}
+
+/** Stable, unique React keys even when the server repeats an id (two events in the same second). */
+export function rowKeys(items: Pick<AppNotification, "id">[]): string[] {
+  const seen = new Map<string, number>();
+  return items.map((n) => {
+    const k = seen.get(n.id) ?? 0;
+    seen.set(n.id, k + 1);
+    return k ? `${n.id}#${k}` : n.id;
+  });
 }
 
 /** Where a row leads: the review page for reviewers, the application for applicants. */

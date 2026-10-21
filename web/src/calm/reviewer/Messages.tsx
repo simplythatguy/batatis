@@ -2,6 +2,7 @@
 import { useEffect, useId, useState } from "react";
 import { accounts, AccountsError, type Message } from "../../api/accounts";
 import { Avatar } from "../auth/bits";
+import { MOD_KEY } from "../ui";
 import { clock, sentLabel } from "./queue";
 
 function when(iso: string, now: number): string {
@@ -84,7 +85,7 @@ export function Messages({ caseId, me, messages, onChange, canWrite }: { caseId:
             maxLength={4000}
           />
           <div className="ac-composer-foot">
-            {error ? <span className="ac-error is-row" role="alert">{error}</span> : <span className="ac-faint ac-small">⌘↵ to send</span>}
+            {error ? <span className="ac-error is-row" role="alert">{error}</span> : <span className="ac-faint ac-small">{MOD_KEY} ↵ to send</span>}
             <button type="button" className="cf-btn is-xs" disabled={!draft.trim() || busy} onClick={() => void send()}>{busy ? "Sending…" : "Send"}</button>
           </div>
         </div>

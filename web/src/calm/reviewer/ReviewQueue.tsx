@@ -1,5 +1,5 @@
 /** #/review for reviewers: everything sent to their authority, with who is reviewing what. */
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AccountsError, claimConflict, review, type Claim, type QueueApplication } from "../../api/accounts";
 import { useAccount } from "../account";
 import { authorityName } from "../applications";
@@ -93,7 +93,7 @@ export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
           <label className="ac-search">
             <AcIcon name="search" size={15} />
             <span className="cf-sr">Search applications</span>
-            <input ref={search} type="search" placeholder="Search applications" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => { if (e.key === "Escape" && query) { e.preventDefault(); setQuery(""); } }} />
+            <input ref={search} type="search" placeholder="Search" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => { if (e.key === "Escape" && query) { e.preventDefault(); setQuery(""); } }} />
             {!query && <kbd className="ac-search-kbd" aria-hidden="true">{MOD_KEY} K</kbd>}
           </label>
         }
@@ -142,10 +142,11 @@ export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
                 const comp = completenessView(a.completeness, q.blocking[a.id] ?? null);
                 const title = a.title?.trim() || "Untitled application";
                 return (
-                  <tr key={a.id} className={rs.conflict ? "has-note" : undefined}>
+                  <Fragment key={a.id}>
+                  <tr className={rs.conflict ? "has-note" : undefined}>
                     <td className="ac-td-title" data-label="Application">
                       <a href={open(a.id)} className="ac-row-link">{title}</a>
-                      {a.unread_messages > 0 && <span className="ac-unread">{a.unread_messages} new {a.unread_messages === 1 ? "message" : "messages"}</span>}
+                      {a.unread_messages > 0 && <span className="ac-unread"><span className="ac-note-dot" aria-hidden="true" />{a.unread_messages} unread</span>}
                     </td>
                     <td className="ac-muted-cell" data-label="Applicant">{applicantLine(a)}</td>
                     <td className="ac-muted-cell" data-label="Sent">{sentLabel(a.submitted_at, now)}</td>
@@ -157,13 +158,7 @@ export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
                       {who.name ? <span className="ac-claim"><Avatar name={who.name} size="sm" />{who.label}</span> : <span className="ac-faint">—</span>}
                     </td>
                     <td className="ac-td-action">
-                      {rs.conflict ? (
-                        <div className="ac-conflict" role="status">
-                          <span>{rs.conflict.reviewer_name} is already reviewing this</span>
-                          <a className="cf-btn is-xs is-ghost" href={open(a.id)}>View</a>
-                          <button type="button" className="cf-btn is-xs" onClick={() => setTakeOver({ id: a.id, claim: rs.conflict! })}>Take over</button>
-                        </div>
-                      ) : action === "claim" ? (
+                      {action === "claim" && !rs.conflict ? (
                         <button type="button" className="cf-btn is-sm" disabled={rs.busy} onClick={() => void claim(a.id)}>
                           <AcIcon name="hand" size={15} />{rs.busy ? "Starting…" : "Start reviewing"}
                         </button>
@@ -173,6 +168,19 @@ export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
                       {rs.error && <p className="ac-error is-row" role="alert">{rs.error}</p>}
                     </td>
                   </tr>
+                  {rs.conflict && (
+                    <tr className="ac-conflict-row">
+                      <td colSpan={7}>
+                        <div className="ac-conflict" role="status">
+                          <span>{rs.conflict.reviewer_name} is already reviewing this</span>
+                          <a className="cf-btn is-xs is-ghost" href={open(a.id)}>View</a>
+                          <button type="button" className="cf-btn is-xs" onClick={() => setTakeOver({ id: a.id, claim: rs.conflict! })}>Take over</button>
+                          <button type="button" className="cf-btn is-xs is-ghost" onClick={() => setRow(a.id, {})}>Dismiss</button>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  </Fragment>
                 );
               })}
             </tbody>
