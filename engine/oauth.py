@@ -55,7 +55,10 @@ def redirect_path(value: str) -> str:
     for _ in range(4):
         decoded = unquote(decoded)
     parts = urlsplit(decoded)
-    if (not decoded.startswith('/') or decoded.startswith('//') or parts.scheme or parts.netloc
+    # The raw value is what gets appended to the web origin, so it must be a path too
+    # (e.g. '%2F@evil.test' decodes to '/@evil.test' but would become userinfo@host).
+    if (not value.startswith('/') or value.startswith('//')
+            or not decoded.startswith('/') or decoded.startswith('//') or parts.scheme or parts.netloc
             or '\\' in decoded or any(ord(c) < 32 or ord(c) == 127 for c in decoded)):
         raise HTTPException(400, 'Invalid redirect path')
     return value
@@ -131,7 +134,9 @@ class OAuthClient:
             # Microsoft email is display metadata, not a linking credential. Subject owns identity.
             email = email_address(profile.get('email') or claims.get('email') or '')
             name = str(profile.get('name') or claims.get('name') or email.split('@')[0])[:160].strip()
-            return {'subject': claims['iss'] + '|' + claims['sub'], 'email': email, 'name': name}
+            # Google accepts two issuer spellings; one canonical form keeps one subject per account.
+            issuer = 'https://accounts.google.com' if provider == 'google' else claims['iss']
+            return {'subject': issuer + '|' + claims['sub'], 'email': email, 'name': name}
 
 
 def add_oauth_routes(router, cases):

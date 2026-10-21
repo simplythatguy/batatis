@@ -13,10 +13,12 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from . import llm_gate
 from .access import authorize_case
+from .accounts import require_user
 from .completeness import check_completeness
 from .privacy import assistant_notice
 from .process_fields import process_fields
 from .section_c import section_c_rows
+from .redact import known_values, scrub, scrub_obj
 
 MAX_TOKENS = 1200
 SYSTEM = """You are Batatis's in-app assistant for Alberta alternative-solution applications.
@@ -44,7 +46,12 @@ PRODUCT_HELP = (
     'assumptions/limits are process requirements on the alternative path.'
 )
 ARTICLE = re.compile(r'(?<![\w.])\d{1,2}(?:\.\d{1,3}){3}\.?(?:\(\d+\)(?:\([a-z]+\))?)?(?!\w|\.\d)')
-CLAIM_WORDS = re.compile(r'\b(?:approved|compliant|complies|safe)\b', re.I)
+# Categorical approval/compliance/safety verdicts. 'Safety' alone is not matched: it is part of
+# "Safety Codes Officer". 'Compliance' alone is not matched: disclaimers name it.
+CLAIM_WORDS = re.compile(r'\b(?:approved|compliant|complies|comply|complying|safe|unsafe'
+                         r'|code[- ]compliant|meets?\s+(?:the\s+)?(?:code|requirements?)'
+                         r'|pass(?:es)?\s+(?:the\s+)?code|satisf(?:y|ies|ied)\s+(?:the\s+)?(?:code|requirements?)'
+                         r'|conforms?\s+(?:to|with)|in\s+compliance\s+with)\b', re.I)
 SAFE_HELP = ('I can explain source text and missing administrative information. Ask about a specific field '
              'or provision. The authority and responsible professionals must assess technical matters.')
 
@@ -188,12 +195,24 @@ def create_router(cases, code):
 
     @router.post('/assist', response_model=AssistResult)
     def assist(body: AssistRequest, request: Request, response: Response):
-        case = authorize_case(cases().get(body.case_id), request.state.user) if body.case_id else None
+        # Signed-in users only: anonymous callers must not spend the shared AI budget.
+        user = require_user(request)
+        case = authorize_case(cases().get(body.case_id), user) if body.case_id else None
         provider = 'anthropic' if (os.environ.get('ANTHROPIC_API_KEY') or '').strip() else 'openai'
         if not llm_gate.live_enabled(provider):
             raise HTTPException(503, 'Assistant unavailable')
         codes = code()
-        context = json.dumps(build_context(body, case, codes), ensure_ascii=False)
+        # Personal information never leaves Batatis: scrub the application data and the user's own
+        # words. Code text, Section C rows and product help are not personal and stay verbatim.
+        known = known_values(case) if case is not None else []
+        built = build_context(body, case, codes)
+        for key in ('application', 'focused_card'):
+            if key in built:
+                built[key] = scrub_obj(built[key], known)
+        body = body.model_copy(update={
+            'question': scrub(body.question, known),
+            'history': [turn.model_copy(update={'text': scrub(turn.text, known)}) for turn in body.history]})
+        context = json.dumps(built, ensure_ascii=False)
         model = 'claude-sonnet-5-5' if provider == 'anthropic' else llm_gate.DEFAULT_MODEL
         # UTF-8 bytes bound tokenizer input, including JSON escaping and framing.
         prompt = json.dumps({'context': json.loads(context), 'history': [t.model_dump() for t in body.history],
@@ -203,7 +222,8 @@ def create_router(cases, code):
                                            max_output_tokens=MAX_TOKENS, client_ip=llm_gate.client_ip_from(request))
         if not decision.allowed:
             status = 429 if decision.source == 'rate-limited' else 503
-            raise HTTPException(status, 'Assistant unavailable', headers={'Retry-After': '600'} if status == 429 else None)
+            wait = llm_gate.assist_retry_after(llm_gate.client_ip_from(request)) if status == 429 else None
+            raise HTTPException(status, 'Assistant unavailable', headers={'Retry-After': str(wait)} if wait else None)
         try:
             reply = call_model(provider=provider, model=model, context=context, body=body)
         except Exception:

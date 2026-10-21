@@ -1,7 +1,6 @@
 # Accounts and administrative review API
 
-Implemented on `api/accounts-review`, based on `f48c797`. No deployment, push, or PR.
-All results described here are local or offline test evidence. This API checks
+Shipped in PR #48. This API checks
 administrative completeness; acceptance does not establish technical correctness,
 equivalent performance, professional authentication, or permission to build.
 
@@ -27,7 +26,9 @@ equivalent performance, professional authentication, or permission to build.
 | `GET /cases/{case_id}/messages` | `{messages}` with caller-relative `read_by_me`. |
 | `POST /cases/{case_id}/messages` | Signed-in owner or authorized reviewer; plain text, 1–4000 characters, nonblank; 201 message. |
 | `POST /cases/{case_id}/messages/read` | Mark existing messages read for this caller; 204. |
-| `POST /assist` | Authorized optional case context, screen/focus/question and up to eight history entries. Answer, verified cited ids, removed ids and provider notice. |
+| `GET /me/notifications` | Signed in. Up to 50 newest events by the *other* party on the caller's applications (applicant: started reviewing / returned / accepted as administratively complete / messages; reviewer: submitted / resubmitted / messages on its authority's applications, excluding its own), each with `read`, plus an `unread` count. |
+| `POST /me/notifications/read` | Marks everything up to now as read for the caller; 204. Does not revoke sessions. |
+| `POST /assist` | Signed in only (401 otherwise). Authorized optional case context, screen/focus/question and up to eight history entries. Answer, verified cited ids, removed ids and provider notice. |
 
 The status machine is `draft → submitted → in_review → returned | accepted`,
 with `returned → submitted` resubmission. Resubmission clears the current claim
@@ -146,6 +147,13 @@ provider's key are required; otherwise 503 `Assistant unavailable`. Full maximum
 output and a conservative UTF-8-byte input bound are reserved through `llm_gate`.
 Usage reconciles successful calls; uncertain failed calls retain the reservation.
 
+Personal information is redacted before anything leaves for a provider
+(`engine/redact.py`): the applicant's own names, addresses, permit and
+registration values from the case facts, plus email addresses, phone numbers,
+street addresses and postal codes, become placeholders such as `[email]`. Code
+text, Section C rows and citations are not redacted. Jev relevance scoring sends
+the redacted description as well.
+
 Context uses the authorized application's facts, gaps, process fields, focused
 card/message, and focused provision's verbatim database text plus deterministic
 Section C rows. Questions are capped at 1500 characters and history at eight
@@ -156,8 +164,10 @@ The system prompt forbids invented articles, compliance/safety determinations,
 professional evidence drafting, and authoring the applicant's risk, mitigation or
 assumptions passages. Explanations and questions are permitted. A post-check
 replaces nonexistent article/sentence ids with `[unknown reference removed]` and
-lists them. Generated categorical words `approved`, `compliant`, `complies`, and
-`safe` trigger conservative help text. Model instructions remain a probabilistic
+lists them. Generated categorical verdicts (`approved`, `compliant`/`complies`/`comply`,
+`code-compliant`, `safe`/`unsafe`, "meets/satisfies the code or requirements",
+"conforms to", "in compliance with") trigger conservative help text; "Safety Codes
+Officer" and compliance disclaimers do not. Model instructions remain a probabilistic
 control, not a guarantee against every misleading paraphrase. Existing global
 privacy meta text still describes OpenAI; the assistant's `notice` and header
 identify its actual selected provider. Frontend/privacy-copy reconciliation is
@@ -170,34 +180,29 @@ stored verbatim as text; clients must render them as text, never HTML.
 
 ## Verification and limits
 
-Baseline: 613 passed, 15 failed, 216 skipped at `f48c797`. The isolated Python
-invocation initially needed pytest `-o pythonpath=.`; the final requested command
-without `-I` runs directly from this checkout. Final result: **680 passed, 15
-failed, 216 skipped** in 27.05 seconds. All 15 failure ids match the baseline;
-there are zero new failures and 67 additional passing tests. Schema checks and
-`git diff --check` pass. Full receipt: `/tmp/accounts-review-final-suite.txt`.
+Reproduce from a checkout with the engine requirements installed:
 
-The HTTP script `python -m engine.tests.e2e_accounts_review` completed on port 8040:
-signup/onboarding → owned application → blocked submission → public facts,
-deterministic benchmark selection and synthetic PDF upload → submit → queue →
-claim → second-reviewer 409 → return/message → unread/read/reply → resubmit →
-accept → edit rejected. No identify/model call was needed to pass the real gap
-checker. The fixture retained the officer-routed professional-engagement warning;
-it asserts no real professional evidence. `/assist` returned 503 without keys.
-Transcript: `/tmp/accounts-review-e2e.txt`. The server was stopped.
+```sh
+# CI-like (no code database; database-backed tests skip)
+python -m pytest -q engine/tests codedb/tests evals_dev
+# With the code database built (python scripts/fetch_sources.py && python -m codedb build)
+# and a local PostgreSQL for the Postgres variants:
+TEST_DATABASE_URL=postgresql://<user>@localhost:<port>/<db> python -m pytest -q engine/tests
+# End-to-end over HTTP against an engine on port 8040 (BATATIS_STORE=postgres to use Postgres)
+python -m engine.tests.e2e_accounts_review
+```
 
-File-store/API, signed-token OIDC and fake-model assistant tests ran locally.
-No PostgreSQL server/TEST_DATABASE_URL or provider credentials were available;
-real PostgreSQL, real-provider OAuth/assistant and production behavior remain
-unverified. No new UI was implemented, so there is no visual capture.
+CI builds the code database from sha256-checked official sources before the engine
+tests, so the access matrix, status machine, claim race and assistant tests run on
+every pull request instead of skipping.
 
-Regenerated only `web/src/api/engine.schema.json` and `types.gen.ts` with
-`python -m engine.schema_export` and `node web/scripts/gen-types.mjs`. The schema
-exporter explicitly includes the new auth/review/message/assistant wire models.
+The end-to-end run passed against PostgreSQL 17: signup/onboarding → owned
+application → blocked submission → submit → queue → claim → second-reviewer 409 →
+return with message → unread/read/reply → resubmit → accept → edit rejected.
+`/assist` returns 503 without provider keys. OAuth was exercised with signed test
+tokens only; real Google/Microsoft sign-in and live providers are unverified.
 
-Methods used: T3 workflow feature route; pstack `poteto-mode/playbooks/feature.md`;
-Matt Pocock `engineering/tdd`, `codebase-design`, and `code-review`. Review applied
-the standards/spec axes locally because delegation was explicitly prohibited.
-The route map supplied no dedicated security-review method; the contract's
-security checklist above governed the security pass. Workflow maintenance was
-read-only and reported model-preferences drift; intentional configuration was kept.
+Known follow-ups: a per-authority failure budget for reviewer access codes, password
+change/reset and absolute session lifetime, account deletion and retention, a single
+query for list endpoints, and an Origin check for unsafe methods as CSRF defence in
+depth.

@@ -20,13 +20,13 @@ from .code_library import CodeTOC, ProvisionContext
 from .models import Case, Fact, SectionCRow
 from .account_models import UserResult, MessagesResult
 from .routes_auth import SignupRequest, LoginRequest, OnboardingRequest
-from .routes_review import (ApplicationsResult, QueueResult, ClaimResult, ClaimRequest,
+from .routes_review import (NotificationsResult, ApplicationsResult, QueueResult, ClaimResult, ClaimRequest,
                             DecisionRequest, MessageRequest)
 from .routes_assist import AssistRequest, AssistResult
 
 OUT = Path(__file__).resolve().parent.parent / 'web' / 'src' / 'api' / 'engine.schema.json'
 RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesResult, ApplicationsResult,
-             QueueResult, ClaimResult, AssistResult)  # responses carry every field
+             QueueResult, ClaimResult, AssistResult, NotificationsResult)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
             ClaimRequest, DecisionRequest, MessageRequest, AssistRequest)  # defaulted fields optional
 
