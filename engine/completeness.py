@@ -203,7 +203,8 @@ def check_completeness(case: Case, codes: Codes, *,
     ):
         if (latest_fact(case, *signatures, *dates) is not None) and _missing(confirmed_value(case, *dates)):
             add('D02', 'A', name, f'the {name.replace("_", " ")}.', 'Ask the signatory to supply the signature date.')
-    if case.jurisdiction is None:
+    if (case.jurisdiction is None or not case.jurisdiction.id.strip()
+            or not case.jurisdiction.name.strip()):
         add('admin', 'B', 'jurisdiction', 'the reviewing jurisdiction.', 'Ask which authority will receive the application.')
 
     process = process_fields(case, codes)
