@@ -23,13 +23,26 @@ GOVERN = ('Article {L} states a requirement that directly governs the situation 
 Ask = Callable[[Any, Mapping[str, Mapping[str, Any]], float], Mapping[str, Any]]
 
 
-def jev_ask(model: str = JEV_MODEL) -> Ask:
-    """The live adapter: vendored jevkit client, pinned model. Needs SSL_CERT_FILE=/etc/ssl/cert.pem on this Mac."""
+class NoRetry(Exception):
+    """A failure that retrying cannot fix (the spend gate is shut). Judge re-raises it at once."""
+
+
+def raw_jev_ask(model: str = JEV_MODEL) -> Ask:
+    """Unmetered vendored jevkit client, pinned model. Use only behind engine.identify.providers.metered_ask."""
     from .jevkit import client
 
     def ask(state, questions, timeout):
         return client.ask(state, questions, timeout=timeout, model=model, provider=JEV_PROVIDER)
     return ask
+
+
+def jev_ask(model: str = JEV_MODEL) -> Ask:
+    """The live adapter, metered: every request reserves and settles through engine.llm_gate.
+
+    Needs BATATIS_LIVE=1 and the TypeSafe credential (and SSL_CERT_FILE=/etc/ssl/cert.pem on this Mac).
+    """
+    from .providers import metered_ask
+    return metered_ask(raw_jev_ask(model), model=model)
 
 
 def noul(text: str) -> dict:
@@ -98,6 +111,10 @@ class Judge:
                         for i, (a, _) in enumerate(batch):
                             probs[a] = rep['answers'][f'q{i}']['noul']
                     return
+                except NoRetry:
+                    with self._lock:
+                        self.usage.errors += 1
+                    raise
                 except Exception as error:
                     last_error = error
                     with self._lock:

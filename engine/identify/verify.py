@@ -6,7 +6,6 @@ The verifier ranks; it never decides compliance.
 """
 from __future__ import annotations
 
-import os
 import re
 import time
 from dataclasses import dataclass, field
@@ -73,17 +72,23 @@ def check_quotes(picks: list[Pick], candidates: list[str], arts: dict[str, dict]
 
 
 class ClaudeVerifier:
-    """Adapter over the Anthropic Messages API (structured output). `client` is injectable for tests."""
+    """Adapter over the Anthropic Messages API (structured output). `client` is injectable for tests.
+
+    With no client, the live client is built behind the spend gate (BATATIS_LIVE=1 and ANTHROPIC_API_KEY).
+    """
 
     def __init__(self, db_path: Path | str, *, client=None, model: str = VERIFIER_MODEL, effort: str = 'medium',
                  max_tokens: int = 16000):
+        if 'haiku' in model.lower():
+            raise ValueError('Haiku models are not used for verification')
         self.arts = articles(Path(db_path))
         self.model, self.effort, self.max_tokens = model, effort, max_tokens
         if client is None:
-            import anthropic
-            if not os.environ.get('ANTHROPIC_API_KEY'):
-                raise RuntimeError('ANTHROPIC_API_KEY is not set')
-            client = anthropic.Anthropic()
+            from engine import llm_gate
+            from .providers import MeteredAnthropic, live_anthropic
+            if not llm_gate.provider_enabled('anthropic'):
+                raise RuntimeError('Anthropic is not enabled (BATATIS_LIVE=1 and ANTHROPIC_API_KEY)')
+            client = MeteredAnthropic(live_anthropic())
         self.client = client
 
     def prompt(self, query: str, candidates: list[str]) -> str:
