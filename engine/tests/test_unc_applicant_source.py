@@ -84,10 +84,10 @@ def test_posted_confirmed_user_answers_cannot_return_no(tmp_path):
         assert body['status'] == 'confirmed' and body['source']['type'] == 'user_text'
         assert client.post(f'/cases/{case_id}/facts', json=body).status_code == 200
     assert client.patch(f'/cases/{case_id}/facts', json={'status': 'confirmed'}).status_code == 405
-    issue = client.get(f'/cases/{case_id}/section-d/issues').json()[0]
+    issue = client.get(f'/cases/{case_id}/section-d/issues').json()['items'][0]
     assert issue['practice_of_engineering']['value'] == 'unknown'
     assert issue['routed_to'] == 'officer'
-    gaps = client.get(f'/cases/{case_id}/gaps').json()
+    gaps = client.get(f'/cases/{case_id}/gaps').json()['items']
     assert any(gap['message'] == OFFICER_PROFESSIONAL_GAP and gap['routed_to'] == 'officer' for gap in gaps)
 
 
@@ -157,10 +157,10 @@ def test_acceptable_path_applicant_answers_do_not_clear_special_safety_or_profes
     professional = client.get(f'/cases/{saved.id}/professional').json()
     assert professional['required'] == 'depends'
     assert professional['required'] != 'no'
-    issued = client.get(f'/cases/{saved.id}/section-d/issues').json()[0]
+    issued = client.get(f'/cases/{saved.id}/section-d/issues').json()['items'][0]
     assert issued['practice_of_engineering']['value'] == 'unknown'
     assert issued['routed_to'] == 'officer'
-    gaps = client.get(f'/cases/{saved.id}/gaps').json()
+    gaps = client.get(f'/cases/{saved.id}/gaps').json()['items']
     assert any(row['message'] == OFFICER_PROFESSIONAL_GAP and row['routed_to'] == 'officer' for row in gaps)
 
 

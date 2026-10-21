@@ -25,7 +25,7 @@ from .llm_gate import client_ip_from, search_retry_after
 from .models import Case, Fact, Jurisdiction, SectionCRow
 from .retention import maybe_purge
 from .section_c import section_c_rows
-from .store import CaseStore, FileTooLarge, VersionConflict, assert_durable_when_hosted, open_store
+from .store import CaseStore, FileTooLarge, InvalidAttachment, VersionConflict, assert_durable_when_hosted, open_store
 from .uploads import (MULTIPART_MAX_OVERHEAD_BYTES, MULTIPART_MAX_PARTS,
                       PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL)
 
@@ -174,6 +174,8 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
             raise HTTPException(422, 'public fact input cannot assert officer, professional, or code authority')
         try:
             case = cases().add_fact(case_id, fact)
+        except InvalidAttachment as exc:
+            raise HTTPException(422, str(exc)) from exc
         except VersionConflict as exc:
             raise HTTPException(409, 'case was updated concurrently') from exc
         if case is None:

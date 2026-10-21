@@ -19,6 +19,7 @@ Occupancy = Literal['single_family', 'multi_family', 'hotel', 'assembly', 'care'
                     'detention', 'business', 'mercantile', 'industrial', 'farm',
                     'relocatable_industrial_camp', 'mixed', 'other']
 Count = Annotated[int, Field(strict=True, ge=1)]
+PART9_MAX_SPAN_M = 12.20
 
 
 class ProfessionalFacts(BaseModel):
@@ -104,11 +105,12 @@ OFFICER_PROFESSIONAL_GAP = 'Routed to the officer: whether a registered professi
 PRESCRIPTIVE_CONTRADICTION = (
     'An answer of yes for the prescriptive route contradicts this variance request. That answer clears nothing.'
 )
-_OFFICER_REASONS = frozenset({'special_safety', 'professional_law', 'design_scope'})
+_OFFICER_REASONS = frozenset({'special_safety', 'professional_law', 'design_scope', 'acts_units'})
 _ROLE_FIELDS = (
-    'professional.role', 'professional.discipline', 'registered_professional.role',
-    'registered_professional.discipline', 'professional_name', 'responsible_professional', 'professional.name',
+    'professional.role', 'registered_professional.role',
 )
+_DISCIPLINE_FIELDS = ('professional.discipline', 'registered_professional.discipline')
+_NAME_FIELDS = ('professional_name', 'responsible_professional', 'professional.name')
 _SEAL_FIELDS = ('professional.seal', 'professional_seal', 'registered_professional.seal')
 _REGISTRATION_FIELDS = (
     'professional.registration_number', 'professional.registration',
@@ -119,6 +121,8 @@ _NOT_ENGAGED = frozenset({'not_engaged', 'no professional engaged yet'})
 _REJECT_ROLE = frozenset({
     'sales', 'rep', 'supplier', 'manufacturer', 'salesperson', 'vendor',
 })
+_TRAINEE_ROLE = frozenset({'student', 'trainee', 'intern', 'training', 'technologist', 'technician', 'eit'})
+_UNAUTHENTICATED = re.compile(r'\b(?:unsigned|unsealed|not\s+(?:signed|sealed|authenticated))\b', re.I)
 _DEPENDS_FIELDS = {
     'special_safety': ('ahj_requires_professional', 'special_safety_concerns'),
     'part4_unknown': ('part4_design',),
@@ -129,6 +133,7 @@ _DEPENDS_FIELDS = {
     'systems_unknown': ('fire_suppression', 'fire_alarm'),
     'firestop_scope': ('fire_suppression',),
     'professional_law': ('professional_scope_resolved',),
+    'gross_area_acts': ('gross_area_per_floor_m2',),
 }
 
 _DECIDER = {
@@ -172,9 +177,10 @@ def commercial_party(*parts: str) -> bool:
 
 
 def role_confirmed(value: str) -> bool:
-    """Case-insensitive. Punctuation is removed. Engineer and architect variants pass; commercial roles do not."""
+    """Accept the stated engineer/architect role, not a commercial or trainee qualification."""
     tokens = re.sub(r'[^a-z0-9]+', ' ', value.casefold()).split()
-    if commercial_party(value):
+    if (commercial_party(value) or _TRAINEE_ROLE.intersection(tokens)
+            or re.search(r'\be\W*i\W*t\b', value, re.I)):
         return False
     if 'peng' in tokens or {'p', 'eng'} <= set(tokens):
         return True
@@ -186,10 +192,37 @@ def professional_confirmed(case: Case) -> bool:
 
     ``not_engaged`` is not a role and not a number. Nothing here writes a registration fact.
     """
-    role = _applicant_text(case, *_ROLE_FIELDS)
+    # Role withdrawal is authoritative within the role aliases. A later discipline or
+    # name must neither erase a valid role nor restore a deliberately withdrawn one.
+    if latest_fact(case, *_ROLE_FIELDS) is not None:
+        role = _applicant_text(case, *_ROLE_FIELDS)
+    else:
+        role = next((value for fields in (_DISCIPLINE_FIELDS, _NAME_FIELDS)
+                     if (value := _applicant_text(case, *fields)) and role_confirmed(value)), None)
     if role is None or not role_confirmed(role):
         return False
-    return _applicant_text(case, *_SEAL_FIELDS) is not None or _applicant_text(case, *_REGISTRATION_FIELDS) is not None
+    registration = latest_fact(case, *_REGISTRATION_FIELDS)
+    has_registration = (registration is not None and registration.status == 'confirmed'
+                        and registration.kind != 'proposed' and registration.source.type in _APPLICANT_SOURCES
+                        and ((isinstance(registration.value, str) and bool(registration.value.strip()))
+                             or (isinstance(registration.value, int) and not isinstance(registration.value, bool))))
+    return _applicant_text(case, *_SEAL_FIELDS) is not None or has_registration
+
+
+def authentication_metadata_usable(*parts: str) -> bool:
+    """Negative or commercial metadata cannot assert authentication of the work."""
+    return not commercial_party(*parts) and _UNAUTHENTICATED.search(' '.join(parts)) is None
+
+
+def professional_authentication_confirmed(case: Case) -> bool:
+    """A source-aware assertion of work authentication; registration alone is not one.
+
+    This is administrative metadata, not verification of a seal or a licence. A file
+    extraction alone is not an applicant's confirmation that the work is authenticated.
+    """
+    seal = _applicant_text(case, *_SEAL_FIELDS)
+    fact = latest_fact(case, *_SEAL_FIELDS)
+    return bool(seal and fact and authentication_metadata_usable(seal, fact.source.quote or ''))
 
 
 def stated_professional_status(case: Case) -> str | None:
@@ -417,8 +450,8 @@ def _missing_facts(facts: ProfessionalFacts, reasons: list[ProfessionalReason], 
     return tuple(dict.fromkeys(names))
 
 
-def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
-                             provisions: tuple[str, ...] = (), span_handoff: bool = False) -> ProfessionalResult:
+def _screen_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
+                        provisions: tuple[str, ...] = (), span_handoff: bool = False) -> ProfessionalResult:
     case = facts if isinstance(facts, Case) else None
     applicant: tuple[str, ...] = ()
     not_sure: tuple[str, ...] = ()
@@ -441,9 +474,12 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
     def add(code: str, required: Requirement, message: str, pid: str,
             question: str | None = None, division: str = 'C'):
         rec = codes.provision(pid, division)
-        if rec is None:
-            raise KeyError(f'missing professional-involvement provision: {pid}')
-        reasons.append(ProfessionalReason(code=code, required=required, message=message, citation=rec['citation']))
+        citation = str(rec.get('citation') or '').strip() if rec else ''
+        if not citation:
+            required = 'depends'
+            message = f'The citation lookup for Division {division} {pid} did not resolve.'
+            question = f'Ask the code reviewer to verify Division {division} {pid} before deciding this requirement.'
+        reasons.append(ProfessionalReason(code=code, required=required, message=message, citation=citation))
         if question:
             questions.append(question)
             asked[code] = question
@@ -562,14 +598,16 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
         else:
             add('part_scope', 'depends', _PART_MESSAGE, '1.3.3.3.(1)', _PART_QUESTION, division='A')
 
-    # The Acts count suites. Div C 2.4.1.1.(2) does not. Above 4 is a yes even when the code exception is no.
-    # The cite is the codedb authentication sentence. The Act pinpoint is source-pdf and is not a routing cite.
+    # Statute rows retain their own verified pinpoints in human_review. The code's
+    # authentication sentence does not establish an Act unit-count threshold.
     if facts.total_unit_count is not None and facts.total_unit_count > 4 and (
             facts.principal_dwelling_units is None or facts.principal_dwelling_units <= 4):
-        add('acts_units', 'yes',
-            'Dwelling units counted with suites are above 4. Div C 2.4.1.1.(5) is the authentication '
-            'sentence that follows the professional Acts.',
-            '2.4.1.1.(5)')
+        question = 'Which professional-Act requirements apply when the dwelling-unit count includes secondary suites?'
+        reasons.append(ProfessionalReason(code='acts_units', required='depends', citation='',
+            message='Professional-Act applicability with secondary suites needs officer review; '
+                    'the code authentication sentence does not establish that unit-count rule.'))
+        questions.append(question)
+        asked['acts_units'] = question
     if facts.gross_area_unsettled is True:
         add('gross_area_acts', 'depends',
             'Gross area can be read more than one way. This screen does not answer no from building area alone.',
@@ -647,3 +685,35 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
                               involvement=involvement, missing_facts=missing, routed_to=routed,
                               applicant_sourced=bool(applicant), not_sure_fields=not_sure,
                               prescriptive_contradiction=contradiction, professional_status=status)
+
+
+def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
+                             provisions: tuple[str, ...] = (), span_handoff: bool = False) -> ProfessionalResult:
+    """One case decision for issues, professional guidance, completeness and export.
+
+    Facts-only evaluation keeps its explicit inputs. Case callers also receive the
+    same validated mandatory routing and span handoff; no caller promotes it later.
+    """
+    case = facts if isinstance(facts, Case) else None
+    if case is not None:
+        span = confirmed_value(case, 'professional.span_m', 'span_m')
+        span_handoff = span_handoff or (isinstance(span, (int, float)) and not isinstance(span, bool)
+                                        and span > PART9_MAX_SPAN_M)
+    result = _screen_involvement(facts, codes, provisions=provisions, span_handoff=span_handoff)
+    if case is None:
+        return result
+    from .human_review import discretionary_review, mandatory_hits
+
+    hits = mandatory_hits(case, codes, general_required=result.general_required)
+    if hits:
+        reasons = [*result.reasons, *(ProfessionalReason(
+            code=f'mandatory:{hit.division}:{hit.provision_id}', required='yes',
+            message=hit.why, citation=hit.cite) for hit in hits)]
+        missing = list(result.missing_facts)
+        if not professional_confirmed(case):
+            missing += ['professional.role', 'professional.registration_number or professional.seal']
+        return result.model_copy(update=dict(required='yes', reasons=reasons, decision='',
+                                              routed_to='professional', missing_facts=tuple(dict.fromkeys(missing))))
+    if result.required != 'yes' and discretionary_review(case):
+        return result.model_copy(update={'routed_to': 'officer'})
+    return result

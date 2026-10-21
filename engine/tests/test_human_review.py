@@ -60,7 +60,8 @@ def test_code_exception_can_still_name_the_acts():
         fact('preserved_wood_foundation_part4', False), fact('roof_trusses', False),
     ]
     issue = section_d_issues(Case(provisions=[BENCHMARK], facts=facts), codes_with_rules())[0]
-    assert issue.practice_of_engineering.value is True
+    assert issue.practice_of_engineering.value == 'unknown'
+    assert issue.routed_to == 'officer'
     units = [row for row in issue.human_review if row.cite in (
         'Architects Act s.2(6)(b)(ii)', 'EGPA s.2(7)(b)(ii)')]
     assert {row.cite for row in units} == {'Architects Act s.2(6)(b)(ii)', 'EGPA s.2(7)(b)(ii)'}

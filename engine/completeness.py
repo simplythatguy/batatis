@@ -18,7 +18,8 @@ from .models import INTENT_LABEL, Case, Gap as CaseGap
 from .process_fields import confirmed_value, latest_fact, process_fields
 from .professional import (
     NOT_ENGAGED_ITEM, OFFICER_PROFESSIONAL_GAP, PRESCRIPTIVE_CONTRADICTION, ProfessionalResult,
-    commercial_party, professional_confirmed, professional_involvement, unresolved_item,
+    authentication_metadata_usable, professional_authentication_confirmed, professional_confirmed,
+    professional_involvement, unresolved_item,
 )
 from .section_c import section_c_rows
 from .section_d import SupportingDocument, section_d_plan, supporting_documents
@@ -110,7 +111,7 @@ def professional_involvement_gaps(case: Case, codes: Codes, process, *,
             add('D12', 'D', 'professional_qualifications', 'the qualifications of the responsible professional.',
                 'Request their qualifications, experience and background; do not draft them.', codes.citation('2.3.1.1.(4)', 'C'))
         docs = supporting_documents(case) if documents is None else documents
-        if (_missing(confirmed_value(case, 'professional_seal', 'professional.seal'))
+        if (not professional_authentication_confirmed(case)
                 and not any(seal_is_professional_evidence(doc, quote=_file_quote(case, doc)) for doc in docs)):
             add('D12', 'D', 'professional_authentication', 'authentication information for the required professional work.',
                 'Request the responsible professional’s authenticated document; authenticity and scope need human review.',
@@ -151,9 +152,7 @@ def seal_is_professional_evidence(doc: SupportingDocument, *, quote: str = '') -
     seal = doc.professional_seal.strip() if isinstance(doc.professional_seal, str) else ''
     if not seal:
         return False
-    if commercial_party(doc.responsible_party, doc.issuer, doc.title, quote, seal):
-        return False
-    return True
+    return authentication_metadata_usable(doc.responsible_party, doc.issuer, doc.title, quote, seal)
 
 
 def check_completeness(case: Case, codes: Codes, *,

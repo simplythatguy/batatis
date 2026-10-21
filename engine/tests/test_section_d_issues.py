@@ -474,7 +474,7 @@ def test_missing_division_c_citation_is_unknown_and_the_route_does_not_500(tmp_p
     case = store.put(Case(provisions=[BENCHMARK], facts=[fact('part4_design', True)]))
     response = client.get(f'/cases/{case.id}/section-d/issues')
     assert response.status_code == 200
-    flag = response.json()[0]['practice_of_engineering']
+    flag = response.json()['items'][0]['practice_of_engineering']
     assert flag['value'] == 'unknown'
     assert flag['reason']
     assert flag['question']

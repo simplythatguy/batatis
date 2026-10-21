@@ -34,6 +34,44 @@ class FileTooLarge(Exception):
         super().__init__(detail)
 
 
+class InvalidAttachment(ValueError):
+    """A confirmed attachment must name bytes owned by this case."""
+
+
+def attachment_reference(fact: Fact) -> str | None:
+    """Only attachment-presence facts require storage proof; extraction sources do not.
+
+    An unconfirmed empty value remains a valid withdrawal. Public listing text cannot
+    become an attached file by labelling it confirmed or copying a file identifier.
+    """
+    if not (fact.field.startswith('evidence.') and fact.field.endswith('.file_ref')) or fact.status != 'confirmed':
+        return None
+    if (fact.kind == 'proposed' or fact.source.type != 'file' or not isinstance(fact.value, str)
+            or not fact.value.strip() or fact.value != fact.source.ref):
+        raise InvalidAttachment('Attach an uploaded file from this application before confirming the document.')
+    return fact.value
+
+
+def case_with_stored_files(payload: str | dict, file_ids: set[str]) -> Case:
+    """Old metadata is a listing until this case's stored bytes establish presence.
+
+    Preserve its text and provenance, but do not let a legacy or imported file claim
+    silently close an attachment gap. The read and file inventory share a transaction.
+    Pure offline Case fixtures do not have storage and are not upload evidence.
+    """
+    case = Case.model_validate_json(payload) if isinstance(payload, str) else Case.model_validate(payload)
+    for fact in case.facts:
+        try:
+            reference = attachment_reference(fact)
+        except InvalidAttachment:
+            fact.status = 'unconfirmed'
+            continue
+        if reference is not None and reference not in file_ids:
+            fact.status = 'unconfirmed'
+    # Recompute evidence kind after downgrading any unverified legacy file claim.
+    return Case.model_validate(case.model_dump())
+
+
 class CaseBackend(Protocol):
     def get(self, case_id: str) -> Case | None: ...
     def get_snapshot(self, case_id: str) -> tuple[Case, int] | None: ...
@@ -146,7 +184,10 @@ class CaseStore:
         with closing(self._connect()) as con, con:
             self._purge_expired(con, case_id)
             row = con.execute('SELECT json, version FROM cases WHERE id=?', (case_id,)).fetchone()
-        return (Case.model_validate_json(row[0]), int(row[1])) if row else None
+            if row is None:
+                return None
+            files = {item[0] for item in con.execute('SELECT id FROM case_files WHERE case_id=?', (case_id,))}
+            return case_with_stored_files(row[0], files), int(row[1])
 
     def delete(self, case_id: str) -> bool:
         """Remove the case, its facts, its evidence, and its files."""
@@ -184,6 +225,10 @@ class CaseStore:
                 if row is None:
                     con.execute('COMMIT')
                     return None
+                reference = attachment_reference(fact)
+                if reference is not None and con.execute(
+                        'SELECT 1 FROM case_files WHERE id=? AND case_id=?', (reference, case_id)).fetchone() is None:
+                    raise InvalidAttachment('Attach an uploaded file from this application before confirming the document.')
                 case = Case.model_validate_json(row[0])
                 case.facts = [item for item in case.facts if item.id != fact.id] + [fact]
                 case.updated_at = now()

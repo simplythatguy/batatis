@@ -10,6 +10,7 @@ from engine.export import form_path
 from engine.export.sample import sample_case
 from engine.models import Fact, Source
 from engine.store import CaseStore
+from engine.tests.case_builder_fixtures import store_with_synthetic_files
 
 pytestmark = pytest.mark.skipif(not form_path().exists(), reason='SCC form not present (git-excluded)')
 
@@ -23,7 +24,7 @@ def ctx(tmp_path_factory):
 
 def test_export_route(ctx):
     client, store, codes = ctx
-    case = store.put(sample_case(codes))
+    case = store_with_synthetic_files(store, sample_case(codes))
     r = client.post(f'/cases/{case.id}/export')
     assert r.status_code == 200 and r.headers['content-type'] == 'application/pdf'
     assert r.content.startswith(b'%PDF') and 'DRAFT' not in r.headers['content-disposition']
@@ -50,7 +51,7 @@ def test_final_roundtrip_and_direct_api_bypass(ctx):
     assert client.post(f'/cases/{incomplete.id}/export').status_code == 409
     draft = client.post(f'/cases/{incomplete.id}/export', json={'draft': True})
     assert draft.status_code == 200 and 'DRAFT' in draft.headers['content-disposition']
-    store.put(complete)
+    store_with_synthetic_files(store, complete)
     assert not any(g['severity'] == 'blocking' for g in client.get(f'/cases/{complete.id}/gaps').json()['items'])
     final = client.post(f'/cases/{complete.id}/export')
     assert final.status_code == 200

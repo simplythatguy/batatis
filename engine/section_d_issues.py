@@ -14,22 +14,21 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, model_validator
 
 from .codes import Codes
-from .human_review import HumanReview, discretionary_review, human_reviews, mandatory_hits
+from .human_review import HumanReview, human_reviews
 from .models import Case
 from .process_fields import ProcessField, alternative_path, confirmed_value, latest_fact, process_fields
 from .professional import (
-    PracticePrompt, ProfessionalReason, ProfessionalResult, commercial_party,
+    PART9_MAX_SPAN_M, PracticePrompt, ProfessionalReason, ProfessionalResult, commercial_party,
     professional_confirmed, professional_involvement, unresolved_item,
 )
 from .section_d import (
     ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, EvidencePlanItem, EvidenceType, section_d_plan,
 )
 
-# A confirmed span above this value is stored as Part 4 design before the practice screen.
+# A confirmed span above this value is screened as Part 4 design by the shared case decision.
 # This handoff came from development case dev-050. The only provision cited for that
 # result is Div C 2.4.1.2.(1), which engine/professional.py already passes to add().
 # This module does not add a provision id.
-PART9_MAX_SPAN_M = 12.20
 
 # Every practice-screen id below is a string literal already passed to add() in
 # engine/professional.py. Process-field ids are the literals in engine/process_fields.py
@@ -79,7 +78,7 @@ _PROCESS_RULE_IDS = {
 
 # Reason codes professional.py emits, in the order a Division C rule should be shown.
 _YES_PRIORITY = (
-    'part4', 'truss_part4', 'preserved_wood_foundation', 'general_building', 'acts_units', 'ahj_direction',
+    'part4', 'truss_part4', 'preserved_wood_foundation', 'general_building', 'ahj_direction',
     'suppression', 'fire_alarm', 'truss_design',
 )
 _RULE_IDS = {
@@ -105,7 +104,6 @@ _RULE_IDS = {
     'fire_alarm_unknown': ('2.4.1.4.(1)', 'C'),
     'design_scope': ('2.4.1.1.(3)', 'C'),
     'professional_law': ('2.4.1.1.(5)', 'C'),
-    'acts_units': ('2.4.1.1.(5)', 'C'),
     'gross_area_acts': ('2.4.1.1.(5)', 'C'),
 }
 _YES_TEXT = {
@@ -117,7 +115,6 @@ _YES_TEXT = {
     'suppression': 'A fire-suppression system is stated for a building outside the general exceptions. Recommend documenting professional retention for design, field review and witnessing of testing.',
     'fire_alarm': 'A fire-alarm system is stated for a building outside the general exceptions. Recommend documenting professional retention for design, field review and witnessing of verification.',
     'truss_design': 'Wood roof trusses are stated. Recommend engineering responsibility for the truss design and its connections.',
-    'acts_units': 'Dwelling units counted with suites are above 4. Recommend a registered professional for that scope.',
 }
 
 
@@ -210,6 +207,9 @@ def _pick(result: ProfessionalResult, required: str) -> ProfessionalReason | Non
 
 
 def _rule(reason: ProfessionalReason) -> tuple[str, str]:
+    if reason.code.startswith('mandatory:'):
+        _, division, provision = reason.code.split(':', 2)
+        return provision, division
     return _RULE_IDS.get(reason.code, ('', ''))
 
 
@@ -217,34 +217,14 @@ def practice_of_engineering(case: Case, codes: Codes) -> PracticeOfEngineering:
     """Ledger-only screen. Missing facts stay unknown; nothing is defaulted to a boolean."""
     span = confirmed_value(case, 'professional.span_m', 'span_m')
     span_handoff = isinstance(span, (int, float)) and not isinstance(span, bool) and span > PART9_MAX_SPAN_M
-    result = professional_involvement(case, codes, span_handoff=span_handoff)
-    return _apply_trigger_routing(case, codes, render_practice(result, codes, span_handoff=span_handoff))
-
-
-def _apply_trigger_routing(case: Case, codes: Codes, flag: PracticeOfEngineering) -> PracticeOfEngineering:
-    """A mandatory codedb-only hit can push yes. A discretionary hit only routes to the officer."""
-    hits = mandatory_hits(case, codes)
-    if hits and flag.value is not True:
-        top = hits[0]
-        return flag.model_copy(update={
-            'value': True,
-            'rule': top.provision_id,
-            'division': top.division,
-            'citation': top.cite,
-            'reason': top.why,
-            'question': PROFESSIONAL_REQUEST,
-            'routed_to': 'professional',
-        })
-    if flag.value is not True and discretionary_review(case):
-        return flag.model_copy(update={'routed_to': 'officer'})
-    return flag
+    return render_practice(professional_involvement(case, codes), codes, span_handoff=span_handoff)
 
 
 _UNRESOLVED_CITATION_REASON = (
-    'The Division C rule for this practice screen did not resolve in the code database. '
+    'The rule for this practice screen did not resolve in the code database. '
     'Ask before setting the flag to yes or no.')
 _UNRESOLVED_CITATION_QUESTION = (
-    'Which Division C professional-involvement rule applies? No citation was returned.')
+    'Which professional-involvement rule applies? No citation was returned.')
 
 
 def _flag(value: PracticeValue, reason_row: ProfessionalReason | None, text: str, question: str | None) -> PracticeOfEngineering:
@@ -254,8 +234,11 @@ def _flag(value: PracticeValue, reason_row: ProfessionalReason | None, text: str
     if value == 'unknown' or (rule and division and citation and str(citation).strip()):
         return PracticeOfEngineering(value=value, rule=rule or None, division=division or None,
                                      citation=citation or None, reason=text, question=question)
-    return PracticeOfEngineering(value='unknown', reason=_UNRESOLVED_CITATION_REASON,
-                                 question=_UNRESOLVED_CITATION_QUESTION)
+    return PracticeOfEngineering(value='unknown', rule=rule or None, division=division or None,
+                                 reason=_UNRESOLVED_CITATION_REASON,
+                                 question=(f'The citation lookup for Division {division} {rule} failed. '
+                                           'Ask the code reviewer to verify this reference before setting the flag.'
+                                           if rule and division else _UNRESOLVED_CITATION_QUESTION))
 
 
 def _with_prompts(flag: PracticeOfEngineering, result: ProfessionalResult) -> PracticeOfEngineering:
@@ -281,7 +264,7 @@ def render_practice(result: ProfessionalResult, codes: Codes, *, span_handoff: b
     question = _question(result)
     return _with_prompts(PracticeOfEngineering(
         value='unknown', rule=rule or None, division=division or None,
-        citation=reason.citation if reason else None,
+        citation=(reason.citation or None) if reason else None,
         reason=unresolved_item(question, result.routed_to),
         question=question), result)
 

@@ -10,7 +10,7 @@ from engine.codes import Codes
 from engine.models import Case
 from engine.routes_case import create_router
 from engine.store import CaseStore
-from engine.tests.case_builder_fixtures import complete_case, fact
+from engine.tests.case_builder_fixtures import complete_case, fact, store_with_synthetic_files
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ def test_routes_are_mounted_and_rebuild_only_confirmed_rows(context):
 
 def test_professional_process_and_gaps_use_latest_persisted_facts(context):
     client, store, codes = context
-    case = store.put(complete_case())
+    case = store_with_synthetic_files(store, complete_case())
     professional = client.get(f'/cases/{case.id}/professional').json()
     assert professional['involvement'] == 'professional_involved'
     assert professional['required'] != 'no'

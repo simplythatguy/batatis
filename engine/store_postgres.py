@@ -14,7 +14,8 @@ from decimal import Decimal
 from psycopg.types.json import Jsonb
 
 from .models import Case, Fact, now
-from .store import FileTooLarge, VersionConflict, retention_cutoff
+from .store import (FileTooLarge, InvalidAttachment, VersionConflict, attachment_reference,
+                    case_with_stored_files, retention_cutoff)
 from .uploads import PDF_MAX_BYTES
 
 MIGRATIONS = (
@@ -83,7 +84,8 @@ class PostgresCaseStore:
             row = con.execute('SELECT data, version FROM cases WHERE id=%s FOR UPDATE', (case_id,)).fetchone()
             if row is None or self._purge_expired(con, case_id):
                 return None
-            return Case.model_validate(row[0]), int(row[1])
+            files = {item[0] for item in con.execute('SELECT id FROM case_files WHERE case_id=%s', (case_id,))}
+            return case_with_stored_files(row[0], files), int(row[1])
 
     def delete(self, case_id: str) -> bool:
         """Remove the case, its facts, its evidence, and its files."""
@@ -153,6 +155,10 @@ class PostgresCaseStore:
                 row = con.execute('SELECT data, version FROM cases WHERE id=%s FOR UPDATE', (case_id,)).fetchone()
                 if row is None or self._purge_expired(con, case_id):
                     return None
+                reference = attachment_reference(fact)
+                if reference is not None and con.execute(
+                        'SELECT 1 FROM case_files WHERE id=%s AND case_id=%s', (reference, case_id)).fetchone() is None:
+                    raise InvalidAttachment('Attach an uploaded file from this application before confirming the document.')
                 case = Case.model_validate(row[0])
                 case.facts = [item for item in case.facts if item.id != fact.id] + [fact]
                 case.updated_at = now()

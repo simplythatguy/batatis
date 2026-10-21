@@ -12,6 +12,27 @@ def fact(field, value, **changes):
     return Fact(**data)
 
 
+def store_with_synthetic_files(store, case):
+    """API fixtures need actual case-owned bytes, not file-presence metadata alone.
+
+    The deliberately synthetic bytes exercise storage binding only; no test result,
+    professional authentication, parsed document or real evidence is asserted.
+    """
+    store.put(case)
+    references = {}
+    for entry in case.facts:
+        if (entry.field.startswith('evidence.') and entry.field.endswith('.file_ref')
+                and entry.status == 'confirmed' and entry.source.type == 'file'
+                and entry.value == entry.source.ref):
+            if entry.source.ref not in references:
+                saved = store.put_file(case.id, 'SYNTHETIC-storage-fixture.pdf',
+                                       b'%PDF-1.4\nSYNTHETIC storage-binding bytes, not a document or result.\n')
+                references[entry.source.ref] = saved['id']
+            entry.value = references[entry.source.ref]
+            entry.source = entry.source.model_copy(update={'ref': entry.value})
+    return store.put(case)
+
+
 # These Yes/No answers are the authority's, so a clean administrative fixture can resolve.
 _AUTHORITY_SCREEN = {
     'part4_design', 'preserved_wood_foundation_part4', 'roof_trusses',

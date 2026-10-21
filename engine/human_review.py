@@ -17,7 +17,8 @@ from pydantic import BaseModel, ConfigDict
 from .codes import Codes
 from .models import Case
 from .process_fields import alternative_path, confirmed_value
-from .professional import ProfessionalFacts, ProfessionalResult, professional_involvement
+from .professional import (PART9_MAX_SPAN_M, ProfessionalFacts, ProfessionalResult, Requirement,
+                           _screen_involvement, professional_involvement)
 
 # (division, provision id). Each id is a codedb-checked sentence the mandatory rows look up.
 REVIEW_PROVISIONS = (
@@ -239,7 +240,6 @@ def _part4_chain_resolves(codes: Codes) -> bool:
 
 
 def _hr03(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]]) -> None:
-    from .section_d_issues import PART9_MAX_SPAN_M
     span = _number(case, 'span_m')
     elements = _tokens(case, 'part4_elements')
     if not (_yes(case, 'part4_design') or elements or (span is not None and span > PART9_MAX_SPAN_M)):
@@ -249,9 +249,9 @@ def _hr03(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[st
               'C', '2.4.1.2.(1)')
 
 
-def _hr01(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]]) -> None:
-    result = professional_involvement(case, codes)
-    if result.general_required != 'yes':
+def _hr01(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]],
+          general_required: Requirement) -> None:
+    if general_required != 'yes':
         return
     _remember(hits, seen, codes, 'HR-01', 'Registered architectural and/or engineering professional',
               'The stated building is outside the general exceptions. Recommend that a registered '
@@ -361,11 +361,11 @@ def _hr04(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[st
               'A', '1.3.3.2.(1)')
 
 
-def _hr11(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]]) -> None:
+def _hr11(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[str, str]],
+          general_required: Requirement) -> None:
     if _yes(case, 'minor_alteration_existing_system'):
         return
-    result = professional_involvement(case, codes)
-    if result.general_required != 'yes':
+    if general_required != 'yes':
         return
     if _yes(case, 'fire_suppression'):
         _remember(hits, seen, codes, 'HR-11',
@@ -417,17 +417,19 @@ def _hr12(case: Case, codes: Codes, hits: list[MandatoryHit], seen: set[tuple[st
               'B', '10.4.7.2.(1)')
 
 
-def mandatory_hits(case: Case, codes: Codes) -> tuple[MandatoryHit, ...]:
+def mandatory_hits(case: Case, codes: Codes, *, general_required: Requirement | None = None) -> tuple[MandatoryHit, ...]:
     """Mandatory codedb-only triggers whose cites resolved, in routing order."""
+    if general_required is None:
+        general_required = _screen_involvement(case, codes).general_required
     hits: list[MandatoryHit] = []
     seen: set[tuple[str, str]] = set()
     _hr03(case, codes, hits, seen)
-    _hr01(case, codes, hits, seen)
+    _hr01(case, codes, hits, seen, general_required)
     _hr06(case, codes, hits, seen)
     _hr07(case, codes, hits, seen)
     _hr05(case, codes, hits, seen)
     _hr04(case, codes, hits, seen)
-    _hr11(case, codes, hits, seen)
+    _hr11(case, codes, hits, seen, general_required)
     _hr14(case, codes, hits, seen)
     _hr13(case, codes, hits, seen)
     _hr12(case, codes, hits, seen)
