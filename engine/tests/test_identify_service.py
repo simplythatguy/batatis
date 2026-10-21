@@ -449,3 +449,151 @@ def test_reference_withdrawal_clears_a_yes_on_the_identify_cards(client):
     assert withdrawn.status_code == 200 and store.get(case_id).provisions == []
     card = next(a for a in http.get(f'/cases/{case_id}/identify').json()['articles'] if a['provision'] == first)
     assert card['decision'] is None
+
+
+# --- review fixes: answers scope, no network offline, single compare-and-swap ----------------------
+
+def test_answers_only_fill_questions_identify_asked(client):
+    http, store = client
+    case_id = described(http)
+    result = http.post(f'/cases/{case_id}/identify', json={}).json()
+    question = result['open_questions'][0]
+    hostile = [
+        {'question_id': 'project.description', 'answer': 'replaced'},
+        {'field': 'project.description', 'answer': 'replaced'},
+        {'question_id': question['id'], 'field': 'project.description', 'answer': 'replaced'},
+        {'question_id': question['id'], 'field': f"citation.{question['provision']}", 'answer': 'x'},
+        {'question_id': 'evidence.ev_1.file_ref', 'answer': 'x'},
+    ]
+    for answer in hostile:
+        assert http.post(f'/cases/{case_id}/identify', json={'answers': [answer]}).status_code == 422
+    kept = [f for f in store.get(case_id).facts if f.field == 'project.description']
+    assert len(kept) == 1 and kept[0].status == 'confirmed' and kept[0].value == SOFFIT
+    ok = http.post(f'/cases/{case_id}/identify', json={'answers': [{'question_id': question['id'], 'answer': 'yes'}]})
+    assert ok.status_code == 200
+    filled = [f for f in store.get(case_id).facts if f.field == question['field']]
+    assert len(filled) == 1 and filled[0].status == 'unconfirmed' and filled[0].value == 'yes'
+
+
+def test_answers_need_a_stored_identification(client):
+    http, _ = client
+    case_id = described(http)
+    reply = http.post(f'/cases/{case_id}/identify', json={'answers': [{'question_id': 'choice_9.10.15.5.', 'answer': 'y'}]})
+    assert reply.status_code == 422
+
+
+def test_acceptable_solution_wording_is_a_valid_departure(client):
+    http, _ = client
+    case_id = described(http)
+    http.post(f'/cases/{case_id}/identify', json={})
+    ok = http.post(f'/cases/{case_id}/identify/benchmark', json={
+        'provision': '9.10.15.5.(8)', 'departure': 'Departs from the acceptable solution by a 450 mm soffit.'})
+    assert ok.status_code == 200 and ok.json()['benchmark']['departure_status'] == 'confirmed'
+
+
+@pytest.fixture
+def no_network(monkeypatch):
+    """Any socket connect or real HTTP request fails the test."""
+    import socket
+    import httpx
+    calls = []
+
+    def refuse(*args, **kwargs):
+        calls.append(args[:2])
+        raise AssertionError('network call in offline mode')
+    monkeypatch.setattr(socket.socket, 'connect', refuse)
+    monkeypatch.setattr(socket.socket, 'connect_ex', refuse)
+    monkeypatch.setattr(socket, 'create_connection', refuse)
+    monkeypatch.setattr(httpx.HTTPTransport, 'handle_request', refuse)
+    monkeypatch.setattr(httpx.AsyncHTTPTransport, 'handle_async_request', refuse)
+    for name in ('OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'JEV_API_KEY', 'TYPESAFE_API_KEY'):
+        monkeypatch.setenv(name, 'dummy-' + 'x' * 30)
+    return calls
+
+
+@pytest.mark.parametrize('live', ['0', '1'])
+def test_fake_mode_never_reaches_the_network_with_keys_set(codes, no_network, monkeypatch, client, live):
+    from engine import cli_sut
+    from engine.identify import identify as default_identify
+    from engine.relevance import live_judge
+    monkeypatch.setenv('BATATIS_LIVE', live)
+    out = cli_sut.run(SOFFIT, codes.db_path)                       # default Judge() and ClaudeVerifier(db)
+    assert out['articles'] and 'fallback' not in out['trace']['ranker']
+    assert default_identify(SOFFIT, codes.db_path).ranked
+    assert ClaudeVerifier(codes.db_path).verify(SOFFIT, ['9.10.15.5.']).stop_reason == 'end_turn'
+    if live == '1':                                                # the relevance route's live judge, fake transport
+        assert live_judge().judge(SOFFIT, articles(Path(codes.db_path)), ['9.10.15.5.'])
+    assert run(SOFFIT, codes=codes).result.mode == 'fake'
+    http, _ = client
+    case_id = described(http)
+    assert http.post(f'/cases/{case_id}/identify', json={}).json()['mode'] == 'fake'
+    assert no_network == []
+
+
+def test_without_the_live_switch_nothing_reaches_the_network(codes, no_network, monkeypatch):
+    monkeypatch.delenv('BATATIS_PROVIDER')
+    from engine import cli_sut
+    out = cli_sut.run(SOFFIT, codes.db_path)
+    assert out['trace']['ranker'] == 'bm25 fallback' and not any(a['committed'] for a in out['articles'])
+    assert run(SOFFIT, codes=codes).result.mode == 'bm25_fallback'
+    with pytest.raises(RuntimeError):
+        ClaudeVerifier(codes.db_path)
+    assert no_network == []
+
+
+def test_live_mode_never_builds_anthropic_by_default(codes, no_network, monkeypatch):
+    monkeypatch.delenv('BATATIS_PROVIDER')
+    monkeypatch.setenv('BATATIS_LIVE', '1')
+    import anthropic
+    monkeypatch.setattr(anthropic, 'Anthropic', lambda *a, **k: pytest.fail('Anthropic client built'))
+    assert transports().anthropic is None
+    with pytest.raises(RuntimeError, match='not a configured identify provider'):
+        ClaudeVerifier(codes.db_path)
+    assert no_network == []
+
+
+def test_stale_expected_version_is_a_409_and_changes_nothing(client):
+    http, store = client
+    case_id = described(http)
+    result = http.post(f'/cases/{case_id}/identify', json={}).json()
+    version = result['case_version']
+    assert version == store.get(case_id).version
+    first = result['articles'][0]['provision']
+    stale = version - 1
+    assert http.post(f'/cases/{case_id}/identify/{first}/decision',
+                     json={'decision': 'yes', 'expected_version': stale}).status_code == 409
+    assert http.post(f'/cases/{case_id}/identify/confirm',
+                     json={'provisions': ['9.10.15.5.(8)'], 'expected_version': stale}).status_code == 409
+    assert http.post(f'/cases/{case_id}/identify/benchmark', json={
+        'provision': '9.10.15.5.(8)', 'departure': 'A 450 mm soffit.', 'expected_version': stale}).status_code == 409
+    assert http.post(f'/cases/{case_id}/identify', json={'expected_version': stale}).status_code == 409
+    case = store.get(case_id)
+    assert case.version == version and case.provisions == [] and case.identify.benchmark.basis != 'applicant'
+    yes = http.post(f'/cases/{case_id}/identify/{first}/decision', json={'decision': 'yes', 'expected_version': version})
+    assert yes.status_code == 200 and yes.json()['case_version'] == version + 1
+    assert yes.json()['section_c'] and all(r['provision_id'].startswith(first) for r in yes.json()['section_c'])
+    assert http.post(f'/cases/{case_id}/identify/{first}/decision',
+                     json={'decision': 'no', 'expected_version': version}).status_code == 409
+
+
+def test_identify_run_is_one_cas_and_a_write_during_it_is_a_409(client, monkeypatch):
+    http, store = client
+    case_id = described(http)
+    real = fakes.fake_jev_ask
+
+    def edits_midway():
+        ask, done = real(), []
+
+        def inner(state, questions, timeout):
+            if not done:
+                done.append(1)
+                case = store.get(case_id)
+                case.title = 'edited during the run'
+                store.put(case, expected_version=case.version)
+            return ask(state, questions, timeout)
+        return inner
+    monkeypatch.setattr(fakes, 'fake_jev_ask', edits_midway)
+    reply = http.post(f'/cases/{case_id}/identify', json={})
+    assert reply.status_code == 409
+    case = store.get(case_id)
+    assert case.identify is None and case.title == 'edited during the run'

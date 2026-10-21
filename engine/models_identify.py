@@ -158,6 +158,7 @@ class IdentifyResult(BaseModel):
     description_sha256: str
     stale: bool = False
     persisted: bool = False
+    case_version: int | None = None             # the case version after this read or write; send it back as expected_version
     cached: bool = False
     decisions: dict[str, ArticleDecision] = Field(default_factory=dict)
     trace: IdentifyTrace
