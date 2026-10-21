@@ -66,3 +66,47 @@ def evaluate_g1(an: Analysis, verifier: str | None = None) -> list[Check]:
 
 def passed(checks: list[Check]) -> bool:
     return bool(checks) and all(c.status == 'PASS' for c in checks)
+
+
+# ---- Gate G4: committed Part 9 picks on the validation fold ---------------------------------------------------------
+
+G4_MIN_PICKS = 50
+G4_MAX_ERRORS = 1
+SWEEP = [round(0.50 + 0.05 * i, 2) for i in range(10)]
+
+
+def sweep_calibration(an: Analysis, pipeline: str) -> list[dict]:
+    """Committed Part 9 picks and errors at each threshold 0.50-0.95 on the calibration fold. Information only: the fit rule
+    and the calibration file belong to the threshold-fitting step, which needs the larger dataset (WP-13)."""
+    from evals_dev.identify_bench import report
+    from evals_dev.metrics import rate
+    cases = [c for c in an.cases if c.fold == 'calibration' and c.part_group == 'part9']
+    out = []
+    for t in SWEEP:
+        stats = report.commit_stats(an.L, pipeline, cases, threshold=t)
+        out.append({'threshold': t, 'committed': stats['precision']['n'], 'wrong': stats['precision']['n'] - stats['precision']['x'],
+                    'cases': len(cases)})
+    return out
+
+
+def evaluate_g4(an: Analysis, pipeline: str | None, calibration: dict | None) -> list[Check]:
+    """G4 needs a fitted threshold (``calibration.json``, status calibrated, for this pipeline) and then at least 50 committed picks
+    with at most 1 error on the validation fold. Without the file the gate is NOT RUN and says how far the data is."""
+    from evals_dev.identify_bench import report
+    from evals_dev.metrics import clopper_pearson_lower
+    val = [c for c in an.cases if c.fold == 'validation' and c.part_group == 'part9']
+    if pipeline is None or pipeline not in an.development:
+        return [Check('G4.1', 'NOT RUN', 'no pipeline has development-fold rows')]
+    sweep = sweep_calibration(an, pipeline)
+    info = (f'{len(val)} Part 9 validation cases and {sweep[0]["cases"]} calibration cases; calibration sweep committed picks '
+            f'by threshold: ' + ', '.join(f'{r["threshold"]:.2f}:{r["committed"]}' for r in sweep))
+    if not calibration or calibration.get('status') != 'calibrated':
+        return [Check('G4.1', 'NOT RUN', 'calibration.json is absent or not calibrated, so no threshold is fixed; ' + info)]
+    threshold = float(calibration.get('parts', {}).get('9', {}).get('threshold', 0))
+    stats = report.commit_stats(an.L, pipeline, val, threshold=threshold)
+    n, wrong = stats['precision']['n'], stats['precision']['n'] - stats['precision']['x']
+    lower = clopper_pearson_lower(n - wrong, n) if n else 0.0
+    ok = n >= G4_MIN_PICKS and wrong <= G4_MAX_ERRORS
+    return [Check('G4.1', 'PASS' if ok else 'FAIL',
+                  f'{pipeline} at threshold {threshold:.2f} on the validation fold: {n} committed picks, {wrong} wrong, exact one-sided '
+                  f'95% lower bound {lower:.4f}; need at least {G4_MIN_PICKS} picks with at most {G4_MAX_ERRORS} error')]

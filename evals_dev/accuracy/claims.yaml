@@ -1,0 +1,222 @@
+{
+  "schema": "batatis-claims/1",
+  "note": "JSON syntax (a valid YAML subset, like the held-out scenarios) so the standard library reads it. Maps each guaranteed claim (C1-C5), measured claim (M1-M7) and gate (G1-G5) of docs/research/2026-10-20-vision/2-week-build.md to the tests or runs that back it. A claim with no backing says planned, names the work package that closes it and says what is missing. Checked by evals_dev/tests/test_claims.py: every named test exists, every guaranteed claim has at least one test, nothing is marked backed without evidence.",
+  "claims": {
+    "C1": {
+      "kind": "guaranteed",
+      "title": "Every citation is built from the database and passes the citation validator",
+      "status": "partial",
+      "owner": "WP-33, WP-20",
+      "tests": [
+        "codedb/tests/test_validator.py::test_detects_invalid_citations",
+        "engine/tests/test_completeness.py::test_d05_nonexistent_article_is_a_gap_not_a_crash",
+        "engine/tests/test_identify.py::test_quote_check_drops_paraphrase_and_unlisted_articles",
+        "evals_dev/tests/test_identify_bench_contract.py::test_a_lying_verifier_never_gets_a_fabricated_citation_into_the_picks",
+        "evals_dev/tests/test_deterministic_checks.py::test_citation_resolution_splits_system_and_gold"
+      ],
+      "runs": [],
+      "gap": "No end-to-end test yet that every citation in API and export responses passes the validator (WP-33); the identify route that shows picks lands with WP-20."
+    },
+    "C2": {
+      "kind": "guaranteed",
+      "title": "Section C equals the attribution tables, checked against an independent re-extraction, and the exported PDF shows the same text",
+      "status": "partial",
+      "owner": "WP-14",
+      "tests": [
+        "engine/tests/test_section_c.py::test_most_varied_part9_sentences",
+        "engine/tests/test_export.py::test_section_c_cells_and_appendix_match_section_c_rows",
+        "engine/tests/test_export.py::test_render_and_extract_every_filled_value"
+      ],
+      "runs": [],
+      "gap": "The independent re-extraction of every Division B attribution row (5,308 sentences) does not exist; current tests re-derive from the same database."
+    },
+    "C3": {
+      "kind": "guaranteed",
+      "title": "Where a table has no row Section C says so; where the national intent is attributed differently it is labelled",
+      "status": "backed",
+      "owner": "WP-14",
+      "tests": [
+        "engine/tests/test_section_c.py::test_article_without_table_row_says_so",
+        "engine/tests/test_section_c.py::test_differs_flag_comes_from_intent_comparison",
+        "engine/tests/test_export.py::test_differing_intent_is_labelled"
+      ],
+      "runs": [],
+      "gap": "WP-14 pins the 8 provisions that differ and enumerates every status class."
+    },
+    "C4": {
+      "kind": "guaranteed",
+      "title": "No Section A or B value appears without a source; export stays blocked while a required field is empty or a proposed item is unconfirmed",
+      "status": "backed",
+      "owner": "WP-21",
+      "tests": [
+        "engine/tests/test_export.py::test_blocks_on_unconfirmed_facts_and_blocking_gaps",
+        "engine/tests/test_export.py::test_direct_export_cannot_bypass_authoritative_completeness",
+        "engine/tests/test_public_fact_sources.py::test_applicant_sources_keep_their_original_provenance"
+      ],
+      "runs": [],
+      "gap": "The invented-value invariant over the 60 dev cases and their stripped copies arrives with WP-21 and WP-13."
+    },
+    "C5": {
+      "kind": "guaranteed",
+      "title": "Batatis never writes the officer's decision, the risk assessment or mitigating measures, or any statement that a design complies",
+      "status": "partial",
+      "owner": "WP-16, WP-37",
+      "tests": [
+        "engine/tests/test_completeness.py::test_checker_does_not_claim_compliance_or_write_process_answers",
+        "engine/tests/test_process_fields.py::test_applicant_passage_roundtrips_but_ai_cannot_fill_field",
+        "engine/tests/test_export.py::test_generated_or_altered_process_content_never_exports",
+        "engine/tests/test_assist.py::test_compliance_and_safety_verdicts_are_stopped",
+        "engine/tests/test_assist.py::test_prompt_enforces_professional_and_applicant_authorship",
+        "evals_dev/tests/test_judge.py::test_approval_claims_are_flagged_unless_negated"
+      ],
+      "runs": [],
+      "gap": "The boundary-prompt suite (at least 20 prompts, declined 20 of 20) does not exist yet."
+    },
+    "M1": {
+      "kind": "measured",
+      "title": "Committed article picks are right (gate G4: at least 50 committed picks with at most 1 error, exact one-sided 95% lower bound 0.9086)",
+      "status": "partial",
+      "owner": "WP-12, WP-13",
+      "tests": [
+        "evals_dev/tests/test_metrics.py::test_plan_anchor_49_of_50_is_0_9086",
+        "evals_dev/tests/test_metrics.py::test_plan_anchor_32_of_32_is_0_9106",
+        "evals_dev/tests/test_folds.py::test_each_development_stratum_holds_the_calibration_share",
+        "evals_dev/tests/test_identify_bench_report.py::test_commit_exploration_is_part_9_probability_and_verifier_agreement"
+      ],
+      "runs": [
+        {"command": "python -m evals_dev.identify_bench decision --write", "artifact": "docs/accuracy/code-id-decision.md", "note": "commit policy explored at the placeholder threshold; nothing fitted"}
+      ],
+      "gap": "Needs the larger Part 9 development set (WP-13) to fit the threshold on the calibration fold and report precision on the validation fold. calibration.json stays uncalibrated until then."
+    },
+    "M2": {
+      "kind": "measured",
+      "title": "A required article appears in the top 5",
+      "status": "partial",
+      "owner": "WP-12",
+      "tests": [
+        "evals_dev/tests/test_identify_bench_stage0.py::test_the_published_numbers_reproduce_from_recorded_judgments_without_a_network",
+        "evals_dev/tests/test_judge.py::test_aggregate_numbers_follow_the_definitions"
+      ],
+      "runs": [
+        {"command": "python -m evals_dev.identify_bench decision --write", "artifact": "docs/accuracy/code-id-decision.md"},
+        {"command": "python -m evals_dev.judge run --split test --arm <winner>", "artifact": null, "pending": true, "note": "once, at gate G4 time"}
+      ],
+      "gap": "The held-out run happens once, after thresholds are fitted."
+    },
+    "M3": {
+      "kind": "measured",
+      "title": "Batatis asks instead of guessing (at least 90% of scenarios with key facts removed; 0 invented Section A or B values)",
+      "status": "planned",
+      "owner": "WP-13, WP-22",
+      "tests": [],
+      "runs": [],
+      "gap": "The stripped copies of the dev scenarios, their scorer and the invented-value invariant do not exist yet."
+    },
+    "M4": {
+      "kind": "measured",
+      "title": "Professional involvement is flagged (agreement reported; under-flagging reported on its own, target 0; 10 labels checked by an engineer or officer)",
+      "status": "partial",
+      "owner": "WP-10, human",
+      "tests": [
+        "engine/tests/test_professional.py::test_under_flagging_guard_every_missing_house_scope_fact",
+        "engine/tests/test_section_d_heldout_v11.py::test_heldout_v11_scorer_skips_null_labels_and_splits_source",
+        "evals_dev/tests/test_judge.py::test_aggregate_numbers_follow_the_definitions"
+      ],
+      "runs": [
+        {"command": "python -m evals_dev.judge run --split dev --sut engine", "artifact": null, "pending": true, "note": "engineering_required agreement and under_flag are in the judge output"}
+      ],
+      "gap": "The judge scores agreement and under-flagging; the 10 labels checked by a person and the held-out run are still to do."
+    },
+    "M5": {
+      "kind": "measured",
+      "title": "The officer review catches planted gaps (20 seeded applications, half by an author who never saw the checker)",
+      "status": "partial",
+      "owner": "WP-15",
+      "tests": [
+        "engine/tests/test_completeness.py::test_missing_fields_for_each_rule_checked_planted_class",
+        "evals_dev/tests/test_deterministic_checks.py::test_planted_detection_is_known_by_construction"
+      ],
+      "runs": [],
+      "gap": "The 20-application planted-defect evaluation with a blind author (WP-15)."
+    },
+    "M6": {
+      "kind": "measured",
+      "title": "Drawing values, if candidate picking ships (every auto-accepted value correct; every miss becomes a question)",
+      "status": "planned",
+      "owner": "WP-46",
+      "tests": [],
+      "runs": [],
+      "gap": "Phase 2: two sealed real vector sets with ground truth."
+    },
+    "M7": {
+      "kind": "measured",
+      "title": "The held-out test split is run once and reported as is",
+      "status": "partial",
+      "owner": "WP-10",
+      "tests": [
+        "evals_dev/tests/test_judge.py::test_second_test_run_refuses_without_a_logged_override",
+        "evals_dev/tests/test_judge.py::test_lock_is_taken_before_the_sut_so_a_crash_still_consumes_the_run",
+        "evals_dev/tests/test_judge.py::test_concurrent_attempts_let_exactly_one_through",
+        "evals_dev/tests/test_judge.py::test_stdout_and_stderr_contain_no_scenario_text",
+        "evals_dev/tests/test_judge.py::test_sandbox_denies_reading_and_writing_the_judge_folder"
+      ],
+      "runs": [
+        {"command": "python -m evals_dev.judge run --split test --arm <winner>", "artifact": null, "pending": true, "note": "once, at gate G4 time, for the registered winner and the BM25 floor"}
+      ],
+      "gap": "The mechanism is built and tested; the run itself is deliberately not done until thresholds are fitted."
+    },
+    "G1": {
+      "kind": "gate",
+      "title": "Code ID re-measure: rerank MRR at least 0.70 on public53 at the pinned screening-model version; verifier top-1 by Part with intervals; latency and cost per case",
+      "status": "partial",
+      "owner": "WP-12",
+      "tests": [
+        "evals_dev/tests/test_identify_bench_stage0.py::test_the_published_numbers_reproduce_from_recorded_judgments_without_a_network",
+        "evals_dev/tests/test_identify_bench_report.py::test_the_cheapest_tied_pipeline_wins",
+        "evals_dev/tests/test_identify_bench_memo.py::test_g1_section_reports_rerank_mrr_verifier_top1_by_part_and_not_run_for_the_rest"
+      ],
+      "runs": [
+        {"command": "python scripts/gate_g1.py", "artifact": "docs/accuracy/g1-report.md"}
+      ],
+      "gap": "See docs/accuracy/g1-report.md for the measured values and which checks passed."
+    },
+    "G2": {
+      "kind": "gate",
+      "title": "Candidate picking is right or asks on the two held-out vector sets, with no wrong auto-accepted value",
+      "status": "planned",
+      "owner": "WP-46",
+      "tests": [],
+      "runs": [],
+      "gap": "Phase 2."
+    },
+    "G3": {
+      "kind": "gate",
+      "title": "The three demo cases export cleanly (all 50 applicant fields filled or N/A, zero validator errors on the exported text)",
+      "status": "planned",
+      "owner": "WP-33",
+      "tests": [],
+      "runs": [],
+      "gap": "scripts/gate_g3.py and the explicit not-applicable fact type."
+    },
+    "G4": {
+      "kind": "gate",
+      "title": "At least 50 committed Part 9 picks with at most 1 error on the validation fold",
+      "status": "planned",
+      "owner": "WP-12, WP-13",
+      "tests": [
+        "evals_dev/tests/test_metrics.py::test_plan_anchor_49_of_50_is_0_9086"
+      ],
+      "runs": [],
+      "gap": "scripts/gate_g4.py after WP-13 supplies the Part 9 cases; the code-id decision memo lists how many are still to author."
+    },
+    "G5": {
+      "kind": "gate",
+      "title": "9 of 10 uncached live runs of the three demo flows pass",
+      "status": "planned",
+      "owner": "WP-37",
+      "tests": [],
+      "runs": [],
+      "gap": "End-to-end suite and live runs."
+    }
+  }
+}
