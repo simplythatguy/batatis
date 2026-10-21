@@ -1,8 +1,10 @@
 # API contract
 
-Engineer-needed flag (model-checked): rules_only 55/60 on the dev set (in-sample), 1 under-flag; shipped rules_plus_unknown: 50/60 in-sample, 0 under-flags, 27 unknowns sent to the applicant; held-out 7/8 blind (pre-fix), post-fix 4/8 (no longer blind).
+Engineer-needed flag. At measured source `d479e82`, the shipped facts-only `rules_plus_unknown` agreed with model gold on 50/60 text-only dev cases (0 no outputs, 27 unknowns) and 8/11 model-constructed no-ground-truth (no-gt) cases (PR #26; 8 no outputs, 3 unknowns). Unshipped `rules_only` had 55/60 dev agreement and 1 under-flag.
 
-Caveat on the 0 under-flags: On the 60 text-only dev cases it answered only yes or ask, with 0 no answers, so 0 under-flags there is by design. On the 11 model-constructed no-ground-truth (no-gt) Section D cases (PR #26) it answered no 8 times, with 0 under-flags. All in-sample, model-checked, not human-verified.
+Both shipped sets had 0 under-flags, defined only as gold yes to system no. The three no-gt gold-yes cases (`ngt-101`, `ngt-102`, `ngt-103`) abstained; these are misses, not correct answers. Zero under-flags on dev is by design because it never answered no. All current cases are in-sample, model-checked, not human-verified. Neither model gold nor the receipt's self-check is independent expert validation.
+
+These counts do not establish applicability, equivalence, professional approval or safety, or validate the full Case/API/export flow. They apply only to `d479e82`, not this document branch, newer source, a deployment or a final release. Historical shipped-variant results remain 7/8 blind pre-fix and 4/8 post-fix (no longer blind); neither was rerun for this receipt. Source: [Data Nerd receipt `d75e7ff`](https://github.com/simplythatguy/batatis/blob/d75e7ff0fabb89a2d3f23792ceba8ce116536b35/evals_dev/section_d_flag/RESULTS.md).
 
 These are the routes the engine serves. There is no `POST /cases/{id}/files`.
 
