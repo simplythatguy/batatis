@@ -1,3 +1,4 @@
+from engine.privacy import PRIVACY_NOTICE
 import pytest
 from fastapi.testclient import TestClient
 
@@ -17,7 +18,7 @@ def test_missing_code_database_is_503(tmp_path, monkeypatch):
     client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite')))
     response = client.get('/code/search', params={'q': 'fire separation'})
     assert response.status_code == 503
-    assert response.json() == {'detail': 'code database not found'}
+    assert response.json() == {'detail': 'code database not found', 'meta': {'notice': PRIVACY_NOTICE}}
     assert 'absent.sqlite' not in response.text
     assert str(tmp_path) not in response.text
 
@@ -50,7 +51,7 @@ def test_delete_evidence_keeps_the_other_slot(tmp_path):
     assert 'evidence.wall~2.title' in fields
     missing = client.delete('/cases/case_nope/evidence/wall')
     assert missing.status_code == 404
-    assert missing.json() == {'detail': 'case not found'}
+    assert missing.json() == {'detail': 'case not found', 'meta': {'notice': PRIVACY_NOTICE}}
 
 
 def test_case_lifecycle(client):
@@ -107,7 +108,7 @@ def test_missing_scc_form_response_does_not_expose_path(tmp_path, monkeypatch):
     response = client.post(f'/cases/{case_id}/export')
 
     assert response.status_code == 503
-    assert response.json() == {'detail': 'SCC variance form not found'}
+    assert response.json() == {'detail': 'SCC variance form not found', 'meta': {'notice': PRIVACY_NOTICE}}
     assert str(tmp_path) not in response.text
     assert 'BATATIS_SCC_FORM' not in response.text
 
@@ -126,5 +127,5 @@ def test_export_error_response_does_not_expose_path(tmp_path, monkeypatch):
     response = client.post(f'/cases/{case_id}/export')
 
     assert response.status_code == 500
-    assert response.json() == {'detail': 'The SCC variance form could not be exported.'}
+    assert response.json() == {'detail': 'The SCC variance form could not be exported.', 'meta': {'notice': PRIVACY_NOTICE}}
     assert str(tmp_path) not in response.text
