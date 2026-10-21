@@ -1,7 +1,8 @@
 """Where the TypeSafe key lives, and how to read or store it without showing it.
 
 Resolution order (first hit wins):
-  1. ``TYPESAFE_API_KEY`` in the process environment
+  1. ``TYPESAFE_API_KEY`` in the process environment, then ``JEV_API_KEY`` (Batatis's name for the
+     same credential, used in .env.example and the repo-root .env)
   2. the OS secret store (macOS Keychain, or ``secret-tool`` on Linux)
   3. ``~/.config/jev/credentials`` (mode 0600), the portable fallback
 
@@ -19,6 +20,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 ENV_VAR = "TYPESAFE_API_KEY"
+ENV_ALIASES = ("JEV_API_KEY",)       # Batatis local change: same TypeSafe key under the project's name
 KEYCHAIN_SERVICE = "Hermes TypeSafe API"
 KEYCHAIN_ACCOUNT = ENV_VAR
 _SECURITY = "/usr/bin/security"
@@ -72,9 +74,17 @@ def _from_file(provider: str = "typesafe") -> Optional[str]:
     return None
 
 
+def _env_typesafe() -> Optional[str]:
+    for name in (ENV_VAR, *ENV_ALIASES):
+        value = (os.environ.get(name) or "").strip()
+        if value:
+            return value
+    return None
+
+
 def _for(provider: str) -> Optional[str]:
     if provider == "typesafe":
-        return (os.environ.get(ENV_VAR) or "").strip() or _from_keychain() or _from_file()
+        return _env_typesafe() or _from_keychain() or _from_file()
     env = (os.environ.get(_ENV[provider]) or "").strip()
     return env or _from_keychain(provider) or _from_file(provider)
 
@@ -106,7 +116,7 @@ def source(for_provider: Optional[str] = None) -> str:
     name = for_provider or provider()
     if name not in PROVIDERS:
         return "absent"
-    if (os.environ.get(_ENV[name]) or "").strip():
+    if (os.environ.get(_ENV[name]) or "").strip() or (name == "typesafe" and _env_typesafe()):
         return "environment"
     if _from_keychain(name):
         return "os-secret-store"
