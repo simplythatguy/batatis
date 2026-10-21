@@ -28,7 +28,7 @@ test("cut-offs come from the response; the benchmark defaults replace missing or
   assert.equal(cutoffsOf({ bands: { x: 0.7, y: 0.3 } }).fallback, true, "inverted bands are rejected");
 });
 
-test("bands compare hundredths, as Jev reports them", () => {
+test("bands compare hundredths, as the engine reports them", () => {
   const B = { x: 0.3, y: 0.85 };
   assert.equal(bandFor(0.849, B), "high", "0.849 rounds to 0.85");
   assert.equal(bandFor(0.844, B), "mid");

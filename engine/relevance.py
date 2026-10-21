@@ -9,11 +9,21 @@ from pathlib import Path
 
 from .identify import Identification, Judge
 from .identify.jevkit import keystore
-from .identify.screen import JEV_PROVIDER
+from .identify.screen import JEV_MODEL, JEV_PROVIDER
 from .models import Case
-from .relevance_models import RelevanceBands, RelevanceRecord
+from .relevance_models import PUBLIC_MODEL, RelevanceBands, RelevanceRecord
 
 BANDS_FILE = Path(__file__).with_name('identify') / 'relevance_bands.json'
+# Private: the scoring provider's pinned model -> the opaque version responses and stored rows carry.
+# A new pin needs a new entry (and a new public version); an unmapped pin is never passed through.
+PUBLIC_MODEL_VERSIONS = {JEV_MODEL: PUBLIC_MODEL}
+
+
+def public_model(pin: str) -> str:
+    try:
+        return PUBLIC_MODEL_VERSIONS[pin]
+    except KeyError:
+        raise ValueError('the scoring model has no public version') from None
 
 
 class RelevanceUnavailable(RuntimeError):
@@ -79,6 +89,6 @@ def display_probabilities(scores: dict[str, float], rerank: dict[str, float]) ->
 def relevance_record(result: Identification, text: str, scored_at: str) -> RelevanceRecord:
     rerank = dict(result.ranked)
     return RelevanceRecord(
-        model=result.model, scored_at=scored_at, description_sha256=description_hash(text),
+        model=public_model(result.model), scored_at=scored_at, description_sha256=description_hash(text),
         scores=result.screen, rerank=rerank, display=display_probabilities(result.screen, rerank),
         bands=RelevanceBands.model_validate_json(BANDS_FILE.read_text()))

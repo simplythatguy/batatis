@@ -2739,8 +2739,8 @@
           "type": "object"
         },
         "model": {
-          "const": "jev-1.13.0",
-          "default": "jev-1.13.0",
+          "const": "relevance-1",
+          "default": "relevance-1",
           "title": "Model",
           "type": "string"
         },
