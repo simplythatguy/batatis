@@ -128,3 +128,21 @@ def test_an_independent_positive_trigger_still_resolves_yes(codes):
     facts, _signals = observe(row)
     assert facts.part4_design is True
     assert evaluate(row, codes, 'rules_plus_unknown') == ('yes', None)
+
+
+@pytest.mark.parametrize('description', [
+    'single-storey detached house, building area of 150 m2, stick-framed lumber '
+    'from the Part 9 span tables, 4.0 m clear span',
+    HOUSE + '; framing selected from Part 9 span tables',
+])
+def test_supported_prescriptive_table_reference_is_not_an_unparsed_member_span(codes, description):
+    row = case(description)
+    assert observe(row)[0].part4_design is False
+    assert evaluate(row, codes, 'rules_plus_unknown') == ('no', None)
+
+
+@pytest.mark.parametrize('cue', ['roof member span to be confirmed', '5200 mm floor joists'])
+def test_prescriptive_table_reference_does_not_hide_an_unparsed_member(codes, cue):
+    row = case(f'{HOUSE}; Part 9 span tables; {cue}')
+    assert observe(row)[0].part4_design is None
+    assert evaluate(row, codes, 'rules_plus_unknown')[0] == 'unknown'
