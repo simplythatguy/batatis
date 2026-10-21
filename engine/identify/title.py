@@ -5,17 +5,15 @@ design complies or is safe. A provision id is copied from the identify result.
 """
 from __future__ import annotations
 
+import json
 import re
+from pathlib import Path
 
 _BANNED = re.compile(r'\b(?:complies|compliant|compliance|safe)\b', re.I)
 _ARTICLE = re.compile(r'^\d+(?:\.\d+){3}\.$')
 _SENTENCE = re.compile(r'^\d+(?:\.\d+){3}\.\(\d+\)$')
-_CITIES = (
-    'Edmonton', 'Calgary', 'Red Deer', 'Lethbridge', 'Medicine Hat', 'Grande Prairie',
-    'Airdrie', 'Spruce Grove', 'St. Albert', 'Fort McMurray', 'Leduc', 'Okotoks',
-    'Cochrane', 'Chestermere', 'Camrose', 'Brooks', 'Wetaskiwin', 'Lloydminster',
-    'Canmore', 'Banff', 'Jasper', 'Cold Lake', 'High River', 'Strathmore',
-)
+_CITIES = tuple(json.loads((Path(__file__).resolve().parents[1] / 'data' / 'jurisdictions' / 'place_names.json')
+                           .read_text())['places'])
 _CITY = re.compile(r'\b(' + '|'.join(re.escape(name) for name in _CITIES) + r')\b', re.I)
 _CITY_CANON = {name.casefold(): name for name in _CITIES}
 _TYPE_VALUE = {
@@ -147,7 +145,7 @@ def _clean(title: str) -> str:
 
 
 def short_title(prose: str, facts, result: dict | None) -> str:
-    """'Single-family, Edmonton: 9.9.10.1.(2) egress window' when those parts are known."""
+    """'Single-family, Red Deer: 9.9.10.1.(2) egress window' when those parts are known."""
     kind = _building_type(prose, facts)
     place = _place(prose, facts)
     provision, topic = _provision(result or {})

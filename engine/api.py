@@ -23,6 +23,7 @@ from .codes import CodeDbMissing, Codes
 from .export import (EXPORT_FAILED_DETAIL, ExportBlocked, ExportError, FORM_NOT_FOUND_DETAIL, FormNotFound,
                      export_case)
 from .http_guard import HttpGuard
+from .jurisdictions import export_notice
 from .identify import Judge
 from .llm_gate import client_ip_from, search_retry_after
 from .models import Case, Fact, Jurisdiction, SectionCRow
@@ -134,7 +135,8 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
     app.add_middleware(CORSMiddleware, allow_origin_regex=r'http://(localhost|127\.0\.0\.1)(:\d+)?',
                        allow_origins=[os.environ.get('BATATIS_WEB_ORIGIN', 'http://localhost:5480').rstrip('/')],
                        allow_credentials=True, allow_methods=['*'], allow_headers=['*'],
-                       expose_headers=['Retry-After', 'X-Batatis-Notice', 'Content-Disposition'])
+                       expose_headers=['Retry-After', 'X-Batatis-Notice', 'X-Batatis-Jurisdiction-Notice',
+                                       'Content-Disposition'])
     app.add_middleware(HttpGuard, sweep=sweep)
 
     def code() -> Codes:
@@ -245,8 +247,12 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
             logger.error('%s %s', EXPORT_FAILED_DETAIL, exc)
             raise HTTPException(500, EXPORT_FAILED_DETAIL) from None
         name = f'{case_id}-scc-variance{"-DRAFT" if draft else ""}.pdf'
-        return Response(res.pdf, media_type='application/pdf',
-                        headers={'Content-Disposition': f'attachment; filename="{name}"'})
+        headers = {'Content-Disposition': f'attachment; filename="{name}"'}
+        notice = export_notice(case)   # from the case's jurisdiction pack; never a block
+        if notice:
+            # Its own header, so the standard privacy notice in X-Batatis-Notice is kept.
+            headers['X-Batatis-Jurisdiction-Notice'] = notice
+        return Response(res.pdf, media_type='application/pdf', headers=headers)
 
     @app.get('/code/search')
     def code_search(request: Request, q: str, division: str | None = Query('B', pattern='^[ABC]$'),
@@ -314,6 +320,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
     app.include_router(__import__('engine.routes_relevance', fromlist=['create_router']).create_router(
         cases, code, relevance_judge_factory))
     app.include_router(__import__('engine.routes_identify', fromlist=['create_router']).create_router(cases, code))
+    app.include_router(__import__('engine.routes_jurisdictions', fromlist=['create_router']).create_router(cases))
     return app
 
 

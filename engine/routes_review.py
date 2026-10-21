@@ -13,6 +13,7 @@ from .account_models import (reviewing_authority, ApplicationStatus, ApplicantTy
                              Role, ThreadMessage, User)
 from .accounts import require_user
 from .completeness import check_completeness
+from .jurisdictions import reviewing_authority_names
 from .models import Case, now
 from .store import VersionConflict
 
@@ -283,7 +284,7 @@ def create_router(cases, code):
                 raise HTTPException(409, {'message': 'Resolve blocking administrative gaps before submitting',
                                           'gaps': [gap.model_dump() for gap in blocking]})
             if not reviewing_authority(case.authority):
-                raise HTTPException(409, 'Choose Calgary or Edmonton as the reviewing authority before submitting')
+                raise HTTPException(409, f'Choose {reviewing_authority_names()} as the reviewing authority before submitting')
             transition(case, user, 'submitted', 'Submitted for administrative review')
             case.submitted_at = now()
             case.claim = case.decision = None

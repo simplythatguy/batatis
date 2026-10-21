@@ -25,10 +25,13 @@ from .routes_review import (NotificationsResult, ApplicationsResult, QueueResult
 from .routes_assist import AssistRequest, AssistResult
 from .identify.http_models import (BenchmarkConfirmRequest, IdentifyConfirmRequest, IdentifyDecisionRequest,
                                    IdentifyDecisionResponse, IdentifyRequest)
+from .models_jurisdictions import JurisdictionDetail, JurisdictionsResult
+from .routes_jurisdictions import CaseJurisdictionPack
 
 OUT = Path(__file__).resolve().parent.parent / 'web' / 'src' / 'api' / 'engine.schema.json'
 RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesResult, ApplicationsResult,
-             QueueResult, ClaimResult, AssistResult, NotificationsResult, IdentifyDecisionResponse)  # responses carry every field
+             QueueResult, ClaimResult, AssistResult, NotificationsResult, IdentifyDecisionResponse,
+             JurisdictionsResult, JurisdictionDetail, CaseJurisdictionPack)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
             ClaimRequest, DecisionRequest, MessageRequest, AssistRequest,
             IdentifyRequest, IdentifyDecisionRequest, IdentifyConfirmRequest, BenchmarkConfirmRequest)  # defaulted fields optional

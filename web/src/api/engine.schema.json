@@ -436,6 +436,68 @@
       "title": "AttributionPair",
       "type": "object"
     },
+    "Authority": {
+      "additionalProperties": false,
+      "description": "The authority having jurisdiction is an organisation, not an officer (SCC IB-2026-10-16).",
+      "properties": {
+        "contact": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contact"
+        },
+        "kind": {
+          "enum": [
+            "accredited_municipality",
+            "alberta_safety_codes_authority",
+            "accredited_organisation"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "reviewer_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The account `Authority` code when Batatis has reviewer accounts for this office; else null.",
+          "title": "Reviewer Code"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/PackSource"
+          },
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "kind",
+        "reviewer_code",
+        "contact",
+        "sources"
+      ],
+      "title": "Authority",
+      "type": "object"
+    },
     "BenchmarkConfirmRequest": {
       "additionalProperties": false,
       "description": "The applicant names the requirement their design departs from and confirms the one-line departure.",
@@ -631,6 +693,56 @@
         "question"
       ],
       "title": "BenchmarkRecord",
+      "type": "object"
+    },
+    "Bulletin": {
+      "additionalProperties": false,
+      "description": "A Safety Codes Council information bulletin. Title, date and link; paragraphs are not copied.",
+      "properties": {
+        "effective": {
+          "anyOf": [
+            {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effective"
+        },
+        "id": {
+          "pattern": "^IB-\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "issued": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Issued",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/PackSource"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "issued",
+        "effective",
+        "summary",
+        "source"
+      ],
+      "title": "Bulletin",
       "type": "object"
     },
     "Case": {
@@ -850,6 +962,50 @@
       "title": "Case",
       "type": "object"
     },
+    "CaseJurisdictionPack": {
+      "additionalProperties": false,
+      "description": "`pack` is null when the case names no jurisdiction or authority yet.",
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "matched_by": {
+          "anyOf": [
+            {
+              "enum": [
+                "id",
+                "name",
+                "reviewer_code",
+                "fallback"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Matched By"
+        },
+        "pack": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JurisdictionDetail"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "case_id",
+        "matched_by",
+        "pack"
+      ],
+      "title": "CaseJurisdictionPack",
+      "type": "object"
+    },
     "Claim": {
       "properties": {
         "claimed_at": {
@@ -1050,6 +1206,54 @@
         "excerpt"
       ],
       "title": "ContextNote",
+      "type": "object"
+    },
+    "CoverageEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "coverage": {
+          "enum": [
+            "full",
+            "code_only",
+            "preview"
+          ],
+          "title": "Coverage",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[A-Z]{2}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "note": {
+          "title": "Note",
+          "type": "string"
+        },
+        "roadmap": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Roadmap"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "coverage",
+        "note",
+        "roadmap"
+      ],
+      "title": "CoverageEntry",
       "type": "object"
     },
     "Decision": {
@@ -1633,7 +1837,8 @@
           "default": "blocking",
           "enum": [
             "blocking",
-            "warning"
+            "warning",
+            "info"
           ],
           "title": "Severity",
           "type": "string"
@@ -1648,6 +1853,76 @@
         "routed_to"
       ],
       "title": "Gap",
+      "type": "object"
+    },
+    "Guide": {
+      "additionalProperties": false,
+      "description": "A published guide for a design category or process. Guidance, not a variance or an approval.",
+      "properties": {
+        "companions": {
+          "items": {
+            "$ref": "#/$defs/PackSource"
+          },
+          "title": "Companions",
+          "type": "array"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "issued": {
+          "anyOf": [
+            {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Issued"
+        },
+        "requires_professional": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Requires Professional"
+        },
+        "source": {
+          "$ref": "#/$defs/PackSource"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "topic": {
+          "title": "Topic",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "issued",
+        "topic",
+        "summary",
+        "requires_professional",
+        "source",
+        "companions"
+      ],
+      "title": "Guide",
       "type": "object"
     },
     "IdentifyArticle": {
@@ -2577,6 +2852,112 @@
       "title": "Jurisdiction",
       "type": "object"
     },
+    "JurisdictionDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "$ref": "#/$defs/Authority"
+        },
+        "bulletins": {
+          "items": {
+            "$ref": "#/$defs/Bulletin"
+          },
+          "title": "Bulletins",
+          "type": "array"
+        },
+        "code_edition": {
+          "title": "Code Edition",
+          "type": "string"
+        },
+        "coverage": {
+          "enum": [
+            "full",
+            "code_only",
+            "preview"
+          ],
+          "title": "Coverage",
+          "type": "string"
+        },
+        "disclaimer": {
+          "title": "Disclaimer",
+          "type": "string"
+        },
+        "fallback": {
+          "title": "Fallback",
+          "type": "boolean"
+        },
+        "forms": {
+          "items": {
+            "$ref": "#/$defs/ResolvedForm"
+          },
+          "title": "Forms",
+          "type": "array"
+        },
+        "guides": {
+          "items": {
+            "$ref": "#/$defs/Guide"
+          },
+          "title": "Guides",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "notices": {
+          "items": {
+            "$ref": "#/$defs/PackNotice"
+          },
+          "title": "Notices",
+          "type": "array"
+        },
+        "process_notes": {
+          "items": {
+            "$ref": "#/$defs/ResolvedNote"
+          },
+          "title": "Process Notes",
+          "type": "array"
+        },
+        "province": {
+          "title": "Province",
+          "type": "string"
+        },
+        "standing_packages": {
+          "items": {
+            "$ref": "#/$defs/StandingPackage"
+          },
+          "title": "Standing Packages",
+          "type": "array"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "province",
+        "coverage",
+        "fallback",
+        "code_edition",
+        "summary",
+        "authority",
+        "process_notes",
+        "forms",
+        "standing_packages",
+        "guides",
+        "bulletins",
+        "notices",
+        "disclaimer"
+      ],
+      "title": "JurisdictionDetail",
+      "type": "object"
+    },
     "JurisdictionInput": {
       "properties": {
         "authority": {
@@ -2605,6 +2986,117 @@
         "name"
       ],
       "title": "Jurisdiction",
+      "type": "object"
+    },
+    "JurisdictionSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "title": "Authority",
+          "type": "string"
+        },
+        "coverage": {
+          "enum": [
+            "full",
+            "code_only",
+            "preview"
+          ],
+          "title": "Coverage",
+          "type": "string"
+        },
+        "fallback": {
+          "title": "Fallback",
+          "type": "boolean"
+        },
+        "forms": {
+          "title": "Forms",
+          "type": "integer"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "province": {
+          "title": "Province",
+          "type": "string"
+        },
+        "reviewer_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reviewer Code"
+        },
+        "standing_packages": {
+          "title": "Standing Packages",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "province",
+        "coverage",
+        "fallback",
+        "authority",
+        "reviewer_code",
+        "standing_packages",
+        "forms"
+      ],
+      "title": "JurisdictionSummary",
+      "type": "object"
+    },
+    "JurisdictionsResult": {
+      "additionalProperties": false,
+      "properties": {
+        "coverage": {
+          "items": {
+            "$ref": "#/$defs/CoverageEntry"
+          },
+          "title": "Coverage",
+          "type": "array"
+        },
+        "disclaimer": {
+          "title": "Disclaimer",
+          "type": "string"
+        },
+        "jurisdictions": {
+          "items": {
+            "$ref": "#/$defs/JurisdictionSummary"
+          },
+          "title": "Jurisdictions",
+          "type": "array"
+        },
+        "levels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "enum": [
+              "full",
+              "code_only",
+              "preview"
+            ]
+          },
+          "title": "Levels",
+          "type": "object"
+        }
+      },
+      "required": [
+        "jurisdictions",
+        "coverage",
+        "levels",
+        "disclaimer"
+      ],
+      "title": "JurisdictionsResult",
       "type": "object"
     },
     "LoginRequest": {
@@ -2966,6 +3458,158 @@
         "provision"
       ],
       "title": "OpenQuestion",
+      "type": "object"
+    },
+    "PackNotice": {
+      "additionalProperties": false,
+      "description": "Information shown on the gaps list and the export. Severity is always info; it never blocks.",
+      "properties": {
+        "fix_hint": {
+          "title": "Fix Hint",
+          "type": "string"
+        },
+        "heading": {
+          "description": "Appendix heading for the notice.",
+          "title": "Heading",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z0-9_]+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "message": {
+          "description": "ASCII, because it is also sent as an HTTP header.",
+          "minLength": 1,
+          "pattern": "^[\\x20-\\x7e]+$",
+          "title": "Message",
+          "type": "string"
+        },
+        "section": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "process"
+          ],
+          "title": "Section",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/PackSource"
+          },
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        },
+        "surfaces": {
+          "items": {
+            "enum": [
+              "gaps",
+              "export_header",
+              "export_appendix"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Surfaces",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "surfaces",
+        "section",
+        "heading",
+        "message",
+        "fix_hint",
+        "sources"
+      ],
+      "title": "PackNotice",
+      "type": "object"
+    },
+    "PackSource": {
+      "additionalProperties": false,
+      "description": "Where a claim comes from. `retrieved` is the date the URL was fetched or checked.",
+      "properties": {
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
+        "pages": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "PDF pages that carry the claim, as printed by the reader, e.g. \"pp.2-3\".",
+          "title": "Pages"
+        },
+        "retrieved": {
+          "description": "Date the URL was fetched or checked (YYYY-MM-DD).",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Retrieved",
+          "type": "string"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "SHA-256 of the file fetched on `retrieved`.",
+          "title": "Sha256"
+        },
+        "status": {
+          "default": "verified",
+          "description": "`unverified` when the claim could not be checked against the source.",
+          "enum": [
+            "verified",
+            "unverified"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "url": {
+          "pattern": "^https://",
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "url",
+        "retrieved",
+        "pages",
+        "sha256",
+        "status",
+        "note"
+      ],
+      "title": "PackSource",
       "type": "object"
     },
     "ProcessRef": {
@@ -3456,6 +4100,201 @@
       "title": "RelevanceRecord",
       "type": "object"
     },
+    "ResolvedForm": {
+      "additionalProperties": false,
+      "properties": {
+        "export": {
+          "description": "Whether Batatis fills this form today.",
+          "enum": [
+            "supported",
+            "not_yet"
+          ],
+          "title": "Export",
+          "type": "string"
+        },
+        "field_count": {
+          "minimum": 0,
+          "title": "Field Count",
+          "type": "integer"
+        },
+        "field_map": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Repository path of the field map, when export is supported.",
+          "title": "Field Map"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "issuer": {
+          "title": "Issuer",
+          "type": "string"
+        },
+        "local_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Git-excluded local copy under reference/.",
+          "title": "Local Path"
+        },
+        "note": {
+          "default": "",
+          "title": "Note",
+          "type": "string"
+        },
+        "page_count": {
+          "minimum": 1,
+          "title": "Page Count",
+          "type": "integer"
+        },
+        "pdf_last_modified": {
+          "anyOf": [
+            {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pdf Last Modified"
+        },
+        "role": {
+          "enum": [
+            "primary",
+            "additional"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "scope": {
+          "enum": [
+            "province",
+            "local"
+          ],
+          "title": "Scope",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/PackSource"
+        },
+        "status": {
+          "enum": [
+            "current",
+            "confirm_with_office",
+            "historical"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "issuer",
+        "role",
+        "version",
+        "status",
+        "export",
+        "sha256",
+        "page_count",
+        "field_count",
+        "pdf_last_modified",
+        "field_map",
+        "local_path",
+        "note",
+        "source",
+        "scope"
+      ],
+      "title": "ResolvedForm",
+      "type": "object"
+    },
+    "ResolvedNote": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "scope": {
+          "enum": [
+            "province",
+            "local"
+          ],
+          "title": "Scope",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/PackSource"
+          },
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "topic": {
+          "enum": [
+            "entry_point",
+            "submission",
+            "permit_link",
+            "scope",
+            "documents",
+            "professional",
+            "review",
+            "decision",
+            "appeal",
+            "registration",
+            "authority"
+          ],
+          "title": "Topic",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "topic",
+        "text",
+        "sources",
+        "scope"
+      ],
+      "title": "ResolvedNote",
+      "type": "object"
+    },
     "ReviewerName": {
       "properties": {
         "name": {
@@ -3879,6 +4718,127 @@
         "detail"
       ],
       "title": "StageRecord",
+      "type": "object"
+    },
+    "StandingPackage": {
+      "additionalProperties": false,
+      "description": "A published local route (standing posted variance or policy). Metadata only; checklists are WP-32.",
+      "properties": {
+        "applies_to": {
+          "title": "Applies To",
+          "type": "string"
+        },
+        "checklist": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Checklist id once WP-32 builds it. A checklist is never a determination.",
+          "title": "Checklist"
+        },
+        "code": {
+          "description": "The identifier the issuer prints, e.g. SPV-001 or B23-01.",
+          "title": "Code",
+          "type": "string"
+        },
+        "edition": {
+          "description": "Code edition the document cites, as printed.",
+          "title": "Edition",
+          "type": "string"
+        },
+        "historical_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Historical Reason"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "issued": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Issued",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "standing_posted_variance",
+            "policy"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "note": {
+          "default": "",
+          "title": "Note",
+          "type": "string"
+        },
+        "provisions": {
+          "description": "Provisions the source names, as printed. Not a code analysis.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Provisions",
+          "type": "array"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revision"
+        },
+        "source": {
+          "$ref": "#/$defs/PackSource"
+        },
+        "status": {
+          "enum": [
+            "current",
+            "historical"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "code",
+        "kind",
+        "title",
+        "revision",
+        "issued",
+        "edition",
+        "status",
+        "historical_reason",
+        "provisions",
+        "applies_to",
+        "note",
+        "checklist",
+        "source"
+      ],
+      "title": "StandingPackage",
       "type": "object"
     },
     "StatusChange": {
