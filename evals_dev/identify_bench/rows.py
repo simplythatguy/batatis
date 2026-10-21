@@ -36,8 +36,8 @@ def config_hash(config: dict) -> str:
     return hashlib.sha256(json.dumps(config, sort_keys=True, separators=(',', ':')).encode()).hexdigest()[:16]
 
 
-def row_key(chash: str, case_id: str, repeat: int) -> str:
-    return hashlib.sha256(f'{chash}|{case_id}|{repeat}'.encode()).hexdigest()[:16]
+def row_key(chash: str, case_id: str, repeat: int, profile: str = 'throughput') -> str:
+    return hashlib.sha256(f'{chash}|{case_id}|{repeat}|{profile}'.encode()).hexdigest()[:16]
 
 
 def now() -> str:
@@ -66,7 +66,7 @@ class RowDraft:
 def make_row(draft: RowDraft, *, arm: str, chash: str, case, repeat: int, attempt: int, profile: str, git_sha: str | None,
              codedb_sha256: str | None, started_at: str | None = None) -> dict:
     return {
-        'key': row_key(chash, case.id, repeat), 'case_id': case.id, 'dataset': case.dataset, 'fold': case.fold,
+        'key': row_key(chash, case.id, repeat, profile), 'case_id': case.id, 'dataset': case.dataset, 'fold': case.fold,
         'part_group': case.part_group, 'arm': arm, 'config_hash': chash, 'repeat': repeat, 'attempt': attempt,
         'profile': profile,
         'order': draft.order if draft.order_keep is None else draft.order[:draft.order_keep],
@@ -130,14 +130,15 @@ class RowStore:
             if row['arm'] in self._cache:
                 self._cache[row['arm']].append(row)
 
-    def latest(self, arm: str, chash: str | None = None) -> dict[tuple[str, int], dict]:
-        """(case_id, repeat) -> the latest attempt of each row, for one config hash (default: the newest in the file)."""
+    def latest(self, arm: str, chash: str | None = None, profile: str = 'throughput') -> dict[tuple[str, int], dict]:
+        """(case_id, repeat) -> the latest attempt of each row, for one config hash (default: the newest in the file)
+        and one profile (``throughput`` for accuracy, ``interactive`` for latency, ``recorded`` for Stage 0)."""
         rows = self.arm_rows(arm)
         if chash is None and rows:
             chash = rows[-1]['config_hash']
         out: dict[tuple[str, int], dict] = {}
         for r in rows:
-            if r['config_hash'] == chash:
+            if r['config_hash'] == chash and r['profile'] == profile:
                 prev = out.get((r['case_id'], r['repeat']))
                 if prev is None or r['attempt'] >= prev['attempt']:
                     out[(r['case_id'], r['repeat'])] = r

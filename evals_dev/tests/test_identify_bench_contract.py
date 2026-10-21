@@ -12,70 +12,17 @@ import pytest
 from evals_dev.identify_bench import fakes, pricing
 from evals_dev.identify_bench.arms import arm_hashes, topo_order
 from evals_dev.identify_bench.datasets import BenchCase
-from evals_dev.identify_bench.ledger import Ledger
-from evals_dev.identify_bench.methods.base import RunContext
-from evals_dev.identify_bench.methods.fusion import FuseArm
-from evals_dev.identify_bench.methods.jev import JevRerankArm, JevScreenArm
-from evals_dev.identify_bench.methods.lexical import Bm25Arm, SearchRankArm
+from evals_dev.identify_bench.methods.jev import JevScreenArm
+from evals_dev.identify_bench.methods.lexical import SearchRankArm
 from evals_dev.identify_bench.methods.precedent import PrecedentArm
-from evals_dev.identify_bench.methods.verifier import LunaRerankArm, LunaVerifierArm, prompt, prompt_sha
+from evals_dev.identify_bench.methods.verifier import LunaVerifierArm, prompt, prompt_sha
 from evals_dev.identify_bench.rows import RowStore
 from evals_dev.identify_bench.runner import run_arms
-from evals_dev.identify_bench.transports import OpenAIChat
 
-SECRET = 'sk-test-SECRET-0123456789abcdef'
 ARTS = fakes.tiny_corpus()
-
-
-def gold_for(i: int) -> str:
-    part = fakes.PARTS[(i + 1) % 3]
-    return f'{part}.{i + 1}.1.1.'
-
-
-def make_cases(n=6, dataset='dev') -> list[BenchCase]:
-    return [BenchCase(id=f'{dataset}-{i:03}', dataset=dataset,
-                      query=f'We plan work involving the {fakes.TOPICS[i][1]} on a new project.',
-                      gold=(gold_for(i),), kind='homebuilder', family=f'{dataset}-{i:03}') for i in range(n)]
-
-
-class FakeRank:
-    @staticmethod
-    def rank_articles(terms, db_path, limit=300):
-        return sorted(ARTS, key=lambda a: (-fakes.overlap(terms, ARTS[a]['text']), a))[:limit]
-
-
-def precedents():
-    return [{'id': f'prec-{i}', 'title': fakes.TOPICS[i][0], 'summary': fakes.TOPICS[i][1], 'applies_to': 'Alberta',
-             'conditions': [], 'articles_varied': [{'status': 'same-number-present',
-                                                    'ae2023_provision': f'Div B, Article {gold_for(i)}'}]}
-            for i in range(len(fakes.TOPICS))]
-
-
-def fake_arms(**overrides):
-    rank = lambda q: sorted(ARTS, key=lambda a: (-fakes.overlap(q, ARTS[a]['text']), a))
-    arms = [
-        Bm25Arm('R0-bm25', rank_fn=rank),
-        SearchRankArm('R1-searchrank-v3', module=FakeRank, source='fake', source_sha256='0' * 64),
-        PrecedentArm('R2-precedent-lofo', entries=precedents()),
-        JevScreenArm('R4-jev-screen', max_state=8000),
-        JevRerankArm('R5-jev-screen-rerank60', 'R4-jev-screen', n=12, max_state=8000, repeats=2),
-        JevRerankArm('R6-bm25-jev-rerank60', 'R0-bm25', n=12, max_state=8000, repeats=2),
-        FuseArm('F1-rrf-R5-R1-R2', ('R5-jev-screen-rerank60', 'R1-searchrank-v3', 'R2-precedent-lofo')),
-        LunaRerankArm('A9-bm25-luna-rerank60', 'R0-bm25', n=12, repeats=2),
-        LunaVerifierArm('V15f-R5', 'R5-jev-screen-rerank60', shortlist_n=5, repeats=2),
-        LunaVerifierArm('V5c-R5', 'R5-jev-screen-rerank60', shortlist_n=5, chars=60, repeats=2),
-        LunaVerifierArm('V5f-F1-ool', 'F1-rrf-R5-R1-R2', shortlist_n=5, out_of_list=True, repeats=2),
-    ]
-    return {a.name: a for a in arms} | overrides
-
-
-def make_ctx(tmp_path, mode='honest', stop='5.00', jev=None):
-    http = fakes.fake_openai_http(mode)
-    chat = OpenAIChat(Ledger(tmp_path / 'openai.jsonl', 'openai', stop), http=http, sleep=lambda s: None,
-                      environ={'OPENAI_API_KEY': SECRET})
-    ctx = RunContext(arts=ARTS, store=RowStore(tmp_path / 'rows'), openai=chat, jev_ask=jev or fakes.FakeJev(),
-                     jev_ledger=Ledger(tmp_path / 'jev.jsonl', 'jev'))
-    return ctx, http
+SECRET = fakes.SECRET
+gold_for, make_cases, FakeRank, precedents = fakes.gold_for, fakes.make_cases, fakes.FakeRank, fakes.precedents
+fake_arms, make_ctx = fakes.fake_arms, fakes.make_ctx
 
 
 def check_row(row):

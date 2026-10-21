@@ -60,6 +60,7 @@ class Bm25Index:
 
 class PrecedentArm(Arm):
     kind = 'rank'
+    deterministic = True
 
     def __init__(self, name: str = 'R2-precedent', *, index_path: Path | str = INDEX, neighbours: int = 5,
                  entries: list[dict] | None = None, hide_family: bool = True):

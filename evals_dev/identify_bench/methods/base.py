@@ -48,7 +48,7 @@ class RunContext:
         ``clamp`` falls back to the highest repeat below ``repeat``: a deterministic upstream arm has repeat 0 only.
         """
         chash = self.arm_hashes.get(arm)
-        latest = self.store.latest(arm, chash)
+        latest = self.store.latest(arm, chash, self.profile)
         row = latest.get((case.id, repeat))
         while row is None and clamp and repeat > 0:
             repeat -= 1
@@ -67,6 +67,7 @@ class Arm:
     kind: str = ''
     upstream_names: tuple[str, ...] = ()
     repeats: int = 1                      # how many repeats this arm needs by default (deterministic arms: 1)
+    deterministic: bool = False           # True: one repeat is the whole answer, whatever --repeats asks for
     live: bool = False                    # True when run() may call a paid provider
     provider: str | None = None           # 'jev' or 'openai' when live
 

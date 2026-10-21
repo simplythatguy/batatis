@@ -28,6 +28,7 @@ _ARTICLE = re.compile(r'(\d+\.\d+\.\d+\.\d+\.)')
 
 class Bm25Arm(Arm):
     kind = 'rank'
+    deterministic = True
 
     def __init__(self, name: str = 'R0-bm25', rank_fn: Callable[[str], list[str]] | None = None, limit: int = 3000):
         self.name, self.limit, self._rank_fn = name, limit, rank_fn
@@ -71,6 +72,7 @@ def locate_search_rank(path: str | None = None):
 class SearchRankArm(Arm):
     """R1: PR #33 V3 ranking over provisions, collapsed to articles in first-hit order."""
     kind = 'rank'
+    deterministic = True
 
     def __init__(self, name: str = 'R1-searchrank-v3', module=None, source: str = '', source_sha256: str = '',
                  limit: int = 300):

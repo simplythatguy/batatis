@@ -1,6 +1,6 @@
 """One runner for every arm: resumable, keyed by config hash, with cost, latency and error accounting.
 
-* Rows are keyed by ``sha256(config_hash | case | repeat)``. A row that exists is skipped; a failed row is retried only
+* Rows are keyed by ``sha256(config_hash | case | repeat | profile)``. A row that exists is skipped; a failed row is retried only
   with ``retry_errors`` and the new attempt is appended, so the first failure stays on record.
 * Arms run interleaved case by case (A, B, A, B) in upstream-first order, so drift, warm-up and cache state fall on
   every arm alike. Repeats are the outer loop.
@@ -60,18 +60,19 @@ def run_arms(arms: dict[str, Arm], wanted: Sequence[str], cases: Iterable[BenchC
     stop = stop or threading.Event()
     summary = RunSummary(by_arm={n: {'ran': 0, 'skipped': 0, 'errored': 0} for n in order})
     lock = threading.Lock()
-    max_repeats = max((repeats if repeats is not None else arms[n].repeats) for n in order)
+    wanted_repeats = lambda a: 1 if a.deterministic else (repeats if repeats is not None else a.repeats)
+    max_repeats = max(wanted_repeats(arms[n]) for n in order)
 
     def one(case: BenchCase, repeat: int) -> None:
         for name in order:
             if stop.is_set():
                 return
             arm = arms[name]
-            n_rep = repeats if repeats is not None else arm.repeats
+            n_rep = wanted_repeats(arm)
             if repeat >= n_rep:
                 continue
             chash = hashes[name]
-            existing = ctx.store.latest(name, chash).get((case.id, repeat))
+            existing = ctx.store.latest(name, chash, profile).get((case.id, repeat))
             if existing is not None and not (retry_errors and existing['errors']):
                 with lock:
                     summary.skipped += 1
@@ -114,11 +115,11 @@ def run_arms(arms: dict[str, Arm], wanted: Sequence[str], cases: Iterable[BenchC
 
 
 def pending(arms: dict[str, Arm], name: str, cases: Iterable[BenchCase], ctx_store: RowStore,
-            repeats: int | None = None) -> int:
+            repeats: int | None = None, profile: str = 'throughput') -> int:
     """How many rows of this arm are still missing (not counting failures that could be retried)."""
     chash = arm_hashes(arms)[name]
-    have = ctx_store.latest(name, chash)
-    n_rep = repeats if repeats is not None else arms[name].repeats
+    have = ctx_store.latest(name, chash, profile)
+    n_rep = 1 if arms[name].deterministic else (repeats if repeats is not None else arms[name].repeats)
     return sum(1 for c in cases for r in range(n_rep) if (c.id, r) not in have)
 
 
