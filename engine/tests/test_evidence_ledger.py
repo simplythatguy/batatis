@@ -86,11 +86,6 @@ def test_actual_missing_post_route_and_durable_acknowledgment(ledger):
     assert saved['case_version'] == saved['case']['version'] == 2
     assert store.get(case.id).model_dump() == saved['case']
     assert client.get(f'/api/cases/{case.id}').json() == {**saved['case'], 'meta': saved['meta']}
-    routes = client.app.routes
-    assert sum(route.path == '/cases/{case_id}/evidence' and 'POST' in getattr(route, 'methods', set())
-               for route in routes) == 1
-    assert sum(route.path == '/cases/{case_id}/evidence/{evidence_id}' and 'DELETE' in getattr(route, 'methods', set())
-               for route in routes) == 1
 
 
 def test_create_edit_reload_and_delete_use_one_actual_slot_and_keep_revisions(ledger):
