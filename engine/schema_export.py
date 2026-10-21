@@ -23,12 +23,13 @@ from .routes_auth import SignupRequest, LoginRequest, OnboardingRequest
 from .routes_review import (NotificationsResult, ApplicationsResult, QueueResult, ClaimResult, ClaimRequest,
                             DecisionRequest, MessageRequest)
 from .routes_assist import AssistRequest, AssistResult
+from .routes_intake import IntakeRequest, IntakeResult
 
 OUT = Path(__file__).resolve().parent.parent / 'web' / 'src' / 'api' / 'engine.schema.json'
 RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesResult, ApplicationsResult,
-             QueueResult, ClaimResult, AssistResult, NotificationsResult)  # responses carry every field
+             QueueResult, ClaimResult, AssistResult, NotificationsResult, IntakeResult)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
-            ClaimRequest, DecisionRequest, MessageRequest, AssistRequest)  # defaulted fields optional
+            ClaimRequest, DecisionRequest, MessageRequest, AssistRequest, IntakeRequest)  # defaulted fields optional
 
 
 class _ResponsesCarryDefaults(GenerateJsonSchema):

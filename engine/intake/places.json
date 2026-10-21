@@ -1,0 +1,626 @@
+{
+ "note": "Alberta place names the intake rules recognise as a municipality. Data, not code: engine code never names a place. Hamlets and communities are kept as written; the jurisdiction pack decides the authority. Names that are also common words or given names (for example Legal, Raymond, Manning, Viking) are left out so they are never read as a place.",
+ "source": "Agent-written list of Alberta cities, towns, specialized and rural municipalities and large communities (2026-10-21). Not checked against the Municipal Affairs register and not exhaustive: a missing name only means the municipality is asked for, never guessed.",
+ "places": [
+  {
+   "name": "Airdrie",
+   "kind": "city"
+  },
+  {
+   "name": "Beaumont",
+   "kind": "city"
+  },
+  {
+   "name": "Brooks",
+   "kind": "city"
+  },
+  {
+   "name": "Calgary",
+   "kind": "city"
+  },
+  {
+   "name": "Camrose",
+   "kind": "city"
+  },
+  {
+   "name": "Chestermere",
+   "kind": "city"
+  },
+  {
+   "name": "Cold Lake",
+   "kind": "city"
+  },
+  {
+   "name": "Edmonton",
+   "kind": "city"
+  },
+  {
+   "name": "Fort Saskatchewan",
+   "kind": "city"
+  },
+  {
+   "name": "Grande Prairie",
+   "kind": "city"
+  },
+  {
+   "name": "Lacombe",
+   "kind": "city"
+  },
+  {
+   "name": "Leduc",
+   "kind": "city"
+  },
+  {
+   "name": "Lethbridge",
+   "kind": "city"
+  },
+  {
+   "name": "Lloydminster",
+   "kind": "city"
+  },
+  {
+   "name": "Medicine Hat",
+   "kind": "city"
+  },
+  {
+   "name": "Red Deer",
+   "kind": "city"
+  },
+  {
+   "name": "Spruce Grove",
+   "kind": "city"
+  },
+  {
+   "name": "St. Albert",
+   "kind": "city"
+  },
+  {
+   "name": "Wetaskiwin",
+   "kind": "city"
+  },
+  {
+   "name": "Athabasca",
+   "kind": "town"
+  },
+  {
+   "name": "Banff",
+   "kind": "town"
+  },
+  {
+   "name": "Barrhead",
+   "kind": "town"
+  },
+  {
+   "name": "Bashaw",
+   "kind": "town"
+  },
+  {
+   "name": "Bassano",
+   "kind": "town"
+  },
+  {
+   "name": "Beaverlodge",
+   "kind": "town"
+  },
+  {
+   "name": "Blackfalds",
+   "kind": "town"
+  },
+  {
+   "name": "Bon Accord",
+   "kind": "town"
+  },
+  {
+   "name": "Bonnyville",
+   "kind": "town"
+  },
+  {
+   "name": "Bow Island",
+   "kind": "town"
+  },
+  {
+   "name": "Bowden",
+   "kind": "town"
+  },
+  {
+   "name": "Bruderheim",
+   "kind": "town"
+  },
+  {
+   "name": "Calmar",
+   "kind": "town"
+  },
+  {
+   "name": "Canmore",
+   "kind": "town"
+  },
+  {
+   "name": "Cardston",
+   "kind": "town"
+  },
+  {
+   "name": "Carstairs",
+   "kind": "town"
+  },
+  {
+   "name": "Claresholm",
+   "kind": "town"
+  },
+  {
+   "name": "Coaldale",
+   "kind": "town"
+  },
+  {
+   "name": "Coalhurst",
+   "kind": "town"
+  },
+  {
+   "name": "Cochrane",
+   "kind": "town"
+  },
+  {
+   "name": "Crossfield",
+   "kind": "town"
+  },
+  {
+   "name": "Daysland",
+   "kind": "town"
+  },
+  {
+   "name": "Devon",
+   "kind": "town"
+  },
+  {
+   "name": "Diamond Valley",
+   "kind": "town"
+  },
+  {
+   "name": "Didsbury",
+   "kind": "town"
+  },
+  {
+   "name": "Drayton Valley",
+   "kind": "town"
+  },
+  {
+   "name": "Drumheller",
+   "kind": "town"
+  },
+  {
+   "name": "Eckville",
+   "kind": "town"
+  },
+  {
+   "name": "Edson",
+   "kind": "town"
+  },
+  {
+   "name": "Elk Point",
+   "kind": "town"
+  },
+  {
+   "name": "Fairview",
+   "kind": "town"
+  },
+  {
+   "name": "Falher",
+   "kind": "town"
+  },
+  {
+   "name": "Fort Macleod",
+   "kind": "town"
+  },
+  {
+   "name": "Fox Creek",
+   "kind": "town"
+  },
+  {
+   "name": "Gibbons",
+   "kind": "town"
+  },
+  {
+   "name": "Grimshaw",
+   "kind": "town"
+  },
+  {
+   "name": "Hanna",
+   "kind": "town"
+  },
+  {
+   "name": "Hardisty",
+   "kind": "town"
+  },
+  {
+   "name": "High Level",
+   "kind": "town"
+  },
+  {
+   "name": "High Prairie",
+   "kind": "town"
+  },
+  {
+   "name": "High River",
+   "kind": "town"
+  },
+  {
+   "name": "Hinton",
+   "kind": "town"
+  },
+  {
+   "name": "Innisfail",
+   "kind": "town"
+  },
+  {
+   "name": "Irricana",
+   "kind": "town"
+  },
+  {
+   "name": "Killam",
+   "kind": "town"
+  },
+  {
+   "name": "Lamont",
+   "kind": "town"
+  },
+  {
+   "name": "Magrath",
+   "kind": "town"
+  },
+  {
+   "name": "Mayerthorpe",
+   "kind": "town"
+  },
+  {
+   "name": "McLennan",
+   "kind": "town"
+  },
+  {
+   "name": "Milk River",
+   "kind": "town"
+  },
+  {
+   "name": "Morinville",
+   "kind": "town"
+  },
+  {
+   "name": "Mundare",
+   "kind": "town"
+  },
+  {
+   "name": "Nanton",
+   "kind": "town"
+  },
+  {
+   "name": "Okotoks",
+   "kind": "town"
+  },
+  {
+   "name": "Olds",
+   "kind": "town"
+  },
+  {
+   "name": "Onoway",
+   "kind": "town"
+  },
+  {
+   "name": "Oyen",
+   "kind": "town"
+  },
+  {
+   "name": "Peace River",
+   "kind": "town"
+  },
+  {
+   "name": "Penhold",
+   "kind": "town"
+  },
+  {
+   "name": "Picture Butte",
+   "kind": "town"
+  },
+  {
+   "name": "Pincher Creek",
+   "kind": "town"
+  },
+  {
+   "name": "Ponoka",
+   "kind": "town"
+  },
+  {
+   "name": "Rainbow Lake",
+   "kind": "town"
+  },
+  {
+   "name": "Redcliff",
+   "kind": "town"
+  },
+  {
+   "name": "Redwater",
+   "kind": "town"
+  },
+  {
+   "name": "Rimbey",
+   "kind": "town"
+  },
+  {
+   "name": "Rocky Mountain House",
+   "kind": "town"
+  },
+  {
+   "name": "Sedgewick",
+   "kind": "town"
+  },
+  {
+   "name": "Sexsmith",
+   "kind": "town"
+  },
+  {
+   "name": "Slave Lake",
+   "kind": "town"
+  },
+  {
+   "name": "Smoky Lake",
+   "kind": "town"
+  },
+  {
+   "name": "Spirit River",
+   "kind": "town"
+  },
+  {
+   "name": "St. Paul",
+   "kind": "town"
+  },
+  {
+   "name": "Stavely",
+   "kind": "town"
+  },
+  {
+   "name": "Stettler",
+   "kind": "town"
+  },
+  {
+   "name": "Stony Plain",
+   "kind": "town"
+  },
+  {
+   "name": "Strathmore",
+   "kind": "town"
+  },
+  {
+   "name": "Sundre",
+   "kind": "town"
+  },
+  {
+   "name": "Swan Hills",
+   "kind": "town"
+  },
+  {
+   "name": "Sylvan Lake",
+   "kind": "town"
+  },
+  {
+   "name": "Taber",
+   "kind": "town"
+  },
+  {
+   "name": "Thorsby",
+   "kind": "town"
+  },
+  {
+   "name": "Three Hills",
+   "kind": "town"
+  },
+  {
+   "name": "Tofield",
+   "kind": "town"
+  },
+  {
+   "name": "Trochu",
+   "kind": "town"
+  },
+  {
+   "name": "Two Hills",
+   "kind": "town"
+  },
+  {
+   "name": "Valleyview",
+   "kind": "town"
+  },
+  {
+   "name": "Vauxhall",
+   "kind": "town"
+  },
+  {
+   "name": "Vegreville",
+   "kind": "town"
+  },
+  {
+   "name": "Vermilion",
+   "kind": "town"
+  },
+  {
+   "name": "Vulcan",
+   "kind": "town"
+  },
+  {
+   "name": "Wainwright",
+   "kind": "town"
+  },
+  {
+   "name": "Wembley",
+   "kind": "town"
+  },
+  {
+   "name": "Westlock",
+   "kind": "town"
+  },
+  {
+   "name": "Whitecourt",
+   "kind": "town"
+  },
+  {
+   "name": "Strathcona County",
+   "kind": "specialized_municipality"
+  },
+  {
+   "name": "Regional Municipality of Wood Buffalo",
+   "kind": "specialized_municipality"
+  },
+  {
+   "name": "Mackenzie County",
+   "kind": "specialized_municipality"
+  },
+  {
+   "name": "Municipality of Crowsnest Pass",
+   "kind": "specialized_municipality"
+  },
+  {
+   "name": "Municipality of Jasper",
+   "kind": "specialized_municipality"
+  },
+  {
+   "name": "Lac La Biche County",
+   "kind": "specialized_municipality"
+  },
+  {
+   "name": "Foothills County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Rocky View County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Parkland County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Sturgeon County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Leduc County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Red Deer County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Lethbridge County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "County of Grande Prairie",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Mountain View County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Wheatland County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Clearwater County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Lacombe County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Ponoka County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "County of Wetaskiwin",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Camrose County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Brazeau County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Yellowhead County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Woodlands County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Westlock County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Athabasca County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Cypress County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Vulcan County",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "County of Newell",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Municipal District of Bighorn",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Municipal District of Taber",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Municipal District of Willow Creek",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Municipal District of Pincher Creek",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Municipal District of Opportunity",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Municipal District of Greenview",
+   "kind": "rural_municipality"
+  },
+  {
+   "name": "Sherwood Park",
+   "kind": "hamlet_or_community"
+  },
+  {
+   "name": "Fort McMurray",
+   "kind": "hamlet_or_community"
+  },
+  {
+   "name": "Jasper",
+   "kind": "hamlet_or_community"
+  },
+  {
+   "name": "Crowsnest Pass",
+   "kind": "hamlet_or_community"
+  },
+  {
+   "name": "Lac La Biche",
+   "kind": "hamlet_or_community"
+  },
+  {
+   "name": "Grande Cache",
+   "kind": "hamlet_or_community"
+  }
+ ]
+}
