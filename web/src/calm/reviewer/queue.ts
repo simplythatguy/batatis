@@ -87,13 +87,17 @@ export function rowAction(a: QueueApplication, me: string | null): RowAction {
 export function decisionGate(
   a: { status: ApplicationStatus; claim: { reviewer_id: string; reviewer_name: string } | null },
   me: string | null,
-  blocking: number,
+  /** null while the completeness check is loading or has failed: acceptance waits for a real result. */
+  blocking: number | null,
 ): { canReturn: boolean; canAccept: boolean; reason: string } {
   const no = (reason: string) => ({ canReturn: false, canAccept: false, reason });
   if (a.status === "accepted") return no("Accepted as administratively complete.");
   if (a.status === "returned") return no("Returned to the applicant. It comes back here when they resend it.");
   if (a.status !== "in_review" || !a.claim) return no("Start reviewing to return or accept this application.");
   if (!me || a.claim.reviewer_id !== me) return no(`${a.claim.reviewer_name} is reviewing this. Only they can return or accept it.`);
+  if (blocking === null) {
+    return { canReturn: true, canAccept: false, reason: "Waiting for the completeness check before this can be accepted." };
+  }
   if (blocking > 0) {
     return { canReturn: true, canAccept: false, reason: `${blocking} required ${blocking === 1 ? "item is" : "items are"} missing, so it can only be returned.` };
   }

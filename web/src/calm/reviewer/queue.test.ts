@@ -43,6 +43,7 @@ test("claim state labels and row actions", () => {
 
 test("only the current claimer decides; blocking gaps allow return only", () => {
   assert.deepEqual(decisionGate(rows[2], ME, 0), { canReturn: true, canAccept: true, reason: "" });
+  assert.equal(decisionGate(rows[2], ME, null).canAccept, false); // completeness still loading or failed
   assert.equal(decisionGate(rows[2], ME, 2).canAccept, false);
   assert.equal(decisionGate(rows[2], ME, 2).canReturn, true);
   assert.match(decisionGate(rows[1], ME, 0).reason, /^Jordan Tran is reviewing this/);

@@ -130,7 +130,8 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseId]);
 
-  const blocking = (gaps ?? []).filter((g) => g.severity === "blocking").length;
+  // Unknown (loading or failed) is not "no gaps": acceptance waits for a real completeness result.
+  const blocking = gaps === null ? null : gaps.filter((g) => g.severity === "blocking").length;
   const status = c?.status ?? row?.status ?? "submitted";
   const claim = c?.claim ?? row?.claim ?? null;
   const gate = decisionGate({ status, claim }, me, blocking);

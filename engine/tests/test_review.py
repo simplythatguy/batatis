@@ -323,3 +323,16 @@ def test_a_released_claim_is_not_a_submission_and_repeats_collapse(scene):
     mine = [n for n in clients['owner'].get('/me/notifications').json()['notifications'] if n['case_id'] == case.id]
     assert [n['status'] for n in mine].count('in_review') == 1
     assert len({n['id'] for n in mine}) == len(mine)
+
+
+def test_accept_is_refused_while_blocking_gaps_remain(scene):
+    store, clients, users = scene
+    case = owned(scene, status='submitted')  # an incomplete application, e.g. edited outside the submit gate
+    assert clients['reviewer'].post(f'/review/{case.id}/claim', json={}).status_code == 200
+    refused = clients['reviewer'].post(f'/review/{case.id}/decision', json={'outcome': 'accept'})
+    assert refused.status_code == 409
+    assert refused.json()['detail']['gaps']
+    assert store.get(case.id).status == 'in_review'
+    returned = clients['reviewer'].post(f'/review/{case.id}/decision',
+                                        json={'outcome': 'return', 'message': 'Please complete the application.'})
+    assert returned.status_code == 200  # returning is always possible

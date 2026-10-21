@@ -367,6 +367,12 @@ def create_router(cases, code):
                 raise HTTPException(409, 'Only the current reviewer may record a decision')
             if case.status != 'in_review':
                 raise HTTPException(409, 'Only an application in review may receive a decision')
+            if body.outcome == 'accept':
+                # Same gate as submission and the official PDF: never accept with blocking gaps.
+                blocking = [gap for gap in check_completeness(case, code()) if gap.severity == 'blocking']
+                if blocking:
+                    raise HTTPException(409, {'message': 'Resolve blocking administrative gaps before accepting',
+                                              'gaps': [gap.model_dump() for gap in blocking]})
             label = ACCEPT_TEXT if body.outcome == 'accept' else RETURN_TEXT
             message = (body.message or '').strip()
             text = label + ('\n\n' + message if message else '')
