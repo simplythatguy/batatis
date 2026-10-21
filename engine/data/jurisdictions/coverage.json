@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "default_province": "AB",
+  "levels": {
+    "full": "Code database, Section C lookup, and jurisdiction packs with process notes, forms and standing packages.",
+    "code_only": "Code lookup for the adopted code, but no jurisdiction pack: no process notes, forms or standing packages.",
+    "preview": "Roadmap only. Batatis has neither the adopted code nor a pack; nothing it shows is specific to this region."
+  },
+  "regions": [
+    {"id": "AB", "name": "Alberta", "coverage": "full", "note": "NBC(AE) 2023, 2nd printing. Packs: City of Calgary, City of Edmonton, rest of Alberta.", "roadmap": null},
+    {"id": "SK", "name": "Saskatchewan", "coverage": "preview", "note": "No adopted code text or pack in Batatis. Alberta citations do not apply.", "roadmap": "Province packs, wave 1 (with Manitoba)"},
+    {"id": "MB", "name": "Manitoba", "coverage": "preview", "note": "No adopted code text or pack in Batatis. Alberta citations do not apply.", "roadmap": "Province packs, wave 1 (with Saskatchewan)"},
+    {"id": "BC", "name": "British Columbia", "coverage": "preview", "note": "No adopted code text or pack in Batatis. Alberta citations do not apply.", "roadmap": "Province packs, wave 2"},
+    {"id": "ON", "name": "Ontario", "coverage": "preview", "note": "No adopted code text or pack in Batatis. Alberta citations do not apply.", "roadmap": "Province packs, wave 3"},
+    {"id": "NB", "name": "New Brunswick", "coverage": "preview", "note": "No adopted code text or pack in Batatis. Alberta citations do not apply.", "roadmap": "Province packs, Atlantic wave"},
+    {"id": "NS", "name": "Nova Scotia", "coverage": "preview", "note": "No adopted code text or pack in Batatis. Alberta citations do not apply.", "roadmap": "Province packs, Atlantic wave"},
+    {"id": "PE", "name": "Prince Edward Island", "coverage": "preview", "note": "No adopted code text or pack in Batatis. Alberta citations do not apply.", "roadmap": "Province packs, Atlantic wave"},
+    {"id": "NL", "name": "Newfoundland and Labrador", "coverage": "preview", "note": "No adopted code text or pack in Batatis. Alberta citations do not apply.", "roadmap": "Province packs, Atlantic wave"},
+    {"id": "QC", "name": "Quebec", "coverage": "preview", "note": "No adopted code text or pack in Batatis. Alberta citations do not apply.", "roadmap": "Province packs, Quebec wave"},
+    {"id": "YT", "name": "Yukon", "coverage": "preview", "note": "No adopted code text or pack in Batatis. Alberta citations do not apply.", "roadmap": "Territories wave"},
+    {"id": "NT", "name": "Northwest Territories", "coverage": "preview", "note": "No adopted code text or pack in Batatis. Alberta citations do not apply.", "roadmap": "Territories wave"},
+    {"id": "NU", "name": "Nunavut", "coverage": "preview", "note": "No adopted code text or pack in Batatis. Alberta citations do not apply.", "roadmap": "Territories wave"}
+  ]
+}
