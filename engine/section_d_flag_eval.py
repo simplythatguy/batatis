@@ -326,6 +326,10 @@ _JOIST_SPANS = (
     re.compile(r'(\d+(?:\.\d+)?)\s*m\b(?!\s*(?:2|²))(?:\s+\w+){0,4}\s+joists?\b', re.I),
     re.compile(r'joists?(?:\s+\w+){0,5}\s+span(?:ning|s)?(?:\s+\w+){0,4}\s+(\d+(?:\.\d+)?)\s*m\b(?!\s*(?:2|²))', re.I),
 )
+_TABLE_MEMBERS = re.compile(
+    r'\b(?:rafters?|(?:floor|ceiling|roof)\s+joists?|joists?)'
+    r'(?:\s+and\s+(?:rafters?|(?:floor|ceiling|roof)\s+joists?|joists?))*'
+    r'\s+from\s+(?:the\s+)?Part\s+9\s+span\s+tables\b', re.I)
 
 
 def _clause_start(text: str, end: int) -> int:
@@ -397,14 +401,15 @@ def _joist_span_exceeds_4_9(text: str) -> bool | None:
     parsed = _joist_span_matches(text)
     if any(float(match.group(1)) > 4.9 for match in parsed):
         return True
-    if any(not _covered(cue, parsed) and not _immediately_negated(text, cue.start())
+    understood = [*parsed, *_TABLE_MEMBERS.finditer(text)]
+    if any(not _covered(cue, understood) and not _immediately_negated(text, cue.start())
            for cue in re.finditer(r'\bjoists?\b', text, re.I)):
         return None
     return False
 
 
 def _unparsed_span(text: str) -> bool:
-    parsed = [*_SPAN_METRES.finditer(text), *_joist_span_matches(text)]
+    parsed = [*_SPAN_METRES.finditer(text), *_joist_span_matches(text), *_STICK_FRAME.finditer(text)]
     return any(not _covered(cue, parsed) and not _immediately_negated(text, cue.start())
                for cue in re.finditer(r'\bspan(?:ning|s)?\b', text, re.I))
 

@@ -47,15 +47,17 @@ def test_retail_shop_is_mercantile_and_answers_no():
     assert evaluate(case, codes, 'rules_only')[0] == 'no'
 
 
-def test_suites_over_four_answer_yes_without_double_counting_a_stated_total():
+def test_suite_count_applicability_asks_without_double_counting_a_stated_total():
     codes, _codedb = load_codes()
     cases = {item['id']: item for item in load_ngt()}
     townhouses = observe(cases['ngt-101'])[0]
     assert townhouses.principal_dwelling_units == 3
     assert townhouses.total_unit_count == 6
-    assert evaluate(cases['ngt-101'], codes, 'rules_plus_unknown')[0] == 'yes'
+    # The Act rows retain their pinpoints; the code authentication sentence is
+    # not a unit-count threshold. Suite applicability needs the officer's review.
+    assert evaluate(cases['ngt-101'], codes, 'rules_plus_unknown')[0] == 'unknown'
     assert observe(cases['ngt-102'])[0].total_unit_count == 8
-    assert evaluate(cases['ngt-102'], codes, 'rules_plus_unknown')[0] == 'yes'
+    assert evaluate(cases['ngt-102'], codes, 'rules_plus_unknown')[0] == 'unknown'
     stated = observe(cases['ngt-004'])[0]
     assert stated.total_unit_count == 4
     assert evaluate(cases['ngt-004'], codes, 'rules_plus_unknown')[0] == 'no'
@@ -99,6 +101,6 @@ def test_ngt_report_labels_every_line_and_the_shipped_screen_does_not_under_flag
     labels = {case['id']: evaluate(case, codes, 'rules_plus_unknown')[0] for case in cases}
     for name in ('ngt-001', 'ngt-002', 'ngt-003', 'ngt-004', 'ngt-005', 'ngt-006', 'ngt-007', 'ngt-008'):
         assert labels[name] == 'no', name
-    assert labels['ngt-101'] == 'yes'
-    assert labels['ngt-102'] == 'yes'
+    assert labels['ngt-101'] == 'unknown'
+    assert labels['ngt-102'] == 'unknown'
     assert labels['ngt-103'] == 'unknown'

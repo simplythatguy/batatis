@@ -142,12 +142,13 @@ def test_text_evidence_has_no_file_ref_and_the_pdf_lists_it():
     assert TEXT_LABEL in text
 
 
-def test_evidence_route_is_not_on_this_branch_and_writes_no_file_ref(tmp_path):
+def test_typed_evidence_cannot_create_a_file_and_withdrawal_is_idempotent(tmp_path):
     client, store = _client(tmp_path)
     case_id = client.post('/cases', json={'title': 'Dana'}).json()['id']
     posted = client.post(f'/cases/{case_id}/evidence', json={'description': ENGINEER_EMAIL})
     assert posted.status_code == 404
-    assert client.delete(f'/cases/{case_id}/evidence/ev_missing').status_code == 404
+    assert client.delete(f'/cases/{case_id}/evidence/ev_missing').status_code == 200
+    assert client.delete('/cases/missing/evidence/ev_missing').status_code == 404
     saved = store.get(case_id)
     assert saved.evidence == []
     assert all('file_ref' not in entry.field for entry in saved.facts)
