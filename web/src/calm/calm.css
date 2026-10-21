@@ -4237,3 +4237,21 @@ a.cf-save-check {
     position: static;
   }
 }
+
+/* Assistant open on a laptop: the title keeps the left column (about 12 characters at 1280);
+   the authority moves into the title's tooltip. */
+@media (max-width: 1440px) {
+  .cf-app[data-assistant="open"] .cf-head-meta {
+    display: none;
+  }
+  .cf-app[data-assistant="open"] .cf-head {
+    padding-left: 22px;
+    gap: 12px;
+  }
+  .cf-app[data-assistant="open"] .cf-head-left {
+    gap: 4px;
+  }
+  .cf-app[data-assistant="open"] .cf-stage-rings {
+    gap: 2px;
+  }
+}

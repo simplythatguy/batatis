@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { ApplicationSummary } from "../api/accounts";
 import { groupGaps } from "../humanReview";
 import { useCase } from "../store";
-import { bootAccount, initials, refreshApplications, useAccount } from "./account";
+import { bootAccount, refreshApplications, useAccount, type AccountPhase } from "./account";
 import { authorityName } from "./applications";
 import { AssistantPanel } from "./assistant/AssistantPanel";
 import { setAssistantCase, setAssistantContext, toggleAssistant, useAssistant } from "./assistant/assistant";
@@ -15,9 +15,10 @@ import { getSession, resetSession, useSession } from "./session";
 import { AppHeader, type StageRingItem } from "./shell/AppHeader";
 import { AppLayout } from "./shell/AppLayout";
 import { ApplicationList, type ApplicationListHandle } from "./shell/ApplicationList";
-import { Rail, RailAvatar, type RailDestination } from "./shell/Rail";
+import { Rail, type RailDestination } from "./shell/Rail";
 import { ReturnedBanner } from "./shell/ReturnedBanner";
-import { AccountMenu, NotificationsPanel } from "./routes.extra";
+import { AccountButton, NotificationsBell } from "./routes.extra";
+import { useRoute } from "../router";
 import { resetRelevance } from "./useRelevance";
 import { CIcon, ConfirmDialog, Dot, MOD_KEY, type DotTone } from "./ui";
 
@@ -136,13 +137,19 @@ function useStageProgress() {
 }
 
 const PHONE = "(max-width: 760px)";
+const signedInParam = (id: string | null, phase: AccountPhase) => (id && phase === "signed-in" ? id : null);
 /** The signed-in application open in this tab, so a reload reopens it. Tab-scoped, id only. */
 const OPEN_KEY = "batatis-open-application";
 const remembered = () => { try { return sessionStorage.getItem(OPEN_KEY); } catch { return null; } };
 const remember = (id: string | null) => { try { if (id) sessionStorage.setItem(OPEN_KEY, id); else sessionStorage.removeItem(OPEN_KEY); } catch { /* storage unavailable */ } };
 const isPhone = () => window.matchMedia(PHONE).matches;
 
-export function Shell({ active, children }: { active: Screen; children: ReactNode }) {
+/**
+ * `plain`: an account page (settings, notifications, the reviewer's queue and review) that draws its
+ * own header; the shell gives it the rail and the assistant only. Reviewers never get the
+ * application list or the stage header.
+ */
+export function Shell({ active, children, plain = false }: { active: Screen; children: ReactNode; plain?: boolean }) {
   const { c, phase, engineId, resetToWho, openCase, saveStatus, saveDraft, checkStatus, requestCheck } = useCase();
   const account = useAccount();
   const assistant = useAssistant();
@@ -156,7 +163,12 @@ export function Shell({ active, children }: { active: Screen; children: ReactNod
   const inCase = phase === "case";
   const progress = useStageProgress();
   const signedIn = account.phase === "signed-in";
-  const onStage = STAGES.some((s) => s.screen === active);
+  const reviewer = account.user?.role === "reviewer";
+  const bare = plain || reviewer;
+  const onStage = !bare && STAGES.some((s) => s.screen === active);
+  const route = useRoute();
+  /** `#/application?case=<id>` (a notification): open that application, then drop the parameter. */
+  const caseParam = signedInParam(route.params.get("case"), account.phase);
   /** The last stage page, so Applications in the rail returns to it from the code library. */
   const lastStage = useRef("#/");
   if (onStage) lastStage.current = location.hash || "#/";
@@ -174,7 +186,7 @@ export function Shell({ active, children }: { active: Screen; children: ReactNod
     restored.current = true;
     const id = remembered();
     if (!id) return;
-    if (!signedIn || inCase) { if (!signedIn) remember(null); return; }
+    if (!signedIn || inCase || caseParam) { if (!signedIn) remember(null); return; }
     setOpening(id);
     void openCase(id, roleOf(account.user) ?? "homebuilder").then((error) => {
       setOpening(null);
@@ -198,7 +210,8 @@ export function Shell({ active, children }: { active: Screen; children: ReactNod
   // Cmd/Ctrl+B sidebar, +J assistant, +K search applications, +Shift+K search the code.
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
-      if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
+      // A page's own shortcut (the queue's ⌘K search) runs first and claims the key.
+      if (!(e.metaKey || e.ctrlKey) || e.altKey || e.defaultPrevented) return;
       const k = e.key.toLowerCase();
       if (k === "b") { e.preventDefault(); toggleList(); }
       else if (k === "j") { e.preventDefault(); toggleAssistant(); }
@@ -234,7 +247,11 @@ export function Shell({ active, children }: { active: Screen; children: ReactNod
     { id: "application", label: "Application", icon: "file", href: "#/application", pct: current && ["submitted", "in_review", "accepted"].includes(current.status) ? 100 : progress.application, current: active === "application", hint: inCase ? undefined : "Nothing filled in yet" },
   ];
 
-  const destinations: RailDestination[] = [
+  const destinations: RailDestination[] = reviewer ? [
+    { id: "queue", label: "Review queue", icon: "table", href: "#/review", current: route.path === "/review" || route.path.startsWith("/review/") },
+    { id: "code", label: "Code library", icon: "book", href: "#/code", current: active === "code" && !plain },
+    { id: "assistant", label: assistant.open ? "Close the assistant" : "Assistant", icon: "spark", onClick: toggleAssistant, current: assistant.open, shortcut: `${MOD_KEY} J` },
+  ] : [
     {
       id: "applications",
       label: "Applications",
@@ -259,7 +276,7 @@ export function Shell({ active, children }: { active: Screen; children: ReactNod
     resetToWho(signedIn ? "" : undefined);
   }
 
-  async function open(id: string) {
+  async function open(id: string, to = "#/questions") {
     if (id === selectedId) { setListNote(""); if (!onStage) location.hash = lastStage.current; return; }
     if (!signedIn || opening) return;
     setOpening(id);
@@ -276,8 +293,15 @@ export function Shell({ active, children }: { active: Screen; children: ReactNod
     if (error) { setListNote(error); return; }
     resetSession();
     resetRelevance();
-    location.hash = "#/questions";
+    location.hash = to;
   }
+
+  useEffect(() => {
+    if (!caseParam) return;
+    const to = `#${route.path || "/"}`;
+    if (caseParam === engineId) { location.replace(to); return; }
+    void open(caseParam, to);
+  }, [caseParam]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const list = (
     <ApplicationList
@@ -337,14 +361,13 @@ export function Shell({ active, children }: { active: Screen; children: ReactNod
     />
   );
 
-  const avatar = account.user ? <RailAvatar initials={initials(account.user.name, account.user.email)} label={`Signed in as ${account.user.name ?? account.user.email}`} /> : null;
 
   return (
     <>
       <AppLayout
-        rail={<Rail destinations={destinations} notificationsSlot={<NotificationsPanel />} accountSlot={<AccountMenu fallback={avatar} />} />}
-        list={list}
-        header={header}
+        rail={<Rail destinations={destinations} notificationsSlot={<NotificationsBell />} accountSlot={<AccountButton />} />}
+        list={bare ? undefined : list}
+        header={bare ? null : header}
         banner={onStage && current?.status === "returned" ? <ReturnedBanner app={current} /> : null}
         assistant={assistant.open ? <AssistantPanel /> : null}
         listCollapsed={listCollapsed}

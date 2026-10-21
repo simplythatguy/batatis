@@ -5,7 +5,7 @@ import { CodeLibrary } from "./calm/CodeLibrary";
 import { Deck } from "./calm/QuestionDeck";
 import { Review } from "./calm/Review";
 import { resolveRoute, type Screen } from "./calm/routes";
-import { extraRoutes } from "./calm/routes.extra";
+import { extraRoutes, isStandaloneRoute, useAuthRedirect } from "./calm/routes.extra";
 import { getSession, updateSession, useSession } from "./calm/session";
 import { Shell } from "./calm/Shell";
 import { Start } from "./calm/Start";
@@ -63,7 +63,10 @@ const OPEN_WITHOUT_CASE: ReadonlySet<Screen> = new Set(["start", "questions", "r
 
 export function App() {
   const route = useRoute();
+  // Signed-out visitors go to #/signin and new accounts to onboarding before any screen renders.
+  const redirecting = useAuthRedirect(route);
   const { phase } = useCase();
+  // Accounts, reviewer, settings and notification pages (routes.extra.tsx) come before the stages.
   const extra = extraRoutes(route);
   const calm = resolveRoute(route.path, route.params);
   const screen: Screen = phase === "case" || OPEN_WITHOUT_CASE.has(calm.screen) ? calm.screen : "start";
@@ -75,12 +78,16 @@ export function App() {
   // a handler may already have navigated on (Start sets #/questions right after the role).
   const parsed = normalHash(`#${route.path}?${route.params.toString()}`);
   const target = screen === calm.screen ? calm.canonical : "#/";
+  // Not for account pages, nor while the gate is moving the visitor, nor a `?case=` link the shell opens first.
+  const keep = Boolean(extra) || redirecting || route.params.has("case");
   useEffect(() => {
-    if (extra) return;
+    if (keep) return;
     if (parsed !== target && normalHash(location.hash) === parsed) location.replace(target);
-  }, [target, parsed, Boolean(extra)]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [target, parsed, keep]);
 
-  if (extra) return <>{extra}</>;
+  if (redirecting) return null;
+  if (extra && isStandaloneRoute(route)) return <>{extra}</>;
+  if (extra) return <Shell active={screen} plain>{extra}</Shell>;
 
   let body;
   switch (screen) {

@@ -57,7 +57,7 @@ export function StageRings({ stages }: { stages: StageRingItem[] }) {
  * title and authority, the stage rings centred in the remaining width, actions on the right.
  * On phones the same toggle opens the rail and list as a sheet.
  */
-export function AppHeader({ title, meta, stages, right, onToggleList, listOpen, toggleHint }: { title: ReactNode; meta?: ReactNode; stages?: StageRingItem[]; right?: ReactNode; onToggleList?: () => void; listOpen?: boolean; toggleHint?: string }) {
+export function AppHeader({ title, meta, stages, right, onToggleList, listOpen, toggleHint }: { title: string; meta?: string; stages?: StageRingItem[]; right?: ReactNode; onToggleList?: () => void; listOpen?: boolean; toggleHint?: string }) {
   const ref = useRef<HTMLButtonElement>(null);
   const [tip, setTip] = useState(false);
   const label = listOpen ? "Hide the sidebar" : "Show the sidebar";
@@ -86,7 +86,7 @@ export function AppHeader({ title, meta, stages, right, onToggleList, listOpen, 
             </Tip>
           </>
         )}
-        <h1 className="cf-head-title">
+        <h1 className="cf-head-title" title={meta ? `${title} · ${meta}` : title}>
           <span className="cf-head-name">{title}</span>
           {meta && <span className="cf-head-meta">{meta}</span>}
         </h1>
