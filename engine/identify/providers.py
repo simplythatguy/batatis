@@ -124,6 +124,15 @@ class MeteredAnthropic:
         self.messages = _MeteredMessages(raw_client.messages, client_ip, log)
 
 
+def anthropic_opted_in() -> bool:
+    """Anthropic is used only when it is the configured verifier (IdentifyConfig). A key alone never opts in."""
+    from .config import ConfigError, load_config
+    try:
+        return load_config().verifier == 'anthropic'
+    except (ConfigError, ValueError, OSError):
+        return False
+
+
 def live_anthropic():
     import anthropic
     return anthropic.Anthropic(max_retries=0, timeout=60)
@@ -179,8 +188,12 @@ class Transports:
     unavailable: dict[str, str] = field(default_factory=dict)   # provider -> why
 
 
-def transports(client_ip: str | None = None, *, jev_model: str = JEV_MODEL) -> Transports:
-    """Live transports where the gate is open, or the fakes when BATATIS_PROVIDER=fake. No call is made here."""
+def transports(client_ip: str | None = None, *, jev_model: str = JEV_MODEL, anthropic: bool = False) -> Transports:
+    """Live transports where the gate is open, or the fakes when BATATIS_PROVIDER=fake. No call is made here.
+
+    Live mode builds Jev and OpenAI only. An Anthropic client is built only when the run's config asks for the
+    Anthropic verifier (`anthropic=True`); otherwise it is absent even when ANTHROPIC_API_KEY is set.
+    """
     log = SpendLog()
     if llm_gate.fake_providers():
         from . import fakes
@@ -195,7 +208,9 @@ def transports(client_ip: str | None = None, *, jev_model: str = JEV_MODEL) -> T
         out.jev = metered_ask(raw_jev_ask(jev_model), model=jev_model, client_ip=client_ip, log=log)
     else:
         out.unavailable['jev'] = 'BATATIS_LIVE is off or the TypeSafe credential is absent'
-    if llm_gate.provider_enabled('anthropic'):
+    if not anthropic:
+        out.unavailable['anthropic'] = 'Anthropic is not a configured identify provider'
+    elif llm_gate.provider_enabled('anthropic'):
         out.anthropic = MeteredAnthropic(live_anthropic(), client_ip=client_ip, log=log)
     else:
         out.unavailable['anthropic'] = 'BATATIS_LIVE is off or ANTHROPIC_API_KEY is absent'

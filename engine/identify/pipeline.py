@@ -180,7 +180,8 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
         description_sha256: str | None = None, client_ip: str | None = None) -> RunOutput:
     """`prose` is the outbound (already redacted) description. `verifier` overrides the configured one (tests)."""
     config = config or load_config()
-    tp = transports or default_transports(client_ip, jev_model=config.screen_model)
+    tp = transports or default_transports(client_ip, jev_model=config.screen_model,
+                                          anthropic=config.verifier == 'anthropic')
     policy = policy or load_policy(config.config_hash)
     db = Path(codes.db_path)
     arts = articles(db)

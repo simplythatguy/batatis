@@ -37,11 +37,17 @@ def raw_jev_ask(model: str = JEV_MODEL) -> Ask:
 
 
 def jev_ask(model: str = JEV_MODEL) -> Ask:
-    """The live adapter, metered: every request reserves and settles through engine.llm_gate.
+    """The default adapter, metered: every request reserves and settles through engine.llm_gate.
 
-    Needs BATATIS_LIVE=1 and the TypeSafe credential (and SSL_CERT_FILE=/etc/ssl/cert.pem on this Mac).
+    BATATIS_PROVIDER=fake uses the offline fake, so no request leaves the machine. Otherwise the gate
+    refuses every request (before any network) unless BATATIS_LIVE=1 and the TypeSafe credential is
+    present (and SSL_CERT_FILE=/etc/ssl/cert.pem on this Mac).
     """
+    from engine import llm_gate
     from .providers import metered_ask
+    if llm_gate.fake_providers():
+        from .fakes import fake_jev_ask
+        return metered_ask(fake_jev_ask(), model=model)
     return metered_ask(raw_jev_ask(model), model=model)
 
 
