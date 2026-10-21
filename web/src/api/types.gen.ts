@@ -48,6 +48,13 @@ export interface AssistTurn {
   text: string;
 }
 
+/** A documents-panel cell. `value` is 'unknown' when nothing was read; never a guess. */
+export interface Attribute {
+  known: boolean;
+  source: Pointer | null;
+  value: string;
+}
+
 export interface AttributionPair {
   application_note: string | null;
   bracket: string;
@@ -109,6 +116,24 @@ export interface CaseJurisdictionPack {
   pack: JurisdictionDetail | null;
 }
 
+/** Verification of one cited provision against the code database (NBC(AE) 2023, 2nd printing). */
+export interface CitationCheck {
+  canonical_citation: string | null;
+  edition_ok: boolean | null;
+  exists: boolean | null;
+  issues: CitationIssue[];
+  page_ok: boolean | null;
+  pdf_page: number | null;
+  pointer: Pointer;
+  provision_id: string | null;
+  text: string;
+}
+
+export interface CitationIssue {
+  code: string;
+  message: string;
+}
+
 export interface Claim {
   claimed_at: string;
   reviewer_id: string;
@@ -121,6 +146,21 @@ export interface ClaimRequest {
 
 export interface ClaimResult {
   claim: Claim;
+}
+
+/** Close-out after a final decision: the copy goes to the Council within 10 days of the decision. */
+export interface CloseOut {
+  case_id: string;
+  days_remaining: number;
+  decided_at: string;
+  due_date: string;
+  notice: string;
+  outcome: string;
+  overdue: boolean;
+  record_package: RecordPackage;
+  sent: boolean;
+  sent_at: string | null;
+  sent_by_name: string | null;
 }
 
 export interface CodeTOC {
@@ -197,6 +237,33 @@ export interface DecisionSummary {
   outcome: "accept" | "return";
 }
 
+export interface DiffEntry {
+  key: string;
+  label: string;
+  message: string;
+  section: "A" | "B" | "C" | "D" | "process";
+}
+
+export interface DocumentRow {
+  date: Attribute;
+  evidence_rung: Attribute;
+  file: string | null;
+  id: string;
+  issuer: Attribute;
+  listed_in_section_d: boolean;
+  note: string;
+  responsible: Attribute;
+  seal: Attribute;
+  title: Attribute;
+  type: Attribute;
+}
+
+export interface EditedItem {
+  id?: string | null;
+  included?: boolean;
+  text: string;
+}
+
 export interface EvidenceItem {
   description: string;
   evidence_type: string | null;
@@ -239,6 +306,32 @@ export interface FactInput {
   value: string | number | boolean | null;
 }
 
+/** One form or record field. `blank` is certain; `not_found` means ask the officer to look. */
+export interface FieldReading {
+  field: string;
+  label: string;
+  pointer: Pointer;
+  reason: string;
+  section: "A" | "B" | "C" | "D" | "process";
+  status: "present" | "blank" | "not_found";
+  value: string | null;
+}
+
+export interface Finding {
+  citations: string[];
+  defect_class: string | null;
+  field: string;
+  key: string;
+  label: string;
+  message: string;
+  pointers: Pointer[];
+  problem: string | null;
+  routed_to: "applicant" | "officer" | "professional";
+  section: "A" | "B" | "C" | "D" | "process";
+  severity: "blocking" | "warning";
+  status: "blank" | "not_found" | "missing" | "unclear";
+}
+
 export interface Gap {
   field: string;
   id: string;
@@ -258,6 +351,43 @@ export interface Guide {
   summary: string;
   title: string;
   topic: string;
+}
+
+export interface InformationRequest {
+  edited: boolean;
+  intro: string;
+  items: InformationRequestItem[];
+  message_id: string | null;
+  sent_at: string | null;
+  sent_by_name: string | null;
+  text: string;
+}
+
+/** Officer edits: replace the item list (text, inclusion, order) and optionally the intro. */
+export interface InformationRequestEdit {
+  intro?: string | null;
+  items: EditedItem[];
+}
+
+export interface InformationRequestItem {
+  authored_by: "batatis" | "officer";
+  field: string | null;
+  finding_key: string | null;
+  id: string;
+  included: boolean;
+  officer_check: boolean;
+  section: "A" | "B" | "C" | "D" | "process" | null;
+  text: string;
+}
+
+export interface InputFile {
+  form_version: string | null;
+  name: string;
+  note: string;
+  pages: number;
+  role: "scc_form_fillable" | "scc_form_flattened" | "attachment" | "unreadable" | "case_record";
+  sha256: string | null;
+  size: number;
 }
 
 export interface IntentBlock {
@@ -395,6 +525,24 @@ export interface PackSource {
   url: string;
 }
 
+export interface PackageReviewIndex {
+  authority: string;
+  case_id: string | null;
+  close_out: CloseOut | null;
+  latest: ReviewSession | null;
+  package_id: string;
+  sessions: SessionSummary[];
+}
+
+/** Where a value or gap is: file and 1-based page, form field name, rectangle, exact quote. */
+export interface Pointer {
+  bbox: [number, number, number, number] | null;
+  file: string;
+  form_field: string | null;
+  page: number | null;
+  quote: string | null;
+}
+
 export interface ProvisionContext {
   attribution_status: "direct" | "inherited" | "no-row";
   citation: string;
@@ -430,6 +578,21 @@ export interface QueueApplication {
 
 export interface QueueResult {
   applications: QueueApplication[];
+}
+
+export interface RecordItem {
+  detail: string;
+  label: string;
+  present: boolean;
+  source: Pointer | null;
+}
+
+/** What the officer sends to the Safety Codes Council and what stays on file. Batatis never sends it. */
+export interface RecordPackage {
+  basis: string[];
+  note: string;
+  retain_on_file: RecordItem[];
+  send_to_council: RecordItem[];
 }
 
 export interface RelevanceBands {
@@ -477,8 +640,52 @@ export interface ResolvedNote {
   topic: "entry_point" | "submission" | "permit_link" | "scope" | "documents" | "professional" | "review" | "decision" | "appeal" | "registration" | "authority";
 }
 
+export interface ReviewDiff {
+  new: DiffEntry[];
+  previous_gaps: number;
+  previous_version: number;
+  resolved: DiffEntry[];
+  statement: string;
+  still_open: DiffEntry[];
+}
+
+export interface ReviewSession {
+  administrative_only: true;
+  authority: string;
+  case_id: string | null;
+  case_version: number | null;
+  citations: CitationCheck[];
+  created_at: string;
+  created_by_name: string;
+  diff: ReviewDiff | null;
+  documents: DocumentRow[];
+  fields: FieldReading[];
+  files: InputFile[];
+  findings: Finding[];
+  information_request: InformationRequest;
+  input_kind: "case" | "upload";
+  lookup_skipped: boolean;
+  not_a_compliance_determination: true;
+  notice: string;
+  package_id: string;
+  schema_version: "batatis.package_review.v1";
+  section_c: SectionCCheck[];
+  version: number;
+}
+
 export interface ReviewerName {
   name: string;
+}
+
+export interface SectionCCheck {
+  form_function: string | null;
+  form_objective: string | null;
+  message: string;
+  pointer: Pointer;
+  provision_id: string | null;
+  row: number;
+  status: "match" | "mismatch" | "no_table_row" | "provision_not_found" | "not_checked";
+  table_pairs: string[];
 }
 
 export interface SectionCRequest {
@@ -499,6 +706,31 @@ export interface SectionCRow {
   provision_id: string;
   related_root: string | null;
   related_root_method: string | null;
+}
+
+export interface SentInformationRequest {
+  intro: string;
+  items: string[];
+  package_id: string;
+  sent_at: string;
+  sent_by_name: string;
+  text: string;
+  version: number;
+}
+
+export interface SentInformationRequests {
+  case_id: string;
+  requests: SentInformationRequest[];
+}
+
+export interface SessionSummary {
+  created_at: string;
+  created_by_name: string;
+  input_kind: "case" | "upload";
+  open_gaps: number;
+  sent_at: string | null;
+  statement: string | null;
+  version: number;
 }
 
 export interface SignupRequest {
