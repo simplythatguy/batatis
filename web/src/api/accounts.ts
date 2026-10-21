@@ -81,8 +81,11 @@ export const notAvailable = (e: unknown) => e instanceof EngineError && (e.statu
 
 function plain(status: number, raw: string, path: string): string {
   if (status === 0) return "The service did not respond.";
+  if (status === 401 && path === "/auth/login") return "Email or password is incorrect.";
   if (status === 401) return "Sign in to continue.";
-  if (status === 429) return "Too many requests right now. Try again in a moment.";
+  if (status === 429) return "Too many attempts right now. Try again in a moment.";
+  if (status === 422) return "Some of what you entered isn't valid.";
+  if (status === 403) return raw || "You don't have access to this.";
   if (path === "/assist" && status === 503) return "The assistant isn't available on this server.";
   if (status === 409 && /submit/.test(path)) return "Some required items are still missing.";
   if (status === 409) return raw || "This application changed or is read-only right now.";
@@ -90,7 +93,7 @@ function plain(status: number, raw: string, path: string): string {
   return raw || `Request failed (${status}).`;
 }
 
-async function call<T>(method: "GET" | "POST", path: string, body?: unknown, signal?: AbortSignal, ms = 15000): Promise<T> {
+async function call<T>(method: "GET" | "POST" | "DELETE", path: string, body?: unknown, signal?: AbortSignal, ms = 15000): Promise<T> {
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), ms);
   const onAbort = () => ctl.abort();
@@ -156,3 +159,99 @@ export function submitBlockers(e: unknown): { id: string; field: string | null; 
     return { id: o.id ?? `submit-${n}`, field: o.field ?? null, label: o.message ?? o.label ?? o.fix_hint ?? "Required item missing" };
   });
 }
+
+/* —— Sign-in, onboarding, review queue, decisions and notifications (U2) —— */
+
+export interface AuthProvider {
+  id: string;
+  label: string;
+}
+
+export type ApplicantKind = "manufacturer" | "contractor" | "homebuilder";
+export type AuthorityKey = "calgary" | "edmonton";
+
+export interface OnboardingRequest {
+  role: Role;
+  applicant_type?: ApplicantKind;
+  authority?: AuthorityKey;
+  access_code?: string;
+}
+
+export interface Claim {
+  reviewer_id: string;
+  reviewer_name: string;
+  claimed_at: string;
+}
+
+export interface QueueApplication {
+  id: string;
+  title: string | null;
+  applicant: { name: string; applicant_type: string | null };
+  authority: string | null;
+  status: ApplicationStatus;
+  submitted_at: string | null;
+  updated_at: string;
+  completeness: { answered: number; total: number } | null;
+  claim: Claim | null;
+  decision: { outcome: "accept" | "return"; by_name: string; at: string } | null;
+  unread_messages: number;
+}
+
+export interface DecisionItemInput {
+  gap_id?: string;
+  field?: string;
+  note: string;
+}
+
+export type DecisionRequest = { outcome: "accept" } | { outcome: "return"; message: string; items: DecisionItemInput[] };
+
+export interface AppNotification {
+  id: string;
+  case_id: string;
+  case_title: string | null;
+  kind: "status" | "message";
+  status: string | null;
+  actor: { name: string; role: Role | null } | null;
+  text: string;
+  created_at: string;
+  read: boolean;
+}
+
+/** The claim inside a 409 from POST /review/{id}/claim ("Already being reviewed"). */
+export function claimConflict(e: unknown): Claim | null {
+  if (!(e instanceof AccountsError) || e.status !== 409) return null;
+  const c = (e.body as { claim?: Claim } | null)?.claim;
+  return c && typeof c.reviewer_name === "string" ? c : null;
+}
+
+const userOf = (r: { user?: User } | User) => ("user" in r && r.user ? r.user : (r as User));
+
+export const auth = {
+  providers: (signal?: AbortSignal) =>
+    call<{ providers: AuthProvider[] }>("GET", "/auth/providers", undefined, signal).then((r) => r.providers ?? []),
+  signup: (body: { name: string; email: string; password: string }) => call<{ user: User }>("POST", "/auth/signup", body).then(userOf),
+  login: (body: { email: string; password: string }) => call<{ user: User }>("POST", "/auth/login", body).then(userOf),
+  logout: () => call<void>("POST", "/auth/logout", {}),
+  onboarding: (body: OnboardingRequest) => call<{ user: User }>("POST", "/auth/onboarding", body).then(userOf),
+  /** Full-page navigation target for an OAuth provider; `redirect` is the app path to land on. */
+  oauthStart: (provider: string, redirect: string) =>
+    `${ENGINE_BASE}/auth/oauth/${enc(provider)}/start?redirect=${enc(redirect)}`,
+};
+
+export const review = {
+  queue: (signal?: AbortSignal) =>
+    call<{ applications: QueueApplication[] }>("GET", "/review/queue", undefined, signal).then((r) => r.applications ?? []),
+  claim: (caseId: string, takeOver = false) =>
+    call<{ claim: Claim }>("POST", `/review/${enc(caseId)}/claim`, takeOver ? { take_over: true } : {}).then((r) => r.claim),
+  release: (caseId: string) => call<void>("DELETE", `/review/${enc(caseId)}/claim`),
+  decide: (caseId: string, body: DecisionRequest) => call<unknown>("POST", `/review/${enc(caseId)}/decision`, body, undefined, 30000),
+};
+
+export const notifications = {
+  list: (signal?: AbortSignal) =>
+    call<{ notifications: AppNotification[]; unread: number }>("GET", "/me/notifications", undefined, signal).then((r) => ({
+      notifications: r.notifications ?? [],
+      unread: typeof r.unread === "number" ? r.unread : (r.notifications ?? []).filter((n) => !n.read).length,
+    })),
+  markAllRead: () => call<void>("POST", "/me/notifications/read", {}),
+};

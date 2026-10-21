@@ -62,7 +62,12 @@ export function patchApplication(id: string, patch: Partial<ApplicationSummary>)
   set({ applications: state.applications.map((a) => (a.id === id ? { ...a, ...patch } : a)) });
 }
 
-/** Tests and the stub harness. */
+/** The current state outside React (route tables, sign-in actions). */
+export function getAccountState(): AccountState {
+  return state;
+}
+
+/** Tests, the stub harness, and the sign-in / onboarding / sign-out actions. */
 export function setAccountState(next: Partial<AccountState>) {
   set(next);
 }
