@@ -4,6 +4,7 @@ pydantic>=2.7
 httpx>=0.27
 psycopg[binary]>=3.2
 anthropic>=1.0
+PyJWT[crypto]>=2.10  # OIDC RS256 signature, issuer/audience/expiry validation
 pytest>=8.0
 pypdf>=6.0
 pypdfium2>=4.30

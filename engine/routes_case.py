@@ -19,6 +19,7 @@ from .section_d_issues import SectionDIssue, section_d_issues
 from .llm_gate import client_ip_from, search_retry_after
 from .models import Case, Jurisdiction
 from .store import CaseBackend, VersionConflict
+from .account_models import reviewing_authority
 
 
 class SectionDRequest(BaseModel):
@@ -64,6 +65,8 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         if body.expected_version != version:
             raise HTTPException(409, 'case was updated concurrently')
         case.jurisdiction = body.jurisdiction
+        if case.owner_id:
+            case.authority = reviewing_authority(body.jurisdiction.id if body.jurisdiction else None)
         try:
             return store.put(case, expected_version=version)
         except VersionConflict as error:

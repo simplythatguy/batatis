@@ -1,0 +1,325 @@
+"""Route-level authorization matrix and administrative workflow (no live models)."""
+from __future__ import annotations
+
+from contextlib import ExitStack
+from datetime import datetime, timedelta, timezone
+import threading
+
+from fastapi.testclient import TestClient
+import pytest
+
+from engine.api import create_app
+from engine.codes import Codes
+from engine.models import Case
+from engine.store import CaseStore
+from engine.tests.case_builder_fixtures import complete_case, fact, store_with_synthetic_files
+from engine.tests.test_accounts import signup, onboard
+
+
+@pytest.fixture(scope='module')
+def scene(tmp_path_factory):
+    with pytest.MonkeyPatch.context() as patch, ExitStack() as stack:
+        patch.delenv('VERCEL', raising=False)
+        patch.setenv('BATATIS_REVIEWER_CODES', '{"edmonton":"officer-secret","calgary":"calgary-secret"}')
+        patch.setenv('BATATIS_AUTH_RATE_LIMIT', '100')
+        store = CaseStore(tmp_path_factory.mktemp('review') / 'cases.sqlite')
+        app = create_app(store=store, codes=Codes())
+        clients, users = {}, {}
+        for name, role, authority in [('owner', 'applicant', 'edmonton'), ('other', 'applicant', 'edmonton'),
+                                     ('reviewer', 'reviewer', 'edmonton'), ('second', 'reviewer', 'edmonton'),
+                                     ('foreign', 'reviewer', 'calgary'), ('anonymous', None, None)]:
+            clients[name] = stack.enter_context(TestClient(app, base_url='http://localhost'))
+            if role:
+                assert signup(clients[name], name + '@example.test', name.title()).status_code == 201
+                users[name] = onboard(clients[name], role, authority)
+        yield store, clients, users
+
+
+def owned(scene, status='draft', complete=False):
+    store, _, users = scene
+    case = complete_case() if complete else Case(title='Access matrix')
+    case.owner_id, case.authority, case.status = users['owner']['id'], 'edmonton', status
+    return store_with_synthetic_files(store, case) if complete else store.put(case)
+
+
+def test_multiple_applications_and_anonymous_legacy_creation(scene):
+    store, clients, users = scene
+    first = clients['owner'].post('/cases', json={'title': 'First', 'authority': 'edmonton'}).json()
+    second = clients['owner'].post('/cases', json={'title': 'Second', 'authority': 'calgary'}).json()
+    assert first['owner_id'] == second['owner_id'] == users['owner']['id']
+    items = clients['owner'].get('/me/applications').json()['applications']
+    assert {first['id'], second['id']} <= {item['id'] for item in items}
+    assert items[0]['id'] == second['id']  # timestamp ties use the stable persisted ordering below
+    assert all(item['completeness'] is None for item in items)
+    assert clients['other'].get('/me/applications').json()['applications'] == []
+    legacy = clients['anonymous'].post('/cases').json()
+    assert legacy['owner_id'] is None
+    assert clients['anonymous'].get('/cases/' + legacy['id']).status_code == 200
+    assert clients['anonymous'].post('/cases/' + legacy['id'] + '/facts', json=fact('scope', 'site').model_dump()).status_code == 200
+    assert clients['anonymous'].delete('/cases/' + legacy['id']).status_code == 204
+
+
+READ_ROUTES = ['', '/gaps', '/process-fields', '/professional', '/section-d/issues', '/messages']
+
+
+@pytest.mark.parametrize('status', ['draft', 'submitted', 'in_review', 'returned', 'accepted', 'withdrawn'])
+def test_read_access_matrix_on_all_existing_routes(scene, status):
+    store, clients, users = scene
+    case = owned(scene, status)
+    for name, client in clients.items():
+        allowed = name == 'owner' or (name in {'reviewer', 'second'} and status in {'submitted', 'in_review', 'returned', 'accepted'})
+        for suffix in READ_ROUTES:
+            response = client.get(f'/cases/{case.id}' + suffix)
+            assert response.status_code == (200 if allowed else 404), (name, status, suffix, response.text)
+        response = client.post(f'/cases/{case.id}/export', json={'draft': True})
+        if not allowed:
+            assert response.status_code == 404, (name, status, response.text)
+        else:
+            assert response.status_code != 404
+    store.delete(case.id)
+
+
+WRITE_ROUTES = [
+    ('post', '/facts', {'field': 'scope', 'value': 'site', 'kind': 'pointed', 'status': 'confirmed',
+                       'source': {'type': 'user_text', 'ref': 'matrix', 'quote': 'site'}}),
+    ('put', '/jurisdiction', {'expected_version': 1, 'jurisdiction': {'id': 'edmonton', 'name': 'Edmonton'}}),
+    ('post', '/section-d', {}),
+    ('post', '/evidence', {'operation': 'create', 'evidence_id': 'report', 'expected_version': 1,
+                         'title': 'Title', 'description': 'Listing', 'evidence_type': 'manufacturer lit'}),
+    ('delete', '/evidence/report', {'expected_version': 1}),
+]
+
+
+@pytest.mark.parametrize('status', ['draft', 'submitted', 'in_review', 'returned', 'accepted', 'withdrawn'])
+def test_write_access_matrix_facts_evidence_files_and_selection(scene, status):
+    store, clients, _ = scene
+    case = owned(scene, status)
+    for name, client in clients.items():
+        for method, suffix, body in WRITE_ROUTES:
+            expected = 404 if name != 'owner' else 409 if status not in {'draft', 'returned'} else None
+            r = client.request(method, f'/cases/{case.id}' + suffix, json=body)
+            if expected:
+                assert r.status_code == expected, (name, status, suffix, r.text)
+                if expected == 409:
+                    assert r.json()['detail'] == 'Submitted applications are read-only until returned'
+            else:
+                assert r.status_code in {200, 409, 404}, (suffix, r.text)
+        r = client.post(f'/cases/{case.id}/files', content=b'%PDF-1.4 test', headers={'Content-Type': 'application/pdf'})
+        assert r.status_code == (201 if name == 'owner' and status in {'draft', 'returned'}
+                                 else 409 if name == 'owner' else 404), (name, r.text)
+    store.delete(case.id)
+
+
+def test_owner_delete_and_other_review_routes_do_not_leak_ids(scene):
+    store, clients, _ = scene
+    case = owned(scene, 'submitted')
+    for name in ['other', 'foreign', 'anonymous']:
+        for method, path, body in [('post', f'/review/{case.id}/claim', {}),
+                                   ('post', f'/review/{case.id}/decision', {'outcome': 'accept'}),
+                                   ('delete', f'/review/{case.id}/claim', None),
+                                   ('post', f'/cases/{case.id}/messages', {'body': 'Can you clarify?'}),
+                                   ('post', f'/cases/{case.id}/messages/read', {}),
+                                   ('delete', f'/cases/{case.id}', None)]:
+            assert clients[name].request(method, path, json=body).status_code == 404
+    assert clients['reviewer'].delete('/cases/' + case.id).status_code == 404
+    assert clients['owner'].delete('/cases/' + case.id).status_code == 204
+
+
+def test_submit_uses_the_same_blocking_gaps_and_changes_nothing_when_blocked(scene):
+    store, clients, _ = scene
+    case = owned(scene)
+    before = store.get(case.id).model_dump()
+    gaps = clients['owner'].get(f'/cases/{case.id}/gaps').json()['items']
+    r = clients['owner'].post(f'/cases/{case.id}/submit', json={})
+    assert r.status_code == 409
+    assert r.json()['detail']['gaps'] == [g for g in gaps if g['severity'] == 'blocking']
+    assert store.get(case.id).model_dump() == before
+    assert clients['other'].post(f'/cases/{case.id}/submit', json={}).status_code == 404
+
+
+def test_complete_submit_claim_return_messages_resubmit_and_accept(scene):
+    store, clients, users = scene
+    owner, first, second = (clients[n] for n in ('owner', 'reviewer', 'second'))
+    case = owned(scene, complete=True)
+    assert owner.get(f'/cases/{case.id}/gaps').json()['items'] == []
+    r = owner.post(f'/cases/{case.id}/submit', json={})
+    assert r.status_code == 200 and r.json()['status'] == 'submitted', r.text
+    assert r.json()['submitted_at']
+    queue = first.get('/review/queue?status=submitted').json()['applications']
+    assert any(item['id'] == case.id and item['applicant']['applicant_type'] == 'contractor' for item in queue)
+    assert not any(item['id'] == case.id for item in clients['foreign'].get('/review/queue').json()['applications'])
+    claim = first.post(f'/review/{case.id}/claim', json={})
+    assert claim.status_code == 200
+    assert first.post(f'/review/{case.id}/claim', json={}).json()['claim'] == claim.json()['claim']
+    conflict = second.post(f'/review/{case.id}/claim', json={})
+    assert conflict.status_code == 409 and conflict.json()['detail'] == 'Already being reviewed'
+    assert conflict.json()['claim'] == claim.json()['claim']
+    assert second.post(f'/review/{case.id}/decision', json={'outcome': 'accept'}).status_code == 409
+    assert first.post(f'/review/{case.id}/decision', json={'outcome': 'return', 'message': 'Too short'}).status_code == 422
+    items = [{'field': 'risk_assessment', 'note': 'Please identify the scope.'}]
+    r = first.post(f'/review/{case.id}/decision', json={'outcome': 'return',
+                      'message': 'Please clarify the stated scope and attachment revision.', 'items': items})
+    assert r.status_code == 200 and r.json()['status'] == 'returned'
+    applications = owner.get('/me/applications').json()['applications']
+    entry = next(a for a in applications if a['id'] == case.id)
+    assert entry['unread_messages'] == 1 and entry['reviewer']['name'] == 'Reviewer'
+    messages = owner.get(f'/cases/{case.id}/messages').json()['messages']
+    assert messages[-1]['kind'] == 'decision' and messages[-1]['items'] == [dict(items[0], gap_id=None)]
+    assert not messages[-1]['read_by_me']
+    assert owner.post(f'/cases/{case.id}/messages/read', json={}).status_code == 204
+    assert owner.get(f'/cases/{case.id}/messages').json()['messages'][-1]['read_by_me']
+    reply = owner.post(f'/cases/{case.id}/messages', json={'body': '<script>plain text</script> Revision clarified.'})
+    assert reply.status_code == 201 and reply.json()['body'].startswith('<script>')
+    assert first.get('/review/queue?mine=true').json()['applications']
+    assert owner.post(f'/cases/{case.id}/submit', json={}).json()['status'] == 'submitted'
+    assert first.post(f'/review/{case.id}/claim', json={}).status_code == 200
+    r = first.post(f'/review/{case.id}/decision', json={'outcome': 'accept'})
+    assert r.status_code == 200 and r.json()['status'] == 'accepted'
+    assert 'administratively complete' in r.json()['decision']['message']
+    assert not any(word in r.json()['decision']['message'].lower() for word in ['approved', 'compliant', 'complies', 'safe'])
+    assert [x['to_status'] for x in r.json()['status_history']] == ['submitted', 'in_review', 'returned', 'submitted', 'in_review', 'accepted']
+    assert first.delete(f'/review/{case.id}/claim').status_code == 409
+    assert owner.post(f'/cases/{case.id}/submit', json={}).status_code == 409
+
+
+def test_takeover_history_release_and_message_limits(scene):
+    store, clients, users = scene
+    case = owned(scene, 'submitted')
+    first, second = clients['reviewer'], clients['second']
+    assert first.post(f'/review/{case.id}/claim', json={}).status_code == 200
+    assert second.delete(f'/review/{case.id}/claim').status_code == 409
+    assert second.post(f'/review/{case.id}/claim', json={'take_over': True}).status_code == 200
+    changed = first.get(f'/cases/{case.id}').json()
+    assert 'Reviewer' in changed['status_history'][-1]['note'] and 'Second' in changed['status_history'][-1]['note']
+    assert first.post(f'/review/{case.id}/decision', json={'outcome': 'accept'}).status_code == 409
+    assert second.delete(f'/review/{case.id}/claim').status_code == 204
+    assert store.get(case.id).status == 'submitted' and store.get(case.id).claim is None
+    for body in ['', '   ', 'x' * 4001]:
+        assert first.post(f'/cases/{case.id}/messages', json={'body': body}).status_code == 422
+    assert first.post(f'/cases/{case.id}/messages', json={'body': 'x' * 4000}).status_code == 201
+
+
+def test_simultaneous_claims_have_exactly_one_winner(scene):
+    store, clients, _ = scene
+    case = owned(scene, 'submitted')
+    barrier, responses = threading.Barrier(2), []
+
+    def run(name):
+        barrier.wait()
+        responses.append(clients[name].post(f'/review/{case.id}/claim', json={}).status_code)
+
+    threads = [threading.Thread(target=run, args=(name,)) for name in ['reviewer', 'second']]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert sorted(responses) == [200, 409]
+
+
+def test_messages_and_review_history_are_purged_with_case(scene):
+    store, clients, _ = scene
+    case = owned(scene, 'submitted')
+    clients['reviewer'].post(f'/review/{case.id}/claim', json={})
+    clients['reviewer'].post(f'/cases/{case.id}/messages', json={'body': 'A private thread passage.'})
+    expired = store.get(case.id)
+    expired.created_at = (datetime.now(timezone.utc) - timedelta(days=8)).isoformat()
+    store.put(expired)
+    assert store.purge_expired() >= 1
+    assert store.get(case.id) is None
+    assert clients['owner'].get(f'/cases/{case.id}/messages').status_code == 404
+    assert not any(a['id'] == case.id for a in clients['reviewer'].get('/review/queue').json()['applications'])
+
+
+def test_new_merged_case_routes_inherit_the_central_guard(scene):
+    from fastapi import APIRouter
+    store, clients, _ = scene
+    # An unmodified router, shaped like the concurrent library branch's new route.
+    router = APIRouter()
+    @router.get('/cases/{case_id}/future-guard-test')
+    def future(case_id: str):
+        return {'id': case_id}
+    clients['owner'].app.include_router(router)
+    case = owned(scene)
+    assert clients['owner'].get(f'/cases/{case.id}/future-guard-test').status_code == 200
+    assert clients['other'].get(f'/cases/{case.id}/future-guard-test').status_code == 404
+
+
+def test_only_reviewable_authorities_can_be_targeted_or_submitted(scene):
+    store, clients, users = scene
+    assert clients['owner'].post('/cases', json={'title': 'Nowhere', 'authority': 'alberta-other'}).status_code == 422
+    case = owned(scene, complete=True)
+    case.authority = 'alberta-other'  # e.g. derived from an older jurisdiction choice
+    case = store.put(case, expected_version=case.version)
+    blocked = clients['owner'].post(f'/cases/{case.id}/submit', json={})
+    assert blocked.status_code == 409
+    assert store.get(case.id).status == 'draft'
+
+
+def test_an_owner_who_becomes_a_reviewer_cannot_review_their_own_application(scene):
+    store, clients, users = scene
+    case = owned(scene, status='submitted', complete=True)
+    # The owner onboards as an Edmonton reviewer with the shared code.
+    became = onboard(clients['owner'], 'reviewer', 'edmonton')
+    assert became['role'] == 'reviewer'
+    assert clients['owner'].get('/auth/me').json()['user']['role'] == 'reviewer'  # still signed in
+    try:
+        assert clients['owner'].post(f'/review/{case.id}/claim', json={}).status_code == 404
+        queue = clients['owner'].get('/review/queue').json()['applications']
+        assert case.id not in {item['id'] for item in queue}
+        assert clients['owner'].post(f'/review/{case.id}/decision', json={'outcome': 'accept'}).status_code == 404
+        draft = owned(scene)
+        assert clients['owner'].post(f'/cases/{draft.id}/submit', json={}).status_code == 403
+    finally:
+        # Leaving the reviewer role needs the same authority code.
+        back = clients['owner'].post('/auth/onboarding', json={'role': 'applicant', 'applicant_type': 'contractor',
+                                                               'access_code': 'officer-secret'})
+        assert back.status_code == 200, back.text
+
+
+def test_unowned_cases_have_no_message_thread(scene):
+    store, clients, users = scene
+    legacy = store.put(Case(title='Legacy anonymous'))
+    for name in ('owner', 'reviewer'):
+        assert clients[name].get(f'/cases/{legacy.id}/messages').status_code == 404
+        assert clients[name].post(f'/cases/{legacy.id}/messages', json={'body': 'Hello there, anyone?'}).status_code == 404
+        assert clients[name].post(f'/cases/{legacy.id}/messages/read', json={}).status_code == 404
+    assert store.get(legacy.id).messages == []
+
+
+def test_notifications_follow_the_other_partys_actions_and_mark_read(scene):
+    store, clients, users = scene
+    case = owned(scene, status='draft', complete=True)
+    assert clients['owner'].post(f'/cases/{case.id}/submit', json={}).status_code == 200
+    reviewer_view = clients['reviewer'].get('/me/notifications').json()
+    assert any(n['case_id'] == case.id and n['status'] == 'submitted' and not n['read']
+               for n in reviewer_view['notifications'])
+    assert clients['reviewer'].post(f'/review/{case.id}/claim', json={}).status_code == 200
+    returned = clients['reviewer'].post(f'/review/{case.id}/decision',
+                                        json={'outcome': 'return', 'message': 'Please add the legal description.'})
+    assert returned.status_code == 200
+    assert clients['reviewer'].post(f'/cases/{case.id}/messages', json={'body': 'Happy to help with this one.'}).status_code == 201
+    mine = clients['owner'].get('/me/notifications').json()
+    kinds = {(n['kind'], n['status']) for n in mine['notifications'] if n['case_id'] == case.id}
+    assert {('status', 'in_review'), ('status', 'returned'), ('message', None)} <= kinds
+    assert all('approved' not in n['summary'] and 'url' not in n for n in mine['notifications'])
+    assert mine['unread'] >= 3
+    assert clients['owner'].post('/me/notifications/read', json={}).status_code == 204
+    after = clients['owner'].get('/me/notifications').json()
+    assert after['unread'] == 0
+    assert not any(n['case_id'] == case.id and not n['read'] for n in after['notifications'])
+    assert clients['owner'].get('/auth/me').status_code == 200  # marking read keeps the session
+    assert clients['anonymous'].get('/me/notifications').status_code == 401
+
+
+def test_a_released_claim_is_not_a_submission_and_repeats_collapse(scene):
+    store, clients, users = scene
+    case = owned(scene, status='draft', complete=True)
+    assert clients['owner'].post(f'/cases/{case.id}/submit', json={}).status_code == 200
+    for _ in range(2):  # claim, release, claim again
+        assert clients['reviewer'].post(f'/review/{case.id}/claim', json={}).status_code == 200
+        assert clients['reviewer'].delete(f'/review/{case.id}/claim').status_code == 204
+    second = [n for n in clients['second'].get('/me/notifications').json()['notifications'] if n['case_id'] == case.id]
+    assert [n['status'] for n in second] == ['submitted']  # only the applicant's submission
+    mine = [n for n in clients['owner'].get('/me/notifications').json()['notifications'] if n['case_id'] == case.id]
+    assert [n['status'] for n in mine].count('in_review') == 1
+    assert len({n['id'] for n in mine}) == len(mine)

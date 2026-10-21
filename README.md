@@ -199,7 +199,7 @@ User-testing protocol: [`docs/user-testing/README.md`](./docs/user-testing/READM
 
 ## Retention
 
-Do not upload personal information. In live mode, text you enter is sent to OpenAI (US) for processing and is retained by OpenAI under its API data policy (https://openai.com/policies/api-data-usage-policies); Batatis deletes its own stored case data and files after 7 days or on request.
+Batatis automatically removes the names, contact details and addresses it recognizes before any text is sent to an AI provider. In live mode, the remaining text is processed in the US by OpenAI, Anthropic or Jev under their API data policies (https://openai.com/policies/api-data-usage-policies); Batatis deletes its own stored case data and files after 7 days or on request.
 
 A case and its stored files are deleted 7 days after `created_at`, or sooner when the applicant calls `DELETE /cases/{case_id}`. The sqlite store and Neon Postgres use the same purge. Case create and the request sweep run it at most once every 10 minutes per engine instance. `python -m engine.retention` runs it immediately. On Vercel Hobby, a daily cron calls `GET /api/retention/purge`.
 

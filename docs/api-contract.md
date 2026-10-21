@@ -73,7 +73,7 @@ The appendix carries the NRC text for each Section C row: the citation, objectiv
 
 ### Privacy notice and retention
 
-Do not upload personal information. In live mode, text you enter is sent to OpenAI (US) for processing and is retained by OpenAI under its API data policy (https://openai.com/policies/api-data-usage-policies); Batatis deletes its own stored case data and files after 7 days or on request. Every JSON response includes that sentence as `meta.notice`. Responses without a route-specific `X-Batatis-Notice` header also send it in that header; a route's own notice is preserved. A JSON array is returned as `{ "items": [...], "meta": { "notice": "..." } }`.
+Batatis automatically removes the names, contact details and addresses it recognizes before any text is sent to an AI provider. In live mode, the remaining text is processed in the US by OpenAI, Anthropic or Jev under their API data policies (https://openai.com/policies/api-data-usage-policies); Batatis deletes its own stored case data and files after 7 days or on request. Every JSON response includes that sentence as `meta.notice`. Responses without a route-specific `X-Batatis-Notice` header also send it in that header; a route's own notice is preserved. A JSON array is returned as `{ "items": [...], "meta": { "notice": "..." } }`.
 
 A case older than 7 days, measured from `created_at`, is deleted with its facts, evidence, and files. Deleting sooner is allowed. `DELETE /cases/{case_id}` removes that case and its files immediately (`204`, or `404` detail `case not found`). Both sqlite and Postgres remove an expired case and its files when it is accessed, even between periodic sweeps. Reads, file access, and fact or file additions cannot extend the retention window. Timestamp comparisons use elapsed time, including timezone offsets. Case create, and the sweep at the start of each request, run the bulk purge at most once every 10 minutes per engine instance. `GET /retention/purge` (Vercel cron path `/api/retention/purge`, once a day on the Hobby plan) and `python -m engine.retention` run it immediately. A second purge deletes nothing. Failed sweeps and explicit purge requests return `503` detail `case purge failed`, plus `meta`; logs name the exception type without its text.
 
@@ -310,7 +310,7 @@ Alternative path only, after the ladder: CCMC evaluation, ICC-ES evaluation, reg
 
 ### Example
 
-The live body is `{ "items": <the array below>, "meta": { "notice": "Do not upload personal information. In live mode, text you enter is sent to OpenAI (US) for processing and is retained by OpenAI under its API data policy (https://openai.com/policies/api-data-usage-policies); Batatis deletes its own stored case data and files after 7 days or on request." } }`.
+The live body is `{ "items": <the array below>, "meta": { "notice": "Batatis automatically removes the names, contact details and addresses it recognizes before any text is sent to an AI provider. In live mode, the remaining text is processed in the US by OpenAI, Anthropic or Jev under their API data policies (https://openai.com/policies/api-data-usage-policies); Batatis deletes its own stored case data and files after 7 days or on request." } }`.
 
 ```json
 [

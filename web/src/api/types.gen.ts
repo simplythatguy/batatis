@@ -2,6 +2,52 @@
 // Do not edit: change the engine model, run `python -m engine.schema_export`, then `npm run gen:types`.
 // Fields with a default are optional here because the engine accepts them omitted; responses always carry them.
 
+export interface ApplicantSummary {
+  applicant_type: "manufacturer" | "contractor" | "homebuilder" | null;
+  name: string;
+}
+
+export interface ApplicationSummary {
+  authority: string | null;
+  completeness: CompletenessSummary | null;
+  id: string;
+  reviewer: ReviewerName | null;
+  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+  submitted_at: string | null;
+  title: string | null;
+  unread_messages: number;
+  updated_at: string;
+}
+
+export interface ApplicationsResult {
+  applications: ApplicationSummary[];
+}
+
+export interface AssistFocus {
+  id: string;
+  kind: string;
+}
+
+export interface AssistRequest {
+  case_id?: string | null;
+  focus?: AssistFocus | null;
+  history?: AssistTurn[];
+  question: string;
+  screen: string;
+}
+
+export interface AssistResult {
+  answer: string;
+  cited: string[];
+  notice: string;
+  removed_citations: string[];
+}
+
+export interface AssistTurn {
+  role: "user" | "assistant";
+  text: string;
+}
+
 export interface AttributionPair {
   application_note: string | null;
   bracket: string;
@@ -15,24 +61,51 @@ export interface AttributionPair {
 }
 
 export interface Case {
+  authority: string | null;
+  claim: Claim | null;
   created_at: string;
+  decision: Decision | null;
   evidence: EvidenceItem[];
   facts: Fact[];
   gaps: Gap[];
   id: string;
   jurisdiction: Jurisdiction | null;
+  messages: StoredMessage[];
+  owner_id: string | null;
   provisions: string[];
   relevance: RelevanceRecord | null;
   section_c: SectionCRow[];
+  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+  status_history: StatusChange[];
+  submitted_at: string | null;
   title: string | null;
   updated_at: string;
   version: number;
+}
+
+export interface Claim {
+  claimed_at: string;
+  reviewer_id: string;
+  reviewer_name: string;
+}
+
+export interface ClaimRequest {
+  take_over?: boolean;
+}
+
+export interface ClaimResult {
+  claim: Claim;
 }
 
 export interface CodeTOC {
   division: string;
   edition: string;
   parts: TocPart[];
+}
+
+export interface CompletenessSummary {
+  answered: number;
+  total: number;
 }
 
 export interface ContextDefinition {
@@ -55,6 +128,39 @@ export interface ContextNote {
   excerpt: string;
   id: string;
   title: string | null;
+}
+
+export interface Decision {
+  at: string;
+  by_id: string;
+  by_name: string;
+  items: DecisionItem[];
+  message: string;
+  outcome: "accept" | "return";
+}
+
+export interface DecisionItem {
+  field: string | null;
+  gap_id: string | null;
+  note: string;
+}
+
+export interface DecisionItemInput {
+  field?: string | null;
+  gap_id?: string | null;
+  note: string;
+}
+
+export interface DecisionRequest {
+  items?: DecisionItemInput[];
+  message?: string | null;
+  outcome: "accept" | "return";
+}
+
+export interface DecisionSummary {
+  at: string;
+  by_name: string;
+  outcome: "accept" | "return";
 }
 
 export interface EvidenceItem {
@@ -130,9 +236,58 @@ export interface JurisdictionInput {
   name: string;
 }
 
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface MessageAuthor {
+  id: string;
+  name: string;
+  role: "applicant" | "reviewer" | null;
+}
+
+export interface MessageRequest {
+  body: string;
+}
+
+export interface MessagesResult {
+  messages: ThreadMessage[];
+}
+
 export interface NewCase {
+  authority?: "calgary" | "edmonton" | null;
   jurisdiction?: JurisdictionInput | null;
   title?: string | null;
+}
+
+export interface Notification {
+  actor: NotificationActor;
+  case_id: string;
+  case_title: string;
+  created_at: string;
+  id: string;
+  kind: "status" | "message";
+  read: boolean;
+  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn" | null;
+  summary: string;
+}
+
+export interface NotificationActor {
+  name: string;
+  role: "applicant" | "reviewer" | null;
+}
+
+export interface NotificationsResult {
+  notifications: Notification[];
+  unread: number;
+}
+
+export interface OnboardingRequest {
+  access_code?: string | null;
+  applicant_type?: "manufacturer" | "contractor" | "homebuilder" | null;
+  authority?: "calgary" | "edmonton" | null;
+  role: "applicant" | "reviewer";
 }
 
 export interface ProvisionContext {
@@ -154,6 +309,24 @@ export interface ProvisionContext {
   title: string | null;
 }
 
+export interface QueueApplication {
+  applicant: ApplicantSummary;
+  authority: string | null;
+  claim: Claim | null;
+  completeness: CompletenessSummary | null;
+  decision: DecisionSummary | null;
+  id: string;
+  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+  submitted_at: string | null;
+  title: string | null;
+  unread_messages: number;
+  updated_at: string;
+}
+
+export interface QueueResult {
+  applications: QueueApplication[];
+}
+
 export interface RelevanceBands {
   status: string;
   x: number;
@@ -170,6 +343,10 @@ export interface RelevanceRecord {
   scores: Record<string, number>;
   stale: boolean;
   status: "scored";
+}
+
+export interface ReviewerName {
+  name: string;
 }
 
 export interface SectionCRequest {
@@ -192,6 +369,12 @@ export interface SectionCRow {
   related_root_method: string | null;
 }
 
+export interface SignupRequest {
+  email: string;
+  name: string;
+  password: string;
+}
+
 export interface Source {
   bbox: [number, number, number, number] | null;
   page: number | null;
@@ -206,6 +389,35 @@ export interface SourceInput {
   quote?: string | null;
   ref: string;
   type: "code" | "file" | "user_text" | "drawing" | "user_click" | "officer" | "professional";
+}
+
+export interface StatusChange {
+  at: string;
+  by_id: string;
+  by_name: string;
+  from_status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+  note: string;
+  to_status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+}
+
+export interface StoredMessage {
+  author: MessageAuthor;
+  body: string;
+  created_at: string;
+  id: string;
+  items: DecisionItem[];
+  kind: "message" | "decision" | "status";
+  read_by: string[];
+}
+
+export interface ThreadMessage {
+  author: MessageAuthor;
+  body: string;
+  created_at: string;
+  id: string;
+  items: DecisionItem[];
+  kind: "message" | "decision" | "status";
+  read_by_me: boolean;
 }
 
 export interface TocArticle {
@@ -230,4 +442,20 @@ export interface TocSubsection {
   articles: TocArticle[];
   id: string;
   title: string;
+}
+
+export interface User {
+  applicant_type: "manufacturer" | "contractor" | "homebuilder" | null;
+  authority: "calgary" | "edmonton" | null;
+  created_at: string;
+  email: string;
+  id: string;
+  name: string;
+  notifications_seen_at: string | null;
+  onboarded: boolean;
+  role: "applicant" | "reviewer" | null;
+}
+
+export interface UserResult {
+  user: User;
 }

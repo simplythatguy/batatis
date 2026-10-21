@@ -43,6 +43,7 @@ class HttpGuard:
         path = scope.get('path') or ''
         if path == '/api' or path.startswith('/api/'):
             scope = dict(scope)
+            scope['batatis_api_prefix'] = '/api'
             scope['path'] = path[4:] or '/'
             raw_path = scope.get('raw_path') or b''
             if raw_path.startswith(b'/api'):
@@ -79,6 +80,9 @@ class HttpGuard:
                        if key.lower() not in (b'x-robots-tag', b'x-batatis-notice')]
             headers.append((b'x-robots-tag', b'noindex, nofollow'))
             headers.append(notice)
+            if route.startswith(('/auth/', '/cases', '/me/', '/review/', '/assist')):
+                headers = [(key, value) for key, value in headers if key.lower() != b'cache-control']
+                headers.append((b'cache-control', b'no-store'))
             start = dict(started['message'])
             start['headers'] = headers
             # Ids, route, and status only. Never the body, a quote, or uploaded bytes.

@@ -17,6 +17,8 @@ from .models import Case, Fact, now
 from .store import (FileTooLarge, InvalidAttachment, VersionConflict, attachment_reference,
                     case_with_stored_files, retention_cutoff)
 from .uploads import PDF_MAX_BYTES
+from .account_store import ACCOUNT_MIGRATIONS, PostgresAccountsMixin, _DB
+from .access import enforce_mutation, enforce_stored_mutation, enforce_read
 
 MIGRATIONS = (
     """CREATE TABLE IF NOT EXISTS cases (
@@ -35,7 +37,7 @@ MIGRATIONS = (
     """CREATE TABLE IF NOT EXISTS spend (
          day date PRIMARY KEY,
          usd numeric NOT NULL)""",
-)
+) + ACCOUNT_MIGRATIONS
 
 
 def database_url() -> str:
@@ -49,12 +51,14 @@ def database_url() -> str:
     return url
 
 
-class PostgresCaseStore:
+class PostgresCaseStore(PostgresAccountsMixin):
     def __init__(self, url: str | None = None):
         import psycopg
         self._psycopg = psycopg
         self.url = url or database_url()
         with self._conn() as con:
+            # Cold starts run this concurrently after a deploy; serialize the additive DDL.
+            con.execute('SELECT pg_advisory_xact_lock(727274)')
             for statement in MIGRATIONS:
                 con.execute(statement)
 
@@ -85,12 +89,16 @@ class PostgresCaseStore:
             if row is None or self._purge_expired(con, case_id):
                 return None
             files = {item[0] for item in con.execute('SELECT id FROM case_files WHERE case_id=%s', (case_id,))}
-            return case_with_stored_files(row[0], files, int(row[1])), int(row[1])
+            case = case_with_stored_files(row[0], files, int(row[1]))
+            enforce_read(case)
+            return case, int(row[1])
 
     def delete(self, case_id: str) -> bool:
         """Remove the case, its facts, its evidence, and its files."""
         with self._conn() as con:
-            con.execute('SELECT id FROM cases WHERE id=%s FOR UPDATE', (case_id,)).fetchone()
+            previous = con.execute('SELECT data FROM cases WHERE id=%s FOR UPDATE', (case_id,)).fetchone()
+            if previous:
+                enforce_stored_mutation(previous[0])
             con.execute('DELETE FROM case_files WHERE case_id=%s', (case_id,))
             cur = con.execute('DELETE FROM cases WHERE id=%s', (case_id,))
             return cur.rowcount == 1
@@ -101,6 +109,7 @@ class PostgresCaseStore:
             return self._purge_expired(con)
 
     def _purge_expired(self, con, case_id: str | None = None) -> int:
+        self._purge_accounts(_DB(con, postgres=True))
         where = "(data->>'created_at')::timestamptz < %s::timestamptz"
         params = [retention_cutoff()]
         if case_id is not None:
@@ -119,6 +128,9 @@ class PostgresCaseStore:
         conflict = None
         with self._conn() as con:
             if expected_version is None:
+                previous = con.execute('SELECT data FROM cases WHERE id=%s FOR UPDATE', (case.id,)).fetchone()
+                if previous:
+                    enforce_stored_mutation(previous[0])
                 row = con.execute('INSERT INTO cases (id, data, version, updated_at) VALUES (%s, %s, 1, %s) '
                                   'ON CONFLICT (id) DO UPDATE SET data=EXCLUDED.data, '
                                   'version=cases.version+1, updated_at=EXCLUDED.updated_at RETURNING version',
@@ -140,6 +152,7 @@ class PostgresCaseStore:
             if row is None or row[1] != expected_version:
                 conflict = VersionConflict(case.id, expected_version, int(row[1]) if row else None)
             else:
+                enforce_stored_mutation(row[0])
                 saved = con.execute('UPDATE cases SET data=%s, version=version+1, updated_at=%s '
                                   'WHERE id=%s AND version=%s RETURNING version',
                                   (payload, case.updated_at, case.id, expected_version)).fetchone()
@@ -164,6 +177,7 @@ class PostgresCaseStore:
                     raise InvalidAttachment('Attach an uploaded file from this application before confirming the document.')
                 files = {item[0] for item in con.execute('SELECT id FROM case_files WHERE case_id=%s', (case_id,))}
                 case = case_with_stored_files(row[0], files, int(row[1]))
+                enforce_mutation(case)
                 case.facts = [item for item in case.facts if item.id != fact.id] + [fact]
                 case.updated_at = now()
                 case.version = int(row[1]) + 1
@@ -186,6 +200,7 @@ class PostgresCaseStore:
                 return None
             files = {item[0] for item in con.execute('SELECT id FROM case_files WHERE case_id=%s', (case_id,))}
             case = case_with_stored_files(row[0], files, int(row[1]))
+            enforce_mutation(case)
             case.facts = [fact for fact in case.facts if not fact.field.startswith(prefix)]
             case.evidence = [item for item in case.evidence if item.id != evidence_id]
             case.updated_at = now()
@@ -206,6 +221,7 @@ class PostgresCaseStore:
             row = con.execute('SELECT data, version FROM cases WHERE id=%s FOR UPDATE', (case_id,)).fetchone()
             if row is None or self._purge_expired(con, case_id):
                 return None
+            enforce_stored_mutation(row[0])
             con.execute('INSERT INTO case_files (id, case_id, name, content_type, size, data, created_at) '
                         'VALUES (%s, %s, %s, %s, %s, %s, %s)',
                         (file_id, case_id, name, content_type, len(data), data, now()))
