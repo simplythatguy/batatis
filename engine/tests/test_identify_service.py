@@ -654,10 +654,9 @@ def test_a_generated_title_follows_later_runs_but_an_edited_title_is_kept(client
     first = http.post(f'/cases/{case_id}/identify', json={}).json()
     generated = store.get(case_id).title
     assert first['title'] == generated
+    # The first run itself records the marker; the test never sets it.
+    assert store.get(case_id).identify.title == generated
     # The applicant has not touched the title: a changed description produces a new generated title.
-    case = store.get(case_id)
-    case.identify.title = generated
-    store.put(case, expected_version=case.version)
     second = http.post(f'/cases/{case_id}/identify', json={'prose': 'A single-family house in Red Deer with a projecting soffit'}).json()
     assert store.get(case_id).title == second['title'] and second['title']
     # An applicant-edited title stays and is no longer recorded as generated.
