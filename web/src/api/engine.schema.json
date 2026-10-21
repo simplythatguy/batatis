@@ -134,6 +134,17 @@
           "title": "Provisions",
           "type": "array"
         },
+        "relevance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RelevanceRecord"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "section_c": {
           "default": [],
           "items": {
@@ -176,9 +187,147 @@
         "provisions",
         "section_c",
         "evidence",
-        "gaps"
+        "gaps",
+        "relevance"
       ],
       "title": "Case",
+      "type": "object"
+    },
+    "CodeTOC": {
+      "properties": {
+        "division": {
+          "title": "Division",
+          "type": "string"
+        },
+        "edition": {
+          "default": "NBC(AE) 2023, 2nd printing",
+          "title": "Edition",
+          "type": "string"
+        },
+        "parts": {
+          "items": {
+            "$ref": "#/$defs/TocPart"
+          },
+          "title": "Parts",
+          "type": "array"
+        }
+      },
+      "required": [
+        "division",
+        "edition",
+        "parts"
+      ],
+      "title": "CodeTOC",
+      "type": "object"
+    },
+    "ContextDefinition": {
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title"
+        }
+      },
+      "required": [
+        "code",
+        "title"
+      ],
+      "title": "ContextDefinition",
+      "type": "object"
+    },
+    "ContextIntent": {
+      "properties": {
+        "objective": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Objective"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "objective",
+        "text"
+      ],
+      "title": "ContextIntent",
+      "type": "object"
+    },
+    "ContextNode": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "level": {
+          "title": "Level",
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title"
+        }
+      },
+      "required": [
+        "id",
+        "level",
+        "title"
+      ],
+      "title": "ContextNode",
+      "type": "object"
+    },
+    "ContextNote": {
+      "properties": {
+        "excerpt": {
+          "title": "Excerpt",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "excerpt"
+      ],
+      "title": "ContextNote",
       "type": "object"
     },
     "EvidenceItem": {
@@ -710,6 +859,240 @@
       "title": "NewCase",
       "type": "object"
     },
+    "ProvisionContext": {
+      "properties": {
+        "attribution_status": {
+          "enum": [
+            "direct",
+            "inherited",
+            "no-row"
+          ],
+          "title": "Attribution Status",
+          "type": "string"
+        },
+        "citation": {
+          "title": "Citation",
+          "type": "string"
+        },
+        "functions": {
+          "items": {
+            "$ref": "#/$defs/ContextDefinition"
+          },
+          "title": "Functions",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "inherited_from": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Inherited From"
+        },
+        "intent": {
+          "items": {
+            "$ref": "#/$defs/ContextIntent"
+          },
+          "title": "Intent",
+          "type": "array"
+        },
+        "intent_differs": {
+          "title": "Intent Differs",
+          "type": "boolean"
+        },
+        "intent_differs_detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Intent Differs Detail"
+        },
+        "level": {
+          "title": "Level",
+          "type": "string"
+        },
+        "notes": {
+          "items": {
+            "$ref": "#/$defs/ContextNote"
+          },
+          "title": "Notes",
+          "type": "array"
+        },
+        "objectives": {
+          "items": {
+            "$ref": "#/$defs/ContextDefinition"
+          },
+          "title": "Objectives",
+          "type": "array"
+        },
+        "path": {
+          "items": {
+            "$ref": "#/$defs/ContextNode"
+          },
+          "title": "Path",
+          "type": "array"
+        },
+        "pdf_page": {
+          "title": "Pdf Page",
+          "type": "integer"
+        },
+        "referenced_by": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Referenced By",
+          "type": "array"
+        },
+        "references": {
+          "items": {
+            "type": "string"
+          },
+          "title": "References",
+          "type": "array"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title"
+        }
+      },
+      "required": [
+        "id",
+        "level",
+        "title",
+        "citation",
+        "pdf_page",
+        "path",
+        "objectives",
+        "functions",
+        "attribution_status",
+        "inherited_from",
+        "intent",
+        "intent_differs",
+        "intent_differs_detail",
+        "notes",
+        "references",
+        "referenced_by"
+      ],
+      "title": "ProvisionContext",
+      "type": "object"
+    },
+    "RelevanceBands": {
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "x": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Y",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "status"
+      ],
+      "title": "RelevanceBands",
+      "type": "object"
+    },
+    "RelevanceRecord": {
+      "properties": {
+        "bands": {
+          "$ref": "#/$defs/RelevanceBands"
+        },
+        "description_sha256": {
+          "title": "Description Sha256",
+          "type": "string"
+        },
+        "display": {
+          "additionalProperties": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "title": "Display",
+          "type": "object"
+        },
+        "model": {
+          "const": "jev-1.13.0",
+          "default": "jev-1.13.0",
+          "title": "Model",
+          "type": "string"
+        },
+        "rerank": {
+          "additionalProperties": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "title": "Rerank",
+          "type": "object"
+        },
+        "scored_at": {
+          "title": "Scored At",
+          "type": "string"
+        },
+        "scores": {
+          "additionalProperties": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "title": "Scores",
+          "type": "object"
+        },
+        "stale": {
+          "default": false,
+          "title": "Stale",
+          "type": "boolean"
+        },
+        "status": {
+          "const": "scored",
+          "default": "scored",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "model",
+        "scored_at",
+        "description_sha256",
+        "stale",
+        "scores",
+        "rerank",
+        "display",
+        "bands"
+      ],
+      "title": "RelevanceRecord",
+      "type": "object"
+    },
     "SectionCRequest": {
       "properties": {
         "provisions": {
@@ -1017,6 +1400,117 @@
         "ref"
       ],
       "title": "Source",
+      "type": "object"
+    },
+    "TocArticle": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "title": "TocArticle",
+      "type": "object"
+    },
+    "TocPart": {
+      "properties": {
+        "part": {
+          "title": "Part",
+          "type": "integer"
+        },
+        "sections": {
+          "items": {
+            "$ref": "#/$defs/TocSection"
+          },
+          "title": "Sections",
+          "type": "array"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Title"
+        }
+      },
+      "required": [
+        "part",
+        "title",
+        "sections"
+      ],
+      "title": "TocPart",
+      "type": "object"
+    },
+    "TocSection": {
+      "properties": {
+        "articles": {
+          "items": {
+            "$ref": "#/$defs/TocArticle"
+          },
+          "title": "Articles",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "subsections": {
+          "items": {
+            "$ref": "#/$defs/TocSubsection"
+          },
+          "title": "Subsections",
+          "type": "array"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "subsections",
+        "articles"
+      ],
+      "title": "TocSection",
+      "type": "object"
+    },
+    "TocSubsection": {
+      "properties": {
+        "articles": {
+          "items": {
+            "$ref": "#/$defs/TocArticle"
+          },
+          "title": "Articles",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "articles"
+      ],
+      "title": "TocSubsection",
       "type": "object"
     }
   },

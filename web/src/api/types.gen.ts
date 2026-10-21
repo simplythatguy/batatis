@@ -22,10 +22,39 @@ export interface Case {
   id: string;
   jurisdiction: Jurisdiction | null;
   provisions: string[];
+  relevance: RelevanceRecord | null;
   section_c: SectionCRow[];
   title: string | null;
   updated_at: string;
   version: number;
+}
+
+export interface CodeTOC {
+  division: string;
+  edition: string;
+  parts: TocPart[];
+}
+
+export interface ContextDefinition {
+  code: string;
+  title: string | null;
+}
+
+export interface ContextIntent {
+  objective: string | null;
+  text: string;
+}
+
+export interface ContextNode {
+  id: string;
+  level: string;
+  title: string | null;
+}
+
+export interface ContextNote {
+  excerpt: string;
+  id: string;
+  title: string | null;
 }
 
 export interface EvidenceItem {
@@ -106,6 +135,43 @@ export interface NewCase {
   title?: string | null;
 }
 
+export interface ProvisionContext {
+  attribution_status: "direct" | "inherited" | "no-row";
+  citation: string;
+  functions: ContextDefinition[];
+  id: string;
+  inherited_from: string | null;
+  intent: ContextIntent[];
+  intent_differs: boolean;
+  intent_differs_detail: string | null;
+  level: string;
+  notes: ContextNote[];
+  objectives: ContextDefinition[];
+  path: ContextNode[];
+  pdf_page: number;
+  referenced_by: string[];
+  references: string[];
+  title: string | null;
+}
+
+export interface RelevanceBands {
+  status: string;
+  x: number;
+  y: number;
+}
+
+export interface RelevanceRecord {
+  bands: RelevanceBands;
+  description_sha256: string;
+  display: Record<string, number>;
+  model: "jev-1.13.0";
+  rerank: Record<string, number>;
+  scored_at: string;
+  scores: Record<string, number>;
+  stale: boolean;
+  status: "scored";
+}
+
 export interface SectionCRequest {
   provisions: string[];
 }
@@ -140,4 +206,28 @@ export interface SourceInput {
   quote?: string | null;
   ref: string;
   type: "code" | "file" | "user_text" | "drawing" | "user_click" | "officer" | "professional";
+}
+
+export interface TocArticle {
+  id: string;
+  title: string;
+}
+
+export interface TocPart {
+  part: number;
+  sections: TocSection[];
+  title: string | null;
+}
+
+export interface TocSection {
+  articles: TocArticle[];
+  id: string;
+  subsections: TocSubsection[];
+  title: string;
+}
+
+export interface TocSubsection {
+  articles: TocArticle[];
+  id: string;
+  title: string;
 }
