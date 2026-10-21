@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Callable
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
 
 from .ccmc import CCMCRegistry, RegistrySearch, RegistryUnavailable
@@ -14,7 +14,9 @@ from .professional import ProfessionalResult, professional_involvement
 from .section_c import section_c_rows
 from .section_d import SectionDPlan, section_d_plan
 from .section_d_issues import SectionDIssue, section_d_issues
-from .store import CaseStore
+from .llm_gate import client_ip_from, search_retry_after
+from .models import Case
+from .store import CaseBackend, VersionConflict
 
 
 class SectionDRequest(BaseModel):
@@ -23,7 +25,7 @@ class SectionDRequest(BaseModel):
     provisions: list[str] | None = Field(default=None, min_length=1)
 
 
-def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
+def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
                   registry: CCMCRegistry | None = None) -> APIRouter:
     router = APIRouter(tags=['case building'])
     registry = registry or CCMCRegistry()
@@ -36,7 +38,11 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
 
     @router.post('/cases/{case_id}/section-d', response_model=SectionDPlan)
     def section_d(case_id: str, body: SectionDRequest | None = None):
-        case = get_case(case_id)
+        store = cases()
+        snapshot = store.get_snapshot(case_id)
+        if snapshot is None:
+            raise HTTPException(404, 'case not found')
+        case, version = snapshot
         if body and body.provisions is not None:
             case.provisions = body.provisions
         try:
@@ -46,7 +52,12 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
             raise HTTPException(404, error.args[0]) from error
         except ValueError as error:
             raise HTTPException(400, f'invalid provision id: {error}') from error
-        cases().put(case)
+        try:
+            store.put(case, expected_version=version)
+        except VersionConflict as error:
+            if error.actual is None:
+                raise HTTPException(404, 'case not found') from error
+            raise HTTPException(409, 'case was updated concurrently') from error
         return plan
 
     @router.get('/cases/{case_id}/section-d/issues', response_model=list[SectionDIssue])
@@ -61,7 +72,12 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
         return professional_involvement(get_case(case_id), code())
 
     @router.get('/ccmc/search', response_model=RegistrySearch)
-    def ccmc_search(q: str = Query(min_length=1, max_length=200), limit: int = Query(20, ge=1, le=50)):
+    def ccmc_search(request: Request, q: str = Query(min_length=1, max_length=200),
+                    limit: int = Query(20, ge=1, le=50)):
+        wait = search_retry_after(client_ip_from(request))
+        if wait is not None:
+            raise HTTPException(429, f'Search limit reached; try again in {wait} seconds',
+                                headers={'Retry-After': str(wait)})
         try:
             return registry.search(q, limit=limit)
         except ValueError as error:
@@ -76,5 +92,15 @@ def create_router(cases: Callable[[], CaseStore], code: Callable[[], Codes],
     @router.get('/cases/{case_id}/gaps', response_model=list[Gap])
     def gaps(case_id: str):
         return check_completeness(get_case(case_id), code())
+
+    @router.delete('/cases/{case_id}/evidence/{evidence_id}', response_model=Case)
+    def delete_evidence(case_id: str, evidence_id: str):
+        try:
+            case = cases().remove_evidence(case_id, evidence_id)
+        except VersionConflict as error:
+            raise HTTPException(409, 'case was updated concurrently') from error
+        if case is None:
+            raise HTTPException(404, 'case not found')
+        return case
 
     return router

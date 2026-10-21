@@ -3,7 +3,7 @@ from datetime import date
 
 import pytest
 
-from engine.ccmc import API_URL, CCMCRegistry, RegistryUnavailable
+from engine.ccmc import API_URL, CCMCRegistry, REPORT_FETCH_CAP, RegistryUnavailable
 
 
 def record(number='13016-R', product='Example Continuous Exterior Insulation', manufacturer='Example Manufacturer'):
@@ -94,6 +94,23 @@ def test_invalid_search_never_downloads(tmp_path, query):
     client = registry(tmp_path, fetch_json=lambda _: pytest.fail('invalid query must not fetch'))
     with pytest.raises(ValueError):
         client.search(query)
+
+
+def test_one_search_opens_at_most_eight_report_requests(tmp_path):
+    records = [record(f'{index:05d}-R', f'Board {index}') for index in range(REPORT_FETCH_CAP + 4)]
+    calls = []
+
+    def fetch_text(_url):
+        calls.append(_url)
+        return ''
+
+    client = registry(tmp_path, records=records,
+                      fetch_json=lambda _: {'items': records, 'hasMore': False}, fetch_text=fetch_text)
+    first = client.search('board', limit=50)
+    assert len(first.results) == len(records)
+    assert len(calls) == REPORT_FETCH_CAP
+    client.search('board', limit=50)
+    assert len(calls) == len(records)
 
 
 def test_an_unrelated_or_unavailable_report_does_not_supply_a_date(tmp_path):

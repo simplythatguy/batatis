@@ -510,7 +510,7 @@ def test_route_is_read_only_and_missing_case_is_404(tmp_path):
     before = store.get(case.id).model_dump_json()
     response = client.get(f'/cases/{case.id}/section-d/issues')
     assert response.status_code == 200
-    body = response.json()
+    body = response.json()['items']
     assert body[0]['entered_reference'] == UNKNOWN and body[0]['provision'] is None
     assert body[1]['provision']['citation']
     assert store.get(case.id).model_dump_json() == before
@@ -523,7 +523,10 @@ def test_missing_codedb_returns_503_without_a_path(tmp_path, monkeypatch):
     assert created.status_code == 201
     response = client.get(f"/cases/{created.json()['id']}/section-d/issues")
     assert response.status_code == 503
-    assert response.json() == {'detail': 'code database not found'}
+    body = response.json()
+    assert body['detail'] == 'code database not found'
+    assert set(body) == {'detail', 'meta'}
+    assert body['meta']['notice']
     assert 'no-such.sqlite' not in response.text
     assert str(tmp_path) not in response.text
 

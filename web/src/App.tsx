@@ -1,4 +1,4 @@
-import { Icon } from "./components";
+import { Icon, PrivacyNotice, SINGLE_INSTANCE_DEMO } from "./components";
 import { useFocusParam, useRoute } from "./router";
 import { Application } from "./screens/Application";
 import { CodeCheck } from "./screens/CodeCheck";
@@ -91,6 +91,8 @@ export function App() {
           <button type="button" className="btn btn-ghost" onClick={() => resetCase(dispatch)}>
             Reset case
           </button>
+          <PrivacyNotice />
+          <p className="meta demo-notice">{SINGLE_INSTANCE_DEMO}</p>
         </div>
       </aside>
       <main className="main-panel">{screen}</main>

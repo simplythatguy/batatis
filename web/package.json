@@ -9,6 +9,7 @@
     "gen:types": "node scripts/gen-types.mjs",
     "smoke:api": "node scripts/smoke-api.ts",
     "typecheck": "tsc --noEmit",
+    "test:unwrap": "node --experimental-strip-types scripts/unwrap-items.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {

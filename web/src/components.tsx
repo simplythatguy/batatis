@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { PRIVACY_NOTICE } from "./privacy";
 import type { FactKind, Gap } from "./types";
 
 const ICONS: Record<string, ReactNode> = {
@@ -122,6 +123,17 @@ export function GapStrip({ gaps }: { gaps: Gap[] }) {
         ))}
       </ul>
     </details>
+  );
+}
+
+export const SINGLE_INSTANCE_DEMO =
+  "Single-instance demo. Cases stay on this instance until a Postgres store is configured.";
+
+export function PrivacyNotice() {
+  return (
+    <p className="privacy-notice" role="note">
+      {PRIVACY_NOTICE}
+    </p>
   );
 }
 

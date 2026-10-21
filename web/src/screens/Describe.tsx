@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { DetailFields, FactLedger, QuestionChips } from "../case-parts";
-import { GapStrip, Icon, PanelHeader } from "../components";
+import { GapStrip, Icon, PanelHeader, PrivacyNotice } from "../components";
 import { DETAIL_FIELDS, factFor, valueText } from "../model";
 import { useCase } from "../store";
 
@@ -101,6 +101,7 @@ export function Describe() {
               onChange={(e) => dispatch({ type: "setDescription", text: e.target.value })}
               placeholder="What are you building or selling, and what does it do differently?"
             />
+            <PrivacyNotice />
           </div>
           <DropZone />
           <QuestionChips />

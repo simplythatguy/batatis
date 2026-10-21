@@ -6,3 +6,11 @@ node_modules/
 *.pyc
 __pycache__/
 .venv/
+.vercel/
+*.sqlite
+*.sqlite-journal
+reference/codes/*.pdf
+reference/text/
+reference/guides/*.pdf
+.vercel
+.env*
