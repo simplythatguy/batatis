@@ -72,6 +72,100 @@ class UnresolvedCitation(BaseModel):
     page: int | None = None
 
 
+class Regime(BaseModel):
+    """A safety-codes regime other than the building code."""
+    id: str
+    name: str                               # how the applicant would say it
+    code: str                               # the regulation and code it falls under
+    framework: Literal['national_model_code', 'no_division_c_framework']
+    coverage: Literal['roadmap', 'not_covered']   # roadmap: planned in Batatis, not built
+    route: str                              # where to take the request
+
+
+class ScopeCheck(BaseModel):
+    status: Literal['in_scope', 'redirect', 'overridden']
+    regime: Regime | None = None
+    message: str | None = None
+    cue: str | None = None                  # the applicant's words that decided it
+    start: int | None = None                # span of `cue` in the description
+    end: int | None = None
+    scores: dict[str, int] = {}
+    override_allowed: bool = True
+
+
+class Half(BaseModel):
+    """One of the two things an accepted variance needs. They are kept distinct on purpose."""
+    id: Literal['variance_request', 'alternative_solution']
+    label: str
+    basis: str
+    who: str
+    what: str
+
+
+class Fork(BaseModel):
+    """Acceptable-solution path or alternative-solution path, read early (before Section C)."""
+    variance_needed: Literal['likely', 'not_indicated', 'unknown']
+    explanation: str
+    cues: list[str] = []                    # the applicant's words that decided it
+    halves: list[Half] = []
+
+
+class Question(BaseModel):
+    """At most five per plan. The shape of identify's open questions plus why it is asked and what it unblocks."""
+    id: str
+    field: str
+    text: str
+    why: str
+    unblocks: list[str] = []                # in words: what an answer lets Batatis decide
+    splits: list[str] = []                  # current candidate articles the answer separates (from codedb)
+    priority: Literal['critical', 'administrative'] = 'critical'
+    kind: Literal['missing', 'conflict'] = 'missing'
+    provision: str | None = None
+
+
+class PlanSource(BaseModel):
+    title: str
+    url: str | None = None
+
+
+class PreApplicationStep(BaseModel):
+    id: str
+    title: str
+    text: str
+    origin: Literal['pack', 'generic']
+    sources: list[PlanSource] = []
+
+
+class PreApplication(BaseModel):
+    """'Before you submit': meet the authority having jurisdiction and emergency services early."""
+    jurisdiction_id: str | None = None
+    jurisdiction_name: str | None = None
+    resolved_by: str | None = None          # 'case' (the case's jurisdiction), 'description' (unconfirmed) or None
+    steps: list[PreApplicationStep] = []
+
+
+class RouteBullet(BaseModel):
+    claim: str
+    citations: list[PlanSource]
+
+
+class RouteNotice(BaseModel):
+    """Product acceptance versus a site variance, for manufacturers and jurisdiction-wide requests."""
+    summary: str
+    bullets: list[RouteBullet]
+
+
+class IntakePlan(BaseModel):
+    next: Literal['redirect', 'questions', 'identify']
+    scope: ScopeCheck
+    fork: Fork
+    questions: list[Question] = []
+    not_sure: list[str] = []                # question ids answered "not sure"; never asked again, never blocking
+    pre_application: PreApplication = Field(default_factory=PreApplication)
+    route_notice: RouteNotice | None = None
+    candidates_seen: int = 0                # identify candidates the ranking used (0 before identify runs)
+
+
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec='microseconds')
 
@@ -84,3 +178,4 @@ class IntakeRecord(BaseModel):
     model: ModelPass = Field(default_factory=lambda: ModelPass(status='off'))
     conflicts: list[FieldConflict] = []
     unresolved_citations: list[UnresolvedCitation] = []
+    plan: IntakePlan | None = None

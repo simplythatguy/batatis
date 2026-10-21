@@ -1,0 +1,230 @@
+{
+ "author": "blind subagent",
+ "prompts": [
+  {
+   "id": "f-1",
+   "text": "I want to leave out the fire separation between my garage and the house and just use a self-closing door.",
+   "label": "likely"
+  },
+  {
+   "id": "f-2",
+   "text": "We're building a 4-storey wood-frame apartment with only one exit stair, since the lot is tiny.",
+   "label": "likely"
+  },
+  {
+   "id": "f-3",
+   "text": "Our basement bedroom window is smaller than normal, about half the usual clear opening, because of the window well.",
+   "label": "likely"
+  },
+  {
+   "id": "f-4",
+   "text": "As the builder, I plan to use 2x4 walls at 24 inch spacing for a three-storey townhouse, which is lighter than what the tables allow.",
+   "label": "likely"
+  },
+  {
+   "id": "f-5",
+   "text": "We're proposing a stair with 9-inch risers and a narrower tread to fit the loft in a laneway suite.",
+   "label": "likely"
+  },
+  {
+   "id": "f-6",
+   "text": "The design uses a cross-laminated timber floor left exposed with no encapsulation in a six-storey building.",
+   "label": "likely"
+  },
+  {
+   "id": "f-7",
+   "text": "I'm an engineer. We're replacing the required sprinkler coverage in the parkade with a water mist system we tested ourselves.",
+   "label": "likely"
+  },
+  {
+   "id": "f-8",
+   "text": "The guard on our deck is only 30 inches high because of the view, lower than the minimum.",
+   "label": "likely"
+  },
+  {
+   "id": "f-9",
+   "text": "We want to put the furnace room door directly onto the bedroom hallway without the usual separation or rating.",
+   "label": "likely"
+  },
+  {
+   "id": "f-10",
+   "text": "Our shop's occupant load is above what the exit widths are rated for, but we plan to manage it with staff control.",
+   "label": "likely"
+  },
+  {
+   "id": "f-11",
+   "text": "Contractor here: the insulation in the attic will be R-30 where the energy tables call for more.",
+   "label": "likely"
+  },
+  {
+   "id": "f-12",
+   "text": "The corridor in our care home is 1.0 m wide, narrower than the minimum, but we have staff always present.",
+   "label": "likely"
+  },
+  {
+   "id": "f-13",
+   "text": "We're using a new bamboo composite beam product for the main floor span that has no standard listing.",
+   "label": "likely"
+  },
+  {
+   "id": "f-14",
+   "text": "The ceiling height in the renovated basement will be 1.9 m throughout, short of the typical minimum.",
+   "label": "likely"
+  },
+  {
+   "id": "f-15",
+   "text": "Our designer wants to skip the smoke alarm interconnection and use a single battery unit for the whole three-bedroom house.",
+   "label": "likely"
+  },
+  {
+   "id": "f-16",
+   "text": "My plans follow the span tables in the code for 2x10 joists at 16 inches, standard stuff. Do I need a variance?",
+   "label": "not_indicated"
+  },
+  {
+   "id": "f-17",
+   "text": "We're using the standard deck guard detail from the code with 36 inch height and 4-inch maximum baluster gaps.",
+   "label": "not_indicated"
+  },
+  {
+   "id": "f-18",
+   "text": "Builder: ordinary two-storey house, 2x6 walls, code-minimum insulation values, standard stairs with 7-3/4 inch risers.",
+   "label": "not_indicated"
+  },
+  {
+   "id": "f-19",
+   "text": "Our basement egress window meets the minimum opening size listed in the code. Is a variance needed?",
+   "label": "not_indicated"
+  },
+  {
+   "id": "f-20",
+   "text": "The garage wall has 5/8 inch Type X drywall as required, and the door is a weatherstripped self-closing one, as the code says.",
+   "label": "not_indicated"
+  },
+  {
+   "id": "f-21",
+   "text": "I'm a designer and the project follows the acceptable solution for a Part 9 house with no changes. Just checking whether anything else is needed.",
+   "label": "not_indicated"
+  },
+  {
+   "id": "f-22",
+   "text": "We're installing the interconnected hardwired smoke alarms in each bedroom and hallway as the code describes.",
+   "label": "not_indicated"
+  },
+  {
+   "id": "f-23",
+   "text": "Our single-family home uses the prescriptive path for energy, with the wall and attic values from the table.",
+   "label": "not_indicated"
+  },
+  {
+   "id": "f-24",
+   "text": "The stairs are 36 inches wide with handrails on one side at the standard height, all straight from the code.",
+   "label": "not_indicated"
+  },
+  {
+   "id": "f-25",
+   "text": "We built the fireplace with the clearances listed in the manufacturer instructions and code. Do we need a variance for that?",
+   "label": "not_indicated"
+  },
+  {
+   "id": "f-26",
+   "text": "Engineer: this small office building has exits, fire ratings and sprinklers sized exactly per the acceptable solutions.",
+   "label": "not_indicated"
+  },
+  {
+   "id": "f-27",
+   "text": "We plan a typical wood-frame garage with a concrete slab, standard footing depth for frost, nothing unusual.",
+   "label": "not_indicated"
+  },
+  {
+   "id": "f-28",
+   "text": "The hot water heater is installed per the code with a relief valve and drain. Is there any application I should file besides the permit?",
+   "label": "not_indicated"
+  },
+  {
+   "id": "f-29",
+   "text": "Our truss manufacturer supplies engineered trusses sealed to the standard loads in the code.",
+   "label": "not_indicated"
+  },
+  {
+   "id": "f-30",
+   "text": "I'm a homeowner adding a normal bathroom fan vented outside as the code says. Do I need a variance?",
+   "label": "not_indicated"
+  },
+  {
+   "id": "f-31",
+   "text": "I want to try something different with the walls.",
+   "label": "unknown"
+  },
+  {
+   "id": "f-32",
+   "text": "Do I need a variance for a laneway house?",
+   "label": "unknown"
+  },
+  {
+   "id": "f-33",
+   "text": "SIPs panels.",
+   "label": "unknown"
+  },
+  {
+   "id": "f-34",
+   "text": "We're building a deck.",
+   "label": "unknown"
+  },
+  {
+   "id": "f-35",
+   "text": "It's a mass timber building in Calgary.",
+   "label": "unknown"
+  },
+  {
+   "id": "f-36",
+   "text": "Not sure if the stairs are okay, can someone tell me?",
+   "label": "unknown"
+  },
+  {
+   "id": "f-37",
+   "text": "The architect said our design is mostly standard but has a few unusual parts, I don't know which.",
+   "label": "unknown"
+  },
+  {
+   "id": "f-38",
+   "text": "Can you help me with a fire code thing?",
+   "label": "unknown"
+  },
+  {
+   "id": "f-39",
+   "text": "We use the standard footing but I think the soil might be bad, not sure it matters.",
+   "label": "unknown"
+  },
+  {
+   "id": "f-40",
+   "text": "Product name: ThermaBlock ICF.",
+   "label": "unknown"
+  },
+  {
+   "id": "f-41",
+   "text": "What is a variance?",
+   "label": "unknown"
+  },
+  {
+   "id": "f-42",
+   "text": "Our plan is partly per the tables and partly something our engineer suggested, I haven't seen the details.",
+   "label": "unknown"
+  },
+  {
+   "id": "f-43",
+   "text": "The inspector said something about the exit, but I didn't catch it.",
+   "label": "unknown"
+  },
+  {
+   "id": "f-44",
+   "text": "Basement suite renovation, 1960s house.",
+   "label": "unknown"
+  },
+  {
+   "id": "f-45",
+   "text": "We want to save money on the building envelope.",
+   "label": "unknown"
+  }
+ ]
+}
