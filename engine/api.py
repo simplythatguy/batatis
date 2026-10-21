@@ -319,6 +319,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
     app.include_router(__import__('engine.routes_assist', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_relevance', fromlist=['create_router']).create_router(
         cases, code, relevance_judge_factory))
+    app.include_router(__import__('engine.routes_identify', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_package_review', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_jurisdictions', fromlist=['create_router']).create_router(cases))
     return app

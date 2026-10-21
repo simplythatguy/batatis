@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field, model_validator
 from .account_models import ApplicationStatus, Claim, Decision, StatusChange, StoredMessage
 
 from .relevance_models import RelevanceRecord
+from .models_identify import IdentifyResult
 
 FactKind = Literal['exact', 'pointed', 'computed', 'proposed']
 FactStatus = Literal['confirmed', 'unconfirmed']
@@ -171,6 +172,7 @@ class Case(BaseModel):
     evidence: list[EvidenceItem] = []
     gaps: list[Gap] = []
     relevance: RelevanceRecord | None = None   # explicit scoring only; GET recomputes its staleness
+    identify: IdentifyResult | None = None     # last code identification (models_identify.py); never writes provisions
 
     @model_validator(mode='after')
     def _kind_follows_the_file(self):
