@@ -140,6 +140,8 @@ def test_public_attachment_presence_requires_a_file_owned_by_the_current_case(tm
     path = f"/cases/{case['id']}/facts"
     forged = _attachment('SYNTHETIC-not-uploaded.pdf')
     assert client.post(path, json=forged.model_dump()).status_code == 422
+    nested = forged.model_copy(update={'field': 'evidence.folder.synthetic.file_ref'})
+    assert client.post(path, json=nested.model_dump()).status_code == 422
     assert store.get(case['id']).facts == []
     uploaded = client.post(f"/cases/{case['id']}/files", content=b'%PDF-1.4\nSYNTHETIC storage bytes',
                            headers={'Content-Type': 'application/pdf', 'x-filename': 'test.pdf'})
