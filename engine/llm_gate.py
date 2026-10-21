@@ -1,8 +1,13 @@
-"""Live model calls are off unless BATATIS_LIVE=1 and OPENAI_API_KEY is set.
+"""Live model calls are off unless BATATIS_LIVE=1 and the provider's credential is set.
 
-Identify (Jev screen, verifier) and completeness model review call `authorize` before a
-provider request and `record` after. The key is never logged or returned.
-Over the daily cap the caller takes the offline path with source `offline-cap`.
+Completeness model review and the assistant call `authorize` before a provider request and
+`record` after. Identify (Jev screen and rerank, OpenAI or Anthropic verifier) calls `reserve`,
+then `settle` with the reported tokens, or `release` when the call fails. The key is never
+logged or returned. Over the daily cap the caller takes the offline path with source `offline-cap`.
+
+`BATATIS_PROVIDER=fake` lets identify's offline fakes pass this gate as if live, so the spend
+path is exercised without keys. It is refused when `VERCEL` is set and has no effect on
+`authorize` (the assistant and completeness never treat a fake as live).
 """
 from __future__ import annotations
 
@@ -15,9 +20,23 @@ from decimal import Decimal, ROUND_HALF_UP
 
 # USD per 1M tokens, input then output. Unknown models use the conservative pair so the
 # pre-call estimate does not under-count the cap.
+# Identify's pinned models are listed by their exact ids. Anthropic prices are the first-party
+# list prices (claude-api reference, cached 2026-10-06). Jev's input price is the one measured in
+# docs/research/2026-10-20-vision/jev-benchmark/README.md ($0.042 per million input tokens); no
+# output price is published there, so output is priced the same (Jev answers are a few tokens each).
 PRICES = {
     'gpt-4.1-mini': (Decimal('0.40'), Decimal('1.60')),
     'gpt-4.1': (Decimal('2'), Decimal('8')),
+    'gpt-4.1-mini-2025-04-14': (Decimal('0.40'), Decimal('1.60')),
+    'gpt-4.1-2025-04-14': (Decimal('2'), Decimal('8')),
+    'claude-sonnet-5-5': (Decimal('2'), Decimal('10')),
+    'claude-opus-5-5': (Decimal('4'), Decimal('20')),
+    'jev-1.13.0': (Decimal('0.042'), Decimal('0.042')),
+    # GPT Luna, identify's verifier. OpenAI's Standard-tier list price (developers.openai.com/api/docs/pricing,
+    # read 2026-10-21) is $0.10 in / $0.50 out up to 272K input tokens and $0.20 / $0.75 above. Both the
+    # reservation and the settlement use the long-context pair, an over-estimate for every identify call,
+    # so the ledger never under-counts. Reasoning tokens are billed as output and arrive in completion_tokens.
+    'gpt-6-luna': (Decimal('0.20'), Decimal('0.75')),
 }
 CONSERVATIVE = (Decimal('10'), Decimal('30'))
 DEFAULT_MODEL = 'gpt-4.1-mini'
@@ -105,6 +124,7 @@ _search_window = SlidingWindow()
 _assist_window = SlidingWindow()
 _relevance_window = SlidingWindow()
 _relevance_daily = SlidingWindow()
+_identify_window = SlidingWindow()
 _spend = None
 _spend_lock = threading.Lock()
 
@@ -117,6 +137,7 @@ def reset_for_tests() -> None:
     _assist_window.reset()
     _relevance_window.reset()
     _relevance_daily.reset()
+    _identify_window.reset()
     with _spend_lock:
         if _spend is not None:
             _spend.close()
@@ -223,6 +244,75 @@ def assist_retry_after(client_ip: str) -> int:
     _, window = _assist_limits()
     llm_limit, llm_window = _rate_limit('BATATIS_LLM_RATE', '20', '600')
     return max(1, _assist_window.retry_after(client_ip, window), _llm_window.retry_after(client_ip, llm_window))
+
+
+PROVIDERS = ('openai', 'anthropic', 'jev')
+
+
+def fake_providers() -> bool:
+    """True when identify runs on its offline fakes. Never on Vercel."""
+    return (os.environ.get('BATATIS_PROVIDER') or '').strip().lower() == 'fake' and not os.environ.get('VERCEL')
+
+
+def provider_enabled(provider: str) -> bool:
+    """Live switch for identify's providers. Jev's credential is the vendored keystore's."""
+    if provider not in PROVIDERS:
+        return False
+    if fake_providers():
+        return True
+    if provider != 'jev':
+        return live_enabled(provider)
+    if os.environ.get('BATATIS_LIVE') != '1':
+        return False                                   # checked first, so tests never touch the keychain
+    from .identify.jevkit import keystore
+    from .identify.screen import JEV_PROVIDER
+    return bool(keystore.resolve(JEV_PROVIDER))
+
+
+def reserve(*, provider: str, model: str, max_input_tokens: int, max_output_tokens: int,
+            client_ip: str | None = None, rate: bool = False) -> Decision:
+    """Reserve the worst-case cost of one identify provider call. `rate` also takes an LLM window slot.
+
+    Identify takes its per-IP slot once per run (`identify_retry_after`), so stage calls pass rate=False.
+    """
+    if not provider_enabled(provider):
+        return Decision(False, 'offline')
+    if rate:
+        limit, window = _rate_limit('BATATIS_LLM_RATE', '20', '600')
+        if not _llm_window.allow(client_ip or 'local', limit, window):
+            return Decision(False, 'rate-limited')
+    estimate = estimate_usd(model, max_input_tokens, max_output_tokens)
+    try:
+        ledger = _ledger()
+    except SpendStoreRequired:
+        return Decision(False, 'offline-cap')
+    if not _reserve(ledger, estimate, daily_cap()):
+        return Decision(False, 'offline-cap')
+    return Decision(True, 'live', estimate)
+
+
+def settle(decision: Decision, *, model: str, input_tokens: int, output_tokens: int) -> Decimal:
+    """Replace a reservation with the reported tokens. Returns the settled cost."""
+    actual = estimate_usd(model, input_tokens, output_tokens)
+    if decision.allowed:
+        record(model=model, input_tokens=input_tokens, output_tokens=output_tokens,
+               reserved_usd=decision.reserved_usd)
+    return actual
+
+
+def release(decision: Decision) -> None:
+    """Give back a reservation whose call failed before it reported usage."""
+    if decision.allowed:
+        record(model=DEFAULT_MODEL, input_tokens=0, output_tokens=0, reserved_usd=decision.reserved_usd)
+
+
+def identify_retry_after(client_ip: str) -> int | None:
+    """None when this IP may start an identify run. Default 6 runs per 10 minutes per IP, per instance."""
+    limit, window = _rate_limit('BATATIS_IDENTIFY_RATE', '6', '600')
+    key = client_ip or 'unknown'
+    if _identify_window.allow(key, limit, window):
+        return None
+    return _identify_window.retry_after(key, window)
 
 
 def record(*, model: str, input_tokens: int, output_tokens: int, reserved_usd: Decimal | float = 0) -> None:

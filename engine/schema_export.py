@@ -23,17 +23,20 @@ from .routes_auth import SignupRequest, LoginRequest, OnboardingRequest
 from .routes_review import (NotificationsResult, ApplicationsResult, QueueResult, ClaimResult, ClaimRequest,
                             DecisionRequest, MessageRequest)
 from .routes_assist import AssistRequest, AssistResult
+from .identify.http_models import (BenchmarkConfirmRequest, IdentifyConfirmRequest, IdentifyDecisionRequest,
+                                   IdentifyDecisionResponse, IdentifyRequest)
 from .models_review import InformationRequestEdit, PackageReviewIndex, ReviewSession, SentInformationRequests
 from .models_jurisdictions import JurisdictionDetail, JurisdictionsResult
 from .routes_jurisdictions import CaseJurisdictionPack
 
 OUT = Path(__file__).resolve().parent.parent / 'web' / 'src' / 'api' / 'engine.schema.json'
 RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesResult, ApplicationsResult,
-             QueueResult, ClaimResult, AssistResult, NotificationsResult,
+             QueueResult, ClaimResult, AssistResult, NotificationsResult, IdentifyDecisionResponse,
              ReviewSession, PackageReviewIndex, SentInformationRequests,
              JurisdictionsResult, JurisdictionDetail, CaseJurisdictionPack)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
-            ClaimRequest, DecisionRequest, MessageRequest, AssistRequest, InformationRequestEdit)  # defaulted fields optional
+            ClaimRequest, DecisionRequest, MessageRequest, AssistRequest, InformationRequestEdit,
+            IdentifyRequest, IdentifyDecisionRequest, IdentifyConfirmRequest, BenchmarkConfirmRequest)  # defaulted fields optional
 
 
 class _ResponsesCarryDefaults(GenerateJsonSchema):
