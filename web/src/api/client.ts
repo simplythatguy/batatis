@@ -489,7 +489,17 @@ async function readIdentifyResponse(res: Response, onStage?: (stage: string) => 
     buf = parsed.rest;
     for (const ev of parsed.events) {
       onStage?.(ev.event);
-      if (ev.event === "error") throw new EngineError(503, "Article ranking failed.");
+      if (ev.event === "error") {
+        // Keep the engine's status (409 conflict, 503 unavailable) and its public message.
+        let payload: { status?: unknown; message?: unknown } = {};
+        try {
+          payload = JSON.parse(ev.data) as typeof payload;
+        } catch {
+          /* fall back below */
+        }
+        const status = typeof payload.status === "number" ? payload.status : 503;
+        throw new EngineError(status, typeof payload.message === "string" ? payload.message : "Article ranking failed.");
+      }
       if (ev.event === "done") {
         try {
           donePayload = JSON.parse(ev.data) as IdentifyResult;

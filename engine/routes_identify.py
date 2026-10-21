@@ -110,8 +110,8 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
             raise HTTPException(409, 'case was updated concurrently') from error
 
     def execute(case_id: str, text: str, outbound: str, client_ip: str, base: Case,
-                on_stage=None) -> IdentifyResult:
-        """Run identification and store it with one CAS against `base`, the case version the run read."""
+                on_stage=None, answers=()) -> IdentifyResult:
+        """Run identification and store it, with the request's answers, in one CAS against `base`."""
         try:
             config = load_config()
         except (ConfigError, ValueError) as error:
@@ -126,6 +126,8 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         relevance = _relevance(output, text)
 
         def attach(case: Case):
+            if answers:
+                apply_answers(case, answers)
             previous = case.identify.decisions if case.identify else {}
             result.decisions = {k: v for k, v in previous.items() if any(a.provision == k for a in result.articles)}
             if title_should_replace(case.title, text):
@@ -153,7 +155,9 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
                 check_answers(case, body.answers)
             except AnswerRejected as error:
                 raise HTTPException(422, str(error)) from None
-            case, _ = save(case_id, lambda c: apply_answers(c, body.answers), expected_version=case.version)
+            # Staged on a copy: they are written with the result, in the same CAS, or not at all.
+            case = case.model_copy(deep=True)
+            apply_answers(case, body.answers)
         text = body.prose if body.prose and body.prose.strip() else description(case)
         if not text.strip():
             raise HTTPException(409, 'Describe your project first')
@@ -165,10 +169,10 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         user = getattr(request.state, 'user', None)
         outbound = scrub(text, known_values(case, people_names(cases(), case, user)))
         if 'text/event-stream' in request.headers.get('accept', ''):
-            return stream(case_id, text, outbound, client_ip, case)
+            return stream(case_id, text, outbound, client_ip, case, body.answers)
         try:
             with runs.claim(case_id):
-                result = execute(case_id, text, outbound, client_ip, case)
+                result = execute(case_id, text, outbound, client_ip, case, answers=body.answers)
         except RelevanceInProgress:
             raise HTTPException(409, 'Identification already in progress', headers={'Retry-After': '1'}) from None
         except ProcessRefMissing:
@@ -177,7 +181,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
             raise HTTPException(500, 'identify must not change provisions')
         return result
 
-    def stream(case_id: str, text: str, outbound: str, client_ip: str, base: Case) -> StreamingResponse:
+    def stream(case_id: str, text: str, outbound: str, client_ip: str, base: Case, answers=()) -> StreamingResponse:
         try:
             claim = runs.claim(case_id)
             claim.__enter__()
@@ -188,7 +192,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
 
         def worker():
             try:
-                result = execute(case_id, text, outbound, client_ip, base,
+                result = execute(case_id, text, outbound, client_ip, base, answers=answers,
                                  on_stage=lambda stage, payload: events.put((stage, payload)))
                 events.put(('done', attach_meta(attribute_code(json.loads(result.model_dump_json())))))
             except HTTPException as error:

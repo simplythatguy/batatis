@@ -475,6 +475,25 @@ def test_answers_only_fill_questions_identify_asked(client):
     assert len(filled) == 1 and filled[0].status == 'unconfirmed' and filled[0].value == 'yes'
 
 
+def test_answers_are_written_with_the_result_or_not_at_all(client, monkeypatch):
+    """A refused run (429) leaves no answer behind; a successful run is one write, answers included."""
+    import engine.routes_identify as routes
+    http, store = client
+    case_id = described(http)
+    question = http.post(f'/cases/{case_id}/identify', json={}).json()['open_questions'][0]
+    answer = {'question_id': question['id'], 'answer': 'yes'}
+    before = store.get(case_id).version
+    monkeypatch.setattr(routes, 'identify_retry_after', lambda _ip: 30)
+    assert http.post(f'/cases/{case_id}/identify', json={'answers': [answer]}).status_code == 429
+    assert store.get(case_id).version == before
+    assert not [f for f in store.get(case_id).facts if f.field == question['field']]
+    monkeypatch.setattr(routes, 'identify_retry_after', lambda _ip: None)
+    assert http.post(f'/cases/{case_id}/identify', json={'answers': [answer]}).status_code == 200
+    saved = store.get(case_id)
+    assert saved.version == before + 1, 'answers and result are one compare-and-swap'
+    assert [f.value for f in saved.facts if f.field == question['field']] == ['yes']
+
+
 def test_answers_need_a_stored_identification(client):
     http, _ = client
     case_id = described(http)

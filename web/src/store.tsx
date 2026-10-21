@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type Dispatch, type ReactNode } from "react";
 import { engine, EngineError, isCaseConflict, isCaseGone, type EngineGap } from "./api/client";
 import { type CompletenessRecord, isProfessionalHold, officerRoutedLabel } from "./humanReview";
-import { adoptEngineCase, clearEngineSession, engineCaseId, engineGeneration, evidenceFacts, isEngineGeneration, ensureEngineCase, needsReconcile, pushDeletedEvidence, pushFacts, pushListedEvidence, reconcileEngineCase, refreshGaps, syncJurisdiction, type EvidenceOutcome } from "./api/sync";
+import { acknowledgedVersion, acknowledgeWrite, adoptEngineCase, clearEngineSession, engineCaseId, engineGeneration, evidenceFacts, isEngineGeneration, ensureEngineCase, needsReconcile, noteConflict, pushDeletedEvidence, pushFacts, pushListedEvidence, reconcileEngineCase, refreshGaps, syncJurisdiction, type EvidenceOutcome } from "./api/sync";
 import { engineNotices, groupEvidenceGaps, missingFromEngine } from "./rules";
 import { applyIdentifyPlan, planIdentify } from "./identify";
 import { checkCurrent, newCheckState, type CheckState, type SaveStatus } from "./checkState";
@@ -440,8 +440,12 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         if (!id || !syncState.current.saved) throw new Error(syncState.current.detail || "Save was not acknowledged.");
         publishCheck({ ...run, note: "Checking your draft…" });
         const prose = c.description.trim();
-        const result = prose ? await engine.identify(id, prose, [], ctl.signal) : null;
+        // Identify writes against the version this save acknowledged; a newer case is a 409, never overwritten.
+        const acknowledged = acknowledgedVersion(id);
+        if (prose && acknowledged == null) throw new Error("Save was not acknowledged.");
+        const result = prose ? await engine.identify(id, prose, [], ctl.signal, undefined, acknowledged ?? undefined) : null;
         if (!current()) return null;
+        if (result) acknowledgeWrite(id, result.case_version);
         const got = await refreshGaps(id);
         if (!current()) return null;
         if (got.error) throw new Error(got.error);
@@ -467,7 +471,12 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         if (!current()) return null;
         const detail = e instanceof EngineError ? e.technical : e instanceof Error ? e.message : String(e);
-        publishCheck({ ...run, status: "unavailable", note: "Check unavailable. Your work is still here.", detail });
+        const stale = isCaseConflict(e) && /updated concurrently/i.test(detail);
+        if (stale) {
+          const id = engineCaseId();
+          if (id) noteConflict(id);
+        }
+        publishCheck({ ...run, status: "unavailable", note: stale ? CONFLICT_NOTE : "Check unavailable. Your work is still here.", detail });
         setGapsSource("browser");
         setReviewDetail(detail);
         setSyncOk(false);
