@@ -2,20 +2,24 @@
 import hashlib
 import json
 import os
+import sqlite3
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import closing
 from datetime import datetime, timezone
 
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 
 from engine import llm_gate
 from engine.api import create_app
 from engine.codes import Codes
-from engine.identify import Judge, articles
+from engine.identify import JEV_MODEL, Judge, articles
 from engine.identify.jevkit import keystore
 from engine.models import Case, Fact, Source
-from engine.relevance import BANDS_FILE, display_probabilities
+from engine.relevance import BANDS_FILE, PUBLIC_MODEL_VERSIONS, display_probabilities, public_model
+from engine.relevance_models import PUBLIC_MODEL, RelevanceRecord
 from engine.routes_relevance import _save_record
 from engine.store import CaseStore
 
@@ -84,7 +88,7 @@ def test_scores_all_division_b_articles_persists_and_get_never_scores(setup, cod
     response = client.post(f'/cases/{case_id}/relevance')
     assert response.status_code == 200 and response.headers['cache-control'] == 'no-store'
     record = response.json()
-    assert record['status'] == 'scored' and record['model'] == 'jev-1.13.0' and record['stale'] is False
+    assert record['status'] == 'scored' and record['model'] == 'relevance-1' and record['stale'] is False
     assert datetime.fromisoformat(record['scored_at']).tzinfo is not None
     assert record['description_sha256'] == hashlib.sha256(text.encode()).hexdigest()
     assert set(record['scores']) == set(articles(codes.db_path))
@@ -314,3 +318,76 @@ def test_versioned_persistence_retries_without_losing_a_concurrent_fact(setup, m
         assert reopened.version == 3
     finally:
         store.delete(case.id)
+
+
+LEGACY_PIN = 'jev-1.13.0'   # what `relevance.model` held in stored rows before the public version existed
+
+
+def stored_model(store, case_id):
+    """The model value in the raw stored row, read around the Case model."""
+    if isinstance(store, CaseStore):
+        with closing(sqlite3.connect(store.path)) as con:
+            row = con.execute('SELECT json FROM cases WHERE id=?', (case_id,)).fetchone()
+        return json.loads(row[0])['relevance']['model']
+    import psycopg
+    with psycopg.connect(store.url) as con:
+        return con.execute("SELECT data->'relevance'->>'model' FROM cases WHERE id=%s", (case_id,)).fetchone()[0]
+
+
+def store_legacy_model(store, case_id):
+    """Rewrite one stored row the way the engine wrote it before: with the provider's own pin."""
+    if isinstance(store, CaseStore):
+        with closing(sqlite3.connect(store.path)) as con, con:
+            raw = json.loads(con.execute('SELECT json FROM cases WHERE id=?', (case_id,)).fetchone()[0])
+            raw['relevance']['model'] = LEGACY_PIN
+            con.execute('UPDATE cases SET json=? WHERE id=?', (json.dumps(raw), case_id))
+        return
+    import psycopg
+    with psycopg.connect(store.url, autocommit=True) as con:
+        con.execute("UPDATE cases SET data=jsonb_set(data, '{relevance,model}', to_jsonb(%s::text)) WHERE id=%s",
+                    (LEGACY_PIN, case_id))
+
+
+@pytest.mark.parametrize('backend', ['sqlite', 'postgres'])
+def test_rows_stored_with_the_providers_pin_load_as_the_public_version_and_are_rewritten_on_the_next_write(setup, backend):
+    client, local_store, _, _ = setup
+    case_id = create_described(client)
+    assert client.post(f'/cases/{case_id}/relevance').status_code == 200
+    if backend == 'postgres':
+        url = os.environ.get('TEST_DATABASE_URL')
+        if not url:
+            pytest.skip('TEST_DATABASE_URL is not set')
+        from engine.store_postgres import PostgresCaseStore
+        store = PostgresCaseStore(url)
+        store.put(local_store.get(case_id))
+    else:
+        store = local_store
+    try:
+        store_legacy_model(store, case_id)
+        assert stored_model(store, case_id) == LEGACY_PIN
+        assert store.get(case_id).relevance.model == PUBLIC_MODEL == 'relevance-1'
+        if backend == 'sqlite':
+            assert client.get(f'/cases/{case_id}/relevance').json()['model'] == 'relevance-1'
+            assert client.get(f'/cases/{case_id}').json()['relevance']['model'] == 'relevance-1'
+        assert stored_model(store, case_id) == LEGACY_PIN, 'a read never rewrites the row'
+        store.add_fact(case_id, Fact(field='building.storeys', value=2, kind='pointed',
+                                     source=Source(type='user_text', ref='Your answer')))
+        assert stored_model(store, case_id) == 'relevance-1'
+        assert store.get(case_id).relevance.model == 'relevance-1'
+    finally:
+        if backend == 'postgres':
+            store.delete(case_id)
+
+
+def test_the_providers_pin_is_mapped_privately_and_an_unmapped_pin_is_never_passed_through():
+    assert public_model(JEV_MODEL) == PUBLIC_MODEL == 'relevance-1'
+    assert set(PUBLIC_MODEL_VERSIONS.values()) == {PUBLIC_MODEL}
+    with pytest.raises(ValueError):
+        public_model('jev-latest')
+    fields = dict(scored_at='2026-10-21T00:00:00+00:00', description_sha256='0' * 64, scores={'9.1.1.1.': 0.5},
+                  rerank={}, display={'9.1.1.1.': 0.5}, bands={'x': 0.3, 'y': 0.85, 'status': 'test'})
+    assert RelevanceRecord.model_validate(fields).model == 'relevance-1'
+    assert RelevanceRecord.model_validate({**fields, 'model': LEGACY_PIN}).model == 'relevance-1'
+    for bad in ('jev-latest', 'relevance-2', [LEGACY_PIN], None):
+        with pytest.raises(ValidationError):
+            RelevanceRecord.model_validate({**fields, 'model': bad})
