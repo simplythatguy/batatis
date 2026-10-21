@@ -160,6 +160,19 @@ def test_public_attachment_presence_requires_a_file_owned_by_the_current_case(tm
     assert store.get(case['id']) is None
 
 
+def test_legacy_stored_file_claim_without_bytes_is_unconfirmed_and_cannot_export(package, tmp_path):
+    case, codes = package
+    case.facts += [fact('professional.role', 'engineer'), _attachment('SYNTHETIC-legacy-missing.pdf')]
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    store.put(case)  # Models an old internal record predating the public input repair.
+    client = TestClient(create_app(store, codes))
+    saved = client.get(f'/cases/{case.id}').json()
+    legacy = next(row for row in saved['facts'] if row['field'] == 'evidence.synthetic.file_ref')
+    assert legacy['value'] == 'SYNTHETIC-legacy-missing.pdf'  # Preserve the applicant's listing.
+    assert legacy['status'] == 'unconfirmed'
+    assert client.post(f'/cases/{case.id}/export', json={'draft': False}).status_code == 409
+
+
 def test_missing_citation_keeps_the_known_rule_identity(package):
     case, codes = package
     result = professional_involvement(case, codes)
