@@ -301,9 +301,23 @@ def test_notifications_follow_the_other_partys_actions_and_mark_read(scene):
     mine = clients['owner'].get('/me/notifications').json()
     kinds = {(n['kind'], n['status']) for n in mine['notifications'] if n['case_id'] == case.id}
     assert {('status', 'in_review'), ('status', 'returned'), ('message', None)} <= kinds
-    assert all('approved' not in n['text'] for n in mine['notifications'])
+    assert all('approved' not in n['summary'] and 'url' not in n for n in mine['notifications'])
     assert mine['unread'] >= 3
     assert clients['owner'].post('/me/notifications/read', json={}).status_code == 204
     assert clients['owner'].get('/me/notifications').json()['unread'] == 0
     assert clients['owner'].get('/auth/me').status_code == 200  # marking read keeps the session
     assert clients['anonymous'].get('/me/notifications').status_code == 401
+
+
+def test_a_released_claim_is_not_a_submission_and_repeats_collapse(scene):
+    store, clients, users = scene
+    case = owned(scene, status='draft', complete=True)
+    assert clients['owner'].post(f'/cases/{case.id}/submit', json={}).status_code == 200
+    for _ in range(2):  # claim, release, claim again
+        assert clients['reviewer'].post(f'/review/{case.id}/claim', json={}).status_code == 200
+        assert clients['reviewer'].delete(f'/review/{case.id}/claim').status_code == 204
+    second = [n for n in clients['second'].get('/me/notifications').json()['notifications'] if n['case_id'] == case.id]
+    assert [n['status'] for n in second] == ['submitted']  # only the applicant's submission
+    mine = [n for n in clients['owner'].get('/me/notifications').json()['notifications'] if n['case_id'] == case.id]
+    assert [n['status'] for n in mine].count('in_review') == 1
+    assert len({n['id'] for n in mine}) == len(mine)

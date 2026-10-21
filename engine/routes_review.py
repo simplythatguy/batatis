@@ -116,7 +116,8 @@ def reviewer(request: Request) -> User:
 
 
 def unread(case: Case, user: User) -> int:
-    return sum(user.id not in message.read_by and message.author.id != user.id for message in case.messages)
+    return sum(user.id not in message.read_by and message.author.id != user.id and message.kind != 'status'
+               for message in case.messages)
 
 
 def append_message(case, user, body, *, kind='message', items=()):
@@ -163,7 +164,8 @@ class Notification(BaseModel):
     kind: Literal['status', 'message']
     status: ApplicationStatus | None = None
     actor: NotificationActor
-    text: str
+    # Not `text`: the NRC attribution layer treats `text` fields as code text.
+    summary: str
     created_at: str
     read: bool
 
@@ -173,35 +175,46 @@ class NotificationsResult(BaseModel):
     unread: int
 
 
-# What the other party did, in plain words. Never "approved".
-NOTIFY_STATUS = {'in_review': 'started reviewing', 'returned': 'returned', 'submitted': 'submitted',
-                 'accepted': 'accepted as administratively complete'}
+def notification_summary(actor: str, status: str, title: str) -> str:
+    """What the other party did, in plain words. Never "approved"."""
+    if status == 'accepted':
+        return f'{actor} accepted {title} as administratively complete'
+    verb = {'in_review': 'started reviewing', 'returned': 'returned', 'submitted': 'submitted'}[status]
+    return f'{actor} {verb} {title}'
 
 
 def notifications_for(user, store, limit: int = 50) -> NotificationsResult:
-    reviewer = user.role == 'reviewer' and user.authority
+    reviewer = bool(user.role == 'reviewer' and user.authority)
     scoped = ([case for case in store.list_applications(authority=user.authority) if case.owner_id != user.id]
               if reviewer else store.list_applications(owner_id=user.id))
     wanted = {'submitted'} if reviewer else {'in_review', 'returned', 'accepted'}
+    other_role = 'applicant' if reviewer else 'reviewer'
     seen = user.notifications_seen_at or ''
     items: list[Notification] = []
     for case in scoped:
         title = case.title or 'Untitled application'
-        for change in case.status_history:
+        latest: dict[tuple, Notification] = {}
+        for index, change in enumerate(case.status_history):
             if change.by_id == user.id or change.to_status not in wanted:
                 continue
-            items.append(Notification(
-                id=f'{case.id}:status:{change.at}', case_id=case.id, case_title=title, kind='status',
-                status=change.to_status, actor=NotificationActor(name=change.by_name, role=None if reviewer else 'reviewer'),
-                text=f'{change.by_name} {NOTIFY_STATUS[change.to_status]} {title}', created_at=change.at,
-                read=change.at <= seen))
+            # Reviewers hear about the applicant's (re)submissions only, not a colleague releasing a claim.
+            if reviewer and change.by_id != case.owner_id:
+                continue
+            note = Notification(
+                id=f'{case.id}:status:{index}', case_id=case.id, case_title=title, kind='status',
+                status=change.to_status, actor=NotificationActor(name=change.by_name, role=other_role),
+                summary=notification_summary(change.by_name, change.to_status, title), created_at=change.at,
+                read=change.at <= seen)
+            # A release and re-claim repeats the same event; keep the newest one.
+            latest[(change.by_id, change.to_status)] = note
+        items.extend(latest.values())
         for message in case.messages:
             if message.author.id == user.id or message.kind != 'message':
                 continue
             items.append(Notification(
                 id=f'{case.id}:message:{message.id}', case_id=case.id, case_title=title, kind='message',
                 actor=NotificationActor(name=message.author.name, role=message.author.role),
-                text=f'{message.author.name} sent a message about {title}', created_at=message.created_at,
+                summary=f'{message.author.name} sent a message about {title}', created_at=message.created_at,
                 read=user.id in message.read_by or message.created_at <= seen))
     items.sort(key=lambda item: item.created_at, reverse=True)
     items = items[:limit]

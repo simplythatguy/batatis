@@ -270,7 +270,7 @@ export interface Notification {
   kind: "status" | "message";
   read: boolean;
   status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn" | null;
-  text: string;
+  summary: string;
 }
 
 export interface NotificationActor {
