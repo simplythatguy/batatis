@@ -146,8 +146,10 @@ def test_source_gap_preserves_existing_professional_gaps_and_not_engaged_policy(
             'professional_qualifications', 'professional_authentication'} <= {g.field for g in gaps}
     case.facts.append(fact('professional_status', 'not_engaged'))
     gaps = professional_involvement_gaps(case, codes, [])
-    assert len(gaps) == 1 and gaps[0].severity == 'warning'
-    assert gaps[0].message == NOT_ENGAGED_ITEM
+    assert {g.field for g in gaps} == {'professional_source', 'professional_requirement'}
+    assert any(g.field == 'professional_source' and g.severity == 'blocking' for g in gaps)
+    warnings = [g for g in gaps if g.severity == 'warning']
+    assert len(warnings) == 1 and warnings[0].message == NOT_ENGAGED_ITEM
 
 
 @pytest.mark.parametrize('field,value,division,provision_id', [

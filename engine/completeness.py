@@ -84,6 +84,13 @@ def professional_involvement_gaps(case: Case, codes: Codes, process, *,
             field='prescriptive_route_confirmed', message=PRESCRIPTIVE_CONTRADICTION,
             fix_hint='Leave the prescriptive answer unset. It does not close professional involvement.',
             citation=None, routed_to='officer'))
+    # Source resolution is independent of whether a professional has been engaged.
+    for reason in professional.reasons:
+        if reason.source_unresolved:
+            gaps.append(Gap(
+                id=f'professional:source_lookup:{reason.code}', severity='blocking', section='D',
+                field='professional_source', message=reason.message, fix_hint=reason.message,
+                citation=None, routed_to='officer'))
     # An honest "no professional engaged yet" does not invent a number. The blocking
     # name, qualifications, and seal gaps become one officer-routed warning.
     if professional.professional_status == 'not_engaged' and not professional_confirmed(case):
@@ -93,15 +100,6 @@ def professional_involvement_gaps(case: Case, codes: Codes, process, *,
             fix_hint='The officer decides whether a registered professional is required. No registration number has been entered.',
             citation=None, routed_to='officer'))
         return gaps
-    # Professional identity/authentication does not repair a failed source chain.
-    # Keep this independent of required=yes, so other justified duties and all
-    # original administrative gaps remain visible. not_engaged keeps its policy above.
-    for reason in professional.reasons:
-        if reason.source_unresolved:
-            gaps.append(Gap(
-                id=f'professional:source_lookup:{reason.code}', severity='blocking', section='D',
-                field='professional_source', message=reason.message, fix_hint=reason.message,
-                citation=None, routed_to='officer'))
     required = professional.required == 'yes' or confirmed_value(case, 'engineering_required') in ('yes', True)
     if required:
         citation = next((r.citation for r in professional.reasons if r.required == 'yes'), codes.citation('2.4.1.1.(3)', 'C'))
