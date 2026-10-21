@@ -8,6 +8,7 @@ import secrets
 from email import policy
 from email.message import Message
 from email.parser import BytesParser
+from typing import Callable
 
 import psycopg
 from fastapi import FastAPI, HTTPException, Query, Request, Response
@@ -22,6 +23,7 @@ from .codes import CodeDbMissing, Codes
 from .export import (EXPORT_FAILED_DETAIL, ExportBlocked, ExportError, FORM_NOT_FOUND_DETAIL, FormNotFound,
                      export_case)
 from .http_guard import HttpGuard
+from .identify import Judge
 from .llm_gate import client_ip_from, search_retry_after
 from .models import Case, Fact, Jurisdiction, SectionCRow
 from .retention import maybe_purge
@@ -108,7 +110,8 @@ def _pdf_from_body(body: bytes, content_type: str, filename: str | None) -> tupl
         raise HTTPException(400, 'invalid multipart body') from error
 
 
-def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> FastAPI:
+def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
+               relevance_judge_factory: Callable[[], Judge] | None = None) -> FastAPI:
     if store is None:
         assert_durable_when_hosted()
     app = FastAPI(title='Batatis engine')
@@ -294,6 +297,8 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
 
     app.include_router(__import__('engine.routes_case', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_evidence', fromlist=['create_router']).create_router(cases, code))
+    app.include_router(__import__('engine.routes_relevance', fromlist=['create_router']).create_router(
+        cases, code, relevance_judge_factory))
     return app
 
 

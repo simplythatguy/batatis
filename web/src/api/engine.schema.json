@@ -134,6 +134,17 @@
           "title": "Provisions",
           "type": "array"
         },
+        "relevance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RelevanceRecord"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "section_c": {
           "default": [],
           "items": {
@@ -176,7 +187,8 @@
         "provisions",
         "section_c",
         "evidence",
-        "gaps"
+        "gaps",
+        "relevance"
       ],
       "title": "Case",
       "type": "object"
@@ -980,6 +992,105 @@
         "referenced_by"
       ],
       "title": "ProvisionContext",
+      "type": "object"
+    },
+    "RelevanceBands": {
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "x": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Y",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "status"
+      ],
+      "title": "RelevanceBands",
+      "type": "object"
+    },
+    "RelevanceRecord": {
+      "properties": {
+        "bands": {
+          "$ref": "#/$defs/RelevanceBands"
+        },
+        "description_sha256": {
+          "title": "Description Sha256",
+          "type": "string"
+        },
+        "display": {
+          "additionalProperties": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "title": "Display",
+          "type": "object"
+        },
+        "model": {
+          "const": "jev-1.13.0",
+          "default": "jev-1.13.0",
+          "title": "Model",
+          "type": "string"
+        },
+        "rerank": {
+          "additionalProperties": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "title": "Rerank",
+          "type": "object"
+        },
+        "scored_at": {
+          "title": "Scored At",
+          "type": "string"
+        },
+        "scores": {
+          "additionalProperties": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "title": "Scores",
+          "type": "object"
+        },
+        "stale": {
+          "default": false,
+          "title": "Stale",
+          "type": "boolean"
+        },
+        "status": {
+          "const": "scored",
+          "default": "scored",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "model",
+        "scored_at",
+        "description_sha256",
+        "stale",
+        "scores",
+        "rerank",
+        "display",
+        "bands"
+      ],
+      "title": "RelevanceRecord",
       "type": "object"
     },
     "SectionCRequest": {

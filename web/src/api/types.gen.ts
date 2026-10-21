@@ -22,6 +22,7 @@ export interface Case {
   id: string;
   jurisdiction: Jurisdiction | null;
   provisions: string[];
+  relevance: RelevanceRecord | null;
   section_c: SectionCRow[];
   title: string | null;
   updated_at: string;
@@ -151,6 +152,24 @@ export interface ProvisionContext {
   referenced_by: string[];
   references: string[];
   title: string | null;
+}
+
+export interface RelevanceBands {
+  status: string;
+  x: number;
+  y: number;
+}
+
+export interface RelevanceRecord {
+  bands: RelevanceBands;
+  description_sha256: string;
+  display: Record<string, number>;
+  model: "jev-1.13.0";
+  rerank: Record<string, number>;
+  scored_at: string;
+  scores: Record<string, number>;
+  stale: boolean;
+  status: "scored";
 }
 
 export interface SectionCRequest {

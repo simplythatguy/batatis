@@ -83,6 +83,7 @@ class Judge:
         def run(batch):
             state = {'proposal': query, 'articles': {f'A{i}': t for i, (_, t) in enumerate(batch)}}
             qs = {f'q{i}': noul(self.question.format(L=f'A{i}')) for i in range(len(batch))}
+            last_error = None
             for attempt in range(self.attempts):
                 try:
                     t0 = time.monotonic()
@@ -97,12 +98,13 @@ class Judge:
                         for i, (a, _) in enumerate(batch):
                             probs[a] = rep['answers'][f'q{i}']['noul']
                     return
-                except Exception:
+                except Exception as error:
+                    last_error = error
                     with self._lock:
                         self.usage.errors += 1
                     if attempt + 1 < self.attempts:
                         time.sleep(1.5 * (attempt + 1))
-            raise RuntimeError('Jev batch failed after retries')
+            raise RuntimeError('Jev batch failed after retries') from last_error
 
         batches = self.batches(query, arts, ids)
         if len(batches) == 1:
