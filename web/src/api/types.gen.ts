@@ -15,17 +15,46 @@ export interface AttributionPair {
 }
 
 export interface Case {
+  authority: string | null;
+  claim: Claim | null;
   created_at: string;
+  decision: Decision | null;
   evidence: EvidenceItem[];
   facts: Fact[];
   gaps: Gap[];
   id: string;
   jurisdiction: Jurisdiction | null;
+  messages: StoredMessage[];
+  owner_id: string | null;
   provisions: string[];
   section_c: SectionCRow[];
+  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+  status_history: StatusChange[];
+  submitted_at: string | null;
   title: string | null;
   updated_at: string;
   version: number;
+}
+
+export interface Claim {
+  claimed_at: string;
+  reviewer_id: string;
+  reviewer_name: string;
+}
+
+export interface Decision {
+  at: string;
+  by_id: string;
+  by_name: string;
+  items: DecisionItem[];
+  message: string;
+  outcome: "accept" | "return";
+}
+
+export interface DecisionItem {
+  field: string | null;
+  gap_id: string | null;
+  note: string;
 }
 
 export interface EvidenceItem {
@@ -101,9 +130,32 @@ export interface JurisdictionInput {
   name: string;
 }
 
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface MessageAuthor {
+  id: string;
+  name: string;
+  role: "applicant" | "reviewer" | null;
+}
+
+export interface MessagesResult {
+  messages: ThreadMessage[];
+}
+
 export interface NewCase {
+  authority?: string | null;
   jurisdiction?: JurisdictionInput | null;
   title?: string | null;
+}
+
+export interface OnboardingRequest {
+  access_code?: string | null;
+  applicant_type?: "manufacturer" | "contractor" | "homebuilder" | null;
+  authority?: "calgary" | "edmonton" | null;
+  role: "applicant" | "reviewer";
 }
 
 export interface SectionCRequest {
@@ -126,6 +178,12 @@ export interface SectionCRow {
   related_root_method: string | null;
 }
 
+export interface SignupRequest {
+  email: string;
+  name: string;
+  password: string;
+}
+
 export interface Source {
   bbox: [number, number, number, number] | null;
   page: number | null;
@@ -140,4 +198,48 @@ export interface SourceInput {
   quote?: string | null;
   ref: string;
   type: "code" | "file" | "user_text" | "drawing" | "user_click" | "officer" | "professional";
+}
+
+export interface StatusChange {
+  at: string;
+  by_id: string;
+  by_name: string;
+  from_status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+  note: string;
+  to_status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+}
+
+export interface StoredMessage {
+  author: MessageAuthor;
+  body: string;
+  created_at: string;
+  id: string;
+  items: DecisionItem[];
+  kind: "message" | "decision" | "status";
+  read_by: string[];
+}
+
+export interface ThreadMessage {
+  author: MessageAuthor;
+  body: string;
+  created_at: string;
+  id: string;
+  items: DecisionItem[];
+  kind: "message" | "decision" | "status";
+  read_by_me: boolean;
+}
+
+export interface User {
+  applicant_type: "manufacturer" | "contractor" | "homebuilder" | null;
+  authority: "calgary" | "edmonton" | null;
+  created_at: string;
+  email: string;
+  id: string;
+  name: string;
+  onboarded: boolean;
+  role: "applicant" | "reviewer" | null;
+}
+
+export interface UserResult {
+  user: User;
 }

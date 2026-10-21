@@ -83,9 +83,43 @@
     },
     "Case": {
       "properties": {
+        "authority": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Authority"
+        },
+        "claim": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Claim"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "created_at": {
           "title": "Created At",
           "type": "string"
+        },
+        "decision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Decision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "evidence": {
           "default": [],
@@ -126,6 +160,25 @@
           ],
           "default": null
         },
+        "messages": {
+          "items": {
+            "$ref": "#/$defs/StoredMessage"
+          },
+          "title": "Messages",
+          "type": "array"
+        },
+        "owner_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner Id"
+        },
         "provisions": {
           "default": [],
           "items": {
@@ -141,6 +194,38 @@
           },
           "title": "Section C",
           "type": "array"
+        },
+        "status": {
+          "default": "draft",
+          "enum": [
+            "draft",
+            "submitted",
+            "in_review",
+            "returned",
+            "accepted",
+            "withdrawn"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "status_history": {
+          "items": {
+            "$ref": "#/$defs/StatusChange"
+          },
+          "title": "Status History",
+          "type": "array"
+        },
+        "submitted_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Submitted At"
         },
         "title": {
           "anyOf": [
@@ -168,6 +253,14 @@
       "required": [
         "id",
         "title",
+        "owner_id",
+        "authority",
+        "status",
+        "submitted_at",
+        "status_history",
+        "claim",
+        "decision",
+        "messages",
         "created_at",
         "updated_at",
         "version",
@@ -179,6 +272,120 @@
         "gaps"
       ],
       "title": "Case",
+      "type": "object"
+    },
+    "Claim": {
+      "properties": {
+        "claimed_at": {
+          "title": "Claimed At",
+          "type": "string"
+        },
+        "reviewer_id": {
+          "title": "Reviewer Id",
+          "type": "string"
+        },
+        "reviewer_name": {
+          "title": "Reviewer Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reviewer_id",
+        "reviewer_name",
+        "claimed_at"
+      ],
+      "title": "Claim",
+      "type": "object"
+    },
+    "Decision": {
+      "properties": {
+        "at": {
+          "title": "At",
+          "type": "string"
+        },
+        "by_id": {
+          "title": "By Id",
+          "type": "string"
+        },
+        "by_name": {
+          "title": "By Name",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/DecisionItem"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "accept",
+            "return"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        }
+      },
+      "required": [
+        "outcome",
+        "by_id",
+        "by_name",
+        "at",
+        "message",
+        "items"
+      ],
+      "title": "Decision",
+      "type": "object"
+    },
+    "DecisionItem": {
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "gap_id": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gap Id"
+        },
+        "note": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Note",
+          "type": "string"
+        }
+      },
+      "required": [
+        "gap_id",
+        "field",
+        "note"
+      ],
+      "title": "DecisionItem",
       "type": "object"
     },
     "EvidenceItem": {
@@ -681,8 +888,91 @@
       "title": "Jurisdiction",
       "type": "object"
     },
+    "LoginRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "email": {
+          "maxLength": 254,
+          "title": "Email",
+          "type": "string"
+        },
+        "password": {
+          "maxLength": 1024,
+          "title": "Password",
+          "type": "string"
+        }
+      },
+      "required": [
+        "email",
+        "password"
+      ],
+      "title": "LoginRequest",
+      "type": "object"
+    },
+    "MessageAuthor": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "enum": [
+                "applicant",
+                "reviewer"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Role"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "role"
+      ],
+      "title": "MessageAuthor",
+      "type": "object"
+    },
+    "MessagesResult": {
+      "properties": {
+        "messages": {
+          "items": {
+            "$ref": "#/$defs/ThreadMessage"
+          },
+          "title": "Messages",
+          "type": "array"
+        }
+      },
+      "required": [
+        "messages"
+      ],
+      "title": "MessagesResult",
+      "type": "object"
+    },
     "NewCase": {
       "properties": {
+        "authority": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Authority"
+        },
         "jurisdiction": {
           "anyOf": [
             {
@@ -708,6 +998,70 @@
         }
       },
       "title": "NewCase",
+      "type": "object"
+    },
+    "OnboardingRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "access_code": {
+          "anyOf": [
+            {
+              "maxLength": 1024,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Access Code"
+        },
+        "applicant_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "manufacturer",
+                "contractor",
+                "homebuilder"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Applicant Type"
+        },
+        "authority": {
+          "anyOf": [
+            {
+              "enum": [
+                "calgary",
+                "edmonton"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Authority"
+        },
+        "role": {
+          "enum": [
+            "applicant",
+            "reviewer"
+          ],
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role"
+      ],
+      "title": "OnboardingRequest",
       "type": "object"
     },
     "SectionCRequest": {
@@ -856,6 +1210,35 @@
         "explainer"
       ],
       "title": "SectionCRow",
+      "type": "object"
+    },
+    "SignupRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "email": {
+          "maxLength": 254,
+          "title": "Email",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "password": {
+          "maxLength": 1024,
+          "minLength": 10,
+          "title": "Password",
+          "type": "string"
+        }
+      },
+      "required": [
+        "email",
+        "password",
+        "name"
+      ],
+      "title": "SignupRequest",
       "type": "object"
     },
     "Source": {
@@ -1017,6 +1400,263 @@
         "ref"
       ],
       "title": "Source",
+      "type": "object"
+    },
+    "StatusChange": {
+      "properties": {
+        "at": {
+          "title": "At",
+          "type": "string"
+        },
+        "by_id": {
+          "title": "By Id",
+          "type": "string"
+        },
+        "by_name": {
+          "title": "By Name",
+          "type": "string"
+        },
+        "from_status": {
+          "enum": [
+            "draft",
+            "submitted",
+            "in_review",
+            "returned",
+            "accepted",
+            "withdrawn"
+          ],
+          "title": "From Status",
+          "type": "string"
+        },
+        "note": {
+          "default": "",
+          "title": "Note",
+          "type": "string"
+        },
+        "to_status": {
+          "enum": [
+            "draft",
+            "submitted",
+            "in_review",
+            "returned",
+            "accepted",
+            "withdrawn"
+          ],
+          "title": "To Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "by_id",
+        "by_name",
+        "at",
+        "from_status",
+        "to_status",
+        "note"
+      ],
+      "title": "StatusChange",
+      "type": "object"
+    },
+    "StoredMessage": {
+      "properties": {
+        "author": {
+          "$ref": "#/$defs/MessageAuthor"
+        },
+        "body": {
+          "title": "Body",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/DecisionItem"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "kind": {
+          "default": "message",
+          "enum": [
+            "message",
+            "decision",
+            "status"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "read_by": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Read By",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "author",
+        "body",
+        "items",
+        "kind",
+        "created_at",
+        "read_by"
+      ],
+      "title": "StoredMessage",
+      "type": "object"
+    },
+    "ThreadMessage": {
+      "properties": {
+        "author": {
+          "$ref": "#/$defs/MessageAuthor"
+        },
+        "body": {
+          "title": "Body",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/DecisionItem"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "kind": {
+          "enum": [
+            "message",
+            "decision",
+            "status"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "read_by_me": {
+          "title": "Read By Me",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "author",
+        "body",
+        "items",
+        "kind",
+        "created_at",
+        "read_by_me"
+      ],
+      "title": "ThreadMessage",
+      "type": "object"
+    },
+    "User": {
+      "properties": {
+        "applicant_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "manufacturer",
+                "contractor",
+                "homebuilder"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Applicant Type"
+        },
+        "authority": {
+          "anyOf": [
+            {
+              "enum": [
+                "calgary",
+                "edmonton"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Authority"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "email": {
+          "title": "Email",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "onboarded": {
+          "default": false,
+          "title": "Onboarded",
+          "type": "boolean"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "enum": [
+                "applicant",
+                "reviewer"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "name",
+        "role",
+        "applicant_type",
+        "authority",
+        "onboarded",
+        "created_at"
+      ],
+      "title": "User",
+      "type": "object"
+    },
+    "UserResult": {
+      "properties": {
+        "user": {
+          "$ref": "#/$defs/User"
+        }
+      },
+      "required": [
+        "user"
+      ],
+      "title": "UserResult",
       "type": "object"
     }
   },

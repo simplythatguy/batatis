@@ -16,6 +16,8 @@ from typing import Protocol
 
 from .models import Case, Fact, now
 from .uploads import PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL
+from .account_store import FileAccountsMixin, _DB
+from .access import enforce_mutation, enforce_stored_mutation, enforce_read
 
 DEFAULT_PATH = Path.home() / '.batatis' / 'cases.sqlite'
 RETENTION_DAYS = 7
@@ -122,7 +124,7 @@ def open_store(path: Path | str | None = None) -> CaseBackend:
     raise RuntimeError(f'BATATIS_STORE must be file or postgres, not {kind!r}')
 
 
-class CaseStore:
+class CaseStore(FileAccountsMixin):
     def __init__(self, path: Path | str | None = None):
         self.path = Path(path) if path else default_path()
         self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -135,6 +137,7 @@ class CaseStore:
             con.execute('CREATE TABLE IF NOT EXISTS case_files (id TEXT PRIMARY KEY, case_id TEXT NOT NULL, '
                         'name TEXT NOT NULL, content_type TEXT NOT NULL, size INTEGER NOT NULL, '
                         'data BLOB NOT NULL, created_at TEXT NOT NULL)')
+            self.init_accounts(con)
 
     def _connect(self):
         return sqlite3.connect(self.path, timeout=5)
@@ -151,6 +154,10 @@ class CaseStore:
         conflict = None
         with closing(self._connect()) as con, con:
             if expected_version is None:
+                con.execute('BEGIN IMMEDIATE')
+                previous = con.execute('SELECT json FROM cases WHERE id=?', (case.id,)).fetchone()
+                if previous:
+                    enforce_stored_mutation(previous[0])
                 row = con.execute('INSERT INTO cases (id, json, updated_at, version) VALUES (?,?,?,1) '
                                   'ON CONFLICT(id) DO UPDATE SET json=excluded.json, updated_at=excluded.updated_at, '
                                   'version=cases.version+1 RETURNING version',
@@ -170,6 +177,9 @@ class CaseStore:
             # Lock before taking the cutoff, including time spent waiting for another writer.
             con.execute('BEGIN IMMEDIATE')
             self._purge_expired(con, case.id)
+            previous = con.execute('SELECT json FROM cases WHERE id=?', (case.id,)).fetchone()
+            if previous:
+                enforce_stored_mutation(previous[0])
             row = con.execute('UPDATE cases SET json=?, updated_at=?, version=version+1 '
                               'WHERE id=? AND version=? RETURNING version',
                               (payload, case.updated_at, case.id, expected_version)).fetchone()
@@ -195,11 +205,17 @@ class CaseStore:
             if row is None:
                 return None
             files = {item[0] for item in con.execute('SELECT id FROM case_files WHERE case_id=?', (case_id,))}
-            return case_with_stored_files(row[0], files, int(row[1])), int(row[1])
+            case = case_with_stored_files(row[0], files, int(row[1]))
+            enforce_read(case)
+            return case, int(row[1])
 
     def delete(self, case_id: str) -> bool:
         """Remove the case, its facts, its evidence, and its files."""
         with closing(self._connect()) as con, con:
+            con.execute('BEGIN IMMEDIATE')
+            previous = con.execute('SELECT json FROM cases WHERE id=?', (case_id,)).fetchone()
+            if previous:
+                enforce_stored_mutation(previous[0])
             con.execute('DELETE FROM case_files WHERE case_id=?', (case_id,))
             cur = con.execute('DELETE FROM cases WHERE id=?', (case_id,))
             return cur.rowcount == 1
@@ -212,6 +228,7 @@ class CaseStore:
     def _purge_expired(self, con, case_id: str | None = None) -> int:
         if not con.in_transaction:
             con.execute('BEGIN IMMEDIATE')
+        self._purge_accounts(_DB(con))
         # Targeted access uses the case primary key; only periodic sweeps scan all cases.
         where = "julianday(json_extract(json, '$.created_at')) < julianday(?)"
         params = [retention_cutoff()]
@@ -239,6 +256,7 @@ class CaseStore:
                     raise InvalidAttachment('Attach an uploaded file from this application before confirming the document.')
                 files = {item[0] for item in con.execute('SELECT id FROM case_files WHERE case_id=?', (case_id,))}
                 case = case_with_stored_files(row[0], files, int(row[1]))
+                enforce_mutation(case)
                 case.facts = [item for item in case.facts if item.id != fact.id] + [fact]
                 case.updated_at = now()
                 case.version = int(row[1]) + 1
@@ -273,6 +291,7 @@ class CaseStore:
                     return None
                 files = {item[0] for item in con.execute('SELECT id FROM case_files WHERE case_id=?', (case_id,))}
                 case = case_with_stored_files(row[0], files, int(row[1]))
+                enforce_mutation(case)
                 case.facts = [fact for fact in case.facts if not fact.field.startswith(prefix)]
                 case.evidence = [item for item in case.evidence if item.id != evidence_id]
                 case.updated_at = now()
@@ -297,8 +316,10 @@ class CaseStore:
         file_id = f'file_{uuid.uuid4().hex[:12]}'
         with closing(self._connect()) as con, con:
             self._purge_expired(con, case_id)
-            if con.execute('SELECT id FROM cases WHERE id=?', (case_id,)).fetchone() is None:
+            previous = con.execute('SELECT json FROM cases WHERE id=?', (case_id,)).fetchone()
+            if previous is None:
                 return None
+            enforce_stored_mutation(previous[0])
             con.execute('INSERT INTO case_files VALUES (?,?,?,?,?,?,?)',
                         (file_id, case_id, name, content_type, len(data), data, now()))
         return {'id': file_id, 'case_id': case_id, 'name': name, 'content_type': content_type, 'size': len(data)}

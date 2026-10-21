@@ -64,6 +64,8 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         if body.expected_version != version:
             raise HTTPException(409, 'case was updated concurrently')
         case.jurisdiction = body.jurisdiction
+        if case.owner_id:
+            case.authority = body.jurisdiction.id if body.jurisdiction else None
         try:
             return store.put(case, expected_version=version)
         except VersionConflict as error:

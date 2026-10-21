@@ -17,10 +17,12 @@ from pydantic.json_schema import GenerateJsonSchema, models_json_schema
 
 from .api import NewCase, SectionCRequest
 from .models import Case, Fact, SectionCRow
+from .account_models import UserResult, MessagesResult
+from .routes_auth import SignupRequest, LoginRequest, OnboardingRequest
 
 OUT = Path(__file__).resolve().parent.parent / 'web' / 'src' / 'api' / 'engine.schema.json'
-RESPONSES = (Case, SectionCRow)                     # what the engine returns: every field present
-REQUESTS = (Fact, NewCase, SectionCRequest)           # what the engine accepts: defaulted fields optional
+RESPONSES = (Case, SectionCRow, UserResult, MessagesResult)
+REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest)
 
 
 class _ResponsesCarryDefaults(GenerateJsonSchema):

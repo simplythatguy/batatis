@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
+from .account_models import ApplicationStatus, Claim, Decision, StatusChange, StoredMessage
 
 FactKind = Literal['exact', 'pointed', 'computed', 'proposed']
 FactStatus = Literal['confirmed', 'unconfirmed']
@@ -28,7 +29,7 @@ def new_id(prefix: str) -> str:
 
 
 def now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec='seconds')
+    return datetime.now(timezone.utc).isoformat(timespec='microseconds')
 
 
 class Source(BaseModel):
@@ -150,6 +151,14 @@ class Gap(BaseModel):
 class Case(BaseModel):
     id: str = Field(default_factory=lambda: new_id('case'))
     title: str | None = None
+    owner_id: str | None = None
+    authority: str | None = None
+    status: ApplicationStatus = 'draft'
+    submitted_at: str | None = None
+    status_history: list[StatusChange] = Field(default_factory=list)
+    claim: Claim | None = None
+    decision: Decision | None = None
+    messages: list[StoredMessage] = Field(default_factory=list)
     created_at: str = Field(default_factory=now)
     updated_at: str = Field(default_factory=now)
     version: int = Field(default=1, ge=1)      # acknowledgment of the store's row version, never input authority

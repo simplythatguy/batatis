@@ -10,7 +10,7 @@ from email.message import Message
 from email.parser import BytesParser
 
 import psycopg
-from fastapi import FastAPI, HTTPException, Query, Request, Response
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -28,6 +28,7 @@ from .section_c import section_c_rows
 from .store import CaseStore, FileTooLarge, InvalidAttachment, VersionConflict, assert_durable_when_hosted, open_store
 from .uploads import (MULTIPART_MAX_OVERHEAD_BYTES, MULTIPART_MAX_PARTS,
                       PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL)
+from .access import access_dependency
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,7 @@ logger = logging.getLogger(__name__)
 class NewCase(BaseModel):
     title: str | None = None
     jurisdiction: Jurisdiction | None = None
+    authority: str | None = None
 
 
 class SectionCRequest(BaseModel):
@@ -110,8 +112,14 @@ def _pdf_from_body(body: bytes, content_type: str, filename: str | None) -> tupl
 def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> FastAPI:
     if store is None:
         assert_durable_when_hosted()
-    app = FastAPI(title='Batatis engine')
     state = {'store': store, 'codes': codes}
+
+    def cases() -> CaseStore:
+        if state['store'] is None:
+            state['store'] = open_store()
+        return state['store']
+
+    app = FastAPI(title='Batatis engine', dependencies=[Depends(access_dependency(cases))])
 
     def sweep():
         current = state['store']
@@ -119,13 +127,9 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
             maybe_purge(current)
 
     app.add_middleware(CORSMiddleware, allow_origin_regex=r'http://(localhost|127\.0\.0\.1)(:\d+)?',
-                       allow_methods=['*'], allow_headers=['*'])
+                       allow_origins=[os.environ.get('BATATIS_WEB_ORIGIN', 'http://localhost:5480').rstrip('/')],
+                       allow_credentials=True, allow_methods=['*'], allow_headers=['*'])
     app.add_middleware(HttpGuard, sweep=sweep)
-
-    def cases() -> CaseStore:
-        if state['store'] is None:
-            state['store'] = open_store()
-        return state['store']
 
     def code() -> Codes:
         if state['codes'] is None:
@@ -145,9 +149,14 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
             raise HTTPException(503, 'case purge failed', headers={'Cache-Control': 'no-store'}) from None
 
     @app.post('/cases', response_model=Case, status_code=201)
-    def create_case(body: NewCase | None = None):
+    def create_case(request: Request, body: NewCase | None = None):
         purge_cases()
-        return cases().put(Case(**(body.model_dump() if body else {})))
+        case = Case(**(body.model_dump() if body else {}))
+        user = request.state.user
+        if user:
+            case.owner_id = user.id
+            case.authority = case.authority or (case.jurisdiction.id if case.jurisdiction else None)
+        return cases().put(case)
 
     @app.get('/retention/purge')
     def retention_purge(request: Request, response: Response):
@@ -280,6 +289,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
 
     app.include_router(__import__('engine.routes_case', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_evidence', fromlist=['create_router']).create_router(cases, code))
+    app.include_router(__import__('engine.routes_auth', fromlist=['create_router']).create_router(cases))
     return app
 
 
