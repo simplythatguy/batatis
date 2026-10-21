@@ -9,7 +9,7 @@ import {
 } from "../api/client";
 import { ServiceUnavailable, FieldSteps } from "../components";
 import { practiceFlagLine, practicePrompt } from "../humanReview";
-import { evidenceDocuments, shownProcessAnswer } from "../model";
+import { evidenceDocuments, keptDocuments, orphanedEvidence, shownProcessAnswer } from "../model";
 import { AUTHORITY_DECISION_FIELDS, evidenceLinked, evidenceRecorded, isScopeField, practiceFromReview, SCOPE_HELP, sectionDIssueStatus } from "../professional";
 import { useCase } from "../store";
 import { evidenceTask } from "../evidence";
@@ -171,8 +171,8 @@ function EvidenceAnswer({
             {earlier.map((item) => (
               <li key={item.id}>
                 {item.title}{" "}
-                <button type="button" className="btn" onClick={() => dispatch({ type: "removeEvidence", id: item.id })}>
-                  Remove {item.title}
+                <button type="button" className="btn btn-xs" aria-label={`Remove ${item.title}`} onClick={() => dispatch({ type: "removeEvidence", id: item.id })}>
+                  Remove
                 </button>
               </li>
             ))}
@@ -343,7 +343,7 @@ function ProfessionalAnswers({ onEvidence }: { onEvidence: () => void }) {
 
 /** One coherent deterministic plan, after the current case has been saved. */
 export function Recommendations() {
-  const { c, dispatch, snapshotKey, loadSectionD } = useCase();
+  const { c, dispatch, snapshotKey, loadSectionD, saveStatus } = useCase();
   const [view, setView] = useState("professional");
   const [selectedEvidence, setSelectedEvidence] = useState("");
   const [attempt, setAttempt] = useState(0);
@@ -360,12 +360,13 @@ export function Recommendations() {
       const practice = practiceFromReview(c.practiceOfEngineering, result.professional.required,
         Boolean(result.issues?.some(issue => issue.practice_of_engineering.value === true)));
       if (c.practiceOfEngineering !== practice) dispatch({ type: "notePractice", value: practice });
+      // Mirror the engine: a withdrawn reference leaves its documents on the case, unlinked,
+      // and choosing that reference again does not relink them.
+      const orphaned = orphanedEvidence(c, [...result.plan.items.map(item => item.id), ...(result.issues ?? []).map(issue => issue.id)]);
+      if (orphaned.some(id => !c.unscopedEvidence?.includes(id))) dispatch({ type: "noteUnscopedEvidence", ids: orphaned });
       setLoad({ ...result, phase: "live", note: "" });
     }).catch(error => {
-      // The current read contract exposes the unsupported final clear as a plain
-      // Error. Preserve this actionable warning until the backend clear contract lands.
-      const clearNote = error instanceof Error && error.message.startsWith("No confirmed references remain.") ? error.message : null;
-      if (active) setLoad({ ...IDLE, phase: "error", note: clearNote ?? failureText(error), recovery: error instanceof SectionDRecoveryError ? error : undefined });
+      if (active) setLoad({ ...IDLE, phase: "error", note: failureText(error), recovery: error instanceof SectionDRecoveryError ? error : undefined });
     });
     return () => { active = false; };
     // Snapshot captures generation, revision and deterministic reference expansion.
@@ -375,13 +376,16 @@ export function Recommendations() {
 
   // Issues and plans describe the same items. Prefer the issue's richer context;
   // retain plan-only entries when an older engine has no issues route.
+  // `benchmark-unconfirmed` (no provision, nothing entered) is the empty state, not a task.
+  const taskIssues = load.issues?.filter(issue => issue.provision || issue.entered_reference) ?? null;
   const items = [...new Map<string, { id: string; issue?: SectionDIssue; plan?: SectionDPlan["items"][number] }>([
-    ...(load.issues ?? []).map(issue => [issue.id, { id: issue.id, issue, plan: undefined as SectionDPlan["items"][number] | undefined }] as const),
-    ...(load.plan?.items ?? []).filter(item => !load.issues?.some(issue => issue.id === item.id))
+    ...(taskIssues ?? []).map(issue => [issue.id, { id: issue.id, issue, plan: undefined as SectionDPlan["items"][number] | undefined }] as const),
+    ...(load.plan?.items ?? []).filter(item => !taskIssues?.some(issue => issue.id === item.id))
       .map(plan => [plan.id, { id: plan.id, issue: undefined as SectionDIssue | undefined, plan }] as const),
   ]).values()];
   const selectedId = items.some(item => item.id === selectedEvidence) ? selectedEvidence : items[0]?.id;
   const flag = load.professional?.required;
+  const kept = keptDocuments(c);
 
   return (
     <section className="stack" aria-labelledby="reco-title">
@@ -402,27 +406,30 @@ export function Recommendations() {
       {view === "evidence" && <>
       {load.recovery ? <div className="recovery" role="status"><p>{load.recovery.message}</p>
         {load.recovery.kind === "conflict" && <button className="btn" onClick={() => setAttempt(n => n + 1)}>Refresh case and retry</button>}
-        <a className="text-link" href="#/application?download=1">Keep a draft</a>
+        {saveStatus !== "gone" && <a className="text-link" href="#/application?download=1">Keep a draft</a>}
         <details><summary>Technical detail</summary><p>{load.recovery.detail}</p></details>
-      </div> : load.phase === "error" && load.note.startsWith("No confirmed references remain.") ? <div className="recovery" role="status"><p>{load.note}</p><a className="text-link" href="#/section-c">Review code references</a></div> : (load.phase === "error" || load.phase === "unreachable") && <ServiceUnavailable reason={load.note} onRetry={() => setAttempt(n => n + 1)} />}
+      </div> : (load.phase === "error" || load.phase === "unreachable") && <ServiceUnavailable reason={load.note} onRetry={() => setAttempt(n => n + 1)} />}
       {load.phase === "loading" && <p className="meta" role="status">Loading evidence…</p>}
+      {load.phase === "live" && items.length === 0 && <div className="empty-state" role="status">
+        <p>No code references selected. Choose one in Section C to see its evidence tasks.</p>
+        <a className="text-link" href="#/section-c">Review code references</a>
+      </div>}
       {items.length > 0 && <div className="field"><label htmlFor="evidence-choice">Sentence & evidence task</label><select id="evidence-choice" value={selectedId ?? ""} onChange={e => setSelectedEvidence(e.target.value)}>
         {items.map(({ id, issue, plan }) => <option key={id} value={id}>{evidenceTask(c, issue ?? plan ?? {})}</option>)}
       </select></div>}
 
       {load.issues === null && load.issuesNote && <p className="empty">{load.issuesNote}</p>}
-      {load.issues && (
+      {taskIssues && (
         <div className="stack">
 
-          {load.issues.length === 0 && <p className="empty">No Section D issues returned.</p>}
-          {load.issues.filter(issue => issue.id === selectedId).map((issue) => {
+          {taskIssues.filter(issue => issue.id === selectedId).map((issue) => {
             const practice = issue.practice_of_engineering;
             const practiceValue = practice.value === true ? true : practice.value === false ? false : "unknown";
             const prompt = practicePrompt(practiceValue, practice.question);
             const status = sectionDIssueStatus({
               practice: practice.value === true ? true : practice.value === false ? false : "unknown",
               facts: c.facts,
-              evidenceLinked: evidenceLinked(c.facts, issue.id),
+              evidenceLinked: evidenceLinked(c.facts, issue.id, c.unscopedEvidence),
             });
             return (
               <article key={issue.id} className="card">
@@ -458,11 +465,8 @@ export function Recommendations() {
       )}
       {load.plan && (
         <div className="stack">
-          {!load.issues && <h3 className="sub-title">Evidence plan</h3>}
-          {load.plan.items.length === 0 && (
-            <p className="empty">No evidence items yet. Confirm a provision on Section C, then each item appears here for you to answer.</p>
-          )}
-          {load.plan.items.filter(item => item.id === selectedId && !load.issues?.some(issue => issue.id === item.id)).map((item) => (
+          {!load.issues && items.length > 0 && <h3 className="sub-title">Evidence plan</h3>}
+          {load.plan.items.filter(item => item.id === selectedId && !taskIssues?.some(issue => issue.id === item.id)).map((item) => (
             <article key={item.id} className="card">
               <div className="card-head">
                 <h3 className="section-title">Add a document</h3>
@@ -491,6 +495,11 @@ export function Recommendations() {
           ))}</details>}
         </div>
       )}
+      {kept.length > 0 && <details className="compact-help"><summary>Kept documents ({kept.length})</summary>
+        <p className="meta">Their code reference was removed. They stay on this case, not linked to a task.</p>
+        <ul className="plain-list">{kept.map(item => <li key={item.id}>{item.title}{" "}
+          <button type="button" className="btn btn-xs" aria-label={`Remove ${item.title}`} onClick={() => dispatch({ type: "removeEvidence", id: item.id })}>Remove</button></li>)}</ul>
+      </details>}
       </>}
       {load.fields.length > 0 && (
         <div>

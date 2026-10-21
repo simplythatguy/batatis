@@ -157,6 +157,12 @@
         "updated_at": {
           "title": "Updated At",
           "type": "string"
+        },
+        "version": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
         }
       },
       "required": [
@@ -164,6 +170,7 @@
         "title",
         "created_at",
         "updated_at",
+        "version",
         "jurisdiction",
         "facts",
         "provisions",
@@ -354,9 +361,7 @@
           "default": "unconfirmed",
           "enum": [
             "confirmed",
-            "unconfirmed",
-            "open",
-            "unknown"
+            "unconfirmed"
           ],
           "title": "Status",
           "type": "string"
@@ -457,9 +462,7 @@
           "default": "unconfirmed",
           "enum": [
             "confirmed",
-            "unconfirmed",
-            "open",
-            "unknown"
+            "unconfirmed"
           ],
           "title": "Status",
           "type": "string"

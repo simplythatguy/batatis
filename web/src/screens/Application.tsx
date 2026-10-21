@@ -20,7 +20,7 @@ const TABS = [
 type Stage = "idle" | "checking" | "preparing" | "blocked" | "error" | "ready";
 
 export function Application({ route }: { route: Route }) {
-  const { gaps, notices, saveDraft, c, gapsSource, syncOk, reviewDetail, engineGaps, readSync, readGaps, setCompletenessRecord, requestCheck, checkStatus, checkNote, checkDetail, checkedAt } = useCase();
+  const { gaps, notices, saveDraft, saveStatus, c, gapsSource, syncOk, reviewDetail, engineGaps, readSync, readGaps, setCompletenessRecord, requestCheck, checkStatus, checkNote, checkDetail, checkedAt } = useCase();
   const tab = TABS.find((t) => t.id === route.params.get("tab"))?.id ?? "A";
   const dialog = useRef<HTMLDialogElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -268,8 +268,9 @@ export function Application({ route }: { route: Route }) {
         </div>
       </div>
       <div className="footer-bar">
+        {saveStatus === "gone" && <DraftNote />}
         <details className="draft-options"><summary className="btn">Save & options</summary><div className="draft-options-body">
-          <DraftNote />
+          {saveStatus !== "gone" && <DraftNote />}
           <button type="button" className="btn" onClick={() => void saveDraft()}>Save draft</button>
           <a className="btn btn-ghost" href={tab === "A" ? "#/describe?step=last" : tab === "B" ? "#/application?tab=A&step=last" : tab === "alt" ? "#/section-c" : "#/application?tab=alt&step=last"}>Back</a>
           <button type="button" className="btn" onClick={() => dialog.current?.showModal()}>Review missing details</button>

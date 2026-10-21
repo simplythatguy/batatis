@@ -23,7 +23,7 @@ from reportlab.platypus import KeepTogether, Paragraph, SimpleDocTemplate, Space
 from ..copyright import NRC_PUBLICATION_URL
 from ..models import INTENT_LABEL, Case, SectionCRow
 from ..process_fields import process_fields
-from ..section_d import section_d_plan, supporting_documents
+from ..section_d import section_d_plan, supporting_documents, text_evidence
 from .text import faithful_font_text
 
 INK = colors.HexColor('#1f2328')
@@ -181,13 +181,26 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
     docs = supporting_documents(case)
     attached = {doc.id for doc in docs}
     # A text listing is not a file. It is not reviewed, and it is not a file_ref document.
-    text_items = [item for item in case.evidence if item.kind == 'text' and item.id not in attached]
+    # Typed listings use the form's own helper and numbering (files first, then typed text),
+    # so every form row and every "see Appendix D" overflow reference has its entry here.
+    typed = text_evidence(case)
+    typed_titles = {title for title, _ in typed}
+    text_items = [item for item in case.evidence if item.kind == 'text' and item.id not in attached
+                  and item.description.strip() not in typed_titles]
     story.append(Paragraph('D. Supporting documentation', H2))
-    if docs:
+    if docs or typed:
+        on_form = lambda n: f'row {n}' if n <= plan.docs_in_form else 'appendix only'  # noqa: E731
         story.append(_table(['Ref', 'Name of supporting documentation', 'Responsible', 'On the form'],
-                            [[f'D-{n}', d.title, d.responsible_party or '(not given)', f'row {n}' if n <= plan.docs_in_form else 'appendix only']
-                             for n, d in enumerate(docs, start=1)],
+                            [[f'D-{n}', d.title, d.responsible_party or '(not given)', on_form(n)]
+                             for n, d in enumerate(docs, start=1)]
+                            + [[f'D-{n}', title, who or '(not given)', f'{on_form(n)}; no file']
+                               for n, (title, who) in enumerate(typed, start=len(docs) + 1)],
                             [0.5 * inch, 3.1 * inch, 2.4 * inch, 1.0 * inch]))
+    if typed:
+        first, last = len(docs) + 1, len(docs) + len(typed)
+        refs = f'D-{first}' if first == last else f'D-{first} to D-{last}'
+        story.append(_p(f'{refs}: listed by applicant, no file attached, not reviewed.', SMALL))
+    if docs:
         evidence = section_d_plan(case, codes, docs) if codes is not None else None
         labels = {item.id: f'{item.provision_id}, {item.function or "no table function"} / '
                            f'{item.objective or "no table objective"}' for item in evidence.items} if evidence else {}
@@ -207,7 +220,7 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
             Paragraph(escape(item.description), H3),
             _p('listed by applicant, no file attached, not reviewed'),
         ]))
-    if not docs and not text_items:
+    if not docs and not typed and not text_items:
         story.append(_p('No supporting documents listed.'))
 
     buf = io.BytesIO()

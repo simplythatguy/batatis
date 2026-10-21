@@ -25,6 +25,7 @@ export interface Case {
   section_c: SectionCRow[];
   title: string | null;
   updated_at: string;
+  version: number;
 }
 
 export interface EvidenceItem {
@@ -53,7 +54,7 @@ export interface Fact {
   inputs: string[];
   kind: "exact" | "pointed" | "computed" | "proposed";
   source: Source;
-  status: "confirmed" | "unconfirmed" | "open" | "unknown";
+  status: "confirmed" | "unconfirmed";
   value: string | number | boolean | null;
 }
 
@@ -65,7 +66,7 @@ export interface FactInput {
   inputs?: string[];
   kind: "exact" | "pointed" | "computed" | "proposed";
   source: SourceInput;
-  status?: "confirmed" | "unconfirmed" | "open" | "unknown";
+  status?: "confirmed" | "unconfirmed";
   value: string | number | boolean | null;
 }
 

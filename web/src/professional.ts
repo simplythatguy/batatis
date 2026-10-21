@@ -123,11 +123,13 @@ export function sectionDIssueStatus(input: {
   return "open";
 }
 
-export function evidenceLinked(facts: ProfessionalFact[], itemId: string): boolean {
+/** `unscoped` slots were detached by a reference withdrawal and never count for this task. */
+export function evidenceLinked(facts: ProfessionalFact[], itemId: string, unscoped: readonly string[] = []): boolean {
   return facts.some((fact) => {
     const field = fact.field;
     const own = field.startsWith(`evidence.${itemId}.`) || field.startsWith(`evidence.${itemId}~`);
     if (!own) return false;
+    if (unscoped.includes(field.split(".")[1])) return false;
     if (fact.status && fact.status !== "confirmed") return false;
     if (fact.kind === "proposed") return false;
     return field.endsWith(".file_ref") || field.endsWith(".title") || field.endsWith(".responsible_party");

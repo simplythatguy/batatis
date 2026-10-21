@@ -36,7 +36,7 @@ async function scenario(name,run){
  }catch(e){failed++;console.log('FAIL',name,e.stack);}finally{await page.close();}
 }
 
-await scenario('R6 sentence clear withdraws confirmation, refreshes saved plan, and reports unsupported final clear',async p=>{
+await scenario('R6 sentence clear withdraws confirmation, refreshes saved plan, and the final clear persists an empty selection',async p=>{
  for(const ref of ['3.1.9.1.(1)','3.1.9.1.(2)']) await act(p,candidate(ref,'yes'));
  await p.waitForFunction(()=>window.caseStore.c.sectionC.length===2);
  await nav(p,'/application?tab=D');await p.getByRole('button',{name:'Evidence',exact:true}).click();await p.locator('#evidence-choice').waitFor();
@@ -49,11 +49,11 @@ await scenario('R6 sentence clear withdraws confirmation, refreshes saved plan, 
  assert.equal(await p.evaluate(()=>window.caseStore.c.candidates.find(c=>c.provision==='3.1.9.1.(2)').benchmark),false);
  await nav(p,'/application?tab=D');await p.getByRole('button',{name:'Evidence',exact:true}).click();await p.locator('#evidence-choice').waitFor();
  assert.deepEqual((await saved()).provisions,['3.1.9.1.(1)']);
- assert.ok((await (await fetch(base+'/cases/'+id+'/section-d/issues')).json()).every(i=>i.provision?.provision_id==='3.1.9.1.(1)'));
+ assert.ok((await (await fetch(base+'/cases/'+id+'/section-d/issues')).json()).items.every(i=>i.provision?.provision_id==='3.1.9.1.(1)'));
  await nav(p,'/section-c');await p.locator('#reference-choice').selectOption('3.1.9.1.(1)');await p.locator('#sentence-decision').selectOption('');
  await nav(p,'/application?tab=D');await p.getByRole('button',{name:'Evidence',exact:true}).click();
- await p.getByText('The server could not clear its earlier references.',{exact:false}).waitFor();
- assert.equal(await p.locator('#evidence-choice').count(),0);assert.deepEqual((await saved()).provisions,['3.1.9.1.(1)']);
+ await p.getByText('No code references selected.',{exact:false}).waitFor();
+ assert.equal(await p.locator('#evidence-choice').count(),0);assert.deepEqual([(await saved()).provisions,(await saved()).section_c],[[],[]]);
  await nav(p,'/section-c');await p.locator('#reference-choice').selectOption('3.1.9.1.(1)');assert.equal(await p.locator('#sentence-decision').inputValue(),'');
  await p.locator('#sentence-decision').selectOption('yes');await nav(p,'/application?tab=D');await p.getByRole('button',{name:'Evidence',exact:true}).click();await p.locator('#evidence-choice').waitFor();
  assert.deepEqual((await saved()).provisions,['3.1.9.1.(1)']);
@@ -63,7 +63,7 @@ await scenario('R6 seven real tasks across two sentences and two building object
  await p.waitForFunction(()=>window.caseStore.c.sectionC.length===2);await nav(p,'/application?tab=D');await p.getByRole('button',{name:'Evidence',exact:true}).click();await p.locator('#evidence-choice').waitFor();
  const options=await p.locator('#evidence-choice option').evaluateAll(es=>es.map(e=>({id:e.value,label:e.textContent})));
  assert.equal(options.length,7);assert.equal(new Set(options.map(o=>o.label)).size,7);assert.equal(new Set(options.map(o=>o.id)).size,7);
- const id=await p.evaluate(()=>window.caseStore.engineId);const issues=await (await fetch(base+'/cases/'+id+'/section-d/issues')).json();
+ const id=await p.evaluate(()=>window.caseStore.engineId);const issues=(await (await fetch(base+'/cases/'+id+'/section-d/issues')).json()).items;
  const collision=issues.filter(i=>i.provision?.provision_id==='3.1.9.1.(2)'&&['OP3.1','OP1.2'].includes(i.objective));assert.equal(collision.length,2);
  assert.notEqual(options.find(o=>o.id===collision[0].id).label,options.find(o=>o.id===collision[1].id).label);
  for(const [n,o] of options.entries()) {await p.locator('#evidence-choice').selectOption(o.id);assert.equal(await p.locator('input[id^=evidence-doc-]').count(),1);await p.locator('input[id^=evidence-doc-]').fill('TEST draft '+n);}

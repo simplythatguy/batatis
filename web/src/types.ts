@@ -177,6 +177,9 @@ export interface Case {
   practiceOfEngineering?: true | false | "unknown";
   /** Typed evidence waiting for POST /cases/{id}/evidence. Not file references. */
   listedEvidence?: ListedEvidence[];
+  /** Listed documents whose code reference was withdrawn. They stay on the case, unlinked;
+   * selecting that reference again does not relink them (engine `auto_link = false`). */
+  unscopedEvidence?: string[];
   /** Evidence slot ids waiting for DELETE /cases/{id}/evidence/{id}. */
   deletedEvidence?: string[];
   /** Unfinished editors for this visit only; never sent as facts. Reset clears them. */

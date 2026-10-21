@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { createEngine } from '../src/api/client.ts';
 import { canonicalRows } from '../src/api/sectionC.ts';
 import { readSectionD } from '../src/api/sectionD.ts';
+import { acknowledgeWrite } from '../src/api/sync.ts';
 import { reconcileSectionC, confirmedProvisions } from '../src/provisions.ts';
 import { reducer, getGaps, displayValue } from '../src/model.ts';
 import { emptyCase } from '../src/intake.ts';
@@ -50,7 +51,9 @@ await test('sentence answer survives parent re-add and overlapping reference rem
   c = reconcileSectionC(c,canonicalRows(lookup,c.candidates.map(a=>({candidateId:a.id,provision:a.provision}))));
   assert.equal(c.candidates.length,7); assert.equal(c.candidates.find(a=>a.provision==='3.1.9.1.(5)').answer,null);
 });
-const id = (await api.createCase({title:'Synthetic R4 regression'})).id;
+const created = await api.createCase({title:'Synthetic R4 regression'});
+const id = created.id;
+acknowledgeWrite(id, created.version);
 await test('real engine persists only selected sentence then reads issues from its acknowledged plan', async () => {
   requests.length=0;
   const result=await readSectionD(id,c,()=>true);
@@ -68,9 +71,12 @@ await test('late Section D write cannot publish or fetch mixed-revision issues',
   assert.equal(await readSectionD(id,c,()=>current),null);
   globalThis.fetch=(input,init)=>realFetch(String(input).replace(/^\/api/,base),init);
 });
-await test('last-reference withdrawal reports missing backend clear support, never serves stale plan', async () => {
+await test('last-reference withdrawal persists an empty selection, never serves stale plan', async () => {
   const cleared={...c,candidates:c.candidates.map(a=>({...a,answer:'no'}))};
-  await assert.rejects(readSectionD(id,cleared,()=>true),/could not clear/);
+  const result=await readSectionD(id,cleared,()=>true);
+  assert.deepEqual(result.plan.items,[]); assert.deepEqual(result.issues.map(i=>[i.id,i.provision]),[['benchmark-unconfirmed',null]]);
+  const stored=await api.getCase(id);
+  assert.deepEqual([stored.provisions,stored.section_c],[[],[]]);
 });
 await test('unlabelled address fact posts unconfirmed and preserves full original description', async () => {
   const text='The site is 0000 Example Way NW, Calgary. The firestop at the level 2 riser was installed by the plumbing sub.';
