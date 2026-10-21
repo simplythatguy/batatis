@@ -226,3 +226,29 @@ def test_close_out_after_decision_with_record_package(scene):
     assert sent.status_code == 200 and sent.json()['sent'] and sent.json()['sent_by_name'] == 'Reviewer'
     assert clients['reviewer'].post(f'/review/{case.id}/close-out/sent').status_code == 409
     store.delete(case.id)
+
+
+def test_send_claims_the_session_before_posting_and_releases_it_on_failure(scene, monkeypatch):
+    """Nothing reaches the applicant unless the send is claimed; a failed post leaves the request unsent."""
+    import engine.routes_package_review as routes
+    from engine.review.sessions import Sessions
+    store, clients, _ = scene
+    case = claimed(scene)
+    assert clients['reviewer'].post(f'/review/{case.id}/package-review').status_code == 201
+    real = routes.mutate
+    seen = []
+
+    def failing(*args, **kwargs):
+        seen.append(Sessions(store).get(case.id, 1)[0].information_request.sent_at)
+        raise RuntimeError('thread write failed')
+
+    monkeypatch.setattr(routes, 'mutate', failing)
+    with pytest.raises(RuntimeError):
+        clients['reviewer'].post(f'/review/{case.id}/package-review/1/information-request/send')
+    assert seen and seen[0], 'the claim is stored before the message is posted'
+    assert Sessions(store).get(case.id, 1)[0].information_request.sent_at is None
+    monkeypatch.setattr(routes, 'mutate', real)
+    sent = clients['reviewer'].post(f'/review/{case.id}/package-review/1/information-request/send')
+    assert sent.status_code == 200, sent.text
+    assert sent.json()['information_request']['message_id']
+    assert len(clients['owner'].get(f'/cases/{case.id}/information-request').json()['requests']) == 1

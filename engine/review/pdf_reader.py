@@ -300,7 +300,10 @@ def read_pdf(data: bytes, name: str) -> ReadFile:
     except Exception:  # noqa: BLE001 - a malformed upload is reported, not raised
         return ReadFile(name, digest, len(data), 0, 'unreadable', note='The PDF could not be opened.')
     fmaps = field_maps()
-    found = _fillable(reader, data, name, fmaps)
+    try:
+        found = _fillable(reader, data, name, fmaps)
+    except Exception:  # noqa: BLE001 - pypdf parses pages lazily; a broken widget falls through to flattened
+        found = None
     if found is None:
         try:
             found = _flattened(data, name, form_versions(), fmaps)

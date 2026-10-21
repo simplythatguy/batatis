@@ -60,7 +60,7 @@ def verify_citation(text: str, pointer: Pointer, codes) -> list[CitationCheck]:
         if report is not None:
             for error in report['errors'] + report['warnings']:
                 cited = re.sub(r'\s+', '', error.get('citation') or '')
-                if cited and (cited.rstrip('.') in pid.rstrip('.') or pid.rstrip('.') in cited.rstrip('.')):
+                if cited and _same_provision(cited, pid):
                     issues.append(CitationIssue(code=error['code'], message=error['message']))
                 elif error['code'] in ('superseded_edition',) and not cited:
                     issues.append(CitationIssue(code=error['code'], message=error['message']))
@@ -144,3 +144,10 @@ def compare_row(row: int, article: str, objective: str, function: str, pointer: 
                      f'for {pid}; the Division B attribution table gives {", ".join(shown)}.'), **base)
     return SectionCCheck(provision_id=pid, table_pairs=shown, status='match',
                          message=f'The form\'s objective and function match the Division B table for {pid}.', **base)
+
+
+def _same_provision(a: str, b: str) -> bool:
+    """Equal ids, or one is the article or sentence containing the other: 3.2.1.1. holds 3.2.1.1.(2), not 3.2.1.10."""
+    a, b = a.rstrip('.'), b.rstrip('.')
+    short, long_ = sorted((a, b), key=len)
+    return a == b or long_.startswith(short + '.(') or long_.startswith(short + '(')

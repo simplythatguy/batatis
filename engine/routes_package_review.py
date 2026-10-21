@@ -213,19 +213,29 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
         if not included:
             raise HTTPException(409, 'Include at least one item before sending')
         text = ir.render(request_)[:4000]
+        # Claim the send first, so a concurrent send or edit gets 409 before anything reaches the applicant.
+        claimed = session.model_copy(update={'information_request': request_.model_copy(
+            update={'sent_at': now(), 'sent_by_name': user.name, 'text': ir.render(request_)})})
+        try:
+            sessions().replace(claimed, raw)
+        except SessionConflict:
+            raise HTTPException(409, 'package review was updated concurrently') from None
+        claimed_raw = claimed.model_dump_json()
 
         def post(case):
             items = [DecisionItem(field=(item.field or 'information_request')[:200], note=item.text[:2000])
                      for item in included]
             return append_message(case, user, text, items=items)
 
-        _, message = mutate(cases(), case_id, user, post)
-        sent = request_.model_copy(update={'sent_at': now(), 'sent_by_name': user.name, 'message_id': message.id,
-                                           'text': ir.render(request_)})
         try:
-            return sessions().replace(session.model_copy(update={'information_request': sent}), raw)
-        except SessionConflict:
-            raise HTTPException(409, 'package review was updated concurrently') from None
+            _, message = mutate(cases(), case_id, user, post)
+        except BaseException:
+            sessions().replace(session, claimed_raw)   # nothing was posted: release the claim
+            raise
+        done = claimed.model_copy(update={'information_request': claimed.information_request.model_copy(
+            update={'message_id': message.id})})
+        # Only this request holds the claim, and edits refuse a sent request, so this write cannot conflict.
+        return sessions().replace(done, claimed_raw)
 
     @router.get('/cases/{case_id}/information-request', response_model=SentInformationRequests)
     def sent_requests(case_id: str, request: Request):
