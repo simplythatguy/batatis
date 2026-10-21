@@ -4198,7 +4198,7 @@ a.cf-save-check {
   }
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1440px) {
   .cf-app[data-assistant="open"] .cf-save-check {
     display: none;
   }
@@ -4207,5 +4207,33 @@ a.cf-save-check {
 @media (max-width: 760px) {
   .cf-save-check {
     display: none;
+  }
+}
+
+/* Assistant open on a laptop: the header keeps rings centred by dropping the words beside them. */
+@media (max-width: 1440px) {
+  .cf-app[data-assistant="open"] :is(.cf-save-label, .cf-ask-label) {
+    display: none;
+  }
+  .cf-app[data-assistant="open"] .cf-save.is-problem .cf-save-label {
+    display: inline;
+    max-width: 90px;
+  }
+}
+
+/* Review and Application stack when the work area (not the window) is narrow:
+   the list and the assistant both take width from it. */
+.cf-main {
+  container: main / inline-size;
+}
+
+@container main (max-width: 900px) {
+  .cf-review,
+  .cf-doc {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cf-sections,
+  .cf-side {
+    position: static;
   }
 }
