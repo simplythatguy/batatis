@@ -13,7 +13,8 @@ Probability = Annotated[float, Field(ge=0, le=1)]
 PUBLIC_MODEL = 'relevance-1'
 # Rows stored before the public version existed hold that pin instead. They still load, as PUBLIC_MODEL,
 # and the next write stores the public value. The release before this one reads only the pin, so rolling
-# back below this change needs the ROLLBACK statement in engine/tests/test_relevance.py run first.
+# back below this change follows the runbook beside ROLLBACK in engine/tests/test_relevance.py: stop
+# current-release writers, run the statement, then promote the previous release.
 LEGACY_MODEL_PINS = frozenset({'jev-1.13.0'})
 
 

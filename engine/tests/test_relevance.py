@@ -5,7 +5,7 @@ import os
 import sqlite3
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from contextlib import closing
+from contextlib import closing, contextmanager
 from datetime import datetime, timezone
 from typing import Literal
 
@@ -396,8 +396,14 @@ def test_the_providers_pin_is_mapped_privately_and_an_unmapped_pin_is_never_pass
 
 # Operator runbook. This release stores relevance.model as 'relevance-1'. The release before it reads only the
 # provider's pin, and one row it cannot read fails that case and the lists that include it (/me/applications and
-# /review/queue). To roll back below this change, run the statement for the store first. Cases are deleted 7 days
-# after creation, so the exposure ends by itself within a week. The test below runs these exact statements.
+# /review/queue). To roll back below this change:
+#   1. Stop current-release writers (maintenance mode, or block writes) and keep them stopped until step 3. A
+#      current-release write stores 'relevance-1' again, so a conversion that runs while they are live does not hold.
+#   2. Run the statement for the store. It is idempotent.
+#   3. Promote the previous release.
+#   4. Run the statement once more. It catches a write that was in flight at step 1; afterwards no row may be left.
+# Cases are deleted 7 days after creation, so without these steps the exposure still ends within a week.
+# The tests below run these exact statements, restricted to one case so they cannot touch other rows.
 ROLLBACK = {
     'sqlite': "UPDATE cases SET json = json_set(json, '$.relevance.model', 'jev-1.13.0') "
               "WHERE json_extract(json, '$.relevance.model') = 'relevance-1'",
@@ -411,49 +417,82 @@ class PreviousReleaseRelevance(BaseModel):
     model: Literal['jev-1.13.0']
 
 
-def raw_case_after_rollback_statement(store, case_id):
-    """The stored case as the previous release would see it once the runbook statement has run. Rolled back."""
+def rollback_statement(store, case_id, *, keep):
+    """Run the runbook statement on one case and return the stored case as the previous release would read it.
+
+    keep=False rolls the transaction back, so the row is unchanged afterwards."""
     if isinstance(store, CaseStore):
         with closing(sqlite3.connect(store.path)) as con:
             con.execute('BEGIN')
-            con.execute(ROLLBACK['sqlite'])
+            con.execute(ROLLBACK['sqlite'] + ' AND id = ?', (case_id,))
             row = con.execute('SELECT json FROM cases WHERE id=?', (case_id,)).fetchone()
-            con.rollback()
+            con.commit() if keep else con.rollback()
         return json.loads(row[0])
     import psycopg
     with psycopg.connect(store.url) as con:
-        con.execute(ROLLBACK['postgres'])
+        con.execute(ROLLBACK['postgres'] + ' AND id = %s', (case_id,))
         row = con.execute('SELECT data FROM cases WHERE id=%s', (case_id,)).fetchone()
-        con.rollback()
+        con.commit() if keep else con.rollback()
     return row[0]
+
+
+@contextmanager
+def scored_case_in(backend, setup):
+    """A case with a stored, scored relevance record in the sqlite store of `setup` or in Postgres."""
+    client, local_store, _, _ = setup
+    case_id = create_described(client)
+    assert client.post(f'/cases/{case_id}/relevance').status_code == 200
+    if backend == 'sqlite':
+        yield local_store, case_id
+        return
+    url = os.environ.get('TEST_DATABASE_URL')
+    if not url:
+        pytest.skip('TEST_DATABASE_URL is not set')
+    from engine.store_postgres import PostgresCaseStore
+    store = PostgresCaseStore(url)
+    store.put(local_store.get(case_id))
+    try:
+        yield store, case_id
+    finally:
+        store.delete(case_id)
+
+
+def another_write(store, case_id):
+    """What a current-release writer does at any moment: an ordinary write to the case."""
+    store.add_fact(case_id, Fact(field='building.storeys', value=2, kind='pointed',
+                                 source=Source(type='user_text', ref='Your answer')))
 
 
 @pytest.mark.parametrize('backend', ['sqlite', 'postgres'])
 def test_the_rollback_statement_makes_stored_rows_readable_by_the_previous_release(setup, backend):
-    client, local_store, _, _ = setup
-    case_id = create_described(client)
-    assert client.post(f'/cases/{case_id}/relevance').status_code == 200
-    if backend == 'postgres':
-        url = os.environ.get('TEST_DATABASE_URL')
-        if not url:
-            pytest.skip('TEST_DATABASE_URL is not set')
-        from engine.store_postgres import PostgresCaseStore
-        store = PostgresCaseStore(url)
-        store.put(local_store.get(case_id))
-    else:
-        store = local_store
-    try:
+    with scored_case_in(backend, setup) as (store, case_id):
         assert stored_model(store, case_id) == 'relevance-1'
         before = store.get(case_id).model_dump(mode='json')
         # The hazard: the previous release cannot read a row this release wrote.
         with pytest.raises(ValidationError):
             PreviousReleaseRelevance.model_validate({'model': stored_model(store, case_id)})
-        restored = raw_case_after_rollback_statement(store, case_id)
+        restored = rollback_statement(store, case_id, keep=False)
         assert PreviousReleaseRelevance.model_validate(restored['relevance']).model == LEGACY_PIN
         # This release still reads the restored row, and nothing else in it changed.
         reread = Case.model_validate({**restored, 'version': before['version']}).model_dump(mode='json')
         assert reread == before
         assert stored_model(store, case_id) == 'relevance-1', 'the check ran in a transaction that was rolled back'
-    finally:
-        if backend == 'postgres':
-            store.delete(case_id)
+
+
+@pytest.mark.parametrize('backend', ['sqlite', 'postgres'])
+def test_the_rollback_holds_only_once_current_release_writers_have_stopped(setup, backend):
+    """Why step 1 comes first: a current-release write after the statement stores 'relevance-1' again."""
+    with scored_case_in(backend, setup) as (store, case_id):
+        rollback_statement(store, case_id, keep=True)                  # step 2 with a writer still live
+        assert stored_model(store, case_id) == LEGACY_PIN
+        another_write(store, case_id)                                   # the live writer
+        assert stored_model(store, case_id) == 'relevance-1'
+        with pytest.raises(ValidationError):                            # the previous release could not read it
+            PreviousReleaseRelevance.model_validate({'model': stored_model(store, case_id)})
+        # Writers stopped (step 1 done properly): the statement now holds, and running it again changes nothing.
+        rollback_statement(store, case_id, keep=True)
+        assert stored_model(store, case_id) == LEGACY_PIN
+        rollback_statement(store, case_id, keep=True)                  # step 4
+        assert stored_model(store, case_id) == LEGACY_PIN
+        assert PreviousReleaseRelevance.model_validate({'model': stored_model(store, case_id)}).model == LEGACY_PIN
+        assert store.get(case_id).relevance.model == 'relevance-1', 'this release still reads the restored row'
