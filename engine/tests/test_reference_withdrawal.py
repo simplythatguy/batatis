@@ -308,3 +308,110 @@ def test_store_acknowledgments_ignore_supplied_payload_version(context):
     assert response.json()['version'] == store.get_version(case.id) == 4
     case.version = 999999
     assert store.put(case).version == store.get_version(case.id) == 5
+
+
+def test_selection_change_keeps_other_reference_decisions_and_document_links(context):
+    client, store = context
+    case = selected_case(store)
+    first, second = case.provisions[0], '9.27.3.2.(1)'
+    assert_private(replace(client, store, case.id, [first, second]), 200)
+    case = store.get(case.id)
+    plan = section_d_plan(case, Codes())
+    kept_item = next(item for item in plan.items if item.provision_id == second)
+    old_item = next(item for item in plan.items if item.provision_id == first)
+    saved_file = store.put_file(case.id, 'synthetic.pdf', b'%PDF-1.4 synthetic')
+    keep = [fact('citation.' + second, second), fact('open_question.9.27.3.2.', 'Unchanged decision'),
+            fact(f'evidence.{kept_item.id}.file_ref', saved_file['id'], source_type='file', source_ref=saved_file['id'])]
+    case.facts = keep + [fact('citation.' + first, first),
+                        fact('citation.9.25.5.2.', '9.25.5.2.'),
+                        fact('open_question.9.25.5.2.', 'Obsolete decision'),
+                        fact('evidence.shared.item_id', old_item.id),
+                        fact(f'evidence.{old_item.id}.file_ref', saved_file['id'],
+                             source_type='file', source_ref=saved_file['id'])]
+    case.evidence = [EvidenceItem(id=kept_item.id, description='Keep scoped metadata',
+                                 objective=kept_item.objective, function=kept_item.function)]
+    store.put(case, expected_version=case.version)
+    response = replace(client, store, case.id, [second])
+    assert_private(response, 200)
+    current = store.get(case.id)
+    assert {f.id for f in keep} <= {f.id for f in current.facts}
+    assert not any(f.field in {'citation.' + first, 'citation.9.25.5.2.', 'open_question.9.25.5.2.',
+                               'evidence.shared.item_id'} for f in current.facts)
+    assert current.evidence[0].objective == kept_item.objective
+    assert current.evidence[0].function == kept_item.function
+    assert next(item for item in response.json()['items'] if item['id'] == kept_item.id)['attachments']
+    reselected = replace(client, store, case.id, [first, second])
+    assert_private(reselected, 200)
+    assert next(item for item in reselected.json()['items'] if item['id'] == old_item.id)['attachments'] == []
+
+
+def test_old_inflight_rebuild_cannot_restore_a_completed_clear(context, monkeypatch):
+    import engine.routes_case as routes
+    client, store = context
+    case = selected_case(store)
+    entered, release = threading.Event(), threading.Event()
+    original = routes.section_d_plan
+    responses, errors = [], []
+
+    def rebuild():
+        try:
+            responses.append(client.post(f'/cases/{case.id}/section-d', json={}))
+        except BaseException as exc:
+            errors.append(exc)
+
+    old_request = threading.Thread(target=rebuild)
+    # The FastAPI handler runs in a worker, so identify its request by the nonempty selection.
+    def paused_handler_plan(current, codes):
+        result = original(current, codes)
+        if current.provisions:
+            entered.set()
+            assert release.wait(15)
+        return result
+
+    monkeypatch.setattr(routes, 'section_d_plan', paused_handler_plan)
+    old_request.start()
+    try:
+        assert entered.wait(15)
+        assert_private(replace(client, store, case.id, []), 200)
+    finally:
+        release.set()
+        old_request.join(20)
+    assert not old_request.is_alive() and errors == []
+    assert_private(responses[0], 409)
+    assert store.get(case.id).provisions == store.get(case.id).section_c == []
+
+
+def test_legacy_json_version_is_overridden_by_the_same_stored_row(context):
+    client, store = context
+    case = store.put(Case())
+    if isinstance(store, CaseStore):
+        import sqlite3
+        with sqlite3.connect(store.path) as con:
+            con.execute("UPDATE cases SET json=json_set(json, '$.version', 999999) WHERE id=?", (case.id,))
+    else:
+        with store._conn() as con:
+            con.execute("UPDATE cases SET data=jsonb_set(data, '{version}', '999999'::jsonb) WHERE id=%s", (case.id,))
+    snapshot, version = store.get_snapshot(case.id)
+    assert snapshot.version == version == 1
+    assert client.get(f'/cases/{case.id}').json()['version'] == 1
+    updated = store.add_fact(case.id, fact('project.version_note', 'Synthetic'))
+    assert updated.version == store.get(case.id).version == 2
+
+
+def test_reselection_requires_a_fresh_lookup_and_cannot_use_old_rows(context, monkeypatch):
+    from engine.codes import CodeDbMissing
+    client, store = context
+    case = selected_case(store)
+    assert_private(replace(client, store, case.id, []), 200)
+    before = store.get(case.id)
+    calls = []
+
+    def missing(_self, provision_id, division='B'):
+        calls.append((provision_id, division))
+        raise CodeDbMissing()
+
+    monkeypatch.setattr(Codes, 'provision', missing)
+    response = replace(client, store, case.id, case.provisions)
+    assert_private(response, 503)
+    assert calls == [(case.provisions[0], 'B')]
+    assert store.get(case.id) == before
