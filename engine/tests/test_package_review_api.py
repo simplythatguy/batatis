@@ -206,10 +206,10 @@ def test_close_out_after_decision_with_record_package(scene):
     close = clients['second'].get(f'/review/{case.id}/close-out')
     assert close.status_code == 200, close.text
     body = close.json()
-    from datetime import date, datetime, timedelta
+    from datetime import datetime, timedelta, timezone
     decided_at = datetime.fromisoformat(body['decided_at']).date()
     assert body['due_date'] == (decided_at + timedelta(days=10)).isoformat()
-    assert body['days_remaining'] == (decided_at + timedelta(days=10) - date.today()).days
+    assert body['days_remaining'] == (decided_at + timedelta(days=10) - datetime.now(timezone.utc).date()).days
     assert body['sent'] is False and body['overdue'] is False
     package_ = body['record_package']
     assert package_['send_to_council'][0]['label'] == 'Copy of the variance as decided'
@@ -251,4 +251,62 @@ def test_send_claims_the_session_before_posting_and_releases_it_on_failure(scene
     sent = clients['reviewer'].post(f'/review/{case.id}/package-review/1/information-request/send')
     assert sent.status_code == 200, sent.text
     assert sent.json()['information_request']['message_id']
+    assert len(clients['owner'].get(f'/cases/{case.id}/information-request').json()['requests']) == 1
+
+
+def test_send_rechecks_the_claim_on_the_written_case(scene, monkeypatch):
+    """A take-over between the route check and the post stops the send; the claim is released."""
+    import engine.routes_package_review as routes
+    from engine.review.sessions import Sessions
+    store, clients, _ = scene
+    case = claimed(scene)
+    assert clients['reviewer'].post(f'/review/{case.id}/package-review').status_code == 201
+    real = routes.mutate
+
+    def taken_over(backend, case_id, user, change):
+        current = store.get(case_id)
+        current.claim = current.claim.model_copy(update={'reviewer_id': 'someone-else'})
+        return change(current)
+
+    monkeypatch.setattr(routes, 'mutate', taken_over)
+    refused = clients['reviewer'].post(f'/review/{case.id}/package-review/1/information-request/send')
+    assert refused.status_code == 409
+    request = Sessions(store).get(case.id, 1)[0].information_request
+    assert request.sent_at is None and request.message_id is None
+    assert clients['owner'].get(f'/cases/{case.id}/information-request').json()['requests'] == []
+    monkeypatch.setattr(routes, 'mutate', real)
+
+
+def test_a_stuck_claim_keeps_the_original_error_is_hidden_and_expires(scene, monkeypatch):
+    import engine.routes_package_review as routes
+    from engine.review.sessions import Sessions
+    store, clients, _ = scene
+    case = claimed(scene)
+    assert clients['reviewer'].post(f'/review/{case.id}/package-review').status_code == 201
+    real_mutate, real_replace = routes.mutate, Sessions.replace
+    calls = []
+
+    def replace_then_fail(self, session, expected):
+        calls.append(session.information_request.sent_at)
+        if len(calls) > 1:
+            raise OSError('store unavailable')
+        return real_replace(self, session, expected)
+
+    def outage(*_args, **_kwargs):
+        raise RuntimeError('thread write failed')
+
+    monkeypatch.setattr(routes, 'mutate', outage)
+    monkeypatch.setattr(Sessions, 'replace', replace_then_fail)
+    with pytest.raises(RuntimeError, match='thread write failed'):   # not the release's OSError
+        clients['reviewer'].post(f'/review/{case.id}/package-review/1/information-request/send')
+    monkeypatch.setattr(Sessions, 'replace', real_replace)
+    stuck = Sessions(store).get(case.id, 1)[0].information_request
+    assert stuck.sent_at and stuck.message_id is None
+    assert clients['owner'].get(f'/cases/{case.id}/information-request').json()['requests'] == []
+    busy = clients['reviewer'].post(f'/review/{case.id}/package-review/1/information-request/send')
+    assert busy.status_code == 409 and busy.headers['retry-after']
+    monkeypatch.setattr(routes, 'SEND_CLAIM_TTL', routes.timedelta(0))   # the claim has expired
+    monkeypatch.setattr(routes, 'mutate', real_mutate)
+    sent = clients['reviewer'].post(f'/review/{case.id}/package-review/1/information-request/send')
+    assert sent.status_code == 200, sent.text
     assert len(clients['owner'].get(f'/cases/{case.id}/information-request').json()['requests']) == 1

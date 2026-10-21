@@ -12,7 +12,9 @@ reviewer-only and scoped to the reviewer's authority.
 """
 from __future__ import annotations
 
+import logging
 import uuid
+from datetime import datetime, timedelta, timezone
 from typing import Callable
 
 from fastapi import APIRouter, HTTPException, Request
@@ -32,6 +34,23 @@ from .review.sessions import SessionConflict, Sessions
 from .review.uploads import parse_files, read_body
 from .routes_review import append_message, mutate, reviewer
 from .store import CaseBackend
+
+logger = logging.getLogger(__name__)
+# A send claims the request (sent_at, no message_id yet) before posting. A claim older than this
+# never finished, because the post failed and its release failed too, so it no longer blocks a retry.
+SEND_CLAIM_TTL = timedelta(minutes=2)
+
+
+def _in_flight(request_) -> bool:
+    if request_.message_id or not request_.sent_at:
+        return False
+    try:
+        claimed_at = datetime.fromisoformat(request_.sent_at)
+    except ValueError:
+        return False
+    if claimed_at.tzinfo is None:
+        claimed_at = claimed_at.replace(tzinfo=timezone.utc)
+    return datetime.now(timezone.utc) - claimed_at < SEND_CLAIM_TTL
 
 NOT_FOUND = 'package review not found'
 CLAIM_NEEDED = 'Claim this application before running or changing its package review'
@@ -108,10 +127,14 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
         if current is None:
             raise HTTPException(404, NOT_FOUND)
         session, raw = current
-        if session.information_request.sent_at:
+        if session.information_request.message_id:
             raise HTTPException(409, 'This information request was already sent; run a new review to ask again')
+        if _in_flight(session.information_request):
+            raise HTTPException(409, 'This information request is being sent', headers={'Retry-After': '5'})
         try:
-            updated = ir.edit(session.information_request, body.items, body.intro)
+            # An expired, never-posted claim is cleared by the edit.
+            updated = ir.edit(session.information_request, body.items, body.intro).model_copy(
+                update={'sent_at': None, 'sent_by_name': None})
         except KeyError as error:
             raise HTTPException(422, f'unknown information request item {error.args[0]}') from None
         session = session.model_copy(update={'information_request': updated})
@@ -207,15 +230,17 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
             raise HTTPException(404, NOT_FOUND)
         session, raw = current
         request_ = session.information_request
-        if request_.sent_at:
+        if request_.message_id:
             raise HTTPException(409, 'This information request was already sent')
+        if _in_flight(request_):
+            raise HTTPException(409, 'This information request is being sent', headers={'Retry-After': '5'})
         included = [item for item in request_.items if item.included]
         if not included:
             raise HTTPException(409, 'Include at least one item before sending')
         text = ir.render(request_)[:4000]
         # Claim the send first, so a concurrent send or edit gets 409 before anything reaches the applicant.
         claimed = session.model_copy(update={'information_request': request_.model_copy(
-            update={'sent_at': now(), 'sent_by_name': user.name, 'text': ir.render(request_)})})
+            update={'sent_at': now(), 'sent_by_name': user.name, 'text': text})})
         try:
             sessions().replace(claimed, raw)
         except SessionConflict:
@@ -223,6 +248,9 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
         claimed_raw = claimed.model_dump_json()
 
         def post(case):
+            # Re-checked on the version actually written: a take-over or a decision stops the send.
+            if case.claim is None or case.claim.reviewer_id != user.id or case.status != 'in_review':
+                raise HTTPException(409, CLAIM_NEEDED)
             items = [DecisionItem(field=(item.field or 'information_request')[:200], note=item.text[:2000])
                      for item in included]
             return append_message(case, user, text, items=items)
@@ -230,7 +258,10 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
         try:
             _, message = mutate(cases(), case_id, user, post)
         except BaseException:
-            sessions().replace(session, claimed_raw)   # nothing was posted: release the claim
+            try:
+                sessions().replace(session, claimed_raw)   # nothing was posted: release the claim
+            except Exception:  # noqa: BLE001 - keep the original error; a stuck claim expires (_in_flight)
+                logger.warning('information request claim release failed: case=%s version=%s', case_id, version)
             raise
         done = claimed.model_copy(update={'information_request': claimed.information_request.model_copy(
             update={'message_id': message.id})})
@@ -247,7 +278,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
         out = []
         for session in sessions().list(case_id):
             sent = session.information_request
-            if not sent.sent_at:
+            if not sent.message_id:   # never posted (or still being posted): not visible to the applicant
                 continue
             out.append(SentInformationRequest(
                 package_id=session.package_id, version=session.version, sent_at=sent.sent_at,
