@@ -473,7 +473,7 @@ function Reading({ id, filter, onReveal, index, narrow }: { id: string; filter: 
             {cx!.intent.length > 0 && (
               <Group id="cf-g-intent" title="Why this rule exists" count={cx!.intent.length} note="NBC 2020 intent, explanatory only">
                 <ul className="cf-intent">
-                  {cx!.intent.map((i) => <li key={i.text}>{i.objective && <span className="cf-mono cf-faint">{i.objective} </span>}{i.text}</li>)}
+                  {cx!.intent.map((i) => <li key={i.text}><span className="cf-intent-obj">{i.objective ?? ""}</span><span>{i.text}</span></li>)}
                 </ul>
                 {cx!.intent_differs && <p className="cf-note"><span className="cf-dot is-warning" aria-hidden="true" />{cx!.intent_differs_detail ?? "The NBC 2020 intent statement is attributed differently from NBC(AE) 2023."}</p>}
                 <div className="cf-code-src"><NrcCredit source="intent" /></div>
@@ -577,9 +577,11 @@ export function CodeLibrary({ route }: { route: CalmRoute }) {
                 <button type="button" className="cf-chip is-sm" aria-pressed={filter === "maybe"} onClick={() => setFilter("maybe")}><span className="cf-dot is-warning" aria-hidden="true" />Maybe <span className="cf-faint">{mid.length}</span></button>
               </>
             )}
+          </div>
+          <div className="cf-lib-score">
+            <ScoreStatus />
             <RingLegend />
           </div>
-          <ScoreStatus />
         </div>
         <nav className="cf-lib-tree" aria-label="Chapters">
           {toc.state === "loading" ? (
