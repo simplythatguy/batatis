@@ -8,7 +8,7 @@
  *   - cross-origin base: "include" once a credentialed GET /auth/me returns any HTTP response
  *     (200, 401 or 404 all prove the browser accepted it); otherwise "same-origin" (anonymous).
  */
-export const ENGINE_BASE: string = import.meta.env?.VITE_ENGINE_URL ?? "/api";
+export const ENGINE_BASE: string = import.meta.env?.VITE_ENGINE_URL ?? import.meta.env?.VITE_API_BASE ?? "/api";
 
 const sameOrigin = (() => {
   try {

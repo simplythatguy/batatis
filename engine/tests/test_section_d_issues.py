@@ -566,12 +566,16 @@ def test_eval_script_prints_in_sample_wilson_table(capsys):
         'so 0 under-flags is partly by design; since 4425089 it can answer no '
         'when stated facts clear every trigger)'
     )
-    for path in ('docs/api-contract.md', 'README.md', 'engine/section_d_flag_eval.py'):
+    script = Path('engine/section_d_flag_eval.py').read_text()
+    assert disclosure in script
+    assert construction in script
+    # The docs carry the pinned, measured receipt (124ef4d) instead of the live headline.
+    receipt = ('At measured source `d479e82`, the shipped facts-only `rules_plus_unknown` agreed with '
+               'model gold on 50/60 text-only dev cases (0 no outputs, 27 unknowns)')
+    for path in ('docs/api-contract.md', 'README.md'):
         text = Path(path).read_text()
-        if path != 'engine/section_d_flag_eval.py':
-            assert expected in text
-        assert disclosure in text
-        assert construction in text
+        assert receipt in text
+        assert 'Unshipped `rules_only` had 55/60 dev agreement and 1 under-flag.' in text
     assert 'gold: model-checked' in out
     assert 'split: dev (in-sample; pending out-of-sample confirmation)' in out
     assert 'rules_plus_unknown on this dev table is in-sample and pending out-of-sample confirmation' in out

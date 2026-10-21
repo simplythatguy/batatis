@@ -89,7 +89,7 @@ export class CodeLibraryError extends EngineError {
   }
 }
 
-const BASE: string = import.meta.env?.VITE_ENGINE_URL ?? "/api";
+const BASE: string = import.meta.env?.VITE_ENGINE_URL ?? import.meta.env?.VITE_API_BASE ?? "/api";
 const enc = encodeURIComponent;
 
 /** Plain words for each failure the contract names. Raw text stays in `technical`. */

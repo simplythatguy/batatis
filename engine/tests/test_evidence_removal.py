@@ -149,33 +149,42 @@ def test_actual_delete_route_works_without_codedb_and_is_mounted_once(evidence_s
               and 'DELETE' in getattr(route, 'methods', set())]
     assert len(routes) == 1
     client = TestClient(app)
-    response = client.delete(f'/cases/{case.id}/evidence/wall')
+    version = client.get(f'/cases/{case.id}').json()['version']
+    response = client.request('DELETE', f'/cases/{case.id}/evidence/wall', json={'expected_version': version})
     _private_response(response, 200)
     result = Case.model_validate(response.json())
     assert [fact.field for fact in result.facts] == ['evidence.wall~2.title']
     assert [item.id for item in result.evidence] == ['wall~2']
     assert store.get(case.id) == result
-    # The hosted /api prefix uses that same handler and absent slots return the case.
-    response = client.delete(f'/api/cases/{case.id}/evidence/absent')
-    _private_response(response, 200)
-    assert Case.model_validate(response.json()).facts == result.facts
-    response = client.delete('/cases/case_synthetic_missing/evidence/wall')
+    # The hosted /api prefix uses that same handler; an absent slot is 404 without a write
+    # (docs/api-contract.md, versioned withdrawal).
+    response = client.request('DELETE', f'/api/cases/{case.id}/evidence/absent',
+                              json={'expected_version': result.version})
+    _private_response(response, 404)
+    assert response.json()['detail'] == 'evidence not found'
+    assert store.get(case.id) == result
+    response = client.request('DELETE', '/cases/case_synthetic_missing/evidence/wall', json={'expected_version': 1})
     _private_response(response, 404)
     assert response.json()['detail'] == 'case not found'
 
 
 @pytest.mark.parametrize('failure,status,detail', [
-    (VersionConflict('synthetic'), 409, 'case was updated concurrently'),
+    (VersionConflict('synthetic', expected=1, actual=2), 409, 'case was updated concurrently'),
     (psycopg.OperationalError('private-host private-credential'), 503, 'case store unavailable'),
 ])
 def test_delete_route_preserves_safe_error_and_privacy_contract(evidence_store, monkeypatch, failure, status, detail):
-    store, _ = evidence_store
+    store, create = evidence_store
+    case = create(facts=[_fact('evidence.wall.title', 'withdrawn')],
+                  evidence=[EvidenceItem(id='wall', description='withdrawn')])
+    version = store.get_version(case.id)
 
-    def fail(*_args):
+    def fail(*_args, **_kwargs):
         raise failure
 
-    monkeypatch.setattr(store, 'remove_evidence', fail)
-    response = TestClient(create_app(store=store)).delete('/cases/synthetic/evidence/wall')
+    # The public route commits through the versioned store write.
+    monkeypatch.setattr(store, 'put', fail)
+    response = TestClient(create_app(store=store)).request(
+        'DELETE', f'/cases/{case.id}/evidence/wall', json={'expected_version': version})
     _private_response(response, status)
     assert response.json()['detail'] == detail
     assert 'private-' not in response.text
@@ -190,7 +199,7 @@ def test_expired_case_is_purged_on_removal_between_sweeps(evidence_store):
     client = TestClient(create_app(store=store))
     assert client.get(f'/cases/{case.id}').status_code == 200  # Consume the sweep window.
     _age(store, case.id, 8)
-    response = client.delete(f'/cases/{case.id}/evidence/wall')
+    response = client.request('DELETE', f'/cases/{case.id}/evidence/wall', json={'expected_version': 1})
     _private_response(response, 404)
     assert response.json()['detail'] == 'case not found'
     assert store.purge_expired() == 0  # Removal itself physically purged it.

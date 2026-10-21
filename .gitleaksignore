@@ -1,0 +1,2 @@
+# sha256 of codedb/api.py in a Section D eval receipt, not a credential (generic-api-key false positive).
+d75e7ff0fabb89a2d3f23792ceba8ce116536b35:evals_dev/section_d_flag/metrics.json:generic-api-key:16

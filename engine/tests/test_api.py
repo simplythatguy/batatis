@@ -44,12 +44,13 @@ def test_delete_evidence_keeps_the_other_slot(tmp_path):
     ):
         assert client.post(f'/cases/{case_id}/facts', json=fact(field, value)).status_code == 200
 
-    removed = client.delete(f'/cases/{case_id}/evidence/wall')
+    version = client.get(f'/cases/{case_id}').json()['version']
+    removed = client.request('DELETE', f'/cases/{case_id}/evidence/wall', json={'expected_version': version})
     assert removed.status_code == 200
     fields = [item['field'] for item in removed.json()['facts']]
     assert 'evidence.wall.title' not in fields
     assert 'evidence.wall~2.title' in fields
-    missing = client.delete('/cases/case_nope/evidence/wall')
+    missing = client.request('DELETE', '/cases/case_nope/evidence/wall', json={'expected_version': 1})
     assert missing.status_code == 404
     assert missing.json() == {'detail': 'case not found', 'meta': {'notice': PRIVACY_NOTICE}}
 

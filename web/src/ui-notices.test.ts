@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { exportNotice, exportReason, type EngineGap } from "./api/client.ts";
 import { NRC_CREDIT, NRC_SOURCES } from "./config.ts";
+import { PRIVACY_NOTICE } from "./privacy.ts";
 import { EVIDENCE_HINT, engineNotices, groupEvidenceGaps, missingFromEngine, QUOTE_LABEL, quoteKind, splitNoticeUrl } from "./rules.ts";
 
 const CALGARY_URL = "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf";
@@ -41,7 +42,7 @@ test("409 reasons from PR #21 render their label and fix hint, not [object Objec
 test("the export notice header is shown, but the privacy notice is left to the privacy notice", () => {
   assert.equal(exportNotice(CALGARY), CALGARY);
   assert.equal(exportNotice(null), "");
-  assert.equal(exportNotice("Do not upload personal information. In live mode, text you enter is sent to OpenAI (US)…"), "");
+  assert.equal(exportNotice(PRIVACY_NOTICE), "");
 });
 
 test("only code-database text is labelled Code text", () => {

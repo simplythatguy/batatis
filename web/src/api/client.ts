@@ -7,6 +7,7 @@
 import { credentialsMode } from "./engineAuth";
 import { publicDetail, takeSseEvents } from "../rules";
 import type { Case, EvidenceItem, FactInput, Jurisdiction, NewCase, SectionCRow } from "./types.gen";
+import { PRIVACY_NOTICE } from "../privacy";
 
 /** A provision returned by GET /code/search (engine/codes.py `Codes.search`). */
 export interface CodeHit {
@@ -398,7 +399,8 @@ export function exportReason(reason: unknown): string {
 
 export function exportNotice(header: string | null): string {
   const text = header?.trim() ?? "";
-  if (!text || /^Do not upload personal information/i.test(text)) return "";
+  // The privacy notice is shown elsewhere; never repeat it as an export notice.
+  if (!text || text.startsWith(PRIVACY_NOTICE.split(".")[0])) return "";
   return text;
 }
 
@@ -538,4 +540,5 @@ export function failureText(e: unknown): string {
 
 export type Engine = ReturnType<typeof createEngine>;
 
-export const engine: Engine = createEngine(import.meta.env?.VITE_ENGINE_URL ?? "/api");
+// VITE_ENGINE_URL (local direct calls) wins; VITE_API_BASE is the deploy setting (docs/deploy.md).
+export const engine: Engine = createEngine(import.meta.env?.VITE_ENGINE_URL ?? import.meta.env?.VITE_API_BASE ?? "/api");

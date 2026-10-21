@@ -36,7 +36,7 @@ def test_mutation_ack_uses_current_owned_inventory_and_row_version(context, writ
                     source=Source(type='user_text', ref='Synthetic applicant', quote='Applicant ordinary answer'))
         response = client.post(f'/cases/{case.id}/facts', json=note.model_dump())
     else:
-        response = client.delete(f'/cases/{case.id}/evidence/discard')
+        response = client.request('DELETE', f'/cases/{case.id}/evidence/discard', json={'expected_version': before})
     assert response.status_code == 200, response.text
     # Assert the reported attachment state before the new version contract, so this
     # reproduces the parent's ghost-response bug rather than merely a missing version.

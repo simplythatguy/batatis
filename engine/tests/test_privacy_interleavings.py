@@ -105,7 +105,8 @@ def test_section_d_cannot_replace_completed_mutation(store, monkeypatch, real_bu
         if mutation == 'whole_delete':
             assert client.delete(base).status_code == 204
         elif mutation == 'slot_delete':
-            assert client.delete(base + '/evidence/wall').status_code == 200
+            assert client.request('DELETE', base + '/evidence/wall',
+                                  json={'expected_version': store.get_version(case.id)}).status_code == 200
         elif mutation == 'new_fact':
             assert client.post(base + '/facts', json=fact('project.new_answer').model_dump()).status_code == 200
         else:

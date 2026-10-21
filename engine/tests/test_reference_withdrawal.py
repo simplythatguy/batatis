@@ -191,7 +191,8 @@ def test_clear_detaches_coverage_and_preserves_applicant_material(context):
     assert_private(linked, 200)
     rebuilt = client.post(f'/cases/{case.id}/section-d', json={})
     assert next(row for row in rebuilt.json()['items'] if row['id'] == item.id)['attachments']
-    deleted = client.delete(f'/cases/{case.id}/evidence/{item.id}')
+    deleted = client.request('DELETE', f'/cases/{case.id}/evidence/{item.id}',
+                             json={'expected_version': store.get_version(case.id)})
     assert_private(deleted, 200)
     assert store.get(case.id).evidence == []
     assert not any(entry.field.startswith(f'evidence.{item.id}.') for entry in store.get(case.id).facts)
@@ -304,8 +305,9 @@ def test_store_acknowledgments_ignore_supplied_payload_version(context):
     assert snapshot.version == version == 2
     response = client.post(f'/cases/{case.id}/facts', json=fact('project.note', 'saved').model_dump())
     assert response.json()['version'] == store.get_version(case.id) == 3
-    response = client.delete(f'/cases/{case.id}/evidence/absent')
-    assert response.json()['version'] == store.get_version(case.id) == 4
+    # The internal remove_evidence primitive keeps its prior contract (docs/api-contract.md):
+    # withdrawing an absent slot still acknowledges exactly one new version.
+    assert store.remove_evidence(case.id, 'absent').version == store.get_version(case.id) == 4
     case.version = 999999
     assert store.put(case).version == store.get_version(case.id) == 5
 
