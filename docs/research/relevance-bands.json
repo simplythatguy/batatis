@@ -1,0 +1,160 @@
+{
+  "source": "both",
+  "x": 0.3,
+  "y": 0.85,
+  "status": "benchmark-derived, not field-calibrated",
+  "model": "jev-1.13.0",
+  "cases": 53,
+  "gold_articles": 84,
+  "articles_per_case": 2080,
+  "date": "2026-10-20",
+  "display_rule": "Use the rerank probability for an article in the rerank pool (the 60 highest screen probabilities for the case). Use the screen probability for every other article. Compare round(p, 2) with x and y. No probability means grey.",
+  "pool_cap": {
+    "recommended": true,
+    "rule": "An article outside the rerank pool is never yellow or red. It shows green unless it has no score.",
+    "why": "Bounds flagged articles at 60 per case. Costs one gold article in the benchmark.",
+    "per_band": {
+      "green": {"gold_articles": 14, "gold_share_of_all_gold": 0.167},
+      "yellow": {
+        "articles_per_case": {"mean": 27.55, "median": 28, "p90": 55.6, "max": 59},
+        "gold_articles": 55,
+        "gold_rate_per_article": 0.03767
+      },
+      "red": {"articles_total": 18, "gold_articles": 15, "gold_rate_per_article": 0.83333}
+    }
+  },
+  "per_band": {
+    "grey": {
+      "rule": "p == 0 or the article was not scored",
+      "articles_per_case": {"mean": 0, "median": 0, "p90": 0.0, "max": 0},
+      "share_of_corpus": 0.0,
+      "articles_total": 0,
+      "gold_articles": 0,
+      "gold_share_of_all_gold": 0.0,
+      "gold_rate_per_article": null,
+      "cases_with_any": 0,
+      "cases_with_gold": 0,
+      "note": "Jev never returned 0 in the benchmark (minimum 0.01 in 110,240 screen judgments), so grey means not scored: Jev unreachable (BM25 fallback), article outside the screened scope, or no judgment yet."
+    },
+    "green": {
+      "rule": "0 < p < x",
+      "articles_per_case": {"mean": 2033.75, "median": 2052, "p90": 2076.8, "max": 2078},
+      "share_of_corpus": 0.9778,
+      "articles_total": 107789,
+      "gold_articles": 13,
+      "gold_share_of_all_gold": 0.155,
+      "gold_rate_per_article": 0.00012,
+      "cases_with_any": 53,
+      "cases_with_gold": 13,
+      "gold_share_ci95_cases": [0.087, 0.2289]
+    },
+    "yellow": {
+      "rule": "x <= p < y",
+      "articles_per_case": {"mean": 45.91, "median": 28, "p90": 67.8, "max": 694},
+      "share_of_corpus": 0.0221,
+      "articles_total": 2433,
+      "gold_articles": 56,
+      "gold_share_of_all_gold": 0.667,
+      "gold_rate_per_article": 0.02302,
+      "cases_with_any": 53,
+      "cases_with_gold": 39,
+      "gold_rate_ci95_cases": [0.0128, 0.0414],
+      "non_green_per_case_median_ci95": [18, 35]
+    },
+    "red": {
+      "rule": "p >= y",
+      "articles_per_case": {"mean": 0.34, "median": 0, "p90": 1.0, "max": 3},
+      "share_of_corpus": 0.0002,
+      "articles_total": 18,
+      "gold_articles": 15,
+      "gold_share_of_all_gold": 0.179,
+      "gold_rate_per_article": 0.83333,
+      "cases_with_any": 15,
+      "cases_with_gold": 13,
+      "gold_rate_wilson95": [0.608, 0.942],
+      "gold_rate_ci95_cases": [0.6364, 1.0],
+      "share_of_cases_with_any_ci95": [0.1698, 0.4151]
+    }
+  },
+  "per_case": {
+    "cases_with_no_red": 38,
+    "cases_with_one_red": 13,
+    "cases_with_two_or_more_red": 2,
+    "highest_score_median": 0.78,
+    "highest_score_quartiles": [0.7, 0.85],
+    "cases_with_more_than_60_non_green": 6,
+    "highest_scored_article_is_gold": {"p>=0.80": [18, 25], "p>=0.85": [12, 15], "p>=0.90": [7, 8], "format": "[gold, answered cases]"}
+  },
+  "scales": {
+    "comparable": true,
+    "evidence": {
+      "same_3180_articles_mean_p": {"screen": 0.313, "rerank": 0.312},
+      "spearman": 0.825,
+      "auc_gold_vs_non_gold_in_pool": {"screen": 0.859, "rerank": 0.877, "diff": 0.017, "diff_ci": [-0.014, 0.048]},
+      "band_changes_between_screen_and_rerank": "583 of 3180 (572 across x, 11 across y)",
+      "same_request_repeated_mean_abs_diff": 0.01,
+      "different_request_mean_abs_diff_range": [0.042, 0.079]
+    }
+  },
+  "vs_placeholders": {
+    "x": 0.2,
+    "y": 0.6,
+    "source": "engine/identify/relevance_bands.json on api/code-library",
+    "red_per_case": {"mean": 5.23, "median": 3, "p90": 11.8, "max": 37},
+    "cases_with_red": 44,
+    "red_articles": 277,
+    "red_gold": 45,
+    "red_gold_rate": 0.162,
+    "yellow_per_case": {"mean": 95.1, "median": 45, "p90": 178.6},
+    "gold_in_green": 9
+  },
+  "live_applicant_run": {
+    "source": "engine/CODE_LIBRARY_API.md on api/code-library, smoke receipt 2026-10-20",
+    "description_words": 36,
+    "articles_scored": 2080,
+    "flagged_at_x": 101,
+    "flagged_at_x_with_pool_cap": 55,
+    "red_at_y": 4,
+    "red_at_placeholder_y_0_6": 40,
+    "gold_labels": null
+  },
+  "engine_file": {
+    "path": "engine/identify/relevance_bands.json",
+    "content": {"x": 0.3, "y": 0.85, "status": "benchmark-derived, not field-calibrated"},
+    "note": "Keep only these three keys. engine/tests/test_relevance.py compares the file with the validated model."
+  },
+  "sensitivity": {
+    "x": [
+      {"x": 0.1, "gold_in_green": 3, "gold_in_green_share": 0.036, "non_green_median": 195, "non_green_mean": 307.8, "non_green_p90": 691.4, "non_green_max": 1755, "capped_gold_in_green": 9, "capped_non_green_median": 59, "capped_non_green_p90": 60.0, "capped_non_green_max": 60},
+      {"x": 0.15, "gold_in_green": 6, "gold_in_green_share": 0.071, "non_green_median": 91, "non_green_mean": 162.6, "non_green_p90": 357.2, "non_green_max": 1529, "capped_gold_in_green": 9, "capped_non_green_median": 55, "capped_non_green_p90": 60.0, "capped_non_green_max": 60},
+      {"x": 0.2, "gold_in_green": 9, "gold_in_green_share": 0.107, "non_green_median": 48, "non_green_mean": 100.3, "non_green_p90": 188.0, "non_green_max": 1229, "capped_gold_in_green": 10, "capped_non_green_median": 47, "capped_non_green_p90": 59.0, "capped_non_green_max": 60},
+      {"x": 0.25, "gold_in_green": 11, "gold_in_green_share": 0.131, "non_green_median": 36, "non_green_mean": 65.2, "non_green_p90": 109.0, "non_green_max": 929, "capped_gold_in_green": 12, "capped_non_green_median": 36, "capped_non_green_p90": 57.6, "capped_non_green_max": 60},
+      {"x": 0.3, "gold_in_green": 13, "gold_in_green_share": 0.155, "non_green_median": 28, "non_green_mean": 46.2, "non_green_p90": 68.8, "non_green_max": 695, "capped_gold_in_green": 14, "capped_non_green_median": 28, "capped_non_green_p90": 55.8, "capped_non_green_max": 59},
+      {"x": 0.35, "gold_in_green": 21, "gold_in_green_share": 0.25, "non_green_median": 20, "non_green_mean": 33.0, "non_green_p90": 54.0, "non_green_max": 485, "capped_gold_in_green": 21, "capped_non_green_median": 20, "capped_non_green_p90": 53.4, "capped_non_green_max": 58},
+      {"x": 0.4, "gold_in_green": 23, "gold_in_green_share": 0.274, "non_green_median": 15, "non_green_mean": 24.0, "non_green_p90": 46.4, "non_green_max": 313, "capped_gold_in_green": 23, "capped_non_green_median": 15, "capped_non_green_p90": 46.4, "capped_non_green_max": 58},
+      {"x": 0.5, "gold_in_green": 28, "gold_in_green_share": 0.333, "non_green_median": 6, "non_green_mean": 12, "non_green_p90": 26.8, "non_green_max": 101, "capped_gold_in_green": 28, "capped_non_green_median": 6, "capped_non_green_p90": 26.8, "capped_non_green_max": 53}
+    ],
+    "y": [
+      {"y": 0.7, "red_articles": 107, "red_per_case": 2.02, "cases_with_red": 40, "gold_in_red": 35, "gold_rate": 0.327, "gold_rate_wilson95": [0.246, 0.421], "gold_share_of_all_gold": 0.417},
+      {"y": 0.75, "red_articles": 58, "red_per_case": 1.09, "cases_with_red": 31, "gold_in_red": 25, "gold_rate": 0.431, "gold_rate_wilson95": [0.312, 0.559], "gold_share_of_all_gold": 0.298},
+      {"y": 0.8, "red_articles": 35, "red_per_case": 0.66, "cases_with_red": 25, "gold_in_red": 21, "gold_rate": 0.6, "gold_rate_wilson95": [0.436, 0.744], "gold_share_of_all_gold": 0.25},
+      {"y": 0.85, "red_articles": 18, "red_per_case": 0.34, "cases_with_red": 15, "gold_in_red": 15, "gold_rate": 0.833, "gold_rate_wilson95": [0.608, 0.942], "gold_share_of_all_gold": 0.179},
+      {"y": 0.9, "red_articles": 8, "red_per_case": 0.15, "cases_with_red": 8, "gold_in_red": 7, "gold_rate": 0.875, "gold_rate_wilson95": [0.529, 0.978], "gold_share_of_all_gold": 0.083}
+    ]
+  },
+  "limits": [
+    "53 cases (4 revision pairs), 84 gold articles. The red band rests on 18 articles in 15 cases.",
+    "Benchmark queries are 16 to 42 word STANDATA summaries. One live run on a 36-word applicant description flagged 101 articles at x (55 with the pool cap) and 4 at y, so counts may run higher on real input.",
+    "Gold is the list of articles a precedent cites. Gold rates are floors for true relevance.",
+    "Jev scores are not probabilities of governing. The gold rate is 3% at 0.5 to 0.6 and 80% or more only at 0.85 and above.",
+    "One model version (jev-1.13.0), one run per case, no human key (n=0).",
+    "An article scores 0.04 to 0.08 differently on average when the other articles in the request change. The green and yellow line at x is soft."
+  ],
+  "data": {
+    "branch": "main (identical blobs on dev and origin/main)",
+    "folder": "docs/research/2026-10-20-vision/jev-benchmark/",
+    "screen": "results/jev_judgments.jsonl.gz, qkey govern_exhaustive (110,240 rows)",
+    "rerank": "results/jev_judgments.jsonl.gz, qkey govern_stage2_exh60 (3,180 rows)",
+    "gold": "data/cases.json"
+  }
+}
