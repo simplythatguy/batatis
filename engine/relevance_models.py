@@ -12,7 +12,8 @@ Probability = Annotated[float, Field(ge=0, le=1)]
 # maps it to this value.
 PUBLIC_MODEL = 'relevance-1'
 # Rows stored before the public version existed hold that pin instead. They still load, as PUBLIC_MODEL,
-# and the next write stores the public value.
+# and the next write stores the public value. The release before this one reads only the pin, so rolling
+# back below this change needs the ROLLBACK statement in engine/tests/test_relevance.py run first.
 LEGACY_MODEL_PINS = frozenset({'jev-1.13.0'})
 
 
@@ -42,4 +43,5 @@ class RelevanceRecord(BaseModel):
     @field_validator('model', mode='before')
     @classmethod
     def _legacy_pin_loads_as_the_public_version(cls, value):
+        """A row stored with the provider's pin loads as the public version; anything else is checked as given."""
         return PUBLIC_MODEL if isinstance(value, str) and value in LEGACY_MODEL_PINS else value

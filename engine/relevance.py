@@ -20,6 +20,7 @@ PUBLIC_MODEL_VERSIONS = {JEV_MODEL: PUBLIC_MODEL}
 
 
 def public_model(pin: str) -> str:
+    """The version clients see for a scoring model pin. An unmapped pin raises; it is never passed through."""
     try:
         return PUBLIC_MODEL_VERSIONS[pin]
     except KeyError:

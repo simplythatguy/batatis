@@ -7,10 +7,11 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 from datetime import datetime, timezone
+from typing import Literal
 
 import pytest
 from fastapi.testclient import TestClient
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from engine import llm_gate
 from engine.api import create_app
@@ -391,3 +392,68 @@ def test_the_providers_pin_is_mapped_privately_and_an_unmapped_pin_is_never_pass
     for bad in ('jev-latest', 'relevance-2', [LEGACY_PIN], None):
         with pytest.raises(ValidationError):
             RelevanceRecord.model_validate({**fields, 'model': bad})
+
+
+# Operator runbook. This release stores relevance.model as 'relevance-1'. The release before it reads only the
+# provider's pin, and one row it cannot read fails that case and the lists that include it (/me/applications and
+# /review/queue). To roll back below this change, run the statement for the store first. Cases are deleted 7 days
+# after creation, so the exposure ends by itself within a week. The test below runs these exact statements.
+ROLLBACK = {
+    'sqlite': "UPDATE cases SET json = json_set(json, '$.relevance.model', 'jev-1.13.0') "
+              "WHERE json_extract(json, '$.relevance.model') = 'relevance-1'",
+    'postgres': "UPDATE cases SET data = jsonb_set(data, '{relevance,model}', '\"jev-1.13.0\"') "
+                "WHERE data->'relevance'->>'model' = 'relevance-1'",
+}
+
+
+class PreviousReleaseRelevance(BaseModel):
+    """What the release before this change accepted for the stored relevance.model."""
+    model: Literal['jev-1.13.0']
+
+
+def raw_case_after_rollback_statement(store, case_id):
+    """The stored case as the previous release would see it once the runbook statement has run. Rolled back."""
+    if isinstance(store, CaseStore):
+        with closing(sqlite3.connect(store.path)) as con:
+            con.execute('BEGIN')
+            con.execute(ROLLBACK['sqlite'])
+            row = con.execute('SELECT json FROM cases WHERE id=?', (case_id,)).fetchone()
+            con.rollback()
+        return json.loads(row[0])
+    import psycopg
+    with psycopg.connect(store.url) as con:
+        con.execute(ROLLBACK['postgres'])
+        row = con.execute('SELECT data FROM cases WHERE id=%s', (case_id,)).fetchone()
+        con.rollback()
+    return row[0]
+
+
+@pytest.mark.parametrize('backend', ['sqlite', 'postgres'])
+def test_the_rollback_statement_makes_stored_rows_readable_by_the_previous_release(setup, backend):
+    client, local_store, _, _ = setup
+    case_id = create_described(client)
+    assert client.post(f'/cases/{case_id}/relevance').status_code == 200
+    if backend == 'postgres':
+        url = os.environ.get('TEST_DATABASE_URL')
+        if not url:
+            pytest.skip('TEST_DATABASE_URL is not set')
+        from engine.store_postgres import PostgresCaseStore
+        store = PostgresCaseStore(url)
+        store.put(local_store.get(case_id))
+    else:
+        store = local_store
+    try:
+        assert stored_model(store, case_id) == 'relevance-1'
+        before = store.get(case_id).model_dump(mode='json')
+        # The hazard: the previous release cannot read a row this release wrote.
+        with pytest.raises(ValidationError):
+            PreviousReleaseRelevance.model_validate({'model': stored_model(store, case_id)})
+        restored = raw_case_after_rollback_statement(store, case_id)
+        assert PreviousReleaseRelevance.model_validate(restored['relevance']).model == LEGACY_PIN
+        # This release still reads the restored row, and nothing else in it changed.
+        reread = Case.model_validate({**restored, 'version': before['version']}).model_dump(mode='json')
+        assert reread == before
+        assert stored_model(store, case_id) == 'relevance-1', 'the check ran in a transaction that was rolled back'
+    finally:
+        if backend == 'postgres':
+            store.delete(case_id)
