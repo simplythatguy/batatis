@@ -136,6 +136,10 @@ function useStageProgress() {
 }
 
 const PHONE = "(max-width: 760px)";
+/** The signed-in application open in this tab, so a reload reopens it. Tab-scoped, id only. */
+const OPEN_KEY = "batatis-open-application";
+const remembered = () => { try { return sessionStorage.getItem(OPEN_KEY); } catch { return null; } };
+const remember = (id: string | null) => { try { if (id) sessionStorage.setItem(OPEN_KEY, id); else sessionStorage.removeItem(OPEN_KEY); } catch { /* storage unavailable */ } };
 const isPhone = () => window.matchMedia(PHONE).matches;
 
 export function Shell({ active, children }: { active: Screen; children: ReactNode }) {
@@ -161,6 +165,24 @@ export function Shell({ active, children }: { active: Screen; children: ReactNod
   useEffect(() => { setAssistantCase(engineId); }, [engineId]);
   // A new owned case appears in the list once the engine has created it.
   useEffect(() => { if (signedIn && engineId) void refreshApplications(); }, [signedIn, engineId]);
+  useEffect(() => { if (signedIn && engineId) remember(engineId); }, [signedIn, engineId]);
+
+  // After a reload, reopen the application this tab had open (signed in only).
+  const restored = useRef(false);
+  useEffect(() => {
+    if (restored.current || account.phase === "probing") return;
+    restored.current = true;
+    const id = remembered();
+    if (!id) return;
+    if (!signedIn || inCase) { if (!signedIn) remember(null); return; }
+    setOpening(id);
+    void openCase(id, roleOf(account.user) ?? "homebuilder").then((error) => {
+      setOpening(null);
+      if (!error) return;
+      remember(null);
+      resetToWho("That application is no longer available.");
+    });
+  }, [account.phase]); // eslint-disable-line react-hooks/exhaustive-deps
   // Screens without their own context: the assistant looks at the page.
   useEffect(() => {
     if (active === "questions") return;
@@ -231,6 +253,7 @@ export function Shell({ active, children }: { active: Screen; children: ReactNod
 
   function startNew() {
     setListNote("");
+    remember(null);
     resetSession();
     resetRelevance();
     resetToWho(signedIn ? "" : undefined);
