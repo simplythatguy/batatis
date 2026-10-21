@@ -16,7 +16,8 @@ _PHRASE = (
     r'at\s+least|at\s+most|greater\s+than|less\s+than|more\s+than'
 )
 _UNIT = r'mm²|mm2|m²|m2|cm|mm|kPa|MPa|kN|%|m'
-_REQUIREMENT = re.compile(rf'(?i)(?:{_PHRASE})\s+(\d+(?:\.\d+)?)\s*({_UNIT})')
+# The unit must end the token: "45 min" is not 45 m, and "kNm" is not kN.
+_REQUIREMENT = re.compile(rf'(?i)(?:{_PHRASE})\s+(\d+(?:\.\d+)?)\s*({_UNIT})(?![A-Za-z0-9²])')
 _FACT_VALUE = re.compile(rf'(?i)^\s*(\d+(?:\.\d+)?)\s*({_UNIT})\s*$')
 SNIPPET_WORDS = 25
 

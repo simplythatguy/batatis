@@ -15,7 +15,8 @@ from engine.models_identify import Term
 
 _SENTENCE = re.compile(r'^\d+(?:\.\d+){3}\.\(\d+\)$')
 _WS = re.compile(r'\s+')
-_COMPLIANCE = re.compile(r'\b(?:compl(?:y|ies|ied|iant|iance)|safe(?:ly|ty)?|approv(?:e|ed|al)|acceptable)\b', re.I)
+# "acceptable solution" is the domain term a departure is measured against, so it is not a claim.
+_COMPLIANCE = re.compile(r'\b(?:compl(?:y|ies|ied|iant|iance)|safe(?:ly|ty)?|approv(?:e|ed|al))\b', re.I)
 QUOTE_WORDS = 40
 
 

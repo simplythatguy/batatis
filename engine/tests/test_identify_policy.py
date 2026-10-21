@@ -247,3 +247,31 @@ def test_openai_request_pins_luna_medium_effort_and_standard_tier(monkeypatch):
     assert 'service_tier' not in sent and 'max_completion_tokens' in sent and 'max_tokens' not in sent
     assert usage['input_tokens'] == 5 and payload == {'picks': []}
     assert llm_gate.PRICES['gpt-6-luna'] == (Decimal('0.20'), Decimal('0.75'))
+
+
+# --- review fixes: compliance wording, numeric requirement units ----------------------------------
+
+@pytest.mark.parametrize('text,kept', [
+    ('Departs from the acceptable solution by projecting 450 mm over the face.', True),
+    ('The soffit complies with the code.', False),
+    ('This is safe because the wall is rated.', False),
+    ('The officer approved this before.', False),
+    ('Meets the compliance path.', False),
+])
+def test_model_reason_keeps_acceptable_solution_language(text, kept):
+    from engine.identify.cards import model_reason
+    assert (model_reason(text) is not None) is kept
+
+
+@pytest.mark.parametrize('sentence,expected', [
+    ('shall have a fire-resistance rating not less than 45 min', []),
+    ('shall be not less than 1 h', []),
+    ('shall resist a moment not less than 2 kNm', []),
+    ('shall project not more than 450 mm beyond the face', [(450, 'mm')]),
+    ('a limiting distance not less than 1.2 m.', [(1.2, 'm')]),
+    ('not less than 2 kN at the top', [(2, 'kN')]),
+    ('an area not less than 0.35 m² with no dimension', [(0.35, 'm²')]),
+])
+def test_requirement_units_end_at_a_word_boundary(sentence, expected):
+    from engine.identify.requirement import parse_requirements
+    assert [(r['value'], r['unit']) for r in parse_requirements(sentence)] == expected
