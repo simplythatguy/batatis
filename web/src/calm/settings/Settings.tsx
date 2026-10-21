@@ -119,6 +119,7 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
     <div className="ac-page">
       <PageHead title="Settings" phoneTools={phoneTools} />
       <div className="ac-page-body is-narrow">
+        <h1 className="ac-page-title">Settings</h1>
         {user ? (
           <>
             <section className="ac-section" aria-labelledby="ac-s-profile">

@@ -7,7 +7,7 @@ import { Recommendations } from "../screens/Recommendations";
 import { useCase } from "../store";
 import type { ApplicantType } from "../types";
 import { authorityName } from "./applications";
-import { openAssistant, setAssistantContext } from "./assistant/assistant";
+import { openAssistant, setAssistantContext, useAssistant } from "./assistant/assistant";
 import { useBegin, useCurrentApplication } from "./begin";
 import { CodeDrawer, type DrawerState } from "./CodeDrawer";
 import { aliasKey, buildDeck, choiceKey, choicesFor, preCaseDeck, SECTIONS, sourcePhrase, type DeckItem, type SectionId } from "./deck";
@@ -88,6 +88,14 @@ export function SectionFooter({ items, index, onJump, onPrev, onNext, canPrev, c
   const hold = (id: SectionId | null) => { window.clearTimeout(timer.current); setOpen(id); };
   const later = () => { window.clearTimeout(timer.current); timer.current = window.setTimeout(() => setOpen(null), 160); };
   useEffect(() => () => window.clearTimeout(timer.current), []);
+  // The assistant opening (or any resize) moves the sections; a list left open would point at nothing.
+  const assistantOpen = useAssistant().open;
+  useEffect(() => { setOpen(null); }, [assistantOpen]);
+  useEffect(() => {
+    const close = () => setOpen(null);
+    window.addEventListener("resize", close);
+    return () => window.removeEventListener("resize", close);
+  }, []);
   const sections = SECTIONS.map((s) => {
     const at = items.map((it, i) => ({ it, i })).filter((x) => x.it.section === s.id);
     const tracked = at.filter((x) => !x.it.optional);

@@ -183,8 +183,8 @@ export function Onboarding() {
               {busy ? "Saving…" : last ? "Finish" : "OK"}
               <AcIcon name="check" size={16} />
             </button>
-            <span className="ac-ok-hint">press <b>Enter ↵</b></span>
             {n > 1 && <button type="button" className="cf-btn is-ghost is-sm ac-back" onClick={back}><AcIcon name="back" size={14} />Back</button>}
+            <span className="ac-ok-hint">press <b>Enter ↵</b></span>
           </div>
         </div>
       </div>
