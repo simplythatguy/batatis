@@ -6,6 +6,7 @@ import { useCandidateAnswer } from "../screens/CodeCheck";
 import { Recommendations } from "../screens/Recommendations";
 import { useCase } from "../store";
 import { CodeDrawer, type DrawerState } from "./CodeDrawer";
+import { RelevanceRing } from "./RelevanceRing";
 import { aliasKey, buildDeck, choicesFor, type DeckItem } from "./deck";
 import { updateSession, useSession } from "./session";
 import { CIcon, Eyebrow, Kbd, MOD_KEY } from "./ui";
@@ -72,7 +73,7 @@ function CardBody({
     <>
       {item.provision && (
         <button type="button" className="cf-cite" onClick={() => openDrawer({ mode: "code", candidateId: item.ref })}>
-          <CIcon name="doc" size={13} />
+          <RelevanceRing id={item.provision} focusable={false} />
           <b>{item.provision}</b> Show the code
         </button>
       )}

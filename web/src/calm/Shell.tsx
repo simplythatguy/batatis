@@ -2,8 +2,10 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useCase } from "../store";
 import { buildDeck } from "./deck";
 import { STAGES, type Screen } from "./routes";
+import { CodePalette, OPEN_PALETTE, openPalette } from "./CodePalette";
 import { resetSession, useSession } from "./session";
-import { CIcon, ConfirmDialog, Dot, MoreIcon, type DotTone } from "./ui";
+import { resetRelevance } from "./useRelevance";
+import { CIcon, ConfirmDialog, Dot, MOD_KEY, MoreIcon, type DotTone } from "./ui";
 
 function useOutsideClose(open: boolean, close: () => void, ...refs: React.RefObject<HTMLElement | null>[]) {
   useEffect(() => {
@@ -86,8 +88,8 @@ function StagePills({ active, done, disabled }: { active: Screen; done: Record<s
       <nav className="cf-stages" aria-label="Progress">{pills()}</nav>
       <div className="cf-stages-compact" ref={box}>
         <button type="button" className="cf-stage is-compact" aria-expanded={open} aria-haspopup="true" onClick={() => setOpen((v) => !v)} disabled={disabled}>
-          <span className="cf-stage-n">{index >= 0 ? `${current.n}/04` : "··/04"}</span>
-          {index >= 0 ? current.label : "Menu"}
+          {index >= 0 && <span className="cf-stage-n">{current.n}/04</span>}
+          {index >= 0 ? current.label : "Steps"}
         </button>
         {open && <div className="cf-pop cf-stage-pop">{pills(() => setOpen(false))}</div>}
       </div>
@@ -126,8 +128,9 @@ function MoreMenu({ onStartOver }: { onStartOver: () => void }) {
       </button>
       {open && (
         <div ref={pop} className="cf-pop cf-menu" role="menu" aria-label="More" onKeyDown={onMenuKey}>
-          <a role="menuitem" tabIndex={-1} href="#/officer" onClick={close}>Officer view <span className="cf-mono cf-faint">SCO</span></a>
-          <a role="menuitem" tabIndex={-1} href="#/references" onClick={close}>All code references</a>
+          <button role="menuitem" tabIndex={-1} type="button" onClick={() => { close(); openPalette(); }}>Look up code <span className="cf-kbd is-dark" aria-hidden="true">{MOD_KEY} K</span></button>
+          <a role="menuitem" tabIndex={-1} href="#/officer" onClick={close}>Officer view</a>
+          <a role="menuitem" tabIndex={-1} href="#/code" onClick={close}>Code library</a>
           <a role="menuitem" tabIndex={-1} href="#/accuracy" onClick={close}>Accuracy report</a>
           <hr role="separator" />
           <a role="menuitem" tabIndex={-1} href="#/application?download=draft" onClick={close}>Download draft</a>
@@ -142,7 +145,25 @@ export function Shell({ active, children }: { active: Screen; children: ReactNod
   const { c, gaps, phase, checkedAt, resetToWho } = useCase();
   const session = useSession();
   const [confirm, setConfirm] = useState(false);
+  const [palette, setPalette] = useState(false);
   const inCase = phase === "case";
+  // ⌘K / Ctrl+K opens the code search anywhere in an application.
+  useEffect(() => {
+    if (!inCase) return;
+    const on = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey) && !e.altKey) {
+        e.preventDefault();
+        setPalette((v) => !v);
+      }
+    };
+    const open = () => setPalette(true);
+    document.addEventListener("keydown", on);
+    window.addEventListener(OPEN_PALETTE, open);
+    return () => {
+      document.removeEventListener("keydown", on);
+      window.removeEventListener(OPEN_PALETTE, open);
+    };
+  }, [inCase]);
   const openLeft = inCase ? buildDeck(c, gaps, { seen: new Set(session.seen) }).filter((i) => !i.optional).length : 1;
   const done = {
     start: inCase && Boolean(c.description.trim()),
@@ -165,6 +186,7 @@ export function Shell({ active, children }: { active: Screen; children: ReactNod
         </div>
       </header>
       <main className="cf-main" id="main">{children}</main>
+      {inCase && <CodePalette open={palette} onClose={() => setPalette(false)} />}
       <ConfirmDialog
         open={confirm}
         title="Start over?"
@@ -175,6 +197,7 @@ export function Shell({ active, children }: { active: Screen; children: ReactNod
         onConfirm={() => {
           setConfirm(false);
           resetSession();
+          resetRelevance();
           resetToWho();
         }}
       />

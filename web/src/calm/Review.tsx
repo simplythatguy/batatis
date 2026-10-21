@@ -6,7 +6,9 @@ import { useCase } from "../store";
 import type { Case, Gap } from "../types";
 import { buildDeck, deckProgress, gapKey } from "./deck";
 import { calmHref } from "./routes";
+import { rankedIn } from "./relevance";
 import { useSession } from "./session";
+import { useRelevance } from "./useRelevance";
 import { CIcon, Dot, Eyebrow, Kbd, type DotTone } from "./ui";
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
@@ -59,6 +61,9 @@ export function Review() {
   const groups = groupGaps(gaps, new Map(engineGaps.map((g) => [g.id, g.section])));
   const pick = (...keys: string[]) => keys.flatMap((k) => groups.get(k) ?? []);
   const need = engineerNeed(c, gaps);
+  // Rings never count as Section C; this only points at the library.
+  const rel = useRelevance();
+  const likely = rankedIn(rel.display, rel.cutoffs, ["high"]).length;
   const departures = c.sectionC.filter((r) => c.candidates.find((a) => a.id === r.candidateId)?.answer === "yes").length;
 
   const sections = [
@@ -186,7 +191,8 @@ export function Review() {
                   <div>Section {s.letter} · {s.title}</div>
                   <div className="cf-faint">
                     {summary}
-                    {s.letter === "C" && <> · <a className="cf-inline-link" href="#/code">Browse the code</a></>}
+                    {s.letter === "C" && <> · <a className="cf-inline-link" href={likely ? "#/code?filter=attention" : "#/code"}>Browse the code</a></>}
+                    {s.letter === "C" && likely > 0 && <div className="cf-faint">{plural(likely, "article")} likely relate to your project</div>}
                   </div>
                 </div>
                 <Dot tone={engineer && tone === "done" ? "warning" : tone} />

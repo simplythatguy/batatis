@@ -17,7 +17,8 @@ Simple, quiet and fast. The applicant describes the project or drops plans, answ
 | 02 Questions | `#/questions?focus=<key>` | `QuestionDeck.tsx` + `deck.ts` | One card at a time, derived from the case and the shared gaps. |
 | 03 Review | `#/review` | `Review.tsx` | What's left, metric tiles, engineer callout, Sections A–D status. |
 | 04 Application | `#/application` | `Application.tsx` | Paper preview of Part 1 A–D, gated draft and official PDF, text record. |
-| More menu | `#/officer`, `#/references`, `#/accuracy` | existing screens in `.cf-legacy` | Officer view, all code references (Section C), accuracy report. |
+| More menu | `#/officer`, `#/references`, `#/accuracy` | existing screens in `.cf-legacy` | Look up code (⌘K), Code library, Officer view, accuracy report. Section C references stay at `#/references`. |
+| Code library | `#/code`, `#/code/<article>?filter=attention\|maybe\|all` | `CodeLibrary.tsx` | Optional reading surface, not a stage. |
 
 Legacy hrefs (store gap links, old screens) are translated in `calm/routes.ts`: `#/describe` → Start, `#/code-check` → questions (code cards first), `#/section-c` → references, `#/application?tab=…&focus=field-<id>` → the card for that field, `prof-*` → the Section D card.
 
@@ -51,14 +52,16 @@ Keyboard: `1` `2` `3` pick a choice, `↵` continues (`⌘↵` inside a text are
 | `--cf-mono` | Geist Mono Variable | Eyebrows, citations, counters, kbd hints |
 | Radii | card 28, tile 18, control 14, pill 999 | |
 
-Type scale: display 54/1.04 (−3.5%), review headline 40, card question 32 (26 on phones), drawer title 22, lede 18, body 14–15, eyebrow 12 mono uppercase +9% tracking.
+Type scale: display 54/1.04 (−3.5%), review headline 40, card question 32 (26 on phones), drawer title 22, lede 18, body 14–15, eyebrow 12 mono.
+
+**No all-caps anywhere** (user decision 2026-10-21): no `text-transform: uppercase` and no uppercase copy. Eyebrows and small mono labels are sentence case. `calm.css` also neutralizes uppercase from the legacy styles inside the shell. Acronyms (NBC, PDF) stay as written.
 
 ## Components
 
 - **Top bar**: brand left; centered glass pill group `01 Describe · 02 Questions · 03 Review · 04 Application` (active = faint white fill, completed = green numeral); save status (mono, coloured dot; failure shows its note and Retry; unsaved shows Save now) and the `⋯` menu. Under 860px the pills collapse to one `02/04 Questions` pill with a popover.
 - **Buttons** (`.cf-btn`): pill, 44px; `is-primary` is the neutral light fill with a dark `kbd` hint; `is-ghost`, `is-sm`, `is-xs`. Labels never wrap; rows wrap instead of clipping.
 - **Chips** (`.cf-chip`, `aria-pressed`): role and authority choices.
-- **Eyebrow** (`.cf-eyebrow`): mono uppercase with the accent square; `is-plain` drops it.
+- **Eyebrow** (`.cf-eyebrow`): small mono label in sentence case with the accent square; `is-plain` drops it.
 - **Card** (`.cf-card.cf-glass`): eyebrow, question, one muted context line, controls, then the footer (Why we ask · Skip for now · Continue). Two ghost cards peek behind. It enters with opacity, 12px translateY and 4px blur over 300ms ease-out; under reduced motion only the opacity changes.
 - **Answer tiles** (`.cf-answer`): 60px, number hint on the right.
 - **Citation chip** (`.cf-cite`): `9.27.3.4.(1) Show the code`; opens the drawer.
@@ -85,3 +88,14 @@ Motion rules: transitions name their properties (never `all`); hover styles sit 
 9. No silent defaults: authority and scope start unanswered; values read from the description carry their source and a way to confirm.
 10. Process fields (rationale, risk, mitigation, assumptions, maintenance, qualifications) stay reachable as deck cards.
 11. Never fabricate article numbers; never claim compliance or safety; never author Section D professional evidence. Say plainly when an engineer is required.
+
+## Code library and relevance rings
+
+An optional surface for reading the code; the four stages never depend on it.
+
+- **Entry points**: ⌘K / Ctrl+K anywhere in an application (`CodePalette.tsx`), the ⋯ menu ("Look up code", "Code library"), the code drawer ("Open in code library"), Review's Section C row ("Browse the code"). No new top-bar element (the shell is being replaced by a left rail).
+- **Palette**: centered glass dialog. Rows show ring · mono id · title · path, one row per article; ↑ ↓ move, ↵ opens the article. Empty query: "Likely related to your project" when scored, otherwise "Score relevance for my project" and the parts.
+- **Library**: header (eyebrow, edition, scoring status, filters All · Needs attention · Maybe, the "?" legend, Search the code, Your Section C references). Left: ARIA tree Part → Section → Subsection → Article with arrow keys, lazy children, auto-expansion; branch rings show the highest article ("Highest in this section: 72%"); filters prune branches. Right: breadcrumb, title, ring + band pill, verbatim text (reflowed, clause breaks kept) with the NRC credit, Roots (objective and function chips with titles on hover/focus, NBC 2020 intent marked explanatory, appendix notes collapsed, Cites / Cited by chips), and "Add to my application", which uses the same `provisionCandidate` path as the manual search and becomes a Code check card. Hovering or focusing an article row for 300ms shows a peek: path, exact %, band, first ~160 characters, objective codes.
+- **RelevanceRing** (`RelevanceRing.tsx`, the only implementation): 16px (rows, chips) or 22px (reading). Track 1.5px white 14%, arc from 12 o'clock with length p, round caps. Green under x ("Unlikely to apply"), amber x ≤ p < y ("Might apply · check this"), red p ≥ y ("Likely applies · address this"), solid grey outline at 0, dashed grey when not scored. Tooltip: exact % to one decimal, band label, "Jev estimate from your description. Not a compliance decision.", model, "Out of date" when stale. The label is always available as text (aria-label, band pill), never colour alone.
+- **Scores** (`useRelevance.ts`): GET on library or palette open; POST only on "Score relevance for my project" (it costs money). The draft is saved first so the current description is scored. States: checking, not scored, scoring with elapsed seconds, scored · time ago, out of date · Rescore, unavailable · Try again (409 asks for a description; 429 counts down from Retry-After or 15 s; technical detail collapsed). Cut-offs come from `bands.x/y`; 0.2 / 0.6 are placeholders used only when a response has none. Never rescored automatically.
+- **Rules**: rings are estimates, never compliance and never the Section C list. Section C remains only what the applicant confirmed. With scores, the library opens on "Needs attention" so only the handful that matter show.
