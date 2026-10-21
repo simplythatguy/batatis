@@ -44,7 +44,7 @@ export function ScoreStatus() {
       {label}
     </button>
   );
-  const why = wait > 0 ? `Try again in ${wait} s.` : rel.result ? "" : rel.blocked;
+  const why = wait > 0 ? `Try again in ${wait} s.` : rel.result && !rel.stale ? "" : rel.blocked;
   return (
     <div className="cf-score-wrap">
       {rel.result ? (
@@ -391,7 +391,7 @@ function Reading({ id, filter, onReveal, index, narrow }: { id: string; filter: 
     references: [...new Set(raw.references.map((r) => articleOf(r) ?? r))].filter((r) => canonicalProvision(r) !== canonicalProvision(id)),
     referenced_by: [...new Set(raw.referenced_by.map((r) => articleOf(r) ?? r))].filter((r) => canonicalProvision(r) !== canonicalProvision(id)),
   };
-  const link = (r: string) => <a key={r} className="cf-code-chip is-link" href={codeHref(r, filter === "all" ? "" : filter)}>{r}</a>;
+  const link = (r: string) => <a key={r} className="cf-code-chip is-link" href={codeHref(r, filter)}>{r}</a>;
   const part = /^\d+\./.test(id) ? id.split(".")[0] : null;
   const crumbs = (cx?.path ?? []).filter((p) => p.level !== "part" && canonicalProvision(p.id) !== canonicalProvision(id));
   const page = (cx?.pdf_page ?? (text.state === "ready" ? text.value.pdf_page : null)) || null;
@@ -611,7 +611,7 @@ export function CodeLibrary({ route }: { route: CalmRoute }) {
                 <ul className="cf-likely">
                   {[...high, ...mid].slice(0, 8).map((r) => (
                     <li key={r.id}>
-                      <a className="cf-likely-row" href={codeHref(r.id, filter === "all" ? "" : filter)}>
+                      <a className="cf-likely-row" href={codeHref(r.id, filter)}>
                         <RelevanceRing id={r.id} focusable={false} />
                         <span className="cf-mono cf-likely-id">{r.id}</span>
                         <span className="cf-likely-title">{index.get(r.id)?.title ?? ""}</span>

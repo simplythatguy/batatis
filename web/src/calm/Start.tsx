@@ -32,7 +32,7 @@ export function Start() {
   const text = inCase ? c.description : session.draft;
   const role = inCase ? c.applicantType : session.role;
 
-  useEffect(() => { if (!locked) area.current?.focus({ preventScroll: true }); }, [locked]);
+  useEffect(() => { if (!locked && !askRole) area.current?.focus({ preventScroll: true }); }, [locked, askRole]);
 
   function setText(t: string) {
     if (inCase) dispatch({ type: "setDescription", text: t });

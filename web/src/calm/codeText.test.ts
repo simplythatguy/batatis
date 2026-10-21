@@ -51,3 +51,9 @@ test("the collapsed row previews the lead, or the first clause when the lead is 
   assert.equal(previewOf(a.sentences[0]), "Shall be");
   assert.equal(previewOf(a.sentences[1]), "only a clause.");
 });
+
+test("a wrapped cross-reference such as \"(b) and (c) of Sentence (2)\" stays in its clause", () => {
+  const a = parseArticle("1) Doors shall\na) comply with Clauses\n(b) and (c) of Sentence (2), or\nb) be tested.");
+  assert.deepEqual(a.sentences[0].clauses.map((c) => c.mark), ["a", "b"]);
+  assert.equal(a.sentences[0].clauses[0].text, "comply with Clauses (b) and (c) of Sentence (2), or");
+});

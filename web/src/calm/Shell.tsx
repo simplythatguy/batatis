@@ -217,9 +217,11 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     }
   }, [active, bare]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  /** An explicit open or close inside the library is what leaving it restores. */
+  const keepList = (collapsed: boolean) => { if (listBeforeCode.current !== null) listBeforeCode.current = collapsed; };
   const toggleList = () => {
     if (isPhone()) setSheet(true);
-    else setListCollapsed((v) => !v);
+    else setListCollapsed((v) => { keepList(!v); return !v; });
   };
 
   // Cmd/Ctrl+B sidebar, +J assistant, +K search applications, +Shift+K search the code.
@@ -234,7 +236,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
       else if (k === "k") {
         e.preventDefault();
         if (isPhone()) setSheet(true);
-        else setListCollapsed(false);
+        else { keepList(false); setListCollapsed(false); }
         window.setTimeout(() => listRef.current?.focusSearch(), 0);
       }
     };
@@ -273,7 +275,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
       icon: "inbox",
       onClick: () => {
         if (isPhone()) setSheet(true);
-        else setListCollapsed(false);
+        else { keepList(false); setListCollapsed(false); }
         if (!onStage) location.hash = lastStage.current;
       },
       current: onStage,

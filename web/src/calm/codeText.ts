@@ -27,8 +27,8 @@ export interface ArticleText {
 }
 
 const SENTENCE = /^(\d{1,2})\)\s*(.*)$/;
-const LETTER = /^\(?([a-z])\)\s*(.*)$/;
-const ROMAN = /^\(?(i|ii|iii|iv|v|vi|vii|viii|ix|x|xi|xii)\)\s*(.*)$/;
+const LETTER = /^([a-z])\)\s*(.*)$/;
+const ROMAN = /^(i|ii|iii|iv|v|vi|vii|viii|ix|x|xi|xii)\)\s*(.*)$/;
 const ROMANS = ["i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x", "xi", "xii"];
 
 const join = (a: string, b: string) => (a ? (b ? `${a} ${b}` : a) : b);
