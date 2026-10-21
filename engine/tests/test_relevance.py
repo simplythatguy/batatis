@@ -1,5 +1,6 @@
 """Offline HTTP acceptance checks: real exhaustive pipeline with injectable fake Jev asks."""
 import hashlib
+import json
 import os
 import threading
 from concurrent.futures import ThreadPoolExecutor
@@ -14,7 +15,7 @@ from engine.codes import Codes
 from engine.identify import Judge, articles
 from engine.identify.jevkit import keystore
 from engine.models import Case, Fact, Source
-from engine.relevance import display_probabilities
+from engine.relevance import BANDS_FILE, display_probabilities
 from engine.routes_relevance import _save_record
 from engine.store import CaseStore
 
@@ -93,7 +94,7 @@ def test_scores_all_division_b_articles_persists_and_get_never_scores(setup, cod
     assert all(record['display'][a] == p for a, p in record['rerank'].items())
     assert 0 in record['rerank'].values() and 0 in record['display'].values()
     assert any(record['display'][a] == p == 0.25 for a, p in record['scores'].items() if a not in record['rerank'])
-    assert record['bands'] == {'x': 0.2, 'y': 0.6, 'status': 'placeholder_uncalibrated'}
+    assert record['bands'] == json.loads(BANDS_FILE.read_text())
     assert store.get(case_id).relevance.model_dump() == {k: v for k, v in record.items() if k != 'meta'}
     count = len(ask.calls)
     # A new app/store instance reads the persisted record, not an in-memory cache.
