@@ -6,7 +6,7 @@ import { bootAccount, initials, refreshApplications, useAccount } from "./accoun
 import { authorityName } from "./applications";
 import { AssistantPanel } from "./assistant/AssistantPanel";
 import { setAssistantCase, setAssistantContext, toggleAssistant, useAssistant } from "./assistant/assistant";
-import { roleOf } from "./begin";
+import { roleOf, useCurrentApplication } from "./begin";
 import { CodePalette, OPEN_PALETTE, openPalette } from "./CodePalette";
 import { buildDeck, deckProgress } from "./deck";
 import { Icon24 } from "./icons";
@@ -36,7 +36,10 @@ function useOutsideClose(open: boolean, close: () => void, ...refs: React.RefObj
 
 export function SaveStatus() {
   const { phase, saveStatus, savedNote, saveDetail, saveDraft } = useCase();
+  const { app, locked } = useCurrentApplication();
   if (phase !== "case") return null;
+  // Sent to the authority: nothing is saved from here until the officer returns it.
+  if (locked) return <div className="cf-save" role="status"><Dot tone={app?.status === "accepted" ? "done" : "warning"} /><span className="cf-save-label">{app?.status === "accepted" ? "Accepted" : "Sent · read-only"}</span></div>;
   const map: Record<string, { tone: DotTone; label: string }> = {
     idle: { tone: "pending", label: "Not saved yet" },
     unsaved: { tone: "pending", label: "Unsaved" },

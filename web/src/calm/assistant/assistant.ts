@@ -4,6 +4,7 @@
  */
 import { useSyncExternalStore } from "react";
 import { AccountsError, accounts } from "../../api/accounts";
+import { getAccountPhase } from "../account";
 
 export interface AssistContext {
   /** Screen name sent to the engine: "question", "review", "application", "code", "drawer". */
@@ -74,6 +75,8 @@ export function toggleAssistant() {
 export async function ask(question: string) {
   const q = question.trim();
   if (!q || state.pending) return;
+  // Opened with a question while nobody is signed in: the panel shows the sign-in note instead.
+  if (getAccountPhase() !== "signed-in") return;
   ctl?.abort();
   const c = new AbortController();
   ctl = c;
@@ -94,7 +97,7 @@ export async function ask(question: string) {
       pending: false,
       error: {
         status,
-        text: status === 503 || status === 404 || status === 0 ? "The assistant isn't available on this server." : err?.detail ?? "The assistant did not answer.",
+        text: status === 401 ? "Sign in to use the assistant." : status === 503 || status === 404 || status === 0 ? "The assistant isn't available on this server." : err?.detail ?? "The assistant did not answer.",
         technical: err?.technical ?? String(e),
         retryAt: status === 429 ? Date.now() + (err?.retryAfter ?? 15) * 1000 : null,
       },

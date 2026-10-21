@@ -62,6 +62,8 @@ export function patchApplication(id: string, patch: Partial<ApplicationSummary>)
   set({ applications: state.applications.map((a) => (a.id === id ? { ...a, ...patch } : a)) });
 }
 
+export const getAccountPhase = (): AccountPhase => state.phase;
+
 /** Tests and the stub harness. */
 export function setAccountState(next: Partial<AccountState>) {
   set(next);

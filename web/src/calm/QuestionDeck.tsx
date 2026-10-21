@@ -392,7 +392,8 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   const [jumpTo, setJumpTo] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const wrapRef = useRef<HTMLDivElement>(null);
-  const dir = useDirection(index);
+  const formPos = currentKey ? all.findIndex((i) => i.key === currentKey) : all.length;
+  const dir = useDirection(formPos < 0 ? index : formPos);
 
   // Text drafts start from the saved answer each time a card opens.
   useEffect(() => {
@@ -413,7 +414,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     setAssistantContext({
       screen: "question",
       focus: item.provision ? { kind: "provision", id: item.provision } : { kind: "card", id: item.key },
-      label: `question ${index + 1}${item.provision ? ` and ${item.provision}` : ""}`,
+      label: `question ${(all.findIndex((i) => i.key === item.key) + 1) || index + 1}${item.provision ? ` and ${item.provision}` : ""}`,
       suggestions: item.provision ? ["Explain the code", "What does this question mean?"] : ["What does this question mean?", "What should I have ready?"],
     });
   }, [item?.key, index]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -494,8 +495,22 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     }));
   }
 
-  /** Up/down and the footer move through the queue in order, answered cards included. */
-  const goTo = (i: number) => updateSession({ index: Math.max(0, Math.min(queue.length, i)) });
+  /** Up/down and the footer move through the whole form in order, answered cards included. */
+  const pos = currentKey ? all.findIndex((i) => i.key === currentKey) : all.length;
+  function goToKey(key: string | null) {
+    if (!key) return updateSession({ index: queue.length });
+    updateSession((s) => {
+      const base = s.queue.length >= queue.length ? s.queue : queue;
+      const q = base.includes(key) ? base : [...base.slice(0, s.index), key, ...base.slice(s.index)];
+      return { queue: q, index: q.indexOf(key) };
+    });
+  }
+  const step = (d: -1 | 1) => {
+    const at = pos < 0 ? all.length : pos;
+    const to = at + d;
+    if (to < 0) return;
+    goToKey(to >= all.length ? null : all[to].key);
+  };
 
   function canContinue(it: Shown): boolean {
     if (locked) return false;
@@ -561,8 +576,8 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       return;
     }
     if (inText || e.metaKey || e.ctrlKey || e.altKey) return;
-    if (e.key === "ArrowUp" && index > 0) { e.preventDefault(); goTo(index - 1); return; }
-    if (e.key === "ArrowDown" && index < queue.length) { e.preventDefault(); goTo(index + 1); return; }
+    if (e.key === "ArrowUp") { e.preventDefault(); step(-1); return; }
+    if (e.key === "ArrowDown" && item) { e.preventDefault(); step(1); return; }
     if (item && /^[a-z1-9]$/i.test(e.key)) {
       const n = /\d/.test(e.key) ? Number(e.key) - 1 : e.key.toUpperCase().charCodeAt(0) - 65;
       const choice = choicesFor(item)[n];
@@ -578,7 +593,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     return () => document.removeEventListener("keydown", on);
   }, []);
 
-  const shownItems = queue.map((k) => itemFor(k)).filter((x): x is Shown => Boolean(x));
+  const n = (pos < 0 ? index : pos) + 1;
   const openLeft = queue.filter((k) => !itemFor(k)?.done && !itemFor(k)?.optional).length;
   const typed = Boolean(item && multiline(item));
 
@@ -602,7 +617,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       <div className="cf-q-stage">
         {item ? (
           <div ref={wrapRef} key={item.key} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
-            <QNum n={index + 1} label={item.eyebrow} />
+            <QNum n={n} label={item.eyebrow} />
             <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>{item.title}</h2>
             {(item.context || item.quote) && (
               <p className="cf-q-help">
@@ -623,7 +638,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
                 <button type="button" className="cf-link-btn" onClick={skip}>{item.optional ? "Skip" : "Skip for now"}</button>
               </span>
             </OkRow>
-            <AskLink item={item} n={index + 1} />
+            <AskLink item={item} n={n} />
           </div>
         ) : (
           <div ref={wrapRef} key="finish" className={`cf-q-wrap is-from-${dir}`} aria-labelledby="cf-q" role="group">
@@ -653,7 +668,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
           </div>
         )}
       </div>
-      <SectionFooter items={shownItems} index={index} onJump={goTo} onPrev={() => goTo(index - 1)} onNext={() => goTo(index + 1)} canPrev={index > 0} canNext={index < queue.length} />
+      <SectionFooter items={all} index={item ? pos : -1} onJump={(i) => goToKey(all[i]?.key ?? null)} onPrev={() => step(-1)} onNext={() => step(1)} canPrev={(pos < 0 ? all.length : pos) > 0} canNext={Boolean(item)} />
       <CodeDrawer state={drawer} onClose={() => setDrawer(null)} onAdded={(id) => { setDrawer(null); setJumpTo(id); }} />
     </div>
   );

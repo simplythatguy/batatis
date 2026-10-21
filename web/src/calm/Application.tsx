@@ -146,7 +146,7 @@ function SubmitPanel() {
     return <SubmittedStatus app={app} where={where} />;
   }
   const blocking = gaps.filter((g) => g.severity === "blocking");
-  const reason = !c.authority ? "Pick the reviewing authority first." : blocking.length ? `${blocking.length} required ${blocking.length === 1 ? "item is" : "items are"} missing.` : "";
+  const reason = !c.authority ? "Choose Calgary or Edmonton as the reviewing authority before submitting. Not sure yet keeps it open." : blocking.length ? `${blocking.length} required ${blocking.length === 1 ? "item is" : "items are"} missing.` : "";
 
   async function submit() {
     if (reason || busy || !app) return;
