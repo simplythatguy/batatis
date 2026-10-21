@@ -95,7 +95,7 @@ bulletins. `404` detail `jurisdiction not found`.
 | Surface | What reads the pack |
 |---|---|
 | `GET /cases/{id}/gaps` and `check_completeness` | Each notice with surface `gaps` becomes a gap `id: info:<notice id>`, `field: <notice id>`, `severity: info`. Info never blocks export or submit. |
-| `POST /cases/{id}/export` (draft and final) | Notices with surface `export_header` are sent as `X-Batatis-Notice` (joined by a space). Messages are ASCII so they fit a header. |
+| `POST /cases/{id}/export` (draft and final) | Notices with surface `export_header` are sent as `X-Batatis-Jurisdiction-Notice` (joined by a space). `X-Batatis-Notice` keeps the standard privacy notice. Messages are ASCII so they fit a header. |
 | Export appendix | Notices with surface `export_appendix` print under their `heading` (Calgary: "Local variance form"). |
 | `POST /cases/{id}/submit` | The "choose a reviewing authority" message names the packs that have a reviewer code. |
 

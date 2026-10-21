@@ -135,7 +135,8 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
     app.add_middleware(CORSMiddleware, allow_origin_regex=r'http://(localhost|127\.0\.0\.1)(:\d+)?',
                        allow_origins=[os.environ.get('BATATIS_WEB_ORIGIN', 'http://localhost:5480').rstrip('/')],
                        allow_credentials=True, allow_methods=['*'], allow_headers=['*'],
-                       expose_headers=['Retry-After', 'X-Batatis-Notice', 'Content-Disposition'])
+                       expose_headers=['Retry-After', 'X-Batatis-Notice', 'X-Batatis-Jurisdiction-Notice',
+                                       'Content-Disposition'])
     app.add_middleware(HttpGuard, sweep=sweep)
 
     def code() -> Codes:
@@ -249,7 +250,8 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
         headers = {'Content-Disposition': f'attachment; filename="{name}"'}
         notice = export_notice(case)   # from the case's jurisdiction pack; never a block
         if notice:
-            headers['X-Batatis-Notice'] = notice
+            # Its own header, so the standard privacy notice in X-Batatis-Notice is kept.
+            headers['X-Batatis-Jurisdiction-Notice'] = notice
         return Response(res.pdf, media_type='application/pdf', headers=headers)
 
     @app.get('/code/search')

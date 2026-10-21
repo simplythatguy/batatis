@@ -204,7 +204,7 @@ def notices_for(case: Case, surface: str) -> list[PackNotice]:
 
 
 def export_notice(case: Case) -> str | None:
-    """The `X-Batatis-Notice` text for an export, or None when the pack has no export notice."""
+    """The `X-Batatis-Jurisdiction-Notice` text for an export, or None when the pack has no export notice."""
     found = notices_for(case, 'export_header')
     return ' '.join(n.message for n in found) or None
 

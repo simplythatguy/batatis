@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 from engine.api import create_app
 from engine.jurisdictions import registry
 from engine.models import Case
+from engine.privacy import PRIVACY_NOTICE
 from engine.store import CaseStore
 from engine.tests.test_accounts import onboard, signup
 
@@ -98,9 +99,10 @@ def test_export_header_and_gap_carry_the_pack_notice(scene, monkeypatch):
     edmonton = client.post('/cases', json={'jurisdiction': {'id': 'edmonton', 'name': 'City of Edmonton'}}).json()
     for draft in (False, True):
         r = client.post(f'/cases/{calgary["id"]}/export', json={'draft': draft})
-        assert r.status_code == 200 and r.headers['x-batatis-notice'] == message
+        assert r.status_code == 200 and r.headers['x-batatis-jurisdiction-notice'] == message
+        assert r.headers['x-batatis-notice'] == PRIVACY_NOTICE   # the standard notice is not replaced
     other = client.post(f'/cases/{edmonton["id"]}/export')
-    assert other.status_code == 200 and other.headers['x-batatis-notice'] != message
+    assert other.status_code == 200 and 'x-batatis-jurisdiction-notice' not in other.headers
 
 
 def test_submit_message_names_the_reviewing_offices(scene):

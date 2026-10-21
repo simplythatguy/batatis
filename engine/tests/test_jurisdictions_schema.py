@@ -182,3 +182,29 @@ def test_a_name_claimed_by_two_packs_is_rejected(tmp_path):
     path.write_text(json.dumps(data))
     with pytest.raises(PackError, match='also matches'):
         Registry.load(root)
+
+
+def _cited(node):
+    """(provision, status) for every `provisions` list in a pack file."""
+    if isinstance(node, dict):
+        if isinstance(node.get('provisions'), list):
+            for provision in node['provisions']:
+                yield provision, node.get('status')
+        for value in node.values():
+            yield from _cited(value)
+    elif isinstance(node, list):
+        for item in node:
+            yield from _cited(item)
+
+
+def test_every_current_provision_resolves_in_the_code_database():
+    """A pack never cites an NBC(AE) 2023 provision the code database does not hold."""
+    from engine.codes import Codes
+    from engine.tests._db_skip import require_repo_db
+    require_repo_db()
+    codes = Codes()
+    cited = [(path.name, provision) for path in _files() for provision, status in _cited(json.loads(path.read_text()))
+             if status != 'historical']
+    assert cited, 'no current provisions found; the walk is broken'
+    missing = [(name, provision) for name, provision in cited if codes.provision(provision) is None]
+    assert not missing, missing
