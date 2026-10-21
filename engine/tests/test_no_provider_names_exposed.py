@@ -287,8 +287,8 @@ def test_the_export_headers_and_pdf_name_no_provider(world):
 
 
 def test_identify_responses_name_no_provider_when_the_route_exists(world, monkeypatch):
-    app, client, _, _ = world
-    if '/cases/{case_id}/identify' not in {getattr(route, 'path', '') for route in app.routes}:
+    _, client, _, _ = world
+    if '/cases/{case_id}/identify' not in client.get('/openapi.json').json()['paths']:
         pytest.skip('this branch has no code-identification route')
     monkeypatch.setenv('BATATIS_PROVIDER', 'fake')                                # offline stand-ins, never a live call
     monkeypatch.setenv('BATATIS_IDENTIFY_RATE_LIMIT', '1000')
@@ -298,9 +298,14 @@ def test_identify_responses_name_no_provider_when_the_route_exists(world, monkey
     assert client.get(f'/cases/{case_id}/identify').status_code == 200
     stream = client.post(f'/cases/{case_id}/identify', headers={'accept': 'text/event-stream'})
     assert stream.status_code == 200 and 'event: done' in stream.text
-    assert client.get(f'/cases/{case_id}/information-request').status_code == 200
+    shown = run.json()['articles']
+    assert shown, 'the fake run returns article cards'
+    decided = client.post(f"/cases/{case_id}/identify/{shown[0]['provision']}/decision", json={'decision': 'not_sure'})
+    assert decided.status_code == 200, decided.text
+    assert client.get(f'/cases/{case_id}/process-refs').status_code == 200
+    client.get(f'/cases/{case_id}/information-request')            # the officer draft; its status depends on who asks
     assert client.get(f'/cases/{case_id}').status_code == 200
-    assert_no_provider(client, at_least=6)
+    assert_no_provider(client, at_least=8)
 
 
 # ---------------------------------------------------------------- officer review (#53)
