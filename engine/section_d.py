@@ -119,6 +119,35 @@ def supporting_documents(case: Case) -> list[SupportingDocument]:
     return docs
 
 
+def text_evidence(case: Case) -> list[tuple[str, str]]:
+    """Titles the applicant typed. These are not file references."""
+    slots: list[str] = []
+    seen: set[str] = set()
+    for fact in case.facts:
+        if not fact.field.startswith('evidence.'):
+            continue
+        if not (fact.field.endswith('.title') or fact.field.endswith('.description')):
+            continue
+        if fact.source.type == 'file':
+            continue
+        slot = fact.field.split('.')[1]
+        if slot in seen or latest_fact(case, f'evidence.{slot}.file_ref') is not None:
+            continue
+        seen.add(slot)
+        slots.append(slot)
+    rows: list[tuple[str, str]] = []
+    for slot in slots:
+        prefix = f'evidence.{slot}.'
+        title = confirmed_value(case, prefix + 'title')
+        if not isinstance(title, str) or not title.strip():
+            title = confirmed_value(case, prefix + 'description')
+        if not isinstance(title, str) or not title.strip():
+            continue
+        who = confirmed_value(case, prefix + 'responsible_party')
+        rows.append((title.strip(), who.strip() if isinstance(who, str) else ''))
+    return rows
+
+
 def section_d_plan(case: Case, codes: Codes | None, documents: list[SupportingDocument] | None = None) -> SectionDPlan:
     """Re-lookup only confirmed provisions; never trust client-supplied pairs or invent a missing row."""
     documents = supporting_documents(case) if documents is None else documents
