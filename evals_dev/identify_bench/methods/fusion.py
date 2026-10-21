@@ -10,8 +10,8 @@ from .base import Arm, RunContext, UpstreamMissing, unique_in
 class FuseArm(Arm):
     kind = 'fuse'
 
-    def __init__(self, name: str, upstream: tuple[str, ...], *, k: int = 60, depth: int = 100):
-        self.name, self.upstream_names, self.k, self.depth = name, tuple(upstream), k, depth
+    def __init__(self, name: str, upstream: tuple[str, ...], *, k: int = 60, depth: int = 100, repeats: int = 3):
+        self.name, self.upstream_names, self.k, self.depth, self.repeats = name, tuple(upstream), k, depth, repeats
 
     def config(self) -> dict:
         return {'method': 'reciprocal rank fusion', 'k': self.k, 'depth': self.depth}

@@ -15,23 +15,28 @@ from .methods.verifier import LunaRerankArm, LunaVerifierArm
 from .rows import config_hash
 
 
-def standard_arms(*, jev_repeats: int = 3, verifier_repeats: int = 5, search_rank: SearchRankArm | None = None) -> dict[str, Arm]:
+def standard_arms(*, jev_repeats: int = 2, verifier_repeats: int = 5, upstream_cycle: int | None = 2,
+                  search_rank: SearchRankArm | None = None) -> dict[str, Arm]:
+    """``jev_repeats`` independent Jev draws per case; verifier repeat r reads draw ``r % upstream_cycle`` (None: the same r).
+
+    The Jev account ran out of credits after two complete draws of every case (6,300 requests), so the default is two.
+    """
     r1 = search_rank or SearchRankArm('R1-searchrank-v3')
     arms: list[Arm] = [
         Bm25Arm('R0-bm25'),
         r1,
         PrecedentArm('R2-precedent-lofo'),
-        JevScreenArm('R4-jev-screen'),
+        JevScreenArm('R4-jev-screen', repeats=jev_repeats),
         JevRerankArm('R5-jev-screen-rerank60', 'R4-jev-screen', repeats=jev_repeats),
         JevRerankArm('R6-bm25-jev-rerank60', 'R0-bm25', repeats=jev_repeats),
-        FuseArm('F1-rrf-R5-R1-R2', ('R5-jev-screen-rerank60', 'R1-searchrank-v3', 'R2-precedent-lofo')),
+        FuseArm('F1-rrf-R5-R1-R2', ('R5-jev-screen-rerank60', 'R1-searchrank-v3', 'R2-precedent-lofo'), repeats=jev_repeats),
         LunaRerankArm('A9-bm25-luna-rerank60', 'R0-bm25', repeats=3),
-        LunaVerifierArm('V15f-R5', 'R5-jev-screen-rerank60', repeats=verifier_repeats),
-        LunaVerifierArm('V40f-R5', 'R5-jev-screen-rerank60', shortlist_n=40, repeats=verifier_repeats),
-        LunaVerifierArm('V15c-R5', 'R5-jev-screen-rerank60', chars=700, repeats=verifier_repeats),
-        LunaVerifierArm('V15f-R6', 'R6-bm25-jev-rerank60', repeats=verifier_repeats),
-        LunaVerifierArm('V15f-F1', 'F1-rrf-R5-R1-R2', repeats=verifier_repeats),
-        LunaVerifierArm('V15f-R5-ool', 'R5-jev-screen-rerank60', out_of_list=True, repeats=verifier_repeats),
+        LunaVerifierArm('V15f-R5', 'R5-jev-screen-rerank60', repeats=verifier_repeats, upstream_cycle=upstream_cycle),
+        LunaVerifierArm('V40f-R5', 'R5-jev-screen-rerank60', shortlist_n=40, repeats=verifier_repeats, upstream_cycle=upstream_cycle),
+        LunaVerifierArm('V15c-R5', 'R5-jev-screen-rerank60', chars=700, repeats=verifier_repeats, upstream_cycle=upstream_cycle),
+        LunaVerifierArm('V15f-R6', 'R6-bm25-jev-rerank60', repeats=verifier_repeats, upstream_cycle=upstream_cycle),
+        LunaVerifierArm('V15f-F1', 'F1-rrf-R5-R1-R2', repeats=verifier_repeats, upstream_cycle=upstream_cycle),
+        LunaVerifierArm('V15f-R5-ool', 'R5-jev-screen-rerank60', out_of_list=True, repeats=verifier_repeats, upstream_cycle=upstream_cycle),
     ]
     by_name = {a.name: a for a in arms}
     if not by_name['R1-searchrank-v3'].available:

@@ -44,8 +44,7 @@ def _book(ctx: RunContext, model: str, arm: str, case: BenchCase, tokens: dict, 
     if ctx.jev_ledger is None:
         return
     j = tokens['jev']
-    res = ctx.jev_ledger.reserve(model=model, worst_case_usd=0, arm=arm, case=case.id)
-    ctx.jev_ledger.settle(res, usd=usd, input_tokens=j['input'], output_tokens=j['output'], requests=j['requests'],
+    ctx.jev_ledger.record(model=model, usd=usd, input_tokens=j['input'], output_tokens=j['output'], requests=j['requests'],
                           arm=arm, case=case.id)
 
 
@@ -56,8 +55,8 @@ class JevScreenArm(Arm):
     repeats = 3
 
     def __init__(self, name: str = 'R4-jev-screen', *, model: str = PINNED, card_chars: int = 700,
-                 max_state: int = 56000, workers: int = 8, timeout: float = 60, attempts: int = 4):
-        self.name, self.model, self.card_chars, self.max_state = name, model, card_chars, max_state
+                 max_state: int = 56000, workers: int = 8, timeout: float = 60, attempts: int = 4, repeats: int = 3):
+        self.name, self.model, self.card_chars, self.max_state, self.repeats = name, model, card_chars, max_state, repeats
         self.workers, self.timeout, self.attempts = workers, timeout, attempts
 
     def config(self) -> dict:

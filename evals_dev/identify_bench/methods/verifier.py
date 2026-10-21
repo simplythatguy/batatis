@@ -73,27 +73,38 @@ class LunaVerifierArm(Arm):
 
     def __init__(self, name: str, upstream: str, *, model: str = 'gpt-6-luna', effort: str = 'medium',
                  shortlist_n: int = 15, chars: int | None = None, max_completion_tokens: int = 12000,
-                 upstream_repeat: int | None = None, out_of_list: bool = False, repeats: int = 5):
+                 upstream_repeat: int | None = None, upstream_cycle: int | None = None, out_of_list: bool = False,
+                 repeats: int = 5):
         if 'haiku' in model.lower():
             raise ValueError('Haiku models are not used')
         self.name, self.upstream_names, self.model, self.effort = name, (upstream,), model, effort
         self.shortlist_n, self.chars, self.max_completion_tokens = shortlist_n, chars, max_completion_tokens
-        self.upstream_repeat, self.out_of_list, self.repeats = upstream_repeat, out_of_list, repeats
+        self.upstream_repeat, self.upstream_cycle, self.out_of_list, self.repeats = (
+            upstream_repeat, upstream_cycle, out_of_list, repeats)
 
     def config(self) -> dict:
         return {'method': 'verifier over the upstream shortlist, full-text quote match', 'model': self.model,
                 'reasoning_effort': self.effort, 'service_tier': 'default (standard)', 'shortlist_n': self.shortlist_n,
                 'article_text': 'full' if self.chars is None else f'{self.chars} characters',
                 'max_completion_tokens': self.max_completion_tokens,
-                'upstream_repeat': 'same repeat' if self.upstream_repeat is None else self.upstream_repeat,
+                'upstream_repeat': self._upstream_label(),
                 'out_of_list': self.out_of_list, 'prompt_sha': prompt_sha(self.out_of_list),
                 'pattern': 'PR #12 variant c (WP-20 engine/identify/llm.py)'}
+
+    def _upstream_label(self):
+        if self.upstream_cycle:
+            return f'repeat mod {self.upstream_cycle}'
+        return 'same repeat' if self.upstream_repeat is None else self.upstream_repeat
+
+    def _upstream_repeat(self, repeat: int) -> int:
+        if self.upstream_cycle:
+            return repeat % self.upstream_cycle
+        return repeat if self.upstream_repeat is None else self.upstream_repeat
 
     def run(self, case: BenchCase, repeat: int, ctx: RunContext) -> RowDraft:
         from engine.identify.verify import Pick, check_quotes
         try:
-            up = ctx.upstream(self.upstream_names[0], case, repeat if self.upstream_repeat is None else self.upstream_repeat,
-                              clamp=True)
+            up = ctx.upstream(self.upstream_names[0], case, self._upstream_repeat(repeat), clamp=True)
         except UpstreamMissing as e:
             return RowDraft(errors=[{'stage': 'verify', 'category': 'upstream_missing', 'detail': str(e)}])
         cand = [a for a in up['order'][:self.shortlist_n] if a in ctx.arts]
@@ -103,7 +114,8 @@ class LunaVerifierArm(Arm):
         tokens, usd, ids = _openai_numbers(res)
         base = dict(tokens=tokens, usd=usd, upstream={self.upstream_names[0]: up['key']},
                     model_ids={'requested': self.model, **ids}, order_keep=SCREEN_ORDER_KEEP)
-        notes = {'shortlist': len(cand), 'finish_reason': res.finish_reason, 'attempts': res.attempts}
+        notes = {'shortlist': len(cand), 'finish_reason': res.finish_reason, 'attempts': res.attempts,
+                 'upstream_repeat': self._upstream_repeat(repeat)}
         lat = {'verify': res.latency_ms}
         if res.payload is None:
             notes['degraded'] = 'verifier failed; upstream order kept'

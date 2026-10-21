@@ -61,7 +61,8 @@ def cmd_arms(args) -> int:
 
 
 def cmd_run(args) -> int:
-    arms = standard_arms(jev_repeats=args.jev_repeats, verifier_repeats=args.verifier_repeats)
+    arms = standard_arms(jev_repeats=args.jev_repeats, verifier_repeats=args.verifier_repeats,
+                         upstream_cycle=args.upstream_cycle or None)
     unknown = [a for a in args.arms if a not in arms]
     if unknown:
         print('unknown arm(s):', ', '.join(unknown), file=sys.stderr)
@@ -226,7 +227,8 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument('--balanced', type=int, help='N gold-bearing cases spread over the Part groups')
     run.add_argument('--limit', type=int)
     run.add_argument('--repeats', type=int)
-    run.add_argument('--jev-repeats', type=int, default=3)
+    run.add_argument('--jev-repeats', type=int, default=2)
+    run.add_argument('--upstream-cycle', type=int, default=2, help='verifier repeat r reads Jev draw r mod this (0: same r)')
     run.add_argument('--verifier-repeats', type=int, default=5)
     run.add_argument('--workers', type=int, default=1)
     run.add_argument('--profile', choices=['throughput', 'interactive'], default='throughput')

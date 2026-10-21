@@ -81,3 +81,30 @@ def test_formatting_helpers():
     assert memo.pct(0.6416) == '64.2%' and memo.pct(None) == '-' and memo.usd(0.01758) == '$0.0176' and memo.secs(9400) == '9.4 s'
     assert memo.cell({'x': 34, 'n': 53, 'rate': 34 / 53, 'wilson_95': [0.5, 0.75]}) == '34 of 53 (64.2%, 50.0%-75.0%)'
     assert memo.cell({'n': 0}) == '0 of 0'
+
+
+# ---- gates ------------------------------------------------------------------------------------------------------
+
+def test_g4_is_not_run_without_a_calibrated_threshold_and_never_fits_one(world):
+    from evals_dev.accuracy.gates import evaluate_g4, passed
+    an = analyse(world)
+    checks = evaluate_g4(an, 'V15f-R5', None)
+    assert [c.status for c in checks] == ['NOT RUN'] and not passed(checks)
+    assert 'calibration sweep committed picks' in checks[0].text
+    assert [c.status for c in evaluate_g4(an, 'V15f-R5', {'status': 'placeholder_uncalibrated'})] == ['NOT RUN']
+    assert [c.status for c in evaluate_g4(an, None, None)] == ['NOT RUN']
+
+
+def test_g4_fails_when_the_validation_fold_has_too_few_committed_picks(world):
+    from evals_dev.accuracy.gates import evaluate_g4
+    an = analyse(world)
+    checks = evaluate_g4(an, 'V15f-R5', {'status': 'calibrated', 'parts': {'9': {'threshold': 0.5}}})
+    assert checks[0].status == 'FAIL' and 'need at least 50' in checks[0].text
+
+
+def test_g1_checks_fail_closed_on_missing_data(world):
+    from evals_dev.accuracy.gates import evaluate_g1, passed
+    an = analyse(world)
+    checks = {c.id: c for c in evaluate_g1(an, 'V15f-R5')}
+    assert checks['G1.1'].status in ('PASS', 'FAIL', 'NOT RUN') and checks['G1.2'].status == 'FAIL'    # 2 repeats, 5 are needed
+    assert not passed(list(checks.values()))

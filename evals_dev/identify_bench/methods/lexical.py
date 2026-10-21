@@ -69,8 +69,20 @@ def locate_search_rank(path: str | None = None):
     return None
 
 
+# The ranking module is code, not data: a different file would be a different method. Two files are known and accepted: PR #33's
+# original (codedb/search_rank.py at 4107bf6) and WP-20's port of it (engine/identify/search_rank.py), which changes one import line.
+KNOWN_SEARCH_RANK = {
+    'd906186f5ebbd906a75776c9b9baf55d4a1a4d2aa656863b3a76704a1c554e00': 'PR #33 original (codedb/search_rank.py @ 4107bf6)',
+    'ca1bc7a5c19b1185a3fada658cf84f3572afabe4e61c50bcb1ac70bfa367153f': 'WP-20 port (engine/identify/search_rank.py)',
+}
+
+
 class SearchRankArm(Arm):
-    """R1: PR #33 V3 ranking over provisions, collapsed to articles in first-hit order."""
+    """R1: PR #33 V3 ranking over provisions, collapsed to articles in first-hit order.
+
+    The config names the method and its accepted source files, not the machine's copy, so the arm hashes the same wherever
+    the module is present. An unknown file is refused rather than run.
+    """
     kind = 'rank'
     deterministic = True
 
@@ -83,12 +95,18 @@ class SearchRankArm(Arm):
 
     def config(self) -> dict:
         return {'method': 'search_rank.search_variant v3, first hit per article', 'limit': self.limit,
-                'source': self.source, 'source_sha256': self.source_sha256}
+                'accepted_sources': sorted(KNOWN_SEARCH_RANK.values())}
+
+    def _known(self) -> str | None:
+        return KNOWN_SEARCH_RANK.get(self.source_sha256)
 
     def run(self, case: BenchCase, repeat: int, ctx: RunContext) -> RowDraft:
         if not self.available:
             return RowDraft(errors=[{'stage': 'rank', 'category': 'unavailable',
                                      'detail': 'search_rank module not found (WP-20 or PR #33, or BATATIS_SEARCH_RANK_PATH)'}])
+        if self._known() is None and self.source != 'fake':
+            return RowDraft(errors=[{'stage': 'rank', 'category': 'unknown_source',
+                                     'detail': f'search_rank sha256 {self.source_sha256[:12]} is not an accepted source'}])
         t0 = time.monotonic()
         try:
             rank_articles = getattr(self.module, 'rank_articles', None)
@@ -105,4 +123,5 @@ class SearchRankArm(Arm):
         except Exception as e:                                   # noqa: BLE001 - recorded, not raised
             return RowDraft(errors=[{'stage': 'rank', 'category': 'exception', 'detail': type(e).__name__}])
         return RowDraft(order=unique_in(ranked, ctx.arts), latency_ms={'rank': (time.monotonic() - t0) * 1000},
-                        order_keep=SCREEN_ORDER_KEEP)
+                        order_keep=SCREEN_ORDER_KEEP,
+                        notes={'source': self._known() or self.source, 'source_sha256': self.source_sha256})

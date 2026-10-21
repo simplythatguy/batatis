@@ -135,3 +135,23 @@ def test_the_reservation_uses_the_long_context_pair_and_a_generous_token_bound()
 def test_an_unpriced_model_is_refused_not_guessed():
     with pytest.raises(KeyError):
         pricing.price_for('gpt-9-unknown')
+
+
+def test_a_ledger_without_a_stop_records_one_line_per_stage(tmp_path):
+    jev = Ledger(tmp_path / 'jev.jsonl', 'jev', None)
+    jev.record(model='jev-1.13.0', usd=Decimal('0.0176'), requests=21, input_tokens=394_000, output_tokens=2_100, arm='R4', case='c1')
+    s = jev.summary()
+    assert s['requests'] == 21 and Decimal(s['settled_usd']) == Decimal('0.0176') and s['remaining_usd'] is None
+    assert len((tmp_path / 'jev.jsonl').read_text().splitlines()) == 1
+    with pytest.raises(ValueError):
+        Ledger(tmp_path / 'o.jsonl', 'openai', '1.00').record(model='gpt-6-luna', usd=Decimal('0.1'))   # must reserve first
+
+
+def test_the_committed_openai_ledger_verifies_and_is_under_the_stop():
+    from evals_dev.identify_bench.live import LEDGER_DIR, OPENAI_STOP_USD
+    path = LEDGER_DIR / 'openai.jsonl'
+    if not path.exists():
+        pytest.skip('no OpenAI calls recorded yet')
+    ledger = Ledger(path, 'openai', OPENAI_STOP_USD)            # opening it verifies the hash chain
+    assert ledger.spent() <= OPENAI_HARD_CAP_USD
+    assert ledger.summary()['open_reservations'] == 0

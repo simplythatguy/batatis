@@ -199,6 +199,18 @@ class Ledger:
                              'reason': reason, 'arm': arm, 'case': case})
             return self._settled + self._reserved
 
+    def record(self, *, model: str, usd: Decimal | str | float, requests: int = 1, input_tokens: int = 0,
+               output_tokens: int = 0, arm: str = '', case: str = '') -> Decimal:
+        """One accounting line for a provider with no stop (Jev): no reservation step, one line per stage."""
+        if self.stop is not None:
+            raise ValueError('a ledger with a stop must reserve before it spends')
+        with self._locked() as fd:
+            self._sync(fd)
+            self._write(fd, {'op': 'settle', 'id': uuid.uuid4().hex[:12], 'model': model, 'usd': str(_dec(usd)),
+                             'input_tokens': int(input_tokens), 'output_tokens': int(output_tokens),
+                             'cached_tokens': 0, 'reasoning_tokens': 0, 'requests': int(requests), 'arm': arm, 'case': case})
+            return self._settled + self._reserved
+
     def release(self, res: Reservation) -> None:
         """The request was never sent or was rejected before any usage: give the reservation back."""
         with self._locked() as fd:
