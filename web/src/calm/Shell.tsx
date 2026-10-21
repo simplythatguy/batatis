@@ -75,8 +75,9 @@ function StagePills({ active, done, disabled }: { active: Screen; done: Record<s
       }
       return (
         <a key={s.screen} className={cls} href={href} aria-current={isActive ? "step" : undefined} onClick={onPick}>
-          <span className="cf-stage-n">{done[s.screen] && !isActive ? <CIcon name="check" size={11} /> : s.n}</span>
+          <span className="cf-stage-n">{s.n}</span>
           {s.label}
+          {done[s.screen] && !isActive && <span className="cf-sr"> (done)</span>}
         </a>
       );
     });
