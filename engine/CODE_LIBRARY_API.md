@@ -59,7 +59,7 @@ without it, the unchanged base cannot import `engine` during collection.
 
 ```sh
 BATATIS_CODEDB=<path-to>/codedb.sqlite \
-  /private/tmp/batatis-deploy-venv-20261020/bin/python -I -m pytest engine/tests -q -o pythonpath=.
+  <venv>/bin/python -I -m pytest engine/tests -q -o pythonpath=.
 ```
 
 Focused checks: **56 passed, 3 skipped** (live Jev, live verifier, optional Postgres).
