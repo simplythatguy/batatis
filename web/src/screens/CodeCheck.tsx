@@ -128,8 +128,11 @@ function CandidateCard({
  */
 export function useCandidateAnswer() {
   const { dispatch, engineId } = useCase();
-  const [decisionNote, setDecisionNote] = useState("");
+  // Kept per card, so an error on one card never shows on the next; a new answer clears it.
+  const [note, setNote] = useState<{ id: string; text: string } | null>(null);
   function onAnswer(candidate: Candidate, answer: CandidateAnswer) {
+    setNote(null);
+    const setDecisionNote = (text: string) => setNote({ id: candidate.id, text });
     dispatch({ type: "answerCandidate", id: candidate.id, answer });
     if (!engineId || candidate.suggestion !== "identify" || !/^\d/.test(candidate.provision)) return;
     const provision = candidate.provision;
@@ -161,7 +164,7 @@ export function useCandidateAnswer() {
         }
       });
   }
-  return { onAnswer, decisionNote };
+  return { onAnswer, decisionNote: note?.text ?? "", decisionNoteFor: (id: string) => (note?.id === id ? note.text : "") };
 }
 
 type Filter = "all" | "open" | "yes";

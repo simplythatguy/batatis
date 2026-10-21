@@ -170,8 +170,9 @@ export function sectionDRelevant(c: Case, gaps: Gap[]): boolean {
 
 export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckItem[] {
   const seen = opts.seen ?? new Set<string>();
-  // A card a current gap points at is open, whatever the local value says.
-  const gapKeys = new Set(gaps.map((g) => gapKey(c, g)).filter((k): k is string => !!k));
+  // A card a current *blocking* gap points at is open, whatever the local value says.
+  // Warnings (Not sure, open questions for the officer) never lock an answered card.
+  const gapKeys = new Set(gaps.filter((g) => g.severity === "blocking").map((g) => gapKey(c, g)).filter((k): k is string => !!k));
   const items: DeckItem[] = [];
   const push = (item: DeckItem) => {
     const open = !item.done || (!item.optional && gapKeys.has(item.key) && item.kind !== "section-d");

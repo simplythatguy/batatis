@@ -69,6 +69,7 @@ export function Review() {
       title: "Code references",
       gaps: pick("C"),
       ok: c.sectionC.length ? `${plural(c.sectionC.length, "sentence")} · looked up, not AI-written` : "No code reference yet",
+      empty: c.sectionC.length === 0,
     },
     { letter: "D", title: "Evidence & your case", gaps: pick("D", "process"), ok: "Nothing missing" },
   ];
@@ -79,8 +80,10 @@ export function Review() {
       if (e.key !== "Enter" || e.defaultPrevented || document.querySelector("dialog[open]")) return;
       const t = e.target as HTMLElement;
       if (t !== document.body && t.tagName !== "H1") return;
+      // While a check runs, Enter waits for it rather than leaving the page mid-check.
+      if (checkStatus === "running") return;
       e.preventDefault();
-      if (!checked && checkStatus !== "running") void requestCheck(checkStatus === "unavailable");
+      if (!checked) void requestCheck(checkStatus === "unavailable");
       else go();
     };
     document.addEventListener("keydown", on);
@@ -170,7 +173,8 @@ export function Review() {
         <Eyebrow plain>Your application</Eyebrow>
         <ul className="cf-sec-list">
           {sections.map((s) => {
-            const tone = worst(s.gaps);
+            // An empty Section C is not complete: no reference has been confirmed yet.
+            const tone: DotTone = "empty" in s && s.empty && !s.gaps.length ? "pending" : worst(s.gaps);
             const engineer = s.letter === "D" && need;
             const summary = s.gaps.length
               ? `${engineer ? "Engineer needed · " : ""}${plural(s.gaps.length, "item")} left`
@@ -180,10 +184,13 @@ export function Review() {
                 <span className="cf-sec-letter" aria-hidden="true">{s.letter}</span>
                 <div className="cf-sec-t">
                   <div>Section {s.letter} · {s.title}</div>
-                  <div className="cf-faint">{summary}</div>
+                  <div className="cf-faint">
+                    {summary}
+                    {s.letter === "C" && <> · <a className="cf-inline-link" href="#/code">Browse the code</a></>}
+                  </div>
                 </div>
                 <Dot tone={engineer && tone === "done" ? "warning" : tone} />
-                <span className="cf-sr">{tone === "done" ? "complete" : tone === "blocking" ? "required items missing" : "open questions"}</span>
+                <span className="cf-sr">{tone === "done" ? "complete" : tone === "blocking" ? "required items missing" : tone === "pending" ? "not started" : "open questions"}</span>
               </li>
             );
           })}

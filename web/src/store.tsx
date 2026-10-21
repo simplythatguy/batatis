@@ -203,9 +203,11 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Stable dispatch prevents deterministic lookup effects from refiring on status updates.
-  // An upload acknowledgement records what the engine already stored; it is not a new edit.
+  // File list changes and upload acknowledgements are not draft edits: files never travel in a save
+  // (they upload on their own route) and do not change the gaps, so they must not mark the draft
+  // unsaved or abort a running check.
   const dispatch = useCallback((action: Action) => {
-    const derived = (action.type === "reconcileSectionC" && JSON.stringify(reducer(latestCase.current, action).candidates) === JSON.stringify(latestCase.current.candidates)) || [ "editEvidenceDraft", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions"].includes(action.type);
+    const derived = (action.type === "reconcileSectionC" && JSON.stringify(reducer(latestCase.current, action).candidates) === JSON.stringify(latestCase.current.candidates)) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions"].includes(action.type);
     if (!derived) {
       revision.current += 1;
       if (action.type !== "saveEvidence" && action.type !== "removeEvidence") planRevision.current += 1;

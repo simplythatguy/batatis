@@ -90,6 +90,16 @@ test("Not sure on a code card keeps its clarifying question on that card", () =>
   assert.equal(gapKey(c, gap), card.key);
   assert.equal(aliasKey(c, `q-q-from-${card.ref}`), card.key);
   assert.ok(!buildDeck(c, getGaps(c)).some((i) => i.key === `q-q-from-${card.ref}`));
+  // Not sure is an answer: the card is done and Continue is not locked by the officer question.
+  assert.equal(buildDeck(c, getGaps(c), { includeDone: true }).find((i) => i.key === card.key)?.done, true);
+});
+
+test("storeys Not sure is an answer too", () => {
+  let c = described("We replace the housewrap.");
+  c = reducer(c, { type: "setStoreyCount", value: "" });
+  const storeys = buildDeck(c, getGaps(c), { includeDone: true }).find((i) => i.key === "cand-desc-storeys");
+  assert.equal(storeys?.kind, "storeys");
+  assert.equal(storeys?.done, true);
 });
 
 test("Section D joins the deck with a real reference and stays open while its gaps remain", () => {

@@ -66,7 +66,7 @@ export function Start({ focus }: { focus: string | null }) {
       setText(joined);
     }
     const parts = [
-      pdfs.length ? `${pdfs.length} PDF${pdfs.length > 1 ? "s" : ""} attached.` : "",
+      pdfs.length ? `${pdfs.length} PDF${pdfs.length > 1 ? "s" : ""} attached for the officer. Batatis reads your description, not the PDF text.` : "",
       texts.length ? `Text from ${texts.map((f) => f.name).join(", ")} added to your description.` : "",
       other ? `${other} file${other > 1 ? "s" : ""} skipped. Batatis reads PDF, .txt and .md files.` : "",
     ];
@@ -101,7 +101,8 @@ export function Start({ focus }: { focus: string | null }) {
   const takeRef = useRef(take);
   takeRef.current = take;
 
-  const blocked = !chosenRole ? "Pick your role to start." : !text.trim() && !heldFiles.length && !c.files.length ? "Describe it in a sentence, or attach your plans." : "";
+  // Batatis reads the description; attached PDFs are stored for the officer, not read.
+  const blocked = !chosenRole ? "Pick your role to start." : !text.trim() ? "Describe it in a sentence first. Batatis reads your description, not the PDF text." : "";
 
   function start() {
     if (blocked) return;
@@ -127,9 +128,15 @@ export function Start({ focus }: { focus: string | null }) {
   }
 
   function removeFile(id: string) {
-    if (!inCase) return setHeldFiles((h) => h.filter((f) => f.id !== id));
+    if (!inCase) {
+      setHeldFiles((h) => h.filter((f) => f.id !== id));
+      return setNote("Removed. It was not uploaded.");
+    }
+    const uploaded = c.files.find((f) => f.id === id)?.read;
     dispatch({ type: "removeFile", id });
     updateSession((s) => ({ held: s.held.filter((f) => f.id !== id) }));
+    // There is no delete route for an uploaded file; say what actually happens to it.
+    setNote(uploaded ? "Removed from this application. Copies already uploaded expire with the case." : "Removed. It was not uploaded.");
   }
 
   const fileRows = inCase
@@ -137,7 +144,7 @@ export function Start({ focus }: { focus: string | null }) {
         const state = f.error
           ? { tone: "blocking" as const, label: f.error }
           : f.read
-            ? { tone: "done" as const, label: "Attached" }
+            ? { tone: "done" as const, label: "Attached for the officer" }
             : session.uploading.includes(f.id)
               ? { tone: "pending" as const, label: "Uploading…" }
               : session.held.some((h) => h.id === f.id)
@@ -145,7 +152,7 @@ export function Start({ focus }: { focus: string | null }) {
                 : { tone: "warning" as const, label: "Not uploaded" };
         return { id: f.id, name: f.name, ...state };
       })
-    : heldFiles.map((f) => ({ id: f.id, name: f.file.name, tone: "pending" as const, label: "Uploads after Start" }));
+    : heldFiles.map((f) => ({ id: f.id, name: f.file.name, tone: "pending" as const, label: "Attaches after Start" }));
 
   return (
     <div className="cf-start">
@@ -156,7 +163,7 @@ export function Start({ focus }: { focus: string | null }) {
       )}
       <Eyebrow>Alternative solution application</Eyebrow>
       <h1 className="cf-display">Tell us what you’re building differently.</h1>
-      <p className="cf-lede">Drop your plans or describe it in a sentence. Batatis finds the code that applies, asks only what’s missing, and drafts your variance application.</p>
+      <p className="cf-lede">Describe it in a sentence and attach your plans. Batatis finds the code that applies, asks only what’s missing, and drafts your variance application.</p>
 
       <div className={`cf-composer cf-glass${dragging ? " is-drop" : ""}`}>
         {fileRows.length > 0 && (
@@ -189,7 +196,8 @@ export function Start({ focus }: { focus: string | null }) {
         />
         <div className="cf-composer-foot">
           <div className="cf-attach">
-            <input ref={input} className="cf-sr" type="file" multiple accept=".pdf,.txt,.md,application/pdf,text/plain,text/markdown" tabIndex={-1} aria-hidden="true"
+            {/* Hidden: the Attach plans button is the control. */}
+            <input ref={input} hidden type="file" multiple accept=".pdf,.txt,.md,application/pdf,text/plain,text/markdown" tabIndex={-1} aria-hidden="true"
               onChange={(e) => { if (e.target.files?.length) void take(e.target.files); e.target.value = ""; }} />
             <button type="button" className="cf-chip" onClick={() => input.current?.click()}>
               <CIcon name="clip" size={14} />Attach plans

@@ -158,7 +158,7 @@ function CardBody({
 export function Deck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
   const { c, gaps, dispatch, requestCheck, checkStatus, checkNote, checkDetail, sectionCLookup } = useCase();
   const session = useSession();
-  const { onAnswer, decisionNote } = useCandidateAnswer();
+  const { onAnswer, decisionNoteFor } = useCandidateAnswer();
   const seen = useMemo(() => new Set(session.seen), [session.seen]);
   const all = buildDeck(c, gaps, { seen, includeDone: true });
   const byKey = new Map(all.map((i) => [i.key, i] as const));
@@ -253,8 +253,11 @@ export function Deck({ focus, codeFirst }: { focus: string | null; codeFirst: bo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item?.key, item?.gone]);
 
+  // A card that takes typing gets the caret straight away; otherwise the heading (no ring) holds focus.
   useEffect(() => {
-    cardRef.current?.querySelector<HTMLElement>("h2")?.focus({ preventScroll: true });
+    const card = cardRef.current;
+    const field = card?.querySelector<HTMLElement>(".cf-card-body input.cf-input, .cf-card-body textarea");
+    (field ?? card?.querySelector<HTMLElement>("h2"))?.focus({ preventScroll: true });
   }, [currentKey]);
 
   /** Next open card after `from`. At the end, come back once to cards skipped in this pass. */
@@ -325,6 +328,8 @@ export function Deck({ focus, codeFirst }: { focus: string | null; codeFirst: bo
   keyHandler.current = (e: KeyboardEvent) => {
     if (drawer || e.defaultPrevented || document.querySelector("dialog[open]")) return;
     const t = e.target as HTMLElement | null;
+    // Keys typed in the menu, a popover or any dialog belong to them.
+    if (t?.closest?.(".cf-pop, dialog, [role='menu'], .cf-palette")) return;
     const inText = isTextTarget(t);
     const embedded = item?.kind === "section-d" && t && t !== document.body && !t.closest("[data-deck-foot]");
     if (embedded) return;
@@ -332,6 +337,8 @@ export function Deck({ focus, codeFirst }: { focus: string | null; codeFirst: bo
       if (t?.tagName === "TEXTAREA" && !(e.metaKey || e.ctrlKey)) return;
       if (t?.tagName === "SELECT") return;
       if (!inText && t && t !== document.body && !t.hasAttribute("data-deck-answer") && t !== cardRef.current?.querySelector("h2")) return;
+      // Enter on an unpressed tile selects it (native click); only a pressed tile continues.
+      if (t?.hasAttribute("data-deck-answer") && t.getAttribute("aria-pressed") !== "true") return;
       e.preventDefault();
       next();
       return;
@@ -394,7 +401,7 @@ export function Deck({ focus, codeFirst }: { focus: string | null; codeFirst: bo
             <div className="cf-card-body">
               <CardBody item={item} picked={picked[item.key]} onPick={pick} draft={draft} setDraft={setDraft} openDrawer={setDrawer} />
             </div>
-            {decisionNote && item.kind === "candidate" && <p className="cf-note">{decisionNote}</p>}
+            {item.kind === "candidate" && decisionNoteFor(item.ref) && <p className="cf-note">{decisionNoteFor(item.ref)}</p>}
             {why && <p className="cf-why">{item.why}</p>}
             {!canContinue(item) && <p className="cf-hint" role="note">Answer to continue, or skip for now.</p>}
             <div className="cf-card-foot" data-deck-foot>

@@ -61,7 +61,8 @@ export function resolveRoute(path: string, params: URLSearchParams): CalmRoute {
       return build("review");
     case "/application": {
       const tab = params.get("tab");
-      if (tab) return build("questions", focus ?? (tab === "D" ? "section-d" : null));
+      // Without a field, a tab means its end: Section D's "Previous" lands on the last process card.
+      if (tab) return build("questions", focus ?? (tab === "D" ? "section-d" : tab === "alt" ? "field-qualifications" : null));
       if (params.get("review") === "1") return build("review");
       const download = params.get("download");
       if (download === "draft") return build("application", null, { download: "draft" });
@@ -72,6 +73,7 @@ export function resolveRoute(path: string, params: URLSearchParams): CalmRoute {
       return build("officer");
     case "/accuracy":
       return build("accuracy");
+    case "/code":
     case "/section-c":
     case "/references":
       return build("references");

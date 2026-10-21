@@ -100,23 +100,38 @@ function MoreMenu({ onStartOver }: { onStartOver: () => void }) {
   const btn = useRef<HTMLButtonElement>(null);
   const pop = useRef<HTMLDivElement>(null);
   useOutsideClose(open, () => setOpen(false), btn, pop);
+  const wasOpen = useRef(false);
   useEffect(() => {
-    if (open) pop.current?.querySelector<HTMLElement>("a,button")?.focus();
+    if (open) pop.current?.querySelector<HTMLElement>("[role=menuitem]")?.focus();
+    // Closing returns focus to the trigger unless a pick moved focus somewhere on purpose.
+    else if (wasOpen.current && (document.activeElement === document.body || !document.activeElement)) btn.current?.focus();
+    wasOpen.current = open;
   }, [open]);
   const close = () => setOpen(false);
+  function onMenuKey(e: React.KeyboardEvent) {
+    const items = [...(pop.current?.querySelectorAll<HTMLElement>("[role=menuitem]") ?? [])];
+    const at = items.indexOf(document.activeElement as HTMLElement);
+    const to = (n: number) => { e.preventDefault(); items[(n + items.length) % items.length]?.focus(); };
+    if (e.key === "ArrowDown") to(at + 1);
+    else if (e.key === "ArrowUp") to(at - 1);
+    else if (e.key === "Home") to(0);
+    else if (e.key === "End") to(items.length - 1);
+    else if (e.key === "Escape") { e.preventDefault(); e.nativeEvent.stopImmediatePropagation(); close(); btn.current?.focus(); }
+    else if (e.key === "Tab") close();
+  }
   return (
     <div className="cf-more">
       <button ref={btn} type="button" className="cf-icon-btn" aria-label="More" aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen((v) => !v)}>
         <MoreIcon />
       </button>
       {open && (
-        <div ref={pop} className="cf-pop cf-menu" role="menu" aria-label="More">
-          <a role="menuitem" href="#/officer" onClick={close}>Officer view <span className="cf-mono cf-faint">SCO</span></a>
-          <a role="menuitem" href="#/references" onClick={close}>All code references</a>
-          <a role="menuitem" href="#/accuracy" onClick={close}>Accuracy report</a>
-          <hr />
-          <a role="menuitem" href="#/application?download=draft" onClick={close}>Download draft</a>
-          <button role="menuitem" type="button" onClick={() => { close(); onStartOver(); }}>Start over</button>
+        <div ref={pop} className="cf-pop cf-menu" role="menu" aria-label="More" onKeyDown={onMenuKey}>
+          <a role="menuitem" tabIndex={-1} href="#/officer" onClick={close}>Officer view <span className="cf-mono cf-faint">SCO</span></a>
+          <a role="menuitem" tabIndex={-1} href="#/references" onClick={close}>All code references</a>
+          <a role="menuitem" tabIndex={-1} href="#/accuracy" onClick={close}>Accuracy report</a>
+          <hr role="separator" />
+          <a role="menuitem" tabIndex={-1} href="#/application?download=draft" onClick={close}>Download draft</a>
+          <button role="menuitem" tabIndex={-1} type="button" onClick={() => { close(); onStartOver(); }}>Start over</button>
         </div>
       )}
     </div>
@@ -153,7 +168,7 @@ export function Shell({ active, children }: { active: Screen; children: ReactNod
       <ConfirmDialog
         open={confirm}
         title="Start over?"
-        body={<p>This clears your answers and files for this visit. Download a draft first if you need a copy.</p>}
+        body={<p>This clears your answers in this browser and starts a new case. Files already uploaded are not deleted now; they expire with the case. Download a draft first if you need a copy.</p>}
         cancel="Keep my application"
         confirm="Start over"
         onClose={() => setConfirm(false)}

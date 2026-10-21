@@ -1214,6 +1214,10 @@ body {
   }
 }
 
+.cf-app .cf-q:focus-visible {
+  outline: none;
+}
+
 .cf-q {
   font-size: 32px;
   line-height: 1.18;
@@ -1821,6 +1825,20 @@ body {
   margin-top: 22px;
 }
 
+.cf-inline-link {
+  color: var(--cf-text-2);
+  text-decoration: underline;
+  text-decoration-color: var(--cf-line-2);
+  text-underline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (hover: hover) {
+  .cf-inline-link:hover {
+    color: var(--cf-text);
+  }
+}
+
 .cf-disclaimer {
   margin: 14px 2px 0;
 }
@@ -2202,10 +2220,6 @@ body {
   }
 }
 
-/* Its first-step "Previous" points back to the old tab layout; inside the deck that is this card. */
-.cf-sectiond .step-controls > a.btn-ghost {
-  visibility: hidden;
-}
 
 .cf-sectiond .field-step {
   margin-top: 6px;

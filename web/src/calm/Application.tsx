@@ -128,7 +128,7 @@ export function Application({ download }: { download: "" | "options" | "draft" }
     if (route) reasons.push({ tone: "warning", text: "Waiting on a registered professional’s confirmation." });
   }
 
-  const headline = ex.officialReady ? "Ready for the official PDF." : "Draft ready.";
+  const headline = ex.officialReady ? "Ready for the official PDF." : "You can download a draft.";
   const sub = ex.officialReady ? "Nothing required is missing." : "Official PDF on hold.";
   const showStatus = ex.exportAttempted || ex.stage !== "idle";
 
