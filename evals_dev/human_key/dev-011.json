@@ -1,0 +1,16 @@
+{
+  "case_id": "dev-011",
+  "status": "unverified",
+  "persona": "manufacturer",
+  "variance_kind": "engineered-walls",
+  "scenario": "We build factory panelized wall systems for houses. To save material we want to frame load-bearing exterior walls of two-storey homes with 2x4 studs at 600 mm centres supporting the second floor and roof, with a structural header system of our own design. Our in-house tables say it works. What does Alberta need from us?",
+  "section_ab_required_fields": null,
+  "expected_top_articles": null,
+  "benchmark_acceptable_solution": null,
+  "engineer_needed": null,
+  "intake_action": null,
+  "verifier_name": null,
+  "date_verified": null,
+  "source_page_refs": null,
+  "notes": null
+}

@@ -687,8 +687,8 @@ The warnings are source-page references not bound by the scanner to a provision,
 No files in evals, variants or the source solutions folder were read. No unrelated source files were edited; no tools/database changes, commits, pushes or further delegation were performed.
 
 ## Methods used
-- T3 workflow router: `/Users/aamia/.codex/skills/t3-workflow/SKILL.md`; route selection: `/Users/aamia/.codex/skills/t3-workflow/references/routes.md`. Read and applied for scope, source-qualified methods, shared-checkout preservation and proportionate verification. Parent maintenance result reused as instructed.
-- Matt Pocock research: `/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md`. Primary-source claims and a single repository fact sheet. No further delegation under the explicit task limit.
-- pstack unslop: `/Users/aamia/.agents/skill-libraries/pstack/skills/unslop/SKILL.md`. Plain-language paraphrases, explicit attribution and removal of unsupported generalities.
-- PDF: `/Users/aamia/.codex/plugins/cache/openai-primary-runtime/pdf/26.1017.11052/skills/pdf/SKILL.md`. Read-only source inspection. Poppler was unavailable; macOS PDFKit rendered the selected table, intent and form pages, which were viewed. No PDF artifact was authored.
-- Jev search: `/Users/aamia/.codex/skills/jev-search/SKILL.md`. Search-result gate attempted for the official-source searches. It failed open because the service was unavailable; direct primary-source verification supplied the evidence.
+- T3 workflow router: `~/.codex/skills/t3-workflow/SKILL.md`; route selection: `~/.codex/skills/t3-workflow/references/routes.md`. Read and applied for scope, source-qualified methods, shared-checkout preservation and proportionate verification. Parent maintenance result reused as instructed.
+- Matt Pocock research: `~/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md`. Primary-source claims and a single repository fact sheet. No further delegation under the explicit task limit.
+- pstack unslop: `~/.agents/skill-libraries/pstack/skills/unslop/SKILL.md`. Plain-language paraphrases, explicit attribution and removal of unsupported generalities.
+- PDF: `~/.codex/plugins/cache/openai-primary-runtime/pdf/26.1017.11052/skills/pdf/SKILL.md`. Read-only source inspection. Poppler was unavailable; macOS PDFKit rendered the selected table, intent and form pages, which were viewed. No PDF artifact was authored.
+- Jev search: `~/.codex/skills/jev-search/SKILL.md`. Search-result gate attempted for the official-source searches. It failed open because the service was unavailable; direct primary-source verification supplied the evidence.

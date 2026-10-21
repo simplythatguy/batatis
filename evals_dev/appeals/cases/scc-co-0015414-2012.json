@@ -1,0 +1,150 @@
+{
+  "id": "scc-co-0015414-2012",
+  "title": "Building \u2013 Fire and Smoke Alarm Systems for Part 10 Modules April 2012",
+  "decision_date": "2012-04-19",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2012/REDACTED_Bldg_Fire%20and%20Smoke%20Alarm%20Systems%20for%20Part%2010%20Modules%20April%202012_0015414.pdf",
+  "applicant_type": "manufacturer",
+  "topic": null,
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "A modular manufacturer built Part 10 industrial relocatable accommodation modules with a smoke detection/alarm arrangement: detectors signal a panel, which triggers separate audible alarms. This differed from the CAN/ULC-S524 fire alarm system and CAN/ULC-S531 smoke alarms required by the acceptable solutions.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "variance request",
+    "objectives and functional statements",
+    "fire alarm",
+    "smoke alarm",
+    "relocatable industrial accommodation"
+  ],
+  "missing_info": [],
+  "edition_original": "ABC 2006",
+  "other_codes": [],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": "R2_insufficient",
+    "basis_type": "close analog",
+    "basis": "close analog: variance request found not to address objectives and functional statements and not supported by sufficient evidence (appeal of an order)"
+  },
+  "outcome": "upheld",
+  "outcome_summary": "Order confirmed: the proposed system did not comply, and the variance request lacked objective/functional-statement analysis and sufficient evidence.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "1.2.1.1.",
+      "source_code": "ABC 2006",
+      "source_division": "A",
+      "source_part": "Part 1",
+      "parsed_id": "1.2.1.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "2.2.1.1. (OS1.5)",
+      "source_code": "ABC 2006",
+      "source_division": "A",
+      "source_part": "Part 2",
+      "parsed_id": null,
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "Objective or functional-statement label, not a Division B article to carry forward as gold."
+    },
+    {
+      "source_article": "3.2.1.1. (F11, F81)",
+      "source_code": "ABC 2006",
+      "source_division": "A",
+      "source_part": "Part 3",
+      "parsed_id": null,
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "Objective or functional-statement label, not a Division B article to carry forward as gold."
+    },
+    {
+      "source_article": "4.2.8.1. / Table 4.2.8.1.",
+      "source_code": "ABC 2006",
+      "source_division": "A",
+      "source_part": "Part 4",
+      "parsed_id": null,
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "Table citation. Not mapped without a verified NBC(AE) 2023 table id."
+    },
+    {
+      "source_article": "10.6.3.1.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 10",
+      "parsed_id": "10.6.3.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "ABC 2006 Part 10 is Alberta-specific and is not treated as an NBC(AE) 2023 article."
+    },
+    {
+      "source_article": "10.6.3.5.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 10",
+      "parsed_id": "10.6.3.5.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "ABC 2006 Part 10 is Alberta-specific and is not treated as an NBC(AE) 2023 article."
+    },
+    {
+      "source_article": "3.2.4.11.",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 3",
+      "parsed_id": "3.2.4.11.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "The request for variance submitted to the Respondent on February 6, 2012, does not address the criteria for objectives and functional statements.",
+      "sentences": 1,
+      "quote_confidence": "standard",
+      "kind": "excerpt",
+      "field": "refusal_reason_evidence",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2012/REDACTED_Bldg_Fire%20and%20Smoke%20Alarm%20Systems%20for%20Part%2010%20Modules%20April%202012_0015414.pdf"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": false,
+    "weak_flag": null,
+    "label_strength": null,
+    "facts": {}
+  },
+  "anchors": [
+    "section_c_objectives_and_functional_statements"
+  ],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": null,
+    "engineering_reason": "",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}

@@ -27,8 +27,10 @@ REGISTRY_URL = ('https://nrc.canada.ca/en/certifications-evaluations-standards/'
                 'canadian-construction-materials-centre/ccmc-publications/registry.html')
 API_URL = REGISTRY_URL.rsplit('/', 1)[0] + '/published_evaluations.html'
 REPORT_URL = REGISTRY_URL.rsplit('/', 1)[0] + '/document.html'
+# One search may match up to 50 listings. Report dates are cached on this instance.
+# A single search opens at most this many new report requests to nrc.canada.ca.
+REPORT_FETCH_CAP = 8
 _ROOT = Path(__file__).resolve().parents[1]
-_MAIN = Path('/Users/aamia/.t3/projects/batatis')
 
 
 class RegistryUnavailable(RuntimeError):
@@ -113,7 +115,7 @@ class CCMCRegistry:
                  fetch_text: Callable[[str], str] = _fetch_text, ttl_seconds: float = 3600,
                  clock: Callable[[], float] = time.monotonic, today: Callable[[], date] = date.today,
                  offline: bool = False):
-        candidates = [_ROOT / 'reference/data/ccmc-registry.json', _MAIN / 'reference/data/ccmc-registry.json']
+        candidates = [_ROOT / 'reference/data/ccmc-registry.json']
         configured = snapshot_path or os.environ.get('BATATIS_CCMC_SNAPSHOT')
         self.snapshot_path = Path(configured) if configured else next((p for p in candidates if p.exists()), candidates[0])
         if snapshot_date is None:
@@ -229,6 +231,7 @@ class CCMCRegistry:
             matches = [a for a, text in self._items if all(token in text for token in tokens)]
             selected = matches[:limit]
             pending = [a for a in selected if a.number not in self._dates] if self._source == 'live' else []
+            pending = pending[:REPORT_FETCH_CAP]
             if pending:
                 with ThreadPoolExecutor(max_workers=4) as pool:
                     for a, result in zip(pending, pool.map(self._report_date, pending)):

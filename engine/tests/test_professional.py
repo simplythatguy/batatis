@@ -2,7 +2,7 @@ import pytest
 
 from engine.codes import Codes
 from engine.models import Case, Fact, Source
-from engine.professional import ProfessionalFacts, professional_involvement
+from engine.professional import ProfessionalFacts, professional_confirmed, professional_involvement, role_confirmed
 
 
 def ordinary_house(**overrides):
@@ -10,6 +10,31 @@ def ordinary_house(**overrides):
         preserved_wood_foundation_part4=False, roof_trusses=False, prescriptive_route_confirmed=True,
         ahj_requires_professional=False, special_safety_concerns=False, professional_judgement_required=False,
         professional_scope_resolved=True, fire_suppression=False, fire_alarm=False) | overrides))
+
+
+def test_role_confirmation_matches_an_engineer_or_architect_not_a_commercial_role():
+    assert role_confirmed('structural engineer')
+    assert role_confirmed('P.Eng.')
+    assert role_confirmed('P Eng')
+    assert role_confirmed('registered architect')
+    assert not role_confirmed('sales rep')
+    assert not role_confirmed('supplier')
+
+
+def _text(field, value, source_type='user_text'):
+    return Fact(field=field, value=value, kind='pointed', status='confirmed',
+                source=Source(type=source_type, ref='applicant', quote=value))
+
+
+def test_prescriptive_answers_do_not_confirm_a_professional():
+    case = Case(facts=[
+        _text('prescriptive_route_confirmed', 'true'),
+        _text('professional_judgement_required', 'false'),
+        _text('professional.seal', 'copied stamp', 'file'),
+    ])
+    assert professional_confirmed(case) is False
+    case.facts += [_text('professional.role', 'P.Eng.'), _text('professional.registration_number', 'APEGA-1000')]
+    assert professional_confirmed(case) is True
 
 
 def test_missing_facts_never_return_no():
@@ -21,11 +46,14 @@ def test_missing_facts_never_return_no():
 def test_under_flagging_guard_every_missing_house_scope_fact():
     facts = ordinary_house()
     assert professional_involvement(facts, Codes()).required == 'no'
-    for field in ('part4_design', 'preserved_wood_foundation_part4', 'roof_trusses', 'prescriptive_route_confirmed',
-                  'ahj_requires_professional', 'special_safety_concerns', 'professional_judgement_required',
-                  'professional_scope_resolved', 'fire_suppression', 'fire_alarm'):
+    for field in ('part4_design', 'prescriptive_route_confirmed', 'ahj_requires_professional',
+                  'special_safety_concerns', 'professional_judgement_required', 'professional_scope_resolved'):
         result = professional_involvement(facts.model_copy(update={field: None}), Codes())
         assert result.required == 'depends', field
+    # Truss, preserved wood, and suppression questions are out of scope on this house.
+    for field in ('preserved_wood_foundation_part4', 'roof_trusses', 'fire_suppression', 'fire_alarm'):
+        result = professional_involvement(facts.model_copy(update={field: None}), Codes())
+        assert result.required == 'no', field
 
 
 @pytest.mark.parametrize('occupancy,storeys,area,expected', [

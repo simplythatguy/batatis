@@ -1,0 +1,92 @@
+{
+  "id": "ngt-101",
+  "description": "We are building a row of three two-storey townhouses in Edmonton. Each townhouse has a legal basement secondary suite. The building area is 270 m2. Stick-framed lumber rafters and ceiling joists from the Part 9 span tables (no roof trusses); floor joists span 4.3 m; plain concrete footings and foundation walls from the Section 9.15 tables; no sprinkler or fire alarm system; not on permafrost; the building official has not asked for professional drawings. The longest rafter is a 4.0 m clear span.",
+  "known_facts": [
+    "three two-storey townhouses",
+    "each townhouse has a basement secondary suite",
+    "building area of 270 m2",
+    "Edmonton",
+    "4.0 m clear span",
+    "no roof trusses"
+  ],
+  "gold": {
+    "engineering_required": "yes",
+    "engineering_reason": "Code exception passes: 3 principal units, suites need not count (Div C 2.4.1.1.(1)(b)(ii) and (2)). Acts do not carve out suites, and the code defines a secondary suite as a dwelling unit, so the building has 6 dwelling units, above \"4 dwelling units or less\" (Architects Act s.2(6)(b)(ii); EGPA s.2(7)(b)(ii)). Design is the practice of architecture reserved by Architects Act s.2(1): a registered architect (or other authorized entity) is required.",
+    "limit_source": "Architects Act s.2(1), s.2(6)(b)(ii); EGPA s.2(7)(b)(ii); Div C 2.4.1.1.(2) (code-only suite carve-out); Div A 1.4.1.2.(1) Secondary suite definition."
+  },
+  "authoring": {
+    "source": "research/no-ground-truth-cases.md (constructed)",
+    "gold_written": "before any system run",
+    "label": "model-constructed, model-checked, not human-verified",
+    "notes": "Constructed scenario, not a real case. Gold written from the quoted sources before any system run. Not human-reviewed. Code-vs-Act suite counting divergence."
+  },
+  "evidence": {
+    "confidence": "medium-high",
+    "assumptions": [
+      "The Acts do not define \"dwelling unit\"; reading it to include a secondary suite follows the NBC(AE) definition (a suite is \"a self-contained dwelling unit\") and the fact that the code needed an express carve-out. Professional regulations not read (UNSOURCED whether they carve out suites)."
+    ],
+    "label": "model-constructed, model-checked, not human-verified",
+    "sources": [
+      {
+        "cite": "Div A 1.3.3.3.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 40,
+        "verification": "codedb-checked, 2nd printing, PDF p.40"
+      },
+      {
+        "cite": "Div C 2.4.1.1.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 739,
+        "verification": "codedb-checked, 2nd printing, PDF p.739"
+      },
+      {
+        "cite": "Div C 2.4.1.1.(2)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 740,
+        "verification": "codedb-checked, 2nd printing, PDF p.740"
+      },
+      {
+        "cite": "Div A 1.4.1.2.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 42,
+        "verification": "codedb-checked, 2nd printing, PDF p.42"
+      },
+      {
+        "cite": "Architects Act s.2(6)(b)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/A44.pdf",
+        "page": 10,
+        "verification": "source-PDF-checked, Architects Act, p.10; not codedb (legislation)"
+      },
+      {
+        "cite": "EGPA s.2(7)(b)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/E11.pdf",
+        "page": 14,
+        "verification": "source-PDF-checked, Engineering and Geoscience Professions Act, p.14; not codedb (legislation)"
+      },
+      {
+        "cite": "Architects Act s.2(5)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/A44.pdf",
+        "page": 9,
+        "verification": "source-PDF-checked, Architects Act, p.9; not codedb (legislation)"
+      },
+      {
+        "cite": "Architects Act s.2(1)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/A44.pdf",
+        "page": 8,
+        "verification": "source-PDF-checked, Architects Act, p.8; not codedb (legislation)"
+      },
+      {
+        "cite": "Table C-2 (Edmonton); last column = 1/50 hourly wind pressure, kPa",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 667,
+        "verification": "source-PDF-checked, NBC(AE) 2023 2nd printing PDF, p.667; Appendix C table row (not a codedb provision)"
+      },
+      {
+        "cite": "Table C-3 (Edmonton); Sa(0.2)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 672,
+        "verification": "source-PDF-checked, NBC(AE) 2023 2nd printing PDF, p.672; Appendix C table row (not a codedb provision)"
+      }
+    ]
+  }
+}

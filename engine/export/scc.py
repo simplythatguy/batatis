@@ -23,12 +23,16 @@ from pypdf.generic import ArrayObject, NameObject, NumberObject, RectangleObject
 from ..models import INTENT_LABEL, Case, SectionCRow
 from ..codes import Codes
 from ..completeness import check_completeness
+from ..professional import NOT_ENGAGED_ITEM
 from ..process_fields import PROCESS_ALIASES
 from ..section_c import section_c_rows
-from ..section_d import supporting_documents
+from ..section_d import supporting_documents, text_evidence
 from .text import fit, pdf_safe
 
-DEFAULT_FORM = Path('/Users/aamia/.t3/projects/batatis/reference/guides/SCC-Variance-Form.pdf')
+DEFAULT_FORM = Path(__file__).resolve().parents[2] / 'reference' / 'guides' / 'SCC-Variance-Form.pdf'
+BUNDLE_FORM = Path(__file__).resolve().parents[2] / 'codedb' / 'build' / 'SCC-Variance-Form.pdf'
+FORM_NOT_FOUND_DETAIL = 'SCC variance form not found'
+EXPORT_FAILED_DETAIL = 'The SCC variance form could not be exported.'
 MAP_DIR = Path(__file__).parent / 'field_maps'
 CURRENT_MAP = 'scc_2026-10'
 MULTILINE = 1 << 12
@@ -79,7 +83,13 @@ class ExportResult:
 
 
 def form_path() -> Path:
-    return Path(os.environ.get('BATATIS_SCC_FORM') or DEFAULT_FORM)
+    """Explicit path, then a local guide copy, then the file the engine build downloads."""
+    override = (os.environ.get('BATATIS_SCC_FORM') or '').strip()
+    if override:
+        return Path(override)
+    if DEFAULT_FORM.is_file():
+        return DEFAULT_FORM
+    return BUNDLE_FORM
 
 
 def load_field_map(version: str = CURRENT_MAP) -> dict:
@@ -88,8 +98,8 @@ def load_field_map(version: str = CURRENT_MAP) -> dict:
 
 def load_form(path: Path | str | None, fmap: dict) -> bytes:
     path = Path(path) if path else form_path()
-    if not path.exists():
-        raise FormNotFound(f'SCC variance form not found at {path} (set BATATIS_SCC_FORM)')
+    if not path.is_file():
+        raise FormNotFound(FORM_NOT_FOUND_DETAIL)
     data = path.read_bytes()
     digest = hashlib.sha256(data).hexdigest()
     if digest != fmap['sha256']:
@@ -107,6 +117,7 @@ _ALIASES = {
     'mailing_address': ('mailing_address', 'mailingAddress'),
     'municipal_address': ('municipal_address', 'municipalAddress', 'civic_address', 'address'),
     'legal_description': ('legal_description', 'legalDescription', 'section_b.legal_description'),
+    'permit_number': ('permit_number', 'permit', 'section_b.permit_number'),
     'alternative_description': ('alternative_description', 'alternative'),
 }
 _FIELD_KEYS = {alias: key for key, aliases in _ALIASES.items() for alias in aliases}
@@ -125,6 +136,13 @@ def confirmed_values(case: Case) -> dict[str, object]:
     """Latest logical field wins, even when its revision is blank, proposed or unconfirmed."""
     return {key: f.value for key, f in _latest(case).items() if f.export()['status'] == 'confirmed'
             and f.value is not None and str(f.value).strip() != ''}
+
+
+def package_notes(case: Case, codes: Codes | None = None) -> list[str]:
+    """Non-blocking items that still belong in an official package."""
+    codes = codes or Codes()
+    return [gap.message for gap in check_completeness(case, codes)
+            if gap.severity == 'warning' and gap.message == NOT_ENGAGED_ITEM]
 
 
 def blockers(case: Case, fmap: dict, codes: Codes | None = None) -> list[str]:
@@ -234,6 +252,7 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict) -> _Plan:
 
     dslots = fmap['section_d_rows']
     docs = [(pdf_safe(d.title), pdf_safe(d.responsible_party)) for d in supporting_documents(case)]
+    docs += [(pdf_safe(title), pdf_safe(who)) for title, who in text_evidence(case)]
     shown_docs = docs if len(docs) <= len(dslots) else docs[:len(dslots) - 1]
     for n, (slot, (doc, who)) in enumerate(zip(dslots, shown_docs), start=1):
         ref = f'D-{n}'
@@ -323,12 +342,14 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
     reasons = blockers(case, fmap, codes)
     if reasons and not draft:
         raise ExportBlocked(reasons)
+    notes = package_notes(case, codes)
     case = _canonical_case(case, codes)
     blank_form = load_form(form, fmap)
     values = confirmed_values(case)
     plan = _plan(case, values, fmap, _rects(blank_form, fmap))
     filled, placements = _fill_and_flatten(blank_form, plan)
-    appendix = build_appendix(case, plan, values, fmap, codes=codes, open_items=reasons if draft else [])
+    appendix = build_appendix(case, plan, values, fmap, codes=codes,
+                              open_items=reasons if draft else [], package_notes=notes)
 
     out = PdfWriter(clone_from=io.BytesIO(filled))
     form_pages = len(out.pages)
@@ -344,6 +365,7 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
     filled_names = set(plan.text) | {k for k, v in plan.checks.items() if v != '/Off'}
     blank = [n for n in [*fmap['text_fields'], *[f for r in fmap['section_c_rows'] for f in r.values()],
                          *[f for r in fmap['section_d_rows'] for f in r.values()]] if n not in filled_names]
+    visible = list(dict.fromkeys((reasons if draft else []) + notes))
     return ExportResult(pdf=buf.getvalue(), field_map=fmap['version'], form_pages=form_pages,
                         appendix_pages=len(app_reader.pages), draft=draft, placements=placements,
-                        blank_fields=blank, open_items=reasons if draft else [])
+                        blank_fields=blank, open_items=visible)

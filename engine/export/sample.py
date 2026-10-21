@@ -19,14 +19,14 @@ from ..section_d import section_d_plan
 PROVISIONS = ['9.25.5.1.', '9.25.2.2.(1)', '9.23.17.2.(1)', '9.27.3.4.(1)', '9.32.1.3.(2)']
 
 FACTS = {
-    'owner_name': 'SYNTHETIC - Prairie Ridge Homes Ltd.',
-    'owner_rep_name': 'SYNTHETIC - Jordan Ellery (test representative)',
-    'mailing_address': '210, 4410 Example Trail NW\nCalgary, AB T3A 0Z9',
+    'owner_name': 'SYNTHETIC - Example Homes Ltd. (EXAMPLE DATA)',
+    'owner_rep_name': 'SYNTHETIC - J. Example (EXAMPLE DATA)',
+    'mailing_address': '000 Example Avenue NW, Edmonton (EXAMPLE DATA)',
     'request_date': '2026-10-20',
     'submitted_to_scc': False,
-    'permit_number': 'BP-2026-0000-DEMO',
-    'municipal_address': '1234 Sample Crescent SW, Calgary, AB T2X 0Y0',
-    'lot': '14', 'block': '7', 'plan': '2610001',
+    'permit_number': 'BP-0000-00000 (EXAMPLE DATA)',
+    'municipal_address': '000 Example Crescent SW, Calgary (EXAMPLE DATA)',
+    'lot': '0', 'block': '0', 'plan': 'EXAMPLE',
     'scope': 'site',
     'alternative_description': 'SYNTHETIC TEST: Continuous exterior sheathing insulation on a Part 9 wood-frame house. '
                                'This exercises administrative fields and contains no technical equivalency conclusion.',
@@ -46,6 +46,7 @@ FACTS = {
     'fire_suppression': False, 'fire_alarm': False,
     'professional_name': 'SYNTHETIC TEST professional identity (no real appointment)',
     'professional_seal': 'SYNTHETIC TEST authentication metadata (no real seal or review)',
+    'professional.role': 'SYNTHETIC TEST engineer (no real appointment)',
     'supporting_doc.1.name': 'SYNTHETIC product-literature attachment',
     'supporting_doc.1.responsible': 'SYNTHETIC manufacturer role',
     'supporting_doc.2.name': 'SYNTHETIC envelope-analysis attachment',
@@ -77,7 +78,7 @@ def sample_case(codes: Codes, provisions: list[str] = PROVISIONS, facts: dict = 
         name, who = facts.get(f'supporting_doc.{n}.name'), facts.get(f'supporting_doc.{n}.responsible')
         if not name:
             continue
-        case.evidence.append(EvidenceItem(id=eid, description=name, status='provided'))
+        case.evidence.append(EvidenceItem(id=eid, description=name, status='evidence_listed', kind='file'))
         case.facts.append(synthetic_fact(f'evidence.{eid}.file_ref', str(source_file)))
         case.facts[-1].source = Source(type='file', ref=str(source_file), quote=text)
         case.facts += [synthetic_fact(f'evidence.{eid}.{key}', value) for key, value in

@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Batatis · Calm flow prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+/*
+  Visual contract for the Batatis "calm" redesign. Prototype only: static data from the
+  NorthCore CX fixture (web/src/fixture.ts, code text copied from codedb). Not the app.
+*/
+:root {
+  --bg: #08090b;
+  --text: #f4f4f5;
+  --text-2: #a3a6ad;
+  --text-3: #6c7078;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-2: rgba(255, 255, 255, 0.14);
+  --glass: rgba(20, 22, 26, 0.62);
+  --glass-hi: rgba(255, 255, 255, 0.06);
+  --inset: rgba(255, 255, 255, 0.025);
+  --accent: #ff6a3d;
+  --blocking: #f87171;
+  --warning: #fbbf24;
+  --done: #4ade80;
+  --pending: #71717a;
+  --primary-bg: #ededed;
+  --primary-text: #0b0b0c;
+  --font: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", monospace;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font-family: var(--font); color: var(--text); -webkit-font-smoothing: antialiased; }
+.stage-wrap { width: 100%; }
+.app {
+  position: relative; width: 1280px; height: 800px; overflow: hidden; background: var(--bg);
+  transform-origin: top left; border-radius: 20px; isolation: isolate;
+}
+.app::before { /* blooms */
+  content: ""; position: absolute; inset: -20%; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(900px 520px at 50% -8%, rgba(88, 128, 160, 0.20), transparent 62%),
+    radial-gradient(700px 500px at 92% 110%, rgba(255, 106, 61, 0.07), transparent 60%),
+    radial-gradient(600px 400px at 0% 80%, rgba(120, 140, 255, 0.05), transparent 60%);
+}
+.app::after { /* faint vertical light streaks, Giga-style */
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .5;
+  background: repeating-linear-gradient(90deg, transparent 0 159px, rgba(255,255,255,0.018) 159px 160px);
+  mask-image: linear-gradient(180deg, #000, transparent 55%);
+}
+
+/* top bar */
+.top { height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 550; font-size: 15px; letter-spacing: -0.01em; }
+.mark { width: 22px; height: 22px; border-radius: 8px 12px 9px 13px; background: radial-gradient(circle at 35% 30%, #ff9a6b, var(--accent) 55%, #c94418); box-shadow: inset 0 1px 0 rgba(255,255,255,.35); }
+.stages { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(255,255,255,0.03); border: 1px solid var(--line); backdrop-filter: blur(16px); }
+.stage-pill { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border-radius: 999px; border: 0; background: none; color: var(--text-3); font: 500 13px/1 var(--font); cursor: pointer; }
+.stage-pill .n { font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+.stage-pill.done { color: var(--text-2); }
+.stage-pill.done .n { color: var(--done); }
+.stage-pill[aria-current="step"] { background: rgba(255,255,255,0.07); color: var(--text); }
+.top-right { display: flex; align-items: center; gap: 14px; }
+.saved { font: 400 12px var(--mono); color: var(--text-3); display: flex; align-items: center; gap: 8px; letter-spacing: .02em; }
+.dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex: none; }
+.dot.done { background: var(--done); box-shadow: 0 0 10px rgba(74,222,128,.5); }
+.dot.blocking { background: var(--blocking); }
+.dot.warning { background: var(--warning); }
+.dot.pending { background: var(--pending); }
+.icon-btn { width: 36px; height: 36px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.03); color: var(--text-2); display: grid; place-items: center; cursor: pointer; }
+
+/* type */
+.eyebrow { display: inline-flex; align-items: center; gap: 10px; font: 500 12px/1 var(--mono); letter-spacing: .09em; color: var(--text-2); }
+.eyebrow::before { content: ""; width: 9px; height: 9px; background: var(--accent); border-radius: 1px; }
+.eyebrow.plain::before { display: none; }
+.display { font-size: 54px; line-height: 1.04; letter-spacing: -0.035em; font-weight: 500; margin: 20px 0 0; font-optical-sizing: auto; }
+.lede { font-size: 18px; line-height: 1.6; color: var(--text-2); margin: 18px 0 0; max-width: 620px; }
+.muted { color: var(--text-2); }
+.faint { color: var(--text-3); }
+.mono { font-family: var(--mono); }
+
+/* surfaces */
+.glass {
+  background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015)), var(--glass);
+  border: 1px solid var(--line); border-radius: 28px; backdrop-filter: blur(24px) saturate(140%);
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 30px 80px -30px rgba(0,0,0,.7);
+}
+.tile { background: var(--inset); border: 1px solid var(--line); border-radius: 18px; }
+
+/* buttons */
+.btn { height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--line-2); background: transparent; color: var(--text); font: 500 14px/1 var(--font); display: inline-flex; align-items: center; gap: 10px; cursor: pointer; white-space: nowrap; transition: scale .15s ease-out, background-color .15s; }
+.btn:active:not(:disabled) { scale: .96; }
+.btn.primary { background: var(--primary-bg); color: var(--primary-text); border-color: transparent; }
+.btn.ghost { border-color: transparent; color: var(--text-2); padding: 0 12px; }
+.btn.sm { height: 34px; font-size: 13px; padding: 0 14px; }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.kbd { font: 500 11px/1 var(--mono); padding: 4px 6px; border-radius: 6px; border: 1px solid rgba(0,0,0,.18); color: rgba(0,0,0,.55); }
+.btn:not(.primary) .kbd { border-color: var(--line-2); color: var(--text-3); }
+.chip { height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,0.025); color: var(--text-2); font: 500 13px/1 var(--font); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; white-space: nowrap; }
+.chip[aria-pressed="true"] { background: rgba(255,255,255,0.09); color: var(--text); border-color: var(--line-2); }
+.cite { display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px 0 10px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,0.03); font: 500 12px/1 var(--mono); color: var(--text-2); cursor: pointer; }
+.cite b { color: var(--text); font-weight: 500; }
+
+.screen { position: absolute; inset: 72px 0 0 0; display: none; }
+.screen.on { display: block; }
+
+/* 1 · Describe */
+.start { max-width: 820px; margin: 44px auto 0; padding: 0 24px; }
+.composer { margin-top: 40px; padding: 22px 22px 16px; }
+.composer textarea { width: 100%; height: 112px; resize: none; background: none; border: 0; outline: 0; color: var(--text); font: 400 20px/1.55 var(--font); letter-spacing: -0.01em; }
+.composer textarea::placeholder { color: var(--text-3); }
+.composer-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+.attached { display: flex; gap: 8px; margin-bottom: 14px; }
+.file { display: inline-flex; align-items: center; gap: 10px; height: 36px; padding: 0 12px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--line); font-size: 13px; color: var(--text-2); }
+.file .ext { font: 500 10px var(--mono); padding: 3px 5px; border-radius: 5px; background: rgba(255,106,61,.14); color: #ff9a76; }
+.choices { display: flex; align-items: center; gap: 28px; margin-top: 22px; padding: 0 4px; }
+.choice-row { display: flex; align-items: center; gap: 8px; }
+.choice-row .label { white-space: nowrap; font: 500 12px var(--mono); letter-spacing: .06em; color: var(--text-3); margin-right: 4px; }
+.how { display: flex; gap: 36px; margin-top: 40px; padding: 0 4px; }
+.how div { font-size: 14px; color: var(--text-3); display: flex; gap: 10px; }
+.how span { font-family: var(--mono); color: var(--text-2); }
+
+/* 2 · Questions */
+.deck-head { max-width: 680px; margin: 36px auto 0; display: flex; align-items: center; justify-content: space-between; }
+.progress { display: flex; gap: 4px; width: 220px; }
+.progress i { flex: 1; height: 3px; border-radius: 3px; background: rgba(255,255,255,0.1); }
+.progress i.on { background: var(--text); }
+.deck { position: relative; max-width: 680px; margin: 22px auto 0; }
+.deck .ghost-card { position: absolute; left: 0; right: 0; height: 100%; border-radius: 28px; border: 1px solid var(--line); background: rgba(255,255,255,0.02); }
+.deck .g1 { transform: translateY(14px) scale(.965); opacity: .7; }
+.deck .g2 { transform: translateY(28px) scale(.93); opacity: .4; }
+.card { position: relative; padding: 36px 40px 28px; }
+.q { font-size: 32px; line-height: 1.18; letter-spacing: -0.025em; font-weight: 500; margin: 18px 0 0; }
+.context { margin-top: 16px; font-size: 15px; line-height: 1.55; color: var(--text-2); }
+.context q { color: var(--text); quotes: "“" "”"; }
+.answers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 30px; }
+.answer { height: 60px; border-radius: 18px; border: 1px solid var(--line); background: var(--inset); color: var(--text); font: 500 16px var(--font); display: flex; align-items: center; justify-content: space-between; padding: 0 18px; cursor: pointer; }
+.answer .kbd { border-color: var(--line-2); color: var(--text-3); }
+.answer[aria-pressed="true"] { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.28); }
+.card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 28px; }
+.why { margin-top: 18px; font-size: 14px; color: var(--text-3); display: none; }
+.why.open { display: block; }
+
+/* drawer */
+.drawer { position: absolute; top: 84px; right: 16px; bottom: 16px; width: 440px; padding: 28px; transform: translateX(470px); transition: transform .35s var(--ease); overflow: auto; overscroll-behavior: contain; }
+.drawer.open { transform: none; }
+.drawer h3 { font-size: 22px; letter-spacing: -0.02em; font-weight: 500; margin: 14px 0 4px; }
+.code-text { margin-top: 18px; padding: 18px 18px 18px 20px; border-left: 2px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.03); border-radius: 0 14px 14px 0; font-size: 15px; line-height: 1.65; color: #e7e7ea; }
+.code-src { margin-top: 10px; font: 400 11px/1.5 var(--mono); color: var(--text-3); }
+.sect { margin-top: 26px; }
+.sect .eyebrow { font-size: 11px; }
+.sect .eyebrow::before { width: 7px; height: 7px; background: var(--text-3); }
+.pair { display: flex; gap: 10px; align-items: baseline; margin-top: 10px; font-size: 14px; color: var(--text-2); }
+.pair .mono { color: var(--text); font-size: 12px; min-width: 52px; }
+.ai { margin-top: 26px; padding: 16px; border-radius: 16px; border: 1px dashed var(--line-2); font-size: 14px; line-height: 1.6; color: var(--text-2); }
+.ai .tag { font: 500 10px var(--mono); letter-spacing: .08em; color: var(--text-3); display: block; margin-bottom: 6px; }
+
+/* 3 · Review */
+.review { max-width: 1040px; margin: 36px auto 0; padding: 0 24px; display: grid; grid-template-columns: 1.25fr 1fr; gap: 20px; }
+.review h1 { font-size: 40px; letter-spacing: -0.03em; font-weight: 500; line-height: 1.08; margin: 16px 0 0; }
+.metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 26px; }
+.metrics .tile:first-child { border-radius: 18px 0 0 18px; }
+.metrics .tile:last-child { border-radius: 0 18px 18px 0; border-left: 0; }
+.metric { padding: 20px 22px; }
+.metric .k { font: 500 11px var(--mono); letter-spacing: .08em; color: var(--text-3); }
+.metric .v { font-size: 44px; letter-spacing: -0.03em; font-weight: 500; margin-top: 10px; display: flex; align-items: baseline; gap: 12px; }
+.metric .v small { font-size: 13px; font-weight: 500; color: var(--text-2); background: rgba(255,255,255,0.06); padding: 6px 10px; border-radius: 8px; letter-spacing: 0; }
+.list-label { font: 500 11px var(--mono); letter-spacing: .08em; color: var(--text-3); margin: 26px 0 6px; }
+.row { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-top: 1px solid var(--line); font-size: 15px; }
+.row:first-of-type { border-top: 0; }
+.row .grow { flex: 1; }
+.row .go { font-size: 13px; color: var(--text-2); }
+.sections { padding: 24px; }
+.sec { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); }
+.sec:first-of-type { border-top: 0; padding-top: 4px; }
+.sec .letter { width: 34px; height: 34px; border-radius: 11px; background: rgba(255,255,255,0.05); display: grid; place-items: center; font: 500 13px var(--mono); }
+.sec .t { flex: 1; }
+.sec .t div:first-child { font-size: 15px; }
+.sec .t div:last-child { font-size: 13px; color: var(--text-3); margin-top: 3px; }
+.engineer { margin-top: 16px; padding: 18px 20px; border-radius: 20px; background: linear-gradient(180deg, rgba(251,191,36,0.10), rgba(251,191,36,0.05)); border: 1px solid rgba(251,191,36,0.22); }
+.engineer .h { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 550; color: #fde7a8; }
+.engineer p { margin: 8px 0 0; font-size: 14px; line-height: 1.55; color: #d9c9a0; }
+
+/* 4 · Application */
+.doc-wrap { display: grid; grid-template-columns: 1fr 340px; gap: 20px; max-width: 1160px; margin: 24px auto 0; padding: 0 24px; height: calc(100% - 40px); }
+.sheet-pane { overflow: hidden; border-radius: 24px; background: rgba(255,255,255,0.02); border: 1px solid var(--line); padding: 28px 0 0; display: flex; justify-content: center; }
+.sheet { width: 600px; background: #f4f4f5; color: #18181b; border-radius: 6px 6px 0 0; padding: 44px 52px; font-size: 12.5px; line-height: 1.55; box-shadow: 0 30px 80px -20px rgba(0,0,0,.8); }
+.sheet h2 { font-size: 17px; letter-spacing: -0.01em; margin: 0 0 4px; }
+.sheet .sub { color: #71717a; font-size: 11px; font-family: var(--mono); }
+.sheet h4 { font: 600 10.5px var(--mono); letter-spacing: .08em; color: #52525b; margin: 22px 0 8px; }
+.sheet .kv { display: grid; grid-template-columns: 140px 1fr; gap: 6px 12px; }
+.sheet .kv span:nth-child(odd) { color: #71717a; }
+.sheet .ref { display: inline-block; font: 500 10.5px var(--mono); padding: 2px 6px; border-radius: 5px; background: #e4e4e7; }
+.side { padding: 24px; display: flex; flex-direction: column; gap: 16px; height: fit-content; }
+.side .big { font-size: 26px; letter-spacing: -0.02em; font-weight: 500; }
+
+/* menu */
+.menu { position: absolute; top: 64px; right: 28px; width: 240px; padding: 8px; display: none; z-index: 5; border-radius: 18px; }
+.menu.open { display: block; }
+.menu button { width: 100%; text-align: left; height: 38px; padding: 0 12px; border: 0; border-radius: 10px; background: none; color: var(--text-2); font: 500 14px var(--font); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.menu button:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.menu hr { border: 0; border-top: 1px solid var(--line); margin: 6px 4px; }
+</style>
+</head>
+<body>
+<div class="stage-wrap" id="wrap">
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand"><span class="mark" aria-hidden="true"></span>Batatis</div>
+    <nav class="stages" aria-label="Progress">
+      <button class="stage-pill" data-go="describe"><span class="n">01</span>Describe</button>
+      <button class="stage-pill" data-go="questions"><span class="n">02</span>Questions</button>
+      <button class="stage-pill" data-go="review"><span class="n">03</span>Review</button>
+      <button class="stage-pill" data-go="application"><span class="n">04</span>Application</button>
+    </nav>
+    <div class="top-right">
+      <span class="saved"><span class="dot done"></span>Saved</span>
+      <button class="icon-btn" id="menuBtn" aria-label="More">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="3" cy="8" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="13" cy="8" r="1.3"/></svg>
+      </button>
+    </div>
+  </header>
+  <div class="menu glass" id="menu">
+    <button>Officer view <span class="faint mono">SCO</span></button>
+    <button>All code references</button>
+    <button>Accuracy report</button>
+    <hr />
+    <button>Download draft</button>
+    <button>Start over</button>
+  </div>
+
+  <!-- 1 · Describe -->
+  <section class="screen" data-screen="describe">
+    <div class="start">
+      <span class="eyebrow">Alternative solution application</span>
+      <h1 class="display">Tell us what you’re<br />building differently.</h1>
+      <p class="lede">Drop your plans or describe it in a sentence. Batatis finds the code that applies, asks only what’s missing, and drafts your variance application.</p>
+      <div class="composer glass">
+        <div class="attached">
+          <span class="file"><span class="ext">PDF</span>NorthCore-CX_product-data-sheet.pdf</span>
+          <span class="file"><span class="ext">PDF</span>vapour-permeance-test.pdf</span>
+        </div>
+        <textarea aria-label="Describe your project">We make NorthCore CX, a foil-faced rigid board that goes on the outside of the studs as continuous insulation and replaces the housewrap. We want builders to use it on houses and townhomes anywhere in Alberta.</textarea>
+        <div class="composer-foot">
+          <div style="display:flex;gap:8px">
+            <button class="chip"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.5 4.5 5.8 9.2a1.5 1.5 0 0 0 2.1 2.1l5-5a3 3 0 0 0-4.2-4.2l-5 5a4.5 4.5 0 0 0 6.4 6.4l4.2-4.2"/></svg>Attach plans</button>
+            <span class="faint" style="font-size:13px;align-self:center;margin-left:4px">or drop files anywhere</span>
+          </div>
+          <button class="btn primary" data-go="questions">Start <span class="kbd">⌘ ↵</span></button>
+        </div>
+      </div>
+      <div class="choices">
+        <div class="choice-row"><span class="label">I’m a</span>
+          <button class="chip" aria-pressed="true">Manufacturer</button><button class="chip">Contractor</button><button class="chip">Homebuilder</button>
+        </div>
+        <div class="choice-row"><span class="label">Reviewed by</span>
+          <button class="chip">Calgary</button><button class="chip">Edmonton</button><button class="chip" aria-pressed="true">Not sure</button>
+        </div>
+      </div>
+      <div class="how">
+        <div><span>01</span>Describe it</div>
+        <div><span>02</span>Answer a few questions</div>
+        <div><span>03</span>Download your application</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · Questions -->
+  <section class="screen" data-screen="questions">
+    <div class="deck-head">
+      <span class="eyebrow plain faint" style="color:var(--text-3)">4 of 11 · about 3 minutes left</span>
+      <div class="progress"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="deck">
+      <div class="ghost-card g2"></div>
+      <div class="ghost-card g1"></div>
+      <article class="card glass">
+        <span class="eyebrow">Code check</span>
+        <h2 class="q">Will the siding fasteners rely on the board itself to hold?</h2>
+        <p class="context">You said the board <q>goes on the outside of the studs</q>. If the siding is fastened only into the board, the code treats that as a departure.</p>
+        <div style="margin-top:18px"><button class="cite" id="citeBtn"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2.5h7l3 3v8H3z"/><path d="M5.5 7.5h5M5.5 10h5"/></svg><b>9.23.17.3.(1)</b> Show the code</button></div>
+        <div class="answers">
+          <button class="answer">Yes <span class="kbd">1</span></button>
+          <button class="answer" aria-pressed="true">No, into studs <span class="kbd">2</span></button>
+          <button class="answer">Not sure <span class="kbd">3</span></button>
+        </div>
+        <p class="why" id="why">Your answer decides whether this sentence goes into Section C. A “No” removes it; nothing else changes.</p>
+        <div class="card-foot">
+          <div><button class="btn ghost sm" id="whyBtn">Why we ask</button><button class="btn ghost sm">Skip for now</button></div>
+          <button class="btn primary" data-go="review">Continue <span class="kbd">↵</span></button>
+        </div>
+      </article>
+    </div>
+    <aside class="drawer glass" id="drawer" aria-label="Code text">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="eyebrow">Code text · verbatim</span>
+        <button class="icon-btn" id="closeDrawer" aria-label="Close" style="width:30px;height:30px;border-radius:10px">✕</button>
+      </div>
+      <h3>Using the board to hold the siding</h3>
+      <div class="mono faint" style="font-size:12px">NBC(AE) 2023 · Div B · Sentence 9.23.17.3.(1)</div>
+      <div class="code-text">Gypsum sheathing, rigid insulation and fibreboard shall not be used for the attachment of cladding materials.</div>
+      <div class="code-src">NBC(AE) 2023 p2, Div B, Sentence 9.23.17.3.(1) [PDF p.990] · Reproduced with permission of the NRC</div>
+      <div class="sect">
+        <span class="eyebrow">Why this rule exists</span>
+        <p class="muted" style="font-size:14px;line-height:1.6;margin:10px 0 0">To limit the application of Sentence 9.23.17.2.(1) and Table 9.23.17.2.-A so as to exclude sheathing materials that do not have an adequate capacity to hold fasteners.</p>
+        <div class="code-src">NBC 2020 intent statement · explanatory only</div>
+      </div>
+      <div class="sect">
+        <span class="eyebrow">Objectives &amp; functions</span>
+        <p class="faint" style="font-size:14px;margin:10px 0 0">The attribution table has no row for this sentence. Section C states that instead of inventing one.</p>
+      </div>
+      <div class="ai"><span class="tag">AI explanation · not code text</span>Applies only if the siding relies on the board to hold its fasteners. This does not say whether the design complies.</div>
+    </aside>
+  </section>
+
+  <!-- 3 · Review -->
+  <section class="screen" data-screen="review">
+    <div class="review">
+      <div>
+        <span class="eyebrow">Review</span>
+        <h1>Almost there. 3 things<br />stand between you and a draft.</h1>
+        <div class="metrics">
+          <div class="tile metric"><div class="k">Complete</div><div class="v">14<span class="faint" style="font-size:22px">/17</span></div></div>
+          <div class="tile metric"><div class="k">Left to answer</div><div class="v">3 <small>≈ 2 min</small></div></div>
+        </div>
+        <div class="list-label">Still needed</div>
+        <div>
+          <div class="row"><span class="dot blocking"></span><span class="grow">Legal description of the site</span><span class="go">Answer →</span></div>
+          <div class="row"><span class="dot blocking"></span><span class="grow">Risk assessment, in your own words</span><span class="go">Answer →</span></div>
+          <div class="row"><span class="dot warning"></span><span class="grow">Which standard was the foil facer tested to?</span><span class="go">Answer →</span></div>
+        </div>
+        <div class="engineer">
+          <div class="h"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 1.8 15 14H1z"/><path d="M8 6.5v3.3M8 11.8v.1"/></svg>An engineer is required for Section D</div>
+          <p>Evidence that the board performs as well as the membrane it replaces needs a registered professional’s test review. Batatis can list what that evidence must address, but it can’t write it.</p>
+        </div>
+      </div>
+      <div class="glass sections">
+        <span class="eyebrow plain" style="color:var(--text-3)">Your application</span>
+        <div style="margin-top:14px">
+          <div class="sec"><span class="letter">A</span><div class="t"><div>Applicant</div><div>Owner, representative, address</div></div><span class="dot done"></span></div>
+          <div class="sec"><span class="letter">B</span><div class="t"><div>Project &amp; alternative</div><div>1 item left</div></div><span class="dot blocking"></span></div>
+          <div class="sec"><span class="letter">C</span><div class="t"><div>Code references</div><div>2 sentences · looked up, not AI-written</div></div><span class="dot done"></span></div>
+          <div class="sec"><span class="letter">D</span><div class="t"><div>Evidence &amp; risk</div><div>Engineer required · 2 items left</div></div><span class="dot warning"></span></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:22px">
+          <button class="btn primary" style="flex:1;justify-content:center">Answer 3 remaining <span class="kbd">↵</span></button>
+          <button class="btn" data-go="application">Preview</button>
+        </div>
+        <p class="faint" style="font-size:12.5px;line-height:1.5;margin:14px 2px 0">Checks administrative completeness only. It never says the design complies or is safe.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · Application -->
+  <section class="screen" data-screen="application">
+    <div class="doc-wrap">
+      <div class="sheet-pane">
+        <div class="sheet">
+          <h2>Safety Codes Variance — Part 1</h2>
+          <div class="sub">NBC(AE) 2023, 2nd printing · Draft</div>
+          <h4>A · Applicant</h4>
+          <div class="kv"><span>Owner</span><span>NorthCore Building Products Ltd.</span><span>Representative</span><span>Dana Whitfield</span></div>
+          <h4>B · Proposed alternative</h4>
+          <p style="margin:0">Foil-faced rigid board installed outboard of the studs as continuous insulation, replacing the sheathing membrane.</p>
+          <h4>C · Code references</h4>
+          <p style="margin:0 0 6px"><span class="ref">9.25.5.2.(1)(b)</span> Objectives OS2.3, OH1.1, OH1.2 · Functions F62, F63</p>
+          <p style="margin:0"><span class="ref">9.27.3.2.(1)</span> Objectives OS2.3, OH1.1–1.3 · Functions F20, F55, F61, F62</p>
+          <h4>D · Evidence</h4>
+          <p style="margin:0;color:#71717a">Provided by the applicant’s registered professional.</p>
+        </div>
+      </div>
+      <div class="side glass">
+        <span class="eyebrow plain" style="color:var(--text-3)">Status</span>
+        <div class="big">Draft ready.<br /><span class="muted">Official PDF on hold.</span></div>
+        <div class="row" style="border-top:1px solid var(--line);padding-top:14px"><span class="dot warning"></span><span class="grow" style="font-size:14px">Waiting on engineer’s evidence</span></div>
+        <button class="btn primary" style="justify-content:center">Download draft PDF</button>
+        <button class="btn" style="justify-content:center" disabled>Official PDF</button>
+        <p class="faint" style="font-size:12.5px;line-height:1.5;margin:0">The official PDF unlocks once every required item is in.</p>
+      </div>
+    </div>
+  </section>
+</div>
+</div>
+<script>
+const app = document.getElementById('app');
+const order = ['describe', 'questions', 'review', 'application'];
+function go(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.dataset.screen === name));
+  const i = order.indexOf(name);
+  document.querySelectorAll('.stage-pill').forEach((p, n) => {
+    p.toggleAttribute('aria-current', n === i); if (n === i) p.setAttribute('aria-current', 'step');
+    p.classList.toggle('done', n < i);
+  });
+  document.getElementById('drawer').classList.remove('open');
+}
+document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
+document.getElementById('citeBtn').onclick = () => document.getElementById('drawer').classList.add('open');
+document.getElementById('closeDrawer').onclick = () => document.getElementById('drawer').classList.remove('open');
+document.getElementById('whyBtn').onclick = () => document.getElementById('why').classList.toggle('open');
+document.getElementById('menuBtn').onclick = () => document.getElementById('menu').classList.toggle('open');
+function fit() { const w = document.getElementById('wrap').clientWidth; const s = Math.min(1, w / 1280); app.style.transform = `scale(${s})`; document.getElementById('wrap').style.height = 800 * s + 'px'; }
+addEventListener('resize', fit); fit();
+const start = new URLSearchParams(location.search).get('screen') || location.hash.slice(1) || 'describe';
+go(start);
+if (location.hash.includes('drawer')) { go('questions'); document.getElementById('drawer').classList.add('open'); }
+</script>
+</body>
+</html>

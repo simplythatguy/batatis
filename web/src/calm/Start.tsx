@@ -1,0 +1,192 @@
+import { useEffect, useRef, useState } from "react";
+import { useCase } from "../store";
+import { useBegin, useCurrentApplication } from "./begin";
+import { updateSession, useSession } from "./session";
+import { CIcon, Dot, Kbd, MOD_KEY } from "./ui";
+
+let fileSeq = 0;
+const fileId = () => `file-${Date.now().toString(36)}-${(fileSeq++).toString(36)}`;
+const isPdf = (f: File) => f.type === "application/pdf" || /\.pdf$/i.test(f.name);
+const isText = (f: File) => /^text\/(plain|markdown)$/.test(f.type) || /\.(txt|md|markdown)$/i.test(f.name);
+
+/** Describe: one headline and the composer. Role and reviewing authority are asked in the deck. */
+export function Start() {
+  const { c, phase, dispatch, resetNote, requestCheck } = useCase();
+  const session = useSession();
+  const { begin } = useBegin();
+  const { locked } = useCurrentApplication();
+  const inCase = phase === "case";
+  const [dragging, setDragging] = useState(false);
+  const [note, setNote] = useState("");
+  const input = useRef<HTMLInputElement>(null);
+  const area = useRef<HTMLTextAreaElement>(null);
+  const text = inCase ? c.description : session.draft;
+  const role = inCase ? c.applicantType : session.role;
+
+  useEffect(() => { if (!locked) area.current?.focus({ preventScroll: true }); }, [locked]);
+
+  function setText(t: string) {
+    if (inCase) dispatch({ type: "setDescription", text: t });
+    else updateSession({ draft: t });
+  }
+
+  async function take(list: FileList | File[]) {
+    if (locked) return;
+    const files = [...list];
+    const pdfs = files.filter(isPdf);
+    const texts = files.filter((f) => !isPdf(f) && isText(f));
+    const other = files.length - pdfs.length - texts.length;
+    if (pdfs.length) {
+      const made = pdfs.map((file) => ({ id: fileId(), file }));
+      if (inCase) {
+        dispatch({ type: "addFiles", files: made.map((m) => ({ id: m.id, name: m.file.name })) });
+        updateSession((s) => ({ held: [...s.held, ...made] }));
+      } else updateSession((s) => ({ draftFiles: [...s.draftFiles, ...made] }));
+    }
+    if (texts.length) {
+      const bodies = await Promise.all(texts.map((f) => f.text()));
+      const joined = [text.trim(), ...bodies.map((b) => b.trim())].filter(Boolean).join("\n\n");
+      setText(joined);
+    }
+    const parts = [
+      pdfs.length ? `${pdfs.length} PDF${pdfs.length > 1 ? "s" : ""} attached for the officer. Batatis reads your description, not the PDF text.` : "",
+      texts.length ? `Text from ${texts.map((f) => f.name).join(", ")} added to your description.` : "",
+      other ? `${other} file${other > 1 ? "s" : ""} skipped. Batatis reads PDF, .txt and .md files.` : "",
+    ];
+    setNote(parts.filter(Boolean).join(" "));
+  }
+
+  // The whole window is a drop target while this screen is open.
+  useEffect(() => {
+    let depth = 0;
+    const hasFiles = (e: globalThis.DragEvent) => [...(e.dataTransfer?.types ?? [])].includes("Files");
+    const enter = (e: globalThis.DragEvent) => { if (!hasFiles(e)) return; depth++; setDragging(true); };
+    const leave = (e: globalThis.DragEvent) => { if (!hasFiles(e)) return; depth = Math.max(0, depth - 1); if (!depth) setDragging(false); };
+    const over = (e: globalThis.DragEvent) => { if (hasFiles(e)) e.preventDefault(); };
+    const drop = (e: globalThis.DragEvent) => {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      depth = 0;
+      setDragging(false);
+      if (e.dataTransfer?.files.length) void takeRef.current(e.dataTransfer.files);
+    };
+    window.addEventListener("dragenter", enter);
+    window.addEventListener("dragleave", leave);
+    window.addEventListener("dragover", over);
+    window.addEventListener("drop", drop);
+    return () => {
+      window.removeEventListener("dragenter", enter);
+      window.removeEventListener("dragleave", leave);
+      window.removeEventListener("dragover", over);
+      window.removeEventListener("drop", drop);
+    };
+  }, []);
+  const takeRef = useRef(take);
+  takeRef.current = take;
+
+  // Batatis reads the description; attached PDFs are stored for the officer, not read.
+  const blocked = locked ? "Submitted applications are read-only until the officer returns them." : !text.trim() ? "Describe it in a sentence first. Batatis reads your description, not the PDF text." : "";
+
+  function start() {
+    if (blocked) return;
+    if (inCase) {
+      // Explicit action: check the edited draft, then continue.
+      void requestCheck();
+      location.hash = "#/questions";
+      return;
+    }
+    // Without a role from onboarding, the deck asks it first; nothing is picked for the applicant.
+    if (!begin()) location.hash = "#/questions";
+  }
+
+  function removeFile(id: string) {
+    if (!inCase) {
+      updateSession((s) => ({ draftFiles: s.draftFiles.filter((f) => f.id !== id) }));
+      return setNote("Removed. It was not uploaded.");
+    }
+    const uploaded = c.files.find((f) => f.id === id)?.read;
+    dispatch({ type: "removeFile", id });
+    updateSession((s) => ({ held: s.held.filter((f) => f.id !== id) }));
+    // There is no delete route for an uploaded file; say what actually happens to it.
+    setNote(uploaded ? "Removed from this application. Copies already uploaded expire with the case." : "Removed. It was not uploaded.");
+  }
+
+  const fileRows = inCase
+    ? c.files.map((f) => {
+        const state = f.error
+          ? { tone: "blocking" as const, label: f.error }
+          : f.read
+            ? { tone: "done" as const, label: "Attached for the officer" }
+            : session.uploading.includes(f.id)
+              ? { tone: "pending" as const, label: "Uploading…" }
+              : session.held.some((h) => h.id === f.id)
+                ? { tone: "pending" as const, label: "Uploads once your case is saved" }
+                : { tone: "warning" as const, label: "Not uploaded" };
+        return { id: f.id, name: f.name, ...state };
+      })
+    : session.draftFiles.map((f) => ({ id: f.id, name: f.file.name, tone: "pending" as const, label: "Attaches after Start" }));
+
+  return (
+    <div className="cf-start">
+      {dragging && (
+        <div className="cf-drop" aria-hidden="true">
+          <div className="cf-drop-box"><CIcon name="upload" size={22} /><span>Drop to attach</span><small>PDF plans, or .txt and .md notes</small></div>
+        </div>
+      )}
+      <h1 className="cf-display">What are you building differently?</h1>
+
+      <div className={`cf-composer cf-glass${dragging ? " is-drop" : ""}`}>
+        {fileRows.length > 0 && (
+          <ul className="cf-files" aria-label="Attached files">
+            {fileRows.map((f) => (
+              <li key={f.id} className="cf-file">
+                <span className="cf-ext">PDF</span>
+                <span className="cf-file-name">{f.name}</span>
+                <span className={`cf-file-state is-${f.tone}`}><Dot tone={f.tone} />{f.label}</span>
+                <button type="button" className="cf-icon-btn is-xs" aria-label={`Remove ${f.name}`} onClick={() => removeFile(f.id)}>
+                  <CIcon name="close" size={12} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <label className="cf-sr" htmlFor="cf-describe">Describe your project</label>
+        <textarea
+          ref={area}
+          id="cf-describe"
+          readOnly={locked}
+          className="cf-composer-text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+              e.preventDefault();
+              start();
+            }
+          }}
+          placeholder={role === "manufacturer" ? "What is your product, and how will builders use it?" : "What are you building, and what do you want to do differently?"}
+        />
+        <div className="cf-composer-foot">
+          <div className="cf-attach">
+            {/* Hidden: the Attach plans button is the control. */}
+            <input ref={input} hidden type="file" multiple accept=".pdf,.txt,.md,application/pdf,text/plain,text/markdown" tabIndex={-1} aria-hidden="true"
+              onChange={(e) => { if (e.target.files?.length) void take(e.target.files); e.target.value = ""; }} />
+            <button type="button" className="cf-chip" disabled={locked} onClick={() => input.current?.click()}>
+              <CIcon name="clip" size={14} />Attach plans
+            </button>
+            <span className="cf-faint cf-small cf-drop-hint">or drop files anywhere</span>
+          </div>
+          <button type="button" className="cf-btn is-primary" disabled={Boolean(blocked)} onClick={start}>
+            {inCase ? "Continue" : "Start"} <Kbd>{MOD_KEY} ↵</Kbd>
+          </button>
+        </div>
+      </div>
+      <div className="cf-start-notes">
+        {blocked && <p className="cf-faint cf-small" role="note">{blocked}</p>}
+        {note && <p className="cf-faint cf-small" role="status">{note}</p>}
+        {!inCase && resetNote && <p className="cf-faint cf-small" role="status">{resetNote}</p>}
+      </div>
+    </div>
+  );
+}
+

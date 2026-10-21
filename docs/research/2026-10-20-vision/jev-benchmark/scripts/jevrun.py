@@ -1,6 +1,10 @@
 import sys, json, os, time, hashlib, threading
 from concurrent.futures import ThreadPoolExecutor
-sys.path.insert(0, '/tmp/jev-bench/scripts'); sys.path.insert(0, '/Users/aamia/hermes-jev-skills')
+from pathlib import Path
+_HERE = Path(__file__).resolve().parent
+_REPO = next(p for p in _HERE.parents if (p / 'engine' / 'identify' / 'jevkit').is_dir())
+sys.path.insert(0, str(_HERE))
+sys.path.insert(0, str(_REPO / 'engine' / 'identify'))
 from jevkit import client
 from corpus import card
 CACHE = '/tmp/jev-bench/out/jev_cache.jsonl'

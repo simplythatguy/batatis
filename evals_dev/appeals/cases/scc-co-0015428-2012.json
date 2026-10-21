@@ -1,0 +1,103 @@
+{
+  "id": "scc-co-0015428-2012",
+  "title": "Building \u2013 Requirement to provide schedules of Professional Involvement October 2012",
+  "decision_date": "2012-10-09",
+  "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2012/REDACTED_Bldg_%20Requirement%20to%20provide%20schedules%20of%20professional%20involvement%20October%202012_0015428.pdf",
+  "applicant_type": null,
+  "topic": null,
+  "code_part": null,
+  "jurisdiction": "unspecified",
+  "seed_provision": null,
+  "description": "An accredited agency, acting for Alberta Municipal Affairs, ordered a company to submit Schedules A1, A2, B1 and B2 covering the architectural, structural, mechanical, electrical and geotechnical disciplines for occupied residential dwellings, and to complete construction. The company could comply with everything except the architect and coordinating registered professional schedules.",
+  "description_kind": "paraphrase",
+  "known_facts": [
+    "professional involvement",
+    "schedules A/B",
+    "coordinating registered professional",
+    "architect"
+  ],
+  "missing_info": [],
+  "edition_original": "ABC 2006",
+  "other_codes": [],
+  "text_source_kind": "pdftotext",
+  "label_strength": "weak",
+  "refusal": {
+    "code": null,
+    "basis_type": "not applicable",
+    "basis": "not applicable: appeal of an order"
+  },
+  "outcome": "upheld",
+  "outcome_summary": "Order confirmed: schedules from every required discipline, including the coordinating registered professional, are mandatory.",
+  "outcome_summary_kind": "paraphrase",
+  "article_mapping": [
+    {
+      "source_article": "2.4.3.1.",
+      "source_code": "ABC 2006",
+      "source_division": "C",
+      "source_part": "Part 2",
+      "parsed_id": "2.4.3.1.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "2.2.12.5.",
+      "source_code": "ABC 2006",
+      "source_division": "C",
+      "source_part": "Part 2",
+      "parsed_id": "2.2.12.5.",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    },
+    {
+      "source_article": "8.1.2.2.(1)",
+      "source_code": "ABC 2006",
+      "source_division": "B",
+      "source_part": "Part 8",
+      "parsed_id": "8.1.2.2.(1)",
+      "nbc_ae_2023": null,
+      "method": null,
+      "confidence": null,
+      "unmapped_reason": "pre-2023 citation; codedb was not available to compare titles or sentence text, so this number is not an NBC(AE) 2023 citation."
+    }
+  ],
+  "quotes": [
+    {
+      "text": "'The submission of Schedules for all Professional Involvement is required to comply with the ABC 2006.' A coordinating registered professional must obtain assurance from all professionals of record and verify cross-disciplinary connections.",
+      "sentences": 2,
+      "quote_confidence": "standard",
+      "kind": "excerpt",
+      "field": "professional_involvement",
+      "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2012/REDACTED_Bldg_%20Requirement%20to%20provide%20schedules%20of%20professional%20involvement%20October%202012_0015428.pdf"
+    }
+  ],
+  "professional_involvement": {
+    "addressed": true,
+    "weak_flag": "yes",
+    "label_strength": "weak",
+    "facts": {}
+  },
+  "anchors": [],
+  "gold": {
+    "departure": "",
+    "must_cite": [],
+    "should_cite": [],
+    "must_not_cite": [],
+    "section_c": [],
+    "engineering_required": "yes",
+    "engineering_reason": "Weak appeal label only. Not an NBC(AE) 2023 professional-involvement determination.",
+    "engineering_citations": [],
+    "intake_action": null,
+    "out_of_scope": false,
+    "redirect_to": null
+  },
+  "authoring": {
+    "source": "scc-appeal-decision",
+    "author": "Batatis appeals converter",
+    "date": "2026-10-20",
+    "notes": "Weak labels from a Council order or permit appeal, not a refusal on the current variance form. Source articles are not NBC(AE) 2023 gold."
+  }
+}

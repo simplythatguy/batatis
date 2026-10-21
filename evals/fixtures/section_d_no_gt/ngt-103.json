@@ -1,0 +1,155 @@
+{
+  "id": "ngt-103",
+  "description": "We are building a single-storey motel in Red Deer. Guest rooms open directly to the outside (no interior corridors). There is a full basement used for laundry and storage. The building area is 380 m2 and the basement is also 380 m2. Slab-on-ground basement floor; main-floor joists span 4.3 m from the Part 9 span tables; stick-framed lumber rafters, 4.0 m clear span (no roof trusses); no sprinkler system is proposed; the building official has not asked for professional drawings.",
+  "known_facts": [
+    "single-storey motel",
+    "exterior-access guest rooms, no interior corridors",
+    "full basement for laundry and storage",
+    "building area of 380 m2",
+    "basement 380 m2",
+    "Red Deer",
+    "4.0 m clear span",
+    "no roof trusses"
+  ],
+  "gold": {
+    "engineering_required": "yes",
+    "engineering_reason": "Code exception passes: building height is 1 storey (a basement is below the first storey) and building area 380 m2 is within 400 m2 (Div C 2.4.1.1.(1)(c)(i)). The Acts measure gross area: read as a single-storey building, gross area including the basement is 760 m2 (> 400 m2, Architects Act s.2(6)(c)(i)); read as a 2-storey building, each floor is 380 m2 (> 200 m2, s.2(6)(c)(ii)). Either reading fails the exception, so a registered architect (authorized entity) is required (s.2(1)); EGPA s.2(7)(c) is identical.",
+    "limit_source": "Architects Act s.2(1), s.2(6)(c)(i)-(ii); EGPA s.2(7)(c); Div C 2.4.1.1.(1)(c)(i); Div A 1.4.1.2.(1) Building area / Basement / Building height definitions."
+  },
+  "authoring": {
+    "source": "research/no-ground-truth-cases.md (constructed)",
+    "gold_written": "before any system run",
+    "label": "model-constructed, model-checked, not human-verified",
+    "notes": "Constructed scenario, not a real case. Gold written from the quoted sources before any system run. Not human-reviewed. Code building-area vs Act gross-area divergence."
+  },
+  "evidence": {
+    "confidence": "medium",
+    "assumptions": [
+      "\"Gross area\" is not defined in either Act (both PDFs searched). Gold assumes the basement counts either toward gross area or as a storey; a third reading (gross area = above-grade area only, basement ignored) would let the Acts' exception pass. Human confirmation advised before headline use.",
+      "Main floor serves only guest rooms (residential areas) with exterior access, chosen so Div B 9.23.4.1.(2) (non-residential floor spans) is not triggered; laundry/storage basement treated as ancillary."
+    ],
+    "label": "model-constructed, model-checked, not human-verified",
+    "sources": [
+      {
+        "cite": "Div A 1.3.3.3.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 40,
+        "verification": "codedb-checked, 2nd printing, PDF p.40"
+      },
+      {
+        "cite": "Div C 2.4.1.1.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 739,
+        "verification": "codedb-checked, 2nd printing, PDF p.739"
+      },
+      {
+        "cite": "Architects Act s.2(6)(c)(i)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/A44.pdf",
+        "page": 10,
+        "verification": "source-PDF-checked, Architects Act, p.10; not codedb (legislation)"
+      },
+      {
+        "cite": "Architects Act s.2(6)(c)(ii)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/A44.pdf",
+        "page": 10,
+        "verification": "source-PDF-checked, Architects Act, p.10; not codedb (legislation)"
+      },
+      {
+        "cite": "EGPA s.2(7)(c)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/E11.pdf",
+        "page": 14,
+        "verification": "source-PDF-checked, Engineering and Geoscience Professions Act, p.14; not codedb (legislation)"
+      },
+      {
+        "cite": "Architects Act s.2(5)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/A44.pdf",
+        "page": 9,
+        "verification": "source-PDF-checked, Architects Act, p.9; not codedb (legislation)"
+      },
+      {
+        "cite": "Div A 1.4.1.2.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 42,
+        "verification": "codedb-checked, 2nd printing, PDF p.42"
+      },
+      {
+        "cite": "Div A 1.4.1.2.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 42,
+        "verification": "codedb-checked, 2nd printing, PDF p.42"
+      },
+      {
+        "cite": "Div A 1.4.1.2.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 42,
+        "verification": "codedb-checked, 2nd printing, PDF p.42"
+      },
+      {
+        "cite": "Div B 9.23.1.1.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 962,
+        "verification": "codedb-checked, 2nd printing, PDF p.962"
+      },
+      {
+        "cite": "Div B 9.15.3.3.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 925,
+        "verification": "codedb-checked, 2nd printing, PDF p.925"
+      },
+      {
+        "cite": "Div B 9.23.3.5.(4)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 967,
+        "verification": "codedb-checked, 2nd printing, PDF p.967"
+      },
+      {
+        "cite": "Div B 9.23.6.1.(6)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 970,
+        "verification": "codedb-checked, 2nd printing, PDF p.970"
+      },
+      {
+        "cite": "Div B 9.23.16.5.(3)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 988,
+        "verification": "codedb-checked, 2nd printing, PDF p.988"
+      },
+      {
+        "cite": "Div B 9.23.14.11.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 986,
+        "verification": "codedb-checked, 2nd printing, PDF p.986"
+      },
+      {
+        "cite": "Div C 2.4.1.2.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 740,
+        "verification": "codedb-checked, 2nd printing, PDF p.740"
+      },
+      {
+        "cite": "Div C 2.4.1.1.(4)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 740,
+        "verification": "codedb-checked, 2nd printing, PDF p.740"
+      },
+      {
+        "cite": "Architects Act s.2(1)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/A44.pdf",
+        "page": 8,
+        "verification": "source-PDF-checked, Architects Act, p.8; not codedb (legislation)"
+      },
+      {
+        "cite": "Table C-2 (Red Deer); last column = 1/50 hourly wind pressure, kPa",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 669,
+        "verification": "source-PDF-checked, NBC(AE) 2023 2nd printing PDF, p.669; Appendix C table row (not a codedb provision)"
+      },
+      {
+        "cite": "Table C-3 (Red Deer); Sa(0.2)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 673,
+        "verification": "source-PDF-checked, NBC(AE) 2023 2nd printing PDF, p.673; Appendix C table row (not a codedb provision)"
+      }
+    ]
+  }
+}

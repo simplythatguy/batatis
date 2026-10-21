@@ -1,0 +1,19 @@
+{
+  "id": "hold-005",
+  "description": "We are planning a two-storey office. The building area of 251 m2 is the building area, not a sum of the floors.",
+  "known_facts": [
+    "two-storey office",
+    "building area of 251 m2"
+  ],
+  "gold": {
+    "engineering_required": "yes",
+    "engineering_reason": "A business occupancy at two storeys has a building-area limit of 250 m2. 251 m2 is over that limit, so the general exception does not apply.",
+    "limit_source": "engine/professional.py _AREA_LIMITS business (500, 250, 165); the two-storey entry is 250. storeys within three and area above that entry sets general to yes through Div C 2.4.1.1.(3)"
+  },
+  "authoring": {
+    "source": "engine/professional.py",
+    "gold_written": "before any system run",
+    "label": "model-checked",
+    "notes": "Held-out area over the professional-screen limit in engine/professional.py. Gold written from the rule text before the flag script was run on this file. Not human-reviewed."
+  }
+}
