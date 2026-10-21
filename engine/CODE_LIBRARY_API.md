@@ -22,8 +22,10 @@ only the description. GET never performs scoring. Successful relevance responses
 
 `display_probabilities()` in `engine/relevance.py` owns the display policy: rerank value
 when present (including zero), otherwise screen value. Bands come only from
-`engine/identify/relevance_bands.json`; current values are x=0.2, y=0.6,
-`status=placeholder_uncalibrated`. Changing that file needs no scoring-policy edit.
+`engine/identify/relevance_bands.json`; current values are x=0.3, y=0.85,
+`status=benchmark-derived, not field-calibrated` (see `docs/research/relevance-bands.md`).
+The smoke receipt below was recorded with the earlier placeholders x=0.2, y=0.6.
+Changing that file needs no scoring-policy edit.
 
 ## Storage and gates
 
@@ -56,7 +58,7 @@ The requested Python 3.14 venv works with `-I` after adding pytest's `-o pythonp
 without it, the unchanged base cannot import `engine` during collection.
 
 ```sh
-BATATIS_CODEDB=/Users/aamia/.t3/projects/batatis/codedb/build/codedb.sqlite \
+BATATIS_CODEDB=<path-to>/codedb.sqlite \
   /private/tmp/batatis-deploy-venv-20261020/bin/python -I -m pytest engine/tests -q -o pythonpath=.
 ```
 

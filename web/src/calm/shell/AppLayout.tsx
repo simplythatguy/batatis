@@ -43,7 +43,8 @@ export function AppLayout({
           <h2 id="cf-sheet-title" className="cf-sr">Navigation</h2>
           <div className="cf-nav-sheet-body" onClick={(e) => { if ((e.target as HTMLElement).closest("a, .cf-list-hit")) onSheetClose(); }}>
             {rail}
-            {list}
+            {/* Mount the sheet copy only while open, so the sidebar list keeps the shared ref on desktop. */}
+            {sheetOpen && list}
           </div>
         </Modal>
       )}

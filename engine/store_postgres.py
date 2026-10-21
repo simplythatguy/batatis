@@ -254,24 +254,38 @@ class PostgresSpend:
         with self._lock:
             self._con.close()
 
+    def _connection(self):
+        # Serverless Postgres (e.g. Neon) closes idle connections; psycopg does not reconnect.
+        if self._con.closed or getattr(self._con, 'broken', False):
+            self._con = self._psycopg.connect(self.url, autocommit=False, connect_timeout=10)
+        return self._con
+
+    def _rollback(self) -> None:
+        try:
+            self._con.rollback()
+        except self._psycopg.Error:
+            pass  # A dead connection is replaced on the next call.
+
     def try_reserve_spend(self, usd: Decimal, cap: Decimal) -> bool:
         with self._lock:
+            con = self._connection()
             try:
-                self._con.execute('INSERT INTO spend (day, usd) VALUES (CURRENT_DATE, 0) ON CONFLICT (day) DO NOTHING')
-                row = self._con.execute('UPDATE spend SET usd = usd + %s WHERE day = CURRENT_DATE AND usd + %s <= %s '
-                                        'RETURNING usd', (usd, usd, cap)).fetchone()
-                self._con.commit()
+                con.execute('INSERT INTO spend (day, usd) VALUES (CURRENT_DATE, 0) ON CONFLICT (day) DO NOTHING')
+                row = con.execute('UPDATE spend SET usd = usd + %s WHERE day = CURRENT_DATE AND usd + %s <= %s '
+                                  'RETURNING usd', (usd, usd, cap)).fetchone()
+                con.commit()
             except Exception:
-                self._con.rollback()
+                self._rollback()
                 raise
         return row is not None
 
     def adjust_spend(self, delta: Decimal) -> None:
         with self._lock:
+            con = self._connection()
             try:
-                self._con.execute('INSERT INTO spend (day, usd) VALUES (CURRENT_DATE, 0) ON CONFLICT (day) DO NOTHING')
-                self._con.execute('UPDATE spend SET usd = usd + %s WHERE day = CURRENT_DATE', (delta,))
-                self._con.commit()
+                con.execute('INSERT INTO spend (day, usd) VALUES (CURRENT_DATE, 0) ON CONFLICT (day) DO NOTHING')
+                con.execute('UPDATE spend SET usd = usd + %s WHERE day = CURRENT_DATE', (delta,))
+                con.commit()
             except Exception:
-                self._con.rollback()
+                self._rollback()
                 raise

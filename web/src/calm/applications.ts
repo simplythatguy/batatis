@@ -44,6 +44,9 @@ export function statusLine(a: ApplicationSummary, now = Date.now()): StatusLine 
       return { text: join("Accepted", where), tone: "green", attention: false };
     case "withdrawn":
       return { text: "Withdrawn", tone: "grey", attention: false };
+    default:
+      // A status this client does not know yet must not break the whole list.
+      return { text: join(String(a.status ?? "") || "Status unknown", where), tone: "grey", attention: false };
   }
 }
 

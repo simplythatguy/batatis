@@ -126,6 +126,7 @@ export function Shell({ active, children, application }: { active: Screen; child
   const assistant = useAssistant();
   const [confirm, setConfirm] = useState(false);
   const [palette, setPalette] = useState(false);
+  const [listNote, setListNote] = useState("");
   const [listCollapsed, setListCollapsed] = useState(false);
   const [sheet, setSheet] = useState(false);
   const listRef = useRef<ApplicationListHandle>(null);
@@ -183,12 +184,16 @@ export function Shell({ active, children, application }: { active: Screen; child
       ref={listRef}
       items={items}
       selectedId={selectedId}
-      onSelect={(id) => { if (id === selectedId) location.hash = "#/questions"; }}
+      onSelect={(id) => {
+        if (id === selectedId) { setListNote(""); location.hash = "#/questions"; return; }
+        // Opening a saved application is not wired yet; say so instead of ignoring the click.
+        setListNote("Opening another saved application isn’t available yet. This one stays open.");
+      }}
       onNew={inCase ? () => setConfirm(true) : undefined}
       onCollapse={() => setListCollapsed(true)}
       loading={account.loadingList}
       error={account.listError}
-      note={!signedIn && inCase ? "Saved for this visit only." : undefined}
+      note={listNote || (!signedIn && inCase ? "Saved for this visit only." : undefined)}
       empty={<p className="cf-applist-note">Describe what you’re building to start your first application.</p>}
     />
   );
