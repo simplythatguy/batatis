@@ -123,7 +123,8 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
             maybe_purge(current)
 
     app.add_middleware(CORSMiddleware, allow_origin_regex=r'http://(localhost|127\.0\.0\.1)(:\d+)?',
-                       allow_methods=['*'], allow_headers=['*'])
+                       allow_methods=['*'], allow_headers=['*'],
+                       expose_headers=['Retry-After', 'X-Batatis-Notice', 'Content-Disposition'])
     app.add_middleware(HttpGuard, sweep=sweep)
 
     def cases() -> CaseStore:
