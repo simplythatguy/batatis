@@ -7,6 +7,7 @@ const PATHS: Record<string, ReactNode> = {
   close: <path d="m4.5 4.5 7 7m0-7-7 7" />,
   warn: <><path d="M8 1.8 15 14H1z" /><path d="M8 6.5v3.3M8 11.8v.1" /></>,
   arrow: <path d="M3 8h10M9 4l4 4-4 4" />,
+  chev: <path d="m6 4 4 4-4 4" />,
   back: <path d="M13 8H3M7 4 3 8l4 4" />,
   check: <path d="m3.5 8.5 3 3 6-7" />,
   search: <><circle cx="7" cy="7" r="4.5" /><path d="m10.5 10.5 3 3" /></>,

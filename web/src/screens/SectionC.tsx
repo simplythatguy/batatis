@@ -5,7 +5,7 @@ import { sectionCQuoteLabel } from "../rules";
 import { CodeQuote, ServiceUnavailable, GapStrip, PanelHeader, StatusPill } from "../components";
 import { candidateById, unresolvedCandidates } from "../model";
 import { useCase } from "../store";
-import type { SectionCRow } from "../types";
+import type { Candidate, SectionCRow } from "../types";
 
 function AttributionCell({ row }: { row: SectionCRow }) {
   if (row.attributionStatus === "direct") return <span className="label-pill">Direct row</span>;
@@ -61,6 +61,23 @@ function Pairs({ row }: { row: SectionCRow }) {
 }
 
 const SUGGESTED = "Confirm before using";
+
+/** The code-check card a looked-up provision becomes (search here, the code library elsewhere). */
+export function provisionCandidate(h: { id: string; article_title?: string | null; title?: string | null; text: string; citation?: string | null }): Candidate {
+  return {
+    id: `search-${h.id}`,
+    topic: h.article_title || h.title || h.id,
+    provision: h.id,
+    part: Number(h.id.split(".")[0]) || 0,
+    benchmark: false,
+    identified: true,
+    suggestion: "search",
+    quote: { text: h.text, citation: h.citation ?? "No citation returned", source: "code" },
+    departure: "do something other than what this sentence requires",
+    clarifyingQuestion: "Which part of this sentence does the design not follow?",
+    answer: null,
+  };
+}
 
 /** Manual code search. `onAdded` receives the new card id after "Use this provision". */
 export function ProvisionSearch({ onAdded }: { onAdded?: (candidateId: string) => void } = {}) {
@@ -137,22 +154,7 @@ export function ProvisionSearch({ onAdded }: { onAdded?: (candidateId: string) =
                 className="btn"
                 onClick={() => {
                   if (c.candidates.some((x) => x.provision === h.id)) return;
-                  dispatch({
-                    type: "addCandidate",
-                    candidate: {
-                      id: `search-${h.id}`,
-                      topic: h.article_title || h.title || h.id,
-                      provision: h.id,
-                      part: Number(h.id.split(".")[0]) || 0,
-                      benchmark: false,
-                      identified: true,
-                      suggestion: "search",
-                      quote: { text: h.text, citation: h.citation ?? "No citation returned", source: "code" },
-                      departure: "do something other than what this sentence requires",
-                      clarifyingQuestion: "Which part of this sentence does the design not follow?",
-                      answer: null,
-                    },
-                  });
+                  dispatch({ type: "addCandidate", candidate: provisionCandidate(h) });
                   setNote(`${h.id} is in the table. Confirm it before you submit.`);
                   onAdded?.(`search-${h.id}`);
                 }}

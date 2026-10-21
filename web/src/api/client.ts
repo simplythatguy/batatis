@@ -4,8 +4,10 @@
  * proxies `/api` to the same URL (vite.config.ts). The default is http://127.0.0.1:8000.
  * `createEngine(base)` serves scripts and tests outside Vite.
  */
+import { credentialsMode } from "./engineAuth";
 import { publicDetail, takeSseEvents } from "../rules";
 import type { Case, EvidenceItem, FactInput, Jurisdiction, NewCase, SectionCRow } from "./types.gen";
+import { PRIVACY_NOTICE } from "../privacy";
 
 /** A provision returned by GET /code/search (engine/codes.py `Codes.search`). */
 export interface CodeHit {
@@ -125,6 +127,7 @@ export function createEngine(base: string) {
     try {
       res = await fetch(`${base}${path}`, {
         method,
+        credentials: credentialsMode(),
         signal: timed.signal,
         headers: body === undefined ? undefined : { "Content-Type": "application/json" },
         body: body === undefined ? undefined : JSON.stringify(body),
@@ -396,7 +399,8 @@ export function exportReason(reason: unknown): string {
 
 export function exportNotice(header: string | null): string {
   const text = header?.trim() ?? "";
-  if (!text || /^Do not upload personal information/i.test(text)) return "";
+  // The privacy notice is shown elsewhere; never repeat it as an export notice.
+  if (!text || text.startsWith(PRIVACY_NOTICE.split(".")[0])) return "";
   return text;
 }
 
@@ -405,6 +409,7 @@ async function exportPdf(base: string, caseId: string, draft: boolean, signal?: 
   let res: Response;
   try {
     res = await fetch(`${base}/cases/${enc(caseId)}/export`, {
+      credentials: credentialsMode(),
       method: "POST",
       signal: timed.signal,
       headers: { "Content-Type": "application/json" },
@@ -457,7 +462,7 @@ async function uploadPdf(base: string, caseId: string, file: File, signal?: Abor
   body.append("file", file, file.name);
   let res: Response;
   try {
-    res = await fetch(`${base}/cases/${enc(caseId)}/files`, { method: "POST", body, signal: timed.signal });
+    res = await fetch(`${base}/cases/${enc(caseId)}/files`, { method: "POST", body, signal: timed.signal, credentials: credentialsMode() });
   } catch (e) {
     if (signal?.aborted) throw e;
     if (timed.timedOut()) throw new EngineError(0, "The engine did not answer in time.");
@@ -512,6 +517,7 @@ async function identifyCase(
   let res: Response;
   try {
     res = await fetch(`${base}/cases/${enc(caseId)}/identify`, {
+      credentials: credentialsMode(),
       method: "POST",
       signal: timed.signal,
       headers: { Accept: "text/event-stream", "Content-Type": "application/json" },
@@ -534,4 +540,5 @@ export function failureText(e: unknown): string {
 
 export type Engine = ReturnType<typeof createEngine>;
 
-export const engine: Engine = createEngine(import.meta.env?.VITE_ENGINE_URL ?? "/api");
+// VITE_ENGINE_URL (local direct calls) wins; VITE_API_BASE is the deploy setting (docs/deploy.md).
+export const engine: Engine = createEngine(import.meta.env?.VITE_ENGINE_URL ?? import.meta.env?.VITE_API_BASE ?? "/api");

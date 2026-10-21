@@ -200,6 +200,25 @@ export async function reconcileEngineCase(caseId: string): Promise<EngineCase> {
   return saved;
 }
 
+/**
+ * Open a saved case as this visit's engine case (multi-application list). Call right after
+ * clearEngineSession(): adopts the saved version and jurisdiction, and records the saved latest
+ * answer per field as already posted, so the next save sends only what the applicant changes.
+ */
+export function adoptEngineCase(saved: EngineCase) {
+  sessionStorage.setItem(ID_KEY, saved.id);
+  known.set(saved.id, saved.version);
+  jurisdictions.set(saved.id, saved.jurisdiction?.id ?? null);
+  const latest = new Map(saved.facts.map((fact) => [fact.field, fact]));
+  const posted: Record<string, PostedFact> = {};
+  for (const [field, fact] of latest) {
+    if (field.startsWith("evidence.") || fact.source?.ref === "Answer withdrawn by applicant") continue;
+    posted[field] = { id: fact.id, signature: factSignature(fact) };
+  }
+  remember(saved.id, posted);
+  noteLedger(saved.id, saved);
+}
+
 /** Reconcile a complete browser fact snapshot, including withdrawals. Serialize writes
  * so a slower older save cannot become the engine's latest revision. */
 export function pushFacts(caseId: string, facts: Fact[]): Promise<string | null> {

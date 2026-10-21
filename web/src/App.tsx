@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { engine, EngineError } from "./api/client";
 import { Application } from "./calm/Application";
+import { CodeLibrary } from "./calm/CodeLibrary";
 import { Deck } from "./calm/QuestionDeck";
 import { Review } from "./calm/Review";
 import { resolveRoute } from "./calm/routes";
@@ -92,6 +93,9 @@ export function App() {
       break;
     case "references":
       body = <div className="cf-legacy"><SectionC /></div>;
+      break;
+    case "code":
+      body = <CodeLibrary route={calm} />;
       break;
     default:
       body = <Start focus={calm.focus} />;

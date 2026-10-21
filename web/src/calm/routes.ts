@@ -4,7 +4,7 @@
  * so every "Fix" or "Answer" link lands on the matching question card.
  */
 
-export type Screen = "start" | "questions" | "review" | "application" | "officer" | "accuracy" | "references";
+export type Screen = "start" | "questions" | "review" | "application" | "officer" | "accuracy" | "references" | "code";
 
 export interface CalmRoute {
   screen: Screen;
@@ -14,6 +14,9 @@ export interface CalmRoute {
   codeFirst: boolean;
   /** Application: open the download panel ("options") or start a draft PDF ("draft"). */
   download: "" | "options" | "draft";
+  /** Code library: the open article (`#/code/<id>`) and the relevance filter. */
+  article: string | null;
+  filter: "" | "all" | "attention" | "maybe";
   /** The calm hash for this route. Differs from the current hash when it was a legacy link. */
   canonical: string;
 }
@@ -33,17 +36,35 @@ export function deckFocus(focus: string | null): string | null {
 }
 
 function build(screen: Screen, focus: string | null = null, extra: Partial<CalmRoute> = {}): CalmRoute {
-  const base = screen === "start" ? "#/" : `#/${screen}`;
+  const base = screen === "start" ? "#/" : screen === "code" && extra.article ? `#/code/${encodeURIComponent(extra.article)}` : `#/${screen}`;
   const query = new URLSearchParams();
   if (focus) query.set("focus", focus);
   if (extra.codeFirst) query.set("first", "code");
   if (extra.download) query.set("download", extra.download);
+  if (extra.filter) query.set("filter", extra.filter);
   const q = query.toString();
-  return { screen, focus, codeFirst: false, download: "", ...extra, canonical: q ? `${base}?${q}` : base };
+  return { screen, focus, codeFirst: false, download: "", article: null, filter: "", ...extra, canonical: q ? `${base}?${q}` : base };
 }
+
+/** `#/code/<article id>` for links. Ids keep their dots and brackets readable after decoding. */
+export function codeHref(articleId?: string | null, filter?: CalmRoute["filter"]): string {
+  return build("code", null, { article: articleId ?? null, filter: filter ?? "" }).canonical;
+}
+
+const FILTERS = new Set(["all", "attention", "maybe"]);
 
 export function resolveRoute(path: string, params: URLSearchParams): CalmRoute {
   const focus = deckFocus(params.get("focus"));
+  if (path === "/code" || path.startsWith("/code/")) {
+    let article: string | null = null;
+    try {
+      article = decodeURIComponent(path.slice("/code/".length)) || null;
+    } catch {
+      article = null;
+    }
+    const f = params.get("filter") ?? "";
+    return build("code", null, { article, filter: FILTERS.has(f) ? (f as CalmRoute["filter"]) : "" });
+  }
   switch (path) {
     case "":
     case "/":
@@ -73,7 +94,6 @@ export function resolveRoute(path: string, params: URLSearchParams): CalmRoute {
       return build("officer");
     case "/accuracy":
       return build("accuracy");
-    case "/code":
     case "/section-c":
     case "/references":
       return build("references");

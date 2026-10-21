@@ -73,8 +73,10 @@ test("a later evidence save keeps the earlier document as text", () => {
     evidenceType: "engineering review",
     provisionId: "9.10.15.5.(8)",
   });
-  const titles = c.facts.filter((fact) => fact.field.endsWith(".title")).map((fact) => fact.value);
-  assert.deepEqual(titles, ["First report", "Second report"]);
+  // R8: saves are staged listings until the engine acknowledges them; no evidence facts yet.
+  assert.deepEqual(c.listedEvidence?.map((item) => item.description), ["First report", "Second report"]);
+  assert.deepEqual(c.listedEvidence?.map((item) => item.id), ["wall", "wall~2"]);
+  assert.equal(c.facts.some((fact) => fact.field.startsWith("evidence.")), false);
   assert.equal(c.facts.some((fact) => fact.field.endsWith(".file_ref") || fact.source.type === "file"), false);
   assert.equal(c.listedEvidence?.length, 2);
   assert.equal(c.listedEvidence?.[1].evidenceType, "engineering review");
@@ -234,16 +236,30 @@ test("removing one evidence document keeps the other and queues a deletion", () 
     evidenceType: "CCMC",
     provisionId: "9.10.15.5.",
   });
+  // Acknowledge both creates the way the engine does: the ledger comes back as facts.
+  const staged = c.listedEvidence ?? [];
+  c = reducer(c, {
+    type: "ackEvidence",
+    acked: staged.map((op) => ({ id: op.id, rev: op.rev })),
+    facts: staged.map((op) => ({
+      id: `f-${op.id}`, field: `evidence.${op.id}.title`, value: op.description, kind: "pointed", status: "confirmed",
+      source: { type: "user_text", ref: `applicant-evidence:${op.id}`, quote: op.description },
+    })),
+  });
   assert.equal(evidenceDocuments(c, "wall").length, 2);
   const second = evidenceDocuments(c, "wall")[1];
   const before = sectionDRefreshKey(c);
   c = reducer(c, { type: "removeEvidence", id: "wall" });
-  assert.deepEqual(evidenceDocuments(c, "wall").map((item) => item.title), ["Second report"]);
+  // R8: the removal is queued and the document stays visible until the engine confirms it.
   assert.deepEqual(c.deletedEvidence, ["wall"]);
   assert.equal(c.listedEvidence?.some((item) => item.id === "wall"), false);
-  assert.equal(c.listedEvidence?.some((item) => item.id === second.id), true);
   assert.notEqual(sectionDRefreshKey(c), before);
-  c = reducer(c, { type: "ackEvidenceDeletion", ids: ["wall"] });
+  c = reducer(c, {
+    type: "ackEvidence",
+    deleted: ["wall"],
+    facts: c.facts.filter((fact) => fact.field.startsWith(`evidence.${second.id}.`)),
+  });
+  assert.deepEqual(evidenceDocuments(c, "wall").map((item) => item.title), ["Second report"]);
   assert.deepEqual(c.deletedEvidence, []);
 });
 

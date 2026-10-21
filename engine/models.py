@@ -15,6 +15,8 @@ from typing import Literal
 from pydantic import BaseModel, Field, model_validator
 from .account_models import ApplicationStatus, Claim, Decision, StatusChange, StoredMessage
 
+from .relevance_models import RelevanceRecord
+
 FactKind = Literal['exact', 'pointed', 'computed', 'proposed']
 FactStatus = Literal['confirmed', 'unconfirmed']
 SourceType = Literal['code', 'file', 'user_text', 'drawing', 'user_click', 'officer', 'professional']
@@ -168,6 +170,7 @@ class Case(BaseModel):
     section_c: list[SectionCRow] = []
     evidence: list[EvidenceItem] = []
     gaps: list[Gap] = []
+    relevance: RelevanceRecord | None = None   # explicit scoring only; GET recomputes its staleness
 
     @model_validator(mode='after')
     def _kind_follows_the_file(self):

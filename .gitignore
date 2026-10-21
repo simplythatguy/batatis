@@ -2,6 +2,7 @@
 node_modules/
 .env
 .env.*
+.env*
 !.env.example
 *.pyc
 __pycache__/
@@ -12,5 +13,3 @@ __pycache__/
 reference/codes/*.pdf
 reference/text/
 reference/guides/*.pdf
-.vercel
-.env*

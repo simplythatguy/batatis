@@ -7,6 +7,9 @@ import { QUOTE_LABEL, quoteKind } from "../rules";
 import { ProvisionSearch } from "../screens/SectionC";
 import { useCase } from "../store";
 import type { SectionCRow } from "../types";
+import { RelevanceRing } from "./RelevanceRing";
+import { codeHref } from "./routes";
+import { articleOf } from "./useRelevance";
 import { CIcon, Eyebrow, Modal } from "./ui";
 
 export interface DrawerState {
@@ -61,7 +64,12 @@ export function CodeDrawer({ state, onClose, onAdded }: { state: DrawerState | n
         {a ? (
           <>
             <h3 id="cf-drawer-title" className="cf-drawer-title">{a.topic}</h3>
-            {provision && <div className="cf-mono cf-faint cf-small">{CODE_EDITION} · Div B · {provision}</div>}
+            {provision && (
+              <div className="cf-drawer-meta">
+                <RelevanceRing id={provision} />
+                <span className="cf-mono cf-faint cf-small">{CODE_EDITION} · Div B · {provision}</span>
+              </div>
+            )}
             {verbatim ? (
               <>
                 <blockquote className="cf-code-text">{verbatim.text}</blockquote>
@@ -127,6 +135,7 @@ export function CodeDrawer({ state, onClose, onAdded }: { state: DrawerState | n
         )}
 
         <div className="cf-drawer-links">
+          {provision && <a className="cf-btn is-sm is-ghost" href={codeHref(articleOf(provision) ?? provision)} onClick={onClose}>Open in code library <CIcon name="arrow" size={13} /></a>}
           <a className="cf-btn is-sm is-ghost" href="#/references" onClick={onClose}>All code references <CIcon name="arrow" size={13} /></a>
           {a && (
             <button type="button" className="cf-btn is-sm is-ghost" aria-expanded={searching} onClick={() => setSearching((v) => !v)}>

@@ -10,7 +10,7 @@ import os
 import threading
 import time
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, ROUND_HALF_UP
 
 # USD per 1M tokens, input then output. Unknown models use the conservative pair so the
@@ -103,6 +103,8 @@ _memory = MemorySpend()
 _llm_window = SlidingWindow()
 _search_window = SlidingWindow()
 _assist_window = SlidingWindow()
+_relevance_window = SlidingWindow()
+_relevance_daily = SlidingWindow()
 _spend = None
 _spend_lock = threading.Lock()
 
@@ -113,6 +115,8 @@ def reset_for_tests() -> None:
     _llm_window.reset()
     _search_window.reset()
     _assist_window.reset()
+    _relevance_window.reset()
+    _relevance_daily.reset()
     with _spend_lock:
         if _spend is not None:
             _spend.close()
@@ -227,6 +231,24 @@ def search_retry_after(client_ip: str) -> int | None:
     if _search_window.allow(key, limit, window):
         return None
     return _search_window.retry_after(key, window)
+
+
+def relevance_retry_after(client_ip: str) -> int | None:
+    """Per-IP scoring starts and a process-wide UTC daily run cap (including failed runs).
+
+    Like the search limiter, these are per process and reset on restart. Jev's run budget
+    is separate from the OpenAI token-price ledger; no dollar price is assumed for Jev.
+    """
+    limit, window = _rate_limit('BATATIS_RELEVANCE_RATE', '2', '600')
+    key = client_ip or 'unknown'
+    if not _relevance_window.allow(key, limit, window):
+        return _relevance_window.retry_after(key, window)
+    stamp = datetime.now(timezone.utc)
+    daily_limit = int(os.environ.get('BATATIS_RELEVANCE_DAILY_RUNS') or '20')
+    if _relevance_daily.allow(stamp.date().isoformat(), daily_limit, 86400):
+        return None
+    midnight = datetime.combine(stamp.date() + timedelta(days=1), datetime.min.time(), timezone.utc)
+    return max(1, int((midnight - stamp).total_seconds() + 0.999))
 
 
 def _first_hop(value: str | None) -> str | None:

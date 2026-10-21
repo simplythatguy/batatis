@@ -8,6 +8,7 @@ import secrets
 from email import policy
 from email.message import Message
 from email.parser import BytesParser
+from typing import Callable
 
 import psycopg
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
@@ -17,10 +18,12 @@ from pydantic import BaseModel
 
 from codedb import AmbiguousProvisionError
 
+from .code_library import CodeTOC, ProvisionContext, provision_context, table_of_contents
 from .codes import CodeDbMissing, Codes
 from .export import (EXPORT_FAILED_DETAIL, ExportBlocked, ExportError, FORM_NOT_FOUND_DETAIL, FormNotFound,
                      export_case)
 from .http_guard import HttpGuard
+from .identify import Judge
 from .llm_gate import client_ip_from, search_retry_after
 from .models import Case, Fact, Jurisdiction, SectionCRow
 from .retention import maybe_purge
@@ -109,7 +112,8 @@ def _pdf_from_body(body: bytes, content_type: str, filename: str | None) -> tupl
         raise HTTPException(400, 'invalid multipart body') from error
 
 
-def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> FastAPI:
+def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
+               relevance_judge_factory: Callable[[], Judge] | None = None) -> FastAPI:
     if store is None:
         assert_durable_when_hosted()
     state = {'store': store, 'codes': codes}
@@ -128,7 +132,8 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
 
     app.add_middleware(CORSMiddleware, allow_origin_regex=r'http://(localhost|127\.0\.0\.1)(:\d+)?',
                        allow_origins=[os.environ.get('BATATIS_WEB_ORIGIN', 'http://localhost:5480').rstrip('/')],
-                       allow_credentials=True, allow_methods=['*'], allow_headers=['*'])
+                       allow_credentials=True, allow_methods=['*'], allow_headers=['*'],
+                       expose_headers=['Retry-After', 'X-Batatis-Notice', 'Content-Disposition'])
     app.add_middleware(HttpGuard, sweep=sweep)
 
     def code() -> Codes:
@@ -253,8 +258,13 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
                                 headers={'Retry-After': str(wait)})
         return code().search(q, division=division, limit=limit)
 
-    @app.get('/code/{provision_id}')
-    def code_lookup(provision_id: str, request: Request, division: str | None = Query(None, pattern='^[ABC]$')):
+    @app.get('/code/toc', response_model=CodeTOC)
+    def code_toc(division: str = Query('B')):
+        if division not in ('A', 'B', 'C'):
+            raise HTTPException(400, 'invalid division')
+        return table_of_contents(code().db_path, division)
+
+    def lookup_code(provision_id: str, request: Request, division: str | None):
         extra = set(request.query_params) - {'division'}
         if extra:
             raise HTTPException(400, 'this route accepts only division')
@@ -267,6 +277,14 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
         if rec is None:
             raise HTTPException(404, 'provision not found')
         return rec
+
+    @app.get('/code/{provision_id}/context', response_model=ProvisionContext)
+    def code_context(provision_id: str, request: Request, division: str = Query('B', pattern='^[ABC]$')):
+        return provision_context(lookup_code(provision_id, request, division), code())
+
+    @app.get('/code/{provision_id}')
+    def code_lookup(provision_id: str, request: Request, division: str | None = Query(None, pattern='^[ABC]$')):
+        return lookup_code(provision_id, request, division)
 
     @app.post('/section-c', response_model=list[SectionCRow])
     def section_c(body: SectionCRequest):
@@ -292,6 +310,8 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None) -> Fa
     app.include_router(__import__('engine.routes_auth', fromlist=['create_router']).create_router(cases))
     app.include_router(__import__('engine.routes_review', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_assist', fromlist=['create_router']).create_router(cases, code))
+    app.include_router(__import__('engine.routes_relevance', fromlist=['create_router']).create_router(
+        cases, code, relevance_judge_factory))
     return app
 
 

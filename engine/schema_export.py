@@ -16,6 +16,7 @@ from pathlib import Path
 from pydantic.json_schema import GenerateJsonSchema, models_json_schema
 
 from .api import NewCase, SectionCRequest
+from .code_library import CodeTOC, ProvisionContext
 from .models import Case, Fact, SectionCRow
 from .account_models import UserResult, MessagesResult
 from .routes_auth import SignupRequest, LoginRequest, OnboardingRequest
@@ -24,9 +25,10 @@ from .routes_review import (ApplicationsResult, QueueResult, ClaimResult, ClaimR
 from .routes_assist import AssistRequest, AssistResult
 
 OUT = Path(__file__).resolve().parent.parent / 'web' / 'src' / 'api' / 'engine.schema.json'
-RESPONSES = (Case, SectionCRow, UserResult, MessagesResult, ApplicationsResult, QueueResult, ClaimResult, AssistResult)
+RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesResult, ApplicationsResult,
+             QueueResult, ClaimResult, AssistResult)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
-            ClaimRequest, DecisionRequest, MessageRequest, AssistRequest)
+            ClaimRequest, DecisionRequest, MessageRequest, AssistRequest)  # defaulted fields optional
 
 
 class _ResponsesCarryDefaults(GenerateJsonSchema):

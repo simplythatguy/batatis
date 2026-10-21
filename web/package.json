@@ -12,7 +12,7 @@
     "test:sync": "python3 scripts/test-sync.py",
     "typecheck": "tsc --noEmit",
     "test:unwrap": "node --experimental-strip-types --import ./scripts/register-ts.mjs scripts/unwrap-items.test.ts",
-    "test": "node --experimental-strip-types --import ./scripts/register-ts.mjs --test src/rules.test.ts src/professional.test.ts src/humanReview.test.ts src/identify.test.ts src/intake.test.ts src/visit.test.ts src/ui-notices.test.ts src/provisions.test.ts src/calm/deck.test.ts",
+    "test": "node --experimental-strip-types --import ./scripts/register-ts.mjs --test src/rules.test.ts src/professional.test.ts src/humanReview.test.ts src/identify.test.ts src/intake.test.ts src/visit.test.ts src/ui-notices.test.ts src/provisions.test.ts src/calm/deck.test.ts src/calm/relevance.test.ts src/calm/applications.test.ts src/calm/openCase.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {

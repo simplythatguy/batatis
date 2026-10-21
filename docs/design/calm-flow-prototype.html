@@ -73,7 +73,7 @@ body { font-family: var(--font); color: var(--text); -webkit-font-smoothing: ant
 .icon-btn { width: 36px; height: 36px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.03); color: var(--text-2); display: grid; place-items: center; cursor: pointer; }
 
 /* type */
-.eyebrow { display: inline-flex; align-items: center; gap: 10px; font: 500 12px/1 var(--mono); letter-spacing: .09em; text-transform: uppercase; color: var(--text-2); }
+.eyebrow { display: inline-flex; align-items: center; gap: 10px; font: 500 12px/1 var(--mono); letter-spacing: .09em; color: var(--text-2); }
 .eyebrow::before { content: ""; width: 9px; height: 9px; background: var(--accent); border-radius: 1px; }
 .eyebrow.plain::before { display: none; }
 .display { font-size: 54px; line-height: 1.04; letter-spacing: -0.035em; font-weight: 500; margin: 20px 0 0; font-optical-sizing: auto; }
@@ -118,7 +118,7 @@ body { font-family: var(--font); color: var(--text); -webkit-font-smoothing: ant
 .file .ext { font: 500 10px var(--mono); padding: 3px 5px; border-radius: 5px; background: rgba(255,106,61,.14); color: #ff9a76; }
 .choices { display: flex; align-items: center; gap: 28px; margin-top: 22px; padding: 0 4px; }
 .choice-row { display: flex; align-items: center; gap: 8px; }
-.choice-row .label { white-space: nowrap; font: 500 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); margin-right: 4px; }
+.choice-row .label { white-space: nowrap; font: 500 12px var(--mono); letter-spacing: .06em; color: var(--text-3); margin-right: 4px; }
 .how { display: flex; gap: 36px; margin-top: 40px; padding: 0 4px; }
 .how div { font-size: 14px; color: var(--text-3); display: flex; gap: 10px; }
 .how span { font-family: var(--mono); color: var(--text-2); }
@@ -156,7 +156,7 @@ body { font-family: var(--font); color: var(--text); -webkit-font-smoothing: ant
 .pair { display: flex; gap: 10px; align-items: baseline; margin-top: 10px; font-size: 14px; color: var(--text-2); }
 .pair .mono { color: var(--text); font-size: 12px; min-width: 52px; }
 .ai { margin-top: 26px; padding: 16px; border-radius: 16px; border: 1px dashed var(--line-2); font-size: 14px; line-height: 1.6; color: var(--text-2); }
-.ai .tag { font: 500 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); display: block; margin-bottom: 6px; }
+.ai .tag { font: 500 10px var(--mono); letter-spacing: .08em; color: var(--text-3); display: block; margin-bottom: 6px; }
 
 /* 3 · Review */
 .review { max-width: 1040px; margin: 36px auto 0; padding: 0 24px; display: grid; grid-template-columns: 1.25fr 1fr; gap: 20px; }
@@ -165,10 +165,10 @@ body { font-family: var(--font); color: var(--text); -webkit-font-smoothing: ant
 .metrics .tile:first-child { border-radius: 18px 0 0 18px; }
 .metrics .tile:last-child { border-radius: 0 18px 18px 0; border-left: 0; }
 .metric { padding: 20px 22px; }
-.metric .k { font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); }
+.metric .k { font: 500 11px var(--mono); letter-spacing: .08em; color: var(--text-3); }
 .metric .v { font-size: 44px; letter-spacing: -0.03em; font-weight: 500; margin-top: 10px; display: flex; align-items: baseline; gap: 12px; }
 .metric .v small { font-size: 13px; font-weight: 500; color: var(--text-2); background: rgba(255,255,255,0.06); padding: 6px 10px; border-radius: 8px; letter-spacing: 0; }
-.list-label { font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); margin: 26px 0 6px; }
+.list-label { font: 500 11px var(--mono); letter-spacing: .08em; color: var(--text-3); margin: 26px 0 6px; }
 .row { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-top: 1px solid var(--line); font-size: 15px; }
 .row:first-of-type { border-top: 0; }
 .row .grow { flex: 1; }
@@ -190,7 +190,7 @@ body { font-family: var(--font); color: var(--text); -webkit-font-smoothing: ant
 .sheet { width: 600px; background: #f4f4f5; color: #18181b; border-radius: 6px 6px 0 0; padding: 44px 52px; font-size: 12.5px; line-height: 1.55; box-shadow: 0 30px 80px -20px rgba(0,0,0,.8); }
 .sheet h2 { font-size: 17px; letter-spacing: -0.01em; margin: 0 0 4px; }
 .sheet .sub { color: #71717a; font-size: 11px; font-family: var(--mono); }
-.sheet h4 { font: 600 10.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #52525b; margin: 22px 0 8px; }
+.sheet h4 { font: 600 10.5px var(--mono); letter-spacing: .08em; color: #52525b; margin: 22px 0 8px; }
 .sheet .kv { display: grid; grid-template-columns: 140px 1fr; gap: 6px 12px; }
 .sheet .kv span:nth-child(odd) { color: #71717a; }
 .sheet .ref { display: inline-block; font: 500 10.5px var(--mono); padding: 2px 6px; border-radius: 5px; background: #e4e4e7; }
@@ -217,7 +217,7 @@ body { font-family: var(--font); color: var(--text); -webkit-font-smoothing: ant
       <button class="stage-pill" data-go="application"><span class="n">04</span>Application</button>
     </nav>
     <div class="top-right">
-      <span class="saved"><span class="dot done"></span>SAVED</span>
+      <span class="saved"><span class="dot done"></span>Saved</span>
       <button class="icon-btn" id="menuBtn" aria-label="More">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="3" cy="8" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="13" cy="8" r="1.3"/></svg>
       </button>
