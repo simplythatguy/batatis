@@ -11,6 +11,7 @@ from .codes import Codes
 from .completeness import Gap, check_completeness
 from .process_fields import ProcessField, process_fields
 from .reference_selection import replace_references
+from .routes_evidence import EvidenceDelete, delete_listing
 from .professional import ProfessionalResult, professional_involvement
 from .section_c import section_c_rows
 from .section_d import SectionDPlan, section_d_plan
@@ -138,13 +139,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         return check_completeness(get_case(case_id), code())
 
     @router.delete('/cases/{case_id}/evidence/{evidence_id}', response_model=Case)
-    def delete_evidence(case_id: str, evidence_id: str):
-        try:
-            case = cases().remove_evidence(case_id, evidence_id)
-        except VersionConflict as error:
-            raise HTTPException(409, 'case was updated concurrently') from error
-        if case is None:
-            raise HTTPException(404, 'case not found')
-        return case
+    def delete_evidence(case_id: str, evidence_id: str, body: EvidenceDelete):
+        return delete_listing(cases(), case_id, evidence_id, body.expected_version)
 
     return router
