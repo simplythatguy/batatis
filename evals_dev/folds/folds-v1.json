@@ -1,0 +1,879 @@
+{
+ "calibration_share": 0.3,
+ "cases": {
+  "calgary-spv-001-zero-lot-line-2026-03": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "calgary-spv-003-construction-of-exposed-building-face": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "calgary-spv-006-firewall-rowhouse-secondary-suites": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "dev-001": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "dev-002": {
+   "dataset": "dev",
+   "fold": "calibration",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "dev-003": {
+   "dataset": "dev",
+   "fold": "calibration",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "dev-004": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "dev-005": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "ask"
+  },
+  "dev-006": {
+   "dataset": "dev",
+   "fold": "calibration",
+   "generation": 0,
+   "stratum": "ask"
+  },
+  "dev-007": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "ask"
+  },
+  "dev-008": {
+   "dataset": "dev",
+   "fold": "calibration",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "dev-009": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "ask"
+  },
+  "dev-010": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "ask"
+  },
+  "dev-011": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "ask"
+  },
+  "dev-012": {
+   "dataset": "dev",
+   "fold": "calibration",
+   "generation": 0,
+   "stratum": "ask"
+  },
+  "dev-013": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-014": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "dev-015": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "ask"
+  },
+  "dev-016": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-017": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-018": {
+   "dataset": "dev",
+   "fold": "calibration",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-019": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-020": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "ask"
+  },
+  "dev-021": {
+   "dataset": "dev",
+   "fold": "calibration",
+   "generation": 0,
+   "stratum": "ask"
+  },
+  "dev-022": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "ask"
+  },
+  "dev-023": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "ask"
+  },
+  "dev-024": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "redirect"
+  },
+  "dev-025": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "redirect"
+  },
+  "dev-026": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-027": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-028": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-029": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-030": {
+   "dataset": "dev",
+   "fold": "calibration",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-031": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-032": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-033": {
+   "dataset": "dev",
+   "fold": "calibration",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-034": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-035": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-036": {
+   "dataset": "dev",
+   "fold": "calibration",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-037": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-038": {
+   "dataset": "dev",
+   "fold": "calibration",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-039": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-040": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-041": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-042": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-043": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-044": {
+   "dataset": "dev",
+   "fold": "calibration",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-045": {
+   "dataset": "dev",
+   "fold": "calibration",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-046": {
+   "dataset": "dev",
+   "fold": "calibration",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-047": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "dev-048": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "dev-049": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "dev-050": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "dev-051": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "dev-052": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "dev-053": {
+   "dataset": "dev",
+   "fold": "calibration",
+   "generation": 0,
+   "stratum": "ask"
+  },
+  "dev-054": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "ask"
+  },
+  "dev-055": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "ask"
+  },
+  "dev-056": {
+   "dataset": "dev",
+   "fold": "calibration",
+   "generation": 0,
+   "stratum": "ask"
+  },
+  "dev-057": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "ask"
+  },
+  "dev-058": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "ask"
+  },
+  "dev-059": {
+   "dataset": "dev",
+   "fold": "validation",
+   "generation": 0,
+   "stratum": "redirect"
+  },
+  "dev-060": {
+   "dataset": "dev",
+   "fold": "calibration",
+   "generation": 0,
+   "stratum": "redirect"
+  },
+  "idr-001": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-002": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-003": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-004": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-005": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-006": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-007": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-008": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-009": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-010": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-011": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-012": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-013": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-014": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-015": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-016": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-017": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-018": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-019": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-020": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-021": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "idr-022": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "idr-023": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "idr-024": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "idr-025": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "idr-026": {
+   "dataset": "idr26",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-abc2014-variance-14-bcv-009": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-bulletin-23-bcb-001": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-bulletin-23-bcb-002": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-bulletin-23-bcb-002r1": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-bulletin-23-bcb-003": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-bulletin-23-bcb-004": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-bulletin-23-bcb-006": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-bulletin-23-bcb-007": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-bulletin-23-bcb-008": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "mixed"
+  },
+  "standata-nbc2023-bulletin-23-bcb-013": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "mixed"
+  },
+  "standata-nbc2023-interpretation-23-bci-001": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-interpretation-23-bci-002": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "mixed"
+  },
+  "standata-nbc2023-interpretation-23-bci-003": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-interpretation-23-bci-004": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-interpretation-23-bci-008": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-interpretation-23-bci-009": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "mixed"
+  },
+  "standata-nbc2023-interpretation-23-bci-010": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-interpretation-23-bci-011": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-interpretation-23-bci-014": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "mixed"
+  },
+  "standata-nbc2023-interpretation-23-bci-015": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-interpretation-23-bci-015r1": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-interpretation-23-bci-016": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-interpretation-23-bci-017": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "mixed"
+  },
+  "standata-nbc2023-interpretation-23-bci-018": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "mixed"
+  },
+  "standata-nbc2023-interpretation-23-bci-020": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-interpretation-23-bci-022": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-interpretation-23-bci-025": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-interpretation-23-bci-030": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-interpretation-23-bci-034": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-interpretation-23-bci-035": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-interpretation-23-bci-037": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-interpretation-23-bci-038": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-interpretation-23-bci-042": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-interpretation-23-bci-043": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-variance-23-bcv-001": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-variance-23-bcv-003": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-variance-23-bcv-004": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "mixed"
+  },
+  "standata-nbc2023-variance-23-bcv-005": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-variance-23-bcv-007": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-variance-23-bcv-008": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-variance-23-bcv-008-rev1": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-variance-23-bcv-009": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "mixed"
+  },
+  "standata-nbc2023-variance-23-bcv-010": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-variance-23-bcv-010r1": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-variance-23-bcv-011r1": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-variance-23-bcv-012r1": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-variance-23-bcv-013": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-variance-23-bcv-014": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "other"
+  },
+  "standata-nbc2023-variance-23-bcv-017": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  },
+  "standata-nbc2023-variance-23-bcv-018": {
+   "dataset": "public53",
+   "fold": "selection",
+   "generation": 0,
+   "stratum": "part9"
+  }
+ },
+ "counts": {
+  "calibration": {
+   "dev/ask": 5,
+   "dev/other": 8,
+   "dev/part9": 3,
+   "dev/redirect": 1
+  },
+  "selection": {
+   "idr26/other": 5,
+   "idr26/part9": 21,
+   "public53/mixed": 9,
+   "public53/other": 20,
+   "public53/part9": 24
+  },
+  "validation": {
+   "dev/ask": 13,
+   "dev/other": 19,
+   "dev/part9": 8,
+   "dev/redirect": 3
+  }
+ },
+ "folds": [
+  "calibration",
+  "selection",
+  "validation"
+ ],
+ "generations": [
+  {
+   "added": 139,
+   "generation": 0
+  }
+ ],
+ "schema": "batatis-folds/1",
+ "seed": 20261021,
+ "selection_datasets": [
+  "idr26",
+  "public53"
+ ],
+ "sha256": "1521100f267bb161e27558559cb03e09f68f0ed767e31d8558d0d78c0fd518d4",
+ "stratified_by": "part group of the gold articles (part9, other, mixed); intake action (ask, redirect) for cases without gold articles"
+}

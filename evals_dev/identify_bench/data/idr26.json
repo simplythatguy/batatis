@@ -1,0 +1,411 @@
+{
+ "name": "idr26",
+ "label": "model-checked, not human-verified",
+ "provenance": {
+  "pull_request": 39,
+  "branch": "research/data-nerd-2026-10-20-clean",
+  "commit": "9e8ff5311692aa6fa8e3ce4acdb9d4f1dbda0614",
+  "source_path": "docs/research/2026-10-20-data-nerd/identify-regression.json",
+  "source_sha256": "4afdbca8c1dff1ef36a1e88abb7d1291015d680890836ea87005fd277e51db4b",
+  "note": "Trimmed copy: ids, applicant words, article ids by role. Selected after a cold-run failure, so it is biased towards hard cases. Scored at article level."
+ },
+ "cases": [
+  {
+   "id": "idr-001",
+   "applicant_type": "manufacturer",
+   "query": "We make a new insulated sheathing panel and want it approved in Alberta so builders can nail siding straight onto it. What do I need?",
+   "gold": [
+    "9.27.5.1.",
+    "9.27.5.3.",
+    "9.23.17.3."
+   ],
+   "acceptable": [],
+   "forbidden": [
+    "9.23.15.2.",
+    "9.27.10.1.",
+    "9.29.9.2.",
+    "9.29.9.3."
+   ]
+  },
+  {
+   "id": "idr-002",
+   "applicant_type": "manufacturer",
+   "query": "Our panel is selling in two other provinces *(claim not verified)*. We want **approval to sell it across Alberta** and a first **pilot house** in Edmonton this spring. Builders love it because vinyl siding nails **straight into the facer**, so there's no OSB and no strapping.",
+   "gold": [
+    "9.27.5.1.",
+    "9.27.5.3.",
+    "9.23.17.3."
+   ],
+   "acceptable": [],
+   "forbidden": [
+    "9.27.12.1.",
+    "9.29.9.2.",
+    "9.29.9.3."
+   ]
+  },
+  {
+   "id": "idr-003",
+   "applicant_type": "manufacturer",
+   "query": "We make a recycled-plastic rainscreen strapping strip. Builders screw it through the foam board into the studs at 24 inches on centre and hang fibre-cement siding on it. Some framers want to space it at 32 inches to save material. Is our strip OK in place of wood strapping, and does the spacing matter?",
+   "gold": [
+    "9.27.5.3.",
+    "9.27.5.1."
+   ],
+   "acceptable": [],
+   "forbidden": [
+    "9.23.3.5.",
+    "9.27.5.2.",
+    "9.29.9.3."
+   ]
+  },
+  {
+   "id": "idr-004",
+   "applicant_type": "manufacturer",
+   "query": "We sell stainless ring-shank nails for vinyl siding. On houses with 1-1/2 inch foam outside the OSB, our 2-inch nail only gets about 3/4 inch into the studs. Contractors ask whether that's enough or if they need a longer nail.",
+   "gold": [
+    "9.27.5.7."
+   ],
+   "acceptable": [
+    "9.27.5.4.",
+    "9.27.5.5."
+   ],
+   "forbidden": [
+    "9.23.3.4.",
+    "9.23.3.5.",
+    "9.29.9.3."
+   ]
+  },
+  {
+   "id": "idr-005",
+   "applicant_type": "manufacturer",
+   "query": "Our synthetic housewrap is sold all over the US and tested to ASTM standards, but we've never had it tested to a Canadian standard. Can Alberta builders use it behind siding?",
+   "gold": [
+    "9.27.3.2."
+   ],
+   "acceptable": [
+    "9.27.3.3."
+   ],
+   "forbidden": [
+    "9.20.13.1.",
+    "9.25.4.1.",
+    "9.29.9.3."
+   ]
+  },
+  {
+   "id": "idr-006",
+   "applicant_type": "manufacturer",
+   "query": "We make a hemp-fibre batt insulation for walls and attics. There's no Canadian product standard written for hemp. What do inspectors in Alberta need from us before builders can use it?",
+   "gold": [
+    "9.25.2.2."
+   ],
+   "acceptable": [],
+   "forbidden": [
+    "9.10.17.10.",
+    "9.25.2.3.",
+    "9.29.9.3.",
+    "9.36.2.6."
+   ]
+  },
+  {
+   "id": "idr-007",
+   "applicant_type": "manufacturer",
+   "query": "We make a frameless glass railing for decks and balconies. Homeowners like the clean look at 36 inches high. Can we sell it at that height for house decks that are about 8 feet above the yard?",
+   "gold": [
+    "9.8.8.3."
+   ],
+   "acceptable": [
+    "9.8.8.2."
+   ],
+   "forbidden": [
+    "9.29.9.3.",
+    "9.8.7.4.",
+    "9.8.8.6."
+   ]
+  },
+  {
+   "id": "idr-008",
+   "applicant_type": "manufacturer",
+   "query": "We make insulating concrete form blocks for basements. Our new thin-core block pours a 140 mm concrete core to save concrete. Can builders use it for basement walls on houses?",
+   "gold": [
+    "9.15.4.2."
+   ],
+   "acceptable": [
+    "9.15.4.1."
+   ],
+   "forbidden": [
+    "9.15.3.4.",
+    "9.27.5.1.",
+    "9.29.9.3."
+   ]
+  },
+  {
+   "id": "idr-009",
+   "applicant_type": "contractor",
+   "query": "On a duplex we're finishing, the siding sub nailed the vinyl siding straight into the rigid foam boards on two walls instead of into strapping or studs. The inspector flagged it. Can we leave it with some kind of approval?",
+   "gold": [
+    "9.27.5.1.",
+    "9.23.17.3."
+   ],
+   "acceptable": [],
+   "forbidden": [
+    "9.25.2.3.",
+    "9.27.12.1.",
+    "9.29.9.3."
+   ]
+  },
+  {
+   "id": "idr-010",
+   "applicant_type": "contractor",
+   "query": "Our framer put up 1x3 strapping over the sheathing at about 32 inches apart so the cedar siding has a rain gap. Is that spacing a problem?",
+   "gold": [
+    "9.27.5.3."
+   ],
+   "acceptable": [],
+   "forbidden": [
+    "9.27.5.2.",
+    "9.27.6.1.",
+    "9.29.9.3."
+   ]
+  },
+  {
+   "id": "idr-011",
+   "applicant_type": "contractor",
+   "query": "Crew nailed the OSB wall sheathing at 12 inches on the panel edges and 24 in the field because the nail gun was set wrong. What's the actual requirement and do we have to renail?",
+   "gold": [
+    "9.23.3.5."
+   ],
+   "acceptable": [],
+   "forbidden": [
+    "9.23.3.4.",
+    "9.27.5.4.",
+    "9.29.9.3."
+   ]
+  },
+  {
+   "id": "idr-012",
+   "applicant_type": "contractor",
+   "query": "Building a small two-storey office. The stair between floors came out with 210 mm risers because the floor got thicker. Do we have to rebuild it?",
+   "gold": [
+    "9.8.4.1."
+   ],
+   "acceptable": [],
+   "forbidden": [
+    "9.29.9.3.",
+    "9.8.4.3.",
+    "9.8.7.4."
+   ]
+  },
+  {
+   "id": "idr-013",
+   "applicant_type": "contractor",
+   "query": "We want to use 190 mm plain concrete block for a basement wall with about 2.4 m of backfill against it, no rebar. Is that thick enough?",
+   "gold": [
+    "9.15.4.2."
+   ],
+   "acceptable": [],
+   "forbidden": [
+    "9.15.3.4.",
+    "9.15.4.1.",
+    "9.29.9.3."
+   ]
+  },
+  {
+   "id": "idr-014",
+   "applicant_type": "contractor",
+   "query": "On a three-storey walk-up, the architect drew horizontal cable railings on the top-floor balconies, about 5 m above the ground. The owner likes the look. Any issue?",
+   "gold": [
+    "9.8.8.6."
+   ],
+   "acceptable": [
+    "9.8.8.5."
+   ],
+   "forbidden": [
+    "9.29.9.3.",
+    "9.8.7.4.",
+    "9.8.8.3."
+   ]
+  },
+  {
+   "id": "idr-015",
+   "applicant_type": "homebuilder",
+   "query": "We're putting 2 inches of foil-faced foam board on the outside of our houses with taped seams. Can we skip the housewrap behind the vinyl siding?",
+   "gold": [
+    "9.27.3.4."
+   ],
+   "acceptable": [
+    "9.27.3.3."
+   ],
+   "forbidden": [
+    "9.25.4.1.",
+    "9.25.5.1.",
+    "9.29.9.3."
+   ]
+  },
+  {
+   "id": "idr-016",
+   "applicant_type": "homebuilder",
+   "query": "Our back-deck stairs have 8-inch risers and 9-inch treads to fit the yard. Will that pass?",
+   "gold": [
+    "9.8.4.1.",
+    "9.8.4.2."
+   ],
+   "acceptable": [],
+   "forbidden": [
+    "9.29.9.3.",
+    "9.8.4.3.",
+    "9.8.8.3."
+   ]
+  },
+  {
+   "id": "idr-017",
+   "applicant_type": "homebuilder",
+   "query": "For a modern look we want horizontal wood slats on the open side of the basement stairs, with about 4-1/2 inch gaps between slats. Is that allowed in a house?",
+   "gold": [
+    "9.8.8.5."
+   ],
+   "acceptable": [],
+   "forbidden": [
+    "9.29.9.3.",
+    "9.8.8.3.",
+    "9.8.8.6."
+   ]
+  },
+  {
+   "id": "idr-018",
+   "applicant_type": "homebuilder",
+   "query": "To save money we only insulate the basement walls down to about 2 feet below grade. Is full-height basement insulation actually required?",
+   "gold": [
+    "9.25.2.3."
+   ],
+   "acceptable": [],
+   "forbidden": [
+    "9.25.2.2.",
+    "9.29.9.3.",
+    "9.36.2.6."
+   ]
+  },
+  {
+   "id": "idr-019",
+   "applicant_type": "homebuilder",
+   "query": "The lot is silty and the geotech says the water table is about 300 mm below where the footings will sit. We sized the strip footings from the normal house table at 400 mm wide. OK?",
+   "gold": [
+    "9.15.3.4."
+   ],
+   "acceptable": [],
+   "forbidden": [
+    "9.13.2.1.",
+    "9.15.4.2.",
+    "9.29.9.3."
+   ]
+  },
+  {
+   "id": "idr-020",
+   "applicant_type": "homebuilder",
+   "query": "We're switching to 3/8-inch OSB wall sheathing to cut costs and nailing vertical vinyl siding straight to it, no strapping. Any problem?",
+   "gold": [
+    "9.27.5.1."
+   ],
+   "acceptable": [
+    "9.23.17.2."
+   ],
+   "forbidden": [
+    "9.27.10.1.",
+    "9.29.9.2.",
+    "9.29.9.3."
+   ]
+  },
+  {
+   "id": "idr-021",
+   "applicant_type": "contractor",
+   "query": "Fibre-cement lap siding went up with regular bright (uncoated) nails because the coated ones were back-ordered. Do we need to pull it?",
+   "gold": [
+    "9.27.5.5."
+   ],
+   "acceptable": [],
+   "forbidden": [
+    "9.20.16.1.",
+    "9.23.3.4.",
+    "9.29.9.3."
+   ]
+  },
+  {
+   "id": "idr-022",
+   "applicant_type": "contractor",
+   "query": "We're the GC on a six-storey wood-frame apartment, all rental units, sprinklered throughout. The developer now wants to add a seventh floor of units on top, still wood. Is that a problem, or can we just keep framing?",
+   "gold": [
+    "3.2.2.51."
+   ],
+   "acceptable": [
+    "3.2.2.48."
+   ],
+   "forbidden": [
+    "9.10.4.1.",
+    "9.10.8.1.",
+    "9.29.9.3."
+   ]
+  },
+  {
+   "id": "idr-023",
+   "applicant_type": "contractor",
+   "query": "Four storeys: shops on the street level, apartments on the three floors above, sprinklered. The drawings show the floor over the shops as the same 1-hour floor as every other level. The owner asks if that's enough between the stores and the apartments.",
+   "gold": [
+    "3.1.3.1."
+   ],
+   "acceptable": [
+    "3.2.2.7."
+   ],
+   "forbidden": [
+    "9.10.8.1.",
+    "9.10.9.13.",
+    "9.29.9.3."
+   ]
+  },
+  {
+   "id": "idr-024",
+   "applicant_type": "contractor",
+   "query": "Fit-out of a banquet hall on the second floor of an existing two-storey building, about 400 seats. The owner wants only one exit stair from the hall so the kitchen can go where the second stair is drawn. Can we do that?",
+   "gold": [
+    "3.4.2.1."
+   ],
+   "acceptable": [
+    "3.3.1.5."
+   ],
+   "forbidden": [
+    "9.29.9.3.",
+    "9.9.8.2.",
+    "9.9.9.1."
+   ]
+  },
+  {
+   "id": "idr-025",
+   "applicant_type": "contractor",
+   "query": "Two-storey office building, about 1,400 m2 on each floor, wood frame, no sprinklers. The floor between the levels is drawn as plain joists and drywall with no rating. The owner says it's just an office so it doesn't need anything special.",
+   "gold": [
+    "3.2.2.64.",
+    "3.2.2.62."
+   ],
+   "acceptable": [],
+   "forbidden": [
+    "9.10.18.2.",
+    "9.10.8.1.",
+    "9.29.9.3."
+   ]
+  },
+  {
+   "id": "idr-026",
+   "applicant_type": "contractor",
+   "query": "Six-storey hotel. The electrician ran bundles of cable through the rated corridor walls and the drywallers packed the holes with mineral wool and regular caulk. There are also plastic electrical boxes back-to-back in the suite walls. The inspector wants a listed system for each one. Can we leave them?",
+   "gold": [
+    "3.1.9.1.",
+    "3.1.9.2.",
+    "3.1.9.3."
+   ],
+   "acceptable": [],
+   "forbidden": [
+    "9.10.9.6.",
+    "9.10.9.7.",
+    "9.29.9.3."
+   ]
+  }
+ ]
+}
