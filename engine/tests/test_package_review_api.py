@@ -194,3 +194,35 @@ def test_upload_input_errors(scene):
     assert {f['key'] for f in session['findings']} >= {'form:presence', 'file:notes.txt:unreadable'}
     big = [('files', ('big.pdf', b'%PDF' + b'0' * (4 * 1024 * 1024), 'application/pdf'))]
     assert clients['reviewer'].post('/package-review', files=big).status_code == 413
+
+
+def test_close_out_after_decision_with_record_package(scene):
+    store, clients, _ = scene
+    case = claimed(scene)
+    assert clients['reviewer'].post(f'/review/{case.id}/package-review').status_code == 201
+    assert clients['reviewer'].get(f'/review/{case.id}/close-out').status_code == 404   # no decision yet
+    decided = clients['reviewer'].post(f'/review/{case.id}/decision', json={'outcome': 'accept'})
+    assert decided.status_code == 200, decided.text
+    close = clients['second'].get(f'/review/{case.id}/close-out')
+    assert close.status_code == 200, close.text
+    body = close.json()
+    from datetime import date, datetime, timedelta
+    decided_at = datetime.fromisoformat(body['decided_at']).date()
+    assert body['due_date'] == (decided_at + timedelta(days=10)).isoformat()
+    assert body['days_remaining'] == (decided_at + timedelta(days=10) - date.today()).days
+    assert body['sent'] is False and body['overdue'] is False
+    package_ = body['record_package']
+    assert package_['send_to_council'][0]['label'] == 'Copy of the variance as decided'
+    assert {item['label'] for item in package_['retain_on_file']} >= {'Supporting documents',
+                                                                      'Section C code references and attributions'}
+    assert 'IB-2025-11-18' in package_['basis'][0]
+    assert 'never' not in body['notice'] or 'does not send' in body['notice']
+    index = clients['reviewer'].get(f'/review/{case.id}/package-review').json()
+    assert index['close_out']['due_date'] == body['due_date']
+    for name in ['owner', 'other', 'foreign', 'anonymous']:
+        assert clients[name].post(f'/review/{case.id}/close-out/sent').status_code == 404, name
+    assert clients['second'].post(f'/review/{case.id}/close-out/sent').status_code == 409
+    sent = clients['reviewer'].post(f'/review/{case.id}/close-out/sent')
+    assert sent.status_code == 200 and sent.json()['sent'] and sent.json()['sent_by_name'] == 'Reviewer'
+    assert clients['reviewer'].post(f'/review/{case.id}/close-out/sent').status_code == 409
+    store.delete(case.id)

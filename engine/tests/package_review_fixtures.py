@@ -40,7 +40,14 @@ CLEAN_NARRATIVE = {
                        'the time emergency responders need to arrive.',
     'Mitigating measures': 'SYNTHETIC applicant passage: noncombustible soffit with the fire spread limited at the '
                            'exposing building face and the neighbouring house.',
-    'Assumptions and limits': 'SYNTHETIC applicant passage: assumes a single-family house; limited to the east face.',
+    'Assumptions and limits': 'SYNTHETIC applicant passage: assumes a single-family house; limited to the east face. '
+                              'Assumes a fire department response within the municipal standard.',
+    'Code analysis': 'SYNTHETIC applicant passage: objectives and functional statements F03-OP3.1 from the '
+                     'Division B table.',
+    'Testing procedures': 'SYNTHETIC: soffit assembly tested to CAN/ULC-S134 (no test performed).',
+    'Qualifications': 'SYNTHETIC: design by a fictional registered professional; no licence is claimed.',
+    'Maintenance and commissioning': 'SYNTHETIC: annual inspection of the soffit; if maintenance lapses or the '
+                                     'protection fails, the owner restores it before occupancy continues.',
 }
 
 CLEAN_REPORT = [

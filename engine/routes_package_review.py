@@ -22,8 +22,9 @@ from .access import authorize_case
 from .account_models import DecisionItem, User
 from .codes import CodeDbMissing, Codes
 from .models import now
-from .models_review import (InformationRequestEdit, PackageReviewIndex, ReviewSession, SentInformationRequest,
+from .models_review import (CloseOut, InformationRequestEdit, PackageReviewIndex, ReviewSession, SentInformationRequest,
                             SentInformationRequests, SessionSummary)
+from .review import close_out as closeout
 from .review import information_request as ir
 from .review.package import Parts, review_case, review_uploads
 from .review.routes_completeness import create_router as completeness_router
@@ -151,12 +152,42 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
         session = _build(case_id, case_id, case.authority, user, kind, parts, previous)
         return await run_in_threadpool(save, session)
 
+    def close_out_for(case, found: list[ReviewSession]) -> CloseOut | None:
+        if case.decision is None:
+            return None
+        from .review.documents import case_rows
+        documents = found[-1].documents if found else case_rows(case, cases())
+        return closeout.build(case, found, sessions().closeout(case.id), documents)
+
     @router.get('/review/{case_id}/package-review', response_model=PackageReviewIndex)
     def case_index(case_id: str, request: Request):
         case, _user = case_for_reviewer(case_id, request, claimed=False)
         found = sessions().list(case_id)
         return PackageReviewIndex(package_id=case_id, case_id=case_id, authority=case.authority,
-                                  sessions=[_summary(s) for s in found], latest=found[-1] if found else None)
+                                  sessions=[_summary(s) for s in found], latest=found[-1] if found else None,
+                                  close_out=close_out_for(case, found))
+
+    @router.get('/review/{case_id}/close-out', response_model=CloseOut)
+    def case_close_out(case_id: str, request: Request):
+        case, _user = case_for_reviewer(case_id, request, claimed=False)
+        result = close_out_for(case, sessions().list(case_id))
+        if result is None:
+            raise HTTPException(404, 'No final decision to close out')
+        return result
+
+    @router.post('/review/{case_id}/close-out/sent', response_model=CloseOut)
+    def case_close_out_sent(case_id: str, request: Request):
+        """The officer records that they sent the copy. Batatis sends nothing."""
+        case, user = case_for_reviewer(case_id, request, claimed=False)
+        if case.decision is None or case.decision.outcome not in closeout.FINAL_OUTCOMES:
+            raise HTTPException(404, 'No final decision to close out')
+        if case.decision.by_id != user.id and (case.claim is None or case.claim.reviewer_id != user.id):
+            raise HTTPException(409, 'Only the reviewer who recorded the decision may record the close-out')
+        try:
+            sessions().record_closeout(case_id, case.decision.at, now(), user.name)
+        except SessionConflict:
+            raise HTTPException(409, 'The close-out is already recorded') from None
+        return close_out_for(case, sessions().list(case_id))
 
     @router.get('/review/{case_id}/package-review/{version}', response_model=ReviewSession)
     def case_session(case_id: str, version: int, request: Request):

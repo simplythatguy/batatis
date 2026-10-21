@@ -34,8 +34,13 @@ def _exercise(store):
     # Standalone packages follow creation-based retention; case packages go with the case.
     standalone = 'pkg_' + uuid.uuid4().hex[:8]
     sessions.add(_session(standalone, 1, None, created_at='2000-01-01T00:00:00+00:00'))
+    sessions.record_closeout(case.id, '2026-10-21T00:00:00+00:00', '2026-10-22T00:00:00+00:00', 'Reviewer')
+    with pytest.raises(SessionConflict):
+        sessions.record_closeout(case.id, '2026-10-21T00:00:00+00:00', '2026-10-23T00:00:00+00:00', 'Reviewer')
+    assert sessions.closeout(case.id)[2] == 'Reviewer'
     store.delete(case.id)
     assert sessions.list(case.id) == []
+    assert sessions.closeout(case.id) is None
     assert sessions.list(standalone) == []
 
 

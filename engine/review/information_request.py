@@ -71,6 +71,11 @@ def _ask(finding: Finding) -> str:
                 f'{finding.message}')
     if finding.problem in ('missing_row',):
         return f'Please add a Section C row for {label}. {finding.message}'
+    if finding.problem in ('not_mentioned',):
+        return (f'Please state in the documentation {label}{at}, or say that it does not apply. '
+                f'{finding.message}')
+    if finding.problem in ('absent',):
+        return f'Please include the {label}{at}. {finding.message}'
     if finding.problem in ('signature_unread',):
         return f'Please confirm that the application is signed and dated{at}.'
     return f'Please provide or confirm the {label}{at}. {finding.message}'

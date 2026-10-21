@@ -770,6 +770,87 @@
       "title": "ClaimResult",
       "type": "object"
     },
+    "CloseOut": {
+      "additionalProperties": false,
+      "description": "Close-out after a final decision: the copy goes to the Council within 10 days of the decision.",
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "days_remaining": {
+          "title": "Days Remaining",
+          "type": "integer"
+        },
+        "decided_at": {
+          "title": "Decided At",
+          "type": "string"
+        },
+        "due_date": {
+          "title": "Due Date",
+          "type": "string"
+        },
+        "notice": {
+          "default": "Batatis does not send anything to the Safety Codes Council. The officer sends the copy and records it here.",
+          "title": "Notice",
+          "type": "string"
+        },
+        "outcome": {
+          "title": "Outcome",
+          "type": "string"
+        },
+        "overdue": {
+          "title": "Overdue",
+          "type": "boolean"
+        },
+        "record_package": {
+          "$ref": "#/$defs/RecordPackage"
+        },
+        "sent": {
+          "title": "Sent",
+          "type": "boolean"
+        },
+        "sent_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sent At"
+        },
+        "sent_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sent By Name"
+        }
+      },
+      "required": [
+        "case_id",
+        "outcome",
+        "decided_at",
+        "due_date",
+        "days_remaining",
+        "overdue",
+        "sent",
+        "sent_at",
+        "sent_by_name",
+        "record_package",
+        "notice"
+      ],
+      "title": "CloseOut",
+      "type": "object"
+    },
     "CodeTOC": {
       "properties": {
         "division": {
@@ -2542,6 +2623,17 @@
           ],
           "title": "Case Id"
         },
+        "close_out": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CloseOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "latest": {
           "anyOf": [
             {
@@ -2570,7 +2662,8 @@
         "case_id",
         "authority",
         "sessions",
-        "latest"
+        "latest",
+        "close_out"
       ],
       "title": "PackageReviewIndex",
       "type": "object"
@@ -2918,6 +3011,83 @@
         "applications"
       ],
       "title": "QueueResult",
+      "type": "object"
+    },
+    "RecordItem": {
+      "additionalProperties": false,
+      "properties": {
+        "detail": {
+          "default": "",
+          "title": "Detail",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "present": {
+          "default": true,
+          "title": "Present",
+          "type": "boolean"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Pointer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "label",
+        "detail",
+        "present",
+        "source"
+      ],
+      "title": "RecordItem",
+      "type": "object"
+    },
+    "RecordPackage": {
+      "additionalProperties": false,
+      "description": "What the officer sends to the Safety Codes Council and what stays on file. Batatis never sends it.",
+      "properties": {
+        "basis": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Basis",
+          "type": "array"
+        },
+        "note": {
+          "title": "Note",
+          "type": "string"
+        },
+        "retain_on_file": {
+          "items": {
+            "$ref": "#/$defs/RecordItem"
+          },
+          "title": "Retain On File",
+          "type": "array"
+        },
+        "send_to_council": {
+          "items": {
+            "$ref": "#/$defs/RecordItem"
+          },
+          "title": "Send To Council",
+          "type": "array"
+        }
+      },
+      "required": [
+        "send_to_council",
+        "retain_on_file",
+        "basis",
+        "note"
+      ],
+      "title": "RecordPackage",
       "type": "object"
     },
     "RelevanceBands": {

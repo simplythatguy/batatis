@@ -14,6 +14,7 @@ from ..models import INTENT_LABEL
 from ..models_review import (CitationCheck, DocumentRow, FieldReading, Finding, InputFile, Pointer,
                              SectionCCheck)
 from . import citations as cite
+from . import div_c
 from .documents import attachment_row, case_rows, merge_section_d, unreadable_row
 from .ingest import Ingested, StoredValue
 from .pdf_reader import FieldValue, ReadFile, field_maps, read_pdf
@@ -40,7 +41,10 @@ TEXT_FIELDS = {
         r'^\s*(?:[A-Z]-\d+\s+)?qualifications(?: of (?:the )?responsible (?:people|professional|persons?))?\s*(?::|$)',
         re.I | re.M)),
 }
-_STOP_LINE = re.compile(r'^\s*(?:[A-Z]-\d+\s|Applicant source:|NBC\(AE\)|[A-Z]\.\s+[A-Z]|Appendix page)', re.M)
+_STOP_LINE = re.compile(r'^\s*(?:[A-Z]-\d+\s|Applicant source:|NBC\(AE\)|[A-Z]\.\s+[A-Z]|Appendix page|'
+                        r'(?:rationale|code analysis|testing procedures?|qualifications(?: of [a-z ]+)?|'
+                        r'maintenance(?: and (?:operation|commissioning))?|operation and maintenance|commissioning)'
+                        r'\s*(?::|$))', re.M | re.I)
 _ENGINEERING = re.compile(r'\b(?:engineering|registered professional|professional involvement)\s+(?:is\s+)?required'
                           r'\s*[:\-]?\s*(yes|no)\b', re.I)
 
@@ -337,6 +341,7 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
                 listed.append((number, name.value, who.value if who and who.status == 'present' else '',
                                _pointer(form, name), _pointer(form, who) if who else _pointer(form, name)))
     parts.documents = merge_section_d(rows, listed)
+    _div_c_upload(form, by_widget, pages, engineering, parts, codes, reads)
     for row in parts.documents:
         looks_like_evidence = row.listed_in_section_d or row.type.known or row.evidence_rung.known
         if row.file and looks_like_evidence and not row.issuer.known and not row.responsible.known:
@@ -346,6 +351,28 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
                 defect_class='D13', message='No issuer or responsible person was read in this document.',
                 pointers=[row.title.source] if row.title.source else [Pointer(file=row.file)]))
     return parts
+
+
+def _div_c_upload(form, by_widget, pages, engineering, parts: Parts, codes, reads) -> None:
+    where = Pointer(file=form.name if form else (reads[0].name if reads else 'upload'))
+    corpus: div_c.Corpus = [(form.name, value.page + 1, f'{value.name}: {value.value}')
+                            for value in by_widget.values() if value.status == 'present'] if form else []
+    corpus += pages
+    responsible = [row.responsible.value for row in parts.documents if row.responsible.known]
+    readable = any(text.strip() for _f, _p, text in corpus)
+    if readable:
+        uncertain = any(read.role == 'unreadable' for read in reads)
+        parts.findings.extend(div_c.file_findings(corpus, where, codes, responsible=responsible,
+                                                  uncertain=uncertain))
+    signal = div_c.peer_review_finding(
+        professional_required=bool(engineering and engineering.group(1).casefold() == 'yes'),
+        provisions=[check.provision_id for check in parts.citations if check.provision_id],
+        rungs=[row.evidence_rung.value for row in parts.documents],
+        novel_product=any(div_c.NOVEL.search(text) for _f, _p, text in corpus)
+        or any(row.evidence_rung.value == "manufacturer's literature" for row in parts.documents),
+        where=where)
+    if signal:
+        parts.findings.append(signal)
 
 
 def _signatures(form: ReadFile, parts: Parts) -> None:
@@ -534,4 +561,34 @@ def review_case(case, codes, store=None) -> Parts:
                 label=f'Section C row for {row.provision_id}', status='unclear', problem='pair_mismatch',
                 defect_class='D07', message=message, severity='blocking', pointers=[pointer]))
     parts.documents = case_rows(case, store)
+    _div_c_case(case, codes, parts, record)
     return parts
+
+
+def _div_c_case(case, codes, parts: Parts, record: str) -> None:
+    from ..process_fields import alternative_path, confirmed_value
+    from ..professional import professional_involvement
+    corpus: div_c.Corpus = [(record, None, f'{fact.field}: {fact.value}') for fact in case.facts
+                            if isinstance(fact.value, str) and fact.value.strip()]
+    corpus += [(record, None, f'{row.provision_id} {" ".join(p.bracket or "" for p in row.pairs)}')
+               for row in case.section_c]
+    corpus += [(record, None, item.description) for item in case.evidence]
+    responsible = [row.responsible.value for row in parts.documents if row.responsible.known]
+    name = confirmed_value(case, 'professional_name')
+    if isinstance(name, str):
+        responsible.append(name)
+    where = Pointer(file=record)
+    # Qualifications and maintenance are process fields the saved-case policy already names.
+    parts.findings.extend(div_c.file_findings(corpus, where, codes, responsible=responsible,
+                                              skip={'div_c.qualifications', 'div_c.maintenance'},
+                                              on_alternative_path=alternative_path(case)))
+    try:
+        required = professional_involvement(case, codes).required == 'yes'
+    except Exception:  # noqa: BLE001 - the signal is advisory; a screen failure must not block the review
+        required = False
+    signal = div_c.peer_review_finding(
+        professional_required=required, provisions=list(case.provisions),
+        rungs=[row.evidence_rung.value for row in parts.documents],
+        novel_product=any(div_c.NOVEL.search(text) for _f, _p, text in corpus), where=where)
+    if signal:
+        parts.findings.append(signal)

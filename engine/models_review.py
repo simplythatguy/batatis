@@ -206,6 +206,40 @@ class SessionSummary(BaseModel):
     sent_at: str | None = None
 
 
+class RecordItem(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    label: str
+    detail: str = ''
+    present: bool = True
+    source: Pointer | None = None
+
+
+class RecordPackage(BaseModel):
+    """What the officer sends to the Safety Codes Council and what stays on file. Batatis never sends it."""
+    model_config = ConfigDict(extra='forbid')
+    send_to_council: list[RecordItem]
+    retain_on_file: list[RecordItem]
+    basis: list[str]
+    note: str
+
+
+class CloseOut(BaseModel):
+    """Close-out after a final decision: the copy goes to the Council within 10 days of the decision."""
+    model_config = ConfigDict(extra='forbid')
+    case_id: str
+    outcome: str
+    decided_at: str
+    due_date: str                   # ISO date, 10 days after the decision
+    days_remaining: int             # negative when overdue
+    overdue: bool
+    sent: bool                      # the officer recorded that they sent it
+    sent_at: str | None = None
+    sent_by_name: str | None = None
+    record_package: RecordPackage
+    notice: str = ('Batatis does not send anything to the Safety Codes Council. The officer sends the copy and '
+                   'records it here.')
+
+
 class PackageReviewIndex(BaseModel):
     model_config = ConfigDict(extra='forbid')
     package_id: str
@@ -213,6 +247,7 @@ class PackageReviewIndex(BaseModel):
     authority: str
     sessions: list[SessionSummary]
     latest: ReviewSession | None = None
+    close_out: CloseOut | None = None
 
 
 class InformationRequestEdit(BaseModel):

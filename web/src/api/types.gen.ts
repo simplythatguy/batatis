@@ -122,6 +122,21 @@ export interface ClaimResult {
   claim: Claim;
 }
 
+/** Close-out after a final decision: the copy goes to the Council within 10 days of the decision. */
+export interface CloseOut {
+  case_id: string;
+  days_remaining: number;
+  decided_at: string;
+  due_date: string;
+  notice: string;
+  outcome: string;
+  overdue: boolean;
+  record_package: RecordPackage;
+  sent: boolean;
+  sent_at: string | null;
+  sent_by_name: string | null;
+}
+
 export interface CodeTOC {
   division: string;
   edition: string;
@@ -408,6 +423,7 @@ export interface OnboardingRequest {
 export interface PackageReviewIndex {
   authority: string;
   case_id: string | null;
+  close_out: CloseOut | null;
   latest: ReviewSession | null;
   package_id: string;
   sessions: SessionSummary[];
@@ -457,6 +473,21 @@ export interface QueueApplication {
 
 export interface QueueResult {
   applications: QueueApplication[];
+}
+
+export interface RecordItem {
+  detail: string;
+  label: string;
+  present: boolean;
+  source: Pointer | null;
+}
+
+/** What the officer sends to the Safety Codes Council and what stays on file. Batatis never sends it. */
+export interface RecordPackage {
+  basis: string[];
+  note: string;
+  retain_on_file: RecordItem[];
+  send_to_council: RecordItem[];
 }
 
 export interface RelevanceBands {
