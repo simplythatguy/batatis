@@ -233,7 +233,8 @@ export const answeredYes = (c: Case) => c.candidates.filter((a) => a.answer === 
 export const unresolvedCandidates = (c: Case) => c.candidates.filter((a) => a.answer === null);
 
 /** Unanswered code-check cards name the question. They do not say "Answer: what you described". */
-export function codeCheckLabel(topic: string, question?: string): string {
+export function codeCheckLabel(topic: string, question?: string, provision?: string): string {
+  if (provision && isProvision(provision)) return `Code check: does your design depart from ${provision}?`;
   const using = topic.match(/^using\s+(.+)$/i);
   if (using) {
     const rest = using[1].charAt(0).toLowerCase() + using[1].slice(1);
@@ -287,7 +288,7 @@ export function getGaps(c: Case): Gap[] {
       gaps.push({
         id: `answer-${a.id}`,
         severity: "blocking",
-        label: codeCheckLabel(a.topic, a.clarifyingQuestion),
+        label: codeCheckLabel(a.topic, a.clarifyingQuestion, a.provision),
         href: `#/code-check?focus=cand-${a.id}`,
         field: `candidate.${a.id}`,
       });
@@ -376,7 +377,7 @@ export type Action =
   | { type: "setDetail"; field: string; value: string; section: string }
   | { type: "answerQuestion"; id: string; answer: string }
   | { type: "setStoreyCount"; value: string }
-  | { type: "answerCandidate"; id: string; answer: CandidateAnswer }
+  | { type: "answerCandidate"; id: string; answer: CandidateAnswer | null }
   | { type: "setProcess"; field: ProcessFieldId; value: string }
   | { type: "setAuthority"; authority: Case["authority"] }
   | { type: "addCandidate"; candidate: Candidate }

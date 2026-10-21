@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { engine, EngineError, type CodeHit } from "../api/client";
 import { toViewRow } from "../api/sectionC";
 import { CodeQuote, ServiceUnavailable, CheckAction, DraftNote, GapStrip, Icon, PanelHeader, StatusPill, type Dot } from "../components";
 import { CODE_EDITION } from "../config";
 import { DECISION_UNAVAILABLE, readDecisionBody, wireDecision } from "../identify";
 import { answeredYes, unresolvedCandidates } from "../model";
+import { useRoute } from "../router";
+import { withinProvision } from "../provisions";
 import { exitCountWarning, failureKind, QUOTE_LABEL, quoteKind } from "../rules";
 import { useCase } from "../store";
 import type { Candidate, CandidateAnswer } from "../types";
@@ -48,6 +50,7 @@ function CandidateCard({
         <h2 className="card-topic" id={`cand-${a.id}-topic`}>
           {a.topic}
         </h2>
+        {/^\d/.test(a.provision) && <span className="meta">{a.provision}</span>}
         {a.benchmark && a.answer === "yes" && <span className="label-pill">Main requirement</span>}
         {a.suggestion && a.answer === null && <span className="label-pill">Suggested</span>}
         <StatusPill dot={s.dot}>{s.label}</StatusPill>
@@ -123,8 +126,12 @@ type Filter = "all" | "open" | "yes";
 
 export function CodeCheck() {
   const { c, gaps, dispatch, saveDraft, engineId, checkStatus, noteLookupFailure } = useCase();
+  const route = useRoute();
+  const focusedProvision = c.candidates.find(a => `cand-${a.id}` === route.params.get("focus"))?.provision;
   const [decisionNote, setDecisionNote] = useState("");
   const [cardIndex, setCardIndex] = useState(0);
+  const [reviewProvision, setReviewProvision] = useState<string | null>(focusedProvision ?? null);
+  const [searchOpen, setSearchOpen] = useState(checkStatus === "unavailable");
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<CodeHit[]>([]);
@@ -137,6 +144,28 @@ export function CodeCheck() {
   const counts: Record<Filter, number> = { all: c.candidates.length, open: open.length, yes: yes.length };
   const shown = c.candidates.filter((a) => filter === "all" || (filter === "open" ? open.includes(a) : a.answer === "yes"));
   const labels: Record<Filter, string> = { all: "All", open: "Needs an answer", yes: "Departures" };
+
+  useEffect(() => {
+    if (!focusedProvision) return;
+    setFilter("all");
+    setReviewProvision(focusedProvision);
+    setSearchOpen(false);
+  }, [focusedProvision]);
+
+  const reviewIndex = reviewProvision ? shown.findIndex(a => withinProvision(a.provision, reviewProvision)) : -1;
+  const currentIndex = reviewIndex >= 0 ? reviewIndex : Math.min(cardIndex, shown.length - 1);
+  const focusedId = reviewProvision ? shown[currentIndex]?.id : undefined;
+  useLayoutEffect(() => {
+    if (!focusedId || searchOpen) return;
+    const card = document.getElementById(`cand-${focusedId}`);
+    card?.focus({ preventScroll: true });
+    card?.scrollIntoView({ block: "start", behavior: "instant" });
+  }, [focusedId, searchOpen]);
+  function reviewAdded(provision: string) {
+    setFilter("all");
+    setSearchOpen(false);
+    setReviewProvision(provision);
+  }
 
   function onAnswer(candidate: Candidate, answer: CandidateAnswer) {
     dispatch({ type: "answerCandidate", id: candidate.id, answer });
@@ -176,7 +205,7 @@ export function CodeCheck() {
       {(checkStatus === "ready" || checkStatus === "needs_answers") && <GapStrip gaps={gaps} />}
       <div className="toolbar" role="toolbar" aria-label="Filter">
         {(Object.keys(labels) as Filter[]).map((f) => (
-          <button key={f} type="button" className="pill" data-active={filter === f} aria-pressed={filter === f} onClick={() => { setFilter(f); setCardIndex(0); }}>
+          <button key={f} type="button" className="pill" data-active={filter === f} aria-pressed={filter === f} onClick={() => { setFilter(f); setCardIndex(0); setReviewProvision(null); }}>
             {labels[f]} <span className="tab-count">{counts[f]}</span>
           </button>
         ))}
@@ -189,7 +218,7 @@ export function CodeCheck() {
             </p>
           )}
           <CheckAction />
-          <details className="disclosure manual-search" open={checkStatus === "unavailable" || undefined}>
+          <details className="disclosure manual-search" open={searchOpen} onToggle={e => setSearchOpen(e.currentTarget.open)}>
             <summary>Search code manually</summary>
           <form
             className="field"
@@ -269,7 +298,7 @@ export function CodeCheck() {
                       const existing = c.candidates.find((x) => x.provision === h.id);
                       if (existing) {
                         setSearchNote(`${h.id} is already on this check.`);
-                        document.getElementById(`cand-${existing.id}`)?.focus();
+                        reviewAdded(h.id);
                         return;
                       }
                       let text = h.text.trim();
@@ -299,6 +328,7 @@ export function CodeCheck() {
                           answer: null,
                         },
                       });
+                      reviewAdded(h.id);
                       setSearchNote(
                         text
                           ? `Added ${h.id} to this check. Answer the new card before Section C.`
@@ -314,7 +344,7 @@ export function CodeCheck() {
           )}
           </details>
           {shown.length ? (
-            shown.slice(Math.min(cardIndex, shown.length - 1), Math.min(cardIndex, shown.length - 1) + 1).map((a) => (
+            shown.slice(currentIndex, currentIndex + 1).map((a) => (
               <CandidateCard key={a.id} a={a} index={c.candidates.indexOf(a)} total={c.candidates.length} onAnswer={onAnswer} />
             ))
           ) : (
@@ -329,9 +359,9 @@ export function CodeCheck() {
             </p>
           )}
           {shown.length > 1 && <div className="step-controls">
-            <button type="button" className="btn" disabled={cardIndex === 0} onClick={() => setCardIndex(n => n - 1)}>Previous</button>
-            <span className="meta">{Math.min(cardIndex + 1, shown.length)} of {shown.length}</span>
-            <button type="button" className="btn" disabled={cardIndex >= shown.length - 1} onClick={() => setCardIndex(n => n + 1)}>Next question</button>
+            <button type="button" className="btn" disabled={currentIndex === 0} onClick={() => { setReviewProvision(null); setCardIndex(currentIndex - 1); }}>Previous</button>
+            <span className="meta">{Math.min(currentIndex + 1, shown.length)} of {shown.length}</span>
+            <button type="button" className="btn" disabled={currentIndex >= shown.length - 1} onClick={() => { setReviewProvision(null); setCardIndex(currentIndex + 1); }}>Next question</button>
           </div>}
         </div>
       </div>

@@ -189,7 +189,7 @@ export function Officer() {
       <PanelHeader title="Officer review" meta="Administrative completeness" />
       <div className="pane scroll-body">
         <div className="content-col stack">
-          <p className="meta intro">This review is of the application in front of you. It checks whether information is present. It does not decide whether the design complies or is safe.</p>
+          <p className="meta intro">Checks application completeness, not design compliance or safety.</p>
           <p className="meta" role="status">
             {statusLine}
           </p>

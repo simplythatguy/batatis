@@ -155,7 +155,7 @@ function EvidenceAnswer({
         <input id={dateId} value={date} onChange={(e) => edit({ date: e.target.value })} placeholder="Left blank until you enter it" />
       </div>
       <div className="field">
-        <button type="button" className="btn" onClick={save}>
+        <button type="button" className="btn btn-primary" onClick={save}>
           Save this evidence
         </button>
         {note && (
@@ -198,6 +198,7 @@ function ProfessionalAnswers({ onEvidence }: { onEvidence: () => void }) {
                 value={value}
                 onChange={(e) => {
                   if (e.target.value) dispatch({ type: "setProfessionalFact", field: q.field, value: e.target.value });
+                  else dispatch({ type: "answerScope", field: q.field, answer: "clear" });
                 }}
               >
                 {OCCUPANCY.map(([value, label]) => (
@@ -334,7 +335,8 @@ function ProfessionalAnswers({ onEvidence }: { onEvidence: () => void }) {
   const steps = PROFESSIONAL_FIELDS.map((q, i) => ({
     title: q.label,
     fields: [`prof-${q.field}`],
-    content: <div className="form-grid">{inputs[i]}{q.field === "role" && deferred && <div className="full"><p className="meta">You can leave professional details for later. The officer will need them before the official PDF.</p><button className="btn" onClick={onEvidence}>Continue to evidence</button></div>}</div>,
+    content: <div className="form-grid">{inputs[i]}{q.field === "role" && deferred && <p className="meta full">Leave these details for later. The official PDF stays on hold.</p>}</div>,
+    continueAction: q.field === "role" && deferred ? { label: "Add evidence", onClick: onEvidence, optionalLabel: "Add more details" } : undefined,
   })).filter((_, i) => !deferred || ![1, 2].includes(i));
   return <FieldSteps previousHref="#/application?tab=alt&step=last" steps={steps} onComplete={onEvidence} />;
 }
@@ -360,7 +362,10 @@ export function Recommendations() {
       if (c.practiceOfEngineering !== practice) dispatch({ type: "notePractice", value: practice });
       setLoad({ ...result, phase: "live", note: "" });
     }).catch(error => {
-      if (active) setLoad({ ...IDLE, phase: "error", note: failureText(error), recovery: error instanceof SectionDRecoveryError ? error : undefined });
+      // The current read contract exposes the unsupported final clear as a plain
+      // Error. Preserve this actionable warning until the backend clear contract lands.
+      const clearNote = error instanceof Error && error.message.startsWith("No confirmed references remain.") ? error.message : null;
+      if (active) setLoad({ ...IDLE, phase: "error", note: clearNote ?? failureText(error), recovery: error instanceof SectionDRecoveryError ? error : undefined });
     });
     return () => { active = false; };
     // Snapshot captures generation, revision and deterministic reference expansion.
@@ -399,9 +404,9 @@ export function Recommendations() {
         {load.recovery.kind === "conflict" && <button className="btn" onClick={() => setAttempt(n => n + 1)}>Refresh case and retry</button>}
         <a className="text-link" href="#/application?download=1">Keep a draft</a>
         <details><summary>Technical detail</summary><p>{load.recovery.detail}</p></details>
-      </div> : (load.phase === "error" || load.phase === "unreachable") && <ServiceUnavailable reason={load.note} onRetry={() => setAttempt(n => n + 1)} />}
+      </div> : load.phase === "error" && load.note.startsWith("No confirmed references remain.") ? <div className="recovery" role="status"><p>{load.note}</p><a className="text-link" href="#/section-c">Review code references</a></div> : (load.phase === "error" || load.phase === "unreachable") && <ServiceUnavailable reason={load.note} onRetry={() => setAttempt(n => n + 1)} />}
       {load.phase === "loading" && <p className="meta" role="status">Loading evidence…</p>}
-      {items.length > 0 && <div className="field"><label htmlFor="evidence-choice">Document to add</label><select id="evidence-choice" value={selectedId ?? ""} onChange={e => setSelectedEvidence(e.target.value)}>
+      {items.length > 0 && <div className="field"><label htmlFor="evidence-choice">Sentence & evidence task</label><select id="evidence-choice" value={selectedId ?? ""} onChange={e => setSelectedEvidence(e.target.value)}>
         {items.map(({ id, issue, plan }) => <option key={id} value={id}>{evidenceTask(c, issue ?? plan ?? {})}</option>)}
       </select></div>}
 
@@ -422,22 +427,22 @@ export function Recommendations() {
             return (
               <article key={issue.id} className="card">
                 <div className="card-head">
-                  <h3 className="section-title">{evidenceTask(c, issue)}</h3>
+                  <h3 className="section-title">Add a document</h3>
                   <span className="label-pill">
                     <span className={`status-dot ${status === "needs_professional" ? "blocking" : "warning"}`} />
                     {status === "needs_professional" ? "Routed to the officer" : status === "evidence_listed" ? "evidence listed" : "open"}
                   </span>
                 </div>
-                <details className="compact-help"><summary>What this document should address</summary><p className="mono">{issue.provision?.provision_id ?? issue.entered_reference ?? "No confirmed reference"}</p><p>{issue.at_stake}</p>
+                <p className="meta evidence-context">{issue.provision?.provision_id ?? issue.entered_reference ?? "No confirmed reference"} · {evidenceTask(c, issue).split(" · ").slice(1).join(" · ")}</p>
+                <details className="compact-help"><summary>Document guidance</summary><p>Ask your designer to compare the proposed design with this code requirement.</p>
+                <details className="compact-help"><summary>Comparison details</summary><p>{issue.at_stake}</p></details>
                 {issue.question && <p className="field-note">{issue.question}</p>}
                 <p>
                   <span className={`status-dot ${practiceValue === true ? "blocking" : practiceValue === "unknown" ? "warning" : "pending"}`} />{" "}
                   {prompt.lead}
                 </p>
                 {prompt.question && <p className="field-note">{prompt.question}</p>}
-                <p className="meta">
-                  Evidence types to consider: {issue.recommended_types.join(", ") || "none listed"}. Not results, and not filled in for you.
-                </p>
+                <details className="compact-help"><summary>Evidence types</summary><p>{issue.recommended_types.join(", ") || "None listed"}. These are suggestions, not test results.</p></details>
                 {issue.provision?.citation && <p className="mono meta">{issue.provision.citation}</p>}
                 </details>
                 <EvidenceAnswer
@@ -460,16 +465,15 @@ export function Recommendations() {
           {load.plan.items.filter(item => item.id === selectedId && !load.issues?.some(issue => issue.id === item.id)).map((item) => (
             <article key={item.id} className="card">
               <div className="card-head">
-                <h3 className="section-title">{evidenceTask(c, item)}</h3>
+                <h3 className="section-title">Add a document</h3>
                 <span className="label-pill">
                   <span className={`status-dot ${evidenceRecorded(item.status) ? "done" : "warning"}`} />
                   {item.status}
                 </span>
               </div>
-              <details className="compact-help"><summary>What this document should address</summary><p className="mono">{item.provision_id}</p><p>{item.performance_issue}</p>
-              <p className="meta">
-                Evidence types to consider: {item.recommended_types.join(", ") || "none listed"}. Not results, and not filled in for you.
-              </p>
+              <p className="meta evidence-context">{item.provision_id}</p>
+              <details className="compact-help"><summary>Document guidance</summary><p>{item.performance_issue}</p>
+              <details className="compact-help"><summary>Evidence types</summary><p>{item.recommended_types.join(", ") || "None listed"}. These are suggestions, not test results.</p></details>
               {item.citation && <p className="mono meta">{item.citation}</p>}
               </details>
               <EvidenceAnswer
@@ -480,11 +484,11 @@ export function Recommendations() {
               />
             </article>
           ))}
-          {load.plan.notices.map((n) => (
+          {load.plan.notices.length > 0 && <details className="compact-help"><summary>Evidence notes</summary>{load.plan.notices.map((n) => (
             <p key={n} className="meta">
               {n}
             </p>
-          ))}
+          ))}</details>}
         </div>
       )}
       </>}

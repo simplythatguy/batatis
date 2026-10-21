@@ -1369,3 +1369,8 @@ body { font-size: 14px; line-height: 1.45; }
   .onboarding-shell .sidebar { height: auto; }
   .onboarding-shell .phone-navigation { display: none; }
 }
+
+/* Keep the next action clear and supporting context quiet. */
+.optional-next { align-self: flex-start; padding-inline: 0; }
+.evidence-context { margin: -8px 0 8px; }
+.field-step { padding-bottom: 16px; }

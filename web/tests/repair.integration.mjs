@@ -113,7 +113,7 @@ await scenario('N1 continuous forward/back includes all six alternative groups b
  await next();await next();await next();await p.getByRole('button',{name:'Continue',exact:true}).click();await p.getByRole('button',{name:'Continue',exact:true}).click();
  const visited=[];for(let i=0;i<6;i++){await p.locator('.field-step textarea').waitFor();visited.push(await p.locator('.field-step textarea').getAttribute('id'));await next();}
  assert.deepEqual(visited,['field-rationale','field-risk','field-mitigation','field-assumptions','field-maintenance','field-qualifications']);await p.locator('#prof-role').waitFor();
- await p.locator('#prof-role').selectOption('not_sure');await p.getByRole('button',{name:'Continue to evidence',exact:true}).waitFor();await next();await p.locator('#prof-occupancy').waitFor();assert.equal(await p.locator('#prof-registration_number').count(),0);
+ await p.locator('#prof-role').selectOption('not_sure');await p.getByRole('button',{name:'Add evidence',exact:true}).waitFor();await p.getByRole('button',{name:'Add more details',exact:true}).click();await p.locator('#prof-occupancy').waitFor();assert.equal(await p.locator('#prof-registration_number').count(),0);
 });
 await scenario('N3 failure has a visible first-item recovery; officer copy is above the fold at 390px',async p=>{
  await p.setViewportSize({width:390,height:844});await nav(p,'/application?tab=A');await p.getByRole('button',{name:'Ready to submit',exact:true}).click();await p.locator('#completeness-description').filter({hasText:'Check unavailable. Your work is still here.'}).waitFor();

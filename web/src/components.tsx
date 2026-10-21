@@ -220,7 +220,7 @@ export function CheckAction() {
 }
 
 /** Small field groups; deep links open the group containing the requested field. */
-export function FieldSteps({ steps, nextHref, previousHref, onComplete }: { steps: { title: string; fields: string[]; content: ReactNode }[]; nextHref?: string; previousHref?: string; onComplete?: () => void }) {
+export function FieldSteps({ steps, nextHref, previousHref, onComplete }: { steps: { title: string; fields: string[]; content: ReactNode; continueAction?: { label: string; onClick: () => void; optionalLabel: string } }[]; nextHref?: string; previousHref?: string; onComplete?: () => void }) {
   const route = useRoute();
   const focus = route.params.get("focus");
   const focusIndex = steps.findIndex(step => focus && step.fields.includes(focus));
@@ -246,10 +246,11 @@ export function FieldSteps({ steps, nextHref, previousHref, onComplete }: { step
   return <section className="field-step">
     <div className="step-heading"><h2 ref={heading} tabIndex={-1}>{step.title}</h2><span className="meta">{current + 1} of {steps.length}</span></div>
     {step.content}
+    {step.continueAction && current < steps.length - 1 && <button type="button" className="btn btn-ghost optional-next" onClick={() => move(current + 1)}>{step.continueAction.optionalLabel}</button>}
     <div className="step-controls">
       {current === 0 && previousHref ? <a className="btn btn-ghost" href={previousHref}>Previous</a> : <button type="button" className="btn btn-ghost" disabled={current === 0} onClick={() => move(current - 1)}>Previous</button>}
       <details className="jump-menu"><summary>All fields</summary><div>{steps.map((item, n) => <button key={item.title} type="button" className="btn btn-ghost" aria-current={current === n ? "step" : undefined} onClick={e => { move(n); e.currentTarget.closest("details")?.removeAttribute("open"); }}>{item.title}</button>)}</div></details>
-      {current < steps.length - 1 ? <button type="button" className="btn btn-primary" onClick={() => move(current + 1)}>Continue</button> : nextHref ? <a className="btn btn-primary" href={nextHref}>Continue</a> : onComplete ? <button className="btn btn-primary" onClick={onComplete}>Continue to evidence</button> : <span className="meta">You can return to any answer.</span>}
+      {step.continueAction ? <button type="button" className="btn btn-primary" onClick={step.continueAction.onClick}>{step.continueAction.label}</button> : current < steps.length - 1 ? <button type="button" className="btn btn-primary" onClick={() => move(current + 1)}>Continue</button> : nextHref ? <a className="btn btn-primary" href={nextHref}>Continue</a> : onComplete ? <button className="btn btn-primary" onClick={onComplete}>Continue to evidence</button> : <span className="meta">You can return to any answer.</span>}
     </div>
   </section>;
 }

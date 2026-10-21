@@ -194,8 +194,80 @@ export function SectionC() {
           ) : (
             <SourceLabel source={source} error={error} />
           )}
-          {source === "live" && rows.length > 0 && <span className="meta">Rows from the engine's code database for this case</span>}
+          {source === "live" && rows.length > 0 && <span className="meta">Code references loaded</span>}
         </div>
+        {rows.length > 0 && <div className="field"><label htmlFor="reference-choice">Review a reference</label><select id="reference-choice" value={sel ? rowKey(sel) : ""} onChange={e => setSelected(e.target.value)}>{rows.map(r => <option key={rowKey(r)} value={rowKey(r)}>{r.provision}</option>)}</select></div>}
+        {sel && (
+          <div className="sc-detail">
+            {selCand && <div className="field">
+              <label htmlFor="sentence-decision">Does your design depart from this sentence?</label>
+              <select id="sentence-decision" value={selCand.answer ?? ""} onChange={e => {
+                const answer = e.target.value;
+                if (answer === "" || answer === "yes" || answer === "no" || answer === "not-sure") dispatch({ type: "answerCandidate", id: selCand.id, answer: answer === "" ? null : answer });
+              }}>
+                <option value="">Not answered</option><option value="yes">Yes — a departure</option><option value="no">No departure</option><option value="not-sure">Not sure</option>
+              </select>
+              <button type="button" className="btn btn-ghost" onClick={() => dispatch({ type: "removeCandidate", id: selCand.id })}>Remove reference</button>
+            </div>}
+            <details className="source-block disclosure"><summary>Code text and source</summary>
+              <div className="block-label">
+                <span className="label-pill">{quoteLabel.pill}</span>
+                <span className="meta">
+                  {quoteLabel.meta}
+                  {quote?.citation ? ` · ${quote.citation}` : liveText.state === "error" ? ` · ${liveText.message}` : ""}
+                </span>
+              </div>
+              {fromCodedb ? (
+                <CodeQuote text={quote?.text} />
+              ) : (
+                <blockquote className="cite-block quote">
+                  {liveText.state === "loading" ? "Loading the provision text…" : (quote?.text ?? "No code sentence is available for this row.")}
+                </blockquote>
+              )}
+              <p className="meta">
+                Section C row: {sel.citation}
+                {sel.attributionStatus === "inherited" && ` · uses the table row of ${sel.inheritedFrom}`}
+                {sel.attributionStatus === "no-row" && " · the attribution table has no row for it"}
+              </p>
+              {sel.differs && (
+                <p className="field-note">
+                  <span className="status-dot warning" />
+                  {sel.differsDetail}
+                </p>
+              )}
+            </details>
+            <details className="source-block disclosure"><summary>Intent statements</summary>
+              <div className="block-label">
+                <span className="label-pill">NBC 2020 Intent Statements</span>
+                <span className="meta">Explanatory only, not part of NBC(AE) 2023</span>
+              </div>
+              {!sel.intent.length && <p className="meta">No NBC 2020 intent statement for this provision.</p>}
+              {sel.intent.map((i) => (
+                <CodeQuote
+                  key={i.text}
+                  source="intent"
+                  className="intent-block"
+                  text={
+                    <>
+                      {i.objective && <span className="meta">{i.objective} · </span>}
+                      {i.text}
+                    </>
+                  }
+                />
+              ))}
+            </details>
+            <details className="compact-help"><summary>Objectives & functions</summary><Pairs row={sel} /></details>
+            {sel.explanation && (
+              <section className="ai-block">
+                <div className="block-label">
+                  <span className="label-pill ai-pill">AI-written</span>
+                  <span className="meta">Explanation, not code text</span>
+                </div>
+                <p className="ai-explain">{sel.explanation}</p>
+              </section>
+            )}
+          </div>
+        )}
         <details className="compact-help"><summary>About Section C</summary><p>Objectives explain why a code requirement exists. Functions describe what it must achieve. These come from the code tables, not AI.</p></details>
         {source === "error" && <ServiceUnavailable reason={error ?? "The lookup did not return."} onRetry={() => { retrySectionC(); setAttempt(n => n + 1); }} />}
         <details className="disclosure" open={!rows.length || undefined}><summary>Add a code reference</summary><ProvisionSearch /></details>
@@ -268,82 +340,10 @@ export function SectionC() {
           </table>
         </div></details>}
 
-        {rows.length > 0 && <div className="field"><label htmlFor="reference-choice">Review a reference</label><select id="reference-choice" value={sel ? rowKey(sel) : ""} onChange={e => setSelected(e.target.value)}>{rows.map(r => <option key={rowKey(r)} value={rowKey(r)}>{r.provision}</option>)}</select></div>}
-        {sel && (
-          <div className="sc-detail">
-            <details className="source-block disclosure"><summary>Code text and source</summary>
-              <div className="block-label">
-                <span className="label-pill">{quoteLabel.pill}</span>
-                <span className="meta">
-                  {quoteLabel.meta}
-                  {quote?.citation ? ` · ${quote.citation}` : liveText.state === "error" ? ` · ${liveText.message}` : ""}
-                </span>
-              </div>
-              {fromCodedb ? (
-                <CodeQuote text={quote?.text} />
-              ) : (
-                <blockquote className="cite-block quote">
-                  {liveText.state === "loading" ? "Loading the provision text…" : (quote?.text ?? "No code sentence is available for this row.")}
-                </blockquote>
-              )}
-              <p className="meta">
-                Section C row: {sel.citation}
-                {sel.attributionStatus === "inherited" && ` · uses the table row of ${sel.inheritedFrom}`}
-                {sel.attributionStatus === "no-row" && " · the attribution table has no row for it"}
-              </p>
-              {sel.differs && (
-                <p className="field-note">
-                  <span className="status-dot warning" />
-                  {sel.differsDetail}
-                </p>
-              )}
-            </details>
-            <details className="source-block disclosure"><summary>Intent statements</summary>
-              <div className="block-label">
-                <span className="label-pill">NBC 2020 Intent Statements</span>
-                <span className="meta">Explanatory only, not part of NBC(AE) 2023</span>
-              </div>
-              {!sel.intent.length && <p className="meta">No NBC 2020 intent statement for this provision.</p>}
-              {sel.intent.map((i) => (
-                <CodeQuote
-                  key={i.text}
-                  source="intent"
-                  className="intent-block"
-                  text={
-                    <>
-                      {i.objective && <span className="meta">{i.objective} · </span>}
-                      {i.text}
-                    </>
-                  }
-                />
-              ))}
-            </details>
-            <div className="card"><h2 className="section-title">{sel.provision}</h2><Pairs row={sel} /></div>
-            {selCand && <div className="field">
-              <label htmlFor="sentence-decision">Does your design depart from this sentence?</label>
-              <select id="sentence-decision" value={selCand.answer ?? ""} onChange={e => {
-                const answer = e.target.value;
-                if (answer === "yes" || answer === "no" || answer === "not-sure") dispatch({ type: "answerCandidate", id: selCand.id, answer });
-              }}>
-                <option value="">Not answered</option><option value="yes">Yes — a departure</option><option value="no">No departure</option><option value="not-sure">Not sure</option>
-              </select>
-              <button type="button" className="btn btn-ghost" onClick={() => dispatch({ type: "removeCandidate", id: selCand.id })}>Remove reference</button>
-            </div>}
-            {sel.explanation && (
-              <section className="ai-block">
-                <div className="block-label">
-                  <span className="label-pill ai-pill">AI-written</span>
-                  <span className="meta">Explanation, not code text</span>
-                </div>
-                <p className="ai-explain">{sel.explanation}</p>
-              </section>
-            )}
-          </div>
-        )}
       </div>
       <div className="footer-bar">
         <span className="status-note" role="status">
-          {open.length ? `${open.length} row${open.length > 1 ? "s" : ""} wait for your answer in Code check. ` : ""}
+          {open.length ? `${open.length} unanswered Code check question${open.length > 1 ? "s" : ""}. ` : ""}
           Not sure does not block Continue.
         </span>
         <a className="btn btn-ghost" href="#/code-check">

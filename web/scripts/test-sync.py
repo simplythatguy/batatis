@@ -66,6 +66,8 @@ with tempfile.TemporaryDirectory(prefix='batatis-web-sync-') as tmp:
                 result = subprocess.run(['node', '--experimental-strip-types', '--import', './scripts/register-ts.mjs', 'tests/repair.integration.mts'], cwd=WEB, env=env, timeout=120)
                 if result.returncode == 0:
                     result = subprocess.run(['node', 'tests/repair.integration.mjs'], cwd=WEB, env=env, timeout=120)
+                if result.returncode == 0:
+                    result = subprocess.run(['node', 'tests/repair-r6.integration.mjs'], cwd=WEB, env=env, timeout=120)
             sys.exit(result.returncode)
         finally:
             server.terminate()
