@@ -22,14 +22,16 @@ def context(tmp_path):
 def test_routes_are_mounted_and_rebuild_only_confirmed_rows(context):
     client, store, codes = context
     case = store.put(Case())
-    r = client.post(f'/cases/{case.id}/section-d', json={'provisions': ['9.25.5.2.(1)(b)', '9.27.3.2.(1)']})
+    r = client.post(f'/cases/{case.id}/section-d', json={
+        'provisions': ['9.25.5.2.(1)(b)', '9.27.3.2.(1)'], 'expected_version': case.version})
     assert r.status_code == 200 and r.json()['items']
     assert all(item['status'] == 'needed' for item in r.json()['items'])
     stored = store.get(case.id)
     assert stored.provisions == ['9.25.5.2.(1)(b)', '9.27.3.2.(1)'] and stored.section_c
     assert stored.evidence == []
     before = stored.model_dump_json()
-    r = client.post(f'/cases/{case.id}/section-d', json={'provisions': ['9.99.99.99.(1)']})
+    r = client.post(f'/cases/{case.id}/section-d', json={
+        'provisions': ['9.99.99.99.(1)'], 'expected_version': stored.version})
     assert r.status_code == 404 and store.get(case.id).model_dump_json() == before
     assert client.post(f'/cases/{case.id}/section-d', json={'risk_assessment': 'AI-written text'}).status_code == 422
 

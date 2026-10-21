@@ -144,6 +144,7 @@ class Case(BaseModel):
     title: str | None = None
     created_at: str = Field(default_factory=now)
     updated_at: str = Field(default_factory=now)
+    version: int = Field(default=1, ge=1)      # acknowledgment of the store's row version, never input authority
     jurisdiction: Jurisdiction | None = None
     facts: list[Fact] = []
     provisions: list[str] = []                 # Division B ids the applicant confirmed

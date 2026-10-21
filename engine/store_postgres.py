@@ -85,7 +85,7 @@ class PostgresCaseStore:
             if row is None or self._purge_expired(con, case_id):
                 return None
             files = {item[0] for item in con.execute('SELECT id FROM case_files WHERE case_id=%s', (case_id,))}
-            return case_with_stored_files(row[0], files), int(row[1])
+            return case_with_stored_files(row[0], files, int(row[1])), int(row[1])
 
     def delete(self, case_id: str) -> bool:
         """Remove the case, its facts, its evidence, and its files."""
@@ -115,14 +115,15 @@ class PostgresCaseStore:
 
     def put(self, case: Case, *, expected_version: int | None = None) -> Case:
         case.updated_at = now()
-        payload = Jsonb(case.model_dump(mode='json'))
+        payload = Jsonb(case.model_dump(mode='json', exclude={'version'}))
         conflict = None
         with self._conn() as con:
             if expected_version is None:
-                con.execute('INSERT INTO cases (id, data, version, updated_at) VALUES (%s, %s, 1, %s) '
-                            'ON CONFLICT (id) DO UPDATE SET data=EXCLUDED.data, '
-                            'version=cases.version+1, updated_at=EXCLUDED.updated_at',
-                            (case.id, payload, case.updated_at))
+                row = con.execute('INSERT INTO cases (id, data, version, updated_at) VALUES (%s, %s, 1, %s) '
+                                  'ON CONFLICT (id) DO UPDATE SET data=EXCLUDED.data, '
+                                  'version=cases.version+1, updated_at=EXCLUDED.updated_at RETURNING version',
+                                  (case.id, payload, case.updated_at)).fetchone()
+                case.version = int(row[0])
                 return case
             if expected_version == 0:
                 row = con.execute('INSERT INTO cases (id, data, version, updated_at) VALUES (%s, %s, 1, %s) '
@@ -131,6 +132,7 @@ class PostgresCaseStore:
                 if row is None:
                     actual = con.execute('SELECT version FROM cases WHERE id=%s', (case.id,)).fetchone()
                     raise VersionConflict(case.id, 0, int(actual[0]) if actual else None)
+                case.version = int(row[0])
                 return case
             row = con.execute('SELECT data, version FROM cases WHERE id=%s FOR UPDATE', (case.id,)).fetchone()
             if row is not None and self._purge_expired(con, case.id):
@@ -138,11 +140,12 @@ class PostgresCaseStore:
             if row is None or row[1] != expected_version:
                 conflict = VersionConflict(case.id, expected_version, int(row[1]) if row else None)
             else:
-                cur = con.execute('UPDATE cases SET data=%s, version=version+1, updated_at=%s '
-                                  'WHERE id=%s AND version=%s',
-                                  (payload, case.updated_at, case.id, expected_version))
-                if cur.rowcount != 1:
+                saved = con.execute('UPDATE cases SET data=%s, version=version+1, updated_at=%s '
+                                  'WHERE id=%s AND version=%s RETURNING version',
+                                  (payload, case.updated_at, case.id, expected_version)).fetchone()
+                if saved is None:
                     raise VersionConflict(case.id, expected_version)
+                case.version = int(saved[0])
         # Keep an expiry deletion committed even though the optimistic write is rejected.
         if conflict is not None:
             raise conflict
@@ -159,12 +162,14 @@ class PostgresCaseStore:
                 if reference is not None and con.execute(
                         'SELECT 1 FROM case_files WHERE id=%s AND case_id=%s', (reference, case_id)).fetchone() is None:
                     raise InvalidAttachment('Attach an uploaded file from this application before confirming the document.')
-                case = Case.model_validate(row[0])
+                files = {item[0] for item in con.execute('SELECT id FROM case_files WHERE case_id=%s', (case_id,))}
+                case = case_with_stored_files(row[0], files, int(row[1]))
                 case.facts = [item for item in case.facts if item.id != fact.id] + [fact]
                 case.updated_at = now()
+                case.version = int(row[1]) + 1
                 cur = con.execute('UPDATE cases SET data=%s, version=version+1, updated_at=%s '
                                   'WHERE id=%s AND version=%s',
-                                  (Jsonb(case.model_dump(mode='json')), case.updated_at, case_id, row[1]))
+                                  (Jsonb(case.model_dump(mode='json', exclude={'version'})), case.updated_at, case_id, row[1]))
                 if cur.rowcount == 1:
                     return case
         raise VersionConflict(case_id)
@@ -179,13 +184,15 @@ class PostgresCaseStore:
             # Recheck retention after the lock: a waiting read may see a newly expired row.
             if self._purge_expired(con, case_id):
                 return None
-            case = Case.model_validate(row[0])
+            files = {item[0] for item in con.execute('SELECT id FROM case_files WHERE case_id=%s', (case_id,))}
+            case = case_with_stored_files(row[0], files, int(row[1]))
             case.facts = [fact for fact in case.facts if not fact.field.startswith(prefix)]
             case.evidence = [item for item in case.evidence if item.id != evidence_id]
             case.updated_at = now()
+            case.version = int(row[1]) + 1
             cur = con.execute('UPDATE cases SET data=%s, version=version+1, updated_at=%s '
                               'WHERE id=%s AND version=%s',
-                              (Jsonb(case.model_dump(mode='json')), case.updated_at, case_id, row[1]))
+                              (Jsonb(case.model_dump(mode='json', exclude={'version'})), case.updated_at, case_id, row[1]))
             if cur.rowcount != 1:
                 raise VersionConflict(case_id, row[1])
             return case
