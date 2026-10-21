@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react"
 import { engine, EngineError, type CodeHit } from "../api/client";
 import { setPendingReveal, tocIndex, useToc } from "./codeData";
 import { RelevanceRing } from "./RelevanceRing";
-import { BAND_LABEL, bandFor, rankedIn } from "./relevance";
+import { BAND_LABEL, rankedIn } from "./relevance";
 import { codeHref } from "./routes";
 import { articleOf, useRelevance } from "./useRelevance";
 import { CIcon, Modal } from "./ui";
@@ -79,7 +79,7 @@ export function CodePalette({ open, onClose }: { open: boolean; onClose: () => v
       return out;
     }
     if (rel.display) {
-      return rankedIn(rel.display, rel.cutoffs, ["high", "mid"]).slice(0, 10).map((r) => ({
+      return rankedIn(rel.display, rel.cutoffs, ["high", "mid"], rel.rerank).slice(0, 10).map((r) => ({
         kind: "ranked" as const, key: `rank-${r.id}`, id: r.id, target: r.id, title: index.get(r.id)?.title ?? "", path: index.get(r.id)?.path ?? "", p: r.p,
       }));
     }
@@ -87,7 +87,7 @@ export function CodePalette({ open, onClose }: { open: boolean; onClose: () => v
     if (!rel.blocked && rel.phase !== "running") out.push({ kind: "score", key: "score", title: "Score relevance for my project" });
     if (toc.state === "ready") for (const p of toc.value.parts) out.push({ kind: "part", key: `part-${p.part}`, part: p.part, title: p.title ?? "" });
     return out;
-  }, [q, hits, rel.display, rel.cutoffs, rel.blocked, rel.phase, index, toc]);
+  }, [q, hits, rel.display, rel.cutoffs, rel.rerank, rel.blocked, rel.phase, index, toc]);
 
   useEffect(() => { setActive(0); }, [q, rows.length]);
   useEffect(() => {
@@ -153,11 +153,11 @@ export function CodePalette({ open, onClose }: { open: boolean; onClose: () => v
                 <><span className="cf-pal-icon"><CIcon name="doc" size={14} /></span><span className="cf-mono">Part {r.part}</span><span className="cf-pal-title">{r.title}</span></>
               ) : (
                 <>
-                  <RelevanceRing id={r.p == null ? r.target : undefined} p={r.p} focusable={false} />
+                  <RelevanceRing id={r.target} focusable={false} />
                   <span className="cf-mono cf-pal-id">{r.id}</span>
                   <span className="cf-pal-title">{r.title}</span>
                   <span className="cf-faint cf-small cf-pal-path">
-                    {r.kind === "ranked" && r.p != null ? BAND_LABEL[bandFor(r.p, rel.cutoffs)] : r.path}
+                    {r.kind === "ranked" ? BAND_LABEL[rel.shown(r.id).band] : r.path}
                   </span>
                 </>
               )}

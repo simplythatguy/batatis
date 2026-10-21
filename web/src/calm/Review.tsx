@@ -63,7 +63,7 @@ export function Review() {
   const need = engineerNeed(c, gaps);
   // Rings never count as Section C; this only points at the library.
   const rel = useRelevance();
-  const likely = rankedIn(rel.display, rel.cutoffs, ["high"]).length;
+  const likely = rankedIn(rel.display, rel.cutoffs, ["high"], rel.rerank).length;
   const departures = c.sectionC.filter((r) => c.candidates.find((a) => a.id === r.candidateId)?.answer === "yes").length;
 
   const sections = [

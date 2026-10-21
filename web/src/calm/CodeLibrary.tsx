@@ -8,10 +8,10 @@ import { useCase } from "../store";
 import { errorText, takePendingReveal, tocIndex, useContext, useText, useToc } from "./codeData";
 import { BandPill, RelevanceRing, RingGlyph, RingLegend, Tip } from "./RelevanceRing";
 import {
-  ancestorsOf, reflow, BAND_LABEL, bandFor, filterKeep, maxOf, partArticles, pct, pruneToc, rankedIn, sectionArticles, subsectionArticles, ago, type Filter,
+  ancestorsOf, reflow, BAND_LABEL, filterKeep, partArticles, pct, pruneToc, rankedIn, sectionArticles, strongestOf, subsectionArticles, ago, type Filter,
 } from "./relevance";
 import { codeHref, type CalmRoute } from "./routes";
-import { scoreFor, useRelevance } from "./useRelevance";
+import { articleOf, useRelevance } from "./useRelevance";
 import { openPalette } from "./CodePalette";
 import { CIcon, Eyebrow, MOD_KEY } from "./ui";
 
@@ -121,8 +121,7 @@ function Peek({ id, anchor, path }: { id: string; anchor: HTMLElement; path: str
   const text = useText(id);
   const ctx = useContext(id);
   const rel = useRelevance();
-  const p = scoreFor(rel.display, id);
-  const band = bandFor(p, rel.cutoffs);
+  const { p, band, screenedOnly } = rel.shown(id);
   const card = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   useLayoutEffect(() => {
@@ -143,6 +142,7 @@ function Peek({ id, anchor, path }: { id: string; anchor: HTMLElement; path: str
         <RingGlyph p={p} band={band} />
         <span className="cf-mono">{band === "unscored" ? "Not scored" : pct(p!, 1)}</span>
         <span className={`cf-band is-${band}`}>{BAND_LABEL[band]}</span>
+        {screenedOnly && band !== "unscored" && <span className="cf-faint cf-small">Screened only</span>}
       </div>
       <p className="cf-peek-text">{text.state === "loading" ? "Loading…" : text.state === "error" ? "The wording did not load." : words ? (words.length > 160 ? `${words.slice(0, 157)}…` : words) : "Article heading. Open it to read its sentences."}</p>
       {objectives.length > 0 && <div className="cf-peek-codes">{objectives.map((o) => <span key={o} className="cf-code-chip is-static">{o}</span>)}</div>}
@@ -153,7 +153,7 @@ function Peek({ id, anchor, path }: { id: string; anchor: HTMLElement; path: str
 
 function Tree({ toc, selected, filter, revealKey }: { toc: CodeToc; selected: string | null; filter: Filter; revealKey: { key: string; n: number } | null }) {
   const rel = useRelevance();
-  const shown = useMemo(() => pruneToc(toc, filterKeep(filter, rel.display, rel.cutoffs)), [toc, filter, rel.display, rel.cutoffs]);
+  const shown = useMemo(() => pruneToc(toc, filterKeep(filter, rel.display, rel.cutoffs, rel.rerank)), [toc, filter, rel.display, rel.cutoffs, rel.rerank]);
   const nodes = useMemo(() => nodesOf(shown), [shown]);
   const index = useMemo(() => tocIndex(toc), [toc]);
   const [open, setOpen] = useState<Set<string>>(() => new Set(selected ? ancestorsOf(toc, selected) : []));
@@ -235,7 +235,8 @@ function Tree({ toc, selected, filter, revealKey }: { toc: CodeToc; selected: st
     return list.map((n) => {
       const branch = n.children.length > 0;
       const expanded = branch && open.has(n.key);
-      const p = n.kind === "article" ? scoreFor(rel.display, n.id) : maxOf(n.articles, rel.display);
+      const s = n.kind === "article" ? rel.shown(n.id) : strongestOf(n.articles, rel.display, rel.rerank, rel.cutoffs);
+      const p = s?.p;
       return (
         <li key={n.key} role="none">
           <div
@@ -257,7 +258,7 @@ function Tree({ toc, selected, filter, revealKey }: { toc: CodeToc; selected: st
             <span className={`cf-chev${expanded ? " is-open" : ""}`} aria-hidden="true">{branch ? <CIcon name="chev" size={12} /> : null}</span>
             <span className="cf-mono cf-tree-id">{n.label}</span>
             <span className="cf-tree-title">{n.title ?? ""}</span>
-            <RelevanceRing p={p} aggregate={n.kind === "article" ? undefined : n.kind} focusable={false} />
+            <RelevanceRing shown={s} aggregate={n.kind === "article" ? undefined : n.kind} focusable={false} />
           </div>
           {expanded && <ul role="group">{rows(n.children, level + 1)}</ul>}
         </li>
@@ -312,17 +313,18 @@ function Reading({ id, filter, onReveal, index }: { id: string; filter: Filter; 
     functions: [...new Map(raw.functions.map((f) => [f.code, f])).values()],
   };
   const chips = (ids: string[]) => (
-    <div className="cf-chip-row">{ids.map((r) => <a key={r} className="cf-code-chip is-link" href={codeHref(r, filter === "all" ? "" : filter)}>{r}</a>)}</div>
+    <div className="cf-chip-row">{ids.map((r) => <a key={r} className="cf-code-chip is-link" href={codeHref(articleOf(r) ?? r, filter === "all" ? "" : filter)}>{r}</a>)}</div>
   );
   return (
     <article className="cf-read" aria-labelledby="cf-read-title">
       <nav className="cf-crumbs" aria-label="Where this is">
-        {(cx?.path ?? []).map((p, n) => (
+        {/^\d+\./.test(id) && (
+          <button type="button" className="cf-crumb" onClick={() => onReveal(`part-${id.split(".")[0]}`)}>Part {id.split(".")[0]}</button>
+        )}
+        {(cx?.path ?? []).filter((p) => p.level !== "part" && p.id !== id).map((p) => (
           <span key={p.id}>
-            {n > 0 && <span className="cf-faint" aria-hidden="true"> › </span>}
-            <button type="button" className="cf-crumb" onClick={() => onReveal(p.level === "part" || /^\d+$/.test(p.id) ? `part-${p.id.replace(/\D.*$/, "")}` : p.id)}>
-              {p.level === "part" || /^\d+$/.test(p.id) ? `Part ${p.id.replace(/\D.*$/, "")}` : p.id} {p.title ?? ""}
-            </button>
+            <span className="cf-faint" aria-hidden="true"> › </span>
+            <button type="button" className="cf-crumb" onClick={() => onReveal(p.id)}>{p.id} {p.title ?? ""}</button>
           </span>
         ))}
       </nav>
@@ -422,8 +424,8 @@ export function CodeLibrary({ route }: { route: CalmRoute }) {
   // Free GET on open; scoring itself waits for the button.
   useEffect(() => { rel.refresh(); }, [engineId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const high = rankedIn(rel.display, rel.cutoffs, ["high"]);
-  const mid = rankedIn(rel.display, rel.cutoffs, ["mid"]);
+  const high = rankedIn(rel.display, rel.cutoffs, ["high"], rel.rerank);
+  const mid = rankedIn(rel.display, rel.cutoffs, ["mid"], rel.rerank);
   const filter: Filter = route.filter || (rel.display && high.length ? "attention" : "all");
   const index = useMemo(() => tocIndex(toc.state === "ready" ? toc.value : undefined), [toc]);
   const setFilter = (f: Filter) => { location.hash = codeHref(route.article, f); };
@@ -484,9 +486,9 @@ export function CodeLibrary({ route }: { route: CalmRoute }) {
                   <ul className="cf-rows">
                     {[...high, ...mid].slice(0, 8).map((r) => (
                       <li key={r.id} className="cf-row">
-                        <RelevanceRing p={r.p} />
+                        <RelevanceRing id={r.id} />
                         <a className="cf-row-text cf-plain-link" href={codeHref(r.id, filter === "all" ? "" : filter)}><span className="cf-mono">{r.id}</span> {index.get(r.id)?.title ?? ""}</a>
-                        <span className={`cf-band is-${bandFor(r.p, rel.cutoffs)}`}>{BAND_LABEL[bandFor(r.p, rel.cutoffs)]}</span>
+                        <span className={`cf-band is-${rel.shown(r.id).band}`}>{BAND_LABEL[rel.shown(r.id).band]}</span>
                       </li>
                     ))}
                   </ul>

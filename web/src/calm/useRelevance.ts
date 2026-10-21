@@ -6,7 +6,7 @@
 import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { CodeLibraryError, codeLibrary, type RelevanceResult } from "../api/codeLibrary";
 import { useCase } from "../store";
-import { cutoffsOf, type Cutoffs } from "./relevance";
+import { cutoffsOf, shownFor, type Cutoffs, type Shown } from "./relevance";
 
 export type RelevancePhase = "idle" | "loading" | "none" | "ready" | "running" | "error";
 
@@ -97,6 +97,10 @@ export function useRelevanceState(): RelevanceState {
 
 export interface Relevance extends RelevanceState {
   display: Record<string, number> | undefined;
+  /** Articles the rerank judged; others are never yellow or red (the guard). */
+  rerank: Record<string, number> | undefined;
+  /** Score and band for an article or a sentence inside it, after the guard. */
+  shown: (id: string) => Shown;
   cutoffs: Cutoffs;
   stale: boolean;
   /** Why scoring cannot start, or "" when it can. */
@@ -129,7 +133,12 @@ export function useRelevance(): Relevance {
   }, [blocked, saveDraft, engineId]);
   // Stable per result, so memoized trees and filters do not rebuild on every render.
   const cutoffs = useMemo(() => cutoffsOf(mine.result), [mine.result]);
-  return { ...mine, display, cutoffs, stale: Boolean(mine.result?.stale), blocked, refresh, score };
+  const rerank = mine.result?.rerank;
+  const shown = useCallback((id: string) => {
+    const key = display?.[id] != null ? id : articleOf(id) ?? id;
+    return shownFor(key, display, rerank, cutoffs);
+  }, [display, rerank, cutoffs]);
+  return { ...mine, display, rerank, shown, cutoffs, stale: Boolean(mine.result?.stale), blocked, refresh, score };
 }
 
 /** Score for an article or a sentence inside it ("9.27.3.4.(1)" reads "9.27.3.4."). */

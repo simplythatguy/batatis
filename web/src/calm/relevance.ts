@@ -7,34 +7,75 @@ import type { CodeToc, RelevanceResult, TocPart, TocSection, TocSubsection } fro
 
 export type Band = "unscored" | "zero" | "low" | "mid" | "high";
 
-/** Placeholder cut-offs, used only when a response has no `bands` (a benchmark study replaces them). */
-export const DEFAULT_BANDS = { x: 0.2, y: 0.6 } as const;
+/**
+ * Benchmark-derived cut-offs (docs/research/relevance-bands.md, x = 0.30, y = 0.85). Used when a
+ * response has no bands, or still carries the old 0.2 / 0.6 placeholders it was scored with.
+ */
+export const DEFAULT_BANDS = { x: 0.3, y: 0.85 } as const;
 
 export interface Cutoffs {
   x: number;
   y: number;
-  /** True when the response had no bands and the placeholders are in use. */
+  /** True when the response's own bands were missing or placeholders and the defaults apply. */
   fallback: boolean;
 }
 
 export function cutoffsOf(r: Pick<RelevanceResult, "bands"> | null | undefined): Cutoffs {
   const b = r?.bands;
-  if (b && Number.isFinite(b.x) && Number.isFinite(b.y) && b.x > 0 && b.y > b.x) return { x: b.x, y: b.y, fallback: false };
+  const usable = b && Number.isFinite(b.x) && Number.isFinite(b.y) && b.x > 0 && b.y > b.x && !/placeholder/i.test(b.status ?? "");
+  if (usable) return { x: b!.x, y: b!.y, fallback: false };
   return { ...DEFAULT_BANDS, fallback: true };
 }
+
+/** Jev reports hundredths; bands compare round(p, 2). */
+const hundredths = (p: number) => Math.round(p * 100) / 100;
 
 /** p is a probability in [0, 1]. Missing means the article was not scored. */
 export function bandFor(p: number | null | undefined, c: Pick<Cutoffs, "x" | "y">): Band {
   if (p == null || !Number.isFinite(p)) return "unscored";
-  if (p <= 0) return "zero";
-  if (p < c.x) return "low";
-  if (p < c.y) return "mid";
+  const q = hundredths(p);
+  if (q <= 0) return "zero";
+  if (q < c.x) return "low";
+  if (q < c.y) return "mid";
   return "high";
+}
+
+export interface Shown {
+  p: number | undefined;
+  band: Band;
+  /** Scored by the screen only: the rerank did not judge it, so it is never yellow or red. */
+  screenedOnly: boolean;
+}
+
+/**
+ * The guard from the band study: an article the rerank did not judge is never yellow or red.
+ * It caps the flagged set at the rerank size (60) whatever the screen scores do.
+ */
+export function shownFor(id: string, display: Record<string, number> | undefined, rerank: Record<string, number> | undefined, c: Pick<Cutoffs, "x" | "y">): Shown {
+  const p = display?.[id];
+  const band = bandFor(p, c);
+  const judged = Boolean(rerank && id in rerank);
+  if (!judged && rerank && (band === "mid" || band === "high")) return { p, band: "low", screenedOnly: true };
+  return { p, band, screenedOnly: !judged && p != null };
+}
+
+const RANK: Record<Band, number> = { unscored: 0, zero: 1, low: 2, mid: 3, high: 4 };
+
+/** The strongest article among ids (band first, then p), for a section ring. */
+export function strongestOf(ids: Iterable<string>, display: Record<string, number> | undefined, rerank: Record<string, number> | undefined, c: Pick<Cutoffs, "x" | "y">): Shown | undefined {
+  if (!display) return undefined;
+  let best: Shown | undefined;
+  for (const id of ids) {
+    if (display[id] == null) continue;
+    const s = shownFor(id, display, rerank, c);
+    if (!best || RANK[s.band] > RANK[best.band] || (RANK[s.band] === RANK[best.band] && (s.p ?? 0) > (best.p ?? 0))) best = s;
+  }
+  return best;
 }
 
 export const BAND_LABEL: Record<Band, string> = {
   unscored: "Not scored",
-  zero: "No sign it applies",
+  zero: "No Jev score",
   low: "Unlikely to apply",
   mid: "Might apply · check this",
   high: "Likely applies · address this",
@@ -43,7 +84,7 @@ export const BAND_LABEL: Record<Band, string> = {
 /** Short form for aria-labels: "Jev relevance 34%: might apply". */
 export const BAND_SHORT: Record<Band, string> = {
   unscored: "not scored",
-  zero: "no sign it applies",
+  zero: "no Jev score",
   low: "unlikely to apply",
   mid: "might apply",
   high: "likely applies",
@@ -96,17 +137,17 @@ export function pruneToc(toc: CodeToc, keep: (articleId: string) => boolean): Co
 
 export type Filter = "all" | "attention" | "maybe";
 
-export function filterKeep(filter: Filter, display: Record<string, number> | undefined, c: Cutoffs): (id: string) => boolean {
+export function filterKeep(filter: Filter, display: Record<string, number> | undefined, c: Cutoffs, rerank?: Record<string, number>): (id: string) => boolean {
   if (filter === "all" || !display) return () => true;
   const want: Band = filter === "attention" ? "high" : "mid";
-  return (id) => bandFor(display[id], c) === want;
+  return (id) => shownFor(id, display, rerank, c).band === want;
 }
 
-/** Article ids scored into a band, highest first. */
-export function rankedIn(display: Record<string, number> | undefined, c: Cutoffs, bands: Band[]): { id: string; p: number }[] {
+/** Article ids shown in a band (after the guard), highest first. */
+export function rankedIn(display: Record<string, number> | undefined, c: Cutoffs, bands: Band[], rerank?: Record<string, number>): { id: string; p: number }[] {
   if (!display) return [];
   return Object.entries(display)
-    .filter(([, p]) => bands.includes(bandFor(p, c)))
+    .filter(([id]) => bands.includes(shownFor(id, display, rerank, c).band))
     .map(([id, p]) => ({ id, p }))
     .sort((a, b) => b.p - a.p);
 }

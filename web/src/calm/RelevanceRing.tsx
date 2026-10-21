@@ -1,7 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { BAND_LABEL, BAND_SHORT, bandFor, pct, type Band } from "./relevance";
-import { scoreFor, useRelevance } from "./useRelevance";
+import { BAND_LABEL, BAND_SHORT, pct, type Band, type Shown } from "./relevance";
+import { useRelevance } from "./useRelevance";
 
 const ESTIMATE = "Jev estimate from your description. Not a compliance decision.";
 
@@ -65,21 +65,22 @@ export function RingGlyph({ p, band, size = 16 }: { p: number | undefined; band:
  */
 export function RelevanceRing({
   id,
-  p: given,
+  shown: given,
   aggregate,
   size = 16,
   focusable = true,
 }: {
+  /** Article or sentence id: reads the shared scores through the guard. */
   id?: string;
-  p?: number;
+  /** A precomputed score (section rings pass their strongest article). */
+  shown?: Shown;
   aggregate?: "section" | "part" | "subsection";
   size?: 16 | 22;
   focusable?: boolean;
 }) {
   const rel = useRelevance();
-  const p = given ?? (id ? scoreFor(rel.display, id) : undefined);
-  // An unscored case shows dashed rings; a scored case without this article reads as not scored too.
-  const band = bandFor(p, rel.cutoffs);
+  const s: Shown = given ?? (id ? rel.shown(id) : { p: undefined, band: "unscored", screenedOnly: false });
+  const { p, band } = s;
   const tipId = useId();
   const ref = useRef<HTMLSpanElement>(null);
   const [open, setOpen] = useState(false);
@@ -121,6 +122,7 @@ export function RelevanceRing({
               <span className="cf-mono">{aggregate ? `Highest in this ${aggregate}: ` : ""}{pct(p!, 1)}</span>
               <span className={`cf-band is-${band}`}>{BAND_LABEL[band]}</span>
             </div>
+            {s.screenedOnly && <p>Screened only: the closer second look did not judge this article, so it never shows yellow or red.</p>}
             <p>{ESTIMATE}</p>
             <p className="cf-faint cf-mono">{rel.result?.model ? `Model ${rel.result.model}` : ""}{rel.stale ? `${rel.result?.model ? " · " : ""}Out of date` : ""}</p>
           </>
@@ -133,7 +135,7 @@ export function RelevanceRing({
 /** The visible band label pill (never colour alone). */
 export function BandPill({ id }: { id: string }) {
   const rel = useRelevance();
-  const band = bandFor(scoreFor(rel.display, id), rel.cutoffs);
+  const { band } = rel.shown(id);
   return <span className={`cf-band is-${band}`}>{BAND_LABEL[band]}</span>;
 }
 
@@ -148,8 +150,7 @@ export function RingLegend() {
     { band: "high", p: 0.8, text: `${BAND_LABEL.high}. ${pct(y)} or more.` },
     { band: "mid", p: 0.4, text: `${BAND_LABEL.mid}. ${pct(x)} to under ${pct(y)}.` },
     { band: "low", p: 0.1, text: `${BAND_LABEL.low}. Above 0 and under ${pct(x)}.` },
-    { band: "zero", p: 0, text: "0%: no sign it applies." },
-    { band: "unscored", text: "Dashed: not scored yet." },
+    { band: "unscored", text: "Dashed: not scored yet, or no Jev score." },
   ];
   return (
     <>
@@ -173,7 +174,7 @@ export function RingLegend() {
             <li key={r.band}><RingGlyph p={r.p} band={r.band} /> {r.text}</li>
           ))}
         </ul>
-        <p>{ESTIMATE} The arc shows the percentage.</p>
+        <p>{ESTIMATE} The arc shows the percentage. Only the 60 articles the closer second look judged can be yellow or red.</p>
         {fallback && <p className="cf-faint">Cut-offs are placeholders until the benchmark study sets them.</p>}
       </Tip>
     </>
