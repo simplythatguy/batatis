@@ -14,6 +14,7 @@ from pathlib import Path
 from codedb import validate_text
 
 from .codes import Codes
+from .jurisdictions import notices_for
 from .models import INTENT_LABEL, Case, Gap as CaseGap
 from .process_fields import confirmed_value, latest_fact, process_fields
 from .professional import (
@@ -327,4 +328,8 @@ def check_completeness(case: Case, codes: Codes, *,
                 add('evidence', 'D', f'evidence.{item.id}', f'supporting evidence for {item.provision_id}, {item.function}–{item.objective}.',
                     item.performance_issue + ' Select appropriate evidence types with the responsible designer; not every ladder rung is required.',
                     item.citation)
+    # Information from the case's jurisdiction pack (for example a local form). Severity info never blocks.
+    for notice in notices_for(case, 'gaps'):
+        gaps.append(Gap(id=f'info:{notice.id}', severity='info', section=notice.section, field=notice.id,
+                        message=notice.message, fix_hint=notice.fix_hint))
     return gaps

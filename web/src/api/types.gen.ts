@@ -60,6 +60,25 @@ export interface AttributionPair {
   table: string;
 }
 
+/** The authority having jurisdiction is an organisation, not an officer (SCC IB-2026-10-16). */
+export interface Authority {
+  contact: string | null;
+  kind: "accredited_municipality" | "alberta_safety_codes_authority" | "accredited_organisation";
+  name: string;
+  /** The account `Authority` code when Batatis has reviewer accounts for this office; else null. */ reviewer_code: string | null;
+  sources: PackSource[];
+}
+
+/** A Safety Codes Council information bulletin. Title, date and link; paragraphs are not copied. */
+export interface Bulletin {
+  effective: string | null;
+  id: string;
+  issued: string;
+  source: PackSource;
+  summary: string;
+  title: string;
+}
+
 export interface Case {
   authority: string | null;
   claim: Claim | null;
@@ -81,6 +100,13 @@ export interface Case {
   title: string | null;
   updated_at: string;
   version: number;
+}
+
+/** `pack` is null when the case names no jurisdiction or authority yet. */
+export interface CaseJurisdictionPack {
+  case_id: string;
+  matched_by: "id" | "name" | "reviewer_code" | "fallback" | null;
+  pack: JurisdictionDetail | null;
 }
 
 export interface Claim {
@@ -128,6 +154,14 @@ export interface ContextNote {
   excerpt: string;
   id: string;
   title: string | null;
+}
+
+export interface CoverageEntry {
+  coverage: "full" | "code_only" | "preview";
+  id: string;
+  name: string;
+  note: string;
+  roadmap: string | null;
 }
 
 export interface Decision {
@@ -211,7 +245,19 @@ export interface Gap {
   message: string;
   routed_to: "officer" | "professional" | "applicant" | null;
   section: "A" | "B" | "C" | "D" | "process";
-  severity: "blocking" | "warning";
+  severity: "blocking" | "warning" | "info";
+}
+
+/** A published guide for a design category or process. Guidance, not a variance or an approval. */
+export interface Guide {
+  companions: PackSource[];
+  id: string;
+  issued: string | null;
+  requires_professional: boolean | null;
+  source: PackSource;
+  summary: string;
+  title: string;
+  topic: string;
 }
 
 export interface IntentBlock {
@@ -230,10 +276,47 @@ export interface Jurisdiction {
   name: string;
 }
 
+export interface JurisdictionDetail {
+  authority: Authority;
+  bulletins: Bulletin[];
+  code_edition: string;
+  coverage: "full" | "code_only" | "preview";
+  disclaimer: string;
+  fallback: boolean;
+  forms: ResolvedForm[];
+  guides: Guide[];
+  id: string;
+  name: string;
+  notices: PackNotice[];
+  process_notes: ResolvedNote[];
+  province: string;
+  standing_packages: StandingPackage[];
+  summary: string;
+}
+
 export interface JurisdictionInput {
   authority?: string | null;
   id: string;
   name: string;
+}
+
+export interface JurisdictionSummary {
+  authority: string;
+  coverage: "full" | "code_only" | "preview";
+  fallback: boolean;
+  forms: number;
+  id: string;
+  name: string;
+  province: string;
+  reviewer_code: string | null;
+  standing_packages: number;
+}
+
+export interface JurisdictionsResult {
+  coverage: CoverageEntry[];
+  disclaimer: string;
+  jurisdictions: JurisdictionSummary[];
+  levels: Record<string, string>;
 }
 
 export interface LoginRequest {
@@ -288,6 +371,28 @@ export interface OnboardingRequest {
   applicant_type?: "manufacturer" | "contractor" | "homebuilder" | null;
   authority?: "calgary" | "edmonton" | null;
   role: "applicant" | "reviewer";
+}
+
+/** Information shown on the gaps list and the export. Severity is always info; it never blocks. */
+export interface PackNotice {
+  fix_hint: string;
+  /** Appendix heading for the notice. */ heading: string;
+  id: string;
+  /** ASCII, because it is also sent as an HTTP header. */ message: string;
+  section: "A" | "B" | "C" | "D" | "process";
+  sources: PackSource[];
+  surfaces: ("gaps" | "export_header" | "export_appendix")[];
+}
+
+/** Where a claim comes from. `retrieved` is the date the URL was fetched or checked. */
+export interface PackSource {
+  note: string | null;
+  /** PDF pages that carry the claim, as printed by the reader, e.g. "pp.2-3". */ pages: string | null;
+  /** Date the URL was fetched or checked (YYYY-MM-DD). */ retrieved: string;
+  /** SHA-256 of the file fetched on `retrieved`. */ sha256: string | null;
+  /** `unverified` when the claim could not be checked against the source. */ status: "verified" | "unverified";
+  title: string;
+  url: string;
 }
 
 export interface ProvisionContext {
@@ -345,6 +450,33 @@ export interface RelevanceRecord {
   status: "scored";
 }
 
+export interface ResolvedForm {
+  /** Whether Batatis fills this form today. */ export: "supported" | "not_yet";
+  field_count: number;
+  /** Repository path of the field map, when export is supported. */ field_map: string | null;
+  id: string;
+  issuer: string;
+  /** Git-excluded local copy under reference/. */ local_path: string | null;
+  note: string;
+  page_count: number;
+  pdf_last_modified: string | null;
+  role: "primary" | "additional";
+  scope: "province" | "local";
+  sha256: string;
+  source: PackSource;
+  status: "current" | "confirm_with_office" | "historical";
+  title: string;
+  version: string;
+}
+
+export interface ResolvedNote {
+  id: string;
+  scope: "province" | "local";
+  sources: PackSource[];
+  text: string;
+  topic: "entry_point" | "submission" | "permit_link" | "scope" | "documents" | "professional" | "review" | "decision" | "appeal" | "registration" | "authority";
+}
+
 export interface ReviewerName {
   name: string;
 }
@@ -389,6 +521,24 @@ export interface SourceInput {
   quote?: string | null;
   ref: string;
   type: "code" | "file" | "user_text" | "drawing" | "user_click" | "officer" | "professional";
+}
+
+/** A published local route (standing posted variance or policy). Metadata only; checklists are WP-32. */
+export interface StandingPackage {
+  applies_to: string;
+  /** Checklist id once WP-32 builds it. A checklist is never a determination. */ checklist: string | null;
+  /** The identifier the issuer prints, e.g. SPV-001 or B23-01. */ code: string;
+  /** Code edition the document cites, as printed. */ edition: string;
+  historical_reason: string | null;
+  id: string;
+  issued: string;
+  kind: "standing_posted_variance" | "policy";
+  note: string;
+  /** Provisions the source names, as printed. Not a code analysis. */ provisions: string[];
+  revision: string | null;
+  source: PackSource;
+  status: "current" | "historical";
+  title: string;
 }
 
 export interface StatusChange {
