@@ -4,6 +4,7 @@
  * nothing is persisted; Start over clears it.
  */
 import { useSyncExternalStore } from "react";
+import type { ApplicantType } from "../types";
 
 export interface HeldFile {
   id: string;
@@ -27,9 +28,13 @@ export interface Session {
   authorityUnsure: boolean;
   /** Start was pressed: run the explicit check once the new case has rendered. */
   checkAfterStart: boolean;
+  /** Before an application exists: the description, files and role being prepared (Start and the deck share them). */
+  draft: string;
+  draftFiles: HeldFile[];
+  role: ApplicantType | null;
 }
 
-const EMPTY: Session = { queue: [], index: 0, skipped: [], wrapped: false, seen: [], held: [], uploading: [], authorityUnsure: false, checkAfterStart: false };
+const EMPTY: Session = { queue: [], index: 0, skipped: [], wrapped: false, seen: [], held: [], uploading: [], authorityUnsure: false, checkAfterStart: false, draft: "", draftFiles: [], role: null };
 
 let state: Session = EMPTY;
 const listeners = new Set<() => void>();

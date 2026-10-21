@@ -3,7 +3,7 @@ import test from "node:test";
 import { emptyCase } from "../intake.ts";
 import { getGaps, reducer } from "../model.ts";
 import type { Case } from "../types.ts";
-import { aliasKey, buildDeck, deckProgress, gapKey } from "./deck.ts";
+import { aliasKey, buildDeck, choicesFor, deckProgress, gapKey, preCaseDeck, sectionProgress } from "./deck.ts";
 import { calmHref, resolveRoute } from "./routes.ts";
 
 const NORTHCORE =
@@ -40,15 +40,39 @@ test("every local gap that routes to questions has a card", () => {
   }
 });
 
-test("deck order: code check, questions, details, then the applicant's own case", () => {
+test("deck order follows the form: Section A, B, C, then D (the applicant's own case last)", () => {
   const deck = buildDeck(described(), []);
+  const order = deck.map((i) => i.section).join("");
+  assert.equal(order, [...order].sort().join(""), `sections out of order: ${order}`);
   const kinds = deck.map((i) => i.kind);
-  const last = (k: string) => kinds.lastIndexOf(k as never);
-  const first = (k: string) => kinds.indexOf(k as never);
-  assert.ok(last("candidate") < first("question"));
-  assert.ok(last("question") < first("authority"));
-  assert.ok(last("detail") < first("process"));
+  assert.equal(deck.find((i) => i.section !== "A")?.kind, "authority", "Section B opens with the reviewing authority");
+  assert.ok(kinds.lastIndexOf("detail") < kinds.indexOf("candidate"));
+  assert.ok(kinds.lastIndexOf("candidate") < kinds.indexOf("process"));
   assert.equal(deck.filter((i) => i.kind === "process").length, 6);
+});
+
+test("the reviewing authority is asked, Not sure yet is an answer, and nothing is picked silently", () => {
+  const c = described();
+  const card = buildDeck(c, []).find((i) => i.key === "authority")!;
+  assert.equal(c.authority, "");
+  assert.equal(card.done, false);
+  assert.deepEqual(choicesFor(card).map((x) => x.value), ["calgary", "edmonton", "unsure"]);
+  const gap = { id: "jurisdiction", severity: "blocking" as const, label: "Reviewing authority", href: "#/describe?focus=authority" };
+  assert.equal(gapKey(c, gap), "authority");
+  assert.equal(buildDeck(c, [gap], { seen: new Set(["authority"]), includeDone: true }).find((i) => i.key === "authority")?.done, true);
+});
+
+test("before an application exists the deck asks the description, and the role only without one", () => {
+  assert.deepEqual(preCaseDeck("", true, null).map((i) => i.key), ["role", "describe"]);
+  assert.deepEqual(preCaseDeck("", false, null).map((i) => i.key), ["describe"]);
+  assert.equal(preCaseDeck("We build hempcrete walls.", false, null)[0].done, true);
+});
+
+test("section progress counts tracked cards per section", () => {
+  const deck = buildDeck(described(), [], { includeDone: true });
+  const secs = sectionProgress(deck);
+  assert.deepEqual(secs.map((s) => s.id), ["A", "B", "C", "D"]);
+  assert.equal(secs.reduce((n, s) => n + s.items.length, 0), deckProgress(deck).total);
 });
 
 test("answered cards leave the open deck and count as done", () => {
@@ -119,4 +143,18 @@ test("Section D joins the deck with a real reference and stays open while its ga
   assert.equal(buildDeck(c, [gap], { seen, includeDone: true }).find((i) => i.kind === "section-d")?.done, false);
   const code = buildDeck(c, []).find((i) => i.key === "cand-search-9.27.3.4.(1)")!;
   assert.equal(code.provision, "9.27.3.4.(1)");
+});
+
+test("proposed facts ask in plain words, with sentence-case sources and answers that say what they mean", () => {
+  const c = described("We are building a two-storey house with hempcrete walls.");
+  const card = buildDeck(c, getGaps(c)).find((i) => i.kind === "fact" && i.title.includes("storeys"))!;
+  assert.equal(card.title, "How many storeys is the building?");
+  assert.equal(card.context, "Your description says “two-storey”.");
+  assert.deepEqual(choicesFor(card).map((x) => x.label), ["Yes, 2 storeys", "No, something else"]);
+  const addr = described("The house is at 123 Example Street NW in Edmonton. We replace the housewrap.");
+  const a = buildDeck(addr, getGaps(addr)).find((i) => i.key === "field-municipalAddress")!;
+  assert.equal(a.title, "What is the site’s municipal address?");
+  assert.match(a.context, /^Your description says “/);
+  assert.match(choicesFor(a)[0].label, /^Yes, 123 Example Street/);
+  for (const i of [card, a]) assert.doesNotMatch(i.title + i.context, /From Your|your storeys/);
 });

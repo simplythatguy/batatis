@@ -48,7 +48,55 @@ function worst(gaps: Gap[]): DotTone {
   return "done";
 }
 
+/** Before an application exists: what the review will hold, and the one way to start it. */
+export function NothingYet({ title, lede, page }: { title: string; lede: string; page: "review" | "application" }) {
+  const sections = [
+    { letter: "A", title: "Applicant" },
+    { letter: "B", title: "Project & alternative" },
+    { letter: "C", title: "Code references" },
+    { letter: "D", title: "Evidence & your case" },
+  ];
+  return (
+    <div className="cf-review is-empty">
+      <div className="cf-review-main">
+        <h1 className="cf-h1" tabIndex={-1}>{title}</h1>
+        <p className="cf-lede is-sm">{lede}</p>
+        <div className="cf-row-actions">
+          <a className="cf-btn is-primary" href="#/">Describe your project</a>
+        </div>
+        <div className="cf-list-label">Still needed</div>
+        <ul className="cf-rows">
+          <li className="cf-row">
+            <Dot tone="blocking" />
+            <span className="cf-row-text">A description of what you’re building differently</span>
+            <a className="cf-row-go" href="#/">Describe <CIcon name="arrow" size={13} /></a>
+          </li>
+        </ul>
+      </div>
+      <aside className="cf-glass cf-sections" aria-label={page === "review" ? "Your application" : "The variance form"}>
+        <Eyebrow plain>Your application</Eyebrow>
+        <ul className="cf-sec-list">
+          {sections.map((s) => (
+            <li key={s.letter} className="cf-sec">
+              <span className="cf-sec-letter" aria-hidden="true">{s.letter}</span>
+              <div className="cf-sec-t"><div>Section {s.letter} · {s.title}</div><div className="cf-faint">Not started</div></div>
+              <Dot tone="pending" />
+            </li>
+          ))}
+        </ul>
+        <p className="cf-faint cf-small cf-disclaimer">Checks administrative completeness only. It never says the design complies or is safe.</p>
+      </aside>
+    </div>
+  );
+}
+
 export function Review() {
+  const { phase } = useCase();
+  if (phase !== "case") return <NothingYet page="review" title="Nothing to review yet." lede="Describe what you’re building and Batatis lists what your application still needs, section by section." />;
+  return <CaseReview />;
+}
+
+function CaseReview() {
   const { c, gaps, notices, engineGaps, gapsSource, checkStatus, checkNote, checkDetail, requestCheck } = useCase();
   const session = useSession();
   const [showAll, setShowAll] = useState(false);
@@ -121,7 +169,6 @@ export function Review() {
   return (
     <div className="cf-review">
       <div className="cf-review-main">
-        <Eyebrow>Review</Eyebrow>
         <h1 className="cf-h1" tabIndex={-1}>{headline}</h1>
         {lede && <p className="cf-lede is-sm" role="status">{lede}</p>}
         {!checked && (

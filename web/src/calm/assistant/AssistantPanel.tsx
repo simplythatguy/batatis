@@ -3,6 +3,7 @@ import { codeHref } from "../routes";
 import { articleOf } from "../useRelevance";
 import { Icon24 } from "../icons";
 import { MOD_KEY } from "../ui";
+import { useAccount } from "../account";
 import { answerBlocks, ask, closeAssistant, useAssistant } from "./assistant";
 
 const DISCLAIMER = "Plain-language explanation, not code text. It doesn’t say whether your design complies or is safe.";
@@ -10,6 +11,9 @@ const DISCLAIMER = "Plain-language explanation, not code text. It doesn’t say 
 /** Right-hand assistant column. It sits beside the main column and pushes it; it never covers it. */
 export function AssistantPanel() {
   const a = useAssistant();
+  const account = useAccount();
+  // The engine answers signed-in users only; anonymous visits never call it.
+  const signedOut = account.phase !== "signed-in" && account.phase !== "probing";
   const [draft, setDraft] = useState("");
   const body = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
@@ -24,7 +28,7 @@ export function AssistantPanel() {
   const wait = a.error?.retryAt ? Math.max(0, Math.ceil((a.error.retryAt - now) / 1000)) : 0;
   const unavailable = a.error && (a.error.status === 503 || a.error.status === 404 || a.error.status === 0);
   const send = (q: string) => {
-    if (!q.trim() || a.pending || wait > 0) return;
+    if (!q.trim() || a.pending || wait > 0 || signedOut) return;
     setDraft("");
     void ask(q);
   };
@@ -38,7 +42,19 @@ export function AssistantPanel() {
       </div>
       <div ref={body} className="cf-assist-body" aria-live="polite">
         <p className="cf-assist-ctx">Looking at <b>{a.context.label}</b></p>
-        {a.turns.length === 0 && !a.error && (
+        {signedOut && account.phase === "anonymous" && (
+          <div className="cf-assist-error" role="status">
+            <p>The assistant isn’t available on this server.</p>
+            <p className="cf-fine">You can still read the code yourself in the code library.</p>
+          </div>
+        )}
+        {signedOut && account.phase === "signed-out" && (
+          <div className="cf-assist-error" role="status">
+            <p><a className="cf-inline-link" href="#/signin">Sign in</a> to use the assistant.</p>
+            <p className="cf-fine">It explains questions, code references and officer messages for your own applications. You can still read the code yourself in the code library.</p>
+          </div>
+        )}
+        {!signedOut && a.turns.length === 0 && !a.error && (
           <p className="cf-assist-intro">Ask about this question, a code reference, a message from the officer, or what to do next. Answers explain; they never decide whether your design complies.</p>
         )}
         {a.turns.map((t, n) =>
@@ -72,6 +88,7 @@ export function AssistantPanel() {
           id="cf-assist-input"
           ref={input}
           rows={2}
+          disabled={signedOut}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(draft); } }}
@@ -80,10 +97,10 @@ export function AssistantPanel() {
         <div className="cf-composer-box-foot">
           <div className="cf-chips">
             {(a.context.suggestions ?? []).slice(0, 2).map((s) => (
-              <button key={s} type="button" className="cf-suggest" disabled={a.pending || wait > 0} onClick={() => send(s)}>{s}</button>
+              <button key={s} type="button" className="cf-suggest" disabled={a.pending || wait > 0 || signedOut} onClick={() => send(s)}>{s}</button>
             ))}
           </div>
-          <button type="submit" className="cf-icon-btn is-plain" aria-label="Send" disabled={!draft.trim() || a.pending || wait > 0}>
+          <button type="submit" className="cf-icon-btn is-plain" aria-label="Send" disabled={!draft.trim() || a.pending || wait > 0 || signedOut}>
             <Icon24 name="send" size={16} />
           </button>
         </div>

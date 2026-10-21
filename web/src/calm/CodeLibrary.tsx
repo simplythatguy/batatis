@@ -297,7 +297,7 @@ function TermChip({ code, title }: { code: string; title: string | null }) {
 }
 
 function Reading({ id, filter, onReveal, index }: { id: string; filter: Filter; onReveal: (key: string) => void; index: ReturnType<typeof tocIndex> }) {
-  const { c, dispatch } = useCase();
+  const { c, dispatch, phase } = useCase();
   const text = useText(id);
   const ctx = useContext(id);
   const [added, setAdded] = useState(false);
@@ -387,7 +387,9 @@ function Reading({ id, filter, onReveal, index }: { id: string; filter: Filter; 
       </section>
 
       <div className="cf-read-actions">
-        {inCase ? (
+        {phase !== "case" ? (
+          <span className="cf-faint cf-small">Start an application to add this rule. <a className="cf-inline-link" href="#/">Describe your project</a></span>
+        ) : inCase ? (
           <a className="cf-btn is-sm" href="#/questions?first=code"><CIcon name="check" size={13} />In your application</a>
         ) : (
           <button

@@ -40,3 +40,22 @@ test("a saved case reopens with its answers, authority, process text and confirm
   assert.ok(c.candidates.some((a) => a.id.startsWith("desc-")), "description cards are re-derived");
   assert.equal(c.files.length, 0, "file names are not invented");
 });
+
+test("answers to cards read from the description come back, and the saved facts are kept as they are", () => {
+  const base = saved({ provisions: [] });
+  const description = "We are building hempcrete walls instead of a conventional stud wall.";
+  const first = caseFromEngine(saved({ provisions: [], facts: [...base.facts.filter((f) => f.field !== "project.description"), fact("d", "project.description", description, "Your description")] }), "homebuilder");
+  const card = first.candidates.find((a) => a.id.startsWith("desc-") && a.id !== "desc-storeys")!;
+  assert.ok(card, "the description gives a code-check card");
+  const facts = [
+    ...base.facts.filter((f) => f.field !== "project.description"),
+    fact("d", "project.description", description, "Your description"),
+    { ...fact("cc", `codecheck.${card.id}`, "yes", "Your code check answer"), value: "yes" },
+    { ...fact("st", "building.storeys", "2", "Your storey count"), value: 2 },
+  ] as EngineCase["facts"];
+  const c = caseFromEngine(saved({ provisions: [], facts }), "homebuilder");
+  assert.equal(c.candidates.find((a) => a.id === card.id)?.answer, "yes");
+  assert.equal(c.candidates.find((a) => a.id === "desc-storeys")?.answer, "no");
+  assert.equal(c.facts.find((f) => f.field === `codecheck.${card.id}`)?.id, "cc", "the saved fact is kept, so it is not re-sent");
+  assert.equal(c.facts.find((f) => f.field === "building.storeys")?.id, "st");
+});

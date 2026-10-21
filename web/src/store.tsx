@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type Dispatch, type ReactNode } from "react";
 import { engine, EngineError, isCaseConflict, isCaseGone, type EngineGap } from "./api/client";
 import { type CompletenessRecord, isProfessionalHold, officerRoutedLabel } from "./humanReview";
-import { clearEngineSession, engineCaseId, engineGeneration, evidenceFacts, isEngineGeneration, ensureEngineCase, needsReconcile, pushDeletedEvidence, pushFacts, pushListedEvidence, reconcileEngineCase, refreshGaps, syncJurisdiction, type EvidenceOutcome } from "./api/sync";
+import { adoptEngineCase, clearEngineSession, engineCaseId, engineGeneration, evidenceFacts, isEngineGeneration, ensureEngineCase, needsReconcile, pushDeletedEvidence, pushFacts, pushListedEvidence, reconcileEngineCase, refreshGaps, syncJurisdiction, type EvidenceOutcome } from "./api/sync";
 import { engineNotices, groupEvidenceGaps, missingFromEngine } from "./rules";
 import { applyIdentifyPlan, planIdentify } from "./identify";
 import { checkCurrent, newCheckState, type CheckState, type SaveStatus } from "./checkState";
@@ -11,7 +11,8 @@ import { caseForRole, initialVisit } from "./visit";
 import type { ApplicantType, Case, Gap } from "./types";
 import { useSectionC } from "./api/sectionC";
 import { readSectionD, SectionDRecoveryError, type SectionDRead } from "./api/sectionD";
-import { isProvision, reconcileSectionC } from "./provisions";
+import { isProvision, reconcileSectionC, sameCards } from "./provisions";
+import { caseFromEngine } from "./calm/openCase";
 
 /** Older builds kept the whole case here. It is removed on load and never written again. */
 const LEGACY_KEYS = ["batatis-web-case-v4", "batatis-web-case-v3"];
@@ -66,7 +67,10 @@ interface Store {
   dispatch: Dispatch<Action>;
   saveDraft: () => Promise<string | null>;
   beginEmpty: (type: ApplicantType) => void;
-  resetToWho: () => void;
+  /** Back to an empty Start. `note` replaces "Cleared for this visit." (signed in, the old one stays in the list). */
+  resetToWho: (note?: string) => void;
+  /** Open a saved application (list row) as this visit's case. Resolves to an error text, or null when open. */
+  openCase: (id: string, type: ApplicantType) => Promise<string | null>;
   completenessRecord: CompletenessRecord | null;
   setCompletenessRecord: (record: CompletenessRecord | null) => void;
   /** Gap list from the latest review, including one that has not re-rendered yet. */
@@ -87,7 +91,7 @@ const FIELD_HREF: Record<string, string> = {
   legal_description: "#/application?tab=B&focus=field-legalDescription",
   alternative_description: "#/application?tab=B&focus=field-alternative",
   scope: "#/application?tab=B&focus=field-scope",
-  jurisdiction: "#/describe",
+  jurisdiction: "#/describe?focus=authority",
   rationale: "#/application?tab=alt&focus=field-rationale",
   risk_assessment: "#/application?tab=alt&focus=field-risk",
   mitigating_measures: "#/application?tab=alt&focus=field-mitigation",
@@ -153,7 +157,8 @@ function composeGaps(localCase: Case, source: Store["gapsSource"], engine: Engin
   return [...admin, ...workflow];
 }
 
-function hrefFor(field: string): string {
+/** The app link that fixes a field (engine gap field or a reviewer's ticked item). */
+export function hrefFor(field: string): string {
   if (FIELD_HREF[field]) return FIELD_HREF[field];
   if (field.startsWith("section_c") || field.startsWith("provisions")) return "#/section-c";
   if (field.startsWith("evidence") || field.startsWith("professional")) return "#/application?tab=D";
@@ -207,7 +212,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   // (they upload on their own route) and do not change the gaps, so they must not mark the draft
   // unsaved or abort a running check.
   const dispatch = useCallback((action: Action) => {
-    const derived = (action.type === "reconcileSectionC" && JSON.stringify(reducer(latestCase.current, action).candidates) === JSON.stringify(latestCase.current.candidates)) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions"].includes(action.type);
+    // A lookup that only attaches Section C rows (or re-orders the same cards, as it does right
+    // after a saved case is opened) is derived data, not an edit: the draft stays saved.
+    const derived = (action.type === "reconcileSectionC" && sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates)) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions"].includes(action.type);
     if (!derived) {
       revision.current += 1;
       if (action.type !== "saveEvidence" && action.type !== "removeEvidence") planRevision.current += 1;
@@ -538,11 +545,30 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     },
     completenessRecord, setCompletenessRecord,
     readGaps: () => latestGaps.current,
-    resetToWho: () => {
+    resetToWho: (note = "Cleared for this visit.") => {
       clearVisit(emptyCase("homebuilder"));
       setPhase("who");
-      setResetNote("Cleared for this visit.");
+      setResetNote(note);
       location.hash = "#/";
+    },
+    openCase: async (id, type) => {
+      let saved;
+      try {
+        saved = await engine.getCase(id);
+      } catch (e) {
+        return e instanceof EngineError ? (isCaseGone(e) ? "That application was deleted or has expired." : e.detail) : "The application did not open.";
+      }
+      // Same reset as Start over, then adopt the saved version and answers so the next save
+      // sends only what the applicant changes.
+      clearVisit(caseFromEngine(saved, type));
+      adoptEngineCase(saved);
+      setEngineId(saved.id);
+      setSaveStatus("saved");
+      setSavedNote("Saved");
+      syncState.current = { saved: true, reviewed: false, detail: "" };
+      setResetNote("");
+      setPhase("case");
+      return null;
     },
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

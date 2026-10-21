@@ -408,6 +408,9 @@ export type Action =
   | { type: "notePractice"; value: true | false | "unknown" }
   | { type: "reset"; to: Case };
 
+/** Saved answers to code-check cards read from the description: `codecheck.<card id>`. */
+export const CODECHECK_PREFIX = "codecheck.";
+
 let seq = 0;
 const newId = (p: string) => `${p}-${Date.now().toString(36)}-${(seq++).toString(36)}`;
 
@@ -578,7 +581,17 @@ export function reducer(c: Case, a: Action): Case {
           },
         ];
       }
-      return { ...c, candidates, questions };
+      // A card read from the description has no provision the engine keeps, so its answer is
+      // saved as a fact; reopening the application restores it (calm/openCase.ts).
+      let facts = c.facts;
+      if (cand && !isProvision(cand.provision)) {
+        const field = `${CODECHECK_PREFIX}${a.id}`;
+        facts = [
+          ...c.facts.filter((f) => f.field !== field),
+          ...(a.answer ? [{ id: newId("f"), field, value: a.answer, kind: "pointed" as const, status: "confirmed" as const, confidence: null, formula: null, inputs: [], source: { type: "user_click" as const, ref: "Your code check answer", quote: a.answer } }] : []),
+        ];
+      }
+      return { ...c, candidates, questions, facts };
     }
     case "setProcess": {
       const field = PROCESS_FACT[a.field];
