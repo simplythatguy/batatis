@@ -15,6 +15,7 @@ import json
 import os
 import random
 import re
+import threading
 import time
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
@@ -58,10 +59,24 @@ class CallResult:
         return any(e.get('fatal') for e in self.errors)
 
 
-def default_http(url: str, headers: Mapping[str, str], body: dict, timeout: float):
+_CLIENT = None
+_CLIENT_LOCK = threading.Lock()
+
+
+def shared_client():
+    """One pooled client for the process. Many simultaneous fresh TLS connections made the server drop some of them
+    ("server disconnected without sending a response"); a bounded pool with short keep-alive reuses connections instead."""
+    global _CLIENT
     import httpx
-    with httpx.Client(timeout=timeout, follow_redirects=False) as client:
-        r = client.post(url, headers=dict(headers), json=body)
+    with _CLIENT_LOCK:
+        if _CLIENT is None:
+            _CLIENT = httpx.Client(follow_redirects=False, limits=httpx.Limits(max_connections=32, max_keepalive_connections=16,
+                                                                           keepalive_expiry=10.0))
+        return _CLIENT
+
+
+def default_http(url: str, headers: Mapping[str, str], body: dict, timeout: float):
+    r = shared_client().post(url, headers=dict(headers), json=body, timeout=timeout)
     try:
         data = r.json()
     except ValueError:

@@ -287,3 +287,31 @@ def test_vote_agreement_is_higher_than_single_run_agreement_for_a_mostly_stable_
     # one run in five dissents: two votes of three agree with probability 0.896**2 + 0.104**2 = 0.814
     assert e.top1_agreement == pytest.approx(0.6) and e.vote_agreement == pytest.approx(0.814, abs=0.02)
     assert report.vote_agreement(L, 'A', cs, k=9) is None                         # fewer repeats than the vote size
+
+
+def test_costs_within_five_percent_are_equal_and_fewer_stages_win(tmp_path):
+    cs, ev = world(tmp_path, {'screened': (set(range(30)), 0.0191), 'simple': (set(range(30)), 0.0193), 'cheap': (set(range(30)), 0.0189)})
+    stages = {'screened': 6, 'simple': 3, 'cheap': 6}
+    d = decide(ev, {}, cs, stages=stages)
+    assert d.winner == 'simple' and any('within 5 percent' in t for t in d.trace)          # strictly cheapest is `cheap`
+    assert any('strictly: cheap' in t for t in d.trace)
+    far = decide(ev, {}, cs, stages={'screened': 6, 'simple': 3, 'cheap': 6} | {})
+    cs2, ev2 = world(tmp_path / 'b', {'screened': (set(range(30)), 0.05), 'simple': (set(range(30)), 0.0193)})
+    assert decide(ev2, {}, cs2, stages={'screened': 6, 'simple': 3}).winner == 'simple'        # cheaper by far: plain cost rule
+    cs3, ev3 = world(tmp_path / 'c', {'a': (set(range(30)), 0.0191), 'b': (set(range(29)), 0.0192)})
+    assert decide(ev3, {}, cs3, stages={'a': 3, 'b': 3}).winner == 'a'                          # equal stages: the higher success rate
+
+
+def test_a_commit_on_an_ask_scenario_is_an_unwarranted_commit(tmp_path):
+    store = RowStore(tmp_path)
+    ask = BenchCase(id='ask-1', dataset='dev', query='q', gold=(), action='ask', fold='validation')
+    redirect = BenchCase(id='red-1', dataset='dev', query='q', gold=(), action='redirect', fold='validation')
+    answered = BenchCase(id='ok-1', dataset='dev', query='q', gold=('9.1.1.1.',), action='proceed_conditionally', fold='validation')
+    probs = {'9.1.1.1.': 0.9}
+    pick = [{'article': '9.1.1.1.', 'quote': 'q', 'reason': 'r', 'confidence': 0.9}]
+    add(store, 'V', ask, 0, ['9.1.1.1.'], probs=probs, picks=pick)             # commits: wrong, it should have asked
+    add(store, 'V', redirect, 0, ['9.1.1.1.'], probs=probs, picks=[])          # the verifier did not pick it: no commit
+    add(store, 'V', answered, 0, ['9.1.1.1.'], probs=probs, picks=pick)       # not an ask scenario: not counted here
+    L = loaded(store, [ask, redirect, answered], ['V'], kinds={'V': 'verify'})
+    got = report.ask_commit_stats(L, 'V', [ask, redirect, answered])
+    assert got['label'] == '1 of 2' and got['cases_with_a_commit'] == ['ask-1']

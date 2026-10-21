@@ -246,6 +246,8 @@ def evaluate_arm(L: Loaded, arm: str, cases: Iterable[BenchCase], *, threshold: 
     cats = Counter(e['category'] for row in all_rows for e in row['errors'])
     errors = {'rows': len(all_rows), 'rows_with_errors': sum(1 for row in all_rows if row['errors']),
               'rows_degraded': sum(1 for row in all_rows if row['notes'].get('degraded')),
+              'rows_retried': sum(1 for row in all_rows if (row['notes'].get('attempts') or 1) > 1),
+              'rows_first_attempt_failed': sum(1 for row in all_rows if row['attempt'] > 1 or row['errors']),
               'categories': dict(sorted(cats.items())),
               'request_count_mismatch': sum(1 for row in all_rows if row['notes'].get('request_count_ok') is False)}
     usd = [chain_usd(L, row) for row in all_rows]
@@ -347,6 +349,29 @@ def commit_stats(L: Loaded, arm: str, cases: list[BenchCase], *, threshold: floa
     return {'threshold': threshold, 'status': 'placeholder_uncalibrated: exploration only, not a fit',
             'precision': rate(right, picks), 'precision_lenient': rate(right_lenient, picks), 'case_runs': n_cases,
             'coverage': rate(committing, n_cases), 'wrong_commits': wrong_cases}
+
+
+def ask_commit_stats(L: Loaded, arm: str, cases: Iterable[BenchCase], *, threshold: float = PLACEHOLDER_THRESHOLD) -> dict:
+    """Case runs on ``ask`` and ``redirect`` scenarios (the route is undecided or out of scope) where the placeholder policy would commit.
+
+    There is no gold article for these, so any commit is an unwarranted one: the system should have asked."""
+    need_pick = L.kinds.get(arm) == 'verify'
+    rows = L.rows.get(arm, {})
+    runs = commits = 0
+    wrong: list[str] = []
+    for c in cases:
+        if c.action not in ('ask', 'redirect'):
+            continue
+        for rep in range(repeats_of(L, arm)):
+            row = rows.get((c.id, rep))
+            if row is None:
+                continue
+            runs += 1
+            got = committed(row, threshold=threshold, need_pick=need_pick)
+            if got:
+                commits += 1
+                wrong.append(f'{c.id}#r{rep}:{",".join(got)}')
+    return {**rate(commits, runs), 'threshold': threshold, 'cases_with_a_commit': sorted({w.split('#')[0] for w in wrong})}
 
 
 def reliability(L: Loaded, arm: str, cases: list[BenchCase]) -> list[dict]:

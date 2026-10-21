@@ -39,6 +39,7 @@ class Analysis:
     public: dict[str, ArmEval] = field(default_factory=dict)
     latency: dict[str, dict] = field(default_factory=dict)
     stage_latency: dict[str, dict] = field(default_factory=dict)
+    ask_commits: dict[str, dict] = field(default_factory=dict)
     decision: decision.Decision | None = None
     row_files: list[dict] = field(default_factory=list)
 
@@ -79,6 +80,7 @@ def analyse(store: RowStore | None = None, *, arms: dict[str, Arm] | None = None
         an.selection[name] = report.evaluate_arm(L, name, sel)
         if any(cid in {c.id for c in dev} for (cid, _r) in L.rows[name]):        # only arms that were run on the development folds
             an.development[name] = report.evaluate_arm(L, name, dev)
+            an.ask_commits[name] = report.ask_commit_stats(L, name, [c for c in cases if c.fold in DEVELOPMENT])
         an.public[name] = report.evaluate_arm(L, name, pub)
         if has_rows(LI, name):
             an.stage_latency[name] = report.stage_latency_summary(LI, name, sel + dev)
@@ -92,7 +94,8 @@ def analyse(store: RowStore | None = None, *, arms: dict[str, Arm] | None = None
             an.latency.setdefault(name, {'n': 0, 'p50_ms': None, 'p95_ms': None, 'max_ms': None})
             an.latency[name]['lower_bound_p95_ms'] = max(stages)
     if an.selection:
-        an.decision = decision.decide(an.selection, an.latency, sel)
+        an.decision = decision.decide(an.selection, an.latency, sel,
+                                      stages={n: len(chain_of(arms, n)) for n in an.selection})
     return an
 
 

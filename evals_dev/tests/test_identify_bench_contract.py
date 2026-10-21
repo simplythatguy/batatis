@@ -343,3 +343,23 @@ def test_a_failed_connection_costs_nothing_but_a_timeout_after_sending_is_charge
     assert s['requests'] == 0 and Decimal(s['settled_usd']) == 0 and s['open_reservations'] == 0       # nothing left the machine
     row = ctx.store.arm_rows('V15f-R5')[0]
     assert row['errors'][-1]['category'] == 'connection' and row['notes']['degraded']
+
+
+def test_the_default_transport_reuses_one_pooled_client(monkeypatch):
+    import httpx
+    from evals_dev.identify_bench import transports
+    made = []
+
+    class Client:
+        def __init__(self, **kw):
+            made.append(kw)
+
+        def post(self, url, headers, json, timeout):
+            return httpx.Response(200, json={'ok': True}, request=httpx.Request('POST', url))
+
+    monkeypatch.setattr(httpx, 'Client', Client)
+    monkeypatch.setattr(transports, '_CLIENT', None)
+    for _ in range(3):
+        status, _headers, data = transports.default_http('https://example.test/v1', {}, {}, 5.0)
+    assert status == 200 and data == {'ok': True} and len(made) == 1
+    assert made[0]['limits'].max_connections == 32 and made[0]['follow_redirects'] is False

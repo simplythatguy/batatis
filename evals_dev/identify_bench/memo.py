@@ -150,7 +150,9 @@ def render_decision(an: Analysis, *, ledger_openai: dict | None = None, ledger_j
             f'among the three quoted choices. A case scores the share of its repeats that succeed, and the success rate is the mean over '
             f'cases (a count with a decimal is a case that succeeded in some repeats only). Tied with the '
             f'best means a one-sided exact sign test on the discordant cases does not call it worse at alpha {TIE_ALPHA:.2f} and it '
-            f'trails by at most {TIE_POINTS * 100:.0f} points; an override takes a pipeline costing at least '
+            f'trails by at most {TIE_POINTS * 100:.0f} points. Costs within 5 percent of the cheapest tied pipeline count as equal (a refinement added '
+            f'after the interim rows, because the exhaustive screen is almost the whole cost of every pipeline that has it); among those the pipeline '
+            f'with fewer stages wins, then the higher success rate. An override takes a pipeline costing at least '
             f'1/{OVERRIDE_COST_RATIO:g} as much when it trails by under {OVERRIDE_POINTS * 100:.0f} points and is not significantly '
             f'worse. Hard filters: H1 no fabricated citation shown, H2 errors under {ERROR_RATE_MAX * 100:.0f}% of rows and, '
             f'when measured, interactive p95 under {P95_MAX_MS // 1000} s.', '']
@@ -250,20 +252,27 @@ def render_commit_section(an: Analysis) -> list[str]:
     out = ['## Commit policy, explored (not a calibration)', '',
            f'The placeholder policy in `engine/cli_sut.py`: Part 9 only, rerank probability at least {report.PLACEHOLDER_THRESHOLD}, at most '
            f'{report.MAX_COMMITS}, the verifier must have picked it. The threshold is unfitted; this table shows what it would do on the '
-           'Part 9 cases, repeats pooled. `calibration.json` is not written: the fit needs the larger dataset (WP-13).', '']
+           'Part 9 cases, repeats pooled, for the pipelines that have a verifier (without one nothing is committed). `calibration.json` is not '
+           'written: the fit needs the larger dataset (WP-13).', '']
     rows = []
     for n, e in an.selection.items():
+        if an.arms[n].kind != 'verify':                       # no verifier, no commit: the policy commits nothing without one
+            continue
         c = e.commits
-        if c['precision']['n'] or an.arms[n].kind == 'verify':
-            wrong = ', '.join(c['wrong_commits'][:6]) + (' ...' if len(c['wrong_commits']) > 6 else '')
-            rows.append([f'`{n}`', cell(c['precision']), f"{c['precision'].get('cp_lower_95_one_sided', 0) or 0:.3f}",
-                         cell(c['precision_lenient']), cell(c['coverage']), wrong or 'none'])
+        shown = c['wrong_commits'][:3]
+        wrong = ', '.join(shown) + (f' ... ({len(c["wrong_commits"])} in all)' if len(c['wrong_commits']) > len(shown) else '')
+        rows.append([f'`{n}`', cell(c['precision']), f"{c['precision'].get('cp_lower_95_one_sided', 0) or 0:.3f}",
+                     cell(c['precision_lenient']), cell(c['coverage']), wrong or 'none'])
     if rows:
         out += table(['pipeline', 'committed picks right: gold only (Wilson 95%)', 'exact one-sided 95% lower bound',
                       'right if a related article counts', 'coverage (case runs with a commit)',
                       'wrong commits (case#repeat:article)'], rows)
     else:
         out += [NOT_RUN]
+    if an.ask_commits:
+        out += ['', 'On the 22 development scenarios where the right answer is to ask or redirect (no gold article), the same policy would commit on:', '']
+        out += table(['pipeline', 'case runs with a commit', 'scenarios affected'],
+                     [[f'`{n}`', cell(v), ', '.join(v['cases_with_a_commit'][:8]) or 'none'] for n, v in an.ask_commits.items()])
     best = next((n for n in an.selection if an.arms[n].kind == 'verify'), None)
     if best:
         rel = report.reliability(an.L, best, [c for c in an.cases if c.fold in SELECTION and c.gold])
@@ -277,7 +286,7 @@ def render_integrity_section(an: Analysis) -> list[str]:
     rows = []
     for n, e in an.selection.items():
         v = e.verifier
-        rows.append([f'`{n}`', str(e.errors['rows']), str(e.errors['rows_with_errors']), str(e.errors['rows_degraded']),
+        rows.append([f'`{n}`', str(e.errors['rows']), str(e.errors['rows_retried']), str(e.errors['rows_with_errors']), str(e.errors['rows_degraded']),
                      ', '.join(f'{k} {c}' for k, c in e.errors['categories'].items()) or '-',
                      '-' if e.top1_agreement is None else f'{e.top1_agreement:.3f}',
                      '-' if e.vote_agreement is None else f'{e.vote_agreement:.3f}',
@@ -285,7 +294,7 @@ def render_integrity_section(an: Analysis) -> list[str]:
                      '-' if not v else f"{v['raw_picks']} / {v['kept']} / {v['dropped']}",
                      '-' if not v or v.get('quote_match_rate_before_filtering') is None else pct(v['quote_match_rate_before_filtering']),
                      '-' if not v else str(v['fabricated_citations_shown'])])
-    out += table(['pipeline', 'rows', 'rows with errors', 'degraded', 'error categories', 'top-1 agreement across repeats (one run)',
+    out += table(['pipeline', 'rows', 'rows that needed a retry', 'rows still failed', 'degraded', 'error categories', 'top-1 agreement across repeats (one run)',
                   'top-1 agreement of a vote of 3', 'success agreement across repeats', 'majority top-1 right', 'picks made / kept / dropped', 'quote match before filtering', 'fabricated citations shown'], rows)
     mismatch = sum(e.errors['request_count_mismatch'] for e in an.selection.values())
     out += ['', f'Rows whose Jev request count differed from the expected count: {mismatch}. Dropped picks never reach the screen; '
@@ -372,8 +381,7 @@ def render_validity_section(an: Analysis, ledger_openai: dict | None) -> list[st
         '- **Reproduces.** Repeats per arm are in the integrity table (top-1 agreement across repeats, majority top-1). Jev is not deterministic: the same '
         'article set returns different probabilities run to run, so no single run is the answer. A gap smaller than the repeat-to-repeat range of the '
         'per-repeat success rate is no measurable difference.',
-        '- **Limits.** Dollars are provider-reported usage times the price table in `pricing.py`: 394k Jev tokens per case at $0.042 per million is $0.0166, '
-        'which the Jev rows match; OpenAI cost is reported tokens times $0.10 / $0.50 per million with no prompt-cache discount applied.',
+        '- **Limits.** ' + _arithmetic(an),
         '- **Why not double.** For the verifier the latency limiter is completion (reasoning) tokens, shown by the correlation in the cost and latency '
         'section; for the Jev screen it is request round trips (about 21 requests per case, 8 in flight), not the client.',
         '- **Tuned.** Every arm ran as the pipeline would: pinned model ids, strict structured output, reasoning effort set explicitly to medium, standard '
@@ -451,3 +459,22 @@ def render_not_run() -> list[str]:
             'against the US$10 stop; the verifier arms answer the question the product asks.',
             '- **Reasoning effort `max`/`high`:** the user fixed `medium`.',
             '- **The held-out split** is run once, at gate G4, for the registered winner and the BM25 floor (`python -m evals_dev.judge`).']
+
+
+def _arithmetic(an: Analysis) -> str:
+    """The "did it break limits" check: tokens times price against the recorded dollars, from the rows."""
+    rows = [r for r in an.L.rows.get('R4-jev-screen', {}).values() if not r['errors']]
+    text = ('Dollars are provider-reported usage times the price table in `pricing.py`, with no prompt-cache discount applied to OpenAI input. ')
+    if rows:
+        tok = median(r['tokens']['jev']['input'] for r in rows)
+        req = median(r['tokens']['jev']['requests'] for r in rows)
+        cost = median(r['usd'] for r in rows)
+        text += (f'The Jev screen used a median {tok / 1000:.0f}k input tokens in {req:.0f} requests per case: {tok:.0f} tokens at $0.042 per million is '
+                 f'${tok * 0.042 / 1e6:.4f}, and the rows record ${cost:.4f}; the 2026-10-20 recorded run measured 394k tokens and $0.0166 per case.')
+    ver = [r for rows_ in an.L.rows.values() for r in rows_.values() if r['tokens'].get('openai') and not r['errors']]
+    if ver:
+        tin = median(r['tokens']['openai']['input'] for r in ver)
+        tout = median(r['tokens']['openai']['output'] for r in ver)
+        text += (f' A verifier or rerank call used a median {tin:.0f} input and {tout:.0f} output tokens (reasoning included), which at $0.10 / $0.50 per '
+                 f'million is ${(tin * 0.10 + tout * 0.50) / 1e6:.4f}.')
+    return text

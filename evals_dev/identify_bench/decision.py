@@ -7,7 +7,11 @@ before any number existed:
 2. ``SR_best`` is the highest SR. A pipeline is *tied* with it when its paired difference from the best is not significantly
    negative (exact one-sided sign test on the discordant cases, alpha 0.10) and it trails by at most 3 points. A case is discordant
    when the two pipelines' shares of successful repeats differ; the sign of the difference is what the test counts.
-3. Among tied pipelines pick the lowest expected cost per case (API dollars, then p95 latency).
+3. Among tied pipelines pick the lowest expected cost per case (API dollars, then p95 latency). Refinement, added on 2026-10-21 after
+   the interim rows showed that one stage (the exhaustive screen) is almost the whole cost of every pipeline that has it: costs within
+   5 percent (or $0.0002) of the cheapest count as equal, and among those the pipeline with fewer stages wins, then the higher
+   success rate, then the lower p95 latency. Without it a difference of $0.0003 in tokens per case would decide the choice. The
+   strict lowest-cost pick is reported next to it.
 4. Override: if the best pipeline costs more than 3 times a cheaper pipeline that is not significantly worse and trails
    by under 5 points, take the cheaper one.
 5. Robustness: the winner needs run-to-run top-1 agreement of at least 0.9 across repeats (or to be deterministic) and
@@ -31,6 +35,8 @@ TIE_POINTS = 0.03
 TIE_ALPHA = 0.10
 OVERRIDE_POINTS = 0.05
 OVERRIDE_COST_RATIO = 3.0
+COST_BAND = 0.05                  # costs within 5 percent (or COST_BAND_ABS dollars) of the cheapest tied pipeline count as equal
+COST_BAND_ABS = 0.0002
 ERROR_RATE_MAX = 0.02
 P95_MAX_MS = 20_000
 AGREEMENT_MIN = 0.9
@@ -101,7 +107,7 @@ def pareto_front(points: dict[str, tuple[float, float]]) -> set[str]:
 
 
 def decide(evals: dict[str, ArmEval], latency: dict[str, dict], cases: list[BenchCase], *, floor: str = 'R0-bm25',
-           expected_cases: int | None = None) -> Decision:
+           expected_cases: int | None = None, stages: dict[str, int] | None = None) -> Decision:
     gold = [c for c in cases if c.gold]
     n_expected = expected_cases or len(gold)
     trace: list[str] = []
@@ -139,9 +145,21 @@ def decide(evals: dict[str, ArmEval], latency: dict[str, dict], cases: list[Benc
         return (rows[n].usd if rows[n].usd is not None else float('inf'),
                 rows[n].p95_ms if rows[n].p95_ms is not None else float('inf'), n)
 
-    ranked = sorted(tied, key=cost_key)
+    stages = stages or {}
+    by_cost = sorted(tied, key=cost_key)
+    strict = by_cost[0]
+    c0 = rows[strict].usd or 0.0
+    limit = max(c0 * (1 + COST_BAND), c0 + COST_BAND_ABS)
+    band = [n for n in by_cost if (rows[n].usd or 0.0) <= limit]
+    band.sort(key=lambda n: (stages.get(n, 1), -rows[n].sr, rows[n].p95_ms if rows[n].p95_ms is not None else float('inf'), n))
+    ranked = band + [n for n in by_cost if n not in band]
     pick = ranked[0]
-    trace.append(f'cheapest tied pipeline: {pick} (${rows[pick].usd:.4f} per case run)')
+    trace.append(f'cheapest tied pipeline, strictly: {strict} (${c0:.4f} per case run)')
+    if len(band) > 1:
+        trace.append('costs within 5 percent of it count as equal (' + ', '.join(f'{n} ${rows[n].usd:.4f}, {stages.get(n, 1)} stages' for n in band)
+                     + f'); fewest stages, then highest success rate: {pick}')
+    else:
+        trace.append(f'taking {pick}')
     # rule 4: a much cheaper pipeline within 5 points that is not significantly worse
     near = [n for n in feasible if n != best and rows[best].sr - rows[n].sr < OVERRIDE_POINTS and rows[n].p_worse >= TIE_ALPHA]
     if near:
