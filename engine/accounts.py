@@ -13,6 +13,7 @@ from .account_models import Authority, User
 from .llm_gate import client_ip_from
 
 COOKIE = 'batatis_session'
+SESSION_TOKEN = re.compile(r'[A-Za-z0-9_-]{43}')
 SESSION_SECONDS = 30 * 24 * 60 * 60
 SCRYPT_N, SCRYPT_R, SCRYPT_P, SCRYPT_DKLEN = 2**17, 8, 1, 64
 
@@ -62,7 +63,8 @@ def issue_session(store, user: User, request: Request, response: Response):
 
 def optional_user(request: Request, response: Response, store_factory) -> User | None:
     token = request.cookies.get(COOKIE)
-    if not token or len(token) > 128:
+    # Only a well-formed token (secrets.token_urlsafe(32)) may cost a database lookup.
+    if not token or not SESSION_TOKEN.fullmatch(token):
         return None
     user = store_factory().session_user(digest(token), time.time() + SESSION_SECONDS)
     if user:

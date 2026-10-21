@@ -202,12 +202,27 @@ def authorize_assist(*, model: str, max_input_tokens: int, max_output_tokens: in
     """The assistant has its own IP budget, plus the shared LLM budget and spend cap."""
     if not live_enabled(provider):
         return Decision(False, 'offline')
-    limit = int(os.environ.get('BATATIS_ASSIST_RATE_LIMIT') or os.environ.get('BATATIS_ASSIST_RATE') or '12')
-    window = float(os.environ.get('BATATIS_ASSIST_RATE_WINDOW_SECONDS') or '600')
+    limit, window = _assist_limits()
     if not _assist_window.allow(client_ip, limit, window):
         return Decision(False, 'rate-limited')
     return authorize(model=model, provider=provider, max_input_tokens=max_input_tokens,
                      max_output_tokens=max_output_tokens, client_ip=client_ip)
+
+
+def _assist_limits() -> tuple[int, float]:
+    try:
+        limit = int(os.environ.get('BATATIS_ASSIST_RATE_LIMIT') or os.environ.get('BATATIS_ASSIST_RATE') or '12')
+        window = float(os.environ.get('BATATIS_ASSIST_RATE_WINDOW_SECONDS') or '600')
+    except ValueError:
+        limit, window = 12, 600.0  # A malformed setting must not turn /assist into a 500.
+    return limit, window
+
+
+def assist_retry_after(client_ip: str) -> int:
+    """Seconds until the assistant or the shared LLM window frees a slot (at least 1)."""
+    _, window = _assist_limits()
+    llm_limit, llm_window = _rate_limit('BATATIS_LLM_RATE', '20', '600')
+    return max(1, _assist_window.retry_after(client_ip, window), _llm_window.retry_after(client_ip, llm_window))
 
 
 def record(*, model: str, input_tokens: int, output_tokens: int, reserved_usd: Decimal | float = 0) -> None:

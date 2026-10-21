@@ -8,6 +8,6 @@ PII_NOTICE = PRIVACY_NOTICE
 def assistant_notice(provider: str) -> str:
     name = 'Anthropic' if provider == 'anthropic' else 'OpenAI'
     return (f'AI help explains information and administrative completeness; it does not determine technical correctness. '
-            f'In live mode, your question, recent chat and selected application context are sent to {name}. '
+            f'In live mode, your question, recent chat and selected application context (application facts and any selected case message) are sent to {name}, after personal information is redacted. '
             'Avoid personal information. Batatis does not store this assistant chat; stored applications and '
             'their messages are deleted after 7 days or when the application is deleted.')

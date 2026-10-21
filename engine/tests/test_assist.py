@@ -24,6 +24,10 @@ def assistant(tmp_path, monkeypatch):
     llm_gate.reset_for_tests()
     store = CaseStore(tmp_path / 'cases.sqlite')
     client = TestClient(create_app(store=store, codes=Codes()), base_url='http://localhost')
+    anonymous = client.post('/assist', json={'screen': 'application', 'question': 'Explain this field.'})
+    assert anonymous.status_code == 401  # the assistant needs an account
+    assert signup(client, 'asker@example.test', 'Asker').status_code == 201
+    onboard(client, 'applicant')
     calls = []
 
     def fake(**kwargs):
@@ -73,7 +77,7 @@ def test_grounded_provision_lookup_citations_removal_and_spend_receipt(assistant
     context = json.loads(invocation['context'])
     assert context['focused_provision']['text'] == Codes().provision('9.10.9.16.(1)', 'B')['text']
     assert context['section_c'][0]['pairs'][0]['function'] == 'F03'
-    assert 'Anthropic' if provider == 'anthropic' else 'OpenAI' in result['notice']
+    assert ('Anthropic' if provider == 'anthropic' else 'OpenAI') in result['notice']
     assert llm_gate._memory.today() == llm_gate.estimate_usd(invocation['model'], 100, 40)
     assert result['notice'] == r.headers['x-batatis-notice']
 
@@ -93,7 +97,7 @@ def test_case_context_and_focus_only_follow_authorization(assistant, monkeypatch
     assert ask(client, case_id=private.id).status_code == 200
     with TestClient(client.app, base_url='http://localhost') as other:
         before = len(calls)
-        assert ask(other, case_id=private.id).status_code == 404
+        assert ask(other, case_id=private.id).status_code == 401  # anonymous: sign in first
         assert signup(other, 'other@example.test').status_code == 201
         assert ask(other, case_id=private.id).status_code == 404
         assert len(calls) == before
@@ -150,3 +154,36 @@ def test_prompt_enforces_professional_and_applicant_authorship(assistant, monkey
                        'deterministic lookup', '2nd printing', 'untrusted data']:
         assert constraint in routes_assist.SYSTEM
     assert all(c['model'] != 'claude-haiku-5-5' for c in calls)
+
+
+def test_personal_information_is_redacted_before_the_provider_sees_it(assistant, monkeypatch):
+    client, store, calls = assistant
+    enable(monkeypatch)
+    case = store.put(Case(title='Redaction', facts=[
+        fact('owner', 'Priya Natarajan'),
+        fact('mailingAddress', '4410 98 Avenue NW, Edmonton AB T6B 2X3'),
+        fact('project.description', 'Call Priya Natarajan at 780-555-0142 or priya@example.test about the wall.'),
+    ]))
+    r = ask(client, case_id=case.id, question='Can Priya Natarajan (780-555-0142) add 9.10.9.16.(1)?',
+            history=[{'role': 'user', 'text': 'My email is priya@example.test'}])
+    assert r.status_code == 200, r.text
+    sent = json.dumps({key: calls[0][key] if key != 'body' else calls[0][key].model_dump()
+                       for key in ('context', 'body')})
+    for secret in ('Priya', 'Natarajan', '780-555-0142', 'priya@example.test', '4410 98 Avenue', 'T6B 2X3'):
+        assert secret not in sent, secret
+    assert '9.10.9.16.(1)' in sent  # citations survive redaction
+    stored = store.get(case.id)
+    assert any(f.value == 'Priya Natarajan' for f in stored.facts)  # the applicant's own record is unchanged
+
+
+@pytest.mark.parametrize('claim', ['Your wall meets the code requirements.', 'It satisfies the requirements.',
+                                   'The board conforms to 9.27.3.2.(1).', 'This is in compliance with Part 9.',
+                                   'The design is code-compliant.', 'Using foam here is unsafe.'])
+def test_compliance_and_safety_verdicts_are_stopped(claim):
+    answer, cited, _ = routes_assist.check_citations(claim, Codes())
+    assert answer == routes_assist.SAFE_HELP and cited == []
+
+
+def test_safety_codes_officer_and_compliance_disclaimers_are_not_verdicts():
+    text = 'Ask your Safety Codes Officer. Batatis checks completeness, not code compliance.'
+    assert routes_assist.check_citations(text, Codes())[0] == text

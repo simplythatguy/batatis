@@ -256,9 +256,31 @@ export interface MessagesResult {
 }
 
 export interface NewCase {
-  authority?: string | null;
+  authority?: "calgary" | "edmonton" | null;
   jurisdiction?: JurisdictionInput | null;
   title?: string | null;
+}
+
+export interface Notification {
+  actor: NotificationActor;
+  case_id: string;
+  case_title: string;
+  created_at: string;
+  id: string;
+  kind: "status" | "message";
+  read: boolean;
+  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn" | null;
+  text: string;
+}
+
+export interface NotificationActor {
+  name: string;
+  role: "applicant" | "reviewer" | null;
+}
+
+export interface NotificationsResult {
+  notifications: Notification[];
+  unread: number;
 }
 
 export interface OnboardingRequest {
@@ -429,6 +451,7 @@ export interface User {
   email: string;
   id: string;
   name: string;
+  notifications_seen_at: string | null;
   onboarded: boolean;
   role: "applicant" | "reviewer" | null;
 }

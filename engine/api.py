@@ -14,7 +14,7 @@ import psycopg
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from codedb import AmbiguousProvisionError
 
@@ -32,14 +32,15 @@ from .store import CaseStore, FileTooLarge, InvalidAttachment, VersionConflict, 
 from .uploads import (MULTIPART_MAX_OVERHEAD_BYTES, MULTIPART_MAX_PARTS,
                       PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL)
 from .access import access_dependency
+from .account_models import Authority, reviewing_authority
 
 logger = logging.getLogger(__name__)
 
 
 class NewCase(BaseModel):
-    title: str | None = None
+    title: str | None = Field(default=None, max_length=500)
     jurisdiction: Jurisdiction | None = None
-    authority: str | None = None
+    authority: Authority | None = None
 
 
 class SectionCRequest(BaseModel):
@@ -160,7 +161,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
         user = request.state.user
         if user:
             case.owner_id = user.id
-            case.authority = case.authority or (case.jurisdiction.id if case.jurisdiction else None)
+            case.authority = case.authority or reviewing_authority(case.jurisdiction.id if case.jurisdiction else None)
         return cases().put(case)
 
     @app.get('/retention/purge')

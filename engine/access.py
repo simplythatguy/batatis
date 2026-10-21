@@ -36,8 +36,9 @@ def authorize_case(case, user: User | None, *, mode: str = 'read'):
     if not case.owner_id:
         return case
     owner = user is not None and user.id == case.owner_id
+    # Nobody reviews their own application, even after onboarding as a reviewer.
     reviewer = (user is not None and user.role == 'reviewer' and user.authority is not None
-                and user.authority == case.authority and case.status in REVIEWABLE)
+                and user.authority == case.authority and case.status in REVIEWABLE and not owner)
     if mode == 'review' and reviewer:
         return case
     if mode in {'read', 'message'} and (owner or reviewer):
