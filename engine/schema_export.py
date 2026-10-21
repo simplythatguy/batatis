@@ -23,7 +23,7 @@ from .routes_auth import SignupRequest, LoginRequest, OnboardingRequest
 from .routes_review import (NotificationsResult, ApplicationsResult, QueueResult, ClaimResult, ClaimRequest,
                             DecisionRequest, MessageRequest)
 from .routes_assist import AssistRequest, AssistResult
-from .routes_intake import IntakeRequest, IntakeResult
+from .routes_intake import AnswersRequest, IntakeRequest, IntakeResult, PlanRequest, ScopeRequest
 from .identify.http_models import (BenchmarkConfirmRequest, IdentifyConfirmRequest, IdentifyDecisionRequest,
                                    IdentifyDecisionResponse, IdentifyRequest)
 from .models_jurisdictions import JurisdictionDetail, JurisdictionsResult
@@ -34,7 +34,7 @@ RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesR
              QueueResult, ClaimResult, AssistResult, NotificationsResult, IdentifyDecisionResponse,
              JurisdictionsResult, JurisdictionDetail, CaseJurisdictionPack, IntakeResult)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
-            ClaimRequest, DecisionRequest, MessageRequest, AssistRequest, IntakeRequest,
+            ClaimRequest, DecisionRequest, MessageRequest, AssistRequest, IntakeRequest, AnswersRequest, ScopeRequest, PlanRequest,
             IdentifyRequest, IdentifyDecisionRequest, IdentifyConfirmRequest, BenchmarkConfirmRequest)  # defaulted fields optional
 
 

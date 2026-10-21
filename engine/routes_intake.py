@@ -45,6 +45,31 @@ class IntakeRequest(BaseModel):
         return self
 
 
+class AnswerItem(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    question_id: str = Field(max_length=200)
+    field: str | None = Field(default=None, max_length=200)
+    answer: str = Field(default='', max_length=2000)
+
+
+class AnswersRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    answers: list[AnswerItem] = Field(min_length=1, max_length=5)
+    expected_version: int | None = Field(default=None, ge=1, strict=True)
+
+
+class ScopeRequest(BaseModel):
+    """`building_code: true` is the applicant's "this is a building-code question" override."""
+    model_config = ConfigDict(extra='forbid')
+    building_code: bool
+    expected_version: int | None = Field(default=None, ge=1, strict=True)
+
+
+class PlanRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    expected_version: int | None = Field(default=None, ge=1, strict=True)
+
+
 class IntakeResult(BaseModel):
     case_id: str
     case_version: int
@@ -64,6 +89,8 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
             return None
 
     def result(case) -> IntakeResult:
+        if case.intake is None:
+            service.refresh(case)
         ids = {pointer.fact_id for pointer in case.intake.pointers}
         return IntakeResult(case_id=case.id, case_version=case.version, record=case.intake,
                             facts=[fact for fact in case.facts if fact.id in ids])
@@ -95,6 +122,41 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
                 raise HTTPException(404, 'case not found') from error
             raise HTTPException(409, 'case was updated concurrently') from error
         return result(saved)
+
+    def write(case_id: str, expected_version: int | None, change: Callable):
+        """Read, change, one compare-and-swap. No retry."""
+        store = cases()
+        case = store.get(case_id)
+        if case is None:
+            raise HTTPException(404, 'case not found')
+        if expected_version is not None and expected_version != case.version:
+            raise HTTPException(409, 'case was updated concurrently')
+        change(case)
+        try:
+            saved = store.put(case, expected_version=case.version)
+        except VersionConflict as error:
+            if error.actual is None:
+                raise HTTPException(404, 'case not found') from error
+            raise HTTPException(409, 'case was updated concurrently') from error
+        return result(saved)
+
+    @router.post('/cases/{case_id}/intake/plan', response_model=IntakeResult)
+    def replan(case_id: str, body: PlanRequest | None = None):
+        """Recompute the plan, for example after code identification ran. No provider call."""
+        return write(case_id, body.expected_version if body else None, service.refresh)
+
+    @router.post('/cases/{case_id}/intake/answers', response_model=IntakeResult)
+    def answer(case_id: str, body: AnswersRequest):
+        def change(case):
+            try:
+                service.answer(case, [item.model_dump() for item in body.answers])
+            except service.AnswerRejected as error:
+                raise HTTPException(422, str(error)) from error
+        return write(case_id, body.expected_version, change)
+
+    @router.post('/cases/{case_id}/intake/scope', response_model=IntakeResult)
+    def scope(case_id: str, body: ScopeRequest):
+        return write(case_id, body.expected_version, lambda case: service.override_scope(case, body.building_code))
 
     @router.get('/cases/{case_id}/intake', response_model=IntakeResult)
     def get_intake(case_id: str):
