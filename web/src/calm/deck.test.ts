@@ -144,3 +144,17 @@ test("Section D joins the deck with a real reference and stays open while its ga
   const code = buildDeck(c, []).find((i) => i.key === "cand-search-9.27.3.4.(1)")!;
   assert.equal(code.provision, "9.27.3.4.(1)");
 });
+
+test("proposed facts ask in plain words, with sentence-case sources and answers that say what they mean", () => {
+  const c = described("We are building a two-storey house with hempcrete walls.");
+  const card = buildDeck(c, getGaps(c)).find((i) => i.kind === "fact" && i.title.includes("storeys"))!;
+  assert.equal(card.title, "How many storeys is the building?");
+  assert.equal(card.context, "Your description says “two-storey”.");
+  assert.deepEqual(choicesFor(card).map((x) => x.label), ["Yes, 2 storeys", "No, something else"]);
+  const addr = described("The house is at 123 Example Street NW in Edmonton. We replace the housewrap.");
+  const a = buildDeck(addr, getGaps(addr)).find((i) => i.key === "field-municipalAddress")!;
+  assert.equal(a.title, "What is the site’s municipal address?");
+  assert.match(a.context, /^Your description says “/);
+  assert.match(choicesFor(a)[0].label, /^Yes, 123 Example Street/);
+  for (const i of [card, a]) assert.doesNotMatch(i.title + i.context, /From Your|your storeys/);
+});

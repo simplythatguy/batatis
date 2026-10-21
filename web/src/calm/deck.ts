@@ -7,7 +7,7 @@ import { AUTHORITIES } from "../config";
 import { DETAIL_FIELDS, DETAIL_IDS, PROCESS_FIELDS, displayValue, factFor, factLabel, valueText } from "../model";
 import { isProvision } from "../provisions";
 import { quoteKind } from "../rules";
-import type { ApplicantType, Candidate, Case, Gap } from "../types";
+import type { ApplicantType, Candidate, Case, Fact, Gap } from "../types";
 import { calmHref } from "./routes";
 
 export type DeckKind = "fact" | "candidate" | "storeys" | "question" | "authority" | "detail" | "process" | "section-d" | "describe" | "role";
@@ -41,6 +41,8 @@ export interface DeckItem {
   optional: boolean;
   /** A real code provision for the citation chip. Absent for cards built from the applicant's words. */
   provision?: string;
+  /** Proposed-fact cards: the two answers in plain words ("Yes, 2 storeys" / "No, something else"). */
+  confirmLabels?: { confirm: string; dismiss: string };
 }
 
 export interface DeckOptions {
@@ -84,6 +86,41 @@ const PROCESS_QUESTION: Record<string, string> = {
 };
 
 export const WRITTEN_BY_YOU = "You write this in your own words. Batatis never writes it for you.";
+
+const NUMBER_WORDS: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6 };
+
+/** "Your description" → "your description"; other sources keep their case ("NBC table"). */
+export function sourcePhrase(ref: string): string {
+  return /^(Your|The|This)\b/.test(ref) ? ref.charAt(0).toLowerCase() + ref.slice(1) : ref;
+}
+
+const short = (t: string) => (t.length > 48 ? `${t.slice(0, 45)}…` : t);
+
+/**
+ * Plain-language copy for a value read from the applicant's words: the question the field
+ * answers, where the value came from, and two answers that say what they mean.
+ */
+export function factCopy(f: Fact): { title: string; context: string; labels: { confirm: string; dismiss: string } } {
+  const value = displayValue(f);
+  const quoted = (f.source.quote || value).trim();
+  const said = /^your\b/i.test(f.source.ref) ? `${sourcePhrase(f.source.ref).replace(/^./, (x) => x.toUpperCase())} says “${quoted}”.` : `From ${sourcePhrase(f.source.ref)}: “${quoted}”.`;
+  if (f.field === "building.storeys") {
+    const m = String(f.value).toLowerCase().match(/\b(\d+|one|two|three|four|five|six)\b/);
+    const n = m ? (NUMBER_WORDS[m[1]] ?? Number(m[1])) : NaN;
+    return {
+      title: "How many storeys is the building?",
+      context: said,
+      labels: { confirm: Number.isFinite(n) ? `Yes, ${n} ${n === 1 ? "storey" : "storeys"}` : "Yes, that’s right", dismiss: "No, something else" },
+    };
+  }
+  const label = factLabel(f.field).toLowerCase();
+  const def = DETAIL_FIELDS.find((d) => d.id === f.field);
+  return {
+    title: def && DETAIL_QUESTION[def.id] ? DETAIL_QUESTION[def.id] : `What is the ${label}?`,
+    context: said,
+    labels: { confirm: `Yes, ${short(value)}`, dismiss: "No, something else" },
+  };
+}
 
 /** The applicant's first sentence, for quoting back. */
 function firstSentence(text: string): string {
@@ -216,20 +253,20 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   // What we read from the applicant's words, waiting for a click, in the section it fills.
   for (const f of c.facts) {
     if (f.status !== "unconfirmed") continue;
-    const label = factLabel(f.field);
     const detail = DETAIL_IDS.has(f.field);
+    const copy = factCopy(f);
     push({
       key: detail ? `field-${f.field}` : `fact-${f.id}`,
       kind: "fact",
       section: detail ? detailSection(f.field) : "B",
       eyebrow: "Check what we read",
-      title: `Is “${displayValue(f)}” your ${label.toLowerCase()}?`,
-      context: f.source.quote ? `From ${f.source.ref}` : `Read from ${f.source.ref}`,
-      quote: f.source.quote && f.source.quote !== displayValue(f) ? f.source.quote : undefined,
+      title: copy.title,
+      context: copy.context,
       why: "We read this from what you wrote. Nothing is used until you confirm it.",
       ref: f.id,
       done: false,
       optional: false,
+      confirmLabels: copy.labels,
     });
   }
 
@@ -370,7 +407,7 @@ export function sectionProgress(items: DeckItem[]): { id: SectionId; label: stri
 
 /** Choices for a card, in keyboard order (A, B, C). */
 export function choicesFor(item: DeckItem): { value: string; label: string }[] {
-  if (item.kind === "fact") return [{ value: "confirm", label: "Yes, that’s right" }, { value: "dismiss", label: "Not right" }];
+  if (item.kind === "fact") return [{ value: "confirm", label: item.confirmLabels?.confirm ?? "Yes, that’s right" }, { value: "dismiss", label: item.confirmLabels?.dismiss ?? "No, something else" }];
   if (item.kind === "authority") return [...AUTHORITIES.map((a) => ({ value: a.id as string, label: a.name })), { value: "unsure", label: "Not sure yet" }];
   if (item.kind === "role") return ROLE_CHOICES.map((r) => ({ value: r.value as string, label: r.label }));
   if (item.kind === "candidate") {

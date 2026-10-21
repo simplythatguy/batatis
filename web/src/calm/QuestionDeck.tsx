@@ -10,7 +10,7 @@ import { authorityName } from "./applications";
 import { openAssistant, setAssistantContext } from "./assistant/assistant";
 import { useBegin, useCurrentApplication } from "./begin";
 import { CodeDrawer, type DrawerState } from "./CodeDrawer";
-import { aliasKey, buildDeck, choiceKey, choicesFor, preCaseDeck, SECTIONS, type DeckItem, type SectionId } from "./deck";
+import { aliasKey, buildDeck, choiceKey, choicesFor, preCaseDeck, SECTIONS, sourcePhrase, type DeckItem, type SectionId } from "./deck";
 import { Icon24 } from "./icons";
 import { RelevanceRing } from "./RelevanceRing";
 import { updateSession, useSession } from "./session";
@@ -220,7 +220,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer }: { item:
           {fact && !isTyped(fact) && (
             <p className="cf-note">
               <span className={`cf-dot ${fact.status === "confirmed" ? "is-done" : "is-warning"}`} aria-hidden="true" />
-              {picked === "confirm" ? "Confirmed by you. You can still edit it." : `From ${fact.source.ref}. Edit it if it’s not right.`}
+              {picked === "confirm" ? "Confirmed by you. You can still edit it." : `From ${sourcePhrase(fact.source.ref)}. Edit it if it’s not right.`}
             </p>
           )}
           {picked === "dismiss" && !fact && <p className="cf-note">Removed. Type the right one, or skip for now.</p>}
