@@ -98,7 +98,8 @@ def _object_boxes(page) -> frozenset:
         if obj.type in (raw.FPDF_PAGEOBJ_TEXT, raw.FPDF_PAGEOBJ_FORM):
             continue
         try:
-            boxes.add(tuple(round(v) for v in obj.get_pos()))
+            bounds = obj.get_bounds() if hasattr(obj, 'get_bounds') else obj.get_pos()   # pypdfium2 5 / 4
+            boxes.add(tuple(round(v) for v in bounds))
         except Exception:  # noqa: BLE001 - an object without bounds cannot be compared
             continue
     return frozenset(boxes)
@@ -228,8 +229,11 @@ def _flattened(data: bytes, name: str, versions: list[FormVersion], fmaps: list[
     if FORM_TITLE.casefold() not in first.casefold():
         return None
     for version in versions:
-        scores = [_template_score(_norm(doc[i].get_textpage().get_text_range()), version.template_text[i])
-                  for i in range(2)]
+        # Page 1 identifies the form; any other page with a text layer must match its template page too.
+        # A page with no text layer (scanned) does not disqualify the form; its fields become not found.
+        texts = [_norm(doc[i].get_textpage().get_text_range()) for i in range(FORM_PAGES)]
+        scores = [_template_score(texts[i], version.template_text[i]) for i in range(FORM_PAGES)
+                  if i == 0 or texts[i]]
         if min(scores) < TEMPLATE_MATCH:
             continue
         out = ReadFile(name, '', len(data), len(doc), 'scc_form_flattened', version.version, data=data)
