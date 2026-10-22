@@ -259,6 +259,7 @@ async function reviewHarness(opts: { index: () => Promise<unknown> }) {
     "./packageView": packageView,
     "./PackageReview": { PackageReview: "PackageReview", StepTitle: "StepTitle" },
     "../shell/MoreMenu": { MoreMenu: "MoreMenu" },
+    "./InfoRequest": { InfoRequest: "InfoRequest" },
   }, { EngineError });
   return { ...h, EngineError, get runs() { return runs; } };
 }
@@ -313,5 +314,55 @@ test("a first review load that fails still shows the error and retry, with Accep
   click(tree, "Try again");
   tree = await h.render();
   assert.equal(nodes(tree, (n) => n.type === "PackageReview")[0]?.props.session.version, 1);
+  h.unmount();
+});
+
+test("asking for more after a review ran but the index refresh failed: the newest run, no 'earlier', editing waits for the retry", async () => {
+  let failRefresh = false, newest = 1, Err: new (s: number) => Error;
+  const index = () => ({ latest: reviewSession(newest), sessions: [reviewSession(1), ...(newest > 1 ? [reviewSession(newest)] : [])], close_out: null });
+  const h = await reviewHarness({ index: async () => { if (failRefresh) throw new Err(503); return index(); } });
+  Err = h.EngineError;
+  let tree = await h.render({ caseId: "c1" });
+  failRefresh = true;
+  runAgain(tree);
+  tree = await h.render();
+  const final = nodes(tree, (n) => n.type === "PackageReview")[0].props.final.content;
+  const ask = nodes(final, (n) => n.type === "button" && /rv-choice is-amber/.test(n.props.className || ""))[0];
+  ask.props.onClick();
+  tree = await h.render();
+  let ir = nodes(tree, (n) => n.type === "InfoRequest")[0];
+  assert.equal(ir.props.session.version, 2, "the review that just ran stays");
+  assert.equal(ir.props.latest, true, "an unknown index never makes the newest run 'an earlier version'");
+  assert.equal(ir.props.canEdit, false, "editing and sending wait until the index is known again");
+  assert.ok(nodes(tree, (n) => n.type === "button" && text(n) === "Try again").length, "the request view offers the retry");
+  // The retry finds the run: the newest actual version is edited.
+  failRefresh = false;
+  newest = 2;
+  click(tree, "Try again");
+  tree = await h.render();
+  ir = nodes(tree, (n) => n.type === "InfoRequest")[0];
+  assert.deepEqual([ir.props.session.version, ir.props.latest, ir.props.canEdit], [2, true, true]);
+  assert.equal(nodes(tree, (n) => n.type === "button" && text(n) === "Try again").length, 0);
+  assert.equal(accept(tree), undefined, "no accept control in the request view");
+  h.unmount();
+});
+
+test("after recovery the request moves to a newer version another run saved", async () => {
+  let failRefresh = false, newest = 1, Err: new (s: number) => Error;
+  const h = await reviewHarness({ index: async () => { if (failRefresh) throw new Err(503); return { latest: reviewSession(newest), sessions: [reviewSession(newest)], close_out: null }; } });
+  Err = h.EngineError;
+  let tree = await h.render({ caseId: "c1" });
+  failRefresh = true;
+  runAgain(tree);
+  tree = await h.render();
+  const final = nodes(tree, (n) => n.type === "PackageReview")[0].props.final.content;
+  nodes(final, (n) => n.type === "button" && /rv-choice is-amber/.test(n.props.className || ""))[0].props.onClick();
+  tree = await h.render();
+  failRefresh = false;
+  newest = 3;
+  click(tree, "Try again");
+  tree = await h.render();
+  const ir = nodes(tree, (n) => n.type === "InfoRequest")[0];
+  assert.deepEqual([ir.props.session.version, ir.props.latest, ir.props.canEdit], [3, true, true]);
   h.unmount();
 });
