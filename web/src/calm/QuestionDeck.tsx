@@ -17,7 +17,7 @@ import { Icon24 } from "./icons";
 import { RelevanceRing } from "./RelevanceRing";
 import { getSession, updateSession, useSession } from "./session";
 import { CONFLICT_TEXT } from "../api/sync";
-import { retryExtras } from "./caseExtras";
+import { retryExtras, getExtras } from "./caseExtras";
 import { CIcon, MOD_KEY } from "./ui";
 import { engine } from "../api/client";
 import { provisionCandidate } from "../screens/SectionC";
@@ -752,14 +752,19 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     const key = it.key;
     noteFor(key, "");
     setBusyKey(key);
+    // The case this answer belongs to: a switch to another application stops the sibling answers and the UI update.
+    const startCase = getExtras().caseId;
+    const sameCase = () => getExtras().caseId === startCase;
     void (async () => {
       let error = await answerChecklist(cl.id, row.id, state, reason);
       if (!error && state === "confirmed") {
         for (const other of otherOptions(cl, row)) {
+          if (!sameCase()) return;
           error = await answerChecklist(cl.id, other.id, "does_not_apply", `Another option of this choice is followed instead (${row.option ?? row.source.label ?? "the confirmed option"}).`);
           if (error) break;
         }
       }
+      if (!sameCase()) return;
       setBusyKey((k) => (k === key ? null : k));
       if (error) {
         // Nothing was saved: the choice goes back to the saved answer.
