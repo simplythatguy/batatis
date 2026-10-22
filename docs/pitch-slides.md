@@ -33,7 +33,7 @@
 
 **Full slide detail (in notes):**
 
-- Built: the applicant picks a role in onboarding, describes the project, and answers cards in form order. Each card has a plain "Why we ask". "Not sure" keeps an open question for the officer and never blocks
+- Built: the applicant picks a role in onboarding, describes the project, and answers cards one at a time. Each card has a plain "Why we ask". "Not sure" keeps an open question for the officer and never blocks
 - Built: after Start, the intake reader takes the description and text PDFs and shows each fact beside the words it came from. Nothing is used until the applicant says yes, and a No is kept as a confirmed empty answer
 - Rules read first and a model is asked only for fields the rules left empty. Every fact stores the phrase or box it came from. Two values for one field give no fact and a question. At most five questions follow, each with a reason, and the first carries the note on whether this looks like a variance. Pages with no text layer are reported as not read, with the reason, and nothing is guessed
 - If another code applies, such as plumbing, a redirect page replaces the questions until the applicant says otherwise
