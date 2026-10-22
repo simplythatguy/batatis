@@ -1,6 +1,6 @@
 # Batatis: Business Plan
 
-*Building Codes Challenge, Submission 1 (Oct 29, 2026). Status is as of Oct 21, 2026. Every figure carries its kind. **Verified** means a primary source says it and the source is named. **Measured** means a run or a file produced it. **Estimate** means arithmetic on figures shown. **Assumption** means a number we chose, with its basis. Prices are hypotheses, and no buyer has seen one. Figures that no other research file holds are recorded in [`docs/research/2026-10-21-source-checks.md`](./research/2026-10-21-source-checks.md) ("source checks"). The market research is `docs/research/2026-10-20-vision/C-market-provinces-business.md`, and later mentions use its file name alone. What is built is defined in the Implementation Plan, §3.*
+*Building Codes Challenge, Submission 1 (Oct 29, 2026). Status is as of Oct 22, 2026. Every figure carries its kind. **Verified** means a primary source says it and the source is named. **Measured** means a run or a file produced it. **Estimate** means arithmetic on figures shown. **Assumption** means a number we chose, with its basis. Prices are hypotheses, and no buyer has seen one. Figures that no other research file holds are recorded in [`docs/research/2026-10-21-source-checks.md`](./research/2026-10-21-source-checks.md) ("source checks"). The market research is `docs/research/2026-10-20-vision/C-market-provinces-business.md`, and later mentions use its file name alone. What is built is defined in the Implementation Plan, §3.*
 
 ## 1. The company in one paragraph
 
@@ -125,7 +125,7 @@ All figures here are estimates from `C-market-provinces-business.md` (§2.5 and 
 | Canadian authority-side pre-check | US$23M to US$50M a year if every application were covered. US$7M to US$15M at 30% | 300,000 to 650,000 applications a year at Denver's US$77 per application |
 | Canadian seats | About C$42M a year | 25% of 25,700 inspectors at C$3,000, plus 10% of 330,639 engineers at C$700 |
 
-The honest reading is the research's: **the Alberta wedge alone is a single-digit-million-dollar business.** A very large outcome would need other provinces, then all permits, then other countries. The research's own arithmetic says US$100M of annual revenue takes about 875 authorities, or about 12,000 Canadian seats plus international revenue, over 8 to 10 years on a top-decile growth curve. We treat that as an outer bound, not a plan.
+The honest reading is the research's: **the Alberta pool is C$0.9M to C$14M a year before capture, and what Batatis could capture of it, C$0.3M to C$7M a year, is at most a single-digit-million-dollar business.** A very large outcome would need other provinces, then all permits, then other countries. The research's own arithmetic says US$100M of annual revenue takes about 875 authorities, or about 12,000 Canadian seats plus international revenue, over 8 to 10 years on a top-decile growth curve. We treat that as an outer bound, not a plan.
 
 **How it grows, in stages.**
 

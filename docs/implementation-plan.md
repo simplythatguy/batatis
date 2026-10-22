@@ -1,6 +1,6 @@
 # Batatis: Implementation Plan
 
-*Building Codes Challenge, Submission 1 (Oct 29, 2026). Status is as of Oct 21, 2026, on `dev` at commit 054c632 and the live app at <https://batatis-vert.vercel.app>. Four status words are used. **Built** means merged on `dev` and reachable in the live app or API. **Backend only** means the API is merged and its screen is not finished. **In progress** means work on an open branch. **Roadmap** means not started, and it is never described as working. A result appears only where a file or a run backs it, with its limits next to it.*
+*Building Codes Challenge, Submission 1 (Oct 29, 2026). Status is as of Oct 22, 2026, on `dev` at commit 43e7c09, and the live app at <https://batatis-vert.vercel.app> as last checked on Oct 21. Four status words are used. **Built** means merged on `dev` and reachable in the live app or API. **Backend only** means the API is merged and its screen is not finished. **In progress** means work on an open branch. **Roadmap** means not started, and it is never described as working. A result appears only where a file or a run backs it, with its limits next to it.*
 
 ## 1. Summary
 
@@ -66,6 +66,8 @@ The presentation also lists where practice varies: requirements differ by discip
 
 The presentation lists what a Division C, 2.3.1 file must contain. The package review turns each item into a named finding when the item is absent. It checks presence only and never adequacy. The Division C and "demonstrate, don't assert" checks are keyword presence checks, so a passage worded differently can show as "not found", and the officer resolves it.
 
+The process fork in the challenge brief (`docs/hackathon-problem-brief.md`) also lists a rationale for the alternative. The package review does not check that a rationale is present. It reads the description of the proposed alternative and checks the risk assessment, the mitigating measures and the assumptions and limits, so a package can omit a rationale without receiving a finding or an information-request item, and the officer checks that separately. On the applicant's side the deck does ask for a rationale (the "Your case · Rationale" card).
+
 | Item in the file | Division C reference | Check in the package review |
 |---|---|---|
 | Code analysis and attributions | 2.3.1.1.(3) | Section C rows are present, each article exists in the 2nd printing, and each objective and function pair matches the Division B table |
@@ -91,7 +93,7 @@ This is what an SCO does in Batatis from the first screen to the Council copy. T
 
 The officer's own decision to issue or refuse the variance under the Safety Codes Act, s.38, happens in the authority's own process. Batatis records "Accepted as administratively complete" and never "approved".
 
-## 3. State of the product on Oct 21
+## 3. State of the product on Oct 22
 
 | Area | What exists | Status | Evidence |
 |---|---|---|---|
@@ -99,12 +101,13 @@ The officer's own decision to issue or refuse the variance under the Safety Code
 | Applicant deck | Describe. One-question cards in the order of the form: Section A fields, the reviewing authority, what Batatis read from the description, Section B fields, the code check cards (Section C), then the applicant's own rationale, risk, mitigation, assumptions, maintenance and qualifications, and Section D. Review and application sheet | Built | `docs/design-system-calm.md`, `web/src/calm/deck.ts` |
 | Code library | Browse NBC(AE) 2023, 2nd printing, with a relevance estimate for the project on each article and a structured reader. The estimates are not Section C and not compliance | Built | PR #56 |
 | Section C | Looked up from the code's attribution tables. The screen says so when the table has no row for a sentence. NBC 2020 intent statements are shown as explanatory only | Built | `codedb/README.md` |
-| Official SCC form | The October 2026 form (5 pages, 87 fields). The field map is pinned to the form's SHA-256. Draft and official PDF. The official PDF is blocked, with reasons, while a required item is missing. Part 2 and signatures stay blank | Built | `engine/export/field_maps/scc_2026-10.json`, `docs/deploy.md` |
+| Official SCC form | The October 2026 form (5 pages, 87 fields). The field map is pinned to the form's SHA-256. Draft and official PDF. The official PDF is blocked, with reasons, while a required item is missing. Part 2 and signatures stay blank. A field shows N/A only when the applicant has confirmed that it does not apply and given a reason, and a blank is never shown as N/A (no screen yet for stating it). The appendix names the request for variance and the alternative solution, states the equivalence test of Division A 1.2.1.1.(1)(b), lists each N/A with the applicant's reason, and says how each Section C row was identified | Built. The N/A statement is backend only | `engine/export/field_maps/scc_2026-10.json`, `docs/deploy.md`, `docs/api-contract.md` (PR #60) |
 | Submit and review workflow | Submit to Calgary or Edmonton, queue, claim and take over, accept or return, messages, notifications | Built | `docs/api/accounts-review.md` |
 | Intake extraction | Reads the description and text PDFs. Every fact points at the words it came from. At most five questions, each with a reason. "Not sure" never blocks. Fork flag and scope redirects | Backend only | `docs/api/intake.md` (PR #54) |
 | Code identification | Screens all 2,080 Division B articles, re-ranks the top 60, and has a verifier read the full text of the top 15 and quote it word for word. Offers up to three quoted choices. Commits nothing automatically. Labelled keyword fallback when a model stage is unavailable | Backend only, benchmark unfinished | `docs/api/identify.md` (PR #52), draft PR #58 |
 | Jurisdiction packs | Calgary, Edmonton and the rest of Alberta, as data. Coverage labels for the other 12 provinces and territories (preview) | Built as data and API. Picker and process-notes screen in progress | `docs/api/jurisdictions.md` (PR #51) |
 | Officer package review | Reads a fillable or flattened SCC form and its attachments. Findings, a documents panel, a deterministic information request, an "x of y gaps resolved" diff after a re-upload, a close-out record | Backend only | `docs/api/package-review.md` (PR #53) |
+| Process-card examples | For each of the six process fields, what a good answer covers and four public precedents (STANDATA, Calgary and Edmonton documents) cited by title, number, PDF page and link, each with a one-line description of its structure and no source text | Backend only | `docs/api-contract.md` (PR #60), `engine/data/process_examples.json` |
 | Privacy and spend | Recognizable personal details are removed before any AI call. Cases and files are deleted after 7 days. A daily spend cap and per-IP limits apply | Built | `docs/deploy.md`, `engine/redact.py`, `engine/llm_gate.py` |
 | Automated tests | On `dev` at 054c632, CI ran 1,698 tests (5 skipped) over the engine, the code database and the key-free evals. The web typecheck, build and UI smoke test passed | Built | GitHub Actions run 39720990321 |
 | Roadmap | Coded rules for 9.10.15.5.(8) to (10), 9.10.11.2.(2) and 9.10.13.13.(1). Standing-package checklists. Accuracy report page. A written explainer paragraph for each Section C article (challenge brief, §2.1.c.iii: the schema has a field and nothing fills it). Site twin. Calgary form export. Part 2 prefill. Other provinces. Portal integration | Roadmap | `docs/research/2026-10-20-vision/2-week-build.md` |
@@ -146,7 +149,7 @@ The brief asks for an export that matches Appendix 1. The Council has since repl
 | Part 2(b): refusal reasons use "equal or better performance" | The same reasons use "approximately equivalent or greater safety performance" and add a line recording how the refusal was served | Left blank |
 | Part 3: appeal within 30 days "the Written Notice was served in person" | Appeal within 30 days of the date the refusal "was served" | Left blank |
 
-The filled PDF is the 5-page form plus an appendix. The appendix length depends on the case: the synthetic sample in the Oct 20 checkpoint (`docs/research/2026-10-20-vision/build-checkpoint.md`) has ten appendix pages. An Appendix 1 export would be a second field map plus a rendered overlay for Section C. It is roadmap, to be built only if the judges ask for it.
+The filled PDF is the 5-page form plus an appendix. The appendix length depends on the case: the three fictional demo cases run from 4 to 11 appendix pages and the synthetic sample has 14 (`python scripts/gate_g3.py`, run on Oct 22). An Appendix 1 export would be a second field map plus a rendered overlay for Section C. It is roadmap, to be built only if the judges ask for it.
 
 ### 4.4 Integration, in three phases
 
@@ -239,6 +242,7 @@ No person outside the team has used Batatis. The evidence below comes from autom
 | Engineer-needed flag on the same 60 cases (`evals_dev/section_d_flag/RESULTS.md`) | The shipped variant agrees with model-written labels on 50 of 60 cases and sends 27 to the applicant as unknown | It never answers "no" on these text-only cases, so zero under-flags holds by construction. In sample. Not human-verified |
 | Planted defects in officer review (`engine/tests/test_package_review_planted.py`) | Defects from 16 classes (D01 to D16), planted in synthetic fillable and flattened SCC forms, are named by the review, and the information request asks the applicant | Written alongside the checker, on synthetic forms. Not the blind 20-application test in `evals_dev/planted/SPEC.md`, which has not been run |
 | Agent-run browser walk against the engine (PR #49) | Sign-up, submit, claim, return, resubmit and accept all completed | One scripted path run by an agent, not a person |
+| Export gate G3 (`python scripts/gate_g3.py`, run on Oct 22 with the local code database and the Council's form) | For three fictional demo cases and a synthetic sample, all 50 applicant fields are filled or marked N/A from the applicant's own facts, the exported text passes `codedb validate` with 0 errors, every filled field draws inside its box, and the appendix names the request for variance and the alternative solution and uses none of "complies", "safe", "approved" or "adequate" | Fictional cases written for the gate. It shows that the export is complete and consistent, not that a design is acceptable |
 | Public-precedent test of the relevance pipeline (`docs/research/2026-10-20-vision/README.md`, §6) | On 53 Alberta precedents, screening every article and re-ranking the top 60 put an article the precedent cites first in 64% of cases and in the first five in 81%. Keyword search alone: 32% and 66% | Run on 2026-10-20 without the verifier stage. 53 cases from one province and one code. The gold lists can be incomplete. Not a held-out professional evaluation |
 
 ### 7.2 Protocol for the first human sessions

@@ -1,6 +1,6 @@
 # Batatis deck: refresh steps and screenshot slots
 
-**Status: `index.html` and `batatis-pitch-deck.pdf` are stale.** They were built from the earlier slides (PR #32), before the calm interface, the merged backends and the rewritten plans. `pitch-slides.md` and `pitch-narration.md` are current. The deck is refreshed after the screens in the Implementation Plan §3 ("backend only" rows) land.
+**Status: `batatis-pitch-deck.pdf` is stale, and `index.html` has current text with no screenshots.** The PDF was built from the earlier slides (PR #32), before the calm interface, the merged backends and the rewritten plans, so do not submit it. `index.html` was regenerated on Oct 22 from the current `pitch-slides.md` and `pitch-narration.md`, and it shows "Screenshot pending" in every slot. The PDF is exported from `index.html` after the screens in the Implementation Plan §3 ("backend only" rows) land and the screenshots below are added.
 
 ## Refresh steps
 

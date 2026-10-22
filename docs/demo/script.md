@@ -1,6 +1,6 @@
 # Demo video script (4 to 5 minutes)
 
-*One example from the applicant's sign-up to the officer's close-out, filmed on the calm interface. Status is as of Oct 21, 2026, on `dev` at commit 054c632 and the live app at <https://batatis-vert.vercel.app>. Steps whose screens exist are marked **Built**. Steps whose screens are still in progress are marked **Pending UI**, and each has a fallback line, so the video can be recorded after those screens land and never shows or describes a screen that does not exist. Running time: 4:40. Narration: 394 words, about 2.8 minutes of speech at 140 words a minute, which leaves the rest of the clock for typing and clicking. The card order and the wording quoted below come from `web/src/calm/` at commit 054c632. Rehearse once on the final build and correct anything that has changed.*
+*One example from the applicant's sign-up to the officer's close-out, filmed on the calm interface. Status is as of Oct 22, 2026, on `dev` at commit 43e7c09, and the live app at <https://batatis-vert.vercel.app> as last checked on Oct 21. Steps whose screens exist are marked **Built**. Steps whose screens are still in progress are marked **Pending UI**, and each has a fallback line, so the video can be recorded after those screens land and never shows or describes a screen that does not exist. Running time: 4:40. Narration: 394 words, about 2.8 minutes of speech at 140 words a minute, which leaves the rest of the clock for typing and clicking. The card order and the wording quoted below come from `web/src/calm/` at commit 43e7c09. Rehearse once on the final build and correct anything that has changed.*
 
 ## What the video must say, and must not
 
@@ -124,7 +124,7 @@ The deck asks its cards in the order of the form: Section A, Section B, Section 
 
 *50 words, 21.4 s at 140 wpm in a 33 s window.*
 
-**If the screen is not built when you record, say instead:** The questions come one at a time, in the order of the form. She picks the reviewing authority, and she confirms the storey count that Batatis read from her words. Nothing is used until she says yes. *(37 words.)*
+**If the screen is not built when you record, say instead:** The questions come one at a time, in the order of the form. She picks the reviewing authority, and she confirms the storey count that Batatis read from her words. The count is not added until she says yes. *(37 words.)*
 
 ### A4. Code check and the code drawer (1:13 to 1:51, Built with a pending part)
 
@@ -185,7 +185,7 @@ The deck asks its cards in the order of the form: Section A, Section B, Section 
 2. Show the Sections A to D panel, with Section C's line "looked up, not AI-written".
 3. Press **Preview application** to show the paper sheet. Point at the Section C row, "Objectives OP3.1 · Functions F03".
 4. In the download panel, first show the gate while anything is missing ("The official PDF unlocks after a current check finds no required items."). When it reads "Ready for the official PDF.", press **Official PDF**.
-5. Open the downloaded PDF. Page 1 shows Part 1 filled in. Show that the officer's Part 2 and the signatures are blank.
+5. Open the downloaded PDF. Page 1 shows Part 1 filled in. Show that the officer's Part 2 and the signatures are blank. Fields that Priya left empty, such as the permit number, stay blank. A field shows N/A only if the applicant has said it does not apply and given a reason, and there is no screen for that yet (PR #60 is backend only), so do not film or mention N/A.
 6. Press **Submit to Edmonton**. The panel reads "Sent to Edmonton" and "Waiting for an officer to pick it up."
 
 **Narration.**
@@ -286,4 +286,4 @@ The deck asks its cards in the order of the form: Section A, Section B, Section 
 | The Council copy is due in 10 days | `docs/research/2026-10-21-source-checks.md` §1 (IB-2025-11-18), `docs/api/package-review.md` |
 | "Accepted as administratively complete" | `docs/api/accounts-review.md`, `web/src/calm/reviewer/ReviewDetail.tsx` |
 | Package review and information request | `docs/api/package-review.md` |
-| Screen text quoted above | `web/src/calm/` at commit 054c632 |
+| Screen text quoted above | `web/src/calm/` at commit 43e7c09 |

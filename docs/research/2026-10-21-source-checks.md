@@ -67,7 +67,9 @@ The intake model pass was measured in PR #54: 19 live calls cost about US$0.012 
 
 ```python
 import json, collections, statistics
-# run from a checkout that has both ledger files from branch feat/wp10-11-evals at 6a42795
+from pathlib import Path
+# run from a checkout of branch feat/wp10-11-evals at 6a42795, which holds the ledger folder
+LEDGER_FILES = sorted(Path('evals_dev/identify_bench/ledger').glob('*.jsonl'))
 for path in LEDGER_FILES:
     rows = [json.loads(l) for l in open(path)]
     by = collections.defaultdict(list)
@@ -87,11 +89,12 @@ for path in LEDGER_FILES:
 |---|---|---|---|
 | Intake rules on the 60 development cases, Oct 21, `dev` at 054c632, no model, no network | `python -m evals_dev.intake_facts.score` | Precision 159/159 = 1.000 (95% Wilson 0.976 to 1.000). Recall 159/162 = 0.981 (0.947 to 0.994). Recall on labels taken from the cases' known facts: 134/137. Three misses: dev-014, dev-047, dev-051 | In sample: the labels were written while the rules were written (`evals_dev/intake_facts/gold.json`). Cases are agent-authored and model-checked |
 | Continuous integration on `dev` at 054c632 | GitHub Actions run 39720990321 | Engine job: 1,698 passed, 5 skipped. Web job and secret scan passed | The skipped tests need provider access |
+| Export gate G3, Oct 22, `dev` at 43e7c09, with the local code database and the Council's form | `python scripts/gate_g3.py` | Four cases (three fictional demo cases and a synthetic sample): 27, 37, 28 and 45 of 50 applicant fields filled and the rest marked N/A from applicant facts, `codedb validate` 0 errors, render test, Section C and process rows, precedent-example data, CCMC snapshot and wording checks all PASS. Same numbers as the description of PR #60 | Fictional cases written for the gate. It shows that the export is complete and consistent, not that a design is acceptable |
 | Live deployment, read-only requests, Oct 21 | `GET /api/jurisdictions`, `GET /api/code/search`, `GET /api/openapi.json` on <https://batatis-vert.vercel.app> | Three packs (calgary, edmonton, alberta-other) with coverage "full", and 13 coverage rows in total (12 labelled "preview"). Code search for "glazed openings exposing building face" returns 9.10.15.4. and 9.10.15.4.(1) among the first three rows. The OpenAPI document lists 64 paths | Shows the deployed build serves these routes. It does not show live provider access |
 
 ## 7. Code citations checked in the code database
 
-Looked up with `python -m codedb lookup` on Oct 21 in the NBC(AE) 2023, 2nd printing database (`codedb/README.md`). PDF pages are 1-based.
+Looked up with `python -m codedb lookup` on Oct 21 in the NBC(AE) 2023, 2nd printing database (`codedb/README.md`). PDF pages are 1-based. The code database is built locally and is not committed, so the text of the two professional-involvement sentences is quoted here. Other checked-in documents cite the same sentences with the same page: `research/facts/professional-involvement.md` (2.4.1.1.(3) and 2.4.1.2.(1), PDF p.740), `evals/demo-cases/cited-provisions.txt`, and the engine's own rules in `engine/professional.py`.
 
 | Id | Title or topic | PDF page |
 |---|---|---:|
@@ -99,7 +102,8 @@ Looked up with `python -m codedb lookup` on Oct 21 in the NBC(AE) 2023, 2nd prin
 | Division A, 1.2.2.1.(2) | Evaluation reports issued by the Canadian Construction Materials Centre may be used in determining compliance | 38 |
 | Division A, 1.4.1.1.(4) | Where alternative solutions are referred to, they are those in Clause 1.2.1.1.(1)(b) | 41 |
 | Division C, 2.3.1.1.(2)(b), (3), (4), (6) | Documentation of alternative solutions, including the co-ordinator | 739 |
-| Division C, 2.4.1.1.(3), 2.4.1.2.(1) | Registered professionals | 740 |
+| Division C, 2.4.1.1.(3) | "For buildings other than those described in Sentence (1), the drawings and specifications shall be authenticated by one or more registered professionals qualified to engage in the appropriate combination of those areas of the practice of architecture and engineering that are applicable to the project." | 740 |
+| Division C, 2.4.1.2.(1) | "For design carried out in accordance with Part 4 of Division B, the designer shall be a registered professional skilled in the work concerned." | 740 |
 | 9.10.15.4.(1) | Glazed Openings in Exposing Building Face. Attribution [F03-OP3.1] in Table 9.38.1.1., PDF p.1130 | 901 |
 | 9.10.15.5.(8), (9), (10) | Construction of Exposing Building Face of Houses | 904 |
 | 9.10.11.2.(2) | Firewalls Not Required | 889 |

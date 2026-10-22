@@ -20,7 +20,7 @@ The program's onboarding guide says: "Exact submission deadlines, templates and 
 | Business plan | Rewritten | `docs/business-plan.md`, with sources in `docs/research/2026-10-21-source-checks.md` | No team section. See "Decisions for you" |
 | Implementation plan | Rewritten | `docs/implementation-plan.md`. The user-testing appendix is `docs/user-testing/` (no real session has run) | No human session. No pilot partner |
 | Pilot plan | Rewritten | `docs/pilot-adoption-plan.md` | No partner has agreed to anything |
-| Pitch | Text current. Deck stale | `docs/pitch-slides.md` (12 slides), `docs/pitch-outline.md`, `docs/pitch-narration.md` (379 spoken words, 2:47 at 140 wpm) | **GAP:** `docs/pitch-deck/index.html` and `batatis-pitch-deck.pdf` are stale. Do not submit the old PDF. Steps are in `docs/pitch-deck/SCREENSHOTS.md` |
+| Pitch | Text current. PDF stale | `docs/pitch-slides.md` (12 slides), `docs/pitch-outline.md`, `docs/pitch-narration.md` (386 spoken words, 2:50 at 140 wpm) | **GAP:** `docs/pitch-deck/batatis-pitch-deck.pdf` is stale, so do not submit it. `index.html` has current text and no screenshots. Steps to export a new PDF are in `docs/pitch-deck/SCREENSHOTS.md` |
 | Judge Q&A | Rewritten | `docs/judge-qa.md` (23 questions) | |
 
 ## Rubric
@@ -79,7 +79,7 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 **Evidence now:**
 
 - Built: the professional-involvement result as an amber callout on the review screen, with the line "Batatis can list what that evidence must address, but it can't write it." Section D cards list evidence documents and the responsible person. Cards for rationale, risk, mitigation, assumptions, maintenance and qualifications say the applicant writes them (`web/src/calm/Review.tsx`, `web/src/calm/deck.ts`).
-- Engine: `engine/professional.py` answers required, depends or no, with the Division C rule (2.4.1.1.(3), 2.4.1.2.(1) and others) and never answers "no" on missing facts. Flag agreement 50/60 in sample (`evals_dev/section_d_flag/RESULTS.md`).
+- Engine: `engine/professional.py` answers required, depends or no, with the Division C rule (2.4.1.1.(3), 2.4.1.2.(1) and others; the rules and PDF pages are in `research/facts/professional-involvement.md`) and never answers "no" on missing facts. Flag agreement 50/60 in sample (`evals_dev/section_d_flag/RESULTS.md`).
 - Roadmap: coded rules for 9.10.15.5.(8) to (10), 9.10.11.2.(2) and 9.10.13.13.(1), and standing-package checklists (`docs/research/2026-10-20-vision/2-week-build.md`).
 
 **Gaps:**
@@ -97,6 +97,7 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 **Gaps:**
 
 - **GAP:** the package review and close-out screens (in progress).
+- **GAP:** the package review does not check that a rationale is present. It checks the description of the proposed alternative, the risk assessment, the mitigating measures and the assumptions and limits (`docs/implementation-plan.md` §2.3).
 - **GAP:** officer time saved. The timing protocol is `docs/user-testing/officer-timing-protocol.md`, and no session has run.
 - **GAP:** the blind 20-application planted-defect evaluation in `evals_dev/planted/SPEC.md`.
 - **GAP:** refusal is not in Batatis. The officer's written reasons and the 30-day appeal notice stay in the authority's process.

@@ -1,6 +1,6 @@
 # Batatis: Pitch Slides
 
-*Slide copy for Submission 1 (Oct 29, 2026), built from `pitch-outline.md`. Status is as of Oct 21, 2026. Rubric weights are in brackets. On every slide, the **Hero** line (one figure that is also on the slide) and the dash bullets are the only on-slide text. The detail, the speaker notes and the sources go into the speaker notes. The footer of each slide shows public sources only, and file paths stay in the notes. Status words follow the Implementation Plan, §3: **built** (merged and reachable in the live app or API), **backend** (the API is merged and the screen is in progress), **roadmap** (not started). Evaluation figures are model-checked and mostly in sample, and none is human-verified. No slide shows a screen that is not built: where the screen is pending, the slide shows the built screen or says "backend".*
+*Slide copy for Submission 1 (Oct 29, 2026), built from `pitch-outline.md`. Status is as of Oct 22, 2026. Rubric weights are in brackets. On every slide, the **Hero** line (one figure that is also on the slide) and the dash bullets are the only on-slide text. The detail, the speaker notes and the sources go into the speaker notes. The footer of each slide shows public sources only, and file paths stay in the notes. Status words follow the Implementation Plan, §3: **built** (merged and reachable in the live app or API), **backend** (the API is merged and the screen is in progress), **roadmap** (not started). Evaluation figures are model-checked and mostly in sample, and none is human-verified. No slide shows a screen that is not built: where the screen is pending, the slide shows the built screen or says "backend".*
 
 ---
 
@@ -29,7 +29,7 @@
 
 - Built: describe, then one question at a time
 - Backend: facts read with a pointer to your own words
-- Nothing is used until you confirm it
+- Facts read from your words are not added until you confirm them
 
 **Full slide detail (in notes):**
 
@@ -112,7 +112,7 @@
 - Section D lists evidence documents and the responsible person for each. The API also has a CCMC registry search that shows whether a product already has an evaluation, and no screen uses it yet
 
 **Speaker notes:** Where no tested system fits, the tool says an engineer's judgment is needed and stops. It never writes the evidence, a test result or a professional opinion. The agreement figures for the flag are on slide 3 and carry the same limits.
-*Sources:* `engine/professional.py`; `web/src/calm/Review.tsx`; `evals_dev/section_d_flag/RESULTS.md`
+*Sources:* `engine/professional.py`; `research/facts/professional-involvement.md`; `web/src/calm/Review.tsx`; `evals_dev/section_d_flag/RESULTS.md`
 
 ### Slide 7: Officers see gaps by section, never a verdict [Review, 10]
 
@@ -160,6 +160,7 @@
 
 - The export fills Part 1, Sections A to D of the Council's form dated Oct 6, 2026 (5 pages, 87 fields), not the brief's older Appendix 1. The two differ in six places, listed in the Implementation Plan §4.3. A changed form fails the hash check and blocks export
 - The official PDF unlocks only after a current check finds no required item missing. Drafts can be incomplete and say so
+- A field shows N/A only when the applicant has confirmed that it does not apply, with a reason, and the appendix lists each one. A blank is never shown as N/A. There is no screen yet for stating it (backend)
 - A pack is one JSON file with sources, dates and hashes for each note. A test adds a fourth pack with no code change. The Calgary form (R2014-06) is a roadmap item
 - The code library reads the code as a numbered outline and shows a relevance ring on each article. "Add to my application" turns an article into a Code check card, and Section C holds only what the applicant confirms
 
@@ -186,7 +187,7 @@
 **Hero:** US$0.02 | model cost of one identification run (measured, draft benchmark ledger)
 
 - First buyer: production homebuilders. Price to test: C$150 to C$750 a package (assumption)
-- The Alberta wedge alone is a single-digit-million-dollar market (estimate)
+- Alberta wedge: a C$0.9M to C$14M a year pool, of which Batatis could capture C$0.3M to C$7M (estimate)
 - Defensible: jurisdiction packs, officer workflow, an exact core
 
 **Full slide detail (in notes):**
@@ -196,7 +197,7 @@
 - Pools (estimates): Alberta bespoke work C$0.9M to C$14M a year before capture. Canadian authority-side pre-check US$23M to US$50M a year if every application were covered
 - The officer tier is free in Alberta. Calgary and Edmonton charge no variance fee, so the authority has no fee income to pay from
 
-**Speaker notes:** Model cost is not what decides this business. Pack upkeep, support and distribution do, and we have not priced them. We do not claim a billion-dollar market. The sourced size of the Alberta wedge is single-digit millions, and the plan says what would have to be true to grow beyond it.
+**Speaker notes:** Model cost is not what decides this business. Pack upkeep, support and distribution do, and we have not priced them. We do not claim a billion-dollar market. The sourced Alberta pool is C$0.9M to C$14M a year, and the share we could capture is at most single-digit millions. The plan says what would have to be true to grow beyond it.
 *Sources:* `docs/business-plan.md` §5 to §7; `docs/research/2026-10-21-source-checks.md` §5
 
 ### Slide 12: We read the regulator's own data [X Factor, 5]
