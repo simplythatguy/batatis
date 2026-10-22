@@ -368,7 +368,7 @@ test("once described, no card asks again what the applicant is building", () => 
 test("without a departure read, the proposed alternative offers the description instead of asking for it again", () => {
   let c = reducer(emptyCase("homebuilder"), { type: "setDescription", text: DEMO });
   let card = buildDeck(c, getGaps(c)).find((i) => i.key === "field-alternative")!;
-  assert.equal(card.title, "Is this the alternative you’re proposing?");
+  assert.equal(card.title, "Is this what you want to do differently?");
   assert.deepEqual(choicesFor(card).map((x) => x.label), ["Yes, use my description", "No, I’ll write it"]);
   c = reducer(c, { type: "setDetail", field: "alternative", value: c.description.trim(), section: "B" });
   card = buildDeck(c, getGaps(c), { includeDone: true }).find((i) => i.key === "field-alternative")!;
@@ -417,4 +417,13 @@ test("Section D joins the deck with a real reference and stays open while its ga
   const gap = { id: "needs-professional", severity: "blocking" as const, label: "x", href: "#/application?tab=D&focus=prof-role" };
   assert.equal(buildDeck(c, [gap], { seen, includeDone: true }).find((i) => i.kind === "section-d")?.done, false);
   assert.equal(buildDeck(c, []).find((i) => i.key === "cand-search-9.27.3.4.(1)")?.provision, "9.27.3.4.(1)");
+});
+
+test("new cards join the queue in form order, and unreached planner cards follow the latest ranking", async () => {
+  const { mergeQueue, rankAhead } = await import("./deck.ts");
+  const order = ["fact-a", "plan-x", "plan-y", "authority", "cand-1", "field-risk"];
+  assert.deepEqual(mergeQueue(["fact-a", "authority", "field-risk"], ["cand-1"], order), ["fact-a", "authority", "cand-1", "field-risk"]);
+  assert.deepEqual(rankAhead(["fact-a", "plan-y", "plan-x", "authority"], 0, order, (k) => k.startsWith("plan-")), ["fact-a", "plan-x", "plan-y", "authority"]);
+  // The card on screen (and anything before it) keeps its place.
+  assert.deepEqual(rankAhead(["fact-a", "plan-y", "plan-x"], 1, order, (k) => k.startsWith("plan-")), ["fact-a", "plan-y", "plan-x"]);
 });

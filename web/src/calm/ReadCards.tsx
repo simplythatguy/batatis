@@ -8,7 +8,7 @@ import { useId, useState } from "react";
 import { useProvisionText } from "../api/sectionC";
 import type { Fork, PreApplication } from "../api/types.gen";
 import { NrcCredit } from "../components";
-import { forkLine, scopeRedirect, snippet, stageViews, type ReadCopy, type Snippet } from "../intakeView";
+import { forkLine, HALF_PLAIN, scopeRedirect, snippet, stageViews, type ReadCopy, type Snippet } from "../intakeView";
 import { useCase } from "../store";
 import type { Candidate } from "../types";
 import { Icon24 } from "./icons";
@@ -48,11 +48,11 @@ export function ForkNote({ fork }: { fork: Fork }) {
       <p className="cf-fork-line"><Dot tone={fork.variance_needed === "likely" ? "warning" : "pending"} />{forkLine(fork)}</p>
       <p className="cf-fork-text">{fork.explanation}</p>
       <details className="cf-fork-more">
-        <summary>What an accepted variance needs</summary>
+        <summary>What a variance needs</summary>
         <ul className="cf-halves">
           {fork.halves.map((h) => (
             <li key={h.id}>
-              <span className="cf-half-label">{h.label}</span>
+              <span className="cf-half-label">{HALF_PLAIN[h.id] ?? h.label}<span className="cf-half-term"> · {h.label}</span></span>
               <span className="cf-half-basis">{h.basis}</span>
               <span className="cf-half-what">{h.what}.</span>
               <span className="cf-half-who">{h.who}.</span>

@@ -9,7 +9,7 @@ import { authorityName } from "./applications";
 import { openAssistant, setAssistantContext, useAssistant } from "./assistant/assistant";
 import { useCurrentApplication } from "./begin";
 import { CodeDrawer, type DrawerState } from "./CodeDrawer";
-import { aliasKey, alternativeChoice, buildDeck, choiceKey, choicesFor, preCaseState, SECTIONS, sourcePhrase, type DeckItem, type SectionId } from "./deck";
+import { aliasKey, alternativeChoice, buildDeck, mergeQueue, rankAhead, choiceKey, choicesFor, FORM_HINT, preCaseState, SECTIONS, sourcePhrase, type DeckItem, type SectionId } from "./deck";
 import { forkOf, NOT_SURE, planInput } from "../intakeView";
 import { localField } from "../intakeFields";
 import { CodeProgress, ForkNote, ReadingState, ReadSource, RedirectPage, ShowCode } from "./ReadCards";
@@ -19,6 +19,8 @@ import { updateSession, useSession } from "./session";
 import { CIcon, MOD_KEY } from "./ui";
 
 type Shown = DeckItem & { gone?: boolean };
+
+const FORM_HINT_KEY = "batatis-form-hint-seen";
 
 function isTextTarget(t: EventTarget | null): boolean {
   const el = t as HTMLElement | null;
@@ -125,15 +127,15 @@ export function SectionFooter({ items, index, onJump, onPrev, onNext, canPrev, c
                   {s.at.map((x) => <i key={x.it.key} className={x.i === index ? "is-cur" : x.it.done ? "is-done" : ""} />)}
                 </span>
                 <span className="cf-qsec-lab">
-                  <b className="cf-qsec-l">{s.id}</b>
-                  <span className="cf-qsec-sep" aria-hidden="true">·</span>
                   <span className="cf-qsec-name">{s.label}</span>
+                  <span className="cf-qsec-l"><span className="cf-sr">, Section </span>{s.id}</span>
                   <span className="cf-qsec-count">{s.done}<span className="cf-qsec-of"> of </span><span className="cf-qsec-slash" aria-hidden="true">/</span>{s.total}</span>
                 </span>
-                <span className="cf-sr">. Go to the first open question in Section {s.id}.</span>
+                <span className="cf-sr">. Go to the first open question here.</span>
               </button>
               {open === s.id && (
-                <div id={`cf-qsec-pop-${s.id}`} className={`cf-pop cf-qsec-pop${lastHalf(sn) ? " is-end" : ""}`} role="group" aria-label={`Section ${s.id} questions`}>
+                <div id={`cf-qsec-pop-${s.id}`} className={`cf-pop cf-qsec-pop${lastHalf(sn) ? " is-end" : ""}`} role="group" aria-label={`${s.label}, Section ${s.id} questions`}>
+                  <p className="cf-qsec-about">{SECTIONS.find((x) => x.id === s.id)?.about}</p>
                   {s.at.map((x, k) => (
                     <button key={x.it.key} type="button" className={`cf-qsec-row${x.i === index ? " is-cur" : ""}`} aria-current={x.i === index ? "step" : undefined} onClick={() => { setOpen(null); onJump(x.i); }}>
                       <span className="cf-qsec-n">{s.id}{k + 1}</span>
@@ -377,22 +379,6 @@ function NoQuestionsYet() {
 
 /* —— The application's deck —— */
 
-/** Insert each new key after the last queued key that comes before it in the form. */
-export function mergeQueue(queue: string[], fresh: string[], order: string[]): string[] {
-  const out = [...queue];
-  for (const k of fresh) {
-    if (out.includes(k)) continue;
-    const pos = order.indexOf(k);
-    let at = -1;
-    out.forEach((q, i) => {
-      const p = order.indexOf(q);
-      if (p >= 0 && p < pos) at = i;
-    });
-    out.splice(at + 1, 0, k);
-  }
-  return out;
-}
-
 function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
   const { c, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan } = useCase();
   const session = useSession();
@@ -416,16 +402,18 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   const order = all.map((i) => i.key);
   const openKeys = all.filter((i) => !i.done).map((i) => i.key);
   const fresh = openKeys.filter((k) => !session.queue.includes(k));
-  const queue = fresh.length ? mergeQueue(session.queue, fresh, order) : session.queue;
   const sessionKey = session.queue[session.index];
+  // Planner cards not yet reached follow the API's latest ranking (it re-ranks after the code check).
+  const ranked = rankAhead(session.queue, session.index, order, (k) => k.startsWith("plan-"));
+  const queue = fresh.length ? mergeQueue(ranked, fresh, order) : ranked;
   const index = sessionKey !== undefined ? Math.max(queue.indexOf(sessionKey), 0) : fresh.length ? queue.indexOf(fresh[0]) : Math.min(session.index, queue.length);
   const currentKey = queue[index];
   const item = itemFor(currentKey);
-  const queueSig = `${fresh.join("|")}#${session.queue.filter((k) => !byKey.has(k) && k !== currentKey).join("|")}`;
+  const queueSig = `${fresh.join("|")}#${session.queue.filter((k) => !byKey.has(k) && k !== currentKey).join("|")}#${ranked.join("|") === session.queue.join("|") ? "" : ranked.join("|")}`;
   useEffect(() => {
     updateSession((s) => {
       const cur = s.queue[s.index];
-      const kept = s.queue.filter((k) => byKey.has(k) || k === cur);
+      const kept = rankAhead(s.queue, s.index, order, (k) => k.startsWith("plan-")).filter((k) => byKey.has(k) || k === cur);
       const next = mergeQueue(kept, fresh, order);
       return { queue: next, index: cur ? Math.max(next.indexOf(cur), 0) : fresh.length ? next.indexOf(fresh[0]) : Math.min(s.index, next.length) };
     });
@@ -438,6 +426,16 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   const [jumpTo, setJumpTo] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [planNotes, setPlanNotes] = useState<Record<string, string>>({});
+  // What the form is, said once: until dismissed, or until a few questions are answered.
+  const [hintDismissed, setHintDismissed] = useState(() => {
+    try { return localStorage.getItem(FORM_HINT_KEY) === "1"; } catch { return false; }
+  });
+  const formHintSeen = hintDismissed || session.seen.length >= 3;
+  const dismissFormHint = () => {
+    setHintDismissed(true);
+    try { localStorage.setItem(FORM_HINT_KEY, "1"); } catch { /* storage unavailable */ }
+  };
+  useEffect(() => { if (session.seen.length >= 3 && !hintDismissed) dismissFormHint(); }, [session.seen.length]); // eslint-disable-line react-hooks/exhaustive-deps
   /** A typed planner answer was sent: move on once it is saved. */
   const advanceAfter = useRef<string | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -726,7 +724,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
             )}
             <fieldset className="cf-q-body" disabled={locked}>
               <legend className="cf-sr">Your answer</legend>
-              <CardBody item={item} picked={picked[item.key]} onPick={pick} draft={draft} setDraft={setDraft} openDrawer={setDrawer} planNote={planNotes[item.key] ?? ""} firstPlan={item.kind === "plan" && (all.find((i) => i.kind === "plan" && !i.done)?.key ?? all.find((i) => i.kind === "plan")?.key) === item.key} />
+              <CardBody item={item} picked={picked[item.key]} onPick={pick} draft={draft} setDraft={setDraft} openDrawer={setDrawer} planNote={planNotes[item.key] ?? ""} firstPlan={item.kind === "plan" && queue.find((k) => k.startsWith("plan-")) === item.key} />
             </fieldset>
             {item.kind === "candidate" && decisionNoteFor(item.ref) && <p className="cf-note">{decisionNoteFor(item.ref)}</p>}
             {why && <p className="cf-why">{item.why}</p>}
@@ -767,6 +765,12 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
           </div>
         )}
       </div>
+      {!formHintSeen && (
+        <div className="cf-formhint" role="note">
+          <span>{FORM_HINT}</span>
+          <button type="button" className="cf-link-btn" onClick={dismissFormHint}>Got it</button>
+        </div>
+      )}
       <SectionFooter items={all} index={item ? pos : -1} onJump={(i) => goToKey(all[i]?.key ?? null)} onPrev={() => step(-1)} onNext={() => step(1)} canPrev={(pos < 0 ? all.length : pos) > 0} canNext={Boolean(item)} />
       <CodeDrawer state={drawer} onClose={() => setDrawer(null)} onAdded={(id) => { setDrawer(null); setJumpTo(id); }} />
     </div>

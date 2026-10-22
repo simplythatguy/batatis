@@ -29,7 +29,7 @@ export const DETAIL_FIELDS: DetailField[] = [
     label: "Jurisdiction-wide variance",
     section: "B",
     required: true,
-    options: { site: "No, one site", jurisdiction: "Yes, jurisdiction-wide" },
+    options: { site: "One building site", jurisdiction: "Every site in the municipality (jurisdiction-wide)" },
   },
   { id: "permit", label: "Permit number", section: "B", required: false, hint: "Only if a permit was issued" },
   { id: "municipalAddress", label: "Municipal address", section: "B", required: true },
@@ -72,6 +72,16 @@ export const PROCESS_FIELDS: { id: ProcessFieldId; label: string; prompts: strin
     prompts: ["Who takes responsibility, and what is their scope? This tool does not write that opinion."],
   },
 ];
+
+/** Plain names for the applicant's case, with the form's term in brackets. */
+export const PROCESS_PLAIN: Record<ProcessFieldId, string> = {
+  rationale: "Why your design works (rationale)",
+  risk: "What could go wrong (risk assessment)",
+  mitigation: "What reduces the risk (mitigating measures)",
+  assumptions: "When your case holds (assumptions and limits)",
+  maintenance: "Upkeep after construction (maintenance and operation)",
+  qualifications: "Who is responsible (qualifications)",
+};
 
 /**
  * Canonical process fact ids. GET /process-fields returns these names
@@ -255,7 +265,7 @@ export const unresolvedCandidates = (c: Case) => c.candidates.filter((a) => a.an
 
 /** Unanswered code-check cards name the question. They do not say "Answer: what you described". */
 export function codeCheckLabel(topic: string, question?: string, provision?: string): string {
-  if (provision && isProvision(provision)) return `Code check: does your design depart from ${provision}?`;
+  if (provision && isProvision(provision)) return `Rules: does your design differ from rule ${provision}?`;
   const using = topic.match(/^using\s+(.+)$/i);
   if (using) {
     const rest = using[1].charAt(0).toLowerCase() + using[1].slice(1);
@@ -292,7 +302,7 @@ export function getGaps(c: Case): Gap[] {
     gaps.push({
       id: "detail-jurisdiction",
       severity: "blocking",
-      label: "Reviewing authority missing",
+      label: "Who reviews your application (the reviewing authority) isn’t chosen yet",
       href: "#/describe?focus=authority",
     });
   }
@@ -327,7 +337,7 @@ export function getGaps(c: Case): Gap[] {
   }
   for (const a of c.candidates) {
     if (isProvision(a.provision) && !c.sectionC.some(r => canonicalProvision(r.provision) === canonicalProvision(a.provision))) {
-      gaps.push({ id: `lookup-${a.id}`, severity: "blocking", label: `Review the sentences in ${a.provision}`, href: "#/section-c", field: `candidate.${a.id}` });
+      gaps.push({ id: `lookup-${a.id}`, severity: "blocking", label: `Rule ${a.provision} is still loading from the code`, href: "#/section-c", field: `candidate.${a.id}` });
     }
     if (a.answer === null) {
       gaps.push({
@@ -344,7 +354,7 @@ export function getGaps(c: Case): Gap[] {
       gaps.push({
         id: `process-${p.id}`,
         severity: "blocking",
-        label: `${p.label} empty`,
+        label: `${PROCESS_PLAIN[p.id]} isn’t written yet`,
         href: `#/application?tab=alt&focus=field-${p.id}`,
         field: PROCESS_FACT[p.id],
       });

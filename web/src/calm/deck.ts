@@ -30,12 +30,22 @@ export type DeckKind =
 /** Variance form sections, in the order the deck asks them and the footer shows them. */
 export type SectionId = "A" | "B" | "C" | "D";
 
-export const SECTIONS: { id: SectionId; label: string }[] = [
-  { id: "A", label: "Applicant" },
-  { id: "B", label: "Project" },
-  { id: "C", label: "Code" },
-  { id: "D", label: "Evidence" },
+/**
+ * Plain words first; the form's letter stays visible as quiet secondary text, so applicants learn
+ * how their answers map to the official form without needing to know it.
+ */
+export const SECTIONS: { id: SectionId; label: string; about: string }[] = [
+  { id: "A", label: "About you", about: "Section A of the variance form: who is applying, and who owns the site." },
+  { id: "B", label: "Your project", about: "Section B: the site, and what you want to do differently." },
+  { id: "C", label: "Which rules apply", about: "Section C: the building-code rules your design differs from, and why each rule exists." },
+  { id: "D", label: "Your case and proof", about: "Section D: why your design works as well, and the documents that back it up." },
 ];
+
+/** "Your project · Section B": the plain name, then the form's letter. */
+export const sectionEyebrow = (id: SectionId) => `${SECTIONS.find((s) => s.id === id)?.label} · Section ${id}`;
+
+/** One line on what the form is, shown once and on the section labels. */
+export const FORM_HINT = "The official variance form has four parts, A to D. You never fill it in yourself: each answer here goes into its part.";
 
 export interface DeckItem {
   key: string;
@@ -87,11 +97,11 @@ const DETAIL_QUESTION: Record<string, string> = {
   representative: "Who signs for the applicant?",
   mailingAddress: "What is the mailing address?",
   date: "What date is this request?",
-  scope: "Is this for one site, or the whole jurisdiction?",
+  scope: "Is this for one building site, or for every site in the municipality?",
   permit: "Do you already have a permit number?",
   municipalAddress: "What is the site’s municipal address?",
   legalDescription: "What is the site’s legal description?",
-  alternative: "In a sentence or two, what are you proposing instead?",
+  alternative: "In a sentence or two, what do you want to do differently?",
 };
 
 const DETAIL_CONTEXT: Record<string, string> = {
@@ -99,7 +109,7 @@ const DETAIL_CONTEXT: Record<string, string> = {
   representative: "The person who signs for the applicant.",
   mailingAddress: "Where the authority sends letters about this request.",
   date: "The date you submit this request.",
-  scope: "A product used in many places is often jurisdiction-wide. One building is one site.",
+  scope: "One house or building is one site. A product used on many sites can ask for all of them at once.",
   permit: "Only if a permit was already issued. Skip it otherwise.",
   municipalAddress: "The street address of the building.",
   legalDescription: "Lot, block and plan, or ATS.",
@@ -107,12 +117,12 @@ const DETAIL_CONTEXT: Record<string, string> = {
 };
 
 const PROCESS_QUESTION: Record<string, string> = {
-  rationale: "Why do you need this alternative, and why should it perform as well?",
-  risk: "What could go wrong if it under-performs?",
+  rationale: "Why do you need to build it differently, and why will it work as well?",
+  risk: "What could go wrong if it doesn’t work as well?",
   mitigation: "What reduces those risks?",
-  assumptions: "Under which conditions does your case hold?",
-  maintenance: "What has to be maintained or operated after construction?",
-  qualifications: "Who takes responsibility, and what is their scope?",
+  assumptions: "Under what conditions does your case hold?",
+  maintenance: "What has to be looked after once it’s built?",
+  qualifications: "Who takes responsibility for this, and for which parts?",
 };
 
 export const WRITTEN_BY_YOU = "You write this in your own words. Batatis never writes it for you.";
@@ -142,7 +152,7 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
       key: `cand-${a.id}`,
       kind: "storeys",
       section: "C",
-      eyebrow: "Code check · Storeys",
+      eyebrow: sectionEyebrow("C"),
       title: "How many storeys is the building?",
       context: "The count decides which part of the code is the benchmark.",
       why: "Buildings up to 3 storeys usually follow Part 9. Larger ones follow Part 3. Not sure keeps it as an open question for the officer.",
@@ -159,7 +169,7 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
       key: `cand-${a.id}`,
       kind: "candidate",
       section: "C",
-      eyebrow: `Code check · ${topic}`,
+      eyebrow: sectionEyebrow("C"),
       title: `Does your design ${a.departure}?`,
       context: "You wrote",
       quote: a.quote.text.trim() || firstSentence(c.description),
@@ -174,12 +184,12 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
       key: `cand-${a.id}`,
       kind: "candidate",
       section: "C",
-      eyebrow: a.rank === "committed" ? "Code check · Likely applies" : "Code check · A close match",
+      eyebrow: sectionEyebrow("C"),
       title: codeQuestion(topic),
       context: a.rank === "committed"
-        ? "Code identification ranked this rule as one that governs what you described. It is not used until you answer."
+        ? "This rule very likely covers what you described. Nothing is used until you answer."
         : "One of the closest matches to what you described. Nothing is used until you answer.",
-      why: "Yes puts this sentence into Section C as the requirement your design departs from. No leaves it out. Not sure keeps it as an open question for the officer. Batatis never decides whether the design complies.",
+      why: "Yes adds this rule to the list of rules your design differs from (Section C of the form). No leaves it out. Not sure keeps it as an open question for the officer. Batatis never decides whether the design meets the code.",
       ref: a.id,
       done,
       optional: false,
@@ -196,10 +206,10 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
     key: `cand-${a.id}`,
     kind: "candidate",
     section: "C",
-    eyebrow: `Code check · ${topic}`,
+    eyebrow: sectionEyebrow("C"),
     title: "Is your design different from what this rule asks for?",
     context: origin,
-    why: "Yes puts this sentence into Section C as a departure. No removes it from the departures; nothing else changes. Not sure keeps it as an open question for the officer.",
+    why: "Yes adds this rule to the list of rules your design differs from (Section C of the form). No leaves it out. Not sure keeps it as an open question for the officer.",
     ref: a.id,
     done,
     optional: false,
@@ -289,7 +299,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       eyebrow: "Before we go on",
       title: `This reads as a ${redirect.regime?.name ?? "different"} question.`,
       context: redirect.message ?? "",
-      why: "Batatis prepares building-code (NBC(AE)) variance applications only.",
+      why: "Batatis prepares building-code variance applications only (the National Building Code, Alberta Edition).",
       ref: SCOPE_ITEM_KEY,
       done: false,
       optional: false,
@@ -308,7 +318,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       context: failed
         ? opts.intakeNote || "Your words are saved. Try again, or answer the questions below yourself."
         : "It proposes the values it finds, with the words each came from, and asks only what is still missing.",
-      why: "Without the reading, every Section A and B detail is asked as a question instead.",
+      why: "Without the reading, every detail about you and your project is asked as a question instead.",
       ref: "reading",
       done: false,
       optional: true,
@@ -361,7 +371,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       key: `plan-${q.id}`,
       kind: "plan",
       section: detail?.section ?? "B",
-      eyebrow: q.kind === "conflict" ? "You wrote two things" : q.priority === "administrative" ? `Section ${detail?.section ?? "B"} · ${detail?.label ?? "Details"}` : "A quick question",
+      eyebrow: q.kind === "conflict" ? "You wrote two things" : q.priority === "administrative" ? sectionEyebrow(detail?.section ?? "B") : "A quick question",
       title: q.text,
       context: q.why,
       why: q.unblocks.length ? `Your answer decides: ${q.unblocks.join(", ")}. Not sure is fine; it never blocks you.` : "Not sure is fine; it never blocks you.",
@@ -378,7 +388,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     key: "authority",
     kind: "authority",
     section: "B",
-    eyebrow: "Section B · Reviewer",
+    eyebrow: sectionEyebrow("B"),
     title: "Who will review your application?",
     context: `The authority that issues your permit: ${AUTHORITIES.map((a) => a.name).join(" or ")}. Pick Not sure yet if you don’t know.`,
     why: "Each authority has its own submission rules. Batatis never picks one for you.",
@@ -403,13 +413,13 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       key: `field-${d.id}`,
       kind: "detail",
       section: d.section,
-      eyebrow: d.section === "A" ? "Section A · Applicant" : "Section B · Project",
-      title: offer ? "Is this the alternative you’re proposing?" : DETAIL_QUESTION[d.id] ?? d.label,
+      eyebrow: sectionEyebrow(d.section),
+      title: offer ? "Is this what you want to do differently?" : DETAIL_QUESTION[d.id] ?? d.label,
       context: offer
-        ? "Section B asks what you propose instead of the acceptable solution. You described it as"
+        ? "The form asks what you will do instead of the code’s standard way (the acceptable solution). You described it as"
         : d.options && valueText(fact).trim() && !filled ? "You answered in words. Pick the choice that fits:" : DETAIL_CONTEXT[d.id] ?? d.hint ?? "",
       quote: offer ? clip(c.description, 240) : d.options && valueText(fact).trim() && !filled ? valueText(fact).trim() : undefined,
-      why: `Section ${d.section} of the variance form asks for the ${d.label.toLowerCase()}.`,
+      why: `The variance form asks for the ${d.label.toLowerCase()} (Section ${d.section}).`,
       ref: d.id,
       done: d.required ? filled || Boolean(cover?.notSure) : filled || seen.has(`field-${d.id}`),
       optional: !d.required,
@@ -426,7 +436,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       key: `q-${q.id}`,
       kind: "question",
       section: fromCode ? "C" : "B",
-      eyebrow: fromCode ? "From code matching" : "A quick question",
+      eyebrow: fromCode ? sectionEyebrow("C") : "A quick question",
       title: q.text,
       context: "Answer in your own words. A short answer is fine.",
       why: q.why,
@@ -444,14 +454,14 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       key: "code-run",
       kind: "code-run",
       section: "C",
-      eyebrow: "Code check",
+      eyebrow: sectionEyebrow("C"),
       title: opts.identify === "error" ? "The code check didn’t finish." : opts.identify === "running" ? "Checking the code for your project…" : "Check the code for your project.",
       context: opts.identify === "running"
-        ? "Batatis reads every Division B article against what you described. Keep answering; your code questions join the list when it’s done."
+        ? "Batatis reads every rule in the building code against what you described. Keep answering; your rule questions join the list when it’s done."
         : opts.identify === "error"
           ? "Your answers are kept. Try again, or find the rule in the code yourself."
-          : "Batatis reads every Division B article against what you described and asks you about the closest few.",
-      why: "Code identification finds the requirement your design departs from. A ranking is a candidate list, never a decision that the design complies.",
+          : "Batatis reads every rule in the building code against what you described and asks you about the closest few.",
+      why: "This finds the rule your design differs from. It is a list of candidates, never a decision that the design meets the code.",
       ref: "code-run",
       done: false,
       optional: true,
@@ -463,7 +473,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       key: "code-note",
       kind: "code-note",
       section: "C",
-      eyebrow: "Code check",
+      eyebrow: sectionEyebrow("C"),
       title: !id.narrowed ? (id.message?.split(/(?<=\.)\s/)[0] ?? "I could not narrow this down.") : "This list comes from a keyword search.",
       context: !id.narrowed ? (id.message?.split(/(?<=\.)\s/).slice(1).join(" ") || "Find the rule in the code yourself, or answer the questions so the next check can narrow it.") : "The full check wasn’t available, so these are keyword matches only. Treat each one as a lead, not a finding.",
       why: id.label,
@@ -480,10 +490,10 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       key: `field-${p.id}`,
       kind: "process",
       section: "D",
-      eyebrow: `Your case · ${p.label}`,
+      eyebrow: sectionEyebrow("D"),
       title: PROCESS_QUESTION[p.id] ?? p.label,
       context: WRITTEN_BY_YOU,
-      why: `The alternative-solution path needs a ${p.label.toLowerCase()} section. It is not skipped, and it has to come from you or your professional.`,
+      why: `Because your design differs from the code’s standard way, the form needs this in your own words (it calls it ${p.label.toLowerCase()}). It can’t be skipped, and it has to come from you or your professional.`,
       ref: p.id,
       done: Boolean(c.process[p.id].trim()),
       optional: false,
@@ -496,16 +506,42 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       key: "section-d",
       kind: "section-d",
       section: "D",
-      eyebrow: "Section D · Supporting documents",
+      eyebrow: sectionEyebrow("D"),
       title: "Who is responsible, and which documents back this up?",
       context: "Batatis lists what the evidence must address. Your engineer or architect writes it.",
-      why: "Section D names the registered professional and lists the evidence for each rule you depart from. Batatis does not write professional evidence or judgement.",
+      why: "This part of the form (Section D) names the engineer or architect responsible and lists the proof for each rule your design differs from. Batatis does not write that proof.",
       ref: "section-d",
       done: seen.has("section-d") && sectionDGaps(gaps).length === 0,
       optional: false,
     });
   }
   return [...groups.read, ...groups.plan, ...groups.A, ...groups.B, ...groups.questions, ...groups.C, ...groups.D];
+}
+
+/** Keys after `index` that match `pick` take the form's order among their own positions. */
+export function rankAhead(queue: string[], index: number, order: string[], pick: (k: string) => boolean): string[] {
+  const at = queue.map((k, i) => (i > index && pick(k) && order.includes(k) ? i : -1)).filter((i) => i >= 0);
+  if (at.length < 2) return queue;
+  const keys = at.map((i) => queue[i]).sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  const out = [...queue];
+  at.forEach((i, n) => { out[i] = keys[n]; });
+  return out.join("|") === queue.join("|") ? queue : out;
+}
+
+/** Insert each new key after the last queued key that comes before it in the form. */
+export function mergeQueue(queue: string[], fresh: string[], order: string[]): string[] {
+  const out = [...queue];
+  for (const k of fresh) {
+    if (out.includes(k)) continue;
+    const pos = order.indexOf(k);
+    let at = -1;
+    out.forEach((q, i) => {
+      const p = order.indexOf(q);
+      if (p >= 0 && p < pos) at = i;
+    });
+    out.splice(at + 1, 0, k);
+  }
+  return out;
 }
 
 export const ROLE_CHOICES: { value: ApplicantType; label: string }[] = [

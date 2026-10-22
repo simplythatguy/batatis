@@ -73,7 +73,7 @@ const READ_QUESTION: Record<string, string> = {
   span_m: "What is the structural span?",
   part4_design: "Is the structure designed by an engineer under Part 4?",
   applicant_role: "Who is applying?",
-  scope: "Is this for one site, or the whole jurisdiction?",
+  scope: "Is this for one building site, or for every site in the municipality?",
   claimed_provision: "Is this the code article you mean?",
   owner: "Who is the owner?",
   representative: "Who signs for the applicant?",
@@ -82,7 +82,7 @@ const READ_QUESTION: Record<string, string> = {
   legalDescription: "What is the site’s legal description?",
   permit: "What is the permit number?",
   date: "What date is this request?",
-  alternative: "Is this the alternative you’re proposing?",
+  alternative: "Is this what you want to do differently?",
   lot: "What is the lot number?",
   block: "What is the block number?",
   plan: "What is the plan number?",
@@ -221,7 +221,7 @@ export function readCopy(c: Case, g: ReadGroup): ReadCopy {
   return {
     title,
     value,
-    confirm: long ? (f.field === "alternative" ? "Yes, that’s my alternative" : "Yes, that’s right") : `Yes, ${clip(value, 46)}`,
+    confirm: long ? (f.field === "alternative" ? "Yes, that’s what I want to do" : "Yes, that’s right") : `Yes, ${clip(value, 46)}`,
     dismiss: long ? "No, not quite" : "No, something else",
     source: sourceLine(c, f),
     sure: sureness(c, f),
@@ -292,12 +292,18 @@ export function forkOf(c: Case): Fork | null {
   return c.intake?.record.plan?.fork ?? null;
 }
 
-/** The fork in one short line; the API's own explanation sits under it. */
+/** The fork in one plain line; the API's own explanation sits under it. */
 export function forkLine(fork: Fork): string {
-  if (fork.variance_needed === "likely") return "This reads as the alternative-solution path.";
-  if (fork.variance_needed === "not_indicated") return "Nothing so far departs from an acceptable solution.";
-  return "It is not clear yet whether your design departs from an acceptable solution.";
+  if (fork.variance_needed === "likely") return "Your design seems to differ from the code’s standard way, so this is a variance request.";
+  if (fork.variance_needed === "not_indicated") return "Nothing so far differs from the code’s standard way. You may not need a variance.";
+  return "We can’t tell yet whether your design differs from the code’s standard way.";
 }
+
+/** The two halves of an accepted variance, in plain words first (the official term follows). */
+export const HALF_PLAIN: Record<string, string> = {
+  variance_request: "Permission to build it differently",
+  alternative_solution: "Proof that it works at least as well",
+};
 
 /* —— Code identification: committed articles and at most three quoted choices —— */
 
