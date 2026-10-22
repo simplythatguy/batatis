@@ -107,7 +107,7 @@ The officer's own decision to issue or refuse the variance under the Safety Code
 | Officer package review | Reads a fillable or flattened SCC form and its attachments. Findings, a documents panel, a deterministic information request, an "x of y gaps resolved" diff after a re-upload, a close-out record | Backend only | `docs/api/package-review.md` (PR #53) |
 | Privacy and spend | Recognizable personal details are removed before any AI call. Cases and files are deleted after 7 days. A daily spend cap and per-IP limits apply | Built | `docs/deploy.md`, `engine/redact.py`, `engine/llm_gate.py` |
 | Automated tests | On `dev` at 054c632, CI ran 1,698 tests (5 skipped) over the engine, the code database and the key-free evals. The web typecheck, build and UI smoke test passed | Built | GitHub Actions run 39720990321 |
-| Roadmap | Coded rules for 9.10.15.5.(8) to (10), 9.10.11.2.(2) and 9.10.13.13.(1). Standing-package checklists. Accuracy report page. Site twin. Calgary form export. Part 2 prefill. Other provinces. Portal integration | Roadmap | `docs/research/2026-10-20-vision/2-week-build.md` |
+| Roadmap | Coded rules for 9.10.15.5.(8) to (10), 9.10.11.2.(2) and 9.10.13.13.(1). Standing-package checklists. Accuracy report page. A written explainer paragraph for each Section C article (challenge brief, §2.1.c.iii: the schema has a field and nothing fills it). Site twin. Calgary form export. Part 2 prefill. Other provinces. Portal integration | Roadmap | `docs/research/2026-10-20-vision/2-week-build.md` |
 
 ## 4. How it fits current workflows and rules
 
