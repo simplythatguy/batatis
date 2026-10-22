@@ -188,6 +188,9 @@ _OCCUPANCY = (
     ('mixed', _sub(r'\bmixed[-\s]use\b')),
 )
 # Words that contain an occupancy word but name something else.
+# "Larkspur Example Homes", "Acme Home Builders Ltd.": a capitalized Home(s) inside a company name is not the building.
+_COMPANY_HOME = re.compile(r"[A-Z][\w'&.-]*\s+$")
+_COMPANY_AFTER = re.compile(r"\s+(?:[A-Z][\w'&.-]*\s+)*(?:Ltd|Inc|Corp|LLC|Limited|Builders|Construction|Group)\b\.?")
 _OCCUPANCY_SKIP = _sub(r'\b(?:nursing|care|group|tiny|pool|green|ware|town|row|club|field|open)\s*$')
 
 
@@ -197,6 +200,10 @@ def _occupancy(sentence: str, at: int) -> list[Hit]:
         for match in pattern.finditer(sentence):
             if name == 'single_family' and _OCCUPANCY_SKIP.search(sentence[:match.start()]):
                 continue
+            word = match.group(0)
+            if name == 'single_family' and word[:1] == 'H' and word.lower().startswith(('home', 'house')) and (
+                    _COMPANY_HOME.search(sentence[:match.start()]) or _COMPANY_AFTER.match(sentence[match.end():])):
+                continue                             # a company name, not the building's use
             if re.search(r"(?i)\b(?:not|isn'?t|never)\s+(?:an?\s+|the\s+)?$", sentence[:match.start()]):
                 continue
             confidence = 0.6 if name == 'single_family' and match.group(0).lower().startswith(('house', 'home')) else 0.85

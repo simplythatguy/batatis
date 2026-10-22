@@ -401,3 +401,14 @@ def test_a_non_finite_number_from_the_model_is_never_stored(bad):
 def test_a_citation_never_starts_a_longer_number(text, found):
     from engine.intake.rules import _citations
     assert [c[0] for c in _citations(text)] == found
+
+
+@pytest.mark.parametrize('text, house', [
+    ('Applicant: Larkspur Example Homes. We are adding a rooftop deck to an office building.', False),
+    ('Acme Home Builders Ltd. is renovating a warehouse.', False),
+    ('We are building a two-storey house in Red Deer.', True),
+    ('Our new home has a wall 1.2 m from the property line.', True),
+])
+def test_a_company_called_homes_is_not_a_single_family_house(text, house):
+    hits = [h for h in read(text).hits if h.field == 'occupancy' and h.value == 'single_family']
+    assert bool(hits) is house

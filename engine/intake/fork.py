@@ -73,7 +73,8 @@ def assess(text: str, *, decisions: dict[str, str] | None = None) -> Fork:
             'your technical evidence under NBC(AE) Division C, 2.3.1 that the design achieves at least the level '
             'of performance required by Division B in the attributed objectives and functions; and the request '
             'for a variance under the Safety Codes Act, s.38, which only a safety codes officer or an Administrator '
-            'can issue. Batatis helps you prepare both; the officer decides.'))
+            'can issue. Batatis helps you assemble the application and lists what your evidence must address; '
+            'the technical evidence comes from you or your professional, and the officer decides.'))
     if (follows and not departs) or (decided and all(d == 'no' for d in decided)):
         return Fork(variance_needed='not_indicated', cues=follows, halves=HALVES, explanation=(
             'Nothing you have told us departs from an acceptable solution. If the design follows the acceptable '
