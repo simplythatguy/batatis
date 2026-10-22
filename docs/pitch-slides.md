@@ -139,7 +139,7 @@
 
 **Hero:** 3 | applicant types: manufacturer, general contractor, homebuilder
 
-- Onboarding sets the role. The role changes the prompt on Describe and the first question about scope
+- Onboarding sets the role. The role changes the prompt on Describe and whether the planner asks about scope
 - Every card says why it asks
 - Unaided use by a real first-time applicant is untested
 

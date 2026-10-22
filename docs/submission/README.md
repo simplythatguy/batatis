@@ -107,7 +107,7 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 
 **Evidence now:**
 
-- Built: onboarding sets manufacturer, general contractor or homebuilder. The role changes the prompt on Describe and the planner's questions (a manufacturer is asked first whether the variance is for one site or many), and the form cards are the same for every type (`web/src/calm/auth/onboardingSteps.ts`, `web/src/calm/Start.tsx`, `engine/intake/questions.py`). Every card says why it asks.
+- Built: onboarding sets manufacturer, general contractor or homebuilder. The role changes the prompt on Describe and the planner's questions (only a manufacturer is asked by the planner whether the variance is for one site or many), and the form cards are the same for every type (`web/src/calm/auth/onboardingSteps.ts`, `web/src/calm/Start.tsx`, `engine/intake/questions.py`). Every card says why it asks.
 - Three fictional demo cases, one per type, as test inputs (`evals/demo-cases/`).
 
 **Gaps:**
