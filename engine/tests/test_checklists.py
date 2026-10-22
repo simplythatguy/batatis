@@ -156,7 +156,8 @@ def test_no_summary_only_rows(checklist):
         assert any(c.group == group.id for c in checklist.conditions), group.id
 
 
-CODE_REF = re.compile(r'\b(?:[A-D]-\d+(?:\.\d+)+|\d+\.\d+\.\d+(?:\.\d+)*)\.?(?:\(\d+\))?')
+# Article, then any sentence and clause parts: 9.10.15.5.(8)(a) stays distinct from 9.10.15.5.(8)(b).
+CODE_REF = re.compile(r'\b(?:[A-D]-\d+(?:\.\d+)+|\d+\.\d+\.\d+(?:\.\d+)*)\.?(?:\(\d+\))?(?:\([a-z]{1,4}\))*')
 
 
 @pytest.mark.parametrize('checklist', _checklists(), ids=lambda c: c.id)
@@ -186,6 +187,8 @@ def test_reference_matching_is_whole_reference_not_substring():
     assert not _cites('see 9.10.15.50. for soffits', '9.10.15.5.')
     assert _cites('see 9.10.15.5. for soffits', '9.10.15.5.')
     assert _cites('Sentence 9.10.15.5.(8) applies', '9.10.15.5.')
+    assert not _cites('Clause 9.10.15.5.(8)(a) applies', '9.10.15.5.(8)(b)')
+    assert _cites('Clause 9.10.15.5.(8)(b) applies', '9.10.15.5.(8)(b)')
 
 
 @pytest.mark.parametrize('checklist', _checklists(), ids=lambda c: c.id)
