@@ -1,6 +1,6 @@
 # Submission package checklist
 
-*Internal checklist for Submission 1 of the Building Codes Challenge (Thursday Oct 29, 2026). It is not for judges: its file paths can contain internal names that the judge-facing documents avoid. Status is as of Oct 21, 2026, on `dev` at commit 054c632 (CI run 39720990321 passed) and the live app at <https://batatis-vert.vercel.app>. Each line names a file, a pull request (PR) or a number that exists now. A line marked **GAP** has none. Status words follow `docs/implementation-plan.md` §3: **built**, **backend only** (the API is merged and the screen is in progress), **in progress** and **roadmap**.*
+*Internal checklist for Submission 1 of the Building Codes Challenge (Thursday Oct 29, 2026). It is not for judges: its file paths can contain internal names that the judge-facing documents avoid. Status is as of Oct 22, 2026, on `dev` at commit 43e7c09 (CI run 39747003798 passed) and the live app at <https://batatis-vert.vercel.app> as last checked on Oct 21. Each line names a file, a pull request (PR) or a number that exists now. A line marked **GAP** has none. Status words follow `docs/implementation-plan.md` §3: **built**, **backend only** (the API is merged and the screen is in progress), **in progress** and **roadmap**.*
 
 The plans, pitch text, Q&A and demo script in this list are in PR #59. They are on `dev` only after it merges.
 
@@ -85,7 +85,7 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 **Gaps:**
 
 - **GAP:** no engineer or officer has reviewed the professional-involvement labels, the rule vectors or the checklists.
-- **GAP:** the CCMC registry search exists in the API (`/ccmc/search`), and no screen uses it.
+- **GAP:** the CCMC registry search exists in the API (`/ccmc/search`, with a bundled snapshot of the public registry index dated 2026-10-18; PR #60), and no screen uses it.
 
 ### 4. Review (10%)
 
@@ -143,6 +143,7 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 **Evidence now:**
 
 - Built: the calm interface (`docs/design-system-calm.md`), the official Oct 6, 2026 form as a draft or official PDF pinned to its SHA-256 (`engine/export/field_maps/scc_2026-10.json`), and submit and review for Calgary and Edmonton.
+- Export gate G3 (`python scripts/gate_g3.py`, PR #60) passes on three fictional demo cases and a synthetic sample: every applicant field is filled or marked N/A from the applicant's own facts, the exported text passes `codedb validate` with 0 errors, and the appendix uses none of "complies", "safe", "approved" or "adequate" (`docs/research/2026-10-21-source-checks.md` §6).
 - Built as data and API: packs for Calgary, Edmonton and the rest of Alberta, 12 other provinces and territories labelled preview, a lint test against city names in code, and a test that adds a fourth pack with no code change (`docs/api/jurisdictions.md`).
 
 **Gaps:**

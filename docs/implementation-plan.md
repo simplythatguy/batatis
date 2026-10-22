@@ -109,7 +109,7 @@ The officer's own decision to issue or refuse the variance under the Safety Code
 | Officer package review | Reads a fillable or flattened SCC form and its attachments. Findings, a documents panel, a deterministic information request, an "x of y gaps resolved" diff after a re-upload, a close-out record | Backend only | `docs/api/package-review.md` (PR #53) |
 | Process-card examples | For each of the six process fields, what a good answer covers and four public precedents (STANDATA, Calgary and Edmonton documents) cited by title, number, PDF page and link, each with a one-line description of its structure and no source text | Backend only | `docs/api-contract.md` (PR #60), `engine/data/process_examples.json` |
 | Privacy and spend | Recognizable personal details are removed before any AI call. Cases and files are deleted after 7 days. A daily spend cap and per-IP limits apply | Built | `docs/deploy.md`, `engine/redact.py`, `engine/llm_gate.py` |
-| Automated tests | On `dev` at 054c632, CI ran 1,698 tests (5 skipped) over the engine, the code database and the key-free evals. The web typecheck, build and UI smoke test passed | Built | GitHub Actions run 39720990321 |
+| Automated tests | On `dev` at 43e7c09, CI ran 1,734 tests (6 skipped) over the engine, the code database and the key-free evals. The web typecheck, build and UI smoke test passed | Built | GitHub Actions run 39747003798 |
 | Roadmap | Coded rules for 9.10.15.5.(8) to (10), 9.10.11.2.(2) and 9.10.13.13.(1). Standing-package checklists. Accuracy report page. A written explainer paragraph for each Section C article (challenge brief, §2.1.c.iii: the schema has a field and nothing fills it). Site twin. Calgary form export. Part 2 prefill. Other provinces. Portal integration | Roadmap | `docs/research/2026-10-20-vision/2-week-build.md` |
 
 ## 4. How it fits current workflows and rules
@@ -237,7 +237,7 @@ No person outside the team has used Batatis. The evidence below comes from autom
 
 | Evidence | Result | Limits |
 |---|---|---|
-| CI on `dev` at 054c632 | 1,698 tests passed, 5 skipped (engine, code database, key-free evals) | Tests show the code behaves as written, not that it is right |
+| CI on `dev` at 43e7c09 | 1,734 tests passed, 6 skipped (engine, code database, key-free evals) | Tests show the code behaves as written, not that it is right |
 | Intake rules on 60 development cases (`python -m evals_dev.intake_facts.score`, run on Oct 21) | Typed-fact precision 159/159 and recall 159/162 | In sample: the labels were written while the rules were written. Cases are agent-authored and model-checked |
 | Engineer-needed flag on the same 60 cases (`evals_dev/section_d_flag/RESULTS.md`) | The shipped variant agrees with model-written labels on 50 of 60 cases and sends 27 to the applicant as unknown | It never answers "no" on these text-only cases, so zero under-flags holds by construction. In sample. Not human-verified |
 | Planted defects in officer review (`engine/tests/test_package_review_planted.py`) | Defects from 16 classes (D01 to D16), planted in synthetic fillable and flattened SCC forms, are named by the review, and the information request asks the applicant | Written alongside the checker, on synthetic forms. Not the blind 20-application test in `evals_dev/planted/SPEC.md`, which has not been run |
