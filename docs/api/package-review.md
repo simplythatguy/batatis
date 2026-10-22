@@ -82,10 +82,14 @@ session keeps the extracted values and quotes.
   other process fields: presence only, never adequacy. Saved cases use the latest `rationale` or
   `process.rationale` applicant passage; a confirmed acceptable-solution route does not require it. Uploads
   (including standalone packages) read `Rationale`, `Rationale for [the] [proposed] variance/alternative
-  [solution]`, or a numbered appendix heading such as `P-1 Rationale`. A blank heading or the draft export's
-  explicit no-answer notice is a blocking applicant gap (`rationale:presence`); a heading not found is an
-  officer check with the request item excluded by default. A present passage is copied, never assessed or
-  drafted by the review.
+  [solution]`, or a numbered appendix heading such as `P-1 Rationale`. A blank passage on a fully readable
+  page or the draft export's explicit no-answer notice is a blocking applicant gap (`rationale:presence`).
+  Whole-answer placeholders are gaps; a placeholder word inside applicant prose is not. A missing heading,
+  non-text objects in the passage region, or a passage crossing pages stays `not_found`, with no partial
+  `value` and the request item excluded by default. Cross-page findings retain page-linked extracted
+  fragments in `pointers[]` for the officer; the field's single-pointer wire shape is unchanged. These
+  checks do not perform OCR or establish the completeness of a multi-page passage. A present passage is
+  copied, never assessed or drafted by the review.
 - Ported deterministic screens (variant B) over the reading: presence and placeholders (D01–D04), edition
   presented as current (D06), intent label (D08), generic or blank risk, mitigation and assumptions (D09–D11),
   professional named when stated as required (D12), supporting document and its responsible person (D13),

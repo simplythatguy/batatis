@@ -1,4 +1,6 @@
 """Applicant rationale is a presence check, never a review of the applicant's analysis."""
+import io
+
 import pytest
 
 from engine.codes import Codes
@@ -118,3 +120,111 @@ def test_official_export_rationale_round_trip(codes, present):
         assert reading.status == 'blank' and reading.value is None
         finding = next(f for f in parts.findings if f.field == 'rationale')
         assert finding.status == 'blank' and ir.build([finding]).items[0].included
+
+
+def _assert_officer_check(parts):
+    reading = next(f for f in parts.fields if f.field == 'rationale')
+    finding = next(f for f in parts.findings if f.field == 'rationale')
+    assert reading.status == finding.status == 'not_found'
+    assert reading.value is None
+    request = ir.build(parts.findings)
+    item = next(i for i in request.items if i.finding_key == finding.key)
+    assert item.officer_check and not item.included and item.text not in request.text
+    assert finding.key not in ir.open_gaps(parts.findings)
+    return finding
+
+
+def test_long_official_rationale_is_complete_or_an_officer_check(codes):
+    ending = ' SYNTHETIC ending.'
+    rationale = ('SYNTHETIC applicant detail. ' * 400)[:8269 - len(ending)] + ending
+    case = sample_case(codes)
+    case.facts = [f for f in case.facts if f.field != 'rationale'] + [fact('rationale', rationale)]
+    pdf = export_case(case, codes=codes).pdf
+    parts = review_uploads([('long-official-export.pdf', pdf)], codes)
+    reading = next(f for f in parts.fields if f.field == 'rationale')
+    if reading.status == 'present':
+        assert reading.value == rationale, 'A rationale must never be silently truncated at a page boundary.'
+    else:
+        finding = _assert_officer_check(parts)
+        assert len({p.page for p in finding.pointers}) >= 2
+        assert any(ending.strip() in (p.quote or '') for p in finding.pointers)
+
+
+def split_rationale_pdf(*, footer=False):
+    from reportlab.pdfgen import canvas
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=(612, 792))
+    c.drawString(50, 50, 'Rationale')
+    if footer:
+        c.drawString(400, 20, 'Appendix page 1')
+    c.showPage()
+    c.drawString(50, 740, 'SYNTHETIC applicant passage on the next page.')
+    c.drawString(50, 700, 'Applicant source: SYNTHETIC applicant')
+    c.save()
+    return buf.getvalue()
+
+
+@pytest.mark.parametrize('footer', [False, True])
+def test_rationale_heading_at_page_end_does_not_request_the_supplied_body(footer):
+    parts = review_uploads([('split-rationale.pdf', split_rationale_pdf(footer=footer))], None)
+    reading = next(f for f in parts.fields if f.field == 'rationale')
+    if reading.status == 'present':
+        assert reading.value == 'SYNTHETIC applicant passage on the next page.'
+    else:
+        finding = _assert_officer_check(parts)
+        assert {p.page for p in finding.pointers} >= {1, 2}
+        assert any(p.page == 2 and p.quote == 'SYNTHETIC applicant passage on the next page.'
+                   for p in finding.pointers)
+
+
+def raster_rationale_pdf():
+    import pypdfium2 as pdfium
+    from reportlab.lib.utils import ImageReader
+    from reportlab.pdfgen import canvas
+    body = pdfium.PdfDocument(narrative_pdf({'SYNTHETIC applicant passage': 'No technical conclusion.'}))
+    raster = body[0].render(scale=1).to_pil()
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=(612, 792))
+    c.drawString(50, 750, 'Rationale')
+    c.drawImage(ImageReader(raster), 0, 0, width=612, height=720)
+    c.save()
+    return buf.getvalue()
+
+
+def test_readable_heading_over_raster_rationale_is_an_officer_check():
+    parts = review_uploads([('raster-rationale.pdf', raster_rationale_pdf())], None)
+    finding = _assert_officer_check(parts)
+    assert finding.pointers[0].file == 'raster-rationale.pdf' and finding.pointers[0].page == 1
+
+
+@pytest.mark.parametrize('saved', [False, True], ids=['upload', 'saved-case'])
+def test_unknown_in_applicant_prose_is_not_a_placeholder(codes, saved):
+    rationale = ('SYNTHETIC applicant rationale: the existing assembly rating is unknown, '
+                 'so we propose a separately documented alternative.')
+    if saved:
+        from engine.completeness import check_completeness
+        case = complete_case()
+        case.facts = [f for f in case.facts if f.field != 'rationale'] + [fact('process.rationale', rationale)]
+        assert not any(g.field == 'rationale' for g in check_completeness(case, codes))
+        parts = review_case(case, codes)
+    else:
+        parts = review_uploads(package(narrative=dict(CLEAN_NARRATIVE, Rationale=rationale)), codes)
+    reading = next(f for f in parts.fields if f.field == 'rationale')
+    assert reading.status == 'present' and reading.value == rationale
+    assert not any(f.field == 'rationale' for f in parts.findings)
+    assert not any(i.field == 'rationale' for i in ir.build(parts.findings).items)
+
+
+@pytest.mark.parametrize('saved', [False, True], ids=['upload', 'saved-case'])
+@pytest.mark.parametrize('placeholder', ['TBD', 'unknown', 'To be provided.', 'pending', 'N/A', 'Not provided'])
+def test_whole_answer_rationale_placeholders_still_need_applicant_input(codes, saved, placeholder):
+    if saved:
+        case = complete_case()
+        case.facts = [f for f in case.facts if f.field != 'rationale'] + [fact('rationale', placeholder)]
+        parts = review_case(case, codes)
+    else:
+        parts = review_uploads(package(narrative=dict(CLEAN_NARRATIVE, Rationale=placeholder)), codes)
+    finding = next((f for f in parts.findings if f.field == 'rationale'), None)
+    assert finding is not None and finding.severity == 'blocking'
+    item = ir.build([finding]).items[0]
+    assert item.included and not item.officer_check

@@ -71,6 +71,8 @@ class TextValue:
     file: str
     page: int | None
     quote: str | None
+    pointers: list[Pointer] = field(default_factory=list)
+    reason: str = ''
 
 
 def _norm(text: str) -> str:
@@ -93,6 +95,56 @@ def text_value(pages: list[tuple[str, int, str]], pattern) -> TextValue:
         body = body.split('\n\n', 1)[0]
         value = _norm(body)
         return TextValue('present' if value else 'blank', value, file, page, value or _norm(match.group(0)))
+    return TextValue('not_found', '', '', None, None)
+
+
+def rationale_value(reads: list[ReadFile]) -> TextValue:
+    """Read one labelled rationale without treating partial or graphical text as a complete answer.
+
+    The field wire shape has one pointer. Cross-page passages therefore remain officer checks;
+    the finding retains each page's extracted fragment rather than a truncated present value.
+    """
+    pattern = TEXT_FIELDS['rationale'][1]
+    for read in reads:
+        for index, page in enumerate(read.text_pages):
+            match = pattern.search(page.text)
+            if match is None:
+                continue
+            pointers = []
+            uncertain = False
+            value = ''
+            for offset, continuation in enumerate(read.text_pages[index:]):
+                heading = _norm(match.group(0)) if offset == 0 else None
+                rest = continuation.text[match.end():] if offset == 0 else continuation.text
+                # Batatis puts a running header on appendix continuation pages. It is not an answer
+                # or a terminating applicant source; the original page remains available by pointer.
+                if offset:
+                    rest = re.sub(r'^Batatis appendix to SCC variance form - case [^\n]+\n', '', rest)
+                stop = _STOP_LINE.search(rest)
+                for _label_text, other in TEXT_FIELDS.values():
+                    hit = other.search(rest)
+                    if hit and (stop is None or hit.start() < stop.start()):
+                        stop = hit
+                stop_line = rest[stop.start():].strip().split('\n', 1)[0] if stop else None
+                body = _norm(rest[:stop.start()] if stop else rest)
+                if not offset:
+                    value = body
+                pointers.append(Pointer(file=read.name, page=continuation.page + 1, quote=body or heading))
+                uncertain = (uncertain or bool(offset) or not continuation.text.strip()
+                             or read.passage_has_marks(continuation.page, heading, stop_line))
+                if stop_line and stop_line.casefold().startswith('appendix page'):
+                    uncertain = True   # a running footer does not prove that the passage ends here
+                    continue
+                if stop:
+                    break
+            if uncertain:
+                reason = ('The rationale may continue across pages or contain non-text content. '
+                          'Its complete text could not be established; check the indicated pages.')
+                return TextValue('not_found', '', read.name, page.page + 1, pointers[0].quote, pointers, reason)
+            if value == '(Not provided or not confirmed. No answer has been supplied by Batatis.)':
+                value = ''
+            return TextValue('present' if value else 'blank', value or '', read.name, page.page + 1,
+                             pointers[0].quote, pointers)
     return TextValue('not_found', '', '', None, None)
 
 
@@ -227,21 +279,18 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
                                              else "Owner's representative signature", section='A',
                                              status=value.status, value=value.value or None, reason=value.reason,
                                              pointer=_pointer(form, value)))
-    texts = {key: text_value(pages, pattern) for key, (_label_text, pattern) in TEXT_FIELDS.items()}
-    # A draft export explicitly says no answer was supplied. Its notice is not applicant rationale.
-    rationale = texts['rationale']
-    if rationale.value == '(Not provided or not confirmed. No answer has been supplied by Batatis.)':
-        rationale.status, rationale.value = 'blank', ''
+    texts = {key: rationale_value(([form] if form else []) + attachments) if key == 'rationale'
+             else text_value(pages, pattern) for key, (_label_text, pattern) in TEXT_FIELDS.items()}
     for key, found in texts.items():
         label = TEXT_FIELDS[key][0]
         section = 'process' if key in ('rationale', 'risk_assessment', 'mitigating_measures', 'assumptions_and_limits') else (
             'B' if key == 'alternative_description' else 'D')
         parts.fields.append(FieldReading(
             field=key, label=label, section=section, status=found.status, value=found.value or None,
-            reason={'not_found': 'No heading for this passage was found in the form appendix or attachments.',
+            reason=found.reason or {'not_found': 'No heading for this passage was found in the form appendix or attachments.',
                     'blank': 'The heading is present with no text under it.'}.get(found.status, ''),
-            pointer=Pointer(file=found.file or (form.name if form else '(no file)'), page=found.page,
-                            quote=found.quote)))
+            pointer=found.pointers[0] if found.pointers else Pointer(
+                file=found.file or (form.name if form else '(no file)'), page=found.page, quote=found.quote)))
 
     # ---- deterministic element screens (ported variant B) over the form reading
     by_widget = form.fields if form else {}
@@ -306,7 +355,7 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
             pointers.append(_pointer(form, by_widget[widget]))
         found = texts.get(element.field)
         if found is not None and found.file:
-            pointers.append(Pointer(file=found.file, page=found.page, quote=found.quote))
+            pointers.extend(found.pointers or [Pointer(file=found.file, page=found.page, quote=found.quote)])
         for quote in element.quotes:
             if quote.source:
                 pointer = _pointer_from_source(quote.source, form.name if form else 'upload')
@@ -323,8 +372,9 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
             finding.message += ' Blank components: ' + ', '.join(legal_blank) + '.'
         if element.field in TEXT_FIELDS and texts[element.field].status == 'not_found':
             finding.status = 'not_found'
-            finding.message = (f'No {element.label} was found in the form appendix or the attachments. '
-                               'Check the attachments; if it is not there, ask the applicant for it.')
+            finding.message = texts[element.field].reason or (
+                f'No {element.label} was found in the form appendix or the attachments. '
+                'Check the attachments; if it is not there, ask the applicant for it.')
         parts.findings.append(finding)
 
     if form is not None:

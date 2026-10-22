@@ -63,6 +63,24 @@ class ReadFile:
     def locate(self, page: int, quote: str) -> tuple[float, float, float, float] | None:
         return locate(self.data, page, quote)
 
+    def passage_has_marks(self, page: int, heading: str | None, stop: str | None) -> bool:
+        """Non-text objects between passage boundaries make text-only presence uncertain.
+
+        A boundary that cannot be located widens the region; a geometry failure is uncertain.
+        Coordinates and object boxes use the same PDF-point convention as flattened fields.
+        """
+        import pypdfium2 as pdfium
+        try:
+            doc = pdfium.PdfDocument(self.data)
+            boxes = _object_boxes(doc[page])
+            after = self.locate(page, heading) if heading else None
+            before = self.locate(page, stop) if stop else None
+            top = after[3] if after else float('inf')
+            bottom = before[3] if before else float('-inf')
+            return any(y0 < top and y1 > bottom for _x0, y0, _x1, y1 in boxes)
+        except Exception:  # noqa: BLE001 - unreadable graphics must not establish a blank passage
+            return True
+
 
 @dataclass(frozen=True)
 class FormVersion:

@@ -12,6 +12,7 @@ from engine.models import Case
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import complete_case, fact, store_with_synthetic_files
 from engine.tests.package_review_fixtures import CLEAN_FORM, CLEAN_NARRATIVE, package
+from engine.tests.test_package_review_rationale import raster_rationale_pdf, split_rationale_pdf
 from engine.tests.test_accounts import onboard, signup
 
 NAMES = ['owner', 'other', 'reviewer', 'second', 'foreign', 'anonymous']
@@ -165,25 +166,35 @@ def test_upload_on_queue_case_and_reupload_diff(scene):
 
 
 @pytest.mark.parametrize('standalone', [False, True], ids=['case-upload', 'standalone-upload'])
-def test_uploaded_rationale_gap_and_reupload_resolution(scene, standalone):
+@pytest.mark.parametrize('input_kind', ['blank', 'split', 'raster'])
+def test_uploaded_rationale_gap_and_reupload_resolution(scene, standalone, input_kind):
     store, clients, _ = scene
     case = None if standalone else claimed(scene)
     before = store.get(case.id).model_dump(mode='json') if case else None
     path = '/package-review' if standalone else f'/review/{case.id}/package-review'
-    first = clients['reviewer'].post(path, files=multipart(package(narrative=dict(CLEAN_NARRATIVE, Rationale=''))))
+    uploads = package(narrative=dict(CLEAN_NARRATIVE, Rationale='')) if input_kind == 'blank' else (
+        package(drop=('Rationale',)) + [('rationale.pdf',
+            split_rationale_pdf() if input_kind == 'split' else raster_rationale_pdf())])
+    first = clients['reviewer'].post(path, files=multipart(uploads))
     assert first.status_code == 201, first.text
     session = first.json()
     assert session['administrative_only'] and session['not_a_compliance_determination']
     finding = next(f for f in session['findings'] if f['field'] == 'rationale')
-    assert finding['status'] == 'blank' and finding['severity'] == 'blocking'
+    assert finding['status'] == ('blank' if input_kind == 'blank' else 'not_found')
+    assert finding['severity'] == 'blocking'
+    if input_kind == 'split':
+        assert {p['page'] for p in finding['pointers'] if p['file'] == 'rationale.pdf'} >= {1, 2}
     item = next(i for i in session['information_request']['items'] if i['finding_key'] == finding['key'])
-    assert item['included'] and not item['officer_check']
-    assert item['text'].startswith('Please provide the rationale')
+    assert item['included'] is (input_kind == 'blank')
+    assert item['officer_check'] is (input_kind != 'blank')
+    assert (item['text'] in session['information_request']['text']) is (input_kind == 'blank')
     reupload_path = f'/package-review/{session["package_id"]}' if standalone else path
     fixed = clients['reviewer'].post(reupload_path, files=multipart(package(flat=True)))
     assert fixed.status_code == 201, fixed.text
     assert not any(f['field'] == 'rationale' for f in fixed.json()['findings'])
-    assert {e['key'] for e in fixed.json()['diff']['resolved']} == {finding['key']}
+    assert {e['key'] for e in fixed.json()['diff']['resolved']} == (
+        {finding['key']} if input_kind == 'blank' else set())
+    assert fixed.json()['diff']['previous_gaps'] == (1 if input_kind == 'blank' else 0)
     if case:
         assert store.get(case.id).model_dump(mode='json') == before
         store.delete(case.id)
@@ -205,7 +216,8 @@ def test_saved_rationale_gap_blocks_acceptance_until_applicant_supplies_it(scene
     assert any(g['field'] == 'rationale' for g in blocked.json()['detail']['gaps'])
     assert store.get(case.id).status == 'in_review' and store.get(case.id).decision is None
     saved = store.get(case.id)
-    saved.facts.append(fact('process.rationale', 'SYNTHETIC applicant reason; no technical conclusion.'))
+    saved.facts.append(fact('process.rationale', 'SYNTHETIC applicant rationale: the existing assembly rating is '
+                           'unknown, so we propose a separately documented alternative.'))
     store.put(saved)
     second = clients['reviewer'].post(f'{path}/package-review')
     assert second.status_code == 201, second.text

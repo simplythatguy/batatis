@@ -187,7 +187,15 @@ def _stored_state(doc: Ingested, spec: ElementSpec) -> tuple[str, str | None, St
         return 'unclear', 'unconfirmed', stored
     if stored.explicit_blank or not stored.value.strip():
         return 'missing', 'blank', stored
-    if _PLACEHOLDER.search(stored.value):
+    if spec.field == 'rationale':
+        from .completeness import _missing
+        # Presence only: the canonical whole-answer placeholders and explicit short responses.
+        # Applicant prose can truthfully discuss an unknown without being a placeholder answer.
+        placeholder = _missing(stored.value) or _PLACEHOLDER.fullmatch(
+            normalize_ws(stored.value).strip(" .!?;:'\""))
+    else:
+        placeholder = _PLACEHOLDER.search(stored.value)
+    if placeholder:
         return 'missing', 'placeholder', stored
     folded = normalize_ws(stored.value).casefold().strip(" '")
     if folded in _STATUS or (spec.field == 'representative' and folded in {'none', 'no representative'}):
