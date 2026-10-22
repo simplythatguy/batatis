@@ -2,13 +2,7 @@
 import { useState } from "react";
 import { engine } from "../../api/client";
 import { NrcCredit } from "../../components";
-
-/** "NBC(AE) 2023 p2, Div C, Sentence 2.3.1.1.(3) [PDF p.739]" → { division: "C", id: "2.3.1.1.(3)" }. */
-export function parseCitation(citation: string): { division: "A" | "B" | "C"; id: string } | null {
-  const m = /Div(?:ision)?\s*([ABC])\b[^0-9]*?(\d+(?:\.\d+)+\.?(?:\(\d+\))?(?:\([a-z]\))?)/.exec(citation);
-  if (!m) return null;
-  return { division: m[1] as "A" | "B" | "C", id: m[2] };
-}
+import { parseCitation } from "./packageView";
 
 export function CodeRef({ citation }: { citation: string }) {
   const parsed = parseCitation(citation);

@@ -5,30 +5,19 @@
  * its text is copied out instead. Once sent, the request is frozen and shown as the applicant sees it.
  */
 import { useEffect, useId, useMemo, useState } from "react";
-import { AccountsError, review, type DecisionItemInput } from "../../api/accounts";
+import { AccountsError, review } from "../../api/accounts";
 import { packageReview, type ReviewTarget } from "../../api/packageReview";
 import type { ReviewSession, SentInformationRequests } from "../../api/types.gen";
 import { AcIcon } from "../auth/bits";
 import { Modal } from "../ui";
 import { sentLabel } from "./queue";
-import { draftFrom, includedCount, previewText, sameDraft, SECTION_LABEL, toEdit, type DraftItem } from "./packageView";
+import { draftFrom, includedCount, previewText, requestItems, returnAfterRequest, sameDraft, SECTION_LABEL, toEdit, type DraftItem } from "./packageView";
 import "./review.css";
 
 let officerSeq = 0;
 
 function errorText(e: unknown, fallback: string): string {
   return e instanceof AccountsError ? e.detail : fallback;
-}
-
-/** The note that returns the application after a request, and the items it carries. Pure. */
-export function returnAfterRequest(count: number): string {
-  return `I sent you an information request with ${count} ${count === 1 ? "item" : "items"}. Please update the application and send it again.`;
-}
-
-export function requestItems(s: ReviewSession): DecisionItemInput[] {
-  return s.information_request.items
-    .filter((i) => i.included && i.text.trim())
-    .map((i) => ({ field: (i.field || "information_request").slice(0, 200), note: i.text.trim().slice(0, 2000) }));
 }
 
 function SentView({ s, applicant, sent }: { s: ReviewSession; applicant: string; sent: SentInformationRequests | null }) {

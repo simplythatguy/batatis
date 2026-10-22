@@ -12,6 +12,7 @@ import {
   citationView,
   diffView,
   documentView,
+  fileGaps,
   fileItemsView,
   missingView,
   peerView,
@@ -42,7 +43,7 @@ export function stepsFor(s: ReviewSession): StepId[] {
 export const Dot = ({ tone }: { tone: Tone }) => <span className={`cf-dot is-${tone}`} aria-hidden="true" />;
 const TONE_WORD: Record<Tone, string> = { blocking: "required", warning: "check", pending: "not established", done: "no gap" };
 
-function Finding({ f }: { f: FindingView }) {
+function FindingItem({ f }: { f: FindingView }) {
   return (
     <li className="pr-item">
       <Dot tone={f.tone} />
@@ -79,7 +80,7 @@ function Changes({ s }: { s: ReviewSession }) {
   const list = (title: string, items: FindingView[], empty: string) => (
     <section className="pr-group" aria-label={title}>
       <h3 className="pr-group-h">{title} <span className="pr-n">{items.length}</span></h3>
-      {items.length ? <ul className="pr-list">{items.map((f) => <Finding key={f.key} f={f} />)}</ul> : <p className="pr-faint">{empty}</p>}
+      {items.length ? <ul className="pr-list">{items.map((f) => <FindingItem key={f.key} f={f} />)}</ul> : <p className="pr-faint">{empty}</p>}
     </section>
   );
   return (
@@ -145,14 +146,14 @@ function Missing({ s }: { s: ReviewSession }) {
       {v.groups.map((g) => (
         <section key={g.section} className="pr-group" aria-label={g.label}>
           <h3 className="pr-group-h">{g.label} <span className="pr-n">{g.items.length}</span></h3>
-          <ul className="pr-list">{g.items.map((f) => <Finding key={f.key} f={f} />)}</ul>
+          <ul className="pr-list">{g.items.map((f) => <FindingItem key={f.key} f={f} />)}</ul>
         </section>
       ))}
       {v.officer.length > 0 && (
         <section className="pr-group" aria-label="For you to check first">
           <h3 className="pr-group-h">For you to check first <span className="pr-n">{v.officer.length}</span></h3>
           <p className="pr-faint pr-group-sub">The review couldn’t establish these (a stamp, a handwritten value, your own registration paperwork). They are not asked of the applicant unless you add them.</p>
-          <ul className="pr-list">{v.officer.map((f) => <Finding key={f.key} f={f} />)}</ul>
+          <ul className="pr-list">{v.officer.map((f) => <FindingItem key={f.key} f={f} />)}</ul>
         </section>
       )}
       {v.elsewhere > 0 && <p className="pr-fine">{v.elsewhere} Division C {v.elsewhere === 1 ? "item is" : "items are"} under File items.</p>}
@@ -332,15 +333,18 @@ export function PackageReview({
       first.current = false;
       return;
     }
-    body.current?.focus({ preventScroll: true });
-    body.current?.scrollIntoView({ block: "nearest" });
+    const el = body.current;
+    if (!el) return;
+    el.focus({ preventScroll: true });
+    // After "Next" at the foot of a long step, bring the new step's top into view.
+    if (el.getBoundingClientRect().top < 0) el.scrollIntoView({ block: "start" });
   }, [step]);
 
   const at = Math.max(0, steps.indexOf(step));
   const prev = steps[at - 1];
   const next = steps[at + 1];
   const missing = missingView(session);
-  const counts: Partial<Record<StepId, number>> = { missing: missing.total };
+  const counts: Partial<Record<StepId, number>> = { missing: missing.total, file: fileGaps(session), peer: session.findings.some((f) => f.key === "peer_review:signal") ? 1 : 0 };
 
   return (
     <section className="pr" aria-labelledby={`${id}-h`}>

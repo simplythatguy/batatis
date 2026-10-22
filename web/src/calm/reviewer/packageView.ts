@@ -4,6 +4,7 @@
  * the refusal message and the close-out. Pure: everything is derived from a ReviewSession or CloseOut.
  * Administrative completeness only: nothing here judges the design.
  */
+import type { DecisionItemInput } from "../../api/accounts";
 import type {
   Attribute,
   CitationCheck,
@@ -54,6 +55,13 @@ export function pointerQuote(p: Pointer | null | undefined, value?: string | nul
   return q.length > 220 ? `${q.slice(0, 217).trimEnd()}…` : q;
 }
 
+/** "NBC(AE) 2023 p2, Div C, Sentence 2.3.1.1.(3) [PDF p.739]" → { division: "C", id: "2.3.1.1.(3)" }. */
+export function parseCitation(citation: string): { division: "A" | "B" | "C"; id: string } | null {
+  const m = /Div(?:ision)?\s*([ABC])\b[^0-9]*?(\d+(?:\.\d+)+\.?(?:\(\d+\))?(?:\([a-z]\))?)/.exec(citation);
+  if (!m) return null;
+  return { division: m[1] as "A" | "B" | "C", id: m[2] };
+}
+
 /* —— Finding kinds —— */
 
 export const PEER_KEY = "peer_review:signal";
@@ -81,12 +89,17 @@ export interface FindingView {
   citations: string[];
 }
 
+/** Findings are often worded to the applicant ("Your application …"); the officer reads them in the third person. */
+export function officerVoice(message: string): string {
+  return message.replace(/\bYour application\b/g, "The application").replace(/\byour application\b/g, "the application");
+}
+
 export function findingView(f: Finding): FindingView {
   const p = f.pointers[0];
   return {
     key: f.key,
     title: sentence(f.label),
-    message: f.message,
+    message: officerVoice(f.message),
     tone: f.status === "not_found" ? "pending" : f.severity === "blocking" ? "blocking" : "warning",
     where: pointerLabel(p),
     quote: pointerQuote(p),
@@ -275,6 +288,9 @@ export interface CheckRow {
   message: string;
 }
 
+/** Open Division C file items and "demonstrate" prompts, for the step's count. */
+export const fileGaps = (s: ReviewSession) => s.findings.filter((f) => isFileItem(f) || isDemonstrate(f)).length;
+
 export function fileItemsView(s: ReviewSession): { items: CheckRow[]; demonstrate: CheckRow[]; read: boolean } {
   // Nothing readable means nothing was checked; never show "no gap" for an unread package.
   const read = s.fields.some((f) => f.status === "present" && f.value?.trim());
@@ -282,7 +298,7 @@ export function fileItemsView(s: ReviewSession): { items: CheckRow[]; demonstrat
     const f = s.findings.find((x) => x.field === key);
     if (f) {
       const tone: Tone = f.status === "not_found" ? "pending" : demo ? "warning" : "blocking";
-      return { key, label, provision, tone, status: f.status === "not_found" ? "Not found · check it" : demo ? "Not mentioned" : "Missing", message: f.message };
+      return { key, label, provision, tone, status: f.status === "not_found" ? "Not found · check it" : demo ? "Not mentioned" : "Missing", message: officerVoice(f.message) };
     }
     return read ? { key, label, provision, tone: "done", status: "No gap found", message: "" } : { key, label, provision, tone: "pending", status: "Not checked", message: "" };
   };
@@ -347,6 +363,17 @@ export function sameDraft(a: InformationRequestEdit, b: InformationRequestEdit):
 }
 
 export const includedCount = (items: DraftItem[]) => items.filter((i) => i.included && i.text.trim()).length;
+
+/** The note that returns the application after a request, and the items it carries. Pure. */
+export function returnAfterRequest(count: number): string {
+  return `I sent you an information request with ${count} ${count === 1 ? "item" : "items"}. Please update the application and send it again.`;
+}
+
+export function requestItems(s: ReviewSession): DecisionItemInput[] {
+  return s.information_request.items
+    .filter((i) => i.included && i.text.trim())
+    .map((i) => ({ field: (i.field || "information_request").slice(0, 200), note: i.text.trim().slice(0, 2000) }));
+}
 
 /* —— Re-upload diff —— */
 
