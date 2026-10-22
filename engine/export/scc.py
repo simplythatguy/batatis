@@ -21,12 +21,14 @@ from pypdf import PdfReader, PdfWriter
 from pypdf.generic import ArrayObject, NameObject, NumberObject, RectangleObject, TextStringObject
 
 from ..models import INTENT_LABEL, Case, SectionCRow
+from ..not_applicable import LABEL as NA_LABEL, ROWS as NA_ROWS, NotApplicable, not_applicable
 from ..codes import Codes
 from ..completeness import check_completeness
 from ..professional import NOT_ENGAGED_ITEM
 from ..process_fields import PROCESS_ALIASES
 from ..section_c import section_c_rows
 from ..section_d import supporting_documents, text_evidence
+from .edition import code_or_standard_value
 from .text import fit, pdf_safe
 
 DEFAULT_FORM = Path(__file__).resolve().parents[2] / 'reference' / 'guides' / 'SCC-Variance-Form.pdf'
@@ -80,6 +82,8 @@ class ExportResult:
     placements: list[Placement] = field(default_factory=list)
     blank_fields: list[str] = field(default_factory=list)
     open_items: list[str] = field(default_factory=list)
+    not_applicable: list[str] = field(default_factory=list)   # form fields showing N/A from an applicant fact
+    text: list[str] = field(default_factory=list)             # exported narrative: form values, then the appendix
 
 
 def form_path() -> Path:
@@ -187,10 +191,16 @@ class _Plan:
     overflow: list[tuple[str, str, str]] = field(default_factory=list)          # (ref, label, full value)
     rows_in_form: int = 0
     docs_in_form: int = 0
+    na: dict[str, NotApplicable] = field(default_factory=dict)                  # field -> applicant N/A fact
 
 
-def _plan(case: Case, values: dict, fmap: dict, rects: dict) -> _Plan:
+def _plan(case: Case, values: dict, fmap: dict, rects: dict, codes=None) -> _Plan:
     plan = _Plan(rects=rects)
+    na = not_applicable(case)
+
+    def mark_na(name: str, key: str):
+        plan.text[name] = (NA_LABEL, None, NA_LABEL)
+        plan.na[name] = na[key]
     for slot in fmap['section_c_rows']:
         plan.sizes.update({slot[k]: SECTION_C_SIZES for k in ('article', 'objective', 'function', 'intent')})
 
@@ -205,7 +215,11 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict) -> _Plan:
 
     for name, spec in fmap['text_fields'].items():
         value = values.get(spec['fact'], spec.get('default'))
+        if spec['fact'] == 'code_or_standard':
+            value = code_or_standard_value(value, codes)     # claims the 2nd printing only when codedb proves it
         if value is None:
+            if spec['fact'] in na:
+                mark_na(name, spec['fact'])
             continue
         value = pdf_safe(value)
         if fit(value, rects[name]) is not None:
@@ -222,6 +236,7 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict) -> _Plan:
     if values.get('legal_description') and not all(values.get(k) for k in ('lot', 'block', 'plan')):
         ref = f'X-{len(plan.overflow) + 1}'
         value = pdf_safe(values['legal_description'])
+        plan.na.pop('Lot', None)
         put('Lot', f'See Appendix {ref}', ref, value)
         plan.overflow.append((ref, 'Legal description', value))
 
@@ -249,6 +264,10 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict) -> _Plan:
         put(last['objective'], 'See Appendix C')
         put(last['function'], 'See Appendix C')
         put(last['intent'], f'Section C rows {k0} to {n} continue in the appendix (C-{k0} to C-{n}).')
+    elif NA_ROWS['section_c'] in na:
+        for slot in slots[len(rows):]:
+            for name in slot.values():
+                mark_na(name, NA_ROWS['section_c'])
 
     dslots = fmap['section_d_rows']
     docs = [(pdf_safe(d.title), pdf_safe(d.responsible_party)) for d in supporting_documents(case)]
@@ -264,6 +283,10 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict) -> _Plan:
         k0, n = len(dslots), len(docs)
         put(dslots[-1]['document'], f'Documents {k0}-{n}: see Appendix D')
         put(dslots[-1]['responsible'], f'Listed in Appendix D (D-{k0} to D-{n})')
+    elif NA_ROWS['section_d'] in na:
+        for slot in dslots[len(docs):]:
+            for name in slot.values():
+                mark_na(name, NA_ROWS['section_d'])
     return plan
 
 
@@ -346,10 +369,11 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
     case = _canonical_case(case, codes)
     blank_form = load_form(form, fmap)
     values = confirmed_values(case)
-    plan = _plan(case, values, fmap, _rects(blank_form, fmap))
+    plan = _plan(case, values, fmap, _rects(blank_form, fmap), codes)
     filled, placements = _fill_and_flatten(blank_form, plan)
+    text = [f'{name}: {full}' for name, (_shown, _ref, full) in plan.text.items()]
     appendix = build_appendix(case, plan, values, fmap, codes=codes,
-                              open_items=reasons if draft else [], package_notes=notes)
+                              open_items=reasons if draft else [], package_notes=notes, text=text)
 
     out = PdfWriter(clone_from=io.BytesIO(filled))
     form_pages = len(out.pages)
@@ -368,4 +392,4 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
     visible = list(dict.fromkeys((reasons if draft else []) + notes))
     return ExportResult(pdf=buf.getvalue(), field_map=fmap['version'], form_pages=form_pages,
                         appendix_pages=len(app_reader.pages), draft=draft, placements=placements,
-                        blank_fields=blank, open_items=visible)
+                        blank_fields=blank, open_items=visible, not_applicable=list(plan.na), text=text)
