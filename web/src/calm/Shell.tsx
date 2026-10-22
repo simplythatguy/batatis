@@ -2,10 +2,12 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode }
 import type { ApplicationSummary } from "../api/accounts";
 import { groupGaps } from "../humanReview";
 import { useCase } from "../store";
-import { bootAccount, refreshApplications, useAccount, type AccountPhase } from "./account";
-import { readOnly, readOnlyStatus } from "./applications";
+import { bootAccount, deleteApplication, refreshApplications, setApplicationPreferences, useAccount, type AccountPhase } from "./account";
+import { groupApplications, readOnly, readOnlyStatus } from "./applications";
 import { saveTitle, titleError } from "./rename";
 import { RenameDialog } from "./shell/RenameDialog";
+import { DeleteDialog } from "./shell/DeleteDialog";
+import type { RowAction } from "./shell/RowMenu";
 import { AssistantPanel } from "./assistant/AssistantPanel";
 import { setAssistantCase, setAssistantContext, toggleAssistant, useAssistant } from "./assistant/assistant";
 import { roleOf, useCurrentApplication } from "./begin";
@@ -103,6 +105,9 @@ const isPhone = () => window.matchMedia(PHONE).matches;
 export function Shell({ active, children, plain = false }: { active: Screen; children: ReactNode; plain?: boolean }) {
   const { c, phase, engineId, resetToWho, openCase, saveStatus, saveDraft, checkStatus, requestCheck, renameCase } = useCase();
   const [renaming, setRenaming] = useState<{ id: string; title: string } | null>(null);
+  const [deleting, setDeleting] = useState<{ id: string; title: string } | null>(null);
+  /** Applications with a pin or archive change on its way to the server. */
+  const [pending, setPending] = useState<ReadonlySet<string>>(() => new Set());
   const account = useAccount();
   const assistant = useAssistant();
   const [confirm, setConfirm] = useState(false);
@@ -206,7 +211,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
 
   const deckDone = Math.round(progress.questions);
   const localRow: ApplicationSummary | null = inCase
-    ? { id: engineId ?? "this-visit", title: c.title || "New application", status: "draft", authority: c.authority || null, updated_at: new Date().toISOString(), submitted_at: null, completeness: { answered: deckDone, total: 100 }, unread_messages: 0, reviewer: null }
+    ? { id: engineId ?? "this-visit", title: c.title || "New application", status: "draft", authority: c.authority || null, updated_at: new Date().toISOString(), submitted_at: null, completeness: { answered: deckDone, total: 100 }, unread_messages: 0, reviewer: null, archived: false, pinned: false }
     : null;
   const saved = account.applications ?? [];
   // Signed in, a new draft shows at once, before the engine has listed it.
@@ -293,13 +298,60 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     void open(caseParam, to);
   }, [caseParam]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  /** Pin, unpin, archive or restore: the row moves once the server has saved it; the open application stays open. */
+  async function setPreference(a: ApplicationSummary, patch: { pinned?: boolean; archived?: boolean }, verb: string) {
+    setListNote("");
+    setPending((p) => new Set(p).add(a.id));
+    const error = await setApplicationPreferences(a.id, patch);
+    setPending((p) => { const next = new Set(p); next.delete(a.id); return next; });
+    if (error) setListNote(`Couldn’t ${verb} “${a.title || "this application"}”. ${error}`);
+  }
+
+  /** After the server's 204: if it was the open application, open the newest one left, else start fresh. */
+  async function removeApplication(id: string): Promise<string | null> {
+    const error = await deleteApplication(id);
+    if (error) return error;
+    if (id !== engineId) return null;
+    remember(null);
+    resetSession();
+    resetRelevance();
+    const left = groupApplications(saved.filter((a) => a.id !== id));
+    const next = [...left.pinned, ...left.active][0];
+    if (next && !(await openCase(next.id, roleOf(account.user) ?? "homebuilder"))) {
+      location.hash = "#/questions";
+      return null;
+    }
+    resetToWho("");
+    return null;
+  }
+
+  function actionsFor(a: ApplicationSummary): RowAction[] {
+    const editable = !readOnly(a.status);
+    const rename: RowAction = { id: "rename", label: "Rename", icon: "pencil", disabled: !editable, hint: editable ? undefined : "Read-only", onSelect: () => setRenaming({ id: a.id, title: a.title }) };
+    // Pin, archive and delete belong to applications saved to the account.
+    if (!signedIn || !saved.some((s) => s.id === a.id)) return [rename];
+    const waiting = pending.has(a.id);
+    const draft = a.status === "draft";
+    return [
+      rename,
+      ...(a.archived ? [] : [a.pinned
+        ? { id: "unpin", label: "Unpin", icon: "pinOff", disabled: waiting, onSelect: () => void setPreference(a, { pinned: false }, "unpin") } as RowAction
+        : { id: "pin", label: "Pin", icon: "pin", disabled: waiting, onSelect: () => void setPreference(a, { pinned: true }, "pin") } as RowAction]),
+      a.archived
+        ? { id: "restore", label: "Restore", icon: "restore", disabled: waiting, onSelect: () => void setPreference(a, { archived: false }, "restore") }
+        : { id: "archive", label: "Archive", icon: "archive", disabled: waiting, onSelect: () => void setPreference(a, { archived: true }, "archive") },
+      // Only a draft: a sent application is on file with the authority.
+      { id: "delete", label: "Delete…", icon: "trash", destructive: true, separatorBefore: true, disabled: waiting || !draft, hint: draft ? undefined : "Drafts only", onSelect: () => setDeleting({ id: a.id, title: a.title }) },
+    ];
+  }
+
   const list = (
     <ApplicationList
       ref={listRef}
       items={items}
       selectedId={opening ?? selectedId}
       onSelect={(id) => void open(id)}
-      rowActions={(a) => readOnly(a.status) ? null : <MoreMenu label={`Options for ${a.title || "this application"}`} items={[{ label: "Rename", onClick: () => setRenaming({ id: a.id, title: a.title }) }]} />}
+      actionsFor={actionsFor}
       onNew={() => {
         if (!inCase) {
           setListNote("");
@@ -375,6 +427,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
         onClose={() => setRenaming(null)}
         onSave={(id, next) => (id === selectedId ? renameCase(next) : saveTitle(id, next).then(() => null, titleError))}
       />
+      <DeleteDialog target={deleting} onClose={() => setDeleting(null)} onDelete={removeApplication} />
       <ConfirmDialog
         open={confirm}
         title="Start a new application?"

@@ -4,7 +4,7 @@
  * single-visit flow it had before.
  */
 import { useSyncExternalStore } from "react";
-import { accounts, notAvailable, type ApplicationSummary, type User } from "../api/accounts";
+import { accounts, notAvailable, type ApplicationPreferences, type ApplicationSummary, type User } from "../api/accounts";
 import { EngineError } from "../api/client";
 import { probeAuth } from "../api/engineAuth";
 
@@ -60,6 +60,34 @@ export async function refreshApplications() {
 export function patchApplication(id: string, patch: Partial<ApplicationSummary>) {
   if (!state.applications) return;
   set({ applications: state.applications.map((a) => (a.id === id ? { ...a, ...patch } : a)) });
+}
+
+const failure = (e: unknown, fallback: string) => (e instanceof EngineError ? e.detail : fallback);
+
+/**
+ * Pin, unpin, archive or restore one of the owner's applications. Only the server's answer changes
+ * the list (no local-only success); the case itself, and any unsaved answers in it, are untouched.
+ * Resolves to an error text, or null when saved.
+ */
+export async function setApplicationPreferences(id: string, patch: ApplicationPreferences): Promise<string | null> {
+  try {
+    const saved = await accounts.preferences(id, patch);
+    patchApplication(id, saved);
+    return null;
+  } catch (e) {
+    return failure(e, "That didn’t save.");
+  }
+}
+
+/** Delete an owned application for good. The row leaves the list only after the server's 204. */
+export async function deleteApplication(id: string): Promise<string | null> {
+  try {
+    await accounts.deleteCase(id);
+  } catch (e) {
+    return failure(e, "It wasn’t deleted.");
+  }
+  if (state.applications) set({ applications: state.applications.filter((a) => a.id !== id) });
+  return null;
 }
 
 /** The current state outside React (route tables, sign-in actions). */
