@@ -155,14 +155,14 @@
 
 **Hero:** Oct 6, 2026 | form version the export is pinned to (SHA-256)
 
-- Draft or official PDF. Part 2 and signatures stay blank
+- Draft or "Official PDF". Part 2 and signatures stay blank
 - Jurisdiction packs are data: Calgary, Edmonton, rest of Alberta
 - Other provinces are labelled preview only
 
 **Full slide detail (in notes):**
 
 - The export fills Part 1, Sections A to D of the Council's form dated Oct 6, 2026 (5 pages, 87 fields), not the brief's older Appendix 1. The two differ in six places, listed in the Implementation Plan §4.3. A changed form fails the hash check and blocks export
-- The official PDF unlocks only after a current check finds no required item missing. Drafts can be incomplete and say so
+- The "Official PDF" is the Council's form filled in, not a file the Council issues or approves. It unlocks only after a current check finds no required item missing. Drafts can be incomplete and say so
 - A field shows N/A only when the applicant has confirmed that it does not apply, with a reason, and the appendix lists each one. A blank is never shown as N/A. There is no screen yet for stating it (backend)
 - A pack is one JSON file with sources, dates and hashes for each note. A test adds a fourth pack with no code change. The Calgary form (R2014-06) is a roadmap item
 - The code library reads the code as a numbered outline and shows a relevance ring on each article. "Add to my application" turns an article into a Code check card, and Section C holds only what the applicant confirms

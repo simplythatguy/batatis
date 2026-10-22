@@ -143,7 +143,7 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 
 **Evidence now:**
 
-- Built: the calm interface (`docs/design-system-calm.md`), the official Oct 6, 2026 form as a draft or official PDF pinned to its SHA-256 (`engine/export/field_maps/scc_2026-10.json`), and submit and review for Calgary and Edmonton.
+- Built: the calm interface (`docs/design-system-calm.md`), the official Oct 6, 2026 form as a draft or "Official PDF" (the app's label for the Council's form filled in; the Council does not issue it) pinned to its SHA-256 (`engine/export/field_maps/scc_2026-10.json`), and submit and review for Calgary and Edmonton.
 - Export gate G3 (`python scripts/gate_g3.py`, PR #60) passes on three fictional demo cases and a synthetic sample: every applicant field is filled or marked N/A from the applicant's own facts, the exported text passes `codedb validate` with 0 errors, and the appendix uses none of "complies", "safe", "approved" or "adequate" (`docs/research/2026-10-21-source-checks.md` §6).
 - Built as data and API: packs for Calgary, Edmonton and the rest of Alberta, 12 other provinces and territories labelled preview, a lint test against city names in code, and a test that adds a fourth pack with no code change (`docs/api/jurisdictions.md`).
 
