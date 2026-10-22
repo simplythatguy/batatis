@@ -170,7 +170,7 @@ A better model makes anyone's code search and drafting better, including ours. I
 
 - An official template could commoditize the form. We fill the Council's form, and we would add the new template as a form version.
 - An incumbent could add an alternative-solution module. Archistar and Clariti already hold Canadian municipal relationships.
-- **Code-text licensing.** NBC(AE) 2023 says commercial reproduction of National Research Council (NRC) material needs written consent. The research ranks this the highest-priority risk. We quote code text for citations and link to the NRC publication. We have not asked NRC for terms, and written terms are needed before a public commercial launch. If terms are refused, the fallback is a link-out and user-supplied-text design (`C-market-provinces-business.md`, §3.2 and (c)).
+- **Code-text licensing.** NBC(AE) 2023 says commercial reproduction of National Research Council (NRC) material needs written consent. The research ranks this the highest-priority risk. The app shows code text in full, with its citation, PDF page and a credit and link to the NRC publication, and the code library lets a user read any article. We have not asked NRC for terms, and written terms are needed before a public commercial launch. If terms are refused, the fallback is a link-out and user-supplied-text design (`C-market-provinces-business.md`, §3.2 and (c)).
 - **Reviewer adoption is not assured.** A staff survey of more than 150 employees in Honolulu gave "almost universally negative feedback" on an AI plan-review pilot, as reported by Stateline (`C-market-provinces-business.md`, §1.2, verified as reported).
 
 ## 10. The first 18 months, and what must be true
