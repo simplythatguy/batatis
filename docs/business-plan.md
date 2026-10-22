@@ -1,125 +1,197 @@
 # Batatis: Business Plan
 
-*Building Codes Challenge, Submission 1 (Oct 29, 2026). Sources are cited inline and were retrieved Oct 20, 2026. Estimates are labelled and show their arithmetic. Prices are hypotheses to test, not results. Features are described as built only where they exist in the current build; everything else is marked as planned or in progress.*
+*Building Codes Challenge, Submission 1 (Oct 29, 2026). Status is as of Oct 21, 2026. Every figure carries its kind. **Verified** means a primary source says it and the source is named. **Measured** means a run or a file produced it. **Estimate** means arithmetic on figures shown. **Assumption** means a number we chose, with its basis. Prices are hypotheses, and no buyer has seen one. Figures that no other research file holds are recorded in [`docs/research/2026-10-21-source-checks.md`](./research/2026-10-21-source-checks.md) ("source checks"). What is built is defined in the Implementation Plan, §3.*
 
 ## 1. The company in one paragraph
-Batatis helps builders, manufacturers and their consultants prepare a **complete, code-referenced alternative-solution (variance) application** on the Safety Codes Council's *Variance Form for Proposed Alternative Solution*, Part 1, Sections A–D ([SCC form, Oct 6, 2026 version](https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf)). Today the engine fills the SCC form; in the app (PR #16, in review), Check completeness opens a review and the official PDF stays locked until there are 0 blocking gaps; then Download application PDF gives the Council's October 2026 variance form, filled in by the engine, unsigned, officer Part 2 blank, with a notice that it is not a finding that the design complies; the review also offers Download draft PDF and Download text record. It is designed to also give Safety Codes Officers (SCOs) an **alternative-solution completeness review** for any incoming package, plus a package for the Council's mandatory registration portal. The officer screen is in review (PR #16; the officer screen reviews the open application); the registration bundle is not built. Batatis checks completeness, never technical correctness. Where engineering judgment is needed, it says who may provide it and what evidence is expected. It doesn't produce that evidence itself.
 
-A variance request goes to a safety codes officer of the reviewing authority; Batatis fills the Council's current form (the [City of Calgary guide, approved Nov 23, 2023](https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf), points applicants to its own attached Request for Specific Variance form). Local processes and add-on requirements still vary by employer of SCOs ([challenge scope](https://edmontonunlimited.com/wp-content/uploads/2026/09/Building-Codes-Challenge-with-Appendix-.pdf)).
+Batatis helps builders, manufacturers and their consultants prepare a complete, code-referenced alternative-solution application on the Safety Codes Council's *Variance Form for Proposed Alternative Solution* (Part 1, Sections A to D, [form dated Oct 6, 2026](https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf)). It also helps safety codes officers (SCOs) see what an incoming application still lacks. It checks administrative completeness and never technical correctness. When an engineer's judgment is needed, it says so, lists what the evidence must address, and stops.
+
+Live today at https://batatis-vert.vercel.app: sign-up for applicants and officers, a one-question-at-a-time flow for Sections A to D, Section C looked up from the code's tables, the Council's October 2026 form as a draft or official PDF, submission to Calgary or Edmonton, and an officer queue with claim, accept-as-complete and return-with-message. The intake reader, code identification over all 2,080 Division B articles, jurisdiction packs and the officer package review are merged as backends, and their screens are in progress. Coded rules for the most-varied articles, the accuracy report page, a second province and any portal integration are roadmap.
+
+Two terms are kept apart throughout. A *variance* is the officer's legal authorization under the Safety Codes Act, s.38. An *alternative solution* is the applicant's technical evidence, under NBC(AE) Division C, 2.3.1, that the design performs at least as well as the acceptable solution. An accepted variance needs both (Implementation Plan, §2.1). Batatis helps with both halves and decides neither.
+
+Intake still differs by authority. Calgary asks for its own Request for Specific Variance form in addition to the Council's form, and Edmonton uses the Council's form (`engine/data/jurisdictions/packs/`).
 
 ## 2. Why us
-**Our approach.** We built Batatis source-first: every value traces to the form, the code database or the applicant's own documents. That habit of reading the regulator's own data is where the points below came from.
 
-- **Approach: every claim is source-traced.** Code citations must quote the code text word for word or they are dropped (identify step, command line on dev). Section C attributions are database lookups, not model output. Section D professional evidence is never invented. The product never states that a design is safe or compliant. These are the build's non-negotiables, written into the repository.
-- **We caught the form change.** The SCC replaced its variance form on **Oct 6, 2026** (5 pages, 87 fields; the engine-filled PDF is the 5-page Oct 6, 2026 form plus engine-generated attachment pages (7 in total for the simulated walkthrough case; not the brief's Appendix 1)). It differs from the Appendix 1 template in the challenge pack: the Section B checkbox wording, the privacy notice (now the *Protection of Privacy Act* s.13(1)(b)) and the Part 2 decision wording all changed. Batatis's export field map is fingerprinted to that exact form file (SHA-256), so a changed form is detected rather than silently filled. The Council paired the new form with mandatory portal registration from Dec 1, 2026 ([SCC IB-2026-10-01](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf)).
-- **We know where the volume is.** One Part 9 article, **9.10.15.5.(8)** (roof soffits on houses close to the property line), accounts for **1,501 of the 3,088 building-article entries** in the Council's public report *Variances Registered Q1-Q2 2026* ([SCC Variance Data Hub](https://www.safetycodes.ab.ca/data-hub/variance-data/), captured Oct 20, 2026). Calgary turned the same article into a standing variance after it reviewed and accepted 382 zero-lot-line alternative-solution requests between Jan 1 and Sep 1, 2017 ([Calgary advisory](https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/advisory-new-standing-posted-variance-procedure.pdf)).
-- **We target the officer side of alternative solutions.** None of the 10 code-AI products we reviewed (§7) advertises alternative-solution or variance review for officers.
+- **Source-first by rule.** Four rules are written into the repository (`AGENTS.md`). A code citation must quote the code word for word or it is dropped. Section C comes from the code's attribution tables, never from a model. Section D professional evidence is never written. The product never says a design complies or is safe.
+- **We caught the form change.** The Council replaced its variance form on Oct 6, 2026 and paired it with mandatory portal registration from Dec 1, 2026 ([IB-2026-10-01](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf)). The export is pinned to the form's SHA-256, so a changed form is detected instead of silently filled. The challenge brief's Appendix 1 differs from the new form in six places (Implementation Plan, §4.3).
+- **We know where the volume is.** The Council's Data Hub report for Q1 and Q2 2026 counts 3,088 building-article entries. One Part 9 article, 9.10.15.5.(8), has 1,501 of them (49%). The three most-varied articles, 9.10.15.5.(8), 9.10.11.2. and 9.10.13.13., have 2,118 (69%, our arithmetic on the report's figures). Calgary reviewed and accepted 382 zero-lot-line alternative-solution requests between Jan 1 and Sep 1, 2017, and then created standing posted variances. Coded rules for these articles are roadmap.
+- **We target the officer side.** No product in the competitor survey (`docs/research/2026-10-20-vision/C-market-provinces-business.md`, §1.2) prepares or reviews alternative-solution applications. That is an absence found by web search on Oct 20, 2026, not proof.
 
 ## 3. The problem, in sourced numbers
-- **Building variances registered in Alberta** ([SCC Annual Report 2023, p.32](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/Annual%20Report%202023.pdf)):
 
-  | 2019 | 2020 | 2021 | 2022 | 2023 |
-  |---|---|---|---|---|
-  | 1,553 | 637 | 1,698 | 1,713 | 837* |
+**Building variances registered in Alberta** ([Council Annual Report 2023](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/Annual%20Report%202023.pdf), printed page 32; source checks §1). Verified.
 
-  \*The 2023 count is as of the end of March 2024, and the Council notes that "some 2023 variances have not yet been captured", so it is likely an under-count. In 2019 and 2021–2022 the count ran at about 1,550–1,710 a year. The Council also notes that jurisdiction-wide variances may reduce the number issued. No count has been published for 2024 or 2025 ([AR 2024](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/SCC%202024%20Annual%20Report.pdf), [AR 2025](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/Annual%20Report%202025%20Final.pdf)).
-- **Where:** the City of Edmonton accounted for **67% of all variances in the province in 2023 (all disciplines, 909 total)**, Calgary for 9%, and other jurisdictions for 25% (AR 2023, p.32; shares as published, rounded). The report doesn't break the shares out for the building discipline alone.
-- **What gets varied** ([SCC Variance Data Hub](https://www.safetycodes.ab.ca/data-hub/variance-data/), report *Variances Registered Q1-Q2 2026*, captured Oct 20, 2026). The page says the data is updated quarterly and is informational, not legally binding. Each entry is one varied article, not one application, and we don't annualize a half-year.
-  - **Varied articles by discipline:** Building 3,088; Plumbing 22; Electrical 3; Pressure Equipment 3; Fire 1; Gas 1. Together that is 3,118 (our sum of the report's bars; the report shows no total).
-  - **Top 5 building articles:** 9.10.15.5.(8) 1,501; 9.10.11.2. 366; 9.10.13.13. 251; 9.10.14.2. 218; 9.10.14.5. 167. All five are in Section 9.10 (fire protection) of Part 9.
-  - The public report counts varied articles, not applications, and does not show variance type; how many entries are repeats of jurisdiction-wide variances is not published.
+| 2019 | 2020 | 2021 | 2022 | 2023 |
+|---:|---:|---:|---:|---:|
+| 1,553 | 637 | 1,698 | 1,713 | 837 |
 
-  The Data Hub covers Q1–Q2 2026 and counts articles; the annual report's 837 covers 2023 and counts variances. Different periods and bases, so we don't compare them.
-- **New mandatory work from Dec 1, 2026.** SCOs must register every variance in the Orders and Variances Portal, individually and per location, *including those relying on jurisdictional alternative solutions*, with the supporting documentation they used. Only SCOs can register, and accredited organizations and SCOs are jointly responsible ([IB-2026-10-01](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf)). Division C §2.3.1 documentation of alternative solutions is mandatory, with a copy of each variance to the Council within 10 days ([SCC IB-2025-11-18](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf)).
-- **No system-wide quality measure exists yet.** The Council says alternative solutions and supplementary materials "are not currently being collected or retained" and are not in the data ([Data Hub](https://www.safetycodes.ab.ca/data-hub/variance-data/)); from Dec 1, 2026, IB-2026-10-01 requires supporting documentation at registration.
-- **Time:** there is **no published service standard for variance review** from the SCC, Edmonton or Calgary. Variances are decided inside permit review. The nearest proxies are permit averages:
-  - Edmonton commercial, mixed-use, industrial and multi-unit building permits: **60-day average against a 120-day target**, Q3 2026 ([Edmonton Q3 2026 report](https://www.edmonton.ca/sites/default/files/public-files/documents/q3-2026-upe-ds-quarterly-report.pdf)).
-  - Calgary commercial new buildings and additions: **52–62 days**, Apr–Jun 2026; commercial improvements: 21–31 days ([Calgary](https://www.calgary.ca/development/safety-approval-timelines.html)).
+The 2023 count was taken at the end of March 2024, and the Council says "some 2023 variances have not yet been captured", so it is probably low. The Council also notes that a single jurisdiction-wide variance can replace many. The 2023 report gives 909 variances across all disciplines, and the City of Edmonton accounted for 67% of them, the City of Calgary 9% and other jurisdictions 25% (shares as published, rounded). The report does not split those shares by discipline.
+
+**What gets varied** (Council Data Hub, report *Variances Registered Q1-Q2 2026*, read Oct 20, 2026; `C-market-provinces-business.md`, §2.0). Verified. The Data Hub counts varied articles, not applications.
+
+| Discipline | Article entries, Q1 to Q2 2026 |
+|---|---:|
+| Building | 3,088 |
+| Plumbing | 22 |
+| Electrical | 3 |
+| Pressure equipment | 3 |
+| Fire | 1 |
+| Gas | 1 |
+
+The five most-varied building articles are 9.10.15.5.(8) with 1,501, 9.10.11.2. with 366, 9.10.13.13. with 251, 9.10.14.2. with 218 and 9.10.14.5. with 167. All five sit in Section 9.10 (fire protection) of Part 9. The research doubles the half-year to about 6,200 entries a year, and that assumes the half-year is typical (estimate).
+
+**Nobody measures quality.** The Council says it is not collecting or retaining supporting materials or alternative solutions, so no public figure shows how often applications are returned. The Council's 2025 annual report records 9 notices of appeal and none on a variance refusal. We read that as a sign that the friction sits upstream, in the back-and-forth with the officer, but it is an inference (`C-market-provinces-business.md`, §2.0).
+
+**Scale of the system.** 433 accredited organizations (299 municipalities, 93 corporations, 40 agencies and 1 regional services commission), 2,317 certified SCOs in all disciplines, and for the building discipline 520 certifications and 438 designations of powers (Council Annual Report 2025, p.7 and p.10; `C-market-provinces-business.md`, §2.0). Verified.
+
+**Time and cost of delay.**
+- The organizers describe the cost of rework and delay as "a few hundred dollars to tens of thousands of dollars", and call the evidence anecdotal (Challenge Scope, p.2). It is a framing, not a survey.
+- A practitioner guide on alternative solutions advises allowing "one to two months" for correspondence and "two to four months to receive comments" (CWC and WoodWorks BC *Alternative Solutions Guide*, pp.4 to 6; `C-market-provinces-business.md`, §2.4). It is guidance, not a measurement.
+- **Estimate.** A month of carrying cost on one house waiting for a variance decision is about C$2,333, if C$400,000 of land and construction financing is outstanding at 7% (C$400,000 x 0.07 / 12). Both inputs are our assumptions. A two-month back-and-forth is then about C$4,700.
+- No service standard for variance review has been published by the Council, Edmonton or Calgary (`C-market-provinces-business.md`, §2.4).
+
+**New mandatory work from Dec 1, 2026** ([IB-2026-10-01](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf), [IB-2025-11-18](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf)). Verified. SCOs must register every variance individually, for a specific location, in the Orders and Variances Portal, with the documentation they used. Only SCOs can register, and accredited organizations and SCOs are jointly responsible for complete and accurate registrations. Alternative solutions are documented under Division C, 2.3.1, and a copy of each variance goes to the Council within 10 days of issuance.
 
 ## 4. Buyers, ranked
-| Rank | Buyer | Why this rank (public data) | Who bears the cost today |
+
+| Rank | Buyer | Why this rank | Who bears the cost today |
 |---|---|---|---|
-| **1** | **Production homebuilders in the Edmonton region** (permit and code-compliance leads) | **The applicant writes the alternative solution.** Division C §2.3.1 documentation is now mandatory (IB-2025-11-18), and the person proposing the solution supplies it. The most-varied building articles are Part 9 house provisions (Data Hub), and Edmonton is about 67% of all 2023 variances (AR 2023). The challenge names production homebuilders first ([scope](https://edmontonunlimited.com/wp-content/uploads/2026/09/Building-Codes-Challenge-with-Appendix-.pdf)), and two of the challenge's sponsors, BILD Alberta and Jayman Homes, represent them ([onboarding guide](https://edmontonunlimited.com/wp-content/uploads/2026/09/Built-World-Challenge-Onboarding-Guide.docx.pdf)) | **The builder:** staff or consultant time, plus holding cost while an application goes back and forth. Neither Edmonton nor Calgary charges a building-code variance fee (§5) |
-| 2 | **Authorities that employ SCOs**, starting with the City of Edmonton | **The new registration work falls on them.** From Dec 1, only SCOs can register, every variance is registered individually per location (including repeated jurisdictional ones), and the authority is jointly responsible for complete, accurate registrations (IB-2026-10-01). Building-relevant accredited bodies: 299 municipalities and 40 agencies (counts cover all disciplines; [AR 2025](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/Annual%20Report%202025%20Final.pdf)) | **The authority:** officer review and registration time, with no building-code variance fee to recover it in Edmonton or Calgary |
-| 3 | **Manufacturers, and the designers and code consultants who specify their products** | Calgary routes innovative products through CCMC or recognized evaluators, and otherwise through a project-specific alternative solution in a permit application ([Calgary B23-014, Sep 17, 2026](https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-014-new-products-materials-and-systems-in-building-construction.pdf)). A variance "is not intended for product or equipment approval" (Calgary guide, 2023), so Batatis serves the *assembly or design* application that uses a product | **The manufacturer or design team:** CCMC fees, consultant time |
+| 1 | **Production homebuilders, and the consultants who prepare their files**, starting in the Edmonton and Calgary regions | The applicant writes the alternative solution and its Division C documentation, now mandatory. The most-varied building articles are Part 9 house provisions. Edmonton had 67% of 2023 variances in all disciplines. The Challenge Scope lists production homebuilders first among its target customers | The builder, in staff or consultant time and carrying cost. Calgary and Edmonton charge no variance fee (`C-market-provinces-business.md`, §2.4). The Council's schedule for areas served by the Alberta Safety Codes Authority lists a discretionary charge of C$125 per hour for an alternative solution or variance (source checks §1) |
+| 2 | **Authorities that employ SCOs**, starting with Edmonton and Calgary | From Dec 1 the registration work falls on them: individual registration per location, supporting documentation included, joint responsibility. 433 accredited organizations exist | The authority, in officer and registration time, with no variance fee to recover it |
+| 3 | **Manufacturers, and the designers who specify their products** | A product can reach acceptance through an evaluation report from the Canadian Construction Materials Centre (CCMC) or another recognized body (Division A, 1.2.2.1.(2)), and a project-specific alternative solution covers the project that uses it. The research expects product-level demand to be codified away over time (finding 8 in `C-market-provinces-business.md`), so this segment is third | The manufacturer or design team |
 
-The **Safety Codes Council / Build Forward Alberta** is a statutory council (accreditation, certification, variance registration) and runs the "front door for innovation" ([SCC, Oct 7, 2026](https://www.safetycodes.ab.ca/a-step-forward-for-alternative-solutions/)). We treat it as a channel and pilot sponsor, not a buyer.
+The **Safety Codes Council and Build Forward Alberta** run the Council's "front door for innovation" and are developing an official template and guide with SSRIA (announced Oct 7, 2026, no date or price given). We treat the Council as a channel, a pilot sponsor and the main competitive risk, not as a buyer.
 
-**The tension we've named (and test in §9):** some variances are jurisdiction-wide repeats, and how many is not published (the public report does not show variance type). A repeat costs a builder little each time, so per-package pricing only works for the bespoke tail. For repeats, the value moves to the authority, which must still register each one.
+**The tension we have named.** Some variances are repeats. Calgary's standing posted variances replace one-off requests with a posted package, and the Data Hub does not show variance type. The research assumes that only 5% to 15% of entries are bespoke (assumption, `C-market-provinces-business.md`, §2.5). Per-package pricing therefore works for the bespoke tail. For repeats, the value moves to the authority, which must still register each variance. The sizing in §7 shows what each case is worth.
 
-## 5. Willingness to pay: public anchors and an untested price range
-**What exists today (sourced):**
-| Anchor | Amount | Source |
+## 5. Willingness to pay
+
+### 5.1 What exists today
+
+| Anchor | Amount | Kind and source |
 |---|---|---|
-| SCC/ASCA fee for an alternative solution or variance (unaccredited areas) | **C$125/hour** | [SCC fee schedule](https://ebs.safetycodes.ab.ca/documents/webdocs/sr/council%20fee%20schedule%20asca%20v2.pdf) |
-| Calgary / Edmonton building-code variance fee | **None.** Calgary bills "Additional Plans Review" at C$119/h for non-residential permits; it isn't confirmed to apply to variances. Edmonton's "Variance Request Fee" is a **zoning / development-permit** fee, not a building-code fee | [Calgary 2026](https://www.calgary.ca/content/dam/www/pda/pd/documents/fees/building-and-trade-permit-fee-schedule.pdf), [Edmonton 2026](https://www.edmonton.ca/sites/default/files/public-files/2026-planning-and-development-fee-schedules-consolidated.pdf) |
-| Appeal of a refusal | C$500 | [Calgary guide 2023](https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf) |
-| Engineering time (proxy; no Alberta rate guide is published since CEA paused publishing its guide) | **C$160–375/hour** (Saskatchewan 2026 recommended minimums) | [ACEC-SK](https://www.acec-sk.ca/wp-content/uploads/2025/12/2026_Schedule_of_Fees_Summary.pdf); [CEA notice](https://cea.ca/advocacy-publications/rate-guide.html) |
-| CCMC product evaluation | At least C$14,000 at application for highly innovative products (C$4,000 plus C$10k–250k+ guide development), then C$5,000 + C$2,500 per plant for qualification, plus third-party testing and C$5,000 + C$1,850 per plant per year. CCMC estimates 6–12 months with an existing technical guide and 8–18 months where a new guide is needed (CCMC services only; complex products 18+ months). Fee structure effective Sept 1, 2026. A CCMC assessment "is not a mandatory requirement"; the authority having jurisdiction decides | [CCMC PAS-001](https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=PAS-001&type=policy) |
-| Ontario municipal alternative-solution fees (several cities) | Ottawa Tier I C$1,080 plus third-party evaluation costs, Tier II C$430; Kingston C$318.25/h, C$2,000 minimum | [Ottawa](https://documents.ottawa.ca/sites/default/files/bldg_fee_schedule_en_0.pdf), [Kingston](https://www.cityofkingston.ca/media/kwmpr0xh/building-permit-fee-summary-january-1-2026.pdf) |
-| Code-AI seats | UpCodes US$39–59/user/month (annual); CodeComply.Ai US$3,000/seat/year (≈US$250/month); Lawtonica C$30/month (Canadian-dollar anchor) | [UpCodes](https://cms-v2.up.codes/pricing), [Refresh Miami](https://refreshmiami.com/news/with-2m-in-tow-ai-startup-codecomply-ai-aims-to-accelerate-construction-approvals-and-reshape-compliance-checks/), [Lawtonica](https://lawtonica.ca/pricing) |
-| Per-check AI plan review | InspectMind: US$1 per drawing page with a US$50 minimum tier, plus US$0.25 per drawing page per added code | [InspectMind](https://www.inspectmind.ai/pricing) |
-| AI review for cities | CivCheck: "free to our City Partners, forever", with a small applicant prescreening fee. But Denver approved up to US$4.6M over 5 years with CivCheck's operator | [civcheck.com](https://civcheck.com/), [Colorado Politics](https://www.coloradopolitics.com/2026/03/09/denver-approves-4-6m-ai-powered-permit-review-contract/) |
+| Council fee for an alternative solution or variance in areas served by the Alberta Safety Codes Authority | C$125 per hour, a "discretionary charge by issuing Agency" (schedule effective Jan 1, 2022) | Verified, source checks §1 |
+| Calgary, Edmonton | No variance fee. Appeal of a refusal costs C$500 | Verified, `C-market-provinces-business.md`, §2.4 |
+| Ontario municipal alternative-solution fees, 2026 | Toronto C$2,368.32. Ottawa Tier I C$1,080 plus third-party evaluation costs, Tier II C$430. Kingston C$318.25 per hour, minimum C$2,000 | Verified, §2.4 and §5.1 |
+| Consultant fees to prepare an alternative solution in Alberta | Not published | Verified negative. We assume C$3,000 to C$15,000 per bespoke package of consultant, designer and internal time (assumption, §2.5) |
+| AI code-check seats | UpCodes US$39 to US$68 per user per month. CodeComply.Ai US$3,000 per seat per year | Verified as reported, §1.2 and §5.1 |
+| AI plan review sold to authorities | Denver: up to US$4.6M over five years for about 12,000 applications a year, about US$77 per application per year | Verified as reported, with our ratio (estimate), §1.4 |
+| Free pre-check for applicants | Markham and Burlington give applicants an AI pre-check at no charge. The municipality or vendor pays | Verified, §1.3. It limits what a pure applicant-side pre-check can charge in Ontario |
+| Cost of delay | About C$2,333 per month of carrying cost on one house | Estimate, §3 above |
 
-**Price range to test (hypotheses, untested; no buyer has seen a price):**
-- **Applicant, per bespoke package: C$125–750.** *Arithmetic:* the low end is 1 hour at the SCC's own C$125/h alternative-solution rate. The high end is 2 hours at the top of the C$160–375/h engineering proxy (2 × C$375). The test is whether a builder pays roughly the price of one to two hours of the authority's own fee or an engineer's time to arrive complete. The low end is the authority's fee, not a measured applicant cost.
-- **Applicant, seat plan for repeat filers: US$39–250 per user per month.** Bounded by UpCodes Essentials (US$39) at the low end and CodeComply.Ai (US$3,000/yr ÷ 12 = US$250) at the high end. Lawtonica's C$30/month shows a cheaper Canadian code-search tier exists.
-- **Authority licence: no price stated.** Authority willingness to pay is untested. The program's Venture Pilots stream may fund a pilot of roughly $10k–50k to the team (a quote from the program lead to media, not an official figure, and not an authority budget; [Taproot, Sep 22, 2026](https://edmonton.taproot.news/briefs/2026/09/22/pilot-builds-on-foundation-with-new-challenge-ahead-of-startup-week)). For context, both Edmonton and Calgary apply the New West Partnership Trade Agreement's C$75,000 goods-and-services threshold ([Edmonton](https://www.edmonton.ca/sites/default/files/public-files/Procurement%20Standard.pdf), [Calgary](https://www.calgary.ca/buy-sell/supply-to-city/procurement-policy.html)).
+### 5.2 Price hypotheses to test (assumptions, untested)
 
-**Facing the "free to cities" norm head-on.** The market norm for municipal AI pre-check is free to the city, with the applicant paying (CivCheck), so our primary model is the same: **the applicant pays, and officers use Batatis free**. Denver shows cities will also pay for review tools at scale, so an authority licence (for example, for the registration package across repeat variances) is a second line, not the base case. Clariti is already inside Calgary with a zoning and document-completeness pilot ([Clariti case study](https://www.claritisoftware.com/resources/case-studies/how-calgary-is-using-ai-to-bring-consistency-to-one-of-canadas-most-complex-zoning-frameworks)), so we position Batatis as the alternative-solution layer an authority adds, not as a replacement for its permit pre-check.
+| Who | Hypothesis | Basis |
+|---|---|---|
+| Applicant, per completed package | C$150 to C$750 | Low end: the research's per-package assumption (`C-market-provinces-business.md`, §5.4, model 2). High end: about one third of one month's estimated carrying cost for a house (C$2,333). The Council's own rate is C$125 per hour, so the low end is about one hour of that time |
+| Applicant, seat for repeat filers | About C$2,400 per user per year | The research's assumption, set between UpCodes Professional (US$59 per month, US$708 per year) and CodeComply.Ai (US$3,000 per seat per year) |
+| Authority | No price. Pilots sized under C$75,000 | Calgary requires open competitive procurement at C$75,000 or more for goods and services (Calgary procurement policy; `C-market-provinces-business.md`, §5.2). The program guide names a possible paid pilot through Venture Pilots but gives no amount |
+
+**Who pays.** The applicant pays, and the officer's tier is free in Alberta. Calgary and Edmonton charge no variance fee, so they have no fee income that a tool could be paid from. The market evidence points the same way: where authorities buy AI review, the buyer is a city with a budget line (Denver), and Canadian pre-checks are free to the applicant (Markham, Burlington). An authority licence is a second line and not the base case.
+
+**Arithmetic on what per-package fees can support in Alberta alone (estimate).** With 310 to 930 bespoke packages a year (5% to 15% of about 6,200 entries) and a price of C$150 to C$750, the ceiling is C$46,500 to C$697,500 a year if every bespoke package paid. That is a small business. Seat and authority revenue, and other provinces, are what make this a company (§7).
 
 ## 6. Cost per application
-> **Measured cost and latency for code identification (keyed OpenAI run on Oct 20, 2026, 20 dev cases; all figures are means of 3 repeats on pinned 2025-04-14 models; identification step only (excludes the completeness judge and Section D), recorded in draft [PR #12](https://github.com/simplythatguy/batatis/pull/12)):** the shipped default (`gpt-4.1-mini-2025-04-14` rerank plus `gpt-4.1-2025-04-14` verifier, pinned dated snapshots) costs **US$0.019382 = C$0.027 per case** (at 1.4097 US$→C$, Bank of Canada, Oct 19, 2026), with latency of **4.5 s median and 9.1 s at the 95th percentile**. Code identification (draft PR #12, not on dev): top-1 0.758 and recall@5 0.758 (MRR 0.761) on the 11 model-checked dev cases that have a gold article (mean of 3 repeats, in-sample, not human-verified; the 4 ask cases are scored separately, top-1 0.25 at most; 5 cases have no gold); the BM25 baseline gets top-1 0.455, and a 700-character verifier variant reaches recall@5 0.818; it asks the applicant on 42% of cases. That model cost is about **0.02% of the C$125 floor price**. The keyless BM25 fallback costs C$0 in model fees. The shippable completeness check (draft PR #11, variant B: rules and heuristics) makes no model calls and scores 0.996 on 37 planted (synthetic) cases (first repeat, model-checked, not human-verified); the LLM variant C invents values and does not ship. This figure covers identification only.
 
-**[planned: backend/spend-cap PR, not yet on dev]** The live demo site will use OpenAI under a hard total spend cap of US$20 (`BATATIS_TOTAL_BUDGET_USD`), tracked in the site's database and counting every model call. When the cap is reached, or spend can't be checked, the site refuses model calls and shows offline results with a notice; identification falls back to keyword search labelled "keyword search, no AI". Identification alone measured C$0.027 per case ([draft PR #12]); full per-application cost is measured by the keyed benchmark.
+The model cost of one application is small and measured. The prices come from `engine/llm_gate.py`, and the usage comes from the benchmark ledger in draft PR #58 (unmerged, branch tip 6a42795). The method and the script are in source checks §5. Prices are US$ per million tokens at list. Canadian dollars use the Bank of Canada rate of 1.4057 CAD per USD on Oct 21, 2026 (verified).
 
-**How a run is built.** In the demo build (draft [PR #12](https://github.com/simplythatguy/batatis/pull/12), not yet merged), code identification runs BM25 keyword search first (no model cost), then an OpenAI rerank and an OpenAI verifier that picks the governing articles with word-for-word quotes. Jev screening (from TypeSafe) and an Anthropic verifier remain optional, switchable paths that the demo build doesn't use. The provider switch is in draft [PR #12](https://github.com/simplythatguy/batatis/pull/12) on `backend/identify-api`. Section C attribution and the completeness rules are database lookups and rules, with no model cost, unless the LLM completeness judge (draft PR #11, variant C) ships, in which case its calls are included below.
+| Step | Model | Measured use per call | Cost (US$) | Kind |
+|---|---|---|---:|---|
+| Relevance screen of all 2,080 Division B articles | A third-party relevance model. 20 requests | About 375,000 tokens in and 37,000 out. 291 draws | 0.0173 | Measured |
+| Re-rank of the top 60 | The same model. One request | About 12,000 in and 1,100 out. 284 calls | 0.00056 | Measured |
+| Verifier reads the full text of the top 15 and quotes it | A third-party language model | About 4,500 in and 1,100 out. 636 calls | 0.0010 at list price. 0.0017 at the gate's higher reserve price | Measured |
+| **One identification run** | | | **0.019 to 0.020** (C$0.027 to C$0.028) | Measured |
+| Intake model pass (optional) | A third-party language model | 19 live calls cost about US$0.012 in total (PR #54) | About 0.0006 | Measured |
+| Assistant answer | A third-party language model at US$0.40 in and US$1.60 out per million tokens | Output is capped at 1,200 tokens. Input is assumed at up to 10,000 tokens | At most 0.0059 | Assumption on input size |
+| Section C lookup, completeness checks, officer package review, form export | None | | 0 | By construction |
 
-**Formula** (list prices of the pinned models used; retries and failed calls are counted; reasoning tokens count as output tokens):
+**One application, with stated usage (assumptions).** A typical application has one identification run, one intake pass and five assistant answers: 0.0196 + 0.0006 + 5 x 0.0059 = US$0.05, or C$0.07. A generous one has three identification runs and ten assistant answers: 3 x 0.0196 + 0.0006 + 10 x 0.0059 = US$0.12, or C$0.17. No user has used the assistant yet, so the answer counts are illustrative. Even the generous case is about 0.1% of the low end of the price hypothesis (C$150).
 
-cost per case (US$) = Σ over model calls (uncached input tokens × input price + cached input tokens × cached-input price + output tokens × output price) ÷ 1,000,000
+**What this means.** Model cost does not decide whether Batatis is a business. Upkeep of jurisdiction packs, domain review, support, officer onboarding and Canadian-region hosting do, and none of those has been priced. Hosting today is a free-tier demo.
 
-cost per case (C$) = cost per case (US$) × 1.4097 (Bank of Canada daily average exchange rate, USD/CAD, Oct 19, 2026; [Bank of Canada Valet API, series FXUSDCAD](https://www.bankofcanada.ca/valet/observations/FXUSDCAD/json?start_date=2026-10-19&end_date=2026-10-19), retrieved Oct 20, 2026)
+**Spend controls (built).** Each model call reserves its worst-case cost first and settles with the reported tokens afterward. A daily cap (default US$5) is kept in a shared database ledger. Per-IP limits apply, and the product falls back to a labelled keyword search when the gate is shut (`docs/deploy.md`, `engine/llm_gate.py`). The cost may change when the benchmark fixes the final pipeline, which is why this section reports ranges from the ledger and not a promise.
 
-- **Demo build:** BM25 first stage (no model cost), then an OpenAI rerank and an OpenAI verifier. Pinned in draft PR #12 (`config.py`): `gpt-4.1-mini-2025-04-14` (rerank) and `gpt-4.1-2025-04-14` (verifier); the keyed run reported the same ids. Jev and Anthropic calls are added only if those paths are turned on.
-- **Keyless fallback** (BM25 plus rules plus deterministic Section C): model cost is zero. The only cost is hosting, at lower identification quality.
+## 7. How big, and how it grows
 
-## 7. Competitive landscape
-| Product | What it does | Price (public) | Alternative-solution / variance prep or review? |
+All figures here are estimates from `C-market-provinces-business.md` (§2.5, §5.4 and §8 of `docs/research/2026-10-20-vision/README.md`). The assumptions are in those files and summarized in the table.
+
+| Pool | Size | Main assumptions |
+|---|---|---|
+| Alberta bespoke-preparation work | C$0.9M to C$14M a year before capture. C$0.3M to C$7M at a 30% to 50% capture | About 6,200 entries a year. 5% to 15% bespoke. C$3,000 to C$15,000 of time per package |
+| Alberta templated paperwork | C$0.19M to C$1.4M a year of labour | 5,000 to 5,900 entries, 0.5 to 2 hours each, C$75 to C$120 an hour |
+| Canadian authority-side pre-check | US$23M to US$50M a year if every application were covered. US$7M to US$15M at 30% | 300,000 to 650,000 applications a year at Denver's US$77 per application |
+| Canadian seats | About C$42M a year | 25% of 25,700 inspectors at C$3,000, plus 10% of 330,639 engineers at C$700 |
+
+The honest reading is the research's: **the Alberta wedge alone is a single-digit-million-dollar business.** A very large outcome would need other provinces, then all permits, then other countries. The research's own arithmetic says US$100M of annual revenue takes about 875 authorities, or about 12,000 Canadian seats plus international revenue, over 8 to 10 years on a top-decile growth curve. We treat that as an outer bound, not a plan.
+
+**How it grows, in stages.**
+
+| Stage | Product | Who pays | Proof point |
 |---|---|---|---|
-| **CodesWise** (Canada) | Cited AI search of NBC(AE) 2023, NFC(AE) and national codes; reranker; Canadian hosting | Not read | Not mentioned; says it is "a reference tool" that doesn't replace a code consultant ([codeswise.com](https://www.codeswise.com/), [Alberta page](https://www.codeswise.com/codes/alberta)) |
-| **Lawtonica** (Canada) | Code library, AI Q&A, compliance checks; Ontario and Alberta codes | C$30/month | Not mentioned ([features](https://lawtonica.ca/features), [pricing](https://lawtonica.ca/pricing)) |
-| **CodeReady** (Toronto) | Drawing/spec compliance pre-check for municipalities and designers | Not published | Not mentioned ([codeready.ai](https://www.codeready.ai/)) |
-| **UptoCode** | Drawing/BIM checks against uploaded NBC/provincial codes, cited | Not read | Not mentioned ([Canada page](https://uptocode.ai/plan-review-canada)) |
-| **InspectMind** (YC W24) | AI plan check of drawings and specs; lists NBC, Ontario, BC, Alberta | US$1 per drawing page, US$50 minimum tier | Not mentioned ([Canada page](https://www.inspectmind.ai/locations/canada-plan-check), [pricing](https://www.inspectmind.ai/pricing)) |
-| **Clariti CivCheck** | Guided completeness and code checks for permits; **Calgary pilot** (residential zoning and document completeness) | Tiered for cities, or free to cities with an applicant fee | Not mentioned ([product](https://www.claritisoftware.com/products/civcheck-ai-plan-review-software), [Calgary case study](https://www.claritisoftware.com/resources/case-studies/how-calgary-is-using-ai-to-bring-consistency-to-one-of-canadas-most-complex-zoning-frameworks)) |
-| **Archistar AI PreCheck** | AI plan review for 30-plus cities | By demo | Not mentioned ([archistar.ai](https://www.archistar.ai/aiprecheck/)) |
-| **UpCodes** | US code research and Copilot | US$39–59/user/month (annual) | Not mentioned ([pricing](https://cms-v2.up.codes/pricing)) |
-| **CodeComply.Ai** | Design, precheck and plan review against ICC/NFPA/ADA/FHA | US$3,000/seat/year (2025) | Not mentioned ([codecomply.ai](https://codecomply.ai/)) |
-| **PermitFlow** | AI agents for US permit expediting | Not published | Not mentioned ([permitflow.com](https://www.permitflow.com/)) |
-| Code consultants (e.g. TAIREC, Calgary) | Hand-prepare alternative solutions | Not published | **Yes: the status quo** ([listing](https://linkedin.com/company/tairec-fire-consulting-ltd)) |
-| NRC CCMC | Product evaluations along the alternative-solution path | C$4,000 application + C$5,000 (+C$2,500/plant) qualification + annual fees; innovative products add technical-guide costs | Product-level ([PAS-001](https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=PAS-001&type=policy)) |
-| SSRIA + Build Forward Alberta | Official template and written guide, in development | Free resource (expected) | **Yes, as a document** ([SCC](https://www.safetycodes.ab.ca/a-step-forward-for-alternative-solutions/)) |
+| 1. Alberta wedge | Variance preparation for the most-varied articles, a bespoke-case workspace, a free officer view | Production builders and consultants. 3 to 5 authority pilots under C$75,000 | Cycle time and first-pass acceptance on real files |
+| 2. Canada | Completeness pre-flight for more permit types. Packs for Saskatchewan, Manitoba, British Columbia and Ontario | Applicant subscriptions and authority licences | Review minutes saved on real files. Licensed code text |
+| 3. Other countries | Performance-based markets such as England, Australia and New Zealand | The same two sides | A second-country pack shipped |
 
-**Our claim:** we found no software product that prepares or reviews alternative-solution applications. Every tool above searches codes or checks ordinary permit drawings against prescriptive rules. This is based on public product pages as of Oct 20, 2026, so it is absence of evidence, not proof. **We don't claim** to be the only completeness checker (CivCheck checks completeness for ordinary permits) or the only cited NBC(AE) search (CodesWise does that).
+A reviewed province pack takes roughly 3 to 6 months with one jurisdiction expert, if code-text licences allow (estimate, `docs/research/2026-10-20-vision/README.md`, §7). The Alberta packs are data (`docs/api/jurisdictions.md`), and every other province is a labelled "preview" and nothing more.
 
-## 8. Defensibility as models improve
-A better model makes anyone's code search and drafting better, including ours. It doesn't give a competitor these things:
-1. **Officer-side alternative-solution review as a workflow** (in development). It is designed to let an SCO run Batatis on *any* incoming package, including ones not made with Batatis. The officer would get every gap tied to a form section and to Division C §2.3.1, a drafted information request they edit and send themselves, and a registration package for the mandatory portal. Being in the SCO's workflow and earning their trust is earned per authority. It isn't a model capability.
-2. **Form-version tracking per jurisdiction** (built for the Oct 6, 2026 form). Forms and registration rules change, and they differ by employer of SCOs. A fingerprinted field map per version catches each change, and each new jurisdiction pack adds to the library.
-3. **The Section C attribution layer,** which supports both of the above. Each article maps to its objectives, functional statements and intent statements (where the attribution table has a row; otherwise the screen shows that the lookup is not available), and the identify step's validator (command line on dev; draft PR #12) drops any citation that doesn't match the code text. This is specific to alternative solutions. Cited code search alone (CodesWise, Lawtonica) doesn't produce it.
-4. **Corrections from pilots** (planned). Officer corrections to alternative-solution reviews would be collected under a data-sharing agreement with each authority, which owns its records.
+## 8. Competitive landscape
 
-**Risks:**
-- The official SSRIA/SCC template could commoditize the form, so we fill it rather than compete with it.
-- An incumbent already in Alberta (Clariti in Calgary) could add an alternative-solution module.
-- Code-text use for commercial purposes needs written terms from NRC.
+From `C-market-provinces-business.md`, §1 (read Oct 20, 2026). Prices are as reported there.
 
-## 9. What we haven't validated yet
-- **No buyer has seen a price.** Every price in §5 is a hypothesis built from public anchors, and the authority's willingness to pay has no figure at all.
-- **Whether builders pay per package** when some variances are jurisdiction-wide repeats (§4 tension).
-- **Cost and latency are measured for code identification only** (§6), on pinned models and dev cases, not real applications; the shippable completeness check (draft PR #11, variant B) makes no model calls.
-- **The officer screen is in review (PR #16; the officer screen reviews the open application); the registration bundle is not built,** and no officer has used Batatis. Time saved for an SCO is a target, not a result (see the Implementation Plan's testing protocol).
-- **No pilot partner has agreed.** We have not contacted anyone; this is a hackathon prototype.
-- **The Data Hub's bases:** the report covers Q1–Q2 2026, counts varied articles, not applications, and does not show variance type (§3).
-- **Consultant preparation fees in Alberta** are not public; we use proxies.
+| Company | What it does | Public price | Prepares or reviews alternative-solution applications? |
+|---|---|---|---|
+| UpCodes | Code search and an assistant, US codes | US$39 per user per month (annual) to US$59 | Not addressed |
+| CodeComply.Ai | AI plan review for building departments and architects, US codes | US$3,000 per seat per year | Not mentioned on its site |
+| Archistar | AI pre-check for cities. Customers include Surrey, Burlington, Ottawa, Kingston and Markham | By demo | Not stated. Checks are rule-based zoning, Part 9 and completeness |
+| Clariti, including CivCheck | Permit platform with AI plan review. Toronto pilot. Denver contract up to US$4.6M | Not published | Not stated |
+| GreenLite | Third-party plan review using AI | Not published | Not stated |
+| PermitFlow | Permit expediting software for builders | Subscription, amounts not disclosed | No |
+| Cloudpermit | Permitting platform for local governments. The seller claims about 850 municipalities | Not published | Not stated |
+| Trax Codes | AI codes platform for Canada | Not published | Not stated |
+| Code consultants | Prepare alternative solutions by hand | Not published | **Yes. This is the status quo** |
+| Council template and guide (SSRIA, Build Forward Alberta) | An official alternative-solution template and written guide in development | No date or price announced | **Yes, as a document** |
+
+**What we claim.** We found no software product that prepares or reviews alternative-solution applications. That rests on web search and vendor pages on Oct 20, 2026, so it is absence of evidence. **What we do not claim.** We are not the only completeness checker (CivCheck checks completeness for ordinary permits) and not the only code search. At least six Canadian municipalities launched AI pre-check tools between March and September 2026, and all of them cover zoning, completeness and Part 9, so well-funded vendors already hold the relationships (`C-market-provinces-business.md`, §1.1).
+
+## 9. Defensibility as models improve
+
+A better model makes anyone's code search and drafting better, including ours. It also lowers our screen cost. It does not supply the following.
+
+1. **Jurisdiction packs, kept current.** A pack holds an office's process, forms, standing packages and notices with sources, as data. The research argues that the jurisdiction pack, not the model, should be the product. A pack has to be researched from the office's own documents and kept current when the office changes its forms.
+2. **A place in the officer's workflow.** The officer queue is built, and the package review and the drafted information request are merged as a backend. Trust in the officer's workflow is earned per authority and is not a model feature.
+3. **An exact core.** The code database, the Section C tables and the validators make citations checkable. A model that writes fluent text does not make it checkable. Models sit behind pinned versions, and the benchmark harness in draft PR #58 is meant to let us swap one for another and compare them on the same cases.
+4. **Form-version tracking.** The Council changed the form on Oct 6, 2026. A pinned field map detects each change.
+5. **Corrections from pilots (roadmap).** Officer corrections to reviews could be collected under a data agreement with each authority, which owns its records.
+
+**Risks.**
+- An official template could commoditize the form. We fill the Council's form, and we would add the new template as a form version.
+- An incumbent could add an alternative-solution module. Archistar and Clariti already hold Canadian municipal relationships.
+- **Code-text licensing.** NBC(AE) 2023 says commercial reproduction of National Research Council (NRC) material needs written consent. The research ranks this the highest-priority risk. We quote code text for citations and link to the NRC publication. We have not asked NRC for terms, and written terms are needed before a public commercial launch. If terms are refused, the fallback is a link-out and user-supplied-text design (`C-market-provinces-business.md`, §3.2 and (c)).
+- **Reviewer adoption is not assured.** A staff survey of more than 150 employees at Honolulu gave "almost universally negative feedback" on an AI plan-review pilot, as reported by the city's press coverage (`C-market-provinces-business.md`, §1.2, verified as reported).
+
+## 10. The first 18 months, and what must be true
+
+This is a plan, not a commitment from anyone.
+
+1. Ask NRC for written terms before a public launch, and offer Build Forward Alberta an integration or pilot.
+2. Sign 3 to 5 Alberta authorities under C$75,000 a year each, and 2 to 3 production builders.
+3. Apply to Innovative Solutions Canada for non-dilutive funding. Its Challenge Stream funds Phase 1 proofs of feasibility of up to C$150,000, but the page we read lists no open housing or permitting challenge (`C-market-provinces-business.md`, §5.2).
+4. Prepare a privacy impact assessment pack and the notice that Alberta's Protection of Privacy Act expects when personal information is used in an automated system.
+
+**Kill criteria, from the research.**
+- If NRC does not grant workable terms within about six months, change to the link-out design.
+- If Council or municipal data show fewer than 300 bespoke variances a year in Alberta, pivot to standing-variance workflow and all-permit completeness.
+- If no municipality signs a paid contract above C$50,000 within 12 months, rethink the authority side.
+- If the Council's template ships first, integrate it and do not compete with it.
+
+## 11. What we have not validated
+
+- **No buyer has seen a price.** Every price in §5.2 is a hypothesis. The authority side has no price at all.
+- **Whether builders pay per package.** Some variances are repeats, and the share that is bespoke is unknown. The Council does not collect it.
+- **Cost covers model calls only.** Hosting, support, pack upkeep and Canadian-region hosting are not priced. Usage numbers for the assistant are illustrative.
+- **Code identification accuracy on the final pipeline is not measured.** The benchmark is unfinished (draft PR #58) and the commit rule is uncalibrated, so nothing is committed automatically.
+- **No pilot partner has agreed to anything,** and no officer has used Batatis. Time saved for an officer is a target, not a result.
+- **Market sizes are estimates** with the assumptions shown. They rest on a half-year of Data Hub counts and on consultant fees that nobody publishes.
+- **The competitor claim is absence of evidence.**
