@@ -93,7 +93,7 @@ function plain(status: number, raw: string, path: string): string {
   return raw || `Request failed (${status}).`;
 }
 
-async function call<T>(method: "GET" | "POST" | "DELETE", path: string, body?: unknown, signal?: AbortSignal, ms = 15000): Promise<T> {
+export async function call<T>(method: "GET" | "POST" | "PUT" | "DELETE", path: string, body?: unknown, signal?: AbortSignal, ms = 15000): Promise<T> {
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), ms);
   const onAbort = () => ctl.abort();
@@ -105,8 +105,9 @@ async function call<T>(method: "GET" | "POST" | "DELETE", path: string, body?: u
       method,
       credentials: credentialsMode(),
       signal: ctl.signal,
-      headers: body === undefined ? undefined : { "Content-Type": "application/json" },
-      body: body === undefined ? undefined : JSON.stringify(body),
+      // FormData sets its own multipart boundary; everything else is JSON.
+      headers: body === undefined || body instanceof FormData ? undefined : { "Content-Type": "application/json" },
+      body: body === undefined ? undefined : body instanceof FormData ? body : JSON.stringify(body),
     });
   } catch (e) {
     if (signal?.aborted) throw e;
