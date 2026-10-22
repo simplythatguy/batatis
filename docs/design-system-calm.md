@@ -44,6 +44,8 @@ Keyboard: `A` `B` `C` (or `1` `2` `3`) pick a choice, `↵` continues (`⌘↵` 
 
 Stage navigation (header, and the officer's review steps): icons, not words (user direction 2026-10-22). Each stage is its icon in a 34px progress ring, in order, joined by a hairline: the ring fills with progress, a done stage is green with a check badge, the current one is tinted (the accent, or the step's hue for the officer), a locked one is faded, an officer step with open items carries a count badge. The name and progress show on hover or keyboard focus and are the accessible name (`aria-current="step"` marks the current one). Shared component: `StageButton` in `web/src/calm/shell/AppHeader.tsx`.
 
+Application name (header and list): just the name, no authority beside it. Names are short subject names from the engine, never the description's first sentence; the applicant renames in place in the header (double-click, F2 or Enter; Enter or blur saves; Escape cancels; no field box) or from the list row's ⋯ → Rename. Saved through `PATCH /cases/{id}/title`; a chosen name always wins and is never shortened in storage.
+
 ## Tokens
 
 **Light mode since 2026-10-22 (user decision):** "visuals > text", light instead of black, more colour so sections are told apart. Say things with icons, colour, counts and short labels; avoid explanatory sentences.

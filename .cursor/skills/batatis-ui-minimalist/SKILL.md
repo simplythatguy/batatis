@@ -1,6 +1,6 @@
 ---
 name: batatis-ui-minimalist
-description: "Minimalist Batatis UI, the user's standing direction: icons before words, visuals over sentences, one thing at a time, short question labels with help on demand, icon-and-count metadata. Use when designing, changing or reviewing any Batatis screen, navigation, question, list row, card, banner, label or UI copy."
+description: "Minimalist Batatis UI, the user's standing direction: icons before words, visuals over sentences, one thing at a time, short question labels with help on demand, short renamable titles, icon-and-count metadata. Use when designing, changing or reviewing any Batatis screen, navigation, title, question, list row, card, banner, label or UI copy."
 ---
 
 # Batatis minimalist UI
@@ -18,7 +18,8 @@ For each word, line, icon and control ask: does the person need it **now** to ta
 5. **Compact metadata.** Icon then number (a message icon and `2`), never "2 new messages". The number always has its icon; a zero shows nothing.
 6. **Breathing room.** Generous padding (sidebar rows `14px 16px`), selection as a soft fill, no decorative lines, edge bars or borders.
 7. **Obvious questions are a label and a control.** "Request date" and a date field, then OK · Skip · Help. A subtitle that restates the field, "answer to continue" or "press Enter" lines, and a repeated "ask the assistant" invitation all go. The reason and the assistant sit behind the one Help entry on the card (the assistant exists for routine explanation); show text up front only when the control cannot carry it: the applicant's own quote, a validation error, a decision or professional boundary.
-8. **Colour with a job.** Section hue (A blue, B teal, C violet, D amber) or a status dot. Accent marks one thing; it never fills a button.
+8. **Titles are short names the person can change.** A title is a subject or purpose name of a few words ("Infill sheathing"), never the first sentence of the description and never with the city, status or code numbers attached; that context lives where it is used. Automatic names wait until there is real content to name; a name the person chose always wins and is never shortened in storage (the screen may ellipsize it). Rename in place wherever the title shows (double-click, F2 or Enter; Enter or blur saves; Escape cancels; caret at the end, no field box), and from the list row's ⋯.
+9. **Colour with a job.** Section hue (A blue, B teal, C violet, D amber) or a status dot. Accent marks one thing; it never fills a button.
 
 ## Minimal, never hidden
 
@@ -41,6 +42,13 @@ Every icon-only control or icon metadata has an accessible name and a hover labe
 - Before: `1 Describe  2 Questions  3 Review  4 Application` with thin underlines.
 - After: four icons, each in a progress ring joined by a hairline: green ring and check badge when done, tinted when current, faded when locked. "Questions, 40% done" is the accessible name and the hover/focus label. The officer's review steps use the same control with their step hue and an open-count badge.
 - Code: `StageButton` and `StageRings` in `web/src/calm/shell/AppHeader.tsx`, `StepTabs` in `web/src/calm/reviewer/PackageReview.tsx`.
+
+## Example: an application title
+
+- Before: `SYNTHETIC HTTP administrative review fixture  Edmonton` across the header.
+- After: `Infill sheathing`, renamed in place in the header or via the row's ⋯ → Rename; the authority stays in the application.
+- Code: `EditableTitle` and `RenameDialog` in `web/src/calm/shell/`, `renameCase` in `web/src/store.tsx`.
+- Reference (read only, the interaction to match, not its styling or features): Irsal's `components/studio/editable-title.tsx`, `AGENTS.md` (inline renaming rule) and `docs/STUDIO-UI.md` (automatic names), under `~/Documents/Irsal/Irsal Website/Irsal/`.
 
 ## Example: a question card
 
