@@ -32,8 +32,8 @@ const STEP_LABEL: Record<StepId, string> = {
   missing: "What’s missing",
   documents: "Documents",
   code: "Code checks",
-  file: "File items",
-  peer: "Peer review",
+  file: "What the file needs",
+  peer: "Second opinion",
 };
 
 export function stepsFor(s: ReviewSession): StepId[] {
@@ -124,7 +124,7 @@ function Summary({ s }: { s: ReviewSession }) {
         <div><b>{v.toCheck}</b><span>for you to check</span></div>
         <div><b>{v.present}</b><span>items read{v.blank ? ` · ${v.blank} blank` : ""}{v.notFound ? ` · ${v.notFound} not found` : ""}</span></div>
       </div>
-      {v.peer && <p className="pr-note"><Dot tone="warning" /> A peer-review signal is in the last step. Only you see it.</p>}
+      {v.peer && <p className="pr-note"><Dot tone="warning" /> A reason to ask for a second opinion (peer review) is in the last step. Only you see it.</p>}
     </>
   );
 }
@@ -135,7 +135,7 @@ function Missing({ s }: { s: ReviewSession }) {
     return (
       <>
         <h2 className="pr-title">Nothing missing from the form</h2>
-        <p className="pr-lede">Every form item the review reads is present.{v.elsewhere ? ` ${v.elsewhere} Division C ${v.elsewhere === 1 ? "item is" : "items are"} under File items.` : ""}</p>
+        <p className="pr-lede">Every form item the review reads is present.{v.elsewhere ? ` ${v.elsewhere} more ${v.elsewhere === 1 ? "item is" : "items are"} under What the file needs.` : ""}</p>
       </>
     );
   }
@@ -156,7 +156,7 @@ function Missing({ s }: { s: ReviewSession }) {
           <ul className="pr-list">{v.officer.map((f) => <FindingItem key={f.key} f={f} />)}</ul>
         </section>
       )}
-      {v.elsewhere > 0 && <p className="pr-fine">{v.elsewhere} Division C {v.elsewhere === 1 ? "item is" : "items are"} under File items.</p>}
+      {v.elsewhere > 0 && <p className="pr-fine">{v.elsewhere} more {v.elsewhere === 1 ? "item is" : "items are"} under What the file needs.</p>}
     </>
   );
 }
@@ -208,7 +208,7 @@ function CodeChecks({ s }: { s: ReviewSession }) {
       <p className="pr-lede">Each cited provision looked up in NBC(AE) 2023, 2nd printing, and each Section C row compared with the Division B attribution table.</p>
       {s.lookup_skipped && <p className="pr-note"><Dot tone="pending" /> The code lookup wasn’t available, so citations were not checked.</p>}
       <section className="pr-group" aria-label="Citations">
-        <h3 className="pr-group-h">Citations <span className="pr-n">{s.citations.length}</span></h3>
+        <h3 className="pr-group-h">Cited provisions <span className="pr-n">{s.citations.length}</span></h3>
         {s.citations.length ? (
           <ul className="pr-list">
             {s.citations.map((c, i) => {
@@ -229,7 +229,7 @@ function CodeChecks({ s }: { s: ReviewSession }) {
         ) : <p className="pr-faint">No provision is cited.</p>}
       </section>
       <section className="pr-group" aria-label="Section C rows">
-        <h3 className="pr-group-h">Section C rows <span className="pr-n">{s.section_c.length}</span></h3>
+        <h3 className="pr-group-h">Objectives and functions · Section C <span className="pr-n">{s.section_c.length}</span></h3>
         {s.section_c.length ? (
           <ul className="pr-list">
             {s.section_c.map((r) => {
@@ -260,15 +260,15 @@ function FileItems({ s }: { s: ReviewSession }) {
   const v = fileItemsView(s);
   return (
     <>
-      <h2 className="pr-title">File items</h2>
-      <p className="pr-lede">What Division C, 2.3.1.1 asks the file to contain. Presence only: the review looks for each item, not at whether it is enough.</p>
+      <h2 className="pr-title">What the file needs</h2>
+      <p className="pr-lede">The items the code says an alternative-solution file must contain (Division C, 2.3.1.1). The review only looks for each one; it doesn’t judge whether it is enough.</p>
       <section className="pr-group" aria-label="Division C file items">
         <h3 className="pr-group-h">In the documentation</h3>
         <ul className="pr-list">{v.items.map((r) => <Check key={r.key} r={r} />)}</ul>
       </section>
       <section className="pr-group" aria-label="Demonstrate, don't assert">
-        <h3 className="pr-group-h">Demonstrate, don’t assert</h3>
-        <p className="pr-faint pr-group-sub">Does the documentation say what it assumes when things go wrong?</p>
+        <h3 className="pr-group-h">When things go wrong · demonstrate, don’t assert</h3>
+        <p className="pr-faint pr-group-sub">Does the documentation say what it assumes when something fails?</p>
         <ul className="pr-list">{v.demonstrate.map((r) => <Check key={r.key} r={r} />)}</ul>
       </section>
     </>
@@ -282,7 +282,8 @@ function Peer({ s }: { s: ReviewSession }) {
       <p className="pr-only"><AcIcon name="hand" size={14} />For you only · the applicant never sees this</p>
       {v.signal ? (
         <>
-          <h2 className="pr-title">Peer review may be warranted</h2>
+          <h2 className="pr-title">A second opinion may be worth asking for</h2>
+          <p className="pr-lede">Peer review may be warranted, because:</p>
           <ul className="pr-list">
             {v.reasons.map((r) => (
               <li key={r} className="pr-item"><Dot tone="warning" /><div className="pr-item-body"><p className="pr-item-title">{r}</p></div></li>
@@ -291,8 +292,8 @@ function Peer({ s }: { s: ReviewSession }) {
         </>
       ) : (
         <>
-          <h2 className="pr-title">No peer-review signal</h2>
-          <p className="pr-lede">None of the signals came up: a registered professional stated as required, a Part 3 provision cited, or a product relied on with no CCMC evaluation among the documents.</p>
+          <h2 className="pr-title">No reason found to ask for a second opinion</h2>
+          <p className="pr-lede">No peer-review signal. The review looks for a registered professional stated as required, a Part 3 provision cited, or a product relied on with no CCMC evaluation among the documents. None came up.</p>
         </>
       )}
       <p className="pr-fine">It’s your call. Alberta has no set peer-review procedure, and this isn’t a finding about the design.</p>
