@@ -734,6 +734,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         setChecklist(id, result.checklist, result.case_version);
         return null;
       } catch (e) {
+        if (!live()) return null;                     // the applicant moved on: a late reply never touches the new case
         if (isCaseConflict(e)) {
           noteConflict(id);
           return CONFLICT_TEXT;
@@ -761,6 +762,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         if (gone) throw gone;                         // a deleted or expired case is marked gone, not retried
         return ok ? null : "The checklist didn’t load. Try again.";
       } catch (e) {
+        if (!isEngineGeneration(token)) return null;  // a reply for the case the applicant left
         if (isCaseGone(e)) {
           goneCase.current = id;
           markGone((e as EngineError).detail);
