@@ -183,9 +183,9 @@
   /* Narrow screens: the claim and the decision first, then the review, then the checklist and messages. */
   .ac-page .ac-rv { display: flex; flex-direction: column; }
   .ac-rv > .ac-rv-side { display: contents; }
-  .ac-rv-side > * { order: 1; margin: 0 16px 20px; }
-  .ac-rv-side > :is(.ac-done, .ac-error, .ac-claimed, .pr-decide, .pr-due-sec, [role="note"]) { order: -1; }
-  .ac-rv-side > .ac-claimed { margin-top: 18px; }
+  .ac-rv > .ac-rv-side > * { order: 1; margin: 0 16px 20px; }
+  .ac-rv > .ac-rv-side > :is(.ac-done, .ac-error, .ac-claimed, .pr-decide, .pr-due-sec, [role="note"]) { order: -1; }
+  .ac-rv > .ac-rv-side > .ac-claimed { margin-top: 18px; }
   .ac-rv-sheet.pr-main { order: 0; margin-bottom: 20px; }
 }
 

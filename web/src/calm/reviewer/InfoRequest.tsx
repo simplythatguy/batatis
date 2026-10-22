@@ -9,7 +9,7 @@ import { AccountsError, review } from "../../api/accounts";
 import { packageReview, type ReviewTarget } from "../../api/packageReview";
 import type { ReviewSession, SentInformationRequests } from "../../api/types.gen";
 import { AcIcon } from "../auth/bits";
-import { Modal } from "../ui";
+import { CIcon, Modal } from "../ui";
 import { sentLabel } from "./queue";
 import { draftFrom, includedCount, previewText, requestItems, returnAfterRequest, sameDraft, SECTION_LABEL, toEdit, type DraftItem } from "./packageView";
 import "./review.css";
@@ -264,7 +264,7 @@ export function InfoRequest({
                 <label htmlFor={`${id}-add`} className="pr-group-h">Add your own item</label>
                 <textarea id={`${id}-add`} className="ac-ta pr-ta" rows={2} maxLength={2000} placeholder="Please provide…" value={adding} onChange={(e) => setAdding(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); addItem(); } }} />
-                <button type="button" className="cf-btn is-xs" disabled={!adding.trim()} onClick={addItem}><AcIcon name="right" size={13} />Add item</button>
+                <button type="button" className="cf-btn is-xs" disabled={!adding.trim()} onClick={addItem}><CIcon name="plus" size={13} />Add item</button>
               </div>
             )}
           </>

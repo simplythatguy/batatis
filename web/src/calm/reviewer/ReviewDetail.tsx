@@ -290,6 +290,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   async function sendReturn(message: string, items: DecisionItemInput[]) {
     await review.decide(caseId, { outcome: "return", message, items });
     setReturning(false);
+    setView("review");
     patchRow(caseId, { status: "returned" });
     setNote(`Returned to ${applicant} with your message.`);
     await decided();
@@ -299,6 +300,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
     // No refuse outcome in the backend yet: recorded through the return path, labelled as such.
     await review.decide(caseId, { outcome: "return", message: refusalMessage(reasons), items: [] });
     setRefusing(false);
+    setView("review");
     patchRow(caseId, { status: "returned" });
     setNote(`Refusal sent to ${applicant} with the appeal notice. Recorded as a return.`);
     await decided();

@@ -196,7 +196,7 @@ function Documents({ s }: { s: ReviewSession }) {
           );
         })}
       </ul>
-      <p className="pr-fine">Seals are read from text only and never verified. Documents are not reviewed for adequacy.</p>
+      <p className="pr-fine">Seals are read from the text only and never verified. The review lists documents; it doesn’t judge them.</p>
     </>
   );
 }
