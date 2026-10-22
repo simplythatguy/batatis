@@ -391,6 +391,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
           session={shown}
           latest={!latest || shown.version === latest.version}
           canEdit={canRun}
+          terminalStatus={status === "accepted" || status === "refused" ? status : undefined}
           applicant={applicant === "the applicant" ? "the applicant" : applicant}
           onChange={(s) => { setShown(s); void loadIndex(true); accounts.messages(caseId).then(setMessages, () => undefined); }}
           onReturned={requestSentAndReturned}
