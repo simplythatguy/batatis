@@ -101,8 +101,13 @@ def main():
         receipt.append({'step': 'Applicant sees return', 'status': 'returned', 'unread_messages': 1})
         request(owner, 'POST', f'/cases/{cid}/messages/read', json={}, expected=204,
                 label='Applicant marks reviewer message read')
-        request(owner, 'POST', f'/cases/{cid}/messages', expected=201,
-                json={'body': 'SYNTHETIC reply: the revision date is confirmed.'}, label='Applicant replies')
+        before = request(owner, 'GET', f'/cases/{cid}')
+        request(owner, 'POST', f'/cases/{cid}/messages', expected=403,
+                json={'body': 'SYNTHETIC reply: the revision date is confirmed.'}, label='Applicant message rejected')
+        assert request(owner, 'GET', f'/cases/{cid}') == before
+        request(officer, 'POST', f'/cases/{cid}/messages', expected=201,
+                json={'body': 'Please confirm the synthetic revision in the application.'}, label='Officer sends notice')
+        add('evidence.synthetic.date', '2026-10-21')
         request(owner, 'POST', f'/cases/{cid}/submit', json={}, label='Applicant resubmits')
         request(officer, 'POST', f'/review/{cid}/claim', json={}, label='Reviewer reclaims')
         accepted = request(officer, 'POST', f'/review/{cid}/decision', json={'outcome': 'accept'},

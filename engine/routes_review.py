@@ -237,6 +237,10 @@ def threaded(case):
 
 def post_message(case, user, body: str):
     threaded(case)
+    if user.role != 'reviewer':
+        raise HTTPException(403, 'Only reviewing officers can send notices')
+    # Officer notices only. Recheck on every CAS retry, including ownership changes.
+    authorize_case(case, user, mode='review')
     if len(case.messages) >= MAX_MESSAGES:
         raise HTTPException(409, 'This application has reached its message limit')
     return append_message(case, user, body)
