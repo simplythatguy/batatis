@@ -107,6 +107,7 @@ test("a notification for the open file refreshes only its summary and exposes th
     "./assistant/assistant": { useAssistant: () => ({ open: false }), setAssistantCase() {}, setAssistantContext() {} },
     "./session": { useSession: () => ({ seen: [] }), getSession: () => ({ draft: "" }) },
     "./deck": { buildDeck: () => [], deckProgress: () => ({ done: 0, total: 0 }) },
+    "./useDeckExtras": { useDeckExtras: () => ({ options: {} }) },
     "./routes": { STAGES: [{ screen: "application" }] },
     "./shell/AppLayout": { AppLayout: "AppLayout" },
     "./shell/ReturnedBanner": { ReturnedBanner: "ReturnedBanner" },
