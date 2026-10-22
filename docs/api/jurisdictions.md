@@ -116,8 +116,12 @@ restricts reviewer accounts to those two offices for now. A schema test checks t
 code has a pack. When reviewer accounts open to more offices, derive `Authority` from the packs and
 remove the exception.
 
+## Checklists
+
+`standing_packages[].checklist` names the checklist file for SPV-001, SPV-006 and B23-01 (WP-32);
+it is `null` for B14-01, which is historical. Routes and data: [`checklists.md`](checklists.md).
+
 ## Not in this package
 
-- Standing-package condition checklists (WP-32). `standing_packages[].checklist` is `null` until then.
 - Filling Calgary's form (WP-44). The form entry is `export: not_yet`.
 - The picker and process-notes panel (WP-35).

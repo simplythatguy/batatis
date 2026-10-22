@@ -2,6 +2,14 @@
 // Do not edit: change the engine model, run `python -m engine.schema_export`, then `npm run gen:types`.
 // Fields with a default are optional here because the engine accepts them omitted; responses always carry them.
 
+export interface AnswerCounts {
+  confirmed: number;
+  does_not_apply: number;
+  not_yet: number;
+  total: number;
+  unanswered: number;
+}
+
 /** One answer. `question_id` is the question's stable id; `field` is the fact field it fills. */
 export interface AnswerIn {
   answer?: string;
@@ -160,6 +168,51 @@ export interface Case {
   version: number;
 }
 
+export interface CaseChecklist {
+  code: string;
+  conditions: CaseCondition[];
+  counts: AnswerCounts;
+  groups: ChecklistGroup[];
+  id: string;
+  issued: string;
+  jurisdiction: string;
+  /** A provision the package varies is among the case provisions. */ matches_case_provisions: boolean;
+  notice: string;
+  package: string;
+  /** Provisions the package names, as printed in the pack. */ provisions: string[];
+  reviewed: boolean;
+  revision: string | null;
+  source: PackSource;
+  source_notes: SourceNote[];
+  summary: string;
+  title: string;
+}
+
+export interface CaseChecklists {
+  case_id: string;
+  case_version: number;
+  checklists: CaseChecklist[];
+  historical: HistoricalPackage[];
+  /** Pack id the case resolved to; null when the case names none. */ jurisdiction: string | null;
+  matched_by: string | null;
+  /** Why no checklist is offered, when the list is empty. */ none_reason: string | null;
+  notice: string;
+}
+
+export interface CaseCondition {
+  /** null until the applicant answers. */ answer: ConditionAnswer | null;
+  group: string;
+  id: string;
+  kind: "scope" | "construction" | "agreement" | "documents" | "declaration";
+  /** False when the condition always applies to a project that uses the package. */ may_not_apply: boolean;
+  /** Options of one choice share this key; the applicant follows one option and marks the others does not apply. */ one_of: string | null;
+  /** The option this row belongs to within `one_of`, as the source labels it. */ option: string | null;
+  /** Plain-language wording shown first. */ plain: string;
+  source: SourcePointer;
+  /** What the condition is about: both houses, one side, both parcels, the permit documents... */ subject: "project" | "both_houses" | "zero_side" | "easement_side" | "both_parcels" | "building" | "each_house_with_suite" | "permit_documents" | "declaration";
+  /** Plain-language trigger when the condition only applies in some designs. */ when: string | null;
+}
+
 /** `pack` is null when the case names no jurisdiction or authority yet. */
 export interface CaseJurisdictionPack {
   case_id: string;
@@ -173,6 +226,38 @@ export interface CaseRules {
   edition: string;
   notice: string;
   results: RuleResult[];
+}
+
+export interface ChecklistAnswerRequest {
+  condition_id: string;
+  expected_version: number;
+  reason?: string | null;
+  state: "confirmed" | "not_yet" | "does_not_apply";
+}
+
+export interface ChecklistAnswerResult {
+  case_version: number;
+  checklist: CaseChecklist;
+}
+
+/** One operative condition. Plain language first; the source wording sits behind a disclosure. */
+export interface ChecklistCondition {
+  group: string;
+  id: string;
+  kind: "scope" | "construction" | "agreement" | "documents" | "declaration";
+  /** False when the condition always applies to a project that uses the package. */ may_not_apply: boolean;
+  /** Options of one choice share this key; the applicant follows one option and marks the others does not apply. */ one_of: string | null;
+  /** The option this row belongs to within `one_of`, as the source labels it. */ option: string | null;
+  /** Plain-language wording shown first. */ plain: string;
+  source: SourcePointer;
+  /** What the condition is about: both houses, one side, both parcels, the permit documents... */ subject: "project" | "both_houses" | "zero_side" | "easement_side" | "both_parcels" | "building" | "each_house_with_suite" | "permit_documents" | "declaration";
+  /** Plain-language trigger when the condition only applies in some designs. */ when: string | null;
+}
+
+export interface ChecklistGroup {
+  id: string;
+  /** One plain-language line under the group title. */ plain: string;
+  title: string;
 }
 
 /** Verification of one cited provision against the code database (NBC(AE) 2023, 2nd printing). */
@@ -231,6 +316,13 @@ export interface CodeTOC {
 export interface CompletenessSummary {
   answered: number;
   total: number;
+}
+
+/** The applicant's latest answer to one condition, read from case facts. Never a determination. */
+export interface ConditionAnswer {
+  fact_id: string;
+  reason: string | null;
+  state: "confirmed" | "not_yet" | "does_not_apply";
 }
 
 export interface ContextDefinition {
@@ -469,6 +561,17 @@ export interface Half {
   who: string;
 }
 
+/** A superseded package. Shown for history only; never offered as a checklist. */
+export interface HistoricalPackage {
+  code: string;
+  historical_reason: string | null;
+  id: string;
+  issued: string;
+  source: PackSource;
+  status: "historical";
+  title: string;
+}
+
 export interface IdentifyArticle {
   attribution_missing: boolean;
   citation: string | null;
@@ -671,6 +774,30 @@ export interface Jurisdiction {
   authority: string | null;
   id: string;
   name: string;
+}
+
+export interface JurisdictionChecklist {
+  code: string;
+  conditions: ChecklistCondition[];
+  groups: ChecklistGroup[];
+  id: string;
+  issued: string;
+  jurisdiction: string;
+  notice: string;
+  package: string;
+  reviewed: boolean;
+  revision: string | null;
+  source: PackSource;
+  source_notes: SourceNote[];
+  summary: string;
+  title: string;
+}
+
+export interface JurisdictionChecklists {
+  checklists: JurisdictionChecklist[];
+  historical: HistoricalPackage[];
+  jurisdiction: string;
+  notice: string;
 }
 
 export interface JurisdictionDetail {
@@ -1200,6 +1327,24 @@ export interface SourceInput {
   type: "code" | "file" | "user_text" | "drawing" | "user_click" | "officer" | "professional";
 }
 
+/** Something in the source the applicant should know: an inconsistency, an offence warning, a figure-only note. */
+export interface SourceNote {
+  id: string;
+  kind: "conflict" | "warning" | "figure_only" | "scope";
+  page: number;
+  plain: string;
+  /** Verified like a condition quote; null when the text is only in a figure. */ quote: string | null;
+}
+
+/** Where in the source PDF the condition is. `quote` is checked word for word against the reference text. */
+export interface SourcePointer {
+  /** A figure or detail in the source that shows this condition, with its page. */ diagram: string | null;
+  /** The item label the source prints, e.g. "b) ii." or "4. a)". */ label: string | null;
+  /** The sentence the item hangs from, when the item alone is not readable. */ lead_in: string | null;
+  /** One-based page of the source PDF. */ page: number;
+  /** A short extract, verbatim apart from whitespace. */ quote: string;
+}
+
 export interface StageRecord {
   detail: string | null;
   errors: number;
@@ -1212,10 +1357,10 @@ export interface StageRecord {
   stage: string;
 }
 
-/** A published local route (standing posted variance or policy). Metadata only; checklists are WP-32. */
+/** A published local route (standing posted variance or policy). Its conditions live in a checklist file. */
 export interface StandingPackage {
   applies_to: string;
-  /** Checklist id once WP-32 builds it. A checklist is never a determination. */ checklist: string | null;
+  /** Id of the checklist in checklists/<id>.json; null when none is built. Never set on a historical package. A checklist is never a determination. */ checklist: string | null;
   /** The identifier the issuer prints, e.g. SPV-001 or B23-01. */ code: string;
   /** Code edition the document cites, as printed. */ edition: string;
   historical_reason: string | null;
