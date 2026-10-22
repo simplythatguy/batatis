@@ -829,8 +829,9 @@ body {
 }
 
 /* Stages: an icon in a progress ring, in order, joined by a hairline. No visible names (icons before
-   words); the name shows on hover or focus. Current = tinted fill in its hue (the accent by default),
-   done = green ring with a check badge, locked = faded. */
+   words); the name shows on hover or focus. No fills (user direction 2026-10-22): every stage is ink,
+   the current one at full opacity, the rest dimmed (0.6, 4.6:1 on the page), hover and keyboard focus
+   brighter (0.85), locked fainter still. Done keeps its green check badge at full strength. */
 
 .cf-stages {
   display: flex;
@@ -848,13 +849,11 @@ body {
   border: 0;
   border-radius: 999px;
   background: none;
-  color: var(--cf-text-3);
+  color: var(--cf-text);
   font: inherit;
   text-decoration: none;
   cursor: pointer;
-  transition-property: color, transform;
-  transition-duration: 150ms;
-  transition-timing-function: ease-out;
+  --stage-o: 0.6;
 }
 
 /* The hairline between two stages shows the order without numbers. */
@@ -880,8 +879,6 @@ body {
   width: 34px;
   height: 34px;
   border-radius: 999px;
-  transition-property: background-color;
-  transition-duration: 150ms;
 }
 
 /* Only the ring is absolute; the icon's own svg stays centred in the grid. */
@@ -901,38 +898,42 @@ body {
 }
 
 .cf-stage-arc {
-  stroke: var(--cf-text-3);
+  stroke: currentColor;
   stroke-linecap: round;
-  transition-property: stroke-dasharray, stroke;
-  transition-duration: 300ms;
+  transition-property: stroke-dasharray, opacity;
+  transition-duration: 300ms, 150ms;
   transition-timing-function: ease-out;
+}
+
+/* The icon and the progress arc carry the dimming; the track and the badges stay as they are. */
+.cf-stage-ico,
+.cf-stage-arc {
+  opacity: var(--stage-o);
 }
 
 .cf-stage-ico {
   display: inline-flex;
+  transition-property: opacity;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+.cf-stage:focus-visible {
+  --stage-o: 0.85;
 }
 
 .cf-stage[aria-current="step"] {
-  color: var(--cf-text);
+  --stage-o: 1;
 }
 
-/* Neutral by default: the current stage is ink on a soft fill. An officer step with a hue
-   (.is-rose …, matching its heading icon) uses a shade of it. */
-.cf-stage[aria-current="step"] .cf-stage-ring {
-  background: var(--hue-t, var(--cf-selected));
-}
-
+/* Neutral by default: the current stage is ink. An officer step with a hue (.is-rose …, matching
+   its heading icon) uses a shade of it. */
 .cf-stage[aria-current="step"] .cf-stage-ico {
   color: var(--hue-s, var(--cf-text));
 }
 
 .cf-stage[aria-current="step"] .cf-stage-arc {
   stroke: var(--hue-s, var(--cf-text));
-}
-
-/* Done: a quiet ring; the green check badge says it. */
-.cf-stage.is-done .cf-stage-arc {
-  stroke: var(--cf-text-3);
 }
 
 .cf-stage-done,
@@ -962,21 +963,21 @@ body {
 
 .cf-stage.is-disabled {
   cursor: not-allowed;
-  opacity: 0.45;
+  --stage-o: 0.3;
+}
+
+.cf-stage.is-disabled:focus-visible {
+  --stage-o: 0.45;
 }
 
 @media (hover: hover) {
   .cf-stage:not(.is-disabled):not([aria-current="step"]):hover {
-    color: var(--cf-text);
-  }
-  .cf-stage:not(.is-disabled):not([aria-current="step"]):hover .cf-stage-ring {
-    background: var(--cf-hover);
+    --stage-o: 0.85;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cf-stage,
-  .cf-stage-ring,
+  .cf-stage-ico,
   .cf-stage-arc {
     transition: none;
   }

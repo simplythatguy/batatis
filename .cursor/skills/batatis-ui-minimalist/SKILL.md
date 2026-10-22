@@ -41,7 +41,7 @@ Every icon-only control or icon metadata has an accessible name and a hover labe
 ## Example: stage navigation
 
 - Before: `1 Describe  2 Questions  3 Review  4 Application` with thin underlines.
-- After: four icons, each in a progress ring joined by a hairline: a quiet ring and green check badge when done, ink on a soft fill when current, faded when locked. "Questions, 40% done" is the accessible name and the hover/focus label. The officer's review steps use the same control, the current one in a shade of its step hue, with an open-count badge.
+- After: four icons, each in a progress ring joined by a hairline: a quiet ring and green check badge when done, no fill: the current one at full opacity, the others dimmed and brighter on hover or focus, fainter when locked. "Questions, 40% done" is the accessible name and the hover/focus label. The officer's review steps use the same control, the current one in a shade of its step hue, with an open-count badge.
 - Code: `StageButton` and `StageRings` in `web/src/calm/shell/AppHeader.tsx`, `StepTabs` in `web/src/calm/reviewer/PackageReview.tsx`.
 
 ## Example: an application title
