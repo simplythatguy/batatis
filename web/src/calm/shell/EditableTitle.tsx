@@ -24,7 +24,11 @@ export function EditableTitle({ value, label, disabled, onCommit }: {
   const cancelled = useRef(false);
   const restoreFocus = useRef(false);
   const live = useRef(true);
-  useEffect(() => () => { live.current = false; }, []);
+  // Set on every mount: StrictMode mounts, unmounts and mounts again in development.
+  useEffect(() => {
+    live.current = true;
+    return () => { live.current = false; };
+  }, []);
   // A different application (or a name saved elsewhere) clears this one's leftovers.
   useEffect(() => { setFailed(null); setPending(null); }, [value]);
   useLayoutEffect(() => {
@@ -105,8 +109,10 @@ export function EditableTitle({ value, label, disabled, onCommit }: {
         </button>
       )}
       {failed && !editing && (
-        <span className="cf-title-error" role="alert">
-          {failed.message}
+        <span className="cf-title-error" role="alert" title={failed.message}>
+          <span className="cf-dot is-blocking" aria-hidden="true" />
+          <span aria-hidden="true">Not saved</span>
+          <span className="cf-sr">{failed.message}</span>
           <button type="button" className="cf-link-btn" onClick={() => void save(failed.draft)}>Retry</button>
           <button type="button" className="cf-link-btn" onClick={() => start(failed.draft)}>Edit</button>
         </span>

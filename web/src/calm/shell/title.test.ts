@@ -61,7 +61,8 @@ test("a failed save puts the old name back and keeps the typed one for Retry", a
   const tree = await e.rerender();
   assert.equal(text(e.button()), "Infill sheathing", "the saved name stays until a save succeeds");
   const alert = nodes(tree, (n) => n.props?.role === "alert")[0];
-  assert.match(text(alert), /isn’t available/);
+  assert.match(text(alert), /isn’t available/, "the reason is the alert text (screen readers) and its hover label");
+  assert.equal(alert.props.title, "Renaming isn’t available on this server yet.");
   fail = false;
   nodes(alert, (n) => n.type === "button" && text(n) === "Retry")[0].props.onClick();
   await e.rerender();

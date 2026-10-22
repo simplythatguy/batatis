@@ -210,7 +210,9 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     : null;
   const saved = account.applications ?? [];
   // Signed in, a new draft shows at once, before the engine has listed it.
-  const items = signedIn ? (localRow && !saved.some((a) => a.id === localRow.id) ? [localRow, ...saved] : saved) : localRow ? [localRow] : [];
+  // The open case's row shows this draft's name until the server has one, so header and list agree.
+  const named = saved.map((a) => (a.id === engineId && !a.title?.trim() && inCase ? { ...a, title: c.title } : a));
+  const items = signedIn ? (localRow && !named.some((a) => a.id === localRow.id) ? [localRow, ...named] : named) : localRow ? [localRow] : [];
   const selectedId = engineId ?? (localRow ? "this-visit" : null);
   const current = (engineId && saved.find((a) => a.id === engineId)) || null;
 

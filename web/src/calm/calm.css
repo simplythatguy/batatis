@@ -28,6 +28,10 @@
   --cf-shadow: 0 1px 2px rgba(17, 24, 39, 0.05), 0 4px 16px -6px rgba(17, 24, 39, 0.08);
   --cf-accent: #f25a2a;
   --cf-accent-ink: #c2410c;
+  /* Readable text in a status colour on the light page (each at least 4.5:1 on white and on its tint). */
+  --cf-warning-ink: #8a5300;
+  --cf-blocking-ink: #b42318;
+  --cf-done-ink: #11713f;
   --cf-blocking: #e5484d;
   --cf-warning: #f0a20b;
   --cf-done: #18a058;
@@ -288,7 +292,7 @@ body {
 }
 
 .cf-applist-note.is-error {
-  color: #ffb4b4;
+  color: var(--cf-blocking-ink);
 }
 
 .cf-list-rows {
@@ -519,10 +523,10 @@ body {
 }
 
 .cf-title-error {
+  flex: none;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-width: 0;
   color: var(--cf-blocking);
   font-size: 12.5px;
   font-weight: 450;
@@ -712,7 +716,7 @@ body {
 }
 
 .cf-save.is-problem {
-  color: #ffb4b4;
+  color: var(--cf-blocking-ink);
 }
 
 .cf-ask {
@@ -1581,7 +1585,7 @@ body {
   padding: 3px 5px;
   border-radius: 5px;
   background: rgba(255, 106, 61, 0.14);
-  color: #ff9a76;
+  color: var(--cf-accent-ink);
 }
 
 .cf-file-name {
@@ -1603,7 +1607,7 @@ body {
 }
 
 .cf-file-state.is-blocking {
-  color: #fca5a5;
+  color: var(--cf-blocking-ink);
   white-space: normal;
   flex: 0 1 auto;
 }
@@ -2107,7 +2111,7 @@ body {
   margin: 0;
   font-size: 15px;
   font-weight: 550;
-  color: #fde7a8;
+  color: var(--cf-warning-ink);
   line-height: 1.35;
 }
 
@@ -2119,7 +2123,7 @@ body {
   margin: 8px 0 0;
   font-size: 14px;
   line-height: 1.55;
-  color: #d9c9a0;
+  color: var(--cf-text-2);
 }
 
 .cf-engineer-link {
@@ -2129,8 +2133,22 @@ body {
   margin-top: 10px;
   font-size: 13px;
   font-weight: 500;
-  color: #fde7a8;
+  color: var(--cf-warning-ink);
   border-radius: 6px;
+  text-decoration: underline;
+  text-decoration-color: rgba(138, 83, 0, 0.35);
+  text-underline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .cf-engineer-link:hover {
+    text-decoration-color: currentColor;
+  }
+}
+
+.cf-engineer-link:focus-visible {
+  outline: 2px solid var(--cf-focus);
+  outline-offset: 2px;
 }
 
 .cf-sections {
@@ -2837,19 +2855,19 @@ body {
 }
 
 .cf-band.is-high {
-  color: #fecaca;
+  color: var(--cf-blocking-ink);
   border-color: rgba(248, 113, 113, 0.35);
   background: rgba(248, 113, 113, 0.08);
 }
 
 .cf-band.is-mid {
-  color: #fde68a;
+  color: var(--cf-warning-ink);
   border-color: rgba(251, 191, 36, 0.32);
   background: rgba(251, 191, 36, 0.07);
 }
 
 .cf-band.is-low {
-  color: #bbf7d0;
+  color: var(--cf-done-ink);
   border-color: rgba(74, 222, 128, 0.28);
 }
 
@@ -3961,7 +3979,7 @@ body {
 
 .cf-engineer-h,
 .cf-engineer-link {
-  color: #ffe08a;
+  color: var(--cf-warning-ink);
 }
 
 .cf-engineer p {
