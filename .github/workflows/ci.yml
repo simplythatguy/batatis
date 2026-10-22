@@ -33,6 +33,7 @@ jobs:
           npm ci
           npm run typecheck
           npm run test:unwrap
+          npm run test:rules
           npm run build
       - name: Fail if a sqlite file is in the web output
         run: |

@@ -1,0 +1,414 @@
+{
+  "version": 1,
+  "edition": "NBC(AE) 2023, 2nd printing",
+  "rules": [
+    "glazed-openings-houses",
+    "unprotected-openings",
+    "soffits-houses",
+    "firewall-suite-rowhouses",
+    "fire-dampers"
+  ],
+  "notice": "A rule check compares the numbers you gave with one acceptable solution in Division B. It flags where the design departs from that acceptable solution; it is not a review of the design and not an officer's decision.",
+  "departs_next_step": "To build it this way, the applicant prepares an alternative solution (NBC(AE) Division C, Subsection 2.3.1.) showing at least the level of performance of this acceptable solution in its attributed objectives and functions, and submits it with a request for variance (Safety Codes Act, s.38). A safety codes officer decides the request.",
+  "needs_info_message": "To compare the design with {provision}, answer the questions below.",
+  "states": {
+    "follows": "Follows the acceptable solution",
+    "departs": "Departs from the acceptable solution",
+    "needs_info": "Not enough information",
+    "not_applicable": "Not applicable"
+  },
+  "process_provisions": [
+    {
+      "id": "2.3.1.",
+      "division": "C",
+      "citation": "NBC(AE) 2023 p2, Div C, Subsection 2.3.1. [PDF p.739]",
+      "pdf_page": 739
+    }
+  ],
+  "inputs": {
+    "occupancy": {
+      "field": "occupancy",
+      "label": "Occupancy",
+      "type": "enum",
+      "choices": [
+        {
+          "value": "single_family",
+          "label": "House (single-family, with or without a secondary suite)"
+        },
+        {
+          "value": "multi_family",
+          "label": "Multi-unit residential (row house, duplex, apartment)"
+        },
+        {
+          "value": "hotel",
+          "label": "Hotel or motel"
+        },
+        {
+          "value": "assembly",
+          "label": "Assembly"
+        },
+        {
+          "value": "care",
+          "label": "Care"
+        },
+        {
+          "value": "treatment",
+          "label": "Treatment"
+        },
+        {
+          "value": "detention",
+          "label": "Detention"
+        },
+        {
+          "value": "business",
+          "label": "Business and personal services"
+        },
+        {
+          "value": "mercantile",
+          "label": "Mercantile (retail)"
+        },
+        {
+          "value": "industrial",
+          "label": "Industrial"
+        },
+        {
+          "value": "farm",
+          "label": "Farm building"
+        },
+        {
+          "value": "relocatable_industrial_camp",
+          "label": "Relocatable industrial camp"
+        },
+        {
+          "value": "mixed",
+          "label": "Mixed use"
+        }
+      ],
+      "question": "What will the building be used for?",
+      "why": "The occupancy decides which Subsection of Section 9.10. sets the rule: 9.10.15. for houses, 9.10.14. for other Part 9 buildings."
+    },
+    "dwelling_unit_above_another": {
+      "field": "dwelling_unit_above_another",
+      "label": "A dwelling unit above another",
+      "type": "bool",
+      "question": "Is any dwelling unit located above another dwelling unit?",
+      "why": "Subsection 9.10.15. applies only where no dwelling unit is above another (Sentence 9.10.15.1.(1)); otherwise Subsection 9.10.14. applies."
+    },
+    "storeys": {
+      "field": "storeys",
+      "label": "Storeys",
+      "type": "int",
+      "min": 1,
+      "max": 200,
+      "question": "How many storeys does the building have?",
+      "why": "Part 9 covers buildings of 3 storeys or less in building height (Div A, Sentence 1.3.3.3.(1))."
+    },
+    "building_area_m2": {
+      "field": "building_area_m2",
+      "label": "Building area",
+      "type": "number",
+      "unit": "m²",
+      "min": 0,
+      "max": 1000000,
+      "question": "What is the building area (the footprint), in square metres?",
+      "why": "Part 9 covers buildings with a building area of 600 m² or less (Div A, Sentence 1.3.3.3.(1))."
+    },
+    "limiting_distance_m": {
+      "field": "limiting_distance_m",
+      "label": "Limiting distance",
+      "type": "number",
+      "unit": "m",
+      "min": 0,
+      "max": 1000,
+      "question": "How far is this wall from the property line (the limiting distance), in metres?",
+      "why": "The limiting distance decides which column of the table, and which Sentence, applies."
+    },
+    "sprinklered": {
+      "field": "sprinklered",
+      "label": "Sprinklered",
+      "type": "enum",
+      "choices": [
+        {
+          "value": "yes",
+          "label": "Yes, throughout"
+        },
+        {
+          "value": "no",
+          "label": "No"
+        },
+        {
+          "value": "partial",
+          "label": "Partly"
+        }
+      ],
+      "question": "Is the building sprinklered throughout?",
+      "why": "Sprinklers can double the permitted opening area, and an unsprinklered storey matters where the fire department response is slow."
+    },
+    "fire_response_over_10_min": {
+      "field": "fire_response_over_10_min",
+      "label": "Fire department response over 10 minutes",
+      "type": "bool",
+      "question": "Does the fire department take more than 10 minutes to arrive at this site in 10% or more of calls?",
+      "why": "Where it does and any storey is not sprinklered, half the actual limiting distance is used (Sentences 9.10.14.3.(1) and 9.10.15.3.(1)). The local fire department or the authority can tell you."
+    },
+    "ebf_area_m2": {
+      "field": "ebf_area_m2",
+      "label": "Area of the exposing building face",
+      "type": "number",
+      "unit": "m²",
+      "min": 0,
+      "max": 100000,
+      "question": "What is the area of this wall (the exposing building face), from finished ground to the uppermost ceiling, in square metres?",
+      "why": "The table row depends on the area of the exposing building face."
+    },
+    "glazed_area_m2": {
+      "field": "glazed_area_m2",
+      "label": "Area of glazed openings",
+      "type": "number",
+      "unit": "m²",
+      "min": 0,
+      "max": 100000,
+      "question": "What is the total area of windows and other glazed openings in this wall, in square metres?",
+      "why": "This is the number the table limits."
+    },
+    "opening_area_m2": {
+      "field": "opening_area_m2",
+      "label": "Area of unprotected openings",
+      "type": "number",
+      "unit": "m²",
+      "min": 0,
+      "max": 100000,
+      "question": "What is the total area of unprotected openings (windows, doors and other openings without a fire-rated closure) in this wall, in square metres?",
+      "why": "This is the number the table limits."
+    },
+    "adjacent_rooms_sprinklered": {
+      "field": "adjacent_rooms_sprinklered",
+      "label": "Rooms behind this wall sprinklered",
+      "type": "bool",
+      "question": "Are all rooms behind this wall that have openings sprinklered, including closets, bathrooms and attached garages?",
+      "why": "The doubled opening area for sprinklered buildings needs every such room sprinklered, notwithstanding exemptions in the sprinkler standards."
+    },
+    "glass_blocks": {
+      "field": "glass_blocks",
+      "label": "Openings are glass blocks",
+      "type": "bool",
+      "question": "Are the glazed openings in this wall glass blocks (Article 9.10.13.7.)?",
+      "why": "Glass block openings may be up to twice the area (Sentence 9.10.15.4.(7))."
+    },
+    "wired_glass_or_glass_block": {
+      "field": "wired_glass_or_glass_block",
+      "label": "Wired glass or glass blocks",
+      "type": "bool",
+      "question": "Are the openings glazed with wired glass in steel frames (Article 9.10.13.5.) or glass blocks (Article 9.10.13.7.)?",
+      "why": "Such openings may be up to twice the area (Sentence 9.10.14.4.(6))."
+    },
+    "faces_own_detached_garage": {
+      "field": "faces_own_detached_garage",
+      "label": "Faces its own detached garage",
+      "type": "bool",
+      "question": "Does this wall face a detached garage or accessory building that serves only this house, is on the same property, with the house the only major occupancy on the property?",
+      "why": "Where all three hold, the limits on glazed openings do not apply (Sentence 9.10.15.4.(6))."
+    },
+    "industrial_hazard": {
+      "field": "industrial_hazard",
+      "label": "Industrial hazard",
+      "type": "enum",
+      "choices": [
+        {
+          "value": "low",
+          "label": "Low hazard (F3)"
+        },
+        {
+          "value": "medium",
+          "label": "Medium hazard (F2)"
+        },
+        {
+          "value": "high",
+          "label": "High hazard (F1)"
+        }
+      ],
+      "question": "For the industrial use, what is the hazard classification?",
+      "why": "Low-hazard industrial uses the residential row of Table 9.10.14.4.-A; medium-hazard uses the mercantile row. High-hazard industrial is outside Part 9."
+    },
+    "open_air_storage_garage": {
+      "field": "open_air_storage_garage",
+      "label": "Open-air storage garage",
+      "type": "bool",
+      "question": "Is this a storage garage with all storeys constructed as open-air storeys?",
+      "why": "An open-air storage garage with a limiting distance of 3 m or more is exempt from the opening limit (Sentence 9.10.14.4.(8))."
+    },
+    "street_facing_storey": {
+      "field": "street_facing_storey",
+      "label": "Storey faces a street at street level",
+      "type": "bool",
+      "question": "Does this wall belong to a storey that faces a street and is at the same level as the street?",
+      "why": "Such a storey with a limiting distance of 9 m or more is exempt from the opening limit (Sentence 9.10.14.4.(9))."
+    },
+    "soffit_projects": {
+      "field": "soffit_projects",
+      "label": "Roof soffit projects over this wall",
+      "type": "bool",
+      "question": "Does a roof soffit (eave overhang) project above this wall?",
+      "why": "Sentences 9.10.15.5.(8) to (10) only apply to projecting roof soffits."
+    },
+    "soffit_to_property_line_m": {
+      "field": "soffit_to_property_line_m",
+      "label": "Soffit face to property line",
+      "type": "number",
+      "unit": "m",
+      "min": 0,
+      "max": 1000,
+      "question": "How far is the face (outer edge) of the roof soffit from the property line, in metres?",
+      "why": "Where the limiting distance is more than 0.45 m, the face of the soffit must be at least 0.45 m from the property line (Sentence 9.10.15.5.(9))."
+    },
+    "faces_public_way": {
+      "field": "faces_public_way",
+      "label": "Faces a public way",
+      "type": "bool",
+      "question": "Does this wall and its soffit face a public way, such as a street or lane?",
+      "why": "A soffit facing a public way may project to the property line (Sentence 9.10.15.5.(10))."
+    },
+    "houses_in_building": {
+      "field": "houses_in_building",
+      "label": "Houses in the building",
+      "type": "int",
+      "min": 1,
+      "max": 1000,
+      "question": "How many houses (row-house units) are in the building, counting all of them?",
+      "why": "Sentence 9.10.11.2.(2) applies where a building contains more than 2 houses."
+    },
+    "houses_with_secondary_suite": {
+      "field": "houses_with_secondary_suite",
+      "label": "Houses with a secondary suite",
+      "type": "int",
+      "min": 0,
+      "max": 1000,
+      "question": "How many of those houses have a secondary suite?",
+      "why": "The firewall requirement concerns houses with a secondary suite."
+    },
+    "max_suite_houses_between_firewalls": {
+      "field": "max_suite_houses_between_firewalls",
+      "label": "Most suite houses between firewalls",
+      "type": "int",
+      "min": 0,
+      "max": 1000,
+      "question": "Between firewalls, what is the largest number of adjacent houses with a secondary suite in one part of the building? (Count the whole building if there is no firewall.)",
+      "why": "Sentence 9.10.11.2.(2) asks for firewalls so that each part contains no more than 2 adjacent houses with a secondary suite."
+    },
+    "duct_penetrates_rated_separation": {
+      "field": "duct_penetrates_rated_separation",
+      "label": "Duct penetrates a rated fire separation",
+      "type": "bool",
+      "question": "Does a duct pass through a wall or floor that must be a fire separation with a fire-resistance rating?",
+      "why": "Sentence 9.10.13.13.(1) applies to ducts that penetrate such an assembly."
+    },
+    "fire_damper_provided": {
+      "field": "fire_damper_provided",
+      "label": "Fire damper provided",
+      "type": "bool",
+      "question": "Is a fire damper installed where the duct passes through the fire separation?",
+      "why": "Sentence 9.10.13.13.(1) asks for a fire damper unless an exception applies."
+    },
+    "duct_use": {
+      "field": "duct_use",
+      "label": "What the duct is",
+      "type": "enum",
+      "choices": [
+        {
+          "value": "ac_branch",
+          "label": "A branch duct supplying only air-conditioning units, or combined air-conditioning and heating units"
+        },
+        {
+          "value": "exhaust_riser_branch",
+          "label": "A branch duct entering an exhaust duct riser with upward airflow"
+        },
+        {
+          "value": "vertical_service_space_exhaust",
+          "label": "A duct leaving a vertical service space (shaft) and exhausting outside at its top"
+        },
+        {
+          "value": "commercial_cooking",
+          "label": "A duct serving commercial cooking equipment"
+        },
+        {
+          "value": "ceiling_membrane_opening",
+          "label": "An opening in a rated membrane ceiling leading to a duct in the ceiling space"
+        },
+        {
+          "value": "other",
+          "label": "Something else"
+        }
+      ],
+      "question": "Which best describes the duct where it passes through the fire separation?",
+      "why": "Each exception in Sentences 9.10.13.13.(2) to (5) and 9.10.5.1.(3) covers one kind of duct."
+    },
+    "duct_noncombustible": {
+      "field": "duct_noncombustible",
+      "label": "Duct is noncombustible",
+      "type": "bool",
+      "question": "Is the duct noncombustible (for example, sheet steel)?",
+      "why": "The exceptions in Sentences 9.10.13.13.(2) to (4) are for noncombustible ducts."
+    },
+    "duct_melting_point_c": {
+      "field": "duct_melting_point_c",
+      "label": "Duct melting point",
+      "type": "number",
+      "unit": "°C",
+      "min": 0,
+      "max": 5000,
+      "question": "What is the melting point of the duct material, in °C? (Galvanized steel is well above 760 °C; aluminum is below.)",
+      "why": "Sentences 9.10.13.13.(2) and (3) need a melting point not below 760 °C; Sentence (4) needs one above 760 °C."
+    },
+    "duct_area_cm2": {
+      "field": "duct_area_cm2",
+      "label": "Duct cross-sectional area",
+      "type": "number",
+      "unit": "cm²",
+      "min": 0,
+      "max": 1000000,
+      "question": "What is the cross-sectional area of the branch duct, in cm²?",
+      "why": "Sentence 9.10.13.13.(2) needs a cross-sectional area less than 130 cm²."
+    },
+    "discharge_height_m": {
+      "field": "discharge_height_m",
+      "label": "Discharge height above floor",
+      "type": "number",
+      "unit": "m",
+      "min": 0,
+      "max": 100,
+      "question": "How high above the floor do the units it supplies discharge air, in metres?",
+      "why": "Sentence 9.10.13.13.(2) needs discharge not more than 1.2 m above the floor."
+    },
+    "branch_carried_up_mm": {
+      "field": "branch_carried_up_mm",
+      "label": "Branch carried up inside riser",
+      "type": "number",
+      "unit": "mm",
+      "min": 0,
+      "max": 100000,
+      "question": "How far is the branch duct carried up inside the riser, in millimetres?",
+      "why": "Sentence 9.10.13.13.(3) needs at least 500 mm."
+    },
+    "riser_negative_pressure": {
+      "field": "riser_negative_pressure",
+      "label": "Exhaust riser under negative pressure",
+      "type": "bool",
+      "question": "Is the exhaust duct under negative pressure as described in Article 9.10.9.20.?",
+      "why": "Sentence 9.10.13.13.(3) needs it."
+    },
+    "exhausts_outside_at_top": {
+      "field": "exhausts_outside_at_top",
+      "label": "Each duct exhausts outside at the top",
+      "type": "bool",
+      "question": "Does each duct exhaust directly to the outside at the top of the vertical service space?",
+      "why": "Sentence 9.10.13.13.(4) needs it."
+    },
+    "appendix_d_conforms": {
+      "field": "appendix_d_conforms",
+      "label": "Ceiling openings follow Appendix D",
+      "type": "bool",
+      "question": "Do the ducts, the amount of openings and their protection follow Appendix D for the rated membrane ceiling?",
+      "why": "Sentence 9.10.5.1.(3) permits such openings only where they follow Appendix D."
+    }
+  }
+}
