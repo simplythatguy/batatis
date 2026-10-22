@@ -12,7 +12,7 @@ export interface ApplicationListHandle {
 function Row({ a, selected, onSelect, actions, line }: { a: ApplicationSummary; selected: boolean; onSelect: (id: string) => void; actions?: ReactNode; line?: { text: string; tone: string; attention: boolean } }) {
   const l = line ?? statusLine(a);
   return (
-    <li className={`cf-list-row${selected ? " is-selected" : ""}`}>
+    <li className={`cf-list-row${selected ? " is-selected" : ""}`} data-status={a.status}>
       <button type="button" className="cf-list-hit" aria-current={selected ? "page" : undefined} onClick={() => onSelect(a.id)}>
         <span className="cf-list-title">{a.title || "Untitled application"}</span>
         <span className={`cf-list-line is-${l.tone}${l.attention ? " is-attention" : ""}`}>

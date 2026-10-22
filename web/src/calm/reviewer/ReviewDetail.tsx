@@ -211,6 +211,8 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
       setShown(s);
       setView("review");
       await loadIndex(true);
+      // Reading messages can advance the saved version after the initial case load.
+      await reload();
     } catch (e) {
       setRunError(e instanceof AccountsError
         ? e.status === 503 ? "The package review isn’t available on this server (the code database is missing)." : e.status === 413 ? "Those files are too large: at most 12 PDFs and 4 MB in total." : e.detail

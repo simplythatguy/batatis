@@ -303,8 +303,15 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     resetToWho(signedIn ? "" : undefined);
   }
 
-  async function open(id: string, to = "#/questions") {
-    if (id === selectedId) { setListNote(""); if (!onStage) location.hash = lastStage.current; return; }
+  async function open(id: string, to?: string) {
+    const refused = items.find((a) => a.id === id)?.status === "refused";
+    const destination = to ?? (refused ? "#/application" : "#/questions");
+    if (id === selectedId) {
+      setListNote("");
+      if (to || refused) location.hash = destination;
+      else if (!onStage) location.hash = lastStage.current;
+      return;
+    }
     if (!signedIn || opening) return;
     setOpening(id);
     setListNote("");
@@ -320,7 +327,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     if (error) { setListNote(error); return; }
     resetSession();
     resetRelevance();
-    location.hash = to;
+    location.hash = destination;
   }
 
   useEffect(() => {
