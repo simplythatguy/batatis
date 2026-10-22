@@ -104,6 +104,7 @@ def available_destinations(user, case) -> tuple[Destination, ...]:
 _PREAMBLE = re.compile(r'^(?:(?:can|could|would|will) you\s+)?(?:please\s+)?', re.I)
 _OPEN = re.compile(r'^(?:open|show(?: me)?|take me to|go to|navigate to|switch to|jump to|bring up|let me see)\s+(.+)$', re.I)
 _UNSAFE = re.compile(r"\b(?:not|never|don['’]?t|do not|if|unless|would|when|said|says|quoted|quote|delete|submit|send|save|change|write|fill|archive|pin)\b", re.I)
+_QUOTED = re.compile(r"""["'“”‘’`]""")
 
 
 def _name(value: str) -> str:
@@ -118,7 +119,7 @@ def plan_navigation(question: str, offered: list[DestinationId], user, case) -> 
     request never become a side effect. Unrecognized phrasing stays a question.
     """
     text = question.strip()
-    if not offered or text.startswith(('"', "'", '“', '‘', '`')):
+    if not offered or _QUOTED.search(text):
         return None
     text = _PREAMBLE.sub('', text, count=1)
     if _UNSAFE.search(text):
