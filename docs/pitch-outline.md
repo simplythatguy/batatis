@@ -39,4 +39,4 @@ Slides are weighted to the judging rubric. Intake (20) and Code Identification (
 
 Every frame that shows case data carries an EXAMPLE DATA overlay. People, companies and addresses are fictional.
 
-**What the video does not show (say it if asked).** No real user or officer has tested Batatis. Code identification accuracy on the final pipeline is not measured. The Calgary form, Part 2 prefill, coded rules for the most-varied articles, standing-package checklists, the accuracy report page and other provinces are roadmap. Officer time saved has no measurement.
+**What the video does not show (say it if asked).** No real user or officer has tested Batatis. Code identification accuracy on the final pipeline is not measured. Coded rules for the most-varied articles exist as an unreviewed backend with no screen. The Calgary form, Part 2 prefill, standing-package checklists, the accuracy report page and other provinces are roadmap. Officer time saved has no measurement.

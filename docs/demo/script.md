@@ -1,6 +1,6 @@
 # Demo video script (4 to 5 minutes)
 
-*One example from the applicant's sign-up to the officer's close-out, filmed on the calm interface. Status is as of Oct 22, 2026, on `dev` at commit d6de179, and the live app at <https://batatis-vert.vercel.app>, whose script bundle contains the intake and code-check screens (checked on Oct 22). Steps whose screens exist are marked **Built**. Steps whose screens are still in progress are marked **Pending UI**, and each has a fallback line, so the video can be recorded after those screens land and never shows or describes a screen that does not exist. Running time: 4:40. Narration: 388 words, about 2.8 minutes of speech at 140 words a minute, which leaves the rest of the clock for typing and clicking. The card order and the wording quoted below come from `web/src/calm/` at commit d6de179, and the cards it reads from the example text were checked by running the intake rules on it without a model. Rehearse once on the final build and correct anything that has changed.*
+*One example from the applicant's sign-up to the officer's close-out, filmed on the calm interface. Status is as of Oct 22, 2026, on `dev` at commit 309ff03, and the live app at <https://batatis-vert.vercel.app>, whose script bundle contains the intake and code-check screens (checked on Oct 22). Steps whose screens exist are marked **Built**. Steps whose screens are still in progress are marked **Pending UI**, and each has a fallback line, so the video can be recorded after those screens land and never shows or describes a screen that does not exist. Running time: 4:40. Narration: 388 words, about 2.8 minutes of speech at 140 words a minute, which leaves the rest of the clock for typing and clicking. The card order and the wording quoted below come from `web/src/calm/` at commit 309ff03, and the cards it reads from the example text were checked by running the intake rules on it without a model. Rehearse once on the final build and correct anything that has changed.*
 
 ## What the video must say, and must not
 
@@ -256,7 +256,7 @@ The deck asks its cards in this order: the facts Batatis read (each one to confi
 
 ### C1. Closing card (4:32 to 4:40)
 
-**Screen.** A plain card for 8 seconds, with the EXAMPLE DATA label. Three lines. **Built**: sign-up, the question flow with the intake reader and the code check, Section C by lookup, the Council's form, the officer queue and decision. **Backend, screens in progress**: package review and close-out (open PR #62). **Backend, no screen yet**: the benchmark record and the jurisdiction picker. **Roadmap**: coded rules, standing-package checklists, accuracy report, Calgary form, other provinces. If a pending screen did land, move its line to **Built**.
+**Screen.** A plain card for 8 seconds, with the EXAMPLE DATA label. Three lines. **Built**: sign-up, the question flow with the intake reader and the code check, Section C by lookup, the Council's form, the officer queue and decision. **Backend, screens in progress**: package review and close-out (open PR #62). **Backend, no screen yet**: the benchmark record, the jurisdiction picker and the coded rules (unreviewed). **Roadmap**: standing-package checklists, accuracy report, Calgary form, other provinces. If a pending screen did land, move its line to **Built**.
 
 **Narration.**
 
@@ -285,4 +285,4 @@ The deck asks its cards in this order: the facts Batatis read (each one to confi
 | The close-out record lists what to send and keep, with a due date 10 days after the decision (the rule before Dec 1, 2026; the Council's portal rule applies from Dec 1) | `docs/research/2026-10-21-source-checks.md` §1 (IB-2025-11-18 for the 10 days, IB-2026-10-01 for the portal from Dec 1), `docs/api/package-review.md` |
 | "Accepted as administratively complete" | `docs/api/accounts-review.md`, `web/src/calm/reviewer/ReviewDetail.tsx` |
 | Package review and information request | `docs/api/package-review.md` |
-| Screen text quoted above | `web/src/calm/` at commit d6de179 |
+| Screen text quoted above | `web/src/calm/` at commit 309ff03 |

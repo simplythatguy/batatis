@@ -213,7 +213,7 @@
 
 **Full slide detail (in notes):**
 
-- 9.10.15.5.(8) has 1,501, 9.10.11.2. has 366 and 9.10.13.13. has 251, which is 2,118 of 3,088 (our arithmetic). Coded rules for these three are roadmap
+- 9.10.15.5.(8) has 1,501, 9.10.11.2. has 366 and 9.10.13.13. has 251, which is 2,118 of 3,088 (our arithmetic). Coded rules for these three exist as a backend with no screen, and no domain reviewer has signed them
 - Calgary reviewed and accepted 382 zero-lot-line requests between Jan 1 and Sep 1, 2017, then created standing posted variances
 - No product in our competitor survey prepares or reviews alternative-solution applications. That is absence of evidence from web search on Oct 20, 2026
 

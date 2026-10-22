@@ -1,6 +1,6 @@
 # Submission package checklist
 
-*Internal checklist for Submission 1 of the Building Codes Challenge (Thursday Oct 29, 2026). It is not for judges: its file paths can contain internal names that the judge-facing documents avoid. Status is as of Oct 22, 2026, on `dev` at commit d6de179 (CI run 39753045033 passed) and the live app at <https://batatis-vert.vercel.app>, last checked on Oct 21 (API) and Oct 22 (script bundle). Each line names a file, a pull request (PR) or a number that exists now. A line marked **GAP** has none. Status words follow `docs/implementation-plan.md` §3: **built**, **backend only** (the API is merged and the screen is in progress), **in progress** and **roadmap**.*
+*Internal checklist for Submission 1 of the Building Codes Challenge (Thursday Oct 29, 2026). It is not for judges: its file paths can contain internal names that the judge-facing documents avoid. Status is as of Oct 22, 2026, on `dev` at commit 309ff03 (CI run 39759377804 passed) and the live app at <https://batatis-vert.vercel.app>, last checked on Oct 21 (API) and Oct 22 (script bundle). Each line names a file, a pull request (PR) or a number that exists now. A line marked **GAP** has none. Status words follow `docs/implementation-plan.md` §3: **built**, **backend only** (the API is merged and the screen is in progress), **in progress** and **roadmap**.*
 
 The plans, pitch text, Q&A and demo script in this list merged into `dev` with PR #59 (d6de179). The intake and code-check screens of PR #61 were already on `dev`, and a follow-up pass brought these files in line with them.
 
@@ -31,7 +31,7 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 |---|---|---:|---|
 | 1 | Intake | 20% | Deck built, with the reader's cards, the five-question planner and the fork note (walked with the offline provider only). Rules scored in sample |
 | 2 | Code Identification | 20% | Library, Section C, the code check and up to three quoted choices built. The benchmark record has no screen and the final benchmark is unfinished |
-| 3 | Recommendations | 10% | Engineer callout and Section D cards built. Checklists and coded rules are roadmap |
+| 3 | Recommendations | 10% | Engineer callout and Section D cards built. Coded rules are a backend with no screen and no reviewer. Checklists are roadmap |
 | 4 | Review | 10% | Queue, claim, sheet, accept and return built. Package review is backend only. No timing data |
 | 5 | General Applicability | 5% | Role-aware flow built. Untested with a person |
 | 6 | Implementation Plan | 10% | Rewritten. No human session, no partner |
@@ -81,7 +81,8 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 
 - Built: the professional-involvement result as an amber callout on the review screen, with the line "Batatis can list what that evidence must address, but it can't write it." Section D cards list evidence documents and the responsible person. Cards for rationale, risk, mitigation, assumptions, maintenance and qualifications say the applicant writes them (`web/src/calm/Review.tsx`, `web/src/calm/deck.ts`).
 - Engine: `engine/professional.py` answers required, depends or no, with the Division C rule (2.4.1.1.(3), 2.4.1.2.(1) and others; the rules and PDF pages are in `research/facts/professional-involvement.md`) and never answers "no" on missing facts. Flag agreement 50/60 in sample (`evals_dev/section_d_flag/RESULTS.md`).
-- Roadmap: coded rules for 9.10.15.5.(8) to (10), 9.10.11.2.(2) and 9.10.13.13.(1), and standing-package checklists (`docs/research/2026-10-20-vision/2-week-build.md`).
+- Backend only: coded rules for 9.10.15.4.(1), 9.10.14.4.(1), 9.10.15.5.(8) and (9), 9.10.11.2.(2) and 9.10.13.13.(1). Each returns follows, departs, needs information or not applicable with the citation, and a Python and a browser evaluator both run the 89 hand-set vectors (`docs/api/rules.md`, `evals_dev/rules/REVIEW.md`; PR #63). Every rule and vector is marked unreviewed.
+- Roadmap: a screen for the coded rules, and standing-package checklists (`docs/research/2026-10-20-vision/2-week-build.md`).
 
 **Gaps:**
 
