@@ -1068,8 +1068,9 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _draft_paths() -> tuple[Path, Path]:
+    """A new private folder per run (mkdtemp: unique name, mode 0700), never a fixed path another user could pre-plant."""
     import tempfile
-    folder = Path(tempfile.gettempdir()) / 'batatis-accuracy-draft'
+    folder = Path(tempfile.mkdtemp(prefix='batatis-accuracy-draft-'))
     return folder / 'report.json', folder / 'report.md'
 
 

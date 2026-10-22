@@ -144,3 +144,10 @@ def test_an_unverified_draft_never_overwrites_the_published_report(monkeypatch, 
     assert ar.main(['--no-verify']) == 0
     assert (ar.OUT_JSON.read_text(), ar.OUT_MD.read_text()) == published
     assert (tmp_path / 'report.json').read_text() == '{"draft": true}'
+
+
+def test_draft_paths_are_a_fresh_private_folder_each_run():
+    import stat
+    (j1, _), (j2, _) = ar._draft_paths(), ar._draft_paths()
+    assert j1.parent != j2.parent
+    assert stat.S_IMODE(j1.parent.stat().st_mode) == 0o700 and not j1.parent.is_symlink()
