@@ -112,3 +112,20 @@ def test_information_request_items_are_addressed_to_the_applicant():
                      'Please state in the documentation performance under failure conditions, or say that it does not '
                      'apply. Failure is not mentioned.']
     assert not any('Ask the applicant' in t for t in texts)
+
+
+@pytest.mark.parametrize('instruction', [
+    'Ask the applicant to check provision 9.10.14.4.',
+    'Ask the applicant to check provision 9.10.14.4 before resubmitting.',
+    'Ask the applicant to check provision 3.2.3.6.(2).',
+])
+def test_information_request_removes_officer_sentence_with_dotted_provision(instruction):
+    from engine.models_review import Finding
+
+    finding = Finding(key='citation:provision', section='C', field='provision', label='provision',
+                      status='unclear', problem='nonexistent_provision', severity='blocking',
+                      message=f'The provision could not be verified. {instruction} Please confirm the edition.')
+
+    assert ir.build([finding]).items[0].text == (
+        'Please confirm the provision number for provision (Section C). '
+        'The provision could not be verified. Please confirm the edition.')
