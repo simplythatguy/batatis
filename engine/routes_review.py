@@ -237,6 +237,10 @@ def threaded(case):
 
 def post_message(case, user, body: str):
     threaded(case)
+    if user.role != 'reviewer':
+        raise HTTPException(403, 'Only reviewing officers can send notices')
+    # Officer notices only. Recheck on every CAS retry, including ownership changes.
+    authorize_case(case, user, mode='review')
     if len(case.messages) >= MAX_MESSAGES:
         raise HTTPException(409, 'This application has reached its message limit')
     return append_message(case, user, body)
@@ -397,16 +401,7 @@ def create_router(cases, code):
     @router.post('/cases/{case_id}/messages', response_model=ThreadMessage, status_code=201)
     def message(case_id: str, body: MessageRequest, request: Request):
         user = require_user(request)
-
-        def apply(case):
-            threaded(case)
-            # One way only: the officer tells the applicant. The applicant answers by updating the
-            # application and sending it again, never by chatting (less work for the officer).
-            if user.role != 'reviewer':
-                raise HTTPException(403, 'Messages go one way, from the reviewing officer. Update the application and send it again instead.')
-            return post_message(case, user, body.body)
-
-        _, saved = mutate(cases(), case_id, user, apply)
+        _, saved = mutate(cases(), case_id, user, lambda case: post_message(case, user, body.body))
         return as_thread(saved, user)
 
     @router.post('/cases/{case_id}/messages/read', status_code=204)
