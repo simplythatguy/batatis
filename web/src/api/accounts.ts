@@ -20,7 +20,7 @@ export interface User {
   created_at: string;
 }
 
-export type ApplicationStatus = "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+export type ApplicationStatus = "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
 
 export interface ApplicationSummary {
   id: string;
@@ -194,7 +194,7 @@ export interface QueueApplication {
   updated_at: string;
   completeness: { answered: number; total: number } | null;
   claim: Claim | null;
-  decision: { outcome: "accept" | "return"; by_name: string; at: string } | null;
+  decision: { outcome: "accept" | "return" | "refuse"; by_name: string; at: string } | null;
   unread_messages: number;
 }
 
@@ -204,7 +204,7 @@ export interface DecisionItemInput {
   note: string;
 }
 
-export type DecisionRequest = { outcome: "accept" } | { outcome: "return"; message: string; items: DecisionItemInput[] };
+export type DecisionRequest = { outcome: "accept" } | { outcome: "return" | "refuse"; message: string; items: DecisionItemInput[] };
 
 export interface AppNotification {
   id: string;

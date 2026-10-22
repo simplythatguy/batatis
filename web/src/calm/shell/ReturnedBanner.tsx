@@ -28,11 +28,12 @@ export function itemLink(c: Case, gaps: Gap[], item: MessageItem): { label: stri
 }
 
 /**
- * The officer returned the application: who, their message as text, the ticked items as rows
- * that open their questions, then Fix, Reply (posts to the case thread) and Explain (assistant).
+ * The officer's return or final refusal. A refusal keeps the message thread available without
+ * offering application edits or resubmission.
  */
 export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
   const { c, gaps } = useCase();
+  const refused = app.status === "refused";
   const [messages, setMessages] = useState<Message[] | null>(null);
   const [error, setError] = useState("");
   const [replying, setReplying] = useState(false);
@@ -55,11 +56,11 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
       })
       .catch((e: unknown) => { if (live) setError(e instanceof EngineError ? e.detail : "The officer’s message did not load."); });
     return () => { live = false; };
-  }, [app.id]);
+  }, [app.id, app.status]);
 
-  const fromOfficer = (messages ?? []).filter((m) => m.author.role === "reviewer" && m.kind !== "status");
+  const fromOfficer = (messages ?? []).filter((m) => m.author.role === "reviewer" && (refused ? m.kind === "decision" : m.kind !== "status"));
   const latest = fromOfficer[fromOfficer.length - 1];
-  const rows = (latest?.items ?? []).map((it) => itemLink(c, gaps, it));
+  const rows = refused ? [] : (latest?.items ?? []).map((it) => itemLink(c, gaps, it));
   const mine = (messages ?? []).filter((m) => latest && m.author.role !== "reviewer" && m.kind === "message" && m.created_at > latest.created_at);
   const who = latest?.author.name || app.reviewer?.name || "The officer";
   const where = authorityName(app.authority);
@@ -87,12 +88,13 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
       <span className="cf-returned-av" aria-hidden="true">{initials(who) || "?"}</span>
       <div className="cf-returned-body">
         <h2 className="cf-returned-who" id="cf-returned-who">
-          {who} <span>· {where ? `Safety Codes Officer, ${where} · ` : ""}returned this{latest ? ` ${when(latest.created_at)}` : ""}</span>
+          {who} <span>· {where ? `Safety Codes Officer, ${where} · ` : ""}{refused ? "refused" : "returned"} this{latest ? ` ${when(latest.created_at)}` : ""}</span>
         </h2>
         {messages === null && !error && <p className="cf-faint" role="status">Loading the officer’s message…</p>}
         {error && <p className="cf-faint" role="status">{error}</p>}
         {latest && <p className="cf-returned-msg">{latest.body}</p>}
-        {messages && !latest && <p className="cf-returned-msg cf-muted">Returned for administrative information. Open the review to see what is missing.</p>}
+        {messages && !latest && <p className="cf-returned-msg cf-muted">{refused ? "A refusal was recorded. Contact the officer for the written notice and appeal information." : "Returned for administrative information. Open the review to see what is missing."}</p>}
+        {refused && <p className="cf-faint cf-small">This application is closed and read-only. You can still reply to the officer.</p>}
         {rows.length > 0 && (
           <ul className="cf-returned-items">
             {rows.map((r) => (
@@ -105,13 +107,13 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
         {mine.length > 0 && <p className="cf-faint cf-small">You replied {mine.length === 1 ? "once" : `${mine.length} times`}. The officer sees it with the application.</p>}
         <div className="cf-returned-acts">
           {rows.length > 0 && <a className="cf-btn is-primary is-sm" href={rows[0].href}>Fix {rows.length} {rows.length === 1 ? "item" : "items"}</a>}
-          {!rows.length && <a className="cf-btn is-primary is-sm" href="#/review">See what’s missing</a>}
+          {!refused && !rows.length && <a className="cf-btn is-primary is-sm" href="#/review">See what’s missing</a>}
           <button type="button" className="cf-btn is-sm" aria-expanded={replying} onClick={() => setReplying((v) => !v)}><Icon24 name="msg" size={15} />Reply</button>
           {latest && (
             <button
               type="button"
               className="cf-btn is-ghost is-sm"
-              onClick={() => openAssistant({ screen: "message", focus: { kind: "message", id: latest.id }, label: "the officer’s message", suggestions: ["What do I need to change?", "Explain this message"] }, "Explain this message in plain words. What do I need to change?")}
+              onClick={() => openAssistant({ screen: "message", focus: { kind: "message", id: latest.id }, label: "the officer’s message", suggestions: refused ? ["Explain this refusal", "Explain the appeal notice"] : ["What do I need to change?", "Explain this message"] }, refused ? "Explain the officer’s refusal and appeal notice in plain words." : "Explain this message in plain words. What do I need to change?")}
             >
               <Icon24 name="spark" size={15} />Explain this message
             </button>

@@ -4,7 +4,7 @@
  * the refusal message and the close-out. Pure: everything is derived from a ReviewSession or CloseOut.
  * Administrative completeness only: nothing here judges the design.
  */
-import type { DecisionItemInput } from "../../api/accounts";
+import type { DecisionItemInput, DecisionRequest } from "../../api/accounts";
 import type {
   Attribute,
   CitationCheck,
@@ -404,7 +404,7 @@ export function diffView(s: ReviewSession): null | {
   };
 }
 
-/* —— Refusal (recorded through the return path: the backend has no refuse outcome) —— */
+/* —— Refusal —— */
 
 export const REFUSE_MIN = 10;
 
@@ -416,6 +416,11 @@ export const APPEAL_SOURCE = "https://www.safetycodes.ab.ca/permits-inspections/
 /** The officer's reasons, verbatim, then the appeal notice. Batatis writes no reasons of its own. */
 export function refusalMessage(reasons: string): string {
   return ["Your variance request is refused for the reasons below.", "", reasons.trim(), "", `Appeal: ${APPEAL_NOTICE}`].join("\n").slice(0, 4000);
+}
+
+/** A terminal refusal, with the officer's reasons and the existing appeal notice. */
+export function refusalDecision(reasons: string): DecisionRequest {
+  return { outcome: "refuse", message: refusalMessage(reasons), items: [] };
 }
 
 export function reasonsProblem(reasons: string): string {

@@ -1,7 +1,6 @@
 /**
  * Refuse: the officer writes the reasons; the 30-day appeal notice is added below them.
- * Batatis never drafts refusal reasons. The backend has no refuse outcome yet, so this is
- * recorded through the return path (the application goes back to the applicant) and says so.
+ * Batatis never drafts refusal reasons. A refusal closes the application.
  */
 import { useEffect, useId, useState } from "react";
 import { AccountsError } from "../../api/accounts";
@@ -70,7 +69,7 @@ export function RefuseDialog({ open, applicant, onClose, onSend }: {
           <p>{APPEAL_NOTICE}</p>
           <a className="ac-link pr-small" href={APPEAL_SOURCE} target="_blank" rel="noopener noreferrer">Safety Codes Council, Variances</a>
         </div>
-        <p className="pr-note pr-small"><span className="cf-dot is-pending" aria-hidden="true" />Batatis has no separate refusal outcome yet. This is recorded as a return: {applicant} gets your reasons and the notice in the application’s messages, and the application goes back to them. Issue the written notice of refusal through your authority’s usual process.</p>
+        <p className="pr-note pr-small"><span className="cf-dot is-pending" aria-hidden="true" />{applicant} gets your reasons and the appeal notice in the application’s messages. The application is closed and read-only. Issue the written notice of refusal through your authority’s usual process.</p>
         {error && <p className="ac-error" role="alert">{error}</p>}
       </div>
       <div className="cf-modal-foot">

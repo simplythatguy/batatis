@@ -16,7 +16,7 @@ import { Messages } from "./Messages";
 import { CloseOutDue, CloseOutPanel } from "./CloseOutPanel";
 import { InfoRequest } from "./InfoRequest";
 import { PackageReview } from "./PackageReview";
-import { blockingGaps, refusalMessage } from "./packageView";
+import { blockingGaps, refusalDecision } from "./packageView";
 import { applicantLine, decisionGate, sentLabel, sentPhrase, sinceLabel, withPackage, type PackageState } from "./queue";
 import { RefuseDialog } from "./RefuseDialog";
 import { ReturnDialog } from "./ReturnDialog";
@@ -301,12 +301,12 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   }
 
   async function sendRefusal(reasons: string) {
-    // No refuse outcome in the backend yet: recorded through the return path, labelled as such.
-    await review.decide(caseId, { outcome: "return", message: refusalMessage(reasons), items: [] });
+    await review.decide(caseId, refusalDecision(reasons));
     setRefusing(false);
     setView("review");
-    patchRow(caseId, { status: "returned" });
-    setNote(`Refusal sent to ${applicant} with the appeal notice. Recorded as a return.`);
+    patchRow(caseId, { status: "refused" });
+    setCase((saved) => saved ? { ...saved, status: "refused" } : saved);
+    setNote(`Refusal sent to ${applicant} with the appeal notice. This application is closed.`);
     await decided();
   }
 

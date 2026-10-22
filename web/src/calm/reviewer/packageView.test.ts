@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { CloseOut, Finding, ReviewSession } from "../../api/types.gen.ts";
+import { review } from "../../api/accounts.ts";
 import {
   blockingGaps, citationView, diffView, documentView, draftFrom, dueView, fileItemsView, missingView, officerVoice, parseCitation,
-  peerView, pointerLabel, previewText, refusalMessage, reasonsProblem, APPEAL_NOTICE, requestItems, returnAfterRequest, sectionCView, summaryView, toEdit,
+  peerView, pointerLabel, previewText, refusalDecision, refusalMessage, reasonsProblem, APPEAL_NOTICE, requestItems, returnAfterRequest, sectionCView, summaryView, toEdit,
 } from "./packageView.ts";
 import { decisionGate, withPackage } from "./queue.ts";
 
@@ -165,6 +166,23 @@ test("refusal: the officer's reasons verbatim with the 30-day appeal notice; no 
   assert.equal(reasonsProblem("short"), "At least 10 characters · 5 so far.");
   assert.equal(reasonsProblem("Long enough reasons"), "");
   assert.doesNotMatch(m + APPEAL_NOTICE, /\b(complies|compliant|approved|adequate|safe)\b/i);
+});
+
+test("refusal posts a distinct decision with the officer's reasons and appeal notice", async (t) => {
+  const calls: { url: string; method: string | undefined; body: unknown }[] = [];
+  t.mock.method(globalThis, "fetch", async (url: string, init: RequestInit) => {
+    calls.push({ url, method: init.method, body: JSON.parse(String(init.body)) });
+    return new Response(JSON.stringify({ status: "refused", outcome: "refuse" }), { status: 200 });
+  });
+  const reasons = "The requested fire separation drawings were not provided.";
+  await review.decide("case/refusal", refusalDecision(reasons));
+  assert.deepEqual(calls, [{
+    url: "/api/review/case%2Frefusal/decision", method: "POST",
+    body: { outcome: "refuse", message: refusalMessage(reasons), items: [] },
+  }]);
+  assert.ok(refusalMessage(reasons).includes(reasons));
+  assert.ok(refusalMessage(reasons).endsWith(APPEAL_NOTICE));
+  assert.doesNotMatch(refusalMessage(reasons), /returned|fix and resubmit/i);
 });
 
 test("close-out due line", () => {
