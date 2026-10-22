@@ -337,7 +337,10 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
         {!pack && c.authority && engineId && (
           extras.failed.case
             ? <p className="cf-note cf-small" role="status"><Dot tone="warning" />The office’s notes for the download didn’t load. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
-            : <p className="cf-faint cf-small" role="status">Loading the office’s notes for the download…</p>
+            : extras.pack
+              // Loaded, and Batatis has no notes for this office: say so, and what still applies.
+              ? <p className="cf-faint cf-small" role="status">Batatis has no local notes for this office yet. The download uses the standard variance form; ask the office how they want it submitted.</p>
+              : <p className="cf-faint cf-small" role="status">Loading the office’s notes for the download…</p>
         )}
         {exportNotices.map((n) => (
           <div key={n.id} className="cf-side-notice" role="note">
