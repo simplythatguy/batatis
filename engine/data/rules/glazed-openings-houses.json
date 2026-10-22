@@ -1,0 +1,614 @@
+{
+  "id": "glazed-openings-houses",
+  "title": "Window area in a wall near the property line (houses)",
+  "article": "9.10.15.4.",
+  "summary": "Maximum aggregate area of glazed openings in an exposing building face of a house, Sentence 9.10.15.4.(1), with the exceptions in Sentences (6) and (7).",
+  "reviewed": false,
+  "review_note": "Unreviewed: a domain reviewer has not yet signed the vectors for this rule (evals_dev/rules/REVIEW.md).",
+  "provisions": [
+    {
+      "id": "9.10.15.4.(1)",
+      "division": "B",
+      "pdf_page": 901,
+      "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.15.4.(1) [PDF p.901]"
+    },
+    {
+      "id": "9.10.15.4.(6)",
+      "division": "B",
+      "pdf_page": 901,
+      "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.15.4.(6) [PDF p.901]"
+    },
+    {
+      "id": "9.10.15.4.(7)",
+      "division": "B",
+      "pdf_page": 901,
+      "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.15.4.(7) [PDF p.901]"
+    },
+    {
+      "id": "9.10.15.1.(1)",
+      "division": "B",
+      "pdf_page": 900,
+      "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.15.1.(1) [PDF p.900]"
+    },
+    {
+      "id": "9.10.15.3.(1)",
+      "division": "B",
+      "pdf_page": 900,
+      "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.15.3.(1) [PDF p.900]"
+    },
+    {
+      "id": "1.3.3.3.(1)",
+      "division": "A",
+      "pdf_page": 40,
+      "citation": "NBC(AE) 2023 p2, Div A, Sentence 1.3.3.3.(1) [PDF p.40]"
+    }
+  ],
+  "notes": [
+    {
+      "id": "A-9.10.15.4.(2)",
+      "pdf_page": 1380,
+      "used_for": "Notes to Figures A-9.10.15.4.(2)-B and -C, note (4): reading the column for the lesser limiting distance is the simple method; interpolation for limiting distance is also acceptable, only for limiting distances greater than 1.2 m."
+    }
+  ],
+  "tables": [
+    {
+      "id": "Table 9.10.15.4.",
+      "title": "Maximum Area of Glazed Openings in Exterior Walls of Houses",
+      "pdf_page": 902,
+      "row_key": "Maximum total area of exposing building face, m² (the first row whose value is not less than the area; null = over 100)",
+      "col_key": "Limiting distance, m (0 = the 'Less than 1.2' column)",
+      "dash": "A '—' (null) in the printed table follows a 100% entry: no limit at that distance; read as 100.",
+      "columns": [
+        0,
+        1.2,
+        1.5,
+        2.0,
+        4.0,
+        6.0,
+        8.0,
+        10.0,
+        12.0,
+        16.0,
+        20.0,
+        25.0
+      ],
+      "rows": [
+        {
+          "max_area": 30,
+          "values": [
+            0,
+            7,
+            9,
+            12,
+            39,
+            88,
+            100,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "max_area": 40,
+          "values": [
+            0,
+            7,
+            8,
+            11,
+            32,
+            69,
+            100,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "max_area": 50,
+          "values": [
+            0,
+            7,
+            8,
+            10,
+            28,
+            57,
+            100,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "max_area": 100,
+          "values": [
+            0,
+            7,
+            8,
+            9,
+            18,
+            34,
+            56,
+            84,
+            100,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "max_area": null,
+          "values": [
+            0,
+            7,
+            7,
+            8,
+            12,
+            19,
+            28,
+            40,
+            55,
+            92,
+            100,
+            null
+          ]
+        }
+      ],
+      "interpolation": "linear between columns, only for limiting distances greater than 1.2 m (Note A-9.10.15.4.(2), PDF p.1380)"
+    }
+  ],
+  "inputs": [
+    "occupancy",
+    "dwelling_unit_above_another",
+    "storeys",
+    "building_area_m2",
+    "limiting_distance_m",
+    "ebf_area_m2",
+    "glazed_area_m2",
+    "sprinklered",
+    "fire_response_over_10_min",
+    "glass_blocks",
+    "adjacent_rooms_sprinklered",
+    "faces_own_detached_garage"
+  ],
+  "derived": [
+    {
+      "name": "halve_limiting_distance",
+      "label": "Half the limiting distance is used (slow fire department response, not fully sprinklered)",
+      "expr": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "args": [
+              {
+                "var": "fire_response_over_10_min"
+              },
+              true
+            ]
+          },
+          {
+            "op": "ne",
+            "args": [
+              {
+                "var": "sprinklered"
+              },
+              "yes"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "limiting_distance_used_m",
+      "label": "Limiting distance used (halved under Sentence 9.10.15.3.(1) where it applies)",
+      "unit": "m",
+      "expr": {
+        "op": "if",
+        "args": [
+          {
+            "var": "halve_limiting_distance"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "var": "limiting_distance_m"
+              },
+              2
+            ]
+          },
+          {
+            "var": "limiting_distance_m"
+          }
+        ]
+      }
+    },
+    {
+      "name": "table_percent",
+      "label": "Table 9.10.15.4. percentage (lesser column)",
+      "unit": "%",
+      "expr": {
+        "op": "table",
+        "table": "Table 9.10.15.4.",
+        "row": {
+          "var": "ebf_area_m2"
+        },
+        "col": {
+          "var": "limiting_distance_used_m"
+        },
+        "mode": "lesser"
+      }
+    },
+    {
+      "name": "table_limit_m2",
+      "label": "Table 9.10.15.4. limit (lesser column)",
+      "unit": "m²",
+      "expr": {
+        "op": "div",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "var": "table_percent"
+              },
+              {
+                "var": "ebf_area_m2"
+              }
+            ]
+          },
+          100
+        ]
+      }
+    },
+    {
+      "name": "interpolated_percent",
+      "label": "Table 9.10.15.4. percentage (interpolated)",
+      "unit": "%",
+      "expr": {
+        "op": "table",
+        "table": "Table 9.10.15.4.",
+        "row": {
+          "var": "ebf_area_m2"
+        },
+        "col": {
+          "var": "limiting_distance_used_m"
+        },
+        "mode": "interpolate"
+      }
+    },
+    {
+      "name": "interpolated_limit_m2",
+      "label": "Table 9.10.15.4. limit (interpolated)",
+      "unit": "m²",
+      "expr": {
+        "op": "div",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "var": "interpolated_percent"
+              },
+              {
+                "var": "ebf_area_m2"
+              }
+            ]
+          },
+          100
+        ]
+      }
+    },
+    {
+      "name": "square_limit_m2",
+      "label": "Limiting distance squared (Clause (c), only where it is 1.2 m or more)",
+      "unit": "m²",
+      "expr": {
+        "op": "if",
+        "args": [
+          {
+            "op": "ge",
+            "args": [
+              {
+                "var": "limiting_distance_used_m"
+              },
+              1.2
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "var": "limiting_distance_used_m"
+              },
+              {
+                "var": "limiting_distance_used_m"
+              }
+            ]
+          },
+          0
+        ]
+      }
+    },
+    {
+      "name": "sentence_1_limit_m2",
+      "label": "Largest area Sentence (1) permits (Clause (a) or (c))",
+      "unit": "m²",
+      "expr": {
+        "op": "max",
+        "args": [
+          {
+            "var": "interpolated_limit_m2"
+          },
+          {
+            "var": "square_limit_m2"
+          }
+        ]
+      }
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "not_part9",
+      "state": "not_applicable",
+      "provision": "1.3.3.3.(1)",
+      "when": {
+        "op": "or",
+        "args": [
+          {
+            "op": "gt",
+            "args": [
+              {
+                "var": "storeys"
+              },
+              3
+            ]
+          },
+          {
+            "op": "gt",
+            "args": [
+              {
+                "var": "building_area_m2"
+              },
+              600
+            ]
+          }
+        ]
+      },
+      "message": "This building has more than 3 storeys or a building area over 600 m², so Part 9 does not apply (Div A, Sentence 1.3.3.3.(1)). The Part 3 requirements are not checked here.",
+      "if_unknown": "assume",
+      "assumption": "Assumed a Part 9 building (3 storeys or less, building area 600 m² or less); the storeys or building area were not stated."
+    },
+    {
+      "id": "not_a_house",
+      "state": "not_applicable",
+      "provision": "9.10.15.1.(1)",
+      "when": {
+        "op": "not",
+        "args": [
+          {
+            "op": "in",
+            "args": [
+              {
+                "var": "occupancy"
+              },
+              [
+                "single_family",
+                "multi_family"
+              ]
+            ]
+          }
+        ]
+      },
+      "message": "Subsection 9.10.15. covers houses and buildings that contain only dwelling units with none above another. For this occupancy the opening limits are in Article 9.10.14.4."
+    },
+    {
+      "id": "stacked_units",
+      "state": "not_applicable",
+      "provision": "9.10.15.1.(1)",
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "args": [
+              {
+                "var": "occupancy"
+              },
+              "multi_family"
+            ]
+          },
+          {
+            "op": "eq",
+            "args": [
+              {
+                "var": "dwelling_unit_above_another"
+              },
+              true
+            ]
+          }
+        ]
+      },
+      "message": "A dwelling unit is above another, so Subsection 9.10.15. does not apply; the opening limits are in Article 9.10.14.4."
+    },
+    {
+      "id": "follows_table",
+      "state": "follows",
+      "provision": "9.10.15.4.(1)",
+      "when": {
+        "op": "le",
+        "args": [
+          {
+            "var": "glazed_area_m2"
+          },
+          {
+            "var": "table_limit_m2"
+          }
+        ]
+      },
+      "message": "Glazed openings of {glazed_area_m2} m² in a {ebf_area_m2} m² exposing building face at a limiting distance of {limiting_distance_used_m} m are within Table 9.10.15.4. ({table_percent}%, {table_limit_m2} m²). This follows the acceptable solution in Clause 9.10.15.4.(1)(a)."
+    },
+    {
+      "id": "follows_square",
+      "state": "follows",
+      "provision": "9.10.15.4.(1)",
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "ge",
+            "args": [
+              {
+                "var": "limiting_distance_used_m"
+              },
+              1.2
+            ]
+          },
+          {
+            "op": "le",
+            "args": [
+              {
+                "var": "glazed_area_m2"
+              },
+              {
+                "var": "square_limit_m2"
+              }
+            ]
+          }
+        ]
+      },
+      "message": "Glazed openings of {glazed_area_m2} m² are not more than the limiting distance squared ({square_limit_m2} m² at {limiting_distance_used_m} m). This follows the acceptable solution in Clause 9.10.15.4.(1)(c)."
+    },
+    {
+      "id": "follows_interpolated",
+      "state": "follows",
+      "provision": "9.10.15.4.(1)",
+      "when": {
+        "op": "le",
+        "args": [
+          {
+            "var": "glazed_area_m2"
+          },
+          {
+            "var": "interpolated_limit_m2"
+          }
+        ]
+      },
+      "message": "Glazed openings of {glazed_area_m2} m² are within Table 9.10.15.4. when interpolating between limiting-distance columns ({interpolated_percent}%, {interpolated_limit_m2} m²), which Note A-9.10.15.4.(2) describes as acceptable above 1.2 m. Read by the lesser column, the limit is {table_limit_m2} m²; the officer may read the table either way."
+    },
+    {
+      "id": "follows_doubled",
+      "state": "follows",
+      "provision": "9.10.15.4.(7)",
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "le",
+            "args": [
+              {
+                "var": "glazed_area_m2"
+              },
+              {
+                "op": "mul",
+                "args": [
+                  2,
+                  {
+                    "var": "sentence_1_limit_m2"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "eq",
+                "args": [
+                  {
+                    "var": "glass_blocks"
+                  },
+                  true
+                ]
+              },
+              {
+                "op": "and",
+                "args": [
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "var": "sprinklered"
+                      },
+                      "yes"
+                    ]
+                  },
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "var": "adjacent_rooms_sprinklered"
+                      },
+                      true
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "message": "Glazed openings of {glazed_area_m2} m² are within twice the Sentence (1) limit ({sentence_1_limit_m2} m²), which Sentence 9.10.15.4.(7) permits for glass blocks or a sprinklered building with every room behind the wall sprinklered."
+    },
+    {
+      "id": "follows_own_garage",
+      "state": "follows",
+      "provision": "9.10.15.4.(6)",
+      "when": {
+        "op": "eq",
+        "args": [
+          {
+            "var": "faces_own_detached_garage"
+          },
+          true
+        ]
+      },
+      "message": "This wall faces a detached garage or accessory building that serves only this house on the same property, so Sentence 9.10.15.4.(6) lifts the limits on glazed openings."
+    },
+    {
+      "id": "departs_no_openings",
+      "state": "departs",
+      "provision": "9.10.15.4.(1)",
+      "when": {
+        "op": "lt",
+        "args": [
+          {
+            "var": "limiting_distance_used_m"
+          },
+          1.2
+        ]
+      },
+      "message": "At a limiting distance of {limiting_distance_used_m} m (less than 1.2 m), Table 9.10.15.4. permits no glazed openings in this face (0%), and the design shows {glazed_area_m2} m². This departs from the acceptable solution in Sentence 9.10.15.4.(1)."
+    },
+    {
+      "id": "departs",
+      "state": "departs",
+      "provision": "9.10.15.4.(1)",
+      "when": true,
+      "message": "Glazed openings of {glazed_area_m2} m² exceed the {sentence_1_limit_m2} m² that Sentence 9.10.15.4.(1) permits for a {ebf_area_m2} m² face at a limiting distance of {limiting_distance_used_m} m (Table 9.10.15.4., or the limiting distance squared). This departs from the acceptable solution in Sentence 9.10.15.4.(1)."
+    }
+  ],
+  "not_checked": [
+    "Clause 9.10.15.4.(1)(b): conformance with Subsection 3.2.3. (a Part 3 spatial separation calculation)",
+    "Sentence 9.10.15.4.(2): limits for separate portions of a stepped or skewed face",
+    "Sentences 9.10.15.4.(3) to (5): size and spacing of individual openings where the limiting distance is 2 m or less",
+    "Article 9.10.15.5.: fire-resistance rating and cladding of the face"
+  ]
+}
