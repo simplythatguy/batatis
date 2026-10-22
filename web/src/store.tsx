@@ -17,7 +17,7 @@ import { useSectionC } from "./api/sectionC";
 import { readSectionD, SectionDRecoveryError, type SectionDRead } from "./api/sectionD";
 import { isProvision, reconcileSectionC, sameCards } from "./provisions";
 import { caseFromEngine } from "./calm/openCase";
-import { refreshCase, setChecklist } from "./calm/caseExtras";
+import { refreshCase, resetExtras, setChecklist } from "./calm/caseExtras";
 
 /** Older builds kept the whole case here. It is removed on load and never written again. */
 const LEGACY_KEYS = ["batatis-web-case-v4", "batatis-web-case-v3"];
@@ -838,6 +838,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     activeCheck.current?.ctl.abort();
     activeCheck.current = null;
     clearEngineSession();
+    resetExtras();                                   // the next case never renders with the last case's rules, checklists or pack
     goneCase.current = null;
     sectionDHold.current = null;
     syncQueue.current = Promise.resolve();
