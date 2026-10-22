@@ -671,7 +671,7 @@
           }
         ]
       },
-      "message": "Unprotected openings of {opening_area_m2} m² in a {ebf_area_m2} m² exposing building face at a limiting distance of {limiting_distance_used_m} m are within Table 9.10.14.4.-A ({table_percent}%, {table_limit_m2} m²). This follows the acceptable solution in Clause 9.10.14.4.(1)(a)."
+      "message": "Unprotected openings of {opening_area_m2} in a {ebf_area_m2} exposing building face at a limiting distance of {limiting_distance_used_m} are within Table 9.10.14.4.-A ({table_percent}, {table_limit_m2}). This follows the acceptable solution in Clause 9.10.14.4.(1)(a)."
     },
     {
       "id": "follows_square",
@@ -702,7 +702,7 @@
           }
         ]
       },
-      "message": "Unprotected openings of {opening_area_m2} m² are within the Clause (c) limit of {square_limit_m2} m² at a limiting distance of {limiting_distance_used_m} m. This follows the acceptable solution in Clause 9.10.14.4.(1)(c)."
+      "message": "Unprotected openings of {opening_area_m2} are within the Clause (c) limit of {square_limit_m2} at a limiting distance of {limiting_distance_used_m}. This follows the acceptable solution in Clause 9.10.14.4.(1)(c)."
     },
     {
       "id": "follows_wired_glass",
@@ -739,7 +739,7 @@
           }
         ]
       },
-      "message": "The openings are wired glass in steel frames or glass blocks and are within twice the Sentence (1) limit ({sentence_1_limit_m2} m²), which Sentence 9.10.14.4.(6) permits."
+      "message": "The openings are wired glass in steel frames or glass blocks and are within twice the Sentence (1) limit ({sentence_1_limit_m2}), which Sentence 9.10.14.4.(6) permits."
     },
     {
       "id": "follows_sprinklered",
@@ -785,7 +785,7 @@
           }
         ]
       },
-      "message": "The building is sprinklered, every room behind the wall with openings is sprinklered, and the openings are within twice the Sentence (1) limit ({sentence_1_limit_m2} m²), which Sentence 9.10.14.4.(7) permits."
+      "message": "The building is sprinklered, every room behind the wall with openings is sprinklered, and the openings are within twice the Sentence (1) limit ({sentence_1_limit_m2}), which Sentence 9.10.14.4.(7) permits."
     },
     {
       "id": "follows_open_air_garage",
@@ -823,7 +823,7 @@
           }
         ]
       },
-      "message": "An open-air storage garage with a limiting distance of {limiting_distance_m} m (not less than 3 m) need not meet Sentence (1), under Sentence 9.10.14.4.(8)."
+      "message": "An open-air storage garage with a limiting distance of {limiting_distance_m} (not less than 3 m) need not meet Sentence (1), under Sentence 9.10.14.4.(8)."
     },
     {
       "id": "follows_street_level",
@@ -852,7 +852,7 @@
           }
         ]
       },
-      "message": "A storey facing a street at street level with a limiting distance of {limiting_distance_m} m (not less than 9 m) need not meet Sentence (1), under Sentence 9.10.14.4.(9)."
+      "message": "A storey facing a street at street level with a limiting distance of {limiting_distance_m} (not less than 9 m) need not meet Sentence (1), under Sentence 9.10.14.4.(9)."
     },
     {
       "id": "departs_no_openings",
@@ -867,14 +867,14 @@
           1.2
         ]
       },
-      "message": "At a limiting distance of {limiting_distance_used_m} m (less than 1.2 m), Table 9.10.14.4.-A permits no unprotected openings (0%), and the design shows {opening_area_m2} m². Openings there need closures under Sentence 9.10.14.4.(2). This departs from the acceptable solution in Sentence 9.10.14.4.(1)."
+      "message": "At a limiting distance of {limiting_distance_used_m} (less than 1.2 m), Table 9.10.14.4.-A permits no unprotected openings (0%), and the design shows {opening_area_m2}. Openings there need closures under Sentence 9.10.14.4.(2). This departs from the acceptable solution in Sentence 9.10.14.4.(1)."
     },
     {
       "id": "departs",
       "state": "departs",
       "provision": "9.10.14.4.(1)",
       "when": true,
-      "message": "Unprotected openings of {opening_area_m2} m² exceed the {sentence_1_limit_m2} m² that Sentence 9.10.14.4.(1) permits for a {ebf_area_m2} m² face at a limiting distance of {limiting_distance_used_m} m (Table 9.10.14.4.-A, or Clause (c)). This departs from the acceptable solution in Sentence 9.10.14.4.(1)."
+      "message": "Unprotected openings of {opening_area_m2} exceed the {sentence_1_limit_m2} that Sentence 9.10.14.4.(1) permits for a {ebf_area_m2} face at a limiting distance of {limiting_distance_used_m} (Table 9.10.14.4.-A, or Clause (c)). This departs from the acceptable solution in Sentence 9.10.14.4.(1)."
     }
   ],
   "not_checked": [

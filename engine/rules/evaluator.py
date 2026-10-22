@@ -229,12 +229,21 @@ def _decide(when: Any, env: _Env, order: list[str]) -> tuple[bool | None, list[s
     return None, fields
 
 
+def _unit(env: _Env, name: str) -> str | None:
+    return (env.specs[name] if name in env.specs else env.derived[name]).get('unit')
+
+
+def with_unit(text: str, unit: str | None) -> str:
+    """'2.1' + 'm²' -> '2.1 m²'; '7' + '%' -> '7%'."""
+    return text if not unit else f'{text}%' if unit == '%' else f'{text} {unit}'
+
+
 def _render(template: str, env: _Env) -> str:
     def value(match: re.Match) -> str:
         name = match.group(1)
         found, missing = ev({'var': name}, env)
         if found is not None:
-            return fmt(found)
+            return with_unit(fmt(found), _unit(env, name))
         if name in env.specs:
             return 'not stated'
         # A derived value that depends on an unanswered yes/no or choice the outcome did not need:
@@ -249,7 +258,7 @@ def _render(template: str, env: _Env) -> str:
                 return 'not determined'
             if fmt(value) not in shown:
                 shown.append(fmt(value))
-        return ' or '.join(shown)
+        return with_unit(' or '.join(shown), _unit(env, name))
     return _PLACEHOLDER.sub(value, template)
 
 

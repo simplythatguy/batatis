@@ -167,6 +167,14 @@ export interface CaseJurisdictionPack {
   pack: JurisdictionDetail | null;
 }
 
+export interface CaseRules {
+  case_id: string;
+  case_version: number;
+  edition: string;
+  notice: string;
+  results: RuleResult[];
+}
+
 /** Verification of one cited provision against the code database (NBC(AE) 2023, 2nd printing). */
 export interface CitationCheck {
   canonical_citation: string | null;
@@ -1036,6 +1044,65 @@ export interface RouteBullet {
 export interface RouteNotice {
   bullets: RouteBullet[];
   summary: string;
+}
+
+export interface RuleComputed {
+  label: string;
+  name: string;
+  unit: string | null;
+  value: string | number | boolean | null;
+}
+
+export interface RuleInputValue {
+  fact_id: string | null;
+  fact_status: "confirmed" | "unconfirmed" | null;
+  field: string;
+  label: string;
+  unit: string | null;
+  value: string | number | boolean | null;
+}
+
+export interface RuleProvisionRef {
+  citation: string;
+  division: string;
+  id: string;
+  pdf_page: number;
+}
+
+export interface RuleQuestion {
+  field: string;
+  label: string;
+  question: string;
+  why: string;
+}
+
+/** One rule over one set of inputs. A departure flag against an acceptable solution, never a finding that */
+export interface RuleResult {
+  article: string;
+  assumptions: string[];
+  computed: RuleComputed[];
+  ignored_inputs: string[];
+  inputs: RuleInputValue[];
+  message: string;
+  missing: RuleQuestion[];
+  next_step: string | null;
+  not_checked: string[];
+  outcome_id: string | null;
+  provision: RuleProvisionRef;
+  reviewed: boolean;
+  rule_id: string;
+  state: "follows" | "departs" | "needs_info" | "not_applicable";
+  state_label: string;
+  title: string;
+  unconfirmed_inputs: string[];
+}
+
+/** Rule definitions for the browser evaluator (web/src/rules/evaluate.ts). */
+export interface RuleSet {
+  edition: string;
+  index: Record<string, unknown>;
+  rules: (Record<string, unknown>)[];
+  version: number;
 }
 
 export interface ScopeCheck {

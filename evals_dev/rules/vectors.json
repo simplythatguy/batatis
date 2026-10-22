@@ -1,0 +1,2116 @@
+{
+ "version": 1,
+ "about": "Golden vectors for the coded rules (WP-31). Both evaluators run every vector: engine/tests/test_rules_vectors.py and web/src/rules/rules.test.ts. Expected values were set by hand from the code text, not from either evaluator. reviewed: false until a domain reviewer signs them (REVIEW.md).",
+ "vectors": [
+  {
+   "id": "G01",
+   "rule": "glazed-openings-houses",
+   "description": "1.2 m, 30 m² face, 2.1 m² glazing: exactly the 7% Table value",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 1.2,
+    "ebf_area_m2": 30,
+    "glazed_area_m2": 2.1
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_table",
+    "provision": "9.10.15.4.(1)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "G02",
+   "rule": "glazed-openings-houses",
+   "description": "1.2 m, 30 m² face, 2.11 m²: just over 7%; no exception",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 1.2,
+    "ebf_area_m2": 30,
+    "glazed_area_m2": 2.11,
+    "glass_blocks": false,
+    "faces_own_detached_garage": false
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs",
+    "provision": "9.10.15.4.(1)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "G03",
+   "rule": "glazed-openings-houses",
+   "description": "Demo: east wall 1.2 m from the line, 4 m² of windows in 30 m²; glass blocks not stated (doubling would cover it)",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 1.2,
+    "ebf_area_m2": 30,
+    "glazed_area_m2": 4
+   },
+   "expect": {
+    "state": "needs_info",
+    "outcome_id": null,
+    "provision": "9.10.15.4.(1)",
+    "missing": [
+     "glass_blocks"
+    ]
+   },
+   "tags": [
+    "missing",
+    "demo"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "G04",
+   "rule": "glazed-openings-houses",
+   "description": "0.9 m: the less-than-1.2 m column is 0%",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 0.9,
+    "ebf_area_m2": 30,
+    "glazed_area_m2": 0.5,
+    "glass_blocks": false,
+    "faces_own_detached_garage": false
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs_no_openings",
+    "provision": "9.10.15.4.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "G05",
+   "rule": "glazed-openings-houses",
+   "description": "0.9 m with no glazing at all",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 0.9,
+    "ebf_area_m2": 30,
+    "glazed_area_m2": 0
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_table",
+    "provision": "9.10.15.4.(1)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "G06",
+   "rule": "glazed-openings-houses",
+   "description": "2.0 m, 50 m² face: 10% = 5.0 m²",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 2.0,
+    "ebf_area_m2": 50,
+    "glazed_area_m2": 5.0
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_table",
+    "provision": "9.10.15.4.(1)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "G07",
+   "rule": "glazed-openings-houses",
+   "description": "2.0 m, 50 m² face, 5.01 m²: over 10% and over 2.0² = 4",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 2.0,
+    "ebf_area_m2": 50,
+    "glazed_area_m2": 5.01,
+    "glass_blocks": false,
+    "faces_own_detached_garage": false
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs",
+    "provision": "9.10.15.4.(1)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "G08",
+   "rule": "glazed-openings-houses",
+   "description": "3.0 m, 150 m² face: lesser column 8% = 12, interpolated 10% = 15, square 9; 14 m² needs interpolation",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 3.0,
+    "ebf_area_m2": 150,
+    "glazed_area_m2": 14
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_interpolated",
+    "provision": "9.10.15.4.(1)",
+    "missing": []
+   },
+   "tags": [
+    "interpolation"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "G09",
+   "rule": "glazed-openings-houses",
+   "description": "Same face at exactly the interpolated 15 m²",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 3.0,
+    "ebf_area_m2": 150,
+    "glazed_area_m2": 15
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_interpolated",
+    "provision": "9.10.15.4.(1)",
+    "missing": []
+   },
+   "tags": [
+    "boundary",
+    "interpolation"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "G10",
+   "rule": "glazed-openings-houses",
+   "description": "15.5 m², sprinklered with every room behind the wall sprinklered: up to twice 15 m²",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "yes",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 3.0,
+    "ebf_area_m2": 150,
+    "glazed_area_m2": 15.5,
+    "adjacent_rooms_sprinklered": true
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_doubled",
+    "provision": "9.10.15.4.(7)",
+    "missing": []
+   },
+   "tags": [
+    "exception"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "G11",
+   "rule": "glazed-openings-houses",
+   "description": "15.5 m², rooms not all sprinklered, no glass blocks, but faces its own detached garage",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "yes",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 3.0,
+    "ebf_area_m2": 150,
+    "glazed_area_m2": 15.5,
+    "adjacent_rooms_sprinklered": false,
+    "glass_blocks": false,
+    "faces_own_detached_garage": true
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_own_garage",
+    "provision": "9.10.15.4.(6)",
+    "missing": []
+   },
+   "tags": [
+    "exception"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "G12",
+   "rule": "glazed-openings-houses",
+   "description": "2.4 m but slow fire response and unsprinklered: 1.2 m is used; 2.1 m² = 7% of 30",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": true,
+    "limiting_distance_m": 2.4,
+    "ebf_area_m2": 30,
+    "glazed_area_m2": 2.1
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_table",
+    "provision": "9.10.15.4.(1)",
+    "missing": []
+   },
+   "tags": [
+    "halved"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "G13",
+   "rule": "glazed-openings-houses",
+   "description": "2.4 m halved to 1.2 m; 3.0 m² is over 7% (2.1) though it would fit the 2.0 m column unhalved",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": true,
+    "limiting_distance_m": 2.4,
+    "ebf_area_m2": 30,
+    "glazed_area_m2": 3.0,
+    "glass_blocks": false,
+    "faces_own_detached_garage": false
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs",
+    "provision": "9.10.15.4.(1)",
+    "missing": []
+   },
+   "tags": [
+    "halved"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "G14",
+   "rule": "glazed-openings-houses",
+   "description": "Business occupancy: Subsection 9.10.14. applies instead",
+   "inputs": {
+    "occupancy": "business",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false
+   },
+   "expect": {
+    "state": "not_applicable",
+    "outcome_id": "not_a_house",
+    "provision": "9.10.15.1.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "G15",
+   "rule": "glazed-openings-houses",
+   "description": "Apartment with a unit above another",
+   "inputs": {
+    "occupancy": "multi_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "dwelling_unit_above_another": true
+   },
+   "expect": {
+    "state": "not_applicable",
+    "outcome_id": "stacked_units",
+    "provision": "9.10.15.1.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "G16",
+   "rule": "glazed-openings-houses",
+   "description": "4 storeys: outside Part 9",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 4,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false
+   },
+   "expect": {
+    "state": "not_applicable",
+    "outcome_id": "not_part9",
+    "provision": "1.3.3.3.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "G17",
+   "rule": "glazed-openings-houses",
+   "description": "Only the occupancy is known",
+   "inputs": {
+    "occupancy": "single_family"
+   },
+   "expect": {
+    "state": "needs_info",
+    "outcome_id": null,
+    "provision": "9.10.15.4.(1)",
+    "missing": [
+     "limiting_distance_m",
+     "ebf_area_m2",
+     "glazed_area_m2"
+    ],
+    "assumptions": 1
+   },
+   "tags": [
+    "missing"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "G18",
+   "rule": "glazed-openings-houses",
+   "description": "1.21 m: interpolation just above 1.2 m gives 7.07% = 2.12 m²",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 1.21,
+    "ebf_area_m2": 30,
+    "glazed_area_m2": 2.12
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_interpolated",
+    "provision": "9.10.15.4.(1)",
+    "missing": []
+   },
+   "tags": [
+    "boundary",
+    "interpolation"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "G19",
+   "rule": "glazed-openings-houses",
+   "description": "A negative glazed area is ignored and asked again",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 2.0,
+    "ebf_area_m2": 50,
+    "glazed_area_m2": -1
+   },
+   "expect": {
+    "state": "needs_info",
+    "outcome_id": null,
+    "provision": "9.10.15.4.(1)",
+    "missing": [
+     "glazed_area_m2"
+    ]
+   },
+   "tags": [
+    "missing",
+    "invalid"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "G20",
+   "rule": "glazed-openings-houses",
+   "description": "100 m² face uses the 100 row: 9% at 2.0 m = 9.0 m²",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 2.0,
+    "ebf_area_m2": 100,
+    "glazed_area_m2": 9.0
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_table",
+    "provision": "9.10.15.4.(1)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "G21",
+   "rule": "glazed-openings-houses",
+   "description": "100.5 m² face uses the Over 100 row: 8% = 8.04 m², so 9.0 m² departs",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 2.0,
+    "ebf_area_m2": 100.5,
+    "glazed_area_m2": 9.0,
+    "glass_blocks": false,
+    "faces_own_detached_garage": false
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs",
+    "provision": "9.10.15.4.(1)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "U01",
+   "rule": "unprotected-openings",
+   "description": "Business, 1.2 m, 30 m² face, 2.1 m²: exactly 7%",
+   "inputs": {
+    "occupancy": "business",
+    "storeys": 2,
+    "building_area_m2": 300,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 1.2,
+    "ebf_area_m2": 30,
+    "opening_area_m2": 2.1
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_table",
+    "provision": "9.10.14.4.(1)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "U02",
+   "rule": "unprotected-openings",
+   "description": "Mercantile row: 4% of 30 m² = 1.2 m²",
+   "inputs": {
+    "occupancy": "mercantile",
+    "storeys": 2,
+    "building_area_m2": 300,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 1.2,
+    "ebf_area_m2": 30,
+    "opening_area_m2": 1.2
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_table",
+    "provision": "9.10.14.4.(1)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "U03",
+   "rule": "unprotected-openings",
+   "description": "Mercantile, 1.3 m²: over 4% and over half of 1.2² (0.72)",
+   "inputs": {
+    "occupancy": "mercantile",
+    "storeys": 2,
+    "building_area_m2": 300,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 1.2,
+    "ebf_area_m2": 30,
+    "opening_area_m2": 1.3,
+    "wired_glass_or_glass_block": false
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs",
+    "provision": "9.10.14.4.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "U04",
+   "rule": "unprotected-openings",
+   "description": "Mercantile, 4.0 m: table 20% = 6.0, half of 4² = 8.0; 7.0 m² fits Clause (c)",
+   "inputs": {
+    "occupancy": "mercantile",
+    "storeys": 2,
+    "building_area_m2": 300,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 4.0,
+    "ebf_area_m2": 30,
+    "opening_area_m2": 7.0
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_square",
+    "provision": "9.10.14.4.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "U05",
+   "rule": "unprotected-openings",
+   "description": "Industrial without a hazard class",
+   "inputs": {
+    "occupancy": "industrial",
+    "storeys": 2,
+    "building_area_m2": 300,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 1.2,
+    "ebf_area_m2": 30,
+    "opening_area_m2": 1.2
+   },
+   "expect": {
+    "state": "needs_info",
+    "outcome_id": null,
+    "provision": "9.10.14.4.(1)",
+    "missing": [
+     "industrial_hazard"
+    ]
+   },
+   "tags": [
+    "missing"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "U06",
+   "rule": "unprotected-openings",
+   "description": "High-hazard industrial is outside Part 9",
+   "inputs": {
+    "occupancy": "industrial",
+    "storeys": 2,
+    "building_area_m2": 300,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "industrial_hazard": "high"
+   },
+   "expect": {
+    "state": "not_applicable",
+    "outcome_id": "high_hazard",
+    "provision": "1.3.3.3.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "U07",
+   "rule": "unprotected-openings",
+   "description": "Medium-hazard industrial reads the mercantile row: 4% of 30 = 1.2",
+   "inputs": {
+    "occupancy": "industrial",
+    "storeys": 2,
+    "building_area_m2": 300,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "industrial_hazard": "medium",
+    "limiting_distance_m": 1.2,
+    "ebf_area_m2": 30,
+    "opening_area_m2": 1.2
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_table",
+    "provision": "9.10.14.4.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "U08",
+   "rule": "unprotected-openings",
+   "description": "A house: Subsection 9.10.15. applies",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 300,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false
+   },
+   "expect": {
+    "state": "not_applicable",
+    "outcome_id": "house",
+    "provision": "9.10.14.1.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "U09",
+   "rule": "unprotected-openings",
+   "description": "Apartment with units stacked: 10% of 50 m² at 2.0 m",
+   "inputs": {
+    "occupancy": "multi_family",
+    "storeys": 2,
+    "building_area_m2": 300,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "dwelling_unit_above_another": true,
+    "limiting_distance_m": 2.0,
+    "ebf_area_m2": 50,
+    "opening_area_m2": 5.0
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_table",
+    "provision": "9.10.14.4.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "U10",
+   "rule": "unprotected-openings",
+   "description": "0.9 m: no unprotected openings permitted",
+   "inputs": {
+    "occupancy": "business",
+    "storeys": 2,
+    "building_area_m2": 300,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 0.9,
+    "ebf_area_m2": 30,
+    "opening_area_m2": 0.3,
+    "wired_glass_or_glass_block": false
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs_no_openings",
+    "provision": "9.10.14.4.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "U11",
+   "rule": "unprotected-openings",
+   "description": "Wired glass: up to twice 5.0 m²",
+   "inputs": {
+    "occupancy": "business",
+    "storeys": 2,
+    "building_area_m2": 300,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 2.0,
+    "ebf_area_m2": 50,
+    "opening_area_m2": 9.0,
+    "wired_glass_or_glass_block": true
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_wired_glass",
+    "provision": "9.10.14.4.(6)",
+    "missing": []
+   },
+   "tags": [
+    "exception"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "U12",
+   "rule": "unprotected-openings",
+   "description": "Sprinklered throughout with every room behind the wall sprinklered: exactly twice 5.0 m²",
+   "inputs": {
+    "occupancy": "business",
+    "storeys": 2,
+    "building_area_m2": 300,
+    "sprinklered": "yes",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 2.0,
+    "ebf_area_m2": 50,
+    "opening_area_m2": 10.0,
+    "adjacent_rooms_sprinklered": true,
+    "wired_glass_or_glass_block": false
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_sprinklered",
+    "provision": "9.10.14.4.(7)",
+    "missing": []
+   },
+   "tags": [
+    "exception",
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "U13",
+   "rule": "unprotected-openings",
+   "description": "Street-level storey facing a street at exactly 9 m",
+   "inputs": {
+    "occupancy": "business",
+    "storeys": 2,
+    "building_area_m2": 300,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 9.0,
+    "ebf_area_m2": 200,
+    "opening_area_m2": 170,
+    "wired_glass_or_glass_block": false,
+    "street_facing_storey": true
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_street_level",
+    "provision": "9.10.14.4.(9)",
+    "missing": []
+   },
+   "tags": [
+    "exception",
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "U14",
+   "rule": "unprotected-openings",
+   "description": "Same at 8.99 m: the street exception does not reach it",
+   "inputs": {
+    "occupancy": "business",
+    "storeys": 2,
+    "building_area_m2": 300,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 8.99,
+    "ebf_area_m2": 200,
+    "opening_area_m2": 170,
+    "wired_glass_or_glass_block": false,
+    "street_facing_storey": true
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs",
+    "provision": "9.10.14.4.(1)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "U15",
+   "rule": "unprotected-openings",
+   "description": "Open-air storage garage at exactly 3 m",
+   "inputs": {
+    "occupancy": "industrial",
+    "storeys": 2,
+    "building_area_m2": 300,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "industrial_hazard": "low",
+    "limiting_distance_m": 3.0,
+    "ebf_area_m2": 100,
+    "opening_area_m2": 80,
+    "wired_glass_or_glass_block": false,
+    "open_air_storage_garage": true
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_open_air_garage",
+    "provision": "9.10.14.4.(8)",
+    "missing": []
+   },
+   "tags": [
+    "exception",
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "U16",
+   "rule": "unprotected-openings",
+   "description": "Slow response halves 10 m to 5 m for Sentence (1), but Sentence (9) uses the actual 10 m",
+   "inputs": {
+    "occupancy": "business",
+    "storeys": 2,
+    "building_area_m2": 300,
+    "sprinklered": "no",
+    "fire_response_over_10_min": true,
+    "limiting_distance_m": 10.0,
+    "ebf_area_m2": 200,
+    "opening_area_m2": 150,
+    "wired_glass_or_glass_block": false,
+    "street_facing_storey": true
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_street_level",
+    "provision": "9.10.14.4.(9)",
+    "missing": []
+   },
+   "tags": [
+    "halved",
+    "exception"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "U17",
+   "rule": "unprotected-openings",
+   "description": "Assembly is not in Table 9.10.14.4.-A",
+   "inputs": {
+    "occupancy": "assembly",
+    "storeys": 2,
+    "building_area_m2": 300,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false
+   },
+   "expect": {
+    "state": "not_applicable",
+    "outcome_id": "occupancy_not_in_table",
+    "provision": "9.10.14.4.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "S01",
+   "rule": "soffits-houses",
+   "description": "Limiting distance exactly 0.45 m with a soffit",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "soffit_projects": true,
+    "limiting_distance_m": 0.45,
+    "faces_public_way": false
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs_close_face",
+    "provision": "9.10.15.5.(8)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "S02",
+   "rule": "soffits-houses",
+   "description": "0.46 m, soffit face exactly 0.45 m from the line",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "soffit_projects": true,
+    "limiting_distance_m": 0.46,
+    "soffit_to_property_line_m": 0.45
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_setback",
+    "provision": "9.10.15.5.(9)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "S03",
+   "rule": "soffits-houses",
+   "description": "0.46 m, soffit face 0.44 m from the line",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "soffit_projects": true,
+    "limiting_distance_m": 0.46,
+    "soffit_to_property_line_m": 0.44,
+    "faces_public_way": false
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs_soffit_too_close",
+    "provision": "9.10.15.5.(9)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "S04",
+   "rule": "soffits-houses",
+   "description": "0.3 m but the soffit faces a public way",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "soffit_projects": true,
+    "limiting_distance_m": 0.3,
+    "faces_public_way": true
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_public_way",
+    "provision": "9.10.15.5.(10)",
+    "missing": []
+   },
+   "tags": [
+    "exception"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "S05",
+   "rule": "soffits-houses",
+   "description": "1.0 m, soffit 0.2 m from the line, faces a public way",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "soffit_projects": true,
+    "limiting_distance_m": 1.0,
+    "soffit_to_property_line_m": 0.2,
+    "faces_public_way": true
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_public_way",
+    "provision": "9.10.15.5.(10)",
+    "missing": []
+   },
+   "tags": [
+    "exception"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "S06",
+   "rule": "soffits-houses",
+   "description": "No projecting soffit",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "soffit_projects": false
+   },
+   "expect": {
+    "state": "not_applicable",
+    "outcome_id": "no_soffit",
+    "provision": "9.10.15.5.(8)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "S07",
+   "rule": "soffits-houses",
+   "description": "0.8 m halved to 0.4 m (slow response, unsprinklered)",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": true,
+    "soffit_projects": true,
+    "limiting_distance_m": 0.8,
+    "soffit_to_property_line_m": 0.6,
+    "faces_public_way": false
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs_close_face",
+    "provision": "9.10.15.5.(8)",
+    "missing": []
+   },
+   "tags": [
+    "halved"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "S08",
+   "rule": "soffits-houses",
+   "description": "Same, sprinklered: no halving",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "yes",
+    "fire_response_over_10_min": true,
+    "soffit_projects": true,
+    "limiting_distance_m": 0.8,
+    "soffit_to_property_line_m": 0.6
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_setback",
+    "provision": "9.10.15.5.(9)",
+    "missing": []
+   },
+   "tags": [
+    "halved"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "S09",
+   "rule": "soffits-houses",
+   "description": "0.8 m, unsprinklered, response time unknown: the answer decides (8) or (9)",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": null,
+    "soffit_projects": true,
+    "limiting_distance_m": 0.8,
+    "soffit_to_property_line_m": 0.6,
+    "faces_public_way": false
+   },
+   "expect": {
+    "state": "needs_info",
+    "outcome_id": null,
+    "provision": "9.10.15.5.(8)",
+    "missing": [
+     "fire_response_over_10_min"
+    ]
+   },
+   "tags": [
+    "missing",
+    "halved"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "S10",
+   "rule": "soffits-houses",
+   "description": "2.0 m, soffit 0.6 m: halved or not it is over 0.45 m, so nothing is asked",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": null,
+    "fire_response_over_10_min": null,
+    "soffit_projects": true,
+    "limiting_distance_m": 2.0,
+    "soffit_to_property_line_m": 0.6
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_setback",
+    "provision": "9.10.15.5.(9)",
+    "missing": []
+   },
+   "tags": [
+    "missing"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "S11",
+   "rule": "soffits-houses",
+   "description": "0.3 m, public way not stated",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "soffit_projects": true,
+    "limiting_distance_m": 0.3
+   },
+   "expect": {
+    "state": "needs_info",
+    "outcome_id": null,
+    "provision": "9.10.15.5.(8)",
+    "missing": [
+     "faces_public_way"
+    ]
+   },
+   "tags": [
+    "missing"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "S12",
+   "rule": "soffits-houses",
+   "description": "Business occupancy",
+   "inputs": {
+    "occupancy": "business",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "soffit_projects": true
+   },
+   "expect": {
+    "state": "not_applicable",
+    "outcome_id": "not_a_house",
+    "provision": "9.10.15.1.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "S13",
+   "rule": "soffits-houses",
+   "description": "Limiting distance missing",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "soffit_projects": true,
+    "soffit_to_property_line_m": 0.6
+   },
+   "expect": {
+    "state": "needs_info",
+    "outcome_id": null,
+    "provision": "9.10.15.5.(8)",
+    "missing": [
+     "limiting_distance_m"
+    ]
+   },
+   "tags": [
+    "missing"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "S14",
+   "rule": "soffits-houses",
+   "description": "Storeys and area not stated: assumed Part 9, still checked",
+   "inputs": {
+    "occupancy": "single_family",
+    "sprinklered": "yes",
+    "soffit_projects": true,
+    "limiting_distance_m": 1.0,
+    "soffit_to_property_line_m": 0.5
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_setback",
+    "provision": "9.10.15.5.(9)",
+    "missing": [],
+    "assumptions": 1
+   },
+   "tags": [
+    "missing"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "F01",
+   "rule": "firewall-suite-rowhouses",
+   "description": "4 houses, all with suites, no firewall",
+   "inputs": {
+    "occupancy": "multi_family",
+    "storeys": 2,
+    "building_area_m2": 400,
+    "houses_in_building": 4,
+    "houses_with_secondary_suite": 4,
+    "max_suite_houses_between_firewalls": 4
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs",
+    "provision": "9.10.11.2.(2)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "F02",
+   "rule": "firewall-suite-rowhouses",
+   "description": "4 houses with suites, a firewall in the middle",
+   "inputs": {
+    "occupancy": "multi_family",
+    "storeys": 2,
+    "building_area_m2": 400,
+    "houses_in_building": 4,
+    "houses_with_secondary_suite": 4,
+    "max_suite_houses_between_firewalls": 2
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows",
+    "provision": "9.10.11.2.(2)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "F03",
+   "rule": "firewall-suite-rowhouses",
+   "description": "3 adjacent suite houses between firewalls",
+   "inputs": {
+    "occupancy": "multi_family",
+    "storeys": 2,
+    "building_area_m2": 400,
+    "houses_in_building": 6,
+    "houses_with_secondary_suite": 6,
+    "max_suite_houses_between_firewalls": 3
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs",
+    "provision": "9.10.11.2.(2)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "F04",
+   "rule": "firewall-suite-rowhouses",
+   "description": "A duplex (2 houses): Sentence (2) needs more than 2",
+   "inputs": {
+    "occupancy": "multi_family",
+    "storeys": 2,
+    "building_area_m2": 400,
+    "houses_in_building": 2,
+    "houses_with_secondary_suite": 2
+   },
+   "expect": {
+    "state": "not_applicable",
+    "outcome_id": "two_houses_or_fewer",
+    "provision": "9.10.11.2.(2)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "F05",
+   "rule": "firewall-suite-rowhouses",
+   "description": "3 houses, one with a suite",
+   "inputs": {
+    "occupancy": "multi_family",
+    "storeys": 2,
+    "building_area_m2": 400,
+    "houses_in_building": 3,
+    "houses_with_secondary_suite": 1
+   },
+   "expect": {
+    "state": "not_applicable",
+    "outcome_id": "fewer_than_two_suites",
+    "provision": "9.10.11.2.(2)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "F06",
+   "rule": "firewall-suite-rowhouses",
+   "description": "3 houses, 2 with suites: no part can hold more than 2",
+   "inputs": {
+    "occupancy": "multi_family",
+    "storeys": 2,
+    "building_area_m2": 400,
+    "houses_in_building": 3,
+    "houses_with_secondary_suite": 2
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows",
+    "provision": "9.10.11.2.(2)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "F07",
+   "rule": "firewall-suite-rowhouses",
+   "description": "5 houses, 3 with suites, firewall layout not stated",
+   "inputs": {
+    "occupancy": "multi_family",
+    "storeys": 2,
+    "building_area_m2": 400,
+    "houses_in_building": 5,
+    "houses_with_secondary_suite": 3
+   },
+   "expect": {
+    "state": "needs_info",
+    "outcome_id": null,
+    "provision": "9.10.11.2.(2)",
+    "missing": [
+     "max_suite_houses_between_firewalls"
+    ]
+   },
+   "tags": [
+    "missing"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "F08",
+   "rule": "firewall-suite-rowhouses",
+   "description": "Business occupancy",
+   "inputs": {
+    "occupancy": "business",
+    "storeys": 2,
+    "building_area_m2": 400
+   },
+   "expect": {
+    "state": "not_applicable",
+    "outcome_id": "not_residential",
+    "provision": "9.10.11.2.(2)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "F09",
+   "rule": "firewall-suite-rowhouses",
+   "description": "Number of houses not stated",
+   "inputs": {
+    "occupancy": "multi_family",
+    "storeys": 2,
+    "building_area_m2": 400
+   },
+   "expect": {
+    "state": "needs_info",
+    "outcome_id": null,
+    "provision": "9.10.11.2.(2)",
+    "missing": [
+     "houses_in_building"
+    ]
+   },
+   "tags": [
+    "missing"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "F10",
+   "rule": "firewall-suite-rowhouses",
+   "description": "4 storeys: outside Part 9",
+   "inputs": {
+    "occupancy": "multi_family",
+    "storeys": 4,
+    "building_area_m2": 400
+   },
+   "expect": {
+    "state": "not_applicable",
+    "outcome_id": "not_part9",
+    "provision": "1.3.3.3.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "F11",
+   "rule": "firewall-suite-rowhouses",
+   "description": "Described as houses: 6 with suites, firewalls every 2",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 400,
+    "houses_in_building": 6,
+    "houses_with_secondary_suite": 6,
+    "max_suite_houses_between_firewalls": 2
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows",
+    "provision": "9.10.11.2.(2)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "F12",
+   "rule": "firewall-suite-rowhouses",
+   "description": "3 houses all with suites, no firewall",
+   "inputs": {
+    "occupancy": "multi_family",
+    "storeys": 2,
+    "building_area_m2": 400,
+    "houses_in_building": 3,
+    "houses_with_secondary_suite": 3,
+    "max_suite_houses_between_firewalls": 3
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs",
+    "provision": "9.10.11.2.(2)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "D01",
+   "rule": "fire-dampers",
+   "description": "No duct through a rated fire separation",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 300,
+    "duct_penetrates_rated_separation": false,
+    "fire_damper_provided": false
+   },
+   "expect": {
+    "state": "not_applicable",
+    "outcome_id": "no_penetration",
+    "provision": "9.10.13.13.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "D02",
+   "rule": "fire-dampers",
+   "description": "Damper installed",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 300,
+    "duct_penetrates_rated_separation": true,
+    "fire_damper_provided": true
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_damper",
+    "provision": "9.10.13.13.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "D03",
+   "rule": "fire-dampers",
+   "description": "Commercial cooking duct",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 300,
+    "duct_penetrates_rated_separation": true,
+    "fire_damper_provided": false,
+    "duct_use": "commercial_cooking"
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_cooking",
+    "provision": "9.10.13.13.(5)",
+    "missing": []
+   },
+   "tags": [
+    "exception"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "D04",
+   "rule": "fire-dampers",
+   "description": "A/C branch: 129.9 cm², 1.2 m discharge",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 300,
+    "duct_penetrates_rated_separation": true,
+    "fire_damper_provided": false,
+    "duct_use": "ac_branch",
+    "duct_noncombustible": true,
+    "duct_melting_point_c": 1400,
+    "duct_area_cm2": 129.9,
+    "discharge_height_m": 1.2
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_ac_branch",
+    "provision": "9.10.13.13.(2)",
+    "missing": []
+   },
+   "tags": [
+    "exception",
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "D05",
+   "rule": "fire-dampers",
+   "description": "A/C branch at exactly 130 cm²",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 300,
+    "duct_penetrates_rated_separation": true,
+    "fire_damper_provided": false,
+    "duct_use": "ac_branch",
+    "duct_noncombustible": true,
+    "duct_melting_point_c": 1400,
+    "duct_area_cm2": 130,
+    "discharge_height_m": 1.0
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs_ac_branch",
+    "provision": "9.10.13.13.(1)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "D06",
+   "rule": "fire-dampers",
+   "description": "A/C branch with a melting point of exactly 760 °C",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 300,
+    "duct_penetrates_rated_separation": true,
+    "fire_damper_provided": false,
+    "duct_use": "ac_branch",
+    "duct_noncombustible": true,
+    "duct_melting_point_c": 760,
+    "duct_area_cm2": 100,
+    "discharge_height_m": 1.0
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_ac_branch",
+    "provision": "9.10.13.13.(2)",
+    "missing": []
+   },
+   "tags": [
+    "exception",
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "D07",
+   "rule": "fire-dampers",
+   "description": "Aluminum A/C branch (melting point 660 °C)",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 300,
+    "duct_penetrates_rated_separation": true,
+    "fire_damper_provided": false,
+    "duct_use": "ac_branch",
+    "duct_noncombustible": true,
+    "duct_melting_point_c": 660,
+    "duct_area_cm2": 100,
+    "discharge_height_m": 1.0
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs_ac_branch",
+    "provision": "9.10.13.13.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "D08",
+   "rule": "fire-dampers",
+   "description": "Branch into an exhaust riser, carried up 500 mm",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 300,
+    "duct_penetrates_rated_separation": true,
+    "fire_damper_provided": false,
+    "duct_use": "exhaust_riser_branch",
+    "duct_noncombustible": true,
+    "duct_melting_point_c": 1400,
+    "branch_carried_up_mm": 500,
+    "riser_negative_pressure": true
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_riser_branch",
+    "provision": "9.10.13.13.(3)",
+    "missing": []
+   },
+   "tags": [
+    "exception",
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "D09",
+   "rule": "fire-dampers",
+   "description": "Branch carried up 499 mm",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 300,
+    "duct_penetrates_rated_separation": true,
+    "fire_damper_provided": false,
+    "duct_use": "exhaust_riser_branch",
+    "duct_noncombustible": true,
+    "duct_melting_point_c": 1400,
+    "branch_carried_up_mm": 499,
+    "riser_negative_pressure": true
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs_riser_branch",
+    "provision": "9.10.13.13.(1)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "D10",
+   "rule": "fire-dampers",
+   "description": "Service-space duct at exactly 760 °C: Sentence (4) needs above 760",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 300,
+    "duct_penetrates_rated_separation": true,
+    "fire_damper_provided": false,
+    "duct_use": "vertical_service_space_exhaust",
+    "duct_noncombustible": true,
+    "duct_melting_point_c": 760,
+    "exhausts_outside_at_top": true
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs_service_space",
+    "provision": "9.10.13.13.(1)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "D11",
+   "rule": "fire-dampers",
+   "description": "Service-space duct at 761 °C",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 300,
+    "duct_penetrates_rated_separation": true,
+    "fire_damper_provided": false,
+    "duct_use": "vertical_service_space_exhaust",
+    "duct_noncombustible": true,
+    "duct_melting_point_c": 761,
+    "exhausts_outside_at_top": true
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_service_space",
+    "provision": "9.10.13.13.(4)",
+    "missing": []
+   },
+   "tags": [
+    "exception",
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "D12",
+   "rule": "fire-dampers",
+   "description": "Membrane ceiling openings per Appendix D",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 300,
+    "duct_penetrates_rated_separation": true,
+    "fire_damper_provided": false,
+    "duct_use": "ceiling_membrane_opening",
+    "appendix_d_conforms": true
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_membrane",
+    "provision": "9.10.5.1.(3)",
+    "missing": []
+   },
+   "tags": [
+    "exception"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "D13",
+   "rule": "fire-dampers",
+   "description": "Membrane ceiling openings not per Appendix D",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 300,
+    "duct_penetrates_rated_separation": true,
+    "fire_damper_provided": false,
+    "duct_use": "ceiling_membrane_opening",
+    "appendix_d_conforms": false
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs_membrane",
+    "provision": "9.10.13.13.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "D14",
+   "rule": "fire-dampers",
+   "description": "Any other duct without a damper",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 300,
+    "duct_penetrates_rated_separation": true,
+    "fire_damper_provided": false,
+    "duct_use": "other"
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs",
+    "provision": "9.10.13.13.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "D15",
+   "rule": "fire-dampers",
+   "description": "No damper, duct kind not stated",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 300,
+    "duct_penetrates_rated_separation": true,
+    "fire_damper_provided": false
+   },
+   "expect": {
+    "state": "needs_info",
+    "outcome_id": null,
+    "provision": "9.10.13.13.(1)",
+    "missing": [
+     "duct_use"
+    ]
+   },
+   "tags": [
+    "missing"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "D16",
+   "rule": "fire-dampers",
+   "description": "A/C branch, only noncombustible known",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 300,
+    "duct_penetrates_rated_separation": true,
+    "fire_damper_provided": false,
+    "duct_use": "ac_branch",
+    "duct_noncombustible": true
+   },
+   "expect": {
+    "state": "needs_info",
+    "outcome_id": null,
+    "provision": "9.10.13.13.(1)",
+    "missing": [
+     "duct_melting_point_c",
+     "duct_area_cm2",
+     "discharge_height_m"
+    ]
+   },
+   "tags": [
+    "missing"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "D17",
+   "rule": "fire-dampers",
+   "description": "Whether a duct penetrates is not stated",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 300
+   },
+   "expect": {
+    "state": "needs_info",
+    "outcome_id": null,
+    "provision": "9.10.13.13.(1)",
+    "missing": [
+     "duct_penetrates_rated_separation"
+    ]
+   },
+   "tags": [
+    "missing"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "D18",
+   "rule": "fire-dampers",
+   "description": "Combustible A/C branch: departs whatever the other numbers",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 300,
+    "duct_penetrates_rated_separation": true,
+    "fire_damper_provided": false,
+    "duct_use": "ac_branch",
+    "duct_noncombustible": false
+   },
+   "expect": {
+    "state": "departs",
+    "outcome_id": "departs_ac_branch",
+    "provision": "9.10.13.13.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "G22",
+   "rule": "glazed-openings-houses",
+   "description": "3.0 m, 30 m² face: 3² = 9 m² beats the table (3.6 lesser, 7.65 interpolated)",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 3.0,
+    "ebf_area_m2": 30,
+    "glazed_area_m2": 8.5
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_square",
+    "provision": "9.10.15.4.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "U18",
+   "rule": "unprotected-openings",
+   "description": "Building area 700 m²: outside Part 9",
+   "inputs": {
+    "occupancy": "business",
+    "storeys": 2,
+    "building_area_m2": 700,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false
+   },
+   "expect": {
+    "state": "not_applicable",
+    "outcome_id": "not_part9",
+    "provision": "1.3.3.3.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "S15",
+   "rule": "soffits-houses",
+   "description": "5 storeys: outside Part 9",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 5,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "soffit_projects": true
+   },
+   "expect": {
+    "state": "not_applicable",
+    "outcome_id": "not_part9",
+    "provision": "1.3.3.3.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "S16",
+   "rule": "soffits-houses",
+   "description": "Stacked dwelling units",
+   "inputs": {
+    "occupancy": "multi_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "soffit_projects": true,
+    "dwelling_unit_above_another": true
+   },
+   "expect": {
+    "state": "not_applicable",
+    "outcome_id": "stacked_units",
+    "provision": "9.10.15.1.(1)",
+    "missing": []
+   },
+   "tags": [],
+   "reviewed": false
+  },
+  {
+   "id": "D19",
+   "rule": "fire-dampers",
+   "description": "Building area 601 m²: just outside Part 9",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 601,
+    "duct_penetrates_rated_separation": true,
+    "fire_damper_provided": false
+   },
+   "expect": {
+    "state": "not_applicable",
+    "outcome_id": "not_part9",
+    "provision": "1.3.3.3.(1)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  },
+  {
+   "id": "D20",
+   "rule": "fire-dampers",
+   "description": "Building area exactly 600 m² stays in Part 9",
+   "inputs": {
+    "storeys": 2,
+    "building_area_m2": 600,
+    "duct_penetrates_rated_separation": true,
+    "fire_damper_provided": true
+   },
+   "expect": {
+    "state": "follows",
+    "outcome_id": "follows_damper",
+    "provision": "9.10.13.13.(1)",
+    "missing": []
+   },
+   "tags": [
+    "boundary"
+   ],
+   "reviewed": false
+  }
+ ]
+}

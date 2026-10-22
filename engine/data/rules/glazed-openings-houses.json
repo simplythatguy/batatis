@@ -452,7 +452,7 @@
           }
         ]
       },
-      "message": "Glazed openings of {glazed_area_m2} m² in a {ebf_area_m2} m² exposing building face at a limiting distance of {limiting_distance_used_m} m are within Table 9.10.15.4. ({table_percent}%, {table_limit_m2} m²). This follows the acceptable solution in Clause 9.10.15.4.(1)(a)."
+      "message": "Glazed openings of {glazed_area_m2} in a {ebf_area_m2} exposing building face at a limiting distance of {limiting_distance_used_m} are within Table 9.10.15.4. ({table_percent}, {table_limit_m2}). This follows the acceptable solution in Clause 9.10.15.4.(1)(a)."
     },
     {
       "id": "follows_square",
@@ -483,7 +483,7 @@
           }
         ]
       },
-      "message": "Glazed openings of {glazed_area_m2} m² are not more than the limiting distance squared ({square_limit_m2} m² at {limiting_distance_used_m} m). This follows the acceptable solution in Clause 9.10.15.4.(1)(c)."
+      "message": "Glazed openings of {glazed_area_m2} are not more than the limiting distance squared ({square_limit_m2} at {limiting_distance_used_m}). This follows the acceptable solution in Clause 9.10.15.4.(1)(c)."
     },
     {
       "id": "follows_interpolated",
@@ -500,7 +500,7 @@
           }
         ]
       },
-      "message": "Glazed openings of {glazed_area_m2} m² are within Table 9.10.15.4. when interpolating between limiting-distance columns ({interpolated_percent}%, {interpolated_limit_m2} m²), which Note A-9.10.15.4.(2) describes as acceptable above 1.2 m. Read by the lesser column, the limit is {table_limit_m2} m²; the officer may read the table either way."
+      "message": "Glazed openings of {glazed_area_m2} are within Table 9.10.15.4. when interpolating between limiting-distance columns ({interpolated_percent}, {interpolated_limit_m2}), which Note A-9.10.15.4.(2) describes as acceptable above 1.2 m. Read by the lesser column, the limit is {table_limit_m2}; the officer may read the table either way."
     },
     {
       "id": "follows_doubled",
@@ -565,7 +565,7 @@
           }
         ]
       },
-      "message": "Glazed openings of {glazed_area_m2} m² are within twice the Sentence (1) limit ({sentence_1_limit_m2} m²), which Sentence 9.10.15.4.(7) permits for glass blocks or a sprinklered building with every room behind the wall sprinklered."
+      "message": "Glazed openings of {glazed_area_m2} are within twice the Sentence (1) limit ({sentence_1_limit_m2}), which Sentence 9.10.15.4.(7) permits for glass blocks or a sprinklered building with every room behind the wall sprinklered."
     },
     {
       "id": "follows_own_garage",
@@ -595,14 +595,14 @@
           1.2
         ]
       },
-      "message": "At a limiting distance of {limiting_distance_used_m} m (less than 1.2 m), Table 9.10.15.4. permits no glazed openings in this face (0%), and the design shows {glazed_area_m2} m². This departs from the acceptable solution in Sentence 9.10.15.4.(1)."
+      "message": "At a limiting distance of {limiting_distance_used_m} (less than 1.2 m), Table 9.10.15.4. permits no glazed openings in this face (0%), and the design shows {glazed_area_m2}. This departs from the acceptable solution in Sentence 9.10.15.4.(1)."
     },
     {
       "id": "departs",
       "state": "departs",
       "provision": "9.10.15.4.(1)",
       "when": true,
-      "message": "Glazed openings of {glazed_area_m2} m² exceed the {sentence_1_limit_m2} m² that Sentence 9.10.15.4.(1) permits for a {ebf_area_m2} m² face at a limiting distance of {limiting_distance_used_m} m (Table 9.10.15.4., or the limiting distance squared). This departs from the acceptable solution in Sentence 9.10.15.4.(1)."
+      "message": "Glazed openings of {glazed_area_m2} exceed the {sentence_1_limit_m2} that Sentence 9.10.15.4.(1) permits for a {ebf_area_m2} face at a limiting distance of {limiting_distance_used_m} (Table 9.10.15.4., or the limiting distance squared). This departs from the acceptable solution in Sentence 9.10.15.4.(1)."
     }
   ],
   "not_checked": [

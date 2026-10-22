@@ -198,7 +198,7 @@
           }
         ]
       },
-      "message": "The noncombustible branch duct (melting point {duct_melting_point_c} °C, area {duct_area_cm2} cm², discharging {discharge_height_m} m above the floor) meets each condition of Sentence 9.10.13.13.(2), so no fire damper is required. This follows the acceptable solution."
+      "message": "The noncombustible branch duct (melting point {duct_melting_point_c}, area {duct_area_cm2}, discharging {discharge_height_m} above the floor) meets each condition of Sentence 9.10.13.13.(2), so no fire damper is required. This follows the acceptable solution."
     },
     {
       "id": "follows_riser_branch",
@@ -254,7 +254,7 @@
           }
         ]
       },
-      "message": "The noncombustible branch duct (melting point {duct_melting_point_c} °C) is carried {branch_carried_up_mm} mm up inside an exhaust riser under negative pressure, meeting Sentence 9.10.13.13.(3), so no fire damper is required. This follows the acceptable solution."
+      "message": "The noncombustible branch duct (melting point {duct_melting_point_c}) is carried {branch_carried_up_mm} up inside an exhaust riser under negative pressure, meeting Sentence 9.10.13.13.(3), so no fire damper is required. This follows the acceptable solution."
     },
     {
       "id": "follows_service_space",
@@ -301,7 +301,7 @@
           }
         ]
       },
-      "message": "The noncombustible duct (melting point {duct_melting_point_c} °C, above 760 °C) exhausts directly outside at the top of the vertical service space, meeting Sentence 9.10.13.13.(4), so no fire damper is required. This follows the acceptable solution."
+      "message": "The noncombustible duct (melting point {duct_melting_point_c}, above 760 °C) exhausts directly outside at the top of the vertical service space, meeting Sentence 9.10.13.13.(4), so no fire damper is required. This follows the acceptable solution."
     },
     {
       "id": "follows_membrane",
@@ -345,7 +345,7 @@
           "ac_branch"
         ]
       },
-      "message": "There is no fire damper, and the branch duct does not meet every condition of Sentence 9.10.13.13.(2): noncombustible ({duct_noncombustible}), melting point not below 760 °C ({duct_melting_point_c} °C), cross-sectional area less than 130 cm² ({duct_area_cm2} cm²), discharge not more than 1.2 m above the floor ({discharge_height_m} m). The design departs from the acceptable solution in Sentence 9.10.13.13.(1)."
+      "message": "There is no fire damper, and the branch duct does not meet every condition of Sentence 9.10.13.13.(2): noncombustible ({duct_noncombustible}), melting point not below 760 °C ({duct_melting_point_c}), cross-sectional area less than 130 cm² ({duct_area_cm2}), discharge not more than 1.2 m above the floor ({discharge_height_m}). The design departs from the acceptable solution in Sentence 9.10.13.13.(1)."
     },
     {
       "id": "departs_riser_branch",
@@ -360,7 +360,7 @@
           "exhaust_riser_branch"
         ]
       },
-      "message": "There is no fire damper, and the branch duct does not meet every condition of Sentence 9.10.13.13.(3): noncombustible ({duct_noncombustible}), melting point not below 760 °C ({duct_melting_point_c} °C), carried up inside the riser not less than 500 mm ({branch_carried_up_mm} mm), riser under negative pressure ({riser_negative_pressure}). The design departs from the acceptable solution in Sentence 9.10.13.13.(1)."
+      "message": "There is no fire damper, and the branch duct does not meet every condition of Sentence 9.10.13.13.(3): noncombustible ({duct_noncombustible}), melting point not below 760 °C ({duct_melting_point_c}), carried up inside the riser not less than 500 mm ({branch_carried_up_mm}), riser under negative pressure ({riser_negative_pressure}). The design departs from the acceptable solution in Sentence 9.10.13.13.(1)."
     },
     {
       "id": "departs_service_space",
@@ -375,7 +375,7 @@
           "vertical_service_space_exhaust"
         ]
       },
-      "message": "There is no fire damper, and the duct does not meet every condition of Sentence 9.10.13.13.(4): noncombustible ({duct_noncombustible}), melting point above 760 °C ({duct_melting_point_c} °C), exhausting directly outside at the top of the service space ({exhausts_outside_at_top}). The design departs from the acceptable solution in Sentence 9.10.13.13.(1)."
+      "message": "There is no fire damper, and the duct does not meet every condition of Sentence 9.10.13.13.(4): noncombustible ({duct_noncombustible}), melting point above 760 °C ({duct_melting_point_c}), exhausting directly outside at the top of the service space ({exhausts_outside_at_top}). The design departs from the acceptable solution in Sentence 9.10.13.13.(1)."
     },
     {
       "id": "departs_membrane",

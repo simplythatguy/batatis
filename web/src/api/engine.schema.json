@@ -1118,6 +1118,42 @@
       "title": "CaseJurisdictionPack",
       "type": "object"
     },
+    "CaseRules": {
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "case_version": {
+          "title": "Case Version",
+          "type": "integer"
+        },
+        "edition": {
+          "title": "Edition",
+          "type": "string"
+        },
+        "notice": {
+          "title": "Notice",
+          "type": "string"
+        },
+        "results": {
+          "items": {
+            "$ref": "#/$defs/RuleResult"
+          },
+          "title": "Results",
+          "type": "array"
+        }
+      },
+      "required": [
+        "case_id",
+        "case_version",
+        "edition",
+        "notice",
+        "results"
+      ],
+      "title": "CaseRules",
+      "type": "object"
+    },
     "CitationCheck": {
       "additionalProperties": false,
       "description": "Verification of one cited provision against the code database (NBC(AE) 2023, 2nd printing).",
@@ -6595,6 +6631,363 @@
         "bullets"
       ],
       "title": "RouteNotice",
+      "type": "object"
+    },
+    "RuleComputed": {
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "name",
+        "label",
+        "unit",
+        "value"
+      ],
+      "title": "RuleComputed",
+      "type": "object"
+    },
+    "RuleInputValue": {
+      "properties": {
+        "fact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fact Id"
+        },
+        "fact_status": {
+          "anyOf": [
+            {
+              "enum": [
+                "confirmed",
+                "unconfirmed"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fact Status"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "field",
+        "label",
+        "unit",
+        "value",
+        "fact_id",
+        "fact_status"
+      ],
+      "title": "RuleInputValue",
+      "type": "object"
+    },
+    "RuleProvisionRef": {
+      "properties": {
+        "citation": {
+          "title": "Citation",
+          "type": "string"
+        },
+        "division": {
+          "title": "Division",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "pdf_page": {
+          "title": "Pdf Page",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "division",
+        "citation",
+        "pdf_page"
+      ],
+      "title": "RuleProvisionRef",
+      "type": "object"
+    },
+    "RuleQuestion": {
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "why": {
+          "title": "Why",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "label",
+        "question",
+        "why"
+      ],
+      "title": "RuleQuestion",
+      "type": "object"
+    },
+    "RuleResult": {
+      "description": "One rule over one set of inputs. A departure flag against an acceptable solution, never a finding that\nthe design as a whole meets the code.",
+      "properties": {
+        "article": {
+          "title": "Article",
+          "type": "string"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "computed": {
+          "items": {
+            "$ref": "#/$defs/RuleComputed"
+          },
+          "title": "Computed",
+          "type": "array"
+        },
+        "ignored_inputs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Ignored Inputs",
+          "type": "array"
+        },
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/RuleInputValue"
+          },
+          "title": "Inputs",
+          "type": "array"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "missing": {
+          "items": {
+            "$ref": "#/$defs/RuleQuestion"
+          },
+          "title": "Missing",
+          "type": "array"
+        },
+        "next_step": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Step"
+        },
+        "not_checked": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Not Checked",
+          "type": "array"
+        },
+        "outcome_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Outcome Id"
+        },
+        "provision": {
+          "$ref": "#/$defs/RuleProvisionRef"
+        },
+        "reviewed": {
+          "title": "Reviewed",
+          "type": "boolean"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "follows",
+            "departs",
+            "needs_info",
+            "not_applicable"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "state_label": {
+          "title": "State Label",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "unconfirmed_inputs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Unconfirmed Inputs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "rule_id",
+        "title",
+        "article",
+        "state",
+        "state_label",
+        "outcome_id",
+        "provision",
+        "message",
+        "next_step",
+        "missing",
+        "inputs",
+        "ignored_inputs",
+        "computed",
+        "assumptions",
+        "not_checked",
+        "reviewed",
+        "unconfirmed_inputs"
+      ],
+      "title": "RuleResult",
+      "type": "object"
+    },
+    "RuleSet": {
+      "description": "Rule definitions for the browser evaluator (web/src/rules/evaluate.ts).",
+      "properties": {
+        "edition": {
+          "title": "Edition",
+          "type": "string"
+        },
+        "index": {
+          "additionalProperties": true,
+          "title": "Index",
+          "type": "object"
+        },
+        "rules": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Rules",
+          "type": "array"
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "version",
+        "edition",
+        "index",
+        "rules"
+      ],
+      "title": "RuleSet",
       "type": "object"
     },
     "ScopeCheck": {

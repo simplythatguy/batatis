@@ -237,7 +237,7 @@
           }
         ]
       },
-      "message": "The limiting distance is {limiting_distance_used_m} m (more than 0.45 m) and the face of the soffit is {soffit_to_property_line_m} m from the property line (not less than 0.45 m). This follows the acceptable solution in Sentence 9.10.15.5.(9)."
+      "message": "The limiting distance is {limiting_distance_used_m} (more than 0.45 m) and the face of the soffit is {soffit_to_property_line_m} from the property line (not less than 0.45 m). This follows the acceptable solution in Sentence 9.10.15.5.(9)."
     },
     {
       "id": "follows_public_way",
@@ -267,7 +267,7 @@
           0.45
         ]
       },
-      "message": "The limiting distance of this wall is {limiting_distance_used_m} m (not more than 0.45 m) and a roof soffit projects above it. Sentence 9.10.15.5.(8) does not permit a projecting roof soffit there, so the design departs from the acceptable solution."
+      "message": "The limiting distance of this wall is {limiting_distance_used_m} (not more than 0.45 m) and a roof soffit projects above it. Sentence 9.10.15.5.(8) does not permit a projecting roof soffit there, so the design departs from the acceptable solution."
     },
     {
       "id": "departs_soffit_too_close",
@@ -282,7 +282,7 @@
           0.45
         ]
       },
-      "message": "The limiting distance is {limiting_distance_used_m} m, and the face of the soffit is {soffit_to_property_line_m} m from the property line. Sentence 9.10.15.5.(9) asks for not less than 0.45 m, so the design departs from the acceptable solution."
+      "message": "The limiting distance is {limiting_distance_used_m}, and the face of the soffit is {soffit_to_property_line_m} from the property line. Sentence 9.10.15.5.(9) asks for not less than 0.45 m, so the design departs from the acceptable solution."
     }
   ],
   "not_checked": [
