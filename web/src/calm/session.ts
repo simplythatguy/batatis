@@ -26,15 +26,15 @@ export interface Session {
   uploading: string[];
   /** The applicant chose "Not sure" for the reviewing authority (the case keeps it empty). */
   authorityUnsure: boolean;
-  /** Start was pressed: run the explicit check once the new case has rendered. */
-  checkAfterStart: boolean;
+  /** Start was pressed: read the description (intake, then the code check) once the new case has rendered. */
+  readAfterStart: boolean;
   /** Before an application exists: the description, files and role being prepared (Start and the deck share them). */
   draft: string;
   draftFiles: HeldFile[];
   role: ApplicantType | null;
 }
 
-const EMPTY: Session = { queue: [], index: 0, skipped: [], wrapped: false, seen: [], held: [], uploading: [], authorityUnsure: false, checkAfterStart: false, draft: "", draftFiles: [], role: null };
+const EMPTY: Session = { queue: [], index: 0, skipped: [], wrapped: false, seen: [], held: [], uploading: [], authorityUnsure: false, readAfterStart: false, draft: "", draftFiles: [], role: null };
 
 let state: Session = EMPTY;
 const listeners = new Set<() => void>();

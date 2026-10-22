@@ -4,7 +4,9 @@ import { groupGaps, isProfessionalHold, professionalFlagLines } from "../humanRe
 import { professionalConfirmed } from "../professional";
 import { useCase } from "../store";
 import type { Case, Gap } from "../types";
+import { forkOf, scopeRedirect } from "../intakeView";
 import { buildDeck, deckProgress, gapKey } from "./deck";
+import { BeforeYouSubmit, ForkNote } from "./ReadCards";
 import { calmHref } from "./routes";
 import { rankedIn } from "./relevance";
 import { useSession } from "./session";
@@ -18,10 +20,10 @@ export function engineerNeed(c: Case, gaps: Gap[]): { title: string; line: strin
   const confirmed = professionalConfirmed(c.facts);
   const hold = gaps.some(isProfessionalHold);
   if (c.practiceOfEngineering === true && !confirmed) {
-    return { title: "An engineer or architect is required for Section D", line: professionalFlagLines(c)[0] };
+    return { title: "Your case and proof needs an engineer or architect", line: professionalFlagLines(c)[0] };
   }
   if (c.practiceOfEngineering === "unknown" && !confirmed) {
-    return { title: "Section D may need an engineer or architect", line: professionalFlagLines(c)[0] };
+    return { title: "Your case and proof may need an engineer or architect", line: professionalFlagLines(c)[0] };
   }
   if (hold) {
     return { title: "The official PDF is on hold for a registered professional", line: "A professional item is routed to the officer until an engineer or architect confirms a seal or registration number." };
@@ -37,7 +39,7 @@ export function EngineerCallout({ c, gaps }: { c: Case; gaps: Gap[] }) {
       <h2 className="cf-engineer-h" id="cf-engineer-title"><CIcon name="warn" />{need.title}</h2>
       <p>{need.line}</p>
       <p>Batatis can list what that evidence must address, but it can’t write it.</p>
-      <a className="cf-engineer-link" href="#/questions?focus=section-d">Open Section D <CIcon name="arrow" size={13} /></a>
+      <a className="cf-engineer-link" href="#/questions?focus=section-d">Open your case and proof <CIcon name="arrow" size={13} /></a>
     </section>
   );
 }
@@ -51,10 +53,10 @@ function worst(gaps: Gap[]): DotTone {
 /** Before an application exists: what the review will hold, and the one way to start it. */
 export function NothingYet({ title, lede, page }: { title: string; lede: string; page: "review" | "application" }) {
   const sections = [
-    { letter: "A", title: "Applicant" },
-    { letter: "B", title: "Project & alternative" },
-    { letter: "C", title: "Code references" },
-    { letter: "D", title: "Evidence & your case" },
+    { letter: "A", title: "About you" },
+    { letter: "B", title: "Your project" },
+    { letter: "C", title: "Which rules apply" },
+    { letter: "D", title: "Your case and proof" },
   ];
   return (
     <div className="cf-review is-empty">
@@ -79,7 +81,7 @@ export function NothingYet({ title, lede, page }: { title: string; lede: string;
           {sections.map((s) => (
             <li key={s.letter} className="cf-sec">
               <span className="cf-sec-letter" aria-hidden="true">{s.letter}</span>
-              <div className="cf-sec-t"><div>Section {s.letter} · {s.title}</div><div className="cf-faint">Not started</div></div>
+              <div className="cf-sec-t"><div>{s.title} <span className="cf-faint">· Section {s.letter}</span></div><div className="cf-faint">Not started</div></div>
               <Dot tone="pending" />
             </li>
           ))}
@@ -97,10 +99,10 @@ export function Review() {
 }
 
 function CaseReview() {
-  const { c, gaps, notices, engineGaps, gapsSource, checkStatus, checkNote, checkDetail, requestCheck } = useCase();
+  const { c, gaps, notices, engineGaps, gapsSource, checkStatus, checkNote, checkDetail, requestCheck, reading } = useCase();
   const session = useSession();
   const [showAll, setShowAll] = useState(false);
-  const deck = buildDeck(c, gaps, { seen: new Set(session.seen), includeDone: true });
+  const deck = buildDeck(c, gaps, { seen: new Set(session.seen), includeDone: true, identify: reading.identify });
   const { done, total } = deckProgress(deck);
   const openCards = deck.filter((i) => !i.done && !i.optional).length;
   const blocking = gaps.filter((g) => g.severity === "blocking");
@@ -112,19 +114,21 @@ function CaseReview() {
   // Rings never count as Section C; this only points at the library.
   const rel = useRelevance();
   const likely = rankedIn(rel.display, rel.cutoffs, ["high"], rel.rerank).length;
+  const fork = forkOf(c);
+  const pre = c.intake?.record.plan?.pre_application;
   const departures = c.sectionC.filter((r) => c.candidates.find((a) => a.id === r.candidateId)?.answer === "yes").length;
 
   const sections = [
-    { letter: "A", title: "Applicant", gaps: pick("A"), ok: "Owner, representative and address are in" },
-    { letter: "B", title: "Project & alternative", gaps: pick("B", "facts"), ok: "Site, scope and your alternative are in" },
+    { letter: "A", title: "About you", gaps: pick("A"), ok: "Owner, representative and address are in" },
+    { letter: "B", title: "Your project", gaps: pick("B", "facts"), ok: "Site, scope and your alternative are in" },
     {
       letter: "C",
-      title: "Code references",
+      title: "Which rules apply",
       gaps: pick("C"),
-      ok: c.sectionC.length ? `${plural(c.sectionC.length, "sentence")} · looked up, not AI-written` : "No code reference yet",
+      ok: c.sectionC.length ? `${plural(c.sectionC.length, "rule")} · looked up from the code, not AI-written` : "No rule chosen yet",
       empty: c.sectionC.length === 0,
     },
-    { letter: "D", title: "Evidence & your case", gaps: pick("D", "process"), ok: "Nothing missing" },
+    { letter: "D", title: "Your case and proof", gaps: pick("D", "process"), ok: "Nothing missing" },
   ];
 
   const go = () => { location.hash = openCards ? "#/questions" : "#/application"; };
@@ -219,6 +223,13 @@ function CaseReview() {
         )}
         {notices.length > 0 && <div className="cf-notices"><Notices notices={notices} /></div>}
         <EngineerCallout c={c} gaps={gaps} />
+        {fork && !scopeRedirect(c) && (
+          <section className="cf-review-fork" aria-labelledby="cf-fork-h">
+            <h2 id="cf-fork-h" className="cf-list-label">Your path</h2>
+            <ForkNote fork={fork} />
+          </section>
+        )}
+        {pre && !scopeRedirect(c) && <BeforeYouSubmit pre={pre} />}
       </div>
 
       <aside className="cf-glass cf-sections" aria-label="Your application">
@@ -235,7 +246,7 @@ function CaseReview() {
               <li key={s.letter} className="cf-sec">
                 <span className="cf-sec-letter" aria-hidden="true">{s.letter}</span>
                 <div className="cf-sec-t">
-                  <div>Section {s.letter} · {s.title}</div>
+                  <div>{s.title} <span className="cf-faint">· Section {s.letter}</span></div>
                   <div className="cf-faint">
                     {summary}
                     {s.letter === "C" && <> · <a className="cf-inline-link" href={likely ? "#/code?filter=attention" : "#/code"}>Browse the code</a></>}

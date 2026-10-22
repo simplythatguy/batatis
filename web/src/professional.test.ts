@@ -154,12 +154,13 @@ test("a registered professional clears the gap and a commercial or file claim do
 test("a code-check gap names the question", () => {
   assert.equal(
     codeCheckLabel("Using the board to hold the siding"),
-    "Code check: answer whether your design relies on the board to hold the siding",
+    "Answer whether your design relies on the board to hold the siding",
   );
   assert.equal(
     codeCheckLabel("What you described", "What would the acceptable solution have required here?"),
-    "Code check: What would the acceptable solution have required here?",
+    "What would the acceptable solution have required here?",
   );
+  assert.equal(codeCheckLabel("Openings in Exposing Building Face", undefined, "9.10.14.4.(1)"), "Does your design do something different from the rule on openings in exposing building face?");
   assert.equal(plainFactStatus("pointed", "confirmed"), "from what you entered");
   assert.doesNotMatch(plainFactStatus("pointed", "confirmed"), /pointed|confirmed/);
 });

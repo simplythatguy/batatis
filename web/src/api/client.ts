@@ -12,6 +12,8 @@ import type {
   FactInput,
   IdentifyDecisionResponse,
   IdentifyResult,
+  IntakeRequest,
+  IntakeResult,
   Jurisdiction,
   NewCase,
   SectionCRow,
@@ -222,9 +224,27 @@ export function createEngine(base: string) {
       prose: string,
       answers: { field?: string | null; question_id?: string | null; answer: string }[] = [],
       signal?: AbortSignal,
-      onStage?: (stage: string) => void,
+      onStage?: StageListener,
       expectedVersion?: number,
     ) => identifyCase(base, caseId, prose, answers, signal, onStage, expectedVersion),
+    /**
+     * POST /cases/{id}/intake (docs/api/intake.md): read the description and uploaded PDFs into
+     * unconfirmed facts that point at the words they came from, plus the plan (scope, fork, questions).
+     */
+    intake: (caseId: string, body: IntakeRequest, signal?: AbortSignal) =>
+      call<IntakeResult>("POST", `/cases/${enc(caseId)}/intake`, body, signal, 30000),
+    /** GET /cases/{id}/intake: the stored run. 404 `intake not run` before the first run. */
+    storedIntake: (caseId: string, signal?: AbortSignal) =>
+      call<IntakeResult>("GET", `/cases/${enc(caseId)}/intake`, undefined, signal),
+    /** POST /cases/{id}/intake/answers. "Not sure" writes no fact and is never asked again. */
+    intakeAnswers: (caseId: string, answers: { question_id: string; answer: string }[], expectedVersion?: number, signal?: AbortSignal) =>
+      call<IntakeResult>("POST", `/cases/${enc(caseId)}/intake/answers`, withVersion({ answers }, expectedVersion), signal),
+    /** POST /cases/{id}/intake/scope: `true` is the applicant's "this is a building-code question". */
+    intakeScope: (caseId: string, buildingCode: boolean, expectedVersion?: number, signal?: AbortSignal) =>
+      call<IntakeResult>("POST", `/cases/${enc(caseId)}/intake/scope`, withVersion({ building_code: buildingCode }, expectedVersion), signal),
+    /** POST /cases/{id}/intake/plan: re-rank the questions, for example after code identification. */
+    intakePlan: (caseId: string, expectedVersion?: number, signal?: AbortSignal) =>
+      call<IntakeResult>("POST", `/cases/${enc(caseId)}/intake/plan`, withVersion({}, expectedVersion), signal),
     /** GET /cases/{id}/identify. 404 detail `identify result not found` when nothing is stored. */
     storedIdentify: (caseId: string, signal?: AbortSignal) =>
       call<IdentifyResult>("GET", `/cases/${enc(caseId)}/identify`, undefined, signal),
@@ -490,7 +510,10 @@ function withVersion<T extends object>(body: T, expectedVersion?: number): T & {
   return expectedVersion == null ? body : { ...body, expected_version: expectedVersion };
 }
 
-async function readIdentifyResponse(res: Response, onStage?: (stage: string) => void): Promise<IdentifyResult> {
+/** One identify stream event: the stage name and its counts (never prose or code text). */
+export type StageListener = (stage: string, data: Record<string, unknown>) => void;
+
+async function readIdentifyResponse(res: Response, onStage?: StageListener): Promise<IdentifyResult> {
   if (!res.ok) throw new EngineError(res.status, await readError(res));
   const type = res.headers.get("content-type") ?? "";
   if (!type.includes("text/event-stream")) return (await res.json()) as IdentifyResult;
@@ -506,7 +529,16 @@ async function readIdentifyResponse(res: Response, onStage?: (stage: string) => 
     const parsed = takeSseEvents(buf);
     buf = parsed.rest;
     for (const ev of parsed.events) {
-      onStage?.(ev.event);
+      if (ev.event !== "done" && ev.event !== "error") {
+        let data: Record<string, unknown> = {};
+        try {
+          const parsedData = JSON.parse(ev.data) as unknown;
+          if (parsedData && typeof parsedData === "object") data = parsedData as Record<string, unknown>;
+        } catch {
+          /* counts are optional */
+        }
+        onStage?.(ev.event, data);
+      }
       if (ev.event === "error") {
         // Keep the engine's status (409 conflict, 503 unavailable) and its public message.
         let payload: { status?: unknown; message?: unknown } = {};
@@ -537,10 +569,10 @@ async function identifyCase(
   prose: string,
   answers: { field?: string | null; question_id?: string | null; answer: string }[],
   signal?: AbortSignal,
-  onStage?: (stage: string) => void,
+  onStage?: StageListener,
   expectedVersion?: number,
 ): Promise<IdentifyResult> {
-  const timed = withTimeout(signal, 25000);
+  const timed = withTimeout(signal, 60000);
   let res: Response;
   try {
     res = await fetch(`${base}/cases/${enc(caseId)}/identify`, {

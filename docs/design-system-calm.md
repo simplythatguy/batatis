@@ -24,12 +24,18 @@ Legacy hrefs (store gap links, old screens) are translated in `calm/routes.ts`: 
 
 ### Deck order
 
-1. "Check what we read": facts proposed from the applicant's words (confirm or Not right).
-2. Code check: one card per candidate (Yes / No / Not sure; storeys takes a number). Not sure shows the clarifying question; it stays an open question for the officer.
-3. Open questions (text).
-4. Reviewing authority, then Section A/B fields that are required and empty (choices as pills, date as a styled date input). Permit is optional and offered once.
-5. The alternative-path case, written by the applicant: rationale, risk assessment, mitigating measures, assumptions and limits, maintenance, qualifications. "What to include" holds the prompts. Batatis never writes these.
-6. Section D (one card): the existing `Recommendations` component (professional questions, then evidence documents), restyled. It is done when no Section D gap remains and the applicant has continued past it.
+Start runs intake (`POST /cases/{id}/intake`, docs/api/intake.md) and then code identification over the stream (docs/api/identify.md), both in the save queue. While intake reads, the deck shows one waiting card.
+
+1. "Check what we read": one card per thing intake read, with the applicant's words marked, where they came from (description, PDF and page, form field) and how sure we are. Confirm or Not right (a confirmed empty answer; the field is asked again). A unit conversion and the same words read twice are one card. Files that could not be read say so, with the reason.
+2. The planner's questions (at most five, as the API ranks them), each with its why; Not sure is always allowed and never blocks. The fork note (the API's wording, the two halves kept apart) sits on the first one. A field a planner card asks is not asked again on its form card.
+3. Reviewing authority (answered by confirming the site's municipality when it is Edmonton or Calgary), then the remaining Section A/B fields.
+4. Which rules apply: stage progress while identification runs, then committed articles and at most three quoted choices (Yes / No / Not sure through the decision route; the article number and code sentence behind "Show the code"), plus rules added from the library. "I could not narrow this down" and the keyword fallback are labelled. The rest of the ranking stays in the library.
+5. The applicant's own case (rationale, risk, mitigation, assumptions, maintenance, qualifications). Batatis never writes these.
+6. Section D (one card).
+
+Another regime (electrical, gas, private sewage, fire, plumbing, energy) shows only the redirect page until the applicant says it is a building-code question; export stays blocked until then. The review shows the fork note and the pre-application note ("Before you submit").
+
+Plain language first: the footer and eyebrows say About you, Your project, Which rules apply, Your case and proof, with the form's letter as quiet secondary text. Each section's list explains its part of the form, and one line says what the form is on first use.
 
 Skip moves on; at the end of the pass the deck comes back once to skipped cards, then shows the finish card ("That's everything for now" → Review my application).
 

@@ -16,6 +16,7 @@ import type { Case as EngineCase } from "./types.gen";
 import { factSignature, jurisdictionBody, jurisdictionForCreate } from "../rules";
 import type { AuthorityId, Fact, ListedEvidence } from "../types";
 import { evidenceSlot } from "../model";
+import { localField } from "../intakeFields";
 
 const ID_KEY = "batatis-engine-case-id";
 const POSTED_KEY = "batatis-engine-posted";
@@ -187,11 +188,11 @@ export async function reconcileEngineCase(caseId: string): Promise<EngineCase> {
   assertGeneration(token);
   known.set(caseId, saved.version);
   jurisdictions.set(caseId, saved.jurisdiction?.id ?? null);
-  const latest = new Map(saved.facts.map((fact) => [fact.field, fact]));
+  const latest = new Map(saved.facts.map((fact) => [localField(fact.field), fact]));
   const posted = postedFor(caseId);
   for (const field of Object.keys(posted)) {
     const stored = latest.get(field);
-    if (stored) posted[field] = { id: stored.id, signature: factSignature(stored) };
+    if (stored) posted[field] = { id: stored.id, signature: factSignature({ ...stored, field }) };
     else delete posted[field];
   }
   remember(caseId, posted);
@@ -209,14 +210,28 @@ export function adoptEngineCase(saved: EngineCase) {
   sessionStorage.setItem(ID_KEY, saved.id);
   known.set(saved.id, saved.version);
   jurisdictions.set(saved.id, saved.jurisdiction?.id ?? null);
-  const latest = new Map(saved.facts.map((fact) => [fact.field, fact]));
+  // Intake writes Section A/B facts under the export keys; the browser holds them under its own names.
+  const latest = new Map(saved.facts.map((fact) => [localField(fact.field), fact]));
   const posted: Record<string, PostedFact> = {};
   for (const [field, fact] of latest) {
     if (field.startsWith("evidence.") || fact.source?.ref === "Answer withdrawn by applicant") continue;
-    posted[field] = { id: fact.id, signature: factSignature(fact) };
+    posted[field] = { id: fact.id, signature: factSignature({ ...fact, field }) };
   }
   remember(saved.id, posted);
   noteLedger(saved.id, saved);
+}
+
+/**
+ * Facts an engine route wrote itself (intake, its answers, the scope click), adopted by the browser
+ * under its own field names: recorded as already posted so a save never sends them back. `forget`
+ * lists browser fields whose posted entry the engine removed (a re-run dropped its unconfirmed facts),
+ * so no withdrawal is sent for them.
+ */
+export function notePosted(caseId: string, facts: Fact[], forget: string[] = []) {
+  const done = postedFor(caseId);
+  for (const field of forget) delete done[field];
+  for (const fact of facts) done[fact.field] = { id: fact.id, signature: factSignature(fact) };
+  remember(caseId, done);
 }
 
 /** Reconcile a complete browser fact snapshot, including withdrawals. Serialize writes

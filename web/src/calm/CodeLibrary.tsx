@@ -603,7 +603,7 @@ export function CodeLibrary({ route }: { route: CalmRoute }) {
             <Tree toc={toc.value} selected={route.article} filter={filter} revealKey={reveal} />
           )}
         </nav>
-        <a className="cf-lib-foot" href="#/references">Your Section C references <CIcon name="arrow" size={13} /></a>
+        <a className="cf-lib-foot" href="#/references">Rules you chose (Section C) <CIcon name="arrow" size={13} /></a>
       </aside>
       <section className="cf-lib-reader" aria-label="Reading">
         {route.article ? (

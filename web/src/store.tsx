@@ -1,14 +1,18 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type Dispatch, type ReactNode } from "react";
-import { engine, EngineError, isCaseConflict, isCaseGone, type EngineGap } from "./api/client";
+import { engine, EngineError, failureText, isCaseConflict, isCaseGone, type EngineGap } from "./api/client";
+import type { IdentifyResult, IntakeResult, Question as PlanQuestion } from "./api/types.gen";
 import { type CompletenessRecord, isProfessionalHold, officerRoutedLabel } from "./humanReview";
-import { acknowledgedVersion, acknowledgeWrite, adoptEngineCase, clearEngineSession, engineCaseId, engineGeneration, evidenceFacts, isEngineGeneration, ensureEngineCase, needsReconcile, noteConflict, pushDeletedEvidence, pushFacts, pushListedEvidence, reconcileEngineCase, refreshGaps, syncJurisdiction, type EvidenceOutcome } from "./api/sync";
-import { engineNotices, groupEvidenceGaps, missingFromEngine } from "./rules";
-import { applyIdentifyPlan, planIdentify } from "./identify";
+import { acknowledgedVersion, acknowledgeWrite, adoptEngineCase, clearEngineSession, CONFLICT_TEXT, engineCaseId, engineGeneration, evidenceFacts, isEngineGeneration, ensureEngineCase, needsReconcile, noteConflict, notePosted, pushDeletedEvidence, pushFacts, pushListedEvidence, reconcileEngineCase, refreshGaps, syncJurisdiction, type EvidenceOutcome } from "./api/sync";
+import { engineNotices, groupEvidenceGaps, missingFromEngine, uploadMessage } from "./rules";
+import { readDecisionBody, wireDecision } from "./identify";
+import { asLocal } from "./intakeFields";
+import { toViewRow } from "./api/sectionC";
+import { getSession, updateSession } from "./calm/session";
 import { checkCurrent, newCheckState, type CheckState, type SaveStatus } from "./checkState";
 import { emptyCase } from "./intake";
 import { gapLabel, getGaps, lookupBasis, reducer, type Action } from "./model";
 import { caseForRole, initialVisit } from "./visit";
-import type { ApplicantType, Case, Gap } from "./types";
+import type { ApplicantType, Candidate, CandidateAnswer, Case, Fact, Gap } from "./types";
 import { useSectionC } from "./api/sectionC";
 import { readSectionD, SectionDRecoveryError, type SectionDRead } from "./api/sectionD";
 import { isProvision, reconcileSectionC, sameCards } from "./provisions";
@@ -28,7 +32,42 @@ function load() {
   return initialVisit();
 }
 
+/**
+ * The reading after Start: intake (what we read and the plan), then code identification over the
+ * stream. Visit-local progress only; the results live on the case (`Case.intake`, `Case.identify`).
+ */
+export interface Reading {
+  intake: "idle" | "running" | "done" | "error";
+  intakeNote: string;
+  identify: "idle" | "running" | "done" | "error" | "skipped";
+  identifyNote: string;
+  /** Stream stages seen in the current identification, with their counts. */
+  stages: Record<string, Record<string, unknown>>;
+  /** A planner question, the scope click or a code card being written (its id). */
+  busy: string | null;
+}
+
+const NO_READING: Reading = { intake: "idle", intakeNote: "", identify: "idle", identifyNote: "", stages: {}, busy: null };
+
+/** The engine's role name for the applicant type (docs/api/intake.md `applicant_role`). */
+function roleFor(type: ApplicantType): string {
+  return type === "builder" ? "homebuilder" : type;
+}
+
 interface Store {
+  reading: Reading;
+  /** Read the description and attached PDFs (intake), then check the code (identify). Explicit: Start and Continue. */
+  readDescription: () => Promise<void>;
+  /** Upload PDFs held for this case (in the save queue, so intake can read them by id). */
+  uploadFiles: () => Promise<void>;
+  /** Run code identification again (the code-check card's Try again). */
+  runIdentify: () => Promise<void>;
+  /** Answer one planner question; "Not sure" is allowed. Resolves to an error text, or null when saved. */
+  answerPlan: (q: PlanQuestion, answer: string) => Promise<string | null>;
+  /** The redirect page: `true` is "This is a building-code question". */
+  overrideScope: (buildingCode: boolean) => Promise<string | null>;
+  /** Yes, No or Not sure on a code card; identified cards also go to the decision route. */
+  decide: (candidate: Candidate, answer: CandidateAnswer) => Promise<string | null>;
   sectionCLookup: ReturnType<typeof useSectionC>;
   retrySectionC: () => void;
   snapshotKey: string;
@@ -193,6 +232,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const checkRef = useRef(check);
   const activeCheck = useRef<{ promise: Promise<string | null>; ctl: AbortController } | null>(null);
   const [completenessRecord, setCompletenessRecord] = useState<CompletenessRecord | null>(null);
+  const [reading, setReadingState] = useState<Reading>(NO_READING);
+  const setReading = (patch: Partial<Reading> | ((r: Reading) => Partial<Reading>)) =>
+    setReadingState((r) => ({ ...r, ...(typeof patch === "function" ? patch(r) : patch) }));
   const latestGaps = useRef<Gap[]>([]);
   const latestCase = useRef(c);
   latestCase.current = c;
@@ -214,7 +256,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const dispatch = useCallback((action: Action) => {
     // A lookup that only attaches Section C rows (or re-orders the same cards, as it does right
     // after a saved case is opened) is derived data, not an edit: the draft stays saved.
-    const derived = (action.type === "reconcileSectionC" && sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates)) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions"].includes(action.type);
+    const derived = (action.type === "reconcileSectionC" && sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates)) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions", "noteIntake", "restoreIntake", "noteIntakeRecord", "adoptFacts", "noteIdentify"].includes(action.type);
     if (!derived) {
       revision.current += 1;
       if (action.type !== "saveEvidence" && action.type !== "removeEvidence") planRevision.current += 1;
@@ -412,6 +454,258 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     latestGaps.current = getGaps(latestCase.current);
   }
 
+  /** Every engine write runs on the save queue, so versions advance one at a time (docs/api-contract.md). */
+  function enqueue<T>(work: () => Promise<T>): Promise<T> {
+    const pending = syncQueue.current.catch(() => {}).then(work);
+    syncQueue.current = pending;
+    return pending;
+  }
+
+  /** Apply derived engine output without marking the draft unsaved. */
+  function derive(action: Action) {
+    dispatch(action);
+  }
+
+  /** PDFs held until the case exists: uploaded once, in this queue, so intake can read them. */
+  async function uploadHeld(id: string, live: () => boolean): Promise<void> {
+    const held = getSession().held;
+    if (!held.length) return;
+    updateSession((s) => ({ held: [], uploading: [...s.uploading, ...held.map((h) => h.id)] }));
+    for (const { id: local, file } of held) {
+      if (!live()) break;
+      if (!latestCase.current.files.some((f) => f.id === local)) continue;
+      try {
+        const saved = await engine.upload(id, file);
+        if (!live()) break;
+        dispatch({ type: "setFileResult", id: local, error: null, read: true, pages: saved.pages, sha256: saved.sha256, engineId: saved.id });
+      } catch (e) {
+        const status = e instanceof EngineError ? e.status : 0;
+        const detail = e instanceof EngineError ? e.detail : String(e);
+        dispatch({ type: "setFileResult", id: local, error: uploadMessage(status, detail), unreachable: status === 0 });
+      } finally {
+        updateSession((s) => ({ uploading: s.uploading.filter((x) => x !== local) }));
+      }
+    }
+  }
+
+  /** Take an intake run's facts into the case, recorded as saved (the engine wrote them). */
+  function adoptIntake(id: string, result: IntakeResult, text: string) {
+    const before = latestCase.current;
+    const previous = new Set(before.intake?.factIds ?? []);
+    const removed = before.facts.filter((f) => previous.has(f.id) && f.status === "unconfirmed").map((f) => f.field);
+    derive({ type: "noteIntake", result, text });
+    const ids = new Set(result.facts.map((f) => f.id));
+    const adopted = latestCase.current.facts.filter((f) => ids.has(f.id));
+    notePosted(id, adopted, removed.filter((field) => !adopted.some((f) => f.field === field)));
+  }
+
+  /** Read facts an intake route wrote (answers, the scope click) back from the case, once. */
+  async function adoptWritten(id: string, fields: string[], refs: string[], drop: (f: Fact) => boolean = () => false) {
+    const saved = await engine.getCase(id);
+    const known = new Set(latestCase.current.facts.map((f) => f.id));
+    const facts: Fact[] = [];
+    for (const field of fields) {
+      const latest = [...saved.facts].reverse().find((f) => f.field === field);
+      if (latest && refs.includes(latest.source.ref) && !known.has(latest.id)) facts.push(asLocal(latest) as Fact);
+    }
+    const dropIds = latestCase.current.facts.filter(drop).map((f) => f.id);
+    if (facts.length || dropIds.length) derive({ type: "adoptFacts", facts, drop: dropIds });
+    if (facts.length) notePosted(id, facts);
+  }
+
+  function intakeError(e: unknown, id: string): string {
+    if (isCaseConflict(e)) {
+      noteConflict(id);
+      return CONFLICT_TEXT;
+    }
+    if (e instanceof EngineError && e.status === 0) return "Batatis could not be reached. Your description is still here.";
+    return failureText(e);
+  }
+
+  /** Code identification over the stream, then the planner re-ranked against its candidates. Inside the queue. */
+  async function identifyNow(id: string, live: () => boolean): Promise<void> {
+    setReading({ identify: "running", identifyNote: "", stages: {} });
+    let result: IdentifyResult;
+    try {
+      result = await engine.identify(
+        id,
+        latestCase.current.description.trim(),
+        [],
+        undefined,
+        (stage, data) => { if (live()) setReading((r) => ({ stages: { ...r.stages, [stage]: data } })); },
+        acknowledgedVersion(id) ?? undefined,
+      );
+    } catch (e) {
+      if (!live()) return;
+      setReading({ identify: "error", identifyNote: intakeError(e, id) });
+      return;
+    }
+    if (!live()) return;
+    acknowledgeWrite(id, result.case_version);
+    derive({ type: "noteIdentify", result });
+    setReading({ identify: "done" });
+    try {
+      const planned = await engine.intakePlan(id, acknowledgedVersion(id) ?? undefined);
+      if (!live()) return;
+      acknowledgeWrite(id, planned.case_version);
+      derive({ type: "noteIntakeRecord", record: planned.record });
+    } catch {
+      /* the earlier plan stays; its questions are still valid */
+    }
+  }
+
+  function readDescription(): Promise<void> {
+    const token = engineGeneration();
+    const live = () => isEngineGeneration(token);
+    setReading({ ...NO_READING, intake: "running" });
+    return enqueue(async () => {
+      if (!live()) return;
+      const snapshot = latestCase.current;
+      const text = snapshot.description.trim();
+      const id = await performSync(snapshot, live);
+      if (!live()) return;
+      if (!id) {
+        setReading({ intake: "error", intakeNote: "Your description wasn’t saved, so it wasn’t read yet. Try again." });
+        return;
+      }
+      await uploadHeld(id, live);
+      if (!live()) return;
+      const fileIds = latestCase.current.files.map((f) => f.engineId).filter((x): x is string => Boolean(x));
+      let result: IntakeResult;
+      try {
+        result = await engine.intake(id, { text: text || undefined, file_ids: fileIds, role: roleFor(snapshot.applicantType), model: true, expected_version: acknowledgedVersion(id) ?? undefined });
+      } catch (e) {
+        if (!live()) return;
+        setReading({ intake: "error", intakeNote: intakeError(e, id) });
+        return;
+      }
+      if (!live()) return;
+      acknowledgeWrite(id, result.case_version);
+      adoptIntake(id, result, text);
+      setReading({ intake: "done" });
+      if (result.record.plan?.scope.status === "redirect") {
+        setReading({ identify: "skipped" });
+        return;
+      }
+      if (text) await identifyNow(id, live);
+    });
+  }
+
+  function runIdentify(): Promise<void> {
+    const token = engineGeneration();
+    const live = () => isEngineGeneration(token);
+    setReading({ identify: "running", identifyNote: "", stages: {} });
+    return enqueue(async () => {
+      const id = await performSync(latestCase.current, live);
+      if (!id || !live()) {
+        if (live()) setReading({ identify: "error", identifyNote: "Your draft wasn’t saved, so the code check didn’t run. Try again." });
+        return;
+      }
+      await identifyNow(id, live);
+    });
+  }
+
+  function answerPlan(q: PlanQuestion, answer: string): Promise<string | null> {
+    const token = engineGeneration();
+    const live = () => isEngineGeneration(token);
+    setReading({ busy: q.id });
+    return enqueue(async () => {
+      try {
+        const id = await performSync(latestCase.current, live);
+        if (!live()) return null;
+        if (!id) return "Your draft wasn’t saved, so the answer wasn’t either. Try again.";
+        let result: IntakeResult;
+        try {
+          result = await engine.intakeAnswers(id, [{ question_id: q.id, answer }], acknowledgedVersion(id) ?? undefined);
+        } catch (e) {
+          if (e instanceof EngineError && e.status === 422) return `That answer couldn’t be read. ${e.detail.replace(/^./, (x) => x.toUpperCase())}.`.replace(/\.\.$/, ".");
+          return intakeError(e, id);
+        }
+        if (!live()) return null;
+        acknowledgeWrite(id, result.case_version);
+        await adoptWritten(id, [q.field], ["intake answer"]);
+        if (!live()) return null;
+        derive({ type: "noteIntakeRecord", record: result.record });
+        return null;
+      } catch (e) {
+        return failureText(e);
+      } finally {
+        if (live()) setReading({ busy: null });
+      }
+    });
+  }
+
+  function overrideScope(buildingCode: boolean): Promise<string | null> {
+    const token = engineGeneration();
+    const live = () => isEngineGeneration(token);
+    setReading({ busy: "scope" });
+    return enqueue(async () => {
+      try {
+        const id = await performSync(latestCase.current, live);
+        if (!live()) return null;
+        if (!id) return "Your draft wasn’t saved. Try again.";
+        let result: IntakeResult;
+        try {
+          result = await engine.intakeScope(id, buildingCode, acknowledgedVersion(id) ?? undefined);
+        } catch (e) {
+          return intakeError(e, id);
+        }
+        if (!live()) return null;
+        acknowledgeWrite(id, result.case_version);
+        await adoptWritten(id, ["scope.redirect"], ["intake:scope", "intake:description"], (f) => f.field === "scope.redirect" && f.kind === "computed");
+        if (!live()) return null;
+        derive({ type: "noteIntakeRecord", record: result.record });
+        // An override is an explicit "this is building code": identify the current description again, so a
+        // result kept from an earlier description can never be decided on.
+        if (result.record.plan?.scope.status !== "redirect" && (buildingCode || !latestCase.current.identify)) await identifyNow(id, live);
+        return null;
+      } catch (e) {
+        return failureText(e);
+      } finally {
+        if (live()) setReading({ busy: null });
+      }
+    });
+  }
+
+  function decide(candidate: Candidate, answer: CandidateAnswer): Promise<string | null> {
+    dispatch({ type: "answerCandidate", id: candidate.id, answer });
+    if (candidate.suggestion !== "identify" || !/^\d/.test(candidate.provision)) return Promise.resolve(null);
+    const token = engineGeneration();
+    const live = () => isEngineGeneration(token);
+    const provision = candidate.provision;
+    return enqueue(async () => {
+      const id = engineCaseId();
+      if (!id || !live()) return null;
+      try {
+        const body = await engine.decide(id, provision, wireDecision(answer), undefined, acknowledgedVersion(id) ?? undefined);
+        if (!live()) return null;
+        acknowledgeWrite(id, body.case_version);
+        derive({ type: "markDecisionPending", id: candidate.id, pending: false });
+        const read = readDecisionBody(body, provision);
+        if (read.row) derive({ type: "noteSectionC", rows: [toViewRow(read.row, candidate.id)] });
+        if (answer === "not-sure" && read.openQuestionId) derive({ type: "bindOpenQuestion", candidateId: candidate.id, questionId: read.openQuestionId });
+        derive({ type: "noteIdentify", result: body });
+        // A decision moves the fork (any yes reads as the alternative-solution path); re-plan quietly.
+        try {
+          const planned = await engine.intakePlan(id, acknowledgedVersion(id) ?? undefined);
+          if (live()) {
+            acknowledgeWrite(id, planned.case_version);
+            derive({ type: "noteIntakeRecord", record: planned.record });
+          }
+        } catch {
+          /* no intake run on this case, or the plan is unchanged */
+        }
+        return null;
+      } catch (e) {
+        if (isCaseConflict(e)) noteConflict(id);
+        // Keep the answer on screen but not as done: until the engine stores it, a No or Not sure would be lost
+        // (Section D saves persist only Yes) and a Not sure would miss the officer's information request.
+        if (live()) derive({ type: "markDecisionPending", id: candidate.id, pending: true });
+        return e instanceof EngineError && e.status === 0 ? "Not saved yet: Batatis could not be reached. Your answer is kept here; answer again to resend it." : failureText(e);
+      }
+    });
+  }
+
   function requestCheck(retry = false): Promise<string | null> {
     const token = renderGeneration;
     const version = renderRevision;
@@ -439,26 +733,11 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         if (!current()) return null;
         if (!id || !syncState.current.saved) throw new Error(syncState.current.detail || "Save was not acknowledged.");
         publishCheck({ ...run, note: "Checking your draft…" });
-        const prose = c.description.trim();
-        // Identify writes against the version this save acknowledged; a newer case is a 409, never overwritten.
-        const acknowledged = acknowledgedVersion(id);
-        if (prose && acknowledged == null) throw new Error("Save was not acknowledged.");
-        const result = prose ? await engine.identify(id, prose, [], ctl.signal, undefined, acknowledged ?? undefined) : null;
-        if (!current()) return null;
-        if (result) acknowledgeWrite(id, result.case_version);
+        // Code identification runs once after Start (readDescription), not on every check: the
+        // check is the save plus the administrative gap list.
         const got = await refreshGaps(id);
         if (!current()) return null;
         if (got.error) throw new Error(got.error);
-        // The engine no longer serves a demo cache; a legacy payload is still refused.
-        if ((result?.mode as string | undefined) === "cached_demo" || result?.cached === true) throw new Error("Only a cached demonstration is available. Use manual code search.");
-        if (result) {
-          const plan = planIdentify(result);
-          // Publishing derived output is part of this run, not new user intent.
-          applyIdentifyPlan((action) => {
-            latestCase.current = reducer(latestCase.current, action);
-            reduce(action);
-          }, plan);
-        }
         const combined = composeGaps(latestCase.current, "engine", got.gaps);
         latestGaps.current = combined;
         setEngineGaps(got.gaps);
@@ -521,6 +800,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     setSavedNote("");
     setReviewDetail("");
     setCompletenessRecord(null);
+    setReadingState(NO_READING);
     publishCheck(newCheckState());
   }
 
@@ -529,6 +809,14 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   useEffect(() => { latestGaps.current = gaps; }, [gaps]);
 
   const value: Store = {
+    reading, readDescription, runIdentify,
+    uploadFiles: () => {
+      const token = engineGeneration();
+      return enqueue(async () => {
+        const id = engineCaseId();
+        if (id) await uploadHeld(id, () => isEngineGeneration(token));
+      });
+    }, answerPlan, overrideScope, decide,
     sectionCLookup, retrySectionC: () => setLookupAttempt(n => n + 1),
     snapshotKey: `${renderGeneration}:${renderPlanRevision}:${JSON.stringify(c.candidates)}:${JSON.stringify(c.sectionC)}:${sectionCLookup.source}`,
     loadSectionD,
@@ -573,6 +861,14 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       clearVisit(caseFromEngine(saved, type));
       adoptEngineCase(saved);
       setEngineId(saved.id);
+      // What intake read and the last code identification come back as they were stored (no provider call).
+      const [intake, identify] = await Promise.all([
+        engine.storedIntake(saved.id).catch(() => null),
+        engine.storedIdentify(saved.id).catch(() => null),
+      ]);
+      if (intake) derive({ type: "restoreIntake", result: intake, text: latestCase.current.description.trim() });
+      if (identify) derive({ type: "noteIdentify", result: identify });
+      setReadingState({ ...NO_READING, intake: intake ? "done" : "idle", identify: identify ? "done" : "idle" });
       setSaveStatus("saved");
       setSavedNote("Saved");
       syncState.current = { saved: true, reviewed: false, detail: "" };

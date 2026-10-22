@@ -8,6 +8,7 @@
  */
 import type { Case as EngineCase } from "../api/types.gen";
 import { emptyCase, applyDescription } from "../intake";
+import { localField } from "../intakeFields";
 import { CODECHECK_PREFIX, PROCESS_FACT, reducer } from "../model";
 import { isProvision } from "../provisions";
 import type { ApplicantType, AuthorityId, Candidate, Case, Fact, ProcessFieldId } from "../types";
@@ -16,11 +17,12 @@ const WITHDRAWN = "Answer withdrawn by applicant";
 
 /** The latest saved fact per field, without withdrawn answers. Order is preserved. */
 export function latestFacts(facts: EngineCase["facts"]): Fact[] {
+  // Intake's Section A/B export keys (owner_name, ...) are the browser's field ids (owner, ...).
   const latest = new Map<string, EngineCase["facts"][number]>();
-  for (const f of facts) latest.set(f.field, f);
-  return [...latest.values()]
-    .filter((f) => f.source?.ref !== WITHDRAWN && !(f.value === "" && f.status === "unconfirmed"))
-    .map((f) => ({ ...f, id: f.id, status: f.status }) as Fact);
+  for (const f of facts) latest.set(localField(f.field), f);
+  return [...latest.entries()]
+    .filter(([, f]) => f.source?.ref !== WITHDRAWN && !(f.value === "" && f.status === "unconfirmed"))
+    .map(([field, f]) => ({ ...f, field, id: f.id, status: f.status }) as Fact);
 }
 
 export function caseFromEngine(saved: EngineCase, type: ApplicantType): Case {
