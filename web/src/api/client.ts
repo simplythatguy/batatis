@@ -6,6 +6,16 @@
  */
 import { credentialsMode } from "./engineAuth";
 import { publicDetail, takeSseEvents } from "../rules";
+import type { RuleDef, RuleIndex } from "../rules/evaluate";
+import type {
+  CaseChecklists,
+  CaseJurisdictionPack,
+  CaseRules,
+  ChecklistAnswerRequest,
+  ChecklistAnswerResult,
+  JurisdictionDetail,
+  JurisdictionsResult,
+} from "./types.gen";
 import type {
   Case,
   EvidenceItem,
@@ -271,6 +281,22 @@ export function createEngine(base: string) {
      * slot and returns the full saved Case; other slots and uploaded bytes stay. */
     deleteEvidence: (caseId: string, evidenceId: string, expectedVersion: number, signal?: AbortSignal) =>
       call<Case>("DELETE", `/cases/${enc(caseId)}/evidence/${enc(evidenceId)}`, { expected_version: expectedVersion }, signal),
+    /** GET /rules: the rule definitions the browser evaluator runs (docs/api/rules.md). No case, no provider. */
+    rules: (signal?: AbortSignal) =>
+      call<{ version: number; edition: string; index: RuleIndex; rules: RuleDef[] }>("GET", "/rules", undefined, signal),
+    /** GET /cases/{id}/rules: the stored state of record for every coded rule. Read-only. */
+    caseRules: (caseId: string, signal?: AbortSignal) => call<CaseRules>("GET", `/cases/${enc(caseId)}/rules`, undefined, signal),
+    /** GET /jurisdictions: every pack, the coverage labels and their meanings (docs/api/jurisdictions.md). */
+    jurisdictions: (signal?: AbortSignal) => call<JurisdictionsResult>("GET", "/jurisdictions", undefined, signal),
+    /** GET /jurisdictions/{id}: one pack with the province's items merged in. */
+    jurisdiction: (id: string, signal?: AbortSignal) => call<JurisdictionDetail>("GET", `/jurisdictions/${enc(id)}`, undefined, signal),
+    /** GET /cases/{id}/jurisdiction/pack: the pack the case resolves to, or null. */
+    casePack: (caseId: string, signal?: AbortSignal) => call<CaseJurisdictionPack>("GET", `/cases/${enc(caseId)}/jurisdiction/pack`, undefined, signal),
+    /** GET /cases/{id}/checklists: standing-package checklists with the applicant's answers (docs/api/checklists.md). */
+    caseChecklists: (caseId: string, signal?: AbortSignal) => call<CaseChecklists>("GET", `/cases/${enc(caseId)}/checklists`, undefined, signal),
+    /** POST one checklist answer with `expected_version`. 409 = stale version: reload and let the person answer again. */
+    answerChecklist: (caseId: string, checklistId: string, body: ChecklistAnswerRequest, signal?: AbortSignal) =>
+      call<ChecklistAnswerResult>("POST", `/cases/${enc(caseId)}/checklists/${enc(checklistId)}/answers`, body, signal),
     /** POST /cases/{id}/identify/confirm. Writes provisions after a code-database check. */
     confirmIdentify: (caseId: string, provisions: string[], signal?: AbortSignal, expectedVersion?: number) =>
       call<Case>("POST", `/cases/${enc(caseId)}/identify/confirm`, withVersion({ provisions }, expectedVersion), signal),

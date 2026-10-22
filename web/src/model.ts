@@ -486,6 +486,8 @@ export type Action =
   | { type: "ackEvidence"; acked?: { id: string; rev: number }[]; deleted?: string[]; rejected?: { id: string; rev?: number; reason: string }[]; facts?: Fact[] | null; refreshed?: boolean; error?: string | null }
   | { type: "deferProfessional"; field: string; choice: "not_sure" | "not_engaged_yet"; label: string }
   | { type: "setProfessionalFact"; field: string; value: string | number | boolean }
+  /** A coded-rule input answered on its deck card (docs/api/rules.md): a confirmed fact, or null to clear it. */
+  | { type: "setRuleInput"; field: string; value: number | boolean | string | null; rule: string; quote: string }
   | { type: "answerScope"; field: string; answer: "yes" | "no" | "not-sure" | "clear"; text?: string }
   | { type: "notePractice"; value: true | false | "unknown" }
   | { type: "reset"; to: Case };
@@ -984,6 +986,12 @@ export function reducer(c: Case, a: Action): Case {
           f.field === field && f.source.ref === "Your answer" ? { ...f, value: a.value } : f,
         ),
       };
+    }
+    case "setRuleInput": {
+      const rest = c.facts.filter((f) => f.field !== a.field);
+      if (a.value === null) return { ...c, facts: rest };
+      const type = typeof a.value === "number" ? "user_text" : "user_click";
+      return { ...c, facts: [...rest, { id: newId("f"), field: a.field, value: a.value, kind: "pointed", status: "confirmed", source: { type, ref: `rules:${a.rule}`, quote: a.quote } }] };
     }
     case "reset":
       return a.to;

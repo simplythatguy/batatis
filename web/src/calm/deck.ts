@@ -14,7 +14,17 @@ import { DETAIL_FIELDS, DETAIL_IDS, PROCESS_FIELDS, answeredByDescription, factF
 import { isProvision } from "../provisions";
 import { quoteKind } from "../rules";
 import type { ApplicantType, Candidate, Case, Gap } from "../types";
+import type { CaseChecklists, CaseRules } from "../api/types.gen";
+import type { InputSpec } from "../rules/evaluate";
+import { conditionChoices, coveredByOption, followedInFull, groupOf, matchingChecklists, tallyLine } from "./checklistView";
 import { calmHref } from "./routes";
+import { caseRuleResults, inputChoices, linkedCandidate, plainResult, RULE_REF, ruleFacts, ruleInPlay, ruleTopic, sharedInputs, type RuleData, type ShownRule } from "./rulesView";
+
+/** Choice values on rule and package cards. */
+export const RULE_ADD = "add";
+export const RULE_LEAVE = "leave";
+export const PACKAGE_YES = "yes";
+export const PACKAGE_NO = "no";
 
 export type DeckKind =
   | "fact" | "file" | "plan" | "candidate" | "storeys" | "question" | "authority" | "detail" | "process" | "section-d"
@@ -24,6 +34,16 @@ export type DeckKind =
   | "code-run"
   /** "I could not narrow this down", or the labelled keyword fallback. */
   | "code-note"
+  /** A number or answer a coded rule needs (docs/api/rules.md). */
+  | "rule-input"
+  /** A coded rule's result: follows or departs from the acceptable solution. */
+  | "rule"
+  /** A standing package offered for this project (docs/api/checklists.md). */
+  | "package"
+  /** One condition of an accepted standing package. */
+  | "condition"
+  /** The tally after the last condition, and what to ask the office. */
+  | "package-end"
   /** Another safety-codes regime: the redirect page. */
   | "scope";
 
@@ -78,6 +98,15 @@ export interface DeckItem {
   plan?: PlanQuestion;
   /** Answered as Not sure on another card: a gap may stay on the review, but it is not asked again. */
   settled?: boolean;
+  /** A coded rule's result: on its own card, or on the code-check card for the same article. */
+  rule?: ShownRule;
+  /** A rule input card: the field and how it is asked. */
+  input?: { field: string; spec: InputSpec; rule: string };
+  /** Standing-package cards: the checklist id, and the condition id on a condition card. */
+  checklist?: string;
+  condition?: string;
+  /** Answer choices carried by the card itself (rules and packages), in keyboard order. */
+  choices?: { value: string; label: string }[];
 }
 
 export interface DeckOptions {
@@ -90,6 +119,23 @@ export interface DeckOptions {
   /** Intake for this visit: while it reads, the deck holds one waiting card so nothing is asked twice. */
   intake?: "idle" | "running" | "done" | "error";
   intakeNote?: string;
+  /** Rule definitions (GET /rules) and the case's stored results (GET /cases/{id}/rules). */
+  rules?: RuleData | null;
+  storedRules?: CaseRules | null;
+  /** Rule inputs answered Not sure in this visit: not asked again. */
+  ruleUnsure?: ReadonlySet<string>;
+  /** GET /cases/{id}/checklists, and the applicant's choice on each offered package. */
+  checklists?: CaseChecklists | null;
+  packages?: Readonly<Record<string, "yes" | "no">>;
+}
+
+const RULE_WHY = "Batatis compares the numbers you give with one acceptable solution in the code. It flags where your design departs from it; it never decides whether the design is acceptable. The officer decides.";
+
+/** Coded rules and standing packages that apply to this case, ready to place in the Rules step. */
+export function caseRules(c: Case, opts: DeckOptions): ShownRule[] {
+  if (!opts.rules) return [];
+  const shared = sharedInputs(opts.rules);
+  return caseRuleResults(c, opts.rules, opts.storedRules).filter((r) => ruleInPlay(c, opts.rules!, r, shared));
 }
 
 const DETAIL_QUESTION: Record<string, string> = {
@@ -483,7 +529,131 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       optional: true,
     });
   }
-  for (const a of c.candidates) push("C", candidateItem(c, a));
+  // Standing packages that fit this project: offered once; accepted, one condition at a time.
+  const inPlay = caseRules(c, opts);
+  for (const cl of matchingChecklists(c, opts.checklists ?? null, inPlay)) {
+    const answered = cl.conditions.some((x) => x.answer);
+    const choice = opts.packages?.[cl.id];
+    push("C", {
+      key: `pkg-${cl.id}`,
+      kind: "package",
+      section: "C",
+      eyebrow: "A pre-approved path",
+      title: "Your city has a pre-approved path for this kind of project.",
+      context: `Follow the conditions of ${cl.code}, ${cl.title}, instead of building a full case?`,
+      why: `${cl.summary} ${cl.notice}`,
+      ref: cl.id,
+      done: Boolean(choice) || answered,
+      optional: true,
+      checklist: cl.id,
+      choices: [{ value: PACKAGE_YES, label: "Yes, follow its conditions" }, { value: PACKAGE_NO, label: "No, build my own case" }],
+    });
+    if (choice !== "yes" && !answered) continue;
+    for (const row of cl.conditions) {
+      if (!row.answer && coveredByOption(cl, row)) continue;
+      const group = groupOf(cl, row);
+      push("C", {
+        key: `pkgc-${cl.id}-${row.id}`,
+        kind: "condition",
+        section: "C",
+        eyebrow: `${cl.code} · ${group?.title ?? "Condition"}`,
+        title: row.plain,
+        context: row.when ?? "",
+        why: group?.plain ?? cl.notice,
+        ref: row.id,
+        done: Boolean(row.answer),
+        optional: false,
+        checklist: cl.id,
+        condition: row.id,
+        choices: conditionChoices(row),
+      });
+    }
+    const full = followedInFull(cl);
+    push("C", {
+      key: `pkgend-${cl.id}`,
+      kind: "package-end",
+      section: "C",
+      eyebrow: cl.code,
+      title: full ? `You’ve answered every condition of ${cl.code}.` : `${cl.code} is not yet followed in full.`,
+      context: `${tallyLine(cl)}. This is your declaration, not a decision: the officer decides whether the package can be used.`,
+      why: cl.notice,
+      ref: cl.id,
+      done: seen.has(`pkgend-${cl.id}`),
+      optional: true,
+      checklist: cl.id,
+    });
+  }
+
+  // Coded rules: the inputs each still needs (one per field), then the result. A result for an
+  // article that already has a code-check card sits on that card instead of a second one.
+  const index = opts.rules?.index;
+  const facts = index ? ruleFacts(c, index) : new Map();
+  const unsure = opts.ruleUnsure ?? new Set<string>();
+  const missing = new Set(inPlay.flatMap((r) => r.missing.map((m) => m.field)));
+  const asked = new Set<string>();
+  const ruleInputs = (r: ShownRule) => {
+    if (!index) return;
+    const mine = new Set(r.missing.map((m) => m.field));
+    const fields = r.inputs.map((i) => i.field).filter((f) => mine.has(f) || facts.get(f)?.source.ref?.startsWith(RULE_REF) || (unsure.has(f) && !facts.has(f)));
+    for (const f of fields) {
+      // A planner question asks this field already (or it was answered Not sure there).
+      if (asked.has(f) || planned.has(f) || !index.inputs[f]) continue;
+      asked.add(f);
+      const settled = unsure.has(f) && missing.has(f);
+      push("C", {
+        key: `rulein-${f}`,
+        kind: "rule-input",
+        section: "C",
+        eyebrow: sectionEyebrow("C"),
+        title: index.inputs[f].question,
+        context: `Batatis compares it with the code’s standard way for ${ruleTopic(r).toLowerCase()}.`,
+        why: index.inputs[f].why,
+        ref: f,
+        done: !missing.has(f) || settled,
+        optional: false,
+        settled,
+        provision: r.provision.id,
+        input: { field: f, spec: index.inputs[f], rule: r.rule_id },
+        choices: inputChoices(index.inputs[f]),
+      });
+    }
+  };
+  const resultItem = (r: ShownRule): DeckItem | null => {
+    if (r.state !== "departs" && r.state !== "follows") return null;
+    const plain = plainResult(r);
+    const key = `rule-${r.rule_id}`;
+    return {
+      key,
+      kind: "rule",
+      section: "C",
+      eyebrow: sectionEyebrow("C"),
+      title: plain.title,
+      context: plain.line,
+      why: RULE_WHY,
+      ref: r.rule_id,
+      done: seen.has(key),
+      // A departure needs an answer (add the rule, or leave it out); a "follows" result is a note.
+      optional: r.state === "follows",
+      provision: r.provision.id,
+      rule: r,
+      choices: r.state === "departs" ? [{ value: RULE_ADD, label: "Add this rule to my application" }, { value: RULE_LEAVE, label: "Leave it out for now" }] : [],
+    };
+  };
+  const linked = new Map<string, ShownRule>();
+  for (const r of inPlay) {
+    const card = linkedCandidate(c, r);
+    if (card) { linked.set(card.id, r); continue; }
+    ruleInputs(r);
+    const item = resultItem(r);
+    if (item) push("C", item);
+  }
+
+  for (const a of c.candidates) {
+    const r = linked.get(a.id);
+    if (r) ruleInputs(r);
+    const item = candidateItem(c, a);
+    push("C", r && (r.state === "departs" || r.state === "follows") ? { ...item, rule: r } : item);
+  }
 
   // 5. The alternative-solution case, written by the applicant.
   for (const p of PROCESS_FIELDS) {
@@ -591,6 +761,7 @@ export function sectionProgress(items: DeckItem[]): { id: SectionId; label: stri
 
 /** Choices for a card, in keyboard order (A, B, C). */
 export function choicesFor(item: DeckItem): { value: string; label: string }[] {
+  if (item.choices) return item.choices;
   if (item.kind === "plan" && item.plan) {
     const input = planInput(item.plan.field);
     return input.kind === "choices" ? [...(input.choices ?? []), { value: NOT_SURE, label: "Not sure" }] : [];

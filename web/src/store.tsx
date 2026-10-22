@@ -17,6 +17,7 @@ import { useSectionC } from "./api/sectionC";
 import { readSectionD, SectionDRecoveryError, type SectionDRead } from "./api/sectionD";
 import { isProvision, reconcileSectionC, sameCards } from "./provisions";
 import { caseFromEngine } from "./calm/openCase";
+import { refreshCase, setChecklist } from "./calm/caseExtras";
 
 /** Older builds kept the whole case here. It is removed on load and never written again. */
 const LEGACY_KEYS = ["batatis-web-case-v4", "batatis-web-case-v3"];
@@ -68,6 +69,13 @@ interface Store {
   overrideScope: (buildingCode: boolean) => Promise<string | null>;
   /** Yes, No or Not sure on a code card; identified cards also go to the decision route. */
   decide: (candidate: Candidate, answer: CandidateAnswer) => Promise<string | null>;
+  /**
+   * One standing-package answer through the checklist answers route, with `expected_version`, in the
+   * save queue. Resolves to an error text (a 409 says so and waits for `reloadChecklists`), or null.
+   */
+  answerChecklist: (checklistId: string, conditionId: string, state: "confirmed" | "not_yet" | "does_not_apply", reason?: string) => Promise<string | null>;
+  /** The explicit reload after a conflict: adopt the saved version, then read the checklists again. */
+  reloadChecklists: () => Promise<string | null>;
   sectionCLookup: ReturnType<typeof useSectionC>;
   retrySectionC: () => void;
   snapshotKey: string;
@@ -706,6 +714,51 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     });
   }
 
+  function answerChecklist(checklistId: string, conditionId: string, state: "confirmed" | "not_yet" | "does_not_apply", reason?: string): Promise<string | null> {
+    const token = engineGeneration();
+    const live = () => isEngineGeneration(token);
+    return enqueue(async () => {
+      const id = await performSync(latestCase.current, live);
+      if (!live()) return null;
+      if (!id) return "Your draft wasn’t saved, so the answer wasn’t either. Try again.";
+      const expected = acknowledgedVersion(id);
+      if (needsReconcile(id) || expected === null) return CONFLICT_TEXT;
+      try {
+        const result = await engine.answerChecklist(id, checklistId, { condition_id: conditionId, state, reason: reason?.trim() || null, expected_version: expected });
+        if (!live()) return null;
+        acknowledgeWrite(id, result.case_version);
+        setChecklist(id, result.checklist, result.case_version);
+        return null;
+      } catch (e) {
+        if (isCaseConflict(e)) {
+          noteConflict(id);
+          return CONFLICT_TEXT;
+        }
+        if (e instanceof EngineError && e.status === 0) return "Not saved: Batatis could not be reached. Answer again to resend it.";
+        return failureText(e);
+      }
+    });
+  }
+
+  function reloadChecklists(): Promise<string | null> {
+    const token = engineGeneration();
+    return enqueue(async () => {
+      const id = engineCaseId();
+      if (!id || !isEngineGeneration(token)) return null;
+      try {
+        if (needsReconcile(id)) refreshed(await reconcileEngineCase(id), latestCase.current);
+        await refreshCase(id);
+        return null;
+      } catch (e) {
+        if (isCaseGone(e)) {
+          goneCase.current = id;
+          markGone((e as EngineError).detail);
+        }
+        return failureText(e);
+      }
+    });
+  }
+
   function requestCheck(retry = false): Promise<string | null> {
     const token = renderGeneration;
     const version = renderRevision;
@@ -816,7 +869,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         const id = engineCaseId();
         if (id) await uploadHeld(id, () => isEngineGeneration(token));
       });
-    }, answerPlan, overrideScope, decide,
+    }, answerPlan, overrideScope, decide, answerChecklist, reloadChecklists,
     sectionCLookup, retrySectionC: () => setLookupAttempt(n => n + 1),
     snapshotKey: `${renderGeneration}:${renderPlanRevision}:${JSON.stringify(c.candidates)}:${JSON.stringify(c.sectionC)}:${sectionCLookup.source}`,
     loadSectionD,
