@@ -108,56 +108,81 @@ def text_value(pages: list[tuple[str, int, str]], pattern) -> TextValue:
 
 
 def rationale_value(reads: list[ReadFile]) -> TextValue:
-    """Read one labelled rationale without treating partial or graphical text as a complete answer.
+    """Aggregate all labelled passages; upload order never chooses an authoritative answer.
 
-    The field wire shape has one pointer. Cross-page passages therefore remain officer checks;
-    the finding retains each page's extracted fragment rather than a truncated present value.
+    A single passage keeps its existing reading. Consistent blanks remain an applicant gap.
+    Other multiple candidates remain officer checks so every source can be retained in the
+    finding's pointer list without inventing precedence or changing the field wire shape.
     """
     pattern = TEXT_FIELDS['rationale'][1]
-    for read in reads:
-        for index, page in enumerate(read.text_pages):
-            match = pattern.search(page.text)
-            if match is None:
-                continue
-            pointers = []
-            uncertain = False
-            value = ''
-            for offset, continuation in enumerate(read.text_pages[index:]):
-                heading = _norm(match.group(0)) if offset == 0 else None
-                rest = continuation.text[match.end():] if offset == 0 else continuation.text
-                # Batatis puts a running header on appendix continuation pages. It is not an answer
-                # or a terminating applicant source; the original page remains available by pointer.
-                if offset:
-                    rest = re.sub(r'^Batatis appendix to SCC variance form - case [^\n]+\n', '', rest)
-                stop = _RATIONALE_STOP_LINE.search(rest)
-                ambiguous = bool(stop and stop.group('ambiguous'))
-                for _label_text, other in TEXT_FIELDS.values():
-                    hit = other.search(rest)
-                    if hit and (stop is None or hit.start() <= stop.start()):
-                        stop = hit
-                        ambiguous = False
-                stop_line = rest[stop.start():].strip().split('\n', 1)[0] if stop else None
-                body = _norm(rest[:stop.start()] if stop else rest)
-                if not offset:
-                    value = body
-                pointers.append(Pointer(file=read.name, page=continuation.page + 1, quote=body or heading))
-                uncertain = (uncertain or bool(offset) or not continuation.text.strip()
-                             or (ambiguous and body != _NO_RATIONALE)
-                             or read.passage_has_marks(continuation.page, heading, stop_line))
-                if stop_line and stop_line.casefold().startswith('appendix page'):
-                    uncertain = True   # a running footer does not prove that the passage ends here
-                    continue
-                if stop:
-                    break
-            if uncertain:
-                reason = ('The rationale may continue across pages, contain non-text content or have an ambiguous boundary. '
-                          'Its complete text could not be established; check the indicated pages.')
-                return TextValue('not_found', '', read.name, page.page + 1, pointers[0].quote, pointers, reason)
-            if value == _NO_RATIONALE:
-                value = ''
-            return TextValue('present' if value else 'blank', value or '', read.name, page.page + 1,
-                             pointers[0].quote, pointers)
-    return TextValue('not_found', '', '', None, None)
+    candidates = [_rationale_candidate(read, index, match)
+                  for read in reads for index, page in enumerate(read.text_pages)
+                  for match in pattern.finditer(page.text)]
+    # Unreadable files cannot establish absence. They do not invalidate a readable passage,
+    # but must prevent a blank template from asserting that nothing was supplied elsewhere.
+    if not any(candidate.status == 'present' for candidate in candidates):
+        for read in reads:
+            if read.role == 'unreadable':
+                pointer = Pointer(file=read.name, page=1 if read.pages else None)
+                candidates.append(TextValue(
+                    'not_found', '', read.name, pointer.page, None, [pointer],
+                    'A supplied file could not be read. Check it before treating the rationale as absent.'))
+    if not candidates:
+        return TextValue('not_found', '', '', None, None)
+    candidates.sort(key=lambda value: (value.file, value.page or 0, value.quote or '', value.status))
+    if len(candidates) == 1:
+        return candidates[0]
+    first = candidates[0]
+    pointers = [pointer for candidate in candidates for pointer in candidate.pointers]
+    blank = all(candidate.status == 'blank' for candidate in candidates)
+    reason = '' if blank else (
+        'Multiple possible rationale sources were found. Check all indicated sources; '
+        'the review does not choose which passage controls.')
+    return TextValue('blank' if blank else 'not_found', '', first.file, first.page,
+                     first.quote, pointers, reason)
+
+
+def _rationale_candidate(read: ReadFile, index: int, match: re.Match) -> TextValue:
+    """Read one candidate, retaining page/graphics/boundary uncertainty and its source fragments."""
+    page = read.text_pages[index]
+    pointers = []
+    uncertain = False
+    value = ''
+    for offset, continuation in enumerate(read.text_pages[index:]):
+        heading = _norm(match.group(0)) if offset == 0 else None
+        rest = continuation.text[match.end():] if offset == 0 else continuation.text
+        # Batatis puts a running header on appendix continuation pages. It is not an answer
+        # or a terminating applicant source; the original page remains available by pointer.
+        if offset:
+            rest = re.sub(r'^Batatis appendix to SCC variance form - case [^\n]+\n', '', rest)
+        stop = _RATIONALE_STOP_LINE.search(rest)
+        ambiguous = bool(stop and stop.group('ambiguous'))
+        for _label_text, other in TEXT_FIELDS.values():
+            hit = other.search(rest)
+            if hit and (stop is None or hit.start() <= stop.start()):
+                stop = hit
+                ambiguous = False
+        stop_line = rest[stop.start():].strip().split('\n', 1)[0] if stop else None
+        body = _norm(rest[:stop.start()] if stop else rest)
+        if not offset:
+            value = body
+        pointers.append(Pointer(file=read.name, page=continuation.page + 1, quote=body or heading))
+        uncertain = (uncertain or bool(offset) or not continuation.text.strip()
+                     or (ambiguous and body != _NO_RATIONALE)
+                     or read.passage_has_marks(continuation.page, heading, stop_line))
+        if stop_line and stop_line.casefold().startswith('appendix page'):
+            uncertain = True   # a running footer does not prove that the passage ends here
+            continue
+        if stop:
+            break
+    if uncertain:
+        reason = ('The rationale may continue across pages, contain non-text content or have an ambiguous boundary. '
+                  'Its complete text could not be established; check the indicated pages.')
+        return TextValue('not_found', '', read.name, page.page + 1, pointers[0].quote, pointers, reason)
+    if value == _NO_RATIONALE:
+        value = ''
+    return TextValue('present' if value else 'blank', value or '', read.name, page.page + 1,
+                     pointers[0].quote, pointers)
 
 
 def _finding_status(element: ElementVerdict) -> str:
@@ -259,7 +284,9 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
     forms = [read for read in reads if read.role.startswith('scc_form')]
     form = forms[0] if forms else None
     for extra in forms[1:]:
-        parts.files[reads.index(extra)].note = 'A second SCC form was uploaded; only the first form was reviewed.'
+        parts.files[reads.index(extra)].note = (
+            'A second SCC form was uploaded; only the first form\'s fields were reviewed. '
+            'Labelled rationale passages from every supplied form were checked for presence.')
     attachments = [read for read in reads if read.role == 'attachment']
     pages = [(read.name, page.page + 1, page.text) for read in ([form] if form else []) + attachments
              for page in read.text_pages]
@@ -291,7 +318,8 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
                                              else "Owner's representative signature", section='A',
                                              status=value.status, value=value.value or None, reason=value.reason,
                                              pointer=_pointer(form, value)))
-    texts = {key: rationale_value(([form] if form else []) + attachments) if key == 'rationale'
+    rationale_reads = forms + attachments + [read for read in reads if read.role == 'unreadable']
+    texts = {key: rationale_value(rationale_reads) if key == 'rationale'
              else text_value(pages, pattern) for key, (_label_text, pattern) in TEXT_FIELDS.items()}
     for key, found in texts.items():
         label = TEXT_FIELDS[key][0]
@@ -349,7 +377,8 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
     doc = Ingested(ref=form.name if form else 'upload', data=blob.encode('utf-8'), text=blob, kind='form',
                    values=values, form_fields={name: value.value for name, value in by_widget.items() if value.value})
     # Files that carry the application's own passages are not evidence to compare Section B with.
-    narrative_files = {found.file for found in texts.values() if found.file}
+    narrative_files = {name for found in texts.values()
+                       for name in [found.file, *(pointer.file for pointer in found.pointers)] if name}
     doc.section_text = {'A': '', 'B': texts['alternative_description'].value, 'C': values.get(
         'section_c.article', StoredValue('', '', '', None)).value, 'D': '', 'process': '',
         'attachment': '\n'.join(page.text for read in attachments if read.name not in narrative_files

@@ -82,8 +82,13 @@ session keeps the extracted values and quotes.
   other process fields: presence only, never adequacy. Saved cases use the latest `rationale` or
   `process.rationale` applicant passage; a confirmed acceptable-solution route does not require it. Uploads
   (including standalone packages) read `Rationale`, `Rationale for [the] [proposed] variance/alternative
-  [solution]`, or a numbered appendix heading such as `P-1 Rationale`. A blank passage on a fully readable
-  page or the draft export's explicit no-answer notice is a blocking applicant gap (`rationale:presence`).
+  [solution]`, or a numbered appendix heading such as `P-1 Rationale`. Every labelled candidate is read,
+  including repeated headings within one page. Consistent blank-only candidates on fully readable inputs
+  (including the draft's explicit no-answer notice) are a blocking applicant gap (`rationale:presence`).
+  Multiple candidates containing text or uncertainty become one excluded officer check with all source
+  pointers, in stable order; the review never chooses which candidate controls, even when text matches.
+  An unreadable supplied file also prevents blank-only input from establishing absence. A single readable
+  passage remains present beside an unrelated unreadable file.
   Whole-answer placeholders are gaps; a placeholder word inside applicant prose is not. A missing heading,
   non-text objects in the passage region, or a passage crossing pages stays `not_found`, with no partial
   `value` and the request item excluded by default. Cross-page findings retain page-linked extracted

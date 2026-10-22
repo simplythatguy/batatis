@@ -251,3 +251,94 @@ def test_ambiguous_rationale_boundaries_are_officer_checks(codes, boundary):
     finding = _assert_officer_check(parts)
     assert finding.pointers[0].file == 'ambiguous.pdf' and finding.pointers[0].page == 1
     assert 'ambiguous boundary' in finding.message
+
+
+@pytest.mark.parametrize('layout', ['files', 'pages', 'same-page'])
+@pytest.mark.parametrize('values', [('', ''), ('', 'SYNTHETIC supplied rationale.'),
+    ('SYNTHETIC first rationale.', 'SYNTHETIC different rationale.'),
+    ('SYNTHETIC repeated rationale.', 'SYNTHETIC repeated rationale.')],
+    ids=['all-blank', 'blank-and-supplied', 'conflicting', 'matching-text'])
+def test_multiple_rationale_candidates_keep_all_sources_and_stable_outcomes(layout, values):
+    def lines(value):
+        return ['Rationale', value, 'Risk assessment', 'SYNTHETIC next process field.']
+
+    if layout == 'files':
+        uploads = [('a.pdf', text_pdf(lines(values[0]))), ('b.pdf', text_pdf(lines(values[1])))]
+    elif layout == 'pages':
+        from pypdf import PdfWriter
+        writer = PdfWriter()
+        for value in values:
+            writer.append(io.BytesIO(text_pdf(lines(value))))
+        buf = io.BytesIO()
+        writer.write(buf)
+        uploads = [('both.pdf', buf.getvalue())]
+    else:
+        uploads = [('both.pdf', text_pdf(lines(values[0]) + lines(values[1])))]
+    before = None
+    for ordered in (uploads, list(reversed(uploads))):
+        parts = review_uploads(ordered, None)
+        reading = next(f for f in parts.fields if f.field == 'rationale')
+        if any(values):
+            finding = _assert_officer_check(parts)
+        else:
+            finding = next(f for f in parts.findings if f.field == 'rationale')
+            assert reading.status == finding.status == 'blank' and finding.severity == 'blocking'
+            item = ir.build([finding]).items[0]
+            assert item.included and not item.officer_check
+        assert len(finding.pointers) == 2, 'Both labelled candidates must retain their actual source pointers.'
+        assert sorted(p.quote for p in finding.pointers) == sorted(value or 'Rationale' for value in values)
+        projection = (reading.model_dump(), finding.model_dump(), ir.build([finding]).model_dump())
+        if before is not None:
+            assert projection == before, 'Multipart order must not choose which rationale controls.'
+        before = projection
+
+
+@pytest.mark.parametrize('other', ['', 'SYNTHETIC supplied rationale.'], ids=['blank', 'present'])
+def test_uncertain_rationale_sources_are_not_masked_by_other_candidates(other):
+    uploads = [('a.pdf', text_pdf(['Rationale', other, 'Risk assessment'])),
+               ('b.pdf', raster_rationale_pdf())]
+    before = None
+    for ordered in (uploads, list(reversed(uploads))):
+        finding = _assert_officer_check(review_uploads(ordered, None))
+        assert {p.file for p in finding.pointers} == {'a.pdf', 'b.pdf'}
+        assert any(p.file == 'a.pdf' and p.quote == (other or 'Rationale') for p in finding.pointers)
+        if before is not None:
+            assert finding.model_dump() == before
+        before = finding.model_dump()
+
+
+def test_blank_rationale_does_not_assert_absence_when_another_file_is_unreadable():
+    uploads = [('blank.pdf', text_pdf(['Rationale', 'Risk assessment'])),
+               ('supplied-scan.pdf', scanned(narrative_pdf({'Rationale': 'SYNTHETIC supplied passage.'})))]
+    finding = _assert_officer_check(review_uploads(uploads, None))
+    assert {p.file for p in finding.pointers} == {'blank.pdf', 'supplied-scan.pdf'}
+    assert any(p.file == 'supplied-scan.pdf' and p.quote is None for p in finding.pointers)
+
+
+def test_single_readable_rationale_stays_present_beside_an_unreadable_other_file():
+    passage = 'SYNTHETIC supplied rationale.'
+    uploads = [('rationale.pdf', text_pdf(['Rationale', passage, 'Risk assessment'])),
+               ('other-scan.pdf', scanned(text_pdf(['SYNTHETIC supporting document.'])))]
+    parts = review_uploads(uploads, None)
+    reading = next(f for f in parts.fields if f.field == 'rationale')
+    assert reading.status == 'present' and reading.value == passage
+    assert not any(f.field == 'rationale' for f in parts.findings)
+
+
+def test_additional_recognized_forms_cannot_hide_a_supplied_rationale(codes):
+    supplied = sample_case(codes)
+    blank = supplied.model_copy(deep=True)
+    blank.facts = [f for f in blank.facts if f.field != 'rationale']
+    uploads = [('blank-draft.pdf', export_case(blank, codes=codes, draft=True).pdf),
+               ('supplied-form.pdf', export_case(supplied, codes=codes).pdf)]
+    before = None
+    for ordered in (uploads, list(reversed(uploads))):
+        parts = review_uploads(ordered, codes)
+        assert all(file.role == 'scc_form_flattened' for file in parts.files)
+        finding = _assert_officer_check(parts)
+        assert {p.file for p in finding.pointers} == {'blank-draft.pdf', 'supplied-form.pdf'}
+        assert any(p.file == 'supplied-form.pdf' and p.quote == next(
+            f.value for f in supplied.facts if f.field == 'rationale') for p in finding.pointers)
+        if before is not None:
+            assert finding.model_dump() == before
+        before = finding.model_dump()
