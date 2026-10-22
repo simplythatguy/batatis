@@ -16,11 +16,11 @@ function SourceLink({ cl }: { cl: CaseChecklist }) {
   );
 }
 
-/** Quiet footer on every package card: the notice and the review state. */
-function PackageFoot({ cl }: { cl: CaseChecklist }) {
+/** Quiet footer on package cards: the full notice on the offer and the tally, one short line per condition. */
+function PackageFoot({ cl, short = false }: { cl: CaseChecklist; short?: boolean }) {
   return (
     <p className="cf-pkg-foot">
-      {cl.notice} {!cl.reviewed && <span className="cf-faint">Checklist {NOT_REVIEWED_PERSON.toLowerCase()}</span>}
+      {short ? "Your declaration, not a decision: the officer decides." : cl.notice} {!cl.reviewed && <span className="cf-faint">Checklist {NOT_REVIEWED_PERSON.toLowerCase()}</span>}
     </p>
   );
 }
@@ -103,7 +103,7 @@ export function ConditionBody({ cl, row, position, children, reasonOpen, reason,
         </p>
       )}
       <SourceWording cl={cl} row={row} />
-      <PackageFoot cl={cl} />
+      <PackageFoot cl={cl} short />
     </div>
   );
 }

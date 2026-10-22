@@ -19,6 +19,7 @@ export function useDeckExtras(): { options: DeckOptions; extras: CaseExtras } {
     checklists: extras.checklists,
     packages: session.packages,
     ruleUnsure: new Set(session.ruleUnsure),
+    confirmAuthority: true,
   }), [extras.rules, extras.caseRules, extras.checklists, session.packages, session.ruleUnsure]);
   return { options, extras };
 }

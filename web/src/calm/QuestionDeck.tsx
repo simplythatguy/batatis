@@ -24,6 +24,7 @@ import { otherOptions } from "./checklistView";
 import { RuleNumberInput, RuleResultView } from "./RuleCards";
 import { choiceValue, NOT_SURE_RULE, readNumber, RULE_REF } from "./rulesView";
 import { useDeckExtras } from "./useDeckExtras";
+import { JurisdictionNote } from "./JurisdictionNote";
 import { PACKAGE_YES, RULE_ADD, RULE_LEAVE } from "./deck";
 
 type Shown = DeckItem & { gone?: boolean };
@@ -38,7 +39,7 @@ function isTextTarget(t: EventTarget | null): boolean {
 
 /** Cards answered by typing several lines continue with Cmd/Ctrl+Enter instead of Enter. */
 function multiline(item: DeckItem): boolean {
-  return item.kind === "question" || item.kind === "process" || item.kind === "condition" || (item.kind === "detail" && Boolean(DETAIL_FIELDS.find((d) => d.id === item.ref)?.multiline)) || (item.kind === "plan" && planInput(item.plan?.field ?? "").kind === "area");
+  return item.kind === "question" || item.kind === "process" || (item.kind === "detail" && Boolean(DETAIL_FIELDS.find((d) => d.id === item.ref)?.multiline)) || (item.kind === "plan" && planInput(item.plan?.field ?? "").kind === "area");
 }
 
 /* —— Typeform pieces —— */
@@ -377,6 +378,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
         </div>
       )}
       {item.kind === "authority" && current === "unsure" && <p className="cf-note"><span className="cf-dot is-warning" aria-hidden="true" />Left open. The review keeps it on your list until you pick one.</p>}
+      {item.kind === "authority" && <JurisdictionNote authority={c.authority} unsure={current === "unsure"} extras={extras} />}
       {cand && exitCountWarning(cand.provision, cand.topic) && <p className="cf-note"><span className="cf-dot is-warning" aria-hidden="true" />{exitCountWarning(cand.provision, cand.topic)}</p>}
       {item.kind === "fact" && item.gone && <p className="cf-note"><span className="cf-dot is-done" aria-hidden="true" />{picked === "dismiss" ? "Removed." : "Confirmed."}</p>}
     </>
@@ -873,7 +875,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
 
   const n = (pos < 0 ? index : pos) + 1;
   const openLeft = queue.filter((k) => !itemFor(k)?.done && !itemFor(k)?.optional).length;
-  const typed = Boolean(item && multiline(item));
+  const typed = Boolean(item && (item.kind === "condition" ? (picked[item.key] ?? currentState(item)) === "does_not_apply" : multiline(item)));
 
   return (
     <div className="cf-deck-page">

@@ -127,6 +127,11 @@ export interface DeckOptions {
   /** GET /cases/{id}/checklists, and the applicant's choice on each offered package. */
   checklists?: CaseChecklists | null;
   packages?: Readonly<Record<string, "yes" | "no">>;
+  /**
+   * The reviewing authority card shows the office's pack. An authority read from the site's
+   * municipality is then confirmed once on that card (optional) instead of being skipped.
+   */
+  confirmAuthority?: boolean;
 }
 
 const RULE_WHY = "Batatis compares the numbers you give with one acceptable solution in the code. It flags where your design departs from it; it never decides whether the design is acceptable. The officer decides.";
@@ -440,8 +445,10 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     context: `The authority that issues your permit: ${AUTHORITIES.map((a) => a.name).join(" or ")}. Pick Not sure yet if you don’t know.`,
     why: "Each authority has its own submission rules. Batatis never picks one for you.",
     ref: "authority",
-    done: Boolean(c.authority) || seen.has("authority"),
-    optional: false,
+    // Read from the site's municipality, it is a quiet confirmation offered once (with the office's
+    // pack); unanswered, it is required.
+    done: opts.confirmAuthority ? seen.has("authority") : Boolean(c.authority) || seen.has("authority"),
+    optional: Boolean(opts.confirmAuthority && c.authority),
   });
   const planned = plannedFields(c);
   for (const d of DETAIL_FIELDS) {
