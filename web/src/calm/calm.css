@@ -5320,6 +5320,7 @@ a.cf-save-check {
 }
 
 .cf-side-notice {
+  overflow-wrap: anywhere;
   margin: 4px 0 0;
   padding: 12px 14px;
   border: 1px solid var(--cf-line);
