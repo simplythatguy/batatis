@@ -15,6 +15,7 @@ from typing import Literal
 from pydantic import BaseModel, Field, model_validator
 from .account_models import ApplicationStatus, Claim, Decision, StatusChange, StoredMessage
 
+from .models_intake import IntakeRecord
 from .relevance_models import RelevanceRecord
 from .models_identify import IdentifyResult
 
@@ -173,6 +174,7 @@ class Case(BaseModel):
     gaps: list[Gap] = []
     relevance: RelevanceRecord | None = None   # explicit scoring only; GET recomputes its staleness
     identify: IdentifyResult | None = None     # last code identification (models_identify.py); never writes provisions
+    intake: IntakeRecord | None = None         # last intake run: fact pointers and file reports (models_intake)
 
     @model_validator(mode='after')
     def _kind_follows_the_file(self):

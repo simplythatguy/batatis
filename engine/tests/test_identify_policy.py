@@ -275,3 +275,45 @@ def test_model_reason_keeps_acceptable_solution_language(text, kept):
 def test_requirement_units_end_at_a_word_boundary(sentence, expected):
     from engine.identify.requirement import parse_requirements
     assert [(r['value'], r['unit']) for r in parse_requirements(sentence)] == expected
+
+
+def test_a_billed_but_unusable_answer_is_still_settled(monkeypatch):
+    """A refusal (null content) or a truncated answer is billed: the ledger records the real usage, not $0."""
+    import httpx
+    from engine.identify.providers import UnreadableResponse, raw_openai_json
+    for content in (None, '{"picks": [', ''):
+        class Reply:
+            def raise_for_status(self):
+                pass
+
+            def json(self, content=content):
+                return {'model': 'gpt-6-luna', 'choices': [{'message': {'content': content}}],
+                        'usage': {'prompt_tokens': 900, 'completion_tokens': 300}}
+
+        class Client:
+            def __init__(self, **kw):
+                pass
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+            def post(self, url, headers, json):
+                return Reply()
+
+        monkeypatch.setattr(httpx, 'Client', Client)
+        monkeypatch.setenv('OPENAI_API_KEY', 'sk-test-not-real')
+        with pytest.raises(UnreadableResponse) as caught:
+            raw_openai_json('picks', {}, 's', 'u', model='gpt-6-luna')
+        assert caught.value.usage['input_tokens'] == 900 and caught.value.usage['output_tokens'] == 300
+    monkeypatch.setenv('BATATIS_PROVIDER', 'fake')
+    log = SpendLog()
+
+    def refused(*a, **k):
+        raise UnreadableResponse('refusal', {'input_tokens': 900, 'output_tokens': 300})
+
+    with pytest.raises(UnreadableResponse):
+        metered_openai_json(refused, log=log)('n', {}, 's', 'u', model='gpt-6-luna')
+    assert [(c['input_tokens'], c['output_tokens']) for c in log.calls] == [(900, 300)]

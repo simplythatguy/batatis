@@ -161,7 +161,7 @@ def _rank(prose, db, arts, ids, config, tp, stages) -> tuple[list[tuple[str, flo
             tp.openai, prose, arts, pool, model=config.rerank_model, chars=config.card_chars,
             effort=config.verifier_effort))
         rerank = dict(scores)
-        ranked = list(scores) + [(a, None) for a in pool if a not in rerank]
+        ranked = sorted(scores, key=lambda x: -x[1]) + [(a, None) for a in pool if a not in rerank]
     else:
         ranked = [(a, screen[a] if screen else None) for a in pool]
     stages.emit('rerank', status='done' if config.rerank != 'none' else 'skipped', method=config.rerank,

@@ -61,7 +61,7 @@ def record_decision(case, provision_id: str, decision: str, codes) -> list:
     card = match_article(result, provision_id)
     article = card.provision
     case.facts = [f for f in case.facts if f.field != f'{CITATION_PREFIX}{article}']
-    case.provisions = [p for p in case.provisions if p != article]
+    case.provisions = [p for p in case.provisions if article_of(p) != article]   # the article and its sentences
     written = []
     if decision == 'yes':
         record = codes.provision(article, 'B') if codes is not None else None

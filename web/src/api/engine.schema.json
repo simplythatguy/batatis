@@ -40,6 +40,72 @@
       "title": "AnswerIn",
       "type": "object"
     },
+    "AnswerItem": {
+      "additionalProperties": false,
+      "properties": {
+        "answer": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Answer",
+          "type": "string"
+        },
+        "field": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "question_id": {
+          "maxLength": 200,
+          "title": "Question Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "question_id"
+      ],
+      "title": "AnswerItem",
+      "type": "object"
+    },
+    "AnswersRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "answers": {
+          "items": {
+            "$ref": "#/$defs/AnswerItem"
+          },
+          "maxItems": 5,
+          "minItems": 1,
+          "title": "Answers",
+          "type": "array"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        }
+      },
+      "required": [
+        "answers"
+      ],
+      "title": "AnswersRequest",
+      "type": "object"
+    },
     "ApplicantSummary": {
       "properties": {
         "applicant_type": {
@@ -858,6 +924,17 @@
           ],
           "default": null
         },
+        "intake": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IntakeRecord"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "jurisdiction": {
           "anyOf": [
             {
@@ -991,7 +1068,8 @@
         "evidence",
         "gaps",
         "relevance",
-        "identify"
+        "identify",
+        "intake"
       ],
       "title": "Case",
       "type": "object"
@@ -2167,6 +2245,148 @@
       "title": "Fact",
       "type": "object"
     },
+    "FactPointer": {
+      "description": "One extracted fact and where it sits. `start`/`end` index the source text: the description,\nor the page text of `page` (text layer order). Form values have no span.",
+      "properties": {
+        "end": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End"
+        },
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "rules",
+            "form",
+            "model"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "source_ref": {
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "start": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Start"
+        },
+        "verified": {
+          "default": true,
+          "title": "Verified",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "fact_id",
+        "field",
+        "method",
+        "source_ref",
+        "page",
+        "start",
+        "end",
+        "verified"
+      ],
+      "title": "FactPointer",
+      "type": "object"
+    },
+    "FieldConflict": {
+      "description": "The text gives two different values for one field, so neither was stored. The planner asks.",
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "quotes": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Quotes",
+          "type": "array"
+        },
+        "source_ref": {
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "values": {
+          "default": [],
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "field",
+        "values",
+        "quotes",
+        "source_ref",
+        "page"
+      ],
+      "title": "FieldConflict",
+      "type": "object"
+    },
     "FieldReading": {
       "additionalProperties": false,
       "description": "One form or record field. `blank` is certain; `not_found` means ask the officer to look.",
@@ -2230,6 +2450,116 @@
         "pointer"
       ],
       "title": "FieldReading",
+      "type": "object"
+    },
+    "FileReport": {
+      "properties": {
+        "facts": {
+          "default": 0,
+          "title": "Facts",
+          "type": "integer"
+        },
+        "file_id": {
+          "title": "File Id",
+          "type": "string"
+        },
+        "form": {
+          "anyOf": [
+            {
+              "enum": [
+                "scc_variance",
+                "acroform"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Form"
+        },
+        "form_fields_read": {
+          "default": 0,
+          "title": "Form Fields Read",
+          "type": "integer"
+        },
+        "form_fields_skipped": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Form Fields Skipped",
+          "type": "array"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "pages": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pages"
+        },
+        "pages_not_read": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Pages Not Read",
+          "type": "array"
+        },
+        "pages_read": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Pages Read",
+          "type": "array"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "status": {
+          "enum": [
+            "read",
+            "partly_read",
+            "not_read"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file_id",
+        "name",
+        "status",
+        "reason",
+        "pages",
+        "pages_read",
+        "pages_not_read",
+        "form",
+        "form_fields_read",
+        "form_fields_skipped",
+        "facts"
+      ],
+      "title": "FileReport",
       "type": "object"
     },
     "Finding": {
@@ -2345,6 +2675,48 @@
         "citations"
       ],
       "title": "Finding",
+      "type": "object"
+    },
+    "Fork": {
+      "description": "Acceptable-solution path or alternative-solution path, read early (before Section C).",
+      "properties": {
+        "cues": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Cues",
+          "type": "array"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        },
+        "halves": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Half"
+          },
+          "title": "Halves",
+          "type": "array"
+        },
+        "variance_needed": {
+          "enum": [
+            "likely",
+            "not_indicated",
+            "unknown"
+          ],
+          "title": "Variance Needed",
+          "type": "string"
+        }
+      },
+      "required": [
+        "variance_needed",
+        "explanation",
+        "cues",
+        "halves"
+      ],
+      "title": "Fork",
       "type": "object"
     },
     "Gap": {
@@ -2479,6 +2851,44 @@
         "companions"
       ],
       "title": "Guide",
+      "type": "object"
+    },
+    "Half": {
+      "description": "One of the two things an accepted variance needs. They are kept distinct on purpose.",
+      "properties": {
+        "basis": {
+          "title": "Basis",
+          "type": "string"
+        },
+        "id": {
+          "enum": [
+            "variance_request",
+            "alternative_solution"
+          ],
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "what": {
+          "title": "What",
+          "type": "string"
+        },
+        "who": {
+          "title": "Who",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "basis",
+        "who",
+        "what"
+      ],
+      "title": "Half",
       "type": "object"
     },
     "IdentifyArticle": {
@@ -3578,6 +3988,238 @@
       "title": "InputFile",
       "type": "object"
     },
+    "IntakePlan": {
+      "properties": {
+        "candidates_seen": {
+          "default": 0,
+          "title": "Candidates Seen",
+          "type": "integer"
+        },
+        "fork": {
+          "$ref": "#/$defs/Fork"
+        },
+        "next": {
+          "enum": [
+            "redirect",
+            "questions",
+            "identify"
+          ],
+          "title": "Next",
+          "type": "string"
+        },
+        "not_sure": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Not Sure",
+          "type": "array"
+        },
+        "pre_application": {
+          "$ref": "#/$defs/PreApplication"
+        },
+        "questions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Question"
+          },
+          "title": "Questions",
+          "type": "array"
+        },
+        "route_notice": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RouteNotice"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "scope": {
+          "$ref": "#/$defs/ScopeCheck"
+        }
+      },
+      "required": [
+        "next",
+        "scope",
+        "fork",
+        "questions",
+        "not_sure",
+        "pre_application",
+        "route_notice",
+        "candidates_seen"
+      ],
+      "title": "IntakePlan",
+      "type": "object"
+    },
+    "IntakeRecord": {
+      "properties": {
+        "conflicts": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/FieldConflict"
+          },
+          "title": "Conflicts",
+          "type": "array"
+        },
+        "files": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/FileReport"
+          },
+          "title": "Files",
+          "type": "array"
+        },
+        "model": {
+          "$ref": "#/$defs/ModelPass"
+        },
+        "plan": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IntakePlan"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pointers": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/FactPointer"
+          },
+          "title": "Pointers",
+          "type": "array"
+        },
+        "ran_at": {
+          "title": "Ran At",
+          "type": "string"
+        },
+        "text_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text Sha256"
+        },
+        "unresolved_citations": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/UnresolvedCitation"
+          },
+          "title": "Unresolved Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "ran_at",
+        "text_sha256",
+        "pointers",
+        "files",
+        "model",
+        "conflicts",
+        "unresolved_citations",
+        "plan"
+      ],
+      "title": "IntakeRecord",
+      "type": "object"
+    },
+    "IntakeRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        },
+        "file_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10,
+          "title": "File Ids",
+          "type": "array"
+        },
+        "model": {
+          "default": true,
+          "title": "Model",
+          "type": "boolean"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "maxLength": 20000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        }
+      },
+      "title": "IntakeRequest",
+      "type": "object"
+    },
+    "IntakeResult": {
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "case_version": {
+          "title": "Case Version",
+          "type": "integer"
+        },
+        "facts": {
+          "items": {
+            "$ref": "#/$defs/Fact"
+          },
+          "title": "Facts",
+          "type": "array"
+        },
+        "record": {
+          "$ref": "#/$defs/IntakeRecord"
+        }
+      },
+      "required": [
+        "case_id",
+        "case_version",
+        "facts",
+        "record"
+      ],
+      "title": "IntakeResult",
+      "type": "object"
+    },
     "IntentBlock": {
       "properties": {
         "brackets": {
@@ -4001,6 +4643,83 @@
         "messages"
       ],
       "title": "MessagesResult",
+      "type": "object"
+    },
+    "ModelPass": {
+      "properties": {
+        "dropped": {
+          "default": 0,
+          "title": "Dropped",
+          "type": "integer"
+        },
+        "input_tokens": {
+          "default": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "output_tokens": {
+          "default": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "pointed": {
+          "default": 0,
+          "title": "Pointed",
+          "type": "integer"
+        },
+        "proposed": {
+          "default": 0,
+          "title": "Proposed",
+          "type": "integer"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "status": {
+          "enum": [
+            "off",
+            "fake",
+            "live",
+            "gate_closed",
+            "failed",
+            "not_needed"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "model",
+        "reason",
+        "pointed",
+        "proposed",
+        "dropped",
+        "input_tokens",
+        "output_tokens"
+      ],
+      "title": "ModelPass",
       "type": "object"
     },
     "NewCase": {
@@ -4492,6 +5211,52 @@
       "title": "PackageReviewIndex",
       "type": "object"
     },
+    "PlanRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        }
+      },
+      "title": "PlanRequest",
+      "type": "object"
+    },
+    "PlanSource": {
+      "properties": {
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "required": [
+        "title",
+        "url"
+      ],
+      "title": "PlanSource",
+      "type": "object"
+    },
     "Pointer": {
       "additionalProperties": false,
       "description": "Where a value or gap is: file and 1-based page, form field name, rectangle, exact quote.",
@@ -4574,6 +5339,104 @@
         "quote"
       ],
       "title": "Pointer",
+      "type": "object"
+    },
+    "PreApplication": {
+      "description": "'Before you submit': meet the authority having jurisdiction and emergency services early.",
+      "properties": {
+        "jurisdiction_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Jurisdiction Id"
+        },
+        "jurisdiction_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Jurisdiction Name"
+        },
+        "resolved_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resolved By"
+        },
+        "steps": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PreApplicationStep"
+          },
+          "title": "Steps",
+          "type": "array"
+        }
+      },
+      "required": [
+        "jurisdiction_id",
+        "jurisdiction_name",
+        "resolved_by",
+        "steps"
+      ],
+      "title": "PreApplication",
+      "type": "object"
+    },
+    "PreApplicationStep": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "origin": {
+          "enum": [
+            "pack",
+            "generic"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "sources": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PlanSource"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "text",
+        "origin",
+        "sources"
+      ],
+      "title": "PreApplicationStep",
       "type": "object"
     },
     "ProcessRef": {
@@ -4772,6 +5635,86 @@
         "referenced_by"
       ],
       "title": "ProvisionContext",
+      "type": "object"
+    },
+    "Question": {
+      "description": "At most five per plan. The shape of identify's open questions plus why it is asked and what it unblocks.",
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "default": "missing",
+          "enum": [
+            "missing",
+            "conflict"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "priority": {
+          "default": "critical",
+          "enum": [
+            "critical",
+            "administrative"
+          ],
+          "title": "Priority",
+          "type": "string"
+        },
+        "provision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision"
+        },
+        "splits": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Splits",
+          "type": "array"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "unblocks": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Unblocks",
+          "type": "array"
+        },
+        "why": {
+          "title": "Why",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "field",
+        "text",
+        "why",
+        "unblocks",
+        "splits",
+        "priority",
+        "kind",
+        "provision"
+      ],
+      "title": "Question",
       "type": "object"
     },
     "QueueApplication": {
@@ -5040,6 +5983,53 @@
         "note"
       ],
       "title": "RecordPackage",
+      "type": "object"
+    },
+    "Regime": {
+      "description": "A safety-codes regime other than the building code.",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "coverage": {
+          "enum": [
+            "roadmap",
+            "not_covered"
+          ],
+          "title": "Coverage",
+          "type": "string"
+        },
+        "framework": {
+          "enum": [
+            "national_model_code",
+            "no_division_c_framework"
+          ],
+          "title": "Framework",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "route": {
+          "title": "Route",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "code",
+        "framework",
+        "coverage",
+        "route"
+      ],
+      "title": "Regime",
       "type": "object"
     },
     "RelevanceBands": {
@@ -5562,6 +6552,174 @@
         "name"
       ],
       "title": "ReviewerName",
+      "type": "object"
+    },
+    "RouteBullet": {
+      "properties": {
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/PlanSource"
+          },
+          "title": "Citations",
+          "type": "array"
+        },
+        "claim": {
+          "title": "Claim",
+          "type": "string"
+        }
+      },
+      "required": [
+        "claim",
+        "citations"
+      ],
+      "title": "RouteBullet",
+      "type": "object"
+    },
+    "RouteNotice": {
+      "description": "Product acceptance versus a site variance, for manufacturers and jurisdiction-wide requests.",
+      "properties": {
+        "bullets": {
+          "items": {
+            "$ref": "#/$defs/RouteBullet"
+          },
+          "title": "Bullets",
+          "type": "array"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "summary",
+        "bullets"
+      ],
+      "title": "RouteNotice",
+      "type": "object"
+    },
+    "ScopeCheck": {
+      "properties": {
+        "cue": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cue"
+        },
+        "end": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End"
+        },
+        "message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message"
+        },
+        "override_allowed": {
+          "default": true,
+          "title": "Override Allowed",
+          "type": "boolean"
+        },
+        "regime": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Regime"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "scores": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "default": {},
+          "title": "Scores",
+          "type": "object"
+        },
+        "start": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Start"
+        },
+        "status": {
+          "enum": [
+            "in_scope",
+            "redirect",
+            "overridden"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "regime",
+        "message",
+        "cue",
+        "start",
+        "end",
+        "scores",
+        "override_allowed"
+      ],
+      "title": "ScopeCheck",
+      "type": "object"
+    },
+    "ScopeRequest": {
+      "additionalProperties": false,
+      "description": "`building_code: true` is the applicant's \"this is a building-code question\" override.",
+      "properties": {
+        "building_code": {
+          "title": "Building Code",
+          "type": "boolean"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        }
+      },
+      "required": [
+        "building_code"
+      ],
+      "title": "ScopeRequest",
       "type": "object"
     },
     "SectionCCheck": {
@@ -6604,6 +7762,38 @@
         "articles"
       ],
       "title": "TocSubsection",
+      "type": "object"
+    },
+    "UnresolvedCitation": {
+      "description": "An article number the applicant typed that is not in NBC(AE) 2023, 2nd printing.",
+      "properties": {
+        "entered": {
+          "title": "Entered",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "source_ref": {
+          "title": "Source Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entered",
+        "source_ref",
+        "page"
+      ],
+      "title": "UnresolvedCitation",
       "type": "object"
     },
     "User": {

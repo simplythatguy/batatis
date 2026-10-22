@@ -9,6 +9,17 @@ export interface AnswerIn {
   question_id?: string | null;
 }
 
+export interface AnswerItem {
+  answer?: string;
+  field?: string | null;
+  question_id: string;
+}
+
+export interface AnswersRequest {
+  answers: AnswerItem[];
+  expected_version?: number | null;
+}
+
 export interface ApplicantSummary {
   applicant_type: "manufacturer" | "contractor" | "homebuilder" | null;
   name: string;
@@ -134,6 +145,7 @@ export interface Case {
   gaps: Gap[];
   id: string;
   identify: IdentifyResult | null;
+  intake: IntakeRecord | null;
   jurisdiction: Jurisdiction | null;
   messages: StoredMessage[];
   owner_id: string | null;
@@ -350,6 +362,27 @@ export interface FactInput {
   value: string | number | boolean | null;
 }
 
+/** One extracted fact and where it sits. `start`/`end` index the source text: the description, */
+export interface FactPointer {
+  end: number | null;
+  fact_id: string;
+  field: string;
+  method: "rules" | "form" | "model";
+  page: number | null;
+  source_ref: string;
+  start: number | null;
+  verified: boolean;
+}
+
+/** The text gives two different values for one field, so neither was stored. The planner asks. */
+export interface FieldConflict {
+  field: string;
+  page: number | null;
+  quotes: string[];
+  source_ref: string;
+  values: (string | number | boolean)[];
+}
+
 /** One form or record field. `blank` is certain; `not_found` means ask the officer to look. */
 export interface FieldReading {
   field: string;
@@ -359,6 +392,20 @@ export interface FieldReading {
   section: "A" | "B" | "C" | "D" | "process";
   status: "present" | "blank" | "not_found";
   value: string | null;
+}
+
+export interface FileReport {
+  facts: number;
+  file_id: string;
+  form: "scc_variance" | "acroform" | null;
+  form_fields_read: number;
+  form_fields_skipped: string[];
+  name: string;
+  pages: number | null;
+  pages_not_read: number[];
+  pages_read: number[];
+  reason: string | null;
+  status: "read" | "partly_read" | "not_read";
 }
 
 export interface Finding {
@@ -374,6 +421,14 @@ export interface Finding {
   section: "A" | "B" | "C" | "D" | "process";
   severity: "blocking" | "warning";
   status: "blank" | "not_found" | "missing" | "unclear";
+}
+
+/** Acceptable-solution path or alternative-solution path, read early (before Section C). */
+export interface Fork {
+  cues: string[];
+  explanation: string;
+  halves: Half[];
+  variance_needed: "likely" | "not_indicated" | "unknown";
 }
 
 export interface Gap {
@@ -395,6 +450,15 @@ export interface Guide {
   summary: string;
   title: string;
   topic: string;
+}
+
+/** One of the two things an accepted variance needs. They are kept distinct on purpose. */
+export interface Half {
+  basis: string;
+  id: "variance_request" | "alternative_solution";
+  label: string;
+  what: string;
+  who: string;
 }
 
 export interface IdentifyArticle {
@@ -548,6 +612,43 @@ export interface InputFile {
   size: number;
 }
 
+export interface IntakePlan {
+  candidates_seen: number;
+  fork: Fork;
+  next: "redirect" | "questions" | "identify";
+  not_sure: string[];
+  pre_application: PreApplication;
+  questions: Question[];
+  route_notice: RouteNotice | null;
+  scope: ScopeCheck;
+}
+
+export interface IntakeRecord {
+  conflicts: FieldConflict[];
+  files: FileReport[];
+  model: ModelPass;
+  plan: IntakePlan | null;
+  pointers: FactPointer[];
+  ran_at: string;
+  text_sha256: string | null;
+  unresolved_citations: UnresolvedCitation[];
+}
+
+export interface IntakeRequest {
+  expected_version?: number | null;
+  file_ids?: string[];
+  model?: boolean;
+  role?: string | null;
+  text?: string | null;
+}
+
+export interface IntakeResult {
+  case_id: string;
+  case_version: number;
+  facts: Fact[];
+  record: IntakeRecord;
+}
+
 export interface IntentBlock {
   brackets: string[];
   intents: string[];
@@ -626,6 +727,17 @@ export interface MessagesResult {
   messages: ThreadMessage[];
 }
 
+export interface ModelPass {
+  dropped: number;
+  input_tokens: number;
+  model: string | null;
+  output_tokens: number;
+  pointed: number;
+  proposed: number;
+  reason: string | null;
+  status: "off" | "fake" | "live" | "gate_closed" | "failed" | "not_needed";
+}
+
 export interface NewCase {
   authority?: "calgary" | "edmonton" | null;
   jurisdiction?: JurisdictionInput | null;
@@ -700,6 +812,15 @@ export interface PackageReviewIndex {
   sessions: SessionSummary[];
 }
 
+export interface PlanRequest {
+  expected_version?: number | null;
+}
+
+export interface PlanSource {
+  title: string;
+  url: string | null;
+}
+
 /** Where a value or gap is: file and 1-based page, form field name, rectangle, exact quote. */
 export interface Pointer {
   bbox: [number, number, number, number] | null;
@@ -707,6 +828,22 @@ export interface Pointer {
   form_field: string | null;
   page: number | null;
   quote: string | null;
+}
+
+/** 'Before you submit': meet the authority having jurisdiction and emergency services early. */
+export interface PreApplication {
+  jurisdiction_id: string | null;
+  jurisdiction_name: string | null;
+  resolved_by: string | null;
+  steps: PreApplicationStep[];
+}
+
+export interface PreApplicationStep {
+  id: string;
+  origin: "pack" | "generic";
+  sources: PlanSource[];
+  text: string;
+  title: string;
 }
 
 /** A process reference listed on every case, read-only: how an alternative solution is allowed and documented. */
@@ -738,6 +875,19 @@ export interface ProvisionContext {
   referenced_by: string[];
   references: string[];
   title: string | null;
+}
+
+/** At most five per plan. The shape of identify's open questions plus why it is asked and what it unblocks. */
+export interface Question {
+  field: string;
+  id: string;
+  kind: "missing" | "conflict";
+  priority: "critical" | "administrative";
+  provision: string | null;
+  splits: string[];
+  text: string;
+  unblocks: string[];
+  why: string;
 }
 
 export interface QueueApplication {
@@ -783,6 +933,16 @@ export interface RecordPackage {
   note: string;
   retain_on_file: RecordItem[];
   send_to_council: RecordItem[];
+}
+
+/** A safety-codes regime other than the building code. */
+export interface Regime {
+  code: string;
+  coverage: "roadmap" | "not_covered";
+  framework: "national_model_code" | "no_division_c_framework";
+  id: string;
+  name: string;
+  route: string;
 }
 
 export interface RelevanceBands {
@@ -865,6 +1025,34 @@ export interface ReviewSession {
 
 export interface ReviewerName {
   name: string;
+}
+
+export interface RouteBullet {
+  citations: PlanSource[];
+  claim: string;
+}
+
+/** Product acceptance versus a site variance, for manufacturers and jurisdiction-wide requests. */
+export interface RouteNotice {
+  bullets: RouteBullet[];
+  summary: string;
+}
+
+export interface ScopeCheck {
+  cue: string | null;
+  end: number | null;
+  message: string | null;
+  override_allowed: boolean;
+  regime: Regime | null;
+  scores: Record<string, number>;
+  start: number | null;
+  status: "in_scope" | "redirect" | "overridden";
+}
+
+/** `building_code: true` is the applicant's "this is a building-code question" override. */
+export interface ScopeRequest {
+  building_code: boolean;
+  expected_version?: number | null;
 }
 
 export interface SectionCCheck {
@@ -1032,6 +1220,13 @@ export interface TocSubsection {
   articles: TocArticle[];
   id: string;
   title: string;
+}
+
+/** An article number the applicant typed that is not in NBC(AE) 2023, 2nd printing. */
+export interface UnresolvedCitation {
+  entered: string;
+  page: number | null;
+  source_ref: string;
 }
 
 export interface User {
