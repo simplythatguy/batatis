@@ -182,3 +182,136 @@ test("an unclaimed editable file keeps takeover guidance; standalone packages ke
   assert.doesNotMatch(text(tree), /historical|Pick up this application/);
   h.unmount();
 });
+
+test("a failed refusal-notice load offers a retry that shows the notice once it loads", async () => {
+  let fail = true, loads = 0, reads = 0;
+  const h = await componentHarness(new URL("./shell/ReturnedBanner.tsx", import.meta.url), "ReturnedBanner", {
+    "../../api/accounts": { accounts: {
+      messages: async () => { loads++; if (fail) throw Object.assign(new Error("outage"), { detail: "The officer’s message did not load." }); return [refusal]; },
+      markRead: async () => { reads++; },
+    } },
+    "../../api/client": { EngineError: Error },
+    "../../store": { useCase: () => ({ c: {}, gaps: [] }), hrefFor: () => "#/review" },
+    "../account": { initials: () => "MO", patchApplication() {} },
+    "../applications": { authorityName: () => "Edmonton" },
+    "../routes": { calmHref: (href) => href },
+  });
+  let tree = await h.render({ app: app() });
+  assert.equal(loads, 1);
+  assert.match(text(tree), /did not load/);
+  assert.doesNotMatch(text(tree), /A refusal was recorded/, "an unknown notice is not described as missing");
+  assert.equal(reads, 0, "nothing is marked read while the notice is not shown");
+  fail = false;
+  click(tree, "Try again");
+  tree = await h.render();
+  assert.equal(loads, 2);
+  assert.ok(text(tree).includes(refusal.body), "the final refusal reasons and appeal notice appear after the retry");
+  assert.doesNotMatch(text(tree), /did not load/);
+  assert.equal(nodes(tree, (n) => n.type === "button" && text(n) === "Try again").length, 0);
+  assert.equal(nodes(tree, (n) => n.type === "textarea").length, 0, "still no reply box");
+  h.unmount();
+});
+
+test("a retry started for one file never shows its notice on another file", async () => {
+  const pending: { id: string; resolve: (m: Message[]) => void; reject: (e: unknown) => void }[] = [];
+  const h = await componentHarness(new URL("./shell/ReturnedBanner.tsx", import.meta.url), "ReturnedBanner", {
+    "../../api/accounts": { accounts: {
+      messages: (id: string) => new Promise<Message[]>((resolve, reject) => pending.push({ id, resolve, reject })),
+      markRead: async () => {},
+    } },
+    "../../api/client": { EngineError: Error },
+    "../../store": { useCase: () => ({ c: {}, gaps: [] }), hrefFor: () => "#/review" },
+    "../account": { initials: () => "MO", patchApplication() {} },
+    "../applications": { authorityName: () => "Edmonton" },
+    "../routes": { calmHref: (href) => href },
+  });
+  await h.render({ app: app() });
+  pending[0].reject(Object.assign(new Error("outage"), { detail: "The officer’s message did not load." }));
+  let tree = await h.render();
+  click(tree, "Try again");
+  tree = await h.render();
+  assert.equal(pending.length, 2);
+  tree = await h.render({ app: app({ id: "c2" }) });
+  assert.equal(pending[2].id, "c2");
+  pending[1].resolve([refusal]);
+  tree = await h.render();
+  assert.ok(!text(tree).includes(refusal.body), "the first file's late answer is ignored");
+  pending[2].resolve([officerReply]);
+  tree = await h.render();
+  assert.ok(text(tree).includes(officerReply.body));
+  h.unmount();
+});
+
+const reviewSession = (version: number) => ({ package_id: "c1", version, case_version: 1, findings: [], information_request: { items: [] } });
+
+async function reviewHarness(opts: { index: () => Promise<unknown> }) {
+  const claim = { reviewer_id: "officer", reviewer_name: "Morgan", claimed_at: "2026-10-22T12:00:00Z" };
+  const current = { id: "c1", title: "Synthetic review refresh", status: "in_review", version: 1, claim };
+  class EngineError extends Error { status: number; constructor(status: number) { super("Synthetic failure"); this.status = status; } }
+  let runs = 0;
+  const h = await componentHarness(new URL("./reviewer/ReviewDetail.tsx", import.meta.url), "ReviewDetail", {
+    "../../api/client": { EngineError, engine: { getCase: async () => current, gaps: async () => [] } },
+    "../../api/accounts": { AccountsError: EngineError, accounts: { messages: async () => [] } },
+    "../../api/packageReview": { packageReview: { index: opts.index, run: async () => { runs++; return reviewSession(2); } } },
+    "../account": { useAccount: () => ({ user: { id: "officer", name: "Morgan" } }) },
+    "./reviewData": { useQueue: () => ({ rows: [{ ...current, applicant: { name: "Mira", applicant_type: "homebuilder" } }] }), setBlocking() {} },
+    "./queue": queue,
+    "./packageView": packageView,
+    "./PackageReview": { PackageReview: "PackageReview", StepTitle: "StepTitle" },
+    "../shell/MoreMenu": { MoreMenu: "MoreMenu" },
+  }, { EngineError });
+  return { ...h, EngineError, get runs() { return runs; } };
+}
+
+const runAgain = (tree) => {
+  const head = nodes(tree, (n) => n.props?.right)[0];
+  const menu = nodes(head.props.right, (n) => n.type === "MoreMenu")[0];
+  const item = menu.props.items.find((i) => i.label === "Run the review again");
+  assert.ok(item, "the claimed case can run again");
+  item.onClick();
+};
+/** Accept is in the failure panel, or in the review's last step (the PackageReview `final` prop). */
+const accept = (tree) => {
+  const isAccept = (n) => n.type === "button" && text(n).startsWith("Accept");
+  const final = nodes(tree, (n) => n.type === "PackageReview")[0]?.props.final.content;
+  return nodes(tree, isAccept)[0] ?? nodes(final, isAccept)[0];
+};
+
+test("a review that ran stays on screen when the background index refresh fails; Accept stays blocked", async () => {
+  let failRefresh = false, Err: new (s: number) => Error;
+  const h = await reviewHarness({ index: async () => { if (failRefresh) throw new Err(503); return { latest: reviewSession(1), sessions: [reviewSession(1)], close_out: null }; } });
+  Err = h.EngineError;
+  let tree = await h.render({ caseId: "c1" });
+  assert.equal(nodes(tree, (n) => n.type === "PackageReview")[0]?.props.session.version, 1);
+  failRefresh = true;
+  runAgain(tree);
+  tree = await h.render();
+  const after = nodes(tree, (n) => n.type === "PackageReview");
+  assert.equal(after.length, 1, "the successful review remains visible");
+  assert.equal(after[0].props.session.version, 2, "the version that just ran stays selected");
+  assert.equal(accept(tree)?.props.disabled, true, "an unknown index still blocks acceptance");
+  assert.ok(nodes(tree, (n) => n.type === "button" && text(n) === "Try again").length, "the refresh failure has a retry");
+  // Retrying succeeds with an index that lags behind: the selected version is not replaced.
+  failRefresh = false;
+  click(tree, "Try again");
+  tree = await h.render();
+  assert.equal(nodes(tree, (n) => n.type === "PackageReview")[0].props.session.version, 2, "retry keeps the selected newer version");
+  assert.equal(nodes(tree, (n) => n.type === "button" && text(n) === "Try again").length, 0);
+  h.unmount();
+});
+
+test("a first review load that fails still shows the error and retry, with Accept blocked", async () => {
+  let fail = true, Err: new (s: number) => Error;
+  const h = await reviewHarness({ index: async () => { if (fail) throw new Err(503); return { latest: reviewSession(1), sessions: [reviewSession(1)], close_out: null }; } });
+  Err = h.EngineError;
+  let tree = await h.render({ caseId: "c1" });
+  assert.match(text(tree), /The review didn’t load/);
+  assert.equal(nodes(tree, (n) => n.type === "PackageReview").length, 0);
+  assert.equal(accept(tree)?.props.disabled, true);
+  assert.equal(h.runs, 0, "an unknown index does not trigger a new review run");
+  fail = false;
+  click(tree, "Try again");
+  tree = await h.render();
+  assert.equal(nodes(tree, (n) => n.type === "PackageReview")[0]?.props.session.version, 1);
+  h.unmount();
+});
