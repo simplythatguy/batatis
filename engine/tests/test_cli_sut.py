@@ -12,23 +12,23 @@ DB = default_db()
 SCRIPT = Path(cli_sut.__file__).resolve()
 
 
-def test_commits_only_part9_above_threshold_and_builds_section_c(monkeypatch):
+def test_uncalibrated_scoring_never_commits_and_keeps_confirmation_questions(monkeypatch):
     monkeypatch.delenv('ANTHROPIC_API_KEY', raising=False)
     out = cli_sut.run('wall close to the property line', DB, Judge(fake_ask('limiting distance'), workers=2))
     assert set(out) >= {'articles', 'section_c', 'engineering_required', 'intake_action', 'questions'}
-    arts = out['articles']
-    assert len(arts) == cli_sut.TOP_K and all(a['division'] == 'B' for a in arts)
-    committed = [a for a in arts if a['committed']]
-    assert 0 < len(committed) <= cli_sut.MAX_COMMITS
-    assert all(a['part'] == 9 and a['probability'] >= cli_sut.COMMIT_THRESHOLD for a in committed)
-    assert any(a['part'] != 9 and a['probability'] >= cli_sut.COMMIT_THRESHOLD and not a['committed'] for a in arts)
-    assert out['section_c'] and all(any(r['provision'].startswith(a['provision']) for a in committed)
-                                    for r in out['section_c'])
-    pair = next(p for r in out['section_c'] for p in r['pairs'])
+    assert len(out['articles']) == cli_sut.TOP_K
+    assert all(a['division'] == 'B' and not a['committed'] for a in out['articles'])
+    assert out['section_c'] == [] and out['questions'] and out['intake_action'] == 'ask'
+    assert out['trace']['commit_policy']['status'] == 'uncalibrated'
+    assert out['trace']['config']['screen_model'] == 'relevance-1'
+
+
+def test_section_c_for_selected_articles_is_deterministic_lookup():
+    from engine.codes import Codes
+    rows = cli_sut.section_c(['9.9.10.1.'], Codes(DB))
+    assert rows and all(r['division'] == 'B' and r['provision'].startswith('9.9.10.1.') for r in rows)
+    pair = next(p for r in rows for p in r['pairs'])
     assert set(pair) == {'function', 'objective', 'condition'}
-    assert out['trace']['verifier'].startswith('skipped')
-    assert out['engineering_required'] in ('yes', 'no', 'depends')
-    assert out['intake_action'] in ('ask', 'proceed_conditionally', 'redirect')
 
 
 def test_jev_failure_falls_back_to_bm25_without_commits(monkeypatch):

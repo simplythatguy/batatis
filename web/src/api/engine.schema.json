@@ -6875,6 +6875,18 @@
         "bands": {
           "$ref": "#/$defs/RelevanceBands"
         },
+        "config_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Config Hash"
+        },
         "description_sha256": {
           "title": "Description Sha256",
           "type": "string"
@@ -6889,10 +6901,28 @@
           "type": "object"
         },
         "model": {
-          "const": "relevance-1",
           "default": "relevance-1",
+          "enum": [
+            "relevance-1",
+            "relevance-2"
+          ],
           "title": "Model",
           "type": "string"
+        },
+        "model_ids": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "default": {},
+          "title": "Model Ids",
+          "type": "object"
         },
         "rerank": {
           "additionalProperties": {
@@ -6931,6 +6961,8 @@
       "required": [
         "status",
         "model",
+        "config_hash",
+        "model_ids",
         "scored_at",
         "description_sha256",
         "stale",

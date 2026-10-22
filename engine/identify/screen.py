@@ -1,7 +1,7 @@
-"""Jev judgments over article cards: the exhaustive screen and the one-request rerank share this module.
+"""Provider-neutral judgments over article cards for exhaustive screening and reranking.
 
 Ported from docs/research/2026-10-20-vision/jev-benchmark/scripts/jevrun.py (benchmark caching removed).
-The decision model is pinned: JEV_MODEL is sent as the request's `model`, never `jev-latest`.
+The default provider follows IdentifyConfig; explicit Jev uses its pinned model, never `jev-latest`.
 """
 from __future__ import annotations
 
@@ -15,7 +15,9 @@ from typing import Any, Callable, Mapping
 from .corpus import card
 
 JEV_MODEL = 'jev-1.13.0'
+DECISIONS_MODEL = 'gpt-6-luna'
 JEV_PROVIDER = 'typesafe'         # OpenRouter names the model differently (~typesafe/...); pin applies to TypeSafe
+MAX_QUESTIONS = 400              # independent of state/card length (Decisions request limit)
 GOVERN = ('Article {L} states a requirement that directly governs the situation described in `proposal`: '
           'the proposal must meet that requirement, relies on it, or departs from it.')
 
@@ -74,8 +76,23 @@ class Judge:
     """Probability, per article, that it governs the proposal. One state per batch of article cards."""
 
     def __init__(self, ask: Ask | None = None, *, chars: int = 700, max_state: int = 56000, workers: int = 8,
-                 timeout: float = 60, attempts: int = 4, question: str = GOVERN):
-        self.ask = ask or jev_ask()
+                 timeout: float = 60, attempts: int = 4, question: str = GOVERN,
+                 model: str | None = None, method: str | None = None):
+        self.config = None
+        self.transports = None
+        if ask is None:
+            from .config import load_config
+            from .providers import scoring_ask, transports
+            config = load_config()
+            self.config = config
+            method, model, chars = config.screen, config.screen_model, config.card_chars
+            self.transports = transports(scoring={config.screen, config.rerank})
+            ask = scoring_ask(self.transports, method)
+        # Metered adapters carry their identity through the injectable Ask seam. Plain
+        # legacy test adapters keep the historical Jev identity unless specified.
+        self.ask = ask
+        self.model = model or getattr(ask, 'model', JEV_MODEL)
+        self.method = method or getattr(ask, 'method', 'jev')
         self.chars, self.max_state, self.workers = chars, max_state, workers
         self.timeout, self.attempts, self.question = timeout, attempts, question
         self.usage = Usage()
@@ -87,7 +104,7 @@ class Judge:
         for a in ids:
             t = card(arts[a], self.chars)
             n = len(json.dumps(t)) + 12
-            if cur and base + size + n > self.max_state:
+            if cur and (base + size + n > self.max_state or len(cur) >= MAX_QUESTIONS):
                 out.append(cur)
                 cur, size = [], 0
             cur.append((a, t))
@@ -127,7 +144,7 @@ class Judge:
                         self.usage.errors += 1
                     if attempt + 1 < self.attempts:
                         time.sleep(1.5 * (attempt + 1))
-            raise RuntimeError('Jev batch failed after retries') from last_error
+            raise RuntimeError('scoring batch failed after retries') from last_error
 
         batches = self.batches(query, arts, ids)
         if len(batches) == 1:

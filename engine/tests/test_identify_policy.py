@@ -23,9 +23,9 @@ def clean_gate(monkeypatch):
 
 # --- config ---------------------------------------------------------------------------------------
 
-def test_default_config_is_jev_screen_jev_rerank_openai_luna_verifier():
+def test_default_config_is_decisions_screen_and_rerank_with_existing_quote_verifier():
     config = load_config(env={})
-    assert (config.screen, config.screen_model, config.rerank, config.rerank_n) == ('jev', 'jev-1.13.0', 'jev', 60)
+    assert (config.screen, config.screen_model, config.rerank, config.rerank_n) == ('decisions', 'gpt-6-luna', 'decisions', 60)
     assert (config.verifier, config.verifier_model, config.verify_n) == ('openai', 'gpt-6-luna', 15)
     assert config.exhaustive and config.model_ids()['verifier'] == 'gpt-6-luna'
 
@@ -170,7 +170,7 @@ def test_fake_provider_does_not_open_the_assistant_gate(monkeypatch):
 
 def test_each_transport_meters_its_calls(monkeypatch):
     monkeypatch.setenv('BATATIS_PROVIDER', 'fake')
-    tp = transports('203.0.113.9')
+    tp = transports('203.0.113.9', scoring={'jev', 'decisions'})
     assert tp.kind == 'fake' and tp.jev and tp.anthropic and tp.openai
     tp.jev({'proposal': 'soffit', 'articles': {'A0': 'Soffit (Part 9 > a > b): soffit text'}}, {'q0': {}}, 5)
     tp.openai('scores', {}, 's', '<proposal>\nsoffit\n</proposal>', model='gpt-6-luna')
@@ -184,7 +184,8 @@ def test_each_transport_meters_its_calls(monkeypatch):
 def test_live_transports_are_absent_without_the_switch():
     tp = transports()
     assert tp.kind == 'live' and tp.jev is None and tp.openai is None and tp.anthropic is None
-    assert set(tp.unavailable) == {'jev', 'openai', 'anthropic'}
+    assert tp.decisions is None
+    assert set(tp.unavailable) == {'jev', 'openai', 'anthropic', 'decisions'}
 
 
 def test_metered_wrappers_settle_from_provider_usage(monkeypatch):

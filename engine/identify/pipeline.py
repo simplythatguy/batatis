@@ -1,8 +1,8 @@
 """Identification used by POST /cases/{id}/identify: screen -> rerank -> verify -> commit or quoted choices.
 
 Ported from PR #12 (engine/identify/pipeline.py) and rebuilt around one IdentifyConfig:
-  screen   Jev judges every Division B article (asserted: 2,080 scores, none missing), or a lexical arm
-  rerank   the top `rerank_n` re-judged together in one request (Jev), or an OpenAI rerank, or none
+  screen   Decisions (temporary default) or Jev judges every Division B article (2,080), or a lexical arm
+  rerank   the top `rerank_n` re-judged by the configured provider, or a structured rerank, or none
   verify   OpenAI (default, GPT Luna) or Anthropic reads the full text of the top `verify_n` and picks
            with word-for-word quotes; a quote that is not in the article drops the pick
   commit   Part 9 only, calibrated threshold for this config, verifier picked, at most 3 (commit.py)
@@ -27,14 +27,14 @@ from engine.codes import Codes
 from engine.models_identify import (BenchmarkRecord, DroppedPick, IdentifyArticle, IdentifyResult, IdentifyTrace,
                                     OpenQuestion, QuotedChoice, StageRecord)
 from engine.process_refs import process_refs
-from engine.public_names import UNAVAILABLE, public_text
+from engine.public_names import UNAVAILABLE, public_stage_model, public_text
 
 from . import cards
 from .commit import CommitPolicy, decide, load_policy
 from .config import DIVISION_B_ARTICLES, IdentifyConfig, load_config
 from .corpus import articles, bm25_rank, card
 from .llm import OpenAIVerifier, score_candidates
-from .providers import Transports, transports as default_transports
+from .providers import Transports, scoring_ask, transports as default_transports
 from .requirement import benchmark as requirement_benchmark
 from .screen import Judge
 from .search_rank import rank_articles
@@ -58,7 +58,7 @@ class StageUnavailable(RuntimeError):
 @dataclass
 class RunOutput:
     result: IdentifyResult
-    screen: dict[str, float] | None        # every article's screen probability (Jev screen only)
+    screen: dict[str, float] | None        # every article's screen estimate (exhaustive model screens only)
     rerank: dict[str, float] | None
 
 
@@ -117,10 +117,9 @@ def _rank(prose, db, arts, ids, config, tp, stages) -> tuple[list[tuple[str, flo
     """Model path: (ranked, screen scores, rerank scores, articles scored). Raises on any failure."""
     screen: dict[str, float] | None = None
     judge = None
-    if config.screen == 'jev':
-        if tp.jev is None:
-            raise StageUnavailable(tp.unavailable.get('jev', 'Jev unavailable'))
-        judge = Judge(tp.jev, chars=config.card_chars, attempts=2)
+    if config.exhaustive:
+        judge = Judge(scoring_ask(tp, config.screen), chars=config.card_chars, attempts=2,
+                      model=config.screen_model, method=config.screen)
 
         def do_screen(record):
             scores = judge.judge(prose, arts, ids)
@@ -129,7 +128,7 @@ def _rank(prose, db, arts, ids, config, tp, stages) -> tuple[list[tuple[str, flo
             if len(ids) != DIVISION_B_ARTICLES or len(scores) != DIVISION_B_ARTICLES or missing:
                 raise ScreenIncomplete(f'screen scored {len(scores)} of {DIVISION_B_ARTICLES} Division B articles')
             return scores
-        screen = stages.run('screen', 'jev', config.screen_model, do_screen)
+        screen = stages.run('screen', config.screen, config.screen_model, do_screen)
         pool = sorted(ids, key=lambda a: -screen[a])[:config.rerank_n]
         scored = len(screen)
     else:
@@ -140,11 +139,10 @@ def _rank(prose, db, arts, ids, config, tp, stages) -> tuple[list[tuple[str, flo
     stages.emit('screen', status='done', method=config.screen, articles=scored)
 
     rerank: dict[str, float] | None = None
-    if config.rerank == 'jev':
-        if judge is None:
-            if tp.jev is None:
-                raise StageUnavailable(tp.unavailable.get('jev', 'Jev unavailable'))
-            judge = Judge(tp.jev, chars=config.card_chars, attempts=2)
+    if config.rerank in ('decisions', 'jev'):
+        if judge is None or judge.method != config.rerank:
+            judge = Judge(scoring_ask(tp, config.rerank), chars=config.card_chars, attempts=2,
+                          model=config.rerank_model, method=config.rerank)
 
         def do_rerank(record):
             before = judge.usage.requests
@@ -152,7 +150,7 @@ def _rank(prose, db, arts, ids, config, tp, stages) -> tuple[list[tuple[str, flo
             record.requests = judge.usage.requests - before
             record.detail = 'one request' if record.requests == 1 else f'{record.requests} requests'
             return out
-        rerank = stages.run('rerank', 'jev', config.rerank_model, do_rerank)
+        rerank = stages.run('rerank', config.rerank, config.rerank_model, do_rerank)
         ranked = sorted(((a, rerank[a]) for a in pool), key=lambda x: -x[1])
     elif config.rerank == 'openai':
         if tp.openai is None:
@@ -183,9 +181,11 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
         description_sha256: str | None = None, client_ip: str | None = None) -> RunOutput:
     """`prose` is the outbound (already redacted) description. `verifier` overrides the configured one (tests)."""
     config = config or load_config()
-    tp = transports or default_transports(client_ip, jev_model=config.screen_model,
+    tp = transports or default_transports(client_ip, scoring={config.screen, config.rerank},
                                           anthropic=config.verifier == 'anthropic')
     policy = policy or load_policy(config.config_hash)
+    if policy.status == 'calibrated' and policy.config_hash != config.config_hash:
+        policy = CommitPolicy('uncalibrated', 'calibration was fitted for a different pipeline config')
     db = Path(codes.db_path)
     arts = articles(db)
     ids = list(arts)
@@ -288,7 +288,8 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
         articles_expected=DIVISION_B_ARTICLES, articles_scored=scored, ranker=ranker, fallback_reason=fallback_reason,
         verifier=verifier_state, picks=[p.article for p in picks], dropped=dropped, stages=stages.records,
         spend=log.by_provider(), usd=round(log.usd(), 6), seconds=round(time.monotonic() - t0, 3))
-    model_ids = config.model_ids()
+    model_ids = {stage: public_stage_model(getattr(config, stage), pin)
+                 for stage, pin in config.model_ids().items()}
     if fallback:
         model_ids = {'screen': None, 'rerank': None, 'verifier': None}
     # Models, providers and spend are named only here and in the log. The result reads them as neutral words.
@@ -306,10 +307,12 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
 
 def _reason(error: Exception) -> str:
     """Technical category only: never a provider body, a credential, or applicant prose."""
-    from .providers import GateClosed
+    from .providers import DecisionsProtocolError, GateClosed, ScoringUnavailable
     if isinstance(error, GateClosed):
         return f'{error.provider} gate: {error.source}'
-    if isinstance(error, (ScreenIncomplete, StageUnavailable)):
+    if isinstance(error, DecisionsProtocolError):
+        return 'scoring response was refused or invalid'
+    if isinstance(error, (ScreenIncomplete, StageUnavailable, ScoringUnavailable)):
         return str(error)
     cause = error.__cause__ or error
     return f'{type(error).__name__}/{type(cause).__name__}'
@@ -321,7 +324,8 @@ def _label(mode: str, config: IdentifyConfig, scored: int, fallback_reason: str 
                 f'({fallback_reason}). Nothing is committed.')
     screen = (f'All {scored} Division B articles were scored' if config.exhaustive
               else f'Keyword search ({config.screen}) shortlisted {scored} articles')
-    rerank = {'jev': f'; the top {config.rerank_n} were re-checked in one request',
+    rerank = {'jev': f'; the top {config.rerank_n} were re-checked',
+              'decisions': f'; the top {config.rerank_n} were re-checked',
               'openai': f'; the top {config.rerank_n} were re-checked', 'none': ''}[config.rerank]
     verify = '' if config.verifier == 'none' else f'; the top {config.verify_n} were read in full'
     fake = ' Offline fake providers: for testing only, not a measurement.' if mode == 'fake' else ''

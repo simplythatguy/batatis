@@ -7,10 +7,10 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 Probability = Annotated[float, Field(ge=0, le=1)]
 
-# The only `model` value a response, the schema or a stored row carries: an opaque product version.
-# The scoring provider's own model pin stays private (engine/identify/screen.py) and engine/relevance.py
-# maps it to this value.
+# Responses and stored rows carry opaque product versions. Private provider pins are mapped
+# by engine/relevance.py; old rows keep their historical version and absent provenance.
 PUBLIC_MODEL = 'relevance-1'
+DECISIONS_PUBLIC_MODEL = 'relevance-2'
 # Rows stored before the public version existed hold that pin instead. They still load, as PUBLIC_MODEL,
 # and the next write stores the public value. The release before this one reads only the pin, so rolling
 # back below this change follows the runbook beside ROLLBACK in engine/tests/test_relevance.py: stop
@@ -32,7 +32,9 @@ class RelevanceBands(BaseModel):
 
 class RelevanceRecord(BaseModel):
     status: Literal['scored'] = 'scored'
-    model: Literal['relevance-1'] = PUBLIC_MODEL
+    model: Literal['relevance-1', 'relevance-2'] = PUBLIC_MODEL
+    config_hash: str | None = None           # absent on historical rows; never infer it on reads
+    model_ids: dict[str, str | None] = {}    # opaque per-stage versions, absent on historical rows
     scored_at: str
     description_sha256: str
     stale: bool = False
@@ -40,6 +42,12 @@ class RelevanceRecord(BaseModel):
     rerank: dict[str, Probability]
     display: dict[str, Probability]
     bands: RelevanceBands
+
+    @field_validator('model_ids')
+    @classmethod
+    def _stage_models_are_public(cls, value):
+        from .public_names import public_model_id
+        return {stage: public_model_id(pin) for stage, pin in value.items()}
 
     @field_validator('model', mode='before')
     @classmethod
