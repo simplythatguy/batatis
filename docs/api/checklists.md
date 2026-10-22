@@ -11,8 +11,8 @@ copy says the design complies, is safe, is approved or is adequate.
 
 | Checklist | Package | Rows | Source |
 |---|---|---|---|
-| `calgary-spv-001` | Calgary SPV-001 Zero Lot Line, Revision 5, 2026-03-05 | 53 | City PDF, 6 pages |
-| `calgary-spv-006` | Calgary SPV-006 Firewall in a Rowhouse with Secondary Suites, 2025-06-19 | 32 | City PDF, 5 pages |
+| `calgary-spv-001` | Calgary SPV-001 Zero Lot Line, Revision 5, 2026-03-05 | 55 | City PDF, 6 pages |
+| `calgary-spv-006` | Calgary SPV-006 Firewall in a Rowhouse with Secondary Suites, 2025-06-19 | 33 | City PDF, 5 pages |
 | `edmonton-b23-01` | Edmonton Policy B23-01 Fire Separation Between Row Houses with More Than Two Secondary Suites, 2024-07-30 | 13 | City PDF, 2 pages |
 
 Edmonton Policy B14-01 (reduced or zero lot line, cites the Alberta Building Code 2014) is **historical
@@ -171,7 +171,7 @@ Responses:
         "answer": {"state": "does_not_apply", "reason": "No front or rear balcony.", "fact_id": "fact_8a43a08282ca"}
       }
     ],
-    "counts": {"total": 53, "confirmed": 0, "not_yet": 0, "does_not_apply": 1, "unanswered": 52},
+    "counts": {"total": 55, "confirmed": 0, "not_yet": 0, "does_not_apply": 1, "unanswered": 54},
     "matches_case_provisions": false,
     "provisions": ["9.10.15.5.(8)", "9.10.15.5.(9)"]
   },

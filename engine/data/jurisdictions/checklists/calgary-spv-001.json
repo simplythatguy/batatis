@@ -189,7 +189,7 @@
       "source": {
         "page": 2,
         "label": "b) iii.",
-        "quote": "A fire resistance rating of not less than 45 minutes on all exposed beams and support columns.",
+        "quote": "A fire resistance rating of not less than 45 minutes on all exposed beams and support columns. The fire resistance rating may be achieved by utilizing mass timber material as per Article 9.10.6.2. and Table 3.1.4.7.",
         "lead_in": "All front or rear facing balconies on or adjacent to the exposing building face at zero limiting distance shall have:"
       }
     },
@@ -369,13 +369,27 @@
       "group": "openings",
       "kind": "construction",
       "subject": "zero_side",
-      "plain": "Three-storey house: any openings on the zero side are on the first or second floor, where the limiting distance is 1.2 m or more, and glazed openings are sized by the Subsection 9.10.15. and Table 9.10.15.4. calculation.",
+      "plain": "Three-storey house: any unprotected mechanical or glazed openings on the zero side are on the first or second floor, where the limiting distance is 1.2 m or more.",
       "when": "Only for a three-storey house with openings on the zero side.",
       "may_not_apply": true,
       "source": {
         "page": 3,
         "label": "f)",
-        "quote": "Unprotected mechanical openings and glazed openings on the first and second floor are permitted on the 'zero' side where the limiting distance is 1.2m or greater. Glazed openings are to be calculated prescriptively"
+        "quote": "Unprotected mechanical openings and glazed openings on the first and second floor are permitted on the 'zero' side where the limiting distance is 1.2m or greater."
+      }
+    },
+    {
+      "id": "f-zero-glazed-calculated",
+      "group": "openings",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "Three-storey house: glazed openings on the zero side are sized by the Subsection 9.10.15. and Table 9.10.15.4. calculation.",
+      "when": "Only for a three-storey house with openings on the zero side.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "f)",
+        "quote": "Glazed openings are to be calculated prescriptively as per 9.10.15 and table 9.10.15.4."
       }
     },
     {
@@ -455,13 +469,27 @@
       "group": "openings",
       "kind": "construction",
       "subject": "zero_side",
-      "plain": "One- or two-storey house: any openings on the zero side are on the first or second floor, where the limiting distance is 1.2 m or more, and glazed openings are sized by the Subsection 9.10.15. and Table 9.10.15.4. calculation.",
+      "plain": "One- or two-storey house: any unprotected mechanical or glazed openings on the zero side are on the first or second floor, where the limiting distance is 1.2 m or more.",
       "when": "Only for a one- or two-storey house with openings on the zero side.",
       "may_not_apply": true,
       "source": {
         "page": 3,
         "label": "g)",
         "quote": "Unprotected mechanical openings and glazed openings on the first and second floor are permitted on the 'zero' side where the limiting distance is 1.2m or greater."
+      }
+    },
+    {
+      "id": "g-zero-glazed-calculated",
+      "group": "openings",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "One- or two-storey house: glazed openings on the zero side are sized by the Subsection 9.10.15. and Table 9.10.15.4. calculation.",
+      "when": "Only for a one- or two-storey house with openings on the zero side.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "g)",
+        "quote": "Glazed openings are to be calculated prescriptively as per 9.10.15 and table 9.10.15.4."
       }
     },
     {

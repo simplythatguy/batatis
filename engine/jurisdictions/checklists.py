@@ -85,6 +85,11 @@ def load_dir(reg: 'Registry') -> None:
                 raise PackError(f'packs/{pack.id}.json: package {pkg.code} names missing checklist {pkg.checklist}')
             if pkg.checklist and pkg.status != 'current':
                 raise PackError(f'packs/{pack.id}.json: historical package {pkg.code} cannot name a checklist')
+            if pkg.checklist:
+                named = reg.checklists[pkg.checklist]
+                if named.jurisdiction != pack.id or named.package != pkg.id:
+                    raise PackError(f'packs/{pack.id}.json: package {pkg.code} names checklist {pkg.checklist}, '
+                                    f'which belongs to {named.jurisdiction}/{named.package}')
 
 
 def for_pack(reg: 'Registry', pack: 'JurisdictionPack') -> list[StandingChecklist]:

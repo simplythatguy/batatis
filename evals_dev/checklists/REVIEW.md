@@ -8,8 +8,8 @@ against its PDF may set `reviewed: true`, with `reviewed_by` and `reviewed_on`.
 
 | Checklist | File | Source PDF (git-excluded) | Rows | Source notes |
 |---|---|---|---|---|
-| `calgary-spv-001` SPV-001 Zero Lot Line, Rev. 5, 2026-03-05 | `engine/data/jurisdictions/checklists/calgary-spv-001.json` | `reference/precedents/calgary/calgary-spv-001-zero-lot-line-2026-03.pdf` (6 pages) | 53 | 3 |
-| `calgary-spv-006` SPV-006 Firewall in a Rowhouse with Secondary Suites, 2025-06-19 | `engine/data/jurisdictions/checklists/calgary-spv-006.json` | `reference/precedents/calgary/calgary-spv-006-firewall-rowhouse-secondary-suites.pdf` (5 pages) | 32 | 3 |
+| `calgary-spv-001` SPV-001 Zero Lot Line, Rev. 5, 2026-03-05 | `engine/data/jurisdictions/checklists/calgary-spv-001.json` | `reference/precedents/calgary/calgary-spv-001-zero-lot-line-2026-03.pdf` (6 pages) | 55 | 3 |
+| `calgary-spv-006` SPV-006 Firewall in a Rowhouse with Secondary Suites, 2025-06-19 | `engine/data/jurisdictions/checklists/calgary-spv-006.json` | `reference/precedents/calgary/calgary-spv-006-firewall-rowhouse-secondary-suites.pdf` (5 pages) | 33 | 3 |
 | `edmonton-b23-01` Policy B23-01, 2024-07-30 | `engine/data/jurisdictions/checklists/edmonton-b23-01.json` | `reference/precedents/edmonton/edmonton-policy-b23-01-row-house-fire-separation-more-than-two-secondary-suites.pdf` (2 pages) | 13 | 4 |
 
 Edmonton Policy B14-01 has no checklist. It cites the Alberta Building Code 2014 and is shown only as
@@ -118,6 +118,7 @@ routes). The loader refuses a checklist on a historical package.
   test as `EXPECTED_LABELS`; a reviewer who finds a missing item adds its label there and a row here);
 - no row repeats another row's quote; no row says "see source", "etc." or "all conditions";
 - no plain-language copy says complies, safe, approved or adequate;
+- every code reference in a `plain` or `when` (for example 9.10.15.4. or D-2.3.8.) appears in that row's verified quote or lead-in, so plain text cannot add a citation (measurements are not checked; read them);
 - every quote and lead-in is on its cited page of `reference/text/<stem>.jsonl` (skips when the
   git-excluded reference folder is absent), and the local PDF hash equals the recorded hash;
 - every checklist is still `reviewed: false` and listed in this file.

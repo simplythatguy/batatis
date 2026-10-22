@@ -68,7 +68,8 @@
         "page": 1,
         "label": "Reason for Variance",
         "quote": "in a building which contains more than 2 houses, a party wall that separates any two adjacent houses with a secondary suite, shall be constructed as a firewall.",
-        "diagram": "Figure 1, p.5 (prescriptive layout with firewalls)"
+        "diagram": "Figure 1, p.5 (prescriptive layout with firewalls)",
+        "lead_in": "Sentence 9.10.11.2.(2) of Division B of the National Building Code - Alberta Edition requires that"
       }
     },
     {
@@ -76,7 +77,7 @@
       "group": "scope",
       "kind": "scope",
       "subject": "project",
-      "plain": "You follow the package exactly as published. Any change means either the Division B acceptable solution or a site-specific variance, and a site-specific variance to Sentence 9.10.11.2.(2) needs a professional involved.",
+      "plain": "You follow the package exactly as published. Any change to its scope or use means either the Division B acceptable solution or a site-specific variance.",
       "may_not_apply": false,
       "source": {
         "page": 1,
@@ -245,7 +246,7 @@
       "group": "rated-construction",
       "kind": "construction",
       "subject": "building",
-      "plain": "Rating method, option b: that insulation meets CAN/ULC-S702.1 and weighs at least 1.22 kg per square metre of wall or floor surface (footnote 1, citing D-2.3.4.(4)).",
+      "plain": "Rating method, option b: that insulation meets CAN/ULC-S702.1 (footnote 1, citing D-2.3.4.(4)).",
       "when": "Only where a fire-resistance rating is required (not sprinklered).",
       "one_of": "rating-method",
       "option": "3. b)",
@@ -253,8 +254,23 @@
       "source": {
         "page": 2,
         "label": "footnote (1)",
-        "quote": "having a mass per unit area of not less than 1.22 kg/m2 of wall/floor surface.",
-        "lead_in": "filled with preformed insulation of rock or slag fibres conforming to CAN/ULC-S702.1"
+        "quote": "D-2.3.4.(4) Method of Calculation - Spaces between wall studs and structural members of floor assembly filled with preformed insulation of rock or slag fibres conforming to CAN/ULC-S702.1"
+      }
+    },
+    {
+      "id": "3b-ii-insulation-mass",
+      "group": "rated-construction",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Rating method, option b: that insulation weighs at least 1.22 kg per square metre of wall or floor surface (footnote 1).",
+      "when": "Only where a fire-resistance rating is required (not sprinklered).",
+      "one_of": "rating-method",
+      "option": "3. b)",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "footnote (1)",
+        "quote": "having a mass per unit area of not less than 1.22 kg/m2 of wall/floor surface."
       }
     },
     {
@@ -302,7 +318,7 @@
       "source": {
         "page": 2,
         "label": "footnote (2)",
-        "quote": "Gypsum board installed over framing or furring in a wall assembly shall be installed so that all edges are supported"
+        "quote": "D-2.3.8. Edge Support for Gypsum Board in Wall Assembly - Gypsum board installed over framing or furring in a wall assembly shall be installed so that all edges are supported"
       }
     },
     {
@@ -373,7 +389,7 @@
       "group": "ducts-doors",
       "kind": "construction",
       "subject": "building",
-      "plain": "Any duct through a fire separation without a fire damper is noncombustible, with a melting point of at least 760 C (see also Clause 9.33.1.1.(3)).",
+      "plain": "Any duct through a fire separation without a fire damper is noncombustible, with a melting point of at least 760 C.",
       "when": "Only where ducts pass through a fire separation without fire dampers.",
       "may_not_apply": true,
       "source": {
@@ -387,13 +403,13 @@
       "group": "ducts-doors",
       "kind": "construction",
       "subject": "building",
-      "plain": "Every opening in that duct system serves only one fire compartment.",
+      "plain": "Every opening in that duct system serves only one fire compartment (the source adds: see also Clause 9.33.1.1.(3)).",
       "when": "Only where ducts pass through a fire separation without fire dampers.",
       "may_not_apply": true,
       "source": {
         "page": 3,
         "label": "5. a)",
-        "quote": "with all openings in the duct system serving only one fire compartment."
+        "quote": "with all openings in the duct system serving only one fire compartment. (See also Clause 9.33.1.1.[3])"
       }
     },
     {

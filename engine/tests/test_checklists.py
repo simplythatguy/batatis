@@ -116,6 +116,17 @@ def test_a_checklist_must_match_its_package(tmp_path):
         Registry.load(root)
 
 
+def test_a_package_cannot_borrow_another_packages_checklist(tmp_path):
+    root = _copy(tmp_path)
+    def borrow(data):    # a second, synthetic current package points at another office's checklist
+        extra = json.loads(json.dumps(data['standing_packages'][0]))
+        extra.update(id='edmonton-planted', code='PLANTED-1', checklist='calgary-spv-001')
+        data['standing_packages'].append(extra)
+    _edit(root / 'packs' / 'edmonton.json', borrow)
+    with pytest.raises(PackError, match='belongs to calgary/calgary-spv-001'):
+        Registry.load(root)
+
+
 def test_removing_a_pack_removes_its_checklists(tmp_path):
     root = _copy(tmp_path)
     (root / 'packs' / 'calgary.json').unlink()
@@ -143,6 +154,21 @@ def test_no_summary_only_rows(checklist):
             assert c.when is None, f'{c.id}: a conditional row must allow does_not_apply'
     for group in checklist.groups:
         assert any(c.group == group.id for c in checklist.conditions), group.id
+
+
+CODE_REF = re.compile(r'\b(?:[A-D]-\d+(?:\.\d+)+|\d+\.\d+\.\d+(?:\.\d+)*)\.?(?:\(\d+\))?')
+
+
+@pytest.mark.parametrize('checklist', _checklists(), ids=lambda c: c.id)
+def test_every_code_reference_in_plain_text_is_in_the_verified_extract(checklist):
+    """Plain text may not add a citation the source extract does not carry."""
+    untraced = []
+    for c in checklist.conditions:
+        extract = normalise(f'{c.source.lead_in or ""} {c.source.quote}').replace('[', '(').replace(']', ')')
+        for ref in CODE_REF.findall(f'{c.plain} {c.when or ""}'):
+            if ref.rstrip('.') not in extract:
+                untraced.append(f'{c.id}: {ref}')
+    assert untraced == []
 
 
 @pytest.mark.parametrize('checklist', _checklists(), ids=lambda c: c.id)
