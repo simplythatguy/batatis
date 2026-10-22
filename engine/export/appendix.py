@@ -10,6 +10,7 @@ from __future__ import annotations
 import io
 import re
 from datetime import date
+from html import unescape
 from xml.sax.saxutils import escape
 
 from pypdf import PdfReader, PdfWriter
@@ -25,6 +26,8 @@ from ..jurisdictions import notices_for
 from ..models import INTENT_LABEL, Case, SectionCRow
 from ..process_fields import process_fields
 from ..section_d import section_d_plan, supporting_documents, text_evidence
+from .article_notes import benchmark, identify_quote, row_basis
+from .edition import second_printing_proven
 from .text import faithful_font_text
 
 INK = colors.HexColor('#1f2328')
@@ -87,19 +90,41 @@ def _nrc(text, citation: str) -> str:
     return ' '.join(parts)
 
 
-def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
+_SOURCE_KIND = {'user_text': 'typed by the applicant', 'user_click': 'chosen by the applicant',
+                'file': "a passage from the applicant's file"}
+
+
+def _field_labels(fmap: dict) -> dict[str, str]:
+    labels = {name: spec['label'] for name, spec in fmap.get('text_fields', {}).items()}
+    for table, rows in (('Section C', fmap.get('section_c_rows', [])), ('Section D', fmap.get('section_d_rows', []))):
+        for k, slot in enumerate(rows, start=1):
+            labels.update({name: f'{table} row {k}' for name in slot.values()})
+    return labels
+
+
+def _row_story(k: int, row: SectionCRow, codes, in_form: bool, case: Case | None = None) -> list:
     out = [Paragraph(f'C-{k}&nbsp;&nbsp;{escape(row.provision_id)}', H3),
            _kv('Citation', row.citation),
            _kv('On the form', f'row {k}' if in_form else 'appendix only (more than five rows)')]
+    if case is not None:
+        out.append(_kv('How this row was identified', row_basis(case, row.provision_id)))
+        quote = identify_quote(case, row.provision_id, codes)
+        if quote:
+            out.append(_kv('Identification quote (word for word in the code database)', _nrc(quote, row.citation)))
     status = row.attribution_status
     if row.attributed_via:
         status += f' ({row.attributed_via})'
     out.append(_kv('Attribution status', status))
+    def statement(code: str, text) -> str:
+        # Objectives and functional statements are Division A text: cite their own Division A sentence.
+        own = codes.definition(code) if codes is not None else None
+        return f'{code} {_nrc(text, (own or {}).get("citation") or row.citation)}'.strip()
+
     if row.pairs:
         out.append(_table(['Function', 'Objective', 'Source'],
-                          [[f'{p.function} {_nrc(p.function_text, row.citation)}'.strip(),
-                            f'{p.objective} {_nrc(p.objective_text, row.citation)}'.strip(),
-                            f'{p.table}, NBC(AE) 2023 PDF p. {p.pdf_page}'
+                          [[statement(p.function, p.function_text),
+                            statement(p.objective, p.objective_text),
+                            f'NBC(AE) 2023 Div B {p.table}, PDF p. {p.pdf_page}'
                             + (f'; clauses {", ".join(p.clauses)}' if p.clauses else '')
                             + (f'; {_nrc(p.application_note, row.citation)}' if p.application_note else '')]
                            for p in row.pairs], [2.3 * inch, 2.3 * inch, 2.4 * inch]))
@@ -114,26 +139,70 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
     out.append(Paragraph(f'<b>{escape(INTENT_LABEL)}</b>', BODY))
     if row.differs:
         out.append(_p('The national 2020 intent statement is attributed differently from NBC(AE) 2023.'
-                      + (f' Only in the intent statement: {", ".join(row.only_in_intent)}.' if row.only_in_intent else '')
-                      + (f' Only in NBC(AE) 2023: {", ".join(row.only_in_ae)}.' if row.only_in_ae else '')))
+                      + (f' Only in the NBC 2020 Intent Statements entry for {row.provision_id}: '
+                         f'{", ".join(row.only_in_intent)}.' if row.only_in_intent else '')
+                      + (f' Only in NBC(AE) 2023, {row.provision_id}: {", ".join(row.only_in_ae)}.'
+                         if row.only_in_ae else '')))
     if not row.intents:
         out.append(_p('No NBC 2020 intent statement was found for this provision.', SMALL))
     for blk in row.intents:
-        head = f'{blk.provision_id}' + (f', objective {blk.objective}' if blk.objective else '') \
-            + (f', attribution {"; ".join(blk.brackets)}' if blk.brackets else '') + f' (intent PDF p. {blk.pdf_page})'
+        head = f'{INTENT_LABEL}: {blk.provision_id}' + (f', objective {blk.objective}' if blk.objective else '') \
+            + (f', attribution {"; ".join(blk.brackets)}' if blk.brackets else '') + f' (PDF p. {blk.pdf_page})'
         out.append(_p(head, SMALL))
         out += [_p(_nrc(t, row.citation), CODE) for t in blk.intents]
         out += [_p(f'Note: {_nrc(n, row.citation)}', SMALL) for n in blk.notes]
     return out
 
 
+# The organizers' two names and the equivalence test (Div A 1.2.1.1.(1)(b)); no finding about the design.
+PACKAGE_NOTE = ('This package has two parts. The request for variance is the application under section 38 of the '
+                'Safety Codes Act; a Safety Codes Officer decides whether to issue a variance. The alternative '
+                'solution (NBC(AE) 2023 Division C 2.3.1) is the evidence the proponent supplies to show that the '
+                'proposed design achieves at least the level of performance of the acceptable solution it replaces, '
+                'in the areas defined by the objectives and functional statements attributed to it (Division A '
+                '1.2.1.1.(1)(b)). This appendix lists what the application cites and what the applicant wrote. It '
+                'makes no finding about the design; the officer reviews it.')
+
+
+def story_text(story: list) -> list[str]:
+    """The appendix as plain text, one entry per paragraph and one ``| a | b |`` entry per table row, in reading
+    order. This is the exported narrative the citation validator checks (paragraph-level, so a PDF line break
+    never separates a citation from its document label)."""
+    out: list[str] = []
+
+    def plain(par: Paragraph) -> str:
+        # A line break is a space in the rendered text; markup and entities are not text.
+        markup = re.sub(r'<br\s*/?>', ' ', par.text)
+        return ' '.join(unescape(re.sub(r'<[^>]+>', '', markup).replace('&nbsp;', ' ')).split())
+
+    def walk(item):
+        if isinstance(item, Paragraph):
+            text = plain(item)
+            if text:
+                out.append(text)
+        elif isinstance(item, Table):
+            for row in item._cellvalues:
+                cells = [plain(c) if isinstance(c, Paragraph) else str(c) for c in row]
+                out.append('| ' + ' | '.join(cells) + ' |')
+        elif isinstance(item, KeepTogether):
+            for sub in item._content:
+                walk(sub)
+        elif isinstance(item, (list, tuple)):
+            for sub in item:
+                walk(sub)
+    walk(story)
+    return out
+
+
 def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, open_items: list[str],
-                   package_notes: list[str] | None = None) -> bytes:
+                   package_notes: list[str] | None = None, text: list[str] | None = None) -> bytes:
+    """Render the appendix PDF. When ``text`` is a list, the appendix's plain text is appended to it."""
+    printing = ', 2nd printing' if codes is not None and second_printing_proven(codes) else ''
     story: list = [Paragraph('Appendix to the Variance Form for Proposed Alternative Solution', H1),
                    _p(f'Case {case.title or ""} ({case.id}). Generated {date.today().isoformat()} by Batatis with '
                       f'field map {fmap["version"]}. Code references are to the National Building Code - 2023 '
-                      'Alberta Edition, 2nd printing (NBC(AE) 2023). This appendix lists what the application '
-                      'cites; it does not state that the proposed design complies.', SMALL)]
+                      f'Alberta Edition{printing} (NBC(AE) 2023).', SMALL),
+                   _p(PACKAGE_NOTE, SMALL)]
 
     # Draft and final both carry the pack's notices. They inform; they never block an export.
     for notice in notices_for(case, 'export_appendix'):
@@ -157,21 +226,36 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
         for ref, label, value in plan.overflow:
             story.append(KeepTogether([Paragraph(f'{escape(ref)}&nbsp;&nbsp;{escape(label)}', H3), _p(value)]))
 
-    story.append(Paragraph('B. Proposed alternative and scope', H2))
+    na = getattr(plan, 'na', {})
+    if na:
+        labels, groups = _field_labels(fmap), {}
+        for name, entry in na.items():
+            groups.setdefault(entry.fact_id, (entry, []))[1].append(labels.get(name, name))
+        story += [Paragraph('N. Fields marked not applicable', H2),
+                  _p('The applicant confirmed that these fields do not apply, so the form shows N/A. Batatis never '
+                     'marks a field not applicable on its own, and a blank field is never shown as N/A.', SMALL),
+                  _table(['Form field', "Applicant's reason", 'Source'],
+                         [['; '.join(dict.fromkeys(names)), entry.reason, f'{entry.via} ({entry.source_ref})']
+                          for entry, names in groups.values()], [2.2 * inch, 3.0 * inch, 1.8 * inch])]
+
+    story.append(Paragraph('B. Request for variance: proposed alternative and scope', H2))
     for label, key in (('Proposed alternative', 'alternative_description'), ('Scope', 'scope')):
         story.append(_kv(label, str(values.get(key, '(not provided or not confirmed)'))))
     if case.jurisdiction:
         story.append(_kv('Reviewing jurisdiction', case.jurisdiction.name))
     if codes is not None:
-        story.append(Paragraph('P. Applicant-written process fields', H2))
-        story.append(_p('The following passages were supplied and confirmed by the applicant. Batatis supplies '
-                        'prompts and checks presence; it does not author or validate the technical analysis.', SMALL))
+        story.append(Paragraph('P. Alternative solution (Div C 2.3.1): applicant-written documentation', H2))
+        story.append(_p('The following passages were supplied and confirmed by the applicant, each with its source. '
+                        'Batatis supplies prompts and checks that each item is present; it does not write, assess or '
+                        'validate the analysis.', SMALL))
         for n, field in enumerate(process_fields(case, codes), start=1):
             block = [Paragraph(f'P-{n}&nbsp;&nbsp;{escape(field.label)}', H3)]
             if field.answer:
                 block.append(_p(field.answer.value))
                 source = field.answer.source
                 block.append(_kv('Applicant source', source.ref + (f', page {source.page}' if source.page else '')))
+                block.append(_kv('Provenance', f'{_SOURCE_KIND.get(source.type, source.type)}; confirmed by the '
+                                               'applicant; not written by Batatis'))
             else:
                 block.append(_p('(Not provided or not confirmed. No answer has been supplied by Batatis.)'))
             block.append(_p(field.citation, SMALL))
@@ -180,8 +264,25 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
     story.append(Paragraph('C. Attributions to acceptable solutions', H2))
     if not case.section_c:
         story.append(_p('No provisions identified.'))
+    else:
+        story.append(_p('Each row is a Division B acceptable solution the proposal departs from. Its objectives and '
+                        'functional statements come from the NBC(AE) 2023 attribution tables by lookup, not from a '
+                        'model.', SMALL))
+        story.append(_table(['Ref', 'Provision', 'How identified', 'Objectives', 'Functions'],
+                            [[f'C-{k}', row.provision_id, row_basis(case, row.provision_id),
+                              ', '.join(dict.fromkeys(p.objective for p in row.pairs)) or 'no table row',
+                              ', '.join(dict.fromkeys(p.function for p in row.pairs)) or 'no table row']
+                             for k, row in enumerate(case.section_c, start=1)],
+                            [0.5 * inch, 1.1 * inch, 2.6 * inch, 1.4 * inch, 1.4 * inch]))
+    bench = benchmark(case, codes)
+    if bench:
+        story.append(Paragraph('Benchmark acceptable solution', H3))
+        story.append(_kv('Benchmark', bench['citation']))
+        story.append(_kv('Quoted sentence', _nrc(_reflow(bench['sentence']), bench['citation'])))
+        story.append(_kv('Departure', bench['departure'] + ' (confirmed by the applicant)' if bench['departure']
+                         else 'not yet confirmed by the applicant'))
     for k, row in enumerate(case.section_c, start=1):
-        story += _row_story(k, row, codes, k <= plan.rows_in_form)
+        story += _row_story(k, row, codes, k <= plan.rows_in_form, case)
 
     docs = supporting_documents(case)
     attached = {doc.id for doc in docs}
@@ -219,7 +320,7 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
             block.append(_kv('Section C performance issues addressed', '; '.join(linked) or '(no matched issue link)'))
             story.append(KeepTogether(block))
         story.append(_p('An attachment and its links record what the applicant supplied. The responsible designer '
-                        'and authority must review its authenticity, scope, limitations and technical adequacy.', SMALL))
+                        'and the authority review its authenticity, scope, limitations and technical content.', SMALL))
     for item in text_items:
         story.append(KeepTogether([
             Paragraph(escape(item.description), H3),
@@ -228,6 +329,8 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
     if not docs and not typed and not text_items:
         story.append(_p('No supporting documents listed.'))
 
+    if text is not None:
+        text.extend(story_text(story))
     buf = io.BytesIO()
 
     def footer(c: canvas.Canvas, doc):

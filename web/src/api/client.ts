@@ -311,6 +311,24 @@ export interface EngineProcessField {
   citation: string;
   required: true;
   answer: { value: string } | null;
+  /** Precedents to read for structure; never text to paste and never an answer. */
+  example?: EngineProcessExample | null;
+}
+
+export interface EngineProcessExample {
+  kind: "structure_only";
+  label: string;
+  must_address: string[];
+  precedents: {
+    title: string;
+    issuer: string;
+    number?: string | null;
+    date?: string | null;
+    pdf_page: number;
+    url?: string | null;
+    structure: string;
+    edition: string;
+  }[];
 }
 
 export interface ProfessionalResult {

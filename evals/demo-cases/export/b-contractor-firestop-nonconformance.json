@@ -1,0 +1,54 @@
+{
+  "_note": "EXAMPLE DATA. A completed version of demo case B (general contractor, firestop nonconformance) for the G3 export gate. Every person, firm, address, document and process passage is fictional applicant text written for the demo; it states no test result, no professional opinion and no finding about the design. Loaded by engine/export/demo_cases.py.",
+  "title": "EXAMPLE DATA: Example Commons plastic-pipe firestops on L3-L4 (general contractor)",
+  "jurisdiction": {"id": "calgary", "name": "City of Calgary"},
+  "facts": {
+    "owner_name": "Example Commons Holdings Inc. (EXAMPLE DATA)",
+    "owner_rep_name": "Carlos Mendes, Northgate Example Builders Ltd. (EXAMPLE DATA)",
+    "mailing_address": "000 Example Street SW, Calgary, AB T0T 0T0 (EXAMPLE DATA)",
+    "request_date": "2026-10-21",
+    "owner_signature_date": "2026-10-21",
+    "owner_rep_signature_date": "2026-10-21",
+    "submitted_to_scc": false,
+    "permit_number": "BP-0000-00000 (EXAMPLE DATA)",
+    "municipal_address": "0000 Example Avenue SW, Calgary, AB (EXAMPLE DATA)",
+    "lot": "0", "block": "0", "plan": "0000000",
+    "scope": "site",
+    "alternative_description": "EXAMPLE DATA. At 12 combustible-pipe penetrations on levels 3 and 4 (IDs P-301 to P-412 in the penetration schedule) where no firestop system tested at a 50 Pa pressure differential is listed for the penetrant and annular space, use the firestop system described in the manufacturer's engineering judgment EJ-0000, reviewed by the coordinating registered professional. All other penetrations are remediated to listed systems.",
+    "rationale": "EXAMPLE DATA. The benchmark is Sentence 3.1.9.1.(1): penetrations of a fire separation sealed by a firestop system tested to the listed standard, and Sentence 3.1.9.4.(3) for combustible piping. For 12 penetrations no tested system fits the pipe size and annular space. The engineering judgment compares each one with the closest tested systems, by bracketing pipe size and annular space, and states where the installed condition differs from the tested one.",
+    "risk_assessment": "EXAMPLE DATA. Risks of this departure: fire and smoke pass through the floor at a penetration sooner than at a tested system, affecting people on the floors above and the units next to the shaft; a plastic pipe burns through and leaves an open hole. We consider the case where the collar is installed wrongly, the case where later trades cut into the seal, and the case where the sprinklers do not operate.",
+    "mitigating_measures": "EXAMPLE DATA. For each risk: intumescent collars where the engineering judgment specifies them; inspection of every one of the 12 penetrations by the third-party inspector before close-in; a label at each penetration naming the system. These measures reduce the risks but do not remove them. If an inspected penetration does not match the engineering judgment, it is removed and replaced with a listed system.",
+    "assumptions_and_limits": "EXAMPLE DATA. Limits: the 12 penetrations listed, the pipe materials and sizes in the schedule, the annular space range in the engineering judgment, the 1 h rated floor assemblies of this building. We assume the sprinkler system is in service and the fire department response is as for the rest of the building; we do not rely on either to close a gap at a penetration. Any change in pipe, size, annular space or assembly needs a new judgment.",
+    "maintenance_operation": "EXAMPLE DATA. After construction: the owner keeps the penetration schedule and labels; any trade that opens a firestop restores it with the same system and records it; the firestops are part of the building's fire safety plan inspections. If maintenance lapses, an unrecorded cut seal is the failure the inspections look for.",
+    "qualifications": "EXAMPLE DATA. Responsible people: Example Architecture Inc. (fictional), coordinating registered professional and single coordinator of the design, code analysis and documentation; Example Sealants Co. technical staff (fictional), responsible for the engineering judgment; Example Firestop Inspection Ltd. (fictional), responsible for inspection.",
+    "occupancy": "residential", "part4_design": true, "preserved_wood_foundation_part4": false,
+    "roof_trusses": false, "prescriptive_route_confirmed": false, "ahj_requires_professional": true,
+    "special_safety_concerns": false, "professional_judgement_required": true, "professional_scope_resolved": true,
+    "fire_suppression": true, "fire_alarm": true,
+    "professional_name": "Example Architecture Inc. (EXAMPLE DATA, no real appointment)",
+    "professional_seal": "EXAMPLE DATA authentication metadata (no real seal)",
+    "professional.role": "EXAMPLE DATA architect (no real appointment)"
+  },
+  "not_applicable": {
+    "ats": "EXAMPLE DATA. The site is an urban lot described by lot, block and plan; no ATS location applies.",
+    "section_c.unused_rows": "EXAMPLE DATA. The three sentences listed are all the acceptable solutions this request departs from."
+  },
+  "identify": {
+    "articles": [
+      {"provision": "3.1.9.1.", "status": "choice", "commit_reason": "not committed: Part 3 articles are quoted choices (demo fixture)"},
+      {"provision": "3.1.9.4.", "status": "choice", "commit_reason": "not committed: Part 3 articles are quoted choices (demo fixture)"},
+      {"provision": "3.1.8.1.", "status": "candidate", "commit_reason": "not committed: Part 3 articles are quoted choices (demo fixture)"}
+    ],
+    "decisions": {"3.1.9.1.": "yes", "3.1.9.4.": "yes", "3.1.8.1.": "yes"},
+    "benchmark": {"provision_id": "3.1.9.1.(1)", "basis": "applicant",
+                  "departure": "EXAMPLE DATA. At 12 plastic-pipe penetrations the firestop is an engineering judgment, not a tested system."}
+  },
+  "provisions": ["3.1.9.1.(1)", "3.1.9.4.(3)", "3.1.8.1.(2)"],
+  "documents": [
+    {"id": "b_ncr", "file": "input/ncr-firestop-EXAMPLE.md", "title": "NCR-FS-007 firestop inspection report (EXAMPLE)", "responsible_party": "Example Firestop Inspection Ltd. (EXAMPLE)", "issuer": "Example Firestop Inspection Ltd. (EXAMPLE)", "date": "2026-10-14"},
+    {"id": "b_schedule", "file": "input/penetration-schedule.md", "title": "Penetration schedule L3-L4 (EXAMPLE)", "responsible_party": "Northgate Example Builders Ltd. (EXAMPLE)", "issuer": "Northgate Example Builders Ltd. (EXAMPLE)", "date": "2026-10-15"},
+    {"id": "b_ej", "file": "input/manufacturer-ej-draft-EXAMPLE.md", "title": "Manufacturer engineering judgment EJ-0000 (EXAMPLE)", "responsible_party": "Example Sealants Co. technical staff (EXAMPLE)", "issuer": "Example Sealants Co. (EXAMPLE)", "date": "2026-10-13"},
+    {"id": "b_architect", "file": "input/architect-email-EXAMPLE.md", "title": "Code analysis and coordinator statement (EXAMPLE)", "responsible_party": "Example Architecture Inc. (EXAMPLE)", "issuer": "Example Architecture Inc. (EXAMPLE)", "date": "2026-10-15"},
+    {"id": "b_brief", "file": "input/project-brief.md", "title": "Remediation plan for listed systems (EXAMPLE)", "responsible_party": "Northgate Example Builders Ltd. (EXAMPLE)", "issuer": "Northgate Example Builders Ltd. (EXAMPLE)", "date": "2026-10-15"}
+  ]
+}
