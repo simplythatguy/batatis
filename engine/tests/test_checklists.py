@@ -184,6 +184,7 @@ def _cites(extract: str, ref: str) -> bool:
 
 
 def test_reference_matching_is_whole_reference_not_substring():
+    # Synthetic parser fixtures, not citations: these strings only exercise the reference pattern.
     assert not _cites('see 9.10.15.50. for soffits', '9.10.15.5.')
     assert _cites('see 9.10.15.5. for soffits', '9.10.15.5.')
     assert _cites('Sentence 9.10.15.5.(8) applies', '9.10.15.5.')
