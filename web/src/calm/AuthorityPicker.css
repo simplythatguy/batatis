@@ -1,0 +1,145 @@
+/* The reviewing-authority picker: a search field over a short list. Scoped to .cf-ap. */
+.cf-ap {
+  position: relative;
+  margin-top: 28px;
+  width: min(440px, 100%);
+}
+
+.cf-ap-lead {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  translate: 0 -50%;
+  display: inline-flex;
+  color: var(--cf-text-3);
+  pointer-events: none;
+}
+
+.cf-ap-input {
+  display: block;
+  width: 100%;
+  padding: 10px 40px 12px 30px;
+  border: 0;
+  border-bottom: 1px solid var(--cf-line-ctl);
+  border-radius: 0;
+  background: none;
+  color: var(--cf-text);
+  font: 400 22px/1.4 var(--cf-font);
+  letter-spacing: -0.01em;
+  outline: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  text-overflow: ellipsis;
+  transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+}
+
+.cf-ap-input::placeholder {
+  color: var(--cf-text-4);
+}
+
+.cf-ap-input:focus {
+  border-bottom-color: var(--cf-text);
+  box-shadow: 0 1px 0 var(--cf-text);
+}
+
+/* The darker line is the focus mark, as on the other underline fields. */
+.cf-app .cf-ap-input:focus-visible {
+  outline: none;
+}
+
+.cf-ap-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cf-ap-toggle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  translate: 0 -50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--cf-text-3);
+  cursor: pointer;
+  transition: color 150ms ease-out, background-color 150ms ease-out;
+}
+
+.cf-ap-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (hover: hover) {
+  .cf-ap-toggle:not(:disabled):hover {
+    color: var(--cf-text);
+    background: var(--cf-hover);
+  }
+}
+
+.cf-ap-list {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  max-height: min(264px, 42vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 14px;
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-line-2);
+  box-shadow: 0 24px 60px -20px rgba(17, 24, 39, 0.16);
+}
+
+.cf-ap-opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--cf-r-ctl);
+  color: var(--cf-text);
+  font: 400 16px/1.3 var(--cf-font);
+  cursor: pointer;
+}
+
+.cf-ap-opt.is-active {
+  background: var(--cf-hover);
+}
+
+.cf-ap-opt[aria-selected="true"] {
+  background: var(--cf-selected);
+}
+
+.cf-ap-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cf-ap-check {
+  display: inline-flex;
+  color: var(--cf-text);
+}
+
+.cf-ap-note {
+  padding: 10px 12px;
+  color: var(--cf-text-3);
+  font: 400 13px/1.4 var(--cf-font);
+}
+
+.cf-ap-unsure {
+  margin-top: 16px;
+}

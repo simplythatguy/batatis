@@ -28,6 +28,8 @@ import { choiceValue, NOT_SURE_RULE, readNumber, RULE_REF, ruleFacts } from "./r
 import { canonicalProvision } from "../provisions";
 import { useDeckExtras } from "./useDeckExtras";
 import { JurisdictionNote } from "./JurisdictionNote";
+import { AuthorityPicker } from "./AuthorityPicker";
+import { AUTHORITIES } from "../config";
 import { PACKAGE_YES, RULE_ADD, RULE_LEAVE } from "./deck";
 
 type Shown = DeckItem & { gone?: boolean };
@@ -368,6 +370,11 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
             </p>
           )}
           {!offer && picked === "dismiss" && !fact && <p className="cf-note">Removed.</p>}
+        </>
+      ) : item.kind === "authority" ? (
+        <>
+          <AuthorityPicker options={AUTHORITIES} value={c.authority} onPick={onPick} label={item.title} />
+          <button type="button" className="cf-chip cf-ap-unsure" data-deck-answer aria-pressed={current === "unsure"} onClick={() => onPick("unsure")}>Not sure yet</button>
         </>
       ) : (
         choices.length > 0 && <Choices choices={choices} current={current} onPick={onPick} />

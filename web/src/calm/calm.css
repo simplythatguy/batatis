@@ -1223,6 +1223,12 @@ body {
   border-left: 0;
 }
 
+/* .cf-modal (later, equal weight) rounds all four corners; the sheet meets the screen edge squarely on the left. */
+.cf-modal.cf-nav-sheet {
+  border-radius: 0 16px 16px 0;
+  border-width: 0 1px 0 0;
+}
+
 .cf-nav-sheet[open] {
   display: flex;
 }

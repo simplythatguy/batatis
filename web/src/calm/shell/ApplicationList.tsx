@@ -6,6 +6,7 @@ import { MOD_KEY } from "../ui";
 import type { MenuAnchor } from "./placement";
 import { pointAnchor, rectAnchor, RowMenu, type RowAction } from "./RowMenu";
 import { RowPreview } from "./RowPreview";
+import "./settled.css";
 
 export interface ApplicationListHandle {
   focusSearch: () => void;
@@ -95,8 +96,10 @@ const PREVIEW_GRACE = 200;
 const finePointer = () => typeof window !== "undefined" && window.matchMedia?.("(hover: hover) and (pointer: fine)").matches;
 
 /**
- * Email-client style list of applications: search, New application, pinned rows, active rows, a
- * quiet Settled group, and an Archived shelf (collapsed, with its count) at the foot.
+ * Email-client style list of applications: search, New application, pinned and active rows, and a
+ * Settled section pinned to the foot (the heading, a rule and a chevron; accepted, refused and
+ * withdrawn rows, scrolling on their own). Archived applications are not listed here: they wait in
+ * Settings, where each is restored (the pattern of Irsal's settled events and T3 Code's archive).
  */
 export const ApplicationList = forwardRef<ApplicationListHandle, {
   title?: string;
@@ -114,18 +117,16 @@ export const ApplicationList = forwardRef<ApplicationListHandle, {
   lineFor?: (a: ApplicationSummary) => Line;
 }>(function ApplicationList({ title = "Applications", items, selectedId, onSelect, onNew, loading, error, note, empty, actionsFor, lineFor }, ref) {
   const [query, setQuery] = useState("");
-  const [shelfOpen, setShelfOpen] = useState(false);
+  const [settledOpen, setSettledOpen] = useState(true);
   const search = useRef<HTMLInputElement>(null);
   const aside = useRef<HTMLElement>(null);
   useImperativeHandle(ref, () => ({ focusSearch: () => search.current?.focus() }), []);
-  const { pinned, active, settled, archived } = groupApplications(items, query);
-  const shelfId = useId();
+  const { pinned, active, settled } = groupApplications(items, query);
+  const settledId = useId();
   const previewId = useId();
 
-  // An application archived while open stays selected: the shelf opens so the row stays in view.
-  const selectedArchived = archived.some((a) => a.id === selectedId);
-  useEffect(() => { if (selectedArchived) setShelfOpen(true); }, [selectedArchived]);
-  const shelfShown = shelfOpen || Boolean(query.trim());
+  // A search always shows its settled matches.
+  const settledShown = settledOpen || Boolean(query.trim());
 
   const [menu, setMenu] = useState<{ id: string; anchor: MenuAnchor; trigger: HTMLElement } | null>(null);
   const menuApp = menu ? items.find((a) => a.id === menu.id) ?? null : null;
@@ -187,7 +188,7 @@ export const ApplicationList = forwardRef<ApplicationListHandle, {
     previewFor: previewApp?.id ?? null,
   });
   const row = (a: ApplicationSummary) => <Row key={a.id} a={a} selected={a.id === selectedId} onSelect={onSelect} line={lineFor?.(a)} hooks={hooks(a)} />;
-  const nothing = !pinned.length && !active.length && !settled.length && !archived.length;
+  const nothing = !pinned.length && !active.length && !settled.length;
 
   return (
     <aside ref={aside} className="cf-list" aria-label={title}>
@@ -215,24 +216,17 @@ export const ApplicationList = forwardRef<ApplicationListHandle, {
         {query && nothing && items.length > 0 && <p className="cf-applist-note">Nothing matches “{query}”.</p>}
         {pinned.length > 0 && <ul className="cf-list-rows is-pinned" aria-label="Pinned">{pinned.map(row)}</ul>}
         <ul className="cf-list-rows">{active.map(row)}</ul>
-        {settled.length > 0 && (
-          <>
-            <div className="cf-list-group">Settled</div>
-            <ul className="cf-list-rows is-settled">{settled.map(row)}</ul>
-          </>
-        )}
-        {archived.length > 0 && (
-          <div className="cf-list-shelf">
-            <button type="button" className="cf-list-shelf-btn" aria-expanded={shelfShown} aria-controls={shelfId} onClick={() => setShelfOpen((v) => !v)}>
-              <Icon24 name="archive" size={15} />
-              <span>Archived</span>
-              <span className="cf-list-shelf-count">{archived.length}</span>
-              <span className="cf-list-shelf-chev" aria-hidden="true"><Icon24 name="chevRight" size={14} /></span>
-            </button>
-            {shelfShown && <ul id={shelfId} className="cf-list-rows is-settled is-archived" aria-label="Archived">{archived.map(row)}</ul>}
-          </div>
-        )}
       </div>
+      {settled.length > 0 && (
+        <section className="cf-settled" aria-label="Settled applications">
+          <button type="button" className="cf-settled-toggle" aria-expanded={settledShown} aria-controls={settledId} onClick={() => setSettledOpen((v) => !v)}>
+            <span>Settled ({settled.length})</span>
+            <span className="cf-settled-rule" aria-hidden="true" />
+            <Icon24 name={settledShown ? "down" : "up"} size={14} />
+          </button>
+          <ul id={settledId} className="cf-list-rows is-settled cf-settled-list" hidden={!settledShown}>{settled.map(row)}</ul>
+        </section>
+      )}
       {menu && menuApp && actionsFor && aside.current && (
         <RowMenu
           label={`Options for ${menuApp.title || "Untitled application"}`}
