@@ -6,10 +6,13 @@ import { ago } from "./relevance";
 export type LineTone = "grey" | "amber" | "accent" | "green";
 
 export interface StatusLine {
+  /** The full line. With unread messages it is the accessible name and hover label, not visible text. */
   text: string;
   tone: LineTone;
   /** Draws the accent colour on the line (returned with news). */
   attention: boolean;
+  /** Unread officer messages on a returned or refused application: shown as a message icon and the count. */
+  unread: number;
 }
 
 export const SETTLED: ReadonlySet<ApplicationStatus> = new Set(["accepted", "refused", "withdrawn"]);
@@ -25,6 +28,10 @@ export function percent(c: ApplicationSummary["completeness"]): number | null {
 }
 
 export function statusLine(a: ApplicationSummary, now = Date.now()): StatusLine {
+  return { unread: 0, ...line(a, now) };
+}
+
+function line(a: ApplicationSummary, now: number): Omit<StatusLine, "unread"> & { unread?: number } {
   const where = authorityName(a.authority);
   const join = (...parts: (string | null | undefined | false)[]) => parts.filter(Boolean).join(" · ");
   switch (a.status) {
@@ -38,13 +45,13 @@ export function statusLine(a: ApplicationSummary, now = Date.now()): StatusLine 
       return { text: join("In review", where), tone: "amber", attention: false };
     case "returned": {
       const n = a.unread_messages;
-      return { text: join("Returned", n > 0 ? `${n} new ${n === 1 ? "message" : "messages"}` : "fix and resubmit"), tone: "accent", attention: true };
+      return { text: join("Returned", n > 0 ? `${n} new ${n === 1 ? "message" : "messages"}` : "fix and resubmit"), tone: "accent", attention: true, unread: Math.max(0, n) };
     }
     case "accepted":
       return { text: join("Accepted", where), tone: "green", attention: false };
     case "refused": {
       const n = a.unread_messages;
-      return { text: join("Refused", n > 0 ? `${n} new ${n === 1 ? "message" : "messages"}` : where), tone: n > 0 ? "accent" : "grey", attention: n > 0 };
+      return { text: join("Refused", n > 0 ? `${n} new ${n === 1 ? "message" : "messages"}` : where), tone: n > 0 ? "accent" : "grey", attention: n > 0, unread: Math.max(0, n) };
     }
     case "withdrawn":
       return { text: "Withdrawn", tone: "grey", attention: false };

@@ -362,6 +362,15 @@ body {
   color: var(--cf-accent-ink);
 }
 
+/* Unread officer messages: a message icon and the count, nothing else. */
+.cf-list-unread {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 560;
+  font-variant-numeric: tabular-nums;
+}
+
 .cf-list-actions {
   position: absolute;
   right: 8px;
