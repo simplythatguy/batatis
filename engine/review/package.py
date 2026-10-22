@@ -48,6 +48,15 @@ _STOP_LINE = re.compile(r'^\s*(?:[A-Z]-\d+\s|Applicant source:|NBC\(AE\)|[A-Z]\.
                         r'(?:rationale|code analysis|testing procedures?|qualifications(?: of [a-z ]+)?|'
                         r'maintenance(?: and (?:operation|commissioning))?|operation and maintenance|commissioning)'
                         r'\s*(?::|$))', re.M | re.I)
+# Rationale can discuss NBC(AE) in its own words. Only labelled boundaries end the passage;
+# generic section labels and citation-shaped lines remain ambiguous rather than proving blankness.
+_RATIONALE_STOP_LINE = re.compile(
+    r'^[ \t]*(?:Applicant source:|Appendix page[ \t]+\d+|'
+    r'(?:[A-Z]-\d+[ \t]+)?(?:rationale|code analysis|testing procedures?|qualifications(?: of [a-z ]+)?|'
+    r'maintenance(?: and (?:operation|commissioning))?|operation and maintenance|commissioning)[ \t]*(?::|$)|'
+    r'(?P<ambiguous>[A-Z]-\d+[ \t]+|[A-Z]\.[ \t]+[A-Z]|'
+    r'NBC\(AE\)[ \t]+\d{4}(?:[ \t]+p\d+)?[ \t]*,[ \t]*Div[ \t]+[ABC][ \t]*,))', re.M | re.I)
+_NO_RATIONALE = '(Not provided or not confirmed. No answer has been supplied by Batatis.)'
 _ENGINEERING = re.compile(r'\b(?:engineering|registered professional|professional involvement)\s+(?:is\s+)?required'
                           r'\s*[:\-]?\s*(yes|no)\b', re.I)
 
@@ -120,17 +129,20 @@ def rationale_value(reads: list[ReadFile]) -> TextValue:
                 # or a terminating applicant source; the original page remains available by pointer.
                 if offset:
                     rest = re.sub(r'^Batatis appendix to SCC variance form - case [^\n]+\n', '', rest)
-                stop = _STOP_LINE.search(rest)
+                stop = _RATIONALE_STOP_LINE.search(rest)
+                ambiguous = bool(stop and stop.group('ambiguous'))
                 for _label_text, other in TEXT_FIELDS.values():
                     hit = other.search(rest)
-                    if hit and (stop is None or hit.start() < stop.start()):
+                    if hit and (stop is None or hit.start() <= stop.start()):
                         stop = hit
+                        ambiguous = False
                 stop_line = rest[stop.start():].strip().split('\n', 1)[0] if stop else None
                 body = _norm(rest[:stop.start()] if stop else rest)
                 if not offset:
                     value = body
                 pointers.append(Pointer(file=read.name, page=continuation.page + 1, quote=body or heading))
                 uncertain = (uncertain or bool(offset) or not continuation.text.strip()
+                             or (ambiguous and body != _NO_RATIONALE)
                              or read.passage_has_marks(continuation.page, heading, stop_line))
                 if stop_line and stop_line.casefold().startswith('appendix page'):
                     uncertain = True   # a running footer does not prove that the passage ends here
@@ -138,10 +150,10 @@ def rationale_value(reads: list[ReadFile]) -> TextValue:
                 if stop:
                     break
             if uncertain:
-                reason = ('The rationale may continue across pages or contain non-text content. '
+                reason = ('The rationale may continue across pages, contain non-text content or have an ambiguous boundary. '
                           'Its complete text could not be established; check the indicated pages.')
                 return TextValue('not_found', '', read.name, page.page + 1, pointers[0].quote, pointers, reason)
-            if value == '(Not provided or not confirmed. No answer has been supplied by Batatis.)':
+            if value == _NO_RATIONALE:
                 value = ''
             return TextValue('present' if value else 'blank', value or '', read.name, page.page + 1,
                              pointers[0].quote, pointers)

@@ -9,7 +9,7 @@ from engine.export.sample import sample_case
 from engine.review import information_request as ir
 from engine.review.package import review_case, review_uploads
 from engine.tests.case_builder_fixtures import complete_case, fact
-from engine.tests.package_review_fixtures import CLEAN_NARRATIVE, narrative_pdf, package, scanned
+from engine.tests.package_review_fixtures import CLEAN_NARRATIVE, narrative_pdf, package, scanned, text_pdf
 
 
 @pytest.fixture(scope='module')
@@ -228,3 +228,26 @@ def test_whole_answer_rationale_placeholders_still_need_applicant_input(codes, s
     assert finding is not None and finding.severity == 'blocking'
     item = ir.build([finding]).items[0]
     assert item.included and not item.officer_check
+
+
+@pytest.mark.parametrize('boundary', ['P-2 Risk assessment', 'Applicant source: SYNTHETIC applicant'])
+def test_labelled_rationale_boundaries_do_not_absorb_the_next_field(boundary):
+    passage = 'NBC(AE) 2023 is the source named by this SYNTHETIC applicant.'
+    parts = review_uploads([('labelled.pdf', text_pdf([
+        'Rationale', passage, boundary, 'SYNTHETIC following field, outside the rationale.']))], None)
+    reading = next(f for f in parts.fields if f.field == 'rationale')
+    assert reading.status == 'present' and reading.value == passage
+    assert reading.pointer.quote == passage
+    assert not any(f.field == 'rationale' for f in parts.findings)
+
+
+@pytest.mark.parametrize('boundary', ['X-17 Applicant-specific context', 'E. Applicant analysis', 'citation'])
+def test_ambiguous_rationale_boundaries_are_officer_checks(codes, boundary):
+    if boundary == 'citation':
+        boundary = codes.citation('2.3.1.1.(2)(a)', 'C')
+    parts = review_uploads([('ambiguous.pdf', text_pdf([
+        'Rationale', 'SYNTHETIC applicant introduction.', boundary,
+        'SYNTHETIC words that might still belong to the rationale.', 'Risk assessment']))], None)
+    finding = _assert_officer_check(parts)
+    assert finding.pointers[0].file == 'ambiguous.pdf' and finding.pointers[0].page == 1
+    assert 'ambiguous boundary' in finding.message

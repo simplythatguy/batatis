@@ -11,7 +11,7 @@ from engine.codes import Codes
 from engine.models import Case
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import complete_case, fact, store_with_synthetic_files
-from engine.tests.package_review_fixtures import CLEAN_FORM, CLEAN_NARRATIVE, package
+from engine.tests.package_review_fixtures import CLEAN_FORM, CLEAN_NARRATIVE, package, text_pdf
 from engine.tests.test_package_review_rationale import raster_rationale_pdf, split_rationale_pdf
 from engine.tests.test_accounts import onboard, signup
 
@@ -228,6 +228,44 @@ def test_saved_rationale_gap_blocks_acceptance_until_applicant_supplies_it(scene
     assert accepted.json()['decision']['message'] == (
         'Accepted as administratively complete. Technical review remains the responsibility of the authority.')
     store.delete(case.id)
+
+
+@pytest.mark.parametrize('path', ['standalone', 'case-upload', 'http-export'])
+@pytest.mark.parametrize('later_paragraph', [False, True], ids=['initial', 'later-paragraph'])
+def test_nbc_prose_rationale_survives_upload_and_http_export(scene, path, later_paragraph):
+    store, clients, _ = scene
+    rationale = ('NBC(AE) defines the benchmark; our proposed departure is described here.'
+                 if not later_paragraph else 'SYNTHETIC applicant introduction.\n\n'
+                 'NBC(AE) defines the benchmark; the applicant supplies this second paragraph.\n'
+                 'SYNTHETIC final words belonging to the rationale.')
+    expected = ' '.join(rationale.split())
+    case = claimed(scene) if path == 'case-upload' else None
+    route = f'/review/{case.id}/package-review' if case else '/package-review'
+    if path == 'http-export':
+        case = owned(scene, complete=True)
+        saved = store.get(case.id)
+        saved.facts = [f for f in saved.facts if f.field != 'rationale'] + [fact('process.rationale', rationale)]
+        store.put(saved)
+        exported = clients['owner'].post(f'/cases/{case.id}/export')
+        assert exported.status_code == 200, exported.text
+        uploads = [('official-prose.pdf', exported.content)]
+        source = 'official-prose.pdf'
+    else:
+        source = 'applicant-rationale.pdf'
+        uploads = package(drop=('Rationale',)) + [(source, text_pdf([
+            'Rationale', *rationale.split('\n'), 'Risk assessment', 'SYNTHETIC next process field.']))]
+    response = clients['reviewer'].post(route, files=multipart(uploads))
+    assert response.status_code == 201, response.text
+    session = response.json()
+    reading = next(f for f in session['fields'] if f['field'] == 'rationale')
+    assert reading['status'] == 'present' and reading['value'] == expected, reading
+    assert reading['pointer']['file'] == source and reading['pointer']['page']
+    assert reading['pointer']['quote'] == expected
+    assert not any(f['field'] == 'rationale' for f in session['findings'])
+    assert not any(i['field'] == 'rationale' for i in session['information_request']['items'])
+    assert session['administrative_only'] and session['not_a_compliance_determination']
+    if case:
+        store.delete(case.id)
 
 
 def test_standalone_upload_review_is_reviewer_and_authority_scoped(scene):
