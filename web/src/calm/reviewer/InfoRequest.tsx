@@ -55,6 +55,7 @@ export function InfoRequest({
   session,
   latest,
   canEdit,
+  held = false,
   terminalStatus,
   applicant,
   onChange,
@@ -66,6 +67,8 @@ export function InfoRequest({
   latest: boolean;
   /** The current claimer (cases) or any officer of the authority (packages). */
   canEdit: boolean;
+  /** Editing waits for something the parent explains beside it (the review list refreshing). */
+  held?: boolean;
   /** A settled case keeps the request as a historical record, without claim recovery. */
   terminalStatus?: "accepted" | "refused";
   applicant: string;
@@ -301,7 +304,7 @@ export function InfoRequest({
           )}
         </footer>
       )}
-      {!sentAlready && !editable && isCase && (terminalStatus || latest) && (
+      {!sentAlready && !editable && !held && isCase && (terminalStatus || latest) && (
         <p className="pr-fine pr-admin">{terminalStatus
           ? `This application was ${terminalStatus}. This request is a historical, read-only record and can’t be edited or sent.`
           : "Pick up this application (or take over) to edit and send this request."}</p>
