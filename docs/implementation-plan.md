@@ -76,6 +76,21 @@ The presentation lists what a Division C, 2.3.1 file must contain. The package r
 
 Source: `docs/api/package-review.md`. The sentence numbers were checked in the code database on Oct 21. Division C, 2.3.1.1.(2)(b), (3), (4) and (6) are on PDF p.739.
 
+### 2.4 The officer's workflow in order
+
+This is what an SCO does in Batatis from the first screen to the Council copy. The status after each step is the status of the screen or the backend that serves it.
+
+1. **Sign in with the authority's access code.** The officer picks the authority and enters the code that the authority gives its SCOs. *Built.*
+2. **Open the queue.** It lists what has been sent to the authority, each row with the applicant, when it was sent, a completeness count, a status and who is reviewing. *Built.*
+3. **Start reviewing.** Claiming tells the other officers that the application is taken. A second officer can see who has it and can take over, and the history records both names. *Built.*
+4. **Read the application as a paper sheet** beside the completeness list. Each missing item is shown as missing and each value the applicant did not confirm is marked "not confirmed by the applicant". *Built.*
+5. **Run the package review (optional).** It reads the SCC form, fillable or flattened, with the attachments, and any other package an officer uploads. It reports each field as present, blank (certain) or not found (the officer looks), checks each cited article against the 2nd printing, compares each Section C row with the Division B table, and names any missing Division C 2.3.1.1 file item. *Backend only.*
+6. **Edit and send the information request.** The draft is deterministic: every item is a question to the applicant ("Please provide ..."). Items the review could not read are marked for the officer and are not included by default. The officer rewrites, removes or adds items and then sends. For a Batatis case, sending posts to the applicant's thread and notifies the applicant. For an uploaded package with no Batatis case, the officer copies the text out. *Backend only.*
+7. **Decide.** The officer accepts the application as administratively complete, or returns it with a message of at least 10 characters. A return can carry structured items. The applicant fixes and resubmits, and a re-run of the package review shows how many gaps were resolved. *Accept and return are built. The re-run diff is backend only.* Refusal is not in Batatis.
+8. **Close out.** After a decision, the close-out record gives the due date, 10 days after the decision, for the copy of the variance to the Council. It lists what to send (the variance as decided, for the single location) and what to keep (Section C references, supporting documents, information requests sent, the latest package review and the decision record). The officer records that the copy was sent. From Dec 1, 2026 the officer registers the variance in the Orders and Variances Portal. Batatis sends and registers nothing. *Backend only.*
+
+The officer's own decision to issue or refuse the variance under the Safety Codes Act, s.38, happens in the authority's own process. Batatis records "Accepted as administratively complete" and never "approved".
+
 ## 3. State of the product on Oct 21
 
 | Area | What exists | Status | Evidence |
@@ -188,6 +203,28 @@ Other provinces appear as labelled coverage ("preview": neither the adopted code
 ### 6.2 What decides whether code identification is ready for a beta
 
 The benchmark harness is in draft PR #58. It holds the frozen datasets and folds, the ledger of spend, and two complete draws of the relevance stage for 139 cases. It does not yet have a third draw, the latency pass, the decision memo or the pinned pipeline file. The commit policy therefore stays at its safe default: with no calibration file on `dev`, nothing is committed automatically, and every article is a candidate or one of up to three quoted choices. A beta needs, at least, a calibrated rule for Part 9, a measured result on cases that were not used to tune anything, and a stated error bound. Until then the product asks and quotes, and the applicant decides.
+
+### 6.3 What "beta" means here, and what it depends on
+
+**Beta** means a build that real applicants and officers at one accredited organization use on live files, in parallel with that organization's current process, with the data handling agreed in writing. It is not a public launch. It is ready to start when all of the following are true.
+
+1. Every backend in §3 has a finished screen, and the whole applicant and officer flow has run in a browser with screenshots that we inspected.
+2. The code identification benchmark is finished, the pipeline is fixed and recorded, and the commit rule is either calibrated with a stated error bound or deliberately left empty.
+3. The pilot authority has a pack, reviewer accounts and an access code, and its own intake steps and forms are in the pack with sources.
+4. Hosting and storage are in a Canadian region, retention is agreed with the organization, and its privacy review has decided whether the model path is allowed.
+5. Round 1 and Round 1b of §7.2 have run, and their fixes are in.
+6. An engineer or an officer has reviewed the rule vectors and checklists that the build uses. A model cannot sign these.
+
+**Who and what the path depends on.** None of these is in hand today.
+
+| Dependency | Why it matters | Status |
+|---|---|---|
+| Account credit for the relevance model (about US$3 to US$4) | The third draw and the latency pass of the benchmark | Needed. Not yet topped up (draft PR #58) |
+| A domain reviewer: an engineer, or an officer who is willing to review | The rule vectors, the standing-package checklists and the professional-involvement labels | No reviewer is named in the repo |
+| Three first-time applicants and one or two officers | Rounds 1 and 1b | None scheduled |
+| A pilot organization and a named privacy contact | Phase 1 of the pilot plan | No partner has agreed to anything |
+| A Canadian hosting quote | Item 4 above | No quote on file |
+| Written terms from NRC | Any public commercial launch | No request on file |
 
 ## 7. Testing with users: how it will shape the design
 
