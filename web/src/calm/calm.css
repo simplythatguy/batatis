@@ -593,13 +593,6 @@ body {
   color: var(--cf-blocking-ink);
 }
 
-@media (hover: hover) {
-  .cf-row-menu button:not([aria-disabled="true"]):hover {
-    background: var(--cf-hover);
-    color: var(--cf-text);
-  }
-}
-
 .cf-row-menu button:focus-visible,
 .cf-row-menu button:focus {
   outline: none;
@@ -608,6 +601,10 @@ body {
 
 .cf-row-menu button:not([aria-disabled="true"]):focus {
   color: var(--cf-text);
+}
+
+.cf-row-menu button.is-destructive:not([aria-disabled="true"]):focus {
+  color: var(--cf-blocking-ink);
 }
 
 .cf-row-menu hr {

@@ -116,6 +116,8 @@ export function RowMenu({ label, actions, anchor, trigger, container, onClose }:
             tabIndex={-1}
             className={a.destructive ? "is-destructive" : undefined}
             aria-disabled={a.disabled || undefined}
+            // As in T3 Code's menus: the pointer moves the focus, so one item is highlighted at a time.
+            onPointerEnter={(e) => { if (e.pointerType === "mouse" && !a.disabled) e.currentTarget.focus({ preventScroll: true }); }}
             onClick={() => {
               if (a.disabled) return;
               onClose(true);
