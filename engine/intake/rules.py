@@ -189,7 +189,10 @@ _OCCUPANCY = (
 )
 # Words that contain an occupancy word but name something else.
 # "Larkspur Example Homes", "Acme Home Builders Ltd.": a capitalized Home(s) inside a company name is not the building.
-_COMPANY_HOME = re.compile(r"[A-Z][\w'&.-]*\s+$")
+# Two or more capitalized words right before it ("Larkspur Example Homes"); one capitalized word is often just the
+# start of a sentence or a determiner ("Our Home has ...").
+_COMPANY_HOME = re.compile(r"(?<![\w'&.-])(?!(?:Our|My|The|This|That|Their|Your|His|Her|A|An|New|Each|Every)\b)[A-Z][\w'&.-]*"
+                           r"\s+[A-Z][\w'&.-]*\s+$")
 _COMPANY_AFTER = re.compile(r"\s+(?:[A-Z][\w'&.-]*\s+)*(?:Ltd|Inc|Corp|LLC|Limited|Builders|Construction|Group)\b\.?")
 _OCCUPANCY_SKIP = _sub(r'\b(?:nursing|care|group|tiny|pool|green|ware|town|row|club|field|open)\s*$')
 
