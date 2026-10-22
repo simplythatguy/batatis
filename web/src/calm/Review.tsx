@@ -4,7 +4,9 @@ import { groupGaps, isProfessionalHold, professionalFlagLines } from "../humanRe
 import { professionalConfirmed } from "../professional";
 import { useCase } from "../store";
 import type { Case, Gap } from "../types";
+import { forkOf, scopeRedirect } from "../intakeView";
 import { buildDeck, deckProgress, gapKey } from "./deck";
+import { BeforeYouSubmit, ForkNote } from "./ReadCards";
 import { calmHref } from "./routes";
 import { rankedIn } from "./relevance";
 import { useSession } from "./session";
@@ -97,10 +99,10 @@ export function Review() {
 }
 
 function CaseReview() {
-  const { c, gaps, notices, engineGaps, gapsSource, checkStatus, checkNote, checkDetail, requestCheck } = useCase();
+  const { c, gaps, notices, engineGaps, gapsSource, checkStatus, checkNote, checkDetail, requestCheck, reading } = useCase();
   const session = useSession();
   const [showAll, setShowAll] = useState(false);
-  const deck = buildDeck(c, gaps, { seen: new Set(session.seen), includeDone: true });
+  const deck = buildDeck(c, gaps, { seen: new Set(session.seen), includeDone: true, identify: reading.identify });
   const { done, total } = deckProgress(deck);
   const openCards = deck.filter((i) => !i.done && !i.optional).length;
   const blocking = gaps.filter((g) => g.severity === "blocking");
@@ -112,6 +114,8 @@ function CaseReview() {
   // Rings never count as Section C; this only points at the library.
   const rel = useRelevance();
   const likely = rankedIn(rel.display, rel.cutoffs, ["high"], rel.rerank).length;
+  const fork = forkOf(c);
+  const pre = c.intake?.record.plan?.pre_application;
   const departures = c.sectionC.filter((r) => c.candidates.find((a) => a.id === r.candidateId)?.answer === "yes").length;
 
   const sections = [
@@ -219,6 +223,13 @@ function CaseReview() {
         )}
         {notices.length > 0 && <div className="cf-notices"><Notices notices={notices} /></div>}
         <EngineerCallout c={c} gaps={gaps} />
+        {fork && !scopeRedirect(c) && (
+          <section className="cf-review-fork" aria-labelledby="cf-fork-h">
+            <h2 id="cf-fork-h" className="cf-list-label">Your path</h2>
+            <ForkNote fork={fork} />
+          </section>
+        )}
+        {pre && !scopeRedirect(c) && <BeforeYouSubmit pre={pre} />}
       </div>
 
       <aside className="cf-glass cf-sections" aria-label="Your application">

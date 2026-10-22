@@ -1,53 +1,36 @@
 import { useEffect } from "react";
-import { engine, EngineError } from "./api/client";
 import { Application } from "./calm/Application";
 import { CodeLibrary } from "./calm/CodeLibrary";
 import { Deck } from "./calm/QuestionDeck";
 import { Review } from "./calm/Review";
 import { resolveRoute, type Screen } from "./calm/routes";
 import { extraRoutes, isStandaloneRoute, useAuthRedirect } from "./calm/routes.extra";
-import { getSession, updateSession, useSession } from "./calm/session";
+import { updateSession, useSession } from "./calm/session";
 import { Shell } from "./calm/Shell";
 import { Start } from "./calm/Start";
 import { useFocusParam, useRoute } from "./router";
-import { uploadMessage } from "./rules";
 import { Accuracy } from "./screens/Accuracy";
 import { Officer } from "./screens/Officer";
 import { SectionC } from "./screens/SectionC";
 import { useCase } from "./store";
 
-/** Store effects the calm screens ask for: the check Start requested, and held PDF uploads. */
+/** Store effects the calm screens ask for: the reading Start requested, and held PDF uploads. */
 function CalmEffects() {
-  const { c, phase, engineId, requestCheck, dispatch } = useCase();
+  const { phase, engineId, readDescription, uploadFiles } = useCase();
   const session = useSession();
 
   useEffect(() => {
-    if (!session.checkAfterStart || phase !== "case") return;
-    updateSession({ checkAfterStart: false });
+    if (!session.readAfterStart || phase !== "case") return;
+    updateSession({ readAfterStart: false });
     // Explicit user action: the applicant pressed Start.
-    void requestCheck();
-  }, [session.checkAfterStart, phase, c, requestCheck]);
+    void readDescription();
+  }, [session.readAfterStart, phase, readDescription]);
 
+  // PDFs attached after the case exists upload in the save queue (intake reads them by id).
   useEffect(() => {
     if (!engineId || !session.held.length) return;
-    const held = getSession().held;
-    updateSession((s) => ({ held: [], uploading: [...s.uploading, ...held.map((h) => h.id)] }));
-    for (const { id, file } of held) {
-      if (!c.files.some((f) => f.id === id)) {
-        updateSession((s) => ({ uploading: s.uploading.filter((x) => x !== id) }));
-        continue;
-      }
-      engine
-        .upload(engineId, file)
-        .then(() => dispatch({ type: "setFileResult", id, error: null, read: true }))
-        .catch((e: unknown) => {
-          const status = e instanceof EngineError ? e.status : 0;
-          const detail = e instanceof EngineError ? e.detail : String(e);
-          dispatch({ type: "setFileResult", id, error: uploadMessage(status, detail), unreachable: status === 0 });
-        })
-        .finally(() => updateSession((s) => ({ uploading: s.uploading.filter((x) => x !== id) })));
-    }
-  }, [engineId, session.held, c.files, dispatch]);
+    void uploadFiles();
+  }, [engineId, session.held, uploadFiles]);
   return null;
 }
 

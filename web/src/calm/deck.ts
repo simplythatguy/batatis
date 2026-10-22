@@ -2,15 +2,30 @@
  * The question deck: one card per thing the applicant still has to answer.
  * Pure and derived. Every card comes from the case and the shared gap list; nothing is typed by hand.
  * Card keys reuse the legacy focus ids (field-*, cand-*, fact-*, q-*), so gap hrefs land on cards.
+ *
+ * Order: what we read (confirm) → the planner's questions (at most five) → the remaining Section A
+ * and B details → the code check → the applicant's own case → Section D.
  */
+import type { Question as PlanQuestion } from "../api/types.gen";
 import { AUTHORITIES } from "../config";
-import { DETAIL_FIELDS, DETAIL_IDS, PROCESS_FIELDS, answeredByDescription, displayValue, factFor, factLabel, valueText } from "../model";
+import { localField } from "../intakeFields";
+import { codeQuestion, fileNotes, type ReadCopy, planInput, planQuestions, plannedFields, readCopy, readGroups, scopeRedirect, NOT_SURE } from "../intakeView";
+import { DETAIL_FIELDS, DETAIL_IDS, PROCESS_FIELDS, answeredByDescription, factFor, valueText } from "../model";
 import { isProvision } from "../provisions";
 import { quoteKind } from "../rules";
-import type { ApplicantType, Candidate, Case, Fact, Gap } from "../types";
+import type { ApplicantType, Candidate, Case, Gap } from "../types";
 import { calmHref } from "./routes";
 
-export type DeckKind = "fact" | "candidate" | "storeys" | "question" | "authority" | "detail" | "process" | "section-d";
+export type DeckKind =
+  | "fact" | "file" | "plan" | "candidate" | "storeys" | "question" | "authority" | "detail" | "process" | "section-d"
+  /** Intake reading the description and files, or failed (with Try again). */
+  | "reading"
+  /** Code identification running, not run yet, or failed (with Try again). */
+  | "code-run"
+  /** "I could not narrow this down", or the labelled keyword fallback. */
+  | "code-note"
+  /** Another safety-codes regime: the redirect page. */
+  | "scope";
 
 /** Variance form sections, in the order the deck asks them and the footer shows them. */
 export type SectionId = "A" | "B" | "C" | "D";
@@ -46,6 +61,13 @@ export interface DeckItem {
    * proposed alternative, which offers the description instead of asking for it again.
    */
   confirmLabels?: { confirm: string; dismiss: string };
+  /** A "what we read" card: every fact one click confirms or rejects, and how it reads. */
+  ids?: string[];
+  read?: ReadCopy;
+  /** A planner card: the question as the API ranked it. */
+  plan?: PlanQuestion;
+  /** Answered as Not sure on another card: a gap may stay on the review, but it is not asked again. */
+  settled?: boolean;
 }
 
 export interface DeckOptions {
@@ -53,6 +75,11 @@ export interface DeckOptions {
   seen?: ReadonlySet<string>;
   /** Include answered cards too (progress, focus links to an answered card). */
   includeDone?: boolean;
+  /** Code identification for this visit: running, failed, or finished. */
+  identify?: "idle" | "running" | "done" | "error" | "skipped";
+  /** Intake for this visit: while it reads, the deck holds one waiting card so nothing is asked twice. */
+  intake?: "idle" | "running" | "done" | "error";
+  intakeNote?: string;
 }
 
 const DETAIL_QUESTION: Record<string, string> = {
@@ -90,44 +117,15 @@ const PROCESS_QUESTION: Record<string, string> = {
 
 export const WRITTEN_BY_YOU = "You write this in your own words. Batatis never writes it for you.";
 
-const NUMBER_WORDS: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6 };
-
-/** "Your description" → "your description"; other sources keep their case ("NBC table"). */
-export function sourcePhrase(ref: string): string {
-  return /^(Your|The|This)\b/.test(ref) ? ref.charAt(0).toLowerCase() + ref.slice(1) : ref;
-}
-
-const short = (t: string) => (t.length > 48 ? `${t.slice(0, 45)}…` : t);
 /** Whitespace folded, cut at `n` characters with an ellipsis. */
 const clip = (t: string, n: number) => {
   const s = t.replace(/\s+/g, " ").trim();
   return s.length > n ? `${s.slice(0, n - 1).trimEnd()}…` : s;
 };
 
-/**
- * Plain-language copy for a value read from the applicant's words: the question the field
- * answers, where the value came from, and two answers that say what they mean.
- */
-export function factCopy(f: Fact): { title: string; context: string; labels: { confirm: string; dismiss: string } } {
-  const value = displayValue(f);
-  const quoted = (f.source.quote || value).trim();
-  const said = /^your\b/i.test(f.source.ref) ? `${sourcePhrase(f.source.ref).replace(/^./, (x) => x.toUpperCase())} says “${quoted}”.` : `From ${sourcePhrase(f.source.ref)}: “${quoted}”.`;
-  if (f.field === "building.storeys") {
-    const m = String(f.value).toLowerCase().match(/\b(\d+|one|two|three|four|five|six)\b/);
-    const n = m ? (NUMBER_WORDS[m[1]] ?? Number(m[1])) : NaN;
-    return {
-      title: "How many storeys is the building?",
-      context: said,
-      labels: { confirm: Number.isFinite(n) ? `Yes, ${n} ${n === 1 ? "storey" : "storeys"}` : "Yes, that’s right", dismiss: "No, something else" },
-    };
-  }
-  const label = factLabel(f.field).toLowerCase();
-  const def = DETAIL_FIELDS.find((d) => d.id === f.field);
-  return {
-    title: def && DETAIL_QUESTION[def.id] ? DETAIL_QUESTION[def.id] : `What is the ${label}?`,
-    context: said,
-    labels: { confirm: `Yes, ${short(value)}`, dismiss: "No, something else" },
-  };
+/** "Your description" → "your description"; other sources keep their case ("NBC table"). */
+export function sourcePhrase(ref: string): string {
+  return /^(Your|The|This)\b/.test(ref) ? ref.charAt(0).toLowerCase() + ref.slice(1) : ref;
 }
 
 /** The applicant's first sentence, for quoting back. */
@@ -171,14 +169,29 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
       optional: false,
     };
   }
+  if (a.suggestion === "identify") {
+    return {
+      key: `cand-${a.id}`,
+      kind: "candidate",
+      section: "C",
+      eyebrow: a.rank === "committed" ? "Code check · Likely applies" : "Code check · A close match",
+      title: codeQuestion(topic),
+      context: a.rank === "committed"
+        ? "Code identification ranked this rule as one that governs what you described. It is not used until you answer."
+        : "One of the closest matches to what you described. Nothing is used until you answer.",
+      why: "Yes puts this sentence into Section C as the requirement your design departs from. No leaves it out. Not sure keeps it as an open question for the officer. Batatis never decides whether the design complies.",
+      ref: a.id,
+      done,
+      optional: false,
+      provision: a.provision,
+    };
+  }
   const origin =
     a.suggestion === "search"
-      ? "You added this rule from the code search."
-      : a.suggestion === "identify"
-        ? "Suggested from your description. Confirm it before it is used."
-        : kind === "ranking"
-          ? "Suggested by article ranking."
-          : `About ${topic.charAt(0).toLowerCase()}${topic.slice(1)}.`;
+      ? "You added this rule from the code library."
+      : kind === "ranking"
+        ? "Suggested by article ranking."
+        : `About ${topic.charAt(0).toLowerCase()}${topic.slice(1)}.`;
   return {
     key: `cand-${a.id}`,
     kind: "candidate",
@@ -202,6 +215,11 @@ function questionOnOtherCard(c: Case, id: string, cardId?: string): boolean {
 
 /** Map a gap or link key to the card that answers it. */
 export function aliasKey(c: Case, key: string): string {
+  if (key.startsWith("fact-")) {
+    const id = key.slice("fact-".length);
+    const group = readGroups(c, DETAIL_IDS).find((g) => g.ids.includes(id));
+    if (group) return group.key;
+  }
   if (key.startsWith("q-q-from-")) return `cand-${key.slice("q-q-from-".length)}`;
   if (key === "q-q-desc-storeys" && c.candidates.some((a) => a.id === "desc-storeys")) return "cand-desc-storeys";
   if (key.startsWith("q-")) {
@@ -228,24 +246,135 @@ export function sectionDRelevant(c: Case, gaps: Gap[]): boolean {
   return c.candidates.some((a) => isProvision(a.provision)) || sectionDGaps(gaps).length > 0 || c.practiceOfEngineering !== undefined;
 }
 
+const SCOPE_ITEM_KEY = "scope";
+
 export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckItem[] {
   const seen = opts.seen ?? new Set<string>();
   // A card a current *blocking* gap points at is open, whatever the local value says.
   // Warnings (Not sure, open questions for the officer) never lock an answered card.
   const gapKeys = new Set(gaps.filter((g) => g.severity === "blocking").map((g) => gapKey(c, g)).filter((k): k is string => !!k));
-  const bySection: Record<SectionId, DeckItem[]> = { A: [], B: [], C: [], D: [] };
-  const push = (item: DeckItem) => {
-    // "Not sure yet" on the authority is an answer, like Not sure on a code card: its gap stays
-    // on the review, but the question is not asked again.
-    const answeredUnsure = item.kind === "authority" && seen.has("authority");
+  const groups = { read: [] as DeckItem[], plan: [] as DeckItem[], A: [] as DeckItem[], B: [] as DeckItem[], questions: [] as DeckItem[], C: [] as DeckItem[], D: [] as DeckItem[] };
+  const push = (group: keyof typeof groups, item: DeckItem) => {
+    // "Not sure yet" on the authority, or Not sure on a planner question, is an answer: its gap
+    // stays on the review, but the question is not asked again.
+    const answeredUnsure = (item.kind === "authority" && seen.has("authority")) || item.settled;
     const open = !item.done || (!item.optional && gapKeys.has(item.key) && item.kind !== "section-d" && !answeredUnsure);
     const next = { ...item, done: !open };
-    if (opts.includeDone || !next.done) bySection[item.section].push(next);
+    if (opts.includeDone || !next.done) groups[group].push(next);
   };
-  const detailSection = (field: string): SectionId => (DETAIL_FIELDS.find((d) => d.id === field)?.section === "A" ? "A" : "B");
 
-  // Section B opens with the reviewing authority: a normal question, never a silent default.
-  push({
+  // While intake reads, nothing else is asked: every card after it may already be answered by what it reads.
+  if (opts.intake === "running") {
+    return [{
+      key: "reading",
+      kind: "reading",
+      section: "B",
+      eyebrow: "Reading",
+      title: "Reading what you wrote…",
+      context: "Batatis reads your description and the text of your PDFs, and marks the words each value came from. Nothing is used until you confirm it.",
+      why: "Values read from your words are proposals. You confirm each one, and Batatis never asks again what you confirmed.",
+      ref: "reading",
+      done: false,
+      optional: true,
+    }];
+  }
+
+  // Another safety-codes regime: one page and nothing else until the applicant says otherwise.
+  const redirect = scopeRedirect(c);
+  if (redirect && c.facts.some((f) => f.field === "scope.redirect" && f.status === "unconfirmed")) {
+    return [{
+      key: SCOPE_ITEM_KEY,
+      kind: "scope",
+      section: "B",
+      eyebrow: "Before we go on",
+      title: `This reads as a ${redirect.regime?.name ?? "different"} question.`,
+      context: redirect.message ?? "",
+      why: "Batatis prepares building-code (NBC(AE)) variance applications only.",
+      ref: SCOPE_ITEM_KEY,
+      done: false,
+      optional: false,
+    }];
+  }
+
+  const unread = !c.intake && Boolean(c.description.trim()) && opts.intake !== undefined;
+  if (opts.intake === "error" || (unread && opts.intake === "idle")) {
+    const failed = opts.intake === "error";
+    push("read", {
+      key: "reading",
+      kind: "reading",
+      section: "B",
+      eyebrow: "Reading",
+      title: failed ? "We couldn’t read your description just now." : "Let Batatis read your description.",
+      context: failed
+        ? opts.intakeNote || "Your words are saved. Try again, or answer the questions below yourself."
+        : "It proposes the values it finds, with the words each came from, and asks only what is still missing.",
+      why: "Without the reading, every Section A and B detail is asked as a question instead.",
+      ref: "reading",
+      done: false,
+      optional: true,
+    });
+  }
+
+  // 1. What we read from the applicant's words and files, one thing to check per card.
+  for (const g of readGroups(c, DETAIL_IDS)) {
+    // Once answered, a Section A or B value lives on its form card (same key), editable there.
+    if (g.done && DETAIL_IDS.has(g.fact.field)) continue;
+    const copy = readCopy(c, g);
+    const detail = DETAIL_FIELDS.find((d) => d.id === g.fact.field);
+    push("read", {
+      key: g.key,
+      kind: "fact",
+      section: detail?.section === "A" ? "A" : "B",
+      eyebrow: "Check what we read",
+      title: copy.title,
+      context: "",
+      why: "We read this from what you gave us. Nothing is used until you confirm it.",
+      ref: g.fact.id,
+      ids: g.ids,
+      read: copy,
+      done: g.done,
+      optional: false,
+      confirmLabels: { confirm: copy.confirm, dismiss: copy.dismiss },
+    });
+  }
+  // Files intake could not read in full say so, with the reason, once.
+  for (const f of fileNotes(c)) {
+    const key = `file-${f.file_id}`;
+    push("read", {
+      key,
+      kind: "file",
+      section: "B",
+      eyebrow: "Your files",
+      title: f.status === "not_read" ? `We couldn’t read ${f.name}.` : `We read part of ${f.name}.`,
+      context: f.reason ?? "",
+      why: "Batatis reads the text layer of PDFs and fillable forms. It does not read images, and it never guesses.",
+      ref: f.file_id,
+      done: seen.has(key),
+      optional: true,
+    });
+  }
+
+  // 2. The planner's questions, as the API ranks them (at most five).
+  for (const { q, done, notSure } of planQuestions(c)) {
+    const detail = DETAIL_FIELDS.find((d) => d.id === localField(q.field));
+    push("plan", {
+      key: `plan-${q.id}`,
+      kind: "plan",
+      section: detail?.section ?? "B",
+      eyebrow: q.kind === "conflict" ? "You wrote two things" : q.priority === "administrative" ? `Section ${detail?.section ?? "B"} · ${detail?.label ?? "Details"}` : "A quick question",
+      title: q.text,
+      context: q.why,
+      why: q.unblocks.length ? `Your answer decides: ${q.unblocks.join(", ")}. Not sure is fine; it never blocks you.` : "Not sure is fine; it never blocks you.",
+      ref: q.id,
+      done,
+      optional: false,
+      settled: notSure,
+      plan: q,
+    });
+  }
+
+  // 3. The remaining Section A and B details. Section B opens with the reviewing authority.
+  push("B", {
     key: "authority",
     kind: "authority",
     section: "B",
@@ -257,38 +386,20 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     done: Boolean(c.authority) || seen.has("authority"),
     optional: false,
   });
-
-  // What we read from the applicant's words, waiting for a click, in the section it fills.
-  for (const f of c.facts) {
-    if (f.status !== "unconfirmed") continue;
-    const detail = DETAIL_IDS.has(f.field);
-    const copy = factCopy(f);
-    push({
-      key: detail ? `field-${f.field}` : `fact-${f.id}`,
-      kind: "fact",
-      section: detail ? detailSection(f.field) : "B",
-      eyebrow: "Check what we read",
-      title: copy.title,
-      context: copy.context,
-      why: "We read this from what you wrote. Nothing is used until you confirm it.",
-      ref: f.id,
-      done: false,
-      optional: false,
-      confirmLabels: copy.labels,
-    });
-  }
-
-  // Section A and B details, one per card.
+  const planned = plannedFields(c);
   for (const d of DETAIL_FIELDS) {
     const fact = factFor(c, d.id);
     if (fact?.status === "unconfirmed") continue; // asked on its "check what we read" card
     // A choice field counts only with one of its choices (a free-text answer elsewhere can land here).
     const filled = d.options ? valueText(fact) in d.options : Boolean(valueText(fact).trim());
     if (!d.required && filled && !opts.includeDone) continue;
+    // A planner question asks this field; its form card waits (or, after Not sure there, stays quiet).
+    const cover = planned.get(d.id);
+    if (cover && !cover.notSure && !filled && !opts.includeDone) continue;
     // The proposed alternative is usually what the applicant already described on Start: offer
     // those words instead of asking again. Nothing is filled until they say yes.
     const offer = d.id === "alternative" && Boolean(c.description.trim());
-    push({
+    push(d.section, {
       key: `field-${d.id}`,
       kind: "detail",
       section: d.section,
@@ -300,17 +411,18 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       quote: offer ? clip(c.description, 240) : d.options && valueText(fact).trim() && !filled ? valueText(fact).trim() : undefined,
       why: `Section ${d.section} of the variance form asks for the ${d.label.toLowerCase()}.`,
       ref: d.id,
-      done: d.required ? filled : filled || seen.has(`field-${d.id}`),
+      done: d.required ? filled || Boolean(cover?.notSure) : filled || seen.has(`field-${d.id}`),
       optional: !d.required,
+      settled: Boolean(cover?.notSure) && !filled,
       confirmLabels: offer ? { confirm: "Yes, use my description", dismiss: "No, I’ll write it" } : undefined,
     });
   }
 
-  // Open questions: project questions in B, questions from code matching in C.
+  // Open questions: project questions, and questions from code matching.
   for (const q of c.questions) {
     if (questionOnOtherCard(c, q.id, q.cardId)) continue;
     const fromCode = q.kind === "intake" || q.id.startsWith("q-identify-");
-    push({
+    push(fromCode ? "C" : "questions", {
       key: `q-${q.id}`,
       kind: "question",
       section: fromCode ? "C" : "B",
@@ -324,12 +436,47 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     });
   }
 
-  // Code check, in the order the cards were found.
-  for (const a of c.candidates) push(candidateItem(c, a));
+  // 4. The code check: committed articles and at most three quoted choices, plus anything the
+  // applicant added from the library. The rest of the ranking stays in the library.
+  const described = Boolean(c.intake || c.description.trim());
+  if (described && !c.identify) {
+    push("C", {
+      key: "code-run",
+      kind: "code-run",
+      section: "C",
+      eyebrow: "Code check",
+      title: opts.identify === "error" ? "The code check didn’t finish." : opts.identify === "running" ? "Checking the code for your project…" : "Check the code for your project.",
+      context: opts.identify === "running"
+        ? "Batatis reads every Division B article against what you described. Keep answering; your code questions join the list when it’s done."
+        : opts.identify === "error"
+          ? "Your answers are kept. Try again, or find the rule in the code yourself."
+          : "Batatis reads every Division B article against what you described and asks you about the closest few.",
+      why: "Code identification finds the requirement your design departs from. A ranking is a candidate list, never a decision that the design complies.",
+      ref: "code-run",
+      done: false,
+      optional: true,
+    });
+  }
+  const id = c.identify;
+  if (id && (!id.narrowed || id.mode === "bm25_fallback")) {
+    push("C", {
+      key: "code-note",
+      kind: "code-note",
+      section: "C",
+      eyebrow: "Code check",
+      title: !id.narrowed ? (id.message?.split(/(?<=\.)\s/)[0] ?? "I could not narrow this down.") : "This list comes from a keyword search.",
+      context: !id.narrowed ? (id.message?.split(/(?<=\.)\s/).slice(1).join(" ") || "Find the rule in the code yourself, or answer the questions so the next check can narrow it.") : "The full check wasn’t available, so these are keyword matches only. Treat each one as a lead, not a finding.",
+      why: id.label,
+      ref: "code-note",
+      done: seen.has("code-note"),
+      optional: true,
+    });
+  }
+  for (const a of c.candidates) push("C", candidateItem(c, a));
 
-  // The alternative-solution case, written by the applicant.
+  // 5. The alternative-solution case, written by the applicant.
   for (const p of PROCESS_FIELDS) {
-    push({
+    push("D", {
       key: `field-${p.id}`,
       kind: "process",
       section: "D",
@@ -343,9 +490,9 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     });
   }
 
-  // Section D: professional and evidence documents.
+  // 6. Section D: professional and evidence documents.
   if (sectionDRelevant(c, gaps)) {
-    push({
+    push("D", {
       key: "section-d",
       kind: "section-d",
       section: "D",
@@ -358,7 +505,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       optional: false,
     });
   }
-  return [...bySection.A, ...bySection.B, ...bySection.C, ...bySection.D];
+  return [...groups.read, ...groups.plan, ...groups.A, ...groups.B, ...groups.questions, ...groups.C, ...groups.D];
 }
 
 export const ROLE_CHOICES: { value: ApplicantType; label: string }[] = [
@@ -407,6 +554,10 @@ export function sectionProgress(items: DeckItem[]): { id: SectionId; label: stri
 
 /** Choices for a card, in keyboard order (A, B, C). */
 export function choicesFor(item: DeckItem): { value: string; label: string }[] {
+  if (item.kind === "plan" && item.plan) {
+    const input = planInput(item.plan.field);
+    return input.kind === "choices" ? [...(input.choices ?? []), { value: NOT_SURE, label: "Not sure" }] : [];
+  }
   if (item.kind === "fact") return [{ value: "confirm", label: item.confirmLabels?.confirm ?? "Yes, that’s right" }, { value: "dismiss", label: item.confirmLabels?.dismiss ?? "No, something else" }];
   if (item.kind === "authority") return [...AUTHORITIES.map((a) => ({ value: a.id as string, label: a.name })), { value: "unsure", label: "Not sure yet" }];
   if (item.kind === "candidate") {

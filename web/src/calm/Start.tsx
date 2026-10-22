@@ -19,7 +19,7 @@ const isText = (f: File) => /^text\/(plain|markdown)$/.test(f.type) || /\.(txt|m
  * the reviewing authority is a Section B question in the deck.
  */
 export function Start() {
-  const { c, phase, dispatch, resetNote, requestCheck } = useCase();
+  const { c, phase, dispatch, resetNote, readDescription } = useCase();
   const session = useSession();
   const { begin, userRole } = useBegin();
   const [askRole, setAskRole] = useState(false);
@@ -58,7 +58,7 @@ export function Start() {
       setText(joined);
     }
     const parts = [
-      pdfs.length ? `${pdfs.length} PDF${pdfs.length > 1 ? "s" : ""} attached for the officer. Batatis reads your description, not the PDF text.` : "",
+      pdfs.length ? `${pdfs.length} PDF${pdfs.length > 1 ? "s" : ""} attached. Batatis reads the text of ${pdfs.length > 1 ? "each one" : "it"} when you start; scans and photos are not read.` : "",
       texts.length ? `Text from ${texts.map((f) => f.name).join(", ")} added to your description.` : "",
       other ? `${other} file${other > 1 ? "s" : ""} skipped. Batatis reads PDF, .txt and .md files.` : "",
     ];
@@ -93,14 +93,15 @@ export function Start() {
   const takeRef = useRef(take);
   takeRef.current = take;
 
-  // Batatis reads the description; attached PDFs are stored for the officer, not read.
-  const blocked = locked ? "Submitted applications are read-only until the officer returns them." : !text.trim() ? "Describe it in a sentence first. Batatis reads your description, not the PDF text." : "";
+  // Batatis reads the description and the text layer of attached PDFs (intake).
+  const blocked = locked ? "Submitted applications are read-only until the officer returns them." : !text.trim() ? "Describe it in a sentence first. Batatis also reads the text of the PDFs you attach." : "";
 
   function start() {
     if (blocked) return;
     if (inCase) {
-      // Explicit action: check the edited draft, then continue.
-      void requestCheck();
+      // Explicit action: read the edited description (and any new PDF) again, then continue.
+      const changed = c.intake?.text !== c.description.trim() || session.held.length > 0;
+      if (changed) void readDescription();
       location.hash = "#/questions";
       return;
     }
@@ -144,10 +145,15 @@ export function Start() {
 
   const fileRows = inCase
     ? c.files.map((f) => {
+        const report = f.engineId ? c.intake?.record.files.find((r) => r.file_id === f.engineId) : undefined;
         const state = f.error
           ? { tone: "blocking" as const, label: f.error }
+          : report
+            ? report.status === "read"
+              ? { tone: "done" as const, label: `Read · ${report.pages ?? report.pages_read.length} ${report.pages === 1 ? "page" : "pages"}` }
+              : { tone: "warning" as const, label: report.status === "partly_read" ? "Partly read" : "Not read", reason: report.reason ?? undefined }
           : f.read
-            ? { tone: "done" as const, label: "Attached for the officer" }
+            ? { tone: "done" as const, label: "Uploaded" }
             : session.uploading.includes(f.id)
               ? { tone: "pending" as const, label: "Uploading…" }
               : session.held.some((h) => h.id === f.id)
@@ -188,7 +194,7 @@ export function Start() {
               <li key={f.id} className="cf-file">
                 <span className="cf-ext">PDF</span>
                 <span className="cf-file-name">{f.name}</span>
-                <span className={`cf-file-state is-${f.tone}`}><Dot tone={f.tone} />{f.label}</span>
+                <span className={`cf-file-state is-${f.tone}`} title={"reason" in f ? f.reason : undefined}><Dot tone={f.tone} />{f.label}</span>
                 <button type="button" className="cf-icon-btn is-xs" aria-label={`Remove ${f.name}`} onClick={() => removeFile(f.id)}>
                   <CIcon name="close" size={12} />
                 </button>

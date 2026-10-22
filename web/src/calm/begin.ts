@@ -33,7 +33,7 @@ export function useBegin() {
       beginEmpty(r);
       dispatch({ type: "setDescription", text: s.draft });
       if (files.length) dispatch({ type: "addFiles", files: files.map((f) => ({ id: f.id, name: f.file.name })) });
-      resetSession({ held: files, checkAfterStart: true });
+      resetSession({ held: files, readAfterStart: true });
       location.hash = "#/questions";
       return true;
     },

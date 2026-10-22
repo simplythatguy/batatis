@@ -4,7 +4,7 @@
  * the tool; it points to a source, computes from sources, or proposes for the user to confirm.
  */
 
-import type { FactInput, SourceInput } from "./api/types.gen";
+import type { FactInput, IdentifyResult, IntakeRecord, SourceInput } from "./api/types.gen";
 
 /** Fact, Source and their enums are the engine's (engine/models.py via src/api/types.gen.ts).
  *  exact = code database or form; pointed = a span from the user's words or files;
@@ -30,6 +30,21 @@ export interface CaseFile {
   sha256?: string;
   /** True only when the engine could not be reached. A missing route is not this. */
   unreachable?: boolean;
+  /** The engine's file id once uploaded; intake reads the file by this id. */
+  engineId?: string;
+}
+
+/**
+ * The latest intake run (docs/api/intake.md): the text it read, the record (pointers, file
+ * reports, conflicts, plan) and the ids of the facts this run wrote. Derived from the engine;
+ * the facts themselves live in `Case.facts` like every other value.
+ */
+export interface IntakeState {
+  text: string;
+  record: IntakeRecord;
+  factIds: string[];
+  /** This run's facts as read (browser field names), so a confirmed card still shows what it confirmed. */
+  facts: Fact[];
 }
 
 export interface Question {
@@ -77,6 +92,8 @@ export interface Candidate {
   answer: CandidateAnswer | null;
   /** Set when search or identify suggested the provision and the applicant has not confirmed it. */
   suggestion?: "search" | "identify";
+  /** For code identification: committed under the calibrated Part 9 rule, or one of the quoted choices. */
+  rank?: "committed" | "choice";
   /**
    * False when the card is a question drawn from the applicant's words
    * and no article has been ranked for it yet.
@@ -209,4 +226,8 @@ export interface Case {
   evidenceIssues?: Record<string, string>;
   /** Unfinished editors for this visit only; never sent as facts. Reset clears them. */
   evidenceDrafts?: Record<string, EvidenceDraft>;
+  /** What intake read, and its plan. Absent until the description has been read. */
+  intake?: IntakeState;
+  /** The latest code identification (committed articles, quoted choices, labels). */
+  identify?: IdentifyResult;
 }

@@ -4681,3 +4681,332 @@ a.cf-save-check {
 .cf-role-back {
   margin-top: 28px;
 }
+
+/* —— WP-23: what we read, the planner, the fork, code-check progress, the scope redirect —— */
+
+/* The applicant's own words, with the span a value was read from marked. Quiet: no fill, one hairline. */
+.cf-said {
+  margin: 22px 0 0;
+  max-width: 620px;
+}
+
+.cf-said-words {
+  margin: 0;
+  padding: 2px 0 2px 16px;
+  border-left: 1px solid var(--cf-line-2);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--cf-text-2);
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+.cf-said-words mark {
+  background: none;
+  color: var(--cf-text);
+  text-decoration: underline;
+  text-decoration-color: var(--cf-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.cf-said-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 16px;
+  margin-top: 10px;
+  padding-left: 17px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--cf-text-3);
+}
+
+.cf-said-sure {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+/* The fork: a calm inline note, the API's words, the two halves under a disclosure. */
+.cf-fork {
+  margin: 20px 0 0;
+  max-width: 620px;
+  padding: 0 0 0 16px;
+  border-left: 1px solid var(--cf-line-2);
+}
+
+.cf-fork-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--cf-text);
+}
+
+.cf-fork-text {
+  margin: 6px 0 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--cf-text-2);
+}
+
+.cf-fork-more,
+.cf-preapp-step {
+  margin-top: 8px;
+  font-size: 13.5px;
+  color: var(--cf-text-2);
+}
+
+.cf-fork-more > summary,
+.cf-preapp-step > summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--cf-text-3);
+  border-radius: 6px;
+  transition-property: color;
+  transition-duration: 150ms;
+}
+
+@media (hover: hover) {
+  .cf-fork-more > summary:hover,
+  .cf-preapp-step > summary:hover {
+    color: var(--cf-text);
+  }
+}
+
+.cf-halves {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.cf-halves li {
+  display: grid;
+  gap: 2px;
+  line-height: 1.5;
+}
+
+.cf-half-label {
+  color: var(--cf-text);
+  font-weight: 500;
+}
+
+.cf-half-basis {
+  font: 400 12px/1.5 var(--cf-mono);
+  color: var(--cf-text-3);
+}
+
+.cf-half-who {
+  color: var(--cf-text-3);
+}
+
+.cf-review-fork .cf-fork {
+  margin-top: 4px;
+}
+
+.cf-preapp {
+  margin-top: 6px;
+  max-width: 620px;
+}
+
+.cf-preapp-step p {
+  margin: 8px 0 0;
+  line-height: 1.6;
+}
+
+.cf-preapp-src {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+  font-size: 12.5px;
+  color: var(--cf-text-3);
+}
+
+.cf-preapp-src a {
+  color: var(--cf-text-2);
+  text-underline-offset: 2px;
+}
+
+/* Planner inputs: a number with its unit, or words, and Not sure beside them. */
+.cf-inline-answer.is-wide {
+  flex-wrap: wrap;
+}
+
+.cf-inline-answer.is-wide .cf-uline {
+  flex: 1 1 100%;
+}
+
+.cf-inline-answer > .cf-uline:not(.is-number):not(.is-area) {
+  flex: 1;
+  min-width: 0;
+  margin-top: 0;
+}
+
+.cf-inline-answer > .cf-uline.is-area {
+  margin-top: 0;
+}
+
+.cf-unit {
+  padding-bottom: 14px;
+  font-size: 18px;
+  color: var(--cf-text-2);
+}
+
+/* Code-check progress: four stages, counts only. */
+.cf-steps {
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+  max-width: 520px;
+}
+
+.cf-step {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  border-bottom: 1px solid var(--cf-line);
+  font-size: 15px;
+  color: var(--cf-text-3);
+}
+
+.cf-step.is-done,
+.cf-step.is-running {
+  color: var(--cf-text);
+}
+
+.cf-step-mark {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--cf-line-2);
+  color: var(--cf-done);
+}
+
+.cf-step.is-done .cf-step-mark {
+  border-color: transparent;
+}
+
+.cf-step.is-running .cf-step-mark {
+  border-color: var(--cf-text-2);
+  border-top-color: transparent;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cf-step.is-running .cf-step-mark {
+    animation: cf-spin 900ms linear infinite;
+  }
+}
+
+@keyframes cf-spin {
+  to {
+    rotate: 1turn;
+  }
+}
+
+.cf-step-detail {
+  font: 400 12.5px/1.4 var(--cf-mono);
+  color: var(--cf-text-3);
+}
+
+.cf-step-start,
+.cf-step-error {
+  margin-top: 26px;
+}
+
+.cf-step-error .cf-btn {
+  margin-top: 14px;
+}
+
+/* "Show the code": the article number and verbatim sentence, hidden until asked. */
+.cf-showcode {
+  margin-top: 18px;
+}
+
+.cf-codebox {
+  margin-top: 10px;
+  max-width: 640px;
+}
+
+.cf-codebox-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  font-size: 13.5px;
+  color: var(--cf-text-2);
+}
+
+.cf-codebox-head .cf-mono {
+  color: var(--cf-text);
+}
+
+.cf-codebox .cf-code-text {
+  margin-top: 10px;
+  background: none;
+}
+
+.cf-codebox-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 8px;
+}
+
+.cf-codebox-links a.cf-link-btn {
+  text-decoration: none;
+}
+
+/* The scope redirect page. */
+.cf-redirect-facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 18px;
+  margin: 20px 0 0;
+  max-width: 620px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.cf-redirect-facts dt {
+  color: var(--cf-text-3);
+}
+
+.cf-redirect-facts dd {
+  margin: 0;
+  color: var(--cf-text-2);
+}
+
+.cf-redirect-foot {
+  margin-top: 18px;
+  max-width: 560px;
+}
+
+@media (max-width: 760px) {
+  .cf-said-words {
+    font-size: 15.5px;
+  }
+  .cf-redirect-facts {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .cf-redirect-facts dd + dt {
+    margin-top: 10px;
+  }
+  .cf-redirect .cf-ok-row > .cf-btn {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+}
