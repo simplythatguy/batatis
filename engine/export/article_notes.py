@@ -44,7 +44,10 @@ def row_basis(case: Case, provision_id: str) -> str:
         found = 'Listed by code identification'
     else:
         found = 'Entered by the applicant (no code identification record)'
-    how = 'confirmed by the applicant' if confirmed or card is None else 'confirmed by the applicant as a benchmark'
+    # Without a recorded yes or citation fact, say only what is known: the provision is in the case's benchmark
+    # list (the confirm route), with no recorded decision on this article.
+    how = 'confirmed by the applicant' if confirmed or card is None else \
+        "in the case's benchmark list; no applicant decision is recorded for this article"
     return f'{found}; {how}.'
 
 

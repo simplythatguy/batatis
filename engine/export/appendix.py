@@ -197,7 +197,7 @@ def story_text(story: list) -> list[str]:
 def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, open_items: list[str],
                    package_notes: list[str] | None = None, text: list[str] | None = None) -> bytes:
     """Render the appendix PDF. When ``text`` is a list, the appendix's plain text is appended to it."""
-    printing = ', 2nd printing' if codes is None or second_printing_proven(codes) else ''
+    printing = ', 2nd printing' if codes is not None and second_printing_proven(codes) else ''
     story: list = [Paragraph('Appendix to the Variance Form for Proposed Alternative Solution', H1),
                    _p(f'Case {case.title or ""} ({case.id}). Generated {date.today().isoformat()} by Batatis with '
                       f'field map {fmap["version"]}. Code references are to the National Building Code - 2023 '

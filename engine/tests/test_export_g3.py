@@ -127,3 +127,32 @@ def test_a_600_word_rationale_goes_to_the_appendix_in_full(codes):
     mailing = next(p for p in result.placements if p.field == 'Mailing Address')
     assert mailing.ref and mailing.lines == [f'See Appendix {mailing.ref}']
     assert check_case(case, result, codes)['render'] == []
+
+
+def test_package_note_citations_resolve_and_paraphrase_the_division_a_clause(codes):
+    """The fixed appendix note cites Div A 1.2.1.1.(1)(b) and Div C 2.3.1; both resolve in codedb and the wording
+    follows the clause text (review on PR #60)."""
+    from codedb import validate_text
+    from engine.export.appendix import PACKAGE_NOTE
+    assert validate_text(PACKAGE_NOTE, db_path=codes.db_path)['errors'] == []
+    clause = codes.provision('1.2.1.1.(1)(b)', 'A')
+    assert clause and 'at least the minimum level of performance' in ' '.join(clause['text'].split())
+    assert 'at least the level of performance of the acceptable solution' in PACKAGE_NOTE
+    assert codes.provision('2.3.1.1.', 'C') is not None
+
+
+def test_story_text_extracts_table_rows_and_grouped_paragraphs(exported):
+    """story_text reads ReportLab tables and KeepTogether groups; fail loudly if a ReportLab change empties them."""
+    _, result = exported['a-manufacturer-nailbase-sheathing']
+    assert any(line.startswith('| C-1 | 9.27.5.1.(1) |') for line in result.appendix_text)
+    assert any(line.startswith('P-1 Rationale') for line in result.appendix_text)
+
+
+def test_appendix_without_a_code_database_claims_no_printing():
+    from types import SimpleNamespace
+    from engine.export.appendix import build_appendix
+    from engine.models import Case
+    text: list[str] = []
+    build_appendix(Case(), SimpleNamespace(overflow=[], rows_in_form=0, docs_in_form=0), {}, {'version': 't'},
+                   codes=None, open_items=[], text=text)
+    assert '2nd printing' not in text[1]
