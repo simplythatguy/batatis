@@ -1060,11 +1060,26 @@ def main(argv: list[str] | None = None) -> int:
     # Only a verified build replaces the published report; a --no-verify draft goes to a temp folder.
     out_json, out_md = (OUT_JSON, OUT_MD) if args.verify else _draft_paths()
     out_json.parent.mkdir(parents=True, exist_ok=True)
-    out_json.write_text(dump(report), encoding='utf-8')
-    out_md.write_text(render_md(report), encoding='utf-8')
+    _publish({out_json: dump(report), out_md: render_md(report)})
     shown = (lambda p: p.relative_to(ROOT)) if args.verify else (lambda p: p)
     print(f'wrote {"" if args.verify else "draft (unverified) "}{shown(out_json)} and {shown(out_md)}')
     return 0
+
+
+def _publish(files: dict) -> None:
+    """Both files or neither: render everything first, write temp files, then rename into place."""
+    staged = {}
+    try:
+        for path, text in files.items():
+            tmp = path.with_name(f'.{path.name}.tmp')
+            tmp.write_text(text, encoding='utf-8')
+            staged[path] = tmp
+        for path, tmp in staged.items():
+            os.replace(tmp, path)
+    finally:
+        for tmp in staged.values():
+            if tmp.exists():
+                tmp.unlink()
 
 
 def _draft_paths() -> tuple[Path, Path]:

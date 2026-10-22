@@ -150,4 +150,17 @@ def test_draft_paths_are_a_fresh_private_folder_each_run():
     import stat
     (j1, _), (j2, _) = ar._draft_paths(), ar._draft_paths()
     assert j1.parent != j2.parent
-    assert stat.S_IMODE(j1.parent.stat().st_mode) == 0o700 and not j1.parent.is_symlink()
+    assert stat.S_IMODE(j1.parent.stat().st_mode) == 0o700
+    assert not j1.parent.is_symlink()
+
+
+def test_a_failed_markdown_render_leaves_the_published_json_untouched(monkeypatch):
+    published = ar.OUT_JSON.read_text()
+    monkeypatch.setattr(ar, 'build', lambda **kw: {'draft': True})
+    monkeypatch.setattr(ar, 'dump', lambda r: '{"new": true}')
+    def boom(r):
+        raise RuntimeError('render failed')
+    monkeypatch.setattr(ar, 'render_md', boom)
+    with pytest.raises(RuntimeError):
+        ar.main([])
+    assert ar.OUT_JSON.read_text() == published

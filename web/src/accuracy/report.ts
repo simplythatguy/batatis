@@ -92,6 +92,7 @@ export function checkReport(data: unknown): Report {
     if (!c.tests?.length) throw new Error(`Guaranteed claim ${c.id} names no test.`);
   }
   for (const s of r.measured) {
+    if (!["measured", "provisional", "not_run"].includes(s.status as string)) throw new Error(`Section ${s.title} has an unknown status.`);
     for (const f of s.figures) {
       if (!f.source?.commit || !(f.source.paths?.length || f.source.pr)) throw new Error(`Figure ${f.id} has no source.`);
       if (!(f.n > 0)) throw new Error(`Figure ${f.id} has no sample size.`);
