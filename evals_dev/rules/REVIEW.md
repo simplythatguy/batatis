@@ -65,7 +65,7 @@ Each of these is a choice made in the rule data. Mark it agreed, or write the co
 
 ## 4. The vectors
 
-- [ ] For each of the 88 vectors in `vectors.json`: the `inputs` and `description` make sense, and `expect` (state, outcome, deciding Sentence, questions asked) is what you would conclude from the code text. The expected values were set by hand from the code text, not from either evaluator.
+- [ ] For each of the 89 vectors in `vectors.json`: the `inputs` and `description` make sense, and `expect` (state, outcome, deciding Sentence, questions asked) is what you would conclude from the code text. The expected values were set by hand from the code text, not from either evaluator.
 
 ## Sign-off
 

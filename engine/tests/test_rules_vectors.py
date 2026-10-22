@@ -7,6 +7,7 @@ equal to this evaluator. `test_typescript_evaluator_agrees` also runs node here 
 from __future__ import annotations
 
 import json
+import math
 import re
 import shutil
 import subprocess
@@ -94,6 +95,16 @@ def test_departs_names_both_halves_as_an_applicant_action():
         assert 'departs from the acceptable solution' in result['message']
 
 
+def test_out_of_range_and_oversized_numbers_are_ignored_not_evaluated():
+    rule = load_rule('glazed-openings-houses')
+    for value in (10 ** 400, 1e200, 1001, float('inf'), float('nan'), -0.1, True, '1.2'):
+        result = evaluate(rule, {'occupancy': 'single_family', 'limiting_distance_m': value, 'ebf_area_m2': 30,
+                                 'glazed_area_m2': 2})
+        assert result['ignored_inputs'] == ['limiting_distance_m'] and result['state'] == 'needs_info', value
+        assert all(c['value'] is None or not isinstance(c['value'], float) or math.isfinite(c['value'])
+                   for c in result['computed'])
+
+
 def test_fmt():
     assert [fmt(x) for x in (2.1, 2, 0.125, 1.005, 7.066666, 1440, 0.45, -0.5, True)] == \
         ['2.1', '2', '0.13', '1', '7.07', '1440', '0.45', '-0.5', 'yes']
@@ -137,6 +148,30 @@ def test_every_citation_and_page_comes_from_the_code_database():
     for rule in load_rules():
         for outcome in rule['outcomes']:
             assert outcome['provision'] in {p['id'] for p in rule['provisions']}, outcome['id']
+
+
+# A provision id written anywhere in rule text: 3 or more numbered levels, or "Section 9.10." style.
+MENTIONED_ID = re.compile(r'(?<![\w.(-])((?:Section\s+)?\d{1,2}\.\d{1,2}\.(?:\d{1,2}\.){0,2}(?:\(\d+\))?)')
+MENTIONED_NOTE = re.compile(r'\bA-(\d{1,2}(?:\.\d{1,2}){2,3}\.(?:\(\d+\))?)')
+
+
+def test_every_provision_mentioned_in_rule_text_resolves_in_the_code_database():
+    """Messages, questions, why texts, not_checked and notes cite provisions too: each must exist."""
+    codes = Codes()
+    texts = list(_strings(load_index())) + [s for rule in load_rules() for s in _strings(rule)]
+    ids, notes = set(), set()
+    for text in texts:
+        for match in MENTIONED_ID.finditer(text):
+            raw = match.group(1)
+            if raw.startswith('Section') or raw.count('.') >= 3:
+                ids.add(raw.removeprefix('Section').strip())
+        notes |= set(MENTIONED_NOTE.findall(text))
+    assert len(ids) > 40
+    for provision_id in ids:
+        assert any(codes.provision(provision_id, division) for division in 'BAC'), provision_id
+    with closing(codedb_store.connect(codes.db_path)) as con:
+        known = {row[0] for row in con.execute("SELECT note_id FROM notes WHERE doc='NBC-AE'")}
+    assert notes and all(f'A-{note}' in known for note in notes), notes
 
 
 def test_every_table_is_cited_by_id_and_page():

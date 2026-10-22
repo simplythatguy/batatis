@@ -2111,6 +2111,34 @@
     "boundary"
    ],
    "reviewed": false
+  },
+  {
+   "id": "G23",
+   "rule": "glazed-openings-houses",
+   "description": "An implausible limiting distance (1e200 m, over the 1000 m bound) is ignored and asked again",
+   "inputs": {
+    "occupancy": "single_family",
+    "storeys": 2,
+    "building_area_m2": 150,
+    "sprinklered": "no",
+    "fire_response_over_10_min": false,
+    "limiting_distance_m": 1e+200,
+    "ebf_area_m2": 30,
+    "glazed_area_m2": 2
+   },
+   "expect": {
+    "state": "needs_info",
+    "outcome_id": null,
+    "provision": "9.10.15.4.(1)",
+    "missing": [
+     "limiting_distance_m"
+    ]
+   },
+   "tags": [
+    "missing",
+    "invalid"
+   ],
+   "reviewed": false
   }
  ]
 }

@@ -10678,6 +10678,165 @@
     "Sentence 9.10.9.9.(5): firestopping around fire dampers (it does not remove the need for a damper)"
    ],
    "reviewed": false
+  },
+  "G23": {
+   "rule_id": "glazed-openings-houses",
+   "title": "Window area in a wall near the property line (houses)",
+   "article": "9.10.15.4.",
+   "state": "needs_info",
+   "state_label": "Not enough information",
+   "outcome_id": null,
+   "provision": {
+    "id": "9.10.15.4.(1)",
+    "division": "B",
+    "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.15.4.(1) [PDF p.901]",
+    "pdf_page": 901
+   },
+   "message": "To compare the design with 9.10.15.4.(1), answer the questions below.",
+   "next_step": null,
+   "missing": [
+    {
+     "field": "limiting_distance_m",
+     "label": "Limiting distance",
+     "question": "How far is this wall from the property line (the limiting distance), in metres?",
+     "why": "The limiting distance decides which column of the table, and which Sentence, applies."
+    }
+   ],
+   "inputs": [
+    {
+     "field": "occupancy",
+     "label": "Occupancy",
+     "unit": null,
+     "value": "single_family"
+    },
+    {
+     "field": "dwelling_unit_above_another",
+     "label": "A dwelling unit above another",
+     "unit": null,
+     "value": null
+    },
+    {
+     "field": "storeys",
+     "label": "Storeys",
+     "unit": null,
+     "value": 2
+    },
+    {
+     "field": "building_area_m2",
+     "label": "Building area",
+     "unit": "m²",
+     "value": 150
+    },
+    {
+     "field": "limiting_distance_m",
+     "label": "Limiting distance",
+     "unit": "m",
+     "value": null
+    },
+    {
+     "field": "ebf_area_m2",
+     "label": "Area of the exposing building face",
+     "unit": "m²",
+     "value": 30
+    },
+    {
+     "field": "glazed_area_m2",
+     "label": "Area of glazed openings",
+     "unit": "m²",
+     "value": 2
+    },
+    {
+     "field": "sprinklered",
+     "label": "Sprinklered",
+     "unit": null,
+     "value": "no"
+    },
+    {
+     "field": "fire_response_over_10_min",
+     "label": "Fire department response over 10 minutes",
+     "unit": null,
+     "value": false
+    },
+    {
+     "field": "glass_blocks",
+     "label": "Openings are glass blocks",
+     "unit": null,
+     "value": null
+    },
+    {
+     "field": "adjacent_rooms_sprinklered",
+     "label": "Rooms behind this wall sprinklered",
+     "unit": null,
+     "value": null
+    },
+    {
+     "field": "faces_own_detached_garage",
+     "label": "Faces its own detached garage",
+     "unit": null,
+     "value": null
+    }
+   ],
+   "ignored_inputs": [
+    "limiting_distance_m"
+   ],
+   "computed": [
+    {
+     "name": "halve_limiting_distance",
+     "label": "Half the limiting distance is used (slow fire department response, not fully sprinklered)",
+     "unit": null,
+     "value": false
+    },
+    {
+     "name": "limiting_distance_used_m",
+     "label": "Limiting distance used (halved under Sentence 9.10.15.3.(1) where it applies)",
+     "unit": "m",
+     "value": null
+    },
+    {
+     "name": "table_percent",
+     "label": "Table 9.10.15.4. percentage (lesser column)",
+     "unit": "%",
+     "value": null
+    },
+    {
+     "name": "table_limit_m2",
+     "label": "Table 9.10.15.4. limit (lesser column)",
+     "unit": "m²",
+     "value": null
+    },
+    {
+     "name": "interpolated_percent",
+     "label": "Table 9.10.15.4. percentage (interpolated)",
+     "unit": "%",
+     "value": null
+    },
+    {
+     "name": "interpolated_limit_m2",
+     "label": "Table 9.10.15.4. limit (interpolated)",
+     "unit": "m²",
+     "value": null
+    },
+    {
+     "name": "square_limit_m2",
+     "label": "Limiting distance squared (Clause (c), only where it is 1.2 m or more)",
+     "unit": "m²",
+     "value": null
+    },
+    {
+     "name": "sentence_1_limit_m2",
+     "label": "Largest area Sentence (1) permits (Clause (a) or (c))",
+     "unit": "m²",
+     "value": null
+    }
+   ],
+   "assumptions": [],
+   "not_checked": [
+    "Clause 9.10.15.4.(1)(b): conformance with Subsection 3.2.3. (a Part 3 spatial separation calculation)",
+    "Sentence 9.10.15.4.(2): limits for separate portions of a stepped or skewed face",
+    "Sentences 9.10.15.4.(3) to (5): size and spacing of individual openings where the limiting distance is 2 m or less",
+    "Article 9.10.15.5.: fire-resistance rating and cladding of the face"
+   ],
+   "reviewed": false
   }
  }
 }

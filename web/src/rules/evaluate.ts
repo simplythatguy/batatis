@@ -24,6 +24,7 @@ export interface InputSpec {
   type: "number" | "int" | "bool" | "enum";
   unit?: string;
   min?: number;
+  max?: number;
   choices?: { value: string; label: string }[];
   question: string;
   why: string;
@@ -106,6 +107,7 @@ export function normalize(spec: InputSpec, value: unknown): Value | null {
   if (!isNum(value)) return null;
   if (spec.type === "int" && !Number.isInteger(value)) return null;
   if (spec.min !== undefined && value < spec.min) return null;
+  if (spec.max !== undefined && value > spec.max) return null; // keeps every derived value finite
   return value;
 }
 

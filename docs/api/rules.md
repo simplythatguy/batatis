@@ -8,7 +8,7 @@ Source: `engine/rules/` (`evaluator.py` authoritative, `case.py`, `models.py`, `
 
 ## Rules
 
-Edition: NBC(AE) 2023, 2nd printing. Every citation and PDF page is copied from the code database and re-checked by `engine/tests/test_rules_vectors.py`.
+Edition: NBC(AE) 2023, 2nd printing. `engine/tests/test_rules_vectors.py` checks the citation string and PDF page of every declared provision (each rule's `provisions` and `index.process_provisions`) exactly against the code database, checks that every other provision id or Note written anywhere in the rule data (messages, questions, `not_checked`) resolves there, and checks each table's id and page against the database's table list. The table values themselves are transcribed by hand and are on the reviewer's checklist.
 
 | `rule_id` | Sentence(s) | Exceptions coded | Tables |
 |---|---|---|---|
@@ -41,7 +41,7 @@ POST /cases/{id}/facts
  "source": {"type": "user_click", "ref": "rules:glazed-openings-houses", "quote": "No"}}
 ```
 
-Values must have the input's type: `number`/`int` (JSON number, not negative), `bool` (JSON true/false), `enum` (one of `choices[].value`). Anything else is listed in `ignored_inputs` and asked again. The full input vocabulary (labels, units, questions, choices) is `GET /rules` → `index.inputs`. Several inputs are intake facts already (`occupancy`, `storeys`, `building_area_m2`, `sprinklered`, `limiting_distance_m`, see `docs/api/intake.md`).
+Values must have the input's type: `number`/`int` (JSON number between the input's `min` and `max`), `bool` (JSON true/false), `enum` (one of `choices[].value`). Anything else is listed in `ignored_inputs` and asked again. The full input vocabulary (labels, units, questions, choices) is `GET /rules` → `index.inputs`. Several inputs are intake facts already (`occupancy`, `storeys`, `building_area_m2`, `sprinklered`, `limiting_distance_m`, see `docs/api/intake.md`).
 
 The case route reads the **latest** fact per field. A `proposed` fact (model judgement) is never used: the rule asks instead. Inputs read from unconfirmed facts are listed in `unconfirmed_inputs`, so the card can say "based on values you have not confirmed".
 

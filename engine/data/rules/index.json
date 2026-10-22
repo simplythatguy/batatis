@@ -99,6 +99,7 @@
       "label": "Storeys",
       "type": "int",
       "min": 1,
+      "max": 200,
       "question": "How many storeys does the building have?",
       "why": "Part 9 covers buildings of 3 storeys or less in building height (Div A, Sentence 1.3.3.3.(1))."
     },
@@ -108,6 +109,7 @@
       "type": "number",
       "unit": "m²",
       "min": 0,
+      "max": 1000000,
       "question": "What is the building area (the footprint), in square metres?",
       "why": "Part 9 covers buildings with a building area of 600 m² or less (Div A, Sentence 1.3.3.3.(1))."
     },
@@ -117,6 +119,7 @@
       "type": "number",
       "unit": "m",
       "min": 0,
+      "max": 1000,
       "question": "How far is this wall from the property line (the limiting distance), in metres?",
       "why": "The limiting distance decides which column of the table, and which Sentence, applies."
     },
@@ -154,6 +157,7 @@
       "type": "number",
       "unit": "m²",
       "min": 0,
+      "max": 100000,
       "question": "What is the area of this wall (the exposing building face), from finished ground to the uppermost ceiling, in square metres?",
       "why": "The table row depends on the area of the exposing building face."
     },
@@ -163,6 +167,7 @@
       "type": "number",
       "unit": "m²",
       "min": 0,
+      "max": 100000,
       "question": "What is the total area of windows and other glazed openings in this wall, in square metres?",
       "why": "This is the number the table limits."
     },
@@ -172,6 +177,7 @@
       "type": "number",
       "unit": "m²",
       "min": 0,
+      "max": 100000,
       "question": "What is the total area of unprotected openings (windows, doors and other openings without a fire-rated closure) in this wall, in square metres?",
       "why": "This is the number the table limits."
     },
@@ -251,6 +257,7 @@
       "type": "number",
       "unit": "m",
       "min": 0,
+      "max": 1000,
       "question": "How far is the face (outer edge) of the roof soffit from the property line, in metres?",
       "why": "Where the limiting distance is more than 0.45 m, the face of the soffit must be at least 0.45 m from the property line (Sentence 9.10.15.5.(9))."
     },
@@ -266,6 +273,7 @@
       "label": "Houses in the building",
       "type": "int",
       "min": 1,
+      "max": 1000,
       "question": "How many houses (row-house units) are in the building, counting all of them?",
       "why": "Sentence 9.10.11.2.(2) applies where a building contains more than 2 houses."
     },
@@ -274,6 +282,7 @@
       "label": "Houses with a secondary suite",
       "type": "int",
       "min": 0,
+      "max": 1000,
       "question": "How many of those houses have a secondary suite?",
       "why": "The firewall requirement concerns houses with a secondary suite."
     },
@@ -282,6 +291,7 @@
       "label": "Most suite houses between firewalls",
       "type": "int",
       "min": 0,
+      "max": 1000,
       "question": "Between firewalls, what is the largest number of adjacent houses with a secondary suite in one part of the building? (Count the whole building if there is no firewall.)",
       "why": "Sentence 9.10.11.2.(2) asks for firewalls so that each part contains no more than 2 adjacent houses with a secondary suite."
     },
@@ -345,6 +355,7 @@
       "type": "number",
       "unit": "°C",
       "min": 0,
+      "max": 5000,
       "question": "What is the melting point of the duct material, in °C? (Galvanized steel is well above 760 °C; aluminum is below.)",
       "why": "Sentences 9.10.13.13.(2) and (3) need a melting point not below 760 °C; Sentence (4) needs one above 760 °C."
     },
@@ -354,6 +365,7 @@
       "type": "number",
       "unit": "cm²",
       "min": 0,
+      "max": 1000000,
       "question": "What is the cross-sectional area of the branch duct, in cm²?",
       "why": "Sentence 9.10.13.13.(2) needs a cross-sectional area less than 130 cm²."
     },
@@ -363,6 +375,7 @@
       "type": "number",
       "unit": "m",
       "min": 0,
+      "max": 100,
       "question": "How high above the floor do the units it supplies discharge air, in metres?",
       "why": "Sentence 9.10.13.13.(2) needs discharge not more than 1.2 m above the floor."
     },
@@ -372,6 +385,7 @@
       "type": "number",
       "unit": "mm",
       "min": 0,
+      "max": 100000,
       "question": "How far is the branch duct carried up inside the riser, in millimetres?",
       "why": "Sentence 9.10.13.13.(3) needs at least 500 mm."
     },

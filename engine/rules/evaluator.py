@@ -56,7 +56,12 @@ def load_rules() -> list[dict]:
 # ---------------------------------------------------------------- values
 
 def _is_num(value: Any) -> bool:
-    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        return False
+    try:
+        return math.isfinite(value)
+    except OverflowError:                      # an int too large for a float
+        return False
 
 
 def normalize(spec: dict, value: Any) -> Any:
@@ -71,6 +76,8 @@ def normalize(spec: dict, value: Any) -> Any:
     if kind == 'int' and float(value) != math.floor(value):
         return None
     if 'min' in spec and value < spec['min']:
+        return None
+    if 'max' in spec and value > spec['max']:  # keeps every derived value finite (no Infinity on the wire)
         return None
     return value
 
