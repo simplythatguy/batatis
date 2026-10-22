@@ -578,3 +578,7 @@
   .ac-q-help { font-size: 15.5px; }
   .ac-underline { font-size: 21px; }
 }
+
+/* Information request sent while in review (applicant) */
+.cf-request-items { margin: 10px 0 12px; padding-left: 20px; color: var(--cf-text); font-size: 14px; line-height: 1.55; }
+.cf-request-items li + li { margin-top: 6px; }

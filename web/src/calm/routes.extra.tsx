@@ -13,6 +13,7 @@ import { AccountButton } from "./auth/AccountButton";
 import { AuthPage } from "./auth/AuthPage";
 import { Onboarding } from "./auth/Onboarding";
 import { NotificationsBell, NotificationsLink, NotificationsPage } from "./notifications/NotificationsBell";
+import { PackagePage } from "./reviewer/PackagePage";
 import { ReviewDetail } from "./reviewer/ReviewDetail";
 import { ReviewQueue } from "./reviewer/ReviewQueue";
 import { Settings } from "./settings/Settings";
@@ -64,7 +65,11 @@ export function extraRoutes(route: Route): ReactNode | null {
     case "/review":
       return getAccountState().user?.role === "reviewer" ? <ReviewQueue phoneTools={phoneTools} /> : null;
   }
-  const id = getAccountState().user?.role === "reviewer" ? reviewId(path) : null;
+  const reviewer = getAccountState().user?.role === "reviewer";
+  // Third-party packages (no Batatis case): #/review/package and #/review/package/<pkg_id>.
+  const pkg = reviewer ? /^\/review\/package(?:\/([^/]+))?$/.exec(path) : null;
+  if (pkg) return <PackagePage key={pkg[1] ?? "new"} packageId={pkg[1] ? decodeURIComponent(pkg[1]) : null} phoneTools={phoneTools} />;
+  const id = reviewer ? reviewId(path) : null;
   if (id) return <ReviewDetail key={id} caseId={id} phoneTools={phoneTools} />;
   return null;
 }

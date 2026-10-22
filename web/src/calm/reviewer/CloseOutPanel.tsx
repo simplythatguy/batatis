@@ -50,7 +50,7 @@ export function CloseOutDue({ c, canMark, onChange }: { c: CloseOut; canMark: bo
   }
 
   return (
-    <section className="ac-side-sec" aria-labelledby={`${id}-h`}>
+    <section className="ac-side-sec pr-due-sec" aria-labelledby={`${id}-h`}>
       <h3 id={`${id}-h`} className="ac-side-h">Copy to the Council</h3>
       <p className="pr-due"><span className={`cf-dot is-${due.tone}`} aria-hidden="true" />{due.text}</p>
       {!c.sent && (

@@ -180,8 +180,13 @@
 .pr-checklist[open] summary::after { content: "Hide"; }
 
 @media (max-width: 960px) {
-  /* The claim and the decision come first on narrow screens. */
-  .ac-rv-side { order: -1; border-bottom: 1px solid var(--cf-line); }
+  /* Narrow screens: the claim and the decision first, then the review, then the checklist and messages. */
+  .ac-page .ac-rv { display: flex; flex-direction: column; }
+  .ac-rv > .ac-rv-side { display: contents; }
+  .ac-rv-side > * { order: 1; margin: 0 16px 20px; }
+  .ac-rv-side > :is(.ac-done, .ac-error, .ac-claimed, .pr-decide, .pr-due-sec, [role="note"]) { order: -1; }
+  .ac-rv-side > .ac-claimed { margin-top: 18px; }
+  .ac-rv-sheet.pr-main { order: 0; margin-bottom: 20px; }
 }
 
 @media (max-width: 760px) {
@@ -196,3 +201,5 @@
   .pr-metrics > div { padding-right: 10px; }
   .pr-metrics > div + div { padding-left: 10px; }
 }
+
+.pr-page { display: flex; flex-direction: column; align-items: center; }

@@ -16,6 +16,7 @@ import { AppHeader, type StageRingItem } from "./shell/AppHeader";
 import { AppLayout } from "./shell/AppLayout";
 import { ApplicationList, type ApplicationListHandle } from "./shell/ApplicationList";
 import { Rail, type RailDestination } from "./shell/Rail";
+import { RequestBanner } from "./shell/RequestBanner";
 import { ReturnedBanner } from "./shell/ReturnedBanner";
 import { AccountButton, NotificationsBell } from "./routes.extra";
 import { useRoute } from "../router";
@@ -391,7 +392,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
         rail={<Rail destinations={destinations} notificationsSlot={<NotificationsBell />} accountSlot={<AccountButton />} />}
         list={bare ? undefined : list}
         header={bare ? null : header}
-        banner={onStage && current?.status === "returned" ? <ReturnedBanner app={current} /> : null}
+        banner={onStage && current?.status === "returned" ? <ReturnedBanner app={current} /> : onStage && current?.status === "in_review" ? <RequestBanner app={current} /> : null}
         assistant={assistant.open ? <AssistantPanel /> : null}
         listCollapsed={listCollapsed}
         sheetOpen={sheet}

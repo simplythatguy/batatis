@@ -11,7 +11,7 @@ import type { Case as EngineCase, PackageReviewIndex, ReviewSession } from "../.
 import { CODE_EDITION } from "../../config";
 import { useAccount } from "../account";
 import { AcIcon, Avatar, PageHead } from "../auth/bits";
-import { ConfirmDialog } from "../ui";
+import { CIcon, ConfirmDialog } from "../ui";
 import { Messages } from "./Messages";
 import { CloseOutDue, CloseOutPanel } from "./CloseOutPanel";
 import { InfoRequest } from "./InfoRequest";
@@ -104,7 +104,7 @@ function UploadButton({ disabled, onFiles, label = "Upload PDFs" }: { disabled?:
     <>
       <input ref={input} className="pr-file-input" type="file" accept="application/pdf,.pdf" multiple tabIndex={-1} aria-hidden="true"
         onChange={(e) => { const f = [...(e.target.files ?? [])]; e.target.value = ""; if (f.length) onFiles(f); }} />
-      <button type="button" className="cf-btn is-xs" disabled={disabled} onClick={() => input.current?.click()}><AcIcon name="right" size={13} />{label}</button>
+      <button type="button" className="cf-btn is-xs" disabled={disabled} onClick={() => input.current?.click()}><CIcon name="upload" size={13} />{label}</button>
     </>
   );
 }
@@ -136,13 +136,15 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
 
   const row = q.rows.find((r) => r.id === caseId) ?? null;
 
-  const reload = useCallback(async () => {
+  const reload = useCallback(async (): Promise<EngineCase | null> => {
     try {
       const saved = (await engine.getCase(caseId)) as unknown as EngineCase;
       setCase(saved);
       setLoadError("");
+      return saved;
     } catch (e) {
       setLoadError(e instanceof EngineError && e.status === 404 ? "This application isn’t available to you. It may have been withdrawn or sent to another authority." : "The application didn’t load.");
+      return null;
     }
   }, [caseId]);
 
@@ -231,10 +233,12 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
       const cl = await review.claim(caseId, takeOver);
       setConflict(null);
       patchRow(caseId, { claim: cl, status: "in_review" });
-      await reload();
-      // Starting a review runs the package review once, unless a current one exists.
+      const saved = await reload();
+      // Starting a review runs the package review, unless one exists for this version of the
+      // application (after a resend it runs again, so the diff shows what was resolved).
       const ix = await loadIndex();
-      if (ix && !ix.latest) void run();
+      const stale = ix?.latest && saved && ix.latest.case_version != null && ix.latest.case_version !== saved.version;
+      if (ix && (!ix.latest || stale)) void run();
     } catch (e) {
       const other = claimConflict(e);
       if (other) setConflict(other);
@@ -326,7 +330,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
 
   const runActions = canRun ? (
     <>
-      <button type="button" className="cf-btn is-xs" disabled={running} onClick={() => void run()}><AcIcon name="search" size={13} />{running ? "Reviewing…" : "Run again"}</button>
+      <button type="button" className="cf-btn is-xs" disabled={running} onClick={() => void run()}><CIcon name="retry" size={13} />{running ? "Reviewing…" : "Run again"}</button>
       <UploadButton disabled={running} onFiles={(f) => void run(f)} />
     </>
   ) : undefined;
