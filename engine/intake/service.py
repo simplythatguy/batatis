@@ -10,6 +10,7 @@ import hashlib
 import re
 
 from ..identify.answers import is_unknown_answer
+from ..identify.title import short_title, title_should_replace
 from ..models import Case, Fact, Source
 from ..models_intake import FactPointer, IntakeRecord
 from . import model as model_pass
@@ -55,6 +56,7 @@ def _latest(case: Case, name: str) -> Fact | None:
 
 def apply(case: Case, text: str | None, extraction: Extraction, *, role: str | None = None) -> list[Fact]:
     """Write this run to the case. Returns the facts added by the run."""
+    previous_text = description(case)
     previous = {pointer.fact_id for pointer in (case.intake.pointers if case.intake else [])}
     case.facts = [fact for fact in case.facts if not (fact.id in previous and fact.status == 'unconfirmed')]
     if text and text.strip():
@@ -99,6 +101,15 @@ def apply(case: Case, text: str | None, extraction: Extraction, *, role: str | N
         text_sha256=hashlib.sha256(text.encode()).hexdigest() if text else None,
         pointers=pointers, files=extraction.files, model=extraction.model, conflicts=extraction.conflicts,
         unresolved_citations=extraction.unresolved, plan=previous_plan)
+    # Only sent/saved applicant context can name an untitled or legacy sentence-seeded
+    # record. Keep an existing subject name, and always honor an explicit rename.
+    generated = case.identify.title if case.identify else None
+    name_text = text if text and text.strip() else description(case)
+    if any(title_should_replace(case.title, prose, generated, manual=case.title_is_manual)
+           for prose in (name_text, previous_text)):
+        title = short_title(text or '', case.facts, None)
+        if title != 'Variance application':
+            case.title = title
     refresh(case)
     return added
 

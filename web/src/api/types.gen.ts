@@ -164,6 +164,7 @@ export interface Case {
   status_history: StatusChange[];
   submitted_at: string | null;
   title: string | null;
+  title_is_manual: boolean;
   updated_at: string;
   version: number;
 }
@@ -1410,6 +1411,10 @@ export interface ThreadMessage {
   items: DecisionItem[];
   kind: "message" | "decision" | "status";
   read_by_me: boolean;
+}
+
+export interface TitleRequest {
+  title: string;
 }
 
 export interface TocArticle {

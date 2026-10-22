@@ -1072,6 +1072,11 @@
           "default": null,
           "title": "Title"
         },
+        "title_is_manual": {
+          "default": false,
+          "title": "Title Is Manual",
+          "type": "boolean"
+        },
         "updated_at": {
           "title": "Updated At",
           "type": "string"
@@ -1086,6 +1091,7 @@
       "required": [
         "id",
         "title",
+        "title_is_manual",
         "owner_id",
         "authority",
         "status",
@@ -8974,6 +8980,22 @@
         "read_by_me"
       ],
       "title": "ThreadMessage",
+      "type": "object"
+    },
+    "TitleRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "title": "TitleRequest",
       "type": "object"
     },
     "TocArticle": {

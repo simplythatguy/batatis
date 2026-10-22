@@ -29,6 +29,7 @@ from .identify.http_models import (BenchmarkConfirmRequest, IdentifyConfirmReque
 from .models_review import InformationRequestEdit, PackageReviewIndex, ReviewSession, SentInformationRequests
 from .models_jurisdictions import JurisdictionDetail, JurisdictionsResult
 from .routes_jurisdictions import CaseJurisdictionPack
+from .routes_case import TitleRequest
 from .rules.models import CaseRules, RuleSet
 from .models_checklists import (CaseChecklists, ChecklistAnswerRequest, ChecklistAnswerResult,
                                 JurisdictionChecklists)
@@ -43,7 +44,7 @@ REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, Onboard
             ClaimRequest, DecisionRequest, MessageRequest, AssistRequest, InformationRequestEdit,
             IntakeRequest, AnswersRequest, ScopeRequest, PlanRequest,
             IdentifyRequest, IdentifyDecisionRequest, IdentifyConfirmRequest, BenchmarkConfirmRequest,
-            ChecklistAnswerRequest)  # defaulted fields optional
+            ChecklistAnswerRequest, TitleRequest)  # defaulted fields optional
 
 
 class _ResponsesCarryDefaults(GenerateJsonSchema):
