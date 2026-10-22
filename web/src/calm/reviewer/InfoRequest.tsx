@@ -89,7 +89,6 @@ export function InfoRequest({
   const [error, setError] = useState("");
   const [note, setNote] = useState("");
   const [confirm, setConfirm] = useState(false);
-  const [alsoReturn, setAlsoReturn] = useState(true);
   const [sent, setSent] = useState<SentInformationRequests | null>(null);
   const [sentFailed, setSentFailed] = useState(false);
   const [sentAttempt, setSentAttempt] = useState(0);
@@ -162,7 +161,9 @@ export function InfoRequest({
     try {
       const done = await packageReview.send(target.id, saved.version);
       onChange(done);
-      if (alsoReturn) {
+      // One-way messages: the applicant can't reply, so a request always returns the application
+      // for them to update and send again.
+      {
         try {
           await review.decide(target.id, { outcome: "return", message: returnAfterRequest(includedCount(draftFrom(done.information_request).items)), items: requestItems(done) });
           await onReturned?.();
@@ -171,8 +172,6 @@ export function InfoRequest({
           setNote("");
           setError(`The request was sent, but the application wasn’t returned: ${errorText(e, "try Return again")}.`);
         }
-      } else {
-        setNote(`Sent to ${applicant}. The application stays with you.`);
       }
     } catch (e) {
       setError(errorText(e, "The request didn’t send. Try again."));
@@ -197,7 +196,7 @@ export function InfoRequest({
     <section className="pr" aria-labelledby={`${id}-h`}>
       <header className="pr-head">
         <div className="pr-head-txt">
-          <h2 id={`${id}-h`} className="pr-head-title">Information request</h2>
+          <h2 id={`${id}-h`} className="pr-title">{sentAlready ? "Information request" : "Ask for what’s missing"}</h2>
           <p className="pr-faint">Version {session.version} · {sentAlready ? "sent" : ir.edited ? "edited draft" : "draft from the review"}{!latest ? " · an earlier version" : ""}</p>
         </div>
         {!sentAlready && (
@@ -220,8 +219,7 @@ export function InfoRequest({
           </>
         ) : (
           <>
-            <h2 className="pr-title">Ask for what’s missing</h2>
-            <p className="pr-lede">Drafted from the review, one item per gap. Include what you want to ask, reword anything, or add your own. Items marked “look first” are left out until you check them.</p>
+            <p className="pr-lede">One item per gap. Tick what to ask, reword anything, or add your own.</p>
             <div className="pr-intro">
               {introOpen && editable ? (
                 <>
@@ -255,19 +253,21 @@ export function InfoRequest({
                       ) : (
                         <p className="pr-req-text">{i.text || <span className="pr-faint">Empty item</span>}</p>
                       )}
-                      <p className="pr-item-meta">
-                        {i.section ? SECTION_LABEL[i.section] : "Your item"}
-                        {i.officerCheck && <span className="pr-tag"><span className="cf-dot is-pending" aria-hidden="true" />Look first: the review couldn’t establish this</span>}
-                        {i.authored === "officer" && i.id && <span className="pr-tag">Your wording</span>}
-                      </p>
-                      {editable && (
-                        <div className="pr-req-acts">
-                          <button type="button" className="cf-btn is-xs is-ghost" onClick={() => setEditing(editing === i.key ? null : i.key)}>{editing === i.key ? "Done" : "Edit"}</button>
-                          {!i.linked && (
-                            <button type="button" className="cf-btn is-xs is-ghost" onClick={() => { edited(); setItems((list) => list.filter((x) => x.key !== i.key)); }}>Remove</button>
-                          )}
-                        </div>
-                      )}
+                      <div className="pr-req-meta">
+                        <p className="pr-item-meta">
+                          {i.section ? SECTION_LABEL[i.section] : "Your item"}
+                          {i.officerCheck && <span className="pr-tag"><span className="cf-dot is-pending" aria-hidden="true" />Look first: the review couldn’t establish this</span>}
+                          {i.authored === "officer" && i.id && <span className="pr-tag">Your wording</span>}
+                        </p>
+                        {editable && (
+                          <div className="pr-req-acts">
+                            <button type="button" className="cf-btn is-xs is-ghost" onClick={() => setEditing(editing === i.key ? null : i.key)}>{editing === i.key ? "Done" : "Edit"}</button>
+                            {!i.linked && (
+                              <button type="button" className="cf-btn is-xs is-ghost" onClick={() => { edited(); setItems((list) => list.filter((x) => x.key !== i.key)); }}>Remove</button>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </li>
                 ))}
@@ -310,17 +310,11 @@ export function InfoRequest({
       <Modal open={confirm} onClose={() => setConfirm(false)} labelledBy={`${id}-ct`} className="ac-return">
         <div className="cf-modal-body">
           <h2 id={`${id}-ct`} className="cf-modal-title">Send to {applicant}?</h2>
-          <p className="cf-muted">The {count} included {count === 1 ? "item goes" : "items go"} to the application’s messages and {applicant} is notified. The request can’t be changed after it’s sent.</p>
-          <label className="ac-check pr-confirm-check">
-            <input type="checkbox" checked={alsoReturn} onChange={() => setAlsoReturn((v) => !v)} />
-            <span className="ac-box" aria-hidden="true"><AcIcon name="check" size={12} stroke={2.4} /></span>
-            <span className="ac-check-text">Also return the application so they can update it and send it again</span>
-          </label>
-          <p className="pr-faint pr-small">Leave this off to keep the application with you; they can still reply with documents.</p>
+          <p className="cf-muted">{count} {count === 1 ? "item" : "items"} · the application goes back to {applicant} to fix and resend. They can’t reply.</p>
         </div>
         <div className="cf-modal-foot">
           <button type="button" className="cf-btn" onClick={() => setConfirm(false)}>Not yet</button>
-          <button type="button" className="cf-btn is-primary" onClick={() => void send()}>{alsoReturn ? "Send and return" : "Send"}</button>
+          <button type="button" className="cf-btn is-primary" onClick={() => void send()}>Send and return</button>
         </div>
       </Modal>
     </section>

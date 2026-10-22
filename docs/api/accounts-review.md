@@ -24,7 +24,7 @@ equivalent performance, professional authentication, or permission to build.
 | `DELETE /review/{case_id}/claim` | Current claimer only, before a decision; 204 and status submitted. |
 | `POST /review/{case_id}/decision` | Current claimer, in review. `accept` or `return`; return needs a message of at least 10 characters. Returns the case. |
 | `GET /cases/{case_id}/messages` | `{messages}` with caller-relative `read_by_me`. |
-| `POST /cases/{case_id}/messages` | Signed-in owner or authorized reviewer; plain text, 1–4000 characters, nonblank; 201 message. |
+| `POST /cases/{case_id}/messages` | Authorized reviewer only (one-way: officer to applicant; the owner gets 403 and answers by updating and resending the application); plain text, 1–4000 characters, nonblank; 201 message. |
 | `POST /cases/{case_id}/messages/read` | Mark existing messages read for this caller; 204. |
 | `GET /me/notifications` | Signed in. Up to 50 newest events by the *other* party on the caller's applications (applicant: started reviewing / returned / accepted as administratively complete / messages; reviewer: submitted / resubmitted / messages on its authority's applications, excluding its own), each with `read`, plus an `unread` count. |
 | `POST /me/notifications/read` | Marks everything up to now as read for the caller; 204. Does not revoke sessions. |
@@ -203,7 +203,7 @@ every pull request instead of skipping.
 
 The end-to-end run passed against PostgreSQL 17: signup/onboarding → owned
 application → blocked submission → submit → queue → claim → second-reviewer 409 →
-return with message → unread/read/reply → resubmit → accept → edit rejected.
+return with message → unread/read → applicant reply rejected (403, one-way) → resubmit → accept → edit rejected.
 `/assist` returns 503 without provider keys. OAuth was exercised with signed test
 tokens only; real Google/Microsoft sign-in and live providers are unverified.
 

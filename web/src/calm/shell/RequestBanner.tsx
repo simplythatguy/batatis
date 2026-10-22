@@ -1,8 +1,8 @@
 /**
  * While the officer still has the application (in review), an information request they sent shows
  * here: who asked, when, and the numbered items. Drafts never reach the applicant (the server
- * returns sent requests only). The applicant answers in Messages; the officer returns the
- * application when they need edits to it.
+ * returns sent requests only). Messages are one way; the applicant answers by updating the
+ * application once it comes back to them.
  */
 import { useEffect, useState } from "react";
 import type { ApplicationSummary } from "../../api/accounts";
@@ -43,7 +43,7 @@ export function RequestBanner({ app }: { app: ApplicationSummary }) {
         <ol className="cf-request-items">
           {latest.items.map((t, i) => <li key={i}>{t}</li>)}
         </ol>
-        <p className="cf-faint cf-small">Reply with the information in Messages. If the officer needs changes to the application itself, they’ll send it back to you to edit.</p>
+        <p className="cf-faint cf-small">Nothing to do yet · it comes back to you to update</p>
       </div>
     </section>
   );

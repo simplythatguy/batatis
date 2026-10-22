@@ -1,4 +1,4 @@
-/** The application's message thread (GET/POST /cases/{id}/messages). Bodies render as text, never HTML. */
+/** The application's message thread (GET/POST /cases/{id}/messages). One way: only the officer writes. Bodies render as text, never HTML. */
 import { useEffect, useId, useState, type Dispatch, type SetStateAction } from "react";
 import { accounts, AccountsError, type Message } from "../../api/accounts";
 import { Avatar } from "../auth/bits";
@@ -10,9 +10,11 @@ function when(iso: string, now: number): string {
   return day.startsWith("Today") ? clock(iso) : `${day}, ${clock(iso)}`;
 }
 
-export function Messages({ caseId, me, messages, onChange, canWrite }: { caseId: string; me: string | null; messages: Message[] | null; onChange: Dispatch<SetStateAction<Message[] | null>>; canWrite: boolean }) {
+export function Messages({ caseId, me, messages, onChange, canWrite, hideTitle = false, draft: outerDraft, onDraft }: { caseId: string; me: string | null; messages: Message[] | null; onChange: Dispatch<SetStateAction<Message[] | null>>; canWrite: boolean; /** Inside a drawer that already says "Messages". */ hideTitle?: boolean; /** Held by the caller so closing a drawer keeps an unsent message. */ draft?: string; onDraft?: (d: string) => void }) {
   const id = useId();
-  const [draft, setDraft] = useState("");
+  const [ownDraft, setOwnDraft] = useState("");
+  const draft = outerDraft ?? ownDraft;
+  const setDraft = onDraft ?? setOwnDraft;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [now] = useState(() => Date.now());
@@ -40,11 +42,11 @@ export function Messages({ caseId, me, messages, onChange, canWrite }: { caseId:
   const thread = (messages ?? []).filter((m) => m.kind !== "status" || m.body.trim());
   return (
     <section className="ac-side-sec" aria-labelledby={`${id}-h`}>
-      <h3 id={`${id}-h`} className="ac-side-h">Messages</h3>
+      <h3 id={`${id}-h`} className={hideTitle ? "cf-sr" : "ac-side-h"}>Messages</h3>
       {messages == null ? (
         <p className="ac-faint ac-small">Loading messages…</p>
       ) : !thread.length ? (
-        <p className="ac-faint ac-small">No messages yet. Returning the application sends your note to the applicant.</p>
+        <p className="ac-faint ac-small">No messages yet</p>
       ) : (
         <ol className="ac-thread">
           {thread.map((m) => (
@@ -86,7 +88,7 @@ export function Messages({ caseId, me, messages, onChange, canWrite }: { caseId:
             maxLength={4000}
           />
           <div className="ac-composer-foot">
-            {error ? <span className="ac-error is-row" role="alert">{error}</span> : <span className="ac-faint ac-small">{MOD_KEY} ↵ to send</span>}
+            {error ? <span className="ac-error is-row" role="alert">{error}</span> : <span className="ac-faint ac-small">One way · they can’t reply · {MOD_KEY} ↵</span>}
             <button type="button" className="cf-btn is-xs" disabled={!draft.trim() || busy} onClick={() => void send()}>{busy ? "Sending…" : "Send"}</button>
           </div>
         </div>

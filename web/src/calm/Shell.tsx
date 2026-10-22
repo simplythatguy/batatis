@@ -16,6 +16,7 @@ import { getSession, resetSession, useSession } from "./session";
 import { AppHeader, type StageRingItem } from "./shell/AppHeader";
 import { AppLayout } from "./shell/AppLayout";
 import { ApplicationList, type ApplicationListHandle } from "./shell/ApplicationList";
+import { MoreMenu } from "./shell/MoreMenu";
 import { Rail, type RailDestination } from "./shell/Rail";
 import { RequestBanner } from "./shell/RequestBanner";
 import { ReturnedBanner } from "./shell/ReturnedBanner";
@@ -23,19 +24,6 @@ import { AccountButton, NotificationsBell } from "./routes.extra";
 import { useRoute } from "../router";
 import { resetRelevance } from "./useRelevance";
 import { CIcon, ConfirmDialog, Dot, MOD_KEY, type DotTone } from "./ui";
-
-function useOutsideClose(open: boolean, close: () => void, ...refs: React.RefObject<HTMLElement | null>[]) {
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: PointerEvent) => {
-      if (refs.some((r) => r.current?.contains(e.target as Node))) return;
-      close();
-    };
-    document.addEventListener("pointerdown", onDown);
-    return () => document.removeEventListener("pointerdown", onDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
-}
 
 /** The check's state, quietly beside the save status (Review holds the detail and the big retry). */
 function CheckStatus() {
@@ -76,51 +64,6 @@ export function SaveStatus() {
   );
 }
 
-export function MoreMenu({ items }: { items: { label: string; href?: string; onClick?: () => void; hint?: string; separator?: boolean }[] }) {
-  const [open, setOpen] = useState(false);
-  const btn = useRef<HTMLButtonElement>(null);
-  const pop = useRef<HTMLDivElement>(null);
-  useOutsideClose(open, () => setOpen(false), btn, pop);
-  const wasOpen = useRef(false);
-  useEffect(() => {
-    if (open) pop.current?.querySelector<HTMLElement>("[role=menuitem]")?.focus();
-    else if (wasOpen.current && (document.activeElement === document.body || !document.activeElement)) btn.current?.focus();
-    wasOpen.current = open;
-  }, [open]);
-  const close = () => setOpen(false);
-  function onMenuKey(e: React.KeyboardEvent) {
-    const list = [...(pop.current?.querySelectorAll<HTMLElement>("[role=menuitem]") ?? [])];
-    const at = list.indexOf(document.activeElement as HTMLElement);
-    const to = (n: number) => { e.preventDefault(); list[(n + list.length) % list.length]?.focus(); };
-    if (e.key === "ArrowDown") to(at + 1);
-    else if (e.key === "ArrowUp") to(at - 1);
-    else if (e.key === "Home") to(0);
-    else if (e.key === "End") to(list.length - 1);
-    else if (e.key === "Escape") { e.preventDefault(); e.nativeEvent.stopImmediatePropagation(); close(); btn.current?.focus(); }
-    else if (e.key === "Tab") close();
-  }
-  return (
-    <div className="cf-more">
-      <button ref={btn} type="button" className="cf-icon-btn is-plain" aria-label="More" aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen((v) => !v)}>
-        <Icon24 name="more" size={18} />
-      </button>
-      {open && (
-        <div ref={pop} className="cf-pop cf-menu" role="menu" aria-label="More" onKeyDown={onMenuKey}>
-          {items.map((it) => (
-            <div key={it.label} role="none">
-              {it.separator && <hr role="separator" />}
-              {it.href ? (
-                <a role="menuitem" tabIndex={-1} href={it.href} onClick={close}>{it.label}{it.hint && <span className="cf-kbd is-dark" aria-hidden="true">{it.hint}</span>}</a>
-              ) : (
-                <button role="menuitem" tabIndex={-1} type="button" onClick={() => { close(); it.onClick?.(); }}>{it.label}{it.hint && <span className="cf-kbd is-dark" aria-hidden="true">{it.hint}</span>}</button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 /** Ring percentages for the four stages, from the same case, gaps and deck as the screens. */
 function useStageProgress() {

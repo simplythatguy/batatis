@@ -64,33 +64,26 @@ test("the banner leaves hidden earlier unread correspondence unread", async () =
   h.unmount();
 });
 
-test("same-file summary updates reload refusal correspondence while preserving a typed reply", async () => {
+test("same-file summary updates reload refusal correspondence; there is no reply box (one-way messages)", async () => {
   const h = await bannerHarness([refusal]);
   let tree = await h.render({ app: app() });
-  click(tree, "Reply");
-  tree = await h.render();
-  nodes(tree, (n) => n.type === "textarea")[0].props.onChange({ target: { value: "My unsent question" } });
-  h.setMessages([refusal, applicantReply, officerReply]);
+  assert.equal(nodes(tree, (n) => n.type === "button" && text(n) === "Reply").length, 0, "the applicant cannot reply");
+  assert.equal(nodes(tree, (n) => n.type === "textarea").length, 0);
+  h.setMessages([refusal, officerReply]);
   tree = await h.render({ app: app({ updated_at: officerReply.created_at }) });
   assert.equal(h.loads, 2);
   assert.ok(text(tree).includes(officerReply.body));
-  assert.equal(nodes(tree, (n) => n.type === "textarea")[0].props.value, "My unsent question");
   h.unmount();
 });
 
-test("returned-for-information keeps its missing-item links and reply submission", async () => {
+test("returned-for-information keeps its missing-item links and offers no reply", async () => {
   const returned = message("1", "Please provide the owner name.", { kind: "decision", items: [{ note: "Owner name", field: "owner_name" }] });
   const h = await bannerHarness([returned]);
-  let tree = await h.render({ app: app({ status: "returned" }) });
+  const tree = await h.render({ app: app({ status: "returned" }) });
   assert.match(text(tree), /returned this/);
-  assert.ok(nodes(tree, (n) => n.type === "a" && text(n).includes("Fix 1 item")).length);
-  click(tree, "Reply");
-  tree = await h.render();
-  nodes(tree, (n) => n.type === "textarea")[0].props.onChange({ target: { value: "I will add the owner name." } });
-  tree = await h.render();
-  nodes(tree, (n) => n.type === "form")[0].props.onSubmit({ preventDefault() {} });
-  tree = await h.render();
-  assert.match(text(tree), /Reply sent to the officer/);
+  assert.ok(nodes(tree, (n) => n.type === "a" && text(n).includes("Fix 1 item")).length, "fixing the application is the answer");
+  assert.equal(nodes(tree, (n) => n.type === "button" && text(n) === "Reply").length, 0);
+  assert.equal(nodes(tree, (n) => n.type === "form").length, 0);
   h.unmount();
 });
 

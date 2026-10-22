@@ -28,18 +28,14 @@ export function itemLink(c: Case, gaps: Gap[], item: MessageItem): { label: stri
 }
 
 /**
- * The officer's return or final refusal. A refusal keeps the message thread available without
- * offering application edits or resubmission.
+ * The officer's return or final refusal. Messages are one way (officer to applicant): the applicant
+ * answers a return by fixing the items and sending the application again, never by replying.
  */
 export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
   const { c, gaps } = useCase();
   const refused = app.status === "refused";
   const [messages, setMessages] = useState<Message[] | null>(null);
   const [error, setError] = useState("");
-  const [replying, setReplying] = useState(false);
-  const [reply, setReply] = useState("");
-  const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState("");
 
   useEffect(() => {
     let live = true;
@@ -78,27 +74,8 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
   }, [app.id, messages, latest, correspondence]);
 
   const rows = refused ? [] : (latest?.items ?? []).map((it) => itemLink(c, gaps, it));
-  const mine = (messages ?? []).filter((m) => latest && m.author.role !== "reviewer" && m.kind === "message" && m.created_at > latest.created_at);
   const who = latest?.author.name || app.reviewer?.name || "The officer";
   const where = authorityName(app.authority);
-
-  async function send() {
-    const body = reply.trim();
-    if (!body || sending) return;
-    setSending(true);
-    setSent("");
-    try {
-      const m = await accounts.postMessage(app.id, body);
-      setMessages((list) => [...(list ?? []), m]);
-      setReply("");
-      setReplying(false);
-      setSent("Reply sent to the officer.");
-    } catch (e) {
-      setSent(e instanceof EngineError ? e.detail : "The reply was not sent. Your text is still here.");
-    } finally {
-      setSending(false);
-    }
-  }
 
   return (
     <section className="cf-returned" aria-labelledby="cf-returned-who">
@@ -111,7 +88,7 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
         {error && <p className="cf-faint" role="status">{error}</p>}
         {latest && <p className="cf-returned-msg">{latest.body}</p>}
         {messages && !latest && <p className="cf-returned-msg cf-muted">{refused ? "A refusal was recorded. Contact the officer for the written notice and appeal information." : "Returned for administrative information. Open the review to see what is missing."}</p>}
-        {refused && <p className="cf-faint cf-small">This application is closed and read-only. You can still reply to the officer.</p>}
+        {refused && <p className="cf-faint cf-small">Closed · read-only</p>}
         {rows.length > 0 && (
           <ul className="cf-returned-items">
             {rows.map((r) => (
@@ -134,11 +111,9 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
             ))}
           </ol>
         )}
-        {!refused && mine.length > 0 && <p className="cf-faint cf-small">You replied {mine.length === 1 ? "once" : `${mine.length} times`}. The officer sees it with the application.</p>}
         <div className="cf-returned-acts">
           {rows.length > 0 && <a className="cf-btn is-primary is-sm" href={rows[0].href}>Fix {rows.length} {rows.length === 1 ? "item" : "items"}</a>}
           {!refused && !rows.length && <a className="cf-btn is-primary is-sm" href="#/review">See what’s missing</a>}
-          <button type="button" className="cf-btn is-sm" aria-expanded={replying} onClick={() => setReplying((v) => !v)}><Icon24 name="msg" size={15} />Reply</button>
           {latest && (
             <button
               type="button"
@@ -149,18 +124,6 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
             </button>
           )}
         </div>
-        {replying && (
-          <form className="cf-composer-box cf-returned-reply" onSubmit={(e) => { e.preventDefault(); void send(); }}>
-            <label className="cf-sr" htmlFor="cf-reply">Reply to {who}</label>
-            <textarea id="cf-reply" rows={3} maxLength={4000} value={reply} autoFocus onChange={(e) => setReply(e.target.value)} placeholder={`Reply to ${who}…`}
-              onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void send(); } if (e.key === "Escape") setReplying(false); }} />
-            <div className="cf-composer-box-foot">
-              <span className="cf-faint cf-small">Plain text. The officer sees it with your application.</span>
-              <button type="submit" className="cf-btn is-sm" disabled={!reply.trim() || sending}>{sending ? "Sending…" : "Send"}</button>
-            </div>
-          </form>
-        )}
-        {sent && <p className="cf-faint cf-small" role="status">{sent}</p>}
       </div>
     </section>
   );

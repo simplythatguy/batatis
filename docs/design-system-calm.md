@@ -44,20 +44,20 @@ Keyboard: `A` `B` `C` (or `1` `2` `3`) pick a choice, `↵` continues (`⌘↵` 
 
 ## Tokens
 
+**Light mode since 2026-10-22 (user decision):** "visuals > text", light instead of black, more colour so sections are told apart. Say things with icons, colour, counts and short labels; avoid explanatory sentences.
+
 | Token | Value | Use |
 | --- | --- | --- |
-| `--cf-bg` | `#08090b` | Page |
-| `--cf-text` / `-2` / `-3` | `#f4f4f5` / `#a3a6ad` / `#7b7f87` | Primary, secondary, faint text |
-| `--cf-line` / `-2` / `-ctl` | white 7% / 13% / 36% | Every divider, card, chip and button / pressed and state lines / form-control boundary (underline inputs, 3:1) |
-| `--cf-glass` | `rgba(20,22,26,.62)` + blur 24px | Cards, panels, drawer, menus |
-| `--cf-inset` | white 2.5% | Tiles, answer buttons |
-| `--cf-accent` | `#ff6a3d` | Brand mark, question number and arrow, current tick. Never a button fill. No eyebrow squares. |
-| `--cf-blocking` / `-warning` / `-done` / `-pending` | `#f87171` / `#fbbf24` / `#4ade80` / `#8b8b94` | Status dots only |
-| `--cf-primary-bg` / `-text` | `#ededed` / `#0b0b0c` | The one primary button |
-| `--cf-focus` | `#9a9aa2` | Focus rings (neutral) |
-| `--cf-font` | Inter Variable (optical sizing) | Text |
-| `--cf-mono` | Geist Mono Variable | Eyebrows, citations, counters, kbd hints |
-| Radii | card 28, tile 18, control 14, pill 999 | |
+| `--cf-bg` / `--cf-surface` | `#f5f6f8` / `#fff` | Page / cards, tiles, menus, drawers (with `--cf-shadow`) |
+| `--cf-text` / `-2` / `-3` / `-4` | `#14161b` / `#4a505c` / `#6b7280` / `#a3a8b3` | Primary, secondary, faint, quietest text |
+| `--cf-line` / `-2` / `-ctl` | ink 8% / 14% / 42% | Every divider, card, chip and button / pressed and state lines / form-control boundary |
+| `--cf-accent` | `#f25a2a` | Brand mark, current step, "New". Never a button fill. |
+| `--cf-blocking` / `-warning` / `-done` / `-pending` | `#e5484d` / `#f0a20b` / `#18a058` / `#9aa0ab` | Status dots and pills |
+| `--cf-hue-*` and `-t` | blue, teal, violet, amber, rose, green, slate (solid + tint) | One hue per section or step. Use the `.is-blue` … `.is-slate` classes, which set `--hue` and `--hue-t`. |
+| `--cf-primary-bg` / `-text` | `#16181d` / `#fff` | The one primary button (neutral near-black; never indigo or purple) |
+| `--cf-focus` | `#6b7280` | Focus rings (neutral) |
+
+Section colours are shared by both sides: **A blue, B teal, C violet, D amber** (the applicant's question footer and Review badges, the officer's "What's missing" groups). Officer review steps: Summary blue, Missing rose, Documents violet, Code checks teal, File needs amber, Peer review slate, Decide / Close-out green.
 
 Type scale: display 54/1.04 (−3.5%), review headline 40, card question 32 (26 on phones), drawer title 22, lede 18, body 14–15, eyebrow 12 mono.
 

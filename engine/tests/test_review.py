@@ -169,8 +169,11 @@ def test_complete_submit_claim_return_messages_resubmit_and_accept(scene):
     assert not messages[-1]['read_by_me']
     assert owner.post(f'/cases/{case.id}/messages/read', json={}).status_code == 204
     assert owner.get(f'/cases/{case.id}/messages').json()['messages'][-1]['read_by_me']
-    reply = owner.post(f'/cases/{case.id}/messages', json={'body': '<script>plain text</script> Revision clarified.'})
-    assert reply.status_code == 201 and reply.json()['body'].startswith('<script>')
+    # Messages are one way: the applicant answers by updating and resending, not by replying.
+    reply = owner.post(f'/cases/{case.id}/messages', json={'body': 'Revision clarified.'})
+    assert reply.status_code == 403
+    note = first.post(f'/cases/{case.id}/messages', json={'body': '<script>plain text</script> Please resend.'})
+    assert note.status_code == 201 and note.json()['body'].startswith('<script>')
     assert first.get('/review/queue?mine=true').json()['applications']
     assert owner.post(f'/cases/{case.id}/submit', json={}).json()['status'] == 'submitted'
     assert first.post(f'/review/{case.id}/claim', json={}).status_code == 200
@@ -393,8 +396,8 @@ def test_refuse_records_a_distinct_terminal_decision(scene):
     assert clients['owner'].post('/me/notifications/read', json={}).status_code == 204
     assert all(n['read'] for n in clients['owner'].get('/me/notifications').json()['notifications']
                if n['case_id'] == case.id)
-    # A final refusal keeps conversations available, but cannot reopen applicant content or the review.
-    assert clients['owner'].post(f'/cases/{case.id}/messages', json={'body': 'Acknowledged the recorded reason.'}).status_code == 201
+    # A final refusal cannot reopen applicant content or the review; the applicant still can't reply.
+    assert clients['owner'].post(f'/cases/{case.id}/messages', json={'body': 'Acknowledged the recorded reason.'}).status_code == 403
     terminal = store.get(case.id).model_dump()
     assert clients['owner'].post(f'/cases/{case.id}/submit', json={}).status_code == 409
     for name in ['reviewer', 'second']:

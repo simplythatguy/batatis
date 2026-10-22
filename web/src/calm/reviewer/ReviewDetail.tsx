@@ -1,7 +1,9 @@
 /**
- * #/review/<caseId>: the package review (one step at a time), the information request, the
- * application as a paper sheet and the close-out in the main pane; the claim, the decision
- * (accept, refuse, request more information), the close-out due date and messages beside it.
+ * #/review/<caseId>: one path, one thing on screen at a time. An unclaimed application shows a
+ * single "Start reviewing" card. Once it's yours, the package review's checks are steps and the
+ * last step is the decision (accept, ask for more information, refuse), then the close-out.
+ * The application (paper sheet and the applicant's checklist) and the messages open in drawers
+ * from the header; running the review again and releasing the claim live in the ⋯ menu.
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { accounts, AccountsError, claimConflict, review, type Claim, type DecisionItemInput, type Message } from "../../api/accounts";
@@ -11,11 +13,12 @@ import type { Case as EngineCase, PackageReviewIndex, ReviewSession } from "../.
 import { CODE_EDITION } from "../../config";
 import { useAccount } from "../account";
 import { AcIcon, Avatar, PageHead } from "../auth/bits";
-import { CIcon, ConfirmDialog } from "../ui";
+import { CIcon, ConfirmDialog, Modal } from "../ui";
+import { MoreMenu } from "../shell/MoreMenu";
 import { Messages } from "./Messages";
 import { CloseOutDue, CloseOutPanel } from "./CloseOutPanel";
 import { InfoRequest } from "./InfoRequest";
-import { PackageReview } from "./PackageReview";
+import { PackageReview, StepTitle, type FinalStep } from "./PackageReview";
 import { blockingGaps, refusalDecision } from "./packageView";
 import { applicantLine, decisionGate, sentLabel, sentPhrase, sinceLabel, withPackage, type PackageState } from "./queue";
 import { RefuseDialog } from "./RefuseDialog";
@@ -72,9 +75,10 @@ function Sheet({ c }: { c: EngineCase }) {
 
 function Completeness({ gaps, error }: { gaps: EngineGap[] | null; error: string }) {
   const shown = (gaps ?? []).filter((g) => g.severity !== "info");
+  const required = gaps ? gaps.filter((g) => g.severity === "blocking").length : 0;
   return (
     <details className="ac-side-sec pr-checklist">
-      <summary id="ac-comp-h">Applicant’s checklist{gaps ? ` · ${gaps.filter((g) => g.severity === "blocking").length} required missing` : ""}</summary>
+      <summary>Applicant’s own checklist{gaps ? ` · ${required ? `${required} required missing` : "nothing required missing"}` : ""}</summary>
       {error ? (
         <p className="ac-faint ac-small">{error}</p>
       ) : gaps == null ? (
@@ -92,22 +96,33 @@ function Completeness({ gaps, error }: { gaps: EngineGap[] | null; error: string
           ))}
         </ul>
       )}
+      <p className="ac-faint ac-small">What Batatis checked before the applicant sent it. Your review is the package review.</p>
     </details>
   );
 }
 
-type View = "review" | "request" | "application" | "closeout";
-
-function UploadButton({ disabled, onFiles, label = "Upload PDFs" }: { disabled?: boolean; onFiles: (files: File[]) => void; label?: string }) {
-  const input = useRef<HTMLInputElement>(null);
+/** A right-side drawer (bottom sheet on phones) with a title and a close button. */
+function Drawer({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: string; children: ReactNode }) {
+  const id = `rv-drawer-${title.toLowerCase().replace(/\W+/g, "-")}`;
+  // Mount on first open, then stay mounted: closing slides out with its content, and a half-written
+  // message survives. Messages are only marked read once the drawer has been opened.
+  const [seen, setSeen] = useState(open);
+  if (open && !seen) setSeen(true);
   return (
-    <>
-      <input ref={input} className="pr-file-input" type="file" accept="application/pdf,.pdf" multiple tabIndex={-1} aria-hidden="true"
-        onChange={(e) => { const f = [...(e.target.files ?? [])]; e.target.value = ""; if (f.length) onFiles(f); }} />
-      <button type="button" className="cf-btn is-xs" disabled={disabled} onClick={() => input.current?.click()}><CIcon name="upload" size={13} />{label}</button>
-    </>
+    <Modal open={open} onClose={onClose} labelledBy={id} className="cf-drawer rv-drawer">
+      <div className="cf-drawer-scroll">
+        <div className="cf-drawer-head">
+          <h2 id={id} className="rv-drawer-title">{title}</h2>
+          <button type="button" className="cf-icon-btn is-plain" aria-label="Close" onClick={onClose}><CIcon name="close" /></button>
+        </div>
+        {seen && children}
+      </div>
+    </Modal>
   );
 }
+
+/** The path, or the information request opened from the decision. */
+type View = "flow" | "request";
 
 export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTools?: ReactNode }) {
   const { user } = useAccount();
@@ -132,7 +147,11 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   const [shown, setShown] = useState<ReviewSession | null>(null);
   const [running, setRunning] = useState(false);
   const [runError, setRunError] = useState("");
-  const [view, setView] = useState<View>("review");
+  const [view, setView] = useState<View>("flow");
+  const [drawer, setDrawer] = useState<"" | "application" | "messages">("");
+  const [msgDraft, setMsgDraft] = useState("");
+  const work = useRef<HTMLDivElement>(null);
+  const upload = useRef<HTMLInputElement>(null);
 
   const row = q.rows.find((r) => r.id === caseId) ?? null;
 
@@ -173,7 +192,9 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
     setShown(null);
     setIndexState("loading");
     void reload();
-    void loadIndex().then((ix) => { if (ix?.close_out) setView("closeout"); });
+    setView("flow");
+    setDrawer("");
+    void loadIndex();
     if (!q.rows.length) void loadQueue();
     engine.gaps(caseId).then(
       (g) => { setGaps(g); setBlocking(caseId, g.filter((x) => x.severity === "blocking").length); },
@@ -183,11 +204,29 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseId]);
 
+  // Opening the messages reads them: the badge clears here and in the queue.
+  useEffect(() => {
+    if (drawer !== "messages") return;
+    setMessages((ms) => (ms?.some((m) => !m.read_by_me) ? ms.map((m) => ({ ...m, read_by_me: true })) : ms));
+    patchRow(caseId, { unread_messages: 0 });
+  }, [drawer, messages, caseId]);
+
   // Unknown (loading or failed) is not "no gaps": acceptance waits for a real completeness result.
   const blocking = gaps === null ? null : gaps.filter((g) => g.severity === "blocking").length;
   const status = c?.status ?? row?.status ?? "submitted";
   const claim = c?.claim ?? row?.claim ?? null;
   const latest = index?.latest ?? null;
+
+  // The screen changes under the keyboard (Start reviewing, Take over, the request and back):
+  // move focus to the top of the work area so nobody is left on the page body.
+  const screenKey = `${view}:${status}:${claim?.reviewer_id ?? ""}`;
+  const lastScreen = useRef(screenKey);
+  useEffect(() => {
+    if (lastScreen.current === screenKey) return;
+    lastScreen.current = screenKey;
+    if (!work.current?.contains(document.activeElement) || document.activeElement === document.body) work.current?.focus({ preventScroll: true });
+  }, [screenKey]);
+
   const pkg: PackageState = indexState === "loading" ? { state: "loading" }
     : indexState === "unavailable" ? { state: "unavailable" }
     : indexState === "failed" ? { state: "failed" }
@@ -209,7 +248,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
     try {
       const s = await packageReview.run(target, files);
       setShown(s);
-      setView("review");
+      setView("flow");
       await loadIndex(true);
       // Reading messages can advance the saved version after the initial case load.
       await reload();
@@ -273,8 +312,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
     await reload();
     accounts.messages(caseId).then(setMessages, () => undefined);
     void loadQueue();
-    const ix = await loadIndex(true);
-    if (ix?.close_out) setView("closeout");
+    await loadIndex(true);
   }
 
   async function accept() {
@@ -296,7 +334,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   async function sendReturn(message: string, items: DecisionItemInput[]) {
     await review.decide(caseId, { outcome: "return", message, items });
     setReturning(false);
-    setView("review");
+    setView("flow");
     patchRow(caseId, { status: "returned" });
     setNote(`Returned to ${applicant} with your message.`);
     await decided();
@@ -305,7 +343,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   async function sendRefusal(reasons: string) {
     await review.decide(caseId, refusalDecision(reasons));
     setRefusing(false);
-    setView("review");
+    setView("flow");
     patchRow(caseId, { status: "refused" });
     setCase((saved) => saved ? { ...saved, status: "refused" } : saved);
     setNote(`Refusal sent to ${applicant} with the appeal notice. This application is closed.`);
@@ -328,88 +366,210 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   const meta = [row ? applicantLine(row) : null, c?.submitted_at ? `sent ${sentPhrase(c.submitted_at)}` : null].filter(Boolean).join(" · ");
   const otherClaim = conflict ?? (claim && !mine && status === "in_review" ? claim : null);
   const decidedRow = c?.decision ? `${c.decision.by_name} · ${sentLabel(c.decision.at)}` : "";
+  const unclaimed = status === "submitted" && !claim && !otherClaim;
+  const unread = (messages ?? []).filter((m) => m.kind !== "status" && !m.read_by_me && m.author.id !== me).length;
+  const requestSent = Boolean(latest?.information_request.sent_at);
+  const suggestAsk = gate.canReturn && !gate.canAccept;
 
-  const views: { id: View; label: string }[] = [
-    { id: "review", label: "Package review" },
-    { id: "request", label: "Information request" },
-    { id: "application", label: "Application" },
-    ...(closeOut ? [{ id: "closeout" as View, label: "Close-out" }] : []),
+  const menu = [
+    ...(canRun ? [
+      { label: running ? "Reviewing…" : "Run the review again", onClick: () => void run(), disabled: running },
+      { label: "Review uploaded PDFs", onClick: () => upload.current?.click(), disabled: running },
+    ] : []),
+    ...(mine && status === "in_review" ? [{ label: busy === "release" ? "Releasing…" : "Stop reviewing", onClick: () => void release(), separator: canRun, disabled: Boolean(busy) }] : []),
   ];
 
-  const runActions = canRun ? (
-    <>
-      <button type="button" className="cf-btn is-xs" disabled={running} onClick={() => void run()}><CIcon name="retry" size={13} />{running ? "Reviewing…" : "Run again"}</button>
-      <UploadButton disabled={running} onFiles={(f) => void run(f)} />
-    </>
-  ) : undefined;
+  /** Not yours to decide: the information request stays readable as a record. */
+  const record = shown && view !== "request" ? <button type="button" className="cf-btn is-xs is-ghost rv-record" onClick={() => setView("request")}>Information request</button> : null;
+
+  /** Who has the file: one quiet line above the path. */
+  function claimLine() {
+    if (unclaimed) return null;
+    if (mine && status === "in_review") {
+      return (
+        <div className="rv-who">
+          <Avatar name={user?.name ?? user?.email} size="sm" />
+          <span>You’re reviewing this <span className="ac-faint">· {sinceLabel(claim!.claimed_at)}</span></span>
+        </div>
+      );
+    }
+    if (otherClaim) {
+      return (
+        <div className="rv-who">
+          <Avatar name={otherClaim.reviewer_name} size="sm" />
+          <span>{otherClaim.reviewer_name} is reviewing this <span className="ac-faint">· {sinceLabel(otherClaim.claimed_at)}</span></span>
+          <button type="button" className="cf-btn is-xs" disabled={Boolean(busy)} onClick={() => setConfirm("takeover")}>Take over</button>
+          {record}
+        </div>
+      );
+    }
+    return (
+      <div className="rv-who">
+        <StatusPill a={{ status, claim }} />
+        {decidedRow && <span className="ac-faint">{decidedRow}</span>}
+        {record}
+      </div>
+    );
+  }
+
+  /** The first screen of an application nobody has picked up: what you'll do, and one button. */
+  function startCard() {
+    return (
+      <section className="rv-start" aria-labelledby="rv-start-h">
+        <span className="rv-chip is-accent"><span className="cf-dot" aria-hidden="true" />New</span>
+        <h2 id="rv-start-h" className="rv-start-title">{title}</h2>
+        {meta && <p className="rv-start-meta">{meta}</p>}
+        <ol className="rv-path" aria-label="How a review goes">
+          <li className="is-blue"><span className="pr-ico" aria-hidden="true"><AcIcon name="hand" size={20} /></span><b>Pick up</b></li>
+          <li className="rv-path-arrow" aria-hidden="true"><AcIcon name="right" size={16} /></li>
+          <li className="is-violet"><span className="pr-ico" aria-hidden="true"><AcIcon name="list" size={20} /></span><b>Check</b></li>
+          <li className="rv-path-arrow" aria-hidden="true"><AcIcon name="right" size={16} /></li>
+          <li className="is-green"><span className="pr-ico" aria-hidden="true"><AcIcon name="scale" size={20} /></span><b>Decide</b></li>
+        </ol>
+        <div className="rv-start-acts">
+          <button type="button" className="cf-btn is-primary" disabled={Boolean(busy)} onClick={() => void doClaim()}>
+            {busy === "claim" ? "Starting…" : "Start reviewing"}
+          </button>
+          <button type="button" className="cf-btn is-ghost" onClick={() => setDrawer("application")}><AcIcon name="doc" size={16} />Read it first</button>
+        </div>
+        <p className="rv-scope"><AcIcon name="clipboard" size={14} />Completeness only · not a design approval</p>
+      </section>
+    );
+  }
+
+  /** The decision: three choices, each saying what it does. Accept waits for a clean review. */
+  function decide() {
+    return (
+      <section className="rv-decide" aria-labelledby="rv-decide-h">
+        <div id="rv-decide-h"><StepTitle step="final">Your decision</StepTitle></div>
+        <p className="rv-scope"><AcIcon name="clipboard" size={14} />Completeness only · not a design approval</p>
+        <div className="rv-choices">
+          <button type="button" className="rv-choice is-green" disabled={!gate.canAccept || Boolean(busy)} onClick={() => setConfirm("accept")} data-requires-no-blocking-gaps={gate.canAccept ? undefined : "true"}>
+            <span className="pr-ico" aria-hidden="true"><AcIcon name="check" size={22} /></span>
+            <span className="rv-choice-t">{busy === "accept" ? "Accepting…" : "Accept"}</span>
+            <span className="rv-choice-d">{gate.canAccept ? "Complete" : gate.reason}</span>
+          </button>
+          <button type="button" className="rv-choice is-amber" disabled={Boolean(busy)} onClick={requestMore}>
+            <span className="pr-ico" aria-hidden="true"><AcIcon name="send" size={20} /></span>
+            <span className="rv-choice-t">Ask for more</span>
+            <span className="rv-choice-d">{suggestAsk ? <span className="rv-tag">Suggested</span> : "Send a list"}</span>
+          </button>
+          <button type="button" className="rv-choice is-rose" disabled={Boolean(busy)} onClick={() => setRefusing(true)}>
+            <span className="pr-ico" aria-hidden="true"><AcIcon name="ban" size={20} /></span>
+            <span className="rv-choice-t">Refuse</span>
+            <span className="rv-choice-d">With appeal notice</span>
+          </button>
+        </div>
+        {!gate.canAccept && gate.reason && <p className="cf-sr" role="note">{gate.reason}</p>}
+      </section>
+    );
+  }
+
+  /** The path's last step: the decision while it's yours, otherwise the close-out or the outcome. */
+  function finalStep(): FinalStep {
+    if (gate.canReturn) return { label: "Decide", content: decide() };
+    if (closeOut) {
+      return {
+        label: "Close-out",
+        content: (
+          <CloseOutPanel c={closeOut} bare>
+            <CloseOutDue c={closeOut} inline canMark={Boolean(me && (c?.decision?.by_id === me || claim?.reviewer_id === me))} onChange={(co) => setIndex((ix) => (ix ? { ...ix, close_out: co } : ix))} />
+          </CloseOutPanel>
+        ),
+      };
+    }
+    return {
+      label: "Outcome",
+      content: (
+        <section className="rv-decide" aria-labelledby="rv-outcome-h">
+          <h2 id="rv-outcome-h" className="pr-title">{status === "returned" ? "Back with the applicant" : status === "in_review" ? "Someone else is deciding" : "Where this stands"}</h2>
+          {gate.reason && <p className="pr-lede">{gate.reason}</p>}
+          <div className="rv-start-acts">
+            {otherClaim && <button type="button" className="cf-btn is-sm" disabled={Boolean(busy)} onClick={() => setConfirm("takeover")}>Take over</button>}
+            {requestSent && <button type="button" className="cf-btn is-sm is-ghost" onClick={() => setView("request")}>See the request that was sent</button>}
+          </div>
+        </section>
+      ),
+    };
+  }
 
   function main() {
-    if (view === "application") return c ? <Sheet c={c} /> : <p className="ac-empty">Loading the application…</p>;
-    if (view === "closeout" && closeOut) return <CloseOutPanel c={closeOut} />;
-    if (indexState === "loading") return <p className="ac-empty pr-empty">Loading the package review…</p>;
+    if (unclaimed) return startCard();
+    if (view === "request" && shown) {
+      return (
+        <>
+          <button type="button" className="rv-back" onClick={() => setView("flow")}><AcIcon name="back" size={15} />{gate.canReturn ? "Back to your decision" : "Back"}</button>
+          <InfoRequest
+            target={target}
+            session={shown}
+            latest={!latest || shown.version === latest.version}
+            canEdit={canRun}
+            terminalStatus={status === "accepted" || status === "refused" ? status : undefined}
+            applicant={applicant === "the applicant" ? "the applicant" : applicant}
+            onChange={(s) => { setShown(s); void loadIndex(true); accounts.messages(caseId).then(setMessages, () => undefined); }}
+            onReturned={requestSentAndReturned}
+          />
+        </>
+      );
+    }
+    if (indexState === "loading") return <p className="ac-empty">Loading the review…</p>;
     if (indexState === "failed") {
       return (
-        <div className="pr-empty">
-          <h2 className="pr-title">The package review didn’t load</h2>
-          <p className="pr-lede">Acceptance waits until it does.</p>
+        <div className="rv-empty">
+          <h2 className="pr-title">The review didn’t load</h2>
+          <p className="pr-lede">Accept waits for it.</p>
           <button type="button" className="cf-btn is-sm" onClick={() => { setIndexState("loading"); void loadIndex(); }}>Try again</button>
+          {gate.canReturn && <div className="rv-final">{decide()}</div>}
         </div>
       );
     }
-    if (indexState === "unavailable") {
+    if (indexState === "unavailable" || !shown) {
+      const f = finalStep();
       return (
-        <div className="pr-empty">
-          <h2 className="pr-title">Package review isn’t available here</h2>
-          <p className="pr-lede">This server doesn’t run the package review. Read the application and use the checklist beside it.</p>
-          <button type="button" className="cf-btn is-sm" onClick={() => setView("application")}>Read the application</button>
-        </div>
-      );
-    }
-    if (!shown) {
-      return (
-        <div className="pr-empty">
-          <h2 className="pr-title">{running ? "Reviewing the package…" : "No package review yet"}</h2>
-          <p className="pr-lede">
-            {canRun
-              ? "The review reads the saved application, or PDFs you upload (the SCC form, fillable or flattened, and its attachments), and lists what is present, blank or not found."
-              : status === "submitted" ? "Start reviewing to run the package review." : "No package review was run for this application."}
-          </p>
-          {runError && <p className="ac-error" role="alert">{runError}</p>}
-          {canRun && (
-            <div className="pr-head-acts">
-              <button type="button" className="cf-btn is-sm is-primary" disabled={running} onClick={() => void run()}>{running ? "Reviewing…" : "Review the saved application"}</button>
-              <UploadButton disabled={running} onFiles={(f) => void run(f)} label="Review uploaded PDFs" />
-            </div>
-          )}
-        </div>
-      );
-    }
-    if (view === "request") {
-      return (
-        <InfoRequest
-          target={target}
-          session={shown}
-          latest={!latest || shown.version === latest.version}
-          canEdit={canRun}
-          terminalStatus={status === "accepted" || status === "refused" ? status : undefined}
-          applicant={applicant === "the applicant" ? "the applicant" : applicant}
-          onChange={(s) => { setShown(s); void loadIndex(true); accounts.messages(caseId).then(setMessages, () => undefined); }}
-          onReturned={requestSentAndReturned}
-        />
+        <>
+          <div className="rv-empty">
+            {indexState === "unavailable" ? (
+              <>
+                <h2 className="pr-title">Read it, then decide</h2>
+                <p className="pr-lede">No automatic review on this server.</p>
+                <button type="button" className="cf-btn is-sm" onClick={() => setDrawer("application")}>Read the application</button>
+              </>
+            ) : canRun ? (
+              <>
+                <h2 className="pr-title">{running ? "Reading the file…" : "Run the review"}</h2>
+                <p className="pr-lede">Batatis reads the file and lists what’s there.</p>
+                {runError && <p className="ac-error" role="alert">{runError}</p>}
+                <div className="rv-start-acts">
+                  <button type="button" className="cf-btn is-sm is-primary" disabled={running} onClick={() => void run()}>{running ? "Reviewing…" : "Review the saved application"}</button>
+                  <button type="button" className="cf-btn is-sm is-ghost" disabled={running} onClick={() => upload.current?.click()}><CIcon name="upload" size={13} />Review uploaded PDFs</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="pr-title">No review was run</h2>
+                
+              </>
+            )}
+          </div>
+          {(indexState === "unavailable" || !canRun || gate.canReturn) && <div className="rv-final">{f.content}</div>}
+        </>
       );
     }
     return (
       <>
-        {runError && <p className="ac-error pr-empty" role="alert">{runError}</p>}
+        {runError && <p className="ac-error" role="alert">{runError}</p>}
         {pkg.state === "stale" && canRun && (
-          <p className="pr-note pr-empty" role="note"><span className="cf-dot is-warning" aria-hidden="true" />The application changed after version {pkg.version}. Run the review again to see what was resolved.</p>
+          <p className="pr-note rv-note" role="note">
+            <span className="cf-dot is-warning" aria-hidden="true" />Changed since review v{pkg.version}
+            <button type="button" className="cf-btn is-xs" disabled={running} onClick={() => void run()}>{running ? "Reviewing…" : "Run it again"}</button>
+          </p>
         )}
         <PackageReview
           session={shown}
           versions={index?.sessions ?? []}
           onPickVersion={(v) => void pickVersion(v)}
-          actions={runActions}
-          finish={{ label: "Information request", onClick: () => setView("request") }}
+          final={finalStep()}
+          initialStep={closeOut ? "final" : undefined}
         />
       </>
     );
@@ -419,77 +579,41 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
     <div className="ac-page">
       <PageHead
         title={<><a className="ac-crumb" href="#/review">Queue</a><span className="ac-crumb-sep" aria-hidden="true">/</span>{title}</>}
-        meta={meta ? `· ${meta}` : undefined}
         phoneTools={phoneTools}
+        right={!loadError && (
+          <>
+            <button type="button" className="cf-btn is-sm is-ghost rv-head-btn" onClick={() => setDrawer("application")} aria-label="Application">
+              <AcIcon name="doc" size={16} /><span className="rv-head-label">Application</span>
+            </button>
+            <button type="button" className="cf-btn is-sm is-ghost rv-head-btn" onClick={() => setDrawer("messages")} aria-label={unread ? `Messages, ${unread} unread` : "Messages"}>
+              <AcIcon name="chat" size={16} /><span className="rv-head-label">Messages</span>
+              {unread > 0 && <span className="rv-badge" aria-hidden="true">{unread}</span>}
+            </button>
+            {menu.length > 0 && <MoreMenu items={menu} />}
+          </>
+        )}
       />
       {loadError ? (
         <div className="ac-page-body is-narrow"><p className="ac-empty">{loadError} <a className="ac-link" href="#/review">Back to the queue</a></p></div>
       ) : (
-        <div className="ac-rv">
-          <div className="ac-rv-sheet pr-main">
-            <div className="pr-view" role="group" aria-label="Show">
-              {views.map((v) => (
-                <button key={v.id} type="button" className="ac-tab" aria-pressed={view === v.id} onClick={() => setView(v.id)}>{v.label}</button>
-              ))}
-            </div>
-            {main()}
-          </div>
-          <aside className="ac-rv-side" aria-label="Review">
-            {note && <p className="ac-done" role="status"><span className="cf-dot is-done" aria-hidden="true" />{note}</p>}
-            {actionError && <p className="ac-error" role="alert">{actionError}</p>}
-
-            {mine && status === "in_review" ? (
-              <div className="ac-claimed">
-                <Avatar name={user?.name ?? user?.email} />
-                <div className="ac-claimed-txt">You’re reviewing this<small>{sinceLabel(claim!.claimed_at)} · other officers see your name</small></div>
-                <button type="button" className="cf-btn is-xs is-ghost" disabled={Boolean(busy)} onClick={() => void release()}>{busy === "release" ? "Releasing…" : "Release"}</button>
-              </div>
-            ) : otherClaim ? (
-              <div className="ac-claimed">
-                <Avatar name={otherClaim.reviewer_name} />
-                <div className="ac-claimed-txt">{otherClaim.reviewer_name} is reviewing this<small>{sinceLabel(otherClaim.claimed_at)}</small></div>
-                <button type="button" className="cf-btn is-xs" disabled={Boolean(busy)} onClick={() => setConfirm("takeover")}>Take over</button>
-              </div>
-            ) : status === "submitted" ? (
-              <div className="ac-claimed">
-                <span className="ac-av is-md is-empty" aria-hidden="true" />
-                <div className="ac-claimed-txt">No one is reviewing this yet<small>Start reviewing so other officers know you’ve got it. The package review runs straight away.</small></div>
-                <button type="button" className="cf-btn is-xs" disabled={Boolean(busy)} onClick={() => void doClaim()}>
-                  <AcIcon name="hand" size={14} />{busy === "claim" ? "Starting…" : "Start reviewing"}
-                </button>
-              </div>
-            ) : (
-              <div className="ac-claimed">
-                <StatusPill a={{ status, claim }} />
-                <div className="ac-claimed-txt">{decidedRow}</div>
-              </div>
-            )}
-
-            {gate.canReturn ? (
-              <section className="ac-side-sec pr-decide" aria-labelledby="pr-decide-h">
-                <h3 id="pr-decide-h" className="ac-side-h">Decide</h3>
-                <button type="button" className="cf-btn is-sm" disabled={Boolean(busy)} onClick={requestMore}>Request more information</button>
-                <div className="pr-decide-row">
-                  <button type="button" className="cf-btn is-sm" disabled={Boolean(busy)} onClick={() => setRefusing(true)}>Refuse</button>
-                  <button type="button" className="cf-btn is-sm is-primary" disabled={!gate.canAccept || Boolean(busy)} onClick={() => setConfirm("accept")} data-requires-no-blocking-gaps={gate.canAccept ? undefined : "true"}>
-                    {busy === "accept" ? "Accepting…" : "Accept as complete"}
-                  </button>
-                </div>
-                {gate.reason && <p className="ac-faint ac-small" role="note">{gate.reason}</p>}
-              </section>
-            ) : (
-              gate.reason && !closeOut && <p className="ac-faint ac-small" role="note">{gate.reason}</p>
-            )}
-
-            {closeOut && <CloseOutDue c={closeOut} canMark={Boolean(me && (c?.decision?.by_id === me || claim?.reviewer_id === me))} onChange={(co) => setIndex((ix) => (ix ? { ...ix, close_out: co } : ix))} />}
-
-            <Completeness gaps={gaps} error={gapError} />
-            <Messages caseId={caseId} me={me} messages={messages} onChange={setMessages} canWrite={Boolean(user)} />
-            <p className="ac-faint ac-small ac-rv-fine">Accepting means administratively complete. It isn’t an approval of the design.</p>
-          </aside>
+        <div ref={work} className="ac-page-body rv" tabIndex={-1} aria-label="Review">
+          {claimLine()}
+          {note && <p className="ac-done rv-note" role="status"><span className="cf-dot is-done" aria-hidden="true" />{note}</p>}
+          {actionError && <p className="ac-error rv-note" role="alert">{actionError}</p>}
+          {main()}
         </div>
       )}
 
+      <input ref={upload} className="pr-file-input" type="file" accept="application/pdf,.pdf" multiple tabIndex={-1} aria-hidden="true"
+        onChange={(e) => { const f = [...(e.target.files ?? [])]; e.target.value = ""; if (f.length) void run(f); }} />
+      <Drawer open={drawer === "application"} onClose={() => setDrawer("")} title="Application">
+        {meta && <p className="ac-faint ac-small rv-drawer-meta">{meta}</p>}
+        <Completeness gaps={gaps} error={gapError} />
+        {c ? <Sheet c={c} /> : <p className="ac-empty">Loading the application…</p>}
+      </Drawer>
+      <Drawer open={drawer === "messages"} onClose={() => setDrawer("")} title="Messages">
+        <Messages caseId={caseId} me={me} messages={messages} onChange={setMessages} canWrite={Boolean(user)} hideTitle draft={msgDraft} onDraft={setMsgDraft} />
+      </Drawer>
       <ReturnDialog open={returning} caseId={caseId} applicant={Applicant} gaps={gaps ?? []} onClose={() => setReturning(false)} onSend={sendReturn} />
       <RefuseDialog open={refusing} applicant={Applicant} onClose={() => setRefusing(false)} onSend={sendRefusal} />
       <ConfirmDialog

@@ -5,7 +5,7 @@
  */
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { ReviewSession, SessionSummary } from "../../api/types.gen";
-import { AcIcon } from "../auth/bits";
+import { AcIcon, type AcIconName } from "../auth/bits";
 import { sentLabel } from "./queue";
 import { CodeRef } from "./CodeRef";
 import {
@@ -36,6 +36,36 @@ const STEP_LABEL: Record<StepId, string> = {
   peer: "Second opinion",
 };
 
+/** Each step's colour and icon, so the steps are told apart at a glance. */
+export const STEP_LOOK: Record<StepId | "final", { hue: string; icon: AcIconName }> = {
+  changes: { hue: "slate", icon: "diff" },
+  summary: { hue: "blue", icon: "eye" },
+  missing: { hue: "rose", icon: "alert" },
+  documents: { hue: "violet", icon: "files" },
+  code: { hue: "teal", icon: "book" },
+  file: { hue: "amber", icon: "clipboard" },
+  peer: { hue: "slate", icon: "users" },
+  final: { hue: "green", icon: "scale" },
+};
+
+/** A step's heading: its coloured icon, the title and an optional count. */
+export function StepTitle({ step, children, count, icon }: { step: StepId | "final"; children: ReactNode; count?: number; icon?: AcIconName }) {
+  const look = STEP_LOOK[step];
+  return (
+    <h2 className="pr-title pr-title-row">
+      <span className={`pr-ico is-${look.hue}`} aria-hidden="true"><AcIcon name={icon ?? look.icon} size={18} /></span>
+      <span>{children}</span>
+      {count ? <span className={`pr-count-pill is-${look.hue}`}>{count}</span> : null}
+    </h2>
+  );
+}
+
+/** The form's parts keep the colours the applicant sees in their questions (A blue, B teal, C violet, D amber). */
+export const SECTION_HUE: Record<string, string> = { A: "blue", B: "teal", C: "violet", D: "amber", process: "amber" };
+
+/** Shorter names for the step bar, where seven sit side by side. */
+const STEP_SHORT: Partial<Record<StepId, string>> = { changes: "Changes", missing: "Missing", file: "File needs", peer: "Peer review" };
+
 export function stepsFor(s: ReviewSession): StepId[] {
   return [...(s.diff ? (["changes"] as StepId[]) : []), "summary", "missing", "documents", "code", "file", "peer"];
 }
@@ -47,17 +77,12 @@ function FindingItem({ f }: { f: FindingView }) {
   return (
     <li className="pr-item">
       <Dot tone={f.tone} />
-      <div className="pr-item-body">
-        <p className="pr-item-title">{f.title}<span className="cf-sr"> ({TONE_WORD[f.tone]})</span></p>
+      <details className="pr-item-body pr-fold">
+        <summary className="pr-item-title">{f.title}<span className="cf-sr"> ({TONE_WORD[f.tone]})</span>{f.where && <span className="pr-where">{f.where}</span>}</summary>
         <p className="pr-item-msg">{f.message}</p>
-        {(f.where || f.quote) && (
-          <p className="pr-src">
-            {f.where && <span>{f.where}</span>}
-            {f.quote && <q>{f.quote}</q>}
-          </p>
-        )}
+        {f.quote && <p className="pr-src"><q>{f.quote}</q></p>}
         {f.citations.length > 0 && <div className="pr-cites">{f.citations.map((c) => <CodeRef key={c} citation={c} />)}</div>}
-      </div>
+      </details>
     </li>
   );
 }
@@ -66,11 +91,11 @@ function Check({ r }: { r: CheckRow }) {
   return (
     <li className="pr-item">
       <Dot tone={r.tone} />
-      <div className="pr-item-body">
-        <p className="pr-item-title">{r.label}</p>
-        <p className="pr-item-meta">{r.status} · <span className="pr-mono">Div C {r.provision}</span></p>
+      <details className="pr-item-body pr-fold">
+        <summary className="pr-item-title">{r.label}<span className="pr-where">{r.status}</span></summary>
+        <p className="pr-item-meta"><span className="pr-mono">Div C {r.provision}</span></p>
         {r.message && <p className="pr-item-msg">{r.message}</p>}
-      </div>
+      </details>
     </li>
   );
 }
@@ -85,15 +110,14 @@ function Changes({ s }: { s: ReviewSession }) {
   );
   return (
     <>
+      <StepTitle step="changes">{d.statement}</StepTitle>
       <p className="pr-lede">Since version {d.from}</p>
-      <h2 className="pr-title">{d.statement}</h2>
       <div className="pr-meter" role="img" aria-label={`${Math.round(d.ratio * 100)}% of the earlier gaps resolved`}>
         <span style={{ width: `${Math.round(d.ratio * 100)}%` }} />
       </div>
       {list("Resolved", d.resolved, "Nothing from the last version was resolved.")}
       {list("Still open", d.stillOpen, "Nothing from the last version is still open.")}
       {list("New", d.added, "No new gaps.")}
-      <p className="pr-fine">Counts the gaps asked of the applicant. Items for you to check and the peer-review signal are not counted.</p>
     </>
   );
 }
@@ -102,29 +126,27 @@ function Summary({ s }: { s: ReviewSession }) {
   const v = summaryView(s);
   return (
     <>
-      <h2 className="pr-title">{v.headline}</h2>
+      <StepTitle step="summary">{v.headline}</StepTitle>
       {v.proposal ? (
         <figure className="pr-quote">
+          <figcaption>Their proposal{v.proposalWhere ? ` · ${v.proposalWhere}` : ""}</figcaption>
           <blockquote>{v.proposal}</blockquote>
-          <figcaption>What they propose, in their words{v.proposalWhere ? ` · ${v.proposalWhere}` : ""}</figcaption>
         </figure>
       ) : (
-        <p className="pr-item-msg"><Dot tone="blocking" /> The proposed alternative was not found.</p>
+        <p className="pr-item-msg"><Dot tone="blocking" /> No proposal found</p>
       )}
-      <dl className="pr-facts">
-        <dt>Code cited</dt>
-        <dd>{v.provisions.length ? v.provisions.map((p) => <span key={p} className="pr-mono pr-pill">{p}</span>) : <span className="pr-faint">No provision cited</span>}</dd>
-        <dt>Supporting material</dt>
-        <dd>{v.documents.length ? <ul className="pr-plain">{v.documents.map((d, i) => <li key={i}>{d}</li>)}</ul> : <span className="pr-faint">No documents listed or uploaded</span>}</dd>
-        <dt>Source</dt>
-        <dd>{v.readFrom}</dd>
-      </dl>
       <div className="pr-metrics">
-        <div><b>{v.toAsk}</b><span>to ask the applicant</span></div>
-        <div><b>{v.toCheck}</b><span>for you to check</span></div>
-        <div><b>{v.present}</b><span>items read{v.blank ? ` · ${v.blank} blank` : ""}{v.notFound ? ` · ${v.notFound} not found` : ""}</span></div>
+        <div className="is-rose"><AcIcon name="send" size={16} /><b>{v.toAsk}</b><span>to ask</span></div>
+        <div className="is-amber"><AcIcon name="eye" size={16} /><b>{v.toCheck}</b><span>for you</span></div>
+        <div className="is-green"><AcIcon name="check" size={16} /><b>{v.present}</b><span>found{v.blank ? ` · ${v.blank} blank` : ""}{v.notFound ? ` · ${v.notFound} not found` : ""}</span></div>
       </div>
-      {v.peer && <p className="pr-note"><Dot tone="warning" /> A reason to ask for a second opinion (peer review) is in the last step. Only you see it.</p>}
+      <dl className="pr-facts">
+        <dt><AcIcon name="book" size={14} />Code</dt>
+        <dd>{v.provisions.length ? v.provisions.map((p) => <span key={p} className="pr-mono pr-pill">{p}</span>) : <span className="pr-faint">None cited</span>}</dd>
+        <dt><AcIcon name="files" size={14} />Documents</dt>
+        <dd>{v.documents.length ? <ul className="pr-plain">{v.documents.map((d, i) => <li key={i}>{d}</li>)}</ul> : <span className="pr-faint">None</span>}</dd>
+      </dl>
+      {v.peer && <p className="pr-note"><Dot tone="warning" /> Peer review may be worth it · see step 6</p>}
     </>
   );
 }
@@ -134,29 +156,30 @@ function Missing({ s }: { s: ReviewSession }) {
   if (!v.total) {
     return (
       <>
-        <h2 className="pr-title">Nothing missing from the form</h2>
-        <p className="pr-lede">Every form item the review reads is present.{v.elsewhere ? ` ${v.elsewhere} more ${v.elsewhere === 1 ? "item is" : "items are"} under What the file needs.` : ""}</p>
+        <StepTitle step="missing" icon="check">Nothing missing</StepTitle>
+        {v.elsewhere > 0 && <p className="pr-lede">{v.elsewhere} more under File needs</p>}
       </>
     );
   }
   return (
     <>
-      <h2 className="pr-title">What’s missing</h2>
-      <p className="pr-lede">Grouped by the form’s sections. Each item says where it was read.</p>
+      <StepTitle step="missing" count={v.total}>What’s missing</StepTitle>
       {v.groups.map((g) => (
         <section key={g.section} className="pr-group" aria-label={g.label}>
-          <h3 className="pr-group-h">{g.label} <span className="pr-n">{g.items.length}</span></h3>
+          <h3 className={`pr-group-h pr-sec is-${SECTION_HUE[g.section]}`}>
+            <span className="pr-sec-badge" aria-hidden="true">{g.section === "process" ? "D" : g.section}</span>
+            {g.label.replace(/^Section [A-D] · /, "")} <span className="pr-n">{g.items.length}</span>
+          </h3>
           <ul className="pr-list">{g.items.map((f) => <FindingItem key={f.key} f={f} />)}</ul>
         </section>
       ))}
       {v.officer.length > 0 && (
         <section className="pr-group" aria-label="For you to check first">
-          <h3 className="pr-group-h">For you to check first <span className="pr-n">{v.officer.length}</span></h3>
-          <p className="pr-faint pr-group-sub">The review couldn’t establish these (a stamp, a handwritten value, your own registration paperwork). They are not asked of the applicant unless you add them.</p>
+          <h3 className="pr-group-h"><AcIcon name="eye" size={14} />For you to check <span className="pr-n">{v.officer.length}</span></h3>
           <ul className="pr-list">{v.officer.map((f) => <FindingItem key={f.key} f={f} />)}</ul>
         </section>
       )}
-      {v.elsewhere > 0 && <p className="pr-fine">{v.elsewhere} more {v.elsewhere === 1 ? "item is" : "items are"} under What the file needs.</p>}
+      {v.elsewhere > 0 && <p className="pr-fine">+{v.elsewhere} under File needs</p>}
     </>
   );
 }
@@ -165,15 +188,13 @@ function Documents({ s }: { s: ReviewSession }) {
   if (!s.documents.length) {
     return (
       <>
-        <h2 className="pr-title">No supporting documents</h2>
-        <p className="pr-lede">Nothing is listed in Section D and no attachment was uploaded.</p>
+        <StepTitle step="documents">No documents</StepTitle>
       </>
     );
   }
   return (
     <>
-      <h2 className="pr-title">Documents</h2>
-      <p className="pr-lede">What each document says about itself. “Unknown” means nothing labelled was read; it’s never a guess.</p>
+      <StepTitle step="documents" count={s.documents.length}>Documents</StepTitle>
       <ul className="pr-docs">
         {s.documents.map((d) => {
           const v = documentView(d);
@@ -196,7 +217,7 @@ function Documents({ s }: { s: ReviewSession }) {
           );
         })}
       </ul>
-      <p className="pr-fine">Seals are read from the text only and never verified. The review lists documents; it doesn’t judge them.</p>
+      <p className="pr-fine">Seals are read from text, never verified.</p>
     </>
   );
 }
@@ -204,8 +225,8 @@ function Documents({ s }: { s: ReviewSession }) {
 function CodeChecks({ s }: { s: ReviewSession }) {
   return (
     <>
-      <h2 className="pr-title">Code checks</h2>
-      <p className="pr-lede">Each cited provision looked up in NBC(AE) 2023, 2nd printing, and each Section C row compared with the Division B attribution table.</p>
+      <StepTitle step="code">Code checks</StepTitle>
+      <p className="pr-lede">NBC(AE) 2023, 2nd printing</p>
       {s.lookup_skipped && <p className="pr-note"><Dot tone="pending" /> The code lookup wasn’t available, so citations were not checked.</p>}
       <section className="pr-group" aria-label="Citations">
         <h3 className="pr-group-h">Cited provisions <span className="pr-n">{s.citations.length}</span></h3>
@@ -260,15 +281,14 @@ function FileItems({ s }: { s: ReviewSession }) {
   const v = fileItemsView(s);
   return (
     <>
-      <h2 className="pr-title">What the file needs</h2>
-      <p className="pr-lede">The items the code says an alternative-solution file must contain (Division C, 2.3.1.1). The review only looks for each one; it doesn’t judge whether it is enough.</p>
+      <StepTitle step="file" count={fileGaps(s)}>What the file needs</StepTitle>
+      <p className="pr-lede">Division C, 2.3.1.1 · present or not, never “enough”</p>
       <section className="pr-group" aria-label="Division C file items">
         <h3 className="pr-group-h">In the documentation</h3>
         <ul className="pr-list">{v.items.map((r) => <Check key={r.key} r={r} />)}</ul>
       </section>
       <section className="pr-group" aria-label="Demonstrate, don't assert">
-        <h3 className="pr-group-h">When things go wrong · demonstrate, don’t assert</h3>
-        <p className="pr-faint pr-group-sub">Does the documentation say what it assumes when something fails?</p>
+        <h3 className="pr-group-h">When things fail</h3>
         <ul className="pr-list">{v.demonstrate.map((r) => <Check key={r.key} r={r} />)}</ul>
       </section>
     </>
@@ -279,11 +299,10 @@ function Peer({ s }: { s: ReviewSession }) {
   const v = peerView(s);
   return (
     <>
-      <p className="pr-only"><AcIcon name="hand" size={14} />For you only · the applicant never sees this</p>
+      <p className="pr-only"><AcIcon name="eye" size={14} />Only you see this</p>
       {v.signal ? (
         <>
-          <h2 className="pr-title">A second opinion may be worth asking for</h2>
-          <p className="pr-lede">Peer review may be warranted, because:</p>
+          <StepTitle step="peer" icon="alert">Peer review may help</StepTitle>
           <ul className="pr-list">
             {v.reasons.map((r) => (
               <li key={r} className="pr-item"><Dot tone="warning" /><div className="pr-item-body"><p className="pr-item-title">{r}</p></div></li>
@@ -292,14 +311,21 @@ function Peer({ s }: { s: ReviewSession }) {
         </>
       ) : (
         <>
-          <h2 className="pr-title">No reason found to ask for a second opinion</h2>
-          <p className="pr-lede">No peer-review signal. The review looks for a registered professional stated as required, a Part 3 provision cited, or a product relied on with no CCMC evaluation among the documents. None came up.</p>
+          <StepTitle step="peer" icon="check">No peer review signal</StepTitle>
         </>
       )}
-      <p className="pr-fine">It’s your call. Alberta has no set peer-review procedure, and this isn’t a finding about the design.</p>
+      <p className="pr-fine">Your call · not a finding about the design</p>
     </>
   );
 }
+
+/** A last step after the checks (the decision, the close-out or the outcome), drawn by the caller. */
+export interface FinalStep {
+  label: string;
+  content: ReactNode;
+}
+
+type Step = StepId | "final";
 
 export function PackageReview({
   session,
@@ -307,20 +333,25 @@ export function PackageReview({
   onPickVersion,
   actions,
   finish,
+  final,
   initialStep,
 }: {
   session: ReviewSession;
   versions: SessionSummary[];
   onPickVersion: (v: number) => void;
-  /** Run again / Upload PDFs, when the officer may run a new version. */
+  /** Run again / Upload PDFs, when the officer may run a new version. Shown quietly at the foot. */
   actions?: ReactNode;
   /** The last step's forward action (e.g. draft the information request). */
   finish?: { label: string; onClick: () => void };
-  initialStep?: StepId;
+  /** An extra step after the checks, so the whole review reads as one path. */
+  final?: FinalStep;
+  initialStep?: Step;
 }) {
   const id = useId();
-  const steps = stepsFor(session);
-  const [step, setStep] = useState<StepId>(initialStep && steps.includes(initialStep) ? initialStep : steps[0]);
+  const steps: Step[] = [...stepsFor(session), ...(final ? (["final"] as Step[]) : [])];
+  const label = (s: Step) => (s === "final" ? final?.label ?? "" : STEP_LABEL[s]);
+  const short = (s: Step) => (s === "final" ? label(s) : STEP_SHORT[s] ?? STEP_LABEL[s]);
+  const [step, setStep] = useState<Step>(initialStep && steps.includes(initialStep) ? initialStep : steps[0]);
   const body = useRef<HTMLDivElement>(null);
   const first = useRef(true);
 
@@ -348,24 +379,16 @@ export function PackageReview({
 
   // Derived during render: a version without a diff has no "What changed" step, even before the
   // reset effect runs, so a stale step never renders against the wrong session.
-  const active: StepId = steps.includes(step) ? step : steps[0];
+  const active: Step = steps.includes(step) ? step : steps[0];
   const at = steps.indexOf(active);
   const prev = steps[at - 1];
   const next = steps[at + 1];
   const missing = missingView(session);
-  const counts: Partial<Record<StepId, number>> = { missing: missing.total, file: fileGaps(session), peer: session.findings.some((f) => f.key === "peer_review:signal") ? 1 : 0 };
+  const counts: Partial<Record<Step, number>> = { missing: missing.total, file: fileGaps(session), peer: session.findings.some((f) => f.key === "peer_review:signal") ? 1 : 0 };
 
   return (
     <section className="pr" aria-labelledby={`${id}-h`}>
-      <header className="pr-head">
-        <div className="pr-head-txt">
-          <h2 id={`${id}-h`} className="pr-head-title">Package review</h2>
-          <p className="pr-faint">
-            Version {session.version} · {session.input_kind === "case" ? "saved application" : "uploaded PDFs"} · {session.created_by_name}, {sentLabel(session.created_at).replace(/^Today, /, "")}
-          </p>
-        </div>
-        {actions && <div className="pr-head-acts">{actions}</div>}
-      </header>
+      <h2 id={`${id}-h`} className="cf-sr">Package review</h2>
       {versions.length > 1 && (
         <div className="pr-versions" role="group" aria-label="Versions">
           {versions.map((v) => (
@@ -377,18 +400,24 @@ export function PackageReview({
         </div>
       )}
       <nav className="pr-steps" aria-label="Review steps">
-        <ol>
+        <ol style={{ ["--n" as string]: steps.length }}>
           {steps.map((s, i) => (
             <li key={s}>
-              <button type="button" aria-current={s === active ? "step" : undefined} onClick={() => setStep(s)}>
-                <span className="pr-step-n">{i + 1}</span>
-                <span className="pr-step-l">{STEP_LABEL[s]}</span>
-                {counts[s] ? <span className="pr-step-c">{counts[s]}</span> : null}
+              <button
+                type="button"
+                className={i < at ? "is-past" : undefined}
+                aria-current={s === active ? "step" : undefined}
+                aria-label={`Step ${i + 1} of ${steps.length}: ${label(s)}${counts[s] ? `, ${counts[s]} to look at` : ""}`}
+                title={label(s)}
+                onClick={() => setStep(s)}
+              >
+                <span className={`pr-step-bar is-${STEP_LOOK[s].hue}`} aria-hidden="true" />
+                <span className={`pr-step-l is-${STEP_LOOK[s].hue}`} aria-hidden="true"><AcIcon name={STEP_LOOK[s].icon} size={13} />{short(s)}</span>
               </button>
             </li>
           ))}
         </ol>
-        <p className="pr-steps-phone" aria-hidden="true">{at + 1} of {steps.length} · {STEP_LABEL[active]}</p>
+        <p className="pr-steps-now" aria-hidden="true">Step {at + 1} of {steps.length} · {short(active)}{counts[active] ? ` · ${counts[active]} to look at` : ""}</p>
       </nav>
       <div ref={body} className="pr-body" tabIndex={-1} aria-live="polite">
         {active === "changes" && session.diff && <Changes s={session} />}
@@ -398,18 +427,24 @@ export function PackageReview({
         {active === "code" && <CodeChecks s={session} />}
         {active === "file" && <FileItems s={session} />}
         {active === "peer" && <Peer s={session} />}
+        {active === "final" && final?.content}
       </div>
       <footer className="pr-foot">
         {prev ? (
-          <button type="button" className="cf-btn is-sm is-ghost" onClick={() => setStep(prev)}><AcIcon name="back" size={15} />{STEP_LABEL[prev]}</button>
+          <button type="button" className="cf-btn is-sm is-ghost" onClick={() => setStep(prev)}><AcIcon name="back" size={15} />Back</button>
         ) : <span />}
         {next ? (
-          <button type="button" className="cf-btn is-sm" onClick={() => setStep(next)}>{STEP_LABEL[next]}<AcIcon name="right" size={15} /></button>
+          <button type="button" className="cf-btn is-sm" onClick={() => setStep(next)}>Next: {label(next)}<AcIcon name="right" size={15} /></button>
         ) : finish ? (
           <button type="button" className="cf-btn is-sm" onClick={finish.onClick}>{finish.label}<AcIcon name="right" size={15} /></button>
         ) : <span />}
       </footer>
-      <p className="pr-fine pr-admin">Administrative completeness only. The review lists what is present or missing; it doesn’t judge the design.</p>
+      <div className="pr-meta-foot">
+        <p className="pr-faint">
+          Review version {session.version} · {session.input_kind === "case" ? "read from the saved application" : "read from uploaded PDFs"} · {session.created_by_name}, {sentLabel(session.created_at).replace(/^Today, /, "")}
+        </p>
+        {actions && <div className="pr-head-acts">{actions}</div>}
+      </div>
     </section>
   );
 }

@@ -83,7 +83,7 @@ export function NothingYet({ title, lede, page }: { title: string; lede: string;
         <ul className="cf-sec-list">
           {sections.map((s) => (
             <li key={s.letter} className="cf-sec">
-              <span className="cf-sec-letter" aria-hidden="true">{s.letter}</span>
+              <span className={`cf-sec-letter is-${({ A: "blue", B: "teal", C: "violet", D: "amber" } as Record<string, string>)[s.letter]}`} aria-hidden="true">{s.letter}</span>
               <div className="cf-sec-t"><div>{s.title} <span className="cf-faint">· Section {s.letter}</span></div><div className="cf-faint">Not started</div></div>
               <Dot tone="pending" />
             </li>
@@ -264,7 +264,7 @@ function CaseReview() {
               : engineer ? "Engineer needed" : s.letter === "C" && !departures && c.sectionC.length ? `${s.ok} · no departure confirmed` : s.ok;
             return (
               <li key={s.letter} className="cf-sec">
-                <span className="cf-sec-letter" aria-hidden="true">{s.letter}</span>
+                <span className={`cf-sec-letter is-${({ A: "blue", B: "teal", C: "violet", D: "amber" } as Record<string, string>)[s.letter]}`} aria-hidden="true">{s.letter}</span>
                 <div className="cf-sec-t">
                   <div>{s.title} <span className="cf-faint">· Section {s.letter}</span></div>
                   <div className="cf-faint">

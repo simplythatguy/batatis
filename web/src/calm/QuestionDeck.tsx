@@ -127,7 +127,7 @@ export function SectionFooter({ items, index, onJump, onPrev, onNext, canPrev, c
           return (
             <div
               key={s.id}
-              className={`cf-qsec${s.on ? " is-on" : ""}`}
+              className={`cf-qsec is-${SECTION_HUE[s.id] ?? "slate"}${s.on ? " is-on" : ""}`}
               style={{ ["--n" as string]: s.at.length }}
               onPointerEnter={(e) => { if (e.pointerType === "mouse") hold(s.id); }}
               onPointerLeave={(e) => { if (e.pointerType === "mouse") later(); }}
@@ -169,6 +169,9 @@ export function SectionFooter({ items, index, onJump, onPrev, onNext, canPrev, c
     </footer>
   );
 }
+
+/** The form's parts, by colour (the officer's review uses the same). */
+const SECTION_HUE: Record<string, string> = { A: "blue", B: "teal", C: "violet", D: "amber" };
 
 /* —— One card's controls —— */
 

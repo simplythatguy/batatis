@@ -8,7 +8,7 @@ import { useCallback, useEffect, useRef, useState, type DragEvent, type ReactNod
 import { AccountsError } from "../../api/accounts";
 import { packageReview, type ReviewTarget } from "../../api/packageReview";
 import type { PackageReviewIndex, ReviewSession } from "../../api/types.gen";
-import { PageHead } from "../auth/bits";
+import { AcIcon, PageHead } from "../auth/bits";
 import { CIcon } from "../ui";
 import { InfoRequest } from "./InfoRequest";
 import { PackageReview } from "./PackageReview";
@@ -173,11 +173,7 @@ export function PackagePage({ packageId, phoneTools }: { packageId: string | nul
       ) : !shown || !target ? (
         <div className="ac-page-body is-narrow"><p className="ac-empty">Loading the package review…</p></div>
       ) : (
-        <div className="ac-page-body pr-page">
-          <div className="pr-view" role="group" aria-label="Show">
-            <button type="button" className="ac-tab" aria-pressed={view === "review"} onClick={() => setView("review")}>Package review</button>
-            <button type="button" className="ac-tab" aria-pressed={view === "request"} onClick={() => setView("request")}>Information request</button>
-          </div>
+        <div className="ac-page-body rv">
           {error && <p className="ac-error pr-empty" role="alert">{error}</p>}
           {view === "review" ? (
             <PackageReview
@@ -185,9 +181,11 @@ export function PackagePage({ packageId, phoneTools }: { packageId: string | nul
               versions={index?.sessions ?? []}
               onPickVersion={(v) => void packageReview.version(target, v).then(setShown, (e) => setError(errorText(e)))}
               actions={<DropZoneButton busy={busy} onFiles={(f) => void upload(f)} />}
-              finish={{ label: "Information request", onClick: () => setView("request") }}
+              finish={{ label: "Ask for what’s missing", onClick: () => setView("request") }}
             />
           ) : (
+            <>
+            <button type="button" className="rv-back" onClick={() => setView("review")}><AcIcon name="back" size={15} />Back to the review</button>
             <InfoRequest
               target={target}
               session={shown}
@@ -196,6 +194,7 @@ export function PackagePage({ packageId, phoneTools }: { packageId: string | nul
               applicant="the applicant"
               onChange={(s) => { setShown(s); void load(true); }}
             />
+            </>
           )}
         </div>
       )}

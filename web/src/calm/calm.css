@@ -5,35 +5,52 @@
 */
 
 :root {
-  /* v2 high-contrast layer (docs/design/calm-flow-prototype-v2.html): black canvas, white ink,
-     hairlines; no grey-filled cards. Only overlays use the raised near-black surface. */
-  --cf-bg: #000;
-  --cf-rail: #050506;
-  --cf-raise: #0c0c0e;
-  --cf-text: #fafafa;
-  --cf-text-2: #b4b4bb;
-  --cf-text-3: #82828b;
-  --cf-text-4: #4a4a52;
+  /* Light layer (user decision 2026-10-22): soft grey canvas, white surfaces, dark ink, hairlines.
+     Colour carries meaning: the accent for the brand, one hue per section, status dots. */
+  --cf-bg: #f5f6f8;
+  --cf-rail: #eceef2;
+  --cf-raise: #ffffff;
+  --cf-surface: #ffffff;
+  --cf-text: #14161b;
+  --cf-text-2: #4a505c;
+  --cf-text-3: #6b7280;
+  --cf-text-4: #a3a8b3;
   /* One line set for every divider, chip, card and button (soft), a stronger one for state
-     (pressed, hover borders), and the form-control boundary (3:1 on black) only on inputs. */
-  --cf-line: rgba(255, 255, 255, 0.07);
-  --cf-line-2: rgba(255, 255, 255, 0.13);
-  --cf-line-ctl: rgba(255, 255, 255, 0.36);
-  --cf-hover: rgba(255, 255, 255, 0.05);
-  --cf-selected: rgba(255, 255, 255, 0.08);
-  --cf-glass: transparent;
+     (pressed, hover borders), and the form-control boundary (3:1 on white) only on inputs. */
+  --cf-line: rgba(17, 24, 39, 0.08);
+  --cf-line-2: rgba(17, 24, 39, 0.14);
+  --cf-line-ctl: rgba(17, 24, 39, 0.42);
+  --cf-hover: rgba(17, 24, 39, 0.04);
+  --cf-selected: rgba(17, 24, 39, 0.07);
+  --cf-glass: #ffffff;
   --cf-glass-hi: transparent;
-  --cf-inset: transparent;
-  --cf-accent: #ff6a3d;
-  --cf-accent-ink: #ff9a76;
-  --cf-blocking: #ff5f5f;
-  --cf-warning: #ffc53d;
-  --cf-done: #3ddc84;
-  --cf-pending: #6b6b73;
-  --cf-primary-bg: #fafafa;
-  --cf-primary-hover: #e4e4e7;
-  --cf-primary-text: #000;
-  --cf-focus: #b4b4bb;
+  --cf-inset: #ffffff;
+  --cf-shadow: 0 1px 2px rgba(17, 24, 39, 0.05), 0 4px 16px -6px rgba(17, 24, 39, 0.08);
+  --cf-accent: #f25a2a;
+  --cf-accent-ink: #c2410c;
+  --cf-blocking: #e5484d;
+  --cf-warning: #f0a20b;
+  --cf-done: #18a058;
+  --cf-pending: #9aa0ab;
+  /* Section hues: tell parts apart at a glance (tints for fills, solid for bars and icons). */
+  --cf-hue-blue: #3b82f6;
+  --cf-hue-blue-t: #e8f0fe;
+  --cf-hue-amber: #e8900c;
+  --cf-hue-amber-t: #fdf2e0;
+  --cf-hue-violet: #8b5cf6;
+  --cf-hue-violet-t: #f1ebfe;
+  --cf-hue-teal: #0f9f8f;
+  --cf-hue-teal-t: #e2f5f2;
+  --cf-hue-rose: #e0457b;
+  --cf-hue-rose-t: #fce8ef;
+  --cf-hue-green: #18a058;
+  --cf-hue-green-t: #e4f5ea;
+  --cf-hue-slate: #64748b;
+  --cf-hue-slate-t: #eef1f5;
+  --cf-primary-bg: #16181d;
+  --cf-primary-hover: #2b2f37;
+  --cf-primary-text: #ffffff;
+  --cf-focus: #6b7280;
   --cf-font: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
   --cf-mono: "Geist Mono Variable", ui-monospace, "SF Mono", monospace;
   --cf-ease: cubic-bezier(0.2, 0, 0, 1);
@@ -43,7 +60,19 @@
   --cf-sheet: #fff;
   --cf-sheet-text: #111;
   --cf-sheet-muted: #63636b;
+  color-scheme: light;
 }
+
+/* One hue per section or step: solid (--hue) for bars and icons, a tint (--hue-t) for fills. */
+.is-blue { --hue: var(--cf-hue-blue); --hue-t: var(--cf-hue-blue-t); }
+.is-amber { --hue: var(--cf-hue-amber); --hue-t: var(--cf-hue-amber-t); }
+.is-violet { --hue: var(--cf-hue-violet); --hue-t: var(--cf-hue-violet-t); }
+.is-teal { --hue: var(--cf-hue-teal); --hue-t: var(--cf-hue-teal-t); }
+.is-rose { --hue: var(--cf-hue-rose); --hue-t: var(--cf-hue-rose-t); }
+.is-green { --hue: var(--cf-hue-green); --hue-t: var(--cf-hue-green-t); }
+.is-slate { --hue: var(--cf-hue-slate); --hue-t: var(--cf-hue-slate-t); }
+.is-accent { --hue: var(--cf-accent); --hue-t: #fdeae3; }
+
 
 html,
 body {
@@ -159,7 +188,7 @@ body {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: #1d1d21;
+  background: #e9ecf1;
   border: 1px solid var(--cf-line-2);
   color: var(--cf-text);
   font: 550 11.5px/1 var(--cf-font);
@@ -436,68 +465,99 @@ body {
   min-width: 0;
 }
 
-.cf-stage-rings {
+/* Stage tabs: label over a thin progress line, like the deck footer. No circles, no icons. */
+
+.cf-stages {
   display: flex;
-  gap: 6px;
+  align-items: stretch;
+  gap: 2px;
+  height: 100%;
 }
 
-.cf-stage-btn {
+.cf-stage {
   position: relative;
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 0 12px;
   color: var(--cf-text-3);
+  text-decoration: none;
   cursor: pointer;
-  transition-property: background-color, color, scale;
+  transition-property: color;
   transition-duration: 150ms;
-  transition-timing-function: ease-out;
 }
 
-.cf-stage-btn[aria-current="step"] {
+.cf-stage:focus-visible {
+  outline: 2px solid var(--cf-focus);
+  outline-offset: -6px;
+  border-radius: 10px;
+}
+
+.cf-stage[aria-current="step"] {
   color: var(--cf-text);
-  background: var(--cf-selected);
 }
 
-.cf-stage-btn:not(.is-disabled):active {
-  scale: 0.96;
-}
-
-.cf-stage-btn.is-disabled {
+.cf-stage.is-disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
 
 @media (hover: hover) {
-  .cf-stage-btn:not(.is-disabled):not([aria-current="step"]):hover {
-    color: var(--cf-text);
+  .cf-stage:not(.is-disabled):not([aria-current="step"]):hover {
+    color: var(--cf-text-2);
   }
 }
 
-.cf-stage-ring {
-  position: absolute;
-  inset: 0;
-  width: 40px;
-  height: 40px;
-  fill: none;
-  stroke-width: 1.6;
+.cf-stage-lab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.cf-stage-trk {
-  stroke: var(--cf-line-2);
+.cf-stage-n {
+  font: 500 11px var(--cf-mono);
+  color: var(--cf-text-4);
 }
 
-.cf-stage-arc {
-  stroke: var(--cf-text);
-  stroke-linecap: round;
-  transition-property: stroke-dasharray, stroke;
+.cf-stage[aria-current="step"] .cf-stage-n {
+  color: var(--cf-accent);
+}
+
+.cf-stage-check {
+  display: inline-flex;
+  color: var(--cf-done);
+}
+
+.cf-stage-bar {
+  display: block;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--cf-line-2);
+  overflow: hidden;
+}
+
+.cf-stage-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--cf-text-3);
+  transition-property: width, background-color;
   transition-duration: 300ms;
   transition-timing-function: ease-out;
 }
 
-.cf-stage-arc.is-full {
-  stroke: var(--cf-done);
+.cf-stage[aria-current="step"] .cf-stage-bar i {
+  background: var(--cf-text);
+}
+
+.cf-stage.is-done .cf-stage-bar i {
+  background: var(--cf-done);
 }
 
 .cf-save {
@@ -624,7 +684,7 @@ body {
   padding: 10px 14px;
   border: 1px solid var(--cf-line);
   border-radius: 14px 14px 4px 14px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(17, 24, 39, 0.08);
 }
 
 .cf-msg-ai p {
@@ -843,11 +903,11 @@ body {
 /* —— Surfaces —— */
 
 .cf-glass {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015)), var(--cf-glass);
+  background: var(--cf-glass);
   border: 1px solid var(--cf-line);
   border-radius: var(--cf-r-card);
   backdrop-filter: blur(24px) saturate(140%);
-  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 30px 80px -30px rgba(0, 0, 0, 0.7);
+  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 30px 80px -30px rgba(17, 24, 39, 0.16);
 }
 
 .cf-tile {
@@ -861,10 +921,10 @@ body {
   z-index: 20;
   padding: 8px;
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)), rgba(18, 20, 24, 0.92);
+  background: var(--cf-surface);
   border: 1px solid var(--cf-line-2);
   backdrop-filter: blur(24px) saturate(140%);
-  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 24px 60px -20px rgba(0, 0, 0, 0.8);
+  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 24px 60px -20px rgba(17, 24, 39, 0.16);
   overscroll-behavior: contain;
 }
 
@@ -944,7 +1004,7 @@ body {
 
 @media (hover: hover) {
   .cf-btn:not(:disabled):hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(17, 24, 39, 0.06);
   }
   .cf-btn.is-primary:not(:disabled):hover {
     background: var(--cf-primary-hover);
@@ -958,8 +1018,13 @@ body {
   font: 500 11px/1 var(--cf-mono);
   padding: 4px 6px;
   border-radius: 6px;
-  border: 1px solid rgba(0, 0, 0, 0.18);
-  color: rgba(0, 0, 0, 0.55);
+  border: 1px solid var(--cf-line-2);
+  color: var(--cf-text-3);
+}
+
+.cf-btn.is-primary .cf-kbd {
+  border-color: rgba(255, 255, 255, 0.28);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .cf-btn:not(.is-primary) .cf-kbd{
@@ -973,7 +1038,7 @@ body {
   flex: none;
   border-radius: 12px;
   border: 1px solid var(--cf-line);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(17, 24, 39, 0.03);
   color: var(--cf-text-2);
   display: grid;
   place-items: center;
@@ -1004,7 +1069,7 @@ body {
 @media (hover: hover) {
   .cf-icon-btn:hover {
     color: var(--cf-text);
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(17, 24, 39, 0.06);
   }
 }
 
@@ -1013,7 +1078,7 @@ body {
   padding: 0 14px;
   border-radius: 999px;
   border: 1px solid var(--cf-line);
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(17, 24, 39, 0.025);
   color: var(--cf-text-2);
   font: 500 13px/1 var(--cf-font);
   display: inline-flex;
@@ -1027,7 +1092,7 @@ body {
 }
 
 .cf-chip[aria-pressed="true"] {
-  background: rgba(255, 255, 255, 0.09);
+  background: rgba(17, 24, 39, 0.09);
   color: var(--cf-text);
   border-color: var(--cf-line-2);
 }
@@ -1047,7 +1112,7 @@ body {
 @media (hover: hover) {
   .cf-chip:not([aria-disabled="true"]):not([aria-pressed="true"]):hover {
     color: var(--cf-text);
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(17, 24, 39, 0.05);
   }
 }
 
@@ -1060,7 +1125,7 @@ body {
   padding: 0 12px 0 10px;
   border-radius: 999px;
   border: 1px solid var(--cf-line);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(17, 24, 39, 0.03);
   font: 500 12px/1 var(--cf-mono);
   color: var(--cf-text-2);
   white-space: nowrap;
@@ -1082,7 +1147,7 @@ body {
 @media (hover: hover) {
   .cf-cite:hover {
     color: var(--cf-text);
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(17, 24, 39, 0.06);
   }
 }
 
@@ -1207,6 +1272,11 @@ body {
   transition-timing-function: ease-out;
 }
 
+.cf-menu button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .cf-menu .cf-mono {
   font-size: 11px;
 }
@@ -1219,15 +1289,15 @@ body {
 
 @media (hover: hover) {
   .cf-menu a:hover,
-  .cf-menu button:hover {
-    background: rgba(255, 255, 255, 0.05);
+  .cf-menu button:not(:disabled):hover {
+    background: rgba(17, 24, 39, 0.05);
     color: var(--cf-text);
   }
 }
 
 .cf-menu a:focus-visible,
 .cf-menu button:focus-visible {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(17, 24, 39, 0.05);
   color: var(--cf-text);
   outline-offset: -2px;
 }
@@ -1239,9 +1309,9 @@ body {
   border: 1px solid var(--cf-line-2);
   border-radius: 24px;
   color: var(--cf-text);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015)), rgba(16, 18, 22, 0.96);
+  background: var(--cf-surface);
   backdrop-filter: blur(24px) saturate(140%);
-  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 30px 80px -20px rgba(0, 0, 0, 0.85);
+  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 30px 80px -20px rgba(17, 24, 39, 0.16);
   font-family: var(--cf-font);
   overscroll-behavior: contain;
 }
@@ -1365,7 +1435,7 @@ body {
   height: 36px;
   padding: 0 4px 0 12px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(17, 24, 39, 0.04);
   border: 1px solid var(--cf-line);
   font-size: 13px;
   color: var(--cf-text-2);
@@ -1434,7 +1504,7 @@ body {
   align-items: center;
   gap: 10px;
   padding: 44px 64px;
-  border: 1.5px dashed rgba(255, 255, 255, 0.35);
+  border: 1.5px dashed rgba(17, 24, 39, 0.35);
   border-radius: 28px;
   font-size: 20px;
   font-weight: 500;
@@ -1612,12 +1682,12 @@ body {
 .cf-code-text {
   margin: 18px 0 0;
   padding: 18px 18px 18px 20px;
-  border-left: 2px solid rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.03);
+  border-left: 2px solid rgba(17, 24, 39, 0.22);
+  background: rgba(17, 24, 39, 0.03);
   border-radius: 0 14px 14px 0;
   font-size: 15px;
   line-height: 1.65;
-  color: #e7e7ea;
+  color: var(--cf-text);
   white-space: pre-line;
 }
 
@@ -1784,7 +1854,7 @@ body {
   font-size: 13px;
   font-weight: 500;
   color: var(--cf-text-2);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(17, 24, 39, 0.06);
   padding: 6px 10px;
   border-radius: 8px;
   letter-spacing: 0;
@@ -1959,10 +2029,11 @@ body {
   width: 34px;
   height: 34px;
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--hue-t, rgba(17, 24, 39, 0.05));
+  color: var(--hue, var(--cf-text));
   display: grid;
   place-items: center;
-  font: 500 13px var(--cf-mono);
+  font: 700 13px var(--cf-font);
 }
 
 .cf-sec-t {
@@ -2018,7 +2089,7 @@ body {
 
 .cf-sheet-pane {
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(17, 24, 39, 0.02);
   border: 1px solid var(--cf-line);
   padding: 28px 24px;
   display: flex;
@@ -2035,7 +2106,7 @@ body {
   padding: 44px 52px;
   font-size: 12.5px;
   line-height: 1.55;
-  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 30px 80px -20px rgba(17, 24, 39, 0.16);
   overflow-wrap: anywhere;
 }
 
@@ -2184,10 +2255,10 @@ body {
 .cf-legacy {
   --bg-app: transparent;
   --bg-panel: transparent;
-  --bg-elevated: rgba(255, 255, 255, 0.04);
-  --bg-hover: rgba(255, 255, 255, 0.06);
-  --bg-active: rgba(255, 255, 255, 0.08);
-  --bg-input: rgba(255, 255, 255, 0.03);
+  --bg-elevated: rgba(17, 24, 39, 0.04);
+  --bg-hover: rgba(17, 24, 39, 0.06);
+  --bg-active: rgba(17, 24, 39, 0.08);
+  --bg-input: rgba(17, 24, 39, 0.03);
   --border-subtle: var(--cf-line);
   --border-default: var(--cf-line-2);
   --border-strong: var(--cf-line-ctl);
@@ -2203,7 +2274,7 @@ body {
   --status-warning: var(--cf-warning);
   --status-pending: var(--cf-pending);
   --status-done: var(--cf-done);
-  --code-bg: rgba(255, 255, 255, 0.03);
+  --code-bg: rgba(17, 24, 39, 0.03);
   --font-sans: var(--cf-font);
   --font-mono: var(--cf-mono);
   --radius-sm: 6px;
@@ -2236,7 +2307,7 @@ body {
 
 @media (hover: hover) {
   :is(.cf-embed, .cf-legacy) .btn:not(:disabled):hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(17, 24, 39, 0.06);
   }
   :is(.cf-embed, .cf-legacy) .btn-primary:not(:disabled):hover {
     background: var(--cf-primary-hover);
@@ -2271,17 +2342,17 @@ body {
 :is(.cf-embed, .cf-legacy) .field textarea {
   border-radius: 12px;
   border-color: var(--cf-line-2);
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: rgba(17, 24, 39, 0.03);
   font-size: 14px;
   color: var(--cf-text);
 }
 
 :is(.cf-embed, .cf-legacy) .field select {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 :is(.cf-embed, .cf-legacy) .field select option {
-  background: #16181c;
+  background: #fff;
   color: var(--cf-text);
 }
 
@@ -2318,9 +2389,9 @@ body {
   font-size: 14px;
   line-height: 1.6;
   border: 0;
-  border-left: 2px solid rgba(255, 255, 255, 0.22);
+  border-left: 2px solid rgba(17, 24, 39, 0.22);
   border-radius: 0 14px 14px 0;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(17, 24, 39, 0.03);
   padding: 14px 16px;
 }
 
@@ -2376,7 +2447,7 @@ body {
 
 @media (hover: hover) {
   .cf-sectiond .btn-primary:not(:disabled):hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(17, 24, 39, 0.06);
   }
 }
 
@@ -2393,9 +2464,9 @@ body {
   flex-direction: column;
   border: 1px solid var(--cf-line);
   border-radius: var(--cf-r-card);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.012)), var(--cf-glass);
+  background: var(--cf-glass);
   backdrop-filter: blur(24px) saturate(140%);
-  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 30px 80px -30px rgba(0, 0, 0, 0.7);
+  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 30px 80px -30px rgba(17, 24, 39, 0.16);
   overflow: hidden;
 }
 
@@ -2473,9 +2544,20 @@ body {
   .cf-head-title {
     display: none;
   }
-  .cf-stage-rings {
+  .cf-stages {
     justify-self: center;
-    gap: 4px;
+    gap: 0;
+  }
+  .cf-stage {
+    padding: 0 8px;
+  }
+  /* Phones: numbers only, except the stage you are on. */
+  .cf-stage:not([aria-current="step"]) .cf-stage-name,
+  .cf-stage:not([aria-current="step"]) .cf-stage-check {
+    display: none;
+  }
+  .cf-stage-n {
+    color: var(--cf-text-3);
   }
   .cf-ask-label,
   .cf-save-label,
@@ -2590,7 +2672,7 @@ body {
 }
 
 .cf-ring-track {
-  stroke: rgba(255, 255, 255, 0.14);
+  stroke: rgba(17, 24, 39, 0.14);
 }
 
 .cf-ring-svg.is-zero .cf-ring-track,
@@ -2647,10 +2729,10 @@ body {
   max-width: 300px;
   padding: 12px 14px;
   border-radius: 14px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)), rgba(16, 18, 22, 0.96);
+  background: var(--cf-surface);
   border: 1px solid var(--cf-line-2);
   backdrop-filter: blur(20px) saturate(140%);
-  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 20px 50px -16px rgba(0, 0, 0, 0.85);
+  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 20px 50px -16px rgba(17, 24, 39, 0.16);
   color: var(--cf-text);
   font: 400 13px/1.5 var(--cf-font);
   pointer-events: none;
@@ -2782,7 +2864,7 @@ body {
 }
 
 .cf-pal-row.is-active {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(17, 24, 39, 0.06);
   color: var(--cf-text);
 }
 
@@ -3696,11 +3778,11 @@ body {
   background: var(--cf-raise);
   backdrop-filter: none;
   border: 1px solid var(--cf-line-2);
-  box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 24px 60px -24px rgba(17, 24, 39, 0.16);
 }
 
 .cf-modal::backdrop {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(17, 24, 39, 0.15);
   backdrop-filter: none;
 }
 
@@ -3734,7 +3816,7 @@ body {
 
 .cf-msg-ai .cf-code-text.is-inline {
   border-left-color: var(--cf-text-2);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(17, 24, 39, 0.04);
   border-radius: 0 8px 8px 0;
 }
 
@@ -3771,7 +3853,7 @@ body {
 }
 
 .cf-chip[aria-pressed="true"]{
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(17, 24, 39, 0.08);
   border-color: var(--cf-text);
 }
 
@@ -4015,7 +4097,7 @@ body {
 .cf-choice[aria-pressed="true"] .cf-choice-key {
   background: var(--cf-text);
   border-color: var(--cf-text);
-  color: #000;
+  color: #fff;
 }
 
 .cf-choice[aria-pressed="true"] .cf-choice-check {
@@ -4087,12 +4169,12 @@ body {
 
 .cf-uline.is-date {
   width: 260px;
-  color-scheme: dark;
+  color-scheme: light;
   font: 400 20px/1.4 var(--cf-mono);
 }
 
 .cf-uline.is-date::-webkit-calendar-picker-indicator {
-  filter: invert(0.75);
+  opacity: 0.6;
   cursor: pointer;
 }
 
@@ -4209,7 +4291,7 @@ body {
 }
 
 .cf-qsec-bar i.is-done {
-  background: var(--cf-text);
+  background: var(--hue, var(--cf-text));
 }
 
 .cf-qsec-bar i.is-cur {
@@ -4241,6 +4323,10 @@ body {
   content: " ·";
   color: var(--cf-text-3);
   font-weight: 400;
+}
+
+.cf-qsec-l {
+  color: var(--hue, var(--cf-text-3));
 }
 
 .cf-qsec-name {
@@ -4398,7 +4484,8 @@ body {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: #26262b;
+  background: var(--cf-hue-blue-t);
+  color: var(--cf-hue-blue);
   font-size: 11.5px;
   font-weight: 600;
 }
@@ -4666,8 +4753,26 @@ a.cf-save-check {
   .cf-app[data-assistant="open"] .cf-head-left {
     gap: 4px;
   }
-  .cf-app[data-assistant="open"] .cf-stage-rings {
-    gap: 2px;
+  .cf-app[data-assistant="open"] .cf-stages {
+    gap: 0;
+  }
+}
+
+/* A narrow work area (list and assistant both open): only the current stage keeps its name. */
+.cf-work {
+  container: work / inline-size;
+}
+
+@container work (max-width: 940px) {
+  .cf-stage {
+    padding: 0 8px;
+  }
+  .cf-stage:not([aria-current="step"]) .cf-stage-name,
+  .cf-stage:not([aria-current="step"]) .cf-stage-check {
+    display: none;
+  }
+  .cf-stage-n {
+    color: var(--cf-text-3);
   }
 }
 
