@@ -1,0 +1,49 @@
+{
+  "_note": "EXAMPLE DATA. A completed version of demo case C (homebuilder, bedroom window W-07) for the G3 export gate. Every person, firm, address, document and process passage is fictional applicant text written for the demo; it states no test result, no professional opinion and no finding about the design. Loaded by engine/export/demo_cases.py.",
+  "title": "EXAMPLE DATA: Example Crescent infill house, bedroom 3 window (homebuilder)",
+  "jurisdiction": {"id": "edmonton", "name": "City of Edmonton"},
+  "facts": {
+    "owner_name": "J. and R. Example (EXAMPLE DATA)",
+    "owner_rep_name": "Priya Natarajan, Larkspur Example Homes (EXAMPLE DATA)",
+    "mailing_address": "000 Example Boulevard NW, Edmonton, AB T0T 0T0 (EXAMPLE DATA)",
+    "request_date": "2026-10-21",
+    "owner_signature_date": "2026-10-21",
+    "owner_rep_signature_date": "2026-10-21",
+    "submitted_to_scc": false,
+    "municipal_address": "0000 Example Crescent NW, Edmonton, AB (EXAMPLE DATA)",
+    "lot": "0", "block": "0", "plan": "0000000",
+    "scope": "site",
+    "alternative_description": "EXAMPLE DATA. Bedroom 3 (second floor) has one window, W-07, a casement with an unobstructed opening of 400 mm by 780 mm (0.312 m2) where the acceptable solution calls for 0.35 m2; no dimension is under 380 mm. The house has no sprinklers. Fall protection is a window opening control device chosen by the designer.",
+    "rationale": "EXAMPLE DATA. The benchmark is Sentence 9.9.10.1.(2): the unobstructed opening area and minimum dimension of a bedroom egress window. W-07 is 0.038 m2 (about 11%) short in area and meets the minimum dimension. The analysis compares the time and ease of getting out through W-07 with a window of the benchmark size, using the opening measured by the supplier, and explains why a larger window or sprinklers were not chosen.",
+    "risk_assessment": "EXAMPLE DATA. Risks of this departure: an occupant of bedroom 3 cannot get out through the window fast enough when the interior route is blocked by fire; a rescuer from outside cannot reach in. We consider the case where the opening control device does not release, the case where the window is painted shut or blocked by furniture, and the case where the fire department arrives later than the usual response.",
+    "mitigating_measures": "EXAMPLE DATA. For each risk: a hardware set that gives the full 400 mm by 780 mm opening in one motion; an opening control device that resets automatically and releases without tools; interconnected smoke alarms including bedroom 3. These measures reduce the risks but do not remove them. If the device does not release in the handover test, it is replaced before occupancy.",
+    "assumptions_and_limits": "EXAMPLE DATA. Limits: bedroom 3 only, used as a bedroom by one or two people, with this one window; the opening is measured as the supplier states. We assume a typical urban fire department response for this street and do not rely on it for the occupant's own way out. A change of window, hardware, room use or a second-floor layout change needs a new assessment.",
+    "maintenance_operation": "EXAMPLE DATA. After construction: the owners keep the window and device instructions; the opening control device is tested at handover and once a year; the window is not painted shut or blocked. If maintenance lapses, a device that does not release is the failure the yearly test looks for.",
+    "qualifications": "EXAMPLE DATA. Responsible people: Larkspur Example Homes in-house designer (fictional), responsible for the window design and this analysis and its single coordinator; Example Fenestration Co. (fictional), responsible for the opening dimensions and hardware data.",
+    "occupancy": "single_family", "part4_design": false, "preserved_wood_foundation_part4": false,
+    "roof_trusses": false, "prescriptive_route_confirmed": false, "ahj_requires_professional": false,
+    "special_safety_concerns": false, "professional_judgement_required": false, "professional_scope_resolved": true,
+    "fire_suppression": false, "fire_alarm": true,
+    "professional_status": "not_engaged"
+  },
+  "not_applicable": {
+    "permit_number": "EXAMPLE DATA. No building permit has been applied for yet; this request goes in with the house permit application.",
+    "ats": "EXAMPLE DATA. The site is an urban lot described by lot, block and plan; no ATS location applies.",
+    "section_c.unused_rows": "EXAMPLE DATA. The two sentences listed are all the acceptable solutions this request departs from.",
+    "section_d.unused_rows": "EXAMPLE DATA. The three documents listed are all the supporting documents for this request."
+  },
+  "identify": {
+    "articles": [
+      {"provision": "9.9.10.1.", "status": "committed", "commit_reason": "committed: Part 9, verifier quote checked (demo fixture)"}
+    ],
+    "decisions": {"9.9.10.1.": "yes"},
+    "benchmark": {"provision_id": "9.9.10.1.(2)", "basis": "committed",
+                  "departure": "EXAMPLE DATA. The only bedroom 3 window has a 0.312 m2 opening where this sentence calls for 0.35 m2."}
+  },
+  "provisions": ["9.9.10.1.(1)", "9.9.10.1.(2)"],
+  "documents": [
+    {"id": "c_schedule", "file": "input/drawing-notes.md", "title": "Window schedule A-202 rev P1 (EXAMPLE)", "responsible_party": "Larkspur Example Homes (EXAMPLE)", "issuer": "Larkspur Example Homes (EXAMPLE)", "date": "2026-10-16"},
+    {"id": "c_supplier", "file": "input/window-supplier-note-EXAMPLE.md", "title": "Supplier opening dimension confirmation (EXAMPLE)", "responsible_party": "Example Fenestration Co. (EXAMPLE)", "issuer": "Example Fenestration Co. (EXAMPLE)", "date": "2026-10-16"},
+    {"id": "c_brief", "file": "input/project-brief.md", "title": "Code analysis with risks, measures and assumptions (EXAMPLE)", "responsible_party": "Larkspur Example Homes in-house designer (EXAMPLE)", "issuer": "Larkspur Example Homes (EXAMPLE)", "date": "2026-10-16"}
+  ]
+}

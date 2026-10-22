@@ -30,6 +30,9 @@ FACTS = {
     'permit_number': 'BP-0000-00000 (EXAMPLE DATA)',
     'municipal_address': '000 Example Crescent SW (EXAMPLE DATA)',
     'lot': '0', 'block': '0', 'plan': 'EXAMPLE',
+    'owner_signature_date': '2026-10-20', 'owner_rep_signature_date': '2026-10-20',
+    # An explicit applicant "not applicable" fact: the lot is described by lot/block/plan, so ATS boxes show N/A.
+    'not_applicable.ats': 'SYNTHETIC: urban lot described by lot, block and plan; no ATS location applies.',
     'scope': 'site',
     'alternative_description': 'SYNTHETIC TEST: Continuous exterior sheathing insulation on a Part 9 wood-frame house. '
                                'This exercises administrative fields and contains no technical equivalency conclusion.',

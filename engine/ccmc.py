@@ -33,6 +33,26 @@ REPORT_FETCH_CAP = 8
 _ROOT = Path(__file__).resolve().parents[1]
 
 
+# The offline fallback shipped with the engine (vercel.json bundles engine/data/**/*.json) and its access date.
+BUNDLED_SNAPSHOT = _ROOT / 'engine/data/ccmc/ccmc-registry.json'
+BUNDLED_META = _ROOT / 'engine/data/ccmc/snapshot.json'
+
+
+def bundled_snapshot_date(path: Path) -> str:
+    """The access date recorded for a known snapshot file, or 'unknown'. The date is attached only when the
+    file's SHA-256 matches the one recorded with it, so a replaced file is never shown with the old date."""
+    import hashlib
+    for meta_path in (BUNDLED_META, _ROOT / 'research/precedents/ccmc-summary.json'):
+        try:
+            meta = json.loads(meta_path.read_text())
+            digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        except (OSError, ValueError):
+            continue
+        if digest == (meta.get('sha256') or meta.get('source_sha256')):
+            return meta['accessed']
+    return 'unknown'
+
+
 class RegistryUnavailable(RuntimeError):
     pass
 
@@ -110,18 +130,24 @@ class _ReportText(HTMLParser):
 
 
 class CCMCRegistry:
+    def _public_snapshot_path(self) -> str:
+        """Repo-relative for a bundled or local snapshot, so no server path reaches a response."""
+        try:
+            return self.snapshot_path.resolve().relative_to(_ROOT).as_posix()
+        except ValueError:
+            return self.snapshot_path.name
+
     def __init__(self, snapshot_path: Path | str | None = None, snapshot_date: str | None = None,
                  *, fetch_json: Callable[[str], dict] = _fetch_json,
                  fetch_text: Callable[[str], str] = _fetch_text, ttl_seconds: float = 3600,
                  clock: Callable[[], float] = time.monotonic, today: Callable[[], date] = date.today,
                  offline: bool = False):
-        candidates = [_ROOT / 'reference/data/ccmc-registry.json']
+        candidates = [BUNDLED_SNAPSHOT, _ROOT / 'reference/data/ccmc-registry.json']
         configured = snapshot_path or os.environ.get('BATATIS_CCMC_SNAPSHOT')
         self.snapshot_path = Path(configured) if configured else next((p for p in candidates if p.exists()), candidates[0])
         if snapshot_date is None:
-            summary = _ROOT / 'research/precedents/ccmc-summary.json'
             # A custom snapshot must bring its own access date; never attach the bundled date to it.
-            snapshot_date = json.loads(summary.read_text())['accessed'] if not configured and summary.exists() else 'unknown'
+            snapshot_date = 'unknown' if configured else bundled_snapshot_date(self.snapshot_path)
         self.snapshot_date = snapshot_date
         self.fetch_json, self.fetch_text = fetch_json, fetch_text
         self.ttl_seconds, self.clock, self.today, self.offline = ttl_seconds, clock, today, offline
@@ -251,5 +277,5 @@ class CCMCRegistry:
             if self._source == 'snapshot':
                 message += f' Offline snapshot dated {self._registry_date}; current registry not verified.'
             return RegistrySearch(query=query.strip(), searched_date=searched, registry_date=self._registry_date,
-                source=self._source, snapshot_path=str(self.snapshot_path) if self._source == 'snapshot' else None,
+                source=self._source, snapshot_path=self._public_snapshot_path() if self._source == 'snapshot' else None,
                 cached=cached, total_matches=len(matches), results=results, message=message, notice=self._notice)
