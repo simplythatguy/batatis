@@ -326,7 +326,10 @@ export function identifyCandidates(result: IdentifyResult, previous: Candidate[]
     if (!/^\d/.test(provision) || seen.has(article)) return;
     seen.add(article);
     const prev = previous.find((a) => a.provision === provision || a.id === `id-${provision}`);
-    const answer = answerOf(result, article) ?? prev?.answer ?? null;
+    const stored = answerOf(result, article);
+    const answer = stored ?? prev?.answer ?? null;
+    // An answer carried from the earlier card that the engine never stored stays pending (open, resendable).
+    const pending = stored === null && prev?.answer != null && prev.pending ? true : undefined;
     out.push({
       id: `id-${provision}`,
       topic: title || provision,
@@ -342,6 +345,7 @@ export function identifyCandidates(result: IdentifyResult, previous: Candidate[]
       departure: "do something other than what this sentence requires",
       clarifyingQuestion: "Which part of this sentence does the design not follow?",
       answer,
+      ...(pending ? { pending } : {}),
     });
   };
   for (const id of result.committed ?? []) {

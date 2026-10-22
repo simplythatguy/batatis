@@ -655,7 +655,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         await adoptWritten(id, ["scope.redirect"], ["intake:scope", "intake:description"], (f) => f.field === "scope.redirect" && f.kind === "computed");
         if (!live()) return null;
         derive({ type: "noteIntakeRecord", record: result.record });
-        if (result.record.plan?.scope.status !== "redirect" && !latestCase.current.identify) await identifyNow(id, live);
+        // An override is an explicit "this is building code": identify the current description again, so a
+        // result kept from an earlier description can never be decided on.
+        if (result.record.plan?.scope.status !== "redirect" && (buildingCode || !latestCase.current.identify)) await identifyNow(id, live);
         return null;
       } catch (e) {
         return failureText(e);

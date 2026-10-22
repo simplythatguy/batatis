@@ -450,7 +450,8 @@ test("a reopened sentence-level reference is one card with its identify Yes, and
   c = reducer(c, { type: "answerCandidate", id: first.id, answer: "yes" });
   c = reducer(c, { type: "noteIdentify", result: identifyResult() });
   const ids = c.candidates.map((x) => x.id);
-  if (c.candidates.find((x) => x.id === first.id)?.answer === "yes") assert.ok(!ids.includes("search-a"), "the same article is not shown twice");
+  assert.equal(c.candidates.find((x) => x.id === first.id)?.answer, "yes", "the Yes survives the rebuild");
+  assert.ok(!ids.includes("search-a"), "the same article is not shown twice");
   assert.ok(ids.includes("search-b"), "a Yes on one article never removes another article's saved card");
 });
 
@@ -458,4 +459,16 @@ test("page counts read 1 page and 3 pages", async () => {
   const { pagesLabel } = await import("../intakeView.ts");
   assert.equal(pagesLabel(1), "1 page");
   assert.equal(pagesLabel(3), "3 pages");
+});
+
+test("a rebuilt card keeps a pending answer the engine never stored", () => {
+  let c = reducer(demoCase(), { type: "noteIdentify", result: identifyResult() });
+  const card = c.candidates.find((x) => x.suggestion === "identify")!;
+  c = reducer(c, { type: "answerCandidate", id: card.id, answer: "not-sure" });
+  c = reducer(c, { type: "markDecisionPending", id: card.id, pending: true });
+  c = reducer(c, { type: "noteIdentify", result: identifyResult() });
+  const rebuilt = c.candidates.find((x) => x.id === card.id)!;
+  assert.equal(rebuilt.answer, "not-sure");
+  assert.equal(rebuilt.pending, true);
+  assert.ok(buildDeck(c, getGaps(c)).some((i) => i.key === `cand-${card.id}` && !i.done));
 });
