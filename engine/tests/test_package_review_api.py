@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 from contextlib import ExitStack
+import os
+import uuid
 
 import pytest
 from fastapi.testclient import TestClient
@@ -10,8 +12,10 @@ from engine.api import create_app
 from engine.codes import Codes
 from engine.models import Case
 from engine.store import CaseStore
-from engine.tests.case_builder_fixtures import complete_case, store_with_synthetic_files
-from engine.tests.package_review_fixtures import CLEAN_FORM, package
+from engine.tests.case_builder_fixtures import complete_case, fact, store_with_synthetic_files
+from engine.tests.package_review_fixtures import (CLEAN_FORM, CLEAN_NARRATIVE, covered_scan_pdf, package,
+                                                repeated_rationale_pdf, text_pdf)
+from engine.tests.test_package_review_rationale import raster_rationale_pdf, split_rationale_pdf
 from engine.tests.test_accounts import onboard, signup
 
 NAMES = ['owner', 'other', 'reviewer', 'second', 'foreign', 'anonymous']
@@ -52,6 +56,29 @@ def claimed(scene):
 
 def multipart(files):
     return {'files': None} if not files else [('files', (name, data, 'application/pdf')) for name, data in files]
+
+
+@pytest.fixture(scope='module', params=['sqlite', 'postgres'])
+def multi_source_scene(request, tmp_path_factory):
+    if request.param == 'postgres':
+        from engine.store_postgres import PostgresCaseStore
+        url = os.environ.get('TEST_DATABASE_URL')
+        if not url:
+            pytest.skip('TEST_DATABASE_URL is not set')
+        store = PostgresCaseStore(url)
+    else:
+        store = CaseStore(tmp_path_factory.mktemp('multi-source') / 'cases.sqlite')
+    with pytest.MonkeyPatch.context() as patch, ExitStack() as stack:
+        patch.delenv('VERCEL', raising=False)
+        patch.setenv('BATATIS_REVIEWER_CODES', '{"edmonton":"officer-secret"}')
+        patch.setenv('BATATIS_AUTH_RATE_LIMIT', '100')
+        app = create_app(store=store, codes=Codes())
+        clients, users = {}, {}
+        for name, role in [('owner', 'applicant'), ('reviewer', 'reviewer')]:
+            client = stack.enter_context(TestClient(app, base_url='http://localhost'))
+            assert signup(client, f'{uuid.uuid4().hex}@example.test', name.title()).status_code == 201
+            clients[name], users[name] = client, onboard(client, role, 'edmonton')
+        yield store, clients, users
 
 
 @pytest.mark.parametrize('status', ['draft', 'submitted', 'in_review', 'returned', 'accepted', 'refused'])
@@ -161,6 +188,216 @@ def test_upload_on_queue_case_and_reupload_diff(scene):
     assert {e['key'] for e in diff['still_open']} == {'application_date:presence'}
     assert {e['key'] for e in diff['new']} == {'legal_description:presence'}
     assert diff['statement'] == '2 of 3 gaps resolved, 1 still open, 1 new'
+    store.delete(case.id)
+
+
+@pytest.mark.parametrize('standalone', [False, True], ids=['case-upload', 'standalone-upload'])
+@pytest.mark.parametrize('input_kind', ['blank', 'split', 'raster'])
+def test_uploaded_rationale_gap_and_reupload_resolution(scene, standalone, input_kind):
+    store, clients, _ = scene
+    case = None if standalone else claimed(scene)
+    before = store.get(case.id).model_dump(mode='json') if case else None
+    path = '/package-review' if standalone else f'/review/{case.id}/package-review'
+    uploads = package(narrative=dict(CLEAN_NARRATIVE, Rationale='')) if input_kind == 'blank' else (
+        package(drop=('Rationale',)) + [('rationale.pdf',
+            split_rationale_pdf() if input_kind == 'split' else raster_rationale_pdf())])
+    first = clients['reviewer'].post(path, files=multipart(uploads))
+    assert first.status_code == 201, first.text
+    session = first.json()
+    assert session['administrative_only'] and session['not_a_compliance_determination']
+    finding = next(f for f in session['findings'] if f['field'] == 'rationale')
+    assert finding['status'] == ('blank' if input_kind == 'blank' else 'not_found')
+    assert finding['severity'] == 'blocking'
+    if input_kind == 'split':
+        assert {p['page'] for p in finding['pointers'] if p['file'] == 'rationale.pdf'} >= {1, 2}
+    item = next(i for i in session['information_request']['items'] if i['finding_key'] == finding['key'])
+    assert item['included'] is (input_kind == 'blank')
+    assert item['officer_check'] is (input_kind != 'blank')
+    assert (item['text'] in session['information_request']['text']) is (input_kind == 'blank')
+    reupload_path = f'/package-review/{session["package_id"]}' if standalone else path
+    fixed = clients['reviewer'].post(reupload_path, files=multipart(package(flat=True)))
+    assert fixed.status_code == 201, fixed.text
+    assert not any(f['field'] == 'rationale' for f in fixed.json()['findings'])
+    assert {e['key'] for e in fixed.json()['diff']['resolved']} == (
+        {finding['key']} if input_kind == 'blank' else set())
+    assert fixed.json()['diff']['previous_gaps'] == (1 if input_kind == 'blank' else 0)
+    if case:
+        assert store.get(case.id).model_dump(mode='json') == before
+        store.delete(case.id)
+
+
+def test_saved_rationale_gap_blocks_acceptance_until_applicant_supplies_it(scene):
+    store, clients, _ = scene
+    case = claimed(scene)
+    saved = store.get(case.id)
+    saved.facts = [f for f in saved.facts if f.field != 'rationale']
+    store.put(saved)
+    path = f'/review/{case.id}'
+    first = clients['reviewer'].post(f'{path}/package-review')
+    assert first.status_code == 201, first.text
+    finding = next(f for f in first.json()['findings'] if f['field'] == 'rationale')
+    assert finding['status'] == 'blank' and finding['severity'] == 'blocking'
+    blocked = clients['reviewer'].post(f'{path}/decision', json={'outcome': 'accept'})
+    assert blocked.status_code == 409, blocked.text
+    assert any(g['field'] == 'rationale' for g in blocked.json()['detail']['gaps'])
+    assert store.get(case.id).status == 'in_review' and store.get(case.id).decision is None
+    saved = store.get(case.id)
+    saved.facts.append(fact('process.rationale', 'SYNTHETIC applicant rationale: the existing assembly rating is '
+                           'unknown, so we propose a separately documented alternative.'))
+    store.put(saved)
+    second = clients['reviewer'].post(f'{path}/package-review')
+    assert second.status_code == 201, second.text
+    assert not any(f['field'] == 'rationale' for f in second.json()['findings'])
+    assert finding['key'] in {e['key'] for e in second.json()['diff']['resolved']}
+    accepted = clients['reviewer'].post(f'{path}/decision', json={'outcome': 'accept'})
+    assert accepted.status_code == 200, accepted.text
+    assert accepted.json()['decision']['message'] == (
+        'Accepted as administratively complete. Technical review remains the responsibility of the authority.')
+    store.delete(case.id)
+
+
+@pytest.mark.parametrize('path', ['standalone', 'case-upload', 'http-export'])
+@pytest.mark.parametrize('later_paragraph', [False, True], ids=['initial', 'later-paragraph'])
+def test_nbc_prose_rationale_survives_upload_and_http_export(scene, path, later_paragraph):
+    store, clients, _ = scene
+    rationale = ('NBC(AE) defines the benchmark; our proposed departure is described here.'
+                 if not later_paragraph else 'SYNTHETIC applicant introduction.\n\n'
+                 'NBC(AE) defines the benchmark; the applicant supplies this second paragraph.\n'
+                 'SYNTHETIC final words belonging to the rationale.')
+    expected = ' '.join(rationale.split())
+    case = claimed(scene) if path == 'case-upload' else None
+    route = f'/review/{case.id}/package-review' if case else '/package-review'
+    if path == 'http-export':
+        case = owned(scene, complete=True)
+        saved = store.get(case.id)
+        saved.facts = [f for f in saved.facts if f.field != 'rationale'] + [fact('process.rationale', rationale)]
+        store.put(saved)
+        exported = clients['owner'].post(f'/cases/{case.id}/export')
+        assert exported.status_code == 200, exported.text
+        uploads = [('official-prose.pdf', exported.content)]
+        source = 'official-prose.pdf'
+    else:
+        source = 'applicant-rationale.pdf'
+        uploads = package(drop=('Rationale',)) + [(source, text_pdf([
+            'Rationale', *rationale.split('\n'), 'Risk assessment', 'SYNTHETIC next process field.']))]
+    response = clients['reviewer'].post(route, files=multipart(uploads))
+    assert response.status_code == 201, response.text
+    session = response.json()
+    reading = next(f for f in session['fields'] if f['field'] == 'rationale')
+    assert reading['status'] == 'present' and reading['value'] == expected, reading
+    assert reading['pointer']['file'] == source and reading['pointer']['page']
+    assert reading['pointer']['quote'] == expected
+    assert not any(f['field'] == 'rationale' for f in session['findings'])
+    assert not any(i['field'] == 'rationale' for i in session['information_request']['items'])
+    assert session['administrative_only'] and session['not_a_compliance_determination']
+    if case:
+        store.delete(case.id)
+
+
+@pytest.mark.parametrize('linked', [False, True], ids=['standalone', 'case-linked'])
+@pytest.mark.parametrize('reverse', [False, True], ids=['blank-first', 'supplied-first'])
+def test_official_blank_draft_cannot_mask_supplied_rationale(multi_source_scene, linked, reverse):
+    store, clients, _ = multi_source_scene
+    case = owned(multi_source_scene, complete=True)
+    saved = store.get(case.id)
+    saved.facts = [f for f in saved.facts if f.field not in ('rationale', 'process.rationale')]
+    store.put(saved)
+    exported = clients['owner'].post(f'/cases/{case.id}/export', json={'draft': True})
+    assert exported.status_code == 200, exported.text
+    saved = store.get(case.id)
+    saved.status = 'submitted'
+    store.put(saved)
+    assert clients['reviewer'].post(f'/review/{case.id}/claim', json={}).status_code == 200
+    before = store.get(case.id).model_dump(mode='json')
+    rationale = 'NBC(AE) defines the benchmark; our proposed departure is described here.'
+    uploads = [('official-blank-draft.pdf', exported.content), ('supplied-rationale.pdf', text_pdf([
+        'Rationale', rationale, 'Risk assessment', 'SYNTHETIC following process field.']))]
+    if reverse:
+        uploads.reverse()
+    route = f'/review/{case.id}/package-review' if linked else '/package-review'
+    response = clients['reviewer'].post(route, files=multipart(uploads))
+    assert response.status_code == 201, response.text
+    session = response.json()
+    reading = next(f for f in session['fields'] if f['field'] == 'rationale')
+    assert reading['status'] == 'not_found' and reading['value'] is None, reading
+    finding = next(f for f in session['findings'] if f['field'] == 'rationale')
+    assert finding['status'] == 'not_found'
+    assert {p['file'] for p in finding['pointers']} == {'official-blank-draft.pdf', 'supplied-rationale.pdf'}
+    assert any(p['file'] == 'supplied-rationale.pdf' and p['quote'] == rationale for p in finding['pointers'])
+    assert any(p['file'] == 'official-blank-draft.pdf' and 'No answer has been supplied by Batatis.' in p['quote']
+               for p in finding['pointers'])
+    item = next(i for i in session['information_request']['items'] if i['field'] == 'rationale')
+    assert item['officer_check'] and not item['included']
+    assert item['text'] not in session['information_request']['text']
+    # Once only the supplied passage remains, no rationale request survives the re-upload.
+    reupload = route if linked else f'/package-review/{session["package_id"]}'
+    supplied = [upload for upload in uploads if upload[0] == 'supplied-rationale.pdf']
+    resolved = clients['reviewer'].post(reupload, files=multipart(supplied))
+    assert resolved.status_code == 201, resolved.text
+    assert next(f for f in resolved.json()['fields'] if f['field'] == 'rationale')['value'] == rationale
+    assert not any(i['field'] == 'rationale' for i in resolved.json()['information_request']['items'])
+    assert store.get(case.id).model_dump(mode='json') == before
+    store.delete(case.id)
+
+
+@pytest.mark.parametrize('linked', [False, True], ids=['standalone', 'case-linked'])
+@pytest.mark.parametrize('reverse', [False, True], ids=['blank-first', 'supplement-first'])
+@pytest.mark.parametrize('supplement', [
+    'repeated-raster', 'unique-heading-raster', 'repeated-vector', 'reversed-boundaries',
+    'covered-scan', 'same-page-scan', 'scan-control'])
+def test_official_blank_draft_retains_graphics_and_page_uncertainty(
+        multi_source_scene, linked, reverse, supplement):
+    import hashlib
+    store, clients, _ = multi_source_scene
+    case = owned(multi_source_scene, complete=True)
+    saved = store.get(case.id)
+    saved.facts = [f for f in saved.facts if f.field not in ('rationale', 'process.rationale')]
+    store.put(saved)
+    exported = clients['owner'].post(f'/cases/{case.id}/export', json={'draft': True})
+    assert exported.status_code == 200, exported.text
+    saved = store.get(case.id)
+    saved.status = 'submitted'
+    store.put(saved)
+    assert clients['reviewer'].post(f'/review/{case.id}/claim', json={}).status_code == 200
+    before = store.get(case.id).model_dump(mode='json')
+    if supplement in ('covered-scan', 'same-page-scan', 'scan-control'):
+        cover = {'covered-scan': 'separate', 'same-page-scan': 'same-page', 'scan-control': 'none'}[supplement]
+        data = covered_scan_pdf(cover)
+        expected_sources = [(2 if cover == 'separate' else 1, None)]
+    else:
+        unique = supplement in ('unique-heading-raster', 'reversed-boundaries')
+        data = repeated_rationale_pdf('vector' if supplement == 'repeated-vector' else 'raster',
+                                      unique_heading=unique, reversed_stop=supplement == 'reversed-boundaries')
+        expected_sources = [(1, 'Rationale'), (1, 'Rationale for variance' if unique else 'Rationale')]
+    uploads = [('official-blank-draft.pdf', exported.content), ('supplement.pdf', data)]
+    if reverse:
+        uploads.reverse()
+    route = f'/review/{case.id}/package-review' if linked else '/package-review'
+    response = clients['reviewer'].post(route, files=multipart(uploads))
+    assert response.status_code == 201, response.text
+    session = response.json()
+    reading = next(f for f in session['fields'] if f['field'] == 'rationale')
+    finding = next(f for f in session['findings'] if f['field'] == 'rationale')
+    assert reading['status'] == finding['status'] == 'not_found', reading
+    assert reading['value'] is None
+    assert [(p['page'], p['quote']) for p in finding['pointers'] if p['file'] == 'supplement.pdf'] == expected_sources
+    assert any(p['file'] == 'official-blank-draft.pdf' and p['page'] == 6
+               and p['quote'] == '(Not provided or not confirmed. No answer has been supplied by Batatis.)'
+               for p in finding['pointers'])
+    assert next(f for f in session['files'] if f['name'] == 'supplement.pdf')['sha256'] == hashlib.sha256(data).hexdigest()
+    item = next(i for i in session['information_request']['items'] if i['field'] == 'rationale')
+    assert item['officer_check'] and not item['included']
+    assert item['text'] not in session['information_request']['text']
+    assert session['administrative_only'] and session['not_a_compliance_determination']
+    # A later readable applicant passage resolves the uncertainty without changing the saved case.
+    reupload = route if linked else f'/package-review/{session["package_id"]}'
+    passage = 'SYNTHETIC supplied readable rationale, with unknown existing conditions.'
+    resolved = clients['reviewer'].post(reupload, files=multipart([
+        ('readable.pdf', text_pdf(['Rationale', passage, 'Risk assessment']))]))
+    assert resolved.status_code == 201, resolved.text
+    assert next(f for f in resolved.json()['fields'] if f['field'] == 'rationale')['value'] == passage
+    assert not any(i['field'] == 'rationale' for i in resolved.json()['information_request']['items'])
+    assert store.get(case.id).model_dump(mode='json') == before
     store.delete(case.id)
 
 

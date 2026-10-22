@@ -29,7 +29,7 @@ def _generated_text(parts, request):
 def test_no_compliance_language_in_any_generated_text(flat):
     planted = dict(CLEAN_FORM, Owner='', Lot='TBD', Objective='OS1.2', Function='F02',
                    **{'Article(s)': '9.10.15.5.(99)', 'Name Responsible': ''})
-    narrative = dict(CLEAN_NARRATIVE, **{'Risk assessment': 'low risk', 'Mitigating measures': ''})
+    narrative = dict(CLEAN_NARRATIVE, **{'Rationale': '', 'Risk assessment': 'low risk', 'Mitigating measures': ''})
     parts = review_uploads(package(planted, narrative, flat=flat), None)
     request = ir.build(parts.findings)
     for text in _generated_text(parts, request):
@@ -48,16 +48,19 @@ def test_never_fills_a_blank_from_elsewhere_in_the_package():
     assert item.text.startswith('Please provide')
 
 
-def test_never_writes_risk_mitigation_or_assumptions():
-    narrative = dict(CLEAN_NARRATIVE, **{'Risk assessment': '', 'Mitigating measures': '',
+def test_never_writes_rationale_risk_mitigation_or_assumptions():
+    narrative = dict(CLEAN_NARRATIVE, **{'Rationale': '', 'Risk assessment': '', 'Mitigating measures': '',
                                          'Assumptions and limits': ''})
     parts = review_uploads(package(narrative=narrative), None)
     by_field = {f.field: f for f in parts.fields}
-    for key in ('risk_assessment', 'mitigating_measures', 'assumptions_and_limits'):
+    process = ('rationale', 'risk_assessment', 'mitigating_measures', 'assumptions_and_limits')
+    findings = {f.field: f for f in parts.findings}
+    for key in process:
         assert by_field[key].status == 'blank' and by_field[key].value is None
+        assert findings[key].status == 'blank' and findings[key].severity == 'blocking'
     request = ir.build(parts.findings)
     for item in request.items:
-        if item.field in ('risk_assessment', 'mitigating_measures', 'assumptions_and_limits'):
+        if item.field in process:
             assert item.text.startswith('Please provide the ')
             assert 'The field is blank.' in item.text
             # A request names the gap; it carries no drafted passage.

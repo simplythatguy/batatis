@@ -187,7 +187,15 @@ def _stored_state(doc: Ingested, spec: ElementSpec) -> tuple[str, str | None, St
         return 'unclear', 'unconfirmed', stored
     if stored.explicit_blank or not stored.value.strip():
         return 'missing', 'blank', stored
-    if _PLACEHOLDER.search(stored.value):
+    if spec.field == 'rationale':
+        from .completeness import _missing
+        # Presence only: the canonical whole-answer placeholders and explicit short responses.
+        # Applicant prose can truthfully discuss an unknown without being a placeholder answer.
+        placeholder = _missing(stored.value) or _PLACEHOLDER.fullmatch(
+            normalize_ws(stored.value).strip(" .!?;:'\""))
+    else:
+        placeholder = _PLACEHOLDER.search(stored.value)
+    if placeholder:
         return 'missing', 'placeholder', stored
     folded = normalize_ws(stored.value).casefold().strip(" '")
     if folded in _STATUS or (spec.field == 'representative' and folded in {'none', 'no representative'}):
@@ -345,7 +353,7 @@ def _one(doc: Ingested, spec: ElementSpec, codes, engineering: bool, heuristics:
         return _professional(doc, spec, engineering)
     if spec.field == 'supporting_doc':
         return _supporting(doc, spec, heuristics)
-    if spec.field in ('risk_assessment', 'mitigating_measures', 'assumptions_and_limits'):
+    if spec.field in ('rationale', 'risk_assessment', 'mitigating_measures', 'assumptions_and_limits'):
         return _process(doc, spec, heuristics)
     if spec.field == 'division_c_2_3_1':
         return _division_c_documentation(doc, spec)
@@ -483,7 +491,7 @@ def _process(doc: Ingested, spec: ElementSpec, heuristics: bool) -> ElementVerdi
     if state == 'missing':
         copied = _process_fix(spec.field)
         message = copied[0] if copied else _presence_copy(spec.label, problem or 'blank')[0]
-        defect = {'risk_assessment': 'D09', 'mitigating_measures': 'D10', 'assumptions_and_limits': 'D11'}[spec.field]
+        defect = {'risk_assessment': 'D09', 'mitigating_measures': 'D10', 'assumptions_and_limits': 'D11'}.get(spec.field)
         return _finish(spec, doc, 'missing', message, problem=problem, defect_class=defect,
                        quotes=_quote_for(doc, stored), preflight=True)
     if state == 'unclear':

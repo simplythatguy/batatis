@@ -36,6 +36,7 @@ CLEAN_FORM = {
 CLEAN_NARRATIVE = {
     'Description of the proposed alternative': 'SYNTHETIC: a protected roof soffit on the east exposing building '
                                                'face, where the limiting distance is 0.40 m. limiting distance: 0.40 m',
+    'Rationale': 'SYNTHETIC applicant rationale; no technical conclusion.',
     'Risk assessment': 'SYNTHETIC applicant passage: fire spread from the soffit to the neighbouring house during '
                        'the time emergency responders need to arrive.',
     'Mitigating measures': 'SYNTHETIC applicant passage: noncombustible soffit with the fire spread limited at the '
@@ -139,6 +140,51 @@ def narrative_pdf(sections: dict) -> bytes:
     for heading, body in sections.items():
         lines += ['', heading, body if body is not None else '', '']
     return text_pdf(lines)
+
+
+def repeated_rationale_pdf(body='raster', *, unique_heading=False, reversed_stop=False) -> bytes:
+    """Two labelled candidates; the second body is not necessarily in the text layer."""
+    import pypdfium2 as pdfium
+    from reportlab.lib.utils import ImageReader
+    from reportlab.pdfgen import canvas
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=(612, 792))
+    c.drawString(48, 748, 'Rationale')
+    c.drawString(48, 708, 'Risk assessment')
+    c.drawString(48, 600, 'Rationale for variance' if unique_heading else 'Rationale')
+    if body in ('raster', 'outside'):
+        source = io.BytesIO()
+        text = canvas.Canvas(source, pagesize=(480, 80))
+        text.drawString(12, 40, 'SYNTHETIC supplied rationale raster body.')
+        text.save()
+        doc = pdfium.PdfDocument(source.getvalue())
+        raster = doc[0].render(scale=1.5).to_pil()
+        c.drawImage(ImageReader(raster), 48, 20 if body == 'outside' else 465, width=480, height=80)
+    elif body == 'vector':
+        c.line(48, 520, 480, 480)
+    c.drawString(48, 640 if reversed_stop else 420, 'Risk assessment')
+    c.save()
+    return buf.getvalue()
+
+
+def covered_scan_pdf(cover='separate') -> bytes:
+    """A scanned applicant passage, optionally behind or below a readable cover."""
+    import pypdfium2 as pdfium
+    from reportlab.lib.utils import ImageReader
+    from reportlab.pdfgen import canvas
+    source = pdfium.PdfDocument(text_pdf([
+        'Rationale', 'SYNTHETIC supplied applicant rationale.', 'Risk assessment',
+        'SYNTHETIC following process field.']))
+    raster = source[0].render(scale=1).to_pil()
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=(612, 792))
+    if cover != 'none':
+        c.drawString(48, 748, 'SYNTHETIC supplement - applicant passage follows.')
+        if cover == 'separate':
+            c.showPage()
+    c.drawImage(ImageReader(raster), 0, 0, width=612, height=700 if cover == 'same-page' else 792)
+    c.save()
+    return buf.getvalue()
 
 
 def package(form_values=None, narrative=None, report=None, *, flat=False, drop=()):
