@@ -815,6 +815,12 @@ body {
   color: var(--cf-text-2);
 }
 
+/* The sidebar's rename and delete dialogs: error text in ink red (4.5:1 on white), not the dot colour. */
+.cf-rename .ac-error,
+.cf-delete .ac-error {
+  color: var(--cf-blocking-ink);
+}
+
 .cf-rename-input {
   width: 100%;
   margin-top: 14px;
