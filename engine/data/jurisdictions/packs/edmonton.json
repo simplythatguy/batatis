@@ -140,7 +140,7 @@
       "provisions": ["9.10.11.2.(2)"],
       "applies_to": "Part 9 row houses with more than two adjacent houses containing a secondary suite, on freehold or condominium lots.",
       "note": "Supported by the City report \"Life Safety and Property Protection: Alternative Solution for Secondary Suites in Row Houses\" (26 July 2024). Requires the Letter of Construction Intention with the permit application. Read every operative condition in the source.",
-      "checklist": null,
+      "checklist": "edmonton-b23-01",
       "source": {
         "title": "City of Edmonton, Policy B23-01 (30 July 2024)",
         "url": "https://www.edmonton.ca/sites/default/files/public-files/Policy-B23-01-Secondary-Suites-in-Row-houses.pdf?cb=1755184683",

@@ -1,5 +1,39 @@
 {
   "$defs": {
+    "AnswerCounts": {
+      "additionalProperties": false,
+      "properties": {
+        "confirmed": {
+          "title": "Confirmed",
+          "type": "integer"
+        },
+        "does_not_apply": {
+          "title": "Does Not Apply",
+          "type": "integer"
+        },
+        "not_yet": {
+          "title": "Not Yet",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "unanswered": {
+          "title": "Unanswered",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total",
+        "confirmed",
+        "not_yet",
+        "does_not_apply",
+        "unanswered"
+      ],
+      "title": "AnswerCounts",
+      "type": "object"
+    },
     "AnswerIn": {
       "additionalProperties": false,
       "description": "One answer. `question_id` is the question's stable id; `field` is the fact field it fills.",
@@ -1074,6 +1108,319 @@
       "title": "Case",
       "type": "object"
     },
+    "CaseChecklist": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/CaseCondition"
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "counts": {
+          "$ref": "#/$defs/AnswerCounts"
+        },
+        "groups": {
+          "items": {
+            "$ref": "#/$defs/ChecklistGroup"
+          },
+          "title": "Groups",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "issued": {
+          "title": "Issued",
+          "type": "string"
+        },
+        "jurisdiction": {
+          "title": "Jurisdiction",
+          "type": "string"
+        },
+        "matches_case_provisions": {
+          "description": "A provision the package varies is among the case provisions.",
+          "title": "Matches Case Provisions",
+          "type": "boolean"
+        },
+        "notice": {
+          "title": "Notice",
+          "type": "string"
+        },
+        "package": {
+          "title": "Package",
+          "type": "string"
+        },
+        "provisions": {
+          "description": "Provisions the package names, as printed in the pack.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Provisions",
+          "type": "array"
+        },
+        "reviewed": {
+          "title": "Reviewed",
+          "type": "boolean"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Revision"
+        },
+        "source": {
+          "$ref": "#/$defs/PackSource"
+        },
+        "source_notes": {
+          "items": {
+            "$ref": "#/$defs/SourceNote"
+          },
+          "title": "Source Notes",
+          "type": "array"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jurisdiction",
+        "package",
+        "code",
+        "title",
+        "revision",
+        "issued",
+        "summary",
+        "reviewed",
+        "source",
+        "groups",
+        "source_notes",
+        "notice",
+        "conditions",
+        "counts",
+        "matches_case_provisions",
+        "provisions"
+      ],
+      "title": "CaseChecklist",
+      "type": "object"
+    },
+    "CaseChecklists": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "case_version": {
+          "title": "Case Version",
+          "type": "integer"
+        },
+        "checklists": {
+          "items": {
+            "$ref": "#/$defs/CaseChecklist"
+          },
+          "title": "Checklists",
+          "type": "array"
+        },
+        "historical": {
+          "items": {
+            "$ref": "#/$defs/HistoricalPackage"
+          },
+          "title": "Historical",
+          "type": "array"
+        },
+        "jurisdiction": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Pack id the case resolved to; null when the case names none.",
+          "title": "Jurisdiction"
+        },
+        "matched_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Matched By"
+        },
+        "none_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Why no checklist is offered, when the list is empty.",
+          "title": "None Reason"
+        },
+        "notice": {
+          "title": "Notice",
+          "type": "string"
+        }
+      },
+      "required": [
+        "case_id",
+        "case_version",
+        "jurisdiction",
+        "matched_by",
+        "checklists",
+        "historical",
+        "none_reason",
+        "notice"
+      ],
+      "title": "CaseChecklists",
+      "type": "object"
+    },
+    "CaseCondition": {
+      "additionalProperties": false,
+      "properties": {
+        "answer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ConditionAnswer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "null until the applicant answers."
+        },
+        "group": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Group",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "scope",
+            "construction",
+            "agreement",
+            "documents",
+            "declaration"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "may_not_apply": {
+          "description": "False when the condition always applies to a project that uses the package.",
+          "title": "May Not Apply",
+          "type": "boolean"
+        },
+        "one_of": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Options of one choice share this key; the applicant follows one option and marks the others does not apply.",
+          "title": "One Of"
+        },
+        "option": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The option this row belongs to within `one_of`, as the source labels it.",
+          "title": "Option"
+        },
+        "plain": {
+          "description": "Plain-language wording shown first.",
+          "minLength": 12,
+          "title": "Plain",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/SourcePointer"
+        },
+        "subject": {
+          "description": "What the condition is about: both houses, one side, both parcels, the permit documents...",
+          "enum": [
+            "project",
+            "both_houses",
+            "zero_side",
+            "easement_side",
+            "both_parcels",
+            "building",
+            "each_house_with_suite",
+            "permit_documents",
+            "declaration"
+          ],
+          "title": "Subject",
+          "type": "string"
+        },
+        "when": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Plain-language trigger when the condition only applies in some designs.",
+          "title": "When"
+        }
+      },
+      "required": [
+        "id",
+        "group",
+        "kind",
+        "subject",
+        "plain",
+        "when",
+        "one_of",
+        "option",
+        "may_not_apply",
+        "source",
+        "answer"
+      ],
+      "title": "CaseCondition",
+      "type": "object"
+    },
     "CaseJurisdictionPack": {
       "additionalProperties": false,
       "description": "`pack` is null when the case names no jurisdiction or authority yet.",
@@ -1116,6 +1463,241 @@
         "pack"
       ],
       "title": "CaseJurisdictionPack",
+      "type": "object"
+    },
+    "CaseRules": {
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "case_version": {
+          "title": "Case Version",
+          "type": "integer"
+        },
+        "edition": {
+          "title": "Edition",
+          "type": "string"
+        },
+        "notice": {
+          "title": "Notice",
+          "type": "string"
+        },
+        "results": {
+          "items": {
+            "$ref": "#/$defs/RuleResult"
+          },
+          "title": "Results",
+          "type": "array"
+        }
+      },
+      "required": [
+        "case_id",
+        "case_version",
+        "edition",
+        "notice",
+        "results"
+      ],
+      "title": "CaseRules",
+      "type": "object"
+    },
+    "ChecklistAnswerRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "condition_id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Condition Id",
+          "type": "string"
+        },
+        "expected_version": {
+          "minimum": 1,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "maxLength": 1000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "state": {
+          "enum": [
+            "confirmed",
+            "not_yet",
+            "does_not_apply"
+          ],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "condition_id",
+        "state",
+        "expected_version"
+      ],
+      "title": "ChecklistAnswerRequest",
+      "type": "object"
+    },
+    "ChecklistAnswerResult": {
+      "additionalProperties": false,
+      "properties": {
+        "case_version": {
+          "title": "Case Version",
+          "type": "integer"
+        },
+        "checklist": {
+          "$ref": "#/$defs/CaseChecklist"
+        }
+      },
+      "required": [
+        "case_version",
+        "checklist"
+      ],
+      "title": "ChecklistAnswerResult",
+      "type": "object"
+    },
+    "ChecklistCondition": {
+      "additionalProperties": false,
+      "description": "One operative condition. Plain language first; the source wording sits behind a disclosure.",
+      "properties": {
+        "group": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Group",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "scope",
+            "construction",
+            "agreement",
+            "documents",
+            "declaration"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "may_not_apply": {
+          "description": "False when the condition always applies to a project that uses the package.",
+          "title": "May Not Apply",
+          "type": "boolean"
+        },
+        "one_of": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Options of one choice share this key; the applicant follows one option and marks the others does not apply.",
+          "title": "One Of"
+        },
+        "option": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The option this row belongs to within `one_of`, as the source labels it.",
+          "title": "Option"
+        },
+        "plain": {
+          "description": "Plain-language wording shown first.",
+          "minLength": 12,
+          "title": "Plain",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/SourcePointer"
+        },
+        "subject": {
+          "description": "What the condition is about: both houses, one side, both parcels, the permit documents...",
+          "enum": [
+            "project",
+            "both_houses",
+            "zero_side",
+            "easement_side",
+            "both_parcels",
+            "building",
+            "each_house_with_suite",
+            "permit_documents",
+            "declaration"
+          ],
+          "title": "Subject",
+          "type": "string"
+        },
+        "when": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Plain-language trigger when the condition only applies in some designs.",
+          "title": "When"
+        }
+      },
+      "required": [
+        "id",
+        "group",
+        "kind",
+        "subject",
+        "plain",
+        "when",
+        "one_of",
+        "option",
+        "may_not_apply",
+        "source"
+      ],
+      "title": "ChecklistCondition",
+      "type": "object"
+    },
+    "ChecklistGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "plain": {
+          "description": "One plain-language line under the group title.",
+          "title": "Plain",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "plain"
+      ],
+      "title": "ChecklistGroup",
       "type": "object"
     },
     "CitationCheck": {
@@ -1413,6 +1995,43 @@
         "total"
       ],
       "title": "CompletenessSummary",
+      "type": "object"
+    },
+    "ConditionAnswer": {
+      "additionalProperties": false,
+      "description": "The applicant's latest answer to one condition, read from case facts. Never a determination.",
+      "properties": {
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        },
+        "state": {
+          "enum": [
+            "confirmed",
+            "not_yet",
+            "does_not_apply"
+          ],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "reason",
+        "fact_id"
+      ],
+      "title": "ConditionAnswer",
       "type": "object"
     },
     "ContextDefinition": {
@@ -2891,6 +3510,58 @@
       "title": "Half",
       "type": "object"
     },
+    "HistoricalPackage": {
+      "additionalProperties": false,
+      "description": "A superseded package. Shown for history only; never offered as a checklist.",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "historical_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Historical Reason"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "issued": {
+          "title": "Issued",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/PackSource"
+        },
+        "status": {
+          "const": "historical",
+          "title": "Status",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "code",
+        "title",
+        "issued",
+        "status",
+        "historical_reason",
+        "source"
+      ],
+      "title": "HistoricalPackage",
+      "type": "object"
+    },
     "IdentifyArticle": {
       "properties": {
         "attribution_missing": {
@@ -4309,6 +4980,135 @@
         "authority"
       ],
       "title": "Jurisdiction",
+      "type": "object"
+    },
+    "JurisdictionChecklist": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/ChecklistCondition"
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "groups": {
+          "items": {
+            "$ref": "#/$defs/ChecklistGroup"
+          },
+          "title": "Groups",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "issued": {
+          "title": "Issued",
+          "type": "string"
+        },
+        "jurisdiction": {
+          "title": "Jurisdiction",
+          "type": "string"
+        },
+        "notice": {
+          "title": "Notice",
+          "type": "string"
+        },
+        "package": {
+          "title": "Package",
+          "type": "string"
+        },
+        "reviewed": {
+          "title": "Reviewed",
+          "type": "boolean"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Revision"
+        },
+        "source": {
+          "$ref": "#/$defs/PackSource"
+        },
+        "source_notes": {
+          "items": {
+            "$ref": "#/$defs/SourceNote"
+          },
+          "title": "Source Notes",
+          "type": "array"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jurisdiction",
+        "package",
+        "code",
+        "title",
+        "revision",
+        "issued",
+        "summary",
+        "reviewed",
+        "source",
+        "groups",
+        "source_notes",
+        "notice",
+        "conditions"
+      ],
+      "title": "JurisdictionChecklist",
+      "type": "object"
+    },
+    "JurisdictionChecklists": {
+      "additionalProperties": false,
+      "properties": {
+        "checklists": {
+          "items": {
+            "$ref": "#/$defs/JurisdictionChecklist"
+          },
+          "title": "Checklists",
+          "type": "array"
+        },
+        "historical": {
+          "items": {
+            "$ref": "#/$defs/HistoricalPackage"
+          },
+          "title": "Historical",
+          "type": "array"
+        },
+        "jurisdiction": {
+          "title": "Jurisdiction",
+          "type": "string"
+        },
+        "notice": {
+          "title": "Notice",
+          "type": "string"
+        }
+      },
+      "required": [
+        "jurisdiction",
+        "checklists",
+        "historical",
+        "notice"
+      ],
+      "title": "JurisdictionChecklists",
       "type": "object"
     },
     "JurisdictionDetail": {
@@ -6597,6 +7397,363 @@
       "title": "RouteNotice",
       "type": "object"
     },
+    "RuleComputed": {
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "name",
+        "label",
+        "unit",
+        "value"
+      ],
+      "title": "RuleComputed",
+      "type": "object"
+    },
+    "RuleInputValue": {
+      "properties": {
+        "fact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fact Id"
+        },
+        "fact_status": {
+          "anyOf": [
+            {
+              "enum": [
+                "confirmed",
+                "unconfirmed"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fact Status"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "field",
+        "label",
+        "unit",
+        "value",
+        "fact_id",
+        "fact_status"
+      ],
+      "title": "RuleInputValue",
+      "type": "object"
+    },
+    "RuleProvisionRef": {
+      "properties": {
+        "citation": {
+          "title": "Citation",
+          "type": "string"
+        },
+        "division": {
+          "title": "Division",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "pdf_page": {
+          "title": "Pdf Page",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "division",
+        "citation",
+        "pdf_page"
+      ],
+      "title": "RuleProvisionRef",
+      "type": "object"
+    },
+    "RuleQuestion": {
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "why": {
+          "title": "Why",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "label",
+        "question",
+        "why"
+      ],
+      "title": "RuleQuestion",
+      "type": "object"
+    },
+    "RuleResult": {
+      "description": "One rule over one set of inputs. A departure flag against an acceptable solution, never a finding that\nthe design as a whole meets the code.",
+      "properties": {
+        "article": {
+          "title": "Article",
+          "type": "string"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "computed": {
+          "items": {
+            "$ref": "#/$defs/RuleComputed"
+          },
+          "title": "Computed",
+          "type": "array"
+        },
+        "ignored_inputs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Ignored Inputs",
+          "type": "array"
+        },
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/RuleInputValue"
+          },
+          "title": "Inputs",
+          "type": "array"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "missing": {
+          "items": {
+            "$ref": "#/$defs/RuleQuestion"
+          },
+          "title": "Missing",
+          "type": "array"
+        },
+        "next_step": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Step"
+        },
+        "not_checked": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Not Checked",
+          "type": "array"
+        },
+        "outcome_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Outcome Id"
+        },
+        "provision": {
+          "$ref": "#/$defs/RuleProvisionRef"
+        },
+        "reviewed": {
+          "title": "Reviewed",
+          "type": "boolean"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "follows",
+            "departs",
+            "needs_info",
+            "not_applicable"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "state_label": {
+          "title": "State Label",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "unconfirmed_inputs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Unconfirmed Inputs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "rule_id",
+        "title",
+        "article",
+        "state",
+        "state_label",
+        "outcome_id",
+        "provision",
+        "message",
+        "next_step",
+        "missing",
+        "inputs",
+        "ignored_inputs",
+        "computed",
+        "assumptions",
+        "not_checked",
+        "reviewed",
+        "unconfirmed_inputs"
+      ],
+      "title": "RuleResult",
+      "type": "object"
+    },
+    "RuleSet": {
+      "description": "Rule definitions for the browser evaluator (web/src/rules/evaluate.ts).",
+      "properties": {
+        "edition": {
+          "title": "Edition",
+          "type": "string"
+        },
+        "index": {
+          "additionalProperties": true,
+          "title": "Index",
+          "type": "object"
+        },
+        "rules": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Rules",
+          "type": "array"
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "version",
+        "edition",
+        "index",
+        "rules"
+      ],
+      "title": "RuleSet",
+      "type": "object"
+    },
     "ScopeCheck": {
       "properties": {
         "cue": {
@@ -7272,6 +8429,127 @@
       "title": "Source",
       "type": "object"
     },
+    "SourceNote": {
+      "additionalProperties": false,
+      "description": "Something in the source the applicant should know: an inconsistency, an offence warning, a figure-only note.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "conflict",
+            "warning",
+            "figure_only",
+            "scope"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "page": {
+          "minimum": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "plain": {
+          "title": "Plain",
+          "type": "string"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "maxLength": 260,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Verified like a condition quote; null when the text is only in a figure.",
+          "title": "Quote"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "plain",
+        "page",
+        "quote"
+      ],
+      "title": "SourceNote",
+      "type": "object"
+    },
+    "SourcePointer": {
+      "additionalProperties": false,
+      "description": "Where in the source PDF the condition is. `quote` is checked word for word against the reference text.",
+      "properties": {
+        "diagram": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A figure or detail in the source that shows this condition, with its page.",
+          "title": "Diagram"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The item label the source prints, e.g. \"b) ii.\" or \"4. a)\".",
+          "title": "Label"
+        },
+        "lead_in": {
+          "anyOf": [
+            {
+              "maxLength": 260,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The sentence the item hangs from, when the item alone is not readable.",
+          "title": "Lead In"
+        },
+        "page": {
+          "description": "One-based page of the source PDF.",
+          "minimum": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "quote": {
+          "description": "A short extract, verbatim apart from whitespace.",
+          "maxLength": 260,
+          "minLength": 8,
+          "title": "Quote",
+          "type": "string"
+        }
+      },
+      "required": [
+        "page",
+        "label",
+        "quote",
+        "lead_in",
+        "diagram"
+      ],
+      "title": "SourcePointer",
+      "type": "object"
+    },
     "StageRecord": {
       "properties": {
         "detail": {
@@ -7348,7 +8626,7 @@
     },
     "StandingPackage": {
       "additionalProperties": false,
-      "description": "A published local route (standing posted variance or policy). Metadata only; checklists are WP-32.",
+      "description": "A published local route (standing posted variance or policy). Its conditions live in a checklist file.",
       "properties": {
         "applies_to": {
           "title": "Applies To",
@@ -7364,7 +8642,7 @@
             }
           ],
           "default": null,
-          "description": "Checklist id once WP-32 builds it. A checklist is never a determination.",
+          "description": "Id of the checklist in checklists/<id>.json; null when none is built. Never set on a historical package. A checklist is never a determination.",
           "title": "Checklist"
         },
         "code": {

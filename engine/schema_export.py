@@ -29,16 +29,21 @@ from .identify.http_models import (BenchmarkConfirmRequest, IdentifyConfirmReque
 from .models_review import InformationRequestEdit, PackageReviewIndex, ReviewSession, SentInformationRequests
 from .models_jurisdictions import JurisdictionDetail, JurisdictionsResult
 from .routes_jurisdictions import CaseJurisdictionPack
+from .rules.models import CaseRules, RuleSet
+from .models_checklists import (CaseChecklists, ChecklistAnswerRequest, ChecklistAnswerResult,
+                                JurisdictionChecklists)
 
 OUT = Path(__file__).resolve().parent.parent / 'web' / 'src' / 'api' / 'engine.schema.json'
 RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesResult, ApplicationsResult,
              QueueResult, ClaimResult, AssistResult, NotificationsResult, IdentifyDecisionResponse,
              ReviewSession, PackageReviewIndex, SentInformationRequests,
-             JurisdictionsResult, JurisdictionDetail, CaseJurisdictionPack, IntakeResult)  # responses carry every field
+             JurisdictionsResult, JurisdictionDetail, CaseJurisdictionPack, IntakeResult, CaseRules, RuleSet,
+             JurisdictionChecklists, CaseChecklists, ChecklistAnswerResult)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
             ClaimRequest, DecisionRequest, MessageRequest, AssistRequest, InformationRequestEdit,
             IntakeRequest, AnswersRequest, ScopeRequest, PlanRequest,
-            IdentifyRequest, IdentifyDecisionRequest, IdentifyConfirmRequest, BenchmarkConfirmRequest)  # defaulted fields optional
+            IdentifyRequest, IdentifyDecisionRequest, IdentifyConfirmRequest, BenchmarkConfirmRequest,
+            ChecklistAnswerRequest)  # defaulted fields optional
 
 
 class _ResponsesCarryDefaults(GenerateJsonSchema):

@@ -1,259 +1,229 @@
 # Submission package checklist
 
-Checklist for Submission 1 of the Alberta Building Codes Challenge (Built World Tech — Venture Pilots 2026). It maps each judging criterion to evidence that exists. A line marked `GAP:` has no supporting file, pull request, or number in the places this checklist was allowed to use.
+*Internal checklist for Submission 1 of the Building Codes Challenge (Thursday Oct 29, 2026). It is not for judges: its file paths can contain internal names that the judge-facing documents avoid. Status is as of Oct 22, 2026, on `dev` at commit 309ff03 (CI run 39759377804 passed) and the live app at <https://batatis-vert.vercel.app>, last checked on Oct 21 (API) and Oct 22 (script bundle). Each line names a file, a pull request (PR) or a number that exists now. A line marked **GAP** has none. Status words follow `docs/implementation-plan.md` §3: **built**, **backend only** (the API is merged and its screen is not finished), **in progress** and **roadmap**.*
 
-Evidence base:
-
-- `dev` at `914b8ec` (`evals: three demo cases (manufacturer, GC, homebuilder) + planted-gap SCO package (#14)`). Paths below are on that commit. It is later than `69fb4ff` (`Section D issues and practice-of-engineering screen (#8)`), which is an ancestor.
-- Pull request [#7](https://github.com/simplythatguy/batatis/pull/7) is inside that pin. It merged at `bbdd051` (`web: small a11y and copy polish (polish-1)`) and renames the user-facing button to "Check completeness".
-- Open pull requests into `dev`. An open pull request is not on `dev`.
-- **BLOCKED** means a reviewer has requested changes on that pull request's current head, so this checklist does not treat it as clear to merge.
-- Pull request [#18](https://github.com/simplythatguy/batatis/pull/18) merged into dev as `64d5027`. It adds `docs/business-plan.md`, `docs/implementation-plan.md`, `docs/pitch-outline.md`, `docs/pilot-adoption-plan.md`, `docs/judge-qa.md`, and `docs/pitch-slides.md`.
-- Pull request [#16](https://github.com/simplythatguy/batatis/pull/16) is not merged and is CHANGES @ `27bec3e`, not re-tested. It is not on `dev`.
-- Pull request [#20](https://github.com/simplythatguy/batatis/pull/20) is a demo script (`docs/demo/script.md`) and is **BLOCKED**. It is not on `dev`.
-- Numbers are copied from files on the pinned `dev`, from pull-request bodies, or from the explicitly pinned Section D receipt below. **model-checked** means that source labels the number as model-checked. It is not a human verification.
-
-This file does not add scores, citations, or demo results.
+The plans, pitch text, Q&A and demo script in this list merged into `dev` with PR #59 (d6de179). The intake and code-check screens of PR #61 were already on `dev`, and a follow-up pass brought these files in line with them.
 
 ## Package rules this repo cannot confirm
 
-The package's exact contents and the submission time are only posted in Discord. They are unverified from this repository.
+The program's onboarding guide says: "Exact submission deadlines, templates and instructions to be posted in Discord." This checklist assumes Thursday Oct 29, 2026, "Submission 1: your semi-final package" (about 10 teams go on to the Nov 10 semi-finals).
 
-The date this checklist is aimed at is **29 October 2026**. That date is in the task for this file and in [`docs/research/2026-10-20-vision/2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) ("Thursday 29 October 2026, the submission deadline"). That research note is not the Discord posting, and it does not give a clock time.
+**GAP:** confirm in Discord the exact submission time, the list of files, and the demo video's format and length limit.
+
+## Deliverables
+
+| Deliverable | Status | Evidence now | GAP |
+|---|---|---|---|
+| Demo video | Not recorded | `docs/demo/script.md`: shot list, narration sized to the clock, EXAMPLE DATA overlay, and the preconditions to record | **GAP:** record it. It needs the officer screens marked "pending UI" in the script (open PR #62), a live-mode decision, and a seeded officer account for the recording |
+| Working link | Live | <https://batatis-vert.vercel.app> answered HTTP 200 on Oct 21. `GET /api/jurisdictions` returned the three packs and 13 coverage rows. `GET /api/code/search` returned 9.10.15.4.(1) among its top three. The OpenAPI document lists 64 paths. On Oct 22 the script bundle contained the strings of the intake and code-check screens (`docs/research/2026-10-21-source-checks.md` §6) | **GAP:** the site does not show which commit it serves, so confirm it is the final one. The Vercel Hobby deployment allowance ran out on Oct 20 (`docs/deploy.md`), so a late redeploy can fail. **GAP:** decide whether live model access is on. `docs/deploy.md` says to keep it off until the US$20 total cap (PR #41, still open) is integrated. Without live access code identification shows its labelled keyword fallback and the relevance rings stay unscored. **GAP:** decide how judges sign in as an officer. The access code is a secret (`BATATIS_REVIEWER_CODES`), and cases are deleted after 7 days |
+| Repo | Private: <https://github.com/simplythatguy/batatis> | `main` is 7 commits behind `dev`. The last release was PR #50 | **GAP:** confirm that judges can open the repo. Release `dev` to `main` after the last merge. Decide which branch the package names |
+| Business plan | Rewritten | `docs/business-plan.md`, with sources in `docs/research/2026-10-21-source-checks.md` | No team section. See "Decisions for you" |
+| Implementation plan | Rewritten | `docs/implementation-plan.md`. The user-testing appendix is `docs/user-testing/` (no real session has run) | No human session. No pilot partner |
+| Pilot plan | Rewritten | `docs/pilot-adoption-plan.md` | No partner has agreed to anything |
+| Pitch | Text current. PDF stale | `docs/pitch-slides.md` (12 slides), `docs/pitch-outline.md`, `docs/pitch-narration.md` (388 spoken words, 2:51 at 140 wpm) | **GAP:** `docs/pitch-deck/batatis-pitch-deck.pdf` is stale, so do not submit it. `index.html` has current text and no screenshots. Steps to export a new PDF are in `docs/pitch-deck/SCREENSHOTS.md` |
+| Judge Q&A | Rewritten | `docs/judge-qa.md` (23 questions) | |
 
 ## Rubric
 
-The verbatim scoring text is on `dev`: [`docs/judging-rubric.md`](../judging-rubric.md), merged in pull request [#15](https://github.com/simplythatguy/batatis/pull/15) at `709aef7`. The scoring question under each criterion below is quoted from that file. The file's editor's note says the nine weights sum to 100, that the sum is computed, and that the PDF prints no total row.
+The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 
-| # | Criterion | Weight |
-| --- | --- | ---: |
-| 1 | Intake | 20% |
-| 2 | Code Identification | 20% |
-| 3 | Recommendations | 10% |
-| 4 | Review | 10% |
-| 5 | General Applicability | 5% |
-| 6 | Implementation Plan | 10% |
-| 7 | Business Plan | 10% |
-| 8 | Usability and Portability | 10% |
-| 9 | The X Factor | 5% |
+| # | Criterion | Weight | Status in one line |
+|---|---|---:|---|
+| 1 | Intake | 20% | Deck built, with the reader's cards, the five-question planner and the fork note (walked with the offline provider only). Rules scored in sample |
+| 2 | Code Identification | 20% | Library, Section C, the code check and up to three quoted choices built. The benchmark record has no screen and the final benchmark is unfinished |
+| 3 | Recommendations | 10% | Engineer callout and Section D cards built. Coded rules are a backend with no screen and no reviewer. Checklists are roadmap |
+| 4 | Review | 10% | Queue, claim, sheet, accept and return built. Package review is backend only. No timing data |
+| 5 | General Applicability | 5% | Role-aware flow built. Untested with a person |
+| 6 | Implementation Plan | 10% | Rewritten. No human session, no partner |
+| 7 | Business Plan | 10% | Rewritten with sourced numbers. No buyer has seen a price |
+| 8 | Usability and Portability | 10% | Calm interface, Council form export and packs built. No usability test |
+| 9 | The X Factor | 5% | Regulator-data insight documented. Team text missing |
 
-## Expected deliverables
+### 1. Intake (20%)
 
-These are the deliverables we expect the package to need. Discord has not been checked, so this list can be wrong.
+**Evidence now:**
 
-| Deliverable | Status |
-| --- | --- |
-| Demo video | `GAP:` no submission demo video is in the repo. [`2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) has a six-minute demo script ("The six-minute demo"). That is a script. Pull request [#20](https://github.com/simplythatguy/batatis/pull/20) is a demo script (`docs/demo/script.md`) and is **BLOCKED**. Pull request [#16](https://github.com/simplythatguy/batatis/pull/16) is not merged and is CHANGES @ `27bec3e`, not re-tested. It links an agent screen recording of a local preview (`vite-who-to-completeness.mp4`). That recording is a development walkthrough of the branch, not a submission video. |
-| Business plan | Pull request [#18](https://github.com/simplythatguy/batatis/pull/18) merged into dev as `64d5027`: [`docs/business-plan.md`](https://github.com/simplythatguy/batatis/blob/docs/plans-draft/docs/business-plan.md). Research on `dev` remains [`docs/research/2026-10-20-vision/C-market-provinces-business.md`](../research/2026-10-20-vision/C-market-provinces-business.md). This checklist does not restate the plan. |
-| Implementation plan | Pull request [#18](https://github.com/simplythatguy/batatis/pull/18) merged into dev as `64d5027`: [`docs/implementation-plan.md`](https://github.com/simplythatguy/batatis/blob/docs/plans-draft/docs/implementation-plan.md). Closest material on `dev` is the research schedule [`2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) (dated 2026-10-20). The user-testing appendix is on `dev` at [`docs/user-testing/`](../user-testing/), merged in pull request [#6](https://github.com/simplythatguy/batatis/pull/6) at `f7fcf4c`. That folder says no real-user or officer sessions have been run, simulated sessions are labelled SIMULATED, and every number in a results table is blank until a session takes place. |
-| Pitch outline | Pull request [#18](https://github.com/simplythatguy/batatis/pull/18) merged into dev as `64d5027`: [`docs/pitch-outline.md`](https://github.com/simplythatguy/batatis/blob/docs/plans-draft/docs/pitch-outline.md). |
-| Pilot plan | Pull request [#18](https://github.com/simplythatguy/batatis/pull/18) merged into dev as `64d5027`: [`docs/pilot-adoption-plan.md`](https://github.com/simplythatguy/batatis/blob/docs/plans-draft/docs/pilot-adoption-plan.md). |
-| Brief §2.1.b.ii | Covered only in draft pull request [#12](https://github.com/simplythatguy/batatis/pull/12). The brief asks the solution to recommend the most likely benchmark or accepted solution, with an explanation. On that branch, `engine/identify/pipeline.py` `_benchmark` returns role `benchmark_acceptable_solution`. It is not on `dev`. |
-| Brief §2.1.c.iii | Covered only in draft pull request [#12](https://github.com/simplythatguy/batatis/pull/12). The brief asks for an explainer paragraph for each article included, and why. On that branch, `engine/section_c.py` `_explainer` builds that paragraph. It is not on `dev`. |
-| Working link | `GAP:` no deployed URL is in the repo. Deploy PR [#24](https://github.com/simplythatguy/batatis/pull/24) is **BLOCKED**, not deployed. On `dev`, `web/src/api/client.ts` proxies `/api` to `http://127.0.0.1:8000`. [`2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) says "Demo runs locally" and "A skeleton deploys on day 3". |
-| Repo | Present: [https://github.com/simplythatguy/batatis](https://github.com/simplythatguy/batatis). This checklist's tree is `dev` at `914b8ec`, plus the open pull requests named below. Pull request [#7](https://github.com/simplythatguy/batatis/pull/7) is inside that pin (`bbdd051`). Pull request [#8](https://github.com/simplythatguy/batatis/pull/8) is inside that pin (`69fb4ff`). Pull request [#14](https://github.com/simplythatguy/batatis/pull/14) is that pin. The root [`README.md`](../../README.md) status line still says application product code is not the focus of that document. `engine/` and `web/` are already on `dev`. |
+- Built: Describe, then one card at a time, with a "Why we ask" on each card and "Not sure" as an open question (`web/src/calm/Start.tsx`, `web/src/calm/deck.ts`; PRs #49, #56, #61). After Start the deck shows each fact the reader found beside the words it came from, and nothing is used until the applicant confirms it.
+- Built: `POST /cases/{id}/intake` reads the description and text PDFs, attaches a pointer to each fact, turns conflicts into questions, asks at most five questions with reasons, flags when a variance may not be needed, and redirects other codes (`docs/api/intake.md`; PR #54). Its screens are in the deck: the "Check what we read" cards, the planner's questions with the fork note, the redirect page, a "Not read" status for a PDF with no text layer, and "Before you submit" on the review (`web/src/calm/ReadCards.tsx`; PR #61).
+- Rules on 60 development cases: precision 159/159, recall 159/162 (`python -m evals_dev.intake_facts.score`, run Oct 21; PR #54). In sample, model-checked.
+- Invariant (PR #54): over the 60 cases and four stripped copies of each, with the rules and the offline fake model, no fact has a quote that is not in its source.
+- Live model check (PR #54): 19 calls, 73 model facts pointed, 0 proposed, 5 dropped, about US$0.012.
+- Engineer-needed flag: 50/60 agreement, 27 unknown, in sample (`evals_dev/section_d_flag/RESULTS.md`).
 
-## Risks
+**Gaps:**
 
-| Risk | Status |
-| --- | --- |
-| Appendix 1 vs the Oct 6 SCC form | Brief §2.5(a) asks for an export in the Appendix 1 format. The crosswalk is pull request [#18](https://github.com/simplythatguy/batatis/pull/18) (merged into dev as `64d5027`), implementation plan §3, "Export target": the export fills the Oct 6, 2026 SCC form. On `dev`, export is engine-only (`POST /cases/{id}/export` in [`engine/api.py`](../../engine/api.py)). The Application screen has no export button. The SCC form PDF is not in git. |
-| NBC(AE) 2023 2nd printing | The edition has to be the same on the screen, in the docs, and in the demo script. On this pin, [`codedb/README.md`](../../codedb/README.md) says the code database is NBC(AE) 2023, second printing. Pull request [#20](https://github.com/simplythatguy/batatis/pull/20) (demo script, **BLOCKED**) and pull request [#16](https://github.com/simplythatguy/batatis/pull/16) (not merged, CHANGES @ `27bec3e`, not re-tested) are the script and screen sides of that check. |
+- **GAP:** the new screens were walked in a browser only with the offline fake provider (PR #61). Run them once with live model access before the video.
+- **GAP:** no human-verified labels, so every intake figure is model-checked and in sample.
+- **GAP:** accuracy across all applicant types is not measured. The 60 cases are agent-authored.
 
-## 1. Intake — 20%
+### 2. Code Identification (20%)
 
-Scoring question, from `docs/judging-rubric.md`: "Does the tool capture the information it needs across varied application types, prompt for what's missing or incomplete, and signal its own confidence rather than filling boxes regardless. Evidence of internal testing/evals."
+**Evidence now:**
 
-### On `dev`
+- Built: the code check in the deck shows four stages of progress and then up to three quoted choices, each with its verbatim sentence behind "Show the code", plus labelled cards for "I could not narrow this down" and the keyword fallback (`web/src/calm/ReadCards.tsx`; PR #61). The pipeline behind it screens all 2,080 Division B articles, re-ranks 60, and has a verifier read 15 and quote word for word (`docs/api/identify.md`; PR #52). The commit rule needs a calibration file and none exists, so nothing is committed automatically.
+- Backend only: a benchmark acceptable-solution record per result, and Div A 1.2.1.1. and Div C 2.3.1.1. attached read-only.
+- Built: code library with a relevance ring on each article and a structured reader (PRs #47, #56). Section C looked up from the attribution tables, with a row for 72.1% of Division B sentences in parts with a table (`codedb/README.md`).
+- Measured on 53 public precedents (relevance stage only, no verifier): first place 64% against 32% for keyword search, first five 81% against 66% (`docs/research/2026-10-20-vision/README.md` §6, which names the subfolder that holds the data and scripts).
+- Cost: US$0.019 to US$0.020 per run, measured in the benchmark ledger (draft PR #58; `docs/research/2026-10-21-source-checks.md` §5).
+- Citations: every citation in the docs was looked up in the 2nd-printing database (`docs/research/2026-10-21-source-checks.md` §7). A fixed-seed audit of 30 provisions found 0 mismatches (`codedb/README.md`).
 
-- Fact model: [`engine/models.py`](../../engine/models.py). A fact is `exact`, `pointed`, `computed`, or `proposed`. A `proposed` fact carries `confidence` and the validator rejects `proposed` plus `confirmed`.
-- Development fixtures: [`evals_dev/SCHEMA.md`](../../evals_dev/SCHEMA.md) and [`evals_dev/cases/dev-001.json`](../../evals_dev/cases/dev-001.json) through `dev-060.json`. `intake_action` is `ask`, `proceed_conditionally`, or `redirect`. `missing_info` separates `critical` from `administrative`. `description` is the only text the system under test is supposed to receive, and it must contain no article numbers.
-- Fixture review: [`evals_dev/REVIEW.md`](../../evals_dev/REVIEW.md). The file's own status line is **model-checked** development fixtures; not human reviewed. Counts written there: 60 cases; intake actions `ask` 18, `proceed_conditionally` 38, `redirect` 4; applicant types architect-engineer 14, contractor 13, homebuilder 8, manufacturer 14, owner 11. The same file says human/professional review completed for zero cases in that task, and that no held-out accuracy is claimed. Those counts are model-checked. They are not human-verified.
-- Web intake chrome on `dev`: [`web/src/screens/Describe.tsx`](../../web/src/screens/Describe.tsx), confidence text for proposed facts in [`web/src/case-parts.tsx`](../../web/src/case-parts.tsx), and a "Not sure" answer in [`web/src/screens/CodeCheck.tsx`](../../web/src/screens/CodeCheck.tsx).
-- A new visit loads a filled example. [`web/src/store.tsx`](../../web/src/store.tsx) session key `batatis-web-case-v2` falls through to [`web/src/fixture.ts`](../../web/src/fixture.ts). The screens do not call the engine's case or fact routes. The typed client does define `createCase` and `addFact` ([`web/src/api/client.ts`](../../web/src/api/client.ts)), and [`web/scripts/smoke-api.ts`](../../web/scripts/smoke-api.ts) calls them against a running engine. No result of that script is recorded in the repo. The routes themselves are in [`engine/api.py`](../../engine/api.py).
-- Demo cases, merged in pull request [#14](https://github.com/simplythatguy/batatis/pull/14) at `914b8ec`: [`evals/demo-cases/`](../../evals/demo-cases/). [`evals/demo-cases/README.md`](../../evals/demo-cases/README.md) says no loader reads that folder. It says the cases were checked against the NBC(AE) 2023 1st printing. all 95 listed ids present in the code database (presence only), per #27, merged as 7a0e6e7. Spot-checked: 9.27.5.1.(2), 3.1.9.1.(1), 9.9.10.1.(2) and S115:2018 [PDF p.116]. People and products are fictional. Files that would be uploaded are each case's `input/` and the `tester-samples/` bundles `01`–`03`. Answer keys are under `keys/<case>/` (`presenter/known-gaps.md` and `expected/`) and `keys/tester-samples/03-sco-bundle-TESTER-KEY.md`.
+**Gaps:**
 
-### Open pull requests
+- **GAP:** accuracy of the final pipeline. Draft PR #58 holds two complete draws of the relevance stage for 139 cases. The third draw and the latency pass need about US$3 to US$4 of account credit, and the decision memo and `pipeline.json` are not generated.
+- **GAP:** the commit rule is uncalibrated, so there is no committed-pick precision to report.
+- **GAP:** the benchmark record has no screen. The quoted choices were walked in a browser only with the offline fake provider (PR #61).
+- **GAP:** the written explainer paragraph per article (brief §2.1.c.iii). The `Explainer` field exists in `engine/models.py` and nothing fills it. What exists is a one-line verifier reason per pick (backend) and the national intent statements shown as "Why this rule exists".
+- **GAP:** no held-out result is reported. The judge-only set of 48 scenarios sits outside the repo and its harness is in draft PR #58.
 
-- [#16](https://github.com/simplythatguy/batatis/pull/16) (not merged, CHANGES @ `27bec3e`, not re-tested, web-to-engine MVP). The body describes an empty case, three roles (manufacturer, general contractor, homebuilder), a typed description posted with `POST /cases` and `POST /facts`, and "Not sure" stored as an open question. It also says file upload `POST /files` returned 404, and that article ranking stays command-line only.
+### 3. Recommendations (10%)
 
-### GAP
+**Evidence now:**
 
-- `GAP:` no human-verified intake score, and no scored run of the product on varied application types. The 60-case file is a model-checked fixture set. [`evals_dev/REVIEW.md`](../../evals_dev/REVIEW.md) says no held-out accuracy is claimed.
-- `GAP:` on `dev`, the applicant UI starts from the fixture in `web/src/fixture.ts`.
+- Built: the professional-involvement result as an amber callout on the review screen, with the line "Batatis can list what that evidence must address, but it can't write it." Section D cards list evidence documents and the responsible person. Cards for rationale, risk, mitigation, assumptions, maintenance and qualifications say the applicant writes them (`web/src/calm/Review.tsx`, `web/src/calm/deck.ts`).
+- Engine: `engine/professional.py` answers required, depends or no, with the Division C rule (2.4.1.1.(3), 2.4.1.2.(1) and others; the rules and PDF pages are in `research/facts/professional-involvement.md`) and never answers "no" on missing facts. Flag agreement 50/60 in sample (`evals_dev/section_d_flag/RESULTS.md`).
+- Backend only: coded rules for 9.10.15.4.(1), 9.10.14.4.(1), 9.10.15.5.(8) and (9), 9.10.11.2.(2) and 9.10.13.13.(1). Each returns follows, departs, needs information or not applicable with the citation (a departure flag, not a compliance finding), and a Python and a browser evaluator both run the 89 hand-set vectors (`docs/api/rules.md`, `evals_dev/rules/REVIEW.md`; PR #63). Every rule and vector is marked unreviewed.
+- Roadmap: a screen for the coded rules, and standing-package checklists (`docs/research/2026-10-20-vision/2-week-build.md`).
 
-## 2. Code Identification — 20%
+**Gaps:**
 
-Scoring question, from `docs/judging-rubric.md`: "Does it map the project to the right articles and rank them sensibly; does it name a plausible benchmark acceptable solution; is Section C's attribution table complete and accurate; do all citations resolve to real articles in the correct edition; is the rationale for each article's inclusion consistent with the code's structure."
+- **GAP:** no engineer or officer has reviewed the professional-involvement labels, the rule vectors or the checklists.
+- **GAP:** the CCMC registry search exists in the API (`/ccmc/search`, with a bundled snapshot of the public registry index dated 2026-10-18; PR #60), and no screen uses it.
 
-### On `dev`
+### 4. Review (10%)
 
-- Identifier library: [`engine/identify/__init__.py`](../../engine/identify/__init__.py). It screens Division B articles, reranks the top N, and can call [`engine/identify/verify.py`](../../engine/identify/verify.py). The module docstring says nothing there commits an article. There is no identify route in [`engine/api.py`](../../engine/api.py) or [`engine/routes_case.py`](../../engine/routes_case.py).
-- Section C lookup: [`engine/section_c.py`](../../engine/section_c.py) and `POST /section-c` in [`engine/api.py`](../../engine/api.py). Code search and lookup: `GET /code/search`, `GET /code/{provision_id}`.
-- Web Section C: [`web/src/api/sectionC.ts`](../../web/src/api/sectionC.ts) calls `POST /section-c`. If the engine cannot be reached, it falls back to fixture rows and sets `source` to `offline`.
-- Fixture gold for benchmarks and Section C rows: [`evals_dev/SCHEMA.md`](../../evals_dev/SCHEMA.md). `gold.must_cite` uses role `benchmark` or `scope`. `gold.section_c` is specified as a copy of `codedb.lookup`. The checker is [`evals_dev/validate_cases.py`](../../evals_dev/validate_cases.py). Edition named in the schema: NBC(AE) 2023, 2nd printing. [`evals_dev/REVIEW.md`](../../evals_dev/REVIEW.md) says that review was model-checked and that no engine accuracy is claimed.
-- Research benchmark, separate from the product API: [`docs/research/2026-10-20-vision/jev-benchmark/README.md`](../research/2026-10-20-vision/jev-benchmark/README.md). It records a run on 53 public Alberta precedent cases (84 gold articles) against 2,080 Division B articles. Figures written in that README: BM25 MRR 0.485, top-1 32%; BM25 top 60 then Jev rerank MRR 0.728, top-1 66%; screen-all then rerank MRR 0.723, top-1 64%; on 20 variance and SPV cases, adding a Sonnet 5.5 verifier moved MRR from 0.748 to 0.875 and top-1 from 65% to 85%. The same README says this is not a held-out professional evaluation, and that the protected evaluation set was not used. Those figures are the research note's measured results. They are not human-verified, and they are not a score of the applicant product.
+**Evidence now:**
 
-### Open pull requests
+- Built: queue with tabs and claim, take-over, the application as a paper sheet beside its completeness list, messages, notifications, "Accept as complete" and "Return with message" (`docs/api/accounts-review.md`; PRs #48, #49). An agent-run browser walk completed sign-up, submit, claim, return, resubmit and accept (PR #49).
+- Backend only: the package review of fillable and flattened SCC forms with attachments, a documents panel, a deterministic information request, an "x of y gaps resolved" diff, the Division C 2.3.1.1 file-item findings, a peer-review signal for the officer, and a close-out record with a due date 10 days after the decision (`docs/api/package-review.md`; PR #53). The 10-day date is the rule before Dec 1, 2026, and the record does not yet follow the portal timing that starts on Dec 1. Tests plant defects from 16 classes in synthetic forms (`engine/tests/test_package_review_planted.py`).
 
-- [#12](https://github.com/simplythatguy/batatis/pull/12) (identify pipeline and keyed OpenAI benchmark, draft, not merged). The body says `POST /cases/{id}/identify` and `engine/cli_sut.py` call `engine.identify.pipeline.run`, and that an answer of "not sure" is stored with status `unknown`. It gives the benchmark command (`python -m engine.identify.benchmark`, 20 `evals_dev` cases, `--repeats 3`, FX 1.4097 on 2026-10-19). It says pytest of the listed modules was 17 passed, and that a missing `OPENAI_API_KEY` exits 2. The summary says demo-cache quotes and a live OpenAI score are not in that push. The keyed benchmark results section of the same body records a single run, not those 3 repeats. For variant `c_openai_rerank_verify`: top-1 9/11 and recall@5 9/11 on model-checked dev cases with gold, in-sample, single run (the body's 0.8182 on n=11). BM25 baseline 5/11 (the body's `a_bm25` top-1 0.4545 on the same 11 cases). Asks on 40%. C$0.0277 and 5.7 s median per case for identification only, on model aliases (`gpt-4.1-mini` and `gpt-4.1`, not dated snapshots). Model-checked. Not human-verified. Not on `dev`. Brief §2.1.b.ii is `_benchmark` in `engine/identify/pipeline.py` on that branch (role `benchmark_acceptable_solution`). Brief §2.1.c.iii is `_explainer` in `engine/section_c.py` on that branch. Neither function is on `dev`.
-- [#16](https://github.com/simplythatguy/batatis/pull/16) (not merged, CHANGES @ `27bec3e`, not re-tested). The body says Section C on that branch is a live lookup or a labelled cached demo, and that article ranking is command-line only.
+**Gaps:**
 
-### GAP
+- **GAP:** the package review and close-out screens (in progress, open PR #62).
+- **GAP:** the package review does not check that a rationale is present. It checks the description of the proposed alternative, the risk assessment, the mitigating measures and the assumptions and limits (`docs/implementation-plan.md` §2.3).
+- **GAP:** officer time saved. The timing protocol is `docs/user-testing/officer-timing-protocol.md`, and no session has run.
+- **GAP:** the blind 20-application planted-defect evaluation in `evals_dev/planted/SPEC.md`.
+- **GAP:** refusal is not in Batatis. The officer's written reasons and the 30-day appeal notice stay in the authority's process.
 
-- `GAP:` no applicant-facing run, on `dev` or in a pull-request body, that scores the benchmark acceptable solution as its own result. c_openai_rerank_verify: top-1 9/11 and recall@5 9/11 on the 11 dev cases with a gold article (in-sample, single run, 9 cases without gold excluded); BM25 baseline 5/11; asks the applicant on 40% of cases, model-checked, not human-verified.
+### 5. General Applicability (5%)
 
-## 3. Recommendations — 10%
+**Evidence now:**
 
-Scoring question, from `docs/judging-rubric.md`: "Does it identify the specific technical issues or code sections the supplemental documentation must address, and does it correctly flag where engineering or another licensed professional is required — including knowing where to stop rather than generating professional judgment itself."
+- Built: onboarding sets manufacturer, general contractor or homebuilder. The role changes the prompt on Describe and the planner's questions (only a manufacturer is asked by the planner whether the variance is for one site or many), and the form cards are the same for every type (`web/src/calm/auth/onboardingSteps.ts`, `web/src/calm/Start.tsx`, `engine/intake/questions.py`). Every card says why it asks.
+- Three fictional demo cases, one per type, as test inputs (`evals/demo-cases/`).
 
-### Measured flag and historical `dev` evidence
+**Gaps:**
 
-- At measured source `d479e82`, the shipped facts-only `rules_plus_unknown` agreed with model gold on 50/60 text-only dev cases (0 no outputs, 27 unknowns) and 8/11 model-constructed no-ground-truth (no-gt) cases (PR #26; 8 no outputs, 3 unknowns). Unshipped `rules_only` had 55/60 dev agreement and 1 under-flag. Both shipped sets had 0 under-flags, defined only as gold yes to system no. The three no-gt gold-yes cases (`ngt-101`, `ngt-102`, `ngt-103`) abstained; these are misses, not correct answers. Zero under-flags on dev is by design because it never answered no. All current cases are in-sample, model-checked, not human-verified. Neither model gold nor the receipt's self-check is independent expert validation. These counts do not establish applicability, equivalence, professional approval or safety, or validate the full Case/API/export flow. They apply only to `d479e82`, not this document branch, newer source, a deployment or a final release. Historical shipped-variant results remain 7/8 blind pre-fix and 4/8 post-fix (no longer blind); neither was rerun for this receipt. Source: [Data Nerd receipt `d75e7ff`](https://github.com/simplythatguy/batatis/blob/d75e7ff0fabb89a2d3f23792ceba8ce116536b35/evals_dev/section_d_flag/RESULTS.md).
-- Historical source: the #8 headline, on `dev` at `69fb4ff`. The shipped screen is `rules_plus_unknown` 50/60. The body says the dev table is in-sample, and that the span rule came from development case `dev-050`. As written in that body, and not recomputed here: `held-out rules_plus_unknown: 7/8 [0.5291, 0.9776]`; post-fix and no longer blind for missing-fact cases: `rules_plus_unknown: 4/8 [0.2152, 0.7848]`. Pytest written in the body: `python3 -m pytest engine/tests/test_section_d_issues.py -q` — 18 passed. The body says citation text was not checked against a local code database in that run.
-- Evidence plan: [`engine/section_d.py`](../../engine/section_d.py). Items offer evidence types in the confidence-ladder order, plus the alternative-path types (CCMC, ICC-ES, registered professional opinion, engineering review). The module docstring says no test, evaluation, professional opinion, or result is generated there.
-- Professional screen: [`engine/professional.py`](../../engine/professional.py). The docstring says it is a deterministic screen, not a licence determination, and that missing facts cannot produce an overall `no`. Result values are `yes`, `no`, and `depends`.
-- Process prompts: [`engine/process_fields.py`](../../engine/process_fields.py). The docstring says the module supplies prompts, never answers. Field ids include `rationale`, `risk_assessment`, `mitigating_measures`, and `assumptions_and_limits`.
-- Routes in [`engine/routes_case.py`](../../engine/routes_case.py): `POST /cases/{id}/section-d`, `GET /cases/{id}/section-d/issues`, `GET /cases/{id}/professional`, `GET /cases/{id}/process-fields`. The issues route and [`engine/section_d_issues.py`](../../engine/section_d_issues.py) arrived with #8. That module's docstring says an issue does not conclude that a design complies, is safe, or that a supplied opinion is adequate.
-- Fixture labels: [`evals_dev/REVIEW.md`](../../evals_dev/REVIEW.md) records professional-involvement flags of 33 `yes`, 17 `depends`, 10 `no` on the 60 cases. That review is model-checked. It is not human-verified. The file says zero cases received human/professional review.
+- **GAP:** no first-time applicant has tried it. The target is 2 of 3 finishing Part 1 unaided (`docs/implementation-plan.md` §7.2).
+- **GAP:** the demo cases were checked against the 1st printing and spot-checked in the 2nd (`evals/demo-cases/README.md`), so they are not used as evidence of code accuracy.
 
-### Open pull requests
+### 6. Implementation Plan (10%)
 
-- [#9](https://github.com/simplythatguy/batatis/pull/9) (human-key harness, merged into dev as `623f7c9`), which includes the Section D screen from #8 at `69fb4ff`. Numbers below are copied from the pull-request body. The body marks `label_strength: weak; editions pre-2023`. They are not human-verified.
-  - `rules_only`, `rules_plus_unknown`, and `always_unknown`: each `7/12 [0.3195, 0.8067]`. 7/12 is the always-unknown baseline by construction.
-  - `unknown: 12` on each variant. `confident_wrong: none`.
-  - The body says stored facts do not establish a yes or a no, so every variant abstains; the 7 matches are the weak `depends` labels; the 5 weak `yes` labels land in the unknown column.
-  - Pytest written in the body: 21 passed (`test_human_key.py`, `test_deterministic_checks.py`, `test_appeals.py`).
+**Evidence now:**
 
-### GAP
+- `docs/implementation-plan.md`: state of the product, the Council's six steps mapped to Batatis, the officer workflow with the Council copy and the Dec 1 portal rule, the regulatory fit, hosting and data handling, the path to beta with the definition of beta and its dependencies, and the user-testing plan.
+- `docs/user-testing/` (session script, consent form, officer timing protocol). `docs/pilot-adoption-plan.md`. Jurisdiction onboarding by data packs: `docs/api/jurisdictions.md` (PR #51).
 
-- `GAP:` no human-verified professional-flag score. The appeals labels in #9 are marked weak and pre-2023 in that pull request. The issues list is on `dev` (`GET /cases/{id}/section-d/issues`).
+**Gaps:**
 
-## 4. Review — 10%
+- **GAP:** no human session has run and no pilot partner has agreed to anything.
+- **GAP:** Canadian-region hosting is a plan. The demo runs in the US East region.
 
-Scoring question, from `docs/judging-rubric.md`: "Can it review a completed application, summarize it usefully for an SCO or applicant including supplemental material, and flag gaps or missing components. Does the reviewer-facing view actually save an SCO time."
+### 7. Business Plan (10%)
 
-### On `dev`
+**Evidence now:**
 
-- Administrative checker: [`engine/completeness.py`](../../engine/completeness.py). The docstring limits this file to planted classes D01–D13 and D16, and says D09/D10 cover empty fields only. It says generic or unrelated narratives, attachment contradictions (D14), relevance (D15), engineering adequacy, and licence authenticity require human judgement. `check_completeness` says an empty list is no technical or acceptance determination.
-- Route: `GET /cases/{id}/gaps` in [`engine/routes_case.py`](../../engine/routes_case.py).
-- Tests for those classes: [`engine/tests/test_completeness.py`](../../engine/tests/test_completeness.py). This checklist does not restate a pass count; none is written beside the file.
-- Planted-defect protocol only: [`evals_dev/planted/SPEC.md`](../../evals_dev/planted/SPEC.md). The spec says generating the seeded PDFs waits for form export. The directory contains that spec and no planted applications.
-- Applicant completeness chrome: [`web/src/screens/Application.tsx`](../../web/src/screens/Application.tsx). "Check completeness" stays available while blocking gaps remain, so the missing items can be reviewed. The official PDF stays closed until those gaps are cleared. The dialog says filling the official SCC form arrives with the engine, and that the check is administrative. There is no export button on this screen.
-- Officer screen: [`web/src/screens/Placeholders.tsx`](../../web/src/screens/Placeholders.tsx) renders "Not built yet" for officer review. The accuracy page in the same file says "No evaluation runs yet".
+- `docs/business-plan.md`: buyers ranked, willingness to pay with anchors and assumed prices, cost per application from the measured per-stage cost, market size from estimates, competitors, defensibility, and what has not been validated.
+- Sources: `docs/research/2026-10-20-vision/C-market-provinces-business.md` and `docs/research/2026-10-21-source-checks.md`.
 
-### Open pull requests
+**Gaps:**
 
-- [#11](https://github.com/simplythatguy/batatis/pull/11) (administrative completeness pipeline, draft, not merged). The body adds bulletin gates for IB-2025-11-18 and IB-2026-10-01, and says the 10-day copy to the Safety Codes Council is a reminder, not an export blocker. Numbers below are copied from the pull-request body (offline `python3 -m evals_dev.completeness_eval --repeats 1`, no `--live`, no code database). They are not human-verified.
-  - Before, as written: variant A 0.992 (729/735), variant B 1.000 (735/735), clean-control false positives 0, invented values 0. Variant C not scored.
-  - After, as written: variant A `overall_success=0.993 (845/851)`; variant B `overall_success=1.000 (851/851)`. 845/851 and 851/851 are an internal, in-sample, synthetic planted set, not a judge-facing score. They are model-checked. They are not human-verified. Both have `invented_values=0` and `invented_value_gate=pass`; clean-control false positives 0. Variant C `status=skipped`.
-  - The body says variant A still misses generic risk (D09 1/2), unrelated mitigations (D10 1/2), contradictions (D14 0/2), and relevance (D15 0/2), and that D05 and D07 are absent from that table because they need the code database.
-  - Pytest written in the body, without a code database: 12 passed across `test_bulletin_gates.py`, `test_portal_package.py`, `test_jurisdiction_wording.py`, and `test_schema_export.py`.
-  - The body says the draft is not ready to merge.
-- [#16](https://github.com/simplythatguy/batatis/pull/16). #16 is not merged and is CHANGES @ `27bec3e`, not re-tested. On this branch, Check completeness stays available while blocking gaps remain, and Download text record saves a .txt record either way. The official PDF stays closed until those gaps are cleared, and then downloads the engine-filled Safety Codes Council variance form PDF (the 5-page Oct 6, 2026 form plus engine-generated attachment pages (7 for Unc's 3b case; not the brief's Appendix 1)) behind a "not a finding that the design complies" dialog. The body also says `GET /gaps` returned 503 when `BATATIS_CODEDB` was missing.
+- **GAP:** no buyer has seen a price. Hosting, support and pack upkeep are not priced.
+- **GAP:** no team section (see "Decisions for you").
 
-### GAP
+### 8. Usability and Portability (10%)
 
-- `GAP:` no measurement that a reviewer-facing view saves an SCO time. The officer screen on `dev` is the placeholder in `web/src/screens/Placeholders.tsx`. [`docs/user-testing/officer-timing-protocol.md`](../user-testing/officer-timing-protocol.md) is the planned comparison. The folder says no officer session has been run, and every number in a results table is blank until a session takes place.
-- `GAP:` no planted-gap applications in `evals_dev/planted/` on `dev`. The spec says the PDFs are not generated yet.
+**Evidence now:**
 
-## 5. General Applicability — 5%
+- Built: the calm interface (`docs/design-system-calm.md`), the official Oct 6, 2026 form as a draft or "Official PDF" (the app's label for the Council's form filled in; the Council does not issue it) pinned to its SHA-256 (`engine/export/field_maps/scc_2026-10.json`), and submit and review for Calgary and Edmonton.
+- Export gate G3 (`python scripts/gate_g3.py`, PR #60) passes on three fictional demo cases and a synthetic sample: every applicant field is filled or marked N/A from the applicant's own facts, the exported text passes `codedb validate` with 0 errors, and the appendix uses none of "complies", "safe", "approved" or "adequate" (`docs/research/2026-10-21-source-checks.md` §6).
+- Built as data and API: packs for Calgary, Edmonton and the rest of Alberta, 12 other provinces and territories labelled preview, a lint test against city names in code, and a test that adds a fourth pack with no code change (`docs/api/jurisdictions.md`).
 
-Scoring question, from `docs/judging-rubric.md`: "Could an inexperienced applicant of any type — manufacturer, general contractor, homebuilder — use this without prior variance experience or code fluency."
+**Gaps:**
 
-### On `dev`
+- **GAP:** no usability test with a person on either side.
+- **GAP:** the picker for other offices and the pack's process notes beyond "Before you submit" have no screen. The Calgary form export, the Appendix 1 export and Part 2 prefill are roadmap.
+- **GAP:** reviewer accounts exist only for Calgary and Edmonton.
 
-- The 60 development cases include those roles. [`evals_dev/REVIEW.md`](../../evals_dev/REVIEW.md) counts, model-checked and not human-verified: manufacturer 14, contractor 13, homebuilder 8, plus architect-engineer 14 and owner 11. Descriptions are specified to be plain language with no article numbers ([`evals_dev/SCHEMA.md`](../../evals_dev/SCHEMA.md)).
-- The web app on `dev` has one filled fixture ([`web/src/fixture.ts`](../../web/src/fixture.ts)), not a role chooser.
-- The three applicant demo cases are on `dev` at [`evals/demo-cases/`](../../evals/demo-cases/) (#14, `914b8ec`). [`evals/demo-cases/README.md`](../../evals/demo-cases/README.md) says no loader reads them. Upload paths are each case's `input/` and `tester-samples/` bundles `01`–`03`. Answer keys are `keys/<case>/` and `keys/tester-samples/`.
+### 9. The X Factor (5%)
 
-### Open pull requests
+**Evidence now:**
 
-- [#16](https://github.com/simplythatguy/batatis/pull/16) (not merged, CHANGES @ `27bec3e`, not re-tested). The body describes a "Who are you?" step with manufacturer, general contractor, and homebuilder, each starting from an empty case, plus "Try an example" for three cached runs.
+- The Oct 6 form change was caught and the export pinned to it (`docs/research/2026-10-21-source-checks.md` §3). Three articles are 69% of the Q1 to Q2 2026 Data Hub entries (`docs/research/2026-10-20-vision/C-market-provinces-business.md` §2.0). The product follows the Council's own terms and six steps (`docs/implementation-plan.md` §2).
 
-### GAP
+**Gaps:**
 
-- `GAP:` no session with an inexperienced applicant. [`docs/user-testing/README.md`](../user-testing/README.md) says no real-user or officer sessions have been run.
-- `GAP:` the role chooser is not on `dev`. The demo-case files are on `dev`, and their README says no loader reads them.
+- **GAP:** the team, the insight and the unfair advantage are not described in any file. Only the user can supply this text.
 
-## 6. Implementation Plan — 10%
+## Challenge scope requirements
 
-Scoring question, from `docs/judging-rubric.md`: "Is there a realistic path to beta. How will the product testing with users inform final design? How does the product integrate with current user workflows?"
+From the Challenge Scope, §2 ("Detailed Technical Scope").
 
-### On `dev`
+| Item | Status |
+|---|---|
+| 1.a Prompt for the information Sections A and B need | Built (deck and the reader's cards) |
+| 1.b.i Select relevant codes and rank them | Built: the code check offers up to three quoted choices, and the library ranks articles with relevance rings |
+| 1.b.ii Recommend the most likely benchmark acceptable solution, with an explanation | Quoted choices are on screen. The benchmark record per result is backend only |
+| 1.c Complete Section C by lookup | Built. A row exists for 72.1% of sentences in parts with a table |
+| 1.c.iii An explainer paragraph for each article and why | **GAP** (see criterion 2) |
+| 2 Say when a professional or an engineer is involved | Built (callout) over the engine check |
+| 3 Recommend issues and code sections for Section D | Built: the Section D card loads the engine's issues and evidence plan. It never writes the evidence |
+| 4 Review an application for completeness | Built for Batatis cases. Backend only for uploaded forms with attachments |
+| 5.a Export a PDF that matches the template | Built for the Oct 6, 2026 form. The Appendix 1 layout is roadmap by decision (`docs/implementation-plan.md` §4.3) |
+| 5.b Portable data | Built (packs) |
 
-- The plans are on dev, merged via [#18](https://github.com/simplythatguy/batatis/pull/18) as `64d5027`. Research schedule: [`docs/research/2026-10-20-vision/2-week-build.md`](../research/2026-10-20-vision/2-week-build.md), dated 2026-10-20. It names a build window of 21–29 October 2026, gates G1–G5, a cut order, and a day-3 skeleton deploy. It is a research note. It is not a submission implementation plan, and the gates in it are not results.
-- [`docs/user-testing/`](../user-testing/), merged in pull request [#6](https://github.com/simplythatguy/batatis/pull/6) at `f7fcf4c`. Round plan, think-aloud script, SUS, a consent form marked DRAFT, and an officer timing protocol. The folder says no real-user or officer sessions have been run, simulated sessions are labelled SIMULATED, and every number in a results table is blank until a session takes place. Round 1 is planned as 3 applicants. Round 1b is planned as 1–2 officers.
+## Open work, ranked by rubric weight
 
-### Open pull requests
+1. **A live-mode run of the intake and code-check screens** (criteria 1 and 2, 40 points). PR #61 walked them with the offline fake provider only.
+2. **The code identification benchmark and the commit decision.** Needs account credit.
+3. **Package review and close-out screens** (criterion 4; open PR #62).
+4. **Record the demo video** after PR #62 lands (script preconditions).
+5. **Refresh the pitch deck:** capture the screenshots (the intake and code-check screens exist now) and export a new PDF.
+6. **Human sessions.** None are scheduled.
+7. **The live-mode decision** and the total spend cap (PR #41).
+8. **Release `dev` to `main`** and confirm judge access to the repo.
+9. **Team and X-factor text.**
+10. **The explainer paragraph** (brief §2.1.c.iii).
+11. **Close-out timing for Dec 1.** `engine/review/close_out.py` sets every due date to 10 days after the decision. From Dec 1, 2026 the Council wants variances registered at issuance or as soon as reasonably practicable after (IB-2026-10-01). Change the record before a pilot.
 
-- [#18](https://github.com/simplythatguy/batatis/pull/18) merged into dev as `64d5027`. The pull request adds `docs/implementation-plan.md` and `docs/pilot-adoption-plan.md`. This checklist does not restate those files.
+## Decisions for you
 
-### GAP
+These need an answer or a file that only you can supply.
 
-- `GAP:` no user-test results that could inform a final design. The testing kit is on `dev` and its results tables are blank. The submission implementation plan and the pilot plan are in PR #18, which merged into dev as `64d5027`.
+1. **Live model access for the demo.** Turn it on, which needs the spend cap in PR #41, or keep it off and accept the labelled keyword fallback and unscored rings.
+2. **How judges and the video sign in as an officer.** Share the access code, or seed a demo reviewer.
+3. **Who the plans can say you have spoken to.** The earlier plans said "we have contacted no one". The rewritten plans say only that no partner has agreed to anything. If you have spoken with Safety Codes Council experts, say what may be written.
+4. **The team text** for criterion 9 and the business plan.
+5. **Whether the reviewer's "Accept as complete" also stands for the officer's decision to issue the variance.** The product says "Accepted as administratively complete", and the close-out record starts its 10-day clock at that decision. The Council's decision to issue a variance is the officer's own act under s.38. Decide how the demo and the plans should describe it.
+6. **Account credit** for the benchmark (about US$3 to US$4) and whether to spend it before Oct 29.
+7. **Whether to close PR #32 and PR #20.** PR #59 merged, so both are superseded.
 
-## 7. Business Plan — 10%
+## How the claims were checked
 
-Scoring question, from `docs/judging-rubric.md`: "Is there a credible company here — buyer, willingness to pay, cost per application, and a defensible position as the underlying models improve."
+- Every figure in the judge-facing documents was extracted by script and matched against the repo's source files, the new source-check note and the primary PDFs read on Oct 21 (`docs/research/2026-10-21-source-checks.md`). Derived figures are labelled arithmetic, and assumed figures carry their basis.
+- Council bulletins were re-downloaded, and each file's SHA-256 matched the hash in `engine/data/jurisdictions/provinces/AB.json`.
+- Every code citation was looked up with `python -m codedb lookup` in the NBC(AE) 2023, 2nd-printing database.
+- Judge-facing documents name no AI or scoring provider. They say "a relevance model" and "a third-party AI provider".
+- No statistic, quote, customer or pilot result is invented, and the user-testing appendix still says that no real session has run.
 
-### On `dev`
+## Open pull requests that touch the package
 
-- The plans are on dev, merged via [#18](https://github.com/simplythatguy/batatis/pull/18) as `64d5027`. Research notes: [`docs/research/2026-10-20-vision/C-market-provinces-business.md`](../research/2026-10-20-vision/C-market-provinces-business.md). Header: "Research only." Claim labels in that file are VERIFIED, VENDOR CLAIM, ESTIMATE, and UNVERIFIED.
-- Section "(a) One-page business case" is labelled "ESTIMATES unless marked". It discusses who pays, a cost-per-application anchor, and a moat. Those sentences stay inside that file's labels. This checklist does not promote them to a business plan.
-- Section 5 records the file's own reading of willingness to pay. The same file says Alberta or Canadian consultant fees for alternative solutions were still not found after that pass.
-
-### Open pull requests
-
-- [#18](https://github.com/simplythatguy/batatis/pull/18) merged into dev as `64d5027`. The pull request adds `docs/business-plan.md`, `docs/pitch-outline.md`, `docs/judge-qa.md`, and `docs/pitch-slides.md`. This checklist does not restate those files.
-
-## 8. Usability and Portability — 10%
-
-Scoring question, from `docs/judging-rubric.md`: "Overall user experience for both sides. Would a design lead choose this over their current process; would an SCO open it twice. Is it designed for adaptability to individual jurisdictions."
-
-### On `dev`
-
-- Applicant screens: Describe, Code check, Section C, and Application under [`web/src/screens/`](../../web/src/screens/). Officer review and the accuracy report are placeholders ([`web/src/screens/Placeholders.tsx`](../../web/src/screens/Placeholders.tsx)).
-- Visual system: [`docs/design-system-linear.md`](../design-system-linear.md) and [`docs/design/tokens.css`](../design/tokens.css).
-- Jurisdiction is a data field, not a pack. [`engine/models.py`](../../engine/models.py) `Jurisdiction` has `id`, `name`, and `authority`. [`evals_dev/SCHEMA.md`](../../evals_dev/SCHEMA.md) says `jurisdiction` is kept as data so cases stay portable across jurisdictions. A search of the tree finds no jurisdiction-pack files. Packs are described as future work in [`2-week-build.md`](../research/2026-10-20-vision/2-week-build.md) and in the market research note.
-- Export route on the engine: `POST /cases/{id}/export` in [`engine/api.py`](../../engine/api.py), implementation under [`engine/export/`](../../engine/export/). The Application screen does not call it and has no export button. The dialog says the SCC form arrives with the engine. The SCC form PDF is not in git.
-- Pull request [#7](https://github.com/simplythatguy/batatis/pull/7) is inside this pin (`bbdd051`). The user-facing button on `dev` is "Check completeness".
-
-### Open pull requests
-
-- [#16](https://github.com/simplythatguy/batatis/pull/16). #16 is not merged and is CHANGES @ `27bec3e`, not re-tested. On this branch, Check completeness stays available while blocking gaps remain, and Download text record saves a .txt record either way. The official PDF stays closed until those gaps are cleared, and then downloads the engine-filled Safety Codes Council variance form PDF (the 5-page Oct 6, 2026 form plus engine-generated attachment pages (7 for Unc's 3b case; not the brief's Appendix 1)) behind a "not a finding that the design complies" dialog. The body says the product surface moves to `web/`. Screenshots in that body are of a local preview.
-- [#11](https://github.com/simplythatguy/batatis/pull/11). The body says wire fields on `Jurisdiction` stay `id`, `name`, and `authority`, and that "authority having jurisdiction" wording follows IB-2026-10-16. That wording change is not on `dev`.
-
-### GAP
-
-- `GAP:` no evidence a design lead would choose this over a current process, and no evidence an SCO would open it twice. The officer screen on `dev` says it is not built yet.
-- `GAP:` no jurisdiction packs. Portability on `dev` is the `Jurisdiction` field and the case schema, not a per-municipality package.
-
-## 9. The X Factor — 5%
-
-Scoring question, from `docs/judging-rubric.md`: "Hard-to-quantify edge — team, insight, unfair advantage."
-
-### On `dev`
-
-- Product thesis, as research: [`docs/research/2026-10-20-vision/README.md`](../research/2026-10-20-vision/README.md). It argues that Alberta variance volume is concentrated in a few Part 9 articles and that surveyed AI plan-review products check prescriptive rules. The market note ([`C-market-provinces-business.md`](../research/2026-10-20-vision/C-market-provinces-business.md), section 1) labels "no competitor prepares alternative-solution applications" as an UNVERIFIED negative (absence from search, not proof).
-- The same vision note's measured identification work is the Jev benchmark in section 2 above. The benchmark README's own limit applies: not a held-out professional evaluation.
-
-### GAP
-
-- `GAP:` no team note, no biography, and no submission statement of an unfair advantage.
-- `GAP:` the competitor claim stays an UNVERIFIED negative inside the research file. This checklist does not treat it as established.
-
-## Open work that blocks the package
-
-Nothing below is a result. It is the list of `GAP:` lines that still have no file.
-
-1. Submission demo video. The demo script is pull request #20, which is **BLOCKED**.
-2. A working link. Deploy PR #24 is **BLOCKED**, not deployed. No deployed URL is in the repo.
-3. Identification figures on `dev`. c_openai_rerank_verify: top-1 9/11 and recall@5 9/11 on the 11 dev cases with a gold article (in-sample, single run, 9 cases without gold excluded); BM25 baseline 5/11; asks the applicant on 40% of cases, model-checked, not human-verified. Those figures are not on `dev`.
-4. Human-verified intake, code-identification, and professional-flag scores. What exists is model-checked, or marked weak, or a research measurement with the limits written in its own file.
-5. An officer view with a time measurement. The screen on `dev` is a placeholder.
-6. Jurisdiction packs. The three applicant demo cases are on `dev` (`evals/demo-cases/`, #14 at `914b8ec`) and the README says no loader reads them. The role chooser is pull request #16.
-7. User-test results that could inform a final design. The protocol is on `dev` at `docs/user-testing/`. Its results tables are blank.
-8. Brief §2.1.b.ii and §2.1.c.iii on `dev`. Both are only on draft pull request #12.
-
-The business plan, the implementation plan, the pitch outline, the pilot plan, `docs/judge-qa.md`, and `docs/pitch-slides.md` are in PR #18, which merged into dev as `64d5027`. Pull request #16 is not merged and is CHANGES @ `27bec3e`, not re-tested.
+| PR | What | Action |
+|---|---|---|
+| #62 | WP-36: officer review screens (package review, information request, decisions, close-out) | Review and merge, then update the plan, the demo script and this file |
+| #58 | Code identification benchmark (draft) | Finish after account credit. Do not merge as it is |
+| #41 | Hard total spend cap and pre-public checks | Decide with the live-mode question |
+| #32 | The earlier v2 plans and deck | Superseded by #59, which merged. Close |
+| #20 | A 3-minute demo script for the retired interface | Superseded by `docs/demo/script.md`. Close |
+| #28 | A one-command demo recorder | Check against the final screens before use |
+| #43 | Keyed benchmark results from the superseded pipeline | Stale. Review before merging |
+| #42 | NRC attribution wording | Review |
