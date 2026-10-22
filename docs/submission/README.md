@@ -1,8 +1,8 @@
 # Submission package checklist
 
-*Internal checklist for Submission 1 of the Building Codes Challenge (Thursday Oct 29, 2026). It is not for judges: its file paths can contain internal names that the judge-facing documents avoid. Status is as of Oct 22, 2026, on `dev` at commit 43e7c09 (CI run 39747003798 passed) and the live app at <https://batatis-vert.vercel.app> as last checked on Oct 21. Each line names a file, a pull request (PR) or a number that exists now. A line marked **GAP** has none. Status words follow `docs/implementation-plan.md` §3: **built**, **backend only** (the API is merged and the screen is in progress), **in progress** and **roadmap**.*
+*Internal checklist for Submission 1 of the Building Codes Challenge (Thursday Oct 29, 2026). It is not for judges: its file paths can contain internal names that the judge-facing documents avoid. Status is as of Oct 22, 2026, on `dev` at commit d6de179 (CI run 39753045033 passed) and the live app at <https://batatis-vert.vercel.app>, last checked on Oct 21 (API) and Oct 22 (script bundle). Each line names a file, a pull request (PR) or a number that exists now. A line marked **GAP** has none. Status words follow `docs/implementation-plan.md` §3: **built**, **backend only** (the API is merged and the screen is in progress), **in progress** and **roadmap**.*
 
-The plans, pitch text, Q&A and demo script in this list are in PR #59. They are on `dev` only after it merges.
+The plans, pitch text, Q&A and demo script in this list merged into `dev` with PR #59 (d6de179). The intake and code-check screens of PR #61 were already on `dev`, and a follow-up pass brought these files in line with them.
 
 ## Package rules this repo cannot confirm
 
@@ -14,8 +14,8 @@ The program's onboarding guide says: "Exact submission deadlines, templates and 
 
 | Deliverable | Status | Evidence now | GAP |
 |---|---|---|---|
-| Demo video | Not recorded | `docs/demo/script.md`: shot list, narration sized to the clock, EXAMPLE DATA overlay, and the preconditions to record | **GAP:** record it. It needs the screens marked "pending UI" in the script, a live-mode decision, and a seeded officer account for the recording |
-| Working link | Live | <https://batatis-vert.vercel.app> answered HTTP 200 on Oct 21. `GET /api/jurisdictions` returned the three packs and 13 coverage rows. `GET /api/code/search` returned 9.10.15.4.(1) among its top three. The OpenAPI document lists 64 paths (`docs/research/2026-10-21-source-checks.md` §6) | **GAP:** the site does not show which commit it serves, so confirm it is the final one. The Vercel Hobby deployment allowance ran out on Oct 20 (`docs/deploy.md`), so a late redeploy can fail. **GAP:** decide whether live model access is on. `docs/deploy.md` says to keep it off until the US$20 total cap (PR #41, still open) is integrated. Without live access code identification shows its labelled keyword fallback and the relevance rings stay unscored. **GAP:** decide how judges sign in as an officer. The access code is a secret (`BATATIS_REVIEWER_CODES`), and cases are deleted after 7 days |
+| Demo video | Not recorded | `docs/demo/script.md`: shot list, narration sized to the clock, EXAMPLE DATA overlay, and the preconditions to record | **GAP:** record it. It needs the officer screens marked "pending UI" in the script (open PR #62), a live-mode decision, and a seeded officer account for the recording |
+| Working link | Live | <https://batatis-vert.vercel.app> answered HTTP 200 on Oct 21. `GET /api/jurisdictions` returned the three packs and 13 coverage rows. `GET /api/code/search` returned 9.10.15.4.(1) among its top three. The OpenAPI document lists 64 paths. On Oct 22 the script bundle contained the strings of the intake and code-check screens (`docs/research/2026-10-21-source-checks.md` §6) | **GAP:** the site does not show which commit it serves, so confirm it is the final one. The Vercel Hobby deployment allowance ran out on Oct 20 (`docs/deploy.md`), so a late redeploy can fail. **GAP:** decide whether live model access is on. `docs/deploy.md` says to keep it off until the US$20 total cap (PR #41, still open) is integrated. Without live access code identification shows its labelled keyword fallback and the relevance rings stay unscored. **GAP:** decide how judges sign in as an officer. The access code is a secret (`BATATIS_REVIEWER_CODES`), and cases are deleted after 7 days |
 | Repo | Private: <https://github.com/simplythatguy/batatis> | `main` is 7 commits behind `dev`. The last release was PR #50 | **GAP:** confirm that judges can open the repo. Release `dev` to `main` after the last merge. Decide which branch the package names |
 | Business plan | Rewritten | `docs/business-plan.md`, with sources in `docs/research/2026-10-21-source-checks.md` | No team section. See "Decisions for you" |
 | Implementation plan | Rewritten | `docs/implementation-plan.md`. The user-testing appendix is `docs/user-testing/` (no real session has run) | No human session. No pilot partner |
@@ -29,8 +29,8 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 
 | # | Criterion | Weight | Status in one line |
 |---|---|---:|---|
-| 1 | Intake | 20% | Deck built. Reader, planner and fork flag are backend only. Rules scored in sample |
-| 2 | Code Identification | 20% | Library and Section C built. The pipeline is backend only and its final benchmark is unfinished |
+| 1 | Intake | 20% | Deck built, with the reader's cards, the five-question planner and the fork note (walked with the offline provider only). Rules scored in sample |
+| 2 | Code Identification | 20% | Library, Section C, the code check and up to three quoted choices built. The benchmark record has no screen and the final benchmark is unfinished |
 | 3 | Recommendations | 10% | Engineer callout and Section D cards built. Checklists and coded rules are roadmap |
 | 4 | Review | 10% | Queue, claim, sheet, accept and return built. Package review is backend only. No timing data |
 | 5 | General Applicability | 5% | Role-aware flow built. Untested with a person |
@@ -43,8 +43,8 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 
 **Evidence now:**
 
-- Built: Describe, then one question per card in form order, with a "Why we ask" on each card and "Not sure" as an open question (`web/src/calm/Start.tsx`, `web/src/calm/deck.ts`; PRs #49, #56).
-- Backend only: `POST /cases/{id}/intake` reads the description and text PDFs, attaches a pointer to each fact, turns conflicts into questions, asks at most five questions with reasons, flags when a variance may not be needed, and redirects other codes (`docs/api/intake.md`; PR #54).
+- Built: Describe, then one card at a time, with a "Why we ask" on each card and "Not sure" as an open question (`web/src/calm/Start.tsx`, `web/src/calm/deck.ts`; PRs #49, #56, #61). After Start the deck shows each fact the reader found beside the words it came from, and nothing is used until the applicant confirms it.
+- Built: `POST /cases/{id}/intake` reads the description and text PDFs, attaches a pointer to each fact, turns conflicts into questions, asks at most five questions with reasons, flags when a variance may not be needed, and redirects other codes (`docs/api/intake.md`; PR #54). Its screens are in the deck: the "Check what we read" cards, the planner's questions with the fork note, the redirect page, a "Not read" status for a PDF with no text layer, and "Before you submit" on the review (`web/src/calm/ReadCards.tsx`; PR #61).
 - Rules on 60 development cases: precision 159/159, recall 159/162 (`python -m evals_dev.intake_facts.score`, run Oct 21; PR #54). In sample, model-checked.
 - Invariant (PR #54): over the 60 cases and four stripped copies of each, with the rules and the offline fake model, no fact has a quote that is not in its source.
 - Live model check (PR #54): 19 calls, 73 model facts pointed, 0 proposed, 5 dropped, about US$0.012.
@@ -52,7 +52,7 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 
 **Gaps:**
 
-- **GAP:** the screens for the reader's pointers, the five questions and the fork and scope notices (in progress).
+- **GAP:** the new screens were walked in a browser only with the offline fake provider (PR #61). Run them once with live model access before the video.
 - **GAP:** no human-verified labels, so every intake figure is model-checked and in sample.
 - **GAP:** accuracy across all applicant types is not measured. The 60 cases are agent-authored.
 
@@ -60,7 +60,8 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 
 **Evidence now:**
 
-- Backend only: all 2,080 Division B articles screened, 60 re-ranked, 15 read by a verifier that must quote word for word, up to three quoted choices, a benchmark acceptable-solution record per result, Div A 1.2.1.1. and Div C 2.3.1.1. attached read-only, a labelled keyword fallback (`docs/api/identify.md`; PR #52). The commit rule needs a calibration file and none exists, so nothing is committed automatically.
+- Built: the code check in the deck shows four stages of progress and then up to three quoted choices, each with its verbatim sentence behind "Show the code", plus labelled cards for "I could not narrow this down" and the keyword fallback (`web/src/calm/ReadCards.tsx`; PR #61). The pipeline behind it screens all 2,080 Division B articles, re-ranks 60, and has a verifier read 15 and quote word for word (`docs/api/identify.md`; PR #52). The commit rule needs a calibration file and none exists, so nothing is committed automatically.
+- Backend only: a benchmark acceptable-solution record per result, and Div A 1.2.1.1. and Div C 2.3.1.1. attached read-only.
 - Built: code library with a relevance ring on each article and a structured reader (PRs #47, #56). Section C looked up from the attribution tables, with a row for 72.1% of Division B sentences in parts with a table (`codedb/README.md`).
 - Measured on 53 public precedents (relevance stage only, no verifier): first place 64% against 32% for keyword search, first five 81% against 66% (`docs/research/2026-10-20-vision/README.md` §6, which names the subfolder that holds the data and scripts).
 - Cost: US$0.019 to US$0.020 per run, measured in the benchmark ledger (draft PR #58; `docs/research/2026-10-21-source-checks.md` §5).
@@ -70,7 +71,7 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 
 - **GAP:** accuracy of the final pipeline. Draft PR #58 holds two complete draws of the relevance stage for 139 cases. The third draw and the latency pass need about US$3 to US$4 of account credit, and the decision memo and `pipeline.json` are not generated.
 - **GAP:** the commit rule is uncalibrated, so there is no committed-pick precision to report.
-- **GAP:** the screens for quoted choices and the benchmark record (in progress).
+- **GAP:** the benchmark record has no screen. The quoted choices were walked in a browser only with the offline fake provider (PR #61).
 - **GAP:** the written explainer paragraph per article (brief §2.1.c.iii). The `Explainer` field exists in `engine/models.py` and nothing fills it. What exists is a one-line verifier reason per pick (backend) and the national intent statements shown as "Why this rule exists".
 - **GAP:** no held-out result is reported. The judge-only set of 48 scenarios sits outside the repo and its harness is in draft PR #58.
 
@@ -96,7 +97,7 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 
 **Gaps:**
 
-- **GAP:** the package review and close-out screens (in progress).
+- **GAP:** the package review and close-out screens (in progress, open PR #62).
 - **GAP:** the package review does not check that a rationale is present. It checks the description of the proposed alternative, the risk assessment, the mitigating measures and the assumptions and limits (`docs/implementation-plan.md` §2.3).
 - **GAP:** officer time saved. The timing protocol is `docs/user-testing/officer-timing-protocol.md`, and no session has run.
 - **GAP:** the blind 20-application planted-defect evaluation in `evals_dev/planted/SPEC.md`.
@@ -106,7 +107,7 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 
 **Evidence now:**
 
-- Built: onboarding sets manufacturer, general contractor or homebuilder, and the starting questions differ by role (`web/src/calm/auth/onboardingSteps.ts`, `web/src/calm/Start.tsx`). Every card says why it asks.
+- Built: onboarding sets manufacturer, general contractor or homebuilder. The role changes the prompt on Describe and the planner's questions (a manufacturer is asked first whether the variance is for one site or many), and the form cards are the same for every type (`web/src/calm/auth/onboardingSteps.ts`, `web/src/calm/Start.tsx`, `engine/intake/questions.py`). Every card says why it asks.
 - Three fictional demo cases, one per type, as test inputs (`evals/demo-cases/`).
 
 **Gaps:**
@@ -149,7 +150,7 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 **Gaps:**
 
 - **GAP:** no usability test with a person on either side.
-- **GAP:** the jurisdiction picker and process-notes screen (in progress). The Calgary form export, the Appendix 1 export and Part 2 prefill are roadmap.
+- **GAP:** the picker for other offices and the pack's process notes beyond "Before you submit" have no screen. The Calgary form export, the Appendix 1 export and Part 2 prefill are roadmap.
 - **GAP:** reviewer accounts exist only for Calgary and Edmonton.
 
 ### 9. The X Factor (5%)
@@ -168,9 +169,9 @@ From the Challenge Scope, §2 ("Detailed Technical Scope").
 
 | Item | Status |
 |---|---|
-| 1.a Prompt for the information Sections A and B need | Built (deck). The reader that fills them from files is backend only |
-| 1.b.i Select relevant codes and rank them | Backend only. The library ranks articles with relevance rings (built) |
-| 1.b.ii Recommend the most likely benchmark acceptable solution, with an explanation | Backend only (benchmark record per result) |
+| 1.a Prompt for the information Sections A and B need | Built (deck and the reader's cards) |
+| 1.b.i Select relevant codes and rank them | Built: the code check offers up to three quoted choices, and the library ranks articles with relevance rings |
+| 1.b.ii Recommend the most likely benchmark acceptable solution, with an explanation | Quoted choices are on screen. The benchmark record per result is backend only |
 | 1.c Complete Section C by lookup | Built. A row exists for 72.1% of sentences in parts with a table |
 | 1.c.iii An explainer paragraph for each article and why | **GAP** (see criterion 2) |
 | 2 Say when a professional or an engineer is involved | Built (callout) over the engine check |
@@ -181,11 +182,11 @@ From the Challenge Scope, §2 ("Detailed Technical Scope").
 
 ## Open work, ranked by rubric weight
 
-1. **Screens for intake and code identification** (40 points between criteria 1 and 2). In progress.
+1. **A live-mode run of the intake and code-check screens** (criteria 1 and 2, 40 points). PR #61 walked them with the offline fake provider only.
 2. **The code identification benchmark and the commit decision.** Needs account credit.
-3. **Package review and close-out screens** (criterion 4).
-4. **Record the demo video** after the screens land (script preconditions).
-5. **Refresh the pitch deck** after the screens land.
+3. **Package review and close-out screens** (criterion 4; open PR #62).
+4. **Record the demo video** after PR #62 lands (script preconditions).
+5. **Refresh the pitch deck:** capture the screenshots (the intake and code-check screens exist now) and export a new PDF.
 6. **Human sessions.** None are scheduled.
 7. **The live-mode decision** and the total spend cap (PR #41).
 8. **Release `dev` to `main`** and confirm judge access to the repo.
@@ -203,7 +204,7 @@ These need an answer or a file that only you can supply.
 4. **The team text** for criterion 9 and the business plan.
 5. **Whether the reviewer's "Accept as complete" also stands for the officer's decision to issue the variance.** The product says "Accepted as administratively complete", and the close-out record starts its 10-day clock at that decision. The Council's decision to issue a variance is the officer's own act under s.38. Decide how the demo and the plans should describe it.
 6. **Account credit** for the benchmark (about US$3 to US$4) and whether to spend it before Oct 29.
-7. **Whether to close PR #32 and PR #20** after PR #59 merges. Both are superseded.
+7. **Whether to close PR #32 and PR #20.** PR #59 merged, so both are superseded.
 
 ## How the claims were checked
 
@@ -217,11 +218,11 @@ These need an answer or a file that only you can supply.
 
 | PR | What | Action |
 |---|---|---|
-| #59 | This refresh. Supersedes #32 | Merge |
+| #62 | WP-36: officer review screens (package review, information request, decisions, close-out) | Review and merge, then update the plan, the demo script and this file |
 | #58 | Code identification benchmark (draft) | Finish after account credit. Do not merge as it is |
 | #41 | Hard total spend cap and pre-public checks | Decide with the live-mode question |
-| #32 | The earlier v2 plans and deck | Superseded by #59. Close after #59 merges |
-| #20 | A 3-minute demo script for the retired interface | Superseded by `docs/demo/script.md`. Close after #59 merges |
+| #32 | The earlier v2 plans and deck | Superseded by #59, which merged. Close |
+| #20 | A 3-minute demo script for the retired interface | Superseded by `docs/demo/script.md`. Close |
 | #28 | A one-command demo recorder | Check against the final screens before use |
 | #43 | Keyed benchmark results from the superseded pipeline | Stale. Review before merging |
 | #42 | NRC attribution wording | Review |

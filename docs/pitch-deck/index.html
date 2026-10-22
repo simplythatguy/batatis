@@ -167,7 +167,7 @@ body.show-notes #notes-panel { display: block; }
         <div class="hero"><span class="hero-num">A to D</span><span class="hero-label">the form's sections, asked one card at a time (built)</span></div>
         <ul class="bullets">
           <li>Built: describe, then one question at a time</li>
-          <li>Backend: facts read with a pointer to your own words</li>
+          <li>Built: facts read with a pointer to your own words</li>
           <li>Facts read from your words are not added until you confirm them</li>
         </ul>
       </div>
@@ -181,6 +181,28 @@ body.show-notes #notes-panel { display: block; }
           
         </div>
         <figcaption class="shot-caption">Describe: one box, one question</figcaption>
+      </figure>
+<figure class="shot" id="shot-s02-read" data-shot="shot-s02-read">
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s02-read.png" alt="A Check what we read card with the applicant&#x27;s words marked and the Yes and No choices" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
+        </div>
+        <figcaption class="shot-caption">Facts beside their source words</figcaption>
+      </figure>
+<figure class="shot" id="shot-s02-planner" data-shot="shot-s02-planner">
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s02-planner.png" alt="The first planner question with the fork note and the two halves of a variance" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
+        </div>
+        <figcaption class="shot-caption">Planner question and the fork note</figcaption>
       </figure>
 <figure class="shot" id="shot-s02-question" data-shot="shot-s02-question">
         <div class="shot-frame">
@@ -199,9 +221,9 @@ body.show-notes #notes-panel { display: block; }
       <h3>Narration</h3>
       <p class="narration">Describe the project in plain words. Batatis asks one question at a time for the form's sections A to D. The facts it reads from the applicant's words are not added to the application until the applicant confirms them.</p>
       <p class="timing"><strong>Time (150 wpm):</strong> 0:14 to 0:30  |  <strong>Spoken words:</strong> 39  |  <strong>At 150 wpm:</strong> 15.6 s  |  <strong>At 140 wpm:</strong> 16.7 s</p>
-      <h3>Slide detail</h3><ul><li>Built: the applicant picks a role in onboarding, describes the project, and answers cards in form order. Each card has a plain "Why we ask". "Not sure" keeps an open question for the officer and never blocks</li><li>Backend: the intake reader takes the description and text PDFs. Rules read first and a model is asked only for fields the rules left empty. Every fact stores the phrase or box it came from. Two values for one field give no fact and a question. At most five questions, each with a reason. Pages with no text layer are reported as not read, with the reason, and nothing is guessed</li><li>The screens that show the reader's facts and the five questions are in progress</li></ul>
+      <h3>Slide detail</h3><ul><li>Built: the applicant picks a role in onboarding, describes the project, and answers cards in form order. Each card has a plain "Why we ask". "Not sure" keeps an open question for the officer and never blocks</li><li>Built: after Start, the intake reader takes the description and text PDFs and shows each fact beside the words it came from. Nothing is used until the applicant says yes, and a No is kept as a confirmed empty answer</li><li>Rules read first and a model is asked only for fields the rules left empty. Every fact stores the phrase or box it came from. Two values for one field give no fact and a question. At most five questions follow, each with a reason, and the first carries the note on whether this looks like a variance. Pages with no text layer are reported as not read, with the reason, and nothing is guessed</li><li>If another code applies, such as plumbing, a redirect page replaces the questions until the applicant says otherwise</li><li>An agent walked these screens with the offline fake provider. They have not been run with live model access</li></ul>
       <h3>Background</h3>
-      <p>Intake is a fifth of the score, so we start with it. Today's screens ask one question at a time and keep what the applicant says apart from what is confirmed. The reader that points each fact at the words it came from is merged but is not yet on screen, and we say so rather than show a mock-up.</p>
+      <p>Intake is a fifth of the score, so we start with it. Today's screens ask one question at a time and keep what the applicant says apart from what is confirmed. The reader that points each fact at the words it came from is on screen now. We have walked it only with the offline provider, and we say so.</p>
       <h3>Sources</h3>
       <p><code>docs/design-system-calm.md</code>; <code>docs/api/intake.md</code></p>
     </aside>
@@ -235,7 +257,7 @@ body.show-notes #notes-panel { display: block; }
       <p><code>evals_dev/intake_facts/score.py</code>; <code>evals_dev/section_d_flag/RESULTS.md</code>; <code>docs/research/2026-10-21-source-checks.md</code> §6</p>
     </aside>
   </section>
-  <section class="slide layout-shot has-hero" id="s04" data-index="4">
+  <section class="slide layout-shot has-hero shots-2" id="s04" data-index="4">
     <header class="slide-head">
       <span class="brand">Batatis</span>
       <span class="slide-num">4 / 12</span>
@@ -247,19 +269,30 @@ body.show-notes #notes-panel { display: block; }
         <ul class="bullets">
           <li>A relevance model scores all of them, re-ranks 60, and a verifier quotes the text</li>
           <li>Up to three quoted choices. Nothing is committed automatically</li>
-          <li>Backend merged. Screen in progress. Benchmark unfinished</li>
+          <li>Built on screen. Benchmark unfinished</li>
         </ul>
       </div>
-      <div class="shots"><figure class="shot" id="shot-s04-code-check" data-shot="shot-s04-code-check">
+      <div class="shots"><figure class="shot" id="shot-s04-progress" data-shot="shot-s04-progress">
         <div class="shot-frame">
-          <img class="shot-img" src="img/shot-s04-code-check.png" alt="A code check card with the verbatim code text in the drawer" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <img class="shot-img" src="img/shot-s04-progress.png" alt="The four stages of the code check with their counts" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
           <div class="shot-placeholder" aria-hidden="true">
             <div class="shot-icon"></div>
             <div class="shot-pending">Screenshot pending</div>
           </div>
           <span class="example-badge">EXAMPLE DATA</span>
         </div>
-        <figcaption class="shot-caption">Code check card and code drawer</figcaption>
+        <figcaption class="shot-caption">Four stages while it checks</figcaption>
+      </figure>
+<figure class="shot" id="shot-s04-code-check" data-shot="shot-s04-code-check">
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s04-code-check.png" alt="A code check card with the verbatim sentence open under Show the code" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
+        </div>
+        <figcaption class="shot-caption">A quoted choice, code shown</figcaption>
       </figure></div>
     </div>
     <footer class="sources"><span class="sources-label">Sources:</span> in speaker notes</footer>
@@ -267,7 +300,7 @@ body.show-notes #notes-panel { display: block; }
       <h3>Narration</h3>
       <p class="narration">Code identification scores all two thousand and eighty Division B articles, re-ranks sixty, and has a verifier quote the text. It offers up to three quoted choices, and it commits nothing by itself.</p>
       <p class="timing"><strong>Time (150 wpm):</strong> 0:45 to 0:58  |  <strong>Spoken words:</strong> 33  |  <strong>At 150 wpm:</strong> 13.2 s  |  <strong>At 140 wpm:</strong> 14.1 s</p>
-      <h3>Slide detail</h3><ul><li>Pipeline: screen every Division B article, re-rank the top 60 in one request, have a verifier read the full text of the top 15 and quote it word for word</li><li>Quotes that do not match the article are dropped. The pipeline checks again before display</li><li>Commit rule: only Part 9 and at most three articles can ever be committed, and only with a calibration file from the benchmark. No such file exists yet, so every article is a candidate or one of up to three quoted choices</li><li>Each result stores a benchmark acceptable-solution record: the quoted Division B sentence the design departs from, and its objective and function codes. Div A 1.2.1.1. and Div C 2.3.1.1. are attached read-only to every case</li><li>If a model stage is unavailable, a labelled keyword fallback runs and commits nothing</li><li>The Council deck's worked example is Sentence 9.10.15.4.(1), openings in an exposing building face: function F03, objective OP3.1 (Table 9.38.1.1., PDF p.1130)</li></ul>
+      <h3>Slide detail</h3><ul><li>Pipeline: screen every Division B article, re-rank the top 60 in one request, have a verifier read the full text of the top 15 and quote it word for word</li><li>On screen: four stages of progress, then up to three quoted choices. Each asks whether the design does something different from the rule, with the code sentence behind "Show the code". The benchmark record has no screen yet</li><li>Quotes that do not match the article are dropped. The pipeline checks again before display</li><li>Commit rule: only Part 9 and at most three articles can ever be committed, and only with a calibration file from the benchmark. No such file exists yet, so every article is a candidate or one of up to three quoted choices</li><li>Each result stores a benchmark acceptable-solution record: the quoted Division B sentence the design departs from, and its objective and function codes. Div A 1.2.1.1. and Div C 2.3.1.1. are attached read-only to every case</li><li>If a model stage is unavailable, a labelled keyword fallback runs and commits nothing</li><li>The Council deck's worked example is Sentence 9.10.15.4.(1), openings in an exposing building face: function F03, objective OP3.1 (Table 9.38.1.1., PDF p.1130)</li></ul>
       <h3>Background</h3>
       <p>We would rather ask than guess. The commit rule is empty on purpose until the benchmark calibrates it. The relevance model is a third-party service pinned to one version and shown to users only as "relevance-1".</p>
       <h3>Sources</h3>
@@ -412,7 +445,7 @@ body.show-notes #notes-panel { display: block; }
       <div class="bullets-wrap">
         <div class="hero"><span class="hero-num">3</span><span class="hero-label">applicant types: manufacturer, general contractor, homebuilder</span></div>
         <ul class="bullets">
-          <li>Onboarding sets the role, and the starting questions differ by role</li>
+          <li>Onboarding sets the role. The role changes the prompt on Describe and the first question about scope</li>
           <li>Every card says why it asks</li>
           <li>Unaided use by a real first-time applicant is untested</li>
         </ul>
@@ -456,7 +489,18 @@ body.show-notes #notes-panel { display: block; }
           <li>Other provinces are labelled preview only</li>
         </ul>
       </div>
-      <div class="shots"><figure class="shot" id="shot-s09-application" data-shot="shot-s09-application">
+      <div class="shots"><figure class="shot" id="shot-s09-before-submit" data-shot="shot-s09-before-submit">
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s09-before-submit.png" alt="The review screen with the Before you submit disclosures open" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
+        </div>
+        <figcaption class="shot-caption">Before you submit, from the pack</figcaption>
+      </figure>
+<figure class="shot" id="shot-s09-application" data-shot="shot-s09-application">
         <div class="shot-frame">
           <img class="shot-img" src="img/shot-s09-application.png" alt="Application screen with the download panel" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
           <div class="shot-placeholder" aria-hidden="true">

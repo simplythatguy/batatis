@@ -28,16 +28,18 @@
 **Hero:** A to D | the form's sections, asked one card at a time (built)
 
 - Built: describe, then one question at a time
-- Backend: facts read with a pointer to your own words
+- Built: facts read with a pointer to your own words
 - Facts read from your words are not added until you confirm them
 
 **Full slide detail (in notes):**
 
 - Built: the applicant picks a role in onboarding, describes the project, and answers cards in form order. Each card has a plain "Why we ask". "Not sure" keeps an open question for the officer and never blocks
-- Backend: the intake reader takes the description and text PDFs. Rules read first and a model is asked only for fields the rules left empty. Every fact stores the phrase or box it came from. Two values for one field give no fact and a question. At most five questions, each with a reason. Pages with no text layer are reported as not read, with the reason, and nothing is guessed
-- The screens that show the reader's facts and the five questions are in progress
+- Built: after Start, the intake reader takes the description and text PDFs and shows each fact beside the words it came from. Nothing is used until the applicant says yes, and a No is kept as a confirmed empty answer
+- Rules read first and a model is asked only for fields the rules left empty. Every fact stores the phrase or box it came from. Two values for one field give no fact and a question. At most five questions follow, each with a reason, and the first carries the note on whether this looks like a variance. Pages with no text layer are reported as not read, with the reason, and nothing is guessed
+- If another code applies, such as plumbing, a redirect page replaces the questions until the applicant says otherwise
+- An agent walked these screens with the offline fake provider. They have not been run with live model access
 
-**Speaker notes:** Intake is a fifth of the score, so we start with it. Today's screens ask one question at a time and keep what the applicant says apart from what is confirmed. The reader that points each fact at the words it came from is merged but is not yet on screen, and we say so rather than show a mock-up.
+**Speaker notes:** Intake is a fifth of the score, so we start with it. Today's screens ask one question at a time and keep what the applicant says apart from what is confirmed. The reader that points each fact at the words it came from is on screen now. We have walked it only with the offline provider, and we say so.
 *Sources:* `docs/design-system-calm.md`; `docs/api/intake.md`
 
 ### Slide 3: It asks before it guesses, and we test that [Intake, 20]
@@ -64,11 +66,12 @@
 
 - A relevance model scores all of them, re-ranks 60, and a verifier quotes the text
 - Up to three quoted choices. Nothing is committed automatically
-- Backend merged. Screen in progress. Benchmark unfinished
+- Built on screen. Benchmark unfinished
 
 **Full slide detail (in notes):**
 
 - Pipeline: screen every Division B article, re-rank the top 60 in one request, have a verifier read the full text of the top 15 and quote it word for word
+- On screen: four stages of progress, then up to three quoted choices. Each asks whether the design does something different from the rule, with the code sentence behind "Show the code". The benchmark record has no screen yet
 - Quotes that do not match the article are dropped. The pipeline checks again before display
 - Commit rule: only Part 9 and at most three articles can ever be committed, and only with a calibration file from the benchmark. No such file exists yet, so every article is a candidate or one of up to three quoted choices
 - Each result stores a benchmark acceptable-solution record: the quoted Division B sentence the design departs from, and its objective and function codes. Div A 1.2.1.1. and Div C 2.3.1.1. are attached read-only to every case
@@ -136,7 +139,7 @@
 
 **Hero:** 3 | applicant types: manufacturer, general contractor, homebuilder
 
-- Onboarding sets the role, and the starting questions differ by role
+- Onboarding sets the role. The role changes the prompt on Describe and the first question about scope
 - Every card says why it asks
 - Unaided use by a real first-time applicant is untested
 
