@@ -11,7 +11,16 @@ test("the description is the applicant's own confirmed words; nothing is guessed
   assert.deepEqual(c.facts.map((f) => [f.field, f.status]), [["project.description", "confirmed"]]);
   assert.equal(c.candidates.length, 0, "no keyword card: code identification offers the code questions");
   assert.equal(c.questions.length, 0, "no starter question: the intake planner asks what is missing");
-  assert.equal(c.title, "Two-storey infill house in Edmonton, about 210 m².");
+  assert.equal(c.title, "New house application", "a sentence (with its city) is not a name; the engine names the case");
+});
+
+test("a name the applicant chose, or a saved one, survives description edits", () => {
+  let c = reducer(emptyCase("homebuilder"), { type: "renameCase", title: "Infill sheathing" });
+  c = reducer(c, { type: "setDescription", text: TEXT });
+  assert.equal(c.title, "Infill sheathing");
+  assert.equal(c.titleKept, true);
+  c = reducer(c, { type: "setDescription", text: "" });
+  assert.equal(c.title, "Infill sheathing", "clearing the description keeps the chosen name");
 });
 
 test("clearing the description clears its fact and title", () => {

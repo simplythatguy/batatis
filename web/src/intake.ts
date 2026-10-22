@@ -81,10 +81,10 @@ export function applyDescription(c: Case, text: string): Case {
   const trimmed = text.trim();
   const facts = base.facts.filter((f) => f.source.ref !== FROM_YOU);
   if (!trimmed) {
-    return { ...base, description: text, title: base.exampleId ? base.title : defaultTitle(base.applicantType), facts };
+    return { ...base, description: text, title: base.exampleId || base.titleKept ? base.title : defaultTitle(base.applicantType), facts };
   }
-  const sentence = trimmed.split(/(?<=[.!?])\s+/)[0] ?? trimmed;
-  const title = sentence.length > 72 ? `${sentence.slice(0, 69)}…` : sentence;
   facts.push({ id: "desc-description", field: "project.description", value: trimmed, kind: "pointed", status: "confirmed", source: { type: "user_text", ref: FROM_YOU, quote: trimmed } });
-  return { ...base, description: text, title: base.exampleId ? base.title : title, facts };
+  // The description does not name the application: a sentence is not a title. The engine gives a
+  // short subject name once it has read the case; a name the applicant typed always wins.
+  return { ...base, description: text, title: base.exampleId || base.titleKept ? base.title : defaultTitle(base.applicantType), facts };
 }

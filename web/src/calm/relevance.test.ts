@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { CodeToc } from "../api/codeLibrary.ts";
-import { reflow, ancestorsOf, bandFor, cutoffsOf, DEFAULT_BANDS, filterKeep, maxOf, partArticles, pruneToc, rankedIn, sectionArticles, shownFor, strongestOf } from "./relevance.ts";
+import { reflow, ancestorsOf, BAND_LABEL, bandFor, cutoffsOf, DEFAULT_BANDS, filterKeep, maxOf, partArticles, pruneToc, rankedIn, sectionArticles, shownFor, strongestOf } from "./relevance.ts";
 import { codeHref, resolveRoute } from "./routes.ts";
 
-const C = { x: 0.2, y: 0.6 };
+const C = { rated: true, x: 0.2, y: 0.6, fallback: false } as const;
 
 test("band edges: 0 is grey, x is moderate, y is high, missing is not scored", () => {
   assert.equal(bandFor(0, C), "zero");
@@ -19,13 +19,46 @@ test("band edges: 0 is grey, x is moderate, y is high, missing is not scored", (
   assert.equal(bandFor(Number.NaN, C), "unscored");
 });
 
-test("cut-offs come from the response; the benchmark defaults replace missing or placeholder bands", () => {
+const HISTORICAL = { model: "relevance-1", bands: { x: 0.3, y: 0.85, status: "benchmark-derived, not field-calibrated" } };
+const LEGACY_PLACEHOLDER = { model: "relevance-1", bands: { x: 0.2, y: 0.6, status: "placeholder_uncalibrated" } };
+/** The exact bands engine/relevance.py scoring_bands() returns for any non-historical configuration. */
+const UNCALIBRATED = { model: "relevance-2", bands: { x: 0, y: 1, status: "uncalibrated; display range only" } };
+const UNRATED = { rated: false, x: null, y: null, fallback: false };
+
+test("cut-offs: the historical benchmark bands are used; legacy relevance-1 placeholder rows read with the benchmark defaults", () => {
   assert.deepEqual(DEFAULT_BANDS, { x: 0.3, y: 0.85 });
-  assert.deepEqual(cutoffsOf({ bands: { x: 0.3, y: 0.85, status: "benchmark-derived, not field-calibrated" } }), { x: 0.3, y: 0.85, fallback: false });
-  assert.deepEqual(cutoffsOf({ bands: { x: 0.2, y: 0.6, status: "placeholder_uncalibrated" } }), { x: 0.3, y: 0.85, fallback: true });
-  assert.deepEqual(cutoffsOf({ bands: null }), { ...DEFAULT_BANDS, fallback: true });
-  assert.deepEqual(cutoffsOf(null), { ...DEFAULT_BANDS, fallback: true });
-  assert.equal(cutoffsOf({ bands: { x: 0.7, y: 0.3 } }).fallback, true, "inverted bands are rejected");
+  assert.deepEqual(cutoffsOf(HISTORICAL), { rated: true, x: 0.3, y: 0.85, fallback: false });
+  assert.deepEqual(cutoffsOf(LEGACY_PLACEHOLDER), { rated: true, x: 0.3, y: 0.85, fallback: true });
+});
+
+test("cut-offs: uncalibrated, missing or malformed bands give no likely/unlikely rating, never the historical thresholds", () => {
+  assert.deepEqual(cutoffsOf(UNCALIBRATED), UNRATED, "the exact backend payload");
+  assert.deepEqual(cutoffsOf({ ...UNCALIBRATED, model: "relevance-1" }), UNRATED, "a relevance-1 run outside the benchmark configuration is uncalibrated too");
+  assert.deepEqual(cutoffsOf({ model: "relevance-2", bands: { x: 0.3, y: 0.85, status: "uncalibrated" } }), UNRATED, "the status wins over plausible numbers");
+  assert.deepEqual(cutoffsOf({ model: "relevance-2", bands: { x: 0.2, y: 0.6, status: "placeholder_uncalibrated" } }), UNRATED, "the benchmark defaults belong to relevance-1 only");
+  assert.deepEqual(cutoffsOf({ model: "relevance-2", bands: null }), UNRATED);
+  assert.deepEqual(cutoffsOf({ model: "relevance-1", bands: null }), UNRATED, "missing bands are not assumed historical");
+  assert.deepEqual(cutoffsOf(null), UNRATED);
+  assert.deepEqual(cutoffsOf({ model: "relevance-1", bands: { x: 0.7, y: 0.3, status: "benchmark-derived, not field-calibrated" } }), UNRATED, "inverted");
+  assert.deepEqual(cutoffsOf({ model: "relevance-1", bands: { x: 0.3, y: 0.85 } }), UNRATED, "no status");
+  assert.deepEqual(cutoffsOf({ model: "relevance-1", bands: { x: Number.NaN, y: 0.85, status: "benchmark-derived, not field-calibrated" } }), UNRATED, "not a number");
+  // The 0 and 1 boundaries are the display range, not cut-offs, whatever the status says.
+  assert.deepEqual(cutoffsOf({ model: "relevance-1", bands: { x: 0, y: 0.85, status: "benchmark-derived, not field-calibrated" } }), UNRATED);
+  assert.deepEqual(cutoffsOf({ model: "relevance-1", bands: { x: 0.3, y: 1, status: "benchmark-derived, not field-calibrated" } }), UNRATED);
+});
+
+test("uncalibrated scores stay estimates: never likely-applies, unlikely or no-relevance (independent review repro)", () => {
+  const c = cutoffsOf(UNCALIBRATED);
+  assert.deepEqual(shownFor("synthetic", { synthetic: 0.9 }, { synthetic: 0.9 }, c), { p: 0.9, band: "estimate", screenedOnly: false });
+  for (const p of [0, 0.004, 0.29, 0.3, 0.85, 1]) assert.equal(bandFor(p, c), "estimate", `p=${p}`);
+  assert.equal(bandFor(undefined, c), "unscored");
+  const display = { a: 0.95, b: 0.5, c: 0 }, rerank = { a: 0.95 };
+  assert.equal(shownFor("b", display, rerank, c).band, "estimate", "screened-only stays an estimate, not unlikely");
+  assert.deepEqual(rankedIn(display, c, ["high", "mid", "low", "zero"], rerank), [], "nothing lands in a rated list");
+  assert.equal(filterKeep("attention", display, c, rerank)("a"), true, "rating filters show everything rather than an empty tree");
+  assert.deepEqual(strongestOf(["b", "a"], display, rerank, c), { p: 0.95, band: "estimate", screenedOnly: false });
+  assert.equal(BAND_LABEL.estimate, "Estimate only");
+  assert.deepEqual(display, { a: 0.95, b: 0.5, c: 0 }, "raw probabilities are untouched");
 });
 
 test("bands compare hundredths, as the engine reports them", () => {
@@ -37,7 +70,7 @@ test("bands compare hundredths, as the engine reports them", () => {
 });
 
 test("the guard: an article the rerank did not judge is never yellow or red (live NorthCore values)", () => {
-  const B = cutoffsOf({ bands: { x: 0.2, y: 0.6, status: "placeholder_uncalibrated" } });
+  const B = cutoffsOf(LEGACY_PLACEHOLDER);
   const display = { "9.27.3.4.": 0.88, "9.25.1.1.": 0.85, "9.25.5.2.": 0.76, "9.23.17.3.": 0.71, "9.27.3.2.": 0.47, "9.1.1.1.": 0.05 };
   const rerank = { "9.27.3.4.": 0.88, "9.25.1.1.": 0.85, "9.25.5.2.": 0.76, "9.23.17.3.": 0.71 };
   assert.equal(shownFor("9.27.3.4.", display, rerank, B).band, "high");
@@ -92,7 +125,7 @@ test("filters prune branches with no matching article", () => {
   const maybe = pruneToc(TOC, filterKeep("maybe", display, C));
   assert.deepEqual(maybe.parts[0].sections.map((s) => s.id), ["9.25."]);
   assert.equal(pruneToc(TOC, filterKeep("all", display, C)).parts[0].sections.length, 2);
-  assert.deepEqual(rankedIn({ a: 0.61, b: 0.9, c: 0.3, d: 0 }, cutoffsOf(null), ["high", "mid"]).map((r) => r.id), ["b", "a", "c"]);
+  assert.deepEqual(rankedIn({ a: 0.61, b: 0.9, c: 0.3, d: 0 }, cutoffsOf(HISTORICAL), ["high", "mid"]).map((r) => r.id), ["b", "a", "c"]);
 });
 
 test("tree ancestors auto-expand to an article", () => {

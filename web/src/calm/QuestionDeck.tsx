@@ -18,7 +18,7 @@ import { RelevanceRing } from "./RelevanceRing";
 import { getSession, updateSession, useSession } from "./session";
 import { CONFLICT_TEXT } from "../api/sync";
 import { retryExtras, getExtras } from "./caseExtras";
-import { CIcon, MOD_KEY } from "./ui";
+import { CIcon } from "./ui";
 import { engine } from "../api/client";
 import { provisionCandidate } from "../screens/SectionC";
 import { ConditionBody, PackageEnd, PackageOffer } from "./ChecklistCards";
@@ -66,10 +66,9 @@ export function Choices({ choices, current, onPick }: { choices: { value: string
 function OkRow({ label = "OK", disabled, onOk, typed, children }: { label?: string; disabled?: boolean; onOk: () => void; typed: boolean; children?: ReactNode }) {
   return (
     <div className="cf-ok-row" data-deck-foot>
-      <button type="button" className="cf-btn is-primary is-lg" disabled={disabled} onClick={onOk}>
+      <button type="button" className="cf-btn is-primary is-lg" disabled={disabled} onClick={onOk} aria-keyshortcuts={typed ? "Meta+Enter Control+Enter" : "Enter"}>
         {label} <Icon24 name="check" size={16} stroke={2} />
       </button>
-      {!disabled && <span className="cf-ok-hint" aria-hidden="true">press <b>{typed ? `${MOD_KEY} Enter ↵` : "Enter ↵"}</b></span>}
       {children}
     </div>
   );
@@ -219,7 +218,7 @@ function PlanBody({ item, onPick, draft, setDraft, note, first }: { item: Shown;
       )}
       {busy && <p className="cf-note" role="status"><span className="cf-dot is-pending" aria-hidden="true" />Saving your answer…</p>}
       {!busy && note && <p className="cf-note" role="alert"><span className="cf-dot is-warning" aria-hidden="true" />{note}</p>}
-      {!busy && !note && current === NOT_SURE && <p className="cf-note"><span className="cf-dot is-pending" aria-hidden="true" />Saved as Not sure. It never blocks you, and it is not asked again.</p>}
+      {!busy && !note && current === NOT_SURE && <p className="cf-note"><span className="cf-dot is-pending" aria-hidden="true" />Saved as Not sure.</p>}
       {!busy && !note && current && current !== NOT_SURE && input.kind !== "choices" && <p className="cf-note"><span className="cf-dot is-done" aria-hidden="true" />Saved: {current}{input.unit ? ` ${input.unit}` : ""}.</p>}
     </>
   );
@@ -359,16 +358,16 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
               aria-label={def.label}
               value={valueText(fact)}
               onChange={(e) => dispatch({ type: "setDetail", field: def.id, value: e.target.value, section: def.section })}
-              placeholder={def.inputType === "date" ? undefined : "Type your answer here…"}
+              placeholder={def.inputType === "date" ? undefined : def.hint ?? "Type your answer here…"}
             />
           )}
           {!offer && fact && !isTyped(fact) && (
             <p className="cf-note">
               <span className={`cf-dot ${fact.status === "confirmed" ? "is-done" : "is-warning"}`} aria-hidden="true" />
-              {picked === "confirm" ? "Confirmed by you. You can still edit it." : `From ${sourcePhrase(fact.source.ref)}. Edit it if it’s not right.`}
+              {picked === "confirm" ? "Confirmed" : `From ${sourcePhrase(fact.source.ref)}`}
             </p>
           )}
-          {!offer && picked === "dismiss" && !fact && <p className="cf-note">Removed. Type the right one, or skip for now.</p>}
+          {!offer && picked === "dismiss" && !fact && <p className="cf-note">Removed.</p>}
         </>
       ) : (
         choices.length > 0 && <Choices choices={choices} current={current} onPick={onPick} />
@@ -382,10 +381,10 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
         <div className="cf-followup" role="status">
           <span className="cf-eyebrow is-plain">Open question for the officer</span>
           <p>{cand.clarifyingQuestion}</p>
-          <p className="cf-faint">Logged as an open question. It does not block you, and it is not treated as a confirmed departure.</p>
+          <p className="cf-faint">Not counted as a departure. It never blocks you.</p>
         </div>
       )}
-      {item.kind === "authority" && current === "unsure" && <p className="cf-note"><span className="cf-dot is-warning" aria-hidden="true" />Left open. The review keeps it on your list until you pick one.</p>}
+      {item.kind === "authority" && current === "unsure" && <p className="cf-note"><span className="cf-dot is-warning" aria-hidden="true" />Left open · stays on your list.</p>}
       {item.kind === "authority" && <JurisdictionNote authority={c.authority} unsure={current === "unsure"} extras={extras} />}
       {cand && exitCountWarning(cand.provision, cand.topic) && <p className="cf-note"><span className="cf-dot is-warning" aria-hidden="true" />{exitCountWarning(cand.provision, cand.topic)}</p>}
       {item.kind === "fact" && item.gone && <p className="cf-note"><span className="cf-dot is-done" aria-hidden="true" />{picked === "dismiss" ? "Removed." : "Confirmed."}</p>}
@@ -393,21 +392,32 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
   );
 }
 
-/** Not sure what a question means: the assistant opens on it (it explains; it never answers for you). */
-function AskLink({ item, n }: { item: DeckItem; n: number }) {
+/** The assistant opened on this card: it explains; it never answers for you. */
+function askAbout(item: DeckItem, n: number) {
+  openAssistant({
+    screen: "question",
+    focus: item.provision ? { kind: "provision", id: item.provision } : { kind: "card", id: item.key },
+    label: `question ${n}${item.provision ? ` and ${item.provision}` : ""}`,
+    suggestions: item.provision ? ["Explain the code", "What does this question mean?"] : ["What does this question mean?", "What should I have ready?"],
+  });
+}
+
+/**
+ * The one help entry on a card. Routine explanation lives behind it, not under the question:
+ * the reason the form asks, then the assistant on this card. Without a reason it opens the assistant.
+ */
+function HelpButton({ item, n, open, onToggle }: { item: DeckItem; n: number; open: boolean; onToggle: () => void }) {
+  return item.why
+    ? <button type="button" className="cf-link-btn cf-help-btn" aria-expanded={open} aria-controls="cf-q-why" onClick={onToggle}><Icon24 name="spark" size={14} />Help</button>
+    : <button type="button" className="cf-link-btn cf-help-btn" onClick={() => askAbout(item, n)}><Icon24 name="spark" size={14} />Help</button>;
+}
+
+function HelpPanel({ item, n }: { item: DeckItem; n: number }) {
   return (
-    <button
-      type="button"
-      className="cf-assist-link"
-      onClick={() => openAssistant({
-        screen: "question",
-        focus: item.provision ? { kind: "provision", id: item.provision } : { kind: "card", id: item.key },
-        label: `question ${n}${item.provision ? ` and ${item.provision}` : ""}`,
-        suggestions: item.provision ? ["Explain the code", "What does this question mean?"] : ["What does this question mean?", "What should I have ready?"],
-      })}
-    >
-      <Icon24 name="spark" size={15} />Not sure what this means? Ask the assistant
-    </button>
+    <div id="cf-q-why" className="cf-why">
+      <p>{item.why}</p>
+      <button type="button" className="cf-link-btn" onClick={() => askAbout(item, n)}><Icon24 name="spark" size={14} />Ask the assistant</button>
+    </div>
   );
 }
 
@@ -958,15 +968,13 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
             {item.section === "C" && (extras.failed.rules || extras.failed.case) && (
               <p className="cf-note" role="status"><span className="cf-dot is-warning" aria-hidden="true" />Rule checks didn’t load, so some rule questions may be missing. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
             )}
-            {why && <p className="cf-why">{item.why}</p>}
-            {!canContinue(item) && !locked && <p className="cf-hint" role="note">Answer to continue, or skip for now.</p>}
             <OkRow label={item.kind === "section-d" ? "Finish Section D" : item.kind === "code-run" ? "Continue" : "OK"} disabled={!canContinue(item)} onOk={next} typed={typed}>
               <span className="cf-ok-more">
-                <button type="button" className="cf-link-btn" aria-expanded={why} onClick={() => setWhy((v) => !v)}>Why we ask</button>
-                <button type="button" className="cf-link-btn" onClick={skip}>{item.optional ? "Skip" : "Skip for now"}</button>
+                <button type="button" className="cf-link-btn" title={item.optional ? undefined : "It stays on your list"} onClick={skip}>Skip</button>
+                <HelpButton item={item} n={n} open={why} onToggle={() => setWhy((v) => !v)} />
               </span>
             </OkRow>
-            <AskLink item={item} n={n} />
+            {why && item.why && <HelpPanel item={item} n={n} />}
           </div>
         ) : (
           <div ref={wrapRef} key="finish" className={`cf-q-wrap is-from-${dir}`} aria-labelledby="cf-q" role="group">

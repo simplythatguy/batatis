@@ -117,13 +117,13 @@ function remember(caseId: string, fields: Record<string, PostedFact>) {
  * One create at a time. A second caller waits on the same promise, so two
  * keystrokes cannot open two cases and strand facts on the first.
  */
-export function ensureEngineCase(title: string, authority: AuthorityId): Promise<string> {
+export function ensureEngineCase(title: string | null, authority: AuthorityId): Promise<string> {
   const existing = engineCaseId();
   if (existing) return Promise.resolve(existing);
   if (inflight) return inflight;
   const token = generation;
   const request = engine
-    .createCase({ title, jurisdiction: jurisdictionForCreate(authority) })
+    .createCase({ ...(title ? { title } : {}), jurisdiction: jurisdictionForCreate(authority) })
     .then((created) => {
       assertGeneration(token);
       sessionStorage.setItem(ID_KEY, created.id);

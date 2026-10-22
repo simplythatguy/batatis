@@ -15,7 +15,7 @@ function useOutsideClose(open: boolean, close: () => void, ...refs: React.RefObj
 }
 
 /** The `⋯` menu: links or actions, arrow keys move, Esc closes and returns focus. */
-export function MoreMenu({ items }: { items: { label: string; href?: string; onClick?: () => void; hint?: string; separator?: boolean; disabled?: boolean }[] }) {
+export function MoreMenu({ items, label = "More" }: { items: { label: string; href?: string; onClick?: () => void; hint?: string; separator?: boolean; disabled?: boolean }[]; label?: string }) {
   const [open, setOpen] = useState(false);
   const btn = useRef<HTMLButtonElement>(null);
   const pop = useRef<HTMLDivElement>(null);
@@ -40,11 +40,11 @@ export function MoreMenu({ items }: { items: { label: string; href?: string; onC
   }
   return (
     <div className="cf-more">
-      <button ref={btn} type="button" className="cf-icon-btn is-plain" aria-label="More" aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen((v) => !v)}>
+      <button ref={btn} type="button" className="cf-icon-btn is-plain" aria-label={label} aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen((v) => !v)}>
         <Icon24 name="more" size={18} />
       </button>
       {open && (
-        <div ref={pop} className="cf-pop cf-menu" role="menu" aria-label="More" onKeyDown={onMenuKey}>
+        <div ref={pop} className="cf-pop cf-menu" role="menu" aria-label={label} onKeyDown={onMenuKey}>
           {items.map((it) => (
             <div key={it.label} role="none">
               {it.separator && <hr role="separator" />}

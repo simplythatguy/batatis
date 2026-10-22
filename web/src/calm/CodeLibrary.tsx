@@ -548,7 +548,8 @@ export function CodeLibrary({ route }: { route: CalmRoute }) {
 
   const high = rankedIn(rel.display, rel.cutoffs, ["high"], rel.rerank);
   const mid = rankedIn(rel.display, rel.cutoffs, ["mid"], rel.rerank);
-  const filter: Filter = route.filter || (rel.display && high.length ? "attention" : "all");
+  // Estimates without cut-offs have no "needs attention" or "maybe" to filter by.
+  const filter: Filter = !rel.cutoffs.rated ? "all" : route.filter || (rel.display && high.length ? "attention" : "all");
   const index = useMemo(() => tocIndex(toc.state === "ready" ? toc.value : undefined), [toc]);
   const setFilter = (f: Filter) => { location.hash = codeHref(route.article, f); };
   const edition = toc.state === "ready" ? toc.value.edition : "NBC(AE) 2023";
@@ -584,7 +585,7 @@ export function CodeLibrary({ route }: { route: CalmRoute }) {
         <div className="cf-lib-tools">
           <div className="cf-filters" role="group" aria-label="Show">
             <button type="button" className="cf-chip is-sm" aria-pressed={filter === "all"} onClick={() => setFilter("all")}>All</button>
-            {rel.display && (
+            {rel.display && rel.cutoffs.rated && (
               <>
                 <button type="button" className="cf-chip is-sm" aria-pressed={filter === "attention"} onClick={() => setFilter("attention")}><span className="cf-dot is-blocking" aria-hidden="true" />Needs attention <span className="cf-faint">{high.length}</span></button>
                 <button type="button" className="cf-chip is-sm" aria-pressed={filter === "maybe"} onClick={() => setFilter("maybe")}><span className="cf-dot is-warning" aria-hidden="true" />Maybe <span className="cf-faint">{mid.length}</span></button>

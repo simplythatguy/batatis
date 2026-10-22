@@ -283,27 +283,18 @@
 .pr-basis-fold > summary::after { content: " +"; color: var(--cf-text-4); }
 .pr-basis-fold[open] > summary::after { content: " −"; }
 
-/* —— Step tabs: the shell's stage tabs (number, name, thin line), centred in the page header —— */
+/* —— Step icons: the shell's stage icons (calm.css .cf-stage), centred in the page header —— */
 
 .ac-head.has-center { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
 .ac-head.has-center .ac-head-right { justify-self: end; }
 .rv-head-steps { align-self: stretch; display: flex; justify-content: center; min-width: 0; }
-.rv-steps .cf-stage { border: 0; background: none; font: inherit; }
-.rv-step-n { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--hue-t); color: var(--hue); font: 600 11px/18px var(--cf-font); text-align: center; }
-/* Without a header (outside PDFs) the same tabs sit above the step. */
-.pr-steps-inline { height: 48px; display: flex; justify-content: center; border-bottom: 1px solid var(--cf-line); }
-@media (max-width: 1100px) {
-  .rv-steps .cf-stage { padding: 0 8px; }
-  .rv-steps .cf-stage:not([aria-current="step"]) .cf-stage-name { display: none; }
-}
+/* Without a header (outside PDFs) the same steps sit above the step. */
+.pr-steps-inline { height: 52px; display: flex; justify-content: center; border-bottom: 1px solid var(--cf-line); }
 /* Phones: the steps get their own row under the title, so nothing collides. */
 @media (max-width: 760px) {
   .ac-head.has-center { height: auto; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 52px auto; }
-  .ac-head.has-center .rv-head-steps { grid-column: 1 / -1; grid-row: 2; height: 44px; margin: 0 -8px 0 -16px; padding: 0 8px; border-top: 1px solid var(--cf-line); }
+  .ac-head.has-center .rv-head-steps { grid-column: 1 / -1; grid-row: 2; height: 48px; margin: 0 -8px 0 -16px; padding: 0 8px; border-top: 1px solid var(--cf-line); }
   .ac-head.has-center .rv-head-steps:empty { display: none; }
-  .rv-steps { width: 100%; justify-content: space-between; }
-  .ac-head .rv-steps .cf-stage { padding: 0 4px; }
-  .ac-head .rv-steps .cf-stage:not([aria-current="step"]) .cf-stage-name { display: inline; }
 }
 
 /* —— Checks: four folded rows, one open at a time —— */

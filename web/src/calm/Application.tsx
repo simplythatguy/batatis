@@ -2,115 +2,18 @@ import { useEffect, useRef, useState } from "react";
 import { accounts, submitBlockers, type ApplicationSummary } from "../api/accounts";
 import { EngineError } from "../api/client";
 import { Notices } from "../components";
-import { AUTHORITIES, CODE_EDITION } from "../config";
 import { UNSIGNED_LINE, isProfessionalHold, professionalRouteNote } from "../humanReview";
-import { DETAIL_FIELDS, PROCESS_FIELDS, displayValue, factFor, valueText } from "../model";
 import { useApplicationExport } from "../screens/Application";
 import { useCase } from "../store";
-import type { Case, SectionCRow } from "../types";
 import { patchApplication, refreshApplications, useAccount } from "./account";
 import { authorityName, readOnlyStatus } from "./applications";
 import { useCurrentApplication } from "./begin";
 import { gapKey } from "./deck";
 import { calmHref } from "./routes";
 import { EngineerCallout } from "./Review";
+import { FormPlaceholder, FormViewer } from "./FormViewer";
 import { CIcon, Dot, Eyebrow } from "./ui";
 import { retryExtras, useCaseExtras } from "./caseExtras";
-
-function Missing() {
-  return <span className="cf-sheet-missing"><span className="cf-sheet-dot" aria-hidden="true" />— <em>missing</em></span>;
-}
-
-function Value({ c, id }: { c: Case; id: string }) {
-  const def = DETAIL_FIELDS.find((d) => d.id === id)!;
-  const fact = factFor(c, id);
-  if (!valueText(fact).trim()) return def.required ? <Missing /> : <span className="cf-sheet-none">—</span>;
-  return (
-    <span>
-      {displayValue(fact!)}
-      {fact!.status === "unconfirmed" && <span className="cf-sheet-flag"> · needs your check</span>}
-    </span>
-  );
-}
-
-function codes(row: SectionCRow) {
-  const objectives = [...new Set(row.pairs.flatMap((p) => p.objectives))];
-  const functions = [...new Set(row.pairs.flatMap((p) => p.functions))];
-  if (!objectives.length && !functions.length) return "No row in the attribution table";
-  return `Objectives ${objectives.join(", ") || "—"} · Functions ${functions.join(", ") || "—"}`;
-}
-
-function documents(c: Case): string[] {
-  const titles = new Map<string, string>();
-  for (const f of c.facts) {
-    const m = /^evidence\.([^.]+)\.title$/.exec(f.field);
-    if (m && typeof f.value === "string" && f.value.trim() && !c.unscopedEvidence?.includes(m[1])) titles.set(m[1], f.value.trim());
-  }
-  return [...titles.values()];
-}
-
-/** Part 1, Sections A–D, from the same case values the PDF is generated from. */
-function Sheet({ c }: { c: Case }) {
-  const kv = (ids: string[]) => ids.map((id) => {
-    const def = DETAIL_FIELDS.find((d) => d.id === id)!;
-    return [<span key={`${id}-k`}>{def.label}</span>, <Value key={`${id}-v`} c={c} id={id} />];
-  });
-  const departures = c.sectionC.filter((r) => c.candidates.find((a) => a.id === r.candidateId)?.answer === "yes");
-  const otherRefs = c.sectionC.length - departures.length;
-  const role = factFor(c, "professional.role");
-  const registration = factFor(c, "professional.registration_number");
-  const docs = documents(c);
-  const authority = AUTHORITIES.find((a) => a.id === c.authority)?.name;
-  return (
-    <article className="cf-sheet" aria-label="Application preview">
-      <h2>Safety Codes Variance — Part 1</h2>
-      <div className="cf-sheet-sub">{CODE_EDITION} · Draft preview</div>
-
-      <h4>A · Applicant</h4>
-      <div className="cf-sheet-kv">{kv(["owner", "representative", "mailingAddress", "date"])}</div>
-
-      <h4>B · Project</h4>
-      <div className="cf-sheet-kv">
-        <span>Reviewing authority</span>
-        {authority ? <span>{authority}</span> : <Missing />}
-        {kv(["scope", "permit", "municipalAddress", "legalDescription"])}
-      </div>
-      <p className="cf-sheet-label">Proposed alternative</p>
-      <p className="cf-sheet-p">{valueText(factFor(c, "alternative")).trim() || <Missing />}</p>
-
-      <h4>C · Code references</h4>
-      {departures.length ? (
-        departures.map((r) => (
-          <p key={r.provision} className="cf-sheet-p">
-            <span className="cf-sheet-ref">{r.provision}</span> {codes(r)}
-          </p>
-        ))
-      ) : (
-        <p className="cf-sheet-p"><Missing /> No departure from a looked-up sentence confirmed yet.</p>
-      )}
-      {otherRefs > 0 && <p className="cf-sheet-note">{otherRefs} other looked-up {otherRefs === 1 ? "sentence is" : "sentences are"} not marked as a departure.</p>}
-
-      <h4>Alternative path · written by the applicant</h4>
-      <div className="cf-sheet-kv is-wide">
-        {PROCESS_FIELDS.map((p) => [
-          <span key={`${p.id}-k`}>{p.label}</span>,
-          <span key={`${p.id}-v`}>{c.process[p.id].trim() || <Missing />}</span>,
-        ])}
-      </div>
-
-      <h4>D · Supporting information</h4>
-      <div className="cf-sheet-kv">
-        <span>Registered professional</span>
-        {role && valueText(role) ? <span>{displayValue(role)}{role.status === "unconfirmed" ? " · routed to the officer" : ""}</span> : <Missing />}
-        <span>Registration or seal</span>
-        {registration && valueText(registration) ? <span>{displayValue(registration)}</span> : <span className="cf-sheet-none">—</span>}
-        <span>Documents listed</span>
-        {docs.length ? <span>{docs.join("; ")}</span> : <Missing />}
-      </div>
-      <p className="cf-sheet-note">Professional evidence is provided by the applicant’s registered professional. Batatis does not write it.</p>
-    </article>
-  );
-}
 
 const when = (iso: string | null) => {
   if (!iso) return "";
@@ -225,12 +128,9 @@ function SubmittedStatus({ app, where }: { app: ApplicationSummary; where: strin
 
 /** Before an application exists: the empty form, so it is clear what will be filled in. */
 function ApplicationEmpty() {
-  const { c } = useCase();
   return (
     <div className="cf-doc">
-      <div className="cf-sheet-pane">
-        <Sheet c={c} />
-      </div>
+      <FormPlaceholder />
       <aside className="cf-glass cf-side" aria-label="Download">
         <Eyebrow plain>Status</Eyebrow>
         <div className="cf-side-big">Nothing filled in yet.<br /><span className="cf-muted">Every section is still missing.</span></div>
@@ -293,9 +193,8 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
 
   return (
     <div className="cf-doc">
-      <div className="cf-sheet-pane">
-        <Sheet c={c} />
-      </div>
+      {/* The actual PDF the engine fills, not a drawing of it. */}
+      <FormViewer locked={locked} />
       <aside className="cf-glass cf-side" aria-label="Download">
         <Eyebrow plain>Status</Eyebrow>
         {!locked && <div className="cf-side-big">{headline}<br /><span className="cf-muted">{sub}</span></div>}

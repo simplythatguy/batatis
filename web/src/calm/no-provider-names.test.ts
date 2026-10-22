@@ -6,7 +6,7 @@ import { BAND_LABEL, BAND_SHORT } from "./relevance.ts";
 
 /** The scoring provider by name and by vendor, and the other AI providers the privacy notice must not name. */
 const PROVIDER = /jev|typesafe|openai|anthropic|claude|gpt/i;
-const BANDS = ["high", "low", "mid", "unscored", "zero"];
+const BANDS = ["estimate", "high", "low", "mid", "unscored", "zero"];
 
 test("the relevance label maps name no provider", () => {
   for (const [name, labels] of Object.entries({ BAND_LABEL, BAND_SHORT })) {

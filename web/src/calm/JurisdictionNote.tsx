@@ -46,6 +46,9 @@ function PackDetail({ pack, extras }: { pack: JurisdictionDetail; extras: CaseEx
   return (
     <div className="cf-juris" role="note">
       <p className="cf-juris-h"><Dot tone="done" />{pack.authority.name} reviews it.</p>
+      {/* The answer is the line above; the office's contact, process notes and their limits wait here. */}
+      <details className="cf-juris-more">
+      <summary>Office details</summary>
       {pack.authority.contact && <p>{pack.authority.contact}</p>}
       {current.length > 0 && (
         <p className="cf-faint">
@@ -79,6 +82,7 @@ function PackDetail({ pack, extras }: { pack: JurisdictionDetail; extras: CaseEx
         </details>
       )}
       <p className="cf-faint cf-small">{pack.disclaimer}</p>
+      </details>
     </div>
   );
 }

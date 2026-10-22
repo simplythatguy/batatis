@@ -8,16 +8,27 @@ export interface ApplicationListHandle {
   focusSearch: () => void;
 }
 
-/** One row: title, one context line, accent bar when selected, optional hover actions. */
-function Row({ a, selected, onSelect, actions, line }: { a: ApplicationSummary; selected: boolean; onSelect: (id: string) => void; actions?: ReactNode; line?: { text: string; tone: string; attention: boolean } }) {
-  const l = line ?? statusLine(a);
+type Line = { text: string; tone: string; attention: boolean; unread?: number };
+
+/**
+ * One row: title and one context line, soft fill when selected, optional hover actions.
+ * Unread officer messages read as a message icon and the count; the words stay for hover and screen readers.
+ */
+function Row({ a, selected, onSelect, actions, line }: { a: ApplicationSummary; selected: boolean; onSelect: (id: string) => void; actions?: ReactNode; line?: Line }) {
+  const l: Line = line ?? statusLine(a);
+  const unread = l.unread ?? 0;
   return (
     <li className={`cf-list-row${selected ? " is-selected" : ""}`} data-status={a.status}>
       <button type="button" className="cf-list-hit" aria-current={selected ? "page" : undefined} onClick={() => onSelect(a.id)}>
         <span className="cf-list-title">{a.title || "Untitled application"}</span>
-        <span className={`cf-list-line is-${l.tone}${l.attention ? " is-attention" : ""}`}>
+        <span className={`cf-list-line is-${l.tone}${l.attention ? " is-attention" : ""}`} title={unread > 0 ? l.text : undefined}>
           <span className={`cf-dot is-${l.tone === "accent" ? "accent" : l.tone === "amber" ? "warning" : l.tone === "green" ? "done" : "pending"}`} aria-hidden="true" />
-          {l.text}
+          {unread > 0 ? (
+            <>
+              <span className="cf-list-unread" aria-hidden="true"><Icon24 name="msg" size={13} />{unread}</span>
+              <span className="cf-sr">{l.text}</span>
+            </>
+          ) : l.text}
         </span>
       </button>
       {actions && <div className="cf-list-actions">{actions}</div>}
@@ -41,7 +52,7 @@ export const ApplicationList = forwardRef<ApplicationListHandle, {
   note?: ReactNode;
   empty?: ReactNode;
   rowActions?: (a: ApplicationSummary) => ReactNode;
-  lineFor?: (a: ApplicationSummary) => { text: string; tone: string; attention: boolean };
+  lineFor?: (a: ApplicationSummary) => Line;
 }>(function ApplicationList({ title = "Applications", items, selectedId, onSelect, onNew, loading, error, note, empty, rowActions, lineFor }, ref) {
   const [query, setQuery] = useState("");
   const search = useRef<HTMLInputElement>(null);

@@ -36,6 +36,8 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
   const refused = app.status === "refused";
   const [messages, setMessages] = useState<Message[] | null>(null);
   const [error, setError] = useState("");
+  // Bumped by "Try again"; the effect below owns the request, so a late answer for another file is dropped.
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let live = true;
@@ -49,7 +51,7 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
       })
       .catch((e: unknown) => { if (live) setError(e instanceof EngineError ? e.detail : "The officer’s message did not load."); });
     return () => { live = false; };
-  }, [app.id, app.status, app.updated_at]);
+  }, [app.id, app.status, app.updated_at, attempt]);
 
   const { latest, correspondence } = useMemo(() => {
     const ordered = [...(messages ?? [])].sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
@@ -85,7 +87,11 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
           {who} <span>· {where ? `Safety Codes Officer, ${where} · ` : ""}{refused ? "refused" : "returned"} this{latest ? ` ${when(latest.created_at)}` : ""}</span>
         </h2>
         {messages === null && !error && <p className="cf-faint" role="status">Loading the officer’s message…</p>}
-        {error && <p className="cf-faint" role="status">{error}</p>}
+        {error && (
+          <p className="cf-faint cf-returned-retry" role="status">
+            {error} <button type="button" className="cf-btn is-xs" onClick={() => setAttempt((n) => n + 1)}>Try again</button>
+          </p>
+        )}
         {latest && <p className="cf-returned-msg">{latest.body}</p>}
         {messages && !latest && <p className="cf-returned-msg cf-muted">{refused ? "A refusal was recorded. Contact the officer for the written notice and appeal information." : "Returned for administrative information. Open the review to see what is missing."}</p>}
         {refused && <p className="cf-faint cf-small">Closed · read-only</p>}

@@ -17,6 +17,7 @@ import { useSectionC } from "./api/sectionC";
 import { readSectionD, SectionDRecoveryError, type SectionDRead } from "./api/sectionD";
 import { isProvision, reconcileSectionC, sameCards } from "./provisions";
 import { caseFromEngine } from "./calm/openCase";
+import { normalizeTitle, saveTitle, TITLE_EMPTY, titleError } from "./calm/rename";
 import { refreshCase, resetExtras, setChecklist } from "./calm/caseExtras";
 
 /** Older builds kept the whole case here. It is removed on load and never written again. */
@@ -65,6 +66,8 @@ interface Store {
   runIdentify: () => Promise<void>;
   /** Answer one planner question; "Not sure" is allowed. Resolves to an error text, or null when saved. */
   answerPlan: (q: PlanQuestion, answer: string) => Promise<string | null>;
+  /** Rename the open application (saved, then shown in the header and the list). Resolves to an error text, or null. */
+  renameCase: (title: string) => Promise<string | null>;
   /** The redirect page: `true` is "This is a building-code question". */
   overrideScope: (buildingCode: boolean) => Promise<string | null>;
   /** Yes, No or Not sure on a code card; identified cards also go to the decision route. */
@@ -264,7 +267,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const dispatch = useCallback((action: Action) => {
     // A lookup that only attaches Section C rows (or re-orders the same cards, as it does right
     // after a saved case is opened) is derived data, not an edit: the draft stays saved.
-    const derived = (action.type === "reconcileSectionC" && sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates)) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions", "noteIntake", "restoreIntake", "noteIntakeRecord", "adoptFacts", "noteIdentify"].includes(action.type);
+    const derived = (action.type === "reconcileSectionC" && sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates)) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions", "noteIntake", "restoreIntake", "noteIntakeRecord", "adoptFacts", "noteIdentify", "renameCase"].includes(action.type);
     if (!derived) {
       revision.current += 1;
       if (action.type !== "saveEvidence" && action.type !== "removeEvidence") planRevision.current += 1;
@@ -396,7 +399,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     setSavedNote("Saving…");
     setSaveDetail("");
     try {
-      let id = await ensureEngineCase(snapshot.title, snapshot.authority);
+      // Only a name the applicant chose is sent; a placeholder leaves the case for the engine to name.
+      let id = await ensureEngineCase(snapshot.titleKept ? snapshot.title : null, snapshot.authority);
       if (!current()) return null;
       setEngineId(id);
       id = await syncJurisdiction(id, snapshot.authority, snapshot.title);
@@ -467,6 +471,35 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     const pending = syncQueue.current.catch(() => {}).then(work);
     syncQueue.current = pending;
     return pending;
+  }
+
+  /**
+   * Rename the open application. Saved through PATCH /cases/{id}/title in the save queue (it moves
+   * the case version), then shown in the header and the list. Before the case exists the name is kept
+   * and sent when it is created. Resolves to an error text, or null when saved.
+   */
+  function renameCase(raw: string): Promise<string | null> {
+    const title = normalizeTitle(raw);
+    if (!title) return Promise.resolve(TITLE_EMPTY);
+    const token = engineGeneration();
+    return enqueue(async () => {
+      const id = engineCaseId();
+      if (!isEngineGeneration(token)) return null;
+      if (!id) {
+        derive({ type: "renameCase", title });
+        return null;
+      }
+      try {
+        const saved = await saveTitle(id, title);
+        // Another application was opened meanwhile: the list row is updated, this case is not.
+        if (!isEngineGeneration(token) || engineCaseId() !== id) return null;
+        acknowledgeWrite(id, saved.version);
+        derive({ type: "renameCase", title: saved.title ?? title });
+        return null;
+      } catch (e) {
+        return isEngineGeneration(token) ? titleError(e) : null;
+      }
+    });
   }
 
   /** Apply derived engine output without marking the draft unsaved. */
@@ -889,7 +922,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         const id = engineCaseId();
         if (id) await uploadHeld(id, () => isEngineGeneration(token));
       });
-    }, answerPlan, overrideScope, decide, answerChecklist, reloadChecklists,
+    }, answerPlan, overrideScope, decide, answerChecklist, reloadChecklists, renameCase,
     sectionCLookup, retrySectionC: () => setLookupAttempt(n => n + 1),
     snapshotKey: `${renderGeneration}:${renderPlanRevision}:${JSON.stringify(c.candidates)}:${JSON.stringify(c.sectionC)}:${sectionCLookup.source}`,
     loadSectionD,
