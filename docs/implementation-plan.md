@@ -1,6 +1,6 @@
 # Batatis: Implementation Plan
 
-*Building Codes Challenge, Submission 1 (Oct 29, 2026). Status is as of Oct 21, 2026, on `dev` at commit 054c632 and the live app at https://batatis-vert.vercel.app. Four status words are used. **Built** means merged on `dev` and reachable in the live app or API. **Backend only** means the API is merged and its screen is not finished. **In progress** means work on an open branch. **Roadmap** means not started, and it is never described as working. A result appears only where a file or a run backs it, with its limits next to it.*
+*Building Codes Challenge, Submission 1 (Oct 29, 2026). Status is as of Oct 21, 2026, on `dev` at commit 054c632 and the live app at <https://batatis-vert.vercel.app>. Four status words are used. **Built** means merged on `dev` and reachable in the live app or API. **Backend only** means the API is merged and its screen is not finished. **In progress** means work on an open branch. **Roadmap** means not started, and it is never described as working. A result appears only where a file or a run backs it, with its limits next to it.*
 
 ## 1. Summary
 

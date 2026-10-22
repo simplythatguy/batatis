@@ -1,6 +1,6 @@
 # Demo video script (4 to 5 minutes)
 
-*One example from the applicant's sign-up to the officer's close-out, filmed on the calm interface. Status is as of Oct 21, 2026, on `dev` at commit 054c632 and the live app at https://batatis-vert.vercel.app. Steps whose screens exist are marked **Built**. Steps whose screens are still in progress are marked **Pending UI**, and each has a fallback line, so the video can be recorded after those screens land and never shows or describes a screen that does not exist. Running time: 4:40. Narration: 394 words, about 2.8 minutes of speech at 140 words a minute, which leaves the rest of the clock for typing and clicking. The card order and the wording quoted below come from `web/src/calm/` at commit 054c632. Rehearse once on the final build and correct anything that has changed.*
+*One example from the applicant's sign-up to the officer's close-out, filmed on the calm interface. Status is as of Oct 21, 2026, on `dev` at commit 054c632 and the live app at <https://batatis-vert.vercel.app>. Steps whose screens exist are marked **Built**. Steps whose screens are still in progress are marked **Pending UI**, and each has a fallback line, so the video can be recorded after those screens land and never shows or describes a screen that does not exist. Running time: 4:40. Narration: 394 words, about 2.8 minutes of speech at 140 words a minute, which leaves the rest of the clock for typing and clicking. The card order and the wording quoted below come from `web/src/calm/` at commit 054c632. Rehearse once on the final build and correct anything that has changed.*
 
 ## What the video must say, and must not
 
@@ -14,7 +14,7 @@ An **EXAMPLE DATA** label sits bottom left on every frame that shows case data, 
 
 | Item | Value |
 |---|---|
-| Applicant | Priya Natarajan, Larkspur Example Homes Ltd. (the persona in `evals/demo-cases/`). Account email priya@example.com, an address on the reserved example domain |
+| Applicant | Priya Natarajan, Larkspur Example Homes Ltd. (the persona in `evals/demo-cases/`). Account email `priya@example.com`, an address on the reserved example domain |
 | Officer | Dana Example, City of Edmonton, officer account on the example domain. The authority access code is a secret and is never on screen |
 | Site | 0000 Example Crescent NW, Edmonton, AB. Legal description Lot 0, Block 0, Plan 0000000 |
 | Departure | The worked example in the Council's presentation: Sentence 9.10.15.4.(1), glazed openings in an exposing building face, attribution [F03-OP3.1]. The code database returns that pair, and the sentence is on PDF p.901 |
@@ -22,7 +22,7 @@ An **EXAMPLE DATA** label sits bottom left on every frame that shows case data, 
 
 **Paste this into Describe.** The first five lines are labelled, so the app reads them as the applicant's own statements and fills Sections A and B without asking again. The last paragraph is the applicant's own description, and it states what she proposes, not whether it is acceptable.
 
-```
+```text
 Owner: Larkspur Example Homes Ltd.
 Representative: Priya Natarajan
 Mailing address: 0000 Example Way NW, Edmonton, AB
@@ -76,6 +76,7 @@ The deck asks its cards in the order of the form: Section A, Section B, Section 
 **Screens.** `#/signup`, then `#/onboarding`.
 
 **Actions.**
+
 1. Open with the title card for 3 seconds: "Batatis" and the EXAMPLE DATA label.
 2. On "Create your account" type the name, the example email and a password. The password is masked. Press **Continue**.
 3. On "How will you use Batatis?" choose **I'm applying for a variance** (sub-line "Manufacturer, general contractor or homebuilder").
@@ -92,6 +93,7 @@ The deck asks its cards in the order of the form: Section A, Section B, Section 
 **Screen.** `#/`. Headline "What are you building differently?".
 
 **Actions.**
+
 1. Paste the example text into the box. Pause so the labelled lines are readable.
 2. Press **Start** (the button shows the ⌘↵ hint). The app goes to `#/questions`.
 
@@ -106,6 +108,7 @@ The deck asks its cards in the order of the form: Section A, Section B, Section 
 **Screen.** `#/questions`. One card at a time, in form order.
 
 **Actions.** Use the A, B and C keys to speed up the choices.
+
 1. "What date is this request?" Pick today's date.
 2. "Who will review your application?" (eyebrow "Section B · Reviewer"). Choose **Edmonton**. The choices are Calgary, Edmonton and "Not sure yet".
 3. "Check what we read": "How many storeys is the building?", with the line "Your description says “two-storey”." Choose **Yes, 2 storeys**. Pause on the quoted phrase.
@@ -128,6 +131,7 @@ The deck asks its cards in the order of the form: Section A, Section B, Section 
 **Screen.** `#/questions`. Cards with the eyebrow "Code check".
 
 **Actions.**
+
 1. The card reads "Is your design different from what this rule asks for?" with a citation chip such as `9.10.15.4.(1) Show the code`. Click the chip.
 2. In the drawer, scroll the verbatim code text (label "Code text · verbatim", its PDF page and the NRC credit). Open "Why this rule exists" and point at the label that says the national intent statements are explanatory. Show the objective and function chips for the pair (OP3.1 and F03). Close with **Esc**.
 3. Choose **Yes, it differs**.
@@ -146,6 +150,7 @@ The deck asks its cards in the order of the form: Section A, Section B, Section 
 **Screen.** `#/questions`. Cards with the eyebrow "Your case".
 
 **Actions.**
+
 1. Type the short text above on each card: rationale, risk, mitigating measures, assumptions and limits, maintenance, and qualifications.
 2. Keep the card line "You write this in your own words. Batatis never writes it for you." on screen for one card.
 
@@ -160,6 +165,7 @@ The deck asks its cards in the order of the form: Section A, Section B, Section 
 **Screen.** `#/questions` (the card "Who is responsible, and which documents back this up?"), then `#/review`.
 
 **Actions.**
+
 1. Answer the professional questions and show the list of evidence documents and who is responsible for each. Enter the fictional professional ("Example Engineer", "EXAMPLE-0000") so that the official PDF can unlock later.
 2. Open `#/review` and show the amber callout "An engineer or architect is required for Section D" with the line "Batatis can list what that evidence must address, but it can't write it." If the callout disappears once the professional is entered, film it first and enter the professional afterwards.
 
@@ -174,6 +180,7 @@ The deck asks its cards in the order of the form: Section A, Section B, Section 
 **Screens.** `#/review`, then `#/application`.
 
 **Actions.**
+
 1. On Review press **Check my application**. Read the headline ("Almost there. N things stand between you and the official PDF." or "Nothing required is missing."), the tiles and the "Still needed" list. Press **Answer** on one row to fix it, then return.
 2. Show the Sections A to D panel, with Section C's line "looked up, not AI-written".
 3. Press **Preview application** to show the paper sheet. Point at the Section C row, "Objectives OP3.1 · Functions F03".
@@ -192,6 +199,7 @@ The deck asks its cards in the order of the form: Section A, Section B, Section 
 **Screens.** `#/signin`, `#/review` (the queue), `#/review/<case id>`.
 
 **Actions.**
+
 1. In the officer's browser profile sign in with the example email and password. The app opens the queue, titled "Review queue" with the authority's name.
 2. Show the row: the application title, the applicant, when it was sent, the completeness count, the status and the reviewer column. Press **Start reviewing**.
 3. On the application page read the paper sheet beside the "Completeness" list. Point at an item marked "— missing" and, if one exists, a value marked "not confirmed by the applicant".
@@ -207,6 +215,7 @@ The deck asks its cards in the order of the form: Section A, Section B, Section 
 **Screen.** The application page for the claimed case. The exact panel is not built yet.
 
 **Actions (when the screen lands).**
+
 1. Open the package review for this case. Show the findings grouped by section A to D and the process items, each field marked present, blank or not found, and the supporting-documents panel.
 2. Open the drafted information request. Edit one item, then send it. The applicant is notified.
 3. Show that nothing in the panel says the design is acceptable.
@@ -224,6 +233,7 @@ The deck asks its cards in the order of the form: Section A, Section B, Section 
 **Screens.** The officer's page, the applicant's page, then the officer's page again. Keep this to a short cut.
 
 **Actions.**
+
 1. If the information request is not built, press **Return with message** on the officer's page, tick the items to address and press **Send and return** (the dialog is titled "Return with a message").
 2. In the applicant's profile show the notification bell and the returned banner with the officer's message. Fix one item and press **Resubmit to Edmonton**.
 3. Back in the officer's profile press **Accept as complete**. Read the dialog: "Accept as administratively complete?" and "It isn't an approval of the design; technical review stays with the authority." Confirm. The page shows "Accepted as administratively complete."

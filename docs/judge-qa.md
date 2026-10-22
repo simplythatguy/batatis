@@ -7,6 +7,7 @@ Batatis never states that a design complies or is safe. It checks whether an app
 
 **2. How accurate is it?**
 We have four measurements, each with its limit, and one gap.
+
 - **Intake rules,** on 60 development cases: typed-fact precision 159/159 and recall 159/162. In sample, because we wrote the labels while we wrote the rules.
 - **Engineer-needed flag,** on the same 60 cases: it agrees with model-written labels on 50 and sends 27 to the applicant as unknown. It never answers "no" on these text-only cases, so zero under-flags holds by construction.
 - **Relevance stage,** on 53 public Alberta precedents: it put a cited article first in 64% of cases and in the first five in 81%. Keyword search got 32% and 66%. This run had no verifier stage, covers one province and one code, and the gold lists can be incomplete.

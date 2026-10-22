@@ -1,6 +1,6 @@
 # Submission package checklist
 
-*Internal checklist for Submission 1 of the Building Codes Challenge (Thursday Oct 29, 2026). It is not for judges: its file paths can contain internal names that the judge-facing documents avoid. Status is as of Oct 21, 2026, on `dev` at commit 054c632 (CI run 39720990321 passed) and the live app at https://batatis-vert.vercel.app. Each line names a file, a pull request (PR) or a number that exists now. A line marked **GAP** has none. Status words follow `docs/implementation-plan.md` §3: **built**, **backend only** (the API is merged and the screen is in progress), **in progress** and **roadmap**.*
+*Internal checklist for Submission 1 of the Building Codes Challenge (Thursday Oct 29, 2026). It is not for judges: its file paths can contain internal names that the judge-facing documents avoid. Status is as of Oct 21, 2026, on `dev` at commit 054c632 (CI run 39720990321 passed) and the live app at <https://batatis-vert.vercel.app>. Each line names a file, a pull request (PR) or a number that exists now. A line marked **GAP** has none. Status words follow `docs/implementation-plan.md` §3: **built**, **backend only** (the API is merged and the screen is in progress), **in progress** and **roadmap**.*
 
 The plans, pitch text, Q&A and demo script in this list are in PR #59. They are on `dev` only after it merges.
 
@@ -15,8 +15,8 @@ The program's onboarding guide says: "Exact submission deadlines, templates and 
 | Deliverable | Status | Evidence now | GAP |
 |---|---|---|---|
 | Demo video | Not recorded | `docs/demo/script.md`: shot list, narration sized to the clock, EXAMPLE DATA overlay, and the preconditions to record | **GAP:** record it. It needs the screens marked "pending UI" in the script, a live-mode decision, and a seeded officer account for the recording |
-| Working link | Live | https://batatis-vert.vercel.app answered HTTP 200 on Oct 21. `GET /api/jurisdictions` returned the three packs and 13 coverage rows. `GET /api/code/search` returned 9.10.15.4.(1) among its top three. The OpenAPI document lists 64 paths (`docs/research/2026-10-21-source-checks.md` §6) | **GAP:** the site does not show which commit it serves, so confirm it is the final one. The Vercel Hobby deployment allowance ran out on Oct 20 (`docs/deploy.md`), so a late redeploy can fail. **GAP:** decide whether live model access is on. `docs/deploy.md` says to keep it off until the US$20 total cap (PR #41, still open) is integrated. Without live access code identification shows its labelled keyword fallback and the relevance rings stay unscored. **GAP:** decide how judges sign in as an officer. The access code is a secret (`BATATIS_REVIEWER_CODES`), and cases are deleted after 7 days |
-| Repo | Private: https://github.com/simplythatguy/batatis | `main` is 7 commits behind `dev`. The last release was PR #50 | **GAP:** confirm that judges can open the repo. Release `dev` to `main` after the last merge. Decide which branch the package names |
+| Working link | Live | <https://batatis-vert.vercel.app> answered HTTP 200 on Oct 21. `GET /api/jurisdictions` returned the three packs and 13 coverage rows. `GET /api/code/search` returned 9.10.15.4.(1) among its top three. The OpenAPI document lists 64 paths (`docs/research/2026-10-21-source-checks.md` §6) | **GAP:** the site does not show which commit it serves, so confirm it is the final one. The Vercel Hobby deployment allowance ran out on Oct 20 (`docs/deploy.md`), so a late redeploy can fail. **GAP:** decide whether live model access is on. `docs/deploy.md` says to keep it off until the US$20 total cap (PR #41, still open) is integrated. Without live access code identification shows its labelled keyword fallback and the relevance rings stay unscored. **GAP:** decide how judges sign in as an officer. The access code is a secret (`BATATIS_REVIEWER_CODES`), and cases are deleted after 7 days |
+| Repo | Private: <https://github.com/simplythatguy/batatis> | `main` is 7 commits behind `dev`. The last release was PR #50 | **GAP:** confirm that judges can open the repo. Release `dev` to `main` after the last merge. Decide which branch the package names |
 | Business plan | Rewritten | `docs/business-plan.md`, with sources in `docs/research/2026-10-21-source-checks.md` | No team section. See "Decisions for you" |
 | Implementation plan | Rewritten | `docs/implementation-plan.md`. The user-testing appendix is `docs/user-testing/` (no real session has run) | No human session. No pilot partner |
 | Pilot plan | Rewritten | `docs/pilot-adoption-plan.md` | No partner has agreed to anything |
@@ -41,7 +41,8 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 
 ### 1. Intake (20%)
 
-**Evidence now**
+**Evidence now:**
+
 - Built: Describe, then one question per card in form order, with a "Why we ask" on each card and "Not sure" as an open question (`web/src/calm/Start.tsx`, `web/src/calm/deck.ts`; PRs #49, #56).
 - Backend only: `POST /cases/{id}/intake` reads the description and text PDFs, attaches a pointer to each fact, turns conflicts into questions, asks at most five questions with reasons, flags when a variance may not be needed, and redirects other codes (`docs/api/intake.md`; PR #54).
 - Rules on 60 development cases: precision 159/159, recall 159/162 (`python -m evals_dev.intake_facts.score`, run Oct 21; PR #54). In sample, model-checked.
@@ -49,21 +50,24 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 - Live model check (PR #54): 19 calls, 73 model facts pointed, 0 proposed, 5 dropped, about US$0.012.
 - Engineer-needed flag: 50/60 agreement, 27 unknown, in sample (`evals_dev/section_d_flag/RESULTS.md`).
 
-**GAP**
+**Gaps:**
+
 - **GAP:** the screens for the reader's pointers, the five questions and the fork and scope notices (in progress).
 - **GAP:** no human-verified labels, so every intake figure is model-checked and in sample.
 - **GAP:** accuracy across all applicant types is not measured. The 60 cases are agent-authored.
 
 ### 2. Code Identification (20%)
 
-**Evidence now**
+**Evidence now:**
+
 - Backend only: all 2,080 Division B articles screened, 60 re-ranked, 15 read by a verifier that must quote word for word, up to three quoted choices, a benchmark acceptable-solution record per result, Div A 1.2.1.1. and Div C 2.3.1.1. attached read-only, a labelled keyword fallback (`docs/api/identify.md`; PR #52). The commit rule needs a calibration file and none exists, so nothing is committed automatically.
 - Built: code library with a relevance ring on each article and a structured reader (PRs #47, #56). Section C looked up from the attribution tables, with a row for 72.1% of Division B sentences in parts with a table (`codedb/README.md`).
 - Measured on 53 public precedents (relevance stage only, no verifier): first place 64% against 32% for keyword search, first five 81% against 66% (`docs/research/2026-10-20-vision/README.md` §6; the subfolder `jev-benchmark/` holds the data and scripts).
 - Cost: US$0.019 to US$0.020 per run, measured in the benchmark ledger (draft PR #58; `docs/research/2026-10-21-source-checks.md` §5).
 - Citations: every citation in the docs was looked up in the 2nd-printing database (`docs/research/2026-10-21-source-checks.md` §7). A fixed-seed audit of 30 provisions found 0 mismatches (`codedb/README.md`).
 
-**GAP**
+**Gaps:**
+
 - **GAP:** accuracy of the final pipeline. Draft PR #58 holds two complete draws of the relevance stage for 139 cases. The third draw and the latency pass need about US$3 to US$4 of account credit, and the decision memo and `pipeline.json` are not generated.
 - **GAP:** the commit rule is uncalibrated, so there is no committed-pick precision to report.
 - **GAP:** the screens for quoted choices and the benchmark record (in progress).
@@ -72,22 +76,26 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 
 ### 3. Recommendations (10%)
 
-**Evidence now**
+**Evidence now:**
+
 - Built: the professional-involvement result as an amber callout on the review screen, with the line "Batatis can list what that evidence must address, but it can't write it." Section D cards list evidence documents and the responsible person. Cards for rationale, risk, mitigation, assumptions, maintenance and qualifications say the applicant writes them (`web/src/calm/Review.tsx`, `web/src/calm/deck.ts`).
 - Engine: `engine/professional.py` answers required, depends or no, with the Division C rule (2.4.1.1.(3), 2.4.1.2.(1) and others) and never answers "no" on missing facts. Flag agreement 50/60 in sample (`evals_dev/section_d_flag/RESULTS.md`).
 - Roadmap: coded rules for 9.10.15.5.(8) to (10), 9.10.11.2.(2) and 9.10.13.13.(1), and standing-package checklists (`docs/research/2026-10-20-vision/2-week-build.md`).
 
-**GAP**
+**Gaps:**
+
 - **GAP:** no engineer or officer has reviewed the professional-involvement labels, the rule vectors or the checklists.
 - **GAP:** the CCMC registry search exists in the API (`/ccmc/search`), and no screen uses it.
 
 ### 4. Review (10%)
 
-**Evidence now**
+**Evidence now:**
+
 - Built: queue with tabs and claim, take-over, the application as a paper sheet beside its completeness list, messages, notifications, "Accept as complete" and "Return with message" (`docs/api/accounts-review.md`; PRs #48, #49). An agent-run browser walk completed sign-up, submit, claim, return, resubmit and accept (PR #49).
 - Backend only: the package review of fillable and flattened SCC forms with attachments, a documents panel, a deterministic information request, an "x of y gaps resolved" diff, the Division C 2.3.1.1 file-item findings, a peer-review signal for the officer, and a close-out record with a due date 10 days after the decision (`docs/api/package-review.md`; PR #53). Tests plant defects from 16 classes in synthetic forms (`engine/tests/test_package_review_planted.py`).
 
-**GAP**
+**Gaps:**
+
 - **GAP:** the package review and close-out screens (in progress).
 - **GAP:** officer time saved. The timing protocol is `docs/user-testing/officer-timing-protocol.md`, and no session has run.
 - **GAP:** the blind 20-application planted-defect evaluation in `evals_dev/planted/SPEC.md`.
@@ -95,51 +103,61 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 
 ### 5. General Applicability (5%)
 
-**Evidence now**
+**Evidence now:**
+
 - Built: onboarding sets manufacturer, general contractor or homebuilder, and the starting questions differ by role (`web/src/calm/auth/onboardingSteps.ts`, `web/src/calm/Start.tsx`). Every card says why it asks.
 - Three fictional demo cases, one per type, as test inputs (`evals/demo-cases/`).
 
-**GAP**
+**Gaps:**
+
 - **GAP:** no first-time applicant has tried it. The target is 2 of 3 finishing Part 1 unaided (`docs/implementation-plan.md` §7.2).
 - **GAP:** the demo cases were checked against the 1st printing and spot-checked in the 2nd (`evals/demo-cases/README.md`), so they are not used as evidence of code accuracy.
 
 ### 6. Implementation Plan (10%)
 
-**Evidence now**
+**Evidence now:**
+
 - `docs/implementation-plan.md`: state of the product, the Council's six steps mapped to Batatis, the officer workflow with the 10-day Council copy, the regulatory fit, hosting and data handling, the path to beta with the definition of beta and its dependencies, and the user-testing plan.
 - `docs/user-testing/` (session script, consent form, officer timing protocol). `docs/pilot-adoption-plan.md`. Jurisdiction onboarding by data packs: `docs/api/jurisdictions.md` (PR #51).
 
-**GAP**
+**Gaps:**
+
 - **GAP:** no human session has run and no pilot partner has agreed to anything.
 - **GAP:** Canadian-region hosting is a plan. The demo runs in the US East region.
 
 ### 7. Business Plan (10%)
 
-**Evidence now**
+**Evidence now:**
+
 - `docs/business-plan.md`: buyers ranked, willingness to pay with anchors and assumed prices, cost per application from the measured per-stage cost, market size from estimates, competitors, defensibility, and what has not been validated.
 - Sources: `docs/research/2026-10-20-vision/C-market-provinces-business.md` and `docs/research/2026-10-21-source-checks.md`.
 
-**GAP**
+**Gaps:**
+
 - **GAP:** no buyer has seen a price. Hosting, support and pack upkeep are not priced.
 - **GAP:** no team section (see "Decisions for you").
 
 ### 8. Usability and Portability (10%)
 
-**Evidence now**
+**Evidence now:**
+
 - Built: the calm interface (`docs/design-system-calm.md`), the official Oct 6, 2026 form as a draft or official PDF pinned to its SHA-256 (`engine/export/field_maps/scc_2026-10.json`), and submit and review for Calgary and Edmonton.
 - Built as data and API: packs for Calgary, Edmonton and the rest of Alberta, 12 other provinces and territories labelled preview, a lint test against city names in code, and a test that adds a fourth pack with no code change (`docs/api/jurisdictions.md`).
 
-**GAP**
+**Gaps:**
+
 - **GAP:** no usability test with a person on either side.
 - **GAP:** the jurisdiction picker and process-notes screen (in progress). The Calgary form export, the Appendix 1 export and Part 2 prefill are roadmap.
 - **GAP:** reviewer accounts exist only for Calgary and Edmonton.
 
 ### 9. The X Factor (5%)
 
-**Evidence now**
+**Evidence now:**
+
 - The Oct 6 form change was caught and the export pinned to it (`docs/research/2026-10-21-source-checks.md` §3). Three articles are 69% of the Q1 to Q2 2026 Data Hub entries (`docs/research/2026-10-20-vision/C-market-provinces-business.md` §2.0). The product follows the Council's own terms and six steps (`docs/implementation-plan.md` §2).
 
-**GAP**
+**Gaps:**
+
 - **GAP:** the team, the insight and the unfair advantage are not described in any file. Only the user can supply this text.
 
 ## Challenge scope requirements

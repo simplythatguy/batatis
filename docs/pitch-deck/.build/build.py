@@ -33,8 +33,15 @@ for blk in re.split(r"^### Slide ", slides_md, flags=re.M)[1:]:
     if hero:
         hv, hl = [x.strip() for x in hero.split("|", 1)]
         hero = dict(value=hv, label=hl)
-    bullets = [l[2:] for l in lines if l.startswith("- ")]
-    detail = [l[2:] for l in lines if l.startswith("* ")]
+    # On-slide bullets come before the "Full slide detail" label; detail items come after it.
+    bullets, detail, in_detail = [], [], False
+    for l in lines:
+        if l.startswith("**Full slide detail"):
+            in_detail = True
+        elif l.startswith("**Speaker notes:**"):
+            in_detail = False
+        elif l.startswith(("- ", "* ")):
+            (detail if in_detail else bullets).append(l[2:])
     notes = next(l for l in lines if l.startswith("**Speaker notes:**"))[len("**Speaker notes:** "):]
     src = next(l for l in lines if l.startswith("*Sources:*"))[len("*Sources:* "):]
     slides.append(dict(n=int(num), title=title, hero=hero, bullets=bullets, detail=detail, notes=notes, sources=src))

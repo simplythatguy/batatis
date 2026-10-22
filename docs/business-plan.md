@@ -6,7 +6,7 @@
 
 Batatis helps builders, manufacturers and their consultants prepare a complete, code-referenced alternative-solution application on the Safety Codes Council's *Variance Form for Proposed Alternative Solution* (Part 1, Sections A to D, [form dated Oct 6, 2026](https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf)). It also helps safety codes officers (SCOs) see what an incoming application still lacks. It checks administrative completeness and never technical correctness. When an engineer's judgment is needed, it says so, lists what the evidence must address, and stops.
 
-Live today at https://batatis-vert.vercel.app: sign-up for applicants and officers, a one-question-at-a-time flow for Sections A to D, Section C looked up from the code's tables, the Council's October 2026 form as a draft or official PDF, submission to Calgary or Edmonton, and an officer queue with claim, accept-as-complete and return-with-message. The intake reader, code identification over all 2,080 Division B articles, jurisdiction packs and the officer package review are merged as backends, and their screens are in progress. Coded rules for the most-varied articles, the accuracy report page, a second province and any portal integration are roadmap.
+Live today at <https://batatis-vert.vercel.app>: sign-up for applicants and officers, a one-question-at-a-time flow for Sections A to D, Section C looked up from the code's tables, the Council's October 2026 form as a draft or official PDF, submission to Calgary or Edmonton, and an officer queue with claim, accept-as-complete and return-with-message. The intake reader, code identification over all 2,080 Division B articles, jurisdiction packs and the officer package review are merged as backends, and their screens are in progress. Coded rules for the most-varied articles, the accuracy report page, a second province and any portal integration are roadmap.
 
 Two terms are kept apart throughout. A *variance* is the officer's legal authorization under the Safety Codes Act, s.38. An *alternative solution* is the applicant's technical evidence, under NBC(AE) Division C, 2.3.1, that the design performs at least as well as the acceptable solution. An accepted variance needs both (Implementation Plan, §2.1). Batatis helps with both halves and decides neither.
 
@@ -47,6 +47,7 @@ The five most-varied building articles are 9.10.15.5.(8) with 1,501, 9.10.11.2. 
 **Scale of the system.** 433 accredited organizations (299 municipalities, 93 corporations, 40 agencies and 1 regional services commission), 2,317 certified SCOs in all disciplines, and for the building discipline 520 certifications and 438 designations of powers (Council Annual Report 2025, p.7 and p.10; `C-market-provinces-business.md`, §2.0). Verified.
 
 **Time and cost of delay.**
+
 - The organizers describe the cost of rework and delay as "a few hundred dollars to tens of thousands of dollars", and call the evidence anecdotal (Challenge Scope, p.2). It is a framing, not a survey.
 - A practitioner guide on alternative solutions advises allowing "one to two months" for correspondence and "two to four months to receive comments" (CWC and WoodWorks BC *Alternative Solutions Guide*, pp.4 to 6; `C-market-provinces-business.md`, §2.4). It is guidance, not a measurement.
 - **Estimate.** A month of carrying cost on one house waiting for a variance decision is about C$2,333, if C$400,000 of land and construction financing is outstanding at 7% (C$400,000 x 0.07 / 12). Both inputs are our assumptions. A two-month back-and-forth is then about C$4,700.
@@ -166,6 +167,7 @@ A better model makes anyone's code search and drafting better, including ours. I
 5. **Corrections from pilots (roadmap).** Officer corrections to reviews could be collected under a data agreement with each authority, which owns its records.
 
 **Risks.**
+
 - An official template could commoditize the form. We fill the Council's form, and we would add the new template as a form version.
 - An incumbent could add an alternative-solution module. Archistar and Clariti already hold Canadian municipal relationships.
 - **Code-text licensing.** NBC(AE) 2023 says commercial reproduction of National Research Council (NRC) material needs written consent. The research ranks this the highest-priority risk. We quote code text for citations and link to the NRC publication. We have not asked NRC for terms, and written terms are needed before a public commercial launch. If terms are refused, the fallback is a link-out and user-supplied-text design (`C-market-provinces-business.md`, §3.2 and (c)).
@@ -181,6 +183,7 @@ This is a plan, not a commitment from anyone.
 4. Prepare a privacy impact assessment pack and the notice that Alberta's Protection of Privacy Act expects when personal information is used in an automated system.
 
 **What must be true, from the research.**
+
 - NRC grants workable written terms within about six months. Otherwise we switch to the link-out design.
 - Council or municipal data show at least 300 bespoke variances a year in Alberta. Otherwise we pivot to a standing-variance workflow and all-permit completeness.
 - One municipality signs a paid contract above C$50,000 within 12 months.

@@ -4,62 +4,76 @@
 
 ---
 
+## Script
+
 ### Slide 1: Alberta's variances are frequent, repetitive and unmeasured
+
 **Time (150 wpm):** 0:00 to 0:14  |  **Spoken words:** 34  |  **At 150 wpm:** 13.6 s  |  **At 140 wpm:** 14.6 s
 
 > Alberta's building variances are frequent, repetitive and unmeasured. In the first half of twenty twenty-six, the Council counted three thousand and eighty-eight building articles varied, and one soffit article is nearly half of them.
 
 ### Slide 2: Describe it in plain words, then answer one question at a time
+
 **Time (150 wpm):** 0:14 to 0:26  |  **Spoken words:** 30  |  **At 150 wpm:** 12.0 s  |  **At 140 wpm:** 12.9 s
 
 > Describe the project in plain words. Batatis asks one question at a time for the form's sections A to D, and nothing you say is used until you confirm it.
 
 ### Slide 3: It asks before it guesses, and we test that
+
 **Time (150 wpm):** 0:27 to 0:41  |  **Spoken words:** 36  |  **At 150 wpm:** 14.4 s  |  **At 140 wpm:** 15.4 s
 
 > It asks before it guesses. On sixty practice cases that we wrote ourselves, the rules read a hundred and fifty-nine facts and got none wrong. They missed three. Where facts conflict or are missing, it asks.
 
 ### Slide 4: Every Division B article is screened, then quoted
+
 **Time (150 wpm):** 0:41 to 0:55  |  **Spoken words:** 33  |  **At 150 wpm:** 13.2 s  |  **At 140 wpm:** 14.1 s
 
 > Code identification scores all two thousand and eighty Division B articles, re-ranks sixty, and has a verifier quote the text. It offers up to three quoted choices, and it commits nothing by itself.
 
 ### Slide 5: Citations come from the code database
+
 **Time (150 wpm):** 0:55 to 1:14  |  **Spoken words:** 48  |  **At 150 wpm:** 19.2 s  |  **At 140 wpm:** 20.6 s
 
 > A quote that does not match the code word for word is dropped. Section C is a lookup. On fifty-three public precedents, screening and re-ranking put a cited article first sixty-four percent of the time, against thirty-two for keyword search. The benchmark for the final pipeline is unfinished.
 
 ### Slide 6: It knows where to stop
+
 **Time (150 wpm):** 1:15 to 1:24  |  **Spoken words:** 24  |  **At 150 wpm:** 9.6 s  |  **At 140 wpm:** 10.3 s
 
 > It knows where to stop. It says whether an engineer is required, and lists what the evidence must address. It never writes the evidence.
 
 ### Slide 7: Officers see gaps by section, never a verdict
+
 **Time (150 wpm):** 1:25 to 1:34  |  **Spoken words:** 24  |  **At 150 wpm:** 9.6 s  |  **At 140 wpm:** 10.3 s
 
 > For officers, there is a queue, a paper sheet, and gaps by section. There is never a verdict. We have no timing data yet.
 
 ### Slide 8: One flow for three kinds of first-time applicants
+
 **Time (150 wpm):** 1:35 to 1:44  |  **Spoken words:** 22  |  **At 150 wpm:** 8.8 s  |  **At 140 wpm:** 9.4 s
 
 > One flow serves a manufacturer, a general contractor and a homebuilder. Whether a real first-time applicant can use it unaided is untested.
 
 ### Slide 9: It fills the Council's current form and is built to travel
+
 **Time (150 wpm):** 1:44 to 1:54  |  **Spoken words:** 26  |  **At 150 wpm:** 10.4 s  |  **At 140 wpm:** 11.1 s
 
 > It fills the Council's current form, dated October sixth, and leaves the officer's part blank. Jurisdiction packs are data: Calgary, Edmonton and the rest of Alberta.
 
 ### Slide 10: It fits the Dec 1 portal switch
+
 **Time (150 wpm):** 1:55 to 2:10  |  **Spoken words:** 37  |  **At 150 wpm:** 14.8 s  |  **At 140 wpm:** 15.9 s
 
 > From December first, the Council's portal is the only way to register a variance, and registration is not approval. Our path is Submission two, Demo Day, then a pilot with one accredited organization, which is a target.
 
 ### Slide 11: Applicants pay to arrive complete
+
 **Time (150 wpm):** 2:10 to 2:25  |  **Spoken words:** 36  |  **At 150 wpm:** 14.4 s  |  **At 140 wpm:** 15.4 s
 
 > Applicants pay to arrive complete. One identification run costs about two cents in model fees. The price to test is one hundred fifty to seven hundred fifty dollars a package. No buyer has seen a price.
 
 ### Slide 12: We read the regulator's own data
+
 **Time (150 wpm):** 2:25 to 2:37  |  **Spoken words:** 29  |  **At 150 wpm:** 11.6 s  |  **At 140 wpm:** 12.4 s
 
 > We read the regulator's own data. Three articles make up sixty-nine percent of the entries. No one outside our team has tried Batatis. It checks completeness. The officer decides.
