@@ -9,7 +9,8 @@ from engine.export.sample import sample_case
 from engine.review import information_request as ir
 from engine.review.package import review_case, review_uploads
 from engine.tests.case_builder_fixtures import complete_case, fact
-from engine.tests.package_review_fixtures import CLEAN_NARRATIVE, narrative_pdf, package, scanned, text_pdf
+from engine.tests.package_review_fixtures import (CLEAN_NARRATIVE, covered_scan_pdf, narrative_pdf, package,
+                                                repeated_rationale_pdf, scanned, text_pdf)
 
 
 @pytest.fixture(scope='module')
@@ -195,6 +196,71 @@ def test_readable_heading_over_raster_rationale_is_an_officer_check():
     parts = review_uploads([('raster-rationale.pdf', raster_rationale_pdf())], None)
     finding = _assert_officer_check(parts)
     assert finding.pointers[0].file == 'raster-rationale.pdf' and finding.pointers[0].page == 1
+
+
+@pytest.mark.parametrize('body,unique_heading,reversed_stop', [
+    ('raster', False, False), ('raster', True, False), ('vector', False, False), ('raster', True, True)],
+    ids=['repeated-raster', 'unique-heading-repeated-stop', 'repeated-vector', 'reversed-boundaries'])
+def test_each_rationale_occurrence_checks_its_own_graphical_body(body, unique_heading, reversed_stop):
+    pdf = repeated_rationale_pdf(body, unique_heading=unique_heading, reversed_stop=reversed_stop)
+    finding = _assert_officer_check(review_uploads([('repeated.pdf', pdf)], None))
+    assert [(p.file, p.page, p.quote) for p in finding.pointers] == [
+        ('repeated.pdf', 1, 'Rationale'),
+        ('repeated.pdf', 1, 'Rationale for variance' if unique_heading else 'Rationale')]
+
+
+@pytest.mark.parametrize('body', ['blank', 'outside'])
+def test_repeated_readable_blank_rationales_do_not_include_graphics_outside_the_passages(body):
+    parts = review_uploads([('repeated.pdf', repeated_rationale_pdf(body))], None)
+    finding = next(f for f in parts.findings if f.field == 'rationale')
+    assert finding.status == 'blank' and finding.severity == 'blocking'
+    assert len(finding.pointers) == 2
+    item = ir.build([finding]).items[0]
+    assert item.included and not item.officer_check
+
+
+@pytest.mark.parametrize('cover,page', [('none', 1), ('separate', 2), ('same-page', 1)])
+def test_readable_cover_cannot_make_a_scanned_rationale_certainly_absent(cover, page):
+    uploads = [('blank.pdf', text_pdf(['Rationale', 'Risk assessment'])),
+               ('supplement.pdf', covered_scan_pdf(cover))]
+    for ordered in (uploads, list(reversed(uploads))):
+        finding = _assert_officer_check(review_uploads(ordered, None))
+        assert [(p.file, p.page, p.quote) for p in finding.pointers] == [
+            ('blank.pdf', 1, 'Rationale'), ('supplement.pdf', page, None)]
+
+
+def test_readable_cover_and_truly_empty_page_do_not_imply_an_unreadable_passage():
+    from reportlab.pdfgen import canvas
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=(612, 792))
+    c.drawString(48, 748, 'SYNTHETIC readable cover.')
+    c.showPage()
+    c.showPage()
+    c.save()
+    parts = review_uploads([('blank.pdf', text_pdf(['Rationale', 'Risk assessment'])),
+                            ('empty-page.pdf', buf.getvalue())], None)
+    finding = next(f for f in parts.findings if f.field == 'rationale')
+    assert finding.status == 'blank' and ir.build([finding]).items[0].included
+
+
+@pytest.mark.parametrize('cover', ['separate', 'same-page'])
+@pytest.mark.parametrize('layout', ['files', 'same-file'])
+def test_single_readable_rationale_stays_present_beside_unrelated_covered_scan(cover, layout):
+    passage = 'SYNTHETIC supplied readable rationale.'
+    uploads = [('rationale.pdf', text_pdf(['Rationale', passage, 'Risk assessment'])),
+               ('other-material.pdf', covered_scan_pdf(cover))]
+    if layout == 'same-file':
+        from pypdf import PdfWriter
+        writer = PdfWriter()
+        for _name, data in uploads:
+            writer.append(io.BytesIO(data))
+        buf = io.BytesIO()
+        writer.write(buf)
+        uploads = [('combined.pdf', buf.getvalue())]
+    parts = review_uploads(uploads, None)
+    reading = next(f for f in parts.fields if f.field == 'rationale')
+    assert reading.status == 'present' and reading.value == passage
+    assert not any(f.field == 'rationale' for f in parts.findings)
 
 
 @pytest.mark.parametrize('saved', [False, True], ids=['upload', 'saved-case'])

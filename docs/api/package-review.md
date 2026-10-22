@@ -87,14 +87,19 @@ session keeps the extracted values and quotes.
   (including the draft's explicit no-answer notice) are a blocking applicant gap (`rationale:presence`).
   Multiple candidates containing text or uncertainty become one excluded officer check with all source
   pointers, in stable order; the review never chooses which candidate controls, even when text matches.
-  An unreadable supplied file also prevents blank-only input from establishing absence. A single readable
-  passage remains present beside an unrelated unreadable file.
+  An unreadable supplied file, a textless drawn page, or an unlabelled raster region also prevents
+  blank-only input from establishing absence; the finding retains the actual file/page pointers. A readable
+  cover cannot make a scanned page readable. Vector table borders on otherwise readable pages do not
+  imply a scanned passage. A single readable passage remains present beside unrelated
+  unreadable material, including other pages of the same file.
   Whole-answer placeholders are gaps; a placeholder word inside applicant prose is not. A missing heading,
   non-text objects in the passage region, or a passage crossing pages stays `not_found`, with no partial
   `value` and the request item excluded by default. Cross-page findings retain page-linked extracted
   fragments in `pointers[]` for the officer; the field's single-pointer wire shape is unchanged. These
   checks do not perform OCR or establish the completeness of a multi-page passage. A present passage is
-  copied, never assessed or drafted by the review.
+  copied, never assessed or drafted by the review. Graphics checks pair each heading/stop occurrence with
+  its extracted text offset; unmatched or reversed geometry remains uncertain. Graphics outside a reliably
+  bounded labelled passage do not make that passage unreadable.
 - Ported deterministic screens (variant B) over the reading: presence and placeholders (D01–D04), edition
   presented as current (D06), intent label (D08), generic or blank risk, mitigation and assumptions (D09–D11),
   professional named when stated as required (D12), supporting document and its responsible person (D13),

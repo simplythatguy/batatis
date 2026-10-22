@@ -118,15 +118,21 @@ def rationale_value(reads: list[ReadFile]) -> TextValue:
     candidates = [_rationale_candidate(read, index, match)
                   for read in reads for index, page in enumerate(read.text_pages)
                   for match in pattern.finditer(page.text)]
-    # Unreadable files cannot establish absence. They do not invalidate a readable passage,
-    # but must prevent a blank template from asserting that nothing was supplied elsewhere.
+    # Unreadable files/pages/regions cannot establish absence. Labelled passage regions
+    # are checked above; graphics elsewhere on those pages do not belong to that passage.
+    # A single readable rationale still remains present beside unrelated unreadable material.
     if not any(candidate.status == 'present' for candidate in candidates):
         for read in reads:
-            if read.role == 'unreadable':
-                pointer = Pointer(file=read.name, page=1 if read.pages else None)
+            labelled_pages = {pointer.page - 1 for candidate in candidates for pointer in candidate.pointers
+                              if pointer.file == read.name and pointer.page is not None}
+            unreadable = (list(range(read.pages)) or [None]) if read.role == 'unreadable' else [
+                page for page in read.unreadable_pages() if page not in labelled_pages]
+            for page in unreadable:
+                pointer = Pointer(file=read.name, page=page + 1 if page is not None else None)
                 candidates.append(TextValue(
                     'not_found', '', read.name, pointer.page, None, [pointer],
-                    'A supplied file could not be read. Check it before treating the rationale as absent.'))
+                    'A supplied file or page region could not be read. '
+                    'Check it before treating the rationale as absent.'))
     if not candidates:
         return TextValue('not_found', '', '', None, None)
     candidates.sort(key=lambda value: (value.file, value.page or 0, value.quote or '', value.status))
@@ -149,12 +155,18 @@ def _rationale_candidate(read: ReadFile, index: int, match: re.Match) -> TextVal
     uncertain = False
     value = ''
     for offset, continuation in enumerate(read.text_pages[index:]):
-        heading = _norm(match.group(0)) if offset == 0 else None
-        rest = continuation.text[match.end():] if offset == 0 else continuation.text
+        heading_text = _norm(match.group(0)) if offset == 0 else None
+        heading = None
+        if not offset:
+            raw_heading = match.group(0)
+            heading = (heading_text, match.start() + len(raw_heading) - len(raw_heading.lstrip()))
+        rest_start = match.end() if not offset else 0
         # Batatis puts a running header on appendix continuation pages. It is not an answer
         # or a terminating applicant source; the original page remains available by pointer.
         if offset:
-            rest = re.sub(r'^Batatis appendix to SCC variance form - case [^\n]+\n', '', rest)
+            header = re.match(r'^Batatis appendix to SCC variance form - case [^\n]+\n', continuation.text)
+            rest_start = header.end() if header else 0
+        rest = continuation.text[rest_start:]
         stop = _RATIONALE_STOP_LINE.search(rest)
         ambiguous = bool(stop and stop.group('ambiguous'))
         for _label_text, other in TEXT_FIELDS.values():
@@ -162,14 +174,18 @@ def _rationale_candidate(read: ReadFile, index: int, match: re.Match) -> TextVal
             if hit and (stop is None or hit.start() <= stop.start()):
                 stop = hit
                 ambiguous = False
-        stop_line = rest[stop.start():].strip().split('\n', 1)[0] if stop else None
+        stop_line, stop_boundary = None, None
+        if stop:
+            suffix = rest[stop.start():]
+            stop_line = suffix.strip().split('\n', 1)[0]
+            stop_boundary = (stop_line, rest_start + stop.start() + len(suffix) - len(suffix.lstrip()))
         body = _norm(rest[:stop.start()] if stop else rest)
         if not offset:
             value = body
-        pointers.append(Pointer(file=read.name, page=continuation.page + 1, quote=body or heading))
+        pointers.append(Pointer(file=read.name, page=continuation.page + 1, quote=body or heading_text))
         uncertain = (uncertain or bool(offset) or not continuation.text.strip()
                      or (ambiguous and body != _NO_RATIONALE)
-                     or read.passage_has_marks(continuation.page, heading, stop_line))
+                     or read.passage_has_marks(continuation.page, heading, stop_boundary))
         if stop_line and stop_line.casefold().startswith('appendix page'):
             uncertain = True   # a running footer does not prove that the passage ends here
             continue

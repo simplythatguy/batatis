@@ -63,23 +63,50 @@ class ReadFile:
     def locate(self, page: int, quote: str) -> tuple[float, float, float, float] | None:
         return locate(self.data, page, quote)
 
-    def passage_has_marks(self, page: int, heading: str | None, stop: str | None) -> bool:
+    def passage_has_marks(self, page: int, heading: tuple[str, int] | None,
+                          stop: tuple[str, int] | None) -> bool:
         """Non-text objects between passage boundaries make text-only presence uncertain.
 
-        A boundary that cannot be located widens the region; a geometry failure is uncertain.
+        Boundaries carry their offsets in the newline-normalized extracted page text.
+        Unmatched or reversed boundaries cannot establish a readable, empty region.
         Coordinates and object boxes use the same PDF-point convention as flattened fields.
         """
         import pypdfium2 as pdfium
         try:
             doc = pdfium.PdfDocument(self.data)
-            boxes = _object_boxes(doc[page])
-            after = self.locate(page, heading) if heading else None
-            before = self.locate(page, stop) if stop else None
+            pdf_page = doc[page]
+            textpage = pdf_page.get_textpage()
+            after = _boundary_box(textpage, heading) if heading else None
+            before = _boundary_box(textpage, stop) if stop else None
+            if (heading and after is None) or (stop and before is None):
+                return True
+            if after and before and after[1] <= before[3]:
+                return True
             top = after[3] if after else float('inf')
             bottom = before[3] if before else float('-inf')
-            return any(y0 < top and y1 > bottom for _x0, y0, _x1, y1 in boxes)
+            return any(y0 < top and y1 > bottom for _x0, y0, _x1, y1 in _object_boxes(pdf_page))
         except Exception:  # noqa: BLE001 - unreadable graphics must not establish a blank passage
             return True
+
+    def unreadable_pages(self) -> list[int]:
+        """Textless drawn pages or raster regions in attachment/appendix pages.
+
+        Paths on otherwise readable pages can be table borders/backgrounds, including in
+        the official export. Paths inside a labelled passage are checked by passage_has_marks.
+        """
+        import pypdfium2 as pdfium
+        import pypdfium2.raw as raw
+        try:
+            doc = pdfium.PdfDocument(self.data)
+            unreadable = []
+            for page in self.text_pages:
+                pdf_page = doc[page.page]
+                if (not page.text.strip() and _object_boxes(pdf_page)) or any(
+                        obj.type == raw.FPDF_PAGEOBJ_IMAGE for obj in pdf_page.get_objects(max_depth=4)):
+                    unreadable.append(page.page)
+            return unreadable
+        except Exception:  # noqa: BLE001 - a failed inspection cannot establish absence
+            return [page.page for page in self.text_pages]
 
 
 @dataclass(frozen=True)
@@ -181,6 +208,29 @@ def locate(data: bytes, page: int, quote: str) -> tuple[float, float, float, flo
         return None
     return (round(min(b[0] for b in boxes), 1), round(min(b[1] for b in boxes), 1),
             round(max(b[2] for b in boxes), 1), round(max(b[3] for b in boxes), 1))
+
+
+def _boundary_box(textpage, boundary: tuple[str, int]) -> tuple[float, float, float, float] | None:
+    """Pair a text offset with the same PDFium search occurrence, never the first by default."""
+    quote, offset = boundary
+    quote = _norm(quote)[:200]
+    if not quote:
+        return None
+    text = textpage.get_text_range().replace('\r\n', '\n').replace('\r', '\n')
+    matches = list(re.finditer(r'\s+'.join(re.escape(word) for word in quote.split()), text, re.I))
+    occurrence = next((index for index, match in enumerate(matches) if match.start() == offset), None)
+    if occurrence is None:
+        return None
+    searcher = textpage.search(quote, match_case=False)
+    hits = []
+    while hit := searcher.get_next():
+        hits.append(hit)
+    if len(hits) != len(matches):
+        return None   # extraction and geometry disagree; do not guess a boundary
+    start, count = hits[occurrence]
+    boxes = [textpage.get_charbox(index) for index in range(start, start + count)]
+    return (min(b[0] for b in boxes), min(b[1] for b in boxes),
+            max(b[2] for b in boxes), max(b[3] for b in boxes))
 
 
 def _fillable(reader, data: bytes, name: str, fmaps: list[dict]) -> ReadFile | None:

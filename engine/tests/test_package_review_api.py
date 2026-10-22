@@ -13,7 +13,8 @@ from engine.codes import Codes
 from engine.models import Case
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import complete_case, fact, store_with_synthetic_files
-from engine.tests.package_review_fixtures import CLEAN_FORM, CLEAN_NARRATIVE, package, text_pdf
+from engine.tests.package_review_fixtures import (CLEAN_FORM, CLEAN_NARRATIVE, covered_scan_pdf, package,
+                                                repeated_rationale_pdf, text_pdf)
 from engine.tests.test_package_review_rationale import raster_rationale_pdf, split_rationale_pdf
 from engine.tests.test_accounts import onboard, signup
 
@@ -334,6 +335,67 @@ def test_official_blank_draft_cannot_mask_supplied_rationale(multi_source_scene,
     resolved = clients['reviewer'].post(reupload, files=multipart(supplied))
     assert resolved.status_code == 201, resolved.text
     assert next(f for f in resolved.json()['fields'] if f['field'] == 'rationale')['value'] == rationale
+    assert not any(i['field'] == 'rationale' for i in resolved.json()['information_request']['items'])
+    assert store.get(case.id).model_dump(mode='json') == before
+    store.delete(case.id)
+
+
+@pytest.mark.parametrize('linked', [False, True], ids=['standalone', 'case-linked'])
+@pytest.mark.parametrize('reverse', [False, True], ids=['blank-first', 'supplement-first'])
+@pytest.mark.parametrize('supplement', [
+    'repeated-raster', 'unique-heading-raster', 'repeated-vector', 'reversed-boundaries',
+    'covered-scan', 'same-page-scan', 'scan-control'])
+def test_official_blank_draft_retains_graphics_and_page_uncertainty(
+        multi_source_scene, linked, reverse, supplement):
+    import hashlib
+    store, clients, _ = multi_source_scene
+    case = owned(multi_source_scene, complete=True)
+    saved = store.get(case.id)
+    saved.facts = [f for f in saved.facts if f.field not in ('rationale', 'process.rationale')]
+    store.put(saved)
+    exported = clients['owner'].post(f'/cases/{case.id}/export', json={'draft': True})
+    assert exported.status_code == 200, exported.text
+    saved = store.get(case.id)
+    saved.status = 'submitted'
+    store.put(saved)
+    assert clients['reviewer'].post(f'/review/{case.id}/claim', json={}).status_code == 200
+    before = store.get(case.id).model_dump(mode='json')
+    if supplement in ('covered-scan', 'same-page-scan', 'scan-control'):
+        cover = {'covered-scan': 'separate', 'same-page-scan': 'same-page', 'scan-control': 'none'}[supplement]
+        data = covered_scan_pdf(cover)
+        expected_sources = [(2 if cover == 'separate' else 1, None)]
+    else:
+        unique = supplement in ('unique-heading-raster', 'reversed-boundaries')
+        data = repeated_rationale_pdf('vector' if supplement == 'repeated-vector' else 'raster',
+                                      unique_heading=unique, reversed_stop=supplement == 'reversed-boundaries')
+        expected_sources = [(1, 'Rationale'), (1, 'Rationale for variance' if unique else 'Rationale')]
+    uploads = [('official-blank-draft.pdf', exported.content), ('supplement.pdf', data)]
+    if reverse:
+        uploads.reverse()
+    route = f'/review/{case.id}/package-review' if linked else '/package-review'
+    response = clients['reviewer'].post(route, files=multipart(uploads))
+    assert response.status_code == 201, response.text
+    session = response.json()
+    reading = next(f for f in session['fields'] if f['field'] == 'rationale')
+    finding = next(f for f in session['findings'] if f['field'] == 'rationale')
+    assert reading['status'] == finding['status'] == 'not_found', reading
+    assert reading['value'] is None
+    assert [(p['page'], p['quote']) for p in finding['pointers'] if p['file'] == 'supplement.pdf'] == expected_sources
+    assert any(p['file'] == 'official-blank-draft.pdf' and p['page'] == 6
+               and p['quote'] == '(Not provided or not confirmed. No answer has been supplied by Batatis.)'
+               for p in finding['pointers'])
+    assert next(f for f in session['files'] if f['name'] == 'supplement.pdf')['sha256'] == hashlib.sha256(data).hexdigest()
+    item = next(i for i in session['information_request']['items'] if i['field'] == 'rationale')
+    assert item['officer_check'] and not item['included']
+    assert item['text'] not in session['information_request']['text']
+    assert session['administrative_only'] and session['not_a_compliance_determination']
+    # A later readable applicant passage resolves the uncertainty without changing the saved case.
+    reupload = route if linked else f'/package-review/{session["package_id"]}'
+    passage = 'SYNTHETIC supplied readable rationale, with unknown existing conditions.'
+    resolved = clients['reviewer'].post(reupload, files=multipart([
+        ('readable.pdf', text_pdf(['Rationale', passage, 'Risk assessment']))]))
+    assert resolved.status_code == 201, resolved.text
+    assert next(f for f in resolved.json()['fields'] if f['field'] == 'rationale')['value'] == passage
     assert not any(i['field'] == 'rationale' for i in resolved.json()['information_request']['items'])
     assert store.get(case.id).model_dump(mode='json') == before
     store.delete(case.id)
