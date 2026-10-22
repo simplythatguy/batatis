@@ -366,8 +366,11 @@ body {
   color: var(--cf-accent-ink);
 }
 
-/* Unread officer messages: a message icon and the count, nothing else. */
+/* Unread officer messages: a message icon and the count, nothing else, at the row's right edge
+   (the status dot stays at the left). */
 .cf-list-unread {
+  margin-left: auto;
+  flex: none;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -380,10 +383,11 @@ body {
   padding-right: 26px;
 }
 
+/* On the title row (32px, inside the title's reserved space), clear of the unread count below. */
 .cf-list-actions {
   position: absolute;
   right: 8px;
-  top: 8px;
+  top: 6px;
   display: flex;
   gap: 2px;
   opacity: 0;
@@ -397,6 +401,11 @@ body {
   .cf-list-actions {
     opacity: 1;
   }
+}
+
+.cf-list-actions .cf-icon-btn {
+  width: 32px;
+  height: 32px;
 }
 
 .cf-list-group {
