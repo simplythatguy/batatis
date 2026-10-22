@@ -271,7 +271,12 @@ body {
 }
 
 .cf-list-search input::placeholder {
-  color: var(--cf-text-3);
+  color: #5f6673;
+}
+
+/* The ⌘K hint: 4.5:1 on the page, like the row lines (the global --cf-text-3 gives 4.47). */
+.cf-list-search .cf-kbd.is-dark {
+  color: #5f6673;
 }
 
 .cf-list-search input::-webkit-search-cancel-button {
