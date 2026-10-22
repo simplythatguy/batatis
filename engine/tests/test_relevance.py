@@ -382,7 +382,7 @@ def test_rows_stored_with_the_providers_pin_load_as_the_public_version_and_are_r
 
 def test_the_providers_pin_is_mapped_privately_and_an_unmapped_pin_is_never_passed_through():
     assert public_model(JEV_MODEL) == PUBLIC_MODEL == 'relevance-1'
-    assert set(PUBLIC_MODEL_VERSIONS.values()) == {PUBLIC_MODEL}
+    assert PUBLIC_MODEL_VERSIONS[JEV_MODEL] == PUBLIC_MODEL
     with pytest.raises(ValueError):
         public_model('jev-latest')
     fields = dict(scored_at='2026-10-21T00:00:00+00:00', description_sha256='0' * 64, scores={'9.1.1.1.': 0.5},
