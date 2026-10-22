@@ -84,6 +84,11 @@ export async function deleteApplication(id: string): Promise<string | null> {
   try {
     await accounts.deleteCase(id);
   } catch (e) {
+    // 404: already deleted elsewhere, or not this account's; the list is re-read from the server.
+    if (e instanceof EngineError && e.status === 404) {
+      void refreshApplications();
+      return "This application isn’t available any more.";
+    }
     return failure(e, "It wasn’t deleted.");
   }
   if (state.applications) set({ applications: state.applications.filter((a) => a.id !== id) });
