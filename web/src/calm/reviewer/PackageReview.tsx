@@ -324,8 +324,13 @@ export function PackageReview({
   const body = useRef<HTMLDivElement>(null);
   const first = useRef(true);
 
-  // A new version opens on its first step ("What changed" when there is a diff).
+  // A new version opens on its first step ("What changed" when there is a diff); the first mount
+  // keeps `initialStep`.
+  const shownKey = useRef(`${session.package_id}:${session.version}`);
   useEffect(() => {
+    const key = `${session.package_id}:${session.version}`;
+    if (shownKey.current === key) return;
+    shownKey.current = key;
     setStep(stepsFor(session)[0]);
   }, [session.package_id, session.version]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -341,7 +346,10 @@ export function PackageReview({
     if (el.getBoundingClientRect().top < 0) el.scrollIntoView({ block: "start" });
   }, [step]);
 
-  const at = Math.max(0, steps.indexOf(step));
+  // Derived during render: a version without a diff has no "What changed" step, even before the
+  // reset effect runs, so a stale step never renders against the wrong session.
+  const active: StepId = steps.includes(step) ? step : steps[0];
+  const at = steps.indexOf(active);
   const prev = steps[at - 1];
   const next = steps[at + 1];
   const missing = missingView(session);
@@ -372,7 +380,7 @@ export function PackageReview({
         <ol>
           {steps.map((s, i) => (
             <li key={s}>
-              <button type="button" aria-current={s === step ? "step" : undefined} onClick={() => setStep(s)}>
+              <button type="button" aria-current={s === active ? "step" : undefined} onClick={() => setStep(s)}>
                 <span className="pr-step-n">{i + 1}</span>
                 <span className="pr-step-l">{STEP_LABEL[s]}</span>
                 {counts[s] ? <span className="pr-step-c">{counts[s]}</span> : null}
@@ -380,16 +388,16 @@ export function PackageReview({
             </li>
           ))}
         </ol>
-        <p className="pr-steps-phone" aria-hidden="true">{at + 1} of {steps.length} · {STEP_LABEL[step]}</p>
+        <p className="pr-steps-phone" aria-hidden="true">{at + 1} of {steps.length} · {STEP_LABEL[active]}</p>
       </nav>
       <div ref={body} className="pr-body" tabIndex={-1} aria-live="polite">
-        {step === "changes" && <Changes s={session} />}
-        {step === "summary" && <Summary s={session} />}
-        {step === "missing" && <Missing s={session} />}
-        {step === "documents" && <Documents s={session} />}
-        {step === "code" && <CodeChecks s={session} />}
-        {step === "file" && <FileItems s={session} />}
-        {step === "peer" && <Peer s={session} />}
+        {active === "changes" && session.diff && <Changes s={session} />}
+        {active === "summary" && <Summary s={session} />}
+        {active === "missing" && <Missing s={session} />}
+        {active === "documents" && <Documents s={session} />}
+        {active === "code" && <CodeChecks s={session} />}
+        {active === "file" && <FileItems s={session} />}
+        {active === "peer" && <Peer s={session} />}
       </div>
       <footer className="pr-foot">
         {prev ? (

@@ -117,7 +117,7 @@ def test_information_request_items_are_addressed_to_the_applicant():
 @pytest.mark.parametrize('instruction', [
     'Ask the applicant to check provision 9.10.14.4.',
     'Ask the applicant to check provision 9.10.14.4 before resubmitting.',
-    'Ask the applicant to check provision 3.2.3.6.(2).',
+    'Ask the applicant to check provision 9.9.10.1.(1).',
 ])
 def test_information_request_removes_officer_sentence_with_dotted_provision(instruction):
     from engine.models_review import Finding

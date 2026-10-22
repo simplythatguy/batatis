@@ -294,17 +294,19 @@ export const fileGaps = (s: ReviewSession) => s.findings.filter((f) => isFileIte
 export function fileItemsView(s: ReviewSession): { items: CheckRow[]; demonstrate: CheckRow[]; read: boolean } {
   // Nothing readable means nothing was checked; never show "no gap" for an unread package.
   const read = s.fields.some((f) => f.status === "present" && f.value?.trim());
+  const found = (f: Finding, key: string, label: string, provision: string, demo: boolean): CheckRow => {
+    const tone: Tone = f.status === "not_found" ? "pending" : demo ? "warning" : "blocking";
+    return { key, label, provision, tone, status: f.status === "not_found" ? "Not found · check it" : demo ? "Not mentioned" : "Missing", message: officerVoice(f.message) };
+  };
   const row = ([key, label, provision]: [string, string, string], demo: boolean): CheckRow => {
     const f = s.findings.find((x) => x.field === key);
-    if (f) {
-      const tone: Tone = f.status === "not_found" ? "pending" : demo ? "warning" : "blocking";
-      return { key, label, provision, tone, status: f.status === "not_found" ? "Not found · check it" : demo ? "Not mentioned" : "Missing", message: officerVoice(f.message) };
-    }
+    if (f) return found(f, key, label, provision, demo);
     return read ? { key, label, provision, tone: "done", status: "No gap found", message: "" } : { key, label, provision, tone: "pending", status: "Not checked", message: "" };
   };
   const items = FILE_ITEMS.map((i) => row(i, false));
+  // Only listed when more than one person or firm takes responsibility and none co-ordinates.
   const coordinator = s.findings.find((f) => f.field === "div_c.coordinator");
-  if (coordinator) items.push({ key: "div_c.coordinator", label: "A single co-ordinator for the design", provision: "2.3.1.1.(6)", tone: "blocking", status: "Missing", message: coordinator.message });
+  if (coordinator) items.push(found(coordinator, "div_c.coordinator", "A single co-ordinator for the design", "2.3.1.1.(6)", false));
   return { items, demonstrate: DEMONSTRATE.map((i) => row(i, true)), read };
 }
 

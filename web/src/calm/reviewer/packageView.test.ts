@@ -194,3 +194,19 @@ test("citations parse for the code reveal; officer voice", () => {
   assert.equal(parseCitation("see the appendix"), null);
   assert.equal(officerVoice("Your application appears to be missing x."), "The application appears to be missing x.");
 });
+
+test("co-ordinator row: officer voice, and not found stays an officer check", () => {
+  const coord = F({ key: "div_c.coordinator:presence", section: "process", field: "div_c.coordinator", label: "single co-ordinator", status: "missing", message: "Your application names 2 firms and no co-ordinator." });
+  const row = fileItemsView(session([coord])).items.find((i) => i.key === "div_c.coordinator")!;
+  assert.deepEqual([row.status, row.tone, row.message], ["Missing", "blocking", "The application names 2 firms and no co-ordinator."]);
+  const unsure = fileItemsView(session([{ ...coord, status: "not_found" }])).items.find((i) => i.key === "div_c.coordinator")!;
+  assert.deepEqual([unsure.status, unsure.tone], ["Not found · check it", "pending"]);
+  assert.equal(fileItemsView(session([])).items.some((i) => i.key === "div_c.coordinator"), false);
+});
+
+test("a package review that failed to load blocks acceptance (it is not 'none' or 'unavailable')", () => {
+  const open = decisionGate({ status: "in_review", claim: { reviewer_id: "u1", reviewer_name: "M" } }, "u1", 0);
+  const g = withPackage(open, { state: "failed" });
+  assert.deepEqual([g.canAccept, g.canReturn], [false, true]);
+  assert.match(g.reason, /didn’t load/);
+});

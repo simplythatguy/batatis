@@ -60,6 +60,7 @@ function DropZone({ busy, label, onFiles, children }: { busy: boolean; label: st
   const drop = (e: DragEvent) => {
     e.preventDefault();
     setOver(false);
+    if (busy) return; // one review at a time
     const files = [...e.dataTransfer.files];
     if (files.length) onFiles(files);
   };
@@ -81,6 +82,8 @@ export function PackagePage({ packageId, phoneTools }: { packageId: string | nul
   const [shown, setShown] = useState<ReviewSession | null>(null);
   const [loadError, setLoadError] = useState("");
   const [busy, setBusy] = useState(false);
+  // A ref, not state: a second drop in the same tick must see the first one as pending.
+  const pending = useRef(false);
   const [error, setError] = useState("");
   const [view, setView] = useState<"review" | "request">("review");
   const target: ReviewTarget | null = packageId ? { kind: "package", id: packageId } : null;
@@ -91,17 +94,23 @@ export function PackagePage({ packageId, phoneTools }: { packageId: string | nul
       const ix = await packageReview.index({ kind: "package", id: packageId });
       setIndex(ix);
       if (!keep) setShown(ix.latest);
+      setLoadError("");
+      setError("");
       remember(packageId);
     } catch (e) {
-      setLoadError(errorText(e));
+      // With a review on screen, a failed refresh is a note, not a page that hides it.
+      if (keep) setError(`The version list didn’t refresh: ${errorText(e)}`);
+      else setLoadError(errorText(e));
     }
   }, [packageId]);
 
   useEffect(() => { void load(); }, [load]);
 
   async function upload(files: File[]) {
+    if (pending.current) return;
     const problem = filesProblem(files);
     if (problem) return setError(problem);
+    pending.current = true;
     setBusy(true);
     setError("");
     try {
@@ -117,6 +126,7 @@ export function PackagePage({ packageId, phoneTools }: { packageId: string | nul
     } catch (e) {
       setError(errorText(e));
     } finally {
+      pending.current = false;
       setBusy(false);
     }
   }

@@ -20,7 +20,7 @@ function errorText(e: unknown, fallback: string): string {
   return e instanceof AccountsError ? e.detail : fallback;
 }
 
-function SentView({ s, applicant, sent }: { s: ReviewSession; applicant: string; sent: SentInformationRequests | null }) {
+function SentView({ s, applicant, sent, failed, onRetry }: { s: ReviewSession; applicant: string; sent: SentInformationRequests | null; failed?: boolean; onRetry?: () => void }) {
   const ir = s.information_request;
   const theirs = sent?.requests ?? [];
   return (
@@ -28,7 +28,9 @@ function SentView({ s, applicant, sent }: { s: ReviewSession; applicant: string;
       <p className="pr-status"><span className="cf-dot is-done" aria-hidden="true" />Sent {sentLabel(ir.sent_at).replace(/^Today/, "today")}{ir.sent_by_name ? ` by ${ir.sent_by_name}` : ""}. It’s frozen; run a new review to ask again.</p>
       <section className="pr-group" aria-label={`What ${applicant} sees`}>
         <h3 className="pr-group-h">What {applicant} sees</h3>
-        {sent === null ? (
+        {failed ? (
+          <p className="ac-error" role="alert">What the applicant sees didn’t load. <button type="button" className="cf-btn is-xs" onClick={onRetry}>Try again</button></p>
+        ) : sent === null ? (
           <p className="pr-faint">Loading…</p>
         ) : theirs.length ? (
           <ol className="pr-sent">
@@ -86,6 +88,8 @@ export function InfoRequest({
   const [confirm, setConfirm] = useState(false);
   const [alsoReturn, setAlsoReturn] = useState(true);
   const [sent, setSent] = useState<SentInformationRequests | null>(null);
+  const [sentFailed, setSentFailed] = useState(false);
+  const [sentAttempt, setSentAttempt] = useState(0);
 
   // A different version (or a server update) resets the draft.
   useEffect(() => {
@@ -101,9 +105,14 @@ export function InfoRequest({
     if (!isCase || !sentAlready) return;
     const ctl = new AbortController();
     setSent(null);
-    packageReview.sent(target.id, ctl.signal).then(setSent, () => setSent({ case_id: target.id, requests: [] }));
+    setSentFailed(false);
+    // A failure is shown as a failure with a retry, never as "nothing has reached the applicant".
+    packageReview.sent(target.id, ctl.signal).then(
+      (r) => { if (!ctl.signal.aborted) setSent(r); },
+      () => { if (!ctl.signal.aborted) setSentFailed(true); },
+    );
     return () => ctl.abort();
-  }, [isCase, sentAlready, target.id, ir.message_id]);
+  }, [isCase, sentAlready, target.id, ir.message_id, sentAttempt]);
 
   const server = useMemo(() => toEdit(ir.intro, draftFrom(ir).items), [ir]);
   const local = toEdit(intro, items);
@@ -111,7 +120,9 @@ export function InfoRequest({
   const count = includedCount(items);
   const text = previewText(intro, items);
 
-  const patch = (key: string, p: Partial<DraftItem>) => setItems((list) => list.map((i) => (i.key === key ? { ...i, ...p } : i)));
+  /** Any edit makes earlier save or send feedback stale. */
+  const edited = () => { setError(""); setNote(""); };
+  const patch = (key: string, p: Partial<DraftItem>) => { edited(); setItems((list) => list.map((i) => (i.key === key ? { ...i, ...p } : i))); };
 
   async function save(): Promise<ReviewSession | null> {
     if (!dirty) return session;
@@ -133,9 +144,10 @@ export function InfoRequest({
   function addItem() {
     const t = adding.trim();
     if (!t) return;
-    setItems((list) => [...list, { id: null, key: `new-${++officerSeq}`, text: t, included: true, authored: "officer", officerCheck: false, section: null, linked: false }]);
+    const key = `new-${++officerSeq}`;
+    edited();
+    setItems((list) => [...list, { id: null, key, text: t, included: true, authored: "officer", officerCheck: false, section: null, linked: false }]);
     setAdding("");
-    setNote("");
   }
 
   async function send() {
@@ -195,7 +207,7 @@ export function InfoRequest({
       <div className="pr-body">
         {sentAlready ? (
           <>
-            <SentView s={session} applicant={applicant} sent={isCase ? sent : { case_id: "", requests: [] }} />
+            <SentView s={session} applicant={applicant} sent={isCase ? sent : { case_id: "", requests: [] }} failed={isCase && sentFailed} onRetry={() => setSentAttempt((n) => n + 1)} />
             {!isCase && <pre className="pr-letter pr-pre">{ir.text}</pre>}
           </>
         ) : preview ? (
@@ -211,7 +223,7 @@ export function InfoRequest({
               {introOpen && editable ? (
                 <>
                   <label htmlFor={`${id}-intro`} className="pr-group-h">Opening line</label>
-                  <textarea id={`${id}-intro`} className="ac-ta pr-ta" rows={3} maxLength={2000} value={intro} onChange={(e) => setIntro(e.target.value)} />
+                  <textarea id={`${id}-intro`} className="ac-ta pr-ta" rows={3} maxLength={2000} value={intro} onChange={(e) => { edited(); setIntro(e.target.value); }} />
                   <button type="button" className="cf-btn is-xs" onClick={() => setIntroOpen(false)}>Done</button>
                 </>
               ) : (
@@ -249,7 +261,7 @@ export function InfoRequest({
                         <div className="pr-req-acts">
                           <button type="button" className="cf-btn is-xs is-ghost" onClick={() => setEditing(editing === i.key ? null : i.key)}>{editing === i.key ? "Done" : "Edit"}</button>
                           {!i.linked && (
-                            <button type="button" className="cf-btn is-xs is-ghost" onClick={() => setItems((list) => list.filter((x) => x.key !== i.key))}>Remove</button>
+                            <button type="button" className="cf-btn is-xs is-ghost" onClick={() => { edited(); setItems((list) => list.filter((x) => x.key !== i.key)); }}>Remove</button>
                           )}
                         </div>
                       )}
@@ -262,7 +274,7 @@ export function InfoRequest({
             {editable && (
               <div className="pr-add">
                 <label htmlFor={`${id}-add`} className="pr-group-h">Add your own item</label>
-                <textarea id={`${id}-add`} className="ac-ta pr-ta" rows={2} maxLength={2000} placeholder="Please provide…" value={adding} onChange={(e) => setAdding(e.target.value)}
+                <textarea id={`${id}-add`} className="ac-ta pr-ta" rows={2} maxLength={2000} placeholder="Please provide…" value={adding} onChange={(e) => { edited(); setAdding(e.target.value); }}
                   onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); addItem(); } }} />
                 <button type="button" className="cf-btn is-xs" disabled={!adding.trim()} onClick={addItem}><CIcon name="plus" size={13} />Add item</button>
               </div>

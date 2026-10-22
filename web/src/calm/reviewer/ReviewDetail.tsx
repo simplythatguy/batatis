@@ -4,7 +4,7 @@
  * (accept, refuse, request more information), the close-out due date and messages beside it.
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { accounts, AccountsError, claimConflict, notAvailable, review, type Claim, type DecisionItemInput, type Message } from "../../api/accounts";
+import { accounts, AccountsError, claimConflict, review, type Claim, type DecisionItemInput, type Message } from "../../api/accounts";
 import { engine, EngineError, type EngineGap } from "../../api/client";
 import { packageReview, type ReviewTarget } from "../../api/packageReview";
 import type { Case as EngineCase, PackageReviewIndex, ReviewSession } from "../../api/types.gen";
@@ -128,7 +128,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   const [refusing, setRefusing] = useState(false);
   // Package review: the index (versions, latest, close-out) and the version on screen.
   const [index, setIndex] = useState<PackageReviewIndex | null>(null);
-  const [indexState, setIndexState] = useState<"loading" | "ready" | "unavailable">("loading");
+  const [indexState, setIndexState] = useState<"loading" | "ready" | "unavailable" | "failed">("loading");
   const [shown, setShown] = useState<ReviewSession | null>(null);
   const [running, setRunning] = useState(false);
   const [runError, setRunError] = useState("");
@@ -156,7 +156,9 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
       if (!keepShown) setShown(ix.latest);
       return ix;
     } catch (e) {
-      setIndexState(notAvailable(e) ? "unavailable" : "ready");
+      // Only a missing route means "not on this server"; anything else (network, 5xx) is a failure
+      // with a retry, and acceptance waits for it.
+      setIndexState(e instanceof EngineError && (e.status === 404 || e.status === 405) ? "unavailable" : "failed");
       return null;
     }
   }, [target]);
@@ -188,6 +190,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   const latest = index?.latest ?? null;
   const pkg: PackageState = indexState === "loading" ? { state: "loading" }
     : indexState === "unavailable" ? { state: "unavailable" }
+    : indexState === "failed" ? { state: "failed" }
     : !latest ? { state: "none" }
     : c && latest.case_version != null && latest.case_version !== c.version ? { state: "stale", version: latest.version }
     : { state: "current", blocking: blockingGaps(latest) };
@@ -219,6 +222,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
 
   async function pickVersion(v: number) {
     if (shown?.version === v) return;
+    setRunError("");
     try {
       setShown(await packageReview.version(target, v));
     } catch (e) {
@@ -341,6 +345,15 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
     if (view === "application") return c ? <Sheet c={c} /> : <p className="ac-empty">Loading the application…</p>;
     if (view === "closeout" && closeOut) return <CloseOutPanel c={closeOut} />;
     if (indexState === "loading") return <p className="ac-empty pr-empty">Loading the package review…</p>;
+    if (indexState === "failed") {
+      return (
+        <div className="pr-empty">
+          <h2 className="pr-title">The package review didn’t load</h2>
+          <p className="pr-lede">Acceptance waits until it does.</p>
+          <button type="button" className="cf-btn is-sm" onClick={() => { setIndexState("loading"); void loadIndex(); }}>Try again</button>
+        </div>
+      );
+    }
     if (indexState === "unavailable") {
       return (
         <div className="pr-empty">

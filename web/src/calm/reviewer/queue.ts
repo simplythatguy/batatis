@@ -107,6 +107,7 @@ export function decisionGate(
 export type PackageState =
   | { state: "loading" }
   | { state: "unavailable" }
+  | { state: "failed" }
   | { state: "none" }
   | { state: "stale"; version: number }
   | { state: "current"; blocking: number };
@@ -120,6 +121,7 @@ export function withPackage(gate: ReturnType<typeof decisionGate>, pkg: PackageS
   if (!gate.canAccept || pkg.state === "unavailable") return gate;
   const no = (reason: string) => ({ ...gate, canAccept: false, reason });
   if (pkg.state === "loading") return no("Waiting for the package review before this can be accepted.");
+  if (pkg.state === "failed") return no("The package review didn’t load. Try again before accepting.");
   if (pkg.state === "none") return no("Run the package review before accepting.");
   if (pkg.state === "stale") return no(`The application changed after review version ${pkg.version}. Run the review again before accepting.`);
   if (pkg.blocking > 0) return no(`The package review has ${pkg.blocking} required ${pkg.blocking === 1 ? "item" : "items"} open, so it can't be accepted yet.`);
