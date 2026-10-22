@@ -247,7 +247,7 @@ export interface PlanInput {
 export function planInput(field: string): PlanInput {
   if (field === "sprinklered") return { kind: "choices", choices: [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }, { value: "partial", label: "Partly" }] };
   if (field === "part4_design") return { kind: "choices", choices: [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }] };
-  if (field === "scope") return { kind: "choices", choices: [{ value: "site", label: "One building or site" }, { value: "jurisdiction", label: "Across the jurisdiction" }] };
+  if (field === "scope") return { kind: "choices", choices: [{ value: "site", label: "One building or site" }, { value: "jurisdiction", label: "Many sites, or across Alberta" }] };
   if (field === "storeys" || field === "dwelling_units") return { kind: "number" };
   if (/_m2$/.test(field)) return { kind: "number", unit: "m²" };
   if (/_m$/.test(field)) return { kind: "number", unit: "m" };
@@ -369,7 +369,7 @@ export interface StageView {
 }
 
 const STAGES: { id: string; label: string }[] = [
-  { id: "screen", label: "Reading every Division B article" },
+  { id: "screen", label: "Reading every rule in the building code" },
   { id: "rerank", label: "Re-checking the closest ones" },
   { id: "verify", label: "Reading the top matches in full" },
   { id: "questions", label: "Choosing what to ask you" },

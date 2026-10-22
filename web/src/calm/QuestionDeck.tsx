@@ -127,7 +127,7 @@ export function SectionFooter({ items, index, onJump, onPrev, onNext, canPrev, c
                   {s.at.map((x) => <i key={x.it.key} className={x.i === index ? "is-cur" : x.it.done ? "is-done" : ""} />)}
                 </span>
                 <span className="cf-qsec-lab">
-                  <span className="cf-qsec-name">{s.label}</span>
+                  <span className="cf-qsec-name" title={s.label}>{s.short}</span>
                   <span className="cf-qsec-l"><span className="cf-sr">, Section </span>{s.id}</span>
                   <span className="cf-qsec-count">{s.done}<span className="cf-qsec-of"> of </span><span className="cf-qsec-slash" aria-hidden="true">/</span>{s.total}</span>
                 </span>
@@ -513,7 +513,11 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   useEffect(() => {
     if (item?.gone && (item.kind === "candidate" || item.kind === "storeys")) moveFrom(index, false);
     // The code check finished while its card was open: the code questions take its place.
-    if (item?.gone && item.kind === "code-run") moveFrom(index, false);
+    if (item?.gone && item.kind === "code-run") {
+      const code = queue.findIndex((k) => { const it = itemFor(k); return Boolean(it && !it.done && it.section === "C"); });
+      if (code >= 0) updateSession({ queue, index: code });
+      else moveFrom(index, false);
+    }
     // The reading finished: start at the first thing it read.
     if (item?.gone && (item.kind === "reading" || item.kind === "scope")) {
       const first = queue.findIndex((k) => { const it = itemFor(k); return Boolean(it && !it.done); });

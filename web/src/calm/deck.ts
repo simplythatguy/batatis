@@ -34,11 +34,11 @@ export type SectionId = "A" | "B" | "C" | "D";
  * Plain words first; the form's letter stays visible as quiet secondary text, so applicants learn
  * how their answers map to the official form without needing to know it.
  */
-export const SECTIONS: { id: SectionId; label: string; about: string }[] = [
-  { id: "A", label: "About you", about: "Section A of the variance form: who is applying, and who owns the site." },
-  { id: "B", label: "Your project", about: "Section B: the site, and what you want to do differently." },
-  { id: "C", label: "Which rules apply", about: "Section C: the building-code rules your design differs from, and why each rule exists." },
-  { id: "D", label: "Your case and proof", about: "Section D: why your design works as well, and the documents that back it up." },
+export const SECTIONS: { id: SectionId; label: string; short: string; about: string }[] = [
+  { id: "A", label: "About you", short: "About you", about: "Section A of the variance form: who is applying, and who owns the site." },
+  { id: "B", label: "Your project", short: "Project", about: "Section B: the site, and what you want to do differently." },
+  { id: "C", label: "Which rules apply", short: "Rules", about: "Section C: the building-code rules your design differs from, and why each rule exists." },
+  { id: "D", label: "Your case and proof", short: "Your case", about: "Section D: why your design works as well, and the documents that back it up." },
 ];
 
 /** "Your project · Section B": the plain name, then the form's letter. */
