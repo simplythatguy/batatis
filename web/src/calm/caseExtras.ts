@@ -81,14 +81,14 @@ export function loadJurisdiction(id: string): Promise<void> {
 /**
  * Re-read everything case-scoped. Older data stays on screen until the new read lands, and a read
  * that saw an older case version than the one held (a GET racing a checklist answer) is dropped.
- * Resolves false when a read failed.
+ * Resolves false when a read failed; `onError` sees each rejection (so a caller can tell a deleted case apart).
  */
-export async function refreshCase(caseId: string): Promise<boolean> {
+export async function refreshCase(caseId: string, onError?: (e: unknown) => void): Promise<boolean> {
   if (state.caseId !== caseId) state = { ...EMPTY, rules: state.rules, directory: state.directory, details: state.details, failed: state.failed, caseId };
   const seq = ++refreshSeq;
   const live = () => state.caseId === caseId;
   let ok = true;
-  const miss = () => { ok = false; };
+  const miss = (e: unknown) => { ok = false; onError?.(e); };
   await Promise.all([
     engine.caseRules(caseId).then((r) => { if (live() && r.case_version >= (state.caseRules?.case_version ?? 0)) set({ caseRules: r }); }, miss),
     engine.caseChecklists(caseId).then((r) => { if (live() && r.case_version >= (state.checklists?.case_version ?? 0)) set({ checklists: r }); }, miss),

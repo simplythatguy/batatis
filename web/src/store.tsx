@@ -737,6 +737,10 @@ export function CaseProvider({ children }: { children: ReactNode }) {
           noteConflict(id);
           return CONFLICT_TEXT;
         }
+        if (isCaseGone(e)) {
+          goneCase.current = id;
+          markGone((e as EngineError).detail);
+        }
         if (e instanceof EngineError && e.status === 0) return "Not saved: Batatis could not be reached. Answer again to resend it.";
         return failureText(e);
       }
@@ -750,7 +754,10 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       if (!id || !isEngineGeneration(token)) return null;
       try {
         if (needsReconcile(id) || acknowledgedVersion(id) === null) refreshed(await reconcileEngineCase(id), latestCase.current);
-        return (await refreshCase(id)) ? null : "The checklist didn’t load. Try again.";
+        let gone: unknown = null;
+        const ok = await refreshCase(id, (e) => { if (isCaseGone(e)) gone = e; });
+        if (gone) throw gone;                         // a deleted or expired case is marked gone, not retried
+        return ok ? null : "The checklist didn’t load. Try again.";
       } catch (e) {
         if (isCaseGone(e)) {
           goneCase.current = id;
