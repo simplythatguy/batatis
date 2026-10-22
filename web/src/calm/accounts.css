@@ -322,6 +322,9 @@
 .ac-crumb { color: var(--cf-text-3); font-weight: 400; text-decoration: none; }
 @media (hover: hover) { .ac-crumb:hover { color: var(--cf-text); } }
 .ac-crumb-sep { color: var(--cf-text-4); font-weight: 400; }
+/* The page name after the crumbs: the part that gives way, with an ellipsis (a flex item, not bare text). */
+.ac-crumb, .ac-crumb-sep { flex: none; }
+.ac-crumb-leaf { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .ac-page-body { flex: 1; padding: 28px 32px 40px; }
 /* Settings, notifications: one centred 640px column with the onboarding screens' rhythm. */

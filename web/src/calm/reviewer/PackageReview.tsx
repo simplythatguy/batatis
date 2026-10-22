@@ -360,7 +360,7 @@ export function StepTabs({ steps, active, label, counts, onPick }: { steps: Step
             key={s}
             id={`rv-${s}`}
             label={label(s)}
-            ariaLabel={`Step ${i + 1} of ${steps.length}: ${label(s)}${n ? `, ${n} to look at` : ""}`}
+            ariaLabel={`Step ${i + 1} of ${steps.length}: ${label(s)}${past ? ", done" : ""}${n ? `, ${n} to look at` : ""}`}
             icon={<AcIcon name={STEP_LOOK[s].icon} size={16} />}
             pct={past || s === active ? 100 : 0}
             current={s === active}

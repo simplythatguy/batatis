@@ -5,7 +5,7 @@ import { componentHarness, nodes, text } from "../../scripts/component-harness.m
 class EngineError extends Error { status: number; constructor(status: number) { super("x"); this.status = status; } }
 class ExportBlockedError extends EngineError { reasons: string[]; constructor(reasons: string[]) { super(409); this.reasons = reasons; } }
 
-async function viewer({ locked = false, fail = 0 } = {}) {
+async function viewer({ locked = false, fail = 0, status = undefined as string | undefined } = {}) {
   const calls: string[] = [];
   let failures = fail, epoch = 1;
   // Saving moves the sync epoch, as the real store does; only a changed answer makes the PDF out of date.
@@ -20,10 +20,10 @@ async function viewer({ locked = false, fail = 0 } = {}) {
     "../store": { useCase: () => store },
     "./ui": { CIcon: "CIcon" },
   }, { URL, Blob });
-  let tree = await h.render({ locked });
+  let tree = await h.render({ locked, status });
   await new Promise((r) => setTimeout(r, 0));
-  tree = await h.render({ locked });
-  return { h, calls, get tree() { return tree; }, async rerender() { tree = await h.render({ locked }); return tree; }, bump() { epoch++; c = { ...c, facts: [{ field: "owner", value: `Ada ${epoch}`, status: "confirmed" }] }; } };
+  tree = await h.render({ locked, status });
+  return { h, calls, get tree() { return tree; }, async rerender() { tree = await h.render({ locked, status }); return tree; }, bump() { epoch++; c = { ...c, facts: [{ field: "owner", value: `Ada ${epoch}`, status: "confirmed" }] }; } };
 }
 
 test("the form is the engine's own draft PDF, filled after the draft is saved", async () => {
@@ -65,4 +65,21 @@ test("a failed fill says so and can be tried again", async () => {
   const tree = await v.rerender();
   assert.ok(nodes(tree, (n) => n.type === "iframe").length);
   v.h.unmount();
+});
+
+test("a sent or closed application keeps its own status apart from the draft PDF on screen", async () => {
+  for (const status of ["Sent", "Accepted", "Refused"]) {
+    const v = await viewer({ locked: true, status });
+    const tree = await v.rerender();
+    const bar = nodes(tree, (n) => n.props?.className === "cf-form-bar")[0];
+    assert.equal(text(bar).startsWith(`${status}Draft PDF`), true, `${status}: the application's status, then what the file is`);
+    assert.match(nodes(tree, (n) => n.type === "iframe")[0].props.title, /draft PDF/);
+    const open = nodes(tree, (n) => n.type === "a")[0];
+    assert.match(open.props["aria-label"], /draft PDF/, "the new tab link says it opens the draft");
+    assert.doesNotMatch(text(tree), /official/i, "status never labels the draft bytes official");
+    v.h.unmount();
+  }
+  const draft = await viewer();
+  assert.equal(text(nodes(await draft.rerender(), (n) => n.props?.className === "cf-form-bar")[0]).trim().startsWith("Draft PDF"), true, "an editable draft: just the file's label");
+  draft.h.unmount();
 });

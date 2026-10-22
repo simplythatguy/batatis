@@ -259,6 +259,7 @@ async function reviewHarness(opts: { index: () => Promise<unknown> }) {
     "./packageView": packageView,
     "./PackageReview": { PackageReview: "PackageReview", StepTitle: "StepTitle" },
     "../shell/MoreMenu": { MoreMenu: "MoreMenu" },
+    "./InfoRequest": { InfoRequest: "InfoRequest" },
   }, { EngineError });
   return { ...h, EngineError, get runs() { return runs; } };
 }
@@ -313,5 +314,122 @@ test("a first review load that fails still shows the error and retry, with Accep
   click(tree, "Try again");
   tree = await h.render();
   assert.equal(nodes(tree, (n) => n.type === "PackageReview")[0]?.props.session.version, 1);
+  h.unmount();
+});
+
+test("asking for more after a review ran but the index refresh failed: the newest run, no 'earlier', editing waits for the retry", async () => {
+  let failRefresh = false, newest = 1, Err: new (s: number) => Error;
+  const index = () => ({ latest: reviewSession(newest), sessions: [reviewSession(1), ...(newest > 1 ? [reviewSession(newest)] : [])], close_out: null });
+  const h = await reviewHarness({ index: async () => { if (failRefresh) throw new Err(503); return index(); } });
+  Err = h.EngineError;
+  let tree = await h.render({ caseId: "c1" });
+  failRefresh = true;
+  runAgain(tree);
+  tree = await h.render();
+  const final = nodes(tree, (n) => n.type === "PackageReview")[0].props.final.content;
+  const ask = nodes(final, (n) => n.type === "button" && /rv-choice is-amber/.test(n.props.className || ""))[0];
+  ask.props.onClick();
+  tree = await h.render();
+  let ir = nodes(tree, (n) => n.type === "InfoRequest")[0];
+  assert.equal(ir.props.session.version, 2, "the review that just ran stays");
+  assert.equal(ir.props.latest, true, "an unknown index never makes the newest run 'an earlier version'");
+  assert.equal(ir.props.canEdit, false, "editing and sending wait until the index is known again");
+  assert.ok(nodes(tree, (n) => n.type === "button" && text(n) === "Try again").length, "the request view offers the retry");
+  // The retry finds the run: the newest actual version is edited.
+  failRefresh = false;
+  newest = 2;
+  click(tree, "Try again");
+  tree = await h.render();
+  ir = nodes(tree, (n) => n.type === "InfoRequest")[0];
+  assert.deepEqual([ir.props.session.version, ir.props.latest, ir.props.canEdit], [2, true, true]);
+  assert.equal(nodes(tree, (n) => n.type === "button" && text(n) === "Try again").length, 0);
+  assert.equal(accept(tree), undefined, "no accept control in the request view");
+  h.unmount();
+});
+
+test("after recovery the request moves to a newer version another run saved", async () => {
+  let failRefresh = false, newest = 1, Err: new (s: number) => Error;
+  const h = await reviewHarness({ index: async () => { if (failRefresh) throw new Err(503); return { latest: reviewSession(newest), sessions: [reviewSession(newest)], close_out: null }; } });
+  Err = h.EngineError;
+  let tree = await h.render({ caseId: "c1" });
+  failRefresh = true;
+  runAgain(tree);
+  tree = await h.render();
+  const final = nodes(tree, (n) => n.type === "PackageReview")[0].props.final.content;
+  nodes(final, (n) => n.type === "button" && /rv-choice is-amber/.test(n.props.className || ""))[0].props.onClick();
+  tree = await h.render();
+  failRefresh = false;
+  newest = 3;
+  click(tree, "Try again");
+  tree = await h.render();
+  const ir = nodes(tree, (n) => n.type === "InfoRequest")[0];
+  assert.deepEqual([ir.props.session.version, ir.props.latest, ir.props.canEdit], [3, true, true]);
+  h.unmount();
+});
+
+test("a return's decision and the officer's note sent with it are both shown, so the thread can be marked read", async () => {
+  // The engine records a return as a decision (with the items to fix) and, at the same moment, a
+  // plain message. Showing only the last one left the decision unread and the sidebar stuck on 2.
+  const at = "2026-10-22T19:40:56Z";
+  const decision = message("1", "Returned for administrative information.\n\nPlease clarify the owner.", { kind: "decision", created_at: at, items: [{ note: "Owner name", field: "owner_name" }] });
+  const note = message("2", "Please update the revision date, then send it again.", { created_at: at });
+  const status = message("0", "Submitted for administrative review.", { kind: "status", created_at: "2026-10-22T19:00:00Z", author: applicantReply.author, read_by_me: true });
+  const h = await bannerHarness([status, decision, note]);
+  const tree = await h.render({ app: app({ status: "returned", unread_messages: 2 }) });
+  const shown = text(tree);
+  assert.ok(shown.includes("Please clarify the owner."), "the return decision is displayed");
+  assert.ok(shown.includes(note.body), "the note sent with it is displayed");
+  assert.ok(nodes(tree, (n) => n.type === "a" && text(n).includes("Fix 1 item")).length, "the decision's item still links to its fix");
+  assert.equal(h.reads, 1, "both displayed, so the thread is marked read");
+  await new Promise((r) => setTimeout(r));
+  assert.equal(JSON.stringify(h.patches), JSON.stringify([["c1", { unread_messages: 0 }]]), "the sidebar count clears");
+  assert.equal(nodes(tree, (n) => n.type === "button" && text(n) === "Reply").length, 0, "still one-way");
+  h.unmount();
+});
+
+test("a return also lists the officer's unread messages from an earlier round, then marks the thread read", async () => {
+  // An applicant can resend without opening the last return; those messages stay counted, so they are shown.
+  const old = message("0", "An earlier round's note.", { created_at: "2026-10-20T10:00:00Z" });
+  const seen = message("5", "An earlier note already read.", { created_at: "2026-10-20T09:00:00Z", read_by_me: true });
+  const decision = message("1", "Returned again.", { kind: "decision", created_at: "2026-10-22T10:00:00Z", items: [{ note: "Owner name", field: "owner_name" }] });
+  const h = await bannerHarness([seen, old, decision]);
+  const tree = await h.render({ app: app({ status: "returned", unread_messages: 2 }) });
+  const shown = text(tree);
+  assert.ok(shown.indexOf("Returned again.") < shown.indexOf(old.body), "the new return leads, the earlier unread note follows");
+  assert.equal(shown.includes(seen.body), false, "messages already read are not repeated");
+  assert.equal(h.reads, 1);
+  h.unmount();
+});
+
+test("the sidebar offers Delete on every owned application; the server's DELETE policy decides", async () => {
+  const statuses = ["draft", "submitted", "in_review", "returned", "accepted", "refused", "withdrawn"] as const;
+  const owned = statuses.map((status, i) => app({ id: `c${i}`, status, archived: false, pinned: false }));
+  const account = { phase: "signed-in", user: { role: "applicant", applicant_type: "homebuilder" }, applications: owned };
+  const h = await componentHarness(new URL("./Shell.tsx", import.meta.url), "Shell", {
+    "../store": { useCase: () => ({ c: { title: "", description: "", authority: "" }, gaps: [], engineGaps: [], phase: "who", engineId: null }) },
+    "../humanReview": { groupGaps: () => new Map() },
+    "./account": { useAccount: () => account, bootAccount() {}, refreshApplications: async () => {} },
+    "./applications": await import("./applications.ts"),
+    "./assistant/assistant": { useAssistant: () => ({ open: false }), setAssistantCase() {}, setAssistantContext() {} },
+    "./session": { useSession: () => ({ seen: [] }), getSession: () => ({ draft: "" }) },
+    "./deck": { buildDeck: () => [], deckProgress: () => ({ done: 0, total: 0 }) },
+    "./useDeckExtras": { useDeckExtras: () => ({ options: {} }) },
+    "./routes": { STAGES: [{ screen: "start" }] },
+    "./shell/AppLayout": { AppLayout: "AppLayout" },
+    "../router": { useRoute: () => ({ path: "/", params: new URLSearchParams() }) },
+  }, {
+    sessionStorage: { getItem: () => null, setItem() {}, removeItem() {} },
+    location: { hash: "#/", replace() {} },
+    document: { addEventListener() {}, removeEventListener() {} },
+    window: { addEventListener() {}, removeEventListener() {} },
+  });
+  const tree = await h.render({ active: "start", children: null });
+  const list = nodes(tree, (n) => n.type === "AppLayout")[0].props.list;
+  for (const a of owned) {
+    const del = list.props.actionsFor(a).find((x) => x.id === "delete");
+    assert.ok(del, `${a.status}: Delete is offered`);
+    assert.equal(Boolean(del.disabled), false, `${a.status}: no client-side status gate`);
+    assert.equal(del.hint, undefined, `${a.status}: no invented reason`);
+  }
   h.unmount();
 });

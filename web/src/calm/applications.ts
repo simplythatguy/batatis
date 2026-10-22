@@ -61,13 +61,63 @@ function line(a: ApplicationSummary, now: number): Omit<StatusLine, "unread"> & 
   }
 }
 
-/** Active first (newest first), settled in their own group; the search matches the title. */
-export function groupApplications(apps: ApplicationSummary[], query = ""): { active: ApplicationSummary[]; settled: ApplicationSummary[] } {
+export interface ApplicationGroups {
+  /** Pinned by the owner, above everything else (any status). */
+  pinned: ApplicationSummary[];
+  active: ApplicationSummary[];
+  settled: ApplicationSummary[];
+  /** The owner's archive shelf: out of the main list until restored (a pin waits for the restore). */
+  archived: ApplicationSummary[];
+}
+
+/** Pinned, then active (newest first), then settled; archived on their own shelf. The search matches the title and authority. */
+export function groupApplications(apps: ApplicationSummary[], query = ""): ApplicationGroups {
   const q = query.trim().toLowerCase();
   const shown = apps
     .filter((a) => !q || a.title.toLowerCase().includes(q) || authorityName(a.authority).toLowerCase().includes(q))
     .sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at));
-  return { active: shown.filter((a) => !SETTLED.has(a.status)), settled: shown.filter((a) => SETTLED.has(a.status)) };
+  const live = shown.filter((a) => !a.archived);
+  return {
+    pinned: live.filter((a) => a.pinned),
+    active: live.filter((a) => !a.pinned && !SETTLED.has(a.status)),
+    settled: live.filter((a) => !a.pinned && SETTLED.has(a.status)),
+    archived: shown.filter((a) => a.archived),
+  };
+}
+
+const STATUS_WORD: Record<ApplicationStatus, string> = {
+  draft: "Draft",
+  submitted: "Submitted",
+  in_review: "In review",
+  returned: "Returned · fix and resubmit",
+  // The officer's decision is about administrative completeness only.
+  accepted: "Accepted · completeness only",
+  refused: "Refused",
+  withdrawn: "Withdrawn",
+};
+
+export interface PreviewFact {
+  icon: "review" | "landmark" | "user" | "questions" | "msg" | "clock" | "archive";
+  text: string;
+}
+
+/**
+ * The row's hover and focus preview: the real summary fields only, one short line each, nothing
+ * the server did not send (no score, no verdict).
+ */
+export function previewFacts(a: ApplicationSummary, now = Date.now()): PreviewFact[] {
+  const facts: PreviewFact[] = [{ icon: "review", text: STATUS_WORD[a.status] ?? (String(a.status ?? "") || "Status unknown") }];
+  const where = authorityName(a.authority);
+  if (where) facts.push({ icon: "landmark", text: where });
+  if (a.reviewer?.name) facts.push({ icon: "user", text: a.reviewer.name });
+  const c = a.completeness;
+  if (c && c.total > 0) facts.push({ icon: "questions", text: `${Math.min(c.answered, c.total)} of ${c.total} answered` });
+  const n = statusLine(a, now).unread;
+  if (n > 0) facts.push({ icon: "msg", text: `${n} new ${n === 1 ? "message" : "messages"}` });
+  const when = ago(a.updated_at, now);
+  if (when) facts.push({ icon: "clock", text: `Updated ${when}` });
+  if (a.archived) facts.push({ icon: "archive", text: "Archived" });
+  return facts;
 }
 
 /** Sent applications wait for a return; settled applications stay read-only. */

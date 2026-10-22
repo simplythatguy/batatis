@@ -35,6 +35,8 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
   const { c, gaps } = useCase();
   const refused = app.status === "refused";
   const [messages, setMessages] = useState<Message[] | null>(null);
+  /** Unread when this load arrived: they stay on screen after being marked read. */
+  const [unreadAtLoad, setUnreadAtLoad] = useState<ReadonlySet<string>>(() => new Set());
   const [error, setError] = useState("");
   // Bumped by "Try again"; the effect below owns the request, so a late answer for another file is dropped.
   const [attempt, setAttempt] = useState(0);
@@ -48,6 +50,7 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
       .then((m) => {
         if (!live) return;
         setMessages(m);
+        setUnreadAtLoad(new Set(m.filter((x) => !x.read_by_me).map((x) => x.id)));
       })
       .catch((e: unknown) => { if (live) setError(e instanceof EngineError ? e.detail : "The officer’s message did not load."); });
     return () => { live = false; };
@@ -55,17 +58,24 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
 
   const { latest, correspondence } = useMemo(() => {
     const ordered = [...(messages ?? [])].sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
-    const fromOfficer = ordered.filter((m) => m.author.role === "reviewer" && (refused ? m.kind === "decision" : m.kind !== "status"));
-    const latest = fromOfficer[fromOfficer.length - 1];
-    return { latest, correspondence: refused ? ordered.slice(latest ? ordered.indexOf(latest) + 1 : 0) : [] };
-  }, [messages, refused]);
+    const fromOfficer = ordered.filter((m) => m.author.role === "reviewer" && m.kind !== "status");
+    // The latest decision leads (a return carries its items there); without one, the latest officer message.
+    const decisions = fromOfficer.filter((m) => m.kind === "decision");
+    const latest = refused ? decisions[decisions.length - 1] : decisions[decisions.length - 1] ?? fromOfficer[fromOfficer.length - 1];
+    const after = ordered.slice(latest ? ordered.indexOf(latest) + 1 : 0);
+    // Refused: both sides' correspondence since. Returned: the officer's notes sent with or after the
+    // return, and any earlier officer message still unread (an applicant can resend without opening it).
+    const notes = latest ? fromOfficer.filter((m) => m !== latest && (after.includes(m) || unreadAtLoad.has(m.id))) : [];
+    return { latest, correspondence: refused ? after : notes };
+  }, [messages, refused, unreadAtLoad]);
 
   // The read endpoint clears the whole thread. Only call it after rendering every unread message;
-  // earlier correspondence and the return banner's reply count are not displayed message bodies.
+  // earlier correspondence is not displayed. Status lines are not messages and are never counted.
   useEffect(() => {
-    if (!messages?.some((m) => !m.read_by_me)) return;
+    const counted = (m: Message) => !m.read_by_me && m.kind !== "status";
+    if (!messages?.some(counted)) return;
     const visible = new Set([...(latest ? [latest.id] : []), ...correspondence.map((m) => m.id)]);
-    if (messages.some((m) => !m.read_by_me && !visible.has(m.id))) return;
+    if (messages.some((m) => counted(m) && !visible.has(m.id))) return;
     let live = true;
     accounts.markRead(app.id).then(() => {
       if (!live) return;
@@ -105,7 +115,7 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
           </ul>
         )}
         {correspondence.length > 0 && (
-          <ol className="cf-returned-items" aria-label="Correspondence after refusal">
+          <ol className="cf-returned-items" aria-label={refused ? "Correspondence after refusal" : "The officer’s notes"}>
             {correspondence.map((m) => (
               <li key={m.id}>
                 <p className="cf-faint cf-small">{m.author.role === "reviewer" ? m.author.name || "The officer" : "You"} · {when(m.created_at)}</p>

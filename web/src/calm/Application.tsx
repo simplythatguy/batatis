@@ -151,7 +151,7 @@ export function Application({ download }: { download: "" | "options" | "draft" }
 /** Derive the application preview and export panel from shared gaps and jurisdiction data. */
 function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
   const account = useAccount();
-  const { locked } = useCurrentApplication();
+  const { app, locked } = useCurrentApplication();
   const signedIn = account.phase === "signed-in";
   const { c, gaps, checkStatus, checkNote, completenessRecord, engineId, factsEpoch } = useCase();
   const extras = useCaseExtras(engineId, factsEpoch, c.authority);
@@ -194,7 +194,7 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
   return (
     <div className="cf-doc">
       {/* The actual PDF the engine fills, not a drawing of it. */}
-      <FormViewer locked={locked} />
+      <FormViewer locked={locked} status={locked && app ? readOnlyStatus(app.status).label.split(" · ")[0] : undefined} />
       <aside className="cf-glass cf-side" aria-label="Download">
         <Eyebrow plain>Status</Eyebrow>
         {!locked && <div className="cf-side-big">{headline}<br /><span className="cf-muted">{sub}</span></div>}

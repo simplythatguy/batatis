@@ -29,3 +29,17 @@ test("clearing the description clears its fact and title", () => {
   assert.equal(c.facts.length, 0);
   assert.equal(c.title, "New construction application");
 });
+
+test("an evidence acknowledgement that changes nothing keeps the same case, so autosave does not loop", () => {
+  // Every save acknowledges the stored evidence ledger. A new object with the same content re-armed
+  // the 500 ms autosave, whose save bumped the facts epoch and re-read rules, checklists and the pack
+  // twice a second while idle.
+  const ledger = [{ id: "f-ev", field: "evidence.ev-1.title", value: "SYNTHETIC test report", kind: "pointed" as const, status: "confirmed" as const, confidence: null, formula: null, inputs: [], source: { type: "engine" as const, ref: "ledger", quote: "" } }];
+  let c = reducer(emptyCase("homebuilder"), { type: "setDescription", text: TEXT });
+  c = reducer(c, { type: "ackEvidence", acked: [], deleted: [], rejected: [], facts: ledger, error: null });
+  const again = reducer(c, { type: "ackEvidence", acked: [], deleted: [], rejected: [], facts: ledger.map((f) => ({ ...f })), error: null });
+  assert.equal(again, c, "an unchanged acknowledgement returns the same case");
+  const changed = reducer(c, { type: "ackEvidence", acked: [], deleted: [], rejected: [], facts: [{ ...ledger[0], value: "SYNTHETIC revised report" }], error: null });
+  assert.notEqual(changed, c);
+  assert.equal(changed.facts.find((f) => f.field === "evidence.ev-1.title")?.value, "SYNTHETIC revised report");
+});

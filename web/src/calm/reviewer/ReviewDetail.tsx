@@ -371,6 +371,13 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
     } else setReturning(true);
   }
 
+  /** Retry the index from the request view; once it is known, edit its newest version. */
+  async function retryIndexForRequest() {
+    setIndexState("loading");
+    const ix = await loadIndex(true);
+    if (ix?.latest && (!shown || ix.latest.version > shown.version)) setShown(ix.latest);
+  }
+
   async function requestSentAndReturned() {
     patchRow(caseId, { status: "returned" });
     await decided();
@@ -508,11 +515,20 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
       return (
         <>
           <button type="button" className="rv-back" onClick={() => setView("flow")}><AcIcon name="back" size={15} />{gate.canReturn ? "Back to your decision" : "Back"}</button>
+          {/* The run on screen can be newer than a stale index; editing and sending wait until the index is known. */}
+          {canRun && indexState !== "ready" && indexState !== "unavailable" && (
+            <p className="pr-note rv-note" role={indexState === "failed" ? "alert" : "status"}>
+              <span className="cf-dot is-warning" aria-hidden="true" />
+              {indexState === "failed" ? "The review list didn’t refresh · editing waits" : "Checking the review list…"}
+              {indexState === "failed" && <button type="button" className="cf-btn is-xs" onClick={() => void retryIndexForRequest()}>Try again</button>}
+            </p>
+          )}
           <InfoRequest
             target={target}
             session={shown}
-            latest={!latest || shown.version === latest.version}
-            canEdit={canRun}
+            latest={!latest || shown.version >= latest.version}
+            canEdit={canRun && (indexState === "ready" || indexState === "unavailable")}
+            held={canRun && indexState !== "ready" && indexState !== "unavailable"}
             terminalStatus={status === "accepted" || status === "refused" ? status : undefined}
             applicant={applicant === "the applicant" ? "the applicant" : applicant}
             onChange={(s) => { setShown(s); void loadIndex(true); accounts.messages(caseId).then(setMessages, () => undefined); }}
@@ -598,7 +614,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   return (
     <div className="ac-page">
       <PageHead
-        title={<><a className="ac-crumb" href="#/review">Queue</a><span className="ac-crumb-sep" aria-hidden="true">/</span>{title}</>}
+        title={<><a className="ac-crumb" href="#/review">Queue</a><span className="ac-crumb-sep" aria-hidden="true">/</span><span className="ac-crumb-leaf" title={title}>{title}</span></>}
         phoneTools={phoneTools}
         center={<div ref={setStepSlot} className="rv-head-steps" />}
         right={!loadError && (

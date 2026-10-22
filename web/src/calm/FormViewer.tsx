@@ -22,7 +22,11 @@ function failure(e: unknown): { message: string; reasons: string[] } {
   return { message: "The form didn’t load.", reasons: [] };
 }
 
-export function FormViewer({ locked }: { locked: boolean }) {
+/**
+ * `status`: a sent or closed application's own status ("Sent", "Accepted"). The file on screen is
+ * always the draft export, whatever the application's status, and is labelled as such.
+ */
+export function FormViewer({ locked, status }: { locked: boolean; status?: string }) {
   const { c, engineId, saveDraft } = useCase();
   // What the PDF is filled from: the answers, the applicant's own case, the authority and Section C.
   const key = useMemo(() => JSON.stringify([c.facts.map((f) => [f.field, f.value, f.status]), c.process, c.authority, c.sectionC.map((r) => r.provision)]), [c.facts, c.process, c.authority, c.sectionC]);
@@ -65,13 +69,14 @@ export function FormViewer({ locked }: { locked: boolean }) {
   return (
     <section className="cf-form-view" aria-label="Application form">
       <div className="cf-form-bar">
-        <span className="cf-form-tag">Draft</span>
+        {status && <span className="cf-form-status">{status}</span>}
+        <span className="cf-form-tag" title="Filled from your answers. Not the official PDF.">Draft PDF</span>
         {view.state === "loading" && <span className="cf-faint cf-small" role="status"><span className="cf-dot is-pending cf-pulse" aria-hidden="true" /> Filling the form…</span>}
         {stale && <button type="button" className="cf-btn is-xs" onClick={() => void load()}><CIcon name="retry" size={13} />Update</button>}
-        {view.state === "ready" && <a className="cf-icon-btn is-plain" href={view.url} target="_blank" rel="noreferrer" aria-label="Open the form in a new tab" title="Open in a new tab"><CIcon name="external" size={15} /></a>}
+        {view.state === "ready" && <a className="cf-icon-btn is-plain" href={view.url} target="_blank" rel="noreferrer" aria-label="Open the draft PDF in a new tab" title="Open the draft PDF in a new tab"><CIcon name="external" size={15} /></a>}
       </div>
       {view.state === "ready" ? (
-        <iframe className="cf-form-frame" src={`${view.url}#toolbar=0&navpanes=0&view=FitH`} title="Application form, draft PDF" />
+        <iframe className="cf-form-frame" src={`${view.url}#toolbar=0&navpanes=0&view=FitH`} title={status ? `Application form (${status.toLowerCase()}), draft PDF` : "Application form, draft PDF"} />
       ) : view.state === "failed" ? (
         <div className="cf-form-empty" role="alert">
           <p>{view.message}</p>

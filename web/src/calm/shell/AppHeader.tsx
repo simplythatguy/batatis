@@ -19,9 +19,9 @@ export interface StageRingItem {
 const RING = { size: 34, r: 15 } as const;
 
 /**
- * One stage or review step as an icon in a progress ring: the ring fills with progress and turns
- * green with a check when done; the current one is tinted. Its name is the accessible name and a
- * label on hover or keyboard focus, never visible text (user direction: icons before words).
+ * One stage or review step as an icon in a progress ring: the ring fills with progress and a done
+ * stage gets a check badge; the current one is at full opacity, the others dimmed (no fill). Its name
+ * is the accessible name and a label on hover or keyboard focus, never visible text.
  */
 export function StageButton({ id, label, ariaLabel, icon, pct, current, done, disabled, count, hue, note, href, onClick }: {
   id: string;

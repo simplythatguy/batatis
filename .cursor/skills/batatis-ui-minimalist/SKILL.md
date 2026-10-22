@@ -34,13 +34,14 @@ Every icon-only control or icon metadata has an accessible name and a hover labe
 ## Example: application sidebar row
 
 - Before: `● Returned · 2 new messages`
-- After: `●` message icon `2` (the SVG `msg` icon, not an emoji), with "Returned · 2 new messages" as the hover title and screen-reader text. With no unread messages the row keeps its short status line ("Returned · fix and resubmit") and no icon.
-- Code: `statusLine()` in `web/src/calm/applications.ts`, `Row` in `web/src/calm/shell/ApplicationList.tsx`.
+- After: no status dot at all (user decision 2026-10-22); the message icon and `2` at the row's right edge (the SVG `msg` icon, not an emoji), with "Returned · 2 new messages" as screen-reader text. With no unread messages the row keeps its short status line ("Returned · fix and resubmit") and no icon.
+- Details one step away: hovering or keyboard-focusing a row shows a small card to the right of the sidebar (status, authority, reviewer, answered count, unread, last update), one icon and a few words per line. Actions sit behind the row's ⋯ (glyph only, no fill), a right-click or Shift+F10: one icon-left menu with Rename, Pin, Archive or Restore, Delete. Archived rows wait on a collapsed "Archived" shelf with its count.
+- Code: `statusLine()` and `previewFacts()` in `web/src/calm/applications.ts`, `Row` in `web/src/calm/shell/ApplicationList.tsx`, `RowMenu` and `RowPreview` in `web/src/calm/shell/`.
 
 ## Example: stage navigation
 
 - Before: `1 Describe  2 Questions  3 Review  4 Application` with thin underlines.
-- After: four icons, each in a progress ring joined by a hairline: a quiet ring and green check badge when done, ink on a soft fill when current, faded when locked. "Questions, 40% done" is the accessible name and the hover/focus label. The officer's review steps use the same control, the current one in a shade of its step hue, with an open-count badge.
+- After: four icons, each in a progress ring joined by a hairline: a quiet ring and green check badge when done, no fill: the current one at full opacity, the others dimmed and brighter on hover or focus, fainter when locked. "Questions, 40% done" is the accessible name and the hover/focus label. The officer's review steps use the same control, the current one in a shade of its step hue, with an open-count badge.
 - Code: `StageButton` and `StageRings` in `web/src/calm/shell/AppHeader.tsx`, `StepTabs` in `web/src/calm/reviewer/PackageReview.tsx`.
 
 ## Example: an application title
