@@ -166,9 +166,26 @@ def test_every_code_reference_in_plain_text_is_in_the_verified_extract(checklist
     for c in checklist.conditions:
         extract = normalise(f'{c.source.lead_in or ""} {c.source.quote}').replace('[', '(').replace(']', ')')
         for ref in CODE_REF.findall(f'{c.plain} {c.when or ""}'):
-            if ref.rstrip('.') not in extract:
+            if not _cites(extract, ref):
                 untraced.append(f'{c.id}: {ref}')
     assert untraced == []
+
+
+def _refs(text: str) -> set[str]:
+    return {m.group(0).rstrip('.') for m in CODE_REF.finditer(text)}
+
+
+def _cites(extract: str, ref: str) -> bool:
+    """Whole references only: 9.10.15.5 is not found inside 9.10.15.50, and a sentence cites its article."""
+    wanted = ref.rstrip('.')
+    found = _refs(extract)
+    return wanted in found or any(r.startswith(wanted + '.(') or r.startswith(wanted + '(') for r in found)
+
+
+def test_reference_matching_is_whole_reference_not_substring():
+    assert not _cites('see 9.10.15.50. for soffits', '9.10.15.5.')
+    assert _cites('see 9.10.15.5. for soffits', '9.10.15.5.')
+    assert _cites('Sentence 9.10.15.5.(8) applies', '9.10.15.5.')
 
 
 @pytest.mark.parametrize('checklist', _checklists(), ids=lambda c: c.id)
