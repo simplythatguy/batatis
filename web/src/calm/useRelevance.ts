@@ -1,11 +1,14 @@
 /**
  * Relevance scores for the current engine case, shared by every ring.
  * GET when the library or palette opens; POST only on the explicit "Score relevance" button
- * (it costs money). Never rescored automatically.
+ * (it costs money). Never rescored automatically. With the library's context set to None
+ * (codeScope.ts) there are no scores at all: nothing is read, requested or shown.
  */
 import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { CodeLibraryError, codeLibrary, type RelevanceResult } from "../api/codeLibrary";
 import { useCase } from "../store";
+import { useCodeScope, type CodeScope } from "./codeScope";
+import { libraryEpoch } from "./libraryContext";
 import { cutoffsOf, shownFor, type Cutoffs, type Shown } from "./relevance";
 
 export type RelevancePhase = "idle" | "loading" | "none" | "ready" | "running" | "error";
@@ -26,6 +29,8 @@ const EMPTY: RelevanceState = { caseId: null, phase: "idle", result: null, error
 let state: RelevanceState = EMPTY;
 const listeners = new Set<() => void>();
 let inflight: AbortController | null = null;
+/** Bumps on every reset (another case opened, Start over), so a Score that was saving its draft stops. */
+let resets = 0;
 
 function set(next: Partial<RelevanceState>) {
   state = { ...state, ...next };
@@ -40,6 +45,7 @@ function asError(e: unknown): CodeLibraryError {
 
 /** Reset when the case changes (Start over). */
 export function resetRelevance() {
+  resets += 1;
   inflight?.abort();
   inflight = null;
   state = EMPTY;
@@ -50,12 +56,16 @@ export async function loadRelevance(caseId: string) {
   if (state.phase === "running" && state.caseId === caseId) return;
   if (state.caseId !== caseId) state = { ...EMPTY, caseId };
   set({ phase: state.result ? state.phase : "loading", error: null });
+  // A reset while this GET was out (the shell settling the switch that opened this very case)
+  // leaves no case in the state: the answer is still this case's. Another case's state drops it;
+  // every reader also compares caseId with the open case before showing anything.
+  const mine = () => (state.caseId === null ? ((state = { ...EMPTY, caseId }), true) : state.caseId === caseId) && state.phase !== "running";
   try {
     const result = await codeLibrary.relevance(caseId);
-    if (state.caseId !== caseId || state.phase === "running") return;
+    if (!mine()) return;
     set({ phase: result ? "ready" : "none", result });
   } catch (e) {
-    if (state.caseId !== caseId || state.phase === "running") return;
+    if (!mine()) return;
     set({ phase: state.result ? "ready" : "error", error: asError(e) });
   }
 }
@@ -96,6 +106,8 @@ export function useRelevanceState(): RelevanceState {
 }
 
 export interface Relevance extends RelevanceState {
+  /** "none": the library is browsing without an application; every field below is empty. */
+  scope: CodeScope;
   display: Record<string, number> | undefined;
   /** Articles the rerank judged; others are never yellow or red (the guard). */
   rerank: Record<string, number> | undefined;
@@ -113,24 +125,29 @@ export interface Relevance extends RelevanceState {
 
 export function useRelevance(): Relevance {
   const { engineId, c, phase, saveDraft } = useCase();
+  const scope = useCodeScope();
+  const none = scope === "none";
   const s = useRelevanceState();
-  const mine = s.caseId === engineId ? s : { ...EMPTY, caseId: engineId };
+  const mine = none ? EMPTY : s.caseId === engineId ? s : { ...EMPTY, caseId: engineId };
   const display = mine.result?.display;
   const blocked =
-    phase !== "case" ? "Start your application first." : !c.description.trim() ? "Describe your project first. Scores are estimated from your description." : "";
+    none ? "" : phase !== "case" ? "Start your application first." : !c.description.trim() ? "Describe your project first. Scores are estimated from your description." : "";
   const refresh = useCallback(() => {
-    if (engineId) void loadRelevance(engineId);
-  }, [engineId]);
+    if (!none && engineId) void loadRelevance(engineId);
+  }, [none, engineId]);
   const score = useCallback(async () => {
-    if (blocked) return;
-    // The engine scores the saved description, so the current text is saved first.
+    if (none || blocked) return;
+    // The engine scores the saved description, so the current text is saved first. If the library
+    // changed context or another case opened meanwhile, the request is no longer the one asked for.
+    const asked = `${resets}:${libraryEpoch()}`;
     const id = (await saveDraft()) ?? engineId;
+    if (asked !== `${resets}:${libraryEpoch()}`) return;
     if (!id) {
       set({ caseId: engineId, phase: state.result ? "ready" : "error", error: new CodeLibraryError(0, "Your draft could not be saved, so it cannot be scored yet.", "save not acknowledged") });
       return;
     }
     await scoreRelevance(id);
-  }, [blocked, saveDraft, engineId]);
+  }, [none, blocked, saveDraft, engineId]);
   // Stable per result, so memoized trees and filters do not rebuild on every render.
   const cutoffs = useMemo(() => cutoffsOf(mine.result), [mine.result]);
   const rerank = mine.result?.rerank;
@@ -138,7 +155,7 @@ export function useRelevance(): Relevance {
     const key = display?.[id] != null ? id : articleOf(id) ?? id;
     return shownFor(key, display, rerank, cutoffs);
   }, [display, rerank, cutoffs]);
-  return { ...mine, display, rerank, shown, cutoffs, stale: Boolean(mine.result?.stale), blocked, refresh, score };
+  return { ...mine, scope, display, rerank, shown, cutoffs, stale: Boolean(mine.result?.stale), blocked, refresh, score };
 }
 
 /** Score for an article or a sentence inside it ("9.27.3.4.(1)" reads "9.27.3.4."). */

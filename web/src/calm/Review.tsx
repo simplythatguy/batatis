@@ -14,6 +14,7 @@ import { rankedIn } from "./relevance";
 import { useSession } from "./session";
 import { useDeckExtras } from "./useDeckExtras";
 import { useRelevance } from "./useRelevance";
+import { Icon24, type IconName } from "./icons";
 import { CIcon, Dot, Eyebrow, Kbd, type DotTone } from "./ui";
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
@@ -53,6 +54,9 @@ function worst(gaps: Gap[]): DotTone {
   return "done";
 }
 
+/** One neutral icon per official section; the label beside it stays the Section A–D name. */
+const SECTION_ICON: Record<string, IconName> = { A: "user", B: "file", C: "book", D: "review" };
+
 /** Before an application exists: what the review will hold, and the one way to start it. */
 export function NothingYet({ title, lede, page }: { title: string; lede: string; page: "review" | "application" }) {
   const sections = [
@@ -83,7 +87,7 @@ export function NothingYet({ title, lede, page }: { title: string; lede: string;
         <ul className="cf-sec-list">
           {sections.map((s) => (
             <li key={s.letter} className="cf-sec">
-              <span className={`cf-sec-letter is-${({ A: "blue", B: "teal", C: "violet", D: "amber" } as Record<string, string>)[s.letter]}`} aria-hidden="true">{s.letter}</span>
+              <span className="cf-sec-icon" aria-hidden="true"><Icon24 name={SECTION_ICON[s.letter] ?? "file"} size={18} /></span>
               <div className="cf-sec-t"><div>{s.title} <span className="cf-faint">· Section {s.letter}</span></div><div className="cf-faint">Not started</div></div>
               <Dot tone="pending" />
             </li>
@@ -264,7 +268,7 @@ function CaseReview() {
               : engineer ? "Engineer needed" : s.letter === "C" && !departures && c.sectionC.length ? `${s.ok} · no departure confirmed` : s.ok;
             return (
               <li key={s.letter} className="cf-sec">
-                <span className={`cf-sec-letter is-${({ A: "blue", B: "teal", C: "violet", D: "amber" } as Record<string, string>)[s.letter]}`} aria-hidden="true">{s.letter}</span>
+                <span className="cf-sec-icon" aria-hidden="true"><Icon24 name={SECTION_ICON[s.letter] ?? "file"} size={18} /></span>
                 <div className="cf-sec-t">
                   <div>{s.title} <span className="cf-faint">· Section {s.letter}</span></div>
                   <div className="cf-faint">

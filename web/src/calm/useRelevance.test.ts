@@ -11,6 +11,8 @@ async function hookWith(result: unknown) {
   const h = await componentHarness(new URL("./useRelevance.ts", import.meta.url), "useRelevance", {
     "../api/codeLibrary": { CodeLibraryError, codeLibrary: { relevance: async () => { gets++; return result; } } },
     "../store": { useCase: () => ({ engineId: "c1", c: { description: "Synthetic project." }, phase: "case", saveDraft: async () => "c1" }) },
+    "./codeScope": { useCodeScope: () => "application" },
+    "./libraryContext": { libraryEpoch: () => 0 },
     "./relevance": relevance,
   });
   await h.render({});
@@ -61,7 +63,7 @@ test("useRelevance: missing bands are estimates, not historical thresholds", asy
 const legendWith = async (cutoffs: relevance.Cutoffs) => {
   const h = await componentHarness(new URL("./RelevanceRing.tsx", import.meta.url), "RingLegend", {
     "./relevance": relevance,
-    "./useRelevance": { useRelevance: () => ({ cutoffs }) },
+    "./useRelevance": { useRelevance: () => ({ cutoffs, scope: "application" }) },
     "react-dom": { createPortal: (node) => node },
   });
   const tree = await h.render({});

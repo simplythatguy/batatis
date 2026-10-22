@@ -827,6 +827,8 @@ body {
 }
 
 .cf-head-right {
+  /* Always the last column, also when there are no stage rings between (the library under None). */
+  grid-column: -2;
   justify-self: end;
   display: flex;
   align-items: center;
@@ -2479,16 +2481,15 @@ body {
   padding-top: 4px;
 }
 
-.cf-sec-letter {
+.cf-sec-icon {
   flex: none;
   width: 34px;
   height: 34px;
   border-radius: 11px;
-  background: var(--hue-t, rgba(17, 24, 39, 0.05));
-  color: var(--hue, var(--cf-text));
+  background: rgba(17, 24, 39, 0.05);
+  color: var(--cf-text);
   display: grid;
   place-items: center;
-  font: 700 13px var(--cf-font);
 }
 
 .cf-sec-t {
@@ -3477,6 +3478,148 @@ body {
   margin: 2px 0 0;
   font-size: 12.5px;
   color: var(--cf-text-3);
+}
+
+/* The application the library reads for: one listbox button above the search. */
+.cf-ctx {
+  position: relative;
+  margin: 0 12px 8px;
+}
+
+.cf-ctx-btn {
+  width: 100%;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 9px 0 11px;
+  border-radius: 10px;
+  border: 1px solid var(--cf-line);
+  background: transparent;
+  color: var(--cf-text);
+  font: 500 13.5px/1 var(--cf-font);
+  text-align: left;
+  cursor: pointer;
+  transition-property: border-color, background-color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+.cf-ctx-btn > svg {
+  flex: none;
+  color: var(--cf-text-3);
+}
+
+.cf-ctx-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cf-ctx-btn[aria-expanded="true"] {
+  border-color: var(--cf-line-2);
+  background: rgba(17, 24, 39, 0.04);
+}
+
+.cf-ctx-btn:disabled {
+  cursor: progress;
+  color: var(--cf-text-3);
+}
+
+@media (hover: hover) {
+  .cf-ctx-btn:not(:disabled):hover {
+    border-color: var(--cf-line-2);
+  }
+}
+
+.cf-ctx-list {
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  max-height: min(320px, 60vh);
+  overflow-y: auto;
+  border-radius: 14px;
+}
+
+.cf-ctx-opt {
+  height: 38px;
+  padding: 0 10px 0 6px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--cf-text-2);
+  font: 500 14px var(--cf-font);
+  cursor: pointer;
+  transition-property: background-color, color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+.cf-ctx-opt.is-none {
+  margin-bottom: 6px;
+  position: relative;
+}
+
+.cf-ctx-opt.is-none::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: -4px;
+  border-top: 1px solid var(--cf-line);
+}
+
+.cf-ctx-opt[aria-selected="true"] {
+  color: var(--cf-text);
+}
+
+.cf-ctx-opt:focus-visible {
+  outline: none;
+  background: rgba(17, 24, 39, 0.05);
+  color: var(--cf-text);
+  box-shadow: inset 0 0 0 2px var(--cf-focus);
+}
+
+@media (hover: hover) {
+  .cf-ctx-opt:hover {
+    background: rgba(17, 24, 39, 0.05);
+    color: var(--cf-text);
+  }
+}
+
+.cf-ctx-check {
+  flex: none;
+  width: 18px;
+  display: grid;
+  place-items: center;
+}
+
+.cf-ctx-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cf-ctx-meta {
+  flex: none;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--cf-text-3);
+}
+
+.cf-ctx-note {
+  margin: 6px 2px 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--cf-text-2);
 }
 
 .cf-lib-search {

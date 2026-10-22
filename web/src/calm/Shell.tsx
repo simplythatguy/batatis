@@ -9,12 +9,14 @@ import { RenameDialog } from "./shell/RenameDialog";
 import { DeleteDialog } from "./shell/DeleteDialog";
 import type { RowAction } from "./shell/RowMenu";
 import { AssistantPanel } from "./assistant/AssistantPanel";
+import { AskButton, AskHost } from "./assistant/AskButton";
 import { setAssistantCase, setAssistantContext, toggleAssistant, useAssistant } from "./assistant/assistant";
 import { roleOf, useCurrentApplication } from "./begin";
 import { CodePalette, OPEN_PALETTE, openPalette } from "./CodePalette";
+import { ApplicationSwitchContext, useCodeScope, type ApplicationSwitch } from "./codeScope";
+import { KEEP_OPEN_NOTE, switchApplication } from "./libraryContext";
 import { buildDeck, deckProgress } from "./deck";
 import { useDeckExtras } from "./useDeckExtras";
-import { Icon24 } from "./icons";
 import { STAGES, type Screen } from "./routes";
 import { getSession, resetSession, useSession } from "./session";
 import { AppHeader, type StageRingItem } from "./shell/AppHeader";
@@ -124,6 +126,8 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   const bare = plain || reviewer;
   const onStage = !bare && STAGES.some((s) => s.screen === active);
   const route = useRoute();
+  /** "none": the code library is browsing without an application (no title, stages or status). */
+  const scope = useCodeScope();
   /** `#/application?case=<id>` (a notification): open that application, then drop the parameter. */
   const caseParam = signedInParam(route.params.get("case"), account.phase);
   /** The last stage page, so Applications in the rail returns to it from the code library. */
@@ -131,7 +135,8 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   if (onStage) lastStage.current = location.hash || "#/";
 
   useEffect(() => { bootAccount(); }, []);
-  useEffect(() => { setAssistantCase(engineId); }, [engineId]);
+  // Under None the assistant reads no application either.
+  useEffect(() => { setAssistantCase(scope === "none" ? null : engineId); }, [engineId, scope]);
   // A new owned case appears in the list once the engine has created it.
   useEffect(() => { if (signedIn && engineId) void refreshApplications(); }, [signedIn, engineId]);
   useEffect(() => { if (signedIn && engineId) remember(engineId); }, [signedIn, engineId]);
@@ -232,7 +237,6 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   const destinations: RailDestination[] = reviewer ? [
     { id: "queue", label: "Review queue", icon: "table", href: "#/review", current: route.path === "/review" || route.path.startsWith("/review/") },
     { id: "code", label: "Code library", icon: "book", href: "#/code", current: active === "code" && !plain },
-    { id: "assistant", label: assistant.open ? "Close the assistant" : "Assistant", icon: "spark", onClick: toggleAssistant, current: assistant.open, shortcut: `${MOD_KEY} J` },
   ] : [
     {
       id: "applications",
@@ -247,7 +251,6 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
       badge: items.some((a) => (a.status === "returned" || a.status === "refused") && a.unread_messages > 0),
     },
     { id: "code", label: "Code library", icon: "book", href: "#/code", current: active === "code", shortcut: `${MOD_KEY} ⇧ K` },
-    { id: "assistant", label: assistant.open ? "Close the assistant" : "Assistant", icon: "spark", onClick: toggleAssistant, current: assistant.open, shortcut: `${MOD_KEY} J` },
   ];
 
   function startNew() {
@@ -256,6 +259,24 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     resetSession();
     resetRelevance();
     resetToWho(signedIn ? "" : undefined);
+  }
+
+  /** Open another saved application here (the list and the code library's picker share it). */
+  async function switchTo(id: string): Promise<string | null> {
+    if (!signedIn) return "Sign in to open a saved application.";
+    if (opening) return "Another application is still opening.";
+    setOpening(id);
+    const role = roleOf(account.user) ?? (c.applicantType as Parameters<typeof openCase>[1]);
+    // Keep the open draft before switching; a failed save keeps it open and says so.
+    const error = await switchApplication(id, {
+      inCase, saveStatus, saveDraft,
+      openCase: (next) => openCase(next, role),
+      settle: () => { resetSession(); resetRelevance(); },
+    });
+    setOpening(null);
+    // A deleted or expired application leaves the list; a refused save changed nothing on the server.
+    if (error && error !== KEEP_OPEN_NOTE) void refreshApplications();
+    return error;
   }
 
   async function open(id: string, to?: string) {
@@ -268,20 +289,9 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
       return;
     }
     if (!signedIn || opening) return;
-    setOpening(id);
     setListNote("");
-    // Keep the open draft before switching; a failed save keeps it open and says so.
-    if (inCase && saveStatus === "unsaved" && !(await saveDraft())) {
-      setOpening(null);
-      setListNote("This application isn’t saved yet, so it stays open. Try again once it’s saved.");
-      return;
-    }
-    const role = roleOf(account.user) ?? (c.applicantType as Parameters<typeof openCase>[1]);
-    const error = await openCase(id, role);
-    setOpening(null);
+    const error = await switchTo(id);
     if (error) { setListNote(error); return; }
-    resetSession();
-    resetRelevance();
     location.hash = destination;
   }
 
@@ -368,29 +378,30 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
 
   // The saved name when the list has it (so header and list always agree), else this draft's.
   const title = inCase ? current?.title || c.title || "New application" : "New application";
+  // In the code library the picker names the application; under None nothing of the application shows.
+  const library = active === "code";
+  const withCase = inCase && scope === "application";
   const header = (
     <AppHeader
-      title={title}
+      title={library ? undefined : title}
       onRename={inCase ? renameCase : undefined}
       renameDisabled={readOnly(current?.status)}
-      stages={stages}
+      stages={scope === "none" ? undefined : stages}
       onToggleList={toggleList}
       listOpen={!listCollapsed}
       toggleHint={`${MOD_KEY} B`}
       right={
         <>
-          <CheckStatus />
-          <SaveStatus />
-          <button type="button" className="cf-btn is-ghost is-sm cf-ask" aria-pressed={assistant.open} onClick={toggleAssistant} title={`Assistant (${MOD_KEY} J)`}>
-            <Icon24 name="spark" size={16} /><span className="cf-ask-label">Ask</span>
-          </button>
+          {scope === "application" && <CheckStatus />}
+          {scope === "application" && <SaveStatus />}
+          <AskButton />
           <MoreMenu
             items={[
               { label: "Look up code", hint: `${MOD_KEY} ⇧ K`, onClick: openPalette },
               { label: "Code library", href: "#/code" },
               { label: "Accuracy report", href: "#/accuracy" },
-              ...(inCase && current?.status !== "refused" && checkStatus === "unavailable" ? [{ label: "Try the check again", onClick: () => void requestCheck(true), separator: true }] : []),
-              ...(inCase
+              ...(withCase && current?.status !== "refused" && checkStatus === "unavailable" ? [{ label: "Try the check again", onClick: () => void requestCheck(true), separator: true }] : []),
+              ...(withCase
                 ? [
                     { label: "Rules you chose (Section C)", href: "#/references", separator: checkStatus === "unavailable" },
                     { label: "Officer view", href: "#/officer" },
@@ -406,12 +417,17 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   );
 
 
+  const appSwitch: ApplicationSwitch = { items, openId: selectedId, opening, switchTo };
+  // Reviewers' code library has no application header; it keeps a slim one so Ask stays one tap away.
+  const bareHeader = bare && library && !plain ? <AppHeader right={<AskButton />} /> : null;
+
   return (
-    <>
+    <AskHost.Provider value={true}>
+    <ApplicationSwitchContext.Provider value={appSwitch}>
       <AppLayout
         rail={<Rail destinations={destinations} notificationsSlot={<NotificationsBell />} accountSlot={<AccountButton />} />}
         list={bare ? undefined : list}
-        header={bare ? null : header}
+        header={bare ? bareHeader : header}
         banner={onStage && (current?.status === "returned" || current?.status === "refused") ? <ReturnedBanner key={`${current.id}:${current.status}`} app={current} /> : onStage && current?.status === "in_review" ? <RequestBanner app={current} /> : null}
         assistant={assistant.open ? <AssistantPanel /> : null}
         listCollapsed={listCollapsed}
@@ -439,6 +455,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
           startNew();
         }}
       />
-    </>
+    </ApplicationSwitchContext.Provider>
+    </AskHost.Provider>
   );
 }

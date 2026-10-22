@@ -51,8 +51,8 @@ function RailButton({ d }: { d: RailDestination }) {
 
 /**
  * The far-left icon rail: brand, then the destinations; at the bottom the notifications bell and
- * the account avatar. Destinations are a prop, so the applicant (Applications, Code library,
- * Assistant) and the reviewer (Queue, Code library, Assistant) share one component. The two
+ * the account avatar. Destinations are a prop, so the applicant (Applications, Code library)
+ * and the reviewer (Queue, Code library) share one component. The two
  * bottom slots are filled by the accounts UI (routes.extra.tsx).
  */
 export function Rail({ destinations, notificationsSlot, accountSlot }: { destinations: RailDestination[]; notificationsSlot?: ReactNode; accountSlot?: ReactNode }) {
