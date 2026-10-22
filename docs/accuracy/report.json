@@ -2,7 +2,7 @@
   "schema": "batatis-accuracy/1",
   "generated_on": "2026-10-22",
   "built_from": {
-    "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+    "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
     "dirty": false
   },
   "edition": "NBC(AE) 2023, 2nd printing",
@@ -318,8 +318,8 @@
     },
     {
       "id": "no-provider-names",
-      "claim": "Nothing a user can see names an AI provider.",
-      "detail": "The web code that ships to the browser, the API responses, the exported PDF, this report and this page are scanned for provider names.",
+      "claim": "The web app, code identification answers, the exported form and this report name no AI provider.",
+      "detail": "Tests scan the web code that ships to the browser, the code identification responses, the exported PDF, this report and this page for provider names.",
       "tests": [
         {
           "id": "engine/tests/test_no_provider_names_exposed.py::test_web_source_that_ships_to_the_browser_names_no_provider",
@@ -438,7 +438,7 @@
   ],
   "verified": {
     "date": "2026-10-22",
-    "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+    "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
     "passed": 48,
     "skipped": 0,
     "total": 48
@@ -481,7 +481,7 @@
               "evals_dev/cases/",
               "evals_dev/intake_facts/score.py"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": "python -m evals_dev.intake_facts.score",
             "pr": 54
           }
@@ -513,7 +513,7 @@
               "evals_dev/cases/",
               "evals_dev/intake_facts/score.py"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": "python -m evals_dev.intake_facts.score",
             "pr": 54
           }
@@ -545,7 +545,7 @@
               "evals_dev/cases/",
               "evals_dev/intake_facts/score.py"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": "python -m evals_dev.intake_facts.score",
             "pr": 54
           }
@@ -1162,7 +1162,7 @@
               "evals_dev/cases/",
               "engine/intake/scope.py"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": "pytest engine/tests/test_intake_plan.py -k scope -s",
             "pr": 54
           }
@@ -1192,7 +1192,7 @@
               "evals_dev/cases/",
               "engine/intake/scope.py"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": "pytest engine/tests/test_intake_plan.py -k scope -s",
             "pr": 54
           }
@@ -1222,7 +1222,7 @@
               "evals_dev/boundary/scope.json",
               "engine/intake/scope.py"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": null,
             "pr": 54
           }
@@ -1279,7 +1279,7 @@
               "evals_dev/boundary/blind_scope.json",
               "engine/intake/scope.py"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": null,
             "pr": 54
           }
@@ -1348,7 +1348,7 @@
               "evals_dev/boundary/blind_fork.json",
               "engine/intake/fork.py"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": null,
             "pr": 54
           }
@@ -1378,7 +1378,7 @@
               "evals_dev/boundary/blind_fork.json",
               "engine/intake/fork.py"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": null,
             "pr": 54
           }
@@ -1408,7 +1408,7 @@
               "evals_dev/boundary/blind_fork.json",
               "engine/intake/fork.py"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": null,
             "pr": 54
           }
@@ -1438,7 +1438,7 @@
               "evals_dev/boundary/blind_fork.json",
               "engine/intake/fork.py"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": null,
             "pr": 54
           }
@@ -1494,7 +1494,7 @@
               "evals_dev/cases/",
               "engine/intake/fork.py"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": null,
             "pr": 54
           }
@@ -1525,7 +1525,7 @@
               "engine/intake/plan.py",
               "engine/intake/questions.py"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": "pytest engine/tests/test_intake_plan.py -k asks_or_abstains -s",
             "pr": 54
           }
@@ -1640,7 +1640,7 @@
               "evals_dev/rules/outputs.json",
               "engine/rules/"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": "pytest engine/tests/test_rules_vectors.py; npm run test:rules",
             "pr": 63
           }
@@ -1678,7 +1678,7 @@
               "scripts/gate_g3.py",
               "evals/demo-cases/export/"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": "python scripts/gate_g3.py",
             "pr": 60
           }
@@ -1705,7 +1705,7 @@
               "scripts/gate_g3.py",
               "evals/demo-cases/export/"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": "python scripts/gate_g3.py",
             "pr": 60
           }
@@ -1732,7 +1732,7 @@
               "scripts/gate_g3.py",
               "evals/demo-cases/export/"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": "python scripts/gate_g3.py",
             "pr": 60
           }
@@ -1759,7 +1759,7 @@
               "scripts/gate_g3.py",
               "evals/demo-cases/export/"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": "python scripts/gate_g3.py",
             "pr": 60
           }
@@ -1786,7 +1786,7 @@
               "scripts/gate_g3.py",
               "evals/demo-cases/export/"
             ],
-            "commit": "de3258a7ab617c72e3eb246dbe5252321d07661d",
+            "commit": "7b0d6ce31af2d2116001dc6414284acca3b03dce",
             "command": "python scripts/gate_g3.py",
             "pr": 60
           }
