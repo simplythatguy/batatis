@@ -16,6 +16,7 @@ Nothing here writes the case; the route persists the result.
 from __future__ import annotations
 
 import hashlib
+import logging
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -26,6 +27,7 @@ from engine.codes import Codes
 from engine.models_identify import (BenchmarkRecord, DroppedPick, IdentifyArticle, IdentifyResult, IdentifyTrace,
                                     OpenQuestion, QuotedChoice, StageRecord)
 from engine.process_refs import process_refs
+from engine.public_names import UNAVAILABLE, public_text
 
 from . import cards
 from .commit import CommitPolicy, decide, load_policy
@@ -38,6 +40,7 @@ from .screen import Judge
 from .search_rank import rank_articles
 from .verify import Pick, check_quotes, normalize
 
+logger = logging.getLogger(__name__)
 OnStage = Callable[[str, dict], None]
 CHOICE_WHY = 'Your answer tells us whether this is the requirement your design departs from.'
 NOT_NARROWED = ('I could not narrow this down. These are the closest articles; none is committed. '
@@ -196,6 +199,8 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
         ranker = f'{config.screen} screen + {config.rerank} rerank'
     except Exception as error:
         fallback_reason = _reason(error)
+        # The response says only that scoring was unavailable (engine/public_names.py); the cause is logged here.
+        logger.warning('Identify model path unavailable, keyword fallback: %s', fallback_reason)
         mode = 'bm25_fallback'
         ranked = [(a, None) for a in stages.run('fallback', config.fallback, None,
                                                 lambda r: _lexical(config.fallback, prose, db, arts))[:config.rerank_n]]
@@ -286,9 +291,12 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
     model_ids = config.model_ids()
     if fallback:
         model_ids = {'screen': None, 'rerank': None, 'verifier': None}
+    # Models, providers and spend are named only here and in the log. The result reads them as neutral words.
+    logger.info('Identify run detail: ranker=%s verifier=%s models=%s spend=%s', ranker, verifier_state, model_ids,
+                log.by_provider())
     result = IdentifyResult(
         mode=mode, source={'live': 'live', 'fake': 'fake', 'bm25_fallback': 'bm25 fallback'}[mode],
-        label=_label(mode, config, scored, fallback_reason), narrowed=narrowed,
+        label=_label(mode, config, scored, public_text(fallback_reason, UNAVAILABLE)), narrowed=narrowed,
         message=None if narrowed else NOT_NARROWED, articles=shown, committed=committed, choices=choices,
         questions=[q.text for q in questions], open_questions=questions, benchmark=benchmark,
         process_refs=process_refs(codes), model_ids=model_ids, commit_policy=policy.view(), scored_at=_now(),
@@ -311,11 +319,11 @@ def _label(mode: str, config: IdentifyConfig, scored: int, fallback_reason: str 
     if mode == 'bm25_fallback':
         return (f'Ranked by keyword search ({config.fallback.upper()}) because the model path was unavailable '
                 f'({fallback_reason}). Nothing is committed.')
-    screen = (f'Jev ({config.screen_model}) judged all {scored} Division B articles' if config.exhaustive
+    screen = (f'All {scored} Division B articles were scored' if config.exhaustive
               else f'Keyword search ({config.screen}) shortlisted {scored} articles')
-    rerank = {'jev': f'; the top {config.rerank_n} were re-judged in one request',
-              'openai': f'; {config.rerank_model} reranked the top {config.rerank_n}', 'none': ''}[config.rerank]
-    verify = '' if config.verifier == 'none' else f'; {config.verifier_model} read the top {config.verify_n} in full'
+    rerank = {'jev': f'; the top {config.rerank_n} were re-checked in one request',
+              'openai': f'; the top {config.rerank_n} were re-checked', 'none': ''}[config.rerank]
+    verify = '' if config.verifier == 'none' else f'; the top {config.verify_n} were read in full'
     fake = ' Offline fake providers: for testing only, not a measurement.' if mode == 'fake' else ''
     return f'{screen}{rerank}{verify}.{fake}'
 

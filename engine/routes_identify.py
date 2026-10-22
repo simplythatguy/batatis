@@ -41,6 +41,7 @@ from .llm_gate import client_ip_from, identify_retry_after
 from .models import Case, now
 from .models_identify import IdentifyResult, ProcessRef
 from .process_refs import ProcessRefMissing, process_refs
+from .public_names import public_event
 from .redact import known_values, people_names, scrub
 from .relevance import BANDS_FILE, CaseScorings, RelevanceInProgress, description, display_probabilities
 from .relevance_models import RelevanceBands, RelevanceRecord
@@ -68,8 +69,8 @@ def _relevance(output: RunOutput, text: str) -> RelevanceRecord | None:
     if not output.screen:
         return None
     rerank = output.rerank or {}
-    return RelevanceRecord(model=output.result.model_ids.get('screen') or 'jev', scored_at=now(),
-                           description_sha256=description_hash(text), scores=output.screen, rerank=rerank,
+    return RelevanceRecord(scored_at=now(), description_sha256=description_hash(text), scores=output.screen,
+                           rerank=rerank,
                            display=display_probabilities(output.screen, rerank),
                            bands=RelevanceBands.model_validate_json(BANDS_FILE.read_text()))
 
@@ -195,7 +196,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         def worker():
             try:
                 result = execute(case_id, text, outbound, client_ip, base, answers=answers,
-                                 on_stage=lambda stage, payload: events.put((stage, payload)))
+                                 on_stage=lambda stage, payload: events.put((stage, public_event(payload))))
                 events.put(('done', attach_meta(attribute_code(json.loads(result.model_dump_json())))))
             except HTTPException as error:
                 events.put(('error', {'message': str(error.detail), 'status': error.status_code}))

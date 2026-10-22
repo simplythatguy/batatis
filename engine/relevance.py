@@ -9,14 +9,12 @@ from pathlib import Path
 
 from .identify import Identification, Judge
 from .identify.jevkit import keystore
-from .identify.screen import JEV_MODEL, JEV_PROVIDER
+from .identify.screen import JEV_PROVIDER
 from .models import Case
-from .relevance_models import PUBLIC_MODEL, RelevanceBands, RelevanceRecord
+from .public_names import MODEL_VERSIONS as PUBLIC_MODEL_VERSIONS
+from .relevance_models import RelevanceBands, RelevanceRecord
 
 BANDS_FILE = Path(__file__).with_name('identify') / 'relevance_bands.json'
-# Private: the scoring provider's pinned model -> the opaque version responses and stored rows carry.
-# A new pin needs a new entry (and a new public version); an unmapped pin is never passed through.
-PUBLIC_MODEL_VERSIONS = {JEV_MODEL: PUBLIC_MODEL}
 
 
 def public_model(pin: str) -> str:

@@ -11,8 +11,10 @@ see them. A new web file, route or response field that names the provider fails 
 from __future__ import annotations
 
 import io
+import json
 import re
-from contextlib import ExitStack
+import sqlite3
+from contextlib import ExitStack, closing
 from pathlib import Path
 
 import httpx
@@ -39,6 +41,8 @@ ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / 'web'
 PROVIDER = re.compile(r'jev|typesafe', re.I)
 NOTICE_PROVIDERS = re.compile(r'jev|typesafe|openai|anthropic|claude|gpt', re.I)
+# What identify answers must not carry either: it was built neutral for every provider, model and credential.
+IDENTIFY_NAMES = re.compile(r'jev|typesafe|openai|anthropic|claude|\bgpt-?\d|\bluna\b|BATATIS_[A-Z_]+|[A-Z]+_API_KEY', re.I)
 TEST_FILE = re.compile(r'\.test\.[cm]?[jt]sx?$')
 # Random tokens are not copy: a session cookie could contain these letters by chance.
 RANDOM_HEADERS = {'set-cookie', 'cookie'}
@@ -97,10 +101,10 @@ class Recording(TestClient):
         return response
 
 
-def assert_no_provider(*clients: Recording, at_least: int = 1) -> int:
+def assert_no_provider(*clients: Recording, at_least: int = 1, pattern: re.Pattern = PROVIDER) -> int:
     responses = [response for client in clients for response in client.responses]
     assert len(responses) >= at_least, f'the scenario made {len(responses)} requests; expected {at_least}'
-    found = [hit for response in responses for hit in leaks(response)]
+    found = [hit for response in responses for hit in leaks(response, pattern)]
     assert not found, '\n'.join(found)
     return len(responses)
 
@@ -286,26 +290,108 @@ def test_the_export_headers_and_pdf_name_no_provider(world):
     assert_no_provider(client, at_least=3)
 
 
-def test_identify_responses_name_no_provider_when_the_route_exists(world, monkeypatch):
-    _, client, _, _ = world
+def require_identify(client: Recording) -> None:
     if '/cases/{case_id}/identify' not in client.get('/openapi.json').json()['paths']:
         pytest.skip('this branch has no code-identification route')
+
+
+def test_identify_responses_name_no_provider(world, monkeypatch):
+    _, client, _, _ = world
+    require_identify(client)
     monkeypatch.setenv('BATATIS_PROVIDER', 'fake')                                # offline stand-ins, never a live call
     monkeypatch.setenv('BATATIS_IDENTIFY_RATE_LIMIT', '1000')
     case_id = described_case(client)
     run = client.post(f'/cases/{case_id}/identify')
     assert run.status_code == 200, run.text
+    result = run.json()
+    assert result['mode'] == 'fake' and result['model_ids'] == {
+        'screen': 'relevance-1', 'rerank': 'relevance-1', 'verifier': 'verifier-1'}
     assert client.get(f'/cases/{case_id}/identify').status_code == 200
     stream = client.post(f'/cases/{case_id}/identify', headers={'accept': 'text/event-stream'})
-    assert stream.status_code == 200 and 'event: done' in stream.text
-    shown = run.json()['articles']
+    assert stream.status_code == 200 and 'event: done' in stream.text and '"method": "model"' in stream.text
+    shown = result['articles']
     assert shown, 'the fake run returns article cards'
-    decided = client.post(f"/cases/{case_id}/identify/{shown[0]['provision']}/decision", json={'decision': 'not_sure'})
+    provision = shown[0]['provision']
+    decided = client.post(f"/cases/{case_id}/identify/{provision}/decision", json={'decision': 'not_sure'})
     assert decided.status_code == 200, decided.text
+    benchmark = client.post(f'/cases/{case_id}/identify/benchmark', json={
+        'provision': provision, 'departure': 'The design uses continuous exterior insulation instead of the listed material.'})
+    assert benchmark.status_code == 200, benchmark.text
+    assert client.post(f'/cases/{case_id}/identify/confirm', json={'provisions': [provision]}).status_code == 200
     assert client.get(f'/cases/{case_id}/process-refs').status_code == 200
     client.get(f'/cases/{case_id}/information-request')            # the officer draft; its status depends on who asks
+    case = client.get(f'/cases/{case_id}')
+    assert case.status_code == 200 and case.json()['relevance']['model'] == 'relevance-1'
+    assert_no_provider(client, at_least=12, pattern=IDENTIFY_NAMES)
+
+
+def test_identify_with_the_gate_closed_names_no_provider(world, monkeypatch):
+    """No fake selected and no live switch: the run takes the labelled keyword fallback, whose cause names a provider."""
+    _, client, _, _ = world
+    require_identify(client)
+    monkeypatch.setenv('BATATIS_IDENTIFY_RATE_LIMIT', '1000')
+    case_id = described_case(client)
+    run = client.post(f'/cases/{case_id}/identify')
+    assert run.status_code == 200, run.text
+    result = run.json()
+    assert result['mode'] == 'bm25_fallback' and result['trace']['fallback_reason'] == 'scoring unavailable'
+    assert 'scoring unavailable' in result['label'] and result['model_ids'] == {
+        'screen': None, 'rerank': None, 'verifier': None}
+    stream = client.post(f'/cases/{case_id}/identify', headers={'accept': 'text/event-stream'})
+    assert stream.status_code == 200 and 'event: done' in stream.text
+    assert client.get(f'/cases/{case_id}/identify').status_code == 200 and client.get(f'/cases/{case_id}').status_code == 200
+    assert_no_provider(client, at_least=6, pattern=IDENTIFY_NAMES)
+
+
+def test_identify_with_a_failing_provider_names_no_provider(world, monkeypatch):
+    """The provider fails with an error that names it. The run falls back, and the response does not say who."""
+    from engine.identify import fakes
+    _, client, _, _ = world
+    require_identify(client)
+
+    def outage(state, questions, timeout):
+        raise RuntimeError('Jev gateway timeout at jev.example (TypeSafe), OPENAI_API_KEY rejected')
+    monkeypatch.setattr(fakes, 'fake_jev_ask', lambda: outage)
+    monkeypatch.setenv('BATATIS_PROVIDER', 'fake')
+    monkeypatch.setenv('BATATIS_IDENTIFY_RATE_LIMIT', '1000')
+    case_id = described_case(client)
+    run = client.post(f'/cases/{case_id}/identify')
+    assert run.status_code == 200 and run.json()['mode'] == 'bm25_fallback', run.text
+    stream = client.post(f'/cases/{case_id}/identify', headers={'accept': 'text/event-stream'})
+    assert stream.status_code == 200 and 'event: done' in stream.text
+    assert_no_provider(client, at_least=4, pattern=IDENTIFY_NAMES)
+
+
+def test_an_identify_result_stored_before_the_names_were_hidden_is_cleaned_when_read(world, monkeypatch):
+    """A row written while identify still returned provider names, as the rows of the first release did."""
+    _, client, store, _ = world
+    require_identify(client)
+    monkeypatch.setenv('BATATIS_PROVIDER', 'fake')
+    monkeypatch.setenv('BATATIS_IDENTIFY_RATE_LIMIT', '1000')
+    case_id = described_case(client)
+    assert client.post(f'/cases/{case_id}/identify').status_code == 200
+    with closing(sqlite3.connect(store.path)) as con, con:
+        raw = json.loads(con.execute('SELECT json FROM cases WHERE id=?', (case_id,)).fetchone()[0])
+        identify, trace = raw['identify'], raw['identify']['trace']
+        identify['label'] = 'Jev (jev-1.13.0) judged all 2080 Division B articles; gpt-6-luna read the top 15 in full.'
+        identify['model_ids'] = {'screen': 'jev-1.13.0', 'rerank': 'jev-1.13.0', 'verifier': 'gpt-6-luna'}
+        trace.update(ranker='jev screen + jev rerank', fallback_reason='BATATIS_LIVE is off or the TypeSafe credential is absent',
+                     verifier='failed: openai gate: offline-cap',
+                     config={'screen': 'jev', 'screen_model': 'jev-1.13.0', 'verifier': 'openai', 'verifier_model': 'gpt-6-luna'},
+                     stages=[{'stage': 'screen', 'method': 'jev', 'model': 'jev-1.13.0'}],
+                     spend={'jev': {'requests': 21}, 'openai': {'requests': 1}})
+        con.execute('UPDATE cases SET json=? WHERE id=?', (json.dumps(raw), case_id))
+
+    def stored():
+        with closing(sqlite3.connect(store.path)) as con:
+            return con.execute('SELECT json FROM cases WHERE id=?', (case_id,)).fetchone()[0]
+    assert IDENTIFY_NAMES.search(stored()), 'the stored row really does name providers'
+    assert client.get(f'/cases/{case_id}/identify').status_code == 200
     assert client.get(f'/cases/{case_id}').status_code == 200
-    assert_no_provider(client, at_least=8)
+    assert_no_provider(client, at_least=4, pattern=IDENTIFY_NAMES)
+    # The next write stores the neutral form.
+    assert client.post(f'/cases/{case_id}/facts', json=description_fact('Edited.', 'edit')).status_code == 200
+    assert not IDENTIFY_NAMES.search(stored())
 
 
 # ---------------------------------------------------------------- officer review (#53)
