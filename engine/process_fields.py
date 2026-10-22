@@ -11,6 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .codes import Codes
 from .models import Case, Fact, Source
+from .process_examples import ProcessExample, example_for
 
 ProcessFieldId = Literal['rationale', 'risk_assessment', 'mitigating_measures',
                          'assumptions_and_limits', 'maintenance_operation', 'qualifications']
@@ -53,30 +54,37 @@ class ProcessField(BaseModel):
     citation: str
     required: Literal[True] = True
     answer: ApplicantText | None = None
+    example: ProcessExample | None = None       # precedent structure to read, never text to paste
 
 
 # Risk/mitigations are required by the challenge workflow; these process citations supply
 # the documentation context, without claiming that the code uses those exact field titles.
 _FIELDS = (
     ('rationale', 'Rationale', 'Why are you proposing this departure from the acceptable solution?',
-     ('Name the confirmed benchmark and the proposed departure.',
-      'Identify the analytical method and the reason for choosing it.'), '2.3.1.1.(2)(a)'),
+     ('Name the confirmed benchmark acceptable solution and the proposed departure.',
+      'Explain how the design achieves at least the level of performance of the acceptable solution it '
+      'replaces ("as well as", not "well enough"), and the method of analysis and why it was chosen.'),
+     '2.3.1.1.(2)(a)'),
     ('risk_assessment', 'Risk assessment', 'What risks arise from the specific departure?',
-     ('Identify affected people, property and failure scenarios.',
+     ('Identify affected people, property and failure scenarios, including failure of a measure and lapsed '
+      'maintenance.',
       'Link each risk to the benchmark objective/function; identify who assesses it.'), '2.3.1.1.(3)'),
     ('mitigating_measures', 'Mitigating measures', 'What measures address each identified risk?',
-     ('Link measures to risks and the Section C objectives/functions.',
+     ('Link measures to risks and the Section C objectives/functions; say what happens when a measure fails '
+      '(mitigation is not elimination).',
       'Point to supporting evidence and identify remaining uncertainties.'), '2.3.1.1.(3)'),
     ('assumptions_and_limits', 'Assumptions and limits', 'What assumptions and limits does your analysis rely on?',
-     ('Record use, installation, exposure and project limits.',
-      'Identify unverified assumptions and changes that would require reassessment.'), '2.3.1.1.(3)'),
+     ('Record use, installation, exposure and project limits, and the testing procedures relied on.',
+      'State assumptions about services (for example fire department response), what is unverified, and the '
+      'changes that would require reassessment.'), '2.3.1.1.(3)'),
     ('maintenance_operation', 'Maintenance and operation',
      'What operation, maintenance and commissioning conditions are needed after construction?',
-     ('Identify activities, intervals, commissioning and responsible people.',
+     ('Identify activities, intervals, commissioning and responsible people, and what happens if maintenance lapses.',
       'If none are needed, have the responsible person state that explicitly with the basis.'), '2.3.1.1.(2)(b)'),
     ('qualifications', 'Qualifications of responsible people', 'Who takes responsibility for the design and analysis?',
      ('Name each person, their scope, qualifications, experience and background.',
-      'Identify professional authority where required and a coordinator if several people are responsible.'),
+      'Identify professional authority where required and a single coordinator if several people are responsible '
+      '(2.3.1.1.(6)).'),
      '2.3.1.1.(4)'),
 )
 
@@ -124,5 +132,6 @@ def process_fields(case: Case, codes: Codes) -> list[ProcessField]:
         if rec is None:
             raise KeyError(f'missing process provision: {pid}')
         fields.append(ProcessField(id=fid, label=label, prompt=prompt,
-                                   reviewer_looks_for=structure, citation=rec['citation'], answer=answer))
+                                   reviewer_looks_for=structure, citation=rec['citation'], answer=answer,
+                                   example=example_for(fid)))
     return fields
