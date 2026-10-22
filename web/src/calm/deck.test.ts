@@ -427,3 +427,35 @@ test("new cards join the queue in form order, and unreached planner cards follow
   // The card on screen (and anything before it) keeps its place.
   assert.deepEqual(rankAhead(["fact-a", "plan-y", "plan-x"], 1, order, (k) => k.startsWith("plan-")), ["fact-a", "plan-y", "plan-x"]);
 });
+
+/* —— Review fixes: pending decisions, reopened references, page counts —— */
+
+test("an answer the engine has not stored stays open in the deck", () => {
+  let c = reducer(demoCase(), { type: "noteIdentify", result: identifyResult() });
+  const card = c.candidates.find((x) => x.suggestion === "identify")!;
+  c = reducer(c, { type: "answerCandidate", id: card.id, answer: "no" });
+  c = reducer(c, { type: "markDecisionPending", id: card.id, pending: true });
+  const open = buildDeck(c, getGaps(c)).find((i) => i.key === `cand-${card.id}`);
+  assert.ok(open && !open.done, "a failed No is asked again");
+  c = reducer(c, { type: "markDecisionPending", id: card.id, pending: false });
+  assert.equal(buildDeck(c, getGaps(c)).find((i) => i.key === `cand-${card.id}`), undefined);
+});
+
+test("a reopened sentence-level reference is one card with its identify Yes, and only for that article", () => {
+  let c = reducer(demoCase(), { type: "noteIdentify", result: identifyResult() });
+  const [first, second] = c.candidates.filter((x) => x.suggestion === "identify");
+  const sentence = (p: string) => `${p.match(/^\d+\.\d+\.\d+\.\d+\./)![0]}(1)`;
+  const saved = (p: string, id: string) => ({ ...first, id, provision: sentence(p), suggestion: "search" as const, answer: "yes" as const });
+  c = { ...c, candidates: [...c.candidates, saved(first.provision, "search-a"), saved(second.provision, "search-b")] };
+  c = reducer(c, { type: "answerCandidate", id: first.id, answer: "yes" });
+  c = reducer(c, { type: "noteIdentify", result: identifyResult() });
+  const ids = c.candidates.map((x) => x.id);
+  if (c.candidates.find((x) => x.id === first.id)?.answer === "yes") assert.ok(!ids.includes("search-a"), "the same article is not shown twice");
+  assert.ok(ids.includes("search-b"), "a Yes on one article never removes another article's saved card");
+});
+
+test("page counts read 1 page and 3 pages", async () => {
+  const { pagesLabel } = await import("../intakeView.ts");
+  assert.equal(pagesLabel(1), "1 page");
+  assert.equal(pagesLabel(3), "3 pages");
+});

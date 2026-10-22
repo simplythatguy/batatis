@@ -391,3 +391,8 @@ export function stageViews(seen: Record<string, Record<string, unknown>>, runnin
     return { ...s, state: d ? "done" : running && i === firstOpen ? "running" : "waiting", detail };
   });
 }
+
+/** "1 page", "3 pages": one count for both the number and the plural. */
+export function pagesLabel(count: number): string {
+  return `${count} ${count === 1 ? "page" : "pages"}`;
+}

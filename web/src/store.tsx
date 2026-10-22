@@ -678,6 +678,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         const body = await engine.decide(id, provision, wireDecision(answer), undefined, acknowledgedVersion(id) ?? undefined);
         if (!live()) return null;
         acknowledgeWrite(id, body.case_version);
+        derive({ type: "markDecisionPending", id: candidate.id, pending: false });
         const read = readDecisionBody(body, provision);
         if (read.row) derive({ type: "noteSectionC", rows: [toViewRow(read.row, candidate.id)] });
         if (answer === "not-sure" && read.openQuestionId) derive({ type: "bindOpenQuestion", candidateId: candidate.id, questionId: read.openQuestionId });
@@ -695,7 +696,10 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         return null;
       } catch (e) {
         if (isCaseConflict(e)) noteConflict(id);
-        return e instanceof EngineError && e.status === 0 ? "Not saved yet: Batatis could not be reached. Your answer is kept here." : failureText(e);
+        // Keep the answer on screen but not as done: until the engine stores it, a No or Not sure would be lost
+        // (Section D saves persist only Yes) and a Not sure would miss the officer's information request.
+        if (live()) derive({ type: "markDecisionPending", id: candidate.id, pending: true });
+        return e instanceof EngineError && e.status === 0 ? "Not saved yet: Batatis could not be reached. Your answer is kept here; answer again to resend it." : failureText(e);
       }
     });
   }

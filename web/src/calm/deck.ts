@@ -146,7 +146,8 @@ function firstSentence(text: string): string {
 }
 
 function candidateItem(c: Case, a: Candidate): DeckItem {
-  const done = a.answer !== null;
+  // An answer the engine has not stored yet keeps the card open, so answering again resends it.
+  const done = a.answer !== null && !a.pending;
   if (a.id === "desc-storeys") {
     return {
       key: `cand-${a.id}`,

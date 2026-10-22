@@ -1,3 +1,4 @@
+import { pagesLabel } from "../intakeView";
 import { useEffect, useRef, useState } from "react";
 import { useCase } from "../store";
 import type { ApplicantType } from "../types";
@@ -150,7 +151,7 @@ export function Start() {
           ? { tone: "blocking" as const, label: f.error }
           : report
             ? report.status === "read"
-              ? { tone: "done" as const, label: `Read · ${report.pages ?? report.pages_read.length} ${report.pages === 1 ? "page" : "pages"}` }
+              ? { tone: "done" as const, label: `Read · ${pagesLabel(report.pages ?? report.pages_read.length)}` }
               : { tone: "warning" as const, label: report.status === "partly_read" ? "Partly read" : "Not read", reason: report.reason ?? undefined }
           : f.read
             ? { tone: "done" as const, label: "Uploaded" }
@@ -241,4 +242,3 @@ export function Start() {
     </div>
   );
 }
-

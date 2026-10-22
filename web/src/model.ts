@@ -455,6 +455,7 @@ export type Action =
   | { type: "adoptFacts"; facts: Fact[]; drop?: string[] }
   /** Derived: the latest code identification; its committed articles and choices become code cards. */
   | { type: "noteIdentify"; result: IdentifyResult }
+  | { type: "markDecisionPending"; id: string; pending: boolean }
   | { type: "setDetail"; field: string; value: string; section: string }
   | { type: "answerQuestion"; id: string; answer: string }
   | { type: "setStoreyCount"; value: string }
@@ -672,10 +673,12 @@ export function reducer(c: Case, a: Action): Case {
     }
     case "noteIdentify": {
       const made = identifyCandidates(a.result, c.candidates);
-      const articles = new Set(made.map((m) => m.provision.match(/^\d+\.\d+\.\d+\.\d+\./)?.[0] ?? m.provision));
-      // The rest of the ranking stays in the code library. A saved reference to the same article
-      // (reopened case) is the same card, not a second one.
-      const rest = c.candidates.filter((x) => x.suggestion !== "identify" && !(x.id.startsWith("search-") && articles.has(x.provision) && made.some((m) => m.answer === "yes")));
+      const articleOf = (p: string) => p.match(/^\d+\.\d+\.\d+\.\d+\./)?.[0] ?? p;
+      // Articles the applicant said Yes to on an identify card. A saved reference to one of them (a reopened
+      // case stores sentence ids such as 9.27.3.4.(1)) is the same card, not a second one.
+      const decidedYes = new Set(made.filter((m) => m.answer === "yes").map((m) => articleOf(m.provision)));
+      // The rest of the ranking stays in the code library.
+      const rest = c.candidates.filter((x) => x.suggestion !== "identify" && !(x.id.startsWith("search-") && decidedYes.has(articleOf(x.provision))));
       const candidates = [...rest, ...made];
       return {
         ...c,
@@ -684,6 +687,8 @@ export function reducer(c: Case, a: Action): Case {
         questions: c.questions.filter((q) => q.kind !== "intake" && (!q.cardId || candidates.some((x) => x.id === q.cardId))),
       };
     }
+    case "markDecisionPending":
+      return { ...c, candidates: c.candidates.map((x) => (x.id === a.id ? { ...x, pending: a.pending || undefined } : x)) };
     case "setDetail":
       return { ...c, facts: upsertUserFact(c, a.field, a.value, { type: "user_text", ref: `${TYPED_REF} Section ${a.section}` }) };
     case "answerQuestion": {

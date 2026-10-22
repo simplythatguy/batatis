@@ -90,6 +90,8 @@ export interface Candidate {
   /** Asked when the applicant answers "Not sure". */
   clarifyingQuestion: string;
   answer: CandidateAnswer | null;
+  /** The answer is shown but the engine has not stored it yet; the card stays open so answering sends it again. */
+  pending?: boolean;
   /** Set when search or identify suggested the provision and the applicant has not confirmed it. */
   suggestion?: "search" | "identify";
   /** For code identification: committed under the calibrated Part 9 rule, or one of the quoted choices. */
