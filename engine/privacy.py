@@ -8,6 +8,6 @@ PII_NOTICE = PRIVACY_NOTICE
 def assistant_notice(provider: str = '') -> str:
     """The same wording for every provider: what is sent and how it is treated, never who runs the model."""
     return ('AI help explains information and administrative completeness; it does not determine technical correctness. '
-            'In live mode, your question, recent chat and selected application context (application facts and any selected case message) are sent to a third-party AI service provider in the United States, after the names, contact details and addresses Batatis recognizes are removed. '
+            'In live mode, your question, recent chat and selected application context (application facts and any selected case message) are sent to a third-party AI service provider in the United States and processed under its API data-use terms, after the names, contact details and addresses Batatis recognizes are removed. '
             'Batatis does not store this assistant chat; stored applications and '
             'their messages are deleted after 7 days or when the application is deleted.')
