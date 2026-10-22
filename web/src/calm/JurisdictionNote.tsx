@@ -96,7 +96,13 @@ function Elsewhere({ extras }: { extras: CaseExtras }) {
       <p>{fallback.authority} reviews it. Batatis has no local pack for that office yet, so ask it about its own forms and steps.</p>
       <p className="cf-faint">{dir.levels.full}</p>
       {preview > 0 && <p className="cf-faint">Outside {dir.coverage.find((c) => c.id === fallback.province)?.name ?? "this province"}, Batatis is a preview only: {dir.levels.preview.charAt(0).toLowerCase()}{dir.levels.preview.slice(1)}</p>}
-      {finder && <a className="cf-inline-link cf-small" href={finder.url} target="_blank" rel="noreferrer">{finder.title} <CIcon name="external" size={12} /></a>}
+      {finder ? (
+        <a className="cf-inline-link cf-small" href={finder.url} target="_blank" rel="noreferrer">{finder.title} <CIcon name="external" size={12} /></a>
+      ) : extras.failed.details[fallback.id] ? (
+        <p className="cf-note cf-small"><Dot tone="warning" />The office’s contact link didn’t load. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
+      ) : !extras.details[fallback.id] ? (
+        <p className="cf-faint cf-small" role="status">Loading the office’s contact link…</p>
+      ) : null}
     </div>
   );
 }
