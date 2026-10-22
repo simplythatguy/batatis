@@ -1,6 +1,6 @@
 # Batatis deck: refresh steps and screenshot slots
 
-**Status: `batatis-pitch-deck.pdf` is stale, and `index.html` has current text with no screenshots.** The PDF was built from the earlier slides (PR #32), before the calm interface, the merged backends and the rewritten plans, so do not submit it. `index.html` was regenerated on Oct 22 from the current `pitch-slides.md` and `pitch-narration.md`, and it shows "Screenshot pending" in every slot. The PDF is exported from `index.html` after the screens in the Implementation Plan §3 ("backend only" rows) land and the screenshots below are added.
+**Status: `batatis-pitch-deck.pdf` is stale, and `index.html` has current text with no screenshots.** The PDF was built from the earlier slides (PR #32), before the calm interface, the merged backends and the rewritten plans, so do not submit it. `index.html` was regenerated on Oct 22 from the current `pitch-slides.md` and `pitch-narration.md`, and it shows "Screenshot pending" in every slot. The PDF is exported from `index.html` after the screenshots below are added. The intake and code-check screens are on `dev` now (PR #61). The officer screens are in open PR #62.
 
 ## Refresh steps
 
@@ -16,13 +16,17 @@ Only built screens appear in the deck. A slide whose screen is still pending sho
 | Slide | Placeholder id | Caption | What to capture | File |
 |---|---|---|---|---|
 | 2 | `shot-s02-describe` | Describe: one box, one question | The Start screen: the headline "What are you building differently?" and the description box | `img/shot-s02-describe.png` |
+| 2 | `shot-s02-read` | Facts beside their source words | A "Check what we read" card: the question, the applicant's sentence with the span marked, the source line and "Read from your words.", and the Yes and No choices | `img/shot-s02-read.png` |
+| 2 | `shot-s02-planner` | Planner question and the fork note | The first planner question ("A quick question") with the fork note above its input and "What a variance needs" open | `img/shot-s02-planner.png` |
 | 2 | `shot-s02-question` | One question at a time | A question card in the deck with "Why we ask" open | `img/shot-s02-question.png` |
-| 4 | `shot-s04-code-check` | Code check card and code drawer | A code check card for the example article with the verbatim text in the drawer | `img/shot-s04-code-check.png` |
+| 4 | `shot-s04-progress` | Four stages while it checks | The code check card with its four stages and their counts | `img/shot-s04-progress.png` |
+| 4 | `shot-s04-code-check` | A quoted choice, code shown | A quoted-choice card ("Does your design do something different from the rule on ...?") with "Show the code" open on the verbatim sentence | `img/shot-s04-code-check.png` |
 | 5 | `shot-s05-library` | Code library with relevance rings | The code library reader with the relevance ring on an article | `img/shot-s05-library.png` |
 | 6 | `shot-s06-engineer` | Engineer callout on the review | The review screen showing the engineer callout and Sections A to D | `img/shot-s06-engineer.png` |
 | 7 | `shot-s07-queue` | Officer queue with claim | The reviewer queue with "Start reviewing" | `img/shot-s07-queue.png` |
 | 7 | `shot-s07-sheet` | Paper sheet with completeness list | An application as a paper sheet beside its completeness list | `img/shot-s07-sheet.png` |
 | 8 | `shot-s08-onboarding` | Onboarding sets the applicant type | The onboarding question: manufacturer, general contractor or homebuilder | `img/shot-s08-onboarding.png` |
+| 9 | `shot-s09-before-submit` | Before you submit, from the pack | The review screen with the "Before you submit" disclosures open for an Edmonton description | `img/shot-s09-before-submit.png` |
 | 9 | `shot-s09-application` | Draft or official PDF, gated | The application screen with the download panel | `img/shot-s09-application.png` |
 | 9 | `shot-s09-scc-form` | Council form, officer part blank | The downloaded SCC variance form: unsigned, officer Part 2 blank | `img/shot-s09-scc-form.png` |
 
@@ -32,7 +36,6 @@ Slides 1, 3, 10, 11 and 12 have no product shot.
 
 These need their own capture after the screens land. Add a shot and a `SHOTS` entry for each.
 
-- The intake reader's facts with a pointer to the source words, and the five-question planner (slide 2).
-- Code identification's quoted choices and the benchmark acceptable-solution record (slide 4).
-- The jurisdiction picker and process notes (slide 9).
+- The benchmark acceptable-solution record (slide 4). It has no screen yet.
+- The jurisdiction picker for other offices and the pack's process notes beyond "Before you submit" (slide 9).
 - The officer package review: findings, the drafted information request, the "x of y gaps resolved" diff, and the close-out record (slide 7).

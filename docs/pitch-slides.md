@@ -1,6 +1,6 @@
 # Batatis: Pitch Slides
 
-*Slide copy for Submission 1 (Oct 29, 2026), built from `pitch-outline.md`. Status is as of Oct 22, 2026. Rubric weights are in brackets. On every slide, the **Hero** line (one figure that is also on the slide) and the dash bullets are the only on-slide text. The detail, the speaker notes and the sources go into the speaker notes. The footer of each slide shows public sources only, and file paths stay in the notes. Status words follow the Implementation Plan, §3: **built** (merged and reachable in the live app or API), **backend** (the API is merged and the screen is in progress), **roadmap** (not started). Evaluation figures are model-checked and mostly in sample, and none is human-verified. No slide shows a screen that is not built: where the screen is pending, the slide shows the built screen or says "backend".*
+*Slide copy for Submission 1 (Oct 29, 2026), built from `pitch-outline.md`. Status is as of Oct 22, 2026. Rubric weights are in brackets. On every slide, the **Hero** line (one figure that is also on the slide) and the dash bullets are the only on-slide text. The detail, the speaker notes and the sources go into the speaker notes. The footer of each slide shows public sources only, and file paths stay in the notes. Status words follow the Implementation Plan, §3: **built** (merged and reachable in the live app or API), **backend** (the API is merged and its screen is not finished), **roadmap** (not started). Evaluation figures are model-checked and mostly in sample, and none is human-verified. No slide shows a screen that is not built: where the screen is pending, the slide shows the built screen or says "backend".*
 
 ---
 
@@ -28,16 +28,18 @@
 **Hero:** A to D | the form's sections, asked one card at a time (built)
 
 - Built: describe, then one question at a time
-- Backend: facts read with a pointer to your own words
+- Built: facts read with a pointer to your own words
 - Facts read from your words are not added until you confirm them
 
 **Full slide detail (in notes):**
 
-- Built: the applicant picks a role in onboarding, describes the project, and answers cards in form order. Each card has a plain "Why we ask". "Not sure" keeps an open question for the officer and never blocks
-- Backend: the intake reader takes the description and text PDFs. Rules read first and a model is asked only for fields the rules left empty. Every fact stores the phrase or box it came from. Two values for one field give no fact and a question. At most five questions, each with a reason. Pages with no text layer are reported as not read, with the reason, and nothing is guessed
-- The screens that show the reader's facts and the five questions are in progress
+- Built: the applicant picks a role in onboarding, describes the project, and answers cards one at a time. Each card has a plain "Why we ask". "Not sure" keeps an open question for the officer and never blocks
+- Built: after Start, the intake reader takes the description and text PDFs and shows each fact beside the words it came from. Nothing is used until the applicant says yes, and a No is kept as a confirmed empty answer
+- Rules read first and a model is asked only for fields the rules left empty. Every fact stores the phrase or box it came from. Two values for one field give no fact and a question. At most five questions follow, each with a reason, and the first carries the note on whether this looks like a variance. Pages with no text layer are reported as not read, with the reason, and nothing is guessed
+- If another code applies, such as plumbing, a redirect page replaces the questions until the applicant says otherwise
+- An agent walked these screens with the offline fake provider. They have not been run with live model access
 
-**Speaker notes:** Intake is a fifth of the score, so we start with it. Today's screens ask one question at a time and keep what the applicant says apart from what is confirmed. The reader that points each fact at the words it came from is merged but is not yet on screen, and we say so rather than show a mock-up.
+**Speaker notes:** Intake is a fifth of the score, so we start with it. Today's screens ask one question at a time and keep what the applicant says apart from what is confirmed. The reader that points each fact at the words it came from is on screen now. We have walked it only with the offline provider, and we say so.
 *Sources:* `docs/design-system-calm.md`; `docs/api/intake.md`
 
 ### Slide 3: It asks before it guesses, and we test that [Intake, 20]
@@ -64,11 +66,12 @@
 
 - A relevance model scores all of them, re-ranks 60, and a verifier quotes the text
 - Up to three quoted choices. Nothing is committed automatically
-- Backend merged. Screen in progress. Benchmark unfinished
+- Built on screen. Benchmark unfinished
 
 **Full slide detail (in notes):**
 
 - Pipeline: screen every Division B article, re-rank the top 60 in one request, have a verifier read the full text of the top 15 and quote it word for word
+- On screen: four stages of progress, then up to three quoted choices. Each asks whether the design does something different from the rule, with the code sentence behind "Show the code". The benchmark record has no screen yet
 - Quotes that do not match the article are dropped. The pipeline checks again before display
 - Commit rule: only Part 9 and at most three articles can ever be committed, and only with a calibration file from the benchmark. No such file exists yet, so every article is a candidate or one of up to three quoted choices
 - Each result stores a benchmark acceptable-solution record: the quoted Division B sentence the design departs from, and its objective and function codes. Div A 1.2.1.1. and Div C 2.3.1.1. are attached read-only to every case
@@ -136,7 +139,7 @@
 
 **Hero:** 3 | applicant types: manufacturer, general contractor, homebuilder
 
-- Onboarding sets the role, and the starting questions differ by role
+- Onboarding sets the role. The role changes the prompt on Describe and whether the planner asks about scope
 - Every card says why it asks
 - Unaided use by a real first-time applicant is untested
 
@@ -152,14 +155,14 @@
 
 **Hero:** Oct 6, 2026 | form version the export is pinned to (SHA-256)
 
-- Draft or official PDF. Part 2 and signatures stay blank
+- Draft or "Official PDF". Part 2 and signatures stay blank
 - Jurisdiction packs are data: Calgary, Edmonton, rest of Alberta
 - Other provinces are labelled preview only
 
 **Full slide detail (in notes):**
 
 - The export fills Part 1, Sections A to D of the Council's form dated Oct 6, 2026 (5 pages, 87 fields), not the brief's older Appendix 1. The two differ in six places, listed in the Implementation Plan §4.3. A changed form fails the hash check and blocks export
-- The official PDF unlocks only after a current check finds no required item missing. Drafts can be incomplete and say so
+- The "Official PDF" is the Council's form filled in, not a file the Council issues or approves. It unlocks only after a current check finds no required item missing. Drafts can be incomplete and say so
 - A field shows N/A only when the applicant has confirmed that it does not apply, with a reason, and the appendix lists each one. A blank is never shown as N/A. There is no screen yet for stating it (backend)
 - A pack is one JSON file with sources, dates and hashes for each note. A test adds a fourth pack with no code change. The Calgary form (R2014-06) is a roadmap item
 - The code library reads the code as a numbered outline and shows a relevance ring on each article. "Add to my application" turns an article into a Code check card, and Section C holds only what the applicant confirms
@@ -210,7 +213,7 @@
 
 **Full slide detail (in notes):**
 
-- 9.10.15.5.(8) has 1,501, 9.10.11.2. has 366 and 9.10.13.13. has 251, which is 2,118 of 3,088 (our arithmetic). Coded rules for these three are roadmap
+- 9.10.15.5.(8) has 1,501, 9.10.11.2. has 366 and 9.10.13.13. has 251, which is 2,118 of 3,088 (our arithmetic). Coded rules for these three exist as a backend with no screen, and no domain reviewer has signed them
 - Calgary reviewed and accepted 382 zero-lot-line requests between Jan 1 and Sep 1, 2017, then created standing posted variances
 - No product in our competitor survey prepares or reviews alternative-solution applications. That is absence of evidence from web search on Oct 20, 2026
 

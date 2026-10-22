@@ -58,14 +58,18 @@ assert len(narr) == 12
 
 SHOTS = {  # (placeholder id, on-slide caption of 6 words or fewer, alt text, EXAMPLE DATA tag). Built screens only.
  2: [("shot-s02-describe", "Describe: one box, one question", "Start screen with the headline and the description box", False),
+     ("shot-s02-read", "Facts beside their source words", "A Check what we read card with the applicant's words marked and the Yes and No choices", True),
+     ("shot-s02-planner", "Planner question and the fork note", "The first planner question with the fork note and the two halves of a variance", True),
      ("shot-s02-question", "One question at a time", "A question card with its reason under Why we ask", True)],
- 4: [("shot-s04-code-check", "Code check card and code drawer", "A code check card with the verbatim code text in the drawer", True)],
+ 4: [("shot-s04-progress", "Four stages while it checks", "The four stages of the code check with their counts", True),
+     ("shot-s04-code-check", "A quoted choice, code shown", "A code check card with the verbatim sentence open under Show the code", True)],
  5: [("shot-s05-library", "Code library with relevance rings", "Code library reader with the relevance ring on an article", False)],
  6: [("shot-s06-engineer", "Engineer callout on the review", "Review screen with the engineer callout and Sections A to D", True)],
  7: [("shot-s07-queue", "Officer queue with claim", "Review queue with tabs and Start reviewing", True),
      ("shot-s07-sheet", "Paper sheet with completeness list", "An application as a paper sheet beside its completeness list", True)],
  8: [("shot-s08-onboarding", "Onboarding sets the applicant type", "Onboarding question: manufacturer, general contractor or homebuilder", False)],
- 9: [("shot-s09-application", "Draft or official PDF, gated", "Application screen with the download panel", True),
+ 9: [("shot-s09-before-submit", "Before you submit, from the pack", "The review screen with the Before you submit disclosures open", True),
+     ("shot-s09-application", "Draft or official PDF, gated", "Application screen with the download panel", True),
      ("shot-s09-scc-form", "Council form, officer part blank", "Downloaded SCC variance form, unsigned, officer Part 2 blank", True)],
 }
 EXAMPLE_SLIDES = set()
