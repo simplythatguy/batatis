@@ -13,8 +13,9 @@
     "typecheck": "tsc --noEmit",
     "test:rules": "node --experimental-strip-types --import ./scripts/register-ts.mjs --test src/rules/rules.test.ts",
     "test:unwrap": "node --experimental-strip-types --import ./scripts/register-ts.mjs scripts/unwrap-items.test.ts",
-    "test": "node --experimental-strip-types --import ./scripts/register-ts.mjs --test src/rules.test.ts src/professional.test.ts src/humanReview.test.ts src/identify.test.ts src/intake.test.ts src/visit.test.ts src/ui-notices.test.ts src/provisions.test.ts src/calm/deck.test.ts src/calm/rulesDeck.test.ts src/calm/relevance.test.ts src/calm/codeText.test.ts src/calm/no-provider-names.test.ts src/calm/applications.test.ts src/calm/openCase.test.ts src/calm/auth/gate.test.ts src/calm/notifications/notifications.test.ts src/calm/reviewer/queue.test.ts src/calm/reviewer/sheet.test.ts src/rules/rules.test.ts",
-    "preview": "vite preview"
+    "test": "node --experimental-strip-types --import ./scripts/register-ts.mjs --test src/rules.test.ts src/professional.test.ts src/humanReview.test.ts src/identify.test.ts src/intake.test.ts src/visit.test.ts src/ui-notices.test.ts src/provisions.test.ts src/calm/deck.test.ts src/calm/relevance.test.ts src/calm/codeText.test.ts src/calm/no-provider-names.test.ts src/calm/applications.test.ts src/calm/openCase.test.ts src/calm/auth/gate.test.ts src/calm/notifications/notifications.test.ts src/calm/reviewer/queue.test.ts src/calm/reviewer/sheet.test.ts src/calm/reviewer/packageView.test.ts src/rules/rules.test.ts src/accuracy/report.test.ts src/calm/rulesDeck.test.ts",
+    "preview": "vite preview",
+    "test:accuracy": "node --experimental-strip-types --import ./scripts/register-ts.mjs --test src/accuracy/report.test.ts src/calm/no-provider-names.test.ts"
   },
   "dependencies": {
     "@fontsource-variable/geist-mono": "^5.3.0",

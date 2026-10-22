@@ -63,13 +63,14 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 - Built: the code check in the deck shows four stages of progress and then up to three quoted choices, each with its verbatim sentence behind "Show the code", plus labelled cards for "I could not narrow this down" and the keyword fallback (`web/src/calm/ReadCards.tsx`; PR #61). The pipeline behind it screens all 2,080 Division B articles, re-ranks 60, and has a verifier read 15 and quote word for word (`docs/api/identify.md`; PR #52). The commit rule needs a calibration file and none exists, so nothing is committed automatically.
 - Backend only: a benchmark acceptable-solution record per result, and Div A 1.2.1.1. and Div C 2.3.1.1. attached read-only.
 - Built: code library with a relevance ring on each article and a structured reader (PRs #47, #56). Section C looked up from the attribution tables, with a row for 72.1% of Division B sentences in parts with a table (`codedb/README.md`).
-- Measured on 53 public precedents (relevance stage only, no verifier): first place 64% against 32% for keyword search, first five 81% against 66% (`docs/research/2026-10-20-vision/README.md` §6, which names the subfolder that holds the data and scripts).
+- Provisional benchmark (draft PR #58, stored rows of Oct 21): on 79 public precedents and interpretation requests with known answers, the product pipeline shows a right article in 63.6 of 79 cases (80.5%, 95% interval 70.4–87.7%) against 28 of 79 for keyword search; on 38 development cases it was not tuned on, 30.4 of 38 (80.0%, 64.8–89.7%). Two relevance draws per case, five verifier runs (`docs/accuracy/report.md`, also on the `#/accuracy` page).
+- Relevance stage alone on 53 public precedents, two draws: first place 63.2% against 34.0% for keyword search, first five 79.2% against 67.9% (same report).
 - Cost: US$0.019 to US$0.020 per run, measured in the benchmark ledger (draft PR #58; `docs/research/2026-10-21-source-checks.md` §5).
 - Citations: every citation in the docs was looked up in the 2nd-printing database (`docs/research/2026-10-21-source-checks.md` §7). A fixed-seed audit of 30 provisions found 0 mismatches (`codedb/README.md`).
 
 **Gaps:**
 
-- **GAP:** accuracy of the final pipeline. Draft PR #58 holds two complete draws of the relevance stage for 139 cases. The third draw and the latency pass need about US$3 to US$4 of account credit, and the decision memo and `pipeline.json` are not generated.
+- **GAP:** the code identification figures are provisional. Draft PR #58 holds two complete draws of the relevance stage for 139 cases. The third draw and the latency pass need about US$3 to US$4 of account credit, and the decision memo and `pipeline.json` are not generated. Re-running `scripts/accuracy_report.py` after that updates the report and the page.
 - **GAP:** the commit rule is uncalibrated, so there is no committed-pick precision to report.
 - **GAP:** the benchmark record has no screen. The quoted choices were walked in a browser only with the offline fake provider (PR #61).
 - **GAP:** the written explainer paragraph per article (brief §2.1.c.iii). The `Explainer` field exists in `engine/models.py` and nothing fills it. What exists is a one-line verifier reason per pick (backend) and the national intent statements shown as "Why this rule exists".

@@ -374,6 +374,10 @@ body {
   display: none;
 }
 
+.cf-list-rows.is-settled [data-status="refused"] .cf-list-line {
+  display: flex;
+}
+
 /* Work area */
 
 .cf-work {

@@ -5,6 +5,8 @@ import { NrcCredit } from "../components";
 import { canonicalProvision, withinProvision } from "../provisions";
 import { provisionCandidate } from "../screens/SectionC";
 import { useCase } from "../store";
+import { readOnlyStatus } from "./applications";
+import { useCurrentApplication } from "./begin";
 import { errorText, takePendingReveal, tocIndex, useContext, useText, useToc } from "./codeData";
 import { parseArticle, previewOf, type Clause, type Sentence } from "./codeText";
 import { BandPill, RelevanceRing, RingGlyph, RingLegend } from "./RelevanceRing";
@@ -373,6 +375,8 @@ function CodeText({ id, text }: { id: string; text: string }) {
 
 function Reading({ id, filter, onReveal, index, narrow }: { id: string; filter: Filter; onReveal: (key: string) => void; index: ReturnType<typeof tocIndex>; narrow: boolean }) {
   const { c, dispatch, phase } = useCase();
+  const { app } = useCurrentApplication();
+  const refused = app?.status === "refused";
   const text = useText(id);
   const ctx = useContext(id);
   const [added, setAdded] = useState(false);
@@ -425,6 +429,8 @@ function Reading({ id, filter, onReveal, index, narrow }: { id: string; filter: 
       <div className="cf-read-actions">
         {phase !== "case" ? (
           <span className="cf-faint cf-small">Start an application to add this rule. <a className="cf-inline-link" href="#/">Describe your project</a></span>
+        ) : refused ? (
+          <span className="cf-faint cf-small">{readOnlyStatus(app.status, app.authority).note}</span>
         ) : inCase ? (
           <a className="cf-btn is-sm" href="#/questions?first=code"><CIcon name="check" size={13} />In your application</a>
         ) : (

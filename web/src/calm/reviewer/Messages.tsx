@@ -60,7 +60,8 @@ export function Messages({ caseId, me, messages, onChange, canWrite }: { caseId:
                     {!m.read_by_me && m.author.id !== me && <span className="ac-note-dot" aria-label="New" />}
                   </div>
                   <p className="ac-msg-body">{m.body}</p>
-                  {m.items.length > 0 && (
+                  {/* An information request already lists its items in the body; show them once. */}
+                  {m.items.length > 0 && !m.items.every((it) => it.note && m.body.includes(it.note.trim())) && (
                     <ul className="ac-msg-items">
                       {m.items.map((it, i) => <li key={i}>{it.note || it.field}</li>)}
                     </ul>

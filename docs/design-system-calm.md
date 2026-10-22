@@ -17,7 +17,8 @@ Simple, quiet and fast. The applicant describes the project or drops plans, answ
 | 02 Questions | `#/questions?focus=<key>` | `QuestionDeck.tsx` + `deck.ts` | Typeform questions in form order (A, B, C, D), derived from the case and the shared gaps. Footer progress per section with a popover and up/down. Before a description exists it asks nothing: one quiet line and a link back to Start (no card, no progress count). Once described, no card re-asks it: the starter questions the description answers are skipped and the proposed alternative offers the description (Yes, use my description / No, I'll write it). |
 | 03 Review | `#/review` | `Review.tsx` | What's left, metric tiles, engineer callout, Sections A–D status. |
 | 04 Application | `#/application` | `Application.tsx` | Paper preview of Part 1 A–D, gated draft and official PDF, text record. |
-| More menu | `#/officer`, `#/references`, `#/accuracy` | existing screens in `.cf-legacy` | Look up code (⌘K), Code library, Officer view, accuracy report. Section C references stay at `#/references`. |
+| More menu | `#/officer`, `#/references` | existing screens in `.cf-legacy` | Look up code (⌘K), Code library, accuracy report, Officer view. Section C references stay at `#/references`. |
+| Accuracy | `#/accuracy` | `web/src/accuracy/AccuracyPage.tsx` | What Batatis guarantees and what we measured, from the bundled `docs/accuracy/report.json` (no engine call). Public: signed-out visitors see it without the shell. Linked from Settings and the More menu, never from the four stages. |
 | Code library | `#/code`, `#/code/<article>?filter=attention\|maybe\|all` | `CodeLibrary.tsx` | Optional reading surface, not a stage. |
 
 Legacy hrefs (store gap links, old screens) are translated in `calm/routes.ts`: `#/describe` → Start, `#/code-check` → questions (code cards first), `#/section-c` → references, `#/application?tab=…&focus=field-<id>` → the card for that field, `prof-*` → the Section D card.

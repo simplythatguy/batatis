@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { QueueApplication } from "../../api/accounts.ts";
 import { localDraft, decisionItems, messageProblem, returnableGaps } from "./decision.ts";
-import { applicantLine, completenessView, decisionGate, filterQueue, reviewerCell, rowAction, sentLabel, sinceLabel, statusPill, tabCounts } from "./queue.ts";
+import { applicantLine, completenessView, decisionGate, filterQueue, reviewerCell, rowAction, sentLabel, sinceLabel, statusPill, tabCounts, withPackage } from "./queue.ts";
 
 const ME = "u-dana";
 const OTHER = { reviewer_id: "u-jordan", reviewer_name: "Jordan Tran", claimed_at: "2026-10-21T09:00:00Z" };
@@ -22,12 +22,27 @@ const rows = [
 ];
 
 test("tab counts and filters", () => {
-  assert.deepEqual(tabCounts(rows, ME), { all: 5, new: 1, mine: 2, returned: 1, accepted: 1 });
+  assert.deepEqual(tabCounts(rows, ME), { all: 5, new: 1, mine: 2, returned: 1, accepted: 1, refused: 0 });
   assert.deepEqual(filterQueue(rows, "mine", "", ME).map((r) => r.id), ["mine", "ret"]);
   assert.deepEqual(filterQueue(rows, "all", "northline", ME).map((r) => r.id), ["other"]);
   assert.deepEqual(filterQueue(rows, "all", "contractor", ME).map((r) => r.id), ["other"]);
   assert.equal(filterQueue(rows, "all", "", ME)[0].id, "mine", "newest sent first");
   assert.equal(applicantLine(rows[1]), "Northline Builds · general contractor");
+});
+
+test("refusal has its own queue tab and final gate, even with a retained claim", () => {
+  const refused = row({ id: "refused", status: "refused", claim: MINE, decision: { outcome: "refuse", by_name: "Dana Ross", at: "2026-10-22T10:00:00Z" } });
+  const all = [...rows, refused];
+  assert.deepEqual(tabCounts(all, ME), { all: 6, new: 1, mine: 2, returned: 1, accepted: 1, refused: 1 });
+  assert.deepEqual(filterQueue(all, "refused", "", ME), [refused]);
+  assert.deepEqual(filterQueue(all, "returned", "", ME).map((r) => r.id), ["ret"]);
+  assert.deepEqual(statusPill(refused.status, true), { label: "Refused", tone: "blocking" });
+  assert.equal(rowAction(refused, ME), "view");
+  for (const blocking of [null, 0, 2]) {
+    const gate = decisionGate(refused, ME, blocking);
+    assert.deepEqual(gate, { canReturn: false, canAccept: false, reason: "Refused. This application is closed." });
+    assert.deepEqual(withPackage(gate, { state: "current", blocking: 0 }), gate);
+  }
 });
 
 test("claim state labels and row actions", () => {

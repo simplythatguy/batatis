@@ -15,7 +15,8 @@ Authority = Literal['calgary', 'edmonton']
 def reviewing_authority(value: str | None) -> 'Authority | None':
     """Only authorities that have reviewers; anything else (e.g. alberta-other) is not reviewable."""
     return value if value in get_args(Authority) else None  # type: ignore[return-value]
-ApplicationStatus = Literal['draft', 'submitted', 'in_review', 'returned', 'accepted', 'withdrawn']
+ApplicationStatus = Literal['draft', 'submitted', 'in_review', 'returned', 'accepted', 'refused', 'withdrawn']
+DecisionOutcome = Literal['accept', 'return', 'refuse']
 
 
 class User(BaseModel):
@@ -55,7 +56,7 @@ class DecisionItem(BaseModel):
 
 
 class Decision(BaseModel):
-    outcome: Literal['accept', 'return']
+    outcome: DecisionOutcome
     by_id: str
     by_name: str
     at: str = Field(default_factory=now)

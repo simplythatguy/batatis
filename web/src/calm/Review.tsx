@@ -6,6 +6,8 @@ import { useCase } from "../store";
 import type { Case, Gap } from "../types";
 import { forkOf, scopeRedirect } from "../intakeView";
 import { buildDeck, caseRules, deckProgress, gapKey } from "./deck";
+import { readOnlyStatus } from "./applications";
+import { useCurrentApplication } from "./begin";
 import { BeforeYouSubmit, ForkNote } from "./ReadCards";
 import { calmHref } from "./routes";
 import { rankedIn } from "./relevance";
@@ -96,7 +98,20 @@ export function NothingYet({ title, lede, page }: { title: string; lede: string;
 /** Show the current case’s review or the instructions to start an application. */
 export function Review() {
   const { phase } = useCase();
+  const { app } = useCurrentApplication();
   if (phase !== "case") return <NothingYet page="review" title="Nothing to review yet." lede="Describe what you’re building and Batatis lists what your application still needs, section by section." />;
+  if (app?.status === "refused") {
+    const s = readOnlyStatus(app.status, app.authority);
+    return (
+      <div className="cf-review">
+        <div className="cf-review-main">
+          <h1 className="cf-h1" tabIndex={-1}>{s.heading}</h1>
+          <p className="cf-lede is-sm">{s.note}</p>
+          <div className="cf-row-actions"><a className="cf-btn is-primary" href="#/application">View application</a></div>
+        </div>
+      </div>
+    );
+  }
   return <CaseReview />;
 }
 

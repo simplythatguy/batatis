@@ -3,7 +3,7 @@ import type { ApplicationSummary } from "../api/accounts";
 import { groupGaps } from "../humanReview";
 import { useCase } from "../store";
 import { bootAccount, refreshApplications, useAccount, type AccountPhase } from "./account";
-import { authorityName } from "./applications";
+import { authorityName, readOnlyStatus } from "./applications";
 import { AssistantPanel } from "./assistant/AssistantPanel";
 import { setAssistantCase, setAssistantContext, toggleAssistant, useAssistant } from "./assistant/assistant";
 import { roleOf, useCurrentApplication } from "./begin";
@@ -17,6 +17,7 @@ import { AppHeader, type StageRingItem } from "./shell/AppHeader";
 import { AppLayout } from "./shell/AppLayout";
 import { ApplicationList, type ApplicationListHandle } from "./shell/ApplicationList";
 import { Rail, type RailDestination } from "./shell/Rail";
+import { RequestBanner } from "./shell/RequestBanner";
 import { ReturnedBanner } from "./shell/ReturnedBanner";
 import { AccountButton, NotificationsBell } from "./routes.extra";
 import { useRoute } from "../router";
@@ -39,7 +40,8 @@ function useOutsideClose(open: boolean, close: () => void, ...refs: React.RefObj
 /** The check's state, quietly beside the save status (Review holds the detail and the big retry). */
 function CheckStatus() {
   const { phase, checkStatus } = useCase();
-  if (phase !== "case") return null;
+  const { app } = useCurrentApplication();
+  if (phase !== "case" || app?.status === "refused") return null;
   if (checkStatus === "running") return <span className="cf-save-check" role="status"><span className="cf-dot is-pending cf-pulse" aria-hidden="true" />Checking…</span>;
   if (checkStatus === "unavailable") return <a className="cf-save-check" href="#/review" role="status" title="The last check couldn’t finish. Retry from the ⋯ menu or open Review.">Check unavailable</a>;
   return null;
@@ -49,8 +51,10 @@ export function SaveStatus() {
   const { phase, saveStatus, savedNote, saveDetail, saveDraft } = useCase();
   const { app, locked } = useCurrentApplication();
   if (phase !== "case") return null;
-  // Sent to the authority: nothing is saved from here until the officer returns it.
-  if (locked) return <div className="cf-save" role="status"><Dot tone={app?.status === "accepted" ? "done" : "warning"} /><span className="cf-save-label">{app?.status === "accepted" ? "Accepted" : "Sent · read-only"}</span></div>;
+  if (locked) {
+    const s = readOnlyStatus(app?.status);
+    return <div className="cf-save" role="status"><Dot tone={s.tone} /><span className="cf-save-label">{s.label}</span></div>;
+  }
   const map: Record<string, { tone: DotTone; label: string }> = {
     idle: { tone: "pending", label: "Not saved yet" },
     unsaved: { tone: "pending", label: "Unsaved" },
@@ -269,7 +273,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     { id: "start", label: "Describe", icon: "describe", href: "#/", pct: progress.start, current: active === "start" },
     { id: "questions", label: "Questions", icon: "questions", href: "#/questions", pct: progress.questions, current: active === "questions", hint: inCase ? undefined : "Starts with your description" },
     { id: "review", label: "Review", icon: "review", href: "#/review", pct: progress.review, current: active === "review", hint: inCase ? undefined : "Nothing to review yet" },
-    { id: "application", label: "Application", icon: "file", href: "#/application", pct: current && ["submitted", "in_review", "accepted"].includes(current.status) ? 100 : progress.application, current: active === "application", hint: inCase ? undefined : "Nothing filled in yet" },
+    { id: "application", label: "Application", icon: "file", href: "#/application", pct: current && ["submitted", "in_review", "accepted", "refused"].includes(current.status) ? 100 : progress.application, current: active === "application", hint: inCase ? undefined : "Nothing filled in yet" },
   ];
 
   const destinations: RailDestination[] = reviewer ? [
@@ -287,7 +291,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
         if (!onStage) location.hash = lastStage.current;
       },
       current: onStage,
-      badge: items.some((a) => a.status === "returned" && a.unread_messages > 0),
+      badge: items.some((a) => (a.status === "returned" || a.status === "refused") && a.unread_messages > 0),
     },
     { id: "code", label: "Code library", icon: "book", href: "#/code", current: active === "code", shortcut: `${MOD_KEY} ⇧ K` },
     { id: "assistant", label: assistant.open ? "Close the assistant" : "Assistant", icon: "spark", onClick: toggleAssistant, current: assistant.open, shortcut: `${MOD_KEY} J` },
@@ -301,8 +305,15 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     resetToWho(signedIn ? "" : undefined);
   }
 
-  async function open(id: string, to = "#/questions") {
-    if (id === selectedId) { setListNote(""); if (!onStage) location.hash = lastStage.current; return; }
+  async function open(id: string, to?: string) {
+    const refused = items.find((a) => a.id === id)?.status === "refused";
+    const destination = to ?? (refused ? "#/application" : "#/questions");
+    if (id === selectedId) {
+      setListNote("");
+      if (to || refused) location.hash = destination;
+      else if (!onStage) location.hash = lastStage.current;
+      return;
+    }
     if (!signedIn || opening) return;
     setOpening(id);
     setListNote("");
@@ -318,7 +329,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     if (error) { setListNote(error); return; }
     resetSession();
     resetRelevance();
-    location.hash = to;
+    location.hash = destination;
   }
 
   useEffect(() => {
@@ -369,12 +380,12 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
             items={[
               { label: "Look up code", hint: `${MOD_KEY} ⇧ K`, onClick: openPalette },
               { label: "Code library", href: "#/code" },
-              ...(inCase && checkStatus === "unavailable" ? [{ label: "Try the check again", onClick: () => void requestCheck(true), separator: true }] : []),
+              { label: "Accuracy report", href: "#/accuracy" },
+              ...(inCase && current?.status !== "refused" && checkStatus === "unavailable" ? [{ label: "Try the check again", onClick: () => void requestCheck(true), separator: true }] : []),
               ...(inCase
                 ? [
                     { label: "Rules you chose (Section C)", href: "#/references", separator: checkStatus === "unavailable" },
                     { label: "Officer view", href: "#/officer" },
-                    { label: "Accuracy report", href: "#/accuracy" },
                     { label: "Download draft", href: "#/application?download=draft", separator: true },
                     { label: signedIn ? "New application" : "Start over", onClick: () => (signedIn ? startNew() : setConfirm(true)) },
                   ]
@@ -393,7 +404,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
         rail={<Rail destinations={destinations} notificationsSlot={<NotificationsBell />} accountSlot={<AccountButton />} />}
         list={bare ? undefined : list}
         header={bare ? null : header}
-        banner={onStage && current?.status === "returned" ? <ReturnedBanner app={current} /> : null}
+        banner={onStage && (current?.status === "returned" || current?.status === "refused") ? <ReturnedBanner key={`${current.id}:${current.status}`} app={current} /> : onStage && current?.status === "in_review" ? <RequestBanner app={current} /> : null}
         assistant={assistant.open ? <AssistantPanel /> : null}
         listCollapsed={listCollapsed}
         sheetOpen={sheet}

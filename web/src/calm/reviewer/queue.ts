@@ -2,7 +2,7 @@
 import type { ApplicationStatus, QueueApplication } from "../../api/accounts";
 import { APPLICANT_LABEL } from "../auth/onboardingSteps";
 
-export type QueueTab = "all" | "new" | "mine" | "returned" | "accepted";
+export type QueueTab = "all" | "new" | "mine" | "returned" | "accepted" | "refused";
 
 export const TABS: { id: QueueTab; label: string }[] = [
   { id: "all", label: "All" },
@@ -10,6 +10,7 @@ export const TABS: { id: QueueTab; label: string }[] = [
   { id: "mine", label: "Mine" },
   { id: "returned", label: "Returned" },
   { id: "accepted", label: "Accepted" },
+  { id: "refused", label: "Refused" },
 ];
 
 export function inTab(a: QueueApplication, tab: QueueTab, me: string | null): boolean {
@@ -19,16 +20,18 @@ export function inTab(a: QueueApplication, tab: QueueTab, me: string | null): bo
     case "new":
       return a.status === "submitted" && !a.claim;
     case "mine":
-      return Boolean(me && a.claim?.reviewer_id === me) && a.status !== "accepted";
+      return Boolean(me && a.claim?.reviewer_id === me) && a.status !== "accepted" && a.status !== "refused";
     case "returned":
       return a.status === "returned";
     case "accepted":
       return a.status === "accepted";
+    case "refused":
+      return a.status === "refused";
   }
 }
 
 export function tabCounts(rows: QueueApplication[], me: string | null): Record<QueueTab, number> {
-  const out = { all: 0, new: 0, mine: 0, returned: 0, accepted: 0 } as Record<QueueTab, number>;
+  const out: Record<QueueTab, number> = { all: 0, new: 0, mine: 0, returned: 0, accepted: 0, refused: 0 };
   for (const r of rows) for (const t of TABS) if (inTab(r, t.id, me)) out[t.id]++;
   return out;
 }
@@ -60,6 +63,8 @@ export function statusPill(status: ApplicationStatus, claimed: boolean): { label
       return { label: "Returned", tone: "blocking" };
     case "accepted":
       return { label: "Accepted", tone: "done" };
+    case "refused":
+      return { label: "Refused", tone: "blocking" };
     case "withdrawn":
       return { label: "Withdrawn", tone: "pending" };
     default:
@@ -92,6 +97,7 @@ export function decisionGate(
 ): { canReturn: boolean; canAccept: boolean; reason: string } {
   const no = (reason: string) => ({ canReturn: false, canAccept: false, reason });
   if (a.status === "accepted") return no("Accepted as administratively complete.");
+  if (a.status === "refused") return no("Refused. This application is closed.");
   if (a.status === "returned") return no("Returned to the applicant. It comes back here when they resend it.");
   if (a.status !== "in_review" || !a.claim) return no("Start reviewing to return or accept this application.");
   if (!me || a.claim.reviewer_id !== me) return no(`${a.claim.reviewer_name} is reviewing this. Only they can return or accept it.`);
@@ -99,9 +105,33 @@ export function decisionGate(
     return { canReturn: true, canAccept: false, reason: "Waiting for the completeness check before this can be accepted." };
   }
   if (blocking > 0) {
-    return { canReturn: true, canAccept: false, reason: `${blocking} required ${blocking === 1 ? "item is" : "items are"} missing, so it can only be returned.` };
+    return { canReturn: true, canAccept: false, reason: `${blocking} required ${blocking === 1 ? "item is" : "items are"} missing. Request more information or record a refusal.` };
   }
   return { canReturn: true, canAccept: true, reason: "" };
+}
+
+export type PackageState =
+  | { state: "loading" }
+  | { state: "unavailable" }
+  | { state: "failed" }
+  | { state: "none" }
+  | { state: "stale"; version: number }
+  | { state: "current"; blocking: number };
+
+/**
+ * The accept gate with the package review: acceptance also waits for a package review of the
+ * current application and never passes with its blocking gaps open. When the package review
+ * can't run on this server, the completeness check alone decides (as before).
+ */
+export function withPackage(gate: ReturnType<typeof decisionGate>, pkg: PackageState): ReturnType<typeof decisionGate> {
+  if (!gate.canAccept || pkg.state === "unavailable") return gate;
+  const no = (reason: string) => ({ ...gate, canAccept: false, reason });
+  if (pkg.state === "loading") return no("Waiting for the package review before this can be accepted.");
+  if (pkg.state === "failed") return no("The package review didn’t load. Try again before accepting.");
+  if (pkg.state === "none") return no("Run the package review before accepting.");
+  if (pkg.state === "stale") return no(`The application changed after review version ${pkg.version}. Run the review again before accepting.`);
+  if (pkg.blocking > 0) return no(`The package review has ${pkg.blocking} required ${pkg.blocking === 1 ? "item" : "items"} open, so it can't be accepted yet.`);
+  return gate;
 }
 
 /* —— Times —— */

@@ -38,7 +38,7 @@ export interface ApplicationSummary {
   completeness: CompletenessSummary | null;
   id: string;
   reviewer: ReviewerName | null;
-  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
   submitted_at: string | null;
   title: string | null;
   unread_messages: number;
@@ -160,7 +160,7 @@ export interface Case {
   provisions: string[];
   relevance: RelevanceRecord | null;
   section_c: SectionCRow[];
-  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
   status_history: StatusChange[];
   submitted_at: string | null;
   title: string | null;
@@ -299,7 +299,7 @@ export interface CloseOut {
   decided_at: string;
   due_date: string;
   notice: string;
-  outcome: string;
+  outcome: "accept" | "refuse";
   overdue: boolean;
   record_package: RecordPackage;
   sent: boolean;
@@ -361,7 +361,7 @@ export interface Decision {
   by_name: string;
   items: DecisionItem[];
   message: string;
-  outcome: "accept" | "return";
+  outcome: "accept" | "return" | "refuse";
 }
 
 export interface DecisionItem {
@@ -379,13 +379,13 @@ export interface DecisionItemInput {
 export interface DecisionRequest {
   items?: DecisionItemInput[];
   message?: string | null;
-  outcome: "accept" | "return";
+  outcome: "accept" | "return" | "refuse";
 }
 
 export interface DecisionSummary {
   at: string;
   by_name: string;
-  outcome: "accept" | "return";
+  outcome: "accept" | "return" | "refuse";
 }
 
 export interface DiffEntry {
@@ -887,7 +887,7 @@ export interface Notification {
   id: string;
   kind: "status" | "message";
   read: boolean;
-  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn" | null;
+  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn" | null;
   summary: string;
 }
 
@@ -1032,7 +1032,7 @@ export interface QueueApplication {
   completeness: CompletenessSummary | null;
   decision: DecisionSummary | null;
   id: string;
-  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
   submitted_at: string | null;
   title: string | null;
   unread_messages: number;
@@ -1379,9 +1379,9 @@ export interface StatusChange {
   at: string;
   by_id: string;
   by_name: string;
-  from_status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+  from_status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
   note: string;
-  to_status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+  to_status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
 }
 
 export interface StoredMessage {

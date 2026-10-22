@@ -102,7 +102,7 @@ export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
         <div className="ac-queue-head">
           <div>
             <h2 className="ac-h1">{q.phase === "ready" || q.rows.length ? `${counts.all} ${counts.all === 1 ? "application" : "applications"}` : "Applications"}</h2>
-            <p className="ac-lead">{authority ? `Sent to ${authority}. ` : ""}Pick one up to let other officers know you’ve got it.</p>
+            <p className="ac-lead">{authority ? `Sent to ${authority}. ` : ""}Pick one up to let other officers know you’ve got it. A package from outside Batatis? <a className="ac-link" href="#/review/package">Review its PDFs</a>.</p>
           </div>
           <div className="ac-tabs" role="group" aria-label="Filter applications">
             {TABS.map((t) => (

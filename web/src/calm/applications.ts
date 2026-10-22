@@ -12,7 +12,7 @@ export interface StatusLine {
   attention: boolean;
 }
 
-export const SETTLED: ReadonlySet<ApplicationStatus> = new Set(["accepted", "withdrawn"]);
+export const SETTLED: ReadonlySet<ApplicationStatus> = new Set(["accepted", "refused", "withdrawn"]);
 
 export function authorityName(id: string | null | undefined): string {
   if (!id) return "";
@@ -42,6 +42,10 @@ export function statusLine(a: ApplicationSummary, now = Date.now()): StatusLine 
     }
     case "accepted":
       return { text: join("Accepted", where), tone: "green", attention: false };
+    case "refused": {
+      const n = a.unread_messages;
+      return { text: join("Refused", n > 0 ? `${n} new ${n === 1 ? "message" : "messages"}` : where), tone: n > 0 ? "accent" : "grey", attention: n > 0 };
+    }
     case "withdrawn":
       return { text: "Withdrawn", tone: "grey", attention: false };
     default:
@@ -59,5 +63,19 @@ export function groupApplications(apps: ApplicationSummary[], query = ""): { act
   return { active: shown.filter((a) => !SETTLED.has(a.status)), settled: shown.filter((a) => SETTLED.has(a.status)) };
 }
 
-/** Submitted and in-review applications are read-only until they come back. */
-export const readOnly = (s: ApplicationStatus | null | undefined) => s === "submitted" || s === "in_review" || s === "accepted" || s === "withdrawn";
+/** Sent applications wait for a return; settled applications stay read-only. */
+export const readOnly = (s: ApplicationStatus | null | undefined) => s === "submitted" || s === "in_review" || (s != null && SETTLED.has(s));
+
+/** Shared wording for the header, questions and submitted application. */
+export function readOnlyStatus(status: ApplicationStatus | null | undefined, authority?: string | null): {
+  label: string;
+  heading: string;
+  note: string;
+  tone: "done" | "blocking" | "pending" | "warning";
+} {
+  const where = authorityName(authority) || "the authority";
+  if (status === "refused") return { label: "Refused · read-only", heading: `Refused by ${where}`, note: "This application is closed. Read the officer’s reasons and appeal notice.", tone: "blocking" };
+  if (status === "accepted") return { label: "Accepted", heading: `Accepted by ${where}`, note: "Accepted as administratively complete. This is not a finding that the design complies or is safe.", tone: "done" };
+  if (status === "withdrawn") return { label: "Withdrawn · read-only", heading: "Withdrawn", note: "This application is closed.", tone: "pending" };
+  return { label: "Sent · read-only", heading: `Sent to ${where}`, note: "Read-only until the officer returns it.", tone: "warning" };
+}

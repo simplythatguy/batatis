@@ -215,6 +215,7 @@
             "in_review",
             "returned",
             "accepted",
+            "refused",
             "withdrawn"
           ],
           "title": "Status",
@@ -1034,6 +1035,7 @@
             "in_review",
             "returned",
             "accepted",
+            "refused",
             "withdrawn"
           ],
           "title": "Status",
@@ -1897,6 +1899,10 @@
           "type": "string"
         },
         "outcome": {
+          "enum": [
+            "accept",
+            "refuse"
+          ],
           "title": "Outcome",
           "type": "string"
         },
@@ -2220,7 +2226,8 @@
         "outcome": {
           "enum": [
             "accept",
-            "return"
+            "return",
+            "refuse"
           ],
           "title": "Outcome",
           "type": "string"
@@ -2354,7 +2361,8 @@
         "outcome": {
           "enum": [
             "accept",
-            "return"
+            "return",
+            "refuse"
           ],
           "title": "Outcome",
           "type": "string"
@@ -2379,7 +2387,8 @@
         "outcome": {
           "enum": [
             "accept",
-            "return"
+            "return",
+            "refuse"
           ],
           "title": "Outcome",
           "type": "string"
@@ -5610,6 +5619,7 @@
                 "in_review",
                 "returned",
                 "accepted",
+                "refused",
                 "withdrawn"
               ],
               "type": "string"
@@ -6575,6 +6585,7 @@
             "in_review",
             "returned",
             "accepted",
+            "refused",
             "withdrawn"
           ],
           "title": "Status",
@@ -8766,6 +8777,7 @@
             "in_review",
             "returned",
             "accepted",
+            "refused",
             "withdrawn"
           ],
           "title": "From Status",
@@ -8783,6 +8795,7 @@
             "in_review",
             "returned",
             "accepted",
+            "refused",
             "withdrawn"
           ],
           "title": "To Status",
