@@ -1,0 +1,9 @@
+{
+  "file": "ccmc-registry.json",
+  "accessed": "2026-10-18",
+  "source_url": "https://const-bers-app-prod.corp.nrc.gc.ca/ords/ccmc/dac/published_evaluations",
+  "registry_page": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/registry.html",
+  "sha256": "2bc06567ed90bc7d87517fb9a1c2ea134e55e18bd8ddceaa58d2d64684c822f8",
+  "assessments": 462,
+  "note": "Offline fallback for the CCMC registry search, bundled with the engine (vercel.json includes engine/data/**/*.json). It is the public NRC registry index as downloaded on the access date; results from it are labelled as a snapshot and never as the current registry."
+}

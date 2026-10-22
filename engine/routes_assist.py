@@ -129,7 +129,7 @@ def build_context(body: AssistRequest, case, codes) -> dict:
         context['application'] = {'id': case.id, 'title': case.title, 'status': case.status,
             'facts': [fact.model_dump() for fact in case.facts[-100:]],
             'open_gaps': [gap.model_dump() for gap in gaps],
-            'process_fields': [field.model_dump() for field in fields],
+            'process_fields': [field.model_dump(exclude={'example'}) for field in fields],   # examples: focused card only
             'provisions': case.provisions}
         # Bound user-controlled context; leave source code below intact.
         if len(json.dumps(context['application'])) > 24000:

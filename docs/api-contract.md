@@ -71,6 +71,10 @@ Returning code text is not a finding that a design complies. The code database f
 
 `POST /cases/{case_id}/export` fills the Safety Codes Council form and appends a generated appendix. The form cells carry provision ids, objective and function codes, and a pointer to the appendix for the intent statement. They do not carry provision sentences.
 
+A form field the applicant says does not apply shows `N/A`, but only from a confirmed applicant fact `not_applicable.<key>` (source `user_text` or `user_click`; value is the applicant's reason, or `true`; `false` or blank withdraws it). Allowed keys: `owner_rep_name`, `owner_rep_signature_date`, `permit_number`, `lot`, `block`, `plan`, the ATS keys `ats_qtr` to `ats_mer`, the groups `owner_rep`, `lot_block_plan` and `ats`, and `section_c.unused_rows` / `section_d.unused_rows` (the remaining rows of those tables). A blank is never shown as N/A. An N/A on a field that always applies (owner, mailing address, request date, municipal address, description, process fields), an N/A from another source, or an N/A next to a confirmed value for the same field is a blocking `not_applicable:<fact field>` gap on `GET /cases/{id}/gaps` and blocks the official export; an unconfirmed N/A blocks it as an unconfirmed fact. A confirmed `not_applicable.owner_rep` clears the representative gap. The appendix lists each N/A field with the applicant's reason and source (section N).
+
+The appendix names the two halves of the package: the request for variance (Safety Codes Act s.38, decided by the officer) and the alternative solution (NBC(AE) 2023 Division C 2.3.1, the proponent's evidence), and states the equivalence test of Division A 1.2.1.1.(1)(b) ("at least the level of performance of the acceptable solution"). It makes no finding about the design. Each Section C row says how it was identified (committed or listed by code identification, or entered by the applicant) and that the applicant confirmed it; an identification quote is printed only when it is word for word in the code database, and the benchmark sentence is re-read from the code database. Each process row carries its applicant source and provenance.
+
 The appendix carries the NRC text for each Section C row: the citation, objective and functional-statement titles, any application note, the full provision text, and the NBC 2020 intent statements and their notes, each with the NRC publication link. Applicant-written process answers and other confirmed form values stay the applicant's words. JSON responses and the appendix do not clip provision text.
 
 ### Privacy notice and retention
@@ -214,6 +218,8 @@ Screening questions follow the case topic, the cited provision prefixes, and whe
 An unsigned email from a vendor or sales rep does not satisfy professional authentication and does not count as professional evidence. A seal string copied from that email does not close the authentication gap.
 
 ### Process field ids
+
+Each process field also carries `example` (`kind: "structure_only"`): `must_address` (what a good answer covers) and `precedents` (public precedents by `title`, `issuer`, `number`, `date`, `pdf_page`, `url`, `edition`, plus a one-sentence `structure` description written by Batatis). It never contains text to paste and never fills `answer`.
 
 Canonical ids on `GET /process-fields` and on an issue's `empty_process_fields` are `rationale`, `risk_assessment`, `mitigating_measures`, `assumptions_and_limits`, `maintenance_operation`, and `qualifications`.
 

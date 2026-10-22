@@ -1,0 +1,342 @@
+{
+ "label": "Precedent examples: structure only. Read the source; write your own words.",
+ "note": "Sources are cited by title, issuer, number and PDF page with their public link. Each structure line is a Batatis description of how the page is laid out, never the source text. Local copies (reference/, git-excluded) are used only to check that the page exists and that nothing is copied.",
+ "fields": {
+  "rationale": {
+   "must_address": [
+    "Name the acceptable solution being departed from (division, article, sentence) and what it is there to achieve.",
+    "Say why this project needs the departure, in project terms (site, product, constraint).",
+    "Argue equivalence, not sufficiency: show at least the level of performance of the acceptable solution for each attributed objective and function.",
+    "Name the method of analysis (test, calculation, comparison with another standard) and why it suits this departure.",
+    "Cite each piece of evidence by title and date, its finding in a line, and what it does not cover.",
+    "State what stays exactly as the acceptable solution requires, so the size of the departure is visible."
+   ],
+   "precedents": [
+    {
+     "title": "Firewall in a Rowhouse with Secondary Suites",
+     "issuer": "City of Calgary",
+     "number": "SPV-006",
+     "date": "2025-06-19",
+     "pdf_page": 1,
+     "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/firewall-in-a-rowhouse-with-secondary-suites-spv-006.pdf",
+     "structure": "Opens with the code route and a list of the exact provisions varied, then a reason section: what the provision demands, why that burden bites in practice, and what a review of other jurisdictions showed.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/calgary/calgary-spv-006-firewall-rowhouse-secondary-suites.pdf"
+    },
+    {
+     "title": "Alternative Solution for Secondary Suites in Row Houses (supporting report for Edmonton Policy B23-01)",
+     "issuer": "City of Edmonton",
+     "number": null,
+     "date": "2024-07-26",
+     "pdf_page": 5,
+     "url": "https://www.edmonton.ca/sites/default/files/public-files/Alternative-Solution-for-Secondary-Suites-in-Row-houses.pdf?cb=1755184686",
+     "structure": "Background naming the code sentence that causes the difficulty, then a one-paragraph proposal set against that benchmark, framed as performance at least equal to the acceptable solutions, with objectives, functions and intent in an appendix.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/edmonton/edmonton-alternative-solution-secondary-suites-in-row-houses.pdf"
+    },
+    {
+     "title": "Application of 9.9.4.4. (Policy Interpretation)",
+     "issuer": "City of Edmonton",
+     "number": "B23-05",
+     "date": "2026-06-10",
+     "pdf_page": 4,
+     "url": "https://www.edmonton.ca/sites/default/files/public-files/documents/coe-scpi-pol-int-0001-b23-05-application-of-9944.pdf?cb=1781105565",
+     "structure": "A block repeated for each limit being justified: the article, its objective and function attribution, its intent statements, an analysis paragraph and a short conclusion.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/edmonton/edmonton-policy-interpretation-b23-05-application-of-9944.pdf"
+    },
+    {
+     "title": "Engineer's authentication for welding procedures",
+     "issuer": "Alberta Municipal Affairs (STANDATA)",
+     "number": "23-BCV-010R1",
+     "date": "2025-04",
+     "pdf_page": 1,
+     "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/e18fadda-66e8-40e2-950b-79f990724912/download/ma-23-bcv-010r1-engineers-authentication-welding-procedures.pdf",
+     "structure": "A chain of reasoning: where the benchmark requirement comes from, why it cannot be met here, what the substitute lacks by comparison, which added controls close that gap, and which professional standard backs them.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/alberta-standata/standata-nbc2023-variance-23-bcv-010r1.pdf"
+    }
+   ]
+  },
+  "risk_assessment": {
+   "must_address": [
+    "Name the specific hazards this departure adds or leaves in place, not generic building risks.",
+    "Identify who and what is exposed (occupants, neighbours, responders, adjacent property) and under what conditions.",
+    "Walk through failure scenarios in order: the trigger, what the measure is meant to do, what happens if it does not.",
+    "Cover a measure that fails, is disabled or loses its maintenance, and a services assumption (such as fire department response) that does not hold.",
+    "Set the residual risk against what the acceptable solution leaves, so the result reads as at least the level of performance of the acceptable solution.",
+    "Record who carried out the assessment, with what inputs and assumptions."
+   ],
+   "precedents": [
+    {
+     "title": "Alternative Solution for Secondary Suites in Row Houses (supporting report for Edmonton Policy B23-01)",
+     "issuer": "City of Edmonton",
+     "number": null,
+     "date": "2024-07-26",
+     "pdf_page": 14,
+     "url": "https://www.edmonton.ca/sites/default/files/public-files/Alternative-Solution-for-Secondary-Suites-in-Row-houses.pdf?cb=1755184686",
+     "structure": "Names the function the omitted element serves for neighbouring buildings, the condition under which it matters (fire service delayed), what the method cannot show, and weighs the remaining exposure against the limits of the acceptable solution.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/edmonton/edmonton-alternative-solution-secondary-suites-in-row-houses.pdf"
+    },
+    {
+     "title": "Occupancy classification of oil and gas processing buildings",
+     "issuer": "Alberta Municipal Affairs (STANDATA)",
+     "number": "23-BCV-005",
+     "date": "2024-05",
+     "pdf_page": 2,
+     "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/bda7efc6-de1f-480f-b81b-1ecc8f66eea0/download/ma-standata-variance-building-23-bcv-005-2024-05.pdf",
+     "structure": "One numbered condition requires a risk assessment by a named class of professional and lists what it must contain; the list continues on the next page with its recommendations carried into the permit submission.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/alberta-standata/standata-nbc2023-variance-23-bcv-005.pdf"
+    },
+    {
+     "title": "Variance process for industrial occupancy",
+     "issuer": "Alberta Municipal Affairs (STANDATA)",
+     "number": "23-BCI-024 / 23-FCI-008",
+     "date": "2026-08",
+     "pdf_page": 2,
+     "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/ac39e5fc-3eee-46af-9c1c-f000ea3d4d1e/download/ma-standata-interpretation-joint-23bci024-23fci008-2026-08.pdf",
+     "structure": "The applicant assesses the hazards of the specific occupancy and shows by analysis that they are absent or controlled, followed by a list of reasons an officer may refuse the request.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/alberta-standata/standata-nbc2023-interpretation-23-bci-024.pdf"
+    },
+    {
+     "title": "Photoluminescent exit signs",
+     "issuer": "Alberta Municipal Affairs (STANDATA)",
+     "number": "23-BCI-017",
+     "date": "2025-03",
+     "pdf_page": 1,
+     "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/d2851ca8-3883-498c-9293-d71665299098/download/ma-standata-interpretation-building-23-bci-017-2025-03.pdf",
+     "structure": "A numbered failure chain for one circuit: what it must keep working, then four consequences in order, ending in harm to persons.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/alberta-standata/standata-nbc2023-interpretation-23-bci-017.pdf"
+    }
+   ]
+  },
+  "mitigating_measures": {
+   "must_address": [
+    "Tie every measure to a named risk or failure scenario it addresses.",
+    "Say plainly that a measure lowers likelihood or consequence and does not remove the hazard; show the residual risk.",
+    "Specify each measure so it can be checked: type, rating or size, location, and the standard or test behind it.",
+    "Say what happens when a measure fails or is out of service: interim steps, who is told, and when the acceptable solution applies instead.",
+    "Name who installs, verifies and keeps each measure working.",
+    "Confirm that every requirement not being varied still applies alongside the measures."
+   ],
+   "precedents": [
+    {
+     "title": "Firewall in a Rowhouse with Secondary Suites",
+     "issuer": "City of Calgary",
+     "number": "SPV-006",
+     "date": "2025-06-19",
+     "pdf_page": 2,
+     "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/firewall-in-a-rowhouse-with-secondary-suites-spv-006.pdf",
+     "structure": "A short paragraph on what the measures must achieve, then numbered measure groups with lettered options (a rating or a sprinkler-based alternative) and deemed construction details; the next page keeps every other requirement in force.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/calgary/calgary-spv-006-firewall-rowhouse-secondary-suites.pdf"
+    },
+    {
+     "title": "Application of 9.9.4.4. (Policy Interpretation)",
+     "issuer": "City of Edmonton",
+     "number": "B23-05",
+     "date": "2026-06-10",
+     "pdf_page": 11,
+     "url": "https://www.edmonton.ca/sites/default/files/public-files/documents/coe-scpi-pol-int-0001-b23-05-application-of-9944.pdf?cb=1781105565",
+     "structure": "A conclusion listing each condition as a bullet with the reason it matters beside it, followed by definitions of how the key limit is measured.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/edmonton/edmonton-policy-interpretation-b23-05-application-of-9944.pdf"
+    },
+    {
+     "title": "Sprinkler-protected glazing in fire-resistant wall assemblies",
+     "issuer": "Alberta Municipal Affairs (STANDATA)",
+     "number": "23-BCV-004",
+     "date": "2024-05",
+     "pdf_page": 3,
+     "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/b5795c91-92b2-40b8-997f-ff5d955e2a5c/download/ma-standata-variance-building-23-bcv-004-2024-05.pdf",
+     "structure": "Numbered criteria running from where the measure must never be used to safeguards for the measure itself (identification, a warning placard, a supply duration tied to the rating), then notes on reliability over the building life.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/alberta-standata/standata-nbc2023-variance-23-bcv-004.pdf"
+    },
+    {
+     "title": "Electromagnetic locks - installation, maintenance, testing, and verification",
+     "issuer": "Alberta Municipal Affairs (STANDATA)",
+     "number": "23-BCI-043 / 23-FCI-010",
+     "date": "2025-11",
+     "pdf_page": 7,
+     "url": "https://open.alberta.ca/dataset/aa64d44e-6f21-474b-a86f-47bf24e40665/resource/9d416bf3-2a63-4dab-986c-0f04d3ed8e1c/download/ma-standata-joint-interpretation-23-fci-010-23-bci-043-2025-11.pdf",
+     "structure": "Lines up the owner's duty to maintain, the records to keep, who counts as qualified, and an impairment procedure with notice and an interim watch when a system is out of service.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/alberta-standata/standata-nbc2023-interpretation-23-bci-043.pdf"
+    }
+   ]
+  },
+  "assumptions_and_limits": {
+   "must_address": [
+    "State the use, occupancy, size and exposure the departure is valid for, and what falls outside it.",
+    "State installation and project limits (location, separation, materials, listings) in checkable terms.",
+    "State services assumptions (for example fire department response time) with their source.",
+    "Describe the testing procedures, design inputs and acceptance criteria relied on, with the acceptable solution as the baseline.",
+    "List the changes that require reassessment: change of use, alteration, loss of a measure or of a service.",
+    "Say what applies outside the limits: the acceptable solution or a new application."
+   ],
+   "precedents": [
+    {
+     "title": "Polyethylene film for greenhouse enclosures",
+     "issuer": "Alberta Municipal Affairs (STANDATA)",
+     "number": "23-BCV-011R1",
+     "date": "2026-10",
+     "pdf_page": 2,
+     "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/85d5eedb-04e6-47b3-8922-79de7fb9c5f2/download/ma-standata-variance-building-23-bcv-011r1-2026-10.pdf",
+     "structure": "Two options, each opening with checkable limits on use, access, height or occupancy and then numbered conditions, and a closing sentence that sends anything outside both options back to the standard requirement.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/alberta-standata/standata-nbc2023-variance-23-bcv-011r1.pdf"
+    },
+    {
+     "title": "Alternative Solution for Secondary Suites in Row Houses (supporting report for Edmonton Policy B23-01)",
+     "issuer": "City of Edmonton",
+     "number": null,
+     "date": "2024-07-26",
+     "pdf_page": 16,
+     "url": "https://www.edmonton.ca/sites/default/files/public-files/Alternative-Solution-for-Secondary-Suites-in-Row-houses.pdf?cb=1755184686",
+     "structure": "A short conditions section ties the alternative to the other code requirements that must stay in place, cited by article, and ends with the fire department response assumption; an earlier page shows how that figure is sourced.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/edmonton/edmonton-alternative-solution-secondary-suites-in-row-houses.pdf"
+    },
+    {
+     "title": "Variance process for industrial occupancy",
+     "issuer": "Alberta Municipal Affairs (STANDATA)",
+     "number": "23-BCI-024 / 23-FCI-008",
+     "date": "2026-08",
+     "pdf_page": 3,
+     "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/ac39e5fc-3eee-46af-9c1c-f000ea3d4d1e/download/ma-standata-interpretation-joint-23bci024-23fci008-2026-08.pdf",
+     "structure": "After occupancy the officer checks that the conditions behind the variance still hold; a change of use, process, equipment or an alteration obliges the owner to consult the authority and can end the variance.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/alberta-standata/standata-nbc2023-interpretation-23-bci-024.pdf"
+    },
+    {
+     "title": "Vented soffit protection",
+     "issuer": "Alberta Municipal Affairs (STANDATA)",
+     "number": "23-BCV-018",
+     "date": "2025-09",
+     "pdf_page": 4,
+     "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/3cd8d34e-f417-4f3e-86b6-fc106564be76/download/ma-standata-variance-building-23-bcv-018-2025-09.pdf",
+     "structure": "A testing appendix: the exposure used and what it represents, then a results table with the benchmark material first and each candidate after it, with footnotes where the set-up differed.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/alberta-standata/standata-nbc2023-variance-23-bcv-018.pdf"
+    }
+   ]
+  },
+  "maintenance_operation": {
+   "must_address": [
+    "List what must be inspected, tested and maintained for the departure to keep at least the level of performance of the acceptable solution, how often, and by whom.",
+    "Set out commissioning and verification before occupancy: what is tested, to which standard, witnessed by whom.",
+    "State the operating conditions that must hold and what may not be altered without telling the authority.",
+    "Name where each condition is carried forward: permit condition, fire safety plan, title, owner information or a record kept on the premises.",
+    "State who keeps the records, where, in what format and for how long.",
+    "State the procedure when a system is impaired or out of service, and how alterations are controlled."
+   ],
+   "precedents": [
+    {
+     "title": "Electromagnetic locks - installation, maintenance, testing, and verification",
+     "issuer": "Alberta Municipal Affairs (STANDATA)",
+     "number": "23-BCI-043 / 23-FCI-010",
+     "date": "2025-11",
+     "pdf_page": 9,
+     "url": "https://open.alberta.ca/dataset/aa64d44e-6f21-474b-a86f-47bf24e40665/resource/9d416bf3-2a63-4dab-986c-0f04d3ed8e1c/download/ma-standata-joint-interpretation-23-fci-010-23-bci-043-2025-11.pdf",
+     "structure": "Numbered points follow the life of the system: permit, professional involvement, installation and verification standards, integrated testing, ongoing inspection, then records kept on site in a set format.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/alberta-standata/standata-nbc2023-interpretation-23-bci-043.pdf"
+    },
+    {
+     "title": "Fixed fire suppression and exhaust systems - cooking, cleaning, maintenance and qualified persons",
+     "issuer": "Alberta Municipal Affairs (STANDATA)",
+     "number": "23-BCI-009 / 23-FCI-004",
+     "date": "2024-12",
+     "pdf_page": 10,
+     "url": "https://open.alberta.ca/dataset/0741f88e-bdd8-4dbb-be1f-32187a0f436f/resource/434658c1-874f-45aa-9fd4-50a5414f637a/download/ma-standata-interpretation-fire-building-23-fci-004-23-bci-009-2024-12.pdf",
+     "structure": "Sections by task: minimum frequency and when the officer may require more, which equipment changes need new engineering, and where records are kept and for how long.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/alberta-standata/standata-nbc2023-interpretation-23-bci-009.pdf"
+    },
+    {
+     "title": "Zero Lot Line (Revision 5)",
+     "issuer": "City of Calgary",
+     "number": "SPV-001",
+     "date": "2026-03-05",
+     "pdf_page": 4,
+     "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/zero-lot-line-march-2026.pdf",
+     "structure": "One lettered condition defines a maintenance easement registered on title, with sub-points for width, projections and a duty to keep it clear for firefighting; the next page ties the variance to permit conditions.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/calgary/calgary-spv-001-zero-lot-line-2026-03.pdf"
+    },
+    {
+     "title": "Polyethylene film for greenhouse enclosures",
+     "issuer": "Alberta Municipal Affairs (STANDATA)",
+     "number": "23-BCV-011R1",
+     "date": "2026-10",
+     "pdf_page": 2,
+     "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/85d5eedb-04e6-47b3-8922-79de7fb9c5f2/download/ma-standata-variance-building-23-bcv-011r1-2026-10.pdf",
+     "structure": "The last numbered condition requires a fire safety plan that is prepared, put into effect and kept up, lists its contents, and is submitted for review before occupancy where the authority requires.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/alberta-standata/standata-nbc2023-variance-23-bcv-011r1.pdf"
+    }
+   ]
+  },
+  "qualifications": {
+   "must_address": [
+    "Name each person taking responsibility for each part of the design and analysis, with role, registration and scope.",
+    "Give the qualifications, experience and background that match that scope.",
+    "Say which documents each professional authenticates, and what field review or test witnessing continues through construction.",
+    "Where more than one person is responsible, name a single coordinator of the design, the code analysis and the documentation (Div C 2.3.1.1.(6)).",
+    "Show who does work under supervision and who signs it off.",
+    "Note where the authority may require professional involvement because of size or complexity."
+   ],
+   "precedents": [
+    {
+     "title": "Variance process for industrial occupancy",
+     "issuer": "Alberta Municipal Affairs (STANDATA)",
+     "number": "23-BCI-024 / 23-FCI-008",
+     "date": "2026-08",
+     "pdf_page": 5,
+     "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/ac39e5fc-3eee-46af-9c1c-f000ea3d4d1e/download/ma-standata-interpretation-joint-23bci024-23fci008-2026-08.pdf",
+     "structure": "Documentation rules as numbered sentences, including qualifications and experience of each responsible person, a single coordinator when several people hold different parts, and when the officer may require registered professionals.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/alberta-standata/standata-nbc2023-interpretation-23-bci-024.pdf"
+    },
+    {
+     "title": "Integrated testing coordinator",
+     "issuer": "Alberta Municipal Affairs (STANDATA)",
+     "number": "23-BCI-014",
+     "date": "2025-03",
+     "pdf_page": 3,
+     "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/7342f4c1-5c7f-4aee-901e-3388d5464cfc/download/ma-standata-interpretation-building-23-bci-014-2025-03.pdf",
+     "structure": "Defines one role in layers: who may hold it, the knowledge and experience required, the licences required, and what others may do under the supervision and sign-off of the registered person.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/alberta-standata/standata-nbc2023-interpretation-23-bci-014.pdf"
+    },
+    {
+     "title": "Engineer's authentication for welding procedures",
+     "issuer": "Alberta Municipal Affairs (STANDATA)",
+     "number": "23-BCV-010R1",
+     "date": "2025-04",
+     "pdf_page": 3,
+     "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/e18fadda-66e8-40e2-950b-79f990724912/download/ma-23-bcv-010r1-engineers-authentication-welding-procedures.pdf",
+     "structure": "A table with one row per role sets the benchmark standard's requirement beside the alternative's, with a last column naming who does or verifies the equivalent measure.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/alberta-standata/standata-nbc2023-variance-23-bcv-010r1.pdf"
+    },
+    {
+     "title": "Fixed fire suppression and exhaust systems - cooking, cleaning, maintenance and qualified persons",
+     "issuer": "Alberta Municipal Affairs (STANDATA)",
+     "number": "23-BCI-009 / 23-FCI-004",
+     "date": "2024-12",
+     "pdf_page": 8,
+     "url": "https://open.alberta.ca/dataset/0741f88e-bdd8-4dbb-be1f-32187a0f436f/resource/434658c1-874f-45aa-9fd4-50a5414f637a/download/ma-standata-interpretation-fire-building-23-fci-004-23-bci-009-2024-12.pdf",
+     "structure": "Defines who is qualified for each task by training source, ties the qualification to the specific system, and lists what proof of training must show.",
+     "edition": "NBC(AE) 2023",
+     "file": "precedents/alberta-standata/standata-nbc2023-interpretation-23-bci-009.pdf"
+    }
+   ]
+  }
+ }
+}
