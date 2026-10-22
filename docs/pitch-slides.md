@@ -124,8 +124,8 @@
 
 **Full slide detail (in notes):**
 
-- Built: the officer signs in with the authority's access code, sees the queue, claims an application, reads it as a paper sheet beside its completeness list, messages the applicant, and accepts it as administratively complete or returns it with a message
-- Backend: the package review reads a fillable or flattened SCC form and its attachments. It tells a blank field (certain) from one it could not find (ask the officer). It lists named findings for the Division C 2.3.1.1 file items, drafts an information request in which every item is a question to the applicant, and keeps a close-out record with a due date 10 days after the decision. The officer sends. Batatis never does
+- Built: the officer creates an account, entering the authority's access code once, then signs in, sees the queue, claims an application, reads it as a paper sheet beside its completeness list, messages the applicant, and accepts it as administratively complete or returns it with a message
+- Backend: the package review reads a fillable or flattened SCC form and its attachments. It tells a blank field (certain) from one it could not find (ask the officer). It lists named findings for the Division C 2.3.1.1 file items, drafts an information request in which every item is a question to the applicant, and keeps a close-out record. Its due date is 10 days after the decision, the rule before Dec 1, 2026. From Dec 1 the Council's portal rule applies (register at issuance or as soon as reasonably practicable after), and the record does not follow that timing yet. The officer sends or registers. Batatis never does
 - Tests plant defects from 16 classes in synthetic forms. They were written alongside the checker and are not a blind evaluation
 - No model is called anywhere in the package review
 
@@ -176,7 +176,7 @@
 **Full slide detail (in notes):**
 
 - The Council's six steps are Recognize, Pre-apply, Submit, Review, Decide and Close out. Batatis covers the applicant's side of the first three and the officer's side of the last three. The Implementation Plan §2 maps each step to a screen or a backend and gives its status
-- Close out: a copy of the variance to the Council within 10 days. The close-out record shows the due date and lists what to send and keep. The officer sends or registers. Batatis never does
+- Close out: before Dec 1, 2026 the authority sends the Council a copy of the variance within 10 days of issuance. From Dec 1 the SCO registers the variance in the portal at issuance or as soon as reasonably practicable after, with the supporting documentation. The close-out record lists what to send and keep and shows a 10-day due date. It does not follow the portal timing yet. The officer sends or registers. Batatis never does
 - First user sessions are a protocol with targets, and none has run
 
 **Speaker notes:** The Council says registration does not move responsibility for the decision. The officer still decides and still registers. Batatis prepares and checks. The Council invites high-volume organizations to build approved integrations, and we would do that only on its terms. No pilot partner has agreed to anything.

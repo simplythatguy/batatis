@@ -1,6 +1,6 @@
 # Demo video script (4 to 5 minutes)
 
-*One example from the applicant's sign-up to the officer's close-out, filmed on the calm interface. Status is as of Oct 22, 2026, on `dev` at commit 43e7c09, and the live app at <https://batatis-vert.vercel.app> as last checked on Oct 21. Steps whose screens exist are marked **Built**. Steps whose screens are still in progress are marked **Pending UI**, and each has a fallback line, so the video can be recorded after those screens land and never shows or describes a screen that does not exist. Running time: 4:40. Narration: 394 words, about 2.8 minutes of speech at 140 words a minute, which leaves the rest of the clock for typing and clicking. The card order and the wording quoted below come from `web/src/calm/` at commit 43e7c09. Rehearse once on the final build and correct anything that has changed.*
+*One example from the applicant's sign-up to the officer's close-out, filmed on the calm interface. Status is as of Oct 22, 2026, on `dev` at commit 43e7c09, and the live app at <https://batatis-vert.vercel.app> as last checked on Oct 21. Steps whose screens exist are marked **Built**. Steps whose screens are still in progress are marked **Pending UI**, and each has a fallback line, so the video can be recorded after those screens land and never shows or describes a screen that does not exist. Running time: 4:40. Narration: 396 words, about 2.8 minutes of speech at 140 words a minute, which leaves the rest of the clock for typing and clicking. The card order and the wording quoted below come from `web/src/calm/` at commit 43e7c09. Rehearse once on the final build and correct anything that has changed.*
 
 ## What the video must say, and must not
 
@@ -206,9 +206,9 @@ The deck asks its cards in the order of the form: Section A, Section B, Section 
 
 **Narration.**
 
-> On the other side, an officer signs in with her authority's access code. The queue shows what has been sent. She starts reviewing, so nobody duplicates the work, and reads the application as a paper sheet beside its completeness list.
+> On the other side, an officer signs in. The queue shows what has been sent. She starts reviewing, so nobody duplicates the work, and reads the application as a paper sheet beside its completeness list.
 
-*40 words, 17.1 s at 140 wpm in a 22 s window.*
+*35 words, 15.0 s at 140 wpm in a 22 s window.*
 
 ### O2. Package review and the information request (3:33 to 3:58, Pending UI)
 
@@ -249,13 +249,13 @@ The deck asks its cards in the order of the form: Section A, Section B, Section 
 
 **Screen.** The accepted case. The panel is not built yet.
 
-**Actions (when the screen lands).** Show the close-out record: the due date 10 days after the decision, what to send to the Council (the variance as decided, for the single location) and what to keep. Press the control that records that the officer sent the copy. State on screen that Batatis sends nothing.
+**Actions (when the screen lands).** Show the close-out record: the due date 10 days after the decision (the rule before Dec 1, 2026), what to send to the Council (the variance as decided, for the single location) and what to keep. Press the control that records that the officer sent the copy. State on screen that Batatis sends nothing. Do not say that the 10-day date still holds after Dec 1: from then the Council's portal rule applies (register at issuance or as soon as reasonably practicable after), and the record does not follow it yet.
 
 **Narration.**
 
-> After the decision, a close-out record shows the Council copy is due in ten days. The officer sends it. Batatis never does.
+> After the decision, a close-out record lists what to send the Council and what to keep, with a due date. The officer sends or registers it. Batatis never does.
 
-*22 words, 9.4 s at 140 wpm in a 14 s window.*
+*29 words, 12.4 s at 140 wpm in a 14 s window.*
 
 ### C1. Closing card (4:32 to 4:40)
 
@@ -283,7 +283,7 @@ The deck asks its cards in the order of the form: Section A, Section B, Section 
 | The Council's form dated Oct 6, 2026, Part 2 and signatures blank | `engine/export/field_maps/scc_2026-10.json`, `docs/research/2026-10-21-source-checks.md` §1 |
 | Section C looked up from the attribution tables | `codedb/README.md`, `docs/api/identify.md` |
 | 9.10.15.4.(1) with [F03-OP3.1], PDF p.901 | `docs/research/2026-10-21-source-checks.md` §7 |
-| The Council copy is due in 10 days | `docs/research/2026-10-21-source-checks.md` §1 (IB-2025-11-18), `docs/api/package-review.md` |
+| The close-out record lists what to send and keep, with a due date 10 days after the decision | `docs/research/2026-10-21-source-checks.md` §1 (IB-2025-11-18 for the 10 days, IB-2026-10-01 for the portal from Dec 1), `docs/api/package-review.md` |
 | "Accepted as administratively complete" | `docs/api/accounts-review.md`, `web/src/calm/reviewer/ReviewDetail.tsx` |
 | Package review and information request | `docs/api/package-review.md` |
 | Screen text quoted above | `web/src/calm/` at commit 43e7c09 |

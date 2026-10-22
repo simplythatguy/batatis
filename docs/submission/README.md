@@ -62,7 +62,7 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 
 - Backend only: all 2,080 Division B articles screened, 60 re-ranked, 15 read by a verifier that must quote word for word, up to three quoted choices, a benchmark acceptable-solution record per result, Div A 1.2.1.1. and Div C 2.3.1.1. attached read-only, a labelled keyword fallback (`docs/api/identify.md`; PR #52). The commit rule needs a calibration file and none exists, so nothing is committed automatically.
 - Built: code library with a relevance ring on each article and a structured reader (PRs #47, #56). Section C looked up from the attribution tables, with a row for 72.1% of Division B sentences in parts with a table (`codedb/README.md`).
-- Measured on 53 public precedents (relevance stage only, no verifier): first place 64% against 32% for keyword search, first five 81% against 66% (`docs/research/2026-10-20-vision/README.md` §6; the subfolder `jev-benchmark/` holds the data and scripts).
+- Measured on 53 public precedents (relevance stage only, no verifier): first place 64% against 32% for keyword search, first five 81% against 66% (`docs/research/2026-10-20-vision/README.md` §6, which names the subfolder that holds the data and scripts).
 - Cost: US$0.019 to US$0.020 per run, measured in the benchmark ledger (draft PR #58; `docs/research/2026-10-21-source-checks.md` §5).
 - Citations: every citation in the docs was looked up in the 2nd-printing database (`docs/research/2026-10-21-source-checks.md` §7). A fixed-seed audit of 30 provisions found 0 mismatches (`codedb/README.md`).
 
@@ -92,7 +92,7 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 **Evidence now:**
 
 - Built: queue with tabs and claim, take-over, the application as a paper sheet beside its completeness list, messages, notifications, "Accept as complete" and "Return with message" (`docs/api/accounts-review.md`; PRs #48, #49). An agent-run browser walk completed sign-up, submit, claim, return, resubmit and accept (PR #49).
-- Backend only: the package review of fillable and flattened SCC forms with attachments, a documents panel, a deterministic information request, an "x of y gaps resolved" diff, the Division C 2.3.1.1 file-item findings, a peer-review signal for the officer, and a close-out record with a due date 10 days after the decision (`docs/api/package-review.md`; PR #53). Tests plant defects from 16 classes in synthetic forms (`engine/tests/test_package_review_planted.py`).
+- Backend only: the package review of fillable and flattened SCC forms with attachments, a documents panel, a deterministic information request, an "x of y gaps resolved" diff, the Division C 2.3.1.1 file-item findings, a peer-review signal for the officer, and a close-out record with a due date 10 days after the decision (`docs/api/package-review.md`; PR #53). The 10-day date is the rule before Dec 1, 2026, and the record does not yet follow the portal timing that starts on Dec 1. Tests plant defects from 16 classes in synthetic forms (`engine/tests/test_package_review_planted.py`).
 
 **Gaps:**
 
@@ -191,6 +191,7 @@ From the Challenge Scope, §2 ("Detailed Technical Scope").
 8. **Release `dev` to `main`** and confirm judge access to the repo.
 9. **Team and X-factor text.**
 10. **The explainer paragraph** (brief §2.1.c.iii).
+11. **Close-out timing for Dec 1.** `engine/review/close_out.py` sets every due date to 10 days after the decision. From Dec 1, 2026 the Council wants variances registered at issuance or as soon as reasonably practicable after (IB-2026-10-01). Change the record before a pilot.
 
 ## Decisions for you
 
