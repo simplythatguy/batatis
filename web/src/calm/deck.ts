@@ -142,28 +142,17 @@ export function caseRules(c: Case, opts: DeckOptions): ShownRule[] {
   return caseRuleResults(c, opts.rules, opts.storedRules).filter((r) => ruleInPlay(c, opts.rules!, r));
 }
 
+/** A short label is enough for an obvious field; the control and its placeholder say the rest. */
 const DETAIL_QUESTION: Record<string, string> = {
-  owner: "Who is the owner?",
-  representative: "Who signs for the applicant?",
-  mailingAddress: "What is the mailing address?",
-  date: "What date is this request?",
-  scope: "Is this for one building site, or for every site in the municipality?",
-  permit: "Do you already have a permit number?",
-  municipalAddress: "What is the site’s municipal address?",
-  legalDescription: "What is the site’s legal description?",
-  alternative: "In a sentence or two, what do you want to do differently?",
-};
-
-const DETAIL_CONTEXT: Record<string, string> = {
-  owner: "The person or company the variance is for.",
-  representative: "The person who signs for the applicant.",
-  mailingAddress: "Where the authority sends letters about this request.",
-  date: "The date you submit this request.",
-  scope: "One house or building is one site. A product used on many sites can ask for all of them at once.",
-  permit: "Only if a permit was already issued. Skip it otherwise.",
-  municipalAddress: "The street address of the building.",
-  legalDescription: "Lot, block and plan, or ATS.",
-  alternative: "Plain words are fine. This goes into Section B as your proposed alternative.",
+  owner: "Owner",
+  representative: "Representative",
+  mailingAddress: "Mailing address",
+  date: "Request date",
+  scope: "One site or every site?",
+  permit: "Permit number",
+  municipalAddress: "Site address",
+  legalDescription: "Legal description",
+  alternative: "What will you do differently?",
 };
 
 const PROCESS_QUESTION: Record<string, string> = {
@@ -206,8 +195,8 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
       section: "C",
       eyebrow: sectionEyebrow("C"),
       title: "How many storeys is the building?",
-      context: "The count decides which part of the code is the benchmark.",
-      why: "Buildings up to 3 storeys usually follow Part 9. Larger ones follow Part 3. Not sure keeps it as an open question for the officer.",
+      context: "",
+      why: "The count decides which part of the code is the benchmark. Buildings up to 3 storeys usually follow Part 9; larger ones follow Part 3. Not sure keeps it as an open question for the officer.",
       ref: a.id,
       done,
       optional: false,
@@ -238,10 +227,8 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
       section: "C",
       eyebrow: sectionEyebrow("C"),
       title: codeQuestion(topic),
-      context: a.rank === "committed"
-        ? "This rule very likely covers what you described. Nothing is used until you answer."
-        : "One of the closest matches to what you described. Nothing is used until you answer.",
-      why: "Yes adds this rule to the list of rules your design differs from (Section C of the form). No leaves it out. Not sure keeps it as an open question for the officer. Batatis never decides whether the design meets the code.",
+      context: a.rank === "committed" ? "Likely match for your project." : "Close match for your project.",
+      why: "Nothing is used until you answer. Yes adds this rule to the list of rules your design differs from (Section C of the form). No leaves it out. Not sure keeps it as an open question for the officer. Batatis never decides whether the design meets the code.",
       ref: a.id,
       done,
       optional: false,
@@ -426,8 +413,8 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       section: detail?.section ?? "B",
       eyebrow: q.kind === "conflict" ? "You wrote two things" : q.priority === "administrative" ? sectionEyebrow(detail?.section ?? "B") : "A quick question",
       title: q.text,
-      context: q.why,
-      why: q.unblocks.length ? `Your answer decides: ${q.unblocks.join(", ")}. Not sure is fine; it never blocks you.` : "Not sure is fine; it never blocks you.",
+      context: "",
+      why: [q.why, q.unblocks.length ? `Your answer decides: ${q.unblocks.join(", ")}.` : "", "Not sure is fine; it never blocks you."].filter(Boolean).join(" "),
       ref: q.id,
       done,
       optional: false,
@@ -443,8 +430,8 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     section: "B",
     eyebrow: sectionEyebrow("B"),
     title: "Who will review your application?",
-    context: `The authority that issues your permit: ${AUTHORITIES.map((a) => a.name).join(" or ")}. Pick Not sure yet if you don’t know.`,
-    why: "Each authority has its own submission rules. Batatis never picks one for you.",
+    context: "",
+    why: `The authority that issues your permit: ${AUTHORITIES.map((a) => a.name).join(" or ")}. Each has its own submission rules. Batatis never picks one for you.`,
     ref: "authority",
     // Read from the site's municipality, it is a quiet confirmation offered once (with the office's
     // pack); unanswered, it is required.
@@ -470,11 +457,11 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       section: d.section,
       eyebrow: sectionEyebrow(d.section),
       title: offer ? "Is this what you want to do differently?" : DETAIL_QUESTION[d.id] ?? d.label,
-      context: offer
-        ? "The form asks what you will do instead of the code’s standard way (the acceptable solution). You described it as"
-        : d.options && valueText(fact).trim() && !filled ? "You answered in words. Pick the choice that fits:" : DETAIL_CONTEXT[d.id] ?? d.hint ?? "",
+      context: offer || (d.options && valueText(fact).trim() && !filled) ? "You wrote" : "",
       quote: offer ? clip(c.description, 240) : d.options && valueText(fact).trim() && !filled ? valueText(fact).trim() : undefined,
-      why: `The variance form asks for the ${d.label.toLowerCase()} (Section ${d.section}).`,
+      why: offer
+        ? "The form asks what you will do instead of the code’s standard way (the acceptable solution)."
+        : `The variance form asks for the ${d.label.toLowerCase()} (Section ${d.section}).${d.hint ? ` ${d.hint}.` : ""}`,
       ref: d.id,
       done: d.required ? filled || Boolean(cover?.notSure) : filled || seen.has(`field-${d.id}`),
       optional: !d.required,
@@ -493,7 +480,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       section: fromCode ? "C" : "B",
       eyebrow: fromCode ? sectionEyebrow("C") : "A quick question",
       title: q.text,
-      context: "Answer in your own words. A short answer is fine.",
+      context: "",
       why: q.why,
       ref: q.id,
       done: Boolean(q.answer?.trim()),
@@ -616,8 +603,8 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
         section: "C",
         eyebrow: sectionEyebrow("C"),
         title: index.inputs[f].question,
-        context: `Batatis compares it with the code’s standard way for ${ruleTopic(r).toLowerCase()}.`,
-        why: index.inputs[f].why,
+        context: "",
+        why: `${index.inputs[f].why} Batatis compares it with the code’s standard way for ${ruleTopic(r).toLowerCase()}.`,
         ref: f,
         done: !missing.has(f) || settled,
         optional: false,

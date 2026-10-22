@@ -3926,8 +3926,7 @@ body {
 }
 
 @media (hover: hover) {
-  .cf-link-btn:hover,
-  .cf-assist-link:hover {
+  .cf-link-btn:hover {
     color: var(--cf-text);
   }
 }
@@ -4216,35 +4215,27 @@ body {
   margin-top: 26px;
 }
 
-.cf-ok-hint {
-  font-size: 13px;
-  color: var(--cf-text-3);
-}
-
-.cf-ok-hint b {
-  color: var(--cf-text-2);
-  font-weight: 600;
-}
-
 .cf-ok-more {
   display: inline-flex;
   gap: 14px;
   margin-left: 8px;
 }
 
-.cf-assist-link {
+/* The one help entry on a question: the reason, then the assistant on this card. */
+.cf-help-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  margin-top: 30px;
-  padding: 4px 0;
-  border: 0;
-  background: none;
-  color: var(--cf-text-3);
-  font: 400 13.5px/1.4 var(--cf-font);
-  cursor: pointer;
-  transition-property: color;
-  transition-duration: 150ms;
+  gap: 6px;
+}
+
+.cf-why p {
+  margin: 0 0 8px;
+}
+
+.cf-why .cf-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .cf-q-wrap .cf-hint,
@@ -4650,16 +4641,10 @@ body {
     flex: 1;
     justify-content: center;
   }
-  .cf-ok-hint {
-    display: none;
-  }
   .cf-ok-more {
     width: 100%;
     justify-content: center;
     margin-left: 0;
-  }
-  .cf-assist-link {
-    margin-top: 18px;
   }
   .cf-qfoot {
     min-height: 64px;
