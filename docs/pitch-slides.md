@@ -142,7 +142,7 @@
 
 **Full slide detail (in notes):**
 
-- Onboarding asks one question to set the type. A manufacturer sees "What is your product, and how will builders use it?" and others see "What are you building, and what do you want to do differently?"
+- Onboarding asks whether the person applies or reviews, and an applicant then picks the type that describes them best. A manufacturer sees "What is your product, and how will builders use it?" and others see "What are you building, and what do you want to do differently?"
 - Three fictional demo cases (a manufacturer, a general contractor and a homebuilder) are test inputs for user sessions, not tool output (`evals/demo-cases/`)
 
 **Speaker notes:** The aim is that nobody needs code fluency or prior variance experience. We have not tested that with a person, and the testing plan names the three first-time applicants we would recruit.
@@ -161,7 +161,7 @@
 - The export fills Part 1, Sections A to D of the Council's form dated Oct 6, 2026 (5 pages, 87 fields), not the brief's older Appendix 1. The two differ in six places, listed in the Implementation Plan §4.3. A changed form fails the hash check and blocks export
 - The official PDF unlocks only after a current check finds no required item missing. Drafts can be incomplete and say so
 - A pack is one JSON file with sources, dates and hashes for each note. A test adds a fourth pack with no code change. The Calgary form (R2014-06) is a roadmap item
-- The code library reads the code as a numbered outline, shows a relevance ring on each article, and adds a Section C reference with one click
+- The code library reads the code as a numbered outline and shows a relevance ring on each article. "Add to my application" turns an article into a Code check card, and Section C holds only what the applicant confirms
 
 **Speaker notes:** We caught the Council's October form revision and pinned the export to that exact file. Part 2 is the officer's. We never sign, declare or fill it.
 *Sources:* `engine/export/field_maps/scc_2026-10.json`; `docs/api/jurisdictions.md`; [Council form](https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf)
