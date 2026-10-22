@@ -466,99 +466,155 @@ body {
   min-width: 0;
 }
 
-/* Stage tabs: label over a thin progress line, like the deck footer. No circles, no icons. */
+/* Stages: an icon in a progress ring, in order, joined by a hairline. No visible names (icons before
+   words); the name shows on hover or focus. Current = tinted fill in its hue (the accent by default),
+   done = green ring with a check badge, locked = faded. */
 
 .cf-stages {
   display: flex;
-  align-items: stretch;
-  gap: 2px;
+  align-items: center;
+  gap: 14px;
   height: 100%;
 }
 
 .cf-stage {
   position: relative;
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  gap: 7px;
-  min-width: 0;
-  padding: 0 12px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
   color: var(--cf-text-3);
+  font: inherit;
   text-decoration: none;
   cursor: pointer;
-  transition-property: color;
+  transition-property: color, transform;
   transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+/* The hairline between two stages shows the order without numbers. */
+.cf-stage + .cf-stage::before {
+  content: "";
+  position: absolute;
+  right: calc(100% + 3px);
+  top: 50%;
+  width: 8px;
+  height: 1px;
+  background: var(--cf-line-2);
 }
 
 .cf-stage:focus-visible {
   outline: 2px solid var(--cf-focus);
-  outline-offset: -6px;
-  border-radius: 10px;
+  outline-offset: 2px;
+}
+
+.cf-stage-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  transition-property: background-color;
+  transition-duration: 150ms;
+}
+
+.cf-stage-ring svg {
+  position: absolute;
+  inset: 0;
+}
+
+.cf-stage-track,
+.cf-stage-arc {
+  fill: none;
+  stroke-width: 2;
+}
+
+.cf-stage-track {
+  stroke: var(--cf-line-2);
+}
+
+.cf-stage-arc {
+  stroke: var(--cf-text-3);
+  stroke-linecap: round;
+  transition-property: stroke-dasharray, stroke;
+  transition-duration: 300ms;
+  transition-timing-function: ease-out;
+}
+
+.cf-stage-ico {
+  display: inline-flex;
 }
 
 .cf-stage[aria-current="step"] {
   color: var(--cf-text);
 }
 
+/* A step hue (.is-rose …) when given, the accent otherwise. */
+.cf-stage[aria-current="step"] .cf-stage-ring {
+  background: var(--hue-t, rgba(242, 90, 42, 0.1));
+}
+
+.cf-stage[aria-current="step"] .cf-stage-ico {
+  color: var(--hue, var(--cf-accent));
+}
+
+.cf-stage[aria-current="step"] .cf-stage-arc {
+  stroke: var(--hue, var(--cf-accent));
+}
+
+.cf-stage.is-done .cf-stage-arc {
+  stroke: var(--cf-done);
+}
+
+.cf-stage-done,
+.cf-stage-count {
+  position: absolute;
+  top: -3px;
+  right: -4px;
+  display: grid;
+  place-items: center;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px var(--cf-surface);
+  font: 600 9.5px/1 var(--cf-font);
+}
+
+.cf-stage-done {
+  background: var(--cf-done);
+  color: #fff;
+}
+
+.cf-stage-count {
+  background: var(--hue, var(--cf-accent));
+  color: #fff;
+}
+
 .cf-stage.is-disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.45;
 }
 
 @media (hover: hover) {
   .cf-stage:not(.is-disabled):not([aria-current="step"]):hover {
-    color: var(--cf-text-2);
+    color: var(--cf-text);
+  }
+  .cf-stage:not(.is-disabled):not([aria-current="step"]):hover .cf-stage-ring {
+    background: var(--cf-hover);
   }
 }
 
-.cf-stage-lab {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.cf-stage-n {
-  font: 500 11px var(--cf-mono);
-  color: var(--cf-text-4);
-}
-
-.cf-stage[aria-current="step"] .cf-stage-n {
-  color: var(--cf-accent);
-}
-
-.cf-stage-check {
-  display: inline-flex;
-  color: var(--cf-done);
-}
-
-.cf-stage-bar {
-  display: block;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--cf-line-2);
-  overflow: hidden;
-}
-
-.cf-stage-bar i {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--cf-text-3);
-  transition-property: width, background-color;
-  transition-duration: 300ms;
-  transition-timing-function: ease-out;
-}
-
-.cf-stage[aria-current="step"] .cf-stage-bar i {
-  background: var(--cf-text);
-}
-
-.cf-stage.is-done .cf-stage-bar i {
-  background: var(--cf-done);
+@media (prefers-reduced-motion: reduce) {
+  .cf-stage,
+  .cf-stage-ring,
+  .cf-stage-arc {
+    transition: none;
+  }
 }
 
 .cf-save {
@@ -2547,18 +2603,11 @@ body {
   }
   .cf-stages {
     justify-self: center;
-    gap: 0;
+    gap: 10px;
   }
-  .cf-stage {
-    padding: 0 8px;
-  }
-  /* Phones: numbers only, except the stage you are on. */
-  .cf-stage:not([aria-current="step"]) .cf-stage-name,
-  .cf-stage:not([aria-current="step"]) .cf-stage-check {
-    display: none;
-  }
-  .cf-stage-n {
-    color: var(--cf-text-3);
+  .cf-stage + .cf-stage::before {
+    width: 6px;
+    right: calc(100% + 2px);
   }
   .cf-ask-label,
   .cf-save-label,
@@ -4766,25 +4815,18 @@ a.cf-save-check {
     gap: 4px;
   }
   .cf-app[data-assistant="open"] .cf-stages {
-    gap: 0;
+    gap: 8px;
   }
 }
 
-/* A narrow work area (list and assistant both open): only the current stage keeps its name. */
+/* A narrow work area (list and assistant both open): the stage icons sit closer. */
 .cf-work {
   container: work / inline-size;
 }
 
 @container work (max-width: 940px) {
-  .cf-stage {
-    padding: 0 8px;
-  }
-  .cf-stage:not([aria-current="step"]) .cf-stage-name,
-  .cf-stage:not([aria-current="step"]) .cf-stage-check {
-    display: none;
-  }
-  .cf-stage-n {
-    color: var(--cf-text-3);
+  .cf-stages {
+    gap: 10px;
   }
 }
 

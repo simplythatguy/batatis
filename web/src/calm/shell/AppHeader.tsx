@@ -15,41 +15,92 @@ export interface StageRingItem {
   hint?: string;
 }
 
-function StageTab({ s, n }: { s: StageRingItem; n: number }) {
-  const ref = useRef<HTMLAnchorElement & HTMLSpanElement>(null);
+const RING = { size: 34, r: 15 } as const;
+
+/**
+ * One stage or review step as an icon in a progress ring: the ring fills with progress and turns
+ * green with a check when done; the current one is tinted. Its name is the accessible name and a
+ * label on hover or keyboard focus, never visible text (user direction: icons before words).
+ */
+export function StageButton({ id, label, ariaLabel, icon, pct, current, done, disabled, count, hue, note, href, onClick }: {
+  id: string;
+  label: string;
+  ariaLabel: string;
+  icon: ReactNode;
+  pct: number;
+  current?: boolean;
+  done?: boolean;
+  /** Why the stage cannot open yet; it renders as a non-link. */
+  disabled?: string;
+  /** Items still open, as a small badge on the icon. */
+  count?: number;
+  /** A section hue for the current tint; the accent otherwise. */
+  hue?: string;
+  /** One quiet line in the label (for example "Nothing here yet"). */
+  note?: string;
+  href?: string;
+  onClick?: () => void;
+}) {
+  const ref = useRef<HTMLAnchorElement & HTMLButtonElement & HTMLSpanElement>(null);
   const [tip, setTip] = useState(false);
-  const pct = Math.max(0, Math.min(100, Math.round(s.pct)));
-  const done = pct >= 100;
-  const label = `${n} ${s.label}, ${done ? "done" : `${pct}% done`}${s.disabled ? `. ${s.disabled}` : ""}${s.hint ? `. ${s.hint}` : ""}`;
+  const p = Math.max(0, Math.min(100, Math.round(pct)));
+  const c = 2 * Math.PI * RING.r;
+  const mid = RING.size / 2;
   const events = { onPointerEnter: () => setTip(true), onPointerLeave: () => setTip(false), onFocus: () => setTip(true), onBlur: () => setTip(false) };
+  const className = `cf-stage${hue ? ` is-${hue}` : ""}${done ? " is-done" : ""}${disabled ? " is-disabled" : ""}`;
   const body = (
-    <>
-      <span className="cf-stage-lab">
-        <span className="cf-stage-n" aria-hidden="true">{n}</span>
-        <span className="cf-stage-name">{s.label}</span>
-        {done && <span className="cf-stage-check" aria-hidden="true"><Icon24 name="check" size={12} /></span>}
-      </span>
-      <span className="cf-stage-bar" aria-hidden="true"><i style={{ width: `${pct}%` }} /></span>
-    </>
+    <span className="cf-stage-ring" aria-hidden="true">
+      <svg width={RING.size} height={RING.size} viewBox={`0 0 ${RING.size} ${RING.size}`}>
+        <circle className="cf-stage-track" cx={mid} cy={mid} r={RING.r} />
+        {p > 0 && <circle className="cf-stage-arc" cx={mid} cy={mid} r={RING.r} strokeDasharray={`${(p / 100) * c} ${c}`} transform={`rotate(-90 ${mid} ${mid})`} />}
+      </svg>
+      <span className="cf-stage-ico">{icon}</span>
+      {done ? <span className="cf-stage-done"><Icon24 name="check" size={9} stroke={3.2} /></span> : count ? <span className="cf-stage-count">{count}</span> : null}
+    </span>
   );
+  const common = { ref, className, "aria-label": ariaLabel, "aria-current": current ? ("step" as const) : undefined, ...events };
   return (
     <>
-      {s.disabled ? (
-        <span ref={ref} className="cf-stage is-disabled" role="link" aria-disabled="true" tabIndex={0} aria-label={label} {...events}>{body}</span>
+      {disabled ? (
+        <span {...common} role="link" aria-disabled="true" tabIndex={0}>{body}</span>
+      ) : href ? (
+        <a {...common} href={href}>{body}</a>
       ) : (
-        <a ref={ref} className={`cf-stage${done ? " is-done" : ""}`} href={s.href} aria-label={label} aria-current={s.current ? "step" : undefined} {...events}>{body}</a>
+        <button {...common} type="button" onClick={onClick}>{body}</button>
       )}
-      <Tip anchor={ref.current} open={tip} id={`stage-tip-${s.id}`} side="bottom">
-        <span>{s.label}</span> <span className="cf-faint cf-mono">{done ? "done" : `${pct}%`}</span>
-        {(s.disabled || s.hint) && <p>{s.disabled || s.hint}</p>}
+      <Tip anchor={ref.current} open={tip} id={`stage-tip-${id}`} side="bottom">
+        <span>{label}</span>{done ? " ✓" : p > 0 && p < 100 ? <span className="cf-faint cf-mono"> {p}%</span> : null}
+        {(disabled || note) && <p>{disabled || note}</p>}
       </Tip>
     </>
   );
 }
 
-/** The four stages as quiet text tabs, each with a thin progress line (the deck footer's bars). */
+/** The four applicant stages as icons in progress rings, in order, joined by a hairline. */
 export function StageRings({ stages }: { stages: StageRingItem[] }) {
-  return <nav className="cf-stages" aria-label="Stages">{stages.map((s, i) => <StageTab key={s.id} s={s} n={i + 1} />)}</nav>;
+  return (
+    <nav className="cf-stages" aria-label="Stages">
+      {stages.map((s, i) => {
+        const pct = Math.max(0, Math.min(100, Math.round(s.pct)));
+        const done = pct >= 100;
+        return (
+          <StageButton
+            key={s.id}
+            id={s.id}
+            label={s.label}
+            ariaLabel={`${i + 1} ${s.label}, ${done ? "done" : `${pct}% done`}${s.disabled ? `. ${s.disabled}` : ""}${s.hint ? `. ${s.hint}` : ""}`}
+            icon={<Icon24 name={s.icon} size={16} />}
+            pct={pct}
+            current={s.current}
+            done={done}
+            disabled={s.disabled}
+            note={s.hint}
+            href={s.href}
+          />
+        );
+      })}
+    </nav>
+  );
 }
 
 /**

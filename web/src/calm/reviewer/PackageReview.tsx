@@ -6,6 +6,7 @@
  */
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { StageButton } from "../shell/AppHeader";
 import type { ReviewSession, SessionSummary } from "../../api/types.gen";
 import { AcIcon, type AcIconName } from "../auth/bits";
 import { sentLabel } from "./queue";
@@ -343,10 +344,11 @@ export interface FinalStep {
 type Step = StepId | "final";
 
 /**
- * The steps as the shell's stage tabs (number, name, a thin line under it): the same look as the
- * applicant's Describe · Questions · Review · Application. A step you've passed shows a green check.
+ * The steps as the shell's stage icons (the applicant's Describe · Questions · Review · Application
+ * look): each step's icon in a ring, tinted in its hue when current, a check once passed, and the
+ * open count as a badge. Names are the accessible name and a label on hover or focus.
  */
-function StepTabs({ steps, active, label, counts, onPick }: { steps: Step[]; active: Step; label: (s: Step) => string; counts: Partial<Record<Step, number>>; onPick: (s: Step) => void }) {
+export function StepTabs({ steps, active, label, counts, onPick }: { steps: Step[]; active: Step; label: (s: Step) => string; counts: Partial<Record<Step, number>>; onPick: (s: Step) => void }) {
   const at = steps.indexOf(active);
   return (
     <nav className="cf-stages rv-steps" aria-label="Review steps">
@@ -354,22 +356,20 @@ function StepTabs({ steps, active, label, counts, onPick }: { steps: Step[]; act
         const past = i < at;
         const n = counts[s] ?? 0;
         return (
-          <button
+          <StageButton
             key={s}
-            type="button"
-            className={`cf-stage${past ? " is-done" : ""}`}
-            aria-current={s === active ? "step" : undefined}
-            aria-label={`Step ${i + 1} of ${steps.length}: ${label(s)}${n ? `, ${n} to look at` : ""}`}
+            id={`rv-${s}`}
+            label={label(s)}
+            ariaLabel={`Step ${i + 1} of ${steps.length}: ${label(s)}${n ? `, ${n} to look at` : ""}`}
+            icon={<AcIcon name={STEP_LOOK[s].icon} size={16} />}
+            pct={past || s === active ? 100 : 0}
+            current={s === active}
+            done={past}
+            count={n}
+            hue={STEP_LOOK[s].hue}
+            note={n && !past ? `${n} to look at` : undefined}
             onClick={() => onPick(s)}
-          >
-            <span className="cf-stage-lab">
-              <span className="cf-stage-n" aria-hidden="true">{i + 1}</span>
-              <span className="cf-stage-name">{label(s)}</span>
-              {n > 0 && !past && <span className={`rv-step-n is-${STEP_LOOK[s].hue}`} aria-hidden="true">{n}</span>}
-              {past && <span className="cf-stage-check" aria-hidden="true"><AcIcon name="check" size={12} stroke={2.2} /></span>}
-            </span>
-            <span className="cf-stage-bar" aria-hidden="true"><i style={{ width: past || s === active ? "100%" : "0%" }} /></span>
-          </button>
+          />
         );
       })}
     </nav>
