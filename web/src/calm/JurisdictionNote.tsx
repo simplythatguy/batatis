@@ -45,8 +45,7 @@ function PackDetail({ pack, extras }: { pack: JurisdictionDetail; extras: CaseEx
   const current = pack.standing_packages.filter((p) => p.status === "current");
   return (
     <div className="cf-juris" role="note">
-      <p className="cf-juris-h"><Dot tone="done" />{pack.authority.name} reviews it.</p>
-      {/* The answer is the line above; the office's contact, process notes and their limits wait here. */}
+      {/* The picker above is the answer; the office's contact, process notes and their limits wait here. */}
       <details className="cf-juris-more">
       <summary>Office details</summary>
       {pack.authority.contact && <p>{pack.authority.contact}</p>}
@@ -100,8 +99,11 @@ function Elsewhere({ extras }: { extras: CaseExtras }) {
     <div className="cf-juris" role="note">
       <p className="cf-juris-h"><Dot tone="pending" />Somewhere else in {dir.coverage.find((c) => c.id === fallback.province)?.name ?? "the province"}?</p>
       <p>{fallback.authority} reviews it. Batatis has no local pack for that office yet, so ask it about its own forms and steps.</p>
-      <p className="cf-faint">{dir.levels.full}</p>
-      {preview > 0 && <p className="cf-faint">Outside {dir.coverage.find((c) => c.id === fallback.province)?.name ?? "this province"}, Batatis is a preview only: {dir.levels.preview.charAt(0).toLowerCase()}{dir.levels.preview.slice(1)}</p>}
+      <details className="cf-juris-more">
+        <summary>What Batatis covers</summary>
+        <p className="cf-faint">{dir.levels.full}</p>
+        {preview > 0 && <p className="cf-faint">Outside {dir.coverage.find((c) => c.id === fallback.province)?.name ?? "this province"}, Batatis is a preview only: {dir.levels.preview.charAt(0).toLowerCase()}{dir.levels.preview.slice(1)}</p>}
+      </details>
       {finder ? (
         <a className="cf-inline-link cf-small" href={finder.url} target="_blank" rel="noreferrer">{finder.title} <CIcon name="external" size={12} /></a>
       ) : extras.failed.details[fallback.id] ? (
