@@ -32,9 +32,11 @@ export function caseFromEngine(saved: EngineCase, type: ApplicantType): Case {
   const description = by.get("project.description");
   const authority = (saved.jurisdiction?.id === "calgary" || saved.jurisdiction?.id === "edmonton" ? saved.jurisdiction.id : "") as AuthorityId;
   const process = { ...base.process };
+  // As engine/process_fields.py: the newest answer across the field's names counts only when the
+  // applicant confirmed it as their own words. Anything else stays a gap; its saved fact is kept.
   for (const [id, field] of Object.entries(PROCESS_FACT) as [ProcessFieldId, string][]) {
-    const v = by.get(field)?.value;
-    if (typeof v === "string") process[id] = v;
+    const f = by.get(field);
+    if (f && f.status === "confirmed" && f.kind === "pointed" && typeof f.value === "string" && f.value.trim() && f.value === f.source?.quote) process[id] = f.value;
   }
   // Starter and intake questions read as answered when their field has a saved answer.
   const questions = base.questions.map((q) => {

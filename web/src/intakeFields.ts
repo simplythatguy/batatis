@@ -18,8 +18,37 @@ const ENGINE_TO_LOCAL: Readonly<Record<string, string>> = {
 
 const LOCAL_TO_ENGINE: Readonly<Record<string, string>> = Object.fromEntries(Object.entries(ENGINE_TO_LOCAL).map(([e, l]) => [l, e]));
 
+/**
+ * The other names the engine reads as the same field (engine/completeness.py `_CORE`,
+ * engine/process_fields.py `PROCESS_ALIASES`). Read only: saved answers under any of them open on
+ * the browser's one card, and the newest across them wins, as on the engine. The browser still
+ * writes the names above, so adding a name here never changes what a save sends.
+ */
+const READ_ALIASES: Readonly<Record<string, string>> = {
+  "section_a.owner_name": "owner",
+  applicant_name: "representative",
+  application_date: "date",
+  "section_a.date": "date",
+  civic_address: "municipalAddress",
+  address: "municipalAddress",
+  "section_b.legal_description": "legalDescription",
+  ...processAliases({
+    rationale: ["rationale"],
+    risk_assessment: ["risk_assessment", "risk"],
+    mitigating_measures: ["mitigating_measures", "mitigation"],
+    assumptions_and_limits: ["assumptions_and_limits", "assumptions_limits", "assumptions"],
+    maintenance_operation: ["maintenance_operation", "operation_maintenance"],
+    qualifications: ["qualifications"],
+  }),
+};
+
+/** `process.<name>` and the bare name both read as the canonical `process.<id>`. */
+function processAliases(names: Record<string, string[]>): Record<string, string> {
+  return Object.fromEntries(Object.entries(names).flatMap(([id, all]) => all.flatMap((n) => [[n, `process.${id}`], [`process.${n}`, `process.${id}`]])));
+}
+
 /** The browser's field name for an engine fact field. */
-export const localField = (field: string): string => ENGINE_TO_LOCAL[field] ?? field;
+export const localField = (field: string): string => ENGINE_TO_LOCAL[field] ?? READ_ALIASES[field] ?? field;
 
 /** The engine's intake field for a browser field (the planner asks by this name). */
 export const engineField = (field: string): string => LOCAL_TO_ENGINE[field] ?? field;
