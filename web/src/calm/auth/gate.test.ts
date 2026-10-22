@@ -64,3 +64,10 @@ test("settings asks for a code when becoming or leaving a reviewer", () => {
   assert.equal(codeNeeded({ role: "applicant", authority: null }, "applicant"), null);
   assert.equal(codeNeeded({ role: "applicant", authority: null }, "reviewer", null), null);
 });
+
+test("the accuracy report is readable signed out, before onboarding and signed in", () => {
+  assert.equal(gateRedirect("signed-out", null, "/accuracy"), null);
+  assert.equal(gateRedirect("needs-onboarding", null, "/accuracy"), null);
+  assert.equal(gateRedirect("ready", null, "/accuracy"), null);
+  assert.equal(gateRedirect("signed-out", null, "/accuracy-not-public"), "#/signin");
+});

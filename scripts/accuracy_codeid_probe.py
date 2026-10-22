@@ -24,7 +24,7 @@ def main(root: str) -> int:
     sys.path.insert(0, root)
     from evals_dev.accuracy.gates import evaluate_g1
     from evals_dev.identify_bench import decision as rule
-    from evals_dev.identify_bench.analysis import SELECTION, analyse, mrr_by_repeat, top1_by_part
+    from evals_dev.identify_bench.analysis import SELECTION, analyse, chain_of, mrr_by_repeat, top1_by_part
 
     arts = None
     try:                                                   # the integrity recheck needs the code database
@@ -63,6 +63,7 @@ def main(root: str) -> int:
         'development': {n: arm_eval(e) for n, e in an.development.items()},
         'public53': {n: arm_eval(e) for n, e in an.public.items()},
         'kinds': {n: a.kind for n, a in an.arms.items()},
+        'chains': {n: chain_of(an.arms, n) for n in an.selection},
         'latency': {n: v for n, v in an.latency.items()},
         'stage_latency': {n: v for n, v in an.stage_latency.items()},
         'g1': [{'id': c.id, 'status': c.status} for c in evaluate_g1(an)],
@@ -71,7 +72,8 @@ def main(root: str) -> int:
         'decision': None if d is None else {
             'best': d.best, 'winner': d.winner, 'provisional': d.provisional,
             'rows': [{'arm': r.arm, 'tied': r.tied, 'p_worse': r.p_worse, 'cluster_ci': r.cluster_ci, 'complete': r.complete,
-                      'filters': r.filters, 'robust': r.robust, 'usd': r.usd} for r in d.rows],
+                      'filters': r.filters, 'robust': r.robust, 'usd': r.usd,
+                      'notes': r.notes} for r in d.rows],
             'agreement_min': rule.AGREEMENT_MIN, 'tie_alpha': rule.TIE_ALPHA, 'tie_points': rule.TIE_POINTS},
         'rows': {'live': len(live), 'first': min((r['started_at'] for r in live), default=None),
                  'last': max((r['started_at'] for r in live), default=None)},

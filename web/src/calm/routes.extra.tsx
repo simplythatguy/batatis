@@ -7,6 +7,7 @@
  * `#/review` is the reviewer queue only for reviewers; applicants keep their own Review screen.
  */
 import type { ReactNode } from "react";
+import { AccuracyPage } from "../accuracy/AccuracyPage";
 import type { Route } from "../router";
 import { getAccountState } from "./account";
 import { AccountButton } from "./auth/AccountButton";
@@ -24,9 +25,10 @@ export { gateRedirect, gateStatus, homeFor, type GateStatus } from "./auth/gate"
 
 const STANDALONE = new Set(["/signin", "/signup", "/onboarding"]);
 
-/** Sign-in, sign-up and onboarding fill the window; render them without the shell. */
+/** Sign-in, sign-up and onboarding fill the window; render them without the shell. So does the
+ * public accuracy report for a visitor who is not signed in. */
 export function isStandaloneRoute(route: Route): boolean {
-  return STANDALONE.has(route.path);
+  return STANDALONE.has(route.path) || (route.path === "/accuracy" && getAccountState().phase === "signed-out");
 }
 
 function reviewId(path: string): string | null {
@@ -59,6 +61,10 @@ export function extraRoutes(route: Route): ReactNode | null {
       return <Onboarding />;
     case "/settings":
       return <Settings phoneTools={phoneTools} />;
+    case "/accuracy":
+      return getAccountState().phase === "signed-out"
+        ? <AccuracyPage right={<a className="cf-btn is-sm" href="#/signin">Sign in</a>} />
+        : <AccuracyPage phoneTools={phoneTools} />;
     case "/notifications":
       return <NotificationsPage phoneTools={phoneTools} />;
     case "/review":

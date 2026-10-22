@@ -4,7 +4,6 @@
     python scripts/accuracy_report.py                       # code identification from evals_dev/identify_bench if present
     python scripts/accuracy_report.py --bench-ref REF       # ... or from a git ref that holds the benchmark (draft PR #58)
     python scripts/accuracy_report.py --verify              # also run every test a guaranteed claim names
-    python scripts/accuracy_report.py --check               # rebuild in memory and fail if the committed files differ
 
 Two kinds of claim, kept apart:
 
@@ -337,12 +336,16 @@ def _dev_cases() -> list[dict]:
     return [json.loads(p.read_text()) for p in sorted((ROOT / 'evals_dev' / 'cases').glob('dev-*.json'))]
 
 
+DEV_REGIMES = {'dev-024': 'plumbing', 'dev-025': 'electrical', 'dev-059': 'gas', 'dev-060': 'private_sewage'}
+
+
 def scope_section(commit: str, today: str) -> dict:
     from engine.intake.scope import classify
     cases = _dev_cases()
     redirects = [c for c in cases if c['gold']['intake_action'] == 'redirect']
     in_scope = [c for c in cases if c['gold']['intake_action'] != 'redirect']
-    want = {c['id']: (c['gold'].get('redirect_regime') or c['gold'].get('regime')) for c in redirects}
+    # The regime each development redirect belongs to, as in engine/tests/test_intake_plan.py (gold names the route, not the id).
+    want = {c['id']: DEV_REGIMES.get(c['id']) for c in redirects}
     hits = 0
     for c in redirects:
         got = classify(c['description'])
@@ -508,6 +511,12 @@ def rules_section(commit: str, today: str) -> dict:
     }
 
 
+G3_LABELS = {'a-manufacturer-nailbase-sheathing': 'Manufacturer, nail-base sheathing (demo)',
+             'b-contractor-firestop-nonconformance': 'Contractor, firestop (demo)',
+             'c-homebuilder-infill-house': 'Homebuilder, infill house (demo)',
+             'sample-btrboard': 'BTRboard sample'}
+
+
 def g3_section(run_gate: bool, commit: str, today: str) -> dict:
     lines, ran = None, False
     form = os.environ.get('BATATIS_SCC_FORM')
@@ -532,7 +541,7 @@ def g3_section(run_gate: bool, commit: str, today: str) -> dict:
                           sample=f'{len(cases)} example applications', date=date, source=src, interval=False,
                           tags=['example data']))
     for name, filled, na in cases:
-        label = name if ran is False else name.replace('-', ' ')
+        label = G3_LABELS.get(name, name.replace('-', ' '))
         figures.append(figure(f'g3.case.{len(figures)}', f'{label}: fields filled or marked N/A by the applicant', filled + na, 50,
                               dataset='Export gate G3', sample='50 applicant fields', date=date, source=src, interval=False,
                               tags=['example data'], note=f'{filled} filled, {na} N/A with the applicant’s reason.'))
@@ -573,6 +582,23 @@ FLOOR = 'R0-bm25'
 GROUP_LABEL = {'part9': 'Part 9', 'other': 'Other Parts', 'mixed': 'Mixed'}
 
 
+def note_text(row: dict) -> str:
+    """The decision rule's notes for a pipeline, in plain words."""
+    out = []
+    for n in row.get('notes') or []:
+        if n.startswith('incomplete'):
+            out.append('rows missing')
+        elif 'H2_errors' in n:
+            out.append('too many failed runs (limit 2%)')
+        elif 'H1_no_fabricated' in n:
+            out.append('showed a fabricated citation')
+        elif 'H2_p95' in n:
+            out.append('too slow (limit 20 s)')
+    if not out and row.get('p_worse') is not None and not row.get('tied'):
+        out.append('worse than the best on the paired test, or more than 3 points behind')
+    return '; '.join(dict.fromkeys(out)) or '-'
+
+
 def neutral(arm: str) -> tuple[str, str]:
     if arm in ARMS:
         return ARMS[arm]
@@ -591,7 +617,9 @@ def bench_tree(ref: str | None) -> tuple[Path | None, str | None, str | None, te
         build = ROOT / 'codedb' / 'build'
         if build.exists() and not (Path(tmp.name) / 'codedb' / 'build').exists():
             (Path(tmp.name) / 'codedb' / 'build').symlink_to(build.resolve())
-        return Path(tmp.name), commit, ref, tmp
+        remote = subprocess.run(['git', 'show-ref', '--verify', '--quiet', f'refs/remotes/{ref}'], cwd=ROOT).returncode == 0
+        label = f'branch {ref.split("/", 1)[1]}' if remote and '/' in ref else ref
+        return Path(tmp.name), commit, label, tmp
     if (ROOT / BENCH / 'results').is_dir():
         return ROOT, git('log', '-1', '--format=%H', '--', f'{BENCH}/results'), 'this checkout', None
     return None, None, None, None
@@ -627,12 +655,16 @@ def code_id_from_probe(p: dict, commit: str, where: str) -> dict:
         return {'status': 'not_run', 'figures': [], 'detail': [], 'caveats': ['The product pipeline has no stored rows yet.']}
     first, last = (p['rows']['first'] or '')[:10], (p['rows']['last'] or '')[:10]
     date = first if first == last else f'{first} to {last}'
-    rows_path = lambda arm: f'{BENCH}/results/{arm}.jsonl.gz'  # noqa: E731
     pr = 58 if where != 'this checkout' else None
 
+    digests = {f['arm']: f['sha256'] for f in p['row_files']}
+
     def src(arms: list[str]) -> dict:
-        return file_source([rows_path(a) for a in arms], commit, 'python -m evals_dev.identify_bench decision', pr=pr,
-                           ref=where if where != 'this checkout' else None)
+        # Row files are named after internal arm ids, some of which name a provider; cite the folder and the files'
+        # digests under their neutral names instead.
+        files = [{'pipeline': neutral(a)[0], 'sha256_16': digests.get(a)} for a in arms]
+        return file_source([f'{BENCH}/results/'], commit, 'python -m evals_dev.identify_bench decision', pr=pr,
+                           ref=where if where != 'this checkout' else None, row_files=files)
 
     c = p['cases']
     n_sel = c['selection_gold']
@@ -659,12 +691,7 @@ def code_id_from_probe(p: dict, commit: str, where: str) -> dict:
                       tags=tags, note=note)
 
     def chain(arm: str) -> list[str]:
-        out = [arm]
-        if arm.startswith('V15') or arm.startswith('V40'):
-            out += [SCREEN_RERANK, 'R4-jev-screen'] if arm.endswith('R5') or arm.endswith('ool') else []
-        if arm == SCREEN_RERANK:
-            out.append('R4-jev-screen')
-        return out
+        return list(reversed(p.get('chains', {}).get(arm) or [arm]))
 
     tags = ['provisional'] if status == 'provisional' else []
     figures = [
@@ -710,7 +737,8 @@ def code_id_from_probe(p: dict, commit: str, where: str) -> dict:
         lo, hi = s['wilson_95']
         table.append([label, f'{count(s["x"])} of {s["n"]}', f'{s["rate"] * 100:.1f}% ({lo * 100:.1f}–{hi * 100:.1f})',
                       draws(e, arm), '-' if e['usd_per_case_run'] is None else f'US${e["usd_per_case_run"]:.4f}',
-                      'yes' if r.get('tied') else 'no'])
+                      'yes' if r.get('tied') else 'no',
+                      'chosen' if arm == winner else ('carried as provisional' if arm == provisional else note_text(r))])
     by_group = []
     for arm in [PRODUCT, SCREEN_RERANK, FLOOR]:
         if arm in sel:
@@ -731,7 +759,7 @@ def code_id_from_probe(p: dict, commit: str, where: str) -> dict:
     parts = []
     for label, v in sorted((p.get('top1_by_part') or {}).get(PRODUCT, {}).items()):
         lo, hi = v['rate']['wilson_95']
-        parts.append([label, f'{v["rate"]["label"]}', f'{lo * 100:.1f}–{hi * 100:.1f}%'])
+        parts.append([label[:1].upper() + label[1:], f'{v["rate"]["label"]}', f'{lo * 100:.1f}–{hi * 100:.1f}%'])
 
     rob = (by_arm.get(provisional or winner or '', {}) or {}).get('robust') or {}
     if winner:
@@ -759,7 +787,7 @@ def code_id_from_probe(p: dict, commit: str, where: str) -> dict:
 
     detail = [
         {'title': 'Every pipeline the benchmark compared (selection folds)',
-         'header': ['Pipeline', 'Right article', 'Rate (Wilson 95%)', 'Runs', 'Cost per case run', 'Tied with the best'],
+         'header': ['Pipeline', 'Right article', 'Rate (Wilson 95%)', 'Runs', 'Cost per case run', 'Tied with the best', 'Decision'],
          'rows': table},
         {'title': 'By Part group (selection folds)', 'header': ['Pipeline', 'Part 9', 'Other Parts', 'Mixed'], 'rows': by_group},
         {'title': 'Verification model: first article right, by Part (all cases with known answers)',
@@ -850,7 +878,7 @@ def verify_tests(claims: list[dict]) -> dict:
         run = subprocess.run(['node', '--experimental-strip-types', '--no-warnings', '--import', './scripts/register-ts.mjs',
                               '--test', f'--test-name-pattern={re.escape(name)}', file.removeprefix('web/')],
                              cwd=ROOT / 'web', capture_output=True, text=True)
-        results[t] = 'passed' if run.returncode == 0 and re.search(r'# pass [1-9]', run.stdout) else 'failed'
+        results[t] = 'passed' if run.returncode == 0 and re.search(r'(?:#|ℹ) pass [1-9]', run.stdout) else 'failed'
     missing = [t for t in ids if t not in results]
     for t in missing:
         results[t] = 'not collected'

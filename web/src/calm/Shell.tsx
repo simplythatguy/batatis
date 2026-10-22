@@ -367,12 +367,12 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
             items={[
               { label: "Look up code", hint: `${MOD_KEY} ⇧ K`, onClick: openPalette },
               { label: "Code library", href: "#/code" },
+              { label: "Accuracy report", href: "#/accuracy" },
               ...(inCase && checkStatus === "unavailable" ? [{ label: "Try the check again", onClick: () => void requestCheck(true), separator: true }] : []),
               ...(inCase
                 ? [
                     { label: "Rules you chose (Section C)", href: "#/references", separator: checkStatus === "unavailable" },
                     { label: "Officer view", href: "#/officer" },
-                    { label: "Accuracy report", href: "#/accuracy" },
                     { label: "Download draft", href: "#/application?download=draft", separator: true },
                     { label: signedIn ? "New application" : "Start over", onClick: () => (signedIn ? startNew() : setConfirm(true)) },
                   ]
