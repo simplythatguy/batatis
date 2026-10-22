@@ -2672,6 +2672,10 @@ body {
   stroke: #71717a;
 }
 
+.cf-ring-svg.is-estimate .cf-ring-arc {
+  stroke: var(--cf-text-3);
+}
+
 .cf-ring-svg.is-low .cf-ring-arc {
   stroke: var(--cf-done);
 }
