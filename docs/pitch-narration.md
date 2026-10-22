@@ -14,73 +14,73 @@
 
 ### Slide 2: Describe it in plain words, then answer one question at a time
 
-**Time (150 wpm):** 0:14 to 0:29  |  **Spoken words:** 37  |  **At 150 wpm:** 14.8 s  |  **At 140 wpm:** 15.9 s
+**Time (150 wpm):** 0:14 to 0:30  |  **Spoken words:** 39  |  **At 150 wpm:** 15.6 s  |  **At 140 wpm:** 16.7 s
 
-> Describe the project in plain words. Batatis asks one question at a time for the form's sections A to D. The facts it reads from her words are not added to the application until she confirms them.
+> Describe the project in plain words. Batatis asks one question at a time for the form's sections A to D. The facts it reads from the applicant's words are not added to the application until the applicant confirms them.
 
 ### Slide 3: It asks before it guesses, and we test that
 
-**Time (150 wpm):** 0:29 to 0:44  |  **Spoken words:** 36  |  **At 150 wpm:** 14.4 s  |  **At 140 wpm:** 15.4 s
+**Time (150 wpm):** 0:30 to 0:45  |  **Spoken words:** 36  |  **At 150 wpm:** 14.4 s  |  **At 140 wpm:** 15.4 s
 
 > It asks before it guesses. On sixty practice cases that we wrote ourselves, the rules read a hundred and fifty-nine facts and got none wrong. They missed three. Where facts conflict or are missing, it asks.
 
 ### Slide 4: Every Division B article is screened, then quoted
 
-**Time (150 wpm):** 0:44 to 0:57  |  **Spoken words:** 33  |  **At 150 wpm:** 13.2 s  |  **At 140 wpm:** 14.1 s
+**Time (150 wpm):** 0:45 to 0:58  |  **Spoken words:** 33  |  **At 150 wpm:** 13.2 s  |  **At 140 wpm:** 14.1 s
 
 > Code identification scores all two thousand and eighty Division B articles, re-ranks sixty, and has a verifier quote the text. It offers up to three quoted choices, and it commits nothing by itself.
 
 ### Slide 5: Citations come from the code database
 
-**Time (150 wpm):** 0:58 to 1:17  |  **Spoken words:** 48  |  **At 150 wpm:** 19.2 s  |  **At 140 wpm:** 20.6 s
+**Time (150 wpm):** 0:59 to 1:18  |  **Spoken words:** 48  |  **At 150 wpm:** 19.2 s  |  **At 140 wpm:** 20.6 s
 
 > A quote that does not match the code word for word is dropped. Section C is a lookup. On fifty-three public precedents, screening and re-ranking put a cited article first sixty-four percent of the time, against thirty-two for keyword search. The benchmark for the final pipeline is unfinished.
 
 ### Slide 6: It knows where to stop
 
-**Time (150 wpm):** 1:17 to 1:27  |  **Spoken words:** 24  |  **At 150 wpm:** 9.6 s  |  **At 140 wpm:** 10.3 s
+**Time (150 wpm):** 1:18 to 1:28  |  **Spoken words:** 24  |  **At 150 wpm:** 9.6 s  |  **At 140 wpm:** 10.3 s
 
 > It knows where to stop. It says whether an engineer is required, and lists what the evidence must address. It never writes the evidence.
 
 ### Slide 7: Officers see gaps by section, never a verdict
 
-**Time (150 wpm):** 1:28 to 1:37  |  **Spoken words:** 24  |  **At 150 wpm:** 9.6 s  |  **At 140 wpm:** 10.3 s
+**Time (150 wpm):** 1:28 to 1:38  |  **Spoken words:** 24  |  **At 150 wpm:** 9.6 s  |  **At 140 wpm:** 10.3 s
 
 > For officers, there is a queue, a paper sheet, and gaps by section. There is never a verdict. We have no timing data yet.
 
 ### Slide 8: One flow for three kinds of first-time applicants
 
-**Time (150 wpm):** 1:38 to 1:46  |  **Spoken words:** 22  |  **At 150 wpm:** 8.8 s  |  **At 140 wpm:** 9.4 s
+**Time (150 wpm):** 1:38 to 1:47  |  **Spoken words:** 22  |  **At 150 wpm:** 8.8 s  |  **At 140 wpm:** 9.4 s
 
 > One flow serves a manufacturer, a general contractor and a homebuilder. Whether a real first-time applicant can use it unaided is untested.
 
 ### Slide 9: It fills the Council's current form and is built to travel
 
-**Time (150 wpm):** 1:47 to 1:57  |  **Spoken words:** 26  |  **At 150 wpm:** 10.4 s  |  **At 140 wpm:** 11.1 s
+**Time (150 wpm):** 1:48 to 1:58  |  **Spoken words:** 26  |  **At 150 wpm:** 10.4 s  |  **At 140 wpm:** 11.1 s
 
 > It fills the Council's current form, dated October sixth, and leaves the officer's part blank. Jurisdiction packs are data: Calgary, Edmonton and the rest of Alberta.
 
 ### Slide 10: It fits the Dec 1 portal switch
 
-**Time (150 wpm):** 1:58 to 2:12  |  **Spoken words:** 37  |  **At 150 wpm:** 14.8 s  |  **At 140 wpm:** 15.9 s
+**Time (150 wpm):** 1:58 to 2:13  |  **Spoken words:** 37  |  **At 150 wpm:** 14.8 s  |  **At 140 wpm:** 15.9 s
 
 > From December first, the Council's portal is the only way to register a variance, and registration is not approval. Our path is Submission two, Demo Day, then a pilot with one accredited organization, which is a target.
 
 ### Slide 11: Applicants pay to arrive complete
 
-**Time (150 wpm):** 2:13 to 2:27  |  **Spoken words:** 36  |  **At 150 wpm:** 14.4 s  |  **At 140 wpm:** 15.4 s
+**Time (150 wpm):** 2:14 to 2:28  |  **Spoken words:** 36  |  **At 150 wpm:** 14.4 s  |  **At 140 wpm:** 15.4 s
 
 > Applicants pay to arrive complete. One identification run costs about two cents in model fees. The price to test is one hundred fifty to seven hundred fifty dollars a package. No buyer has seen a price.
 
 ### Slide 12: We read the regulator's own data
 
-**Time (150 wpm):** 2:28 to 2:39  |  **Spoken words:** 29  |  **At 150 wpm:** 11.6 s  |  **At 140 wpm:** 12.4 s
+**Time (150 wpm):** 2:29 to 2:40  |  **Spoken words:** 29  |  **At 150 wpm:** 11.6 s  |  **At 140 wpm:** 12.4 s
 
 > We read the regulator's own data. Three articles make up sixty-nine percent of the entries. No one outside our team has tried Batatis. It checks completeness. The officer decides.
 
 ---
 
-**Total: 386 spoken words. With about 5 seconds of slide changes: 2:39 at 150 wpm, 2:50 at 140 wpm.**
+**Total: 388 spoken words. With about 5 seconds of slide changes: 2:40 at 150 wpm, 2:51 at 140 wpm.**
 
 ## Traceability
 

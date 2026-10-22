@@ -20,7 +20,7 @@ The program's onboarding guide says: "Exact submission deadlines, templates and 
 | Business plan | Rewritten | `docs/business-plan.md`, with sources in `docs/research/2026-10-21-source-checks.md` | No team section. See "Decisions for you" |
 | Implementation plan | Rewritten | `docs/implementation-plan.md`. The user-testing appendix is `docs/user-testing/` (no real session has run) | No human session. No pilot partner |
 | Pilot plan | Rewritten | `docs/pilot-adoption-plan.md` | No partner has agreed to anything |
-| Pitch | Text current. PDF stale | `docs/pitch-slides.md` (12 slides), `docs/pitch-outline.md`, `docs/pitch-narration.md` (386 spoken words, 2:50 at 140 wpm) | **GAP:** `docs/pitch-deck/batatis-pitch-deck.pdf` is stale, so do not submit it. `index.html` has current text and no screenshots. Steps to export a new PDF are in `docs/pitch-deck/SCREENSHOTS.md` |
+| Pitch | Text current. PDF stale | `docs/pitch-slides.md` (12 slides), `docs/pitch-outline.md`, `docs/pitch-narration.md` (388 spoken words, 2:51 at 140 wpm) | **GAP:** `docs/pitch-deck/batatis-pitch-deck.pdf` is stale, so do not submit it. `index.html` has current text and no screenshots. Steps to export a new PDF are in `docs/pitch-deck/SCREENSHOTS.md` |
 | Judge Q&A | Rewritten | `docs/judge-qa.md` (23 questions) | |
 
 ## Rubric

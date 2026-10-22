@@ -197,8 +197,8 @@ body.show-notes #notes-panel { display: block; }
     <footer class="sources"><span class="sources-label">Sources:</span> in speaker notes</footer>
     <aside class="notes" hidden>
       <h3>Narration</h3>
-      <p class="narration">Describe the project in plain words. Batatis asks one question at a time for the form's sections A to D. The facts it reads from her words are not added to the application until she confirms them.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 0:14 to 0:29  |  <strong>Spoken words:</strong> 37  |  <strong>At 150 wpm:</strong> 14.8 s  |  <strong>At 140 wpm:</strong> 15.9 s</p>
+      <p class="narration">Describe the project in plain words. Batatis asks one question at a time for the form's sections A to D. The facts it reads from the applicant's words are not added to the application until the applicant confirms them.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 0:14 to 0:30  |  <strong>Spoken words:</strong> 39  |  <strong>At 150 wpm:</strong> 15.6 s  |  <strong>At 140 wpm:</strong> 16.7 s</p>
       <h3>Slide detail</h3><ul><li>Built: the applicant picks a role in onboarding, describes the project, and answers cards in form order. Each card has a plain "Why we ask". "Not sure" keeps an open question for the officer and never blocks</li><li>Backend: the intake reader takes the description and text PDFs. Rules read first and a model is asked only for fields the rules left empty. Every fact stores the phrase or box it came from. Two values for one field give no fact and a question. At most five questions, each with a reason. Pages with no text layer are reported as not read, with the reason, and nothing is guessed</li><li>The screens that show the reader's facts and the five questions are in progress</li></ul>
       <h3>Background</h3>
       <p>Intake is a fifth of the score, so we start with it. Today's screens ask one question at a time and keep what the applicant says apart from what is confirmed. The reader that points each fact at the words it came from is merged but is not yet on screen, and we say so rather than show a mock-up.</p>
@@ -227,7 +227,7 @@ body.show-notes #notes-panel { display: block; }
     <aside class="notes" hidden>
       <h3>Narration</h3>
       <p class="narration">It asks before it guesses. On sixty practice cases that we wrote ourselves, the rules read a hundred and fifty-nine facts and got none wrong. They missed three. Where facts conflict or are missing, it asks.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 0:29 to 0:44  |  <strong>Spoken words:</strong> 36  |  <strong>At 150 wpm:</strong> 14.4 s  |  <strong>At 140 wpm:</strong> 15.4 s</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 0:30 to 0:45  |  <strong>Spoken words:</strong> 36  |  <strong>At 150 wpm:</strong> 14.4 s  |  <strong>At 140 wpm:</strong> 15.4 s</p>
       <h3>Slide detail</h3><ul><li>Intake rules on the 60 development cases: precision 159/159 (95% Wilson 0.976 to 1.000), recall 159/162 (0.947 to 0.994). Misses: dev-014, dev-047, dev-051. Reproduce with <code>python -m evals_dev.intake_facts.score</code></li><li>In sample: the labels were written while the rules were written, and the cases are agent-authored</li><li>Engineer-needed flag on the same 60 cases: the shipped variant agrees with model-written labels on 50 of 60 (95% Wilson 0.72 to 0.91) and sends 27 to the applicant as unknown. On these text-only cases it never answers "no", so zero under-flags holds by construction</li><li>A rules-only variant that is not shipped agrees on 55 of 60 and under-flags once</li></ul>
       <h3>Background</h3>
       <p>These are our own cases, so the numbers show the code behaves as designed and nothing more. The point is the behavior: when facts conflict or are missing, Batatis asks. It does not fill the box. A human-verified set needs an engineer or an officer to label cases, and that is not scheduled.</p>
@@ -266,7 +266,7 @@ body.show-notes #notes-panel { display: block; }
     <aside class="notes" hidden>
       <h3>Narration</h3>
       <p class="narration">Code identification scores all two thousand and eighty Division B articles, re-ranks sixty, and has a verifier quote the text. It offers up to three quoted choices, and it commits nothing by itself.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 0:44 to 0:57  |  <strong>Spoken words:</strong> 33  |  <strong>At 150 wpm:</strong> 13.2 s  |  <strong>At 140 wpm:</strong> 14.1 s</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 0:45 to 0:58  |  <strong>Spoken words:</strong> 33  |  <strong>At 150 wpm:</strong> 13.2 s  |  <strong>At 140 wpm:</strong> 14.1 s</p>
       <h3>Slide detail</h3><ul><li>Pipeline: screen every Division B article, re-rank the top 60 in one request, have a verifier read the full text of the top 15 and quote it word for word</li><li>Quotes that do not match the article are dropped. The pipeline checks again before display</li><li>Commit rule: only Part 9 and at most three articles can ever be committed, and only with a calibration file from the benchmark. No such file exists yet, so every article is a candidate or one of up to three quoted choices</li><li>Each result stores a benchmark acceptable-solution record: the quoted Division B sentence the design departs from, and its objective and function codes. Div A 1.2.1.1. and Div C 2.3.1.1. are attached read-only to every case</li><li>If a model stage is unavailable, a labelled keyword fallback runs and commits nothing</li><li>The Council deck's worked example is Sentence 9.10.15.4.(1), openings in an exposing building face: function F03, objective OP3.1 (Table 9.38.1.1., PDF p.1130)</li></ul>
       <h3>Background</h3>
       <p>We would rather ask than guess. The commit rule is empty on purpose until the benchmark calibrates it. The relevance model is a third-party service pinned to one version and shown to users only as "relevance-1".</p>
@@ -305,7 +305,7 @@ body.show-notes #notes-panel { display: block; }
     <aside class="notes" hidden>
       <h3>Narration</h3>
       <p class="narration">A quote that does not match the code word for word is dropped. Section C is a lookup. On fifty-three public precedents, screening and re-ranking put a cited article first sixty-four percent of the time, against thirty-two for keyword search. The benchmark for the final pipeline is unfinished.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 0:58 to 1:17  |  <strong>Spoken words:</strong> 48  |  <strong>At 150 wpm:</strong> 19.2 s  |  <strong>At 140 wpm:</strong> 20.6 s</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 0:59 to 1:18  |  <strong>Spoken words:</strong> 48  |  <strong>At 150 wpm:</strong> 19.2 s  |  <strong>At 140 wpm:</strong> 20.6 s</p>
       <h3>Slide detail</h3><ul><li>53 Alberta precedents, 2,080 articles, run on Oct 20, 2026. Keyword search: first 32%, in the first five 66%. Screening all articles then re-ranking 60: first 64%, in the first five 81%, and 88% of cited articles within the first 50 (keyword search 77%)</li><li>Limits: no verifier stage in that run, 53 cases from one province and one code, gold lists can be incomplete. Not a held-out professional evaluation</li><li>A separate blind test on 20 cases with a different verifier model raised the first-place rate from 65% to 85%. The verifier in the product is a different model, and its measurement is part of the unfinished benchmark (draft PR #58: two draws are done, a third draw and a latency pass wait for account credit)</li><li>Code database: NBC(AE) 2023, 2nd printing, 13,743 provisions, built by script from the official PDFs, with a 30-provision spot audit that found 0 mismatches</li></ul>
       <h3>Background</h3>
       <p>A fabricated citation would sink an application, so the verifier and the lookup are the heart of this. We report the earlier public-precedent result with its limits, and we do not report an accuracy figure for the final pipeline because we do not have one yet.</p>
@@ -344,7 +344,7 @@ body.show-notes #notes-panel { display: block; }
     <aside class="notes" hidden>
       <h3>Narration</h3>
       <p class="narration">It knows where to stop. It says whether an engineer is required, and lists what the evidence must address. It never writes the evidence.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 1:17 to 1:27  |  <strong>Spoken words:</strong> 24  |  <strong>At 150 wpm:</strong> 9.6 s  |  <strong>At 140 wpm:</strong> 10.3 s</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 1:18 to 1:28  |  <strong>Spoken words:</strong> 24  |  <strong>At 150 wpm:</strong> 9.6 s  |  <strong>At 140 wpm:</strong> 10.3 s</p>
       <h3>Slide detail</h3><ul><li>The professional-involvement check is deterministic over confirmed facts. Missing facts never produce "no". It cites the Division C rule when one applies, for example 2.4.1.1.(3) and 2.4.1.2.(1)</li><li>The review screen shows an amber callout, "An engineer or architect is required for Section D", and the line "Batatis can list what that evidence must address, but it can't write it."</li><li>The cards for rationale, risk assessment, mitigating measures, assumptions and limits, maintenance and qualifications say "You write this in your own words. Batatis never writes it for you."</li><li>Section D lists evidence documents and the responsible person for each. The API also has a CCMC registry search that shows whether a product already has an evaluation, and no screen uses it yet</li></ul>
       <h3>Background</h3>
       <p>Where no tested system fits, the tool says an engineer's judgment is needed and stops. It never writes the evidence, a test result or a professional opinion. The agreement figures for the flag are on slide 3 and carry the same limits.</p>
@@ -394,7 +394,7 @@ body.show-notes #notes-panel { display: block; }
     <aside class="notes" hidden>
       <h3>Narration</h3>
       <p class="narration">For officers, there is a queue, a paper sheet, and gaps by section. There is never a verdict. We have no timing data yet.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 1:28 to 1:37  |  <strong>Spoken words:</strong> 24  |  <strong>At 150 wpm:</strong> 9.6 s  |  <strong>At 140 wpm:</strong> 10.3 s</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 1:28 to 1:38  |  <strong>Spoken words:</strong> 24  |  <strong>At 150 wpm:</strong> 9.6 s  |  <strong>At 140 wpm:</strong> 10.3 s</p>
       <h3>Slide detail</h3><ul><li>Built: the officer signs in with the authority's access code, sees the queue, claims an application, reads it as a paper sheet beside its completeness list, messages the applicant, and accepts it as administratively complete or returns it with a message</li><li>Backend: the package review reads a fillable or flattened SCC form and its attachments. It tells a blank field (certain) from one it could not find (ask the officer). It lists named findings for the Division C 2.3.1.1 file items, drafts an information request in which every item is a question to the applicant, and keeps a close-out record with a due date 10 days after the decision. The officer sends. Batatis never does</li><li>Tests plant defects from 16 classes in synthetic forms. They were written alongside the checker and are not a blind evaluation</li><li>No model is called anywhere in the package review</li></ul>
       <h3>Background</h3>
       <p>The review lists administrative gaps. It does not say the design is acceptable. "Saves an officer time" is a target with a timing protocol, and we have no timing data.</p>
@@ -433,7 +433,7 @@ body.show-notes #notes-panel { display: block; }
     <aside class="notes" hidden>
       <h3>Narration</h3>
       <p class="narration">One flow serves a manufacturer, a general contractor and a homebuilder. Whether a real first-time applicant can use it unaided is untested.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 1:38 to 1:46  |  <strong>Spoken words:</strong> 22  |  <strong>At 150 wpm:</strong> 8.8 s  |  <strong>At 140 wpm:</strong> 9.4 s</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 1:38 to 1:47  |  <strong>Spoken words:</strong> 22  |  <strong>At 150 wpm:</strong> 8.8 s  |  <strong>At 140 wpm:</strong> 9.4 s</p>
       <h3>Slide detail</h3><ul><li>Onboarding asks whether the person applies or reviews, and an applicant then picks the type that describes them best. A manufacturer sees "What is your product, and how will builders use it?" and others see "What are you building, and what do you want to do differently?"</li><li>Three fictional demo cases (a manufacturer, a general contractor and a homebuilder) are test inputs for user sessions, not tool output (<code>evals/demo-cases/</code>)</li></ul>
       <h3>Background</h3>
       <p>The aim is that nobody needs code fluency or prior variance experience. We have not tested that with a person, and the testing plan names the three first-time applicants we would recruit.</p>
@@ -483,7 +483,7 @@ body.show-notes #notes-panel { display: block; }
     <aside class="notes" hidden>
       <h3>Narration</h3>
       <p class="narration">It fills the Council's current form, dated October sixth, and leaves the officer's part blank. Jurisdiction packs are data: Calgary, Edmonton and the rest of Alberta.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 1:47 to 1:57  |  <strong>Spoken words:</strong> 26  |  <strong>At 150 wpm:</strong> 10.4 s  |  <strong>At 140 wpm:</strong> 11.1 s</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 1:48 to 1:58  |  <strong>Spoken words:</strong> 26  |  <strong>At 150 wpm:</strong> 10.4 s  |  <strong>At 140 wpm:</strong> 11.1 s</p>
       <h3>Slide detail</h3><ul><li>The export fills Part 1, Sections A to D of the Council's form dated Oct 6, 2026 (5 pages, 87 fields), not the brief's older Appendix 1. The two differ in six places, listed in the Implementation Plan §4.3. A changed form fails the hash check and blocks export</li><li>The official PDF unlocks only after a current check finds no required item missing. Drafts can be incomplete and say so</li><li>A field shows N/A only when the applicant has confirmed that it does not apply, with a reason, and the appendix lists each one. A blank is never shown as N/A. There is no screen yet for stating it (backend)</li><li>A pack is one JSON file with sources, dates and hashes for each note. A test adds a fourth pack with no code change. The Calgary form (R2014-06) is a roadmap item</li><li>The code library reads the code as a numbered outline and shows a relevance ring on each article. "Add to my application" turns an article into a Code check card, and Section C holds only what the applicant confirms</li></ul>
       <h3>Background</h3>
       <p>We caught the Council's October form revision and pinned the export to that exact file. Part 2 is the officer's. We never sign, declare or fill it.</p>
@@ -512,7 +512,7 @@ body.show-notes #notes-panel { display: block; }
     <aside class="notes" hidden>
       <h3>Narration</h3>
       <p class="narration">From December first, the Council's portal is the only way to register a variance, and registration is not approval. Our path is Submission two, Demo Day, then a pilot with one accredited organization, which is a target.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 1:58 to 2:12  |  <strong>Spoken words:</strong> 37  |  <strong>At 150 wpm:</strong> 14.8 s  |  <strong>At 140 wpm:</strong> 15.9 s</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 1:58 to 2:13  |  <strong>Spoken words:</strong> 37  |  <strong>At 150 wpm:</strong> 14.8 s  |  <strong>At 140 wpm:</strong> 15.9 s</p>
       <h3>Slide detail</h3><ul><li>The Council's six steps are Recognize, Pre-apply, Submit, Review, Decide and Close out. Batatis covers the applicant's side of the first three and the officer's side of the last three. The Implementation Plan §2 maps each step to a screen or a backend and gives its status</li><li>Close out: a copy of the variance to the Council within 10 days. The close-out record shows the due date and lists what to send and keep. The officer sends or registers. Batatis never does</li><li>First user sessions are a protocol with targets, and none has run</li></ul>
       <h3>Background</h3>
       <p>The Council says registration does not move responsibility for the decision. The officer still decides and still registers. Batatis prepares and checks. The Council invites high-volume organizations to build approved integrations, and we would do that only on its terms. No pilot partner has agreed to anything.</p>
@@ -541,7 +541,7 @@ body.show-notes #notes-panel { display: block; }
     <aside class="notes" hidden>
       <h3>Narration</h3>
       <p class="narration">Applicants pay to arrive complete. One identification run costs about two cents in model fees. The price to test is one hundred fifty to seven hundred fifty dollars a package. No buyer has seen a price.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 2:13 to 2:27  |  <strong>Spoken words:</strong> 36  |  <strong>At 150 wpm:</strong> 14.4 s  |  <strong>At 140 wpm:</strong> 15.4 s</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 2:14 to 2:28  |  <strong>Spoken words:</strong> 36  |  <strong>At 150 wpm:</strong> 14.4 s  |  <strong>At 140 wpm:</strong> 15.4 s</p>
       <h3>Slide detail</h3><ul><li>One identification run: screen US$0.0173, re-rank US$0.0006, verifier US$0.001 to US$0.0017. Total US$0.019 to US$0.020, or C$0.027 to C$0.028. One application with stated usage: US$0.05 (typical) to US$0.12 (generous). No other cost is priced, and hosting today is a free-tier demo</li><li>Prices are hypotheses and no buyer has seen one. Seats for repeat filers: about C$2,400 a year (assumption). Authorities: no price, and pilots sized under C$75,000</li><li>Pools (estimates): Alberta bespoke work C$0.9M to C$14M a year before capture. Canadian authority-side pre-check US$23M to US$50M a year if every application were covered</li><li>The officer tier is free in Alberta. Calgary and Edmonton charge no variance fee, so the authority has no fee income to pay from</li></ul>
       <h3>Background</h3>
       <p>Model cost is not what decides this business. Pack upkeep, support and distribution do, and we have not priced them. We do not claim a billion-dollar market. The sourced Alberta pool is C$0.9M to C$14M a year, and the share we could capture is at most single-digit millions. The plan says what would have to be true to grow beyond it.</p>
@@ -570,7 +570,7 @@ body.show-notes #notes-panel { display: block; }
     <aside class="notes" hidden>
       <h3>Narration</h3>
       <p class="narration">We read the regulator's own data. Three articles make up sixty-nine percent of the entries. No one outside our team has tried Batatis. It checks completeness. The officer decides.</p>
-      <p class="timing"><strong>Time (150 wpm):</strong> 2:28 to 2:39  |  <strong>Spoken words:</strong> 29  |  <strong>At 150 wpm:</strong> 11.6 s  |  <strong>At 140 wpm:</strong> 12.4 s</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 2:29 to 2:40  |  <strong>Spoken words:</strong> 29  |  <strong>At 150 wpm:</strong> 11.6 s  |  <strong>At 140 wpm:</strong> 12.4 s</p>
       <h3>Slide detail</h3><ul><li>9.10.15.5.(8) has 1,501, 9.10.11.2. has 366 and 9.10.13.13. has 251, which is 2,118 of 3,088 (our arithmetic). Coded rules for these three are roadmap</li><li>Calgary reviewed and accepted 382 zero-lot-line requests between Jan 1 and Sep 1, 2017, then created standing posted variances</li><li>No product in our competitor survey prepares or reviews alternative-solution applications. That is absence of evidence from web search on Oct 20, 2026</li></ul>
       <h3>Background</h3>
       <p>Reading the Council's own data and bulletins is how we found both the form change and the concentration in one soffit article. This is a prototype. No applicant, officer or pilot partner has used it. Batatis checks completeness. The officer decides.</p>
