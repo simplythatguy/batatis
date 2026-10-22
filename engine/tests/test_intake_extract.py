@@ -379,3 +379,25 @@ def test_get_before_a_run_and_unknown_case(client):
 def test_section_ab_fields_are_marked_personal():
     assert SECTION_AB <= PERSONAL | {'request_date'}
     assert read('Owner: Jane Example').hits[0].field == 'owner_name'
+
+
+@pytest.mark.parametrize('bad', ['nan', 'NaN', 'inf', '-inf', 'Infinity', '1e999'])
+def test_a_non_finite_number_from_the_model_is_never_stored(bad):
+    text = 'We want to build a wall 1.2 m from the property line.'
+
+    def transport(system, user, schema):
+        return {'facts': [{'field': 'limiting_distance_m', 'value': bad, 'quote': '1.2 m from the property line'}]}, {}
+    facts = service.run(text, [], transport=transport, status='fake').facts
+    assert not [f for f in facts if f.field == 'limiting_distance_m' and f.source.type != 'user_text' and f.value != 1.2]
+    import math
+    assert all(not isinstance(f.value, float) or math.isfinite(f.value) for f in facts)
+
+
+@pytest.mark.parametrize('text, found', [
+    ('The date is 21.10.2026 and we cite 9.10.15.5.(8) here.', ['9.10.15.5.(8)']),
+    ('Version 2.10.2026 of the drawing set.', []),
+    ('See 9.10.14.4. and 3.2.3.1.', ['9.10.14.4.', '3.2.3.1.']),
+])
+def test_a_citation_never_starts_a_longer_number(text, found):
+    from engine.intake.rules import _citations
+    assert [c[0] for c in _citations(text)] == found

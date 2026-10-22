@@ -175,13 +175,29 @@ def _form_field(name: str) -> str | None:
     return next((key for key, pattern in _FORM_LABELS if re.fullmatch(pattern, label)), None)
 
 
+def _parsed(cache: dict | None, file_id: str, data: bytes):
+    """read_pdf once per file per run: the model pass runs the same files a second time."""
+    if cache is None:
+        return read_pdf(data)
+    if file_id not in cache:
+        try:
+            cache[file_id] = read_pdf(data)
+        except NotAPdf as exc:
+            cache[file_id] = exc
+    found = cache[file_id]
+    if isinstance(found, NotAPdf):
+        raise found
+    return found
+
+
 def read_file(file_id: str, name: str, data: bytes, *, codes=None, outbound: Outbound = scrubbed,
-              transport: model_pass.Transport | None = None, status: str = 'off') -> Extraction:
+              transport: model_pass.Transport | None = None, status: str = 'off',
+              cache: dict | None = None) -> Extraction:
     out = Extraction()
     report = FileReport(file_id=file_id, name=name, status='not_read')
     out.files.append(report)
     try:
-        content = read_pdf(data)
+        content = _parsed(cache, file_id, data)
     except NotAPdf:
         report.reason = NOT_A_PDF
         return out

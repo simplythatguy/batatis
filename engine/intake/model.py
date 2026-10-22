@@ -10,6 +10,7 @@ gate (`engine.llm_gate`). Tests and `BATATIS_PROVIDER=fake` use a deterministic 
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 from dataclasses import dataclass, field
@@ -89,9 +90,10 @@ def _coerce(name: str, raw: str):
         return int(text) if re.fullmatch(r'\d{1,5}', text) else None
     if kind == 'number':
         try:
-            return float(text.replace(',', ''))
+            value = float(text.replace(',', ''))
         except ValueError:
             return None
+        return value if math.isfinite(value) else None     # float() also accepts "nan", "inf" and "1e999"
     if kind == 'bool':
         return {'true': True, 'yes': True, 'false': False, 'no': False}.get(text.lower())
     if kind == 'enum':

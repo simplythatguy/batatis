@@ -20,14 +20,14 @@ from .scope import classify
 from .text import NUMBER, number
 
 
-def _run(text, files, codes, outbound, transport, status) -> Extraction:
+def _run(text, files, codes, outbound, transport, status, cache=None) -> Extraction:
     out = Extraction()
     if text and text.strip():
         out.merge(read_text(text, Origin(DESCRIPTION), codes=codes, outbound=outbound,
                             transport=transport, status=status))
     for file_id, name, data in files:
         out.merge(read_file(file_id, name, data, codes=codes, outbound=outbound, transport=transport,
-                            status=status))
+                            status=status, cache=cache))
     return out
 
 
@@ -38,11 +38,12 @@ def run(text: str | None, files: list[tuple[str, str, bytes]], *, codes=None,
 
     With a model, the rules and form passes run over every source first, so a name or address read
     from one file is scrubbed from every text the model sees."""
-    first = _run(text, files, codes, outbound, None, status)
+    cache: dict = {}                                  # each PDF is parsed once across both passes
+    first = _run(text, files, codes, outbound, None, status, cache)
     if transport is None:
         return first
     personal = [str(f.value) for f in first.facts if f.field in PERSONAL and len(str(f.value)) >= 3]
-    out = _run(text, files, codes, lambda s, own: outbound(s, [*own, *personal]), transport, status)
+    out = _run(text, files, codes, lambda s, own: outbound(s, [*own, *personal]), transport, status, cache)
     if out.model.status == 'off':
         out.model.status = 'not_needed'
     return out

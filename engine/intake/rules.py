@@ -467,7 +467,8 @@ def _proposal(text: str, spans: list[tuple[int, int]]) -> list[Hit]:
     return [Hit('alternative_description', text[start:end], start, end, 0.6)]
 
 
-_PID = re.compile(r'(?<![\d.])\d{1,2}\.\d{1,2}\.\d{1,3}(?:\.\d{1,3})?\.?(?:\s?\(\d{1,2}\))?(?:\([a-z]{1,2}\))?')
+# Not the start of a longer number: "21.10.2026" is a date, not 21.10.202 followed by a stray 6.
+_PID = re.compile(r'(?<![\d.])\d{1,2}\.\d{1,2}\.\d{1,3}(?:\.\d{1,3})?\.?(?:\s?\(\d{1,2}\))?(?:\([a-z]{1,2}\))?(?!\d)')
 
 
 def _citations(text: str) -> list[tuple[str, int, int]]:

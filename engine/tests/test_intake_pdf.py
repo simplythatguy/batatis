@@ -202,3 +202,16 @@ def test_pushbuttons_are_not_values_and_radio_children_use_their_own_state():
     radios = [w.value for w in widgets if w.name == 'Kind']
     assert radios.count(True) == 1
     assert [w.value for w in widgets if w.name == 'Agree'] == [True]
+
+
+def test_each_pdf_is_parsed_once_across_the_rules_and_model_passes(monkeypatch):
+    """With a model the files run twice (rules first, then the model); the PDF itself is read once."""
+    from engine.intake import extract
+    calls = []
+    real = extract.read_pdf
+    monkeypatch.setattr(extract, 'read_pdf', lambda data: calls.append(len(data)) or real(data))
+    data = pdf([[(72, 700, 'We are building a two-storey house with a building area of 150 m2.')]])
+    out = service.run('A house.', [('f1', 'brief.pdf', data), ('f2', 'notes.pdf', b'not a pdf')],
+                      transport=lambda system, user, schema: ({'facts': []}, {}), status='fake')
+    assert calls == [len(data), 9]                            # one read per file, not one per pass (two passes ran)
+    assert [r.status for r in out.files] == ['read', 'not_read']
