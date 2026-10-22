@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 ENGINE = ROOT / 'engine'
 SKIP = {'.git', 'node_modules', 'dist', '__pycache__', '.venv', 'reference'}
 OLD = 'Demo data ' + 'may be deleted.'
+PROVIDER_NAMES = re.compile(r'jev|typesafe|openai|anthropic|claude|gpt', re.I)
 
 
 def _web_notice() -> str:
@@ -43,7 +44,6 @@ def _header_values(response, name: bytes) -> list[str]:
 def test_web_and_engine_notices_match_and_no_other_notice_remains():
     web = _web_notice()
     assert HEADER_NOTICE is BODY_NOTICE is PII_NOTICE is PRIVACY_NOTICE == web
-    assert 'https://openai.com/policies/api-data-usage-policies' in web
     assert web.endswith(f'after {RETENTION_DAYS} days or on request.')
     needle = PRIVACY_NOTICE.split('.', 1)[0]
     for path in ENGINE.rglob('*.py'):
@@ -69,6 +69,19 @@ def test_web_and_engine_notices_match_and_no_other_notice_remains():
                 break
             assert text.startswith(PRIVACY_NOTICE, found), path.relative_to(ROOT)
             start = found + len(PRIVACY_NOTICE)
+
+
+def test_the_notice_names_no_provider_and_still_makes_its_disclosures():
+    """The owner does not want the backend's providers named. The disclosures stay: redaction, US processing, deletion."""
+    assert not PROVIDER_NAMES.search(PRIVACY_NOTICE), PROVIDER_NAMES.search(PRIVACY_NOTICE).group()
+    assert '://' not in PRIVACY_NOTICE and '(' not in PRIVACY_NOTICE, 'no link, so Settings has nothing to point at'
+    assert PRIVACY_NOTICE.isascii(), 'the notice is also an HTTP header value'
+    first, second = PRIVACY_NOTICE.split('. ', 1)
+    assert first == ('Batatis automatically removes the names, contact details and addresses it recognizes '
+                     'before any text is sent to an AI provider')
+    assert 'In live mode' in second and 'United States' in second
+    assert 'third-party AI service providers' in second and 'API data-use terms' in second
+    assert second.endswith(f'Batatis deletes its own stored case data and files after {RETENTION_DAYS} days or on request.')
 
 
 def test_each_response_has_one_notice_header_and_noindex():

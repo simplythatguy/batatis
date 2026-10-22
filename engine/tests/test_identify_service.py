@@ -105,12 +105,14 @@ def test_incomplete_screen_falls_back_and_commits_nothing(codes):
     assert all(a.status == 'fallback' and a.verifier == 'not_run' for a in result.articles)
 
 
-def test_offline_without_fakes_is_a_labelled_bm25_fallback(codes, monkeypatch):
+def test_offline_without_fakes_is_a_labelled_bm25_fallback(codes, monkeypatch, caplog):
     monkeypatch.delenv('BATATIS_PROVIDER')
     result = run(SOFFIT, codes=codes, policy=calibrated()).result
     assert result.mode == 'bm25_fallback' and result.source == 'bm25 fallback'
     assert result.committed == [] and result.model_ids == {'screen': None, 'rerank': None, 'verifier': None}
-    assert 'jev gate' in result.trace.fallback_reason or 'BATATIS_LIVE' in result.trace.fallback_reason
+    # The response says only that scoring was unavailable; the cause, with the provider and the switch, is in the log.
+    assert result.trace.fallback_reason == 'scoring unavailable'
+    assert 'jev gate' in caplog.text or 'BATATIS_LIVE' in caplog.text
     assert result.articles and result.trace.usd == 0 and llm_gate._memory.today() == 0
 
 
@@ -369,7 +371,7 @@ def test_spend_is_settled_per_provider_for_a_run(client):
     http, _ = client
     case_id = described(http)
     trace = http.post(f'/cases/{case_id}/identify', json={}).json()['trace']
-    assert set(trace['spend']) == {'jev', 'openai'} and trace['spend']['jev']['requests'] == 21
+    assert set(trace['spend']) == {'scoring', 'verification'} and trace['spend']['scoring']['requests'] == 21
     assert abs(float(llm_gate._memory.today()) - trace['usd']) < 1e-6
 
 

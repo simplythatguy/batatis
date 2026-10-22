@@ -49,7 +49,7 @@ export function ScoreStatus({ compact = false }: { compact?: boolean }) {
         rel.stale ? (
           <span className="cf-score is-stale"><span className="cf-dot is-warning" aria-hidden="true" />Out of date {scoreBtn("Rescore", false)}</span>
         ) : (
-          <span className="cf-score" title={rel.result.model ? `Model ${rel.result.model}` : undefined}>
+          <span className="cf-score" title={rel.result.model ? `Estimate version ${rel.result.model}` : undefined}>
             <span className="cf-dot is-done" aria-hidden="true" />Scored for your project{rel.result.scored_at ? ` · ${ago(rel.result.scored_at)}` : ""}
           </span>
         )
@@ -245,7 +245,7 @@ function Tree({ toc, selected, filter, revealKey }: { toc: CodeToc; selected: st
             aria-level={level}
             aria-expanded={branch ? expanded : undefined}
             aria-selected={n.kind === "article" ? n.id === selected : undefined}
-            aria-label={`${n.label} ${n.title ?? ""}${p != null ? `, Jev ${pct(p)}${n.kind === "article" ? "" : " highest"}` : ""}`}
+            aria-label={`${n.label} ${n.title ?? ""}${p != null ? `, relevance ${pct(p)}${n.kind === "article" ? "" : " highest"}` : ""}`}
             tabIndex={n.key === focusKey ? 0 : -1}
             className={`cf-tree-row is-${n.kind}${n.id === selected ? " is-selected" : ""}`}
             style={{ paddingLeft: 10 + (level - 1) * 14 }}
@@ -408,7 +408,7 @@ function Reading({ id, filter, onReveal, index }: { id: string; filter: Filter; 
         )}
         {added && <span className="cf-faint cf-small" role="status">Added as a Code check card. <a className="cf-inline-link" href="#/questions?first=code">Answer it</a></span>}
       </div>
-      <p className="cf-faint cf-small cf-disclaimer">Rings are Jev estimates from your description. They are not a compliance decision and not your Section C, which lists only the rules you confirm.</p>
+      <p className="cf-faint cf-small cf-disclaimer">Rings are Batatis estimates from your description. They are not a compliance decision and not your Section C, which lists only the rules you confirm.</p>
     </article>
   );
 }

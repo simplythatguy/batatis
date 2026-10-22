@@ -1,6 +1,6 @@
 """The privacy notice. The same sentence lives in web/src/privacy.ts; a test keeps them identical."""
 
-PRIVACY_NOTICE = 'Batatis automatically removes the names, contact details and addresses it recognizes before any text is sent to an AI provider. In live mode, the remaining text is processed in the US by OpenAI, Anthropic or Jev under their API data policies (https://openai.com/policies/api-data-usage-policies); Batatis deletes its own stored case data and files after 7 days or on request.'
+PRIVACY_NOTICE = 'Batatis automatically removes the names, contact details and addresses it recognizes before any text is sent to an AI provider. In live mode, the remaining text is processed in the United States by third-party AI service providers under their API data-use terms; Batatis deletes its own stored case data and files after 7 days or on request.'
 # The response header and the JSON meta notice are this same sentence.
 PII_NOTICE = PRIVACY_NOTICE
 
