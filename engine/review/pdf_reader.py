@@ -84,12 +84,13 @@ class ReadFile:
                 return True
             top = after[3] if after else float('inf')
             bottom = before[3] if before else float('-inf')
-            return any(y0 < top and y1 > bottom for _x0, y0, _x1, y1 in _object_boxes(pdf_page))
+            boxes = _object_boxes(pdf_page) | _annotation_boxes(pdf_page)
+            return any(y0 < top and y1 > bottom for _x0, y0, _x1, y1 in boxes)
         except Exception:  # noqa: BLE001 - unreadable graphics must not establish a blank passage
             return True
 
     def unreadable_pages(self) -> list[int]:
-        """Textless drawn pages or raster regions in attachment/appendix pages.
+        """Textless drawn pages, raster regions or annotation appearances in attachment/appendix pages.
 
         Paths on otherwise readable pages can be table borders/backgrounds, including in
         the official export. Paths inside a labelled passage are checked by passage_has_marks.
@@ -101,7 +102,7 @@ class ReadFile:
             unreadable = []
             for page in self.text_pages:
                 pdf_page = doc[page.page]
-                if (not page.text.strip() and _object_boxes(pdf_page)) or any(
+                if _annotation_boxes(pdf_page) or (not page.text.strip() and _object_boxes(pdf_page)) or any(
                         obj.type == raw.FPDF_PAGEOBJ_IMAGE for obj in pdf_page.get_objects(max_depth=4)):
                     unreadable.append(page.page)
             return unreadable
@@ -147,6 +148,68 @@ def _object_boxes(page) -> frozenset:
             boxes.add(tuple(round(v) for v in bounds))
         except Exception:  # noqa: BLE001 - an object without bounds cannot be compared
             continue
+    return frozenset(boxes)
+
+
+def _annotation_boxes(page) -> frozenset:
+    """Normal-view annotation appearances are separate from page-content objects.
+
+    Compare normal rendering with annotations on/off: flags, appearance states and invisible
+    drawing modes must not be guessed from /Contents or object counts. This detects ink only,
+    never OCRs or reads applicant text. Legacy flattened-field extraction remains unchanged.
+    """
+    import ctypes
+    import pypdfium2.raw as raw
+    from PIL import ImageChops
+    rects = []
+    count = raw.FPDFPage_GetAnnotCount(page)
+    if count < 0:
+        raise ValueError('Annotation inventory could not be read.')
+    for index in range(count):
+        annotation = raw.FPDFPage_GetAnnot(page, index)
+        if not annotation:
+            raise ValueError('Annotation could not be opened.')
+        try:
+            flags = raw.FPDFAnnot_GetFlags(annotation)
+            if flags & (raw.FPDF_ANNOT_FLAG_HIDDEN | raw.FPDF_ANNOT_FLAG_NOVIEW):
+                continue
+            rect = raw.FS_RECTF()
+            if not raw.FPDFAnnot_GetRect(annotation, ctypes.byref(rect)):
+                raise ValueError('Annotation bounds could not be read.')
+            rects.append((rect.left, rect.bottom, rect.right, rect.top))
+        finally:
+            raw.FPDFPage_CloseAnnot(annotation)
+    if not rects:
+        return frozenset()
+    with_annots = page.render(scale=1, draw_annots=True, may_draw_forms=False)
+    without_annots = page.render(scale=1, draw_annots=False, may_draw_forms=False)
+    difference = ImageChops.difference(with_annots.to_pil().convert('RGB'), without_annots.to_pil().convert('RGB'))
+    width, height = difference.size
+
+    def pixel(x, y):
+        px, py = ctypes.c_int(), ctypes.c_int()
+        if not raw.FPDF_PageToDevice(page, 0, 0, width, height, 0, x, y, ctypes.byref(px), ctypes.byref(py)):
+            raise ValueError('Annotation page coordinates could not be read.')
+        return px.value, py.value
+
+    def point(x, y):
+        px, py = ctypes.c_double(), ctypes.c_double()
+        if not raw.FPDF_DeviceToPage(page, 0, 0, width, height, 0, x, y, ctypes.byref(px), ctypes.byref(py)):
+            raise ValueError('Annotation render coordinates could not be read.')
+        return px.value, py.value
+
+    boxes = set()
+    for x0, y0, x1, y1 in rects:
+        a, b = pixel(x0, y0), pixel(x1, y1)
+        crop = (max(0, min(a[0], b[0]) - 1), max(0, min(a[1], b[1]) - 1),
+                min(width, max(a[0], b[0]) + 1), min(height, max(a[1], b[1]) + 1))
+        if crop[0] >= crop[2] or crop[1] >= crop[3]:
+            continue
+        ink = difference.crop(crop).getbbox()
+        if ink:
+            a = point(crop[0] + ink[0], crop[1] + ink[1])
+            b = point(crop[0] + ink[2], crop[1] + ink[3])
+            boxes.add((min(a[0], b[0]), min(a[1], b[1]), max(a[0], b[0]), max(a[1], b[1])))
     return frozenset(boxes)
 
 

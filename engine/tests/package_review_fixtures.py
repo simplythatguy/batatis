@@ -187,6 +187,60 @@ def covered_scan_pdf(cover='separate') -> bytes:
     return buf.getvalue()
 
 
+def annotated_rationale_pdf(kind='text', *, layout='labelled', flags=4, appearance='stream',
+                            subtype='/Stamp', passage='', rotation=0) -> bytes:
+    """SYNTHETIC visible or non-rendered annotation appearances, never page text."""
+    from reportlab.pdfgen import canvas
+    from pypdf.generic import DecodedStreamObject, DictionaryObject, NumberObject, TextStringObject
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=(612, 792))
+    if layout in ('cover', 'cover-page'):
+        c.drawString(48, 748, 'SYNTHETIC readable supplement cover.')
+        if layout == 'cover-page':
+            c.showPage()
+            c.drawString(48, 748, 'SYNTHETIC continuation page.')
+    else:
+        c.drawString(48, 748, 'Rationale')
+        if passage:
+            c.drawString(48, 700, passage)
+        c.drawString(48, 500, 'Risk assessment')
+    c.save()
+    writer = PdfWriter()
+    writer.append(io.BytesIO(buf.getvalue()))
+    ap = DecodedStreamObject()
+    ap.set_data(b'BT /F1 12 Tf 6 36 Td (SYNTHETIC applicant passage supplied as an annotation.) Tj ET'
+                if kind == 'text' else b'4 w 10 10 m 470 70 l S')
+    if appearance == 'empty':
+        ap.set_data(b'q Q')
+    elif appearance == 'invisible-text':
+        ap.set_data(ap.get_data().replace(b'BT ', b'BT 3 Tr '))
+    ap.update({NameObject('/Type'): NameObject('/XObject'), NameObject('/Subtype'): NameObject('/Form'),
+               NameObject('/BBox'): ArrayObject([NumberObject(x) for x in (0, 0, 500, 80)]),
+               NameObject('/Resources'): DictionaryObject({NameObject('/Font'): DictionaryObject({
+                   NameObject('/F1'): DictionaryObject({NameObject('/Type'): NameObject('/Font'),
+                       NameObject('/Subtype'): NameObject('/Type1'), NameObject('/BaseFont'): NameObject('/Helvetica')})})})})
+    y = 80 if layout == 'outside' else 580
+    rect = (48, y, 548, y + 80)
+    if layout == 'page-rect-outside':
+        rect = (0, 0, 612, 792)
+        ap[NameObject('/BBox')] = ArrayObject([NumberObject(x) for x in rect])
+    annotation = DictionaryObject({NameObject('/Type'): NameObject('/Annot'), NameObject('/Subtype'): NameObject(subtype),
+        NameObject('/Rect'): ArrayObject([NumberObject(x) for x in rect]),
+        NameObject('/F'): NumberObject(flags), NameObject('/Contents'): TextStringObject('SYNTHETIC metadata, not page text.')})
+    if appearance != 'missing':
+        normal = writer._add_object(ap)
+        if appearance in ('state', 'unselected-state'):
+            normal = DictionaryObject({NameObject('/On'): normal})
+            annotation[NameObject('/AS')] = NameObject('/On' if appearance == 'state' else '/Off')
+        annotation[NameObject('/AP')] = DictionaryObject({NameObject('/N'): normal})
+    writer.add_annotation(page_number=len(writer.pages) - 1, annotation=annotation)
+    if rotation:
+        writer.pages[-1].rotate(rotation)
+    out = io.BytesIO()
+    writer.write(out)
+    return out.getvalue()
+
+
 def package(form_values=None, narrative=None, report=None, *, flat=False, drop=()):
     form_values = copy.deepcopy(CLEAN_FORM if form_values is None else form_values)
     narrative = copy.deepcopy(CLEAN_NARRATIVE if narrative is None else narrative)
