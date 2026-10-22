@@ -116,7 +116,7 @@ def test_a_600_word_rationale_goes_to_the_appendix_in_full(codes):
     """AC9.3: long applicant text is carried by the appendix by default, never clipped on the form."""
     from engine.models import Fact, Source
     case = demo_case('a-manufacturer-nailbase-sheathing', codes)
-    long = ' '.join(f'EXAMPLE rationale word {n} of the applicant.' for n in range(100))   # 600 words
+    long = ' '.join(f'EXAMPLE rationale word {n}.' for n in range(150))   # 600 words
     assert len(long.split()) == 600
     case.facts += [Fact(field=key, value=long, kind='pointed', status='confirmed',
                         source=Source(type='user_text', ref='test:applicant', quote=long))

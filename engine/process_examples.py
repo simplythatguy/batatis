@@ -11,6 +11,7 @@ by `scripts/gate_g3.py` and `engine/tests/test_process_examples.py`.
 from __future__ import annotations
 
 import json
+import os
 import re
 from functools import lru_cache
 from pathlib import Path
@@ -20,7 +21,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 DATA = Path(__file__).resolve().parent / 'data' / 'process_examples.json'
-REFERENCE = Path(__file__).resolve().parents[1] / 'reference'
+# Git-excluded local copies of the precedents (a worktree may point at the main checkout's copy).
+REFERENCE = Path(os.environ.get('BATATIS_REFERENCE_DIR') or Path(__file__).resolve().parents[1] / 'reference')
 LABEL = 'Precedent examples: structure only. Read the source; write your own words.'
 MAX_STRUCTURE_WORDS = 45       # a description, not an excerpt
 MAX_SHARED_WORDS = 7           # no run of this many consecutive words copied from the cited page
