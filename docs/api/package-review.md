@@ -100,6 +100,12 @@ session keeps the extracted values and quotes.
   copied, never assessed or drafted by the review. Graphics checks pair each heading/stop occurrence with
   its extracted text offset; unmatched or reversed geometry remains uncertain. Graphics outside a reliably
   bounded labelled passage do not make that passage unreadable.
+  Visible annotation appearances (including text/vector stamps and selected appearance states) also remain
+  officer checks, with actual file/page pointers. The rationale check compares normal rendering with and
+  without annotations to locate visible ink; it performs no OCR and never treats annotation metadata as
+  applicant text. Hidden, NoView, empty or non-rendered appearances do not supply a visible passage.
+  Wrapped next-field labels end rationale extraction conservatively as an excluded officer check; neighboring
+  labels and bodies never become the rationale. These rules do not change other text-field extraction.
 - Ported deterministic screens (variant B) over the reading: presence and placeholders (D01–D04), edition
   presented as current (D06), intent label (D08), generic or blank risk, mitigation and assumptions (D09–D11),
   professional named when stated as required (D12), supporting document and its responsible person (D13),

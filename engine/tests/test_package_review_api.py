@@ -13,8 +13,8 @@ from engine.codes import Codes
 from engine.models import Case
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import complete_case, fact, store_with_synthetic_files
-from engine.tests.package_review_fixtures import (CLEAN_FORM, CLEAN_NARRATIVE, covered_scan_pdf, package,
-                                                repeated_rationale_pdf, text_pdf)
+from engine.tests.package_review_fixtures import (CLEAN_FORM, CLEAN_NARRATIVE, annotated_rationale_pdf,
+                                                covered_scan_pdf, package, repeated_rationale_pdf, text_pdf)
 from engine.tests.test_package_review_rationale import raster_rationale_pdf, split_rationale_pdf
 from engine.tests.test_accounts import onboard, signup
 
@@ -392,6 +392,79 @@ def test_official_blank_draft_retains_graphics_and_page_uncertainty(
     # A later readable applicant passage resolves the uncertainty without changing the saved case.
     reupload = route if linked else f'/package-review/{session["package_id"]}'
     passage = 'SYNTHETIC supplied readable rationale, with unknown existing conditions.'
+    resolved = clients['reviewer'].post(reupload, files=multipart([
+        ('readable.pdf', text_pdf(['Rationale', passage, 'Risk assessment']))]))
+    assert resolved.status_code == 201, resolved.text
+    assert next(f for f in resolved.json()['fields'] if f['field'] == 'rationale')['value'] == passage
+    assert not any(i['field'] == 'rationale' for i in resolved.json()['information_request']['items'])
+    assert store.get(case.id).model_dump(mode='json') == before
+    store.delete(case.id)
+
+
+@pytest.mark.parametrize('linked', [False, True], ids=['standalone', 'case-linked'])
+@pytest.mark.parametrize('reverse', [False, True], ids=['forward', 'reverse'])
+@pytest.mark.parametrize('variant', ['stamp-text', 'stamp-vector', 'selected-state', 'free-text', 'cover-page',
+    'hidden', 'unselected-state', 'outside-present', 'wrapped-label', 'wrapped-body', 'wrapped-limits'])
+def test_annotation_and_wrapped_boundaries_over_http(multi_source_scene, linked, reverse, variant):
+    import hashlib
+    store, clients, _ = multi_source_scene
+    case = owned(multi_source_scene, complete=True)
+    saved = store.get(case.id)
+    saved.facts = [f for f in saved.facts if f.field not in ('rationale', 'process.rationale')]
+    store.put(saved)
+    exported = clients['owner'].post(f'/cases/{case.id}/export', json={'draft': True})
+    assert exported.status_code == 200, exported.text
+    saved = store.get(case.id)
+    saved.status = 'submitted'
+    store.put(saved)
+    assert clients['reviewer'].post(f'/review/{case.id}/claim', json={}).status_code == 200
+    before = store.get(case.id).model_dump(mode='json')
+    passage = 'SYNTHETIC readable applicant rationale, with unknown existing conditions.'
+    expected, page, quote = 'not_found', 1, 'Rationale'
+    other = ('official-blank.pdf', exported.content)
+    if variant.startswith('wrapped'):
+        heading = ['Assumptions', 'and limits:'] if variant == 'wrapped-limits' else ['Risk', 'assessment:']
+        data = text_pdf(['Rationale', *heading,
+                         '' if variant == 'wrapped-label' else 'SYNTHETIC neighboring field body.', 'Commissioning'])
+        other = ('cover.pdf', text_pdf(['SYNTHETIC readable cover.']))
+    else:
+        options = {'stamp-text': {}, 'stamp-vector': {'kind': 'vector'}, 'selected-state': {'appearance': 'state'},
+                   'free-text': {'subtype': '/FreeText'}, 'cover-page': {'layout': 'cover-page'},
+                   'hidden': {'flags': 6}, 'unselected-state': {'appearance': 'unselected-state'},
+                   'outside-present': {'layout': 'outside', 'passage': passage}}[variant]
+        data = annotated_rationale_pdf(**options)
+        if variant == 'cover-page':
+            page, quote = 2, None
+        elif variant in ('hidden', 'unselected-state'):
+            expected = 'blank'
+        elif variant == 'outside-present':
+            expected, quote = 'present', passage
+            other = ('cover.pdf', text_pdf(['SYNTHETIC readable cover.']))
+    uploads = [other, ('supplement.pdf', data)]
+    if reverse:
+        uploads.reverse()
+    route = f'/review/{case.id}/package-review' if linked else '/package-review'
+    response = clients['reviewer'].post(route, files=multipart(uploads))
+    assert response.status_code == 201, response.text
+    session = response.json()
+    reading = next(f for f in session['fields'] if f['field'] == 'rationale')
+    assert reading['status'] == expected, reading
+    findings = [f for f in session['findings'] if f['field'] == 'rationale']
+    items = [i for i in session['information_request']['items'] if i['field'] == 'rationale']
+    if expected == 'present':
+        assert reading['value'] == reading['pointer']['quote'] == passage and not findings and not items
+    else:
+        assert reading['value'] is None and findings[0]['status'] == expected
+        assert any((p['file'], p['page'], p['quote']) == ('supplement.pdf', page, quote)
+                   for p in findings[0]['pointers'])
+        assert items[0]['included'] == (expected == 'blank')
+        assert items[0]['officer_check'] == (expected == 'not_found')
+        if expected == 'not_found':
+            assert items[0]['text'] not in session['information_request']['text']
+    assert session['administrative_only'] and session['not_a_compliance_determination']
+    assert {f['name']: f['sha256'] for f in session['files']} == {
+        name: hashlib.sha256(content).hexdigest() for name, content in uploads}
+    reupload = route if linked else f'/package-review/{session["package_id"]}'
     resolved = clients['reviewer'].post(reupload, files=multipart([
         ('readable.pdf', text_pdf(['Rationale', passage, 'Risk assessment']))]))
     assert resolved.status_code == 201, resolved.text

@@ -51,9 +51,14 @@ _STOP_LINE = re.compile(r'^\s*(?:[A-Z]-\d+\s|Applicant source:|NBC\(AE\)|[A-Z]\.
 # Rationale can discuss NBC(AE) in its own words. Only labelled boundaries end the passage;
 # generic section labels and citation-shaped lines remain ambiguous rather than proving blankness.
 _RATIONALE_STOP_LINE = re.compile(
-    r'^[ \t]*(?:Applicant source:|Appendix page[ \t]+\d+|'
-    r'(?:[A-Z]-\d+[ \t]+)?(?:rationale|code analysis|testing procedures?|qualifications(?: of [a-z ]+)?|'
-    r'maintenance(?: and (?:operation|commissioning))?|operation and maintenance|commissioning)[ \t]*(?::|$)|'
+    r'^[ \t]*(?:Applicant\s+source:|Appendix\s+page[ \t]+\d+|'
+    r'(?:[A-Z]-\d+[ \t]+)?(?:'
+    r'proposed\s+alternative(?:\s+solution)?|description\s+of\s+(?:the\s+)?proposed\s+alternative(?:\s+solution)?|'
+    r'rationale(?:\s+for\s+(?:the\s+)?(?:proposed\s+)?(?:alternative(?:\s+solution)?|variance))?|'
+    r'risk\s+assessment|mitigating\s+measures|assumptions,?(?:\s+and)?\s+limit(?:s|ing\s+factors|ations)?|'
+    r'(?:responsible|registered)\s+professional|code\s+analysis|testing\s+procedures?|'
+    r'qualifications(?:\s+of\s+(?:the\s+)?responsible\s+(?:people|professional|persons?)|[ \t]+of[ \t]+[a-z ]+)?|'
+    r'maintenance(?:\s+and\s+(?:operation|commissioning))?|operation\s+and\s+maintenance|commissioning)[ \t]*(?::|$)|'
     r'(?P<ambiguous>[A-Z]-\d+[ \t]+|[A-Z]\.[ \t]+[A-Z]|'
     r'NBC\(AE\)[ \t]+\d{4}(?:[ \t]+p\d+)?[ \t]*,[ \t]*Div[ \t]+[ABC][ \t]*,))', re.M | re.I)
 _NO_RATIONALE = '(Not provided or not confirmed. No answer has been supplied by Batatis.)'
@@ -169,11 +174,9 @@ def _rationale_candidate(read: ReadFile, index: int, match: re.Match) -> TextVal
         rest = continuation.text[rest_start:]
         stop = _RATIONALE_STOP_LINE.search(rest)
         ambiguous = bool(stop and stop.group('ambiguous'))
-        for _label_text, other in TEXT_FIELDS.values():
-            hit = other.search(rest)
-            if hit and (stop is None or hit.start() <= stop.start()):
-                stop = hit
-                ambiguous = False
+        # A known multiword label can wrap in extracted text. Stop before that label,
+        # but retain uncertainty rather than attributing its words/body to the rationale.
+        wrapped = bool(stop and '\n' in stop.group(0).strip())
         stop_line, stop_boundary = None, None
         if stop:
             suffix = rest[stop.start():]
@@ -183,10 +186,10 @@ def _rationale_candidate(read: ReadFile, index: int, match: re.Match) -> TextVal
         if not offset:
             value = body
         pointers.append(Pointer(file=read.name, page=continuation.page + 1, quote=body or heading_text))
-        uncertain = (uncertain or bool(offset) or not continuation.text.strip()
+        uncertain = (uncertain or bool(offset) or wrapped or not continuation.text.strip()
                      or (ambiguous and body != _NO_RATIONALE)
                      or read.passage_has_marks(continuation.page, heading, stop_boundary))
-        if stop_line and stop_line.casefold().startswith('appendix page'):
+        if stop and _norm(stop.group(0)).casefold().startswith('appendix page'):
             uncertain = True   # a running footer does not prove that the passage ends here
             continue
         if stop:
