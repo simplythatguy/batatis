@@ -140,3 +140,42 @@ def test_vercel_config_keeps_sqlite_on_the_engine_only():
     assert 'VITE_API_BASE' in client
     assert 'PDF too large' not in client
     assert 'PDF too large: the limit is 4 MB' in (ROOT / 'engine' / 'uploads.py').read_text()
+
+
+def _globs(value: str) -> list[str]:
+    return value.strip('{}').split(',')
+
+
+def _matches(path: str, globs: list[str]) -> bool:
+    from fnmatch import fnmatch
+    return any(fnmatch(path, g) or fnmatch(path, g.replace('/**/', '/')) for g in globs)
+
+
+def test_export_and_ccmc_runtime_files_are_bundled_and_not_excluded():
+    """WP-33: everything the export and the CCMC offline fallback read at runtime ships with the engine."""
+    from engine import ccmc
+    from engine.export import scc
+
+    function = json.loads((ROOT / 'vercel.json').read_text())['services']['engine']['functions']['engine/api.py']
+    included, excluded = _globs(function['includeFiles']), _globs(function['excludeFiles'])
+    runtime = [scc.BUNDLE_FORM, scc.MAP_DIR / f'{scc.CURRENT_MAP}.json', ccmc.BUNDLED_SNAPSHOT, ccmc.BUNDLED_META,
+               ROOT / 'engine' / 'data' / 'process_examples.json']
+    for path in runtime:
+        rel = path.relative_to(ROOT).as_posix()
+        assert _matches(rel, included), f'{rel} is not in includeFiles'
+        assert not _matches(rel, excluded), f'{rel} is excluded from the engine bundle'
+    for path in runtime[1:]:
+        assert path.is_file(), f'{path} is not committed'
+
+
+def test_bundled_ccmc_snapshot_is_the_default_offline_fallback_and_labelled():
+    from engine.ccmc import BUNDLED_META, BUNDLED_SNAPSHOT, CCMCRegistry
+
+    meta = json.loads(BUNDLED_META.read_text())
+    assert hashlib.sha256(BUNDLED_SNAPSHOT.read_bytes()).hexdigest() == meta['sha256']
+    client = CCMCRegistry(offline=True)
+    assert client.snapshot_path == BUNDLED_SNAPSHOT
+    found = client.search('insulation')
+    assert found.source == 'snapshot' and found.registry_date == meta['accessed']
+    assert found.total_matches > 0 and 'Offline snapshot dated' in found.message
+    assert found.snapshot_path == 'engine/data/ccmc/ccmc-registry.json'   # repo-relative, never a server path

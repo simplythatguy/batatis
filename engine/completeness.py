@@ -16,6 +16,7 @@ from codedb import validate_text
 from .codes import Codes
 from .jurisdictions import notices_for
 from .models import INTENT_LABEL, Case, Gap as CaseGap
+from .not_applicable import not_applicable, problems as not_applicable_problems
 from .process_fields import confirmed_value, latest_fact, process_fields
 from .professional import (
     NOT_ENGAGED_ITEM, OFFICER_PROFESSIONAL_GAP, PRESCRIPTIVE_CONTRADICTION, ProfessionalResult,
@@ -173,7 +174,10 @@ def check_completeness(case: Case, codes: Codes, *,
         gaps.append(Gap(id=f'{rule}:{field}', severity=severity, section=section, field=field,
                         message=f'Your application appears to be missing {missing}', fix_hint=fix_hint, citation=citation))
 
+    na = not_applicable(case)
     for rule, section, field, label, aliases in _CORE:
+        if field == 'representative' and 'owner_rep_name' in na:
+            continue    # the applicant confirmed there is no representative; the form shows N/A
         fact = latest_fact(case, *aliases)
         value = confirmed_value(case, *aliases)
         if field == 'legal_description' and fact is None:
@@ -202,6 +206,10 @@ def check_completeness(case: Case, codes: Codes, *,
     ):
         if (latest_fact(case, *signatures, *dates) is not None) and _missing(confirmed_value(case, *dates)):
             add('D02', 'A', name, f'the {name.replace("_", " ")}.', 'Ask the signatory to supply the signature date.')
+    for field, missing, hint in not_applicable_problems(case):
+        section = next((sec for token, sec in (('section_c', 'C'), ('section_d', 'D'), ('owner', 'A'),
+                                                ('representative', 'A')) if token in field), 'B')
+        add('not_applicable', section, field, missing, hint)
     if (case.jurisdiction is None or not case.jurisdiction.id.strip()
             or not case.jurisdiction.name.strip()):
         add('admin', 'B', 'jurisdiction', 'the reviewing jurisdiction.', 'Ask which authority will receive the application.')
