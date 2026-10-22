@@ -33,10 +33,23 @@ export interface ApplicantSummary {
   name: string;
 }
 
+export interface ApplicationPreferences {
+  archived: boolean;
+  pinned: boolean;
+}
+
+/** Omitted fields keep their stored value; explicit values must be booleans. */
+export interface ApplicationPreferencesPatch {
+  archived?: boolean;
+  pinned?: boolean;
+}
+
 export interface ApplicationSummary {
+  archived: boolean;
   authority: string | null;
   completeness: CompletenessSummary | null;
   id: string;
+  pinned: boolean;
   reviewer: ReviewerName | null;
   status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
   submitted_at: string | null;
@@ -60,8 +73,13 @@ export interface AssistFocus {
   kind: string;
 }
 
+export interface AssistNavigation {
+  destination: "applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "officer-view" | "settings" | "notifications" | "accuracy" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out";
+}
+
 export interface AssistRequest {
   case_id?: string | null;
+  destinations?: ("applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "officer-view" | "settings" | "notifications" | "accuracy" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out")[];
   focus?: AssistFocus | null;
   history?: AssistTurn[];
   question: string;
@@ -71,6 +89,7 @@ export interface AssistRequest {
 export interface AssistResult {
   answer: string;
   cited: string[];
+  navigation: AssistNavigation | null;
   notice: string;
   removed_citations: string[];
 }
