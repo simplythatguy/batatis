@@ -387,12 +387,16 @@ test("a return's decision and the officer's note sent with it are both shown, so
   h.unmount();
 });
 
-test("a return keeps an unread message from an earlier round unread when it is not displayed", async () => {
+test("a return also lists the officer's unread messages from an earlier round, then marks the thread read", async () => {
+  // An applicant can resend without opening the last return; those messages stay counted, so they are shown.
   const old = message("0", "An earlier round's note.", { created_at: "2026-10-20T10:00:00Z" });
+  const seen = message("5", "An earlier note already read.", { created_at: "2026-10-20T09:00:00Z", read_by_me: true });
   const decision = message("1", "Returned again.", { kind: "decision", created_at: "2026-10-22T10:00:00Z", items: [{ note: "Owner name", field: "owner_name" }] });
-  const h = await bannerHarness([old, decision]);
-  await h.render({ app: app({ status: "returned", unread_messages: 2 }) });
-  assert.equal(h.reads, 0);
-  assert.equal(h.patches.length, 0);
+  const h = await bannerHarness([seen, old, decision]);
+  const tree = await h.render({ app: app({ status: "returned", unread_messages: 2 }) });
+  const shown = text(tree);
+  assert.ok(shown.indexOf("Returned again.") < shown.indexOf(old.body), "the new return leads, the earlier unread note follows");
+  assert.equal(shown.includes(seen.body), false, "messages already read are not repeated");
+  assert.equal(h.reads, 1);
   h.unmount();
 });

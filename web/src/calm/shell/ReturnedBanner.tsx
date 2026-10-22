@@ -35,6 +35,8 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
   const { c, gaps } = useCase();
   const refused = app.status === "refused";
   const [messages, setMessages] = useState<Message[] | null>(null);
+  /** Unread when this load arrived: they stay on screen after being marked read. */
+  const [unreadAtLoad, setUnreadAtLoad] = useState<ReadonlySet<string>>(() => new Set());
   const [error, setError] = useState("");
   // Bumped by "Try again"; the effect below owns the request, so a late answer for another file is dropped.
   const [attempt, setAttempt] = useState(0);
@@ -48,6 +50,7 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
       .then((m) => {
         if (!live) return;
         setMessages(m);
+        setUnreadAtLoad(new Set(m.filter((x) => !x.read_by_me).map((x) => x.id)));
       })
       .catch((e: unknown) => { if (live) setError(e instanceof EngineError ? e.detail : "The officer’s message did not load."); });
     return () => { live = false; };
@@ -60,9 +63,11 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
     const decisions = fromOfficer.filter((m) => m.kind === "decision");
     const latest = refused ? decisions[decisions.length - 1] : decisions[decisions.length - 1] ?? fromOfficer[fromOfficer.length - 1];
     const after = ordered.slice(latest ? ordered.indexOf(latest) + 1 : 0);
-    // Refused: both sides' correspondence since. Returned: the officer's notes sent with or after the return.
-    return { latest, correspondence: refused ? after : latest ? after.filter((m) => m.author.role === "reviewer" && m.kind !== "status") : [] };
-  }, [messages, refused]);
+    // Refused: both sides' correspondence since. Returned: the officer's notes sent with or after the
+    // return, and any earlier officer message still unread (an applicant can resend without opening it).
+    const notes = latest ? fromOfficer.filter((m) => m !== latest && (after.includes(m) || unreadAtLoad.has(m.id))) : [];
+    return { latest, correspondence: refused ? after : notes };
+  }, [messages, refused, unreadAtLoad]);
 
   // The read endpoint clears the whole thread. Only call it after rendering every unread message;
   // earlier correspondence is not displayed. Status lines are not messages and are never counted.
