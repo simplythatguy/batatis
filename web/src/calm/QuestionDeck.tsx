@@ -515,7 +515,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     // The code check finished while its card was open: the code questions take its place.
     if (item?.gone && item.kind === "code-run") moveFrom(index, false);
     // The reading finished: start at the first thing it read.
-    if (item?.gone && item.kind === "reading") {
+    if (item?.gone && (item.kind === "reading" || item.kind === "scope")) {
       const first = queue.findIndex((k) => { const it = itemFor(k); return Boolean(it && !it.done); });
       updateSession({ queue, index: first >= 0 ? first : queue.length });
     }
@@ -710,7 +710,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
         </div>
       )}
       <div className="cf-q-stage">
-        {item?.kind === "scope" ? (
+        {item?.kind === "scope" && !item.gone ? (
           <RedirectPage n={n} />
         ) : item ? (
           <div ref={wrapRef} key={item.key} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">

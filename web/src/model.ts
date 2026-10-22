@@ -2,7 +2,7 @@ import type { IntakeRecord, IntakeResult, IdentifyResult } from "./api/types.gen
 import { AUTHORITIES } from "./config";
 import { applyDescription } from "./intake";
 import { asLocal } from "./intakeFields";
-import { identifyCandidates, readGroups } from "./intakeView";
+import { codeQuestion, identifyCandidates, readGroups } from "./intakeView";
 import { AUTHORITY_ONLY_FIELDS, professionalConfirmed } from "./professional";
 import type { Candidate, CandidateAnswer, Case, EvidenceDraft, Fact, Gap, ListedEvidence, ProcessFieldId, SectionCRow } from "./types";
 import { canonicalProvision, isProvision, reconcileSectionC } from "./provisions";
@@ -72,6 +72,18 @@ export const PROCESS_FIELDS: { id: ProcessFieldId; label: string; prompts: strin
     prompts: ["Who takes responsibility, and what is their scope? This tool does not write that opinion."],
   },
 ];
+
+/** What a missing Section A or B field means, in plain words. */
+const DETAIL_GAP: Record<string, string> = {
+  owner: "The owner’s name",
+  representative: "Who signs for the applicant",
+  mailingAddress: "A mailing address for the officer",
+  date: "The date of the request",
+  scope: "Whether this is for one site or every site (jurisdiction-wide)",
+  municipalAddress: "The site’s street address",
+  legalDescription: "The site’s legal description (lot, block and plan)",
+  alternative: "What you want to do differently (the proposed alternative)",
+};
 
 /** Plain names for the applicant's case, with the form's term in brackets. */
 export const PROCESS_PLAIN: Record<ProcessFieldId, string> = {
@@ -265,15 +277,16 @@ export const unresolvedCandidates = (c: Case) => c.candidates.filter((a) => a.an
 
 /** Unanswered code-check cards name the question. They do not say "Answer: what you described". */
 export function codeCheckLabel(topic: string, question?: string, provision?: string): string {
-  if (provision && isProvision(provision)) return `Rules: does your design differ from rule ${provision}?`;
+  // The article number stays behind "Show the code"; the rule's name says what it is about.
+  if (provision && isProvision(provision)) return /^\d/.test(topic.trim()) ? `Answer whether your design differs from rule ${provision}` : codeQuestion(topic);
   const using = topic.match(/^using\s+(.+)$/i);
   if (using) {
     const rest = using[1].charAt(0).toLowerCase() + using[1].slice(1);
-    return `Code check: answer whether your design relies on ${rest}`;
+    return `Answer whether your design relies on ${rest}`;
   }
-  if (/^what you described$/i.test(topic.trim()) && question?.trim()) return `Code check: ${question.trim()}`;
+  if (/^what you described$/i.test(topic.trim()) && question?.trim()) return question.trim();
   const named = topic.charAt(0).toLowerCase() + topic.slice(1);
-  return `Code check: answer whether your design relies on ${named}`;
+  return `Answer whether your design relies on ${named}`;
 }
 
 /** Words for the text record. The fact kind and status enums are not printed. */
@@ -298,6 +311,17 @@ export function answeredByDescription(c: Pick<Case, "description">, questionId: 
 
 export function getGaps(c: Case): Gap[] {
   const gaps: Gap[] = [];
+  const redirect = c.facts.find((f) => f.field === "scope.redirect" && f.status === "unconfirmed");
+  if (redirect) {
+    const regime = c.intake?.record.plan?.scope.regime?.name ?? String(redirect.value ?? "another regime");
+    gaps.push({
+      id: `confirm-${redirect.id}`,
+      severity: "blocking",
+      label: `This reads as a ${regime} question. Say whether it is a building-code question before export.`,
+      href: "#/questions?focus=scope",
+      field: "scope.redirect",
+    });
+  }
   if (!c.authority) {
     gaps.push({
       id: "detail-jurisdiction",
@@ -309,19 +333,8 @@ export function getGaps(c: Case): Gap[] {
   for (const d of DETAIL_FIELDS) {
     const fact = factFor(c, d.id);
     if (d.required && !valueText(fact).trim()) {
-      gaps.push({ id: `detail-${d.id}`, severity: "blocking", label: `${d.label} missing`, href: routeForDetail(d.id), field: d.id });
+      gaps.push({ id: `detail-${d.id}`, severity: "blocking", label: DETAIL_GAP[d.id] ?? `${d.label} missing`, href: routeForDetail(d.id), field: d.id });
     }
-  }
-  const redirect = c.facts.find((f) => f.field === "scope.redirect" && f.status === "unconfirmed");
-  if (redirect) {
-    const regime = c.intake?.record.plan?.scope.regime?.name ?? String(redirect.value ?? "another regime");
-    gaps.push({
-      id: `confirm-${redirect.id}`,
-      severity: "blocking",
-      label: `This reads as a ${regime} question. Say whether it is a building-code question before export.`,
-      href: "#/questions?focus=scope",
-      field: "scope.redirect",
-    });
   }
   // One gap per thing to check: a value with its unit conversion, or the same words read twice, is one card.
   for (const g of readGroups(c, DETAIL_IDS)) {
