@@ -392,6 +392,63 @@
       "title": "AssistFocus",
       "type": "object"
     },
+    "AssistNavigation": {
+      "additionalProperties": false,
+      "properties": {
+        "destination": {
+          "enum": [
+            "applications",
+            "description",
+            "questions",
+            "review",
+            "application",
+            "code-library",
+            "code-search",
+            "references",
+            "downloads",
+            "officer-view",
+            "settings",
+            "notifications",
+            "accuracy",
+            "question-authority",
+            "question-owner",
+            "question-representative",
+            "question-mailing-address",
+            "question-date",
+            "question-scope",
+            "question-permit",
+            "question-site-address",
+            "question-legal-description",
+            "question-alternative",
+            "question-rationale",
+            "question-risk",
+            "question-mitigation",
+            "question-assumptions",
+            "question-maintenance",
+            "question-qualifications",
+            "question-documents",
+            "review-queue",
+            "package-review",
+            "review-overview",
+            "review-missing",
+            "review-checks",
+            "review-decide",
+            "review-application",
+            "review-messages",
+            "review-request",
+            "review-versions",
+            "review-close-out"
+          ],
+          "title": "Destination",
+          "type": "string"
+        }
+      },
+      "required": [
+        "destination"
+      ],
+      "title": "AssistNavigation",
+      "type": "object"
+    },
     "AssistRequest": {
       "additionalProperties": false,
       "properties": {
@@ -408,6 +465,57 @@
           ],
           "default": null,
           "title": "Case Id"
+        },
+        "destinations": {
+          "items": {
+            "enum": [
+              "applications",
+              "description",
+              "questions",
+              "review",
+              "application",
+              "code-library",
+              "code-search",
+              "references",
+              "downloads",
+              "officer-view",
+              "settings",
+              "notifications",
+              "accuracy",
+              "question-authority",
+              "question-owner",
+              "question-representative",
+              "question-mailing-address",
+              "question-date",
+              "question-scope",
+              "question-permit",
+              "question-site-address",
+              "question-legal-description",
+              "question-alternative",
+              "question-rationale",
+              "question-risk",
+              "question-mitigation",
+              "question-assumptions",
+              "question-maintenance",
+              "question-qualifications",
+              "question-documents",
+              "review-queue",
+              "package-review",
+              "review-overview",
+              "review-missing",
+              "review-checks",
+              "review-decide",
+              "review-application",
+              "review-messages",
+              "review-request",
+              "review-versions",
+              "review-close-out"
+            ],
+            "type": "string"
+          },
+          "maxItems": 64,
+          "title": "Destinations",
+          "type": "array"
         },
         "focus": {
           "anyOf": [
@@ -461,6 +569,17 @@
           "title": "Cited",
           "type": "array"
         },
+        "navigation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AssistNavigation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "notice": {
           "title": "Notice",
           "type": "string"
@@ -477,7 +596,8 @@
         "answer",
         "cited",
         "removed_citations",
-        "notice"
+        "notice",
+        "navigation"
       ],
       "title": "AssistResult",
       "type": "object"
