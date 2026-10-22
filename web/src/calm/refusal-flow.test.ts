@@ -366,3 +366,33 @@ test("after recovery the request moves to a newer version another run saved", as
   assert.deepEqual([ir.props.session.version, ir.props.latest, ir.props.canEdit], [3, true, true]);
   h.unmount();
 });
+
+test("a return's decision and the officer's note sent with it are both shown, so the thread can be marked read", async () => {
+  // The engine records a return as a decision (with the items to fix) and, at the same moment, a
+  // plain message. Showing only the last one left the decision unread and the sidebar stuck on 2.
+  const at = "2026-10-22T19:40:56Z";
+  const decision = message("1", "Returned for administrative information.\n\nPlease clarify the owner.", { kind: "decision", created_at: at, items: [{ note: "Owner name", field: "owner_name" }] });
+  const note = message("2", "Please update the revision date, then send it again.", { created_at: at });
+  const status = message("0", "Submitted for administrative review.", { kind: "status", created_at: "2026-10-22T19:00:00Z", author: applicantReply.author, read_by_me: true });
+  const h = await bannerHarness([status, decision, note]);
+  const tree = await h.render({ app: app({ status: "returned", unread_messages: 2 }) });
+  const shown = text(tree);
+  assert.ok(shown.includes("Please clarify the owner."), "the return decision is displayed");
+  assert.ok(shown.includes(note.body), "the note sent with it is displayed");
+  assert.ok(nodes(tree, (n) => n.type === "a" && text(n).includes("Fix 1 item")).length, "the decision's item still links to its fix");
+  assert.equal(h.reads, 1, "both displayed, so the thread is marked read");
+  await new Promise((r) => setTimeout(r));
+  assert.equal(JSON.stringify(h.patches), JSON.stringify([["c1", { unread_messages: 0 }]]), "the sidebar count clears");
+  assert.equal(nodes(tree, (n) => n.type === "button" && text(n) === "Reply").length, 0, "still one-way");
+  h.unmount();
+});
+
+test("a return keeps an unread message from an earlier round unread when it is not displayed", async () => {
+  const old = message("0", "An earlier round's note.", { created_at: "2026-10-20T10:00:00Z" });
+  const decision = message("1", "Returned again.", { kind: "decision", created_at: "2026-10-22T10:00:00Z", items: [{ note: "Owner name", field: "owner_name" }] });
+  const h = await bannerHarness([old, decision]);
+  await h.render({ app: app({ status: "returned", unread_messages: 2 }) });
+  assert.equal(h.reads, 0);
+  assert.equal(h.patches.length, 0);
+  h.unmount();
+});
