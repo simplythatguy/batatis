@@ -15,6 +15,7 @@ import { gapKey } from "./deck";
 import { calmHref } from "./routes";
 import { EngineerCallout } from "./Review";
 import { CIcon, Dot, Eyebrow } from "./ui";
+import { useCaseExtras } from "./caseExtras";
 
 function Missing() {
   return <span className="cf-sheet-missing"><span className="cf-sheet-dot" aria-hidden="true" />— <em>missing</em></span>;
@@ -251,7 +252,8 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
   const account = useAccount();
   const { locked } = useCurrentApplication();
   const signedIn = account.phase === "signed-in";
-  const { c, gaps, checkStatus, checkNote, completenessRecord } = useCase();
+  const { c, gaps, checkStatus, checkNote, completenessRecord, engineId, factsEpoch } = useCase();
+  const extras = useCaseExtras(engineId, factsEpoch, c.authority);
   const ex = useApplicationExport();
   const draftBtn = useRef<HTMLButtonElement>(null);
   const checked = checkStatus === "ready" || checkStatus === "needs_answers";
@@ -270,9 +272,18 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
   if (!ex.officialReady) {
     if (checkStatus === "running") reasons.push({ tone: "pending", text: checkNote || "Checking your draft…" });
     else if (!checked) reasons.push({ tone: "warning", text: checkStatus === "unavailable" ? "The last check couldn’t finish." : checkStatus === "stale" ? "Your draft changed since the last check." : "Your application hasn’t been checked yet.", action: { label: checkStatus === "unavailable" ? "Try again" : "Check now", run: ex.runCheck } });
-    if (ex.blocking.length) reasons.push({ tone: "blocking", text: `${ex.blocking.length} required ${ex.blocking.length === 1 ? "item is" : "items are"} missing.`, action: { label: "See them", href: "#/review" } });
     if (route) reasons.push({ tone: "warning", text: "Waiting on a registered professional’s confirmation." });
   }
+
+  // Each blocker links to the card that fixes it (the same shared gap list as Review and the deck).
+  const blockers = ex.officialReady ? [] : ex.blocking.filter((g) => !isProfessionalHold(g));
+  const fixHref = (g: (typeof gaps)[number]) => {
+    const key = gapKey(c, g);
+    return key ? `#/questions?focus=${encodeURIComponent(key)}` : calmHref(g.href);
+  };
+  const pack = extras.pack?.pack ?? null;
+  const exportNotices = pack?.notices.filter((n) => n.surfaces.includes("export_header") || n.surfaces.includes("export_appendix")) ?? [];
+  const filled = pack?.forms.find((f) => f.export === "supported");
 
   const headline = ex.officialReady ? "Ready for the official PDF." : "You can download a draft.";
   const sub = ex.officialReady ? "Nothing required is missing." : "Official PDF on hold.";
@@ -306,7 +317,30 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
         <button type="button" className="cf-btn is-center" disabled={ex.busy || !ex.officialReady} data-requires-no-blocking-gaps={ex.blocking.length ? "true" : undefined} onClick={() => void ex.prepare(false)}>
           {ex.stage === "preparing" && !ex.draftIntent ? "Preparing PDF…" : "Official PDF"}
         </button>
-        {!ex.officialReady && <p className="cf-faint cf-small">The official PDF unlocks after a current check finds no required items. Drafts can be incomplete.</p>}
+        {!ex.officialReady && <p className="cf-faint cf-small">The Official PDF unlocks after a current check finds no required items. Drafts can be incomplete.</p>}
+        {blockers.length > 0 && !locked && (
+          <div className="cf-side-blockers">
+            <p className="cf-small">Still needed for the Official PDF:</p>
+            <ul className="cf-rows is-compact">
+              {blockers.slice(0, 5).map((g) => (
+                <li key={g.id} className="cf-row">
+                  <Dot tone="blocking" />
+                  <span className="cf-row-text">{g.label}</span>
+                  <a className="cf-row-go" href={fixHref(g)}>Fix <CIcon name="arrow" size={13} /></a>
+                </li>
+              ))}
+            </ul>
+            {blockers.length > 5 && <p className="cf-faint cf-small">And {blockers.length - 5} more. <a className="cf-inline-link" href="#/review">See all on Review</a></p>}
+          </div>
+        )}
+        {filled && <p className="cf-faint cf-small">Batatis fills {filled.title}{filled.version ? ` (${filled.version})` : ""}.</p>}
+        {exportNotices.map((n) => (
+          <div key={n.id} className="cf-side-notice" role="note">
+            <p className="cf-side-notice-h">{n.heading}</p>
+            <p>{n.message}</p>
+            {n.sources[0] && <p><a className="cf-inline-link" href={n.sources[0].url} target="_blank" rel="noreferrer">{n.sources[0].title}</a></p>}
+          </div>
+        ))}
         <button type="button" className="cf-btn is-ghost is-sm is-center" onClick={ex.downloadRecord}>Download a text record</button>
 
         {showStatus && (
