@@ -82,6 +82,9 @@ export const SCHEMA = "batatis-accuracy/1";
 export function checkReport(data: unknown): Report {
   const r = data as Partial<Report> | null;
   if (!r || r.schema !== SCHEMA) throw new Error("The accuracy report has an unknown format.");
+  if (typeof r.generated_on !== "string" || typeof r.edition !== "string" || typeof r.intro !== "string" || typeof r.built_from?.commit !== "string") {
+    throw new Error("The accuracy report is missing when and how it was built.");
+  }
   if (!Array.isArray(r.guaranteed) || !Array.isArray(r.measured) || !Array.isArray(r.not_measured)) {
     throw new Error("The accuracy report is incomplete.");
   }
@@ -92,6 +95,7 @@ export function checkReport(data: unknown): Report {
     for (const f of s.figures) {
       if (!f.source?.commit || !(f.source.paths?.length || f.source.pr)) throw new Error(`Figure ${f.id} has no source.`);
       if (!(f.n > 0)) throw new Error(`Figure ${f.id} has no sample size.`);
+      if (typeof f.value !== "string" || typeof f.label !== "string" || !Number.isFinite(f.x)) throw new Error(`Figure ${f.id} is incomplete.`);
     }
   }
   return r as Report;
@@ -112,8 +116,11 @@ export function dateText(value: string): string {
 
 export function percent(x: number | null): string {
   if (x == null) return "—";
-  const v = x * 100;
-  return `${v >= 99.95 || v === 0 ? v.toFixed(0) : v.toFixed(1)}%`;
+  if (x >= 1) return "100%";
+  if (x <= 0) return "0%";
+  // Never round a rate below one up to 100%, or a rate above zero down to 0%.
+  const v = Math.min(Math.max(x * 100, 0.1), 99.9);
+  return `${v.toFixed(1)}%`;
 }
 
 /** "95% interval 97.6–100%" or null when the figure has none (a count of checks, a count of vectors). */

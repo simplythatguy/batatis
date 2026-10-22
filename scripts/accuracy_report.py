@@ -3,12 +3,12 @@
 
     python scripts/accuracy_report.py                       # code identification from evals_dev/identify_bench if present
     python scripts/accuracy_report.py --bench-ref REF       # ... or from a git ref that holds the benchmark (draft PR #58)
-    python scripts/accuracy_report.py --verify              # also run every test a guaranteed claim names
+    python scripts/accuracy_report.py --no-verify           # draft: skip running the tests behind the guaranteed claims
 
 Two kinds of claim, kept apart:
 
 * Guaranteed: true by construction and enforced by named tests. The builder fails when a claim names no test or a test
-  that does not exist; `--verify` runs them and fails on any failure.
+  that does not exist, then runs them and fails unless every one passes (skipped counts as not passed).
 * Measured: a number with its dataset, sample size, date, interval and source (a file and commit, or a PR body and its
   merge commit). The builder fails when a figure has no source. Deterministic figures are recomputed from the stored
   datasets at the current commit; figures that cannot be recomputed (a first blind run, a gate run) are quoted from the
@@ -156,9 +156,9 @@ GUARANTEED = [
     },
     {
         'id': 'no-provider-names',
-        'claim': 'Nothing a user can see names an AI provider.',
-        'detail': ('The web code that ships to the browser, the API responses, the exported PDF, this report and this '
-                   'page are scanned for provider names.'),
+        'claim': 'The web app, code identification answers, the exported form and this report name no AI provider.',
+        'detail': ('Tests scan the web code that ships to the browser, the code identification responses, the exported '
+                   'PDF, this report and this page for provider names.'),
         'tests': [
             'engine/tests/test_no_provider_names_exposed.py::test_web_source_that_ships_to_the_browser_names_no_provider',
             'engine/tests/test_no_provider_names_exposed.py::test_identify_responses_name_no_provider',
@@ -723,7 +723,7 @@ def code_id_from_probe(p: dict, commit: str, where: str) -> dict:
                               dataset='Public Alberta precedents', sample=f'{n} cases', date=date, source=src([SCREEN_RERANK, FLOOR]),
                               tags=tags + ['relevance stage only'],
                               note=f'Mean of {pub[SCREEN_RERANK]["repeats"]} draws. Keyword search: {r0["hit@5"]["mean"] * 100:.1f}%.'))
-    fab = prod.get('fabricated_citations_shown')
+    fab = prod.get('fabricated_citations_shown') if p.get('integrity_rechecked') else None
     if fab is not None:
         shown = prod['errors']['rows']
         figures.append(figure('codeid.fabricated', 'Stored product runs that would show a citation not in the code database', fab, shown,
@@ -908,9 +908,9 @@ def build(*, bench_ref: str | None, verify: bool, run_gate: bool, today: str | N
                 t['result'] = results.get(t['id'], 'not collected')
         guaranteed.append({'id': c['id'], 'claim': c['claim'], 'detail': c['detail'], 'tests': tests})
     if results:
-        bad = [t for t, r in results.items() if r not in ('passed',)]
-        if any(results[t] == 'failed' for t in bad):
-            raise ReportError('a test behind a guaranteed claim failed: ' + ', '.join(t for t in bad if results[t] == 'failed'))
+        bad = [f'{t} ({r})' for t, r in sorted(results.items()) if r != 'passed']
+        if bad:   # a skipped or uncollected test enforces nothing
+            raise ReportError('a test behind a guaranteed claim did not pass: ' + ', '.join(bad))
     measured = [
         intake_section(commit, today),
         code_id_section(bench_ref),
@@ -973,7 +973,10 @@ def validate(report: dict) -> None:
                 problems.append(f'{where}: no sample size')
             if f.get('interval') is not None and not (0 <= f['interval'][0] <= f['interval'][1] <= 1):
                 problems.append(f'{where}: bad interval')
-    text = json.dumps(report, ensure_ascii=False)
+    try:
+        text = json.dumps(report, ensure_ascii=False, allow_nan=False)
+    except ValueError:
+        raise ReportError('the report holds a non-finite number (NaN or infinity)') from None
     for m in list(PROVIDER_NAMES.finditer(text))[:5]:
         problems.append(f'provider name in the report: ...{text[max(0, m.start() - 40):m.end() + 40]}...')
     if problems:
@@ -999,7 +1002,7 @@ def render_md(r: dict) -> str:
            + (' (uncommitted changes)' if r['built_from']['dirty'] else '') + '. Do not edit by hand. '
            'The page at `#/accuracy` reads `report.json` next to this file.', '', r['intro'], '',
            '## What Batatis guarantees', '',
-           'True by construction and enforced by tests. If a test fails, the build fails.', '']
+           'True by construction and enforced by tests. The report is built only when every one of these tests passes.', '']
     if r.get('verified'):
         v = r['verified']
         out += [f'Last run of these tests: {v["passed"]} passed, {v["skipped"]} skipped, of {v["total"]}, on {v["date"]} at `{v["commit"][:7]}`.', '']
@@ -1036,13 +1039,14 @@ def render_md(r: dict) -> str:
 
 
 def dump(report: dict) -> str:
-    return json.dumps(report, indent=2, ensure_ascii=False, sort_keys=False) + '\n'
+    return json.dumps(report, indent=2, ensure_ascii=False, sort_keys=False, allow_nan=False) + '\n'
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--bench-ref', help='git ref holding evals_dev/identify_bench (for example the fetched PR #58 branch)')
-    ap.add_argument('--verify', action='store_true', help='run every test a guaranteed claim names')
+    ap.add_argument('--no-verify', dest='verify', action='store_false',
+                    help='skip running the tests a guaranteed claim names (drafts only; the committed report is verified)')
     ap.add_argument('--run-gate', action='store_true', help='re-run gate G3 (needs BATATIS_SCC_FORM)')
     ap.add_argument('--date', help='measurement date to record (default today)')
     args = ap.parse_args(argv)

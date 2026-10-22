@@ -21,6 +21,24 @@ def test_the_committed_report_validates_and_was_built_from_a_clean_tree():
     ar.validate(REPORT)
     assert REPORT['built_from']['dirty'] is False, 'regenerate after committing the code it measures'
     assert ar.HEX.match(REPORT['built_from']['commit'])
+    v = REPORT['verified']
+    assert v and v['passed'] == v['total'], 'the committed report is built with its guaranteed tests run and passing'
+
+
+def test_a_non_finite_number_fails_the_build():
+    broken = copy.deepcopy(REPORT)
+    broken['measured'][0]['figures'][0]['x'] = float('nan')
+    with pytest.raises(ar.ReportError, match='non-finite'):
+        ar.validate(broken)
+
+
+def test_without_the_database_recheck_no_fabrication_count_is_shown():
+    probe = _probe()
+    probe['integrity_rechecked'] = False
+    s = _section(probe)
+    assert not [f for f in s['figures'] if f['id'] == 'codeid.fabricated']
+    g1 = next(t for t in s['detail'] if t['title'] == 'Gate G1 checks')['rows']
+    assert any(r[0] == 'Fabricated citations shown' and r[1] == 'not rechecked' for r in g1)
 
 
 def test_a_figure_without_a_source_fails_the_build():

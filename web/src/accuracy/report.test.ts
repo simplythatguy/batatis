@@ -44,12 +44,17 @@ test("a figure without a source, or a claim without a test, is refused", () => {
   untested.guaranteed[0].tests = [];
   assert.throws(() => checkReport(untested), /names no test/);
   assert.throws(() => checkReport({ schema: "other" }), /unknown format/);
+  const unbuilt = structuredClone(RAW);
+  delete unbuilt.built_from;
+  assert.throws(() => checkReport(unbuilt), /how it was built/);
 });
 
 test("numbers and dates read plainly", () => {
   assert.equal(percent(1), "100%");
   assert.equal(percent(0.98148), "98.1%");
   assert.equal(percent(0), "0%");
+  assert.equal(percent(0.9996), "99.9%", "a rate below one never reads as 100%");
+  assert.equal(percent(0.0004), "0.1%");
   assert.equal(dateText("2026-10-21"), "21 Oct 2026");
   assert.equal(dateText("2026-10-21 to 2026-10-22"), "21 Oct 2026 to 22 Oct 2026");
   const f = { interval: [0.9764, 1] } as unknown as Figure;

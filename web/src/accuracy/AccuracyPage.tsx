@@ -141,7 +141,7 @@ export function AccuracyPage({ phoneTools, right, standalone = false }: { phoneT
             <section className="ac-section" aria-labelledby="acc-guaranteed">
               <h2 id="acc-guaranteed" className="acc-h2">What Batatis guarantees</h2>
               <p className="acc-plain">
-                These hold by construction. Each one names the tests that enforce it, and the build fails if a test fails.
+                These hold by construction. Each one names the tests that enforce it, and this report is built only when every one of those tests passes.
               </p>
               {verifiedText(report) && <p className="acc-faint">{verifiedText(report)}</p>}
               <ul className="acc-claims">
