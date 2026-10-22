@@ -118,6 +118,8 @@ def answers(case: Case, checklist: StandingChecklist) -> dict[str, ConditionAnsw
         state = latest.get(field(checklist.id, condition.id))
         if state is None or state.value not in ANSWER_STATES:
             continue
+        if state.value == 'does_not_apply' and not condition.may_not_apply:
+            continue            # only reachable through raw fact writes; the answer route rejects it
         reason = latest.get(field(checklist.id, condition.id, reason=True))
         found[condition.id] = ConditionAnswer(state=state.value, fact_id=state.id,
                                               reason=str(reason.value) if reason and reason.value else None)
