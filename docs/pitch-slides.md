@@ -179,7 +179,7 @@
 - Close out: before Dec 1, 2026 the authority sends the Council a copy of the variance within 10 days of issuance. From Dec 1 the SCO registers the variance in the portal at issuance or as soon as reasonably practicable after, with the supporting documentation. The close-out record lists what to send and keep and shows a 10-day due date. It does not follow the portal timing yet. The officer sends or registers. Batatis never does
 - First user sessions are a protocol with targets, and none has run
 
-**Speaker notes:** The Council says registration does not move responsibility for the decision. The officer still decides and still registers. Batatis prepares and checks. The Council invites high-volume organizations to build approved integrations, and we would do that only on its terms. No pilot partner has agreed to anything.
+**Speaker notes:** The Council says registration does not move responsibility for the decision. The officer still decides and still registers. Batatis helps assemble and check. The Council invites high-volume organizations to build approved integrations, and we would do that only on its terms. No pilot partner has agreed to anything.
 *Sources:* [IB-2026-10-01](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf); [IB-2026-10-16](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-16_AHJ_Clarification.pdf); [onboarding guide](https://edmontonunlimited.com/wp-content/uploads/2026/09/Built-World-Challenge-Onboarding-Guide.docx.pdf)
 
 ### Slide 11: Applicants pay to arrive complete [Business Plan, 10]

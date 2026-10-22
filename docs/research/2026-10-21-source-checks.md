@@ -1,6 +1,6 @@
 # Source checks, 21 October 2026
 
-The plans and the pitch cite figures that no other file in `docs/research/` holds. This note records where each one comes from, what was read, and the value. Each source was downloaded or run on Oct 21, 2026. Downloaded files are not committed. Each entry gives the SHA-256 of the file read (first 16 hex digits), so a reader can repeat the check. Anything not listed here is either in another research file (named in the plan that uses it) or is labelled an estimate or an assumption there.
+The plans and the pitch cite figures that no other file in `docs/research/` holds. This note records where each one comes from, what was read, and the value. Each source was downloaded or run on Oct 21 or Oct 22, 2026, and §6 gives the date of each run. Downloaded files are not committed. Each entry gives the SHA-256 of the file read (first 16 hex digits), so a reader can repeat the check. Anything not listed here is either in another research file (named in the plan that uses it) or is labelled an estimate or an assumption there.
 
 Labels follow `C-market-provinces-business.md`: **verified** means the figure is on the primary source named, **measured** means a run or a file produced it, **estimate** means arithmetic on the figures shown.
 

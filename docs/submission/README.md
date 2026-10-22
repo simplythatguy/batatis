@@ -118,7 +118,7 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 
 **Evidence now:**
 
-- `docs/implementation-plan.md`: state of the product, the Council's six steps mapped to Batatis, the officer workflow with the 10-day Council copy, the regulatory fit, hosting and data handling, the path to beta with the definition of beta and its dependencies, and the user-testing plan.
+- `docs/implementation-plan.md`: state of the product, the Council's six steps mapped to Batatis, the officer workflow with the Council copy and the Dec 1 portal rule, the regulatory fit, hosting and data handling, the path to beta with the definition of beta and its dependencies, and the user-testing plan.
 - `docs/user-testing/` (session script, consent form, officer timing protocol). `docs/pilot-adoption-plan.md`. Jurisdiction onboarding by data packs: `docs/api/jurisdictions.md` (PR #51).
 
 **Gaps:**

@@ -283,7 +283,7 @@ The deck asks its cards in the order of the form: Section A, Section B, Section 
 | The Council's form dated Oct 6, 2026, Part 2 and signatures blank | `engine/export/field_maps/scc_2026-10.json`, `docs/research/2026-10-21-source-checks.md` §1 |
 | Section C looked up from the attribution tables | `codedb/README.md`, `docs/api/identify.md` |
 | 9.10.15.4.(1) with [F03-OP3.1], PDF p.901 | `docs/research/2026-10-21-source-checks.md` §7 |
-| The close-out record lists what to send and keep, with a due date 10 days after the decision | `docs/research/2026-10-21-source-checks.md` §1 (IB-2025-11-18 for the 10 days, IB-2026-10-01 for the portal from Dec 1), `docs/api/package-review.md` |
+| The close-out record lists what to send and keep, with a due date 10 days after the decision (the rule before Dec 1, 2026; the Council's portal rule applies from Dec 1) | `docs/research/2026-10-21-source-checks.md` §1 (IB-2025-11-18 for the 10 days, IB-2026-10-01 for the portal from Dec 1), `docs/api/package-review.md` |
 | "Accepted as administratively complete" | `docs/api/accounts-review.md`, `web/src/calm/reviewer/ReviewDetail.tsx` |
 | Package review and information request | `docs/api/package-review.md` |
 | Screen text quoted above | `web/src/calm/` at commit 43e7c09 |
