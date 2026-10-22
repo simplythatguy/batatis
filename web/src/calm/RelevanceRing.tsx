@@ -92,6 +92,8 @@ export function RelevanceRing({
   useEffect(() => () => window.clearTimeout(timer.current), []);
   const show = () => { window.clearTimeout(timer.current); timer.current = window.setTimeout(() => setOpen(true), 120); };
   const hide = () => { window.clearTimeout(timer.current); setOpen(false); };
+  // Browsing without an application: no rings at all, not even "not scored".
+  if (rel.scope === "none") return null;
   const label =
     band === "unscored"
       ? "Relevance estimate: not scored"
@@ -140,6 +142,7 @@ export function RelevanceRing({
 export function BandPill({ id }: { id: string }) {
   const rel = useRelevance();
   const { band } = rel.shown(id);
+  if (rel.scope === "none") return null;
   return <span className={`cf-band is-${band}`}>{BAND_LABEL[band]}</span>;
 }
 
@@ -162,6 +165,7 @@ export function RingLegend() {
       { band: "estimate", p: 0.4, text: `${BAND_LABEL.estimate}. Not rated likely or unlikely yet.` },
       { band: "unscored", text: "Dashed: not scored yet." },
     ];
+  if (rel.scope === "none") return null;
   return (
     <>
       <button

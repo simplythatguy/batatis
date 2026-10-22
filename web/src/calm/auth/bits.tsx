@@ -1,6 +1,7 @@
 /** Small shared pieces for the account, reviewer, settings and notification screens. */
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { initials } from "../account";
+import { AskButton } from "../assistant/AskButton";
 
 /** 24px line icons, currentColor only (same grid and stroke as calm/icons.tsx). */
 const P = {
@@ -148,6 +149,7 @@ export function PageHead({ title, meta, right, phoneTools, center }: { title: Re
       {center}
       <div className="ac-head-right">
         {right}
+        <AskButton />
         {phoneTools && <span className="ac-phone-tools">{phoneTools}</span>}
       </div>
     </header>

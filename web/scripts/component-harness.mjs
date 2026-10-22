@@ -78,6 +78,8 @@ export async function componentHarness(url, name, modules, globals = {}) {
       throw new Error(`${name} did not settle`);
     },
     unmount() { for (const slot of slots) slot?.cleanup?.(); },
+    /** The module's other exports, from the same instance (its module-level state included). */
+    exports,
   };
 }
 

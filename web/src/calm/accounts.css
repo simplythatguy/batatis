@@ -502,8 +502,11 @@
   .ac-head { padding: 0 8px 0 16px; height: 52px; }
   .ac-head-meta { display: none; }
   .ac-phone-tools { display: inline-flex; }
-  .ac-search { width: 160px; }
+  .ac-search { width: 120px; }
   .ac-search-kbd { display: none; }
+  /* Ask is icon-only here (its label hides under 760px); keep it a square tap target beside the bell. */
+  .ac-head-right { gap: 4px; }
+  .ac-head-right .cf-ask { width: 36px; padding: 0; justify-content: center; }
   .ac-page-body { padding: 20px 16px 32px; }
   .ac-page-body.is-narrow { padding-top: 24px; }
   .ac-page-title { font-size: 26px; margin-bottom: 18px; }

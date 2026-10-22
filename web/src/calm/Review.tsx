@@ -54,10 +54,10 @@ function worst(gaps: Gap[]): DotTone {
   return "done";
 }
 
-/** Before an application exists: what the review will hold, and the one way to start it. */
 /** One neutral icon per official section; the label beside it stays the Section A–D name. */
 const SECTION_ICON: Record<string, IconName> = { A: "user", B: "file", C: "book", D: "review" };
 
+/** Before an application exists: what the review will hold, and the one way to start it. */
 export function NothingYet({ title, lede, page }: { title: string; lede: string; page: "review" | "application" }) {
   const sections = [
     { letter: "A", title: "About you" },

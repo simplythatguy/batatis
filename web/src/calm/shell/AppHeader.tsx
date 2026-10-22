@@ -110,7 +110,8 @@ export function StageRings({ stages }: { stages: StageRingItem[] }) {
  * On phones the same toggle opens the rail and list as a sheet.
  */
 export function AppHeader({ title, onRename, renameDisabled, stages, right, onToggleList, listOpen, toggleHint }: {
-  title: string;
+  /** Omitted where another control names the page (the code library's application picker). */
+  title?: string;
   /** Renames the open application in place; resolves to an error text, or null when saved. */
   onRename?: (title: string) => Promise<string | null>;
   /** A sent or closed application keeps its name. */
@@ -150,9 +151,11 @@ export function AppHeader({ title, onRename, renameDisabled, stages, right, onTo
           </>
         )}
         {/* Just the name: where it goes lives in the application, not beside its title. */}
-        <h1 className="cf-head-title">
-          {onRename ? <EditableTitle value={title} label="Application name" disabled={renameDisabled} onCommit={onRename} /> : <span className="cf-title-text" title={title}>{title}</span>}
-        </h1>
+        {title != null && (
+          <h1 className="cf-head-title">
+            {onRename ? <EditableTitle value={title} label="Application name" disabled={renameDisabled} onCommit={onRename} /> : <span className="cf-title-text" title={title}>{title}</span>}
+          </h1>
+        )}
       </div>
       {stages && <StageRings stages={stages} />}
       <div className="cf-head-right">{right}</div>

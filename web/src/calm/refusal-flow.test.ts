@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import * as libraryContext from "./libraryContext.ts";
 import { componentHarness, nodes, text } from "../../scripts/component-harness.mjs";
 import type { ApplicationSummary, Message } from "../api/accounts.ts";
 import * as packageView from "./reviewer/packageView.ts";
@@ -98,6 +99,9 @@ test("a notification for the open file refreshes only its summary and exposes th
     "./account": { useAccount: () => account, bootAccount() {}, refreshApplications: async () => { refreshes++; account.applications = [remote]; } },
     "./applications": { authorityName: () => "Edmonton", readOnly: () => false },
     "./assistant/assistant": { useAssistant: () => ({ open: false }), setAssistantCase() {}, setAssistantContext() {} },
+    "./assistant/AskButton": { AskButton: () => null, AskHost: { Provider: "fragment" } },
+    "./codeScope": { useCodeScope: () => "application", ApplicationSwitchContext: { Provider: "fragment" } },
+    "./libraryContext": libraryContext,
     "./session": { useSession: () => ({ seen: [] }), getSession: () => ({ draft: "" }) },
     "./deck": { buildDeck: () => [], deckProgress: () => ({ done: 0, total: 0 }) },
     "./useDeckExtras": { useDeckExtras: () => ({ options: {} }) },
@@ -411,6 +415,9 @@ test("the sidebar offers Delete on every owned application; the server's DELETE 
     "./account": { useAccount: () => account, bootAccount() {}, refreshApplications: async () => {} },
     "./applications": await import("./applications.ts"),
     "./assistant/assistant": { useAssistant: () => ({ open: false }), setAssistantCase() {}, setAssistantContext() {} },
+    "./assistant/AskButton": { AskButton: () => null, AskHost: { Provider: "fragment" } },
+    "./codeScope": { useCodeScope: () => "application", ApplicationSwitchContext: { Provider: "fragment" } },
+    "./libraryContext": libraryContext,
     "./session": { useSession: () => ({ seen: [] }), getSession: () => ({ draft: "" }) },
     "./deck": { buildDeck: () => [], deckProgress: () => ({ done: 0, total: 0 }) },
     "./useDeckExtras": { useDeckExtras: () => ({ options: {} }) },
