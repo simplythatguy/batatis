@@ -17,7 +17,7 @@ from fastapi import HTTPException, Request, Response
 from .account_models import User
 from .accounts import optional_user
 
-REVIEWABLE = {'submitted', 'in_review', 'returned', 'accepted'}
+REVIEWABLE = {'submitted', 'in_review', 'returned', 'accepted', 'refused'}
 READ_ONLY_DETAIL = 'Submitted applications are read-only until returned'
 
 

@@ -158,7 +158,7 @@ class FileAccountsMixin(AccountsMixin):
     def list_applications(self, *, owner_id: str | None = None, authority: str | None = None):
         field, value = ('owner_id', owner_id) if owner_id is not None else ('authority', authority)
         visible = (" AND json_extract(json, '$.owner_id') IS NOT NULL AND "
-                   "json_extract(json, '$.status') IN ('submitted','in_review','returned','accepted')"
+                   "json_extract(json, '$.status') IN ('submitted','in_review','returned','accepted','refused')"
                    if owner_id is None else '')
         with self.account_db() as db:
             rows = db.execute(f"SELECT id FROM cases WHERE json_extract(json, '$.{field}')=? "
@@ -182,7 +182,7 @@ class PostgresAccountsMixin(AccountsMixin):
     def list_applications(self, *, owner_id: str | None = None, authority: str | None = None):
         field, value = ('owner_id', owner_id) if owner_id is not None else ('authority', authority)
         visible = (" AND data->>'owner_id' IS NOT NULL AND "
-                   "data->>'status' IN ('submitted','in_review','returned','accepted')"
+                   "data->>'status' IN ('submitted','in_review','returned','accepted','refused')"
                    if owner_id is None else '')
         with self.account_db() as db:
             rows = db.execute(f"SELECT id FROM cases WHERE data->>'{field}'=? "

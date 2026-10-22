@@ -15,7 +15,7 @@ from ..models_review import CloseOut, Pointer, RecordItem, RecordPackage, Review
 from .bulletins import BULLETINS, PORTAL_URL
 
 DAYS = 10
-# Outcomes that end the file. #48 records accept; a refusal outcome joins here when the workflow adds it.
+# Outcomes that end the file; a return remains open for applicant revisions.
 FINAL_OUTCOMES = {'accept', 'refuse'}
 
 
