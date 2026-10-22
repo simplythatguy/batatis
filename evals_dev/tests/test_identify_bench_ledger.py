@@ -154,3 +154,26 @@ def test_the_committed_openai_ledger_verifies_and_is_under_the_stop():
         pytest.skip('no OpenAI calls recorded yet')
     ledger = Ledger(path, 'openai', OPENAI_STOP_USD)            # opening it verifies the hash chain
     assert ledger.settled() <= OPENAI_HARD_CAP_USD              # a run in flight holds reservations, so test settled spend
+
+
+def test_typical_cost_needs_enough_settled_calls_and_ignores_unknown_outcomes(tmp_path):
+    ledger = Ledger(tmp_path / 'o.jsonl', 'openai', '10.00')
+    assert ledger.typical_usd('gpt-6-luna') is None
+    for i in range(40):
+        r = ledger.reserve(model='gpt-6-luna', worst_case_usd=Decimal('0.01'))
+        ledger.settle(r, usd=Decimal('0.001') + Decimal('0.0001') * i, input_tokens=4000, output_tokens=900)
+    r = ledger.reserve(model='gpt-6-luna', worst_case_usd=Decimal('0.01'))
+    ledger.unknown(r, 'dropped')                                           # at the cap, but not a sample of what a call costs
+    p99 = ledger.typical_usd('gpt-6-luna')
+    assert Decimal('0.0045') <= p99 <= Decimal('0.0050')
+    assert ledger.typical_usd('another-model') is None
+
+
+def test_an_unknown_outcome_can_be_charged_at_a_stated_estimate_never_above_the_cap(tmp_path):
+    ledger = Ledger(tmp_path / 'o.jsonl', 'openai', '10.00')
+    r = ledger.reserve(model='gpt-6-luna', worst_case_usd=Decimal('0.01'))
+    ledger.unknown(r, 'dropped', usd=Decimal('0.003'), basis='99th percentile of settled calls')
+    r2 = ledger.reserve(model='gpt-6-luna', worst_case_usd=Decimal('0.01'))
+    ledger.unknown(r2, 'dropped', usd=Decimal('0.5'))                      # an estimate above the cap is cut to the cap
+    lines = [json.loads(x) for x in (tmp_path / 'o.jsonl').read_text().splitlines() if '"unknown"' in x]
+    assert [(x['usd'], x['basis']) for x in lines] == [('0.003', '99th percentile of settled calls'), ('0.01', 'worst case')]

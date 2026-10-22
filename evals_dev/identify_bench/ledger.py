@@ -9,8 +9,10 @@ across processes.
 * One JSON line per operation, each carrying a hash of the exact text of the line before it, so an edited or
   truncated ledger is detected (``LedgerCorrupt``) when it is opened and the run stops.
 * A reservation that was never settled or released (a crash, a kill) counts at its worst case until
-  ``close_orphans`` records it as unknown spend. A call whose outcome is unknown (a client timeout after the request
-  was sent) is settled with ``unknown`` at its worst case, because the provider may have billed it.
+  ``close_orphans`` records it as unknown spend. A call whose outcome is unknown (a client timeout or a dropped connection after the request
+  was sent) is settled with ``unknown`` because the provider may have billed it: at its worst case by default, or at an estimate the caller
+  names (the transport uses the 99th percentile of what that model's settled calls cost, once it has 30 of them, because a completion that
+  filled the whole cap never happens in practice and thousands of dropped connections charged at the cap would exhaust the stop on paper).
 * The OpenAI ledger refuses a stop above ``OPENAI_HARD_CAP_USD``: the user's decision is US$10.00 for the whole
   benchmark, leaving the rest of the credit for the live demo.
 * Jev has no stop (the user said to use as much as needed); its ledger is for accounting and takes one line per
@@ -85,6 +87,7 @@ class Ledger:
         self._requests = 0
         self._by_model: dict = defaultdict(lambda: {'requests': 0, 'input_tokens': 0, 'output_tokens': 0,
                                                     'reasoning_tokens': 0, 'cached_tokens': 0, 'usd': Decimal(0)})
+        self._call_usd: dict[str, list[Decimal]] = defaultdict(list)       # settled (usage-based) cost of each call, per model
 
     def _apply(self, r: dict) -> None:
         op = r['op']
@@ -92,6 +95,8 @@ class Ledger:
             self._open[r['id']] = _dec(r['worst_case_usd'])
         elif op in ('settle', 'unknown'):
             self._open.pop(r['id'], None)
+            if op == 'settle' and r.get('model') and int(r.get('requests', 1)) == 1 and int(r.get('output_tokens', 0)) > 0:
+                self._call_usd[r['model']].append(_dec(r['usd']))
             self._settled += _dec(r['usd'])
             self._requests += int(r.get('requests', 1))
             m = self._by_model[r.get('model') or 'unknown']
@@ -191,11 +196,23 @@ class Ledger:
                              'arm': arm, 'case': case})
             return self._settled + self._reserved
 
-    def unknown(self, res: Reservation, reason: str, *, arm: str = '', case: str = '') -> Decimal:
-        """The call may have been billed but no usage came back: charge its worst case."""
+    def typical_usd(self, model: str, quantile: float = 0.99, *, min_samples: int = 30) -> Decimal | None:
+        """The ``quantile`` of what this model's settled single calls actually cost, or None before ``min_samples`` of them."""
         with self._locked() as fd:
             self._sync(fd)
-            self._write(fd, {'op': 'unknown', 'id': res.id, 'model': res.model, 'usd': str(res.worst_case_usd),
+            costs = sorted(self._call_usd.get(model, []))
+        if len(costs) < min_samples:
+            return None
+        return costs[min(len(costs) - 1, int(quantile * (len(costs) - 1) + 0.5))]
+
+    def unknown(self, res: Reservation, reason: str, *, usd: Decimal | str | float | None = None, basis: str = 'worst case',
+                arm: str = '', case: str = '') -> Decimal:
+        """The call may have been billed but no usage came back. Charge ``usd`` (an estimate the caller states the basis of), by default the
+        worst case. An estimate never exceeds the reservation's worst case."""
+        charge = res.worst_case_usd if usd is None else min(_dec(usd), res.worst_case_usd)
+        with self._locked() as fd:
+            self._sync(fd)
+            self._write(fd, {'op': 'unknown', 'id': res.id, 'model': res.model, 'usd': str(charge), 'basis': basis,
                              'reason': reason, 'arm': arm, 'case': case})
             return self._settled + self._reserved
 

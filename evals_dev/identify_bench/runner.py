@@ -88,6 +88,10 @@ def run_arms(arms: dict[str, Arm], wanted: Sequence[str], cases: Iterable[BenchC
             except Exception as e:                                   # noqa: BLE001 - an arm bug must not stop the run
                 from .rows import RowDraft
                 draft = RowDraft(errors=[{'stage': name, 'category': 'arm_exception', 'detail': type(e).__name__}])
+            if any(e.get('category') == 'circuit_open' for e in draft.errors):
+                summary.stopped = 'circuit_open'            # the network is failing: record nothing for this case and stop the run
+                stop.set()
+                return
             row = make_row(draft, arm=name, chash=chash, case=case, repeat=repeat, attempt=attempt, profile=profile,
                            git_sha=git_sha, codedb_sha256=codedb_sha256)
             ctx.store.append(row)

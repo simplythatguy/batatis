@@ -15,8 +15,10 @@ import json
 import os
 import random
 import re
+import sys
 import threading
 import time
+from collections import deque
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from decimal import Decimal
@@ -27,6 +29,9 @@ from . import pricing
 from .ledger import BudgetExceeded, Ledger
 
 OPENAI_URL = 'https://api.openai.com/v1/chat/completions'
+CIRCUIT_WINDOW = 20             # attempts looked at
+CIRCUIT_FAILURES = 10           # connection failures among them that open the circuit
+CIRCUIT_COOLDOWN = 45.0         # seconds a run waits before it tries again
 NOT_SENT = frozenset({'ConnectError', 'ConnectTimeout', 'PoolTimeout', 'gaierror'})   # failed before any request bytes left
 _KEY_SHAPE = re.compile(r'sk-[A-Za-z0-9_\-]{10,}')
 # (url, headers, json body, timeout seconds) -> (status, response headers, parsed json or None)
@@ -63,15 +68,31 @@ _CLIENT = None
 _CLIENT_LOCK = threading.Lock()
 
 
+def keepalive_options() -> list[tuple[int, int, int]]:
+    """Socket options that make the kernel probe an idle connection. A non-streaming completion leaves the connection silent for the
+    whole reasoning time (5 to 60 seconds); some path elements drop a flow that stays silent, which showed up as completions that never
+    returned ("read timeout" after 150 s) and "server disconnected without sending a response". With probes every few seconds the same
+    load ran 36 of 36 where it had lost 3 of 36."""
+    import socket
+    opts = [(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)]
+    if sys.platform == 'darwin':
+        opts += [(socket.IPPROTO_TCP, 0x10, 10), (socket.IPPROTO_TCP, 0x101, 5), (socket.IPPROTO_TCP, 0x102, 6)]   # idle, interval, count
+    elif hasattr(socket, 'TCP_KEEPIDLE'):
+        opts += [(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 10), (socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 5),
+                 (socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 6)]
+    return opts
+
+
 def shared_client():
-    """One pooled client for the process. Many simultaneous fresh TLS connections made the server drop some of them
-    ("server disconnected without sending a response"); a bounded pool with short keep-alive reuses connections instead."""
+    """One pooled client for the process, with TCP keepalive. Many simultaneous fresh TLS connections made the server drop some of them,
+    so connections are reused up to a bound and kept short-lived."""
     global _CLIENT
     import httpx
     with _CLIENT_LOCK:
         if _CLIENT is None:
-            _CLIENT = httpx.Client(follow_redirects=False, limits=httpx.Limits(max_connections=32, max_keepalive_connections=16,
-                                                                           keepalive_expiry=10.0))
+            transport = httpx.HTTPTransport(socket_options=keepalive_options(),
+                                            limits=httpx.Limits(max_connections=32, max_keepalive_connections=16, keepalive_expiry=10.0))
+            _CLIENT = httpx.Client(follow_redirects=False, transport=transport)
         return _CLIENT
 
 
@@ -86,11 +107,14 @@ def default_http(url: str, headers: Mapping[str, str], body: dict, timeout: floa
 
 class OpenAIChat:
     def __init__(self, ledger: Ledger, *, key_env: str = 'OPENAI_API_KEY', http: Http | None = None,
-                 timeout: float = 150.0, max_attempts: int = 3, sleep: Callable[[float], None] = time.sleep,
+                 timeout: float = 90.0, max_attempts: int = 3, sleep: Callable[[float], None] = time.sleep,
                  environ: Mapping[str, str] | None = None, url: str = OPENAI_URL):
         self.ledger, self.key_env, self.timeout, self.max_attempts = ledger, key_env, timeout, max_attempts
         self.http, self.sleep, self.url = http or default_http, sleep, url
         self._environ = environ if environ is not None else os.environ
+        self._recent: deque[bool] = deque(maxlen=CIRCUIT_WINDOW)          # True = the attempt failed at the connection
+        self._recent_lock = threading.Lock()
+        self._open_until = 0.0
 
     def _key(self) -> str:
         key = (self._environ.get(self.key_env) or '').strip()
@@ -123,6 +147,10 @@ class OpenAIChat:
         result = CallResult()
         for attempt in range(1, self.max_attempts + 1):
             result.attempts = attempt
+            if self._circuit_is_open():
+                result.errors.append({'category': 'circuit_open', 'detail': f'{CIRCUIT_FAILURES} of the last {CIRCUIT_WINDOW} attempts '
+                                      'failed at the connection; the run stops rather than charge more failed calls', 'fatal': True})
+                return result
             try:
                 res = self.ledger.reserve(model=model, worst_case_usd=worst, arm=arm, case=case)
             except BudgetExceeded as e:
@@ -132,15 +160,20 @@ class OpenAIChat:
             try:
                 status, resp_headers, data = self.http(self.url, headers, body, self.timeout)
             except Exception as e:                                  # noqa: BLE001 - timeout, reset, TLS
+                self._note(failed=True)
                 if type(e).__name__ in NOT_SENT:                    # the connection was never made: nothing was billed
                     self.ledger.release(res)
                 else:                                               # the request left; the provider may have billed it
-                    self.ledger.unknown(res, f'{type(e).__name__} after the request was sent', arm=arm, case=case)
+                    typical = self.ledger.typical_usd(model)
+                    self.ledger.unknown(res, f'{type(e).__name__} after the request was sent', usd=typical,
+                                        basis='worst case' if typical is None else '99th percentile of settled calls',
+                                        arm=arm, case=case)
                 result.errors.append({'category': 'timeout' if 'Timeout' in type(e).__name__ else 'connection',
                                       'detail': self._redact(type(e).__name__), 'fatal': attempt == self.max_attempts})
                 self._backoff(attempt, None)
                 continue
             result.latency_ms = (time.monotonic() - started) * 1000.0
+            self._note(failed=False)
             usage = (data or {}).get('usage') or {}
             if status == 200 and data and usage:
                 return self._finish(res, result, data, usage, model, resp_headers, arm, case)
@@ -155,6 +188,17 @@ class OpenAIChat:
                 return result
             self._backoff(attempt, resp_headers.get('retry-after'))
         return result
+
+    def _note(self, failed: bool) -> None:
+        with self._recent_lock:
+            self._recent.append(failed)
+            if sum(self._recent) >= CIRCUIT_FAILURES and len(self._recent) >= CIRCUIT_WINDOW // 2:
+                self._open_until = time.monotonic() + CIRCUIT_COOLDOWN
+                self._recent.clear()
+
+    def _circuit_is_open(self) -> bool:
+        with self._recent_lock:
+            return time.monotonic() < self._open_until
 
     def _backoff(self, attempt: int, retry_after) -> None:
         try:

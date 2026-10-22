@@ -362,4 +362,29 @@ def test_the_default_transport_reuses_one_pooled_client(monkeypatch):
     for _ in range(3):
         status, _headers, data = transports.default_http('https://example.test/v1', {}, {}, 5.0)
     assert status == 200 and data == {'ok': True} and len(made) == 1
-    assert made[0]['limits'].max_connections == 32 and made[0]['follow_redirects'] is False
+    assert made[0]['follow_redirects'] is False and made[0]['transport'] is not None
+    import socket
+    assert (socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1) in transports.keepalive_options()
+
+
+def test_a_dropped_connection_is_charged_at_the_typical_call_once_there_are_enough_samples(tmp_path):
+    ctx, http = make_ctx(tmp_path)
+    ledger = ctx.openai.ledger
+    for i in range(35):                                                    # build the sample of what a settled call costs
+        r = ledger.reserve(model='gpt-6-luna', worst_case_usd=Decimal('0.0108'))
+        ledger.settle(r, usd=Decimal('0.0009'), input_tokens=4000, output_tokens=900)
+    ctx.openai.http = fakes.fake_openai_http('timeout')
+    run_arms(fake_arms(), ['V15f-R5'], make_cases(1), ctx, repeats=1)
+    unknown = [json.loads(x) for x in (tmp_path / 'openai.jsonl').read_text().splitlines() if '"unknown"' in x]
+    assert len(unknown) == 3 and all(x['basis'] == '99th percentile of settled calls' and Decimal(x['usd']) == Decimal('0.0009') for x in unknown)
+
+
+def test_repeated_connection_failures_open_a_circuit_and_stop_the_run_without_writing_rows(tmp_path):
+    ctx, http = make_ctx(tmp_path, mode='connect_error')
+    summary = run_arms(fake_arms(), ['V15f-R5'], make_cases(8), ctx, repeats=2)
+    assert summary.stopped == 'circuit_open'
+    assert 10 <= len(http.calls) < 8 * 2 * 3                                        # it opened after the tenth failure, not after all of them
+    rows = ctx.store.arm_rows('V15f-R5')
+    assert all(r['errors'][-1]['category'] != 'circuit_open' for r in rows)       # the stopped case is not recorded as a result
+    assert len(rows) < 8 * 2
+    assert ctx.openai.ledger.summary()['open_reservations'] == 0
