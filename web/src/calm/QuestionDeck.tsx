@@ -74,10 +74,10 @@ function OkRow({ label = "OK", disabled, onOk, typed, children }: { label?: stri
   );
 }
 
-/** Number and arrow in the accent, then the section label. */
-function QNum({ n, label }: { n: ReactNode; label?: string }) {
+/** Number and arrow in a shade of the section's hue (neutral without one), then the section label. */
+function QNum({ n, label, hue }: { n: ReactNode; label?: string; hue?: string }) {
   return (
-    <div className="cf-q-num">
+    <div className={`cf-q-num${hue ? ` is-${hue}` : ""}`}>
       <span className="cf-q-n">{n}</span>
       <Icon24 name="right" size={15} stroke={2} />
       {label && <span className="cf-q-sec">{label}</span>}
@@ -938,7 +938,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
           <RedirectPage n={n} />
         ) : item ? (
           <div ref={wrapRef} key={item.key} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
-            <QNum n={n} label={item.eyebrow} />
+            <QNum n={n} label={item.eyebrow} hue={SECTION_HUE[item.section]} />
             <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>{item.title}</h2>
             {(item.context || item.quote) && (
               <p className="cf-q-help">

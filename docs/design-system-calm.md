@@ -42,13 +42,15 @@ Skip moves on; at the end of the pass the deck comes back once to skipped cards,
 
 Keyboard: `A` `B` `C` (or `1` `2` `3`) pick a choice, `↵` continues (`⌘↵` inside a text area), `↑` `↓` move through the form, `Esc` closes the drawer. Shell: `⌘B` sidebar (toggle at the far left of the header), `⌘J` assistant (full-height black column), `⌘K` search applications, `⌘⇧K` search the code. All four stages and the code library open in every state; Review and Application show an empty state before a description exists.
 
-Stage navigation (header, and the officer's review steps): icons, not words (user direction 2026-10-22). Each stage is its icon in a 34px progress ring, in order, joined by a hairline: the ring fills with progress, a done stage is green with a check badge, the current one is tinted (the accent, or the step's hue for the officer), a locked one is faded, an officer step with open items carries a count badge. The name and progress show on hover or keyboard focus and are the accessible name (`aria-current="step"` marks the current one). Shared component: `StageButton` in `web/src/calm/shell/AppHeader.tsx`.
+Stage navigation (header, and the officer's review steps): icons, not words (user direction 2026-10-22). Each stage is its icon in a 34px progress ring, in order, joined by a hairline: the ring fills with progress, a done stage has a quiet ring and a green check badge, the current one is ink on a soft fill (an officer step uses a shade of its step hue, matching its heading icon), a locked one is faded, an officer step with open items carries a count badge. The name and progress show on hover or keyboard focus and are the accessible name (`aria-current="step"` marks the current one). Shared component: `StageButton` in `web/src/calm/shell/AppHeader.tsx`.
 
 Application name (header and list): just the name, no authority beside it. Names are short subject names from the engine, never the description's first sentence; the applicant renames in place in the header (double-click, F2 or Enter; Enter or blur saves; Escape cancels; no field box) or from the list row's ⋯ → Rename. Saved through `PATCH /cases/{id}/title`; a chosen name always wins and is never shortened in storage.
 
 ## Tokens
 
-**Light mode since 2026-10-22 (user decision):** "visuals > text", light instead of black, more colour so sections are told apart. Say things with icons, colour, counts and short labels; avoid explanatory sentences.
+**Light mode since 2026-10-22 (user decision):** "visuals > text", light instead of black. Say things with icons, counts and short labels; avoid explanatory sentences.
+
+**Monotone, colour to identify (user correction, 2026-10-22):** the UI is neutral. A hue appears only where it identifies something: the section or step you are in, or items that would otherwise be hard to tell apart in a crowded place. Progress and navigation are grey except the current section, which shows its hue for answered questions and a darker shade of the same hue for the current one (open ones stay grey); the question number takes that shade. The global accent never marks "you are here". Status colours (blocking, warning, done) and the brand mark keep their meaning.
 
 | Token | Value | Use |
 | --- | --- | --- |
@@ -57,11 +59,11 @@ Application name (header and list): just the name, no authority beside it. Names
 | `--cf-line` / `-2` / `-ctl` | ink 8% / 14% / 42% | Every divider, card, chip and button / pressed and state lines / form-control boundary |
 | `--cf-accent` | `#f25a2a` | Brand mark, current step, "New". Never a button fill. |
 | `--cf-blocking` / `-warning` / `-done` / `-pending` | `#e5484d` / `#f0a20b` / `#18a058` / `#9aa0ab` | Status dots and pills |
-| `--cf-hue-*` and `-t` | blue, teal, violet, amber, rose, green, slate (solid + tint) | One hue per section or step. Use the `.is-blue` … `.is-slate` classes, which set `--hue` and `--hue-t`. |
+| `--cf-hue-*` and `-t` | blue, teal, violet, amber, rose, green, slate (solid + tint) | Identification only (see above). The `.is-blue` … `.is-slate` classes set `--hue`, `--hue-t` and `--hue-s` (a darker shade, at least 5.6:1 on the page, for "you are here" and text). |
 | `--cf-primary-bg` / `-text` | `#16181d` / `#fff` | The one primary button (neutral near-black; never indigo or purple) |
 | `--cf-focus` | `#6b7280` | Focus rings (neutral) |
 
-Section colours are shared by both sides: **A blue, B teal, C violet, D amber** (the applicant's question footer and Review badges, the officer's "What's missing" groups). Officer review steps: Summary blue, Missing rose, Documents violet, Code checks teal, File needs amber, Peer review slate, Decide / Close-out green.
+Section hues, used only where they identify: **A blue, B teal, C violet, D amber** (the current section in the applicant's question footer, Review badges, the officer's "What's missing" groups). Officer review steps: Summary blue, Missing rose, Documents violet, Code checks teal, File needs amber, Peer review slate, Decide / Close-out green.
 
 Type scale: display 54/1.04 (−3.5%), review headline 40, card question 32 (26 on phones), drawer title 22, lede 18, body 14–15, eyebrow 12 mono.
 

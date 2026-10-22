@@ -67,14 +67,16 @@
   color-scheme: light;
 }
 
-/* One hue per section or step: solid (--hue) for bars and icons, a tint (--hue-t) for fills. */
-.is-blue { --hue: var(--cf-hue-blue); --hue-t: var(--cf-hue-blue-t); }
-.is-amber { --hue: var(--cf-hue-amber); --hue-t: var(--cf-hue-amber-t); }
-.is-violet { --hue: var(--cf-hue-violet); --hue-t: var(--cf-hue-violet-t); }
-.is-teal { --hue: var(--cf-hue-teal); --hue-t: var(--cf-hue-teal-t); }
-.is-rose { --hue: var(--cf-hue-rose); --hue-t: var(--cf-hue-rose-t); }
-.is-green { --hue: var(--cf-hue-green); --hue-t: var(--cf-hue-green-t); }
-.is-slate { --hue: var(--cf-hue-slate); --hue-t: var(--cf-hue-slate-t); }
+/* Hues identify, they do not decorate: the UI is monotone, and a hue marks the section or step you
+   are in, or tells crowded items apart. Solid (--hue) for bars and icons, a tint (--hue-t) for fills,
+   a darker shade (--hue-s, at least 5.6:1 on the page) for "you are here" and for text. */
+.is-blue { --hue: var(--cf-hue-blue); --hue-t: var(--cf-hue-blue-t); --hue-s: #1d4ed8; }
+.is-amber { --hue: var(--cf-hue-amber); --hue-t: var(--cf-hue-amber-t); --hue-s: #8a5300; }
+.is-violet { --hue: var(--cf-hue-violet); --hue-t: var(--cf-hue-violet-t); --hue-s: #6d28d9; }
+.is-teal { --hue: var(--cf-hue-teal); --hue-t: var(--cf-hue-teal-t); --hue-s: #0b6b60; }
+.is-rose { --hue: var(--cf-hue-rose); --hue-t: var(--cf-hue-rose-t); --hue-s: #b4235a; }
+.is-green { --hue: var(--cf-hue-green); --hue-t: var(--cf-hue-green-t); --hue-s: #11713f; }
+.is-slate { --hue: var(--cf-hue-slate); --hue-t: var(--cf-hue-slate-t); --hue-s: #3f4b5e; }
 .is-accent { --hue: var(--cf-accent); --hue-t: #fdeae3; }
 
 
@@ -643,21 +645,23 @@ body {
   color: var(--cf-text);
 }
 
-/* A step hue (.is-rose …) when given, the accent otherwise. */
+/* Neutral by default: the current stage is ink on a soft fill. An officer step with a hue
+   (.is-rose …, matching its heading icon) uses a shade of it. */
 .cf-stage[aria-current="step"] .cf-stage-ring {
-  background: var(--hue-t, rgba(242, 90, 42, 0.1));
+  background: var(--hue-t, var(--cf-selected));
 }
 
 .cf-stage[aria-current="step"] .cf-stage-ico {
-  color: var(--hue, var(--cf-accent));
+  color: var(--hue-s, var(--cf-text));
 }
 
 .cf-stage[aria-current="step"] .cf-stage-arc {
-  stroke: var(--hue, var(--cf-accent));
+  stroke: var(--hue-s, var(--cf-text));
 }
 
+/* Done: a quiet ring; the green check badge says it. */
 .cf-stage.is-done .cf-stage-arc {
-  stroke: var(--cf-done);
+  stroke: var(--cf-text-3);
 }
 
 .cf-stage-done,
@@ -681,7 +685,7 @@ body {
 }
 
 .cf-stage-count {
-  background: var(--hue, var(--cf-accent));
+  background: var(--hue-s, var(--cf-text-2));
   color: #fff;
 }
 
@@ -4237,7 +4241,8 @@ body {
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
-  color: var(--cf-accent-ink);
+  /* The question number takes its section's shade (neutral where there is no section). */
+  color: var(--hue-s, var(--cf-text-2));
   font-size: 15px;
   font-weight: 550;
 }
@@ -4527,12 +4532,19 @@ body {
   transition-duration: 150ms;
 }
 
+/* Neutral everywhere but the section you are in: there, answered questions take its hue and the
+   current one a darker shade of the same hue (never the global accent). Open ones stay grey. */
 .cf-qsec-bar i.is-done {
-  background: var(--hue, var(--cf-text));
+  background: var(--cf-text-3);
 }
 
+.cf-qsec.is-on .cf-qsec-bar i.is-done {
+  background: var(--hue, var(--cf-text-3));
+}
+
+.cf-qsec.is-on .cf-qsec-bar i.is-cur,
 .cf-qsec-bar i.is-cur {
-  background: var(--cf-accent);
+  background: var(--hue-s, var(--cf-text));
 }
 
 /* Letter and count never truncate; only the section word does, and it goes first when narrow. */
@@ -4563,7 +4575,7 @@ body {
 }
 
 .cf-qsec-l {
-  color: var(--hue, var(--cf-text-3));
+  color: var(--cf-text-3);
 }
 
 .cf-qsec-name {
@@ -4590,7 +4602,8 @@ body {
 }
 
 .cf-qsec.is-on .cf-qsec-l {
-  color: var(--cf-text-2);
+  color: var(--hue-s, var(--cf-text-2));
+  font-weight: 550;
 }
 
 /* Compact: "C · 0/1" (narrow segment, assistant open, phone). */
