@@ -1,6 +1,6 @@
 # Batatis: Pilot and Adoption Plan
 
-*Building Codes Challenge, Submission 1 (Oct 29, 2026). Status is as of Oct 22, 2026. Status words follow the Implementation Plan, §3: **built**, **backend** (the API is merged and the screen is in progress) and **roadmap**. Source notes: `docs/research/2026-10-21-source-checks.md`.*
+*Building Codes Challenge, Submission 1 (Oct 29, 2026). Status is as of Oct 22, 2026. Status words follow the Implementation Plan, §3: **built**, **backend** (the API is merged and its screen is not finished) and **roadmap**. Source notes: `docs/research/2026-10-21-source-checks.md`.*
 
 > **No pilot partner has agreed to anything.** No applicant, officer or organization has used Batatis or seen a price. Every date, segment and metric below is a **target**, not a result and not a commitment from anyone else.
 
