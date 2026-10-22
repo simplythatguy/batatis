@@ -462,6 +462,8 @@ export type Action =
   | { type: "answerCandidate"; id: string; answer: CandidateAnswer | null }
   | { type: "setProcess"; field: ProcessFieldId; value: string }
   | { type: "setAuthority"; authority: Case["authority"] }
+  /** The applicant's own name (already saved, or kept for when the case is created). */
+  | { type: "renameCase"; title: string }
   | { type: "addCandidate"; candidate: Candidate }
   | {
       type: "addIdentified";
@@ -761,6 +763,8 @@ export function reducer(c: Case, a: Action): Case {
       }
       return { ...c, process: { ...c.process, [a.field]: value }, facts };
     }
+    case "renameCase":
+      return { ...c, title: a.title, titleKept: true };
     case "setAuthority":
       return { ...c, authority: a.authority };
     case "addCandidate":

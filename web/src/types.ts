@@ -196,6 +196,11 @@ export type ApplicantType = "manufacturer" | "contractor" | "homebuilder" | "bui
 export interface Case {
   id: string;
   title: string;
+  /**
+   * The title is a saved name (from the engine) or the applicant's own; the description never replaces
+   * it. Unset on a new draft, whose placeholder title is never sent as a name.
+   */
+  titleKept?: boolean;
   applicantType: ApplicantType;
   /** Test-fixture provenance only. Product visits never load sample cases. */
   exampleId?: string;

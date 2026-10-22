@@ -3,7 +3,9 @@ import type { ApplicationSummary } from "../api/accounts";
 import { groupGaps } from "../humanReview";
 import { useCase } from "../store";
 import { bootAccount, refreshApplications, useAccount, type AccountPhase } from "./account";
-import { authorityName, readOnlyStatus } from "./applications";
+import { readOnly, readOnlyStatus } from "./applications";
+import { saveTitle, titleError } from "./rename";
+import { RenameDialog } from "./shell/RenameDialog";
 import { AssistantPanel } from "./assistant/AssistantPanel";
 import { setAssistantCase, setAssistantContext, toggleAssistant, useAssistant } from "./assistant/assistant";
 import { roleOf, useCurrentApplication } from "./begin";
@@ -99,7 +101,8 @@ const isPhone = () => window.matchMedia(PHONE).matches;
  * application list or the stage header.
  */
 export function Shell({ active, children, plain = false }: { active: Screen; children: ReactNode; plain?: boolean }) {
-  const { c, phase, engineId, resetToWho, openCase, saveStatus, saveDraft, checkStatus, requestCheck } = useCase();
+  const { c, phase, engineId, resetToWho, openCase, saveStatus, saveDraft, checkStatus, requestCheck, renameCase } = useCase();
+  const [renaming, setRenaming] = useState<{ id: string; title: string } | null>(null);
   const account = useAccount();
   const assistant = useAssistant();
   const [confirm, setConfirm] = useState(false);
@@ -294,6 +297,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
       items={items}
       selectedId={opening ?? selectedId}
       onSelect={(id) => void open(id)}
+      rowActions={(a) => readOnly(a.status) ? null : <MoreMenu label={`Options for ${a.title || "this application"}`} items={[{ label: "Rename", onClick: () => setRenaming({ id: a.id, title: a.title }) }]} />}
       onNew={() => {
         if (!inCase) {
           setListNote("");
@@ -309,11 +313,13 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     />
   );
 
-  const title = inCase ? c.title || "New application" : "New application";
+  // The saved name when the list has it (so header and list always agree), else this draft's.
+  const title = inCase ? current?.title || c.title || "New application" : "New application";
   const header = (
     <AppHeader
       title={title}
-      meta={inCase && c.authority ? authorityName(c.authority) : undefined}
+      onRename={inCase ? renameCase : undefined}
+      renameDisabled={readOnly(current?.status)}
       stages={stages}
       onToggleList={toggleList}
       listOpen={!listCollapsed}
@@ -362,6 +368,11 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
         {children}
       </AppLayout>
       <CodePalette open={palette} onClose={() => setPalette(false)} />
+      <RenameDialog
+        target={renaming}
+        onClose={() => setRenaming(null)}
+        onSave={(id, next) => (id === selectedId ? renameCase(next) : saveTitle(id, next).then(() => null, titleError))}
+      />
       <ConfirmDialog
         open={confirm}
         title="Start a new application?"

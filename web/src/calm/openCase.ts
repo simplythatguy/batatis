@@ -69,7 +69,7 @@ export function caseFromEngine(saved: EngineCase, type: ApplicantType): Case {
   if (description && typeof description.value === "string") c = applyDescription(c, description.value);
   // Keep the saved description fact itself (same id and value), so nothing is re-sent.
   if (description) c = { ...c, facts: [...c.facts.filter((f) => f.field !== "project.description"), description] };
-  if (saved.title) c = { ...c, title: saved.title };
+  if (saved.title) c = { ...c, title: saved.title, titleKept: true };
   return restoreCardAnswers(c);
 }
 

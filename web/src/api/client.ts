@@ -142,7 +142,7 @@ export function isCaseConflict(e: unknown): boolean {
 const enc = encodeURIComponent;
 
 export function createEngine(base: string) {
-  async function call<T>(method: "GET" | "POST" | "PUT" | "DELETE", path: string, body?: unknown, signal?: AbortSignal, ms = ENGINE_WAIT_MS): Promise<T> {
+  async function call<T>(method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE", path: string, body?: unknown, signal?: AbortSignal, ms = ENGINE_WAIT_MS): Promise<T> {
     const timed = withTimeout(signal, ms);
     let res: Response;
     try {
@@ -182,6 +182,13 @@ export function createEngine(base: string) {
     setJurisdiction: (caseId: string, body: JurisdictionBody, signal?: AbortSignal) =>
       call<Case>("PUT", `/cases/${enc(caseId)}/jurisdiction`, body, signal),
     getCase: (id: string, signal?: AbortSignal) => call<Case>("GET", `/cases/${enc(id)}`, undefined, signal),
+    /**
+     * PATCH /cases/{id}/title `{ title }`: the applicant's own name for the application, returning the
+     * full Case. The server trims it to one line; empty or over 500 characters is 422; a sent,
+     * accepted or refused application cannot be renamed.
+     */
+    renameCase: (caseId: string, title: string, signal?: AbortSignal) =>
+      call<Case>("PATCH", `/cases/${enc(caseId)}/title`, { title }, signal),
     addFact: (caseId: string, fact: FactInput, signal?: AbortSignal) =>
       call<Case>("POST", `/cases/${enc(caseId)}/facts`, fact, signal),
     provision: (id: string, division?: Division, signal?: AbortSignal) =>

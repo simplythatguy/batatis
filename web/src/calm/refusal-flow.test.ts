@@ -96,7 +96,7 @@ test("a notification for the open file refreshes only its summary and exposes th
     "../store": { useCase: () => ({ c: draft, gaps: [], engineGaps: [], phase: "case", engineId: "c1", saveStatus: "unsaved", openCase: async () => { reopened++; }, saveDraft: async () => { saved++; } }) },
     "../humanReview": { groupGaps: () => new Map() },
     "./account": { useAccount: () => account, bootAccount() {}, refreshApplications: async () => { refreshes++; account.applications = [remote]; } },
-    "./applications": { authorityName: () => "Edmonton" },
+    "./applications": { authorityName: () => "Edmonton", readOnly: () => false },
     "./assistant/assistant": { useAssistant: () => ({ open: false }), setAssistantCase() {}, setAssistantContext() {} },
     "./session": { useSession: () => ({ seen: [] }), getSession: () => ({ draft: "" }) },
     "./deck": { buildDeck: () => [], deckProgress: () => ({ done: 0, total: 0 }) },

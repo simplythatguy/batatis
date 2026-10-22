@@ -1,6 +1,7 @@
 import { useRef, useState, type ReactNode } from "react";
 import { Icon24, type IconName } from "../icons";
 import { Tip } from "../RelevanceRing";
+import { EditableTitle } from "./EditableTitle";
 
 export interface StageRingItem {
   id: string;
@@ -108,7 +109,18 @@ export function StageRings({ stages }: { stages: StageRingItem[] }) {
  * title and authority, the stage tabs centred in the remaining width, actions on the right.
  * On phones the same toggle opens the rail and list as a sheet.
  */
-export function AppHeader({ title, meta, stages, right, onToggleList, listOpen, toggleHint }: { title: string; meta?: string; stages?: StageRingItem[]; right?: ReactNode; onToggleList?: () => void; listOpen?: boolean; toggleHint?: string }) {
+export function AppHeader({ title, onRename, renameDisabled, stages, right, onToggleList, listOpen, toggleHint }: {
+  title: string;
+  /** Renames the open application in place; resolves to an error text, or null when saved. */
+  onRename?: (title: string) => Promise<string | null>;
+  /** A sent or closed application keeps its name. */
+  renameDisabled?: boolean;
+  stages?: StageRingItem[];
+  right?: ReactNode;
+  onToggleList?: () => void;
+  listOpen?: boolean;
+  toggleHint?: string;
+}) {
   const ref = useRef<HTMLButtonElement>(null);
   const [tip, setTip] = useState(false);
   const label = listOpen ? "Hide the sidebar" : "Show the sidebar";
@@ -137,9 +149,9 @@ export function AppHeader({ title, meta, stages, right, onToggleList, listOpen, 
             </Tip>
           </>
         )}
-        <h1 className="cf-head-title" title={meta ? `${title} · ${meta}` : title}>
-          <span className="cf-head-name">{title}</span>
-          {meta && <span className="cf-head-meta">{meta}</span>}
+        {/* Just the name: where it goes lives in the application, not beside its title. */}
+        <h1 className="cf-head-title">
+          {onRename ? <EditableTitle value={title} label="Application name" disabled={renameDisabled} onCommit={onRename} /> : <span className="cf-title-text" title={title}>{title}</span>}
         </h1>
       </div>
       {stages && <StageRings stages={stages} />}
