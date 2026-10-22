@@ -10,8 +10,8 @@ from engine.api import create_app
 from engine.codes import Codes
 from engine.models import Case
 from engine.store import CaseStore
-from engine.tests.case_builder_fixtures import complete_case, store_with_synthetic_files
-from engine.tests.package_review_fixtures import CLEAN_FORM, package
+from engine.tests.case_builder_fixtures import complete_case, fact, store_with_synthetic_files
+from engine.tests.package_review_fixtures import CLEAN_FORM, CLEAN_NARRATIVE, package
 from engine.tests.test_accounts import onboard, signup
 
 NAMES = ['owner', 'other', 'reviewer', 'second', 'foreign', 'anonymous']
@@ -161,6 +161,60 @@ def test_upload_on_queue_case_and_reupload_diff(scene):
     assert {e['key'] for e in diff['still_open']} == {'application_date:presence'}
     assert {e['key'] for e in diff['new']} == {'legal_description:presence'}
     assert diff['statement'] == '2 of 3 gaps resolved, 1 still open, 1 new'
+    store.delete(case.id)
+
+
+@pytest.mark.parametrize('standalone', [False, True], ids=['case-upload', 'standalone-upload'])
+def test_uploaded_rationale_gap_and_reupload_resolution(scene, standalone):
+    store, clients, _ = scene
+    case = None if standalone else claimed(scene)
+    before = store.get(case.id).model_dump(mode='json') if case else None
+    path = '/package-review' if standalone else f'/review/{case.id}/package-review'
+    first = clients['reviewer'].post(path, files=multipart(package(narrative=dict(CLEAN_NARRATIVE, Rationale=''))))
+    assert first.status_code == 201, first.text
+    session = first.json()
+    assert session['administrative_only'] and session['not_a_compliance_determination']
+    finding = next(f for f in session['findings'] if f['field'] == 'rationale')
+    assert finding['status'] == 'blank' and finding['severity'] == 'blocking'
+    item = next(i for i in session['information_request']['items'] if i['finding_key'] == finding['key'])
+    assert item['included'] and not item['officer_check']
+    assert item['text'].startswith('Please provide the rationale')
+    reupload_path = f'/package-review/{session["package_id"]}' if standalone else path
+    fixed = clients['reviewer'].post(reupload_path, files=multipart(package(flat=True)))
+    assert fixed.status_code == 201, fixed.text
+    assert not any(f['field'] == 'rationale' for f in fixed.json()['findings'])
+    assert {e['key'] for e in fixed.json()['diff']['resolved']} == {finding['key']}
+    if case:
+        assert store.get(case.id).model_dump(mode='json') == before
+        store.delete(case.id)
+
+
+def test_saved_rationale_gap_blocks_acceptance_until_applicant_supplies_it(scene):
+    store, clients, _ = scene
+    case = claimed(scene)
+    saved = store.get(case.id)
+    saved.facts = [f for f in saved.facts if f.field != 'rationale']
+    store.put(saved)
+    path = f'/review/{case.id}'
+    first = clients['reviewer'].post(f'{path}/package-review')
+    assert first.status_code == 201, first.text
+    finding = next(f for f in first.json()['findings'] if f['field'] == 'rationale')
+    assert finding['status'] == 'blank' and finding['severity'] == 'blocking'
+    blocked = clients['reviewer'].post(f'{path}/decision', json={'outcome': 'accept'})
+    assert blocked.status_code == 409, blocked.text
+    assert any(g['field'] == 'rationale' for g in blocked.json()['detail']['gaps'])
+    assert store.get(case.id).status == 'in_review' and store.get(case.id).decision is None
+    saved = store.get(case.id)
+    saved.facts.append(fact('process.rationale', 'SYNTHETIC applicant reason; no technical conclusion.'))
+    store.put(saved)
+    second = clients['reviewer'].post(f'{path}/package-review')
+    assert second.status_code == 201, second.text
+    assert not any(f['field'] == 'rationale' for f in second.json()['findings'])
+    assert finding['key'] in {e['key'] for e in second.json()['diff']['resolved']}
+    accepted = clients['reviewer'].post(f'{path}/decision', json={'outcome': 'accept'})
+    assert accepted.status_code == 200, accepted.text
+    assert accepted.json()['decision']['message'] == (
+        'Accepted as administratively complete. Technical review remains the responsibility of the authority.')
     store.delete(case.id)
 
 

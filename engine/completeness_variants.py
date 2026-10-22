@@ -345,7 +345,7 @@ def _one(doc: Ingested, spec: ElementSpec, codes, engineering: bool, heuristics:
         return _professional(doc, spec, engineering)
     if spec.field == 'supporting_doc':
         return _supporting(doc, spec, heuristics)
-    if spec.field in ('risk_assessment', 'mitigating_measures', 'assumptions_and_limits'):
+    if spec.field in ('rationale', 'risk_assessment', 'mitigating_measures', 'assumptions_and_limits'):
         return _process(doc, spec, heuristics)
     if spec.field == 'division_c_2_3_1':
         return _division_c_documentation(doc, spec)
@@ -483,7 +483,7 @@ def _process(doc: Ingested, spec: ElementSpec, heuristics: bool) -> ElementVerdi
     if state == 'missing':
         copied = _process_fix(spec.field)
         message = copied[0] if copied else _presence_copy(spec.label, problem or 'blank')[0]
-        defect = {'risk_assessment': 'D09', 'mitigating_measures': 'D10', 'assumptions_and_limits': 'D11'}[spec.field]
+        defect = {'risk_assessment': 'D09', 'mitigating_measures': 'D10', 'assumptions_and_limits': 'D11'}.get(spec.field)
         return _finish(spec, doc, 'missing', message, problem=problem, defect_class=defect,
                        quotes=_quote_for(doc, stored), preflight=True)
     if state == 'unclear':

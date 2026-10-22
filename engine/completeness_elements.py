@@ -73,6 +73,10 @@ ELEMENTS: tuple[ElementSpec, ...] = (
     ElementSpec('alternative_description', 'B', 'B', 'alternative_description', (), 'description of the proposed alternative',
                 'Describe the proposed alternative in your own words, including the acceptable solution you want to depart from.',
                 'applicant'),
+    ElementSpec('rationale', 'B', 'process', 'rationale', (), 'rationale',
+                'Please provide your rationale for the proposed departure. The review checks presence only; '
+                'the tool will not write or assess it.',
+                'applicant', 'Alternative-path process field. Applicant-written. Presence only.'),
     ElementSpec('risk_assessment', 'B', 'process', 'risk_assessment', (), 'risk assessment',
                 'What risks arise from this specific departure? Name who or what is affected. A line such as "low risk" is not enough. Write this yourself; the tool will not draft it.',
                 'applicant', 'Alternative-path process field. Applicant-written. Not an evidence type.'),

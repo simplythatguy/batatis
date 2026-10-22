@@ -44,7 +44,7 @@ session keeps the extracted values and quotes.
 - `files[]`: name, sha256, size, pages, `role` (`scc_form_fillable`, `scc_form_flattened`, `attachment`,
   `unreadable`, `case_record`), `form_version` (field map, e.g. `scc_2026-10`), note.
 - `fields[]`: one row per form field (the form's own widget names, typos included) and per applicant passage
-  read from the appendix or attachments (`alternative_description`, `risk_assessment`, `mitigating_measures`,
+  read from the appendix or attachments (`alternative_description`, `rationale`, `risk_assessment`, `mitigating_measures`,
   `assumptions_and_limits`, `professional_name`, `professional_qualifications`). `status`:
   - `present`: the exact text read (`value`).
   - `blank` (certain): a fillable field with no value; a flattened box with no text on a page whose text layer
@@ -78,6 +78,14 @@ session keeps the extracted values and quotes.
 
 ## What is checked
 
+- Applicant rationale on the alternative path, separately from the proposed-alternative description and the
+  other process fields: presence only, never adequacy. Saved cases use the latest `rationale` or
+  `process.rationale` applicant passage; a confirmed acceptable-solution route does not require it. Uploads
+  (including standalone packages) read `Rationale`, `Rationale for [the] [proposed] variance/alternative
+  [solution]`, or a numbered appendix heading such as `P-1 Rationale`. A blank heading or the draft export's
+  explicit no-answer notice is a blocking applicant gap (`rationale:presence`); a heading not found is an
+  officer check with the request item excluded by default. A present passage is copied, never assessed or
+  drafted by the review.
 - Ported deterministic screens (variant B) over the reading: presence and placeholders (D01–D04), edition
   presented as current (D06), intent label (D08), generic or blank risk, mitigation and assumptions (D09–D11),
   professional named when stated as required (D12), supporting document and its responsible person (D13),

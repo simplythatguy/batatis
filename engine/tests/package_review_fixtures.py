@@ -36,6 +36,7 @@ CLEAN_FORM = {
 CLEAN_NARRATIVE = {
     'Description of the proposed alternative': 'SYNTHETIC: a protected roof soffit on the east exposing building '
                                                'face, where the limiting distance is 0.40 m. limiting distance: 0.40 m',
+    'Rationale': 'SYNTHETIC applicant rationale; no technical conclusion.',
     'Risk assessment': 'SYNTHETIC applicant passage: fire spread from the soffit to the neighbouring house during '
                        'the time emergency responders need to arrive.',
     'Mitigating measures': 'SYNTHETIC applicant passage: noncombustible soffit with the fire spread limited at the '

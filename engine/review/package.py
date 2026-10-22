@@ -30,6 +30,9 @@ TEXT_FIELDS = {
     'alternative_description': ('description of the proposed alternative', re.compile(
         r'^\s*(?:[A-Z]-\d+\s+)?(?:proposed alternative(?: solution)?|description of (?:the )?proposed alternative'
         r'(?: solution)?)\s*(?::|$)', re.I | re.M)),
+    'rationale': ('rationale', re.compile(
+        r'^\s*(?:[A-Z]-\d+\s+)?rationale(?: for (?:the )?(?:proposed )?(?:alternative(?: solution)?|variance))?'
+        r'\s*(?::|$)', re.I | re.M)),
     'risk_assessment': ('risk assessment', re.compile(r'^\s*(?:[A-Z]-\d+\s+)?risk assessment\s*(?::|$)', re.I | re.M)),
     'mitigating_measures': ('mitigating measures', re.compile(
         r'^\s*(?:[A-Z]-\d+\s+)?mitigating measures\s*(?::|$)', re.I | re.M)),
@@ -225,9 +228,13 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
                                              status=value.status, value=value.value or None, reason=value.reason,
                                              pointer=_pointer(form, value)))
     texts = {key: text_value(pages, pattern) for key, (_label_text, pattern) in TEXT_FIELDS.items()}
+    # A draft export explicitly says no answer was supplied. Its notice is not applicant rationale.
+    rationale = texts['rationale']
+    if rationale.value == '(Not provided or not confirmed. No answer has been supplied by Batatis.)':
+        rationale.status, rationale.value = 'blank', ''
     for key, found in texts.items():
         label = TEXT_FIELDS[key][0]
-        section = 'process' if key in ('risk_assessment', 'mitigating_measures', 'assumptions_and_limits') else (
+        section = 'process' if key in ('rationale', 'risk_assessment', 'mitigating_measures', 'assumptions_and_limits') else (
             'B' if key == 'alternative_description' else 'D')
         parts.fields.append(FieldReading(
             field=key, label=label, section=section, status=found.status, value=found.value or None,
