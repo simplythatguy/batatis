@@ -34,6 +34,7 @@ type Shown = DeckItem & { gone?: boolean };
 
 const FORM_HINT_KEY = "batatis-form-hint-seen";
 
+/** Detect editable controls so deck keyboard shortcuts leave text entry to the control. */
 function isTextTarget(t: EventTarget | null): boolean {
   const el = t as HTMLElement | null;
   if (!el) return false;
@@ -221,6 +222,7 @@ function PlanBody({ item, onPick, draft, setDraft, note, first }: { item: Shown;
   );
 }
 
+/** Render the current card’s inputs, saved answer, source details and loading or failure feedback. */
 function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote, firstPlan, extras, note, busy, onReload, position }: { item: Shown; picked?: string; onPick: (value: string) => void; draft: string; setDraft: (v: string) => void; openDrawer: (s: DrawerState) => void; planNote: string; firstPlan: boolean; extras: ReturnType<typeof useDeckExtras>["extras"]; note: string; busy: boolean; onReload?: () => void; position: number }) {
   const { c, dispatch } = useCase();
   const session = useSession();
@@ -435,6 +437,7 @@ function NoQuestionsYet() {
 
 /* —— The application's deck —— */
 
+/** Coordinate the visit queue, rule and checklist answers, and navigation through the case’s cards. */
 function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
   const { c, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan, answerChecklist, reloadChecklists } = useCase();
   const session = useSession();
@@ -446,6 +449,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   const byKey = new Map(all.map((i) => [i.key, i] as const));
   const snapshots = useRef(new Map<string, DeckItem>());
   for (const i of all) snapshots.current.set(i.key, i);
+  /** Read a live card or retain its last snapshot when an answer removes it from the derived deck. */
   const itemFor = (k: string | undefined): Shown | undefined => {
     if (!k) return undefined;
     const live = byKey.get(k);
@@ -651,6 +655,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     goToKey(to >= all.length ? null : all[to].key);
   };
 
+  /** Check whether the current answer can advance, including pending writes and required reasons. */
   function canContinue(it: Shown): boolean {
     if (locked) return false;
     if (it.kind === "section-d" || it.kind === "file" || it.kind === "code-run" || it.kind === "code-note") return true;
@@ -667,6 +672,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     return it.done;
   }
 
+  /** Save a typed answer before advancing, or open Review when the visit has no current card. */
   function next() {
     if (!item) {
       void requestCheck();
@@ -709,6 +715,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     moveFrom(index, true);
   }
 
+  /** Defer a required card until the return pass, or mark an optional card as seen. */
   function skip() {
     if (!item) return;
     // Optional cards are offered once; required ones come back at the end of this pass.
@@ -728,9 +735,11 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     });
   }
 
+  /** Find the current saved checklist condition associated with a deck card. */
   function conditionOf(it: Shown) {
     return extras.checklists?.checklists.find((x) => x.id === it.checklist)?.conditions.find((x) => x.id === it.condition);
   }
+  /** Read a condition’s persisted answer before applying any local selection. */
   function currentState(it: Shown) {
     return conditionOf(it)?.answer?.state;
   }
@@ -795,6 +804,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     }
   }
 
+  /** Apply a card’s selected choice through the rule, package, checklist or case answer flow. */
   function pick(value: string) {
     if (!item || locked) return;
     if (item.kind === "rule-input" && item.input) {
@@ -989,6 +999,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   );
 }
 
+/** Show the saved case’s deck or the prompt to describe a new application. */
 export function Deck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
   const { phase } = useCase();
   return phase === "case" ? <CaseDeck focus={focus} codeFirst={codeFirst} /> : <NoQuestionsYet />;

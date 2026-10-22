@@ -32,6 +32,7 @@ export interface ShownRule extends RuleResult {
 export const RULE_REF = "rules:";
 export const NOT_REVIEWED = "Checked by Batatis, not yet reviewed by an expert.";
 
+/** Read the article prefix from a provision id, preserving ids with no article prefix. */
 export const articleOf = (id: string) => id.match(/^\d+\.\d+\.\d+\.\d+\./)?.[0] ?? id;
 
 /** The latest usable fact per rule input, read like the engine's `case_inputs`: never a proposed fact. */
@@ -45,6 +46,7 @@ export function ruleFacts(c: Case, index: RuleIndex): Map<string, Fact> {
   return found;
 }
 
+/** Describe a fact’s source and whether the applicant has confirmed it. */
 function originOf(f: Fact): InputOrigin {
   const confirmed = f.status === "confirmed";
   const ref = f.source.ref ?? "";
@@ -53,6 +55,7 @@ function originOf(f: Fact): InputOrigin {
   return { text: confirmed ? "your answer" : "not confirmed yet", confirmed };
 }
 
+/** Compare ordered input fields and values before using an engine result in place of a live result. */
 const sameInputs = (a: { field: string; value: unknown }[], b: { field: string; value: unknown }[]) =>
   JSON.stringify(a.map((x) => [x.field, x.value])) === JSON.stringify(b.map((x) => [x.field, x.value]));
 
@@ -113,6 +116,7 @@ export function valueWithUnit(value: Value | null, unit: string | null | undefin
   return unit ? `${n} ${unit}` : n;
 }
 
+/** Read a numeric computed value or input, returning null for missing or nonnumeric values. */
 const num = (r: RuleResult, name: string) => {
   const v = r.computed.find((x) => x.name === name)?.value ?? r.inputs.find((x) => x.field === name)?.value ?? null;
   return typeof v === "number" ? v : null;
@@ -162,6 +166,7 @@ const PLAIN: Record<string, { topic: string; departs: (r: RuleResult) => string;
   },
 };
 
+/** Use the plain-language topic for a known rule, falling back to its published title. */
 export function ruleTopic(r: { rule_id: string; title: string }): string {
   return PLAIN[r.rule_id]?.topic ?? r.title;
 }
@@ -196,6 +201,7 @@ const PLAIN_LABEL: Record<string, string> = {
   building_area_m2: "Building footprint (building area)",
 };
 
+/** Use the plain-language input label when available, otherwise retain the supplied label. */
 export const plainLabel = (field: string, label: string) => PLAIN_LABEL[field] ?? label;
 
 type Row = { label: string; value: string; origin: string; muted?: boolean };

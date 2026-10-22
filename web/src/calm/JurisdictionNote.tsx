@@ -22,6 +22,7 @@ function Pending({ failed, what }: { failed: boolean; what: string }) {
 }
 import { CIcon, Dot } from "./ui";
 
+/** Render source links with page references and any unverified-source label. */
 function Sources({ sources }: { sources: PackSource[] }) {
   if (!sources.length) return null;
   return (
@@ -37,6 +38,7 @@ function Sources({ sources }: { sources: PackSource[] }) {
   );
 }
 
+/** Show the office’s contact, local process notes, current packages and historical notices. */
 function PackDetail({ pack, extras }: { pack: JurisdictionDetail; extras: CaseExtras }) {
   const local = pack.process_notes.filter((n) => n.scope === "local");
   const historical = extras.checklists?.jurisdiction === pack.id ? extras.checklists.historical : [];
@@ -107,6 +109,7 @@ function Elsewhere({ extras }: { extras: CaseExtras }) {
   );
 }
 
+/** Load and show the selected office’s notes, or provincial guidance when the office is unknown. */
 export function JurisdictionNote({ authority, unsure, extras }: { authority: string; unsure: boolean; extras: CaseExtras }) {
   useEffect(() => { if (authority) void loadJurisdiction(authority); }, [authority]);
   if (authority) {

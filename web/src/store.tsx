@@ -714,6 +714,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     });
   }
 
+  /** Queue a versioned checklist answer and update shared extras, preserving conflict and missing-case feedback. */
   function answerChecklist(checklistId: string, conditionId: string, state: "confirmed" | "not_yet" | "does_not_apply", reason?: string): Promise<string | null> {
     const token = engineGeneration();
     const live = () => isEngineGeneration(token);
@@ -747,6 +748,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     });
   }
 
+  /** Reconcile a stale case and reload its extras, marking a deleted or expired case as gone. */
   function reloadChecklists(): Promise<string | null> {
     const token = engineGeneration();
     return enqueue(async () => {
@@ -841,6 +843,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, c.facts, c.authority, c.title, c.listedEvidence, c.deletedEvidence]);
 
+  /** Reset the save session, case extras and visible request state before adopting another case. */
   function clearVisit(next: Case) {
     activeCheck.current?.ctl.abort();
     activeCheck.current = null;

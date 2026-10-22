@@ -93,12 +93,14 @@ export function NothingYet({ title, lede, page }: { title: string; lede: string;
   );
 }
 
+/** Show the current case’s review or the instructions to start an application. */
 export function Review() {
   const { phase } = useCase();
   if (phase !== "case") return <NothingYet page="review" title="Nothing to review yet." lede="Describe what you’re building and Batatis lists what your application still needs, section by section." />;
   return <CaseReview />;
 }
 
+/** Summarize shared gaps, deck progress and rule departures for the current case. */
 function CaseReview() {
   const { c, gaps, notices, engineGaps, gapsSource, checkStatus, checkNote, checkDetail, requestCheck, reading } = useCase();
   const session = useSession();

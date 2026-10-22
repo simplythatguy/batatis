@@ -13,12 +13,14 @@ import { buildDeck, caseRules, choicesFor, PACKAGE_YES, RULE_ADD, type DeckOptio
 import { BUILDING_WIDE, caseRuleResults, numbersUsed, plainResult, readNumber, ruleInPlay, type RuleData } from "./rulesView.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../..");
+/** Load a checked-in JSON fixture relative to the repository root. */
 const read = (path: string) => JSON.parse(readFileSync(join(ROOT, path), "utf8"));
 const index: RuleIndex = read("engine/data/rules/index.json");
 const rules: Record<string, RuleDef> = Object.fromEntries(index.rules.map((id) => [id, read(`engine/data/rules/${id}.json`)]));
 const DATA: RuleData = { index, rules };
 
 let n = 0;
+/** Create a pointed fixture fact with a unique id and explicit confirmation and source. */
 function fact(field: string, value: string | number | boolean, status: "confirmed" | "unconfirmed" = "confirmed", ref = "intake:description"): Fact {
   n += 1;
   return { id: `f${n}`, field, value, kind: "pointed", status, source: { type: "user_text", ref, quote: String(value) } };
@@ -34,11 +36,14 @@ function demo(extra: Fact[] = []): Case {
   };
 }
 
+/** Create a confirmed fixture answer with coded-rule provenance. */
 const answered = (field: string, value: number | boolean | string) => fact(field, value, "confirmed", "rules:glazed-openings-houses");
 const NUMBERS = [answered("ebf_area_m2", 30), answered("glazed_area_m2", 4)];
 const NO_EXCEPTIONS = ["sprinklered", "fire_response_over_10_min", "glass_blocks", "faces_own_detached_garage"].map((f) => answered(f, f === "sprinklered" ? "no" : false));
 
+/** Build deck fixture options with rule data and answered cards included by default. */
 const opts = (extra: Partial<DeckOptions> = {}): DeckOptions => ({ rules: DATA, includeDone: true, confirmAuthority: true, ...extra });
+/** Read the derived card keys for a case and its deck options. */
 const keys = (c: Case, o: DeckOptions = opts()) => buildDeck(c, [], o).map((i) => i.key);
 
 test("building-wide facts alone never put a rule in play (a house that is not sprinklered asks no wall questions)", () => {
@@ -162,6 +167,7 @@ test("typed numbers are checked against the input's type and range", () => {
 
 const SPV001 = read("engine/data/jurisdictions/checklists/calgary-spv-001.json");
 
+/** Build a checklist response from the published fixture and supplied condition answers. */
 function checklist(answers: Record<string, { state: "confirmed" | "not_yet" | "does_not_apply"; reason?: string }> = {}): CaseChecklist {
   const conditions = SPV001.conditions.map((row: Record<string, unknown>) => ({
     when: null, one_of: null, option: null, ...row,
@@ -177,6 +183,7 @@ function checklist(answers: Record<string, { state: "confirmed" | "not_yet" | "d
     provisions: ["9.10.15.5.(8)", "9.10.15.5.(9)"], matches_case_provisions: false,
   } as unknown as CaseChecklist;
 }
+/** Wrap a checklist fixture in the case response shape consumed by the deck. */
 const list = (cl: CaseChecklist): CaseChecklists => ({ case_id: "c", case_version: 3, checklists: [cl], historical: [], jurisdiction: "calgary", matched_by: "id", none_reason: null, notice: cl.notice });
 
 const ZERO = { ...emptyCase("homebuilder"), description: "Single-family house in Calgary on a zero lot line, two storeys." };

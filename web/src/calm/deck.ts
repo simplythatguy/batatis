@@ -195,6 +195,7 @@ function firstSentence(text: string): string {
   return s.length > 160 ? `${s.slice(0, 157)}…` : s;
 }
 
+/** Build a code-check card, keeping answers open until the engine stores them. */
 function candidateItem(c: Case, a: Candidate): DeckItem {
   // An answer the engine has not stored yet keeps the card open, so answering again resends it.
   const done = a.answer !== null && !a.pending;
@@ -309,6 +310,7 @@ export function sectionDRelevant(c: Case, gaps: Gap[]): boolean {
 
 const SCOPE_ITEM_KEY = "scope";
 
+/** Derive ordered form cards from case facts, shared gaps, coded rules and package choices. */
 export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckItem[] {
   const seen = opts.seen ?? new Set<string>();
   // A card a current *blocking* gap points at is open, whatever the local value says.
@@ -598,6 +600,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   const unsure = opts.ruleUnsure ?? new Set<string>();
   const missing = new Set(inPlay.flatMap((r) => r.missing.map((m) => m.field)));
   const asked = new Set<string>();
+  /** Add each needed rule input once, leaving fields already handled by the planner on its cards. */
   const ruleInputs = (r: ShownRule) => {
     if (!index) return;
     const mine = new Set(r.missing.map((m) => m.field));
@@ -625,6 +628,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       });
     }
   };
+  /** Build a follows or departs card; unresolved and inapplicable rules have no result card. */
   const resultItem = (r: ShownRule): DeckItem | null => {
     if (r.state !== "departs" && r.state !== "follows") return null;
     const plain = plainResult(r);

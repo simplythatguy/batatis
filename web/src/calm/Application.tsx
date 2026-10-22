@@ -243,11 +243,13 @@ function ApplicationEmpty() {
   );
 }
 
+/** Show the current application and download options, or the empty form before a case exists. */
 export function Application({ download }: { download: "" | "options" | "draft" }) {
   const { phase } = useCase();
   return phase === "case" ? <CaseApplication download={download} /> : <ApplicationEmpty />;
 }
 
+/** Derive the application preview and export panel from shared gaps and jurisdiction data. */
 function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
   const account = useAccount();
   const { locked } = useCurrentApplication();
@@ -277,6 +279,7 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
 
   // Each blocker links to the card that fixes it (the same shared gap list as Review and the deck).
   const blockers = ex.officialReady ? [] : ex.blocking.filter((g) => !isProfessionalHold(g));
+  /** Link an export blocker to its deck card, falling back to the gap’s existing destination. */
   const fixHref = (g: (typeof gaps)[number]) => {
     const key = gapKey(c, g);
     return key ? `#/questions?focus=${encodeURIComponent(key)}` : calmHref(g.href);

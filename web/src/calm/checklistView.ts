@@ -13,6 +13,7 @@ export type ConditionState = "confirmed" | "not_yet" | "does_not_apply";
 
 export const NOT_REVIEWED_PERSON = "Not yet reviewed by a person.";
 
+/** Normalize text with word boundaries for matching published package titles. */
 const words = (t: string) => ` ${t.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()} `;
 
 /** A sentence matches its own id; an article matches every sentence the package lists in it. */
@@ -51,6 +52,7 @@ export function followedInFull(cl: CaseChecklist): boolean {
   return cl.conditions.every((x) => x.answer && x.answer.state !== "not_yet");
 }
 
+/** Find the published group containing a checklist condition. */
 export function groupOf(cl: CaseChecklist, row: CaseCondition) {
   return cl.groups.find((g) => g.id === row.group);
 }

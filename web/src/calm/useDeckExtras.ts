@@ -9,6 +9,7 @@ import { useCaseExtras, type CaseExtras } from "./caseExtras";
 import type { DeckOptions } from "./deck";
 import { useSession } from "./session";
 
+/** Combine shared engine extras and visit choices into the options used by every deck consumer. */
 export function useDeckExtras(): { options: DeckOptions; extras: CaseExtras } {
   const { c, engineId, factsEpoch } = useCase();
   const extras = useCaseExtras(engineId, factsEpoch, c.authority);

@@ -8,6 +8,7 @@ import type { CaseChecklist, CaseCondition } from "../api/types.gen";
 import { askTheOffice, followedInFull, NOT_REVIEWED_PERSON, tallyLine } from "./checklistView";
 import { CIcon, Dot } from "./ui";
 
+/** Link to the checklist’s published source in a separate tab. */
 function SourceLink({ cl }: { cl: CaseChecklist }) {
   return (
     <a className="cf-inline-link" href={cl.source.url} target="_blank" rel="noreferrer">

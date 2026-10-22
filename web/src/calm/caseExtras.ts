@@ -32,18 +32,22 @@ const listeners = new Set<() => void>();
 let loadedKey = "";
 /** The latest case refresh; an older one finishing late never overwrites the pack. */
 let refreshSeq = 0;
+/** Merge read-failure flags and notify every subscriber to the shared extras store. */
 const fail = (patch: Partial<CaseExtras["failed"]>) => set({ failed: { ...state.failed, ...patch } });
 let rulesLoad: Promise<void> | null = null;
 let directoryLoad: Promise<void> | null = null;
 const detailLoads = new Map<string, Promise<void>>();
 
+/** Merge an extras update and notify all screens using the shared snapshot. */
 function set(next: Partial<CaseExtras>) {
   state = { ...state, ...next };
   for (const l of listeners) l();
 }
 
+/** Return the current shared snapshot for React subscriptions and imperative readers. */
 export const getExtras = () => state;
 
+/** Register a snapshot listener and return its unsubscribe callback. */
 function subscribe(l: () => void) {
   listeners.add(l);
   return () => listeners.delete(l);
@@ -59,12 +63,14 @@ function loadRules(): Promise<void> {
   return rulesLoad;
 }
 
+/** Load and cache the jurisdiction directory; failed reads can be retried. */
 export function loadDirectory(): Promise<void> {
   if (state.directory) return Promise.resolve();
   directoryLoad ??= engine.jurisdictions().then((d) => { set({ directory: d }); fail({ directory: false }); }, () => { directoryLoad = null; fail({ directory: true }); });
   return directoryLoad;
 }
 
+/** Load one jurisdiction detail, sharing in-flight reads and allowing retries after failure. */
 export function loadJurisdiction(id: string): Promise<void> {
   if (state.details[id]) return Promise.resolve();
   let p = detailLoads.get(id);
@@ -113,6 +119,7 @@ export function retryExtras() {
   for (const [id, bad] of Object.entries(state.failed.details)) if (bad) void loadJurisdiction(id);
 }
 
+/** Clear the previous case and visit key while retaining reusable rule and jurisdiction data. */
 export function resetExtras() {
   loadedKey = "";
   state = { ...EMPTY, rules: state.rules, directory: state.directory, details: state.details, failed: { ...state.failed, case: false } };
