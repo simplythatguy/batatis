@@ -23,6 +23,11 @@ test("rows lead to the review page for reviewers and the application for applica
   assert.equal(notificationHref({ case_id: "case_1" }, "applicant"), "#/application?case=case_1");
 });
 
+test("refusal notifications say refused and open the recorded decision", () => {
+  assert.equal(notificationText({ kind: "status", status: "refused", actor, case_title: "Hempcrete walls", summary: "" }), "Dana Ross refused Hempcrete walls");
+  assert.equal(notificationHref({ case_id: "refused-case" }, "applicant"), "#/application?case=refused-case");
+});
+
 test("duplicate ids still get unique keys; newest first", () => {
   assert.deepEqual(rowKeys([{ id: "a" }, { id: "a" }, { id: "b" }]), ["a", "a#1", "b"]);
   const s = sortNewest([

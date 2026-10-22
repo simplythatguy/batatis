@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .access import REVIEWABLE, authorize_case
-from .account_models import (reviewing_authority, ApplicationStatus, ApplicantType, Claim, Decision, DecisionItem,
+from .account_models import (reviewing_authority, ApplicationStatus, ApplicantType, Claim, Decision, DecisionItem, DecisionOutcome,
                              MessageAuthor, MessagesResult, StatusChange, StoredMessage,
                              Role, ThreadMessage, User)
 from .accounts import require_user
@@ -19,6 +19,7 @@ from .store import VersionConflict
 
 ACCEPT_TEXT = 'Accepted as administratively complete. Technical review remains the responsibility of the authority.'
 RETURN_TEXT = 'Returned for administrative information.'
+REFUSE_TEXT = 'Refusal recorded by the reviewing officer.'
 
 
 class CompletenessSummary(BaseModel):
@@ -52,7 +53,7 @@ class ApplicantSummary(BaseModel):
 
 
 class DecisionSummary(BaseModel):
-    outcome: Literal['accept', 'return']
+    outcome: DecisionOutcome
     by_name: str
     at: str
 
@@ -86,14 +87,15 @@ class ClaimResult(BaseModel):
 
 class DecisionRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
-    outcome: Literal['accept', 'return']
+    outcome: DecisionOutcome
     message: str | None = Field(default=None, max_length=4000)
     items: list[DecisionItem] = Field(default_factory=list, max_length=50)
 
     @model_validator(mode='after')
-    def _return_needs_message(self):
-        if self.outcome == 'return' and (self.message is None or len(self.message.strip()) < 10):
-            raise ValueError('A return requires a message of at least 10 characters')
+    def _reason_required(self):
+        if self.outcome in {'return', 'refuse'} and (self.message is None or len(self.message.strip()) < 10):
+            noun = 'return' if self.outcome == 'return' else 'refusal'
+            raise ValueError(f'A {noun} requires a message of at least 10 characters')
         return self
 
 
@@ -180,7 +182,8 @@ def notification_summary(actor: str, status: str, title: str) -> str:
     """What the other party did, in plain words. Never "approved"."""
     if status == 'accepted':
         return f'{actor} accepted {title} as administratively complete'
-    verb = {'in_review': 'started reviewing', 'returned': 'returned', 'submitted': 'submitted'}[status]
+    verb = {'in_review': 'started reviewing', 'returned': 'returned', 'submitted': 'submitted',
+            'refused': 'recorded a refusal for'}[status]
     return f'{actor} {verb} {title}'
 
 
@@ -188,7 +191,7 @@ def notifications_for(user, store, limit: int = 50) -> NotificationsResult:
     reviewer = bool(user.role == 'reviewer' and user.authority)
     scoped = ([case for case in store.list_applications(authority=user.authority) if case.owner_id != user.id]
               if reviewer else store.list_applications(owner_id=user.id))
-    wanted = {'submitted'} if reviewer else {'in_review', 'returned', 'accepted'}
+    wanted = {'submitted'} if reviewer else {'in_review', 'returned', 'accepted', 'refused'}
     other_role = 'applicant' if reviewer else 'reviewer'
     seen = user.notifications_seen_at or ''
     items: list[Notification] = []
@@ -374,12 +377,13 @@ def create_router(cases, code):
                 if blocking:
                     raise HTTPException(409, {'message': 'Resolve blocking administrative gaps before accepting',
                                               'gaps': [gap.model_dump() for gap in blocking]})
-            label = ACCEPT_TEXT if body.outcome == 'accept' else RETURN_TEXT
+            status, label = {'accept': ('accepted', ACCEPT_TEXT), 'return': ('returned', RETURN_TEXT),
+                             'refuse': ('refused', REFUSE_TEXT)}[body.outcome]
             message = (body.message or '').strip()
             text = label + ('\n\n' + message if message else '')
             case.decision = Decision(outcome=body.outcome, by_id=user.id, by_name=user.name,
                                      message=text, items=body.items)
-            transition(case, user, 'accepted' if body.outcome == 'accept' else 'returned', label)
+            transition(case, user, status, label)
             append_message(case, user, text, kind='decision', items=body.items)
 
         return mutate(cases(), case_id, user, apply)[0]

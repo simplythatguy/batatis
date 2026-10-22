@@ -5,7 +5,7 @@ import { exitCountWarning } from "../rules";
 import { useCandidateAnswer } from "../screens/CodeCheck";
 import { Recommendations } from "../screens/Recommendations";
 import { useCase } from "../store";
-import { authorityName } from "./applications";
+import { readOnlyStatus } from "./applications";
 import { openAssistant, setAssistantContext, useAssistant } from "./assistant/assistant";
 import { useCurrentApplication } from "./begin";
 import { CodeDrawer, type DrawerState } from "./CodeDrawer";
@@ -597,7 +597,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
 
   function next() {
     if (!item) {
-      void requestCheck();
+      if (!locked) void requestCheck();
       location.hash = "#/review";
       return;
     }
@@ -704,13 +704,14 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   const n = (pos < 0 ? index : pos) + 1;
   const openLeft = queue.filter((k) => !itemFor(k)?.done && !itemFor(k)?.optional).length;
   const typed = Boolean(item && multiline(item));
+  const status = readOnlyStatus(app?.status, app?.authority);
 
   return (
     <div className="cf-deck-page">
       {/* The check state lives on Review and in the header; the deck stays quiet. */}
       {locked && (
         <div className="cf-deck-status" role="status">
-          <span className="cf-dot is-warning" aria-hidden="true" />{app?.status === "accepted" ? "Accepted as administratively complete" : `Sent to ${authorityName(app?.authority) || "the authority"}`}. Read-only until the officer returns it.
+          <span className={`cf-dot is-${status.tone}`} aria-hidden="true" />{status.heading}. {status.note}
         </div>
       )}
       <div className="cf-q-stage">

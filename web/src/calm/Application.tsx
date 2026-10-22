@@ -9,7 +9,7 @@ import { useApplicationExport } from "../screens/Application";
 import { useCase } from "../store";
 import type { Case, SectionCRow } from "../types";
 import { patchApplication, refreshApplications, useAccount } from "./account";
-import { authorityName } from "./applications";
+import { authorityName, readOnlyStatus } from "./applications";
 import { useCurrentApplication } from "./begin";
 import { gapKey } from "./deck";
 import { calmHref } from "./routes";
@@ -120,8 +120,6 @@ const when = (iso: string | null) => {
 const STATUS_TEXT: Record<string, string> = {
   submitted: "Waiting for an officer to pick it up.",
   in_review: "An officer is reviewing it.",
-  accepted: "Accepted as administratively complete. This is not a finding that the design complies or is safe.",
-  withdrawn: "Withdrawn.",
 };
 
 /**
@@ -208,16 +206,17 @@ function SubmitPanel() {
 }
 
 function SubmittedStatus({ app, where }: { app: ApplicationSummary; where: string }) {
+  const s = readOnlyStatus(app.status, where);
   return (
     <div className="cf-submitted" role="status">
       <p className="cf-submitted-h">
-        <Dot tone={app.status === "accepted" ? "done" : "warning"} />
-        {app.status === "accepted" ? `Accepted by ${where || "the authority"}` : `Sent to ${where || "the authority"}`}
+        <Dot tone={s.tone} />
+        {s.heading}
       </p>
       <p className="cf-faint cf-small">
         {app.submitted_at ? `Submitted ${when(app.submitted_at)}. ` : ""}
         {app.reviewer?.name && app.status === "in_review" ? `${app.reviewer.name} is reviewing it. ` : STATUS_TEXT[app.status] ? `${STATUS_TEXT[app.status]} ` : ""}
-        {app.status !== "accepted" && "Read-only until the officer returns it."}
+        {s.note}
       </p>
     </div>
   );

@@ -37,7 +37,16 @@ def _where(finding: Finding) -> str:
     return ', '.join(parts)
 
 
+# Finding messages are written for the officer ("Ask the applicant to …"). The request is addressed to
+# the applicant, so those officer-facing sentences are dropped from the copied message.
+_OFFICER_SENTENCE = re.compile(r'\s*Ask the applicant\b[\s\S]*?\.(?=\s|$)')
+
+
 def _ask(finding: Finding) -> str:
+    return _OFFICER_SENTENCE.sub('', _ask_text(finding)).strip()
+
+
+def _ask_text(finding: Finding) -> str:
     where = _where(finding)
     at = f' ({where})' if where else ''
     label = finding.label

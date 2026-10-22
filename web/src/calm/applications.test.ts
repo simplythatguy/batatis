@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { ApplicationSummary } from "../api/accounts.ts";
-import { groupApplications, readOnly, statusLine } from "./applications.ts";
+import { groupApplications, readOnly, readOnlyStatus, statusLine } from "./applications.ts";
 
 const NOW = Date.parse("2026-10-21T12:00:00Z");
 const app = (over: Partial<ApplicationSummary>): ApplicationSummary => ({
@@ -35,6 +35,23 @@ test("the list groups settled applications and searches titles", () => {
   assert.equal(readOnly("in_review"), true);
   assert.equal(readOnly("returned"), false);
   assert.equal(readOnly("draft"), false);
+});
+
+test("refused applications are settled and read-only, without resubmission instructions", () => {
+  const refused = app({ id: "refused", status: "refused", unread_messages: 1 });
+  assert.equal(readOnly(refused.status), true);
+  assert.deepEqual(groupApplications([refused, app({})]), { active: [app({})], settled: [refused] });
+  assert.deepEqual(statusLine(refused, NOW), { text: "Refused · 1 new message", tone: "accent", attention: true });
+  assert.equal(statusLine({ ...refused, unread_messages: 2 }, NOW).text, "Refused · 2 new messages");
+  assert.equal(statusLine({ ...refused, unread_messages: 0 }, NOW).text, "Refused · Edmonton");
+  assert.doesNotMatch(statusLine(refused, NOW).text, /returned|fix|resubmit/i);
+  const display = readOnlyStatus(refused.status, refused.authority);
+  assert.equal(display.label, "Refused · read-only");
+  assert.equal(display.heading, "Refused by Edmonton");
+  assert.equal(display.tone, "blocking");
+  assert.match(display.note, /closed/);
+  assert.doesNotMatch(display.note, /until|return|fix|resubmit|missing/i);
+  assert.equal(readOnly("returned"), false, "an ordinary return stays editable");
 });
 
 import { answerBlocks } from "./assistant/assistant.ts";

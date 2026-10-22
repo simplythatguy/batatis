@@ -2,6 +2,7 @@ import { pagesLabel } from "../intakeView";
 import { useEffect, useRef, useState } from "react";
 import { useCase } from "../store";
 import type { ApplicantType } from "../types";
+import { readOnlyStatus } from "./applications";
 import { useBegin, useCurrentApplication } from "./begin";
 import { ROLE_CHOICES } from "./deck";
 import { Icon24 } from "./icons";
@@ -24,7 +25,7 @@ export function Start() {
   const session = useSession();
   const { begin, userRole } = useBegin();
   const [askRole, setAskRole] = useState(false);
-  const { locked } = useCurrentApplication();
+  const { app, locked } = useCurrentApplication();
   const inCase = phase === "case";
   const [dragging, setDragging] = useState(false);
   const [note, setNote] = useState("");
@@ -95,7 +96,7 @@ export function Start() {
   takeRef.current = take;
 
   // Batatis reads the description and the text layer of attached PDFs (intake).
-  const blocked = locked ? "Submitted applications are read-only until the officer returns them." : !text.trim() ? "Describe it in a sentence first. Batatis also reads the text of the PDFs you attach." : "";
+  const blocked = locked ? readOnlyStatus(app?.status, app?.authority).note : !text.trim() ? "Describe it in a sentence first. Batatis also reads the text of the PDFs you attach." : "";
 
   function start() {
     if (blocked) return;
@@ -133,6 +134,7 @@ export function Start() {
   useEffect(() => { if (askRole) roleHeading.current?.focus({ preventScroll: true }); }, [askRole]);
 
   function removeFile(id: string) {
+    if (locked) return;
     if (!inCase) {
       updateSession((s) => ({ draftFiles: s.draftFiles.filter((f) => f.id !== id) }));
       return setNote("Removed. It was not uploaded.");
@@ -196,7 +198,7 @@ export function Start() {
                 <span className="cf-ext">PDF</span>
                 <span className="cf-file-name">{f.name}</span>
                 <span className={`cf-file-state is-${f.tone}`} title={"reason" in f ? f.reason : undefined}><Dot tone={f.tone} />{f.label}</span>
-                <button type="button" className="cf-icon-btn is-xs" aria-label={`Remove ${f.name}`} onClick={() => removeFile(f.id)}>
+                <button type="button" className="cf-icon-btn is-xs" aria-label={`Remove ${f.name}`} disabled={locked} onClick={() => removeFile(f.id)}>
                   <CIcon name="close" size={12} />
                 </button>
               </li>
