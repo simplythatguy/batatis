@@ -1,0 +1,407 @@
+{
+  "id": "fire-dampers",
+  "title": "Fire dampers where a duct passes through a fire separation",
+  "article": "9.10.13.13.",
+  "summary": "A fire damper where a duct penetrates a fire separation with a fire-resistance rating, Sentence 9.10.13.13.(1), with the exceptions in Sentences (2) to (5) and 9.10.5.1.(3).",
+  "reviewed": false,
+  "review_note": "Unreviewed: a domain reviewer has not yet signed the vectors for this rule (evals_dev/rules/REVIEW.md).",
+  "provisions": [
+    {
+      "id": "9.10.13.13.(1)",
+      "division": "B",
+      "pdf_page": 893,
+      "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.13.13.(1) [PDF p.893]"
+    },
+    {
+      "id": "9.10.13.13.(2)",
+      "division": "B",
+      "pdf_page": 893,
+      "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.13.13.(2) [PDF p.893]"
+    },
+    {
+      "id": "9.10.13.13.(3)",
+      "division": "B",
+      "pdf_page": 893,
+      "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.13.13.(3) [PDF p.893]"
+    },
+    {
+      "id": "9.10.13.13.(4)",
+      "division": "B",
+      "pdf_page": 893,
+      "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.13.13.(4) [PDF p.893]"
+    },
+    {
+      "id": "9.10.13.13.(5)",
+      "division": "B",
+      "pdf_page": 894,
+      "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.13.13.(5) [PDF p.894]"
+    },
+    {
+      "id": "9.10.5.1.(3)",
+      "division": "B",
+      "pdf_page": 880,
+      "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.5.1.(3) [PDF p.880]"
+    },
+    {
+      "id": "1.3.3.3.(1)",
+      "division": "A",
+      "pdf_page": 40,
+      "citation": "NBC(AE) 2023 p2, Div A, Sentence 1.3.3.3.(1) [PDF p.40]"
+    }
+  ],
+  "notes": [],
+  "tables": [],
+  "inputs": [
+    "storeys",
+    "building_area_m2",
+    "duct_penetrates_rated_separation",
+    "fire_damper_provided",
+    "duct_use",
+    "duct_noncombustible",
+    "duct_melting_point_c",
+    "duct_area_cm2",
+    "discharge_height_m",
+    "branch_carried_up_mm",
+    "riser_negative_pressure",
+    "exhausts_outside_at_top",
+    "appendix_d_conforms"
+  ],
+  "derived": [],
+  "outcomes": [
+    {
+      "id": "not_part9",
+      "state": "not_applicable",
+      "provision": "1.3.3.3.(1)",
+      "when": {
+        "op": "or",
+        "args": [
+          {
+            "op": "gt",
+            "args": [
+              {
+                "var": "storeys"
+              },
+              3
+            ]
+          },
+          {
+            "op": "gt",
+            "args": [
+              {
+                "var": "building_area_m2"
+              },
+              600
+            ]
+          }
+        ]
+      },
+      "message": "This building has more than 3 storeys or a building area over 600 m², so Part 9 does not apply (Div A, Sentence 1.3.3.3.(1)). The Part 3 requirements are not checked here.",
+      "if_unknown": "assume",
+      "assumption": "Assumed a Part 9 building (3 storeys or less, building area 600 m² or less); the storeys or building area were not stated."
+    },
+    {
+      "id": "no_penetration",
+      "state": "not_applicable",
+      "provision": "9.10.13.13.(1)",
+      "when": {
+        "op": "eq",
+        "args": [
+          {
+            "var": "duct_penetrates_rated_separation"
+          },
+          false
+        ]
+      },
+      "message": "No duct passes through a fire separation with a fire-resistance rating, so Sentence 9.10.13.13.(1) does not apply."
+    },
+    {
+      "id": "follows_damper",
+      "state": "follows",
+      "provision": "9.10.13.13.(1)",
+      "when": {
+        "op": "eq",
+        "args": [
+          {
+            "var": "fire_damper_provided"
+          },
+          true
+        ]
+      },
+      "message": "A fire damper is installed where the duct passes through the fire separation. This follows the acceptable solution in Sentence 9.10.13.13.(1); the damper's rating and installation (Articles 3.1.8.4. and 3.1.8.10.) are not checked here."
+    },
+    {
+      "id": "follows_cooking",
+      "state": "follows",
+      "provision": "9.10.13.13.(5)",
+      "when": {
+        "op": "eq",
+        "args": [
+          {
+            "var": "duct_use"
+          },
+          "commercial_cooking"
+        ]
+      },
+      "message": "The duct serves commercial cooking equipment; Sentence 9.10.13.13.(5) does not require a fire damper at the fire separation. This follows the acceptable solution."
+    },
+    {
+      "id": "follows_ac_branch",
+      "state": "follows",
+      "provision": "9.10.13.13.(2)",
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "args": [
+              {
+                "var": "duct_use"
+              },
+              "ac_branch"
+            ]
+          },
+          {
+            "op": "eq",
+            "args": [
+              {
+                "var": "duct_noncombustible"
+              },
+              true
+            ]
+          },
+          {
+            "op": "ge",
+            "args": [
+              {
+                "var": "duct_melting_point_c"
+              },
+              760
+            ]
+          },
+          {
+            "op": "lt",
+            "args": [
+              {
+                "var": "duct_area_cm2"
+              },
+              130
+            ]
+          },
+          {
+            "op": "le",
+            "args": [
+              {
+                "var": "discharge_height_m"
+              },
+              1.2
+            ]
+          }
+        ]
+      },
+      "message": "The noncombustible branch duct (melting point {duct_melting_point_c}, area {duct_area_cm2}, discharging {discharge_height_m} above the floor) meets each condition of Sentence 9.10.13.13.(2), so no fire damper is required. This follows the acceptable solution."
+    },
+    {
+      "id": "follows_riser_branch",
+      "state": "follows",
+      "provision": "9.10.13.13.(3)",
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "args": [
+              {
+                "var": "duct_use"
+              },
+              "exhaust_riser_branch"
+            ]
+          },
+          {
+            "op": "eq",
+            "args": [
+              {
+                "var": "duct_noncombustible"
+              },
+              true
+            ]
+          },
+          {
+            "op": "ge",
+            "args": [
+              {
+                "var": "duct_melting_point_c"
+              },
+              760
+            ]
+          },
+          {
+            "op": "ge",
+            "args": [
+              {
+                "var": "branch_carried_up_mm"
+              },
+              500
+            ]
+          },
+          {
+            "op": "eq",
+            "args": [
+              {
+                "var": "riser_negative_pressure"
+              },
+              true
+            ]
+          }
+        ]
+      },
+      "message": "The noncombustible branch duct (melting point {duct_melting_point_c}) is carried {branch_carried_up_mm} up inside an exhaust riser under negative pressure, meeting Sentence 9.10.13.13.(3), so no fire damper is required. This follows the acceptable solution."
+    },
+    {
+      "id": "follows_service_space",
+      "state": "follows",
+      "provision": "9.10.13.13.(4)",
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "args": [
+              {
+                "var": "duct_use"
+              },
+              "vertical_service_space_exhaust"
+            ]
+          },
+          {
+            "op": "eq",
+            "args": [
+              {
+                "var": "duct_noncombustible"
+              },
+              true
+            ]
+          },
+          {
+            "op": "gt",
+            "args": [
+              {
+                "var": "duct_melting_point_c"
+              },
+              760
+            ]
+          },
+          {
+            "op": "eq",
+            "args": [
+              {
+                "var": "exhausts_outside_at_top"
+              },
+              true
+            ]
+          }
+        ]
+      },
+      "message": "The noncombustible duct (melting point {duct_melting_point_c}, above 760 °C) exhausts directly outside at the top of the vertical service space, meeting Sentence 9.10.13.13.(4), so no fire damper is required. This follows the acceptable solution."
+    },
+    {
+      "id": "follows_membrane",
+      "state": "follows",
+      "provision": "9.10.5.1.(3)",
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "args": [
+              {
+                "var": "duct_use"
+              },
+              "ceiling_membrane_opening"
+            ]
+          },
+          {
+            "op": "eq",
+            "args": [
+              {
+                "var": "appendix_d_conforms"
+              },
+              true
+            ]
+          }
+        ]
+      },
+      "message": "The opening is in a rated membrane ceiling, and the ducts, openings and protection follow Appendix D, which Sentence 9.10.5.1.(3) permits. This follows the acceptable solution."
+    },
+    {
+      "id": "departs_ac_branch",
+      "state": "departs",
+      "provision": "9.10.13.13.(1)",
+      "when": {
+        "op": "eq",
+        "args": [
+          {
+            "var": "duct_use"
+          },
+          "ac_branch"
+        ]
+      },
+      "message": "There is no fire damper, and the branch duct does not meet every condition of Sentence 9.10.13.13.(2): noncombustible ({duct_noncombustible}), melting point not below 760 °C ({duct_melting_point_c}), cross-sectional area less than 130 cm² ({duct_area_cm2}), discharge not more than 1.2 m above the floor ({discharge_height_m}). The design departs from the acceptable solution in Sentence 9.10.13.13.(1)."
+    },
+    {
+      "id": "departs_riser_branch",
+      "state": "departs",
+      "provision": "9.10.13.13.(1)",
+      "when": {
+        "op": "eq",
+        "args": [
+          {
+            "var": "duct_use"
+          },
+          "exhaust_riser_branch"
+        ]
+      },
+      "message": "There is no fire damper, and the branch duct does not meet every condition of Sentence 9.10.13.13.(3): noncombustible ({duct_noncombustible}), melting point not below 760 °C ({duct_melting_point_c}), carried up inside the riser not less than 500 mm ({branch_carried_up_mm}), riser under negative pressure ({riser_negative_pressure}). The design departs from the acceptable solution in Sentence 9.10.13.13.(1)."
+    },
+    {
+      "id": "departs_service_space",
+      "state": "departs",
+      "provision": "9.10.13.13.(1)",
+      "when": {
+        "op": "eq",
+        "args": [
+          {
+            "var": "duct_use"
+          },
+          "vertical_service_space_exhaust"
+        ]
+      },
+      "message": "There is no fire damper, and the duct does not meet every condition of Sentence 9.10.13.13.(4): noncombustible ({duct_noncombustible}), melting point above 760 °C ({duct_melting_point_c}), exhausting directly outside at the top of the service space ({exhausts_outside_at_top}). The design departs from the acceptable solution in Sentence 9.10.13.13.(1)."
+    },
+    {
+      "id": "departs_membrane",
+      "state": "departs",
+      "provision": "9.10.13.13.(1)",
+      "when": {
+        "op": "eq",
+        "args": [
+          {
+            "var": "duct_use"
+          },
+          "ceiling_membrane_opening"
+        ]
+      },
+      "message": "There is no fire damper, and the openings in the rated membrane ceiling do not follow Appendix D as Sentence 9.10.5.1.(3) requires. The design departs from the acceptable solution in Sentence 9.10.13.13.(1)."
+    },
+    {
+      "id": "departs",
+      "state": "departs",
+      "provision": "9.10.13.13.(1)",
+      "when": true,
+      "message": "A duct passes through a fire separation with a fire-resistance rating without a fire damper, and none of the exceptions in Sentences 9.10.13.13.(2) to (5) or 9.10.5.1.(3) fits it. The design departs from the acceptable solution in Sentence 9.10.13.13.(1)."
+    }
+  ],
+  "not_checked": [
+    "Articles 3.1.8.4. and 3.1.8.10.: the damper's rating and installation",
+    "Sentence 9.10.9.9.(5): firestopping around fire dampers (it does not remove the need for a damper)"
+  ]
+}
