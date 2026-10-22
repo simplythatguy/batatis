@@ -4521,6 +4521,14 @@ body {
   overflow-wrap: anywhere;
 }
 
+.cf-returned-retry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 0;
+}
+
 .cf-returned-items {
   margin: 10px 0 0;
   padding: 0;

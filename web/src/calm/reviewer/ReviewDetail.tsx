@@ -365,7 +365,8 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   function requestMore() {
     // Without a package review (or on a server without it), fall back to the plain return note.
     if (shown || latest) {
-      if (latest && shown?.version !== latest.version) setShown(latest);
+      // A failed refresh leaves an older index: never swap the version that just ran for it.
+      if (latest && indexState === "ready" && shown?.version !== latest.version) setShown(latest);
       setView("request");
     } else setReturning(true);
   }
@@ -520,8 +521,8 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
         </>
       );
     }
-    if (indexState === "loading") return <p className="ac-empty">Loading the review…</p>;
-    if (indexState === "failed") {
+    if (indexState === "loading" && !shown) return <p className="ac-empty">Loading the review…</p>;
+    if (indexState === "failed" && !shown) {
       return (
         <div className="rv-empty">
           <h2 className="pr-title">The review didn’t load</h2>
@@ -569,6 +570,13 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
     return (
       <>
         {runError && <p className="ac-error" role="alert">{runError}</p>}
+        {/* The review on screen loaded; only the version list behind it did not. Accept waits for it. */}
+        {indexState === "failed" && (
+          <p className="pr-note rv-note" role="alert">
+            <span className="cf-dot is-warning" aria-hidden="true" />The review list didn’t refresh · Accept waits
+            <button type="button" className="cf-btn is-xs" onClick={() => { setIndexState("loading"); void loadIndex(true); }}>Try again</button>
+          </p>
+        )}
         {pkg.state === "stale" && canRun && (
           <p className="pr-note rv-note" role="note">
             <span className="cf-dot is-warning" aria-hidden="true" />Changed since review v{pkg.version}
