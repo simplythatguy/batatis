@@ -750,6 +750,8 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       }
       setBusyKey((k) => (k === key ? null : k));
       if (error) {
+        // Nothing was saved: the choice goes back to the saved answer.
+        setPicked((p) => { const { [key]: _drop, ...rest } = p; return rest; });
         noteFor(key, error);
         setConflicted(/changed somewhere else/.test(error) ? key : null);
         return;
