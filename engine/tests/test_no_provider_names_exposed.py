@@ -146,6 +146,12 @@ def test_the_generated_wire_schema_and_types_name_no_provider():
     assert not PROVIDER.search(schema_export.render()), 'the schema the engine models generate today'
 
 
+def test_the_assistant_notice_names_no_provider():
+    from engine.privacy import assistant_notice
+    for provider in ('anthropic', 'openai', ''):
+        assert not NOTICE_PROVIDERS.search(assistant_notice(provider))
+
+
 def test_the_privacy_notice_names_no_provider():
     assert not NOTICE_PROVIDERS.search(PRIVACY_NOTICE)
     assert not NOTICE_PROVIDERS.search((WEB / 'src' / 'privacy.ts').read_text())
