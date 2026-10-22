@@ -117,7 +117,10 @@ export function CodeProgress() {
     return (
       <div className="cf-step-error">
         <p className="cf-note"><Dot tone="warning" />{reading.identifyNote || "The code check didn’t finish."}</p>
-        <button type="button" className="cf-btn" onClick={() => void runIdentify()}><CIcon name="retry" size={14} />Try again</button>
+        <div className="cf-row-actions">
+          <button type="button" className="cf-btn" onClick={() => void runIdentify()}><CIcon name="retry" size={14} />Try again</button>
+          <a className="cf-btn is-ghost" href="#/code">Find the rule yourself</a>
+        </div>
       </div>
     );
   }
@@ -187,12 +190,6 @@ export function RedirectPage({ n }: { n: number }) {
         <figcaption className="cf-said-meta"><span>The words that decided it, from your description</span></figcaption>
       </figure>
       <p className="cf-q-help">{scope.message}</p>
-      <dl className="cf-redirect-facts">
-        <dt>Code</dt>
-        <dd>{scope.regime.code}</dd>
-        <dt>Where to take it</dt>
-        <dd>{scope.regime.route}</dd>
-      </dl>
       <div className="cf-ok-row">
         {scope.override_allowed && (
           <button
