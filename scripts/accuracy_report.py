@@ -767,13 +767,15 @@ def code_id_from_probe(p: dict, commit: str, where: str) -> dict:
 
     rob = (by_arm.get(provisional or winner or '', {}) or {}).get('robust') or {}
     if winner:
-        verdict = f'The decision rule chose the product pipeline ({neutral(winner)[1].lower()}).'
+        verdict = (f'The decision rule chose the product pipeline ({neutral(winner)[1].lower()}).' if winner == PRODUCT
+                   else f'The decision rule chose {neutral(winner)[1].lower()}, not the product pipeline.')
     elif provisional:
         why = ''
         if rob.get('agreement_ok') is False and rob.get('top1_agreement') is not None:
             why = (f' It fails one robustness condition: two runs on the same case agree on the first article '
                    f'{rob["top1_agreement"] * 100:.1f}% of the time, under the required {d.get("agreement_min", 0.9) * 100:.0f}%.')
-        verdict = (f'The decision rule carries the product pipeline as provisional, not as a winner: it is tied with the best '
+        carried = 'the product pipeline' if provisional == PRODUCT else neutral(provisional)[1].lower()
+        verdict = (f'The decision rule carries {carried} as provisional, not as a winner: it is tied with the best '
                    f'and the cheapest of those tied.{why} The choice needs a person.')
     else:
         verdict = 'No pipeline met the decision rule yet.'
@@ -1055,11 +1057,20 @@ def main(argv: list[str] | None = None) -> int:
     except ReportError as e:
         print(f'accuracy report: {e}', file=sys.stderr)
         return 1
-    OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
-    OUT_JSON.write_text(dump(report), encoding='utf-8')
-    OUT_MD.write_text(render_md(report), encoding='utf-8')
-    print(f'wrote {OUT_JSON.relative_to(ROOT)} and {OUT_MD.relative_to(ROOT)}')
+    # Only a verified build replaces the published report; a --no-verify draft goes to a temp folder.
+    out_json, out_md = (OUT_JSON, OUT_MD) if args.verify else _draft_paths()
+    out_json.parent.mkdir(parents=True, exist_ok=True)
+    out_json.write_text(dump(report), encoding='utf-8')
+    out_md.write_text(render_md(report), encoding='utf-8')
+    shown = (lambda p: p.relative_to(ROOT)) if args.verify else (lambda p: p)
+    print(f'wrote {"" if args.verify else "draft (unverified) "}{shown(out_json)} and {shown(out_md)}')
     return 0
+
+
+def _draft_paths() -> tuple[Path, Path]:
+    import tempfile
+    folder = Path(tempfile.gettempdir()) / 'batatis-accuracy-draft'
+    return folder / 'report.json', folder / 'report.md'
 
 
 if __name__ == '__main__':

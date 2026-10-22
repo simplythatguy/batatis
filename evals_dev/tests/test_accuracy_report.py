@@ -133,3 +133,14 @@ def test_without_benchmark_rows_the_section_says_not_run_and_shows_no_number(mon
     s = ar.code_id_section(None)
     assert s['status'] == 'not_run' and s['figures'] == []
     ar.validate({**REPORT, 'measured': [s]})
+
+
+def test_an_unverified_draft_never_overwrites_the_published_report(monkeypatch, tmp_path):
+    published = (ar.OUT_JSON.read_text(), ar.OUT_MD.read_text())
+    monkeypatch.setattr(ar, 'build', lambda **kw: {'draft': True})
+    monkeypatch.setattr(ar, 'dump', lambda r: '{"draft": true}')
+    monkeypatch.setattr(ar, 'render_md', lambda r: '# draft')
+    monkeypatch.setattr(ar, '_draft_paths', lambda: (tmp_path / 'report.json', tmp_path / 'report.md'))
+    assert ar.main(['--no-verify']) == 0
+    assert (ar.OUT_JSON.read_text(), ar.OUT_MD.read_text()) == published
+    assert (tmp_path / 'report.json').read_text() == '{"draft": true}'
