@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { ApplicationSummary } from "../api/accounts";
 import { groupGaps } from "../humanReview";
 import { useCase } from "../store";
@@ -202,9 +202,32 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     setAssistantContext({ screen: active === "start" ? "describe" : active, label });
   }, [active]);
 
+  // The code library needs the room: the list folds away while it is open (⌘B or the header
+  // button brings it back) and returns to how it was when the library closes.
+  const listBeforeCode = useRef<boolean | null>(null);
+  useEffect(() => {
+    if (active === "code" && !bare) {
+      if (listBeforeCode.current === null) {
+        listBeforeCode.current = listCollapsed;
+        setListCollapsed(true);
+      }
+    } else if (listBeforeCode.current !== null) {
+      setListCollapsed(listBeforeCode.current);
+      listBeforeCode.current = null;
+    }
+  }, [active, bare]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /** An explicit open or close inside the library is what leaving it restores. */
+  const keepList = (collapsed: boolean) => { if (listBeforeCode.current !== null) listBeforeCode.current = collapsed; };
+  // The shortcut handler is registered once; it reads the current state from this ref.
+  // Synced after commit, not during render: a render React discards must not leave its value in the ref.
+  const listCollapsedNow = useRef(listCollapsed);
+  useLayoutEffect(() => { listCollapsedNow.current = listCollapsed; });
   const toggleList = () => {
-    if (isPhone()) setSheet(true);
-    else setListCollapsed((v) => !v);
+    if (isPhone()) return setSheet(true);
+    const next = !listCollapsedNow.current;
+    keepList(next);
+    setListCollapsed(next);
   };
 
   // Cmd/Ctrl+B sidebar, +J assistant, +K search applications, +Shift+K search the code.
@@ -219,7 +242,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
       else if (k === "k") {
         e.preventDefault();
         if (isPhone()) setSheet(true);
-        else setListCollapsed(false);
+        else { keepList(false); setListCollapsed(false); }
         window.setTimeout(() => listRef.current?.focusSearch(), 0);
       }
     };
@@ -258,7 +281,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
       icon: "inbox",
       onClick: () => {
         if (isPhone()) setSheet(true);
-        else setListCollapsed(false);
+        else { keepList(false); setListCollapsed(false); }
         if (!onStage) location.hash = lastStage.current;
       },
       current: onStage,

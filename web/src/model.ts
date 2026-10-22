@@ -254,6 +254,17 @@ export function plainFactStatus(kind: string, status: string): string {
 }
 
 /** Derived gap list: the only list any surface renders. */
+/**
+ * Starter questions whose answer is the description itself ("What is the product called, and what
+ * does it do?", "What are you building…?"). Start asks that once; with a description they are
+ * neither asked again in the deck nor listed as open.
+ */
+const ANSWERED_BY_DESCRIPTION: ReadonlySet<string> = new Set(["q-product", "q-job"]);
+
+export function answeredByDescription(c: Pick<Case, "description">, questionId: string): boolean {
+  return ANSWERED_BY_DESCRIPTION.has(questionId) && Boolean(c.description.trim());
+}
+
 export function getGaps(c: Case): Gap[] {
   const gaps: Gap[] = [];
   if (!c.authority) {
@@ -306,7 +317,7 @@ export function getGaps(c: Case): Gap[] {
     }
   }
   for (const q of c.questions) {
-    if (q.id.startsWith("q-prof-")) continue;
+    if (q.id.startsWith("q-prof-") || answeredByDescription(c, q.id)) continue;
     if (!q.answer) {
       const article = q.kind === "article" || q.id.startsWith("q-from-") || q.id.startsWith("oq_") || Boolean(q.cardId);
       const intake = q.kind === "intake" || q.id.startsWith("q-identify-");

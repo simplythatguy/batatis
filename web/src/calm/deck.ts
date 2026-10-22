@@ -4,13 +4,13 @@
  * Card keys reuse the legacy focus ids (field-*, cand-*, fact-*, q-*), so gap hrefs land on cards.
  */
 import { AUTHORITIES } from "../config";
-import { DETAIL_FIELDS, DETAIL_IDS, PROCESS_FIELDS, displayValue, factFor, factLabel, valueText } from "../model";
+import { DETAIL_FIELDS, DETAIL_IDS, PROCESS_FIELDS, answeredByDescription, displayValue, factFor, factLabel, valueText } from "../model";
 import { isProvision } from "../provisions";
 import { quoteKind } from "../rules";
 import type { ApplicantType, Candidate, Case, Fact, Gap } from "../types";
 import { calmHref } from "./routes";
 
-export type DeckKind = "fact" | "candidate" | "storeys" | "question" | "authority" | "detail" | "process" | "section-d" | "describe" | "role";
+export type DeckKind = "fact" | "candidate" | "storeys" | "question" | "authority" | "detail" | "process" | "section-d";
 
 /** Variance form sections, in the order the deck asks them and the footer shows them. */
 export type SectionId = "A" | "B" | "C" | "D";
@@ -41,7 +41,10 @@ export interface DeckItem {
   optional: boolean;
   /** A real code provision for the citation chip. Absent for cards built from the applicant's words. */
   provision?: string;
-  /** Proposed-fact cards: the two answers in plain words ("Yes, 2 storeys" / "No, something else"). */
+  /**
+   * Two answers in plain words: proposed facts ("Yes, 2 storeys" / "No, something else") and the
+   * proposed alternative, which offers the description instead of asking for it again.
+   */
   confirmLabels?: { confirm: string; dismiss: string };
 }
 
@@ -95,6 +98,11 @@ export function sourcePhrase(ref: string): string {
 }
 
 const short = (t: string) => (t.length > 48 ? `${t.slice(0, 45)}…` : t);
+/** Whitespace folded, cut at `n` characters with an ellipsis. */
+const clip = (t: string, n: number) => {
+  const s = t.replace(/\s+/g, " ").trim();
+  return s.length > n ? `${s.slice(0, n - 1).trimEnd()}…` : s;
+};
 
 /**
  * Plain-language copy for a value read from the applicant's words: the question the field
@@ -186,9 +194,9 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
   };
 }
 
-/** Questions answered on another card are not asked twice. */
+/** Questions answered on another card, or by the description on Start, are not asked twice. */
 function questionOnOtherCard(c: Case, id: string, cardId?: string): boolean {
-  if (id.startsWith("q-prof-") || id.startsWith("q-scope-") || id.startsWith("q-from-") || cardId) return true;
+  if (id.startsWith("q-prof-") || id.startsWith("q-scope-") || id.startsWith("q-from-") || cardId || answeredByDescription(c, id)) return true;
   return id === "q-desc-storeys" && c.candidates.some((a) => a.id === "desc-storeys");
 }
 
@@ -277,18 +285,24 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     // A choice field counts only with one of its choices (a free-text answer elsewhere can land here).
     const filled = d.options ? valueText(fact) in d.options : Boolean(valueText(fact).trim());
     if (!d.required && filled && !opts.includeDone) continue;
+    // The proposed alternative is usually what the applicant already described on Start: offer
+    // those words instead of asking again. Nothing is filled until they say yes.
+    const offer = d.id === "alternative" && Boolean(c.description.trim());
     push({
       key: `field-${d.id}`,
       kind: "detail",
       section: d.section,
       eyebrow: d.section === "A" ? "Section A · Applicant" : "Section B · Project",
-      title: DETAIL_QUESTION[d.id] ?? d.label,
-      context: d.options && valueText(fact).trim() && !filled ? "You answered in words. Pick the choice that fits:" : DETAIL_CONTEXT[d.id] ?? d.hint ?? "",
-      quote: d.options && valueText(fact).trim() && !filled ? valueText(fact).trim() : undefined,
+      title: offer ? "Is this the alternative you’re proposing?" : DETAIL_QUESTION[d.id] ?? d.label,
+      context: offer
+        ? "Section B asks what you propose instead of the acceptable solution. You described it as"
+        : d.options && valueText(fact).trim() && !filled ? "You answered in words. Pick the choice that fits:" : DETAIL_CONTEXT[d.id] ?? d.hint ?? "",
+      quote: offer ? clip(c.description, 240) : d.options && valueText(fact).trim() && !filled ? valueText(fact).trim() : undefined,
       why: `Section ${d.section} of the variance form asks for the ${d.label.toLowerCase()}.`,
       ref: d.id,
       done: d.required ? filled : filled || seen.has(`field-${d.id}`),
       optional: !d.required,
+      confirmLabels: offer ? { confirm: "Yes, use my description", dismiss: "No, I’ll write it" } : undefined,
     });
   }
 
@@ -353,41 +367,27 @@ export const ROLE_CHOICES: { value: ApplicantType; label: string }[] = [
   { value: "homebuilder", label: "Homebuilder" },
 ];
 
-/**
- * Before an application exists: the description, then (without a signed-in applicant type) who is
- * applying. Answering both starts the application; nothing is assumed for either.
- */
-export function preCaseDeck(description: string, needsRole: boolean, role: ApplicantType | null): DeckItem[] {
-  const items: DeckItem[] = [
-    {
-      key: "describe",
-      kind: "describe",
-      section: "B",
-      eyebrow: "Section B · Project",
-      title: "What are you building differently?",
-      context: "A sentence or two is enough. Batatis reads your words to find the code that applies.",
-      why: "Your description is where Batatis starts: it finds the code that may apply and asks only what is missing.",
-      ref: "describe",
-      done: Boolean(description.trim()),
-      optional: false,
-    },
-  ];
-  if (needsRole) {
-    items.unshift({
-      key: "role",
-      kind: "role",
-      section: "A",
-      eyebrow: "Section A · Applicant",
-      title: "Who is applying?",
-      context: "This decides which starting questions you get.",
-      why: "Manufacturers, contractors and homebuilders are asked different starting questions. Batatis never picks one for you.",
-      ref: "role",
-      done: Boolean(role),
-      optional: false,
-    });
-  }
-  return items;
+/** Which of the two alternative answers the saved value means (the description, or the applicant's own words). */
+export function alternativeChoice(description: string, value: string): "confirm" | "dismiss" | undefined {
+  const v = value.trim();
+  if (!v) return undefined;
+  return v === description.trim() ? "confirm" : "dismiss";
 }
+
+/**
+ * Before an application exists the Questions stage asks nothing. Start is the one place to describe
+ * the project (and to pick who is applying when onboarding has not), so there is no card to repeat
+ * it here: just a quiet line and the way back to Start.
+ */
+export function preCaseState(draft: string): { items: DeckItem[]; line: string; action: string } {
+  const started = Boolean(draft.trim());
+  return {
+    items: [],
+    line: started ? "You’ve started describing your project. Finish it and your questions start here." : "Your questions start once you describe your project.",
+    action: started ? "Continue describing" : "Describe your project",
+  };
+}
+
 /** Answered out of tracked (non-optional) cards. */
 export function deckProgress(items: DeckItem[]): { done: number; total: number } {
   const tracked = items.filter((i) => !i.optional);
@@ -409,13 +409,13 @@ export function sectionProgress(items: DeckItem[]): { id: SectionId; label: stri
 export function choicesFor(item: DeckItem): { value: string; label: string }[] {
   if (item.kind === "fact") return [{ value: "confirm", label: item.confirmLabels?.confirm ?? "Yes, that’s right" }, { value: "dismiss", label: item.confirmLabels?.dismiss ?? "No, something else" }];
   if (item.kind === "authority") return [...AUTHORITIES.map((a) => ({ value: a.id as string, label: a.name })), { value: "unsure", label: "Not sure yet" }];
-  if (item.kind === "role") return ROLE_CHOICES.map((r) => ({ value: r.value as string, label: r.label }));
   if (item.kind === "candidate") {
     return item.provision
       ? [{ value: "yes", label: "Yes, it differs" }, { value: "no", label: "No, it follows" }, { value: "not-sure", label: "Not sure" }]
       : [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }, { value: "not-sure", label: "Not sure" }];
   }
   if (item.kind === "detail") {
+    if (item.confirmLabels) return [{ value: "confirm", label: item.confirmLabels.confirm }, { value: "dismiss", label: item.confirmLabels.dismiss }];
     const def = DETAIL_FIELDS.find((d) => d.id === item.ref);
     if (def?.options) return Object.entries(def.options).map(([value, label]) => ({ value, label }));
   }

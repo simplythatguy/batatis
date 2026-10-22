@@ -5,12 +5,11 @@ import { exitCountWarning } from "../rules";
 import { useCandidateAnswer } from "../screens/CodeCheck";
 import { Recommendations } from "../screens/Recommendations";
 import { useCase } from "../store";
-import type { ApplicantType } from "../types";
 import { authorityName } from "./applications";
 import { openAssistant, setAssistantContext, useAssistant } from "./assistant/assistant";
-import { useBegin, useCurrentApplication } from "./begin";
+import { useCurrentApplication } from "./begin";
 import { CodeDrawer, type DrawerState } from "./CodeDrawer";
-import { aliasKey, buildDeck, choiceKey, choicesFor, preCaseDeck, SECTIONS, sourcePhrase, type DeckItem, type SectionId } from "./deck";
+import { aliasKey, alternativeChoice, buildDeck, choiceKey, choicesFor, preCaseState, SECTIONS, sourcePhrase, type DeckItem, type SectionId } from "./deck";
 import { Icon24 } from "./icons";
 import { RelevanceRing } from "./RelevanceRing";
 import { updateSession, useSession } from "./session";
@@ -26,13 +25,13 @@ function isTextTarget(t: EventTarget | null): boolean {
 
 /** Cards answered by typing several lines continue with Cmd/Ctrl+Enter instead of Enter. */
 function multiline(item: DeckItem): boolean {
-  return item.kind === "question" || item.kind === "process" || item.kind === "describe" || (item.kind === "detail" && Boolean(DETAIL_FIELDS.find((d) => d.id === item.ref)?.multiline));
+  return item.kind === "question" || item.kind === "process" || (item.kind === "detail" && Boolean(DETAIL_FIELDS.find((d) => d.id === item.ref)?.multiline));
 }
 
 /* —— Typeform pieces —— */
 
 /** Stacked choices with letter keys. Pressed = selected; the check shows on the chosen one. */
-function Choices({ choices, current, onPick }: { choices: { value: string; label: string }[]; current?: string; onPick: (v: string) => void }) {
+export function Choices({ choices, current, onPick }: { choices: { value: string; label: string }[]; current?: string; onPick: (v: string) => void }) {
   return (
     <div className="cf-choices-q" role="group" aria-label="Your answer">
       {choices.map((o, n) => (
@@ -173,6 +172,9 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer }: { item:
   if (item.kind === "candidate" && cand) current = cand.answer ?? undefined;
   if (item.kind === "authority") current = c.authority || (session.authorityUnsure ? "unsure" : undefined);
   if (item.kind === "detail" && def?.options) current = valueText(fact) || undefined;
+  // The proposed alternative offers the description: Yes uses it, No opens the field.
+  const offer = item.kind === "detail" && Boolean(item.confirmLabels);
+  if (offer) current = picked === "dismiss" ? "dismiss" : alternativeChoice(c.description, valueText(fact)) ?? picked;
 
   return (
     <>
@@ -212,8 +214,9 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer }: { item:
         </>
       ) : item.kind === "detail" && def && !def.options ? (
         <>
-          {def.multiline ? (
-            <textarea id={`field-${def.id}`} className="cf-uline is-area" rows={2} aria-label={def.label} value={valueText(fact)} onChange={(e) => dispatch({ type: "setDetail", field: def.id, value: e.target.value, section: def.section })} placeholder="Type your answer here…" />
+          {offer && <Choices choices={choices} current={current} onPick={onPick} />}
+          {offer && current !== "dismiss" ? null : def.multiline ? (
+            <textarea id={`field-${def.id}`} className="cf-uline is-area" rows={2} aria-label={def.label} value={valueText(fact)} onChange={(e) => dispatch({ type: "setDetail", field: def.id, value: e.target.value, section: def.section })} placeholder={offer ? "What you propose instead, in a sentence or two…" : "Type your answer here…"} />
           ) : (
             <input
               id={`field-${def.id}`}
@@ -225,18 +228,13 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer }: { item:
               placeholder={def.inputType === "date" ? undefined : "Type your answer here…"}
             />
           )}
-          {fact && !isTyped(fact) && (
+          {!offer && fact && !isTyped(fact) && (
             <p className="cf-note">
               <span className={`cf-dot ${fact.status === "confirmed" ? "is-done" : "is-warning"}`} aria-hidden="true" />
               {picked === "confirm" ? "Confirmed by you. You can still edit it." : `From ${sourcePhrase(fact.source.ref)}. Edit it if it’s not right.`}
             </p>
           )}
-          {picked === "dismiss" && !fact && <p className="cf-note">Removed. Type the right one, or skip for now.</p>}
-          {def.id === "alternative" && !valueText(fact).trim() && c.description.trim() && (
-            <button type="button" className="cf-chip cf-from-desc" onClick={() => dispatch({ type: "setDetail", field: "alternative", value: c.description.trim(), section: "B" })}>
-              Start from my description
-            </button>
-          )}
+          {!offer && picked === "dismiss" && !fact && <p className="cf-note">Removed. Type the right one, or skip for now.</p>}
         </>
       ) : (
         choices.length > 0 && <Choices choices={choices} current={current} onPick={onPick} />
@@ -278,82 +276,29 @@ function AskLink({ item, n }: { item: DeckItem; n: number }) {
   );
 }
 
-/* —— Before an application exists: description, then the role when onboarding has none —— */
+/* —— Before an application exists: nothing to ask yet —— */
 
-function PreCaseDeck() {
+/** One quiet line and the way back to Start, the one place to describe the project. */
+function NoQuestionsYet() {
   const session = useSession();
-  const { userRole, begin } = useBegin();
-  const items = preCaseDeck(session.draft, !userRole, session.role);
-  const [index, setIndex] = useState(() => Math.max(0, items.findIndex((i) => !i.done)));
-  const at = Math.min(index, items.length - 1);
-  const item = items[at];
-  const dir = useDirection(at);
-  const wrap = useRef<HTMLDivElement>(null);
-
+  const { line, action } = preCaseState(session.draft);
   useEffect(() => {
-    setAssistantContext({ screen: "question", focus: { kind: "card", id: item.key }, label: "your new application", suggestions: ["What is an alternative solution?", "What should I describe?"] });
-    const el = wrap.current;
-    (el?.querySelector<HTMLElement>("textarea") ?? el?.querySelector<HTMLElement>("h2"))?.focus({ preventScroll: true });
-  }, [item.key]);
-
-  function ok() {
-    if (item.kind === "describe" && !session.draft.trim()) return;
-    if (item.kind === "role" && !session.role) return;
-    if (begin()) return;
-    const open = items.findIndex((i) => !i.done);
-    if (open >= 0) setIndex(open);
-  }
-  function pick(v: string) {
-    updateSession({ role: v as ApplicantType });
-  }
-
-  const keys = useRef<(e: KeyboardEvent) => void>(() => {});
-  keys.current = (e) => {
-    if (e.defaultPrevented || document.querySelector("dialog[open]")) return;
-    const t = e.target as HTMLElement | null;
-    if (t?.closest?.(".cf-pop, dialog, [role='menu'], .cf-palette, .cf-assist, .cf-qfoot")) return;
-    const inText = isTextTarget(t);
-    if (e.key === "Enter") {
-      if (t?.tagName === "TEXTAREA" && !(e.metaKey || e.ctrlKey)) return;
-      if (t?.hasAttribute("data-deck-answer") && t.getAttribute("aria-pressed") !== "true") return;
-      if (!inText && t && t !== document.body && !t.hasAttribute("data-deck-answer") && t.tagName !== "H2") return;
-      e.preventDefault();
-      ok();
-    } else if (!inText && !e.metaKey && !e.ctrlKey && !e.altKey && (!t || t === document.body || t.closest(".cf-deck-page"))) {
-      if (e.key === "ArrowUp" && at > 0) { e.preventDefault(); setIndex(at - 1); }
-      else if (e.key === "ArrowDown" && at < items.length - 1) { e.preventDefault(); setIndex(at + 1); }
-      else if (item.kind === "role" && /^[a-z]$/i.test(e.key)) {
-        const ch = choicesFor(item)[e.key.toUpperCase().charCodeAt(0) - 65];
-        if (ch) { e.preventDefault(); pick(ch.value); }
-      }
-    }
-  };
-  useEffect(() => {
-    const on = (e: KeyboardEvent) => keys.current(e);
-    document.addEventListener("keydown", on);
-    return () => document.removeEventListener("keydown", on);
+    setAssistantContext({ screen: "question", label: "your new application", suggestions: ["What is an alternative solution?", "What should I describe?"] });
   }, []);
-
-  const ready = item.kind === "describe" ? Boolean(session.draft.trim()) : Boolean(session.role);
   return (
     <div className="cf-deck-page">
       <div className="cf-q-stage">
-        <div ref={wrap} key={item.key} className={`cf-q-wrap is-from-${dir}`}>
-          <QNum n={at + 1} label={item.eyebrow} />
-          <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>{item.title}</h2>
-          <p className="cf-q-help">{item.context}</p>
-          {item.kind === "describe" ? (
-            <textarea className="cf-uline is-area" rows={2} aria-labelledby="cf-q" value={session.draft} onChange={(e) => updateSession({ draft: e.target.value })} placeholder="Type your answer here…" />
-          ) : (
-            <Choices choices={choicesFor(item)} current={session.role ?? undefined} onPick={pick} />
-          )}
-          {session.draftFiles.length > 0 && item.kind === "describe" && <p className="cf-faint cf-small">{session.draftFiles.length} {session.draftFiles.length === 1 ? "file" : "files"} attached on Describe.</p>}
-          {!ready && <p className="cf-hint" role="note">{item.kind === "describe" ? "Describe it in a sentence to continue." : "Pick one to continue."}</p>}
-          <OkRow disabled={!ready} onOk={ok} typed={item.kind === "describe"} />
-          <AskLink item={item} n={at + 1} />
+        <div className="cf-q-wrap cf-q-empty" role="group" aria-labelledby="cf-q-empty">
+          <p id="cf-q-empty" className="cf-q-empty-line">{line}</p>
+          <a
+            className="cf-btn is-primary is-lg"
+            href="#/"
+            onClick={() => window.setTimeout(() => document.getElementById("cf-describe")?.focus(), 0)}
+          >
+            {action} <Icon24 name="right" size={16} stroke={2} />
+          </a>
         </div>
       </div>
-      <SectionFooter items={items} index={at} onJump={setIndex} onPrev={() => setIndex(Math.max(0, at - 1))} onNext={() => setIndex(Math.min(items.length - 1, at + 1))} canPrev={at > 0} canNext={at < items.length - 1} />
     </div>
   );
 }
@@ -559,6 +504,10 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     } else if (item.kind === "candidate") {
       const cand = c.candidates.find((a) => a.id === item.ref);
       if (cand) onAnswer(cand, value as "yes" | "no" | "not-sure");
+    } else if (item.kind === "detail" && item.confirmLabels) {
+      const saved = valueText(factFor(c, item.ref));
+      if (value === "confirm") dispatch({ type: "setDetail", field: item.ref, value: c.description.trim(), section: "B" });
+      else if (alternativeChoice(c.description, saved) === "confirm") dispatch({ type: "setDetail", field: item.ref, value: "", section: "B" });
     } else if (item.kind === "detail") {
       const def = DETAIL_FIELDS.find((d) => d.id === item.ref);
       if (def) dispatch({ type: "setDetail", field: def.id, value, section: def.section });
@@ -679,5 +628,5 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
 
 export function Deck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
   const { phase } = useCase();
-  return phase === "case" ? <CaseDeck focus={focus} codeFirst={codeFirst} /> : <PreCaseDeck />;
+  return phase === "case" ? <CaseDeck focus={focus} codeFirst={codeFirst} /> : <NoQuestionsYet />;
 }

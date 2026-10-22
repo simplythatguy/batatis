@@ -3,7 +3,7 @@ import test from "node:test";
 import { emptyCase } from "../intake.ts";
 import { getGaps, reducer } from "../model.ts";
 import type { Case } from "../types.ts";
-import { aliasKey, buildDeck, choicesFor, deckProgress, gapKey, preCaseDeck, sectionProgress } from "./deck.ts";
+import { aliasKey, alternativeChoice, buildDeck, choicesFor, deckProgress, gapKey, preCaseState, sectionProgress } from "./deck.ts";
 import { calmHref, resolveRoute } from "./routes.ts";
 
 const NORTHCORE =
@@ -62,10 +62,41 @@ test("the reviewing authority is asked, Not sure yet is an answer, and nothing i
   assert.equal(buildDeck(c, [gap], { seen: new Set(["authority"]), includeDone: true }).find((i) => i.key === "authority")?.done, true);
 });
 
-test("before an application exists the deck asks the description, and the role only without one", () => {
-  assert.deepEqual(preCaseDeck("", true, null).map((i) => i.key), ["role", "describe"]);
-  assert.deepEqual(preCaseDeck("", false, null).map((i) => i.key), ["describe"]);
-  assert.equal(preCaseDeck("We build hempcrete walls.", false, null)[0].done, true);
+test("before an application exists the Questions stage has no describe card (Start asks it once)", () => {
+  for (const draft of ["", "We build hempcrete walls."]) {
+    const state = preCaseState(draft);
+    assert.deepEqual(state.items, [], "nothing to ask before a description");
+    assert.ok(!state.items.some((i) => (i.kind as string) === "describe" || (i.kind as string) === "role"));
+    assert.doesNotMatch(state.line, /\?$/, "a quiet line, not a question");
+  }
+  assert.equal(preCaseState("").action, "Describe your project");
+  assert.equal(preCaseState("We build hempcrete walls.").action, "Continue describing");
+});
+
+test("once described, no card asks again what the applicant is building", () => {
+  for (const role of ["manufacturer", "contractor", "homebuilder"] as const) {
+    const c = reducer(emptyCase(role), { type: "setDescription", text: NORTHCORE });
+    const deck = buildDeck(c, getGaps(c), { includeDone: true });
+    for (const i of deck) assert.doesNotMatch(i.title, /what are you building|what is the product called/i, `${role}: ${i.key} re-asks the description`);
+    assert.ok(!getGaps(c).some((g) => g.id === "question-q-product" || g.id === "question-q-job"), `${role}: the description answers the starter question`);
+  }
+  // Without a description the starter question is still open (nothing is assumed).
+  assert.ok(getGaps(emptyCase("contractor")).some((g) => g.id === "question-q-job"));
+});
+
+test("the proposed alternative offers the description instead of asking for it again", () => {
+  let c = described();
+  let card = buildDeck(c, getGaps(c)).find((i) => i.key === "field-alternative")!;
+  assert.equal(card.title, "Is this the alternative you’re proposing?");
+  assert.ok(card.quote && NORTHCORE.startsWith(card.quote.replace(/…$/, "")));
+  assert.deepEqual(choicesFor(card).map((x) => x.label), ["Yes, use my description", "No, I’ll write it"]);
+  assert.equal(card.done, false, "nothing is filled until the applicant says yes");
+  c = reducer(c, { type: "setDetail", field: "alternative", value: c.description.trim(), section: "B" });
+  card = buildDeck(c, getGaps(c), { includeDone: true }).find((i) => i.key === "field-alternative")!;
+  assert.equal(card.done, true);
+  assert.equal(alternativeChoice(c.description, NORTHCORE), "confirm");
+  assert.equal(alternativeChoice(c.description, "A rainscreen instead of housewrap."), "dismiss");
+  assert.equal(alternativeChoice(c.description, " "), undefined);
 });
 
 test("section progress counts tracked cards per section", () => {
