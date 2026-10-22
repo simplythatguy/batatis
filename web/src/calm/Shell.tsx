@@ -232,7 +232,6 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   const destinations: RailDestination[] = reviewer ? [
     { id: "queue", label: "Review queue", icon: "table", href: "#/review", current: route.path === "/review" || route.path.startsWith("/review/") },
     { id: "code", label: "Code library", icon: "book", href: "#/code", current: active === "code" && !plain },
-    { id: "assistant", label: assistant.open ? "Close the assistant" : "Assistant", icon: "spark", onClick: toggleAssistant, current: assistant.open, shortcut: `${MOD_KEY} J` },
   ] : [
     {
       id: "applications",
@@ -247,7 +246,6 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
       badge: items.some((a) => (a.status === "returned" || a.status === "refused") && a.unread_messages > 0),
     },
     { id: "code", label: "Code library", icon: "book", href: "#/code", current: active === "code", shortcut: `${MOD_KEY} ⇧ K` },
-    { id: "assistant", label: assistant.open ? "Close the assistant" : "Assistant", icon: "spark", onClick: toggleAssistant, current: assistant.open, shortcut: `${MOD_KEY} J` },
   ];
 
   function startNew() {

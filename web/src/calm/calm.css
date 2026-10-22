@@ -2479,16 +2479,15 @@ body {
   padding-top: 4px;
 }
 
-.cf-sec-letter {
+.cf-sec-icon {
   flex: none;
   width: 34px;
   height: 34px;
   border-radius: 11px;
-  background: var(--hue-t, rgba(17, 24, 39, 0.05));
-  color: var(--hue, var(--cf-text));
+  background: rgba(17, 24, 39, 0.05);
+  color: var(--cf-text);
   display: grid;
   place-items: center;
-  font: 700 13px var(--cf-font);
 }
 
 .cf-sec-t {
