@@ -120,7 +120,7 @@ test("sidebar rows carry no status dot (user decision 2026-10-22)", async () => 
   }
 });
 
-test("pinned rows sit above the rest; archived rows leave the list for the shelf and keep their pin", () => {
+test("pinned rows sit above the rest; archived rows leave the list (they are restored from Settings) and keep their pin", () => {
   const apps = [
     app({ id: "a", title: "Newest draft", updated_at: "2026-10-21T11:00:00Z" }),
     app({ id: "b", title: "Pinned old draft", pinned: true, updated_at: "2026-09-01T00:00:00Z" }),
@@ -137,7 +137,7 @@ test("pinned rows sit above the rest; archived rows leave the list for the shelf
   assert.equal(g.archived.find((a) => a.id === "d")?.pinned, true, "the pin waits for the restore");
   // Restoring brings the pin back above the active rows.
   assert.deepEqual(groupApplications(apps.map((a) => (a.id === "d" ? { ...a, archived: false } : a))).pinned.map((a) => a.id), ["d", "c", "b"]);
-  assert.deepEqual(groupApplications(apps, "archived").archived.map((a) => a.id).sort(), ["d", "e"], "search reaches the shelf");
+  assert.deepEqual(groupApplications(apps, "archived").archived.map((a) => a.id).sort(), ["d", "e"], "search still finds them for Settings");
 });
 
 test("row preview: real summary fields only, no verdicts", () => {

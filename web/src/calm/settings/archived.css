@@ -1,0 +1,59 @@
+/* Settings → Archived applications. Scoped to .cf-arch-*. */
+.cf-arch-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cf-arch-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 16px;
+  min-height: 56px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--cf-line);
+}
+
+.cf-arch-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cf-arch-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14.5px;
+  color: var(--cf-text);
+}
+
+.cf-arch-line {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+  color: var(--cf-text-3);
+}
+
+.cf-arch-restore {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cf-arch-error {
+  grid-column: 1 / -1;
+  font-size: 12.5px;
+  color: var(--cf-blocking-ink);
+}
+
+.cf-arch-empty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--cf-text-3);
+  font-size: 13.5px;
+}
