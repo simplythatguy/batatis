@@ -92,12 +92,14 @@ def test_every_source_in_every_file_is_complete_and_unverified_ones_say_why():
     assert count >= 30
 
 
-def test_standing_packages_are_metadata_and_b14_01_is_historical(reg):
+def test_standing_packages_link_their_checklists_and_b14_01_is_historical(reg):
     packages = {p.code: p for pack in reg.packs.values() for p in pack.standing_packages}
     assert {'SPV-001', 'SPV-006', 'B23-01', 'B14-01'} <= set(packages)
-    for code in ('SPV-001', 'SPV-006', 'B23-01'):
-        assert packages[code].status == 'current' and packages[code].checklist is None
+    for code in ('SPV-001', 'SPV-006', 'B23-01'):   # WP-32 built these; the checklist names its package back
+        assert packages[code].status == 'current' and packages[code].checklist == packages[code].id
+        assert reg.checklists[packages[code].checklist].package == packages[code].id
     b14 = packages['B14-01']
+    assert b14.checklist is None
     assert b14.status == 'historical' and '2014' in b14.edition and b14.historical_reason
     assert 'superseded' in b14.historical_reason
     for package in packages.values():

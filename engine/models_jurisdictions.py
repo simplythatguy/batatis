@@ -75,7 +75,7 @@ class FormEntry(_Strict):
 
 
 class StandingPackage(_Strict):
-    """A published local route (standing posted variance or policy). Metadata only; checklists are WP-32."""
+    """A published local route (standing posted variance or policy). Its conditions live in a checklist file."""
     id: str = Field(pattern=SLUG)
     code: str = Field(description='The identifier the issuer prints, e.g. SPV-001 or B23-01.')
     kind: Literal['standing_posted_variance', 'policy']
@@ -88,7 +88,7 @@ class StandingPackage(_Strict):
     provisions: list[str] = Field(default_factory=list, description='Provisions the source names, as printed. Not a code analysis.')
     applies_to: str
     note: str = ''
-    checklist: str | None = Field(default=None, description='Checklist id once WP-32 builds it. A checklist is never a determination.')
+    checklist: str | None = Field(default=None, description='Id of the checklist in checklists/<id>.json; null when none is built. Never set on a historical package. A checklist is never a determination.')
     source: PackSource
 
 
