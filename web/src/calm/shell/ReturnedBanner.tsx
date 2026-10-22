@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { accounts, type ApplicationSummary, type Message, type MessageItem } from "../../api/accounts";
 import { EngineError } from "../../api/client";
 import { factLabel } from "../../model";
@@ -50,16 +50,33 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
       .then((m) => {
         if (!live) return;
         setMessages(m);
-        if (m.some((x) => !x.read_by_me)) {
-          accounts.markRead(app.id).then(() => patchApplication(app.id, { unread_messages: 0 })).catch(() => {});
-        }
       })
       .catch((e: unknown) => { if (live) setError(e instanceof EngineError ? e.detail : "The officer’s message did not load."); });
     return () => { live = false; };
-  }, [app.id, app.status]);
+  }, [app.id, app.status, app.updated_at]);
 
-  const fromOfficer = (messages ?? []).filter((m) => m.author.role === "reviewer" && (refused ? m.kind === "decision" : m.kind !== "status"));
-  const latest = fromOfficer[fromOfficer.length - 1];
+  const { latest, correspondence } = useMemo(() => {
+    const ordered = [...(messages ?? [])].sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
+    const fromOfficer = ordered.filter((m) => m.author.role === "reviewer" && (refused ? m.kind === "decision" : m.kind !== "status"));
+    const latest = fromOfficer[fromOfficer.length - 1];
+    return { latest, correspondence: refused ? ordered.slice(latest ? ordered.indexOf(latest) + 1 : 0) : [] };
+  }, [messages, refused]);
+
+  // The read endpoint clears the whole thread. Only call it after rendering every unread message;
+  // earlier correspondence and the return banner's reply count are not displayed message bodies.
+  useEffect(() => {
+    if (!messages?.some((m) => !m.read_by_me)) return;
+    const visible = new Set([...(latest ? [latest.id] : []), ...correspondence.map((m) => m.id)]);
+    if (messages.some((m) => !m.read_by_me && !visible.has(m.id))) return;
+    let live = true;
+    accounts.markRead(app.id).then(() => {
+      if (!live) return;
+      setMessages((list) => list?.map((m) => visible.has(m.id) ? { ...m, read_by_me: true } : m) ?? null);
+      patchApplication(app.id, { unread_messages: 0 });
+    }).catch(() => {});
+    return () => { live = false; };
+  }, [app.id, messages, latest, correspondence]);
+
   const rows = refused ? [] : (latest?.items ?? []).map((it) => itemLink(c, gaps, it));
   const mine = (messages ?? []).filter((m) => latest && m.author.role !== "reviewer" && m.kind === "message" && m.created_at > latest.created_at);
   const who = latest?.author.name || app.reviewer?.name || "The officer";
@@ -104,7 +121,20 @@ export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
             ))}
           </ul>
         )}
-        {mine.length > 0 && <p className="cf-faint cf-small">You replied {mine.length === 1 ? "once" : `${mine.length} times`}. The officer sees it with the application.</p>}
+        {correspondence.length > 0 && (
+          <ol className="cf-returned-items" aria-label="Correspondence after refusal">
+            {correspondence.map((m) => (
+              <li key={m.id}>
+                <p className="cf-faint cf-small">{m.author.role === "reviewer" ? m.author.name || "The officer" : "You"} · {when(m.created_at)}</p>
+                <p className="cf-returned-msg">{m.body}</p>
+                {m.items.length > 0 && !m.items.every((it) => it.note && m.body.includes(it.note.trim())) && (
+                  <ul className="cf-returned-items">{m.items.map((it, i) => <li key={i}>{it.note || it.field}</li>)}</ul>
+                )}
+              </li>
+            ))}
+          </ol>
+        )}
+        {!refused && mine.length > 0 && <p className="cf-faint cf-small">You replied {mine.length === 1 ? "once" : `${mine.length} times`}. The officer sees it with the application.</p>}
         <div className="cf-returned-acts">
           {rows.length > 0 && <a className="cf-btn is-primary is-sm" href={rows[0].href}>Fix {rows.length} {rows.length === 1 ? "item" : "items"}</a>}
           {!refused && !rows.length && <a className="cf-btn is-primary is-sm" href="#/review">See what’s missing</a>}

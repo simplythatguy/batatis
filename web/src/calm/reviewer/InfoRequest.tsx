@@ -55,6 +55,7 @@ export function InfoRequest({
   session,
   latest,
   canEdit,
+  terminalStatus,
   applicant,
   onChange,
   onReturned,
@@ -65,6 +66,8 @@ export function InfoRequest({
   latest: boolean;
   /** The current claimer (cases) or any officer of the authority (packages). */
   canEdit: boolean;
+  /** A settled case keeps the request as a historical record, without claim recovery. */
+  terminalStatus?: "accepted" | "refused";
   applicant: string;
   onChange: (s: ReviewSession) => void;
   /** The application was also returned so the applicant can update it. */
@@ -74,7 +77,7 @@ export function InfoRequest({
   const ir = session.information_request;
   const isCase = target.kind === "case";
   const sentAlready = Boolean(ir.sent_at);
-  const editable = canEdit && latest && !sentAlready;
+  const editable = canEdit && !terminalStatus && latest && !sentAlready;
 
   const [intro, setIntro] = useState(ir.intro);
   const [items, setItems] = useState<DraftItem[]>(() => draftFrom(ir).items);
@@ -298,7 +301,11 @@ export function InfoRequest({
           )}
         </footer>
       )}
-      {!sentAlready && !editable && isCase && latest && <p className="pr-fine pr-admin">Start reviewing (or take over) to edit and send this request.</p>}
+      {!sentAlready && !editable && isCase && (terminalStatus || latest) && (
+        <p className="pr-fine pr-admin">{terminalStatus
+          ? `This application was ${terminalStatus}. This request is a historical, read-only record and can’t be edited or sent.`
+          : "Start reviewing (or take over) to edit and send this request."}</p>
+      )}
 
       <Modal open={confirm} onClose={() => setConfirm(false)} labelledBy={`${id}-ct`} className="ac-return">
         <div className="cf-modal-body">

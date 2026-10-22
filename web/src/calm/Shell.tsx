@@ -333,7 +333,13 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   useEffect(() => {
     if (!caseParam) return;
     const to = `#${route.path || "/"}`;
-    if (caseParam === engineId) { location.replace(to); return; }
+    if (caseParam === engineId) {
+      // A notification can target the file already open here. Refresh status and message freshness
+      // without reopening the case, which would replace any unsaved applicant answers.
+      void refreshApplications();
+      location.replace(to);
+      return;
+    }
     void open(caseParam, to);
   }, [caseParam]); // eslint-disable-line react-hooks/exhaustive-deps
 
