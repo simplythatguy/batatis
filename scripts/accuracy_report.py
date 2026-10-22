@@ -1067,19 +1067,38 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _publish(files: dict) -> None:
-    """Both files or neither: render everything first, write temp files, then rename into place."""
-    staged = {}
+    """Publish the files together. Everything is rendered and written to unique temp files first; if a replacement
+    fails, files already replaced are restored from their backups. A crash between two replacements can still leave
+    a mismatched pair until the next run, which is why `--verify` rebuilds both every time."""
+    import shutil
+    import tempfile
+    staged, backups, replaced = {}, {}, []
     try:
         for path, text in files.items():
-            tmp = path.with_name(f'.{path.name}.tmp')
-            tmp.write_text(text, encoding='utf-8')
-            staged[path] = tmp
-        for path, tmp in staged.items():
-            os.replace(tmp, path)
+            fd, tmp = tempfile.mkstemp(prefix=f'.{path.name}.', suffix='.tmp', dir=path.parent)
+            with os.fdopen(fd, 'w', encoding='utf-8') as handle:
+                handle.write(text)
+            staged[path] = Path(tmp)
+            if path.exists():
+                fd, bak = tempfile.mkstemp(prefix=f'.{path.name}.', suffix='.bak', dir=path.parent)
+                os.close(fd)
+                shutil.copy2(path, bak)
+                backups[path] = Path(bak)
+        try:
+            for path, tmp in staged.items():
+                os.replace(tmp, path)
+                replaced.append(path)
+        except BaseException:
+            for path in replaced:                     # roll back what was already published
+                if path in backups:
+                    os.replace(backups.pop(path), path)
+                else:
+                    path.unlink(missing_ok=True)
+            raise
     finally:
-        for tmp in staged.values():
-            if tmp.exists():
-                tmp.unlink()
+        for leftover in [*staged.values(), *backups.values()]:
+            if leftover.exists():
+                leftover.unlink()
 
 
 def _draft_paths() -> tuple[Path, Path]:

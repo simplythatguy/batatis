@@ -164,3 +164,31 @@ def test_a_failed_markdown_render_leaves_the_published_json_untouched(monkeypatc
     with pytest.raises(RuntimeError):
         ar.main([])
     assert ar.OUT_JSON.read_text() == published
+
+
+def test_a_failed_second_replacement_rolls_back_the_first(tmp_path, monkeypatch):
+    a, b = tmp_path / 'report.json', tmp_path / 'report.md'
+    a.write_text('old json')
+    b.write_text('old md')
+    real = ar.os.replace
+    calls = []
+
+    def flaky(src, dst):
+        calls.append(dst)
+        if str(dst) == str(b):
+            raise OSError('disk full')
+        return real(src, dst)
+
+    monkeypatch.setattr(ar.os, 'replace', flaky)
+    with pytest.raises(OSError):
+        ar._publish({a: 'new json', b: 'new md'})
+    monkeypatch.setattr(ar.os, 'replace', real)
+    assert (a.read_text(), b.read_text()) == ('old json', 'old md')
+    assert sorted(p.name for p in tmp_path.iterdir()) == ['report.json', 'report.md']   # no temp files left
+
+
+def test_publish_uses_unique_temp_files(tmp_path):
+    a = tmp_path / 'report.json'
+    ar._publish({a: 'one'})
+    ar._publish({a: 'two'})
+    assert a.read_text() == 'two' and [p.name for p in tmp_path.iterdir()] == ['report.json']
