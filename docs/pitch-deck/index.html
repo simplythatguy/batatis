@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Batatis: Pitch Deck, Submission 1</title>
+<style>
+/* ===== Theme variables: restyle here ===== */
+:root {
+  --slide-w: 1280px;
+  --slide-h: 720px;
+  --font-sans: "Inter", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, monospace;
+  --color-bg: #ffffff;
+  --color-stage: #e9ecef;
+  --color-text: #1d2329;
+  --color-muted: #5f6b76;
+  --color-rule: #d5dbe1;
+  --color-accent: #0b6e69;
+  --color-accent-soft: #e3f2f1;
+  --color-placeholder-bg: #f4f6f8;
+  --color-placeholder-border: #9aa6b2;
+  --color-example: #8a5a00;
+  --color-example-bg: #fff4dc;
+  --pad-x: 64px;
+  --pad-top: 40px;
+  --pad-bottom: 28px;
+  --title-size: 38px;
+  --rubric-size: 18px;
+  --bullet-size: 26px;      /* starting size; script shrinks to fit */
+  --bullet-min: 15px;
+  --sources-size: 11.5px;
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--color-stage); font-family: var(--font-sans); color: var(--color-text); }
+
+/* ===== Stage and slide frame ===== */
+.deck { position: fixed; inset: 0; overflow: hidden; }
+.slide {
+  position: absolute; left: 50%; top: 50%;
+  width: var(--slide-w); height: var(--slide-h);
+  margin-left: calc(var(--slide-w) / -2); margin-top: calc(var(--slide-h) / -2);
+  background: var(--color-bg);
+  padding: var(--pad-top) var(--pad-x) var(--pad-bottom);
+  display: flex; flex-direction: column;
+  visibility: hidden; opacity: 0;
+  transform: scale(var(--scale, 1));
+  box-shadow: 0 6px 30px rgba(0,0,0,.12);
+}
+.slide.active { visibility: visible; opacity: 1; }
+
+/* ===== Header ===== */
+.slide-head { display: flex; align-items: center; gap: 14px; font-size: 14px; color: var(--color-muted); letter-spacing: .04em; }
+.brand { font-weight: 700; color: var(--color-accent); text-transform: uppercase; letter-spacing: .12em; }
+.slide-num { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+/* ===== Title ===== */
+.slide-title { font-size: var(--title-size); line-height: 1.15; font-weight: 700; margin: 14px 0 22px; padding-bottom: 14px; border-bottom: 3px solid var(--color-accent); }
+.rubric { font-size: var(--rubric-size); font-weight: 600; color: var(--color-accent); margin-left: 10px; white-space: nowrap; vertical-align: middle; }
+
+/* ===== Body layouts ===== */
+.slide-body { flex: 1 1 auto; min-height: 0; display: grid; gap: 36px; }
+.layout-text .slide-body { grid-template-columns: 1fr; }
+.layout-shot .slide-body { grid-template-columns: 1fr 1.1fr; }
+.hero { display: flex; flex-direction: column; margin: 4px 0 26px; }
+.hero-num { font-size: 84px; line-height: 1; font-weight: 800; color: var(--color-accent); letter-spacing: -.01em; }
+.hero-label { font-size: 22px; color: var(--color-muted); margin-top: 8px; }
+.has-hero .bullets, .layout-shot .bullets { --bullet-size: 28px; }
+.layout-shot.dense .slide-body { grid-template-columns: 1.55fr 1fr; gap: 28px; }
+.bullets-wrap { min-height: 0; overflow: hidden; }
+.bullets { margin: 0; padding: 0; list-style: none; font-size: var(--bullet-fs, var(--bullet-size)); line-height: 1.32; }
+.layout-text .bullets { --bullet-size: 36px; max-width: 1000px; }
+.bullets li { position: relative; padding-left: 1.1em; margin-bottom: .7em; }
+.bullets li::before { content: ""; position: absolute; left: 0; top: .5em; width: .42em; height: .42em; border-radius: 50%; background: var(--color-accent); }
+.status { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+code { font-family: var(--font-mono); font-size: .92em; }
+
+/* ===== Screenshot slots ===== */
+.shots { min-height: 0; display: flex; flex-direction: column; gap: 16px; }
+.shot { position: relative; margin: 0; flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.shot-frame { position: relative; flex: 1 1 auto; min-height: 0; border-radius: var(--radius); overflow: hidden; }
+.shot-img { display: none; width: 100%; height: 100%; object-fit: contain; background: var(--color-placeholder-bg); }
+.shot.has-img .shot-img { display: block; }
+.shot.has-img .shot-placeholder { display: none; }
+.shot-placeholder {
+  position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+  gap: 12px; padding: 16px; overflow: hidden;
+  background: var(--color-placeholder-bg);
+  background-image: repeating-linear-gradient(45deg, transparent 0 14px, rgba(0,0,0,.025) 14px 28px);
+  border: 2px dashed var(--color-placeholder-border); border-radius: var(--radius);
+  color: var(--color-muted);
+}
+.shot-icon { flex: 0 0 auto; width: 54px; height: 40px; border: 3px solid var(--color-placeholder-border); border-radius: 6px; position: relative; }
+.shots-2 .shot-icon { width: 42px; height: 31px; }
+.shot-icon::after { content: ""; position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border: 3px solid var(--color-placeholder-border); border-radius: 50%; }
+.shots-2 .shot-icon::after { width: 10px; height: 10px; margin: -5px 0 0 -5px; }
+.shot-pending { font-size: 18px; font-weight: 600; color: var(--color-muted); letter-spacing: .02em; }
+.shot-caption { flex: 0 0 auto; font-size: 16px; line-height: 1.3; color: var(--color-text); text-align: center; }
+.example-badge { position: absolute; top: 10px; right: 10px; font-size: 11px; font-weight: 700; letter-spacing: .1em; padding: 4px 8px; border-radius: 4px; color: var(--color-example); background: var(--color-example-bg); border: 1px solid currentColor; }
+.slide-badge { position: static; }
+
+/* ===== Sources footer ===== */
+.sources { flex: 0 0 auto; margin-top: 14px; padding-top: 8px; border-top: 1px solid var(--color-rule); font-size: var(--sources-size); line-height: 1.4; color: var(--color-muted); }
+.sources a { color: inherit; }
+.sources-label { font-weight: 700; }
+
+/* ===== Speaker notes (hidden; N toggles panel) ===== */
+.notes { display: none; }
+#notes-panel { position: fixed; left: 0; right: 0; bottom: 0; max-height: 38vh; overflow: auto; background: #111820; color: #e8edf2; padding: 18px 28px; font-size: 16px; line-height: 1.5; display: none; z-index: 10; }
+body.show-notes #notes-panel { display: block; }
+#notes-panel h3 { margin: 0 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: #8fd3cd; }
+#notes-panel p, #notes-panel ul { margin: 0 0 12px; }
+#notes-panel .timing { font-size: 13px; color: #9aa6b2; }
+#notes-panel a { color: #8fd3cd; }
+
+/* ===== Print / PDF: one slide per page ===== */
+@page { size: 1280px 720px; margin: 0; }
+@media print {
+  html, body { background: #fff; height: auto; }
+  .deck { position: static; overflow: visible; }
+  .slide { position: relative; left: 0; top: 0; margin: 0; transform: none; visibility: visible; opacity: 1; box-shadow: none; page-break-after: always; break-after: page; }
+  .slide:last-child { page-break-after: auto; break-after: auto; }
+  #notes-panel { display: none !important; }
+}
+</style>
+</head>
+<body>
+<main class="deck" id="deck">
+  <section class="slide layout-text" id="s01" data-index="1">
+    <header class="slide-head">
+      <span class="brand">Batatis</span>
+      <span class="slide-num">1 / 12</span>
+    </header>
+    <h2 class="slide-title">Alberta's variances are frequent, repetitive and unmeasured</h2>
+    <div class="slide-body">
+      <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">3,088</span><span class="hero-label">building-article entries in the Council's Data Hub, Q1 to Q2 2026</span></div>
+        <ul class="bullets">
+          <li>One article, 9.10.15.5.(8), has 49% of them</li>
+          <li>No public measure of how often applications come back</li>
+        </ul>
+      </div>
+      
+    </div>
+    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://www.safetycodes.ab.ca/data-hub/variance-data/">Council Data Hub</a>; <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/Annual%20Report%202023.pdf">Council Annual Report 2023</a>; full list in speaker notes</footer>
+    <aside class="notes" hidden>
+      <h3>Narration</h3>
+      <p class="narration">Alberta's building variances are frequent, repetitive and unmeasured. In the first half of twenty twenty-six, the Council counted three thousand and eighty-eight building articles varied, and one soffit article is nearly half of them.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 0:00 to 0:14  |  <strong>Spoken words:</strong> 34  |  <strong>At 150 wpm:</strong> 13.6 s  |  <strong>At 140 wpm:</strong> 14.6 s</p>
+      <h3>Slide detail</h3><ul><li>The Data Hub counts varied articles, not applications. Building 3,088, plumbing 22, electrical 3, pressure equipment 3, fire 1, gas 1</li><li>Top five building articles: 1,501, 366, 251, 218 and 167. All are in Part 9, Section 9.10</li><li>Building variances registered 2019 to 2023: 1,553, 637, 1,698, 1,713 and 837 (2023 was still partial)</li><li>The Council says it does not collect supporting materials or alternative solutions</li></ul>
+      <h3>Background</h3>
+      <p>A request for a variance goes to a safety codes officer of the reviewing authority. Batatis fills the Council's current form, and Calgary also asks for its own request form. The organizers describe many first submissions failing as anecdotal, so we do not quote a return rate: nobody publishes one.</p>
+      <h3>Sources</h3>
+      <p><a href="https://www.safetycodes.ab.ca/data-hub/variance-data/">Council Data Hub</a>; <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/Annual%20Report%202023.pdf">Council Annual Report 2023</a>, p.32; notes: <code>docs/research/2026-10-20-vision/C-market-provinces-business.md</code> §2.0, <code>docs/research/2026-10-21-source-checks.md</code> §1</p>
+    </aside>
+  </section>
+  <section class="slide layout-shot has-hero shots-2" id="s02" data-index="2">
+    <header class="slide-head">
+      <span class="brand">Batatis</span>
+      <span class="slide-num">2 / 12</span>
+    </header>
+    <h2 class="slide-title">Describe it in plain words, then answer one question at a time<span class="rubric"> [Intake, 20]</span></h2>
+    <div class="slide-body">
+      <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">A to D</span><span class="hero-label">the form's sections, asked one card at a time (built)</span></div>
+        <ul class="bullets">
+          <li>Built: describe, then one question at a time</li>
+          <li>Backend: facts read with a pointer to your own words</li>
+          <li>Facts read from your words are not added until you confirm them</li>
+        </ul>
+      </div>
+      <div class="shots"><figure class="shot" id="shot-s02-describe" data-shot="shot-s02-describe">
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s02-describe.png" alt="Start screen with the headline and the description box" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          
+        </div>
+        <figcaption class="shot-caption">Describe: one box, one question</figcaption>
+      </figure>
+<figure class="shot" id="shot-s02-question" data-shot="shot-s02-question">
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s02-question.png" alt="A question card with its reason under Why we ask" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
+        </div>
+        <figcaption class="shot-caption">One question at a time</figcaption>
+      </figure></div>
+    </div>
+    <footer class="sources"><span class="sources-label">Sources:</span> in speaker notes</footer>
+    <aside class="notes" hidden>
+      <h3>Narration</h3>
+      <p class="narration">Describe the project in plain words. Batatis asks one question at a time for the form's sections A to D. The facts it reads from the applicant's words are not added to the application until the applicant confirms them.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 0:14 to 0:30  |  <strong>Spoken words:</strong> 39  |  <strong>At 150 wpm:</strong> 15.6 s  |  <strong>At 140 wpm:</strong> 16.7 s</p>
+      <h3>Slide detail</h3><ul><li>Built: the applicant picks a role in onboarding, describes the project, and answers cards in form order. Each card has a plain "Why we ask". "Not sure" keeps an open question for the officer and never blocks</li><li>Backend: the intake reader takes the description and text PDFs. Rules read first and a model is asked only for fields the rules left empty. Every fact stores the phrase or box it came from. Two values for one field give no fact and a question. At most five questions, each with a reason. Pages with no text layer are reported as not read, with the reason, and nothing is guessed</li><li>The screens that show the reader's facts and the five questions are in progress</li></ul>
+      <h3>Background</h3>
+      <p>Intake is a fifth of the score, so we start with it. Today's screens ask one question at a time and keep what the applicant says apart from what is confirmed. The reader that points each fact at the words it came from is merged but is not yet on screen, and we say so rather than show a mock-up.</p>
+      <h3>Sources</h3>
+      <p><code>docs/design-system-calm.md</code>; <code>docs/api/intake.md</code></p>
+    </aside>
+  </section>
+  <section class="slide layout-text" id="s03" data-index="3">
+    <header class="slide-head">
+      <span class="brand">Batatis</span>
+      <span class="slide-num">3 / 12</span>
+    </header>
+    <h2 class="slide-title">It asks before it guesses, and we test that<span class="rubric"> [Intake, 20]</span></h2>
+    <div class="slide-body">
+      <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">159/159</span><span class="hero-label">typed facts read correctly on 60 development cases · in-sample · model-checked</span></div>
+        <ul class="bullets">
+          <li>3 missed (recall 159/162)</li>
+          <li>Engineer-needed flag: 50 of 60 agree, 27 go to the applicant as unknown</li>
+          <li>No human-verified subset exists</li>
+        </ul>
+      </div>
+      
+    </div>
+    <footer class="sources"><span class="sources-label">Sources:</span> in speaker notes</footer>
+    <aside class="notes" hidden>
+      <h3>Narration</h3>
+      <p class="narration">It asks before it guesses. On sixty practice cases that we wrote ourselves, the rules read a hundred and fifty-nine facts and got none wrong. They missed three. Where facts conflict or are missing, it asks.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 0:30 to 0:45  |  <strong>Spoken words:</strong> 36  |  <strong>At 150 wpm:</strong> 14.4 s  |  <strong>At 140 wpm:</strong> 15.4 s</p>
+      <h3>Slide detail</h3><ul><li>Intake rules on the 60 development cases: precision 159/159 (95% Wilson 0.976 to 1.000), recall 159/162 (0.947 to 0.994). Misses: dev-014, dev-047, dev-051. Reproduce with <code>python -m evals_dev.intake_facts.score</code></li><li>In sample: the labels were written while the rules were written, and the cases are agent-authored</li><li>Engineer-needed flag on the same 60 cases: the shipped variant agrees with model-written labels on 50 of 60 (95% Wilson 0.72 to 0.91) and sends 27 to the applicant as unknown. On these text-only cases it never answers "no", so zero under-flags holds by construction</li><li>A rules-only variant that is not shipped agrees on 55 of 60 and under-flags once</li></ul>
+      <h3>Background</h3>
+      <p>These are our own cases, so the numbers show the code behaves as designed and nothing more. The point is the behavior: when facts conflict or are missing, Batatis asks. It does not fill the box. A human-verified set needs an engineer or an officer to label cases, and that is not scheduled.</p>
+      <h3>Sources</h3>
+      <p><code>evals_dev/intake_facts/score.py</code>; <code>evals_dev/section_d_flag/RESULTS.md</code>; <code>docs/research/2026-10-21-source-checks.md</code> §6</p>
+    </aside>
+  </section>
+  <section class="slide layout-shot has-hero" id="s04" data-index="4">
+    <header class="slide-head">
+      <span class="brand">Batatis</span>
+      <span class="slide-num">4 / 12</span>
+    </header>
+    <h2 class="slide-title">Every Division B article is screened, then quoted<span class="rubric"> [Code Identification, 20]</span></h2>
+    <div class="slide-body">
+      <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">2,080</span><span class="hero-label">Division B articles scored for each description</span></div>
+        <ul class="bullets">
+          <li>A relevance model scores all of them, re-ranks 60, and a verifier quotes the text</li>
+          <li>Up to three quoted choices. Nothing is committed automatically</li>
+          <li>Backend merged. Screen in progress. Benchmark unfinished</li>
+        </ul>
+      </div>
+      <div class="shots"><figure class="shot" id="shot-s04-code-check" data-shot="shot-s04-code-check">
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s04-code-check.png" alt="A code check card with the verbatim code text in the drawer" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
+        </div>
+        <figcaption class="shot-caption">Code check card and code drawer</figcaption>
+      </figure></div>
+    </div>
+    <footer class="sources"><span class="sources-label">Sources:</span> in speaker notes</footer>
+    <aside class="notes" hidden>
+      <h3>Narration</h3>
+      <p class="narration">Code identification scores all two thousand and eighty Division B articles, re-ranks sixty, and has a verifier quote the text. It offers up to three quoted choices, and it commits nothing by itself.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 0:45 to 0:58  |  <strong>Spoken words:</strong> 33  |  <strong>At 150 wpm:</strong> 13.2 s  |  <strong>At 140 wpm:</strong> 14.1 s</p>
+      <h3>Slide detail</h3><ul><li>Pipeline: screen every Division B article, re-rank the top 60 in one request, have a verifier read the full text of the top 15 and quote it word for word</li><li>Quotes that do not match the article are dropped. The pipeline checks again before display</li><li>Commit rule: only Part 9 and at most three articles can ever be committed, and only with a calibration file from the benchmark. No such file exists yet, so every article is a candidate or one of up to three quoted choices</li><li>Each result stores a benchmark acceptable-solution record: the quoted Division B sentence the design departs from, and its objective and function codes. Div A 1.2.1.1. and Div C 2.3.1.1. are attached read-only to every case</li><li>If a model stage is unavailable, a labelled keyword fallback runs and commits nothing</li><li>The Council deck's worked example is Sentence 9.10.15.4.(1), openings in an exposing building face: function F03, objective OP3.1 (Table 9.38.1.1., PDF p.1130)</li></ul>
+      <h3>Background</h3>
+      <p>We would rather ask than guess. The commit rule is empty on purpose until the benchmark calibrates it. The relevance model is a third-party service pinned to one version and shown to users only as "relevance-1".</p>
+      <h3>Sources</h3>
+      <p><code>docs/api/identify.md</code>; <code>engine/identify/</code>; <code>docs/research/2026-10-21-source-checks.md</code> §7</p>
+    </aside>
+  </section>
+  <section class="slide layout-shot has-hero" id="s05" data-index="5">
+    <header class="slide-head">
+      <span class="brand">Batatis</span>
+      <span class="slide-num">5 / 12</span>
+    </header>
+    <h2 class="slide-title">Citations come from the code database<span class="rubric"> [Code Identification, 20]</span></h2>
+    <div class="slide-body">
+      <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">64%</span><span class="hero-label">an article the precedent cites ranked first · relevance stage · 53 public precedents · keyword search alone: 32%</span></div>
+        <ul class="bullets">
+          <li>A quote that does not match word for word is dropped</li>
+          <li>Section C is a lookup. It has a row for 72.1% of the sentences in parts with a table, and the screen says so when it has none</li>
+          <li>Final-pipeline benchmark: unfinished</li>
+        </ul>
+      </div>
+      <div class="shots"><figure class="shot" id="shot-s05-library" data-shot="shot-s05-library">
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s05-library.png" alt="Code library reader with the relevance ring on an article" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          
+        </div>
+        <figcaption class="shot-caption">Code library with relevance rings</figcaption>
+      </figure></div>
+    </div>
+    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://www.alberta.ca/building-codes-and-standards">Alberta building codes</a>; full list in speaker notes</footer>
+    <aside class="notes" hidden>
+      <h3>Narration</h3>
+      <p class="narration">A quote that does not match the code word for word is dropped. Section C is a lookup. On fifty-three public precedents, screening and re-ranking put a cited article first sixty-four percent of the time, against thirty-two for keyword search. The benchmark for the final pipeline is unfinished.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 0:59 to 1:18  |  <strong>Spoken words:</strong> 48  |  <strong>At 150 wpm:</strong> 19.2 s  |  <strong>At 140 wpm:</strong> 20.6 s</p>
+      <h3>Slide detail</h3><ul><li>53 Alberta precedents, 2,080 articles, run on Oct 20, 2026. Keyword search: first 32%, in the first five 66%. Screening all articles then re-ranking 60: first 64%, in the first five 81%, and 88% of cited articles within the first 50 (keyword search 77%)</li><li>Limits: no verifier stage in that run, 53 cases from one province and one code, gold lists can be incomplete. Not a held-out professional evaluation</li><li>A separate blind test on 20 cases with a different verifier model raised the first-place rate from 65% to 85%. The verifier in the product is a different model, and its measurement is part of the unfinished benchmark (draft PR #58: two draws are done, a third draw and a latency pass wait for account credit)</li><li>Code database: NBC(AE) 2023, 2nd printing, 13,743 provisions, built by script from the official PDFs, with a 30-provision spot audit that found 0 mismatches</li></ul>
+      <h3>Background</h3>
+      <p>A fabricated citation would sink an application, so the verifier and the lookup are the heart of this. We report the earlier public-precedent result with its limits, and we do not report an accuracy figure for the final pipeline because we do not have one yet.</p>
+      <h3>Sources</h3>
+      <p><a href="https://www.alberta.ca/building-codes-and-standards">Alberta building codes</a>; <code>docs/research/2026-10-20-vision/README.md</code> §6; <code>codedb/README.md</code></p>
+    </aside>
+  </section>
+  <section class="slide layout-shot has-hero" id="s06" data-index="6">
+    <header class="slide-head">
+      <span class="brand">Batatis</span>
+      <span class="slide-num">6 / 12</span>
+    </header>
+    <h2 class="slide-title">It knows where to stop<span class="rubric"> [Recommendations, 10]</span></h2>
+    <div class="slide-body">
+      <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">3 answers</span><span class="hero-label">required, depends, no</span></div>
+        <ul class="bullets">
+          <li>Says when an engineer or architect is required, and why, when the facts support it</li>
+          <li>Lists what Section D evidence must address. Never writes it</li>
+          <li>Risk, mitigation and assumptions are the applicant's own words</li>
+        </ul>
+      </div>
+      <div class="shots"><figure class="shot" id="shot-s06-engineer" data-shot="shot-s06-engineer">
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s06-engineer.png" alt="Review screen with the engineer callout and Sections A to D" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
+        </div>
+        <figcaption class="shot-caption">Engineer callout on the review</figcaption>
+      </figure></div>
+    </div>
+    <footer class="sources"><span class="sources-label">Sources:</span> in speaker notes</footer>
+    <aside class="notes" hidden>
+      <h3>Narration</h3>
+      <p class="narration">It knows where to stop. It says whether an engineer is required, and lists what the evidence must address. It never writes the evidence.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 1:18 to 1:28  |  <strong>Spoken words:</strong> 24  |  <strong>At 150 wpm:</strong> 9.6 s  |  <strong>At 140 wpm:</strong> 10.3 s</p>
+      <h3>Slide detail</h3><ul><li>The professional-involvement check is deterministic over confirmed facts. Missing facts never produce "no". It cites the Division C rule when one applies, for example 2.4.1.1.(3) and 2.4.1.2.(1)</li><li>The review screen shows an amber callout, "An engineer or architect is required for Section D", and the line "Batatis can list what that evidence must address, but it can't write it."</li><li>The cards for rationale, risk assessment, mitigating measures, assumptions and limits, maintenance and qualifications say "You write this in your own words. Batatis never writes it for you."</li><li>Section D lists evidence documents and the responsible person for each. The API also has a CCMC registry search that shows whether a product already has an evaluation, and no screen uses it yet</li></ul>
+      <h3>Background</h3>
+      <p>Where no tested system fits, the tool says an engineer's judgment is needed and stops. It never writes the evidence, a test result or a professional opinion. The agreement figures for the flag are on slide 3 and carry the same limits.</p>
+      <h3>Sources</h3>
+      <p><code>engine/professional.py</code>; <code>research/facts/professional-involvement.md</code>; <code>web/src/calm/Review.tsx</code>; <code>evals_dev/section_d_flag/RESULTS.md</code></p>
+    </aside>
+  </section>
+  <section class="slide layout-shot has-hero shots-2" id="s07" data-index="7">
+    <header class="slide-head">
+      <span class="brand">Batatis</span>
+      <span class="slide-num">7 / 12</span>
+    </header>
+    <h2 class="slide-title">Officers see gaps by section, never a verdict<span class="rubric"> [Review, 10]</span></h2>
+    <div class="slide-body">
+      <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">16</span><span class="hero-label">planted defect classes in the package review's tests (synthetic forms)</span></div>
+        <ul class="bullets">
+          <li>Built: queue, claim, paper sheet, completeness list, messages, accept or return</li>
+          <li>Backend: reads any SCC form with its attachments, drafts the information request, shows "x of y gaps resolved" after a re-upload</li>
+          <li>No officer timing data exists</li>
+        </ul>
+      </div>
+      <div class="shots"><figure class="shot" id="shot-s07-queue" data-shot="shot-s07-queue">
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s07-queue.png" alt="Review queue with tabs and Start reviewing" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
+        </div>
+        <figcaption class="shot-caption">Officer queue with claim</figcaption>
+      </figure>
+<figure class="shot" id="shot-s07-sheet" data-shot="shot-s07-sheet">
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s07-sheet.png" alt="An application as a paper sheet beside its completeness list" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
+        </div>
+        <figcaption class="shot-caption">Paper sheet with completeness list</figcaption>
+      </figure></div>
+    </div>
+    <footer class="sources"><span class="sources-label">Sources:</span> in speaker notes</footer>
+    <aside class="notes" hidden>
+      <h3>Narration</h3>
+      <p class="narration">For officers, there is a queue, a paper sheet, and gaps by section. There is never a verdict. We have no timing data yet.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 1:28 to 1:38  |  <strong>Spoken words:</strong> 24  |  <strong>At 150 wpm:</strong> 9.6 s  |  <strong>At 140 wpm:</strong> 10.3 s</p>
+      <h3>Slide detail</h3><ul><li>Built: the officer creates an account, entering the authority's access code once, then signs in, sees the queue, claims an application, reads it as a paper sheet beside its completeness list, messages the applicant, and accepts it as administratively complete or returns it with a message</li><li>Backend: the package review reads a fillable or flattened SCC form and its attachments. It tells a blank field (certain) from one it could not find (ask the officer). It lists named findings for the Division C 2.3.1.1 file items, drafts an information request in which every item is a question to the applicant, and keeps a close-out record. Its due date is 10 days after the decision, the rule before Dec 1, 2026. From Dec 1 the Council's portal rule applies (register at issuance or as soon as reasonably practicable after), and the record does not follow that timing yet. The officer sends or registers. Batatis never does</li><li>Tests plant defects from 16 classes in synthetic forms. They were written alongside the checker and are not a blind evaluation</li><li>No model is called anywhere in the package review</li></ul>
+      <h3>Background</h3>
+      <p>The review lists administrative gaps. It does not say the design is acceptable. "Saves an officer time" is a target with a timing protocol, and we have no timing data.</p>
+      <h3>Sources</h3>
+      <p><code>docs/api/package-review.md</code>; <code>docs/api/accounts-review.md</code>; <code>engine/tests/test_package_review_planted.py</code>; <code>docs/user-testing/officer-timing-protocol.md</code></p>
+    </aside>
+  </section>
+  <section class="slide layout-shot has-hero" id="s08" data-index="8">
+    <header class="slide-head">
+      <span class="brand">Batatis</span>
+      <span class="slide-num">8 / 12</span>
+    </header>
+    <h2 class="slide-title">One flow for three kinds of first-time applicants<span class="rubric"> [General Applicability, 5]</span></h2>
+    <div class="slide-body">
+      <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">3</span><span class="hero-label">applicant types: manufacturer, general contractor, homebuilder</span></div>
+        <ul class="bullets">
+          <li>Onboarding sets the role, and the starting questions differ by role</li>
+          <li>Every card says why it asks</li>
+          <li>Unaided use by a real first-time applicant is untested</li>
+        </ul>
+      </div>
+      <div class="shots"><figure class="shot" id="shot-s08-onboarding" data-shot="shot-s08-onboarding">
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s08-onboarding.png" alt="Onboarding question: manufacturer, general contractor or homebuilder" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          
+        </div>
+        <figcaption class="shot-caption">Onboarding sets the applicant type</figcaption>
+      </figure></div>
+    </div>
+    <footer class="sources"><span class="sources-label">Sources:</span> in speaker notes</footer>
+    <aside class="notes" hidden>
+      <h3>Narration</h3>
+      <p class="narration">One flow serves a manufacturer, a general contractor and a homebuilder. Whether a real first-time applicant can use it unaided is untested.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 1:38 to 1:47  |  <strong>Spoken words:</strong> 22  |  <strong>At 150 wpm:</strong> 8.8 s  |  <strong>At 140 wpm:</strong> 9.4 s</p>
+      <h3>Slide detail</h3><ul><li>Onboarding asks whether the person applies or reviews, and an applicant then picks the type that describes them best. A manufacturer sees "What is your product, and how will builders use it?" and others see "What are you building, and what do you want to do differently?"</li><li>Three fictional demo cases (a manufacturer, a general contractor and a homebuilder) are test inputs for user sessions, not tool output (<code>evals/demo-cases/</code>)</li></ul>
+      <h3>Background</h3>
+      <p>The aim is that nobody needs code fluency or prior variance experience. We have not tested that with a person, and the testing plan names the three first-time applicants we would recruit.</p>
+      <h3>Sources</h3>
+      <p><code>web/src/calm/auth/onboardingSteps.ts</code>; <code>web/src/calm/Start.tsx</code>; <code>docs/implementation-plan.md</code> §7</p>
+    </aside>
+  </section>
+  <section class="slide layout-shot has-hero shots-2" id="s09" data-index="9">
+    <header class="slide-head">
+      <span class="brand">Batatis</span>
+      <span class="slide-num">9 / 12</span>
+    </header>
+    <h2 class="slide-title">It fills the Council's current form and is built to travel<span class="rubric"> [Usability and Portability, 10]</span></h2>
+    <div class="slide-body">
+      <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">Oct 6, 2026</span><span class="hero-label">form version the export is pinned to (SHA-256)</span></div>
+        <ul class="bullets">
+          <li>Draft or official PDF. Part 2 and signatures stay blank</li>
+          <li>Jurisdiction packs are data: Calgary, Edmonton, rest of Alberta</li>
+          <li>Other provinces are labelled preview only</li>
+        </ul>
+      </div>
+      <div class="shots"><figure class="shot" id="shot-s09-application" data-shot="shot-s09-application">
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s09-application.png" alt="Application screen with the download panel" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
+        </div>
+        <figcaption class="shot-caption">Draft or official PDF, gated</figcaption>
+      </figure>
+<figure class="shot" id="shot-s09-scc-form" data-shot="shot-s09-scc-form">
+        <div class="shot-frame">
+          <img class="shot-img" src="img/shot-s09-scc-form.png" alt="Downloaded SCC variance form, unsigned, officer Part 2 blank" onload="this.closest('.shot').classList.add('has-img')" onerror="this.remove()">
+          <div class="shot-placeholder" aria-hidden="true">
+            <div class="shot-icon"></div>
+            <div class="shot-pending">Screenshot pending</div>
+          </div>
+          <span class="example-badge">EXAMPLE DATA</span>
+        </div>
+        <figcaption class="shot-caption">Council form, officer part blank</figcaption>
+      </figure></div>
+    </div>
+    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf">Council form</a>; full list in speaker notes</footer>
+    <aside class="notes" hidden>
+      <h3>Narration</h3>
+      <p class="narration">It fills the Council's current form, dated October sixth, and leaves the officer's part blank. Jurisdiction packs are data: Calgary, Edmonton and the rest of Alberta.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 1:48 to 1:58  |  <strong>Spoken words:</strong> 26  |  <strong>At 150 wpm:</strong> 10.4 s  |  <strong>At 140 wpm:</strong> 11.1 s</p>
+      <h3>Slide detail</h3><ul><li>The export fills Part 1, Sections A to D of the Council's form dated Oct 6, 2026 (5 pages, 87 fields), not the brief's older Appendix 1. The two differ in six places, listed in the Implementation Plan §4.3. A changed form fails the hash check and blocks export</li><li>The official PDF unlocks only after a current check finds no required item missing. Drafts can be incomplete and say so</li><li>A field shows N/A only when the applicant has confirmed that it does not apply, with a reason, and the appendix lists each one. A blank is never shown as N/A. There is no screen yet for stating it (backend)</li><li>A pack is one JSON file with sources, dates and hashes for each note. A test adds a fourth pack with no code change. The Calgary form (R2014-06) is a roadmap item</li><li>The code library reads the code as a numbered outline and shows a relevance ring on each article. "Add to my application" turns an article into a Code check card, and Section C holds only what the applicant confirms</li></ul>
+      <h3>Background</h3>
+      <p>We caught the Council's October form revision and pinned the export to that exact file. Part 2 is the officer's. We never sign, declare or fill it.</p>
+      <h3>Sources</h3>
+      <p><code>engine/export/field_maps/scc_2026-10.json</code>; <code>docs/api/jurisdictions.md</code>; <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf">Council form</a></p>
+    </aside>
+  </section>
+  <section class="slide layout-text" id="s10" data-index="10">
+    <header class="slide-head">
+      <span class="brand">Batatis</span>
+      <span class="slide-num">10 / 12</span>
+    </header>
+    <h2 class="slide-title">It fits the Dec 1 portal switch<span class="rubric"> [Implementation Plan, 10]</span></h2>
+    <div class="slide-body">
+      <div class="bullets-wrap">
+        
+        <ul class="bullets">
+          <li>From Dec 1, 2026 the Council's portal is the only way to register a variance. Registration is not approval</li>
+          <li>Any pilot would be with an accredited organization, not one officer</li>
+          <li>Oct 29 Submission 1, Nov 26 Submission 2, Dec 1 Demo Day, then a Dec 2 to Mar 2 window (not guaranteed)</li>
+        </ul>
+      </div>
+      
+    </div>
+    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf">IB-2026-10-01</a>; <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-16_AHJ_Clarification.pdf">IB-2026-10-16</a>; <a href="https://edmontonunlimited.com/wp-content/uploads/2026/09/Built-World-Challenge-Onboarding-Guide.docx.pdf">onboarding guide</a>; full list in speaker notes</footer>
+    <aside class="notes" hidden>
+      <h3>Narration</h3>
+      <p class="narration">From December first, the Council's portal is the only way to register a variance, and registration is not approval. Our path is Submission two, Demo Day, then a pilot with one accredited organization, which is a target.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 1:58 to 2:13  |  <strong>Spoken words:</strong> 37  |  <strong>At 150 wpm:</strong> 14.8 s  |  <strong>At 140 wpm:</strong> 15.9 s</p>
+      <h3>Slide detail</h3><ul><li>The Council's six steps are Recognize, Pre-apply, Submit, Review, Decide and Close out. Batatis covers the applicant's side of the first three and the officer's side of the last three. The Implementation Plan §2 maps each step to a screen or a backend and gives its status</li><li>Close out: before Dec 1, 2026 the authority sends the Council a copy of the variance within 10 days of issuance. From Dec 1 the SCO registers the variance in the portal at issuance or as soon as reasonably practicable after, with the supporting documentation. The close-out record lists what to send and keep and shows a 10-day due date. It does not follow the portal timing yet. The officer sends or registers. Batatis never does</li><li>First user sessions are a protocol with targets, and none has run</li></ul>
+      <h3>Background</h3>
+      <p>The Council says registration does not move responsibility for the decision. The officer still decides and still registers. Batatis helps assemble and check. The Council invites high-volume organizations to build approved integrations, and we would do that only on its terms. No pilot partner has agreed to anything.</p>
+      <h3>Sources</h3>
+      <p><a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf">IB-2026-10-01</a>; <a href="https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-16_AHJ_Clarification.pdf">IB-2026-10-16</a>; <a href="https://edmontonunlimited.com/wp-content/uploads/2026/09/Built-World-Challenge-Onboarding-Guide.docx.pdf">onboarding guide</a></p>
+    </aside>
+  </section>
+  <section class="slide layout-text" id="s11" data-index="11">
+    <header class="slide-head">
+      <span class="brand">Batatis</span>
+      <span class="slide-num">11 / 12</span>
+    </header>
+    <h2 class="slide-title">Applicants pay to arrive complete<span class="rubric"> [Business Plan, 10]</span></h2>
+    <div class="slide-body">
+      <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">US$0.02</span><span class="hero-label">model cost of one identification run (measured, draft benchmark ledger)</span></div>
+        <ul class="bullets">
+          <li>First buyer: production homebuilders. Price to test: C$150 to C$750 a package (assumption)</li>
+          <li>Alberta wedge: a C$0.9M to C$14M a year pool, of which Batatis could capture C$0.3M to C$7M (estimate)</li>
+          <li>Defensible: jurisdiction packs, officer workflow, an exact core</li>
+        </ul>
+      </div>
+      
+    </div>
+    <footer class="sources"><span class="sources-label">Sources:</span> in speaker notes</footer>
+    <aside class="notes" hidden>
+      <h3>Narration</h3>
+      <p class="narration">Applicants pay to arrive complete. One identification run costs about two cents in model fees. The price to test is one hundred fifty to seven hundred fifty dollars a package. No buyer has seen a price.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 2:14 to 2:28  |  <strong>Spoken words:</strong> 36  |  <strong>At 150 wpm:</strong> 14.4 s  |  <strong>At 140 wpm:</strong> 15.4 s</p>
+      <h3>Slide detail</h3><ul><li>One identification run: screen US$0.0173, re-rank US$0.0006, verifier US$0.001 to US$0.0017. Total US$0.019 to US$0.020, or C$0.027 to C$0.028. One application with stated usage: US$0.05 (typical) to US$0.12 (generous). No other cost is priced, and hosting today is a free-tier demo</li><li>Prices are hypotheses and no buyer has seen one. Seats for repeat filers: about C$2,400 a year (assumption). Authorities: no price, and pilots sized under C$75,000</li><li>Pools (estimates): Alberta bespoke work C$0.9M to C$14M a year before capture. Canadian authority-side pre-check US$23M to US$50M a year if every application were covered</li><li>The officer tier is free in Alberta. Calgary and Edmonton charge no variance fee, so the authority has no fee income to pay from</li></ul>
+      <h3>Background</h3>
+      <p>Model cost is not what decides this business. Pack upkeep, support and distribution do, and we have not priced them. We do not claim a billion-dollar market. The sourced Alberta pool is C$0.9M to C$14M a year, and the share we could capture is at most single-digit millions. The plan says what would have to be true to grow beyond it.</p>
+      <h3>Sources</h3>
+      <p><code>docs/business-plan.md</code> §5 to §7; <code>docs/research/2026-10-21-source-checks.md</code> §5</p>
+    </aside>
+  </section>
+  <section class="slide layout-text" id="s12" data-index="12">
+    <header class="slide-head">
+      <span class="brand">Batatis</span>
+      <span class="slide-num">12 / 12</span>
+    </header>
+    <h2 class="slide-title">We read the regulator's own data<span class="rubric"> [X Factor, 5]</span></h2>
+    <div class="slide-body">
+      <div class="bullets-wrap">
+        <div class="hero"><span class="hero-num">69%</span><span class="hero-label">of Q1 to Q2 2026 building-article entries are three articles</span></div>
+        <ul class="bullets">
+          <li>Caught the Council's Oct 6, 2026 form change</li>
+          <li>Designed around three Council bulletins from the past year</li>
+          <li>No person outside our team has used Batatis</li>
+        </ul>
+      </div>
+      
+    </div>
+    <footer class="sources"><span class="sources-label">Sources:</span> <a href="https://www.safetycodes.ab.ca/data-hub/variance-data/">Council Data Hub</a>; full list in speaker notes</footer>
+    <aside class="notes" hidden>
+      <h3>Narration</h3>
+      <p class="narration">We read the regulator's own data. Three articles make up sixty-nine percent of the entries. No one outside our team has tried Batatis. It checks completeness. The officer decides.</p>
+      <p class="timing"><strong>Time (150 wpm):</strong> 2:29 to 2:40  |  <strong>Spoken words:</strong> 29  |  <strong>At 150 wpm:</strong> 11.6 s  |  <strong>At 140 wpm:</strong> 12.4 s</p>
+      <h3>Slide detail</h3><ul><li>9.10.15.5.(8) has 1,501, 9.10.11.2. has 366 and 9.10.13.13. has 251, which is 2,118 of 3,088 (our arithmetic). Coded rules for these three are roadmap</li><li>Calgary reviewed and accepted 382 zero-lot-line requests between Jan 1 and Sep 1, 2017, then created standing posted variances</li><li>No product in our competitor survey prepares or reviews alternative-solution applications. That is absence of evidence from web search on Oct 20, 2026</li></ul>
+      <h3>Background</h3>
+      <p>Reading the Council's own data and bulletins is how we found both the form change and the concentration in one soffit article. This is a prototype. No applicant, officer or pilot partner has used it. Batatis checks completeness. The officer decides.</p>
+      <h3>Sources</h3>
+      <p><a href="https://www.safetycodes.ab.ca/data-hub/variance-data/">Council Data Hub</a>; <code>docs/research/2026-10-20-vision/C-market-provinces-business.md</code> §1.2 and §2.0</p>
+    </aside>
+  </section>
+</main>
+<div id="notes-panel" aria-live="polite"></div>
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var panel = document.getElementById('notes-panel');
+  var cur = 0;
+
+  // Shrink bullet text until it fits its column (layout only; text unchanged).
+  function fit() {
+    var min = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bullet-min')) || 15;
+    slides.forEach(function (s) {
+      var wrap = s.querySelector('.bullets-wrap'), ul = s.querySelector('.bullets');
+      ul.style.removeProperty('--bullet-fs');
+      var size = parseFloat(getComputedStyle(ul).fontSize);
+      while (ul.scrollHeight > wrap.clientHeight + 1 && size > min) {
+        size -= 0.5; ul.style.setProperty('--bullet-fs', size + 'px');
+      }
+    });
+  }
+  function scale() {
+    var sc = Math.min(window.innerWidth / 1280, window.innerHeight / 720) * 0.96;
+    document.documentElement.style.setProperty('--scale', sc);
+  }
+  function show(i) {
+    cur = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach(function (s, k) { s.classList.toggle('active', k === cur); });
+    panel.innerHTML = slides[cur].querySelector('.notes').innerHTML;
+    if (location.hash !== '#' + (cur + 1)) history.replaceState(null, '', '#' + (cur + 1));
+  }
+  document.addEventListener('keydown', function (e) {
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || k === ' ') { e.preventDefault(); show(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { e.preventDefault(); show(cur - 1); }
+    else if (k === 'Home') show(0);
+    else if (k === 'End') show(slides.length - 1);
+    else if (k === 'n' || k === 'N') document.body.classList.toggle('show-notes');
+  });
+  window.addEventListener('resize', scale);
+  window.addEventListener('load', fit);
+  window.addEventListener('beforeprint', fit);
+  scale(); fit();
+  show((parseInt(location.hash.slice(1), 10) || 1) - 1);
+})();
+</script>
+</body>
+</html>

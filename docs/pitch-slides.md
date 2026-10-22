@@ -1,103 +1,218 @@
 # Batatis: Pitch Slides
 
-*Slide copy for Submission 1 (Oct 29, 2026), built from pitch-outline.md. Rubric weights are in brackets. Status labels: **on dev** (engine or screen merged), **[if merged: PR #N]** (in an open pull request), **not built** or **planned**. The end-to-end applicant flow (description → Section C → export in one screen flow) is in review in PR #16, not yet on `dev` (it reaches the engine-filled form PDF; identification is still command line only); where a slide shows it, the demo uses PR #16's screens in review or a labelled still. A **cached demo run** is a recorded real model run for a seeded example case, replayed and labelled as such on screen instead of a live model call. Evaluation figures are model-checked, not human-verified.*
+*Slide copy for Submission 1 (Oct 29, 2026), built from `pitch-outline.md`. Status is as of Oct 22, 2026. Rubric weights are in brackets. On every slide, the **Hero** line (one figure that is also on the slide) and the dash bullets are the only on-slide text. The detail, the speaker notes and the sources go into the speaker notes. The footer of each slide shows public sources only, and file paths stay in the notes. Status words follow the Implementation Plan, §3: **built** (merged and reachable in the live app or API), **backend** (the API is merged and the screen is in progress), **roadmap** (not started). Evaluation figures are model-checked and mostly in sample, and none is human-verified. No slide shows a screen that is not built: where the screen is pending, the slide shows the built screen or says "backend".*
 
 ---
 
-### Slide 1: Alberta's variance paperwork keeps bouncing back
-- 1,553 / 637 / 1,698 / 1,713 building variances in 2019–2022
-- Edmonton: about 67% of 2023 variances (all disciplines)
-- No published service standard for variance review
+## Slides
 
-**Speaker notes:** Every alternative solution in Alberta goes through the same Safety Codes Council form. Incomplete packages lead to repeated "more information" requests, which cost applicants and officers time. The 2023 count (837) was still partial when the Council published it, so we quote the full years.
-*Sources:* [SCC Annual Report 2023](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/Annual%20Report%202023.pdf); [challenge scope](https://edmontonunlimited.com/wp-content/uploads/2026/09/Building-Codes-Challenge-with-Appendix-.pdf)
+### Slide 1: Alberta's variances are frequent, repetitive and unmeasured
 
-### Slide 2: Describe your project in plain words [Intake, 20]
-- Your description becomes facts, each tagged with where it came from [if merged: PR #16]
-- Designed so applicant and site details come only from you; upload isn't available yet
-- "Not sure" becomes an open question instead of a dead end (in review, PR #16)
+**Hero:** 3,088 | building-article entries in the Council's Data Hub, Q1 to Q2 2026
 
-**Speaker notes:** Intake is a fifth of the score, so we start with it. Batatis is designed to build Sections A and B from the applicant's description; today the engine lists what's missing, and the end-to-end screen flow is in review in PR #16, not yet on dev. Anything it can't confirm, it is designed to ask about instead of filling in.
-*Sources:* dev `engine/models.py`, `engine/completeness.py`; [PR #16](https://github.com/simplythatguy/batatis/pull/16)
+- One article, 9.10.15.5.(8), has 49% of them
+- No public measure of how often applications come back
+
+**Full slide detail (in notes):**
+
+- The Data Hub counts varied articles, not applications. Building 3,088, plumbing 22, electrical 3, pressure equipment 3, fire 1, gas 1
+- Top five building articles: 1,501, 366, 251, 218 and 167. All are in Part 9, Section 9.10
+- Building variances registered 2019 to 2023: 1,553, 637, 1,698, 1,713 and 837 (2023 was still partial)
+- The Council says it does not collect supporting materials or alternative solutions
+
+**Speaker notes:** A request for a variance goes to a safety codes officer of the reviewing authority. Batatis fills the Council's current form, and Calgary also asks for its own request form. The organizers describe many first submissions failing as anecdotal, so we do not quote a return rate: nobody publishes one.
+*Sources:* [Council Data Hub](https://www.safetycodes.ab.ca/data-hub/variance-data/); [Council Annual Report 2023](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/Annual%20Report%202023.pdf), p.32; notes: `docs/research/2026-10-20-vision/C-market-provinces-business.md` §2.0, `docs/research/2026-10-21-source-checks.md` §1
+
+### Slide 2: Describe it in plain words, then answer one question at a time [Intake, 20]
+
+**Hero:** A to D | the form's sections, asked one card at a time (built)
+
+- Built: describe, then one question at a time
+- Backend: facts read with a pointer to your own words
+- Facts read from your words are not added until you confirm them
+
+**Full slide detail (in notes):**
+
+- Built: the applicant picks a role in onboarding, describes the project, and answers cards in form order. Each card has a plain "Why we ask". "Not sure" keeps an open question for the officer and never blocks
+- Backend: the intake reader takes the description and text PDFs. Rules read first and a model is asked only for fields the rules left empty. Every fact stores the phrase or box it came from. Two values for one field give no fact and a question. At most five questions, each with a reason. Pages with no text layer are reported as not read, with the reason, and nothing is guessed
+- The screens that show the reader's facts and the five questions are in progress
+
+**Speaker notes:** Intake is a fifth of the score, so we start with it. Today's screens ask one question at a time and keep what the applicant says apart from what is confirmed. The reader that points each fact at the words it came from is merged but is not yet on screen, and we say so rather than show a mock-up.
+*Sources:* `docs/design-system-calm.md`; `docs/api/intake.md`
 
 ### Slide 3: It asks before it guesses, and we test that [Intake, 20]
-- Missing fields become plain questions, each tied to a form section (engine on dev; screen in review)
-- Engineer-needed flag, measured at `d479e82`: shipped facts-only `rules_plus_unknown` agreement 50/60 dev (0 no, 27 unknown) and 8/11 model-constructed no-gt (8 no, 3 unknown). Three gold-yes abstentions are misses. All in-sample, model-checked, not human-verified; scope and historical results in notes.
-- Accuracy across all applicant types: still to be measured
 
-**Speaker notes:** The completeness check on dev names each missing field and the question to ask. The engineer-needed flag originated in PR #8. At measured source `d479e82`, the shipped facts-only `rules_plus_unknown` agreed with model gold on 50/60 text-only dev cases (0 no outputs, 27 unknowns) and 8/11 model-constructed no-ground-truth (no-gt) cases (PR #26; 8 no outputs, 3 unknowns). Unshipped `rules_only` had 55/60 dev agreement and 1 under-flag. Both shipped sets had 0 under-flags, defined only as gold yes to system no. The three no-gt gold-yes cases (`ngt-101`, `ngt-102`, `ngt-103`) abstained; these are misses, not correct answers. Zero under-flags on dev is by design because it never answered no. All current cases are in-sample, model-checked, not human-verified. Neither model gold nor the receipt's self-check is independent expert validation.
+**Hero:** 159/159 | typed facts read correctly on 60 development cases · in-sample · model-checked
 
-These counts do not establish applicability, equivalence, professional approval or safety, or validate the full Case/API/export flow. They apply only to `d479e82`, not this document branch, newer source, a deployment or a final release. Historical shipped-variant results remain 7/8 blind pre-fix and 4/8 post-fix (no longer blind); neither was rerun for this receipt. Source: [Data Nerd receipt `d75e7ff`](https://github.com/simplythatguy/batatis/blob/d75e7ff0fabb89a2d3f23792ceba8ce116536b35/evals_dev/section_d_flag/RESULTS.md).
-*Sources:* dev `engine/completeness.py`; [PR #8](https://github.com/simplythatguy/batatis/pull/8)
+- 3 missed (recall 159/162)
+- Engineer-needed flag: 50 of 60 agree, 27 go to the applicant as unknown
+- No human-verified subset exists
 
-### Slide 4: A ranked shortlist, measured against a named acceptable solution [Code Identification, 20]
-- Ranked articles with a named benchmark acceptable solution [if merged: PR #12]
-- You confirm departures; a narrow Part 9 auto-commit is designed (p ≥ 0.75, at most 3 articles), but its thresholds are uncalibrated placeholders, so auto-commit stays off in the UI
-- Section C objectives and functions are looked up from the code's tables (on dev); the table stays empty until an article is added from Search, because identification is command-line only
+**Full slide detail (in notes):**
 
-**Speaker notes:** For the homebuilder's window, the benchmark acceptable solution is Sentence 9.9.10.1.(2): at least 0.35 m² unobstructed, no dimension under 380 mm, and the case's 0.312 m² opening is the departure. Showing each requirement beside the code text is the design; on today's screens that view is still being fixed, so in the demo it is a labelled still from PR #12 (not in this app build). Ranking is command-line only on dev and moves to HTTP in PR #12, which also runs BM25 (keyword search ranking) first, then an OpenAI rerank and verifier.
-*Sources:* dev `engine/section_c.py`, `engine/identify/`; [PR #12](https://github.com/simplythatguy/batatis/pull/12); case C (PR #14, on dev)
+- Intake rules on the 60 development cases: precision 159/159 (95% Wilson 0.976 to 1.000), recall 159/162 (0.947 to 0.994). Misses: dev-014, dev-047, dev-051. Reproduce with `python -m evals_dev.intake_facts.score`
+- In sample: the labels were written while the rules were written, and the cases are agent-authored
+- Engineer-needed flag on the same 60 cases: the shipped variant agrees with model-written labels on 50 of 60 (95% Wilson 0.72 to 0.91) and sends 27 to the applicant as unknown. On these text-only cases it never answers "no", so zero under-flags holds by construction
+- A rules-only variant that is not shipped agrees on 55 of 60 and under-flags once
 
-### Slide 5: Every citation resolves, or it's dropped [Code Identification, 20]
-- Built by script from the official NBC(AE) 2023; the 2nd printing is pinned in the codedb README on dev (SHA-256 source manifest in PR #12)
-- A citation that doesn't quote the code word for word is removed (on dev)
-- Identification (model aliases, not pinned): C$0.0277 per case, 5.7 s median, 11.3 s p95 (measured, 20 dev cases, cost and latency over 3 repeats, identification step only (excludes the completeness judge and Section D))
+**Speaker notes:** These are our own cases, so the numbers show the code behaves as designed and nothing more. The point is the behavior: when facts conflict or are missing, Batatis asks. It does not fill the box. A human-verified set needs an engineer or an officer to label cases, and that is not scheduled.
+*Sources:* `evals_dev/intake_facts/score.py`; `evals_dev/section_d_flag/RESULTS.md`; `docs/research/2026-10-21-source-checks.md` §6
 
-**Speaker notes:** Hallucinated citations are the failure that would sink an application, so the verifier drops any citation whose quote doesn't match the code text. Each Section C row carries its article, objective and function from the attribution tables, so the rationale follows the code's own structure; the three demo articles were checked against our code database. Code identification: top-1 9/11 and recall@5 (correct article in the top 5) 9/11 on the model-checked dev cases that have a gold article (in-sample, single run, 9 cases without gold excluded); the BM25 baseline gets 5/11; it asks the applicant on 40% of cases. These are dev cases, not real applications, and the models are aliases until they are pinned to dated snapshots in PR #12 (in progress).
-*Sources:* [Alberta building codes](https://www.alberta.ca/building-codes-and-standards); Implementation Plan §9
+### Slide 4: Every Division B article is screened, then quoted [Code Identification, 20]
+
+**Hero:** 2,080 | Division B articles scored for each description
+
+- A relevance model scores all of them, re-ranks 60, and a verifier quotes the text
+- Up to three quoted choices. Nothing is committed automatically
+- Backend merged. Screen in progress. Benchmark unfinished
+
+**Full slide detail (in notes):**
+
+- Pipeline: screen every Division B article, re-rank the top 60 in one request, have a verifier read the full text of the top 15 and quote it word for word
+- Quotes that do not match the article are dropped. The pipeline checks again before display
+- Commit rule: only Part 9 and at most three articles can ever be committed, and only with a calibration file from the benchmark. No such file exists yet, so every article is a candidate or one of up to three quoted choices
+- Each result stores a benchmark acceptable-solution record: the quoted Division B sentence the design departs from, and its objective and function codes. Div A 1.2.1.1. and Div C 2.3.1.1. are attached read-only to every case
+- If a model stage is unavailable, a labelled keyword fallback runs and commits nothing
+- The Council deck's worked example is Sentence 9.10.15.4.(1), openings in an exposing building face: function F03, objective OP3.1 (Table 9.38.1.1., PDF p.1130)
+
+**Speaker notes:** We would rather ask than guess. The commit rule is empty on purpose until the benchmark calibrates it. The relevance model is a third-party service pinned to one version and shown to users only as "relevance-1".
+*Sources:* `docs/api/identify.md`; `engine/identify/`; `docs/research/2026-10-21-source-checks.md` §7
+
+### Slide 5: Citations come from the code database [Code Identification, 20]
+
+**Hero:** 64% | an article the precedent cites ranked first · relevance stage · 53 public precedents · keyword search alone: 32%
+
+- A quote that does not match word for word is dropped
+- Section C is a lookup. It has a row for 72.1% of the sentences in parts with a table, and the screen says so when it has none
+- Final-pipeline benchmark: unfinished
+
+**Full slide detail (in notes):**
+
+- 53 Alberta precedents, 2,080 articles, run on Oct 20, 2026. Keyword search: first 32%, in the first five 66%. Screening all articles then re-ranking 60: first 64%, in the first five 81%, and 88% of cited articles within the first 50 (keyword search 77%)
+- Limits: no verifier stage in that run, 53 cases from one province and one code, gold lists can be incomplete. Not a held-out professional evaluation
+- A separate blind test on 20 cases with a different verifier model raised the first-place rate from 65% to 85%. The verifier in the product is a different model, and its measurement is part of the unfinished benchmark (draft PR #58: two draws are done, a third draw and a latency pass wait for account credit)
+- Code database: NBC(AE) 2023, 2nd printing, 13,743 provisions, built by script from the official PDFs, with a 30-provision spot audit that found 0 mismatches
+
+**Speaker notes:** A fabricated citation would sink an application, so the verifier and the lookup are the heart of this. We report the earlier public-precedent result with its limits, and we do not report an accuracy figure for the final pipeline because we do not have one yet.
+*Sources:* [Alberta building codes](https://www.alberta.ca/building-codes-and-standards); `docs/research/2026-10-20-vision/README.md` §6; `codedb/README.md`
 
 ### Slide 6: It knows where to stop [Recommendations, 10]
-- Lists the evidence an alternative solution needs, in order (engine on dev; screen in review)
-- Says when a registered professional is required, with the code reference (engine on dev)
-- Never writes engineering judgment itself
 
-**Speaker notes:** The professional-involvement check answers yes, depends or no and cites the rule. In the firestop demo case, plastic pipe in a 5-storey building needs firestops tested at a 50 Pa pressure differential (Clause 3.1.9.4.(4)(b)), and the tool is designed to say an engineering judgment is required where no tested system fits, list what it must contain, and stop. That case hasn't been run through the engine yet.
-*Sources:* dev `engine/section_d.py`, `engine/professional.py`; [IFC engineering-judgment guidelines](https://firestop.org/wp-content/uploads/2024/03/Guidelines_Firestop_Engineering_Judgments_Rev2024-02.pdf); case B (PR #14, on dev)
+**Hero:** 3 answers | required, depends, no
 
-### Slide 7: Completeness review: built in the engine, officer screen in review [Review, 10]
-- Gaps listed by form section A–D; completeness only, never compliance (engine on dev)
-- Officer screen with a drafted information request [if merged: PR #16]
-- Div C 2.3.1 and one-location gates, portal package [if merged: PR #11]
+- Says when an engineer or architect is required, and why, when the facts support it
+- Lists what Section D evidence must address. Never writes it
+- Risk, mitigation and assumptions are the applicant's own words
 
-**Speaker notes:** Today the A–D gap check and the export block with reasons run in the engine on dev; the officer screen isn't on dev yet. The bulletin gates and portal package are in a draft pull request, and portal registration is not approval: the officer still decides. Saving an officer time is a target with a planted-gap protocol to measure it; we have no timing data.
-*Sources:* [IB-2025-11-18](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2025-11-18%20Mandatory%20Documentation%20of%20Variances.pdf); [IB-2026-10-01](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf); dev `engine/completeness.py`
+**Full slide detail (in notes):**
 
-### Slide 8: One tool, three kinds of first-time applicants [General Applicability, 5]
-- Homebuilder: slab edges need detailing, the unvented roof probably fails its STANDATA as drawn, the window needs a variance and fall protection [case files: PR #14, on dev]
-- Manufacturers can seek a voluntary CCMC assessment (or another recognized evaluation) as evidence for the authority having jurisdiction, which makes the approval decision; the variance stays project-specific [case files: PR #14, on dev]
-- General contractor: plastic pipe needs 50 Pa-tested firestops, Clause 3.1.9.4.(4)(b) [case files: PR #14, on dev]
+- The professional-involvement check is deterministic over confirmed facts. Missing facts never produce "no". It cites the Division C rule when one applies, for example 2.4.1.1.(3) and 2.4.1.2.(1)
+- The review screen shows an amber callout, "An engineer or architect is required for Section D", and the line "Batatis can list what that evidence must address, but it can't write it."
+- The cards for rationale, risk assessment, mitigating measures, assumptions and limits, maintenance and qualifications say "You write this in your own words. Batatis never writes it for you."
+- Section D lists evidence documents and the responsible person for each. The API also has a CCMC registry search that shows whether a product already has an evaluation, and no screen uses it yet
 
-**Speaker notes:** Our three demo cases cover a homebuilder, a manufacturer and a general contractor, with fictional people and real code citations. The STANDATA reasoning (23-BCV-003 covers the under-slab insulation but not the edges; the roof is probably not covered by 23-BCV-017 as drawn) is case content; the tool's STANDATA "you may not need a variance" check is not built. Whether a real first-time applicant could use it unaided is untested.
-*Sources:* [STANDATA 23-BCV-017](https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/2aa7678c-c476-4523-b0c3-36e71256e11b/download/ma-standata-variance-building-23-bcv-017-2025-09.pdf); [STANDATA 23-BCV-001](https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/01b622f0-f4a1-426d-b15f-ffc25e725949/download/ma-standata-variance-building-23-bcv-001-2024-04.pdf); [STANDATA 23-BCV-003](https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/3915ba54-96dd-4c54-a9c1-63df5c917836/download/ma-standata-variance-building-23-bcv-003-2024-05.pdf); [Calgary B23-014](https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-014-new-products-materials-and-systems-in-building-construction.pdf)
+**Speaker notes:** Where no tested system fits, the tool says an engineer's judgment is needed and stops. It never writes the evidence, a test result or a professional opinion. The agreement figures for the flag are on slide 3 and carry the same limits.
+*Sources:* `engine/professional.py`; `research/facts/professional-involvement.md`; `web/src/calm/Review.tsx`; `evals_dev/section_d_flag/RESULTS.md`
 
-### Slide 9: Fills the current SCC form; built to travel [Usability and Portability, 10]
-- Fills Part 1, Sections A–D of the Council's current SCC form (PDF last modified Oct 6, 2026), not the brief's older Appendix 1 template; same field names, differences listed in the Implementation Plan (the engine fills the SCC form; in the app, PR #16 in review, Check completeness stays available while blocking gaps remain, and the official PDF stays closed until they are cleared. That PDF is unsigned, with officer Part 2 blank)
-- The engine blocks export with reasons until gaps clear, or returns a labelled draft (engine on dev; in the app (PR #16, in review), Check completeness stays available while blocking gaps remain, and the official PDF stays closed until they are cleared. That PDF is the Council's October 2026 variance form, filled in by the engine, unsigned, officer Part 2 blank, with a notice that it is not a finding that the design complies. Download draft record separately saves a .txt draft record)
-- Designed so local add-ons are configuration; per-jurisdiction form registry in PR #12
+### Slide 7: Officers see gaps by section, never a verdict [Review, 10]
 
-**Speaker notes:** We caught the Council's October form revision and fingerprinted the export to that exact file, leaving the officer's Part 2 blank. A third AI-agent simulated walkthrough on PR #16 @d076aa2 did not reach export; a simulated re-run on PR #16 @579cd2c reached the engine-filled form PDF in about 6 minutes, but only after the simulated user confirmed facts it didn't have; one evidence item was lost, and the professional-involvement gap cleared only after contradictory answers. PR #26 (open), which requires a confirmed professional before an issue lists evidence, addresses that gap. The engine fills the SCC form; in the app (PR #16, in review), Check completeness stays available while blocking gaps remain, and the official PDF stays closed until they are cleared. That PDF is the Council's October 2026 variance form, filled in by the engine, unsigned, officer Part 2 blank, with a notice that it is not a finding that the design complies. Download draft record separately saves a .txt draft record. No real user has tested it.
-*Sources:* dev `engine/export/field_maps/scc_2026-10.json`, `engine/export/scc.py`; [SCC form](https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf); [PR #12](https://github.com/simplythatguy/batatis/pull/12)
+**Hero:** 16 | planted defect classes in the package review's tests (synthetic forms)
 
-### Slide 10: Ready for December 1 [Implementation Plan, 10]
-- From Dec 1, 2026, the SCC portal is the only way to register a variance, and registration is not approval
-- The authority having jurisdiction is the organization, so we pilot with an organization
-- Oct 29 demo → Nov 26 Canadian hosting → Dec 2 – Mar 2 pilot window (not guaranteed)
+- Built: queue, claim, paper sheet, completeness list, messages, accept or return
+- Backend: reads any SCC form with its attachments, drafts the information request, shows "x of y gaps resolved" after a re-upload
+- No officer timing data exists
 
-**Speaker notes:** The Council says registration in its portal is not approval and doesn't move responsibility for the decision. The SCO still decides and still registers; Batatis is designed to prepare the package they upload. The Council invites high-volume organizations to build approved integrations, and we'd do that only on its terms; no pilot partner exists yet, and we have contacted no one.
+**Full slide detail (in notes):**
+
+- Built: the officer creates an account, entering the authority's access code once, then signs in, sees the queue, claims an application, reads it as a paper sheet beside its completeness list, messages the applicant, and accepts it as administratively complete or returns it with a message
+- Backend: the package review reads a fillable or flattened SCC form and its attachments. It tells a blank field (certain) from one it could not find (ask the officer). It lists named findings for the Division C 2.3.1.1 file items, drafts an information request in which every item is a question to the applicant, and keeps a close-out record. Its due date is 10 days after the decision, the rule before Dec 1, 2026. From Dec 1 the Council's portal rule applies (register at issuance or as soon as reasonably practicable after), and the record does not follow that timing yet. The officer sends or registers. Batatis never does
+- Tests plant defects from 16 classes in synthetic forms. They were written alongside the checker and are not a blind evaluation
+- No model is called anywhere in the package review
+
+**Speaker notes:** The review lists administrative gaps. It does not say the design is acceptable. "Saves an officer time" is a target with a timing protocol, and we have no timing data.
+*Sources:* `docs/api/package-review.md`; `docs/api/accounts-review.md`; `engine/tests/test_package_review_planted.py`; `docs/user-testing/officer-timing-protocol.md`
+
+### Slide 8: One flow for three kinds of first-time applicants [General Applicability, 5]
+
+**Hero:** 3 | applicant types: manufacturer, general contractor, homebuilder
+
+- Onboarding sets the role, and the starting questions differ by role
+- Every card says why it asks
+- Unaided use by a real first-time applicant is untested
+
+**Full slide detail (in notes):**
+
+- Onboarding asks whether the person applies or reviews, and an applicant then picks the type that describes them best. A manufacturer sees "What is your product, and how will builders use it?" and others see "What are you building, and what do you want to do differently?"
+- Three fictional demo cases (a manufacturer, a general contractor and a homebuilder) are test inputs for user sessions, not tool output (`evals/demo-cases/`)
+
+**Speaker notes:** The aim is that nobody needs code fluency or prior variance experience. We have not tested that with a person, and the testing plan names the three first-time applicants we would recruit.
+*Sources:* `web/src/calm/auth/onboardingSteps.ts`; `web/src/calm/Start.tsx`; `docs/implementation-plan.md` §7
+
+### Slide 9: It fills the Council's current form and is built to travel [Usability and Portability, 10]
+
+**Hero:** Oct 6, 2026 | form version the export is pinned to (SHA-256)
+
+- Draft or official PDF. Part 2 and signatures stay blank
+- Jurisdiction packs are data: Calgary, Edmonton, rest of Alberta
+- Other provinces are labelled preview only
+
+**Full slide detail (in notes):**
+
+- The export fills Part 1, Sections A to D of the Council's form dated Oct 6, 2026 (5 pages, 87 fields), not the brief's older Appendix 1. The two differ in six places, listed in the Implementation Plan §4.3. A changed form fails the hash check and blocks export
+- The official PDF unlocks only after a current check finds no required item missing. Drafts can be incomplete and say so
+- A field shows N/A only when the applicant has confirmed that it does not apply, with a reason, and the appendix lists each one. A blank is never shown as N/A. There is no screen yet for stating it (backend)
+- A pack is one JSON file with sources, dates and hashes for each note. A test adds a fourth pack with no code change. The Calgary form (R2014-06) is a roadmap item
+- The code library reads the code as a numbered outline and shows a relevance ring on each article. "Add to my application" turns an article into a Code check card, and Section C holds only what the applicant confirms
+
+**Speaker notes:** We caught the Council's October form revision and pinned the export to that exact file. Part 2 is the officer's. We never sign, declare or fill it.
+*Sources:* `engine/export/field_maps/scc_2026-10.json`; `docs/api/jurisdictions.md`; [Council form](https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf)
+
+### Slide 10: It fits the Dec 1 portal switch [Implementation Plan, 10]
+
+- From Dec 1, 2026 the Council's portal is the only way to register a variance. Registration is not approval
+- Any pilot would be with an accredited organization, not one officer
+- Oct 29 Submission 1, Nov 26 Submission 2, Dec 1 Demo Day, then a Dec 2 to Mar 2 window (not guaranteed)
+
+**Full slide detail (in notes):**
+
+- The Council's six steps are Recognize, Pre-apply, Submit, Review, Decide and Close out. Batatis covers the applicant's side of the first three and the officer's side of the last three. The Implementation Plan §2 maps each step to a screen or a backend and gives its status
+- Close out: before Dec 1, 2026 the authority sends the Council a copy of the variance within 10 days of issuance. From Dec 1 the SCO registers the variance in the portal at issuance or as soon as reasonably practicable after, with the supporting documentation. The close-out record lists what to send and keep and shows a 10-day due date. It does not follow the portal timing yet. The officer sends or registers. Batatis never does
+- First user sessions are a protocol with targets, and none has run
+
+**Speaker notes:** The Council says registration does not move responsibility for the decision. The officer still decides and still registers. Batatis helps assemble and check. The Council invites high-volume organizations to build approved integrations, and we would do that only on its terms. No pilot partner has agreed to anything.
 *Sources:* [IB-2026-10-01](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf); [IB-2026-10-16](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-16_AHJ_Clarification.pdf); [onboarding guide](https://edmontonunlimited.com/wp-content/uploads/2026/09/Built-World-Challenge-Onboarding-Guide.docx.pdf)
 
 ### Slide 11: Applicants pay to arrive complete [Business Plan, 10]
-- First buyer: production homebuilders, who write the Div C 2.3.1 documentation
-- Price to test: C$125–750 per bespoke package (untested hypothesis)
-- Identification model cost (model aliases, not pinned): C$0.0277 per case, about 0.02% of the C$125 floor (measured on dev cases; identification step only)
 
-**Speaker notes:** The low end of the range is one hour at the Council's own C$125/hour alternative-solution rate. No buyer has seen a price. Authority pilots would sit under the C$75,000 trade-agreement threshold that Edmonton and Calgary apply.
-*Sources:* [draft PR #12](https://github.com/simplythatguy/batatis/pull/12) (keyed run, Oct 20, 2026); [SCC fee schedule](https://ebs.safetycodes.ab.ca/documents/webdocs/sr/council%20fee%20schedule%20asca%20v2.pdf); [Edmonton Procurement Standard](https://www.edmonton.ca/sites/default/files/public-files/Procurement%20Standard.pdf); [Calgary procurement policy](https://www.calgary.ca/buy-sell/supply-to-city/procurement-policy.html)
+**Hero:** US$0.02 | model cost of one identification run (measured, draft benchmark ledger)
+
+- First buyer: production homebuilders. Price to test: C$150 to C$750 a package (assumption)
+- Alberta wedge: a C$0.9M to C$14M a year pool, of which Batatis could capture C$0.3M to C$7M (estimate)
+- Defensible: jurisdiction packs, officer workflow, an exact core
+
+**Full slide detail (in notes):**
+
+- One identification run: screen US$0.0173, re-rank US$0.0006, verifier US$0.001 to US$0.0017. Total US$0.019 to US$0.020, or C$0.027 to C$0.028. One application with stated usage: US$0.05 (typical) to US$0.12 (generous). No other cost is priced, and hosting today is a free-tier demo
+- Prices are hypotheses and no buyer has seen one. Seats for repeat filers: about C$2,400 a year (assumption). Authorities: no price, and pilots sized under C$75,000
+- Pools (estimates): Alberta bespoke work C$0.9M to C$14M a year before capture. Canadian authority-side pre-check US$23M to US$50M a year if every application were covered
+- The officer tier is free in Alberta. Calgary and Edmonton charge no variance fee, so the authority has no fee income to pay from
+
+**Speaker notes:** Model cost is not what decides this business. Pack upkeep, support and distribution do, and we have not priced them. We do not claim a billion-dollar market. The sourced Alberta pool is C$0.9M to C$14M a year, and the share we could capture is at most single-digit millions. The plan says what would have to be true to grow beyond it.
+*Sources:* `docs/business-plan.md` §5 to §7; `docs/research/2026-10-21-source-checks.md` §5
 
 ### Slide 12: We read the regulator's own data [X Factor, 5]
-- 1,501 of 3,088 building article entries are one soffit article, 9.10.15.5.(8)
-- Designed around three SCC bulletins from the past year
-- No code-AI product we reviewed advertises officer-side alternative-solution review
 
-**Speaker notes:** Reading the Council's own data and bulletins is how we found both the form change and the soffit concentration. The competitor claim rests on public product pages as of Oct 20, 2026, so it's absence of evidence, not proof. This is a prototype: no real user, officer or pilot partner has used it.
-*Sources:* [SCC Data Hub](https://www.safetycodes.ab.ca/data-hub/variance-data/); Business Plan §7
+**Hero:** 69% | of Q1 to Q2 2026 building-article entries are three articles
+
+- Caught the Council's Oct 6, 2026 form change
+- Designed around three Council bulletins from the past year
+- No person outside our team has used Batatis
+
+**Full slide detail (in notes):**
+
+- 9.10.15.5.(8) has 1,501, 9.10.11.2. has 366 and 9.10.13.13. has 251, which is 2,118 of 3,088 (our arithmetic). Coded rules for these three are roadmap
+- Calgary reviewed and accepted 382 zero-lot-line requests between Jan 1 and Sep 1, 2017, then created standing posted variances
+- No product in our competitor survey prepares or reviews alternative-solution applications. That is absence of evidence from web search on Oct 20, 2026
+
+**Speaker notes:** Reading the Council's own data and bulletins is how we found both the form change and the concentration in one soffit article. This is a prototype. No applicant, officer or pilot partner has used it. Batatis checks completeness. The officer decides.
+*Sources:* [Council Data Hub](https://www.safetycodes.ab.ca/data-hub/variance-data/); `docs/research/2026-10-20-vision/C-market-provinces-business.md` §1.2 and §2.0
