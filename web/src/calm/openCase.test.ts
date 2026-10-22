@@ -37,25 +37,18 @@ test("a saved case reopens with its answers, authority, process text and confirm
   assert.equal(c.process.risk, "Moisture could collect.");
   assert.equal(c.facts.find((f) => f.field === "project.description")?.id, "desc-description", "the saved fact is kept, so it is not re-sent");
   assert.equal(c.candidates.find((a) => a.provision === "9.27.3.4.(1)")?.answer, "yes");
-  assert.ok(c.candidates.some((a) => a.id.startsWith("desc-")), "description cards are re-derived");
+  assert.ok(!c.candidates.some((a) => a.id.startsWith("desc-")), "no card is guessed from the description; intake and identify are read back from the engine");
   assert.equal(c.files.length, 0, "file names are not invented");
 });
 
-test("answers to cards read from the description come back, and the saved facts are kept as they are", () => {
-  const base = saved({ provisions: [] });
-  const description = "We are building hempcrete walls instead of a conventional stud wall.";
-  const first = caseFromEngine(saved({ provisions: [], facts: [...base.facts.filter((f) => f.field !== "project.description"), fact("d", "project.description", description, "Your description")] }), "homebuilder");
-  const card = first.candidates.find((a) => a.id.startsWith("desc-") && a.id !== "desc-storeys")!;
-  assert.ok(card, "the description gives a code-check card");
-  const facts = [
-    ...base.facts.filter((f) => f.field !== "project.description"),
-    fact("d", "project.description", description, "Your description"),
-    { ...fact("cc", `codecheck.${card.id}`, "yes", "Your code check answer"), value: "yes" },
-    { ...fact("st", "building.storeys", "2", "Your storey count"), value: 2 },
-  ] as EngineCase["facts"];
-  const c = caseFromEngine(saved({ provisions: [], facts }), "homebuilder");
-  assert.equal(c.candidates.find((a) => a.id === card.id)?.answer, "yes");
-  assert.equal(c.candidates.find((a) => a.id === "desc-storeys")?.answer, "no");
-  assert.equal(c.facts.find((f) => f.field === `codecheck.${card.id}`)?.id, "cc", "the saved fact is kept, so it is not re-sent");
-  assert.equal(c.facts.find((f) => f.field === "building.storeys")?.id, "st");
+test("intake facts reopen under the browser's field names and stay unconfirmed until clicked", () => {
+  const read = (id: string, field: string, value: string | number) => ({
+    ...fact(id, field, String(value), "intake:description"), value, status: "unconfirmed" as const,
+  });
+  const c = caseFromEngine(saved({ provisions: [], facts: [...saved().facts, read("i1", "owner_name", "Jordan Lee"), read("i2", "storeys", 2), read("i3", "municipal_address", "10234 84 Avenue NW")] as EngineCase["facts"] }), "homebuilder");
+  // The newest owner answer wins across the two names (owner, owner_name): the engine treats them as one field.
+  assert.equal(c.facts.find((f) => f.field === "owner")?.id, "i1");
+  assert.equal(c.facts.some((f) => f.field === "owner_name"), false);
+  assert.equal(c.facts.find((f) => f.field === "municipalAddress")?.status, "unconfirmed");
+  assert.equal(c.facts.find((f) => f.field === "storeys")?.value, 2);
 });

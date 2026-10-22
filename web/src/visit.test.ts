@@ -70,11 +70,7 @@ test("a role switch starts a fresh case", () => {
   assert.equal(next.files.length, 0);
   assert.equal(next.candidates.length, 0);
   assert.equal(next.exampleId, undefined);
-  assert.deepEqual(
-    next.questions.map((question) => question.id),
-    ["q-job", "q-site"],
-  );
-  assert.equal(next.questions.some((question) => question.id === "q-product"), false);
+  assert.deepEqual(next.questions, [], "the intake planner asks once the description is read");
   const blob = JSON.stringify(next);
   assert.equal(blob.includes("NorthCore"), false);
   assert.equal(blob.includes("Previous user"), false);

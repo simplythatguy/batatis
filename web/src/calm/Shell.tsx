@@ -371,7 +371,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
               ...(inCase && checkStatus === "unavailable" ? [{ label: "Try the check again", onClick: () => void requestCheck(true), separator: true }] : []),
               ...(inCase
                 ? [
-                    { label: "Your Section C references", href: "#/references", separator: checkStatus === "unavailable" },
+                    { label: "Rules you chose (Section C)", href: "#/references", separator: checkStatus === "unavailable" },
                     { label: "Officer view", href: "#/officer" },
                     { label: "Accuracy report", href: "#/accuracy" },
                     { label: "Download draft", href: "#/application?download=draft", separator: true },

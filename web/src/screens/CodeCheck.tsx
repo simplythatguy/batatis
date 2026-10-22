@@ -1,9 +1,7 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { engine, EngineError, type CodeHit } from "../api/client";
-import { toViewRow } from "../api/sectionC";
 import { CodeQuote, ServiceUnavailable, CheckAction, DraftNote, GapStrip, Icon, PanelHeader, StatusPill, type Dot } from "../components";
 import { CODE_EDITION } from "../config";
-import { DECISION_UNAVAILABLE, readDecisionBody, wireDecision } from "../identify";
 import { answeredYes, unresolvedCandidates } from "../model";
 import { useRoute } from "../router";
 import { withinProvision } from "../provisions";
@@ -123,46 +121,19 @@ function CandidateCard({
 }
 
 /**
- * Record a code-check answer. For an article ranking suggested, also send the decision so the
- * engine returns its Section C row and, for Not sure, binds the officer's open question.
+ * Record a code-check answer. For an article code identification offered, the store also sends the
+ * decision (with the case version), so the engine writes its Section C row and, for Not sure,
+ * binds the officer's open question.
  */
 export function useCandidateAnswer() {
-  const { dispatch, engineId } = useCase();
+  const { decide } = useCase();
   // Kept per card, so an error on one card never shows on the next; a new answer clears it.
   const [note, setNote] = useState<{ id: string; text: string } | null>(null);
   function onAnswer(candidate: Candidate, answer: CandidateAnswer) {
     setNote(null);
-    const setDecisionNote = (text: string) => setNote({ id: candidate.id, text });
-    dispatch({ type: "answerCandidate", id: candidate.id, answer });
-    if (!engineId || candidate.suggestion !== "identify" || !/^\d/.test(candidate.provision)) return;
-    const provision = candidate.provision;
-    void engine
-      .decide(engineId, provision, wireDecision(answer))
-      .then(async (body) => {
-        const read = readDecisionBody(body, provision);
-        if (read.row) dispatch({ type: "noteSectionC", rows: [toViewRow(read.row, candidate.id)] });
-        let questionId = read.openQuestionId;
-        if (answer === "not-sure" && !questionId) {
-          try {
-            const request = await engine.informationRequest(engineId);
-            questionId = request.items.find((item) => item.provision_id === provision || provision.startsWith(item.provision_id))?.id ?? null;
-          } catch {
-            questionId = null;
-          }
-        }
-        if (answer === "not-sure" && questionId) {
-          dispatch({ type: "bindOpenQuestion", candidateId: candidate.id, questionId });
-        }
-      })
-      .catch((err: unknown) => {
-        if (err instanceof EngineError && failureKind(err.status, err.detail) === "missing-route") {
-          setDecisionNote(DECISION_UNAVAILABLE);
-          return;
-        }
-        if (err instanceof EngineError && failureKind(err.status, err.detail) !== "unreachable") {
-          setDecisionNote(err.detail);
-        }
-      });
+    void decide(candidate, answer).then((error) => {
+      if (error) setNote({ id: candidate.id, text: error });
+    });
   }
   return { onAnswer, decisionNote: note?.text ?? "", decisionNoteFor: (id: string) => (note?.id === id ? note.text : "") };
 }
