@@ -96,7 +96,7 @@ The officer's own decision to issue or refuse the variance under the Safety Code
 | Area | What exists | Status | Evidence |
 |---|---|---|---|
 | Accounts and workflow | Sign-up and sign-in (password, plus Google or Microsoft where configured). Onboarding as an applicant (manufacturer, general contractor or homebuilder) or as a reviewer with the authority's access code. Application list, notifications, settings, an assistant | Built | `web/src/calm/`, `docs/api/accounts-review.md` (PR #48, #49) |
-| Applicant deck | Describe. One-question cards in form order: check what we read, code check, reviewing authority, Section A and B fields, the applicant's own rationale, risk, mitigation, assumptions, maintenance and qualifications, then Section D. Review and application sheet | Built | `docs/design-system-calm.md` |
+| Applicant deck | Describe. One-question cards in the order of the form: Section A fields, the reviewing authority, what Batatis read from the description, Section B fields, the code check cards (Section C), then the applicant's own rationale, risk, mitigation, assumptions, maintenance and qualifications, and Section D. Review and application sheet | Built | `docs/design-system-calm.md`, `web/src/calm/deck.ts` |
 | Code library | Browse NBC(AE) 2023, 2nd printing, with a relevance estimate for the project on each article and a structured reader. The estimates are not Section C and not compliance | Built | PR #56 |
 | Section C | Looked up from the code's attribution tables. The screen says so when the table has no row for a sentence. NBC 2020 intent statements are shown as explanatory only | Built | `codedb/README.md` |
 | Official SCC form | The October 2026 form (5 pages, 87 fields). The field map is pinned to the form's SHA-256. Draft and official PDF. The official PDF is blocked, with reasons, while a required item is missing. Part 2 and signatures stay blank | Built | `engine/export/field_maps/scc_2026-10.json`, `docs/deploy.md` |
@@ -192,7 +192,7 @@ Other provinces appear as labelled coverage ("preview": neither the adopted code
 
 | When | Engineering | Evidence we will produce | Program |
 |---|---|---|---|
-| Oct 21 to 26 | Screens for intake (read and confirm, the five questions, fork and scope notices), code identification (quoted choices and the benchmark acceptable solution), the jurisdiction picker and process notes, and the officer package review (findings, information request, diff, close-out). Official PDF closure | Browser run of the whole applicant and officer flow with screenshots that we inspect. CI green | |
+| Oct 21 to 26 | Screens for intake (read and confirm, the five questions, fork and scope notices), code identification (quoted choices and the benchmark acceptable solution), the jurisdiction picker and process notes, and the officer package review (findings, information request, diff, close-out). The remaining checks on the official PDF export | Browser run of the whole applicant and officer flow with screenshots that we inspect. CI green | |
 | Oct 27 to 28 | Demo video and polish | | |
 | Oct 29 | | | Submission 1 |
 | Nov 10 | | Finish the code identification benchmark: a third relevance-model draw and the latency pass need account credit. Then fix the pipeline and calibrate the commit rule | Semi-finals |

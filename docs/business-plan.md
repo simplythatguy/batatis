@@ -1,6 +1,6 @@
 # Batatis: Business Plan
 
-*Building Codes Challenge, Submission 1 (Oct 29, 2026). Status is as of Oct 21, 2026. Every figure carries its kind. **Verified** means a primary source says it and the source is named. **Measured** means a run or a file produced it. **Estimate** means arithmetic on figures shown. **Assumption** means a number we chose, with its basis. Prices are hypotheses, and no buyer has seen one. Figures that no other research file holds are recorded in [`docs/research/2026-10-21-source-checks.md`](./research/2026-10-21-source-checks.md) ("source checks"). What is built is defined in the Implementation Plan, §3.*
+*Building Codes Challenge, Submission 1 (Oct 29, 2026). Status is as of Oct 21, 2026. Every figure carries its kind. **Verified** means a primary source says it and the source is named. **Measured** means a run or a file produced it. **Estimate** means arithmetic on figures shown. **Assumption** means a number we chose, with its basis. Prices are hypotheses, and no buyer has seen one. Figures that no other research file holds are recorded in [`docs/research/2026-10-21-source-checks.md`](./research/2026-10-21-source-checks.md) ("source checks"). The market research is `docs/research/2026-10-20-vision/C-market-provinces-business.md`, and later mentions use its file name alone. What is built is defined in the Implementation Plan, §3.*
 
 ## 1. The company in one paragraph
 
@@ -14,7 +14,7 @@ Intake still differs by authority. Calgary asks for its own Request for Specific
 
 ## 2. Why us
 
-- **Source-first by rule.** Four rules are written into the repository (`AGENTS.md`). A code citation must quote the code word for word or it is dropped. Section C comes from the code's attribution tables, never from a model. Section D professional evidence is never written. The product never says a design complies or is safe.
+- **Source-first by rule.** The repository's non-negotiables (`AGENTS.md`) say that an article number is never fabricated, that Section C is a deterministic lookup, that Section D professional evidence is never authored, and that the product never says a design complies or is safe. The code identification pipeline enforces the first with a quote check: a citation that does not quote the code word for word is dropped.
 - **We caught the form change.** The Council replaced its variance form on Oct 6, 2026 and paired it with mandatory portal registration from Dec 1, 2026 ([IB-2026-10-01](https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-01%20Orders%20and%20Variances%20Registration%20Changes.pdf)). The export is pinned to the form's SHA-256, so a changed form is detected instead of silently filled. The challenge brief's Appendix 1 differs from the new form in six places (Implementation Plan, §4.3).
 - **We know where the volume is.** The Council's Data Hub report for Q1 and Q2 2026 counts 3,088 building-article entries. One Part 9 article, 9.10.15.5.(8), has 1,501 of them (49%). The three most-varied articles, 9.10.15.5.(8), 9.10.11.2. and 9.10.13.13., have 2,118 (69%, our arithmetic on the report's figures). Calgary reviewed and accepted 382 zero-lot-line alternative-solution requests between Jan 1 and Sep 1, 2017, and then created standing posted variances. Coded rules for these articles are roadmap.
 - **We target the officer side.** No product in the competitor survey (`docs/research/2026-10-20-vision/C-market-provinces-business.md`, §1.2) prepares or reviews alternative-solution applications. That is an absence found by web search on Oct 20, 2026, not proof.
@@ -107,7 +107,7 @@ The model cost of one application is small and measured. The prices come from `e
 | Assistant answer | A third-party language model at US$0.40 in and US$1.60 out per million tokens | Output is capped at 1,200 tokens. Input is assumed at up to 10,000 tokens | At most 0.0059 | Assumption on input size |
 | Section C lookup, completeness checks, officer package review, form export | None | | 0 | By construction |
 
-**One application, with stated usage (assumptions).** A typical application has one identification run, one intake pass and five assistant answers: 0.0196 + 0.0006 + 5 x 0.0059 = US$0.05, or C$0.07. A generous one has three identification runs and ten assistant answers: 3 x 0.0196 + 0.0006 + 10 x 0.0059 = US$0.12, or C$0.17. No user has used the assistant yet, so the answer counts are illustrative. Even the generous case is about 0.1% of the low end of the price hypothesis (C$150).
+**One application, with stated usage (assumptions).** A typical application has one identification run, one intake pass and five assistant answers: 0.0196 + 0.0006 + 5 x 0.0059 = US$0.05, or C$0.07. A generous one has three identification runs and ten assistant answers: 3 x 0.0196 + 0.0006 + 10 x 0.0059 = US$0.12, or C$0.17. No applicant has used the assistant yet, so the answer counts are illustrative. Even the generous case is about 0.1% of the low end of the price hypothesis (C$150).
 
 **What this means.** Model cost does not decide whether Batatis is a business. Upkeep of jurisdiction packs, domain review, support, officer onboarding and Canadian-region hosting do, and none of those has been priced. Hosting today is a free-tier demo.
 
@@ -115,7 +115,7 @@ The model cost of one application is small and measured. The prices come from `e
 
 ## 7. How big, and how it grows
 
-All figures here are estimates from `C-market-provinces-business.md` (§2.5, §5.4 and §8 of `docs/research/2026-10-20-vision/README.md`). The assumptions are in those files and summarized in the table.
+All figures here are estimates from `C-market-provinces-business.md` (§2.5 and §5.4) and `docs/research/2026-10-20-vision/README.md` (§8). The assumptions are in those files and are summarized in the table.
 
 | Pool | Size | Main assumptions |
 |---|---|---|
@@ -169,7 +169,7 @@ A better model makes anyone's code search and drafting better, including ours. I
 - An official template could commoditize the form. We fill the Council's form, and we would add the new template as a form version.
 - An incumbent could add an alternative-solution module. Archistar and Clariti already hold Canadian municipal relationships.
 - **Code-text licensing.** NBC(AE) 2023 says commercial reproduction of National Research Council (NRC) material needs written consent. The research ranks this the highest-priority risk. We quote code text for citations and link to the NRC publication. We have not asked NRC for terms, and written terms are needed before a public commercial launch. If terms are refused, the fallback is a link-out and user-supplied-text design (`C-market-provinces-business.md`, §3.2 and (c)).
-- **Reviewer adoption is not assured.** A staff survey of more than 150 employees at Honolulu gave "almost universally negative feedback" on an AI plan-review pilot, as reported by the city's press coverage (`C-market-provinces-business.md`, §1.2, verified as reported).
+- **Reviewer adoption is not assured.** A staff survey of more than 150 employees in Honolulu gave "almost universally negative feedback" on an AI plan-review pilot, as reported by Stateline (`C-market-provinces-business.md`, §1.2, verified as reported).
 
 ## 10. The first 18 months, and what must be true
 

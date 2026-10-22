@@ -1,6 +1,6 @@
 # Batatis: Pitch Deck Outline and Demo Video Summary
 
-*Building Codes Challenge, Submission 1 (Oct 29, 2026). Status is as of Oct 21, 2026. Every number names its source, and each source is a file in this repository or a public document. Status words follow the Implementation Plan, §3: **built** (merged and reachable in the live app or API), **backend** (the API is merged and the screen is in progress), **roadmap** (not started). Evaluation figures are model-checked and mostly in sample, and none is human-verified. A slide shows a screen only if the screen is built. The pitch deck PDF and `docs/pitch-deck/index.html` were made from an earlier version of these slides and are refreshed after the screens land.*
+*Building Codes Challenge, Submission 1 (Oct 29, 2026). Status is as of Oct 21, 2026. Every number names its source, and each source is a file in this repository or a public document. Status words follow the Implementation Plan, §3: **built** (merged and reachable in the live app or API), **backend** (the API is merged and the screen is in progress), **roadmap** (not started). Evaluation figures are model-checked and mostly in sample, and none is human-verified. A slide shows a screen only if the screen is built. `C-market-provinces-business.md` is `docs/research/2026-10-20-vision/C-market-provinces-business.md`. The pitch deck PDF and `docs/pitch-deck/index.html` were made from an earlier version of these slides and are refreshed after the screens land.*
 
 ---
 
@@ -27,15 +27,15 @@ Slides are weighted to the judging rubric. Intake (20) and Code Identification (
 
 ---
 
-## Part B. Demo video (4 to 5 minutes)
+## Part B. Demo video (4:40, within the 4 to 5 minute slot)
 
 `docs/demo/script.md` is the shot list and the narration for the demo video. It follows one fictional example from the applicant's sign-in to the officer's close-out, on the calm interface, and marks each step whose screen is not built yet as "pending UI" so that it is recorded only after the screen lands.
 
 | Part | Time | What the viewer sees | Status |
 |---|---|---|---|
-| Applicant | 0:00 to 3:10 | Sign-up and onboarding. Describe the project. Check what we read. The questions. Code check with the code drawer. The applicant's own alternative-path cards. Section D and the engineer callout. Review. Application, draft or official PDF, submit | Built, except the pointer view of facts, the five-question planner and the quoted choices, which wait for their screens |
-| Officer | 3:10 to 4:40 | Officer sign-in, queue, claim. The application sheet and completeness list. Package review findings and the drafted information request. Return, resubmit, accept as complete. Close-out record | Queue, claim, sheet, completeness, messages, accept and return are built. Package review and close-out wait for their screens |
-| Close | 4:40 to 5:00 | What is built, what is backend, what is roadmap. "Batatis checks completeness. The officer decides." | |
+| Applicant | 0:00 to 3:11 | Sign-up and onboarding. Describe the project. Check what we read. The questions. Code check with the code drawer. The applicant's own alternative-path cards. Section D and the engineer callout. Review. Application, draft or official PDF, submit | Built, except the pointer view of facts, the five-question planner and the quoted choices, which wait for their screens |
+| Officer | 3:11 to 4:32 | Officer sign-in, queue, claim. The application sheet and completeness list. Package review findings and the drafted information request. Return, resubmit, accept as complete. Close-out record | Queue, claim, sheet, completeness, messages, accept and return are built. Package review and close-out wait for their screens |
+| Close | 4:32 to 4:40 | What is built, what is backend, what is roadmap. "Batatis checks completeness. The officer decides." | |
 
 Every frame that shows case data carries an EXAMPLE DATA overlay. People, companies and addresses are fictional.
 
