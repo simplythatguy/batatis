@@ -1,0 +1,160 @@
+{
+  "id": "ngt-006",
+  "description": "We are building a single-storey detached garage of 48 m2 in Edmonton, serving our detached house. Stick-framed lumber rafters and ceiling joists from the Part 9 span tables (no roof trusses); slab-on-ground floor; plain concrete footings and foundation walls from the Section 9.15 tables; no sprinkler or fire alarm system; not on permafrost; the building official has not asked for professional drawings. The longest rafter is a 3.6 m clear span.",
+  "known_facts": [
+    "single-storey detached garage",
+    "serves one detached house",
+    "building area of 48 m2",
+    "Edmonton",
+    "3.6 m clear span",
+    "no roof trusses"
+  ],
+  "gold": {
+    "engineering_required": "no",
+    "engineering_reason": "Whether classed with the house (residential, single-family exception) or as a storage garage (Group F, Division 3; Div B Note A-3.1.2.1.(1)), it is within the exceptions: single-family, or industrial 1 storey at 500 m2 or less (Div C 2.4.1.1.(1)(d)(i); Architects Act s.2(6)(d)(i); EGPA s.2(7)(d)). No Part 9 to Part 4 trigger is stated: spans are at most 12.20 m and floor joists at most 4.9 m, live load is residential, Edmonton 1-in-50 hourly wind pressure is 0.45 kPa (below 1.2) and Sa(0.2) is 0.103 (not above 1.2 or 1.8), no wood roof trusses, no sprinkler/alarm system, and no AHJ direction under Div C 2.4.1.1.(4).",
+    "limit_source": "Div A 1.3.3.3.(1) (Part 9 applies); Div C 2.4.1.1.(1) exception; Architects Act s.2(5)-(6) and EGPA s.2(6)-(7) exceptions; Part 4 triggers absent per Div B 9.23.1.1.(1), 9.15.3.3.(1), 9.23.3.5.(4), 9.23.6.1.(6), 9.23.16.5.(3); Div B Appendix C Tables C-2/C-3 (Edmonton)."
+  },
+  "authoring": {
+    "source": "research/no-ground-truth-cases.md (constructed)",
+    "gold_written": "before any system run",
+    "label": "model-constructed, model-checked, not human-verified",
+    "notes": "Constructed scenario, not a real case. Gold written from the quoted sources before any system run. Not human-reviewed. "
+  },
+  "evidence": {
+    "confidence": "high",
+    "assumptions": [
+      "Occupancy classification of an accessory garage is not decided here; both candidate classifications are exempt.",
+      "No AHJ direction under Div C 2.4.1.1.(4) or Administrative Items Regulation s.18 (stated in the text as \"has not asked for professional drawings\").",
+      "Rafter and joist sizes taken from the Part 9 span tables (Div B 9.23.4.2.); table values not re-checked here."
+    ],
+    "label": "model-constructed, model-checked, not human-verified",
+    "sources": [
+      {
+        "cite": "Div A 1.3.3.3.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 40,
+        "verification": "codedb-checked, 2nd printing, PDF p.40"
+      },
+      {
+        "cite": "Div C 2.4.1.1.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 739,
+        "verification": "codedb-checked, 2nd printing, PDF p.739"
+      },
+      {
+        "cite": "Div C 2.4.1.1.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 739,
+        "verification": "codedb-checked, 2nd printing, PDF p.739"
+      },
+      {
+        "cite": "Div B 9.35.1.1.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 1066,
+        "verification": "codedb-checked, 2nd printing, PDF p.1066"
+      },
+      {
+        "cite": "Architects Act s.2(6)(b)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/A44.pdf",
+        "page": 10,
+        "verification": "source-PDF-checked, Architects Act, p.10; not codedb (legislation)"
+      },
+      {
+        "cite": "EGPA s.2(7)(b)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/E11.pdf",
+        "page": 14,
+        "verification": "source-PDF-checked, Engineering and Geoscience Professions Act, p.14; not codedb (legislation)"
+      },
+      {
+        "cite": "Architects Act s.2(6)(d)(i)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/A44.pdf",
+        "page": 10,
+        "verification": "source-PDF-checked, Architects Act, p.10; not codedb (legislation)"
+      },
+      {
+        "cite": "EGPA s.2(7)(d)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/E11.pdf",
+        "page": 14,
+        "verification": "source-PDF-checked, Engineering and Geoscience Professions Act, p.14; not codedb (legislation)"
+      },
+      {
+        "cite": "Architects Act s.2(1)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/A44.pdf",
+        "page": 8,
+        "verification": "source-PDF-checked, Architects Act, p.8; not codedb (legislation)"
+      },
+      {
+        "cite": "Architects Act s.2(5)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/A44.pdf",
+        "page": 9,
+        "verification": "source-PDF-checked, Architects Act, p.9; not codedb (legislation)"
+      },
+      {
+        "cite": "EGPA s.2(6)",
+        "url": "https://kings-printer.alberta.ca/documents/Acts/E11.pdf",
+        "page": 13,
+        "verification": "source-PDF-checked, Engineering and Geoscience Professions Act, p.13; not codedb (legislation)"
+      },
+      {
+        "cite": "Div B 9.23.1.1.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 962,
+        "verification": "codedb-checked, 2nd printing, PDF p.962"
+      },
+      {
+        "cite": "Div B 9.15.3.3.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 925,
+        "verification": "codedb-checked, 2nd printing, PDF p.925"
+      },
+      {
+        "cite": "Div B 9.23.3.5.(4)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 967,
+        "verification": "codedb-checked, 2nd printing, PDF p.967"
+      },
+      {
+        "cite": "Div B 9.23.6.1.(6)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 970,
+        "verification": "codedb-checked, 2nd printing, PDF p.970"
+      },
+      {
+        "cite": "Div B 9.23.16.5.(3)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 988,
+        "verification": "codedb-checked, 2nd printing, PDF p.988"
+      },
+      {
+        "cite": "Div B 9.23.14.11.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 986,
+        "verification": "codedb-checked, 2nd printing, PDF p.986"
+      },
+      {
+        "cite": "Div C 2.4.1.2.(1)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 740,
+        "verification": "codedb-checked, 2nd printing, PDF p.740"
+      },
+      {
+        "cite": "Div C 2.4.1.1.(4)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 740,
+        "verification": "codedb-checked, 2nd printing, PDF p.740"
+      },
+      {
+        "cite": "Table C-2 (Edmonton); last column = 1/50 hourly wind pressure, kPa",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 667,
+        "verification": "source-PDF-checked, NBC(AE) 2023 2nd printing PDF, p.667; Appendix C table row (not a codedb provision)"
+      },
+      {
+        "cite": "Table C-3 (Edmonton); Sa(0.2)",
+        "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+        "page": 672,
+        "verification": "source-PDF-checked, NBC(AE) 2023 2nd printing PDF, p.672; Appendix C table row (not a codedb provision)"
+      }
+    ]
+  }
+}

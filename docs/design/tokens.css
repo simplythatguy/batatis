@@ -1,62 +1,15 @@
-/**
- * Batatis product UI tokens — Batatis default product system.
- * Opus seal: primary CTAs NEUTRAL (not indigo-filled); focus rings NEUTRAL grey
- * (never indigo/#5E6AD2). Reference: docs/design/linear-reference/
- */
-
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+@import "./variables.css";
 
 :root {
-  /* —— Surfaces —— */
-  --bg-app: #080808;
-  --bg-sidebar: #0c0c0d;
-  --bg-panel: #131315;
-  --bg-elevated: #19191b;
-  --bg-hover: rgba(255, 255, 255, 0.04);
-  --bg-active: rgba(255, 255, 255, 0.06);
-  --bg-input: #121214;
-
-  /* —— Borders —— */
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-default: rgba(255, 255, 255, 0.1);
-  --border-strong: rgba(255, 255, 255, 0.16);
-  --border-danger: rgba(235, 87, 87, 0.55);
-
-  /* Focus ring only — neutral grey, never indigo (not CTA fill, not active nav) */
-  --focus-ring: #8a8a8e;
+  /* Eval chrome only. shadcn --accent is a wash, not this alias. */
   --accent: var(--focus-ring);
 
-  /* —— Text —— */
-  --text-primary: #eeeeef;
-  --text-secondary: #9b9ba1;
-  --text-tertiary: #808086;
-  --text-inverse: #141415;
-
-  /* —— Primary CTA = neutral (Opus P0) —— */
-  --btn-primary-bg: #e6e6e6;
-  --btn-primary-text: #141415;
-  --btn-primary-hover: #f2f2f2;
-
-  /* —— Status map (one map, all screens) —— */
-  --status-blocking: #eb5757; /* red — blocking gaps */
-  --status-warning: #f2c94c; /* amber — warnings */
-  --status-pending: #8a8a8e; /* grey — pending */
-  --status-done: #4cb782; /* green — complete / done */
   --status-danger: var(--status-blocking);
   --status-success: var(--status-done);
   --status-progress: var(--status-warning);
   --status-todo: var(--status-pending);
   --status-info: var(--status-pending);
-
-  /* legacy aliases unused for buttons */
-  --accent-muted: rgba(138, 138, 142, 0.22);
-
-  --diff-add-bg: rgba(76, 183, 130, 0.12);
-  --diff-del-bg: rgba(235, 87, 87, 0.12);
-  --code-bg: #161618;
-  --pdf-sheet-bg: #f4f4f5;
-  --pdf-sheet-text: #1a1a1c;
-  --pdf-sheet-muted: #5c5c62;
 
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
@@ -126,8 +79,6 @@ a {
   text-decoration: none;
 }
 
-/* —— Buttons —— */
-
 .btn {
   display: inline-flex;
   align-items: center;
@@ -156,7 +107,6 @@ a {
   outline-offset: 2px;
 }
 
-/* Neutral primary — NOT indigo fill */
 .btn-primary {
   background: var(--btn-primary-bg);
   border-color: transparent;
@@ -473,7 +423,6 @@ a {
   gap: 6px;
 }
 
-/* Custom checkbox — 14px square hairline; checked = neutral light fill + dark check */
 input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;

@@ -13,10 +13,16 @@ from datetime import datetime, timezone
 from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
+from .account_models import ApplicationStatus, Claim, Decision, StatusChange, StoredMessage
+
+from .models_intake import IntakeRecord
+from .relevance_models import RelevanceRecord
+from .models_identify import IdentifyResult
 
 FactKind = Literal['exact', 'pointed', 'computed', 'proposed']
 FactStatus = Literal['confirmed', 'unconfirmed']
-SourceType = Literal['code', 'file', 'user_text', 'drawing', 'user_click']
+SourceType = Literal['code', 'file', 'user_text', 'drawing', 'user_click', 'officer', 'professional']
+RouteTarget = Literal['officer', 'professional', 'applicant']
 AttributionStatus = Literal['direct', 'inherited from parent', 'no row in the attribution table']
 
 INTENT_LABEL = 'NBC 2020 Intent Statements, explanatory only'
@@ -27,7 +33,7 @@ def new_id(prefix: str) -> str:
 
 
 def now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec='seconds')
+    return datetime.now(timezone.utc).isoformat(timespec='microseconds')
 
 
 class Source(BaseModel):
@@ -67,7 +73,7 @@ class Fact(BaseModel):
 
 
 class Jurisdiction(BaseModel):
-    id: str                                    # e.g. "calgary", "edmonton", "alberta-other"
+    id: str                                    # a jurisdiction pack id, see engine/data/jurisdictions/packs
     name: str
     authority: str | None = None
 
@@ -94,6 +100,13 @@ class IntentBlock(BaseModel):
     pdf_page: int
 
 
+class Explainer(BaseModel):
+    """Short note on a Section C row. A quote is copied from codedb; the note never finds compliance."""
+    text: str
+    quote: str
+    source: Literal['ai_written', 'deterministic']
+
+
 class SectionCRow(BaseModel):
     provision_id: str
     citation: str
@@ -107,6 +120,7 @@ class SectionCRow(BaseModel):
     only_in_ae: list[str] = []
     related_root: str | None = None            # codedb heuristic (e.g. referenced sentence); never implied as a row
     related_root_method: str | None = None
+    explainer: Explainer | None = None         # deterministic template, or null when there is nothing to quote
 
 
 class EvidenceItem(BaseModel):
@@ -116,7 +130,17 @@ class EvidenceItem(BaseModel):
     description: str
     evidence_type: str | None = None
     professional_required: bool | None = None
-    status: Literal['needed', 'provided', 'not_applicable'] = 'needed'
+    status: Literal['needed', 'evidence_listed', 'not_applicable'] = 'needed'
+    # text: the applicant listed it and no file is attached. file: a confirmed file-source file_ref exists.
+    kind: Literal['text', 'file'] = 'text'
+
+    @model_validator(mode='before')
+    @classmethod
+    def _provided_loads_as_listed(cls, data):
+        """A stored provided row is evidence_listed. Old cases load, and the next write stores the new token."""
+        if isinstance(data, dict) and data.get('status') == 'provided':
+            return {**data, 'status': 'evidence_listed'}
+        return data
 
 
 class Gap(BaseModel):
@@ -124,20 +148,46 @@ class Gap(BaseModel):
     section: Literal['A', 'B', 'C', 'D', 'process']
     field: str
     message: str
-    severity: Literal['blocking', 'warning'] = 'blocking'
+    severity: Literal['blocking', 'warning', 'info'] = 'blocking'   # info never blocks (jurisdiction pack notices)
+    routed_to: RouteTarget | None = None
 
 
 class Case(BaseModel):
     id: str = Field(default_factory=lambda: new_id('case'))
     title: str | None = None
+    owner_id: str | None = None
+    authority: str | None = None
+    status: ApplicationStatus = 'draft'
+    submitted_at: str | None = None
+    status_history: list[StatusChange] = Field(default_factory=list)
+    claim: Claim | None = None
+    decision: Decision | None = None
+    messages: list[StoredMessage] = Field(default_factory=list)
     created_at: str = Field(default_factory=now)
     updated_at: str = Field(default_factory=now)
+    version: int = Field(default=1, ge=1)      # acknowledgment of the store's row version, never input authority
     jurisdiction: Jurisdiction | None = None
     facts: list[Fact] = []
     provisions: list[str] = []                 # Division B ids the applicant confirmed
     section_c: list[SectionCRow] = []
     evidence: list[EvidenceItem] = []
     gaps: list[Gap] = []
+    relevance: RelevanceRecord | None = None   # explicit scoring only; GET recomputes its staleness
+    identify: IdentifyResult | None = None     # last code identification (models_identify.py); never writes provisions
+    intake: IntakeRecord | None = None         # last intake run: fact pointers and file reports (models_intake)
+
+    @model_validator(mode='after')
+    def _kind_follows_the_file(self):
+        """kind is file only when a confirmed file-source file_ref exists. Otherwise it is text."""
+        for item in self.evidence:
+            prefix = f'evidence.{item.id}.file_ref'
+            fact = next((entry for entry in reversed(self.facts) if entry.field == prefix), None)
+            has_file = (
+                fact is not None and fact.status == 'confirmed' and fact.kind != 'proposed'
+                and fact.source.type == 'file' and fact.value == fact.source.ref
+                and isinstance(fact.source.ref, str) and fact.source.ref.strip())
+            item.kind = 'file' if has_file else 'text'
+        return self
 
     def export_facts(self) -> list[dict]:
         return [f.export() for f in self.facts]

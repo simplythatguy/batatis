@@ -5,6 +5,8 @@ description: Default Batatis product UI/UX system. Always produce Linear-caliber
 
 # Batatis UI — Linear-default system
 
+> **Default look changed (user decision 2026-10-20):** product UI now uses the calm system in `docs/design-system-calm.md` (contract: `docs/design/calm-flow-prototype.html`, code: `web/src/calm/`). The Linear visual language below (sidebar, charcoal tool chrome) is superseded. The **Opus P0 rules** in this file still apply to every surface; where a rule names a Linear detail (sidebar, active nav, 14px checkbox), apply its intent to the calm components.
+
 ## Mandate (always on for product UI)
 
 Agents **always** ship spectacular, simplified product UI matching this system — **without** the prompt saying “make it Linear.”

@@ -23,13 +23,32 @@ GOVERN = ('Article {L} states a requirement that directly governs the situation 
 Ask = Callable[[Any, Mapping[str, Mapping[str, Any]], float], Mapping[str, Any]]
 
 
-def jev_ask(model: str = JEV_MODEL) -> Ask:
-    """The live adapter: vendored jevkit client, pinned model. Needs SSL_CERT_FILE=/etc/ssl/cert.pem on this Mac."""
+class NoRetry(Exception):
+    """A failure that retrying cannot fix (the spend gate is shut). Judge re-raises it at once."""
+
+
+def raw_jev_ask(model: str = JEV_MODEL) -> Ask:
+    """Unmetered vendored jevkit client, pinned model. Use only behind engine.identify.providers.metered_ask."""
     from .jevkit import client
 
     def ask(state, questions, timeout):
         return client.ask(state, questions, timeout=timeout, model=model, provider=JEV_PROVIDER)
     return ask
+
+
+def jev_ask(model: str = JEV_MODEL) -> Ask:
+    """The default adapter, metered: every request reserves and settles through engine.llm_gate.
+
+    BATATIS_PROVIDER=fake uses the offline fake, so no request leaves the machine. Otherwise the gate
+    refuses every request (before any network) unless BATATIS_LIVE=1 and the TypeSafe credential is
+    present (and SSL_CERT_FILE=/etc/ssl/cert.pem on this Mac).
+    """
+    from engine import llm_gate
+    from .providers import metered_ask
+    if llm_gate.fake_providers():
+        from .fakes import fake_jev_ask
+        return metered_ask(fake_jev_ask(), model=model)
+    return metered_ask(raw_jev_ask(model), model=model)
 
 
 def noul(text: str) -> dict:
@@ -83,6 +102,7 @@ class Judge:
         def run(batch):
             state = {'proposal': query, 'articles': {f'A{i}': t for i, (_, t) in enumerate(batch)}}
             qs = {f'q{i}': noul(self.question.format(L=f'A{i}')) for i in range(len(batch))}
+            last_error = None
             for attempt in range(self.attempts):
                 try:
                     t0 = time.monotonic()
@@ -97,12 +117,17 @@ class Judge:
                         for i, (a, _) in enumerate(batch):
                             probs[a] = rep['answers'][f'q{i}']['noul']
                     return
-                except Exception:
+                except NoRetry:
+                    with self._lock:
+                        self.usage.errors += 1
+                    raise
+                except Exception as error:
+                    last_error = error
                     with self._lock:
                         self.usage.errors += 1
                     if attempt + 1 < self.attempts:
                         time.sleep(1.5 * (attempt + 1))
-            raise RuntimeError('Jev batch failed after retries')
+            raise RuntimeError('Jev batch failed after retries') from last_error
 
         batches = self.batches(query, arts, ids)
         if len(batches) == 1:

@@ -1,99 +1,124 @@
-import { Icon } from "./components";
+import { useEffect } from "react";
+import { engine, EngineError } from "./api/client";
+import { Application } from "./calm/Application";
+import { CodeLibrary } from "./calm/CodeLibrary";
+import { Deck } from "./calm/QuestionDeck";
+import { Review } from "./calm/Review";
+import { resolveRoute, type Screen } from "./calm/routes";
+import { extraRoutes, isStandaloneRoute, useAuthRedirect } from "./calm/routes.extra";
+import { getSession, updateSession, useSession } from "./calm/session";
+import { Shell } from "./calm/Shell";
+import { Start } from "./calm/Start";
 import { useFocusParam, useRoute } from "./router";
-import { Application } from "./screens/Application";
-import { CodeCheck } from "./screens/CodeCheck";
-import { Describe } from "./screens/Describe";
-import { Accuracy, Officer } from "./screens/Placeholders";
+import { uploadMessage } from "./rules";
+import { Accuracy } from "./screens/Accuracy";
+import { Officer } from "./screens/Officer";
 import { SectionC } from "./screens/SectionC";
-import { resetCase, useCase } from "./store";
+import { useCase } from "./store";
 
-const EXPLICIT_ROUTES = ["/code-check", "/section-c", "/application", "/officer", "/accuracy"];
+/** Store effects the calm screens ask for: the check Start requested, and held PDF uploads. */
+function CalmEffects() {
+  const { c, phase, engineId, requestCheck, dispatch } = useCase();
+  const session = useSession();
 
-const NAV = [
-  {
-    area: "Applicant",
-    items: [
-      { path: "/describe", label: "Describe", icon: "describe" },
-      { path: "/code-check", label: "Code check", icon: "check" },
-      { path: "/section-c", label: "Section C", icon: "table" },
-      { path: "/application", label: "Application", icon: "application" },
-    ],
-  },
-  { area: "Officer", items: [{ path: "/officer", label: "Officer review", icon: "officer" }] },
-  { area: "Accuracy", items: [{ path: "/accuracy", label: "Accuracy report", icon: "accuracy" }] },
-];
+  useEffect(() => {
+    if (!session.checkAfterStart || phase !== "case") return;
+    updateSession({ checkAfterStart: false });
+    // Explicit user action: the applicant pressed Start.
+    void requestCheck();
+  }, [session.checkAfterStart, phase, c, requestCheck]);
+
+  useEffect(() => {
+    if (!engineId || !session.held.length) return;
+    const held = getSession().held;
+    updateSession((s) => ({ held: [], uploading: [...s.uploading, ...held.map((h) => h.id)] }));
+    for (const { id, file } of held) {
+      if (!c.files.some((f) => f.id === id)) {
+        updateSession((s) => ({ uploading: s.uploading.filter((x) => x !== id) }));
+        continue;
+      }
+      engine
+        .upload(engineId, file)
+        .then(() => dispatch({ type: "setFileResult", id, error: null, read: true }))
+        .catch((e: unknown) => {
+          const status = e instanceof EngineError ? e.status : 0;
+          const detail = e instanceof EngineError ? e.detail : String(e);
+          dispatch({ type: "setFileResult", id, error: uploadMessage(status, detail), unreachable: status === 0 });
+        })
+        .finally(() => updateSession((s) => ({ uploading: s.uploading.filter((x) => x !== id) })));
+    }
+  }, [engineId, session.held, c.files, dispatch]);
+  return null;
+}
+
+function normalHash(hash: string): string {
+  const raw = hash.replace(/^#/, "") || "/";
+  const [path, query = ""] = raw.split("?");
+  const q = new URLSearchParams(query).toString();
+  return `#${path || "/"}${q ? `?${q}` : ""}`;
+}
+
+/** The four stages and the code library open in every state; the old screens need an application. */
+const OPEN_WITHOUT_CASE: ReadonlySet<Screen> = new Set(["start", "questions", "review", "application", "code"]);
 
 export function App() {
   const route = useRoute();
-  const { c, dispatch } = useCase();
-  useFocusParam(route);
-  const isDescribeRoute = !EXPLICIT_ROUTES.includes(route.path);
+  // Signed-out visitors go to #/signin and new accounts to onboarding before any screen renders.
+  const redirecting = useAuthRedirect(route);
+  const { phase } = useCase();
+  // Accounts, reviewer, settings and notification pages (routes.extra.tsx) come before the stages.
+  const extra = extraRoutes(route);
+  const calm = resolveRoute(route.path, route.params);
+  const screen: Screen = phase === "case" || OPEN_WITHOUT_CASE.has(calm.screen) ? calm.screen : "start";
+  const legacy = screen === "officer" || screen === "accuracy" || screen === "references";
+  useFocusParam(legacy ? route : { path: route.path, params: new URLSearchParams() });
 
-  let screen;
-  switch (route.path) {
-    case "/code-check":
-      screen = <CodeCheck />;
+  // Legacy links (gap hrefs, old screens) are rewritten to the calm route they mean.
+  // Rewrite only while the address bar still shows the route this render parsed:
+  // a handler may already have navigated on (Start sets #/questions right after the role).
+  const parsed = normalHash(`#${route.path}?${route.params.toString()}`);
+  const target = screen === calm.screen ? calm.canonical : "#/";
+  // Not for account pages, nor while the gate is moving the visitor, nor a `?case=` link the shell opens first.
+  const keep = Boolean(extra) || redirecting || route.params.has("case");
+  useEffect(() => {
+    if (keep) return;
+    if (parsed !== target && normalHash(location.hash) === parsed) location.replace(target);
+  }, [target, parsed, keep]);
+
+  if (redirecting) return null;
+  if (extra && isStandaloneRoute(route)) return <>{extra}</>;
+  if (extra) return <Shell active={screen} plain>{extra}</Shell>;
+
+  let body;
+  switch (screen) {
+    case "questions":
+      body = <Deck focus={calm.focus} codeFirst={calm.codeFirst} />;
       break;
-    case "/section-c":
-      screen = <SectionC />;
+    case "review":
+      body = <Review />;
       break;
-    case "/application":
-      screen = <Application route={route} />;
+    case "application":
+      body = <Application download={calm.download} />;
       break;
-    case "/officer":
-      screen = <Officer />;
+    case "officer":
+      body = <div className="cf-legacy"><Officer /></div>;
       break;
-    case "/accuracy":
-      screen = <Accuracy />;
+    case "accuracy":
+      body = <div className="cf-legacy"><Accuracy /></div>;
+      break;
+    case "references":
+      body = <div className="cf-legacy"><SectionC /></div>;
+      break;
+    case "code":
+      body = <CodeLibrary route={calm} />;
       break;
     default:
-      screen = <Describe />;
+      body = <Start />;
   }
-
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <div className="workspace">
-          <span className="logo" aria-hidden="true">
-            B
-          </span>
-          Batatis
-        </div>
-        <nav className="nav" aria-label="Main">
-          {NAV.map((g) => (
-            <div key={g.area} className="nav-section">
-              <div className="sidebar-section-label">{g.area}</div>
-              <div className="nav-group">
-                {g.items.map((i) => {
-                  const active = route.path === i.path || (i.path === "/describe" && isDescribeRoute);
-                  return (
-                    <a
-                      key={i.path}
-                      className="nav-item"
-                      href={`#${i.path}`}
-                      data-active={active}
-                      aria-current={active ? "page" : undefined}
-                    >
-                      <Icon name={i.icon} />
-                      {i.label}
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </nav>
-        <div className="sidebar-foot">
-          <div className="case-card">
-            <span className="case-title">{c.title}</span>
-            <span className="meta">Fixture case · fictional applicant</span>
-          </div>
-          <button type="button" className="btn btn-ghost" onClick={() => resetCase(dispatch)}>
-            Reset case
-          </button>
-        </div>
-      </aside>
-      <main className="main-panel">{screen}</main>
-    </div>
+    <Shell active={screen}>
+      <CalmEffects />
+      {body}
+    </Shell>
   );
 }

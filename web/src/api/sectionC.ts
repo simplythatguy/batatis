@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import type { AttributionStatus, SectionCRow } from "../types";
-import { engine } from "./client";
+import { engine, EngineError } from "./client";
 import type { SectionCRow as EngineRow } from "./types.gen";
+import { canonicalProvision, withinProvision } from "../provisions";
 
 const STATUS: Record<EngineRow["attribution_status"], AttributionStatus> = {
   direct: "direct",
@@ -45,9 +46,18 @@ export function toViewRow(r: EngineRow, candidateId: string): SectionCRow {
 }
 
 /** True when `row` (a sentence or clause id) belongs to the candidate provision `p` (itself or below it). */
-const within = (row: string, p: string) => row === p || (row.startsWith(p) && (p.endsWith(".") || row[p.length] === "("));
+export function canonicalRows(rows: EngineRow[], wanted: Wanted[]): SectionCRow[] {
+  return [...new Map(rows.map(r => [canonicalProvision(r.provision_id), r])).values()].flatMap(r => {
+    // Prefer the exact candidate, independently of input order.
+    const owner = wanted.find(w => canonicalProvision(w.provision) === canonicalProvision(r.provision_id))
+      ?? wanted.find(w => withinProvision(r.provision_id, w.provision));
+    return owner ? [toViewRow(r, owner.candidateId)] : [];
+  });
+}
 
-export type SectionCSource = "loading" | "live" | "offline";
+export type SectionCSource = "loading" | "live" | "cached" | "error";
+
+const PROVISION_ID = /^\d+(?:\.\d+)+/;
 
 export interface Wanted {
   candidateId: string;
@@ -58,16 +68,17 @@ export interface Wanted {
  * Section C rows from POST /section-c for the given provisions. When the engine cannot be reached or
  * rejects the request, falls back to `offline` rows (the fixture), and says so through `source`.
  */
-export function useSectionC(wanted: Wanted[], offline: SectionCRow[]) {
-  const key = wanted.map((w) => `${w.candidateId}=${w.provision}`).join("|");
-  const [state, setState] = useState<{ key: string; source: SectionCSource; rows: SectionCRow[]; error?: string }>({
+export function useSectionC(wanted: Wanted[], offline: SectionCRow[], attempt = 0) {
+  const real = wanted.filter((w) => PROVISION_ID.test(w.provision));
+  const key = `${attempt}|` + real.map((w) => `${w.candidateId}=${w.provision}`).join("|");
+  const [state, setState] = useState<{ key: string; source: SectionCSource; rows: SectionCRow[]; error?: string; status?: number }>({
     key: "",
     source: "loading",
     rows: [],
   });
 
   useEffect(() => {
-    if (!wanted.length) {
+    if (!real.length) {
       setState({ key, source: "live", rows: [] });
       return;
     }
@@ -75,37 +86,61 @@ export function useSectionC(wanted: Wanted[], offline: SectionCRow[]) {
     setState((s) => ({ ...s, key, source: "loading" }));
     engine
       .sectionC(
-        wanted.map((w) => w.provision),
+        real.map((w) => w.provision),
         ctl.signal,
       )
       .then((rows) => {
-        const view = wanted.flatMap((w) => rows.filter((r) => within(r.provision_id, w.provision)).map((r) => toViewRow(r, w.candidateId)));
+        if (ctl.signal.aborted) return;
+        const view = canonicalRows(rows, real);
         setState({ key, source: "live", rows: view });
       })
       .catch((e: unknown) => {
         if (ctl.signal.aborted) return;
-        const ids = new Set(wanted.map((w) => w.candidateId));
-        setState({ key, source: "offline", rows: offline.filter((r) => ids.has(r.candidateId)), error: String(e instanceof Error ? e.message : e) });
+        const ids = new Set(real.map((w) => w.candidateId));
+        const cached = offline.filter((r) => ids.has(r.candidateId));
+        const status = e instanceof EngineError ? e.status : 0;
+        const message = e instanceof EngineError ? e.detail : e instanceof Error ? e.message : String(e);
+        if (cached.length) setState({ key, source: "cached", rows: cached, error: message, status });
+        else setState({ key, source: "error", rows: [], error: message, status });
       });
     return () => ctl.abort();
-    // `key` captures `wanted`; `offline` is the static fixture.
+    // `key` captures the provisions and the retry count.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
-  return state.key === key ? state : { ...state, key, source: "loading" as const };
+  return state.key === key ? state : { key, rows: [], source: "loading" as const };
 }
 
-/** Verbatim provision text and citation from GET /code/{id}; null until loaded, or when `id` is undefined. */
-export function useProvisionText(id: string | undefined) {
-  const [got, setGot] = useState<{ id: string; text: string; citation: string } | null>(null);
+export type ProvisionText =
+  | { state: "idle" }
+  | { state: "loading" }
+  | { state: "live"; text: string; citation: string }
+  | { state: "error"; message: string };
+
+/** Verbatim provision text from GET /code/{id}. An error is a state, not a permanent loading spinner. */
+export function useProvisionText(id: string | undefined, attempt = 0): ProvisionText {
+  const [got, setGot] = useState<{ id: string; attempt: number; value: ProvisionText }>({ id: "", attempt: -1, value: { state: "idle" } });
   useEffect(() => {
     if (!id) return;
     const ctl = new AbortController();
+    setGot({ id, attempt, value: { state: "loading" } });
     engine
       .provision(id, "B", ctl.signal)
-      .then((r) => setGot({ id, text: r.text.replace(/\s+/g, " ").trim(), citation: r.citation }))
-      .catch(() => undefined);
+      .then((r) =>
+        setGot({
+          id,
+          attempt,
+          value: { state: "live", text: r.text.replace(/\s+/g, " ").trim(), citation: r.citation },
+        }),
+      )
+      .catch((e: unknown) => {
+        if (ctl.signal.aborted) return;
+        const message = e instanceof Error ? e.message : "The provision text did not load.";
+        setGot({ id, attempt, value: { state: "error", message } });
+      });
     return () => ctl.abort();
-  }, [id]);
-  return got && got.id === id ? got : null;
+  }, [id, attempt]);
+  if (!id) return { state: "idle" };
+  if (got.id !== id || got.attempt !== attempt) return { state: "loading" };
+  return got.value;
 }

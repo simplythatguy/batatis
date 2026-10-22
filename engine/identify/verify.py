@@ -6,7 +6,6 @@ The verifier ranks; it never decides compliance.
 """
 from __future__ import annotations
 
-import os
 import re
 import time
 from dataclasses import dataclass, field
@@ -73,17 +72,32 @@ def check_quotes(picks: list[Pick], candidates: list[str], arts: dict[str, dict]
 
 
 class ClaudeVerifier:
-    """Adapter over the Anthropic Messages API (structured output). `client` is injectable for tests."""
+    """Adapter over the Anthropic Messages API (structured output). `client` is injectable for tests.
+
+    With no client: BATATIS_PROVIDER=fake uses the offline fake. A live Anthropic client is built only when
+    Anthropic is explicitly configured as the verifier (BATATIS_IDENTIFY_VERIFIER=anthropic) and the gate is
+    open (BATATIS_LIVE=1 and ANTHROPIC_API_KEY). Live providers are OpenAI and Jev by default (2026-10-21), so a
+    key in the environment alone never reaches Anthropic.
+    """
 
     def __init__(self, db_path: Path | str, *, client=None, model: str = VERIFIER_MODEL, effort: str = 'medium',
                  max_tokens: int = 16000):
+        if 'haiku' in model.lower():
+            raise ValueError('Haiku models are not used for verification')
         self.arts = articles(Path(db_path))
         self.model, self.effort, self.max_tokens = model, effort, max_tokens
         if client is None:
-            import anthropic
-            if not os.environ.get('ANTHROPIC_API_KEY'):
-                raise RuntimeError('ANTHROPIC_API_KEY is not set')
-            client = anthropic.Anthropic()
+            from engine import llm_gate
+            from .providers import MeteredAnthropic, anthropic_opted_in, live_anthropic
+            if llm_gate.fake_providers():
+                from .fakes import FakeAnthropic
+                client = MeteredAnthropic(FakeAnthropic())
+            elif not anthropic_opted_in():
+                raise RuntimeError('Anthropic is not a configured identify provider (BATATIS_IDENTIFY_VERIFIER)')
+            elif not llm_gate.provider_enabled('anthropic'):
+                raise RuntimeError('Anthropic is not enabled (BATATIS_LIVE=1 and ANTHROPIC_API_KEY)')
+            else:
+                client = MeteredAnthropic(live_anthropic())
         self.client = client
 
     def prompt(self, query: str, candidates: list[str]) -> str:

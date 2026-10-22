@@ -3,27 +3,32 @@
 Each issue recommends evidence and, where Division C says so, professional involvement.
 It does not conclude that a design complies, is safe, or that a supplied opinion is adequate.
 Citations are copied from codedb lookups. A reference that does not resolve becomes no citation
-and a question.
+and a question. This module does not write the case and does not fill a professional's name,
+discipline, seal, or registration number.
 """
 from __future__ import annotations
 
+import logging
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
 from .codes import Codes
+from .human_review import HumanReview, human_reviews
 from .models import Case
-from .process_fields import ProcessField, alternative_path, confirmed_value, process_fields
-from .professional import ProfessionalFacts, ProfessionalReason, ProfessionalResult, professional_involvement
+from .process_fields import ProcessField, alternative_path, confirmed_value, latest_fact, process_fields
+from .professional import (
+    PART9_MAX_SPAN_M, PracticePrompt, ProfessionalReason, ProfessionalResult, commercial_party,
+    professional_confirmed, professional_involvement, unresolved_item,
+)
 from .section_d import (
     ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, EvidencePlanItem, EvidenceType, section_d_plan,
 )
 
-# A confirmed span above this value is stored as Part 4 design before the practice screen.
+# A confirmed span above this value is screened as Part 4 design by the shared case decision.
 # This handoff came from development case dev-050. The only provision cited for that
 # result is Div C 2.4.1.2.(1), which engine/professional.py already passes to add().
 # This module does not add a provision id.
-PART9_MAX_SPAN_M = 12.20
 
 # Every practice-screen id below is a string literal already passed to add() in
 # engine/professional.py. Process-field ids are the literals in engine/process_fields.py
@@ -48,7 +53,28 @@ PROCESS_RULES = (
 )
 
 PracticeValue = bool | Literal['unknown']
-IssueStatus = Literal['open', 'addressed', 'needs_professional']
+IssueStatus = Literal['open', 'evidence_listed', 'needs_professional']
+
+log = logging.getLogger(__name__)
+
+# Used only when the Division C screen is unresolved and every specific question was unusable.
+GENERIC_FALLBACK_QUESTION = (
+    'Which building facts are still unconfirmed before this practice-of-engineering flag can be set?')
+
+# The applicant has to confirm these. A name or seal copied off a document does not count.
+PROFESSIONAL_REQUEST = (
+    'Name the registered professional for this scope: name, discipline (engineer or architect), '
+    'and APEGA or AAA registration number. A seal the applicant confirms can stand in for the number. '
+    'This screen does not fill the name, the discipline, or the number.')
+_APPLICANT_SOURCES = frozenset({'user_text', 'user_click'})
+_PROCESS_RULE_IDS = {
+    'rationale': ('C', '2.3.1.1.(2)(a)'),
+    'maintenance_operation': ('C', '2.3.1.1.(2)(b)'),
+    'risk_assessment': ('C', '2.3.1.1.(3)'),
+    'mitigating_measures': ('C', '2.3.1.1.(3)'),
+    'assumptions_and_limits': ('C', '2.3.1.1.(3)'),
+    'qualifications': ('C', '2.3.1.1.(4)'),
+}
 
 # Reason codes professional.py emits, in the order a Division C rule should be shown.
 _YES_PRIORITY = (
@@ -71,10 +97,14 @@ _RULE_IDS = {
     'trusses_unknown': ('2.4.1.2.(1)', 'C'),
     'suppression': ('2.4.1.3.(1)', 'C'),
     'suppression_unknown': ('2.4.1.3.(1)', 'C'),
+    'systems_unknown': ('2.4.1.3.(1)', 'C'),
+    'firestop_scope': ('2.4.1.3.(1)', 'C'),
+    'part_scope': ('1.3.3.3.(1)', 'A'),
     'fire_alarm': ('2.4.1.4.(1)', 'C'),
     'fire_alarm_unknown': ('2.4.1.4.(1)', 'C'),
     'design_scope': ('2.4.1.1.(3)', 'C'),
     'professional_law': ('2.4.1.1.(5)', 'C'),
+    'gross_area_acts': ('2.4.1.1.(5)', 'C'),
 }
 _YES_TEXT = {
     'part4': 'The stated work is Part 4 design. Recommend a registered professional skilled in that work.',
@@ -105,6 +135,8 @@ class PracticeOfEngineering(BaseModel):
     citation: str | None = None
     reason: str
     question: str | None = None
+    prompts: tuple[PracticePrompt, ...] = ()
+    routed_to: Literal['officer', 'professional', 'applicant'] | None = None
 
     @model_validator(mode='after')
     def _shape(self):
@@ -140,7 +172,9 @@ class SectionDIssue(BaseModel):
     recommended_types: tuple[EvidenceType, ...]
     practice_of_engineering: PracticeOfEngineering
     empty_process_fields: tuple[EmptyProcessField, ...]
+    human_review: tuple[HumanReview, ...] = ()
     status: IssueStatus
+    routed_to: Literal['officer', 'professional', 'applicant'] | None = None
 
 
 def _question(result: ProfessionalResult) -> str:
@@ -148,7 +182,20 @@ def _question(result: ProfessionalResult) -> str:
         folded = question.casefold()
         if question.strip() and 'safe' not in folded and 'compli' not in folded:
             return question
-    return 'Which building facts are still unconfirmed before this practice-of-engineering flag can be set?'
+    log.info('generic fallback practice question')
+    return GENERIC_FALLBACK_QUESTION
+
+
+def _applicant_confirmed(case: Case, *fields: str) -> str | None:
+    """Confirmed applicant text or an explicit confirmation. Document sources do not qualify."""
+    fact = latest_fact(case, *fields)
+    if fact is None or fact.status != 'confirmed' or fact.kind == 'proposed':
+        return None
+    if fact.source.type not in _APPLICANT_SOURCES:
+        return None
+    if not isinstance(fact.value, str) or not fact.value.strip():
+        return None
+    return fact.value.strip()
 
 
 def _pick(result: ProfessionalResult, required: str) -> ProfessionalReason | None:
@@ -160,6 +207,9 @@ def _pick(result: ProfessionalResult, required: str) -> ProfessionalReason | Non
 
 
 def _rule(reason: ProfessionalReason) -> tuple[str, str]:
+    if reason.code.startswith('mandatory:'):
+        _, division, provision = reason.code.split(':', 2)
+        return provision, division
     return _RULE_IDS.get(reason.code, ('', ''))
 
 
@@ -167,39 +217,56 @@ def practice_of_engineering(case: Case, codes: Codes) -> PracticeOfEngineering:
     """Ledger-only screen. Missing facts stay unknown; nothing is defaulted to a boolean."""
     span = confirmed_value(case, 'professional.span_m', 'span_m')
     span_handoff = isinstance(span, (int, float)) and not isinstance(span, bool) and span > PART9_MAX_SPAN_M
-    facts = ProfessionalFacts.from_case(case)
-    if span_handoff and facts.part4_design is not True:
-        facts = facts.model_copy(update={'part4_design': True})
-    result = professional_involvement(facts, codes)
-    return render_practice(result, codes, span_handoff=span_handoff)
+    return render_practice(professional_involvement(case, codes), codes, span_handoff=span_handoff)
+
+
+_UNRESOLVED_CITATION_REASON = (
+    'The rule for this practice screen did not resolve in the code database. '
+    'Ask before setting the flag to yes or no.')
+_UNRESOLVED_CITATION_QUESTION = (
+    'Which professional-involvement rule applies? No citation was returned.')
+
+
+def _flag(value: PracticeValue, reason_row: ProfessionalReason | None, text: str, question: str | None) -> PracticeOfEngineering:
+    """A yes or no flag needs the looked-up rule. A missing citation becomes unknown, not an error."""
+    rule, division = _rule(reason_row) if reason_row else ('', '')
+    citation = reason_row.citation if reason_row else None
+    if value == 'unknown' or (rule and division and citation and str(citation).strip()):
+        return PracticeOfEngineering(value=value, rule=rule or None, division=division or None,
+                                     citation=citation or None, reason=text, question=question)
+    return PracticeOfEngineering(value='unknown', rule=rule or None, division=division or None,
+                                 reason=_UNRESOLVED_CITATION_REASON,
+                                 question=(f'The citation lookup for Division {division} {rule} failed. '
+                                           'Ask the code reviewer to verify this reference before setting the flag.'
+                                           if rule and division else _UNRESOLVED_CITATION_QUESTION))
+
+
+def _with_prompts(flag: PracticeOfEngineering, result: ProfessionalResult) -> PracticeOfEngineering:
+    return flag.model_copy(update={'prompts': tuple(result.prompts), 'routed_to': result.routed_to})
 
 
 def render_practice(result: ProfessionalResult, codes: Codes, *, span_handoff: bool = False) -> PracticeOfEngineering:
     if result.required == 'yes':
         reason = _pick(result, 'yes')
-        rule, division = _rule(reason) if reason else ('', '')
         text = _YES_TEXT.get(reason.code, 'Recommend a registered professional for the stated scope.') if reason else (
             'Recommend a registered professional for the stated scope.')
         if span_handoff:
             text += ' The stated span is recorded as Part 4 design, so the same Division C rule applies.'
-        return PracticeOfEngineering(value=True, rule=rule or None, division=division or None,
-                                     citation=reason.citation if reason else None, reason=text, question=None)
+        return _with_prompts(_flag(True, reason, text, PROFESSIONAL_REQUEST), result)
     if result.required == 'no':
         reason = _pick(result, 'no') or _pick(result, 'depends')
-        rule, division = _rule(reason) if reason else ('', '')
-        return PracticeOfEngineering(
-            value=False, rule=rule or None, division=division or None,
-            citation=reason.citation if reason else None,
-            reason=('The stated facts fit a general exception. Recommend checking component duties and any '
-                    'authority direction. This screen does not decide professional-law scope.'),
-            question=None)
+        return _with_prompts(_flag(False, reason,
+                     ('The stated facts fit a general exception. Recommend checking component duties and any '
+                      'authority direction. This screen does not decide professional-law scope.'),
+                     None), result)
     reason = _pick(result, 'depends')
     rule, division = _rule(reason) if reason else ('', '')
-    return PracticeOfEngineering(
+    question = _question(result)
+    return _with_prompts(PracticeOfEngineering(
         value='unknown', rule=rule or None, division=division or None,
-        citation=reason.citation if reason else None,
-        reason='These facts do not establish whether practice of engineering applies. Ask before setting the flag to yes or no.',
-        question=_question(result))
+        citation=(reason.citation or None) if reason else None,
+        reason=unresolved_item(question, result.routed_to),
+        question=question), result)
 
 
 def _at_stake(item: EvidencePlanItem) -> str:
@@ -211,12 +278,22 @@ def _at_stake(item: EvidencePlanItem) -> str:
             'designer which performance benchmark applies before selecting evidence.')
 
 
-def _status(flag: PracticeOfEngineering, attachments) -> IssueStatus:
-    named = any((doc.responsible_party or '').strip() or doc.professional_seal for doc in attachments)
-    if flag.value is True and not named:
+def _commercial_attachment(case: Case, doc) -> bool:
+    """An unsigned vendor or sales email is not professional evidence."""
+    fact = latest_fact(case, f'evidence.{doc.id}.file_ref')
+    quote = fact.source.quote if fact is not None and isinstance(fact.source.quote, str) else ''
+    seal = doc.professional_seal if isinstance(doc.professional_seal, str) else ''
+    return commercial_party(doc.responsible_party, doc.issuer, doc.title, quote, seal)
+
+
+def _status(case: Case, flag: PracticeOfEngineering, attachments) -> IssueStatus:
+    """None of these values is a sign-off or a compliance determination."""
+    if flag.value == 'unknown':
+        return 'open'
+    if flag.value is True and not professional_confirmed(case):
         return 'needs_professional'
-    if attachments and flag.value != 'unknown':
-        return 'addressed'
+    if any(not _commercial_attachment(case, doc) for doc in attachments):
+        return 'evidence_listed'
     return 'open'
 
 
@@ -232,6 +309,20 @@ def _lookup(codes: Codes, provision_id: str, division: str):
         return None
 
 
+def _routed(flag: PracticeOfEngineering, status: IssueStatus):
+    if status == 'needs_professional':
+        return 'professional'
+    return flag.routed_to
+
+
+def _with_review(case: Case, codes: Codes, issues: list[SectionDIssue]) -> list[SectionDIssue]:
+    reviews = human_reviews(case, codes)
+    return [issue.model_copy(update={
+        'human_review': reviews,
+        'routed_to': _routed(issue.practice_of_engineering, issue.status),
+    }) for issue in issues]
+
+
 def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
     """Read-only list. Does not write the case and does not invent a citation or a professional opinion."""
     flag = practice_of_engineering(case, codes)
@@ -239,12 +330,12 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
     recommended_fallback = CONFIDENCE_LADDER + (ALTERNATIVE_EVIDENCE_TYPES if alternative_path(case) else ())
 
     if not case.provisions:
-        return [SectionDIssue(
+        return _with_review(case, codes, [SectionDIssue(
             id='benchmark-unconfirmed', provision=None, question=(
                 'Confirm the Division B benchmark provisions before recommending performance evidence.'),
             at_stake='No confirmed benchmark is on the case. Recommend evidence only after a provision resolves in the code database.',
             recommended_types=recommended_fallback, practice_of_engineering=flag,
-            empty_process_fields=empty, status=_status(flag, ()))]
+            empty_process_fields=empty, status=_status(case, flag, ()))])
 
     known: list[str] = []
     unresolved: list[SectionDIssue] = []
@@ -256,13 +347,13 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
                 question='This entered reference was not found in the code database. Ask which Division B provision is the benchmark. No replacement article is suggested.',
                 at_stake='Recommend evidence only after the benchmark resolves in the code database.',
                 recommended_types=recommended_fallback, practice_of_engineering=flag,
-                empty_process_fields=empty, status=_status(flag, ())))
+                empty_process_fields=empty, status=_status(case, flag, ())))
         else:
             known.append(provision_id)
 
     issues = list(unresolved)
     if not known:
-        return issues
+        return _with_review(case, codes, issues)
     scoped = case.model_copy(update={'provisions': known})
     plan = section_d_plan(scoped, codes)
     for item in plan.items:
@@ -275,7 +366,7 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
                 objective=None, function=None,
                 at_stake='Recommend evidence only after the benchmark resolves in the code database.',
                 recommended_types=item.recommended_types, practice_of_engineering=flag,
-                empty_process_fields=empty, status=_status(flag, item.attachments)))
+                empty_process_fields=empty, status=_status(case, flag, item.attachments)))
             continue
         question = None
         if not (item.objective and item.function):
@@ -286,5 +377,58 @@ def section_d_issues(case: Case, codes: Codes) -> list[SectionDIssue]:
             question=question, objective=item.objective, function=item.function,
             at_stake=_at_stake(item),
             recommended_types=item.recommended_types, practice_of_engineering=flag,
-            empty_process_fields=empty, status=_status(flag, item.attachments)))
-    return issues
+            empty_process_fields=empty, status=_status(case, flag, item.attachments)))
+    return _with_review(case, codes, issues)
+
+
+def generic_fallback_on_dev(cases: list[dict], codes: Codes) -> int:
+    """Count fallback questions for dev cases as the issues route sees them.
+
+    Each case contributes its seed provision only. The route does not read the prose
+    and does not infer facts from it.
+    """
+    fired = 0
+    for case in cases:
+        seed = case.get('seed_provision')
+        provisions = [seed] if isinstance(seed, str) and seed else []
+        issues = section_d_issues(Case(provisions=provisions), codes)
+        if any(issue.practice_of_engineering.question == GENERIC_FALLBACK_QUESTION for issue in issues):
+            fired += 1
+    log.info('generic fallback practice question fired %s times on %s dev cases', fired, len(cases))
+    return fired
+
+
+def _cited(issue: SectionDIssue) -> list[tuple[str, str, str]]:
+    rows: list[tuple[str, str, str]] = []
+    if issue.provision and issue.provision.citation:
+        rows.append((issue.provision.division, issue.provision.provision_id, issue.provision.citation))
+    flag = issue.practice_of_engineering
+    if flag.rule and flag.division and flag.citation:
+        rows.append((flag.division, flag.rule, flag.citation))
+    for field in issue.empty_process_fields:
+        rule = _PROCESS_RULE_IDS.get(field.id)
+        if rule and field.citation:
+            rows.append((rule[0], rule[1], field.citation))
+    from .human_review import REVIEW_PROVISIONS
+    for review in issue.human_review:
+        for division, provision_id in REVIEW_PROVISIONS:
+            if provision_id in review.cite:
+                rows.append((division, provision_id, review.cite))
+    return rows
+
+
+def citation_resolution(cases: list[dict], codes: Codes) -> tuple[int, int]:
+    """Unique cited provisions from one issues-endpoint pass, and how many still resolve."""
+    seen: dict[tuple[str, str], str] = {}
+    for case in cases:
+        seed = case.get('seed_provision')
+        provisions = [seed] if isinstance(seed, str) and seed else []
+        for issue in section_d_issues(Case(provisions=provisions), codes):
+            for division, provision_id, citation in _cited(issue):
+                seen.setdefault((division, provision_id), citation)
+    resolved = 0
+    for (division, provision_id), citation in seen.items():
+        record = _lookup(codes, provision_id, division)
+        if record and record.get('citation') == citation:
+            resolved += 1
+    return resolved, len(seen)

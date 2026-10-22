@@ -14,9 +14,14 @@ from pathlib import Path
 from codedb import validate_text
 
 from .codes import Codes
+from .jurisdictions import notices_for
 from .models import INTENT_LABEL, Case, Gap as CaseGap
 from .process_fields import confirmed_value, latest_fact, process_fields
-from .professional import ProfessionalResult, professional_involvement
+from .professional import (
+    NOT_ENGAGED_ITEM, OFFICER_PROFESSIONAL_GAP, PRESCRIPTIVE_CONTRADICTION, ProfessionalResult,
+    authentication_metadata_usable, professional_authentication_confirmed, professional_confirmed,
+    professional_involvement, unresolved_item,
+)
 from .section_c import section_c_rows
 from .section_d import SupportingDocument, section_d_plan, supporting_documents
 
@@ -63,6 +68,101 @@ def _edition_crosswalks() -> tuple[dict, ...]:
                  and 'successor' in a.get('status', ''))
 
 
+def professional_involvement_gaps(case: Case, codes: Codes, process, *,
+                                  professional: ProfessionalResult | None = None,
+                                  documents: list[SupportingDocument] | None = None) -> list[Gap]:
+    """Administrative professional gap. An alternative case does not clear by a prescriptive Yes."""
+    gaps: list[Gap] = []
+
+    def add(rule, section, field, missing, fix_hint, citation=None, severity='blocking'):
+        gaps.append(Gap(id=f'{rule}:{field}', severity=severity, section=section, field=field,
+                        message=f'Your application appears to be missing {missing}', fix_hint=fix_hint, citation=citation))
+
+    professional = professional or professional_involvement(case, codes)
+    if professional.prescriptive_contradiction:
+        gaps.append(Gap(
+            id='professional:prescriptive_route_confirmed', severity='warning', section='D',
+            field='prescriptive_route_confirmed', message=PRESCRIPTIVE_CONTRADICTION,
+            fix_hint='Leave the prescriptive answer unset. It does not close professional involvement.',
+            citation=None, routed_to='officer'))
+    # Source resolution is independent of whether a professional has been engaged.
+    for reason in professional.reasons:
+        if reason.source_unresolved:
+            gaps.append(Gap(
+                id=f'professional:source_lookup:{reason.code}', severity='blocking', section='D',
+                field='professional_source', message=reason.message, fix_hint=reason.message,
+                citation=None, routed_to='officer'))
+    # An honest "no professional engaged yet" does not invent a number. The blocking
+    # name, qualifications, and seal gaps become one officer-routed warning.
+    if professional.professional_status == 'not_engaged' and not professional_confirmed(case):
+        gaps.append(Gap(
+            id='professional:not_engaged', severity='warning', section='D',
+            field='professional_requirement', message=NOT_ENGAGED_ITEM,
+            fix_hint='The officer decides whether a registered professional is required. No registration number has been entered.',
+            citation=None, routed_to='officer'))
+        return gaps
+    required = professional.required == 'yes' or confirmed_value(case, 'engineering_required') in ('yes', True)
+    if required:
+        citation = next((r.citation for r in professional.reasons if r.required == 'yes'), codes.citation('2.4.1.1.(3)', 'C'))
+        if not professional_confirmed(case):
+            gaps.append(Gap(
+                id='D12:professional_confirmation', severity='blocking', section='D',
+                field='professional_confirmation',
+                message='Your application appears to be missing an applicant-confirmed registered professional for this scope.',
+                fix_hint='Confirm their engineer or architect role and registration number or seal. File metadata alone does not confirm this.',
+                citation=citation, routed_to='professional'))
+        if _missing(confirmed_value(case, 'professional_name', 'responsible_professional', 'professional.name')):
+            add('D12', 'D', 'responsible_professional', 'a named registered professional required for this work.',
+                'Ask who takes responsibility, their discipline and scope, and obtain their own authenticated work.', citation)
+        qualifications = next((item.answer for item in process if item.id == 'qualifications'), None)
+        if qualifications is None and _missing(confirmed_value(case, 'professional.qualifications', 'professional_qualifications')):
+            add('D12', 'D', 'professional_qualifications', 'the qualifications of the responsible professional.',
+                'Request their qualifications, experience and background; do not draft them.', codes.citation('2.3.1.1.(4)', 'C'))
+        docs = supporting_documents(case) if documents is None else documents
+        if (not professional_authentication_confirmed(case)
+                and not any(seal_is_professional_evidence(doc, quote=_file_quote(case, doc)) for doc in docs)):
+            add('D12', 'D', 'professional_authentication', 'authentication information for the required professional work.',
+                'Request the responsible professional’s authenticated document; authenticity and scope need human review.',
+                codes.citation('2.4.1.1.(5)', 'C'))
+    elif professional.involvement == 'professional_involved':
+        pass
+    elif professional.applicant_sourced or professional.not_sure_fields:
+        gaps.append(Gap(
+            id='professional:professional_requirement', severity='blocking', section='D',
+            field='professional_requirement', message=OFFICER_PROFESSIONAL_GAP,
+            fix_hint='The officer decides whether a registered professional is required. An applicant yes or no does not close this.',
+            citation=next((r.citation for r in professional.reasons if r.required == 'depends'), None),
+            routed_to='officer'))
+    elif professional.required == 'depends' or professional.involvement == 'unresolved':
+        line = next((reason.message for reason in professional.reasons if reason.required == 'depends'), '')
+        if not line:
+            what = professional.questions[0] if professional.questions else 'Whether a registered professional is required'
+            line = unresolved_item(what, professional.routed_to)
+        gaps.append(Gap(
+            id='professional:professional_requirement', severity='blocking', section='D',
+            field='professional_requirement',
+            message=line,
+            fix_hint=line,
+            citation=next((r.citation for r in professional.reasons if r.required == 'depends'), None),
+            routed_to=professional.routed_to))
+    return gaps
+
+
+def _file_quote(case: Case, doc: SupportingDocument) -> str:
+    fact = latest_fact(case, f'evidence.{doc.id}.file_ref')
+    if fact is None or not isinstance(fact.source.quote, str):
+        return ''
+    return fact.source.quote
+
+
+def seal_is_professional_evidence(doc: SupportingDocument, *, quote: str = '') -> bool:
+    """A seal string on an unsigned vendor or sales email does not authenticate the work."""
+    seal = doc.professional_seal.strip() if isinstance(doc.professional_seal, str) else ''
+    if not seal:
+        return False
+    return authentication_metadata_usable(doc.responsible_party, doc.issuer, doc.title, quote, seal)
+
+
 def check_completeness(case: Case, codes: Codes, *,
                        professional: ProfessionalResult | None = None,
                        documents: list[SupportingDocument] | None = None) -> list[Gap]:
@@ -102,7 +202,8 @@ def check_completeness(case: Case, codes: Codes, *,
     ):
         if (latest_fact(case, *signatures, *dates) is not None) and _missing(confirmed_value(case, *dates)):
             add('D02', 'A', name, f'the {name.replace("_", " ")}.', 'Ask the signatory to supply the signature date.')
-    if case.jurisdiction is None:
+    if (case.jurisdiction is None or not case.jurisdiction.id.strip()
+            or not case.jurisdiction.name.strip()):
         add('admin', 'B', 'jurisdiction', 'the reviewing jurisdiction.', 'Ask which authority will receive the application.')
 
     process = process_fields(case, codes)
@@ -195,26 +296,7 @@ def check_completeness(case: Case, codes: Codes, *,
             add('D08', 'C', field + '.intent_label', 'the explanatory label for the national 2020 intent statement; it is not Alberta law.',
                 f'Use the label: {INTENT_LABEL}. Keep the Alberta code benchmark separate.')
 
-    professional = professional or professional_involvement(case, codes)
-    required = professional.required == 'yes' or confirmed_value(case, 'engineering_required') in ('yes', True)
-    if required:
-        citation = next((r.citation for r in professional.reasons if r.required == 'yes'), codes.citation('2.4.1.1.(3)', 'C'))
-        if _missing(confirmed_value(case, 'professional_name', 'responsible_professional', 'professional.name')):
-            add('D12', 'D', 'responsible_professional', 'a named registered professional required for this work.',
-                'Ask who takes responsibility, their discipline and scope, and obtain their own authenticated work.', citation)
-        qualifications = next((f.answer for f in process if f.id == 'qualifications'), None)
-        if qualifications is None and _missing(confirmed_value(case, 'professional.qualifications', 'professional_qualifications')):
-            add('D12', 'D', 'professional_qualifications', 'the qualifications of the responsible professional.',
-                'Request their qualifications, experience and background; do not draft them.', codes.citation('2.3.1.1.(4)', 'C'))
-        docs = supporting_documents(case) if documents is None else documents
-        if (_missing(confirmed_value(case, 'professional_seal', 'professional.seal'))
-                and not any(d.professional_seal and d.professional_seal.strip() for d in docs)):
-            add('D12', 'D', 'professional_authentication', 'authentication information for the required professional work.',
-                'Request the responsible professional’s authenticated document; authenticity and scope need human review.',
-                codes.citation('2.4.1.1.(5)', 'C'))
-    elif professional.required == 'depends':
-        add('professional', 'D', 'professional_requirement', 'facts needed to resolve professional involvement.',
-            ' '.join(professional.questions), next((r.citation for r in professional.reasons if r.required == 'depends'), None))
+    gaps.extend(professional_involvement_gaps(case, codes, process, professional=professional, documents=documents))
 
     docs = supporting_documents(case) if documents is None else documents
     for doc in docs:
@@ -229,9 +311,9 @@ def check_completeness(case: Case, codes: Codes, *,
                 'Request the issue/revision date so the reviewer can identify the version supplied.', severity='warning')
     attached_ids = {d.id for d in docs}
     for evidence in case.evidence:
-        if evidence.status == 'provided' and evidence.id not in attached_ids:
+        if evidence.status == 'evidence_listed' and evidence.id not in attached_ids:
             add('attachment', 'D', f'evidence.{evidence.id}.file_ref', f'a file reference for the supporting document “{evidence.description}”.',
-                'Attach the file and retain its source; a provided flag is not an attachment.')
+                'Attach the file and retain its source; an evidence_listed status is not an attachment.')
             if _missing(confirmed_value(case, f'evidence.{evidence.id}.responsible_party')):
                 add('D13', 'D', f'evidence.{evidence.id}.responsible_party', f'a responsible person for supporting document “{evidence.description}”.',
                     'Ask for the author, issuer or responsible organisation and their scope.')
@@ -242,8 +324,12 @@ def check_completeness(case: Case, codes: Codes, *,
             if item.objective is None:
                 add('evidence_scope', 'D', f'evidence.{item.id}.scope', f'an identified performance benchmark for {item.provision_id}.',
                     'The table has no row; ask the responsible designer which substantive benchmark applies.', item.citation, 'warning')
-            elif item.status == 'not provided':
+            elif item.status == 'needed':
                 add('evidence', 'D', f'evidence.{item.id}', f'supporting evidence for {item.provision_id}, {item.function}–{item.objective}.',
                     item.performance_issue + ' Select appropriate evidence types with the responsible designer; not every ladder rung is required.',
                     item.citation)
+    # Information from the case's jurisdiction pack (for example a local form). Severity info never blocks.
+    for notice in notices_for(case, 'gaps'):
+        gaps.append(Gap(id=f'info:{notice.id}', severity='info', section=notice.section, field=notice.id,
+                        message=notice.message, fix_hint=notice.fix_hint))
     return gaps

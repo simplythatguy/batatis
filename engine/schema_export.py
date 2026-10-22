@@ -16,11 +16,29 @@ from pathlib import Path
 from pydantic.json_schema import GenerateJsonSchema, models_json_schema
 
 from .api import NewCase, SectionCRequest
+from .code_library import CodeTOC, ProvisionContext
 from .models import Case, Fact, SectionCRow
+from .account_models import UserResult, MessagesResult
+from .routes_auth import SignupRequest, LoginRequest, OnboardingRequest
+from .routes_review import (NotificationsResult, ApplicationsResult, QueueResult, ClaimResult, ClaimRequest,
+                            DecisionRequest, MessageRequest)
+from .routes_assist import AssistRequest, AssistResult
+from .routes_intake import AnswersRequest, IntakeRequest, IntakeResult, PlanRequest, ScopeRequest
+from .identify.http_models import (BenchmarkConfirmRequest, IdentifyConfirmRequest, IdentifyDecisionRequest,
+                                   IdentifyDecisionResponse, IdentifyRequest)
+from .models_review import InformationRequestEdit, PackageReviewIndex, ReviewSession, SentInformationRequests
+from .models_jurisdictions import JurisdictionDetail, JurisdictionsResult
+from .routes_jurisdictions import CaseJurisdictionPack
 
 OUT = Path(__file__).resolve().parent.parent / 'web' / 'src' / 'api' / 'engine.schema.json'
-RESPONSES = (Case, SectionCRow)                     # what the engine returns: every field present
-REQUESTS = (Fact, NewCase, SectionCRequest)           # what the engine accepts: defaulted fields optional
+RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesResult, ApplicationsResult,
+             QueueResult, ClaimResult, AssistResult, NotificationsResult, IdentifyDecisionResponse,
+             ReviewSession, PackageReviewIndex, SentInformationRequests,
+             JurisdictionsResult, JurisdictionDetail, CaseJurisdictionPack, IntakeResult)  # responses carry every field
+REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
+            ClaimRequest, DecisionRequest, MessageRequest, AssistRequest, InformationRequestEdit,
+            IntakeRequest, AnswersRequest, ScopeRequest, PlanRequest,
+            IdentifyRequest, IdentifyDecisionRequest, IdentifyConfirmRequest, BenchmarkConfirmRequest)  # defaulted fields optional
 
 
 class _ResponsesCarryDefaults(GenerateJsonSchema):

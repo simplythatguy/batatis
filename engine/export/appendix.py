@@ -3,6 +3,7 @@
 Sections: X (form values too long for their cell), C (one entry per Section C row: citation, attribution
 pairs with their Division A text and table source, provision text, NBC 2020 intent statements labelled as
 explanatory only), D (every supporting document) and, for drafts, the open items that block a final export.
+NRC prose in section C is the full provision text, with its citation and the NRC publication link.
 """
 from __future__ import annotations
 
@@ -19,9 +20,11 @@ from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
 from reportlab.platypus import KeepTogether, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
+from ..copyright import NRC_PUBLICATION_URL
+from ..jurisdictions import notices_for
 from ..models import INTENT_LABEL, Case, SectionCRow
 from ..process_fields import process_fields
-from ..section_d import section_d_plan, supporting_documents
+from ..section_d import section_d_plan, supporting_documents, text_evidence
 from .text import faithful_font_text
 
 INK = colors.HexColor('#1f2328')
@@ -71,6 +74,19 @@ def _table(header: list[str], rows: list[list[str]], widths: list[float]) -> Tab
     return t
 
 
+def _nrc(text, citation: str) -> str:
+    """Full code text, its citation, and the NRC publication link."""
+    if not text:
+        return ''
+    body = str(text)
+    parts = [body]
+    if citation and citation not in body:
+        parts.append(citation)
+    if NRC_PUBLICATION_URL not in body:
+        parts.append(NRC_PUBLICATION_URL)
+    return ' '.join(parts)
+
+
 def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
     out = [Paragraph(f'C-{k}&nbsp;&nbsp;{escape(row.provision_id)}', H3),
            _kv('Citation', row.citation),
@@ -81,10 +97,11 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
     out.append(_kv('Attribution status', status))
     if row.pairs:
         out.append(_table(['Function', 'Objective', 'Source'],
-                          [[f'{p.function} {p.function_text or ""}'.strip(), f'{p.objective} {p.objective_text or ""}'.strip(),
+                          [[f'{p.function} {_nrc(p.function_text, row.citation)}'.strip(),
+                            f'{p.objective} {_nrc(p.objective_text, row.citation)}'.strip(),
                             f'{p.table}, NBC(AE) 2023 PDF p. {p.pdf_page}'
                             + (f'; clauses {", ".join(p.clauses)}' if p.clauses else '')
-                            + (f'; {p.application_note}' if p.application_note else '')]
+                            + (f'; {_nrc(p.application_note, row.citation)}' if p.application_note else '')]
                            for p in row.pairs], [2.3 * inch, 2.3 * inch, 2.4 * inch]))
     else:
         out.append(_p('The NBC(AE) 2023 attribution table has no row for this provision, so no objective or '
@@ -93,7 +110,7 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
         rec = codes.provision(row.provision_id, 'B')
         if rec and rec.get('text'):
             out.append(_kv('Provision text', f'Article {rec["article"]} {rec["article_title"] or ""}'.strip()))
-            out.append(_p(_reflow(rec['text']), CODE))
+            out.append(_p(_nrc(_reflow(rec['text']), row.citation), CODE))
     out.append(Paragraph(f'<b>{escape(INTENT_LABEL)}</b>', BODY))
     if row.differs:
         out.append(_p('The national 2020 intent statement is attributed differently from NBC(AE) 2023.'
@@ -105,17 +122,22 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool) -> list:
         head = f'{blk.provision_id}' + (f', objective {blk.objective}' if blk.objective else '') \
             + (f', attribution {"; ".join(blk.brackets)}' if blk.brackets else '') + f' (intent PDF p. {blk.pdf_page})'
         out.append(_p(head, SMALL))
-        out += [_p(t, CODE) for t in blk.intents]
-        out += [_p(f'Note: {n}', SMALL) for n in blk.notes]
+        out += [_p(_nrc(t, row.citation), CODE) for t in blk.intents]
+        out += [_p(f'Note: {_nrc(n, row.citation)}', SMALL) for n in blk.notes]
     return out
 
 
-def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, open_items: list[str]) -> bytes:
+def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, open_items: list[str],
+                   package_notes: list[str] | None = None) -> bytes:
     story: list = [Paragraph('Appendix to the Variance Form for Proposed Alternative Solution', H1),
                    _p(f'Case {case.title or ""} ({case.id}). Generated {date.today().isoformat()} by Batatis with '
                       f'field map {fmap["version"]}. Code references are to the National Building Code - 2023 '
                       'Alberta Edition, 2nd printing (NBC(AE) 2023). This appendix lists what the application '
                       'cites; it does not state that the proposed design complies.', SMALL)]
+
+    # Draft and final both carry the pack's notices. They inform; they never block an export.
+    for notice in notices_for(case, 'export_appendix'):
+        story += [Paragraph(escape(notice.heading), H2), _p(notice.message)]
 
     if open_items:
         story += [Paragraph('Open items (draft export)', H2),
@@ -124,6 +146,11 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
         story += [_p(f'- {r}') for r in open_items]
         story.append(_p('Section C below was rebuilt from verified confirmed provisions. Unverified or changed '
                         'source text has been excluded; rebuilding does not resolve the listed open items.', SMALL))
+
+    if package_notes:
+        story += [Paragraph('Open items', H2),
+                  _p('These items remain open. The officer decides them. This export does not close them.')]
+        story += [_p(f'- {note}') for note in package_notes]
 
     if plan.overflow:
         story.append(Paragraph('X. Form values continued', H2))
@@ -157,12 +184,28 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
         story += _row_story(k, row, codes, k <= plan.rows_in_form)
 
     docs = supporting_documents(case)
+    attached = {doc.id for doc in docs}
+    # A text listing is not a file. It is not reviewed, and it is not a file_ref document.
+    # Typed listings use the form's own helper and numbering (files first, then typed text),
+    # so every form row and every "see Appendix D" overflow reference has its entry here.
+    typed = text_evidence(case)
+    typed_titles = {title for title, _ in typed}
+    text_items = [item for item in case.evidence if item.kind == 'text' and item.id not in attached
+                  and item.description.strip() not in typed_titles]
     story.append(Paragraph('D. Supporting documentation', H2))
-    if docs:
+    if docs or typed:
+        on_form = lambda n: f'row {n}' if n <= plan.docs_in_form else 'appendix only'  # noqa: E731
         story.append(_table(['Ref', 'Name of supporting documentation', 'Responsible', 'On the form'],
-                            [[f'D-{n}', d.title, d.responsible_party or '(not given)', f'row {n}' if n <= plan.docs_in_form else 'appendix only']
-                             for n, d in enumerate(docs, start=1)],
+                            [[f'D-{n}', d.title, d.responsible_party or '(not given)', on_form(n)]
+                             for n, d in enumerate(docs, start=1)]
+                            + [[f'D-{n}', title, who or '(not given)', f'{on_form(n)}; no file']
+                               for n, (title, who) in enumerate(typed, start=len(docs) + 1)],
                             [0.5 * inch, 3.1 * inch, 2.4 * inch, 1.0 * inch]))
+    if typed:
+        first, last = len(docs) + 1, len(docs) + len(typed)
+        refs = f'D-{first}' if first == last else f'D-{first} to D-{last}'
+        story.append(_p(f'{refs}: listed by applicant, no file attached, not reviewed.', SMALL))
+    if docs:
         evidence = section_d_plan(case, codes, docs) if codes is not None else None
         labels = {item.id: f'{item.provision_id}, {item.function or "no table function"} / '
                            f'{item.objective or "no table objective"}' for item in evidence.items} if evidence else {}
@@ -177,7 +220,12 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
             story.append(KeepTogether(block))
         story.append(_p('An attachment and its links record what the applicant supplied. The responsible designer '
                         'and authority must review its authenticity, scope, limitations and technical adequacy.', SMALL))
-    else:
+    for item in text_items:
+        story.append(KeepTogether([
+            Paragraph(escape(item.description), H3),
+            _p('listed by applicant, no file attached, not reviewed'),
+        ]))
+    if not docs and not typed and not text_items:
         story.append(_p('No supporting documents listed.'))
 
     buf = io.BytesIO()
