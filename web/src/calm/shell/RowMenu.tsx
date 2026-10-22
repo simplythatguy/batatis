@@ -47,9 +47,11 @@ export function RowMenu({ label, actions, anchor, trigger, container, onClose }:
     const el = ref.current;
     if (!el) return;
     const box = container.getBoundingClientRect();
-    const p = placeMenu(anchor, { width: el.offsetWidth, height: el.scrollHeight }, box, { width: window.innerWidth, height: window.innerHeight });
+    // Measured boxes are in zoomed pixels and styles are not (CSS zoom); convert between the two.
+    const k = box.width ? container.offsetWidth / box.width : 1;
+    const p = placeMenu(anchor, { width: el.offsetWidth / k, height: el.scrollHeight / k }, box, { width: window.innerWidth, height: window.innerHeight });
     // Positioned inside the list, so its coordinates are the list's.
-    setPlace({ ...p, left: p.left - box.left, top: p.top - box.top });
+    setPlace({ left: (p.left - box.left) * k, top: (p.top - box.top) * k, width: p.width * k, maxHeight: p.maxHeight * k });
   }, [anchor, container]);
 
   useEffect(() => {

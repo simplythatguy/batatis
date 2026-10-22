@@ -23,7 +23,11 @@ export function RowPreview({ id, app, row, sidebar, onPointerEnter, onPointerLea
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    setPos(placePreview(row.getBoundingClientRect(), sidebar.getBoundingClientRect(), { width: el.offsetWidth, height: el.offsetHeight }, { width: window.innerWidth, height: window.innerHeight }));
+    const box = sidebar.getBoundingClientRect();
+    // Zoomed pixels to style pixels (CSS zoom), as in RowMenu.
+    const k = box.width ? sidebar.offsetWidth / box.width : 1;
+    const p = placePreview(row.getBoundingClientRect(), box, { width: el.offsetWidth / k, height: el.offsetHeight / k }, { width: window.innerWidth, height: window.innerHeight });
+    setPos(p && { left: p.left * k, top: p.top * k });
   }, [app, row, sidebar]);
   if (pos === null) return null;
   return createPortal(
