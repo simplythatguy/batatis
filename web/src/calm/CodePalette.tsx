@@ -169,7 +169,7 @@ export function CodePalette({ open, onClose }: { open: boolean; onClose: () => v
       <div className="cf-palette-foot cf-faint cf-small">
         <span><span className="cf-kbd is-dark">↑</span> <span className="cf-kbd is-dark">↓</span> move</span>
         <span><span className="cf-kbd is-dark">↵</span> open in the library</span>
-        <span>Rings are Jev estimates, not compliance.</span>
+        <span>Rings are Batatis estimates, not compliance.</span>
       </div>
     </Modal>
   );

@@ -2,12 +2,6 @@
 import { useId, useState, type ReactNode } from "react";
 import { AccountsError, type ApplicantKind, type AuthorityKey, type Role } from "../../api/accounts";
 import { PRIVACY_NOTICE } from "../../privacy";
-
-/** The same notice the engine shows; its "(https://…)" becomes a link with readable text. */
-const LINK = /\s*\((https?:\/\/[^)\s]+)\)/.exec(PRIVACY_NOTICE);
-const NOTICE = LINK
-  ? { before: PRIVACY_NOTICE.slice(0, LINK.index), url: LINK[1], after: PRIVACY_NOTICE.slice(LINK.index + LINK[0].length) }
-  : { before: PRIVACY_NOTICE, url: null, after: "" };
 import { useAccount } from "../account";
 import { authorityName } from "../applications";
 import { PageHead, clockText, useCountdown } from "../auth/bits";
@@ -145,11 +139,7 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
 
         <section className="ac-section" aria-labelledby="ac-s-data">
           <h2 id="ac-s-data" className="ac-section-title">How your data is handled</h2>
-          <p className="ac-prose">
-            {NOTICE.before}
-            {NOTICE.url && <> (<a className="cf-inline-link" href={NOTICE.url} target="_blank" rel="noopener noreferrer">OpenAI API data policy<span className="cf-sr">, opens in a new tab</span></a>)</>}
-            {NOTICE.after}
-          </p>
+          <p className="ac-prose">{PRIVACY_NOTICE}</p>
         </section>
 
         {user && (

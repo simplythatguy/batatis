@@ -11,9 +11,18 @@ from .identify import Identification, Judge
 from .identify.jevkit import keystore
 from .identify.screen import JEV_PROVIDER
 from .models import Case
+from .public_names import MODEL_VERSIONS as PUBLIC_MODEL_VERSIONS
 from .relevance_models import RelevanceBands, RelevanceRecord
 
 BANDS_FILE = Path(__file__).with_name('identify') / 'relevance_bands.json'
+
+
+def public_model(pin: str) -> str:
+    """The version clients see for a scoring model pin. An unmapped pin raises; it is never passed through."""
+    try:
+        return PUBLIC_MODEL_VERSIONS[pin]
+    except KeyError:
+        raise ValueError('the scoring model has no public version') from None
 
 
 class RelevanceUnavailable(RuntimeError):
@@ -79,6 +88,6 @@ def display_probabilities(scores: dict[str, float], rerank: dict[str, float]) ->
 def relevance_record(result: Identification, text: str, scored_at: str) -> RelevanceRecord:
     rerank = dict(result.ranked)
     return RelevanceRecord(
-        model=result.model, scored_at=scored_at, description_sha256=description_hash(text),
+        model=public_model(result.model), scored_at=scored_at, description_sha256=description_hash(text),
         scores=result.screen, rerank=rerank, display=display_probabilities(result.screen, rerank),
         bands=RelevanceBands.model_validate_json(BANDS_FILE.read_text()))

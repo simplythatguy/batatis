@@ -1,5 +1,5 @@
 /**
- * Jev relevance scores for the current engine case, shared by every ring.
+ * Relevance scores for the current engine case, shared by every ring.
  * GET when the library or palette opens; POST only on the explicit "Score relevance" button
  * (it costs money). Never rescored automatically.
  */

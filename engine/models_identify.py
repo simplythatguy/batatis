@@ -9,7 +9,10 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationInfo, field_validator
+
+from .public_names import (UNAVAILABLE, VERIFIER_UNAVAILABLE, public_config, public_label, public_method,
+                           public_model_id, public_ranker, public_spend, public_text)
 
 Decision = Literal['yes', 'no', 'not_sure']
 IdentifyMode = Literal['live', 'fake', 'bm25_fallback']
@@ -113,6 +116,16 @@ class StageRecord(BaseModel):
     errors: int = 0
     detail: str | None = None
 
+    @field_validator('method')
+    @classmethod
+    def _method_names_no_service(cls, value):
+        return public_method(value)
+
+    @field_validator('model')
+    @classmethod
+    def _model_is_an_opaque_version(cls, value):
+        return public_model_id(value)
+
 
 class IdentifyTrace(BaseModel):
     config: dict
@@ -129,6 +142,33 @@ class IdentifyTrace(BaseModel):
     spend: dict = {}
     usd: float = 0
     seconds: float = 0
+
+    # What a client reads about how the run went names no provider, model pin or credential (engine/public_names.py).
+    # The same checks clean a result stored before they existed when it loads.
+    @field_validator('config')
+    @classmethod
+    def _config_names_no_service(cls, value):
+        return public_config(value)
+
+    @field_validator('ranker')
+    @classmethod
+    def _ranker_names_no_service(cls, value):
+        return public_ranker(value)
+
+    @field_validator('fallback_reason')
+    @classmethod
+    def _reason_names_no_service(cls, value):
+        return public_text(value, UNAVAILABLE)
+
+    @field_validator('verifier')
+    @classmethod
+    def _verifier_state_names_no_service(cls, value):
+        return public_text(value, VERIFIER_UNAVAILABLE)
+
+    @field_validator('spend')
+    @classmethod
+    def _spend_is_by_role(cls, value):
+        return public_spend(value)
 
 
 class ArticleDecision(BaseModel):
@@ -162,3 +202,13 @@ class IdentifyResult(BaseModel):
     cached: bool = False
     decisions: dict[str, ArticleDecision] = Field(default_factory=dict)
     trace: IdentifyTrace
+
+    @field_validator('label')
+    @classmethod
+    def _label_names_no_service(cls, value, info: ValidationInfo):
+        return public_label(value, info.data.get('mode'))
+
+    @field_validator('model_ids')
+    @classmethod
+    def _model_ids_are_opaque_versions(cls, value):
+        return {stage: public_model_id(pin) for stage, pin in value.items()}

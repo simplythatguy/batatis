@@ -955,7 +955,7 @@ export interface RelevanceRecord {
   bands: RelevanceBands;
   description_sha256: string;
   display: Record<string, number>;
-  model: "jev-1.13.0";
+  model: "relevance-1";
   rerank: Record<string, number>;
   scored_at: string;
   scores: Record<string, number>;

@@ -1,5 +1,5 @@
 /**
- * Jev relevance rings: pure band mapping, labels and tree aggregation.
+ * Relevance rings: pure band mapping, labels and tree aggregation.
  * A ring is an estimate from the applicant's description. It is never a compliance decision and
  * never the Section C list (Section C is only what the applicant confirmed).
  */
@@ -27,7 +27,7 @@ export function cutoffsOf(r: Pick<RelevanceResult, "bands"> | null | undefined):
   return { ...DEFAULT_BANDS, fallback: true };
 }
 
-/** Jev reports hundredths; bands compare round(p, 2). */
+/** The engine reports hundredths; bands compare round(p, 2). */
 const hundredths = (p: number) => Math.round(p * 100) / 100;
 
 /** p is a probability in [0, 1]. Missing means the article was not scored. */
@@ -75,16 +75,16 @@ export function strongestOf(ids: Iterable<string>, display: Record<string, numbe
 
 export const BAND_LABEL: Record<Band, string> = {
   unscored: "Not scored",
-  zero: "No Jev score",
+  zero: "No relevance score",
   low: "Unlikely to apply",
   mid: "Might apply · check this",
   high: "Likely applies · address this",
 };
 
-/** Short form for aria-labels: "Jev relevance 34%: might apply". */
+/** Short form for aria-labels: "Relevance estimate 34%: might apply". */
 export const BAND_SHORT: Record<Band, string> = {
   unscored: "not scored",
-  zero: "no Jev score",
+  zero: "no relevance score",
   low: "unlikely to apply",
   mid: "might apply",
   high: "likely applies",
