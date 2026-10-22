@@ -54,7 +54,7 @@ def multipart(files):
     return {'files': None} if not files else [('files', (name, data, 'application/pdf')) for name, data in files]
 
 
-@pytest.mark.parametrize('status', ['draft', 'submitted', 'in_review', 'returned', 'accepted'])
+@pytest.mark.parametrize('status', ['draft', 'submitted', 'in_review', 'returned', 'accepted', 'refused'])
 def test_read_access_matrix(scene, status):
     store, clients, _ = scene
     case = owned(scene, status)
@@ -196,16 +196,29 @@ def test_upload_input_errors(scene):
     assert clients['reviewer'].post('/package-review', files=big).status_code == 413
 
 
-def test_close_out_after_decision_with_record_package(scene):
+@pytest.mark.parametrize('outcome', ['accept', 'refuse'])
+def test_close_out_after_decision_with_record_package(scene, outcome):
     store, clients, _ = scene
     case = claimed(scene)
-    assert clients['reviewer'].post(f'/review/{case.id}/package-review').status_code == 201
+    reviewed = clients['reviewer'].post(f'/review/{case.id}/package-review')
+    assert reviewed.status_code == 201
+    source_version = reviewed.json()['case_version']
     assert clients['reviewer'].get(f'/review/{case.id}/close-out').status_code == 404   # no decision yet
-    decided = clients['reviewer'].post(f'/review/{case.id}/decision', json={'outcome': 'accept'})
+    decided = clients['reviewer'].post(f'/review/{case.id}/decision',
+                                      json={'outcome': outcome, 'message': 'Officer recorded the written reason.'})
     assert decided.status_code == 200, decided.text
     close = clients['second'].get(f'/review/{case.id}/close-out')
     assert close.status_code == 200, close.text
     body = close.json()
+    assert body['outcome'] == outcome
+    assert body['decided_at'] == decided.json()['decision']['at']
+    decided_case = store.get(case.id).model_dump()
+    # Decision/close-out writes never rewrite the review's saved source version or applicant evidence.
+    for path, payload in [('/package-review', None),
+                          ('/package-review/1/information-request', {'items': []}),
+                          ('/package-review/1/information-request/send', None)]:
+        method = 'put' if payload is not None else 'post'
+        assert clients['reviewer'].request(method, f'/review/{case.id}' + path, json=payload).status_code == 409
     from datetime import datetime, timedelta, timezone
     decided_at = datetime.fromisoformat(body['decided_at']).date()
     assert body['due_date'] == (decided_at + timedelta(days=10)).isoformat()
@@ -219,12 +232,16 @@ def test_close_out_after_decision_with_record_package(scene):
     assert 'never' not in body['notice'] or 'does not send' in body['notice']
     index = clients['reviewer'].get(f'/review/{case.id}/package-review').json()
     assert index['close_out']['due_date'] == body['due_date']
+    assert index['close_out']['outcome'] == outcome
+    assert index['latest']['case_version'] == source_version
     for name in ['owner', 'other', 'foreign', 'anonymous']:
         assert clients[name].post(f'/review/{case.id}/close-out/sent').status_code == 404, name
     assert clients['second'].post(f'/review/{case.id}/close-out/sent').status_code == 409
     sent = clients['reviewer'].post(f'/review/{case.id}/close-out/sent')
     assert sent.status_code == 200 and sent.json()['sent'] and sent.json()['sent_by_name'] == 'Reviewer'
     assert clients['reviewer'].post(f'/review/{case.id}/close-out/sent').status_code == 409
+    assert clients['second'].get(f'/review/{case.id}/close-out').json()['sent']
+    assert store.get(case.id).model_dump() == decided_case
     store.delete(case.id)
 
 

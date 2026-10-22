@@ -227,7 +227,7 @@ class CloseOut(BaseModel):
     """Close-out after a final decision: the copy goes to the Council within 10 days of the decision."""
     model_config = ConfigDict(extra='forbid')
     case_id: str
-    outcome: str
+    outcome: Literal['accept', 'refuse']
     decided_at: str
     due_date: str                   # ISO date, 10 days after the decision
     days_remaining: int             # negative when overdue
