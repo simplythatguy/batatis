@@ -304,7 +304,7 @@ export function InfoRequest({
       {!sentAlready && !editable && isCase && (terminalStatus || latest) && (
         <p className="pr-fine pr-admin">{terminalStatus
           ? `This application was ${terminalStatus}. This request is a historical, read-only record and can’t be edited or sent.`
-          : "Start reviewing (or take over) to edit and send this request."}</p>
+          : "Pick up this application (or take over) to edit and send this request."}</p>
       )}
 
       <Modal open={confirm} onClose={() => setConfirm(false)} labelledBy={`${id}-ct`} className="ac-return">

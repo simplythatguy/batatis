@@ -62,7 +62,7 @@ test("only the current claimer decides; blocking gaps allow return only", () => 
   assert.equal(decisionGate(rows[2], ME, 2).canAccept, false);
   assert.equal(decisionGate(rows[2], ME, 2).canReturn, true);
   assert.match(decisionGate(rows[1], ME, 0).reason, /^Jordan Tran is reviewing this/);
-  assert.match(decisionGate(rows[0], ME, 0).reason, /^Start reviewing/);
+  assert.match(decisionGate(rows[0], ME, 0).reason, /^Pick up/);
   assert.equal(decisionGate(rows[4], ME, 0).canReturn, false);
 });
 

@@ -1,9 +1,9 @@
 /**
- * #/review/<caseId>: one path, one thing on screen at a time. An unclaimed application shows a
- * single "Start reviewing" card. Once it's yours, the package review's checks are steps and the
- * last step is the decision (accept, ask for more information, refuse), then the close-out.
- * The application (paper sheet and the applicant's checklist) and the messages open in drawers
- * from the header; running the review again and releasing the claim live in the ⋯ menu.
+ * #/review/<caseId>: one path, one thing on screen at a time. "Pick up" in the queue claims the
+ * application and lands here on the review; the review runs by itself. Its four steps (Overview,
+ * Missing, Checks, Decide) sit in the header as the shell's stage tabs. An application nobody has
+ * picked up shows the application itself with one "Pick up" bar. The application and the messages
+ * open in drawers from the header; running the review again and releasing the claim live in ⋯.
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { accounts, AccountsError, claimConflict, review, type Claim, type DecisionItemInput, type Message } from "../../api/accounts";
@@ -152,6 +152,9 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   const [msgDraft, setMsgDraft] = useState("");
   const work = useRef<HTMLDivElement>(null);
   const upload = useRef<HTMLInputElement>(null);
+  // The header slot the step tabs render into (state, so the review re-renders once it exists).
+  const [stepSlot, setStepSlot] = useState<HTMLDivElement | null>(null);
+  const autoRan = useRef("");
 
   const row = q.rows.find((r) => r.id === caseId) ?? null;
 
@@ -217,7 +220,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   const claim = c?.claim ?? row?.claim ?? null;
   const latest = index?.latest ?? null;
 
-  // The screen changes under the keyboard (Start reviewing, Take over, the request and back):
+  // The screen changes under the keyboard (Pick up, Take over, the request and back):
   // move focus to the top of the work area so nobody is left on the page body.
   const screenKey = `${view}:${status}:${claim?.reviewer_id ?? ""}`;
   const lastScreen = useRef(screenKey);
@@ -240,6 +243,17 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   const Applicant = applicant === "the applicant" ? "The applicant" : applicant;
   const title = c?.title?.trim() || row?.title?.trim() || "Application";
   const closeOut = index?.close_out ?? null;
+
+  // Yours and not reviewed yet (or changed since): run the review now instead of asking for a
+  // click. Once per saved version, so a failure shows its retry rather than looping.
+  const needsRun = canRun && indexState === "ready" && Boolean(c) && (!latest || pkg.state === "stale");
+  useEffect(() => {
+    const key = `${caseId}:${c?.version ?? ""}`;
+    if (!needsRun || running || autoRan.current === key) return;
+    autoRan.current = key;
+    void run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needsRun, caseId, c?.version]);
 
   async function run(files?: File[]) {
     if (running) return;
@@ -278,12 +292,10 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
       const cl = await review.claim(caseId, takeOver);
       setConflict(null);
       patchRow(caseId, { claim: cl, status: "in_review" });
-      const saved = await reload();
-      // Starting a review runs the package review, unless one exists for this version of the
-      // application (after a resend it runs again, so the diff shows what was resolved).
-      const ix = await loadIndex();
-      const stale = ix?.latest && saved && ix.latest.case_version != null && ix.latest.case_version !== saved.version;
-      if (ix && (!ix.latest || stale)) void run();
+      // The review then runs by itself (see needsRun) unless one exists for this version of the
+      // application; after a resend it runs again, so the diff shows what was resolved.
+      await reload();
+      await loadIndex();
     } catch (e) {
       const other = claimConflict(e);
       if (other) setConflict(other);
@@ -384,15 +396,8 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
 
   /** Who has the file: one quiet line above the path. */
   function claimLine() {
-    if (unclaimed) return null;
-    if (mine && status === "in_review") {
-      return (
-        <div className="rv-who">
-          <Avatar name={user?.name ?? user?.email} size="sm" />
-          <span>You’re reviewing this <span className="ac-faint">· {sinceLabel(claim!.claimed_at)}</span></span>
-        </div>
-      );
-    }
+    // Yours: the steps in the header already say so; nothing to read here.
+    if (unclaimed || (mine && status === "in_review")) return null;
     if (otherClaim) {
       return (
         <div className="rv-who">
@@ -412,28 +417,19 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
     );
   }
 
-  /** The first screen of an application nobody has picked up: what you'll do, and one button. */
-  function startCard() {
+  /** Nobody has picked it up: the application itself, with one bar to pick it up. */
+  function pickUp() {
     return (
-      <section className="rv-start" aria-labelledby="rv-start-h">
-        <span className="rv-chip is-accent"><span className="cf-dot" aria-hidden="true" />New</span>
-        <h2 id="rv-start-h" className="rv-start-title">{title}</h2>
-        {meta && <p className="rv-start-meta">{meta}</p>}
-        <ol className="rv-path" aria-label="How a review goes">
-          <li className="is-blue"><span className="pr-ico" aria-hidden="true"><AcIcon name="hand" size={20} /></span><b>Pick up</b></li>
-          <li className="rv-path-arrow" aria-hidden="true"><AcIcon name="right" size={16} /></li>
-          <li className="is-violet"><span className="pr-ico" aria-hidden="true"><AcIcon name="list" size={20} /></span><b>Check</b></li>
-          <li className="rv-path-arrow" aria-hidden="true"><AcIcon name="right" size={16} /></li>
-          <li className="is-green"><span className="pr-ico" aria-hidden="true"><AcIcon name="scale" size={20} /></span><b>Decide</b></li>
-        </ol>
-        <div className="rv-start-acts">
-          <button type="button" className="cf-btn is-primary" disabled={Boolean(busy)} onClick={() => void doClaim()}>
-            {busy === "claim" ? "Starting…" : "Start reviewing"}
+      <>
+        <div className="rv-pick" role="region" aria-label="Not picked up">
+          <span className="rv-chip is-accent"><span className="cf-dot" aria-hidden="true" />New</span>
+          <span className="rv-pick-t">Not picked up yet</span>
+          <button type="button" className="cf-btn is-sm is-primary" disabled={Boolean(busy)} onClick={() => void doClaim()}>
+            <AcIcon name="hand" size={15} />{busy === "claim" ? "Picking up…" : "Pick up"}
           </button>
-          <button type="button" className="cf-btn is-ghost" onClick={() => setDrawer("application")}><AcIcon name="doc" size={16} />Read it first</button>
         </div>
-        <p className="rv-scope"><AcIcon name="clipboard" size={14} />Completeness only · not a design approval</p>
-      </section>
+        {c ? <Sheet c={c} /> : <p className="ac-empty">Loading the application…</p>}
+      </>
     );
   }
 
@@ -494,7 +490,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   }
 
   function main() {
-    if (unclaimed) return startCard();
+    if (unclaimed) return pickUp();
     if (view === "request" && shown) {
       return (
         <>
@@ -535,15 +531,17 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
                 <button type="button" className="cf-btn is-sm" onClick={() => setDrawer("application")}>Read the application</button>
               </>
             ) : canRun ? (
-              <>
-                <h2 className="pr-title">{running ? "Reading the file…" : "Run the review"}</h2>
-                <p className="pr-lede">Batatis reads the file and lists what’s there.</p>
-                {runError && <p className="ac-error" role="alert">{runError}</p>}
-                <div className="rv-start-acts">
-                  <button type="button" className="cf-btn is-sm is-primary" disabled={running} onClick={() => void run()}>{running ? "Reviewing…" : "Review the saved application"}</button>
-                  <button type="button" className="cf-btn is-sm is-ghost" disabled={running} onClick={() => upload.current?.click()}><CIcon name="upload" size={13} />Review uploaded PDFs</button>
-                </div>
-              </>
+              runError ? (
+                <>
+                  <h2 className="pr-title">The review didn’t run</h2>
+                  <p className="ac-error" role="alert">{runError}</p>
+                  <div className="rv-start-acts">
+                    <button type="button" className="cf-btn is-sm is-primary" disabled={running} onClick={() => void run()}>{running ? "Reviewing…" : "Try again"}</button>
+                  </div>
+                </>
+              ) : (
+                <p className="ac-empty rv-reading" role="status"><span className="rv-spin" aria-hidden="true" />Reading the application…</p>
+              )
             ) : (
               <>
                 <h2 className="pr-title">No review was run</h2>
@@ -551,7 +549,8 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
               </>
             )}
           </div>
-          {(indexState === "unavailable" || !canRun || gate.canReturn) && <div className="rv-final">{f.content}</div>}
+          {/* While the review reads the file, only that shows; a failed run still lets you decide. */}
+          {(indexState === "unavailable" || !canRun || (gate.canReturn && runError)) && <div className="rv-final">{f.content}</div>}
         </>
       );
     }
@@ -570,6 +569,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
           onPickVersion={(v) => void pickVersion(v)}
           final={finalStep()}
           initialStep={closeOut ? "final" : undefined}
+          navTarget={stepSlot}
         />
       </>
     );
@@ -580,11 +580,14 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
       <PageHead
         title={<><a className="ac-crumb" href="#/review">Queue</a><span className="ac-crumb-sep" aria-hidden="true">/</span>{title}</>}
         phoneTools={phoneTools}
+        center={<div ref={setStepSlot} className="rv-head-steps" />}
         right={!loadError && (
           <>
-            <button type="button" className="cf-btn is-sm is-ghost rv-head-btn" onClick={() => setDrawer("application")} aria-label="Application">
-              <AcIcon name="doc" size={16} /><span className="rv-head-label">Application</span>
-            </button>
+            {!unclaimed && (
+              <button type="button" className="cf-btn is-sm is-ghost rv-head-btn" onClick={() => setDrawer("application")} aria-label="Application">
+                <AcIcon name="doc" size={16} /><span className="rv-head-label">Application</span>
+              </button>
+            )}
             <button type="button" className="cf-btn is-sm is-ghost rv-head-btn" onClick={() => setDrawer("messages")} aria-label={unread ? `Messages, ${unread} unread` : "Messages"}>
               <AcIcon name="chat" size={16} /><span className="rv-head-label">Messages</span>
               {unread > 0 && <span className="rv-badge" aria-hidden="true">{unread}</span>}

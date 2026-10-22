@@ -108,18 +108,18 @@ export function findingView(f: Finding): FindingView {
 }
 
 export interface MissingView {
-  /** Asked of the applicant, grouped by form section in form order. */
+  /** Asked of the applicant, grouped by form section in form order (Division C file items and the
+   *  "demonstrate" prompts sit in the alternative-path group). */
   groups: { section: Section; label: string; items: FindingView[] }[];
   /** For the officer to look at first. */
   officer: FindingView[];
-  /** Division C file items and "demonstrate" prompts, shown in their own step. */
-  elsewhere: number;
+  /** Equals the summary's "to ask" plus "to check", so both screens show the same number. */
   total: number;
 }
 
 export function missingView(s: ReviewSession): MissingView {
   const asked = askable(s);
-  const own = s.findings.filter((f) => !isPeer(f) && !isFileItem(f) && !isDemonstrate(f));
+  const own = s.findings.filter((f) => !isPeer(f));
   const rank = (f: Finding) => (f.severity === "blocking" ? 0 : 1);
   const applicant = own.filter((f) => !isOfficerCheck(f, asked)).sort((a, b) => rank(a) - rank(b));
   const groups = SECTION_ORDER.map((section) => ({
@@ -128,8 +128,7 @@ export function missingView(s: ReviewSession): MissingView {
     items: applicant.filter((f) => f.section === section).map(findingView),
   })).filter((g) => g.items.length);
   const officer = own.filter((f) => isOfficerCheck(f, asked)).map(findingView);
-  const elsewhere = s.findings.filter((f) => isFileItem(f) || isDemonstrate(f)).length;
-  return { groups, officer, elsewhere, total: applicant.length + officer.length };
+  return { groups, officer, total: applicant.length + officer.length };
 }
 
 /** Open applicant gaps that block acceptance (not-found items are the officer's checks, not gaps). */

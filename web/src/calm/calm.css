@@ -217,7 +217,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 10px 0 18px;
+  padding: 0 12px 0 22px;
 }
 
 .cf-list-head h2 {
@@ -237,11 +237,11 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 36px;
-  margin: 0 12px 10px;
-  padding: 0 10px;
+  height: 38px;
+  margin: 4px 14px 14px;
+  padding: 0 12px;
   border: 1px solid var(--cf-line);
-  border-radius: 10px;
+  border-radius: 12px;
   color: var(--cf-text-3);
   transition-property: border-color;
   transition-duration: 150ms;
@@ -281,7 +281,7 @@ body {
 }
 
 .cf-applist-note {
-  margin: 4px 18px 10px;
+  margin: 4px 30px 10px;
   font-size: 12.5px;
   line-height: 1.5;
   color: var(--cf-text-3);
@@ -295,31 +295,23 @@ body {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .cf-list-row {
   position: relative;
-  margin: 0 8px;
-  border-radius: 10px;
+  margin: 0 14px;
+  border-radius: 12px;
   transition-property: background-color;
   transition-duration: 150ms;
   transition-timing-function: ease-out;
 }
 
+/* Selected = a soft fill, nothing else (no coloured edge). */
 .cf-list-row.is-selected {
   background: var(--cf-selected);
-  border-radius: 0 10px 10px 0;
-}
-
-.cf-list-row.is-selected::before {
-  content: "";
-  position: absolute;
-  left: -8px;
-  top: 6px;
-  bottom: 6px;
-  width: 3px;
-  border-radius: 3px;
-  background: var(--cf-accent);
 }
 
 @media (hover: hover) {
@@ -335,7 +327,7 @@ body {
 .cf-list-hit {
   display: block;
   width: 100%;
-  padding: 10px 12px 10px 14px;
+  padding: 14px 16px;
   border: 0;
   background: none;
   color: inherit;
@@ -358,7 +350,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: 6px;
   font-size: 12.5px;
   color: var(--cf-text-3);
   white-space: nowrap;
@@ -383,14 +375,14 @@ body {
 }
 
 .cf-list-group {
-  padding: 14px 18px 6px;
+  padding: 18px 30px 8px;
   font: 500 12px var(--cf-mono);
   color: var(--cf-text-3);
 }
 
 .cf-list-rows.is-settled .cf-list-hit {
-  padding-top: 8px;
-  padding-bottom: 8px;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .cf-list-rows.is-settled .cf-list-title {
@@ -3932,6 +3924,20 @@ body {
   min-height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+/* With a banner above it (an officer's notice), the deck takes only the height that is left, so
+   the question stays centred in what you can see. */
+.cf-main:has(> .cf-deck-page) {
+  display: flex;
+  flex-direction: column;
+}
+.cf-main:has(> .cf-deck-page) > * {
+  flex: none;
+}
+.cf-main:has(> .cf-deck-page) > .cf-deck-page {
+  flex: 1 0 auto;
+  min-height: 0;
 }
 
 .cf-deck-status {

@@ -1,12 +1,12 @@
 /** #/review for reviewers: everything sent to their authority, one quiet row each. A row opens the file. */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import type { QueueApplication } from "../../api/accounts";
+import { review, type QueueApplication } from "../../api/accounts";
 import { useAccount } from "../account";
 import { authorityName } from "../applications";
 import { AcIcon, Avatar, PageHead, type AcIconName } from "../auth/bits";
 import { MOD_KEY } from "../ui";
 import { completenessView, filterQueue, reviewerCell, sentLabel, statusPill, tabCounts, TABS, type QueueTab } from "./queue";
-import { loadQueue, useQueue } from "./reviewData";
+import { loadQueue, patchRow, useQueue } from "./reviewData";
 
 export function StatusPill({ a }: { a: Pick<QueueApplication, "status" | "claim"> }) {
   const s = statusPill(a.status, Boolean(a.claim));
@@ -52,6 +52,23 @@ export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
   const [query, setQuery] = useState("");
   const search = useRef<HTMLInputElement>(null);
   const [now] = useState(() => Date.now());
+  const [picking, setPicking] = useState("");
+
+  /** "Pick up" means it: claim, then open the review (no second "start" screen). If someone got
+   *  there first, the review page says who and offers to take over. */
+  async function pickUp(a: QueueApplication, href: string) {
+    if (picking) return;
+    setPicking(a.id);
+    try {
+      const claim = await review.claim(a.id, false);
+      patchRow(a.id, { claim, status: "in_review" });
+    } catch {
+      // Fall through: the review page shows the conflict or the error.
+    } finally {
+      setPicking("");
+      window.location.hash = href;
+    }
+  }
 
   useEffect(() => { void loadQueue(); }, []);
 
@@ -121,7 +138,16 @@ export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
               const step = nextStep(a, me);
               return (
                 <li key={a.id}>
-                  <a className="rq-row" href={`#/review/${encodeURIComponent(a.id)}`}>
+                  <a
+                    className="rq-row"
+                    href={`#/review/${encodeURIComponent(a.id)}`}
+                    aria-busy={picking === a.id || undefined}
+                    onClick={step === "Pick up" ? (e) => {
+                      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                      e.preventDefault();
+                      void pickUp(a, e.currentTarget.getAttribute("href") ?? "");
+                    } : undefined}
+                  >
                     <span className="rq-main">
                       <span className="rq-title">
                         {title}
@@ -135,7 +161,7 @@ export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
                     <span className="rq-side">
                       {who.name && <span className="rq-who" title={who.mine ? "You’re reviewing this" : `${who.name} is reviewing this`}><Avatar name={who.name} size="sm" /><span className="rq-who-name">{who.label}</span></span>}
                       <StatusPill a={a} />
-                      <span className={`rq-go${step === "Pick up" ? " is-new" : ""}`}>{step}<AcIcon name="chev" size={14} /></span>
+                      <span className={`rq-go${step === "Pick up" ? " is-new" : ""}`}>{picking === a.id ? "Picking up…" : step}<AcIcon name="chev" size={14} /></span>
                     </span>
                   </a>
                 </li>

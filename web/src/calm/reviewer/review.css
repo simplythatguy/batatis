@@ -1,4 +1,4 @@
-/* Officer package review (WP-36). Calm: black, white ink, hairlines; no grey cards, no all caps. */
+/* Officer package review (WP-36). Calm light theme: hairlines, one hue per step, no all caps. */
 
 .pr { width: 100%; max-width: 720px; display: flex; flex-direction: column; min-width: 0; }
 .pr-head .pr-title { margin-bottom: 4px; }
@@ -13,44 +13,6 @@
 
 .pr-versions { display: flex; gap: 4px; flex-wrap: wrap; padding-top: 12px; }
 
-/* Steps: thin bars with the step name under each (the deck footer's language). Past steps are
-   white, the current one is the accent; under 760px only the bars and "Step 2 of 7" show. */
-.pr-steps { padding: 6px 0 0; container: prsteps / inline-size; }
-.pr-steps ol { list-style: none; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 6px; margin: 0; padding: 0; }
-.pr-steps li { min-width: 0; }
-.pr-steps button {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 8px;
-  padding: 6px 0;
-  border: 0;
-  border-radius: 6px;
-  background: none;
-  color: var(--cf-text-3);
-  font: 400 12.5px var(--cf-font);
-  text-align: left;
-  cursor: pointer;
-  transition-property: color;
-  transition-duration: 150ms;
-}
-.pr-steps button:focus-visible { outline: 2px solid var(--cf-focus); outline-offset: 2px; }
-.pr-step-bar { display: block; height: 4px; border-radius: 3px; background: var(--cf-line-2); transition-property: background-color; transition-duration: 150ms; }
-.pr-steps button.is-past .pr-step-bar { background: color-mix(in srgb, var(--hue) 40%, transparent); }
-.pr-steps button[aria-current="step"] { color: var(--cf-text); }
-.pr-steps button[aria-current="step"] .pr-step-bar { background: var(--hue); }
-.pr-steps button[aria-current="step"] .pr-step-l svg { color: var(--hue); }
-.pr-step-l { display: flex; align-items: center; gap: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pr-step-l svg { flex: none; }
-@media (hover: hover) { .pr-steps button:not([aria-current]):hover { color: var(--cf-text-2); } }
-.pr-steps-now { display: none; margin: 4px 0 0; font: 500 12px var(--cf-mono); color: var(--cf-text-3); }
-/* Too narrow for every name: bars only, and the current step's name underneath. */
-@container prsteps (max-width: 640px) {
-  .pr-steps ol { gap: 4px; }
-  .pr-step-l { display: none; }
-  .pr-steps-now { display: block; }
-}
 .pr-meta-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; margin-top: 28px; font-size: 12.5px; }
 .pr-meta-foot .pr-faint { margin: 0; }
 
@@ -221,16 +183,9 @@
 .rv-head-btn { position: relative; gap: 7px; }
 .rv-badge { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--cf-accent); color: #fff; font: 600 11px/18px var(--cf-font); text-align: center; }
 
-/* First screen: three icons say how a review goes, one button starts it */
-.rv-start { padding: 24px 0 8px; }
+/* Not picked up yet: one bar above the application */
 .rv-chip { display: inline-flex; align-items: center; gap: 7px; height: 26px; padding: 0 11px; border-radius: 999px; background: var(--hue-t); color: var(--hue); font-size: 12.5px; font-weight: 600; }
 .rv-chip .cf-dot { background: var(--hue); }
-.rv-start-title { margin: 14px 0 6px; font-size: 34px; line-height: 1.15; font-weight: 600; letter-spacing: -0.025em; text-wrap: balance; }
-.rv-start-meta { margin: 0; color: var(--cf-text-3); font-size: 14px; }
-.rv-path { list-style: none; display: flex; align-items: center; gap: 14px; margin: 30px 0 0; padding: 20px 22px; border: 1px solid var(--cf-line); border-radius: var(--cf-r-card); background: var(--cf-surface); box-shadow: var(--cf-shadow); }
-.rv-path li:not(.rv-path-arrow) { flex: 1; display: flex; align-items: center; gap: 12px; }
-.rv-path b { font-size: 15px; font-weight: 600; }
-.rv-path-arrow { color: var(--cf-text-4); }
 .rv-start-acts { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 24px; }
 .rv-scope { display: inline-flex; align-items: center; gap: 7px; margin: 18px 0 0; padding: 4px 10px; border-radius: 999px; background: var(--cf-hover); color: var(--cf-text-3); font-size: 12.5px; }
 
@@ -279,12 +234,9 @@
 @media (max-width: 760px) {
   .ac-page-body.rv { padding-top: 18px; }
   .rv-head-label { display: none; }
-  .rv-start-title { font-size: 26px; }
   .rv-choices { grid-template-columns: minmax(0, 1fr); }
   .rv-choice { min-height: 0; flex-direction: row; flex-wrap: wrap; align-items: center; }
   .rv-choice .pr-ico { margin: 0; }
-  .rv-path { flex-direction: column; align-items: stretch; }
-  .rv-path-arrow { display: none; }
   .cf-drawer.rv-drawer { width: 100%; }
 }
 
@@ -330,3 +282,46 @@
 .pr-basis-fold > summary::-webkit-details-marker { display: none; }
 .pr-basis-fold > summary::after { content: " +"; color: var(--cf-text-4); }
 .pr-basis-fold[open] > summary::after { content: " −"; }
+
+/* —— Step tabs: the shell's stage tabs (number, name, thin line), centred in the page header —— */
+
+.ac-head.has-center { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+.ac-head.has-center .ac-head-right { justify-self: end; }
+.rv-head-steps { align-self: stretch; display: flex; justify-content: center; min-width: 0; }
+.rv-steps .cf-stage { border: 0; background: none; font: inherit; }
+.rv-step-n { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--hue-t); color: var(--hue); font: 600 11px/18px var(--cf-font); text-align: center; }
+/* Without a header (outside PDFs) the same tabs sit above the step. */
+.pr-steps-inline { height: 48px; display: flex; justify-content: center; border-bottom: 1px solid var(--cf-line); }
+@media (max-width: 1100px) {
+  .rv-steps .cf-stage { padding: 0 8px; }
+  .rv-steps .cf-stage:not([aria-current="step"]) .cf-stage-name { display: none; }
+}
+
+/* —— Checks: four folded rows, one open at a time —— */
+
+.pr-panels { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+.pr-panel { border: 1px solid var(--cf-line); border-radius: var(--cf-r-tile); background: var(--cf-surface); box-shadow: var(--cf-shadow); }
+.pr-panel > summary { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 12px 16px; list-style: none; cursor: pointer; border-radius: inherit; }
+.pr-panel > summary::-webkit-details-marker { display: none; }
+.pr-panel > summary:focus-visible { outline: 2px solid var(--cf-focus); outline-offset: 2px; }
+.pr-panel-t { flex: 1; min-width: 0; font-size: 15px; font-weight: 550; }
+.pr-panel-chip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: 999px; background: var(--cf-hover); color: var(--cf-text-2); font-size: 12.5px; white-space: nowrap; }
+.pr-panel-chev { display: inline-flex; color: var(--cf-text-4); transition-property: rotate; transition-duration: 150ms; transition-timing-function: ease-out; }
+.pr-panel[open] .pr-panel-chev { rotate: 90deg; }
+.pr-panel[open] > summary { border-bottom: 1px solid var(--cf-line); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.pr-panel-body { padding: 4px 18px 16px; }
+.pr-panel-body .pr-group:first-child { margin-top: 12px; }
+.pr-panel-body > .pr-faint:first-child { margin: 12px 0 0; }
+@media (hover: hover) { .pr-panel > summary:hover { background: var(--cf-hover); } }
+
+/* —— Not picked up: one bar, then the application itself —— */
+
+.rv-pick { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0 0 22px; padding: 12px 12px 12px 16px; border: 1px solid var(--cf-line); border-radius: var(--cf-r-tile); background: var(--cf-surface); box-shadow: var(--cf-shadow); }
+.rv-pick-t { flex: 1; min-width: 140px; font-size: 14.5px; font-weight: 550; }
+.rv .ac-sheet { max-width: none; }
+
+/* Reading the application (the review runs by itself) */
+.rv-reading { display: flex; align-items: center; gap: 10px; }
+.rv-spin { width: 14px; height: 14px; border: 2px solid var(--cf-line-2); border-top-color: var(--cf-text-2); border-radius: 50%; }
+@media (prefers-reduced-motion: no-preference) { .rv-spin { animation: rv-spin 800ms linear infinite; } }
+@keyframes rv-spin { to { rotate: 360deg; } }

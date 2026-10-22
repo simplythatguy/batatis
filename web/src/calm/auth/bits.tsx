@@ -137,13 +137,15 @@ export function usePopover() {
 }
 
 /** Page header for the in-app pages (queue, review, settings, notifications). `right` holds actions. */
-export function PageHead({ title, meta, right, phoneTools }: { title: ReactNode; meta?: ReactNode; right?: ReactNode; phoneTools?: ReactNode }) {
+/** `center` sits in the middle of the bar (the review's step tabs), like the applicant's stage tabs. */
+export function PageHead({ title, meta, right, phoneTools, center }: { title: ReactNode; meta?: ReactNode; right?: ReactNode; phoneTools?: ReactNode; center?: ReactNode }) {
   return (
-    <header className="ac-head">
+    <header className={`ac-head${center ? " has-center" : ""}`}>
       <h1 className="ac-head-title">
         <span className="ac-head-name">{title}</span>
         {meta && <span className="ac-head-meta">{meta}</span>}
       </h1>
+      {center}
       <div className="ac-head-right">
         {right}
         {phoneTools && <span className="ac-phone-tools">{phoneTools}</span>}

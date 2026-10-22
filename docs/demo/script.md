@@ -198,7 +198,7 @@ The deck asks its cards in this order: the facts Batatis read (each one to confi
 **Actions.**
 
 1. In the officer's browser profile sign in with the example email and password. The app opens the queue, titled "Review queue" with the authority's name.
-2. Show the row: the application title, the applicant, when it was sent, the completeness count, the status and the reviewer column. Press **Start reviewing**.
+2. Show the row: the application title, the applicant, when it was sent, the completeness count, the status and the reviewer column. Press **Pick up**: it claims the application and opens the review.
 3. On the application page read the paper sheet beside the "Completeness" list. Point at an item marked "— missing" and, if one exists, a value marked "not confirmed by the applicant".
 
 **Narration.**

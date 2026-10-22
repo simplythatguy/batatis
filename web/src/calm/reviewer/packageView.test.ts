@@ -49,11 +49,12 @@ const peer = F({ key: "peer_review:signal", section: "D", field: "peer_review", 
   message: "Peer review may be warranted: a registered professional is stated to be required; a Part 3 provision is cited (3.2.5.7.(1)). This is the officer's call; it is not a finding about the design." });
 const all = [sig, legal, stamp, reg, testing, failure, peer];
 
-test("what's missing: applicant gaps grouped in form order, officer checks apart, Div C elsewhere", () => {
+test("what's missing: applicant gaps grouped in form order (Div C items with the alternative path), officer checks apart", () => {
   const v = missingView(session(all));
-  assert.deepEqual(v.groups.map((g) => [g.section, g.items.map((i) => i.key)]), [["A", ["signature:presence"]], ["B", ["legal:presence"]]]);
+  assert.deepEqual(v.groups.map((g) => [g.section, g.items.map((i) => i.key)]), [["A", ["signature:presence"]], ["B", ["legal:presence"]], ["process", ["div_c.testing_procedures:presence", "demonstrate.failure_conditions:not_mentioned"]]]);
   assert.deepEqual(v.officer.map((i) => i.key), ["seal:presence", "division_c_2_3_1:presence"]);
-  assert.equal(v.elsewhere, 2);
+  const sum = summaryView(session(all));
+  assert.equal(v.total, sum.toAsk + sum.toCheck);
   assert.equal(v.officer[0].tone, "pending");
   assert.equal(v.officer[0].where, "form.pdf · page 2 · field “Seal”");
   assert.equal(v.groups[1].items[0].message, "The application appears to be missing the thing.");

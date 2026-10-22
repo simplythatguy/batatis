@@ -81,7 +81,7 @@ export function reviewerCell(a: QueueApplication, me: string | null): { name: st
 
 export type RowAction = "claim" | "open" | "view";
 
-/** Unclaimed submitted → Start reviewing; your own in-review → Open; everything else → View. */
+/** Unclaimed submitted → Pick up; your own in-review → Open; everything else → View. */
 export function rowAction(a: QueueApplication, me: string | null): RowAction {
   if (a.status === "submitted" && !a.claim) return "claim";
   if (a.status === "in_review" && me && a.claim?.reviewer_id === me) return "open";
@@ -99,7 +99,7 @@ export function decisionGate(
   if (a.status === "accepted") return no("Accepted as administratively complete.");
   if (a.status === "refused") return no("Refused. This application is closed.");
   if (a.status === "returned") return no("Returned to the applicant. It comes back here when they resend it.");
-  if (a.status !== "in_review" || !a.claim) return no("Start reviewing to return or accept this application.");
+  if (a.status !== "in_review" || !a.claim) return no("Pick up this application to return or accept it.");
   if (!me || a.claim.reviewer_id !== me) return no(`${a.claim.reviewer_name} is reviewing this. Only they can return or accept it.`);
   if (blocking === null) {
     return { canReturn: true, canAccept: false, reason: "Waiting for the completeness check before this can be accepted." };

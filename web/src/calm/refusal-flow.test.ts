@@ -166,7 +166,7 @@ test("terminal officer files pass a historical read-only reason to the informati
     const requestTree = await ir.render(info.props);
     assert.match(text(requestTree), /historical.*read-only/i);
     assert.ok(text(requestTree).includes(status));
-    assert.doesNotMatch(text(requestTree), /Start reviewing \(or take over\)/);
+    assert.doesNotMatch(text(requestTree), /Pick up this application \(or take over\)/);
     assert.equal(nodes(requestTree, (n) => n.type === "fieldset")[0].props.disabled, true);
     assert.equal(nodes(requestTree, (n) => n.type === "button" && text(n).startsWith("Send to"))[0].props.disabled, true);
     ir.unmount(); h.unmount();
@@ -176,9 +176,9 @@ test("terminal officer files pass a historical read-only reason to the informati
 test("an unclaimed editable file keeps takeover guidance; standalone packages keep copy", async () => {
   const h = await componentHarness(new URL("./reviewer/InfoRequest.tsx", import.meta.url), "InfoRequest", { "./packageView": packageView });
   const props = { target: { kind: "case", id: "c1" }, session: request, latest: true, canEdit: false, applicant: "Mira", onChange() {} };
-  assert.match(text(await h.render(props)), /Start reviewing \(or take over\)/);
+  assert.match(text(await h.render(props)), /Pick up this application \(or take over\)/);
   const tree = await h.render({ ...props, target: { kind: "package", id: "p1" }, canEdit: true });
   assert.ok(nodes(tree, (n) => n.type === "button" && text(n) === "Copy the text").length);
-  assert.doesNotMatch(text(tree), /historical|Start reviewing/);
+  assert.doesNotMatch(text(tree), /historical|Pick up this application/);
   h.unmount();
 });
