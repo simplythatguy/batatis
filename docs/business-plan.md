@@ -180,11 +180,11 @@ This is a plan, not a commitment from anyone.
 3. Apply to Innovative Solutions Canada for non-dilutive funding. Its Challenge Stream funds Phase 1 proofs of feasibility of up to C$150,000, but the page we read lists no open housing or permitting challenge (`C-market-provinces-business.md`, §5.2).
 4. Prepare a privacy impact assessment pack and the notice that Alberta's Protection of Privacy Act expects when personal information is used in an automated system.
 
-**Kill criteria, from the research.**
-- If NRC does not grant workable terms within about six months, change to the link-out design.
-- If Council or municipal data show fewer than 300 bespoke variances a year in Alberta, pivot to standing-variance workflow and all-permit completeness.
-- If no municipality signs a paid contract above C$50,000 within 12 months, rethink the authority side.
-- If the Council's template ships first, integrate it and do not compete with it.
+**What must be true, from the research.**
+- NRC grants workable written terms within about six months. Otherwise we switch to the link-out design.
+- Council or municipal data show at least 300 bespoke variances a year in Alberta. Otherwise we pivot to a standing-variance workflow and all-permit completeness.
+- One municipality signs a paid contract above C$50,000 within 12 months.
+- If the Council's template ships first, we integrate it and do not compete with it.
 
 ## 11. What we have not validated
 
