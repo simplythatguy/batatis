@@ -331,7 +331,6 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     // Pin, archive and delete belong to applications saved to the account.
     if (!signedIn || !saved.some((s) => s.id === a.id)) return [rename];
     const waiting = pending.has(a.id);
-    const draft = a.status === "draft";
     return [
       rename,
       ...(a.archived ? [] : [a.pinned
@@ -340,8 +339,8 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
       a.archived
         ? { id: "restore", label: "Restore", icon: "restore", disabled: waiting, onSelect: () => void setPreference(a, { archived: false }, "restore") }
         : { id: "archive", label: "Archive", icon: "archive", disabled: waiting, onSelect: () => void setPreference(a, { archived: true }, "archive") },
-      // Only a draft: a sent application is on file with the authority.
-      { id: "delete", label: "Delete…", icon: "trash", destructive: true, separatorBefore: true, disabled: waiting || !draft, hint: draft ? undefined : "Drafts only", onSelect: () => setDeleting({ id: a.id, title: a.title }) },
+      // Any owned application: the server's DELETE policy decides, and its refusal is shown in the dialog.
+      { id: "delete", label: "Delete…", icon: "trash", destructive: true, separatorBefore: true, disabled: waiting, onSelect: () => setDeleting({ id: a.id, title: a.title }) },
     ];
   }
 

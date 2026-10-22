@@ -400,3 +400,36 @@ test("a return also lists the officer's unread messages from an earlier round, t
   assert.equal(h.reads, 1);
   h.unmount();
 });
+
+test("the sidebar offers Delete on every owned application; the server's DELETE policy decides", async () => {
+  const statuses = ["draft", "submitted", "in_review", "returned", "accepted", "refused", "withdrawn"] as const;
+  const owned = statuses.map((status, i) => app({ id: `c${i}`, status, archived: false, pinned: false }));
+  const account = { phase: "signed-in", user: { role: "applicant", applicant_type: "homebuilder" }, applications: owned };
+  const h = await componentHarness(new URL("./Shell.tsx", import.meta.url), "Shell", {
+    "../store": { useCase: () => ({ c: { title: "", description: "", authority: "" }, gaps: [], engineGaps: [], phase: "who", engineId: null }) },
+    "../humanReview": { groupGaps: () => new Map() },
+    "./account": { useAccount: () => account, bootAccount() {}, refreshApplications: async () => {} },
+    "./applications": await import("./applications.ts"),
+    "./assistant/assistant": { useAssistant: () => ({ open: false }), setAssistantCase() {}, setAssistantContext() {} },
+    "./session": { useSession: () => ({ seen: [] }), getSession: () => ({ draft: "" }) },
+    "./deck": { buildDeck: () => [], deckProgress: () => ({ done: 0, total: 0 }) },
+    "./useDeckExtras": { useDeckExtras: () => ({ options: {} }) },
+    "./routes": { STAGES: [{ screen: "start" }] },
+    "./shell/AppLayout": { AppLayout: "AppLayout" },
+    "../router": { useRoute: () => ({ path: "/", params: new URLSearchParams() }) },
+  }, {
+    sessionStorage: { getItem: () => null, setItem() {}, removeItem() {} },
+    location: { hash: "#/", replace() {} },
+    document: { addEventListener() {}, removeEventListener() {} },
+    window: { addEventListener() {}, removeEventListener() {} },
+  });
+  const tree = await h.render({ active: "start", children: null });
+  const list = nodes(tree, (n) => n.type === "AppLayout")[0].props.list;
+  for (const a of owned) {
+    const del = list.props.actionsFor(a).find((x) => x.id === "delete");
+    assert.ok(del, `${a.status}: Delete is offered`);
+    assert.equal(Boolean(del.disabled), false, `${a.status}: no client-side status gate`);
+    assert.equal(del.hint, undefined, `${a.status}: no invented reason`);
+  }
+  h.unmount();
+});
