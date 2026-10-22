@@ -81,14 +81,15 @@ export function caseRuleResults(c: Case, data: RuleData, stored?: CaseRules | nu
 }
 
 /**
- * Inputs most rules share (occupancy, storeys, building area) say what the building is, not that a
- * rule is in play. Derived from the data: an input used by most rules.
+ * Inputs nearly every rule shares (occupancy, storeys, building area) say what the building is, not
+ * that a rule is in play. Derived from the data.
  */
 export function sharedInputs(data: RuleData): Set<string> {
   const ids = data.index.rules;
   const counts = new Map<string, number>();
   for (const id of ids) for (const f of data.rules[id]?.inputs ?? []) counts.set(f, (counts.get(f) ?? 0) + 1);
-  return new Set([...counts].filter(([, n]) => n > ids.length / 2).map(([f]) => f));
+  // Used by every rule, or by all but one (occupancy is not asked by the duct rule).
+  return new Set([...counts].filter(([, n]) => n >= Math.max(ids.length - 1, 2)).map(([f]) => f));
 }
 
 /** The code-check card for this rule's article, if the case has one the applicant has not ruled out. */
@@ -188,16 +189,35 @@ export function plainResult(r: RuleResult): { title: string; line: string } {
 }
 
 /** The numbers a result used, each with where it came from, plus the limit it was compared with. */
-export function numbersUsed(r: ShownRule, index: RuleIndex): { label: string; value: string; origin: string; muted?: boolean }[] {
-  const rows: { label: string; value: string; origin: string; muted?: boolean }[] = r.inputs
-    .filter((i) => i.value !== null)
-    .map((i) => ({ label: i.label, value: valueWithUnit(i.value, i.unit, index.inputs[i.field]), origin: r.origins[i.field]?.text ?? "" }));
+/** Plain names for the numbers the rules compare; the code's term follows in brackets. */
+const PLAIN_LABEL: Record<string, string> = {
+  limiting_distance_m: "Distance to the property line (limiting distance)",
+  ebf_area_m2: "Wall area (exposing building face)",
+  glazed_area_m2: "Window area (glazed openings)",
+  opening_area_m2: "Opening area (unprotected openings)",
+  soffit_to_property_line_m: "Roof overhang to the property line",
+  building_area_m2: "Building footprint (building area)",
+};
+
+export const plainLabel = (field: string, label: string) => PLAIN_LABEL[field] ?? label;
+
+type Row = { label: string; value: string; origin: string; muted?: boolean };
+
+/**
+ * The numbers a result used (each with where it came from) and the limit it was compared with.
+ * Yes/no and list answers are `others`, shown folded so the numbers stay readable.
+ */
+export function numbersUsed(r: ShownRule, index: RuleIndex): Row[] & { others?: Row[] } {
+  const given = r.inputs.filter((i) => i.value !== null);
+  const row = (i: (typeof given)[number]): Row => ({ label: plainLabel(i.field, i.label), value: valueWithUnit(i.value, i.unit, index.inputs[i.field]), origin: r.origins[i.field]?.text ?? "" });
+  const rows: Row[] & { others?: Row[] } = given.filter((i) => typeof i.value === "number" && !index.inputs[i.field]?.choices && !/^(storeys|building_area_m2)$/.test(i.field)).map(row);
+  rows.others = given.filter((i) => !rows.some((x) => x.label === plainLabel(i.field, i.label))).map(row);
   const limit = PLAIN[r.rule_id]?.limit;
   const v = limit ? r.computed.find((x) => x.name === limit.name) : undefined;
   if (limit && v && v.value !== null) rows.push({ label: limit.label, value: valueWithUnit(v.value, v.unit), origin: `${r.provision.id}`, muted: true });
   const used = r.computed.find((x) => x.name === "limiting_distance_used_m");
-  const given = r.inputs.find((x) => x.field === "limiting_distance_m")?.value;
-  if (used && used.value !== null && given !== undefined && given !== null && used.value !== given) {
+  const distance = r.inputs.find((x) => x.field === "limiting_distance_m")?.value;
+  if (used && used.value !== null && distance !== undefined && distance !== null && used.value !== distance) {
     rows.push({ label: "Distance used (halved for a slow fire response)", value: valueWithUnit(used.value, used.unit), origin: "the code’s rule", muted: true });
   }
   return rows;

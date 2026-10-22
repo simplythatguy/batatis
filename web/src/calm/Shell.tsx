@@ -9,6 +9,7 @@ import { setAssistantCase, setAssistantContext, toggleAssistant, useAssistant } 
 import { roleOf, useCurrentApplication } from "./begin";
 import { CodePalette, OPEN_PALETTE, openPalette } from "./CodePalette";
 import { buildDeck, deckProgress } from "./deck";
+import { useDeckExtras } from "./useDeckExtras";
 import { Icon24 } from "./icons";
 import { STAGES, type Screen } from "./routes";
 import { getSession, resetSession, useSession } from "./session";
@@ -121,9 +122,10 @@ export function MoreMenu({ items }: { items: { label: string; href?: string; onC
 function useStageProgress() {
   const { c, gaps, phase, checkedAt, engineGaps } = useCase();
   const session = useSession();
+  const { options } = useDeckExtras();
   return useMemo(() => {
     if (phase !== "case") return { start: 0, questions: 0, review: 0, application: 0 };
-    const deck = buildDeck(c, gaps, { seen: new Set(session.seen), includeDone: true });
+    const deck = buildDeck(c, gaps, { ...options, seen: new Set(session.seen), includeDone: true });
     const { done, total } = deckProgress(deck);
     const groups = groupGaps(gaps, new Map(engineGaps.map((g) => [g.id, g.section])));
     const sectionsClear = [["A"], ["B", "facts"], ["C"], ["D", "process"]].filter((keys) => !keys.some((k) => (groups.get(k) ?? []).length)).length;
@@ -133,7 +135,7 @@ function useStageProgress() {
       review: checkedAt ? (100 * sectionsClear) / 4 : 0,
       application: 0,
     };
-  }, [c, gaps, phase, checkedAt, engineGaps, session.seen]);
+  }, [c, gaps, phase, checkedAt, engineGaps, session.seen, options]);
 }
 
 const PHONE = "(max-width: 760px)";

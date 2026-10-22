@@ -17,6 +17,14 @@ import { Icon24 } from "./icons";
 import { RelevanceRing } from "./RelevanceRing";
 import { updateSession, useSession } from "./session";
 import { CIcon, MOD_KEY } from "./ui";
+import { engine } from "../api/client";
+import { provisionCandidate } from "../screens/SectionC";
+import { ConditionBody, PackageEnd, PackageOffer } from "./ChecklistCards";
+import { otherOptions } from "./checklistView";
+import { RuleNumberInput, RuleResultView } from "./RuleCards";
+import { choiceValue, NOT_SURE_RULE, readNumber, RULE_REF } from "./rulesView";
+import { useDeckExtras } from "./useDeckExtras";
+import { PACKAGE_YES, RULE_ADD, RULE_LEAVE } from "./deck";
 
 type Shown = DeckItem & { gone?: boolean };
 
@@ -30,7 +38,7 @@ function isTextTarget(t: EventTarget | null): boolean {
 
 /** Cards answered by typing several lines continue with Cmd/Ctrl+Enter instead of Enter. */
 function multiline(item: DeckItem): boolean {
-  return item.kind === "question" || item.kind === "process" || (item.kind === "detail" && Boolean(DETAIL_FIELDS.find((d) => d.id === item.ref)?.multiline)) || (item.kind === "plan" && planInput(item.plan?.field ?? "").kind === "area");
+  return item.kind === "question" || item.kind === "process" || item.kind === "condition" || (item.kind === "detail" && Boolean(DETAIL_FIELDS.find((d) => d.id === item.ref)?.multiline)) || (item.kind === "plan" && planInput(item.plan?.field ?? "").kind === "area");
 }
 
 /* —— Typeform pieces —— */
@@ -209,11 +217,53 @@ function PlanBody({ item, onPick, draft, setDraft, note, first }: { item: Shown;
   );
 }
 
-function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote, firstPlan }: { item: Shown; picked?: string; onPick: (value: string) => void; draft: string; setDraft: (v: string) => void; openDrawer: (s: DrawerState) => void; planNote: string; firstPlan: boolean }) {
+function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote, firstPlan, extras, note, busy, onReload, position }: { item: Shown; picked?: string; onPick: (value: string) => void; draft: string; setDraft: (v: string) => void; openDrawer: (s: DrawerState) => void; planNote: string; firstPlan: boolean; extras: ReturnType<typeof useDeckExtras>["extras"]; note: string; busy: boolean; onReload?: () => void; position: number }) {
   const { c, dispatch } = useCase();
   const session = useSession();
   const [tips, setTips] = useState(false);
   const choices = choicesFor(item);
+  const index = extras.rules?.index;
+  const cl = item.checklist ? extras.checklists?.checklists.find((x) => x.id === item.checklist) : undefined;
+
+  if (item.kind === "rule-input" && item.input) {
+    const { field, spec } = item.input;
+    const fact = factFor(c, field);
+    const unsure = session.ruleUnsure.includes(field) && (fact?.value === undefined || fact?.value === null);
+    if (spec.type === "number" || spec.type === "int") {
+      return <RuleNumberInput id={`cf-rule-${field}`} label={spec.label} unit={spec.unit} draft={draft} setDraft={setDraft} unsure={unsure} onUnsure={() => onPick(NOT_SURE_RULE)} note={note} />;
+    }
+    const current = unsure ? NOT_SURE_RULE : fact?.value === undefined || fact?.value === null ? undefined : String(fact.value);
+    return <Choices choices={choices} current={current} onPick={onPick} />;
+  }
+  if (item.kind === "rule" && item.rule && index) {
+    return (
+      <>
+        <RuleResultView rule={item.rule} index={index} />
+        {choices.length > 0 && <Choices choices={choices} current={picked ?? (item.done ? RULE_LEAVE : undefined)} onPick={onPick} />}
+        {busy && <p className="cf-note" role="status"><span className="cf-dot is-pending" aria-hidden="true" />Adding the rule…</p>}
+        {!busy && note && <p className="cf-note" role="alert"><span className="cf-dot is-warning" aria-hidden="true" />{note}</p>}
+      </>
+    );
+  }
+  if (item.kind === "package" && cl) {
+    return (
+      <>
+        <PackageOffer cl={cl} />
+        <Choices choices={choices} current={session.packages[cl.id] ?? (cl.conditions.some((x) => x.answer) ? PACKAGE_YES : undefined)} onPick={onPick} />
+      </>
+    );
+  }
+  if (item.kind === "condition" && cl) {
+    const row = cl.conditions.find((x) => x.id === item.condition);
+    if (!row) return null;
+    const current = picked ?? row.answer?.state;
+    return (
+      <ConditionBody cl={cl} row={row} position={position} reasonOpen={current === "does_not_apply"} reason={draft} setReason={setDraft} note={note} busy={busy} onReload={onReload}>
+        <Choices choices={choices} current={current} onPick={onPick} />
+      </ConditionBody>
+    );
+  }
+  if (item.kind === "package-end" && cl) return <PackageEnd cl={cl} />;
 
   if (item.kind === "section-d") {
     return <div className="cf-embed cf-sectiond"><Recommendations /></div>;
@@ -249,6 +299,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
 
   return (
     <>
+      {item.kind === "candidate" && item.rule && index && <RuleResultView rule={item.rule} index={index} onCard />}
       {item.kind === "fact" && item.read && <ReadSource copy={item.read} />}
       {item.provision && cand?.suggestion === "identify" ? (
         <ShowCode cand={cand} onMore={() => openDrawer({ mode: "code", candidateId: item.ref })} />
@@ -380,12 +431,13 @@ function NoQuestionsYet() {
 /* —— The application's deck —— */
 
 function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
-  const { c, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan } = useCase();
+  const { c, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan, answerChecklist, reloadChecklists } = useCase();
   const session = useSession();
   const { app, locked } = useCurrentApplication();
   const { onAnswer, decisionNoteFor } = useCandidateAnswer();
+  const { options: deckExtras, extras } = useDeckExtras();
   const seen = useMemo(() => new Set(session.seen), [session.seen]);
-  const all = buildDeck(c, gaps, { seen, includeDone: true, identify: reading.identify, intake: reading.intake, intakeNote: reading.intakeNote });
+  const all = buildDeck(c, gaps, { ...deckExtras, seen, includeDone: true, identify: reading.identify, intake: reading.intake, intakeNote: reading.intakeNote });
   const byKey = new Map(all.map((i) => [i.key, i] as const));
   const snapshots = useRef(new Map<string, DeckItem>());
   for (const i of all) snapshots.current.set(i.key, i);
@@ -426,6 +478,11 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   const [jumpTo, setJumpTo] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [planNotes, setPlanNotes] = useState<Record<string, string>>({});
+  /** Rule and package cards: a note per card (an error, or a 409 waiting for a reload), and the card being saved. */
+  const [cardNotes, setCardNotes] = useState<Record<string, string>>({});
+  const [conflicted, setConflicted] = useState<string | null>(null);
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+  const noteFor = (key: string, text: string) => setCardNotes((n) => ({ ...n, [key]: text }));
   // What the form is, said once: until dismissed, or until a few questions are answered.
   const [hintDismissed, setHintDismissed] = useState(() => {
     try { return localStorage.getItem(FORM_HINT_KEY) === "1"; } catch { return false; }
@@ -451,6 +508,12 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     else if (item.kind === "plan" && item.plan) {
       const saved = factFor(c, localField(item.plan.field))?.value;
       setDraft(saved == null || typeof saved === "boolean" ? "" : String(saved));
+    } else if (item.kind === "rule-input" && item.input) {
+      const saved = factFor(c, item.input.field)?.value;
+      setDraft(typeof saved === "number" ? String(saved) : "");
+    } else if (item.kind === "condition") {
+      const row = extras.checklists?.checklists.find((x) => x.id === item.checklist)?.conditions.find((x) => x.id === item.condition);
+      setDraft(row?.answer?.reason ?? "");
     } else setDraft("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentKey]);
@@ -511,7 +574,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
 
   // A code card the lookup replaced (article split into sentences) has nothing left to answer.
   useEffect(() => {
-    if (item?.gone && (item.kind === "candidate" || item.kind === "storeys")) moveFrom(index, false);
+    if (item?.gone && (item.kind === "candidate" || item.kind === "storeys" || item.kind === "rule" || item.kind === "rule-input" || item.kind === "condition" || item.kind === "package" || item.kind === "package-end")) moveFrom(index, false);
     // The code check finished while its card was open: the code questions take its place.
     if (item?.gone && item.kind === "code-run") {
       const code = queue.findIndex((k) => { const it = itemFor(k); return Boolean(it && !it.done && it.section === "C"); });
@@ -592,6 +655,10 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     if (it.kind === "question") return Boolean(draft.trim()) || it.done;
     if (it.kind === "storeys") return (Number.isInteger(Number(draft)) && Number(draft) > 0) || it.done;
     if (it.kind === "authority") return it.done || Boolean(c.authority) || session.authorityUnsure;
+    if (it.kind === "rule") return it.rule?.state !== "departs" || it.done || picked[it.key] === RULE_LEAVE;
+    if (it.kind === "package-end") return true;
+    if (it.kind === "rule-input" && it.input && (it.input.spec.type === "number" || it.input.spec.type === "int")) return it.done || Boolean(draft.trim());
+    if (it.kind === "condition") return busyKey !== it.key && ((picked[it.key] ?? currentState(it)) === "does_not_apply" ? Boolean(draft.trim()) : it.done);
     return it.done;
   }
 
@@ -607,6 +674,28 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       const saved = factFor(c, localField(item.plan.field))?.value;
       if (!item.done || String(saved ?? "") !== typed) {
         sendPlan(item, typed, true);
+        return;
+      }
+    }
+    if (item.kind === "rule-input" && item.input && draft.trim() && (item.input.spec.type === "number" || item.input.spec.type === "int")) {
+      const got = readNumber(item.input.spec, draft);
+      if ("error" in got) return noteFor(item.key, got.error);
+      noteFor(item.key, "");
+      const saved = factFor(c, item.input.field)?.value;
+      if (saved !== got.value) {
+        dispatch({ type: "setRuleInput", field: item.input.field, value: got.value, rule: item.input.rule, quote: `${draft.trim()}${item.input.spec.unit ? ` ${item.input.spec.unit}` : ""}` });
+        updateSession((s) => ({ ruleUnsure: s.ruleUnsure.filter((f) => f !== item.input!.field) }));
+        // Move on once the new value has rendered, so a question it opens comes next, not at the end.
+        if (!item.done) {
+          advanceAfter.current = item.key;
+          return;
+        }
+      }
+    }
+    if (item.kind === "condition" && (picked[item.key] ?? currentState(item)) === "does_not_apply") {
+      const row = conditionOf(item);
+      if (row && (row.answer?.state !== "does_not_apply" || (row.answer.reason ?? "") !== draft.trim())) {
+        sendCondition(item, "does_not_apply", draft.trim(), true);
         return;
       }
     }
@@ -634,8 +723,89 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     });
   }
 
+  function conditionOf(it: Shown) {
+    return extras.checklists?.checklists.find((x) => x.id === it.checklist)?.conditions.find((x) => x.id === it.condition);
+  }
+  function currentState(it: Shown) {
+    return conditionOf(it)?.answer?.state;
+  }
+
+  /** One checklist answer; a confirmed option records "does not apply" for the other options of its choice. */
+  function sendCondition(it: Shown, state: "confirmed" | "not_yet" | "does_not_apply", reason: string, advance: boolean) {
+    const cl = extras.checklists?.checklists.find((x) => x.id === it.checklist);
+    const row = conditionOf(it);
+    if (!cl || !row) return;
+    const key = it.key;
+    noteFor(key, "");
+    setBusyKey(key);
+    void (async () => {
+      let error = await answerChecklist(cl.id, row.id, state, reason);
+      if (!error && state === "confirmed") {
+        for (const other of otherOptions(cl, row)) {
+          error = await answerChecklist(cl.id, other.id, "does_not_apply", `Another option of this choice is followed instead (${row.option ?? row.source.label ?? "the confirmed option"}).`);
+          if (error) break;
+        }
+      }
+      setBusyKey((k) => (k === key ? null : k));
+      if (error) {
+        noteFor(key, error);
+        setConflicted(/changed somewhere else/.test(error) ? key : null);
+        return;
+      }
+      setConflicted(null);
+      if (advance) moveFrom(index, true);
+    })();
+  }
+
+  /** "Add this rule to my application": the departure becomes a Code check card, answered Yes. */
+  async function addRule(it: Shown) {
+    const r = it.rule;
+    if (!r) return;
+    const id = r.provision.id;
+    noteFor(it.key, "");
+    setBusyKey(it.key);
+    try {
+      const rec = await engine.provision(id, "B").catch(() => null);
+      const cand = provisionCandidate({ id, article_title: rec?.article_title ?? r.title, title: rec?.title ?? r.title, text: rec?.text ?? "", citation: rec?.citation ?? r.provision.citation });
+      dispatch({ type: "addCandidate", candidate: cand });
+      dispatch({ type: "answerCandidate", id: cand.id, answer: "yes" });
+    } finally {
+      setBusyKey((k) => (k === it.key ? null : k));
+    }
+  }
+
   function pick(value: string) {
     if (!item || locked) return;
+    if (item.kind === "rule-input" && item.input) {
+      const { field, rule, spec } = item.input;
+      setPicked((p) => ({ ...p, [item.key]: value }));
+      if (value === NOT_SURE_RULE) {
+        if (factFor(c, field)?.source.ref?.startsWith(RULE_REF)) dispatch({ type: "setRuleInput", field, value: null, rule, quote: "" });
+        updateSession((s) => ({ ruleUnsure: s.ruleUnsure.includes(field) ? s.ruleUnsure : [...s.ruleUnsure, field] }));
+        setDraft("");
+        return;
+      }
+      dispatch({ type: "setRuleInput", field, value: choiceValue(spec, value), rule, quote: choicesFor(item).find((x) => x.value === value)?.label ?? value });
+      updateSession((s) => ({ ruleUnsure: s.ruleUnsure.filter((f) => f !== field) }));
+      return;
+    }
+    if (item.kind === "rule") {
+      setPicked((p) => ({ ...p, [item.key]: value }));
+      if (value === RULE_ADD) void addRule(item);
+      else if (value === RULE_LEAVE) updateSession((s) => ({ seen: s.seen.includes(item.key) ? s.seen : [...s.seen, item.key] }));
+      return;
+    }
+    if (item.kind === "package" && item.checklist) {
+      const id = item.checklist;
+      updateSession((s) => ({ packages: { ...s.packages, [id]: value as "yes" | "no" } }));
+      return;
+    }
+    if (item.kind === "condition") {
+      setPicked((p) => ({ ...p, [item.key]: value }));
+      if (value === "does_not_apply") return; // the reason comes first; OK sends it
+      sendCondition(item, value as "confirmed" | "not_yet", "", false);
+      return;
+    }
     setPicked((p) => ({ ...p, [item.key]: value }));
     if (item.kind === "plan") sendPlan(item, value, value === NOT_SURE && planInput(item.plan?.field ?? "").kind !== "choices");
     else if (item.kind === "fact") {
@@ -728,7 +898,21 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
             )}
             <fieldset className="cf-q-body" disabled={locked}>
               <legend className="cf-sr">Your answer</legend>
-              <CardBody item={item} picked={picked[item.key]} onPick={pick} draft={draft} setDraft={setDraft} openDrawer={setDrawer} planNote={planNotes[item.key] ?? ""} firstPlan={item.kind === "plan" && queue.find((k) => k.startsWith("plan-")) === item.key} />
+              <CardBody
+                item={item}
+                picked={picked[item.key]}
+                onPick={pick}
+                draft={draft}
+                setDraft={setDraft}
+                openDrawer={setDrawer}
+                planNote={planNotes[item.key] ?? ""}
+                firstPlan={item.kind === "plan" && queue.find((k) => k.startsWith("plan-")) === item.key}
+                extras={extras}
+                note={cardNotes[item.key] ?? ""}
+                busy={busyKey === item.key}
+                onReload={conflicted === item.key ? () => void reloadChecklists().then((e) => { noteFor(item.key, e ?? ""); if (!e) setConflicted(null); }) : undefined}
+                position={item.kind === "condition" ? (extras.checklists?.checklists.find((x) => x.id === item.checklist)?.conditions.findIndex((x) => x.id === item.condition) ?? 0) + 1 : 0}
+              />
             </fieldset>
             {item.kind === "candidate" && decisionNoteFor(item.ref) && <p className="cf-note">{decisionNoteFor(item.ref)}</p>}
             {why && <p className="cf-why">{item.why}</p>}

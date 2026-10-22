@@ -5059,3 +5059,296 @@ a.cf-save-check {
     margin: 0 22px 10px;
   }
 }
+
+/* —— WP-35: coded rules, standing packages, the jurisdiction note and the download panel —— */
+
+/* A rule result: the numbers used as a quiet two-column list, then Show the code. No fills. */
+.cf-rule {
+  margin: 20px 0 0;
+  max-width: 640px;
+}
+
+.cf-rule.is-on-card {
+  margin-top: 18px;
+  padding-left: 16px;
+  border-left: 1px solid var(--cf-line-2);
+}
+
+.cf-rule-lead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--cf-text);
+}
+
+.cf-rule-nums {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  border-top: 1px solid var(--cf-line);
+}
+
+.cf-rule-num {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 4px 18px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--cf-line);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.cf-rule-num dt {
+  color: var(--cf-text-2);
+}
+
+.cf-rule-num dd {
+  margin: 0;
+  color: var(--cf-text);
+  overflow-wrap: anywhere;
+}
+
+.cf-rule-num dd b {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.cf-rule-num.is-limit dt,
+.cf-rule-num.is-limit dd b {
+  color: var(--cf-text-2);
+}
+
+.cf-rule-next {
+  margin: 14px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--cf-text-2);
+}
+
+.cf-rule-review,
+.cf-pkg-foot {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--cf-text-3);
+}
+
+.cf-rule-how {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px dashed var(--cf-line-2);
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--cf-text-2);
+}
+
+.cf-rule-how p {
+  margin: 6px 0 0;
+}
+
+.cf-rule-how .cf-rule-how-h {
+  margin: 0;
+  font: 400 12px/1.5 var(--cf-mono);
+  color: var(--cf-text-3);
+}
+
+.cf-rule-calc {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  gap: 4px 14px;
+  margin: 10px 0 0;
+}
+
+.cf-rule-calc dt {
+  color: var(--cf-text-3);
+}
+
+.cf-rule-calc dd {
+  margin: 0;
+  color: var(--cf-text);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.cf-rule-notchecked {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--cf-text-2);
+}
+
+.cf-rule-notchecked > summary,
+.cf-juris details > summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--cf-text-3);
+  border-radius: 6px;
+  transition-property: color;
+  transition-duration: 150ms;
+}
+
+@media (hover: hover) {
+  .cf-rule-notchecked > summary:hover,
+  .cf-juris details > summary:hover {
+    color: var(--cf-text);
+  }
+}
+
+.cf-rule-notchecked ul,
+.cf-pkg-ask ul,
+.cf-juris-notes {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  line-height: 1.5;
+}
+
+.cf-rule-notchecked li,
+.cf-pkg-ask li {
+  padding-left: 14px;
+  border-left: 1px solid var(--cf-line);
+}
+
+/* Standing packages: plain wording first, progress as one hairline bar. */
+.cf-pkg {
+  margin: 18px 0 0;
+  max-width: 640px;
+}
+
+.cf-pkg-summary {
+  margin: 0 0 8px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--cf-text-2);
+  text-wrap: pretty;
+}
+
+.cf-pkg-progress {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-size: 12.5px;
+}
+
+.cf-pkg-bar {
+  display: block;
+  height: 2px;
+  max-width: 320px;
+  border-radius: 999px;
+  background: var(--cf-line-2);
+  overflow: hidden;
+}
+
+.cf-pkg-bar i {
+  display: block;
+  height: 100%;
+  background: var(--cf-text-2);
+  transition-property: width;
+  transition-duration: 300ms;
+}
+
+.cf-pkg-reason {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+  justify-items: start;
+}
+
+.cf-pkg-reason .cf-uline {
+  width: 100%;
+}
+
+.cf-pkg-ask {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--cf-text-2);
+}
+
+/* The jurisdiction note under "Who will review your application?". */
+.cf-juris {
+  margin: 20px 0 0;
+  max-width: 640px;
+  padding-left: 16px;
+  border-left: 1px solid var(--cf-line-2);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--cf-text-2);
+}
+
+.cf-juris-h {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--cf-text);
+}
+
+.cf-juris p {
+  margin: 6px 0 0;
+}
+
+.cf-juris details {
+  margin-top: 8px;
+}
+
+.cf-juris-notes li {
+  display: grid;
+  gap: 2px;
+}
+
+.cf-juris-src {
+  font-size: 12.5px;
+  color: var(--cf-text-3);
+}
+
+.cf-juris-src a,
+.cf-pkg a.cf-inline-link {
+  color: var(--cf-text-2);
+  text-underline-offset: 2px;
+}
+
+/* Download panel: each blocker on its own row with the card that fixes it; the office's note. */
+.cf-side-blockers .cf-row-text {
+  font-size: 13px;
+}
+
+.cf-side-notice {
+  margin: 4px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--cf-line);
+  border-radius: 14px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--cf-text-2);
+}
+
+.cf-side-notice-h {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--cf-text);
+}
+
+.cf-side-notice p {
+  margin: 4px 0 0;
+}
+
+@media (max-width: 760px) {
+  .cf-rule-num {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .cf-rule-calc {
+    grid-template-columns: 1fr;
+  }
+  .cf-rule-calc dd {
+    text-align: left;
+  }
+}

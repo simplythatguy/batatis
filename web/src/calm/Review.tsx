@@ -5,11 +5,12 @@ import { professionalConfirmed } from "../professional";
 import { useCase } from "../store";
 import type { Case, Gap } from "../types";
 import { forkOf, scopeRedirect } from "../intakeView";
-import { buildDeck, deckProgress, gapKey } from "./deck";
+import { buildDeck, caseRules, deckProgress, gapKey } from "./deck";
 import { BeforeYouSubmit, ForkNote } from "./ReadCards";
 import { calmHref } from "./routes";
 import { rankedIn } from "./relevance";
 import { useSession } from "./session";
+import { useDeckExtras } from "./useDeckExtras";
 import { useRelevance } from "./useRelevance";
 import { CIcon, Dot, Eyebrow, Kbd, type DotTone } from "./ui";
 
@@ -102,7 +103,9 @@ function CaseReview() {
   const { c, gaps, notices, engineGaps, gapsSource, checkStatus, checkNote, checkDetail, requestCheck, reading } = useCase();
   const session = useSession();
   const [showAll, setShowAll] = useState(false);
-  const deck = buildDeck(c, gaps, { seen: new Set(session.seen), includeDone: true, identify: reading.identify });
+  const { options } = useDeckExtras();
+  const ruleFlags = caseRules(c, options).filter((r) => r.state === "departs").length;
+  const deck = buildDeck(c, gaps, { ...options, seen: new Set(session.seen), includeDone: true, identify: reading.identify });
   const { done, total } = deckProgress(deck);
   const openCards = deck.filter((i) => !i.done && !i.optional).length;
   const blocking = gaps.filter((g) => g.severity === "blocking");
@@ -251,6 +254,7 @@ function CaseReview() {
                     {summary}
                     {s.letter === "C" && <> · <a className="cf-inline-link" href={likely ? "#/code?filter=attention" : "#/code"}>Browse the code</a></>}
                     {s.letter === "C" && likely > 0 && <div className="cf-faint">{plural(likely, "article")} likely relate to your project</div>}
+                    {s.letter === "C" && ruleFlags > 0 && <div className="cf-faint">{plural(ruleFlags, "rule check")} {ruleFlags === 1 ? "flags" : "flag"} a departure · <a className="cf-inline-link" href="#/questions?first=code">See {ruleFlags === 1 ? "it" : "them"}</a></div>}
                   </div>
                 </div>
                 <Dot tone={engineer && tone === "done" ? "warning" : tone} />
