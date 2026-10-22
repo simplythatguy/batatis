@@ -10,7 +10,7 @@ import type { RuleDef, RuleIndex } from "../rules/evaluate.ts";
 import type { Candidate, Case, Fact } from "../types.ts";
 import { conditionChoices, coveredByOption, followedInFull, matchingChecklists, otherOptions, tallyLine } from "./checklistView.ts";
 import { buildDeck, caseRules, choicesFor, PACKAGE_YES, RULE_ADD, type DeckOptions } from "./deck.ts";
-import { caseRuleResults, numbersUsed, plainResult, readNumber, ruleInPlay, sharedInputs, type RuleData } from "./rulesView.ts";
+import { BUILDING_WIDE, caseRuleResults, numbersUsed, plainResult, readNumber, ruleInPlay, type RuleData } from "./rulesView.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const read = (path: string) => JSON.parse(readFileSync(join(ROOT, path), "utf8"));
@@ -41,8 +41,11 @@ const NO_EXCEPTIONS = ["sprinklered", "fire_response_over_10_min", "glass_blocks
 const opts = (extra: Partial<DeckOptions> = {}): DeckOptions => ({ rules: DATA, includeDone: true, confirmAuthority: true, ...extra });
 const keys = (c: Case, o: DeckOptions = opts()) => buildDeck(c, [], o).map((i) => i.key);
 
-test("only the shared building descriptors are excluded from putting a rule in play", () => {
-  assert.deepEqual([...sharedInputs(DATA)].sort(), ["building_area_m2", "occupancy", "storeys"]);
+test("building-wide facts alone never put a rule in play (a house that is not sprinklered asks no wall questions)", () => {
+  for (const f of BUILDING_WIDE) assert.ok(f in index.inputs, f);
+  const c = { ...demo(), facts: demo().facts.filter((f) => f.field !== "limiting_distance_m").concat(fact("sprinklered", "no"), fact("fire_response_over_10_min", false)) };
+  assert.deepEqual(caseRuleResults(c, DATA).filter((r) => ruleInPlay(c, DATA, r)).map((r) => r.rule_id), []);
+  assert.ok(!buildDeck(c, [], opts()).some((i) => i.kind === "rule-input"));
 });
 
 test("a known limiting distance puts the window and soffit rules in play, not the duct or firewall rules", () => {
@@ -189,8 +192,8 @@ test("a package matches by its name in the description, or a card on a provision
 test("the package is offered once; accepted, its conditions come one at a time, then the tally", () => {
   const offer = buildDeck(ZERO, [], opts({ checklists: list(checklist()) }));
   const pkg = offer.find((i) => i.kind === "package")!;
-  assert.equal(pkg.title, "Your city has a pre-approved path for this kind of project.");
-  assert.equal(pkg.optional, true);
+  assert.equal(pkg.title, "Your city has a pre-reviewed path for this kind of project.");
+  assert.equal(pkg.optional, false);
   assert.equal(choicesFor(pkg)[0].value, PACKAGE_YES);
   assert.ok(!offer.some((i) => i.kind === "condition"));
 
@@ -219,8 +222,10 @@ test("a confirmed option hides the other options of its choice; 'not yet' means 
   assert.equal(followedInFull(checklist(all)), true);
   assert.equal(followedInFull(checklist({ ...all, [first.id]: { state: "not_yet" } })), false);
   assert.doesNotMatch(tallyLine(checklist(all)), /complete|pass/i);
-  // An answered package needs no offer answer to show its conditions (a reopened application).
+  // An answered package needs no offer answer to show its conditions (a reopened application);
+  // "No, build my own case" removes them even after an answer.
   assert.ok(buildDeck(ZERO, [], opts({ checklists: list(cl) })).some((i) => i.kind === "condition"));
+  assert.ok(!buildDeck(ZERO, [], opts({ checklists: list(cl), packages: { [SPV001.id]: "no" } })).some((i) => i.kind === "condition" || i.kind === "package-end"));
 });
 
 test("an authority read from the site is confirmed once on its card; unanswered it is required", () => {

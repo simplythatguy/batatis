@@ -25,7 +25,7 @@ function PackageFoot({ cl, short = false }: { cl: CaseChecklist; short?: boolean
   );
 }
 
-/** "Your city has a pre-approved path": what the package is, and where it was published. */
+/** "Your city has a pre-reviewed path": what the standing package is, and where it was published. */
 export function PackageOffer({ cl }: { cl: CaseChecklist }) {
   return (
     <div className="cf-pkg">

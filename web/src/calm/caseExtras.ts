@@ -70,15 +70,22 @@ export function loadJurisdiction(id: string): Promise<void> {
   return p;
 }
 
-/** Re-read everything case-scoped. Older data stays on screen until the new read lands. */
-export async function refreshCase(caseId: string) {
+/**
+ * Re-read everything case-scoped. Older data stays on screen until the new read lands, and a read
+ * that saw an older case version than the one held (a GET racing a checklist answer) is dropped.
+ * Resolves false when a read failed.
+ */
+export async function refreshCase(caseId: string): Promise<boolean> {
   if (state.caseId !== caseId) state = { ...EMPTY, rules: state.rules, directory: state.directory, details: state.details, caseId };
   const live = () => state.caseId === caseId;
+  let ok = true;
+  const fail = () => { ok = false; };
   await Promise.all([
-    engine.caseRules(caseId).then((r) => { if (live()) set({ caseRules: r }); }, () => {}),
-    engine.caseChecklists(caseId).then((r) => { if (live()) set({ checklists: r }); }, () => {}),
-    engine.casePack(caseId).then((r) => { if (live()) set({ pack: r }); }, () => {}),
+    engine.caseRules(caseId).then((r) => { if (live() && r.case_version >= (state.caseRules?.case_version ?? 0)) set({ caseRules: r }); }, fail),
+    engine.caseChecklists(caseId).then((r) => { if (live() && r.case_version >= (state.checklists?.case_version ?? 0)) set({ checklists: r }); }, fail),
+    engine.casePack(caseId).then((r) => { if (live()) set({ pack: r }); }, fail),
   ]);
+  return ok;
 }
 
 /** A checklist answer's response: the whole checklist with answers at the committed version. */

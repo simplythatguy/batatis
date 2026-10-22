@@ -15,14 +15,15 @@ import { localField } from "../intakeFields";
 import { CodeProgress, ForkNote, ReadingState, ReadSource, RedirectPage, ShowCode } from "./ReadCards";
 import { Icon24 } from "./icons";
 import { RelevanceRing } from "./RelevanceRing";
-import { updateSession, useSession } from "./session";
+import { getSession, updateSession, useSession } from "./session";
 import { CIcon, MOD_KEY } from "./ui";
 import { engine } from "../api/client";
 import { provisionCandidate } from "../screens/SectionC";
 import { ConditionBody, PackageEnd, PackageOffer } from "./ChecklistCards";
 import { otherOptions } from "./checklistView";
 import { RuleNumberInput, RuleResultView } from "./RuleCards";
-import { choiceValue, NOT_SURE_RULE, readNumber, RULE_REF } from "./rulesView";
+import { choiceValue, NOT_SURE_RULE, readNumber, RULE_REF, ruleFacts } from "./rulesView";
+import { canonicalProvision } from "../provisions";
 import { useDeckExtras } from "./useDeckExtras";
 import { JurisdictionNote } from "./JurisdictionNote";
 import { PACKAGE_YES, RULE_ADD, RULE_LEAVE } from "./deck";
@@ -511,7 +512,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       const saved = factFor(c, localField(item.plan.field))?.value;
       setDraft(saved == null || typeof saved === "boolean" ? "" : String(saved));
     } else if (item.kind === "rule-input" && item.input) {
-      const saved = factFor(c, item.input.field)?.value;
+      const saved = extras.rules ? ruleFacts(c, extras.rules.index).get(item.input.field)?.value : undefined;
       setDraft(typeof saved === "number" ? String(saved) : "");
     } else if (item.kind === "condition") {
       const row = extras.checklists?.checklists.find((x) => x.id === item.checklist)?.conditions.find((x) => x.id === item.condition);
@@ -683,8 +684,8 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       const got = readNumber(item.input.spec, draft);
       if ("error" in got) return noteFor(item.key, got.error);
       noteFor(item.key, "");
-      const saved = factFor(c, item.input.field)?.value;
-      if (saved !== got.value) {
+      const saved = extras.rules ? ruleFacts(c, extras.rules.index).get(item.input.field)?.value : undefined;
+      if (!item.done || saved !== got.value) {
         dispatch({ type: "setRuleInput", field: item.input.field, value: got.value, rule: item.input.rule, quote: `${draft.trim()}${item.input.spec.unit ? ` ${item.input.spec.unit}` : ""}` });
         updateSession((s) => ({ ruleUnsure: s.ruleUnsure.filter((f) => f !== item.input!.field) }));
         // Move on once the new value has rendered, so a question it opens comes next, not at the end.
@@ -757,7 +758,12 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
         return;
       }
       setConflicted(null);
-      if (advance) moveFrom(index, true);
+      if (!advance) return;
+      // Move on only if the applicant is still on this card; a first answer moves once it renders.
+      const s = getSession();
+      if (s.queue[s.index] !== key) return;
+      if (!row.answer) advanceAfter.current = key;
+      else moveFrom(index, true);
     })();
   }
 
@@ -769,6 +775,12 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     noteFor(it.key, "");
     setBusyKey(it.key);
     try {
+      // A card for this sentence already exists (answered No earlier): answer it Yes instead.
+      const existing = c.candidates.find((a) => canonicalProvision(a.provision) === canonicalProvision(id));
+      if (existing) {
+        onAnswer(existing, "yes");
+        return;
+      }
       const rec = await engine.provision(id, "B").catch(() => null);
       const cand = provisionCandidate({ id, article_title: rec?.article_title ?? r.title, title: rec?.title ?? r.title, text: rec?.text ?? "", citation: rec?.citation ?? r.provision.citation });
       dispatch({ type: "addCandidate", candidate: cand });

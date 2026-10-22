@@ -81,16 +81,13 @@ export function caseRuleResults(c: Case, data: RuleData, stored?: CaseRules | nu
 }
 
 /**
- * Inputs nearly every rule shares (occupancy, storeys, building area) say what the building is, not
- * that a rule is in play. Derived from the data.
+ * Facts about the whole building (what it is, how big, sprinklers, the fire department) say nothing
+ * about which element the design changes, so they never put a rule in play on their own. A rule's
+ * element inputs (a wall's distance to the line, its window area, a soffit, a duct) do.
  */
-export function sharedInputs(data: RuleData): Set<string> {
-  const ids = data.index.rules;
-  const counts = new Map<string, number>();
-  for (const id of ids) for (const f of data.rules[id]?.inputs ?? []) counts.set(f, (counts.get(f) ?? 0) + 1);
-  // Used by every rule, or by all but one (occupancy is not asked by the duct rule).
-  return new Set([...counts].filter(([, n]) => n >= Math.max(ids.length - 1, 2)).map(([f]) => f));
-}
+export const BUILDING_WIDE: ReadonlySet<string> = new Set([
+  "occupancy", "storeys", "building_area_m2", "dwelling_unit_above_another", "sprinklered", "fire_response_over_10_min", "adjacent_rooms_sprinklered", "industrial_hazard",
+]);
 
 /** The code-check card for this rule's article, if the case has one the applicant has not ruled out. */
 export function linkedCandidate(c: Case, rule: { article: string }): Candidate | undefined {
@@ -99,12 +96,12 @@ export function linkedCandidate(c: Case, rule: { article: string }): Candidate |
 
 /**
  * A rule joins the deck when the case points at it: a code-check card for its article, or one of the
- * rule's own inputs (a number only this kind of rule uses, such as the limiting distance) is known.
+ * rule's element inputs (such as a wall's limiting distance) is known.
  */
-export function ruleInPlay(c: Case, data: RuleData, r: ShownRule, shared = sharedInputs(data)): boolean {
+export function ruleInPlay(c: Case, data: RuleData, r: ShownRule): boolean {
   if (linkedCandidate(c, r)) return true;
   const facts = ruleFacts(c, data.index);
-  return (data.rules[r.rule_id]?.inputs ?? []).some((f) => !shared.has(f) && facts.has(f));
+  return (data.rules[r.rule_id]?.inputs ?? []).some((f) => !BUILDING_WIDE.has(f) && facts.has(f));
 }
 
 /** A value with its unit, the way the engine writes it ("1.2 m", "4 m²", "Yes"). */
@@ -135,7 +132,7 @@ const PLAIN: Record<string, { topic: string; departs: (r: RuleResult) => string;
       : `Your window area is more than the code’s table allows${at(r)}.`,
     follows: (r) => r.outcome_id === "follows_own_garage"
       ? "This wall faces your own detached garage, so the window limits don’t apply."
-      : `Your window area is within what the code allows${at(r)}.`,
+      : `Your window area is within the code’s standard way${at(r)}.`,
     limit: { name: "sentence_1_limit_m2", label: "Most window area the code’s table allows" },
   },
   "unprotected-openings": {
@@ -143,7 +140,7 @@ const PLAIN: Record<string, { topic: string; departs: (r: RuleResult) => string;
     departs: (r) => r.outcome_id === "departs_no_openings"
       ? `${at(r).replace(" at", "At") || "At this distance"} from the property line, the code’s table allows no unprotected openings in this wall.`
       : `Your opening area is more than the code’s table allows${at(r)}.`,
-    follows: (r) => `Your opening area is within what the code allows${at(r)}.`,
+    follows: (r) => `Your opening area is within the code’s standard way${at(r)}.`,
     limit: { name: "sentence_1_limit_m2", label: "Most opening area the code’s table allows" },
   },
   "soffits-houses": {
@@ -151,12 +148,12 @@ const PLAIN: Record<string, { topic: string; departs: (r: RuleResult) => string;
     departs: (r) => r.outcome_id === "departs_close_face"
       ? "The code’s standard way allows no roof overhang above a wall this close to the property line."
       : "Your roof overhang comes closer to the property line than the code’s 0.45 m.",
-    follows: () => "Your roof overhang stays far enough from the property line.",
+    follows: () => "Your roof overhang follows the code’s standard way for its distance from the property line.",
   },
   "firewall-suite-rowhouses": {
     topic: "Firewalls between row houses with suites",
     departs: () => "More than two neighbouring houses with a secondary suite share one section without a firewall between them.",
-    follows: () => "No more than two neighbouring houses with a suite sit between firewalls.",
+    follows: () => "Your firewalls follow the code’s standard way: no more than two neighbouring houses with a suite between them.",
   },
   "fire-dampers": {
     topic: "Ducts through a fire separation",

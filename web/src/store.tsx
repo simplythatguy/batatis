@@ -722,7 +722,10 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       if (!live()) return null;
       if (!id) return "Your draft wasn’t saved, so the answer wasn’t either. Try again.";
       const expected = acknowledgedVersion(id);
-      if (needsReconcile(id) || expected === null) return CONFLICT_TEXT;
+      if (needsReconcile(id) || expected === null) {
+        noteConflict(id);
+        return CONFLICT_TEXT;
+      }
       try {
         const result = await engine.answerChecklist(id, checklistId, { condition_id: conditionId, state, reason: reason?.trim() || null, expected_version: expected });
         if (!live()) return null;
@@ -746,9 +749,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       const id = engineCaseId();
       if (!id || !isEngineGeneration(token)) return null;
       try {
-        if (needsReconcile(id)) refreshed(await reconcileEngineCase(id), latestCase.current);
-        await refreshCase(id);
-        return null;
+        if (needsReconcile(id) || acknowledgedVersion(id) === null) refreshed(await reconcileEngineCase(id), latestCase.current);
+        return (await refreshCase(id)) ? null : "The checklist didn’t load. Try again.";
       } catch (e) {
         if (isCaseGone(e)) {
           goneCase.current = id;

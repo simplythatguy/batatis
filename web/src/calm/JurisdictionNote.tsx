@@ -34,7 +34,7 @@ function PackDetail({ pack, extras }: { pack: JurisdictionDetail; extras: CaseEx
       {pack.authority.contact && <p>{pack.authority.contact}</p>}
       {current.length > 0 && (
         <p className="cf-faint">
-          This office publishes {current.length === 1 ? "one pre-approved path" : `${current.length} pre-approved paths`} ({current.map((p) => p.code).join(", ")}). Batatis offers one if your project fits.
+          This office publishes {current.length === 1 ? "one pre-reviewed path" : `${current.length} pre-reviewed paths`} (standing {current.length === 1 ? "package" : "packages"} {current.map((p) => p.code).join(", ")}). Batatis offers one if your project fits.
         </p>
       )}
       {local.length > 0 && (

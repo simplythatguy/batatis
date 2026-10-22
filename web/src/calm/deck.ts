@@ -18,7 +18,7 @@ import type { CaseChecklists, CaseRules } from "../api/types.gen";
 import type { InputSpec } from "../rules/evaluate";
 import { conditionChoices, coveredByOption, followedInFull, groupOf, matchingChecklists, tallyLine } from "./checklistView";
 import { calmHref } from "./routes";
-import { caseRuleResults, inputChoices, linkedCandidate, plainResult, RULE_REF, ruleFacts, ruleInPlay, ruleTopic, sharedInputs, type RuleData, type ShownRule } from "./rulesView";
+import { caseRuleResults, inputChoices, linkedCandidate, plainResult, RULE_REF, ruleFacts, ruleInPlay, ruleTopic, type RuleData, type ShownRule } from "./rulesView";
 
 /** Choice values on rule and package cards. */
 export const RULE_ADD = "add";
@@ -139,8 +139,7 @@ const RULE_WHY = "Batatis compares the numbers you give with one acceptable solu
 /** Coded rules and standing packages that apply to this case, ready to place in the Rules step. */
 export function caseRules(c: Case, opts: DeckOptions): ShownRule[] {
   if (!opts.rules) return [];
-  const shared = sharedInputs(opts.rules);
-  return caseRuleResults(c, opts.rules, opts.storedRules).filter((r) => ruleInPlay(c, opts.rules!, r, shared));
+  return caseRuleResults(c, opts.rules, opts.storedRules).filter((r) => ruleInPlay(c, opts.rules!, r));
 }
 
 const DETAIL_QUESTION: Record<string, string> = {
@@ -545,17 +544,18 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       key: `pkg-${cl.id}`,
       kind: "package",
       section: "C",
-      eyebrow: "A pre-approved path",
-      title: "Your city has a pre-approved path for this kind of project.",
-      context: `Follow the conditions of ${cl.code}, ${cl.title}, instead of building a full case?`,
+      eyebrow: "A pre-reviewed path",
+      title: "Your city has a pre-reviewed path for this kind of project.",
+      context: `Follow the conditions of its standing package ${cl.code}, ${cl.title}, instead of building a full case?`,
       why: `${cl.summary} ${cl.notice}`,
       ref: cl.id,
       done: Boolean(choice) || answered,
-      optional: true,
+      // A real choice: skipped, it comes back once at the end of the pass (even if it joined late).
+      optional: false,
       checklist: cl.id,
       choices: [{ value: PACKAGE_YES, label: "Yes, follow its conditions" }, { value: PACKAGE_NO, label: "No, build my own case" }],
     });
-    if (choice !== "yes" && !answered) continue;
+    if (choice === "no" || (choice !== "yes" && !answered)) continue;
     for (const row of cl.conditions) {
       if (!row.answer && coveredByOption(cl, row)) continue;
       const group = groupOf(cl, row);
