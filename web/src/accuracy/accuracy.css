@@ -121,8 +121,8 @@
 .acc-table caption { padding: 0 0 8px; text-align: left; font-size: 13.5px; font-weight: 550; color: var(--cf-text); }
 .acc-table th, .acc-table td { padding: 8px 12px 8px 0; border-bottom: 1px solid var(--cf-line); text-align: left; vertical-align: top; }
 .acc-table thead th { font-weight: 500; color: var(--cf-text-3); white-space: nowrap; }
-.acc-table tbody th { min-width: 200px; font-weight: 450; color: var(--cf-text); }
-.acc-table td { color: var(--cf-text-2); white-space: nowrap; }
+.acc-table tbody th { min-width: 180px; font-weight: 450; color: var(--cf-text); }
+.acc-table td { color: var(--cf-text-2); min-width: 64px; }
 
 @media (max-width: 640px) {
   .acc-page .ac-page-body.is-narrow { padding: 32px 20px 72px; }

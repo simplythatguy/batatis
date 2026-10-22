@@ -594,8 +594,8 @@ def note_text(row: dict) -> str:
             out.append('showed a fabricated citation')
         elif 'H2_p95' in n:
             out.append('too slow (limit 20 s)')
-    if not out and row.get('p_worse') is not None and not row.get('tied'):
-        out.append('worse than the best on the paired test, or more than 3 points behind')
+    if not out and row.get('p_worse') is not None:
+        out.append('tied with the best; the rule prefers a cheaper one' if row.get('tied') else 'not tied with the best')
     return '; '.join(dict.fromkeys(out)) or '-'
 
 
@@ -685,6 +685,11 @@ def code_id_from_probe(p: dict, commit: str, where: str) -> dict:
             return f'{e["repeats"]} verifier runs over {screen_draws} relevance draws'
         return f'{e["repeats"]} draw{"s" if e["repeats"] != 1 else ""}'
 
+    def short_runs(e: dict, arm: str) -> str:
+        if p['kinds'].get(arm) == 'verify':
+            return f'{e["repeats"]} runs, {screen_draws} draws'
+        return f'{e["repeats"]} run{"s" if e["repeats"] != 1 else ""}'
+
     def fig(fid, label, arm, e, *, dataset, sample, tags, note=None):
         s = e['success']
         return figure(fid, label, s['x'], s['n'], dataset=dataset, sample=sample, date=date, source=src(chain(arm)),
@@ -736,8 +741,7 @@ def code_id_from_probe(p: dict, commit: str, where: str) -> dict:
         r = by_arm.get(arm, {})
         lo, hi = s['wilson_95']
         table.append([label, f'{count(s["x"])} of {s["n"]}', f'{s["rate"] * 100:.1f}% ({lo * 100:.1f}–{hi * 100:.1f})',
-                      draws(e, arm), '-' if e['usd_per_case_run'] is None else f'US${e["usd_per_case_run"]:.4f}',
-                      'yes' if r.get('tied') else 'no',
+                      short_runs(e, arm), '-' if e['usd_per_case_run'] is None else f'US${e["usd_per_case_run"]:.4f}',
                       'chosen' if arm == winner else ('carried as provisional' if arm == provisional else note_text(r))])
     by_group = []
     for arm in [PRODUCT, SCREEN_RERANK, FLOOR]:
@@ -787,7 +791,7 @@ def code_id_from_probe(p: dict, commit: str, where: str) -> dict:
 
     detail = [
         {'title': 'Every pipeline the benchmark compared (selection folds)',
-         'header': ['Pipeline', 'Right article', 'Rate (Wilson 95%)', 'Runs', 'Cost per case run', 'Tied with the best', 'Decision'],
+         'header': ['Pipeline', 'Right article', 'Rate (Wilson 95%)', 'Runs', 'Cost per case run', 'Decision'],
          'rows': table},
         {'title': 'By Part group (selection folds)', 'header': ['Pipeline', 'Part 9', 'Other Parts', 'Mixed'], 'rows': by_group},
         {'title': 'Verification model: first article right, by Part (all cases with known answers)',
