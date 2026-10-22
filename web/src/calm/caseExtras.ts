@@ -22,12 +22,17 @@ export interface CaseExtras {
   directory: JurisdictionsResult | null;
   /** GET /jurisdictions/{id}, by pack id. */
   details: Record<string, JurisdictionDetail>;
+  /** Reads that failed, so screens can say so and offer Try again (`retryExtras`). */
+  failed: { rules?: boolean; case?: boolean; directory?: boolean; details: Record<string, boolean> };
 }
 
-const EMPTY: CaseExtras = { caseId: null, rules: null, caseRules: null, checklists: null, pack: null, directory: null, details: {} };
+const EMPTY: CaseExtras = { caseId: null, rules: null, caseRules: null, checklists: null, pack: null, directory: null, details: {}, failed: { details: {} } };
 let state: CaseExtras = EMPTY;
 const listeners = new Set<() => void>();
 let loadedKey = "";
+/** The latest case refresh; an older one finishing late never overwrites the pack. */
+let refreshSeq = 0;
+const fail = (patch: Partial<CaseExtras["failed"]>) => set({ failed: { ...state.failed, ...patch } });
 let rulesLoad: Promise<void> | null = null;
 let directoryLoad: Promise<void> | null = null;
 const detailLoads = new Map<string, Promise<void>>();
@@ -48,15 +53,15 @@ function subscribe(l: () => void) {
 function loadRules(): Promise<void> {
   if (state.rules) return Promise.resolve();
   rulesLoad ??= engine.rules().then(
-    (r) => set({ rules: { index: r.index, rules: Object.fromEntries(r.rules.map((d) => [d.id, d])) } }),
-    () => { rulesLoad = null; },
+    (r) => { set({ rules: { index: r.index, rules: Object.fromEntries(r.rules.map((d) => [d.id, d])) } }); fail({ rules: false }); },
+    () => { rulesLoad = null; fail({ rules: true }); },
   );
   return rulesLoad;
 }
 
 export function loadDirectory(): Promise<void> {
   if (state.directory) return Promise.resolve();
-  directoryLoad ??= engine.jurisdictions().then((d) => set({ directory: d }), () => { directoryLoad = null; });
+  directoryLoad ??= engine.jurisdictions().then((d) => { set({ directory: d }); fail({ directory: false }); }, () => { directoryLoad = null; fail({ directory: true }); });
   return directoryLoad;
 }
 
@@ -64,7 +69,10 @@ export function loadJurisdiction(id: string): Promise<void> {
   if (state.details[id]) return Promise.resolve();
   let p = detailLoads.get(id);
   if (!p) {
-    p = engine.jurisdiction(id).then((d) => set({ details: { ...state.details, [id]: d } }), () => { detailLoads.delete(id); });
+    p = engine.jurisdiction(id).then(
+      (d) => { set({ details: { ...state.details, [id]: d } }); fail({ details: { ...state.failed.details, [id]: false } }); },
+      () => { detailLoads.delete(id); fail({ details: { ...state.failed.details, [id]: true } }); },
+    );
     detailLoads.set(id, p);
   }
   return p;
@@ -76,15 +84,17 @@ export function loadJurisdiction(id: string): Promise<void> {
  * Resolves false when a read failed.
  */
 export async function refreshCase(caseId: string): Promise<boolean> {
-  if (state.caseId !== caseId) state = { ...EMPTY, rules: state.rules, directory: state.directory, details: state.details, caseId };
+  if (state.caseId !== caseId) state = { ...EMPTY, rules: state.rules, directory: state.directory, details: state.details, failed: state.failed, caseId };
+  const seq = ++refreshSeq;
   const live = () => state.caseId === caseId;
   let ok = true;
-  const fail = () => { ok = false; };
+  const miss = () => { ok = false; };
   await Promise.all([
-    engine.caseRules(caseId).then((r) => { if (live() && r.case_version >= (state.caseRules?.case_version ?? 0)) set({ caseRules: r }); }, fail),
-    engine.caseChecklists(caseId).then((r) => { if (live() && r.case_version >= (state.checklists?.case_version ?? 0)) set({ checklists: r }); }, fail),
-    engine.casePack(caseId).then((r) => { if (live()) set({ pack: r }); }, fail),
+    engine.caseRules(caseId).then((r) => { if (live() && r.case_version >= (state.caseRules?.case_version ?? 0)) set({ caseRules: r }); }, miss),
+    engine.caseChecklists(caseId).then((r) => { if (live() && r.case_version >= (state.checklists?.case_version ?? 0)) set({ checklists: r }); }, miss),
+    engine.casePack(caseId).then((r) => { if (live() && seq === refreshSeq) set({ pack: r }); }, miss),
   ]);
+  if (live() && seq === refreshSeq) fail({ case: !ok });
   return ok;
 }
 
@@ -95,9 +105,17 @@ export function setChecklist(caseId: string, checklist: CaseChecklists["checklis
   set({ checklists: { ...cur, case_version: caseVersion, checklists: cur.checklists.map((x) => (x.id === checklist.id ? checklist : x)) } });
 }
 
+/** Try again after a failed read: the rule data, the case's reads, the directory and any failed pack. */
+export function retryExtras() {
+  void loadRules();
+  if (state.caseId) void refreshCase(state.caseId);
+  if (state.failed.directory) void loadDirectory();
+  for (const [id, bad] of Object.entries(state.failed.details)) if (bad) void loadJurisdiction(id);
+}
+
 export function resetExtras() {
   loadedKey = "";
-  state = { ...EMPTY, rules: state.rules, directory: state.directory, details: state.details };
+  state = { ...EMPTY, rules: state.rules, directory: state.directory, details: state.details, failed: { ...state.failed, case: false } };
   for (const l of listeners) l();
 }
 

@@ -15,7 +15,7 @@ import { gapKey } from "./deck";
 import { calmHref } from "./routes";
 import { EngineerCallout } from "./Review";
 import { CIcon, Dot, Eyebrow } from "./ui";
-import { useCaseExtras } from "./caseExtras";
+import { retryExtras, useCaseExtras } from "./caseExtras";
 
 function Missing() {
   return <span className="cf-sheet-missing"><span className="cf-sheet-dot" aria-hidden="true" />— <em>missing</em></span>;
@@ -334,6 +334,11 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
           </div>
         )}
         {filled && <p className="cf-faint cf-small">Batatis fills {filled.title}{filled.version ? ` (${filled.version})` : ""}.</p>}
+        {!pack && c.authority && engineId && (
+          extras.failed.case
+            ? <p className="cf-note cf-small" role="status"><Dot tone="warning" />The office’s notes for the download didn’t load. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
+            : <p className="cf-faint cf-small" role="status">Loading the office’s notes for the download…</p>
+        )}
         {exportNotices.map((n) => (
           <div key={n.id} className="cf-side-notice" role="note">
             <p className="cf-side-notice-h">{n.heading}</p>

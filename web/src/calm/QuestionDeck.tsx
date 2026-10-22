@@ -16,6 +16,8 @@ import { CodeProgress, ForkNote, ReadingState, ReadSource, RedirectPage, ShowCod
 import { Icon24 } from "./icons";
 import { RelevanceRing } from "./RelevanceRing";
 import { getSession, updateSession, useSession } from "./session";
+import { CONFLICT_TEXT } from "../api/sync";
+import { retryExtras } from "./caseExtras";
 import { CIcon, MOD_KEY } from "./ui";
 import { engine } from "../api/client";
 import { provisionCandidate } from "../screens/SectionC";
@@ -754,7 +756,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
         // Nothing was saved: the choice goes back to the saved answer.
         setPicked((p) => { const { [key]: _drop, ...rest } = p; return rest; });
         noteFor(key, error);
-        setConflicted(/changed somewhere else/.test(error) ? key : null);
+        setConflicted(error === CONFLICT_TEXT ? key : null);
         return;
       }
       setConflicted(null);
@@ -781,10 +783,13 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
         onAnswer(existing, "yes");
         return;
       }
-      const rec = await engine.provision(id, "B").catch(() => null);
-      const cand = provisionCandidate({ id, article_title: rec?.article_title ?? r.title, title: rec?.title ?? r.title, text: rec?.text ?? "", citation: rec?.citation ?? r.provision.citation });
+      const rec = await engine.provision(id, "B");
+      const cand = provisionCandidate({ id, article_title: rec.article_title ?? r.title, title: rec.title ?? r.title, text: rec.text, citation: rec.citation ?? r.provision.citation });
       dispatch({ type: "addCandidate", candidate: cand });
       dispatch({ type: "answerCandidate", id: cand.id, answer: "yes" });
+    } catch {
+      setPicked((p) => { const { [it.key]: _drop, ...rest } = p; return rest; });
+      noteFor(it.key, "The rule couldn’t be added just now. Try again.");
     } finally {
       setBusyKey((k) => (k === it.key ? null : k));
     }
@@ -931,6 +936,9 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
               />
             </fieldset>
             {item.kind === "candidate" && decisionNoteFor(item.ref) && <p className="cf-note">{decisionNoteFor(item.ref)}</p>}
+            {item.section === "C" && (extras.failed.rules || extras.failed.case) && (
+              <p className="cf-note" role="status"><span className="cf-dot is-warning" aria-hidden="true" />Rule checks didn’t load, so some rule questions may be missing. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
+            )}
             {why && <p className="cf-why">{item.why}</p>}
             {!canContinue(item) && !locked && <p className="cf-hint" role="note">Answer to continue, or skip for now.</p>}
             <OkRow label={item.kind === "section-d" ? "Finish Section D" : item.kind === "code-run" ? "Continue" : "OK"} disabled={!canContinue(item)} onOk={next} typed={typed}>

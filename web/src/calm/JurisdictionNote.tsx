@@ -6,7 +6,20 @@
  */
 import { useEffect } from "react";
 import type { JurisdictionDetail, PackSource } from "../api/types.gen";
-import { loadDirectory, loadJurisdiction, type CaseExtras } from "./caseExtras";
+import { loadDirectory, loadJurisdiction, retryExtras, type CaseExtras } from "./caseExtras";
+
+/** Loading or failed: say so, with Try again on failure. */
+function Pending({ failed, what }: { failed: boolean; what: string }) {
+  return (
+    <div className="cf-juris" role="status">
+      {failed ? (
+        <p className="cf-note"><Dot tone="warning" />{what} didn’t load. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
+      ) : (
+        <p className="cf-faint">Loading {what.toLowerCase()}…</p>
+      )}
+    </div>
+  );
+}
 import { CIcon, Dot } from "./ui";
 
 function Sources({ sources }: { sources: PackSource[] }) {
@@ -74,7 +87,7 @@ function Elsewhere({ extras }: { extras: CaseExtras }) {
   const dir = extras.directory;
   const fallback = dir?.jurisdictions.find((j) => j.fallback);
   useEffect(() => { if (fallback) void loadJurisdiction(fallback.id); }, [fallback?.id]); // eslint-disable-line react-hooks/exhaustive-deps
-  if (!dir || !fallback) return null;
+  if (!dir || !fallback) return <Pending failed={Boolean(extras.failed.directory)} what="Where else applications go" />;
   const finder = extras.details[fallback.id]?.authority.sources[0];
   const preview = dir.coverage.filter((c) => c.coverage === "preview").length;
   return (
@@ -92,7 +105,7 @@ export function JurisdictionNote({ authority, unsure, extras }: { authority: str
   useEffect(() => { if (authority) void loadJurisdiction(authority); }, [authority]);
   if (authority) {
     const pack = extras.details[authority];
-    return pack ? <PackDetail pack={pack} extras={extras} /> : null;
+    return pack ? <PackDetail pack={pack} extras={extras} /> : <Pending failed={Boolean(extras.failed.details[authority])} what="The office’s notes" />;
   }
   return unsure ? <Elsewhere extras={extras} /> : null;
 }
