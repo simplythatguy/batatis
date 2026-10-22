@@ -18,7 +18,7 @@ from pydantic.json_schema import GenerateJsonSchema, models_json_schema
 from .api import NewCase, SectionCRequest
 from .code_library import CodeTOC, ProvisionContext
 from .models import Case, Fact, SectionCRow
-from .account_models import UserResult, MessagesResult
+from .account_models import ApplicationPreferences, ApplicationPreferencesPatch, UserResult, MessagesResult
 from .routes_auth import SignupRequest, LoginRequest, OnboardingRequest
 from .routes_review import (NotificationsResult, ApplicationsResult, QueueResult, ClaimResult, ClaimRequest,
                             DecisionRequest, MessageRequest)
@@ -39,12 +39,13 @@ RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesR
              QueueResult, ClaimResult, AssistResult, NotificationsResult, IdentifyDecisionResponse,
              ReviewSession, PackageReviewIndex, SentInformationRequests,
              JurisdictionsResult, JurisdictionDetail, CaseJurisdictionPack, IntakeResult, CaseRules, RuleSet,
-             JurisdictionChecklists, CaseChecklists, ChecklistAnswerResult)  # responses carry every field
+             JurisdictionChecklists, CaseChecklists, ChecklistAnswerResult,
+             ApplicationPreferences)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
             ClaimRequest, DecisionRequest, MessageRequest, AssistRequest, InformationRequestEdit,
             IntakeRequest, AnswersRequest, ScopeRequest, PlanRequest,
             IdentifyRequest, IdentifyDecisionRequest, IdentifyConfirmRequest, BenchmarkConfirmRequest,
-            ChecklistAnswerRequest, TitleRequest)  # defaulted fields optional
+            ChecklistAnswerRequest, TitleRequest, ApplicationPreferencesPatch)  # defaulted fields optional
 
 
 class _ResponsesCarryDefaults(GenerateJsonSchema):

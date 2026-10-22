@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import get_args, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, model_validator
 
 from .models_ids import new_id, now
 
@@ -34,6 +34,24 @@ class User(BaseModel):
 
 class UserResult(BaseModel):
     user: User
+
+
+class ApplicationPreferences(BaseModel):
+    archived: bool = False
+    pinned: bool = False
+
+
+class ApplicationPreferencesPatch(BaseModel):
+    """Omitted fields keep their stored value; explicit values must be booleans."""
+    model_config = ConfigDict(extra='forbid', json_schema_extra={'minProperties': 1})
+    archived: StrictBool = False
+    pinned: StrictBool = False
+
+    @model_validator(mode='after')
+    def _nonempty(self):
+        if not self.model_fields_set:
+            raise ValueError('Supply archived or pinned')
+        return self
 
 
 class Claim(BaseModel):

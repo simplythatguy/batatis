@@ -1,8 +1,9 @@
 """Accounts on the same durable database as cases; no second storage configuration.
 
 Case history/messages are part of the case JSON and its CAS transaction. These
-tables contain only accounts, hashed sessions, short-lived OAuth exchanges and
-hashed rate-limit keys. SQL is intentionally portable between SQLite and Postgres.
+tables contain accounts, hashed sessions, short-lived OAuth exchanges, hashed
+rate-limit keys and account-relative application-list flags. SQL is portable
+between SQLite and Postgres.
 """
 from __future__ import annotations
 
@@ -11,7 +12,7 @@ import time
 from contextlib import closing, contextmanager
 from types import SimpleNamespace
 
-from .account_models import User
+from .account_models import ApplicationPreferences, ApplicationPreferencesPatch, User
 
 ACCOUNT_MIGRATIONS = (
     'CREATE TABLE IF NOT EXISTS account_users (id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, data TEXT NOT NULL)',
@@ -25,6 +26,14 @@ ACCOUNT_MIGRATIONS = (
     'expires_at DOUBLE PRECISION NOT NULL)',
     'CREATE TABLE IF NOT EXISTS account_rates (bucket TEXT PRIMARY KEY, hits INTEGER NOT NULL, '
     'expires_at DOUBLE PRECISION NOT NULL)',
+    'CREATE TABLE IF NOT EXISTS account_application_preferences ('
+    'user_id TEXT NOT NULL REFERENCES account_users(id) ON DELETE CASCADE, '
+    'application_id TEXT NOT NULL REFERENCES cases(id) ON DELETE CASCADE, '
+    'archived BOOLEAN NOT NULL DEFAULT FALSE CHECK (archived IN (FALSE, TRUE)), '
+    'pinned BOOLEAN NOT NULL DEFAULT FALSE CHECK (pinned IN (FALSE, TRUE)), '
+    'PRIMARY KEY(user_id, application_id))',
+    'CREATE INDEX IF NOT EXISTS account_application_preferences_case '
+    'ON account_application_preferences(application_id)',
 )
 
 
@@ -48,6 +57,45 @@ class AccountsMixin:
     def init_accounts(self, con):
         for statement in ACCOUNT_MIGRATIONS:
             con.execute(statement)
+
+    def list_application_preferences(self, user_id: str) -> dict[str, ApplicationPreferences]:
+        """Only the account's preferences for its currently owned applications."""
+        with self.account_db() as db:
+            owner = "c.data->>'owner_id'" if db.postgres else "json_extract(c.json, '$.owner_id')"
+            rows = db.execute('SELECT p.application_id, p.archived, p.pinned '
+                              'FROM account_application_preferences p JOIN cases c ON c.id=p.application_id '
+                              f'WHERE p.user_id=? AND {owner}=?', (user_id, user_id)).fetchall()
+        return {row[0]: ApplicationPreferences(archived=row[1], pinned=row[2]) for row in rows}
+
+    def patch_application_preferences(self, application_id: str, user: User,
+                                      changes: dict[str, bool]) -> ApplicationPreferences | None:
+        """Authorize the locked current case and patch only the supplied flags.
+
+        The case lock serializes this with deletion/ownership changes and other
+        preference patches. No Case/User read-modify-write or session revocation.
+        """
+        from .access import authorize_application_preferences
+
+        patch = ApplicationPreferencesPatch.model_validate(changes).model_dump(exclude_unset=True)
+        with self.account_db() as db:
+            column, lock = ('data', ' FOR UPDATE') if db.postgres else ('json', '')
+            row = db.execute(f'SELECT {column} FROM cases WHERE id=?' + lock, (application_id,)).fetchone()
+            if row is None or self._purge_expired(db.con, application_id):
+                return None  # Commit an expiry deletion before the route reports 404.
+            payload = row[0] if db.postgres else json.loads(row[0])
+            authorize_application_preferences(SimpleNamespace(owner_id=payload.get('owner_id')), user)
+            # Keep account deletion from racing the foreign-key insert. Role does not
+            # affect ownership of list metadata; a reviewer can organize their own cases.
+            account_lock = ' FOR KEY SHARE' if db.postgres else ''
+            if db.execute('SELECT id FROM account_users WHERE id=?' + account_lock, (user.id,)).fetchone() is None:
+                return None
+            updates = ', '.join(f'{field}=excluded.{field}' for field in patch)
+            saved = db.execute('INSERT INTO account_application_preferences '
+                               '(user_id,application_id,archived,pinned) VALUES (?,?,?,?) '
+                               f'ON CONFLICT(user_id,application_id) DO UPDATE SET {updates} '
+                               'RETURNING archived,pinned',
+                               (user.id, application_id, patch.get('archived', False), patch.get('pinned', False))).fetchone()
+            return ApplicationPreferences(archived=saved[0], pinned=saved[1])
 
     def create_user(self, user: User, password: dict | None = None) -> bool:
         data = json.dumps({'user': user.model_dump(), 'password': password})
