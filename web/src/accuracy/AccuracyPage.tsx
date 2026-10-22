@@ -124,10 +124,10 @@ function SectionBlock({ s }: { s: Section }) {
   );
 }
 
-export function AccuracyPage({ phoneTools, right }: { phoneTools?: ReactNode; right?: ReactNode }) {
+export function AccuracyPage({ phoneTools, right, standalone = false }: { phoneTools?: ReactNode; right?: ReactNode; standalone?: boolean }) {
   const { report, error } = LOADED;
   return (
-    <div className="ac-page acc-page">
+    <div className={`ac-page acc-page${standalone ? " is-standalone" : ""}`}>
       <PageHead title="Accuracy" phoneTools={phoneTools} right={right} />
       <div className="ac-page-body is-narrow acc-body">
         <h1 className="ac-page-title">How accurate Batatis is</h1>

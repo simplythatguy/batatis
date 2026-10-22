@@ -2,7 +2,7 @@
   "schema": "batatis-accuracy/1",
   "generated_on": "2026-10-22",
   "built_from": {
-    "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+    "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
     "dirty": false
   },
   "edition": "NBC(AE) 2023, 2nd printing",
@@ -438,7 +438,7 @@
   ],
   "verified": {
     "date": "2026-10-22",
-    "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+    "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
     "passed": 48,
     "skipped": 0,
     "total": 48
@@ -481,7 +481,7 @@
               "evals_dev/cases/",
               "evals_dev/intake_facts/score.py"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": "python -m evals_dev.intake_facts.score",
             "pr": 54
           }
@@ -513,7 +513,7 @@
               "evals_dev/cases/",
               "evals_dev/intake_facts/score.py"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": "python -m evals_dev.intake_facts.score",
             "pr": 54
           }
@@ -545,7 +545,7 @@
               "evals_dev/cases/",
               "evals_dev/intake_facts/score.py"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": "python -m evals_dev.intake_facts.score",
             "pr": 54
           }
@@ -812,7 +812,6 @@
             "Rate (Wilson 95%)",
             "Runs",
             "Cost per case run",
-            "Tied with the best",
             "Decision"
           ],
           "rows": [
@@ -820,127 +819,113 @@
               "As the product pipeline, but the verification model reads the top 40",
               "65.3 of 79",
               "82.7% (72.9–89.5)",
-              "3 verifier runs over 2 relevance draws",
+              "3 runs, 2 draws",
               "US$0.0196",
-              "no",
               "too many failed runs (limit 2%)"
             ],
             [
               "As the product pipeline, but the verification model may name an article outside the list",
               "64.3 of 79",
               "81.4% (71.5–88.5)",
-              "3 verifier runs over 2 relevance draws",
+              "3 runs, 2 draws",
               "US$0.0190",
-              "no",
               "too many failed runs (limit 2%)"
             ],
             [
               "The blend, then the verification model reads the top 15",
               "63.7 of 79",
               "80.6% (70.5–87.8)",
-              "3 verifier runs over 2 relevance draws",
+              "3 runs, 2 draws",
               "US$0.0190",
-              "no",
               "rows missing; too many failed runs (limit 2%)"
             ],
             [
               "Screen and re-rank, then the verification model reads the top 15 in full and quotes",
               "63.6 of 79",
               "80.5% (70.4–87.7)",
-              "5 verifier runs over 2 relevance draws",
+              "5 runs, 2 draws",
               "US$0.0191",
-              "yes",
               "carried as provisional"
             ],
             [
               "As the product pipeline, but the verification model reads the first 700 characters",
               "61.7 of 79",
               "78.1% (67.8–85.8)",
-              "3 verifier runs over 2 relevance draws",
+              "3 runs, 2 draws",
               "US$0.0188",
-              "no",
               "too many failed runs (limit 2%)"
             ],
             [
               "Keyword search and re-rank, then the verification model reads the top 15",
               "61 of 79",
               "77.2% (66.8–85.1)",
-              "3 verifier runs over 2 relevance draws",
+              "3 runs, 2 draws",
               "US$0.0014",
-              "no",
               "too many failed runs (limit 2%)"
             ],
             [
               "Screen, then the relevance model re-ranks the top 60",
               "60.5 of 79",
               "76.6% (66.1–84.6)",
-              "2 draws",
+              "2 runs",
               "US$0.0181",
-              "no",
-              "worse than the best on the paired test, or more than 3 points behind"
+              "not tied with the best"
             ],
             [
               "Keyword search, then the verification model re-ranks the top 60",
               "59.3 of 79",
               "75.1% (64.6–83.3)",
-              "3 draws",
+              "3 runs",
               "US$0.0014",
-              "no",
               "rows missing; too many failed runs (limit 2%)"
             ],
             [
               "Keyword search, then the relevance model re-ranks the top 60",
               "56 of 79",
               "70.9% (60.1–79.7)",
-              "2 draws",
+              "2 runs",
               "US$0.0006",
-              "no",
-              "worse than the best on the paired test, or more than 3 points behind"
+              "not tied with the best"
             ],
             [
               "A blend of the screen-and-re-rank, structured keyword and precedent rankings",
               "51.5 of 79",
               "65.2% (54.2–74.8)",
-              "2 draws",
+              "2 runs",
               "US$0.0181",
-              "no",
-              "worse than the best on the paired test, or more than 3 points behind"
+              "not tied with the best"
             ],
             [
               "The relevance model screens all 2,080 articles",
               "50.5 of 79",
               "63.9% (52.9–73.6)",
-              "2 draws",
+              "2 runs",
               "US$0.0176",
-              "no",
-              "worse than the best on the paired test, or more than 3 points behind"
+              "not tied with the best"
             ],
             [
               "Keyword search with code-structure ranking",
               "36 of 79",
               "45.6% (35.0–56.5)",
-              "1 draw",
+              "1 run",
               "US$0.0000",
-              "no",
-              "worse than the best on the paired test, or more than 3 points behind"
+              "not tied with the best"
             ],
             [
               "Keyword search (the floor)",
               "28 of 79",
               "35.4% (25.8–46.4)",
-              "1 draw",
+              "1 run",
               "US$0.0000",
-              "no",
-              "worse than the best on the paired test, or more than 3 points behind"
+              "not tied with the best"
             ],
             [
               "Precedent matcher",
               "15 of 79",
               "19.0% (11.9–29.0)",
-              "1 draw",
+              "1 run",
               "US$0.0000",
-              "no",
-              "worse than the best on the paired test, or more than 3 points behind"
+              "not tied with the best"
             ]
           ]
         },
@@ -1177,7 +1162,7 @@
               "evals_dev/cases/",
               "engine/intake/scope.py"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": "pytest engine/tests/test_intake_plan.py -k scope -s",
             "pr": 54
           }
@@ -1207,7 +1192,7 @@
               "evals_dev/cases/",
               "engine/intake/scope.py"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": "pytest engine/tests/test_intake_plan.py -k scope -s",
             "pr": 54
           }
@@ -1237,7 +1222,7 @@
               "evals_dev/boundary/scope.json",
               "engine/intake/scope.py"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": null,
             "pr": 54
           }
@@ -1294,7 +1279,7 @@
               "evals_dev/boundary/blind_scope.json",
               "engine/intake/scope.py"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": null,
             "pr": 54
           }
@@ -1363,7 +1348,7 @@
               "evals_dev/boundary/blind_fork.json",
               "engine/intake/fork.py"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": null,
             "pr": 54
           }
@@ -1393,7 +1378,7 @@
               "evals_dev/boundary/blind_fork.json",
               "engine/intake/fork.py"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": null,
             "pr": 54
           }
@@ -1423,7 +1408,7 @@
               "evals_dev/boundary/blind_fork.json",
               "engine/intake/fork.py"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": null,
             "pr": 54
           }
@@ -1453,7 +1438,7 @@
               "evals_dev/boundary/blind_fork.json",
               "engine/intake/fork.py"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": null,
             "pr": 54
           }
@@ -1509,7 +1494,7 @@
               "evals_dev/cases/",
               "engine/intake/fork.py"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": null,
             "pr": 54
           }
@@ -1540,7 +1525,7 @@
               "engine/intake/plan.py",
               "engine/intake/questions.py"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": "pytest engine/tests/test_intake_plan.py -k asks_or_abstains -s",
             "pr": 54
           }
@@ -1655,7 +1640,7 @@
               "evals_dev/rules/outputs.json",
               "engine/rules/"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": "pytest engine/tests/test_rules_vectors.py; npm run test:rules",
             "pr": 63
           }
@@ -1693,7 +1678,7 @@
               "scripts/gate_g3.py",
               "evals/demo-cases/export/"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": "python scripts/gate_g3.py",
             "pr": 60
           }
@@ -1720,7 +1705,7 @@
               "scripts/gate_g3.py",
               "evals/demo-cases/export/"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": "python scripts/gate_g3.py",
             "pr": 60
           }
@@ -1747,7 +1732,7 @@
               "scripts/gate_g3.py",
               "evals/demo-cases/export/"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": "python scripts/gate_g3.py",
             "pr": 60
           }
@@ -1774,7 +1759,7 @@
               "scripts/gate_g3.py",
               "evals/demo-cases/export/"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": "python scripts/gate_g3.py",
             "pr": 60
           }
@@ -1801,7 +1786,7 @@
               "scripts/gate_g3.py",
               "evals/demo-cases/export/"
             ],
-            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "commit": "3d24b6a8ba8e667e0f54cb02d6b3ca97066463b6",
             "command": "python scripts/gate_g3.py",
             "pr": 60
           }

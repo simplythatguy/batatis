@@ -63,7 +63,7 @@ export function extraRoutes(route: Route): ReactNode | null {
       return <Settings phoneTools={phoneTools} />;
     case "/accuracy":
       return getAccountState().phase === "signed-out"
-        ? <AccuracyPage right={<a className="cf-btn is-sm" href="#/signin">Sign in</a>} />
+        ? <AccuracyPage standalone right={<a className="cf-btn is-sm" href="#/signin">Sign in</a>} />
         : <AccuracyPage phoneTools={phoneTools} />;
     case "/notifications":
       return <NotificationsPage phoneTools={phoneTools} />;
