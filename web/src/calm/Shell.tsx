@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { ApplicationSummary } from "../api/accounts";
 import { groupGaps } from "../humanReview";
 import { useCase } from "../store";
@@ -220,8 +220,9 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   /** An explicit open or close inside the library is what leaving it restores. */
   const keepList = (collapsed: boolean) => { if (listBeforeCode.current !== null) listBeforeCode.current = collapsed; };
   // The shortcut handler is registered once; it reads the current state from this ref.
+  // Synced after commit, not during render: a render React discards must not leave its value in the ref.
   const listCollapsedNow = useRef(listCollapsed);
-  listCollapsedNow.current = listCollapsed;
+  useLayoutEffect(() => { listCollapsedNow.current = listCollapsed; });
   const toggleList = () => {
     if (isPhone()) return setSheet(true);
     const next = !listCollapsedNow.current;

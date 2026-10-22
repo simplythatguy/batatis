@@ -377,8 +377,15 @@ function Reading({ id, filter, onReveal, index, narrow }: { id: string; filter: 
   const ctx = useContext(id);
   const [added, setAdded] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
-  // One pane at a time: opening an article moves focus into it (the tree is hidden).
-  useEffect(() => { if (narrow) heading.current?.focus({ preventScroll: true }); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // One pane at a time: opening an article moves focus into it (the tree is hidden). `narrow` is measured after
+  // the first render, so a direct #/code/<id> visit sees it turn true; focus once, when it does.
+  const focused = useRef(false);
+  useEffect(() => {
+    if (narrow && !focused.current) {
+      focused.current = true;
+      heading.current?.focus({ preventScroll: true });
+    }
+  }, [narrow]);
   const title = (ctx.state === "ready" ? ctx.value.title : null) ?? (text.state === "ready" ? text.value.article_title ?? text.value.title : null) ?? index.get(id)?.title ?? "";
   const inCase = c.candidates.some((a) => canonicalProvision(a.provision) === canonicalProvision(id) || withinProvision(a.provision, id));
   // The same statement or term can repeat (one per objective); show each once.
