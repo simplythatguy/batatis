@@ -44,6 +44,9 @@ export async function componentHarness(url, name, modules, globals = {}) {
     useId: () => useMemo(() => `test-${cursor}`, []),
     // Reads the store on every render; the test calls render() again after the store changes.
     useSyncExternalStore: (_subscribe, getSnapshot) => getSnapshot(),
+    // A forwardRef component renders as a plain function component; the test passes no ref.
+    forwardRef: (render) => (props) => render(props, null),
+    useImperativeHandle() {},
   };
   const jsx = (type, props, key) => ({ type, props, key });
   const exports = {};
