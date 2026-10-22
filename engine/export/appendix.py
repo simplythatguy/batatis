@@ -114,11 +114,16 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool, case: Case | None
     if row.attributed_via:
         status += f' ({row.attributed_via})'
     out.append(_kv('Attribution status', status))
+    def statement(code: str, text) -> str:
+        # Objectives and functional statements are Division A text: cite their own Division A sentence.
+        own = codes.definition(code) if codes is not None else None
+        return f'{code} {_nrc(text, (own or {}).get("citation") or row.citation)}'.strip()
+
     if row.pairs:
         out.append(_table(['Function', 'Objective', 'Source'],
-                          [[f'{p.function} {_nrc(p.function_text, row.citation)}'.strip(),
-                            f'{p.objective} {_nrc(p.objective_text, row.citation)}'.strip(),
-                            f'{p.table}, NBC(AE) 2023 PDF p. {p.pdf_page}'
+                          [[statement(p.function, p.function_text),
+                            statement(p.objective, p.objective_text),
+                            f'NBC(AE) 2023 Div B {p.table}, PDF p. {p.pdf_page}'
                             + (f'; clauses {", ".join(p.clauses)}' if p.clauses else '')
                             + (f'; {_nrc(p.application_note, row.citation)}' if p.application_note else '')]
                            for p in row.pairs], [2.3 * inch, 2.3 * inch, 2.4 * inch]))

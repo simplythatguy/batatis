@@ -1,0 +1,51 @@
+{
+  "_note": "EXAMPLE DATA. A completed version of demo case A (manufacturer, BTRboard-like nail-base sheathing) for the G3 export gate. Every person, firm, address, document and process passage is fictional applicant text written for the demo; it states no test result, no professional opinion and no finding about the design. Loaded by engine/export/demo_cases.py.",
+  "title": "EXAMPLE DATA: EPW NailBase CI-50 pilot house (manufacturer)",
+  "jurisdiction": {"id": "edmonton", "name": "City of Edmonton"},
+  "facts": {
+    "owner_name": "Birchfield Example Homes Ltd. (EXAMPLE DATA)",
+    "mailing_address": "000 Example Road NW, Edmonton, AB T0T 0T0 (EXAMPLE DATA)",
+    "request_date": "2026-10-21",
+    "owner_signature_date": "2026-10-21",
+    "submitted_to_scc": false,
+    "municipal_address": "0000 Example Way NW, Edmonton, AB (EXAMPLE DATA)",
+    "lot": "0", "block": "0", "plan": "0000000",
+    "scope": "site",
+    "alternative_description": "EXAMPLE DATA. On wall type W1 of the pilot house, vertical vinyl siding is fastened with ring-shank nails at 400 mm o.c. directly into the 6 mm fibre-cement facer of a 50 mm non-wood insulating sheathing panel (EPW NailBase CI-50), instead of into framing, furring or a listed sheathing.",
+    "rationale": "EXAMPLE DATA. The benchmark is Sentence 9.27.5.1.(2): cladding fastened to sheathing of the kind and thickness it lists. Our panel replaces that sheathing, so the siding is held by the facer alone. We will compare fastener withdrawal and wind-load resistance of the installed assembly with the benchmark assembly by side-by-side testing, because the departure is about holding power and a test of both assemblies shows the difference directly.",
+    "risk_assessment": "EXAMPLE DATA. Risks of this departure: siding pulls off in a wind event if the facer gives less holding power than the benchmark sheathing; the facer delaminates from the foam after freeze-thaw cycles; long-term creep loosens the nails. People near the wall and the building envelope are affected. We also consider the case where the nails are placed off the specified spacing during installation, and the case where damaged siding is re-nailed years later by someone who does not know the panel.",
+    "mitigating_measures": "EXAMPLE DATA. For each risk: a fastener schedule printed on every panel; a field pull-test on three locations per elevation before siding is complete; a re-siding instruction left with the owner. These measures reduce the risks but do not remove them. If a field pull-test falls below the value in the test report, siding on that elevation stops until the designer decides the fix.",
+    "assumptions_and_limits": "EXAMPLE DATA. Limits: this pilot house only; vertical vinyl siding; ring-shank nails of the listed size at 400 mm o.c.; 6 mm facer; the wind exposure of the site. We assume the panel is installed as in the wall section note. A change of siding type, nail, spacing, facer thickness or site exposure needs a new assessment. The test procedure and its parameters are in the test report listed in Section D.",
+    "maintenance_operation": "EXAMPLE DATA. After construction: the owner keeps the re-siding instruction; damaged siding is re-fastened only with the specified nails and spacing; an inspection of the siding after any severe wind event. If maintenance lapses, a loose panel is the first sign; the instruction tells the owner who to call.",
+    "qualifications": "EXAMPLE DATA. Responsible people: J. Example, P.Eng. (fictional), responsible for the fastening analysis; Example Panel Works Ltd. (fictional), responsible for the product data and installation guide. J. Example coordinates the design, analysis and documentation as the single coordinator.",
+    "occupancy": "single_family", "part4_design": true, "preserved_wood_foundation_part4": false,
+    "roof_trusses": false, "prescriptive_route_confirmed": false, "ahj_requires_professional": false,
+    "special_safety_concerns": false, "professional_judgement_required": true, "professional_scope_resolved": true,
+    "fire_suppression": false, "fire_alarm": false,
+    "professional_name": "J. Example, P.Eng. (EXAMPLE DATA, no real appointment)",
+    "professional_seal": "EXAMPLE DATA authentication metadata (no real seal)",
+    "professional.role": "EXAMPLE DATA engineer (no real appointment)"
+  },
+  "not_applicable": {
+    "owner_rep": "EXAMPLE DATA. The owner, Birchfield Example Homes, applies directly; there is no owner's representative.",
+    "permit_number": "EXAMPLE DATA. No building permit has been applied for yet; this request goes in with the permit application.",
+    "ats": "EXAMPLE DATA. The site is an urban lot described by lot, block and plan; no ATS location applies.",
+    "section_c.unused_rows": "EXAMPLE DATA. The two sentences listed are all the acceptable solutions this request departs from.",
+    "section_d.unused_rows": "EXAMPLE DATA. The four documents listed are all the supporting documents for this request."
+  },
+  "identify": {
+    "articles": [
+      {"provision": "9.27.5.1.", "status": "committed", "commit_reason": "committed: Part 9, verifier quote checked (demo fixture)"}
+    ],
+    "decisions": {"9.27.5.1.": "yes"},
+    "benchmark": {"provision_id": "9.27.5.1.(2)", "basis": "committed",
+                  "departure": "EXAMPLE DATA. Siding is fastened into the facer of a non-wood insulating panel instead of the sheathing this sentence lists."}
+  },
+  "provisions": ["9.27.5.1.(1)", "9.27.5.1.(2)"],
+  "documents": [
+    {"id": "a_test", "file": "input/test-summary-EXAMPLE.md", "title": "Test report summary EMT-2025-0417 (EXAMPLE)", "responsible_party": "Example Materials Testing LLC (EXAMPLE)", "issuer": "Example Materials Testing LLC (EXAMPLE)", "date": "2025-06-03"},
+    {"id": "a_letter", "file": "input/engineer-letter-draft-EXAMPLE.md", "title": "Engineer's letter on fastening (EXAMPLE)", "responsible_party": "J. Example, P.Eng. (EXAMPLE)", "issuer": "J. Example, P.Eng. (EXAMPLE)", "date": "2026-10-10"},
+    {"id": "a_wall", "file": "input/wall-section-note.md", "title": "Wall section and fastening note (EXAMPLE)", "responsible_party": "Birchfield Example Homes Ltd. (EXAMPLE)", "issuer": "Birchfield Example Homes Ltd. (EXAMPLE)", "date": "2026-10-12"},
+    {"id": "a_data", "file": "input/product-data-sheet.md", "title": "Product data sheet and installation guide (EXAMPLE)", "responsible_party": "Example Panel Works Ltd. (EXAMPLE)", "issuer": "Example Panel Works Ltd. (EXAMPLE)", "date": "2026-09-01"}
+  ]
+}
