@@ -1,6 +1,6 @@
 ---
 name: batatis-ui-minimalist
-description: "Minimalist Batatis UI, the user's standing direction: visuals over sentences, one thing at a time, icon-and-count metadata. Use when designing, changing or reviewing any Batatis screen, list row, card, banner, label or UI copy."
+description: "Minimalist Batatis UI, the user's standing direction: visuals over sentences, one thing at a time, short question labels with help on demand, icon-and-count metadata. Use when designing, changing or reviewing any Batatis screen, question, list row, card, banner, label or UI copy."
 ---
 
 # Batatis minimalist UI
@@ -16,7 +16,8 @@ For each word, line, icon and control ask: does the person need it **now** to ta
 3. **Progressive disclosure.** Reasons, detail, history, code text and technical text sit one click or hover away: tooltip, drawer, `<details>`, the next screen.
 4. **Compact metadata.** Icon then number (a message icon and `2`), never "2 new messages". The number always has its icon; a zero shows nothing.
 5. **Breathing room.** Generous padding (sidebar rows `14px 16px`), selection as a soft fill, no decorative lines, edge bars or borders.
-6. **Colour with a job.** Section hue (A blue, B teal, C violet, D amber) or a status dot. Accent marks one thing; it never fills a button.
+6. **Obvious questions are a label and a control.** "Request date" and a date field, then OK · Skip · Help. A subtitle that restates the field, "answer to continue" or "press Enter" lines, and a repeated "ask the assistant" invitation all go. The reason and the assistant sit behind the one Help entry on the card (the assistant exists for routine explanation); show text up front only when the control cannot carry it: the applicant's own quote, a validation error, a decision or professional boundary.
+7. **Colour with a job.** Section hue (A blue, B teal, C violet, D amber) or a status dot. Accent marks one thing; it never fills a button.
 
 ## Minimal, never hidden
 
@@ -33,6 +34,12 @@ Every icon-only control or icon metadata has an accessible name and a hover labe
 - Before: `● Returned · 2 new messages`
 - After: `●` message icon `2` (the SVG `msg` icon, not an emoji), with "Returned · 2 new messages" as the hover title and screen-reader text. With no unread messages the row keeps its short status line ("Returned · fix and resubmit") and no icon.
 - Code: `statusLine()` in `web/src/calm/applications.ts`, `Row` in `web/src/calm/shell/ApplicationList.tsx`.
+
+## Example: a question card
+
+- Before: "What date is this request?" / "The date you submit this request." / date field / "Answer to continue, or skip for now." / OK · Why we ask · Skip for now / "Not sure what this means? Ask the assistant".
+- After: "Request date" / date field / OK · Skip · Help.
+- Code: titles and context in `web/src/calm/deck.ts`, the card shell and `HelpButton` in `web/src/calm/QuestionDeck.tsx`.
 
 ## Check before handing off
 
