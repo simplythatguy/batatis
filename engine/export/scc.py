@@ -3,7 +3,7 @@
 Steps: check the blank form's SHA-256 against the version-keyed field map, decide what goes in each applicant
 field (short values in the cell, long ones moved to the appendix with a reference), fill with pypdf, flatten
 (appearance streams merged into the page, every widget removed, so the help pop-ups and buttons disappear and
-every viewer shows the same thing), append the generated appendix, and stamp DRAFT on every page when asked.
+every viewer shows the same thing), and append the generated appendix. Draft status stays in metadata.
 
 Export refuses while a fact is unconfirmed, a blocking gap is open or a required field is empty, unless
 draft=True. Only confirmed facts are ever written to the form, draft or not.
@@ -364,7 +364,7 @@ def _rects(form: bytes, fmap: dict) -> dict[str, tuple[float, float, float, floa
 def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str | None = None,
                 version: str = CURRENT_MAP) -> ExportResult:
     """Authoritatively check, canonicalize, fill, flatten and append; no prior gap request is needed."""
-    from .appendix import build_appendix, stamp_draft
+    from .appendix import build_appendix
 
     fmap = load_field_map(version)
     codes = codes or Codes()
@@ -387,8 +387,6 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
     app_reader = PdfReader(io.BytesIO(appendix))
     for page in app_reader.pages:
         out.add_page(page)
-    if draft:
-        stamp_draft(out)
     out.add_metadata({'/Title': 'Variance Form for Proposed Alternative Solution' + (' (DRAFT)' if draft else ''),
                       '/Producer': f'Batatis export, field map {fmap["version"]}'})
     buf = io.BytesIO()
