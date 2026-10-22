@@ -1,0 +1,569 @@
+{
+  "schema_version": 1,
+  "id": "calgary-spv-006",
+  "jurisdiction": "calgary",
+  "package": "calgary-spv-006",
+  "code": "SPV-006",
+  "title": "Firewall in a Rowhouse with Secondary Suites",
+  "revision": null,
+  "issued": "2025-06-19",
+  "summary": "Lets a rowhouse whose houses have secondary suites leave out the firewall that Sentence 9.10.11.2.(2) would otherwise need, if every fire-safety feature below is built: fire separations around exits and between suites, rated construction, egress, ducts, doors and penetrations.",
+  "reviewed": false,
+  "reviewed_by": null,
+  "reviewed_on": null,
+  "reference_text": "calgary-spv-006-firewall-rowhouse-secondary-suites",
+  "source": {
+    "title": "City of Calgary, Variance SPV-006 Firewall in a Rowhouse with Secondary Suites (19 June 2025)",
+    "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/firewall-in-a-rowhouse-with-secondary-suites-spv-006.pdf",
+    "retrieved": "2026-10-21",
+    "pages": "pp.1-5",
+    "sha256": "8df85aa592abc0272806687daf7de01c14fdc9433b97c6641192e438889e9437"
+  },
+  "groups": [
+    {
+      "id": "scope",
+      "title": "When this package can be used",
+      "plain": "Check these first. If one does not fit your project, the package cannot be used as published."
+    },
+    {
+      "id": "separations",
+      "title": "Fire separations around exits and suites",
+      "plain": "Items 1 and 2 of the package."
+    },
+    {
+      "id": "rated-construction",
+      "title": "How a fire-resistance rating is achieved",
+      "plain": "Item 3: either Article 9.10.3.1., or the deemed construction the package describes."
+    },
+    {
+      "id": "egress",
+      "title": "Second way out",
+      "plain": "Item 4: when a suite shares its only exit."
+    },
+    {
+      "id": "ducts-doors",
+      "title": "Ducts, doors and penetrations",
+      "plain": "Items 5 and 6."
+    },
+    {
+      "id": "everything-else",
+      "title": "Everything else for secondary suites",
+      "plain": "Item 7."
+    },
+    {
+      "id": "permit",
+      "title": "Permit documents",
+      "plain": "How the package is tied to your building permit."
+    }
+  ],
+  "conditions": [
+    {
+      "id": "scope-rowhouse",
+      "group": "scope",
+      "kind": "scope",
+      "subject": "building",
+      "plain": "The building has more than two houses, and adjacent houses with a secondary suite would otherwise need a firewall between them under Sentence 9.10.11.2.(2).",
+      "may_not_apply": false,
+      "source": {
+        "page": 1,
+        "label": "Reason for Variance",
+        "quote": "in a building which contains more than 2 houses, a party wall that separates any two adjacent houses with a secondary suite, shall be constructed as a firewall.",
+        "diagram": "Figure 1, p.5 (prescriptive layout with firewalls)",
+        "lead_in": "Sentence 9.10.11.2.(2) of Division B of the National Building Code - Alberta Edition requires that"
+      }
+    },
+    {
+      "id": "scope-no-changes",
+      "group": "scope",
+      "kind": "scope",
+      "subject": "project",
+      "plain": "You follow the package exactly as published. Any change to its scope or use means either the Division B acceptable solution or a site-specific variance.",
+      "may_not_apply": false,
+      "source": {
+        "page": 1,
+        "label": "Note",
+        "quote": "Standing Posted Variances (SPV) cannot be altered or deviated from."
+      }
+    },
+    {
+      "id": "scope-every-feature",
+      "group": "scope",
+      "kind": "scope",
+      "subject": "building",
+      "plain": "The firewall is left out only if the design includes every fire-safety feature listed below (items 1 to 7).",
+      "may_not_apply": false,
+      "source": {
+        "page": 2,
+        "label": "Acceptable method of Variance",
+        "quote": "Where a design incorporates the fire safety features as identified below, a firewall required by Division B 9.10.11.2.(2) need not be provided.",
+        "diagram": "Figure 2, p.5 (SPV-006 layout)"
+      }
+    },
+    {
+      "id": "1a-exit-separation",
+      "group": "separations",
+      "kind": "construction",
+      "subject": "each_house_with_suite",
+      "plain": "Where an exit is in a house with a secondary suite (common spaces included), the exit is separated from the floor areas next to it by a fire separation.",
+      "when": "Only where an exit is located in a house with a secondary suite.",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "1. a)",
+        "quote": "Where an exit is located in a house with a secondary suite including their common spaces, the exit shall be separated from adjacent floor areas with a fire separation,",
+        "diagram": "Figure 2, p.5"
+      }
+    },
+    {
+      "id": "1b-exit-45-min",
+      "group": "separations",
+      "kind": "construction",
+      "subject": "each_house_with_suite",
+      "plain": "Exit separation, option b: the fire separation has a fire-resistance rating of at least 45 minutes.",
+      "one_of": "exit-rating",
+      "option": "1. b)",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "1. b)",
+        "quote": "have a fire-resistance rating not less than 45 min., or",
+        "lead_in": "the exit shall be separated from adjacent floor areas with a fire separation,"
+      }
+    },
+    {
+      "id": "1c-exit-sprinklered",
+      "group": "separations",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Exit separation, option c: the building is sprinklered, so the fire separation needs no rating.",
+      "one_of": "exit-rating",
+      "option": "1. c)",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "1. c)",
+        "quote": "that is not required to have a fire-resistance rating if the building is sprinklered.",
+        "lead_in": "the exit shall be separated from adjacent floor areas with a fire separation,"
+      }
+    },
+    {
+      "id": "2a-suite-separation",
+      "group": "separations",
+      "kind": "construction",
+      "subject": "each_house_with_suite",
+      "plain": "In each house with a secondary suite, the dwelling units are separated from each other, and from ancillary and common spaces, by a fire separation.",
+      "may_not_apply": false,
+      "source": {
+        "page": 2,
+        "label": "2. a)",
+        "quote": "In a house with a secondary suite, dwelling units shall be separated from each other and from ancillary spaces and common spaces with a fire separation,",
+        "diagram": "Figure 2, p.5"
+      }
+    },
+    {
+      "id": "2b-suite-45-min",
+      "group": "separations",
+      "kind": "construction",
+      "subject": "each_house_with_suite",
+      "plain": "Suite separation, option b: the fire separation has a fire-resistance rating of at least 45 minutes.",
+      "one_of": "suite-rating",
+      "option": "2. b)",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "2. b)",
+        "quote": "have a fire-resistance rating not less than 45 min., or",
+        "lead_in": "dwelling units shall be separated from each other and from ancillary spaces and common spaces with a fire separation,"
+      }
+    },
+    {
+      "id": "2c-suite-sprinklered",
+      "group": "separations",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Suite separation, option c: the building is sprinklered, so the fire separation needs no rating.",
+      "one_of": "suite-rating",
+      "option": "2. c)",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "2. c)",
+        "quote": "that is not required to have a fire-resistance rating if the building is sprinklered.",
+        "lead_in": "dwelling units shall be separated from each other and from ancillary spaces and common spaces with a fire separation,"
+      }
+    },
+    {
+      "id": "3a-rating-by-9-10-3-1",
+      "group": "rated-construction",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Rating method, option a: each required fire-resistance rating is determined under Article 9.10.3.1.",
+      "when": "Only where a fire-resistance rating is required (not sprinklered).",
+      "one_of": "rating-method",
+      "option": "3. a)",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "3. a)",
+        "quote": "Where a fire-resistance rating is required, such rating shall be determined in conformance with a) Article 9.10.3.1., or"
+      }
+    },
+    {
+      "id": "3b-i-wood-framing",
+      "group": "rated-construction",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Rating method, option b: walls and floor-ceiling assemblies are framed with wood studs, wood joists or wood I-joists.",
+      "when": "Only where a fire-resistance rating is required (not sprinklered).",
+      "one_of": "rating-method",
+      "option": "3. b)",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "3. b) i)",
+        "quote": "walls and floor/ceiling assemblies framed with wood studs, wood joists or wood I joists,",
+        "lead_in": "construction that is deemed to satisfy the requirements of 9.10.3.1. having"
+      }
+    },
+    {
+      "id": "3b-ii-mineral-fibre",
+      "group": "rated-construction",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Rating method, option b: the joist and stud spaces are filled with preformed rock or slag fibre insulation.",
+      "when": "Only where a fire-resistance rating is required (not sprinklered).",
+      "one_of": "rating-method",
+      "option": "3. b)",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "3. b) ii)",
+        "quote": "joist/stud spaces filled with preformed rock or slag fibre insulation(1),"
+      }
+    },
+    {
+      "id": "3b-ii-insulation-standard",
+      "group": "rated-construction",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Rating method, option b: that insulation meets CAN/ULC-S702.1 (footnote 1, citing D-2.3.4.(4)).",
+      "when": "Only where a fire-resistance rating is required (not sprinklered).",
+      "one_of": "rating-method",
+      "option": "3. b)",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "footnote (1)",
+        "quote": "D-2.3.4.(4) Method of Calculation - Spaces between wall studs and structural members of floor assembly filled with preformed insulation of rock or slag fibres conforming to CAN/ULC-S702.1"
+      }
+    },
+    {
+      "id": "3b-ii-insulation-mass",
+      "group": "rated-construction",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Rating method, option b: that insulation weighs at least 1.22 kg per square metre of wall or floor surface (footnote 1).",
+      "when": "Only where a fire-resistance rating is required (not sprinklered).",
+      "one_of": "rating-method",
+      "option": "3. b)",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "footnote (1)",
+        "quote": "having a mass per unit area of not less than 1.22 kg/m2 of wall/floor surface."
+      }
+    },
+    {
+      "id": "3b-iii-resilient-channel",
+      "group": "rated-construction",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Rating method, option b: resilient channel on one side of the fire separation, at 400 or 600 mm on centre.",
+      "when": "Only where a fire-resistance rating is required (not sprinklered).",
+      "one_of": "rating-method",
+      "option": "3. b)",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "3. b) iii)",
+        "quote": "resilient channel on one side of the fire separation spaced 400 or 600 mm on centre, and"
+      }
+    },
+    {
+      "id": "3b-iv-type-x-both-sides",
+      "group": "rated-construction",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Rating method, option b: at least 15.9 mm Type X gypsum board on ceilings and on both sides of walls.",
+      "when": "Only where a fire-resistance rating is required (not sprinklered).",
+      "one_of": "rating-method",
+      "option": "3. b)",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "3. b) iv)",
+        "quote": "not less than 15.9 mm thick Type X gypsum board on ceilings and both sides of walls (2),"
+      }
+    },
+    {
+      "id": "3b-iv-edge-support",
+      "group": "rated-construction",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Rating method, option b: that wall gypsum board has every edge supported (footnote 2, citing D-2.3.8.); 15.9 mm Type X may run horizontally with unsupported horizontal joints only where framing is at most 400 mm on centre.",
+      "when": "Only where a fire-resistance rating is required (not sprinklered).",
+      "one_of": "rating-method",
+      "option": "3. b)",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "footnote (2)",
+        "quote": "D-2.3.8. Edge Support for Gypsum Board in Wall Assembly - Gypsum board installed over framing or furring in a wall assembly shall be installed so that all edges are supported"
+      }
+    },
+    {
+      "id": "3c-loadbearing-below",
+      "group": "rated-construction",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Loadbearing walls, columns and arches in the storey below a rated floor have at least the rating required for the floor or roof they support.",
+      "when": "Only where a fire-resistance rating is required (not sprinklered).",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "3. c)",
+        "quote": "all loadbearing walls, columns and arches in the storey immediately below a floor assembly shall have a fire-resistance rating of not less than that required for the supported floor or roof assembly."
+      }
+    },
+    {
+      "id": "4a-sprinklered",
+      "group": "egress",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Second way out, option: the building is sprinklered, so a unit whose only exit opens onto a shared stair or corridor needs no second means of egress.",
+      "when": "Only where a dwelling unit's egress door opens onto a shared egress facility and the unit has a single exit.",
+      "one_of": "second-egress",
+      "option": "4. a) sprinklered",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "4. a)",
+        "quote": "a second and separate means of egress need not be provided if the building is sprinklered",
+        "lead_in": "where an egress door from either dwelling unit opens onto a shared egress facility and the dwelling unit is served by only a single exit,"
+      }
+    },
+    {
+      "id": "4a-i-balcony",
+      "group": "egress",
+      "kind": "construction",
+      "subject": "each_house_with_suite",
+      "plain": "Second way out, option: each such unit has its own direct access to a balcony.",
+      "when": "Only where a dwelling unit's egress door opens onto a shared egress facility and the unit has a single exit.",
+      "one_of": "second-egress",
+      "option": "4. a) i)",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "4. a) i)",
+        "quote": "if the dwelling units have separate and direct access to i) a balcony, or"
+      }
+    },
+    {
+      "id": "4a-ii-window",
+      "group": "egress",
+      "kind": "construction",
+      "subject": "each_house_with_suite",
+      "plain": "Second way out, option: each such unit has its own direct access to an openable window meeting Clauses 9.9.9.1.(2)(a) and (b).",
+      "when": "Only where a dwelling unit's egress door opens onto a shared egress facility and the unit has a single exit.",
+      "one_of": "second-egress",
+      "option": "4. a) ii)",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "4. a) ii)",
+        "quote": "an openable window conforming to Clauses 9.9.9.1.(2)(a) and (b)."
+      }
+    },
+    {
+      "id": "5a-ducts-noncombustible",
+      "group": "ducts-doors",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Any duct through a fire separation without a fire damper is noncombustible, with a melting point of at least 760 C.",
+      "when": "Only where ducts pass through a fire separation without fire dampers.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "5. a)",
+        "quote": "Ducts penetrating fire separations need not be equipped with fire dampers in conformance with Article 9.10.13.13. provided they are noncombustible having a melting point not below 760"
+      }
+    },
+    {
+      "id": "5a-ducts-one-compartment",
+      "group": "ducts-doors",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Every opening in that duct system serves only one fire compartment (the source adds: see also Clause 9.33.1.1.(3)).",
+      "when": "Only where ducts pass through a fire separation without fire dampers.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "5. a)",
+        "quote": "with all openings in the duct system serving only one fire compartment. (See also Clause 9.33.1.1.[3])"
+      }
+    },
+    {
+      "id": "5b-hvac-drawings-distribution",
+      "group": "ducts-doors",
+      "kind": "documents",
+      "subject": "permit_documents",
+      "plain": "Heating, ventilating and air-conditioning drawings go in with the permit application, showing the size and continuity of all pipes, ducts, shafts, flues and fire dampers.",
+      "may_not_apply": false,
+      "source": {
+        "page": 3,
+        "label": "5. b)",
+        "quote": "Drawings are submitted with the building permit application for heating, ventilating and air-conditioning systems showing the size and continuity of all pipes, ducts, shafts, flues and fire dampers;"
+      }
+    },
+    {
+      "id": "5b-hvac-drawings-equipment",
+      "group": "ducts-doors",
+      "kind": "documents",
+      "subject": "permit_documents",
+      "plain": "Those drawings also show the location, size, capacity and type of each main piece of equipment, and the size and location of every combustion-air and ventilation opening.",
+      "may_not_apply": false,
+      "source": {
+        "page": 3,
+        "label": "5. b)",
+        "quote": "the location, size, capacity and type of all principal units of equipment, and the size and location of all combustion air and ventilation openings."
+      }
+    },
+    {
+      "id": "6a-door-closures",
+      "group": "ducts-doors",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Each door in a fire separation has a closure with at least a 20-minute fire-protection rating, or is a 45 mm solid-core wood door as in Article 9.10.13.2.",
+      "may_not_apply": false,
+      "source": {
+        "page": 3,
+        "label": "6. a)",
+        "quote": "Door openings in fire separations shall be protected by closures with a minimum 20 min fire-protection rating, or a 45 mm thick solid core wood door in accordance with 9.10.13.2."
+      }
+    },
+    {
+      "id": "6a-self-closing",
+      "group": "ducts-doors",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Each of those doors has a self-closing device.",
+      "may_not_apply": false,
+      "source": {
+        "page": 3,
+        "label": "6. a)",
+        "quote": "and shall be installed with a self-closing device."
+      }
+    },
+    {
+      "id": "6b-penetrations-sealed",
+      "group": "ducts-doors",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Every penetration of a fire separation is sealed as Article 9.10.9.6. requires.",
+      "may_not_apply": false,
+      "source": {
+        "page": 3,
+        "label": "6. b)",
+        "quote": "Penetrations of fire separations are to be sealed in accordance with 9.10.9.6."
+      }
+    },
+    {
+      "id": "7a-all-other-suite-requirements",
+      "group": "everything-else",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "Apart from the points above, the project meets every other acceptable solution and technical requirement for secondary suites in the NBC(AE).",
+      "may_not_apply": false,
+      "source": {
+        "page": 3,
+        "label": "7. a)",
+        "quote": "Excepting the points noted above, all other acceptable solutions and technical requirements for secondary suites as outlined in the National Building Code - Alberta Edition must be satisfied"
+      }
+    },
+    {
+      "id": "permit-reference",
+      "group": "permit",
+      "kind": "documents",
+      "subject": "permit_documents",
+      "plain": "Your building permit documents name SPV-006. Naming it is how the owner or contractor accepts the authority it is issued under.",
+      "may_not_apply": false,
+      "source": {
+        "page": 4,
+        "label": "Authority and conditions",
+        "quote": "The owner/contractor acknowledging the authority under which the variance is issued by virtue of referencing this variance number (SPV-006) in the Building Permit documentation."
+      }
+    },
+    {
+      "id": "permit-shows-construction",
+      "group": "permit",
+      "kind": "documents",
+      "subject": "permit_documents",
+      "plain": "The permit documents also show how each construction requirement above is met.",
+      "may_not_apply": false,
+      "source": {
+        "page": 4,
+        "label": "This variance is based on",
+        "quote": "Reference to Variance SPV-006 and compliance with the construction requirements is included in the permit documents submitted by the applicant to obtain a building permit."
+      }
+    },
+    {
+      "id": "permit-conditions",
+      "group": "permit",
+      "kind": "documents",
+      "subject": "permit_documents",
+      "plain": "The conditions of the issued building permit name SPV-006. The City writes these; check them when the permit is issued.",
+      "may_not_apply": false,
+      "source": {
+        "page": 4,
+        "label": "This variance is based on",
+        "quote": "Reference to Variance SPV-006 is included within the permit conditions of the building permit."
+      }
+    },
+    {
+      "id": "built-as-outlined",
+      "group": "permit",
+      "kind": "declaration",
+      "subject": "project",
+      "plain": "The owner and the contractor make sure the project is built as the package sets out.",
+      "may_not_apply": false,
+      "source": {
+        "page": 4,
+        "label": "Authority and conditions",
+        "quote": "The owner and contractor ensuring that the project is carried out as outlined in this variance."
+      }
+    }
+  ],
+  "source_notes": [
+    {
+      "id": "professional-outside-package",
+      "kind": "scope",
+      "plain": "If you need to change anything, a site-specific variance to Sentence 9.10.11.2.(2) needs a professional involved in the application.",
+      "page": 1,
+      "quote": "If a site-specific variance is applied for to vary Division B, Sentence 9.10.11.2.(2) professional involvement is required as part of the application."
+    },
+    {
+      "id": "figure-2-summary",
+      "kind": "figure_only",
+      "plain": "Figure 2 on page 5 summarises the package in a drawing (45-minute separations when not sprinklered, penetrations to Division B 9.10.9., two means of egress when only shared egress is provided or the building is not sprinklered, no dampers for noncombustible ducts serving one compartment). The written items above are what the checklist follows; the figure's egress wording reads differently from item 4, so ask the City if they seem to disagree for your design.",
+      "page": 5,
+      "quote": null
+    },
+    {
+      "id": "offence",
+      "kind": "warning",
+      "plain": "If you rely on this package to get a permit, not meeting its requirements is an offence under the Safety Codes Act.",
+      "page": 4,
+      "quote": "If this variance is relied upon to obtain a permit, non-compliance with the requirements of this variance are an offence under the Safety Codes Act."
+    }
+  ]
+}

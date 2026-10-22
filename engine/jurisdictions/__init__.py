@@ -3,6 +3,7 @@
     engine/data/jurisdictions/packs/<id>.json      one pack per office (JurisdictionPack)
     engine/data/jurisdictions/provinces/<XX>.json  items every pack in a province shares
     engine/data/jurisdictions/coverage.json        coverage labels for every province and territory
+    engine/data/jurisdictions/checklists/<id>.json standing-package checklists (see checklists.py)
 
 `BATATIS_JURISDICTIONS_DIR` points the loader at another directory with the same layout, so a new
 pack is a new file and no code changes. Nothing here names a particular city.
@@ -65,6 +66,7 @@ class Registry:
     _ids: dict[str, str] = field(default_factory=dict)
     _names: dict[str, str] = field(default_factory=dict)
     fallbacks: dict[str, str] = field(default_factory=dict)
+    checklists: dict = field(default_factory=dict)      # id -> StandingChecklist, see checklists.py
 
     @classmethod
     def load(cls, root: Path | str | None = None) -> 'Registry':
@@ -82,6 +84,8 @@ class Registry:
         for path in sorted((root / 'packs').glob('*.json')):
             reg._add(path, _read(path, JurisdictionPack))
         reg._check()
+        from .checklists import load_dir
+        load_dir(reg)
         return reg
 
     def _add(self, path: Path, pack: JurisdictionPack):

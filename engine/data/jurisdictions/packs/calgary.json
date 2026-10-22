@@ -191,7 +191,7 @@
       "provisions": ["9.10.15.5.(8)", "9.10.15.5.(9)"],
       "applies_to": "Single-family houses up to three storeys, including houses with a secondary suite, in the paired easement-side and zero-side layout the variance describes.",
       "note": "Originally issued 2017-10-01. Conditions apply to both houses, and a Maintenance Access Right-of-Way agreement is registered on the title of the parcel and the adjacent parcel (pp.4-5); the source has a footing-projection conflict (0.3 m on p.4, 0.6 m on p.5) that only the City can resolve. Read every operative condition in the source.",
-      "checklist": null,
+      "checklist": "calgary-spv-001",
       "source": {
         "title": "City of Calgary, Variance SPV-001 Zero Lot Line (Revision 5, 5 March 2026)",
         "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/zero-lot-line-march-2026.pdf",
@@ -212,7 +212,7 @@
       "provisions": ["9.10.11.2.(2)", "9.10.13.13.(1)"],
       "applies_to": "Rowhouses with more than two houses containing a secondary suite.",
       "note": "A site-specific variance to Sentence 9.10.11.2.(2) outside this package needs professional involvement (p.1). Read every operative condition in the source.",
-      "checklist": null,
+      "checklist": "calgary-spv-006",
       "source": {
         "title": "City of Calgary, Variance SPV-006 Firewall in a Rowhouse with Secondary Suites (19 June 2025)",
         "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/firewall-in-a-rowhouse-with-secondary-suites-spv-006.pdf",

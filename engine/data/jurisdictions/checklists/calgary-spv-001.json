@@ -1,0 +1,851 @@
+{
+  "schema_version": 1,
+  "id": "calgary-spv-001",
+  "jurisdiction": "calgary",
+  "package": "calgary-spv-001",
+  "code": "SPV-001",
+  "title": "Zero Lot Line",
+  "revision": "Revision 5",
+  "issued": "2026-03-05",
+  "summary": "Lets two neighbouring houses share the space between them (one wall at or near the property line, the other 1.5 m back) instead of each meeting the soffit limits of Sentences 9.10.15.5.(8) and (9) on its own. It works only if both houses are built to these conditions and an access agreement is registered on both titles.",
+  "reviewed": false,
+  "reviewed_by": null,
+  "reviewed_on": null,
+  "reference_text": "calgary-spv-001-zero-lot-line-2026-03",
+  "source": {
+    "title": "City of Calgary, Variance SPV-001 Zero Lot Line (Revision 5, 5 March 2026)",
+    "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/zero-lot-line-march-2026.pdf",
+    "retrieved": "2026-10-21",
+    "pages": "pp.1-6",
+    "sha256": "bbe2767cfbebab533b1afa971afc9393ef56547337bd95f7996aa5d981b649de"
+  },
+  "groups": [
+    {
+      "id": "scope",
+      "title": "When this package can be used",
+      "plain": "Check these first. If one does not fit your project, the package cannot be used as published."
+    },
+    {
+      "id": "both-houses",
+      "title": "Walls, soffits and finishes on both houses",
+      "plain": "These apply to the side walls of your house and of the house next door."
+    },
+    {
+      "id": "openings",
+      "title": "Windows, vents and openings",
+      "plain": "Limits on glazed and mechanical openings, by house height and side."
+    },
+    {
+      "id": "services-returns",
+      "title": "Wiring, services and decorative returns",
+      "plain": "What can go inside or on the wall near the property line."
+    },
+    {
+      "id": "agreement",
+      "title": "Registered access agreement (MARW)",
+      "plain": "The Maintenance Access Right of Way agreement on the titles of both parcels."
+    },
+    {
+      "id": "permit",
+      "title": "Permit documents",
+      "plain": "How the package is tied to your building permit."
+    }
+  ],
+  "conditions": [
+    {
+      "id": "scope-houses",
+      "group": "scope",
+      "kind": "scope",
+      "subject": "both_houses",
+      "plain": "Both buildings are single-family houses, with or without a secondary suite.",
+      "may_not_apply": false,
+      "source": {
+        "page": 1,
+        "label": "Background",
+        "quote": "for single family dwelling units and single-family dwelling units containing secondary suites"
+      }
+    },
+    {
+      "id": "scope-storeys",
+      "group": "scope",
+      "kind": "scope",
+      "subject": "both_houses",
+      "plain": "Each house is no more than three storeys.",
+      "may_not_apply": false,
+      "source": {
+        "page": 1,
+        "label": "Reason for the Variance",
+        "quote": "single-family homes up to three storeys tall"
+      }
+    },
+    {
+      "id": "scope-layout",
+      "group": "scope",
+      "kind": "scope",
+      "subject": "both_houses",
+      "plain": "Every house on the block uses the same layout: one side 1.5 m from the property line (the easement side) and the other side at the property line (the zero side).",
+      "may_not_apply": false,
+      "source": {
+        "page": 1,
+        "label": "Reason for the Variance",
+        "quote": "All homes on the block follow the same layout, 1.5 meters on one side and zero on the other",
+        "diagram": "Sample Cross Section Detail of Adjacent Zero Lot Line Houses, p.6"
+      }
+    },
+    {
+      "id": "scope-no-changes",
+      "group": "scope",
+      "kind": "scope",
+      "subject": "project",
+      "plain": "You follow the package exactly as published. Any change to its scope or use means either the Division B acceptable solution or a site-specific variance.",
+      "may_not_apply": false,
+      "source": {
+        "page": 1,
+        "label": "Note",
+        "quote": "Standing Posted Variances (SPV) cannot be altered or deviated from."
+      }
+    },
+    {
+      "id": "scope-both-houses",
+      "group": "scope",
+      "kind": "scope",
+      "subject": "both_houses",
+      "plain": "The construction conditions below are met on both side walls of both neighbouring houses, not just yours.",
+      "may_not_apply": false,
+      "source": {
+        "page": 2,
+        "label": "Accepted method of Variance",
+        "quote": "The following construction methods are to apply to the exposing building faces on both side walls of both houses adjacent to each other",
+        "diagram": "Sample Cross Section Detail of Adjacent Zero Lot Line Houses, p.6"
+      }
+    },
+    {
+      "id": "a-wall-finish-at-line",
+      "group": "both-houses",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "On every storey, the outside face of the wall finish on the zero side is on the property line or inside your own lot. Any other arrangement needs its own variance request.",
+      "may_not_apply": false,
+      "source": {
+        "page": 2,
+        "label": "a)",
+        "quote": "The outermost face of all storeys (1 - 3) of the exterior wall finish of the wall at zero limiting distance shall be in line with the property line or within the property of the building",
+        "diagram": "Sample Cross Section Detail of Adjacent Zero Lot Line Houses, p.6 (\"Outermost finish of exposing building face to be in line with the property line\")"
+      }
+    },
+    {
+      "id": "b-i-balcony-no-openings",
+      "group": "both-houses",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "A front or rear balcony on or next to the zero-side wall has no glazed openings and no unprotected mechanical openings.",
+      "when": "Only if there is a front or rear balcony on or next to the zero-side wall.",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "b) i.",
+        "quote": "i. No glazed openings or unprotected mechanical openings.",
+        "lead_in": "All front or rear facing balconies on or adjacent to the exposing building face at zero limiting distance shall have:"
+      }
+    },
+    {
+      "id": "b-ii-balcony-ceiling-gypsum",
+      "group": "both-houses",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "The whole ceiling or soffit of that open balcony has at least 15.9 mm (5/8 in) Type X gypsum sheathing, or the equivalent.",
+      "when": "Only if there is a front or rear balcony on or next to the zero-side wall.",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "b) ii.",
+        "quote": "A minimum 15.9mm (5/8\") Type X gypsum sheathing or the equivalent on the entire ceiling or soffit of the open balcony",
+        "lead_in": "All front or rear facing balconies on or adjacent to the exposing building face at zero limiting distance shall have:"
+      }
+    },
+    {
+      "id": "b-ii-balcony-metal-soffit",
+      "group": "both-houses",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "That balcony ceiling or soffit is finished with non-vented metal soffit material.",
+      "when": "Only if there is a front or rear balcony on or next to the zero-side wall.",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "b) ii.",
+        "quote": "c/w non vented metal soffit material",
+        "lead_in": "All front or rear facing balconies on or adjacent to the exposing building face at zero limiting distance shall have:"
+      }
+    },
+    {
+      "id": "b-iii-balcony-beams-columns",
+      "group": "both-houses",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "Every exposed beam and support column of that balcony has a fire-resistance rating of at least 45 minutes (the source allows mass timber under Article 9.10.6.2. and Table 3.1.4.7., or a noncombustible cladding the City accepts).",
+      "when": "Only if there is a front or rear balcony on or next to the zero-side wall.",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "b) iii.",
+        "quote": "A fire resistance rating of not less than 45 minutes on all exposed beams and support columns. The fire resistance rating may be achieved by utilizing mass timber material as per Article 9.10.6.2. and Table 3.1.4.7.",
+        "lead_in": "All front or rear facing balconies on or adjacent to the exposing building face at zero limiting distance shall have:"
+      }
+    },
+    {
+      "id": "c-i-fibre-cement",
+      "group": "both-houses",
+      "kind": "construction",
+      "subject": "both_houses",
+      "plain": "Cladding option i: noncombustible fibre cement board over accepted OSB or over at least 15.9 mm (5/8 in) Type X gypsum sheathing.",
+      "one_of": "cladding",
+      "option": "c) i.",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "c) i.",
+        "quote": "Non-combustible fiber cement board, installed over an accepted oriented strand board (OSB) or a minimum 15.9mm (5/8\") Type X gypsum sheathing."
+      }
+    },
+    {
+      "id": "c-i-above-soffit",
+      "group": "both-houses",
+      "kind": "construction",
+      "subject": "both_houses",
+      "plain": "Cladding option i: the wall area above the soffit, up to the underside of the roof sheathing, has at least 15.9 mm Type X gypsum sheathing (or equivalent) with every edge supported.",
+      "one_of": "cladding",
+      "option": "c) i.",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "c) i.",
+        "quote": "Type X gypsum sheathing. The area above the soffit to the underside of the roof sheathing is to be protected by a minimum 15.9 mm (5/8\") Type X gypsum sheathing or equivalent with all edges to be fully supported.",
+        "diagram": "Sample Cross Section Detail of Adjacent Zero Lot Line Houses, p.6 (\"Exterior drywall to extend to the underside of the roof sheathing\")"
+      }
+    },
+    {
+      "id": "c-ii-stucco",
+      "group": "both-houses",
+      "kind": "construction",
+      "subject": "both_houses",
+      "plain": "Cladding option ii: cementitious stucco meeting Subsection 9.28. of Division B, over accepted OSB.",
+      "one_of": "cladding",
+      "option": "c) ii.",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "c) ii.",
+        "quote": "Cementitious stucco conforming to Subsection 9.28 of Division B of the National Building Code - Alberta Edition, over an accepted oriented strand board (OSB)."
+      }
+    },
+    {
+      "id": "c-ii-above-soffit",
+      "group": "both-houses",
+      "kind": "construction",
+      "subject": "both_houses",
+      "plain": "Cladding option ii: the wall area above the soffit, up to the underside of the roof sheathing, has at least 15.9 mm Type X gypsum sheathing (or equivalent) with every edge supported.",
+      "one_of": "cladding",
+      "option": "c) ii.",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "c) ii.",
+        "quote": "over an accepted oriented strand board (OSB). The area above the soffit to the underside of the roof sheathing is to be protected by a minimum 15.9 mm (5/8\") Type X gypsum sheathing"
+      }
+    },
+    {
+      "id": "c-iii-vinyl-over-type-x",
+      "group": "both-houses",
+      "kind": "construction",
+      "subject": "both_houses",
+      "plain": "Cladding option iii: vinyl siding to CAN/CGSB-41.24 over at least 15.9 mm (5/8 in) Type X gypsum sheathing, on both side walls of both houses.",
+      "one_of": "cladding",
+      "option": "c) iii.",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "c) iii.",
+        "quote": "Vinyl siding conforming to CAN/CGSB-41.24, shall be installed on over a minimum 15.9 mm (5/8\") Type X gypsum sheathing on both side walls of both houses."
+      }
+    },
+    {
+      "id": "c-iii-sheathing-to-roof",
+      "group": "both-houses",
+      "kind": "construction",
+      "subject": "both_houses",
+      "plain": "Cladding option iii: the sheathing panels run up to the underside of the roof sheathing, and every joint lands on a stud or plate or is otherwise supported (taping is not needed).",
+      "one_of": "cladding",
+      "option": "c) iii.",
+      "may_not_apply": true,
+      "source": {
+        "page": 2,
+        "label": "c) iii.",
+        "quote": "Sheathing panels are to extend to the underside of the roof sheathing with all joints to be on the studs, top and bottom plates or otherwise fully supported."
+      }
+    },
+    {
+      "id": "d-interior-type-x",
+      "group": "both-houses",
+      "kind": "construction",
+      "subject": "both_houses",
+      "plain": "Inside, both side walls of both houses have at least 12.7 mm (1/2 in) Type X gypsum board.",
+      "may_not_apply": false,
+      "source": {
+        "page": 3,
+        "label": "d)",
+        "quote": "Interior gypsum board is to be a minimum 12.7 mm (1/2\") Type X gypsum board on both side walls of both houses"
+      }
+    },
+    {
+      "id": "d-interior-joints",
+      "group": "both-houses",
+      "kind": "construction",
+      "subject": "both_houses",
+      "plain": "Every joint of that interior gypsum board is supported, taped and finished.",
+      "may_not_apply": false,
+      "source": {
+        "page": 3,
+        "label": "d)",
+        "quote": "with all joints fully supported taped and finished."
+      }
+    },
+    {
+      "id": "e-top-ceiling-type-x",
+      "group": "both-houses",
+      "kind": "construction",
+      "subject": "both_houses",
+      "plain": "The ceiling of the top floor of both houses has at least 12.7 mm (1/2 in) Type X gypsum board.",
+      "may_not_apply": false,
+      "source": {
+        "page": 3,
+        "label": "e)",
+        "quote": "Gypsum board on the ceiling of the uppermost floor of both houses shall be a minimum 12.7 mm (1/2\") Type X."
+      }
+    },
+    {
+      "id": "m-edge-support",
+      "group": "both-houses",
+      "kind": "construction",
+      "subject": "both_houses",
+      "plain": "Gypsum board in the walls has every edge supported, as in D-2.3.8. of Division B (15.9 mm Type X may run horizontally with unsupported horizontal joints only where framing is at most 400 mm on centre).",
+      "may_not_apply": false,
+      "source": {
+        "page": 4,
+        "label": "m)",
+        "quote": "Edge support - to be as per National Building Code - Alberta Edition, Division B, D-2.3.8. Edge Support for Wallboard"
+      }
+    },
+    {
+      "id": "f-third-storey-no-openings",
+      "group": "openings",
+      "kind": "construction",
+      "subject": "both_houses",
+      "plain": "Three-storey house: the third storey has no glazed openings and no unprotected mechanical openings on either side wall.",
+      "when": "Only for a three-storey house.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "f)",
+        "quote": "No glazed or unprotected mechanical openings are permitted on the exposing building face on either side wall of the 3 rd storey"
+      }
+    },
+    {
+      "id": "f-zero-side-under-1-2",
+      "group": "openings",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "Three-storey house: no glazed openings and no unprotected mechanical openings on the zero side where the limiting distance is under 1.2 m.",
+      "when": "Only for a three-storey house.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "f)",
+        "quote": "no glazed openings or unprotected mechanical openings are permitted on the exposing building face face on the 'zero' side less than 1.2m limiting distance"
+      }
+    },
+    {
+      "id": "f-zero-side-1-2-plus",
+      "group": "openings",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "Three-storey house: any unprotected mechanical or glazed openings on the zero side are on the first or second floor, where the limiting distance is 1.2 m or more.",
+      "when": "Only for a three-storey house with openings on the zero side.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "f)",
+        "quote": "Unprotected mechanical openings and glazed openings on the first and second floor are permitted on the 'zero' side where the limiting distance is 1.2m or greater."
+      }
+    },
+    {
+      "id": "f-zero-glazed-calculated",
+      "group": "openings",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "Three-storey house: glazed openings on the zero side are sized by the Subsection 9.10.15. and Table 9.10.15.4. calculation.",
+      "when": "Only for a three-storey house with openings on the zero side.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "f)",
+        "quote": "Glazed openings are to be calculated prescriptively as per 9.10.15 and table 9.10.15.4."
+      }
+    },
+    {
+      "id": "f-easement-7-percent",
+      "group": "openings",
+      "kind": "construction",
+      "subject": "easement_side",
+      "plain": "Three-storey house, easement side at 1.5 m: glazed openings total no more than 7% of the wall face, measured from grade to the underside of the second-floor ceiling.",
+      "when": "Only for a three-storey house whose easement-side limiting distance is 1.5 m.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "f)",
+        "quote": "At 1.5m limiting distance on the 'easement' side, a maximum glazed opening area of 7% of the exposing building face measured from grade to the underside of 2nd floor ceiling is permitted.",
+        "diagram": "Sample Cross Section Detail of Adjacent Zero Lot Line Houses, p.6"
+      }
+    },
+    {
+      "id": "f-easement-over-1-5",
+      "group": "openings",
+      "kind": "construction",
+      "subject": "easement_side",
+      "plain": "Three-storey house, easement side beyond 1.5 m: glazed openings are sized by the Subsection 9.10.15. and Table 9.10.15.4. calculation.",
+      "when": "Only for a three-storey house whose easement-side limiting distance is more than 1.5 m.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "f)",
+        "quote": "Where the limiting distance on the 'easement' side exceeds 1.5m, glazed openings are allowed to be calculated prescriptively using 9.10.15 and table 9.10.15.4."
+      }
+    },
+    {
+      "id": "f-single-opening-3-5-percent",
+      "group": "openings",
+      "kind": "construction",
+      "subject": "both_houses",
+      "plain": "Three-storey house: no single opening is more than 3.5% of the wall face, measured from grade to the underside of the second-floor ceiling only.",
+      "when": "Only for a three-storey house.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "f)",
+        "quote": "No individual opening is to exceed 3.5% of the exposing building face, measured from grade to the underside of 2nd floor ceiling only.",
+        "diagram": "Sample Cross Section Detail of Adjacent Zero Lot Line Houses, p.6"
+      }
+    },
+    {
+      "id": "f-third-storey-area-excluded",
+      "group": "openings",
+      "kind": "construction",
+      "subject": "both_houses",
+      "plain": "Three-storey house: the third-storey wall area is left out when you work out the opening percentages.",
+      "when": "Only for a three-storey house.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "f)",
+        "quote": "The wall area of the 3rd storey is not to be included in the calculation."
+      }
+    },
+    {
+      "id": "g-zero-side-under-1-2",
+      "group": "openings",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "One- or two-storey house: no glazed openings and no unprotected mechanical openings on the zero side where the limiting distance is under 1.2 m.",
+      "when": "Only for a one- or two-storey house.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "g)",
+        "quote": "One - Two Storey House - No glazed openings or unprotected mechanical openings are permitted on the exposing building face on the 'zero' side less than 1.2m limiting distance."
+      }
+    },
+    {
+      "id": "g-zero-side-1-2-plus",
+      "group": "openings",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "One- or two-storey house: any unprotected mechanical or glazed openings on the zero side are on the first or second floor, where the limiting distance is 1.2 m or more.",
+      "when": "Only for a one- or two-storey house with openings on the zero side.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "g)",
+        "quote": "Unprotected mechanical openings and glazed openings on the first and second floor are permitted on the 'zero' side where the limiting distance is 1.2m or greater."
+      }
+    },
+    {
+      "id": "g-zero-glazed-calculated",
+      "group": "openings",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "One- or two-storey house: glazed openings on the zero side are sized by the Subsection 9.10.15. and Table 9.10.15.4. calculation.",
+      "when": "Only for a one- or two-storey house with openings on the zero side.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "g)",
+        "quote": "Glazed openings are to be calculated prescriptively as per 9.10.15 and table 9.10.15.4."
+      }
+    },
+    {
+      "id": "g-easement-7-percent",
+      "group": "openings",
+      "kind": "construction",
+      "subject": "easement_side",
+      "plain": "One- or two-storey house, easement side at 1.5 m: glazed openings total no more than 7% of the wall face, measured from grade to the underside of the top ceiling.",
+      "when": "Only for a one- or two-storey house whose easement-side limiting distance is 1.5 m.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "g)",
+        "quote": "a maximum glazed opening area of 7 % of the exposing building face measured from grade to the underside of the uppermost ceiling is permitted.",
+        "diagram": "Sample Cross Section Detail of Adjacent Zero Lot Line Houses, p.6"
+      }
+    },
+    {
+      "id": "g-easement-over-1-5",
+      "group": "openings",
+      "kind": "construction",
+      "subject": "easement_side",
+      "plain": "One- or two-storey house, easement side beyond 1.5 m: glazed openings are sized by the Subsection 9.10.15. and Table 9.10.15.4. calculation.",
+      "when": "Only for a one- or two-storey house whose easement-side limiting distance is more than 1.5 m.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "g)",
+        "quote": "Where the limiting distance on the 'easement' side exceeds 1.5m, glazed openings are allowed to be calculated prescriptively using 9.10.15 and table 9.10.15.4"
+      }
+    },
+    {
+      "id": "g-single-opening-3-5-percent",
+      "group": "openings",
+      "kind": "construction",
+      "subject": "both_houses",
+      "plain": "One- or two-storey house: no single opening is more than 3.5% of the wall face.",
+      "when": "Only for a one- or two-storey house.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "g)",
+        "quote": "No individual opening is to exceed 3.5% of the exposing building face.",
+        "diagram": "Sample Cross Section Detail of Adjacent Zero Lot Line Houses, p.6"
+      }
+    },
+    {
+      "id": "h-outlet-boxes",
+      "group": "services-returns",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "Electrical outlet boxes in the zero-side wall are tested and listed for that use, or protected with a listed fire stop system. (Outlet boxes in the 1.5 m wall need no protection.)",
+      "may_not_apply": true,
+      "when": "Only if there are electrical penetrations in the zero-side wall.",
+      "source": {
+        "page": 3,
+        "label": "h)",
+        "quote": "Outlet boxes are to be tested and listed for such installation or are to be protected with a listed fire stop system.",
+        "lead_in": "Protection of electrical penetrations within the exterior wall at zero limiting distance."
+      }
+    },
+    {
+      "id": "i-combustible-services",
+      "group": "services-returns",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "There are no combustible services in the zero-side wall, unless they are fire stopped at every penetration of the top or bottom plates and of the interior gypsum layer.",
+      "may_not_apply": true,
+      "when": "Only if combustible services run in the zero-side wall.",
+      "source": {
+        "page": 3,
+        "label": "i)",
+        "quote": "No combustible services are allowed within the wall at zero limiting distance unless they are fire stopped at all penetrations through top or bottom plates"
+      }
+    },
+    {
+      "id": "j-i-zero-returns-limit",
+      "group": "services-returns",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "Zero side, limiting distance under 2.4 m: decorative combustible returns cover no more than 2% of the wall face, or reach no more than 0.6 m along the side wall from the corner.",
+      "when": "Only if the zero side has decorative combustible architectural returns.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "j) i.",
+        "quote": "Where the limiting distance is between 0.0 m and less than 2.4 m from the property line decorative combustible architectural returns:"
+      }
+    },
+    {
+      "id": "j-ii-zero-combustible-cladding",
+      "group": "services-returns",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "Zero side: combustible cladding is used only on the first and second storeys where the limiting distance is 2.4 m or more.",
+      "when": "Only if the zero side has combustible cladding.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "j) ii.",
+        "quote": "For the 1st and 2nd story if the limiting distance is 2.4 meters or more from the property line, combustible cladding is permitted."
+      }
+    },
+    {
+      "id": "j-iii-zero-cladding-over-type-x",
+      "group": "services-returns",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "Zero side: any combustible cladding is over at least 15.9 mm (5/8 in) Type X gypsum sheathing.",
+      "when": "Only if the zero side has combustible cladding.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "j) iii.",
+        "quote": "In all cases: Combustible cladding must be installed over a minimum 15.9 mm (5/8\") Type X gypsum sheathing."
+      }
+    },
+    {
+      "id": "j-iii-zero-returns-coating",
+      "group": "services-returns",
+      "kind": "construction",
+      "subject": "zero_side",
+      "plain": "Zero side: combustible architectural returns have a fire-retardant coating the City accepts.",
+      "when": "Only if the zero side has combustible architectural returns.",
+      "may_not_apply": true,
+      "source": {
+        "page": 3,
+        "label": "j) iii.",
+        "quote": "Combustible architectural returns must be treated with a fire-retardant coating approved by the Authority Having Jurisdiction (AHJ)."
+      }
+    },
+    {
+      "id": "k-i-easement-returns-limit",
+      "group": "services-returns",
+      "kind": "construction",
+      "subject": "easement_side",
+      "plain": "Easement side, from the 1.5 m easement line to less than 0.9 m beyond it: decorative combustible returns cover no more than 2% of the wall face, or reach no more than 0.6 m along the side wall from the corner.",
+      "when": "Only if the easement side has decorative combustible architectural returns.",
+      "may_not_apply": true,
+      "source": {
+        "page": 4,
+        "label": "k) i.",
+        "quote": "Where the limiting distance is from the 1.5 m easement line to less than 0.9 m beyond that line."
+      }
+    },
+    {
+      "id": "k-ii-easement-combustible-cladding",
+      "group": "services-returns",
+      "kind": "construction",
+      "subject": "easement_side",
+      "plain": "Easement side: combustible cladding is used only on the first and second storeys, 0.9 m or more beyond the 1.5 m easement line.",
+      "when": "Only if the easement side has combustible cladding.",
+      "may_not_apply": true,
+      "source": {
+        "page": 4,
+        "label": "k) ii.",
+        "quote": "For the 1st and 2nd story if the limiting distance is 0.9 meters or more from the 1.5m easement line, combustible cladding is permitted."
+      }
+    },
+    {
+      "id": "k-iii-easement-cladding-over-type-x",
+      "group": "services-returns",
+      "kind": "construction",
+      "subject": "easement_side",
+      "plain": "Easement side: any combustible cladding is over at least 15.9 mm (5/8 in) Type X gypsum sheathing and fixed to wood studs.",
+      "when": "Only if the easement side has combustible cladding.",
+      "may_not_apply": true,
+      "source": {
+        "page": 4,
+        "label": "k) iii.",
+        "quote": "Combustible cladding must be installed over a minimum 15.9 mm (5/8\") Type X gypsum sheathing and fixed to wood studs."
+      }
+    },
+    {
+      "id": "k-iii-easement-returns-coating",
+      "group": "services-returns",
+      "kind": "construction",
+      "subject": "easement_side",
+      "plain": "Easement side: every combustible architectural return has a fire-retardant coating the City accepts.",
+      "when": "Only if the easement side has combustible architectural returns.",
+      "may_not_apply": true,
+      "source": {
+        "page": 4,
+        "label": "k) iii.",
+        "quote": "All combustible architectural returns must be treated with a fire-retardant coating approved by the AHJ."
+      }
+    },
+    {
+      "id": "l-marw-on-title",
+      "group": "agreement",
+      "kind": "agreement",
+      "subject": "both_parcels",
+      "plain": "A Maintenance Access Right of Way (MARW) agreement is registered on title.",
+      "may_not_apply": false,
+      "source": {
+        "page": 4,
+        "label": "l)",
+        "quote": "Maintenance Access Right-of-Way (MARW) - to be registered on title with the following provisions:",
+        "diagram": "Sample Cross Section Detail of Adjacent Zero Lot Line Houses, p.6 (\"Minimum 1.5m - Maintenance Access Right of Way agreement (MARW) to be registered on title\")"
+      }
+    },
+    {
+      "id": "l-i-easement-each-lot",
+      "group": "agreement",
+      "kind": "agreement",
+      "subject": "both_parcels",
+      "plain": "Each lot provides a 1.5 m maintenance easement. A side facing a street or lane may not need one, but a side next to a zero-lot-line neighbour always does.",
+      "may_not_apply": false,
+      "source": {
+        "page": 4,
+        "label": "l) i.",
+        "quote": "Each lot must provide a 1.5 m Maintenance Easement Agreement, except for lots terminating at a street or lane"
+      }
+    },
+    {
+      "id": "l-ii-soffit-projection",
+      "group": "agreement",
+      "kind": "agreement",
+      "subject": "both_houses",
+      "plain": "No soffit projects more than 0.3 m into the easement.",
+      "may_not_apply": false,
+      "source": {
+        "page": 4,
+        "label": "l) ii.",
+        "quote": "Maximum allowable soffit projection into the easement: 0.3 m."
+      }
+    },
+    {
+      "id": "l-iii-footing-projection",
+      "group": "agreement",
+      "kind": "agreement",
+      "subject": "both_houses",
+      "plain": "No footing projects more than 0.3 m into the easement. Note: page 5 of the source says the agreement can allow 0.6 m; ask the City which figure applies.",
+      "may_not_apply": false,
+      "source": {
+        "page": 4,
+        "label": "l) iii.",
+        "quote": "Maximum allowable footing projection into the easement: 0.3 m.",
+        "diagram": "Sample Cross Section Detail of Adjacent Zero Lot Line Houses, p.6 (\"0.3 m allowable footing projection into the easement\")"
+      }
+    },
+    {
+      "id": "l-iv-easement-clear",
+      "group": "agreement",
+      "kind": "agreement",
+      "subject": "both_parcels",
+      "plain": "The easement stays clear of anything that could get in the way of firefighting. Side entrance steps and landings no more than 0.6 m above or below grade, without guards, do not count as obstructions.",
+      "may_not_apply": false,
+      "source": {
+        "page": 4,
+        "label": "l) iv.",
+        "quote": "easement on a Zero Lot Line build shall remain clear of all obstructions which could impede firefighting efforts."
+      }
+    },
+    {
+      "id": "marw-both-titles",
+      "group": "agreement",
+      "kind": "agreement",
+      "subject": "both_parcels",
+      "plain": "The MARW agreement, in a form the City accepts, is registered on the title of your parcel and of the adjacent parcel.",
+      "may_not_apply": false,
+      "source": {
+        "page": 5,
+        "label": "Authority and conditions",
+        "quote": "must be registered on the title of th parcel and the adjacent parcel over a 1.5m width parallel to the property line.",
+        "lead_in": "A Maintenance Access Right of Way (MARW) agreement in a form satisfactory to the Authority Having Jurisdiction (City of Calgary)"
+      }
+    },
+    {
+      "id": "marw-projections",
+      "group": "agreement",
+      "kind": "agreement",
+      "subject": "both_parcels",
+      "plain": "Any projection across the property line stays within what the agreement allows: eaves up to 0.3 m, footings up to 0.6 m (page 4 says 0.3 m for footings; ask the City).",
+      "may_not_apply": false,
+      "source": {
+        "page": 5,
+        "label": "Authority and conditions",
+        "quote": "The agreement can allow for 0.3 m eave projection and a 0.6m footing projection across the property line."
+      }
+    },
+    {
+      "id": "marw-0-9-m-apart",
+      "group": "agreement",
+      "kind": "agreement",
+      "subject": "both_houses",
+      "plain": "No part of the two buildings, eaves included, is ever closer than 0.9 m to the other.",
+      "may_not_apply": false,
+      "source": {
+        "page": 5,
+        "label": "Authority and conditions",
+        "quote": "At no time may any portion of the buildings including the eaves on either parcel be closer together than 0.9 m.",
+        "diagram": "Sample Cross Section Detail of Adjacent Zero Lot Line Houses, p.6 (\"Minimum distance of 0.9 m between facias c/w with unvented soffit\")"
+      }
+    },
+    {
+      "id": "permit-reference",
+      "group": "permit",
+      "kind": "documents",
+      "subject": "permit_documents",
+      "plain": "Your building permit documents name SPV-001. Naming it is how the owner or contractor accepts the authority it is issued under.",
+      "may_not_apply": false,
+      "source": {
+        "page": 5,
+        "label": "Authority and conditions",
+        "quote": "The owner/contractor acknowledging the authority under which the variance is issued by virtue of referencing this Variance number (SPV-001) in the Building Permit documentation."
+      }
+    },
+    {
+      "id": "permit-conditions",
+      "group": "permit",
+      "kind": "documents",
+      "subject": "permit_documents",
+      "plain": "The conditions of the issued building permit name SPV-001. The City writes these; check them when the permit is issued.",
+      "may_not_apply": false,
+      "source": {
+        "page": 5,
+        "label": "This Variance is based on",
+        "quote": "Reference to this variance within the permit conditions of the building permit."
+      }
+    },
+    {
+      "id": "built-as-outlined",
+      "group": "permit",
+      "kind": "declaration",
+      "subject": "project",
+      "plain": "The owner and the contractor make sure the project is built as the package sets out.",
+      "may_not_apply": false,
+      "source": {
+        "page": 5,
+        "label": "Authority and conditions",
+        "quote": "The owner, and contractor ensuring that the project is carried out as outlined in this Variance."
+      }
+    }
+  ],
+  "source_notes": [
+    {
+      "id": "footing-conflict",
+      "kind": "conflict",
+      "plain": "The source gives two footing projections: 0.3 m into the easement on page 4 (and in the page 6 figure) and 0.6 m across the property line on page 5. Only the City can say which applies.",
+      "page": 5,
+      "quote": "The agreement can allow for 0.3 m eave projection and a 0.6m footing projection across the property line."
+    },
+    {
+      "id": "figure-opening-spacing",
+      "kind": "figure_only",
+      "plain": "The sample cross-section on page 6 also notes that unprotected openings serving the same room are kept at least 2.0 m from other unprotected openings. That note is only in the figure, not in the written conditions; ask the City whether it applies.",
+      "page": 6,
+      "quote": null
+    },
+    {
+      "id": "offence",
+      "kind": "warning",
+      "plain": "If you rely on this package to get a permit, not meeting its requirements is an offence under the Safety Codes Act.",
+      "page": 5,
+      "quote": "If this variance is relied upon to obtain a permit, non-compliance with the requirements of this variance are an offence under the Safety Codes Act."
+    }
+  ]
+}
