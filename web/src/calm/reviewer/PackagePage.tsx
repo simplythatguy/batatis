@@ -133,7 +133,7 @@ export function PackagePage({ packageId, phoneTools }: { packageId: string | nul
 
   const head = (
     <PageHead
-      title={<><a className="ac-crumb" href="#/review">Queue</a><span className="ac-crumb-sep" aria-hidden="true">/</span>{packageId ? "PDF package" : "Review a PDF package"}</>}
+      title={<><a className="ac-crumb" href="#/review">Queue</a><span className="ac-crumb-sep" aria-hidden="true">/</span><span className="ac-crumb-leaf">{packageId ? "PDF package" : "Review a PDF package"}</span></>}
       meta={shown ? `· ${shown.files.map((f) => f.name).join(", ")}` : undefined}
       phoneTools={phoneTools}
     />

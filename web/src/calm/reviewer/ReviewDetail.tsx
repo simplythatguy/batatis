@@ -614,7 +614,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   return (
     <div className="ac-page">
       <PageHead
-        title={<><a className="ac-crumb" href="#/review">Queue</a><span className="ac-crumb-sep" aria-hidden="true">/</span>{title}</>}
+        title={<><a className="ac-crumb" href="#/review">Queue</a><span className="ac-crumb-sep" aria-hidden="true">/</span><span className="ac-crumb-leaf" title={title}>{title}</span></>}
         phoneTools={phoneTools}
         center={<div ref={setStepSlot} className="rv-head-steps" />}
         right={!loadError && (
