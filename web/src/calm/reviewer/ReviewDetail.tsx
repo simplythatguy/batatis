@@ -433,6 +433,18 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
     );
   }
 
+  /** Why Accept is off, in a few words (the full sentence stays in the title and for screen readers). */
+  function acceptHint(): string {
+    const n = (k: number) => `${k} required ${k === 1 ? "item" : "items"}`;
+    if (blocking === null || pkg.state === "loading") return "Checking…";
+    if (blocking > 0) return `${n(blocking)} missing`;
+    if (pkg.state === "current" && pkg.blocking > 0) return `${n(pkg.blocking)} open`;
+    if (pkg.state === "stale") return "Changed · review again";
+    if (pkg.state === "failed") return "Review didn’t load";
+    if (pkg.state === "none") return "Not reviewed yet";
+    return "Not yet";
+  }
+
   /** The decision: three choices, each saying what it does. Accept waits for a clean review. */
   function decide() {
     return (
@@ -443,7 +455,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
           <button type="button" className="rv-choice is-green" disabled={!gate.canAccept || Boolean(busy)} onClick={() => setConfirm("accept")} data-requires-no-blocking-gaps={gate.canAccept ? undefined : "true"}>
             <span className="pr-ico" aria-hidden="true"><AcIcon name="check" size={22} /></span>
             <span className="rv-choice-t">{busy === "accept" ? "Accepting…" : "Accept"}</span>
-            <span className="rv-choice-d">{gate.canAccept ? "Complete" : gate.reason}</span>
+            <span className="rv-choice-d" title={gate.canAccept ? undefined : gate.reason}>{gate.canAccept ? "Complete" : acceptHint()}</span>
           </button>
           <button type="button" className="rv-choice is-amber" disabled={Boolean(busy)} onClick={requestMore}>
             <span className="pr-ico" aria-hidden="true"><AcIcon name="send" size={20} /></span>

@@ -296,6 +296,15 @@
   .rv-steps .cf-stage { padding: 0 8px; }
   .rv-steps .cf-stage:not([aria-current="step"]) .cf-stage-name { display: none; }
 }
+/* Phones: the steps get their own row under the title, so nothing collides. */
+@media (max-width: 760px) {
+  .ac-head.has-center { height: auto; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 52px auto; }
+  .ac-head.has-center .rv-head-steps { grid-column: 1 / -1; grid-row: 2; height: 44px; margin: 0 -8px 0 -16px; padding: 0 8px; border-top: 1px solid var(--cf-line); }
+  .ac-head.has-center .rv-head-steps:empty { display: none; }
+  .rv-steps { width: 100%; justify-content: space-between; }
+  .ac-head .rv-steps .cf-stage { padding: 0 4px; }
+  .ac-head .rv-steps .cf-stage:not([aria-current="step"]) .cf-stage-name { display: inline; }
+}
 
 /* —— Checks: four folded rows, one open at a time —— */
 
