@@ -1,0 +1,1844 @@
+{
+  "schema": "batatis-accuracy/1",
+  "generated_on": "2026-10-22",
+  "built_from": {
+    "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+    "dirty": false
+  },
+  "edition": "NBC(AE) 2023, 2nd printing",
+  "intro": "Batatis checks whether a variance application is complete and cites the code. It does not judge whether a design is right. This page separates what Batatis guarantees by construction from what we measured, with how sure we are.",
+  "guaranteed": [
+    {
+      "id": "citations-resolve",
+      "claim": "Every code reference Batatis shows is checked against the NBC(AE) 2023, 2nd printing code database.",
+      "detail": "An article number that is not in the database is removed from code identification and from assistant answers, or kept as the applicant’s own unchecked text. The exported form text passes the citation validator with zero errors.",
+      "tests": [
+        {
+          "id": "engine/tests/test_identify_service.py::test_lying_model_never_shows_a_fabricated_citation",
+          "file": "engine/tests/test_identify_service.py",
+          "name": "test_lying_model_never_shows_a_fabricated_citation",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_assist.py::test_grounded_provision_lookup_citations_removal_and_spend_receipt",
+          "file": "engine/tests/test_assist.py",
+          "name": "test_grounded_provision_lookup_citations_removal_and_spend_receipt",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_intake_extract.py::test_article_numbers_resolve_in_codedb_or_stay_unresolved_text",
+          "file": "engine/tests/test_intake_extract.py",
+          "name": "test_article_numbers_resolve_in_codedb_or_stay_unresolved_text",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_export_g3.py::test_codedb_validate_cli_reports_zero_errors",
+          "file": "engine/tests/test_export_g3.py",
+          "name": "test_codedb_validate_cli_reports_zero_errors",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "codedb/tests/test_validator.py::test_detects_invalid_citations",
+          "file": "codedb/tests/test_validator.py",
+          "name": "test_detects_invalid_citations",
+          "runner": "pytest",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "fabrications-filtered",
+      "claim": "A made-up citation or quote from an AI model never reaches the screen.",
+      "detail": "Tests replace the model with one that lies on purpose: invented article numbers, paraphrased or invented quotes. A pick is kept only when its quote appears word for word in the article. Over 30 random liars, nothing invented is shown.",
+      "tests": [
+        {
+          "id": "engine/tests/test_identify_service.py::test_lying_model_never_shows_a_fabricated_citation",
+          "file": "engine/tests/test_identify_service.py",
+          "name": "test_lying_model_never_shows_a_fabricated_citation",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_identify.py::test_quote_check_drops_paraphrase_and_unlisted_articles",
+          "file": "engine/tests/test_identify.py",
+          "name": "test_quote_check_drops_paraphrase_and_unlisted_articles",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_intake_extract.py::test_a_lying_model_can_only_point_at_real_words",
+          "file": "engine/tests/test_intake_extract.py",
+          "name": "test_a_lying_model_can_only_point_at_real_words",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_identify_service.py::test_verifier_failure_means_no_commit",
+          "file": "engine/tests/test_identify_service.py",
+          "name": "test_verifier_failure_means_no_commit",
+          "runner": "pytest",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "section-c-lookup",
+      "claim": "Section C objectives and functions come from a lookup in the code’s attribution tables, not from an AI model.",
+      "detail": "Once an article is identified, its objective and function rows are read from the tables. Where a sentence has no row, Section C says so. Where the national intent differs, it is labelled.",
+      "tests": [
+        {
+          "id": "engine/tests/test_section_c.py::test_most_varied_part9_sentences",
+          "file": "engine/tests/test_section_c.py",
+          "name": "test_most_varied_part9_sentences",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_section_c.py::test_article_without_table_row_says_so",
+          "file": "engine/tests/test_section_c.py",
+          "name": "test_article_without_table_row_says_so",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_section_c.py::test_differs_flag_comes_from_intent_comparison",
+          "file": "engine/tests/test_section_c.py",
+          "name": "test_differs_flag_comes_from_intent_comparison",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_export.py::test_section_c_cells_and_appendix_match_section_c_rows",
+          "file": "engine/tests/test_export.py",
+          "name": "test_section_c_cells_and_appendix_match_section_c_rows",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_export_g3.py::test_section_c_rows_carry_identification_lookup_and_quoted_sentence",
+          "file": "engine/tests/test_export_g3.py",
+          "name": "test_section_c_rows_carry_identification_lookup_and_quoted_sentence",
+          "runner": "pytest",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "no-filled-blanks",
+      "claim": "Batatis never fills a blank to make the form look complete.",
+      "detail": "A value needs a source and the applicant’s confirmation before it reaches the form. A field shows N/A only when the applicant said it does not apply and gave a reason. The official form stays locked while a required field is empty.",
+      "tests": [
+        {
+          "id": "engine/tests/test_export_na.py::test_without_the_fact_the_field_stays_blank_and_is_never_shown_as_n_a",
+          "file": "engine/tests/test_export_na.py",
+          "name": "test_without_the_fact_the_field_stays_blank_and_is_never_shown_as_n_a",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_export_na.py::test_only_the_applicant_can_mark_a_field_not_applicable",
+          "file": "engine/tests/test_export_na.py",
+          "name": "test_only_the_applicant_can_mark_a_field_not_applicable",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_export.py::test_blocks_on_unconfirmed_facts_and_blocking_gaps",
+          "file": "engine/tests/test_export.py",
+          "name": "test_blocks_on_unconfirmed_facts_and_blocking_gaps",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_export.py::test_direct_export_cannot_bypass_authoritative_completeness",
+          "file": "engine/tests/test_export.py",
+          "name": "test_direct_export_cannot_bypass_authoritative_completeness",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_intake_extract.py::test_no_value_without_a_source_on_dev_cases_and_stripped_copies",
+          "file": "engine/tests/test_intake_extract.py",
+          "name": "test_no_value_without_a_source_on_dev_cases_and_stripped_copies",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_intake_extract.py::test_every_extracted_fact_blocks_export_until_confirmed",
+          "file": "engine/tests/test_intake_extract.py",
+          "name": "test_every_extracted_fact_blocks_export_until_confirmed",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_package_review_boundary.py::test_never_fills_a_blank_from_elsewhere_in_the_package",
+          "file": "engine/tests/test_package_review_boundary.py",
+          "name": "test_never_fills_a_blank_from_elsewhere_in_the_package",
+          "runner": "pytest",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "applicant-writes-the-case",
+      "claim": "Batatis never writes the applicant’s case or the officer’s decision.",
+      "detail": "The rationale, risk assessment, mitigating measures, assumptions and limits are the applicant’s words. Text an AI drafted, or altered applicant text, is refused at export.",
+      "tests": [
+        {
+          "id": "engine/tests/test_process_fields.py::test_applicant_passage_roundtrips_but_ai_cannot_fill_field",
+          "file": "engine/tests/test_process_fields.py",
+          "name": "test_applicant_passage_roundtrips_but_ai_cannot_fill_field",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_export.py::test_generated_or_altered_process_content_never_exports",
+          "file": "engine/tests/test_export.py",
+          "name": "test_generated_or_altered_process_content_never_exports",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_package_review_boundary.py::test_never_writes_risk_mitigation_or_assumptions",
+          "file": "engine/tests/test_package_review_boundary.py",
+          "name": "test_never_writes_risk_mitigation_or_assumptions",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_completeness.py::test_checker_does_not_claim_compliance_or_write_process_answers",
+          "file": "engine/tests/test_completeness.py",
+          "name": "test_checker_does_not_claim_compliance_or_write_process_answers",
+          "runner": "pytest",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "no-compliance-language",
+      "claim": "Batatis never says a design complies, is safe, approved or adequate.",
+      "detail": "The checker, the assistant, the coded rules, the checklists, the intake notes, the package review and the exported form are each tested for those words. It reports what is missing, not whether the design is right.",
+      "tests": [
+        {
+          "id": "engine/tests/test_completeness.py::test_checker_does_not_claim_compliance_or_write_process_answers",
+          "file": "engine/tests/test_completeness.py",
+          "name": "test_checker_does_not_claim_compliance_or_write_process_answers",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_assist.py::test_compliance_and_safety_verdicts_are_stopped",
+          "file": "engine/tests/test_assist.py",
+          "name": "test_compliance_and_safety_verdicts_are_stopped",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_rules_vectors.py::test_no_rule_text_or_output_says_complies_safe_approved_or_adequate",
+          "file": "engine/tests/test_rules_vectors.py",
+          "name": "test_no_rule_text_or_output_says_complies_safe_approved_or_adequate",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_checklists.py::test_copy_never_says_complies_safe_approved_or_adequate",
+          "file": "engine/tests/test_checklists.py",
+          "name": "test_copy_never_says_complies_safe_approved_or_adequate",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_intake_plan.py::test_fork_wording_keeps_the_two_halves_distinct",
+          "file": "engine/tests/test_intake_plan.py",
+          "name": "test_fork_wording_keeps_the_two_halves_distinct",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_package_review_boundary.py::test_no_compliance_language_in_any_generated_text",
+          "file": "engine/tests/test_package_review_boundary.py",
+          "name": "test_no_compliance_language_in_any_generated_text",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_export_g3.py::test_wording_check_catches_a_banned_word",
+          "file": "engine/tests/test_export_g3.py",
+          "name": "test_wording_check_catches_a_banned_word",
+          "runner": "pytest",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "personal-details-scrubbed",
+      "claim": "Before the intake reader, code identification or the assistant sends text to an AI model, Batatis removes the names, contact details and addresses it recognizes.",
+      "detail": "Known values from the application and the account are replaced too, including a name read from an uploaded file.",
+      "tests": [
+        {
+          "id": "engine/tests/test_redact.py::test_known_personal_facts_are_replaced_case_insensitively",
+          "file": "engine/tests/test_redact.py",
+          "name": "test_known_personal_facts_are_replaced_case_insensitively",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_intake_extract.py::test_model_text_is_scrubbed_before_it_leaves",
+          "file": "engine/tests/test_intake_extract.py",
+          "name": "test_model_text_is_scrubbed_before_it_leaves",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_intake_pdf.py::test_a_name_read_from_a_file_is_scrubbed_from_the_description_sent_to_the_model",
+          "file": "engine/tests/test_intake_pdf.py",
+          "name": "test_a_name_read_from_a_file_is_scrubbed_from_the_description_sent_to_the_model",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_identify_service.py::test_identify_redacts_personal_details_before_the_provider",
+          "file": "engine/tests/test_identify_service.py",
+          "name": "test_identify_redacts_personal_details_before_the_provider",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_assist.py::test_personal_information_is_redacted_before_the_provider_sees_it",
+          "file": "engine/tests/test_assist.py",
+          "name": "test_personal_information_is_redacted_before_the_provider_sees_it",
+          "runner": "pytest",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "no-provider-names",
+      "claim": "Nothing a user can see names an AI provider.",
+      "detail": "The web code that ships to the browser, the API responses, the exported PDF, this report and this page are scanned for provider names.",
+      "tests": [
+        {
+          "id": "engine/tests/test_no_provider_names_exposed.py::test_web_source_that_ships_to_the_browser_names_no_provider",
+          "file": "engine/tests/test_no_provider_names_exposed.py",
+          "name": "test_web_source_that_ships_to_the_browser_names_no_provider",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_no_provider_names_exposed.py::test_identify_responses_name_no_provider",
+          "file": "engine/tests/test_no_provider_names_exposed.py",
+          "name": "test_identify_responses_name_no_provider",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_no_provider_names_exposed.py::test_the_export_headers_and_pdf_name_no_provider",
+          "file": "engine/tests/test_no_provider_names_exposed.py",
+          "name": "test_the_export_headers_and_pdf_name_no_provider",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_no_provider_names_exposed.py::test_the_accuracy_report_names_no_provider",
+          "file": "engine/tests/test_no_provider_names_exposed.py",
+          "name": "test_the_accuracy_report_names_no_provider",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "web/src/calm/no-provider-names.test.ts::the accuracy page and its report name no provider",
+          "file": "web/src/calm/no-provider-names.test.ts",
+          "name": "the accuracy page and its report name no provider",
+          "runner": "node",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "refused-run-writes-nothing",
+      "claim": "A refused or failed run leaves no partial write.",
+      "detail": "A run refused for a stale version, a rate limit or a concurrent edit changes nothing on the application. A failed model call stores no model facts and commits no article.",
+      "tests": [
+        {
+          "id": "engine/tests/test_identify_service.py::test_answers_are_written_with_the_result_or_not_at_all",
+          "file": "engine/tests/test_identify_service.py",
+          "name": "test_answers_are_written_with_the_result_or_not_at_all",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_identify_service.py::test_stale_expected_version_is_a_409_and_changes_nothing",
+          "file": "engine/tests/test_identify_service.py",
+          "name": "test_stale_expected_version_is_a_409_and_changes_nothing",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_identify_service.py::test_identify_run_is_one_cas_and_a_write_during_it_is_a_409",
+          "file": "engine/tests/test_identify_service.py",
+          "name": "test_identify_run_is_one_cas_and_a_write_during_it_is_a_409",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_intake_plan.py::test_a_stale_version_is_refused_before_any_model_call",
+          "file": "engine/tests/test_intake_plan.py",
+          "name": "test_a_stale_version_is_refused_before_any_model_call",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_intake_extract.py::test_gate_closed_and_failures_store_no_model_facts",
+          "file": "engine/tests/test_intake_extract.py",
+          "name": "test_gate_closed_and_failures_store_no_model_facts",
+          "runner": "pytest",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "nothing-committed-uncalibrated",
+      "claim": "Code identification does not pick an article on its own while its commit rule is uncalibrated.",
+      "detail": "Until a calibration exists it offers at most three quoted choices, and the applicant decides.",
+      "tests": [
+        {
+          "id": "engine/tests/test_identify_service.py::test_uncalibrated_default_commits_nothing_and_offers_three_quoted_choices",
+          "file": "engine/tests/test_identify_service.py",
+          "name": "test_uncalibrated_default_commits_nothing_and_offers_three_quoted_choices",
+          "runner": "pytest",
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "id": "rule-evaluators-agree",
+      "claim": "The coded rules give the same answer in the browser and on the server.",
+      "detail": "Two evaluators, one in Python and one in TypeScript, run the same hand-set vectors and must produce identical output.",
+      "tests": [
+        {
+          "id": "engine/tests/test_rules_vectors.py::test_golden_outputs_are_current",
+          "file": "engine/tests/test_rules_vectors.py",
+          "name": "test_golden_outputs_are_current",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "web/src/rules/rules.test.ts::cross-language agreement: every full output equals the Python evaluator's (outputs.json)",
+          "file": "web/src/rules/rules.test.ts",
+          "name": "cross-language agreement: every full output equals the Python evaluator's (outputs.json)",
+          "runner": "node",
+          "result": "passed"
+        }
+      ]
+    }
+  ],
+  "verified": {
+    "date": "2026-10-22",
+    "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+    "passed": 48,
+    "skipped": 0,
+    "total": 48
+  },
+  "measured": [
+    {
+      "id": "intake",
+      "title": "Reading facts from a description",
+      "plain": "How often the facts Batatis reads from a project description are right (precision) and how many of the stated facts it finds (recall).",
+      "status": "measured",
+      "caveats": [
+        "In sample: the labels were written while the rules were written, so these numbers flatter the rules.",
+        "The cases are agent-written and model-checked. No label is human-verified."
+      ],
+      "figures": [
+        {
+          "id": "intake.precision",
+          "label": "Facts read that are right",
+          "x": 159,
+          "n": 159,
+          "rate": 1.0,
+          "value": "159 of 159",
+          "interval": [
+            0.9764,
+            1.0
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Intake gold labels",
+          "sample": "60 development cases (agent-written)",
+          "date": "2026-10-22",
+          "tags": [
+            "in-sample",
+            "model-checked"
+          ],
+          "note": null,
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/intake_facts/gold.json",
+              "evals_dev/cases/",
+              "evals_dev/intake_facts/score.py"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": "python -m evals_dev.intake_facts.score",
+            "pr": 54
+          }
+        },
+        {
+          "id": "intake.recall",
+          "label": "Stated facts it found",
+          "x": 159,
+          "n": 162,
+          "rate": 0.9815,
+          "value": "159 of 162",
+          "interval": [
+            0.947,
+            0.9937
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Intake gold labels",
+          "sample": "60 development cases (agent-written)",
+          "date": "2026-10-22",
+          "tags": [
+            "in-sample",
+            "model-checked"
+          ],
+          "note": null,
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/intake_facts/gold.json",
+              "evals_dev/cases/",
+              "evals_dev/intake_facts/score.py"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": "python -m evals_dev.intake_facts.score",
+            "pr": 54
+          }
+        },
+        {
+          "id": "intake.recall_known",
+          "label": "Stated facts it found, counting only labels from each case’s fact list",
+          "x": 134,
+          "n": 137,
+          "rate": 0.9781,
+          "value": "134 of 137",
+          "interval": [
+            0.9376,
+            0.9925
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Intake gold labels",
+          "sample": "60 development cases (agent-written)",
+          "date": "2026-10-22",
+          "tags": [
+            "in-sample",
+            "model-checked"
+          ],
+          "note": null,
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/intake_facts/gold.json",
+              "evals_dev/cases/",
+              "evals_dev/intake_facts/score.py"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": "python -m evals_dev.intake_facts.score",
+            "pr": 54
+          }
+        }
+      ]
+    },
+    {
+      "id": "code-id",
+      "title": "Finding the code articles that apply",
+      "plain": "Whether the article an applicant needs is the one Batatis shows first (Part 9), or among the three quoted choices it offers (other Parts and mixed cases).",
+      "status": "provisional",
+      "figures": [
+        {
+          "id": "codeid.product",
+          "label": "Right article shown (product pipeline)",
+          "x": 63.6,
+          "n": 79,
+          "rate": 0.8051,
+          "value": "63.6 of 79",
+          "interval": [
+            0.7044,
+            0.8774
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Public Alberta precedents (53) and interpretation requests (26), the selection folds",
+          "sample": "79 cases with known answers (45 Part 9, 25 other Parts, 9 mixed)",
+          "date": "2026-10-21",
+          "tags": [
+            "provisional",
+            "selection folds"
+          ],
+          "note": "5 verifier runs over 2 relevance draws. A case that succeeded in some runs only counts as a fraction.",
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/identify_bench/results/"
+            ],
+            "commit": "6a4279525d22f39501cb2456431121446007c3c9",
+            "command": "python -m evals_dev.identify_bench decision",
+            "pr": 58,
+            "ref": "branch feat/wp10-11-evals",
+            "row_files": [
+              {
+                "pipeline": "product",
+                "sha256_16": "219eefa547c1c059"
+              },
+              {
+                "pipeline": "screen-rerank",
+                "sha256_16": "6dc4fce3e8fcb976"
+              },
+              {
+                "pipeline": "screen",
+                "sha256_16": "5b13781d27eead2e"
+              }
+            ]
+          }
+        },
+        {
+          "id": "codeid.floor",
+          "label": "Right article shown (keyword search, for comparison)",
+          "x": 28.0,
+          "n": 79,
+          "rate": 0.3544,
+          "value": "28 of 79",
+          "interval": [
+            0.258,
+            0.4644
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Public Alberta precedents (53) and interpretation requests (26), the selection folds",
+          "sample": "79 cases with known answers (45 Part 9, 25 other Parts, 9 mixed)",
+          "date": "2026-10-21",
+          "tags": [
+            "selection folds"
+          ],
+          "note": "Deterministic: one run.",
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/identify_bench/results/"
+            ],
+            "commit": "6a4279525d22f39501cb2456431121446007c3c9",
+            "command": "python -m evals_dev.identify_bench decision",
+            "pr": 58,
+            "ref": "branch feat/wp10-11-evals",
+            "row_files": [
+              {
+                "pipeline": "keyword",
+                "sha256_16": "1f3cdaa21e42cd4e"
+              }
+            ]
+          }
+        },
+        {
+          "id": "codeid.product_dev",
+          "label": "Right article shown on development cases (not used to choose)",
+          "x": 30.4,
+          "n": 38,
+          "rate": 0.8,
+          "value": "30.4 of 38",
+          "interval": [
+            0.6482,
+            0.8967
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Development cases with known answers (calibration and validation folds)",
+          "sample": "38 cases",
+          "date": "2026-10-21",
+          "tags": [
+            "provisional",
+            "development folds"
+          ],
+          "note": "5 verifier runs over 2 relevance draws. Agent-written cases.",
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/identify_bench/results/"
+            ],
+            "commit": "6a4279525d22f39501cb2456431121446007c3c9",
+            "command": "python -m evals_dev.identify_bench decision",
+            "pr": 58,
+            "ref": "branch feat/wp10-11-evals",
+            "row_files": [
+              {
+                "pipeline": "product",
+                "sha256_16": "219eefa547c1c059"
+              },
+              {
+                "pipeline": "screen-rerank",
+                "sha256_16": "6dc4fce3e8fcb976"
+              },
+              {
+                "pipeline": "screen",
+                "sha256_16": "5b13781d27eead2e"
+              }
+            ]
+          }
+        },
+        {
+          "id": "codeid.public_top1",
+          "label": "Relevance stage puts a cited article first",
+          "x": 33.5,
+          "n": 53,
+          "rate": 0.6321,
+          "value": "33.5 of 53",
+          "interval": [
+            0.4975,
+            0.7488
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Public Alberta precedents",
+          "sample": "53 cases",
+          "date": "2026-10-21",
+          "tags": [
+            "provisional",
+            "relevance stage only"
+          ],
+          "note": "Mean of 2 draws. Keyword search: 34.0%.",
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/identify_bench/results/"
+            ],
+            "commit": "6a4279525d22f39501cb2456431121446007c3c9",
+            "command": "python -m evals_dev.identify_bench decision",
+            "pr": 58,
+            "ref": "branch feat/wp10-11-evals",
+            "row_files": [
+              {
+                "pipeline": "screen-rerank",
+                "sha256_16": "6dc4fce3e8fcb976"
+              },
+              {
+                "pipeline": "keyword",
+                "sha256_16": "1f3cdaa21e42cd4e"
+              }
+            ]
+          }
+        },
+        {
+          "id": "codeid.public_top5",
+          "label": "Relevance stage puts a cited article in the first five",
+          "x": 42.0,
+          "n": 53,
+          "rate": 0.7925,
+          "value": "42 of 53",
+          "interval": [
+            0.6654,
+            0.88
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Public Alberta precedents",
+          "sample": "53 cases",
+          "date": "2026-10-21",
+          "tags": [
+            "provisional",
+            "relevance stage only"
+          ],
+          "note": "Mean of 2 draws. Keyword search: 67.9%.",
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/identify_bench/results/"
+            ],
+            "commit": "6a4279525d22f39501cb2456431121446007c3c9",
+            "command": "python -m evals_dev.identify_bench decision",
+            "pr": 58,
+            "ref": "branch feat/wp10-11-evals",
+            "row_files": [
+              {
+                "pipeline": "screen-rerank",
+                "sha256_16": "6dc4fce3e8fcb976"
+              },
+              {
+                "pipeline": "keyword",
+                "sha256_16": "1f3cdaa21e42cd4e"
+              }
+            ]
+          }
+        },
+        {
+          "id": "codeid.fabricated",
+          "label": "Stored product runs that would show a citation not in the code database",
+          "x": 0,
+          "n": 395,
+          "rate": 0.0,
+          "value": "0 of 395",
+          "interval": [
+            0.0,
+            0.0096
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Public Alberta precedents (53) and interpretation requests (26), the selection folds",
+          "sample": "395 stored runs, rechecked against the code database",
+          "date": "2026-10-21",
+          "tags": [
+            "selection folds"
+          ],
+          "note": null,
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/identify_bench/results/"
+            ],
+            "commit": "6a4279525d22f39501cb2456431121446007c3c9",
+            "command": "python -m evals_dev.identify_bench decision",
+            "pr": 58,
+            "ref": "branch feat/wp10-11-evals",
+            "row_files": [
+              {
+                "pipeline": "product",
+                "sha256_16": "219eefa547c1c059"
+              }
+            ]
+          }
+        }
+      ],
+      "detail": [
+        {
+          "title": "Every pipeline the benchmark compared (selection folds)",
+          "header": [
+            "Pipeline",
+            "Right article",
+            "Rate (Wilson 95%)",
+            "Runs",
+            "Cost per case run",
+            "Tied with the best",
+            "Decision"
+          ],
+          "rows": [
+            [
+              "As the product pipeline, but the verification model reads the top 40",
+              "65.3 of 79",
+              "82.7% (72.9–89.5)",
+              "3 verifier runs over 2 relevance draws",
+              "US$0.0196",
+              "no",
+              "too many failed runs (limit 2%)"
+            ],
+            [
+              "As the product pipeline, but the verification model may name an article outside the list",
+              "64.3 of 79",
+              "81.4% (71.5–88.5)",
+              "3 verifier runs over 2 relevance draws",
+              "US$0.0190",
+              "no",
+              "too many failed runs (limit 2%)"
+            ],
+            [
+              "The blend, then the verification model reads the top 15",
+              "63.7 of 79",
+              "80.6% (70.5–87.8)",
+              "3 verifier runs over 2 relevance draws",
+              "US$0.0190",
+              "no",
+              "rows missing; too many failed runs (limit 2%)"
+            ],
+            [
+              "Screen and re-rank, then the verification model reads the top 15 in full and quotes",
+              "63.6 of 79",
+              "80.5% (70.4–87.7)",
+              "5 verifier runs over 2 relevance draws",
+              "US$0.0191",
+              "yes",
+              "carried as provisional"
+            ],
+            [
+              "As the product pipeline, but the verification model reads the first 700 characters",
+              "61.7 of 79",
+              "78.1% (67.8–85.8)",
+              "3 verifier runs over 2 relevance draws",
+              "US$0.0188",
+              "no",
+              "too many failed runs (limit 2%)"
+            ],
+            [
+              "Keyword search and re-rank, then the verification model reads the top 15",
+              "61 of 79",
+              "77.2% (66.8–85.1)",
+              "3 verifier runs over 2 relevance draws",
+              "US$0.0014",
+              "no",
+              "too many failed runs (limit 2%)"
+            ],
+            [
+              "Screen, then the relevance model re-ranks the top 60",
+              "60.5 of 79",
+              "76.6% (66.1–84.6)",
+              "2 draws",
+              "US$0.0181",
+              "no",
+              "worse than the best on the paired test, or more than 3 points behind"
+            ],
+            [
+              "Keyword search, then the verification model re-ranks the top 60",
+              "59.3 of 79",
+              "75.1% (64.6–83.3)",
+              "3 draws",
+              "US$0.0014",
+              "no",
+              "rows missing; too many failed runs (limit 2%)"
+            ],
+            [
+              "Keyword search, then the relevance model re-ranks the top 60",
+              "56 of 79",
+              "70.9% (60.1–79.7)",
+              "2 draws",
+              "US$0.0006",
+              "no",
+              "worse than the best on the paired test, or more than 3 points behind"
+            ],
+            [
+              "A blend of the screen-and-re-rank, structured keyword and precedent rankings",
+              "51.5 of 79",
+              "65.2% (54.2–74.8)",
+              "2 draws",
+              "US$0.0181",
+              "no",
+              "worse than the best on the paired test, or more than 3 points behind"
+            ],
+            [
+              "The relevance model screens all 2,080 articles",
+              "50.5 of 79",
+              "63.9% (52.9–73.6)",
+              "2 draws",
+              "US$0.0176",
+              "no",
+              "worse than the best on the paired test, or more than 3 points behind"
+            ],
+            [
+              "Keyword search with code-structure ranking",
+              "36 of 79",
+              "45.6% (35.0–56.5)",
+              "1 draw",
+              "US$0.0000",
+              "no",
+              "worse than the best on the paired test, or more than 3 points behind"
+            ],
+            [
+              "Keyword search (the floor)",
+              "28 of 79",
+              "35.4% (25.8–46.4)",
+              "1 draw",
+              "US$0.0000",
+              "no",
+              "worse than the best on the paired test, or more than 3 points behind"
+            ],
+            [
+              "Precedent matcher",
+              "15 of 79",
+              "19.0% (11.9–29.0)",
+              "1 draw",
+              "US$0.0000",
+              "no",
+              "worse than the best on the paired test, or more than 3 points behind"
+            ]
+          ]
+        },
+        {
+          "title": "By Part group (selection folds)",
+          "header": [
+            "Pipeline",
+            "Part 9",
+            "Other Parts",
+            "Mixed"
+          ],
+          "rows": [
+            [
+              "Screen and re-rank, then the verification model reads the top 15 in full and quotes",
+              "37.4 of 45",
+              "18 of 25",
+              "8.2 of 9"
+            ],
+            [
+              "Screen, then the relevance model re-ranks the top 60",
+              "37 of 45",
+              "16.5 of 25",
+              "7 of 9"
+            ],
+            [
+              "Keyword search (the floor)",
+              "13 of 45",
+              "9 of 25",
+              "6 of 9"
+            ]
+          ]
+        },
+        {
+          "title": "Verification model: first article right, by Part (all cases with known answers)",
+          "header": [
+            "Part",
+            "Right",
+            "Wilson 95%"
+          ],
+          "rows": [
+            [
+              "Part 3",
+              "23 of 35",
+              "49.2–79.2%"
+            ],
+            [
+              "Part 4",
+              "10.8 of 14",
+              "51.0–91.6%"
+            ],
+            [
+              "Part 6",
+              "1 of 1",
+              "20.7–100.0%"
+            ],
+            [
+              "Part 8",
+              "0 of 1",
+              "0.0–79.3%"
+            ],
+            [
+              "Part 9",
+              "44.4 of 56",
+              "67.0–87.8%"
+            ],
+            [
+              "Mixed",
+              "7 of 10",
+              "39.7–89.2%"
+            ]
+          ]
+        },
+        {
+          "title": "Gate G1 checks",
+          "header": [
+            "Check",
+            "Value",
+            "Status"
+          ],
+          "rows": [
+            [
+              "Re-rank mean reciprocal rank on 53 public precedents, at least 0.70",
+              "0.713 over 2 draws (lowest 0.710)",
+              "pass"
+            ],
+            [
+              "Verification model top-1 by Part, with intervals, over at least 5 runs",
+              "5 runs",
+              "pass"
+            ],
+            [
+              "Cost per case run, all stages",
+              "US$0.0191",
+              "pass"
+            ],
+            [
+              "Verification stage latency, one request at a time",
+              "not measured",
+              "not run"
+            ],
+            [
+              "End-to-end latency, one case at a time",
+              "not measured",
+              "not run"
+            ],
+            [
+              "Fabricated citations shown",
+              "0",
+              "pass"
+            ]
+          ]
+        }
+      ],
+      "caveats": [
+        "Provisional: 2 complete relevance draws per case on 139 cases; the plan asks for more draws, and the latency pass has not run.",
+        "The decision rule carries the product pipeline as provisional, not as a winner: it is tied with the best and the cheapest of those tied. It fails one robustness condition: two runs on the same case agree on the first article 84.6% of the time, under the required 90%. The choice needs a person.",
+        "The selection folds were used to choose the pipeline, so its number there is the best of several and flatters it. The development folds were not used to choose.",
+        "No committed-pick precision exists: the commit rule is uncalibrated, so Batatis commits nothing on its own.",
+        "The held-out test split has not been run. It runs once, after the commit rule is fitted.",
+        "Answer lists for public precedents can be incomplete, so a right answer can be scored as a miss."
+      ],
+      "definition": "A Part 9 case succeeds when the first article shown is a right one; any other case when a right article is among the three quoted choices. Each case scores the share of its runs that succeed.",
+      "rows": {
+        "live_rows": 3503,
+        "first": "2026-10-21T18:21:47Z",
+        "last": "2026-10-21T23:55:18Z",
+        "files": [
+          {
+            "pipeline": "keyword-verifier-rerank",
+            "rows": 237,
+            "sha256_16": "592bb58bcead3340"
+          },
+          {
+            "pipeline": "fusion",
+            "rows": 158,
+            "sha256_16": "dd6cdd4f8f3f4cd3"
+          },
+          {
+            "pipeline": "keyword",
+            "rows": 139,
+            "sha256_16": "1f3cdaa21e42cd4e"
+          },
+          {
+            "pipeline": "keyword-structured",
+            "rows": 139,
+            "sha256_16": "02efd17dc0ac9ef2"
+          },
+          {
+            "pipeline": "precedent",
+            "rows": 139,
+            "sha256_16": "b993c6146954d4ac"
+          },
+          {
+            "pipeline": "screen",
+            "rows": 278,
+            "sha256_16": "5b13781d27eead2e"
+          },
+          {
+            "pipeline": "screen-rerank",
+            "rows": 278,
+            "sha256_16": "6dc4fce3e8fcb976"
+          },
+          {
+            "pipeline": "keyword-rerank",
+            "rows": 278,
+            "sha256_16": "d3b38ab69e37fbb1"
+          },
+          {
+            "pipeline": "product-short",
+            "rows": 238,
+            "sha256_16": "8ef9c9ef48c01869"
+          },
+          {
+            "pipeline": "fusion-verify",
+            "rows": 240,
+            "sha256_16": "cfaa2795d1d52fba"
+          },
+          {
+            "pipeline": "product",
+            "rows": 674,
+            "sha256_16": "219eefa547c1c059"
+          },
+          {
+            "pipeline": "product-open",
+            "rows": 237,
+            "sha256_16": "eb5434edb02117fa"
+          },
+          {
+            "pipeline": "keyword-rerank-verify",
+            "rows": 238,
+            "sha256_16": "0de628180ba6b04d"
+          },
+          {
+            "pipeline": "product-40",
+            "rows": 238,
+            "sha256_16": "5299d6f7409a006a"
+          }
+        ]
+      },
+      "updates_when": "The benchmark finishes: more relevance draws, the latency pass, then the decision memo. Re-run python scripts/accuracy_report.py and this section updates with no code change."
+    },
+    {
+      "id": "scope",
+      "title": "Sending other codes elsewhere",
+      "plain": "Whether Batatis notices a question that belongs to another code (plumbing, fire, energy, electrical, gas, private sewage) and redirects it, without redirecting building-code questions.",
+      "status": "measured",
+      "caveats": [
+        "The first blind run is the only out-of-sample result. The rules were then generalised with the blind prompts in view, so the later blind-set numbers are no longer blind.",
+        "A fresh blind set is needed for a real estimate. Prompts are agent-written, not human-verified."
+      ],
+      "figures": [
+        {
+          "id": "scope.dev_redirects",
+          "label": "Development cases redirected correctly",
+          "x": 4,
+          "n": 4,
+          "rate": 1.0,
+          "value": "4 of 4",
+          "interval": [
+            0.5101,
+            1.0
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Development cases",
+          "sample": "4 out-of-scope cases",
+          "date": "2026-10-22",
+          "tags": [
+            "in-sample"
+          ],
+          "note": null,
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/cases/",
+              "engine/intake/scope.py"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": "pytest engine/tests/test_intake_plan.py -k scope -s",
+            "pr": 54
+          }
+        },
+        {
+          "id": "scope.dev_false",
+          "label": "Building-code cases redirected by mistake",
+          "x": 0,
+          "n": 56,
+          "rate": 0.0,
+          "value": "0 of 56",
+          "interval": [
+            0.0,
+            0.0642
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Development cases",
+          "sample": "56 in-scope cases",
+          "date": "2026-10-22",
+          "tags": [
+            "in-sample"
+          ],
+          "note": null,
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/cases/",
+              "engine/intake/scope.py"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": "pytest engine/tests/test_intake_plan.py -k scope -s",
+            "pr": 54
+          }
+        },
+        {
+          "id": "scope.boundary",
+          "label": "Boundary prompts redirected correctly",
+          "x": 24,
+          "n": 24,
+          "rate": 1.0,
+          "value": "24 of 24",
+          "interval": [
+            0.862,
+            1.0
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Scope boundary set",
+          "sample": "24 redirect prompts",
+          "date": "2026-10-22",
+          "tags": [
+            "in-sample"
+          ],
+          "note": "0 of 16 in-scope boundary prompts redirected by mistake.",
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/boundary/scope.json",
+              "engine/intake/scope.py"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": null,
+            "pr": 54
+          }
+        },
+        {
+          "id": "scope.blind_first",
+          "label": "Blind prompts redirected correctly, first contact",
+          "x": 16,
+          "n": 32,
+          "rate": 0.5,
+          "value": "16 of 32",
+          "interval": [
+            0.3363,
+            0.6637
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Blind scope set",
+          "sample": "32 redirect prompts",
+          "date": "2026-10-21",
+          "tags": [
+            "blind",
+            "first run"
+          ],
+          "note": "2 of 32 in-scope blind prompts redirected by mistake.",
+          "source": {
+            "kind": "pr",
+            "pr": 54,
+            "commit": "d13e2d6ce68040fb1b05c589c3f4407023635a77",
+            "quote": "Blind set `blind_scope.json` (32 redirects, 32 in-scope; written by a subagent that never saw the code) | **16/32 redirects, 2/32 false**"
+          }
+        },
+        {
+          "id": "scope.blind_now",
+          "label": "Blind prompts redirected correctly, after the fixes",
+          "x": 32,
+          "n": 32,
+          "rate": 1.0,
+          "value": "32 of 32",
+          "interval": [
+            0.8928,
+            1.0
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Blind scope set",
+          "sample": "32 redirect prompts",
+          "date": "2026-10-22",
+          "tags": [
+            "no longer blind"
+          ],
+          "note": "0 of 32 in-scope blind prompts redirected by mistake.",
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/boundary/blind_scope.json",
+              "engine/intake/scope.py"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": null,
+            "pr": 54
+          }
+        }
+      ]
+    },
+    {
+      "id": "fork",
+      "title": "Saying early whether a variance is likely needed",
+      "plain": "From the description alone, whether the project likely departs from an acceptable solution (so a variance is likely needed), shows no departure, or is unclear and needs a question.",
+      "status": "measured",
+      "caveats": [
+        "As with scope, only the first blind run is out of sample; the rules were generalised with those prompts in view.",
+        "Precision is how often the label Batatis gives is right; recall is how many cases with that label it finds."
+      ],
+      "figures": [
+        {
+          "id": "fork.blind_first_likely_recall",
+          "label": "Blind prompts labelled likely that it found, first contact",
+          "x": 4,
+          "n": 15,
+          "rate": 0.2667,
+          "value": "4 of 15",
+          "interval": [
+            0.109,
+            0.5195
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Blind fork set",
+          "sample": "15 prompts labelled likely",
+          "date": "2026-10-21",
+          "tags": [
+            "blind",
+            "first run"
+          ],
+          "note": "Precision 4 of 4. Not indicated: precision 7 of 8, recall 7 of 15.",
+          "source": {
+            "kind": "pr",
+            "pr": 54,
+            "commit": "d13e2d6ce68040fb1b05c589c3f4407023635a77",
+            "quote": "Fork, `blind_fork.json` (45 labelled) | **likely 4/4 precision, 4/15 recall; not_indicated 7/8, 7/15**"
+          }
+        },
+        {
+          "id": "fork.blind_likely_precision",
+          "label": "Likely, when Batatis says it",
+          "x": 14,
+          "n": 14,
+          "rate": 1.0,
+          "value": "14 of 14",
+          "interval": [
+            0.7847,
+            1.0
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Blind fork set",
+          "sample": "14 prompts it labelled likely",
+          "date": "2026-10-22",
+          "tags": [
+            "no longer blind"
+          ],
+          "note": null,
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/boundary/blind_fork.json",
+              "engine/intake/fork.py"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": null,
+            "pr": 54
+          }
+        },
+        {
+          "id": "fork.blind_likely_recall",
+          "label": "Blind prompts labelled likely that it found",
+          "x": 14,
+          "n": 15,
+          "rate": 0.9333,
+          "value": "14 of 15",
+          "interval": [
+            0.7018,
+            0.9881
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Blind fork set",
+          "sample": "15 prompts labelled likely",
+          "date": "2026-10-22",
+          "tags": [
+            "no longer blind"
+          ],
+          "note": null,
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/boundary/blind_fork.json",
+              "engine/intake/fork.py"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": null,
+            "pr": 54
+          }
+        },
+        {
+          "id": "fork.blind_not_indicated_precision",
+          "label": "Not indicated, when Batatis says it",
+          "x": 15,
+          "n": 15,
+          "rate": 1.0,
+          "value": "15 of 15",
+          "interval": [
+            0.7961,
+            1.0
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Blind fork set",
+          "sample": "15 prompts it labelled not indicated",
+          "date": "2026-10-22",
+          "tags": [
+            "no longer blind"
+          ],
+          "note": null,
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/boundary/blind_fork.json",
+              "engine/intake/fork.py"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": null,
+            "pr": 54
+          }
+        },
+        {
+          "id": "fork.blind_not_indicated_recall",
+          "label": "Blind prompts labelled not indicated that it found",
+          "x": 15,
+          "n": 15,
+          "rate": 1.0,
+          "value": "15 of 15",
+          "interval": [
+            0.7961,
+            1.0
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Blind fork set",
+          "sample": "15 prompts labelled not indicated",
+          "date": "2026-10-22",
+          "tags": [
+            "no longer blind"
+          ],
+          "note": null,
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/boundary/blind_fork.json",
+              "engine/intake/fork.py"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": null,
+            "pr": 54
+          }
+        },
+        {
+          "id": "fork.dev_first",
+          "label": "Development cases that need a variance, flagged likely, first run",
+          "x": 20,
+          "n": 38,
+          "rate": 0.5263,
+          "value": "20 of 38",
+          "interval": [
+            0.3726,
+            0.6752
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Development cases",
+          "sample": "38 cases that proceed conditionally",
+          "date": "2026-10-21",
+          "tags": [
+            "first run"
+          ],
+          "note": null,
+          "source": {
+            "kind": "pr",
+            "pr": 54,
+            "commit": "d13e2d6ce68040fb1b05c589c3f4407023635a77",
+            "quote": "Fork, 38 dev `proceed_conditionally` cases (`likely`) | 20/38"
+          }
+        },
+        {
+          "id": "fork.dev_now",
+          "label": "Development cases that need a variance, flagged likely",
+          "x": 35,
+          "n": 38,
+          "rate": 0.9211,
+          "value": "35 of 38",
+          "interval": [
+            0.792,
+            0.9728
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Development cases",
+          "sample": "38 cases that proceed conditionally",
+          "date": "2026-10-22",
+          "tags": [
+            "in-sample"
+          ],
+          "note": null,
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/cases/",
+              "engine/intake/fork.py"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": null,
+            "pr": 54
+          }
+        },
+        {
+          "id": "fork.asks",
+          "label": "Descriptions missing key facts that get a critical question or an unclear answer",
+          "x": 74,
+          "n": 74,
+          "rate": 1.0,
+          "value": "74 of 74",
+          "interval": [
+            0.9507,
+            1.0
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Development cases with facts removed, plus the cases whose answer is to ask",
+          "sample": "74 descriptions",
+          "date": "2026-10-22",
+          "tags": [
+            "in-sample"
+          ],
+          "note": null,
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/cases/",
+              "engine/intake/plan.py",
+              "engine/intake/questions.py"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": "pytest engine/tests/test_intake_plan.py -k asks_or_abstains -s",
+            "pr": 54
+          }
+        }
+      ]
+    },
+    {
+      "id": "engineer",
+      "title": "Saying when an engineer is needed",
+      "plain": "Whether Batatis’s flag for professional involvement agrees with the labels, and how often it says no when the answer is yes (an under-flag).",
+      "status": "measured",
+      "caveats": [
+        "It never answers no on these text-only cases. It answers yes or asks, so zero under-flags holds by construction, and 27 of 60 cases are sent to the applicant as a question.",
+        "Labels are model-written, not checked by an engineer."
+      ],
+      "figures": [
+        {
+          "id": "engineer.agreement",
+          "label": "Agrees with the label",
+          "x": 50,
+          "n": 60,
+          "rate": 0.8333,
+          "value": "50 of 60",
+          "interval": [
+            0.7197,
+            0.9069
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Engineer-needed labels",
+          "sample": "60 development cases",
+          "date": "2026-10-21",
+          "tags": [
+            "in-sample",
+            "model-checked"
+          ],
+          "note": null,
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/section_d_flag/metrics.json",
+              "evals_dev/section_d_flag/RESULTS.md"
+            ],
+            "commit": "d75e7ff0fabb89a2d3f23792ceba8ce116536b35",
+            "command": null,
+            "measured_at": "d479e825487eb1c12efbfe469100fbf34ce90672"
+          }
+        },
+        {
+          "id": "engineer.under_flag",
+          "label": "Said no when the label was yes",
+          "x": 0,
+          "n": 60,
+          "rate": 0.0,
+          "value": "0 of 60",
+          "interval": [
+            0.0,
+            0.0602
+          ],
+          "interval_kind": "Wilson 95%",
+          "dataset": "Engineer-needed labels",
+          "sample": "60 development cases",
+          "date": "2026-10-21",
+          "tags": [
+            "in-sample",
+            "model-checked"
+          ],
+          "note": null,
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/section_d_flag/metrics.json",
+              "evals_dev/section_d_flag/RESULTS.md"
+            ],
+            "commit": "d75e7ff0fabb89a2d3f23792ceba8ce116536b35",
+            "command": null,
+            "measured_at": "d479e825487eb1c12efbfe469100fbf34ce90672"
+          }
+        }
+      ]
+    },
+    {
+      "id": "rules",
+      "title": "Coded rules",
+      "plain": "For five provisions applicants often vary, Batatis compares the applicant’s numbers with the acceptable solution and says whether the design follows or departs from it. Each rule is checked against vectors set by hand from the code text.",
+      "status": "measured",
+      "caveats": [
+        "Unreviewed: 5 of 5 rules and 89 of 89 vectors are not yet signed by a domain reviewer (evals_dev/rules/REVIEW.md).",
+        "The vectors test the rules as coded. They do not show that a reading of the code is the right one.",
+        "The browser evaluator is checked against the server’s output for every vector."
+      ],
+      "figures": [
+        {
+          "id": "rules.vectors",
+          "label": "Hand-set vectors where the server evaluator gives the expected result",
+          "x": 89,
+          "n": 89,
+          "rate": 1.0,
+          "value": "89 of 89",
+          "interval": null,
+          "interval_kind": null,
+          "dataset": "Coded-rule vectors",
+          "sample": "89 vectors over 5 rules",
+          "date": "2026-10-22",
+          "tags": [
+            "unreviewed"
+          ],
+          "note": null,
+          "source": {
+            "kind": "file",
+            "paths": [
+              "evals_dev/rules/vectors.json",
+              "evals_dev/rules/outputs.json",
+              "engine/rules/"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": "pytest engine/tests/test_rules_vectors.py; npm run test:rules",
+            "pr": 63
+          }
+        }
+      ]
+    },
+    {
+      "id": "export",
+      "title": "The official form export",
+      "plain": "Whether the three demo applications and one sample export cleanly to the official SCC form: every applicant field filled or marked N/A by the applicant, zero citation errors, and no compliance wording.",
+      "status": "measured",
+      "caveats": [
+        "These are fictional example applications. They show the export works end to end, not that a real application is accurate."
+      ],
+      "figures": [
+        {
+          "id": "g3.checks",
+          "label": "Gate checks passed",
+          "x": 8,
+          "n": 8,
+          "rate": 1.0,
+          "value": "8 of 8",
+          "interval": null,
+          "interval_kind": null,
+          "dataset": "Export gate G3",
+          "sample": "4 example applications",
+          "date": "2026-10-22",
+          "tags": [
+            "example data"
+          ],
+          "note": null,
+          "source": {
+            "kind": "file",
+            "paths": [
+              "scripts/gate_g3.py",
+              "evals/demo-cases/export/"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": "python scripts/gate_g3.py",
+            "pr": 60
+          }
+        },
+        {
+          "id": "g3.case.1",
+          "label": "Manufacturer, nail-base sheathing (demo): fields filled or marked N/A by the applicant",
+          "x": 50,
+          "n": 50,
+          "rate": 1.0,
+          "value": "50 of 50",
+          "interval": null,
+          "interval_kind": null,
+          "dataset": "Export gate G3",
+          "sample": "50 applicant fields",
+          "date": "2026-10-22",
+          "tags": [
+            "example data"
+          ],
+          "note": "27 filled, 23 N/A with the applicant’s reason.",
+          "source": {
+            "kind": "file",
+            "paths": [
+              "scripts/gate_g3.py",
+              "evals/demo-cases/export/"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": "python scripts/gate_g3.py",
+            "pr": 60
+          }
+        },
+        {
+          "id": "g3.case.2",
+          "label": "Contractor, firestop (demo): fields filled or marked N/A by the applicant",
+          "x": 50,
+          "n": 50,
+          "rate": 1.0,
+          "value": "50 of 50",
+          "interval": null,
+          "interval_kind": null,
+          "dataset": "Export gate G3",
+          "sample": "50 applicant fields",
+          "date": "2026-10-22",
+          "tags": [
+            "example data"
+          ],
+          "note": "37 filled, 13 N/A with the applicant’s reason.",
+          "source": {
+            "kind": "file",
+            "paths": [
+              "scripts/gate_g3.py",
+              "evals/demo-cases/export/"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": "python scripts/gate_g3.py",
+            "pr": 60
+          }
+        },
+        {
+          "id": "g3.case.3",
+          "label": "Homebuilder, infill house (demo): fields filled or marked N/A by the applicant",
+          "x": 50,
+          "n": 50,
+          "rate": 1.0,
+          "value": "50 of 50",
+          "interval": null,
+          "interval_kind": null,
+          "dataset": "Export gate G3",
+          "sample": "50 applicant fields",
+          "date": "2026-10-22",
+          "tags": [
+            "example data"
+          ],
+          "note": "28 filled, 22 N/A with the applicant’s reason.",
+          "source": {
+            "kind": "file",
+            "paths": [
+              "scripts/gate_g3.py",
+              "evals/demo-cases/export/"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": "python scripts/gate_g3.py",
+            "pr": 60
+          }
+        },
+        {
+          "id": "g3.case.4",
+          "label": "BTRboard sample: fields filled or marked N/A by the applicant",
+          "x": 50,
+          "n": 50,
+          "rate": 1.0,
+          "value": "50 of 50",
+          "interval": null,
+          "interval_kind": null,
+          "dataset": "Export gate G3",
+          "sample": "50 applicant fields",
+          "date": "2026-10-22",
+          "tags": [
+            "example data"
+          ],
+          "note": "45 filled, 5 N/A with the applicant’s reason.",
+          "source": {
+            "kind": "file",
+            "paths": [
+              "scripts/gate_g3.py",
+              "evals/demo-cases/export/"
+            ],
+            "commit": "d617d7831bc3b01239401bf8c5cf2cca2a138cf8",
+            "command": "python scripts/gate_g3.py",
+            "pr": 60
+          }
+        }
+      ]
+    }
+  ],
+  "not_measured": [
+    {
+      "title": "A held-out result",
+      "why": "The held-out test split runs once, after the commit rule is fitted. It has not run."
+    },
+    {
+      "title": "How often a committed article is right",
+      "why": "The commit rule is uncalibrated, so Batatis commits nothing on its own and there is nothing to count."
+    },
+    {
+      "title": "Latency of code identification",
+      "why": "The one-case-at-a-time timing pass needs account credit and has not run."
+    },
+    {
+      "title": "Whether the officer review catches planted gaps",
+      "why": "The 20-application planted-gap evaluation with a blind author has not run."
+    },
+    {
+      "title": "Labels a person has checked",
+      "why": "Every label above is model-checked. No human-verified subset exists yet."
+    }
+  ],
+  "not_claimed": [
+    {
+      "claim": "Personal details are scrubbed before relevance scoring.",
+      "why": "The relevance route calls the scrubber, but no test asserts it, so the guarantee names only the three paths that are tested."
+    },
+    {
+      "claim": "No compliance language anywhere.",
+      "why": "The tests cover the generated text of named components, not every string in the product, so the claim names those components."
+    }
+  ]
+}
