@@ -336,3 +336,20 @@ def test_accept_is_refused_while_blocking_gaps_remain(scene):
     returned = clients['reviewer'].post(f'/review/{case.id}/decision',
                                         json={'outcome': 'return', 'message': 'Please complete the application.'})
     assert returned.status_code == 200  # returning is always possible
+
+
+def test_refuse_records_a_distinct_terminal_decision(scene):
+    store, clients, users = scene
+    case = owned(scene, status='submitted')
+    reviewer = clients['reviewer']
+    assert reviewer.post(f'/review/{case.id}/claim', json={}).status_code == 200
+    reason = 'The requested administrative record has not been provided.'
+    response = reviewer.post(f'/review/{case.id}/decision', json={'outcome': 'refuse', 'message': reason})
+    assert response.status_code == 200, response.text
+    assert response.json()['status'] == 'refused'
+    saved = store.get(case.id)
+    assert saved.status == 'refused'
+    assert saved.decision.outcome == 'refuse'
+    assert saved.decision.message.endswith(reason)
+    assert 'Returned' not in saved.decision.message
+    assert saved.decision.by_id == users['reviewer']['id']
