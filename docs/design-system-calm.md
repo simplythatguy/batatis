@@ -46,6 +46,8 @@ Stage navigation (header, and the officer's review steps): icons, not words (use
 
 Application name (header and list): just the name, no authority beside it. Names are short subject names from the engine, never the description's first sentence; the applicant renames in place in the header (double-click, F2 or Enter; Enter or blur saves; Escape cancels; no field box) or from the list row's ⋯ → Rename. Saved through `PATCH /cases/{id}/title`; a chosen name always wins and is never shortened in storage.
 
+Application list (sidebar): rows carry no status dot. Pinned rows sit first (a small pin before the name), then active, then Settled; archived rows leave the list for a collapsed "Archived" shelf at the foot (icon, word, count). The ⋯ (glyph only: no fill at rest, hover or press; a focus ring for the keyboard), a right-click and Shift+F10 open one menu with an icon on the left of each item: Rename (only where the title can be edited), Pin or Unpin, Archive or Restore, Delete (drafts only, after a confirmation that names the application). The menu stays inside the sidebar: never wider than it, never past its left edge, inside the viewport (`shell/placement.ts`). Hovering or keyboard-focusing a row shows a small preview to the right of the sidebar with the summary's real fields only, when there is room (not on phones or touch). Pin and archive go through `PATCH /me/applications/{id}/preferences` and only organise the owner's list; they never withdraw a sent application. The interaction model follows T3 Code's thread sidebar.
+
 ## Tokens
 
 **Light mode since 2026-10-22 (user decision):** "visuals > text", light instead of black. Say things with icons, counts and short labels; avoid explanatory sentences.
