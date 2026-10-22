@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Callable
 
 from fastapi import APIRouter, HTTPException, Query, Request
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .ccmc import CCMCRegistry, RegistrySearch, RegistryUnavailable
 from .codes import Codes
@@ -20,6 +20,17 @@ from .llm_gate import client_ip_from, search_retry_after
 from .models import Case, Jurisdiction
 from .store import CaseBackend, VersionConflict
 from .account_models import reviewing_authority
+from .identify.title import normalize_title
+
+
+class TitleRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    title: str = Field(min_length=1, max_length=500, strict=True)
+
+    @field_validator('title', mode='before')
+    @classmethod
+    def _single_line(cls, value):
+        return normalize_title(value)
 
 
 class SectionDRequest(BaseModel):
@@ -54,6 +65,16 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         if case is None:
             raise HTTPException(404, 'case not found')
         return case
+
+    @router.patch('/cases/{case_id}/title', response_model=Case)
+    def rename_title(case_id: str, body: TitleRequest):
+        try:
+            saved = cases().rename_title(case_id, body.title)
+        except VersionConflict as error:
+            raise HTTPException(409, 'case was updated concurrently') from error
+        if saved is None:
+            raise HTTPException(404, 'case not found')
+        return saved
 
     @router.put('/cases/{case_id}/jurisdiction', response_model=Case)
     def set_jurisdiction(case_id: str, body: JurisdictionRequest):

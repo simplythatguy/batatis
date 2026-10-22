@@ -1,21 +1,12 @@
-"""Ported from PR #12 (backend/identify-api). Short case title: building type, place, and one real provision.
+"""Local subject names from sent prose or confirmed applicant facts; no model call.
 
-The title is not the first sentence of the description, and it does not say the
-design complies or is safe. A provision id is copied from the identify result.
+A small vocabulary names a recognized subject, then falls back to building type.
+Unknown subjects keep a generic label. This is deliberately conservative, not a
+universal word-count rule or a clipped copy of the applicant's description.
 """
 from __future__ import annotations
 
-import json
 import re
-from pathlib import Path
-
-_BANNED = re.compile(r'\b(?:complies|compliant|compliance|safe)\b', re.I)
-_ARTICLE = re.compile(r'^\d+(?:\.\d+){3}\.$')
-_SENTENCE = re.compile(r'^\d+(?:\.\d+){3}\.\(\d+\)$')
-_CITIES = tuple(json.loads((Path(__file__).resolve().parents[1] / 'data' / 'jurisdictions' / 'place_names.json')
-                           .read_text())['places'])
-_CITY = re.compile(r'\b(' + '|'.join(re.escape(name) for name in _CITIES) + r')\b', re.I)
-_CITY_CANON = {name.casefold(): name for name in _CITIES}
 _TYPE_VALUE = {
     'single_family': 'Single-family',
     'multi_family': 'Multi-family',
@@ -30,7 +21,6 @@ _TYPE_VALUE = {
     'farm': 'Farm',
     'relocatable_industrial_camp': 'Relocatable industrial camp',
     'mixed': 'Mixed use',
-    'other': 'Other',
 }
 _TYPE_PROSE = (
     (re.compile(r'\b(?:apartment|apartments|multi[- ]family)\b', re.I), 'Multi-family'),
@@ -47,7 +37,55 @@ _TYPE_PROSE = (
     (re.compile(r'\b(?:farm (?:building|barn)|agricultural building|barn)\b', re.I), 'Farm'),
 )
 _OCCUPANCY_FIELDS = {'professional.occupancy', 'occupancy', 'building.occupancy', 'building.type'}
-_PLACE_FIELDS = {'municipalAddress', 'site.city', 'site.address', 'building.address', 'site.location'}
+_SUBJECT_FIELDS = {'project.description', 'alternative_description'}
+# Prefer the earliest recognized subject in the applicant's wording. More specific
+# phrases precede their generic forms when they start at the same position.
+_SUBJECTS = tuple((re.compile(pattern, re.I), label) for pattern, label in (
+    (r'\b(?:exterior|external)\s+sheathing\b', 'Exterior sheathing'),
+    (r'\bwall\s+sheathing\b', 'Wall sheathing'),
+    (r'\binsulating\s+sheathing\b', 'Insulating sheathing'),
+    (r'\bcontinuous\s+sheathing\b', 'Continuous sheathing'),
+    (r'\bsheathing\b', 'Sheathing'),
+    (r'\b(?:egress|escape)\s+windows?\b', 'Egress window'),
+    (r'\b(?:fire[- ]?stopp?ing|fire[- ]?stops?)\b', 'Firestopping'),
+    (r'\bfire[- ]rated\s+walls?\b', 'Fire-rated wall'),
+    (r'\bfire[- ]rated\s+assembl(?:y|ies)\b', 'Fire-rated assembly'),
+    (r'\bfire\s+separations?\b', 'Fire separation'),
+    (r'\b(?:exit|egress)\s+stairs?\b', 'Exit stair'),
+    (r'\b(?:staircases?|stairs?|stairways?)\b', 'Stairs'),
+    (r'\bguard(?:rail)?\s+heights?\b', 'Guard height'),
+    (r'\bhandrail\s+heights?\b', 'Handrail height'),
+    (r'\bguardrails?\b', 'Guardrail'),
+    (r'\bhandrails?\b', 'Handrail'),
+    (r'\bsoffits?\b', 'Soffit'),
+    (r'\b(?:barrier[- ]free|accessible)\s+entrances?\b', 'Accessible entrance'),
+    (r'\b(?:barrier[- ]free|accessible)\s+routes?\b', 'Accessible route'),
+    (r'\b(?:barrier[- ]free|accessible)\s+access\b', 'Accessible access'),
+    (r'\bramps?\b', 'Ramp'),
+    (r'\bsprinklers?\b', 'Sprinklers'),
+    (r'\bfire\s+alarms?\b', 'Fire alarm'),
+    (r'\bsmoke\s+alarms?\b', 'Smoke alarm'),
+    (r'\bexterior\s+insulation\b', 'Exterior insulation'),
+    (r'\bwall\s+insulation\b', 'Wall insulation'),
+    (r'\bcontinuous\s+insulation\b', 'Continuous insulation'),
+    (r'\binsulation\b', 'Insulation'),
+    (r'\b(?:mass\s+timber|cross[- ]laminated\s+timber)\b', 'Mass timber'),
+    (r'\broof(?:ing)?\s+(?:membranes?|assembl(?:y|ies))\b', 'Roof assembly'),
+    (r'\bfoundations?\b', 'Foundation'),
+    (r'\bcladding\b', 'Cladding'),
+    (r'\bventilation\b', 'Ventilation'),
+    (r'\b(?:exit|egress)\b', 'Egress'),
+))
+
+
+def normalize_title(value: str) -> str:
+    """Keep custom wording and Unicode; collapse whitespace without clipping it."""
+    if not isinstance(value, str):
+        raise ValueError('title must be a string')
+    title = ' '.join(value.split())
+    if not 1 <= len(title) <= 500:
+        raise ValueError('title must contain between 1 and 500 characters')
+    return title
 
 
 def first_sentence(text: str) -> str:
@@ -57,11 +95,14 @@ def first_sentence(text: str) -> str:
     return re.split(r'(?<=[.!?])\s+', trimmed, maxsplit=1)[0]
 
 
-def title_should_replace(title: str | None, prose: str, generated: str | None = None) -> bool:
+def title_should_replace(title: str | None, prose: str, generated: str | None = None, *, manual: bool = False) -> bool:
     """Replace a blank title, one Batatis generated earlier (`generated`), or the description's first sentence.
 
-    A title the applicant edited matches none of these, so it is kept.
+    The persisted manual marker wins even if the text equals an old automatic name.
+    Old serialized cases keep the original conservative replacement heuristic.
     """
+    if manual:
+        return False
     if title is None or not str(title).strip():
         return True
     current = ' '.join(str(title).split())
@@ -74,6 +115,15 @@ def title_should_replace(title: str | None, prose: str, generated: str | None = 
         return True
     prose_flat = ' '.join((prose or '').split())
     return bool(prose_flat) and current == prose_flat
+
+
+def _accepted_facts(facts) -> list[dict]:
+    latest = {}
+    for fact in facts or []:
+        row = fact.model_dump() if hasattr(fact, 'model_dump') else fact
+        latest[row.get('field')] = row
+    return [row for row in latest.values() if row.get('status') == 'confirmed' and row.get('kind') != 'proposed'
+            and (row.get('source') or {}).get('type') in {'user_text', 'user_click', 'file', 'drawing'}]
 
 
 def _building_type(prose: str, facts) -> str | None:
@@ -91,77 +141,19 @@ def _building_type(prose: str, facts) -> str | None:
     return None
 
 
-def _place(prose: str, facts) -> str | None:
-    blobs = [prose or '']
-    for fact in facts or []:
-        name = fact.field if hasattr(fact, 'field') else fact.get('field')
-        if name in _PLACE_FIELDS:
-            value = fact.value if hasattr(fact, 'value') else fact.get('value')
-            blobs.append('' if value is None else str(value))
-    for blob in blobs:
-        match = _CITY.search(blob)
-        if match:
-            return _CITY_CANON[match.group(1).casefold()]
-    return None
-
-
-def _real_id(value) -> str | None:
-    if isinstance(value, str) and (_SENTENCE.match(value) or _ARTICLE.match(value)):
-        return value
-    return None
-
-
-def _topic(title: str | None) -> str | None:
-    words = []
-    for word in re.sub(r'[^A-Za-z0-9/-]+', ' ', title or '').split():
-        if _BANNED.search(word):
-            continue
-        words.append(word)
-    if not words:
-        return None
-    return ' '.join(words[:4]).lower()
-
-
-def _provision(result: dict) -> tuple[str | None, str | None]:
-    articles = [row for row in (result.get('articles') or []) if isinstance(row, dict)]
-    benchmark = result.get('benchmark') if isinstance(result.get('benchmark'), dict) else {}
-    chosen = None
-    target = benchmark.get('provision') if benchmark.get('identified') else None
-    if target:
-        for article in articles:
-            if article.get('provision') == target or article.get('provision_id') == target:
-                chosen = article
-                break
-        if chosen is None:
-            chosen = {'provision': target, 'title': None}
-    else:
-        # Only an article Batatis put forward (committed or offered as a quoted choice) names the title;
-        # a candidate or labelled-fallback ranking is not a selected result.
-        chosen = next((row for row in articles if row.get('status') in ('committed', 'choice')), None)
-    if not chosen:
-        return None, None
-    shown = _real_id(chosen.get('provision_id')) or _real_id(chosen.get('provision')) or _real_id(target)
-    return shown, _topic(chosen.get('title'))
-
-
-def _clean(title: str) -> str:
-    cleaned = _BANNED.sub('', title)
-    cleaned = re.sub(r'\s+', ' ', cleaned)
-    cleaned = re.sub(r'\s+([,:])', r'\1', cleaned)
-    cleaned = re.sub(r'([,:])(?:\s*[:,])+', r'\1', cleaned)
-    cleaned = re.sub(r'\s+', ' ', cleaned).strip(' ,:-')
-    return cleaned
-
-
 def short_title(prose: str, facts, result: dict | None) -> str:
-    """'Single-family, Red Deer: 9.9.10.1.(2) egress window' when those parts are known."""
-    kind = _building_type(prose, facts)
-    place = _place(prose, facts)
-    provision, topic = _provision(result or {})
-    head = ', '.join(part for part in (kind, place) if part)
-    tail = ' '.join(part for part in (provision, topic) if part)
-    if head and tail:
-        title = f'{head}: {tail}'
-    else:
-        title = head or tail or 'Variance application'
-    return _clean(title)
+    """Name the applicant's subject; `result` remains accepted for legacy callers.
+
+    Identification output is deliberately not naming input: an offered code topic
+    or unaccepted suggestion is not the applicant's project identity.
+    """
+    accepted = _accepted_facts(facts)
+    blobs = [prose or '', *(row['value'] for row in accepted
+                           if row.get('field') in _SUBJECT_FIELDS and isinstance(row.get('value'), str))]
+    for blob in blobs:
+        matches = [(match.start(), order, label) for order, (pattern, label) in enumerate(_SUBJECTS)
+                   if (match := pattern.search(blob))]
+        if matches:
+            return min(matches)[2]
+    kind = _building_type(' '.join(blobs), accepted)
+    return kind or 'Variance application'

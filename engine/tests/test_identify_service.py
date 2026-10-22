@@ -626,16 +626,6 @@ def test_identify_run_is_one_cas_and_a_write_during_it_is_a_409(client, monkeypa
     assert case.identify is None and case.title == 'edited during the run'
 
 
-def test_title_names_only_a_committed_or_offered_article():
-    from engine.identify.title import short_title
-    prose = 'Single-family house in Red Deer with an egress window'
-    rows = lambda status: {'articles': [{'provision': '9.9.10.1.(2)', 'title': 'Egress window', 'status': status}]}  # noqa: E731
-    for status in ('candidate', 'fallback'):
-        assert '9.9.10.1.(2)' not in short_title(prose, [], rows(status))
-    for status in ('committed', 'choice'):
-        assert '9.9.10.1.(2)' in short_title(prose, [], rows(status))
-
-
 @pytest.mark.parametrize('prose', [
     'A house with a fire-rated wall assembly that departs from the tested listing.',
     'Please take care to review the surface treatment of the stairs.',

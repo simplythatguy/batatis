@@ -19,6 +19,7 @@ from .store import (FileTooLarge, InvalidAttachment, VersionConflict, attachment
 from .uploads import PDF_MAX_BYTES
 from .account_store import ACCOUNT_MIGRATIONS, PostgresAccountsMixin, _DB
 from .access import enforce_mutation, enforce_stored_mutation, enforce_read
+from .identify.title import normalize_title
 
 MIGRATIONS = (
     """CREATE TABLE IF NOT EXISTS cases (
@@ -81,6 +82,26 @@ class PostgresCaseStore(PostgresAccountsMixin):
     def get(self, case_id: str) -> Case | None:
         snapshot = self.get_snapshot(case_id)
         return snapshot[0] if snapshot else None
+
+    def rename_title(self, case_id: str, title: str) -> Case | None:
+        """Reauthorize and patch only naming fields of the locked current row."""
+        title = normalize_title(title)
+        with self._conn() as con:
+            row = con.execute('SELECT data, version FROM cases WHERE id=%s FOR UPDATE', (case_id,)).fetchone()
+            if row is None or self._purge_expired(con, case_id):
+                return None
+            payload, version = row[0], int(row[1])
+            enforce_stored_mutation(payload)
+            if payload.get('title') != title or payload.get('title_is_manual') is not True:
+                payload.update(title=title, title_is_manual=True, updated_at=now())
+                saved = con.execute('UPDATE cases SET data=%s, updated_at=%s, version=version+1 '
+                                    'WHERE id=%s AND version=%s RETURNING version',
+                                    (Jsonb(payload), payload['updated_at'], case_id, version)).fetchone()
+                if saved is None:
+                    raise VersionConflict(case_id, version)
+                version = int(saved[0])
+            files = {item[0] for item in con.execute('SELECT id FROM case_files WHERE case_id=%s', (case_id,))}
+            return case_with_stored_files(payload, files, version)
 
     def get_snapshot(self, case_id: str) -> tuple[Case, int] | None:
         """Read the case and version together, checking retention after any lock wait."""
