@@ -11,6 +11,7 @@ quotes, quotes the wrong article and names articles outside the candidate list.
 """
 from __future__ import annotations
 
+import json
 import random
 import re
 from types import SimpleNamespace
@@ -53,6 +54,19 @@ def fake_jev_ask():
         return {'answers': answers, 'usage': {'input_tokens': max(1, size // 4), 'output_tokens': 4 * len(questions)},
                 'latency_ms': 1}
     return ask
+
+
+def fake_decisions(body: dict, timeout: float) -> dict:
+    """The Decisions wire shape, using only synthetic overlap estimates in offline mode."""
+    state = json.loads(body['input'])
+    answers = [{'name': q['name'], 'type': 'predicate',
+                'probability': overlap(state['proposal'], state['articles'][f"A{q['name'][1:]}"])}
+               for q in body['questions']]
+    tokens = _tokens(json.dumps(body))
+    return {'model': body['model'], 'answers': answers,
+            'usage': {'input_tokens': tokens, 'output_tokens': 0, 'total_tokens': tokens,
+                      'input_tokens_details': {'cached_tokens': 0, 'cache_write_tokens': 0},
+                      'output_tokens_details': {'reasoning_tokens': 0}}}
 
 
 def _body(card_text: str) -> str:

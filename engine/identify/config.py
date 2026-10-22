@@ -7,9 +7,9 @@ so a threshold fitted on one pipeline is never applied to another.
 
 Resolution order: defaults below -> JSON file (`BATATIS_IDENTIFY_CONFIG`, else
 engine/identify/pipeline.json when present) -> `BATATIS_IDENTIFY_<FIELD>` environment overrides.
-The defaults are the never-cut plan under the 2026-10-21 provider decision (live providers are
-OpenAI and Jev only): Jev screen of every Division B article (pinned jev-1.13.0) -> one-request
-Jev rerank of the top 60 -> OpenAI "Luna" verifier on the full text of the top 15. The Anthropic
+The temporary 2026-10-22 default is OpenAI Decisions for every Division B article and the
+top-60 rerank, followed by the existing OpenAI full-text verifier on the top 15. Explicit Jev
+configuration remains available. These scoring configurations have different hashes. The Anthropic
 verifier adapter (ClaudeVerifier, claude-sonnet-5-5) is kept but off unless configured.
 Haiku models are refused.
 """
@@ -18,18 +18,18 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-from dataclasses import asdict, dataclass, fields, replace
+from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 
-from .screen import JEV_MODEL
+from .screen import DECISIONS_MODEL, JEV_MODEL
 from .verify import VERIFIER_MODEL
 
 HERE = Path(__file__).resolve().parent
 PIPELINE_FILE = HERE / 'pipeline.json'
-DIVISION_B_ARTICLES = 2080           # NBC(AE) 2023 2nd printing, codedb articles(); asserted on every Jev screen
+DIVISION_B_ARTICLES = 2080           # NBC(AE) 2023 2nd printing; asserted on every exhaustive model screen
 
-SCREENS = ('jev', 'bm25', 'bm25_v3')
-RERANKS = ('jev', 'openai', 'none')
+SCREENS = ('decisions', 'jev', 'bm25', 'bm25_v3')
+RERANKS = ('decisions', 'jev', 'openai', 'none')
 VERIFIERS = ('anthropic', 'openai', 'none')
 FALLBACKS = ('bm25', 'bm25_v3')
 EFFORTS = ('low', 'medium', 'high', 'xhigh', 'max')
@@ -47,11 +47,11 @@ class ConfigError(ValueError):
 
 @dataclass(frozen=True)
 class IdentifyConfig:
-    screen: str = 'jev'                  # jev = all 2,080 articles judged; bm25/bm25_v3 = lexical arm (not exhaustive)
-    screen_model: str = JEV_MODEL
+    screen: str = 'decisions'            # decisions/jev judge all 2,080; lexical arms are not exhaustive
+    screen_model: str = DECISIONS_MODEL
     card_chars: int = 700                # screen and rerank card length
-    rerank: str = 'jev'
-    rerank_model: str = JEV_MODEL
+    rerank: str = 'decisions'
+    rerank_model: str = DECISIONS_MODEL
     rerank_n: int = 60
     verifier: str = 'openai'
     verifier_model: str = OPENAI_VERIFIER
@@ -75,6 +75,9 @@ class IdentifyConfig:
         if (self.screen == 'jev' and self.screen_model != JEV_MODEL) or (
                 self.rerank == 'jev' and self.rerank_model != JEV_MODEL):
             raise ConfigError(f'Jev stages use the pinned {JEV_MODEL}')
+        if (self.screen == 'decisions' and self.screen_model != DECISIONS_MODEL) or (
+                self.rerank == 'decisions' and self.rerank_model != DECISIONS_MODEL):
+            raise ConfigError('Decisions stages require the pinned scoring model')
         for name in ('card_chars', 'rerank_n', 'verify_n', 'top_k', 'choices_k'):
             if getattr(self, name) < 1:
                 raise ConfigError(f'{name} must be at least 1')
@@ -84,7 +87,7 @@ class IdentifyConfig:
     @property
     def exhaustive(self) -> bool:
         """True when the screen judges every Division B article."""
-        return self.screen == 'jev'
+        return self.screen in ('decisions', 'jev')
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -95,7 +98,7 @@ class IdentifyConfig:
         return hashlib.sha256(blob.encode()).hexdigest()[:16]
 
     def model_ids(self) -> dict[str, str | None]:
-        return {'screen': self.screen_model if self.screen == 'jev' else None,
+        return {'screen': self.screen_model if self.exhaustive else None,
                 'rerank': self.rerank_model if self.rerank != 'none' else None,
                 'verifier': self.verifier_model if self.verifier != 'none' else None}
 
@@ -128,9 +131,13 @@ def load_config(path: Path | str | None = None, env: dict | None = None) -> Iden
         raw = env.get('BATATIS_IDENTIFY_' + name.upper())
         if raw not in (None, ''):
             values[name] = _coerce(name, raw)
-    config = IdentifyConfig(**values)
-    if 'verifier_model' not in values and config.verifier == 'anthropic':
-        config = replace(config, verifier_model=ANTHROPIC_VERIFIER)
-    if 'rerank_model' not in values and config.rerank == 'openai':
-        config = replace(config, rerank_model=OPENAI_RERANK)
-    return config
+    # Infer pins only when omitted, including for the explicit switch back to Jev. Validate
+    # explicit pins before constructing transports; a stale key never selects a provider.
+    for stage in ('screen', 'rerank'):
+        if f'{stage}_model' not in values:
+            method = values.get(stage, 'decisions')
+            if method in ('jev', 'decisions', 'openai'):
+                values[f'{stage}_model'] = JEV_MODEL if method == 'jev' else DECISIONS_MODEL
+    if 'verifier_model' not in values and values.get('verifier') == 'anthropic':
+        values['verifier_model'] = ANTHROPIC_VERIFIER
+    return IdentifyConfig(**values)

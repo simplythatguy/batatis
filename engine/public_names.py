@@ -12,16 +12,16 @@ from __future__ import annotations
 
 import re
 
-from .relevance_models import PUBLIC_MODEL
+from .relevance_models import DECISIONS_PUBLIC_MODEL, PUBLIC_MODEL
 
 # Private: model pin -> the opaque version a client sees. A pin that is not listed reads as CUSTOM.
 MODEL_VERSIONS = {'jev-1.13.0': PUBLIC_MODEL, 'gpt-6-luna': 'verifier-1', 'claude-sonnet-5-5': 'verifier-2'}
 CUSTOM = 'custom'
 MODEL = 'model'
 # Methods that are a third-party service. The keyword arms (bm25, bm25_v3) and 'none' are not.
-PROVIDER_METHODS = frozenset({'jev', 'openai', 'anthropic'})
+PROVIDER_METHODS = frozenset({'jev', 'openai', 'anthropic', 'decisions'})
 # Spend is shown by what it paid for, not by who was paid.
-SPEND_ROLES = {'jev': 'scoring', 'openai': 'verification', 'anthropic': 'verification'}
+SPEND_ROLES = {'jev': 'scoring', 'openai_decisions': 'scoring', 'openai': 'verification', 'anthropic': 'verification'}
 UNAVAILABLE = 'scoring unavailable'
 VERIFIER_UNAVAILABLE = 'failed: scoring unavailable'
 GENERIC_LABEL = {
@@ -48,11 +48,16 @@ def public_model_id(pin: str | None) -> str | None:
         return None
     if pin in MODEL_VERSIONS:
         return MODEL_VERSIONS[pin]
-    return pin if pin == CUSTOM or pin in MODEL_VERSIONS.values() else CUSTOM
+    return pin if pin in {CUSTOM, DECISIONS_PUBLIC_MODEL} or pin in MODEL_VERSIONS.values() else CUSTOM
+
+
+def public_stage_model(method: str, pin: str | None) -> str | None:
+    """Scoring and quote verification using the same private pin are distinct product versions."""
+    return DECISIONS_PUBLIC_MODEL if method == 'decisions' and pin == 'gpt-6-luna' else public_model_id(pin)
 
 
 def public_ranker(ranker: str) -> str:
-    return re.sub(r'\b(?:jev|openai|anthropic)\b', MODEL, ranker, flags=re.I)
+    return re.sub(r'\b(?:jev|openai|anthropic|decisions)\b', MODEL, ranker, flags=re.I)
 
 
 def public_text(text: str | None, instead: str) -> str | None:
@@ -74,7 +79,7 @@ def public_config(config: dict) -> dict:
             out[stage] = public_method(method)
         if f'{stage}_model' in out:
             used = method in PROVIDER_METHODS or method == MODEL
-            out[f'{stage}_model'] = public_model_id(out[f'{stage}_model']) if used else None
+            out[f'{stage}_model'] = public_stage_model(method, out[f'{stage}_model']) if used else None
     return out
 
 

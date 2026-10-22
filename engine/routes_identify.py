@@ -43,8 +43,8 @@ from .models_identify import IdentifyResult, ProcessRef
 from .process_refs import ProcessRefMissing, process_refs
 from .public_names import public_event
 from .redact import known_values, people_names, scrub
-from .relevance import BANDS_FILE, CaseScorings, RelevanceInProgress, description, display_probabilities
-from .relevance_models import RelevanceBands, RelevanceRecord
+from .relevance import CaseScorings, RelevanceInProgress, description, display_probabilities, scoring_bands
+from .relevance_models import RelevanceRecord
 from .section_c import section_c_rows
 from .store import CaseBackend, VersionConflict
 
@@ -69,10 +69,13 @@ def _relevance(output: RunOutput, text: str) -> RelevanceRecord | None:
     if not output.screen:
         return None
     rerank = output.rerank or {}
-    return RelevanceRecord(scored_at=now(), description_sha256=description_hash(text), scores=output.screen,
+    models = {stage: pin for stage, pin in output.result.model_ids.items() if stage != 'verifier'}
+    model = models['screen']
+    return RelevanceRecord(model=model, config_hash=output.result.trace.config_hash, model_ids=models,
+                           scored_at=now(), description_sha256=description_hash(text), scores=output.screen,
                            rerank=rerank,
                            display=display_probabilities(output.screen, rerank),
-                           bands=RelevanceBands.model_validate_json(BANDS_FILE.read_text()))
+                           bands=scoring_bands(model, models, output.result.trace.config_hash))
 
 
 def _event(stage: str, payload: dict) -> str:

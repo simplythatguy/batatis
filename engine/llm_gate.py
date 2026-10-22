@@ -246,7 +246,7 @@ def assist_retry_after(client_ip: str) -> int:
     return max(1, _assist_window.retry_after(client_ip, window), _llm_window.retry_after(client_ip, llm_window))
 
 
-PROVIDERS = ('openai', 'anthropic', 'jev')
+PROVIDERS = ('openai', 'openai_decisions', 'anthropic', 'jev')
 
 
 def fake_providers() -> bool:

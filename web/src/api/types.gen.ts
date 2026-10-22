@@ -1088,9 +1088,11 @@ export interface RelevanceBands {
 
 export interface RelevanceRecord {
   bands: RelevanceBands;
+  config_hash: string | null;
   description_sha256: string;
   display: Record<string, number>;
-  model: "relevance-1";
+  model: "relevance-1" | "relevance-2";
+  model_ids: Record<string, string | null>;
   rerank: Record<string, number>;
   scored_at: string;
   scores: Record<string, number>;

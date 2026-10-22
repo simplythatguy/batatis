@@ -1,4 +1,4 @@
-"""Relevance orchestration over the existing exhaustive Jev screen and top-60 rerank."""
+"""Relevance orchestration over configured exhaustive article scoring and rerank."""
 from __future__ import annotations
 
 import hashlib
@@ -8,13 +8,13 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from .identify import Identification, Judge
-from .identify.jevkit import keystore
-from .identify.screen import JEV_PROVIDER
+from .identify.screen import DECISIONS_MODEL, JEV_MODEL
 from .models import Case
-from .public_names import MODEL_VERSIONS as PUBLIC_MODEL_VERSIONS
-from .relevance_models import RelevanceBands, RelevanceRecord
+from .public_names import public_stage_model
+from .relevance_models import DECISIONS_PUBLIC_MODEL, PUBLIC_MODEL, RelevanceBands, RelevanceRecord
 
 BANDS_FILE = Path(__file__).with_name('identify') / 'relevance_bands.json'
+PUBLIC_MODEL_VERSIONS = {JEV_MODEL: PUBLIC_MODEL, DECISIONS_MODEL: DECISIONS_PUBLIC_MODEL}
 
 
 def public_model(pin: str) -> str:
@@ -54,12 +54,22 @@ class CaseScorings:
 
 
 def live_judge() -> Judge:
-    # Jev has its own credentials; an unrelated OpenAI key must not enable/disable it.
     if os.environ.get('BATATIS_LIVE') != '1':
         raise RelevanceUnavailable('BATATIS_LIVE is disabled')
-    if not keystore.resolve(JEV_PROVIDER):
-        raise RelevanceUnavailable('TypeSafe credential is absent')
-    return Judge()
+    from .identify.config import load_config
+    from .identify.providers import scoring_ask, transports
+    config = load_config()
+    if not config.exhaustive:
+        raise RelevanceUnavailable('relevance requires exhaustive scoring')
+    tp = transports(scoring={config.screen, config.rerank})
+    try:
+        judge = Judge(scoring_ask(tp, config.screen), chars=config.card_chars,
+                      model=config.screen_model, method=config.screen)
+    except RuntimeError:
+        raise RelevanceUnavailable('configured scoring credential is absent or disabled') from None
+    judge.config = config
+    judge.transports = tp
+    return judge
 
 
 def description(case: Case) -> str:
@@ -87,7 +97,20 @@ def display_probabilities(scores: dict[str, float], rerank: dict[str, float]) ->
 
 def relevance_record(result: Identification, text: str, scored_at: str) -> RelevanceRecord:
     rerank = dict(result.ranked)
+    models = {stage: public_stage_model(result.methods.get(stage, 'jev'), model)
+              for stage, model in result.model_ids.items()}
     return RelevanceRecord(
         model=public_model(result.model), scored_at=scored_at, description_sha256=description_hash(text),
+        config_hash=result.config_hash, model_ids=models,
         scores=result.screen, rerank=rerank, display=display_probabilities(result.screen, rerank),
-        bands=RelevanceBands.model_validate_json(BANDS_FILE.read_text()))
+        bands=scoring_bands(public_model(result.model), models, result.config_hash))
+
+
+def scoring_bands(model: str, model_ids: dict, config_hash: str | None) -> RelevanceBands:
+    """Historical Jev bands stay historical; other configurations have no fitted relevance thresholds."""
+    from .identify.config import IdentifyConfig
+    historical_config = IdentifyConfig(screen='jev', screen_model=JEV_MODEL, rerank='jev', rerank_model=JEV_MODEL)
+    if model == PUBLIC_MODEL and config_hash == historical_config.config_hash \
+            and all(pin in (JEV_MODEL, PUBLIC_MODEL) for pin in model_ids.values()):
+        return RelevanceBands.model_validate_json(BANDS_FILE.read_text())
+    return RelevanceBands(x=0.0, y=1.0, status='uncalibrated; display range only')

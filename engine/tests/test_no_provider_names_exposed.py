@@ -320,7 +320,7 @@ def test_identify_responses_name_no_provider(world, monkeypatch):
     assert run.status_code == 200, run.text
     result = run.json()
     assert result['mode'] == 'fake' and result['model_ids'] == {
-        'screen': 'relevance-1', 'rerank': 'relevance-1', 'verifier': 'verifier-1'}
+        'screen': 'relevance-2', 'rerank': 'relevance-2', 'verifier': 'verifier-1'}
     assert client.get(f'/cases/{case_id}/identify').status_code == 200
     stream = client.post(f'/cases/{case_id}/identify', headers={'accept': 'text/event-stream'})
     assert stream.status_code == 200 and 'event: done' in stream.text and '"method": "model"' in stream.text
@@ -336,7 +336,7 @@ def test_identify_responses_name_no_provider(world, monkeypatch):
     assert client.get(f'/cases/{case_id}/process-refs').status_code == 200
     client.get(f'/cases/{case_id}/information-request')            # the officer draft; its status depends on who asks
     case = client.get(f'/cases/{case_id}')
-    assert case.status_code == 200 and case.json()['relevance']['model'] == 'relevance-1'
+    assert case.status_code == 200 and case.json()['relevance']['model'] == 'relevance-2'
     assert_no_provider(client, at_least=12, pattern=IDENTIFY_NAMES)
 
 
@@ -360,6 +360,8 @@ def test_identify_with_the_gate_closed_names_no_provider(world, monkeypatch):
 
 def test_identify_with_a_failing_provider_names_no_provider(world, monkeypatch):
     """The provider fails with an error that names it. The run falls back, and the response does not say who."""
+    monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'jev')
+    monkeypatch.setenv('BATATIS_IDENTIFY_RERANK', 'jev')
     from engine.identify import fakes
     _, client, _, _ = world
     require_identify(client)
