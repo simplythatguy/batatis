@@ -49,19 +49,19 @@ for blk in re.split(r"^### Slide ", narr_md, flags=re.M)[1:]:
     narr[int(num)] = dict(title=ntitle, text=para, timing=timing)
 assert len(narr) == 12
 
-SHOTS = {  # (placeholder id, on-slide caption of 6 words or fewer, alt text, EXAMPLE DATA tag)
- 2: [("shot-s02-describe", "Describe screen lists gaps · in review", "Describe screen with a pasted homebuilder description and the gaps listed", True)],
- 3: [("shot-s03-not-sure", "\u201cNot sure\u201d logged as questions · in review", "Code check cards answered Not sure and logged as open questions", True)],
- 4: [("shot-s04-search", "Code search adds window article · in review", "Code search for the bedroom window article, added to the check", True),
-     ("shot-s04-benchmark", "Identify output · draft, not in app", "Identify output and benchmark card from the draft build", True)],
- 5: [("shot-s05-eval", "Evaluation results per variant · model-checked", "Evaluation results, one labelled line per variant", False)],
- 6: [("shot-s06-section-d", "Section D leaves evidence blank · in review", "Alternative path with its fields left empty and the Section D card", True)],
- 7: [("shot-s07-officer", "Officer review, open application · in review", "Officer review screen reviews the applicant's open application for administrative completeness", True)],
- 8: [("shot-s08-roles", "\u201cWho are you?\u201d role picker · in review", "Role picker: Manufacturer, General contractor, Homebuilder", True)],
- 9: [("shot-s09-locked", "Download locked while gaps open · in review", "Application screen: Check completeness opens a review; the official PDF stays locked while blocking gaps remain", True),
-     ("shot-s09-scc-form", "Engine-filled SCC form · simulated session", "Downloaded engine-filled SCC variance form PDF, unsigned, officer Part 2 blank", True)],
+SHOTS = {  # (placeholder id, on-slide caption of 6 words or fewer, alt text, EXAMPLE DATA tag). Built screens only.
+ 2: [("shot-s02-describe", "Describe: one box, one question", "Start screen with the headline and the description box", False),
+     ("shot-s02-question", "One question at a time", "A question card with its reason under Why we ask", True)],
+ 4: [("shot-s04-code-check", "Code check card and code drawer", "A code check card with the verbatim code text in the drawer", True)],
+ 5: [("shot-s05-library", "Code library with relevance rings", "Code library reader with the relevance ring on an article", False)],
+ 6: [("shot-s06-engineer", "Engineer callout on the review", "Review screen with the engineer callout and Sections A to D", True)],
+ 7: [("shot-s07-queue", "Officer queue with claim", "Review queue with tabs and Start reviewing", True),
+     ("shot-s07-sheet", "Paper sheet with completeness list", "An application as a paper sheet beside its completeness list", True)],
+ 8: [("shot-s08-onboarding", "Onboarding sets the applicant type", "Onboarding question: manufacturer, general contractor or homebuilder", False)],
+ 9: [("shot-s09-application", "Draft or official PDF, gated", "Application screen with the download panel", True),
+     ("shot-s09-scc-form", "Council form, officer part blank", "Downloaded SCC variance form, unsigned, officer Part 2 blank", True)],
 }
-EXAMPLE_SLIDES = {8}
+EXAMPLE_SLIDES = set()
 DENSE = set()
 
 def title_html(t):

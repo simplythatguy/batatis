@@ -1,20 +1,38 @@
-# Batatis deck: screenshot slots
+# Batatis deck: refresh steps and screenshot slots
 
-Drop each image into `docs/pitch-deck/img/` with the exact file name below (PNG). `index.html` shows the image automatically when the file exists and shows a dashed "Screenshot pending" placeholder when it doesn't. The on-slide caption (6 words or fewer) shows under the slot either way; captions live in `.build/build.py`. Re-export the PDF after adding images.
+**Status: `index.html` and `batatis-pitch-deck.pdf` are stale.** They were built from the earlier slides (PR #32), before the calm interface, the merged backends and the rewritten plans. `pitch-slides.md` and `pitch-narration.md` are current. The deck is refreshed after the screens in the Implementation Plan §3 ("backend only" rows) land.
 
-Shots 1 to 7 follow the PR #20 demo script (`docs/demo/script.md`, not merged), filmed on PR #16's screens (in review), not on `dev`. Case text comes from the PR #14 demo cases. People and projects are fictional: every frame showing case data must carry an **EXAMPLE DATA** label. The slot on slide 9 for the filled SCC form is extra and not in the PR #20 shot list.
+## Refresh steps
 
-| # | Placeholder id | Slide | On-slide caption | What to capture | Source label | File |
-|---|---|---|---|---|---|---|
-| 1 | `shot-s08-roles` | 8: One tool, three kinds of first-time applicants | “Who are you?” role picker · in review | "Who are you?" role picker: Manufacturer, General contractor, Homebuilder (PR #20 shot 1, 0:00–0:18) | PR #16 screen (in review) · EXAMPLE DATA | `img/shot-s08-roles.png` |
-| 2 | `shot-s02-describe` | 2: Describe your project in plain words | Describe screen lists gaps · in review | Case C (homebuilder) description pasted on Describe, authority set to Edmonton, **Review gaps** listing owner, mailing address and legal description as missing, no upload (PR #20 shot 2, 0:18–0:28) | PR #16 screen (in review) · EXAMPLE DATA | `img/shot-s02-describe.png` |
-| 3 | `shot-s03-not-sure` | 3: It asks before it guesses, and we test that | “Not sure” logged as questions · in review | After reset, manufacturer description pasted; two "Your words" cards on Code check, both answered **Not sure** and logged as open questions (PR #20 shot 3, 0:28–0:51) | PR #16 screen (in review) · EXAMPLE DATA | `img/shot-s03-not-sure.png` |
-| 4a | `shot-s04-search` | 4: A ranked shortlist, measured against a named acceptable solution | Code search adds window article · in review | Code search for the bedroom window, the returned row added to the check, and its Section C row looked up from the attribution tables (PR #20 shot 4, 0:51–1:36) | PR #16 screen (in review) · EXAMPLE DATA | `img/shot-s04-search.png` |
-| 4b | `shot-s04-benchmark` | 4 | Identify output · draft, not in app | PR #12 identify output and benchmark card (PR #20 shot 4). The pasted homebuilder case isn't a seeded case, so without a model key the ranked-list still must be labelled as keyword search with no AI key | PR #12 still, labelled "not in this app build" · EXAMPLE DATA | `img/shot-s04-benchmark.png` |
-| 4c | `shot-s05-eval` | 5: Citations come from the code database | Evaluation results per variant · model-checked | Eval still with one labelled line per variant, as in pitch-outline.md Part B (PR #20 shot 4) | Eval still, labelled model-checked | `img/shot-s05-eval.png` |
-| 5 | `shot-s06-section-d` | 6: It knows where to stop | Section D leaves evidence blank · in review | Alternative path with its six fields left empty; Section D card with the line "This tool does not write the evidence or the professional opinion." (PR #20 shot 5, 1:36–2:08) | PR #16 screen (in review) · EXAMPLE DATA | `img/shot-s06-section-d.png` |
-| 6 | `shot-s07-officer` | 7: Completeness review: built in the engine, officer screen in review | Officer review, open application · in review | Officer review screen: reviews the applicant's open application for administrative completeness, before and after fixes; **Copy request** (PR #20 shot 6, 2:08–2:44) | PR #16 screen (in review) · EXAMPLE DATA | `img/shot-s07-officer.png` |
-| 7 | `shot-s09-locked` | 9: Fills the current SCC form; built to travel | Download locked while gaps open · in review | Authority select on Describe; Application with **Check completeness** open on its review and **Download application PDF** locked while blocking gaps remain (PR #20 shot 7, 2:44–3:00) | PR #16 screen (in review) · EXAMPLE DATA | `img/shot-s09-locked.png` |
-| + | `shot-s09-scc-form` | 9 | Engine-filled SCC form · simulated session | The downloaded SCC variance form PDF filled in by the engine (unsigned, officer Part 2 blank) after **Check completeness**, from an AI-agent simulated session. The "not a finding that the design complies" notice is in the app's dialog, not the PDF; the PDF's appendix separately says it "does not state that the proposed design complies." | PR #16 (in review): Check completeness download, AI-agent simulated session · EXAMPLE DATA | `img/shot-s09-scc-form.png` |
+1. Record or capture the screenshots below on the final build. Every frame that shows case data carries the EXAMPLE DATA badge, and people and addresses are fictional.
+2. Save each image into `docs/pitch-deck/img/` as a PNG with the exact file name below. `index.html` shows the image when the file exists and a dashed "Screenshot pending" placeholder when it does not.
+3. Run `python3 docs/pitch-deck/.build/build.py`. It reads `docs/pitch-slides.md` and `docs/pitch-narration.md` and rewrites `index.html`. Captions (6 words or fewer) live in the `SHOTS` table in `.build/build.py`, which already matches this file.
+4. Export the PDF from `index.html` and replace `batatis-pitch-deck.pdf`.
 
-Slides 1, 10, 11 and 12 have no product shot.
+## Shot list
+
+Only built screens appear in the deck. A slide whose screen is still pending shows no shot, so the deck never pictures a screen that does not exist yet.
+
+| Slide | Placeholder id | Caption | What to capture | File |
+|---|---|---|---|---|
+| 2 | `shot-s02-describe` | Describe: one box, one question | The Start screen: the headline "What are you building differently?" and the description box | `img/shot-s02-describe.png` |
+| 2 | `shot-s02-question` | One question at a time | A question card in the deck with "Why we ask" open | `img/shot-s02-question.png` |
+| 4 | `shot-s04-code-check` | Code check card and code drawer | A code check card for the example article with the verbatim text in the drawer | `img/shot-s04-code-check.png` |
+| 5 | `shot-s05-library` | Code library with relevance rings | The code library reader with the relevance ring on an article | `img/shot-s05-library.png` |
+| 6 | `shot-s06-engineer` | Engineer callout on the review | The review screen showing the engineer callout and Sections A to D | `img/shot-s06-engineer.png` |
+| 7 | `shot-s07-queue` | Officer queue with claim | The reviewer queue with "Start reviewing" | `img/shot-s07-queue.png` |
+| 7 | `shot-s07-sheet` | Paper sheet with completeness list | An application as a paper sheet beside its completeness list | `img/shot-s07-sheet.png` |
+| 8 | `shot-s08-onboarding` | Onboarding sets the applicant type | The onboarding question: manufacturer, general contractor or homebuilder | `img/shot-s08-onboarding.png` |
+| 9 | `shot-s09-application` | Draft or official PDF, gated | The application screen with the download panel | `img/shot-s09-application.png` |
+| 9 | `shot-s09-scc-form` | Council form, officer part blank | The downloaded SCC variance form: unsigned, officer Part 2 blank | `img/shot-s09-scc-form.png` |
+
+Slides 1, 3, 10, 11 and 12 have no product shot.
+
+## Pending screens (not in the deck until they exist)
+
+These need their own capture after the screens land. Add a shot and a `SHOTS` entry for each.
+
+- The intake reader's facts with a pointer to the source words, and the five-question planner (slide 2).
+- Code identification's quoted choices and the benchmark acceptable-solution record (slide 4).
+- The jurisdiction picker and process notes (slide 9).
+- The officer package review: findings, the drafted information request, the "x of y gaps resolved" diff, and the close-out record (slide 7).

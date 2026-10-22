@@ -34,9 +34,9 @@ Read each prompt aloud, hand over the project brief or the drawing notes, and **
 
 | # | Prompt (read verbatim) | Success = |
 |---|---|---|
-| R1 Intake | "Here's the project brief. Get the project into the tool." | Project described in **Describe your idea**. Missing legal description and permit # are left as gaps, not invented. |
+| R1 Intake | "Here's the project brief. Get the project into the tool." | Project described on the **Describe** screen. Missing legal description and permit # are left as gaps, not invented. |
 | R2 Gaps and questions | "Use the tool on this project. See which gaps and questions it surfaces, and how clearly it explains whether an alternative-solution application may be needed. Leave any variance decision to the authority having jurisdiction." | Participant can point to the gaps and questions the tool surfaces, and can say how clearly it explains whether an alternative-solution application may be needed. They leave the variance decision to the authority having jurisdiction. They are not asked to cite articles. |
-| R3 Section C | "Finish the part where you explain what each rule is for." | **Section C** rows complete. Participant can tell code text from AI explanation. |
+| R3 Section C | "Finish the part where you explain what each rule is for." | The Code check cards are answered, and the **Section C** rows appear on the application sheet. Participant can tell code text (in the code drawer) from AI explanation. |
 | R4 Export | "Get a copy you could hand to the municipality." (Leave risk assessment empty.) | Record **completeness discovery (Y/N)** when the participant notices the completeness check or warning and can name what's missing. Record **finished/export success (Y/P/N)** separately: only completing the missing fields and downloading or exporting the filled application form counts as Y. Discovery without a finished export counts as P at the cutoff. |
 
 **Time to finished application** runs from the start of R1 to finished/export success (**Y**) in R4. Record completeness discovery separately. If finished/export success is **P** or **N**, record only the elapsed attempt time and mark the application **unfinished**; leave finished-application time blank. The same rule applies when the participant stops early. Unscored work after a hint never counts as a finished application in these results.

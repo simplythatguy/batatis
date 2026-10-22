@@ -17,7 +17,7 @@ Batatis checks alternative-solution (variance) applications under NBC(AE) 2023 f
 - **Round 1b (real officers):** 1–2 SCOs or permit staff on the timing protocol (manual checklist vs Batatis).
 
 ## How to run a session
-1. Use a build that has the full workflow (Describe your idea → Code check → Section C → Application). Record the commit.
+1. Use a build that has the full workflow (Describe → Questions → Review → Application). Record the commit.
 2. Round 1 applicants receive only a project brief and drawing notes. The planted-gap SCO package and its answer key are for Round 1b only. They are not in this repo; they will be added under evals/demo-cases/ in a separate PR. Example documents are labelled EXAMPLE DATA. Never show the answer key to a participant.
 3. Get a signed consent form, then follow the script or protocol word for word. Fill in the tables during or right after the session.
 
