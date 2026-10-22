@@ -81,7 +81,7 @@ The verbatim criteria are in `docs/judging-rubric.md`. The weights sum to 100.
 
 - Built: the professional-involvement result as an amber callout on the review screen, with the line "Batatis can list what that evidence must address, but it can't write it." Section D cards list evidence documents and the responsible person. Cards for rationale, risk, mitigation, assumptions, maintenance and qualifications say the applicant writes them (`web/src/calm/Review.tsx`, `web/src/calm/deck.ts`).
 - Engine: `engine/professional.py` answers required, depends or no, with the Division C rule (2.4.1.1.(3), 2.4.1.2.(1) and others; the rules and PDF pages are in `research/facts/professional-involvement.md`) and never answers "no" on missing facts. Flag agreement 50/60 in sample (`evals_dev/section_d_flag/RESULTS.md`).
-- Backend only: coded rules for 9.10.15.4.(1), 9.10.14.4.(1), 9.10.15.5.(8) and (9), 9.10.11.2.(2) and 9.10.13.13.(1). Each returns follows, departs, needs information or not applicable with the citation, and a Python and a browser evaluator both run the 89 hand-set vectors (`docs/api/rules.md`, `evals_dev/rules/REVIEW.md`; PR #63). Every rule and vector is marked unreviewed.
+- Backend only: coded rules for 9.10.15.4.(1), 9.10.14.4.(1), 9.10.15.5.(8) and (9), 9.10.11.2.(2) and 9.10.13.13.(1). Each returns follows, departs, needs information or not applicable with the citation (a departure flag, not a compliance finding), and a Python and a browser evaluator both run the 89 hand-set vectors (`docs/api/rules.md`, `evals_dev/rules/REVIEW.md`; PR #63). Every rule and vector is marked unreviewed.
 - Roadmap: a screen for the coded rules, and standing-package checklists (`docs/research/2026-10-20-vision/2-week-build.md`).
 
 **Gaps:**
