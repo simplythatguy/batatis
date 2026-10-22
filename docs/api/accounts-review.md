@@ -17,7 +17,8 @@ equivalent performance, professional authentication, or permission to build.
 | `GET /auth/oauth/{provider}/start?redirect=/path` | Browser-bound state, nonce and S256 PKCE; 302. |
 | `GET /auth/oauth/{provider}/callback` | Verified OIDC/token/userinfo exchange, session and web redirect; 302. |
 | `POST /cases` | Sets owner from the cookie; anonymous creation remains available. Optional `authority`; otherwise the jurisdiction id is used for owned cases. |
-| `GET /me/applications` | Owner's applications newest first, reviewer name and unread count. `completeness` is null: list requests do not run the expensive full checker. |
+| `GET /me/applications` | All owned applications newest first, including archived ones; adds account-relative `archived` and `pinned` booleans (both false for legacy applications), alongside the existing reviewer name and unread count. `completeness` is null: list requests do not run the expensive full checker. |
+| `PATCH /me/applications/{application_id}/preferences` | Signed-in owner only, in any application status. Nonempty partial body `{ "archived"?: boolean, "pinned"?: boolean }`; strict booleans, no nulls or extra fields (`422`). Returns `{ "archived": boolean, "pinned": boolean }` plus the normal `meta.notice` envelope. Anonymous `401`; unknown/expired/deleted, other-owner and ownerless legacy applications `404`. |
 | `POST /cases/{case_id}/submit` | Owner only; same `check_completeness` as GET gaps. Blocking findings return 409 `detail: {message, gaps}`; otherwise submitted with timestamp. |
 | `GET /review/queue?status=&mine=` | Reviewers only, authority-scoped; claim, decision, applicant summary and unread count. Completeness is null. |
 | `POST /review/{case_id}/claim` | Claim/idempotent self-claim; conflict is 409 with top-level `detail` and `claim`. `take_over: true` records both names in history. |
@@ -45,6 +46,16 @@ an authority code: applicants use the target authority's code; reviewers leaving
 the role use their current authority's code. This prevents switching role through
 a less restrictive onboarding payload. Privilege changes invalidate all existing
 sessions and issue a fresh session.
+
+List organization is separate from application content. Archiving does not withdraw
+an application or remove it from the officer queue. Pinning survives archiving;
+clients may exclude archives from active/pinned lists until retrieved. Preference
+patches preserve Case status, authority, claim, decision, history, messages,
+content/source inputs, versions and timestamps, including on an identical replay.
+They do not change account data or revoke sessions. A reviewer may organize an
+application they own, with the same ownership rules as other signed-in accounts.
+Existing title edits still require draft/returned status; existing owner deletion
+remains available in every status through `DELETE /cases/{case_id}`.
 
 ## Central access policy
 
@@ -101,6 +112,16 @@ store adapters. Additive `CREATE TABLE/INDEX IF NOT EXISTS` migrations create
 `account_users`, `account_sessions`, `account_identities`, `account_oauth`, and
 `account_rates`, plus session expiry/user indexes. PostgreSQL appends these to its
 existing `MIGRATIONS`; no existing tables are dropped or rewritten.
+
+`account_application_preferences` stores only the two flags, keyed by account and
+application, with cascading foreign keys to both. SQLite enables foreign keys on
+every case/account connection, including atomic fact writes. Case deletion and
+creation-based retention remove preferences with the files; account deletion at
+the storage seam also removes that account's preferences. This adds no account
+deletion endpoint or new account-retention policy. The owner check, current case
+existence/retention check, account-existence check and partial upsert share the same
+SQLite write transaction or PostgreSQL case-row lock. Concurrent partial patches
+preserve omitted flags. Preferences never pass through Case/User replacement.
 
 Ownership, authority, status, submission timestamp, claim, decision, status history,
 and messages/read receipts live in the case JSON. Historic applicant replies,

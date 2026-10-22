@@ -33,10 +33,23 @@ export interface ApplicantSummary {
   name: string;
 }
 
+export interface ApplicationPreferences {
+  archived: boolean;
+  pinned: boolean;
+}
+
+/** Omitted fields keep their stored value; explicit values must be booleans. */
+export interface ApplicationPreferencesPatch {
+  archived?: boolean;
+  pinned?: boolean;
+}
+
 export interface ApplicationSummary {
+  archived: boolean;
   authority: string | null;
   completeness: CompletenessSummary | null;
   id: string;
+  pinned: boolean;
   reviewer: ReviewerName | null;
   status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
   submitted_at: string | null;

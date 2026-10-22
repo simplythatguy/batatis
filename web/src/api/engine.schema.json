@@ -170,8 +170,52 @@
       "title": "ApplicantSummary",
       "type": "object"
     },
+    "ApplicationPreferences": {
+      "properties": {
+        "archived": {
+          "default": false,
+          "title": "Archived",
+          "type": "boolean"
+        },
+        "pinned": {
+          "default": false,
+          "title": "Pinned",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "archived",
+        "pinned"
+      ],
+      "title": "ApplicationPreferences",
+      "type": "object"
+    },
+    "ApplicationPreferencesPatch": {
+      "additionalProperties": false,
+      "description": "Omitted fields keep their stored value; explicit values must be booleans.",
+      "minProperties": 1,
+      "properties": {
+        "archived": {
+          "default": false,
+          "title": "Archived",
+          "type": "boolean"
+        },
+        "pinned": {
+          "default": false,
+          "title": "Pinned",
+          "type": "boolean"
+        }
+      },
+      "title": "ApplicationPreferencesPatch",
+      "type": "object"
+    },
     "ApplicationSummary": {
       "properties": {
+        "archived": {
+          "default": false,
+          "title": "Archived",
+          "type": "boolean"
+        },
         "authority": {
           "anyOf": [
             {
@@ -197,6 +241,11 @@
         "id": {
           "title": "Id",
           "type": "string"
+        },
+        "pinned": {
+          "default": false,
+          "title": "Pinned",
+          "type": "boolean"
         },
         "reviewer": {
           "anyOf": [
@@ -261,7 +310,9 @@
         "submitted_at",
         "completeness",
         "unread_messages",
-        "reviewer"
+        "reviewer",
+        "archived",
+        "pinned"
       ],
       "title": "ApplicationSummary",
       "type": "object"

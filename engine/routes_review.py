@@ -3,12 +3,13 @@ from __future__ import annotations
 
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException, Query, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .access import REVIEWABLE, authorize_case
-from .account_models import (reviewing_authority, ApplicationStatus, ApplicantType, Claim, Decision, DecisionItem, DecisionOutcome,
+from .account_models import (reviewing_authority, ApplicationPreferences, ApplicationPreferencesPatch,
+                             ApplicationStatus, ApplicantType, Claim, Decision, DecisionItem, DecisionOutcome,
                              MessageAuthor, MessagesResult, StatusChange, StoredMessage,
                              Role, ThreadMessage, User)
 from .accounts import require_user
@@ -41,6 +42,8 @@ class ApplicationSummary(BaseModel):
     completeness: CompletenessSummary | None = None
     unread_messages: int
     reviewer: ReviewerName | None
+    archived: bool = False
+    pinned: bool = False
 
 
 class ApplicationsResult(BaseModel):
@@ -267,13 +270,27 @@ def create_router(cases, code):
     @router.get('/me/applications', response_model=ApplicationsResult)
     def applications(request: Request):
         user = require_user(request)
+        store = cases()
+        preferences = store.list_application_preferences(user.id)
         result = []
-        for case in cases().list_applications(owner_id=user.id):
+        for case in store.list_applications(owner_id=user.id):
+            if case.owner_id != user.id:  # A former owner may still have reviewer read access.
+                continue
             name = case.claim.reviewer_name if case.claim else case.decision.by_name if case.decision else None
+            flags = preferences.get(case.id, ApplicationPreferences())
             result.append(ApplicationSummary(id=case.id, title=case.title, status=case.status,
                 authority=case.authority, updated_at=case.updated_at, submitted_at=case.submitted_at,
-                unread_messages=unread(case, user), reviewer=ReviewerName(name=name) if name else None))
+                unread_messages=unread(case, user), reviewer=ReviewerName(name=name) if name else None,
+                archived=flags.archived, pinned=flags.pinned))
         return ApplicationsResult(applications=result)
+
+    @router.patch('/me/applications/{application_id}/preferences', response_model=ApplicationPreferences)
+    def preferences(application_id: str, body: ApplicationPreferencesPatch, user: User = Depends(require_user)):
+        """Owner-only list metadata at any status; never edits or withdraws a case."""
+        saved = cases().patch_application_preferences(application_id, user, body.model_dump(exclude_unset=True))
+        if saved is None:
+            raise HTTPException(404, 'case not found')
+        return saved
 
     @router.post('/cases/{case_id}/submit', response_model=Case)
     def submit(case_id: str, request: Request):
