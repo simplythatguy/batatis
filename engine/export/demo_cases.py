@@ -80,10 +80,11 @@ def demo_case(name: str, codes: Codes | None = None) -> Case:
     case.section_c = section_c_rows(case.provisions, codes)
     for doc in data['documents']:
         path = DEMO_DIR / name / doc['file']
+        file_ref = path.relative_to(ROOT).as_posix()          # repo-relative: no local path reaches the PDF
         eid = doc['id']
         case.evidence.append(EvidenceItem(id=eid, description=doc['title'], status='evidence_listed', kind='file'))
-        case.facts.append(Fact(field=f'evidence.{eid}.file_ref', value=str(path), kind='pointed', status='confirmed',
-                               source=Source(type='file', ref=str(path), quote=path.read_text())))
+        case.facts.append(Fact(field=f'evidence.{eid}.file_ref', value=file_ref, kind='pointed', status='confirmed',
+                               source=Source(type='file', ref=file_ref, quote=path.read_text())))
         case.facts += [_fact(f'evidence.{eid}.{key}', doc[key], ref)
                        for key in ('title', 'responsible_party', 'issuer', 'date') if doc.get(key)]
     ids = [doc['id'] for doc in data['documents']]

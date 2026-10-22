@@ -83,7 +83,13 @@ class ExportResult:
     blank_fields: list[str] = field(default_factory=list)
     open_items: list[str] = field(default_factory=list)
     not_applicable: list[str] = field(default_factory=list)   # form fields showing N/A from an applicant fact
-    text: list[str] = field(default_factory=list)             # exported narrative: form values, then the appendix
+    form_text: list[str] = field(default_factory=list)        # 'field: full value' for every filled form field
+    appendix_text: list[str] = field(default_factory=list)    # appendix paragraphs and '| a | b |' table rows
+
+    @property
+    def text(self) -> list[str]:
+        """The exported narrative the citation validator checks: form values, then the appendix."""
+        return [*self.form_text, *self.appendix_text]
 
 
 def form_path() -> Path:
@@ -371,9 +377,10 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
     values = confirmed_values(case)
     plan = _plan(case, values, fmap, _rects(blank_form, fmap), codes)
     filled, placements = _fill_and_flatten(blank_form, plan)
-    text = [f'{name}: {full}' for name, (_shown, _ref, full) in plan.text.items()]
+    form_text = [f'{name}: {full}' for name, (_shown, _ref, full) in plan.text.items()]
+    appendix_text: list[str] = []
     appendix = build_appendix(case, plan, values, fmap, codes=codes,
-                              open_items=reasons if draft else [], package_notes=notes, text=text)
+                              open_items=reasons if draft else [], package_notes=notes, text=appendix_text)
 
     out = PdfWriter(clone_from=io.BytesIO(filled))
     form_pages = len(out.pages)
@@ -392,4 +399,5 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
     visible = list(dict.fromkeys((reasons if draft else []) + notes))
     return ExportResult(pdf=buf.getvalue(), field_map=fmap['version'], form_pages=form_pages,
                         appendix_pages=len(app_reader.pages), draft=draft, placements=placements,
-                        blank_fields=blank, open_items=visible, not_applicable=list(plan.na), text=text)
+                        blank_fields=blank, open_items=visible, not_applicable=list(plan.na), form_text=form_text,
+                        appendix_text=appendix_text)

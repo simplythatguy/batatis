@@ -10,6 +10,7 @@ from __future__ import annotations
 import io
 import re
 from datetime import date
+from html import unescape
 from xml.sax.saxutils import escape
 
 from pypdf import PdfReader, PdfWriter
@@ -169,14 +170,19 @@ def story_text(story: list) -> list[str]:
     never separates a citation from its document label)."""
     out: list[str] = []
 
+    def plain(par: Paragraph) -> str:
+        # A line break is a space in the rendered text; markup and entities are not text.
+        markup = re.sub(r'<br\s*/?>', ' ', par.text)
+        return ' '.join(unescape(re.sub(r'<[^>]+>', '', markup).replace('&nbsp;', ' ')).split())
+
     def walk(item):
         if isinstance(item, Paragraph):
-            text = ' '.join(item.getPlainText().split())
+            text = plain(item)
             if text:
                 out.append(text)
         elif isinstance(item, Table):
             for row in item._cellvalues:
-                cells = [' '.join(c.getPlainText().split()) if isinstance(c, Paragraph) else str(c) for c in row]
+                cells = [plain(c) if isinstance(c, Paragraph) else str(c) for c in row]
                 out.append('| ' + ' | '.join(cells) + ' |')
         elif isinstance(item, KeepTogether):
             for sub in item._content:
