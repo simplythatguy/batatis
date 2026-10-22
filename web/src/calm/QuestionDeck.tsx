@@ -408,7 +408,7 @@ function askAbout(item: DeckItem, n: number) {
  */
 function HelpButton({ item, n, open, onToggle }: { item: DeckItem; n: number; open: boolean; onToggle: () => void }) {
   return item.why
-    ? <button type="button" className="cf-link-btn cf-help-btn" aria-expanded={open} aria-controls="cf-q-why" onClick={onToggle}><Icon24 name="spark" size={14} />Help</button>
+    ? <button type="button" className="cf-link-btn cf-help-btn" aria-expanded={open} aria-controls={open ? "cf-q-why" : undefined} onClick={onToggle}><Icon24 name="spark" size={14} />Help</button>
     : <button type="button" className="cf-link-btn cf-help-btn" onClick={() => askAbout(item, n)}><Icon24 name="spark" size={14} />Help</button>;
 }
 
