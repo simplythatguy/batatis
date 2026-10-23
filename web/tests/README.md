@@ -36,6 +36,25 @@ races, stale provider completions, and evidence replacement/deletion generations
 They do not certify PostgreSQL, provider execution, deployment, official export
 eligibility, or the separately queued explicit-check and guided-flow UX changes.
 
+Saved code-check selections (docs/api/selected-articles.md) use the same harness, but start its Vite
+with the client pinned to the test engine, so nothing can reach Vite's default `/api` proxy target
+(`127.0.0.1:8000`, which may be someone else's server):
+
+```sh
+VITE_ENGINE_URL=http://127.0.0.1:<engine port> npx vite --host 127.0.0.1 --port <web port> --strictPort
+SYNC_TEST_BASE=http://127.0.0.1:<engine port> SYNC_WEB_BASE=http://127.0.0.1:<web port> \
+SYNC_TEST_DB=<engine dir>/cases.sqlite node tests/selection.integration.mjs
+```
+
+Every page aborts, records and fails on a request to any other origin, or to `/api` on the harness
+origin. Owned-account scenarios reuse fixed synthetic accounts: the engine allows 10 logins per IP
+per 10 minutes, so pace repeated runs or use a fresh engine directory and port.
+
+`selection.integration.mjs` saves two synthetic applications with disjoint cards (unanswered,
+No, Not sure, a pending Yes), switches and reloads, removes and clears cards, expands an article,
+reopens a legacy case and checks delayed saves and reads, refused writes, conflicts, deletion,
+a read-only case and another account (synthetic password accounts on the disposable engine).
+
 R4 regression coverage uses the same disposable engine and production Vite app:
 
 ```sh

@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import type { Case as EngineCase } from "../api/types.gen.ts";
+import type { Case as EngineCase, IdentifyResult } from "../api/types.gen.ts";
 import { toViewRow } from "../api/sectionC.ts";
 import { engineField } from "../intakeFields.ts";
 import { getGaps, reducer } from "../model.ts";
-import { caseFromEngine, latestFacts } from "./openCase.ts";
+import { caseFromEngine, latestFacts, openedCase, selectedArticles } from "./openCase.ts";
 
 const fact = (id: string, field: string, value: string, ref = "Typed in Section A") => ({
   id, field, value, kind: "pointed" as const, status: "confirmed" as const, confidence: null, formula: null, inputs: [],
@@ -14,7 +14,7 @@ const fact = (id: string, field: string, value: string, ref = "Typed in Section 
 
 const saved = (over: Partial<EngineCase> = {}): EngineCase => ({
   id: "case_abc", title: "NorthCore CX exterior sheathing board", version: 7, created_at: "", updated_at: "",
-  evidence: [], gaps: [], section_c: [], relevance: null, provisions: ["9.27.3.4.(1)"],
+  evidence: [], gaps: [], section_c: [], relevance: null, provisions: ["9.27.3.4.(1)"], selected_articles: null,
   jurisdiction: { id: "edmonton", name: "Edmonton", authority: null } as EngineCase["jurisdiction"],
   facts: [
     fact("f1", "owner", "NorthCore Building Products Ltd."),
@@ -135,4 +135,63 @@ test("reopening the API fixture and saving at once sends nothing: no re-post, no
   const c = caseFromEngine(API_CASE, "manufacturer");
   assert.equal(await sync.pushFacts(API_CASE.id, c.facts), null);
   assert.deepEqual(requests, []);
+});
+
+/* —— Saved code-check selections (docs/api/selected-articles.md) —— */
+
+const pick = (id: string, provision: string, answer: "yes" | "no" | "not-sure" | null = null, pending = false) => ({ id, provision, answer, pending });
+
+test("a saved selection reopens every card in order with its answer, including unanswered and pending ones", () => {
+  const c = caseFromEngine(saved({
+    provisions: [],
+    selected_articles: [pick("search-9.25.2.2.", "9.25.2.2."), pick("search-9.27.3.4.(1)", "9.27.3.4.(1)", "no"), pick("id-9.10.9.16.", "9.10.9.16.", "not-sure"), pick("search-9.36.2.6.", "9.36.2.6.", "yes", true)],
+  }), "manufacturer");
+  assert.deepEqual(c.candidates.map((a) => [a.id, a.provision, a.answer, Boolean(a.pending)]), [
+    ["search-9.25.2.2.", "9.25.2.2.", null, false],
+    ["search-9.27.3.4.(1)", "9.27.3.4.(1)", "no", false],
+    ["id-9.10.9.16.", "9.10.9.16.", "not-sure", false],
+    ["search-9.36.2.6.", "9.36.2.6.", "yes", true],
+  ]);
+  assert.ok(c.questions.some((q) => q.cardId === "id-9.10.9.16."), "Not sure keeps its open question for the officer");
+});
+
+test("the saved selection comes back with the same ids, so reopening and saving sends the same list", () => {
+  const list = [pick("search-9.25.2.2.", "9.25.2.2."), pick("provision-9.27.3.4.(2)", "9.27.3.4.(2)", "not-sure"), pick("search-9.36.2.6.", "9.36.2.6.", "yes", true)];
+  assert.deepEqual(selectedArticles(caseFromEngine(saved({ selected_articles: list }), "manufacturer")), list);
+});
+
+test("an explicitly empty selection stays empty; only a never-saved one falls back to confirmed references", () => {
+  assert.deepEqual(caseFromEngine(saved({ selected_articles: [] }), "manufacturer").candidates.filter((a) => a.provision.match(/^\d/)), [], "a removed reference is not refilled");
+  assert.deepEqual(caseFromEngine(saved({ selected_articles: null }), "manufacturer").candidates.map((a) => [a.id, a.answer]), [["search-9.27.3.4.(1)", "yes"]]);
+});
+
+test("a selected, unanswered or pending card never becomes a confirmed benchmark when reopened", () => {
+  const c = caseFromEngine(saved({ provisions: [], selected_articles: [pick("search-9.25.2.2.", "9.25.2.2."), pick("search-9.36.2.6.", "9.36.2.6.", "yes", true), pick("search-9.27.3.4.(1)", "9.27.3.4.(1)", "not-sure")] }), "manufacturer");
+  assert.deepEqual(c.candidates.map((a) => [a.id, a.benchmark]), [["search-9.25.2.2.", false], ["search-9.36.2.6.", false], ["search-9.27.3.4.(1)", false]]);
+  assert.deepEqual(c.sectionC, [], "nothing reaches Section C until its deterministic lookup returns");
+});
+
+const identified = (decisions: Record<string, string> = {}) => ({
+  mode: "fake", label: "", narrowed: true, message: null, committed: [], case_version: 3, open_questions: [], questions: [],
+  decisions: Object.fromEntries(Object.entries(decisions).map(([k, decision]) => [k, { decision }])),
+  articles: [],
+  choices: ["9.10.14.4.", "9.10.14.5."].map((provision) => ({ provision, provision_id: `${provision}(1)`, title: `Article ${provision}`, part: 9, quote: "1) Synthetic quote.", citation: null })),
+}) as unknown as IdentifyResult;
+
+test("with a saved selection, the stored identification never refills a removed card and keeps pending answers", () => {
+  const list = [pick("search-9.25.2.2.", "9.25.2.2."), pick("id-9.10.14.4.(1)", "9.10.14.4.(1)", "no", true)];
+  const c = openedCase(saved({ provisions: [], selected_articles: list }), "manufacturer", { intake: null, identify: identified({ "9.10.14.4.": "yes" }) });
+  assert.deepEqual(c.candidates.map((a) => [a.id, a.answer, Boolean(a.pending), a.suggestion]), [
+    ["search-9.25.2.2.", null, false, "search"],
+    ["id-9.10.14.4.(1)", "no", true, "identify"],
+  ], "9.10.14.5. was removed; the pending No is not replaced by the older stored Yes");
+  assert.equal(c.candidates[1].quote.text, "1) Synthetic quote.", "the identified card keeps the stored wording");
+  assert.deepEqual(selectedArticles(c), list);
+});
+
+test("an acknowledged identification decision stays the answer of its card; a legacy case keeps every identified card", () => {
+  const c = openedCase(saved({ provisions: [], selected_articles: [pick("id-9.10.14.4.(1)", "9.10.14.4.(1)")] }), "manufacturer", { intake: null, identify: identified({ "9.10.14.4.": "yes" }) });
+  assert.deepEqual(c.candidates.map((a) => [a.id, a.answer]), [["id-9.10.14.4.(1)", "yes"]]);
+  const legacy = openedCase(saved({ provisions: [], selected_articles: null }), "manufacturer", { intake: null, identify: identified() });
+  assert.deepEqual(legacy.candidates.map((a) => [a.id, a.answer]), [["id-9.10.14.4.(1)", null], ["id-9.10.14.5.(1)", null]]);
 });

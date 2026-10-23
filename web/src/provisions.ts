@@ -32,9 +32,10 @@ export function reconcileSectionC(c: Case, rows: SectionCRow[]): Case {
   return JSON.stringify(next) === JSON.stringify(c) ? c : next;
 }
 
-/** Article-level answers cannot be submitted before deterministic expansion. */
+/** Article-level answers cannot be submitted before deterministic expansion. A Yes still waiting
+ * for the engine (pending) is not confirmed yet: it stays a card until its decision is acknowledged. */
 export function confirmedProvisions(c: Case): string[] {
-  return [...new Set(c.candidates.filter(a => a.answer === "yes" && isProvision(a.provision)
+  return [...new Set(c.candidates.filter(a => a.answer === "yes" && !a.pending && isProvision(a.provision)
     && c.sectionC.some(r => canonicalProvision(r.provision) === canonicalProvision(a.provision)))
     .map(a => a.provision))];
 }
