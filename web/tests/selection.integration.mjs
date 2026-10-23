@@ -22,10 +22,27 @@ const card = provision => ({
   departure: 'do something other than what this sentence requires', clarifyingQuestion: 'Which part of this sentence does the design not follow?', answer: null,
 });
 const pick = (id, provision, answer = null, pending = false) => ({ id, provision, answer, pending });
+/** Sign in as a fixed synthetic account on the test engine, creating it once (signups are rate limited). */
+const account = (p, email, name) => p.evaluate(async ({ base, email, name }) => {
+  const send = (path, body) => fetch(base + path, { method: 'POST', credentials: 'include', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  const login = await send('/auth/login', { email, password: 'SYNTHETIC-password-1' });
+  if (login.status === 200) return 200;
+  return (await send('/auth/signup', { email, password: 'SYNTHETIC-password-1', name })).status;
+}, { base, email, name });
 
+/** Only the harness page and the test engine are reachable; anything else is aborted and fails the scenario. */
+const owned = new Set([new URL(web).host, new URL(base).host]);
 async function page() {
-  const p = await (await browser.newContext()).newPage();
+  const ctx = await browser.newContext();
+  const offsite = [];
+  await ctx.route('**/*', route => {
+    const u = new URL(route.request().url());
+    if (['http:', 'https:'].includes(u.protocol) && !owned.has(u.host)) { offsite.push(`${route.request().method()} ${u.href}`); return route.abort(); }
+    return route.continue();
+  });
+  const p = await ctx.newPage();
   p.errors = [];
+  p.offsite = offsite;
   p.on('pageerror', e => p.errors.push(e.message));
   await p.addInitScript(({ base }) => {
     const original = window.fetch;
@@ -58,6 +75,7 @@ async function scenario(name, run) {
   try {
     await run(open);
     for (const p of pages) assert.deepEqual(p.errors, []);
+    for (const p of pages) assert.deepEqual(p.offsite, [], 'no request leaves the harness and the test engine');
     passed++;
     console.log('PASS', name);
   } catch (e) {
@@ -286,6 +304,59 @@ try {
     assert.deepEqual((await remote(acked)).provisions, ['9.27.3.4.(1)'], 'an acknowledged Yes still becomes a confirmed reference');
   });
 
+  await scenario('a read-only application holding an unexpanded article reopens without writing and can be left', async open => {
+    const p = await open();
+    const call = (path, method = 'GET', body) => p.evaluate(async ({ base, path, method, body }) => { const r = await fetch(base + path, { method, credentials: 'include', headers: { 'content-type': 'application/json' }, ...(body ? { body: JSON.stringify(body) } : {}) }); return { status: r.status, body: await r.json().catch(() => null) }; }, { base, path, method, body });
+    assert.ok([200, 201].includes(await account(p, 'selection-readonly@example.test', 'SYNTHETIC Owner')));
+    const seed = async (title, status) => {
+      const c = (await call('/cases', 'POST', { title })).body;
+      assert.equal((await call(`/cases/${c.id}/selected-articles`, 'PUT', { expected_version: c.version, selected_articles: [pick('search-9.25.2.2.', '9.25.2.2.')] })).status, 200);
+      if (status) {                                                    // as the submit route would leave it (owned test store)
+        const sql = new DatabaseSync(db);
+        const row = sql.prepare('SELECT json FROM cases WHERE id=?').get(c.id);
+        sql.prepare('UPDATE cases SET json=? WHERE id=?').run(JSON.stringify({ ...JSON.parse(row.json), status }), c.id);
+        sql.close();
+      }
+      return c.id;
+    };
+    const sent = id => p.evaluate(id => window.requests.filter(r => !r.startsWith('GET') && r.includes(`/cases/${id}`)), id);
+    const sentId = await seed('SYNTHETIC submitted', 'submitted');
+    const other = await seed('SYNTHETIC other draft');
+    await p.evaluate(() => { window.requests.length = 0; });           // the seeding writes above are not the app's
+    assert.equal(await openCase(p, sentId), null);
+    await looked(p);
+    await p.waitForFunction(() => window.caseStore.c.candidates.some(a => a.id === 'provision-9.25.2.2.(2)'));
+    await p.evaluate(() => new Promise(r => setTimeout(r, 1200)));     // past the 500 ms automatic save
+    assert.deepEqual(await sent(sentId), [], 'nothing is written to a read-only application');
+    assert.equal((await status(p)).save, 'saved', 'the expansion is not an unsaved change');
+    // Card changes the applicant could still reach (the legacy references screen's Remove) are refused, not
+    // applied and then silently dropped: the screen keeps showing what is saved.
+    const shown = await cards(p);
+    await dispatch(p, { type: 'removeCandidate', id: 'provision-9.25.2.2.(2)' });
+    await dispatch(p, { type: 'answerCandidate', id: 'provision-9.25.2.2.(1)', answer: 'no' });
+    await dispatch(p, { type: 'answerCandidate', id: 'provision-9.25.2.2.(3)', answer: 'not-sure' });
+    await dispatch(p, { type: 'addCandidate', candidate: card('9.36.2.6.(1)') });
+    await p.evaluate(() => new Promise(r => setTimeout(r, 900)));
+    assert.deepEqual(await cards(p), shown, 'a read-only application\'s cards do not change on screen');
+    assert.equal(await p.evaluate(() => window.caseStore.saveDraft()), sentId, 'an explicit save has nothing to send');
+    assert.deepEqual(await sent(sentId), [], 'still nothing written');
+    assert.equal((await status(p)).save, 'saved');
+    const switched = await p.evaluate(async other => {
+      const { switchApplication } = await import('/src/calm/libraryContext.ts');
+      const s = window.caseStore;
+      return switchApplication(other, { inCase: s.phase === 'case', saveStatus: s.saveStatus, saveDraft: s.saveDraft, openCase: id => s.openCase(id, 'homebuilder'), settle: () => {} });
+    }, other);
+    assert.equal(switched, null, 'the guarded switch leaves the read-only application');
+    assert.equal(await p.evaluate(() => window.caseStore.engineId), other);
+    assert.deepEqual((await call(`/cases/${sentId}`)).body.selected_articles, [pick('search-9.25.2.2.', '9.25.2.2.')], 'its saved selection is unchanged');
+    // The editable application expands the same article and saves the sentence cards.
+    await looked(p);
+    await p.waitForFunction(() => window.caseStore.c.candidates.some(a => a.id === 'provision-9.25.2.2.(2)'));
+    await save(p);
+    assert.equal((await status(p)).save, 'saved');
+    assert.deepEqual((await call(`/cases/${other}`)).body.selected_articles.map(x => x.id), ['provision-9.25.2.2.(1)', 'provision-9.25.2.2.(2)', 'provision-9.25.2.2.(3)']);
+  });
+
   await scenario('rejected selection writes keep the cards and store nothing', async open => {
     const p = await open();
     const { a } = await twoApplications(p);
@@ -357,12 +428,7 @@ try {
 
   await scenario('owned accounts: a read-only application refuses the write, and another account cannot read or write it', async open => {
     const p = await open();
-    const signup = (email, name) => p.evaluate(async ({ base, email, name }) => {
-      const r = await fetch(base + '/auth/signup', { method: 'POST', credentials: 'include', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, password: 'SYNTHETIC-password-1', name }) });
-      return r.status;
-    }, { base, email, name });
-    const stamp = Date.now();
-    assert.equal(await signup(`owner-${stamp}@example.test`, 'SYNTHETIC Owner'), 201);
+    assert.ok([200, 201].includes(await account(p, 'selection-owner@example.test', 'SYNTHETIC Owner')));
     await begin(p);
     await dispatch(p, { type: 'setDetail', field: 'owner', value: 'SYNTHETIC owned', section: 'A' });
     await dispatch(p, { type: 'addCandidate', candidate: card('9.25.2.2.(1)') });
@@ -383,7 +449,7 @@ try {
     assert.deepEqual(after.selected_articles, [pick('search-9.25.2.2.(1)', '9.25.2.2.(1)')], 'read-only: nothing changed');
     // Another account: the application is inaccessible and nothing of it leaks.
     await p.evaluate(async base => { await fetch(base + '/auth/logout', { method: 'POST', credentials: 'include' }); }, base);
-    assert.equal(await signup(`other-${stamp}@example.test`, 'SYNTHETIC Other'), 201);
+    assert.ok([200, 201].includes(await account(p, 'selection-other@example.test', 'SYNTHETIC Other')));
     const other = await open();
     await other.context().addCookies(await p.context().cookies());
     assert.match(await openCase(other, id), /deleted or has expired/);
