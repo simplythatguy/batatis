@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:
-    branches: [dev, main]
+    branches: [dev, main, "feat/**"]
   push:
     branches: [dev]
 
@@ -32,6 +32,7 @@ jobs:
         run: |
           npm ci
           npm run typecheck
+          npm test
           npm run test:unwrap
           npm run test:rules
           npm run test:accuracy
