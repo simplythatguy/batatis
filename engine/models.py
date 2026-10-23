@@ -12,7 +12,9 @@ import uuid
 from datetime import datetime, timezone
 from typing import Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+from codedb.ids import parse
 from .account_models import ApplicationStatus, Claim, Decision, StatusChange, StoredMessage
 
 from .models_intake import IntakeRecord
@@ -152,6 +154,30 @@ class Gap(BaseModel):
     routed_to: RouteTarget | None = None
 
 
+class SelectedArticle(BaseModel):
+    """An applicant's code-check card, not a confirmed benchmark or code quotation."""
+    model_config = ConfigDict(extra='forbid')
+    id: str = Field(min_length=1, max_length=200, strict=True)
+    provision: str = Field(min_length=1, max_length=80, strict=True)
+    answer: Literal['yes', 'no', 'not-sure'] | None = None
+    pending: bool = Field(default=False, strict=True)
+
+    @field_validator('id')
+    @classmethod
+    def _nonblank_id(cls, value):
+        if not value.strip():
+            raise ValueError('a selected article needs a stable card id')
+        return value
+
+    @field_validator('provision')
+    @classmethod
+    def _article_or_descendant(cls, value):
+        provision = parse(value)
+        if provision.article is None:
+            raise ValueError('select an article or one of its sentences or clauses')
+        return str(provision)
+
+
 class Case(BaseModel):
     id: str = Field(default_factory=lambda: new_id('case'))
     title: str | None = None
@@ -169,6 +195,9 @@ class Case(BaseModel):
     version: int = Field(default=1, ge=1)      # acknowledgment of the store's row version, never input authority
     jurisdiction: Jurisdiction | None = None
     facts: list[Fact] = []
+    # None: legacy case with no saved card list. []: applicant explicitly cleared it.
+    # Only applicant card state lives here; provisions remains the confirmed selection.
+    selected_articles: list[SelectedArticle] | None = None
     provisions: list[str] = []                 # Division B ids the applicant confirmed
     section_c: list[SectionCRow] = []
     evidence: list[EvidenceItem] = []
