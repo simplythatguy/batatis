@@ -1,9 +1,10 @@
 """Provider transports for identify, every one metered through engine.llm_gate.
 
-A transport is the only thing that talks to Jev, Anthropic or OpenAI. Each call reserves its
+A transport is the only thing that talks to Elephant, Jev, Anthropic or OpenAI. Each call reserves its
 worst-case cost first (`llm_gate.reserve`), settles with the tokens the provider reported
 (`llm_gate.settle`), and releases the reservation when the call fails (`llm_gate.release`).
-A shut gate raises GateClosed (no retry), and the pipeline takes its labelled fallback.
+Unknown dispatch/usage follows the transport's own accounting policy. A shut gate raises
+GateClosed (no retry), and the pipeline takes its labelled fallback.
 
 `BATATIS_PROVIDER=fake` swaps every transport for the offline fakes in fakes.py. The fakes are
 metered the same way under the same pinned model ids, so the spend path is tested without keys.
@@ -277,13 +278,14 @@ class Transports:
     anthropic: Any = None                      # has .messages.parse
     openai: OpenAIJson | None = None
     decisions: Ask | None = None
+    elephant: Ask | None = None
     log: SpendLog = field(default_factory=SpendLog)
     unavailable: dict[str, str] = field(default_factory=dict)   # provider -> why
 
 
 def scoring_ask(tp: Transports, method: str) -> Ask:
     """Choose only the configured scoring transport; credentials cannot select a method."""
-    ask = tp.decisions if method == 'decisions' else tp.jev if method == 'jev' else None
+    ask = {'decisions': tp.decisions, 'jev': tp.jev, 'elephant': tp.elephant}.get(method)
     if ask is None:
         raise ScoringUnavailable(tp.unavailable.get(method, 'exhaustive scoring transport unavailable'))
     return ask
@@ -304,8 +306,12 @@ def transports(client_ip: str | None = None, *, jev_model: str = JEV_MODEL, anth
     log = SpendLog()
     if llm_gate.fake_providers():
         from . import fakes
+        from .elephant_runtime import metered_ask as metered_elephant, raw_ask as raw_elephant
         return Transports(
             kind='fake', log=log,
+            elephant=(metered_elephant(raw_elephant(post=fakes.fake_elephant_post,
+                                                    credential=lambda: 'offline-fake'), client_ip=client_ip, log=log)
+                      if 'elephant' in scoring else None),
             jev=(metered_ask(fakes.fake_jev_ask(), model=jev_model, client_ip=client_ip, log=log)
                  if 'jev' in scoring else None),
             decisions=(metered_decisions_ask(fakes.fake_decisions, client_ip=client_ip, log=log)
@@ -313,6 +319,13 @@ def transports(client_ip: str | None = None, *, jev_model: str = JEV_MODEL, anth
             anthropic=MeteredAnthropic(fakes.FakeAnthropic(), client_ip=client_ip, log=log),
             openai=metered_openai_json(fakes.fake_openai_json, client_ip=client_ip, log=log))
     out = Transports(kind='live', log=log)
+    if 'elephant' not in scoring:
+        out.unavailable['elephant'] = 'Elephant is not a configured scoring provider'
+    elif llm_gate.provider_enabled('elephant'):
+        from .elephant_runtime import metered_ask as metered_elephant, raw_ask as raw_elephant
+        out.elephant = metered_elephant(raw_elephant(), client_ip=client_ip, log=log)
+    else:
+        out.unavailable['elephant'] = 'BATATIS_LIVE_ELEPHANT/BATATIS_LIVE is off or OPENROUTER_API_KEY is absent'
     if 'jev' not in scoring:
         out.unavailable['jev'] = 'Jev is not a configured scoring provider'
     elif llm_gate.provider_enabled('jev'):

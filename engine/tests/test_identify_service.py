@@ -16,7 +16,7 @@ from engine.codes import Codes
 from engine.identify import articles
 from engine.identify import fakes
 from engine.identify.commit import CommitPolicy, load_policy
-from engine.identify.config import DIVISION_B_ARTICLES, IdentifyConfig
+from engine.identify.config import DIVISION_B_ARTICLES, IdentifyConfig, load_config
 from engine.identify.corpus import card
 from engine.identify.llm import OpenAIVerifier
 from engine.identify.pipeline import run
@@ -34,7 +34,8 @@ SOFFIT = ('New two-storey single detached house. The north wall is 0.3 m from th
 @pytest.fixture(autouse=True)
 def offline(monkeypatch):
     llm_gate.reset_for_tests()
-    for name in ('BATATIS_LIVE', 'VERCEL', 'BATATIS_STORE', 'OPENAI_API_KEY', 'ANTHROPIC_API_KEY',
+    for name in ('BATATIS_LIVE', 'BATATIS_LIVE_ELEPHANT', 'OPENROUTER_API_KEY',
+                 'VERCEL', 'BATATIS_STORE', 'OPENAI_API_KEY', 'ANTHROPIC_API_KEY',
                  'BATATIS_IDENTIFY_CONFIG'):
         monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv('BATATIS_PROVIDER', 'fake')
@@ -72,15 +73,18 @@ def displayed_text_ok(result, arts):
 # --- pipeline -------------------------------------------------------------------------------------
 
 def test_screen_judges_all_2080_articles_and_reranks_in_one_request(codes, arts):
+    # The explicitly retained legacy scorer still supports its larger one-call
+    # rerank. Elephant's 16K whole-request batching is exercised separately.
+    config = load_config(env={'BATATIS_IDENTIFY_SCREEN': 'decisions', 'BATATIS_IDENTIFY_RERANK': 'decisions'})
     seen = []
     base = fakes.fake_jev_ask()
 
     def counting(state, questions, timeout):
         seen.append(len(questions))
         return base(state, questions, timeout)
-    tp = transports()
+    tp = transports(scoring={'decisions'})
     tp.decisions = counting
-    out = run(SOFFIT, codes=codes, transports=tp)
+    out = run(SOFFIT, codes=codes, transports=tp, config=config)
     assert len(arts) == DIVISION_B_ARTICLES == 2080
     assert len(out.screen) == 2080 and set(out.screen) == set(arts)
     assert sum(seen[:-1]) == 2080 and seen[-1] == 60                   # screen batches, then one rerank request
@@ -90,6 +94,7 @@ def test_screen_judges_all_2080_articles_and_reranks_in_one_request(codes, arts)
 
 
 def test_incomplete_screen_falls_back_and_commits_nothing(codes):
+    config = load_config(env={'BATATIS_IDENTIFY_SCREEN': 'decisions', 'BATATIS_IDENTIFY_RERANK': 'decisions'})
     base = fakes.fake_jev_ask()
 
     def drops_one(state, questions, timeout):
@@ -97,9 +102,9 @@ def test_incomplete_screen_falls_back_and_commits_nothing(codes):
         if len(questions) > 60:
             reply['answers'].pop(next(iter(reply['answers'])))
         return reply
-    tp = transports()
+    tp = transports(scoring={'decisions'})
     tp.decisions = drops_one
-    result = run(SOFFIT, codes=codes, transports=tp, policy=calibrated()).result
+    result = run(SOFFIT, codes=codes, transports=tp, config=config, policy=calibrated(config)).result
     assert result.mode == 'bm25_fallback' and result.committed == [] and not result.narrowed
     assert 'Nothing is committed' in result.label and result.message
     assert all(a.status == 'fallback' and a.verifier == 'not_run' for a in result.articles)
@@ -373,7 +378,11 @@ def test_spend_is_settled_per_provider_for_a_run(client):
     http, _ = client
     case_id = described(http)
     trace = http.post(f'/cases/{case_id}/identify', json={}).json()['trace']
-    assert set(trace['spend']) == {'scoring', 'verification'} and trace['spend']['scoring']['requests'] == 21
+    assert set(trace['spend']) == {'scoring', 'verification'}
+    scoring_stages = [s for s in trace['stages'] if s['stage'] in ('screen', 'rerank')]
+    assert trace['spend']['scoring']['requests'] == sum(s['requests'] for s in scoring_stages)
+    assert trace['spend']['scoring']['requests'] > 2  # Elephant's full request budget requires batches.
+    assert trace['spend']['scoring']['usd'] == 0
     assert abs(float(llm_gate._memory.today()) - trace['usd']) < 1e-6
 
 

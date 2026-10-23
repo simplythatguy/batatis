@@ -12,16 +12,19 @@ from __future__ import annotations
 
 import re
 
-from .relevance_models import DECISIONS_PUBLIC_MODEL, PUBLIC_MODEL
+from .relevance_models import DECISIONS_PUBLIC_MODEL, ELEPHANT_PUBLIC_MODEL, PUBLIC_MODEL
 
 # Private: model pin -> the opaque version a client sees. A pin that is not listed reads as CUSTOM.
-MODEL_VERSIONS = {'jev-1.13.0': PUBLIC_MODEL, 'gpt-6-luna': 'verifier-1', 'claude-sonnet-5-5': 'verifier-2'}
+MODEL_VERSIONS = {'jev-1.13.0': PUBLIC_MODEL, 'gpt-6-luna': 'verifier-1', 'claude-sonnet-5-5': 'verifier-2',
+                  'baseten/elephant-1:free': ELEPHANT_PUBLIC_MODEL,
+                  'baseten/elephant-1-20261021': ELEPHANT_PUBLIC_MODEL}
 CUSTOM = 'custom'
 MODEL = 'model'
 # Methods that are a third-party service. The keyword arms (bm25, bm25_v3) and 'none' are not.
-PROVIDER_METHODS = frozenset({'jev', 'openai', 'anthropic', 'decisions'})
+PROVIDER_METHODS = frozenset({'jev', 'openai', 'anthropic', 'decisions', 'elephant'})
 # Spend is shown by what it paid for, not by who was paid.
-SPEND_ROLES = {'jev': 'scoring', 'openai_decisions': 'scoring', 'openai': 'verification', 'anthropic': 'verification'}
+SPEND_ROLES = {'jev': 'scoring', 'openai_decisions': 'scoring', 'elephant': 'scoring',
+               'openai': 'verification', 'anthropic': 'verification'}
 UNAVAILABLE = 'scoring unavailable'
 VERIFIER_UNAVAILABLE = 'failed: scoring unavailable'
 GENERIC_LABEL = {
@@ -30,7 +33,7 @@ GENERIC_LABEL = {
     'bm25_fallback': 'Ranked by keyword search because scoring was unavailable. Nothing is committed.',
 }
 # A provider, a model, a credential or an environment variable that names one.
-PROVIDER_TEXT = re.compile(r'jev|typesafe|openai|anthropic|claude|gpt|luna|BATATIS_[A-Z_]+|[A-Z][A-Z_]*_API_KEY', re.I)
+PROVIDER_TEXT = re.compile(r'jev|typesafe|openai|anthropic|claude|gpt|luna|elephant|baseten|openrouter|BATATIS_[A-Z_]+|[A-Z][A-Z_]*_API_KEY', re.I)
 
 
 def names_a_provider(text: str | None) -> bool:
@@ -57,7 +60,7 @@ def public_stage_model(method: str, pin: str | None) -> str | None:
 
 
 def public_ranker(ranker: str) -> str:
-    return re.sub(r'\b(?:jev|openai|anthropic|decisions)\b', MODEL, ranker, flags=re.I)
+    return re.sub(r'\b(?:jev|openai|anthropic|decisions|elephant)\b', MODEL, ranker, flags=re.I)
 
 
 def public_text(text: str | None, instead: str) -> str | None:

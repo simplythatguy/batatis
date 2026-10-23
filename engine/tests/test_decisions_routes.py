@@ -1,4 +1,4 @@
-"""Synthetic HTTP acceptance for the temporary scoring provider; no live requests."""
+"""Synthetic HTTP acceptance for explicitly selected legacy Decisions; no live requests."""
 import json
 import re
 import threading
@@ -25,6 +25,8 @@ def world(tmp_path, monkeypatch):
     for name in ('BATATIS_PROVIDER', 'BATATIS_STORE', 'VERCEL', 'BATATIS_IDENTIFY_CONFIG'):
         monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv('BATATIS_LIVE', '1')
+    monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'decisions')
+    monkeypatch.setenv('BATATIS_IDENTIFY_RERANK', 'decisions')
     monkeypatch.setenv('OPENAI_API_KEY', 'synthetic-key')
     monkeypatch.setenv('TYPESAFE_API_KEY', 'stale-synthetic-key')
     for limit in ('BATATIS_RELEVANCE_RATE_LIMIT', 'BATATIS_IDENTIFY_RATE_LIMIT', 'BATATIS_RELEVANCE_DAILY_RUNS'):
@@ -56,8 +58,8 @@ def assert_provenance(record):
     assert not re.search(r'jev|typesafe|openai|gpt|luna|decisions', json.dumps(record), re.I)
 
 
-def test_default_and_reversal_are_explicit_exhaustive_and_hash_distinct():
-    current = load_config(env={})
+def test_explicit_decisions_and_jev_are_exhaustive_and_hash_distinct():
+    current = load_config(env={'BATATIS_IDENTIFY_SCREEN': 'decisions', 'BATATIS_IDENTIFY_RERANK': 'decisions'})
     assert (current.screen, current.rerank, current.screen_model, current.rerank_model) == (
         'decisions', 'decisions', 'gpt-6-luna', 'gpt-6-luna')
     previous = load_config(env={'BATATIS_IDENTIFY_SCREEN': 'jev', 'BATATIS_IDENTIFY_RERANK': 'jev'})
@@ -78,7 +80,7 @@ def test_changed_jev_configuration_cannot_borrow_historical_relevance_cutoffs(wo
     assert response.json()['bands'] == {'x': 0.0, 'y': 1.0, 'status': 'uncalibrated; display range only'}
 
 
-def test_public_relevance_defaults_to_decisions_without_touching_stale_jev_key(world):
+def test_public_relevance_explicitly_selects_decisions_without_touching_stale_jev_key(world):
     client, store, calls = world
     case_id = create_described(client, 'SYNTHETIC: exterior insulation replaces housewrap.')
     result = client.post(f'/cases/{case_id}/relevance')

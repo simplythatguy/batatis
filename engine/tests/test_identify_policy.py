@@ -15,7 +15,8 @@ from engine.identify import fakes
 @pytest.fixture(autouse=True)
 def clean_gate(monkeypatch):
     llm_gate.reset_for_tests()
-    for name in ('BATATIS_LIVE', 'BATATIS_PROVIDER', 'VERCEL', 'BATATIS_STORE', 'OPENAI_API_KEY', 'ANTHROPIC_API_KEY'):
+    for name in ('BATATIS_LIVE', 'BATATIS_LIVE_ELEPHANT', 'OPENROUTER_API_KEY', 'BATATIS_PROVIDER',
+                 'VERCEL', 'BATATIS_STORE', 'OPENAI_API_KEY', 'ANTHROPIC_API_KEY'):
         monkeypatch.delenv(name, raising=False)
     yield
     llm_gate.reset_for_tests()
@@ -23,9 +24,10 @@ def clean_gate(monkeypatch):
 
 # --- config ---------------------------------------------------------------------------------------
 
-def test_default_config_is_decisions_screen_and_rerank_with_existing_quote_verifier():
+def test_default_config_is_elephant_screen_and_rerank_with_existing_quote_verifier():
     config = load_config(env={})
-    assert (config.screen, config.screen_model, config.rerank, config.rerank_n) == ('decisions', 'gpt-6-luna', 'decisions', 60)
+    assert (config.screen, config.screen_model, config.rerank, config.rerank_n) == (
+        'elephant', 'baseten/elephant-1:free', 'elephant', 60)
     assert (config.verifier, config.verifier_model, config.verify_n) == ('openai', 'gpt-6-luna', 15)
     assert config.exhaustive and config.model_ids()['verifier'] == 'gpt-6-luna'
 
@@ -185,7 +187,8 @@ def test_live_transports_are_absent_without_the_switch():
     tp = transports()
     assert tp.kind == 'live' and tp.jev is None and tp.openai is None and tp.anthropic is None
     assert tp.decisions is None
-    assert set(tp.unavailable) == {'jev', 'openai', 'anthropic', 'decisions'}
+    assert tp.elephant is None
+    assert set(tp.unavailable) == {'jev', 'openai', 'anthropic', 'decisions', 'elephant'}
 
 
 def test_metered_wrappers_settle_from_provider_usage(monkeypatch):

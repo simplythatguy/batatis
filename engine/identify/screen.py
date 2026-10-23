@@ -16,6 +16,7 @@ from .corpus import card
 
 JEV_MODEL = 'jev-1.13.0'
 DECISIONS_MODEL = 'gpt-6-luna'
+ELEPHANT_MODEL = 'baseten/elephant-1:free'
 JEV_PROVIDER = 'typesafe'         # OpenRouter names the model differently (~typesafe/...); pin applies to TypeSafe
 MAX_QUESTIONS = 400              # independent of state/card length (Decisions request limit)
 GOVERN = ('Article {L} states a requirement that directly governs the situation described in `proposal`: '
@@ -91,11 +92,30 @@ class Judge:
         self.model = model or getattr(ask, 'model', JEV_MODEL)
         self.method = method or getattr(ask, 'method', 'jev')
         self.chars, self.max_state, self.workers = chars, max_state, workers
-        self.timeout, self.attempts, self.question = timeout, attempts, question
+        self.timeout, self.attempts, self.question = timeout, (1 if self.method == 'elephant' else attempts), question
         self.usage = Usage()
         self._lock = threading.Lock()
 
     def batches(self, query: str, arts: Mapping[str, dict], ids: list[str]) -> list[list[tuple[str, str]]]:
+        if self.method == 'elephant':
+            from .elephant_runtime import ElephantError, request_bytes
+            out, cur = [], []
+            for article in ids:
+                candidate = (article, card(arts[article], self.chars))
+                trial = [*cur, candidate]
+                try:
+                    request_bytes(*self._payload(query, trial), model=self.model)
+                except ElephantError as error:
+                    if error.code != 'request_too_large' or not cur:
+                        raise
+                    out.append(cur)
+                    cur = [candidate]
+                    request_bytes(*self._payload(query, cur), model=self.model)
+                else:
+                    cur = trial
+            if cur:
+                out.append(cur)
+            return out
         out, cur, size = [], [], 0
         base = len(json.dumps(query)) + 300
         for a in ids:
@@ -110,12 +130,16 @@ class Judge:
             out.append(cur)
         return out
 
+    def _payload(self, query, batch):
+        state = {'proposal': query, 'articles': {f'A{i}': t for i, (_, t) in enumerate(batch)}}
+        qs = {f'q{i}': noul(self.question.format(L=f'A{i}')) for i in range(len(batch))}
+        return state, qs
+
     def judge(self, query: str, arts: Mapping[str, dict], ids: list[str]) -> dict[str, float]:
         probs: dict[str, float] = {}
 
         def run(batch):
-            state = {'proposal': query, 'articles': {f'A{i}': t for i, (_, t) in enumerate(batch)}}
-            qs = {f'q{i}': noul(self.question.format(L=f'A{i}')) for i in range(len(batch))}
+            state, qs = self._payload(query, batch)
             last_error = None
             for attempt in range(self.attempts):
                 try:
@@ -144,7 +168,12 @@ class Judge:
             raise RuntimeError('scoring batch failed after retries') from last_error
 
         batches = self.batches(query, arts, ids)
-        if len(batches) == 1:
+        if self.method == 'elephant':
+            # Free routing is quota-limited. No queued fan-out may keep sending
+            # after a 429/timeout/malformed batch; partial results never return.
+            for batch in batches:
+                run(batch)
+        elif len(batches) == 1:
             run(batches[0])
         elif batches:
             with ThreadPoolExecutor(max_workers=self.workers) as pool:

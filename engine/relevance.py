@@ -8,13 +8,14 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from .identify import Identification, Judge
-from .identify.screen import DECISIONS_MODEL, JEV_MODEL
+from .identify.screen import DECISIONS_MODEL, ELEPHANT_MODEL, JEV_MODEL
 from .models import Case
 from .public_names import public_stage_model
-from .relevance_models import DECISIONS_PUBLIC_MODEL, PUBLIC_MODEL, RelevanceBands, RelevanceRecord
+from .relevance_models import DECISIONS_PUBLIC_MODEL, ELEPHANT_PUBLIC_MODEL, PUBLIC_MODEL, RelevanceBands, RelevanceRecord
 
 BANDS_FILE = Path(__file__).with_name('identify') / 'relevance_bands.json'
-PUBLIC_MODEL_VERSIONS = {JEV_MODEL: PUBLIC_MODEL, DECISIONS_MODEL: DECISIONS_PUBLIC_MODEL}
+PUBLIC_MODEL_VERSIONS = {JEV_MODEL: PUBLIC_MODEL, DECISIONS_MODEL: DECISIONS_PUBLIC_MODEL,
+                         ELEPHANT_MODEL: ELEPHANT_PUBLIC_MODEL}
 
 
 def public_model(pin: str) -> str:
@@ -54,11 +55,13 @@ class CaseScorings:
 
 
 def live_judge() -> Judge:
-    if os.environ.get('BATATIS_LIVE') != '1':
-        raise RelevanceUnavailable('BATATIS_LIVE is disabled')
+    from . import llm_gate
     from .identify.config import load_config
     from .identify.providers import scoring_ask, transports
     config = load_config()
+    if not llm_gate.fake_providers() and os.environ.get('BATATIS_LIVE') != '1' \
+            and not (config.screen == 'elephant' and llm_gate.provider_enabled('elephant')):
+        raise RelevanceUnavailable('BATATIS_LIVE is disabled')
     if not config.exhaustive:
         raise RelevanceUnavailable('relevance requires exhaustive scoring')
     tp = transports(scoring={config.screen, config.rerank})

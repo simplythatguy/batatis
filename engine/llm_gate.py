@@ -1,4 +1,7 @@
-"""Live model calls are off unless BATATIS_LIVE=1 and the provider's credential is set.
+"""Live model calls require an explicit switch and the provider's credential.
+
+BATATIS_LIVE controls providers by default; BATATIS_LIVE_ELEPHANT can enable only
+the free Elephant route while the global switch keeps unrelated providers off.
 
 Completeness model review and the assistant call `authorize` before a provider request and
 `record` after. Identify (Jev screen and rerank, OpenAI or Anthropic verifier) calls `reserve`,
@@ -32,6 +35,8 @@ PRICES = {
     'claude-sonnet-5-5': (Decimal('2'), Decimal('10')),
     'claude-opus-5-5': (Decimal('4'), Decimal('20')),
     'jev-1.13.0': (Decimal('0.042'), Decimal('0.042')),
+    # The exact free Decisions request route only; no paid aliases inherit this price.
+    'baseten/elephant-1:free': (Decimal('0'), Decimal('0')),
     # GPT Luna, identify's verifier. OpenAI's Standard-tier list price (developers.openai.com/api/docs/pricing,
     # read 2026-10-21) is $0.10 in / $0.50 out up to 272K input tokens and $0.20 / $0.75 above. Both the
     # reservation and the settlement use the long-context pair, an over-estimate for every identify call,
@@ -145,6 +150,9 @@ def reset_for_tests() -> None:
 
 
 def live_enabled(provider: str = 'openai') -> bool:
+    if provider == 'elephant':
+        switch = os.environ.get('BATATIS_LIVE_ELEPHANT') or os.environ.get('BATATIS_LIVE')
+        return switch == '1' and bool((os.environ.get('OPENROUTER_API_KEY') or '').strip())
     key = {'openai': 'OPENAI_API_KEY', 'openai_decisions': 'OPENAI_API_KEY',
            'anthropic': 'ANTHROPIC_API_KEY', 'xai': 'XAI_API_KEY'}.get(provider)
     return key is not None and os.environ.get('BATATIS_LIVE') == '1' and bool((os.environ.get(key) or '').strip())
@@ -273,7 +281,7 @@ def assist_retry_after(client_ip: str) -> int:
     return max(1, _assist_window.retry_after(client_ip, window), _llm_window.retry_after(client_ip, llm_window))
 
 
-PROVIDERS = ('openai', 'openai_decisions', 'anthropic', 'jev')
+PROVIDERS = ('openai', 'openai_decisions', 'anthropic', 'jev', 'elephant')
 
 
 def fake_providers() -> bool:
@@ -302,6 +310,8 @@ def reserve(*, provider: str, model: str, max_input_tokens: int, max_output_toke
 
     Identify takes its per-IP slot once per run (`identify_retry_after`), so stage calls pass rate=False.
     """
+    if provider == 'elephant' and model != 'baseten/elephant-1:free':
+        return Decision(False, 'model-not-admitted')
     if not provider_enabled(provider):
         return Decision(False, 'offline')
     if rate:

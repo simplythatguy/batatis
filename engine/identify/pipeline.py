@@ -1,7 +1,7 @@
 """Identification used by POST /cases/{id}/identify: screen -> rerank -> verify -> commit or quoted choices.
 
 Ported from PR #12 (engine/identify/pipeline.py) and rebuilt around one IdentifyConfig:
-  screen   Decisions (temporary default) or Jev judges every Division B article (2,080), or a lexical arm
+  screen   Elephant (default), Decisions or Jev judges every Division B article (2,080), or a lexical arm
   rerank   the top `rerank_n` re-judged by the configured provider, or a structured rerank, or none
   verify   OpenAI (default, GPT Luna) or Anthropic reads the full text of the top `verify_n` and picks
            with word-for-word quotes; a quote that is not in the article drops the pick
@@ -139,7 +139,7 @@ def _rank(prose, db, arts, ids, config, tp, stages) -> tuple[list[tuple[str, flo
     stages.emit('screen', status='done', method=config.screen, articles=scored)
 
     rerank: dict[str, float] | None = None
-    if config.rerank in ('decisions', 'jev'):
+    if config.rerank in ('elephant', 'decisions', 'jev'):
         if judge is None or judge.method != config.rerank:
             judge = Judge(scoring_ask(tp, config.rerank), chars=config.card_chars, attempts=2,
                           model=config.rerank_model, method=config.rerank)
@@ -297,7 +297,7 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
                 log.by_provider())
     result = IdentifyResult(
         mode=mode, source={'live': 'live', 'fake': 'fake', 'bm25_fallback': 'bm25 fallback'}[mode],
-        label=_label(mode, config, scored, public_text(fallback_reason, UNAVAILABLE)), narrowed=narrowed,
+        label=_label(mode, config, scored, public_text(fallback_reason, UNAVAILABLE), verifier_ran=verifier_ran), narrowed=narrowed,
         message=None if narrowed else NOT_NARROWED, articles=shown, committed=committed, choices=choices,
         questions=[q.text for q in questions], open_questions=questions, benchmark=benchmark,
         process_refs=process_refs(codes), model_ids=model_ids, commit_policy=policy.view(), scored_at=_now(),
@@ -318,16 +318,18 @@ def _reason(error: Exception) -> str:
     return f'{type(error).__name__}/{type(cause).__name__}'
 
 
-def _label(mode: str, config: IdentifyConfig, scored: int, fallback_reason: str | None) -> str:
+def _label(mode: str, config: IdentifyConfig, scored: int, fallback_reason: str | None, *, verifier_ran: bool) -> str:
     if mode == 'bm25_fallback':
         return (f'Ranked by keyword search ({config.fallback.upper()}) because the model path was unavailable '
                 f'({fallback_reason}). Nothing is committed.')
     screen = (f'All {scored} Division B articles were scored' if config.exhaustive
               else f'Keyword search ({config.screen}) shortlisted {scored} articles')
-    rerank = {'jev': f'; the top {config.rerank_n} were re-checked',
+    rerank = {'elephant': f'; the top {config.rerank_n} were re-checked',
+              'jev': f'; the top {config.rerank_n} were re-checked',
               'decisions': f'; the top {config.rerank_n} were re-checked',
               'openai': f'; the top {config.rerank_n} were re-checked', 'none': ''}[config.rerank]
-    verify = '' if config.verifier == 'none' else f'; the top {config.verify_n} were read in full'
+    verify = ('' if config.verifier == 'none' else f'; the top {config.verify_n} were read in full'
+              if verifier_ran else '; full-text verification was unavailable')
     fake = ' Offline fake providers: for testing only, not a measurement.' if mode == 'fake' else ''
     return f'{screen}{rerank}{verify}.{fake}'
 

@@ -77,6 +77,7 @@ stop() {
 
 start() {
   local i
+  local env_args=()
   if ! status; then
     echo "local-app: not starting; a port is in use. Ask the owner to stop it, or run: scripts/local-app.sh wait" >&2
     return 3
@@ -90,8 +91,17 @@ start() {
   # The helper exits after spawning a new session; all server output goes to files, so it also releases
   # the caller's output pipe: `scripts/local-app.sh start | tail` returns as soon as the servers are up.
   py=$(python_bin)
+  # Only Uvicorn loads the worktree's server configuration. This never executes
+  # shell syntax or exports provider credentials into the web process.
+  if [ -f "$root/.env" ]; then
+    if ! "$py" -c 'import dotenv' >/dev/null 2>&1; then
+      echo "local-app: install engine/requirements.txt in the selected Python environment before loading .env" >&2
+      return 2
+    fi
+    env_args=(--env-file "$root/.env")
+  fi
   ( cd "$root" && BATATIS_CASES="${BATATIS_CASES:-$root/.data/cases.sqlite}" detached "$py" -m uvicorn engine.api:app \
-      --host 127.0.0.1 --port $ENGINE_PORT >"$logs/engine.log" 2>&1 </dev/null )
+      "${env_args[@]}" --host 127.0.0.1 --port $ENGINE_PORT >"$logs/engine.log" 2>&1 </dev/null )
   ( cd "$root/web" && detached npm run dev -- --port $WEB_PORT --strictPort --host 127.0.0.1 >"$logs/web.log" 2>&1 </dev/null )
   for i in $(seq 1 60); do
     if curl -fsS -m 3 -o /dev/null "http://127.0.0.1:$ENGINE_PORT/docs" 2>/dev/null && curl -fsS -m 3 -o /dev/null "http://127.0.0.1:$WEB_PORT/" 2>/dev/null; then

@@ -6,7 +6,7 @@ Reads applicant prose on stdin and prints one JSON object:
      "engineering_required": ..., "intake_action": ..., "questions": [...]}
 
 Pipeline: the same configured exhaustive screen, rerank, full-text quote verifier, and exact-config
-calibration gate as the identify API. The temporary default uses Decisions. Uncalibrated or failed
+calibration gate as the identify API. The default uses Elephant. Uncalibrated or failed
 runs never commit; Section C remains deterministic lookup for calibrated commits only.
 
 The judge runs this from a temporary directory, so call it by absolute path:
@@ -54,7 +54,9 @@ def run(prose: str, db_path: Path | str | None = None, judge: Judge | None = Non
         config = replace(config, screen=judge.method, screen_model=judge.model,
                          rerank=judge.method, rerank_model=judge.model, card_chars=judge.chars)
         tp = transports(scoring={config.screen, config.rerank}, anthropic=config.verifier == 'anthropic')
-        if judge.method == 'decisions':
+        if judge.method == 'elephant':
+            tp.elephant = judge.ask
+        elif judge.method == 'decisions':
             tp.decisions = judge.ask
         else:
             tp.jev = judge.ask

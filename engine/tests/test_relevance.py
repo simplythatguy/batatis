@@ -389,7 +389,8 @@ def test_the_providers_pin_is_mapped_privately_and_an_unmapped_pin_is_never_pass
                   rerank={}, display={'9.1.1.1.': 0.5}, bands={'x': 0.3, 'y': 0.85, 'status': 'test'})
     assert RelevanceRecord.model_validate(fields).model == 'relevance-1'
     assert RelevanceRecord.model_validate({**fields, 'model': LEGACY_PIN}).model == 'relevance-1'
-    for bad in ('jev-latest', 'relevance-3', [LEGACY_PIN], None):
+    assert RelevanceRecord.model_validate({**fields, 'model': 'relevance-3'}).model == 'relevance-3'
+    for bad in ('jev-latest', 'relevance-4', [LEGACY_PIN], None):
         with pytest.raises(ValidationError):
             RelevanceRecord.model_validate({**fields, 'model': bad})
 

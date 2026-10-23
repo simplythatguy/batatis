@@ -42,7 +42,7 @@ WEB = ROOT / 'web'
 PROVIDER = re.compile(r'jev|typesafe', re.I)
 NOTICE_PROVIDERS = re.compile(r'jev|typesafe|openai|anthropic|claude|gpt', re.I)
 # What identify answers must not carry either: it was built neutral for every provider, model and credential.
-IDENTIFY_NAMES = re.compile(r'jev|typesafe|openai|anthropic|claude|\bgpt-?\d|\bluna\b|BATATIS_[A-Z_]+|[A-Z]+_API_KEY', re.I)
+IDENTIFY_NAMES = re.compile(r'elephant|baseten|openrouter|jev|typesafe|openai|anthropic|claude|\bgpt-?\d|\bluna\b|BATATIS_[A-Z_]+|[A-Z]+_API_KEY', re.I)
 TEST_FILE = re.compile(r'\.test\.[cm]?[jt]sx?$')
 # Random tokens are not copy: a session cookie could contain these letters by chance.
 RANDOM_HEADERS = {'set-cookie', 'cookie'}
@@ -320,7 +320,7 @@ def test_identify_responses_name_no_provider(world, monkeypatch):
     assert run.status_code == 200, run.text
     result = run.json()
     assert result['mode'] == 'fake' and result['model_ids'] == {
-        'screen': 'relevance-2', 'rerank': 'relevance-2', 'verifier': 'verifier-1'}
+        'screen': 'relevance-3', 'rerank': 'relevance-3', 'verifier': 'verifier-1'}
     assert client.get(f'/cases/{case_id}/identify').status_code == 200
     stream = client.post(f'/cases/{case_id}/identify', headers={'accept': 'text/event-stream'})
     assert stream.status_code == 200 and 'event: done' in stream.text and '"method": "model"' in stream.text
@@ -336,7 +336,7 @@ def test_identify_responses_name_no_provider(world, monkeypatch):
     assert client.get(f'/cases/{case_id}/process-refs').status_code == 200
     client.get(f'/cases/{case_id}/information-request')            # the officer draft; its status depends on who asks
     case = client.get(f'/cases/{case_id}')
-    assert case.status_code == 200 and case.json()['relevance']['model'] == 'relevance-2'
+    assert case.status_code == 200 and case.json()['relevance']['model'] == 'relevance-3'
     assert_no_provider(client, at_least=12, pattern=IDENTIFY_NAMES)
 
 

@@ -1,4 +1,4 @@
-"""Offline stand-ins for Jev, Anthropic and OpenAI, selected by BATATIS_PROVIDER=fake.
+"""Offline stand-ins for Elephant, Jev, Anthropic and OpenAI, selected by BATATIS_PROVIDER=fake.
 
 They are deterministic and read only what a real provider would receive (the request), so the
 pipeline, the quote check, the commit policy, the SSE stream and the spend gate all run without
@@ -67,6 +67,18 @@ def fake_decisions(body: dict, timeout: float) -> dict:
             'usage': {'input_tokens': tokens, 'output_tokens': 0, 'total_tokens': tokens,
                       'input_tokens_details': {'cached_tokens': 0, 'cache_write_tokens': 0},
                       'output_tokens_details': {'reasoning_tokens': 0}}}
+
+
+def fake_elephant_post(body: bytes, headers: dict, timeout: float) -> tuple[int, bytes]:
+    """Real typed Decisions shape, passed through the same validator as live responses."""
+    from .elephant_runtime import RESPONSE_MODEL
+    request = json.loads(body)
+    state = request['state']
+    answers = {name: {'type': 'noul', 'noul': overlap(state['proposal'], state['articles'][f'A{name[1:]}'])}
+               for name in request['questions']}
+    return 200, json.dumps({'model': RESPONSE_MODEL, 'answers': answers,
+                            'usage': {'input_tokens': _tokens(body), 'output_tokens': len(answers),
+                                      'cost': 0}}).encode('utf-8')
 
 
 def _body(card_text: str) -> str:

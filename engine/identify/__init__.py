@@ -1,7 +1,7 @@
 """Code identification: which Division B articles govern a described situation.
 
 The configured provider screens every Division B article in batches, then reranks the top N.
-The temporary default is Decisions; Jev remains an explicit option. Historical benchmark results
+The default is Elephant; Decisions and Jev remain explicit options. Historical benchmark results
 apply to their measured configuration only. This module returns scores and private provenance;
 the API/pipeline maps them to neutral versions. Nothing here commits an article.
 """
@@ -61,7 +61,7 @@ def identify(query: str, db_path: Path | str, judge: Judge | None = None, *, rer
     rerank_requests_before = judge.usage.requests
     calls_before = len(tp.log.calls) if tp is not None else 0
     reranker = judge
-    if config.rerank in ('decisions', 'jev'):
+    if config.rerank in ('elephant', 'decisions', 'jev'):
         if config.rerank != judge.method:
             reranker = Judge(scoring_ask(tp, config.rerank), chars=config.card_chars,
                              model=config.rerank_model, method=config.rerank)
