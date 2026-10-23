@@ -2,15 +2,16 @@
  * Rebuild the browser case from a saved engine case (opening an application from the list). Pure.
  *
  * What the engine stores: facts (answers, the description, process fields, professional and
- * evidence facts), the jurisdiction, the title and the confirmed provisions. What it does not
- * store: unanswered or "No" code-check cards and attached file names. Those are re-derived from
- * the description (cards) or are simply absent (files), never invented.
+ * evidence facts), the jurisdiction, the title, the confirmed provisions and the code-check
+ * selection (`selected_articles`, docs/api/selected-articles.md): every code card with its answer,
+ * unanswered and pending ones included. What it does not store: attached file names, which are
+ * simply absent, never invented.
  */
-import type { Case as EngineCase } from "../api/types.gen";
+import type { Case as EngineCase, IdentifyResult, IntakeResult, SelectedArticleInput } from "../api/types.gen";
 import { emptyCase, applyDescription } from "../intake";
 import { localField } from "../intakeFields";
 import { CODECHECK_PREFIX, PROCESS_FACT, reducer } from "../model";
-import { isProvision } from "../provisions";
+import { canonicalProvision, isProvision } from "../provisions";
 import type { ApplicantType, AuthorityId, Candidate, Case, Fact, ProcessFieldId } from "../types";
 
 const WITHDRAWN = "Answer withdrawn by applicant";
@@ -43,7 +44,8 @@ export function caseFromEngine(saved: EngineCase, type: ApplicantType): Case {
     const v = by.get(q.field)?.value;
     return v != null && v !== "" ? { ...q, answer: String(v) } : q;
   });
-  const confirmed: Candidate[] = saved.provisions.filter(isProvision).map((id) => ({
+  // A saved selection is the card list; `null` (never saved) falls back to the confirmed references.
+  const confirmed: Candidate[] = saved.selected_articles ? [] : saved.provisions.filter(isProvision).map((id) => ({
     id: `search-${id}`,
     topic: id,
     provision: id,
@@ -70,7 +72,94 @@ export function caseFromEngine(saved: EngineCase, type: ApplicantType): Case {
   // Keep the saved description fact itself (same id and value), so nothing is re-sent.
   if (description) c = { ...c, facts: [...c.facts.filter((f) => f.field !== "project.description"), description] };
   if (saved.title) c = { ...c, title: saved.title, titleKept: true };
+  if (saved.selected_articles) c = restoreSelection(c, saved.selected_articles, saved.provisions);
   return restoreCardAnswers(c);
+}
+
+/**
+ * The code-check selection to save: every card on a real provision, in order, with its answer and
+ * whether that answer still waits for the engine. Cards read from the description are not code
+ * references; their answers travel as facts. One card per provision and per id.
+ */
+export function selectedArticles(c: Case): SelectedArticleInput[] {
+  const ids = new Set<string>();
+  const provisions = new Set<string>();
+  const out: SelectedArticleInput[] = [];
+  for (const a of c.candidates) {
+    const key = canonicalProvision(a.provision);
+    if (!isProvision(a.provision) || ids.has(a.id) || provisions.has(key)) continue;
+    ids.add(a.id);
+    provisions.add(key);
+    out.push({ id: a.id, provision: a.provision, answer: a.answer, pending: Boolean(a.pending) });
+  }
+  return out;
+}
+
+/** A saved card, rebuilt with its stable id. Code wording and attributions are read separately. */
+function selectedCard(s: SelectedArticleInput, confirmed: Set<string>): Candidate {
+  const suggestion = s.id.startsWith("id-") ? "identify" : s.id.startsWith("search-") && !confirmed.has(canonicalProvision(s.provision)) ? "search" : undefined;
+  return {
+    id: s.id,
+    topic: s.provision,
+    provision: s.provision,
+    part: Number(s.provision.split(".")[0]) || 0,
+    benchmark: false,
+    identified: true,
+    ...(suggestion ? { suggestion } : {}),
+    quote: { text: "", citation: "", source: "code" },
+    departure: "do something other than what this sentence requires",
+    clarifyingQuestion: "Which part of this sentence does the design not follow?",
+    answer: null,
+  };
+}
+
+/**
+ * Put each saved card's answer and pending state back through the reducer (a Not sure keeps its
+ * open question). Only an answer the engine acknowledged reads as the benchmark: a pending Yes
+ * stays open and resendable, and nothing here confirms a reference.
+ */
+function answerSelection(c: Case, list: SelectedArticleInput[], skip: (s: SelectedArticleInput) => boolean = () => false): Case {
+  let next = c;
+  for (const s of list) {
+    if (skip(s)) continue;
+    const card = next.candidates.find((a) => a.id === s.id);
+    if (!card) continue;
+    const answer = s.answer ?? null;
+    if (card.answer !== answer) next = reducer(next, { type: "answerCandidate", id: s.id, answer });
+    if (Boolean(card.pending) !== Boolean(s.pending)) next = reducer(next, { type: "markDecisionPending", id: s.id, pending: Boolean(s.pending) });
+  }
+  const pending = new Set(list.filter((s) => s.pending).map((s) => s.id));
+  return { ...next, candidates: next.candidates.map((a) => (pending.has(a.id) && a.benchmark ? { ...a, benchmark: false } : a)) };
+}
+
+function restoreSelection(c: Case, list: SelectedArticleInput[], provisions: string[]): Case {
+  const confirmed = new Set(provisions.map(canonicalProvision));
+  const cards = list.map((s) => selectedCard(s, confirmed));
+  const keep = c.candidates.filter((a) => !isProvision(a.provision) && !cards.some((x) => x.id === a.id));
+  return answerSelection({ ...c, candidates: [...keep, ...cards] }, list);
+}
+
+/**
+ * Open a saved application in one step: the saved case, then what intake read and the last code
+ * identification as they were stored (no provider call). With a saved selection, it decides which
+ * code cards exist: identification never refills a removed card, and a card it replaced keeps its
+ * saved id. A stored identification decision stays the answer of its card unless the saved card
+ * was still waiting for the engine (pending), whose answer and state come back as they were.
+ */
+export function openedCase(saved: EngineCase, type: ApplicantType, stored: { intake: IntakeResult | null; identify: IdentifyResult | null }): Case {
+  const restored = caseFromEngine(saved, type);
+  let c = restored;
+  if (stored.intake) c = reducer(c, { type: "restoreIntake", result: stored.intake, text: c.description.trim() });
+  if (stored.identify) c = reducer(c, { type: "noteIdentify", result: stored.identify });
+  const list = saved.selected_articles;
+  if (!list) return c;
+  const cards = list.map((s) => c.candidates.find((a) => a.id === s.id) ?? restored.candidates.find((a) => a.id === s.id)).filter((a): a is Candidate => Boolean(a));
+  const ids = new Set(cards.map((a) => a.id));
+  const keep = c.candidates.filter((a) => !isProvision(a.provision) && !ids.has(a.id));
+  const next = { ...c, candidates: [...keep, ...cards] };
+  const decided = new Set(stored.identify ? cards.filter((a) => a.suggestion === "identify").map((a) => a.id) : []);
+  const questions = next.questions.filter((q) => !q.cardId || next.candidates.some((a) => a.id === q.cardId));
+  return answerSelection({ ...next, questions }, list, (s) => decided.has(s.id) && !s.pending);
 }
 
 /**
