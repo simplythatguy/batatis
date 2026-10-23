@@ -12,7 +12,6 @@ from engine.export.scc import blockers, load_field_map
 from engine.models import Case, Fact, Jurisdiction, Source
 from engine.models import EvidenceItem
 from engine.models import Gap
-from engine.professional import NOT_ENGAGED_ITEM
 from engine.section_c import section_c_rows
 from engine.section_d import section_d_plan
 from engine.store import CaseStore
@@ -293,7 +292,7 @@ def test_reference_withdrawal_and_reselection_never_restore_document_scope(conte
 
 
 @pytest.mark.parametrize('withhold', [False, True])
-def test_not_engaged_warning_never_hides_independent_source_failure(context, withhold):
+def test_not_engaged_never_hides_a_mandatory_duty_or_independent_source_failure(context, withhold):
     client, store, codes = context
     if withhold:
         original = codes.provision
@@ -301,8 +300,10 @@ def test_not_engaged_warning_never_hides_independent_source_failure(context, wit
     case = store.put(Case(facts=[fact('professional_status', 'not_engaged'), fact('supported_joist_span_m', 5.2)]))
     response = client.post(f'/cases/{case.id}/completeness', json={})
     found = elements(response)
-    assert found['professional_requirement']['reason'] == NOT_ENGAGED_ITEM
-    assert found['professional_requirement']['severity'] == 'warning'
+    if withhold:
+        assert found['professional_requirement']['severity'] == 'blocking'
+    else:
+        assert found['professional_confirmation']['severity'] == 'blocking'
     assert ('professional_source' in found) is withhold
     if withhold:
         assert found['professional_source']['in_export_preflight'] is True
@@ -386,8 +387,8 @@ def _complete_package(store, codes):
     return case, uploaded
 
 
-@pytest.mark.parametrize('condition,status', [('healthy', 200), ('failed_source', 409), ('missing_risk', 409)])
-def test_report_reasons_match_actual_official_export_and_do_not_change_current_policy(context, tmp_path, condition, status):
+@pytest.mark.parametrize('condition', ['unresolved_requirement', 'failed_source', 'missing_risk'])
+def test_report_reasons_match_official_export_while_professional_handoff_is_unresolved(context, tmp_path, condition):
     client, store, codes = context
     case, upload = _complete_package(store, codes)
     if condition == 'failed_source':
@@ -400,25 +401,18 @@ def test_report_reasons_match_actual_official_export_and_do_not_change_current_p
     reviewed = client.post(f'/api/cases/{case.id}/completeness', json={})
     found = elements(reviewed)
     reasons = reviewed.json()['reviews'][0]['export_reasons']
-    assert found['professional_requirement']['reason'] == NOT_ENGAGED_ITEM
+    assert found['professional_requirement']['severity'] == 'blocking'
     official = client.post(f'/api/cases/{case.id}/export', json={'draft': False})
-    assert official.status_code == status, official.text if status != 200 else 'expected a real official PDF'
-    if status == 409:
-        assert official.json()['detail']['reasons'] == reasons
-        assert reasons
-    else:
-        assert reasons == []
-        assert official.headers['content-type'] == 'application/pdf'
-        official_text = '\n'.join(page.extract_text() for page in PdfReader(io.BytesIO(official.content)).pages)
-        assert NOT_ENGAGED_ITEM in official_text
-        (tmp_path / 'healthy-official.pdf').write_bytes(official.content)
+    assert official.status_code == 409, official.text
+    assert official.json()['detail']['reasons'] == reasons
+    assert reasons
     if condition == 'failed_source':
         assert found['professional_source']['severity'] == 'blocking'
         draft = client.post(f'/api/cases/{case.id}/export', json={'draft': True})
         assert draft.status_code == 200
         text = '\n'.join(page.extract_text() for page in PdfReader(io.BytesIO(draft.content)).pages)
         assert '9.15.3.3.(2)' in text
-        assert NOT_ENGAGED_ITEM in text
+        assert 'professional' in text.casefold()
         (tmp_path / 'failed-source-draft.pdf').write_bytes(draft.content)
     assert store.get(case.id).model_dump() == before
     assert store.get_file(case.id, upload['id'])['data'] == bytes_before

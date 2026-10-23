@@ -17,7 +17,9 @@ SCOPE_FIELD = 'scope.redirect'
 def _latest(case: Case) -> dict[str, Fact]:
     out: dict[str, Fact] = {}
     for fact in case.facts:
-        out[fact.field] = fact
+        # Saved code-check counts use this alias. A newer withdrawal must also
+        # replace the older value before the next applicant question is chosen.
+        out['storeys' if fact.field == 'building.storeys' else fact.field] = fact
     return out
 
 

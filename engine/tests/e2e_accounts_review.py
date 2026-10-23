@@ -60,7 +60,7 @@ def main():
             'assumptions_and_limits': 'SYNTHETIC scope limits, fixture only.',
             'maintenance_operation': 'SYNTHETIC operation and maintenance passage.',
             'qualifications': 'SYNTHETIC document author role, no licence or competence asserted.',
-            'professional_status': 'not_engaged', 'occupancy': 'single_family',
+            'professional.role': 'not_engaged_yet', 'occupancy': 'single_family',
         }.items():
             add(field, value)
         selected = request(owner, 'GET', f'/cases/{cid}')
@@ -82,10 +82,11 @@ def main():
         for item in plan['items']:
             add('evidence.synthetic.covers.' + item['id'], True)
         gaps = request(owner, 'GET', f'/cases/{cid}/gaps')['items']
-        blocking = [gap for gap in gaps if gap['severity'] == 'blocking']
+        blocking = [gap for gap in gaps if gap['severity'] == 'blocking' and gap['submission_blocking']]
         assert not blocking, json.dumps(blocking, indent=2)
-        receipt.append({'step': 'Gap check', 'blocking': 0, 'warnings': [g['id'] for g in gaps]})
-        request(owner, 'POST', f'/cases/{cid}/submit', json={}, label='Applicant submits complete administrative fixture')
+        assert any(gap['field'] == 'professional_requirement' and gap['severity'] == 'blocking' for gap in gaps)
+        receipt.append({'step': 'Submission gap check', 'blocking': 0, 'officer_handoff': True})
+        request(owner, 'POST', f'/cases/{cid}/submit', json={}, label='Applicant submits fixture with unresolved officer requirement')
         queue = request(officer, 'GET', '/review/queue', label='Reviewer reads authority queue')['applications']
         assert any(a['id'] == cid for a in queue)
         request(officer, 'POST', f'/review/{cid}/claim', json={}, label='Reviewer One claims')
@@ -110,6 +111,14 @@ def main():
         add('evidence.synthetic.date', '2026-10-21')
         request(owner, 'POST', f'/cases/{cid}/submit', json={}, label='Applicant resubmits')
         request(officer, 'POST', f'/review/{cid}/claim', json={}, label='Reviewer reclaims')
+        request(officer, 'POST', f'/review/{cid}/decision', json={'outcome': 'accept'}, expected=409,
+                label='Unresolved professional requirement blocks acceptance')
+        current = request(officer, 'GET', f'/cases/{cid}')
+        request(officer, 'POST', f'/review/{cid}/professional-requirement', json={
+            'expected_version': current['version'], 'required': False,
+            'scope': 'SYNTHETIC complete submitted alternative including component and professional-law scope',
+            'basis': 'SYNTHETIC authority scope determination for the HTTP fixture; no technical approval.',
+            'reference': 'SYNTHETIC authority record J02'}, label='Reviewer records scoped professional requirement determination')
         accepted = request(officer, 'POST', f'/review/{cid}/decision', json={'outcome': 'accept'},
                            label='Reviewer accepts as administratively complete')
         assert accepted['status'] == 'accepted'

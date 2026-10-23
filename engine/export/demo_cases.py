@@ -14,7 +14,8 @@ import json
 from pathlib import Path
 
 from ..codes import Codes
-from ..models import Case, EvidenceItem, Fact, Jurisdiction, Source
+from ..models import Case, EvidenceItem, Fact, Jurisdiction, ProfessionalRequirementResolution, Source
+from ..professional_resolution import requirement_fingerprint
 from ..models_identify import (ArticleDecision, BenchmarkRecord, IdentifyArticle, IdentifyResult, IdentifyTrace,
                                Term)
 from ..section_c import section_c_rows
@@ -27,7 +28,13 @@ DECIDED_AT = '2026-10-21T00:00:00Z'
 
 
 def spec(name: str) -> dict:
-    return json.loads((DEMO_DIR / 'export' / f'{name}.json').read_text())
+    data = json.loads((DEMO_DIR / 'export' / f'{name}.json').read_text())
+    # Preserve the journey candidate's fictional layout determinations with the
+    # engine fixtures, without depending on a separately restored evals directory.
+    resolutions = json.loads((Path(__file__).parent / 'fixtures' / 'demo-professional-resolutions.json').read_text())
+    if name in resolutions and 'professional_requirement_resolution' not in data:
+        data['professional_requirement_resolution'] = resolutions[name]
+    return data
 
 
 def _fact(key: str, value, ref: str, source_type: str = 'user_text') -> Fact:
@@ -90,6 +97,12 @@ def demo_case(name: str, codes: Codes | None = None) -> Case:
     ids = [doc['id'] for doc in data['documents']]
     for n, item in enumerate(section_d_plan(case, codes).items):
         case.facts.append(_fact(f'evidence.{ids[n % len(ids)]}.covers.{item.id}', True, ref, 'user_click'))
+    # Some completed layout examples need a scoped officer determination. This is
+    # explicit fictional fixture data, never inferred from an applicant fact or
+    # professional_status. Bind it after the entire example content is assembled.
+    if resolution := data.get('professional_requirement_resolution'):
+        case.professional_resolutions.append(ProfessionalRequirementResolution(
+            **resolution, content_fingerprint=requirement_fingerprint(case)))
     return case
 
 

@@ -515,7 +515,8 @@ def test_close_out_after_decision_with_record_package(scene, outcome):
     source_version = reviewed.json()['case_version']
     assert clients['reviewer'].get(f'/review/{case.id}/close-out').status_code == 404   # no decision yet
     decided = clients['reviewer'].post(f'/review/{case.id}/decision',
-                                      json={'outcome': outcome, 'message': 'Officer recorded the written reason.'})
+                                      json={'outcome': outcome, 'message': 'Officer recorded the written reason.',
+                                            'expected_version': source_version})
     assert decided.status_code == 200, decided.text
     close = clients['second'].get(f'/review/{case.id}/close-out')
     assert close.status_code == 200, close.text

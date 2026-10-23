@@ -760,15 +760,12 @@ def _pdf_text(pdf: bytes) -> str:
     return ' '.join(' '.join((page.extract_text() or '').split()) for page in PdfReader(io.BytesIO(pdf)).pages)
 
 
-def test_gc_not_engaged_allows_export_with_the_open_item(monkeypatch):
-    """A GC can say no professional is engaged yet. Export stays allowed and names the open item."""
-    from types import SimpleNamespace
-
+def test_gc_not_engaged_never_waives_known_mandatory_professional_duties(monkeypatch):
+    """Honest engagement answers do not remove mandatory identity/authentication/export gates."""
     from engine.completeness import professional_involvement_gaps
-    from engine.export.appendix import build_appendix
-    from engine.export.scc import ExportBlocked, ExportError, blockers, export_case, load_field_map, package_notes
+    from engine.export.scc import blockers, load_field_map
     from engine.models import Jurisdiction
-    from engine.professional import NOT_ENGAGED_ITEM, professional_confirmed, professional_involvement
+    from engine.professional import professional_confirmed, professional_involvement
     from engine.section_c import section_c_rows
 
     monkeypatch.setattr('engine.completeness.validate_text', lambda *args, **kwargs: {'errors': []})
@@ -826,31 +823,14 @@ def test_gc_not_engaged_allows_export_with_the_open_item(monkeypatch):
         assert not any(item.field in (
             'professional.registration_number', 'apega_number', 'aaa_number', 'professional.seal',
         ) for item in case.facts)
-        open_item = next(gap for gap in gaps if gap.field == 'professional_requirement')
-        assert open_item.message == NOT_ENGAGED_ITEM
-        assert open_item.severity == 'warning' and open_item.routed_to == 'officer'
-        assert not any(gap.id.startswith('D12:') for gap in gaps)
+        assert result.required == 'yes'
+        assert {'professional_confirmation', 'responsible_professional',
+                'professional_authentication'} <= {gap.field for gap in gaps}
+        assert all(gap.severity == 'blocking' and gap.submission_blocking
+                   for gap in gaps if gap.id.startswith('D12:'))
         reasons = blockers(case, load_field_map(), codes)
-        assert reasons == []
-        assert NOT_ENGAGED_ITEM not in '\n'.join(reasons)
-        assert package_notes(case, codes) == [NOT_ENGAGED_ITEM]
-        appendix = build_appendix(
-            case, SimpleNamespace(overflow=[], rows_in_form=0, docs_in_form=0), {},
-            {'version': 'test'}, codes=codes, open_items=[], package_notes=package_notes(case, codes))
-        assert NOT_ENGAGED_ITEM in _pdf_text(appendix)
-        assert 'Open items (draft export)' not in _pdf_text(appendix)
-        try:
-            exported = export_case(case, draft=False, codes=codes)
-        except ExportBlocked as blocked_export:
-            raise AssertionError(blocked_export.reasons) from blocked_export
-        except ExportError:
-            exported = None
-        if exported is not None:
-            assert exported.draft is False
-            assert NOT_ENGAGED_ITEM in exported.open_items
-            packaged = _pdf_text(exported.pdf)
-            assert NOT_ENGAGED_ITEM in packaged
-            assert 'DRAFT' not in packaged
+        assert any('professional_confirmation' in reason for reason in reasons)
+        assert_export_blocked_on_professional(case, codes)
 
 
 def assert_export_blocked_on_professional(case, codes):

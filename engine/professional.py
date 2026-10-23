@@ -11,8 +11,9 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from .codes import Codes
-from .models import Case
+from .models import Case, ProfessionalRequirementResolution
 from .process_fields import alternative_path, confirmed_value, latest_fact
+from .professional_resolution import current_resolution
 
 Requirement = Literal['yes', 'no', 'depends']
 Occupancy = Literal['single_family', 'multi_family', 'hotel', 'assembly', 'care', 'treatment',
@@ -169,6 +170,8 @@ def _applicant_text(case: Case, *fields: str) -> str | None:
         return None
     if not isinstance(fact.value, str) or not fact.value.strip():
         return None
+    if ' '.join(fact.value.split()).casefold() in _NOT_SURE_VALUES | _NOT_ENGAGED:
+        return None  # A confirmed uncertainty/engagement answer is never a credential or seal.
     return fact.value.strip()
 
 
@@ -206,7 +209,8 @@ def professional_confirmed(case: Case) -> bool:
     registration = latest_fact(case, *_REGISTRATION_FIELDS)
     has_registration = (registration is not None and registration.status == 'confirmed'
                         and registration.kind != 'proposed' and registration.source.type in _APPLICANT_SOURCES
-                        and ((isinstance(registration.value, str) and bool(registration.value.strip()))
+                        and ((isinstance(registration.value, str)
+                              and _applicant_text(case, *_REGISTRATION_FIELDS) is not None)
                              or (isinstance(registration.value, int) and not isinstance(registration.value, bool))))
     return _applicant_text(case, *_SEAL_FIELDS) is not None or has_registration
 
@@ -348,6 +352,8 @@ class ProfessionalResult(BaseModel):
     prescriptive_contradiction: str | None = None
     # Applicant-stated. not_engaged does not confirm a professional and does not supply a number.
     professional_status: Literal['not_engaged'] | None = None
+    resolution: ProfessionalRequirementResolution | None = None
+    mandatory_required: bool = False  # Underlying duty, independent of an officer's discretionary determination.
     scope_note: str = ('This screens documented professional duties. The responsible professional, regulator '
                        'and authority resolve scope, competence and local conditions.')
 
@@ -707,7 +713,7 @@ def _screen_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
                               prescriptive_contradiction=contradiction, professional_status=status)
 
 
-def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
+def _case_professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
                              provisions: tuple[str, ...] = (), span_handoff: bool = False) -> ProfessionalResult:
     """One case decision for issues, professional guidance, completeness and export.
 
@@ -774,3 +780,34 @@ def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
     if result.required != 'yes' and discretionary_review(case):
         return result.model_copy(update={'routed_to': 'officer'})
     return result
+
+
+def professional_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
+                             provisions: tuple[str, ...] = (), span_handoff: bool = False) -> ProfessionalResult:
+    """Apply a current, server-recorded officer determination after every mandatory screen.
+
+    A not-required determination cannot override a mandatory duty, engineering_required
+    assertion or unresolved source. Engagement answers never resolve the requirement.
+    """
+    result = _case_professional_involvement(facts, codes, provisions=provisions, span_handoff=span_handoff)
+    mandatory = result.required == 'yes' or (isinstance(facts, Case)
+        and confirmed_value(facts, 'engineering_required') in ('yes', True))
+    result = result.model_copy(update={'mandatory_required': mandatory})
+    resolution = current_resolution(facts) if isinstance(facts, Case) else None
+    if resolution is None:
+        return result
+    if any(reason.source_unresolved for reason in result.reasons):
+        return result
+    if not resolution.required and mandatory:
+        return result
+    citation = codes.citation('2.4.1.1.(4)', 'C')
+    if not citation:
+        return result
+    required = 'yes' if resolution.required else 'no'
+    reason = ProfessionalReason(code='ahj_resolution', required=required, citation=citation,
+        message=f'{resolution.by_name} recorded the professional requirement for {resolution.scope}: '
+                f'{"required" if resolution.required else "not required"}. {resolution.basis}')
+    return result.model_copy(update=dict(required=required, resolution=resolution,
+        involvement='unresolved' if resolution.required else 'not_required',
+        reasons=[reason, *result.reasons], routed_to='professional' if resolution.required else None,
+        applicant_sourced=False, not_sure_fields=(), missing_facts=(), questions=[], prompts=[], decision=''))

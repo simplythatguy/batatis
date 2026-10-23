@@ -19,7 +19,7 @@ from .models import INTENT_LABEL, Case, Gap as CaseGap
 from .not_applicable import not_applicable, problems as not_applicable_problems
 from .process_fields import confirmed_value, latest_fact, process_fields
 from .professional import (
-    NOT_ENGAGED_ITEM, OFFICER_PROFESSIONAL_GAP, PRESCRIPTIVE_CONTRADICTION, ProfessionalResult,
+    OFFICER_PROFESSIONAL_GAP, PRESCRIPTIVE_CONTRADICTION, ProfessionalResult,
     authentication_metadata_usable, professional_authentication_confirmed, professional_confirmed,
     professional_involvement, unresolved_item,
 )
@@ -93,15 +93,8 @@ def professional_involvement_gaps(case: Case, codes: Codes, process, *,
                 id=f'professional:source_lookup:{reason.code}', severity='blocking', section='D',
                 field='professional_source', message=reason.message, fix_hint=reason.message,
                 citation=None, routed_to='officer'))
-    # An honest "no professional engaged yet" does not invent a number. The blocking
-    # name, qualifications, and seal gaps become one officer-routed warning.
-    if professional.professional_status == 'not_engaged' and not professional_confirmed(case):
-        gaps.append(Gap(
-            id='professional:not_engaged', severity='warning', section='D',
-            field='professional_requirement', message=NOT_ENGAGED_ITEM,
-            fix_hint='The officer decides whether a registered professional is required. No registration number has been entered.',
-            citation=None, routed_to='officer'))
-        return gaps
+    # Engagement is not a requirement determination. In particular, not_engaged
+    # must never bypass a mandatory duty or let an officer accept an unresolved question.
     required = professional.required == 'yes' or confirmed_value(case, 'engineering_required') in ('yes', True)
     if required:
         citation = next((r.citation for r in professional.reasons if r.required == 'yes'), codes.citation('2.4.1.1.(3)', 'C'))
@@ -127,13 +120,15 @@ def professional_involvement_gaps(case: Case, codes: Codes, process, *,
                 codes.citation('2.4.1.1.(5)', 'C'))
     elif professional.involvement == 'professional_involved':
         pass
+    elif professional.resolution is not None and not professional.resolution.required:
+        pass
     elif professional.applicant_sourced or professional.not_sure_fields:
         gaps.append(Gap(
             id='professional:professional_requirement', severity='blocking', section='D',
             field='professional_requirement', message=OFFICER_PROFESSIONAL_GAP,
             fix_hint='The officer decides whether a registered professional is required. An applicant yes or no does not close this.',
             citation=next((r.citation for r in professional.reasons if r.required == 'depends'), None),
-            routed_to='officer'))
+            routed_to='officer', submission_blocking=False))
     elif professional.required == 'depends' or professional.involvement == 'unresolved':
         line = next((reason.message for reason in professional.reasons if reason.required == 'depends'), '')
         if not line:
@@ -145,7 +140,7 @@ def professional_involvement_gaps(case: Case, codes: Codes, process, *,
             message=line,
             fix_hint=line,
             citation=next((r.citation for r in professional.reasons if r.required == 'depends'), None),
-            routed_to=professional.routed_to))
+            routed_to=professional.routed_to, submission_blocking=professional.routed_to != 'officer'))
     return gaps
 
 

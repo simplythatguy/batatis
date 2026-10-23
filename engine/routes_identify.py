@@ -308,8 +308,10 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
 
     @router.get('/cases/{case_id}/identify/information-request')
     def officer_information_request(case_id: str):
-        """Draft of what the officer still needs to ask: the applicant's not_sure identify decisions."""
-        return information_request(get_case(case_id))
+        """Saved contextual questions for officer review, plus the legacy not_sure decision items."""
+        from .review_questions import review_questions
+        case = get_case(case_id)
+        return {**information_request(case), 'case_version': case.version, 'questions': review_questions(case)}
 
     @router.get('/cases/{case_id}/process-refs', response_model=list[ProcessRef])
     def case_process_refs(case_id: str):
