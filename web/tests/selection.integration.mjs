@@ -30,14 +30,18 @@ const account = (p, email, name) => p.evaluate(async ({ base, email, name }) => 
   return (await send('/auth/signup', { email, password: 'SYNTHETIC-password-1', name })).status;
 }, { base, email, name });
 
-/** Only the harness page and the test engine are reachable; anything else is aborted and fails the scenario. */
+/**
+ * Only the harness page and the test engine are reachable; anything else is aborted and fails the scenario.
+ * So is /api on the harness origin: Vite would proxy it to its own target (by default :8000), not the test engine.
+ */
 const owned = new Set([new URL(web).host, new URL(base).host]);
+const proxied = (u) => u.host === new URL(web).host && u.pathname.startsWith('/api/');
 async function page() {
   const ctx = await browser.newContext();
   const offsite = [];
   await ctx.route('**/*', route => {
     const u = new URL(route.request().url());
-    if (['http:', 'https:'].includes(u.protocol) && !owned.has(u.host)) { offsite.push(`${route.request().method()} ${u.href}`); return route.abort(); }
+    if (['http:', 'https:'].includes(u.protocol) && (!owned.has(u.host) || proxied(u))) { offsite.push(`${route.request().method()} ${u.href}`); return route.abort(); }
     return route.continue();
   });
   const p = await ctx.newPage();
@@ -355,6 +359,34 @@ try {
     await save(p);
     assert.equal((await status(p)).save, 'saved');
     assert.deepEqual((await call(`/cases/${other}`)).body.selected_articles.map(x => x.id), ['provision-9.25.2.2.(1)', 'provision-9.25.2.2.(2)', 'provision-9.25.2.2.(3)']);
+  });
+
+  await scenario('an answer on a draft that is sent elsewhere meanwhile is never reported saved', async open => {
+    const p = await open();
+    assert.ok([200, 201].includes(await account(p, 'selection-flip@example.test', 'SYNTHETIC Owner')));
+    await begin(p);
+    await dispatch(p, { type: 'setDetail', field: 'owner', value: 'SYNTHETIC flipped', section: 'A' });
+    await dispatch(p, { type: 'addCandidate', candidate: card('9.27.3.4.(1)') });
+    const id = await save(p);
+    assert.ok(id);
+    const remoteNow = async () => (await p.evaluate(async ({ base, id }) => (await fetch(base + '/cases/' + id, { credentials: 'include' })).json(), { base, id })).selected_articles;
+    assert.deepEqual(await remoteNow(), [pick('search-9.27.3.4.(1)', '9.27.3.4.(1)')]);
+    // Sent elsewhere (as the submit route would leave it; owned test store), then the applicant answers here.
+    const sql = new DatabaseSync(db);
+    const row = sql.prepare('SELECT json FROM cases WHERE id=?').get(id);
+    sql.prepare('UPDATE cases SET json=? WHERE id=?').run(JSON.stringify({ ...JSON.parse(row.json), status: 'submitted' }), id);
+    sql.close();
+    await dispatch(p, { type: 'answerCandidate', id: 'search-9.27.3.4.(1)', answer: 'no' });
+    await p.evaluate(() => new Promise(r => setTimeout(r, 900)));     // the automatic save meets the real 409
+    const first = await status(p);
+    assert.equal(first.save, 'failed', 'the refused save is not saved');
+    assert.ok((await p.evaluate(() => window.requests)).some(r => r === `PUT /cases/${id}/selected-articles`));
+    assert.equal(await p.evaluate(() => window.caseStore.saveDraft()), null, 'the explicit save (which reads the case first) is not acknowledged');
+    const second = await status(p);
+    assert.notEqual(second.save, 'saved', 'never reported saved while the server keeps the old answer');
+    assert.match(second.detail, /read-only/i, 'and it says why');
+    assert.deepEqual(await remoteNow(), [pick('search-9.27.3.4.(1)', '9.27.3.4.(1)')], 'the server keeps the old selection');
+    assert.deepEqual((await cards(p)).map(x => [x[0], x[2]]), [['search-9.27.3.4.(1)', 'no']], 'the applicant\'s answer stays on screen');
   });
 
   await scenario('rejected selection writes keep the cards and store nothing', async open => {
