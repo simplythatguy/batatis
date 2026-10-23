@@ -170,10 +170,11 @@ class PostgresCaseStore(PostgresAccountsMixin):
             row = con.execute('SELECT data, version FROM cases WHERE id=%s FOR UPDATE', (case.id,)).fetchone()
             if row is not None and self._purge_expired(con, case.id):
                 row = None
+            if row is not None:
+                enforce_stored_mutation(row[0])
             if row is None or row[1] != expected_version:
                 conflict = VersionConflict(case.id, expected_version, int(row[1]) if row else None)
             else:
-                enforce_stored_mutation(row[0])
                 saved = con.execute('UPDATE cases SET data=%s, version=version+1, updated_at=%s '
                                   'WHERE id=%s AND version=%s RETURNING version',
                                   (payload, case.updated_at, case.id, expected_version)).fetchone()

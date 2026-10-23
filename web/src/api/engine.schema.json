@@ -1198,6 +1198,21 @@
           "title": "Section C",
           "type": "array"
         },
+        "selected_articles": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/SelectedArticle"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selected Articles"
+        },
         "status": {
           "default": "draft",
           "enum": [
@@ -1276,6 +1291,7 @@
         "version",
         "jurisdiction",
         "facts",
+        "selected_articles",
         "provisions",
         "section_c",
         "evidence",
@@ -8324,6 +8340,124 @@
         "explainer"
       ],
       "title": "SectionCRow",
+      "type": "object"
+    },
+    "SelectedArticle": {
+      "additionalProperties": false,
+      "description": "An applicant's code-check card, not a confirmed benchmark or code quotation.",
+      "properties": {
+        "answer": {
+          "anyOf": [
+            {
+              "enum": [
+                "yes",
+                "no",
+                "not-sure"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Answer"
+        },
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "pending": {
+          "default": false,
+          "title": "Pending",
+          "type": "boolean"
+        },
+        "provision": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Provision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "provision",
+        "answer",
+        "pending"
+      ],
+      "title": "SelectedArticle",
+      "type": "object"
+    },
+    "SelectedArticleInput": {
+      "additionalProperties": false,
+      "description": "An applicant's code-check card, not a confirmed benchmark or code quotation.",
+      "properties": {
+        "answer": {
+          "anyOf": [
+            {
+              "enum": [
+                "yes",
+                "no",
+                "not-sure"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Answer"
+        },
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "pending": {
+          "default": false,
+          "title": "Pending",
+          "type": "boolean"
+        },
+        "provision": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Provision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "provision"
+      ],
+      "title": "SelectedArticle",
+      "type": "object"
+    },
+    "SelectedArticlesRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_version": {
+          "minimum": 1,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "selected_articles": {
+          "items": {
+            "$ref": "#/$defs/SelectedArticleInput"
+          },
+          "maxItems": 500,
+          "title": "Selected Articles",
+          "type": "array"
+        }
+      },
+      "required": [
+        "selected_articles",
+        "expected_version"
+      ],
+      "title": "SelectedArticlesRequest",
       "type": "object"
     },
     "SentInformationRequest": {

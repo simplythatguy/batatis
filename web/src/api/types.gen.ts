@@ -179,6 +179,7 @@ export interface Case {
   provisions: string[];
   relevance: RelevanceRecord | null;
   section_c: SectionCRow[];
+  selected_articles: SelectedArticle[] | null;
   status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
   status_history: StatusChange[];
   submitted_at: string | null;
@@ -1300,6 +1301,27 @@ export interface SectionCRow {
   provision_id: string;
   related_root: string | null;
   related_root_method: string | null;
+}
+
+/** An applicant's code-check card, not a confirmed benchmark or code quotation. */
+export interface SelectedArticle {
+  answer: "yes" | "no" | "not-sure" | null;
+  id: string;
+  pending: boolean;
+  provision: string;
+}
+
+/** An applicant's code-check card, not a confirmed benchmark or code quotation. */
+export interface SelectedArticleInput {
+  answer?: "yes" | "no" | "not-sure" | null;
+  id: string;
+  pending?: boolean;
+  provision: string;
+}
+
+export interface SelectedArticlesRequest {
+  expected_version: number;
+  selected_articles: SelectedArticleInput[];
 }
 
 export interface SentInformationRequest {

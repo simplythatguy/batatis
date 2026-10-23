@@ -12,7 +12,7 @@
  */
 import { engine, EngineError, isCaseConflict, isCaseGone } from "./client";
 import type { EngineGap, EvidenceWrite } from "./client";
-import type { Case as EngineCase } from "./types.gen";
+import type { Case as EngineCase, SelectedArticleInput } from "./types.gen";
 import { factSignature, jurisdictionBody, jurisdictionForCreate } from "../rules";
 import type { AuthorityId, Fact, ListedEvidence } from "../types";
 import { evidenceSlot } from "../model";
@@ -29,6 +29,11 @@ const factQueues = new Map<string, Promise<unknown>>();
 const known = new Map<string, number>();
 const conflicts = new Set<string>();
 const jurisdictions = new Map<string, string | null>();
+/** The code-check selection the engine acknowledged (or holds as of opening), as `selectionKey`. */
+const selections = new Map<string, string>();
+/** Opened cases their owner cannot edit (sent, in review or closed): their selection is never written. Cards
+ * shown on them change only by derived display (a lookup expanding an article), recorded with noteShownSelection. */
+const readOnly = new Set<string>();
 /** Evidence slots the engine has shown for each case, from acknowledged writes and explicit reads. */
 const ledgerSlots = new Map<string, Set<string>>();
 /** Listing revisions the engine acknowledged, so a repeated push never writes them twice. */
@@ -85,6 +90,8 @@ export function clearEngineSession() {
   known.clear();
   conflicts.clear();
   jurisdictions.clear();
+  selections.clear();
+  readOnly.clear();
   ledgerSlots.clear();
   ackedRevs.clear();
   attempted.clear();
@@ -188,6 +195,8 @@ export async function reconcileEngineCase(caseId: string): Promise<EngineCase> {
   assertGeneration(token);
   known.set(caseId, saved.version);
   jurisdictions.set(caseId, saved.jurisdiction?.id ?? null);
+  if (saved.selected_articles) selections.set(caseId, selectionKey(saved.selected_articles));
+  noteEditable(saved);
   const latest = new Map(saved.facts.map((fact) => [localField(fact.field), fact]));
   const posted = postedFor(caseId);
   for (const field of Object.keys(posted)) {
@@ -206,10 +215,15 @@ export async function reconcileEngineCase(caseId: string): Promise<EngineCase> {
  * clearEngineSession(): adopts the saved version and jurisdiction, and records the saved latest
  * answer per field as already posted, so the next save sends only what the applicant changes.
  */
-export function adoptEngineCase(saved: EngineCase) {
+export function adoptEngineCase(saved: EngineCase, selection?: SelectedArticleInput[]) {
   sessionStorage.setItem(ID_KEY, saved.id);
   known.set(saved.id, saved.version);
   jurisdictions.set(saved.id, saved.jurisdiction?.id ?? null);
+  // The cards the opened case shows count as saved: a legacy case (no saved selection) is not rewritten
+  // until the applicant changes a card.
+  const opened = selection ?? saved.selected_articles;
+  if (opened) selections.set(saved.id, selectionKey(opened));
+  noteEditable(saved);
   // Intake writes Section A/B facts under the export keys; the browser holds them under its own names.
   const latest = new Map(saved.facts.map((fact) => [localField(fact.field), fact]));
   const posted: Record<string, PostedFact> = {};
@@ -232,6 +246,68 @@ export function notePosted(caseId: string, facts: Fact[], forget: string[] = [])
   for (const field of forget) delete done[field];
   for (const fact of facts) done[fact.field] = { id: fact.id, signature: factSignature(fact) };
   remember(caseId, done);
+}
+
+/** The owner edits only a draft or a returned application (engine/access.py); a case without a status is a draft. */
+function noteEditable(saved: EngineCase) {
+  if (saved.status && saved.status !== "draft" && saved.status !== "returned") readOnly.add(saved.id);
+  else readOnly.delete(saved.id);
+}
+
+/** True when the opened case is read-only for its owner: its code cards are not the applicant's to change. */
+export const isReadOnlyCase = (caseId: string | null) => Boolean(caseId && readOnly.has(caseId));
+
+/**
+ * On a read-only case, cards a lookup derives from the shown (saved) cards are shown too: nothing to save.
+ * Only a change on top of exactly the shown cards moves them; an unsaved change of the applicant's never does.
+ */
+export function noteShownSelection(caseId: string | null, before: SelectedArticleInput[], after: SelectedArticleInput[]) {
+  if (caseId && readOnly.has(caseId) && selections.get(caseId) === selectionKey(before)) selections.set(caseId, selectionKey(after));
+}
+
+const READ_ONLY_SELECTION = "This application is read-only, so the code check change wasn’t saved.";
+
+/** Equal selections, order included. */
+export const selectionKey = (list: SelectedArticleInput[]) => JSON.stringify(list.map((s) => [s.id, s.provision, s.answer ?? null, Boolean(s.pending)]));
+
+const SELECTION_REFUSED: Record<number, string> = {
+  404: "A code reference wasn’t found, so your code check wasn’t saved. Your cards are still here.",
+  422: "Your code check couldn’t be saved. Your cards are still here.",
+};
+
+/**
+ * PUT the complete code-check selection with the acknowledged version, only when it differs from the
+ * last one the engine acknowledged. Runs inside the save queue, so versions advance one at a time.
+ * Resolves to an error text, or null when saved. A conflict (another write, or a read-only case)
+ * throws and waits for an explicit reconcile; a deleted, expired or inaccessible case is reported as
+ * "case not found" and never recreated. Nothing is retried here.
+ */
+export async function pushSelectedArticles(caseId: string, list: SelectedArticleInput[]): Promise<string | null> {
+  const token = generation;
+  const key = selectionKey(list);
+  const acked = selections.get(caseId);
+  if (acked === key || (acked === undefined && !list.length)) return null;
+  // Never written, and never reported as saved: the owner cannot change a read-only case's cards.
+  if (readOnly.has(caseId)) return READ_ONLY_SELECTION;
+  const expected = known.get(caseId);
+  if (conflicts.has(caseId) || expected === undefined) throw new EngineError(409, CONFLICT_TEXT, "No acknowledged case version to send.");
+  try {
+    const saved = await engine.setSelectedArticles(caseId, { selected_articles: list, expected_version: expected });
+    assertGeneration(token);
+    acknowledgeWrite(caseId, saved.version);
+    // The engine canonicalizes provisions; what it acknowledged is this visit's list.
+    selections.set(caseId, key);
+    return null;
+  } catch (e) {
+    assertGeneration(token);
+    if (isCaseConflict(e)) {
+      noteConflict(caseId);
+      throw new EngineError(409, CONFLICT_TEXT, (e as EngineError).technical);
+    }
+    if (isCaseGone(e)) return (e as EngineError).detail;
+    if (e instanceof EngineError) return SELECTION_REFUSED[e.status] ?? e.detail;
+    return String(e);
+  }
 }
 
 /** Reconcile a complete browser fact snapshot, including withdrawals. Serialize writes

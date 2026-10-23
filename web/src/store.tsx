@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useReducer,
 import { engine, EngineError, failureText, isCaseConflict, isCaseGone, type EngineGap } from "./api/client";
 import type { IdentifyResult, IntakeResult, Question as PlanQuestion } from "./api/types.gen";
 import { type CompletenessRecord, isProfessionalHold, officerRoutedLabel } from "./humanReview";
-import { acknowledgedVersion, acknowledgeWrite, adoptEngineCase, clearEngineSession, CONFLICT_TEXT, engineCaseId, engineGeneration, evidenceFacts, isEngineGeneration, ensureEngineCase, needsReconcile, noteConflict, notePosted, pushDeletedEvidence, pushFacts, pushListedEvidence, reconcileEngineCase, refreshGaps, syncJurisdiction, type EvidenceOutcome } from "./api/sync";
+import { acknowledgedVersion, acknowledgeWrite, adoptEngineCase, clearEngineSession, CONFLICT_TEXT, engineCaseId, engineGeneration, evidenceFacts, isEngineGeneration, ensureEngineCase, isReadOnlyCase, needsReconcile, noteConflict, notePosted, noteShownSelection, pushDeletedEvidence, pushFacts, pushListedEvidence, pushSelectedArticles, reconcileEngineCase, refreshGaps, selectionKey, syncJurisdiction, type EvidenceOutcome } from "./api/sync";
 import { engineNotices, groupEvidenceGaps, missingFromEngine, uploadMessage } from "./rules";
 import { readDecisionBody, wireDecision } from "./identify";
 import { asLocal } from "./intakeFields";
@@ -16,7 +16,7 @@ import type { ApplicantType, Candidate, CandidateAnswer, Case, Fact, Gap } from 
 import { useSectionC } from "./api/sectionC";
 import { readSectionD, SectionDRecoveryError, type SectionDRead } from "./api/sectionD";
 import { isProvision, reconcileSectionC, sameCards } from "./provisions";
-import { caseFromEngine } from "./calm/openCase";
+import { openedCase, selectedArticles } from "./calm/openCase";
 import { normalizeTitle, saveTitle, TITLE_EMPTY, titleError } from "./calm/rename";
 import { refreshCase, resetExtras, setChecklist } from "./calm/caseExtras";
 
@@ -119,7 +119,10 @@ interface Store {
   beginEmpty: (type: ApplicantType) => void;
   /** Back to an empty Start. `note` replaces "Cleared for this visit." (signed in, the old one stays in the list). */
   resetToWho: (note?: string) => void;
-  /** Open a saved application (list row) as this visit's case. Resolves to an error text, or null when open. */
+  /**
+   * Open a saved application (list row) as this visit's case. Resolves to an error text, or null when open.
+   * An open overtaken by a newer open, Start over or any other reset changes nothing and resolves to null.
+   */
   openCase: (id: string, type: ApplicantType) => Promise<string | null>;
   completenessRecord: CompletenessRecord | null;
   setCompletenessRecord: (record: CompletenessRecord | null) => void;
@@ -207,6 +210,9 @@ function composeGaps(localCase: Case, source: Store["gapsSource"], engine: Engin
   return [...admin, ...workflow];
 }
 
+/** The code cards on a case, ignoring order. */
+const selectionSet = (c: Case) => selectionKey([...selectedArticles(c)].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)));
+
 /** The app link that fixes a field (engine gap field or a reviewer's ticked item). */
 export function hrefFor(field: string): string {
   if (FIELD_HREF[field]) return FIELD_HREF[field];
@@ -228,6 +234,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const sectionDHold = useRef<{ generation: number; id: string; error: SectionDRecoveryError } | null>(null);
   /** The saved case was deleted or expired. Nothing is written again until Reset starts a new case. */
   const goneCase = useRef<string | null>(null);
+  /** The latest open; an older one still reading the saved case is abandoned. */
+  const openAttempt = useRef(0);
   const [engineId, setEngineId] = useState<string | null>(null);
   const [factsEpoch, setFactsEpoch] = useState(0);
   const [engineGaps, setEngineGaps] = useState<EngineGap[]>([]);
@@ -267,7 +275,12 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const dispatch = useCallback((action: Action) => {
     // A lookup that only attaches Section C rows (or re-orders the same cards, as it does right
     // after a saved case is opened) is derived data, not an edit: the draft stays saved.
-    const derived = (action.type === "reconcileSectionC" && sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates)) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions", "noteIntake", "restoreIntake", "noteIntakeRecord", "adoptFacts", "noteIdentify", "renameCase"].includes(action.type);
+    // On a read-only case the lookup's expansion of an article is display only: never an unsaved edit.
+    const readOnlyCase = isReadOnlyCase(engineCaseId());
+    const derived = (action.type === "reconcileSectionC" && (readOnlyCase || sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates))) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions", "noteIntake", "restoreIntake", "noteIntakeRecord", "adoptFacts", "noteIdentify", "renameCase"].includes(action.type);
+    // A read-only application's code cards are not the applicant's to change (the deck and library are locked;
+    // the references screen's Remove is not): refused, so the screen keeps showing what is saved.
+    if (!derived && readOnlyCase && action.type !== "reset" && selectionKey(selectedArticles(reducer(latestCase.current, action))) !== selectionKey(selectedArticles(latestCase.current))) return;
     if (!derived) {
       revision.current += 1;
       if (action.type !== "saveEvidence" && action.type !== "removeEvidence") planRevision.current += 1;
@@ -289,7 +302,12 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         publishCheck({ ...checkRef.current, status: "stale", note: "Draft changed. Check your updates when you’re ready.", detail: "" });
       }
     }
-    latestCase.current = reducer(latestCase.current, action);
+    const before = latestCase.current;
+    latestCase.current = reducer(before, action);
+    // Derived output that adds or removes a code card (an identification) is saved like an edit, so a
+    // switch saves it first. A re-order alone is saved quietly by the next save.
+    if (derived && readOnlyCase) noteShownSelection(engineCaseId(), selectedArticles(before), selectedArticles(latestCase.current));
+    else if (derived && selectionSet(latestCase.current) !== selectionSet(before) && (!goneCase.current || goneCase.current !== engineCaseId())) setSaveStatus("unsaved");
     reduce(action);
   }, [publishCheck]);
 
@@ -407,6 +425,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       if (!current()) return null;
       const factError = await pushFacts(id, snapshot.facts);
       if (!current()) return null;
+      // The code-check cards, answers and pending state: a snapshot that never confirms a reference.
+      const selectionError = await pushSelectedArticles(id, selectedArticles(snapshot));
+      if (!current()) return null;
       // One atomic write per listing, then removals. Only acknowledged revisions count as saved.
       const listed = await pushListedEvidence(id, snapshot.listedEvidence ?? []);
       if (!current()) return null;
@@ -416,10 +437,11 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       if (deleted) snapshot = applyEvidence(deleted, snapshot);
       if (!factError) setFactsEpoch((n) => n + 1);
       // A refused listing is back in its form with a note; it is not a failed save of the case.
-      const failure = factError ?? listed.error ?? deleted?.error;
+      const failure = factError ?? selectionError ?? listed.error ?? deleted?.error;
       if (failure) throw new Error(failure);
       // A document staged after this snapshot is not saved yet; the next save sends it.
-      const staged = latestCase.current.listedEvidence?.length || latestCase.current.deletedEvidence?.length;
+      const staged = latestCase.current.listedEvidence?.length || latestCase.current.deletedEvidence?.length
+        || (!isReadOnlyCase(id) && selectionKey(selectedArticles(latestCase.current)) !== selectionKey(selectedArticles(snapshot)));
       if (staged && !goneCase.current) {
         setSaveStatus("unsaved");
         setSavedNote("");
@@ -739,8 +761,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         return null;
       } catch (e) {
         if (isCaseConflict(e)) noteConflict(id);
-        // Keep the answer on screen but not as done: until the engine stores it, a No or Not sure would be lost
-        // (Section D saves persist only Yes) and a Not sure would miss the officer's information request.
+        // Keep the answer on screen but not as done (pending, saved with the selection): until the engine stores the
+        // decision, it is not a confirmed reference (Section D sends only an acknowledged Yes) and a Not sure would
+        // miss the officer's information request. Answering again resends it.
         if (live()) derive({ type: "markDecisionPending", id: candidate.id, pending: true });
         return e instanceof EngineError && e.status === 0 ? "Not saved yet: Batatis could not be reached. Your answer is kept here; answer again to resend it." : failureText(e);
       }
@@ -874,6 +897,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     return promise;
   }
 
+  const selection = useMemo(() => selectionKey(selectedArticles(c)), [c.candidates]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (phase !== "case") return;
     if (!c.facts.length && !c.authority && !engineCaseId()) return;
@@ -881,7 +905,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(handle);
     // Saving facts does not request identification or a full administrative check.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, c.facts, c.authority, c.title, c.listedEvidence, c.deletedEvidence]);
+  }, [phase, c.facts, c.authority, c.title, c.listedEvidence, c.deletedEvidence, selection]);
 
   /** Reset the save session, case extras and visible request state before adopting another case. */
   function clearVisit(next: Case) {
@@ -956,24 +980,32 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       location.hash = "#/";
     },
     openCase: async (id, type) => {
+      // A newer open or a reset (Start over, New application) while this one is still
+      // reading wins: the late reads are dropped and the draft open now stays as it is.
+      const attempt = ++openAttempt.current;
+      const token = engineGeneration();
+      const live = () => openAttempt.current === attempt && isEngineGeneration(token);
       let saved;
       try {
         saved = await engine.getCase(id);
       } catch (e) {
+        if (!live()) return null;
         return e instanceof EngineError ? (isCaseGone(e) ? "That application was deleted or has expired." : e.detail) : "The application did not open.";
       }
-      // Same reset as Start over, then adopt the saved version and answers so the next save
-      // sends only what the applicant changes.
-      clearVisit(caseFromEngine(saved, type));
-      adoptEngineCase(saved);
-      setEngineId(saved.id);
-      // What intake read and the last code identification come back as they were stored (no provider call).
+      if (!live()) return null;
+      // What intake read and the last code identification come back as they were stored (no provider call),
+      // read before the reset so the opened case, its code cards included, is built in one step.
       const [intake, identify] = await Promise.all([
         engine.storedIntake(saved.id).catch(() => null),
         engine.storedIdentify(saved.id).catch(() => null),
       ]);
-      if (intake) derive({ type: "restoreIntake", result: intake, text: latestCase.current.description.trim() });
-      if (identify) derive({ type: "noteIdentify", result: identify });
+      if (!live()) return null;
+      const opened = openedCase(saved, type, { intake, identify });
+      // Same reset as Start over, then adopt the saved version, answers and code cards so the next
+      // save sends only what the applicant changes.
+      clearVisit(opened);
+      adoptEngineCase(saved, selectedArticles(opened));
+      setEngineId(saved.id);
       setReadingState({ ...NO_READING, intake: intake ? "done" : "idle", identify: identify ? "done" : "idle" });
       setSaveStatus("saved");
       setSavedNote("Saved");

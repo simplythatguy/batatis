@@ -65,6 +65,8 @@ with tempfile.TemporaryDirectory(prefix='batatis-web-sync-') as tmp:
             result = subprocess.run(['node', '--experimental-strip-types', '--import', './scripts/register-ts.mjs', 'tests/sync.integration.mts'], cwd=WEB, env=env, timeout=120)
             if result.returncode == 0 and '--browser' in sys.argv:
                 result = subprocess.run(['node', 'tests/provider.integration.mjs'], cwd=WEB, env=env, timeout=120)
+            if result.returncode == 0 and '--selection' in sys.argv:
+                result = subprocess.run(['node', 'tests/selection.integration.mjs'], cwd=WEB, env=env, timeout=300)
             if result.returncode == 0 and '--repair' in sys.argv:
                 result = subprocess.run(['node', '--experimental-strip-types', '--import', './scripts/register-ts.mjs', 'tests/repair.integration.mts'], cwd=WEB, env=env, timeout=120)
                 if result.returncode == 0:

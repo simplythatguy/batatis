@@ -27,6 +27,7 @@ import type {
   Jurisdiction,
   NewCase,
   SectionCRow,
+  SelectedArticlesRequest,
 } from "./types.gen";
 import { PRIVACY_NOTICE } from "../privacy";
 
@@ -181,6 +182,12 @@ export function createEngine(base: string) {
      */
     setJurisdiction: (caseId: string, body: JurisdictionBody, signal?: AbortSignal) =>
       call<Case>("PUT", `/cases/${enc(caseId)}/jurisdiction`, body, signal),
+    /**
+     * PUT /cases/{id}/selected-articles: replace the saved code-check selection (docs/api/selected-articles.md),
+     * returning the full saved Case. A snapshot only: it never confirms a reference or changes Section C/D.
+     */
+    setSelectedArticles: (caseId: string, body: SelectedArticlesRequest, signal?: AbortSignal) =>
+      call<Case>("PUT", `/cases/${enc(caseId)}/selected-articles`, body, signal),
     getCase: (id: string, signal?: AbortSignal) => call<Case>("GET", `/cases/${enc(id)}`, undefined, signal),
     /**
      * PATCH /cases/{id}/title `{ title }`: the applicant's own name for the application, returning the
