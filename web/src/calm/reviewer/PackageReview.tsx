@@ -37,8 +37,8 @@ const STEP_LABEL: Record<StepId, string> = {
 
 /** Each step's icon. The hue is kept for callers; the review itself draws in ink (monotone). */
 export const STEP_LOOK: Record<StepId | "final", { hue: string; icon: AcIconName }> = {
-  changes: { hue: "slate", icon: "diff" },
-  summary: { hue: "blue", icon: "eye" },
+  changes: { hue: "slate", icon: "history" },
+  summary: { hue: "blue", icon: "doc" },
   missing: { hue: "rose", icon: "alert" },
   checks: { hue: "violet", icon: "list" },
   final: { hue: "green", icon: "scale" },
@@ -345,8 +345,8 @@ type Step = StepId | "final";
 
 /**
  * The steps as the shell's stage buttons (the applicant's Describe · Questions · Review · Application
- * look): the current step named in a soft tab, a check once passed, the open count as a quiet number.
- * Other names are the accessible name and a label on hover or focus.
+ * look): the current step's icon and one-word name, the others icons only, a check once passed, the
+ * open count as a quiet number. Every name is the accessible name and a label on hover or focus.
  */
 export function StepTabs({ steps, active, label, counts, onPick }: { steps: Step[]; active: Step; label: (s: Step) => string; counts: Partial<Record<Step, number>>; onPick: (s: Step) => void }) {
   const at = steps.indexOf(active);

@@ -836,11 +836,11 @@ body {
   min-width: 0;
 }
 
-/* Stages and review steps: icons only, no fill, pill or shadow in any state (user direction
-   2026-10-22). Every stage is ink; the current one is at full opacity, the rest dimmed (0.6, 4.6:1 on
-   the page), hover and keyboard focus brighter (0.85), locked fainter still. Compact cues carry the
-   state: a small green check mark once done, a thin line at the foot while part of the way through,
-   the open count as a quiet number. One neutral ink: no step hues. */
+/* Stages and review steps: no fill, pill or shadow in any state (user decision 2026-10-22, "Option
+   A+B"). The current one is its icon and its one-word name at full opacity; the rest are icons only,
+   dimmed (0.6, 4.6:1 on the page), brighter on hover and keyboard focus (0.85), locked fainter still.
+   Compact cues carry the state: a small green check mark once done, a thin line at the foot while part
+   of the way through, the open count as a quiet number. One neutral ink: no step hues. */
 
 .cf-stages {
   display: flex;
@@ -877,6 +877,7 @@ body {
 
 /* The icon, its count and its progress line carry the dimming; the done mark stays full strength. */
 .cf-stage-ico,
+.cf-stage-word,
 .cf-stage-count,
 .cf-stage-bar {
   opacity: var(--stage-o);
@@ -908,8 +909,29 @@ body {
   box-shadow: 0 0 0 1.5px var(--cf-bg);
 }
 
+/* The current stage's name, one word beside its icon. */
+.cf-stage-word {
+  margin-left: 2px;
+  font-size: 13.5px;
+  font-weight: 550;
+  line-height: 1;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+}
+
+/* Clear of the done mark, which sits over the icon's top-right corner. */
+.cf-stage.is-done .cf-stage-word {
+  margin-left: 5px;
+}
+
 .cf-stage-count {
   font: 500 11.5px var(--cf-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Beside the current stage's name the count reads as part of it ("Missing 9"). */
+.cf-stage[aria-current="step"] .cf-stage-count {
+  font: 500 13.5px/1 var(--cf-font);
   font-variant-numeric: tabular-nums;
 }
 
@@ -935,10 +957,6 @@ body {
   --stage-o: 0.85;
 }
 
-.cf-stage[aria-current="step"] {
-  --stage-o: 1;
-}
-
 .cf-stage.is-disabled {
   cursor: not-allowed;
   --stage-o: 0.3;
@@ -948,14 +966,29 @@ body {
   --stage-o: 0.45;
 }
 
+/* The current stage stays at full strength in every state, locked included. */
+.cf-stage[aria-current="step"],
+.cf-stage.is-disabled[aria-current="step"] {
+  --stage-o: 1;
+}
+
 @media (hover: hover) {
   .cf-stage:not(.is-disabled):not([aria-current="step"]):hover {
     --stage-o: 0.85;
   }
 }
 
+/* The smallest phones: narrower stage boxes keep the current name clear of the save status. */
+@media (max-width: 360px) {
+  .cf-stage {
+    min-width: 30px;
+    padding: 0 5px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cf-stage-ico,
+  .cf-stage-word,
   .cf-stage-count,
   .cf-stage-bar {
     transition: none;

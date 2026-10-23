@@ -33,7 +33,7 @@ const STAGES = [
   { id: "application", label: "Application", icon: "file", href: "#/application", pct: 0, current: false, disabled: "Nothing filled in yet" },
 ];
 
-test("applicant stages are icons only: no stage name drawn, names for screen readers and on hover or focus", async () => {
+test("applicant stages: the current stage shows its one-word name beside its icon, the others are icons only", async () => {
   const h = await componentHarness(new URL("./AppHeader.tsx", import.meta.url), "StageRings", {
     "../icons": { Icon24: "Icon24" },
     "../RelevanceRing": { Tip: "Tip" },
@@ -42,8 +42,10 @@ test("applicant stages are icons only: no stage name drawn, names for screen rea
   h.unmount();
   const controls = nodes(tree, (n) => /^cf-stage( |$)/.test(n.props?.className ?? ""));
   assert.equal(controls.length, 4);
-  // User direction 2026-10-22: the current stage is told apart by opacity alone, never by its name or a fill.
-  assert.equal(drawn(tree).replace(/\s+/g, ""), "", "no stage name (or other word) drawn in the stage bar, the current one included");
+  // User decision 2026-10-22 (Option A+B): only the current stage draws its name; no fill marks it.
+  assert.equal(drawn(tree).replace(/\s+/g, " ").trim(), "Questions", "the current stage's name is the only word in the stage bar");
+  assert.deepEqual(controls.map((c) => drawn(c).trim()), ["", "Questions", "", ""], "the other stages draw no name");
+  assert.equal(nodes(tree, (n) => n.props?.className === "cf-stage-word").length, 1, "one visible stage word");
   assert.deepEqual(controls.map((c) => c.props["aria-label"]), [
     "1 Describe, done", "2 Questions, 40% done", "3 Review, 0% done", "4 Application, 0% done. Nothing filled in yet",
   ]);
@@ -75,5 +77,35 @@ test("reviewer steps use the same control, with the open count beside the icon",
   assert.deepEqual(controls.map((c) => Boolean(c.props.current)), [false, true, false, false]);
   assert.deepEqual(controls.map((c) => Boolean(c.props.done)), [true, false, false, false], "a passed step shows done");
   assert.equal(controls[1].props.count, 3, "the open count stays visible beside its icon");
-  assert.deepEqual(controls.map((c) => c.props.icon.props.name), ["eye", "alert", "list", "scale"]);
+  assert.deepEqual(controls.map((c) => c.props.icon.props.name), ["doc", "alert", "list", "scale"], "Request is a document; Missing, Checks and Decide keep their icons");
+});
+
+test("a resubmitted file's Changes step is the history icon, ahead of the others", async () => {
+  const h = await componentHarness(new URL("../reviewer/PackageReview.tsx", import.meta.url), "StepTabs", {
+    "../auth/bits": { AcIcon: "AcIcon" },
+    "../shell/AppHeader": { StageButton: "StageButton" },
+  });
+  const tree = await h.render({ steps: ["changes", "summary", "missing", "checks", "final"], active: "changes", label: (s) => ({ changes: "Changes", summary: "Request", missing: "Missing", checks: "Checks", final: "Decide" })[s], counts: { missing: 2 }, onPick() {} });
+  h.unmount();
+  const controls = nodes(tree, (n) => n.type === "StageButton");
+  assert.deepEqual(controls.map((c) => c.props.icon.props.name), ["history", "doc", "alert", "list", "scale"]);
+  assert.deepEqual(controls.map((c) => Boolean(c.props.current)), [true, false, false, false, false]);
+  assert.equal(controls[2].props.count, 2, "a later step keeps its real open count");
+});
+
+test("the current step draws its name and open count; another step draws only its count", async () => {
+  const h = await componentHarness(new URL("./AppHeader.tsx", import.meta.url), "StageButton", {
+    "../icons": { Icon24: "Icon24" },
+    "../RelevanceRing": { Tip: "Tip" },
+  }, { window: { addEventListener() {}, removeEventListener() {}, dispatchEvent() {} }, CustomEvent: class {} });
+  const props = { id: "rv-missing", label: "Missing", ariaLabel: "Step 2 of 4: Missing, 7 to look at", icon: { type: "AcIcon", props: { name: "alert" } }, pct: 100, count: 7, onClick() {} };
+  const current = expand(await h.render({ ...props, current: true }));
+  assert.equal(drawn(current).replace(/\s+/g, " ").trim(), "Missing 7", "name, then the count (the state's own number)");
+  assert.equal(current.props.children[0].props["aria-current"], "step");
+  const other = expand(await h.render({ ...props, current: false }));
+  assert.equal(drawn(other).replace(/\s+/g, " ").trim(), "7", "no name on a step that is not current");
+  assert.equal(other.props.children[0].props["aria-current"], undefined);
+  const tips = nodes(other, (n) => n.type === "Tip");
+  assert.equal(tips.length, 1, "the hover or focus label stays");
+  h.unmount();
 });

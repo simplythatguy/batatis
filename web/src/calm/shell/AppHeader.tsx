@@ -19,11 +19,12 @@ export interface StageRingItem {
 const STAGE_TIP = "cf-stage-tip";
 
 /**
- * One stage or review step as its icon alone (user direction 2026-10-22): no fill, pill or shadow in
- * any state. The current one is at full opacity, the others dimmed and brighter on hover or keyboard
- * focus, a locked one fainter still. Compact cues keep the state: a small check mark once done, a thin
- * line at the foot while part of the way through, and the open count as a quiet number. The name and
- * progress are the accessible name and a label on hover or keyboard focus, never visible text.
+ * One stage or review step (user decision 2026-10-22, "Option A+B"): no fill, pill or shadow in any
+ * state. The current one shows its one-word name beside its icon at full opacity; the others are the
+ * icon alone, dimmed and brighter on hover or keyboard focus, a locked one fainter still. Compact cues
+ * keep the state: a small check mark once done, a thin line at the foot while part of the way through,
+ * and the open count as a quiet number. Name and progress are also the accessible name and a label on
+ * hover or keyboard focus.
  */
 export function StageButton({ id, label, ariaLabel, icon, pct, current, done, disabled, count, note, href, onClick }: {
   id: string;
@@ -60,6 +61,7 @@ export function StageButton({ id, label, ariaLabel, icon, pct, current, done, di
         <span className="cf-stage-ico">{icon}</span>
         {done && <span className="cf-stage-done"><Icon24 name="check" size={8} stroke={3.4} /></span>}
       </span>
+      {current && <span className="cf-stage-word">{label}</span>}
       {count ? <span className="cf-stage-count" aria-hidden="true">{count}</span> : null}
       {!done && p > 0 && p < 100 && <span className="cf-stage-bar" aria-hidden="true"><span style={{ width: `${p}%` }} /></span>}
     </>
