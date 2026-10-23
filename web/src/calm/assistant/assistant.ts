@@ -141,7 +141,6 @@ export interface AssistantDeps {
   account(): { signedIn: boolean; userId: string | null; role: NavRole | null; authority: string | null };
   page: OpenDeps & PageProbe & { hash(): string; focusId(): string | null; focus(id: string | null): void };
   voice(events: ConstructorParameters<typeof VoiceClient>[1]): VoiceClient;
-  phone(): boolean;
   noticeSeen(notice: string): boolean;
   markNoticeSeen(notice: string): void;
   setTimer(fn: () => void, ms: number): number;
@@ -189,7 +188,6 @@ function browserDeps(): AssistantDeps {
       clearTimer: (id) => window.clearTimeout(id),
       page: () => ({ protocol: location.protocol, host: location.host }),
     }, events),
-    phone: () => window.matchMedia("(max-width: 760px)").matches,
     noticeSeen: (notice) => { try { return sessionStorage.getItem(noticeKey(notice)) === "1"; } catch { return false; } },
     markNoticeSeen: (notice) => { try { sessionStorage.setItem(noticeKey(notice), "1"); } catch { /* storage unavailable */ } },
     setTimer: (fn, ms) => window.setTimeout(fn, ms),
@@ -506,8 +504,7 @@ async function applyPlan(plan: { destination: unknown }, asked: { key: string; g
   const ok = await openDestination(plan.destination as DestinationId, caseId, page);
   if (epoch !== accountEpoch || key !== conversationKey(k)) return;
   patchTurn(k, t.id, (x) => ({ nav: { ...x.nav!, state: ok ? "opened" : "failed", back: ok && back.href !== page.hash() ? back : null } }));
-  // On a phone the panel covers the page: get out of the way once it really opened.
-  if (ok && d().phone()) set({ open: false });
+  // The chat stays open after it navigates, on phones too (user decision 2026-10-22); only the person closes it.
 }
 
 /** Go back to where the person was before the assistant opened something. */
@@ -521,7 +518,6 @@ export async function goBack(turnId: number) {
   const ok = await returnTo(back, d().page);
   if (epoch !== accountEpoch || key !== conversationKey(k)) return;
   patchTurn(k, turnId, (x) => ({ nav: { ...x.nav!, backState: ok ? "returned" : "failed" } }));
-  if (ok && d().phone()) set({ open: false });
 }
 
 // —— Attachments (typed excerpts and voice use the same stored file IDs) ——————————————
@@ -547,11 +543,22 @@ export function canAttach(): boolean {
   return state.binding.mode === "case" && Boolean(state.binding.caseId) && bound();
 }
 
+/** The conversation lifetime a browser file chooser was opened in. */
+export interface AttachPick { key: string; context: string; epoch: number }
+
+/** Call as the file chooser opens; its files are used only while this lifetime is still current. */
+export function beginAttachPick(): AttachPick {
+  return { key, context: contextId, epoch: accountEpoch };
+}
+
 /**
  * Upload PDFs to the bound application through the normal upload route. The result is recorded
- * on the conversation it was started in (the same application), even after a switch.
+ * on the conversation it was started in (the same application), even after a switch. Files from
+ * a chooser (`pick`) opened before a switch of application or account (even A → B → A) are
+ * dropped: they were chosen for an application that is no longer the one open.
  */
-export async function attachFiles(files: File[]) {
+export async function attachFiles(files: File[], pick?: AttachPick) {
+  if (pick && (pick.key !== key || pick.context !== contextId || pick.epoch !== accountEpoch)) return;
   const b = state.binding;
   const caseId = b.caseId;
   if (!canAttach() || !caseId || !b.canUpload) return;
@@ -772,6 +779,14 @@ function scheduleVoiceUpdate(now = false) {
 export function assistantRouteChanged() {
   bumpViewGeneration();
   scheduleVoiceUpdate();
+}
+
+/**
+ * The person chose another application: a plan asked before that never applies, even when the
+ * switch then fails and this application stays open. The conversation itself is kept.
+ */
+export function invalidateAssistantNavigation() {
+  assistantRouteChanged();
 }
 
 if (typeof window !== "undefined") {

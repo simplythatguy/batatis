@@ -16,3 +16,26 @@ export function setOpenProblem(next: { id: string; text: string } | null) {
 export function useOpenProblem() {
   return useSyncExternalStore((l) => { listeners.add(l); return () => listeners.delete(l); }, () => problem, () => problem);
 }
+
+/** Open the native page for a captured case; confirm the rendered case before acknowledging it. */
+export function openCommentsPage(caseId: string): Promise<boolean> {
+  location.hash = `#/comments?case=${encodeURIComponent(caseId)}`;
+  return new Promise((resolve) => {
+    const finish = (opened: boolean) => {
+      clearTimeout(timer);
+      observer.disconnect();
+      window.removeEventListener("hashchange", check);
+      resolve(opened);
+    };
+    const check = () => {
+      if (location.hash.split("?")[0] !== "#/comments") return finish(false);
+      const shown = document.querySelector(".cf-comments[data-application-id]");
+      if (shown?.getAttribute("data-application-id") === caseId) finish(true);
+    };
+    const observer = new MutationObserver(check);
+    const timer = window.setTimeout(() => finish(false), 2000);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-application-id"] });
+    window.addEventListener("hashchange", check);
+    check();
+  });
+}

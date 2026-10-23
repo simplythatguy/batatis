@@ -168,7 +168,7 @@ export function Comments({ caseParam }: { caseParam: string | null }) {
   const who = lead?.author.name || app.reviewer?.name || "The officer";
 
   return (
-    <div className="cf-comments">
+    <div className="cf-comments" data-application-id={app.id}>
       {head}
       {status && <p className="cf-comments-state"><Dot tone={status.tone} /><span>{status.label}</span>{status.note && <span className="cf-faint"> · {status.note}</span>}</p>}
       {messages === null && !failed && <p className="cf-comments-note" role="status">Loading…</p>}

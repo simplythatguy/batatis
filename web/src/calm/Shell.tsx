@@ -11,7 +11,7 @@ import type { RowAction } from "./shell/RowMenu";
 import { AssistantPanel } from "./assistant/AssistantPanel";
 import { NativePanels } from "./assistant/NativePanels";
 import { AskButton, AskHost } from "./assistant/AskButton";
-import { setAssistantCase, setAssistantContext, toggleAssistant, useAssistant, type AssistBinding } from "./assistant/assistant";
+import { invalidateAssistantNavigation, setAssistantCase, setAssistantContext, toggleAssistant, useAssistant, type AssistBinding } from "./assistant/assistant";
 import { OPEN_APPLICATIONS } from "./assistant/destinations";
 import { roleOf, useCurrentApplication } from "./begin";
 import { CodePalette, OPEN_PALETTE, openPalette } from "./CodePalette";
@@ -137,6 +137,8 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   const [palette, setPalette] = useState(false);
   const [listNote, setListNote] = useState("");
   const [opening, setOpening] = useState<string | null>(null);
+  /** Bumped by Start over / New application: a switch still saving or opening then leaves the new draft alone. */
+  const freshDraft = useRef(0);
   const [listCollapsed, setListCollapsed] = useState(false);
   const [sheet, setSheet] = useState(false);
   const listRef = useRef<ApplicationListHandle>(null);
@@ -210,7 +212,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   useEffect(() => {
     if (active === "questions" && !plain) return;
     const page = plain ? accountPage(route.path) : null;
-    const label = page?.label ?? (active === "start" ? "your description" : active === "review" ? "your review" : active === "application" ? "your application" : active === "code" ? "the code library" : "your application");
+    const label = page?.label ?? (active === "start" ? "your description" : active === "review" ? "your review" : active === "application" ? "your application" : active === "code" ? "the code library" : active === "comments" ? "the officer’s comments" : "your application");
     setAssistantContext({ screen: page?.screen ?? (active === "start" ? "describe" : active), label });
   }, [active, plain, route.path]);
 
@@ -311,6 +313,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   ];
 
   function startNew() {
+    freshDraft.current += 1;
     setListNote("");
     remember(null);
     resetSession();
@@ -322,13 +325,18 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   async function switchTo(id: string): Promise<string | null> {
     if (!signedIn) return "Sign in to open a saved application.";
     if (opening) return "Another application is still opening.";
+    // Choosing another application retires what the assistant was about to open, even if the switch fails.
+    invalidateAssistantNavigation();
     setOpening(id);
     const role = roleOf(account.user) ?? (c.applicantType as Parameters<typeof openCase>[1]);
-    // Keep the open draft before switching; a failed save keeps it open and says so.
+    const mark = freshDraft.current;
+    const superseded = () => freshDraft.current !== mark;
+    // Keep the open draft before switching; a failed save keeps it open and says so. A new draft started
+    // meanwhile wins: nothing is opened over it and its description, files and role stay.
     const error = await switchApplication(id, {
       inCase, saveStatus, saveDraft,
-      openCase: (next) => openCase(next, role),
-      settle: () => { resetSession(); resetRelevance(); },
+      openCase: (next) => (superseded() ? Promise.resolve(null) : openCase(next, role)),
+      settle: () => { if (!superseded()) { resetSession(); resetRelevance(); } },
     });
     setOpening(null);
     // A deleted or expired application leaves the list; a refused save changed nothing on the server.
@@ -348,7 +356,9 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     if (!signedIn || opening) return;
     setListNote("");
     setOpenProblem(null);
+    const mark = freshDraft.current;
     const error = await switchTo(id);
+    if (freshDraft.current !== mark) return; // Start over meanwhile: stay on the new draft
     if (error) {
       setListNote(error);
       // A link (a notification's comments) says why on its page; the open application stays as it was.
@@ -487,7 +497,8 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
 
   return (
     <AskHost.Provider value={true}>
-      <NativePanels ownedCaseId={!reviewer && assistRow?.id === engineId ? engineId : null} />
+      {/* Nothing native is offered while another application is opening. */}
+      <NativePanels ownedCaseId={!reviewer && !opening && assistRow?.id === engineId ? engineId : null} />
     <ApplicationSwitchContext.Provider value={appSwitch}>
       <AppLayout
         rail={<Rail destinations={destinations} notificationsSlot={<NotificationsBell />} accountSlot={<AccountButton />} />}

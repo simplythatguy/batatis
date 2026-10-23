@@ -3,8 +3,8 @@ import { Icon24 } from "../icons";
 import { ToolButton } from "./ToolButton";
 import type { VoiceStatus } from "../voice/session";
 import {
-  attachExisting, attachFiles, canAttach, commitVoice, dismissVoiceMessage, dismissVoiceNotice, endVoice, loadVoiceCapability, MAX_ATTACHMENTS,
-  removeAttachment, requestVoice, startVoice, stopVoiceSpeaking, toggleVoiceMute, voiceLevel, type AssistantState,
+  attachExisting, attachFiles, beginAttachPick, canAttach, commitVoice, dismissVoiceMessage, dismissVoiceNotice, endVoice, loadVoiceCapability, MAX_ATTACHMENTS,
+  removeAttachment, requestVoice, startVoice, stopVoiceSpeaking, toggleVoiceMute, voiceLevel, type AssistantState, type AttachPick,
 } from "./assistant";
 
 const ACTIVE: ReadonlySet<VoiceStatus> = new Set(["mic", "connecting", "listening", "hearing", "sending", "speaking", "updating", "stopping"]);
@@ -59,6 +59,7 @@ function endedText(a: AssistantState): string | null {
   const v = a.voice;
   if (v.problem === "denied") return "Microphone blocked. Allow it in the browser, or type instead.";
   if (v.problem === "no-mic") return "No microphone found. Type instead.";
+  if (v.problem === "no-answer") return "The microphone wasn’t allowed in time. Start again, or type instead.";
   if (v.problem === "busy") return `Voice is busy.${v.retryAfter ? ` Try again in ${v.retryAfter} s.` : " Try again soon."}`;
   switch (v.reason) {
     case "expired": return "Time’s up. Start again to keep talking.";
@@ -164,6 +165,8 @@ export function Attachments({ a }: { a: AssistantState }) {
 /** Add a PDF from this application, or upload one through its authorized file route. */
 export function AttachButton({ a }: { a: AssistantState }) {
   const file = useRef<HTMLInputElement>(null);
+  /** The application lifetime the open chooser belongs to; its files go nowhere else. */
+  const pickFor = useRef<AttachPick | null>(null);
   const root = useRef<HTMLSpanElement>(null);
   const menuId = useId();
   const [menu, setMenu] = useState(false);
@@ -184,7 +187,8 @@ export function AttachButton({ a }: { a: AssistantState }) {
   const existing = [...known.values()].filter((f) => !list.some((x) => x.fileId === f.id && x.status !== "failed"));
   if (!b.canUpload && !existing.length) return null;
   const full = live >= MAX_ATTACHMENTS;
-  const pick = () => (existing.length ? setMenu((m) => !m) : file.current?.click());
+  const choose = () => { pickFor.current = beginAttachPick(); file.current?.click(); };
+  const pick = () => (existing.length ? setMenu((m) => !m) : choose());
   const label = full ? `Up to ${MAX_ATTACHMENTS} selected PDFs` : existing.length ? "Select a PDF" : "Upload a PDF";
   return (
     <span ref={root} className="cf-av-add" onKeyDown={(e) => {
@@ -209,13 +213,19 @@ export function AttachButton({ a }: { a: AssistantState }) {
             </button>
           ))}
           {b.canUpload && (
-            <button type="button" role="menuitem" onClick={() => { close(true); file.current?.click(); }}>
+            <button type="button" role="menuitem" onClick={() => { close(true); choose(); }}>
               <Icon24 name="up" size={14} /><span>Upload a PDF…</span>
             </button>
           )}
         </div>
       )}
-      <input ref={file} type="file" accept="application/pdf,.pdf" multiple hidden onChange={(e) => { const files = [...(e.target.files ?? [])]; e.target.value = ""; void attachFiles(files); }} />
+      <input ref={file} type="file" accept="application/pdf,.pdf" multiple hidden onChange={(e) => {
+        const files = [...(e.target.files ?? [])];
+        e.target.value = "";
+        const openedFor = pickFor.current;
+        pickFor.current = null;
+        if (openedFor) void attachFiles(files, openedFor);
+      }} />
     </span>
   );
 }

@@ -3,7 +3,7 @@ import { test, beforeEach } from "node:test";
 import type { AssistRequest, AssistResponse } from "../../api/accounts.ts";
 import { VoiceClient, type SocketLike, type VoiceAudio } from "../voice/session.ts";
 import {
-  ask, assistantKey, assistantRouteChanged, attachExisting, attachFiles, cancelQuestion, closeAssistant, goBack, loadVoiceCapability, openAssistant, removeAttachment, requestVoice, resetAssistant, retry,
+  ask, assistantKey, assistantRouteChanged, attachExisting, attachFiles, cancelQuestion, closeAssistant, goBack, invalidateAssistantNavigation, loadVoiceCapability, openAssistant, removeAttachment, requestVoice, resetAssistant, retry,
   getAssistantState, selectedAttachmentIds, setAssistantBinding, setAssistantContext, setAssistantDeps, setDraft, startVoice, type AssistBinding, type AssistantDeps,
 } from "./assistant.ts";
 import { bumpViewGeneration, checkPlan, offeredDestinations, registerPanel } from "./destinations.ts";
@@ -87,7 +87,6 @@ beforeEach(() => {
       clearTimer: () => {},
       page: () => ({ protocol: "https:", host: "batatis.example" }),
     }, events),
-    phone: () => false,
     noticeSeen: () => f.notice,
     markNoticeSeen: () => { f.notice = true; },
     setTimer: (fn) => { queueMicrotask(fn); return 1; },
@@ -332,6 +331,37 @@ test("typed navigation opens the exact question card and returns to the exact pr
   assert.equal(f.page.went.at(-1), "#/questions?focus=field-owner");
   assert.equal(f.page.focused, "cf-q");
   assert.equal(state().conv.turns.at(-1)!.nav!.backState, "returned");
+});
+
+test("the chat stays open after it navigates and goes back; a person who closes it keeps it closed", async () => {
+  setAssistantBinding(caseBinding("A"));
+  openAssistant();
+  void ask("Open the request date");
+  f.requests[0].reply.resolve({ answer: "", cited: [], removed_citations: [], notice: "", navigation: { destination: "question-date" } });
+  await flush();
+  assert.equal(state().conv.turns.at(-1)!.nav!.state, "opened");
+  assert.equal(state().open, true, "navigating does not close the chat");
+  await goBack(state().conv.turns.at(-1)!.id);
+  assert.equal(state().open, true, "going back does not close it either");
+  void ask("Open the permit");
+  closeAssistant();
+  f.requests[1].reply.resolve({ answer: "", cited: [], removed_citations: [], notice: "", navigation: { destination: "question-permit" } });
+  await flush();
+  assert.equal(state().open, false);
+});
+
+test("choosing another application retires a plan asked before it, even when the switch fails", async () => {
+  setAssistantBinding(caseBinding("A"));
+  void ask("Open settings");
+  invalidateAssistantNavigation(); // the switch then fails: A stays open
+  f.requests[0].reply.resolve({ answer: "", cited: [], removed_citations: [], notice: "", navigation: { destination: "settings" } });
+  await flush();
+  assert.deepEqual(f.page.went, []);
+  assert.equal(state().conv.turns.at(-1)!.nav!.state, "moved-on");
+  void ask("Open settings");
+  f.requests[1].reply.resolve({ answer: "", cited: [], removed_citations: [], notice: "", navigation: { destination: "settings" } });
+  await flush();
+  assert.deepEqual(f.page.went, ["#/settings"], "a fresh question can still navigate");
 });
 
 test("a plan whose page never shows (redirect, card missing) is reported as not opened", async () => {

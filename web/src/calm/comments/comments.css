@@ -91,7 +91,7 @@
   margin-left: -6px;
   padding: 0 8px 0 4px;
   border-radius: 8px;
-  color: var(--cf-text-3);
+  color: var(--cf-text-2);
   font-size: 13px;
   text-decoration: none;
 }
@@ -131,7 +131,7 @@
 
 .cf-comments-empty {
   margin: 24px 0 0;
-  color: var(--cf-text-3);
+  color: var(--cf-text-2);
 }
 
 .cf-comment-lead {
@@ -142,6 +142,11 @@
   border: 1px solid var(--cf-line);
   border-radius: 14px;
   background: var(--cf-surface);
+}
+
+.cf-comment-lead > .cf-returned-av {
+  background: var(--cf-hover);
+  color: var(--cf-text-2);
 }
 
 .cf-comment-lead-body {

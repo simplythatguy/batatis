@@ -163,6 +163,29 @@ test("a microphone granted after the person ended is released at once and opens 
   assert.equal(h.sockets.length, 0);
 });
 
+test("an unanswered microphone prompt ends startup at its deadline; a later grant is released and opens nothing", async () => {
+  let grant: (m: { stop(): void }) => void = () => {};
+  let stopped = 0;
+  const h = harness({ microphone: () => new Promise((r) => { grant = r; }) });
+  const start = h.client.start("/api/voice/relay/session", SCOPE);
+  await flush();
+  h.advance(29_999);
+  assert.equal(h.client.snapshot().status, "mic", "the person still has time to answer the browser");
+  h.advance(1);
+  assert.equal(h.client.snapshot().status, "ended");
+  assert.equal(h.client.snapshot().problem, "no-answer");
+  grant({ stop: () => { stopped += 1; } });
+  await start;
+  assert.equal(stopped, 1, "a grant after the deadline is released at once");
+  assert.equal(h.sockets.length, 0, "and opens no relay");
+});
+
+test("a microphone answered in time is not ended by the permission deadline", async () => {
+  const h = await started();
+  h.advance(31_000);
+  assert.equal(h.client.snapshot().status, "listening");
+});
+
 test("silence is never sent and never answered", async () => {
   const h = await started();
   h.say(0, 40);

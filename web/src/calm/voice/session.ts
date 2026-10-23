@@ -68,8 +68,8 @@ export interface VoiceDeps {
  * (committed, waiting for the answer) → speaking → listening; updating / stopping are barriers.
  */
 export type VoiceStatus = "idle" | "mic" | "connecting" | "listening" | "hearing" | "sending" | "speaking" | "updating" | "stopping" | "ended";
-/** Why it could not run, in product terms. */
-export type VoiceProblem = "denied" | "no-mic" | "busy" | "unavailable" | null;
+/** Why it could not run, in product terms. "no-answer": the browser's microphone prompt was never answered. */
+export type VoiceProblem = "denied" | "no-mic" | "no-answer" | "busy" | "unavailable" | null;
 
 export interface VoiceSnapshot {
   status: VoiceStatus;
@@ -105,6 +105,8 @@ export interface VoiceEvents {
   onEnd?(reason: EndReason): void;
 }
 
+/** The browser's microphone prompt waits for the person; startup still ends if it is never answered. */
+const MIC_MS = 30000;
 const READY_MS = 8000;
 const STARTED_MS = 25000;
 /** The relay fails its own barriers after a few seconds; this is the browser's backstop. */
@@ -244,9 +246,13 @@ export class VoiceClient {
     this.set({ ...VoiceClient.blank(), status: "mic" });
     if (!url) return this.finish("unavailable", "unavailable");
     let mic: MicHandle;
+    // finish() moves the epoch on, so a grant after this deadline is released below and opens nothing.
+    const permission = this.timer(() => { if (epoch === this.epoch) this.finish("unavailable", "no-answer"); }, MIC_MS);
     try {
       mic = await this.deps.microphone();
+      this.cancelTimer(permission);
     } catch (e) {
+      this.cancelTimer(permission);
       if (epoch !== this.epoch) return;
       const name = (e as { name?: string })?.name;
       this.finish("ended", name === "NotFoundError" || name === "OverconstrainedError" ? "no-mic" : name === "NotAllowedError" || name === "SecurityError" ? "denied" : "unavailable");

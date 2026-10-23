@@ -1,9 +1,9 @@
 /** Open the existing comments route for the captured owned case; never selects another case. */
 import { useEffect } from "react";
 import { getAccountState } from "../account";
+import { openCommentsPage } from "../comments/opening";
 import { getAssistantState, assistantKey, useAssistant } from "./assistant";
 import { registerPanel } from "./destinations";
-const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
 export function NativePanels({ ownedCaseId }: { ownedCaseId: string | null }) {
   const { binding: b } = useAssistant();
@@ -20,15 +20,9 @@ export function NativePanels({ ownedCaseId }: { ownedCaseId: string | null }) {
     if (b.role === "applicant" && ownedCaseId === caseId) {
       offs.push(registerPanel("comments", caseId, async (requested) => {
         if (requested !== caseId || !current()) return false;
-        location.hash = `#/comments?case=${encodeURIComponent(caseId)}`;
-        for (let i = 0; i < 60; i++) {
-          await frame();
-          if (!current()) return false;
-          const [path, query = ""] = location.hash.slice(1).split("?");
-          // Shell may remove the redundant case parameter after checking the open case.
-          if (path === "/comments" && (!query || new URLSearchParams(query).get("case") === caseId) && document.querySelector(".cf-comments")) return true;
-        }
-        return false;
+        // Opened only once the page renders this application (its data-application-id), not merely the route.
+        const opened = await openCommentsPage(caseId);
+        return opened && current();
       }));
     }
 
