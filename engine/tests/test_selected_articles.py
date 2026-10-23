@@ -263,6 +263,18 @@ def test_list_preferences_are_unchanged_by_selection_save(context, actors):
     assert store.list_application_preferences(users['owner'].id)[case.id] == original
 
 
+def test_nul_card_id_is_422_and_preserves_the_previous_selection(context, actors):
+    _, store = context
+    clients, users = actors
+    case = store.put(Case(owner_id=users['owner'].id, selected_articles=[selection()]))
+    with TestClient(create_app(store=store), base_url='http://localhost', raise_server_exceptions=False) as client:
+        client.cookies.update(clients['owner'].cookies)
+        assert client.get(f'/cases/{case.id}').status_code == 200
+        response = save(client, case, [selection(id='card\x00suffix')])
+    assert response.status_code == 422, response.text
+    assert store.get(case.id) == case
+
+
 def test_edit_revocation_before_snapshot_wins_over_stale_version_even_with_reviewer_read_access(context, actors, monkeypatch):
     _, store = context
     clients, users = actors
