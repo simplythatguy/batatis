@@ -257,9 +257,12 @@ function noteEditable(saved: EngineCase) {
 /** True when the opened case is read-only for its owner: its code cards are not the applicant's to change. */
 export const isReadOnlyCase = (caseId: string | null) => Boolean(caseId && readOnly.has(caseId));
 
-/** On a read-only case, the cards a lookup derived are what is shown: nothing to save. */
-export function noteShownSelection(caseId: string | null, list: SelectedArticleInput[]) {
-  if (caseId && readOnly.has(caseId)) selections.set(caseId, selectionKey(list));
+/**
+ * On a read-only case, cards a lookup derives from the shown (saved) cards are shown too: nothing to save.
+ * Only a change on top of exactly the shown cards moves them; an unsaved change of the applicant's never does.
+ */
+export function noteShownSelection(caseId: string | null, before: SelectedArticleInput[], after: SelectedArticleInput[]) {
+  if (caseId && readOnly.has(caseId) && selections.get(caseId) === selectionKey(before)) selections.set(caseId, selectionKey(after));
 }
 
 const READ_ONLY_SELECTION = "This application is read-only, so the code check change wasn’t saved.";

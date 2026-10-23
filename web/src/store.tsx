@@ -306,7 +306,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     latestCase.current = reducer(before, action);
     // Derived output that adds or removes a code card (an identification) is saved like an edit, so a
     // switch saves it first. A re-order alone is saved quietly by the next save.
-    if (derived && readOnlyCase) noteShownSelection(engineCaseId(), selectedArticles(latestCase.current));
+    if (derived && readOnlyCase) noteShownSelection(engineCaseId(), selectedArticles(before), selectedArticles(latestCase.current));
     else if (derived && selectionSet(latestCase.current) !== selectionSet(before) && (!goneCase.current || goneCase.current !== engineCaseId())) setSaveStatus("unsaved");
     reduce(action);
   }, [publishCheck]);
