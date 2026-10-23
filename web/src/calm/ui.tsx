@@ -39,6 +39,16 @@ export function Eyebrow({ children, plain = false, as: Tag = "span", id }: { chi
   return <Tag id={id} className={`cf-eyebrow${plain ? " is-plain" : ""}`}>{children}</Tag>;
 }
 
+/** The one standing boundary: a short chip that opens a short explanation (touch, keyboard and pointer). */
+export function CompletenessNote() {
+  return (
+    <details className="cf-complete">
+      <summary>Completeness only</summary>
+      <p>Checks administrative completeness. It never says the design complies or is safe.</p>
+    </details>
+  );
+}
+
 export function Kbd({ children }: { children: ReactNode }) {
   return <span className="cf-kbd" aria-hidden="true">{children}</span>;
 }

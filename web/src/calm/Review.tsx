@@ -15,7 +15,7 @@ import { useSession } from "./session";
 import { useDeckExtras } from "./useDeckExtras";
 import { useRelevance } from "./useRelevance";
 import { Icon24, type IconName } from "./icons";
-import { CIcon, Dot, Eyebrow, Kbd, type DotTone } from "./ui";
+import { CIcon, CompletenessNote, Dot, Eyebrow, Kbd, type DotTone } from "./ui";
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
@@ -93,7 +93,7 @@ export function NothingYet({ title, lede, page }: { title: string; lede: string;
             </li>
           ))}
         </ul>
-        <p className="cf-faint cf-small cf-disclaimer">Checks administrative completeness only. It never says the design complies or is safe.</p>
+        <CompletenessNote />
       </aside>
     </div>
   );
@@ -294,7 +294,7 @@ function CaseReview() {
             <a className="cf-btn is-primary is-grow" href="#/application">Preview application {checked && <Kbd>↵</Kbd>}</a>
           )}
         </div>
-        <p className="cf-faint cf-small cf-disclaimer">Checks administrative completeness only. It never says the design complies or is safe.</p>
+        <CompletenessNote />
       </aside>
     </div>
   );

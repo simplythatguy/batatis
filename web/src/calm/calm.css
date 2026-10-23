@@ -2537,6 +2537,35 @@ body {
   margin: 14px 2px 0;
 }
 
+/* "Completeness only": a quiet chip; the one sentence opens on demand. */
+.cf-complete {
+  margin: 14px 2px 0;
+  font-size: 12.5px;
+  color: var(--cf-text-3);
+}
+
+.cf-complete summary {
+  display: inline-block;
+  padding: 3px 9px;
+  border: 1px solid var(--cf-line);
+  border-radius: 999px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.cf-complete summary::-webkit-details-marker {
+  display: none;
+}
+
+.cf-complete p {
+  margin: 8px 2px 0;
+  line-height: 1.5;
+}
+
+.cf-side-notice > summary {
+  cursor: pointer;
+}
+
 /* —— 04 Application —— */
 
 .cf-doc {

@@ -12,7 +12,7 @@ import { gapKey } from "./deck";
 import { calmHref } from "./routes";
 import { EngineerCallout } from "./Review";
 import { FormPlaceholder, FormViewer } from "./FormViewer";
-import { CIcon, Dot, Eyebrow } from "./ui";
+import { CIcon, CompletenessNote, Dot, Eyebrow } from "./ui";
 import { retryExtras, useCaseExtras } from "./caseExtras";
 
 const when = (iso: string | null) => {
@@ -39,11 +39,11 @@ function SubmitPanel() {
   const [blockers, setBlockers] = useState<{ id: string; field: string | null; label: string }[]>([]);
   if (account.phase !== "signed-in") {
     return account.phase === "signed-out"
-      ? <p className="cf-faint cf-small cf-submit-note">Submitting to the authority needs an account. <a className="cf-inline-link" href="#/signin">Sign in</a>, or download the PDF.</p>
-      : <p className="cf-faint cf-small cf-submit-note">Submitting isn’t available on this server. You can still download the PDF.</p>;
+      ? <p className="cf-faint cf-small cf-submit-note"><a className="cf-inline-link" href="#/signin">Sign in</a> to submit.</p>
+      : <p className="cf-faint cf-small cf-submit-note">Submitting isn’t available here.</p>;
   }
   if (!engineId || !app) {
-    return <p className="cf-faint cf-small cf-submit-note" role="status">{saveStatus === "failed" || saveStatus === "gone" ? "Submit becomes available once this application is saved." : "Saving your application…"}</p>;
+    return <p className="cf-faint cf-small cf-submit-note" role="status">{saveStatus === "failed" || saveStatus === "gone" ? "Save to enable Submit." : "Saving your application…"}</p>;
   }
   const where = authorityName(app.authority || c.authority) || "";
   if (app.status !== "draft" && app.status !== "returned") {
@@ -53,7 +53,7 @@ function SubmitPanel() {
   // application: they close the official PDF, not submission. The engine's submit check agrees.
   const blocking = gaps.filter((g) => g.severity === "blocking" && !isProfessionalHold(g));
   const routed = gaps.some((g) => g.severity === "blocking" && isProfessionalHold(g));
-  const reason = !c.authority ? "Choose Calgary or Edmonton as the reviewing authority before submitting. Not sure yet keeps it open." : blocking.length ? `${blocking.length} required ${blocking.length === 1 ? "item is" : "items are"} missing.` : "";
+  const reason = !c.authority ? "Choose a reviewing office." : blocking.length ? `${blocking.length} required ${blocking.length === 1 ? "item" : "items"} missing.` : "";
 
   async function submit() {
     if (reason || busy || !app) return;
@@ -89,10 +89,10 @@ function SubmitPanel() {
           {reason} <a className="cf-inline-link" href={!c.authority ? "#/questions?focus=authority" : "#/review"}>{!c.authority ? "Pick one" : "See them"}</a>
         </p>
       )}
-      {!reason && routed && <p className="cf-faint cf-small">The professional question goes to the officer with your application.</p>}
+      {!reason && routed && <p className="cf-faint cf-small">The professional question goes with your application.</p>}
       {blockers.length > 0 && (
         <div role="status">
-          <p className="cf-small">The authority’s check found {blockers.length} required {blockers.length === 1 ? "item" : "items"} still missing:</p>
+          <p className="cf-small">{blockers.length} required {blockers.length === 1 ? "item" : "items"} still missing:</p>
           <ul className="cf-rows is-compact">
             {blockers.map((b) => (
               <li key={b.id} className="cf-row">
@@ -119,8 +119,7 @@ function SubmittedStatus({ app, where }: { app: ApplicationSummary; where: strin
       </p>
       <p className="cf-faint cf-small">
         {app.submitted_at ? `Submitted ${when(app.submitted_at)}. ` : ""}
-        {app.reviewer?.name && app.status === "in_review" ? `${app.reviewer.name} is reviewing it. ` : STATUS_TEXT[app.status] ? `${STATUS_TEXT[app.status]} ` : ""}
-        {s.note}
+        {app.reviewer?.name && app.status === "in_review" ? `${app.reviewer.name} is reviewing it.` : STATUS_TEXT[app.status] ?? s.note}
       </p>
     </div>
   );
@@ -133,10 +132,9 @@ function ApplicationEmpty() {
       <FormPlaceholder />
       <aside className="cf-glass cf-side" aria-label="Download">
         <Eyebrow plain>Status</Eyebrow>
-        <div className="cf-side-big">Nothing filled in yet.<br /><span className="cf-muted">Every section is still missing.</span></div>
-        <p className="cf-faint cf-small">Describe what you’re building. Batatis fills in what it can and asks you for the rest.</p>
+        <div className="cf-side-big">Nothing filled in yet.</div>
         <a className="cf-btn is-primary is-center" href="#/">Describe your project</a>
-        <p className="cf-faint cf-small cf-disclaimer">This checks administrative completeness. It does not say the design complies or is safe.</p>
+        <CompletenessNote />
       </aside>
     </div>
   );
@@ -153,7 +151,7 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
   const account = useAccount();
   const { app, locked } = useCurrentApplication();
   const signedIn = account.phase === "signed-in";
-  const { c, gaps, checkStatus, checkNote, completenessRecord, engineId, factsEpoch } = useCase();
+  const { c, gaps, checkStatus, checkNote, engineId, factsEpoch } = useCase();
   const extras = useCaseExtras(engineId, factsEpoch, c.authority);
   const ex = useApplicationExport();
   const draftBtn = useRef<HTMLButtonElement>(null);
@@ -185,8 +183,7 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
   };
   const pack = extras.pack?.pack ?? null;
   const exportNotices = pack?.notices.filter((n) => n.surfaces.includes("export_header") || n.surfaces.includes("export_appendix")) ?? [];
-  const filled = pack?.forms.find((f) => f.export === "supported");
-
+  
   const headline = ex.officialReady ? "Ready for the official PDF." : "You can download a draft.";
   const sub = ex.officialReady ? "Nothing required is missing." : "Official PDF on hold.";
   const showStatus = ex.exportAttempted || ex.stage !== "idle";
@@ -215,10 +212,9 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
         <button ref={draftBtn} type="button" className={`cf-btn is-center${signedIn ? "" : " is-primary"}`} disabled={ex.busy || Boolean(c.exampleId)} onClick={() => void ex.prepare(true)}>
           {ex.stage === "preparing" && ex.draftIntent ? "Preparing draft…" : "Download draft PDF"}
         </button>
-        <button type="button" className="cf-btn is-center" disabled={ex.busy || !ex.officialReady} data-requires-no-blocking-gaps={ex.blocking.length ? "true" : undefined} onClick={() => void ex.prepare(false)}>
+        <button type="button" className="cf-btn is-center" disabled={ex.busy || !ex.officialReady} data-requires-no-blocking-gaps={ex.blocking.length ? "true" : undefined} title={ex.officialReady ? undefined : "Unlocks after a current check finds no required items."} onClick={() => void ex.prepare(false)}>
           {ex.stage === "preparing" && !ex.draftIntent ? "Preparing PDF…" : "Official PDF"}
         </button>
-        {!ex.officialReady && <p className="cf-faint cf-small">The Official PDF unlocks after a current check finds no required items. Drafts can be incomplete.</p>}
         {blockers.length > 0 && !locked && (
           <div className="cf-side-blockers">
             <p className="cf-small">Still needed for the Official PDF:</p>
@@ -234,23 +230,22 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
             {blockers.length > 5 && <p className="cf-faint cf-small">And {blockers.length - 5} more. <a className="cf-inline-link" href="#/review">See all on Review</a></p>}
           </div>
         )}
-        {filled && <p className="cf-faint cf-small">Batatis fills {filled.title}{filled.version ? ` (${filled.version})` : ""}.</p>}
         {!pack && c.authority && engineId && (
           extras.failed.case
-            ? <p className="cf-note cf-small" role="status"><Dot tone="warning" />The office’s notes for the download didn’t load. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
+            ? <p className="cf-note cf-small" role="status"><Dot tone="warning" />Office notes didn’t load. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
             : extras.pack
-              // Loaded, and Batatis has no notes for this office: say so, and what still applies.
-              ? <p className="cf-faint cf-small" role="status">Batatis has no local notes for this office yet. The download uses the standard variance form; ask the office how they want it submitted.</p>
-              : <p className="cf-faint cf-small" role="status">Loading the office’s notes for the download…</p>
+              // Loaded, and no notes for this office: nothing to show.
+              ? null
+              : <p className="cf-faint cf-small" role="status">Loading office notes…</p>
         )}
         {exportNotices.map((n) => (
-          <div key={n.id} className="cf-side-notice" role="note">
-            <p className="cf-side-notice-h">{n.heading}</p>
+          <details key={n.id} className="cf-side-notice">
+            <summary className="cf-side-notice-h">{n.heading}</summary>
             <p>{n.message}</p>
             {n.sources[0] && <p><a className="cf-inline-link" href={n.sources[0].url} target="_blank" rel="noreferrer">{n.sources[0].title}</a></p>}
-          </div>
+          </details>
         ))}
-        <button type="button" className="cf-btn is-ghost is-sm is-center" onClick={ex.downloadRecord}>Download a text record</button>
+        <button type="button" className="cf-btn is-ghost is-sm is-center" title="Not the official form" onClick={ex.downloadRecord}>Text record</button>
 
         {showStatus && (
           <div className="cf-side-status" role="status">
@@ -258,7 +253,7 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
             <p>{ex.statusText}</p>
             {ex.stage === "ready" && ex.file && (
               <>
-                <p className="cf-faint">Download started: {ex.file.name}. {ex.file.draft ? "This draft may have missing or unconfirmed information." : UNSIGNED_LINE}</p>
+                <p className="cf-faint" title={ex.file.draft ? undefined : UNSIGNED_LINE}>{ex.file.draft ? "Draft: may be incomplete." : "Unsigned. Officer Part 2 is blank."}</p>
                 <button type="button" className="cf-btn is-sm" onClick={ex.downloadAgain}>Download again</button>
               </>
             )}
@@ -272,9 +267,8 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
             {ex.reasons.length > 0 ? <ul>{ex.reasons.map((r) => <li key={r}>{r}</li>)}</ul> : <p>{ex.tech}</p>}
           </details>
         )}
-        {completenessRecord && <p className="cf-faint cf-small">Record: {completenessRecord.label}. {completenessRecord.note}</p>}
         <EngineerCallout c={c} gaps={gaps} />
-        <p className="cf-faint cf-small cf-disclaimer">This checks administrative completeness. It does not say the design complies or is safe.</p>
+        <CompletenessNote />
       </aside>
     </div>
   );
