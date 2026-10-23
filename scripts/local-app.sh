@@ -81,11 +81,14 @@ start() {
     (cd "$root/web" && npm ci >"$logs/npm-ci.log" 2>&1) || { echo "local-app: npm ci failed; see $logs/npm-ci.log" >&2; return 1; }
   fi
   # Each worktree keeps its own cases so servers never share or wipe one another's data.
-  (cd "$root" && BATATIS_CASES="${BATATIS_CASES:-$root/.data/cases.sqlite}" nohup "$(python_bin)" -m uvicorn engine.api:app \
-    --host 127.0.0.1 --port $ENGINE_PORT >"$logs/engine.log" 2>&1 &)
-  (cd "$root/web" && nohup npm run dev -- --port $WEB_PORT --strictPort --host 127.0.0.1 >"$logs/web.log" 2>&1 &)
+  # exec replaces each subshell with its server, and stdin/stdout/stderr are detached, so nothing keeps the
+  # caller's output pipe open: `scripts/local-app.sh start | tail` returns as soon as the servers are up.
+  py=$(python_bin)
+  ( cd "$root" && exec env BATATIS_CASES="${BATATIS_CASES:-$root/.data/cases.sqlite}" nohup "$py" -m uvicorn engine.api:app \
+      --host 127.0.0.1 --port $ENGINE_PORT >"$logs/engine.log" 2>&1 </dev/null ) &
+  ( cd "$root/web" && exec nohup npm run dev -- --port $WEB_PORT --strictPort --host 127.0.0.1 >"$logs/web.log" 2>&1 </dev/null ) &
   for i in $(seq 1 60); do
-    if curl -fsS -o /dev/null "http://127.0.0.1:$ENGINE_PORT/docs" 2>/dev/null && curl -fsS -o /dev/null "http://127.0.0.1:$WEB_PORT/" 2>/dev/null; then
+    if curl -fsS -m 3 -o /dev/null "http://127.0.0.1:$ENGINE_PORT/docs" 2>/dev/null && curl -fsS -m 3 -o /dev/null "http://127.0.0.1:$WEB_PORT/" 2>/dev/null; then
       echo "local-app: up. Web http://localhost:$WEB_PORT   Engine http://127.0.0.1:$ENGINE_PORT/docs   logs $logs"
       return 0
     fi
