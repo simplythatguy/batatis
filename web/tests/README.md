@@ -36,6 +36,19 @@ races, stale provider completions, and evidence replacement/deletion generations
 They do not certify PostgreSQL, provider execution, deployment, official export
 eligibility, or the separately queued explicit-check and guided-flow UX changes.
 
+Saved code-check selections (docs/api/selected-articles.md) use the same harness:
+
+```sh
+BATATIS_CODEDB=/absolute/path/to/codedb.sqlite \
+SYNC_WEB_BASE=http://127.0.0.1:15126 \
+python3 scripts/test-sync.py --selection
+```
+
+`selection.integration.mjs` saves two synthetic applications with disjoint cards (unanswered,
+No, Not sure, a pending Yes), switches and reloads, removes and clears cards, expands an article,
+reopens a legacy case and checks delayed saves and reads, refused writes, conflicts, deletion,
+a read-only case and another account (synthetic password accounts on the disposable engine).
+
 R4 regression coverage uses the same disposable engine and production Vite app:
 
 ```sh
