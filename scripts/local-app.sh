@@ -43,6 +43,12 @@ python_bin() {
   command -v python3
 }
 
+# Give each server its own session. nohup alone ignores SIGHUP but leaves it in an agent command's
+# process group, which some runners terminate after the start command returns.
+detached() {
+  "$py" -c 'import subprocess, sys; subprocess.Popen(sys.argv[1:], stdin=subprocess.DEVNULL, start_new_session=True)' "$@"
+}
+
 stop() {
   local force=0 port pid dir ppid i
   [ "${1:-}" = "--force" ] && force=1
@@ -81,12 +87,12 @@ start() {
     (cd "$root/web" && npm ci >"$logs/npm-ci.log" 2>&1) || { echo "local-app: npm ci failed; see $logs/npm-ci.log" >&2; return 1; }
   fi
   # Each worktree keeps its own cases so servers never share or wipe one another's data.
-  # exec replaces each subshell with its server, and stdin/stdout/stderr are detached, so nothing keeps the
-  # caller's output pipe open: `scripts/local-app.sh start | tail` returns as soon as the servers are up.
+  # The helper exits after spawning a new session; all server output goes to files, so it also releases
+  # the caller's output pipe: `scripts/local-app.sh start | tail` returns as soon as the servers are up.
   py=$(python_bin)
-  ( cd "$root" && exec env BATATIS_CASES="${BATATIS_CASES:-$root/.data/cases.sqlite}" nohup "$py" -m uvicorn engine.api:app \
-      --host 127.0.0.1 --port $ENGINE_PORT >"$logs/engine.log" 2>&1 </dev/null ) &
-  ( cd "$root/web" && exec nohup npm run dev -- --port $WEB_PORT --strictPort --host 127.0.0.1 >"$logs/web.log" 2>&1 </dev/null ) &
+  ( cd "$root" && BATATIS_CASES="${BATATIS_CASES:-$root/.data/cases.sqlite}" detached "$py" -m uvicorn engine.api:app \
+      --host 127.0.0.1 --port $ENGINE_PORT >"$logs/engine.log" 2>&1 </dev/null )
+  ( cd "$root/web" && detached npm run dev -- --port $WEB_PORT --strictPort --host 127.0.0.1 >"$logs/web.log" 2>&1 </dev/null )
   for i in $(seq 1 60); do
     if curl -fsS -m 3 -o /dev/null "http://127.0.0.1:$ENGINE_PORT/docs" 2>/dev/null && curl -fsS -m 3 -o /dev/null "http://127.0.0.1:$WEB_PORT/" 2>/dev/null; then
       echo "local-app: up. Web http://localhost:$WEB_PORT   Engine http://127.0.0.1:$ENGINE_PORT/docs   logs $logs"
