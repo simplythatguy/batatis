@@ -329,6 +329,18 @@ try {
     await p.evaluate(() => new Promise(r => setTimeout(r, 1200)));     // past the 500 ms automatic save
     assert.deepEqual(await sent(sentId), [], 'nothing is written to a read-only application');
     assert.equal((await status(p)).save, 'saved', 'the expansion is not an unsaved change');
+    // Card changes the applicant could still reach (the legacy references screen's Remove) are refused, not
+    // applied and then silently dropped: the screen keeps showing what is saved.
+    const shown = await cards(p);
+    await dispatch(p, { type: 'removeCandidate', id: 'provision-9.25.2.2.(2)' });
+    await dispatch(p, { type: 'answerCandidate', id: 'provision-9.25.2.2.(1)', answer: 'no' });
+    await dispatch(p, { type: 'answerCandidate', id: 'provision-9.25.2.2.(3)', answer: 'not-sure' });
+    await dispatch(p, { type: 'addCandidate', candidate: card('9.36.2.6.(1)') });
+    await p.evaluate(() => new Promise(r => setTimeout(r, 900)));
+    assert.deepEqual(await cards(p), shown, 'a read-only application\'s cards do not change on screen');
+    assert.equal(await p.evaluate(() => window.caseStore.saveDraft()), sentId, 'an explicit save has nothing to send');
+    assert.deepEqual(await sent(sentId), [], 'still nothing written');
+    assert.equal((await status(p)).save, 'saved');
     const switched = await p.evaluate(async other => {
       const { switchApplication } = await import('/src/calm/libraryContext.ts');
       const s = window.caseStore;

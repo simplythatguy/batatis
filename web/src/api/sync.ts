@@ -31,7 +31,8 @@ const conflicts = new Set<string>();
 const jurisdictions = new Map<string, string | null>();
 /** The code-check selection the engine acknowledged (or holds as of opening), as `selectionKey`. */
 const selections = new Map<string, string>();
-/** Opened cases their owner cannot edit (sent, in review or closed): their selection is never written. */
+/** Opened cases their owner cannot edit (sent, in review or closed): their selection is never written. Cards
+ * shown on them change only by derived display (a lookup expanding an article), recorded with noteShownSelection. */
 const readOnly = new Set<string>();
 /** Evidence slots the engine has shown for each case, from acknowledged writes and explicit reads. */
 const ledgerSlots = new Map<string, Set<string>>();
@@ -253,8 +254,15 @@ function noteEditable(saved: EngineCase) {
   else readOnly.delete(saved.id);
 }
 
-/** True when the opened case is read-only for its owner: nothing derived on screen is saved to it. */
+/** True when the opened case is read-only for its owner: its code cards are not the applicant's to change. */
 export const isReadOnlyCase = (caseId: string | null) => Boolean(caseId && readOnly.has(caseId));
+
+/** On a read-only case, the cards a lookup derived are what is shown: nothing to save. */
+export function noteShownSelection(caseId: string | null, list: SelectedArticleInput[]) {
+  if (caseId && readOnly.has(caseId)) selections.set(caseId, selectionKey(list));
+}
+
+const READ_ONLY_SELECTION = "This application is read-only, so the code check change wasn’t saved.";
 
 /** Equal selections, order included. */
 export const selectionKey = (list: SelectedArticleInput[]) => JSON.stringify(list.map((s) => [s.id, s.provision, s.answer ?? null, Boolean(s.pending)]));
@@ -275,8 +283,9 @@ export async function pushSelectedArticles(caseId: string, list: SelectedArticle
   const token = generation;
   const key = selectionKey(list);
   const acked = selections.get(caseId);
-  // A read-only case's cards only change by derived display (a lookup expanding an article): never written.
-  if (readOnly.has(caseId) || acked === key || (acked === undefined && !list.length)) return null;
+  if (acked === key || (acked === undefined && !list.length)) return null;
+  // Never written, and never reported as saved: the owner cannot change a read-only case's cards.
+  if (readOnly.has(caseId)) return READ_ONLY_SELECTION;
   const expected = known.get(caseId);
   if (conflicts.has(caseId) || expected === undefined) throw new EngineError(409, CONFLICT_TEXT, "No acknowledged case version to send.");
   try {
