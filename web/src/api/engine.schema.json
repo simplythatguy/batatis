@@ -369,6 +369,150 @@
       "title": "ArticleDecision",
       "type": "object"
     },
+    "AssistAttachment": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "content_state": {
+          "enum": [
+            "not_read",
+            "text_excerpt"
+          ],
+          "title": "Content State",
+          "type": "string"
+        },
+        "file_id": {
+          "title": "File Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "pages": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Pages",
+          "type": "array"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "truncated": {
+          "title": "Truncated",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "case_id",
+        "file_id",
+        "name",
+        "content_state",
+        "pages",
+        "truncated",
+        "reason"
+      ],
+      "title": "AssistAttachment",
+      "type": "object"
+    },
+    "AssistContextBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "attachment_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Attachment Ids",
+          "type": "array"
+        },
+        "case_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Case Id"
+        },
+        "case_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Case Version"
+        },
+        "context_id": {
+          "title": "Context Id",
+          "type": "string"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "user_id": {
+          "title": "User Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_id",
+        "context_id",
+        "revision",
+        "case_id",
+        "case_version",
+        "attachment_ids"
+      ],
+      "title": "AssistContextBinding",
+      "type": "object"
+    },
+    "AssistDocumentReference": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "file_id": {
+          "title": "File Id",
+          "type": "string"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "quote": {
+          "title": "Quote",
+          "type": "string"
+        }
+      },
+      "required": [
+        "case_id",
+        "file_id",
+        "page",
+        "quote"
+      ],
+      "title": "AssistDocumentReference",
+      "type": "object"
+    },
     "AssistFocus": {
       "additionalProperties": false,
       "properties": {
@@ -410,6 +554,7 @@
             "settings",
             "notifications",
             "accuracy",
+            "comments",
             "question-authority",
             "question-owner",
             "question-representative",
@@ -452,6 +597,16 @@
     "AssistRequest": {
       "additionalProperties": false,
       "properties": {
+        "attachment_ids": {
+          "items": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 3,
+          "title": "Attachment Ids",
+          "type": "array"
+        },
         "case_id": {
           "anyOf": [
             {
@@ -465,6 +620,34 @@
           ],
           "default": null,
           "title": "Case Id"
+        },
+        "case_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Version"
+        },
+        "context_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "minLength": 16,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context Id"
         },
         "destinations": {
           "items": {
@@ -482,6 +665,7 @@
               "settings",
               "notifications",
               "accuracy",
+              "comments",
               "question-authority",
               "question-owner",
               "question-representative",
@@ -542,6 +726,20 @@
           "title": "Question",
           "type": "string"
         },
+        "revision": {
+          "anyOf": [
+            {
+              "maximum": 1000000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revision"
+        },
         "screen": {
           "maxLength": 100,
           "minLength": 1,
@@ -562,11 +760,36 @@
           "title": "Answer",
           "type": "string"
         },
+        "attachments": {
+          "items": {
+            "$ref": "#/$defs/AssistAttachment"
+          },
+          "title": "Attachments",
+          "type": "array"
+        },
         "cited": {
           "items": {
             "type": "string"
           },
           "title": "Cited",
+          "type": "array"
+        },
+        "context": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AssistContextBinding"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "document_references": {
+          "items": {
+            "$ref": "#/$defs/AssistDocumentReference"
+          },
+          "title": "Document References",
           "type": "array"
         },
         "navigation": {
@@ -597,7 +820,10 @@
         "cited",
         "removed_citations",
         "notice",
-        "navigation"
+        "navigation",
+        "context",
+        "attachments",
+        "document_references"
       ],
       "title": "AssistResult",
       "type": "object"
@@ -9739,6 +9965,7 @@
               "settings",
               "notifications",
               "accuracy",
+              "comments",
               "question-authority",
               "question-owner",
               "question-representative",

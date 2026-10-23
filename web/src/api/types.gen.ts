@@ -68,27 +68,60 @@ export interface ArticleDecision {
   open_question_id: string | null;
 }
 
+export interface AssistAttachment {
+  case_id: string;
+  content_state: "not_read" | "text_excerpt";
+  file_id: string;
+  name: string;
+  pages: number[];
+  reason: string | null;
+  truncated: boolean;
+}
+
+export interface AssistContextBinding {
+  attachment_ids: string[];
+  case_id: string | null;
+  case_version: number | null;
+  context_id: string;
+  revision: number;
+  user_id: string;
+}
+
+export interface AssistDocumentReference {
+  case_id: string;
+  file_id: string;
+  page: number;
+  quote: string;
+}
+
 export interface AssistFocus {
   id: string;
   kind: string;
 }
 
 export interface AssistNavigation {
-  destination: "applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "officer-view" | "settings" | "notifications" | "accuracy" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out";
+  destination: "applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "officer-view" | "settings" | "notifications" | "accuracy" | "comments" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out";
 }
 
 export interface AssistRequest {
+  attachment_ids?: string[];
   case_id?: string | null;
-  destinations?: ("applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "officer-view" | "settings" | "notifications" | "accuracy" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out")[];
+  case_version?: number | null;
+  context_id?: string | null;
+  destinations?: ("applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "officer-view" | "settings" | "notifications" | "accuracy" | "comments" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out")[];
   focus?: AssistFocus | null;
   history?: AssistTurn[];
   question: string;
+  revision?: number | null;
   screen: string;
 }
 
 export interface AssistResult {
   answer: string;
+  attachments: AssistAttachment[];
   cited: string[];
+  context: AssistContextBinding | null;
+  document_references: AssistDocumentReference[];
   navigation: AssistNavigation | null;
   notice: string;
   removed_citations: string[];
@@ -1528,7 +1561,7 @@ export interface VoiceScope {
   case_id?: string | null;
   case_version?: number | null;
   context_id: string;
-  destinations?: ("applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "officer-view" | "settings" | "notifications" | "accuracy" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out")[];
+  destinations?: ("applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "officer-view" | "settings" | "notifications" | "accuracy" | "comments" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out")[];
   focus?: AssistFocus | null;
   revision?: number;
   screen: string;
