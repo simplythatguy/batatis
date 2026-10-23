@@ -31,7 +31,7 @@ export default defineConfig(({ mode }) => {
     plugins: [dropRemoteTokenFonts(), react()],
     server: {
       fs: { allow: [".."] },
-      proxy: { "/api": { target: ENGINE, changeOrigin: true, rewrite: (p) => p.replace(/^\/api/, "") } },
+      proxy: { "/api": { target: ENGINE, changeOrigin: true, ws: true, rewrite: (p) => p.replace(/^\/api/, "") } },
     },
   };
 });
