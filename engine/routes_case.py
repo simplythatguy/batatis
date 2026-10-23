@@ -20,6 +20,7 @@ from .llm_gate import client_ip_from, search_retry_after
 from .models import Case, Jurisdiction, SelectedArticle
 from .store import CaseBackend, VersionConflict
 from .account_models import reviewing_authority
+from .access import enforce_mutation
 from .identify.title import normalize_title
 
 
@@ -88,6 +89,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         if snapshot is None:
             raise HTTPException(404, 'case not found')
         case, version = snapshot
+        enforce_mutation(case)
         if body.expected_version != version:
             raise HTTPException(409, 'case was updated concurrently')
         if body.selected_articles:

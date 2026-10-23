@@ -263,6 +263,37 @@ def test_list_preferences_are_unchanged_by_selection_save(context, actors):
     assert store.list_application_preferences(users['owner'].id)[case.id] == original
 
 
+def test_edit_revocation_before_snapshot_wins_over_stale_version_even_with_reviewer_read_access(context, actors, monkeypatch):
+    _, store = context
+    clients, users = actors
+    case = store.put(Case(owner_id=users['reviewer'].id, authority='edmonton'))
+    get_snapshot = store.get_snapshot
+    first = True
+
+    def after_guard(case_id):
+        nonlocal first
+        if first and case_id == case.id:
+            first = False
+            # There is no public ownership-transfer route. Simulate the committed transfer
+            # after the public edit guard; the old owner is now only an authorized reviewer.
+            latest, version = get_snapshot(case_id)
+            latest.owner_id = users['other'].id
+            latest.status = 'submitted'
+            store.put(latest, expected_version=version)
+        return get_snapshot(case_id)
+
+    monkeypatch.setattr(store, 'get_snapshot', after_guard)
+    response = save(clients['reviewer'], case, [selection()])
+    assert response.status_code == 404, response.text
+    assert response.json()['detail'] == 'case not found'
+    assert 'selected_articles' not in response.text and case.id not in response.text
+    assert save(clients['reviewer'], case, [selection()]).status_code == 404
+    assert clients['reviewer'].get(f'/cases/{case.id}').status_code == 200
+    loaded = store.get(case.id)
+    assert loaded.owner_id == users['other'].id and loaded.status == 'submitted'
+    assert loaded.version == case.version + 1 and loaded.selected_articles is None
+
+
 def test_two_simultaneous_selection_snapshots_have_one_winner(context, monkeypatch):
     _, store = context
     case = store.put(Case())
