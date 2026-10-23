@@ -59,7 +59,9 @@ class GrokVoice:
     def configuration(instructions: str) -> dict:
         return {'type': 'session.update', 'session': {'model': MODEL, 'voice': 'Eve',
             'instructions': instructions, 'tools': [], 'resumption': {'enabled': False},
-            'turn_detection': {'type': 'server_vad'},
+            # Automatic VAD responses carry no triggering input identity. Manual
+            # commits let the relay own the turn and response metadata instead.
+            'turn_detection': {'type': None},
             'audio': {'input': {'format': {'type': 'audio/pcm', 'rate': PCM_RATE}},
                       'output': {'format': {'type': 'audio/pcm', 'rate': PCM_RATE}}}}}
 
@@ -69,7 +71,7 @@ class GrokVoice:
             for _ in range(10):
                 event = await self.receive()
                 if event['type'] == 'session.updated':
-                    self.check_session(event)
+                    self.check_session(event, manual=True)
                     return
                 if event['type'] == 'session.created':
                     self.check_session(event)
@@ -78,9 +80,12 @@ class GrokVoice:
         raise VoiceFailure()
 
     @staticmethod
-    def check_session(event: dict):
+    def check_session(event: dict, *, manual=False):
         session = event.get('session')
         if not isinstance(session, dict) or session.get('model') != MODEL or session.get('tools', []):
+            raise VoiceFailure()
+        if manual and (not isinstance(session.get('turn_detection'), dict)
+                       or session['turn_detection'].get('type', 'missing') is not None):
             raise VoiceFailure()
 
     async def send(self, event: dict):

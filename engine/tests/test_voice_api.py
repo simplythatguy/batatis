@@ -57,6 +57,10 @@ def voice_app(tmp_path, monkeypatch):
             self.sent = []
             self.aborted = False
             self.closed = 0
+            self.event_number = 0
+            self.next_item = 'u'
+            self.metadata = None
+            self.response_metadata = {}
             providers.append(self)
 
         async def open(self):
@@ -67,6 +71,20 @@ def voice_app(tmp_path, monkeypatch):
 
         async def send(self, event):
             self.sent.append(event)
+            self.event_number += 1
+            ack = {'event_id': f'synthetic-{self.event_number}'}
+            if event['type'] == 'input_audio_buffer.clear':
+                await self.events.put(dict(ack, type='input_audio_buffer.cleared'))
+            elif event['type'] == 'input_audio_buffer.commit':
+                await self.events.put(dict(ack, type='input_audio_buffer.committed', item_id=self.next_item))
+            elif event['type'] == 'conversation.item.create':
+                await self.events.put(dict(ack, type='conversation.item.added', item=event['item']))
+            elif event['type'] == 'response.create':
+                self.metadata = event['response']['metadata']
+            elif event['type'] == 'response.cancel':
+                await self.events.put(dict(ack, type='response.done', response={
+                    'id': event['response_id'], 'status': 'cancelled',
+                    'metadata': self.response_metadata[event['response_id']]}))
 
         async def receive(self):
             return await self.events.get()
@@ -128,7 +146,32 @@ def begin(client, scope=None):
 
 
 def upstream(client, provider, **event):
+    # Existing synthetic response fixtures now supply the documented identity
+    # fields and echoed request metadata; explicit adversarial values are kept.
+    if event['type'] in {'response.created', 'response.done'}:
+        if event['type'] == 'response.created' and 'metadata' not in event['response']:
+            async def requested():
+                async with asyncio.timeout(1):
+                    while provider.metadata is None:
+                        await asyncio.sleep(0.001)
+            client.portal.call(requested)
+        event['response'] = {'metadata': provider.metadata, **event['response']}
+        if event['type'] == 'response.created':
+            provider.response_metadata[event['response']['id']] = event['response']['metadata']
+    if event['type'].startswith('response.') and any(name in event['type'] for name in ('audio.', 'transcript.', 'text.')):
+        event = {'item_id': 'out', 'output_index': 0, 'content_index': 0, **event}
     client.portal.call(provider.events.put, event)
+
+
+def commit_turn(client, provider, socket, started, item='u', revision=0):
+    provider.next_item = item
+    provider.metadata = None
+    bound = {'session_id': started['session_id'], 'context_id': SCOPE['context_id'], 'revision': revision}
+    socket.send_json(dict(bound, type='audio.append', audio=PCM))
+    assert socket.receive_json()['type'] == 'audio.clear'
+    socket.send_json(dict(bound, type='audio.commit'))
+    acknowledged = socket.receive_json()
+    assert acknowledged['type'] == 'audio.committed' and acknowledged['turn_id'] == item
 
 
 def test_only_a_completed_explicit_utterance_can_offer_native_navigation(voice_app):
@@ -137,8 +180,7 @@ def test_only_a_completed_explicit_utterance_can_offer_native_navigation(voice_a
     try:
         assert started['type'] == 'session.started'
         provider = providers[0]
-        upstream(client, provider, type='input_audio_buffer.speech_started', item_id='utterance-1')
-        assert socket.receive_json()['type'] == 'audio.clear'
+        commit_turn(client, provider, socket, started, 'utterance-1')
         upstream(client, provider, type='conversation.item.input_audio_transcription.updated',
                  item_id='utterance-1', transcript='Open settings')
         upstream(client, provider, type='conversation.item.input_audio_transcription.completed',
@@ -147,7 +189,7 @@ def test_only_a_completed_explicit_utterance_can_offer_native_navigation(voice_a
         assert final['type'] == 'transcript.completed'
         assert final['navigation'] == {'destination': 'settings'}
         assert final['context_id'] == SCOPE['context_id'] and final['revision'] == 0
-        assert not provider.sent  # no model tool or mutation is executed
+        assert [event['type'] for event in provider.sent] == ['input_audio_buffer.append', 'input_audio_buffer.commit']
     finally:
         socket.__exit__(None, None, None)
 
@@ -198,8 +240,7 @@ def test_quoted_negated_hypothetical_mixed_and_external_speech_never_navigates(v
     client, _, providers = voice_app
     socket, started = begin(client)
     try:
-        upstream(client, providers[0], type='input_audio_buffer.speech_started', item_id='u')
-        assert socket.receive_json()['type'] == 'audio.clear'
+        commit_turn(client, providers[0], socket, started)
         upstream(client, providers[0], type='conversation.item.input_audio_transcription.completed',
                  item_id='u', transcript=question)
         assert socket.receive_json()['navigation'] is None
@@ -210,24 +251,22 @@ def test_quoted_negated_hypothetical_mixed_and_external_speech_never_navigates(v
 PCM = base64.b64encode(b'\0\0' * 240).decode()
 
 
-def scripted_response(client, provider, *, text='Choose the field you want to explain.', user_text='Explain this field.'):
-    upstream(client, provider, type='input_audio_buffer.speech_started', item_id='u')
+def scripted_response(client, provider, socket, started, *, text='Choose the field you want to explain.', user_text='Explain this field.'):
+    commit_turn(client, provider, socket, started)
+    upstream(client, provider, type='conversation.item.input_audio_transcription.completed',
+             item_id='u', transcript=user_text)
+    assert socket.receive_json()['type'] == 'transcript.completed'
     upstream(client, provider, type='response.created', response={'id': 'r'})
     upstream(client, provider, type='response.output_audio.delta', response_id='r', delta=PCM)
     upstream(client, provider, type='response.output_audio_transcript.done', response_id='r', transcript=text)
     upstream(client, provider, type='response.done', response={'id': 'r', 'status': 'completed'})
-    # Output arrived before the final input transcription. It must stay buffered.
-    upstream(client, provider, type='conversation.item.input_audio_transcription.completed',
-             item_id='u', transcript=user_text)
 
 
 def test_audio_waits_for_whole_utterance_and_complete_checked_response(voice_app):
     client, _, providers = voice_app
-    socket, _ = begin(client)
+    socket, started = begin(client)
     try:
-        scripted_response(client, providers[0])
-        assert socket.receive_json()['type'] == 'audio.clear'
-        assert socket.receive_json()['type'] == 'transcript.completed'
+        scripted_response(client, providers[0], socket, started)
         text = socket.receive_json()
         assert text['type'] == 'response.text' and text['withheld_audio'] is False
         audio = socket.receive_json()
@@ -247,11 +286,9 @@ def test_audio_waits_for_whole_utterance_and_complete_checked_response(voice_app
 ])
 def test_rejected_response_audio_is_never_sent(voice_app, text, user_text):
     client, _, providers = voice_app
-    socket, _ = begin(client)
+    socket, started = begin(client)
     try:
-        scripted_response(client, providers[0], text=text, user_text=user_text)
-        assert socket.receive_json()['type'] == 'audio.clear'
-        assert socket.receive_json()['type'] == 'transcript.completed'
+        scripted_response(client, providers[0], socket, started, text=text, user_text=user_text)
         result = socket.receive_json()
         assert result['type'] == 'response.text' and result['withheld_audio'] is True
         assert socket.receive_json()['type'] == 'response.done'  # no audio frame in between
@@ -262,7 +299,7 @@ def test_rejected_response_audio_is_never_sent(voice_app, text, user_text):
 @pytest.mark.parametrize('failure', ['error', 'model-mismatch', 'tool-prose'])
 def test_upstream_errors_mismatch_or_tools_fail_closed_without_payload_leaks(voice_app, failure, caplog):
     client, _, providers = voice_app
-    socket, _ = begin(client)
+    socket, started = begin(client)
     try:
         event = ({'type': 'error', 'message': 'synthetic-xai-secret PRIVATE SOURCE'} if failure == 'error' else
                  {'type': 'session.updated', 'session': {'model': 'grok-voice-latest'}} if failure == 'model-mismatch' else
@@ -281,16 +318,15 @@ def test_upstream_errors_mismatch_or_tools_fail_closed_without_payload_leaks(voi
 
 def test_logout_is_rechecked_before_completed_speech_can_plan_navigation(voice_app):
     client, store, providers = voice_app
-    socket, _ = begin(client)
+    socket, started = begin(client)
     try:
-        upstream(client, providers[0], type='input_audio_buffer.speech_started', item_id='u')
-        assert socket.receive_json()['type'] == 'audio.clear'
+        commit_turn(client, providers[0], socket, started)
         store.delete_session(digest(client.cookies.get(COOKIE)))
         upstream(client, providers[0], type='conversation.item.input_audio_transcription.completed',
                  item_id='u', transcript='Open settings')
         stopped = socket.receive_json()
         assert stopped['type'] == 'session.ended' and stopped['reason'] == 'authorization_changed'
-        assert not providers[0].sent
+        assert [event['type'] for event in providers[0].sent] == ['input_audio_buffer.append', 'input_audio_buffer.commit']
     finally:
         socket.__exit__(None, None, None)
 
@@ -383,8 +419,7 @@ def test_context_update_discards_old_utterances_and_restricts_new_plans_to_curre
     client, _, providers = voice_app
     socket, started = begin(client)
     try:
-        upstream(client, providers[0], type='input_audio_buffer.speech_started', item_id='old')
-        assert socket.receive_json()['type'] == 'audio.clear'
+        commit_turn(client, providers[0], socket, started, 'old')
         socket.send_json({'type': 'context.update', 'session_id': started['session_id'],
             'context_id': SCOPE['context_id'], 'revision': 0,
             'scope': {**SCOPE, 'revision': 1, 'destinations': ['notifications']}})
@@ -392,8 +427,7 @@ def test_context_update_discards_old_utterances_and_restricts_new_plans_to_curre
         assert socket.receive_json()['type'] == 'context.updated'
         upstream(client, providers[0], type='conversation.item.input_audio_transcription.completed',
                  item_id='old', transcript='Open settings')
-        upstream(client, providers[0], type='input_audio_buffer.speech_started', item_id='new')
-        assert socket.receive_json()['type'] == 'audio.clear'  # no old transcript/plan escaped
+        commit_turn(client, providers[0], socket, started, 'new', revision=1)
         upstream(client, providers[0], type='conversation.item.input_audio_transcription.completed',
                  item_id='new', transcript='Open settings')
         result = socket.receive_json()
@@ -476,6 +510,7 @@ def test_successful_pcm_input_is_the_only_client_audio_event_forwarded(voice_app
     try:
         socket.send_json({'type': 'audio.append', 'session_id': started['session_id'],
                           'context_id': SCOPE['context_id'], 'revision': 0, 'audio': PCM})
+        assert socket.receive_json()['type'] == 'audio.clear'
         socket.send_json({'type': 'audio.clear', 'session_id': started['session_id'],
                           'context_id': SCOPE['context_id'], 'revision': 0})
         assert socket.receive_json()['type'] == 'audio.clear'
@@ -529,7 +564,7 @@ def test_end_during_attachment_context_refresh_interrupts_preparation(voice_app,
         socket.send_json({'type': 'session.end', 'session_id': started['session_id'],
                           'context_id': SCOPE['context_id']})
         assert socket.receive_json()['reason'] == 'ended'
-        assert not providers[0].sent
+        assert [event['type'] for event in providers[0].sent] == ['input_audio_buffer.clear']
     finally:
         resume.set()
         socket.__exit__(None, None, None)

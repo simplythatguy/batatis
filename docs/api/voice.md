@@ -39,7 +39,9 @@ Official transport references checked 2026-10-22:
 [speech-to-speech guide](https://docs.x.ai/developers/model-capabilities/audio/speech-to-speech),
 [exact model/modalities](https://docs.x.ai/developers/models/grok-voice-3.0).
 The adapter uses server-only Bearer authentication, JSON audio events, PCM16 LE
-24 kHz mono, server VAD, no tools and no resumption. Redirects/proxies and wire
+24 kHz mono, manual turns (`turn_detection.type = null`), no tools and no resumption.
+The configuration acknowledgement must confirm manual mode and the exact model.
+Redirects/proxies and wire
 debug logging are disabled. Raw audio reaches the provider before redaction;
 do not describe live transcription as pre-redacted.
 
@@ -104,7 +106,8 @@ destinations or invalid identities are rejected. `session.started` is emitted
 only after authorization, allowance reservation, upstream exact-model confirmation
 and session configuration acknowledgement. It includes `expires_at`,
 `max_seconds`, the full voice notice and audio format. `expires_at` includes time
-already spent connecting/configuring; it is not a new 55-second lease.
+already spent preparing context and connecting/configuring; it is not a new
+55-second lease. The lifetime starts when explicit start is accepted.
 
 Subsequent commands use the ready/started `session_id`, original `context_id`,
 and current `revision`:
@@ -112,16 +115,38 @@ and current `revision`:
 | Type | Additional fields | Meaning |
 | --- | --- | --- |
 | `audio.append` | `audio`: base64 PCM16 LE | At most 32,000 decoded bytes per frame; valid, even byte count. |
-| `audio.clear` | none | Discard pending input and invalidate pending output; emits `audio.clear`. |
-| `response.cancel` | none | Cancel generating speech if present and clear browser playback; no native case work exists to cancel. |
+| `audio.commit` | none | Finish one complete utterance. Wait for `audio.committed` before appending the next utterance. |
+| `audio.clear` | none | Discard upstream pending input and cancel/drain pending output; `audio.clear` acknowledges the barrier. |
+| `response.cancel` | none | Same input/output invalidation barrier; no native case work exists to cancel. |
 | `context.update` | `scope`: complete replacement scope | Same context/case/version; revision must increase by exactly one. |
 | `session.end` | none; revision optional | End this socket's session; repeated close/end cleanup is harmless. |
+
+For a completed utterance, flush its PCM frames, then send:
+
+```json
+{"type":"audio.commit","session_id":"voice_...","context_id":"random-local-context-identity","revision":0}
+```
+
+Only one commit may be pending. The matching acknowledgement is:
+
+```json
+{"type":"audio.committed","session_id":"voice_...","context_id":"random-local-context-identity","revision":0,"case_id":null,"case_version":null,"turn_id":"upstream-input-item"}
+```
+
+This acknowledges an identified input item, not a transcript or navigation.
+Neither partial microphone buffers nor partial/correctable transcripts can plan
+navigation. The first PCM frame of a new utterance emits `audio.clear` and
+invalidates prior generated output. The client owns utterance segmentation and
+must commit completed speech; merely streaming frames does not request an answer.
+No automatic server-VAD response is accepted.
 
 The socket also accepts exactly `{"type":"session.end"}` before start, with no
 provider or allowance. During preparation/connection, the bound `session.end`
 command remains observable and interrupts work. Audio must wait for
 `session.started`. During context updates, wait for `context.updated` before
-resuming input. Do not send browser `session.update`, model names, tools,
+resuming input. During a clear/update barrier or context preparation, only
+`session.end` may interrupt; overlapping audio, commit, clear/cancel or another
+context update ends with `invalid_request`. Do not send browser `session.update`, model names, tools,
 arbitrary URLs, confirmation flags or provider-protocol events.
 
 Every server event includes `session_id`, `context_id`, `revision`, `case_id` and
@@ -135,7 +160,8 @@ automatically. A fresh explicit start re-authorizes and reserves a fresh allowan
 | `session.ready` | No provider yet; retains identity for ending while startup is pending. |
 | `session.started` | Provider acknowledged; microphone frames may begin. |
 | `audio.clear` | Stop queued/playing audio immediately. Also occurs on new speech and context updates. |
-| `context.updated` | The authorized reference update was sent; this does not prove semantic understanding. |
+| `audio.committed` | `turn_id`; upstream acknowledged this completed input. More frames may now begin a new utterance. |
+| `context.updated` | Old input/response barriers and the identified authorized reference acknowledgement completed; this does not prove semantic understanding. |
 | `transcript.completed` | `turn_id`, scrubbed display `text`, optional `navigation: {destination}`. Only final full speech can plan navigation. |
 | `response.text` | `response_id`, `text`, `withheld_audio`. Render as generated help, never as confirmed application evidence. |
 | `response.audio` | `response_id`, base64 `audio`; queue PCM playback only for the current identity/revision. |
@@ -177,7 +203,32 @@ scans and image-only pages remain `not_read`; filenames do not establish content
 No image payload or full PDF bytes go to Grok. No extraction becomes confirmed
 facts, a Section D attachment confirmation or professional evidence automatically.
 
-Context updates invalidate pending turns, speech and plans. Additions can be
+Context updates invalidate pending turns, speech and plans **before** any
+asynchronous preparation. The relay sends a real upstream input clear, cancels
+each outstanding response when its ID is known, and drains the old commit and
+response acknowledgements before sending the replacement reference. The new
+reference has a server-generated item ID and must be acknowledged by the same ID
+in `conversation.item.added` before `context.updated`. A clear acknowledgement
+alone cannot skip an outstanding old commit. Missing barriers end the session
+after a three-second barrier timeout; no old scope is resumed after failed updates.
+Duplicate/unsolicited commit/clear acknowledgements, repeated context IDs and
+invalid acknowledgement identities fail closed. An unrelated context item does
+not acknowledge the update. End stays observable during all these waits.
+
+The relay uses the documented `input_audio_buffer.commit`/`committed` exchange
+with at most one pending commit. Only that commit can own a transcript item.
+Completed speech is re-authorized, then the server requests a response using
+`response.create` with private random per-turn metadata. Both `response.created`
+and `response.done` must echo that exact metadata. The nonce is never a browser
+credential. Invalidated turns and old response IDs/nonces retain their original
+epoch; they are never relabeled by arrival time. Missing/null/wrong response
+metadata terminates with `unavailable`. Late owned responses are cancelled and
+withheld; a barrier that cannot drain them ends rather than advancing context.
+Idle commit/response-created acknowledgement deadlines are checked by the
+one-second authorization guard. The overall 55-second lifetime still bounds all
+preparation, waits, connection and cleanup initiation.
+
+Additions can be
 selected while the session exists, but an in-flight utterance is discarded across
 that revision; frontend behavior must make this recovery usable. Case/account
 changes require end/start, not a context update.
@@ -191,7 +242,12 @@ its native destination adapter; a plan does not prove that anything opened.
 Model prose can never submit, edit, delete, archive or navigate.
 
 Generated audio is buffered until the complete response and final user transcript
-are present. Categorical safety/compliance claims, unsupported citations, known
+are present. Every released audio part needs its own identified, nonempty final
+audio transcript. Text output cannot attest an untranscribed audio part. All
+parts and their combined text are checked; conflicting streamed/final/content or
+item-summary transcripts withhold the whole response. Safe multipart output is
+retained, with every checked part's text and audio in content order. Missing or
+unsupported part identity/structure fails closed. Categorical safety/compliance claims, unsupported citations, known
 personal text, and explicit professional/process-evidence authoring requests
 withhold audio and return conservative help. This introduces response latency
 and is a bounded filter, not proof of technical correctness or complete semantic
@@ -203,10 +259,10 @@ One authorized start reserves **USD 0.160000 total** in the same money ledger as
 text AI: one whole minute at USD 0.08 plus at most 20 non-audio upstream messages
 at USD 0.004 each. This conservative policy uses the current official
 [xAI voice prices](https://docs.x.ai/developers/pricing). Configuration, context,
-clear and cancellation messages all count, including failed sends; a 21st
+clear, commit, response-create and cancellation messages all count, including failed sends; a 21st
 non-audio send is refused. Only audio append frames use the separate audio bound.
 Accepted input and output each cap at 55 seconds of PCM bytes. The server aborts
-the upstream transport after a 55-second lifetime including connect/configure,
+the upstream transport after a 55-second lifetime including preparation/connect/configure,
 before bounded shielded cleanup; no client timer or token TTL is the enforcement.
 
 The entire allowance stays held after a provider attempt, including timeout,
@@ -223,3 +279,6 @@ runs skip that opt-in integration when absent. The implementation run used its
 own PostgreSQL 17.11 UTF8 Unix-socket cluster and temporary case/source databases.
 No paid provider calls, production/user stores or microphone were used. A local
 synthetic WebSocket test exercises the real client library's abort/close behavior.
+The repaired manual-turn, acknowledgement and metadata exchanges have not been
+accepted by an actual Grok session in this task; the fake upstream follows the
+current official [WebSocket protocol](https://docs.x.ai/voice-realtime.ws.json).

@@ -16,7 +16,8 @@ def transport(monkeypatch):
     class Socket:
         def __init__(self):
             self.events = [json.dumps({'type': 'session.created', 'session': {'model': 'grok-voice-3.0'}}),
-                           json.dumps({'type': 'session.updated', 'session': {'model': 'grok-voice-3.0', 'tools': []}})]
+                           json.dumps({'type': 'session.updated', 'session': {'model': 'grok-voice-3.0',
+                               'turn_detection': {'type': None}, 'tools': []}})]
             self.sent = []
             self.aborted = 0
             self.transport = SimpleNamespace(abort=self.abort)
@@ -55,11 +56,13 @@ def test_exact_model_auth_protocol_configuration_and_all_non_audio_message_accou
             config = socket.sent[0]['session']
             assert config['model'] == 'grok-voice-3.0' and config['tools'] == []
             assert config['resumption'] == {'enabled': False}
+            assert config['turn_detection'] == {'type': None}
             assert config['audio'] == {'input': {'format': {'type': 'audio/pcm', 'rate': 24000}},
                                        'output': {'format': {'type': 'audio/pcm', 'rate': 24000}}}
             # Actual session.update, user reference context, input clear and
             # response.cancel messages ALL consume this same paid-message bound.
-            kinds = ['conversation.item.create', 'input_audio_buffer.clear', 'response.cancel', 'session.update']
+            kinds = ['conversation.item.create', 'input_audio_buffer.clear', 'response.cancel', 'session.update',
+                     'input_audio_buffer.commit', 'response.create']
             for index in range(19):
                 await adapter.send({'type': kinds[index % len(kinds)]})
             assert adapter.text_inputs == 20 and len(socket.sent) == 20
@@ -125,6 +128,22 @@ def test_enabled_tools_in_upstream_configuration_are_refused(transport):
     socket, _ = transport
     socket.events[1] = json.dumps({'type': 'session.updated', 'session': {
         'model': 'grok-voice-3.0', 'tools': [{'type': 'web_search'}]}})
+    async def scenario():
+        adapter = GrokVoice()
+        try:
+            await adapter.open()
+            with pytest.raises(VoiceFailure):
+                await adapter.configure('Synthetic context')
+        finally:
+            await adapter.close()
+    asyncio.run(scenario())
+
+
+@pytest.mark.parametrize('turn_detection', [None, {}, {'type': 'server_vad'}])
+def test_manual_turn_mode_must_be_confirmed_before_accepting_audio(transport, turn_detection):
+    socket, _ = transport
+    socket.events[1] = json.dumps({'type': 'session.updated', 'session': {
+        'model': 'grok-voice-3.0', 'turn_detection': turn_detection}})
     async def scenario():
         adapter = GrokVoice()
         try:

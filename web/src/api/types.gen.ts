@@ -1498,7 +1498,7 @@ export interface VoiceCommand {
   revision?: number | null;
   scope?: VoiceScope | null;
   session_id: string;
-  type: "session.end" | "audio.append" | "audio.clear" | "response.cancel" | "context.update";
+  type: "session.end" | "audio.append" | "audio.commit" | "audio.clear" | "response.cancel" | "context.update";
 }
 
 export interface VoiceScope {

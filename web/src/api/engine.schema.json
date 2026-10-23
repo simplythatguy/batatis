@@ -9527,6 +9527,7 @@
           "enum": [
             "session.end",
             "audio.append",
+            "audio.commit",
             "audio.clear",
             "response.cancel",
             "context.update"
