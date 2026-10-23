@@ -113,6 +113,24 @@ def test_vercel_refuses_postgres_without_a_database_url(monkeypatch):
         create_app()
 
 
+@pytest.mark.parametrize('connection,sslmode', [
+    ("host=127.0.0.1 dbname=synthetic user=synthetic options='-c search_path=voice_contract'", 'require'),
+    ("host=127.0.0.1 dbname=synthetic user=synthetic sslmode = verify-full options='-c search_path=voice_contract'", 'verify-full'),
+    ('postgres://synthetic@127.0.0.1/synthetic?options=-c%20search_path%3Dvoice_contract', 'require'),
+    ('postgresql://synthetic@127.0.0.1/synthetic?sslmode=verify-full&options=-c%20search_path%3Dvoice_contract', 'verify-full'),
+])
+def test_postgres_config_preserves_scoped_connection_options_and_tls(monkeypatch, connection, sslmode):
+    from psycopg.conninfo import conninfo_to_dict
+    from engine.store_postgres import database_url
+
+    monkeypatch.setenv('DATABASE_URL', connection)
+    params = conninfo_to_dict(database_url())
+    assert params['host'] == '127.0.0.1'
+    assert params['dbname'] == params['user'] == 'synthetic'
+    assert params['options'] == '-c search_path=voice_contract'
+    assert params['sslmode'] == sslmode
+
+
 def test_postgres_backend(monkeypatch):
     url = os.environ.get('TEST_DATABASE_URL')
     if not url:
