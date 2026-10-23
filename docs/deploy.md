@@ -10,12 +10,18 @@ root `vercel.json` owns the two services. A dashboard root of `web` builds only
 the frontend; a Services framework override on a branch without service
 declarations fails with `MISSING_SERVICES`.
 
-Set the production branch to `dev`. Only reviewed merges to `dev` should trigger
-automatic deployments: `git.deploymentEnabled` disables other branches. Keep
-automatic PR previews disabled in the project settings so older PR branches
-without this configuration cannot use the deployment allowance. Use local
-builds and explicitly requested previews for review. Do not redeploy an unchanged
-`dev` SHA on every team standup.
+Two branches deploy, and only two: `main` is production and `dev` is the preview
+the user tests. In the Vercel project set **Production Branch = `main`**
+(Settings, Environments, Production, Branch Tracking; older dashboards: Settings,
+Git). `dev` then builds as a Preview at the stable branch URL
+`batatis-git-dev-abdelwaly-projects.vercel.app` (Vercel login). `git.deploymentEnabled`
+in `vercel.json` turns every other branch off, so nothing else can spend the
+deployment allowance. Keep automatic PR previews disabled in the project settings.
+Agents push verified work to `dev` only; production changes only when the user
+merges the release PR `dev → main` (see `docs/agents/git-workflow.md`). Set
+Production Branch to `main` before merging the first release PR, so the live URL
+keeps serving its current build until `main` deploys. Do not redeploy an
+unchanged SHA.
 
 The Hobby project's deployment allowance was exhausted on October 20, 2026
 (`api-deployments-free-per-day`, more than 100 deployments). When Vercel reports
@@ -116,7 +122,7 @@ warm POST /cases 201 0.040s
 
 ## Production
 
-Production tracks `dev`, and only after #12 and `backend/case-api` have merged there. This branch is the deploy shape. It is not the production promotion by itself.
+Production is `main`. It changes only when the user merges the release PR (`dev → main`, merge commit) after testing the dev site. The notes below describe the deploy shape; they are not a promotion by themselves. (The #12, #41 and `backend/case-api` notes below predate the 2026-10-22 consolidation; those branches are parked, see `docs/agents/parked-work.md`.)
 
 `backend/case-api` is also making `CaseStore` writes atomic. The overlap is `put(..., expected_version=)` and `VersionConflict` (retry inside `add_fact`, HTTP 409 if the retry is exhausted). Keep one optimistic-update implementation when the branches merge.
 

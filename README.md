@@ -41,18 +41,9 @@ Cases are saved in `~/.batatis/cases.sqlite`, which every clone on this machine 
 BATATIS_CASES=./.data/cases.sqlite .venv/bin/uvicorn engine.api:app --port 8000
 ```
 
-If port 8000 is already taken, Uvicorn exits with `Errno 98` (`address already in use`). Start the engine on another port and point the web app at that same URL:
+The engine runs on port 8000 and the web app on port 3000. Nothing else: if 8000 is already taken, Uvicorn exits with `Errno 98` (`address already in use`). Do not start another port. Find the owner with `scripts/local-app.sh status` and wait for them or stop theirs. `scripts/local-app.sh start` starts both servers from the current worktree and refuses to run when either port is busy. See `docs/agents/git-workflow.md`.
 
-```bash
-.venv/bin/uvicorn engine.api:app --port 8010
-```
-
-```bash
-cd web
-VITE_ENGINE_URL=http://127.0.0.1:8010 npm run dev
-```
-
-`VITE_ENGINE_URL` is the engine the app calls, and the dev server proxies `/api` to that URL. Check this engine at http://127.0.0.1:8010/docs.
+`VITE_ENGINE_URL` still overrides the engine URL that the dev server proxies `/api` to, for pointing the web app at a deployed engine.
 
 Creating a case works before any code database exists:
 
@@ -128,9 +119,9 @@ npm install
 npm run dev
 ```
 
-Vite listens on localhost. Open the URL it prints, http://localhost:5173/. The page title is Batatis and the Describe screen loads. By default Vite proxies `/api` to http://127.0.0.1:8000, so `http://localhost:5173/api/code/search?q=egress` returns the same 503 body. If the engine is on another port, set `VITE_ENGINE_URL` as in the Backend step; `/api` follows that URL.
+Vite listens on http://localhost:3000/ and fails instead of choosing another port when 3000 is busy. The page title is Batatis and the Describe screen loads. By default Vite proxies `/api` to http://127.0.0.1:8000, so `http://localhost:3000/api/code/search?q=egress` returns the same 503 body.
 
-On http://localhost:5173/#/section-c, with the database missing, the page shows **Offline sample** and this sentence: "The engine is not reachable, so these rows are a bundled offline sample, not a lookup for this case." The label tooltip reads `Engine not reachable: Engine 503: code database not found`.
+On http://localhost:3000/#/section-c, with the database missing, the page shows **Offline sample** and this sentence: "The engine is not reachable, so these rows are a bundled offline sample, not a lookup for this case." The label tooltip reads `Engine not reachable: Engine 503: code database not found`.
 
 ### Tests
 

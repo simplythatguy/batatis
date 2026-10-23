@@ -30,6 +30,11 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [dropRemoteTokenFonts(), react()],
     server: {
+      // The one local port for the app (docs/agents/git-workflow.md). strictPort fails loudly when 3000 is
+      // busy instead of drifting to 5174, 5175, ... and leaving a trail of stray servers.
+      host: "127.0.0.1",
+      port: 3000,
+      strictPort: true,
       fs: { allow: [".."] },
       proxy: { "/api": { target: ENGINE, changeOrigin: true, rewrite: (p) => p.replace(/^\/api/, "") } },
     },
