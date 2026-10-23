@@ -175,17 +175,9 @@ def metered(provider: str, model: str, max_input_tokens: int, max_output_tokens:
 
 def metered_ask(raw: Ask, *, model: str = JEV_MODEL, client_ip: str | None = None,
                 log: SpendLog | None = None) -> Ask:
-    """Wrap a Jev ask so each request is reserved and settled. Estimated from the request size."""
-    def ask(state, questions, timeout):
-        size = len(json.dumps(state)) + len(json.dumps(questions))
-        with metered('jev', model, estimate_tokens(size), 32 * len(questions) + 256,
-                     client_ip=client_ip, log=log) as settle:
-            reply = raw(state, questions, timeout)
-            usage = reply.get('usage') or {}
-            settle(usage.get('input_tokens', 0), usage.get('output_tokens', 0))
-            return reply
-    ask.model, ask.method = model, 'jev'
-    return ask
+    """Jev's own strict accounting, including an explicit Jev-only dollar exemption."""
+    from .jev_runtime import metered_ask as wrap
+    return wrap(raw, model=model, client_ip=client_ip, log=log)
 
 
 class _MeteredMessages:

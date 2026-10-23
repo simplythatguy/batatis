@@ -30,12 +30,9 @@ class NoRetry(Exception):
 
 
 def raw_jev_ask(model: str = JEV_MODEL) -> Ask:
-    """Unmetered vendored jevkit client, pinned model. Use only behind engine.identify.providers.metered_ask."""
-    from .jevkit import client
-
-    def ask(state, questions, timeout):
-        return client.ask(state, questions, timeout=timeout, model=model, provider=JEV_PROVIDER)
-    return ask
+    """Pinned TypeSafe model and verified Jev-only TLS. Use behind providers.metered_ask."""
+    from .jev_runtime import raw_ask
+    return raw_ask(model)
 
 
 def jev_ask(model: str = JEV_MODEL) -> Ask:
@@ -43,7 +40,7 @@ def jev_ask(model: str = JEV_MODEL) -> Ask:
 
     BATATIS_PROVIDER=fake uses the offline fake, so no request leaves the machine. Otherwise the gate
     refuses every request (before any network) unless BATATIS_LIVE=1 and the TypeSafe credential is
-    present (and SSL_CERT_FILE=/etc/ssl/cert.pem on this Mac).
+    present. Its verified TLS context is local to Jev and does not change other providers.
     """
     from engine import llm_gate
     from .providers import metered_ask

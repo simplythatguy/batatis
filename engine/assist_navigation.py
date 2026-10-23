@@ -17,7 +17,7 @@ from .access import REVIEWABLE
 DestinationId = Literal[
     'applications', 'description', 'questions', 'review', 'application',
     'code-library', 'code-search', 'references', 'downloads', 'officer-view',
-    'settings', 'notifications', 'accuracy',
+    'settings', 'notifications', 'accuracy', 'comments',
     'question-authority', 'question-owner', 'question-representative',
     'question-mailing-address', 'question-date', 'question-scope', 'question-permit',
     'question-site-address', 'question-legal-description', 'question-alternative',
@@ -55,6 +55,9 @@ DESTINATIONS = (
     Destination('references', 'Rules you chose', ('code references', 'selected rules', 'section c', 'attributions'), 'applicant', True),
     Destination('downloads', 'Download options', ('downloads', 'download', 'export options', 'pdf download'), 'applicant', True),
     Destination('officer-view', 'Officer view', ('officer preview',), 'applicant', True),
+    Destination('comments', 'Officer comments', ('comments', 'officer feedback', 'officer messages',
+        'reviewer comments', 'reviewer feedback', 'reviewer messages', 'sco comments', 'sco feedback',
+        'sco messages', 'safety codes officer comments'), 'applicant', True),
     Destination('settings', 'Settings', ('account settings', 'account', 'profile')),
     Destination('notifications', 'Notifications', ('notices', 'alerts')),
     Destination('accuracy', 'Accuracy report', ('accuracy',)),
@@ -105,6 +108,9 @@ _PREAMBLE = re.compile(r'^(?:(?:can|could|would|will) you\s+)?(?:please\s+)?', r
 _OPEN = re.compile(r'^(?:open|show(?: me)?|take me to|go to|navigate to|switch to|jump to|bring up|let me see)\s+(.+)$', re.I)
 _UNSAFE = re.compile(r"\b(?:not|never|don['’]?t|do not|if|unless|would|when|said|says|quoted|quote|delete|submit|send|save|change|write|fill|archive|pin)\b", re.I)
 _QUOTED = re.compile(r"""["'“”‘’`]""")
+# Only the possessive inside a comments target is grammatical punctuation.
+# Surrounding or embedded quotation marks must still reject the whole request.
+_COMMENT_POSSESSIVE = re.compile(r"\b(officer|reviewer|sco)['’]s\b(?=\s+(?:comments|feedback|messages)\b)", re.I)
 
 
 def _name(value: str) -> str:
@@ -118,7 +124,7 @@ def plan_navigation(question: str, offered: list[DestinationId], user, case) -> 
     The whole target must match. Words in a quote, a hypothetical, or a mixed
     request never become a side effect. Unrecognized phrasing stays a question.
     """
-    text = question.strip()
+    text = _COMMENT_POSSESSIVE.sub(r'\1', question.strip())
     if not offered or _QUOTED.search(text):
         return None
     text = _PREAMBLE.sub('', text, count=1)

@@ -43,5 +43,14 @@ The server supplies human destination names as product-help context, replacing
 internal screen-name guesses. Older clients that omit `destinations` receive normal
 help with `navigation: null`.
 
+`comments` opens the existing officer-comments page for the applicant's captured
+current application. The browser offers it only while that native destination is
+available, rejects stale plans after account, application or view changes, and
+acknowledges opening only after the page renders the captured application id.
+Question and help-context changes also retire pending navigation, including a
+move away and back while the route stays the same.
+Reading and read receipts remain the comments page's responsibility. Requests
+about another named application are not inferred or retargeted.
+
 This backend contract is not evidence that the browser has implemented every
 destination, that voice is connected, or that a hosted deployment supports it.
