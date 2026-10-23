@@ -30,6 +30,9 @@ TEXT_FIELDS = {
     'alternative_description': ('description of the proposed alternative', re.compile(
         r'^\s*(?:[A-Z]-\d+\s+)?(?:proposed alternative(?: solution)?|description of (?:the )?proposed alternative'
         r'(?: solution)?)\s*(?::|$)', re.I | re.M)),
+    'rationale': ('rationale', re.compile(
+        r'^\s*(?:[A-Z]-\d+\s+)?rationale(?: for (?:the )?(?:proposed )?(?:alternative(?: solution)?|variance))?'
+        r'\s*(?::|$)', re.I | re.M)),
     'risk_assessment': ('risk assessment', re.compile(r'^\s*(?:[A-Z]-\d+\s+)?risk assessment\s*(?::|$)', re.I | re.M)),
     'mitigating_measures': ('mitigating measures', re.compile(
         r'^\s*(?:[A-Z]-\d+\s+)?mitigating measures\s*(?::|$)', re.I | re.M)),
@@ -45,6 +48,20 @@ _STOP_LINE = re.compile(r'^\s*(?:[A-Z]-\d+\s|Applicant source:|NBC\(AE\)|[A-Z]\.
                         r'(?:rationale|code analysis|testing procedures?|qualifications(?: of [a-z ]+)?|'
                         r'maintenance(?: and (?:operation|commissioning))?|operation and maintenance|commissioning)'
                         r'\s*(?::|$))', re.M | re.I)
+# Rationale can discuss NBC(AE) in its own words. Only labelled boundaries end the passage;
+# generic section labels and citation-shaped lines remain ambiguous rather than proving blankness.
+_RATIONALE_STOP_LINE = re.compile(
+    r'^[ \t]*(?:Applicant\s+source:|Appendix\s+page[ \t]+\d+|'
+    r'(?:[A-Z]-\d+[ \t]+)?(?:'
+    r'proposed\s+alternative(?:\s+solution)?|description\s+of\s+(?:the\s+)?proposed\s+alternative(?:\s+solution)?|'
+    r'rationale(?:\s+for\s+(?:the\s+)?(?:proposed\s+)?(?:alternative(?:\s+solution)?|variance))?|'
+    r'risk\s+assessment|mitigating\s+measures|assumptions,?(?:\s+and)?\s+limit(?:s|ing\s+factors|ations)?|'
+    r'(?:responsible|registered)\s+professional|code\s+analysis|testing\s+procedures?|'
+    r'qualifications(?:\s+of\s+(?:the\s+)?responsible\s+(?:people|professional|persons?)|[ \t]+of[ \t]+[a-z ]+)?|'
+    r'maintenance(?:\s+and\s+(?:operation|commissioning))?|operation\s+and\s+maintenance|commissioning)[ \t]*(?::|$)|'
+    r'(?P<ambiguous>[A-Z]-\d+[ \t]+|[A-Z]\.[ \t]+[A-Z]|'
+    r'NBC\(AE\)[ \t]+\d{4}(?:[ \t]+p\d+)?[ \t]*,[ \t]*Div[ \t]+[ABC][ \t]*,))', re.M | re.I)
+_NO_RATIONALE = '(Not provided or not confirmed. No answer has been supplied by Batatis.)'
 _ENGINEERING = re.compile(r'\b(?:engineering|registered professional|professional involvement)\s+(?:is\s+)?required'
                           r'\s*[:\-]?\s*(yes|no)\b', re.I)
 
@@ -68,6 +85,8 @@ class TextValue:
     file: str
     page: int | None
     quote: str | None
+    pointers: list[Pointer] = field(default_factory=list)
+    reason: str = ''
 
 
 def _norm(text: str) -> str:
@@ -91,6 +110,98 @@ def text_value(pages: list[tuple[str, int, str]], pattern) -> TextValue:
         value = _norm(body)
         return TextValue('present' if value else 'blank', value, file, page, value or _norm(match.group(0)))
     return TextValue('not_found', '', '', None, None)
+
+
+def rationale_value(reads: list[ReadFile]) -> TextValue:
+    """Aggregate all labelled passages; upload order never chooses an authoritative answer.
+
+    A single passage keeps its existing reading. Consistent blanks remain an applicant gap.
+    Other multiple candidates remain officer checks so every source can be retained in the
+    finding's pointer list without inventing precedence or changing the field wire shape.
+    """
+    pattern = TEXT_FIELDS['rationale'][1]
+    candidates = [_rationale_candidate(read, index, match)
+                  for read in reads for index, page in enumerate(read.text_pages)
+                  for match in pattern.finditer(page.text)]
+    # Unreadable files/pages/regions cannot establish absence. Labelled passage regions
+    # are checked above; graphics elsewhere on those pages do not belong to that passage.
+    # A single readable rationale still remains present beside unrelated unreadable material.
+    if not any(candidate.status == 'present' for candidate in candidates):
+        for read in reads:
+            labelled_pages = {pointer.page - 1 for candidate in candidates for pointer in candidate.pointers
+                              if pointer.file == read.name and pointer.page is not None}
+            unreadable = (list(range(read.pages)) or [None]) if read.role == 'unreadable' else [
+                page for page in read.unreadable_pages() if page not in labelled_pages]
+            for page in unreadable:
+                pointer = Pointer(file=read.name, page=page + 1 if page is not None else None)
+                candidates.append(TextValue(
+                    'not_found', '', read.name, pointer.page, None, [pointer],
+                    'A supplied file or page region could not be read. '
+                    'Check it before treating the rationale as absent.'))
+    if not candidates:
+        return TextValue('not_found', '', '', None, None)
+    candidates.sort(key=lambda value: (value.file, value.page or 0, value.quote or '', value.status))
+    if len(candidates) == 1:
+        return candidates[0]
+    first = candidates[0]
+    pointers = [pointer for candidate in candidates for pointer in candidate.pointers]
+    blank = all(candidate.status == 'blank' for candidate in candidates)
+    reason = '' if blank else (
+        'Multiple possible rationale sources were found. Check all indicated sources; '
+        'the review does not choose which passage controls.')
+    return TextValue('blank' if blank else 'not_found', '', first.file, first.page,
+                     first.quote, pointers, reason)
+
+
+def _rationale_candidate(read: ReadFile, index: int, match: re.Match) -> TextValue:
+    """Read one candidate, retaining page/graphics/boundary uncertainty and its source fragments."""
+    page = read.text_pages[index]
+    pointers = []
+    uncertain = False
+    value = ''
+    for offset, continuation in enumerate(read.text_pages[index:]):
+        heading_text = _norm(match.group(0)) if offset == 0 else None
+        heading = None
+        if not offset:
+            raw_heading = match.group(0)
+            heading = (heading_text, match.start() + len(raw_heading) - len(raw_heading.lstrip()))
+        rest_start = match.end() if not offset else 0
+        # Batatis puts a running header on appendix continuation pages. It is not an answer
+        # or a terminating applicant source; the original page remains available by pointer.
+        if offset:
+            header = re.match(r'^Batatis appendix to SCC variance form - case [^\n]+\n', continuation.text)
+            rest_start = header.end() if header else 0
+        rest = continuation.text[rest_start:]
+        stop = _RATIONALE_STOP_LINE.search(rest)
+        ambiguous = bool(stop and stop.group('ambiguous'))
+        # A known multiword label can wrap in extracted text. Stop before that label,
+        # but retain uncertainty rather than attributing its words/body to the rationale.
+        wrapped = bool(stop and '\n' in stop.group(0).strip())
+        stop_line, stop_boundary = None, None
+        if stop:
+            suffix = rest[stop.start():]
+            stop_line = suffix.strip().split('\n', 1)[0]
+            stop_boundary = (stop_line, rest_start + stop.start() + len(suffix) - len(suffix.lstrip()))
+        body = _norm(rest[:stop.start()] if stop else rest)
+        if not offset:
+            value = body
+        pointers.append(Pointer(file=read.name, page=continuation.page + 1, quote=body or heading_text))
+        uncertain = (uncertain or bool(offset) or wrapped or not continuation.text.strip()
+                     or (ambiguous and body != _NO_RATIONALE)
+                     or read.passage_has_marks(continuation.page, heading, stop_boundary))
+        if stop and _norm(stop.group(0)).casefold().startswith('appendix page'):
+            uncertain = True   # a running footer does not prove that the passage ends here
+            continue
+        if stop:
+            break
+    if uncertain:
+        reason = ('The rationale may continue across pages, contain non-text content or have an ambiguous boundary. '
+                  'Its complete text could not be established; check the indicated pages.')
+        return TextValue('not_found', '', read.name, page.page + 1, pointers[0].quote, pointers, reason)
+    if value == _NO_RATIONALE:
+        value = ''
+    return TextValue('present' if value else 'blank', value or '', read.name, page.page + 1,
+                     pointers[0].quote, pointers)
 
 
 def _finding_status(element: ElementVerdict) -> str:
@@ -192,7 +303,9 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
     forms = [read for read in reads if read.role.startswith('scc_form')]
     form = forms[0] if forms else None
     for extra in forms[1:]:
-        parts.files[reads.index(extra)].note = 'A second SCC form was uploaded; only the first form was reviewed.'
+        parts.files[reads.index(extra)].note = (
+            'A second SCC form was uploaded; only the first form\'s fields were reviewed. '
+            'Labelled rationale passages from every supplied form were checked for presence.')
     attachments = [read for read in reads if read.role == 'attachment']
     pages = [(read.name, page.page + 1, page.text) for read in ([form] if form else []) + attachments
              for page in read.text_pages]
@@ -224,17 +337,19 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
                                              else "Owner's representative signature", section='A',
                                              status=value.status, value=value.value or None, reason=value.reason,
                                              pointer=_pointer(form, value)))
-    texts = {key: text_value(pages, pattern) for key, (_label_text, pattern) in TEXT_FIELDS.items()}
+    rationale_reads = forms + attachments + [read for read in reads if read.role == 'unreadable']
+    texts = {key: rationale_value(rationale_reads) if key == 'rationale'
+             else text_value(pages, pattern) for key, (_label_text, pattern) in TEXT_FIELDS.items()}
     for key, found in texts.items():
         label = TEXT_FIELDS[key][0]
-        section = 'process' if key in ('risk_assessment', 'mitigating_measures', 'assumptions_and_limits') else (
+        section = 'process' if key in ('rationale', 'risk_assessment', 'mitigating_measures', 'assumptions_and_limits') else (
             'B' if key == 'alternative_description' else 'D')
         parts.fields.append(FieldReading(
             field=key, label=label, section=section, status=found.status, value=found.value or None,
-            reason={'not_found': 'No heading for this passage was found in the form appendix or attachments.',
+            reason=found.reason or {'not_found': 'No heading for this passage was found in the form appendix or attachments.',
                     'blank': 'The heading is present with no text under it.'}.get(found.status, ''),
-            pointer=Pointer(file=found.file or (form.name if form else '(no file)'), page=found.page,
-                            quote=found.quote)))
+            pointer=found.pointers[0] if found.pointers else Pointer(
+                file=found.file or (form.name if form else '(no file)'), page=found.page, quote=found.quote)))
 
     # ---- deterministic element screens (ported variant B) over the form reading
     by_widget = form.fields if form else {}
@@ -281,7 +396,8 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
     doc = Ingested(ref=form.name if form else 'upload', data=blob.encode('utf-8'), text=blob, kind='form',
                    values=values, form_fields={name: value.value for name, value in by_widget.items() if value.value})
     # Files that carry the application's own passages are not evidence to compare Section B with.
-    narrative_files = {found.file for found in texts.values() if found.file}
+    narrative_files = {name for found in texts.values()
+                       for name in [found.file, *(pointer.file for pointer in found.pointers)] if name}
     doc.section_text = {'A': '', 'B': texts['alternative_description'].value, 'C': values.get(
         'section_c.article', StoredValue('', '', '', None)).value, 'D': '', 'process': '',
         'attachment': '\n'.join(page.text for read in attachments if read.name not in narrative_files
@@ -299,7 +415,7 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
             pointers.append(_pointer(form, by_widget[widget]))
         found = texts.get(element.field)
         if found is not None and found.file:
-            pointers.append(Pointer(file=found.file, page=found.page, quote=found.quote))
+            pointers.extend(found.pointers or [Pointer(file=found.file, page=found.page, quote=found.quote)])
         for quote in element.quotes:
             if quote.source:
                 pointer = _pointer_from_source(quote.source, form.name if form else 'upload')
@@ -316,8 +432,9 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
             finding.message += ' Blank components: ' + ', '.join(legal_blank) + '.'
         if element.field in TEXT_FIELDS and texts[element.field].status == 'not_found':
             finding.status = 'not_found'
-            finding.message = (f'No {element.label} was found in the form appendix or the attachments. '
-                               'Check the attachments; if it is not there, ask the applicant for it.')
+            finding.message = texts[element.field].reason or (
+                f'No {element.label} was found in the form appendix or the attachments. '
+                'Check the attachments; if it is not there, ask the applicant for it.')
         parts.findings.append(finding)
 
     if form is not None:

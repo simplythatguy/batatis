@@ -44,7 +44,7 @@ session keeps the extracted values and quotes.
 - `files[]`: name, sha256, size, pages, `role` (`scc_form_fillable`, `scc_form_flattened`, `attachment`,
   `unreadable`, `case_record`), `form_version` (field map, e.g. `scc_2026-10`), note.
 - `fields[]`: one row per form field (the form's own widget names, typos included) and per applicant passage
-  read from the appendix or attachments (`alternative_description`, `risk_assessment`, `mitigating_measures`,
+  read from the appendix or attachments (`alternative_description`, `rationale`, `risk_assessment`, `mitigating_measures`,
   `assumptions_and_limits`, `professional_name`, `professional_qualifications`). `status`:
   - `present`: the exact text read (`value`).
   - `blank` (certain): a fillable field with no value; a flattened box with no text on a page whose text layer
@@ -78,6 +78,34 @@ session keeps the extracted values and quotes.
 
 ## What is checked
 
+- Applicant rationale on the alternative path, separately from the proposed-alternative description and the
+  other process fields: presence only, never adequacy. Saved cases use the latest `rationale` or
+  `process.rationale` applicant passage; a confirmed acceptable-solution route does not require it. Uploads
+  (including standalone packages) read `Rationale`, `Rationale for [the] [proposed] variance/alternative
+  [solution]`, or a numbered appendix heading such as `P-1 Rationale`. Every labelled candidate is read,
+  including repeated headings within one page. Consistent blank-only candidates on fully readable inputs
+  (including the draft's explicit no-answer notice) are a blocking applicant gap (`rationale:presence`).
+  Multiple candidates containing text or uncertainty become one excluded officer check with all source
+  pointers, in stable order; the review never chooses which candidate controls, even when text matches.
+  An unreadable supplied file, a textless drawn page, or an unlabelled raster region also prevents
+  blank-only input from establishing absence; the finding retains the actual file/page pointers. A readable
+  cover cannot make a scanned page readable. Vector table borders on otherwise readable pages do not
+  imply a scanned passage. A single readable passage remains present beside unrelated
+  unreadable material, including other pages of the same file.
+  Whole-answer placeholders are gaps; a placeholder word inside applicant prose is not. A missing heading,
+  non-text objects in the passage region, or a passage crossing pages stays `not_found`, with no partial
+  `value` and the request item excluded by default. Cross-page findings retain page-linked extracted
+  fragments in `pointers[]` for the officer; the field's single-pointer wire shape is unchanged. These
+  checks do not perform OCR or establish the completeness of a multi-page passage. A present passage is
+  copied, never assessed or drafted by the review. Graphics checks pair each heading/stop occurrence with
+  its extracted text offset; unmatched or reversed geometry remains uncertain. Graphics outside a reliably
+  bounded labelled passage do not make that passage unreadable.
+  Visible annotation appearances (including text/vector stamps and selected appearance states) also remain
+  officer checks, with actual file/page pointers. The rationale check compares normal rendering with and
+  without annotations to locate visible ink; it performs no OCR and never treats annotation metadata as
+  applicant text. Hidden, NoView, empty or non-rendered appearances do not supply a visible passage.
+  Wrapped next-field labels end rationale extraction conservatively as an excluded officer check; neighboring
+  labels and bodies never become the rationale. These rules do not change other text-field extraction.
 - Ported deterministic screens (variant B) over the reading: presence and placeholders (D01–D04), edition
   presented as current (D06), intent label (D08), generic or blank risk, mitigation and assumptions (D09–D11),
   professional named when stated as required (D12), supporting document and its responsible person (D13),

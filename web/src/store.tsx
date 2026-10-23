@@ -17,6 +17,8 @@ import { useSectionC } from "./api/sectionC";
 import { readSectionD, SectionDRecoveryError, type SectionDRead } from "./api/sectionD";
 import { isProvision, reconcileSectionC, sameCards } from "./provisions";
 import { caseFromEngine } from "./calm/openCase";
+import { normalizeTitle, saveTitle, TITLE_EMPTY, titleError } from "./calm/rename";
+import { refreshCase, resetExtras, setChecklist } from "./calm/caseExtras";
 
 /** Older builds kept the whole case here. It is removed on load and never written again. */
 const LEGACY_KEYS = ["batatis-web-case-v4", "batatis-web-case-v3"];
@@ -64,10 +66,19 @@ interface Store {
   runIdentify: () => Promise<void>;
   /** Answer one planner question; "Not sure" is allowed. Resolves to an error text, or null when saved. */
   answerPlan: (q: PlanQuestion, answer: string) => Promise<string | null>;
+  /** Rename the open application (saved, then shown in the header and the list). Resolves to an error text, or null. */
+  renameCase: (title: string) => Promise<string | null>;
   /** The redirect page: `true` is "This is a building-code question". */
   overrideScope: (buildingCode: boolean) => Promise<string | null>;
   /** Yes, No or Not sure on a code card; identified cards also go to the decision route. */
   decide: (candidate: Candidate, answer: CandidateAnswer) => Promise<string | null>;
+  /**
+   * One standing-package answer through the checklist answers route, with `expected_version`, in the
+   * save queue. Resolves to an error text (a 409 says so and waits for `reloadChecklists`), or null.
+   */
+  answerChecklist: (checklistId: string, conditionId: string, state: "confirmed" | "not_yet" | "does_not_apply", reason?: string) => Promise<string | null>;
+  /** The explicit reload after a conflict: adopt the saved version, then read the checklists again. */
+  reloadChecklists: () => Promise<string | null>;
   sectionCLookup: ReturnType<typeof useSectionC>;
   retrySectionC: () => void;
   snapshotKey: string;
@@ -256,7 +267,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const dispatch = useCallback((action: Action) => {
     // A lookup that only attaches Section C rows (or re-orders the same cards, as it does right
     // after a saved case is opened) is derived data, not an edit: the draft stays saved.
-    const derived = (action.type === "reconcileSectionC" && sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates)) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions", "noteIntake", "restoreIntake", "noteIntakeRecord", "adoptFacts", "noteIdentify"].includes(action.type);
+    const derived = (action.type === "reconcileSectionC" && sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates)) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions", "noteIntake", "restoreIntake", "noteIntakeRecord", "adoptFacts", "noteIdentify", "renameCase"].includes(action.type);
     if (!derived) {
       revision.current += 1;
       if (action.type !== "saveEvidence" && action.type !== "removeEvidence") planRevision.current += 1;
@@ -388,7 +399,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     setSavedNote("Saving…");
     setSaveDetail("");
     try {
-      let id = await ensureEngineCase(snapshot.title, snapshot.authority);
+      // Only a name the applicant chose is sent; a placeholder leaves the case for the engine to name.
+      let id = await ensureEngineCase(snapshot.titleKept ? snapshot.title : null, snapshot.authority);
       if (!current()) return null;
       setEngineId(id);
       id = await syncJurisdiction(id, snapshot.authority, snapshot.title);
@@ -459,6 +471,35 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     const pending = syncQueue.current.catch(() => {}).then(work);
     syncQueue.current = pending;
     return pending;
+  }
+
+  /**
+   * Rename the open application. Saved through PATCH /cases/{id}/title in the save queue (it moves
+   * the case version), then shown in the header and the list. Before the case exists the name is kept
+   * and sent when it is created. Resolves to an error text, or null when saved.
+   */
+  function renameCase(raw: string): Promise<string | null> {
+    const title = normalizeTitle(raw);
+    if (!title) return Promise.resolve(TITLE_EMPTY);
+    const token = engineGeneration();
+    return enqueue(async () => {
+      const id = engineCaseId();
+      if (!isEngineGeneration(token)) return null;
+      if (!id) {
+        derive({ type: "renameCase", title });
+        return null;
+      }
+      try {
+        const saved = await saveTitle(id, title);
+        // Another application was opened meanwhile: the list row is updated, this case is not.
+        if (!isEngineGeneration(token) || engineCaseId() !== id) return null;
+        acknowledgeWrite(id, saved.version);
+        derive({ type: "renameCase", title: saved.title ?? title });
+        return null;
+      } catch (e) {
+        return isEngineGeneration(token) ? titleError(e) : null;
+      }
+    });
   }
 
   /** Apply derived engine output without marking the draft unsaved. */
@@ -706,6 +747,69 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     });
   }
 
+  /** Queue a versioned checklist answer and update shared extras, preserving conflict and missing-case feedback. */
+  function answerChecklist(checklistId: string, conditionId: string, state: "confirmed" | "not_yet" | "does_not_apply", reason?: string): Promise<string | null> {
+    const token = engineGeneration();
+    const live = () => isEngineGeneration(token);
+    return enqueue(async () => {
+      const id = await performSync(latestCase.current, live);
+      if (!live()) return null;
+      if (!id) return "Your draft wasn’t saved, so the answer wasn’t either. Try again.";
+      const expected = acknowledgedVersion(id);
+      if (needsReconcile(id) || expected === null) {
+        noteConflict(id);
+        return CONFLICT_TEXT;
+      }
+      try {
+        const result = await engine.answerChecklist(id, checklistId, { condition_id: conditionId, state, reason: reason?.trim() || null, expected_version: expected });
+        if (!live()) return null;
+        acknowledgeWrite(id, result.case_version);
+        setChecklist(id, result.checklist, result.case_version);
+        return null;
+      } catch (e) {
+        if (!live()) return null;                     // the applicant moved on: a late reply never touches the new case
+        if (isCaseConflict(e)) {
+          noteConflict(id);
+          return CONFLICT_TEXT;
+        }
+        if (isCaseGone(e)) {
+          goneCase.current = id;
+          markGone((e as EngineError).detail);
+        }
+        if (e instanceof EngineError && e.status === 0) return "Not saved: Batatis could not be reached. Answer again to resend it.";
+        return failureText(e);
+      }
+    });
+  }
+
+  /** Reconcile a stale case and reload its extras, marking a deleted or expired case as gone. */
+  function reloadChecklists(): Promise<string | null> {
+    const token = engineGeneration();
+    return enqueue(async () => {
+      const id = engineCaseId();
+      if (!id || !isEngineGeneration(token)) return null;
+      try {
+        if (needsReconcile(id) || acknowledgedVersion(id) === null) {
+          const saved = await reconcileEngineCase(id);
+          if (!isEngineGeneration(token)) return null;  // the applicant moved on during the reconcile
+          refreshed(saved, latestCase.current);
+        }
+        let gone: unknown = null;
+        const ok = await refreshCase(id, (e) => { if (isCaseGone(e)) gone = e; });
+        if (!isEngineGeneration(token)) return null;
+        if (gone) throw gone;                         // a deleted or expired case is marked gone, not retried
+        return ok ? null : "The checklist didn’t load. Try again.";
+      } catch (e) {
+        if (!isEngineGeneration(token)) return null;  // a reply for the case the applicant left
+        if (isCaseGone(e)) {
+          goneCase.current = id;
+          markGone((e as EngineError).detail);
+        }
+        return failureText(e);
+      }
+    });
+  }
+
   function requestCheck(retry = false): Promise<string | null> {
     const token = renderGeneration;
     const version = renderRevision;
@@ -779,10 +883,12 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, c.facts, c.authority, c.title, c.listedEvidence, c.deletedEvidence]);
 
+  /** Reset the save session, case extras and visible request state before adopting another case. */
   function clearVisit(next: Case) {
     activeCheck.current?.ctl.abort();
     activeCheck.current = null;
     clearEngineSession();
+    resetExtras();                                   // the next case never renders with the last case's rules, checklists or pack
     goneCase.current = null;
     sectionDHold.current = null;
     syncQueue.current = Promise.resolve();
@@ -816,7 +922,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         const id = engineCaseId();
         if (id) await uploadHeld(id, () => isEngineGeneration(token));
       });
-    }, answerPlan, overrideScope, decide,
+    }, answerPlan, overrideScope, decide, answerChecklist, reloadChecklists, renameCase,
     sectionCLookup, retrySectionC: () => setLookupAttempt(n => n + 1),
     snapshotKey: `${renderGeneration}:${renderPlanRevision}:${JSON.stringify(c.candidates)}:${JSON.stringify(c.sectionC)}:${sectionCLookup.source}`,
     loadSectionD,

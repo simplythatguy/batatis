@@ -17,7 +17,7 @@ from fastapi import HTTPException, Request, Response
 from .account_models import User
 from .accounts import optional_user
 
-REVIEWABLE = {'submitted', 'in_review', 'returned', 'accepted'}
+REVIEWABLE = {'submitted', 'in_review', 'returned', 'accepted', 'refused'}
 READ_ONLY_DETAIL = 'Submitted applications are read-only until returned'
 
 
@@ -28,6 +28,17 @@ class AccessContext:
 
 
 current_access: ContextVar[AccessContext | None] = ContextVar('batatis_access', default=None)
+
+
+def authorize_application_preferences(case, user: User):
+    """List organization requires an actual owner, including on legacy records.
+
+    This is separate from applicant content editing and officer review access.
+    Stores call it on the latest row while holding the case's write lock.
+    """
+    if case is None or not case.owner_id or case.owner_id != user.id:
+        raise HTTPException(404, 'case not found')
+    return case
 
 
 def authorize_case(case, user: User | None, *, mode: str = 'read'):

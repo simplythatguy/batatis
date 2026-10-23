@@ -5,23 +5,37 @@ import { exitCountWarning } from "../rules";
 import { useCandidateAnswer } from "../screens/CodeCheck";
 import { Recommendations } from "../screens/Recommendations";
 import { useCase } from "../store";
-import { authorityName } from "./applications";
+import { readOnlyStatus } from "./applications";
 import { openAssistant, setAssistantContext, useAssistant } from "./assistant/assistant";
 import { useCurrentApplication } from "./begin";
 import { CodeDrawer, type DrawerState } from "./CodeDrawer";
-import { aliasKey, alternativeChoice, buildDeck, mergeQueue, rankAhead, choiceKey, choicesFor, FORM_HINT, preCaseState, SECTIONS, sourcePhrase, type DeckItem, type SectionId } from "./deck";
+import { aliasKey, alternativeChoice, buildDeck, mergeQueue, rankAhead, choiceKey, choicesFor, preCaseState, SECTIONS, sourcePhrase, type DeckItem, type SectionId } from "./deck";
 import { forkOf, NOT_SURE, planInput } from "../intakeView";
 import { localField } from "../intakeFields";
 import { CodeProgress, ForkNote, ReadingState, ReadSource, RedirectPage, ShowCode } from "./ReadCards";
 import { Icon24 } from "./icons";
 import { RelevanceRing } from "./RelevanceRing";
-import { updateSession, useSession } from "./session";
-import { CIcon, MOD_KEY } from "./ui";
+import { getSession, updateSession, useSession } from "./session";
+import { CONFLICT_TEXT } from "../api/sync";
+import { retryExtras, getExtras } from "./caseExtras";
+import { CIcon } from "./ui";
+import { engine } from "../api/client";
+import { provisionCandidate } from "../screens/SectionC";
+import { ConditionBody, PackageEnd, PackageOffer } from "./ChecklistCards";
+import { otherOptions } from "./checklistView";
+import { RuleNumberInput, RuleResultView } from "./RuleCards";
+import { choiceValue, NOT_SURE_RULE, readNumber, RULE_REF, ruleFacts } from "./rulesView";
+import { canonicalProvision } from "../provisions";
+import { useDeckExtras } from "./useDeckExtras";
+import { JurisdictionNote } from "./JurisdictionNote";
+import { AuthorityPicker } from "./AuthorityPicker";
+import { AUTHORITIES } from "../config";
+import { PACKAGE_YES, RULE_ADD, RULE_LEAVE } from "./deck";
 
 type Shown = DeckItem & { gone?: boolean };
 
-const FORM_HINT_KEY = "batatis-form-hint-seen";
 
+/** Detect editable controls so deck keyboard shortcuts leave text entry to the control. */
 function isTextTarget(t: EventTarget | null): boolean {
   const el = t as HTMLElement | null;
   if (!el) return false;
@@ -53,19 +67,18 @@ export function Choices({ choices, current, onPick }: { choices: { value: string
 function OkRow({ label = "OK", disabled, onOk, typed, children }: { label?: string; disabled?: boolean; onOk: () => void; typed: boolean; children?: ReactNode }) {
   return (
     <div className="cf-ok-row" data-deck-foot>
-      <button type="button" className="cf-btn is-primary is-lg" disabled={disabled} onClick={onOk}>
+      <button type="button" className="cf-btn is-primary is-lg" disabled={disabled} onClick={onOk} aria-keyshortcuts={typed ? "Meta+Enter Control+Enter" : "Enter"}>
         {label} <Icon24 name="check" size={16} stroke={2} />
       </button>
-      {!disabled && <span className="cf-ok-hint" aria-hidden="true">press <b>{typed ? `${MOD_KEY} Enter ↵` : "Enter ↵"}</b></span>}
       {children}
     </div>
   );
 }
 
-/** Number and arrow in the accent, then the section label. */
-function QNum({ n, label }: { n: ReactNode; label?: string }) {
+/** Number and arrow in a shade of the section's hue (neutral without one), then the section label. */
+function QNum({ n, label, hue }: { n: ReactNode; label?: string; hue?: string }) {
   return (
-    <div className="cf-q-num">
+    <div className={`cf-q-num${hue ? ` is-${hue}` : ""}`}>
       <span className="cf-q-n">{n}</span>
       <Icon24 name="right" size={15} stroke={2} />
       {label && <span className="cf-q-sec">{label}</span>}
@@ -114,7 +127,7 @@ export function SectionFooter({ items, index, onJump, onPrev, onNext, canPrev, c
           return (
             <div
               key={s.id}
-              className={`cf-qsec${s.on ? " is-on" : ""}`}
+              className={`cf-qsec is-${SECTION_HUE[s.id] ?? "slate"}${s.on ? " is-on" : ""}`}
               style={{ ["--n" as string]: s.at.length }}
               onPointerEnter={(e) => { if (e.pointerType === "mouse") hold(s.id); }}
               onPointerLeave={(e) => { if (e.pointerType === "mouse") later(); }}
@@ -156,6 +169,9 @@ export function SectionFooter({ items, index, onJump, onPrev, onNext, canPrev, c
     </footer>
   );
 }
+
+/** The form's parts, by colour (the officer's review uses the same). */
+const SECTION_HUE: Record<string, string> = { A: "blue", B: "teal", C: "violet", D: "amber" };
 
 /* —— One card's controls —— */
 
@@ -203,17 +219,60 @@ function PlanBody({ item, onPick, draft, setDraft, note, first }: { item: Shown;
       )}
       {busy && <p className="cf-note" role="status"><span className="cf-dot is-pending" aria-hidden="true" />Saving your answer…</p>}
       {!busy && note && <p className="cf-note" role="alert"><span className="cf-dot is-warning" aria-hidden="true" />{note}</p>}
-      {!busy && !note && current === NOT_SURE && <p className="cf-note"><span className="cf-dot is-pending" aria-hidden="true" />Saved as Not sure. It never blocks you, and it is not asked again.</p>}
+      {!busy && !note && current === NOT_SURE && <p className="cf-note"><span className="cf-dot is-pending" aria-hidden="true" />Saved as Not sure.</p>}
       {!busy && !note && current && current !== NOT_SURE && input.kind !== "choices" && <p className="cf-note"><span className="cf-dot is-done" aria-hidden="true" />Saved: {current}{input.unit ? ` ${input.unit}` : ""}.</p>}
     </>
   );
 }
 
-function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote, firstPlan }: { item: Shown; picked?: string; onPick: (value: string) => void; draft: string; setDraft: (v: string) => void; openDrawer: (s: DrawerState) => void; planNote: string; firstPlan: boolean }) {
+/** Render the current card’s inputs, saved answer, source details and loading or failure feedback. */
+function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote, firstPlan, extras, note, busy, onReload, position }: { item: Shown; picked?: string; onPick: (value: string) => void; draft: string; setDraft: (v: string) => void; openDrawer: (s: DrawerState) => void; planNote: string; firstPlan: boolean; extras: ReturnType<typeof useDeckExtras>["extras"]; note: string; busy: boolean; onReload?: () => void; position: number }) {
   const { c, dispatch } = useCase();
   const session = useSession();
   const [tips, setTips] = useState(false);
   const choices = choicesFor(item);
+  const index = extras.rules?.index;
+  const cl = item.checklist ? extras.checklists?.checklists.find((x) => x.id === item.checklist) : undefined;
+
+  if (item.kind === "rule-input" && item.input) {
+    const { field, spec } = item.input;
+    const fact = factFor(c, field);
+    const unsure = session.ruleUnsure.includes(field) && (fact?.value === undefined || fact?.value === null);
+    if (spec.type === "number" || spec.type === "int") {
+      return <RuleNumberInput id={`cf-rule-${field}`} label={spec.label} unit={spec.unit} draft={draft} setDraft={setDraft} unsure={unsure} onUnsure={() => onPick(NOT_SURE_RULE)} note={note} />;
+    }
+    const current = unsure ? NOT_SURE_RULE : fact?.value === undefined || fact?.value === null ? undefined : String(fact.value);
+    return <Choices choices={choices} current={current} onPick={onPick} />;
+  }
+  if (item.kind === "rule" && item.rule && index) {
+    return (
+      <>
+        <RuleResultView rule={item.rule} index={index} />
+        {choices.length > 0 && <Choices choices={choices} current={picked ?? (item.done ? RULE_LEAVE : undefined)} onPick={onPick} />}
+        {busy && <p className="cf-note" role="status"><span className="cf-dot is-pending" aria-hidden="true" />Adding the rule…</p>}
+        {!busy && note && <p className="cf-note" role="alert"><span className="cf-dot is-warning" aria-hidden="true" />{note}</p>}
+      </>
+    );
+  }
+  if (item.kind === "package" && cl) {
+    return (
+      <>
+        <PackageOffer cl={cl} />
+        <Choices choices={choices} current={session.packages[cl.id] ?? (cl.conditions.some((x) => x.answer) ? PACKAGE_YES : undefined)} onPick={onPick} />
+      </>
+    );
+  }
+  if (item.kind === "condition" && cl) {
+    const row = cl.conditions.find((x) => x.id === item.condition);
+    if (!row) return null;
+    const current = picked ?? row.answer?.state;
+    return (
+      <ConditionBody cl={cl} row={row} position={position} reasonOpen={current === "does_not_apply"} reason={draft} setReason={setDraft} note={note} busy={busy} onReload={onReload}>
+        <Choices choices={choices} current={current} onPick={onPick} />
+      </ConditionBody>
+    );
+  }
+  if (item.kind === "package-end" && cl) return <PackageEnd cl={cl} />;
 
   if (item.kind === "section-d") {
     return <div className="cf-embed cf-sectiond"><Recommendations /></div>;
@@ -249,6 +308,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
 
   return (
     <>
+      {item.kind === "candidate" && item.rule && index && <RuleResultView rule={item.rule} index={index} onCard />}
       {item.kind === "fact" && item.read && <ReadSource copy={item.read} />}
       {item.provision && cand?.suggestion === "identify" ? (
         <ShowCode cand={cand} onMore={() => openDrawer({ mode: "code", candidateId: item.ref })} />
@@ -299,16 +359,21 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
               aria-label={def.label}
               value={valueText(fact)}
               onChange={(e) => dispatch({ type: "setDetail", field: def.id, value: e.target.value, section: def.section })}
-              placeholder={def.inputType === "date" ? undefined : "Type your answer here…"}
+              placeholder={def.inputType === "date" ? undefined : def.hint ?? "Type your answer here…"}
             />
           )}
           {!offer && fact && !isTyped(fact) && (
             <p className="cf-note">
               <span className={`cf-dot ${fact.status === "confirmed" ? "is-done" : "is-warning"}`} aria-hidden="true" />
-              {picked === "confirm" ? "Confirmed by you. You can still edit it." : `From ${sourcePhrase(fact.source.ref)}. Edit it if it’s not right.`}
+              {picked === "confirm" ? "Confirmed" : `From ${sourcePhrase(fact.source.ref)}`}
             </p>
           )}
-          {!offer && picked === "dismiss" && !fact && <p className="cf-note">Removed. Type the right one, or skip for now.</p>}
+          {!offer && picked === "dismiss" && !fact && <p className="cf-note">Removed.</p>}
+        </>
+      ) : item.kind === "authority" ? (
+        <>
+          <AuthorityPicker options={AUTHORITIES} value={c.authority} onPick={onPick} label={item.title} />
+          <button type="button" className="cf-chip cf-ap-unsure" data-deck-answer aria-pressed={current === "unsure"} onClick={() => onPick("unsure")}>Not sure yet</button>
         </>
       ) : (
         choices.length > 0 && <Choices choices={choices} current={current} onPick={onPick} />
@@ -322,31 +387,43 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
         <div className="cf-followup" role="status">
           <span className="cf-eyebrow is-plain">Open question for the officer</span>
           <p>{cand.clarifyingQuestion}</p>
-          <p className="cf-faint">Logged as an open question. It does not block you, and it is not treated as a confirmed departure.</p>
+          <p className="cf-faint">Not counted as a departure. It never blocks you.</p>
         </div>
       )}
-      {item.kind === "authority" && current === "unsure" && <p className="cf-note"><span className="cf-dot is-warning" aria-hidden="true" />Left open. The review keeps it on your list until you pick one.</p>}
+      {item.kind === "authority" && current === "unsure" && <p className="cf-note"><span className="cf-dot is-warning" aria-hidden="true" />Left open · stays on your list.</p>}
+      {item.kind === "authority" && <JurisdictionNote authority={c.authority} unsure={current === "unsure"} extras={extras} />}
       {cand && exitCountWarning(cand.provision, cand.topic) && <p className="cf-note"><span className="cf-dot is-warning" aria-hidden="true" />{exitCountWarning(cand.provision, cand.topic)}</p>}
       {item.kind === "fact" && item.gone && <p className="cf-note"><span className="cf-dot is-done" aria-hidden="true" />{picked === "dismiss" ? "Removed." : "Confirmed."}</p>}
     </>
   );
 }
 
-/** Not sure what a question means: the assistant opens on it (it explains; it never answers for you). */
-function AskLink({ item, n }: { item: DeckItem; n: number }) {
+/** The assistant opened on this card: it explains; it never answers for you. */
+function askAbout(item: DeckItem, n: number) {
+  openAssistant({
+    screen: "question",
+    focus: item.provision ? { kind: "provision", id: item.provision } : { kind: "card", id: item.key },
+    label: `question ${n}${item.provision ? ` and ${item.provision}` : ""}`,
+    suggestions: item.provision ? ["Explain the code", "What does this question mean?"] : ["What does this question mean?", "What should I have ready?"],
+  });
+}
+
+/**
+ * The one help entry on a card. Routine explanation lives behind it, not under the question:
+ * the reason the form asks, then the assistant on this card. Without a reason it opens the assistant.
+ */
+function HelpButton({ item, n, open, onToggle }: { item: DeckItem; n: number; open: boolean; onToggle: () => void }) {
+  return item.why
+    ? <button type="button" className="cf-link-btn cf-help-btn" aria-expanded={open} aria-controls={open ? "cf-q-why" : undefined} onClick={onToggle}><Icon24 name="spark" size={14} />Help</button>
+    : <button type="button" className="cf-link-btn cf-help-btn" onClick={() => askAbout(item, n)}><Icon24 name="spark" size={14} />Help</button>;
+}
+
+function HelpPanel({ item, n }: { item: DeckItem; n: number }) {
   return (
-    <button
-      type="button"
-      className="cf-assist-link"
-      onClick={() => openAssistant({
-        screen: "question",
-        focus: item.provision ? { kind: "provision", id: item.provision } : { kind: "card", id: item.key },
-        label: `question ${n}${item.provision ? ` and ${item.provision}` : ""}`,
-        suggestions: item.provision ? ["Explain the code", "What does this question mean?"] : ["What does this question mean?", "What should I have ready?"],
-      })}
-    >
-      <Icon24 name="spark" size={15} />Not sure what this means? Ask the assistant
-    </button>
+    <div id="cf-q-why" className="cf-why">
+      <p>{item.why}</p>
+      <button type="button" className="cf-link-btn" onClick={() => askAbout(item, n)}><Icon24 name="spark" size={14} />Ask the assistant</button>
+    </div>
   );
 }
 
@@ -379,16 +456,19 @@ function NoQuestionsYet() {
 
 /* —— The application's deck —— */
 
+/** Coordinate the visit queue, rule and checklist answers, and navigation through the case’s cards. */
 function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
-  const { c, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan } = useCase();
+  const { c, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan, answerChecklist, reloadChecklists } = useCase();
   const session = useSession();
   const { app, locked } = useCurrentApplication();
   const { onAnswer, decisionNoteFor } = useCandidateAnswer();
+  const { options: deckExtras, extras } = useDeckExtras();
   const seen = useMemo(() => new Set(session.seen), [session.seen]);
-  const all = buildDeck(c, gaps, { seen, includeDone: true, identify: reading.identify, intake: reading.intake, intakeNote: reading.intakeNote });
+  const all = buildDeck(c, gaps, { ...deckExtras, seen, includeDone: true, identify: reading.identify, intake: reading.intake, intakeNote: reading.intakeNote });
   const byKey = new Map(all.map((i) => [i.key, i] as const));
   const snapshots = useRef(new Map<string, DeckItem>());
   for (const i of all) snapshots.current.set(i.key, i);
+  /** Read a live card or retain its last snapshot when an answer removes it from the derived deck. */
   const itemFor = (k: string | undefined): Shown | undefined => {
     if (!k) return undefined;
     const live = byKey.get(k);
@@ -426,16 +506,11 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   const [jumpTo, setJumpTo] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [planNotes, setPlanNotes] = useState<Record<string, string>>({});
-  // What the form is, said once: until dismissed, or until a few questions are answered.
-  const [hintDismissed, setHintDismissed] = useState(() => {
-    try { return localStorage.getItem(FORM_HINT_KEY) === "1"; } catch { return false; }
-  });
-  const formHintSeen = hintDismissed || session.seen.length >= 3;
-  const dismissFormHint = () => {
-    setHintDismissed(true);
-    try { localStorage.setItem(FORM_HINT_KEY, "1"); } catch { /* storage unavailable */ }
-  };
-  useEffect(() => { if (session.seen.length >= 3 && !hintDismissed) dismissFormHint(); }, [session.seen.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  /** Rule and package cards: a note per card (an error, or a 409 waiting for a reload), and the card being saved. */
+  const [cardNotes, setCardNotes] = useState<Record<string, string>>({});
+  const [conflicted, setConflicted] = useState<string | null>(null);
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+  const noteFor = (key: string, text: string) => setCardNotes((n) => ({ ...n, [key]: text }));
   /** A typed planner answer was sent: move on once it is saved. */
   const advanceAfter = useRef<string | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -451,6 +526,12 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     else if (item.kind === "plan" && item.plan) {
       const saved = factFor(c, localField(item.plan.field))?.value;
       setDraft(saved == null || typeof saved === "boolean" ? "" : String(saved));
+    } else if (item.kind === "rule-input" && item.input) {
+      const saved = extras.rules ? ruleFacts(c, extras.rules.index).get(item.input.field)?.value : undefined;
+      setDraft(typeof saved === "number" ? String(saved) : "");
+    } else if (item.kind === "condition") {
+      const row = extras.checklists?.checklists.find((x) => x.id === item.checklist)?.conditions.find((x) => x.id === item.condition);
+      setDraft(row?.answer?.reason ?? "");
     } else setDraft("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentKey]);
@@ -511,7 +592,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
 
   // A code card the lookup replaced (article split into sentences) has nothing left to answer.
   useEffect(() => {
-    if (item?.gone && (item.kind === "candidate" || item.kind === "storeys")) moveFrom(index, false);
+    if (item?.gone && (item.kind === "candidate" || item.kind === "storeys" || item.kind === "rule" || item.kind === "rule-input" || item.kind === "condition" || item.kind === "package" || item.kind === "package-end")) moveFrom(index, false);
     // The code check finished while its card was open: the code questions take its place.
     if (item?.gone && item.kind === "code-run") {
       const code = queue.findIndex((k) => { const it = itemFor(k); return Boolean(it && !it.done && it.section === "C"); });
@@ -583,6 +664,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     goToKey(to >= all.length ? null : all[to].key);
   };
 
+  /** Check whether the current answer can advance, including pending writes and required reasons. */
   function canContinue(it: Shown): boolean {
     if (locked) return false;
     if (it.kind === "section-d" || it.kind === "file" || it.kind === "code-run" || it.kind === "code-note") return true;
@@ -592,12 +674,17 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     if (it.kind === "question") return Boolean(draft.trim()) || it.done;
     if (it.kind === "storeys") return (Number.isInteger(Number(draft)) && Number(draft) > 0) || it.done;
     if (it.kind === "authority") return it.done || Boolean(c.authority) || session.authorityUnsure;
+    if (it.kind === "rule") return it.rule?.state !== "departs" || it.done || picked[it.key] === RULE_LEAVE;
+    if (it.kind === "package-end") return true;
+    if (it.kind === "rule-input" && it.input && (it.input.spec.type === "number" || it.input.spec.type === "int")) return it.done || Boolean(draft.trim());
+    if (it.kind === "condition") return busyKey !== it.key && ((picked[it.key] ?? currentState(it)) === "does_not_apply" ? Boolean(draft.trim()) : it.done);
     return it.done;
   }
 
+  /** Save a typed answer before advancing, or open Review when the visit has no current card. */
   function next() {
     if (!item) {
-      void requestCheck();
+      if (!locked) void requestCheck();
       location.hash = "#/review";
       return;
     }
@@ -610,11 +697,34 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
         return;
       }
     }
+    if (item.kind === "rule-input" && item.input && draft.trim() && (item.input.spec.type === "number" || item.input.spec.type === "int")) {
+      const got = readNumber(item.input.spec, draft);
+      if ("error" in got) return noteFor(item.key, got.error);
+      noteFor(item.key, "");
+      const saved = extras.rules ? ruleFacts(c, extras.rules.index).get(item.input.field)?.value : undefined;
+      if (!item.done || saved !== got.value) {
+        dispatch({ type: "setRuleInput", field: item.input.field, value: got.value, rule: item.input.rule, quote: `${draft.trim()}${item.input.spec.unit ? ` ${item.input.spec.unit}` : ""}` });
+        updateSession((s) => ({ ruleUnsure: s.ruleUnsure.filter((f) => f !== item.input!.field) }));
+        // Move on once the new value has rendered, so a question it opens comes next, not at the end.
+        if (!item.done) {
+          advanceAfter.current = item.key;
+          return;
+        }
+      }
+    }
+    if (item.kind === "condition" && (picked[item.key] ?? currentState(item)) === "does_not_apply") {
+      const row = conditionOf(item);
+      if (row && (row.answer?.state !== "does_not_apply" || (row.answer.reason ?? "") !== draft.trim())) {
+        sendCondition(item, "does_not_apply", draft.trim(), true);
+        return;
+      }
+    }
     if (item.kind === "question" && draft.trim()) dispatch({ type: "answerQuestion", id: item.ref, answer: draft.trim() });
     if (item.kind === "storeys" && Number(draft) > 0) dispatch({ type: "setStoreyCount", value: draft });
     moveFrom(index, true);
   }
 
+  /** Defer a required card until the return pass, or mark an optional card as seen. */
   function skip() {
     if (!item) return;
     // Optional cards are offered once; required ones come back at the end of this pass.
@@ -634,8 +744,113 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     });
   }
 
+  /** Find the current saved checklist condition associated with a deck card. */
+  function conditionOf(it: Shown) {
+    return extras.checklists?.checklists.find((x) => x.id === it.checklist)?.conditions.find((x) => x.id === it.condition);
+  }
+  /** Read a condition’s persisted answer before applying any local selection. */
+  function currentState(it: Shown) {
+    return conditionOf(it)?.answer?.state;
+  }
+
+  /** One checklist answer; a confirmed option records "does not apply" for the other options of its choice. */
+  function sendCondition(it: Shown, state: "confirmed" | "not_yet" | "does_not_apply", reason: string, advance: boolean) {
+    const cl = extras.checklists?.checklists.find((x) => x.id === it.checklist);
+    const row = conditionOf(it);
+    if (!cl || !row) return;
+    const key = it.key;
+    noteFor(key, "");
+    setBusyKey(key);
+    // The case this answer belongs to: a switch to another application stops the sibling answers and the UI update.
+    const startCase = getExtras().caseId;
+    const sameCase = () => getExtras().caseId === startCase;
+    void (async () => {
+      let error = await answerChecklist(cl.id, row.id, state, reason);
+      if (!error && state === "confirmed") {
+        for (const other of otherOptions(cl, row)) {
+          if (!sameCase()) return;
+          error = await answerChecklist(cl.id, other.id, "does_not_apply", `Another option of this choice is followed instead (${row.option ?? row.source.label ?? "the confirmed option"}).`);
+          if (error) break;
+        }
+      }
+      if (!sameCase()) return;
+      setBusyKey((k) => (k === key ? null : k));
+      if (error) {
+        // Nothing was saved: the choice goes back to the saved answer.
+        setPicked((p) => { const { [key]: _drop, ...rest } = p; return rest; });
+        noteFor(key, error);
+        setConflicted(error === CONFLICT_TEXT ? key : null);
+        return;
+      }
+      setConflicted(null);
+      if (!advance) return;
+      // Move on only if the applicant is still on this card; a first answer moves once it renders.
+      const s = getSession();
+      if (s.queue[s.index] !== key) return;
+      if (!row.answer) advanceAfter.current = key;
+      else moveFrom(index, true);
+    })();
+  }
+
+  /** "Add this rule to my application": the departure becomes a Code check card, answered Yes. */
+  async function addRule(it: Shown) {
+    const r = it.rule;
+    if (!r) return;
+    const id = r.provision.id;
+    noteFor(it.key, "");
+    setBusyKey(it.key);
+    try {
+      // A card for this sentence already exists (answered No earlier): answer it Yes instead.
+      const existing = c.candidates.find((a) => canonicalProvision(a.provision) === canonicalProvision(id));
+      if (existing) {
+        onAnswer(existing, "yes");
+        return;
+      }
+      const rec = await engine.provision(id, "B");
+      const cand = provisionCandidate({ id, article_title: rec.article_title ?? r.title, title: rec.title ?? r.title, text: rec.text, citation: rec.citation ?? r.provision.citation });
+      dispatch({ type: "addCandidate", candidate: cand });
+      dispatch({ type: "answerCandidate", id: cand.id, answer: "yes" });
+    } catch {
+      setPicked((p) => { const { [it.key]: _drop, ...rest } = p; return rest; });
+      noteFor(it.key, "The rule couldn’t be added just now. Try again.");
+    } finally {
+      setBusyKey((k) => (k === it.key ? null : k));
+    }
+  }
+
+  /** Apply a card’s selected choice through the rule, package, checklist or case answer flow. */
   function pick(value: string) {
     if (!item || locked) return;
+    if (item.kind === "rule-input" && item.input) {
+      const { field, rule, spec } = item.input;
+      setPicked((p) => ({ ...p, [item.key]: value }));
+      if (value === NOT_SURE_RULE) {
+        if (factFor(c, field)?.source.ref?.startsWith(RULE_REF)) dispatch({ type: "setRuleInput", field, value: null, rule, quote: "" });
+        updateSession((s) => ({ ruleUnsure: s.ruleUnsure.includes(field) ? s.ruleUnsure : [...s.ruleUnsure, field] }));
+        setDraft("");
+        return;
+      }
+      dispatch({ type: "setRuleInput", field, value: choiceValue(spec, value), rule, quote: choicesFor(item).find((x) => x.value === value)?.label ?? value });
+      updateSession((s) => ({ ruleUnsure: s.ruleUnsure.filter((f) => f !== field) }));
+      return;
+    }
+    if (item.kind === "rule") {
+      setPicked((p) => ({ ...p, [item.key]: value }));
+      if (value === RULE_ADD) void addRule(item);
+      else if (value === RULE_LEAVE) updateSession((s) => ({ seen: s.seen.includes(item.key) ? s.seen : [...s.seen, item.key] }));
+      return;
+    }
+    if (item.kind === "package" && item.checklist) {
+      const id = item.checklist;
+      updateSession((s) => ({ packages: { ...s.packages, [id]: value as "yes" | "no" } }));
+      return;
+    }
+    if (item.kind === "condition") {
+      setPicked((p) => ({ ...p, [item.key]: value }));
+      if (value === "does_not_apply") return; // the reason comes first; OK sends it
+      sendCondition(item, value as "confirmed" | "not_yet", "", false);
+      return;
+    }
     setPicked((p) => ({ ...p, [item.key]: value }));
     if (item.kind === "plan") sendPlan(item, value, value === NOT_SURE && planInput(item.plan?.field ?? "").kind !== "choices");
     else if (item.kind === "fact") {
@@ -703,14 +918,15 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
 
   const n = (pos < 0 ? index : pos) + 1;
   const openLeft = queue.filter((k) => !itemFor(k)?.done && !itemFor(k)?.optional).length;
-  const typed = Boolean(item && multiline(item));
+  const typed = Boolean(item && (item.kind === "condition" ? (picked[item.key] ?? currentState(item)) === "does_not_apply" : multiline(item)));
+  const status = readOnlyStatus(app?.status, app?.authority);
 
   return (
     <div className="cf-deck-page">
       {/* The check state lives on Review and in the header; the deck stays quiet. */}
       {locked && (
         <div className="cf-deck-status" role="status">
-          <span className="cf-dot is-warning" aria-hidden="true" />{app?.status === "accepted" ? "Accepted as administratively complete" : `Sent to ${authorityName(app?.authority) || "the authority"}`}. Read-only until the officer returns it.
+          <span className={`cf-dot is-${status.tone}`} aria-hidden="true" />{status.heading}. {status.note}
         </div>
       )}
       <div className="cf-q-stage">
@@ -718,7 +934,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
           <RedirectPage n={n} />
         ) : item ? (
           <div ref={wrapRef} key={item.key} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
-            <QNum n={n} label={item.eyebrow} />
+            <QNum n={n} label={item.eyebrow} hue={SECTION_HUE[item.section]} />
             <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>{item.title}</h2>
             {(item.context || item.quote) && (
               <p className="cf-q-help">
@@ -728,18 +944,33 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
             )}
             <fieldset className="cf-q-body" disabled={locked}>
               <legend className="cf-sr">Your answer</legend>
-              <CardBody item={item} picked={picked[item.key]} onPick={pick} draft={draft} setDraft={setDraft} openDrawer={setDrawer} planNote={planNotes[item.key] ?? ""} firstPlan={item.kind === "plan" && queue.find((k) => k.startsWith("plan-")) === item.key} />
+              <CardBody
+                item={item}
+                picked={picked[item.key]}
+                onPick={pick}
+                draft={draft}
+                setDraft={setDraft}
+                openDrawer={setDrawer}
+                planNote={planNotes[item.key] ?? ""}
+                firstPlan={item.kind === "plan" && queue.find((k) => k.startsWith("plan-")) === item.key}
+                extras={extras}
+                note={cardNotes[item.key] ?? ""}
+                busy={busyKey === item.key}
+                onReload={conflicted === item.key ? () => void reloadChecklists().then((e) => { noteFor(item.key, e ?? ""); if (!e) setConflicted(null); }) : undefined}
+                position={item.kind === "condition" ? (extras.checklists?.checklists.find((x) => x.id === item.checklist)?.conditions.findIndex((x) => x.id === item.condition) ?? 0) + 1 : 0}
+              />
             </fieldset>
             {item.kind === "candidate" && decisionNoteFor(item.ref) && <p className="cf-note">{decisionNoteFor(item.ref)}</p>}
-            {why && <p className="cf-why">{item.why}</p>}
-            {!canContinue(item) && !locked && <p className="cf-hint" role="note">Answer to continue, or skip for now.</p>}
+            {item.section === "C" && (extras.failed.rules || extras.failed.case) && (
+              <p className="cf-note" role="status"><span className="cf-dot is-warning" aria-hidden="true" />Rule checks didn’t load, so some rule questions may be missing. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
+            )}
             <OkRow label={item.kind === "section-d" ? "Finish Section D" : item.kind === "code-run" ? "Continue" : "OK"} disabled={!canContinue(item)} onOk={next} typed={typed}>
               <span className="cf-ok-more">
-                <button type="button" className="cf-link-btn" aria-expanded={why} onClick={() => setWhy((v) => !v)}>Why we ask</button>
-                <button type="button" className="cf-link-btn" onClick={skip}>{item.optional ? "Skip" : "Skip for now"}</button>
+                <button type="button" className="cf-link-btn" title={item.optional ? undefined : "It stays on your list"} onClick={skip}>Skip</button>
+                <HelpButton item={item} n={n} open={why} onToggle={() => setWhy((v) => !v)} />
               </span>
             </OkRow>
-            <AskLink item={item} n={n} />
+            {why && item.why && <HelpPanel item={item} n={n} />}
           </div>
         ) : (
           <div ref={wrapRef} key="finish" className={`cf-q-wrap is-from-${dir}`} aria-labelledby="cf-q" role="group">
@@ -769,18 +1000,13 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
           </div>
         )}
       </div>
-      {!formHintSeen && (
-        <div className="cf-formhint" role="note">
-          <span>{FORM_HINT}</span>
-          <button type="button" className="cf-link-btn" onClick={dismissFormHint}>Got it</button>
-        </div>
-      )}
       <SectionFooter items={all} index={item ? pos : -1} onJump={(i) => goToKey(all[i]?.key ?? null)} onPrev={() => step(-1)} onNext={() => step(1)} canPrev={(pos < 0 ? all.length : pos) > 0} canNext={Boolean(item)} />
       <CodeDrawer state={drawer} onClose={() => setDrawer(null)} onAdded={(id) => { setDrawer(null); setJumpTo(id); }} />
     </div>
   );
 }
 
+/** Show the saved case’s deck or the prompt to describe a new application. */
 export function Deck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
   const { phase } = useCase();
   return phase === "case" ? <CaseDeck focus={focus} codeFirst={codeFirst} /> : <NoQuestionsYet />;

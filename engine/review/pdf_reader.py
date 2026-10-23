@@ -63,6 +63,52 @@ class ReadFile:
     def locate(self, page: int, quote: str) -> tuple[float, float, float, float] | None:
         return locate(self.data, page, quote)
 
+    def passage_has_marks(self, page: int, heading: tuple[str, int] | None,
+                          stop: tuple[str, int] | None) -> bool:
+        """Non-text objects between passage boundaries make text-only presence uncertain.
+
+        Boundaries carry their offsets in the newline-normalized extracted page text.
+        Unmatched or reversed boundaries cannot establish a readable, empty region.
+        Coordinates and object boxes use the same PDF-point convention as flattened fields.
+        """
+        import pypdfium2 as pdfium
+        try:
+            doc = pdfium.PdfDocument(self.data)
+            pdf_page = doc[page]
+            textpage = pdf_page.get_textpage()
+            after = _boundary_box(textpage, heading) if heading else None
+            before = _boundary_box(textpage, stop) if stop else None
+            if (heading and after is None) or (stop and before is None):
+                return True
+            if after and before and after[1] <= before[3]:
+                return True
+            top = after[3] if after else float('inf')
+            bottom = before[3] if before else float('-inf')
+            boxes = _object_boxes(pdf_page) | _annotation_boxes(pdf_page)
+            return any(y0 < top and y1 > bottom for _x0, y0, _x1, y1 in boxes)
+        except Exception:  # noqa: BLE001 - unreadable graphics must not establish a blank passage
+            return True
+
+    def unreadable_pages(self) -> list[int]:
+        """Textless drawn pages, raster regions or annotation appearances in attachment/appendix pages.
+
+        Paths on otherwise readable pages can be table borders/backgrounds, including in
+        the official export. Paths inside a labelled passage are checked by passage_has_marks.
+        """
+        import pypdfium2 as pdfium
+        import pypdfium2.raw as raw
+        try:
+            doc = pdfium.PdfDocument(self.data)
+            unreadable = []
+            for page in self.text_pages:
+                pdf_page = doc[page.page]
+                if _annotation_boxes(pdf_page) or (not page.text.strip() and _object_boxes(pdf_page)) or any(
+                        obj.type == raw.FPDF_PAGEOBJ_IMAGE for obj in pdf_page.get_objects(max_depth=4)):
+                    unreadable.append(page.page)
+            return unreadable
+        except Exception:  # noqa: BLE001 - a failed inspection cannot establish absence
+            return [page.page for page in self.text_pages]
+
 
 @dataclass(frozen=True)
 class FormVersion:
@@ -102,6 +148,68 @@ def _object_boxes(page) -> frozenset:
             boxes.add(tuple(round(v) for v in bounds))
         except Exception:  # noqa: BLE001 - an object without bounds cannot be compared
             continue
+    return frozenset(boxes)
+
+
+def _annotation_boxes(page) -> frozenset:
+    """Normal-view annotation appearances are separate from page-content objects.
+
+    Compare normal rendering with annotations on/off: flags, appearance states and invisible
+    drawing modes must not be guessed from /Contents or object counts. This detects ink only,
+    never OCRs or reads applicant text. Legacy flattened-field extraction remains unchanged.
+    """
+    import ctypes
+    import pypdfium2.raw as raw
+    from PIL import ImageChops
+    rects = []
+    count = raw.FPDFPage_GetAnnotCount(page)
+    if count < 0:
+        raise ValueError('Annotation inventory could not be read.')
+    for index in range(count):
+        annotation = raw.FPDFPage_GetAnnot(page, index)
+        if not annotation:
+            raise ValueError('Annotation could not be opened.')
+        try:
+            flags = raw.FPDFAnnot_GetFlags(annotation)
+            if flags & (raw.FPDF_ANNOT_FLAG_HIDDEN | raw.FPDF_ANNOT_FLAG_NOVIEW):
+                continue
+            rect = raw.FS_RECTF()
+            if not raw.FPDFAnnot_GetRect(annotation, ctypes.byref(rect)):
+                raise ValueError('Annotation bounds could not be read.')
+            rects.append((rect.left, rect.bottom, rect.right, rect.top))
+        finally:
+            raw.FPDFPage_CloseAnnot(annotation)
+    if not rects:
+        return frozenset()
+    with_annots = page.render(scale=1, draw_annots=True, may_draw_forms=False)
+    without_annots = page.render(scale=1, draw_annots=False, may_draw_forms=False)
+    difference = ImageChops.difference(with_annots.to_pil().convert('RGB'), without_annots.to_pil().convert('RGB'))
+    width, height = difference.size
+
+    def pixel(x, y):
+        px, py = ctypes.c_int(), ctypes.c_int()
+        if not raw.FPDF_PageToDevice(page, 0, 0, width, height, 0, x, y, ctypes.byref(px), ctypes.byref(py)):
+            raise ValueError('Annotation page coordinates could not be read.')
+        return px.value, py.value
+
+    def point(x, y):
+        px, py = ctypes.c_double(), ctypes.c_double()
+        if not raw.FPDF_DeviceToPage(page, 0, 0, width, height, 0, x, y, ctypes.byref(px), ctypes.byref(py)):
+            raise ValueError('Annotation render coordinates could not be read.')
+        return px.value, py.value
+
+    boxes = set()
+    for x0, y0, x1, y1 in rects:
+        a, b = pixel(x0, y0), pixel(x1, y1)
+        crop = (max(0, min(a[0], b[0]) - 1), max(0, min(a[1], b[1]) - 1),
+                min(width, max(a[0], b[0]) + 1), min(height, max(a[1], b[1]) + 1))
+        if crop[0] >= crop[2] or crop[1] >= crop[3]:
+            continue
+        ink = difference.crop(crop).getbbox()
+        if ink:
+            a = point(crop[0] + ink[0], crop[1] + ink[1])
+            b = point(crop[0] + ink[2], crop[1] + ink[3])
+            boxes.add((min(a[0], b[0]), min(a[1], b[1]), max(a[0], b[0]), max(a[1], b[1])))
     return frozenset(boxes)
 
 
@@ -163,6 +271,29 @@ def locate(data: bytes, page: int, quote: str) -> tuple[float, float, float, flo
         return None
     return (round(min(b[0] for b in boxes), 1), round(min(b[1] for b in boxes), 1),
             round(max(b[2] for b in boxes), 1), round(max(b[3] for b in boxes), 1))
+
+
+def _boundary_box(textpage, boundary: tuple[str, int]) -> tuple[float, float, float, float] | None:
+    """Pair a text offset with the same PDFium search occurrence, never the first by default."""
+    quote, offset = boundary
+    quote = _norm(quote)[:200]
+    if not quote:
+        return None
+    text = textpage.get_text_range().replace('\r\n', '\n').replace('\r', '\n')
+    matches = list(re.finditer(r'\s+'.join(re.escape(word) for word in quote.split()), text, re.I))
+    occurrence = next((index for index, match in enumerate(matches) if match.start() == offset), None)
+    if occurrence is None:
+        return None
+    searcher = textpage.search(quote, match_case=False)
+    hits = []
+    while hit := searcher.get_next():
+        hits.append(hit)
+    if len(hits) != len(matches):
+        return None   # extraction and geometry disagree; do not guess a boundary
+    start, count = hits[occurrence]
+    boxes = [textpage.get_charbox(index) for index in range(start, start + count)]
+    return (min(b[0] for b in boxes), min(b[1] for b in boxes),
+            max(b[2] for b in boxes), max(b[3] for b in boxes))
 
 
 def _fillable(reader, data: bytes, name: str, fmaps: list[dict]) -> ReadFile | None:

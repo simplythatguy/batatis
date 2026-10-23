@@ -155,6 +155,7 @@ class Gap(BaseModel):
 class Case(BaseModel):
     id: str = Field(default_factory=lambda: new_id('case'))
     title: str | None = None
+    title_is_manual: bool = False             # only an explicit rename sets this; legacy names keep their heuristic
     owner_id: str | None = None
     authority: str | None = None
     status: ApplicationStatus = 'draft'

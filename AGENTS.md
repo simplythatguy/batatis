@@ -28,7 +28,7 @@ Single-context: root `GLOSSARY.md` + `docs/adr/` + challenge brief. See `docs/ag
 
 ### Stack skills
 
-- **Batatis challenge:** `.cursor/skills/batatis-*` (hackathon, variance-workflow, ui-opus, **ui-linear**).
+- **Batatis challenge:** `.cursor/skills/batatis-*` (hackathon, variance-workflow, ui-opus, **ui-linear**, **ui-minimalist**).
 - **Matt Pocock engineering:** `.agents/skills/` (also symlinked under `.cursor/skills/`). Reinstall with `npx skills@latest add mattpocock/skills -a cursor`.
 - **pstack / poteto-mode:** Cursor plugin (not vendored). See `docs/pstack.md`. Review/judgment roles pinned to Opus 5.5 in `.cursor/rules/pstack-models.mdc`.
 
@@ -44,7 +44,7 @@ Official NBC(AE) process fork (acceptable vs alternative): [`docs/diagrams/nbc-a
 
 1. Read `.cursor/skills/batatis-hackathon/SKILL.md` (domain + pitfalls + NBC(AE) fork).
 2. For product flow work, read `.cursor/skills/batatis-variance-workflow/SKILL.md`.
-3. For any UI / frontend / visual work: read `.cursor/skills/batatis-ui-linear/SKILL.md` (P0 rules) + `.cursor/skills/batatis-ui-opus/SKILL.md`. **Default product look** = the calm system (user decision 2026-10-20): `docs/design-system-calm.md`, contract `docs/design/calm-flow-prototype.html`, code `web/src/calm/`. It replaces the Linear look (`docs/design-system-linear.md` is history); the P0 rules still hold. Primary CTAs are **neutral grey** (not indigo fill). Use **Claude Opus 5.5** for UI implement **and** formal UI review (Composer is provisional). Simplify ruthlessly without dropping capabilities; meet the bug-free bar + `evals/ui-artifacts/smoke.mjs`.
+3. For any UI / frontend / visual work: read `.cursor/skills/batatis-ui-linear/SKILL.md` (P0 rules) + `.cursor/skills/batatis-ui-opus/SKILL.md` + `.cursor/skills/batatis-ui-minimalist/SKILL.md` (how much goes on screen: icons before words, visuals over sentences, obvious questions as a label + control with help on demand, short renamable titles, icon + count metadata). **Default product look** = the calm system (user decision 2026-10-20): `docs/design-system-calm.md`, contract `docs/design/calm-flow-prototype.html`, code `web/src/calm/`. It replaces the Linear look (`docs/design-system-linear.md` is history); the P0 rules still hold. Since 2026-10-22 it is **light mode and minimal text** (visuals over sentences), and since the user's later correction **monotone: colour only identifies** where you are or tells crowded items apart, never decorates; see the Tokens section. Primary CTAs stay **neutral** (near-black fill, never indigo). Use **Claude Opus 5.5** for UI implement **and** formal UI review (Composer is provisional). Simplify ruthlessly without dropping capabilities; meet the bug-free bar + `evals/ui-artifacts/smoke.mjs`.
 4. Run understanding checks in `evals/fixtures/understanding-checklist.md` when changing skills/rules. Blind UI prompts: `evals/battle-prompts/ui-blind/`.
 
 Always-on domain rule: `.cursor/rules/batatis-hackathon.mdc`. UI globs: `.cursor/rules/batatis-ui-opus.mdc`, `.cursor/rules/batatis-ui-linear.mdc`.

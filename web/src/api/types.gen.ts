@@ -33,12 +33,25 @@ export interface ApplicantSummary {
   name: string;
 }
 
+export interface ApplicationPreferences {
+  archived: boolean;
+  pinned: boolean;
+}
+
+/** Omitted fields keep their stored value; explicit values must be booleans. */
+export interface ApplicationPreferencesPatch {
+  archived?: boolean;
+  pinned?: boolean;
+}
+
 export interface ApplicationSummary {
+  archived: boolean;
   authority: string | null;
   completeness: CompletenessSummary | null;
   id: string;
+  pinned: boolean;
   reviewer: ReviewerName | null;
-  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
   submitted_at: string | null;
   title: string | null;
   unread_messages: number;
@@ -60,8 +73,13 @@ export interface AssistFocus {
   kind: string;
 }
 
+export interface AssistNavigation {
+  destination: "applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "officer-view" | "settings" | "notifications" | "accuracy" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out";
+}
+
 export interface AssistRequest {
   case_id?: string | null;
+  destinations?: ("applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "officer-view" | "settings" | "notifications" | "accuracy" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out")[];
   focus?: AssistFocus | null;
   history?: AssistTurn[];
   question: string;
@@ -71,6 +89,7 @@ export interface AssistRequest {
 export interface AssistResult {
   answer: string;
   cited: string[];
+  navigation: AssistNavigation | null;
   notice: string;
   removed_citations: string[];
 }
@@ -160,10 +179,11 @@ export interface Case {
   provisions: string[];
   relevance: RelevanceRecord | null;
   section_c: SectionCRow[];
-  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
   status_history: StatusChange[];
   submitted_at: string | null;
   title: string | null;
+  title_is_manual: boolean;
   updated_at: string;
   version: number;
 }
@@ -299,7 +319,7 @@ export interface CloseOut {
   decided_at: string;
   due_date: string;
   notice: string;
-  outcome: string;
+  outcome: "accept" | "refuse";
   overdue: boolean;
   record_package: RecordPackage;
   sent: boolean;
@@ -361,7 +381,7 @@ export interface Decision {
   by_name: string;
   items: DecisionItem[];
   message: string;
-  outcome: "accept" | "return";
+  outcome: "accept" | "return" | "refuse";
 }
 
 export interface DecisionItem {
@@ -379,13 +399,13 @@ export interface DecisionItemInput {
 export interface DecisionRequest {
   items?: DecisionItemInput[];
   message?: string | null;
-  outcome: "accept" | "return";
+  outcome: "accept" | "return" | "refuse";
 }
 
 export interface DecisionSummary {
   at: string;
   by_name: string;
-  outcome: "accept" | "return";
+  outcome: "accept" | "return" | "refuse";
 }
 
 export interface DiffEntry {
@@ -887,7 +907,7 @@ export interface Notification {
   id: string;
   kind: "status" | "message";
   read: boolean;
-  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn" | null;
+  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn" | null;
   summary: string;
 }
 
@@ -1032,7 +1052,7 @@ export interface QueueApplication {
   completeness: CompletenessSummary | null;
   decision: DecisionSummary | null;
   id: string;
-  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+  status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
   submitted_at: string | null;
   title: string | null;
   unread_messages: number;
@@ -1088,9 +1108,11 @@ export interface RelevanceBands {
 
 export interface RelevanceRecord {
   bands: RelevanceBands;
+  config_hash: string | null;
   description_sha256: string;
   display: Record<string, number>;
-  model: "relevance-1";
+  model: "relevance-1" | "relevance-2";
+  model_ids: Record<string, string | null>;
   rerank: Record<string, number>;
   scored_at: string;
   scores: Record<string, number>;
@@ -1379,9 +1401,9 @@ export interface StatusChange {
   at: string;
   by_id: string;
   by_name: string;
-  from_status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+  from_status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
   note: string;
-  to_status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+  to_status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
 }
 
 export interface StoredMessage {
@@ -1408,6 +1430,10 @@ export interface ThreadMessage {
   items: DecisionItem[];
   kind: "message" | "decision" | "status";
   read_by_me: boolean;
+}
+
+export interface TitleRequest {
+  title: string;
 }
 
 export interface TocArticle {
@@ -1455,4 +1481,38 @@ export interface User {
 
 export interface UserResult {
   user: User;
+}
+
+export interface VoiceCapability {
+  available: boolean;
+  max_seconds: number;
+  notice: string;
+  protocol: "batatis.voice.v1";
+  reason: string | null;
+  relay_path: "/api/voice/relay/session";
+}
+
+export interface VoiceCommand {
+  audio?: string | null;
+  context_id: string;
+  revision?: number | null;
+  scope?: VoiceScope | null;
+  session_id: string;
+  type: "session.end" | "audio.append" | "audio.commit" | "audio.clear" | "response.cancel" | "context.update";
+}
+
+export interface VoiceScope {
+  attachment_ids?: string[];
+  case_id?: string | null;
+  case_version?: number | null;
+  context_id: string;
+  destinations?: ("applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "officer-view" | "settings" | "notifications" | "accuracy" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out")[];
+  focus?: AssistFocus | null;
+  revision?: number;
+  screen: string;
+}
+
+export interface VoiceStart {
+  scope: VoiceScope;
+  type: "session.start";
 }

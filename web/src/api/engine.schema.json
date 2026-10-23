@@ -170,8 +170,52 @@
       "title": "ApplicantSummary",
       "type": "object"
     },
+    "ApplicationPreferences": {
+      "properties": {
+        "archived": {
+          "default": false,
+          "title": "Archived",
+          "type": "boolean"
+        },
+        "pinned": {
+          "default": false,
+          "title": "Pinned",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "archived",
+        "pinned"
+      ],
+      "title": "ApplicationPreferences",
+      "type": "object"
+    },
+    "ApplicationPreferencesPatch": {
+      "additionalProperties": false,
+      "description": "Omitted fields keep their stored value; explicit values must be booleans.",
+      "minProperties": 1,
+      "properties": {
+        "archived": {
+          "default": false,
+          "title": "Archived",
+          "type": "boolean"
+        },
+        "pinned": {
+          "default": false,
+          "title": "Pinned",
+          "type": "boolean"
+        }
+      },
+      "title": "ApplicationPreferencesPatch",
+      "type": "object"
+    },
     "ApplicationSummary": {
       "properties": {
+        "archived": {
+          "default": false,
+          "title": "Archived",
+          "type": "boolean"
+        },
         "authority": {
           "anyOf": [
             {
@@ -198,6 +242,11 @@
           "title": "Id",
           "type": "string"
         },
+        "pinned": {
+          "default": false,
+          "title": "Pinned",
+          "type": "boolean"
+        },
         "reviewer": {
           "anyOf": [
             {
@@ -215,6 +264,7 @@
             "in_review",
             "returned",
             "accepted",
+            "refused",
             "withdrawn"
           ],
           "title": "Status",
@@ -260,7 +310,9 @@
         "submitted_at",
         "completeness",
         "unread_messages",
-        "reviewer"
+        "reviewer",
+        "archived",
+        "pinned"
       ],
       "title": "ApplicationSummary",
       "type": "object"
@@ -340,6 +392,63 @@
       "title": "AssistFocus",
       "type": "object"
     },
+    "AssistNavigation": {
+      "additionalProperties": false,
+      "properties": {
+        "destination": {
+          "enum": [
+            "applications",
+            "description",
+            "questions",
+            "review",
+            "application",
+            "code-library",
+            "code-search",
+            "references",
+            "downloads",
+            "officer-view",
+            "settings",
+            "notifications",
+            "accuracy",
+            "question-authority",
+            "question-owner",
+            "question-representative",
+            "question-mailing-address",
+            "question-date",
+            "question-scope",
+            "question-permit",
+            "question-site-address",
+            "question-legal-description",
+            "question-alternative",
+            "question-rationale",
+            "question-risk",
+            "question-mitigation",
+            "question-assumptions",
+            "question-maintenance",
+            "question-qualifications",
+            "question-documents",
+            "review-queue",
+            "package-review",
+            "review-overview",
+            "review-missing",
+            "review-checks",
+            "review-decide",
+            "review-application",
+            "review-messages",
+            "review-request",
+            "review-versions",
+            "review-close-out"
+          ],
+          "title": "Destination",
+          "type": "string"
+        }
+      },
+      "required": [
+        "destination"
+      ],
+      "title": "AssistNavigation",
+      "type": "object"
+    },
     "AssistRequest": {
       "additionalProperties": false,
       "properties": {
@@ -356,6 +465,57 @@
           ],
           "default": null,
           "title": "Case Id"
+        },
+        "destinations": {
+          "items": {
+            "enum": [
+              "applications",
+              "description",
+              "questions",
+              "review",
+              "application",
+              "code-library",
+              "code-search",
+              "references",
+              "downloads",
+              "officer-view",
+              "settings",
+              "notifications",
+              "accuracy",
+              "question-authority",
+              "question-owner",
+              "question-representative",
+              "question-mailing-address",
+              "question-date",
+              "question-scope",
+              "question-permit",
+              "question-site-address",
+              "question-legal-description",
+              "question-alternative",
+              "question-rationale",
+              "question-risk",
+              "question-mitigation",
+              "question-assumptions",
+              "question-maintenance",
+              "question-qualifications",
+              "question-documents",
+              "review-queue",
+              "package-review",
+              "review-overview",
+              "review-missing",
+              "review-checks",
+              "review-decide",
+              "review-application",
+              "review-messages",
+              "review-request",
+              "review-versions",
+              "review-close-out"
+            ],
+            "type": "string"
+          },
+          "maxItems": 64,
+          "title": "Destinations",
+          "type": "array"
         },
         "focus": {
           "anyOf": [
@@ -409,6 +569,17 @@
           "title": "Cited",
           "type": "array"
         },
+        "navigation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AssistNavigation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "notice": {
           "title": "Notice",
           "type": "string"
@@ -425,7 +596,8 @@
         "answer",
         "cited",
         "removed_citations",
-        "notice"
+        "notice",
+        "navigation"
       ],
       "title": "AssistResult",
       "type": "object"
@@ -1034,6 +1206,7 @@
             "in_review",
             "returned",
             "accepted",
+            "refused",
             "withdrawn"
           ],
           "title": "Status",
@@ -1070,6 +1243,11 @@
           "default": null,
           "title": "Title"
         },
+        "title_is_manual": {
+          "default": false,
+          "title": "Title Is Manual",
+          "type": "boolean"
+        },
         "updated_at": {
           "title": "Updated At",
           "type": "string"
@@ -1084,6 +1262,7 @@
       "required": [
         "id",
         "title",
+        "title_is_manual",
         "owner_id",
         "authority",
         "status",
@@ -1897,6 +2076,10 @@
           "type": "string"
         },
         "outcome": {
+          "enum": [
+            "accept",
+            "refuse"
+          ],
           "title": "Outcome",
           "type": "string"
         },
@@ -2220,7 +2403,8 @@
         "outcome": {
           "enum": [
             "accept",
-            "return"
+            "return",
+            "refuse"
           ],
           "title": "Outcome",
           "type": "string"
@@ -2354,7 +2538,8 @@
         "outcome": {
           "enum": [
             "accept",
-            "return"
+            "return",
+            "refuse"
           ],
           "title": "Outcome",
           "type": "string"
@@ -2379,7 +2564,8 @@
         "outcome": {
           "enum": [
             "accept",
-            "return"
+            "return",
+            "refuse"
           ],
           "title": "Outcome",
           "type": "string"
@@ -5610,6 +5796,7 @@
                 "in_review",
                 "returned",
                 "accepted",
+                "refused",
                 "withdrawn"
               ],
               "type": "string"
@@ -6575,6 +6762,7 @@
             "in_review",
             "returned",
             "accepted",
+            "refused",
             "withdrawn"
           ],
           "title": "Status",
@@ -6864,6 +7052,18 @@
         "bands": {
           "$ref": "#/$defs/RelevanceBands"
         },
+        "config_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Config Hash"
+        },
         "description_sha256": {
           "title": "Description Sha256",
           "type": "string"
@@ -6878,10 +7078,28 @@
           "type": "object"
         },
         "model": {
-          "const": "relevance-1",
           "default": "relevance-1",
+          "enum": [
+            "relevance-1",
+            "relevance-2"
+          ],
           "title": "Model",
           "type": "string"
+        },
+        "model_ids": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "default": {},
+          "title": "Model Ids",
+          "type": "object"
         },
         "rerank": {
           "additionalProperties": {
@@ -6920,6 +7138,8 @@
       "required": [
         "status",
         "model",
+        "config_hash",
+        "model_ids",
         "scored_at",
         "description_sha256",
         "stale",
@@ -8766,6 +8986,7 @@
             "in_review",
             "returned",
             "accepted",
+            "refused",
             "withdrawn"
           ],
           "title": "From Status",
@@ -8783,6 +9004,7 @@
             "in_review",
             "returned",
             "accepted",
+            "refused",
             "withdrawn"
           ],
           "title": "To Status",
@@ -8929,6 +9151,22 @@
         "read_by_me"
       ],
       "title": "ThreadMessage",
+      "type": "object"
+    },
+    "TitleRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "title": "TitleRequest",
       "type": "object"
     },
     "TocArticle": {
@@ -9183,6 +9421,274 @@
         "user"
       ],
       "title": "UserResult",
+      "type": "object"
+    },
+    "VoiceCapability": {
+      "properties": {
+        "available": {
+          "title": "Available",
+          "type": "boolean"
+        },
+        "max_seconds": {
+          "title": "Max Seconds",
+          "type": "integer"
+        },
+        "notice": {
+          "title": "Notice",
+          "type": "string"
+        },
+        "protocol": {
+          "const": "batatis.voice.v1",
+          "title": "Protocol",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        },
+        "relay_path": {
+          "const": "/api/voice/relay/session",
+          "title": "Relay Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "available",
+        "reason",
+        "protocol",
+        "relay_path",
+        "max_seconds",
+        "notice"
+      ],
+      "title": "VoiceCapability",
+      "type": "object"
+    },
+    "VoiceCommand": {
+      "additionalProperties": false,
+      "properties": {
+        "audio": {
+          "anyOf": [
+            {
+              "maxLength": 64000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Audio"
+        },
+        "context_id": {
+          "maxLength": 80,
+          "minLength": 16,
+          "title": "Context Id",
+          "type": "string"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "maximum": 1000000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revision"
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VoiceScope"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "session_id": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Session Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "session.end",
+            "audio.append",
+            "audio.commit",
+            "audio.clear",
+            "response.cancel",
+            "context.update"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "session_id",
+        "context_id"
+      ],
+      "title": "VoiceCommand",
+      "type": "object"
+    },
+    "VoiceScope": {
+      "additionalProperties": false,
+      "properties": {
+        "attachment_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 3,
+          "title": "Attachment Ids",
+          "type": "array"
+        },
+        "case_id": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Id"
+        },
+        "case_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Version"
+        },
+        "context_id": {
+          "maxLength": 80,
+          "minLength": 16,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Context Id",
+          "type": "string"
+        },
+        "destinations": {
+          "items": {
+            "enum": [
+              "applications",
+              "description",
+              "questions",
+              "review",
+              "application",
+              "code-library",
+              "code-search",
+              "references",
+              "downloads",
+              "officer-view",
+              "settings",
+              "notifications",
+              "accuracy",
+              "question-authority",
+              "question-owner",
+              "question-representative",
+              "question-mailing-address",
+              "question-date",
+              "question-scope",
+              "question-permit",
+              "question-site-address",
+              "question-legal-description",
+              "question-alternative",
+              "question-rationale",
+              "question-risk",
+              "question-mitigation",
+              "question-assumptions",
+              "question-maintenance",
+              "question-qualifications",
+              "question-documents",
+              "review-queue",
+              "package-review",
+              "review-overview",
+              "review-missing",
+              "review-checks",
+              "review-decide",
+              "review-application",
+              "review-messages",
+              "review-request",
+              "review-versions",
+              "review-close-out"
+            ],
+            "type": "string"
+          },
+          "maxItems": 64,
+          "title": "Destinations",
+          "type": "array"
+        },
+        "focus": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AssistFocus"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "revision": {
+          "default": 0,
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "screen": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Screen",
+          "type": "string"
+        }
+      },
+      "required": [
+        "context_id",
+        "screen"
+      ],
+      "title": "VoiceScope",
+      "type": "object"
+    },
+    "VoiceStart": {
+      "additionalProperties": false,
+      "properties": {
+        "scope": {
+          "$ref": "#/$defs/VoiceScope"
+        },
+        "type": {
+          "const": "session.start",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "scope"
+      ],
+      "title": "VoiceStart",
       "type": "object"
     }
   },

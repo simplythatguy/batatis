@@ -92,3 +92,40 @@ def test_part3_citation_raises_the_peer_review_signal(codes):
 def test_clean_package_has_no_div_c_or_peer_review_findings(codes):
     keys = {f.key for f in review_uploads(package(), codes).findings}
     assert not {k for k in keys if k.startswith(('div_c.', 'demonstrate.', 'peer_review'))}
+
+
+def test_information_request_items_are_addressed_to_the_applicant():
+    """Finding messages speak to the officer; the request copied to the applicant must not."""
+    from engine.models_review import Finding, Pointer
+    from engine.review import information_request as ir
+    finding = Finding(key='div_c.testing_procedures:presence', section='process', field='div_c.testing_procedures',
+                      label='testing procedures', status='missing', problem='absent', severity='blocking',
+                      message='No testing procedures were named. Ask the applicant to include it.',
+                      pointers=[Pointer(file='case:x')])
+    demo = Finding(key='demonstrate.failure_conditions:not_mentioned', section='process',
+                   field='demonstrate.failure_conditions', label='performance under failure conditions',
+                   status='unclear', problem='not_mentioned', severity='warning',
+                   message='Failure is not mentioned. Ask the applicant to state it; the review does not judge adequacy.',
+                   pointers=[Pointer(file='case:x')])
+    texts = [item.text for item in ir.build([finding, demo]).items]
+    assert texts == ['Please include the testing procedures. No testing procedures were named.',
+                     'Please state in the documentation performance under failure conditions, or say that it does not '
+                     'apply. Failure is not mentioned.']
+    assert not any('Ask the applicant' in t for t in texts)
+
+
+@pytest.mark.parametrize('instruction', [
+    'Ask the applicant to check provision 9.10.14.4.',
+    'Ask the applicant to check provision 9.10.14.4 before resubmitting.',
+    'Ask the applicant to check provision 9.9.10.1.(1).',
+])
+def test_information_request_removes_officer_sentence_with_dotted_provision(instruction):
+    from engine.models_review import Finding
+
+    finding = Finding(key='citation:provision', section='C', field='provision', label='provision',
+                      status='unclear', problem='nonexistent_provision', severity='blocking',
+                      message=f'The provision could not be verified. {instruction} Please confirm the edition.')
+
+    assert ir.build([finding]).items[0].text == (
+        'Please confirm the provision number for provision (Section C). '
+        'The provision could not be verified. Please confirm the edition.')

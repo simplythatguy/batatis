@@ -145,8 +145,9 @@ def reset_for_tests() -> None:
 
 
 def live_enabled(provider: str = 'openai') -> bool:
-    key = 'ANTHROPIC_API_KEY' if provider == 'anthropic' else 'OPENAI_API_KEY'
-    return os.environ.get('BATATIS_LIVE') == '1' and bool((os.environ.get(key) or '').strip())
+    key = {'openai': 'OPENAI_API_KEY', 'openai_decisions': 'OPENAI_API_KEY',
+           'anthropic': 'ANTHROPIC_API_KEY', 'xai': 'XAI_API_KEY'}.get(provider)
+    return key is not None and os.environ.get('BATATIS_LIVE') == '1' and bool((os.environ.get(key) or '').strip())
 
 
 def daily_cap() -> Decimal:
@@ -203,12 +204,17 @@ def _rate_limit(name: str, default_limit: str, default_window: str) -> tuple[int
 def authorize(*, model: str = DEFAULT_MODEL, max_input_tokens: int, max_output_tokens: int,
               client_ip: str | None = None, provider: str = 'openai') -> Decision:
     """Reserve the worst-case cost. Refuse without calling a provider when the gate is shut."""
-    if not live_enabled(provider):
+    if provider == 'xai' or not live_enabled(provider):
+        # Realtime voice is billed in time/text inputs, never token estimates.
         return Decision(False, 'offline')
+    return _authorize_cost(estimate_usd(model, max_input_tokens, max_output_tokens), client_ip)
+
+
+def _authorize_cost(estimate: Decimal, client_ip: str | None) -> Decision:
+    """Shared LLM rate window and atomic dollar ledger, including non-token billing."""
     limit, window = _rate_limit('BATATIS_LLM_RATE', '20', '600')
     if not _llm_window.allow(client_ip or 'local', limit, window):
         return Decision(False, 'rate-limited')
-    estimate = estimate_usd(model, max_input_tokens, max_output_tokens)
     try:
         ledger = _ledger()
     except SpendStoreRequired:
@@ -216,6 +222,27 @@ def authorize(*, model: str = DEFAULT_MODEL, max_input_tokens: int, max_output_t
     if not _reserve(ledger, estimate, daily_cap()):
         return Decision(False, 'offline-cap')
     return Decision(True, 'live', estimate)
+
+
+def authorize_voice(*, client_ip: str, max_seconds: int, max_text_inputs: int) -> Decision:
+    """Reserve a bounded relay's full allowance; never settle voice as text tokens.
+
+    Official xAI pricing, checked 2026-10-22: $0.08/min + $0.004/text input.
+    The relay bounds connection/audio time and ALL non-audio upstream messages.
+    Once a connection is attempted this entire reservation is retained, including
+    refusal, timeout and cancellation. Reported token counts cannot price minutes.
+    """
+    if not (1 <= max_seconds <= 60 and 1 <= max_text_inputs <= 20):
+        raise ValueError('Voice allowance exceeds the bounded session policy')
+    if not live_enabled('xai'):
+        return Decision(False, 'offline')
+    limit, window = _assist_limits()
+    if not _assist_window.allow(client_ip, limit, window):
+        return Decision(False, 'rate-limited')
+    # Round time UP to whole minutes, even for a short/failed call.
+    minutes = (max_seconds + 59) // 60
+    estimate = Decimal(minutes) * Decimal('0.08') + Decimal(max_text_inputs) * Decimal('0.004')
+    return _authorize_cost(estimate.quantize(Decimal('0.000001')), client_ip)
 
 
 def authorize_assist(*, model: str, max_input_tokens: int, max_output_tokens: int,
@@ -246,7 +273,7 @@ def assist_retry_after(client_ip: str) -> int:
     return max(1, _assist_window.retry_after(client_ip, window), _llm_window.retry_after(client_ip, llm_window))
 
 
-PROVIDERS = ('openai', 'anthropic', 'jev')
+PROVIDERS = ('openai', 'openai_decisions', 'anthropic', 'jev')
 
 
 def fake_providers() -> bool:

@@ -32,9 +32,13 @@ export interface Session {
   draft: string;
   draftFiles: HeldFile[];
   role: ApplicantType | null;
+  /** The applicant's choice on each offered standing package (checklist id → yes or no). */
+  packages: Record<string, "yes" | "no">;
+  /** Coded-rule inputs answered Not sure: not asked again in this visit. */
+  ruleUnsure: string[];
 }
 
-const EMPTY: Session = { queue: [], index: 0, skipped: [], wrapped: false, seen: [], held: [], uploading: [], authorityUnsure: false, readAfterStart: false, draft: "", draftFiles: [], role: null };
+const EMPTY: Session = { queue: [], index: 0, skipped: [], wrapped: false, seen: [], held: [], uploading: [], authorityUnsure: false, readAfterStart: false, draft: "", draftFiles: [], role: null, packages: {}, ruleUnsure: [] };
 
 let state: Session = EMPTY;
 const listeners = new Set<() => void>();

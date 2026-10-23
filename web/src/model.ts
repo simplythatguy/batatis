@@ -462,6 +462,8 @@ export type Action =
   | { type: "answerCandidate"; id: string; answer: CandidateAnswer | null }
   | { type: "setProcess"; field: ProcessFieldId; value: string }
   | { type: "setAuthority"; authority: Case["authority"] }
+  /** The applicant's own name (already saved, or kept for when the case is created). */
+  | { type: "renameCase"; title: string }
   | { type: "addCandidate"; candidate: Candidate }
   | {
       type: "addIdentified";
@@ -486,6 +488,8 @@ export type Action =
   | { type: "ackEvidence"; acked?: { id: string; rev: number }[]; deleted?: string[]; rejected?: { id: string; rev?: number; reason: string }[]; facts?: Fact[] | null; refreshed?: boolean; error?: string | null }
   | { type: "deferProfessional"; field: string; choice: "not_sure" | "not_engaged_yet"; label: string }
   | { type: "setProfessionalFact"; field: string; value: string | number | boolean }
+  /** A coded-rule input answered on its deck card (docs/api/rules.md): a confirmed fact, or null to clear it. */
+  | { type: "setRuleInput"; field: string; value: number | boolean | string | null; rule: string; quote: string }
   | { type: "answerScope"; field: string; answer: "yes" | "no" | "not-sure" | "clear"; text?: string }
   | { type: "notePractice"; value: true | false | "unknown" }
   | { type: "reset"; to: Case };
@@ -549,7 +553,21 @@ function restoreDraft(c: Case, op: ListedEvidence, note: string, editing?: strin
   return { ...c, evidenceDrafts: { ...c.evidenceDrafts, [op.taskId]: draft } };
 }
 
+/** Same content, same object: an acknowledgement that changes nothing must not look like an edit. */
+const same = (a: unknown, b: unknown) => a === b || JSON.stringify(a) === JSON.stringify(b);
+
+/**
+ * Every save acknowledges the stored evidence ledger. When it changes nothing the case keeps its
+ * identity; new arrays with the same content re-armed the autosave effect and polled the engine.
+ */
 function ackEvidence(c: Case, a: Extract<Action, { type: "ackEvidence" }>): Case {
+  const next = applyAck(c, a);
+  const keep = <K extends "facts" | "listedEvidence" | "deletedEvidence" | "evidenceIssues" | "evidenceDrafts">(k: K) => (same(c[k], next[k]) ? c[k] : next[k]);
+  const kept: Case = { ...next, facts: keep("facts"), listedEvidence: keep("listedEvidence"), deletedEvidence: keep("deletedEvidence"), evidenceIssues: keep("evidenceIssues"), evidenceDrafts: keep("evidenceDrafts") };
+  return (Object.keys(kept) as (keyof Case)[]).every((k) => kept[k] === c[k]) && Object.keys(c).length === Object.keys(kept).length ? c : kept;
+}
+
+function applyAck(c: Case, a: Extract<Action, { type: "ackEvidence" }>): Case {
   let next: Case = c;
   if (a.facts) next = { ...next, facts: [...next.facts.filter((fact) => !fact.field.startsWith("evidence.")), ...a.facts] };
   let ops = [...(next.listedEvidence ?? [])];
@@ -759,6 +777,8 @@ export function reducer(c: Case, a: Action): Case {
       }
       return { ...c, process: { ...c.process, [a.field]: value }, facts };
     }
+    case "renameCase":
+      return { ...c, title: a.title, titleKept: true };
     case "setAuthority":
       return { ...c, authority: a.authority };
     case "addCandidate":
@@ -984,6 +1004,12 @@ export function reducer(c: Case, a: Action): Case {
           f.field === field && f.source.ref === "Your answer" ? { ...f, value: a.value } : f,
         ),
       };
+    }
+    case "setRuleInput": {
+      const rest = c.facts.filter((f) => f.field !== a.field);
+      if (a.value === null) return { ...c, facts: rest };
+      const type = typeof a.value === "number" ? "user_text" : "user_click";
+      return { ...c, facts: [...rest, { id: newId("f"), field: a.field, value: a.value, kind: "pointed", status: "confirmed", source: { type, ref: `rules:${a.rule}`, quote: a.quote } }] };
     }
     case "reset":
       return a.to;

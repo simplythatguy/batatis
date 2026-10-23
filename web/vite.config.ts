@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       strictPort: true,
       fs: { allow: [".."] },
-      proxy: { "/api": { target: ENGINE, changeOrigin: true, rewrite: (p) => p.replace(/^\/api/, "") } },
+      proxy: { "/api": { target: ENGINE, changeOrigin: true, ws: true, rewrite: (p) => p.replace(/^\/api/, "") } },
     },
   };
 });

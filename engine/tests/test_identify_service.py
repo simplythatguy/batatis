@@ -79,7 +79,7 @@ def test_screen_judges_all_2080_articles_and_reranks_in_one_request(codes, arts)
         seen.append(len(questions))
         return base(state, questions, timeout)
     tp = transports()
-    tp.jev = counting
+    tp.decisions = counting
     out = run(SOFFIT, codes=codes, transports=tp)
     assert len(arts) == DIVISION_B_ARTICLES == 2080
     assert len(out.screen) == 2080 and set(out.screen) == set(arts)
@@ -98,7 +98,7 @@ def test_incomplete_screen_falls_back_and_commits_nothing(codes):
             reply['answers'].pop(next(iter(reply['answers'])))
         return reply
     tp = transports()
-    tp.jev = drops_one
+    tp.decisions = drops_one
     result = run(SOFFIT, codes=codes, transports=tp, policy=calibrated()).result
     assert result.mode == 'bm25_fallback' and result.committed == [] and not result.narrowed
     assert 'Nothing is committed' in result.label and result.message
@@ -278,6 +278,8 @@ def test_post_json_persists_and_get_never_calls_a_provider(client, monkeypatch):
 
 
 def test_identify_redacts_personal_details_before_the_provider(client, monkeypatch):
+    monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'jev')
+    monkeypatch.setenv('BATATIS_IDENTIFY_RERANK', 'jev')
     http, _ = client
     seen = []
     real = fakes.fake_jev_ask
@@ -376,6 +378,8 @@ def test_spend_is_settled_per_provider_for_a_run(client):
 
 
 def test_concurrent_run_on_the_same_case_is_refused(client, monkeypatch):
+    monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'jev')
+    monkeypatch.setenv('BATATIS_IDENTIFY_RERANK', 'jev')
     http, _ = client
     case_id = described(http)
     started, release = threading.Event(), threading.Event()
@@ -598,6 +602,8 @@ def test_stale_expected_version_is_a_409_and_changes_nothing(client):
 
 
 def test_identify_run_is_one_cas_and_a_write_during_it_is_a_409(client, monkeypatch):
+    monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'jev')
+    monkeypatch.setenv('BATATIS_IDENTIFY_RERANK', 'jev')
     http, store = client
     case_id = described(http)
     real = fakes.fake_jev_ask
@@ -618,16 +624,6 @@ def test_identify_run_is_one_cas_and_a_write_during_it_is_a_409(client, monkeypa
     assert reply.status_code == 409
     case = store.get(case_id)
     assert case.identify is None and case.title == 'edited during the run'
-
-
-def test_title_names_only_a_committed_or_offered_article():
-    from engine.identify.title import short_title
-    prose = 'Single-family house in Red Deer with an egress window'
-    rows = lambda status: {'articles': [{'provision': '9.9.10.1.(2)', 'title': 'Egress window', 'status': status}]}  # noqa: E731
-    for status in ('candidate', 'fallback'):
-        assert '9.9.10.1.(2)' not in short_title(prose, [], rows(status))
-    for status in ('committed', 'choice'):
-        assert '9.9.10.1.(2)' in short_title(prose, [], rows(status))
 
 
 @pytest.mark.parametrize('prose', [

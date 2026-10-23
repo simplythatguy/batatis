@@ -46,9 +46,9 @@ export function ForkNote({ fork }: { fork: Fork }) {
   return (
     <div className="cf-fork" role="note">
       <p className="cf-fork-line"><Dot tone={fork.variance_needed === "likely" ? "warning" : "pending"} />{forkLine(fork)}</p>
-      <p className="cf-fork-text">{fork.explanation}</p>
       <details className="cf-fork-more">
-        <summary>What a variance needs</summary>
+        <summary>Details</summary>
+        <p className="cf-fork-text">{fork.explanation}</p>
         <ul className="cf-halves">
           {fork.halves.map((h) => (
             <li key={h.id}>

@@ -12,6 +12,7 @@ Keys are read only by the provider SDK or as a request header; they are never lo
 from __future__ import annotations
 
 import json
+import math
 import os
 import threading
 from contextlib import contextmanager
@@ -21,11 +22,94 @@ from typing import Any, Callable
 
 from engine import llm_gate
 
-from .screen import JEV_MODEL, Ask, NoRetry
+from .screen import DECISIONS_MODEL, JEV_MODEL, MAX_QUESTIONS, Ask, NoRetry
 
 OPENAI_URL = 'https://api.openai.com/v1/chat/completions'
+DECISIONS_URL = 'https://api.openai.com/v1/decisions'
+DECISIONS_MAX_QUESTIONS = MAX_QUESTIONS
 # OpenAI JSON transport: (name, schema, system, user, model, max_output_tokens) -> (payload, usage)
 OpenAIJson = Callable[..., tuple[dict, dict]]
+DecisionsRaw = Callable[[dict, float], dict]
+
+
+class DecisionsProtocolError(NoRetry):
+    """Invalid or refused scoring answers cannot be repaired by repeating the same request."""
+
+
+class ScoringUnavailable(NoRetry, RuntimeError):
+    """A configured scoring transport is unavailable; no network call or retry is appropriate."""
+
+
+def raw_openai_decisions(body: dict, timeout: float) -> dict:
+    """Dedicated Decisions HTTP transport. Runtime callers use metered_decisions_ask."""
+    import httpx
+    key = (os.environ.get('OPENAI_API_KEY') or '').strip()
+    if not key:
+        raise RuntimeError('OPENAI_API_KEY is not set')
+    with httpx.Client(timeout=timeout, follow_redirects=False) as client:
+        response = client.post(DECISIONS_URL, headers={'Authorization': 'Bearer ' + key}, json=body)
+        response.raise_for_status()
+        return response.json()
+
+
+def metered_decisions_ask(raw: DecisionsRaw, *, model: str = DECISIONS_MODEL,
+                          client_ip: str | None = None, log: SpendLog | None = None) -> Ask:
+    """Adapt named Decisions predicates to Judge's internal `noul` values, after settlement.
+
+    The serialized state is text input; no JSON-part limits or generated-output parameters apply.
+    Decisions reports input/output token counts directly. The existing conservative Luna price
+    remains the ledger estimate, including for refused or malformed answers with reported usage.
+    """
+    if model != DECISIONS_MODEL:
+        raise ValueError('Decisions requires the pinned scoring model')
+
+    def ask(state, questions, timeout):
+        if not 1 <= len(questions) <= DECISIONS_MAX_QUESTIONS:
+            raise DecisionsProtocolError('scoring requires 1 to 400 questions')
+        predicates = []
+        for name, question in questions.items():
+            if not isinstance(name, str) or not name or question.get('type') != 'noul' \
+                    or not isinstance(question.get('instructions'), str):
+                raise DecisionsProtocolError('invalid scoring question')
+            predicates.append({'type': 'predicate', 'name': name, 'instructions': question['instructions']})
+        body = {'model': model, 'input': json.dumps(state), 'questions': predicates}
+        # One token per serialized UTF-8 byte plus framing bounds text/question tokens conservatively.
+        with metered('openai_decisions', model, len(json.dumps(body).encode('utf-8')) + 64, 0,
+                     client_ip=client_ip, log=log) as settle:
+            data = raw(body, timeout)
+            usage = data.get('usage') if isinstance(data, dict) else None
+            if not isinstance(usage, dict) or any(type(usage.get(k)) is not int or usage[k] < 0
+                                                  for k in ('input_tokens', 'output_tokens')):
+                raise DecisionsProtocolError('scoring usage is missing or invalid')
+            settle(usage['input_tokens'], usage['output_tokens'])
+            if type(usage.get('total_tokens')) is not int \
+                    or usage['total_tokens'] != usage['input_tokens'] + usage['output_tokens']:
+                raise DecisionsProtocolError('scoring token totals do not match')
+            for field, names, total in (
+                ('input_tokens_details', ('cached_tokens', 'cache_write_tokens'), usage['input_tokens']),
+                ('output_tokens_details', ('reasoning_tokens',), usage['output_tokens']),
+            ):
+                details = usage.get(field)
+                if not isinstance(details, dict) or any(type(details.get(k)) is not int or not 0 <= details[k] <= total
+                                                        for k in names):
+                    raise DecisionsProtocolError('scoring token details are missing or invalid')
+            if data.get('model') != model:
+                raise DecisionsProtocolError('scoring returned an unexpected model')
+            answers = data.get('answers')
+            if not isinstance(answers, list) or len(answers) != len(predicates):
+                raise DecisionsProtocolError('scoring answer count does not match')
+            normalized = {}
+            for expected, answer in zip(predicates, answers):
+                if not isinstance(answer, dict) or answer.get('name') != expected['name']:
+                    raise DecisionsProtocolError('scoring answer names do not match')
+                probability = answer.get('probability')
+                if answer.get('type') != 'predicate' or type(probability) not in (int, float) \
+                        or not 0 <= probability <= 1 or not math.isfinite(probability):
+                    raise DecisionsProtocolError('scoring answer is refused or invalid')
+                normalized[expected['name']] = {'noul': probability}
+            return {'answers': normalized, 'usage': usage, 'model': data['model']}
+    ask.model, ask.method = model, 'decisions'
+    return ask
 
 
 class GateClosed(NoRetry):
@@ -100,6 +184,7 @@ def metered_ask(raw: Ask, *, model: str = JEV_MODEL, client_ip: str | None = Non
             usage = reply.get('usage') or {}
             settle(usage.get('input_tokens', 0), usage.get('output_tokens', 0))
             return reply
+    ask.model, ask.method = model, 'jev'
     return ask
 
 
@@ -199,26 +284,46 @@ class Transports:
     jev: Ask | None = None
     anthropic: Any = None                      # has .messages.parse
     openai: OpenAIJson | None = None
+    decisions: Ask | None = None
     log: SpendLog = field(default_factory=SpendLog)
     unavailable: dict[str, str] = field(default_factory=dict)   # provider -> why
 
 
-def transports(client_ip: str | None = None, *, jev_model: str = JEV_MODEL, anthropic: bool = False) -> Transports:
+def scoring_ask(tp: Transports, method: str) -> Ask:
+    """Choose only the configured scoring transport; credentials cannot select a method."""
+    ask = tp.decisions if method == 'decisions' else tp.jev if method == 'jev' else None
+    if ask is None:
+        raise ScoringUnavailable(tp.unavailable.get(method, 'exhaustive scoring transport unavailable'))
+    return ask
+
+
+def transports(client_ip: str | None = None, *, jev_model: str = JEV_MODEL, anthropic: bool = False,
+               scoring: set[str] | None = None) -> Transports:
     """Live transports where the gate is open, or the fakes when BATATIS_PROVIDER=fake. No call is made here.
 
-    Live mode builds Jev and OpenAI only. An Anthropic client is built only when the run's config asks for the
-    Anthropic verifier (`anthropic=True`); otherwise it is absent even when ANTHROPIC_API_KEY is set.
+    Only selected scoring transports are built. An unselected Jev credential is never resolved.
+    The full-text OpenAI verifier is separate from Decisions. An Anthropic client is built only
+    when the run's config asks for it (`anthropic=True`), regardless of credential presence.
     """
+    if scoring is None:
+        from .config import load_config
+        config = load_config()
+        scoring = {config.screen, config.rerank}
     log = SpendLog()
     if llm_gate.fake_providers():
         from . import fakes
         return Transports(
             kind='fake', log=log,
-            jev=metered_ask(fakes.fake_jev_ask(), model=jev_model, client_ip=client_ip, log=log),
+            jev=(metered_ask(fakes.fake_jev_ask(), model=jev_model, client_ip=client_ip, log=log)
+                 if 'jev' in scoring else None),
+            decisions=(metered_decisions_ask(fakes.fake_decisions, client_ip=client_ip, log=log)
+                       if 'decisions' in scoring else None),
             anthropic=MeteredAnthropic(fakes.FakeAnthropic(), client_ip=client_ip, log=log),
             openai=metered_openai_json(fakes.fake_openai_json, client_ip=client_ip, log=log))
     out = Transports(kind='live', log=log)
-    if llm_gate.provider_enabled('jev'):
+    if 'jev' not in scoring:
+        out.unavailable['jev'] = 'Jev is not a configured scoring provider'
+    elif llm_gate.provider_enabled('jev'):
         from .screen import raw_jev_ask
         out.jev = metered_ask(raw_jev_ask(jev_model), model=jev_model, client_ip=client_ip, log=log)
     else:
@@ -231,6 +336,10 @@ def transports(client_ip: str | None = None, *, jev_model: str = JEV_MODEL, anth
         out.unavailable['anthropic'] = 'BATATIS_LIVE is off or ANTHROPIC_API_KEY is absent'
     if llm_gate.provider_enabled('openai'):
         out.openai = metered_openai_json(raw_openai_json, client_ip=client_ip, log=log)
+        if 'decisions' in scoring:
+            out.decisions = metered_decisions_ask(raw_openai_decisions, client_ip=client_ip, log=log)
     else:
         out.unavailable['openai'] = 'BATATIS_LIVE is off or OPENAI_API_KEY is absent'
+    if out.decisions is None:
+        out.unavailable['decisions'] = 'OpenAI Decisions is not configured or BATATIS_LIVE/OPENAI_API_KEY is absent'
     return out

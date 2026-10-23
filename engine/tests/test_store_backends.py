@@ -41,8 +41,29 @@ def _exercise(store, created: list | None = None):
     assert store.get_version(case.id) >= 2
 
 
+def _refused_applications(store):
+    """Both account-store SQL filters keep final refusals readable in the authority's queue."""
+    from engine.account_models import Decision
+
+    owner, authority = 'owner_' + uuid.uuid4().hex, 'authority_' + uuid.uuid4().hex
+    refused = store.put(Case(owner_id=owner, authority=authority, status='refused',
+                            decision=Decision(outcome='refuse', by_id='reviewer', by_name='Reviewer',
+                                              message='Administrative record not provided.')))
+    draft = store.put(Case(owner_id=owner, authority=authority))
+    try:
+        assert {c.id for c in store.list_applications(authority=authority)} == {refused.id}
+        assert {c.id for c in store.list_applications(owner_id=owner)} == {refused.id, draft.id}
+        assert store.access_record(refused.id).status == 'refused'
+        assert store.get(refused.id).decision.outcome == 'refuse'
+    finally:
+        store.delete(refused.id)
+        store.delete(draft.id)
+
+
 def test_file_backend_roundtrip_conflict_and_bytes(tmp_path):
-    _exercise(CaseStore(tmp_path / 'cases.sqlite'))
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    _exercise(store)
+    _refused_applications(store)
 
 
 def test_add_fact_retries_lost_updates(tmp_path):
@@ -99,6 +120,7 @@ def test_postgres_backend(monkeypatch):
     monkeypatch.setenv('DATABASE_URL', url)
     from engine.store_postgres import PostgresCaseStore
     store = PostgresCaseStore(url)
+    _refused_applications(store)
     created = []
     try:
         first = store.put(Case(title='pg'))

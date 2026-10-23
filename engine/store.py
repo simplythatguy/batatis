@@ -17,7 +17,9 @@ from typing import Protocol
 from .models import Case, Fact, now
 from .uploads import PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL
 from .account_store import FileAccountsMixin, _DB
+from .account_models import ApplicationPreferences, User
 from .access import enforce_mutation, enforce_stored_mutation, enforce_read
+from .identify.title import normalize_title
 
 DEFAULT_PATH = Path.home() / '.batatis' / 'cases.sqlite'
 RETENTION_DAYS = 7
@@ -82,6 +84,10 @@ class CaseBackend(Protocol):
     def get_version(self, case_id: str) -> int | None: ...
     def put(self, case: Case, *, expected_version: int | None = None) -> Case: ...
     def add_fact(self, case_id: str, fact: Fact) -> Case | None: ...
+    def rename_title(self, case_id: str, title: str) -> Case | None: ...
+    def list_application_preferences(self, user_id: str) -> dict[str, ApplicationPreferences]: ...
+    def patch_application_preferences(self, application_id: str, user: User,
+                                      changes: dict[str, bool]) -> ApplicationPreferences | None: ...
     def remove_evidence(self, case_id: str, evidence_id: str) -> Case | None: ...
     def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf') -> dict | None: ...
     def get_file(self, case_id: str, file_id: str) -> dict | None: ...
@@ -140,7 +146,9 @@ class CaseStore(FileAccountsMixin):
             self.init_accounts(con)
 
     def _connect(self):
-        return sqlite3.connect(self.path, timeout=5)
+        con = sqlite3.connect(self.path, timeout=5)
+        con.execute('PRAGMA foreign_keys=ON')
+        return con
 
     def get_version(self, case_id: str) -> int | None:
         with closing(self._connect()) as con, con:
@@ -197,6 +205,28 @@ class CaseStore(FileAccountsMixin):
         snapshot = self.get_snapshot(case_id)
         return snapshot[0] if snapshot else None
 
+    def rename_title(self, case_id: str, title: str) -> Case | None:
+        """Patch the current row under the edit lock, including for an identical rename."""
+        title = normalize_title(title)
+        with closing(self._connect()) as con, con:
+            con.execute('BEGIN IMMEDIATE')
+            self._purge_expired(con, case_id)
+            row = con.execute('SELECT json, version FROM cases WHERE id=?', (case_id,)).fetchone()
+            if row is None:
+                return None
+            payload, version = json.loads(row[0]), int(row[1])
+            enforce_stored_mutation(payload)
+            if payload.get('title') != title or payload.get('title_is_manual') is not True:
+                payload.update(title=title, title_is_manual=True, updated_at=now())
+                saved = con.execute('UPDATE cases SET json=?, updated_at=?, version=version+1 '
+                                    'WHERE id=? AND version=? RETURNING version',
+                                    (json.dumps(payload, ensure_ascii=False), payload['updated_at'], case_id, version)).fetchone()
+                if saved is None:
+                    raise VersionConflict(case_id, version)
+                version = int(saved[0])
+            files = {item[0] for item in con.execute('SELECT id FROM case_files WHERE case_id=?', (case_id,))}
+            return case_with_stored_files(payload, files, version)
+
     def get_snapshot(self, case_id: str) -> tuple[Case, int] | None:
         """The case and its optimistic version come from the same stored row."""
         with closing(self._connect()) as con, con:
@@ -242,7 +272,8 @@ class CaseStore(FileAccountsMixin):
     def add_fact(self, case_id: str, fact: Fact) -> Case | None:
         """Read-modify-write under a reserved lock so two writers cannot drop a fact."""
         for _ in range(5):
-            con = sqlite3.connect(self.path, timeout=5, isolation_level=None)
+            con = self._connect()
+            con.isolation_level = None
             try:
                 con.execute('BEGIN IMMEDIATE')
                 self._purge_expired(con, case_id)

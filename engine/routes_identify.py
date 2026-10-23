@@ -43,8 +43,8 @@ from .models_identify import IdentifyResult, ProcessRef
 from .process_refs import ProcessRefMissing, process_refs
 from .public_names import public_event
 from .redact import known_values, people_names, scrub
-from .relevance import BANDS_FILE, CaseScorings, RelevanceInProgress, description, display_probabilities
-from .relevance_models import RelevanceBands, RelevanceRecord
+from .relevance import CaseScorings, RelevanceInProgress, description, display_probabilities, scoring_bands
+from .relevance_models import RelevanceRecord
 from .section_c import section_c_rows
 from .store import CaseBackend, VersionConflict
 
@@ -57,6 +57,8 @@ def _current(result: IdentifyResult, case: Case) -> IdentifyResult:
     out.stale = out.description_sha256 != description_hash(description(case))
     out.persisted = True
     out.case_version = case.version
+    if case.title_is_manual:
+        out.title = None
     # A `yes` stands only while the article is still a case provision: a reference withdrawal
     # (POST /cases/{id}/section-d) clears provisions and citation.* facts without touching this record.
     kept = {p.split('(')[0] for p in case.provisions}
@@ -69,10 +71,13 @@ def _relevance(output: RunOutput, text: str) -> RelevanceRecord | None:
     if not output.screen:
         return None
     rerank = output.rerank or {}
-    return RelevanceRecord(scored_at=now(), description_sha256=description_hash(text), scores=output.screen,
+    models = {stage: pin for stage, pin in output.result.model_ids.items() if stage != 'verifier'}
+    model = models['screen']
+    return RelevanceRecord(model=model, config_hash=output.result.trace.config_hash, model_ids=models,
+                           scored_at=now(), description_sha256=description_hash(text), scores=output.screen,
                            rerank=rerank,
                            display=display_probabilities(output.screen, rerank),
-                           bands=RelevanceBands.model_validate_json(BANDS_FILE.read_text()))
+                           bands=scoring_bands(model, models, output.result.trace.config_hash))
 
 
 def _event(stage: str, payload: dict) -> str:
@@ -111,7 +116,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
             raise HTTPException(409, 'case was updated concurrently') from error
 
     def execute(case_id: str, text: str, outbound: str, client_ip: str, base: Case,
-                on_stage=None, answers=()) -> IdentifyResult:
+                on_stage=None, answers=(), *, naming_prose: str = '') -> IdentifyResult:
         """Run identification and store it, with the request's answers, in one CAS against `base`."""
         try:
             config = load_config()
@@ -132,11 +137,13 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
             previous = case.identify.decisions if case.identify else {}
             result.decisions = {k: v for k, v in previous.items() if any(a.provision == k for a in result.articles)}
             generated = case.identify.title if case.identify else None
-            if title_should_replace(case.title, text, generated):
-                case.title = short_title(text, case.facts, result.model_dump())
+            if title_should_replace(case.title, text, generated, manual=case.title_is_manual):
+                # `text` may be an unconfirmed saved description. Only explicit sent
+                # prose and the helper's confirmed applicant facts are naming inputs.
+                case.title = short_title(naming_prose, case.facts, result.model_dump())
                 result.title = case.title
             else:
-                result.title = generated if case.title == generated else None   # `title` is only ever Batatis's own
+                result.title = (generated if not case.title_is_manual and case.title == generated else None)
             case.identify = result
             if relevance is not None:
                 case.relevance = relevance
@@ -163,7 +170,8 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
             # Staged on a copy: they are written with the result, in the same CAS, or not at all.
             case = case.model_copy(deep=True)
             apply_answers(case, body.answers)
-        text = body.prose if body.prose and body.prose.strip() else description(case)
+        naming_prose = body.prose if body.prose and body.prose.strip() else ''
+        text = naming_prose or description(case)
         if not text.strip():
             raise HTTPException(409, 'Describe your project first')
         client_ip = client_ip_from(request)
@@ -174,17 +182,19 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         user = getattr(request.state, 'user', None)
         outbound = scrub(text, known_values(case, people_names(cases(), case, user)))
         if 'text/event-stream' in request.headers.get('accept', ''):
-            return stream(case_id, text, outbound, client_ip, case, body.answers)
+            return stream(case_id, text, outbound, client_ip, case, body.answers, naming_prose=naming_prose)
         try:
             with runs.claim(case_id):
-                result = execute(case_id, text, outbound, client_ip, case, answers=body.answers)
+                result = execute(case_id, text, outbound, client_ip, case, answers=body.answers,
+                                 naming_prose=naming_prose)
         except RelevanceInProgress:
             raise HTTPException(409, 'Identification already in progress', headers={'Retry-After': '1'}) from None
         except ProcessRefMissing:
             raise HTTPException(503, 'process references missing from the code database') from None
         return result
 
-    def stream(case_id: str, text: str, outbound: str, client_ip: str, base: Case, answers=()) -> StreamingResponse:
+    def stream(case_id: str, text: str, outbound: str, client_ip: str, base: Case, answers=(), *,
+               naming_prose: str = '') -> StreamingResponse:
         try:
             claim = runs.claim(case_id)
             claim.__enter__()
@@ -195,7 +205,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
 
         def worker():
             try:
-                result = execute(case_id, text, outbound, client_ip, base, answers=answers,
+                result = execute(case_id, text, outbound, client_ip, base, answers=answers, naming_prose=naming_prose,
                                  on_stage=lambda stage, payload: events.put((stage, public_event(payload))))
                 events.put(('done', attach_meta(attribute_code(json.loads(result.model_dump_json())))))
             except HTTPException as error:

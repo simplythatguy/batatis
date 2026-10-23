@@ -2,43 +2,40 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode }
 import type { ApplicationSummary } from "../api/accounts";
 import { groupGaps } from "../humanReview";
 import { useCase } from "../store";
-import { bootAccount, refreshApplications, useAccount, type AccountPhase } from "./account";
-import { authorityName } from "./applications";
+import { bootAccount, deleteApplication, refreshApplications, setApplicationPreferences, useAccount, type AccountPhase } from "./account";
+import { groupApplications, readOnly, readOnlyStatus } from "./applications";
+import { saveTitle, titleError } from "./rename";
+import { RenameDialog } from "./shell/RenameDialog";
+import { DeleteDialog } from "./shell/DeleteDialog";
+import type { RowAction } from "./shell/RowMenu";
 import { AssistantPanel } from "./assistant/AssistantPanel";
+import { AskButton, AskHost } from "./assistant/AskButton";
 import { setAssistantCase, setAssistantContext, toggleAssistant, useAssistant } from "./assistant/assistant";
 import { roleOf, useCurrentApplication } from "./begin";
 import { CodePalette, OPEN_PALETTE, openPalette } from "./CodePalette";
+import { ApplicationSwitchContext, useCodeScope, type ApplicationSwitch } from "./codeScope";
+import { KEEP_OPEN_NOTE, switchApplication } from "./libraryContext";
 import { buildDeck, deckProgress } from "./deck";
-import { Icon24 } from "./icons";
+import { useDeckExtras } from "./useDeckExtras";
 import { STAGES, type Screen } from "./routes";
 import { getSession, resetSession, useSession } from "./session";
 import { AppHeader, type StageRingItem } from "./shell/AppHeader";
 import { AppLayout } from "./shell/AppLayout";
 import { ApplicationList, type ApplicationListHandle } from "./shell/ApplicationList";
+import { MoreMenu } from "./shell/MoreMenu";
 import { Rail, type RailDestination } from "./shell/Rail";
+import { RequestBanner } from "./shell/RequestBanner";
 import { ReturnedBanner } from "./shell/ReturnedBanner";
 import { AccountButton, NotificationsBell } from "./routes.extra";
 import { useRoute } from "../router";
 import { resetRelevance } from "./useRelevance";
 import { CIcon, ConfirmDialog, Dot, MOD_KEY, type DotTone } from "./ui";
 
-function useOutsideClose(open: boolean, close: () => void, ...refs: React.RefObject<HTMLElement | null>[]) {
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: PointerEvent) => {
-      if (refs.some((r) => r.current?.contains(e.target as Node))) return;
-      close();
-    };
-    document.addEventListener("pointerdown", onDown);
-    return () => document.removeEventListener("pointerdown", onDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
-}
-
 /** The check's state, quietly beside the save status (Review holds the detail and the big retry). */
 function CheckStatus() {
   const { phase, checkStatus } = useCase();
-  if (phase !== "case") return null;
+  const { app } = useCurrentApplication();
+  if (phase !== "case" || app?.status === "refused") return null;
   if (checkStatus === "running") return <span className="cf-save-check" role="status"><span className="cf-dot is-pending cf-pulse" aria-hidden="true" />Checking…</span>;
   if (checkStatus === "unavailable") return <a className="cf-save-check" href="#/review" role="status" title="The last check couldn’t finish. Retry from the ⋯ menu or open Review.">Check unavailable</a>;
   return null;
@@ -48,8 +45,10 @@ export function SaveStatus() {
   const { phase, saveStatus, savedNote, saveDetail, saveDraft } = useCase();
   const { app, locked } = useCurrentApplication();
   if (phase !== "case") return null;
-  // Sent to the authority: nothing is saved from here until the officer returns it.
-  if (locked) return <div className="cf-save" role="status"><Dot tone={app?.status === "accepted" ? "done" : "warning"} /><span className="cf-save-label">{app?.status === "accepted" ? "Accepted" : "Sent · read-only"}</span></div>;
+  if (locked) {
+    const s = readOnlyStatus(app?.status);
+    return <div className="cf-save" role="status"><Dot tone={s.tone} /><span className="cf-save-label">{s.label}</span></div>;
+  }
   const map: Record<string, { tone: DotTone; label: string }> = {
     idle: { tone: "pending", label: "Not saved yet" },
     unsaved: { tone: "pending", label: "Unsaved" },
@@ -71,59 +70,15 @@ export function SaveStatus() {
   );
 }
 
-export function MoreMenu({ items }: { items: { label: string; href?: string; onClick?: () => void; hint?: string; separator?: boolean }[] }) {
-  const [open, setOpen] = useState(false);
-  const btn = useRef<HTMLButtonElement>(null);
-  const pop = useRef<HTMLDivElement>(null);
-  useOutsideClose(open, () => setOpen(false), btn, pop);
-  const wasOpen = useRef(false);
-  useEffect(() => {
-    if (open) pop.current?.querySelector<HTMLElement>("[role=menuitem]")?.focus();
-    else if (wasOpen.current && (document.activeElement === document.body || !document.activeElement)) btn.current?.focus();
-    wasOpen.current = open;
-  }, [open]);
-  const close = () => setOpen(false);
-  function onMenuKey(e: React.KeyboardEvent) {
-    const list = [...(pop.current?.querySelectorAll<HTMLElement>("[role=menuitem]") ?? [])];
-    const at = list.indexOf(document.activeElement as HTMLElement);
-    const to = (n: number) => { e.preventDefault(); list[(n + list.length) % list.length]?.focus(); };
-    if (e.key === "ArrowDown") to(at + 1);
-    else if (e.key === "ArrowUp") to(at - 1);
-    else if (e.key === "Home") to(0);
-    else if (e.key === "End") to(list.length - 1);
-    else if (e.key === "Escape") { e.preventDefault(); e.nativeEvent.stopImmediatePropagation(); close(); btn.current?.focus(); }
-    else if (e.key === "Tab") close();
-  }
-  return (
-    <div className="cf-more">
-      <button ref={btn} type="button" className="cf-icon-btn is-plain" aria-label="More" aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen((v) => !v)}>
-        <Icon24 name="more" size={18} />
-      </button>
-      {open && (
-        <div ref={pop} className="cf-pop cf-menu" role="menu" aria-label="More" onKeyDown={onMenuKey}>
-          {items.map((it) => (
-            <div key={it.label} role="none">
-              {it.separator && <hr role="separator" />}
-              {it.href ? (
-                <a role="menuitem" tabIndex={-1} href={it.href} onClick={close}>{it.label}{it.hint && <span className="cf-kbd is-dark" aria-hidden="true">{it.hint}</span>}</a>
-              ) : (
-                <button role="menuitem" tabIndex={-1} type="button" onClick={() => { close(); it.onClick?.(); }}>{it.label}{it.hint && <span className="cf-kbd is-dark" aria-hidden="true">{it.hint}</span>}</button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 /** Ring percentages for the four stages, from the same case, gaps and deck as the screens. */
 function useStageProgress() {
   const { c, gaps, phase, checkedAt, engineGaps } = useCase();
   const session = useSession();
+  const { options } = useDeckExtras();
   return useMemo(() => {
     if (phase !== "case") return { start: 0, questions: 0, review: 0, application: 0 };
-    const deck = buildDeck(c, gaps, { seen: new Set(session.seen), includeDone: true });
+    const deck = buildDeck(c, gaps, { ...options, seen: new Set(session.seen), includeDone: true });
     const { done, total } = deckProgress(deck);
     const groups = groupGaps(gaps, new Map(engineGaps.map((g) => [g.id, g.section])));
     const sectionsClear = [["A"], ["B", "facts"], ["C"], ["D", "process"]].filter((keys) => !keys.some((k) => (groups.get(k) ?? []).length)).length;
@@ -133,7 +88,7 @@ function useStageProgress() {
       review: checkedAt ? (100 * sectionsClear) / 4 : 0,
       application: 0,
     };
-  }, [c, gaps, phase, checkedAt, engineGaps, session.seen]);
+  }, [c, gaps, phase, checkedAt, engineGaps, session.seen, options]);
 }
 
 const PHONE = "(max-width: 760px)";
@@ -150,7 +105,11 @@ const isPhone = () => window.matchMedia(PHONE).matches;
  * application list or the stage header.
  */
 export function Shell({ active, children, plain = false }: { active: Screen; children: ReactNode; plain?: boolean }) {
-  const { c, phase, engineId, resetToWho, openCase, saveStatus, saveDraft, checkStatus, requestCheck } = useCase();
+  const { c, phase, engineId, resetToWho, openCase, saveStatus, saveDraft, checkStatus, requestCheck, renameCase } = useCase();
+  const [renaming, setRenaming] = useState<{ id: string; title: string } | null>(null);
+  const [deleting, setDeleting] = useState<{ id: string; title: string } | null>(null);
+  /** Applications with a pin or archive change on its way to the server. */
+  const [pending, setPending] = useState<ReadonlySet<string>>(() => new Set());
   const account = useAccount();
   const assistant = useAssistant();
   const [confirm, setConfirm] = useState(false);
@@ -167,6 +126,8 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   const bare = plain || reviewer;
   const onStage = !bare && STAGES.some((s) => s.screen === active);
   const route = useRoute();
+  /** "none": the code library is browsing without an application (no title, stages or status). */
+  const scope = useCodeScope();
   /** `#/application?case=<id>` (a notification): open that application, then drop the parameter. */
   const caseParam = signedInParam(route.params.get("case"), account.phase);
   /** The last stage page, so Applications in the rail returns to it from the code library. */
@@ -174,7 +135,8 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   if (onStage) lastStage.current = location.hash || "#/";
 
   useEffect(() => { bootAccount(); }, []);
-  useEffect(() => { setAssistantCase(engineId); }, [engineId]);
+  // Under None the assistant reads no application either.
+  useEffect(() => { setAssistantCase(scope === "none" ? null : engineId); }, [engineId, scope]);
   // A new owned case appears in the list once the engine has created it.
   useEffect(() => { if (signedIn && engineId) void refreshApplications(); }, [signedIn, engineId]);
   useEffect(() => { if (signedIn && engineId) remember(engineId); }, [signedIn, engineId]);
@@ -254,11 +216,13 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
 
   const deckDone = Math.round(progress.questions);
   const localRow: ApplicationSummary | null = inCase
-    ? { id: engineId ?? "this-visit", title: c.title || "New application", status: "draft", authority: c.authority || null, updated_at: new Date().toISOString(), submitted_at: null, completeness: { answered: deckDone, total: 100 }, unread_messages: 0, reviewer: null }
+    ? { id: engineId ?? "this-visit", title: c.title || "New application", status: "draft", authority: c.authority || null, updated_at: new Date().toISOString(), submitted_at: null, completeness: { answered: deckDone, total: 100 }, unread_messages: 0, reviewer: null, archived: false, pinned: false }
     : null;
   const saved = account.applications ?? [];
   // Signed in, a new draft shows at once, before the engine has listed it.
-  const items = signedIn ? (localRow && !saved.some((a) => a.id === localRow.id) ? [localRow, ...saved] : saved) : localRow ? [localRow] : [];
+  // The open case's row shows this draft's name until the server has one, so header and list agree.
+  const named = saved.map((a) => (a.id === engineId && !a.title?.trim() && inCase ? { ...a, title: c.title } : a));
+  const items = signedIn ? (localRow && !named.some((a) => a.id === localRow.id) ? [localRow, ...named] : named) : localRow ? [localRow] : [];
   const selectedId = engineId ?? (localRow ? "this-visit" : null);
   const current = (engineId && saved.find((a) => a.id === engineId)) || null;
 
@@ -267,13 +231,12 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     { id: "start", label: "Describe", icon: "describe", href: "#/", pct: progress.start, current: active === "start" },
     { id: "questions", label: "Questions", icon: "questions", href: "#/questions", pct: progress.questions, current: active === "questions", hint: inCase ? undefined : "Starts with your description" },
     { id: "review", label: "Review", icon: "review", href: "#/review", pct: progress.review, current: active === "review", hint: inCase ? undefined : "Nothing to review yet" },
-    { id: "application", label: "Application", icon: "file", href: "#/application", pct: current && ["submitted", "in_review", "accepted"].includes(current.status) ? 100 : progress.application, current: active === "application", hint: inCase ? undefined : "Nothing filled in yet" },
+    { id: "application", label: "Application", icon: "file", href: "#/application", pct: current && ["submitted", "in_review", "accepted", "refused"].includes(current.status) ? 100 : progress.application, current: active === "application", hint: inCase ? undefined : "Nothing filled in yet" },
   ];
 
   const destinations: RailDestination[] = reviewer ? [
     { id: "queue", label: "Review queue", icon: "table", href: "#/review", current: route.path === "/review" || route.path.startsWith("/review/") },
     { id: "code", label: "Code library", icon: "book", href: "#/code", current: active === "code" && !plain },
-    { id: "assistant", label: assistant.open ? "Close the assistant" : "Assistant", icon: "spark", onClick: toggleAssistant, current: assistant.open, shortcut: `${MOD_KEY} J` },
   ] : [
     {
       id: "applications",
@@ -285,10 +248,9 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
         if (!onStage) location.hash = lastStage.current;
       },
       current: onStage,
-      badge: items.some((a) => a.status === "returned" && a.unread_messages > 0),
+      badge: items.some((a) => (a.status === "returned" || a.status === "refused") && a.unread_messages > 0),
     },
     { id: "code", label: "Code library", icon: "book", href: "#/code", current: active === "code", shortcut: `${MOD_KEY} ⇧ K` },
-    { id: "assistant", label: assistant.open ? "Close the assistant" : "Assistant", icon: "spark", onClick: toggleAssistant, current: assistant.open, shortcut: `${MOD_KEY} J` },
   ];
 
   function startNew() {
@@ -299,32 +261,98 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     resetToWho(signedIn ? "" : undefined);
   }
 
-  async function open(id: string, to = "#/questions") {
-    if (id === selectedId) { setListNote(""); if (!onStage) location.hash = lastStage.current; return; }
-    if (!signedIn || opening) return;
+  /** Open another saved application here (the list and the code library's picker share it). */
+  async function switchTo(id: string): Promise<string | null> {
+    if (!signedIn) return "Sign in to open a saved application.";
+    if (opening) return "Another application is still opening.";
     setOpening(id);
-    setListNote("");
+    const role = roleOf(account.user) ?? (c.applicantType as Parameters<typeof openCase>[1]);
     // Keep the open draft before switching; a failed save keeps it open and says so.
-    if (inCase && saveStatus === "unsaved" && !(await saveDraft())) {
-      setOpening(null);
-      setListNote("This application isn’t saved yet, so it stays open. Try again once it’s saved.");
+    const error = await switchApplication(id, {
+      inCase, saveStatus, saveDraft,
+      openCase: (next) => openCase(next, role),
+      settle: () => { resetSession(); resetRelevance(); },
+    });
+    setOpening(null);
+    // A deleted or expired application leaves the list; a refused save changed nothing on the server.
+    if (error && error !== KEEP_OPEN_NOTE) void refreshApplications();
+    return error;
+  }
+
+  async function open(id: string, to?: string) {
+    const refused = items.find((a) => a.id === id)?.status === "refused";
+    const destination = to ?? (refused ? "#/application" : "#/questions");
+    if (id === selectedId) {
+      setListNote("");
+      if (to || refused) location.hash = destination;
+      else if (!onStage) location.hash = lastStage.current;
       return;
     }
-    const role = roleOf(account.user) ?? (c.applicantType as Parameters<typeof openCase>[1]);
-    const error = await openCase(id, role);
-    setOpening(null);
+    if (!signedIn || opening) return;
+    setListNote("");
+    const error = await switchTo(id);
     if (error) { setListNote(error); return; }
-    resetSession();
-    resetRelevance();
-    location.hash = to;
+    location.hash = destination;
   }
 
   useEffect(() => {
     if (!caseParam) return;
     const to = `#${route.path || "/"}`;
-    if (caseParam === engineId) { location.replace(to); return; }
+    if (caseParam === engineId) {
+      // A notification can target the file already open here. Refresh status and message freshness
+      // without reopening the case, which would replace any unsaved applicant answers.
+      void refreshApplications();
+      location.replace(to);
+      return;
+    }
     void open(caseParam, to);
   }, [caseParam]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /** Pin, unpin, archive or restore: the row moves once the server has saved it; the open application stays open. */
+  async function setPreference(a: ApplicationSummary, patch: { pinned?: boolean; archived?: boolean }, verb: string) {
+    setListNote("");
+    setPending((p) => new Set(p).add(a.id));
+    const error = await setApplicationPreferences(a.id, patch);
+    setPending((p) => { const next = new Set(p); next.delete(a.id); return next; });
+    if (error) setListNote(`Couldn’t ${verb} “${a.title || "this application"}”. ${error}`);
+  }
+
+  /** After the server's 204: if it was the open application, open the newest one left, else start fresh. */
+  async function removeApplication(id: string): Promise<string | null> {
+    const error = await deleteApplication(id);
+    if (error) return error;
+    if (id !== engineId) return null;
+    remember(null);
+    resetSession();
+    resetRelevance();
+    const left = groupApplications(saved.filter((a) => a.id !== id));
+    const next = [...left.pinned, ...left.active][0];
+    if (next && !(await openCase(next.id, roleOf(account.user) ?? "homebuilder"))) {
+      location.hash = "#/questions";
+      return null;
+    }
+    resetToWho("");
+    return null;
+  }
+
+  function actionsFor(a: ApplicationSummary): RowAction[] {
+    const editable = !readOnly(a.status);
+    const rename: RowAction = { id: "rename", label: "Rename", icon: "pencil", disabled: !editable, hint: editable ? undefined : "Read-only", onSelect: () => setRenaming({ id: a.id, title: a.title }) };
+    // Pin, archive and delete belong to applications saved to the account.
+    if (!signedIn || !saved.some((s) => s.id === a.id)) return [rename];
+    const waiting = pending.has(a.id);
+    return [
+      rename,
+      ...(a.archived ? [] : [a.pinned
+        ? { id: "unpin", label: "Unpin", icon: "pinOff", disabled: waiting, onSelect: () => void setPreference(a, { pinned: false }, "unpin") } as RowAction
+        : { id: "pin", label: "Pin", icon: "pin", disabled: waiting, onSelect: () => void setPreference(a, { pinned: true }, "pin") } as RowAction]),
+      a.archived
+        ? { id: "restore", label: "Restore", icon: "restore", disabled: waiting, onSelect: () => void setPreference(a, { archived: false }, "restore") }
+        : { id: "archive", label: "Archive", icon: "archive", disabled: waiting, onSelect: () => void setPreference(a, { archived: true }, "archive") },
+      // Any owned application: the server's DELETE policy decides, and its refusal is shown in the dialog.
+      { id: "delete", label: "Delete…", icon: "trash", destructive: true, separatorBefore: true, disabled: waiting, onSelect: () => setDeleting({ id: a.id, title: a.title }) },
+    ];
+  }
 
   const list = (
     <ApplicationList
@@ -332,6 +360,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
       items={items}
       selectedId={opening ?? selectedId}
       onSelect={(id) => void open(id)}
+      actionsFor={actionsFor}
       onNew={() => {
         if (!inCase) {
           setListNote("");
@@ -347,32 +376,35 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     />
   );
 
-  const title = inCase ? c.title || "New application" : "New application";
+  // The saved name when the list has it (so header and list always agree), else this draft's.
+  const title = inCase ? current?.title || c.title || "New application" : "New application";
+  // In the code library the picker names the application; under None nothing of the application shows.
+  const library = active === "code";
+  const withCase = inCase && scope === "application";
   const header = (
     <AppHeader
-      title={title}
-      meta={inCase && c.authority ? authorityName(c.authority) : undefined}
-      stages={stages}
+      title={library ? undefined : title}
+      onRename={inCase ? renameCase : undefined}
+      renameDisabled={readOnly(current?.status)}
+      stages={scope === "none" ? undefined : stages}
       onToggleList={toggleList}
       listOpen={!listCollapsed}
       toggleHint={`${MOD_KEY} B`}
       right={
         <>
-          <CheckStatus />
-          <SaveStatus />
-          <button type="button" className="cf-btn is-ghost is-sm cf-ask" aria-pressed={assistant.open} onClick={toggleAssistant} title={`Assistant (${MOD_KEY} J)`}>
-            <Icon24 name="spark" size={16} /><span className="cf-ask-label">Ask</span>
-          </button>
+          {scope === "application" && <CheckStatus />}
+          {scope === "application" && <SaveStatus />}
+          <AskButton />
           <MoreMenu
             items={[
               { label: "Look up code", hint: `${MOD_KEY} ⇧ K`, onClick: openPalette },
               { label: "Code library", href: "#/code" },
-              ...(inCase && checkStatus === "unavailable" ? [{ label: "Try the check again", onClick: () => void requestCheck(true), separator: true }] : []),
-              ...(inCase
+              { label: "Accuracy report", href: "#/accuracy" },
+              ...(withCase && current?.status !== "refused" && checkStatus === "unavailable" ? [{ label: "Try the check again", onClick: () => void requestCheck(true), separator: true }] : []),
+              ...(withCase
                 ? [
                     { label: "Rules you chose (Section C)", href: "#/references", separator: checkStatus === "unavailable" },
                     { label: "Officer view", href: "#/officer" },
-                    { label: "Accuracy report", href: "#/accuracy" },
                     { label: "Download draft", href: "#/application?download=draft", separator: true },
                     { label: signedIn ? "New application" : "Start over", onClick: () => (signedIn ? startNew() : setConfirm(true)) },
                   ]
@@ -385,13 +417,18 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   );
 
 
+  const appSwitch: ApplicationSwitch = { items, openId: selectedId, opening, switchTo };
+  // Reviewers' code library has no application header; it keeps a slim one so Ask stays one tap away.
+  const bareHeader = bare && library && !plain ? <AppHeader right={<AskButton />} /> : null;
+
   return (
-    <>
+    <AskHost.Provider value={true}>
+    <ApplicationSwitchContext.Provider value={appSwitch}>
       <AppLayout
         rail={<Rail destinations={destinations} notificationsSlot={<NotificationsBell />} accountSlot={<AccountButton />} />}
         list={bare ? undefined : list}
-        header={bare ? null : header}
-        banner={onStage && current?.status === "returned" ? <ReturnedBanner app={current} /> : null}
+        header={bare ? bareHeader : header}
+        banner={onStage && (current?.status === "returned" || current?.status === "refused") ? <ReturnedBanner key={`${current.id}:${current.status}`} app={current} /> : onStage && current?.status === "in_review" ? <RequestBanner app={current} /> : null}
         assistant={assistant.open ? <AssistantPanel /> : null}
         listCollapsed={listCollapsed}
         sheetOpen={sheet}
@@ -400,6 +437,12 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
         {children}
       </AppLayout>
       <CodePalette open={palette} onClose={() => setPalette(false)} />
+      <RenameDialog
+        target={renaming}
+        onClose={() => setRenaming(null)}
+        onSave={(id, next) => (id === selectedId ? renameCase(next) : saveTitle(id, next).then(() => null, titleError))}
+      />
+      <DeleteDialog target={deleting} onClose={() => setDeleting(null)} onDelete={removeApplication} />
       <ConfirmDialog
         open={confirm}
         title="Start a new application?"
@@ -412,6 +455,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
           startNew();
         }}
       />
-    </>
+    </ApplicationSwitchContext.Provider>
+    </AskHost.Provider>
   );
 }

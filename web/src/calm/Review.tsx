@@ -5,13 +5,17 @@ import { professionalConfirmed } from "../professional";
 import { useCase } from "../store";
 import type { Case, Gap } from "../types";
 import { forkOf, scopeRedirect } from "../intakeView";
-import { buildDeck, deckProgress, gapKey } from "./deck";
+import { buildDeck, caseRules, deckProgress, gapKey } from "./deck";
+import { readOnlyStatus } from "./applications";
+import { useCurrentApplication } from "./begin";
 import { BeforeYouSubmit, ForkNote } from "./ReadCards";
 import { calmHref } from "./routes";
 import { rankedIn } from "./relevance";
 import { useSession } from "./session";
+import { useDeckExtras } from "./useDeckExtras";
 import { useRelevance } from "./useRelevance";
-import { CIcon, Dot, Eyebrow, Kbd, type DotTone } from "./ui";
+import { Icon24, type IconName } from "./icons";
+import { CIcon, CompletenessNote, Dot, Eyebrow, Kbd, type DotTone } from "./ui";
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
@@ -50,6 +54,9 @@ function worst(gaps: Gap[]): DotTone {
   return "done";
 }
 
+/** One neutral icon per official section; the label beside it stays the Section A–D name. */
+const SECTION_ICON: Record<string, IconName> = { A: "user", B: "file", C: "book", D: "review" };
+
 /** Before an application exists: what the review will hold, and the one way to start it. */
 export function NothingYet({ title, lede, page }: { title: string; lede: string; page: "review" | "application" }) {
   const sections = [
@@ -80,29 +87,46 @@ export function NothingYet({ title, lede, page }: { title: string; lede: string;
         <ul className="cf-sec-list">
           {sections.map((s) => (
             <li key={s.letter} className="cf-sec">
-              <span className="cf-sec-letter" aria-hidden="true">{s.letter}</span>
+              <span className="cf-sec-icon" aria-hidden="true"><Icon24 name={SECTION_ICON[s.letter] ?? "file"} size={18} /></span>
               <div className="cf-sec-t"><div>{s.title} <span className="cf-faint">· Section {s.letter}</span></div><div className="cf-faint">Not started</div></div>
               <Dot tone="pending" />
             </li>
           ))}
         </ul>
-        <p className="cf-faint cf-small cf-disclaimer">Checks administrative completeness only. It never says the design complies or is safe.</p>
+        <CompletenessNote />
       </aside>
     </div>
   );
 }
 
+/** Show the current case’s review or the instructions to start an application. */
 export function Review() {
   const { phase } = useCase();
+  const { app } = useCurrentApplication();
   if (phase !== "case") return <NothingYet page="review" title="Nothing to review yet." lede="Describe what you’re building and Batatis lists what your application still needs, section by section." />;
+  if (app?.status === "refused") {
+    const s = readOnlyStatus(app.status, app.authority);
+    return (
+      <div className="cf-review">
+        <div className="cf-review-main">
+          <h1 className="cf-h1" tabIndex={-1}>{s.heading}</h1>
+          <p className="cf-lede is-sm">{s.note}</p>
+          <div className="cf-row-actions"><a className="cf-btn is-primary" href="#/application">View application</a></div>
+        </div>
+      </div>
+    );
+  }
   return <CaseReview />;
 }
 
+/** Summarize shared gaps, deck progress and rule departures for the current case. */
 function CaseReview() {
   const { c, gaps, notices, engineGaps, gapsSource, checkStatus, checkNote, checkDetail, requestCheck, reading } = useCase();
   const session = useSession();
   const [showAll, setShowAll] = useState(false);
-  const deck = buildDeck(c, gaps, { seen: new Set(session.seen), includeDone: true, identify: reading.identify });
+  const { options } = useDeckExtras();
+  const ruleFlags = caseRules(c, options).filter((r) => r.state === "departs").length;
+  const deck = buildDeck(c, gaps, { ...options, seen: new Set(session.seen), includeDone: true, identify: reading.identify });
   const { done, total } = deckProgress(deck);
   const openCards = deck.filter((i) => !i.done && !i.optional).length;
   const blocking = gaps.filter((g) => g.severity === "blocking");
@@ -160,7 +184,6 @@ function CaseReview() {
     lede = checkNote;
   } else if (!checked) {
     headline = "Let’s check your application.";
-    lede = "Batatis saves your draft, looks for the code that applies and lists anything missing. Nothing is submitted.";
   } else if (blocking.length) {
     headline = `Almost there. ${plural(blocking.length, "thing")} ${blocking.length === 1 ? "stands" : "stand"} between you and the official PDF.`;
   } else if (warnings) {
@@ -197,11 +220,10 @@ function CaseReview() {
           </div>
         </div>
 
-        <div className="cf-list-label">Still needed</div>
-        {gapsSource !== "engine" && <p className="cf-faint cf-small cf-list-note">From this browser’s list. The online check can add more.</p>}
-        {gaps.length === 0 ? (
-          <p className="cf-faint cf-row-empty">Nothing on the list.</p>
-        ) : (
+        {gaps.length > 0 && (
+          <div className="cf-list-label" title={gapsSource !== "engine" ? "From this browser’s list. The online check can add more." : undefined}>Still needed</div>
+        )}
+        {gaps.length > 0 && (
           <ul className="cf-rows">
             {shown.map((g) => {
               const key = gapKey(c, g);
@@ -244,13 +266,14 @@ function CaseReview() {
               : engineer ? "Engineer needed" : s.letter === "C" && !departures && c.sectionC.length ? `${s.ok} · no departure confirmed` : s.ok;
             return (
               <li key={s.letter} className="cf-sec">
-                <span className="cf-sec-letter" aria-hidden="true">{s.letter}</span>
+                <span className="cf-sec-icon" aria-hidden="true"><Icon24 name={SECTION_ICON[s.letter] ?? "file"} size={18} /></span>
                 <div className="cf-sec-t">
                   <div>{s.title} <span className="cf-faint">· Section {s.letter}</span></div>
                   <div className="cf-faint">
                     {summary}
                     {s.letter === "C" && <> · <a className="cf-inline-link" href={likely ? "#/code?filter=attention" : "#/code"}>Browse the code</a></>}
                     {s.letter === "C" && likely > 0 && <div className="cf-faint">{plural(likely, "article")} likely relate to your project</div>}
+                    {s.letter === "C" && ruleFlags > 0 && <div className="cf-faint">{plural(ruleFlags, "rule check")} {ruleFlags === 1 ? "flags" : "flag"} a departure · <a className="cf-inline-link" href="#/questions?first=code">See {ruleFlags === 1 ? "it" : "them"}</a></div>}
                   </div>
                 </div>
                 <Dot tone={engineer && tone === "done" ? "warning" : tone} />
@@ -269,7 +292,7 @@ function CaseReview() {
             <a className="cf-btn is-primary is-grow" href="#/application">Preview application {checked && <Kbd>↵</Kbd>}</a>
           )}
         </div>
-        <p className="cf-faint cf-small cf-disclaimer">Checks administrative completeness only. It never says the design complies or is safe.</p>
+        <CompletenessNote />
       </aside>
     </div>
   );

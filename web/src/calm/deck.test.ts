@@ -186,7 +186,7 @@ test("a value already confirmed is not asked again when the description is read 
   const again = intakeResult({ facts: [fact("fact_owner_2", "owner_name", "Jordan Lee", "Jordan Lee")] });
   c = reducer(c, { type: "noteIntake", result: again, text: DEMO });
   assert.equal(factFor(c, "owner")?.status, "confirmed");
-  assert.ok(!buildDeck(c, getGaps(c)).some((i) => i.kind === "fact" && i.title === "Who is the owner?"));
+  assert.ok(!buildDeck(c, getGaps(c)).some((i) => i.kind === "fact" && i.title === "Owner"));
   // The earlier run's unconfirmed facts are gone (the engine removes them too).
   assert.ok(!c.facts.some((f) => f.id === "fact_storeys"));
 });
@@ -213,7 +213,8 @@ test("the planner asks at most five questions, ranked as the API ranks them, and
   const deck = buildDeck(c, getGaps(c));
   const plan = deck.filter((i) => i.kind === "plan");
   assert.deepEqual(plan.map((i) => i.ref), ["intake.part4_design", "intake.assembly.description", "intake.sprinklered", "intake.legal_description", "intake.mailing_address"]);
-  assert.equal(plan[0].context, "Why part4_design.", "each question shows why it is asked");
+  assert.equal(plan[0].context, "", "the question stands alone");
+  assert.match(plan[0].why, /^Why part4_design\./, "why it is asked waits behind Help");
   assert.deepEqual(choicesFor(plan[2]).map((x) => x.label), ["Yes", "No", "Partly", "Not sure"]);
   // Legal description and mailing address are planner cards, so their form cards wait.
   assert.ok(!deck.some((i) => i.key === "field-legalDescription" || i.key === "field-mailingAddress"));
@@ -471,4 +472,20 @@ test("a rebuilt card keeps a pending answer the engine never stored", () => {
   assert.equal(rebuilt.answer, "not-sure");
   assert.equal(rebuilt.pending, true);
   assert.ok(buildDeck(c, getGaps(c)).some((i) => i.key === `cand-${card.id}` && !i.done));
+});
+
+test("an obvious question is a short label and its control; the reason waits behind Help", () => {
+  const c = demoCase();
+  const deck = buildDeck(c, getGaps(c), { includeDone: true });
+  const date = deck.find((i) => i.key === "field-date")!;
+  assert.equal(date.title, "Request date");
+  assert.equal(date.context, "", "no subtitle restating the field");
+  assert.match(date.why, /Section A/, "the reason is still one click away");
+  for (const i of deck.filter((x) => x.kind === "detail" || x.kind === "plan" || x.kind === "question" || x.kind === "authority")) {
+    if (!i.quote) assert.equal(i.context, "", `${i.key}: no default subtitle`);
+    assert.ok(i.title.length <= 70, `${i.key}: short title`);
+  }
+  // A quote the applicant wrote still shows with its one-word lead.
+  const alt = deck.find((i) => i.key === "field-alternative");
+  if (alt?.quote) assert.equal(alt.context, "You wrote");
 });

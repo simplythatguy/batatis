@@ -17,21 +17,24 @@ equivalent performance, professional authentication, or permission to build.
 | `GET /auth/oauth/{provider}/start?redirect=/path` | Browser-bound state, nonce and S256 PKCE; 302. |
 | `GET /auth/oauth/{provider}/callback` | Verified OIDC/token/userinfo exchange, session and web redirect; 302. |
 | `POST /cases` | Sets owner from the cookie; anonymous creation remains available. Optional `authority`; otherwise the jurisdiction id is used for owned cases. |
-| `GET /me/applications` | Owner's applications newest first, reviewer name and unread count. `completeness` is null: list requests do not run the expensive full checker. |
+| `GET /me/applications` | All owned applications newest first, including archived ones; adds account-relative `archived` and `pinned` booleans (both false for legacy applications), alongside the existing reviewer name and unread count. `completeness` is null: list requests do not run the expensive full checker. |
+| `PATCH /me/applications/{application_id}/preferences` | Signed-in owner only, in any application status. Nonempty partial body `{ "archived"?: boolean, "pinned"?: boolean }`; strict booleans, no nulls or extra fields (`422`). Returns `{ "archived": boolean, "pinned": boolean }` plus the normal `meta.notice` envelope. Anonymous `401`; unknown/expired/deleted, other-owner and ownerless legacy applications `404`. |
 | `POST /cases/{case_id}/submit` | Owner only; same `check_completeness` as GET gaps. Blocking findings return 409 `detail: {message, gaps}`; otherwise submitted with timestamp. |
 | `GET /review/queue?status=&mine=` | Reviewers only, authority-scoped; claim, decision, applicant summary and unread count. Completeness is null. |
 | `POST /review/{case_id}/claim` | Claim/idempotent self-claim; conflict is 409 with top-level `detail` and `claim`. `take_over: true` records both names in history. |
 | `DELETE /review/{case_id}/claim` | Current claimer only, before a decision; 204 and status submitted. |
-| `POST /review/{case_id}/decision` | Current claimer, in review. `accept` or `return`; return needs a message of at least 10 characters. Returns the case. |
-| `GET /cases/{case_id}/messages` | `{messages}` with caller-relative `read_by_me`. |
-| `POST /cases/{case_id}/messages` | Signed-in owner or authorized reviewer; plain text, 1–4000 characters, nonblank; 201 message. |
-| `POST /cases/{case_id}/messages/read` | Mark existing messages read for this caller; 204. |
-| `GET /me/notifications` | Signed in. Up to 50 newest events by the *other* party on the caller's applications (applicant: started reviewing / returned / accepted as administratively complete / messages; reviewer: submitted / resubmitted / messages on its authority's applications, excluding its own), each with `read`, plus an `unread` count. |
+| `POST /review/{case_id}/decision` | Current claimer, in review. `accept`, `return` or `refuse`; return and refusal need a message of at least 10 characters. Returns the case. |
+| `GET /cases/{case_id}/messages` | Owner or authorized reviewer; `{messages}` with caller-relative `read_by_me`, including historic applicant replies. |
+| `POST /cases/{case_id}/messages` | Authorized same-authority reviewer, excluding the owner; officer-to-applicant notices only. Plain text, 1–4000 characters, nonblank; 201 message. Signed-in applicant owners receive 403; other unauthorized signed-in callers, including reviewers messaging their own cases, receive 404. Anonymous callers receive 401. |
+| `POST /cases/{case_id}/messages/read` | Owner or authorized reviewer; mark existing messages read for this caller, independently of send permission; 204. |
+| `GET /me/notifications` | Signed in. Up to 50 newest events by the *other* party on the caller's applications (applicant: started reviewing / returned / accepted as administratively complete / refused / officer notices; reviewer: submitted / resubmitted / stored historic messages on its authority's applications, excluding its own), each with `read`, plus an `unread` count. |
 | `POST /me/notifications/read` | Marks everything up to now as read for the caller; 204. Does not revoke sessions. |
 | `POST /assist` | Signed in only (401 otherwise). Authorized optional case context, screen/focus/question and up to eight history entries. Answer, verified cited ids, removed ids and provider notice. |
 
-The status machine is `draft → submitted → in_review → returned | accepted`,
-with `returned → submitted` resubmission. Resubmission clears the current claim
+The status machine is `draft → submitted → in_review → returned | accepted | refused`,
+with `returned → submitted` resubmission. Accepted and refused cases are terminal.
+Applicants supply corrections through their application and, when returned,
+resubmission; they cannot send new free-form replies in any status. Resubmission clears the current claim
 and decision; previous decisions/messages/history remain in the case. Withdrawal
 is optional in the contract and no withdrawal endpoint is implemented.
 
@@ -44,20 +47,36 @@ the role use their current authority's code. This prevents switching role throug
 a less restrictive onboarding payload. Privilege changes invalidate all existing
 sessions and issue a fresh session.
 
+List organization is separate from application content. Archiving does not withdraw
+an application or remove it from the officer queue. Pinning survives archiving;
+clients may exclude archives from active/pinned lists until retrieved. Preference
+patches preserve Case status, authority, claim, decision, history, messages,
+content/source inputs, versions and timestamps, including on an identical replay.
+They do not change account data or revoke sessions. A reviewer may organize an
+application they own, with the same ownership rules as other signed-in accounts.
+Existing title edits still require draft/returned status; existing owner deletion
+remains available in every status through `DELETE /cases/{case_id}`.
+
 ## Central access policy
 
 `engine/access.py:authorize_case` and the application-wide dependency protect all
 case path routes, including routers subsequently included by the code-library
 branch. Metadata reads preserve existing endpoint snapshot/CAS timing. Stores
 recheck access on snapshots and content writes under their existing transaction
-locks. Unowned legacy cases retain anonymous read/write behavior. New message
-posting/read receipts require a signed-in author.
+locks. Unowned legacy cases retain anonymous read/write behavior but have no
+message thread. Message reads and read receipts require a signed-in owner or
+authorized reviewer; new notices additionally require reviewer access on every CAS retry.
 
 For owned cases, the owner may read. A reviewer may read only when their authority
-matches and status is submitted, in_review, returned or accepted. Reviewers cannot
+matches and status is submitted, in_review, returned, accepted or refused. Reviewers cannot
 write applicant facts, selections, jurisdiction, evidence or files. Unauthorized
 case access returns 404. Review operations additionally require a reviewer role
-and current claim as appropriate. Messages remain available while content is locked.
+and current claim as appropriate. Reading correspondence and marking it read remain
+available to owners while content is locked. Authorized non-owner officers can
+still send notices in those reviewable statuses, including accepted and refused,
+without claiming or reopening the case. An owner who becomes a reviewer cannot
+send notices on their own application. Denied sends change no case content,
+messages, version, status history or notifications.
 
 Guarded existing routes:
 
@@ -94,8 +113,20 @@ store adapters. Additive `CREATE TABLE/INDEX IF NOT EXISTS` migrations create
 `account_rates`, plus session expiry/user indexes. PostgreSQL appends these to its
 existing `MIGRATIONS`; no existing tables are dropped or rewritten.
 
+`account_application_preferences` stores only the two flags, keyed by account and
+application, with cascading foreign keys to both. SQLite enables foreign keys on
+every case/account connection, including atomic fact writes. Case deletion and
+creation-based retention remove preferences with the files; account deletion at
+the storage seam also removes that account's preferences. This adds no account
+deletion endpoint or new account-retention policy. The owner check, current case
+existence/retention check, account-existence check and partial upsert share the same
+SQLite write transaction or PostgreSQL case-row lock. Concurrent partial patches
+preserve omitted flags. Preferences never pass through Case/User replacement.
+
 Ownership, authority, status, submission timestamp, claim, decision, status history,
-and messages/read receipts live in the case JSON. All workflow/thread mutations
+and messages/read receipts live in the case JSON. Historic applicant replies,
+officer reasons and status history are retained without rewriting them for the
+one-way policy. All workflow/thread mutations
 use the existing case version CAS, retrying against fresh state. Thus deletion
 and the existing seven-day **creation-based** case retention remove messages,
 history, decisions and files with the case, on both backends. Submitting or
@@ -203,7 +234,8 @@ every pull request instead of skipping.
 
 The end-to-end run passed against PostgreSQL 17: signup/onboarding → owned
 application → blocked submission → submit → queue → claim → second-reviewer 409 →
-return with message → unread/read/reply → resubmit → accept → edit rejected.
+return with message → unread/read → applicant message rejected without mutation →
+officer notice → applicant correction in the application → resubmit → accept → edit rejected.
 `/assist` returns 503 without provider keys. OAuth was exercised with signed test
 tokens only; real Google/Microsoft sign-in and live providers are unverified.
 

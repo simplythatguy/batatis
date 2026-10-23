@@ -149,8 +149,8 @@ def test_no_key_is_safe_503_and_does_not_start_scoring(tmp_path, codes, monkeypa
     case_id = create_described(client)
     response = client.post(f'/cases/{case_id}/relevance')
     assert response.status_code == 503 and response.json()['detail'] == 'Relevance scoring unavailable'
-    assert resolved == ['typesafe']
-    assert 'TypeSafe credential is absent' in caplog.text and 'credential' not in response.text
+    assert resolved == []
+    assert 'configured scoring credential is absent' in caplog.text and 'credential' not in response.text
     assert client.get(f'/cases/{case_id}/relevance').status_code == 404
 
 
@@ -389,7 +389,7 @@ def test_the_providers_pin_is_mapped_privately_and_an_unmapped_pin_is_never_pass
                   rerank={}, display={'9.1.1.1.': 0.5}, bands={'x': 0.3, 'y': 0.85, 'status': 'test'})
     assert RelevanceRecord.model_validate(fields).model == 'relevance-1'
     assert RelevanceRecord.model_validate({**fields, 'model': LEGACY_PIN}).model == 'relevance-1'
-    for bad in ('jev-latest', 'relevance-2', [LEGACY_PIN], None):
+    for bad in ('jev-latest', 'relevance-3', [LEGACY_PIN], None):
         with pytest.raises(ValidationError):
             RelevanceRecord.model_validate({**fields, 'model': bad})
 

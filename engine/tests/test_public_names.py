@@ -59,7 +59,7 @@ def test_the_config_names_no_service_and_unused_stages_hold_none():
     public = public_config(RAW_CONFIG)
     assert not names_a_provider(' '.join(str(v) for v in public.values()))
     assert (public['screen'], public['rerank'], public['verifier']) == ('model', 'model', 'model')
-    assert (public['screen_model'], public['rerank_model'], public['verifier_model']) == (PUBLIC_MODEL, PUBLIC_MODEL, 'verifier-1')
+    assert (public['screen_model'], public['rerank_model'], public['verifier_model']) == ('relevance-2', 'relevance-2', 'verifier-1')
     assert public['card_chars'] == RAW_CONFIG['card_chars'] and set(public) == set(RAW_CONFIG)
     lexical = public_config({**RAW_CONFIG, 'screen': 'bm25', 'rerank': 'none', 'verifier': 'none'})
     assert (lexical['screen'], lexical['rerank'], lexical['verifier']) == ('bm25', 'none', 'none')

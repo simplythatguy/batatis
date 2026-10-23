@@ -20,7 +20,7 @@ export interface User {
   created_at: string;
 }
 
-export type ApplicationStatus = "draft" | "submitted" | "in_review" | "returned" | "accepted" | "withdrawn";
+export type ApplicationStatus = "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
 
 export interface ApplicationSummary {
   id: string;
@@ -32,7 +32,14 @@ export interface ApplicationSummary {
   completeness: { answered: number; total: number } | null;
   unread_messages: number;
   reviewer: { name: string } | null;
+  /** The owner's own sidebar shelf. Organises the list only; it never withdraws a sent application. */
+  archived: boolean;
+  /** Kept above the other applications (and kept while archived, shown again on restore). */
+  pinned: boolean;
 }
+
+/** PATCH /me/applications/{id}/preferences: at least one of the two. */
+export type ApplicationPreferences = { archived?: boolean; pinned?: boolean };
 
 export interface MessageItem {
   gap_id?: string | null;
@@ -93,7 +100,7 @@ function plain(status: number, raw: string, path: string): string {
   return raw || `Request failed (${status}).`;
 }
 
-async function call<T>(method: "GET" | "POST" | "DELETE", path: string, body?: unknown, signal?: AbortSignal, ms = 15000): Promise<T> {
+export async function call<T>(method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE", path: string, body?: unknown, signal?: AbortSignal, ms = 15000): Promise<T> {
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), ms);
   const onAbort = () => ctl.abort();
@@ -105,8 +112,9 @@ async function call<T>(method: "GET" | "POST" | "DELETE", path: string, body?: u
       method,
       credentials: credentialsMode(),
       signal: ctl.signal,
-      headers: body === undefined ? undefined : { "Content-Type": "application/json" },
-      body: body === undefined ? undefined : JSON.stringify(body),
+      // FormData sets its own multipart boundary; everything else is JSON.
+      headers: body === undefined || body instanceof FormData ? undefined : { "Content-Type": "application/json" },
+      body: body === undefined ? undefined : body instanceof FormData ? body : JSON.stringify(body),
     });
   } catch (e) {
     if (signal?.aborted) throw e;
@@ -136,8 +144,18 @@ const enc = encodeURIComponent;
 
 export const accounts = {
   me: (signal?: AbortSignal) => call<{ user: User }>("GET", "/auth/me", undefined, signal).then((r) => r.user ?? (r as unknown as User)),
+  /** Every owned application, archived ones included; a server without preferences reads as neither. */
   applications: (signal?: AbortSignal) =>
-    call<{ applications: ApplicationSummary[] }>("GET", "/me/applications", undefined, signal).then((r) => r.applications ?? []),
+    call<{ applications: ApplicationSummary[] }>("GET", "/me/applications", undefined, signal).then((r) =>
+      (r.applications ?? []).map((a) => ({ ...a, archived: a.archived === true, pinned: a.pinned === true }))),
+  /** Pin or archive in the owner's list. Changes no case content, status or version. */
+  preferences: (id: string, patch: ApplicationPreferences, signal?: AbortSignal) =>
+    call<{ archived: boolean; pinned: boolean }>("PATCH", `/me/applications/${enc(id)}/preferences`, patch, signal).then((r) => ({
+      archived: r.archived === true,
+      pinned: r.pinned === true,
+    })),
+  /** Permanently delete an owned application (204). */
+  deleteCase: (id: string, signal?: AbortSignal) => call<void>("DELETE", `/cases/${enc(id)}`, undefined, signal),
   submit: (caseId: string, signal?: AbortSignal) => call<unknown>("POST", `/cases/${enc(caseId)}/submit`, {}, signal, 30000),
   messages: (caseId: string, signal?: AbortSignal) =>
     call<{ messages: Message[] }>("GET", `/cases/${enc(caseId)}/messages`, undefined, signal).then((r) => r.messages ?? []),
@@ -193,7 +211,7 @@ export interface QueueApplication {
   updated_at: string;
   completeness: { answered: number; total: number } | null;
   claim: Claim | null;
-  decision: { outcome: "accept" | "return"; by_name: string; at: string } | null;
+  decision: { outcome: "accept" | "return" | "refuse"; by_name: string; at: string } | null;
   unread_messages: number;
 }
 
@@ -203,7 +221,7 @@ export interface DecisionItemInput {
   note: string;
 }
 
-export type DecisionRequest = { outcome: "accept" } | { outcome: "return"; message: string; items: DecisionItemInput[] };
+export type DecisionRequest = { outcome: "accept" } | { outcome: "return" | "refuse"; message: string; items: DecisionItemInput[] };
 
 export interface AppNotification {
   id: string;

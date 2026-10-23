@@ -9,10 +9,10 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field, ValidationInfo, field_validator
+from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
 
 from .public_names import (UNAVAILABLE, VERIFIER_UNAVAILABLE, public_config, public_label, public_method,
-                           public_model_id, public_ranker, public_spend, public_text)
+                           public_model_id, public_ranker, public_spend, public_stage_model, public_text)
 
 Decision = Literal['yes', 'no', 'not_sure']
 IdentifyMode = Literal['live', 'fake', 'bm25_fallback']
@@ -115,6 +115,13 @@ class StageRecord(BaseModel):
     output_tokens: int = 0
     errors: int = 0
     detail: str | None = None
+
+    @model_validator(mode='before')
+    @classmethod
+    def _stage_model_has_its_scoring_role(cls, value):
+        if isinstance(value, dict) and 'model' in value:
+            return {**value, 'model': public_stage_model(value.get('method'), value['model'])}
+        return value
 
     @field_validator('method')
     @classmethod

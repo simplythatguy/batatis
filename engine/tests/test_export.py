@@ -98,7 +98,8 @@ def test_blocks_on_unconfirmed_facts_and_blocking_gaps(case, codes):
 
     draft = export_case(blocked, codes=codes, draft=True)
     texts = page_texts(draft.pdf)
-    assert all('DRAFT' in t for t in texts)
+    assert draft.draft is True
+    assert pypdf.PdfReader(io.BytesIO(draft.pdf)).metadata.title.endswith(' (DRAFT)')
     assert 'risk assessment not written' in appendix_text(draft.pdf, draft.form_pages)
     assert '99' not in norm(texts[0]).split()          # proposed value never reaches the form
     assert 'Lot' not in {p.field for p in draft.placements}  # the older lot value must not silently return

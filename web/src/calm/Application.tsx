@@ -2,114 +2,18 @@ import { useEffect, useRef, useState } from "react";
 import { accounts, submitBlockers, type ApplicationSummary } from "../api/accounts";
 import { EngineError } from "../api/client";
 import { Notices } from "../components";
-import { AUTHORITIES, CODE_EDITION } from "../config";
 import { UNSIGNED_LINE, isProfessionalHold, professionalRouteNote } from "../humanReview";
-import { DETAIL_FIELDS, PROCESS_FIELDS, displayValue, factFor, valueText } from "../model";
 import { useApplicationExport } from "../screens/Application";
 import { useCase } from "../store";
-import type { Case, SectionCRow } from "../types";
 import { patchApplication, refreshApplications, useAccount } from "./account";
-import { authorityName } from "./applications";
+import { authorityName, readOnlyStatus } from "./applications";
 import { useCurrentApplication } from "./begin";
 import { gapKey } from "./deck";
 import { calmHref } from "./routes";
 import { EngineerCallout } from "./Review";
-import { CIcon, Dot, Eyebrow } from "./ui";
-
-function Missing() {
-  return <span className="cf-sheet-missing"><span className="cf-sheet-dot" aria-hidden="true" />— <em>missing</em></span>;
-}
-
-function Value({ c, id }: { c: Case; id: string }) {
-  const def = DETAIL_FIELDS.find((d) => d.id === id)!;
-  const fact = factFor(c, id);
-  if (!valueText(fact).trim()) return def.required ? <Missing /> : <span className="cf-sheet-none">—</span>;
-  return (
-    <span>
-      {displayValue(fact!)}
-      {fact!.status === "unconfirmed" && <span className="cf-sheet-flag"> · needs your check</span>}
-    </span>
-  );
-}
-
-function codes(row: SectionCRow) {
-  const objectives = [...new Set(row.pairs.flatMap((p) => p.objectives))];
-  const functions = [...new Set(row.pairs.flatMap((p) => p.functions))];
-  if (!objectives.length && !functions.length) return "No row in the attribution table";
-  return `Objectives ${objectives.join(", ") || "—"} · Functions ${functions.join(", ") || "—"}`;
-}
-
-function documents(c: Case): string[] {
-  const titles = new Map<string, string>();
-  for (const f of c.facts) {
-    const m = /^evidence\.([^.]+)\.title$/.exec(f.field);
-    if (m && typeof f.value === "string" && f.value.trim() && !c.unscopedEvidence?.includes(m[1])) titles.set(m[1], f.value.trim());
-  }
-  return [...titles.values()];
-}
-
-/** Part 1, Sections A–D, from the same case values the PDF is generated from. */
-function Sheet({ c }: { c: Case }) {
-  const kv = (ids: string[]) => ids.map((id) => {
-    const def = DETAIL_FIELDS.find((d) => d.id === id)!;
-    return [<span key={`${id}-k`}>{def.label}</span>, <Value key={`${id}-v`} c={c} id={id} />];
-  });
-  const departures = c.sectionC.filter((r) => c.candidates.find((a) => a.id === r.candidateId)?.answer === "yes");
-  const otherRefs = c.sectionC.length - departures.length;
-  const role = factFor(c, "professional.role");
-  const registration = factFor(c, "professional.registration_number");
-  const docs = documents(c);
-  const authority = AUTHORITIES.find((a) => a.id === c.authority)?.name;
-  return (
-    <article className="cf-sheet" aria-label="Application preview">
-      <h2>Safety Codes Variance — Part 1</h2>
-      <div className="cf-sheet-sub">{CODE_EDITION} · Draft preview</div>
-
-      <h4>A · Applicant</h4>
-      <div className="cf-sheet-kv">{kv(["owner", "representative", "mailingAddress", "date"])}</div>
-
-      <h4>B · Project</h4>
-      <div className="cf-sheet-kv">
-        <span>Reviewing authority</span>
-        {authority ? <span>{authority}</span> : <Missing />}
-        {kv(["scope", "permit", "municipalAddress", "legalDescription"])}
-      </div>
-      <p className="cf-sheet-label">Proposed alternative</p>
-      <p className="cf-sheet-p">{valueText(factFor(c, "alternative")).trim() || <Missing />}</p>
-
-      <h4>C · Code references</h4>
-      {departures.length ? (
-        departures.map((r) => (
-          <p key={r.provision} className="cf-sheet-p">
-            <span className="cf-sheet-ref">{r.provision}</span> {codes(r)}
-          </p>
-        ))
-      ) : (
-        <p className="cf-sheet-p"><Missing /> No departure from a looked-up sentence confirmed yet.</p>
-      )}
-      {otherRefs > 0 && <p className="cf-sheet-note">{otherRefs} other looked-up {otherRefs === 1 ? "sentence is" : "sentences are"} not marked as a departure.</p>}
-
-      <h4>Alternative path · written by the applicant</h4>
-      <div className="cf-sheet-kv is-wide">
-        {PROCESS_FIELDS.map((p) => [
-          <span key={`${p.id}-k`}>{p.label}</span>,
-          <span key={`${p.id}-v`}>{c.process[p.id].trim() || <Missing />}</span>,
-        ])}
-      </div>
-
-      <h4>D · Supporting information</h4>
-      <div className="cf-sheet-kv">
-        <span>Registered professional</span>
-        {role && valueText(role) ? <span>{displayValue(role)}{role.status === "unconfirmed" ? " · routed to the officer" : ""}</span> : <Missing />}
-        <span>Registration or seal</span>
-        {registration && valueText(registration) ? <span>{displayValue(registration)}</span> : <span className="cf-sheet-none">—</span>}
-        <span>Documents listed</span>
-        {docs.length ? <span>{docs.join("; ")}</span> : <Missing />}
-      </div>
-      <p className="cf-sheet-note">Professional evidence is provided by the applicant’s registered professional. Batatis does not write it.</p>
-    </article>
-  );
-}
+import { FormPlaceholder, FormViewer } from "./FormViewer";
+import { CIcon, CompletenessNote, Dot, Eyebrow } from "./ui";
+import { retryExtras, useCaseExtras } from "./caseExtras";
 
 const when = (iso: string | null) => {
   if (!iso) return "";
@@ -120,8 +24,6 @@ const when = (iso: string | null) => {
 const STATUS_TEXT: Record<string, string> = {
   submitted: "Waiting for an officer to pick it up.",
   in_review: "An officer is reviewing it.",
-  accepted: "Accepted as administratively complete. This is not a finding that the design complies or is safe.",
-  withdrawn: "Withdrawn.",
 };
 
 /**
@@ -137,11 +39,11 @@ function SubmitPanel() {
   const [blockers, setBlockers] = useState<{ id: string; field: string | null; label: string }[]>([]);
   if (account.phase !== "signed-in") {
     return account.phase === "signed-out"
-      ? <p className="cf-faint cf-small cf-submit-note">Submitting to the authority needs an account. <a className="cf-inline-link" href="#/signin">Sign in</a>, or download the PDF.</p>
-      : <p className="cf-faint cf-small cf-submit-note">Submitting isn’t available on this server. You can still download the PDF.</p>;
+      ? <p className="cf-faint cf-small cf-submit-note"><a className="cf-inline-link" href="#/signin">Sign in</a> to submit.</p>
+      : <p className="cf-faint cf-small cf-submit-note">Submitting isn’t available here.</p>;
   }
   if (!engineId || !app) {
-    return <p className="cf-faint cf-small cf-submit-note" role="status">{saveStatus === "failed" || saveStatus === "gone" ? "Submit becomes available once this application is saved." : "Saving your application…"}</p>;
+    return <p className="cf-faint cf-small cf-submit-note" role="status">{saveStatus === "failed" || saveStatus === "gone" ? "Save to enable Submit." : "Saving your application…"}</p>;
   }
   const where = authorityName(app.authority || c.authority) || "";
   if (app.status !== "draft" && app.status !== "returned") {
@@ -151,7 +53,7 @@ function SubmitPanel() {
   // application: they close the official PDF, not submission. The engine's submit check agrees.
   const blocking = gaps.filter((g) => g.severity === "blocking" && !isProfessionalHold(g));
   const routed = gaps.some((g) => g.severity === "blocking" && isProfessionalHold(g));
-  const reason = !c.authority ? "Choose Calgary or Edmonton as the reviewing authority before submitting. Not sure yet keeps it open." : blocking.length ? `${blocking.length} required ${blocking.length === 1 ? "item is" : "items are"} missing.` : "";
+  const reason = !c.authority ? "Choose a reviewing office." : blocking.length ? `${blocking.length} required ${blocking.length === 1 ? "item" : "items"} missing.` : "";
 
   async function submit() {
     if (reason || busy || !app) return;
@@ -187,10 +89,10 @@ function SubmitPanel() {
           {reason} <a className="cf-inline-link" href={!c.authority ? "#/questions?focus=authority" : "#/review"}>{!c.authority ? "Pick one" : "See them"}</a>
         </p>
       )}
-      {!reason && routed && <p className="cf-faint cf-small">The professional question goes to the officer with your application.</p>}
+      {!reason && routed && <p className="cf-faint cf-small">The professional question goes with your application.</p>}
       {blockers.length > 0 && (
         <div role="status">
-          <p className="cf-small">The authority’s check found {blockers.length} required {blockers.length === 1 ? "item" : "items"} still missing:</p>
+          <p className="cf-small">{blockers.length} required {blockers.length === 1 ? "item" : "items"} still missing:</p>
           <ul className="cf-rows is-compact">
             {blockers.map((b) => (
               <li key={b.id} className="cf-row">
@@ -208,16 +110,16 @@ function SubmitPanel() {
 }
 
 function SubmittedStatus({ app, where }: { app: ApplicationSummary; where: string }) {
+  const s = readOnlyStatus(app.status, where);
   return (
     <div className="cf-submitted" role="status">
       <p className="cf-submitted-h">
-        <Dot tone={app.status === "accepted" ? "done" : "warning"} />
-        {app.status === "accepted" ? `Accepted by ${where || "the authority"}` : `Sent to ${where || "the authority"}`}
+        <Dot tone={s.tone} />
+        {s.heading}
       </p>
       <p className="cf-faint cf-small">
         {app.submitted_at ? `Submitted ${when(app.submitted_at)}. ` : ""}
-        {app.reviewer?.name && app.status === "in_review" ? `${app.reviewer.name} is reviewing it. ` : STATUS_TEXT[app.status] ? `${STATUS_TEXT[app.status]} ` : ""}
-        {app.status !== "accepted" && "Read-only until the officer returns it."}
+        {app.reviewer?.name && app.status === "in_review" ? `${app.reviewer.name} is reviewing it.` : STATUS_TEXT[app.status] ?? s.note}
       </p>
     </div>
   );
@@ -225,33 +127,32 @@ function SubmittedStatus({ app, where }: { app: ApplicationSummary; where: strin
 
 /** Before an application exists: the empty form, so it is clear what will be filled in. */
 function ApplicationEmpty() {
-  const { c } = useCase();
   return (
     <div className="cf-doc">
-      <div className="cf-sheet-pane">
-        <Sheet c={c} />
-      </div>
+      <FormPlaceholder />
       <aside className="cf-glass cf-side" aria-label="Download">
         <Eyebrow plain>Status</Eyebrow>
-        <div className="cf-side-big">Nothing filled in yet.<br /><span className="cf-muted">Every section is still missing.</span></div>
-        <p className="cf-faint cf-small">Describe what you’re building. Batatis fills in what it can and asks you for the rest.</p>
+        <div className="cf-side-big">Nothing filled in yet.</div>
         <a className="cf-btn is-primary is-center" href="#/">Describe your project</a>
-        <p className="cf-faint cf-small cf-disclaimer">This checks administrative completeness. It does not say the design complies or is safe.</p>
+        <CompletenessNote />
       </aside>
     </div>
   );
 }
 
+/** Show the current application and download options, or the empty form before a case exists. */
 export function Application({ download }: { download: "" | "options" | "draft" }) {
   const { phase } = useCase();
   return phase === "case" ? <CaseApplication download={download} /> : <ApplicationEmpty />;
 }
 
+/** Derive the application preview and export panel from shared gaps and jurisdiction data. */
 function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
   const account = useAccount();
-  const { locked } = useCurrentApplication();
+  const { app, locked } = useCurrentApplication();
   const signedIn = account.phase === "signed-in";
-  const { c, gaps, checkStatus, checkNote, completenessRecord } = useCase();
+  const { c, gaps, checkStatus, checkNote, engineId, factsEpoch } = useCase();
+  const extras = useCaseExtras(engineId, factsEpoch, c.authority);
   const ex = useApplicationExport();
   const draftBtn = useRef<HTMLButtonElement>(null);
   const checked = checkStatus === "ready" || checkStatus === "needs_answers";
@@ -270,19 +171,27 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
   if (!ex.officialReady) {
     if (checkStatus === "running") reasons.push({ tone: "pending", text: checkNote || "Checking your draft…" });
     else if (!checked) reasons.push({ tone: "warning", text: checkStatus === "unavailable" ? "The last check couldn’t finish." : checkStatus === "stale" ? "Your draft changed since the last check." : "Your application hasn’t been checked yet.", action: { label: checkStatus === "unavailable" ? "Try again" : "Check now", run: ex.runCheck } });
-    if (ex.blocking.length) reasons.push({ tone: "blocking", text: `${ex.blocking.length} required ${ex.blocking.length === 1 ? "item is" : "items are"} missing.`, action: { label: "See them", href: "#/review" } });
     if (route) reasons.push({ tone: "warning", text: "Waiting on a registered professional’s confirmation." });
   }
 
+  // Each blocker links to the card that fixes it (the same shared gap list as Review and the deck).
+  const blockers = ex.officialReady ? [] : ex.blocking.filter((g) => !isProfessionalHold(g));
+  /** Link an export blocker to its deck card, falling back to the gap’s existing destination. */
+  const fixHref = (g: (typeof gaps)[number]) => {
+    const key = gapKey(c, g);
+    return key ? `#/questions?focus=${encodeURIComponent(key)}` : calmHref(g.href);
+  };
+  const pack = extras.pack?.pack ?? null;
+  const exportNotices = pack?.notices.filter((n) => n.surfaces.includes("export_header") || n.surfaces.includes("export_appendix")) ?? [];
+  
   const headline = ex.officialReady ? "Ready for the official PDF." : "You can download a draft.";
   const sub = ex.officialReady ? "Nothing required is missing." : "Official PDF on hold.";
   const showStatus = ex.exportAttempted || ex.stage !== "idle";
 
   return (
     <div className="cf-doc">
-      <div className="cf-sheet-pane">
-        <Sheet c={c} />
-      </div>
+      {/* The actual PDF the engine fills, not a drawing of it. */}
+      <FormViewer locked={locked} status={locked && app ? readOnlyStatus(app.status).label.split(" · ")[0] : undefined} />
       <aside className="cf-glass cf-side" aria-label="Download">
         <Eyebrow plain>Status</Eyebrow>
         {!locked && <div className="cf-side-big">{headline}<br /><span className="cf-muted">{sub}</span></div>}
@@ -303,11 +212,40 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
         <button ref={draftBtn} type="button" className={`cf-btn is-center${signedIn ? "" : " is-primary"}`} disabled={ex.busy || Boolean(c.exampleId)} onClick={() => void ex.prepare(true)}>
           {ex.stage === "preparing" && ex.draftIntent ? "Preparing draft…" : "Download draft PDF"}
         </button>
-        <button type="button" className="cf-btn is-center" disabled={ex.busy || !ex.officialReady} data-requires-no-blocking-gaps={ex.blocking.length ? "true" : undefined} onClick={() => void ex.prepare(false)}>
+        <button type="button" className="cf-btn is-center" disabled={ex.busy || !ex.officialReady} data-requires-no-blocking-gaps={ex.blocking.length ? "true" : undefined} title={ex.officialReady ? undefined : "Unlocks after a current check finds no required items."} onClick={() => void ex.prepare(false)}>
           {ex.stage === "preparing" && !ex.draftIntent ? "Preparing PDF…" : "Official PDF"}
         </button>
-        {!ex.officialReady && <p className="cf-faint cf-small">The official PDF unlocks after a current check finds no required items. Drafts can be incomplete.</p>}
-        <button type="button" className="cf-btn is-ghost is-sm is-center" onClick={ex.downloadRecord}>Download a text record</button>
+        {blockers.length > 0 && !locked && (
+          <div className="cf-side-blockers">
+            <p className="cf-small">Still needed for the Official PDF:</p>
+            <ul className="cf-rows is-compact">
+              {blockers.slice(0, 5).map((g) => (
+                <li key={g.id} className="cf-row">
+                  <Dot tone="blocking" />
+                  <span className="cf-row-text">{g.label}</span>
+                  <a className="cf-row-go" href={fixHref(g)}>Fix <CIcon name="arrow" size={13} /></a>
+                </li>
+              ))}
+            </ul>
+            {blockers.length > 5 && <p className="cf-faint cf-small">And {blockers.length - 5} more. <a className="cf-inline-link" href="#/review">See all on Review</a></p>}
+          </div>
+        )}
+        {!pack && c.authority && engineId && (
+          extras.failed.case
+            ? <p className="cf-note cf-small" role="status"><Dot tone="warning" />Office notes didn’t load. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
+            : extras.pack
+              // Loaded, and no notes for this office: nothing to show.
+              ? null
+              : <p className="cf-faint cf-small" role="status">Loading office notes…</p>
+        )}
+        {exportNotices.map((n) => (
+          <details key={n.id} className="cf-side-notice">
+            <summary className="cf-side-notice-h">{n.heading}</summary>
+            <p>{n.message}</p>
+            {n.sources[0] && <p><a className="cf-inline-link" href={n.sources[0].url} target="_blank" rel="noreferrer">{n.sources[0].title}</a></p>}
+          </details>
+        ))}
+        <button type="button" className="cf-btn is-ghost is-sm is-center" title="Not the official form" onClick={ex.downloadRecord}>Text record</button>
 
         {showStatus && (
           <div className="cf-side-status" role="status">
@@ -315,7 +253,7 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
             <p>{ex.statusText}</p>
             {ex.stage === "ready" && ex.file && (
               <>
-                <p className="cf-faint">Download started: {ex.file.name}. {ex.file.draft ? "This draft may have missing or unconfirmed information." : UNSIGNED_LINE}</p>
+                <p className="cf-faint" title={ex.file.draft ? undefined : UNSIGNED_LINE}>{ex.file.draft ? "Draft: may be incomplete." : "Unsigned. Officer Part 2 is blank."}</p>
                 <button type="button" className="cf-btn is-sm" onClick={ex.downloadAgain}>Download again</button>
               </>
             )}
@@ -329,9 +267,8 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
             {ex.reasons.length > 0 ? <ul>{ex.reasons.map((r) => <li key={r}>{r}</li>)}</ul> : <p>{ex.tech}</p>}
           </details>
         )}
-        {completenessRecord && <p className="cf-faint cf-small">Record: {completenessRecord.label}. {completenessRecord.note}</p>}
         <EngineerCallout c={c} gaps={gaps} />
-        <p className="cf-faint cf-small cf-disclaimer">This checks administrative completeness. It does not say the design complies or is safe.</p>
+        <CompletenessNote />
       </aside>
     </div>
   );

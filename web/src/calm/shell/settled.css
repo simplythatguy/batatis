@@ -1,0 +1,59 @@
+/* The Settled section at the foot of the application list (after Irsal's settled events). Scoped to .cf-settled. */
+.cf-settled {
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 50%;
+  padding-bottom: 12px;
+}
+
+.cf-settled-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 30px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--cf-text-3);
+  font: 500 12px var(--cf-mono);
+  text-align: left;
+  cursor: pointer;
+  transition: color 150ms ease-out;
+}
+
+.cf-settled-toggle > svg {
+  flex: none;
+}
+
+@media (hover: hover) {
+  .cf-settled-toggle:hover {
+    color: var(--cf-text);
+  }
+}
+
+.cf-settled-toggle:focus-visible {
+  outline: 2px solid var(--cf-focus);
+  outline-offset: -2px;
+}
+
+.cf-settled-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--cf-line-2);
+}
+
+.cf-settled-list {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.cf-settled-list[hidden] {
+  display: none;
+}

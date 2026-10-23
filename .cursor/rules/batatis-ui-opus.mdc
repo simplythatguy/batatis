@@ -13,6 +13,6 @@ alwaysApply: false
 For all Batatis UI / frontend / visual / UX **implementation or review**:
 
 - Use **Claude Opus 5.5** at the **highest available Opus 5.5 reasoning tier** (prefer `claude-opus-5-5-max`, else `xhigh`, else `high`).
-- Load `.cursor/skills/batatis-ui-opus/SKILL.md` **and** `.cursor/skills/batatis-ui-linear/SKILL.md`.
+- Load `.cursor/skills/batatis-ui-opus/SKILL.md`, `.cursor/skills/batatis-ui-linear/SKILL.md` **and** `.cursor/skills/batatis-ui-minimalist/SKILL.md`.
 - Default product look = Linear-caliber tokens in `docs/design/tokens.css` (user need not ask).
 - Do not silently switch UI implement or UI review to a cheaper/faster non-Opus model.

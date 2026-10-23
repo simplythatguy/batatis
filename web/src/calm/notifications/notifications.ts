@@ -110,6 +110,7 @@ const VERB: Record<string, string> = {
   in_review: "started reviewing",
   returned: "returned",
   accepted: "accepted",
+  refused: "refused",
   withdrawn: "withdrew",
 };
 

@@ -92,10 +92,12 @@ export function RelevanceRing({
   useEffect(() => () => window.clearTimeout(timer.current), []);
   const show = () => { window.clearTimeout(timer.current); timer.current = window.setTimeout(() => setOpen(true), 120); };
   const hide = () => { window.clearTimeout(timer.current); setOpen(false); };
+  // Browsing without an application: no rings at all, not even "not scored".
+  if (rel.scope === "none") return null;
   const label =
     band === "unscored"
       ? "Relevance estimate: not scored"
-      : `Relevance estimate ${pct(p!)}${aggregate ? ` (highest in this ${aggregate})` : ""}: ${BAND_SHORT[band]}`;
+      : `Relevance estimate ${pct(p!)}${aggregate ? ` (highest in this ${aggregate})` : ""}${band === "estimate" ? "" : `: ${BAND_SHORT[band]}`}`;
   return (
     <>
       <span
@@ -126,7 +128,7 @@ export function RelevanceRing({
               <span className="cf-mono">{aggregate ? `Highest in this ${aggregate}: ` : ""}{pct(p!, 1)}</span>
               <span className={`cf-band is-${band}`}>{BAND_LABEL[band]}</span>
             </div>
-            {s.screenedOnly && <p>Screened only: the closer second look did not judge this article, so it never shows yellow or red.</p>}
+            {s.screenedOnly && band !== "estimate" && <p>Screened only: the closer second look did not judge this article, so it never shows yellow or red.</p>}
             <p>{ESTIMATE}</p>
             <p className="cf-faint cf-mono">{rel.result?.model ? `Estimate version ${rel.result.model}` : ""}{rel.stale ? `${rel.result?.model ? " · " : ""}Out of date` : ""}</p>
           </>
@@ -140,6 +142,7 @@ export function RelevanceRing({
 export function BandPill({ id }: { id: string }) {
   const rel = useRelevance();
   const { band } = rel.shown(id);
+  if (rel.scope === "none") return null;
   return <span className={`cf-band is-${band}`}>{BAND_LABEL[band]}</span>;
 }
 
@@ -149,13 +152,20 @@ export function RingLegend() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLButtonElement>(null);
   const tipId = useId();
-  const { x, y, fallback } = rel.cutoffs;
-  const rows: { band: Band; p?: number; text: string }[] = [
-    { band: "high", p: 0.8, text: `${BAND_LABEL.high}. ${pct(y)} or more.` },
-    { band: "mid", p: 0.4, text: `${BAND_LABEL.mid}. ${pct(x)} to under ${pct(y)}.` },
-    { band: "low", p: 0.1, text: `${BAND_LABEL.low}. Above 0 and under ${pct(x)}.` },
-    { band: "unscored", text: "Dashed: not scored yet, or no relevance score." },
-  ];
+  const cut = rel.cutoffs;
+  // Without fitted cut-offs there is no likely / unlikely rating to explain: only the estimate.
+  const rows: { band: Band; p?: number; text: string }[] = cut.rated
+    ? [
+      { band: "high", p: 0.8, text: `${BAND_LABEL.high}. ${pct(cut.y)} or more.` },
+      { band: "mid", p: 0.4, text: `${BAND_LABEL.mid}. ${pct(cut.x)} to under ${pct(cut.y)}.` },
+      { band: "low", p: 0.1, text: `${BAND_LABEL.low}. Above 0 and under ${pct(cut.x)}.` },
+      { band: "unscored", text: "Dashed: not scored yet, or no relevance score." },
+    ]
+    : [
+      { band: "estimate", p: 0.4, text: `${BAND_LABEL.estimate}. Not rated likely or unlikely yet.` },
+      { band: "unscored", text: "Dashed: not scored yet." },
+    ];
+  if (rel.scope === "none") return null;
   return (
     <>
       <button
@@ -178,8 +188,8 @@ export function RingLegend() {
             <li key={r.band}><RingGlyph p={r.p} band={r.band} /> {r.text}</li>
           ))}
         </ul>
-        <p>{ESTIMATE} The arc shows the percentage. Only the 60 articles the closer second look judged can be yellow or red.</p>
-        {fallback && <p className="cf-faint">Cut-offs are placeholders until the benchmark study sets them.</p>}
+        <p>{ESTIMATE} The arc shows the percentage.{cut.rated ? " Only the 60 articles the closer second look judged can be yellow or red." : ""}</p>
+        {cut.fallback && <p className="cf-faint">Cut-offs are placeholders until the benchmark study sets them.</p>}
       </Tip>
     </>
   );
