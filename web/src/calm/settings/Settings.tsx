@@ -141,14 +141,15 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
 
         <section className="ac-section" aria-labelledby="ac-s-data">
           <h2 id="ac-s-data" className="ac-section-title">How your data is handled</h2>
-          <p className="ac-prose">{PRIVACY_NOTICE}</p>
+          <details className="cf-help">
+            <summary>Details</summary>
+            <p className="ac-prose">{PRIVACY_NOTICE}</p>
+          </details>
         </section>
 
         <section className="ac-section" aria-labelledby="ac-s-accuracy">
           <h2 id="ac-s-accuracy" className="ac-section-title">Accuracy</h2>
-          <p className="ac-prose">
-            What Batatis guarantees, and what we measured with how sure we are. <a className="acc-inline-link" href="#/accuracy">Read the accuracy report</a>
-          </p>
+          <p className="ac-prose"><a className="acc-inline-link" href="#/accuracy">Read the accuracy report</a></p>
         </section>
 
         {user && (

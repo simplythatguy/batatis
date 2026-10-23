@@ -64,9 +64,6 @@ export const SECTIONS: { id: SectionId; label: string; short: string; about: str
 /** "Your project · Section B": the plain name, then the form's letter. */
 export const sectionEyebrow = (id: SectionId) => `${SECTIONS.find((s) => s.id === id)?.label} · Section ${id}`;
 
-/** One line on what the form is, shown once and on the section labels. */
-export const FORM_HINT = "The official variance form has four parts, A to D. You never fill it in yourself: each answer here goes into its part.";
-
 export interface DeckItem {
   key: string;
   kind: DeckKind;

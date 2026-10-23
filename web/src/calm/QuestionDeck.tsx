@@ -9,7 +9,7 @@ import { readOnlyStatus } from "./applications";
 import { openAssistant, setAssistantContext, useAssistant } from "./assistant/assistant";
 import { useCurrentApplication } from "./begin";
 import { CodeDrawer, type DrawerState } from "./CodeDrawer";
-import { aliasKey, alternativeChoice, buildDeck, mergeQueue, rankAhead, choiceKey, choicesFor, FORM_HINT, preCaseState, SECTIONS, sourcePhrase, type DeckItem, type SectionId } from "./deck";
+import { aliasKey, alternativeChoice, buildDeck, mergeQueue, rankAhead, choiceKey, choicesFor, preCaseState, SECTIONS, sourcePhrase, type DeckItem, type SectionId } from "./deck";
 import { forkOf, NOT_SURE, planInput } from "../intakeView";
 import { localField } from "../intakeFields";
 import { CodeProgress, ForkNote, ReadingState, ReadSource, RedirectPage, ShowCode } from "./ReadCards";
@@ -34,7 +34,6 @@ import { PACKAGE_YES, RULE_ADD, RULE_LEAVE } from "./deck";
 
 type Shown = DeckItem & { gone?: boolean };
 
-const FORM_HINT_KEY = "batatis-form-hint-seen";
 
 /** Detect editable controls so deck keyboard shortcuts leave text entry to the control. */
 function isTextTarget(t: EventTarget | null): boolean {
@@ -512,16 +511,6 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   const [conflicted, setConflicted] = useState<string | null>(null);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const noteFor = (key: string, text: string) => setCardNotes((n) => ({ ...n, [key]: text }));
-  // What the form is, said once: until dismissed, or until a few questions are answered.
-  const [hintDismissed, setHintDismissed] = useState(() => {
-    try { return localStorage.getItem(FORM_HINT_KEY) === "1"; } catch { return false; }
-  });
-  const formHintSeen = hintDismissed || session.seen.length >= 3;
-  const dismissFormHint = () => {
-    setHintDismissed(true);
-    try { localStorage.setItem(FORM_HINT_KEY, "1"); } catch { /* storage unavailable */ }
-  };
-  useEffect(() => { if (session.seen.length >= 3 && !hintDismissed) dismissFormHint(); }, [session.seen.length]); // eslint-disable-line react-hooks/exhaustive-deps
   /** A typed planner answer was sent: move on once it is saved. */
   const advanceAfter = useRef<string | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -1011,12 +1000,6 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
           </div>
         )}
       </div>
-      {!formHintSeen && (
-        <div className="cf-formhint" role="note">
-          <span>{FORM_HINT}</span>
-          <button type="button" className="cf-link-btn" onClick={dismissFormHint}>Got it</button>
-        </div>
-      )}
       <SectionFooter items={all} index={item ? pos : -1} onJump={(i) => goToKey(all[i]?.key ?? null)} onPrev={() => step(-1)} onNext={() => step(1)} canPrev={(pos < 0 ? all.length : pos) > 0} canNext={Boolean(item)} />
       <CodeDrawer state={drawer} onClose={() => setDrawer(null)} onAdded={(id) => { setDrawer(null); setJumpTo(id); }} />
     </div>

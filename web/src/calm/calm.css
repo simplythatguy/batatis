@@ -5852,29 +5852,6 @@ a.cf-save-check {
   white-space: normal;
 }
 
-.cf-formhint {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 14px;
-  margin: 0 28px 10px 14%;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--cf-text-3);
-}
-
-@media (max-width: 960px) {
-  .cf-formhint {
-    margin-left: 8%;
-  }
-}
-
-@media (max-width: 760px) {
-  .cf-formhint {
-    margin: 0 22px 10px;
-  }
-}
-
 /* —— WP-35: coded rules, standing packages, the jurisdiction note and the download panel —— */
 
 /* A rule result: the numbers used as a quiet two-column list, then Show the code. No fills. */
@@ -6166,5 +6143,41 @@ a.cf-save-check {
   }
   .cf-rule-calc dd {
     text-align: left;
+  }
+}
+
+/* A short explanation that opens on demand: one quiet summary line, the text below it. */
+.cf-help {
+  margin: 4px 0 8px;
+  font-size: 13px;
+  color: var(--cf-text-3);
+}
+
+.cf-help summary {
+  display: inline-block;
+  cursor: pointer;
+  list-style: none;
+}
+
+.cf-help summary::-webkit-details-marker {
+  display: none;
+}
+
+.cf-help summary::before {
+  content: "›";
+  display: inline-block;
+  margin-right: 6px;
+  transition-property: transform;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+.cf-help[open] summary::before {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-help summary::before {
+    transition: none;
   }
 }

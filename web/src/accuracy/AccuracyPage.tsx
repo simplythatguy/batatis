@@ -79,7 +79,7 @@ function SectionBlock({ s }: { s: Section }) {
         {status && <span className={`acc-status is-${s.status}`}>{status}</span>}
       </h3>
       <p className="acc-plain">{s.plain}</p>
-      {s.definition && <p className="acc-faint">{s.definition}</p>}
+      {s.definition && <details className="cf-help"><summary>Definition</summary><p className="acc-faint">{s.definition}</p></details>}
       {s.figures.length > 0 && (
         <ul className="acc-figures">
           {s.figures.map((f) => {
@@ -140,9 +140,12 @@ export function AccuracyPage({ phoneTools, right, standalone = false }: { phoneT
 
             <section className="ac-section" aria-labelledby="acc-guaranteed">
               <h2 id="acc-guaranteed" className="acc-h2">What Batatis guarantees</h2>
-              <p className="acc-plain">
-                These hold by construction. Each one names the tests that enforce it, and this report is built only when every one of those tests passes.
-              </p>
+              <details className="cf-help">
+                <summary>How to read this</summary>
+                <p className="acc-plain">
+                  These hold by construction. Each one names the tests that enforce it, and this report is built only when every one of those tests passes.
+                </p>
+              </details>
               {verifiedText(report) && <p className="acc-faint">{verifiedText(report)}</p>}
               <ul className="acc-claims">
                 {report.guaranteed.map((c) => <ClaimRow key={c.id} c={c} />)}
@@ -151,10 +154,13 @@ export function AccuracyPage({ phoneTools, right, standalone = false }: { phoneT
 
             <section className="ac-section" aria-labelledby="acc-measured">
               <h2 id="acc-measured" className="acc-h2">What we measured, and how sure we are</h2>
-              <p className="acc-plain">
-                Each number is a count out of a sample, with a 95% interval where one applies. The interval is the range the
-                true rate plausibly lies in; small samples give wide intervals.
-              </p>
+              <details className="cf-help">
+                <summary>How to read this</summary>
+                <p className="acc-plain">
+                  Each number is a count out of a sample, with a 95% interval where one applies. The interval is the range the
+                  true rate plausibly lies in; small samples give wide intervals.
+                </p>
+              </details>
               {report.measured.map((s) => <SectionBlock key={s.id} s={s} />)}
             </section>
 
